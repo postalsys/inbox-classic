@@ -70,6 +70,23 @@ public final class Mailbox: NSObject {
     private let rightSplit = NSSplitView()
     /// the folder tree in its scroll view: the left pane, hidden with View > Folder List off
     private var treePane: NSScrollView!
+    /// what the panes show: the list above the reader, or beside it (MainWindow.updateLayout decides)
+    private(set) var layout = PE_LAYOUT_CLASSIC
+    /// the one column of the column layout's rows, and what Classic has in its place while it is shown
+    private let rowColumn = NSTableColumn(identifier: MessageRowCell.identifier)
+    private var classicColumns: [NSTableColumn] = []
+    private var classicHeader: NSTableHeaderView?
+    /// over the column layout's list in place of the headings: how it is sorted, a pull-down of the Sort By choices
+    private let sortBar = NSPopUpButton(frame: .zero, pullsDown: true)
+    private let sortRow = NSView()
+    private var sortRowHeight: NSLayoutConstraint!
+    /// the pane sizes each layout needs: the list's height above the reader, its width beside it
+    private var listHeightMin: NSLayoutConstraint!
+    private var readerHeightMin: NSLayoutConstraint!
+    private var listWidthMin: NSLayoutConstraint!
+    private var classicListHeight: CGFloat = 260
+    /// while the layout changes, the dividers moved are not the user's
+    private var changingLayout = false
 
     /// the counts or the folder changed (the main window shows them)
     var changed: () -> Void = {}
@@ -179,25 +196,33 @@ public final class Mailbox: NSObject {
         searchBar.setAccessibilityIdentifier("search.bar")
         let barHeight = searchBar.heightAnchor.constraint(equalToConstant: 0)
         searchBar.heightConstraint = barHeight
+        setUpSortBar()
         NSLayoutConstraint.activate([
             searchBar.topAnchor.constraint(equalTo: listArea.topAnchor),
             searchBar.leadingAnchor.constraint(equalTo: listArea.leadingAnchor),
             searchBar.trailingAnchor.constraint(equalTo: listArea.trailingAnchor),
             barHeight,
-            listScroll.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
+            sortRow.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
+            sortRow.leadingAnchor.constraint(equalTo: listArea.leadingAnchor),
+            sortRow.trailingAnchor.constraint(equalTo: listArea.trailingAnchor),
+            sortRowHeight,
+            listScroll.topAnchor.constraint(equalTo: sortRow.bottomAnchor),
             listScroll.leadingAnchor.constraint(equalTo: listArea.leadingAnchor),
             listScroll.trailingAnchor.constraint(equalTo: listArea.trailingAnchor),
             listScroll.bottomAnchor.constraint(equalTo: listArea.bottomAnchor),
         ])
         setUpEmptyText(in: listScroll)
-        listArea.heightAnchor.constraint(greaterThanOrEqualToConstant: Mailbox.smallestList).isActive = true
+        listHeightMin = listArea.heightAnchor.constraint(greaterThanOrEqualToConstant: Mailbox.smallestList)
+        listHeightMin.isActive = true
+        listWidthMin = listArea.widthAnchor.constraint(greaterThanOrEqualToConstant: Mailbox.smallestListWidth)
 
         reader.status = { [weak self] in self?.status($0) }
         reader.openMailto = { [weak self] in self?.openMailto($0) }
         reader.arrivedHandler = { [weak self] in self?.messageArrived() }
         reader.shownHandler = { [weak self] in self?.messageShown() }
         reader.bouncedHandler = { [weak self] in self?.showMessage(folder: $0, uid: $1) }
-        reader.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 120).isActive = true
+        readerHeightMin = reader.view.heightAnchor.constraint(greaterThanOrEqualToConstant: 120)
+        readerHeightMin.isActive = true
         rightSplit.addArrangedSubview(listArea)
         rightSplit.addArrangedSubview(reader.view)
         view.addArrangedSubview(treeScroll)
@@ -205,6 +230,7 @@ public final class Mailbox: NSObject {
         view.setHoldingPriority(.defaultLow + 10, forSubviewAt: 0)
         rightSplit.setHoldingPriority(.defaultLow + 10, forSubviewAt: 0)
         view.delegate = self
+        rightSplit.delegate = self
         treePane.isHidden = !(AppDelegate.shared?.folderList ?? true)
         clearReader()
         reload()
@@ -246,9 +272,173 @@ public final class Mailbox: NSObject {
         }
     }
 
-    /// the smallest the folder tree and the message list can be made
+    /// the smallest the folder tree and the message list can be made; the list beside the reader, its width
     private static let smallestTree: CGFloat = 160
     private static let smallestList: CGFloat = 80
+    private static let smallestListWidth: CGFloat = 280
+
+    // ---- the layout ----
+
+    /// Classic (the list above the reader, with its columns) or Columns (the list beside the reader, three lines a
+    /// row); the selection, the open conversations and the keyboard stay where they were
+    func setLayout(_ wanted: PeLayout) {
+        guard wanted != layout else { return }
+        let columns = wanted == PE_LAYOUT_COLUMNS
+        let responder = view.window?.firstResponder
+        changingLayout = true
+        defer { changingLayout = false }
+        if columns {
+            let height = rightSplit.arrangedSubviews[0].frame.height
+            classicListHeight = height > Mailbox.smallestList + 1 ? height : 260
+        }
+        layout = wanted
+        rightSplit.autosaveName = nil
+        rightSplit.isVertical = columns
+        listHeightMin.isActive = !columns
+        readerHeightMin.isActive = !columns
+        listWidthMin.isActive = columns
+        showColumns(columns)
+        rightSplit.adjustSubviews()
+        view.layoutSubtreeIfNeeded()
+        if columns {
+            rightSplit.setPosition(Mailbox.columnsListWidth, ofDividerAt: 0)
+        } else {
+            rightSplit.autosaveName = TestHooks.testing ? nil : "ListAndReader"
+            rightSplit.setPosition(classicListHeight, ofDividerAt: 0)
+        }
+        reloadList(keepSelection: true)
+        if let responder, view.window?.firstResponder !== responder {
+            view.window?.makeFirstResponder(responder)
+        }
+    }
+
+    /// the list's width beside the reader, kept for the next start (not by the UI test)
+    private static var columnsListWidth: CGFloat {
+        get {
+            let kept = TestHooks.testing ? 0 : UserDefaults.standard.double(forKey: "ListBesideReader")
+            return kept >= smallestListWidth ? kept : 360
+        }
+        set {
+            if !TestHooks.testing {
+                UserDefaults.standard.set(Double(newValue), forKey: "ListBesideReader")
+            }
+        }
+    }
+
+    /// the list's columns and headings for Classic, or its one column of three line rows for Columns
+    private func showColumns(_ columns: Bool) {
+        if columns {
+            classicColumns = list.tableColumns
+            classicHeader = list.headerView
+            classicColumns.forEach { list.removeTableColumn($0) }
+            rowColumn.resizingMask = .autoresizingMask
+            list.addTableColumn(rowColumn)
+            list.headerView = nil
+        } else {
+            list.removeTableColumn(rowColumn)
+            classicColumns.forEach { list.addTableColumn($0) }
+            list.headerView = classicHeader
+            showSortIndicator()
+        }
+        list.rowHeight = columns ? MessageRowCell.height : 20
+        list.usesAlternatingRowBackgroundColors = !columns
+        list.gridStyleMask = columns ? .solidHorizontalGridLineMask : []
+        sortRow.isHidden = !columns
+        sortRowHeight.constant = columns ? 28 : 0
+        list.sizeLastColumnToFit()
+        updateSortBar()
+    }
+
+    // ---- the order of the list ----
+
+    private func setUpSortBar() {
+        sortBar.isBordered = false
+        sortBar.controlSize = .small
+        sortBar.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        sortBar.setAccessibilityIdentifier("list.sortBy")
+        sortBar.translatesAutoresizingMaskIntoConstraints = false
+        // the pull-down's own title, then the choices of View > Sort By
+        sortBar.addItem(withTitle: "")
+        for command in Mailbox.sortCommands {
+            if command == .sortAscending {
+                sortBar.menu?.addItem(.separator())
+            }
+            let item = NSMenuItem(title: command.label, action: #selector(sortChosen(_:)), keyEquivalent: "")
+            item.tag = command.rawValue
+            item.target = self
+            sortBar.menu?.addItem(item)
+        }
+        let line = NSBox()
+        line.boxType = .separator
+        line.translatesAutoresizingMaskIntoConstraints = false
+        sortRow.addSubview(sortBar)
+        sortRow.addSubview(line)
+        sortRow.translatesAutoresizingMaskIntoConstraints = false
+        sortRow.isHidden = true
+        listArea.addSubview(sortRow)
+        sortRowHeight = sortRow.heightAnchor.constraint(equalToConstant: 0)
+        NSLayoutConstraint.activate([
+            sortBar.leadingAnchor.constraint(equalTo: sortRow.leadingAnchor, constant: 8),
+            sortBar.trailingAnchor.constraint(lessThanOrEqualTo: sortRow.trailingAnchor, constant: -8),
+            sortBar.centerYAnchor.constraint(equalTo: sortRow.centerYAnchor),
+            line.leadingAnchor.constraint(equalTo: sortRow.leadingAnchor),
+            line.trailingAnchor.constraint(equalTo: sortRow.trailingAnchor),
+            line.bottomAnchor.constraint(equalTo: sortRow.bottomAnchor),
+        ])
+    }
+
+    private static let sortCommands: [Command] = [.sortDate, .sortFrom, .sortSubject, .sortSize, .sortAscending, .sortDescending]
+    private static let sortFields: [Command: PeSortField] = [
+        .sortDate: PE_SORT_FIELD_DATE, .sortFrom: PE_SORT_FIELD_FROM, .sortSubject: PE_SORT_FIELD_SUBJECT,
+        .sortSize: PE_SORT_FIELD_SIZE,
+    ]
+
+    @objc private func sortChosen(_ sender: NSMenuItem) {
+        guard let command = Command(rawValue: sender.tag) else { return }
+        AppDelegate.shared.perform(command)
+    }
+
+    /// whether a command of View > Sort By is checked: the field the list is sorted by, and its direction; nil for
+    /// another command
+    func sortState(_ command: Command) -> Bool? {
+        switch command {
+        case .sortAscending: return ascending
+        case .sortDescending: return !ascending
+        default: return Mailbox.sortFields[command].map { $0 == sort }
+        }
+    }
+
+    /// "Sorted by Date" over the column layout's list, its menu's checks as View > Sort By has them
+    private func updateSortBar() {
+        let field = Mailbox.sortFields.first { $0.value == sort }?.key ?? .sortDate
+        sortBar.item(at: 0)?.title = Text.uiSortedBy.text(["field": field.label])
+        for item in sortBar.itemArray.dropFirst() {
+            guard let command = Command(rawValue: item.tag), let on = sortState(command) else { continue }
+            item.state = on ? .on : .off
+        }
+    }
+
+    /// View > Sort By a field: the same one keeps its direction, another starts its own way (the core says which)
+    func sortBy(_ field: PeSortField) {
+        if field != sort {
+            ascending = pe_sort_starts_ascending(field)
+        }
+        sort = field
+        applySort()
+    }
+
+    /// View > Sort By > Sort Ascending or Sort Descending
+    func setAscending(_ up: Bool) {
+        ascending = up
+        applySort()
+    }
+
+    private func applySort() {
+        listView.setSort(sort, ascending: ascending)
+        showSortIndicator()
+        updateSortBar()
+        reloadList(keepSelection: true)
+    }
 
     private func scrolled(_ document: NSView) -> NSScrollView {
         let scroll = NSScrollView()
@@ -581,6 +771,8 @@ public final class Mailbox: NSObject {
     /// the Folder column while the list has messages of several folders, and not otherwise; in All Inboxes, whose rows
     /// are all in an Inbox, the Account column
     private func showFolderColumn() {
+        // the column layout's rows name the folder themselves
+        guard layout == PE_LAYOUT_CLASSIC else { return }
         let title = searching ? Text.uiColFolder.text : Text.uiColAccount.text
         list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(ColumnID.folder.rawValue))?.title = title
         guard severalFolders != folderColumn else { return }
@@ -742,23 +934,23 @@ public final class Mailbox: NSObject {
         case .subject: field = PE_SORT_FIELD_SUBJECT
         default: field = PE_SORT_FIELD_DATE
         }
-        // the same column again turns the order around; dates start with the newest
-        ascending = field == sort ? !ascending : field != PE_SORT_FIELD_DATE
+        // the same column again turns the order around; another starts its own way
+        ascending = field == sort ? !ascending : pe_sort_starts_ascending(field)
         sort = field
-        listView.setSort(sort, ascending: ascending)
-        showSortIndicator()
-        reloadList(keepSelection: true)
+        applySort()
     }
 
     private func showSortIndicator() {
-        let sorted: ColumnID
+        let sorted: ColumnID?
         switch sort {
         case PE_SORT_FIELD_FROM: sorted = .from
         case PE_SORT_FIELD_SUBJECT: sorted = .subject
+        // no column of sizes: no column shows the order
+        case PE_SORT_FIELD_SIZE: sorted = nil
         default: sorted = .received
         }
         for column in list.tableColumns {
-            let image = column.identifier.rawValue == sorted.rawValue
+            let image = column.identifier.rawValue == sorted?.rawValue
                 ? NSImage(named: ascending ? "NSAscendingSortIndicator" : "NSDescendingSortIndicator") : nil
             list.setIndicatorImage(image, in: column)
         }
@@ -814,8 +1006,8 @@ public final class Mailbox: NSObject {
         emptyTitle.isHidden = title.isEmpty
         emptyMore.isHidden = more.isEmpty
         emptyMoreWidth.constant = evenWidth(more, font: emptyMore.font, widest: Mailbox.emptyTextWidth)
-        // the stripes of empty rows would run through the text
-        list.usesAlternatingRowBackgroundColors = total != 0
+        // the stripes of empty rows would run through the text; the column layout's rows have lines between them instead
+        list.usesAlternatingRowBackgroundColors = total != 0 && layout == PE_LAYOUT_CLASSIC
     }
 
     /// the narrowest width that wraps `text` into as few lines as `widest` does, so no line is left with a lone word
@@ -2123,6 +2315,9 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
     public func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row index: Int) -> NSView? {
         guard let column = tableColumn, let message = row(index) else { return nil }
         let id = column.identifier
+        if id == MessageRowCell.identifier {
+            return rowCell(tableView, message)
+        }
         switch ColumnID(rawValue: id.rawValue) {
         case .attach, .flag:
             let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? IconCell) ?? IconCell(id)
@@ -2157,6 +2352,20 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
             cell.show(value, bold: message.bold, grey: message.dimmed)
             return cell
         }
+    }
+
+    /// a row of the column layout: who, the subject, the first words, the marks
+    private func rowCell(_ tableView: NSTableView, _ message: Message) -> NSView {
+        let cell = (tableView.makeView(withIdentifier: MessageRowCell.identifier, owner: nil) as? MessageRowCell) ?? MessageRowCell()
+        cell.toggled = { [weak self, weak tableView, weak cell] open in
+            guard let self, let tableView, let cell else { return }
+            let at = tableView.row(for: cell)
+            if at >= 0 { self.setExpanded(open, row: at) }
+        }
+        let who = recipientsColumn ? Text.headerTo.text + ": " + message.recipients : message.from
+        cell.show(message, who: who, date: message.date.map(shortDate) ?? "",
+                  folder: severalFolders ? rowFolder(message.folder) : "")
+        return cell
     }
 
     public func tableViewSelectionDidChange(_ notification: Notification) {
@@ -2479,6 +2688,178 @@ final class SubjectCell: NSTableCellView {
     }
 }
 
+/// A row of the list in the column layout, three lines as Mail has them: who and when; the subject with the marks of
+/// the classic columns (and the folder, in a search or All Inboxes); the first words of the message, with a
+/// conversation's count and its disclosure triangle. An unread row has a dot in the gutter. The text is in a stack of
+/// its own, so a picture can go before it.
+final class MessageRowCell: NSTableCellView {
+    static let identifier = NSUserInterfaceItemIdentifier("row")
+    static let height: CGFloat = 62
+
+    private let dot = NSView()
+    private let who = MessageRowCell.label(13)
+    private let date = MessageRowCell.label(12)
+    private let subject = MessageRowCell.label(12)
+    private let folder = MessageRowCell.label(11)
+    private let attach = NSImageView()
+    private let flag = NSImageView()
+    private let snippet = MessageRowCell.label(12)
+    private let count = MessageRowCell.label(12)
+    let disclosure = NSButton()
+    private var indent: NSLayoutConstraint!
+    /// the triangle clicked: open (true) or close the conversation
+    var toggled: (Bool) -> Void = { _ in }
+    private var grey = false
+    private var flags: (plain: NSImage?, selected: NSImage?) = (nil, nil)
+
+    override var backgroundStyle: NSView.BackgroundStyle {
+        didSet { paint() }
+    }
+
+    private static func label(_ size: CGFloat) -> NSTextField {
+        let label = NSTextField(labelWithString: "")
+        label.font = .systemFont(ofSize: size)
+        label.lineBreakMode = .byTruncatingTail
+        label.cell?.usesSingleLineMode = true
+        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        label.setContentHuggingPriority(.init(1), for: .horizontal)
+        return label
+    }
+
+    /// a line of the row: its main text taking the room, what is at its end kept whole
+    private static func line(_ main: NSView, _ end: [NSView], baseline: Bool = false) -> NSStackView {
+        for view in end {
+            view.setContentCompressionResistancePriority(.required, for: .horizontal)
+            view.setContentHuggingPriority(.required, for: .horizontal)
+        }
+        let stack = NSStackView(views: [main] + end)
+        stack.orientation = .horizontal
+        stack.spacing = 6
+        // the date on the sender's baseline; the marks and the triangle in the middle of their line
+        stack.alignment = baseline ? .firstBaseline : .centerY
+        stack.distribution = .fill
+        return stack
+    }
+
+    init() {
+        super.init(frame: .zero)
+        identifier = MessageRowCell.identifier
+        dot.wantsLayer = true
+        dot.layer?.cornerRadius = 3.5
+        dot.translatesAutoresizingMaskIntoConstraints = false
+        for icon in [attach, flag] {
+            icon.translatesAutoresizingMaskIntoConstraints = false
+            icon.widthAnchor.constraint(equalToConstant: 14).isActive = true
+            icon.heightAnchor.constraint(equalToConstant: 14).isActive = true
+            icon.imageScaling = .scaleProportionallyDown
+        }
+        date.alignment = .right
+        disclosure.bezelStyle = .disclosure
+        disclosure.setButtonType(.onOff)
+        disclosure.title = ""
+        disclosure.controlSize = .small
+        disclosure.target = self
+        disclosure.action = #selector(clicked)
+        disclosure.setAccessibilityIdentifier("list.disclosure")
+        let text = NSStackView(views: [
+            MessageRowCell.line(who, [date], baseline: true),
+            MessageRowCell.line(subject, [folder, attach, flag]),
+            MessageRowCell.line(snippet, [count, disclosure]),
+        ])
+        text.orientation = .vertical
+        text.alignment = .leading
+        text.spacing = 2
+        text.distribution = .fill
+        text.translatesAutoresizingMaskIntoConstraints = false
+        for line in text.arrangedSubviews {
+            line.widthAnchor.constraint(equalTo: text.widthAnchor).isActive = true
+        }
+        addSubview(dot)
+        addSubview(text)
+        indent = text.leadingAnchor.constraint(equalTo: leadingAnchor, constant: MessageRowCell.gutter)
+        NSLayoutConstraint.activate([
+            dot.widthAnchor.constraint(equalToConstant: 7),
+            dot.heightAnchor.constraint(equalToConstant: 7),
+            dot.centerXAnchor.constraint(equalTo: leadingAnchor, constant: MessageRowCell.gutter / 2 + 1),
+            dot.centerYAnchor.constraint(equalTo: who.centerYAnchor),
+            indent,
+            text.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
+            text.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+        textField = who
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    /// the row shows itself unread: its dot, and its subject bold (for the UI test)
+    var unreadShown: Bool {
+        !dot.isHidden && subject.font?.fontDescriptor.symbolicTraits.contains(.bold) == true
+    }
+
+    /// the room of the unread dot before the text, and how much further the messages of an open conversation are in
+    static let gutter: CGFloat = 18
+    static let step: CGFloat = 16
+
+    /// `who`: the sender, or the recipients in Sent Items and Drafts; `folder`: the folder's name in a list of several
+    func show(_ message: Message, who name: String, date when: String, folder place: String) {
+        // the sender always semibold, as Mail's: the dot and a bold subject say the row is unread
+        who.stringValue = name
+        who.font = .systemFont(ofSize: 13, weight: .semibold)
+        date.stringValue = when
+        subject.stringValue = message.subject.isEmpty ? Text.uiNoSubject.text : message.subject
+        subject.font = message.bold ? .boldSystemFont(ofSize: 12) : .systemFont(ofSize: 12)
+        folder.stringValue = place
+        folder.isHidden = place.isEmpty
+        // a bounce's mark in the paper clip's place, whether or not it has files
+        attach.image = message.bounce ? Icons.bounce : (message.hasAttachments ? Icons.list("attach") : nil)
+        attach.isHidden = attach.image == nil
+        flags = message.flagged ? (Icons.coloredFlag(message.flagColor), Icons.selectedFlag) : (nil, nil)
+        flag.isHidden = !message.flagged
+        snippet.stringValue = message.snippet
+        // the count is a number alone, which needs no words of a language
+        count.stringValue = "\(message.threadCount)"
+        count.isHidden = !message.opens
+        disclosure.isHidden = !message.opens
+        disclosure.state = message.threadExpanded ? .on : .off
+        indent.constant = MessageRowCell.gutter + CGFloat(message.threadDepth) * MessageRowCell.step
+        dot.isHidden = !message.bold
+        grey = message.dimmed
+        paint()
+        setAccessibilityLabel(spoken(message, who: name, date: when))
+    }
+
+    /// what a screen reader says of the row: unread, who, the subject, when, the first words
+    private func spoken(_ message: Message, who name: String, date when: String) -> String {
+        var parts: [String] = []
+        if message.bold { parts.append(Text.uiRowUnread.text) }
+        parts += [name, subject.stringValue, when]
+        if message.flagged { parts.append(Text.uiRowFlagged.text) }
+        if message.hasAttachments { parts.append(Text.uiRowAttachments.text) }
+        if message.opens { parts.append(Text.uiRowMessages.text(["count": message.threadCount])) }
+        if !message.snippet.isEmpty { parts.append(message.snippet) }
+        return parts.joined(separator: ", ")
+    }
+
+    /// the colours of the row: white on the selection, an ignored conversation's grey, the secondary lines lighter
+    private func paint() {
+        let selected = backgroundStyle == .emphasized
+        let main = Mailbox.rowColor(grey: grey, style: backgroundStyle)
+        let secondary: NSColor = selected ? .alternateSelectedControlTextColor.withAlphaComponent(0.8) : .secondaryLabelColor
+        who.textColor = main
+        subject.textColor = main
+        for label in [date, folder, snippet, count] {
+            label.textColor = secondary
+        }
+        dot.layer?.backgroundColor = (selected ? NSColor.alternateSelectedControlTextColor : .controlAccentColor).cgColor
+        flag.image = selected ? (flags.selected ?? flags.plain) : flags.plain
+        attach.contentTintColor = selected ? .alternateSelectedControlTextColor : nil
+    }
+
+    @objc private func clicked() {
+        toggled(disclosure.state == .on)
+    }
+}
+
 /// A row of the folder tree with its selection in the system's colors: the accent while the tree has the keyboard, grey
 /// otherwise
 final class SelectionRow: NSTableRowView {
@@ -2616,8 +2997,17 @@ public final class MessageTable: NSTableView {
     }
 }
 
-/// The folder pane can be dragged closed, as a sidebar can: that turns View > Folder List off
+/// The folder pane can be dragged closed, as a sidebar can: that turns View > Folder List off. The list's width beside
+/// the reader is kept as the user drags it
 extension Mailbox: NSSplitViewDelegate {
+    private func keepListWidth() {
+        guard layout == PE_LAYOUT_COLUMNS, !changingLayout else { return }
+        let width = rightSplit.arrangedSubviews[0].frame.width
+        if width >= Mailbox.smallestListWidth {
+            Mailbox.columnsListWidth = width
+        }
+    }
+
     public func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView) -> Bool {
         splitView === view && subview === treePane
     }
@@ -2625,6 +3015,10 @@ extension Mailbox: NSSplitViewDelegate {
     /// a drag that collapsed or opened the pane sets the preference, whose setter calls folderListChanged (which then
     /// finds the pane as it should be and does nothing)
     public func splitViewDidResizeSubviews(_ notification: Notification) {
+        if notification.object as? NSSplitView === rightSplit {
+            keepListWidth()
+            return
+        }
         guard let app = AppDelegate.shared, notification.object as? NSSplitView === view else { return }
         let shown = !view.isSubviewCollapsed(treePane) && !treePane.isHidden
         if shown != app.folderList {

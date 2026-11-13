@@ -158,6 +158,26 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
     }
     private var showingFolders = Preference("FolderList", default: true)
+    /// View > Layout and Settings: Automatic (the window's width decides), Classic or Columns; in memory under test
+    var layoutMode: PeLayoutMode {
+        get {
+            let value = TestHooks.testing ? testLayout : UserDefaults.standard.integer(forKey: "Layout")
+            return PeLayoutMode(rawValue: UInt32(clamping: max(0, min(2, value))))
+        }
+        set {
+            if TestHooks.testing {
+                testLayout = Int(newValue.rawValue)
+            } else {
+                UserDefaults.standard.set(Int(newValue.rawValue), forKey: "Layout")
+            }
+            main?.updateLayout()
+        }
+    }
+    private var testLayout = 0
+    /// the View > Layout command of each choice
+    static let layoutModes: [Command: PeLayoutMode] = [
+        .layoutAutomatic: PE_LAYOUT_MODE_AUTOMATIC, .layoutClassic: PE_LAYOUT_MODE_CLASSIC, .layoutColumns: PE_LAYOUT_MODE_COLUMNS,
+    ]
     /// message files (and links) the system asked to open before the window was there
     private var pending: [URL] = []
     /// the app ends after the compose windows that are saving have closed
@@ -334,6 +354,33 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         return item
     }
 
+    /// the View menu's items, those of a submenu (Layout, Sort By) together in it where the first of them is
+    private func viewItems(_ commands: [Command]) -> [NSMenuItem] {
+        var items: [NSMenuItem] = []
+        var submenus: [String: NSMenu] = [:]
+        for command in commands {
+            guard let name = command.submenu else {
+                items.append(item(for: command))
+                continue
+            }
+            if submenus[name] == nil {
+                let title = name == "layout" ? Text.menuLayout.text : Text.menuSortBy.text
+                let menu = NSMenu(title: title)
+                let holder = NSMenuItem(title: title, action: nil, keyEquivalent: "")
+                holder.submenu = menu
+                holder.setAccessibilityIdentifier("menu.\(name)")
+                submenus[name] = menu
+                items.append(holder)
+            }
+            // the direction after the fields, apart from them
+            if command == .sortAscending {
+                submenus[name]?.addItem(.separator())
+            }
+            submenus[name]?.addItem(item(for: command))
+        }
+        return items
+    }
+
     private func buildMenu() -> NSMenu {
         let bar = NSMenu()
         func submenu(_ title: String, _ items: [NSMenuItem]) -> NSMenu {
@@ -398,7 +445,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             item(for: .move), item(for: .delete),
         ]
         _ = submenu(Text.menuEdit.text, edit)
-        _ = submenu(Text.menuView.text, commands("view").map { item(for: $0) })
+        _ = submenu(Text.menuView.text, viewItems(commands("view")))
         _ = submenu(Text.menuMessage.text, [item(for: .newMail), separator(), item(for: .reply), item(for: .replyAll), item(for: .forward),
                                 separator(), item(for: .flag), flagMenu(), separator(), item(for: .watchConversation),
                                 item(for: .ignoreConversation), separator(), item(for: .archive), item(for: .junk),
@@ -514,6 +561,15 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .hideIgnored: hideIgnored.toggle()
         case .hideRead: hideRead.toggle()
         case .folderList: folderList.toggle()
+        case .layoutAutomatic: layoutMode = PE_LAYOUT_MODE_AUTOMATIC
+        case .layoutClassic: layoutMode = PE_LAYOUT_MODE_CLASSIC
+        case .layoutColumns: layoutMode = PE_LAYOUT_MODE_COLUMNS
+        case .sortDate: main.mailbox.sortBy(PE_SORT_FIELD_DATE)
+        case .sortFrom: main.mailbox.sortBy(PE_SORT_FIELD_FROM)
+        case .sortSubject: main.mailbox.sortBy(PE_SORT_FIELD_SUBJECT)
+        case .sortSize: main.mailbox.sortBy(PE_SORT_FIELD_SIZE)
+        case .sortAscending: main.mailbox.setAscending(true)
+        case .sortDescending: main.mailbox.setAscending(false)
         case .notify: notify.toggle()
         case .open: main.show()
         case .defaultApp: main.makeDefaultMailApp()
@@ -604,6 +660,12 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
         if command == .folderList {
             item.state = folderList ? .on : .off
+        }
+        if let mode = Self.layoutModes[command] {
+            item.state = layoutMode == mode ? .on : .off
+        }
+        if let main, let state = main.mailbox.sortState(command) {
+            item.state = state ? .on : .off
         }
         guard let main, core != nil else { return command == .exit || command == .about || command == .help }
         // checked while the conversation of every message they are about has the mark, which choosing it again takes away

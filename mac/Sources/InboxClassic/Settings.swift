@@ -88,6 +88,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     let pictures: NSButton
     let downloadAhead = NSPopUpButton()
     let downloadLimit = NSPopUpButton()
+    /// Automatic, Classic, Columns: View > Layout's choice
+    let layout = NSPopUpButton()
     private let core: Core
     /// the codes of the popup's items, nil for System default
     private var codes: [String?] = []
@@ -200,9 +202,20 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
 
         let label = NSTextField(labelWithString: Text.macLanguageLabel.text)
         label.alignment = .right
+        // in the order of PeLayoutMode
+        for command in [Command.layoutAutomatic, .layoutClassic, .layoutColumns] {
+            layout.addItem(withTitle: command.label)
+        }
+        layout.selectItem(at: Int(AppDelegate.shared?.layoutMode.rawValue ?? 0))
+        layout.target = self
+        layout.action = #selector(layoutChosen)
+        layout.setAccessibilityIdentifier("settings.layout")
+        let layoutLabel = NSTextField(labelWithString: Text.uiLayoutLabel.text)
+        layoutLabel.alignment = .right
         let grid = NSGridView(views: [
             [label, language],
             [NSGridCell.emptyContentView, hint],
+            [layoutLabel, layout],
             [NSGridCell.emptyContentView, notify],
             [NSGridCell.emptyContentView, indented],
             [NSGridCell.emptyContentView, grouping],
@@ -218,11 +231,13 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grid.columnSpacing = 8
         grid.column(at: 0).xPlacement = .trailing
         grid.row(at: 2).topPadding = 8
-        grid.row(at: 7).topPadding = 4
-        grid.row(at: 8).topPadding = 8
-        grid.row(at: 9).topPadding = 12
-        // the label on the pop-up's text line, as the other forms have it
+        grid.row(at: 3).topPadding = 8
+        grid.row(at: 8).topPadding = 4
+        grid.row(at: 9).topPadding = 8
+        grid.row(at: 10).topPadding = 12
+        // the labels on the pop-ups' text lines, as the other forms have them
         grid.row(at: 0).rowAlignment = .firstBaseline
+        grid.row(at: 2).rowAlignment = .firstBaseline
         grid.translatesAutoresizingMaskIntoConstraints = false
         // the help button in the bottom right corner, as the system's settings have it
         let help = HelpButton("options")
@@ -247,6 +262,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
 
     func windowWillClose(_ notification: Notification) {
         SettingsWindow.shown = nil
+    }
+
+    @objc private func layoutChosen() {
+        AppDelegate.shared?.layoutMode = PeLayoutMode(rawValue: UInt32(max(0, layout.indexOfSelectedItem)))
     }
 
     @objc func notifyChanged() {

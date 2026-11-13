@@ -588,6 +588,9 @@ struct Message {
     let mark: PeThreadMark
     /// the row grey, its conversation ignored (the core decides)
     let dimmed: Bool
+    /// the first words of what the sender wrote, empty until the core has read them (text from the sender: shown as
+    /// text only)
+    let snippet: String
 
     init(_ message: PeMessage) {
         folder = message.folder
@@ -614,6 +617,7 @@ struct Message {
         bounce = message.bounce
         mark = message.mark
         dimmed = message.dimmed
+        snippet = text(message.snippet)
     }
 }
 
@@ -668,6 +672,21 @@ func formatDate(_ seconds: Int64) -> String {
     formatter.dateStyle = .short
     formatter.timeStyle = .short
     return formatter.string(from: Date(timeIntervalSince1970: TimeInterval(seconds)))
+}
+
+/// A date of the column list's rows, short as the core says for its age: the time today, the weekday this week, the
+/// day and month this year, the date before
+func shortDate(_ seconds: Int64) -> String {
+    let date = Date(timeIntervalSince1970: TimeInterval(seconds))
+    let offset = Int64(TimeZone.current.secondsFromGMT(for: Date()))
+    let formatter = DateFormatter()
+    switch pe_date_style(seconds, Int64(Date().timeIntervalSince1970), offset) {
+    case PE_DATE_STYLE_TIME: formatter.timeStyle = .short
+    case PE_DATE_STYLE_WEEKDAY: formatter.setLocalizedDateFormatFromTemplate("EEEE")
+    case PE_DATE_STYLE_DAY_MONTH: formatter.setLocalizedDateFormatFromTemplate("dMMM")
+    default: formatter.dateStyle = .short
+    }
+    return formatter.string(from: date)
 }
 
 /// The time of day now, without seconds
