@@ -372,7 +372,7 @@ pub(crate) struct Worker {
     pub(crate) fallback: Option<UnboundedSender<Command>>,
     /// When the server last refused a connection because too many are open
     limited: Option<Instant>,
-    /// When a connection could last not be made, for whatever reason
+    /// When the server last took a connection and closed it, or refused one more
     connect_failed: Option<Instant>,
     /// When the connection last did something (the reader's keep-alive and answer limit)
     last_used: Instant,
@@ -621,8 +621,8 @@ impl Worker {
         background::nudge(&self.ctx.nudges, self.account);
     }
 
-    /// Whether this worker could not connect since `at` (the server refused one more connection, or closed it
-    /// without saying why, as some do when too many are open): the main worker, connected already, does the work
+    /// Whether the server refused this worker a connection since `at` (said it has too many, or closed it without
+    /// saying why, as some do then): the main worker, connected already, does the work
     fn refused_since(&self, at: Instant) -> bool {
         self.role != Role::Main && self.connect_failed.is_some_and(|failed| failed >= at)
     }
@@ -1481,7 +1481,11 @@ impl Worker {
                 config.timeouts.response = config.timeouts.response.min(limit);
             }
             let connected = Client::connect(config).await;
-            if let Err(error) = &connected {
+            // a server that took the connection and then closed it, or said it has too many: the main worker,
+            // connected already, does this worker's work; one that can not be reached fails it here at once
+            if let Err(error) = &connected
+                && (error.is_connection_limit() || matches!(error, pe_imap::Error::Closed(_)))
+            {
                 self.connect_failed = Some(Instant::now());
                 if error.is_connection_limit() {
                     self.limited = self.connect_failed;
