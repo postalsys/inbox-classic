@@ -35,11 +35,7 @@ pub(crate) fn judge(headers: &str, from_address: &str, trusted: &[String]) -> Ju
     if authres::verdict(&parsed, trusted).is_none() {
         bits |= NO_VERDICT;
     }
-    let domain = from_address
-        .rsplit_once('@')
-        .map(|(_, domain)| domain.trim().to_ascii_lowercase())
-        .unwrap_or_default();
-    if !domain.is_empty() && pictures::from_verified(&parsed, trusted, &domain) {
+    if pictures::sender_of(from_address, &parsed, trusted).is_some_and(|sender| sender.verified) {
         bits |= VERIFIED;
     }
     // the logo's address only: the logo itself (BIMI-Indicator) is not fetched with the summary
@@ -155,6 +151,23 @@ mod tests {
         let headers = "Authentication-Results: mx.example.com; dkim=pass header.d=example.org\r\n";
         assert_eq!(judge(headers, "bo@mail.example.org", &trusted()).bits, VERIFIED);
         assert_eq!(judge(headers, "bo@other.example", &trusted()).bits, 0);
+    }
+
+    #[test]
+    fn an_oversized_verdict_on_top_gives_none() {
+        // the provider's results on top, too large to keep; a forged pass below them
+        let provider = format!(
+            "Authentication-Results: mx.example.com; dmarc=fail header.from=shop.example; {}\r\n",
+            "x".repeat(5000)
+        );
+        let header = format!(
+            "{provider}Authentication-Results: mx.example.com; dmarc=pass header.from=shop.example; bimi=pass\r\n\
+             {LOCATION}\r\n"
+        );
+        let kept = pe_sync::auth_fields(header.as_bytes());
+        let judged = judge(&kept, "news@shop.example", &trusted());
+        assert_eq!(judged.bits, NO_VERDICT);
+        assert_eq!(judged.logo_url, None);
     }
 
     #[test]

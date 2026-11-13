@@ -100,57 +100,59 @@ pub(crate) fn with_auth_fields(mut fields: Vec<String>) -> Vec<String> {
     fields
 }
 
-/// The verdict fields of a header block, in their order, folded lines kept, whole fields only up to [`AUTH_LIMIT`]
-pub(crate) fn auth_fields(header: &[u8]) -> String {
+/// The fields of a header block in their order: each one's name and its lines as they are, folded ones kept (a line
+/// that is no field and no fold gets an empty name, so the folds after it belong to nothing)
+fn header_fields(header: &[u8]) -> Vec<(String, String)> {
     let text = String::from_utf8_lossy(header);
-    let mut kept = String::new();
-    let mut field = String::new();
-    let mut inside = false;
-    let flush = |field: &mut String, kept: &mut String| {
-        if !field.is_empty() && kept.len() + field.len() <= AUTH_LIMIT {
-            kept.push_str(field);
-        }
-        field.clear();
-    };
+    let mut fields: Vec<(String, String)> = Vec::new();
     for line in text.lines() {
         if line.starts_with([' ', '\t']) {
-            if inside {
-                field.push_str(line);
-                field.push_str("\r\n");
+            if let Some((_, raw)) = fields.last_mut() {
+                raw.push_str(line);
+                raw.push_str("\r\n");
             }
             continue;
         }
-        flush(&mut field, &mut kept);
-        inside = line
-            .split_once(':')
-            .is_some_and(|(name, _)| AUTH_FIELDS.iter().any(|known| name.trim().eq_ignore_ascii_case(known)));
-        if inside {
-            field.push_str(line);
-            field.push_str("\r\n");
-        }
+        let name = line.split_once(':').map_or("", |(name, _)| name.trim());
+        fields.push((name.to_string(), format!("{line}\r\n")));
     }
-    flush(&mut field, &mut kept);
+    fields
+}
+
+/// The verdict fields of a header block, in their order, folded lines kept, whole fields only up to [`AUTH_LIMIT`]. The
+/// first field that does not fit ends them: one left out must never let a lower one (which the sender may have
+/// written) take the place of the provider's on top, so when the topmost alone is too large, none is kept
+pub fn auth_fields(header: &[u8]) -> String {
+    let mut kept = String::new();
+    for (_, raw) in header_fields(header)
+        .into_iter()
+        .filter(|(name, _)| AUTH_FIELDS.iter().any(|known| name.eq_ignore_ascii_case(known)))
+    {
+        if kept.len() + raw.len() > AUTH_LIMIT {
+            break;
+        }
+        kept.push_str(&raw);
+    }
     kept
 }
 
 /// The Message-IDs of the References field of a header block (folded or not)
 pub(crate) fn references_of(header: &[u8]) -> Vec<String> {
-    let text = String::from_utf8_lossy(header);
     let mut value = String::new();
-    let mut inside = false;
-    for line in text.lines() {
-        if line.starts_with([' ', '\t']) {
-            if inside {
-                value.push(' ');
-                value.push_str(line.trim());
-            }
-            continue;
-        }
-        inside = line
-            .split_once(':')
-            .is_some_and(|(name, _)| name.trim().eq_ignore_ascii_case("References"));
-        if inside {
-            value.push_str(line.split_once(':').map_or("", |(_, v)| v));
+    for (_, raw) in header_fields(header)
+        .into_iter()
+        .filter(|(name, _)| name.eq_ignore_ascii_case("References"))
+    {
+        let mut lines = raw.lines();
+        value.push_str(
+            lines
+                .next()
+                .and_then(|first| first.split_once(':'))
+                .map_or("", |(_, v)| v),
+        );
+        for fold in lines {
+            value.push(' ');
+            value.push_str(fold.trim());
         }
     }
     pe_store::parse_references(&value)
@@ -182,6 +184,11 @@ mod tests {
         // whole fields only, at most the limit
         let long = format!("Authentication-Results: {}\r\n", "x".repeat(AUTH_LIMIT));
         let header = format!("Authentication-Results: first\r\n{long}");
+        assert_eq!(auth_fields(header.as_bytes()), "Authentication-Results: first\r\n");
+        // one that does not fit ends them: a lower one never takes the place of the provider's on top
+        let header = format!("{long}Authentication-Results: forged; dmarc=pass\r\n");
+        assert_eq!(auth_fields(header.as_bytes()), "");
+        let header = format!("Authentication-Results: first\r\n{long}BIMI-Location: l=x\r\n");
         assert_eq!(auth_fields(header.as_bytes()), "Authentication-Results: first\r\n");
     }
 
