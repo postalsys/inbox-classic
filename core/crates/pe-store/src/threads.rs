@@ -166,6 +166,17 @@ impl Store {
     /// Puts up to `limit` messages that are in no conversation yet (stored before conversations were kept) into
     /// theirs, the oldest first so a conversation starts with its first message. Returns how many; 0 when all are.
     pub fn thread_unthreaded(&self, account: AccountId, limit: usize) -> Result<usize> {
+        // nothing to do, the common case: found without taking the write lock
+        let any: bool = self
+            .db
+            .prepare_cached(
+                "SELECT EXISTS (SELECT 1 FROM messages m JOIN folders f ON f.id = m.folder_id \
+             WHERE m.thread_id < 0 AND f.account_id = ?1)",
+            )?
+            .query_row(params![account], |row| row.get(0))?;
+        if !any {
+            return Ok(0);
+        }
         let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
         let mut statement = self.db.prepare_cached(
             "SELECT m.id, m.message_id, m.in_reply_to, COALESCE(m.refs, '') FROM messages m \

@@ -3133,6 +3133,18 @@ fn sessions(server: &ImapKit) -> Vec<(u64, String)> {
         .collect()
 }
 
+/// The reader's session, once the three workers are connected and done: the main worker's and the background
+/// worker's have a folder selected, the reader's not before its first open
+fn reader_session(server: &ImapKit) -> Option<u64> {
+    let now = sessions(server);
+    let waiting: Vec<u64> = now
+        .iter()
+        .filter(|(_, state)| state == "Authenticated")
+        .map(|(number, _)| *number)
+        .collect();
+    (now.len() == 3 && waiting.len() == 1).then(|| waiting[0])
+}
+
 /// An account synced once, with these messages in its Inbox: (account, Inbox, their UIDs)
 fn synced_with(s: &Setup, subjects: &[&str]) -> (pe_store::AccountId, pe_store::FolderId, Vec<u64>) {
     let uids = subjects
@@ -3162,9 +3174,8 @@ fn open(s: &Setup, folder: pe_store::FolderId, uid: u64) {
 fn the_reader_is_connected_before_the_first_open() {
     let Some(s) = setup() else { return };
     let (_, inbox, uids) = synced_with(&s, &["One"]);
-    // the main worker's connection and the reader's
     eventually(
-        || sessions(&s.server).len() == 2,
+        || reader_session(&s.server).is_some(),
         "the reader connects after the first sync",
     );
     open(&s, inbox, uids[0]);
@@ -3181,15 +3192,9 @@ fn the_reader_is_connected_before_the_first_open() {
 fn a_dead_reader_connection_is_replaced_within_seconds() {
     let Some(s) = setup() else { return };
     let (_, inbox, uids) = synced_with(&s, &["One"]);
-    // signed in, and no folder selected yet
-    let reader_ready = || sessions(&s.server).iter().any(|(_, state)| state == "Authenticated");
-    eventually(reader_ready, "the reader connects");
+    eventually(|| reader_session(&s.server).is_some(), "the reader connects");
     // from now on the reader's session gets no answer, as one a NAT forgot
-    let reader = sessions(&s.server)
-        .into_iter()
-        .find(|(_, state)| state == "Authenticated")
-        .map(|(number, _)| number)
-        .expect("the reader's session");
+    let reader = reader_session(&s.server).expect("the reader's session");
     s.server.request(
         "POST",
         "/v1/script/rules",
@@ -3223,13 +3228,14 @@ fn a_dead_reader_connection_is_replaced_within_seconds() {
 fn connections_are_made_again_after_a_wake() {
     let Some(s) = setup() else { return };
     let (_, inbox, uids) = synced_with(&s, &["One"]);
-    eventually(|| sessions(&s.server).len() == 2, "the reader connects");
+    eventually(|| sessions(&s.server).len() >= 2, "the reader connects");
     let before: Vec<u64> = sessions(&s.server).into_iter().map(|(n, _)| n).collect();
     s.core.woke();
     eventually(
         || {
+            // the main worker's and the reader's at least (the background worker's while it has work)
             let now = sessions(&s.server);
-            now.len() == 2 && now.iter().all(|(n, _)| !before.contains(n))
+            now.len() >= 2 && now.iter().all(|(n, _)| !before.contains(n))
         },
         "both connections are new",
     );
@@ -3258,4 +3264,49 @@ fn opens_go_to_the_main_worker_when_the_server_allows_one_connection() {
     let timings = s.core.open_timings();
     assert!(timings.iter().all(|t| t.served == Served::Main), "{timings:?}");
     assert!(s.core.message_view(inbox, uids[1], false).unwrap().is_some());
+}
+
+// ---- the background worker: what the user does not wait for, on a connection of its own (phase 3) ----
+
+/// Whether the search finds `word` in the text of the mail of `folder`
+fn finds(s: &Setup, folder: pe_store::FolderId, word: &str) -> bool {
+    let search = Search {
+        text: word.into(),
+        ..Search::folder(folder)
+    };
+    !s.core.search(&search, Sort::default(), 0, 10).unwrap().is_empty()
+}
+
+#[test]
+fn new_mail_shows_while_the_search_text_is_downloaded() {
+    // the text of the mail comes slowly: seconds for each batch
+    let Some(s) = setup_with(json!({ "script": {
+        "on": "command", "match": "BODY\\.PEEK\\[1\\]", "delay": 3000
+    } })) else {
+        return;
+    };
+    let (account, inbox, _) = synced_with(&s, &["One", "Two"]);
+    // the main worker is on the Inbox meanwhile, not in the batch
+    std::thread::sleep(Duration::from_millis(300));
+    s.server.add_message("INBOX", &rfc822("Three", "x"), &[]);
+    let started = std::time::Instant::now();
+    s.wait(|e| *e == Event::FolderChanged { account, folder: inbox });
+    assert!(started.elapsed() < Duration::from_secs(2), "{:?}", started.elapsed());
+    eventually(|| finds(&s, inbox, "Hello"), "the search text comes after");
+}
+
+#[test]
+fn the_main_worker_does_the_background_work_when_the_server_allows_one_connection() {
+    let Some(s) = setup_with(json!({ "script": {
+        "on": "greeting", "nth": 2, "send": "* BYE Too many connections\r\n", "close": true
+    } })) else {
+        return;
+    };
+    let (account, inbox, _) = synced_with(&s, &["One"]);
+    eventually(|| finds(&s, inbox, "Hello"), "the search text of the mail");
+    // and new mail still comes in over IDLE
+    s.server.add_message("INBOX", &rfc822("Two", "Later words"), &[]);
+    s.wait(|e| *e == Event::FolderChanged { account, folder: inbox });
+    eventually(|| finds(&s, inbox, "Later"), "the search text of new mail");
+    assert_eq!(sessions(&s.server).len(), 1);
 }
