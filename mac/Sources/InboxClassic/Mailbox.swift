@@ -84,7 +84,9 @@ public final class Mailbox: NSObject {
     private var listHeightMin: NSLayoutConstraint!
     private var readerHeightMin: NSLayoutConstraint!
     private var listWidthMin: NSLayoutConstraint!
-    private var classicListHeight: CGFloat = 260
+    private var classicListHeight = Mailbox.defaultListHeight
+    /// what the column layout's dates are seen from, taken again with each reload of the list
+    private var dateClock = DateClock()
     /// while the layout changes, the dividers moved are not the user's
     private var changingLayout = false
 
@@ -173,7 +175,7 @@ public final class Mailbox: NSObject {
         view.autosaveName = TestHooks.testing ? nil : "Panes"
         rightSplit.isVertical = false
         rightSplit.dividerStyle = .thin
-        rightSplit.autosaveName = TestHooks.testing ? nil : "ListAndReader"
+        rightSplit.autosaveName = Mailbox.classicAutosave
 
         tree.dataSource = self
         tree.delegate = self
@@ -253,7 +255,7 @@ public final class Mailbox: NSObject {
         }
         let list = rightSplit.arrangedSubviews[0].frame.height
         if TestHooks.testing || list <= Mailbox.smallestList + 1 {
-            rightSplit.setPosition(260, ofDividerAt: 0)
+            rightSplit.setPosition(Mailbox.defaultListHeight, ofDividerAt: 0)
         }
     }
 
@@ -276,6 +278,11 @@ public final class Mailbox: NSObject {
     private static let smallestTree: CGFloat = 160
     private static let smallestList: CGFloat = 80
     private static let smallestListWidth: CGFloat = 280
+    /// the list's height above the reader until the user drags it, and a classic row's
+    private static let defaultListHeight: CGFloat = 260
+    private static let classicRowHeight: CGFloat = 20
+    /// the classic panes' sizes are kept by the split view under this name (not by the UI test)
+    private static var classicAutosave: String? { TestHooks.testing ? nil : "ListAndReader" }
 
     // ---- the layout ----
 
@@ -289,7 +296,7 @@ public final class Mailbox: NSObject {
         defer { changingLayout = false }
         if columns {
             let height = rightSplit.arrangedSubviews[0].frame.height
-            classicListHeight = height > Mailbox.smallestList + 1 ? height : 260
+            classicListHeight = height > Mailbox.smallestList + 1 ? height : Mailbox.defaultListHeight
         }
         layout = wanted
         rightSplit.autosaveName = nil
@@ -301,9 +308,9 @@ public final class Mailbox: NSObject {
         rightSplit.adjustSubviews()
         view.layoutSubtreeIfNeeded()
         if columns {
-            rightSplit.setPosition(Mailbox.columnsListWidth, ofDividerAt: 0)
+            rightSplit.setPosition(CGFloat(Mailbox.listBesideReader.value), ofDividerAt: 0)
         } else {
-            rightSplit.autosaveName = TestHooks.testing ? nil : "ListAndReader"
+            rightSplit.autosaveName = Mailbox.classicAutosave
             rightSplit.setPosition(classicListHeight, ofDividerAt: 0)
         }
         reloadList(keepSelection: true)
@@ -312,18 +319,8 @@ public final class Mailbox: NSObject {
         }
     }
 
-    /// the list's width beside the reader, kept for the next start (not by the UI test)
-    private static var columnsListWidth: CGFloat {
-        get {
-            let kept = TestHooks.testing ? 0 : UserDefaults.standard.double(forKey: "ListBesideReader")
-            return kept >= smallestListWidth ? kept : 360
-        }
-        set {
-            if !TestHooks.testing {
-                UserDefaults.standard.set(Double(newValue), forKey: "ListBesideReader")
-            }
-        }
-    }
+    /// the list's width beside the reader, kept for the next start (in memory under test)
+    private static var listBesideReader = Preference("ListBesideReader", default: 360.0)
 
     /// the list's columns and headings for Classic, or its one column of three line rows for Columns
     private func showColumns(_ columns: Bool) {
@@ -340,8 +337,7 @@ public final class Mailbox: NSObject {
             list.headerView = classicHeader
             showSortIndicator()
         }
-        list.rowHeight = columns ? MessageRowCell.height : 20
-        list.usesAlternatingRowBackgroundColors = !columns
+        list.rowHeight = columns ? MessageRowCell.height : Mailbox.classicRowHeight
         list.gridStyleMask = columns ? .solidHorizontalGridLineMask : []
         sortRow.isHidden = !columns
         sortRowHeight.constant = columns ? 28 : 0
@@ -359,14 +355,15 @@ public final class Mailbox: NSObject {
         sortBar.translatesAutoresizingMaskIntoConstraints = false
         // the pull-down's own title, then the choices of View > Sort By
         sortBar.addItem(withTitle: "")
+        // the menu's own items: they run the commands, and are checked as View > Sort By's are
         for command in Mailbox.sortCommands {
             if command == .sortAscending {
                 sortBar.menu?.addItem(.separator())
             }
-            let item = NSMenuItem(title: command.label, action: #selector(sortChosen(_:)), keyEquivalent: "")
-            item.tag = command.rawValue
-            item.target = self
-            sortBar.menu?.addItem(item)
+            if let item = AppDelegate.shared?.item(for: command) {
+                item.keyEquivalent = ""
+                sortBar.menu?.addItem(item)
+            }
         }
         let line = NSBox()
         line.boxType = .separator
@@ -388,15 +385,10 @@ public final class Mailbox: NSObject {
     }
 
     private static let sortCommands: [Command] = [.sortDate, .sortFrom, .sortSubject, .sortSize, .sortAscending, .sortDescending]
-    private static let sortFields: [Command: PeSortField] = [
+    static let sortFields: [Command: PeSortField] = [
         .sortDate: PE_SORT_FIELD_DATE, .sortFrom: PE_SORT_FIELD_FROM, .sortSubject: PE_SORT_FIELD_SUBJECT,
         .sortSize: PE_SORT_FIELD_SIZE,
     ]
-
-    @objc private func sortChosen(_ sender: NSMenuItem) {
-        guard let command = Command(rawValue: sender.tag) else { return }
-        AppDelegate.shared.perform(command)
-    }
 
     /// whether a command of View > Sort By is checked: the field the list is sorted by, and its direction; nil for
     /// another command
@@ -408,14 +400,10 @@ public final class Mailbox: NSObject {
         }
     }
 
-    /// "Sorted by Date" over the column layout's list, its menu's checks as View > Sort By has them
+    /// "Sorted by Date" over the column layout's list (its menu's checks come from validateMenuItem)
     private func updateSortBar() {
         let field = Mailbox.sortFields.first { $0.value == sort }?.key ?? .sortDate
         sortBar.item(at: 0)?.title = Text.uiSortedBy.text(["field": field.label])
-        for item in sortBar.itemArray.dropFirst() {
-            guard let command = Command(rawValue: item.tag), let on = sortState(command) else { continue }
-            item.state = on ? .on : .off
-        }
     }
 
     /// View > Sort By a field: the same one keeps its direction, another starts its own way (the core says which)
@@ -718,7 +706,7 @@ public final class Mailbox: NSObject {
         list.usesAlternatingRowBackgroundColors = true
         list.allowsMultipleSelection = true
         list.allowsColumnReordering = false
-        list.rowHeight = 20
+        list.rowHeight = Mailbox.classicRowHeight
         list.style = .fullWidth
         list.target = self
         list.doubleAction = #selector(openSelected)
@@ -833,6 +821,7 @@ public final class Mailbox: NSObject {
     }
 
     func reloadList(keepSelection: Bool) {
+        dateClock = DateClock()
         pages = []
         total = 0
         unread = 0
@@ -2323,20 +2312,13 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
             let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? IconCell) ?? IconCell(id)
             switch ColumnID(rawValue: id.rawValue) {
             // a bounce's mark in the paper clip's place, whether or not it has files
-            case .attach where message.bounce: cell.show(Icons.bounce)
-            case .attach: cell.show(message.hasAttachments ? Icons.list("attach") : nil)
-            default:
-                cell.show(message.flagged ? Icons.coloredFlag(message.flagColor) : nil,
-                          selected: message.flagged ? Icons.selectedFlag : nil)
+            case .attach: cell.show(message.attachIcon)
+            default: cell.show(message.flagIcons.plain, selected: message.flagIcons.selected)
             }
             return cell
         case .subject:
             let cell = (tableView.makeView(withIdentifier: id, owner: nil) as? SubjectCell) ?? SubjectCell(id)
-            cell.toggled = { [weak self, weak tableView, weak cell] open in
-                guard let self, let tableView, let cell else { return }
-                let at = tableView.row(for: cell)
-                if at >= 0 { self.setExpanded(open, row: at) }
-            }
+            wireToggle(cell, in: tableView)
             cell.show(message, grouped: grouped)
             return cell
         default:
@@ -2354,16 +2336,21 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
         }
     }
 
-    /// a row of the column layout: who, the subject, the first words, the marks
-    private func rowCell(_ tableView: NSTableView, _ message: Message) -> NSView {
-        let cell = (tableView.makeView(withIdentifier: MessageRowCell.identifier, owner: nil) as? MessageRowCell) ?? MessageRowCell()
+    /// a cell's disclosure triangle opens and closes the conversation of its row
+    private func wireToggle(_ cell: ConversationCell, in tableView: NSTableView) {
         cell.toggled = { [weak self, weak tableView, weak cell] open in
             guard let self, let tableView, let cell else { return }
             let at = tableView.row(for: cell)
             if at >= 0 { self.setExpanded(open, row: at) }
         }
+    }
+
+    /// a row of the column layout: who, the subject, the first words, the marks
+    private func rowCell(_ tableView: NSTableView, _ message: Message) -> NSView {
+        let cell = (tableView.makeView(withIdentifier: MessageRowCell.identifier, owner: nil) as? MessageRowCell) ?? MessageRowCell()
+        wireToggle(cell, in: tableView)
         let who = recipientsColumn ? Text.headerTo.text + ": " + message.recipients : message.from
-        cell.show(message, who: who, date: message.date.map(shortDate) ?? "",
+        cell.show(message, who: who, date: message.date.map { shortDate($0, at: dateClock) } ?? "",
                   folder: severalFolders ? rowFolder(message.folder) : "")
         return cell
     }
@@ -2622,9 +2609,42 @@ final class TextCell: NSTableCellView {
     }
 }
 
+@MainActor
+extension Message {
+    /// the mark in the paper clip's place: a bounce's whether or not it has files, else the paper clip, or none
+    var attachIcon: NSImage? {
+        bounce ? Icons.bounce : (hasAttachments ? Icons.list("attach") : nil)
+    }
+
+    /// its flag in its colour, and white for a selected row (a blue flag stays visible on the selection's blue)
+    var flagIcons: (plain: NSImage?, selected: NSImage?) {
+        flagged ? (Icons.coloredFlag(flagColor), Icons.selectedFlag) : (nil, nil)
+    }
+}
+
+/// A cell of a row that can open and close its conversation (the classic subject, the column layout's row)
+@MainActor
+protocol ConversationCell: NSView {
+    /// the triangle clicked: open (true) or close the conversation
+    var toggled: (Bool) -> Void { get set }
+}
+
+extension ConversationCell {
+    /// the disclosure triangle of a conversation's row, clicked through `action` of the cell
+    func setUpDisclosure(_ disclosure: NSButton, action: Selector) {
+        disclosure.bezelStyle = .disclosure
+        disclosure.setButtonType(.onOff)
+        disclosure.title = ""
+        disclosure.controlSize = .small
+        disclosure.target = self
+        disclosure.action = action
+        disclosure.setAccessibilityIdentifier("list.disclosure")
+    }
+}
+
 /// The subject of a row; grouped by conversation, a conversation's row of several has a disclosure triangle and the
 /// count of its messages, and the messages under an open one are indented
-final class SubjectCell: NSTableCellView {
+final class SubjectCell: NSTableCellView, ConversationCell {
     private let label = NSTextField(labelWithString: "")
     let disclosure = NSButton()
     private var grey = false {
@@ -2647,13 +2667,7 @@ final class SubjectCell: NSTableCellView {
     init(_ id: NSUserInterfaceItemIdentifier) {
         super.init(frame: .zero)
         identifier = id
-        disclosure.bezelStyle = .disclosure
-        disclosure.setButtonType(.onOff)
-        disclosure.title = ""
-        disclosure.controlSize = .small
-        disclosure.target = self
-        disclosure.action = #selector(clicked)
-        disclosure.setAccessibilityIdentifier("list.disclosure")
+        setUpDisclosure(disclosure, action: #selector(clicked))
         disclosure.translatesAutoresizingMaskIntoConstraints = false
         label.lineBreakMode = .byTruncatingTail
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -2692,7 +2706,7 @@ final class SubjectCell: NSTableCellView {
 /// the classic columns (and the folder, in a search or All Inboxes); the first words of the message, with a
 /// conversation's count and its disclosure triangle. An unread row has a dot in the gutter. The text is in a stack of
 /// its own, so a picture can go before it.
-final class MessageRowCell: NSTableCellView {
+final class MessageRowCell: NSTableCellView, ConversationCell {
     static let identifier = NSUserInterfaceItemIdentifier("row")
     static let height: CGFloat = 62
 
@@ -2754,13 +2768,9 @@ final class MessageRowCell: NSTableCellView {
             icon.imageScaling = .scaleProportionallyDown
         }
         date.alignment = .right
-        disclosure.bezelStyle = .disclosure
-        disclosure.setButtonType(.onOff)
-        disclosure.title = ""
-        disclosure.controlSize = .small
-        disclosure.target = self
-        disclosure.action = #selector(clicked)
-        disclosure.setAccessibilityIdentifier("list.disclosure")
+        // the sender always semibold, as Mail's: the dot and a bold subject say the row is unread
+        who.font = .systemFont(ofSize: 13, weight: .semibold)
+        setUpDisclosure(disclosure, action: #selector(clicked))
         let text = NSStackView(views: [
             MessageRowCell.line(who, [date], baseline: true),
             MessageRowCell.line(subject, [folder, attach, flag]),
@@ -2802,18 +2812,15 @@ final class MessageRowCell: NSTableCellView {
 
     /// `who`: the sender, or the recipients in Sent Items and Drafts; `folder`: the folder's name in a list of several
     func show(_ message: Message, who name: String, date when: String, folder place: String) {
-        // the sender always semibold, as Mail's: the dot and a bold subject say the row is unread
         who.stringValue = name
-        who.font = .systemFont(ofSize: 13, weight: .semibold)
         date.stringValue = when
         subject.stringValue = message.subject.isEmpty ? Text.uiNoSubject.text : message.subject
         subject.font = message.bold ? .boldSystemFont(ofSize: 12) : .systemFont(ofSize: 12)
         folder.stringValue = place
         folder.isHidden = place.isEmpty
-        // a bounce's mark in the paper clip's place, whether or not it has files
-        attach.image = message.bounce ? Icons.bounce : (message.hasAttachments ? Icons.list("attach") : nil)
+        attach.image = message.attachIcon
         attach.isHidden = attach.image == nil
-        flags = message.flagged ? (Icons.coloredFlag(message.flagColor), Icons.selectedFlag) : (nil, nil)
+        flags = message.flagIcons
         flag.isHidden = !message.flagged
         snippet.stringValue = message.snippet
         // the count is a number alone, which needs no words of a language
@@ -3004,7 +3011,7 @@ extension Mailbox: NSSplitViewDelegate {
         guard layout == PE_LAYOUT_COLUMNS, !changingLayout else { return }
         let width = rightSplit.arrangedSubviews[0].frame.width
         if width >= Mailbox.smallestListWidth {
-            Mailbox.columnsListWidth = width
+            Mailbox.listBesideReader.value = Double(width)
         }
     }
 

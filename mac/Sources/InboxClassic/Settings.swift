@@ -202,11 +202,12 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
 
         let label = NSTextField(labelWithString: Text.macLanguageLabel.text)
         label.alignment = .right
-        // in the order of PeLayoutMode
-        for command in [Command.layoutAutomatic, .layoutClassic, .layoutColumns] {
+        // View > Layout's choices, each item tagged with its mode
+        for (command, mode) in AppDelegate.layoutModes.sorted(by: { $0.value.rawValue < $1.value.rawValue }) {
             layout.addItem(withTitle: command.label)
+            layout.lastItem?.tag = Int(mode.rawValue)
         }
-        layout.selectItem(at: Int(AppDelegate.shared?.layoutMode.rawValue ?? 0))
+        layout.selectItem(withTag: Int(AppDelegate.shared?.layoutMode.rawValue ?? 0))
         layout.target = self
         layout.action = #selector(layoutChosen)
         layout.setAccessibilityIdentifier("settings.layout")
@@ -265,7 +266,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     }
 
     @objc private func layoutChosen() {
-        AppDelegate.shared?.layoutMode = PeLayoutMode(rawValue: UInt32(max(0, layout.indexOfSelectedItem)))
+        AppDelegate.shared?.layoutMode = PeLayoutMode(rawValue: UInt32(max(0, layout.selectedTag())))
     }
 
     @objc func notifyChanged() {

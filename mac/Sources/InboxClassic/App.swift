@@ -78,19 +78,20 @@ public func runApp(_ arguments: Arguments = Arguments(CommandLine.arguments)) ->
 /// A setting of the app in the user defaults; the UI test keeps it in memory, so a run never changes the setting of
 /// whoever runs it
 @MainActor
-private struct Preference {
+struct Preference<Value> {
     let key: String
-    private var testValue: Bool
-    private let fallback: Bool
+    private var testValue: Value
+    private let fallback: Value
 
-    init(_ key: String, default fallback: Bool) {
+    init(_ key: String, default fallback: Value) {
         self.key = key
         self.fallback = fallback
         testValue = fallback
     }
 
-    var value: Bool {
-        get { TestHooks.testing ? testValue : UserDefaults.standard.object(forKey: key) as? Bool ?? fallback }
+    /// a Bool, Int or Double, as the user defaults keep them
+    var value: Value {
+        get { TestHooks.testing ? testValue : UserDefaults.standard.object(forKey: key) as? Value ?? fallback }
         set {
             if TestHooks.testing {
                 testValue = newValue
@@ -160,20 +161,13 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     private var showingFolders = Preference("FolderList", default: true)
     /// View > Layout and Settings: Automatic (the window's width decides), Classic or Columns; in memory under test
     var layoutMode: PeLayoutMode {
-        get {
-            let value = TestHooks.testing ? testLayout : UserDefaults.standard.integer(forKey: "Layout")
-            return PeLayoutMode(rawValue: UInt32(clamping: max(0, min(2, value))))
-        }
+        get { PeLayoutMode(rawValue: UInt32(clamping: max(0, min(2, layoutChoice.value)))) }
         set {
-            if TestHooks.testing {
-                testLayout = Int(newValue.rawValue)
-            } else {
-                UserDefaults.standard.set(Int(newValue.rawValue), forKey: "Layout")
-            }
+            layoutChoice.value = Int(newValue.rawValue)
             main?.updateLayout()
         }
     }
-    private var testLayout = 0
+    private var layoutChoice = Preference("Layout", default: 0)
     /// the View > Layout command of each choice
     static let layoutModes: [Command: PeLayoutMode] = [
         .layoutAutomatic: PE_LAYOUT_MODE_AUTOMATIC, .layoutClassic: PE_LAYOUT_MODE_CLASSIC, .layoutColumns: PE_LAYOUT_MODE_COLUMNS,
@@ -342,7 +336,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
 
     // ---- the menus ----
 
-    private func item(for command: Command, title: String? = nil) -> NSMenuItem {
+    /// a menu item that runs `command`, checked and turned off by validateMenuItem as the menus open
+    func item(for command: Command, title: String? = nil) -> NSMenuItem {
         let item = NSMenuItem(title: title ?? command.label, action: #selector(runCommand(_:)), keyEquivalent: "")
         if let (key, modifiers) = command.key {
             item.keyEquivalent = key
@@ -561,13 +556,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .hideIgnored: hideIgnored.toggle()
         case .hideRead: hideRead.toggle()
         case .folderList: folderList.toggle()
-        case .layoutAutomatic: layoutMode = PE_LAYOUT_MODE_AUTOMATIC
-        case .layoutClassic: layoutMode = PE_LAYOUT_MODE_CLASSIC
-        case .layoutColumns: layoutMode = PE_LAYOUT_MODE_COLUMNS
-        case .sortDate: main.mailbox.sortBy(PE_SORT_FIELD_DATE)
-        case .sortFrom: main.mailbox.sortBy(PE_SORT_FIELD_FROM)
-        case .sortSubject: main.mailbox.sortBy(PE_SORT_FIELD_SUBJECT)
-        case .sortSize: main.mailbox.sortBy(PE_SORT_FIELD_SIZE)
+        case .layoutAutomatic, .layoutClassic, .layoutColumns: layoutMode = Self.layoutModes[command] ?? layoutMode
+        case .sortDate, .sortFrom, .sortSubject, .sortSize:
+            if let field = Mailbox.sortFields[command] { main.mailbox.sortBy(field) }
         case .sortAscending: main.mailbox.setAscending(true)
         case .sortDescending: main.mailbox.setAscending(false)
         case .notify: notify.toggle()

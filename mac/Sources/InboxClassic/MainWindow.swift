@@ -144,17 +144,11 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     }
 
     /// whether the note of Automatic's columns was shown; kept in memory under test
+    private static var noteShown = Preference("ColumnsNoteShown", default: false)
     static var columnsNoteShown: Bool {
-        get { TestHooks.testing ? testNoteShown : UserDefaults.standard.bool(forKey: "ColumnsNoteShown") }
-        set {
-            if TestHooks.testing {
-                testNoteShown = newValue
-            } else {
-                UserDefaults.standard.set(newValue, forKey: "ColumnsNoteShown")
-            }
-        }
+        get { noteShown.value }
+        set { noteShown.value = newValue }
     }
-    private static var testNoteShown = false
 
     // ---- the status bar ----
 
