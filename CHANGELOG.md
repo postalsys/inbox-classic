@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.15.0](https://github.com/postalsys/inbox-classic/compare/v0.14.2...v0.15.0) (2026-11-13)
+
+
+### Features
+
+* large messages show their text first ([c2e0ba7](https://github.com/postalsys/inbox-classic/commit/c2e0ba7b25aba3d03f6118bc6db4ecb687e05bca))
+* large messages show their text first ([fea650b](https://github.com/postalsys/inbox-classic/commit/fea650b28ff0b5e2ccbaf9ece9a5d99de5c47c14))
+* messages downloaded before they are opened ([19b1ab2](https://github.com/postalsys/inbox-classic/commit/19b1ab2aaa797092925ec05d5e3c04913d9b0ff4))
+* messages downloaded before they are opened ([9c6d6d9](https://github.com/postalsys/inbox-classic/commit/9c6d6d95426c45733b4c62d323a8880b34c44bee))
+* new app icon ([d318fc2](https://github.com/postalsys/inbox-classic/commit/d318fc245267cae5bfb6aa52376143753e3720a0))
+* new app icon ([76cf068](https://github.com/postalsys/inbox-classic/commit/76cf068848e05f64937df5951591717bad7e18d6))
+* the downloading page says how large the message is ([fa16549](https://github.com/postalsys/inbox-classic/commit/fa165496e7656a1cf3235620adf46d8e98740a20))
+* the downloading page says how large the message is ([e4eac5d](https://github.com/postalsys/inbox-classic/commit/e4eac5d88b59484daf76301d70d7d8eda18884e9))
+
+
+### Bug Fixes
+
+* **core:** hand work to the main worker only when the server refused the connection ([e1e3a69](https://github.com/postalsys/inbox-classic/commit/e1e3a6950796cc259fce49e07c4997f63c0ef4be))
+* **core:** room for the workers' deep futures ([4b02391](https://github.com/postalsys/inbox-classic/commit/4b02391a6fa13c9dc160eae1d35212a36d2cb278))
+* **core:** the text shown first goes whatever ends the download ([a5f2bf6](https://github.com/postalsys/inbox-classic/commit/a5f2bf662884bda6b447b812b294965b5c6b9208))
+* keep the small app icon's corners clear at 16 pixels ([b6317b2](https://github.com/postalsys/inbox-classic/commit/b6317b2d35e5a94d291060d03817a387b14799a7))
+
+
+### Performance Improvements
+
+* **core:** a reader that is always ready ([6acfeb4](https://github.com/postalsys/inbox-classic/commit/6acfeb462402884df381d53205aa2a0cf822e6d3))
+* **core:** a reader that is always ready ([0699cca](https://github.com/postalsys/inbox-classic/commit/0699ccaaa64c0a497d725214d2e43fec7b46b932))
+* **core:** background work on a connection of its own ([9df0adc](https://github.com/postalsys/inbox-classic/commit/9df0adc2b7f59c6180d37f5ca4f7fb39139133bb))
+* **core:** background work on a connection of its own ([d3cb3fa](https://github.com/postalsys/inbox-classic/commit/d3cb3fadedc6d039d995aaa97d9b20b30b688c31))
+* **core:** the user goes first ([ca2386d](https://github.com/postalsys/inbox-classic/commit/ca2386d0dc6e55b2bafaa2282c65700a8bbcac84))
+* **core:** the user goes first ([24ea601](https://github.com/postalsys/inbox-classic/commit/24ea60158d998c9ff45df0c1fdff5335daa1142c))
+* **core:** time every message open ([62cea77](https://github.com/postalsys/inbox-classic/commit/62cea7701ed4fd088885edea250008f5eefb7b79))
+* **core:** time every message open ([a083e98](https://github.com/postalsys/inbox-classic/commit/a083e989bb7201d1ea0c1131e0ef138aadbdc5ca))
+
 ## [0.14.2](https://github.com/postalsys/inbox-classic/compare/v0.14.1...v0.14.2) (2026-11-12)
 
 
