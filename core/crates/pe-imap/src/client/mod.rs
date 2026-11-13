@@ -197,8 +197,12 @@ pub struct Client {
     bye: Option<String>,
     closed: bool,
     events: UnboundedSender<Event>,
-    /// When the first response to the last command came
+    /// When the first bytes of the answer to the last command came
     answered: Option<std::time::Instant>,
+    /// How long the first bytes of the answer to the next command may take (Client::limit_next_answer)
+    answer_limit: Option<Duration>,
+    /// A command was sent and nothing of its answer came yet: with the limit on its first bytes, if it has one
+    awaiting_answer: Option<Option<Duration>>,
 }
 
 impl Client {
@@ -229,6 +233,8 @@ impl Client {
             closed: false,
             events,
             answered: None,
+            answer_limit: None,
+            awaiting_answer: None,
         };
         client.start_session().await?;
         Ok((client, receiver))
@@ -350,9 +356,18 @@ impl Client {
         self.closed
     }
 
-    /// When the first response to the last command came: a FETCH's first byte, for timing what the user waits for
+    /// When the first bytes of the answer to the last command came: a FETCH's first byte, for timing what the user
+    /// waits for
     pub fn answered_at(&self) -> Option<std::time::Instant> {
         self.answered
+    }
+
+    /// How long the server may take to start answering the next command, when shorter than `Timeouts::response`. For
+    /// what the user waits for on a connection made a while ago: one the network forgot is found dead in seconds, not
+    /// minutes. Once the answer started, each read has `Timeouts::response` again. Running out closes the connection,
+    /// as any timeout does.
+    pub fn limit_next_answer(&mut self, limit: Duration) {
+        self.answer_limit = Some(limit);
     }
 
     pub async fn noop(&mut self) -> Result<(), Error> {
@@ -416,6 +431,9 @@ impl Client {
     async fn read_response(&mut self, tag: Option<&str>, timeout: Option<Duration>) -> Result<Response, Error> {
         loop {
             if let Some(raw) = self.ready.pop_front() {
+                if self.awaiting_answer.take().is_some() {
+                    self.answered = Some(std::time::Instant::now());
+                }
                 self.log(Direction::Server, || {
                     String::from_utf8_lossy(&raw.line[..raw.line.len().min(LOG_LINE_LIMIT)]).into_owned()
                 });
@@ -428,6 +446,10 @@ impl Client {
             if let Some(error) = self.framing_error.take() {
                 return Err(self.lost(error.into()));
             }
+            let timeout = match (self.awaiting_answer, timeout) {
+                (Some(Some(first)), Some(limit)) => Some(first.min(limit)),
+                _ => timeout,
+            };
             let read = self.stream.read(&mut self.buffer);
             let count = match timeout {
                 Some(limit) => match tokio::time::timeout(limit, read).await {
@@ -439,6 +461,9 @@ impl Client {
             let count = count.map_err(|error| self.lost(pe_net::Error::Io(error).into()))?;
             if count == 0 {
                 return Err(self.lost(Error::Closed(self.bye.clone())));
+            }
+            if self.awaiting_answer.take().is_some() {
+                self.answered = Some(std::time::Instant::now());
             }
             let mut framed = Vec::new();
             let result = self.framer.push(&self.buffer[..count], &mut framed);
@@ -501,12 +526,12 @@ impl Client {
     ) -> Result<Completion, Error> {
         let (tag, mut segments) = self.send(name, args).await?;
         self.answered = None;
+        self.awaiting_answer = Some(self.answer_limit.take());
         let mut collected = Vec::new();
         loop {
             let response = self
                 .read_response(Some(&tag), Some(self.config.timeouts.response))
                 .await?;
-            self.answered.get_or_insert_with(std::time::Instant::now);
             if response.is_continuation() {
                 let data = match (segments.next(), continuation.as_mut()) {
                     (Some(segment), _) => segment,

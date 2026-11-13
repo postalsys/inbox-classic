@@ -63,6 +63,24 @@ pub enum Stream {
 /// How long one address has to itself before the next one is tried as well (RFC 8305 "Happy Eyeballs")
 const NEXT_ADDRESS_AFTER: Duration = Duration::from_millis(250);
 
+/// TCP keepalive: the first probe after this long without traffic, then one every [`KEEPALIVE_INTERVAL`]. Keeps NAT
+/// and routers from forgetting a quiet connection, and makes one they forgot fail instead of waiting for ever.
+const KEEPALIVE_IDLE: Duration = Duration::from_secs(60);
+const KEEPALIVE_INTERVAL: Duration = Duration::from_secs(15);
+/// Probes unanswered before the connection is given up, where the system lets it be set
+const KEEPALIVE_PROBES: u32 = 4;
+
+/// Turns TCP keepalive on for a connection
+fn keep_alive(socket: &TcpStream) -> io::Result<()> {
+    let keepalive = socket2::TcpKeepalive::new()
+        .with_time(KEEPALIVE_IDLE)
+        .with_interval(KEEPALIVE_INTERVAL);
+    // Windows sends 10 probes, and does not let the count be set
+    #[cfg(any(target_os = "linux", target_os = "macos"))]
+    let keepalive = keepalive.with_retries(KEEPALIVE_PROBES);
+    socket2::SockRef::from(socket).set_tcp_keepalive(&keepalive)
+}
+
 /// The addresses in the order to try them: IPv6 and IPv4 by turns, starting with the family the resolver put first, so
 /// a family that does not work on this network costs one short head start, not the whole timeout
 fn interleaved(addresses: Vec<SocketAddr>) -> Vec<SocketAddr> {
@@ -120,6 +138,7 @@ impl Stream {
         let connect = async {
             let socket = connect_any(host, port).await?;
             socket.set_nodelay(true)?;
+            keep_alive(&socket)?;
             match security {
                 Security::Tls => Ok(Stream::Tls(Box::new(tls::handshake(socket, host, trust).await?))),
                 Security::StartTls | Security::Plain => Ok(Stream::Plain(socket)),
@@ -182,6 +201,21 @@ impl Stream {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn connections_are_kept_alive() {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let port = listener.local_addr().unwrap().port();
+        let socket = connect_any("127.0.0.1", port).await.unwrap();
+        keep_alive(&socket).unwrap();
+        let sock = socket2::SockRef::from(&socket);
+        assert!(sock.keepalive().unwrap());
+        #[cfg(any(target_os = "linux", target_os = "macos"))]
+        {
+            assert_eq!(sock.tcp_keepalive_time().unwrap(), KEEPALIVE_IDLE);
+            assert_eq!(sock.tcp_keepalive_interval().unwrap(), KEEPALIVE_INTERVAL);
+        }
+    }
 
     #[test]
     fn addresses_take_turns_by_family() {

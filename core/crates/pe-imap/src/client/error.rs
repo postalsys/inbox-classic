@@ -111,6 +111,59 @@ impl Error {
     }
 }
 
+impl Error {
+    /// The server refused one more connection: too many are open already (`[LIMIT]`, `[INUSE]`, `[UNAVAILABLE]` at
+    /// sign-in, or words such as Gmail's "Too many simultaneous connections" and Dovecot's "Maximum number of
+    /// connections", in a BYE too), at the greeting or at sign-in. An app with a connection to spare does without it.
+    pub fn is_connection_limit(&self) -> bool {
+        let (code, text) = match self {
+            Error::Closed(Some(text)) => (None, text.as_str()),
+            Error::AuthenticationFailed { code, text } | Error::Refused { code, text, .. } => {
+                (code.as_deref(), text.as_str())
+            }
+            _ => return false,
+        };
+        let limit_code = code.is_some_and(|code| {
+            ["LIMIT", "INUSE", "UNAVAILABLE"]
+                .iter()
+                .any(|known| code.eq_ignore_ascii_case(known))
+        });
+        let text = text.to_ascii_lowercase();
+        let in_words = text.contains("connection")
+            && ["too many", "maximum number", "limit", "exceeded"]
+                .iter()
+                .any(|words| text.contains(words));
+        limit_code || in_words
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn connection_limits_are_told_from_other_refusals() {
+        let closed = |text: &str| Error::Closed(Some(text.into()));
+        let login = |code: Option<&str>, text: &str| Error::AuthenticationFailed {
+            code: code.map(Into::into),
+            text: text.into(),
+        };
+        assert!(closed("Too many connections").is_connection_limit());
+        assert!(
+            closed("Maximum number of connections from user+IP exceeded (mail_max_userip_connections=10)")
+                .is_connection_limit()
+        );
+        assert!(login(Some("ALERT"), "Too many simultaneous connections. (Failure)").is_connection_limit());
+        assert!(login(Some("LIMIT"), "Try later").is_connection_limit());
+        assert!(login(Some("UNAVAILABLE"), "Backend down").is_connection_limit());
+        assert!(!login(Some("AUTHENTICATIONFAILED"), "Invalid credentials").is_connection_limit());
+        assert!(!login(None, "Login failed").is_connection_limit());
+        assert!(!closed("Autologout; idle for too long").is_connection_limit());
+        assert!(!Error::Closed(None).is_connection_limit());
+        assert!(!Error::Timeout.is_connection_limit());
+    }
+}
+
 fn is_privacy_required(code: &str) -> bool {
     code.eq_ignore_ascii_case("PRIVACYREQUIRED")
 }

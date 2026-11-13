@@ -7,7 +7,7 @@ use std::collections::{BTreeSet, HashMap};
 
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use pe_imap::{Client, Credentials, ErrorKind, Event as ImapEvent};
 use pe_net::Trust;
@@ -16,14 +16,16 @@ use pe_sync::{
     Change, apply_event, copy_messages, expunge_messages, fetch_source, imap_config, move_message, set_flag,
     smtp_config, sync_folder, sync_folders,
 };
-use tokio::sync::mpsc::{UnboundedReceiver, error::TryRecvError};
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender, error::TryRecvError};
 
 use pe_i18n::{Text, tr, tr_args};
 
-use crate::timing::{Clock, Link, Served};
 use crate::{Event, EventSink, FailureKind, Secrets};
 
+mod reader;
 mod transfer;
+
+pub(crate) use reader::{Synced, tell_woke, watch_sleep};
 
 #[derive(Debug, PartialEq, Eq)]
 pub(crate) enum Command {
@@ -34,6 +36,9 @@ pub(crate) enum Command {
         /// When the window asked, for the timing of the open
         asked: std::time::Instant,
     },
+    /// The reader connects once the main worker's first sync is done, so the first message opened does not wait for
+    /// a connection (the main worker takes no notice)
+    Connect,
     SetFlag {
         folder: FolderId,
         uids: Vec<u64>,
@@ -215,6 +220,9 @@ impl From<pe_store::Error> for Failure {
 
 type Outcome = Result<(), Failure>;
 
+/// The largest message downloaded for the one-time code of its notification
+const CODE_SOURCE_LIMIT: u64 = 1024 * 1024;
+
 #[cfg(test)]
 mod failure_tests {
     use super::*;
@@ -254,7 +262,6 @@ async fn build(
         .map_err(Failure::from)
 }
 
-/// Seconds since the Unix epoch
 /// Seconds since the Unix epoch
 pub(crate) fn unix_now() -> i64 {
     std::time::SystemTime::now()
@@ -296,6 +303,20 @@ pub(crate) enum Role {
     Reader,
 }
 
+impl Role {
+    /// The longest a read from the server may take on this worker's connections, when shorter than the default
+    fn response_limit(self) -> Option<Duration> {
+        match self {
+            // the user waits for everything the reader does, its sign-in too
+            Role::Reader => Some(reader::RESPONSE_LIMIT),
+            Role::Main => None,
+        }
+    }
+}
+
+/// How long the server may take to start answering a command the user waits for, on a connection made before
+pub(crate) const ANSWER_LIMIT: Duration = Duration::from_secs(8);
+
 /// What every worker of the core shares
 #[derive(Clone)]
 pub(crate) struct Context {
@@ -307,6 +328,10 @@ pub(crate) struct Context {
     pub(crate) events: EventSink,
     /// How long opening messages took (timing.rs)
     pub(crate) timings: crate::timing::Timings,
+    /// A new number each time the computer woke from sleep: every connection is made again
+    pub(crate) wake: tokio::sync::watch::Receiver<u64>,
+    /// The accounts synced once, which their readers wait for before connecting
+    pub(crate) synced: Arc<Synced>,
 }
 
 pub(crate) struct Worker {
@@ -323,6 +348,18 @@ pub(crate) struct Worker {
     worked: bool,
     /// The Gmail labels archived messages lost, by Message-ID, for Undo to put back
     archived_labels: HashMap<String, Vec<String>>,
+    /// The main worker, for a reader the server refuses a connection of its own: the opens go there
+    pub(crate) fallback: Option<UnboundedSender<Command>>,
+    /// When the server last refused a connection because too many are open
+    limited: Option<Instant>,
+    /// When the connection last did something (the reader's keep-alive and answer limit)
+    last_used: Instant,
+    /// The wake number (Context::wake) when the connection was made: one made before a later wake is dropped
+    wake_seen: u64,
+    /// How many connections this worker made, which tells whether one was made just now
+    connections_made: u64,
+    /// The server's host, for the timing of opens
+    host: String,
 }
 
 /// What ended a wait on the Inbox
@@ -337,6 +374,8 @@ enum Wake {
     Behind,
     /// A message in the Outbox waited for now
     Due,
+    /// The computer woke from sleep: the connection is gone, and mail may have come meanwhile
+    Slept,
 }
 
 impl Worker {
@@ -351,6 +390,12 @@ impl Worker {
             behind: None,
             worked: false,
             archived_labels: HashMap::new(),
+            fallback: None,
+            limited: None,
+            last_used: Instant::now(),
+            wake_seen: 0,
+            connections_made: 0,
+            host: String::new(),
         }
     }
 
@@ -374,6 +419,9 @@ impl Worker {
                 outcome = self.apply_server_events(&mut store).await;
             }
             let failure = outcome.as_ref().err().map(|failure| failure.kind);
+            if sync && failure.is_none() {
+                reader::mark_synced(&self.ctx.synced, self.account);
+            }
             if let Err(failure) = outcome {
                 self.fail(failure);
             }
@@ -404,106 +452,6 @@ impl Worker {
         if let Some((mut client, _)) = self.connection.take() {
             let _ = client.logout().await;
         }
-    }
-
-    /// The reader: the messages opened, each downloaded as it is asked for; one that can not be is reported for the
-    /// reading pane ([`Event::MessageFailed`]), not as a failure of the account (the main worker reports those)
-    async fn read(&mut self, store: &mut Store, commands: &mut UnboundedReceiver<Command>) {
-        while let Some(mut command) = commands.recv().await {
-            // only the message asked for last: those the user moved past on the way to it are not waited for
-            while let Ok(next) = commands.try_recv() {
-                command = next;
-            }
-            let Command::FetchSource { folder, uid, asked } = command else {
-                continue;
-            };
-            // what the server says of its folder is the main worker's to follow, not kept here
-            if let Some((_, server_events)) = &mut self.connection {
-                while server_events.try_recv().is_ok() {}
-            }
-            let mut clock = Clock::start(folder, uid, asked);
-            // a connection the server closed while it was not used shows when it is used: once more on a new one
-            let had_connection = self.connection.is_some();
-            let mut outcome = self.fetch_for_view(store, folder, uid, &mut clock).await;
-            if had_connection
-                && outcome
-                    .as_ref()
-                    .is_err_and(|failure| failure.kind == FailureKind::Network)
-            {
-                self.connection = None;
-                clock.timing.link = Link::Retried;
-                outcome = self.fetch_for_view(store, folder, uid, &mut clock).await;
-            }
-            if let Err(failure) = outcome {
-                clock.timing.failed = true;
-                self.ctx.timings.add(&clock);
-                self.reset_after(&failure);
-                self.emit(Event::MessageFailed {
-                    folder,
-                    uid,
-                    kind: failure.kind,
-                    message: failure.message,
-                });
-            }
-        }
-        if let Some((mut client, _)) = self.connection.take() {
-            let _ = client.logout().await;
-        }
-    }
-
-    /// The source of a message in the store, fetched when it is not there yet; [`Event::MessageReady`] once it is,
-    /// and the search indexes it by its text from then on
-    async fn fetch_for_view(&mut self, store: &mut Store, folder: FolderId, uid: u64, clock: &mut Clock) -> Outcome {
-        let source = if store.has_source(folder, uid)? {
-            clock.timing.size = store.message(folder, uid)?.and_then(|m| m.info.size).unwrap_or(0);
-            None
-        } else {
-            Some(self.download(store, folder, uid, clock).await?)
-        };
-        clock.timing.ready = Some(clock.now());
-        // kept before the window hears, so what it reads next includes it
-        self.ctx.timings.add(clock);
-        self.emit(Event::MessageReady { folder, uid });
-        // the search finds it by what the parser reads in it from now on, after the window has it
-        if let (Some(source), Some(message)) = (source, store.message(folder, uid)?) {
-            let text = crate::search::index_text(&source);
-            // its index row replaced at once, never missing for a search meanwhile
-            store.transaction(|store| store.set_indexed(message.id, &text))?;
-        }
-        Ok(())
-    }
-
-    /// Downloads a message the user opened into the store, timing each step on `clock`
-    async fn download(
-        &mut self,
-        store: &mut Store,
-        folder: FolderId,
-        uid: u64,
-        clock: &mut Clock,
-    ) -> Result<Vec<u8>, Failure> {
-        clock.timing.served = match self.role {
-            Role::Reader => Served::Reader,
-            Role::Main => Served::Main,
-        };
-        clock.timing.host = store.account(self.account)?.settings.imap_host;
-        let fresh = self.connection.as_ref().is_none_or(|(client, _)| client.is_closed());
-        let client = self.client(store).await?;
-        if fresh {
-            clock.timing.connected = Some(clock.now());
-            if clock.timing.link != Link::Retried {
-                clock.timing.link = Link::New;
-            }
-        } else {
-            clock.timing.link = Link::Reused;
-        }
-        pe_sync::select_folder(client, store, folder).await?;
-        clock.timing.selected = Some(clock.now());
-        let source = pe_sync::fetch_raw(client, store, folder, uid).await?;
-        clock.timing.first_byte = client.answered_at().map(|at| clock.at(at));
-        clock.timing.last_byte = Some(clock.now());
-        clock.timing.size = source.len() as u64;
-        store.set_source(folder, uid, &source)?;
-        Ok(source)
     }
 
     /// Archives messages already out of the store's `folder`: on Gmail their labels taken off (kept for Undo), elsewhere
@@ -706,6 +654,12 @@ impl Worker {
             match self.watch(&inbox, commands, due).await {
                 Ok(Wake::Command(command)) => return command,
                 Ok(Wake::Due) => continue,
+                // on a new connection (client() drops the one of before): what came to the Inbox meanwhile
+                Ok(Wake::Slept) => {
+                    if let Err(failure) = self.sync_one(store, inbox.id).await {
+                        self.fail(failure);
+                    }
+                }
                 Ok(Wake::Behind) => {
                     if let Err(failure) = self.sync_one(store, inbox.id).await {
                         self.fail(failure);
@@ -730,6 +684,7 @@ impl Worker {
         commands: &mut UnboundedReceiver<Command>,
         due: Option<Duration>,
     ) -> Result<Wake, Failure> {
+        let wake_up = &mut self.ctx.wake;
         let Some((client, events)) = self.connection.as_mut() else {
             return Ok(Wake::Period);
         };
@@ -770,7 +725,22 @@ impl Worker {
                 () = until_due => wake = Wake::Due,
             }
         };
-        client.idle(stop).await?;
+        // after a sleep the connection is gone, whatever the socket says: left as it is, not ended with DONE, which
+        // would wait minutes for an answer that never comes
+        let slept = tokio::select! {
+            idled = client.idle(stop) => {
+                idled?;
+                false
+            }
+            Ok(()) = wake_up.changed() => true,
+        };
+        if slept {
+            self.connection = None;
+            return Ok(match wake {
+                Wake::Command(command) => Wake::Command(command),
+                _ => Wake::Slept,
+            });
+        }
         self.held = held;
         Ok(wake)
     }
@@ -886,8 +856,14 @@ impl Worker {
             }
             Command::Transfer => self.transfer(store).await,
             Command::SendOutbox => self.send_outbox(store).await,
-            // the reader's (Core::open_message), never sent here
-            Command::FetchSource { .. } => Ok(()),
+            // the reader's (Core::open_message), here when the server refused the reader a connection of its own
+            Command::FetchSource { folder, uid, asked } => {
+                if let Err(failure) = self.open_message(store, folder, uid, asked).await {
+                    self.message_failed(folder, uid, failure);
+                }
+                Ok(())
+            }
+            Command::Connect => Ok(()),
             Command::SetFlag { folder, uids, flag, on } => {
                 Ok(set_flag(self.client(store).await?, store, folder, &uids, flag, on).await?)
             }
@@ -1351,7 +1327,8 @@ impl Worker {
 
     /// The one-time code of a message just arrived, for its notification: only when the app turned that on, for a fresh
     /// message outside Junk E-mail, Sent Items and Drafts, whose domain the provider says signed it (as the card asks).
-    /// Its source is downloaded for that, a few seconds at most; when that is slow it is announced without the code.
+    /// Its source (up to [`CODE_SOURCE_LIMIT`]) is downloaded for that; when the server does not answer in a few seconds
+    /// it is announced without the code.
     async fn code_of_new(
         &mut self,
         store: &mut Store,
@@ -1372,13 +1349,17 @@ impl Worker {
         if unix_now() - at > crate::otp::FRESH_FOR_NOTIFICATIONS {
             return None;
         }
+        // a large message is not downloaded for its notification: one-time codes come in small ones
+        if newest.info.size.is_some_and(|size| size > CODE_SOURCE_LIMIT) {
+            return None;
+        }
         let trusted = crate::authres::trusted(&store.account(self.account).ok()?.settings);
         let uid = newest.info.uid;
         let client = self.client(store).await.ok()?;
-        let source = tokio::time::timeout(Duration::from_secs(5), fetch_source(client, store, folder, uid))
-            .await
-            .ok()?
-            .ok()?;
+        // never cut short once it is coming, which would leave the rest of the answer on the connection; a server that
+        // does not start answering in time loses the connection, made again for the next command
+        client.limit_next_answer(ANSWER_LIMIT);
+        let source = fetch_source(client, store, folder, uid).await.ok()?;
         let message = pe_mime::parser::parse(&source).ok()?;
         crate::otp::of(&message, &trusted)
     }
@@ -1436,9 +1417,14 @@ impl Worker {
         Ok(())
     }
 
-    /// The connection, made when there is none or the server closed it
+    /// The connection, made when there is none, the server closed it, or it is from before the computer slept
     async fn client(&mut self, store: &mut Store) -> Result<&mut Client, Failure> {
-        if self.connection.as_ref().is_some_and(|(client, _)| client.is_closed()) {
+        let wake = *self.ctx.wake.borrow_and_update();
+        if self
+            .connection
+            .as_ref()
+            .is_some_and(|(client, _)| client.is_closed() || wake != self.wake_seen)
+        {
             self.connection = None;
         }
         if self.connection.is_none() {
@@ -1446,8 +1432,17 @@ impl Worker {
             let account = store.account(self.account)?;
             let mut config = imap_config(&account, self.credentials(store, &account).await?);
             config.trust = self.ctx.trust.clone();
+            if let Some(limit) = self.role.response_limit() {
+                config.timeouts.response = config.timeouts.response.min(limit);
+            }
             let connected = Client::connect(config).await;
+            if connected.as_ref().is_err_and(pe_imap::Error::is_connection_limit) {
+                self.limited = Some(Instant::now());
+            }
             self.connection = Some(connected.map_err(|error| scope_hint(Failure::from(error), &account))?);
+            self.wake_seen = wake;
+            self.connections_made += 1;
+            self.host = account.settings.imap_host;
         }
         Ok(&mut self.connection.as_mut().expect("connected").0)
     }
