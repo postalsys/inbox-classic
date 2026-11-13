@@ -455,8 +455,8 @@ impl Store {
         Ok(lists)
     }
 
-    /// A collapsed conversation's row shows the dates and the snippet of its newest message, as the list places it by
-    /// them. Its own
+    /// A collapsed conversation's row shows the dates of its newest message, as the list places it by them (its
+    /// snippet stays its own, the first message's, which selecting the row opens, beside its sender and subject). Its own
     /// small query on the conversations' index rather than a MAX in [`groups`]: with a MAX there besides the MIN, SQLite
     /// would no longer take the key sorts' bare column (`k`) from the first message's row.
     fn date_collapsed(&self, search: &Search, rows: &mut [Message]) -> Result<()> {
@@ -479,27 +479,13 @@ impl Store {
                 Ok((row.get(0)?, (row.get(1)?, row.get(2)?)))
             })?
             .collect::<Result<_>>()?;
-        // and the first words of the newest one (a single MAX: SQLite takes the bare column from its row)
-        let (condition, mut values) = search.condition(false);
-        let marks = id_list(&mut values, &threads);
-        let mut statement = self.db.prepare(&format!(
-            "SELECT thread_id, snippet, MAX({WHEN}) FROM messages WHERE {condition} AND thread_id IN ({marks}) \
-             GROUP BY thread_id"
-        ))?;
-        let snippets: HashMap<i64, Option<String>> = statement
-            .query_map(params_from_iter(values), |row| Ok((row.get(0)?, row.get(1)?)))?
-            .collect::<Result<_>>()?;
         for row in rows {
-            let Some(place) = row.thread.filter(ThreadPlace::collapsed) else {
-                continue;
-            };
-            if let Some(&(date, received)) = newest.get(&place.thread) {
+            if let Some(place) = row.thread.filter(ThreadPlace::collapsed)
+                && let Some(&(date, received)) = newest.get(&place.thread)
+            {
                 let info = &mut row.info;
                 info.date = date.or(info.date);
                 info.internal_date = received.or(info.internal_date);
-            }
-            if let Some(snippet) = snippets.get(&place.thread) {
-                row.snippet = snippet.clone();
             }
         }
         Ok(())
@@ -909,8 +895,8 @@ mod tests {
         let rows = store.thread_rows(&list, newest, &[], 0, 10).unwrap();
         assert_eq!(
             rows[0].snippet.as_deref(),
-            Some("newest words"),
-            "collapsed: the snippet of its newest message"
+            Some("first words"),
+            "collapsed: its own snippet, of the message selecting it opens"
         );
         assert_eq!(subjects(&rows), [("a@x".into(), 0), ("d@x".into(), 0)]);
         assert_eq!(

@@ -112,7 +112,8 @@ the folder bar and the popover show them.
   fetched again by the background worker (text parts only, as before), each account's newest first, after everything
   `open-speed-plan.md` gives it to do. Until then a row's third line is empty. (Built: newest first across the account,
   not the folder on screen first, which would need the worker to know what the windows show.)
-- `PeMessage` gains `snippet`. A conversation's head row carries its newest message's.
+- `PeMessage` gains `snippet`. A conversation's head row carries its own (the first message's, which selecting it
+  opens, beside its sender and subject), while its date is the newest message's as before.
 
 ### Sender pictures
 
