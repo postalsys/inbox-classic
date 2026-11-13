@@ -649,6 +649,8 @@ try {
     Remove-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name ListWidth -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name ColumnsNoteShown -ErrorAction SilentlyContinue
+    # the classic layout for every step but the column layout's (a fresh machine has no key yet)
+    if (-not (Test-Path $preferencesKey)) { New-Item -Path $preferencesKey -Force | Out-Null }
     Set-ItemProperty -Path $preferencesKey -Name Layout -Value 1 -Type DWord
     $app = Start-Process -FilePath $Exe -ArgumentList $arguments -PassThru
 
