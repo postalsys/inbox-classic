@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opening Messages Faster</title>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1f; --muted: #5d5d66; --line: #dddad2;
+  --accent: #2456a6; --accent-soft: #e6eefb; --warn: #9a5b00; --warn-soft: #fdf2df;
+  --good: #1f6b3a; --good-soft: #e3f3e8; --code: #f0eee8;
+  --net: #c4553a; --net-soft: #f6dcd4; --local: #2f8a55; --local-soft: #d6efdf; --wait: #b38b1f; --wait-soft: #f5ebc9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+    --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+    --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31;
+    --net: #f08a70; --net-soft: #4a2820; --local: #7fd3a0; --local-soft: #1e3a2a; --wait: #e8c35a; --wait-soft: #3d3418;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+  --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+  --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31;
+  --net: #f08a70; --net-soft: #4a2820; --local: #7fd3a0; --local-soft: #1e3a2a; --wait: #e8c35a; --wait-soft: #3d3418;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "Segoe UI", system-ui, sans-serif; }
+main { max-width: 1000px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; margin: 48px 0 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font-size: 1.05rem; margin: 20px 0 6px; }
+.lede { color: var(--muted); font-size: 1.08rem; margin-top: 4px; max-width: 70ch; }
+p, li { max-width: 75ch; }
+code { font: 0.86em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--code); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.note { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.good { border-left-color: var(--good); background: var(--good-soft); }
+.table-wrap { overflow-x: auto; margin: 12px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+.big { font-weight: 650; color: var(--net); white-space: nowrap; }
+
+/* timelines */
+.tl { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin: 14px 0; }
+.tl .cap { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 8px; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.tl .cap b { color: var(--ink); text-transform: none; letter-spacing: 0; font-size: 0.95rem; }
+.bar { display: flex; height: 34px; border-radius: 6px; overflow: hidden; font-size: 0.74rem; line-height: 1.15; }
+.bar > div { display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 4px; border-right: 2px solid var(--panel); min-width: 0; overflow: hidden; }
+.bar > div:last-child { border-right: 0; }
+.net { background: var(--net-soft); color: var(--net); }
+.loc { background: var(--local-soft); color: var(--local); }
+.wt { background: var(--wait-soft); color: var(--wait); }
+.keys { display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.85rem; color: var(--muted); margin: 6px 0 0; }
+.keys span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.keys .k-net::before { background: var(--net-soft); border: 1px solid var(--net); }
+.keys .k-loc::before { background: var(--local-soft); border: 1px solid var(--local); }
+.keys .k-wt::before { background: var(--wait-soft); border: 1px solid var(--wait); }
+
+/* phases */
+.phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; margin: 16px 0; }
+.phase { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.phase .num { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); font-weight: 650; }
+.phase h3 { margin: 2px 0 6px; }
+.phase ul { margin: 6px 0 0; padding-left: 18px; font-size: 0.93rem; }
+.phase .meta { font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
+.tag { display: inline-block; font-size: 0.72rem; padding: 1px 8px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); font-weight: 600; margin-left: 6px; vertical-align: 2px; }
+
+/* clients */
+.clients { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.client { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 0.92rem; }
+.client b { display: block; margin-bottom: 2px; }
+
+/* settings mock */
+.mock { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; max-width: 520px; font-size: 0.93rem; }
+.mock .h { font-weight: 650; margin-bottom: 8px; }
+.mock label { display: flex; gap: 8px; align-items: baseline; margin: 4px 0; }
+.mock .hint { color: var(--muted); font-size: 0.83rem; margin: 2px 0 0 24px; }
+
+.qs { counter-reset: q; list-style: none; padding: 0; }
+.qs li { counter-increment: q; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px 12px 48px; margin: 10px 0; position: relative; }
+.qs li::before { content: counter(q); position: absolute; left: 14px; top: 11px; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--panel); font-weight: 700; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+<main>
+<h1>Opening messages faster</h1>
+<p class="lede">Why a new message often shows a spinner when it's opened, what other mail clients do instead, and a plan in six phases to make opening instant in the usual case.</p>
+
+<div class="note good"><b>In short.</b> The app already gives opening a connection of its own, so a click never waits for a sync. The waiting comes from three things:
+<ol style="margin:6px 0 0">
+<li>Nothing is downloaded before the click.</li>
+<li>That connection goes stale between clicks, and a dead one is only noticed after <b>5 minutes</b>.</li>
+<li>Large messages show nothing until every attachment has arrived.</li>
+</ol>
+Other mail clients download new mail as it arrives and keep their connections warm. The plan does both, and puts the user's request ahead of background work.</div>
+
+<h2>One click, now</h2>
+<p>The time from the click on a new message to the message on screen, depending on the state of the reader's connection. Bar widths are illustrative, not to scale between rows.</p>
+
+<div class="tl">
+  <div class="cap"><b>Reader connected and alive</b><span>about 0.3 to 2 s</span></div>
+  <div class="bar">
+    <div class="loc" style="flex:1">header shown</div>
+    <div class="net" style="flex:3">SELECT folder</div>
+    <div class="net" style="flex:5">FETCH whole message</div>
+    <div class="loc" style="flex:1.5">store write</div>
+    <div class="loc" style="flex:1.5">view</div>
+  </div>
+</div>
+<div class="tl">
+  <div class="cap"><b>First click after start, or after the server closed the connection</b><span>about 1 to 4 s</span></div>
+  <div class="bar">
+    <div class="net" style="flex:2">failed command</div>
+    <div class="net" style="flex:2">connect</div>
+    <div class="net" style="flex:2">TLS</div>
+    <div class="net" style="flex:2.5">sign in</div>
+    <div class="net" style="flex:2">SELECT</div>
+    <div class="net" style="flex:3">FETCH</div>
+    <div class="loc" style="flex:1.5">view</div>
+  </div>
+</div>
+<div class="tl">
+  <div class="cap"><b>Connection silently dead (after sleep, Wi-Fi change, NAT timeout)</b><span>up to 300 s, then the above</span></div>
+  <div class="bar">
+    <div class="wt" style="flex:14">no answer: waits for the 300 s response timeout</div>
+    <div class="net" style="flex:3">reconnect, sign in, FETCH</div>
+    <div class="loc" style="flex:1">view</div>
+  </div>
+</div>
+<div class="tl">
+  <div class="cap"><b>A 15 MB message with a PDF</b><span>as long as the whole download</span></div>
+  <div class="bar">
+    <div class="net" style="flex:1.5">SELECT</div>
+    <div class="net" style="flex:14">FETCH every byte, the PDF included, before anything shows</div>
+    <div class="loc" style="flex:1">view</div>
+  </div>
+</div>
+<div class="keys"><span class="k-net">network</span><span class="k-loc">on the computer</span><span class="k-wt">waiting for a timeout</span></div>
+
+<h2>One click, after the plan</h2>
+<div class="tl">
+  <div class="cap"><b>New mail, downloaded as it arrived (phase 3)</b><span>tens of milliseconds</span></div>
+  <div class="bar">
+    <div class="loc" style="flex:1">header</div>
+    <div class="loc" style="flex:1">read store</div>
+    <div class="loc" style="flex:1.5">view</div>
+  </div>
+</div>
+<div class="tl">
+  <div class="cap"><b>Not here yet, reader kept alive (phase 2)</b><span>about 0.2 to 1 s</span></div>
+  <div class="bar">
+    <div class="loc" style="flex:1">header</div>
+    <div class="net" style="flex:2">SELECT</div>
+    <div class="net" style="flex:4">FETCH</div>
+    <div class="loc" style="flex:1.5">view, then store</div>
+  </div>
+</div>
+<div class="tl">
+  <div class="cap"><b>Connection dead anyway (phase 2)</b><span>at most 8 s, then a fresh connection</span></div>
+  <div class="bar">
+    <div class="wt" style="flex:3">first byte limit, 8 s</div>
+    <div class="net" style="flex:6">reconnect, sign in, SELECT, FETCH</div>
+    <div class="loc" style="flex:1">view</div>
+  </div>
+  <p style="margin:8px 0 0;font-size:0.88rem;color:var(--muted)">After sleep or a change of network the app tells the core, which reconnects before the click. So this case becomes rare.</p>
+</div>
+<div class="tl">
+  <div class="cap"><b>The 15 MB message (phase 5)</b><span>text in about a second, PDF after</span></div>
+  <div class="bar">
+    <div class="net" style="flex:1.5">structure</div>
+    <div class="net" style="flex:2">text parts</div>
+    <div class="loc" style="flex:1.5">view shown</div>
+    <div class="net" style="flex:11;opacity:.55">the rest downloads in the background: "Downloading 4.2 of 15 MB"</div>
+  </div>
+</div>
+<div class="keys"><span class="k-net">network</span><span class="k-loc">on the computer</span><span class="k-wt">waiting for a timeout</span></div>
+
+<h2>Where the time goes</h2>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>Cause</th><th>In the code</th><th>Cost</th></tr>
+<tr><td>1</td><td><b>Nothing is downloaded before the click.</b> The sync stores summaries only.</td><td><code>pe-sync</code></td><td>Every first open: a round trip</td></tr>
+<tr><td>2</td><td><b>The reader's connection goes stale.</b> It has no NOOP, no IDLE and no TCP keepalive between clicks. A closed one is found only when used; a dead one only by the response timeout.</td><td><code>worker.rs</code> <code>client</code>, <code>pe-net/src/stream.rs:122</code>, <code>pe-imap/src/client/mod.rs:65</code></td><td class="big">1 to 3 s, or up to 300 s</td></tr>
+<tr><td>3</td><td><b>The first click after start connects from nothing.</b></td><td><code>worker.rs</code> <code>client</code></td><td>0.5 to 2 s</td></tr>
+<tr><td>4</td><td><b>Large messages show nothing until all of it is here</b> (<code>BODY.PEEK[]</code>, attachments included).</td><td><code>pe-sync</code> <code>fetch_source</code></td><td>Seconds to minutes</td></tr>
+<tr><td>5</td><td><b>A click waits for a download already under way</b>, such as a large message the user clicked past.</td><td><code>worker.rs</code> <code>read</code></td><td>The rest of that download</td></tr>
+<tr><td>6</td><td><b>Background downloads share the line</b>: search text (50 messages a batch) and References. A move or delete on the main worker waits for the batch.</td><td><code>worker.rs</code> <code>run</code></td><td>Bandwidth on slow lines</td></tr>
+<tr><td>7</td><td><b>The store is written before the view is built.</b> That write waits whenever the main worker is writing.</td><td><code>fetch_for_view</code></td><td>Milliseconds, at worst seconds</td></tr>
+</table></div>
+<div class="note warn"><b>Found on the way:</b> <code>code_of_new</code> (<code>worker.rs:1347</code>) wraps a FETCH on the main connection in a 5 s timeout. When the timeout fires it drops the FETCH halfway, which leaves the rest of the response unread on that connection. Phase 2 fixes it.</div>
+
+<h2>What other mail clients do</h2>
+<div class="clients">
+  <div class="client"><b>Apple Mail</b>Downloads new messages in full as they arrive, attachments too by default. Opening reads from disk.</div>
+  <div class="client"><b>Thunderbird</b>Keeps IMAP mail offline by default and downloads bodies in the background. It keeps several connections per server (5 by default), fetches only the parts it shows first for large messages it isn't keeping, and renders while streaming.</div>
+  <div class="client"><b>Outlook</b>Cached mode: a local copy of the mailbox that syncs in the background. The user works on the copy.</div>
+  <div class="client"><b>Mobile clients</b>Gmail, K-9 / Thunderbird for Android and iOS Mail download recent mail up to a size limit, and the rest of a large message when it's opened.</div>
+  <div class="client"><b>Gmail, Fastmail (web)</b>Load the messages near the one on screen, so Next opens at once. Actions show immediately and reach the server after.</div>
+</div>
+<p>Five things they have in common:</p>
+<ol>
+<li><b>The body is there before the click</b>, which is the main reason they feel instant.</li>
+<li><b>The user's request jumps the queue.</b></li>
+<li><b>Connections are kept warm</b>, and replaced after sleep or a change of network.</li>
+<li><b>What can be shown is shown first</b>: the header at once, then the text, then the attachments.</li>
+<li><b>Neighbors are fetched ahead</b>, because the next click is usually Next or the row below.</li>
+</ol>
+
+<h2>The plan</h2>
+<p>All of it is in the core, so the Windows, Mac and Linux apps get it at once. The apps change only to report sleep and network changes (phase 2) and to show one new setting (phase 3).</p>
+<div class="phases">
+  <div class="phase"><div class="num">Phase 1</div><h3>Measure <span class="tag">small</span></h3>
+    <ul>
+      <li>Timing for every open: queued, connect, sign-in, SELECT, first byte, last byte, store write and view. Each record also has the size and whether the connection was new, reused or retried.</li>
+      <li>Kept in memory for the last 200 opens; any open over 1 s goes to the log (no message content).</li>
+      <li>An <code>open-timing</code> example against ImapKit with latency injected, run before and after each phase.</li>
+    </ul></div>
+  <div class="phase"><div class="num">Phase 2</div><h3>A reader that is always ready <span class="tag">small to medium</span></h3>
+    <ul>
+      <li>Connect it at start, not at the first click.</li>
+      <li>A NOOP every 4 minutes while it waits; TCP keepalive on every socket.</li>
+      <li>After a minute unused, a 3 s NOOP check before the FETCH.</li>
+      <li>An 8 s limit for the first byte of what the user waits for, then a fresh connection. The 300 s limit stays for background work.</li>
+      <li>The apps report waking from sleep and network changes; the core then drops its connections and connects the readers again.</li>
+      <li>Fix the <code>code_of_new</code> timeout.</li>
+    </ul></div>
+  <div class="phase"><div class="num">Phase 3</div><h3>The message is here before the click <span class="tag">medium</span></h3>
+    <ul>
+      <li>New mail is downloaded in full as it arrives, if it's under the size limit. That's one FETCH in the same session, and the folder is already selected.</li>
+      <li>The search's background text download fetches whole sources instead, so those messages open instantly too.</li>
+      <li>After an open, the reader also fetches the message above and the one below in the list.</li>
+      <li>A new setting for the whole app, with a storage limit for each account.</li>
+    </ul></div>
+  <div class="phase"><div class="num">Phase 4</div><h3>The user goes first <span class="tag">medium</span></h3>
+    <ul>
+      <li>A second reader connection when a click comes during a large download.</li>
+      <li>Background batches wait while an open is under way, and are sized by bytes (about 512 KB) so a move or delete starts quickly.</li>
+      <li>The view is built from the downloaded bytes and the store is written after.</li>
+    </ul></div>
+  <div class="phase"><div class="num">Phase 5</div><h3>Large messages show text first <span class="tag">large</span></h3>
+    <ul>
+      <li>Over 1 MB: the structure, text parts and inline pictures come first, then the view is shown. The attachments are listed from the structure.</li>
+      <li>The whole source follows in the background. Save As, View Source, Forward and opening an attachment wait for it, with progress shown.</li>
+    </ul></div>
+  <div class="phase"><div class="num">Phase 6</div><h3>Waiting that says something <span class="tag">small</span></h3>
+    <ul>
+      <li>The spinner appears after 250 ms on every platform, not just Windows.</li>
+      <li>After 1 s the pane shows how much is left: "Downloading 4.2 of 15 MB".</li>
+      <li>The UI tests check that a prefetched message opens without the downloading state ever showing.</li>
+    </ul></div>
+</div>
+
+<h3>The new setting (phase 3)</h3>
+<p>One setting for the whole app: in Settings on the Mac and Linux, in Options on Windows.</p>
+<div class="mock">
+  <div class="h">Downloading</div>
+  <div style="margin-bottom:4px">Download messages ahead:</div>
+  <label><input type="radio" name="dl" checked> Recent messages up to 1 MB</label>
+  <div class="hint">The last 30 days. They open at once, and offline too.</div>
+  <label><input type="radio" name="dl"> All messages</label>
+  <div class="hint">Every message in every folder, attachments included.</div>
+  <label><input type="radio" name="dl"> Only when opened</label>
+  <div class="hint">Saves space and data; each message opens after it downloads.</div>
+  <div style="margin-top:12px">Keep at most <input type="number" value="1" min="1" style="width:4em"> GB of downloaded messages for each account</div>
+  <div class="hint" style="margin-left:0">Past it, the oldest messages' copies are removed first (never Drafts or the Outbox). They download again when opened.</div>
+</div>
+
+<h2>Tests</h2>
+<ul>
+<li><b>pe-imap</b>:
+  <ul>
+  <li>the first byte limit;</li>
+  <li>a server that answers nothing (the UI test's <code>SilentServer</code>);</li>
+  <li>keepalive set on the socket.</li>
+  </ul></li>
+<li><b>pe-core with ImapKit</b>:
+  <ul>
+  <li>new mail arriving over IDLE is in the store without an open, and messages over the limit are not;</li>
+  <li>an open also fetches the neighbors;</li>
+  <li>a cut reader connection recovers within the first byte limit;</li>
+  <li>a second click during a large download is answered first;</li>
+  <li>background batches wait during an open.</li>
+  </ul></li>
+<li><b>UI tests, all three apps</b>:
+  <ul>
+  <li>a new message opens without the downloading state;</li>
+  <li>an open after ImapKit closes the session still succeeds;</li>
+  <li>the new setting.</li>
+  </ul></li>
+<li><b>The timing example</b>: numbers before and after go in each pull request.</li>
+</ul>
+
+<h2>Order of work</h2>
+<div class="table-wrap"><table>
+<tr><th>Phase</th><th>Size</th><th>Removes</th></tr>
+<tr><td>1 Measure</td><td>Small</td><td>Guessing</td></tr>
+<tr><td>2 Ready reader</td><td>Small to medium</td><td>The long waits: stale connections, the first click</td></tr>
+<tr><td>3 Prefetch</td><td>Medium</td><td>The round trip on most opens</td></tr>
+<tr><td>4 User first</td><td>Medium</td><td>Waits behind large downloads and background work</td></tr>
+<tr><td>5 Text first</td><td>Large</td><td>Long waits for large messages</td></tr>
+<tr><td>6 Waiting state</td><td>Small</td><td>A spinner that says nothing</td></tr>
+</table></div>
+<p>All six phases are built in this order, one pull request each. Phases 1 to 3 cover what you see most often.</p>
+
+<h2>How each phase lands</h2>
+<p>Each phase gets one branch and one pull request off an up-to-date <code>master</code>, and is merged only when CI is green.</p>
+<ol class="qs">
+<li><b>Build.</b> The core and its tests, then the C API and the three apps, then the UI tests, <code>SCENARIO.md</code>, <code>feature-map.mjs</code> and the help in every language.</li>
+<li><b>Check locally.</b> <code>cargo fmt</code>, clippy, <code>cargo test --workspace</code>, the Linux checks, and the UI tests of the apps the phase changes. The timing example runs before and after, and its numbers go in the pull request.</li>
+<li><b>/simplify</b> on the diff, and its findings applied.</li>
+<li><b>/security-review</b> on the diff, and its findings fixed. Phases 3 and 5 get extra attention. Mail downloaded ahead is untrusted, and it is stored and parsed without the user opening it. A partial message must never be taken for a whole one.</li>
+<li><b>Tidy.</b> Prettier on Markdown and YAML, and the translation check where words changed.</li>
+<li><b>Push and watch CI.</b> A real failure gets fixed and pushed again. A flaky one is rerun, at most three times.</li>
+<li><b>Merge</b> when CI is green, then start the next phase from the new <code>master</code>.</li>
+</ol>
+<p>A release isn't part of this plan; one is cut when you ask.</p>
+
+<h2>Decided</h2>
+<div class="note good">
+<ol style="margin:0">
+<li><b>Downloading ahead:</b> recent messages (the last 30 days) up to 1 MB by default.</li>
+<li><b>Storage:</b> a limit you set, applied to each account (1 GB to start).</li>
+<li><b>Phase 5:</b> built now, as part of this plan.</li>
+<li><b>The setting:</b> one for the whole app, not per account.</li>
+<li><b>Pull requests:</b> one per phase, merged when CI passes.</li>
+</ol>
+</div>
+</main>
+</body>
+</html>
