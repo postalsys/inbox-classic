@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Column Layout</title>
+<style>
+:root {
+  --bg: #f6f5f1; --panel: #ffffff; --ink: #1d1d1f; --muted: #5d5d66; --line: #dddad2;
+  --accent: #2456a6; --accent-soft: #e6eefb; --warn: #9a5b00; --warn-soft: #fdf2df;
+  --good: #1f6b3a; --good-soft: #e3f3e8; --code: #f0eee8;
+  --pane: #fbfaf7; --sel: #dce8fb; --ph: #ecebe6; --ph-ink: #85858f; --flag: #c4553a;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+    --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+    --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31;
+    --pane: #24262b; --sel: #263753; --ph: #2f3137; --ph-ink: #8d8d97; --flag: #f08a70;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17181b; --panel: #1f2125; --ink: #ececef; --muted: #a2a2ab; --line: #34363c;
+  --accent: #8fb4f5; --accent-soft: #1f2b40; --warn: #f0b860; --warn-soft: #3a2e19;
+  --good: #84d19f; --good-soft: #1d3326; --code: #2a2c31;
+  --pane: #24262b; --sel: #263753; --ph: #2f3137; --ph-ink: #8d8d97; --flag: #f08a70;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 -apple-system, "Segoe UI", system-ui, sans-serif; }
+main { max-width: 1040px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-size: 1.3rem; margin: 48px 0 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+h3 { font-size: 1.05rem; margin: 20px 0 6px; }
+.lede { color: var(--muted); font-size: 1.08rem; margin-top: 4px; max-width: 70ch; }
+p, li { max-width: 75ch; }
+code { font: 0.86em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--code); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.note { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.good { border-left-color: var(--good); background: var(--good-soft); }
+.note p { margin: 0; }
+.table-wrap { overflow-x: auto; margin: 12px 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.93rem; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin: 16px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+.card .num { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); font-weight: 650; }
+.card h3 { margin: 2px 0 6px; }
+.card ul { margin: 6px 0 0; padding-left: 18px; font-size: 0.93rem; }
+.card p { font-size: 0.93rem; margin: 6px 0 0; }
+.card .meta { font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
+.rec { display: inline-block; font-size: 0.72rem; padding: 1px 8px; border-radius: 99px; background: var(--good-soft); color: var(--good); font-weight: 600; vertical-align: 1px; }
+
+/* the window mock */
+.demo { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin: 16px 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; margin-bottom: 12px; font-size: 0.9rem; }
+.controls label { display: flex; align-items: center; gap: 6px; }
+.controls input[type=range] { width: min(320px, 60vw); accent-color: var(--accent); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.85rem; padding: 4px 12px; border: 0; background: transparent; color: var(--ink); cursor: pointer; border-right: 1px solid var(--line); }
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed=true] { background: var(--accent); color: var(--panel); }
+.readout { font-variant-numeric: tabular-nums; color: var(--muted); }
+.readout b { color: var(--ink); }
+.stage { overflow: hidden; padding: 4px 0; }
+.win { margin: 0 auto; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--pane); font-size: 11px; line-height: 1.35; height: 330px; display: flex; flex-direction: column; transition: width .15s; max-width: 100%; }
+.win .bar { display: flex; gap: 8px; align-items: center; padding: 5px 8px; border-bottom: 1px solid var(--line); background: var(--panel); color: var(--muted); }
+.win .bar .tb { width: 18px; height: 14px; border: 1px solid var(--line); border-radius: 3px; cursor: pointer; background: var(--pane); padding: 0; position: relative; }
+.win .bar .tb::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--muted); opacity: .55; }
+.win .body { flex: 1; display: flex; min-height: 0; }
+.folders { width: 120px; flex: none; border-right: 1px solid var(--line); padding: 6px 0; overflow: hidden; }
+.folders.hidden { display: none; }
+.folders div { padding: 2px 10px; white-space: nowrap; }
+.folders .on { background: var(--sel); font-weight: 600; }
+.folders .acct { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .05em; padding-top: 6px; }
+.right { flex: 1; display: flex; min-width: 0; }
+.win.classic .right { flex-direction: column; }
+.list { background: var(--panel); overflow: hidden; min-width: 0; }
+.win.classic .list { height: 44%; border-bottom: 1px solid var(--line); }
+.win.columns .list { width: 215px; flex: none; border-right: 1px solid var(--line); }
+.reader { flex: 1; padding: 10px 14px; overflow: hidden; min-width: 0; }
+.reader .subj { font-size: 13px; font-weight: 650; }
+.reader .from { color: var(--muted); margin-bottom: 8px; }
+.reader p { margin: 0 0 6px; max-width: 46em; }
+.lhead { display: flex; color: var(--muted); border-bottom: 1px solid var(--line); padding: 2px 8px; font-size: 10px; }
+.win.classic .sortby, .win.columns .cols { display: none; }
+.cols { display: grid; grid-template-columns: 22% 1fr 70px; width: 100%; gap: 8px; }
+.row { border-bottom: 1px solid var(--line); padding: 2px 8px; }
+.row.sel { background: var(--sel); }
+.row.unread .who, .row.unread .subject { font-weight: 700; }
+.win.classic .row { display: grid; grid-template-columns: 22% 1fr 70px; gap: 8px; }
+.win.classic .row > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.win.classic .row .pic, .win.classic .row .snip, .win.classic .row .dot { display: none; }
+.win.columns .row { display: grid; grid-template-columns: 6px 26px 1fr auto; grid-template-areas: "dot pic who date" "dot pic subject subject" "dot pic snip snip"; column-gap: 6px; padding: 5px 8px 5px 4px; }
+.win.columns .row > * { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.row .dot { grid-area: dot; align-self: center; width: 6px; height: 6px; border-radius: 50%; }
+.row.unread .dot { background: var(--accent); }
+.row .pic { grid-area: pic; align-self: center; }
+.row .who { grid-area: who; } .row .date { grid-area: date; color: var(--muted); } .row .subject { grid-area: subject; }
+.row .snip { grid-area: snip; color: var(--muted); }
+.pic { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 600; background: var(--ph); color: var(--ph-ink); flex: none; }
+.pic.logo { background: #1f6b3a; color: #fff; }
+.pic.logo2 { background: #2456a6; color: #fff; }
+.pic.face { background: linear-gradient(135deg, #d9a273, #b9764a); color: #fff; }
+
+/* row anatomy */
+.anat { display: grid; grid-template-columns: minmax(0, 420px) 1fr; gap: 20px; align-items: start; }
+@media (max-width: 760px) { .anat { grid-template-columns: 1fr; } }
+.bigrow { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px 12px 8px; display: grid; grid-template-columns: 10px 40px 1fr auto; grid-template-areas: "dot pic who date" "dot pic subject marks" "dot pic snip count"; column-gap: 10px; font-size: 14px; line-height: 1.45; }
+.bigrow > * { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bigrow .dot { grid-area: dot; align-self: center; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
+.bigrow .pic { grid-area: pic; width: 40px; height: 40px; font-size: 14px; align-self: center; }
+.bigrow .who { grid-area: who; font-weight: 700; } .bigrow .date { grid-area: date; color: var(--muted); font-size: 12.5px; }
+.bigrow .subject { grid-area: subject; font-weight: 700; } .bigrow .marks { grid-area: marks; color: var(--flag); font-size: 12.5px; }
+.bigrow .snip { grid-area: snip; color: var(--muted); } .bigrow .count { grid-area: count; color: var(--muted); font-size: 12.5px; }
+.bigrow + .bigrow { margin-top: 8px; }
+.bigrow.read .dot { background: transparent; } .bigrow.read .who, .bigrow.read .subject { font-weight: 400; }
+.legend { margin: 0; padding-left: 20px; font-size: 0.93rem; }
+.legend li { margin-bottom: 4px; }
+
+/* picture order */
+.order { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; counter-reset: o; }
+.order .card { position: relative; padding-top: 16px; text-align: left; }
+.order .pic { width: 44px; height: 44px; font-size: 15px; margin-bottom: 8px; }
+
+/* threshold strip */
+.strip { position: relative; height: 54px; margin: 22px 0 30px; border-radius: 8px; overflow: hidden; display: flex; font-size: 0.82rem; border: 1px solid var(--line); }
+.strip div { display: grid; place-items: center; text-align: center; padding: 0 6px; }
+.strip .c { background: var(--pane); flex: 1200; } .strip .h { background: var(--warn-soft); color: var(--warn); flex: 120; }
+.strip .w { background: var(--accent-soft); color: var(--accent); flex: 600; }
+</style>
+</head>
+<body>
+<main>
+<h1>A column layout for wide windows</h1>
+<p class="lede">Three panes side by side on a large monitor, the classic layout on a small one, picked by the window's width unless you choose. With it: a folder list that can be hidden, message rows of three lines, and the sender's picture. The full plan is <code>docs/column-layout-plan.md</code>; nothing is started.</p>
+
+<div class="note"><p><b>In one line:</b> View &gt; Layout gets Automatic, Classic and Columns. Automatic turns to Columns at 1320 pixels of width and back to Classic under 1200. Classic stays exactly as it is today.</p></div>
+
+<h2>Try it</h2>
+<p>Drag the width, or pick a layout. The toolbar's small button hides the folder list. This is a sketch of the idea, not of any platform's look: Windows keeps its classic controls, the Mac and Linux their own.</p>
+<div class="demo">
+  <div class="controls">
+    <span class="seg" role="group" aria-label="Layout">
+      <button type="button" data-mode="auto" aria-pressed="true">Automatic</button>
+      <button type="button" data-mode="classic" aria-pressed="false">Classic</button>
+      <button type="button" data-mode="columns" aria-pressed="false">Columns</button>
+    </span>
+    <label>Window width <input id="w" type="range" min="800" max="2000" step="10" value="1500"></label>
+    <span class="readout"><b id="wv">1500</b> px, shown as <b id="lv">Columns</b></span>
+  </div>
+  <div class="stage">
+    <div class="win columns" id="win">
+      <div class="bar"><button class="tb" id="tb" type="button" title="Folder List" aria-label="Show or hide the folder list"></button><span>Inbox Classic</span><span style="margin-left:auto" class="sortby">Sorted by Date ▾</span></div>
+      <div class="body">
+        <div class="folders" id="folders">
+          <div class="acct">Work</div><div class="on">Inbox (3)</div><div>Drafts</div><div>Sent Items</div><div>Junk E-mail</div><div>Deleted Items</div>
+          <div class="acct">Home</div><div>Inbox (1)</div><div>Sent Items</div>
+        </div>
+        <div class="right">
+          <div class="list">
+            <div class="lhead"><div class="cols"><span>From</span><span>Subject</span><span>Received ▾</span></div></div>
+            <div class="row unread sel"><span class="dot"></span><span class="pic face">AL</span><span class="who">Ann Lee</span><span class="subject">Quarterly numbers, final version</span><span class="date">10:42</span><span class="snip">Here are the figures we talked about on Monday. The third sheet has…</span></div>
+            <div class="row unread"><span class="dot"></span><span class="pic logo">N</span><span class="who">Northwind Bank</span><span class="subject">Your statement is ready</span><span class="date">09:15</span><span class="snip">Your October statement can be viewed in online banking now.</span></div>
+            <div class="row"><span class="dot"></span><span class="pic">JK</span><span class="who">Jaan Kask</span><span class="subject">Re: Lunch on Thursday?</span><span class="date">Tue</span><span class="snip">Works for me. The place by the harbor again?</span></div>
+            <div class="row unread"><span class="dot"></span><span class="pic logo2">P</span><span class="who">Parcel Post</span><span class="subject">Your parcel arrives tomorrow</span><span class="date">Mon</span><span class="snip">The courier will be at your door between 10 and 14.</span></div>
+            <div class="row"><span class="dot"></span><span class="pic">M</span><span class="who">mari@example.com</span><span class="subject">Photos from the trip</span><span class="date">7 Nov</span><span class="snip">Finally sorted them. The best ones are in the first folder.</span></div>
+            <div class="row"><span class="dot"></span><span class="pic">TR</span><span class="who">Tiit Rand</span><span class="subject">Invoice 2026-118</span><span class="date">3 Nov</span><span class="snip">Please find the invoice for October attached.</span></div>
+          </div>
+          <div class="reader">
+            <div class="subj">Quarterly numbers, final version</div>
+            <div class="from">Ann Lee, today 10:42</div>
+            <p>Hi,</p>
+            <p>Here are the figures we talked about on Monday. The third sheet has the comparison with last year, and the notes at the end say where the two differ and why.</p>
+            <p>Could you look through them before Friday?</p>
+            <p>Ann</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>Classic or Columns, decided by width</h2>
+<div class="strip" aria-hidden="true">
+  <div class="c">Classic<br>under 1200</div><div class="h">keeps what it has</div><div class="w">Columns<br>1320 and wider</div>
+</div>
+<ul>
+  <li><b>One rule in the core</b> (<code>layout_for</code>), in platform-independent pixels, so the three apps switch at the same widths.</li>
+  <li><b>No flicker at the line.</b> Between 1200 and 1320 the window keeps the layout it has, so dragging its edge near the line does not flip the panes back and forth.</li>
+  <li><b>Your choice wins.</b> Classic or Columns picked in View &gt; Layout (or Options) stays. An explicit Columns holds down to 900; narrower, the window shows Classic without changing the setting.</li>
+  <li><b>Switching loses nothing:</b> the selection, the focus, the open conversations and the selected row stay in view. Each layout remembers its own pane sizes.</li>
+  <li><b>Only the reading pane grows.</b> In Columns the folder list and the message list keep their widths when the window gets wider; the message gets the rest. Plain text gets a line length limit (about 46em), so a 2000 pixel pane does not make 300 character lines.</li>
+</ul>
+
+<h2>Hiding the folder list</h2>
+<p>A command of its own (View &gt; Folder List, with a check mark), in both layouts, remembered. Each platform gets the button its users know:</p>
+<div class="table-wrap"><table>
+<tr><th>Platform</th><th>The button</th><th>Key</th><th>With the list hidden</th></tr>
+<tr><td>Windows</td><td>A close box on a "Folders" caption above the tree, as Outlook Express had</td><td>F9</td><td>The folder bar's title becomes a drop-down that shows the tree, as Outlook Express did</td></tr>
+<tr><td>Mac</td><td>The sidebar button at the toolbar's leading edge</td><td>Ctrl+Cmd+S</td><td>Go to Folder; dragging the divider to the edge collapses it and brings it back</td></tr>
+<tr><td>Linux</td><td>A sidebar toggle at the start of the header bar</td><td>F9</td><td>The folder button's popover that the narrow window already has</td></tr>
+</table></div>
+
+<h2>A row of three lines</h2>
+<div class="anat">
+  <div>
+    <div class="bigrow"><span class="dot"></span><span class="pic face">AL</span><span class="who">Ann Lee</span><span class="date">10:42</span><span class="subject">Quarterly numbers, final version</span><span class="marks">📎 ⚑</span><span class="snip">Here are the figures we talked about on Monday. The third sheet…</span><span class="count">3 ›</span></div>
+    <div class="bigrow read"><span class="dot"></span><span class="pic">JK</span><span class="who">Jaan Kask</span><span class="date">Tue</span><span class="subject">Re: Lunch on Thursday?</span><span class="marks"></span><span class="snip">Works for me. The place by the harbor again?</span><span class="count"></span></div>
+  </div>
+  <ul class="legend">
+    <li><b>Line 1:</b> who (bold while unread) and a short date: the time today, the weekday this week, day and month this year. Sent and Drafts show "To:" and the recipients.</li>
+    <li><b>Line 2:</b> the subject; attachment and flag marks at the right.</li>
+    <li><b>Line 3:</b> the first words the sender wrote, without the quoted reply; the conversation's count and opener at the right.</li>
+    <li><b>Left:</b> the unread dot and the picture.</li>
+    <li><b>Fixed height</b>, so the list stays fast and nothing jumps when the text arrives.</li>
+    <li><b>No column headers:</b> "Sorted by Date ▾" above the list, and View &gt; Sort By in both layouts.</li>
+    <li><b>Classic rows do not change:</b> one line, columns, no picture.</li>
+  </ul>
+</div>
+<div class="note warn"><p><b>The text line is new data.</b> The core stores no message text it can read back today (the search index is one way). A new <code>messages.snippet</code> is written where the text is already at hand, so new mail costs no extra download. Mail stored before is done from downloaded sources, the rest in a background pass, newest first.</p></div>
+
+<h2>Whose picture</h2>
+<p>One picture a row, chosen by the core in this order:</p>
+<div class="order">
+  <div class="card"><span class="pic logo">N</span><div class="num">First</div><h3>The brand's logo (BIMI)</h3><p>When the mail provider's own check says the logo and the sender are genuine. The rule the reading pane uses today.</p></div>
+  <div class="card"><span class="pic face">AL</span><div class="num">Then</div><h3>The contact's picture</h3><p>Set in the Address Book (Choose…, or drop a file). Shown only when the message is confirmed to come from that domain, never in Junk E-mail.</p></div>
+  <div class="card"><span class="pic">JK</span><div class="num">Else</div><h3>Quiet initials</h3><p>One muted tone for everyone, no color per sender, so real logos and faces are what the eye finds.</p></div>
+</div>
+<ul>
+  <li><b>Why confirmed only:</b> a contact's picture is matched by an address, and a From address can be forged. A fake "boss@company.com" must not get the boss's face.</li>
+  <li><b>Logos are downloaded once a domain</b> and kept for 30 days, never a message at a time, so a logo's address cannot be used to see who opened what.</li>
+  <li><b>Pictures are decoded in Rust only.</b> The apps get pixels, as they do for the logo today. A vCard's embedded photo is imported; one that is a link is never fetched.</li>
+  <li><b>The reading pane</b> shows the contact's picture where it shows the logo today. Options gets "Show senders' pictures in the message list".</li>
+</ul>
+
+<h2>What changes where</h2>
+<div class="cards">
+  <div class="card"><h3>Core</h3><ul>
+    <li><code>layout_for</code> and its numbers</li>
+    <li>Commands: three layouts, Folder List, Sort By</li>
+    <li>Migration 23: the text line, the sender's verdict, kept logos, contact pictures</li>
+    <li>Three header fields fetched with the summaries</li>
+    <li><code>pe_picture_start</code>, <code>pe_card_set_picture</code></li>
+  </ul></div>
+  <div class="card"><h3>Windows</h3><ul>
+    <li><code>Layout()</code> with a mode; a vertical second splitter</li>
+    <li>The list made again as owner drawn for Columns (a spike first)</li>
+    <li>Window place and splitters remembered, a minimum size</li>
+    <li>"Folders" caption, the folder bar's drop-down</li>
+  </ul></div>
+  <div class="card"><h3>Mac</h3><ul>
+    <li><code>rightSplit.isVertical</code> follows the layout</li>
+    <li>One column, no header, a new row cell, as Mail's column layout</li>
+    <li>A collapsible sidebar with its toolbar button</li>
+  </ul></div>
+  <div class="card"><h3>Linux</h3><ul>
+    <li>The paned's orientation follows the layout</li>
+    <li>A <code>ListView</code> beside the <code>ColumnView</code>, on the same model</li>
+    <li>The narrow window's breakpoints stay as they are</li>
+  </ul></div>
+</div>
+
+<h2>Order of work</h2>
+<p>Five pull requests, each on all three apps and able to ship by itself.</p>
+<div class="cards">
+  <div class="card"><div class="num">Step 1</div><h3>Hide the folder list</h3><p>The command, the buttons, and Windows remembering its window and splitters. Useful in Classic already.</p><div class="meta">Small</div></div>
+  <div class="card"><div class="num">Step 2</div><h3>The text line, in the core</h3><p>The migration, writing it, the pass over old mail. No app change.</p><div class="meta">After <code>perf/user-first</code> is merged: it touches the background worker</div></div>
+  <div class="card"><div class="num">Step 3</div><h3>The Columns layout</h3><p>The rule, the commands, three-line rows, Sorted by, Options, Automatic.</p><div class="meta">The largest; the Windows spike comes first</div></div>
+  <div class="card"><div class="num">Step 4</div><h3>Pictures in the list</h3><p>The verdict and the logos stored for each message, the quiet initials, the option.</p><div class="meta">Also after <code>perf/user-first</code></div></div>
+  <div class="card"><div class="num">Step 5</div><h3>Contact pictures</h3><p>The Address Book's picture, vCard photos, the order with the logo, the reading pane.</p><div class="meta">Adds a PNG and JPEG decoder to the core</div></div>
+</div>
+
+<h2>Decided</h2>
+<p>Settled on 2026-11-13. Only the widths are left to tune by trying them.</p>
+<div class="table-wrap"><table>
+<tr><th>#</th><th>Question</th><th>Decision</th></tr>
+<tr><td>1</td><td>Who gets Automatic?</td><td><span class="rec">Everyone</span> Those who update too. Only windows 1320 or wider change; the status bar says once where to change it</td></tr>
+<tr><td>2</td><td>The name</td><td><span class="rec">Columns</span> View &gt; Layout &gt; Automatic, Classic, Columns</td></tr>
+<tr><td>3</td><td>Contact pictures on which messages?</td><td><span class="rec">Confirmed senders only</span> Never in Junk E-mail</td></tr>
+<tr><td>4</td><td>Logo or contact picture first?</td><td><span class="rec">Logo first</span> The contact's picture where there is no logo</td></tr>
+<tr><td>5</td><td>The placeholder</td><td><span class="rec">Quiet initials</span> One muted tone, no color per sender</td></tr>
+<tr><td>6</td><td>Is the text line optional?</td><td><span class="rec">No</span> Rows in Columns always have three lines</td></tr>
+<tr><td>7</td><td>Pictures in Classic rows?</td><td><span class="rec">No</span> Classic stays as it is</td></tr>
+<tr><td>8</td><td>Mail stored before</td><td><span class="rec">A background pass over all of it</span> The folder on screen first, newest first</td></tr>
+<tr><td></td><td>The widths</td><td>Open: 1320 up, 1200 down, 900 as the floor of an explicit Columns, to tune by trying</td></tr>
+</table></div>
+
+<h2>Risks</h2>
+<ul>
+  <li><b>Windows' owner drawn list</b> is the one unknown (owner draw together with a virtual list, the keyboard, screen readers). Half a day's spike first; the fallback is a tall image list with custom draw.</li>
+  <li><b>Fewer logos than Gmail's own page shows:</b> Gmail does not expose its BIMI verdict in the header the app trusts. Looking the record up ourselves would trust any domain's own claim without checking its certificate, so it is left out.</li>
+  <li><b>A larger first sync:</b> three more header fields a message. To be measured on a large folder before step 4 lands.</li>
+  <li><b>The UI tests:</b> Linux's test window is 1600 wide, so the existing steps pin Classic at their start, or Automatic would turn every existing screenshot into Columns.</li>
+</ul>
+</main>
+<script>
+(function () {
+  var win = document.getElementById('win'), w = document.getElementById('w');
+  var wv = document.getElementById('wv'), lv = document.getElementById('lv');
+  var folders = document.getElementById('folders');
+  var mode = 'auto', current = 'columns';
+  function layoutFor(width) {
+    if (mode === 'classic') return 'classic';
+    if (mode === 'columns') return width >= 900 ? 'columns' : 'classic';
+    if (width >= 1320) return 'columns';
+    if (width < 1200) return 'classic';
+    return current;
+  }
+  function apply() {
+    var width = +w.value;
+    current = layoutFor(width);
+    win.className = 'win ' + current;
+    win.style.width = (width / 2) + 'px';
+    wv.textContent = width;
+    lv.textContent = current === 'columns' ? 'Columns' : 'Classic';
+  }
+  w.addEventListener('input', apply);
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      mode = b.dataset.mode;
+      document.querySelectorAll('.seg button').forEach(function (o) { o.setAttribute('aria-pressed', o === b); });
+      apply();
+    });
+  });
+  document.getElementById('tb').addEventListener('click', function () { folders.classList.toggle('hidden'); });
+  apply();
+})();
+</script>
+</body>
+</html>

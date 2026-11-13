@@ -10,6 +10,7 @@ enum Command: Int, CaseIterable {
     case selectAll = 134
     case markRead = 103
     case markUnread = 104
+    case folderList = 155
     case pictures = 105
     case about = 106
     case newMail = 107
@@ -68,6 +69,7 @@ enum Command: Int, CaseIterable {
         case .selectAll: return "edit"
         case .markRead: return "edit"
         case .markUnread: return "edit"
+        case .folderList: return "view"
         case .pictures: return "view"
         case .about: return "help"
         case .newMail: return "message"
@@ -133,6 +135,7 @@ enum Command: Int, CaseIterable {
         case .selectAll: return .cmdSelectAll
         case .markRead: return .cmdMarkRead
         case .markUnread: return .cmdMarkUnread
+        case .folderList: return .cmdFolderList
         case .pictures: return .cmdPictures
         case .about: return .cmdAbout
         case .newMail: return .cmdNewMail
@@ -193,6 +196,7 @@ enum Command: Int, CaseIterable {
         case .selectAll: return ("a", [.command])
         case .markRead: return ("u", [.command, .shift])
         case .markUnread: return nil
+        case .folderList: return ("s", [.control, .command])
         case .pictures: return nil
         case .about: return nil
         case .newMail: return ("n", [.command])
@@ -253,6 +257,7 @@ enum Command: Int, CaseIterable {
         case .selectAll: return false
         case .markRead: return false
         case .markUnread: return false
+        case .folderList: return true
         case .pictures: return false
         case .about: return false
         case .newMail: return false
@@ -313,6 +318,7 @@ enum Command: Int, CaseIterable {
         case .selectAll: return false
         case .markRead: return true
         case .markUnread: return true
+        case .folderList: return false
         case .pictures: return false
         case .about: return false
         case .newMail: return false
@@ -373,6 +379,7 @@ enum Command: Int, CaseIterable {
         case .selectAll: return false
         case .markRead: return false
         case .markUnread: return false
+        case .folderList: return false
         case .pictures: return true
         case .about: return false
         case .newMail: return false

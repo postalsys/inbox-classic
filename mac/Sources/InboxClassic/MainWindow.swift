@@ -391,11 +391,12 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     // ---- the toolbar ----
 
     private enum Item: String, CaseIterable {
-        case createMail, reply, replyAll, forward, print, delete, archive, junk, sync, markRead, markUnread, unreadOnly, search
+        case folderList, createMail, reply, replyAll, forward, print, delete, archive, junk, sync, markRead, markUnread, unreadOnly, search
     }
 
     private func command(of item: Item) -> Command? {
         switch item {
+        case .folderList: return .folderList
         case .createMail: return .newMail
         case .reply: return .reply
         case .replyAll: return .replyAll
@@ -415,7 +416,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     public func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         let id = { (item: Item) in NSToolbarItem.Identifier(item.rawValue) }
         // in groups as Outlook Express has them: writing, answering, the message, getting mail, read state
-        return [id(.createMail), .space, id(.reply), id(.replyAll), id(.forward), .space, id(.print), id(.delete), id(.archive), id(.junk),
+        return [id(.folderList), id(.createMail), .space, id(.reply), id(.replyAll), id(.forward), .space, id(.print), id(.delete), id(.archive), id(.junk),
                 .space, id(.sync), .space, id(.markRead), id(.markUnread), .flexibleSpace, id(.unreadOnly), id(.search)]
     }
 
@@ -448,6 +449,18 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             searchField.setAccessibilityIdentifier("find")
             search.preferredWidthForSearchField = 260
             return search
+        }
+        if item == .folderList {
+            // the sidebar button at the toolbar's leading edge, as Mail and Finder have it
+            let sidebar = NSToolbarItem(itemIdentifier: identifier)
+            sidebar.label = Text.uiFolders.text
+            sidebar.paletteLabel = sidebar.label
+            sidebar.toolTip = Command.folderList.label
+            sidebar.image = NSImage(systemSymbolName: "sidebar.leading", accessibilityDescription: Command.folderList.label)
+            sidebar.target = self
+            sidebar.action = #selector(toolbarClicked(_:))
+            sidebar.isBordered = true
+            return sidebar
         }
         if item == .unreadOnly {
             // the list's filter, as Mail has it beside its search: filled while on

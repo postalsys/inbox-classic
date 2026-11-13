@@ -138,6 +138,35 @@ int Widest(const Labels& labels, int least, int margin) {
 }
 }  // namespace
 
+void DrawMarlettGlyph(HDC dc, const RECT& box, wchar_t glyph, int height, COLORREF color) {
+    LOGFONTW symbol = {};
+    symbol.lfHeight = -height;
+    symbol.lfCharSet = SYMBOL_CHARSET;
+    wcscpy_s(symbol.lfFaceName, L"Marlett");
+    HFONT font = CreateFontIndirectW(&symbol);
+    HGDIOBJ old = SelectObject(dc, font);
+    SetBkMode(dc, TRANSPARENT);
+    SetTextColor(dc, color);
+    RECT area = box;
+    DrawTextW(dc, &glyph, 1, &area, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
+    SelectObject(dc, old);
+    DeleteObject(font);
+}
+
+void AddTip(HWND owner, HWND tool, const std::wstring& text) {
+    HWND tip = CreateWindowExW(0, TOOLTIPS_CLASSW, nullptr, WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+                               CW_USEDEFAULT, owner, nullptr, GetModuleHandleW(nullptr), nullptr);
+    // the classic tooltips take the size of their first version
+    TOOLINFOW info = {};
+    info.cbSize = TTTOOLINFOW_V2_SIZE;
+    info.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+    info.hwnd = owner;
+    info.uId = reinterpret_cast<UINT_PTR>(tool);
+    std::wstring words = text;
+    info.lpszText = words.data();
+    SendMessageW(tip, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&info));
+}
+
 int TextWidth(HWND control, HFONT font) {
     HDC dc = GetDC(control);
     int width = static_cast<int>(Measure(dc, font, GetWindowString(control)).cx);

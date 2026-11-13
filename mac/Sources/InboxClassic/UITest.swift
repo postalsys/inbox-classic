@@ -512,6 +512,7 @@ final class UITest {
         try await accountOrder()
         try await betweenAccounts()
         try await unreadOnly()
+        try await folderList()
         try await trustedPictures()
         try await openEml()
         try await accountsAndHelp()

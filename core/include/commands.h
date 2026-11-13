@@ -12,6 +12,7 @@ enum PeCommandId : unsigned short {
     IDM_SELECT_ALL = 134,
     IDM_MARK_READ = 103,
     IDM_MARK_UNREAD = 104,
+    IDM_FOLDER_LIST = 155,
     IDM_PICTURES = 105,
     IDM_ABOUT = 106,
     IDM_NEW_MAIL = 107,
@@ -108,6 +109,7 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_SELECT_ALL: return PE_TEXT_CMD_SELECT_ALL;
     case IDM_MARK_READ: return PE_TEXT_CMD_MARK_READ;
     case IDM_MARK_UNREAD: return PE_TEXT_CMD_MARK_UNREAD;
+    case IDM_FOLDER_LIST: return PE_TEXT_CMD_FOLDER_LIST;
     case IDM_PICTURES: return PE_TEXT_CMD_PICTURES;
     case IDM_ABOUT: return PE_TEXT_CMD_ABOUT;
     case IDM_NEW_MAIL: return PE_TEXT_CMD_NEW_MAIL;

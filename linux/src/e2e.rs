@@ -34,6 +34,9 @@ mod watch;
 /// View > Hide Read Messages
 mod hide_read;
 
+/// View > Folder List, and later the layouts
+mod layout;
+
 /// Pictures from trusted senders, and in every message
 mod pictures;
 
@@ -696,6 +699,13 @@ fn has_focus_in(widget: &impl IsA<gtk::Widget>) -> bool {
     focused_in(widget).is_some_and(|f| f == *widget.as_ref() || f.is_ancestor(widget))
 }
 
+/// The main window's toggle button named `name` is pressed
+fn toggle_on(name: &str) -> bool {
+    named_in(&main_window(), name)
+        .and_downcast::<gtk::ToggleButton>()
+        .is_some_and(|b| b.is_active())
+}
+
 fn named_in(root: &gtk::Widget, name: &str) -> Option<gtk::Widget> {
     // the one drawn last: a dialog opened again over one still closing
     descendants::<gtk::Widget>(root)
@@ -961,6 +971,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::bounces(&d).await;
     steps::one_time_codes(&d).await;
     hide_read::hide_read(&d).await;
+    layout::folder_list(&d).await;
     pictures::trusted(&d).await;
     pictures::options(&d).await;
     watch::watch_and_ignore(&d).await;

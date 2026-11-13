@@ -149,6 +149,15 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
     }
     private var hidingRead = Preference("HideRead", default: false)
+    /// View > Folder List and the toolbar's sidebar button: the folder list beside the messages, on unless turned off
+    var folderList: Bool {
+        get { showingFolders.value }
+        set {
+            showingFolders.value = newValue
+            main?.mailbox.folderListChanged()
+        }
+    }
+    private var showingFolders = Preference("FolderList", default: true)
     /// message files (and links) the system asked to open before the window was there
     private var pending: [URL] = []
     /// the app ends after the compose windows that are saving have closed
@@ -504,6 +513,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .ignoreConversation: main.mailbox.markConversations(PE_ACTION_IGNORE)
         case .hideIgnored: hideIgnored.toggle()
         case .hideRead: hideRead.toggle()
+        case .folderList: folderList.toggle()
         case .notify: notify.toggle()
         case .open: main.show()
         case .defaultApp: main.makeDefaultMailApp()
@@ -591,6 +601,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
         if command == .hideRead {
             item.state = hideRead ? .on : .off
+        }
+        if command == .folderList {
+            item.state = folderList ? .on : .off
         }
         guard let main, core != nil else { return command == .exit || command == .about || command == .help }
         // checked while the conversation of every message they are about has the mark, which choosing it again takes away

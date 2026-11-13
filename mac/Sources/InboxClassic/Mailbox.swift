@@ -68,6 +68,8 @@ public final class Mailbox: NSObject {
     private lazy var emptyMoreWidth = emptyMore.widthAnchor.constraint(equalToConstant: Mailbox.emptyTextWidth)
     private static let emptyTextWidth: CGFloat = 420
     private let rightSplit = NSSplitView()
+    /// the folder tree in its scroll view: the left pane, hidden with View > Folder List off
+    private var treePane: NSScrollView!
 
     /// the counts or the folder changed (the main window shows them)
     var changed: () -> Void = {}
@@ -164,6 +166,7 @@ public final class Mailbox: NSObject {
         tree.action = #selector(treeClicked)
         let treeScroll = scrolled(tree)
         treeScroll.widthAnchor.constraint(greaterThanOrEqualToConstant: Mailbox.smallestTree).isActive = true
+        treePane = treeScroll
 
         setUpList()
         let listScroll = scrolled(list)
@@ -201,6 +204,8 @@ public final class Mailbox: NSObject {
         view.addArrangedSubview(rightSplit)
         view.setHoldingPriority(.defaultLow + 10, forSubviewAt: 0)
         rightSplit.setHoldingPriority(.defaultLow + 10, forSubviewAt: 0)
+        view.delegate = self
+        treePane.isHidden = !(AppDelegate.shared?.folderList ?? true)
         clearReader()
         reload()
     }
@@ -223,6 +228,21 @@ public final class Mailbox: NSObject {
         let list = rightSplit.arrangedSubviews[0].frame.height
         if TestHooks.testing || list <= Mailbox.smallestList + 1 {
             rightSplit.setPosition(260, ofDividerAt: 0)
+        }
+    }
+
+    /// View > Folder List turned on or off: the folder pane shown at the width it had, or hidden (folders are then
+    /// chosen with Go to Folder); the keyboard leaves the tree when it goes
+    func folderListChanged() {
+        let shown = AppDelegate.shared?.folderList ?? true
+        guard treePane.isHidden == shown else { return }
+        if !shown, let window = view.window, let responder = window.firstResponder as? NSView, responder.isDescendant(of: treePane) {
+            window.makeFirstResponder(list)
+        }
+        treePane.isHidden = !shown
+        view.adjustSubviews()
+        if shown && treePane.frame.width < Mailbox.smallestTree {
+            view.setPosition(210, ofDividerAt: 0)
         }
     }
 
@@ -2592,6 +2612,23 @@ public final class MessageTable: NSTableView {
             break
         default:
             super.keyDown(with: event)
+        }
+    }
+}
+
+/// The folder pane can be dragged closed, as a sidebar can: that turns View > Folder List off
+extension Mailbox: NSSplitViewDelegate {
+    public func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView) -> Bool {
+        splitView === view && subview === treePane
+    }
+
+    /// a drag that collapsed or opened the pane sets the preference, whose setter calls folderListChanged (which then
+    /// finds the pane as it should be and does nothing)
+    public func splitViewDidResizeSubviews(_ notification: Notification) {
+        guard let app = AppDelegate.shared, notification.object as? NSSplitView === view else { return }
+        let shown = !view.isSubviewCollapsed(treePane) && !treePane.isHidden
+        if shown != app.folderList {
+            app.folderList = shown
         }
     }
 }

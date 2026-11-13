@@ -328,7 +328,10 @@ void Mailbox::Destroy() {
 }
 
 void Mailbox::Layout(const RECT& tree, const RECT& list, const RECT& reader) {
-    MoveWindow(tree_, tree.left, tree.top, tree.right - tree.left, tree.bottom - tree.top, TRUE);
+    // none while the folder list is hidden (or in the folder bar's drop-down)
+    if (!IsRectEmpty(&tree)) {
+        MoveWindow(tree_, tree.left, tree.top, tree.right - tree.left, tree.bottom - tree.top, TRUE);
+    }
     listArea_ = list;
     LayoutList();
     reader_.Layout(reader);

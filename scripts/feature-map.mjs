@@ -392,6 +392,13 @@ const sections = [
                 checked: ['Only the unread messages are listed', 'One read stays until the folder changes', 'Turned off, every message is back']
             },
             {
+                shot: 'layout-3-folders-hidden',
+                name: 'Hiding the folder list',
+                what: 'More room for the messages: View > Folder List (F9, Control-Command-S on the Mac) hides the folder list and brings it back, remembered. While it is hidden, a folder is chosen from the folder bar (Windows), the folder button (Linux) or Go to Folder.',
+                how: "View > Folder List, the close box on its Folders caption (Windows), or the toolbar's sidebar button (the Mac and Linux).",
+                checked: ['The list hides and comes back', 'A folder is still chosen while it is hidden', 'The choice is kept']
+            },
+            {
                 shot: 'read-1-html',
                 name: 'HTML messages, with pictures sent inside them',
                 what: 'HTML mail is cleaned (no scripts, no forms, no tracking) and shown with its layout. Pictures that travel inside the message are shown at once. Showing a message for a second marks it read, on the server too.',

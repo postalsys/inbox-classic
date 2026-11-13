@@ -41,9 +41,13 @@ HACCEL g_accelerators = nullptr;
 core::Core g_core;
 Mailbox g_mailbox;
 
-// pane sizes in pixels at 96 DPI
+// pane sizes in pixels at 96 DPI, kept for the next start (not by the UI test)
 int g_treeWidth = 200;
 int g_listHeight = 260;
+// View > Folder List: the folder tree beside the messages under its "Folders" caption, else chosen from the folder
+// bar's drop-down; kept for the next start
+bool g_folderList = true;
+HWND g_folderCaption = nullptr;
 constexpr int kGap = 4;
 // the splitter being dragged: 0 none, 1 between the tree and the rest, 2 between the list and the reading pane
 int g_dragging = 0;
@@ -87,6 +91,7 @@ std::wstring StatusText(int part = 0) {
 void ShowFolderName() {
     std::wstring name = g_mailbox.SelectedName();
     SetWindowTextW(g_folderBar, (L" " + name).c_str());
+    InvalidateRect(g_folderBar, nullptr, FALSE);
     g_mailbox.UpdateSearchBar();
     SetWindowTextW(g_main, name.empty() ? kTitle : (name + L" - " + kTitle).c_str());
 }
@@ -189,6 +194,8 @@ void UpdateMenu(HMENU menu) {
             CheckMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.HideIgnored() ? MF_CHECKED : MF_UNCHECKED));
         } else if (id == IDM_HIDE_READ) {
             CheckMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.UnreadOnly() ? MF_CHECKED : MF_UNCHECKED));
+        } else if (id == IDM_FOLDER_LIST) {
+            CheckMenuItem(menu, id, MF_BYCOMMAND | (g_folderList ? MF_CHECKED : MF_UNCHECKED));
         } else if (id == IDM_EMPTY_FOLDER) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanEmptyFolder() ? MF_ENABLED : MF_GRAYED));
         }
@@ -570,6 +577,9 @@ HMENU BuildMenu() {
     AppendMenuW(edit, MF_STRING, IDM_COPY, MenuItem(PE_TEXT_CMD_COPY).c_str());
     AppendMenuW(edit, MF_STRING, IDM_DELETE, MenuItem(PE_TEXT_CMD_DELETE, L"Del").c_str());
     HMENU view = CreatePopupMenu();
+    // checked as the menu opens (UpdateMenu)
+    AppendMenuW(view, MF_STRING, IDM_FOLDER_LIST, MenuItem(PE_TEXT_CMD_FOLDER_LIST, L"F9").c_str());
+    AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(view, MF_STRING, IDM_NEXT_MESSAGE, MenuItem(PE_TEXT_CMD_NEXT_MESSAGE, L"Ctrl+.").c_str());
     AppendMenuW(view, MF_STRING, IDM_PREVIOUS_MESSAGE, MenuItem(PE_TEXT_CMD_PREVIOUS_MESSAGE, L"Ctrl+,").c_str());
     AppendMenuW(view, MF_STRING, IDM_NEXT_UNREAD, MenuItem(PE_TEXT_CMD_NEXT_UNREAD, L"N").c_str());
@@ -614,6 +624,7 @@ HMENU BuildMenu() {
 HACCEL BuildAccelerators() {
     ACCEL keys[] = {
         {FVIRTKEY, VK_F5, IDM_SYNC},
+        {FVIRTKEY, VK_F9, IDM_FOLDER_LIST},
         {FVIRTKEY | FCONTROL, 'Q', IDM_MARK_READ},
         {FVIRTKEY | FCONTROL, 'J', IDM_JUNK},
         {FVIRTKEY | FCONTROL | FSHIFT, 'A', IDM_MARK_ALL_READ},
@@ -757,11 +768,13 @@ RECT ContentArea() {
     return client;
 }
 
-// where the panes go: the tree width and the list height as Layout clamps them, in pixels
+// where the panes go: the tree width and the list height as Layout clamps them, and where the list and the reading
+// pane start (at the left edge while the folder list is hidden), in pixels
 struct Panes {
     RECT area;
     int treeWidth;
     int listHeight;
+    int right;
 };
 
 Panes Measure() {
@@ -770,7 +783,8 @@ Panes Measure() {
     int height = area.bottom - area.top;
     int treeWidth = std::clamp(Scale(g_treeWidth), Scale(80), std::max(Scale(80), width - Scale(200)));
     int listHeight = std::clamp(Scale(g_listHeight), Scale(60), std::max(Scale(60), height - Scale(120)));
-    return {area, treeWidth, listHeight};
+    int right = g_folderList ? area.left + treeWidth + Scale(kGap) : area.left;
+    return {area, treeWidth, listHeight, right};
 }
 
 // how many buttons end before `right`, from the end without every button past it and a separator that would be last
@@ -843,8 +857,10 @@ void Layout() {
     Panes panes = Measure();
     const RECT& area = panes.area;
     int gap = Scale(kGap);
-    int right = area.left + panes.treeWidth + gap;
-    RECT tree = {area.left, area.top, area.left + panes.treeWidth, area.bottom};
+    int right = panes.right;
+    int captionHeight = FolderCaptionHeight();
+    MoveWindow(g_folderCaption, area.left, area.top, panes.treeWidth, captionHeight, TRUE);
+    RECT tree = g_folderList ? RECT{area.left, area.top + captionHeight, area.left + panes.treeWidth, area.bottom} : RECT{};
     RECT list = {right, area.top, area.right, area.top + panes.listHeight};
     RECT reader = {right, list.bottom + gap, area.right, area.bottom};
     g_mailbox.Layout(tree, list, reader);
@@ -875,11 +891,12 @@ int SplitterAt(POINT point) {
     Panes panes = Measure();
     int gap = Scale(kGap);
     int treeRight = panes.area.left + panes.treeWidth;
-    if (point.y >= panes.area.top && point.y < panes.area.bottom && point.x >= treeRight && point.x < treeRight + gap) {
+    if (g_folderList && point.y >= panes.area.top && point.y < panes.area.bottom && point.x >= treeRight &&
+        point.x < treeRight + gap) {
         return 1;
     }
     int listBottom = panes.area.top + panes.listHeight;
-    if (point.x >= treeRight + gap && point.y >= listBottom && point.y < listBottom + gap) {
+    if (point.x >= panes.right && point.y >= listBottom && point.y < listBottom + gap) {
         return 2;
     }
     return 0;
@@ -1056,10 +1073,121 @@ int RelayMcp() {
     return pe_mcp_relay(store.c_str(), StoreArgument());
 }
 
+// the pane sizes and the window's place and size, kept for the next start; not by the UI test, which keeps the
+// user's own
+void SavePanes() {
+    if (g_arguments.testHooks || !g_main) {
+        return;
+    }
+    SetPreference(L"TreeWidth", static_cast<DWORD>(g_treeWidth));
+    SetPreference(L"ListHeight", static_cast<DWORD>(g_listHeight));
+    WINDOWPLACEMENT place = {sizeof(place)};
+    if (GetWindowPlacement(g_main, &place)) {
+        const RECT& r = place.rcNormalPosition;
+        SetTextPreference(L"WindowPlace", std::to_wstring(r.left) + L"," + std::to_wstring(r.top) + L"," +
+                                              std::to_wstring(r.right) + L"," + std::to_wstring(r.bottom) + L"," +
+                                              (place.showCmd == SW_SHOWMAXIMIZED ? L"1" : L"0"));
+    }
+}
+
+// the folder tree and its caption shown or hidden as View > Folder List says
+void ShowFolderPane() {
+    ShowWindow(g_mailbox.Tree(), g_folderList ? SW_SHOW : SW_HIDE);
+    ShowWindow(g_folderCaption, g_folderList ? SW_SHOW : SW_HIDE);
+}
+
+void LoadPanes() {
+    g_folderList = GetPreference(L"FolderList", 1) != 0;
+    ShowFolderPane();
+    if (g_arguments.testHooks) {
+        return;
+    }
+    g_treeWidth = static_cast<int>(std::clamp<DWORD>(GetPreference(L"TreeWidth", 200), 80, 2000));
+    g_listHeight = static_cast<int>(std::clamp<DWORD>(GetPreference(L"ListHeight", 260), 60, 2000));
+}
+
+// the window where it was last time, on a screen that is still there; maximized again when it was (`show`)
+void RestorePlace(HWND hwnd, int& show) {
+    if (g_arguments.testHooks) {
+        return;
+    }
+    std::wstring text = GetTextPreference(L"WindowPlace");
+    int left = 0, top = 0, right = 0, bottom = 0, maximized = 0;
+    if (swscanf_s(text.c_str(), L"%d,%d,%d,%d,%d", &left, &top, &right, &bottom, &maximized) != 5 || right - left < 200 ||
+        bottom - top < 150) {
+        return;
+    }
+    RECT place = {left, top, right, bottom};
+    if (!MonitorFromRect(&place, MONITOR_DEFAULTTONULL)) {
+        return;
+    }
+    WINDOWPLACEMENT saved = {sizeof(saved)};
+    GetWindowPlacement(hwnd, &saved);
+    saved.rcNormalPosition = place;
+    saved.showCmd = SW_HIDE;
+    SetWindowPlacement(hwnd, &saved);
+    if (maximized && (show == SW_SHOWNORMAL || show == SW_SHOWDEFAULT)) {
+        show = SW_SHOWMAXIMIZED;
+    }
+}
+
+// View > Folder List on or off: the tree and its caption beside the messages, or hidden with the keyboard moved to
+// the list; kept for the next start
+void SetFolderList(bool on) {
+    CloseFolderDrop();
+    g_folderList = on;
+    SetPreference(L"FolderList", on ? 1 : 0);
+    if (!on && GetFocus() == g_mailbox.Tree()) {
+        SetFocus(g_mailbox.List());
+    }
+    ShowFolderPane();
+    Layout();
+    InvalidateRect(g_folderBar, nullptr, TRUE);
+}
+
+// the folder bar clicked while the folder list is hidden: the list in a drop-down under the folder's name, as tall as
+// the panes, as wide as the list was
+void DropFolderList() {
+    RECT bar;
+    GetWindowRect(g_folderBar, &bar);
+    Panes panes = Measure();
+    RECT under = {bar.left + Scale(2), bar.top, bar.right, bar.bottom};
+    int height = std::max(Scale(200), static_cast<int>(panes.area.bottom - panes.area.top) * 3 / 4);
+    OpenFolderDrop(g_main, g_mailbox.Tree(), under, std::max(panes.treeWidth, Scale(220)), height);
+}
+
+// the folder bar: the folder's name in white on dark grey, as Outlook Express's; while the folder list is hidden, the
+// arrow after it that says a click drops the list down
+void DrawFolderBar(const DRAWITEMSTRUCT& item) {
+    RECT area = item.rcItem;
+    FillRect(item.hDC, &area, g_folderBrush);
+    std::wstring name = GetWindowString(g_folderBar);
+    HGDIOBJ old = SelectObject(item.hDC, g_folderFont);
+    SetBkMode(item.hDC, TRANSPARENT);
+    SetTextColor(item.hDC, RGB(0xFF, 0xFF, 0xFF));
+    RECT words = area;
+    words.right -= g_folderList ? 0 : Scale(24);
+    DrawTextW(item.hDC, name.c_str(), static_cast<int>(name.size()), &words,
+              DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+    if (g_folderList) {
+        SelectObject(item.hDC, old);
+        return;
+    }
+    // the down arrow of a combo box after the name
+    RECT measured = words;
+    DrawTextW(item.hDC, name.c_str(), static_cast<int>(name.size()), &measured,
+              DT_LEFT | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_CALCRECT);
+    SelectObject(item.hDC, old);
+    RECT arrow = {std::min(measured.right, words.right) + Scale(2), area.top, 0, area.bottom};
+    arrow.right = arrow.left + Scale(16);
+    DrawMarlettGlyph(item.hDC, arrow, L'6', Scale(12), RGB(0xFF, 0xFF, 0xFF));
+}
+
 void CreateChildren(HWND hwnd) {
     CreateToolbar(hwnd);
     // the Show and In choices lie over its right end
-    g_folderBar = CreateChild(hwnd, L"STATIC", L"", SS_LEFT | SS_CENTERIMAGE | SS_NOPREFIX | SS_ENDELLIPSIS | WS_CLIPSIBLINGS, 0, {});
+    // drawn here (DrawFolderBar): while the folder list is hidden its name has the arrow of the drop-down
+    g_folderBar = CreateChild(hwnd, L"STATIC", L"", SS_OWNERDRAW | SS_NOTIFY | WS_CLIPSIBLINGS, IDC_FOLDER_BAR, {});
     NONCLIENTMETRICSW metrics = {sizeof(metrics)};
     SystemParametersInfoForDpi(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0, GetDpiForWindow(hwnd));
     metrics.lfMessageFont.lfHeight = -Scale(16);
@@ -1071,6 +1199,8 @@ void CreateChildren(HWND hwnd) {
     g_status = CreateWindowExW(0, STATUSCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS, 0, 0, 0, 0, hwnd, nullptr,
                                GetModuleHandleW(nullptr), nullptr);
     g_mailbox.Create(hwnd, g_core.get());
+    g_folderCaption = CreateFolderCaption(hwnd, false, reinterpret_cast<HFONT>(SendMessageW(g_mailbox.Tree(), WM_GETFONT, 0, 0)));
+    LoadPanes();
     UpdateUnreadOnlyButton();
 }
 
@@ -1482,6 +1612,14 @@ void OnCommand(WORD id, WORD code) {
         g_mailbox.SetUnreadOnly(!g_mailbox.UnreadOnly());
         UpdateUnreadOnlyButton();
         return;
+    case IDM_FOLDER_LIST:
+        SetFolderList(!g_folderList);
+        return;
+    case IDC_FOLDER_BAR:
+        if (code == STN_CLICKED && !g_folderList) {
+            DropFolderList();
+        }
+        return;
     case IDM_FIND_IN_MESSAGE:
         // F3 again finds the next place; the menu asks for the words
         g_mailbox.FindInMessage(g_main, code == 1);
@@ -1621,6 +1759,11 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (g_mailbox.OnSetCursor(reinterpret_cast<HWND>(wParam))) {
             return TRUE;
         }
+        // the folder bar drops the folder list down while it is hidden
+        if (reinterpret_cast<HWND>(wParam) == g_folderBar && !g_folderList) {
+            SetCursor(LoadCursorW(nullptr, IDC_HAND));
+            return TRUE;
+        }
         POINT point;
         GetCursorPos(&point);
         ScreenToClient(hwnd, &point);
@@ -1651,6 +1794,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (message == WM_LBUTTONUP) {
                 ReleaseCapture();
             }
+            SavePanes();
         }
         return 0;
     case WM_DPICHANGED: {
@@ -1704,27 +1848,28 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         OnEvent(*event);
         return 0;
     }
-    case WM_DRAWITEM:
-        if (reinterpret_cast<const DRAWITEMSTRUCT*>(lParam)->hwndItem == g_chevron) {
-            DrawChevron(*reinterpret_cast<const DRAWITEMSTRUCT*>(lParam));
+    case WM_DRAWITEM: {
+        const auto& item = *reinterpret_cast<const DRAWITEMSTRUCT*>(lParam);
+        if (item.hwndItem == g_folderBar) {
+            DrawFolderBar(item);
             return TRUE;
         }
-        if (g_mailbox.OnDrawItem(*reinterpret_cast<const DRAWITEMSTRUCT*>(lParam))) {
+        if (item.hwndItem == g_chevron) {
+            DrawChevron(item);
+            return TRUE;
+        }
+        if (g_mailbox.OnDrawItem(item)) {
             return TRUE;
         }
         break;
+    }
     case WM_CTLCOLORSTATIC:
         if (LRESULT brush = 0; g_mailbox.OnCtlColor(reinterpret_cast<HWND>(lParam), reinterpret_cast<HDC>(wParam), brush)) {
             return brush;
         }
-        if (reinterpret_cast<HWND>(lParam) == g_folderBar) {
-            // white on dark grey, as the folder bar of Outlook Express
-            SetTextColor(reinterpret_cast<HDC>(wParam), RGB(0xFF, 0xFF, 0xFF));
-            SetBkColor(reinterpret_cast<HDC>(wParam), kFolderBarColor);
-            return reinterpret_cast<LRESULT>(g_folderBrush);
-        }
         return ButtonFaceColor(reinterpret_cast<HDC>(wParam));
     case WM_CLOSE:
+        SavePanes();
         // the close button: into the tray, where it goes on checking mail
         if (!g_exiting) {
             HideToTray();
@@ -1742,6 +1887,12 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             g_exiting = false;
             g_restart = false;
             return 0;
+        }
+        break;
+    case WM_NCACTIVATE:
+        // the window stays drawn active while the folder bar's drop-down has the keyboard, as under a menu
+        if (!wParam && FolderDropOpen()) {
+            return DefWindowProcW(hwnd, message, TRUE, lParam);
         }
         break;
     case WM_ACTIVATE:
@@ -1857,6 +2008,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
     if (!hwnd) {
         return 1;
     }
+    RestorePlace(hwnd, show);
     g_accelerators = BuildAccelerators();
     // started for an agent: in the tray, where it checks mail as it does with its window closed
     if (!g_arguments.background) {

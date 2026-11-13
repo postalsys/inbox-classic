@@ -71,6 +71,28 @@ extension UITest {
               "turned off, the list shows every message again (\(list.numberOfRows) of \(all))")
     }
 
+    // ---- the folder list ----
+
+    func folderList() async throws {
+        step("the folder list hidden and shown again")
+        let pane = { self.tree.enclosingScrollView }
+        check(AppDelegate.shared.folderList && pane()?.isHidden == false && menuItem(.folderList)?.state == .on,
+              "the folder list starts beside the messages, View > Folder List checked")
+        command(.folderList)
+        check(await waitUntil(10) { pane()?.isHidden == true && !AppDelegate.shared.folderList },
+              "View > Folder List hides it")
+        check(menuItem(.folderList)?.state == .off, "and the menu item is no longer checked")
+        check(await waitUntil(5) { list.convert(list.bounds, to: nil).minX < 40 },
+              "the messages and the reading pane take the width")
+        await shot(main.window, "layout-3-folders-hidden")
+        selectFolder(named: "Sent Items")
+        check(await waitUntil(10) { main.mailbox.selectedName == "Sent Items" }, "a folder is still chosen while it is hidden")
+        selectFolder(named: "Inbox")
+        pressToolbar("folderList")
+        check(await waitUntil(10) { pane()?.isHidden == false && AppDelegate.shared.folderList && (pane()?.frame.width ?? 0) >= 160 },
+              "the toolbar's sidebar button shows it again, at its width")
+    }
+
     // ---- pictures from trusted senders ----
 
     /// a newsletter from the shop with a picture on the internet; `verified`: the provider's Authentication-Results

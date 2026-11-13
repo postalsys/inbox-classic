@@ -535,6 +535,17 @@ Screenshot: `list-unread-only`
 - a message opened, and so read, stays in the list; another folder and back: it is gone
 - turned off, every message is back
 
+## 34g4. The folder list hidden
+
+Screenshot: `layout-3-folders-hidden`
+
+- the folder list starts beside the messages, View > Folder List checked
+- View > Folder List (F9) hides it, and that is kept for the next start; the messages and the reading pane take the
+  width
+- a folder is still chosen while it is hidden: from the folder bar's drop-down on Windows (Esc closes it), the folder
+  button's popover on Linux, Go to Folder on the Mac
+- the toolbar's sidebar button (the Mac and Linux) or View > Folder List brings it back
+
 ## 35. Folders
 
 Screenshots: `folders-2-tree`, `folders-3-delete`, `folders-4-inbox`

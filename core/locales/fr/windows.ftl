@@ -118,3 +118,9 @@ win-options-language-label = &Afficher Inbox Classic en :
 win-options-restart-note = Redémarrez Inbox Classic pour appliquer la nouvelle langue.
 win-options-notify = &Me prévenir de l'arrivée de nouveaux messages
 win-restart-ask = Inbox Classic s'affichera dans la langue choisie ({ $language }) après un redémarrage. Redémarrer maintenant ?
+# review: new
+win-folders-hide = Masquer la liste des dossiers
+# review: new
+win-folders-pin = Épingler la liste des dossiers à côté des messages
+# review: new
+win-folders-show = Afficher les dossiers
