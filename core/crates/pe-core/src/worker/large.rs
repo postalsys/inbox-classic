@@ -60,6 +60,20 @@ impl Worker {
             self.ctx.partials.insert(folder, uid, first);
             self.emit(Event::MessageReady { folder, uid });
         }
+        let source = self.download_told(store, folder, uid, size).await;
+        // gone whatever happened: the whole source, or a failure the pane shows in its place
+        self.ctx.partials.remove(folder, uid);
+        Ok((source?, shown))
+    }
+
+    /// The whole source in one FETCH, how far it is told every [`TOLD_EVERY`] for the status bar
+    async fn download_told(
+        &mut self,
+        store: &mut Store,
+        folder: FolderId,
+        uid: u64,
+        size: u64,
+    ) -> Result<Vec<u8>, Failure> {
         let events = self.ctx.events.clone();
         let mut told = 0;
         let client = self.client(store).await?;
@@ -72,7 +86,6 @@ impl Worker {
         })));
         let fetched = pe_sync::fetch_raw(client, store, folder, uid).await;
         client.on_received(None);
-        self.ctx.partials.remove(folder, uid);
-        Ok((fetched?, shown))
+        Ok(fetched?)
     }
 }
