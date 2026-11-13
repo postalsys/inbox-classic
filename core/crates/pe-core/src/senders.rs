@@ -81,16 +81,16 @@ pub fn picture_of(key: u64) -> Option<(PictureKind, i64)> {
     }
 }
 
-/// The picture of a row of the list: its kind and key. The brand's logo first; else the picture of the Address
-/// Book's card with the sender's address, when the provider confirmed the From domain or gives no verdict at all (a
-/// forged sender gets the initials, not the face of whom it pretends to be); never in a Junk folder (the store leaves
-/// both out there)
+/// The picture of a row of the list, and of the reading pane: its kind and key. The brand's logo first; else the
+/// picture of the Address Book's card with the sender's address, only when the provider confirmed the From domain:
+/// without a verdict (a provider whose Authentication-Results name no authserv-id, as Microsoft's) a forged colleague
+/// would get the real face, so the initials show; never in a Junk folder (the store leaves both out there)
 pub fn picture(message: &pe_store::Message) -> (PictureKind, u64) {
     if let Some(logo) = message.logo {
         return (PictureKind::Logo, picture_key(PictureKind::Logo, logo));
     }
     match message.contact {
-        Some((card, revision)) if message.sender_auth & (VERIFIED | NO_VERDICT) != 0 => {
+        Some((card, revision)) if message.sender_auth & VERIFIED != 0 => {
             (PictureKind::Contact, contact_key(card, revision))
         }
         _ => (PictureKind::None, 0),
@@ -223,16 +223,28 @@ mod tests {
         let contact = Some((7, 3));
         // the brand's logo comes first
         assert_eq!(picture(&row(VERIFIED | LOGO, Some(42), contact)).0, PictureKind::Logo);
-        // a confirmed sender, or a provider that gives no verdict at all: the contact's picture
+        // a confirmed sender: the contact's picture
         assert_eq!(
             picture(&row(VERIFIED, None, contact)),
             (PictureKind::Contact, contact_key(7, 3))
         );
-        assert_eq!(picture(&row(NO_VERDICT, None, contact)).0, PictureKind::Contact);
+        // no verdict: the initials, as anyone can write that address
+        assert_eq!(picture(&row(NO_VERDICT, None, contact)), (PictureKind::None, 0));
         // a sender the provider did not confirm (a forged From), or one not judged yet: the initials
         assert_eq!(picture(&row(0, None, contact)), (PictureKind::None, 0));
         // no card picture (the store leaves it out in Junk too)
         assert_eq!(picture(&row(VERIFIED, None, None)), (PictureKind::None, 0));
+    }
+
+    #[test]
+    fn microsofts_results_without_an_authserv_id_confirm_nobody() {
+        // Outlook.com and Microsoft 365 write Authentication-Results without an authserv-id: a forged colleague's
+        // message says dmarc=pass as well as a real one, and no verdict is the provider's
+        let headers = "Authentication-Results: spf=pass smtp.mailfrom=contoso.example; dkim=pass \
+                       header.d=contoso.example; dmarc=pass action=none header.from=contoso.example;\r\n";
+        let judged = judge(headers, "boss@contoso.example", &trusted());
+        assert_eq!(judged.bits & VERIFIED, 0);
+        assert_eq!(picture(&row(judged.bits, None, Some((7, 1)))), (PictureKind::None, 0));
     }
 
     #[test]

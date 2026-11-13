@@ -2590,14 +2590,12 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
     }
     // without a Date header, the date the list shows: when the server got it
     view.date = view.date.or(found.received);
-    // without a logo, the picture of the contact it is from, by the list's rules
+    // without a logo, the contact's picture the list's row has: one decision for both, so they never differ
     if !view.has_logo
-        && !found.junk
-        && view.sender_confirmed
-        && let Some(address) = view.sender.as_ref().map(|s| s.address.clone())
-        && let Some((card, revision)) = store().and_then(|store| store.picture_of_address(&address).ok().flatten())
+        && let Some(row) = store().and_then(|store| store.message(found.folder, found.uid).ok().flatten())
+        && let (senders::PictureKind::Contact, key) = senders::picture(&row)
     {
-        view.picture = senders::contact_key(card, revision);
+        view.picture = key;
     }
     if view.bounce
         && !found.marked
