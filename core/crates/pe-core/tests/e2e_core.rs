@@ -1382,6 +1382,18 @@ fn searches_the_local_index() {
     assert!(!lunch["flags"].to_string().contains("Seen"), "{lunch}");
     let listed = s.core.messages(inbox, Sort::default(), 0, 10).unwrap();
     assert!(listed.iter().all(|m| !m.cached), "only the text parts were fetched");
+    // and the first words of each for the list, from the same text
+    let snippet = |subject: &str| {
+        listed
+            .iter()
+            .find(|m| m.info.subject == subject)
+            .and_then(|m| m.snippet.clone())
+    };
+    assert_eq!(snippet("Lunch").as_deref(), Some("a giraffe at noon"));
+    assert_eq!(
+        snippet("Kvartali aruanne").as_deref(),
+        Some("The numbers mention a zebra.")
+    );
     // opened, the cached source indexes it again, with what the parser reads in it
     s.core.open_message(inbox, report_uid).unwrap();
     s.wait(|e| {

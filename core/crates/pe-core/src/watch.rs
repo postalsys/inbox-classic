@@ -116,6 +116,7 @@ mod tests {
             cached: false,
             thread: None,
             mark,
+            snippet: None,
         }
     }
 

@@ -127,6 +127,7 @@ pub(crate) fn index_text(source: &[u8]) -> IndexText {
         recipient_people: people(&[&message.to, &message.cc, &message.bcc]),
         attachment_names: names.join("\n"),
         attachment_count: attachments.len() as u32,
+        snippet: crate::snippet::of(&body),
         body,
     }
 }

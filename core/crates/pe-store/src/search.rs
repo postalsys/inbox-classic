@@ -243,6 +243,8 @@ pub struct IndexText {
     pub attachment_names: String,
     pub attachment_count: u32,
     pub body: String,
+    /// The first words of what the sender wrote, for the message list (empty: the message has no text)
+    pub snippet: String,
 }
 
 impl Store {
@@ -443,8 +445,8 @@ impl Store {
             .prepare_cached("UPDATE bodies SET indexed = 1 WHERE message_id = ?1 AND indexed = 0")?
             .execute([message])?;
         self.db
-            .prepare_cached("UPDATE messages SET text_indexed = 1 WHERE id = ?1")?
-            .execute([message])?;
+            .prepare_cached("UPDATE messages SET text_indexed = 1, snippet = ?2 WHERE id = ?1")?
+            .execute(params![message, text.snippet])?;
         Ok(())
     }
 
@@ -453,6 +455,22 @@ impl Store {
         let mut statement = self.db.prepare_cached(
             "SELECT m.id, m.folder_id, m.uid FROM messages m INDEXED BY messages_text_unindexed \
              JOIN folders f ON f.id = m.folder_id WHERE m.text_indexed = 0 AND m.fetch_failed = 0 AND f.account_id = ?1 \
+             ORDER BY COALESCE(m.date, m.internal_date) DESC LIMIT ?2",
+        )?;
+        statement
+            .query_map(params![account, limit as i64], |row| {
+                Ok((row.get(0)?, row.get(1)?, row.get(2)?))
+            })?
+            .collect()
+    }
+
+    /// Messages of an account indexed before the store kept snippets, newest first, without a cached source (those are
+    /// read again where they are): (message id, folder, UID)
+    pub fn messages_without_snippet(&self, account: AccountId, limit: usize) -> Result<Vec<(i64, FolderId, u64)>> {
+        let mut statement = self.db.prepare_cached(
+            "SELECT m.id, m.folder_id, m.uid FROM messages m INDEXED BY messages_snippet_missing \
+             JOIN folders f ON f.id = m.folder_id WHERE m.snippet IS NULL AND m.text_indexed = 1 AND m.fetch_failed = 0 \
+             AND f.account_id = ?1 AND NOT EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = m.id) \
              ORDER BY COALESCE(m.date, m.internal_date) DESC LIMIT ?2",
         )?;
         statement
@@ -767,6 +785,7 @@ mod tests {
             attachment_names: "plan.xlsx".into(),
             attachment_count: 1,
             body: "the zebra crossing".into(),
+            snippet: "the zebra crossing".into(),
         };
         store.set_indexed(id, &text).unwrap();
         assert!(store.sources_to_index(10).unwrap().is_empty());
@@ -785,6 +804,44 @@ mod tests {
         // a source cached again is indexed again
         store.set_source(inbox, 1, b"Subject: Plans\r\n\r\nnew text").unwrap();
         assert_eq!(store.sources_to_index(10).unwrap().len(), 1);
+    }
+
+    #[test]
+    fn snippets_kept_and_missing_ones_found() {
+        let (store, inbox, _) = setup();
+        let account = store.folder(inbox).unwrap().account_id;
+        store
+            .add_messages(inbox, &[message(1, "Old", "Ann", &[]), message(2, "New", "Ann", &[])])
+            .unwrap();
+        let id = |uid| store.message(inbox, uid).unwrap().unwrap().id;
+        // not read yet: no snippet, and not one to fetch again (the search fetches it first)
+        assert_eq!(store.message(inbox, 1).unwrap().unwrap().snippet, None);
+        assert!(store.messages_without_snippet(account, 10).unwrap().is_empty());
+        let text = IndexText {
+            body: "Lunch on Thursday? Ann".into(),
+            snippet: "Lunch on Thursday?".into(),
+            ..Default::default()
+        };
+        store.set_indexed(id(2), &text).unwrap();
+        assert_eq!(
+            store.message(inbox, 2).unwrap().unwrap().snippet.as_deref(),
+            Some("Lunch on Thursday?")
+        );
+        // indexed before there were snippets: fetched again, unless its source is here to be read again
+        store.set_indexed(id(1), &IndexText::default()).unwrap();
+        assert_eq!(store.message(inbox, 1).unwrap().unwrap().snippet.as_deref(), Some(""));
+        store.db.execute("UPDATE messages SET snippet = NULL", []).unwrap();
+        let missing = |store: &Store| -> Vec<u64> {
+            store
+                .messages_without_snippet(account, 10)
+                .unwrap()
+                .into_iter()
+                .map(|(_, _, uid)| uid)
+                .collect()
+        };
+        assert_eq!(missing(&store), [2, 1]);
+        store.set_source(inbox, 2, b"Subject: New\r\n\r\nLunch").unwrap();
+        assert_eq!(missing(&store), [1]);
     }
 
     #[test]
