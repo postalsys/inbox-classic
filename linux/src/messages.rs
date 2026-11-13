@@ -13,6 +13,7 @@ use gtk::{gdk, gio, glib};
 use pe_store::{Message, MessageRef, Sort, SortField};
 
 use crate::app::shell;
+use crate::ui::set_class;
 
 const PAGE: u32 = 100;
 /// Pages kept while the list scrolls, the least recently used dropped first
@@ -168,6 +169,8 @@ pub struct MessageList {
     compact_dates: Rc<Cell<bool>>,
     /// The list has messages of several folders (its rows of three lines name the folder)
     several_folders: Rc<Cell<bool>>,
+    /// The time the rows of three lines write their dates against, read at each refresh of the list
+    clock: Rc<Cell<crate::rows::Clock>>,
 }
 
 impl MessageList {
@@ -182,16 +185,7 @@ impl MessageList {
         view.set_reorderable(false);
         // no read/unread column: an unread message is bold, which says it; its space is the sender's and the subject's
         // a bounce's mark in the paper clip's place: what matters about a delivery notice is that it is one
-        view.append_column(&icon_column(
-            |m| {
-                if m.info.bounce {
-                    Some(UNDELIVERED_ICON)
-                } else {
-                    m.info.has_attachments.then_some("ic-attach-symbolic")
-                }
-            },
-            |_| None,
-        ));
+        view.append_column(&icon_column(attachment_icon, |_| None));
         view.append_column(&flag_column());
         // no Watch column: the menus check Watch and Ignore Conversation, and an ignored conversation is grey
         let recipients = Rc::new(Cell::new(false));
@@ -227,9 +221,11 @@ impl MessageList {
         view.sort_by_column(Some(&received), gtk::SortType::Descending);
         view.add_controller(file_drop_target());
         let several_folders = Rc::new(Cell::new(false));
+        let clock = Rc::new(Cell::new(crate::rows::Clock::now()));
         let context = crate::rows::RowContext {
             recipients: recipients.clone(),
             several_folders: several_folders.clone(),
+            clock: clock.clone(),
         };
         let rows_view = gtk::ListView::new(Some(selection.clone()), Some(crate::rows::factory(context)));
         rows_view.add_css_class("message-list");
@@ -258,6 +254,7 @@ impl MessageList {
             folder_room: Cell::new(0),
             compact_dates,
             several_folders,
+            clock,
         })
     }
 
@@ -479,6 +476,7 @@ impl MessageList {
 
     /// The list again: the rows of `view`, `total` of them, the rows `select` selected
     pub fn reset(self: &Rc<Self>, view: pe_core::ListView, total: u64, select: &[u64]) {
+        self.clock.set(crate::rows::Clock::now());
         self.model.reset(view, total);
         self.select_positions(select);
         self.reveal(select);
@@ -611,22 +609,8 @@ pub fn sort_command(field: SortField) -> crate::commands::Command {
 
 /// The Columns list's "Sorted by" button, its menu the items of View > Sort By, in place of the column headers
 fn sort_button() -> gtk::MenuButton {
-    let menu = gio::Menu::new();
-    let mut fields = gio::Menu::new();
-    for &command in crate::commands::Command::ALL
-        .iter()
-        .filter(|c| c.submenu() == Some("sort_by"))
-    {
-        // the fields, then the directions, each a section
-        if command == crate::commands::Command::SortAscending {
-            menu.append_section(None, &fields);
-            fields = gio::Menu::new();
-        }
-        fields.append(Some(command.label()), Some(&format!("win.{}", command.name())));
-    }
-    menu.append_section(None, &fields);
     let button = gtk::MenuButton::builder()
-        .menu_model(&menu)
+        .menu_model(&crate::mailbox::submenu_model("sort_by"))
         .always_show_arrow(true)
         .halign(gtk::Align::Start)
         .build();
@@ -662,6 +646,15 @@ fn list_stack(view: &gtk::ColumnView, rows: &gtk::ListView, sort: &gtk::MenuButt
 /// the Windows app has it, in the paper clip's colour; the card in the reading pane says how bad it is
 pub const UNDELIVERED_ICON: &str = "ic-mail-error-symbolic";
 
+/// The paper clip of a message with attachments, or a bounce's own mark in its place; none for the others
+pub(crate) fn attachment_icon(m: &Message) -> Option<&'static str> {
+    if m.info.bounce {
+        Some(UNDELIVERED_ICON)
+    } else {
+        m.info.has_attachments.then_some("ic-attach-symbolic")
+    }
+}
+
 /// The column of the paper clip: an icon, or none, for each row, and what it says on hover and to a screen reader
 fn icon_column(
     icon: fn(&Message) -> Option<&'static str>,
@@ -690,7 +683,7 @@ fn icon_column(
         image.set_icon_name(name);
         image.set_tooltip_text(tip.as_deref());
         image.update_property(&[gtk::accessible::Property::Label(tip.as_deref().unwrap_or_default())]);
-        set_grey(&image, ignored);
+        set_class(&image, "dim-label", ignored);
     });
     let column = gtk::ColumnViewColumn::new(None, Some(factory));
     column.set_fixed_width(30);
@@ -735,6 +728,19 @@ pub fn draw_flag(cr: &gtk::cairo::Context, x: f64, y: f64, color: pe_core::FlagC
     let _ = cr.stroke();
 }
 
+/// A message's flag in its colour on `area`, or nothing; the colour by its name on hover and for a screen reader (and
+/// for those who tell colours apart badly)
+pub(crate) fn bind_flag(area: &gtk::DrawingArea, color: Option<pe_core::FlagColor>) {
+    let name = color.map(pe_core::color_name);
+    area.set_tooltip_text(name);
+    area.update_property(&[gtk::accessible::Property::Label(name.unwrap_or_default())]);
+    area.set_draw_func(move |_, cr, _, _| {
+        if let Some(color) = color {
+            draw_flag(cr, 0.0, 0.0, color);
+        }
+    });
+}
+
 /// The flag column: each flagged message's flag in its colour (Apple Mail's), nothing for the others
 fn flag_column() -> gtk::ColumnViewColumn {
     let factory = gtk::SignalListItemFactory::new();
@@ -760,16 +766,8 @@ fn flag_column() -> gtk::ColumnViewColumn {
             .and_downcast::<MessageRow>()
             .and_then(|row| row.with(|m| (m.info.flag_color(), m.dimmed())))
             .unwrap_or_default();
-        set_grey(&area, ignored);
-        // the colour by its name: on hover, and for a screen reader (and for those who tell colours apart badly)
-        let name = color.map(pe_core::color_name);
-        area.set_tooltip_text(name);
-        area.update_property(&[gtk::accessible::Property::Label(name.unwrap_or_default())]);
-        area.set_draw_func(move |_, cr, _, _| {
-            if let Some(color) = color {
-                draw_flag(cr, 0.0, 0.0, color);
-            }
-        });
+        set_class(&area, "dim-label", ignored);
+        bind_flag(&area, color);
     });
     let column = gtk::ColumnViewColumn::new(None, Some(factory));
     column.set_fixed_width(30);
@@ -816,8 +814,8 @@ fn text_column(
         };
         let (words, unread, ignored) = row.with(|m| (text(m), m.bold(), m.dimmed())).unwrap_or_default();
         label.set_text(&words);
-        set_bold(&label, unread);
-        set_grey(&label, ignored);
+        set_class(&label, "unread", unread);
+        set_class(&label, "dim-label", ignored);
     });
     let column = gtk::ColumnViewColumn::new(Some(title), Some(factory));
     column.set_fixed_width(width);
@@ -856,25 +854,31 @@ fn date_width(compact: bool) -> i32 {
     (widest + 28).max(if compact { 90 } else { 130 })
 }
 
-/// An ignored conversation's cells grey
-fn set_grey(widget: &impl IsA<gtk::Widget>, grey: bool) {
-    if grey {
-        widget.add_css_class("dim-label");
-    } else {
-        widget.remove_css_class("dim-label");
-    }
-}
-
-fn set_bold(label: &gtk::Label, bold: bool) {
-    if bold {
-        label.add_css_class("unread");
-    } else {
-        label.remove_css_class("unread");
-    }
-}
-
-/// How far a reply's subject is indented under its conversation's first message
+/// How far a reply's subject is indented under its conversation's first message in the Classic list (the Columns rows
+/// have their own, rows.rs, as the other apps' Columns rows)
 const REPLY_INDENT: i32 = 18;
+
+/// A conversation's disclosure triangle (pan-end or pan-down), which opens or closes it; a click on it does not select
+pub(crate) fn thread_expander(item: &gtk::ListItem) -> gtk::Image {
+    let expander = gtk::Image::new();
+    expander.set_pixel_size(16);
+    expander.add_css_class("thread-expander");
+    let click = gtk::GestureClick::new();
+    let weak = item.downgrade();
+    click.connect_pressed(move |gesture, _, _, _| {
+        gesture.set_state(gtk::EventSequenceState::Claimed);
+        let thread = weak
+            .upgrade()
+            .and_then(|item| item.item().and_downcast::<MessageRow>())
+            .and_then(|row| row.with(|m| m.thread))
+            .flatten();
+        if let Some(place) = thread.filter(|t| t.opens()) {
+            shell().main().toggle_thread(place.thread);
+        }
+    });
+    expander.add_controller(click);
+    expander
+}
 
 /// The Subject column. In a list grouped by conversation each subject has the room of the disclosure triangle in front
 /// of it (the tree's own, pan-end or pan-down, shown on a conversation of more than one message, a click on it opens or
@@ -886,24 +890,7 @@ fn subject_column() -> gtk::ColumnViewColumn {
             return;
         };
         let cell = gtk::Box::new(gtk::Orientation::Horizontal, 4);
-        let expander = gtk::Image::new();
-        expander.set_pixel_size(16);
-        expander.add_css_class("thread-expander");
-        let click = gtk::GestureClick::new();
-        let weak = item.downgrade();
-        click.connect_pressed(move |gesture, _, _, _| {
-            // the click opens or closes, it does not select
-            gesture.set_state(gtk::EventSequenceState::Claimed);
-            let thread = weak
-                .upgrade()
-                .and_then(|item| item.item().and_downcast::<MessageRow>())
-                .and_then(|row| row.with(|m| m.thread))
-                .flatten();
-            if let Some(place) = thread.filter(|t| t.opens()) {
-                shell().main().toggle_thread(place.thread);
-            }
-        });
-        expander.add_controller(click);
+        let expander = thread_expander(item);
         let label = gtk::Label::new(None);
         label.set_xalign(0.0);
         label.set_hexpand(true);
@@ -934,8 +921,8 @@ fn subject_column() -> gtk::ColumnViewColumn {
         else {
             return;
         };
-        set_bold(&label, unread);
-        set_grey(&cell, ignored);
+        set_class(&label, "unread", unread);
+        set_class(&cell, "dim-label", ignored);
         // one row a message: the subject alone
         let Some(place) = thread else {
             expander.set_visible(false);

@@ -58,8 +58,12 @@ pub struct Mailbox {
     folder_place: Rc<FolderPlace>,
     /// The list and the reading pane, one above the other (Classic) or side by side (Columns)
     right: gtk::Paned,
+    /// While the layout changes: the list's size is not kept then
+    switching: Rc<Cell<bool>>,
     /// The layout shown
     layout: Cell<Layout>,
+    /// View > Layout, as kept in the settings
+    mode: Cell<LayoutMode>,
     /// The folder shown was chosen by its row under All Inboxes (an account's Inbox there), not its account's
     under_all_inboxes: Cell<bool>,
     search_bar: gtk::Box,
@@ -187,8 +191,14 @@ impl Mailbox {
             .wide_handle(true)
             .vexpand(true)
             .build();
-        // the list's height in Classic, its width in Columns, each kept for its layout
-        right.connect_position_notify(|paned| {
+        // the list's height in Classic, its width in Columns, each kept for its layout; not while the layout changes,
+        // when a position of one layout would be kept as the other's
+        let switching = Rc::new(Cell::new(false));
+        let still = switching.clone();
+        right.connect_position_notify(move |paned| {
+            if still.get() {
+                return;
+            }
             let key = if paned.orientation() == gtk::Orientation::Horizontal {
                 settings::LIST_WIDTH
             } else {
@@ -236,7 +246,9 @@ impl Mailbox {
             find_narrow: parts.search.clone(),
             folder_place,
             right: right.clone(),
+            switching,
             layout: Cell::new(Layout::Classic),
+            mode: Cell::new(layout_mode()),
             under_all_inboxes: Cell::new(false),
             search_bar,
             search_summary,
@@ -1652,21 +1664,42 @@ impl Mailbox {
 
     /// View > Layout chosen: kept, its check mark, and the layout it gives now
     pub fn set_layout_mode(&self, mode: LayoutMode) {
-        let name = match mode {
-            LayoutMode::Automatic => None,
-            LayoutMode::Classic => Some("classic"),
-            LayoutMode::Columns => Some("columns"),
-        };
-        shell().settings.set_text(settings::LAYOUT, name);
+        shell().settings.set_text(settings::LAYOUT, layout_mode_name(mode));
+        self.mode.set(mode);
         self.show_layout_checks();
         self.apply_layout();
     }
 
+    /// View > Layout as chosen now
+    pub fn layout_mode(&self) -> LayoutMode {
+        self.mode.get()
+    }
+
     fn show_layout_checks(&self) {
-        let mode = layout_mode();
-        self.set_toggled(Command::LayoutAutomatic, mode == LayoutMode::Automatic);
-        self.set_toggled(Command::LayoutClassic, mode == LayoutMode::Classic);
-        self.set_toggled(Command::LayoutColumns, mode == LayoutMode::Columns);
+        self.show_checks("layout");
+    }
+
+    /// The check marks of the items of a submenu ("layout", "sort_by") as things are now
+    fn show_checks(&self, group: &str) {
+        for &command in Command::ALL.iter().filter(|c| c.submenu() == Some(group)) {
+            self.set_toggled(command, self.checked(command));
+        }
+    }
+
+    /// Whether the menu item of `command` has its check mark now: the order of the list, or what `toggled` says
+    fn checked(&self, command: Command) -> bool {
+        let sort = self.list.sort();
+        match command {
+            Command::SortAscending => sort.ascending,
+            Command::SortDescending => !sort.ascending,
+            Command::SortDate | Command::SortFrom | Command::SortSubject | Command::SortSize => {
+                command == crate::messages::sort_command(sort.field)
+            }
+            Command::LayoutAutomatic | Command::LayoutClassic | Command::LayoutColumns => {
+                command == layout_command(self.mode.get())
+            }
+            _ => toggled(command),
+        }
     }
 
     /// The layout the mode and the window's width give, shown when it is not the one shown
@@ -1675,12 +1708,13 @@ impl Mailbox {
         if width == 0 {
             return;
         }
-        let now = pe_core::layout::layout_for(layout_mode(), width, self.layout.get());
+        let mode = self.mode.get();
+        let now = pe_core::layout::layout_for(mode, width, self.layout.get());
         if now == self.layout.get() {
             return;
         }
         self.switch_layout(now);
-        if now == Layout::Columns && layout_mode() == LayoutMode::Automatic {
+        if now == Layout::Columns && mode == LayoutMode::Automatic {
             self.note_columns();
         }
     }
@@ -1706,6 +1740,7 @@ impl Mailbox {
             settings.int(settings::LIST_HEIGHT, 260)
         };
         self.layout.set(layout);
+        self.switching.set(true);
         self.list.set_columns(columns);
         self.list
             .widget
@@ -1718,16 +1753,11 @@ impl Mailbox {
         // the list keeps its width as the window grows in Columns; in Classic both share the height as before
         self.right.set_resize_start_child(!columns);
         self.right.set_position(position);
+        self.switching.set(false);
         if had_focus {
             self.list.focus();
         }
-        let selected: Vec<u64> = self
-            .list
-            .selected_ranges()
-            .into_iter()
-            .flat_map(|(start, end)| start..end)
-            .collect();
-        if let Some(&first) = selected.first()
+        if let Some(&(first, _)) = self.list.selected_ranges().first()
             && let Ok(first) = u32::try_from(first)
         {
             self.list.scroll_to(first, gtk::ListScrollFlags::NONE);
@@ -1766,18 +1796,7 @@ impl Mailbox {
 
     /// The check marks of View > Sort By: the field and the direction of the order now
     fn show_sort_checks(&self) {
-        let sort = self.list.sort();
-        let field = crate::messages::sort_command(sort.field);
-        for command in [
-            Command::SortDate,
-            Command::SortFrom,
-            Command::SortSubject,
-            Command::SortSize,
-        ] {
-            self.set_toggled(command, command == field);
-        }
-        self.set_toggled(Command::SortAscending, sort.ascending);
-        self.set_toggled(Command::SortDescending, !sort.ascending);
+        self.show_checks("sort_by");
     }
 
     /// The selected messages junk ($Junk, into the Junk folder) or not junk ($NotJunk, into the Inbox)
@@ -2498,12 +2517,34 @@ fn start_view(sort: pe_store::Sort) -> pe_core::ListView {
 const LIST_WIDTH: i32 = 360;
 const MIN_LIST_WIDTH: i32 = 280;
 
-/// View > Layout: what the user chose, Automatic unless they chose otherwise
-pub fn layout_mode() -> LayoutMode {
-    match shell().settings.text(settings::LAYOUT).as_deref() {
+/// View > Layout as the settings keep it, Automatic unless the user chose otherwise (the main window keeps it then)
+fn layout_mode() -> LayoutMode {
+    layout_mode_named(shell().settings.text(settings::LAYOUT).as_deref())
+}
+
+/// A layout mode's name in the settings: none for Automatic, which is what an unset key means
+fn layout_mode_name(mode: LayoutMode) -> Option<&'static str> {
+    match mode {
+        LayoutMode::Automatic => None,
+        LayoutMode::Classic => Some("classic"),
+        LayoutMode::Columns => Some("columns"),
+    }
+}
+
+fn layout_mode_named(name: Option<&str>) -> LayoutMode {
+    match name {
         Some("classic") => LayoutMode::Classic,
         Some("columns") => LayoutMode::Columns,
         _ => LayoutMode::Automatic,
+    }
+}
+
+/// The View > Layout item of a mode
+fn layout_command(mode: LayoutMode) -> Command {
+    match mode {
+        LayoutMode::Automatic => Command::LayoutAutomatic,
+        LayoutMode::Classic => Command::LayoutClassic,
+        LayoutMode::Columns => Command::LayoutColumns,
     }
 }
 
@@ -2572,9 +2613,9 @@ fn toggled(command: Command) -> bool {
         Command::HideIgnored => hide_ignored(),
         Command::HideRead => hide_read(),
         Command::FolderList => folder_list_shown(),
-        Command::LayoutAutomatic => layout_mode() == LayoutMode::Automatic,
-        Command::LayoutClassic => layout_mode() == LayoutMode::Classic,
-        Command::LayoutColumns => layout_mode() == LayoutMode::Columns,
+        Command::LayoutAutomatic | Command::LayoutClassic | Command::LayoutColumns => {
+            command == layout_command(layout_mode())
+        }
         _ => false,
     }
 }
@@ -3066,18 +3107,14 @@ fn command_menu(id: &str) -> gio::Menu {
     let submenu = gio::Menu::new();
     // Quit and Preferences have the places GNOME gives them, at the end
     let elsewhere = [Command::Exit, Command::Options];
-    let mut grouped: Vec<(&'static str, gio::Menu)> = Vec::new();
+    let mut grouped: Vec<&'static str> = Vec::new();
     for command in Command::ALL.iter().filter(|c| c.menu() == id && !elsewhere.contains(c)) {
         // the commands of a submenu (View > Layout) in it, where its first one would be
         if let Some(group) = command.submenu() {
-            if let Some((_, menu)) = grouped.iter().find(|(name, _)| *name == group) {
-                menu.append_item(&menu_item(command.label(), *command));
-                continue;
+            if !grouped.contains(&group) {
+                submenu.append_submenu(Some(&submenu_label(group)), &submenu_model(group));
+                grouped.push(group);
             }
-            let menu = gio::Menu::new();
-            menu.append_item(&menu_item(command.label(), *command));
-            submenu.append_submenu(Some(&submenu_label(group)), &menu);
-            grouped.push((group, menu));
             continue;
         }
         submenu.append_item(&menu_item(command.label(), *command));
@@ -3173,18 +3210,34 @@ fn flag_row(color: FlagColor) -> gtk::Button {
     button
 }
 
-/// An item of the primary menu for `command`, under `label`; the keys of Select All and Undo shown as the others'
-/// are, as they are no application accelerators (TEXT_KEYS)
-/// A submenu's label: the catalog's menu-<submenu>
+/// A submenu's label: the catalog's menu-<submenu> (core/commands.toml names only these)
 fn submenu_label(submenu: &str) -> String {
     use crate::words::{Text, plain};
     match submenu {
         "layout" => plain(Text::MenuLayout),
         "sort_by" => plain(Text::MenuSortBy),
-        other => other.to_string(),
+        other => unreachable!("the catalog has no label for the submenu {other}"),
     }
 }
 
+/// The items of a submenu (View > Layout, View > Sort By), for the View menu and the Columns list's Sorted by button:
+/// Sort By's fields, then its directions, each a section
+pub fn submenu_model(group: &str) -> gio::Menu {
+    let menu = gio::Menu::new();
+    let mut section = gio::Menu::new();
+    for &command in Command::ALL.iter().filter(|c| c.submenu() == Some(group)) {
+        if command == Command::SortAscending {
+            menu.append_section(None, &section);
+            section = gio::Menu::new();
+        }
+        section.append_item(&menu_item(command.label(), command));
+    }
+    menu.append_section(None, &section);
+    menu
+}
+
+/// An item of the primary menu for `command`, under `label`; the keys of Select All and Undo shown as the others'
+/// are, as they are no application accelerators (TEXT_KEYS)
 fn menu_item(label: &str, command: Command) -> gio::MenuItem {
     let item = gio::MenuItem::new(Some(label), Some(&format!("win.{}", command.name())));
     if TEXT_KEYS.contains(&command)

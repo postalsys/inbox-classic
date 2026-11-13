@@ -800,11 +800,7 @@ fn mark_drop(widget: &gtk::Widget, below: Option<bool>) {
         ("drop-above", below == Some(false)),
         ("drop-below", below == Some(true)),
     ] {
-        if shown {
-            row.add_css_class(class);
-        } else {
-            row.remove_css_class(class);
-        }
+        crate::ui::set_class(&row, class, shown);
     }
 }
 

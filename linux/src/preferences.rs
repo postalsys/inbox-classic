@@ -178,11 +178,11 @@ fn layout_row() -> adw::ComboRow {
         .collect();
     let at = modes
         .iter()
-        .position(|mode| *mode == crate::mailbox::layout_mode())
+        .position(|mode| *mode == shell().main().layout_mode())
         .unwrap_or(0);
     choice_row(Text::UiLayoutLabel, &names, "preferences-layout", at, move |chosen| {
         if let Some(&mode) = modes.get(chosen)
-            && mode != crate::mailbox::layout_mode()
+            && mode != shell().main().layout_mode()
         {
             shell().main().set_layout_mode(mode);
         }

@@ -51,6 +51,15 @@ row.drop-below { background-position: center bottom; }
 .new-address { font-size: 0.8em; font-weight: bold; color: white; background-color: @error_bg_color; border-radius: 4px; padding: 1px 6px; }
 ";
 
+/// The CSS class `class` on `widget` or off it
+pub fn set_class(widget: &impl IsA<gtk::Widget>, class: &str, on: bool) {
+    if on {
+        widget.add_css_class(class);
+    } else {
+        widget.remove_css_class(class);
+    }
+}
+
 pub fn load_style() {
     let provider = gtk::CssProvider::new();
     provider.load_from_string(STYLE);

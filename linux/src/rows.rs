@@ -12,10 +12,30 @@ use gtk::subclass::prelude::*;
 use pe_store::Message;
 
 use crate::app::shell;
-use crate::messages::{MessageRow, UNDELIVERED_ICON, draw_flag};
+use crate::messages::{MessageRow, attachment_icon, bind_flag, thread_expander};
+use crate::ui::set_class;
 
-/// How far the rows of an opened conversation are indented under its first
+/// How far the rows of an opened conversation are indented under its first, as the other apps' Columns rows
 const REPLY_INDENT: i32 = 16;
+
+/// Now, and the local time zone's offset from UTC in seconds: what the dates of the rows are written against, read once
+/// for a refresh of the list rather than for each row
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Clock {
+    now: i64,
+    offset: i64,
+}
+
+impl Clock {
+    pub fn now() -> Clock {
+        glib::DateTime::now_local()
+            .map(|now| Clock {
+                now: now.to_unix(),
+                offset: now.utc_offset().as_seconds(),
+            })
+            .unwrap_or_default()
+    }
+}
 
 /// What the rows read besides the message: whether the person is the recipients (Sent Items and Drafts) and whether
 /// the list has messages of several folders (a search, All Inboxes), each kept by the message list
@@ -23,6 +43,7 @@ const REPLY_INDENT: i32 = 16;
 pub struct RowContext {
     pub recipients: Rc<Cell<bool>>,
     pub several_folders: Rc<Cell<bool>>,
+    pub clock: Rc<Cell<Clock>>,
 }
 
 mod imp {
@@ -92,7 +113,8 @@ fn small_dim(label: &gtk::Label) {
 }
 
 impl Parts {
-    fn new() -> (RowWidget, Parts) {
+    fn new(item: &gtk::ListItem) -> (RowWidget, Parts) {
+        let expander = thread_expander(item);
         let dot = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         dot.add_css_class("unread-dot");
         dot.set_valign(gtk::Align::Center);
@@ -117,9 +139,6 @@ impl Parts {
         snippet.add_css_class("dim-label");
         let count = line_label(false);
         small_dim(&count);
-        let expander = gtk::Image::new();
-        expander.set_pixel_size(16);
-        expander.add_css_class("thread-expander");
         let text = gtk::Box::new(gtk::Orientation::Vertical, 2);
         text.set_hexpand(true);
         text.append(&line(&[who.upcast_ref(), date.upcast_ref()]));
@@ -166,8 +185,7 @@ pub fn factory(context: RowContext) -> gtk::SignalListItemFactory {
         let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
             return;
         };
-        let (row, parts) = Parts::new();
-        connect_expander(&parts.expander, item);
+        let (row, parts) = Parts::new(item);
         crate::messages::add_drag_source(&row, item);
         *row.imp().parts.borrow_mut() = Some(parts);
         item.set_child(Some(&row));
@@ -190,32 +208,6 @@ pub fn factory(context: RowContext) -> gtk::SignalListItemFactory {
     factory
 }
 
-/// The expander opens and closes its conversation, as the classic subject cell's does; a click on it does not select
-fn connect_expander(expander: &gtk::Image, item: &gtk::ListItem) {
-    let click = gtk::GestureClick::new();
-    let weak = item.downgrade();
-    click.connect_pressed(move |gesture, _, _, _| {
-        gesture.set_state(gtk::EventSequenceState::Claimed);
-        let thread = weak
-            .upgrade()
-            .and_then(|item| item.item().and_downcast::<MessageRow>())
-            .and_then(|row| row.with(|m| m.thread))
-            .flatten();
-        if let Some(place) = thread.filter(|t| t.opens()) {
-            shell().main().toggle_thread(place.thread);
-        }
-    });
-    expander.add_controller(click);
-}
-
-fn set_class(widget: &impl IsA<gtk::Widget>, class: &str, on: bool) {
-    if on {
-        widget.add_css_class(class);
-    } else {
-        widget.remove_css_class(class);
-    }
-}
-
 /// Who the row names: the sender, or "To:" and the recipients in Sent Items and Drafts
 fn who(m: &Message, recipients: bool) -> String {
     if recipients {
@@ -234,7 +226,12 @@ fn bind(row: &gtk::Widget, parts: &Parts, m: &Message, context: &RowContext) {
     parts.dot.set_opacity(if bold { 1.0 } else { 0.0 });
     let who = who(m, context.recipients.get());
     parts.who.set_text(&who);
-    let date = m.info.display_date().map(short_date).unwrap_or_default();
+    let clock = context.clock.get();
+    let date = m
+        .info
+        .display_date()
+        .map(|seconds| short_date(seconds, clock))
+        .unwrap_or_default();
     parts.date.set_text(&date);
     parts.subject.set_text(&m.info.subject);
     // the sender always a little heavier than the subject; the subject bold while the row is (the dot says unread)
@@ -261,20 +258,12 @@ fn bind(row: &gtk::Widget, parts: &Parts, m: &Message, context: &RowContext) {
 /// The marks at the right of the subject: the paper clip (a bounce's own mark in its place) and the flag in its colour,
 /// as the classic row has them (an ignored conversation is grey, as there)
 fn bind_marks(parts: &Parts, m: &Message) {
-    let attachment = if m.info.bounce {
-        Some(UNDELIVERED_ICON)
-    } else {
-        m.info.has_attachments.then_some("ic-attach-symbolic")
-    };
+    let attachment = attachment_icon(m);
     parts.attachment.set_icon_name(attachment);
     parts.attachment.set_visible(attachment.is_some());
     let color = m.info.flag_color();
     parts.flag.set_visible(color.is_some());
-    parts.flag.set_draw_func(move |_, cr, _, _| {
-        if let Some(color) = color {
-            draw_flag(cr, 0.0, 0.0, color);
-        }
-    });
+    bind_flag(&parts.flag, color);
 }
 
 /// A conversation's row: its count and expander; an opened one's other rows indented under it
@@ -310,15 +299,11 @@ pub fn shown(row: &RowWidget) -> Option<(String, String, String, i32)> {
 
 /// The date as the Columns list writes it, by the core's rule: the time today, the weekday this week, the day and
 /// month this year, the whole date before
-pub fn short_date(seconds: i64) -> String {
-    let Ok(now) = glib::DateTime::now_local() else {
-        return crate::ui::format_date(seconds);
-    };
-    let offset = now.utc_offset().as_seconds();
+fn short_date(seconds: i64, clock: Clock) -> String {
     let Ok(date) = glib::DateTime::from_unix_local(seconds) else {
         return String::new();
     };
-    let format = match pe_core::layout::date_style(seconds, now.to_unix(), offset) {
+    let format = match pe_core::layout::date_style(seconds, clock.now, clock.offset) {
         pe_core::layout::DateStyle::Time => crate::ui::time_format(),
         pe_core::layout::DateStyle::Weekday => "%A",
         pe_core::layout::DateStyle::DayMonth => day_month_format(),
