@@ -691,14 +691,9 @@ bool Reader::OnDrawItem(const DRAWITEMSTRUCT& item) {
         // the logo, its own transparency kept, in the middle of its place beside the header
         FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_BTNFACE));
         if (logoBitmap_) {
-            HDC source = CreateCompatibleDC(item.hDC);
-            HGDIOBJ old = SelectObject(source, logoBitmap_);
-            BLENDFUNCTION blend = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
             int x = (item.rcItem.left + item.rcItem.right - logoSize_) / 2;
             int y = (item.rcItem.top + item.rcItem.bottom - logoSize_) / 2;
-            AlphaBlend(item.hDC, x, y, logoSize_, logoSize_, source, 0, 0, logoSize_, logoSize_, blend);
-            SelectObject(source, old);
-            DeleteDC(source);
+            DrawPremultiplied(item.hDC, x, y, logoBitmap_, logoSize_);
         }
         return true;
     }
@@ -784,19 +779,12 @@ void Reader::OnEvent(const UiEvent& event) {
             logoRequest_ = 0;
             size_t length = 0;
             uint8_t* pixels = pe_logo_result(core_, event.uid, &length);
-            size_t expected = static_cast<size_t>(logoSize_) * logoSize_ * 4;
-            if (pixels && length == expected) {
-                // the core's pixels, BGRA with the alpha multiplied in, as AlphaBlend takes them
-                BITMAPINFO info = {};
-                info.bmiHeader = {sizeof(BITMAPINFOHEADER), logoSize_, -logoSize_, 1, 32, BI_RGB};
-                void* bits = nullptr;
-                logoBitmap_ = CreateDIBSection(nullptr, &info, DIB_RGB_COLORS, &bits, nullptr, 0);
-                if (logoBitmap_ && bits) {
-                    memcpy(bits, pixels, expected);
-                    ShowWindow(logo_, SW_SHOW);
-                    Layout();
-                    InvalidateRect(logo_, nullptr, TRUE);
-                }
+            // the core's pixels, BGRA with the alpha multiplied in, as AlphaBlend takes them
+            logoBitmap_ = PremultipliedBitmap(pixels, length, logoSize_);
+            if (logoBitmap_) {
+                ShowWindow(logo_, SW_SHOW);
+                Layout();
+                InvalidateRect(logo_, nullptr, TRUE);
             }
             if (pixels) {
                 pe_bytes_free(pixels, length);

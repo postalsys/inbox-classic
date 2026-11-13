@@ -86,6 +86,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     let grouping: NSButton
     let signInCodes: NSButton
     let pictures: NSButton
+    let listPictures: NSButton
     let downloadAhead = NSPopUpButton()
     let downloadLimit = NSPopUpButton()
     /// Automatic, Classic, Columns: View > Layout's choice
@@ -117,6 +118,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grouping = NSButton(checkboxWithTitle: Text.uiGroupByConversation.text, target: nil, action: nil)
         signInCodes = NSButton(checkboxWithTitle: Text.uiCodesInNotifications.text, target: nil, action: nil)
         pictures = NSButton(checkboxWithTitle: Text.uiPicturesAlwaysOption.text, target: nil, action: nil)
+        listPictures = NSButton(checkboxWithTitle: Text.uiListPictures.text, target: nil, action: nil)
         super.init()
         window.title = Text.macSettingsTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("settings")
@@ -154,6 +156,17 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grouping.target = self
         grouping.action = #selector(groupingChanged)
         grouping.setAccessibilityIdentifier("settings.grouping")
+
+        // the senders' pictures of the column layout's list, with what is shown and downloaded under it
+        listPictures.state = AppDelegate.shared?.listPictures ?? true ? .on : .off
+        listPictures.target = self
+        listPictures.action = #selector(listPicturesChanged)
+        listPictures.setAccessibilityIdentifier("settings.listPictures")
+        let listNote = NSTextField(wrappingLabelWithString: Text.uiListPicturesNote.text)
+        listNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        listNote.textColor = .secondaryLabelColor
+        let listNoted = NSStackView(views: [listNote])
+        listNoted.edgeInsets = NSEdgeInsets(top: 0, left: 18, bottom: 0, right: 0)
 
         // under the notifications, as a choice of theirs
         let indented = NSStackView(views: [signInCodes])
@@ -220,6 +233,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             [NSGridCell.emptyContentView, notify],
             [NSGridCell.emptyContentView, indented],
             [NSGridCell.emptyContentView, grouping],
+            [NSGridCell.emptyContentView, listPictures],
+            [NSGridCell.emptyContentView, listNoted],
             [NSGridCell.emptyContentView, pictures],
             [NSGridCell.emptyContentView, warned],
             [NSGridCell.emptyContentView, trusted],
@@ -231,14 +246,14 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grid.rowSpacing = 8
         grid.columnSpacing = 8
         grid.column(at: 0).xPlacement = .trailing
-        grid.row(at: 2).topPadding = 8
-        grid.row(at: 3).topPadding = 8
-        grid.row(at: 8).topPadding = 4
-        grid.row(at: 9).topPadding = 8
-        grid.row(at: 10).topPadding = 12
+        // the rows by what is in them, so a row added between them does not move another's room
+        let rowOf = { (view: NSView) in grid.cell(for: view)?.row }
+        for (view, padding) in [(layout, 8), (notify, 8), (pictures, 8), (trusted, 4), (eml, 8), (aheadRow, 12)] as [(NSView, CGFloat)] {
+            rowOf(view)?.topPadding = padding
+        }
         // the labels on the pop-ups' text lines, as the other forms have them
-        grid.row(at: 0).rowAlignment = .firstBaseline
-        grid.row(at: 2).rowAlignment = .firstBaseline
+        rowOf(language)?.rowAlignment = .firstBaseline
+        rowOf(layout)?.rowAlignment = .firstBaseline
         grid.translatesAutoresizingMaskIntoConstraints = false
         // the help button in the bottom right corner, as the system's settings have it
         let help = HelpButton("options")
@@ -279,6 +294,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
 
     @objc func groupingChanged() {
         AppDelegate.shared?.groupByConversation = grouping.state == .on
+    }
+
+    @objc func listPicturesChanged() {
+        AppDelegate.shared?.listPictures = listPictures.state == .on
     }
 
     @objc func picturesChanged() {

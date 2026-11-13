@@ -521,3 +521,5 @@ ui-row-messages = { $count ->
     [one] { $count } message
    *[other] { $count } messages
 }
+ui-list-pictures = Show senders' pictures in the message list
+ui-list-pictures-note = Brand logos the mail provider confirmed, else the sender's initials. Logos are downloaded once for each brand, never for each message.

@@ -417,6 +417,27 @@ CREATE INDEX messages_snippet_missing ON messages (COALESCE(date, internal_date)
 -- the sources kept are read again where they are, for theirs (pe-core search.rs index_pending)
 UPDATE bodies SET indexed = 0;
 "#,
+    // the sender's picture in the message list (pe-core senders.rs): the provider's verdicts fetched with the
+    // summary (Authentication-Results and BIMI-Location, kept only until the core read them), what the core made of
+    // them (bits: the From domain confirmed, a brand logo allowed, no verdict of the provider), and the logo's address
+    // in a table of its own, its SVG downloaded once and kept
+    r#"
+ALTER TABLE messages ADD COLUMN auth_headers TEXT;
+ALTER TABLE messages ADD COLUMN sender_auth INTEGER;
+ALTER TABLE messages ADD COLUMN logo_id INTEGER;
+CREATE TABLE logos (
+    id INTEGER PRIMARY KEY,
+    url TEXT NOT NULL UNIQUE,
+    svg BLOB,
+    -- when the SVG was downloaded, and when a download last failed (milliseconds since the Unix epoch)
+    fetched INTEGER,
+    failed INTEGER
+);
+-- what the core has yet to read, and the mail stored before, whose verdicts are fetched again, newest first
+CREATE INDEX messages_auth_pending ON messages (id) WHERE auth_headers IS NOT NULL;
+CREATE INDEX messages_auth_unknown ON messages (COALESCE(date, internal_date) DESC)
+    WHERE sender_auth IS NULL AND auth_headers IS NULL AND fetch_failed = 0;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

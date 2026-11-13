@@ -110,3 +110,5 @@ pub const CLOSED_ROWS: &str = "ClosedFolderRows";
 pub const HIDE_READ: &str = "HideReadMessages";
 /// View > Folder List: the folder list beside the messages (on when not set), else in the folder button's popover
 pub const FOLDER_LIST: &str = "FolderList";
+/// Preferences: the senders' pictures in the rows of the Columns list (on when not set)
+pub const LIST_PICTURES: &str = "ListPictures";

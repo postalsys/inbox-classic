@@ -39,7 +39,27 @@ pub fn of(headers: &[Header], trusted: &[String]) -> Option<Logo> {
     let location = authres::headers(headers, "bimi-location").next()?;
     let url = tag(location, "l")?.to_string();
     let parsed = pe_net::http::parse_url(&url)?;
-    (parsed.https || cfg!(debug_assertions)).then_some(Logo::Location(url))
+    (parsed.https || cfg!(debug_assertions) || LOOPBACK.load(std::sync::atomic::Ordering::Relaxed))
+        .then_some(Logo::Location(url))
+}
+
+/// Whether a BIMI-Location on the loopback address over plain http counts: only the apps' UI tests turn it on, so a
+/// release build can show a logo the test serves from 127.0.0.1 (pe_net::http::parse_url takes plain http to the
+/// loopback address only, never to another host)
+static LOOPBACK: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// The UI tests' switch for [`LOOPBACK`]; never called otherwise
+pub fn allow_loopback_logos(on: bool) {
+    LOOPBACK.store(on, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// The SVG at a logo's address (a BIMI-Location): fetched without cookies, at most [`MAX_SVG`]; None when the brand's
+/// server gives none
+pub(crate) async fn fetch_svg(url: &str) -> Option<Vec<u8>> {
+    match pe_net::http::get(url, std::time::Duration::from_secs(15)).await {
+        Ok(response) if response.status == 200 && response.body.len() <= MAX_SVG => Some(response.body),
+        _ => None,
+    }
 }
 
 /// An SVG logo as `size` x `size` pixels, BGRA with the alpha multiplied in (as Windows draws them), the logo

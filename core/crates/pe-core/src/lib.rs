@@ -25,6 +25,7 @@ mod requests;
 mod search;
 mod secrets;
 mod selection;
+pub mod senders;
 mod sign_in_apps;
 mod snippet;
 mod targets;
@@ -87,7 +88,7 @@ pub use sign_in_apps::{
 pub use text::{
     DOWNLOAD_LIMITS_MB, HiddenUnread, ReaderState, account_label, account_shown_name, account_title, account_titles,
     default_account_name, download_limit_index, download_limit_text, downloading_text, folder_kind, folder_name,
-    format_size, hidden_unread, list_counts, messages, reader_page, retry_note, saved_text, sentence,
+    format_size, hidden_unread, initials, list_counts, messages, reader_page, retry_note, saved_text, sentence,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};
@@ -158,6 +159,11 @@ pub enum Event {
     },
     /// The logo `request` ([`Core::logo_start`]) is drawn, or there was none: [`Core::logo_result`]
     LogoReady {
+        request: u64,
+    },
+    /// The picture `request` of a row of the list ([`Core::picture_start`]) is drawn, or there was none:
+    /// [`Core::picture_result`]
+    PictureReady {
         request: u64,
     },
     /// The one-click unsubscribe `request` ([`Core::unsubscribe`]) is done, or failed for `problem`
@@ -416,8 +422,10 @@ pub struct Core {
     autoconfig: Requests<Option<pe_autoconfig::Settings>>,
     /// BIMI logos being drawn, as pixels once done
     logos: Requests<Option<Vec<u8>>>,
-    /// The SVGs fetched from BIMI-Location for this run, by address (None: there was none to have)
-    logo_svgs: Arc<std::sync::Mutex<HashMap<String, Option<Vec<u8>>>>>,
+    /// The pictures of the list's rows being drawn, as pixels once done
+    pictures: Requests<Option<Vec<u8>>>,
+    /// The logos being downloaded, by their row: rows asking at once share one download
+    logo_downloads: LogoDownloads,
     /// Message views built off the window thread: parsing, folding and sanitizing a large message takes a while
     views: Requests<Option<MessageView>>,
     /// The view request the reading pane waits for; an older one gives up
@@ -507,7 +515,8 @@ impl Core {
             agent_asks: Mutex::default(),
             autoconfig: Requests::default(),
             logos: Requests::default(),
-            logo_svgs: Arc::default(),
+            pictures: Requests::default(),
+            logo_downloads: Arc::default(),
             views: Requests::default(),
             newest_view: Arc::default(),
             view_store: Arc::default(),
@@ -1031,8 +1040,8 @@ impl Core {
 
     /// The BIMI logo of a message ([`bimi::of`]) drawn `size` pixels square, in the background:
     /// [`Event::LogoReady`] follows with the request this returns. The SVG of BIMI-Indicator is drawn as it is; one
-    /// at a BIMI-Location is fetched once a run, without cookies, at most [`bimi::MAX_SVG`]. Refused for a message
-    /// without a logo the receiving server passed, or not downloaded yet.
+    /// at a BIMI-Location is the list's logo of that address, downloaded once and kept (see [`Self::picture_start`]).
+    /// Refused for a message without a logo the receiving server passed, or not downloaded yet.
     pub fn logo_start(&self, folder: FolderId, uid: u64, size: u32) -> Result<u64> {
         let start = self
             .store()
@@ -1041,28 +1050,11 @@ impl Core {
         let headers = pe_mime::parser::parse(&start).map_err(|_| Error::NotFound)?.headers;
         let logo = bimi::of(&headers, &self.trusted(folder)?).ok_or(Error::NotFound)?;
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
-        let svgs = self.logo_svgs.clone();
+        let logos = self.logo_source();
         let work = async move {
             let svg = match logo {
                 bimi::Logo::Indicator(svg) => Some(svg),
-                bimi::Logo::Location(url) => {
-                    let known = svgs.lock().unwrap_or_else(|p| p.into_inner()).get(&url).cloned();
-                    match known {
-                        Some(svg) => svg,
-                        None => {
-                            let fetched = match pe_net::http::get(&url, std::time::Duration::from_secs(15)).await {
-                                Ok(response) if response.status == 200 && response.body.len() <= bimi::MAX_SVG => {
-                                    Some(response.body)
-                                }
-                                _ => None,
-                            };
-                            svgs.lock()
-                                .unwrap_or_else(|p| p.into_inner())
-                                .insert(url, fetched.clone());
-                            fetched
-                        }
-                    }
-                }
+                bimi::Logo::Location(url) => logos.svg(KeptLogo::At(url)).await,
             };
             svg.and_then(|svg| bimi::render(&svg, size))
         };
@@ -1077,6 +1069,44 @@ impl Core {
     /// none to draw or it is not done
     pub fn logo_result(&self, request: u64) -> Option<Vec<u8>> {
         self.logos.take(request).flatten()
+    }
+
+    /// The picture of a row of the list (its key, [`senders::picture`]) drawn `size` pixels square, in the background:
+    /// [`Event::PictureReady`] follows with the request this returns. A brand's logo is downloaded once and kept
+    /// ([`pe_store::LOGO_KEPT_MS`]; a failure is not tried again for [`pe_store::LOGO_RETRY_MS`]), never a message at
+    /// a time. Refused for a key that names no picture.
+    pub fn picture_start(&self, key: u64, size: u32) -> Result<u64> {
+        let Some((senders::PictureKind::Logo, id)) = senders::picture_of(key) else {
+            return Err(Error::NotFound);
+        };
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let logos = self.logo_source();
+        let work = async move {
+            logos
+                .svg(KeptLogo::Row(id))
+                .await
+                .and_then(|svg| bimi::render(&svg, size))
+        };
+        self.pictures
+            .start(self.runtime()?, request, work, self.events.clone(), |request| {
+                Event::PictureReady { request }
+            });
+        Ok(request)
+    }
+
+    /// Where the kept logos are read and written off the window thread
+    fn logo_source(&self) -> LogoSource {
+        LogoSource {
+            path: self.path.clone(),
+            view_store: self.view_store.clone(),
+            downloads: self.logo_downloads.clone(),
+        }
+    }
+
+    /// The pixels of a drawn picture (BGRA, the alpha multiplied in, `size` x `size`), taken once; None when there was
+    /// none to draw or it is not done
+    pub fn picture_result(&self, request: u64) -> Option<Vec<u8>> {
+        self.pictures.take(request).flatten()
     }
 
     /// Stops a lookup the user no longer waits for, and forgets it
@@ -2329,6 +2359,72 @@ impl Drop for Core {
             // workers that are waiting for the network are cancelled
             runtime.shutdown_timeout(SHUTDOWN_GRACE);
         }
+    }
+}
+
+/// The logos being downloaded, by their row: rows asking at once share one download
+type LogoDownloads = Arc<Mutex<HashMap<i64, Arc<tokio::sync::OnceCell<Option<Vec<u8>>>>>>>;
+
+/// A kept logo: by its row (a row of the list), or by its address (the reading pane's BIMI-Location)
+enum KeptLogo {
+    Row(i64),
+    At(String),
+}
+
+/// The kept logos, read and written on a store connection of their own ([`ViewStore`]), off the window thread
+#[derive(Clone)]
+struct LogoSource {
+    path: PathBuf,
+    view_store: ViewStore,
+    downloads: LogoDownloads,
+}
+
+impl LogoSource {
+    /// The SVG of a logo: kept and fresh, or downloaded once however many ask at the same time and kept (or its
+    /// failure, so it is not tried again for a day); None when there is none to have
+    async fn svg(&self, logo: KeptLogo) -> Option<Vec<u8>> {
+        let source = self.clone();
+        let (id, kept) = tokio::task::spawn_blocking(move || {
+            let store = OpenStore::open(&source.view_store, &source.path)?;
+            let id = match logo {
+                KeptLogo::Row(id) => id,
+                KeptLogo::At(url) => store.logo_id(&url).ok()?.0,
+            };
+            Some((id, store.logo(id).ok()??))
+        })
+        .await
+        .ok()??;
+        let now = list_view::now_ms();
+        if let Some(svg) = kept.fresh_svg(now) {
+            return Some(svg.to_vec());
+        }
+        if !kept.download_due(now) {
+            return None;
+        }
+        let cell = self
+            .downloads
+            .lock()
+            .unwrap_or_else(|p| p.into_inner())
+            .entry(id)
+            .or_default()
+            .clone();
+        let svg = cell
+            .get_or_init(|| async {
+                let svg = bimi::fetch_svg(&kept.url).await;
+                let (fetched, source) = (svg.clone(), self.clone());
+                let _ = tokio::task::spawn_blocking(move || {
+                    if let Some(store) = OpenStore::open(&source.view_store, &source.path) {
+                        let _ = store.set_logo_download(id, fetched.as_deref(), list_view::now_ms());
+                    }
+                })
+                .await;
+                svg
+            })
+            .await
+            .clone();
+        // the next ask reads the store
+        self.downloads.lock().unwrap_or_else(|p| p.into_inner()).remove(&id);
+        svg
     }
 }
 

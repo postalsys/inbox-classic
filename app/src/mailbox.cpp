@@ -34,6 +34,8 @@ const wchar_t* kThreadsPreference = L"GroupByConversation";
 // View > Hide Ignored Conversations (off unless turned on)
 const wchar_t* kHideIgnoredPreference = L"HideIgnoredConversations";
 const wchar_t* kUnreadOnlyPreference = L"HideReadMessages";
+// Tools > Options > Show senders' pictures in the message list (on unless turned off)
+const wchar_t* kListPicturesPreference = L"ListPictures";
 
 constexpr uint64_t kPageSize = 100;
 // pages kept around while the list scrolls
@@ -238,6 +240,8 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     hideIgnored_ = GetPreference(kHideIgnoredPreference, 0) != 0;
     pe_list_view_set_hide_ignored(view_.get(), hideIgnored_);
     unreadOnly_ = GetPreference(kUnreadOnlyPreference, 0) != 0;
+    pictures_.Init(core);
+    listPictures_ = GetPreference(kListPicturesPreference, 1) != 0;
     pe_list_view_set_show(view_.get(), unreadOnly_ ? PE_SHOW_UNREAD : PE_SHOW_ALL);
     // the icons of the list: for the headers of the paper clip and flag columns, and drawn on the rows in CustomDraw
     listIcons_ = IconList(IconSet::List);
@@ -320,6 +324,10 @@ void Mailbox::Create(HWND parent, PeCore* core) {
 }
 
 void Mailbox::Destroy() {
+    if (pictureDc_) {
+        DeleteDC(std::exchange(pictureDc_, nullptr));
+    }
+    pictures_.Clear();
     if (rowSpacer_) {
         // the list lets go of it first: it would destroy the image list it has when it goes
         ListView_SetImageList(list_, listIcons_, LVSIL_SMALL);
@@ -2198,6 +2206,15 @@ void Mailbox::SetUnreadOnly(bool on) {
     ReloadList(true);
 }
 
+void Mailbox::SetListPictures(bool on) {
+    if (on == listPictures_) {
+        return;
+    }
+    SetPreference(kListPicturesPreference, on ? 1 : 0);
+    listPictures_ = on;
+    InvalidateRect(list_, nullptr, TRUE);
+}
+
 void Mailbox::SetGrouped(bool on) {
     if (on == Grouped()) {
         return;
@@ -3028,6 +3045,9 @@ void Mailbox::OnEvent(const UiEvent& event) {
             // a list of several folders has messages of any of them
             SetTimer(parent_, TIMER_RELOAD, 300, nullptr);
         }
+        break;
+    case PE_EVENT_KIND_PICTURE_READY:
+        PictureReady(event.uid);
         break;
     case PE_EVENT_KIND_MESSAGE_READY:
         // fetched now: a draft that was double-clicked before opens

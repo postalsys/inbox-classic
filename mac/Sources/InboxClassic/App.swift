@@ -168,6 +168,15 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
     }
     private var layoutChoice = Preference("Layout", default: 0)
+    /// Settings > Show senders' pictures in the message list, on unless turned off
+    var listPictures: Bool {
+        get { showingPictures.value }
+        set {
+            showingPictures.value = newValue
+            main?.mailbox.listPicturesChanged()
+        }
+    }
+    private var showingPictures = Preference("ListPictures", default: true)
     /// the View > Layout command of each choice
     static let layoutModes: [Command: PeLayoutMode] = [
         .layoutAutomatic: PE_LAYOUT_MODE_AUTOMATIC, .layoutClassic: PE_LAYOUT_MODE_CLASSIC, .layoutColumns: PE_LAYOUT_MODE_COLUMNS,

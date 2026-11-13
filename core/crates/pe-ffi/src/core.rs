@@ -134,6 +134,8 @@ pub enum PeEventKind {
     Transferring = 20,
     /// The folder `folder` of `account` made with `pe_folder_create` is there (to choose it in the window that made it)
     FolderCreated = 21,
+    /// The picture `uid` of `pe_picture_start` (a row's sender) is drawn, or there was none: `pe_picture_result`
+    PictureReady = 22,
 }
 
 #[repr(C)]
@@ -224,6 +226,7 @@ impl Callback {
             } => (PeEventKind::NewMail, *account, *folder, *uid),
             Event::Unsubscribed { request, .. } => (PeEventKind::Unsubscribed, 0, 0, *request),
             Event::LogoReady { request } => (PeEventKind::LogoReady, 0, 0, *request),
+            Event::PictureReady { request } => (PeEventKind::PictureReady, 0, 0, *request),
             Event::MessageFailed { folder, uid, .. } => (PeEventKind::MessageFailed, 0, *folder, *uid),
             Event::AgentAsk { request } => (PeEventKind::AgentAsk, 0, 0, *request),
             Event::AgentLogChanged => (PeEventKind::AgentLogChanged, 0, 0, 0),
@@ -809,6 +812,42 @@ pub unsafe extern "C" fn pe_file_invitation_file(
     }
 }
 
+/// Draws the picture of a row of the list (its `picture` key) `size` pixels square in the background: `PictureReady`
+/// follows with the request this returns; 0 for a key that names no picture
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_picture_start(core: *const PeCore, key: u64, size: u32) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 0, |core| core.picture_start(key, size).unwrap_or(0)) }
+}
+
+/// The pixels of a drawn picture: `size` x `size` BGRA with the alpha multiplied in, `len` bytes; NULL when there was
+/// none. Taken once; free with `pe_bytes_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `len` a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_picture_result(core: *const PeCore, request: u64, len: *mut usize) -> *mut u8 {
+    // SAFETY: as the caller guarantees
+    let Some(len) = (unsafe { len.as_mut() }) else {
+        return null_mut();
+    };
+    *len = 0;
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.picture_result(request) {
+            Some(pixels) => {
+                let pixels = pixels.into_boxed_slice();
+                *len = pixels.len();
+                Box::into_raw(pixels).cast()
+            }
+            None => null_mut(),
+        })
+    }
+}
+
 /// Draws the BIMI logo of a message (`has_logo`) `size` pixels square in the background: `LogoReady` follows with
 /// the request this returns; 0 for a message without one
 ///
@@ -1332,9 +1371,34 @@ pub struct PeMessage {
     /// column's place
     pub bounce: bool,
     /// The first words of what the sender wrote, for the Columns list's third line: empty while the core has not read
-    /// its text yet, or when it has none. A collapsed conversation's row has its newest message's. Text from the
-    /// sender: shown as text, never as markup
+    /// its text yet, or when it has none. A collapsed conversation's row has its own (its first message's). Text
+    /// from the sender: shown as text, never as markup
     pub snippet: *const c_char,
+    /// The sender's picture in the Columns list: its kind, and the key `pe_picture_start` draws it by (0 for none,
+    /// the same key for every row of one picture, so the apps keep its pixels by it). Never one in a Junk folder
+    pub picture_kind: PePictureKind,
+    pub picture: u64,
+    /// One or two letters for a sender without a picture ("AL" for Ann Lee), empty when there is no letter
+    pub initials: *const c_char,
+}
+
+/// What picture a row of the list has: none (the apps draw the initials), a brand's logo, or a contact's picture
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PePictureKind {
+    None = 0,
+    Logo = 1,
+    Contact = 2,
+}
+
+impl From<pe_core::senders::PictureKind> for PePictureKind {
+    fn from(kind: pe_core::senders::PictureKind) -> Self {
+        match kind {
+            pe_core::senders::PictureKind::None => PePictureKind::None,
+            pe_core::senders::PictureKind::Logo => PePictureKind::Logo,
+            pe_core::senders::PictureKind::Contact => PePictureKind::Contact,
+        }
+    }
 }
 
 /// A conversation's mark (Message > Watch Conversation, Ignore Conversation)
@@ -1363,6 +1427,7 @@ pub struct PeMessageList(Rows<PeMessage>);
 pub(crate) fn message_list(messages: &[pe_store::Message]) -> *mut PeMessageList {
     handed(PeMessageList(Rows::new(messages, |m, strings| {
         let info = &m.info;
+        let (picture_kind, picture) = pe_core::senders::picture(m);
         PeMessage {
             folder: m.folder_id,
             uid: info.uid,
@@ -1390,6 +1455,9 @@ pub(crate) fn message_list(messages: &[pe_store::Message]) -> *mut PeMessageList
             mark: m.mark.into(),
             dimmed: m.dimmed(),
             snippet: strings.add(m.snippet.as_deref().unwrap_or_default()),
+            picture_kind: picture_kind.into(),
+            picture,
+            initials: strings.add(&pe_core::initials(&info.from_name, &info.from_address)),
         }
     })))
 }
@@ -1886,6 +1954,13 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
 #[unsafe(no_mangle)]
 pub extern "C" fn pe_set_codes_in_notifications(on: bool) {
     guard(|| pe_core::otp::set_in_notifications(on));
+}
+
+/// The UI tests only: a brand logo's BIMI-Location on the loopback address over plain http counts, so a release build
+/// shows a logo the test serves itself. The apps call it only with their test switch (--test-hooks, the UI test)
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_allow_loopback_logos_for_tests(on: bool) {
+    guard(|| pe_core::bimi::allow_loopback_logos(on));
 }
 
 /// What `pe_set_codes_in_notifications` set last, for the UI tests

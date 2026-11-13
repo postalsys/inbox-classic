@@ -153,6 +153,36 @@ void DrawMarlettGlyph(HDC dc, const RECT& box, wchar_t glyph, int height, COLORR
     DeleteObject(font);
 }
 
+HBITMAP PremultipliedBitmap(const uint8_t* pixels, size_t length, int size) {
+    size_t expected = static_cast<size_t>(size) * size * 4;
+    if (!pixels || size <= 0 || length != expected) {
+        return nullptr;
+    }
+    BITMAPINFO info = {};
+    info.bmiHeader = {sizeof(BITMAPINFOHEADER), size, -size, 1, 32, BI_RGB};
+    void* bits = nullptr;
+    HBITMAP bitmap = CreateDIBSection(nullptr, &info, DIB_RGB_COLORS, &bits, nullptr, 0);
+    if (bitmap && !bits) {
+        DeleteObject(bitmap);
+        return nullptr;
+    }
+    if (bitmap) {
+        memcpy(bits, pixels, expected);
+    }
+    return bitmap;
+}
+
+void DrawPremultiplied(HDC dc, int x, int y, HBITMAP bitmap, int size, HDC memory) {
+    HDC source = memory ? memory : CreateCompatibleDC(dc);
+    HGDIOBJ old = SelectObject(source, bitmap);
+    BLENDFUNCTION blend = {AC_SRC_OVER, 0, 255, AC_SRC_ALPHA};
+    AlphaBlend(dc, x, y, size, size, source, 0, 0, size, size, blend);
+    SelectObject(source, old);
+    if (!memory) {
+        DeleteDC(source);
+    }
+}
+
 void AddTip(HWND owner, HWND tool, const std::wstring& text) {
     HWND tip = CreateWindowExW(0, TOOLTIPS_CLASSW, nullptr, WS_POPUP | TTS_ALWAYSTIP, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
                                CW_USEDEFAULT, owner, nullptr, GetModuleHandleW(nullptr), nullptr);

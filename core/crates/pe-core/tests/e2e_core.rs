@@ -2831,6 +2831,99 @@ fn draws_a_bimi_logo_from_its_location() {
     assert_eq!(served.load(std::sync::atomic::Ordering::Relaxed), 1);
 }
 
+/// The list's pictures: a message whose provider passed the brand's logo gets the logo's key from the verdicts fetched
+/// with the summary (without opening it), downloaded once however often it is drawn; another has its sender's
+/// initials
+#[test]
+fn rows_get_their_senders_pictures() {
+    let Some(s) = setup() else { return };
+    let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny-ps\" viewBox=\"0 0 10 10\">\
+               <title>Brand</title><rect width=\"10\" height=\"10\" fill=\"#00ff00\"/></svg>";
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let served = std::sync::Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let count = served.clone();
+    let body = svg.to_string();
+    std::thread::spawn(move || {
+        use std::io::{Read, Write};
+        for stream in listener.incoming() {
+            let Ok(mut stream) = stream else { break };
+            let mut buffer = [0u8; 2048];
+            let _ = stream.read(&mut buffer);
+            count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            let answer = format!(
+                "HTTP/1.0 200 OK\r\nContent-Type: image/svg+xml\r\nContent-Length: {}\r\n\r\n{body}",
+                body.len()
+            );
+            let _ = stream.write_all(answer.as_bytes());
+        }
+    });
+    let raw = format!(
+        "Authentication-Results: mx.example.com; dmarc=pass header.from=brand.example; bimi=pass header.d=brand.example\r\n\
+         BIMI-Location: v=BIMI1; l=http://127.0.0.1:{port}/logo.svg\r\nFrom: Brand <hello@brand.example>\r\n\
+         Subject: With a logo\r\n\r\nHi.\r\n"
+    );
+    s.server.add_message("INBOX", &raw, &[]);
+    s.server.add_message("INBOX", &rfc822("No logo", "x"), &[]);
+    // a forged one: the provider says the brand's domain failed
+    let forged = format!(
+        "Authentication-Results: mx.example.com; dmarc=fail header.from=brand.example; bimi=fail\r\n\
+         BIMI-Location: v=BIMI1; l=http://127.0.0.1:{port}/logo.svg\r\nFrom: Brand <hello@brand.example>\r\n\
+         Subject: Forged\r\n\r\nHi.\r\n"
+    );
+    s.server.add_message("INBOX", &forged, &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let row = |subject: &str| {
+        s.core
+            .messages(inbox, Sort::default(), 0, 10)
+            .unwrap()
+            .into_iter()
+            .find(|m| m.info.subject == subject)
+            .unwrap()
+    };
+    // the background worker reads the verdicts after the sync
+    let deadline = std::time::Instant::now() + Duration::from_secs(20);
+    while row("With a logo").logo.is_none() {
+        assert!(std::time::Instant::now() < deadline, "no logo on the row");
+        std::thread::sleep(Duration::from_millis(100));
+    }
+    let (kind, key) = pe_core::senders::picture(&row("With a logo"));
+    assert_eq!(kind, pe_core::senders::PictureKind::Logo);
+    assert_ne!(key, 0);
+    assert_ne!(row("With a logo").sender_auth & pe_core::senders::LOGO, 0);
+    for subject in ["No logo", "Forged"] {
+        assert_eq!(
+            pe_core::senders::picture(&row(subject)).0,
+            pe_core::senders::PictureKind::None,
+            "{subject}"
+        );
+    }
+    let plain = row("No logo");
+    assert!(!pe_core::initials(&plain.info.from_name, &plain.info.from_address).is_empty());
+    assert!(s.core.picture_start(0, 32).is_err());
+    // drawn twice, downloaded once, and nothing was downloaded before it was drawn
+    assert_eq!(served.load(std::sync::atomic::Ordering::Relaxed), 0);
+    for _ in 0..2 {
+        let request = s.core.picture_start(key, 32).unwrap();
+        s.wait(|e| *e == Event::PictureReady { request });
+        let pixels = s.core.picture_result(request).expect("the logo");
+        assert_eq!(pixels.len(), 32 * 32 * 4);
+        // green, BGRA
+        assert_eq!(&pixels[(16 * 32 + 16) * 4..][..4], &[0, 255, 0, 255]);
+    }
+    assert_eq!(served.load(std::sync::atomic::Ordering::Relaxed), 1);
+}
+
 /// A message the server can not give says so, for the reading pane, and opening it again tries again: an account
 /// whose server is out of reach (its port changed to one nothing listens on), and back
 #[test]

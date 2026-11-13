@@ -6,6 +6,7 @@
 mod summary;
 mod text_first;
 
+pub use summary::auth_fields;
 pub use text_first::{TextFirst, fetch_text_first};
 
 use std::collections::HashSet;
@@ -269,8 +270,9 @@ fn summary_query() -> FetchQuery {
         internal_date: true,
         size: true,
         modseq: true,
-        // the ids it answers, and Gmail's conversation, for conversations
-        headers: Some(vec!["References".into()]),
+        // the ids it answers, and Gmail's conversation, for conversations; the provider's verdicts on the sender,
+        // for its picture in the list
+        headers: Some(summary::with_auth_fields(vec!["References".into()])),
         gmail_thread: true,
         ..Default::default()
     }
@@ -619,20 +621,52 @@ pub async fn fetch_references(
     folder: FolderId,
     uids: &[u64],
 ) -> Result<Vec<(u64, Vec<String>)>> {
+    fetch_header_fields(
+        client,
+        store,
+        folder,
+        uids,
+        vec!["References".into()],
+        summary::references_of,
+    )
+    .await
+}
+
+/// The provider's verdicts on the senders of messages of `folder` stored before they were fetched with the summary,
+/// by UID: one FETCH of those header fields; a message without any has an empty text
+pub async fn fetch_auth_headers(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uids: &[u64],
+) -> Result<Vec<(u64, String)>> {
+    let fields = summary::with_auth_fields(Vec::new());
+    fetch_header_fields(client, store, folder, uids, fields, summary::auth_fields).await
+}
+
+/// Header `fields` of messages of `folder`, by UID, each header block read by `read`: one FETCH
+async fn fetch_header_fields<T>(
+    client: &mut Client,
+    store: &mut Store,
+    folder: FolderId,
+    uids: &[u64],
+    fields: Vec<String>,
+    read: fn(&[u8]) -> T,
+) -> Result<Vec<(u64, T)>> {
     let Some(set) = SequenceSet::from_numbers(uids) else {
         return Ok(Vec::new());
     };
     let path = store.folder(folder)?.info.path;
     ensure_selected(client, &path).await?;
     let query = FetchQuery {
-        headers: Some(vec!["References".into()]),
+        headers: Some(fields),
         ..Default::default()
     };
     Ok(client
         .fetch(&Messages::Uids(set), &query)
         .await?
         .into_iter()
-        .filter_map(|m| Some((m.uid?, summary::references_of(m.headers.as_deref().unwrap_or_default()))))
+        .filter_map(|m| Some((m.uid?, read(m.headers.as_deref().unwrap_or_default()))))
         .collect())
 }
 

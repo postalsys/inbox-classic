@@ -575,3 +575,7 @@ ui-row-messages = { $count ->
     [one] { $count } Nachricht
    *[other] { $count } Nachrichten
 }
+# review: new
+ui-list-pictures = Bilder der Absender in der Nachrichtenliste anzeigen
+# review: new
+ui-list-pictures-note = Markenlogos, die der E-Mail-Anbieter bestätigt hat, sonst die Initialen des Absenders. Logos werden einmal je Marke heruntergeladen, nie je Nachricht.

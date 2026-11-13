@@ -15,7 +15,7 @@ use crate::{Action, Core, NextUnread, Result, Summary};
 
 /// When a list begins, in milliseconds since the epoch, as the store notes when a message became read: a tenth of a
 /// second early, as SQLite's clock (`seen_at`) can lag behind this one (on Windows by a tick of about 16 ms)
-fn now_ms() -> i64 {
+pub(crate) fn now_ms() -> i64 {
     const SLACK: i64 = 100;
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)

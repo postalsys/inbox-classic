@@ -97,9 +97,17 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
             shell.main().regroup();
         }
     });
+    let pictures = adw::SwitchRow::builder()
+        .title(plain(Text::UiListPictures))
+        .subtitle(plain(Text::UiListPicturesNote))
+        .active(shell().settings.bool(settings::LIST_PICTURES, true))
+        .build();
+    pictures.set_widget_name("preferences-list-pictures");
+    pictures.connect_active_notify(|row| shell().main().set_list_pictures(row.is_active()));
     let list = adw::PreferencesGroup::new();
     list.add(&layout_row());
     list.add(&grouped);
+    list.add(&pictures);
 
     let page = adw::PreferencesPage::new();
     page.add(&words);

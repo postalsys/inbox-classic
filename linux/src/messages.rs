@@ -171,6 +171,8 @@ pub struct MessageList {
     several_folders: Rc<Cell<bool>>,
     /// The time the rows of three lines write their dates against, read at each refresh of the list
     clock: Rc<Cell<crate::rows::Clock>>,
+    /// The rows of three lines show the senders' pictures (Preferences)
+    pictures: Rc<Cell<bool>>,
 }
 
 impl MessageList {
@@ -222,10 +224,12 @@ impl MessageList {
         view.add_controller(file_drop_target());
         let several_folders = Rc::new(Cell::new(false));
         let clock = Rc::new(Cell::new(crate::rows::Clock::now()));
+        let pictures = Rc::new(Cell::new(shell().settings.bool(crate::settings::LIST_PICTURES, true)));
         let context = crate::rows::RowContext {
             recipients: recipients.clone(),
             several_folders: several_folders.clone(),
             clock: clock.clone(),
+            pictures: pictures.clone(),
         };
         let rows_view = gtk::ListView::new(Some(selection.clone()), Some(crate::rows::factory(context)));
         rows_view.add_css_class("message-list");
@@ -255,7 +259,13 @@ impl MessageList {
             compact_dates,
             several_folders,
             clock,
+            pictures,
         })
+    }
+
+    /// The senders' pictures shown in the rows of three lines or not (taken at the list's next refresh)
+    pub fn set_pictures(&self, on: bool) {
+        self.pictures.set(on);
     }
 
     /// The Columns layout's list (`on`), or the Classic one

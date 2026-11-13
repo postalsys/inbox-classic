@@ -582,3 +582,7 @@ ui-row-messages = { $count ->
     [one] { $count } message
    *[other] { $count } messages
 }
+# review: new
+ui-list-pictures = Afficher les images des expéditeurs dans la liste des messages
+# review: new
+ui-list-pictures-note = Les logos de marques confirmés par le fournisseur de messagerie, sinon les initiales de l'expéditeur. Les logos sont téléchargés une fois par marque, jamais pour chaque message.

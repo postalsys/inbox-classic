@@ -6,7 +6,7 @@
 //! calendar, Unsubscribe) in the window it is in.
 
 use adw::prelude::*;
-use gtk::{gdk, gio, glib};
+use gtk::{gio, glib};
 use pe_core::{Event, MessageRef, MessageView};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -836,21 +836,12 @@ impl Reader {
     /// The brand's logo beside the header, once the core drew it: `size` pixels square, BGRA with the alpha
     /// multiplied in
     pub fn show_logo(&self, pixels: Option<Vec<u8>>, size: i32) {
-        let expected = (size * size * 4) as usize;
-        match pixels {
-            Some(pixels) if pixels.len() == expected => {
-                let bytes = glib::Bytes::from_owned(pixels);
-                let texture = gdk::MemoryTexture::new(
-                    size,
-                    size,
-                    gdk::MemoryFormat::B8g8r8a8Premultiplied,
-                    &bytes,
-                    (size * 4) as usize,
-                );
+        match pixels.and_then(|pixels| crate::ui::bgra_texture(pixels, size)) {
+            Some(texture) => {
                 self.logo.set_paintable(Some(&texture));
                 self.logo.set_visible(true);
             }
-            _ => self.logo.set_visible(false),
+            None => self.logo.set_visible(false),
         }
     }
 

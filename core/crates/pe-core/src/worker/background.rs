@@ -106,10 +106,14 @@ impl Worker {
         }
     }
 
-    /// One batch of what is done in the background: messages downloaded ahead first (with their search text), then
-    /// conversations, then the search text of the rest, then the snippets of mail indexed before there were any.
+    /// One batch of what is done in the background: the senders' verdicts fetched with the summaries read (local,
+    /// quick), messages downloaded ahead (with their search text), conversations, the search text of the rest, the
+    /// snippets of mail indexed before there were any, then the verdicts of mail stored before they were fetched.
     /// Whether there may be more.
     async fn background_batch(&mut self, store: &mut Store) -> Result<bool, Failure> {
+        if self.judge_senders(store)? > 0 {
+            return Ok(true);
+        }
         if self.download_ahead(store).await? > 0 {
             return Ok(true);
         }
@@ -119,6 +123,9 @@ impl Worker {
         if self.index_texts(store, Store::messages_to_index).await? > 0 {
             return Ok(true);
         }
-        Ok(self.index_texts(store, Store::messages_without_snippet).await? > 0)
+        if self.index_texts(store, Store::messages_without_snippet).await? > 0 {
+            return Ok(true);
+        }
+        Ok(self.fetch_sender_verdicts(store).await? > 0)
     }
 }

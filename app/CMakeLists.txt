@@ -54,6 +54,7 @@ add_executable(InboxClassic WIN32
     src/reader.cpp
     src/folderpicker.cpp
     src/folderpane.cpp
+    src/listpictures.cpp
     src/columnrow.cpp
     src/dragdrop.cpp
     src/ui.cpp

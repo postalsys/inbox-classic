@@ -31,12 +31,18 @@ pub(crate) fn sender(message: &Message, trusted: &[String]) -> Option<Sender> {
     let Some(ParsedAddress::Mailbox(from)) = &message.from else {
         return None;
     };
-    let address = from.address.trim().to_lowercase();
+    sender_of(&from.address, &message.headers, trusted)
+}
+
+/// The sender at `address` of a message with `headers` (its Authentication-Results among them), None for an address
+/// without a user and a domain
+pub(crate) fn sender_of(address: &str, headers: &[pe_mime::parser::Header], trusted: &[String]) -> Option<Sender> {
+    let address = address.trim().to_lowercase();
     let (_, domain) = address
         .rsplit_once('@')
         .filter(|(user, domain)| !user.is_empty() && domain.contains('.'))?;
     let domain = domain.to_string();
-    let verified = from_verified(&message.headers, trusted, &domain);
+    let verified = from_verified(headers, trusted, &domain);
     Some(Sender {
         address,
         domain,

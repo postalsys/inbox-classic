@@ -1106,6 +1106,8 @@ bool OpenCore(HWND hwnd) {
     g_core.reset(pe_core_open_with(path.c_str(), flags, certificate.empty() ? nullptr : certificate.c_str(), OnCoreEvent, hwnd));
     if (g_core && g_arguments.testHooks) {
         pe_set_download_ahead(g_core.get(), PE_DOWNLOAD_AHEAD_NEVER);
+        // the brand logo of the list's step comes from a server of the test on the loopback address
+        pe_allow_loopback_logos_for_tests(true);
     }
     if (g_core) {
         // where the user's AI agents reach this app (--mcp); another app with this store open keeps them
@@ -1352,6 +1354,8 @@ constexpr ULONG_PTR kTestLink = 0x4C494E4B;
 constexpr ULONG_PTR kTestBadge = 0x42414447;
 // with --test-hooks only: 11 when the last message opened came from the store (downloaded ahead), 10 when not
 constexpr ULONG_PTR kTestFromStore = 0x53544F52;
+// with --test-hooks only: the picture of the list's row of the message whose subject is the text (TestRowPicture)
+constexpr ULONG_PTR kTestRowPicture = 0x50494354;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -1562,7 +1566,9 @@ void OnCommand(WORD id, WORD code) {
         bool threads = g_mailbox.Grouped();
         bool codes = pe_codes_in_notifications();
         int layout = static_cast<int>(g_layoutMode);
-        bool restart = OptionsDialog(g_main, g_core.get(), notify, threads, codes, layout);
+        bool listPictures = g_mailbox.ListPicturesShown();
+        bool restart = OptionsDialog(g_main, g_core.get(), notify, threads, codes, layout, listPictures);
+        g_mailbox.SetListPictures(listPictures);
         if (layout != static_cast<int>(g_layoutMode)) {
             SetLayoutMode(static_cast<PeLayoutMode>(layout));
         }
@@ -1794,6 +1800,10 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (g_arguments.testHooks && data->dwData == kTestLink && data->cbData % sizeof(wchar_t) == 0) {
             std::wstring uri(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
             return g_mailbox.TestLink(uri) ? 1 : 0;
+        }
+        if (g_arguments.testHooks && data->dwData == kTestRowPicture && data->cbData % sizeof(wchar_t) == 0) {
+            std::wstring subject(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
+            return g_mailbox.TestRowPicture(subject);
         }
         if (g_arguments.testHooks && data->dwData == kTestNotification && data->cbData % sizeof(wchar_t) == 0) {
             std::wstring text(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));

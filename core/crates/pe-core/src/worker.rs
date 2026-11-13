@@ -26,6 +26,7 @@ mod background;
 mod download;
 mod large;
 mod reader;
+mod senders;
 mod transfer;
 mod upload;
 

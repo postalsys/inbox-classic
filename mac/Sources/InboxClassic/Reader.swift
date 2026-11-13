@@ -378,16 +378,8 @@ final class Reader: NSObject {
     }
 
     func showLogo(_ pixels: Data?) {
-        let side = logoPixels
-        // the core's pixels: BGRA with the alpha multiplied in
-        guard let pixels, pixels.count == side * side * 4, let provider = CGDataProvider(data: pixels as CFData),
-              let image = CGImage(width: side, height: side, bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: side * 4,
-                                  space: CGColorSpaceCreateDeviceRGB(),
-                                  bitmapInfo: CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Little.rawValue
-                                      | CGImageAlphaInfo.premultipliedFirst.rawValue),
-                                  provider: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
-        else { return }
-        logo.image = NSImage(cgImage: image, size: NSSize(width: 48, height: 48))
+        guard let image = pixelImage(pixels, side: logoPixels, points: 48) else { return }
+        logo.image = image
         logo.isHidden = false
     }
 

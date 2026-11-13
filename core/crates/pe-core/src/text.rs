@@ -23,6 +23,42 @@ pub fn download_limit_index(megabytes: u64) -> usize {
         .unwrap_or(0)
 }
 
+/// The initials the list shows for a sender without a picture: the first letters of the first and the last word of
+/// the name ("Ann Lee", "Lee, Ann" and "Ann B. Lee" give AL), one for a name of one word (a Chinese name gives its first
+/// character), else the first letter of the address; empty when there is no letter (an emoji for a name)
+pub fn initials(name: &str, address: &str) -> String {
+    let words = |text: &str| -> Vec<char> {
+        text.split(|c: char| c.is_whitespace() || matches!(c, '"' | '\'' | '(' | ')' | '<' | '>' | ',' | ';'))
+            .filter_map(|word| word.chars().find(|c| c.is_alphabetic()))
+            .collect()
+    };
+    // a comment in parentheses ("Ann Lee (Shop)") is no part of the name
+    let mut bare = String::new();
+    let mut depth = 0usize;
+    for c in name.chars() {
+        match c {
+            '(' => depth += 1,
+            ')' => depth = depth.saturating_sub(1),
+            _ if depth == 0 => bare.push(c),
+            _ => {}
+        }
+    }
+    let name = bare.as_str();
+    // "Lee, Ann": the given name first
+    let ordered = match name.split_once(',') {
+        Some((last, first)) if !first.trim().is_empty() && !last.trim().is_empty() => format!("{first} {last}"),
+        _ => name.to_string(),
+    };
+    let letters = words(&ordered);
+    let chosen: Vec<char> = match letters.as_slice() {
+        [] => address.chars().find(|c| c.is_alphabetic()).into_iter().collect(),
+        [one] => vec![*one],
+        [first, .., last] => vec![*first, *last],
+    };
+    // one letter each, as wide as the circle holds ("ß" is no "SS")
+    chosen.into_iter().filter_map(|c| c.to_uppercase().next()).collect()
+}
+
 /// A size as the windows show it: `512 bytes`, `13 KB` (rounded up, as Explorer does), `2.4 MB`
 pub fn format_size(bytes: u64) -> String {
     if bytes < 1024 {
@@ -356,6 +392,25 @@ mod download_limit_tests {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn initials_of_senders() {
+        assert_eq!(initials("Ann Lee", "ann@example.com"), "AL");
+        assert_eq!(initials("Ann B. Lee", ""), "AL");
+        assert_eq!(initials("Lee, Ann", ""), "AL");
+        assert_eq!(initials("\"Ann Lee\"", ""), "AL");
+        assert_eq!(initials("Ann", ""), "A");
+        assert_eq!(initials("", "mari@example.com"), "M");
+        assert_eq!(initials("", "123@example.com"), "E");
+        assert_eq!(initials("Õie Sääsk", ""), "ÕS");
+        assert_eq!(initials("Иван Петров", ""), "ИП");
+        assert_eq!(initials("Γιώργος Παπαδόπουλος", ""), "ΓΠ");
+        assert_eq!(initials("王小明", ""), "王");
+        assert_eq!(initials("ann lee (Shop)", ""), "AL");
+        assert_eq!(initials("🎉", "news@shop.example"), "N");
+        assert_eq!(initials("🎉", ""), "");
+        assert_eq!(initials("ß", ""), "S");
+    }
 
     fn folder(path: &str, special_use: Option<&str>, unread: u64) -> pe_store::Folder {
         pe_store::Folder {

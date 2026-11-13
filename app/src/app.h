@@ -6,6 +6,7 @@
 
 #include <commctrl.h>
 #include <functional>
+#include <map>
 #include <optional>
 
 #include <cstdint>
@@ -128,6 +129,12 @@ WORD SortItemOf(PeSortField field);
 // one glyph of the Marlett font (the symbols of the system's own buttons: "r" a close box, "6" a down arrow) centered
 // in `box`, `height` pixels high
 void DrawMarlettGlyph(HDC dc, const RECT& box, wchar_t glyph, int height, COLORREF color);
+// the core's pixels of a picture (`size` x `size` BGRA with the alpha multiplied in, `length` bytes) as a bitmap;
+// nullptr when they are not that
+HBITMAP PremultipliedBitmap(const uint8_t* pixels, size_t length, int size);
+// such a bitmap drawn at `x`, `y` with its own transparency, through `memory` when given (a DC kept for many
+// pictures), else one made for it
+void DrawPremultiplied(HDC dc, int x, int y, HBITMAP bitmap, int size, HDC memory = nullptr);
 // a tooltip of `text` over the child `tool` of `owner`
 void AddTip(HWND owner, HWND tool, const std::wstring& text);
 // how wide the words of a control are in `font` (the dialog font when NULL), its & left out
@@ -365,7 +372,7 @@ void SetTextPreference(const wchar_t* name, const std::wstring& value);
 void StartLanguage(const std::wstring& forced);
 // Tools > Options: the language, the new mail notifications (`notify`), the list grouped by conversation
 // (`threads`) and the layout (`layout`, a PeLayoutMode), these changed when OK is clicked. True when the user chose to restart now for a new language
-bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& codes, int& layout);
+bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& codes, int& layout, bool& listPictures);
 
 // ---- addressbook.cpp ----
 
@@ -466,6 +473,37 @@ struct UiEvent {
     std::string detail;
     // how many messages, for NewMail
     uint64_t count = 0;
+};
+
+// ---- listpictures.cpp ----
+
+// the senders' pictures of the Columns list, drawn by the core once for each key and size and kept for the run
+class ListPictures {
+public:
+    ~ListPictures();
+    void Init(PeCore* core) { core_ = core; }
+    // the picture `key` drawn `size` pixels square; nullptr while the core draws it (asked once) or when there is none
+    HBITMAP Get(uint64_t key, int size);
+    // a PictureReady of `request`: the key whose picture is now there, 0 for none
+    uint64_t Ready(uint64_t request);
+    void Clear();
+
+private:
+    struct Picture {
+        HBITMAP bitmap = nullptr;
+        // the core is drawing it: not let go of
+        bool pending = false;
+        // when it was last drawn, for letting go of the oldest
+        uint64_t used = 0;
+    };
+    void Trim();
+
+    PeCore* core_ = nullptr;
+    // by key and size
+    std::map<std::pair<uint64_t, int>, Picture> pictures_;
+    // the requests the core is drawing, and what for
+    std::unordered_map<uint64_t, std::pair<uint64_t, int>> requests_;
+    uint64_t clock_ = 0;
 };
 
 // the folder tree, the message list and the reading pane
@@ -647,6 +685,13 @@ public:
     // it; or the classic columns. The selection, the open conversations and the row in view stay
     void SetColumns(bool on);
     bool Columns() const { return columns_; }
+    // Tools > Options > Show senders' pictures in the message list: a brand's logo or the initials beside each row of
+    // the Columns list, kept for the next start
+    bool ListPicturesShown() const { return listPictures_; }
+    void SetListPictures(bool on);
+    // the UI test's look at the row of the message `subject`: 12 its picture drawn, 11 its initials, 10 neither, 0 no
+    // such row shown
+    int TestRowPicture(const std::wstring& subject);
     // View > Sort By: by `field` (starting its own way when it is another field), and which way
     void SortBy(PeSortField field);
     void SetAscending(bool ascending);
@@ -768,6 +813,10 @@ private:
     std::wstring ColumnsRowText(const PeMessage& row) const;
     // a paint of the list starts: the time and the time zone its dates are written for, once a paint
     void ColumnsPaintStarts();
+    // the sender's picture of a row in `box`: its logo, or its initials on a quiet square
+    void DrawRowPicture(HDC dc, const RECT& box, const PeMessage& row, bool selected);
+    // a picture the core drew: the rows showing it drawn again
+    void PictureReady(uint64_t request);
     // who a row is for: the sender, or "To:" and the recipients in Sent Items and Drafts
     std::wstring RowPerson(const PeMessage& row) const;
     // the system colour of a row's text: selected (with the keyboard or not), grey for an ignored conversation
@@ -942,6 +991,11 @@ private:
     HWND sortButton_ = nullptr;
     // the widths of the columns but Subject while Columns has them out of the way, to give back in Classic
     std::vector<int> classicWidths_;
+    // the senders' pictures beside the Columns rows, and whether they are shown
+    ListPictures pictures_;
+    bool listPictures_ = true;
+    // a memory DC the rows' pictures are drawn through, kept for the run
+    HDC pictureDc_ = nullptr;
     // the time and the time zone (seconds east of UTC) of the paint under way, for the rows' dates
     int64_t paintNow_ = 0;
     int64_t paintOffset_ = 0;
@@ -1076,6 +1130,9 @@ enum OptionsControlId : WORD {
     IDC_OPTIONS_DOWNLOAD_NOTE,
     // the main window's layout (View > Layout)
     IDC_OPTIONS_LAYOUT,
+    // the senders' pictures in the message list, and what they are
+    IDC_OPTIONS_LIST_PICTURES,
+    IDC_OPTIONS_LIST_PICTURES_NOTE,
 };
 
 // the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them
