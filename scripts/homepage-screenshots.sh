@@ -10,7 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 HOMEPAGE=${HOMEPAGE:-../inboxclassic.com}
 # the screenshots the page shows
-SHOTS=(read-1-html account-1-form find-2-every-folder all-inboxes-3-accounts write-5-new agents-4-send bounce-1-failed otp-1-card)
+SHOTS=(read-1-html account-1-form find-2-every-folder all-inboxes-3-accounts pictures-4-list write-5-new agents-4-send bounce-1-failed otp-1-card)
 platforms=("$@")
 [ ${#platforms[@]} -gt 0 ] || platforms=(windows mac linux)
 
