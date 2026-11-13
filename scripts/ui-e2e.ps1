@@ -278,6 +278,8 @@ $savedClosedRows = (Get-ItemProperty -Path $preferencesKey -Name ClosedFolderRow
 $savedCodes = (Get-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue).CodesInNotifications
 # and View > Hide Read Messages, left out so every message is listed, as out of the box
 $savedHideRead = (Get-ItemProperty -Path $preferencesKey -Name HideReadMessages -ErrorAction SilentlyContinue).HideReadMessages
+# and View > Folder List, left out so the folder list is shown, as out of the box
+$savedFolderList = (Get-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue).FolderList
 # a scheduled task shows no output: everything also goes to log.txt, and result.txt is written last
 Remove-Item -Force -ErrorAction SilentlyContinue (Join-Path $Out 'result.txt')
 Start-Transcript -Path (Join-Path $Out 'log.txt') -Force | Out-Null
@@ -638,6 +640,7 @@ try {
     Remove-ItemProperty -Path $preferencesKey -Name ClosedFolderRows -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name HideReadMessages -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue
     $app = Start-Process -FilePath $Exe -ArgumentList $arguments -PassThru
 
     # the first page of Add Mail Account, with the address fields when $fields, else the page that offers a
@@ -2646,6 +2649,32 @@ public static class Dragger {
     Command $main $IDM_SYNC
     [void](WaitFor { @($unreadOnly | Where-Object { & $listed $_ }).Count -eq 0 } 20)
 
+    # ---- the folder list hidden ----
+
+    Step 'the folder list hidden and shown again'
+    $IDM_FOLDER_LIST = 155; $IDC_FOLDER_BAR = 235; $IDC_FOLDER_CAPTION = 236; $STN_CLICKED = 0
+    Check ((Visible $main $IDC_TREE) -and (Visible $main $IDC_FOLDER_CAPTION) -and (MenuChecked 2 $IDM_FOLDER_LIST)) 'the folder list starts beside the messages under its Folders caption, View > Folder List checked'
+    Command $main $IDM_FOLDER_LIST
+    Check ([bool](WaitFor { -not (Visible $main $IDC_TREE) -and -not (Visible $main $IDC_FOLDER_CAPTION) } 5)) 'View > Folder List hides the list and its caption'
+    Check (-not (MenuChecked 2 $IDM_FOLDER_LIST)) 'and the menu item is no longer checked'
+    Check ((Get-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue).FolderList -eq 0) 'and that is kept for the next start'
+    $listRect = New-Object Native.Win+RECT; $mainRect = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect($list, [ref]$listRect); [void][Native.Win]::GetWindowRect($main, [ref]$mainRect)
+    Check (($listRect.Left - $mainRect.Left) -lt 40) 'the messages take the width'
+    Shot $main 'layout-3-folders-hidden'
+    # the folder bar drops the list down; Esc closes it again
+    [void][Native.Win]::SendMessage($main, $WM_COMMAND, [IntPtr]($IDC_FOLDER_BAR -bor ($STN_CLICKED -shl 16)), [Native.Win]::GetDlgItem($main, $IDC_FOLDER_BAR))
+    $drop = WaitFor { $d = [Native.Win]::FindWindow('InboxClassicFolderDrop', [NullString]::Value); if ($d -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($d)) { $d } } 5
+    Check ([bool]$drop -and [Native.Win]::IsWindowVisible($tree)) 'a click on the folder bar drops the folder list down'
+    if ($drop) {
+        Shot $drop 'layout-3b-folder-drop'
+        [void][Native.Win]::PostMessage($drop, 0x0010, [IntPtr]::Zero, [IntPtr]::Zero)
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($drop) -and -not (Visible $main $IDC_TREE) } 5)) 'and it closes, the list hidden again'
+    }
+    Command $main $IDM_FOLDER_LIST
+    Check ([bool](WaitFor { (Visible $main $IDC_TREE) -and (Visible $main $IDC_FOLDER_CAPTION) } 5)) 'turned on, the folder list is back beside the messages'
+    Check ((Get-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue).FolderList -eq 1) 'and that is kept'
+
     # ---- a message that bounced ----
 
     Step 'a message that bounced'
@@ -4479,6 +4508,11 @@ public static bool HasIcon(IntPtr window) {
         Remove-ItemProperty -Path $preferencesKey -Name HideReadMessages -ErrorAction SilentlyContinue
     } else {
         Set-ItemProperty -Path $preferencesKey -Name HideReadMessages -Value $savedHideRead -Type DWord
+    }
+    if ($null -eq $savedFolderList) {
+        Remove-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue
+    } else {
+        Set-ItemProperty -Path $preferencesKey -Name FolderList -Value $savedFolderList -Type DWord
     }
     $harness.StandardInput.Close()
     if (-not $harness.WaitForExit(5000)) { $harness.Kill() }

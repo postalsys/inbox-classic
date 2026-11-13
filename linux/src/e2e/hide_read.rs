@@ -25,9 +25,7 @@ fn lists(subject: &str) -> bool {
 
 /// The header bar's filter, on or off
 fn filter_on() -> bool {
-    named_in(&main_window(), "hide-read")
-        .and_downcast::<gtk::ToggleButton>()
-        .is_some_and(|b| b.is_active())
+    toggle_on("hide-read")
 }
 
 /// A folder of the first account whose messages are all read, for the empty list
