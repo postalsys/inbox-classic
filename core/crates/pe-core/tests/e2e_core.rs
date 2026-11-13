@@ -2319,7 +2319,11 @@ fn drafts_are_saved_reopened_and_gone_once_sent() {
     s.core.save_draft(account, reopened.clone()).unwrap();
     s.core.send(account, reopened).unwrap();
     s.wait(|e| matches!(e, Event::MessageSent { account: a, .. } if *a == account));
-    assert!(s.server.subjects("Drafts").is_empty());
+    // the drafts go through the uploader's queue, after the save of theirs
+    eventually(
+        || s.server.subjects("Drafts").is_empty(),
+        "the drafts gone once it is sent",
+    );
     assert_eq!(s.server.subjects("INBOX"), ["Plans"]);
     let sent = pe_testkit::raw_text(&s.server.messages("INBOX")[0]);
     // the Bcc of the draft is not in what was sent
