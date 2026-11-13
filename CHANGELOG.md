@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.16.0](https://github.com/postalsys/inbox-classic/compare/v0.15.0...v0.16.0) (2026-11-13)
+
+
+### Features
+
+* contacts' pictures (step 5) ([8453c7f](https://github.com/postalsys/inbox-classic/commit/8453c7fb696c3d2e236245d5d71071e2637c8a9e))
+* **core:** contacts' pictures ([9b3743e](https://github.com/postalsys/inbox-classic/commit/9b3743e4348ea96e3c9d4f428530815062d630ae))
+* **core:** pe_initials for the windows' own pictures of a person ([76a4823](https://github.com/postalsys/inbox-classic/commit/76a4823b799932806049158c31460b56aae962ce))
+* **core:** the column layout's rules, commands and words ([9ede280](https://github.com/postalsys/inbox-classic/commit/9ede2809978e82bf5f671d82d6f6fb40771fb67b))
+* **core:** the first words of each message (step 2 of the column layout) ([fb59705](https://github.com/postalsys/inbox-classic/commit/fb5970570fb3251b0c9c96b22091af432145b52c))
+* **core:** the first words of each message, for the list's rows of several lines ([c41acc6](https://github.com/postalsys/inbox-classic/commit/c41acc6eafe5c6f3fcf2d2cf71c06b884259118f))
+* **core:** the folder_list command, a Ctrl modifier for Mac keys ([f887208](https://github.com/postalsys/inbox-classic/commit/f8872082aa5551571746dda8ea9ac6ec1c5d94dd))
+* **core:** the senders' pictures of the message list ([b6a1b19](https://github.com/postalsys/inbox-classic/commit/b6a1b194eab8ab0af3c22dc9bca1252dec155ed0))
+* **core:** the UI tests may serve a brand logo from the loopback address ([cd277ee](https://github.com/postalsys/inbox-classic/commit/cd277eebf3836038eeb98cfc4434069117b36497))
+* hide the folder list (View &gt; Folder List) ([2baea41](https://github.com/postalsys/inbox-classic/commit/2baea41f18e19a30a3c7b4387c8dcd540be96003))
+* **i18n:** the folder list's words in German, Estonian, Spanish and French ([8a5b060](https://github.com/postalsys/inbox-classic/commit/8a5b060fe1253a3f5965d5f69e824ffe5d719212))
+* **i18n:** the list pictures setting's words ([9fc33b3](https://github.com/postalsys/inbox-classic/commit/9fc33b332779c3395cbbdce4259f58255d96cfc6))
+* **linux:** a contact's picture in Contact Properties, the list and the reading pane ([155996f](https://github.com/postalsys/inbox-classic/commit/155996fe1161662e5a8218380be1a0f8688f4635))
+* **linux:** senders' pictures in the column layout ([0a4128b](https://github.com/postalsys/inbox-classic/commit/0a4128b9441cbbacc7a59de5861e5803cd2a51bc))
+* **linux:** the column layout, View &gt; Layout and Sort By ([20ca9e3](https://github.com/postalsys/inbox-classic/commit/20ca9e3bf363650c54158ccbb37a54b9ca5942b4))
+* **linux:** View &gt; Folder List and the sidebar button ([bd0b6f1](https://github.com/postalsys/inbox-classic/commit/bd0b6f1463548f1c4d9fb9135e5c3a8d78723420))
+* **mac:** a contact's picture in Contact Properties, the list and the reading pane ([2fcf565](https://github.com/postalsys/inbox-classic/commit/2fcf56551529253ebd9e043dc6ee1fc6cc23492d))
+* **mac:** senders' pictures in the column layout ([225316d](https://github.com/postalsys/inbox-classic/commit/225316df601f083fc5d9d0e925a4b2c1d5e7f7f7))
+* **mac:** the column layout, View &gt; Layout and Sort By ([3692c3b](https://github.com/postalsys/inbox-classic/commit/3692c3bd77640203d2d0c00c281dc24a3781a564))
+* **mac:** View &gt; Folder List and the sidebar button ([4c2b7e2](https://github.com/postalsys/inbox-classic/commit/4c2b7e2b005da171740856ab2fa4ba125470ed6f))
+* senders' pictures in the message list (step 4) ([091aeb5](https://github.com/postalsys/inbox-classic/commit/091aeb5088b481f660766331d518cc4d9e6ba2ec))
+* the column layout (step 3) ([9a26236](https://github.com/postalsys/inbox-classic/commit/9a2623675ee3e4d65be3844aa7f2b46bc768cad5))
+* **windows:** a contact's picture in Contact Properties, the list and the reading pane ([34da592](https://github.com/postalsys/inbox-classic/commit/34da59218b4d172fc8bcb94ec1ae11faa26755c4))
+* **windows:** senders' pictures in the column layout ([875046f](https://github.com/postalsys/inbox-classic/commit/875046f92180e9dc31881ee9057663300bf36c44))
+* **windows:** the column layout, View &gt; Layout and Sort By ([79ccfe5](https://github.com/postalsys/inbox-classic/commit/79ccfe52c5fcdd619a3b98c8a238d1b97e65d630))
+* **windows:** View &gt; Folder List, its caption and the folder bar's drop-down ([17354d1](https://github.com/postalsys/inbox-classic/commit/17354d184bdd4b04d9710a9c5d292bd20fc32f85))
+
+
+### Bug Fixes
+
+* **core:** a contact's picture for a confirmed sender only ([9641726](https://github.com/postalsys/inbox-classic/commit/9641726386fb7370c30c2709d7f8b98727aba5af))
+* **core:** a conversation's row keeps its own first words ([7113bab](https://github.com/postalsys/inbox-classic/commit/7113babe14905f8cdda0038b40753c931016b9af))
+* **core:** an oversized verdict on top keeps no lower one in its place ([3a62eb6](https://github.com/postalsys/inbox-classic/commit/3a62eb641efd82ca2aef159248d101e0dd081cb8))
+* **linux:** room for the folder's name beside the sidebar button ([709c13f](https://github.com/postalsys/inbox-classic/commit/709c13f638e3550b4cece11d18ca2185bad29b72))
+* **windows:** no blank band above the column list on a second switch ([4b4f3d3](https://github.com/postalsys/inbox-classic/commit/4b4f3d3c6231d8ecb8c96258aaa2d3a2dc397413))
+
 ## [0.15.0](https://github.com/postalsys/inbox-classic/compare/v0.14.2...v0.15.0) (2026-11-13)
 
 
