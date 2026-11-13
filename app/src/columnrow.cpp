@@ -309,16 +309,22 @@ void Mailbox::SetColumns(bool on) {
     }
     columns_ = on;
     int focused = ListView_GetNextItem(list_, -1, LVNI_FOCUSED);
-    SendMessageW(list_, WM_SETREDRAW, FALSE, 0);
-    // no headings in Columns ("Sorted by" says the order); the rows as tall as the small image list makes them
-    LONG_PTR style = GetWindowLongPtrW(list_, GWL_STYLE);
-    SetWindowLongPtrW(list_, GWL_STYLE, on ? style | LVS_NOCOLUMNHEADER : style & ~static_cast<LONG_PTR>(LVS_NOCOLUMNHEADER));
+    // from the top: a scroll position of the other rows' height would leave the list part of a row down
+    ListView_EnsureVisible(list_, 0, FALSE);
+    // the rows as tall as the small image list makes them
     if (on && !rowSpacer_) {
         rowSpacer_ = ImageList_Create(1, ColumnsRowHeight(), ILC_COLOR, 1, 0);
     }
     ListView_SetImageList(list_, on ? rowSpacer_ : listIcons_, LVSIL_SMALL);
+    // no headings in Columns ("Sorted by" says the order): the style, and the header window itself hidden, as the
+    // classic list view otherwise keeps the header's room above its first row; done with drawing on, so the list
+    // takes the change in at once
+    LONG_PTR style = GetWindowLongPtrW(list_, GWL_STYLE);
+    SetWindowLongPtrW(list_, GWL_STYLE, on ? style | LVS_NOCOLUMNHEADER : style & ~static_cast<LONG_PTR>(LVS_NOCOLUMNHEADER));
+    if (HWND header = ListView_GetHeader(list_)) {
+        ShowWindow(header, on ? SW_HIDE : SW_SHOW);
+    }
     SetWindowPos(list_, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-    SendMessageW(list_, WM_SETREDRAW, TRUE, 0);
     LayoutList();
     // the selected row stays in view; the selection and the open conversations are the view's, and stay
     if (focused >= 0) {
@@ -470,6 +476,15 @@ void Mailbox::PictureReady(uint64_t request) {
     }
 }
 
+int Mailbox::TestListTop() const {
+    RECT row = {};
+    int top = ListView_GetTopIndex(list_);
+    if (ListView_GetItemCount(list_) == 0 || !ListView_GetItemRect(list_, top, &row, LVIR_BOUNDS)) {
+        return 0;
+    }
+    return 1000 + row.top;
+}
+
 int Mailbox::TestRowPicture(const std::wstring& subject) {
     int count = ListView_GetItemCount(list_);
     for (int index = 0; index < count; index++) {
@@ -480,7 +495,10 @@ int Mailbox::TestRowPicture(const std::wstring& subject) {
         if (!columns_ || !listPictures_) {
             return 10;
         }
-        return pictures_.Get(row->picture, Scale(kPicture)) ? 12 : 11;
+        if (!pictures_.Get(row->picture, Scale(kPicture))) {
+            return 11;
+        }
+        return row->picture_kind == PE_PICTURE_KIND_CONTACT ? 13 : 12;
     }
     return 0;
 }
