@@ -27,6 +27,7 @@ mod selection;
 mod sign_in_apps;
 mod targets;
 mod text;
+pub mod timing;
 pub mod unsubscribe;
 pub mod vcard;
 mod view;
@@ -357,6 +358,8 @@ pub struct Core {
     readers: Workers,
     /// The access token of each OAuth account, which its worker and its reader share
     tokens: worker::Tokens,
+    /// How long opening messages took
+    timings: timing::Timings,
     secrets: Secrets,
     trust: Trust,
     events: EventSink,
@@ -432,6 +435,7 @@ impl Core {
             workers: Mutex::default(),
             readers: Mutex::default(),
             tokens: worker::Tokens::default(),
+            timings: timing::Timings::default(),
             secrets,
             trust,
             events: Arc::new(move |event| {
@@ -1108,8 +1112,17 @@ impl Core {
             &self.readers,
             Role::Reader,
             account,
-            Command::FetchSource { folder, uid },
+            Command::FetchSource {
+                folder,
+                uid,
+                asked: std::time::Instant::now(),
+            },
         )
+    }
+
+    /// How long the last messages opened took, oldest first ([`timing::KEPT`] at most)
+    pub fn open_timings(&self) -> Vec<timing::OpenTiming> {
+        self.timings.all()
     }
 
     /// The source of a message and the date the server got it, for a view
@@ -1188,12 +1201,15 @@ impl Core {
         let path = self.path.clone();
         let view_store = self.view_store.clone();
         let events = self.events.clone();
+        let timings = self.timings.clone();
         let work = async move {
             let found = found?;
             let dropped = move || newest.load(Ordering::Relaxed) != request;
             let built = tokio::task::spawn_blocking(move || {
                 let opened = || OpenStore::open(&view_store, &path);
-                finish_view(&found, allow_remote_images, &dropped, opened, &*events)
+                let view = finish_view(&found, allow_remote_images, &dropped, opened, &*events);
+                timings.view_built(found.folder, found.uid, std::time::Instant::now());
+                view
             });
             built.await.ok().flatten()
         };
@@ -1904,6 +1920,19 @@ impl Core {
         self.send_command(account, Command::DeleteFolder { folder })
     }
 
+    /// What the workers share with the core
+    fn worker_context(&self) -> worker::Context {
+        worker::Context {
+            path: self.path.clone(),
+            secrets: self.secrets.clone(),
+            trust: self.trust.clone(),
+            oauth: self.oauth.clone(),
+            tokens: self.tokens.clone(),
+            events: self.events.clone(),
+            timings: self.timings.clone(),
+        }
+    }
+
     fn send_command(&self, account: AccountId, command: Command) -> Result<()> {
         self.send_to(&self.workers, Role::Main, account, command)
     }
@@ -1922,16 +1951,7 @@ impl Core {
         self.store().account(account).map_err(|_| Error::NotFound)?;
         let (sender, receiver) = unbounded_channel();
         sender.send(command).map_err(|_| Error::Closed)?;
-        let worker = Worker::new(
-            account,
-            role,
-            self.path.clone(),
-            self.secrets.clone(),
-            self.trust.clone(),
-            self.oauth.clone(),
-            self.tokens.clone(),
-            self.events.clone(),
-        );
+        let worker = Worker::new(account, role, self.worker_context());
         let task = self.runtime()?.spawn(worker.run(receiver));
         workers.insert(account, (sender, task.abort_handle()));
         Ok(())

@@ -6,6 +6,7 @@
 use std::sync::mpsc::{Receiver, channel};
 use std::time::Duration;
 
+use pe_core::timing::{Link, Served};
 use pe_core::{Action, Core, Event, FailureKind, MessageRef, Scope, Search};
 use pe_store::{AccountSettings, Sort, SortField};
 use pe_testkit::{ImapKit, PASSWORD, TempDir, USER, rfc822};
@@ -101,6 +102,26 @@ fn reads_mail_like_the_windows_do() {
     let view = s.core.message_view(inbox.id, styled, false).unwrap().unwrap();
     assert_eq!(view.subject, "Styled");
     assert!(view.date.is_some(), "no Date header: the received date");
+
+    // timed: the first open over a new connection, the second from the store
+    s.core.open_message(inbox.id, styled).unwrap();
+    s.wait(|e| {
+        *e == Event::MessageReady {
+            folder: inbox.id,
+            uid: styled,
+        }
+    });
+    let timings = s.core.open_timings();
+    assert_eq!(timings.len(), 2, "{timings:?}");
+    let (first, second) = (&timings[0], &timings[1]);
+    assert_eq!((first.served, first.link), (Served::Reader, Link::New));
+    assert_eq!(first.size, html.len() as u64);
+    assert_eq!(first.host, "127.0.0.1");
+    assert!(first.connected <= first.selected && first.selected <= first.first_byte);
+    assert!(first.first_byte <= first.last_byte && first.last_byte <= first.ready);
+    assert!(!first.failed);
+    assert_eq!((second.served, second.link), (Served::Store, Link::None));
+    assert!(second.ready.is_some() && second.connected.is_none());
     let index = s.core.message_index(inbox.id, Sort::default(), styled).unwrap();
     assert_eq!(list[index.unwrap() as usize].info.uid, styled);
     assert_eq!(view.from, "Sender <sender@example.com>");

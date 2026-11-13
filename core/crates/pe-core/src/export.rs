@@ -117,16 +117,7 @@ impl Core {
             let (sender, receiver) = std::sync::mpsc::channel();
             let accounts = missing.len();
             for (account, wanted) in missing {
-                let mut worker = Worker::new(
-                    account,
-                    Role::Reader,
-                    self.path.clone(),
-                    self.secrets.clone(),
-                    self.trust.clone(),
-                    self.oauth.clone(),
-                    self.tokens.clone(),
-                    self.events.clone(),
-                );
+                let mut worker = Worker::new(account, Role::Reader, self.worker_context());
                 let sender = sender.clone();
                 self.runtime()?.spawn(async move {
                     let _ = sender.send(worker.fetch_sources(&wanted).await);

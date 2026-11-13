@@ -20,6 +20,7 @@ use tokio::sync::mpsc::{UnboundedReceiver, error::TryRecvError};
 
 use pe_i18n::{Text, tr, tr_args};
 
+use crate::timing::{Clock, Link, Served};
 use crate::{Event, EventSink, FailureKind, Secrets};
 
 mod transfer;
@@ -30,6 +31,8 @@ pub(crate) enum Command {
     FetchSource {
         folder: FolderId,
         uid: u64,
+        /// When the window asked, for the timing of the open
+        asked: std::time::Instant,
     },
     SetFlag {
         folder: FolderId,
@@ -293,16 +296,24 @@ pub(crate) enum Role {
     Reader,
 }
 
+/// What every worker of the core shares
+#[derive(Clone)]
+pub(crate) struct Context {
+    pub(crate) path: PathBuf,
+    pub(crate) secrets: Secrets,
+    pub(crate) trust: Trust,
+    pub(crate) oauth: crate::OAuthProviders,
+    pub(crate) tokens: Tokens,
+    pub(crate) events: EventSink,
+    /// How long opening messages took (timing.rs)
+    pub(crate) timings: crate::timing::Timings,
+}
+
 pub(crate) struct Worker {
     account: AccountId,
     role: Role,
-    path: PathBuf,
-    secrets: Secrets,
-    trust: Trust,
-    oauth: crate::OAuthProviders,
+    ctx: Context,
     access_token: SharedToken,
-    tokens: Tokens,
-    events: EventSink,
     connection: Option<(Client, UnboundedReceiver<ImapEvent>)>,
     /// A server event that woke the Inbox from IDLE, applied first with the rest
     held: Option<ImapEvent>,
@@ -329,27 +340,12 @@ enum Wake {
 }
 
 impl Worker {
-    #[allow(clippy::too_many_arguments)]
-    pub(crate) fn new(
-        account: AccountId,
-        role: Role,
-        path: PathBuf,
-        secrets: Secrets,
-        trust: Trust,
-        oauth: crate::OAuthProviders,
-        tokens: Tokens,
-        events: EventSink,
-    ) -> Self {
+    pub(crate) fn new(account: AccountId, role: Role, ctx: Context) -> Self {
         Worker {
             account,
             role,
-            path,
-            secrets,
-            trust,
-            oauth,
-            access_token: token_of(&tokens, account),
-            tokens,
-            events,
+            access_token: token_of(&ctx.tokens, account),
+            ctx,
             connection: None,
             held: None,
             behind: None,
@@ -360,7 +356,7 @@ impl Worker {
 
     pub(crate) async fn run(mut self, mut commands: UnboundedReceiver<Command>) {
         // its own connection to the store, opened here and not on the thread that asked for work
-        let mut store = match Store::open(&self.path) {
+        let mut store = match Store::open(&self.ctx.path) {
             Ok(store) => store,
             Err(error) => return self.fail(error.into()),
         };
@@ -418,25 +414,29 @@ impl Worker {
             while let Ok(next) = commands.try_recv() {
                 command = next;
             }
-            let Command::FetchSource { folder, uid } = command else {
+            let Command::FetchSource { folder, uid, asked } = command else {
                 continue;
             };
             // what the server says of its folder is the main worker's to follow, not kept here
             if let Some((_, server_events)) = &mut self.connection {
                 while server_events.try_recv().is_ok() {}
             }
+            let mut clock = Clock::start(folder, uid, asked);
             // a connection the server closed while it was not used shows when it is used: once more on a new one
             let had_connection = self.connection.is_some();
-            let mut outcome = self.fetch_for_view(store, folder, uid).await;
+            let mut outcome = self.fetch_for_view(store, folder, uid, &mut clock).await;
             if had_connection
                 && outcome
                     .as_ref()
                     .is_err_and(|failure| failure.kind == FailureKind::Network)
             {
                 self.connection = None;
-                outcome = self.fetch_for_view(store, folder, uid).await;
+                clock.timing.link = Link::Retried;
+                outcome = self.fetch_for_view(store, folder, uid, &mut clock).await;
             }
             if let Err(failure) = outcome {
+                clock.timing.failed = true;
+                self.ctx.timings.add(&clock);
                 self.reset_after(&failure);
                 self.emit(Event::MessageFailed {
                     folder,
@@ -453,12 +453,16 @@ impl Worker {
 
     /// The source of a message in the store, fetched when it is not there yet; [`Event::MessageReady`] once it is,
     /// and the search indexes it by its text from then on
-    async fn fetch_for_view(&mut self, store: &mut Store, folder: FolderId, uid: u64) -> Outcome {
+    async fn fetch_for_view(&mut self, store: &mut Store, folder: FolderId, uid: u64, clock: &mut Clock) -> Outcome {
         let source = if store.has_source(folder, uid)? {
+            clock.timing.size = store.message(folder, uid)?.and_then(|m| m.info.size).unwrap_or(0);
             None
         } else {
-            Some(fetch_source(self.client(store).await?, store, folder, uid).await?)
+            Some(self.download(store, folder, uid, clock).await?)
         };
+        clock.timing.ready = Some(clock.now());
+        // kept before the window hears, so what it reads next includes it
+        self.ctx.timings.add(clock);
         self.emit(Event::MessageReady { folder, uid });
         // the search finds it by what the parser reads in it from now on, after the window has it
         if let (Some(source), Some(message)) = (source, store.message(folder, uid)?) {
@@ -467,6 +471,39 @@ impl Worker {
             store.transaction(|store| store.set_indexed(message.id, &text))?;
         }
         Ok(())
+    }
+
+    /// Downloads a message the user opened into the store, timing each step on `clock`
+    async fn download(
+        &mut self,
+        store: &mut Store,
+        folder: FolderId,
+        uid: u64,
+        clock: &mut Clock,
+    ) -> Result<Vec<u8>, Failure> {
+        clock.timing.served = match self.role {
+            Role::Reader => Served::Reader,
+            Role::Main => Served::Main,
+        };
+        clock.timing.host = store.account(self.account)?.settings.imap_host;
+        let fresh = self.connection.as_ref().is_none_or(|(client, _)| client.is_closed());
+        let client = self.client(store).await?;
+        if fresh {
+            clock.timing.connected = Some(clock.now());
+            if clock.timing.link != Link::Retried {
+                clock.timing.link = Link::New;
+            }
+        } else {
+            clock.timing.link = Link::Reused;
+        }
+        pe_sync::select_folder(client, store, folder).await?;
+        clock.timing.selected = Some(clock.now());
+        let source = pe_sync::fetch_raw(client, store, folder, uid).await?;
+        clock.timing.first_byte = client.answered_at().map(|at| clock.at(at));
+        clock.timing.last_byte = Some(clock.now());
+        clock.timing.size = source.len() as u64;
+        store.set_source(folder, uid, &source)?;
+        Ok(source)
     }
 
     /// Archives messages already out of the store's `folder`: on Gmail their labels taken off (kept for Undo), elsewhere
@@ -596,7 +633,7 @@ impl Worker {
     /// ([`crate::Core::export_messages`]), on a connection of this worker's own that it closes after. Returns the
     /// messages that could not be had, with why.
     pub(crate) async fn fetch_sources(&mut self, refs: &[pe_store::MessageRef]) -> Vec<(pe_store::MessageRef, String)> {
-        let mut store = match Store::open(&self.path) {
+        let mut store = match Store::open(&self.ctx.path) {
             Ok(store) => store,
             Err(error) => return refs.iter().map(|r| (*r, error.to_string())).collect(),
         };
@@ -808,7 +845,7 @@ impl Worker {
     }
 
     fn emit(&self, event: Event) {
-        (self.events)(event);
+        (self.ctx.events)(event);
     }
 
     /// What a failure leaves no good: the connection (the next command connects again), and a refused access token
@@ -824,7 +861,7 @@ impl Worker {
     fn fail(&mut self, failure: Failure) {
         self.reset_after(&failure);
         // a refused password is told once, not again for each command until the user gives another
-        if failure.kind == FailureKind::Authentication && !self.secrets.first_refusal(self.account) {
+        if failure.kind == FailureKind::Authentication && !self.ctx.secrets.first_refusal(self.account) {
             return;
         }
         self.emit(Event::Failed {
@@ -1011,16 +1048,7 @@ impl Worker {
 
     /// A worker for another account, for one piece of work on a connection of its own
     fn sibling(&self, account: AccountId) -> Worker {
-        Worker::new(
-            account,
-            Role::Main,
-            self.path.clone(),
-            self.secrets.clone(),
-            self.trust.clone(),
-            self.oauth.clone(),
-            self.tokens.clone(),
-            self.events.clone(),
-        )
+        Worker::new(account, Role::Main, self.ctx.clone())
     }
 
     /// Saves a draft in the Drafts folder, in place of the copy saved before, and says how that went to the window it
@@ -1089,7 +1117,7 @@ impl Worker {
         }
         let account = store.account(self.account)?;
         let mut config = smtp_config(&account, self.credentials(store, &account).await?);
-        config.trust = self.trust.clone();
+        config.trust = self.ctx.trust.clone();
         let mut smtp = match pe_smtp::Client::connect(config).await {
             Ok(smtp) => smtp,
             Err(error) => {
@@ -1169,6 +1197,7 @@ impl Worker {
         let user = account.settings.username.clone();
         let pe_store::Auth::OAuth2(provider) = &account.settings.auth else {
             let password = self
+                .ctx
                 .secrets
                 .get(self.account)
                 .ok_or_else(|| no_secret(Text::ErrorNoPassword))?;
@@ -1187,8 +1216,9 @@ impl Worker {
             });
         }
         let provider = self
+            .ctx
             .oauth
-            .resolve(provider, store, &self.secrets)
+            .resolve(provider, store, &self.ctx.secrets)
             .ok_or_else(|| Failure {
                 kind: FailureKind::Other,
                 message: tr_args(
@@ -1207,6 +1237,7 @@ impl Worker {
             });
         }
         let refresh_token = self
+            .ctx
             .secrets
             .get(self.account)
             .ok_or_else(|| no_secret(Text::ErrorNoSignIn))?;
@@ -1222,7 +1253,7 @@ impl Worker {
             })?;
         if let Some(new) = tokens.refresh_token.as_deref().filter(|new| *new != refresh_token) {
             // the provider rotated it: the old one may stop working
-            if let Err(error) = self.secrets.set(self.account, new) {
+            if let Err(error) = self.ctx.secrets.set(self.account, new) {
                 self.emit(Event::Failed {
                     account: self.account,
                     kind: FailureKind::Other,
@@ -1414,7 +1445,7 @@ impl Worker {
             // read at each connect, so changed settings are used from the next connection on
             let account = store.account(self.account)?;
             let mut config = imap_config(&account, self.credentials(store, &account).await?);
-            config.trust = self.trust.clone();
+            config.trust = self.ctx.trust.clone();
             let connected = Client::connect(config).await;
             self.connection = Some(connected.map_err(|error| scope_hint(Failure::from(error), &account))?);
         }
