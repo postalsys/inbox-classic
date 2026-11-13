@@ -1276,9 +1276,9 @@ public static class Dragger {
     SelectFolder 0
 
     Step 'a large message shows its text first'
-    # SCENARIO 17a: the rest of it comes slowly, a pause before each of its first two ranges
+    # SCENARIO 17a: the whole message comes slowly, in pieces of 256 KB 300 ms apart
     [void](Invoke-RestMethod -Method Post -ContentType 'application/json' "http://127.0.0.1:$($ports.rest)/v1/script/rules" -Body (@{
-        on = 'command'; match = 'BODY\.PEEK\[\]<'; delay = 2500; times = 2 } | ConvertTo-Json))
+        on = 'response'; command = 'UID FETCH'; untagged = $true; match = 'BODY\[\] '; chunk = 262144; chunkDelay = 300 } | ConvertTo-Json))
     $large = 'Subject: The quarterly report'
     $pdf = (@('A' * 76) * [int](3 * 1024 * 1024 / 57)) -join "`r`n"
     # in Archive, dated ahead of the one before, so it is the first row there

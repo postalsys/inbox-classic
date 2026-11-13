@@ -78,12 +78,13 @@ extension UITest {
     /// a large message shows its text first, its attachment after, and the status bar says how far it is (SCENARIO 17a)
     func largeMessage() async throws {
         step("a large message shows its text first")
-        // the rest of it comes slowly: a pause before each of its first two ranges
+        // the whole message comes slowly: in pieces of 256 KB, 300 ms apart
         var rule = URLRequest(url: URL(string: rest.replacingOccurrences(of: "/mailboxes", with: "/script/rules"))!)
         rule.httpMethod = "POST"
         rule.setValue("application/json", forHTTPHeaderField: "Content-Type")
         rule.httpBody = try JSONSerialization.data(withJSONObject: [
-            "on": "command", "match": "BODY\\.PEEK\\[\\]<", "delay": 2500, "times": 2,
+            "on": "response", "command": "UID FETCH", "untagged": true, "match": "BODY\\[\\] ",
+            "chunk": 262144, "chunkDelay": 300,
         ])
         _ = try await URLSession.shared.data(for: rule)
         let line = String(repeating: "A", count: 76)

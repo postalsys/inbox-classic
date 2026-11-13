@@ -202,7 +202,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             }
         case PE_EVENT_KIND_AGENT_LOG_CHANGED:
             AgentsWindow.refresh()
-        case PE_EVENT_KIND_TRANSFERRING, PE_EVENT_KIND_MESSAGE_PROGRESS:
+        case PE_EVENT_KIND_TRANSFERRING:
             // messages going to another account: how far, then what was done; how far a large message opened is
             setStatus(event.message)
         case PE_EVENT_KIND_FOLDER_CREATED:

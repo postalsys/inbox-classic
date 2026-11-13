@@ -134,8 +134,6 @@ pub enum PeEventKind {
     Transferring = 20,
     /// The folder `folder` of `account` made with `pe_folder_create` is there (to choose it in the window that made it)
     FolderCreated = 21,
-    /// How far the download of a large message opened is: `message`, for the status bar, about `folder`/`uid`
-    MessageProgress = 22,
 }
 
 #[repr(C)]
@@ -231,7 +229,6 @@ impl Callback {
             Event::AgentLogChanged => (PeEventKind::AgentLogChanged, 0, 0, 0),
             Event::Transferring { .. } => (PeEventKind::Transferring, 0, 0, 0),
             Event::FolderCreated { account, folder } => (PeEventKind::FolderCreated, *account, *folder, 0),
-            Event::MessageProgress { folder, uid, .. } => (PeEventKind::MessageProgress, 0, *folder, *uid),
         };
         let count = if let Event::NewMail { count, .. } = &event {
             *count as u64
@@ -248,9 +245,7 @@ impl Callback {
             Event::Unsubscribed { problem, .. } => (PeFailureKind::None, problem.map(c_string), None),
             Event::MessageFailed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
             Event::SyncFinished { failure, .. } => (failure.map_or(PeFailureKind::None, Into::into), None, None),
-            Event::Transferring { text } | Event::MessageProgress { text, .. } => {
-                (PeFailureKind::None, Some(c_string(text)), None)
-            }
+            Event::Transferring { text } => (PeFailureKind::None, Some(c_string(text)), None),
             _ => (PeFailureKind::None, None, None),
         };
         let event = PeEvent {

@@ -6,7 +6,7 @@
 mod summary;
 mod text_first;
 
-pub use text_first::{SHOWN_FIRST_LIMIT, TextFirst, fetch_text_first};
+pub use text_first::{TextFirst, fetch_text_first};
 
 use std::collections::HashSet;
 use std::fmt;
@@ -343,30 +343,6 @@ pub async fn fetch_source(client: &mut Client, store: &mut Store, folder: Folder
     Ok(source)
 }
 
-/// `length` bytes of a message as the server keeps it, from `from` on (fewer at its end); None when the server no
-/// longer has it
-pub async fn fetch_range(
-    client: &mut Client,
-    store: &mut Store,
-    folder: FolderId,
-    uid: u64,
-    from: u64,
-    length: u64,
-) -> Result<Vec<u8>> {
-    select_folder(client, store, folder).await?;
-    let query = FetchQuery {
-        source: true,
-        source_range: Some((from, length)),
-        ..Default::default()
-    };
-    let fetched = client.fetch(&Messages::uid(uid), &query).await?;
-    fetched
-        .into_iter()
-        .find(|m| m.uid == Some(uid))
-        .and_then(|m| m.source)
-        .ok_or(Error::MessageGone)
-}
-
 /// A message as the server keeps it, fetched without keeping it in the store (one on its way to another account,
 /// whose row is out of the list already)
 pub async fn fetch_raw(client: &mut Client, store: &mut Store, folder: FolderId, uid: u64) -> Result<Vec<u8>> {
@@ -376,12 +352,20 @@ pub async fn fetch_raw(client: &mut Client, store: &mut Store, folder: FolderId,
         source: true,
         ..Default::default()
     };
-    let fetched = client.fetch(&Messages::uid(uid), &query).await?;
-    fetched
-        .into_iter()
-        .find(|m| m.uid == Some(uid))
+    fetch_one(client, uid, &query)
+        .await?
         .and_then(|m| m.source)
         .ok_or(Error::MessageGone)
+}
+
+/// What one FETCH brings of the message `uid` of the folder selected, None when the server no longer has it
+pub(crate) async fn fetch_one(
+    client: &mut Client,
+    uid: u64,
+    query: &FetchQuery,
+) -> Result<Option<pe_imap::client::FetchedMessage>> {
+    let fetched = client.fetch(&Messages::uid(uid), query).await?;
+    Ok(fetched.into_iter().find(|m| m.uid == Some(uid)))
 }
 
 /// The sources of these messages of a folder, as the server keeps them, in one FETCH, without keeping them in the

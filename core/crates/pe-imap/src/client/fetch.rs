@@ -28,8 +28,6 @@ pub struct FetchQuery {
     pub part_limit: Option<u64>,
     /// The whole message
     pub source: bool,
-    /// Only these bytes of the whole message, (from, how many) (`BODY.PEEK[]<0.1048576>`), with `source`
-    pub source_range: Option<(u64, u64)>,
     /// Only messages whose MODSEQ is higher (CONDSTORE)
     pub changed_since: Option<u64>,
     /// Gmail's labels (X-GM-LABELS), where the server has X-GM-EXT-1
@@ -98,11 +96,7 @@ impl FetchQuery {
             partial,
         }));
         if self.source {
-            items.push(Arg::Section {
-                name: "BODY.PEEK".into(),
-                section: Vec::new(),
-                partial: self.source_range,
-            });
+            items.push(peek(Vec::new()));
         }
         items
     }
@@ -366,27 +360,6 @@ mod tests {
         );
         let response = crate::parse(b"* 3 FETCH (UID 5 BODY[2.1]<0> \"hello\")", vec![]).unwrap();
         assert_eq!(parse_fetch(3, response).parts["2.1"], b"hello");
-    }
-
-    #[test]
-    fn a_range_of_the_whole_message() {
-        let query = FetchQuery {
-            source: true,
-            source_range: Some((1048576, 1048576)),
-            ..Default::default()
-        };
-        let command = Command {
-            tag: "A1".into(),
-            name: "UID FETCH".into(),
-            args: vec![Arg::Sequence("5".into()), Arg::List(query.items(false, false))],
-        };
-        let wire = compile(&command, &CompileOptions::default()).unwrap().concat();
-        assert_eq!(
-            String::from_utf8(wire).unwrap(),
-            "A1 UID FETCH 5 (UID BODY.PEEK[]<1048576.1048576>)\r\n"
-        );
-        let response = crate::parse(b"* 3 FETCH (UID 5 BODY[]<1048576> \"rest\")", vec![]).unwrap();
-        assert_eq!(parse_fetch(3, response).source.as_deref(), Some(&b"rest"[..]));
     }
 
     #[test]

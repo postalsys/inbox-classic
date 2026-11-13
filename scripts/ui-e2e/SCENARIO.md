@@ -177,8 +177,8 @@ Screenshots: `read-13-downloading`, `read-12-not-downloaded`
 
 Screenshot: `large-1-text-first`
 
-A message of 3 MB with a line of text and a PDF attached, whose download ImapKit holds back (a pause before each of
-its first two ranges):
+A message of 3 MB with a line of text and a PDF attached, which ImapKit sends slowly (in pieces of 256 KB, 300 ms
+apart):
 
 - opened, the pane shows its text before the rest of it is here
 - the status bar says how far the rest is ("Downloading 1.0 MB of 4.1 MB"), then that it is all here ("Downloaded

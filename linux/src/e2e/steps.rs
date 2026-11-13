@@ -2296,9 +2296,10 @@ pub(super) fn large_message_raw() -> String {
 pub async fn large_message(d: &Driver) {
     d.step("a large message shows its text first");
     let main = main_window();
-    // the rest of it comes slowly: a pause before each of its first two ranges
+    // the whole message comes slowly: in pieces of 256 KB, 300 ms apart
     let rule = serde_json::json!({
-        "on": "command", "match": "BODY\\.PEEK\\[\\]<", "delay": 2500, "times": 2
+        "on": "response", "command": "UID FETCH", "untagged": true, "match": "BODY\\[\\] ",
+        "chunk": 262144, "chunkDelay": 300
     });
     let _ = super::http(d.ports.rest, "POST", "/v1/script/rules", Some(&rule.to_string()));
     // in Archive: the steps after read the Inbox from the server whole, sources and all

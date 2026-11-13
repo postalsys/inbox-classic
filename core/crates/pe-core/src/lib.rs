@@ -140,17 +140,11 @@ pub enum Event {
         account: AccountId,
         folder: FolderId,
     },
-    /// The source of a message is in the store, [`Core::message_view`] can show it; for a large message, first its
-    /// text alone ([`Core::message_downloading`] says so), then again once the whole message is here
+    /// The source of a message is in the store, [`Core::message_view`] can show it; for a large message, its text
+    /// first ([`Core::message_downloading`] says so), the rest read from the store once it is there
     MessageReady {
         folder: FolderId,
         uid: u64,
-    },
-    /// How far the download of a large message opened is: "Downloading 4.2 MB of 15.0 MB", for the status bar
-    MessageProgress {
-        folder: FolderId,
-        uid: u64,
-        text: String,
     },
     /// The message opened ([`Core::open_message`]) could not be downloaded: `kind` and `message` say why. Opening it
     /// again tries again
@@ -229,8 +223,9 @@ pub enum Event {
     },
     /// What agents did changed ([`Core::agent_log`])
     AgentLogChanged,
-    /// Messages going to another account: how far it is ("Moving 3 of 12 messages to Archive..."), and at the end what
-    /// was done ("Moved 12 messages to Archive")
+    /// Work under way, for the status bar: messages going to another account, how far it is ("Moving 3 of 12 messages
+    /// to Archive...") and at the end what was done ("Moved 12 messages to Archive"); a large message opened, how far
+    /// it is ("Downloading 4.2 MB of 15.0 MB") and that it is all here ("Downloaded 15.0 MB")
     Transferring {
         text: String,
     },
@@ -1231,10 +1226,7 @@ impl Core {
     /// Whether a message's text is shown before the rest of it, which is still being downloaded: its attachments,
     /// Save As, View Source and Forward wait for it
     pub fn message_downloading(&self, folder: FolderId, uid: u64) -> bool {
-        self.partials
-            .lock()
-            .unwrap_or_else(|p| p.into_inner())
-            .contains_key(&(folder, uid))
+        self.partials.get(folder, uid).is_some()
     }
 
     /// How long the last messages opened took, oldest first ([`timing::KEPT`] at most)
@@ -1266,21 +1258,16 @@ impl Core {
             false => store.trusted_senders()?,
         };
         // the text of a large message being downloaded, shown before the rest (worker/large.rs)
-        let (source, sizes) = match store.source(folder, uid)? {
-            Some(source) => (Some(source), None),
-            None => match self
-                .partials
-                .lock()
-                .unwrap_or_else(|p| p.into_inner())
-                .get(&(folder, uid))
-            {
-                Some(first) => (Some(first.source.clone()), Some(first.sizes.clone())),
+        let (source, first) = match store.source(folder, uid)? {
+            Some(source) => (Some(Arc::new(source)), None),
+            None => match self.partials.get(folder, uid) {
+                Some(first) => (Some(Arc::new(first.source.clone())), Some(first)),
                 None => (None, None),
             },
         };
         Ok(source.map(|source| ViewSource {
             source,
-            sizes,
+            first,
             received,
             marked,
             trusted,
@@ -2367,9 +2354,9 @@ impl std::ops::Deref for OpenStore<'_> {
 /// The source of a message, the date the server got it, whether the list marks it a bounce, the domains whose
 /// verdicts its account trusts, and where it is
 struct ViewSource {
-    source: Vec<u8>,
-    /// The sizes of the attachments of a large message's text shown first, which has them without content
-    sizes: Option<Vec<u64>>,
+    source: Arc<Vec<u8>>,
+    /// A large message's text shown first, whose attachments have no content: their sizes are its own
+    first: Option<Arc<pe_sync::TextFirst>>,
     received: Option<i64>,
     marked: bool,
     trusted: Vec<String>,
@@ -2461,9 +2448,14 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
         },
     };
     let mut view = view::build_unless(&found.source, allow_remote_images, &trust, dropped, &find)?;
-    // a large message's text first: its attachments without content, their sizes from its structure
-    if let Some(sizes) = &found.sizes {
-        for (attachment, size) in view.attachments.iter_mut().filter(|a| a.size == 0).zip(sizes) {
+    // a large message's text first: its attachments without content, their sizes from its structure, listed by the
+    // same rules
+    if let Some(first) = found
+        .first
+        .as_ref()
+        .filter(|first| first.sizes.len() == view.attachments.len())
+    {
+        for (attachment, size) in view.attachments.iter_mut().zip(&first.sizes) {
             attachment.size = *size;
         }
     }

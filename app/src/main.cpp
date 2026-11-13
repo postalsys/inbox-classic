@@ -492,7 +492,6 @@ void OnEvent(const UiEvent& event) {
         AgentsChanged();
         break;
     case PE_EVENT_KIND_TRANSFERRING:
-    case PE_EVENT_KIND_MESSAGE_PROGRESS:
         // how far messages going to another account are, and what was done once they all went; how far a large
         // message opened is
         SetStatus(event.message);

@@ -130,8 +130,6 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_TRANSFERRING = 20,
   // The folder `folder` of `account` made with `pe_folder_create` is there (to choose it in the window that made it)
   PE_EVENT_KIND_FOLDER_CREATED = 21,
-  // How far the download of a large message opened is: `message`, for the status bar, about `folder`/`uid`
-  PE_EVENT_KIND_MESSAGE_PROGRESS = 22,
 } PeEventKind;
 
 typedef enum PeSecurity {

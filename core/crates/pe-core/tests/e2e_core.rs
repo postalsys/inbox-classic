@@ -3523,9 +3523,9 @@ fn a_click_during_a_large_download_is_answered_first() {
 
 #[test]
 fn a_large_message_shows_its_text_before_its_attachment() {
-    // the whole message comes slowly: a pause before each range of it
+    // the whole message comes slowly: in pieces of 256 KB, 300 ms apart
     let Some(s) = setup_with(json!({ "script": {
-        "on": "command", "match": "BODY\\.PEEK\\[\\]<", "delay": 1500, "times": 2
+        "on": "response", "command": "UID FETCH", "untagged": true, "match": "BODY\\[\\] ", "chunk": 262144, "chunkDelay": 300
     } })) else {
         return;
     };
@@ -3563,10 +3563,10 @@ fn a_large_message_shows_its_text_before_its_attachment() {
     assert_eq!(view.attachments[0].filename, "report.pdf");
     let size = view.attachments[0].size;
     assert!(size > 3_000_000 && size < 3_300_000, "{size}");
-    // how far it is, then the whole message
-    let progress = s.wait(|e| matches!(e, Event::MessageProgress { .. }));
+    // how far it is, then that it is all here, without another MessageReady: the window has its text
+    let progress = s.wait(|e| matches!(e, Event::Transferring { .. }));
     assert!(
-        matches!(&progress, Event::MessageProgress { text, .. } if text.starts_with("Downloading")),
+        matches!(&progress, Event::Transferring { text } if text.starts_with("Downloading")),
         "{progress:?}"
     );
     loop {
@@ -3574,12 +3574,14 @@ fn a_large_message_shows_its_text_before_its_attachment() {
             .events
             .recv_timeout(Duration::from_secs(20))
             .expect("the whole message");
-        if event
-            == (Event::MessageReady {
+        assert_ne!(
+            event,
+            Event::MessageReady {
                 folder: inbox,
-                uid: big,
-            })
-        {
+                uid: big
+            }
+        );
+        if matches!(&event, Event::Transferring { text } if text.starts_with("Downloaded")) {
             break;
         }
     }

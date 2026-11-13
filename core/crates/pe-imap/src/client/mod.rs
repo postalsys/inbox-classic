@@ -44,6 +44,9 @@ const LOG_LINE_LIMIT: usize = 1000;
 /// server lines cut at 1000 bytes
 pub use pe_net::{Direction, WireLog};
 
+/// Hears how many bytes of an answer came so far ([`Client::on_received`])
+pub type Received = Box<dyn FnMut(u64) + Send + Sync>;
+
 #[derive(Debug, Clone, Copy)]
 pub struct Timeouts {
     pub connect: Duration,
@@ -203,6 +206,8 @@ pub struct Client {
     answer_limit: Option<Duration>,
     /// A command was sent and nothing of its answer came yet: with the limit on its first bytes, if it has one
     awaiting_answer: Option<Option<Duration>>,
+    /// Told how many bytes of the answer to the command under way came so far (Client::on_received)
+    received: Option<(u64, Received)>,
 }
 
 impl Client {
@@ -235,6 +240,7 @@ impl Client {
             answered: None,
             answer_limit: None,
             awaiting_answer: None,
+            received: None,
         };
         client.start_session().await?;
         Ok((client, receiver))
@@ -362,6 +368,12 @@ impl Client {
         self.answered
     }
 
+    /// `told` hears how many bytes of the answers to the commands from now on came so far, counted from each command
+    /// (None: nobody): how far a large message is, as it comes in one FETCH
+    pub fn on_received(&mut self, told: Option<Received>) {
+        self.received = told.map(|told| (0, told));
+    }
+
     /// How long the server may take to start answering the next command, when shorter than `Timeouts::response`. For
     /// what the user waits for on a connection made a while ago: one the network forgot is found dead in seconds, not
     /// minutes. Once the answer started, each read has `Timeouts::response` again. Running out closes the connection,
@@ -465,6 +477,10 @@ impl Client {
             if self.awaiting_answer.take().is_some() {
                 self.answered = Some(std::time::Instant::now());
             }
+            if let Some((so_far, told)) = &mut self.received {
+                *so_far += count as u64;
+                told(*so_far);
+            }
             let mut framed = Vec::new();
             let result = self.framer.push(&self.buffer[..count], &mut framed);
             self.ready.extend(framed);
@@ -527,6 +543,9 @@ impl Client {
         let (tag, mut segments) = self.send(name, args).await?;
         self.answered = None;
         self.awaiting_answer = Some(self.answer_limit.take());
+        if let Some((so_far, _)) = &mut self.received {
+            *so_far = 0;
+        }
         let mut collected = Vec::new();
         loop {
             let response = self

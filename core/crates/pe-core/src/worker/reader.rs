@@ -298,11 +298,12 @@ impl Worker {
     /// The source of a message in the store, fetched when it is not there yet; [`Event::MessageReady`] once it is,
     /// and the search indexes it by its text from then on
     async fn fetch_for_view(&mut self, store: &mut Store, folder: FolderId, uid: u64, clock: &mut Clock) -> Outcome {
-        let source = if store.has_source(folder, uid)? {
+        let (source, shown) = if store.has_source(folder, uid)? {
             clock.timing.size = store.message(folder, uid)?.and_then(|m| m.info.size).unwrap_or(0);
-            None
+            (None, false)
         } else {
-            Some(self.download(store, folder, uid, clock).await?)
+            let (source, shown) = self.download(store, folder, uid, clock).await?;
+            (Some(source), shown)
         };
         clock.timing.ready = Some(clock.now());
         // kept before the window hears, so what it reads next includes it
@@ -313,7 +314,10 @@ impl Worker {
             .lock()
             .unwrap_or_else(|p| p.into_inner())
             .insert((folder, uid));
-        self.emit(Event::MessageReady { folder, uid });
+        // a large message's window has its text already, and reads the rest from the store when it needs it
+        if !shown {
+            self.emit(Event::MessageReady { folder, uid });
+        }
         // the search finds it by what the parser reads in it from now on, after the window has it
         if let (Some(source), Some(message)) = (source, store.message(folder, uid)?) {
             match crate::search::read_index_text(&source) {
@@ -325,14 +329,15 @@ impl Worker {
         Ok(())
     }
 
-    /// Downloads a message the user opened into the store, timing each step on `clock`
+    /// Downloads a message the user opened into the store, timing each step on `clock`; whether its window heard of
+    /// it already (a large message's text first)
     async fn download(
         &mut self,
         store: &mut Store,
         folder: FolderId,
         uid: u64,
         clock: &mut Clock,
-    ) -> Result<Vec<u8>, Failure> {
+    ) -> Result<(Vec<u8>, bool), Failure> {
         clock.timing.served = match self.role {
             Role::Reader => Served::Reader,
             Role::Main | Role::Background => Served::Main,
@@ -365,19 +370,24 @@ impl Worker {
             true => self.ctx.opening.downloading(self.account, size),
             false => None,
         };
-        let source = if role == Role::Reader && size > super::large::TEXT_FIRST_OVER {
+        let (source, shown) = if role == Role::Reader && size > super::large::TEXT_FIRST_OVER {
             // its text first, the rest after (large.rs)
             self.download_large(store, folder, uid, size).await?
         } else {
             let (client, _) = self.connection.as_mut().expect("connected");
-            pe_sync::fetch_raw(client, store, folder, uid).await?
+            (pe_sync::fetch_raw(client, store, folder, uid).await?, false)
         };
         let (client, _) = self.connection.as_mut().expect("connected");
         clock.timing.first_byte = client.answered_at().map(|at| clock.at(at));
         clock.timing.last_byte = Some(clock.now());
         clock.timing.size = source.len() as u64;
         store.set_source(folder, uid, &source)?;
-        Ok(source)
+        if size > super::large::TEXT_FIRST_OVER && role == Role::Reader {
+            self.emit(Event::Transferring {
+                text: crate::text::download_done_text(source.len() as u64),
+            });
+        }
+        Ok((source, shown))
     }
 }
 
