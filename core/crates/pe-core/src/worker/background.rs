@@ -18,8 +18,7 @@ use tokio::sync::mpsc::UnboundedReceiver;
 
 use super::{Command, Failure, Worker, shared_of};
 
-/// How long a background connection without work stays open
-const IDLE_FOR: Duration = Duration::from_secs(5 * 60);
+use super::IDLE_FOR;
 /// How long the main worker works on what it was handed before it looks at the Inbox and its commands again
 const MAIN_SLICE: Duration = Duration::from_secs(2);
 

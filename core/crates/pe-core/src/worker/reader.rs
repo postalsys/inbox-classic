@@ -42,15 +42,15 @@ pub(crate) fn mark_synced(synced: &Synced, account: AccountId) {
 /// A download over this size under way sends the next click to a second reader, not to wait for it
 pub(crate) const LARGE_DOWNLOAD: u64 = 256 * 1024;
 /// How long a second reader without an open keeps its connection
-const SPARE_IDLE: Duration = Duration::from_secs(5 * 60);
+const SPARE_IDLE: Duration = super::IDLE_FOR;
 
-/// The opens under way, which the background work steps aside for, and the size of what each account's reader
-/// downloads now
+/// The opens under way, which the background work steps aside for (one count for every account: they share the
+/// line), and the accounts whose reader downloads a large message now
 #[derive(Default)]
 pub(crate) struct Opening {
     count: std::sync::atomic::AtomicUsize,
     done: tokio::sync::Notify,
-    downloading: std::sync::Mutex<std::collections::HashMap<AccountId, u64>>,
+    large: std::sync::Mutex<std::collections::HashSet<AccountId>>,
 }
 
 impl Opening {
@@ -73,13 +73,25 @@ impl Opening {
 
     /// Whether the reader of `account` is downloading a message over [`LARGE_DOWNLOAD`]
     pub(crate) fn large_download(&self, account: AccountId) -> bool {
-        self.downloads()
-            .get(&account)
-            .is_some_and(|size| *size > LARGE_DOWNLOAD)
+        self.large_ones().contains(&account)
     }
 
-    fn downloads(&self) -> std::sync::MutexGuard<'_, std::collections::HashMap<AccountId, u64>> {
-        self.downloading.lock().unwrap_or_else(|p| p.into_inner())
+    /// The reader of `account` downloads a message of `size`: a large one until what this returns is dropped
+    fn downloading(self: &Arc<Self>, account: AccountId, size: u64) -> Option<LargeDownload> {
+        (size > LARGE_DOWNLOAD && self.large_ones().insert(account)).then(|| LargeDownload(self.clone(), account))
+    }
+
+    fn large_ones(&self) -> std::sync::MutexGuard<'_, std::collections::HashSet<AccountId>> {
+        self.large.lock().unwrap_or_else(|p| p.into_inner())
+    }
+}
+
+/// A large download under way, see [`Opening::downloading`]
+struct LargeDownload(Arc<Opening>, AccountId);
+
+impl Drop for LargeDownload {
+    fn drop(&mut self) {
+        self.0.large_ones().remove(&self.1);
     }
 }
 
@@ -323,7 +335,7 @@ impl Worker {
     ) -> Result<Vec<u8>, Failure> {
         clock.timing.served = match self.role {
             Role::Reader => Served::Reader,
-            Role::Main | Role::Background | Role::Upload => Served::Main,
+            Role::Main | Role::Background => Served::Main,
         };
         let quiet = self.last_used.elapsed() > QUIET;
         let role = self.role;
@@ -348,17 +360,15 @@ impl Worker {
         pe_sync::select_folder(client, store, folder).await?;
         clock.timing.selected = Some(clock.now());
         // a click meanwhile on a large one goes to a second reader (Core::open_message)
-        let tracked = role == Role::Reader && !self.spare;
-        if tracked {
-            let size = store.message(folder, uid)?.and_then(|m| m.info.size).unwrap_or(0);
-            self.ctx.opening.downloads().insert(self.account, size);
-        }
+        let _large = match role == Role::Reader && !self.spare {
+            true => {
+                let size = store.message(folder, uid)?.and_then(|m| m.info.size).unwrap_or(0);
+                self.ctx.opening.downloading(self.account, size)
+            }
+            false => None,
+        };
         let (client, _) = self.connection.as_mut().expect("connected");
-        let fetched = pe_sync::fetch_raw(client, store, folder, uid).await;
-        if tracked {
-            self.ctx.opening.downloads().remove(&self.account);
-        }
-        let source = fetched?;
+        let source = pe_sync::fetch_raw(client, store, folder, uid).await?;
         clock.timing.first_byte = client.answered_at().map(|at| clock.at(at));
         clock.timing.last_byte = Some(clock.now());
         clock.timing.size = source.len() as u64;

@@ -181,11 +181,12 @@ Core only: no change to the C API or the apps.
 - **Background work steps aside.** A shared count of opens under way (`worker::Opening`). The background worker
   waits before each batch while it is above zero, so the line is the user's. Text batches are of 16 messages (about
   1 MB at most), so a move, delete or flag the main worker does in their place starts within a moment.
-- **Uploads on a connection of their own.** Saving a draft and the copy in Sent Items (APPEND, often megabytes) go over
-  a connection made for that one upload, in a task of its own, so the main worker stays on the Inbox and the user's
-  commands; the main worker syncs the folder after. One upload of an account at a time, and removing drafts (once a
-  message is sent) waits for an upload under way. When that connection can not be made, the main worker uploads, as
-  before. An upload that failed is told and not repeated (the next save of a draft replaces it by its Message-ID).
+- **Uploads on a connection of their own.** Saving a draft, the copy in Sent Items (APPEND, often megabytes) and
+  removing the drafts of a message sent go to the account's uploader: a worker of its own fed by a queue, its
+  connection closed after 5 idle minutes. The main worker hands an upload over and stays on the Inbox and the user's
+  commands; it syncs the folder after. The queue keeps the order (drafts are removed after a save of theirs). When
+  the uploader can not connect, it hands each upload back to the main worker, which does it as before. An upload that
+  failed is told and not repeated (the next save of a draft replaces it by its Message-ID).
 - **The view first, the store after**: not built. Phase 1's numbers show the window told 1 to 10 ms after the last
   byte, the store write included.
 

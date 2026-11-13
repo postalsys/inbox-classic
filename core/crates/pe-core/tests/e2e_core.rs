@@ -3463,7 +3463,14 @@ fn a_draft_is_uploaded_on_a_connection_of_its_own() {
         html: Some("<p>first</p>".into()),
         ..Default::default()
     };
-    s.core.save_draft(account, outgoing).unwrap();
+    let message_id = s.core.save_draft(account, outgoing.clone()).unwrap();
+    // saved again while the first is on its way: queued, not waited for
+    let again = pe_core::Outgoing {
+        message_id: Some(message_id),
+        html: Some("<p>second</p>".into()),
+        ..outgoing
+    };
+    s.core.save_draft(account, again).unwrap();
     // meanwhile the main worker does what the user asks at once
     std::thread::sleep(Duration::from_millis(500));
     let started = std::time::Instant::now();
@@ -3473,9 +3480,12 @@ fn a_draft_is_uploaded_on_a_connection_of_its_own() {
         "read on the server",
     );
     assert!(started.elapsed() < Duration::from_secs(2), "{:?}", started.elapsed());
-    let saved = s.wait(|e| matches!(e, Event::DraftSaved { .. }));
-    assert!(matches!(saved, Event::DraftSaved { problem: None, .. }), "{saved:?}");
-    eventually(|| s.server.subjects("Drafts") == ["Plans"], "the draft on the server");
+    for _ in 0..2 {
+        let saved = s.wait(|e| matches!(e, Event::DraftSaved { .. }));
+        assert!(matches!(saved, Event::DraftSaved { problem: None, .. }), "{saved:?}");
+    }
+    // the second in place of the first
+    eventually(|| s.server.subjects("Drafts") == ["Plans"], "one draft on the server");
 }
 
 #[test]

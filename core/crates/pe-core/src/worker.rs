@@ -31,7 +31,6 @@ mod upload;
 pub(crate) use background::{Nudges, nudge};
 pub(crate) use download::Opened;
 pub(crate) use reader::Opening;
-pub(crate) use upload::Uploads;
 
 pub(crate) use reader::{Synced, tell_woke, watch_sleep};
 
@@ -55,6 +54,10 @@ pub(crate) enum Command {
     /// A folder synced: an upload put a message in it (upload.rs)
     SyncFolder {
         folder: FolderId,
+    },
+    /// An upload the uploader could not do, done by the main worker (upload.rs)
+    Upload {
+        upload: Box<upload::Upload>,
     },
     SetFlag {
         folder: FolderId,
@@ -324,8 +327,6 @@ pub(crate) enum Role {
     Reader,
     /// What the user does not wait for: conversations and the search text of stored mail (background.rs)
     Background,
-    /// One upload, a draft or the copy of a message sent, on a connection made for it (upload.rs)
-    Upload,
 }
 
 impl Role {
@@ -334,13 +335,16 @@ impl Role {
         match self {
             // the user waits for everything the reader does, its sign-in too
             Role::Reader => Some(reader::RESPONSE_LIMIT),
-            Role::Main | Role::Background | Role::Upload => None,
+            Role::Main | Role::Background => None,
         }
     }
 }
 
 /// How long the server may take to start answering a command the user waits for, on a connection made before
 pub(crate) const ANSWER_LIMIT: Duration = Duration::from_secs(8);
+/// How long a connection made for some work (the background worker's, a second reader's, the uploader's) stays open
+/// without it
+pub(crate) const IDLE_FOR: Duration = Duration::from_secs(5 * 60);
 /// How long after a server refused one more connection the reader and the background worker do without one
 const LIMITED_FOR: Duration = Duration::from_secs(15 * 60);
 /// How long the reader and the background worker wait for the main worker's first sync before they connect anyway
@@ -367,8 +371,6 @@ pub(crate) struct Context {
     pub(crate) opened: Opened,
     /// The opens under way, which background work steps aside for, and the size of what each reader downloads now
     pub(crate) opening: Arc<Opening>,
-    /// Each account's turn to upload
-    pub(crate) uploads: Arc<Uploads>,
 }
 
 pub(crate) struct Worker {
@@ -387,8 +389,10 @@ pub(crate) struct Worker {
     archived_labels: HashMap<String, Vec<String>>,
     /// The main worker, for a reader the server refuses a connection of its own: the opens go there
     pub(crate) fallback: Option<UnboundedSender<Command>>,
-    /// The main worker, kept without keeping it running: for an upload's sync after it, and the main worker's own
+    /// The main worker's own commands, kept without keeping it running: what its uploader sends back (upload.rs)
     pub(crate) main: Option<tokio::sync::mpsc::WeakUnboundedSender<Command>>,
+    /// The main worker's uploader, made with the first upload
+    uploader: Option<upload::Uploader>,
     /// A second reader, made when a click comes during a large download, closed when idle
     pub(crate) spare: bool,
     /// When the server last refused a connection because too many are open
@@ -435,6 +439,7 @@ impl Worker {
             archived_labels: HashMap::new(),
             fallback: None,
             main: None,
+            uploader: None,
             spare: false,
             limited: None,
             connect_failed: None,
@@ -454,8 +459,6 @@ impl Worker {
         match self.role {
             Role::Reader => return self.read(&mut store, &mut commands).await,
             Role::Background => return self.background(&mut store, &mut commands).await,
-            // made and driven by the main worker (upload.rs), never run
-            Role::Upload => return,
             Role::Main => {}
         }
         while let Some(command) = self.next_command(&mut store, &mut commands).await {
@@ -964,6 +967,12 @@ impl Worker {
             }
             Command::Connect => Ok(()),
             Command::SyncFolder { folder } => self.sync_one(store, folder).await,
+            Command::Upload { upload } => {
+                let outcome = self.upload(store, &upload).await;
+                self.uploaded(&upload, &outcome);
+                outcome?;
+                self.sync_one(store, upload.folder()).await
+            }
             Command::Background { reply } => {
                 let _ = reply.send(self.background_slice(store).await);
                 Ok(())
@@ -1138,23 +1147,24 @@ impl Worker {
         Worker::new(account, Role::Main, self.ctx.clone())
     }
 
-    /// Saves a draft in the Drafts folder, in place of the copy saved before, and says how that went to the window it
-    /// came from ([`Event::DraftSaved`]): on a connection of its own when the server gives one (upload.rs)
+    /// Saves a draft in the Drafts folder, in place of the copy saved before, through the uploader (upload.rs), which
+    /// says how that went to the window it came from ([`Event::DraftSaved`])
     async fn save_draft(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Outcome {
         let message_id = outgoing.message_id.clone().unwrap_or_default();
-        let saved = match self.draft_upload(store, outgoing).await {
-            Ok(upload) => match self.upload_apart(store, upload).await {
-                Ok(()) => return Ok(()),
-                Err(upload) => self.upload_into(store, &upload).await.map(|()| upload.folder()),
-            },
-            Err(failure) => Err(failure),
-        };
-        self.emit(Event::DraftSaved {
-            account: self.account,
-            message_id,
-            problem: saved.as_ref().err().map(|failure| failure.message.clone()),
-        });
-        self.sync_one(store, saved?).await
+        match self.draft_upload(store, outgoing).await {
+            Ok(upload) => {
+                self.upload_apart(upload);
+                Ok(())
+            }
+            Err(failure) => {
+                self.emit(Event::DraftSaved {
+                    account: self.account,
+                    message_id,
+                    problem: Some(failure.message.clone()),
+                });
+                Err(failure)
+            }
+        }
     }
 
     /// A draft built for the Drafts folder
@@ -1182,14 +1192,18 @@ impl Worker {
         })
     }
 
+    /// Removes the drafts of a message sent: after a save of theirs that the uploader has yet to do, in its queue
     async fn remove_drafts(&mut self, store: &mut Store, message_id: &str) -> Outcome {
         let Some(drafts) = crate::compose::drafts_folder(store, self.account)? else {
             return Ok(());
         };
-        // a save of the draft still on its way (upload.rs) lands first, and goes with the others; not waited for
-        // longer than an upload takes, as two drafts moved between two accounts at once would wait for each other
-        let turn = shared_of(&self.ctx.uploads, self.account);
-        let _ = tokio::time::timeout(Duration::from_secs(60), turn.lock()).await;
+        if self.uploader.as_ref().is_some_and(|uploader| !uploader.is_closed()) {
+            self.upload_apart(upload::Upload::RemoveDrafts {
+                drafts: drafts.id,
+                message_id: message_id.to_string(),
+            });
+            return Ok(());
+        }
         let client = self.client(store).await?;
         pe_sync::remove_drafts(client, store, drafts.id, message_id).await?;
         self.sync_one(store, drafts.id).await
@@ -1251,7 +1265,7 @@ impl Worker {
                             &[("error", (&error.to_string()).into())],
                         ));
                     }
-                    if let Err(failure) = self.save_sent(store, &raw, message.created).await {
+                    if let Err(failure) = self.save_sent(store, raw, message.created) {
                         self.sent_but(tr_args(Text::ErrorSentNoCopy, &[("reason", (&failure.message).into())]));
                     }
                 }
@@ -1275,19 +1289,14 @@ impl Worker {
         }
     }
 
-    /// The copy of a message sent, in Sent Items: on a connection of its own when the server gives one (upload.rs)
-    async fn save_sent(&mut self, store: &mut Store, raw: &[u8], date: i64) -> Outcome {
-        let Some(sent) = store.special_folder(self.account, "\\Sent")? else {
-            return Ok(());
-        };
-        let upload = upload::Upload::Sent {
-            sent: sent.id,
-            raw: raw.to_vec(),
-            date,
-        };
-        if let Err(upload) = self.upload_apart(store, upload).await {
-            self.upload_into(store, &upload).await?;
-            self.sync_one(store, sent.id).await?;
+    /// The copy of a message sent, in Sent Items, through the uploader (upload.rs)
+    fn save_sent(&mut self, store: &Store, raw: Vec<u8>, date: i64) -> Outcome {
+        if let Some(sent) = store.special_folder(self.account, "\\Sent")? {
+            self.upload_apart(upload::Upload::Sent {
+                sent: sent.id,
+                raw,
+                date,
+            });
         }
         Ok(())
     }

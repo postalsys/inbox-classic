@@ -93,6 +93,27 @@ use worker::{Command, Role, Worker};
 /// The version of the core, which the About boxes show
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+/// Which of an account's workers
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Kind {
+    Main,
+    /// The reader, ready before the first click
+    Reader,
+    /// A second reader, for a click during a large download
+    Spare,
+    Background,
+}
+
+impl Kind {
+    fn role(self) -> Role {
+        match self {
+            Kind::Main => Role::Main,
+            Kind::Reader | Kind::Spare => Role::Reader,
+            Kind::Background => Role::Background,
+        }
+    }
+}
+
 /// The workers of the accounts (or their readers): the commands they take, and the task to stop
 type Workers = Mutex<HashMap<AccountId, (UnboundedSender<Command>, tokio::task::AbortHandle)>>;
 
@@ -365,8 +386,6 @@ pub struct Core {
     opened: worker::Opened,
     /// The opens under way, and what each reader downloads now
     opening: Arc<worker::Opening>,
-    /// Each account's turn to upload
-    uploads: Arc<worker::Uploads>,
     /// The second readers: a click during a large download goes to one (`worker::Worker::spare`)
     spares: Workers,
     /// The access token of each OAuth account, which its worker and its reader share
@@ -461,7 +480,6 @@ impl Core {
             nudges: Arc::default(),
             opened: worker::Opened::default(),
             opening: Arc::default(),
-            uploads: Arc::default(),
             spares: Mutex::default(),
             tokens: worker::Tokens::default(),
             timings: timing::Timings::default(),
@@ -1158,8 +1176,8 @@ impl Core {
         self.send_command(account, Command::Sync)?;
         // the reader connects after the first sync, ready for the first message opened; the background worker starts
         // then too
-        self.send_to(&self.readers, Role::Reader, account, Command::Connect)?;
-        self.worker_of(&self.backgrounds, Role::Background, account).map(|_| ())
+        self.send_to(Kind::Reader, account, Command::Connect)?;
+        self.worker_of(Kind::Background, account).map(|_| ())
     }
 
     /// The computer woke from sleep, or the network changed: every connection is dropped and made again, the main
@@ -1179,13 +1197,12 @@ impl Core {
     pub fn open_message(&self, folder: FolderId, uid: u64) -> Result<()> {
         let account = self.store().folder(folder)?.account_id;
         // a large download under way is not waited for: the click goes to a second reader
-        let readers = match self.opening.large_download(account) {
-            true => &self.spares,
-            false => &self.readers,
+        let reader = match self.opening.large_download(account) {
+            true => Kind::Spare,
+            false => Kind::Reader,
         };
         self.send_to(
-            readers,
-            Role::Reader,
+            reader,
             account,
             Command::FetchSource {
                 folder,
@@ -2013,29 +2030,38 @@ impl Core {
             nudges: self.nudges.clone(),
             opened: self.opened.clone(),
             opening: self.opening.clone(),
-            uploads: self.uploads.clone(),
         }
     }
 
     fn send_command(&self, account: AccountId, command: Command) -> Result<()> {
-        self.send_to(&self.workers, Role::Main, account, command)
+        self.send_to(Kind::Main, account, command)
     }
 
-    /// Hands `command` to the worker of `account` in `workers` (of `role`), started when there is none or it stopped
-    fn send_to(&self, workers: &Workers, role: Role, account: AccountId, command: Command) -> Result<()> {
-        match self.worker_of(workers, role, account)?.send(command) {
+    /// The workers of a kind
+    fn workers_of(&self, kind: Kind) -> &Workers {
+        match kind {
+            Kind::Main => &self.workers,
+            Kind::Reader => &self.readers,
+            Kind::Spare => &self.spares,
+            Kind::Background => &self.backgrounds,
+        }
+    }
+
+    /// Hands `command` to the worker of `account` of `kind`, started when there is none or it stopped
+    fn send_to(&self, kind: Kind, account: AccountId, command: Command) -> Result<()> {
+        match self.worker_of(kind, account)?.send(command) {
             Ok(()) => Ok(()),
             // it stopped meanwhile: a new one takes the command
             Err(returned) => self
-                .worker_of(workers, role, account)?
+                .worker_of(kind, account)?
                 .send(returned.0)
                 .map_err(|_| Error::Closed),
         }
     }
 
-    /// Where the commands of the worker of `account` in `workers` go, the worker started when there is none or it
+    /// Where the commands of the worker of `account` of `kind` go, the worker started when there is none or it
     /// stopped. A reader gets the main worker to hand opens to when the server refuses it a connection.
-    fn worker_of(&self, workers: &Workers, role: Role, account: AccountId) -> Result<UnboundedSender<Command>> {
+    fn worker_of(&self, kind: Kind, account: AccountId) -> Result<UnboundedSender<Command>> {
         /// The worker's sender, while it runs
         fn live(
             workers: &HashMap<AccountId, (UnboundedSender<Command>, tokio::task::AbortHandle)>,
@@ -2046,28 +2072,28 @@ impl Core {
                 .map(|(sender, _)| sender.clone())
                 .filter(|sender| !sender.is_closed())
         }
+        let workers = self.workers_of(kind);
         if let Some(sender) = live(&workers.lock().unwrap_or_else(|p| p.into_inner()), account) {
             return Ok(sender);
         }
         self.store().account(account).map_err(|_| Error::NotFound)?;
-        // taken before the readers' lock, as it takes the workers'
-        let fallback = match role {
-            Role::Reader | Role::Background | Role::Upload => {
-                Some(self.worker_of(&self.workers, Role::Main, account)?)
-            }
-            Role::Main => None,
+        // taken before this kind's lock, as it takes the main workers'
+        let fallback = match kind {
+            Kind::Main => None,
+            Kind::Reader | Kind::Spare | Kind::Background => Some(self.worker_of(Kind::Main, account)?),
         };
-        let spare = std::ptr::eq(workers, &self.spares);
         let mut workers = workers.lock().unwrap_or_else(|p| p.into_inner());
         if let Some(sender) = live(&workers, account) {
             return Ok(sender);
         }
         let (sender, receiver) = unbounded_channel();
-        let mut worker = Worker::new(account, role, self.worker_context());
-        // the main worker for the work the server leaves it, and kept for an upload's sync (its own, too)
-        worker.main = fallback.as_ref().unwrap_or(&sender).downgrade().into();
+        let mut worker = Worker::new(account, kind.role(), self.worker_context());
+        // the main worker's own commands, for what its uploader sends back
+        if kind == Kind::Main {
+            worker.main = Some(sender.downgrade());
+        }
         worker.fallback = fallback;
-        worker.spare = spare;
+        worker.spare = kind == Kind::Spare;
         let task = self.runtime()?.spawn(worker.run(receiver));
         workers.insert(account, (sender.clone(), task.abort_handle()));
         Ok(sender)
