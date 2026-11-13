@@ -1562,6 +1562,14 @@ uint8_t *pe_card_picture(const struct PeCore *core,
                          uint32_t size,
                          size_t *len);
 
+// One or two initials of a person, as the message list shows them (`pe_core::initials`): from `name`, else from
+// `address`; empty for neither. Either may be NULL. Free with `pe_string_free`.
+//
+// # Safety
+// `name` and `address` must each be NULL or a NUL-terminated string.
+char *pe_initials(const char *name,
+                  const char *address);
+
 // Opens the store at `path` (UTF-8, created when missing) and starts the engine. `callback` gets
 // the events, on worker threads, with `context`. NULL on failure. Close with `pe_core_close`.
 //

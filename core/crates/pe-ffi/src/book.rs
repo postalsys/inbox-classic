@@ -916,3 +916,22 @@ pub unsafe extern "C" fn pe_card_picture(core: *const PeCore, card: i64, size: u
         })
     }
 }
+
+/// One or two initials of a person, as the message list shows them (`pe_core::initials`): from `name`, else from
+/// `address`; empty for neither. Either may be NULL. Free with `pe_string_free`.
+///
+/// # Safety
+/// `name` and `address` must each be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_initials(name: *const c_char, address: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let text = |p: *const c_char| {
+        if p.is_null() {
+            String::new()
+        } else {
+            unsafe { std::ffi::CStr::from_ptr(p) }.to_string_lossy().into_owned()
+        }
+    };
+    let (name, address) = (text(name), text(address));
+    crate::guard(|| pe_core::initials(&name, &address)).map_or(std::ptr::null_mut(), crate::into_c_string)
+}
