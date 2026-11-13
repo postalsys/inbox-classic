@@ -356,6 +356,11 @@ pub struct Core {
     workers: Workers,
     /// The readers of the accounts: their own connections that download the messages opened (`worker::Role::Reader`)
     readers: Workers,
+    /// The background workers of the accounts: conversations and search text on connections of their own
+    /// (`worker::Role::Background`)
+    backgrounds: Workers,
+    /// Wakes the background workers when new mail was stored
+    nudges: Arc<worker::Nudges>,
     /// The access token of each OAuth account, which its worker and its reader share
     tokens: worker::Tokens,
     /// How long opening messages took
@@ -442,6 +447,8 @@ impl Core {
             runtime: Some(runtime),
             workers: Mutex::default(),
             readers: Mutex::default(),
+            backgrounds: Mutex::default(),
+            nudges: Arc::default(),
             tokens: worker::Tokens::default(),
             timings: timing::Timings::default(),
             secrets,
@@ -624,7 +631,7 @@ impl Core {
     pub fn remove_account(&self, id: AccountId) -> Result<()> {
         // now, not after its current command: a sync it was running would write into the next account that gets
         // this id
-        for workers in [&self.workers, &self.readers] {
+        for workers in self.all_workers() {
             if let Some((_, task)) = workers.lock().unwrap_or_else(|p| p.into_inner()).remove(&id) {
                 task.abort();
             }
@@ -1104,8 +1111,10 @@ impl Core {
     /// Syncs the folder list and every folder of an account, in the background
     pub fn sync(&self, account: AccountId) -> Result<()> {
         self.send_command(account, Command::Sync)?;
-        // the reader connects after the first sync, ready for the first message opened
-        self.send_to(&self.readers, Role::Reader, account, Command::Connect)
+        // the reader connects after the first sync, ready for the first message opened; the background worker starts
+        // then too
+        self.send_to(&self.readers, Role::Reader, account, Command::Connect)?;
+        self.worker_of(&self.backgrounds, Role::Background, account).map(|_| ())
     }
 
     /// The computer woke from sleep, or the network changed: every connection is dropped and made again, the main
@@ -1948,6 +1957,7 @@ impl Core {
             timings: self.timings.clone(),
             wake: self.wake.subscribe(),
             synced: self.synced.clone(),
+            nudges: self.nudges.clone(),
         }
     }
 
@@ -1986,7 +1996,7 @@ impl Core {
         self.store().account(account).map_err(|_| Error::NotFound)?;
         // taken before the readers' lock, as it takes the workers'
         let fallback = match role {
-            Role::Reader => Some(self.worker_of(&self.workers, Role::Main, account)?),
+            Role::Reader | Role::Background => Some(self.worker_of(&self.workers, Role::Main, account)?),
             Role::Main => None,
         };
         let mut workers = workers.lock().unwrap_or_else(|p| p.into_inner());
@@ -2001,11 +2011,17 @@ impl Core {
         Ok(sender)
     }
 
+    /// The workers of every kind
+    fn all_workers(&self) -> [&Workers; 3] {
+        [&self.workers, &self.readers, &self.backgrounds]
+    }
+
     fn stop_worker(&self, account: AccountId) {
         // dropping the sender ends the worker once its current command is done; the reader too, and the token goes,
         // as the settings it was for changed
-        self.workers.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
-        self.readers.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
+        for workers in self.all_workers() {
+            workers.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
+        }
         self.tokens.lock().unwrap_or_else(|p| p.into_inner()).remove(&account);
     }
 }
@@ -2184,8 +2200,9 @@ const SHUTDOWN_GRACE: std::time::Duration = std::time::Duration::from_secs(2);
 impl Drop for Core {
     fn drop(&mut self) {
         self.closed.store(true, Ordering::Release);
-        self.workers.lock().unwrap_or_else(|p| p.into_inner()).clear();
-        self.readers.lock().unwrap_or_else(|p| p.into_inner()).clear();
+        for workers in self.all_workers() {
+            workers.lock().unwrap_or_else(|p| p.into_inner()).clear();
+        }
         if let Some(runtime) = self.runtime.take() {
             // workers that are waiting for the network are cancelled
             runtime.shutdown_timeout(SHUTDOWN_GRACE);

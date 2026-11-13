@@ -9,7 +9,7 @@
 //!   found dead in seconds, and the message is fetched again on a new one, with no such limit.
 //! - When the computer wakes from sleep ([`Context::wake`]), its connection is dropped and made again.
 //! - A server that refuses one more connection gets the opens through the main worker, and the reader tries again
-//!   after [`LIMITED_FOR`].
+//!   after [`super::LIMITED_FOR`].
 
 use std::collections::HashSet;
 use std::sync::Arc;
@@ -30,10 +30,6 @@ const QUIET_ANSWER_LIMIT: Duration = Duration::from_secs(3);
 const QUIET: Duration = Duration::from_secs(60);
 /// The longest the reader waits for any read from the server: the user waits for all it does, its sign-in included
 pub(super) const RESPONSE_LIMIT: Duration = Duration::from_secs(30);
-/// How long the reader waits for the main worker's first sync before it connects all the same
-const FIRST_SYNC_WAIT: Duration = Duration::from_secs(60);
-/// How long after a server refused one more connection the reader does without one
-const LIMITED_FOR: Duration = Duration::from_secs(15 * 60);
 
 /// The accounts whose main worker finished a sync, which the readers wait for before connecting
 pub(crate) type Synced = tokio::sync::watch::Sender<HashSet<AccountId>>;
@@ -58,13 +54,9 @@ impl Worker {
     /// The reader: the messages opened, each downloaded as it is asked for; one that can not be is reported for the
     /// reading pane ([`Event::MessageFailed`]), not as a failure of the account (the main worker reports those)
     pub(super) async fn read(&mut self, store: &mut Store, commands: &mut UnboundedReceiver<Command>) {
-        let mut synced = self.ctx.synced.subscribe();
-        let account = self.account;
         let mut warm = false;
         // None once it is done
-        let mut first_sync = Some(Box::pin(async move {
-            let _ = tokio::time::timeout(FIRST_SYNC_WAIT, synced.wait_for(|done| done.contains(&account))).await;
-        }));
+        let mut first_sync = Some(Box::pin(self.first_sync()));
         loop {
             let connected = self.connection.is_some();
             let keep_alive = tokio::time::Instant::from_std(self.last_used + KEEP_ALIVE);
@@ -114,9 +106,7 @@ impl Worker {
                 Woke::Slept => {}
             }
         }
-        if let Some((mut client, _)) = self.connection.take() {
-            let _ = client.logout().await;
-        }
+        self.log_out().await;
     }
 
     /// Connects when the server did not refuse a connection lately; a failure waits for the next open
@@ -158,16 +148,6 @@ impl Worker {
                 }
             }
         }
-    }
-
-    /// Whether the server refused one more connection less than [`LIMITED_FOR`] ago
-    fn limited_lately(&self) -> bool {
-        self.limited.is_some_and(|at| at.elapsed() < LIMITED_FOR)
-    }
-
-    /// Whether the server refused one more connection since `at`
-    fn refused_since(&self, at: Instant) -> bool {
-        self.role == Role::Reader && self.limited.is_some_and(|limited| limited >= at)
     }
 
     /// Opens one message; when the server does not take the reader's connection, the main worker does it
@@ -267,7 +247,7 @@ impl Worker {
     ) -> Result<Vec<u8>, Failure> {
         clock.timing.served = match self.role {
             Role::Reader => Served::Reader,
-            Role::Main => Served::Main,
+            Role::Main | Role::Background => Served::Main,
         };
         let quiet = self.last_used.elapsed() > QUIET;
         let role = self.role;

@@ -22,12 +22,15 @@ use pe_i18n::{Text, tr, tr_args};
 
 use crate::{Event, EventSink, FailureKind, Secrets};
 
+mod background;
 mod reader;
 mod transfer;
 
+pub(crate) use background::Nudges;
+
 pub(crate) use reader::{Synced, tell_woke, watch_sleep};
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug)]
 pub(crate) enum Command {
     Sync,
     FetchSource {
@@ -39,6 +42,11 @@ pub(crate) enum Command {
     /// The reader connects once the main worker's first sync is done, so the first message opened does not wait for
     /// a connection (the main worker takes no notice)
     Connect,
+    /// The background worker can not have a connection of its own: the main worker does a slice of its work
+    /// between its commands, and says whether there is more
+    Background {
+        reply: tokio::sync::oneshot::Sender<bool>,
+    },
     SetFlag {
         folder: FolderId,
         uids: Vec<u64>,
@@ -286,14 +294,18 @@ pub(crate) type SharedToken = Arc<tokio::sync::Mutex<Option<(String, i64)>>>;
 /// message moved between accounts) uses that account's, so the token is still refreshed once
 pub(crate) type Tokens = Arc<std::sync::Mutex<std::collections::HashMap<AccountId, SharedToken>>>;
 
-/// The token `account` uses, made when it has none yet
-pub(crate) fn token_of(tokens: &Tokens, account: AccountId) -> SharedToken {
-    tokens
-        .lock()
+/// The value of `account` in a map shared by the workers, made when it has none yet
+pub(crate) fn shared_of<T: Default>(map: &std::sync::Mutex<HashMap<AccountId, Arc<T>>>, account: AccountId) -> Arc<T> {
+    map.lock()
         .unwrap_or_else(|p| p.into_inner())
         .entry(account)
         .or_default()
         .clone()
+}
+
+/// The token `account` uses, made when it has none yet
+pub(crate) fn token_of(tokens: &Tokens, account: AccountId) -> SharedToken {
+    shared_of(tokens, account)
 }
 
 /// What a worker does: everything but opening messages, or only that
@@ -301,6 +313,8 @@ pub(crate) fn token_of(tokens: &Tokens, account: AccountId) -> SharedToken {
 pub(crate) enum Role {
     Main,
     Reader,
+    /// What the user does not wait for: conversations and the search text of stored mail (background.rs)
+    Background,
 }
 
 impl Role {
@@ -309,13 +323,17 @@ impl Role {
         match self {
             // the user waits for everything the reader does, its sign-in too
             Role::Reader => Some(reader::RESPONSE_LIMIT),
-            Role::Main => None,
+            Role::Main | Role::Background => None,
         }
     }
 }
 
 /// How long the server may take to start answering a command the user waits for, on a connection made before
 pub(crate) const ANSWER_LIMIT: Duration = Duration::from_secs(8);
+/// How long after a server refused one more connection the reader and the background worker do without one
+const LIMITED_FOR: Duration = Duration::from_secs(15 * 60);
+/// How long the reader and the background worker wait for the main worker's first sync before they connect anyway
+const FIRST_SYNC_WAIT: Duration = Duration::from_secs(60);
 
 /// What every worker of the core shares
 #[derive(Clone)]
@@ -332,6 +350,8 @@ pub(crate) struct Context {
     pub(crate) wake: tokio::sync::watch::Receiver<u64>,
     /// The accounts synced once, which their readers wait for before connecting
     pub(crate) synced: Arc<Synced>,
+    /// Wakes the background workers: new mail was stored
+    pub(crate) nudges: Arc<Nudges>,
 }
 
 pub(crate) struct Worker {
@@ -352,6 +372,8 @@ pub(crate) struct Worker {
     pub(crate) fallback: Option<UnboundedSender<Command>>,
     /// When the server last refused a connection because too many are open
     limited: Option<Instant>,
+    /// When the server last took a connection and closed it, or refused one more
+    connect_failed: Option<Instant>,
     /// When the connection last did something (the reader's keep-alive and answer limit)
     last_used: Instant,
     /// The wake number (Context::wake) when the connection was made: one made before a later wake is dropped
@@ -392,6 +414,7 @@ impl Worker {
             archived_labels: HashMap::new(),
             fallback: None,
             limited: None,
+            connect_failed: None,
             last_used: Instant::now(),
             wake_seen: 0,
             connections_made: 0,
@@ -405,11 +428,13 @@ impl Worker {
             Ok(store) => store,
             Err(error) => return self.fail(error.into()),
         };
-        if self.role == Role::Reader {
-            return self.read(&mut store, &mut commands).await;
+        match self.role {
+            Role::Reader => return self.read(&mut store, &mut commands).await,
+            Role::Background => return self.background(&mut store, &mut commands).await,
+            Role::Main => {}
         }
         while let Some(command) = self.next_command(&mut store, &mut commands).await {
-            let sync = command == Command::Sync;
+            let sync = matches!(command, Command::Sync);
             if sync {
                 self.emit(Event::SyncStarted { account: self.account });
             }
@@ -432,26 +457,8 @@ impl Worker {
                     failure,
                 });
             }
-            // the conversations of mail stored before they were kept, then its References from the server, a batch at a
-            // time while nothing else waits (as the text below)
-            while commands.is_empty() {
-                match self.thread_stored(&mut store).await {
-                    Ok(0) | Err(_) => break,
-                    Ok(_) => {}
-                }
-            }
-            // the text of the mail for the search, a batch at a time while nothing else waits; a batch that fails is
-            // tried again after the next command
-            while commands.is_empty() {
-                match self.index_texts(&mut store).await {
-                    Ok(0) | Err(_) => break,
-                    Ok(_) => {}
-                }
-            }
         }
-        if let Some((mut client, _)) = self.connection.take() {
-            let _ = client.logout().await;
-        }
+        self.log_out().await;
     }
 
     /// Archives messages already out of the store's `folder`: on Gmail their labels taken off (kept for Undo), elsewhere
@@ -605,10 +612,41 @@ impl Worker {
                 Err(failure) => failed.push((*r, failure.message)),
             }
         }
+        self.log_out().await;
+        failed
+    }
+
+    /// New mail was stored: the background worker has work
+    fn more_background_work(&self) {
+        background::nudge(&self.ctx.nudges, self.account);
+    }
+
+    /// Whether the server refused this worker a connection since `at` (said it has too many, or closed it without
+    /// saying why, as some do then): the main worker, connected already, does the work
+    fn refused_since(&self, at: Instant) -> bool {
+        self.role != Role::Main && self.connect_failed.is_some_and(|failed| failed >= at)
+    }
+
+    /// Whether the server refused one more connection less than [`LIMITED_FOR`] ago
+    fn limited_lately(&self) -> bool {
+        self.limited.is_some_and(|at| at.elapsed() < LIMITED_FOR)
+    }
+
+    /// Until the main worker's first sync is done, [`FIRST_SYNC_WAIT`] at most: what the reader and the background
+    /// worker wait for before they connect
+    fn first_sync(&self) -> impl std::future::Future<Output = ()> + use<> {
+        let mut synced = self.ctx.synced.subscribe();
+        let account = self.account;
+        async move {
+            let _ = tokio::time::timeout(FIRST_SYNC_WAIT, synced.wait_for(|done| done.contains(&account))).await;
+        }
+    }
+
+    /// Ends the connection, when there is one
+    async fn log_out(&mut self) {
         if let Some((mut client, _)) = self.connection.take() {
             let _ = client.logout().await;
         }
-        failed
     }
 
     /// The access token is no good: the next connect of either worker refreshes it
@@ -864,6 +902,10 @@ impl Worker {
                 Ok(())
             }
             Command::Connect => Ok(()),
+            Command::Background { reply } => {
+                let _ = reply.send(self.background_slice(store).await);
+                Ok(())
+            }
             Command::SetFlag { folder, uids, flag, on } => {
                 Ok(set_flag(self.client(store).await?, store, folder, &uids, flag, on).await?)
             }
@@ -1292,6 +1334,9 @@ impl Worker {
                 folder,
             });
         }
+        if report.added > 0 {
+            self.more_background_work();
+        }
         // new unread mail, above the UIDs the store knew: not with the first sync of the folder, nor after a reset,
         // which would call every message new
         if report.added > 0
@@ -1436,8 +1481,15 @@ impl Worker {
                 config.timeouts.response = config.timeouts.response.min(limit);
             }
             let connected = Client::connect(config).await;
-            if connected.as_ref().is_err_and(pe_imap::Error::is_connection_limit) {
-                self.limited = Some(Instant::now());
+            // a server that took the connection and then closed it, or said it has too many: the main worker,
+            // connected already, does this worker's work; one that can not be reached fails it here at once
+            if let Err(error) = &connected
+                && (error.is_connection_limit() || matches!(error, pe_imap::Error::Closed(_)))
+            {
+                self.connect_failed = Some(Instant::now());
+                if error.is_connection_limit() {
+                    self.limited = self.connect_failed;
+                }
             }
             self.connection = Some(connected.map_err(|error| scope_hint(Failure::from(error), &account))?);
             self.wake_seen = wake;
