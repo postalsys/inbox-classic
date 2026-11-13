@@ -4192,14 +4192,18 @@ public static class Dragger {
 
     Step 'a message downloaded ahead opens at once'
     # SCENARIO 49b, near the end: everything recent is downloaded from now on, which the steps before do not expect
-    $IDC_OPTIONS_DOWNLOAD_AHEAD = 672; $CB_SETCURSEL = 0x014E
-    Command $main $IDM_OPTIONS
-    $o = WaitShown 'InboxClassicOptions' 10
-    if ($o) {
-        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_DOWNLOAD_AHEAD), $CB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
-        Click $o 1
-        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
+    # Options' Download messages ahead at the choice of that place: 0 recent messages, 2 only when opened
+    function SetDownloadAhead([int]$choice) {
+        Command $main $IDM_OPTIONS
+        $o = WaitShown 'InboxClassicOptions' 10
+        if ($o) {
+            [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_DOWNLOAD_AHEAD), $CB_SETCURSEL, [IntPtr]$choice, [IntPtr]::Zero)
+            Click $o 1
+            [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
+        }
     }
+    $kTestFromStore = 0x53544F52
+    SetDownloadAhead 0
     $before = 'Subject: Here before you'
     # in Archive, dated ahead of the others there, so it is the first row
     AddMessage ("From: Kim Example <kim@example.com>`r`nTo: testuser@inboxclassic.test`r`n$before`r`n" +
@@ -4211,15 +4215,9 @@ public static class Dragger {
     SelectFolder 3
     Start-Sleep -Seconds 2
     SelectRow 0
-    Check ([bool](WaitFor { [Native.Win]::SendText($main, 0x53544F52, '') -eq 11 } 10)) 'a new message downloaded ahead opens from the store, without a download'
+    Check ([bool](WaitFor { [Native.Win]::SendText($main, $kTestFromStore, '') -eq 11 } 10)) 'a new message downloaded ahead opens from the store, without a download'
     Shot $main 'open-1-from-store'
-    Command $main $IDM_OPTIONS
-    $o = WaitShown 'InboxClassicOptions' 10
-    if ($o) {
-        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_DOWNLOAD_AHEAD), $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
-        Click $o 1
-        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
-    }
+    SetDownloadAhead 2
     SelectFolder 0
 
     Step 'the tray'

@@ -30,6 +30,8 @@ final class Reader: NSObject {
     private(set) var messageView: MessageView?
     /// a message file (.eml) shown, of no folder, instead of a message of the store
     private(set) var file: String?
+    /// the size of the message asked for, from the list, for the page shown while it is downloaded
+    private var loadingSize: UInt64 = 0
     /// its pictures from the internet were asked for
     private(set) var remoteImages = false
     /// a download asked for and not answered yet: MessageReady or MessageFailed for it is this reader's
@@ -191,6 +193,7 @@ final class Reader: NSObject {
     /// a message asked for: its header from the list at once, and after a moment, should it not be here yet, that it is
     /// being downloaded
     func showLoading(_ row: Message) {
+        loadingSize = row.size
         showHeader(true)
         header.attributedStringValue = headerText(from: row.from, date: row.date, to: row.recipients, cc: "", subject: row.subject)
         retry.isHidden = true
@@ -210,7 +213,7 @@ final class Reader: NSObject {
         downloadingTimer?.invalidate()
         retry.isHidden = true
         // how large it is, too
-        preview.show(taken(pe_message_downloading_page(core.handle, folder, uid)) ?? "")
+        preview.showState(PE_READER_STATE_DOWNLOADING, size: loadingSize)
     }
 
     /// the message could not be downloaded: why, in the pane, and Try Again over it

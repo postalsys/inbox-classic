@@ -106,8 +106,8 @@ pub enum PeReaderState {
 }
 
 /// The page of the reading pane for `state`, the same words on every platform: a document to show as the messages
-/// are shown. `failure` and `reason` (NULL for none) are those of `MessageFailed`, for `Failed`. Free with
-/// `pe_string_free`.
+/// are shown. `failure` and `reason` (NULL for none) are those of `MessageFailed`, for `Failed`; `size` that of the
+/// message being downloaded, from its row, for `Downloading` (0 when not known). Free with `pe_string_free`.
 ///
 /// # Safety
 /// `reason` must be NULL or a NUL-terminated string.
@@ -116,13 +116,16 @@ pub unsafe extern "C" fn pe_reader_page(
     state: PeReaderState,
     failure: core::PeFailureKind,
     reason: *const c_char,
+    size: u64,
 ) -> *mut c_char {
     // SAFETY: as the caller guarantees
     let reason = (!reason.is_null()).then(|| unsafe { std::ffi::CStr::from_ptr(reason) }.to_string_lossy());
     guard(|| {
         let state = match state {
             PeReaderState::NoMessage => pe_core::ReaderState::NoMessage,
-            PeReaderState::Downloading => pe_core::ReaderState::Downloading,
+            PeReaderState::Downloading => pe_core::ReaderState::Downloading {
+                size: (size > 0).then_some(size),
+            },
             PeReaderState::Failed => pe_core::ReaderState::Failed {
                 kind: failure.into(),
                 reason: reason.as_deref().unwrap_or_default(),

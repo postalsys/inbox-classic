@@ -133,6 +133,8 @@ private:
     Preview preview_;
     // the message shown, its folder and the account of that, 0 for none
     uint64_t uid_ = 0;
+    // its size from the list, for the page shown while it is downloaded
+    uint64_t size_ = 0;
     int64_t folder_ = 0;
     int64_t account_ = 0;
     bool remoteImages_ = false;

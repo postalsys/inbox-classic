@@ -318,6 +318,7 @@ void Reader::ShowPage(const std::wstring& html) {
 
 void Reader::Open(int64_t folder, uint64_t uid, int64_t account, const PeMessage* row) {
     uid_ = uid;
+    size_ = row ? row->size : 0;
     folder_ = folder;
     account_ = account;
     // the header from the list at once; the pane says the message is being downloaded a moment later, should it not
@@ -332,8 +333,7 @@ void Reader::Open(int64_t folder, uint64_t uid, int64_t account, const PeMessage
 
 // the pane says the message is being downloaded, and how large it is
 void Reader::ShowDownloading() {
-    core::String page(pe_message_downloading_page(core_, folder_, uid_));
-    preview_.Show(page ? core::Widen(page.get()) : L"");
+    preview_.ShowState(PE_READER_STATE_DOWNLOADING, PE_FAILURE_KIND_NONE, {}, size_);
 }
 
 void Reader::Retry() {

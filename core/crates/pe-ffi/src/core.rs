@@ -2279,21 +2279,6 @@ pub unsafe extern "C" fn pe_message_source_text(
     into_c_string(text)
 }
 
-/// The reading pane's page while `folder`/`uid` is downloaded, with its size: shown in place of
-/// `pe_reader_page(PE_READER_STATE_DOWNLOADING)`. Free with `pe_string_free`.
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_message_downloading_page(core: *const PeCore, folder: i64, uid: u64) -> *mut c_char {
-    // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, null_mut(), |core| {
-            into_c_string(core.downloading_page(folder, uid))
-        })
-    }
-}
-
 /// Whether the last message opened came from the store, with no connection used (downloaded ahead): for the UI tests
 ///
 /// # Safety
