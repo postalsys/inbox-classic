@@ -110,15 +110,19 @@ Core only: no change to the C API or the apps.
 
 - **Connect the reader at start**, after the main worker's first sync, not at the first click. Refused: opens go to the
   main worker (see Connections).
-- **Keep it alive**: a NOOP every 4 minutes while it waits, and TCP keepalive on every socket (`socket2`: idle 60 s,
-  interval 15 s). **A NOOP that fails replaces the connection at once**, so it is ready again before the next click and
-  not found dead by it.
-- **A short limit for the first byte of what the user waits for**: no data within 8 s (3 s when the connection was quiet
-  for more than a minute) and the reader drops the connection and tries once more on a new one. The FETCH itself is the
-  check: no NOOP is sent before it. The 300 s inactivity limit stays for background work.
-- **Sleep**: the core notices a wake by itself: a 10 s tick whose wall clock moved more than 30 s. It then drops every
-  connection and connects the main worker and the readers again. The same works on all three systems with no code in
-  the apps.
+- **Keep it alive**: TCP keepalive on every socket (`socket2`: idle 60 s, interval 15 s, 4 probes where the system
+  lets it be set) keeps NAT and routers from forgetting a quiet connection, and a NOOP every 15 minutes while the
+  reader waits keeps servers from logging it out (they may after 30). **A NOOP that fails replaces the connection at
+  once**, so it is ready again before the next click and not found dead by it.
+- **A short limit for the first byte of what the user waits for**: on a connection the reader had already, no data
+  within 8 s (3 s when the connection was quiet for more than a minute) and the reader drops the connection and tries
+  once more on a new one, without that limit (a connection made just now is alive). The FETCH itself is the check: no
+  NOOP is sent before it. The reader's sign-in and reads have 30 s at most; the 300 s inactivity limit stays for the
+  main worker and background work.
+- **Sleep**: the core notices a wake by itself: a 30 s tick whose wall clock moved more than 90 s. Every connection
+  made before it is then dropped when next used (each remembers the wake it was made after), the main worker leaves
+  IDLE without DONE and syncs the Inbox, the reader connects again. `Core::woke` does the same, for an app that hears
+  of a network change. The same works on all three systems with no code in the apps.
 - **Network changes** are covered by keepalive and the first byte limit. The apps telling the core (`NotifyAddrChange`,
   `NWPathMonitor`, `GNetworkMonitor`) is added later only if phase 1's numbers still show waits after a change of
   network.

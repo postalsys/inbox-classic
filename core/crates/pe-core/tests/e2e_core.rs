@@ -114,7 +114,9 @@ fn reads_mail_like_the_windows_do() {
     let timings = s.core.open_timings();
     assert_eq!(timings.len(), 2, "{timings:?}");
     let (first, second) = (&timings[0], &timings[1]);
-    assert_eq!((first.served, first.link), (Served::Reader, Link::New));
+    // the reader connects after the first sync: by now, or for this open
+    assert_eq!(first.served, Served::Reader);
+    assert!(matches!(first.link, Link::New | Link::Reused), "{first:?}");
     assert_eq!(first.size, html.len() as u64);
     assert_eq!(first.host, "127.0.0.1");
     assert!(first.connected <= first.selected && first.selected <= first.first_byte);
@@ -3111,4 +3113,133 @@ fn a_trusted_senders_pictures_load_when_confirmed() {
     s.core.untrust_sender(trusted[0].id).unwrap();
     s.core.set_always_load_pictures(false).unwrap();
     assert!(!view(confirmed).pictures_loaded);
+}
+
+// ---- the reader: ready before the first click and kept ready (docs/open-speed-plan.md, phase 2) ----
+
+/// The sessions ImapKit has open: (number, state)
+fn sessions(server: &ImapKit) -> Vec<(u64, String)> {
+    let listed = server.request("GET", "/v1/sessions", None);
+    listed
+        .as_array()
+        .expect("a list")
+        .iter()
+        .map(|s| {
+            (
+                s["session"].as_u64().unwrap_or(0),
+                s["state"].as_str().unwrap_or("").to_string(),
+            )
+        })
+        .collect()
+}
+
+/// An account synced once, with these messages in its Inbox: (account, Inbox, their UIDs)
+fn synced_with(s: &Setup, subjects: &[&str]) -> (pe_store::AccountId, pe_store::FolderId, Vec<u64>) {
+    let uids = subjects
+        .iter()
+        .map(|subject| s.server.add_message("INBOX", &rfc822(subject, "Hello"), &[]))
+        .collect();
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    (account, inbox, uids)
+}
+
+fn open(s: &Setup, folder: pe_store::FolderId, uid: u64) {
+    s.core.open_message(folder, uid).unwrap();
+    s.wait(|e| *e == Event::MessageReady { folder, uid });
+}
+
+#[test]
+fn the_reader_is_connected_before_the_first_open() {
+    let Some(s) = setup() else { return };
+    let (_, inbox, uids) = synced_with(&s, &["One"]);
+    // the main worker's connection and the reader's
+    eventually(
+        || sessions(&s.server).len() == 2,
+        "the reader connects after the first sync",
+    );
+    open(&s, inbox, uids[0]);
+    let timing = s.core.open_timings().pop().unwrap();
+    assert_eq!(
+        (timing.served, timing.link),
+        (Served::Reader, Link::Reused),
+        "{timing:?}"
+    );
+    assert_eq!(timing.connected, None);
+}
+
+#[test]
+fn a_dead_reader_connection_is_replaced_within_seconds() {
+    let Some(s) = setup() else { return };
+    let (_, inbox, uids) = synced_with(&s, &["One"]);
+    // signed in, and no folder selected yet
+    let reader_ready = || sessions(&s.server).iter().any(|(_, state)| state == "Authenticated");
+    eventually(reader_ready, "the reader connects");
+    // from now on the reader's session gets no answer, as one a NAT forgot
+    let reader = sessions(&s.server)
+        .into_iter()
+        .find(|(_, state)| state == "Authenticated")
+        .map(|(number, _)| number)
+        .expect("the reader's session");
+    s.server.request(
+        "POST",
+        "/v1/script/rules",
+        Some(json!({ "on": "command", "session": reader, "drop": true })),
+    );
+    let started = std::time::Instant::now();
+    open(&s, inbox, uids[0]);
+    let took = started.elapsed();
+    let timing = s.core.open_timings().pop().unwrap();
+    assert_eq!(timing.link, Link::Retried, "{timing:?}");
+    assert!(took < Duration::from_secs(15), "{took:?}");
+}
+
+#[test]
+fn connections_are_made_again_after_a_wake() {
+    let Some(s) = setup() else { return };
+    let (_, inbox, uids) = synced_with(&s, &["One"]);
+    eventually(|| sessions(&s.server).len() == 2, "the reader connects");
+    let before: Vec<u64> = sessions(&s.server).into_iter().map(|(n, _)| n).collect();
+    s.core.woke();
+    eventually(
+        || {
+            let now = sessions(&s.server);
+            now.len() == 2 && now.iter().all(|(n, _)| !before.contains(n))
+        },
+        "both connections are new",
+    );
+    open(&s, inbox, uids[0]);
+}
+
+#[test]
+fn opens_go_to_the_main_worker_when_the_server_allows_one_connection() {
+    // every connection after the first is refused at its greeting
+    let Some(s) = setup_with(json!({ "script": {
+        "on": "greeting", "nth": 2, "send": "* BYE Too many connections\r\n", "close": true
+    } })) else {
+        return;
+    };
+    let (account, inbox, uids) = synced_with(&s, &["One", "Two"]);
+    for uid in &uids {
+        s.core.open_message(inbox, *uid).unwrap();
+        // no failure for the account: doing without the reader is not one
+        s.wait(|e| match e {
+            Event::MessageReady { uid: ready, .. } => ready == uid,
+            Event::MessageFailed { .. } => panic!("{e:?}"),
+            Event::Failed { account: failed, .. } if *failed == account => panic!("{e:?}"),
+            _ => false,
+        });
+    }
+    let timings = s.core.open_timings();
+    assert!(timings.iter().all(|t| t.served == Served::Main), "{timings:?}");
+    assert!(s.core.message_view(inbox, uids[1], false).unwrap().is_some());
 }

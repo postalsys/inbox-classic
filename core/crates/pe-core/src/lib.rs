@@ -360,6 +360,10 @@ pub struct Core {
     tokens: worker::Tokens,
     /// How long opening messages took
     timings: timing::Timings,
+    /// A new number each time the computer woke from sleep (or [`Core::woke`] was called): connections are made again
+    wake: Arc<tokio::sync::watch::Sender<u64>>,
+    /// The accounts whose main worker finished a sync, for their readers to connect after
+    synced: Arc<worker::Synced>,
     secrets: Secrets,
     trust: Trust,
     events: EventSink,
@@ -426,9 +430,13 @@ impl Core {
                 let _ = search::index_pending(&mut store);
             }
         });
+        let wake = Arc::new(tokio::sync::watch::Sender::new(0));
+        runtime.spawn(worker::watch_sleep(wake.clone()));
         let closed = Arc::new(AtomicBool::new(false));
         let open = closed.clone();
         Ok(Core {
+            wake,
+            synced: Arc::new(worker::Synced::new(Default::default())),
             path,
             store: Mutex::new(store),
             runtime: Some(runtime),
@@ -1095,7 +1103,15 @@ impl Core {
 
     /// Syncs the folder list and every folder of an account, in the background
     pub fn sync(&self, account: AccountId) -> Result<()> {
-        self.send_command(account, Command::Sync)
+        self.send_command(account, Command::Sync)?;
+        // the reader connects after the first sync, ready for the first message opened
+        self.send_to(&self.readers, Role::Reader, account, Command::Connect)
+    }
+
+    /// The computer woke from sleep, or the network changed: every connection is dropped and made again, the main
+    /// workers sync. The core notices a sleep by itself; an app calls this when the system tells it about the network.
+    pub fn woke(&self) {
+        worker::tell_woke(&self.wake);
     }
 
     /// One message of a folder as the list shows it, None when the folder has no message with this UID
@@ -1930,6 +1946,8 @@ impl Core {
             tokens: self.tokens.clone(),
             events: self.events.clone(),
             timings: self.timings.clone(),
+            wake: self.wake.subscribe(),
+            synced: self.synced.clone(),
         }
     }
 
@@ -1939,22 +1957,48 @@ impl Core {
 
     /// Hands `command` to the worker of `account` in `workers` (of `role`), started when there is none or it stopped
     fn send_to(&self, workers: &Workers, role: Role, account: AccountId, command: Command) -> Result<()> {
-        let mut workers = workers.lock().unwrap_or_else(|p| p.into_inner());
-        let command = match workers.get(&account) {
-            Some((sender, _)) => match sender.send(command) {
-                Ok(()) => return Ok(()),
-                // the worker stopped: a new one takes the command
-                Err(returned) => returned.0,
-            },
-            None => command,
-        };
+        match self.worker_of(workers, role, account)?.send(command) {
+            Ok(()) => Ok(()),
+            // it stopped meanwhile: a new one takes the command
+            Err(returned) => self
+                .worker_of(workers, role, account)?
+                .send(returned.0)
+                .map_err(|_| Error::Closed),
+        }
+    }
+
+    /// Where the commands of the worker of `account` in `workers` go, the worker started when there is none or it
+    /// stopped. A reader gets the main worker to hand opens to when the server refuses it a connection.
+    fn worker_of(&self, workers: &Workers, role: Role, account: AccountId) -> Result<UnboundedSender<Command>> {
+        /// The worker's sender, while it runs
+        fn live(
+            workers: &HashMap<AccountId, (UnboundedSender<Command>, tokio::task::AbortHandle)>,
+            account: AccountId,
+        ) -> Option<UnboundedSender<Command>> {
+            workers
+                .get(&account)
+                .map(|(sender, _)| sender.clone())
+                .filter(|sender| !sender.is_closed())
+        }
+        if let Some(sender) = live(&workers.lock().unwrap_or_else(|p| p.into_inner()), account) {
+            return Ok(sender);
+        }
         self.store().account(account).map_err(|_| Error::NotFound)?;
+        // taken before the readers' lock, as it takes the workers'
+        let fallback = match role {
+            Role::Reader => Some(self.worker_of(&self.workers, Role::Main, account)?),
+            Role::Main => None,
+        };
+        let mut workers = workers.lock().unwrap_or_else(|p| p.into_inner());
+        if let Some(sender) = live(&workers, account) {
+            return Ok(sender);
+        }
         let (sender, receiver) = unbounded_channel();
-        sender.send(command).map_err(|_| Error::Closed)?;
-        let worker = Worker::new(account, role, self.worker_context());
+        let mut worker = Worker::new(account, role, self.worker_context());
+        worker.fallback = fallback;
         let task = self.runtime()?.spawn(worker.run(receiver));
-        workers.insert(account, (sender, task.abort_handle()));
-        Ok(())
+        workers.insert(account, (sender.clone(), task.abort_handle()));
+        Ok(sender)
     }
 
     fn stop_worker(&self, account: AccountId) {

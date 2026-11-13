@@ -1861,6 +1861,7 @@ version = "0.14.2"
 dependencies = [
  "rustls",
  "rustls-platform-verifier",
+ "socket2",
  "tokio",
  "tokio-rustls",
 ]

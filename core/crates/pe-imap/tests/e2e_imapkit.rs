@@ -696,6 +696,31 @@ async fn a_greeting_that_never_comes_times_out() {
 }
 
 #[tokio::test]
+async fn a_command_never_answered_fails_within_the_answer_limit() {
+    let kit = kit!(json!({ "script": { "on": "command", "command": "NOOP", "drop": true } }));
+    let (mut client, _) = kit.connect().await;
+    client.limit_next_answer(Duration::from_millis(400));
+    let started = std::time::Instant::now();
+    let error = client.noop().await.unwrap_err();
+    assert!(matches!(error, Error::Timeout), "{error:?}");
+    assert!(started.elapsed() < Duration::from_secs(3), "{:?}", started.elapsed());
+    assert!(client.is_closed());
+}
+
+#[tokio::test]
+async fn an_answer_that_started_has_the_whole_response_timeout() {
+    // the answer comes at once, a few octets every 300 ms: slower than the answer limit, but it is coming
+    let kit = kit!(
+        json!({ "script": { "on": "response", "command": "NOOP", "untagged": false, "chunk": 6, "chunkDelay": 300 } })
+    );
+    let (mut client, _) = kit.connect().await;
+    client.limit_next_answer(Duration::from_millis(200));
+    client.noop().await.unwrap();
+    assert!(client.answered_at().is_some());
+    assert!(!client.is_closed());
+}
+
+#[tokio::test]
 async fn a_greeting_split_into_single_octets_is_read() {
     let kit = kit!(
         json!({ "script": { "on": "greeting", "send": "* OK [CAPABILITY IMAP4rev1 IDLE] split greeting\r\n", "chunk": 1, "chunkDelay": 1 } })
