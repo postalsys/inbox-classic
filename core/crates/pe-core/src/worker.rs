@@ -968,7 +968,8 @@ impl Worker {
             Command::Connect => Ok(()),
             Command::SyncFolder { folder } => self.sync_one(store, folder).await,
             Command::Upload { upload } => {
-                let outcome = self.upload(store, &upload).await;
+                // boxed: not part of every command's future
+                let outcome = Box::pin(self.upload(store, &upload)).await;
                 self.uploaded(&upload, &outcome);
                 outcome?;
                 self.sync_one(store, upload.folder()).await

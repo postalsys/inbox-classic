@@ -90,6 +90,9 @@ pub use text::{
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};
 
+/// The stack of each of the core's worker threads
+const WORKER_STACK: usize = 8 * 1024 * 1024;
+
 /// The version of the core, which the About boxes show
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -449,6 +452,9 @@ impl Core {
         let runtime = tokio::runtime::Builder::new_multi_thread()
             .worker_threads(2)
             .thread_name("pe-worker")
+            // a command's futures nest deep (a move taken back between accounts connects to the other account inside
+            // it), and unoptimized builds keep large frames for each: the 2 MiB of tokio's own default ran out
+            .thread_stack_size(WORKER_STACK)
             .enable_all()
             .build()
             .map_err(|_| Error::Closed)?;
