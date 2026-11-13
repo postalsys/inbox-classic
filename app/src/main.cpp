@@ -1143,6 +1143,8 @@ constexpr ULONG_PTR kTestNotification = 0x4E4F5445;
 constexpr ULONG_PTR kTestLink = 0x4C494E4B;
 // with --test-hooks only: what the taskbar button's overlay shows (TrayBadge), plus 10 so a refused one is no 0
 constexpr ULONG_PTR kTestBadge = 0x42414447;
+// with --test-hooks only: 11 when the last message opened came from the store (downloaded ahead), 10 when not
+constexpr ULONG_PTR kTestFromStore = 0x53544F52;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -1549,6 +1551,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_COPYDATA: {
         auto* data = reinterpret_cast<const COPYDATASTRUCT*>(lParam);
+        if (g_arguments.testHooks && data->dwData == kTestFromStore) {
+            return pe_last_open_from_store(g_core.get()) ? 11 : 10;
+        }
         if (g_arguments.testHooks && data->dwData == kTestBadge) {
             return static_cast<LRESULT>(TrayBadge() + 10);
         }

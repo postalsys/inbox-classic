@@ -35,6 +35,8 @@ folder-archive = Archiv
 reader-no-message = Es ist keine Nachricht ausgewählt.
 reader-downloading = Die Nachricht wird heruntergeladen…
 reader-downloading-detail = Die Nachricht wird angezeigt, sobald der Download abgeschlossen ist.
+# review: new
+reader-downloading-size = Die Nachricht ist { $size } groß. Sie erscheint hier, sobald sie heruntergeladen ist.
 reader-failed = Die Nachricht konnte nicht heruntergeladen werden
 reader-failed-network = Der Mailserver war nicht erreichbar ({ $reason }).
 reader-failed-sign-in = Der Mailserver hat die Anmeldung nicht angenommen ({ $reason }). Prüfen Sie das Passwort oder melden Sie sich unter Datei > Konten erneut an.

@@ -96,6 +96,7 @@ private:
     void ChoosePictures();
     // the bar over a message that could not be downloaded, shown or not
     void ShowRetry(bool shown);
+    void ShowDownloading();
     // Try Again, or the account synced again after the message could not be downloaded
     void Retry();
     void ShowLogo(bool wanted);
@@ -132,6 +133,8 @@ private:
     Preview preview_;
     // the message shown, its folder and the account of that, 0 for none
     uint64_t uid_ = 0;
+    // its size from the list, for the page shown while it is downloaded
+    uint64_t size_ = 0;
     int64_t folder_ = 0;
     int64_t account_ = 0;
     bool remoteImages_ = false;

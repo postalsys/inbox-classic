@@ -168,8 +168,8 @@ void Preview::Clear(bool noMessage) {
          L"</head><body></body></html>");
 }
 
-void Preview::ShowState(PeReaderState state, PeFailureKind failure, const std::string& reason) {
-    core::String page(pe_reader_page(state, failure, reason.c_str()));
+void Preview::ShowState(PeReaderState state, PeFailureKind failure, const std::string& reason, uint64_t size) {
+    core::String page(pe_reader_page(state, failure, reason.c_str(), size));
     Show(page ? core::Widen(page.get()) : L"");
 }
 

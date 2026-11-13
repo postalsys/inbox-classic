@@ -984,6 +984,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::language_tour(&d).await;
     about_and_help(&d).await;
     printing(&d).await;
+    steps::opened_from_store(&d).await;
     steps::closing(&d).await;
 }
 

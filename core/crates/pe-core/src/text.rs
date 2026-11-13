@@ -303,8 +303,8 @@ pub fn retry_note() -> String {
 pub enum ReaderState<'a> {
     /// No message is selected
     NoMessage,
-    /// The message selected is being downloaded ([`crate::Core::open_message`])
-    Downloading,
+    /// The message selected is being downloaded ([`crate::Core::open_message`]); how large it is, when known
+    Downloading { size: Option<u64> },
     /// It could not be downloaded ([`crate::Event::MessageFailed`]): `kind` and the server's `reason`
     Failed { kind: crate::FailureKind, reason: &'a str },
 }
@@ -316,8 +316,12 @@ pub fn reader_page(state: ReaderState) -> String {
     use crate::FailureKind;
     match state {
         ReaderState::NoMessage => pe_html::status_page(&tr(Text::ReaderNoMessage), "", false),
-        ReaderState::Downloading => {
-            pe_html::status_page(&tr(Text::ReaderDownloading), &tr(Text::ReaderDownloadingDetail), true)
+        ReaderState::Downloading { size } => {
+            let detail = match size {
+                Some(size) => tr_args(Text::ReaderDownloadingSize, &[("size", (&format_size(size)).into())]),
+                None => tr(Text::ReaderDownloadingDetail),
+            };
+            pe_html::status_page(&tr(Text::ReaderDownloading), &detail, true)
         }
         ReaderState::Failed { kind, reason } => {
             let reason = reason.trim().trim_end_matches('.');
@@ -412,7 +416,13 @@ mod tests {
     #[test]
     fn the_reading_pane_says_why() {
         assert!(reader_page(ReaderState::NoMessage).contains("There is no message selected."));
-        let downloading = reader_page(ReaderState::Downloading);
+        let downloading = reader_page(ReaderState::Downloading { size: None });
+        assert!(
+            reader_page(ReaderState::Downloading {
+                size: Some(2 * 1024 * 1024)
+            })
+            .contains("The message is 2.0 MB.")
+        );
         assert!(downloading.contains("Downloading the message") && downloading.contains("class=\"spin\""));
         let offline = reader_page(ReaderState::Failed {
             kind: crate::FailureKind::Network,

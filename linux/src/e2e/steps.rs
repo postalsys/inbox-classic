@@ -2252,6 +2252,7 @@ pub async fn not_downloaded(d: &Driver) {
         wait_until(10, || reader.preview.shown().contains("Downloading the message")).await,
         "the pane says the message is being downloaded",
     );
+    d.check(reader.preview.shown().contains("The message is"), "and how large it is");
     d.shot(&main, "read-13-downloading").await;
     // the server gone: why, and Try Again
     silent.stop();
@@ -3420,4 +3421,48 @@ pub async fn omarchy_title_bar(d: &Driver) {
         wait_until(5, || header.decoration_layout().is_none()).await,
         "tiled again, the header bar has its own buttons back",
     );
+}
+
+/// A new message downloaded ahead opens from the store, no connection used (SCENARIO 49b). Near the end: everything
+/// recent is downloaded from now on, which the steps before do not expect.
+pub async fn opened_from_store(d: &Driver) {
+    d.step("a message downloaded ahead opens at once");
+    let core = &shell().core;
+    let _ = core.set_download_ahead(pe_core::Ahead::Recent);
+    let raw = format!(
+        "From: Kim Example <kim@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Here before you\r\n\
+         Date: {}\r\nMessage-ID: <here-before@example.com>\r\n\r\nDownloaded before it was opened.\r\n",
+        date_now(0)
+    );
+    let _ = d.add_message_to("Archive", &raw);
+    run_command(Command::Sync);
+    select_folder("Archive");
+    let archive = folder_of(0, "Archive");
+    let stored = || {
+        archive
+            .and_then(|folder| {
+                let listed = core.messages(folder, pe_store::Sort::default(), 0, 100).ok()?;
+                let message = listed.into_iter().find(|m| m.info.subject == "Here before you")?;
+                core.message_source(folder, message.info.uid).ok().flatten()
+            })
+            .is_some()
+    };
+    d.check(
+        wait_until(30, stored).await,
+        "a new message is downloaded before it is opened",
+    );
+    show_found("subject:\"Here before you\"").await;
+    let reader = &shell().main().reader;
+    d.check(
+        wait_until(10, || {
+            document_text(&reader.preview.shown()).contains("Downloaded before it was opened")
+        })
+        .await
+            && core.last_open_from_store(),
+        "and opens from the store, without a download",
+    );
+    d.shot(&main_window(), "open-1-from-store").await;
+    let _ = core.set_download_ahead(pe_core::Ahead::Never);
+    search("").await;
+    select_folder("Inbox");
 }

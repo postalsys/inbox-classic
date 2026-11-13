@@ -2279,6 +2279,16 @@ pub unsafe extern "C" fn pe_message_source_text(
     into_c_string(text)
 }
 
+/// Whether the last message opened came from the store, with no connection used (downloaded ahead): for the UI tests
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_last_open_from_store(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.last_open_from_store()) }
+}
+
 /// Whether `folder`/`uid` shows its text before the rest of it, which is still being downloaded: its attachments,
 /// Save As, View Source and Forward wait for it (a `MessageReady` follows once it is here)
 ///

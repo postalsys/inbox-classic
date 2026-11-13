@@ -129,6 +129,11 @@ impl Timings {
         }
     }
 
+    /// Where the last open's message came from
+    pub(crate) fn last_served(&self) -> Option<Served> {
+        self.lock().back().map(|(_, timing)| timing.served)
+    }
+
     pub(crate) fn all(&self) -> Vec<OpenTiming> {
         self.lock().iter().map(|(_, timing)| timing.clone()).collect()
     }

@@ -197,8 +197,8 @@ final class Preview: NSObject {
     }
 
     /// the core's page for `state` (no message selected, downloading, why it could not be downloaded)
-    func showState(_ state: PeReaderState, failure: PeFailureKind = PE_FAILURE_KIND_NONE, reason: String = "") {
-        show(reason.withCString { taken(pe_reader_page(state, failure, $0)) } ?? "")
+    func showState(_ state: PeReaderState, failure: PeFailureKind = PE_FAILURE_KIND_NONE, reason: String = "", size: UInt64 = 0) {
+        show(reason.withCString { taken(pe_reader_page(state, failure, $0, size)) } ?? "")
     }
 
     /// says that no message is selected, or shows nothing while one loads

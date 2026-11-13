@@ -35,6 +35,8 @@ folder-archive = Arhiiv
 reader-no-message = Ühtegi kirja pole valitud.
 reader-downloading = Kirja laaditakse alla…
 reader-downloading-detail = Kiri kuvatakse siin, kui allalaadimine on lõppenud.
+# review: new
+reader-downloading-size = Kirja suurus on { $size }. See ilmub siia, kui on alla laaditud.
 reader-failed = Kirja ei saanud alla laadida
 reader-failed-network = Meiliserveriga ei saanud ühendust ({ $reason }).
 reader-failed-sign-in = Meiliserver lükkas sisselogimise tagasi ({ $reason }). Kontrollige parooli või logige uuesti sisse menüüs Fail > Kontod.

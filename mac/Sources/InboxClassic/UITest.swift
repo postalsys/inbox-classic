@@ -516,6 +516,7 @@ final class UITest {
         try await openEml()
         try await accountsAndHelp()
         try await languages()
+        try await openedFromStore()
     }
 
     func addAccount() async throws {

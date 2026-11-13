@@ -1020,14 +1020,15 @@ char *pe_html_render(const uint8_t *html,
 char *pe_webkit_content_rules(bool allow_remote_images);
 
 // The page of the reading pane for `state`, the same words on every platform: a document to show as the messages
-// are shown. `failure` and `reason` (NULL for none) are those of `MessageFailed`, for `Failed`. Free with
-// `pe_string_free`.
+// are shown. `failure` and `reason` (NULL for none) are those of `MessageFailed`, for `Failed`; `size` that of the
+// message being downloaded, from its row, for `Downloading` (0 when not known). Free with `pe_string_free`.
 //
 // # Safety
 // `reason` must be NULL or a NUL-terminated string.
 char *pe_reader_page(enum PeReaderState state,
                      enum PeFailureKind failure,
-                     const char *reason);
+                     const char *reason,
+                     uint64_t size);
 
 // What the windows say beside Try Again over a message that could not be downloaded. Free with `pe_string_free`.
 char *pe_retry_note(void);
@@ -2011,6 +2012,12 @@ char *pe_message_source_text(const struct PeCore *core,
                              int64_t folder,
                              uint64_t uid,
                              char **title);
+
+// Whether the last message opened came from the store, with no connection used (downloaded ahead): for the UI tests
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_last_open_from_store(const struct PeCore *core);
 
 // Whether `folder`/`uid` shows its text before the rest of it, which is still being downloaded: its attachments,
 // Save As, View Source and Forward wait for it (a `MessageReady` follows once it is here)

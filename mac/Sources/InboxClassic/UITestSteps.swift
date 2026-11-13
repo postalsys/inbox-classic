@@ -60,6 +60,7 @@ extension UITest {
         check(header?.stringValue.contains("Waiting on the server") == true && header?.stringValue.contains("Hal Example") == true,
               "the header shows the message's sender and subject at once (\(header?.stringValue ?? ""))")
         check(await waitUntil(10) { await readerText().contains("Downloading the message") }, "the pane says the message is being downloaded")
+        check(await readerText().contains("The message is"), "and how large it is")
         await shot(main.window, "read-13-downloading")
         // the server gone: why, and Try Again
         silent.stop()
@@ -112,6 +113,31 @@ extension UITest {
         await shot(main.window, "large-1-text-first")
         check(await waitUntil(30) { said?.stringValue.hasPrefix("Downloaded") == true },
               "then that it is all here (\(said?.stringValue ?? ""))")
+        search("")
+        selectFolder(named: "Inbox")
+    }
+
+    /// a new message downloaded ahead opens from the store, no connection used (SCENARIO 49b). Near the end: everything
+    /// recent is downloaded from now on, which the steps before do not expect.
+    func openedFromStore() async throws {
+        step("a message downloaded ahead opens at once")
+        onMain { self.main.core.downloadAhead = PE_DOWNLOAD_AHEAD_RECENT }
+        try await addMessage("From: Kim Example <kim@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Here before you\r\n"
+            + "Date: \(rfc2822(Date()))\r\nMessage-ID: <here-before@example.com>\r\n\r\nDownloaded before it was opened.\r\n",
+            to: "Archive")
+        command(.sync)
+        selectFolder(named: "Archive")
+        _ = await waitFor(20) { await findMessage("Archive", "Subject: Here before you") }
+        // time for the background to download it: nothing on the screen says when
+        await pause(10)
+        search("subject:\"Here before you\"")
+        _ = await waitUntil(20) { list.numberOfRows == 1 }
+        await selectRow(0)
+        check(await waitUntil(10) { await readerText().contains("Downloaded before it was opened") }
+                  && pe_last_open_from_store(main.core.handle),
+              "a new message downloaded ahead opens from the store, without a download")
+        await shot(main.window, "open-1-from-store")
+        onMain { self.main.core.downloadAhead = PE_DOWNLOAD_AHEAD_NEVER }
         search("")
         selectFolder(named: "Inbox")
     }

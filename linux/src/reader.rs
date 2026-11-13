@@ -66,6 +66,8 @@ pub struct Reader {
     account: Cell<i64>,
     folder: Cell<i64>,
     uid: Cell<u64>,
+    /// The size of the message asked for, from the list, for the page shown while it is downloaded
+    size: Cell<u64>,
     /// A message file shown (a message window opened for a .eml), in place of a message of a folder
     file: RefCell<Option<std::path::PathBuf>>,
     /// Its view once the core built it, with its pictures from the internet when `remote_images`
@@ -77,10 +79,11 @@ pub struct Reader {
     unsubscribe_request: Cell<u64>,
 }
 
-/// The pane says the message is being downloaded, without Try Again
-fn show_downloading(preview: &DocumentView, retry: &gtk::Box) {
+/// The pane says the message is being downloaded, and how large it is (0: not known), without Try Again
+fn show_downloading(preview: &DocumentView, retry: &gtk::Box, size: u64) {
     retry.set_visible(false);
-    preview.show(&pe_core::reader_page(pe_core::ReaderState::Downloading), false);
+    let size = (size > 0).then_some(size);
+    preview.show(&pe_core::reader_page(pe_core::ReaderState::Downloading { size }), false);
 }
 
 /// The find bar over the message: a box to type in, closed with its button or Esc
@@ -233,6 +236,7 @@ impl Reader {
             account: Cell::new(0),
             folder: Cell::new(0),
             uid: Cell::new(0),
+            size: Cell::default(),
             file: RefCell::default(),
             view: RefCell::default(),
             remote_images: Cell::new(false),
@@ -699,9 +703,11 @@ impl Reader {
         self.to.set_text(&message.recipients);
         self.stop_downloading_note();
         let (preview, retry, timer) = (self.preview.clone(), self.retry.clone(), self.downloading.clone());
+        let size = message.size.unwrap_or(0);
+        self.size.set(size);
         let id = glib::timeout_add_local_once(std::time::Duration::from_millis(250), move || {
             timer.borrow_mut().take();
-            show_downloading(&preview, &retry);
+            show_downloading(&preview, &retry, size);
         });
         self.downloading.replace(Some(id));
     }
@@ -716,7 +722,7 @@ impl Reader {
     /// The message is being downloaded
     pub fn downloading(&self) {
         self.stop_downloading_note();
-        show_downloading(&self.preview, &self.retry);
+        show_downloading(&self.preview, &self.retry, self.size.get());
     }
 
     /// The message could not be downloaded: why, in the pane, and Try Again over it

@@ -1223,6 +1223,11 @@ impl Core {
         )
     }
 
+    /// Whether the last message opened came from the store, with no connection used: downloaded ahead
+    pub fn last_open_from_store(&self) -> bool {
+        self.timings.last_served() == Some(timing::Served::Store)
+    }
+
     /// Whether a message's text is shown before the rest of it, which is still being downloaded: its attachments,
     /// Save As, View Source and Forward wait for it
     pub fn message_downloading(&self, folder: FolderId, uid: u64) -> bool {
