@@ -38,6 +38,8 @@ fn setup_with(config: serde_json::Value) -> Option<Setup> {
         let _ = sender.send(event);
     })
     .unwrap();
+    // the tests of opening see the message downloaded when it is opened; those of downloading ahead turn it on
+    core.set_download_ahead(pe_store::Ahead::Never).unwrap();
     Some(Setup {
         server,
         core,
@@ -3309,4 +3311,140 @@ fn the_main_worker_does_the_background_work_when_the_server_allows_one_connectio
     s.wait(|e| *e == Event::FolderChanged { account, folder: inbox });
     eventually(|| finds(&s, inbox, "Later"), "the search text of new mail");
     assert_eq!(sessions(&s.server).len(), 1);
+}
+
+// ---- messages downloaded before they are opened (phase 3) ----
+
+/// Adds a message that arrived long ago, as downloading ahead's "recent" leaves it
+fn add_old(s: &Setup, mailbox: &str, subject: &str) -> u64 {
+    let body = json!({
+        "raw": rfc822(subject, "Old words"),
+        "flags": [],
+        "internaldate": "01-Jan-2020 10:00:00 +0000",
+    });
+    let path = format!("/v1/mailboxes/{mailbox}/messages");
+    s.server.request("POST", &path, Some(body))["uid"].as_u64().unwrap()
+}
+
+fn downloaded(s: &Setup, folder: pe_store::FolderId, uid: u64) -> bool {
+    s.core.message_source(folder, uid).unwrap().is_some()
+}
+
+#[test]
+fn new_mail_is_downloaded_before_it_is_opened() {
+    let Some(s) = setup() else { return };
+    s.core.set_download_ahead(pe_core::Ahead::Recent).unwrap();
+    let big = s
+        .server
+        .add_message("INBOX", &rfc822("Big", &"x".repeat(2 * 1024 * 1024)), &[]);
+    let junk = s.server.add_message("Junk", &rfc822("Spam", "Buy"), &[]);
+    let (account, inbox, uids) = synced_with(&s, &["One"]);
+    eventually(|| downloaded(&s, inbox, uids[0]), "the Inbox message");
+    // new mail over IDLE
+    let new = s.server.add_message("INBOX", &rfc822("Two", "Fresh words"), &[]);
+    eventually(|| downloaded(&s, inbox, new), "new mail as it arrives");
+    // found by the words of its source, which came with it
+    eventually(|| finds(&s, inbox, "Fresh"), "its search text");
+    // opened from the store: no connection used
+    open(&s, inbox, new);
+    let timing = s.core.open_timings().pop().unwrap();
+    assert_eq!(timing.served, Served::Store, "{timing:?}");
+    // too large, or spam: when opened
+    let junk_folder = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "Junk")
+        .unwrap()
+        .id;
+    std::thread::sleep(Duration::from_millis(500));
+    assert!(!downloaded(&s, inbox, big));
+    assert!(!downloaded(&s, junk_folder, junk));
+}
+
+#[test]
+fn the_messages_next_to_the_one_opened_are_downloaded() {
+    let Some(s) = setup() else { return };
+    let older: Vec<u64> = ["A", "B", "C", "D"]
+        .iter()
+        .map(|subject| add_old(&s, "INBOX", subject))
+        .collect();
+    let (_, inbox, _) = synced_with(&s, &[]);
+    // recent only: these are older than that
+    s.core.set_download_ahead(pe_core::Ahead::Recent).unwrap();
+    std::thread::sleep(Duration::from_millis(500));
+    assert!(older.iter().all(|uid| !downloaded(&s, inbox, *uid)));
+    open(&s, inbox, older[1]);
+    eventually(
+        || downloaded(&s, inbox, older[0]) && downloaded(&s, inbox, older[2]),
+        "the messages above and below",
+    );
+    assert!(!downloaded(&s, inbox, older[3]));
+}
+
+#[test]
+fn a_moved_message_keeps_its_downloaded_source() {
+    let Some(s) = setup() else { return };
+    let (account, inbox, uids) = synced_with(&s, &["One"]);
+    open(&s, inbox, uids[0]);
+    let archive = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "Archive")
+        .unwrap()
+        .id;
+    s.core.move_messages(inbox, &uids, archive).unwrap();
+    eventually(
+        || {
+            let moved = s.core.messages(archive, Sort::default(), 0, 10).unwrap();
+            moved.len() == 1 && downloaded(&s, archive, moved[0].info.uid)
+        },
+        "the source with the message where it went",
+    );
+}
+
+#[test]
+fn a_text_batch_the_server_refuses_is_fetched_one_message_at_a_time() {
+    // a batch of more than one message is refused, one alone is not
+    let Some(s) = setup_with(json!({ "script": {
+        "on": "command", "match": "UID FETCH [0-9]+[:,][^ ]* \\(UID BODYSTRUCTURE\\)", "send": "$TAG NO not today\r\n"
+    } })) else {
+        return;
+    };
+    s.server.add_message("INBOX", &rfc822("A", "Apples"), &[]);
+    s.server.add_message("INBOX", &rfc822("B", "Bananas"), &[]);
+    let (_, inbox, _) = synced_with(&s, &[]);
+    eventually(
+        || finds(&s, inbox, "Apples") && finds(&s, inbox, "Bananas"),
+        "both texts",
+    );
+    // the batch was refused indeed
+    let rules = s.server.request("GET", "/v1/script/rules", None);
+    assert!(rules[0]["hits"].as_u64().unwrap() >= 1, "{rules}");
+}
+
+#[test]
+fn an_archived_message_keeps_its_downloaded_source() {
+    let Some(s) = setup() else { return };
+    let (account, inbox, uids) = synced_with(&s, &["One"]);
+    open(&s, inbox, uids[0]);
+    s.core.archive_messages(inbox, &uids).unwrap();
+    let archive = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "Archive")
+        .unwrap()
+        .id;
+    eventually(
+        || {
+            let archived = s.core.messages(archive, Sort::default(), 0, 10).unwrap();
+            archived.len() == 1 && downloaded(&s, archive, archived[0].info.uid)
+        },
+        "the source with the message in the Archive",
+    );
 }

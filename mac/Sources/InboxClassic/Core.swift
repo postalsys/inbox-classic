@@ -176,6 +176,23 @@ final class Core {
         set { pe_set_always_load_pictures(handle, newValue) }
     }
 
+    /// Settings' "Download messages ahead"
+    var downloadAhead: PeDownloadAhead {
+        get { pe_download_ahead(handle) }
+        set { pe_set_download_ahead(handle, newValue) }
+    }
+
+    /// Settings' "Downloaded messages kept for each account": its place among `Core.downloadLimits`
+    var downloadLimitIndex: Int {
+        get { pe_download_limit_index(handle) }
+        set { pe_set_download_limit_index(handle, newValue) }
+    }
+
+    /// The limits of downloaded messages Settings offers, in words ("500 MB", "2 GB")
+    static var downloadLimits: [String] {
+        (0..<pe_download_limit_count()).map { taken(pe_download_limit_text($0)) ?? "" }
+    }
+
     // ---- accounts ----
 
     func accounts() -> [Account] {

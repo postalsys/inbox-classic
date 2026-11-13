@@ -89,8 +89,13 @@ impl Worker {
                         }
                         next = commands.try_recv().ok();
                     }
-                    if let Some((folder, uid, asked)) = open {
-                        self.read_one(store, folder, uid, asked).await;
+                    if let Some((folder, uid, asked)) = open
+                        && self.read_one(store, folder, uid, asked).await
+                        && commands.is_empty()
+                    {
+                        // the next click is most likely Next or Previous; one that comes meanwhile waits for this
+                        // FETCH only
+                        let _ = self.download_neighbors(store, folder, uid).await;
                     } else if warm && first_sync.is_none() && self.connection.is_none() {
                         // asked again after the first sync: connected now, should the first try have failed
                         self.connect_reader(store).await;
@@ -150,8 +155,9 @@ impl Worker {
         }
     }
 
-    /// Opens one message; when the server does not take the reader's connection, the main worker does it
-    async fn read_one(&mut self, store: &mut Store, folder: FolderId, uid: u64, asked: Instant) {
+    /// Opens one message; when the server does not take the reader's connection, the main worker does it. Whether
+    /// this worker opened it.
+    async fn read_one(&mut self, store: &mut Store, folder: FolderId, uid: u64, asked: Instant) -> bool {
         let forward = |worker: &Worker| {
             worker
                 .fallback
@@ -160,14 +166,16 @@ impl Worker {
         };
         // the main worker takes it, unless it is in the store already: that needs no connection
         if self.limited_lately() && !store.has_source(folder, uid).unwrap_or(false) && forward(self) {
-            return;
+            return false;
         }
         let started = Instant::now();
-        if let Err(failure) = self.open_message(store, folder, uid, asked).await
-            && !(self.refused_since(started) && forward(self))
-        {
+        let Err(failure) = self.open_message(store, folder, uid, asked).await else {
+            return true;
+        };
+        if !(self.refused_since(started) && forward(self)) {
             self.message_failed(folder, uid, failure);
         }
+        false
     }
 
     /// Opens a message for the reading pane, timed: from the store, or downloaded on this worker's connection, once
@@ -227,12 +235,20 @@ impl Worker {
         clock.timing.ready = Some(clock.now());
         // kept before the window hears, so what it reads next includes it
         self.ctx.timings.add(clock);
+        // its source stays while the app runs, whatever the limit of downloaded messages
+        self.ctx
+            .opened
+            .lock()
+            .unwrap_or_else(|p| p.into_inner())
+            .insert((folder, uid));
         self.emit(Event::MessageReady { folder, uid });
         // the search finds it by what the parser reads in it from now on, after the window has it
         if let (Some(source), Some(message)) = (source, store.message(folder, uid)?) {
-            let text = crate::search::index_text(&source);
-            // its index row replaced at once, never missing for a search meanwhile
-            store.transaction(|store| store.set_indexed(message.id, &text))?;
+            match crate::search::read_index_text(&source) {
+                // its index row replaced at once, never missing for a search meanwhile
+                Some(text) => store.transaction(|store| store.set_indexed(message.id, &text))?,
+                None => store.mark_fetch_failed(message.id)?,
+            }
         }
         Ok(())
     }

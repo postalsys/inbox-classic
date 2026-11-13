@@ -2898,6 +2898,28 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
     }
     Check (& $showShop $shopSubjects[0]) 'turned off, pictures are blocked again'
+    # 34g2a: what is downloaded before it is opened, and how much each account keeps (app.h, after IDC_TRUSTED_EMPTY);
+    # --test-hooks turned it off when the app started
+    $IDC_OPTIONS_DOWNLOAD_AHEAD = 672; $IDC_OPTIONS_DOWNLOAD_LIMIT = 673; $IDC_OPTIONS_DOWNLOAD_NOTE = 674; $CB_GETCURSEL = 0x0147
+    $selected = { param($dialog, $id) [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($dialog, $id), $CB_GETCURSEL, [IntPtr]::Zero, [IntPtr]::Zero) }
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        Check ((& $selected $o $IDC_OPTIONS_DOWNLOAD_AHEAD) -eq 2 -and (& $selected $o $IDC_OPTIONS_DOWNLOAD_LIMIT) -eq 2) 'Options shows what is downloaded ahead (Only when opened) and 1 GB kept for each account'
+        Check ((GetText $o $IDC_OPTIONS_DOWNLOAD_NOTE) -match 'oldest') "with what that means under them ($(GetText $o $IDC_OPTIONS_DOWNLOAD_NOTE))"
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_DOWNLOAD_AHEAD), $CB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
+        Shot $o 'download-1-options'
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
+    }
+    Command $main $IDM_OPTIONS
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        Check ((& $selected $o $IDC_OPTIONS_DOWNLOAD_AHEAD) -eq 0) 'Recent messages up to 1 MB is kept when chosen'
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_DOWNLOAD_AHEAD), $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
+    }
     foreach ($id in @('sale-signed', 'sale-forged')) {
         $added = Find 'INBOX' "Message-ID: <$id@shop.example>"
         if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }

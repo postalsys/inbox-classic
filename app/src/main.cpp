@@ -924,7 +924,8 @@ struct Arguments {
     // --background: started for an agent (by --mcp), in the tray without its window
     bool background = false;
     // --test-hooks: the UI test drops and drags in place of Explorer (WM_COPYDATA kTestDragOut, kTestDropFiles) and
-    // asks which notification was shown (kTestNotification)
+    // asks which notification was shown (kTestNotification); messages are downloaded only when opened, which the test's
+    // steps expect (its step of Options checks the choices)
     bool testHooks = false;
     // --language <code>: the windows in that language (`de`; `qps` the pseudo-language of the UI test), whatever
     // Options says
@@ -1027,6 +1028,9 @@ bool OpenCore(HWND hwnd) {
     SetInstantFormat();
     pe_set_codes_in_notifications(GetPreference(kCodesPreference, 0) != 0);
     g_core.reset(pe_core_open_with(path.c_str(), flags, certificate.empty() ? nullptr : certificate.c_str(), OnCoreEvent, hwnd));
+    if (g_core && g_arguments.testHooks) {
+        pe_set_download_ahead(g_core.get(), PE_DOWNLOAD_AHEAD_NEVER);
+    }
     if (g_core) {
         // where the user's AI agents reach this app (--mcp); another app with this store open keeps them
         pe_mcp_start(g_core.get());

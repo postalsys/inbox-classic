@@ -43,8 +43,8 @@ use std::sync::{Arc, Mutex, MutexGuard};
 pub use list_view::ListView;
 use pe_i18n::{Text, tr, tr_args};
 use pe_net::Trust;
-pub use pe_store::FlagColor;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
+pub use pe_store::{Ahead, DEFAULT_LIMIT_MB, FlagColor};
 pub use pe_store::{MessageRef, Scope, Search, Show, ThreadMark};
 pub use selection::{Action, Summary, color_name};
 pub use targets::{TargetKind, TargetRow};
@@ -83,9 +83,9 @@ pub use sign_in_apps::{
     SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_text, register_hint,
 };
 pub use text::{
-    HiddenUnread, ReaderState, account_label, account_shown_name, account_title, account_titles, default_account_name,
-    downloading_text, folder_kind, folder_name, format_size, hidden_unread, list_counts, messages, reader_page,
-    retry_note, saved_text, sentence,
+    DOWNLOAD_LIMITS_MB, HiddenUnread, ReaderState, account_label, account_shown_name, account_title, account_titles,
+    default_account_name, download_limit_index, download_limit_text, downloading_text, folder_kind, folder_name,
+    format_size, hidden_unread, list_counts, messages, reader_page, retry_note, saved_text, sentence,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};
@@ -361,6 +361,8 @@ pub struct Core {
     backgrounds: Workers,
     /// Wakes the background workers when new mail was stored
     nudges: Arc<worker::Nudges>,
+    /// The messages opened since the app started
+    opened: worker::Opened,
     /// The access token of each OAuth account, which its worker and its reader share
     tokens: worker::Tokens,
     /// How long opening messages took
@@ -437,6 +439,8 @@ impl Core {
         });
         let wake = Arc::new(tokio::sync::watch::Sender::new(0));
         runtime.spawn(worker::watch_sleep(wake.clone()));
+        // what a move the app was in the middle of when it last ended left behind
+        store.clear_moving_sources()?;
         let closed = Arc::new(AtomicBool::new(false));
         let open = closed.clone();
         Ok(Core {
@@ -449,6 +453,7 @@ impl Core {
             readers: Mutex::default(),
             backgrounds: Mutex::default(),
             nudges: Arc::default(),
+            opened: worker::Opened::default(),
             tokens: worker::Tokens::default(),
             timings: timing::Timings::default(),
             secrets,
@@ -564,6 +569,37 @@ impl Core {
     /// The trusted senders, for Options' list
     pub fn trusted_senders(&self) -> Result<Vec<pe_store::TrustedSender>> {
         Ok(self.store().trusted_senders()?)
+    }
+
+    /// Settings' "Download messages ahead": recent ones up to 1 MB (the default), all, or only when opened
+    pub fn download_ahead(&self) -> Result<pe_store::Ahead> {
+        Ok(self.store().download_ahead()?)
+    }
+
+    /// Changes what is downloaded ahead; the background workers start on what it adds
+    pub fn set_download_ahead(&self, ahead: pe_store::Ahead) -> Result<()> {
+        self.store().set_download_ahead(ahead)?;
+        self.more_to_download();
+        Ok(())
+    }
+
+    /// "Keep at most [n] MB of downloaded messages for each account"
+    pub fn download_limit_mb(&self) -> Result<u64> {
+        Ok(self.store().download_limit_mb()?)
+    }
+
+    /// Changes the limit; the oldest sources go past it with the next batch of the background workers
+    pub fn set_download_limit_mb(&self, megabytes: u64) -> Result<()> {
+        self.store().set_download_limit_mb(megabytes)?;
+        self.more_to_download();
+        Ok(())
+    }
+
+    /// The background workers of the accounts look for work again
+    fn more_to_download(&self) {
+        for account in self.backgrounds.lock().unwrap_or_else(|p| p.into_inner()).keys() {
+            worker::nudge(&self.nudges, *account);
+        }
     }
 
     /// Options' "Download pictures in all messages"
@@ -1613,7 +1649,8 @@ impl Core {
                         .ok_or(pe_store::Error::QueryReturnedNoRows)
                 })
                 .collect::<pe_store::Result<Vec<_>>>()?;
-            store.remove_messages(folder, uids)?;
+            // their sources go with them (worker.rs, Command::Move)
+            store.remove_moving_messages(folder, uids)?;
             Ok(removed)
         });
         let removed = removed.map_err(|error| match error {
@@ -1894,7 +1931,9 @@ impl Core {
                 .iter()
                 .map(|&uid| Ok(store.message(folder, uid)?.ok_or(Error::NotFound)?.info))
                 .collect::<Result<Vec<_>>>()?;
-            store.remove_messages(folder, uids)?;
+            // their sources kept until the command is done: an archived message keeps its own, a failed command
+            // puts them back
+            store.remove_moving_messages(folder, uids)?;
             (account, removed)
         };
         self.post(Event::FolderChanged { account, folder })?;
@@ -1958,6 +1997,7 @@ impl Core {
             wake: self.wake.subscribe(),
             synced: self.synced.clone(),
             nudges: self.nudges.clone(),
+            opened: self.opened.clone(),
         }
     }
 

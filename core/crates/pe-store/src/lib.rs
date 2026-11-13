@@ -11,6 +11,7 @@ mod agents;
 mod bounces;
 mod cards;
 mod contacts;
+mod download;
 mod folders;
 mod marks;
 mod messages;
@@ -32,6 +33,7 @@ pub use accounts::{Account, AccountId, AccountSettings, Auth, Security, app_prov
 pub use agents::{AgentHost, AgentHostId, AgentLevels, AgentLogEntry, NewLogEntry};
 pub use cards::{Card, CardId, Group, GroupId, Member, MemberRow, display_name};
 pub use contacts::Contact;
+pub use download::{Ahead, AheadRule, DEFAULT_LIMIT_MB, Downloaded, RECENT_DAYS, RECENT_MAX_SIZE, ToDownload};
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
 pub use marks::{Conversation, ThreadMark};
 pub use messages::{FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, Sort, SortField};
@@ -80,25 +82,32 @@ impl Store {
             .query_row("SELECT value FROM settings WHERE key = 'profile'", [], |row| row.get(0))
     }
 
-    /// Runs `f` in one transaction: a sync step lands as a whole or not at all. Rolled back when
-    /// `f` fails or panics, or the commit fails.
     /// A setting that is on or off, `fallback` when it was never set
     pub(crate) fn bool_setting(&self, key: &str, fallback: bool) -> Result<bool> {
-        let value: Option<String> = self
-            .db
-            .query_row("SELECT value FROM settings WHERE key = ?1", [key], |row| row.get(0))
-            .optional()?;
-        Ok(value.map_or(fallback, |value| value == "1"))
+        Ok(self.text_setting(key)?.map_or(fallback, |value| value == "1"))
     }
 
     pub(crate) fn set_bool_setting(&self, key: &str, on: bool) -> Result<()> {
+        self.set_text_setting(key, if on { "1" } else { "0" })
+    }
+
+    /// A setting of the app as it is kept, None when it was never set
+    pub(crate) fn text_setting(&self, key: &str) -> Result<Option<String>> {
+        self.db
+            .query_row("SELECT value FROM settings WHERE key = ?1", [key], |row| row.get(0))
+            .optional()
+    }
+
+    pub(crate) fn set_text_setting(&self, key: &str, value: &str) -> Result<()> {
         self.db.execute(
             "INSERT INTO settings (key, value) VALUES (?1, ?2) ON CONFLICT (key) DO UPDATE SET value = excluded.value",
-            (key, if on { "1" } else { "0" }),
+            (key, value),
         )?;
         Ok(())
     }
 
+    /// Runs `f` in one transaction: a sync step lands as a whole or not at all. Rolled back when
+    /// `f` fails or panics, or the commit fails.
     pub fn transaction<T>(&mut self, f: impl FnOnce(&Store) -> Result<T>) -> Result<T> {
         let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
         let value = f(self)?;

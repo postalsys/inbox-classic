@@ -379,6 +379,34 @@ BEGIN
     UPDATE messages SET seen_at = CAST((julianday('now') - 2440587.5) * 86400000 AS INTEGER) WHERE id = NEW.id;
 END;
 "#,
+    // downloading ahead (download.rs): the size of each source, so an account's total is had without reading them, and
+    // a mark on the messages that could not be downloaded or read, not tried again in the background
+    r#"
+-- the sizes in a table of their own, kept by the triggers: a total read from them reads no source, and length() of a
+-- stored BLOB reads its size from the record, not the BLOB
+CREATE TABLE body_sizes (
+    message_id INTEGER PRIMARY KEY REFERENCES messages(id) ON DELETE CASCADE,
+    size INTEGER NOT NULL
+);
+INSERT INTO body_sizes (message_id, size) SELECT message_id, length(source) FROM bodies;
+CREATE TRIGGER bodies_sized AFTER INSERT ON bodies
+BEGIN
+    INSERT OR REPLACE INTO body_sizes (message_id, size) VALUES (NEW.message_id, length(NEW.source));
+END;
+CREATE TRIGGER bodies_unsized AFTER DELETE ON bodies
+BEGIN
+    DELETE FROM body_sizes WHERE message_id = OLD.message_id;
+END;
+ALTER TABLE messages ADD COLUMN fetch_failed INTEGER NOT NULL DEFAULT 0;
+-- the sources of messages on their way to another folder of the account, given to the rows they become there
+-- (COPYUID), or back to theirs when the move fails
+CREATE TABLE moving_sources (
+    folder_id INTEGER NOT NULL,
+    uid INTEGER NOT NULL,
+    source BLOB NOT NULL,
+    PRIMARY KEY (folder_id, uid)
+);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

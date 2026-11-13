@@ -101,6 +101,12 @@ fn people(lists: &[&[ParsedAddress]]) -> String {
     words.join(" ")
 }
 
+/// What the index keeps of a source, None when the parser panicked on it: a message it can not read ends no worker,
+/// and the callers mark it (not downloaded or indexed again in the background)
+pub(crate) fn read_index_text(source: &[u8]) -> Option<IndexText> {
+    std::panic::catch_unwind(|| index_text(source)).ok()
+}
+
 /// What the index keeps of a source; nothing but an empty body when it does not parse
 pub(crate) fn index_text(source: &[u8]) -> IndexText {
     let Ok(message) = parser::parse(source) else {
@@ -136,7 +142,7 @@ pub(crate) fn index_pending(store: &mut Store) -> pe_store::Result<usize> {
         done += pending.len();
         store.transaction(|store| {
             for (message, source) in &pending {
-                store.set_indexed(*message, &index_text(source))?;
+                store.set_indexed(*message, &read_index_text(source).unwrap_or_default())?;
             }
             Ok(())
         })?;

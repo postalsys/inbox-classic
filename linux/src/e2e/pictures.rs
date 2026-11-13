@@ -160,6 +160,42 @@ pub async fn options(d: &Driver) {
         !shell().core.always_load_pictures().unwrap_or(true) && main.reader.pictures_blocked(),
         "turned off, the forged message asks again",
     );
+    download_ahead(d).await;
+}
+
+/// What is downloaded before it is opened, and how much each account keeps (SCENARIO 34g2a)
+async fn download_ahead(d: &Driver) {
+    command(Command::Options);
+    let Some(dialog) = wait_dialog(10, "preferences-dialog").await else {
+        d.check(false, "Preferences opens");
+        return;
+    };
+    let root: &gtk::Widget = dialog.upcast_ref();
+    let row = |name: &str| named_in(root, name).and_downcast::<adw::ComboRow>();
+    let (Some(ahead), Some(limit)) = (row("preferences-download-ahead"), row("preferences-download-limit")) else {
+        d.check(false, "Preferences has what is downloaded ahead");
+        return;
+    };
+    // the test turned it off at its start, before the first account
+    d.check(
+        ahead.selected() == 2 && limit.selected() == 2,
+        "Preferences shows what is downloaded ahead (Only when opened) and 1 GB kept for each account",
+    );
+    ahead.set_selected(0);
+    d.check(
+        shell().core.download_ahead().ok() == Some(pe_core::Ahead::Recent),
+        "Recent messages up to 1 MB is kept when chosen",
+    );
+    // in view for the picture
+    ahead.grab_focus();
+    d.shot(&dialog, "download-1-options").await;
+    ahead.set_selected(2);
+    d.check(
+        shell().core.download_ahead().ok() == Some(pe_core::Ahead::Never),
+        "and Only when opened again",
+    );
+    dialog.close();
+    wait_gone(10, "preferences-dialog").await;
 }
 
 /// The Trusted senders page: the domain listed, removed with its button, then the page says none is

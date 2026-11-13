@@ -242,6 +242,11 @@ fn is_seen(canonical: &str) -> bool {
 /// indexes (schema.rs) sort by
 pub(crate) const LIST_DATE: &str = "COALESCE(MIN(date, internal_date), date, internal_date)";
 
+/// [`LIST_DATE`] of the messages of a table named `alias` in a query
+pub(crate) fn list_date(alias: &str) -> String {
+    format!("COALESCE(MIN({alias}.date, {alias}.internal_date), {alias}.date, {alias}.internal_date)")
+}
+
 pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_date, date, size, subject, from_name, \
      from_address, recipients, message_id, in_reply_to, has_attachments, \
      EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = messages.id), sender_people, recipient_people, \

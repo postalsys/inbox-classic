@@ -72,6 +72,12 @@ pub fn plain(text: Text) -> String {
     pe_core::i18n::without_mnemonic(&tr(text))
 }
 
+/// A field's label as a row's title: without the colon the catalogs give it ("First name:", "Nom :"), as GNOME has
+/// them
+pub fn field_title(text: Text) -> String {
+    plain(text).trim_end_matches(':').trim_end().to_string()
+}
+
 /// Command `text` as the title of the window it opens, without its trailing dots
 pub fn title(text: Text) -> String {
     pe_core::i18n::title(text)

@@ -178,6 +178,18 @@ extension UITest {
         onMain { options.pictures.state = .off; options.picturesChanged() }
         check(await waitUntil(15) { !main.core.alwaysLoadPictures && bar?.isHidden == false && !picturesLoaded },
               "off again, it asks again")
+
+        step("what is downloaded ahead")
+        // the test turned it off at its start, before the first account
+        check(options.downloadAhead.indexOfSelectedItem == 2 && options.downloadLimit.indexOfSelectedItem == 2
+                  && options.downloadLimit.titleOfSelectedItem == "1 GB",
+              "Settings shows what is downloaded ahead (Only when opened) and 1 GB kept for each account")
+        onMain { options.downloadAhead.selectItem(at: 0); options.downloadAheadChosen() }
+        check(await waitUntil(5) { main.core.downloadAhead == PE_DOWNLOAD_AHEAD_RECENT },
+              "Recent messages up to 1 MB is kept when chosen")
+        await shot(options.window, "download-1-options")
+        onMain { options.downloadAhead.selectItem(at: 2); options.downloadAheadChosen() }
+        check(await waitUntil(5) { main.core.downloadAhead == PE_DOWNLOAD_AHEAD_NEVER }, "and Only when opened again")
         onMain { options.window.close() }
         search("")
     }

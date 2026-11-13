@@ -3,6 +3,26 @@
 
 use pe_i18n::{Text, tr, tr_args};
 
+/// The limits of downloaded messages Settings offers, in megabytes
+pub const DOWNLOAD_LIMITS_MB: [u64; 6] = [250, 500, 1024, 2048, 5120, 10240];
+
+/// A limit of [`DOWNLOAD_LIMITS_MB`] as Settings shows it: "500 MB", "2 GB"
+pub fn download_limit_text(megabytes: u64) -> String {
+    if megabytes >= 1024 && megabytes.is_multiple_of(1024) {
+        tr_args(Text::SizeGb, &[("size", (&(megabytes / 1024).to_string()).into())])
+    } else {
+        tr_args(Text::SizeMb, &[("size", (&megabytes.to_string()).into())])
+    }
+}
+
+/// The place in [`DOWNLOAD_LIMITS_MB`] that Settings shows for a limit: its own, or the nearest one below it
+pub fn download_limit_index(megabytes: u64) -> usize {
+    DOWNLOAD_LIMITS_MB
+        .iter()
+        .rposition(|&choice| choice <= megabytes)
+        .unwrap_or(0)
+}
+
 /// A size as the windows show it: `512 bytes`, `13 KB` (rounded up, as Explorer does), `2.4 MB`
 pub fn format_size(bytes: u64) -> String {
     if bytes < 1024 {
@@ -295,6 +315,21 @@ pub fn reader_page(state: ReaderState) -> String {
             let detail = tr_args(text, &[("reason", reason.into())]);
             pe_html::status_page(&tr(Text::ReaderFailed), &detail, false)
         }
+    }
+}
+
+#[cfg(test)]
+mod download_limit_tests {
+    use super::*;
+
+    #[test]
+    fn limits_are_said_in_megabytes_or_gigabytes() {
+        assert_eq!(download_limit_text(500), "500 MB");
+        assert_eq!(download_limit_text(1024), "1 GB");
+        assert_eq!(download_limit_text(10240), "10 GB");
+        assert_eq!(download_limit_index(1024), 2);
+        assert_eq!(download_limit_index(3000), 3);
+        assert_eq!(download_limit_index(50), 0);
     }
 }
 

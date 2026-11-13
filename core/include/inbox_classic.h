@@ -236,6 +236,15 @@ typedef enum PeSecretChange {
   PE_SECRET_CHANGE_REMOVE = 2,
 } PeSecretChange;
 
+// What Settings' "Download messages ahead" downloads
+typedef enum PeDownloadAhead {
+  // The last 30 days' messages up to 1 MB, out of the box
+  PE_DOWNLOAD_AHEAD_RECENT = 0,
+  PE_DOWNLOAD_AHEAD_ALL = 1,
+  // Only when opened
+  PE_DOWNLOAD_AHEAD_NEVER = 2,
+} PeDownloadAhead;
+
 // Which messages the message list shows by their state (`pe_list_view_set_show`)
 typedef enum PeShow {
   PE_SHOW_ALL = 0,
@@ -2371,6 +2380,35 @@ const struct PeTrustedSender *pe_trusted_sender_list_get(const struct PeTrustedS
 // # Safety
 // `list` must be NULL or a list that was not freed yet.
 void pe_trusted_sender_list_free(struct PeTrustedSenderList *list);
+
+// Settings' "Download messages ahead"
+//
+// # Safety
+// `core` must be a live handle.
+enum PeDownloadAhead pe_download_ahead(const struct PeCore *core);
+
+// # Safety
+// `core` must be a live handle.
+bool pe_set_download_ahead(const struct PeCore *core, enum PeDownloadAhead ahead);
+
+// Settings' "Downloaded messages kept for each account", the place of the limit in the choices
+// ([`pe_download_limit_text`])
+//
+// # Safety
+// `core` must be a live handle.
+size_t pe_download_limit_index(const struct PeCore *core);
+
+// Sets the limit to the choice at `index`
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_set_download_limit_index(const struct PeCore *core, size_t index);
+
+// How many limits Settings offers
+size_t pe_download_limit_count(void);
+
+// The words of the limit at `index` ("500 MB", "2 GB"), NULL past the last; freed with `pe_string_free`
+char *pe_download_limit_text(size_t index);
 
 // Options' "Download pictures in all messages" (never in Junk E-mail)
 //

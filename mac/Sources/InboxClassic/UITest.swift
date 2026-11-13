@@ -490,6 +490,8 @@ final class UITest {
         try await seed()
         step("starting Inbox Classic with a store of its own")
         startApp()
+        // the steps that open messages see them downloaded when opened; the step of Settings checks the choices
+        onMain { self.main.core.downloadAhead = PE_DOWNLOAD_AHEAD_NEVER }
         try await addAccount()
         try await reading()
         try await writing()

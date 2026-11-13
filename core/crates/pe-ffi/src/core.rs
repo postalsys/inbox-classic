@@ -3541,6 +3541,104 @@ pub unsafe extern "C" fn pe_trusted_sender_list_free(list: *mut PeTrustedSenderL
     unsafe { take_back(list) }
 }
 
+/// What Settings' "Download messages ahead" downloads
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeDownloadAhead {
+    /// The last 30 days' messages up to 1 MB, out of the box
+    Recent = 0,
+    All = 1,
+    /// Only when opened
+    Never = 2,
+}
+
+impl From<pe_core::Ahead> for PeDownloadAhead {
+    fn from(ahead: pe_core::Ahead) -> Self {
+        match ahead {
+            pe_core::Ahead::Recent => PeDownloadAhead::Recent,
+            pe_core::Ahead::All => PeDownloadAhead::All,
+            pe_core::Ahead::Never => PeDownloadAhead::Never,
+        }
+    }
+}
+
+impl From<PeDownloadAhead> for pe_core::Ahead {
+    fn from(ahead: PeDownloadAhead) -> Self {
+        match ahead {
+            PeDownloadAhead::Recent => pe_core::Ahead::Recent,
+            PeDownloadAhead::All => pe_core::Ahead::All,
+            PeDownloadAhead::Never => pe_core::Ahead::Never,
+        }
+    }
+}
+
+/// Settings' "Download messages ahead"
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_download_ahead(core: *const PeCore) -> PeDownloadAhead {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, PeDownloadAhead::Recent, |core| {
+            core.download_ahead().unwrap_or_default().into()
+        })
+    }
+}
+
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_set_download_ahead(core: *const PeCore, ahead: PeDownloadAhead) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_download_ahead(ahead.into()).is_ok()) }
+}
+
+/// Settings' "Downloaded messages kept for each account", the place of the limit in the choices
+/// ([`pe_download_limit_text`])
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_download_limit_index(core: *const PeCore) -> usize {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, 0, |core| {
+            pe_core::download_limit_index(core.download_limit_mb().unwrap_or(pe_store::DEFAULT_LIMIT_MB))
+        })
+    }
+}
+
+/// Sets the limit to the choice at `index`
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_set_download_limit_index(core: *const PeCore, index: usize) -> bool {
+    let Some(&megabytes) = pe_core::DOWNLOAD_LIMITS_MB.get(index) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_download_limit_mb(megabytes).is_ok()) }
+}
+
+/// How many limits Settings offers
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_download_limit_count() -> usize {
+    pe_core::DOWNLOAD_LIMITS_MB.len()
+}
+
+/// The words of the limit at `index` ("500 MB", "2 GB"), NULL past the last; freed with `pe_string_free`
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_download_limit_text(index: usize) -> *mut c_char {
+    guard(|| {
+        pe_core::DOWNLOAD_LIMITS_MB.get(index).map_or(null_mut(), |&megabytes| {
+            into_c_string(pe_core::download_limit_text(megabytes))
+        })
+    })
+    .unwrap_or(null_mut())
+}
+
 /// Options' "Download pictures in all messages" (never in Junk E-mail)
 ///
 /// # Safety
