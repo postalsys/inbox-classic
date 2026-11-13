@@ -1955,6 +1955,13 @@ pub extern "C" fn pe_set_codes_in_notifications(on: bool) {
     guard(|| pe_core::otp::set_in_notifications(on));
 }
 
+/// The UI tests only: a brand logo's BIMI-Location on the loopback address over plain http counts, so a release build
+/// shows a logo the test serves itself. The apps call it only with their test switch (--test-hooks, the UI test)
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_allow_loopback_logos_for_tests(on: bool) {
+    guard(|| pe_core::bimi::allow_loopback_logos(on));
+}
+
 /// What `pe_set_codes_in_notifications` set last, for the UI tests
 #[unsafe(no_mangle)]
 pub extern "C" fn pe_codes_in_notifications() -> bool {

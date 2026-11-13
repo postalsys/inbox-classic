@@ -1937,6 +1937,10 @@ char *pe_folder_empty(const struct PeCore *core,
 // the app's setting (off unless the user turns it on), set as the app starts and when it changes
 void pe_set_codes_in_notifications(bool on);
 
+// The UI tests only: a brand logo's BIMI-Location on the loopback address over plain http counts, so a release build
+// shows a logo the test serves itself. The apps call it only with their test switch (--test-hooks, the UI test)
+void pe_allow_loopback_logos_for_tests(bool on);
+
 // What `pe_set_codes_in_notifications` set last, for the UI tests
 bool pe_codes_in_notifications(void);
 
