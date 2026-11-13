@@ -246,15 +246,14 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grid.rowSpacing = 8
         grid.columnSpacing = 8
         grid.column(at: 0).xPlacement = .trailing
-        grid.row(at: 2).topPadding = 8
-        grid.row(at: 3).topPadding = 8
-        grid.row(at: 8).topPadding = 8
-        grid.row(at: 10).topPadding = 4
-        grid.row(at: 11).topPadding = 8
-        grid.row(at: 12).topPadding = 12
+        // the rows by what is in them, so a row added between them does not move another's room
+        let rowOf = { (view: NSView) in grid.cell(for: view)?.row }
+        for (view, padding) in [(layout, 8), (notify, 8), (pictures, 8), (trusted, 4), (eml, 8), (aheadRow, 12)] as [(NSView, CGFloat)] {
+            rowOf(view)?.topPadding = padding
+        }
         // the labels on the pop-ups' text lines, as the other forms have them
-        grid.row(at: 0).rowAlignment = .firstBaseline
-        grid.row(at: 2).rowAlignment = .firstBaseline
+        rowOf(language)?.rowAlignment = .firstBaseline
+        rowOf(layout)?.rowAlignment = .firstBaseline
         grid.translatesAutoresizingMaskIntoConstraints = false
         // the help button in the bottom right corner, as the system's settings have it
         let help = HelpButton("options")

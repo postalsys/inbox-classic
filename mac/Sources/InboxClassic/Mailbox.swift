@@ -72,8 +72,11 @@ public final class Mailbox: NSObject {
     private var treePane: NSScrollView!
     /// what the panes show: the list above the reader, or beside it (MainWindow.updateLayout decides)
     private(set) var layout = PE_LAYOUT_CLASSIC
-    /// the senders' pictures of the column layout's rows
+    /// the senders' pictures of the column layout's rows, whether they are shown (Settings), and the screen's scale they
+    /// are drawn at, both taken again when the list is
     let pictures: ListPictures
+    private var showsPictures = true
+    private var pictureScale: CGFloat = 2
     /// the one column of the column layout's rows, and what Classic has in its place while it is shown
     private let rowColumn = NSTableColumn(identifier: MessageRowCell.identifier)
     private var classicColumns: [NSTableColumn] = []
@@ -826,6 +829,8 @@ public final class Mailbox: NSObject {
 
     func reloadList(keepSelection: Bool) {
         dateClock = DateClock()
+        showsPictures = AppDelegate.shared?.listPictures ?? true
+        pictureScale = list.window?.backingScaleFactor ?? 2
         pages = []
         total = 0
         unread = 0
@@ -887,6 +892,7 @@ public final class Mailbox: NSObject {
 
     /// Settings' list pictures turned on or off: the rows drawn again
     func listPicturesChanged() {
+        showsPictures = AppDelegate.shared?.listPictures ?? true
         if layout == PE_LAYOUT_COLUMNS {
             list.reloadData()
         }
@@ -2003,7 +2009,7 @@ public final class Mailbox: NSObject {
     func onEvent(_ event: CoreEvent) {
         switch event.kind {
         case PE_EVENT_KIND_PICTURE_READY:
-            _ = pictures.ready(event.uid, points: SenderPicture.size)
+            pictures.ready(event.uid)
         case PE_EVENT_KIND_FOLDERS_CHANGED:
             reload()
         case PE_EVENT_KIND_FOLDER_CHANGED:
@@ -2375,9 +2381,8 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
         let who = recipientsColumn ? Text.headerTo.text + ": " + message.recipients : message.from
         cell.show(message, who: who, date: message.date.map { shortDate($0, at: dateClock) } ?? "",
                   folder: severalFolders ? rowFolder(message.folder) : "")
-        let scale = tableView.window?.backingScaleFactor ?? 2
-        cell.showPicture(pictures.image(message.picture, points: SenderPicture.size, scale: scale),
-                         initials: message.initials, shown: AppDelegate.shared?.listPictures ?? true)
+        cell.showPicture(pictures.image(message.picture, points: SenderPicture.size, scale: pictureScale),
+                         initials: message.initials, shown: showsPictures)
         return cell
     }
 
@@ -2854,8 +2859,13 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
     /// one, else the initials
     func showPicture(_ image: NSImage?, initials: String, shown: Bool) {
         picture.isHidden = !shown
-        picture.image = image
-        picture.initials = initials
+        // only what changed, so a row drawn again with the same picture is not painted again
+        if picture.image !== image {
+            picture.image = image
+        }
+        if picture.initials != initials {
+            picture.initials = initials
+        }
         if shown != pictureShown {
             pictureShown = shown
             // one constraint off before the other on, so the two never hold at once
@@ -2912,7 +2922,9 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
             label.textColor = secondary
         }
         dot.layer?.backgroundColor = (selected ? NSColor.alternateSelectedControlTextColor : .controlAccentColor).cgColor
-        picture.onSelection = selected
+        if picture.onSelection != selected {
+            picture.onSelection = selected
+        }
         flag.image = selected ? (flags.selected ?? flags.plain) : flags.plain
         attach.contentTintColor = selected ? .alternateSelectedControlTextColor : nil
     }

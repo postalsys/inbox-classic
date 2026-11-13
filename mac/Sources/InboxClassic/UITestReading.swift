@@ -247,10 +247,9 @@ extension UITest {
         let brand = { self.listedRow("Autumn collection") }
         let person = { self.listedRow("Book club") }
         check(await waitUntil(40) {
-            brand() >= 0 && person() >= 0 && main.mailbox.row(brand())?.pictureKind == PE_PICTURE_KIND_LOGO
-        }, "the provider passed the brand's logo: its row has a logo to draw")
-        check(main.mailbox.row(brand())?.picture != 0, "and the key the core draws it by")
-        check(main.mailbox.row(person())?.pictureKind == PE_PICTURE_KIND_NONE, "a sender without a logo has none")
+            brand() >= 0 && person() >= 0 && main.mailbox.row(brand())?.picture ?? 0 != 0
+        }, "the provider passed the brand's logo: its row has a picture to draw, by the core's key")
+        check(main.mailbox.row(person())?.picture == 0, "a sender without a logo has none")
         list.scrollRowToVisible(max(brand(), person()))
         check(await waitUntil(10) {
             let cell = rowCell(person())

@@ -23,6 +23,7 @@ final class ListPictures {
     private struct Key: Hashable {
         let picture: UInt64
         let pixels: Int
+        let points: CGFloat
     }
 
     private let core: Core
@@ -40,7 +41,7 @@ final class ListPictures {
     /// The picture of `picture` drawn `points` wide at `scale`; nil while it is being drawn, or when there is none
     func image(_ picture: UInt64, points: CGFloat, scale: CGFloat) -> NSImage? {
         guard picture != 0 else { return nil }
-        let key = Key(picture: picture, pixels: Int((points * scale).rounded()))
+        let key = Key(picture: picture, pixels: Int((points * scale).rounded()), points: points)
         if let image = images[key] {
             return image
         }
@@ -53,16 +54,15 @@ final class ListPictures {
         return nil
     }
 
-    /// PictureReady: its pixels kept and the rows told; true when it was one of these
-    func ready(_ request: UInt64, points: CGFloat) -> Bool {
-        guard let key = requests.removeValue(forKey: request) else { return false }
+    /// PictureReady: its pixels kept and the rows told (another request's is not these)
+    func ready(_ request: UInt64) {
+        guard let key = requests.removeValue(forKey: request) else { return }
         var length = 0
         if let image = pixelImage(takenBytes(pe_picture_result(core.handle, request, &length), length), side: key.pixels,
-                                  points: points) {
+                                  points: key.points) {
             images[key] = image
             arrived(key.picture)
         }
-        return true
     }
 }
 
