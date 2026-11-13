@@ -4,11 +4,11 @@
 //! brought that the form does not show stays.
 
 use std::cell::{Cell, RefCell};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::rc::Rc;
 
 use adw::prelude::*;
-use gtk::{gdk, glib};
+use gtk::{gdk, gio, glib};
 use pe_store::{Card, CardId, Group, GroupId, Member};
 
 use crate::app::shell;
@@ -437,15 +437,18 @@ const PICTURE_SIZE: i32 = 64;
 /// The picture file kinds Choose offers
 const PICTURE_PATTERNS: [&str; 6] = ["*.png", "*.jpg", "*.jpeg", "*.PNG", "*.JPG", "*.JPEG"];
 
-/// A new card's picture: the file chosen, set once OK saved the card, and the core's own picture of it to show
-struct Pending {
-    path: PathBuf,
-    png: Vec<u8>,
+/// What the form will do to the card's picture once OK saves it: nothing, set the PNG the core prepared from the file
+/// chosen, or take it away
+enum Choice {
+    Kept,
+    Set(Vec<u8>),
+    Removed,
 }
 
 /// The picture well at the top of Contact Properties: the card's picture (the core reads, keeps and draws it), else
 /// its initials on the quiet fill, round as the list draws senders; Choose... and Remove under it, and a picture file
-/// dropped on it. A card kept already takes a picture at once; a new one once OK saved it.
+/// dropped on it. What is chosen is prepared by the core off the window's thread and shown, and written only once OK
+/// saves the card; Cancel leaves the card's picture as it was.
 struct PictureWell {
     group: adw::PreferencesGroup,
     frame: gtk::Box,
@@ -453,9 +456,7 @@ struct PictureWell {
     initials: gtk::Label,
     remove: gtk::Button,
     card: CardId,
-    pending: RefCell<Option<Pending>>,
-    /// The picture changed: the message list draws its senders again
-    changed: Cell<bool>,
+    choice: RefCell<Choice>,
 }
 
 impl PictureWell {
@@ -500,8 +501,7 @@ impl PictureWell {
             initials,
             remove,
             card: card.id,
-            pending: RefCell::default(),
-            changed: Cell::new(false),
+            choice: RefCell::new(Choice::Kept),
         });
         this.connect(&choose, &well);
         this.refresh();
@@ -518,7 +518,8 @@ impl PictureWell {
         let this = Rc::downgrade(self);
         self.remove.connect_clicked(move |_| {
             if let Some(this) = this.upgrade() {
-                this.take_away();
+                *this.choice.borrow_mut() = Choice::Removed;
+                this.refresh();
             }
         });
         // a picture file dragged onto the well, as Choose takes one
@@ -532,7 +533,7 @@ impl PictureWell {
                 .and_then(|file| file.path());
             match (this.upgrade(), path) {
                 (Some(this), Some(path)) => {
-                    this.take(&path);
+                    glib::spawn_future_local(async move { this.take(path).await });
                     true
                 }
                 _ => false,
@@ -557,58 +558,40 @@ impl PictureWell {
         let title = words::field_title(Text::UiCardPicture);
         let pictures = t!(UiFilterPictures);
         if let Some(path) = ui::open_file(&window, &title, Some((&pictures, &PICTURE_PATTERNS))).await {
-            self.take(&path);
+            self.take(path).await;
         }
     }
 
-    /// The picture of the file at `path`: the card's now when it is kept already, else once it is; a file the core
+    /// The picture of the file at `path`, prepared by the core off the window's thread and shown; a file the core
     /// refuses is said over the dialog
-    fn take(&self, path: &Path) {
-        let taken = if self.card != 0 {
-            shell().core.set_card_picture(self.card, path)
-        } else {
-            read_picture(path).map(|png| {
-                *self.pending.borrow_mut() = Some(Pending {
-                    path: path.to_path_buf(),
-                    png,
-                });
-            })
-        };
-        match taken {
-            Ok(()) => {
-                self.changed.set(true);
+    async fn take(&self, path: PathBuf) {
+        let prepared = gio::spawn_blocking(move || pe_core::card_pictures::prepare(&path)).await;
+        match prepared {
+            Ok(Ok(png)) => {
+                *self.choice.borrow_mut() = Choice::Set(png);
                 self.refresh();
             }
-            Err(why) => {
-                // over the dialog the well is in
-                let dialog = glib::WeakRef::new();
-                let ancestor = self.group.ancestor(adw::Dialog::static_type());
-                dialog.set(ancestor.and_downcast::<adw::Dialog>().as_ref());
-                say_later(&dialog, why);
-            }
+            Ok(Err(refused)) => self.say(refused.text()),
+            Err(_) => self.say(pe_core::card_pictures::Refused::NotPicture.text()),
         }
     }
 
-    /// Remove: the card's picture taken away, or the one chosen for a new card forgotten
-    fn take_away(&self) {
-        if self.card != 0 {
-            let _ = shell().core.remove_card_picture(self.card);
-        }
-        self.pending.borrow_mut().take();
-        self.changed.set(true);
-        self.refresh();
+    /// `why` said over the dialog the well is in
+    fn say(&self, why: String) {
+        let dialog = glib::WeakRef::new();
+        let ancestor = self.group.ancestor(adw::Dialog::static_type());
+        dialog.set(ancestor.and_downcast::<adw::Dialog>().as_ref());
+        say_later(&dialog, why);
     }
 
-    /// The picture as it is now, else the initials; Remove only with a picture
+    /// The picture as it would be after OK, else the initials; Remove only with a picture
     fn refresh(&self) {
         let size = PICTURE_SIZE * self.image.scale_factor().max(1);
-        let pixels = if self.card != 0 {
-            shell().core.card_picture(self.card, size as u32)
-        } else {
-            let pending = self.pending.borrow();
-            pending
-                .as_ref()
-                .and_then(|p| pe_core::card_pictures::bgra(&p.png, size as u32))
+        let pixels = match &*self.choice.borrow() {
+            Choice::Set(png) => pe_core::card_pictures::bgra(png, size as u32),
+            Choice::Removed => None,
+            Choice::Kept if self.card != 0 => shell().core.card_picture(self.card, size as u32),
+            Choice::Kept => None,
         };
         let texture = pixels.and_then(|pixels| ui::bgra_texture(pixels, size));
         self.image.set_paintable(texture.as_ref());
@@ -617,10 +600,13 @@ impl PictureWell {
         self.remove.set_visible(texture.is_some());
     }
 
-    /// A new card is saved as `id`: the picture chosen for it is its picture now
-    fn saved(&self, id: CardId) {
-        if let Some(pending) = self.pending.borrow_mut().take() {
-            let _ = shell().core.set_card_picture(id, &pending.path);
+    /// OK saved the card as `id`: what was chosen is its picture now; whether that changed it
+    fn saved(&self, id: CardId) -> bool {
+        let core = &shell().core;
+        match std::mem::replace(&mut *self.choice.borrow_mut(), Choice::Kept) {
+            Choice::Set(png) => core.set_card_picture_png(id, &png).is_ok(),
+            Choice::Removed if self.card != 0 => core.remove_card_picture(id).is_ok(),
+            _ => false,
         }
     }
 
@@ -628,19 +614,6 @@ impl PictureWell {
     fn shows_picture(&self) -> bool {
         self.image.is_visible()
     }
-}
-
-/// The core's own picture of the file at `path`, as a card would keep it; Err with what the window says when the
-/// core refuses it
-fn read_picture(path: &Path) -> Result<Vec<u8>, String> {
-    let too_large = std::fs::metadata(path)
-        .map(|m| m.len() > pe_core::card_pictures::MAX_FILE as u64)
-        .map_err(|error| error.to_string())?;
-    if too_large {
-        return Err(pe_core::card_pictures::Refused::TooLarge.text());
-    }
-    let bytes = std::fs::read(path).map_err(|error| error.to_string())?;
-    pe_core::card_pictures::normalize(&bytes).map_err(|refused| refused.text())
 }
 
 /// Contact Properties of card `id`, or New Contact for 0; the card's id once OK saved it, None for Cancel
@@ -674,12 +647,7 @@ pub async fn contact(parent: &impl IsA<gtk::Widget>, id: CardId) -> Option<CardI
     names.first.grab_focus();
     #[cfg(feature = "e2e")]
     CONTACT_PICTURE.with(|open| *open.borrow_mut() = Some(picture.clone()));
-    let result = contact_answers(&card, &dialog, &clicks, &names, &addresses, &phones, &notes, &picture).await;
-    // a picture changed (kept at once on a card that was kept already): the list draws its senders again
-    if picture.changed.get() {
-        shell().main().senders_changed();
-    }
-    result
+    contact_answers(&card, &dialog, &clicks, &names, &addresses, &phones, &notes, &picture).await
 }
 
 #[cfg(feature = "e2e")]
@@ -719,7 +687,10 @@ async fn contact_answers(
         // the core refuses a contact without a name or an address, and says why
         match core.save_card(&card_from_form(card, names, addresses, phones, notes)) {
             Ok(id) => {
-                picture.saved(id);
+                // a picture set or taken away: the list draws its senders again (their keys change with it)
+                if picture.saved(id) {
+                    shell().main().senders_changed();
+                }
                 dialog.close();
                 return Some(id);
             }

@@ -539,8 +539,8 @@ pub async fn contact_picture(d: &Driver) {
     d.check(
         wait_until(10, crate::book_dialogs::contact_shows_picture).await
             && named_in(&f, "contact-picture-remove").is_some()
-            && core.card_has_picture(id),
-        "Choose takes the picture: the well shows it, Remove is offered, and the contact has it",
+            && !core.card_has_picture(id),
+        "Choose shows the picture and offers Remove, and the contact has it only once OK saves it",
     );
     // an answer the dialog did not take would be the next file dialog's
     crate::ui::FILE_ANSWERS.with(|answers| answers.borrow_mut().clear());
@@ -548,6 +548,7 @@ pub async fn contact_picture(d: &Driver) {
     d.shot(&form, "contacts-6-picture").await;
     click(&f, "dialog-ok");
     wait_gone(10, "contact-dialog").await;
+    d.check(core.card_has_picture(id), "OK gives the contact the picture");
 
     select_folder("Inbox");
     wait_until(10, || main.selected_name() == "Inbox").await;
@@ -590,18 +591,31 @@ pub async fn contact_picture(d: &Driver) {
     pause(500).await;
     d.shot(main.window(), "pictures-5-contact").await;
 
-    // removed: the initials again
+    // Remove then Cancel keeps it; Remove then OK takes it away
     if let Some(form) = open_contact(id).await {
         let f: gtk::Widget = form.clone().upcast();
         click(&f, "contact-picture-remove");
+        let shown = wait_until(10, || !crate::book_dialogs::contact_shows_picture()).await;
+        click(&f, "dialog-cancel");
+        wait_gone(10, "contact-dialog").await;
         d.check(
-            wait_until(10, || !crate::book_dialogs::contact_shows_picture()).await
-                && named_in(&f, "contact-picture-remove").is_none()
-                && !core.card_has_picture(id),
-            "Remove takes the picture away, and the well shows the initials",
+            shown && core.card_has_picture(id),
+            "Remove shows the initials, and Cancel keeps the contact's picture",
         );
+    }
+    if let Some(form) = open_contact(id).await {
+        let f: gtk::Widget = form.clone().upcast();
+        click(&f, "contact-picture-remove");
+        let shown = wait_until(10, || {
+            !crate::book_dialogs::contact_shows_picture() && named_in(&f, "contact-picture-remove").is_none()
+        })
+        .await;
         click(&f, "dialog-ok");
         wait_gone(10, "contact-dialog").await;
+        d.check(
+            shown && !core.card_has_picture(id),
+            "Remove and OK take the picture away",
+        );
     }
     d.check(
         wait_until(20, || {
