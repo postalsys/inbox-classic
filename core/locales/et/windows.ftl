@@ -113,3 +113,9 @@ win-options-language-label = &Inbox Classicu keel:
 win-options-restart-note = Keele vahetamiseks tuleb Inbox Classic taaskäivitada.
 win-options-notify = &Teavita mind uute kirjade saabumisest
 win-restart-ask = Valitud keel ({ $language }) rakendub pärast Inbox Classicu taaskäivitamist. Kas taaskäivitada kohe?
+# review: new
+win-folders-hide = Peida kaustade loend
+# review: new
+win-folders-pin = Kinnita kaustade loend kirjade kõrvale
+# review: new
+win-folders-show = Näita kaustu

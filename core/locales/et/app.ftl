@@ -56,6 +56,8 @@ ui-find-not-found = „{ $words }“ ei ole selles kirjas
 cmd-expand-all-threads = &Laienda kõik vestlused
 cmd-collapse-all-threads = &Ahenda kõik vestlused
 ui-group-by-conversation = &Rühmita kirjad vestluste kaupa
+# review: new
+cmd-folder-list = &Kaustade loend
 cmd-hide-ignored = Peida &ignoreeritud vestlused
 # review: new
 cmd-hide-read = Peida &loetud kirjad
@@ -533,3 +535,5 @@ ui-eml-default = Ava .eml-failid Inbox Classicuga
 ui-eml-default-done = Inbox Classic avab nüüd .eml-failid.
 # review: new
 ui-eml-default-failed = Inbox Classicut ei õnnestunud .eml-failide rakenduseks määrata: { $reason }
+# review: new
+ui-folders = Kaustad

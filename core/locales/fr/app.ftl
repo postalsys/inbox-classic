@@ -56,6 +56,8 @@ ui-find-not-found = Aucune occurrence de « { $words } » dans ce message
 cmd-expand-all-threads = &Développer toutes les conversations
 cmd-collapse-all-threads = Ré&duire toutes les conversations
 ui-group-by-conversation = &Regrouper les messages par conversation
+# review: new
+cmd-folder-list = Liste des d&ossiers
 cmd-hide-ignored = &Masquer les conversations ignorées
 # review: new
 cmd-hide-read = Masquer les messages &lus
@@ -539,3 +541,5 @@ ui-eml-default = Ouvrir les fichiers .eml avec Inbox Classic
 ui-eml-default-done = Inbox Classic ouvre maintenant les fichiers .eml.
 # review: new
 ui-eml-default-failed = Inbox Classic n'a pas pu devenir l'application des fichiers .eml : { $reason }
+# review: new
+ui-folders = Dossiers
