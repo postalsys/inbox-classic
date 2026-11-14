@@ -510,6 +510,7 @@ final class UITest {
         // before the Drafts step, whose Send/Recv brings the newest message the organizing step starts from
         try await undoSend()
         try await attachmentReminder()
+        try await otherAddresses()
         try await outboxAndDrafts()
         try await draftsSavedAutomatically()
         try await textSize()

@@ -1047,6 +1047,27 @@ const sections = [
                 checked: ['It asks, naming the word', 'Going back keeps the message open', 'Sending anyway sends it']
             },
             {
+                shot: 'account-12-other-addresses',
+                name: 'Other addresses you send from',
+                what: 'Account Properties takes the other addresses an account sends from (aliases), comma separated: Name <address> or the address alone.',
+                how: 'File > Accounts > Properties (or the account\'s right-click menu).',
+                checked: ['Properties keeps the other addresses']
+            },
+            {
+                shot: 'write-26-from-alias',
+                name: 'Send from another address',
+                what: 'From lists each account with its other addresses after it; a message goes from the one chosen, with its name. An address that is not the account\'s is refused.',
+                how: 'The From list of a message.',
+                checked: ['From offers the other address', 'It goes from that address, with its name']
+            },
+            {
+                shot: 'write-27-reply-from-alias',
+                name: 'A reply from the address it was sent to',
+                what: 'A reply (or a forward) to a message sent to one of the account\'s other addresses goes from that address; Reply All leaves out every address of the account.',
+                how: 'Reply to such a message.',
+                checked: ['The reply goes from the other address']
+            },
+            {
                 shot: 'write-11-sent',
                 name: 'Sent, and said so',
                 what: 'Once the server took a message, the middle of the main status bar says Sent with its subject and the time, and stays so until the next message goes; while it goes it says Sending, and a message that can not go is reported as waiting in the Outbox.',
