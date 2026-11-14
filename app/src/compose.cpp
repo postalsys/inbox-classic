@@ -459,6 +459,13 @@ void ShowRefusal(HWND hwnd, char* reason, PeText fallback) {
 // sends with the HTML the editor gave, now or with the next Send/Recv
 void Send(HWND hwnd, Compose* state, const std::wstring& html) {
     Fields fields(state, html);
+    // it says a file is attached and none is: No (back to the message) is the default
+    if (core::String word{pe_forgotten_attachment(&fields.outgoing)}) {
+        std::wstring ask = core::T(PE_TEXT_UI_ATTACHMENT_FORGOTTEN, {{"word", Text(word.get())}});
+        if (MessageBoxW(hwnd, ask.c_str(), L"Inbox Classic", MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) != IDYES) {
+            return;
+        }
+    }
     char* reason = nullptr;
     if (!pe_message_send(state->core, state->account, &fields.outgoing, &reason)) {
         // a typo in an address or a file that is gone: the message stays open to fix it
