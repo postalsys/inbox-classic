@@ -836,6 +836,8 @@ private:
     int ColumnsRowHeight() const;
     // the list sorted as sort_ and ascending_ say, its heading's arrow and the "Sorted by" button following
     void ApplySort();
+    // the classic header's sort arrow on the sorted column's heading (none for Size, which has no column)
+    void UpdateSortArrow();
     // "Sorted by Date"
     std::wstring SortedByText() const;
     void DrawSortButton(const DRAWITEMSTRUCT& item) const;
@@ -999,6 +1001,8 @@ private:
     // the Columns layout: rows of three lines, a dummy image list making them that tall, the "Sorted by" button
     bool columns_ = false;
     HIMAGELIST rowSpacer_ = nullptr;
+    // the sort arrows of the header, up and down, made once
+    HBITMAP sortArrows_[2] = {};
     HWND sortButton_ = nullptr;
     // the widths of the columns but Subject while Columns has them out of the way, to give back in Classic
     std::vector<int> classicWidths_;

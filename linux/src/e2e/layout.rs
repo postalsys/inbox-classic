@@ -267,6 +267,22 @@ async fn conversation(d: &Driver) {
     );
     pause(800).await;
     d.shot(main.window(), "layout-5-conversation").await;
+    // Watch Conversation shows its glasses in the row, as the Classic list's Watch column does; again takes them away
+    main.list.select(at as u32);
+    main.mark_conversations(false);
+    d.check(
+        wait_until(10, || {
+            row_on_screen(&head.info.subject).is_some_and(|r| crate::rows::watch_shown(&r))
+        })
+        .await,
+        "a watched conversation's row shows its glasses",
+    );
+    main.list.select(at as u32);
+    main.mark_conversations(false);
+    wait_until(10, || {
+        row_on_screen(&head.info.subject).is_some_and(|r| !crate::rows::watch_shown(&r))
+    })
+    .await;
     main.toggle_thread(thread);
     wait_until(10, || rows_on_screen().iter().all(|r| r.3 == 0)).await;
 }

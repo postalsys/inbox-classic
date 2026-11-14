@@ -1307,10 +1307,15 @@ public static class Dragger {
     Command $main $IDM_SYNC
     [void](WaitFor { Find 'Archive' $large } 30)
     SelectFolder 3
-    Start-Sleep -Seconds 2
+    # the row listed, then opened at once: no pause in which the download could end before the status bar is read
+    [void](WaitFor { (SubjectRows 'The quarterly report').Count -gt 0 } 10)
     SelectRow 0
     $status = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
-    Check ($null -ne (WaitFor { $t = WindowText $status; if ($t -like 'Downloading*') { $t } } 15)) "the status bar says how far the rest of a large message is ($(WindowText $status))"
+    # every text the status bar shows meanwhile, and whether the message came from the store, to say why if it fails
+    $seen = [System.Collections.Generic.List[string]]::new()
+    $progress = WaitFor { $t = WindowText $status; if (-not $seen.Contains($t)) { $seen.Add($t) }; if ($t -like 'Downloading*') { $t } } 15
+    $fromStore = [Native.Win]::SendText($main, 0x53544F52, '')
+    Check ($null -ne $progress) "the status bar says how far the rest of a large message is (seen: $($seen -join ' | '); from the store: $($fromStore -eq 11))"
     Shot $main 'large-1-text-first'
     Check ($null -ne (WaitFor { $t = WindowText $status; if ($t -like 'Downloaded*') { $t } } 30)) "then that it is all here ($(WindowText $status))"
     SelectFolder 0
@@ -2667,9 +2672,11 @@ public static class Dragger {
     Step 'the folder list hidden and shown again'
     $IDM_FOLDER_LIST = 155; $IDC_FOLDER_BAR = 235; $IDC_FOLDER_CAPTION = 236; $STN_CLICKED = 0
     Check ((Visible $main $IDC_TREE) -and (Visible $main $IDC_FOLDER_CAPTION) -and (MenuChecked 2 $IDM_FOLDER_LIST)) 'the folder list starts beside the messages under its Folders caption, View > Folder List checked'
+    Check ([int][Native.Win]::SendMessage($toolbar, $TB_ISBUTTONCHECKED, [IntPtr]$IDM_FOLDER_LIST, [IntPtr]::Zero) -ne 0) "and the toolbar's Folders button is pressed"
     Command $main $IDM_FOLDER_LIST
     Check ([bool](WaitFor { -not (Visible $main $IDC_TREE) -and -not (Visible $main $IDC_FOLDER_CAPTION) } 5)) 'View > Folder List hides the list and its caption'
     Check (-not (MenuChecked 2 $IDM_FOLDER_LIST)) 'and the menu item is no longer checked'
+    Check ([int][Native.Win]::SendMessage($toolbar, $TB_ISBUTTONCHECKED, [IntPtr]$IDM_FOLDER_LIST, [IntPtr]::Zero) -eq 0) "and the toolbar's Folders button is up"
     Check ((Get-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue).FolderList -eq 0) 'and that is kept for the next start'
     $listRect = New-Object Native.Win+RECT; $mainRect = New-Object Native.Win+RECT
     [void][Native.Win]::GetWindowRect($list, [ref]$listRect); [void][Native.Win]::GetWindowRect($main, [ref]$mainRect)
@@ -2686,6 +2693,7 @@ public static class Dragger {
     }
     Command $main $IDM_FOLDER_LIST
     Check ([bool](WaitFor { (Visible $main $IDC_TREE) -and (Visible $main $IDC_FOLDER_CAPTION) } 5)) 'turned on, the folder list is back beside the messages'
+    Check ([int][Native.Win]::SendMessage($toolbar, $TB_ISBUTTONCHECKED, [IntPtr]$IDM_FOLDER_LIST, [IntPtr]::Zero) -ne 0) "and the Folders button is pressed again"
     Check ((Get-ItemProperty -Path $preferencesKey -Name FolderList -ErrorAction SilentlyContinue).FolderList -eq 1) 'and that is kept'
 
     # ---- the column layout ----

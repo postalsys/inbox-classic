@@ -286,6 +286,7 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     AddColumn(list_, COL_FROM, core::T(PE_TEXT_UI_COL_FROM).c_str(), 200);
     AddColumn(list_, COL_SUBJECT, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 320);
     AddColumn(list_, COL_RECEIVED, core::T(PE_TEXT_UI_COL_RECEIVED).c_str(), 130);
+    UpdateSortArrow();
 
     reader_.Create(parent, core);
     reader_.onShown = [this] { OnMessageShown(); };
@@ -323,7 +324,75 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     Reload();
 }
 
+// a small triangle pointing up (`up`) or down, in the gray of disabled text on the button face, as the heading draws a
+// bitmap on its right: the header of the classic controls has no sort arrows of its own (they come with Common
+// Controls 6, which the app leaves out for the classic look)
+static HBITMAP SortArrowBitmap(bool up) {
+    int width = Scale(9), height = Scale(5);
+    HDC screen = GetDC(nullptr);
+    HDC dc = CreateCompatibleDC(screen);
+    HBITMAP bitmap = CreateCompatibleBitmap(screen, width, height);
+    ReleaseDC(nullptr, screen);
+    HGDIOBJ old = SelectObject(dc, bitmap);
+    RECT all = {0, 0, width, height};
+    FillRect(dc, &all, GetSysColorBrush(COLOR_BTNFACE));
+    int base = up ? height - 1 : 0, tip = up ? 0 : height - 1;
+    POINT points[3] = {{0, base}, {width - 1, base}, {(width - 1) / 2, tip}};
+    HGDIOBJ brush = SelectObject(dc, GetSysColorBrush(COLOR_GRAYTEXT));
+    HGDIOBJ pen = SelectObject(dc, GetStockObject(NULL_PEN));
+    Polygon(dc, points, 3);
+    SelectObject(dc, pen);
+    SelectObject(dc, brush);
+    SelectObject(dc, old);
+    DeleteDC(dc);
+    return bitmap;
+}
+
+void Mailbox::UpdateSortArrow() {
+    HWND header = ListView_GetHeader(list_);
+    if (!header) {
+        return;
+    }
+    int sorted = -1;
+    switch (sort_) {
+    case PE_SORT_FIELD_FROM:
+        sorted = COL_FROM;
+        break;
+    case PE_SORT_FIELD_SUBJECT:
+        sorted = COL_SUBJECT;
+        break;
+    case PE_SORT_FIELD_DATE:
+    case PE_SORT_FIELD_RECEIVED:
+        sorted = COL_RECEIVED;
+        break;
+    default:
+        break;
+    }
+    HBITMAP& arrow = sortArrows_[ascending_ ? 0 : 1];
+    if (!arrow) {
+        arrow = SortArrowBitmap(ascending_);
+    }
+    for (int i = 0, count = Header_GetItemCount(header); i < count; i++) {
+        HDITEMW item = {};
+        item.mask = HDI_FORMAT;
+        Header_GetItem(header, i, &item);
+        item.mask = HDI_FORMAT | HDI_BITMAP;
+        item.fmt &= ~(HDF_BITMAP | HDF_BITMAP_ON_RIGHT);
+        item.hbm = nullptr;
+        if (i == sorted) {
+            item.fmt |= HDF_BITMAP | HDF_BITMAP_ON_RIGHT;
+            item.hbm = arrow;
+        }
+        Header_SetItem(header, i, &item);
+    }
+}
+
 void Mailbox::Destroy() {
+    for (HBITMAP& arrow : sortArrows_) {
+        if (arrow) {
+            DeleteObject(std::exchange(arrow, nullptr));
+        }
+    }
     if (pictureDc_) {
         DeleteDC(std::exchange(pictureDc_, nullptr));
     }

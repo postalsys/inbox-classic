@@ -12,6 +12,7 @@ use gtk::subclass::prelude::*;
 use pe_store::Message;
 
 use crate::app::shell;
+use crate::commands::Command;
 use crate::messages::{MessageRow, attachment_icon, bind_flag, thread_expander};
 use crate::ui::set_class;
 
@@ -84,6 +85,8 @@ struct Parts {
     subject: gtk::Label,
     folder: gtk::Label,
     attachment: gtk::Image,
+    /// Glasses on a watched conversation, the muted sign on an ignored one, as the Mac's and Windows' rows have
+    watch: gtk::Image,
     flag: gtk::DrawingArea,
     snippet: gtk::Label,
     count: gtk::Label,
@@ -135,6 +138,7 @@ impl Parts {
         small_dim(&folder);
         folder.set_max_width_chars(18);
         let attachment = gtk::Image::new();
+        let watch = gtk::Image::new();
         let flag = gtk::DrawingArea::new();
         flag.set_content_width(16);
         flag.set_content_height(16);
@@ -148,6 +152,7 @@ impl Parts {
         text.append(&line(&[
             subject.upcast_ref(),
             folder.upcast_ref(),
+            watch.upcast_ref(),
             attachment.upcast_ref(),
             flag.upcast_ref(),
         ]));
@@ -176,6 +181,7 @@ impl Parts {
             subject,
             folder,
             attachment,
+            watch,
             flag,
             snippet,
             count,
@@ -299,6 +305,14 @@ pub fn picture_shown(row: &RowWidget) -> bool {
 /// The marks at the right of the subject: the paper clip (a bounce's own mark in its place) and the flag in its colour,
 /// as the classic row has them (an ignored conversation is grey, as there)
 fn bind_marks(parts: &Parts, m: &Message) {
+    let (icon, command) = match m.mark {
+        pe_store::ThreadMark::Watch => (Some("ic-glasses-symbolic"), Some(Command::WatchConversation)),
+        pe_store::ThreadMark::Ignore => (Some("ic-speaker-mute-symbolic"), Some(Command::IgnoreConversation)),
+        pe_store::ThreadMark::None => (None, None),
+    };
+    parts.watch.set_icon_name(icon);
+    parts.watch.set_visible(icon.is_some());
+    parts.watch.set_tooltip_text(command.map(Command::label));
     let attachment = attachment_icon(m);
     parts.attachment.set_icon_name(attachment);
     parts.attachment.set_visible(attachment.is_some());
@@ -323,6 +337,16 @@ fn bind_thread(parts: &Parts, m: &Message) {
     }
     let depth = place.map_or(0, |p| p.depth);
     parts.text.set_margin_start(if depth > 0 { REPLY_INDENT } else { 0 });
+}
+
+/// Whether a row on screen shows the watched conversation's glasses, for the UI test
+#[cfg(feature = "e2e")]
+pub fn watch_shown(row: &RowWidget) -> bool {
+    row.imp()
+        .parts
+        .borrow()
+        .as_ref()
+        .is_some_and(|parts| parts.watch.is_visible())
 }
 
 /// What a row on screen shows, for the UI test: its three lines' first words and how far it is indented
