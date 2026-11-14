@@ -40,6 +40,8 @@ fn setup_with(config: serde_json::Value) -> Option<Setup> {
     .unwrap();
     // the tests of opening see the message downloaded when it is opened; those of downloading ahead turn it on
     core.set_download_ahead(pe_store::Ahead::Never).unwrap();
+    // a message sent goes at once, but in the tests of Undo Send
+    core.set_send_delay(0).unwrap();
     Some(Setup {
         server,
         core,
@@ -1059,6 +1061,8 @@ fn signs_in_with_oauth() {
         let _ = sender.send(event);
     })
     .unwrap();
+    // a message sent goes at once, as in the other tests
+    core.set_send_delay(0).unwrap();
     let wait = |accept: &dyn Fn(&Event) -> bool| loop {
         let event = events.recv_timeout(Duration::from_secs(10)).expect("an event");
         if accept(&event) {
@@ -1167,6 +1171,8 @@ fn signs_in_with_a_sign_in_app() {
         let _ = sender.send(event);
     })
     .unwrap();
+    // a message sent goes at once, as in the other tests
+    core.set_send_delay(0).unwrap();
     let wait = |accept: &dyn Fn(&Event) -> bool| loop {
         let event = events.recv_timeout(Duration::from_secs(10)).expect("an event");
         if accept(&event) {
@@ -2243,6 +2249,90 @@ fn the_outbox_keeps_what_did_not_go() {
     assert_eq!(queued.len(), 1);
     s.core.outbox_delete(queued[0].id).unwrap();
     assert!(s.core.outbox().unwrap().is_empty());
+}
+
+#[test]
+fn a_message_sent_waits_and_can_be_taken_back() {
+    let Some(s) = setup() else { return };
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    s.core.set_send_delay(3).unwrap();
+    let dir = TempDir::new("undo-send");
+    let file = dir.path().join("plan.txt");
+    std::fs::write(&file, "the plan").unwrap();
+    let message = |subject: &str| pe_core::Outgoing {
+        to: "Ann <ann@example.com>".into(),
+        subject: subject.into(),
+        html: Some("<p>Second thoughts</p>".into()),
+        attachments: vec![file.clone()],
+        ..Default::default()
+    };
+
+    // sent: it waits, and Edit > Undo says it takes the send back
+    s.core.send(account, message("Taken back")).unwrap();
+    let waiting = s.wait(|e| matches!(e, Event::SendWaiting { .. }));
+    assert_eq!(
+        waiting,
+        Event::SendWaiting {
+            account,
+            subject: "Taken back".into(),
+            seconds: 3
+        }
+    );
+    eventually(
+        || s.core.outbox().unwrap().len() == 1,
+        "the message waits in the Outbox",
+    );
+    assert!(s.core.undo_is_send());
+    assert_eq!(s.core.undo_label().as_deref(), Some("Undo Send"));
+    assert!(
+        s.core
+            .send_waiting_text()
+            .unwrap()
+            .starts_with("Sending “Taken back” in "),
+        "the status bar counts down"
+    );
+    let (taken, said) = s.core.undo_send().unwrap();
+    assert_eq!(said, "“Taken back” was not sent. It is open again.");
+    let (from, draft) = taken.unwrap();
+    assert_eq!(from, account);
+    assert_eq!(
+        (draft.to.as_str(), draft.subject.as_str()),
+        ("Ann <ann@example.com>", "Taken back")
+    );
+    assert!(draft.body.contains("Second thoughts"), "{}", draft.body);
+    assert!(draft.message_id.is_some());
+    assert_eq!(draft.attachments.len(), 1);
+    assert_eq!(std::fs::read(&draft.attachments[0]).unwrap(), b"the plan");
+    assert!(s.core.outbox().unwrap().is_empty());
+    assert!(!s.core.undo_is_send());
+    // taken back, it never goes
+    std::thread::sleep(std::time::Duration::from_secs(4));
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    assert!(s.server.subjects("INBOX").is_empty());
+
+    // not taken back: it goes once its time came, and then it is too late
+    s.core.send(account, message("Let go")).unwrap();
+    s.wait(|e| matches!(e, Event::SendWaiting { .. }));
+    assert!(s.server.subjects("INBOX").is_empty(), "nothing goes before its time");
+    s.wait(|e| matches!(e, Event::MessageSent { account: a, .. } if *a == account));
+    assert_eq!(s.server.subjects("INBOX"), ["Let go"]);
+    let (taken, said) = s.core.undo_send().unwrap();
+    assert!(taken.is_none() && said == "“Let go” was already sent.", "{said}");
+    assert!(s.core.send_waiting_text().is_none());
+
+    // one more that waits
+    s.core.send(account, message("Moved after")).unwrap();
+    s.wait(|e| matches!(e, Event::SendWaiting { .. }));
+    assert!(s.core.undo_is_send());
+    s.core.set_send_delay(0).unwrap();
+
+    // quitting sends what waits at once
+    s.core.send_waiting_now().unwrap();
+    s.wait(|e| matches!(e, Event::MessageSent { subject, .. } if subject == "Moved after"));
+    assert!(!s.core.undo_is_send());
 }
 
 #[test]

@@ -14,6 +14,13 @@ size-bytes = { $count ->
 size-kb = { $size } KB
 size-mb = { $size } MB
 size-gb = { $size } GB
+# review: new
+send-delay-off = Desactivado
+# review: new
+send-delay-seconds = { $count ->
+    [one] 1 segundo
+   *[other] { $count } segundos
+}
 list-counts = { $messages }, { $unread } sin leer
 list-counts-selected = { $messages }, { $unread } sin leer, { $selected ->
     [one] { $selected } seleccionado
@@ -215,6 +222,8 @@ undo-delete = Deshacer Eliminar
 undo-archive = Deshacer Archivar
 undo-junk = Deshacer Marcar como correo no deseado
 undo-not-junk = Deshacer Marcar como correo deseado
+# review: new
+undo-send = Deshacer Enviar
 nothing-to-undo = No hay nada que deshacer.
 messages-gone = Los mensajes ya no están.
 folder-holds-no-messages = Esta carpeta no puede contener mensajes.

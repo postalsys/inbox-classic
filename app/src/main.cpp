@@ -31,6 +31,9 @@ constexpr UINT_PTR TIMER_SYNC = 2;
 HWND g_main = nullptr;
 HWND g_toolbar = nullptr;
 HWND g_status = nullptr;
+// the status bar's Undo of the message that waits to be sent, and whether one waits (the countdown runs)
+HWND g_undoSend = nullptr;
+bool g_sendWaiting = false;
 // the band under the toolbar with the name of the selected folder, as Outlook Express has it
 HWND g_folderBar = nullptr;
 // its dark grey, under white text
@@ -347,9 +350,44 @@ std::wstring Quoted(const std::wstring& subject) {
     return subject.empty() ? core::T(PE_TEXT_UI_NO_SUBJECT) : core::T(PE_TEXT_UI_QUOTED, {{"subject", subject}});
 }
 
+// the outgoing pane of the status bar, and its tip: the whole text, as a long subject is cut short
+void SetOutgoing(const std::wstring& text) {
+    SendMessageW(g_status, SB_SETTEXTW, 1, reinterpret_cast<LPARAM>(text.c_str()));
+    SendMessageW(g_status, SB_SETTIPTEXTW, 1, reinterpret_cast<LPARAM>(text.c_str()));
+}
+
+// no message waits to be sent any more: the countdown stops, its Undo goes
+void EndSendWaiting() {
+    g_sendWaiting = false;
+    KillTimer(g_main, TIMER_SEND_WAITING);
+    ShowWindow(g_undoSend, SW_HIDE);
+}
+
+// the countdown of the message that waits to be sent, in the core's words, with its Undo; false once none waits
+bool ShowSendWaiting() {
+    if (!g_sendWaiting) {
+        return false;
+    }
+    core::String text(pe_send_waiting_text(g_core.get()));
+    if (!text) {
+        EndSendWaiting();
+        return false;
+    }
+    SetOutgoing(Text(text.get()));
+    if (!IsWindowVisible(g_undoSend)) {
+        LayoutStatus();
+        ShowWindow(g_undoSend, SW_SHOWNA);
+    }
+    return true;
+}
+
 // the outgoing pane of the status bar, which other work does not write over: what is being sent, what waits in the
 // Outbox and why, or the last message sent
 void ShowOutbox() {
+    // a message waiting to be sent says how long, with its Undo
+    if (ShowSendWaiting()) {
+        return;
+    }
     core::Outbox outbox(pe_outbox(g_core.get()));
     size_t waiting = pe_outbox_count(outbox.get());
     std::wstring text = g_lastSent;
@@ -365,9 +403,7 @@ void ShowOutbox() {
             text = core::T(PE_TEXT_UI_OUTBOX_SENDING, {{"subject", Quoted(subject)}});
         }
     }
-    SendMessageW(g_status, SB_SETTEXTW, 1, reinterpret_cast<LPARAM>(text.c_str()));
-    // the whole text as the pane's tip, as a long subject is cut short
-    SendMessageW(g_status, SB_SETTIPTEXTW, 1, reinterpret_cast<LPARAM>(text.c_str()));
+    SetOutgoing(text);
 }
 
 void SyncAll() {
@@ -497,6 +533,12 @@ void OnEvent(const UiEvent& event) {
         if (std::wstring said = g_mailbox.Unsubscribed(event.uid, event.message); !said.empty()) {
             SetStatus(said);
         }
+        break;
+    case PE_EVENT_KIND_SEND_WAITING:
+        // counted down in the status bar, with an Undo, until it goes
+        g_sendWaiting = true;
+        SetTimer(g_main, TIMER_SEND_WAITING, 1000, nullptr);
+        ShowOutbox();
         break;
     case PE_EVENT_KIND_MESSAGE_SENT:
         // shown by the OutboxChanged that follows it
@@ -947,6 +989,34 @@ void LayoutStatus() {
     int countsWidth = std::max(Scale(220), static_cast<int>(text.cx) + Scale(12) + GetSystemMetrics(SM_CXVSCROLL));
     int parts[] = {std::max(0, width - countsWidth - Scale(340)), std::max(0, width - countsWidth), -1};
     SendMessageW(g_status, SB_SETPARTS, 3, reinterpret_cast<LPARAM>(parts));
+    // the Undo of a message waiting to be sent, at the right end of the outgoing pane
+    RECT pane = {};
+    if (g_undoSend && SendMessageW(g_status, SB_GETRECT, 1, reinterpret_cast<LPARAM>(&pane))) {
+        int buttonWidth = ButtonWidth({core::T(PE_TEXT_UI_UNDO_BUTTON)});
+        MoveWindow(g_undoSend, pane.right - buttonWidth - 2, pane.top + 1, buttonWidth, pane.bottom - pane.top - 2, TRUE);
+    }
+}
+
+// the status bar hands the clicks of its Undo button to the main window
+LRESULT CALLBACK StatusProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR) {
+    if (message == WM_COMMAND && LOWORD(wParam) == IDC_UNDO_SEND) {
+        return SendMessageW(g_main, message, wParam, lParam);
+    }
+    return DefSubclassProc(hwnd, message, wParam, lParam);
+}
+
+// takes back the message that waits to be sent: it opens again as it was, or the status bar says it went
+void UndoSend() {
+    EndSendWaiting();
+    int64_t account = 0;
+    char* said = nullptr;
+    core::Draft draft(pe_undo_send(g_core.get(), &account, &said));
+    core::String status(said);
+    if (draft) {
+        OpenCompose(g_main, g_core.get(), account, pe_draft_info(draft.get()));
+    }
+    SetStatus(status ? Text(status.get()) : L"");
+    ShowOutbox();
 }
 
 // which splitter is under a point of the client area: 0 none, 1 beside the tree, 2 below the list
@@ -1120,6 +1190,8 @@ bool OpenCore(HWND hwnd) {
     g_core.reset(pe_core_open_with(path.c_str(), flags, certificate.empty() ? nullptr : certificate.c_str(), OnCoreEvent, hwnd));
     if (g_core && g_arguments.testHooks) {
         pe_set_download_ahead(g_core.get(), PE_DOWNLOAD_AHEAD_NEVER);
+        // a message sent goes at once, but in the step of Undo Send, which turns the wait on in Options
+        pe_set_send_delay_index(g_core.get(), 0);
         // the brand logo of the list's step comes from a server of the test on the loopback address
         pe_allow_loopback_logos_for_tests(true);
     }
@@ -1293,6 +1365,10 @@ void CreateChildren(HWND hwnd) {
     // tips: the whole text of a pane that is cut short (a long subject in the outgoing pane)
     g_status = CreateWindowExW(0, STATUSCLASSNAMEW, nullptr, WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP | SBARS_TOOLTIPS, 0, 0, 0, 0, hwnd, nullptr,
                                GetModuleHandleW(nullptr), nullptr);
+    g_undoSend = CreateWindowExW(0, L"BUTTON", core::T(PE_TEXT_UI_UNDO_BUTTON).c_str(), WS_CHILD | BS_PUSHBUTTON, 0, 0, 0, 0, g_status,
+                                 reinterpret_cast<HMENU>(static_cast<INT_PTR>(IDC_UNDO_SEND)), GetModuleHandleW(nullptr), nullptr);
+    SendMessageW(g_undoSend, WM_SETFONT, SendMessageW(g_status, WM_GETFONT, 0, 0), FALSE);
+    SetWindowSubclass(g_status, StatusProc, 0, 0);
     g_mailbox.Create(hwnd, g_core.get());
     g_folderCaption = CreateFolderCaption(hwnd, false, reinterpret_cast<HFONT>(SendMessageW(g_mailbox.Tree(), WM_GETFONT, 0, 0)));
     LoadPanes();
@@ -1618,9 +1694,15 @@ void OnCommand(WORD id, WORD code) {
     case IDM_UNDO:
         if (HWND edit = FocusedEdit()) {
             SendMessageW(edit, WM_UNDO, 0, 0);
+        } else if (pe_undo_is_send(g_core.get())) {
+            // the last thing done was sending a message that still waits
+            UndoSend();
         } else {
             g_mailbox.Undo();
         }
+        return;
+    case IDC_UNDO_SEND:
+        UndoSend();
         return;
     case IDM_MARK_READ:
         g_mailbox.MarkSelected(true);
@@ -1965,6 +2047,8 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_TIMER:
         if (wParam == TIMER_SYNC) {
             SyncAll();
+        } else if (wParam == TIMER_SEND_WAITING) {
+            ShowOutbox();
         } else {
             g_mailbox.OnTimer(wParam);
             // a reload or a search changes the counts
@@ -2013,6 +2097,8 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         // saved
         switch (CloseComposeWindows()) {
         case ComposeClose::Closed:
+            // what waits to be taken back goes now, not at the next start
+            pe_send_waiting_now(g_core.get());
             break;
         case ComposeClose::Saving:
             g_quitAfterCompose = true;

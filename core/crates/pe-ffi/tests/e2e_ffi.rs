@@ -84,6 +84,8 @@ fn reads_mail_through_the_c_api() {
         )
     };
     assert!(!core.is_null());
+    // a message sent goes at once, as in the other tests
+    assert!(unsafe { pe_set_send_delay_index(core, 0) });
 
     let c = |s: &str| CString::new(s).unwrap();
     let (name, email, user, host) = (c("Test"), c("testuser@example.com"), c(USER), c("127.0.0.1"));
@@ -627,6 +629,8 @@ fn sign_in_apps_through_the_c_api() {
         )
     };
     assert!(!core.is_null());
+    // a message sent goes at once, as in the other tests
+    assert!(unsafe { pe_set_send_delay_index(core, 0) });
     let c = |s: &str| CString::new(s).unwrap();
 
     // the presets fill in Google and Microsoft

@@ -498,6 +498,21 @@ ui-download-ahead-recent = Hiljutised kirjad suurusega kuni 1 MB
 ui-download-ahead-all = Kõik kirjad
 ui-download-ahead-never = Ainult avamisel
 ui-download-limit = Mahupiir konto kohta:
+# review: new
+ui-send-delay = Oota enne saatmist:
+# review: new
+ui-send-delay-note = Kuni kiri ootab, saate selle nupuga Võta tagasi tagasi võtta.
+# review: new
+ui-sending-in = { $subject } saadetakse { $count ->
+    [one] 1 sekundi pärast
+   *[other] { $count } sekundi pärast
+}
+# review: new
+ui-send-undone = { $subject } jäi saatmata. Kiri on jälle avatud.
+# review: new
+ui-send-too-late = { $subject } on juba saadetud.
+# review: new
+ui-outbox-status-undo = Saadetakse kell { $time }
 ui-download-note = Eelnevalt alla laaditud kirjad avanevad kohe. Mahupiiri ületamisel eemaldatakse arvutist vanimate kirjade koopiad. Kirjade avamisel laaditakse need uuesti alla.
 ui-attachment-downloading = Kirja allalaadimine on veel pooleli. Proovige uuesti, kui allalaadimine on lõppenud.
 ui-trusted-senders-button = Usaldusväärsed saatjad...

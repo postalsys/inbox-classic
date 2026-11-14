@@ -14,6 +14,13 @@ size-bytes = { $count ->
 size-kb = { $size } KB
 size-mb = { $size } MB
 size-gb = { $size } GB
+# review: new
+send-delay-off = Väljas
+# review: new
+send-delay-seconds = { $count ->
+    [one] 1 sekund
+   *[other] { $count } sekundit
+}
 list-counts = { $messages }, { $unread } lugemata
 list-counts-selected = { $messages }, { $unread } lugemata, { $selected } valitud
 list-counts-found = { $found } leitud, { $unread } lugemata
@@ -198,6 +205,8 @@ undo-delete = Võta kustutamine tagasi
 undo-archive = Võta arhiveerimine tagasi
 undo-junk = Võta rämpspostiks märkimine tagasi
 undo-not-junk = Võta tavapostiks märkimine tagasi
+# review: new
+undo-send = Võta saatmine tagasi
 nothing-to-undo = Pole midagi tagasi võtta.
 messages-gone = Neid kirju pole enam.
 folder-holds-no-messages = Selles kaustas ei saa kirju hoida.

@@ -499,11 +499,15 @@ final class UITest {
         startApp()
         // the steps that open messages see them downloaded when opened; the step of Settings checks the choices
         onMain { self.main.core.downloadAhead = PE_DOWNLOAD_AHEAD_NEVER }
+        // a message sent goes at once, but in the step of Undo Send
+        onMain { pe_set_send_delay_index(self.main.core.handle, 0) }
         try await addAccount()
         try await reading()
         try await writing()
         try await notDownloaded()
         try await largeMessage()
+        // before the Drafts step, whose Send/Recv brings the newest message the organizing step starts from
+        try await undoSend()
         try await outboxAndDrafts()
         try await draftsSavedAutomatically()
         try await searching()

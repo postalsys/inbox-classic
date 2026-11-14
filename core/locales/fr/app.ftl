@@ -498,6 +498,21 @@ ui-download-ahead-recent = Messages récents de 1 Mo maximum
 ui-download-ahead-all = Tous les messages
 ui-download-ahead-never = Seulement à l’ouverture
 ui-download-limit = Espace maximal par compte :
+# review: new
+ui-send-delay = Attendre avant d’envoyer :
+# review: new
+ui-send-delay-note = Tant qu’un message attend, vous pouvez le reprendre avec Annuler.
+# review: new
+ui-sending-in = Envoi de { $subject } dans { $count ->
+    [one] 1 seconde
+   *[other] { $count } secondes
+}
+# review: new
+ui-send-undone = { $subject } n’a pas été envoyé. Il est de nouveau ouvert.
+# review: new
+ui-send-too-late = { $subject } a déjà été envoyé.
+# review: new
+ui-outbox-status-undo = Envoi à { $time }
 ui-download-note = Les messages téléchargés à l'avance s'ouvrent immédiatement. Lorsque la limite de stockage est dépassée, les copies locales les plus anciennes sont supprimées, puis téléchargées à nouveau à l'ouverture des messages.
 ui-attachment-downloading = Le téléchargement de ce message est encore en cours. Réessayez une fois le téléchargement terminé.
 ui-trusted-senders-button = Expéditeurs de confiance...

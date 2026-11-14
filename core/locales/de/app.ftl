@@ -498,6 +498,21 @@ ui-download-ahead-recent = Neuere Nachrichten mit jeweils bis zu 1 MB
 ui-download-ahead-all = Alle Nachrichten
 ui-download-ahead-never = Erst beim Öffnen
 ui-download-limit = Maximaler Speicherplatz pro Konto:
+# review: new
+ui-send-delay = Vor dem Senden warten:
+# review: new
+ui-send-delay-note = Solange eine Nachricht wartet, können Sie sie mit „Rückgängig“ zurückholen.
+# review: new
+ui-sending-in = { $subject } wird gesendet in { $count ->
+    [one] 1 Sekunde
+   *[other] { $count } Sekunden
+}
+# review: new
+ui-send-undone = { $subject } wurde nicht gesendet. Die Nachricht ist wieder geöffnet.
+# review: new
+ui-send-too-late = { $subject } wurde bereits gesendet.
+# review: new
+ui-outbox-status-undo = Wird um { $time } gesendet
 ui-download-note = Vorab heruntergeladene Nachrichten lassen sich sofort öffnen. Wird das Speicherlimit überschritten, werden die ältesten lokalen Kopien entfernt und beim Öffnen erneut heruntergeladen.
 ui-attachment-downloading = Diese Nachricht wird noch heruntergeladen. Versuchen Sie es erneut, sobald der Download abgeschlossen ist.
 ui-trusted-senders-button = Vertrauenswürdige Absender...

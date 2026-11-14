@@ -103,6 +103,8 @@ public final class Mailbox: NSObject {
     var status: (String) -> Void = { _ in }
     /// a mailto: link to write (a mailing list's unsubscribe address)
     var openMailto: (String) -> Void = { _ in }
+    /// Edit > Undo when the last thing done was sending a message that still waits
+    var undoSend: (() -> Void)?
 
     // the folder tree
     private var accounts: [AccountNode] = []
@@ -1512,6 +1514,11 @@ public final class Mailbox: NSObject {
     }
 
     func undo() {
+        // the last thing done was sending a message that still waits: Undo Send
+        if pe_undo_is_send(core.handle) {
+            undoSend?()
+            return
+        }
         switch core.undo() {
         case .success(let done):
             status(done)

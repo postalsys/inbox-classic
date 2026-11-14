@@ -288,6 +288,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         // the messages being written first: each may ask to be saved; the app stays while one is kept open or saving
         switch ComposeWindow.closeAll() {
         case .closed:
+            // what waits to be taken back goes now, not at the next start
+            if let core { pe_send_waiting_now(core.handle) }
             return .terminateNow
         case .saving:
             quitAfterCompose = true

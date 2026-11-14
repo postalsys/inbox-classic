@@ -1069,6 +1069,8 @@ enum ControlId : WORD {
     // no control: the reading pane's "Show the message that bounced" clicked, sent to its window once the WebView2's
     // event is over
     IDC_BOUNCED_MESSAGE,
+    // in the status bar: takes back the message that waits to be sent (Undo Send)
+    IDC_UNDO_SEND = 225,
     // the toolbar of a message window, and its Previous and Next buttons
     IDC_MESSAGE_TOOLBAR = 230,
     IDC_PREVIOUS,
@@ -1153,6 +1155,9 @@ enum OptionsControlId : WORD {
     // the senders' pictures in the message list, and what they are
     IDC_OPTIONS_LIST_PICTURES,
     IDC_OPTIONS_LIST_PICTURES_NOTE,
+    // how long a message sent waits to be taken back (Undo Send), and what that is for
+    IDC_OPTIONS_SEND_DELAY,
+    IDC_OPTIONS_SEND_DELAY_NOTE,
 };
 
 // the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them
@@ -1239,3 +1244,6 @@ constexpr UINT_PTR TIMER_DOWNLOADING = 6;
 constexpr UINT_PTR TIMER_SELECTION = 7;
 // a moment after a find in a message started, how many places it found is told as it is then
 constexpr UINT_PTR TIMER_FIND_SETTLED = 8;
+// the main window's: counts down the message that waits to be sent, in the status bar (Undo Send); apart from the
+// list's timers above, which the main window hands to the list
+constexpr UINT_PTR TIMER_SEND_WAITING = 20;

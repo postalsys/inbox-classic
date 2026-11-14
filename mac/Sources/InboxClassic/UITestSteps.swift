@@ -277,6 +277,54 @@ extension UITest {
         check(ComposeWindow.open.isEmpty, "closed, it is not opened again at the next start")
     }
 
+    func undoSend() async throws {
+        step("Undo Send")
+        command(.options)
+        guard await waitWindow("settings", 10) != nil, let options = SettingsWindow.current else {
+            throw Failed(description: "Settings did not open")
+        }
+        check(options.sendDelay.titleOfSelectedItem == "Off", "Wait before sending is in Settings (\(options.sendDelay.titleOfSelectedItem ?? ""))")
+        check(options.sendDelay.itemTitles == ["Off", "5 seconds", "10 seconds", "20 seconds", "30 seconds"],
+              "with the waits it offers (\(options.sendDelay.itemTitles))")
+        onMain { options.sendDelay.selectItem(at: 2); options.sendDelayChosen() }
+        check(await waitUntil(5) { pe_send_delay_index(self.main.core.handle) == 2 }, "10 seconds chosen")
+        await shot(options.window, "write-24-send-delay")
+        onMain { options.window.close() }
+
+        command(.newMail)
+        guard let compose = await waitCompose() else { throw Failed(description: "no compose window") }
+        type("Ida <ida@example.com>", into: field("compose.to", compose))
+        type("Taken back in the UI test", into: field("compose.subject", compose))
+        _ = await typeInEditor(compose, "On second thought.")
+        send(compose)
+        check(await waitUntil { !compose.isVisible }, "Send closes the message")
+        let outgoing: NSTextField? = find("status.outbox", in: main.window)
+        let undoButton: NSButton? = find("status.undoSend", in: main.window)
+        check(await waitUntil(5) { outgoing?.stringValue.hasPrefix("Sending “Taken back in the UI test” in") == true },
+              "the status bar counts down to sending (\(outgoing?.stringValue ?? ""))")
+        check(undoButton?.isHidden == false, "with an Undo button")
+        check(main.core.undoLabel == "Undo Send", "Edit names Undo Send (\(main.core.undoLabel ?? "nothing"))")
+        await shot(main.window, "write-22-undo-send")
+        press(undoButton)
+        guard let undone = await waitFor(10, { ComposeWindow.open.last.flatMap { $0.window.title == "Taken back in the UI test" ? $0.window : nil } })
+        else { throw Failed(description: "the message did not open again") }
+        check(field("compose.to", undone)?.stringValue.contains("ida@example.com") == true, "Undo opens the message again, as it was")
+        check(undoButton?.isHidden == true, "and the Undo button goes")
+        let mainStatus: NSTextField? = find("status.text", in: main.window)
+        check(mainStatus?.stringValue.contains("was not sent") == true, "the status bar says it was not sent (\(mainStatus?.stringValue ?? ""))")
+        await shot(undone, "write-23-undone")
+        _ = await waitUntil(12) { false }
+        check(await findMessage("INBOX", "Subject: Taken back in the UI test") == nil, "taken back, it never goes")
+
+        // sent again and left alone: it goes once its time came
+        _ = await typeInEditor(undone, " Sent after all.", atEnd: true)
+        send(undone)
+        check(await waitFor(40) { await findMessage("INBOX", "Subject: Taken back in the UI test") } != nil,
+              "left alone, it goes once its time came")
+        check(await waitUntil(10) { undoButton?.isHidden == true }, "and the Undo button goes with it")
+        onMain { pe_set_send_delay_index(self.main.core.handle, 0) }
+    }
+
     func rfc2822(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")

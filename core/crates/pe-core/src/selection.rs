@@ -284,6 +284,7 @@ impl Core {
         let text = self.done_text(action, picked.len() as u64, &undo, crossed)?;
         // what moved can be taken back; what is gone for good ends what came before it
         if let Some(what) = undo_name {
+            self.sent_not_last();
             *self.undo.lock().unwrap_or_else(|e| e.into_inner()) =
                 (!undo.is_empty()).then_some(Undo { what, moves: undo });
         }
@@ -428,6 +429,9 @@ impl Core {
 
     /// What Edit > Undo says it takes back, "Undo Move"; None when there is nothing
     pub fn undo_label(&self) -> Option<String> {
+        if self.undo_is_send() {
+            return Some(tr(Text::UndoSend));
+        }
         let undo = self.undo.lock().unwrap_or_else(|e| e.into_inner());
         undo.as_ref().map(|u| tr(u.what))
     }

@@ -217,7 +217,6 @@ Screenshots: `write-0-main-in-front` (not yet on the Mac, not yet on Linux), `wr
 - and its draft is gone
 - the main window says what was sent
 
-
 ## 19a. Drafts saved automatically
 
 Screenshots: `write-20-autosave`, `write-21-restored`
@@ -232,6 +231,22 @@ Screenshots: `write-20-autosave`, `write-21-restored`
 - and says it was restored
 - closing it asks whether to keep it, and No leaves its draft in Drafts, as it may be one the user kept
 - closed, it is not opened again at the next start
+
+## 19b. Undo Send
+
+Screenshots: `write-24-send-delay`, `write-22-undo-send`, `write-23-undone`
+
+The UI tests send at once (the wait is set to Off at their start); this step turns it on.
+
+- Options (Settings, Preferences) offers the wait before sending: Off, 5, 10, 20 or 30 seconds
+- 10 seconds chosen
+- Send closes the message, and the status bar counts down to sending
+- with an Undo button, and Edit names Undo Send
+- Undo opens the message again, as it was, and the Undo button goes
+- the status bar says it was not sent
+- taken back, it never goes
+- sent again and left alone, it goes once its time came, and the Undo button goes with it
+
 ## 20. Send/Recv
 
 Screenshots: `main-2-new-mail`, `main-3-sent-items`

@@ -83,6 +83,26 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
     mail.add(&notify);
     mail.add(&codes);
 
+    let delays: Vec<String> = pe_core::SEND_DELAYS
+        .iter()
+        .map(|s| pe_core::send_delay_text(*s))
+        .collect();
+    let delay = choice_row(
+        Text::UiSendDelay,
+        &delays,
+        "preferences-send-delay",
+        pe_core::send_delay_index(shell().core.send_delay().unwrap_or(0)),
+        |at| {
+            if let Some(seconds) = pe_core::SEND_DELAYS.get(at) {
+                let _ = shell().core.set_send_delay(*seconds);
+            }
+        },
+    );
+    let sending = adw::PreferencesGroup::builder()
+        .description(plain(Text::UiSendDelayNote))
+        .build();
+    sending.add(&delay);
+
     let grouped = adw::SwitchRow::builder()
         .title(plain(Text::UiGroupByConversation))
         .active(crate::mailbox::grouped())
@@ -114,6 +134,7 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
     page.add(&list);
     page.add(&pictures_group());
     page.add(&mail);
+    page.add(&sending);
     page.add(&files_group());
     page.add(&download_group());
     let dialog = adw::PreferencesDialog::builder()

@@ -943,6 +943,8 @@ fn command(command: Command) {
 async fn scenario(d: Rc<Driver>) {
     // the steps that open messages see them downloaded when opened; the step of Preferences checks the choices
     let _ = shell().core.set_download_ahead(pe_core::Ahead::Never);
+    // a message sent goes at once, but in the step of Undo Send
+    let _ = shell().core.set_send_delay(0);
     // the brand logos of the list's pictures come from a server of the test, on the loopback address
     pe_core::bimi::allow_loopback_logos(true);
     // the Classic layout, whatever the window's width, so the screenshots of every step are of it; the layout steps
@@ -957,6 +959,7 @@ async fn scenario(d: Rc<Driver>) {
     outbox(&d).await;
     drafts(&d).await;
     drafts_saved_automatically(&d).await;
+    undo_send(&d).await;
     send_receive(&d).await;
     finding(&d).await;
     files(&d).await;
@@ -1722,6 +1725,86 @@ async fn drafts_saved_automatically(d: &Driver) {
         shell().composes.borrow().is_empty(),
         "closed, it is not opened again at the next start",
     );
+}
+
+async fn undo_send(d: &Driver) {
+    d.step("Undo Send");
+    let main = shell().main();
+    command(Command::Options);
+    if let Some(dialog) = wait_dialog(10, "preferences-dialog").await {
+        let root: gtk::Widget = dialog.clone().upcast();
+        let row = named_in(&root, "preferences-send-delay").and_downcast::<adw::ComboRow>();
+        d.check(row.is_some(), "Wait before sending is in Preferences");
+        if let Some(row) = row {
+            d.check(row.selected() == 0, "off at first in the UI test");
+            row.set_selected(2);
+        }
+        d.check(shell().core.send_delay().unwrap_or(0) == 10, "10 seconds chosen");
+        pause(500).await;
+        d.shot(&dialog, "write-24-send-delay").await;
+        dialog.close();
+        wait_gone(10, "preferences-dialog").await;
+    }
+    run_command(Command::NewMail);
+    let Some(c) = wait_compose(10).await else {
+        d.check(false, "Create Mail opens a compose window");
+        return;
+    };
+    c.to.set_text("Ida <ida@example.com>");
+    c.subject.set_text("Taken back in the UI test");
+    c.editor.type_text("On second thought.");
+    pause(500).await;
+    click(c.window.upcast_ref(), "compose-send");
+    d.check(
+        wait_until(10, || !c.window.is_visible()).await,
+        "Send closes the message",
+    );
+    let counting = wait_until(5, || {
+        main.status_texts()
+            .1
+            .starts_with("Sending “Taken back in the UI test” in")
+    })
+    .await;
+    d.check(
+        counting,
+        &format!("the status bar counts down to sending ({})", main.status_texts().1),
+    );
+    let undo = main.undo_send_button();
+    d.check(undo.is_visible(), "with an Undo button");
+    d.check(
+        shell().core.undo_label().as_deref() == Some("Undo Send"),
+        "Edit names Undo Send",
+    );
+    d.shot(&main_window(), "write-22-undo-send").await;
+    undo.emit_clicked();
+    let Some(again) = wait_compose(10).await else {
+        d.check(false, "Undo opens the message again");
+        return;
+    };
+    d.check(
+        again.to.text().contains("ida@example.com"),
+        "Undo opens the message again, as it was",
+    );
+    d.check(!undo.is_visible(), "and the Undo button goes");
+    d.check(
+        main.status_texts().0.contains("was not sent"),
+        &format!("the status bar says it was not sent ({})", main.status_texts().0),
+    );
+    d.shot(&again.window, "write-23-undone").await;
+    pause(12_000).await;
+    d.check(
+        d.find("INBOX", "Subject: Taken back in the UI test").is_none(),
+        "taken back, it never goes",
+    );
+    // sent again and left alone: it goes once its time came
+    click(again.window.upcast_ref(), "compose-send");
+    let went = wait_for(40, || d.find("INBOX", "Subject: Taken back in the UI test")).await;
+    d.check(went.is_some(), "left alone, it goes once its time came");
+    d.check(
+        wait_until(10, || !undo.is_visible()).await,
+        "and the Undo button goes with it",
+    );
+    let _ = shell().core.set_send_delay(0);
 }
 
 async fn send_receive(d: &Driver) {

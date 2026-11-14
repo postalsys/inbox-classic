@@ -74,7 +74,9 @@ struct OptionsState {
     HWND aheadCombo = nullptr;
     HWND limitCombo = nullptr;
     HWND layoutCombo = nullptr;
+    HWND sendDelayCombo = nullptr;
     int picked = 0;
+    int sendDelay = 0;
     int layout = 0;
     int ahead = 0;
     int limit = 0;
@@ -232,6 +234,7 @@ LRESULT CALLBACK OptionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             state->ahead = static_cast<int>(SendMessageW(state->aheadCombo, CB_GETCURSEL, 0, 0));
             state->limit = static_cast<int>(SendMessageW(state->limitCombo, CB_GETCURSEL, 0, 0));
             state->layout = static_cast<int>(SendMessageW(state->layoutCombo, CB_GETCURSEL, 0, 0));
+            state->sendDelay = static_cast<int>(SendMessageW(state->sendDelayCombo, CB_GETCURSEL, 0, 0));
             state->listPictures = Button_GetCheck(state->listPicturesCheck) == BST_CHECKED;
         }
         state->done = true;
@@ -311,6 +314,12 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     // in the order of PeDownloadAhead
     std::vector<std::wstring> aheadItems = {core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_RECENT), core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_ALL),
                                             core::T(PE_TEXT_UI_DOWNLOAD_AHEAD_NEVER)};
+    std::wstring sendDelayText = core::T(PE_TEXT_UI_SEND_DELAY), sendDelayNote = core::T(PE_TEXT_UI_SEND_DELAY_NOTE);
+    std::vector<std::wstring> sendDelayItems;
+    for (size_t i = 0; i < pe_send_delay_count(); i++) {
+        core::String text(pe_send_delay_text(i));
+        sendDelayItems.push_back(text ? Text(text.get()) : L"");
+    }
     std::vector<std::wstring> limitItems;
     for (size_t i = 0; i < pe_download_limit_count(); i++) {
         core::String text(pe_download_limit_text(i));
@@ -327,7 +336,8 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     }
     int comboWidth = std::max(Scale(200), longest + GetSystemMetrics(SM_CXVSCROLL) + Scale(12));
     // the layout and download lists: their labels in a column, the lists as wide as their longest entry
-    int comboLabel = static_cast<int>(std::max({MeasureText(aheadText).cx, MeasureText(limitText).cx, MeasureText(layoutText).cx})) +
+    int comboLabel = static_cast<int>(std::max({MeasureText(aheadText).cx, MeasureText(limitText).cx, MeasureText(layoutText).cx,
+                                                MeasureText(sendDelayText).cx})) +
                         Scale(8);
     int downloadListWidth = 0;
     for (const auto* items : {&aheadItems, &limitItems}) {
@@ -348,12 +358,15 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     int warningHeight = std::max(Scale(16), static_cast<int>(MeasureText(warning, inner - Scale(17)).cy));
     int listNoteHeight = std::max(Scale(16), static_cast<int>(MeasureText(listPicturesNote, inner - Scale(17)).cy));
     int downloadNoteHeight = std::max(Scale(16), static_cast<int>(MeasureText(downloadNote, inner).cy));
+    int sendNoteHeight = std::max(Scale(16), static_cast<int>(MeasureText(sendDelayNote, inner - comboLabel).cy));
     // the language and its note, a line, the notifications (with their codes under them) and the conversations, a
     // line, reading: pictures with their warning, Trusted Senders and .eml files; the buttons
     int reading = Scale(12) + 2 + Scale(12) + row + warningHeight + Scale(8) + Scale(25);
     // a line, then downloading: the two lists and the note
     int downloading = Scale(12) + 2 + Scale(12) + 2 * row + 2 * Scale(4) + downloadNoteHeight;
-    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + 5 * row + 3 * Scale(4) + Scale(8) + listNoteHeight +
+    // the wait before sending, with its note, under the layout
+    int sending = row + sendNoteHeight + Scale(8);
+    int height = pad + row + Scale(4) + noteHeight + Scale(12) + 2 + Scale(12) + 5 * row + 3 * Scale(4) + Scale(8) + listNoteHeight + sending +
                  reading + downloading +
                  Scale(16) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kOptionsClass, core::Title(PE_TEXT_CMD_OPTIONS).c_str(), width, height);
@@ -399,7 +412,19 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
         SendMessageW(layoutCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
     }
     SendMessageW(layoutCombo, CB_SETCURSEL, std::clamp(layout, 0, 2), 0);
-    y += row + Scale(8);
+    y += row + Scale(4);
+    // how long a message sent waits to be taken back (Undo Send), and what that is for under it
+    CreateChild(dialog, L"STATIC", sendDelayText.c_str(), SS_LEFT, 0, {left, y + Scale(3), left + comboLabel, y + row});
+    HWND sendDelayCombo = CreateChild(dialog, L"COMBOBOX", L"", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, IDC_OPTIONS_SEND_DELAY,
+                                      {left + comboLabel, y, right, y + Scale(200)});
+    for (const std::wstring& item : sendDelayItems) {
+        SendMessageW(sendDelayCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
+    }
+    SendMessageW(sendDelayCombo, CB_SETCURSEL, static_cast<WPARAM>(pe_send_delay_index(core)), 0);
+    y += row;
+    CreateChild(dialog, L"STATIC", sendDelayNote.c_str(), SS_LEFT | SS_NOPREFIX, IDC_OPTIONS_SEND_DELAY_NOTE,
+                {left + comboLabel, y, right, y + sendNoteHeight});
+    y += sendNoteHeight + Scale(8);
     // the senders' pictures of the Columns list, and what they are under the check box's words
     HWND listPicturesCheck = CreateChild(dialog, L"BUTTON", listPicturesText.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX,
                                          IDC_OPTIONS_LIST_PICTURES, {left, y, right, y + row});
@@ -453,6 +478,7 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     state.aheadCombo = aheadCombo;
     state.limitCombo = limitCombo;
     state.layoutCombo = layoutCombo;
+    state.sendDelayCombo = sendDelayCombo;
     state.listPicturesCheck = listPicturesCheck;
     state.core = core;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
@@ -473,6 +499,9 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     }
     if (state.limit >= 0) {
         pe_set_download_limit_index(core, static_cast<size_t>(state.limit));
+    }
+    if (state.sendDelay >= 0) {
+        pe_set_send_delay_index(core, static_cast<size_t>(state.sendDelay));
     }
     int picked = state.picked;
     std::wstring code = picked > 0 && static_cast<size_t>(picked) <= languages.size() ? languages[picked - 1].code : L"";

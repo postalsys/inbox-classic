@@ -501,6 +501,15 @@ ui-download-ahead-recent = Recent messages up to 1 MB each
 ui-download-ahead-all = All messages
 ui-download-ahead-never = Only when opened
 ui-download-limit = Storage limit per account:
+ui-send-delay = Wait before sending:
+ui-send-delay-note = While a message waits, you can take it back with Undo.
+ui-sending-in = Sending { $subject } in { $count ->
+    [one] 1 second
+   *[other] { $count } seconds
+}
+ui-send-undone = { $subject } was not sent. It is open again.
+ui-send-too-late = { $subject } was already sent.
+ui-outbox-status-undo = Sends at { $time }
 ui-download-note = Messages downloaded in advance open immediately. When the storage limit is exceeded, the oldest local copies are removed and downloaded again when you open them.
 ui-attachment-downloading = This message has not finished downloading. Try again when the download is complete.
 ui-trusted-senders-button = Trusted Senders...
