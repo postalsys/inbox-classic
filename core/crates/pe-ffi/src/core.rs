@@ -2499,6 +2499,8 @@ pub struct PeOutgoing {
     pub quote_plain: bool,
     /// PeDraftInfo.quote_text while `quote` is the draft's own (not edited), NULL otherwise
     pub quote_text: *const c_char,
+    /// One of the account's other addresses to send from (a `pe_from_choices` row's), NULL for its own
+    pub from: *const c_char,
 }
 
 /// # Safety
@@ -2543,7 +2545,112 @@ unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
         draft_account: (o.draft_account != 0).then_some(o.draft_account),
         quote_plain: o.quote_plain,
         quote_text: Some(text(o.quote_text)?).filter(|t| !t.is_empty()),
+        from: Some(text(o.from)?).filter(|f| !f.is_empty()),
     })
+}
+
+/// A choice of the From list: an account, or one of its other addresses
+#[repr(C)]
+pub struct PeFromChoice {
+    pub account: i64,
+    /// The other address, for PeOutgoing.from; NULL for the account's own
+    pub address: *const c_char,
+    /// The words shown: `Name <address>`
+    pub label: *const c_char,
+}
+
+/// The From list of a compose window; free with `pe_from_choices_free`
+pub struct PeFromChoices(Rows<PeFromChoice>);
+
+/// What a message can go from: each account in order, with its other addresses after it; NULL on failure
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_from_choices(core: *const PeCore) -> *mut PeFromChoices {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(choices) = core.from_choices() else {
+                return null_mut();
+            };
+            handed(PeFromChoices(Rows::new(
+                &choices,
+                |(account, address, label), strings| PeFromChoice {
+                    account: *account,
+                    address: address.as_deref().map_or(null(), |a| strings.add(a)),
+                    label: strings.add(label),
+                },
+            )))
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_from_choices_count(list: *const PeFromChoices) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
+}
+
+/// Row `index`, NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_from_choices_get(list: *const PeFromChoices, index: usize) -> *const PeFromChoice {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_from_choices_free(list: *mut PeFromChoices) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}
+
+/// The other addresses an account sends from, as Account Properties shows them: `Name <address>`, comma separated. Free with
+/// `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_account_addresses(core: *const PeCore, account: i64) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.account_addresses_text(account).map_or(null_mut(), into_c_string)
+        })
+    }
+}
+
+/// Sets the other addresses an account sends from, comma separated or a line each (`Name <address>` or the address alone);
+/// false with the reason in `error` (free it with `pe_string_free`) for one that is no address
+///
+/// # Safety
+/// `core` must be a live handle, `text` a valid string, `error` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_set_account_addresses(
+    core: *const PeCore,
+    account: i64,
+    text: *const c_char,
+    error: *mut *mut c_char,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(text) = (unsafe { arg(text) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    let result = unsafe {
+        with(core, Err(None), |core| {
+            core.set_account_addresses_text(account, text).map_err(Some)
+        })
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { refused(error, result, "the addresses could not be saved") }.is_some()
 }
 
 /// Sends a message from an account: it goes into the Outbox (`OutboxChanged`), and from there to the server now.
@@ -2698,6 +2805,9 @@ pub struct PeDraftInfo {
     pub attachment_count: usize,
     /// For PeOutgoing: a saved draft opened again; NULL otherwise
     pub message_id: *const c_char,
+    /// The account's other address it goes from (a reply's to the message sent to it, a saved draft's), to choose
+    /// in From; NULL for the account's own
+    pub from: *const c_char,
 }
 
 /// A draft; free with `pe_draft_free`
@@ -2730,6 +2840,7 @@ pub(crate) fn draft_handle(draft: &pe_core::Draft) -> *mut PeDraft {
         attachments: attachments.as_ptr(),
         attachment_count: attachments.len(),
         message_id: draft.message_id.as_deref().map_or(null(), |id| strings.add(id)),
+        from: draft.from.as_deref().map_or(null(), |from| strings.add(from)),
     };
     handed(PeDraft {
         info,

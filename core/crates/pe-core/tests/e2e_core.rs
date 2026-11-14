@@ -2336,6 +2336,80 @@ fn a_message_sent_waits_and_can_be_taken_back() {
 }
 
 #[test]
+fn a_message_goes_from_another_address_of_the_account() {
+    let Some(s) = setup() else { return };
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    s.core
+        .set_account_addresses_text(account, "Sales Desk <sales@example.com>\n\nalias@example.org")
+        .unwrap();
+    assert_eq!(
+        s.core.account_addresses_text(account).unwrap(),
+        "Sales Desk <sales@example.com>, alias@example.org"
+    );
+    assert!(s.core.set_account_addresses_text(account, "not an address").is_err());
+    let choices = s.core.from_choices().unwrap();
+    assert_eq!(choices.len(), 3);
+    assert_eq!(choices[1].1.as_deref(), Some("sales@example.com"));
+    assert!(
+        choices[1].2.starts_with("Sales Desk <sales@example.com>"),
+        "{}",
+        choices[1].2
+    );
+
+    // sent as the other address: its From and its name
+    let outgoing = pe_core::Outgoing {
+        to: "Ann <ann@example.com>".into(),
+        subject: "From the sales desk".into(),
+        text: "Prices attached.".into(),
+        from: Some("sales@example.com".into()),
+        ..Default::default()
+    };
+    s.core.send(account, outgoing.clone()).unwrap();
+    s.wait(|e| matches!(e, Event::MessageSent { .. }));
+    let sent = pe_testkit::raw_text(&s.server.messages("INBOX")[0]);
+    assert!(sent.contains("From: Sales Desk <sales@example.com>"), "{sent}");
+
+    // someone else's address is refused while the message is open
+    let forged = pe_core::Outgoing {
+        from: Some("ceo@example.com".into()),
+        ..outgoing
+    };
+    assert!(s.core.send(account, forged.clone()).is_err());
+    assert!(s.core.save_draft(account, forged).is_err());
+
+    // a reply to a message sent to the other address goes from it
+    s.server.add_message(
+        "INBOX",
+        "From: Bob <bob@example.com>\r\nTo: sales@example.com\r\nSubject: Quote\r\nMessage-ID: <q@example.com>\r\n\r\nA quote please.\r\n",
+        &[],
+    );
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let inbox = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let uid = s
+        .server
+        .messages("INBOX")
+        .iter()
+        .find(|m| pe_testkit::raw_text(m).contains("Subject: Quote"))
+        .unwrap()["uid"]
+        .as_u64()
+        .unwrap();
+    s.core.open_message(inbox, uid).unwrap();
+    s.wait(|e| *e == Event::MessageReady { folder: inbox, uid });
+    let reply = s.core.draft(inbox, uid, pe_core::DraftKind::Reply).unwrap().unwrap();
+    assert_eq!(reply.from.as_deref(), Some("sales@example.com"));
+}
+
+#[test]
 fn drafts_are_saved_reopened_and_gone_once_sent() {
     let Some(s) = setup() else { return };
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();

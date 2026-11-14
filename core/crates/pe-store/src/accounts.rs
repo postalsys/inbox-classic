@@ -243,6 +243,29 @@ impl Store {
         statement.query_map([], from_row)?.collect()
     }
 
+    /// The other addresses an account sends from, as (address, name), in the order they were written
+    pub fn account_addresses(&self, id: AccountId) -> Result<Vec<(String, String)>> {
+        let mut statement = self
+            .db
+            .prepare_cached("SELECT email, name FROM account_addresses WHERE account_id = ?1 ORDER BY position")?;
+        statement
+            .query_map([id], |row| Ok((row.get(0)?, row.get(1)?)))?
+            .collect()
+    }
+
+    /// Sets the other addresses of an account, in place of those it had
+    pub fn set_account_addresses(&self, id: AccountId, addresses: &[(String, String)]) -> Result<()> {
+        self.db
+            .execute("DELETE FROM account_addresses WHERE account_id = ?1", [id])?;
+        let mut insert = self.db.prepare_cached(
+            "INSERT INTO account_addresses (account_id, position, email, name) VALUES (?1, ?2, ?3, ?4)",
+        )?;
+        for (position, (email, name)) in addresses.iter().enumerate() {
+            insert.execute(rusqlite::params![id, position as i64, email, name])?;
+        }
+        Ok(())
+    }
+
     pub fn account(&self, id: AccountId) -> Result<Account> {
         self.db
             .query_row(&format!("SELECT {COLUMNS} FROM accounts WHERE id = ?1"), [id], from_row)
@@ -252,6 +275,23 @@ impl Store {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn other_addresses_are_kept_in_order_and_go_with_their_account() {
+        let store = Store::open_in_memory().unwrap();
+        let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
+        assert!(store.account_addresses(account).unwrap().is_empty());
+        let addresses = vec![
+            ("sales@example.com".to_string(), "Sales".to_string()),
+            ("me@example.org".to_string(), String::new()),
+        ];
+        store.set_account_addresses(account, &addresses).unwrap();
+        assert_eq!(store.account_addresses(account).unwrap(), addresses);
+        store.set_account_addresses(account, &addresses[1..]).unwrap();
+        assert_eq!(store.account_addresses(account).unwrap(), &addresses[1..]);
+        store.remove_account(account).unwrap();
+        assert!(store.account_addresses(account).unwrap().is_empty());
+    }
 
     #[test]
     fn accounts_keep_the_order_they_are_moved_to() {

@@ -345,6 +345,8 @@ error-folder-separator = un nombre de carpeta no puede contener «{ $separator }
 error-folder-special = la Bandeja de entrada y las carpetas especiales no se pueden renombrar ni eliminar
 error-no-recipients = el mensaje no tiene destinatarios
 error-bad-address = «{ $address }» no es una dirección de correo electrónico
+# review: new
+error-not-own-address = { $address } no es una de las direcciones de esta cuenta. Agréguela en Otras direcciones, en las propiedades de la cuenta.
 error-attachment = no se pudo leer { $path }: { $error }
 error-no-drafts = la cuenta no tiene una carpeta Borradores donde guardar el mensaje
 error-draft-attachment = no se pudo conservar un archivo adjunto del borrador: { $error }

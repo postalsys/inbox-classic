@@ -557,6 +557,15 @@ private func setAccountName(core: Core, account: Int64, _ name: String) {
     _ = name.trimmingCharacters(in: .whitespaces).withCString { pe_account_set_name(core.handle, account, $0) }
 }
 
+/// the other addresses of Properties saved, or why not said
+@MainActor
+private func saveOtherAddresses(core: Core, account: Int64, _ text: String) -> Bool {
+    var reason: UnsafeMutablePointer<CChar>?
+    guard !text.withCString({ pe_set_account_addresses(core.handle, account, $0, &reason) }) else { return true }
+    inform(taken(reason) ?? Text.uiAccountNotSaved.text, title: Text.uiProperties.text, style: .warning)
+    return false
+}
+
 /// the Properties of `account`, from File > Accounts or the account's menu in the folder tree; true when it changed
 @MainActor
 func accountProperties(core: Core, account: Int64) -> Bool {
@@ -575,19 +584,25 @@ private func accountProperties(core: Core, account: Int64, accountName: String, 
     var fields = serverFields(accountName: accountName, name: text(stored.name), email: text(stored.email), username: text(stored.username),
                               imapHost: text(stored.imap_host), imapPort: stored.imap_port, imapSecurity: stored.imap_security,
                               smtpHost: text(stored.smtp_host), smtpPort: stored.smtp_port, smtpSecurity: stored.smtp_security)
+    // last, the other addresses it sends from
+    let others = FormField(label: Text.uiFieldOtherAddresses.text, value: taken(pe_account_addresses(core.handle, account)) ?? "")
+    fields.append(others)
     if !signsInWith.isEmpty {
-        // a browser sign-in account: the names only, the rest is the provider's
-        guard let names = formDialog(title: Text.uiProperties.text,
-                                     intro: Text.uiSignsInWith.text(["app": signsInWith]),
-                                     fields: [fields[Field.accountName.rawValue], fields[Field.name.rawValue]],
-                                     help: "account-properties") else { return false }
-        fields[Field.accountName.rawValue] = names[0]
-        fields[Field.name.rawValue] = names[1]
-        let strings = CStrings()
-        var settings = settingsOf(fields, strings)
-        guard pe_account_update(core.handle, account, &settings) else { return false }
-        setAccountName(core: core, account: account, names[0].value)
-        return true
+        // a browser sign-in account: the names and the other addresses only, the rest is the provider's
+        var shown = [fields[Field.accountName.rawValue], fields[Field.name.rawValue], others]
+        while let names = formDialog(title: Text.uiProperties.text, intro: Text.uiSignsInWith.text(["app": signsInWith]),
+                                     fields: shown, help: "account-properties") {
+            shown = names
+            guard saveOtherAddresses(core: core, account: account, names[2].value) else { continue }
+            fields[Field.accountName.rawValue] = names[0]
+            fields[Field.name.rawValue] = names[1]
+            let strings = CStrings()
+            var settings = settingsOf(fields, strings)
+            guard pe_account_update(core.handle, account, &settings) else { return false }
+            setAccountName(core: core, account: account, names[0].value)
+            return true
+        }
+        return false
     }
     let was = (imap: stored.imap_security, imapHost: text(stored.imap_host), smtp: stored.smtp_security, smtpHost: text(stored.smtp_host))
     while let filled = formDialog(title: Text.uiProperties.text, intro: Text.uiKeepPassword.text, fields: fields,
@@ -602,6 +617,7 @@ private func accountProperties(core: Core, account: Int64, accountName: String, 
         if warn && !acceptPlain(fields, title: Text.uiProperties.text) {
             continue
         }
+        guard saveOtherAddresses(core: core, account: account, fields[fields.count - 1].value) else { continue }
         let strings = CStrings()
         var settings = settingsOf(fields, strings)
         guard pe_account_update(core.handle, account, &settings) else {

@@ -1609,7 +1609,7 @@ impl Core {
     }
 
     fn save_draft_as(&self, account: AccountId, mut outgoing: Outgoing, automatic: bool) -> Result<String> {
-        let email = self.store().account(account)?.settings.email;
+        let email = self.check_sender(account, &outgoing)?.email;
         if compose::drafts_folder(&self.store(), account)?.is_none() {
             return Err(Error::Unavailable(tr(Text::ErrorNoDrafts)));
         }
@@ -1674,10 +1674,75 @@ impl Core {
             return Ok(None);
         };
         let (mut draft, files) = compose::reopen(&source);
+        let account = self.store().folder(folder)?.account_id;
+        draft.from = self.other_address(account, draft.from.take())?;
         if !files.is_empty() {
             draft.attachments = attachments_out(&format!("draft-{folder}-{uid}"), files)?;
         }
         Ok(Some(draft))
+    }
+
+    /// The From address of `outgoing` is the account's own or one of its other addresses: a typo or someone else's is
+    /// refused while the message is still open
+    /// (the settings it goes out with, when it is)
+    pub(crate) fn check_sender(&self, account: AccountId, outgoing: &Outgoing) -> Result<pe_store::AccountSettings> {
+        compose::sender_of(&self.store(), account, outgoing.from.as_deref())
+    }
+
+    /// `from` when it is one of the account's other addresses (a draft's or a message's own From), else None: the
+    /// account's own address, or one it no longer has
+    pub(crate) fn other_address(&self, account: AccountId, from: Option<String>) -> Result<Option<String>> {
+        let Some(from) = from else {
+            return Ok(None);
+        };
+        let others = self.store().account_addresses(account)?;
+        Ok(others
+            .into_iter()
+            .map(|(email, _)| email)
+            .find(|email| email.eq_ignore_ascii_case(&from)))
+    }
+
+    /// The other addresses an account sends from, as Account Properties shows them: `Name <address>`, comma separated
+    pub fn account_addresses_text(&self, account: AccountId) -> Result<String> {
+        let others = self.store().account_addresses(account)?;
+        Ok(others
+            .iter()
+            .map(|(email, name)| compose::address_label(name, email))
+            .collect::<Vec<_>>()
+            .join(", "))
+    }
+
+    /// Sets the other addresses an account sends from, written a line (or a comma) each: `Name <address>` or the
+    /// address alone; one that is no address, or the account's own, is refused with the reason
+    pub fn set_account_addresses_text(&self, account: AccountId, text: &str) -> Result<()> {
+        let own = self.store().account(account)?.settings.email;
+        // checked as recipients are: one that is no address is refused with the reason
+        let list = compose::recipients(&text.replace('\n', ",")).map_err(|e| Error::Invalid(e.to_string()))?;
+        let mut addresses: Vec<(String, String)> = Vec::new();
+        for mailbox in list.iter().flat_map(|a| a.mailboxes()) {
+            let email = mailbox.address.trim();
+            if email.eq_ignore_ascii_case(&own) || addresses.iter().any(|(e, _)| e.eq_ignore_ascii_case(email)) {
+                continue;
+            }
+            addresses.push((email.to_string(), mailbox.name.trim().to_string()));
+        }
+        Ok(self.store().set_account_addresses(account, &addresses)?)
+    }
+
+    /// What a message can go from, for the From list of a compose window: each account, with its other addresses
+    /// after it, each as (account, the other address or None for the account's own, the words shown)
+    pub fn from_choices(&self) -> Result<Vec<(AccountId, Option<String>, String)>> {
+        let store = self.store();
+        let mut choices = Vec::new();
+        for account in store.accounts()? {
+            let settings = &account.settings;
+            choices.push((account.id, None, account_label(&settings.name, &settings.email)));
+            for (email, name) in store.account_addresses(account.id)? {
+                let label = account_label(compose::alias_name(&name, &settings.name), &email);
+                choices.push((account.id, Some(email), label));
+            }
+        }
+        Ok(choices)
     }
 
     /// The messages waiting in the Outbox, of every account, oldest first
@@ -1716,16 +1781,16 @@ impl Core {
     /// A reply, a reply to all or a forward of a message whose source is in the store; a forward with the message's
     /// files, written out as a reopened draft's are ([`Core::reopen_draft`]), to be attached
     pub fn draft(&self, folder: FolderId, uid: u64, kind: DraftKind) -> Result<Option<Draft>> {
-        let (source, email, date) = {
+        let (source, own, date) = {
             let store = self.store();
-            let account = store.account(store.folder(folder)?.account_id)?;
+            let account = store.folder(folder)?.account_id;
             let date = store.message(folder, uid)?.and_then(|m| m.info.display_date());
-            (store.source(folder, uid)?, account.settings.email, date)
+            (store.source(folder, uid)?, own_addresses(&store, account)?, date)
         };
         let Some(source) = source else {
             return Ok(None);
         };
-        let mut draft = compose::draft(&source, kind, &email, date);
+        let mut draft = compose::draft(&source, kind, &own, date);
         if kind == DraftKind::Forward {
             let files = compose::forwarded_files(&source);
             if !files.is_empty() {
@@ -1754,8 +1819,8 @@ impl Core {
     /// Reply, Reply All or Forward to a message file, from `account`
     pub fn file_draft(&self, path: &std::path::Path, account: AccountId, kind: DraftKind) -> Result<Draft> {
         let (source, date) = read_message_file(path)?;
-        let email = self.store().account(account)?.settings.email;
-        let mut draft = compose::draft(&source, kind, &email, date);
+        let own = own_addresses(&self.store(), account)?;
+        let mut draft = compose::draft(&source, kind, &own, date);
         if kind == DraftKind::Forward {
             let files = compose::forwarded_files(&source);
             if !files.is_empty() {
@@ -2313,6 +2378,13 @@ pub(crate) fn junk_keywords(junk: bool) -> (&'static str, &'static str) {
 /// a folder of its own there so two of one name stay apart; their paths. Under the runtime folder on Linux (the system's
 /// temporary folder there is shared by every user), under the temporary folder elsewhere (the Mac's and Windows' are
 /// each user's own); readable by this user only.
+/// The addresses of an account, its own first and then its other ones, for a reply to tell them from the others
+fn own_addresses(store: &pe_store::Store, account: AccountId) -> Result<Vec<String>> {
+    let mut own = vec![store.account(account)?.settings.email];
+    own.extend(store.account_addresses(account)?.into_iter().map(|(email, _)| email));
+    Ok(own)
+}
+
 /// [`write_out`] for a message to write on: its files, or why they could not be written out, in words
 pub(crate) fn attachments_out(name: &str, files: Vec<(String, Vec<u8>)>) -> Result<Vec<PathBuf>> {
     write_out(name, files).map_err(|error| {

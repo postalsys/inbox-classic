@@ -309,6 +309,8 @@ ui-field-imap-security = IMAP-turve:
 ui-field-smtp-host = Väljamineva posti server (SMTP):
 ui-field-smtp-port = SMTP-port:
 ui-field-smtp-security = SMTP-turve:
+# review: new
+ui-field-other-addresses = Muud saatja aadressid:
 ui-sign-in-not-started = Brauseris sisselogimist ei saanud alustada.
 ui-sign-in-in-browser = Logige avanenud brauseriaknas sisse kontole { $account } ja tulge siis siia tagasi.
 ui-sign-in-failed = Sisselogimine ei õnnestunud: { $reason }

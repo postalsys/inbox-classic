@@ -222,7 +222,10 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     private let status = NSTextField(labelWithString: "")
     private var statusText = ""
     private let from = NSPopUpButton(frame: .zero, pullsDown: false)
-    private var fromAccounts: [Int64] = []
+    /// what it can go from, in the order of the From list: an account, and one of its other addresses or "" for its own
+    private var fromChoices: [(account: Int64, address: String)] = []
+    /// the other address it goes from, "" for the account's own
+    private var fromAddress = ""
     let to = AddressField()
     let cc = AddressField()
     let bcc = AddressField()
@@ -312,6 +315,8 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             messageId = text(draft.message_id)
             draftAccount = account
             kept = !messageId.isEmpty
+            // a reply from the address its message was sent to, a draft from the one it was saved with
+            selectFrom(text(draft.from))
             for index in 0..<draft.attachment_count {
                 if let path = draft.attachments[index] {
                     addFile(URL(fileURLWithPath: String(cString: path)))
@@ -492,23 +497,41 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     // ---- From ----
 
     /// the From list: each account as "Name <address>", the one the message goes from selected
+    /// the From list: each account as "Name <address>", with its other addresses after it
     private func fillFrom() {
-        for (index, account) in core.accounts().enumerated() {
-            from.addItem(withTitle: account.label)
-            fromAccounts.append(account.id)
-            if account.id == self.account {
-                from.selectItem(at: index)
-            }
+        guard let choices = pe_from_choices(core.handle) else { return }
+        defer { pe_from_choices_free(choices) }
+        for index in 0..<pe_from_choices_count(choices) {
+            guard let choice = pe_from_choices_get(choices, index)?.pointee else { continue }
+            // the same words can be two rows (an address and an account's): items are told apart by position
+            from.addItem(withTitle: "")
+            from.lastItem?.title = text(choice.label)
+            fromChoices.append((choice.account, text(choice.address)))
+        }
+        selectFrom("")
+    }
+
+    /// the From list at the account's `address` ("" for its own)
+    private func selectFrom(_ address: String) {
+        if let index = fromChoices.firstIndex(where: { $0.account == account && $0.address == address }) {
+            from.selectItem(at: index)
+            fromAddress = address
         }
     }
 
-    /// another account chosen in From: the message goes from it, with its servers, Sent Items and Drafts
+    /// another account or address chosen in From: the message goes from it; another account's servers, Sent Items,
+    /// Drafts and signature with it
     @objc private func chooseFrom() {
         let chosen = from.indexOfSelectedItem
-        guard fromAccounts.indices.contains(chosen), fromAccounts[chosen] != account else { return }
-        account = fromAccounts[chosen]
-        // its signature in place of the other's
-        editor.signature(taken(pe_signature_block(core.handle, account)) ?? "")
+        guard fromChoices.indices.contains(chosen) else { return }
+        let choice = fromChoices[chosen]
+        guard choice.account != account || choice.address != fromAddress else { return }
+        fromAddress = choice.address
+        if choice.account != account {
+            account = choice.account
+            // its signature in place of the other's
+            editor.signature(taken(pe_signature_block(core.handle, account)) ?? "")
+        }
         changed()
     }
 
@@ -740,7 +763,8 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             message_id: strings.optional(messageId),
             // saved in another account's Drafts before From changed: the core moves it once this account has it
             draft_account: draftAccount != account ? draftAccount : 0,
-            quote_plain: quotePlain, quote_text: folded && !quoteText.isEmpty ? strings.add(quoteText) : nil)
+            quote_plain: quotePlain, quote_text: folded && !quoteText.isEmpty ? strings.add(quoteText) : nil,
+            from: strings.optional(fromAddress))
     }
 
     /// sends with the HTML the editor gave, now or with the next Send/Recv

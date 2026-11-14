@@ -961,6 +961,7 @@ async fn scenario(d: Rc<Driver>) {
     drafts_saved_automatically(&d).await;
     undo_send(&d).await;
     attachment_reminder(&d).await;
+    other_addresses(&d).await;
     text_size(&d).await;
     send_receive(&d).await;
     finding(&d).await;
@@ -1893,6 +1894,114 @@ async fn text_size(d: &Driver) {
     run_command(Command::TextSizeMedium);
     let medium = wait_until(5, || pane().is_some_and(|v| (v.zoom_level() - 1.0).abs() < 0.01)).await;
     d.check(medium, "Medium is the usual size again");
+}
+
+/// The other addresses of the account set in Properties (its field 11), empty to have none
+async fn set_other_addresses(d: &Driver, text: &str, shot: Option<&str>) {
+    command(Command::Accounts);
+    let Some(accounts) = wait_dialog(10, "accounts-dialog").await else {
+        d.check(false, "File > Accounts opens");
+        return;
+    };
+    let accounts = accounts.upcast::<gtk::Widget>();
+    click(&accounts, "accounts-properties");
+    let Some(form) = wait_dialog(10, "account-properties").await else {
+        d.check(false, "Properties opens");
+        return;
+    };
+    set_text(form.upcast_ref(), "form-11", text);
+    if let Some(shot) = shot {
+        pause(500).await;
+        d.shot(&form, shot).await;
+    }
+    click(form.upcast_ref(), "dialog-ok");
+    if let Some(question) = wait_alert(3).await {
+        answer(&question, "Yes");
+    }
+    wait_gone(10, "account-properties").await;
+    if let Some(dialog) = accounts.downcast_ref::<adw::Dialog>() {
+        dialog.close();
+    }
+    wait_gone(10, "accounts-dialog").await;
+}
+
+async fn other_addresses(d: &Driver) {
+    d.step("sending from another address");
+    set_other_addresses(
+        d,
+        "Sales Desk <sales@inboxclassic.test>",
+        Some("account-12-other-addresses"),
+    )
+    .await;
+    let account = shell().main().current_account();
+    d.check(
+        shell().core.account_addresses_text(account).unwrap_or_default() == "Sales Desk <sales@inboxclassic.test>",
+        "Properties keeps the other addresses the account sends from",
+    );
+    run_command(Command::NewMail);
+    let Some(c) = wait_compose(10).await else {
+        d.check(false, "Create Mail opens a compose window");
+        return;
+    };
+    let choices = shell().core.from_choices().unwrap_or_default();
+    let alias = choices
+        .iter()
+        .position(|(_, address, _)| address.as_deref() == Some("sales@inboxclassic.test"));
+    d.check(alias.is_some(), "From offers the other address");
+    if let (Some(index), Some(from)) = (
+        alias,
+        named_in(c.window.upcast_ref(), "compose-from").and_downcast::<gtk::DropDown>(),
+    ) {
+        from.set_selected(index as u32);
+    }
+    c.to.set_text("Kim <kim@example.com>");
+    c.subject.set_text("From the sales desk in the UI test");
+    c.editor.type_text("Prices on request.");
+    pause(500).await;
+    d.shot(&c.window, "write-26-from-alias").await;
+    click(c.window.upcast_ref(), "compose-send");
+    let sent = wait_for(30, || d.find("INBOX", "Subject: From the sales desk in the UI test")).await;
+    d.check(
+        sent.as_ref()
+            .is_some_and(|m| raw_text(m).contains("From: Sales Desk <sales@inboxclassic.test>")),
+        "it goes from that address, with its name",
+    );
+    // a message sent to the other address: its reply goes from it
+    let _ = d.add_message_to(
+        "Archive",
+        "From: Lee <lee@example.com>\r\nTo: sales@inboxclassic.test\r\nSubject: Price list please\r\n\
+         Message-ID: <prices@example.com>\r\nDate: Mon, 06 Oct 2025 09:00:00 +0000\r\n\r\nCould you send it?\r\n",
+    );
+    shell().sync_all();
+    select_folder("Archive");
+    let main = shell().main();
+    let found = wait_for(20, || {
+        (0..rows()).find(|&i| {
+            main.list.select(i);
+            main.list
+                .selected()
+                .is_some_and(|(_, m)| m.info.subject == "Price list please")
+        })
+    })
+    .await;
+    d.check(found.is_some(), "the message sent to the other address is there");
+    pause(800).await;
+    run_command(Command::Reply);
+    let Some(r) = wait_compose(10).await else {
+        d.check(false, "Reply opens a compose window");
+        return;
+    };
+    d.check(
+        crate::compose::from_address(&r).as_deref() == Some("sales@inboxclassic.test"),
+        "a reply to a message sent to it goes from it",
+    );
+    d.shot(&r.window, "write-27-reply-from-alias").await;
+    r.window.close();
+    if let Some(ask) = wait_alert(5).await {
+        answer(&ask, "No");
+    }
+    select_folder("Inbox");
+    set_other_addresses(d, "", None).await;
 }
 
 async fn send_receive(d: &Driver) {

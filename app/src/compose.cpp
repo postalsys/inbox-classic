@@ -143,7 +143,10 @@ struct Compose : Writing {
     HWND ccButton = nullptr;
     HWND bccButton = nullptr;
     // the accounts it can go from, in the order of the From list
-    std::vector<int64_t> fromAccounts;
+    // what it can go from, in the order of the From list: an account, and one of its other addresses or "" for its own
+    std::vector<std::pair<int64_t, std::string>> fromChoices;
+    // the other address it goes from, "" for the account's own
+    std::string fromAddress;
     HWND from = nullptr;
     HWND to = nullptr;
     HWND cc = nullptr;
@@ -444,6 +447,7 @@ struct Fields {
         // saved in another account's Drafts before From changed: the core moves it once this account has it
         outgoing.draft_account = state->draftAccount != state->account ? state->draftAccount : 0;
         outgoing.quote_plain = state->quotePlain;
+        outgoing.from = state->fromAddress.empty() ? nullptr : state->fromAddress.c_str();
     }
     Fields(const Fields&) = delete;
     Fields& operator=(const Fields&) = delete;
@@ -806,30 +810,49 @@ void PickRecipients(HWND hwnd, Compose* state) {
     Layout(hwnd, state);
 }
 
-// the From list: each account as "Name <address>", the one the message goes from selected
-void FillFrom(Compose* state) {
-    core::AccountList accounts(pe_accounts(state->core));
-    for (size_t i = 0; i < pe_account_list_count(accounts.get()); i++) {
-        const PeAccount* account = pe_account_list_get(accounts.get(), i);
-        std::wstring item = Text(account->label);
-        SendMessageW(state->from, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
-        state->fromAccounts.push_back(account->id);
-        if (account->id == state->account) {
+// the From list selected at the account's `address` ("" for its own)
+void SelectFrom(Compose* state, const std::string& address) {
+    for (size_t i = 0; i < state->fromChoices.size(); i++) {
+        if (state->fromChoices[i].first == state->account && state->fromChoices[i].second == address) {
             SendMessageW(state->from, CB_SETCURSEL, i, 0);
+            state->fromAddress = address;
+            return;
         }
     }
 }
 
-// another account chosen in From: the message goes from it, with its servers, Sent Items and Drafts
+// the From list: each account as "Name <address>", with its other addresses after it; the one it goes from selected
+void FillFrom(Compose* state) {
+    PeFromChoices* choices = pe_from_choices(state->core);
+    for (size_t i = 0; i < pe_from_choices_count(choices); i++) {
+        const PeFromChoice* choice = pe_from_choices_get(choices, i);
+        std::wstring item = Text(choice->label);
+        SendMessageW(state->from, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(item.c_str()));
+        state->fromChoices.emplace_back(choice->account, choice->address ? choice->address : "");
+    }
+    pe_from_choices_free(choices);
+    SelectFrom(state, "");
+}
+
+// another account or address chosen in From: the message goes from it; another account's servers, Sent Items, Drafts
+// and signature with it
 void ChooseFrom(Compose* state) {
     LRESULT chosen = SendMessageW(state->from, CB_GETCURSEL, 0, 0);
-    if (chosen >= 0 && static_cast<size_t>(chosen) < state->fromAccounts.size() && state->fromAccounts[chosen] != state->account) {
-        state->account = state->fromAccounts[chosen];
+    if (chosen < 0 || static_cast<size_t>(chosen) >= state->fromChoices.size()) {
+        return;
+    }
+    const auto& [account, address] = state->fromChoices[chosen];
+    if (account == state->account && address == state->fromAddress) {
+        return;
+    }
+    state->fromAddress = address;
+    if (account != state->account) {
+        state->account = account;
         // its signature in place of the other's
         core::String signature(pe_signature_block(state->core, state->account));
         state->editor.Signature(signature ? Text(signature.get()) : L"");
-        Changed(state);
     }
+    Changed(state);
 }
 
 // the editor with the quote of the draft; its messages come back to the window
@@ -1197,6 +1220,10 @@ HWND OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* dr
         state->messageId = draft->message_id ? draft->message_id : "";
         state->kept = !state->messageId.empty();
         state->draftAccount = account;
+        // a reply from the address its message was sent to, a draft from the one it was saved with
+        if (draft->from) {
+            SelectFrom(state, draft->from);
+        }
         for (size_t i = 0; i < draft->attachment_count; i++) {
             AddFile(state, Text(draft->attachments[i]));
         }

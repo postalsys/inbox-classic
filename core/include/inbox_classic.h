@@ -382,6 +382,9 @@ typedef struct PeExport PeExport;
 // The folders of an account; free with `pe_folder_list_free`
 typedef struct PeFolderList PeFolderList;
 
+// The From list of a compose window; free with `pe_from_choices_free`
+typedef struct PeFromChoices PeFromChoices;
+
 // The groups; free with `pe_group_list_free`
 typedef struct PeGroupList PeGroupList;
 
@@ -836,6 +839,15 @@ typedef struct PeAttachment {
   uint64_t size;
 } PeAttachment;
 
+// A choice of the From list: an account, or one of its other addresses
+typedef struct PeFromChoice {
+  int64_t account;
+  // The other address, for PeOutgoing.from; NULL for the account's own
+  const char *address;
+  // The words shown: `Name <address>`
+  const char *label;
+} PeFromChoice;
+
 // A message to send; strings are UTF-8, address lists as the user typed them
 typedef struct PeOutgoing {
   const char *to;
@@ -865,6 +877,8 @@ typedef struct PeOutgoing {
   bool quote_plain;
   // PeDraftInfo.quote_text while `quote` is the draft's own (not edited), NULL otherwise
   const char *quote_text;
+  // One of the account's other addresses to send from (a `pe_from_choices` row's), NULL for its own
+  const char *from;
 } PeOutgoing;
 
 // A message waiting in the Outbox
@@ -908,6 +922,9 @@ typedef struct PeDraftInfo {
   size_t attachment_count;
   // For PeOutgoing: a saved draft opened again; NULL otherwise
   const char *message_id;
+  // The account's other address it goes from (a reply's to the message sent to it, a saved draft's), to choose
+  // in From; NULL for the account's own
+  const char *from;
 } PeDraftInfo;
 
 // The servers found for an address
@@ -2201,6 +2218,44 @@ bool pe_message_import(const struct PeCore *core,
 // # Safety
 // `data` must be NULL or bytes from this library of `len` bytes, not freed yet.
 void pe_bytes_free(uint8_t *data, size_t len);
+
+// What a message can go from: each account in order, with its other addresses after it; NULL on failure
+//
+// # Safety
+// `core` must be a live handle.
+struct PeFromChoices *pe_from_choices(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_from_choices_count(const struct PeFromChoices *list);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeFromChoice *pe_from_choices_get(const struct PeFromChoices *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_from_choices_free(struct PeFromChoices *list);
+
+// The other addresses an account sends from, as Account Properties shows them: `Name <address>`, comma separated. Free with
+// `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_account_addresses(const struct PeCore *core,
+                           int64_t account);
+
+// Sets the other addresses an account sends from, comma separated or a line each (`Name <address>` or the address alone);
+// false with the reason in `error` (free it with `pe_string_free`) for one that is no address
+//
+// # Safety
+// `core` must be a live handle, `text` a valid string, `error` NULL or a valid pointer.
+bool pe_set_account_addresses(const struct PeCore *core,
+                              int64_t account,
+                              const char *text,
+                              char **error);
 
 // Sends a message from an account: it goes into the Outbox (`OutboxChanged`), and from there to the server now.
 // `MessageSent` when the server took it; `Failed` with the server's answer

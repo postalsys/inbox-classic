@@ -39,6 +39,7 @@ impl Core {
     pub fn send(&self, account: AccountId, mut outgoing: Outgoing) -> Result<()> {
         // a typo in an address is told now, while the message is still open in its window
         compose::check(&outgoing).map_err(Error::Compose)?;
+        self.check_sender(account, &outgoing)?;
         let delay = self.store().send_delay()? as i64;
         if delay == 0 {
             return self.send_command(
@@ -128,6 +129,7 @@ impl Core {
         };
         let (mut draft, files) = compose::reopen(&raw);
         draft.message_id = Some(waiting.message_id.clone());
+        draft.from = self.other_address(account, draft.from.take())?;
         // a folder for the files named by the Message-ID's own letters and digits only
         let name: String = waiting
             .message_id

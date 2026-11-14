@@ -274,6 +274,16 @@ Screenshot: `main-10-flagged`
 - Flagged lists the flagged messages of every folder, with the Folder column, and names the window
 - unflagged, it is no longer counted (the Mac and Linux; on Windows the row and its count are shown)
 
+## 19f. Sending from another address
+
+Screenshots: `account-12-other-addresses`, `write-26-from-alias`, `write-27-reply-from-alias`
+
+- Properties keeps the other addresses the account sends from (`Sales Desk <sales@inboxclassic.test>`)
+- From offers the other address, after the account
+- a message sent from it goes from that address, with its name
+- a reply to a message sent to it (in Archive, so the Inbox's rows stay as they are) goes from it
+- the other address is taken away again for the steps after
+
 ## 20. Send/Recv
 
 Screenshots: `main-2-new-mail`, `main-3-sent-items`

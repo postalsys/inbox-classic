@@ -309,6 +309,8 @@ ui-field-imap-security = Sécurité IMAP :
 ui-field-smtp-host = Serveur sortant (SMTP) :
 ui-field-smtp-port = Port SMTP :
 ui-field-smtp-security = Sécurité SMTP :
+# review: new
+ui-field-other-addresses = Autres adresses d’envoi :
 ui-sign-in-not-started = La connexion par le navigateur n'a pas pu démarrer.
 ui-sign-in-in-browser = Connectez-vous à { $account } dans la fenêtre du navigateur qui s'est ouverte, puis revenez ici.
 ui-sign-in-failed = La connexion a échoué : { $reason }

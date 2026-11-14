@@ -1543,6 +1543,63 @@ public static class Dragger {
     Command $main $IDM_TEXT_SIZE_MEDIUM
     Check ([bool](WaitFor { ([Native.Win]::SendText($main, $kTextZoom, '') - 10) -eq 100 } 5)) 'Medium is the usual size again'
 
+    Step 'sending from another address'
+    # the other addresses of the account set in Properties (its last field), empty to have none
+    function SetOtherAddresses([string]$text, [string]$shot = $null) {
+        Command $main $IDM_ACCOUNTS
+        $accountsList = WaitWindow 'InboxClassicAccounts' 'Accounts'
+        Click $accountsList 402
+        $form = WaitFor {
+            $f = PropertiesForm
+            if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 111) -ne [IntPtr]::Zero) { $f }
+        }
+        if (-not $form) { Check $false 'Properties has the other addresses'; return }
+        SetText $form 111 $text
+        if ($shot) { Shot $form $shot }
+        Click $form 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($form) } 10)
+        [void][Native.Win]::PostMessage($accountsList, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($accountsList) } 10)
+    }
+    SetOtherAddresses 'Sales Desk <sales@inboxclassic.test>' 'account-12-other-addresses'
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    $fromBox = [Native.Win]::GetDlgItem($compose, $IDC_FROM)
+    $choices = [int][Native.Win]::SendMessage($fromBox, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+    Check ($choices -eq 2) "From offers the other address ($choices choices)"
+    [void][Native.Win]::SendMessage($fromBox, $CB_SETCURSEL, [IntPtr]1, [IntPtr]::Zero)
+    [void][Native.Win]::SendMessage($compose, $WM_COMMAND, [IntPtr](($IDC_FROM -band 0xFFFF) -bor (1 -shl 16)), $fromBox)
+    SetText $compose $IDC_TO 'Kim <kim@example.com>'
+    SetText $compose $IDC_SUBJECT 'From the sales desk in the UI test'
+    [void](TypeInEditor $compose 'Prices on request.')
+    Shot $compose 'write-26-from-alias'
+    Command $compose $IDC_SEND
+    $sent = WaitFor { Find 'INBOX' 'Subject: From the sales desk in the UI test' } 30
+    Check ($sent -and (RawText $sent) -match 'From: Sales Desk <sales@inboxclassic\.test>') 'it goes from that address, with its name'
+    AddMessage ("From: Lee <lee@example.com>`r`nTo: sales@inboxclassic.test`r`nSubject: Price list please`r`n" +
+        "Message-ID: <prices@example.com>`r`nDate: Mon, 06 Oct 2025 09:00:00 +0000`r`n`r`nCould you send it?`r`n") @() 'Archive'
+    Command $main $IDM_SYNC
+    [void](WaitFor { Find 'Archive' 'Subject: Price list please' } 20)
+    SelectFolder 3
+    $row = WaitFor { $r = @(SubjectRows 'Price list please'); if ($r.Count -gt 0) { $r[0] } } 20
+    if ($null -ne $row) {
+        SelectRow $row
+        Command $main $IDM_REPLY
+        $reply = WaitCompose
+        if ($reply) {
+            $replyFrom = [Native.Win]::GetDlgItem($reply, $IDC_FROM)
+            Check ([int][Native.Win]::SendMessage($replyFrom, 0x0147, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1) 'a reply to a message sent to it goes from it'
+            Shot $reply 'write-27-reply-from-alias'
+            [void][Native.Win]::PostMessage($reply, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+            $ask = WaitWindow '#32770' 'Inbox Classic' 5
+            if ($ask) { Click $ask 7 }
+        }
+    } else {
+        Check $false 'the message sent to the other address is there'
+    }
+    SelectFolder 0
+    SetOtherAddresses ''
+
     # ---- getting new mail ----
 
     Step 'Send/Recv'
@@ -1719,7 +1776,13 @@ public static class Dragger {
     Step 'the Flagged folder'
     $flaggedRow = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)) | Where-Object { $_ -like 'Flagged*' })
     Check ($flaggedRow.Count -eq 1) "Flagged is in the folder list ($($flaggedRow -join ', '))"
+    # opened, it lists as many messages as it counts, with the Folder column's names
+    $flaggedCount = if ($flaggedRow.Count -eq 1 -and $flaggedRow[0] -match '\((\d+)\)') { [int]$Matches[1] } else { 0 }
+    $flaggedItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $flaggedItem)
+    Check ([bool](WaitFor { (Rows) -gt 0 -and (Rows) -eq $flaggedCount } 15)) "Flagged lists the flagged messages of every folder ($(Rows) of $flaggedCount)"
     Shot $main 'main-10-flagged'
+    SelectFolder 0
     Step 'unsubscribing'
     # the list's server: a socket of the test, answered by hand
     $listServer = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Loopback, 0)

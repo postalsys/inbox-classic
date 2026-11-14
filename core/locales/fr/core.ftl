@@ -361,6 +361,8 @@ error-folder-separator = un nom de dossier ne peut pas contenir « { $separator 
 error-folder-special = la Boîte de réception et les dossiers spéciaux ne peuvent pas être renommés ni supprimés
 error-no-recipients = le message n'a aucun destinataire
 error-bad-address = « { $address } » n'est pas une adresse de messagerie
+# review: new
+error-not-own-address = { $address } n’est pas une adresse de ce compte. Ajoutez-la dans Autres adresses, dans les propriétés du compte.
 error-attachment = { $path } n'a pas pu être lu : { $error }
 error-no-drafts = le compte n'a pas de dossier Brouillons où enregistrer le message
 error-draft-attachment = une pièce jointe du brouillon n'a pas pu être conservée : { $error }

@@ -277,6 +277,15 @@ mod failure_tests {
     }
 }
 
+impl Worker {
+    /// The settings a message of this account goes out with: from its own address, or the other one it names
+    fn sender(&self, store: &Store, outgoing: &crate::Outgoing) -> Result<pe_store::AccountSettings, Failure> {
+        let settings = store.account(self.account)?.settings;
+        let others = store.account_addresses(self.account)?;
+        Ok(crate::compose::sender(settings, &others, outgoing.from.as_deref())?)
+    }
+}
+
 /// Builds a message from an account with `compose` (its attachments read now, off the threads that run the network)
 async fn build(
     settings: pe_store::AccountSettings,
@@ -1137,13 +1146,8 @@ impl Worker {
         let draft = outgoing.message_id.as_deref().and_then(crate::compose::draft_id);
         let draft_account = outgoing.draft_account.unwrap_or(self.account);
         let message_id = outgoing.message_id.clone();
-        let built = build(
-            store.account(self.account)?.settings,
-            outgoing,
-            time,
-            crate::compose::message,
-        )
-        .await?;
+        let settings = self.sender(store, &outgoing)?;
+        let built = build(settings, outgoing, time, crate::compose::message).await?;
         store.queue(
             &pe_store::Queued {
                 id: 0,
@@ -1220,13 +1224,8 @@ impl Worker {
         let message_id = outgoing.message_id.clone().unwrap_or_default();
         let moved_from = outgoing.draft_account.filter(|from| *from != self.account);
         let time = unix_now();
-        let built = build(
-            store.account(self.account)?.settings,
-            outgoing,
-            time,
-            crate::compose::draft_message,
-        )
-        .await?;
+        let settings = self.sender(store, &outgoing)?;
+        let built = build(settings, outgoing, time, crate::compose::draft_message).await?;
         Ok(upload::Upload::Draft {
             drafts: drafts.id,
             raw: built.raw,

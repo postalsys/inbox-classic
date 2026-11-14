@@ -333,6 +333,7 @@ error-folder-separator = a folder name can not have “{ $separator }” in it o
 error-folder-special = the Inbox and the special folders can not be renamed or deleted
 error-no-recipients = the message has no recipients
 error-bad-address = “{ $address }” is not an e-mail address
+error-not-own-address = { $address } is not one of the addresses of this account. Add it under Other addresses in the account’s properties.
 error-attachment = { $path } could not be read: { $error }
 error-no-drafts = the account has no Drafts folder to save the message in
 error-draft-attachment = an attachment of the draft could not be kept: { $error }

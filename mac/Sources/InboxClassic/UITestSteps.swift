@@ -408,6 +408,64 @@ extension UITest {
         selectFolder(named: "Inbox")
     }
 
+    /// the other addresses of the account set in Properties (field 11), empty to have none
+    func setOtherAddresses(_ text: String, shot: String? = nil) async throws {
+        command(.accounts)
+        guard let accounts = await waitWindow("accounts", 10) else { throw Failed(description: "no Accounts window") }
+        press(find("accounts.properties", in: accounts))
+        guard let form = await waitFor(10, { window("form").flatMap { $0.title == "Properties" ? $0 : nil } }) else {
+            throw Failed(description: "no Properties form")
+        }
+        type(text, into: find("form.field.11", in: form))
+        if let shot { await self.shot(form, shot) }
+        press(find("form.ok", in: form))
+        if let ask = await waitWindow("alert", 3) { answer(ask, "Yes") }
+        _ = await waitUntil(10) { !form.isVisible }
+        press(find("accounts.close", in: accounts))
+        _ = await waitUntil(10) { !accounts.isVisible }
+    }
+
+    func otherAddresses() async throws {
+        step("sending from another address")
+        try await setOtherAddresses("Sales Desk <sales@inboxclassic.test>", shot: "account-12-other-addresses")
+        check(taken(pe_account_addresses(main.core.handle, main.mailbox.currentAccount)) == "Sales Desk <sales@inboxclassic.test>",
+              "Properties keeps the other addresses the account sends from")
+        command(.newMail)
+        guard let compose = await waitCompose() else { throw Failed(description: "no compose window") }
+        let from: NSPopUpButton? = find("compose.from", in: compose)
+        check(from?.itemTitles.contains { $0.hasPrefix("Sales Desk <sales@inboxclassic.test>") } == true,
+              "From offers the other address (\(from?.itemTitles ?? []))")
+        if let from, let index = from.itemTitles.firstIndex(where: { $0.hasPrefix("Sales Desk") }) {
+            onMain { from.selectItem(at: index); _ = from.sendAction(from.action, to: from.target) }
+        }
+        type("Kim <kim@example.com>", into: field("compose.to", compose))
+        type("From the sales desk in the UI test", into: field("compose.subject", compose))
+        _ = await typeInEditor(compose, "Prices on request.")
+        await shot(compose, "write-26-from-alias")
+        send(compose)
+        let sent = await waitFor(30) { await findMessage("INBOX", "Subject: From the sales desk in the UI test") }
+        check(sent.map { raw($0).contains("From: Sales Desk <sales@inboxclassic.test>") } == true, "it goes from that address, with its name")
+        // a message sent to the other address: its reply goes from it
+        try await addMessage("From: Lee <lee@example.com>\r\nTo: sales@inboxclassic.test\r\nSubject: Price list please\r\n"
+            + "Message-ID: <prices@example.com>\r\nDate: Mon, 06 Oct 2025 09:00:00 +0000\r\n\r\nCould you send it?\r\n", to: "Archive")
+        command(.sync)
+        selectFolder(named: "Archive")
+        let row = await waitFor(20) { (0..<self.list.numberOfRows).first { self.main.mailbox.row($0)?.subject == "Price list please" } }
+        if let row { await selectRow(row) }
+        command(.reply)
+        guard let reply = await waitFor(10, { ComposeWindow.open.last.flatMap { $0.window.title.contains("Price list") ? $0.window : nil } })
+        else { throw Failed(description: "no reply window") }
+        let replyFrom: NSPopUpButton? = find("compose.from", in: reply)
+        check(replyFrom?.titleOfSelectedItem?.hasPrefix("Sales Desk <sales@inboxclassic.test>") == true,
+              "a reply to a message sent to it goes from it (\(replyFrom?.titleOfSelectedItem ?? ""))")
+        await shot(reply, "write-27-reply-from-alias")
+        onMain { reply.performClose(nil) }
+        if let ask = await waitWindow("alert", 5) { answer(ask, "Don’t Save") }
+        _ = await waitUntil(5) { !reply.isVisible }
+        selectFolder(named: "Inbox")
+        try await setOtherAddresses("")
+    }
+
     func rfc2822(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")

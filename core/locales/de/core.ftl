@@ -334,6 +334,8 @@ error-folder-separator = ein Ordnername darf auf diesem Server kein „{ $separa
 error-folder-special = der Posteingang und die Spezialordner können nicht umbenannt oder gelöscht werden
 error-no-recipients = die Nachricht hat keine Empfänger
 error-bad-address = „{ $address }“ ist keine E-Mail-Adresse
+# review: new
+error-not-own-address = { $address } ist keine Adresse dieses Kontos. Fügen Sie sie in den Eigenschaften des Kontos unter „Weitere Adressen“ hinzu.
 error-attachment = { $path } konnte nicht gelesen werden: { $error }
 error-no-drafts = das Konto hat keinen Entwürfe-Ordner, in dem die Nachricht gespeichert werden kann
 error-draft-attachment = eine Anlage des Entwurfs konnte nicht übernommen werden: { $error }

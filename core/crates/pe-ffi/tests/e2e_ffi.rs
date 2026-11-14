@@ -451,6 +451,7 @@ fn reads_mail_through_the_c_api() {
         draft_account: 0,
         quote_plain: !info.quote_text.is_null(),
         quote_text: info.quote_text,
+        from: std::ptr::null(),
     };
     assert!(unsafe { pe_message_send(core, account, &outgoing, null_mut()) });
     unsafe { pe_draft_free(draft) };
@@ -491,6 +492,7 @@ fn reads_mail_through_the_c_api() {
         draft_account: 0,
         quote_plain: false,
         quote_text: std::ptr::null(),
+        from: std::ptr::null(),
     };
     let mut reason: *mut c_char = null_mut();
     assert!(!unsafe { pe_message_send(core, account, &typo, &mut reason) });

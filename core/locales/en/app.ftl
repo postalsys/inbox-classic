@@ -303,6 +303,7 @@ ui-field-imap-security = IMAP security:
 ui-field-smtp-host = Outgoing (SMTP) server:
 ui-field-smtp-port = SMTP port:
 ui-field-smtp-security = SMTP security:
+ui-field-other-addresses = Other addresses you send from:
 ui-sign-in-not-started = Signing in through the browser could not start.
 ui-sign-in-in-browser = Sign in to { $account } in the browser window that opened, then come back here.
 ui-sign-in-failed = Could not sign in: { $reason }

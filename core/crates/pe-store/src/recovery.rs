@@ -26,6 +26,8 @@ pub struct Recovery {
     pub references: Vec<String>,
     /// The files attached, by their paths
     pub attachments: Vec<PathBuf>,
+    /// The account's other address it goes from, None for its own
+    pub from: Option<String>,
 }
 
 /// A list kept a line each
@@ -50,7 +52,7 @@ impl Store {
     pub fn keep_recovery(&self, r: &Recovery) -> Result<()> {
         self.db.execute(
             "INSERT OR REPLACE INTO compose_recovery (message_id, account_id, recipients, subject, html, quote, \
-             quote_text, in_reply_to, refs, attachments) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+             quote_text, in_reply_to, refs, attachments, sender) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
             params![
                 r.message_id,
                 r.account_id,
@@ -63,6 +65,7 @@ impl Store {
                 r.in_reply_to,
                 lines(&r.references),
                 lines(r.attachments.iter().map(|p| p.to_string_lossy())),
+                r.from,
             ],
         )?;
         Ok(())
@@ -72,7 +75,7 @@ impl Store {
     pub fn recoveries(&self) -> Result<Vec<Recovery>> {
         let mut statement = self.db.prepare(
             "SELECT message_id, account_id, recipients, subject, html, quote, quote_text, in_reply_to, refs, \
-             attachments FROM compose_recovery ORDER BY rowid",
+             attachments, sender FROM compose_recovery ORDER BY rowid",
         )?;
         let rows = statement.query_map([], |row| {
             let recipients: String = row.get(2)?;
@@ -90,6 +93,7 @@ impl Store {
                 in_reply_to: row.get(7)?,
                 references: unlines(row.get(8)?).collect(),
                 attachments: unlines(row.get(9)?).map(PathBuf::from).collect(),
+                from: row.get(10)?,
             })
         })?;
         rows.collect()
@@ -121,6 +125,7 @@ mod tests {
             in_reply_to: Some("<0@example.com>".into()),
             references: vec!["<a@example.com>".into(), "<0@example.com>".into()],
             attachments: vec![PathBuf::from("/tmp/a.pdf"), PathBuf::from("/tmp/b c.txt")],
+            from: Some("sales@example.com".into()),
             ..Default::default()
         };
         store.keep_recovery(&recovery).unwrap();

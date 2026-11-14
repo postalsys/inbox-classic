@@ -16,7 +16,20 @@ std::vector<std::wstring> SecurityChoices() {
 }
 
 // the fields of the server form and Properties, in their order (the UI test finds them by it: 100 + the field)
-enum Field { ACCOUNT_NAME, NAME, EMAIL, USERNAME, PASSWORD, IMAP_HOST, IMAP_PORT, IMAP_SECURITY, SMTP_HOST, SMTP_PORT, SMTP_SECURITY };
+// Properties ends with the other addresses the account sends from
+enum Field { ACCOUNT_NAME, NAME, EMAIL, USERNAME, PASSWORD, IMAP_HOST, IMAP_PORT, IMAP_SECURITY, SMTP_HOST, SMTP_PORT, SMTP_SECURITY, OTHER_ADDRESSES };
+
+// the other addresses of Properties saved, or why not
+bool SaveOtherAddresses(HWND owner, PeCore* core, int64_t account, const std::wstring& text) {
+    char* reason = nullptr;
+    if (pe_set_account_addresses(core, account, core::Narrow(text).c_str(), &reason)) {
+        return true;
+    }
+    core::String why(reason);
+    MessageBoxW(owner, why ? Text(why.get()).c_str() : core::T(PE_TEXT_UI_ACCOUNT_NOT_SAVED).c_str(),
+                core::Title(PE_TEXT_CMD_PROPERTIES).c_str(), MB_OK | MB_ICONWARNING);
+    return false;
+}
 
 PeSecurity SecurityOf(const std::wstring& choice) {
     std::vector<std::wstring> choices = SecurityChoices();
@@ -860,18 +873,23 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
         {core::T(PE_TEXT_UI_FIELD_SMTP_PORT), std::to_wstring(stored->smtp_port), Kind::Number},
         {core::T(PE_TEXT_UI_FIELD_SMTP_SECURITY), SecurityName(stored->smtp_security), Kind::Choice, security},
     };
+    core::String others(pe_account_addresses(core, account));
+    fields.push_back({core::T(PE_TEXT_UI_FIELD_OTHER_ADDRESSES), others ? Text(others.get()) : L""});
     if (!signsInWith.empty()) {
-        // a browser sign-in account: the names only, the rest is the provider's
-        std::vector<FormField> names = {fields[ACCOUNT_NAME], fields[NAME]};
+        // a browser sign-in account: the names and the other addresses only, the rest is the provider's
+        std::vector<FormField> names = {fields[ACCOUNT_NAME], fields[NAME], fields[OTHER_ADDRESSES]};
         std::wstring intro = core::T(PE_TEXT_UI_SIGNS_IN_WITH, {{"app", signsInWith}});
-        if (!FormDialog(owner, title, intro, names)) {
-            return false;
+        while (FormDialog(owner, title, intro, names)) {
+            if (!SaveOtherAddresses(owner, core, account, names[2].value)) {
+                continue;
+            }
+            fields[NAME] = names[1];
+            std::string utf8[5];
+            PeAccountSettings settings = SettingsOf(fields, utf8);
+            return pe_account_update(core, account, &settings) &&
+                   pe_account_set_name(core, account, core::Narrow(names[0].value).c_str());
         }
-        fields[NAME] = names[1];
-        std::string utf8[5];
-        PeAccountSettings settings = SettingsOf(fields, utf8);
-        return pe_account_update(core, account, &settings) &&
-               pe_account_set_name(core, account, core::Narrow(names[0].value).c_str());
+        return false;
     }
     std::wstring intro = core::T(PE_TEXT_UI_KEEP_PASSWORD);
     std::wstring imapHost = Text(stored->imap_host);
@@ -887,6 +905,9 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
         };
         bool warn = newlyPlain(IMAP_SECURITY, IMAP_HOST, imapSecurity, imapHost) || newlyPlain(SMTP_SECURITY, SMTP_HOST, smtpSecurity, smtpHost);
         if (warn && !AcceptPlain(owner, fields, PE_TEXT_CMD_PROPERTIES)) {
+            continue;
+        }
+        if (!SaveOtherAddresses(owner, core, account, fields[OTHER_ADDRESSES].value)) {
             continue;
         }
         std::string utf8[5];
