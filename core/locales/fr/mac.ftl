@@ -16,7 +16,6 @@ mac-paste = Coller
 mac-menu-window = Fenêtre
 mac-minimize = Réduire
 mac-zoom = Zoom
-# review: changed
 mac-no-updates = Cette version d'Inbox Classic ne prend pas en charge les mises à jour automatiques. Téléchargez la dernière version sur inboxclassic.com.
 
 ## Settings
@@ -33,7 +32,6 @@ mac-choose = Choisir
 
 ## The main window
 
-# review: changed
 mac-still-running-detail = Inbox Classic continue de relever le courrier en arrière-plan. Cliquez sur son icône dans le Dock pour ouvrir l'application.
 mac-outbox-waiting =
     { $count ->
@@ -79,7 +77,6 @@ mac-import-messages = Importer des messages
 mac-save-messages = Enregistrer les messages
 mac-save-attachments-menu = Enregistrer les pièces jointes…
 mac-files-not-saved = Fichiers non enregistrés : { $failed } sur { $count }.
-# review: changed
 mac-no-calendar-app = Aucune app de calendrier n'est disponible sur ce Mac pour ouvrir les invitations (fichiers .ics).
 mac-unsubscribing = Désabonnement de { $target }…
 
@@ -115,7 +112,6 @@ mac-sign-in-apps-button = Applications de connexion…
 
 ## AI agents
 
-# review: changed
 mac-forget-program = Supprimer ce programme et l'historique de ses agents ?
 mac-forget-program-detail = Les autorisations du programme seront effacées. Une autorisation vous sera de nouveau demandée à la prochaine connexion.
 

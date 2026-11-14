@@ -41,7 +41,7 @@ mac-outbox-waiting =
 mac-sending = Saadetakse { $subject }…
 mac-checking = Kontrollitakse konto { $account } uusi kirju…
 mac-account-said = { $account }: { $message }
-mac-not-bundle = See Inbox Classicu koopia ei ole rakenduse pakett, seega ei saa see olla vaikimisi e-posti rakendus.
+mac-not-bundle = Inbox Classic pole rakenduspaketina installitud, mistõttu ei saa seda määrata vaikimisi meilirakenduseks.
 mac-not-made-default = Inbox Classicut ei õnnestunud vaikimisi meilirakenduseks määrata: { $reason }
 mac-tool-search = Otsi
 
@@ -53,7 +53,7 @@ mac-still-indexing-more =
     }
 mac-results-everywhere =
     { $count ->
-        [0] Otsingul „{ $words }“ pole kõigis kaustades tulemusi
+        [0] Päringule „{ $words }“ ei leitud ühestki kaustast vastet
         [one] { $count } tulemus otsingule „{ $words }“ kõigis kaustades
        *[other] { $count } tulemust otsingule „{ $words }“ kõigis kaustades
     }

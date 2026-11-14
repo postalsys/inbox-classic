@@ -3,7 +3,6 @@
 
 ## The main window
 
-# review: changed
 gtk-search-looks-in = La recherche dans { $place } porte sur l'objet, les expéditeurs, les destinataires, les noms des pièces jointes et le texte des messages. Vérifiez l'orthographe ou essayez avec moins de mots.
 gtk-search-still-indexing = { $count ->
     [one] Le texte de { $count } message est encore en cours d'indexation, d'autres résultats peuvent donc bientôt apparaître.
@@ -26,7 +25,6 @@ gtk-search-indexing = { $count ->
 gtk-menu-rename = Renommer...
 gtk-import-one-question = Importer le message { $file } dans le dossier { $folder } ?
 gtk-files-not-saved = Fichiers non enregistrés : { $failed } sur { $total }.
-# review: changed
 gtk-unsubscribe-one-click =
     Quitter cette liste de diffusion ?
 
@@ -35,17 +33,14 @@ gtk-unsubscribe-mail =
     Quitter cette liste de diffusion ?
 
     Pour vous désabonner, vous devez envoyer un e-mail à { $target }. Inbox Classic le prépare pour vous. Envoyez-le pour confirmer votre désabonnement.
-# review: changed
 gtk-unsubscribe-web =
     Quitter cette liste de diffusion ?
 
     La page de désabonnement de la liste va s'ouvrir dans votre navigateur ({ $target }).
 gtk-unsubscribe-failed = Désabonnement impossible : { $problem }
 gtk-toolbar-create-mail-menu = Rédiger depuis un compte au choix
-# review: changed
 gtk-toolbar-send-recv-menu = Envoyer et recevoir les messages d'un compte au choix
 gtk-main-menu = Menu principal
-# review: new
 gtk-folder-list = Liste des dossiers
 gtk-quit = Quitter
 
@@ -69,19 +64,16 @@ gtk-unread-messages = { $count ->
 
 ## The Outbox
 
-# review: changed
 gtk-outbox-empty = Aucun message en attente d'envoi.
 gtk-outbox-row = À : { $to }  ·  Mis en attente le { $queued }  ·  { $status }
 
 ## The app
 
-# review: changed
 gtk-still-running-detail = Inbox Classic continue de relever le courrier en arrière-plan. Utilisez son icône dans la barre supérieure pour ouvrir ou quitter l'application.
 gtk-sign-in-again-ask =
     La connexion au compte { $account } a été refusée ou la session a expiré.
 
     Se reconnecter dans le navigateur ?
-# review: changed
 gtk-default-app-not-installed = Inbox Classic n'est pas installé et ne figure donc pas dans la liste des applications de messagerie du système. Installez-le pour le choisir comme application par défaut.
 gtk-default-app-now = Inbox Classic est maintenant votre application de messagerie par défaut : les liens e-mail ouvrent un nouveau message ici.
 gtk-default-app-failed = Impossible de définir Inbox Classic comme application de messagerie par défaut.
@@ -114,12 +106,9 @@ gtk-plain-warning =
     Sans chiffrement, toute personne qui intercepte le trafic réseau peut lire votre mot de passe et vos messages. Utilisez cette connexion uniquement avec un serveur sur votre ordinateur ou votre réseau local.
 
     Continuer ?
-# review: new
 gtk-account-name-title = Nom du compte
 gtk-display-name-title = Nom affiché
-# review: changed
 gtk-turned-off-why = L'option « { $button } » est désactivée sur cet ordinateur. { $reason }
-# review: changed
 gtk-turned-off-why-long =
     L'option « { $button } » est désactivée sur cet ordinateur.
 
@@ -162,7 +151,6 @@ gtk-agent-accounts = Comptes accessibles
 gtk-never-used = Jamais utilisé
 gtk-last-used = Dernière utilisation { $date }
 gtk-forget-program = Supprimer ce programme ?
-# review: changed
 gtk-forget-program-detail = Les autorisations du programme et l'historique de ses agents seront effacés. Une autorisation vous sera de nouveau demandée à la prochaine connexion.
 gtk-no-agents-yet = Aucun agent n'a encore demandé à utiliser votre courrier.
 gtk-nothing-yet = Rien pour l'instant.
@@ -171,12 +159,9 @@ gtk-nothing-yet = Rien pour l'instant.
 
 gtk-preferences = Préférences
 gtk-language = Langue
-# review: changed
 gtk-language-subtitle = Langue de l'interface et de l'aide
 gtk-new-mail-group = Nouveau courrier
 # the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-# review: new
 gtk-notify-new-mail = M'avertir des nouveaux messages
-# review: changed
 gtk-notify-subtitle = Recevoir une notification à l'arrivée de nouveaux messages lorsque la fenêtre est en arrière-plan
 gtk-restart-to-change = Inbox Classic redémarre pour changer de langue.

@@ -1,19 +1,18 @@
-<!--review-->
 <h1>Images et pistage</h1>
-<p class="summary">Pourquoi les images d'Internet sont bloquées, et comment les afficher pour un message ou un expéditeur de confiance.</p>
-<p>Un message peut afficher des images que l'expéditeur conserve sur Internet. Télécharger une telle image indique à l'expéditeur que vous avez ouvert le message, quand et d'où. C'est pourquoi Inbox Classic ne les télécharge pas.</p>
-<p>Les images envoyées dans le message lui-même sont affichées, car elles n'apprennent rien à l'expéditeur.</p>
-<p>Quand un message contient des images d'Internet, une barre en travers indique que certaines images ont été bloquées. Pour les voir dans un message de confiance :</p>
+<p class="summary">Pourquoi les images externes sont bloquées et comment les afficher dans les messages auxquels vous faites confiance.</p>
+<p>Un message peut contenir des images hébergées sur Internet. Leur téléchargement peut permettre à l'expéditeur de savoir quand et d'où vous avez ouvert le message. C'est pourquoi Inbox Classic ne télécharge pas les images externes par défaut.</p>
+<p>Les images intégrées au message sont affichées, car leur ouverture ne transmet aucune information à l'expéditeur.</p>
+<p>Lorsqu'un message contient des images externes, une barre située au-dessus du message indique que certaines images ont été bloquées. Pour les afficher dans un message auquel vous faites confiance :</p>
 <ul>
     <li><!--os:windows,mac-->Cliquez sur la barre.<!--/os--><!--os:linux-->Cliquez sur <b data-text="gtk-download-pictures"></b> dans la barre.<!--/os--></li>
     <li>Ou choisissez <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Seules les images de ce message s'affichent. Le message suivant est de nouveau bloqué.</p>
+<p>Seules les images de ce message sont alors affichées. Les images externes des autres messages restent bloquées.</p>
 <h2>Les expéditeurs de confiance</h2>
-<p>Pour recevoir chaque fois les images d'un expéditeur, <!--os:windows-->cliquez sur la flèche à droite de la barre<!--/os--><!--os:mac-->cliquez sur la flèche à côté de <b data-text="cmd-pictures"></b> dans la barre<!--/os--><!--os:linux-->cliquez sur la flèche à côté de <b data-text="gtk-download-pictures"></b> dans la barre<!--/os-->. Choisissez de toujours télécharger les images de cet expéditeur, ou de tous ceux de son domaine.</p>
-<p>Ses images se chargent alors d'elles-mêmes, mais seulement quand votre fournisseur de messagerie confirme que le message vient bien de ce domaine. Un message qui se fait seulement passer pour lui demande toujours, et la barre indique que l'expéditeur n'a pas pu être confirmé. Dans <b data-text="folder-junk"></b>, les images ne se chargent jamais d'elles-mêmes.</p>
+<p>Pour télécharger automatiquement les images des messages d'un expéditeur, <!--os:windows-->cliquez sur la flèche à droite de la barre<!--/os--><!--os:mac-->cliquez sur la flèche à côté de <b data-text="cmd-pictures"></b> dans la barre<!--/os--><!--os:linux-->cliquez sur la flèche à côté de <b data-text="gtk-download-pictures"></b> dans la barre<!--/os-->. Choisissez de toujours télécharger les images de cet expéditeur, ou de tous ceux de son domaine.</p>
+<p>Les images ne sont téléchargées automatiquement que si votre fournisseur de messagerie confirme que le message provient du domaine de l'expéditeur. Si cette origine ne peut pas être vérifiée, les images restent bloquées et la barre affiche un avertissement. Dans le dossier <b data-text="folder-junk"></b>, les images externes ne sont jamais téléchargées automatiquement.</p>
 <p>Pour retirer un expéditeur de la liste, utilisez <b data-text="ui-trusted-senders-button"></b> dans <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
 <h2>Les images de tous les messages</h2>
-<p><b data-text="ui-pictures-always-option"></b>, dans <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->, télécharge les images de chaque message, sauf dans <b data-text="folder-junk"></b>. Cette option est désactivée au départ, car les expéditeurs peuvent alors savoir quand vous lisez leurs messages.</p>
+<p><b data-text="ui-pictures-always-option"></b>, dans <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->, télécharge les images de chaque message, sauf dans <b data-text="folder-junk"></b>. Cette option est désactivée par défaut, car le téléchargement des images peut permettre aux expéditeurs de savoir quand vous lisez leurs messages.</p>
 <p>Le logo d'une marque à côté de l'en-tête n'est pas une image de pistage. Il est approuvé par votre serveur de messagerie, et il vient de la marque, pas des images de l'expéditeur.</p>
-<nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav><!--/review-->
+<nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>

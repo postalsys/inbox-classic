@@ -8,9 +8,7 @@ menu-view = &Ansicht
 menu-tools = E&xtras
 menu-message = &Nachricht
 menu-help = &Hilfe
-# review: new
 menu-layout = &Layout
-# review: new
 menu-sort-by = &Sortieren nach
 menu-folder = &Ordner
 
@@ -45,7 +43,6 @@ cmd-outbox = &Postausgang...
 cmd-properties = &Eigenschaften
 cmd-mark-all-read = Alle als gelesen &markieren
 cmd-junk = Als &Junk markieren
-# review: changed
 cmd-not-junk = Als Nicht-J&unk markieren
 cmd-archive = A&rchivieren
 cmd-watch-conversation = Unterhaltung &beobachten
@@ -61,28 +58,17 @@ ui-find-not-found = „{ $words }“ kommt in dieser Nachricht nicht vor
 cmd-expand-all-threads = Alle Unterhaltungen &erweitern
 cmd-collapse-all-threads = Alle Unterhaltungen &reduzieren
 ui-group-by-conversation = Nachrichten nach &Unterhaltung gruppieren
-# review: new
 cmd-folder-list = &Ordnerliste
-# review: new
 cmd-layout-automatic = &Automatisch
-# review: new
 cmd-layout-classic = &Klassisch
-# review: new
 cmd-layout-columns = &Spalten
-# review: new
 cmd-sort-date = &Datum
-# review: new
 cmd-sort-from = &Von
-# review: new
 cmd-sort-subject = &Betreff
-# review: new
 cmd-sort-size = &Größe
-# review: new
 cmd-sort-ascending = &Aufsteigend sortieren
-# review: new
 cmd-sort-descending = Ab&steigend sortieren
 cmd-hide-ignored = &Ignorierte Unterhaltungen ausblenden
-# review: new
 cmd-hide-read = &Gelesene Nachrichten ausblenden
 cmd-notify = Bei neuer E-Mail be&nachrichtigen
 cmd-open = Inbox Classic ö&ffnen
@@ -143,7 +129,6 @@ ui-unknown-reason = unbekannter Grund
 ui-checking = Neue Nachrichten von { $account } werden abgerufen...
 ui-done = Fertig
 ui-sent-at = { $subject } um { $time } gesendet
-# review: changed
 ui-draft-saved = Nachricht im Ordner „Entwürfe“ gespeichert
 ui-draft-not-saved = Die Nachricht wurde nicht im Ordner „Entwürfe“ gespeichert: { $reason }
 ui-about-core = Kern { $version }
@@ -219,7 +204,6 @@ ui-signature = Signatur
 ui-signature-hint = Wird neuen Nachrichten, Antworten und Weiterleitungen von diesem Konto angefügt.
 ui-signature-not-saved = Die Signatur konnte nicht gespeichert werden.
 ui-all-inboxes = Alle Posteingänge
-# review: changed
 ui-all-folders = Alle Ordner
 ui-the-account = das Konto
 ui-folder-name = Ordnername:
@@ -247,7 +231,6 @@ ui-cannot-unsubscribe = Diese Nachricht bietet keine Möglichkeit zum Abbestelle
 ui-unsubscribed = Abmeldung bestätigt. Laut Mailingliste erhalten Sie diese E-Mails künftig nicht mehr.
 ui-not-unsubscribed = Abbestellen nicht möglich: { $reason }
 ui-event-span = { $start } bis { $end }
-# review: changed
 ui-event-floating = { $when } (Zeit des Absenders)
 ui-invitation = Einladung: { $title }
 ui-invitation-updated = Geänderte Einladung: { $title }
@@ -284,7 +267,6 @@ ui-found-srv = Diese Einstellungen wurden in den DNS-Einträgen Ihrer Domain gef
 ui-found-autodiscover = Diese Einstellungen wurden von Microsoft Autodiscover (Exchange) gefunden.
 ui-found-other = Diese Einstellungen wurden für diese Adresse gefunden.
 ui-app-password-needed = { $provider } nimmt Ihr normales Passwort in E-Mail-Programmen nicht an. Erstellen Sie in Ihrem Konto bei { $provider } ein App-Passwort und geben Sie es im nächsten Formular in das Feld Passwort ein.
-# review: changed
 ui-app-password-open = Die Anleitung von { $provider } im Browser öffnen?
 ui-plain-warning = Bei einer unverschlüsselten Verbindung können Personen, die den Netzwerkverkehr mitlesen, Ihr Passwort und Ihre E-Mails einsehen. Verwenden Sie diese Verbindung nur mit einem Server auf Ihrem eigenen Computer oder im lokalen Netzwerk.
 ui-continue-ask = Fortfahren?
@@ -294,7 +276,6 @@ ui-off-here = Auf diesem Computer deaktiviert.
 ui-why = Warum?
 ui-more-sign-in = Weitere Anmeldeoptionen...
 ui-other-account = Für ein anderes E-Mail-Konto geben Sie Ihre E-Mail-Adresse und den Namen ein, den Empfänger sehen sollen. Die Servereinstellungen werden im nächsten Schritt gesucht.
-# review: new
 ui-field-account-name = Kontoname:
 ui-field-name = Anzeigename:
 ui-field-email = E-Mail-Adresse:
@@ -310,7 +291,6 @@ ui-sign-in-not-started = Die Anmeldung im Browser konnte nicht gestartet werden.
 ui-sign-in-in-browser = Melden Sie sich im geöffneten Browserfenster bei { $account } an und kehren Sie dann hierher zurück.
 ui-sign-in-failed = Die Anmeldung ist fehlgeschlagen: { $reason }
 ui-account-not-saved = Das Konto konnte nicht gespeichert werden.
-# review: changed
 ui-start-intro = Gmail, Google Workspace, Outlook.com und Microsoft 365: Melden Sie sich auf der Seite von Google oder Microsoft an. Ihr Passwort geben Sie dort ein, nie in Inbox Classic.
 ui-start-intro-apps = Melden Sie sich im Browser mit einer Ihrer Anmelde-Apps an (Weitere Anmeldeoptionen), oder fügen Sie unten ein beliebiges E-Mail-Konto mit Ihrem Namen und Ihrer Adresse hinzu.
 ui-use-app-password = App-Passwort verwenden
@@ -326,7 +306,7 @@ ui-remove-account = Konto entfernen
 ui-remove-account-ask = Dieses Konto aus Inbox Classic entfernen? Seine E-Mails bleiben auf dem Server; die Kopie auf diesem Computer und das gespeicherte Passwort werden entfernt.
 ui-col-email = E-Mail-Adresse
 ui-col-incoming = Posteingangsserver
-ui-type-email = Geben Sie Ihre E-Mail-Adresse ein, name@example.com.
+ui-type-email = Geben Sie Ihre E-Mail-Adresse ein, zum Beispiel name@example.com.
 ui-ai-agent = KI-Agent
 ui-ai-agent-access = Zugriff für KI-Agenten
 ui-ai-agents = KI-Agenten
@@ -371,7 +351,6 @@ ui-client-public = Client-ID: { $client }, ein öffentlicher Client (ohne Geheim
 ui-no-accounts = Keine Konten
 ui-remove-sign-in-app = Anmelde-App entfernen
 ui-remove-sign-in-app-ask = Die Anmelde-App { $name } und ihr gespeichertes Client-Geheimnis entfernen?
-# review: changed
 ui-sign-in-app-not-removed = Die Anmelde-App wurde nicht entfernt. { $reason }
 ui-sign-in-apps-intro = Anmelde-Apps ermöglichen die Anmeldung im Browser. Apps ohne Häkchen werden für neue Konten nicht angeboten. Bestehende Konten können sie weiterhin verwenden.
 ui-col-issuer = Aussteller
@@ -381,13 +360,9 @@ ui-new-folder-title = Neuer Ordner
 ui-rename-folder-title = Ordner umbenennen
 ui-delete-folder-question = Den Ordner „{ $folder }“ mit allen Nachrichten und Unterordnern löschen? Diese werden auch auf dem Server gelöscht.
 ui-properties = &Eigenschaften
-# review: new
 ui-account-sync = Senden und &empfangen
-# review: new
 ui-account-properties = &Eigenschaften...
-# review: new
 ui-account-move-up = Nach &oben
-# review: new
 ui-account-move-down = Nach &unten
 ui-menu-open = Ö&ffnen
 ui-menu-flag = Kenn&zeichnung
@@ -506,84 +481,45 @@ ui-book-exported = { $count ->
    *[other] { $count } Kontakte in { $file } gespeichert.
 }
 ui-book-not-exported = Das Adressbuch konnte nicht gespeichert werden: { $reason }
-# review: new
 ui-code-copied = Code kopiert
-# review: new
 ui-codes-in-notifications = Anmeldecodes in Benachrichtigungen über neue E-Mails anzeigen
-# review: new
 ui-tool-unread-only = Ungelesen
-# review: new
 ui-no-unread = Hier gibt es keine ungelesenen Nachrichten.
-# review: new
 ui-pictures-always-sender = Bilder von { $sender } immer herunterladen
-# review: new
-ui-pictures-always-domain = Bilder von allen bei { $domain } immer herunterladen
-# review: new
-ui-pictures-unconfirmed = Der Absender konnte nicht als { $domain } bestätigt werden, daher werden seine Bilder nicht von selbst heruntergeladen.
-# review: new
+ui-pictures-always-domain = Bilder von allen Absendern der Domain { $domain } immer herunterladen
+ui-pictures-unconfirmed = Die Absenderdomain { $domain } konnte nicht bestätigt werden. Deshalb werden Bilder in dieser Nachricht nicht automatisch heruntergeladen.
 ui-pictures-always-option = Bilder in allen Nachrichten herunterladen
-# review: new
 ui-pictures-always-warning = Absender sehen dann, wann Sie ihre Nachrichten lesen.
-# review: new
 ui-download-heading = Herunterladen
-# review: new
 ui-download-ahead = Nachrichten vorab herunterladen:
-# review: new
-ui-download-ahead-recent = Neuere Nachrichten bis 1 MB
-# review: new
+ui-download-ahead-recent = Neuere Nachrichten mit jeweils bis zu 1 MB
 ui-download-ahead-all = Alle Nachrichten
-# review: new
 ui-download-ahead-never = Erst beim Öffnen
-# review: new
-ui-download-limit = Heruntergeladene Nachrichten je Konto höchstens:
-# review: new
-ui-download-note = Vorab heruntergeladene Nachrichten öffnen sich sofort. Über der Grenze werden die ältesten entfernt und beim Öffnen erneut heruntergeladen.
-# review: new
-ui-attachment-downloading = Der Rest dieser Nachricht wird noch heruntergeladen. Versuchen Sie es erneut, sobald er da ist.
-# review: new
+ui-download-limit = Maximaler Speicherplatz pro Konto:
+ui-download-note = Vorab heruntergeladene Nachrichten lassen sich sofort öffnen. Wird das Speicherlimit überschritten, werden die ältesten lokalen Kopien entfernt und beim Öffnen erneut heruntergeladen.
+ui-attachment-downloading = Diese Nachricht wird noch heruntergeladen. Versuchen Sie es erneut, sobald der Download abgeschlossen ist.
 ui-trusted-senders-button = Vertrauenswürdige Absender...
-# review: new
 ui-trusted-senders-title = Vertrauenswürdige Absender
-# review: new
-ui-trusted-senders-note = Bilder dieser Absender werden heruntergeladen, wenn ihr E-Mail-Anbieter bestätigt, dass die Nachricht von ihnen stammt.
-# review: new
-ui-trusted-everyone-at = Alle bei { $domain }
-# review: new
-ui-trusted-senders-empty = Noch keinem Absender wird vertraut.
-# review: new
+ui-trusted-senders-note = Bilder in Nachrichten dieser Absender werden automatisch heruntergeladen, wenn Ihr E-Mail-Anbieter die Absenderdomain bestätigt.
+ui-trusted-everyone-at = Alle Absender der Domain { $domain }
+ui-trusted-senders-empty = Es wurden noch keine vertrauenswürdigen Absender hinzugefügt.
 ui-eml-default = .eml-Dateien mit Inbox Classic öffnen
-# review: new
 ui-eml-default-done = Inbox Classic öffnet jetzt .eml-Dateien.
-# review: new
-ui-eml-default-failed = Inbox Classic konnte nicht als App für .eml-Dateien festgelegt werden: { $reason }
-# review: new
+ui-eml-default-failed = Inbox Classic konnte nicht als Standard-App für .eml-Dateien festgelegt werden: { $reason }
 ui-folders = Ordner
-# review: new
 ui-sorted-by = Sortiert nach { $field }
-# review: new
 ui-layout-label = Layout:
-# review: new
-ui-columns-note = Das Fenster ist breit genug für das Spaltenlayout. Ansicht > Layout ändert es.
-# review: new
+ui-columns-note = Das Fenster ist breit genug für das Spaltenlayout. Sie können das Layout unter Ansicht > Layout ändern.
 ui-row-unread = Ungelesen
-# review: new
 ui-row-flagged = Gekennzeichnet
-# review: new
 ui-row-attachments = Mit Anlagen
-# review: new
 ui-row-messages = { $count ->
     [one] { $count } Nachricht
    *[other] { $count } Nachrichten
 }
-# review: new
 ui-list-pictures = Bilder der Absender in der Nachrichtenliste anzeigen
-# review: new
-ui-list-pictures-note = Markenlogos, die der E-Mail-Anbieter bestätigt hat, sonst die Initialen des Absenders. Logos werden einmal je Marke heruntergeladen, nie je Nachricht.
-# review: new
+ui-list-pictures-note = Zeigt bei bestätigten Absendern Markenlogos oder Bilder aus dem Adressbuch an. Ist kein Bild verfügbar, erscheinen die Initialen. Logos werden einmal pro Marke heruntergeladen, nicht für jede Nachricht.
 ui-card-picture = Bild:
-# review: new
 ui-card-picture-choose = Aus&wählen...
-# review: new
 ui-picture-not-picture = Diese Datei ist kein PNG- oder JPEG-Bild.
-# review: new
-ui-picture-too-large = Dieses Bild ist zu groß. Wählen Sie eines unter 10 MB und 8000 Pixel Breite.
+ui-picture-too-large = Dieses Bild ist zu groß. Wählen Sie ein Bild mit höchstens 10 MB und maximal 8000 Pixeln Breite und Höhe.

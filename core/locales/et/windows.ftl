@@ -4,7 +4,7 @@
 ## Põhiaken
 
 win-still-running-detail = Inbox Classic kontrollib taustal uute kirjade saabumist. Avamiseks klõpsake ikooni. Väljumiseks avage paremklõpsuga ikooni menüü.
-win-default-app-not-installed = Seda Inbox Classicu koopiat pole installitud, seega ei näita Windows seda meiliprogrammina. Selle valimiseks installige see.
+win-default-app-not-installed = Inbox Classic pole installitud, mistõttu ei kuvata seda Windowsi meilirakenduste loendis. Vaikerakenduseks valimiseks installige Inbox Classic.
 win-default-app-settings = Windows avab vaikerakenduste sätted. Määrake Inbox Classic seal MAILTO-linkide avamiseks.
 win-no-unread = Lugemata kirju pole
 win-unread-messages = { $count ->
@@ -30,7 +30,7 @@ win-too-many-files = Liiga palju faile korraga: valige vähem.
 ## Kirjutamise aken
 
 win-editor-failed = Kirju ei saa kirjutada.
-win-ctrl-click-to-open = ({ $ctrl }+klõps avab)
+win-ctrl-click-to-open = ({ $ctrl }+klõps avamiseks)
 win-format-bold = Paks kiri ({ $ctrl }+B)
 win-format-italic = Kaldkiri ({ $ctrl }+I)
 win-format-underline = Allajoonitud ({ $ctrl }+U)
@@ -42,7 +42,7 @@ win-signature-title = Allkiri: { $account }
 ## Kaustad, kirjade loend ja lugemispaan
 
 win-search-found-all = { $count ->
-    [0] Päringule „{ $words }“ ei leitud kõigist kaustadest midagi
+    [0] Päringule „{ $words }“ ei leitud ühestki kaustast vastet
     [one] { $count } tulemus päringule „{ $words }“ kõigis kaustades
    *[other] { $count } tulemust päringule „{ $words }“ kõigis kaustades
 }
@@ -66,7 +66,6 @@ win-click-to-retry = Uuesti proovimiseks klõpsake siin.
 win-save-attachments = &Salvesta manused...
 win-files-not-saved = { $count } failist { $failed } ei saanud salvestada.
 win-new-folder-in-highlighted = Uus kaust luuakse valitud kausta alamkaustana.
-# review: changed
 win-delete-folder-ask = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja alamkaustadega? Need kustutatakse ka serverist.
 win-rename = &Nimeta ümber...
 win-messages-not-saved = Kirju ei saanud salvestada.
@@ -86,14 +85,11 @@ win-sign-in-apps-button = &Sisselogimisrakendused...
 
 ## Tehisintellekti agendid
 
-# review: changed
 win-dont-allow = Ä&ra luba
 win-col-address = Aadress
 win-never-written-to = Pole kunagi kirjutanud
-# review: new
 win-book-find-label = Sisestage nimi või e-posti aadress:
 win-send = &Saada
-# review: changed
 win-dont-send = Ä&ra saada
 win-forget-program-ask = Kas eemaldada see programm koos õiguste ja agentide tegevusajalooga? Järgmisel ühendumisel küsitakse juurdepääsuluba uuesti.
 win-clear-log-ask = Kas tühjendada agentide tegevusajalugu? See ei võta agentide tehtud muudatusi tagasi.
@@ -113,9 +109,6 @@ win-options-language-label = &Inbox Classicu keel:
 win-options-restart-note = Keele vahetamiseks tuleb Inbox Classic taaskäivitada.
 win-options-notify = &Teavita mind uute kirjade saabumisest
 win-restart-ask = Valitud keel ({ $language }) rakendub pärast Inbox Classicu taaskäivitamist. Kas taaskäivitada kohe?
-# review: new
 win-folders-hide = Peida kaustade loend
-# review: new
 win-folders-pin = Kinnita kaustade loend kirjade kõrvale
-# review: new
 win-folders-show = Näita kaustu

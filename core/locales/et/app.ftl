@@ -8,9 +8,7 @@ menu-view = &Vaade
 menu-tools = &Tööriistad
 menu-message = &Kiri
 menu-help = &Spikker
-# review: new
 menu-layout = Pai&gutus
-# review: new
 menu-sort-by = Sor&teeri
 menu-folder = K&aust
 
@@ -60,28 +58,17 @@ ui-find-not-found = „{ $words }“ ei ole selles kirjas
 cmd-expand-all-threads = &Laienda kõik vestlused
 cmd-collapse-all-threads = &Ahenda kõik vestlused
 ui-group-by-conversation = &Rühmita kirjad vestluste kaupa
-# review: new
 cmd-folder-list = &Kaustade loend
-# review: new
 cmd-layout-automatic = &Automaatne
-# review: new
 cmd-layout-classic = &Klassikaline
-# review: new
 cmd-layout-columns = &Veerud
-# review: new
 cmd-sort-date = &Kuupäev
-# review: new
 cmd-sort-from = &Saatja
-# review: new
 cmd-sort-subject = &Teema
-# review: new
 cmd-sort-size = Su&urus
-# review: new
 cmd-sort-ascending = Sorteeri kas&vavalt
-# review: new
 cmd-sort-descending = Sorteeri kaha&nevalt
 cmd-hide-ignored = Peida &ignoreeritud vestlused
-# review: new
 cmd-hide-read = Peida &loetud kirjad
 cmd-notify = Teavita &uuest postist
 cmd-open = &Ava Inbox Classic
@@ -135,14 +122,13 @@ ui-outbox-waiting = { $count ->
 ui-outbox-waits = { $subject } ootab väljundkaustas
 ui-outbox-sending = Saadetakse { $subject }...
 ui-from-account = Kontolt { $account }
-ui-sign-in-refused = Konto { $account } sisselogimine ebaõnnestus või seanss aegus.
+ui-sign-in-refused = Kontole { $account } sisselogimine lükati tagasi või seanss on aegunud.
 ui-sign-in-again-ask = Kas logida brauseris uuesti sisse?
 ui-sign-in-again-failed = Uuesti sisselogimine ei õnnestunud: { $reason }
 ui-unknown-reason = tundmatu põhjus
 ui-checking = Kontrollitakse konto { $account } uusi kirju...
 ui-done = Valmis
 ui-sent-at = { $subject } saadetud kell { $time }
-# review: changed
 ui-draft-saved = Kiri salvestati mustanditesse
 ui-draft-not-saved = Kirja ei salvestatud mustanditesse: { $reason }
 ui-about-core = Tuum { $version }
@@ -218,7 +204,6 @@ ui-signature = Allkiri
 ui-signature-hint = Lisatakse sellelt kontolt saadetavatele uutele kirjadele, vastustele ja edastatud kirjadele.
 ui-signature-not-saved = Allkirja ei saanud salvestada.
 ui-all-inboxes = Kõik sisendkaustad
-# review: changed
 ui-all-folders = Kõik kaustad
 ui-the-account = konto
 ui-folder-name = Kausta nimi:
@@ -238,7 +223,7 @@ ui-attachment-not-read = Manust ei saanud lugeda.
 ui-attachment-not-saved = Manust ei saanud salvestada.
 ui-not-downloaded = Kiri pole veel alla laaditud.
 ui-leave-list = Kas lahkuda sellest meililistist?
-ui-leave-one-click = Inbox Classic saadab aadressile { $target } tellimusest loobumise taotluse. Veebilehte ei avata ega e-kirja ei saadeta.
+ui-leave-one-click = Inbox Classic saadab aadressile { $target } tellimusest loobumise taotluse. Veebilehte ei avata ega saadeta e-kirja.
 ui-leave-mail = Tellimusest loobumiseks tuleb saata kiri aadressile { $target }. Inbox Classic koostab kirja teie eest. Loobumise kinnitamiseks saatke see ära.
 ui-leave-web = Brauseris avaneb tellimusest loobumise leht ({ $target }).
 ui-unsubscribing = Loobutakse tellimusest { $target }...
@@ -246,8 +231,7 @@ ui-cannot-unsubscribe = See kiri ei sisalda tellimusest loobumise võimalust.
 ui-unsubscribed = Tellimusest loobumise taotlus võeti vastu. Meililisti kinnitusel teile enam neid kirju ei saadeta.
 ui-not-unsubscribed = Tellimusest ei saanud loobuda: { $reason }
 ui-event-span = { $start } kuni { $end }
-# review: changed
-ui-event-floating = { $when } (saatja aeg)
+ui-event-floating = { $when } (saatja kohaliku aja järgi)
 ui-invitation = Kutse: { $title }
 ui-invitation-updated = Uuendatud kutse: { $title }
 ui-invitation-canceled = Tühistatud: { $title }
@@ -272,7 +256,6 @@ ui-add-account-title = Lisa meilikonto
 ui-accounts-title = Kontod
 ui-security-none = Puudub (krüptimata)
 ui-field-required = { $field } on kohustuslik.
-# review: changed
 ui-email-invalid = E-posti aadress pole kehtiv.
 ui-ports-invalid = Pordid on arvud 1 kuni 65535.
 ui-looking-up = Otsitakse domeeni { $domain } sätteid...
@@ -284,7 +267,6 @@ ui-found-srv = Need sätted leiti teie domeeni DNS-kirjetest.
 ui-found-autodiscover = Need sätted leiti Microsoft Autodiscoveri (Exchange) abil.
 ui-found-other = Need sätted leiti selle aadressi jaoks.
 ui-app-password-needed = Meiliprogrammides nõuab { $provider } tavalise parooli asemel rakenduse parooli. Looge see oma teenusekontol ja sisestage järgmise sammu parooliväljale.
-# review: changed
 ui-app-password-open = Kas avada teenusepakkuja { $provider } juhised brauseris?
 ui-plain-warning = Krüptimata ühenduse korral saavad võrguliiklust jälgivad isikud lugeda teie parooli ja kirju. Kasutage seda ainult oma arvutis või kohalikus võrgus oleva serveriga.
 ui-continue-ask = Kas jätkata?
@@ -293,9 +275,7 @@ ui-turned-off = { $name } on selles arvutis välja lülitatud.
 ui-off-here = Selles arvutis välja lülitatud.
 ui-why = Miks?
 ui-more-sign-in = Muud sisselogimisviisid...
-# review: changed
 ui-other-account = Muu meilikonto lisamiseks sisestage oma e-posti aadress ja nimi, mida näevad kirjade saajad. Järgmises sammus otsitakse serveri sätteid.
-# review: new
 ui-field-account-name = Konto nimi:
 ui-field-name = Kuvatav nimi:
 ui-field-email = E-posti aadress:
@@ -311,8 +291,7 @@ ui-sign-in-not-started = Brauseris sisselogimist ei saanud alustada.
 ui-sign-in-in-browser = Logige avanenud brauseriaknas sisse kontole { $account } ja tulge siis siia tagasi.
 ui-sign-in-failed = Sisselogimine ei õnnestunud: { $reason }
 ui-account-not-saved = Kontot ei saanud salvestada.
-# review: changed
-ui-start-intro = Gmail, Google Workspace, Outlook.com ja Microsoft 365: logige sisse Google'i või Microsofti enda lehel. Parool sisestatakse seal, mitte kunagi Inbox Classicusse.
+ui-start-intro = Gmail, Google Workspace, Outlook.com ja Microsoft 365: logige sisse Google'i või Microsofti enda lehel. Parooli sisestate sellel lehel, mitte Inbox Classicus.
 ui-start-intro-apps = Logige brauseris sisse mõne oma sisselogimisrakendusega (Muud sisselogimisviisid) või lisage allpool mis tahes meilikonto oma nime ja aadressiga.
 ui-use-app-password = Kasuta rakenduse parooli
 ui-the-provider = teie meiliteenuse pakkuja
@@ -327,7 +306,7 @@ ui-remove-account = Eemalda konto
 ui-remove-account-ask = Kas eemaldada see konto Inbox Classicust? Kirjad jäävad serverisse alles. Sellest arvutist eemaldatakse kirjade koopiad ja salvestatud parool.
 ui-col-email = E-posti aadress
 ui-col-incoming = Vastuvõttev server
-ui-type-email = Sisestage oma e-posti aadress, nimi@example.com.
+ui-type-email = Sisestage oma e-posti aadress, näiteks nimi@example.com.
 ui-ai-agent = Tehisintellekti agent
 ui-ai-agent-access = Tehisintellekti agendi juurdepääs
 ui-ai-agents = Tehisintellekti agendid
@@ -372,7 +351,6 @@ ui-client-public = Kliendi ID: { $client }, avalik klient (saladuseta).
 ui-no-accounts = Kontosid pole
 ui-remove-sign-in-app = Eemalda sisselogimisrakendus
 ui-remove-sign-in-app-ask = Kas eemaldada sisselogimisrakendus { $name } ja selle salvestatud kliendi saladus?
-# review: changed
 ui-sign-in-app-not-removed = Sisselogimisrakendust ei eemaldatud. { $reason }
 ui-sign-in-apps-intro = Sisselogimisrakendused võimaldavad kontodele brauseris sisse logida. Märkimata rakendusi uutele kontodele ei pakuta. Olemasolevad kontod saavad neid endiselt kasutada.
 ui-col-issuer = Väljaandja
@@ -382,13 +360,9 @@ ui-new-folder-title = Uus kaust
 ui-rename-folder-title = Muuda kausta nime
 ui-delete-folder-question = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja alamkaustadega? Need kustutatakse ka serverist.
 ui-properties = &Atribuudid
-# review: new
 ui-account-sync = Saada ja võta &vastu
-# review: new
 ui-account-properties = Atri&buudid...
-# review: new
 ui-account-move-up = Liiguta ü&les
-# review: new
 ui-account-move-down = Liiguta a&lla
 ui-menu-open = &Ava
 ui-menu-flag = L&ipp
@@ -507,84 +481,45 @@ ui-book-exported = { $count ->
    *[other] { $count } kontakti salvestati faili { $file }.
 }
 ui-book-not-exported = Aadressiraamatut ei saanud salvestada: { $reason }
-# review: new
 ui-code-copied = Kood kopeeriti
-# review: new
-ui-codes-in-notifications = Näita uue kirja teadetes sisselogimiskoode
-# review: new
+ui-codes-in-notifications = Näita uute kirjade teavitustes sisselogimiskoode
 ui-tool-unread-only = Lugemata
-# review: new
 ui-no-unread = Siin pole lugemata kirju.
-# review: new
 ui-pictures-always-sender = Laadi saatjalt { $sender } pildid alati alla
-# review: new
-ui-pictures-always-domain = Laadi kõigilt domeenis { $domain } pildid alati alla
-# review: new
-ui-pictures-unconfirmed = Saatjat ei õnnestunud kinnitada kui { $domain }, seega tema pilte ise alla ei laadita.
-# review: new
+ui-pictures-always-domain = Laadi domeenist { $domain } saabunud kirjade pildid alati alla
+ui-pictures-unconfirmed = Ei õnnestunud kinnitada, et kiri pärineb domeenist { $domain }. Seetõttu ei laadita selle pilte automaatselt alla.
 ui-pictures-always-option = Laadi pildid alla kõigis kirjades
-# review: new
 ui-pictures-always-warning = Saatjad näevad siis, millal te nende kirju loete.
-# review: new
 ui-download-heading = Allalaadimine
-# review: new
-ui-download-ahead = Laadi kirjad ette alla:
-# review: new
-ui-download-ahead-recent = Hiljutised kirjad kuni 1 MB
-# review: new
+ui-download-ahead = Laadi kirjad eelnevalt alla:
+ui-download-ahead-recent = Hiljutised kirjad suurusega kuni 1 MB
 ui-download-ahead-all = Kõik kirjad
-# review: new
-ui-download-ahead-never = Alles avamisel
-# review: new
-ui-download-limit = Igale kontole hoitakse alla laaditud kirju kuni:
-# review: new
-ui-download-note = Ette alla laaditud kirjad avanevad kohe. Üle piiri eemaldatakse vanimad ja need laaditakse avamisel uuesti alla.
-# review: new
-ui-attachment-downloading = Selle kirja ülejäänud osa laaditakse veel alla. Proovige uuesti, kui see on käes.
-# review: new
+ui-download-ahead-never = Ainult avamisel
+ui-download-limit = Mahupiir konto kohta:
+ui-download-note = Eelnevalt alla laaditud kirjad avanevad kohe. Mahupiiri ületamisel eemaldatakse arvutist vanimate kirjade koopiad. Kirjade avamisel laaditakse need uuesti alla.
+ui-attachment-downloading = Kirja allalaadimine on veel pooleli. Proovige uuesti, kui allalaadimine on lõppenud.
 ui-trusted-senders-button = Usaldusväärsed saatjad...
-# review: new
 ui-trusted-senders-title = Usaldusväärsed saatjad
-# review: new
-ui-trusted-senders-note = Nende saatjate pildid laaditakse alla, kui nende meiliteenuse pakkuja kinnitab, et kiri on nende oma.
-# review: new
-ui-trusted-everyone-at = Kõik domeenis { $domain }
-# review: new
-ui-trusted-senders-empty = Ühtegi saatjat veel ei usaldata.
-# review: new
+ui-trusted-senders-note = Nende saatjate kirjade pildid laaditakse automaatselt alla, kui teie meiliteenuse pakkuja on saatja domeeni kinnitanud.
+ui-trusted-everyone-at = Kõik domeeni { $domain } saatjad
+ui-trusted-senders-empty = Usaldusväärseid saatjaid pole veel lisatud.
 ui-eml-default = Ava .eml-failid Inbox Classicuga
-# review: new
 ui-eml-default-done = Inbox Classic avab nüüd .eml-failid.
-# review: new
-ui-eml-default-failed = Inbox Classicut ei õnnestunud .eml-failide rakenduseks määrata: { $reason }
-# review: new
+ui-eml-default-failed = Inbox Classicut ei õnnestunud määrata .eml-failide avamise vaikerakenduseks: { $reason }
 ui-folders = Kaustad
-# review: new
 ui-sorted-by = Järjestus: { $field }
-# review: new
 ui-layout-label = Paigutus:
-# review: new
-ui-columns-note = Aken on veergudega paigutuse jaoks piisavalt lai. Seda muudab Vaade > Paigutus.
-# review: new
+ui-columns-note = Aken on veergudega paigutuse jaoks piisavalt lai. Paigutust saate muuta menüüs Vaade > Paigutus.
 ui-row-unread = Lugemata
-# review: new
 ui-row-flagged = Lipuga
-# review: new
 ui-row-attachments = Manustega
-# review: new
 ui-row-messages = { $count ->
     [one] { $count } kiri
    *[other] { $count } kirja
 }
-# review: new
 ui-list-pictures = Näita kirjade loendis saatjate pilte
-# review: new
-ui-list-pictures-note = E-posti teenusepakkuja kinnitatud brändilogod, muidu saatja initsiaalid. Logod laaditakse alla üks kord iga brändi kohta, mitte iga kirja kohta.
-# review: new
+ui-list-pictures-note = Kui saatja on kinnitatud, kuvatakse brändilogo või aadressiraamatu pilt. Pildi puudumisel kuvatakse saatja initsiaalid. Logod laaditakse alla kord brändi, mitte iga kirja kohta.
 ui-card-picture = Pilt:
-# review: new
 ui-card-picture-choose = &Vali...
-# review: new
 ui-picture-not-picture = See fail ei ole PNG- ega JPEG-pilt.
-# review: new
-ui-picture-too-large = See pilt on liiga suur. Valige pilt, mis on alla 10 MB ja kuni 8000 pikslit lai.
+ui-picture-too-large = See pilt on liiga suur. Valige kuni 10 MB suurune pilt, mille laius ja kõrgus ei ületa 8000 pikslit.
