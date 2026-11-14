@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use gtk::prelude::*;
-use gtk::{gio, glib};
+use gtk::{gdk, gio, glib};
 use webkit::prelude::*;
 
 /// One web context, network session and pair of content rules for all the app's web views
@@ -175,14 +175,41 @@ thread_local! {
     static MESSAGE_VIEWS: RefCell<Vec<glib::WeakRef<webkit::WebView>>> = const { RefCell::new(Vec::new()) };
 }
 
-/// View > Text Size: every web view that shows or writes a message at `zoom` (the core's, 1.0 for Medium)
-pub fn set_text_zoom(zoom: f64) {
+/// `change` done to every web view that shows or writes a message and is still open; the closed ones leave the list
+fn each_message_view(change: impl Fn(&webkit::WebView)) {
     MESSAGE_VIEWS.with(|views| {
-        // each view still open gets the size; the closed ones leave the list
         views
             .borrow_mut()
-            .retain(|view| view.upgrade().map(|view| view.set_zoom_level(zoom)).is_some());
+            .retain(|view| view.upgrade().map(|view| change(&view)).is_some());
     });
+}
+
+/// View > Text Size: every web view that shows or writes a message at `zoom` (the core's, 1.0 for Medium)
+pub fn set_text_zoom(zoom: f64) {
+    each_message_view(|view| view.set_zoom_level(zoom));
+}
+
+/// The background of pe-html's documents in a dark window (its `DOCUMENT_DARK`)
+const DARK_BACKGROUND: &str = "#1e1f22";
+
+/// What a web view that shows or writes a message paints before its document does: the documents' dark background
+/// while the window is dark and messages may be dark (Preferences), white otherwise, so nothing flashes white
+pub fn background() -> gdk::RGBA {
+    let dark = pe_html::dark() && adw::StyleManager::default().is_dark();
+    gdk::RGBA::parse(if dark { DARK_BACKGROUND } else { "#ffffff" }).unwrap_or(gdk::RGBA::WHITE)
+}
+
+/// Every web view that shows or writes a message given the [`background`] of now
+pub fn update_backgrounds() {
+    let color = background();
+    each_message_view(|view| view.set_background_color(&color));
+}
+
+/// The web views follow the style of the windows: their background changes with it. The documents change by
+/// themselves: their `prefers-color-scheme` is WebKit's reading of GTK's gtk-application-prefer-dark-theme, which
+/// libadwaita sets as its style changes (and printing is light, the dark styles being for the screen only)
+pub fn follow_style() {
+    adw::StyleManager::default().connect_dark_notify(|_| update_backgrounds());
 }
 
 impl DocumentView {
@@ -200,6 +227,7 @@ impl DocumentView {
         view.set_hexpand(true);
         if kind == "preview" || kind == "compose" {
             view.set_zoom_level(crate::app::shell().core.text_zoom());
+            view.set_background_color(&background());
             MESSAGE_VIEWS.with(|views| views.borrow_mut().push(view.downgrade()));
         }
         let current: Rc<RefCell<String>> = Rc::default();
@@ -352,12 +380,21 @@ pub fn js_string(value: &str) -> String {
 /// The page of a reading pane with no message: the core's, saying so, or an empty one while a message is coming
 pub fn no_message(say_so: bool) -> String {
     if say_so {
-        pe_core::reader_page(pe_core::ReaderState::NoMessage)
-    } else {
-        "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"color-scheme\" content=\"light\">\
-         <style>html{background:#fff}</style></head><body></body></html>"
-            .into()
+        return pe_core::reader_page(pe_core::ReaderState::NoMessage);
     }
+    // dark in a dark window too, as the documents are, while messages may be dark
+    let (scheme, dark) = if pe_html::dark() {
+        (
+            "light dark",
+            format!("@media screen and (prefers-color-scheme:dark){{html{{background:{DARK_BACKGROUND}}}}}"),
+        )
+    } else {
+        ("light", String::new())
+    };
+    format!(
+        "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"color-scheme\" content=\"{scheme}\">\
+         <style>html{{background:#fff}}{dark}</style></head><body></body></html>"
+    )
 }
 
 #[cfg(test)]
