@@ -1502,6 +1502,26 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
     }
 
+    Step 'a reminder when an attachment is missing'
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    SetText $compose $IDC_TO 'Jo <jo@example.com>'
+    SetText $compose $IDC_SUBJECT 'Forgot the file in the UI test'
+    [void](TypeInEditor $compose 'Here is the attached plan.')
+    Command $compose $IDC_SEND
+    $ask = WaitWindow '#32770' 'Inbox Classic' 10
+    Check ($null -ne $ask) 'a message that says a file is attached, with none, asks first'
+    if ($ask) {
+        Shot $ask 'write-25-attachment-reminder'
+        Click $ask 7
+    }
+    Start-Sleep -Seconds 1
+    Check ([Native.Win]::IsWindow($compose)) 'No keeps the message open'
+    Command $compose $IDC_SEND
+    $ask = WaitWindow '#32770' 'Inbox Classic' 10
+    if ($ask) { Click $ask 6 }
+    Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: Forgot the file in the UI test' } 30)) 'Yes sends it'
+
     # ---- getting new mail ----
 
     Step 'Send/Recv'

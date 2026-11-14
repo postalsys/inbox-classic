@@ -508,6 +508,7 @@ final class UITest {
         try await largeMessage()
         // before the Drafts step, whose Send/Recv brings the newest message the organizing step starts from
         try await undoSend()
+        try await attachmentReminder()
         try await outboxAndDrafts()
         try await draftsSavedAutomatically()
         try await searching()
