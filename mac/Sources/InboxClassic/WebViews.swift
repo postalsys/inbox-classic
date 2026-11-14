@@ -147,6 +147,29 @@ final class StayOnPage: NSObject, WKNavigationDelegate, WKUIDelegate {
 
 // ---- the reading pane ----
 
+/// View > Text Size: the zoom of every web view that shows or writes a message (the reading pane, message windows,
+/// the compose editor), set as each is made and again when the size changes. Their own zoom (pinch, Command and
+/// the scroll wheel) is off, so the size changes only from the menu.
+@MainActor
+enum TextSize {
+    /// the core's zoom for the size in use (pe_text_zoom)
+    static var zoom: CGFloat = 1
+    private static let views = NSHashTable<WKWebView>.weakObjects()
+
+    static func register(_ view: WKWebView) {
+        view.allowsMagnification = false
+        view.pageZoom = zoom
+        views.add(view)
+    }
+
+    static func apply(_ zoom: CGFloat) {
+        Self.zoom = zoom
+        for view in views.allObjects {
+            view.pageZoom = zoom
+        }
+    }
+}
+
 /// The message bodies: the sanitized documents of the core (pe_html_render), shown as they are, scripts off
 @MainActor
 final class Preview: NSObject {
@@ -168,7 +191,7 @@ final class Preview: NSObject {
         view.navigationDelegate = navigation
         view.uiDelegate = navigation
         view.allowsBackForwardNavigationGestures = false
-        view.allowsMagnification = true
+        TextSize.register(view)
         view.isInspectable = false
         view.setAccessibilityIdentifier("preview")
         ContentRules.whenReady { [weak self] in
