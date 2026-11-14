@@ -7,6 +7,7 @@
 #![forbid(unsafe_code)]
 
 pub mod agents;
+pub mod attachment_words;
 mod authres;
 pub mod bimi;
 pub mod book;

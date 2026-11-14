@@ -66,6 +66,20 @@ pub fn editor_document(quote: Option<&str>, folded: bool, body: &str) -> String 
     )
 }
 
+/// The part of the editor's HTML that the user wrote: up to the signature's block ([`signature_block`]), or a quoted
+/// message put into the text ([`quote_html`]: a reply's blockquote, a forward's header)
+pub fn written_part(html: &str) -> &str {
+    let quote_header = text(&pe_i18n::tr(pe_i18n::Text::QuoteOriginal));
+    let ends = [
+        html.find("class=\"pe-signature\"").and_then(|at| html[..at].rfind('<')),
+        html.find("<blockquote"),
+        Some(quote_header.as_str())
+            .filter(|h| !h.is_empty())
+            .and_then(|h| html.find(h)),
+    ];
+    &html[..ends.into_iter().flatten().min().unwrap_or(html.len())]
+}
+
 /// The sanitizer of a quoted message: without style elements, which would restyle the whole page (the editor's, or
 /// the sent message above the quote); inline styles stay
 fn quote_sanitizer(images: &[InlineImage]) -> ammonia::Builder<'static> {
