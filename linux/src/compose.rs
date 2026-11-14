@@ -439,6 +439,11 @@ pub struct Compose {
 /// Opens a window to write a message from `account`, with the fields of `draft` (None for a new message); a window of
 /// its own, which the main window can come in front of
 pub fn open(account: i64, draft: Option<Draft>) {
+    open_window(account, draft);
+}
+
+/// [`open`], the window it opened
+fn open_window(account: i64, draft: Option<Draft>) -> Rc<Compose> {
     let compose = Compose::new(account, draft.as_ref());
     shell().composes.borrow_mut().push(compose.clone());
     compose.window.present();
@@ -448,6 +453,7 @@ pub fn open(account: i64, draft: Option<Draft>) {
     } else {
         compose.to.grab_focus();
     }
+    compose
 }
 
 fn row_label(text: &str) -> gtk::Label {
@@ -967,9 +973,7 @@ impl Compose {
         let since = self.unsaved_since.get().unwrap_or_else(std::time::Instant::now);
         self.unsaved_since.set(Some(since));
         let wait = pe_core::autosave_wait(since.elapsed().as_millis() as u64);
-        if let Some(timer) = self.autosave_timer.take() {
-            timer.remove();
-        }
+        self.cancel_autosave();
         let window = self.window.clone();
         let timer = glib::timeout_add_local_once(std::time::Duration::from_millis(wait), move || {
             let composes = shell().composes.borrow().clone();
@@ -981,6 +985,12 @@ impl Compose {
             }
         });
         *self.autosave_timer.borrow_mut() = Some(timer);
+    }
+
+    fn cancel_autosave(&self) {
+        if let Some(timer) = self.autosave_timer.take() {
+            timer.remove();
+        }
     }
 
     /// Opened again after a crash (`recovered`): closing asks about it, and without saving leaves its copy in Drafts,
@@ -1206,9 +1216,7 @@ impl Compose {
 
     /// The message as it was when its HTML was asked for is saved: clean unless it changed since
     fn saved_clean(&self) {
-        if let Some(timer) = self.autosave_timer.take() {
-            timer.remove();
-        }
+        self.cancel_autosave();
         self.unsaved_since.set(None);
         if self.changes.get() != self.requested_at.get() {
             self.schedule_autosave();
@@ -1265,11 +1273,16 @@ impl Compose {
     }
 
     fn destroy(&self) {
-        if let Some(timer) = self.autosave_timer.take() {
-            timer.remove();
-        }
+        self.destroy_keeping(false);
+    }
+
+    /// The window gone; its copy for a crash too unless `recovery` (the UI test's crash)
+    fn destroy_keeping(&self, recovery: bool) {
+        self.cancel_autosave();
         // nothing left to open again after a crash
-        if let Some(message_id) = self.message_id.borrow().as_deref() {
+        if let Some(message_id) = self.message_id.borrow().as_deref()
+            && !recovery
+        {
             let _ = shell().core.compose_closed(message_id);
         }
         shell().composes.borrow_mut().retain(|c| c.window != self.window);
@@ -1290,10 +1303,7 @@ pub fn open_recovered() {
         return;
     };
     for (account, draft) in recovered {
-        let compose = Compose::new(account, Some(&draft));
-        shell().composes.borrow_mut().push(compose.clone());
-        compose.window.present();
-        compose.restored();
+        open_window(account, Some(draft)).restored();
     }
 }
 
@@ -1302,12 +1312,7 @@ pub fn open_recovered() {
 pub fn abandon(window: &adw::ApplicationWindow) {
     let composes = shell().composes.borrow().clone();
     if let Some(this) = composes.iter().find(|c| &c.window == window) {
-        if let Some(timer) = this.autosave_timer.take() {
-            timer.remove();
-        }
-        shell().composes.borrow_mut().retain(|c| &c.window != window);
-        this.editor.release();
-        this.window.destroy();
+        this.destroy_keeping(true);
     }
 }
 

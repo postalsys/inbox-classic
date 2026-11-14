@@ -1144,7 +1144,7 @@ bool ComposeKey(const MSG& msg) {
     return true;
 }
 
-void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* draft) {
+HWND OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* draft) {
     static bool registered = false;
     if (!registered) {
         WNDCLASSEXW windowClass = {sizeof(windowClass)};
@@ -1163,7 +1163,7 @@ void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* dr
                                 WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT, CW_USEDEFAULT, Scale(760), Scale(620), nullptr,
                                 nullptr, GetModuleHandleW(nullptr), nullptr);
     if (!hwnd) {
-        return;
+        return nullptr;
     }
     g_composeWindows.push_back(hwnd);
     auto* state = new Compose{{}, core, account, main};
@@ -1205,6 +1205,7 @@ void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* dr
     } else {
         SetFocus(state->to);
     }
+    return hwnd;
 }
 
 namespace {
@@ -1254,10 +1255,10 @@ void OpenRecoveredCompose(HWND main, PeCore* core) {
         if (!draft) {
             continue;
         }
-        OpenCompose(main, core, account, pe_draft_info(draft.get()));
+        HWND hwnd = OpenCompose(main, core, account, pe_draft_info(draft.get()));
         // closing asks about it, and without saving leaves its copy in Drafts, as whether the user had kept it is not
         // known
-        if (Compose* state = g_composeWindows.empty() ? nullptr : StateOf(g_composeWindows.back())) {
+        if (Compose* state = hwnd ? StateOf(hwnd) : nullptr) {
             state->kept = true;
             state->autosaved = true;
             SetComposeStatus(state, core::T(PE_TEXT_UI_COMPOSE_RESTORED));

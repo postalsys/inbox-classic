@@ -1581,8 +1581,7 @@ impl Core {
     }
 
     fn save_draft_as(&self, account: AccountId, mut outgoing: Outgoing, automatic: bool) -> Result<String> {
-        let settings = self.store().account(account)?.settings;
-        let email = settings.email.clone();
+        let email = self.store().account(account)?.settings.email;
         if compose::drafts_folder(&self.store(), account)?.is_none() {
             return Err(Error::Unavailable(tr(Text::ErrorNoDrafts)));
         }
@@ -1594,7 +1593,7 @@ impl Core {
             .unwrap_or_else(|| pe_smtp::message::new_message_id(&email));
         outgoing.message_id = Some(message_id.clone());
         // kept here first, so that it is there to open again after a crash, with or without a connection
-        self.keep_recovery(account, &settings, &outgoing, &message_id)?;
+        self.keep_recovery(account, &outgoing, &message_id)?;
         self.send_command(
             account,
             Command::SaveDraft {
@@ -1605,27 +1604,10 @@ impl Core {
         Ok(message_id)
     }
 
-    /// The message being written kept in the store as it is saved now, without its files, which it names
-    fn keep_recovery(
-        &self,
-        account: AccountId,
-        settings: &pe_store::AccountSettings,
-        outgoing: &Outgoing,
-        message_id: &str,
-    ) -> Result<()> {
-        let now = worker::unix_now();
-        let bare = Outgoing {
-            attachments: Vec::new(),
-            ..outgoing.clone()
-        };
-        let message = compose::draft_message(settings, &bare, now).map_err(Error::Compose)?;
-        self.store().keep_recovery(&pe_store::Recovery {
-            message_id: message_id.to_string(),
-            account_id: account,
-            source: pe_smtp::build(&message).raw,
-            attachments: outgoing.attachments.clone(),
-            saved: now,
-        })?;
+    /// The message being written kept in the store as it is saved now, to open again after a crash
+    fn keep_recovery(&self, account: AccountId, outgoing: &Outgoing, message_id: &str) -> Result<()> {
+        self.store()
+            .keep_recovery(&compose::recovery(account, outgoing, message_id))?;
         Ok(())
     }
 
@@ -1640,14 +1622,10 @@ impl Core {
     /// files they had that are still there
     pub fn recovered(&self) -> Result<Vec<(AccountId, Draft)>> {
         let recoveries = self.store().recoveries()?;
-        let mut drafts = Vec::new();
-        for recovery in recoveries {
-            let (mut draft, _) = compose::reopen(&recovery.source);
-            draft.message_id = Some(recovery.message_id);
-            draft.attachments = recovery.attachments.into_iter().filter(|path| path.is_file()).collect();
-            drafts.push((recovery.account_id, draft));
-        }
-        Ok(drafts)
+        Ok(recoveries
+            .into_iter()
+            .map(|recovery| (recovery.account_id, compose::recovered(recovery)))
+            .collect())
     }
 
     /// Removes the draft with this Message-ID from the Drafts of `account`, in the background: a copy only the

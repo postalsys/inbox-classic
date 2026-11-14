@@ -334,7 +334,7 @@ void ClearHelpContext(HWND window);
 // opens a window to write a message from `account`, with the fields of `draft` (NULL for a new message)
 // a compose window of its own on the taskbar, not owned by `main` (so the main window can come in front of it); it
 // tells `main` when it is gone
-void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* draft);
+HWND OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* draft);
 // opens again the messages that were being written when the app last ended without closing them
 void OpenRecoveredCompose(HWND main, PeCore* core);
 // the UI test's crash (--test-hooks): every compose window gone without closing, then those kept for a crash opened

@@ -2851,9 +2851,33 @@ pub unsafe extern "C" fn pe_draft_save(
     error: *mut *mut c_char,
 ) -> bool {
     // SAFETY: as the caller guarantees
+    unsafe { draft_save(core, account, message, message_id, error, false) }
+}
+
+/// `pe_draft_save` and `pe_draft_autosave`
+///
+/// # Safety
+/// As theirs.
+unsafe fn draft_save(
+    core: *const PeCore,
+    account: i64,
+    message: *const PeOutgoing,
+    message_id: *mut *mut c_char,
+    error: *mut *mut c_char,
+    automatic: bool,
+) -> bool {
+    // SAFETY: as the caller guarantees
     let result = match unsafe { outgoing(message) } {
         // SAFETY: as the caller guarantees
-        Some(message) => unsafe { with(core, Err(None), |core| core.save_draft(account, message).map_err(Some)) },
+        Some(message) => unsafe {
+            with(core, Err(None), |core| {
+                if automatic {
+                    core.autosave_draft(account, message).map_err(Some)
+                } else {
+                    core.save_draft(account, message).map_err(Some)
+                }
+            })
+        },
         None => Err(None),
     };
     // SAFETY: as the caller guarantees
@@ -2881,24 +2905,7 @@ pub unsafe extern "C" fn pe_draft_autosave(
     error: *mut *mut c_char,
 ) -> bool {
     // SAFETY: as the caller guarantees
-    let result = match unsafe { outgoing(message) } {
-        // SAFETY: as the caller guarantees
-        Some(message) => unsafe {
-            with(core, Err(None), |core| {
-                core.autosave_draft(account, message).map_err(Some)
-            })
-        },
-        None => Err(None),
-    };
-    // SAFETY: as the caller guarantees
-    let Some(id) = (unsafe { refused(error, result, "the message could not be saved") }) else {
-        return false;
-    };
-    if !message_id.is_null() {
-        // SAFETY: the caller gave a valid pointer
-        unsafe { *message_id = into_c_string(id) };
-    }
-    true
+    unsafe { draft_save(core, account, message, message_id, error, true) }
 }
 
 /// How many milliseconds a compose window waits before it saves by itself (`pe_draft_autosave`), just after a

@@ -321,6 +321,43 @@ fn edited_quote_text(quote: &str) -> String {
     quoted_lines(header, &html_to_text(body), reply)
 }
 
+/// What a compose window keeps of the message being written for a crash (pe-store recovery.rs)
+pub(crate) fn recovery(account: pe_store::AccountId, outgoing: &Outgoing, message_id: &str) -> pe_store::Recovery {
+    pe_store::Recovery {
+        message_id: message_id.to_string(),
+        account_id: account,
+        to: outgoing.to.clone(),
+        cc: outgoing.cc.clone(),
+        bcc: outgoing.bcc.clone(),
+        subject: outgoing.subject.clone(),
+        html: outgoing.html.clone().unwrap_or_else(|| text_to_html(&outgoing.text)),
+        quote: outgoing.quote.clone().unwrap_or_default(),
+        quote_text: outgoing.quote_text.clone(),
+        in_reply_to: outgoing.in_reply_to.clone(),
+        references: outgoing.references.clone(),
+        attachments: outgoing.attachments.clone(),
+    }
+}
+
+/// A message kept for a crash, to write on: as it was in its window, its quote still folded, with the files it had
+/// that are still there
+pub(crate) fn recovered(recovery: pe_store::Recovery) -> Draft {
+    Draft {
+        to: recovery.to,
+        cc: recovery.cc,
+        bcc: recovery.bcc,
+        subject: recovery.subject,
+        quote_folded: !recovery.quote.is_empty(),
+        quote: recovery.quote,
+        quote_text: recovery.quote_text,
+        in_reply_to: recovery.in_reply_to,
+        references: recovery.references,
+        body: recovery.html,
+        attachments: recovery.attachments.into_iter().filter(|path| path.is_file()).collect(),
+        message_id: Some(recovery.message_id),
+    }
+}
+
 /// A saved draft to go on writing: its fields, what was written as the body, and its attachments (name to save
 /// them under, content) for the caller to write out
 pub fn reopen(source: &[u8]) -> (Draft, Vec<(String, Vec<u8>)>) {
@@ -483,6 +520,39 @@ pub fn address_label(name: &str, address: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_reply_kept_for_a_crash_opens_with_its_quote_folded() {
+        let outgoing = Outgoing {
+            to: "Ann <ann@example.com>".into(),
+            subject: "Re: Plans".into(),
+            html: Some("<p>Yes</p>".into()),
+            quote: Some("<blockquote>Plans?</blockquote>".into()),
+            quote_text: Some("> Plans?".into()),
+            in_reply_to: Some("<1@example.com>".into()),
+            references: vec!["<1@example.com>".into()],
+            attachments: vec![PathBuf::from("/no/such/file.pdf")],
+            ..Default::default()
+        };
+        let draft = recovered(recovery(7, &outgoing, "<2@example.com>"));
+        assert_eq!(
+            draft,
+            Draft {
+                to: "Ann <ann@example.com>".into(),
+                subject: "Re: Plans".into(),
+                body: "<p>Yes</p>".into(),
+                quote: "<blockquote>Plans?</blockquote>".into(),
+                quote_folded: true,
+                quote_text: Some("> Plans?".into()),
+                in_reply_to: Some("<1@example.com>".into()),
+                references: vec!["<1@example.com>".into()],
+                // a file that is gone is not attached again
+                attachments: Vec::new(),
+                message_id: Some("<2@example.com>".into()),
+                ..Default::default()
+            }
+        );
+    }
 
     #[test]
     fn saves_when_typing_stops_and_every_half_minute() {

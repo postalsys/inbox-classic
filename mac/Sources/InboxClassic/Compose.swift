@@ -589,13 +589,13 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         let since = unsavedSince ?? Date()
         unsavedSince = since
         let wait = pe_autosave_wait(UInt64(max(0, Date().timeIntervalSince(since)) * 1000))
+        cancelAutosave()
+        autosaveTimer = after(TimeInterval(wait) / 1000) { [weak self] in self?.autosaveDue() }
+    }
+
+    private func cancelAutosave() {
         autosaveTimer?.invalidate()
-        let timer = Timer(timeInterval: TimeInterval(wait) / 1000, repeats: false) { [weak self] _ in
-            MainActor.assumeIsolated { self?.autosaveDue() }
-        }
-        // also while a modal window or a menu runs
-        RunLoop.main.add(timer, forMode: .common)
-        autosaveTimer = timer
+        autosaveTimer = nil
     }
 
     private func autosaveDue() {
@@ -803,8 +803,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
 
     /// the message as it was when its HTML was asked for is saved: clean unless it changed since
     private func savedClean() {
-        autosaveTimer?.invalidate()
-        autosaveTimer = nil
+        cancelAutosave()
         unsavedSince = nil
         guard changes == requestedAt else {
             scheduleAutosave()
@@ -844,8 +843,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     }
 
     func windowWillClose(_ notification: Notification) {
-        autosaveTimer?.invalidate()
-        autosaveTimer = nil
+        cancelAutosave()
         // nothing left to open again after a crash
         if !messageId.isEmpty {
             messageId.withCString { pe_compose_closed(core.handle, $0) }
@@ -885,7 +883,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
 
     /// the UI test's crash: the window goes without closing, so its copy for a crash stays
     func abandon() {
-        autosaveTimer?.invalidate()
+        cancelAutosave()
         window.delegate = nil
         window.orderOut(nil)
         editor.close()

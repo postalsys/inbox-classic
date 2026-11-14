@@ -448,15 +448,20 @@ CREATE TABLE card_pictures (
 );
 "#,
     // the messages being written, as each was last saved (by hand or automatically), until their window closes: what
-    // a crash left here is opened again at the next start (pe-core compose.rs). The message without its files, which
-    // are named by their paths, one a line.
+    // a crash left here is opened again at the next start (pe-store recovery.rs). The compose window's fields; To, Cc
+    // and Bcc, the References and the paths of the files attached a line each.
     r#"
 CREATE TABLE compose_recovery (
     message_id TEXT PRIMARY KEY,
     account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-    source BLOB NOT NULL,
-    attachments TEXT NOT NULL,
-    saved INTEGER NOT NULL
+    recipients TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    html TEXT NOT NULL,
+    quote TEXT NOT NULL,
+    quote_text TEXT,
+    in_reply_to TEXT,
+    refs TEXT NOT NULL,
+    attachments TEXT NOT NULL
 );
 "#,
 ];
