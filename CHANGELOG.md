@@ -1,5 +1,67 @@
 # Changelog
 
+## [0.18.0](https://github.com/postalsys/inbox-classic/compare/v0.17.1...v0.18.0) (2026-11-14)
+
+
+### Features
+
+* ask about a forgotten attachment before sending ([a9962ef](https://github.com/postalsys/inbox-classic/commit/a9962ef4ba52070cd0fa6c2d91db29b47f42ab72))
+* **core:** ask about a forgotten attachment before sending ([e712c50](https://github.com/postalsys/inbox-classic/commit/e712c50c00482be45124446054f74a90463addd7))
+* **core:** drafts saved automatically and kept for a crash ([b12e49f](https://github.com/postalsys/inbox-classic/commit/b12e49ff6e4f8a1b2cd6faa58df0e97005ca1909))
+* **core:** message rules ([a54fcab](https://github.com/postalsys/inbox-classic/commit/a54fcab18af74a7027b2cb1efaec382595028555))
+* **core:** message rules that sort the new mail of an Inbox ([ab7121d](https://github.com/postalsys/inbox-classic/commit/ab7121d706dceb649874abdcec1b706f3feec897))
+* **core:** send from an account's other addresses ([daabe80](https://github.com/postalsys/inbox-classic/commit/daabe809ea9e7116bb9719b1d59e091e527bd7a1))
+* **core:** the commands and folders of the Message Rules windows ([5fc72dd](https://github.com/postalsys/inbox-classic/commit/5fc72dd704b176692adabe724dc59fa0b4e54e6f))
+* **core:** the Flagged folder, the flagged messages of every account ([aab31e3](https://github.com/postalsys/inbox-classic/commit/aab31e3ebfe3cbf91ca0b69e3cdd272872c1b6ee))
+* **core:** Undo Send, a message sent waits in the Outbox to be taken back ([ab618ed](https://github.com/postalsys/inbox-classic/commit/ab618edd3f82963f40ddb237f14711951b9b205b))
+* **core:** View &gt; Text Size, five sizes for reading and writing ([b952c85](https://github.com/postalsys/inbox-classic/commit/b952c85254f02fa71a84997fb49e4c8e3c37aecc))
+* drafts saved automatically, and opened again after a crash ([df5a431](https://github.com/postalsys/inbox-classic/commit/df5a431fff689e1c1e6effab4389701c4311158d))
+* **i18n:** Message Rules' words ([0b9ba93](https://github.com/postalsys/inbox-classic/commit/0b9ba937c06ce19ccd53318d5267e78fb2070592))
+* **i18n:** Text Size's words ([6b06e59](https://github.com/postalsys/inbox-classic/commit/6b06e59a85a571885ba91b85ef200ecb414e871a))
+* **i18n:** the Flagged folder's name ([262f3db](https://github.com/postalsys/inbox-classic/commit/262f3db5586140a5ddc66fe6f47bcd87cf4c1b44))
+* **i18n:** the forgotten attachment's words ([70ad1cc](https://github.com/postalsys/inbox-classic/commit/70ad1ccf3acaf3c53c3549be669fe491cc55e85a))
+* **i18n:** the other addresses' words ([fb64d96](https://github.com/postalsys/inbox-classic/commit/fb64d96a2ee28e414d5c5a8f34d170fced47b840))
+* **i18n:** the restored message's words ([2e514c7](https://github.com/postalsys/inbox-classic/commit/2e514c727aada030986042000b1c97184b5ba766))
+* **i18n:** the words of message rules' refusals ([34786a6](https://github.com/postalsys/inbox-classic/commit/34786a6fccc24e9cc29b51fe9fd4f0c1a4e47ab6))
+* **i18n:** Undo Send's words ([5eaf93d](https://github.com/postalsys/inbox-classic/commit/5eaf93d6a111dd4710d3eeaa4e9e3254326d53e2))
+* **linux:** ask about a forgotten attachment before sending ([03b2910](https://github.com/postalsys/inbox-classic/commit/03b291047aae021ecdf24ee9d8d5724f348b17ef))
+* **linux:** drafts saved automatically, restored after a crash ([f44eb86](https://github.com/postalsys/inbox-classic/commit/f44eb86f5f4294b7094a7d83f5f8dd569929badb))
+* **linux:** Flagged at the top of the folder list ([01fc997](https://github.com/postalsys/inbox-classic/commit/01fc99726cd87e29db1fc9316f12ab4378785df3))
+* **linux:** Message Rules and the rule editor ([5f4fda8](https://github.com/postalsys/inbox-classic/commit/5f4fda8460c677db9e3eda8a71bf85744887bb63))
+* **linux:** other addresses in Account Properties and the From list ([5faafd0](https://github.com/postalsys/inbox-classic/commit/5faafd07d8e7e5090077684d20a83a1d4774427a))
+* **linux:** Undo Send in the status bar, Edit &gt; Undo and Preferences ([9355452](https://github.com/postalsys/inbox-classic/commit/93554523feddc6991304590103ba25ba7401e645))
+* **linux:** View &gt; Text Size for the reading pane, message windows and the editor ([f54f572](https://github.com/postalsys/inbox-classic/commit/f54f572849f2c7035abc3b8f55320d43abd8b6f5))
+* **mac:** ask about a forgotten attachment before sending ([0124aa5](https://github.com/postalsys/inbox-classic/commit/0124aa5630c5dbe1a3191098e0f543c53d06c9a7))
+* **mac:** drafts saved automatically, restored after a crash ([24f43d2](https://github.com/postalsys/inbox-classic/commit/24f43d28277afb33ce32376d2b6a334d213f278a))
+* **mac:** Flagged at the top of the folder list ([2043978](https://github.com/postalsys/inbox-classic/commit/2043978f77dae04d669f15966dbeb47b41a42fed))
+* **mac:** Message Rules and the rule editor ([156bedb](https://github.com/postalsys/inbox-classic/commit/156bedb73462290b94d91188c7ffc636c2ad372f))
+* **mac:** other addresses in Account Properties and the From list ([09f6ed8](https://github.com/postalsys/inbox-classic/commit/09f6ed852e496a51f4c197f1f89ad88de9c4a4c4))
+* **mac:** Undo Send in the status bar, Edit &gt; Undo and Settings ([b9f1e6b](https://github.com/postalsys/inbox-classic/commit/b9f1e6b712ffbcc82729a64da94e63d6753aadb3))
+* **mac:** View &gt; Text Size for the reading pane, message windows and the editor ([d651d90](https://github.com/postalsys/inbox-classic/commit/d651d9030d66f17efd8211b6ee9f4e9e787ff24c))
+* Message Rules windows ([22aedcc](https://github.com/postalsys/inbox-classic/commit/22aedcced7e6326cbd2bb59e04f9d3cc31351474))
+* send from another address ([3347d2b](https://github.com/postalsys/inbox-classic/commit/3347d2b184af1e0a07c78ac4673afe3a21c05dde))
+* the Flagged folder ([b75575f](https://github.com/postalsys/inbox-classic/commit/b75575fce782af7be4f0165cd28ffc150a3be424))
+* Undo Send ([1ad7b6b](https://github.com/postalsys/inbox-classic/commit/1ad7b6b2d1455d9ed9caae7bfe06032d4c469fc1))
+* View &gt; Text Size ([9ec35e5](https://github.com/postalsys/inbox-classic/commit/9ec35e595e098b1d04e83bbe684394a3bd6d232f))
+* **windows:** ask about a forgotten attachment before sending ([44531ef](https://github.com/postalsys/inbox-classic/commit/44531efe1a0c9e1591f8f2de343e5cf3efb80250))
+* **windows:** drafts saved automatically, restored after a crash ([301d99d](https://github.com/postalsys/inbox-classic/commit/301d99d318c39d014ab12f357ccf56c350aa08d4))
+* **windows:** Flagged at the top of the folder list ([3916b12](https://github.com/postalsys/inbox-classic/commit/3916b126fb30f7381265f986df7fb98e43966b09))
+* **windows:** Message Rules and the rule editor ([9db0b1d](https://github.com/postalsys/inbox-classic/commit/9db0b1df2e8e76ac2ea429b2ed0a9e8543667b20))
+* **windows:** other addresses in Account Properties and the From list ([0c71a34](https://github.com/postalsys/inbox-classic/commit/0c71a34bac819078bddf0f5c1e5494e5e98531bd))
+* **windows:** Undo Send in the status bar, Edit &gt; Undo and Options ([d97907f](https://github.com/postalsys/inbox-classic/commit/d97907fe554f9338f924e559c9c14e08ae7325e3))
+* **windows:** View &gt; Text Size for the reading pane, message windows and the editor ([2d117ed](https://github.com/postalsys/inbox-classic/commit/2d117ed9ccd3aaebe5a6fe8363057cd062a311e5))
+
+
+### Bug Fixes
+
+* **i18n:** no review mark inside a message of several lines ([4112de3](https://github.com/postalsys/inbox-classic/commit/4112de3a790fff00520bb9b8dc0a0a7ec73dc384))
+* **linux:** an empty Outbox says so after it was filled once ([7147ea2](https://github.com/postalsys/inbox-classic/commit/7147ea26819fb5a3c6eb0757fbd139a10fae2b3f))
+* **linux:** the app icon in Omarchy's app grid and dock ([3fe1018](https://github.com/postalsys/inbox-classic/commit/3fe10185ca51d7dc8d320def5dd40a77a6b4cbdb))
+* **linux:** the app icon in Omarchy's app grid and dock ([8a50670](https://github.com/postalsys/inbox-classic/commit/8a50670a49a90a8c4b7f16ba0f0ab56de32c9cd8))
+* **linux:** the empty Message Rules list says so, its text no longer removed with the rows ([ac46f12](https://github.com/postalsys/inbox-classic/commit/ac46f126a862a1b73b0f2dc4dbc205c12f327446))
+* **linux:** View &gt; Text Size's label, which the submenu asked for and did not have ([0ddf408](https://github.com/postalsys/inbox-classic/commit/0ddf4080362aba4386d7c0246641671e5b3f314f))
+* **ux:** Linux highlights Go Back, the safe answer, when a file seems forgotten ([2ba3ed0](https://github.com/postalsys/inbox-classic/commit/2ba3ed04af7d05b9d2b6695c7b85970a39b78719))
+
 ## [0.17.1](https://github.com/postalsys/inbox-classic/compare/v0.17.0...v0.17.1) (2026-11-14)
 
 
