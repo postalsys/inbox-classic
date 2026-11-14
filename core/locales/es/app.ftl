@@ -169,6 +169,12 @@ ui-filter-pictures = Imágenes
 ui-filter-messages = Mensajes de correo
 ui-save-attachment-as = Guardar archivo adjunto como
 ui-not-sent = No se pudo enviar el mensaje.
+# review: new
+ui-attachment-forgotten = Escribió «{ $word }», pero no hay ningún archivo adjunto. ¿Desea enviar el mensaje de todos modos?
+# review: new
+ui-send-anyway = Enviar de todos modos
+# review: new
+ui-go-back = Volver
 ui-not-saved = No se pudo guardar el mensaje.
 ui-saving-draft = Guardando en Borradores...
 ui-compose-saved-at = Guardado en Borradores a las { $time }
