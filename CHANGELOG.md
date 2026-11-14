@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.17.1](https://github.com/postalsys/inbox-classic/compare/v0.17.0...v0.17.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* **i18n:** clearer wording in English, German, Estonian, Spanish and French ([60196fd](https://github.com/postalsys/inbox-classic/commit/60196fd128e4ed44b23406d41dca891c3e181550))
+* **i18n:** clearer wording, release 0.17.1 ([9abf95c](https://github.com/postalsys/inbox-classic/commit/9abf95c17bc16f96c68c2a2a7c96407f13f504f6))
+
 ## [0.17.0](https://github.com/postalsys/inbox-classic/compare/v0.16.0...v0.17.0) (2026-11-14)
 
 
