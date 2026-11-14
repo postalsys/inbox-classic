@@ -1701,6 +1701,17 @@ impl Mailbox {
         self.show_checks("layout");
     }
 
+    /// View > Text Size: the size at `command` chosen, every message view shown at it
+    pub fn set_text_size(&self, command: Command) {
+        let core = &shell().core;
+        if let Some(size) = TEXT_SIZES.iter().position(|c| *c == command)
+            && core.set_text_size(size).is_ok()
+        {
+            crate::webview::set_text_zoom(core.text_zoom());
+        }
+        self.show_checks("text_size");
+    }
+
     /// The check marks of the items of a submenu ("layout", "sort_by") as things are now
     fn show_checks(&self, group: &str) {
         for &command in Command::ALL.iter().filter(|c| c.submenu() == Some(group)) {
@@ -2644,8 +2655,23 @@ fn toggled(command: Command) -> bool {
         Command::LayoutAutomatic | Command::LayoutClassic | Command::LayoutColumns => {
             command == layout_command(layout_mode())
         }
+        _ if command.submenu() == Some("text_size") => text_size_checked(command),
         _ => false,
     }
+}
+
+/// View > Text Size's commands, in the order the core counts the sizes (Largest first)
+pub const TEXT_SIZES: [Command; 5] = [
+    Command::TextSizeLargest,
+    Command::TextSizeLarger,
+    Command::TextSizeMedium,
+    Command::TextSizeSmaller,
+    Command::TextSizeSmallest,
+];
+
+/// Whether `command` is the size in use
+fn text_size_checked(command: Command) -> bool {
+    TEXT_SIZES.get(shell().core.text_size()) == Some(&command)
 }
 
 fn special_use(folder: &Folder) -> Option<SpecialUse> {

@@ -170,6 +170,21 @@ pub struct DocumentView {
 /// Asked of a link clicked in a document before the browser opens it: true when the owner took it (the bounce card's)
 type Links = Rc<RefCell<Option<Rc<dyn Fn(&str) -> bool>>>>;
 
+thread_local! {
+    /// The web views that show or write a message, for View > Text Size (the help and printing keep their size)
+    static MESSAGE_VIEWS: RefCell<Vec<glib::WeakRef<webkit::WebView>>> = const { RefCell::new(Vec::new()) };
+}
+
+/// View > Text Size: every web view that shows or writes a message at `zoom` (the core's, 1.0 for Medium)
+pub fn set_text_zoom(zoom: f64) {
+    MESSAGE_VIEWS.with(|views| {
+        // each view still open gets the size; the closed ones leave the list
+        views
+            .borrow_mut()
+            .retain(|view| view.upgrade().map(|view| view.set_zoom_level(zoom)).is_some());
+    });
+}
+
 impl DocumentView {
     /// `kind` names the documents (`preview`, `help`, `compose`); `javascript` for the editor only
     pub fn new(kind: &'static str, javascript: bool) -> DocumentView {
@@ -183,6 +198,10 @@ impl DocumentView {
             .build();
         view.set_vexpand(true);
         view.set_hexpand(true);
+        if kind == "preview" || kind == "compose" {
+            view.set_zoom_level(crate::app::shell().core.text_zoom());
+            MESSAGE_VIEWS.with(|views| views.borrow_mut().push(view.downgrade()));
+        }
         let current: Rc<RefCell<String>> = Rc::default();
         let own = current.clone();
         let links: Links = Rc::default();

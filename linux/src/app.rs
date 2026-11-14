@@ -713,6 +713,11 @@ pub fn run_command(command: Command) {
         Command::LayoutAutomatic => main.set_layout_mode(pe_core::layout::LayoutMode::Automatic),
         Command::LayoutClassic => main.set_layout_mode(pe_core::layout::LayoutMode::Classic),
         Command::LayoutColumns => main.set_layout_mode(pe_core::layout::LayoutMode::Columns),
+        Command::TextSizeLargest
+        | Command::TextSizeLarger
+        | Command::TextSizeMedium
+        | Command::TextSizeSmaller
+        | Command::TextSizeSmallest => main.set_text_size(command),
         Command::SortDate => main.sort_by(pe_store::SortField::Date),
         Command::SortFrom => main.sort_by(pe_store::SortField::From),
         Command::SortSubject => main.sort_by(pe_store::SortField::Subject),
