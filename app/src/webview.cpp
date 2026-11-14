@@ -1,5 +1,7 @@
 #include "webview.h"
 
+#include <vector>
+
 #include "core.h"
 
 #include <shellapi.h>
@@ -74,6 +76,8 @@ void LockDown(ICoreWebView2* view, bool contextMenu) {
     settings->put_IsStatusBarEnabled(FALSE);
     settings->put_IsBuiltInErrorPageEnabled(FALSE);
     settings->put_AreDefaultContextMenusEnabled(contextMenu ? TRUE : FALSE);
+    // the size is View > Text Size's, not Ctrl with the wheel or a pinch
+    settings->put_IsZoomControlEnabled(FALSE);
     ComPtr<ICoreWebView2Settings3> settings3;
     if (SUCCEEDED(settings.As(&settings3))) {
         settings3->put_AreBrowserAcceleratorKeysEnabled(FALSE);
@@ -169,6 +173,38 @@ void FilterRequests(ICoreWebView2* view, ICoreWebView2Environment* environment, 
             return S_OK;
         }).Get(),
         nullptr);
+}
+
+namespace {
+
+double g_textZoom = 1.0;
+// held, so a view that goes without UntrackTextZoom is never called through a pointer that is gone
+std::vector<ComPtr<ICoreWebView2Controller>> g_zoomed;
+
+}  // namespace
+
+void SetTextZoom(double zoom) {
+    g_textZoom = zoom;
+    for (const ComPtr<ICoreWebView2Controller>& controller : g_zoomed) {
+        controller->put_ZoomFactor(zoom);
+    }
+}
+
+void TrackTextZoom(ICoreWebView2Controller* controller) {
+    controller->put_ZoomFactor(g_textZoom);
+    g_zoomed.push_back(controller);
+}
+
+void UntrackTextZoom(ICoreWebView2Controller* controller) {
+    std::erase_if(g_zoomed, [controller](const ComPtr<ICoreWebView2Controller>& held) { return held.Get() == controller; });
+}
+
+int TestTextZoom() {
+    double zoom = 0;
+    if (g_zoomed.empty() || FAILED(g_zoomed.front()->get_ZoomFactor(&zoom))) {
+        return 0;
+    }
+    return static_cast<int>(zoom * 100 + 0.5);
 }
 
 }  // namespace webview

@@ -321,6 +321,7 @@ void CreateControls(HWND hwnd) {
 
     w.host = CreateChild(hwnd, L"STATIC", nullptr, WS_CLIPCHILDREN, 0, {}, WS_EX_CLIENTEDGE);
     w.preview = new Preview();
+    w.preview->KeepOwnSize();
     w.preview->Create(w.host, [](const std::wstring& error) { SetWindowTextW(g_window.host, error.c_str()); });
     // a link to another topic opens it here, once WebView2's event is over; any other goes to the browser
     w.preview->SetLinks([](const wchar_t* uri) {

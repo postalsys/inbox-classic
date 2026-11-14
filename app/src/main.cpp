@@ -15,6 +15,7 @@
 
 #include "app.h"
 #include "icons.h"
+#include "webview.h"
 
 #define WIDEN2(text) L##text
 #define WIDEN(text) WIDEN2(text)
@@ -202,6 +203,11 @@ void UpdateMenu(HMENU menu) {
     if (HasOwnItem(menu, IDM_LAYOUT_AUTOMATIC)) {
         CheckMenuRadioItem(menu, IDM_LAYOUT_AUTOMATIC, IDM_LAYOUT_COLUMNS, IDM_LAYOUT_AUTOMATIC + static_cast<UINT>(g_layoutMode),
                            MF_BYCOMMAND);
+        return;
+    }
+    if (HasOwnItem(menu, IDM_TEXT_SIZE_LARGEST)) {
+        CheckMenuRadioItem(menu, IDM_TEXT_SIZE_LARGEST, IDM_TEXT_SIZE_SMALLEST,
+                           IDM_TEXT_SIZE_LARGEST + static_cast<UINT>(pe_text_size(g_core.get())), MF_BYCOMMAND);
         return;
     }
     if (HasOwnItem(menu, IDM_SORT_DATE)) {
@@ -653,6 +659,14 @@ HMENU BuildMenu() {
     AppendMenuW(view, MF_POPUP, reinterpret_cast<UINT_PTR>(layout), MenuItem(PE_TEXT_MENU_LAYOUT).c_str());
     AppendMenuW(view, MF_STRING, IDM_FOLDER_LIST, MenuItem(PE_TEXT_CMD_FOLDER_LIST, L"F9").c_str());
     AppendMenuW(view, MF_POPUP, reinterpret_cast<UINT_PTR>(Mailbox::SortMenu()), MenuItem(PE_TEXT_MENU_SORT_BY).c_str());
+    // checked as the menu opens (UpdateMenu); no keys, so it never changes by accident
+    HMENU textSize = CreatePopupMenu();
+    AppendMenuW(textSize, MF_STRING, IDM_TEXT_SIZE_LARGEST, MenuItem(PE_TEXT_CMD_TEXT_SIZE_LARGEST).c_str());
+    AppendMenuW(textSize, MF_STRING, IDM_TEXT_SIZE_LARGER, MenuItem(PE_TEXT_CMD_TEXT_SIZE_LARGER).c_str());
+    AppendMenuW(textSize, MF_STRING, IDM_TEXT_SIZE_MEDIUM, MenuItem(PE_TEXT_CMD_TEXT_SIZE_MEDIUM).c_str());
+    AppendMenuW(textSize, MF_STRING, IDM_TEXT_SIZE_SMALLER, MenuItem(PE_TEXT_CMD_TEXT_SIZE_SMALLER).c_str());
+    AppendMenuW(textSize, MF_STRING, IDM_TEXT_SIZE_SMALLEST, MenuItem(PE_TEXT_CMD_TEXT_SIZE_SMALLEST).c_str());
+    AppendMenuW(view, MF_POPUP, reinterpret_cast<UINT_PTR>(textSize), MenuItem(PE_TEXT_MENU_TEXT_SIZE).c_str());
     AppendMenuW(view, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(view, MF_STRING, IDM_NEXT_MESSAGE, MenuItem(PE_TEXT_CMD_NEXT_MESSAGE, L"Ctrl+.").c_str());
     AppendMenuW(view, MF_STRING, IDM_PREVIOUS_MESSAGE, MenuItem(PE_TEXT_CMD_PREVIOUS_MESSAGE, L"Ctrl+,").c_str());
@@ -1188,6 +1202,10 @@ bool OpenCore(HWND hwnd) {
     SetInstantFormat();
     pe_set_codes_in_notifications(GetPreference(kCodesPreference, 0) != 0);
     g_core.reset(pe_core_open_with(path.c_str(), flags, certificate.empty() ? nullptr : certificate.c_str(), OnCoreEvent, hwnd));
+    if (g_core) {
+        // View > Text Size of the last run
+        webview::SetTextZoom(pe_text_zoom(g_core.get()));
+    }
     if (g_core && g_arguments.testHooks) {
         pe_set_download_ahead(g_core.get(), PE_DOWNLOAD_AHEAD_NEVER);
         // a message sent goes at once, but in the step of Undo Send, which turns the wait on in Options
@@ -1453,6 +1471,8 @@ constexpr ULONG_PTR kTestListTop = 0x4C544F50;
 // with --test-hooks only: the compose windows gone as a crash takes them, and opened again (TestAbandonCompose); how
 // many are open after, plus 10
 constexpr ULONG_PTR kTestCrashCompose = 0x43524153;
+// with --test-hooks only: the reading pane's zoom in percent (View > Text Size), plus 10
+constexpr ULONG_PTR kTestTextZoom = 0x5A4F4F4D;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -1810,6 +1830,15 @@ void OnCommand(WORD id, WORD code) {
     case IDM_LAYOUT_COLUMNS:
         SetLayoutMode(static_cast<PeLayoutMode>(id - IDM_LAYOUT_AUTOMATIC));
         return;
+    case IDM_TEXT_SIZE_LARGEST:
+    case IDM_TEXT_SIZE_LARGER:
+    case IDM_TEXT_SIZE_MEDIUM:
+    case IDM_TEXT_SIZE_SMALLER:
+    case IDM_TEXT_SIZE_SMALLEST:
+        if (pe_set_text_size(g_core.get(), id - IDM_TEXT_SIZE_LARGEST)) {
+            webview::SetTextZoom(pe_text_zoom(g_core.get()));
+        }
+        return;
     case IDM_SORT_DATE:
     case IDM_SORT_FROM:
     case IDM_SORT_SUBJECT:
@@ -1906,6 +1935,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         if (g_arguments.testHooks && data->dwData == kTestListTop) {
             return g_mailbox.TestListTop();
+        }
+        if (g_arguments.testHooks && data->dwData == kTestTextZoom) {
+            return static_cast<LRESULT>(webview::TestTextZoom() + 10);
         }
         if (g_arguments.testHooks && data->dwData == kTestCrashCompose) {
             return static_cast<LRESULT>(TestAbandonCompose(hwnd, g_core.get()) + 10);

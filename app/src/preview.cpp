@@ -49,7 +49,11 @@ void Preview::Configure() {
     settings->put_AreHostObjectsAllowed(FALSE);
     settings->put_AreDevToolsEnabled(FALSE);
     settings->put_IsStatusBarEnabled(FALSE);
-    settings->put_IsZoomControlEnabled(TRUE);
+    // View > Text Size, and none of the web view's own zoom
+    settings->put_IsZoomControlEnabled(FALSE);
+    if (textZoom_) {
+        webview::TrackTextZoom(controller_.Get());
+    }
 
     // the document from memory; nothing from the network, also not what a CSP would let through, but images when the
     // user asked for them
@@ -284,6 +288,7 @@ void Preview::StopFind() {
 void Preview::Close() {
     StopFind();
     if (controller_) {
+        webview::UntrackTextZoom(controller_.Get());
         controller_->Close();
     }
     view_.Reset();

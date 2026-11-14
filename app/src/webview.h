@@ -39,6 +39,15 @@ bool IsRemoteImage(const wchar_t* uri, COREWEBVIEW2_WEB_RESOURCE_CONTEXT context
 // would reload the page, Ctrl+P and Ctrl+F open browser windows); the context menu only when `contextMenu`
 void LockDown(ICoreWebView2* view, bool contextMenu);
 
+// View > Text Size: the zoom of every web view that shows or writes a message (the reading pane, message windows,
+// the editor), set as each is made (Track) and again when the size changes; their own zoom (Ctrl with the wheel or
+// + and -) is off, so the size changes only from the menu
+void SetTextZoom(double zoom);
+void TrackTextZoom(ICoreWebView2Controller* controller);
+void UntrackTextZoom(ICoreWebView2Controller* controller);
+// the UI test's check: the zoom of the first web view made at the text size (the reading pane's), in percent
+int TestTextZoom();
+
 // the page at `url` is all the view shows: navigation elsewhere is cancelled and no window opens from it
 void StayOnPage(ICoreWebView2* view, const wchar_t* url);
 
