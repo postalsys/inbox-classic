@@ -122,6 +122,8 @@ pub(crate) enum Command {
     Send {
         outgoing: Box<crate::Outgoing>,
         not_before: Option<i64>,
+        /// The user's, waiting to be taken back (Undo Send)
+        undoable: bool,
     },
     SendOutbox,
     /// Edit > Undo: messages back to the folders they came from (selection.rs)
@@ -1080,7 +1082,11 @@ impl Worker {
                 pe_sync::delete_folder(self.client(store).await?, store, folder).await?;
                 self.sync_folder_list(store).await
             }
-            Command::Send { outgoing, not_before } => self.send(store, *outgoing, not_before).await,
+            Command::Send {
+                outgoing,
+                not_before,
+                undoable,
+            } => self.send(store, *outgoing, not_before, undoable).await,
             Command::SaveDraft { outgoing, automatic } => self.save_draft(store, *outgoing, automatic).await,
             Command::RemoveDraft { message_id } => {
                 let account = self.account;
@@ -1113,7 +1119,13 @@ impl Worker {
     }
 
     /// Builds a message (its attachments read now), puts it in the Outbox and sends the Outbox
-    async fn send(&mut self, store: &mut Store, outgoing: crate::Outgoing, not_before: Option<i64>) -> Outcome {
+    async fn send(
+        &mut self,
+        store: &mut Store,
+        outgoing: crate::Outgoing,
+        not_before: Option<i64>,
+        undoable: bool,
+    ) -> Outcome {
         let time = unix_now();
         let recipients = [outgoing.to.as_str(), outgoing.cc.as_str()]
             .iter()
@@ -1124,6 +1136,7 @@ impl Worker {
         let subject = outgoing.subject.clone();
         let draft = outgoing.message_id.as_deref().and_then(crate::compose::draft_id);
         let draft_account = outgoing.draft_account.unwrap_or(self.account);
+        let message_id = outgoing.message_id.clone();
         let built = build(
             store.account(self.account)?.settings,
             outgoing,
@@ -1142,6 +1155,8 @@ impl Worker {
                 created: time,
                 problem: None,
                 not_before,
+                message_id,
+                undoable,
             },
             &built.raw,
         )?;

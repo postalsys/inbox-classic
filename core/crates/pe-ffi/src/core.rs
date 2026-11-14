@@ -136,6 +136,9 @@ pub enum PeEventKind {
     FolderCreated = 21,
     /// The picture `uid` of `pe_picture_start` (a row's sender) is drawn, or there was none: `pe_picture_result`
     PictureReady = 22,
+    /// A message the user sent from `account` waits `count` seconds in the Outbox before it goes; `message` is its
+    /// subject. `pe_undo_send` takes it back meanwhile.
+    SendWaiting = 23,
 }
 
 #[repr(C)]
@@ -215,6 +218,7 @@ impl Callback {
             Event::MessageReady { folder, uid } => (PeEventKind::MessageReady, 0, *folder, *uid),
             Event::Failed { account, .. } => (PeEventKind::Failed, *account, 0, 0),
             Event::MessageSent { account, .. } => (PeEventKind::MessageSent, *account, 0, 0),
+            Event::SendWaiting { account, .. } => (PeEventKind::SendWaiting, *account, 0, 0),
             Event::DraftSaved { account, .. } => (PeEventKind::DraftSaved, *account, 0, 0),
             Event::AutoconfigDone { request } => (PeEventKind::AutoconfigDone, 0, 0, *request),
             Event::SignInDone { request } => (PeEventKind::SignInDone, 0, 0, *request),
@@ -233,14 +237,16 @@ impl Callback {
             Event::Transferring { .. } => (PeEventKind::Transferring, 0, 0, 0),
             Event::FolderCreated { account, folder } => (PeEventKind::FolderCreated, *account, *folder, 0),
         };
-        let count = if let Event::NewMail { count, .. } = &event {
-            *count as u64
-        } else {
-            0
+        let count = match &event {
+            Event::NewMail { count, .. } => *count as u64,
+            Event::SendWaiting { seconds, .. } => *seconds,
+            _ => 0,
         };
         let (failure, message, detail) = match event {
             Event::Failed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
-            Event::MessageSent { subject, .. } => (PeFailureKind::None, Some(c_string(subject)), None),
+            Event::MessageSent { subject, .. } | Event::SendWaiting { subject, .. } => {
+                (PeFailureKind::None, Some(c_string(subject)), None)
+            }
             Event::DraftSaved {
                 message_id, problem, ..
             } => (PeFailureKind::None, problem.map(c_string), Some(c_string(message_id))),
@@ -2567,8 +2573,11 @@ pub struct PeQueued {
     pub created: i64,
     /// Why the last try did not work, NULL before the first
     pub problem: *const c_char,
-    /// It waits until then before it goes (one an AI agent sent), seconds since the Unix epoch; 0 when it does not
+    /// It waits until then before it goes (one an AI agent sent, or the user's while Undo Send can take it back),
+    /// seconds since the Unix epoch; 0 when it does not
     pub not_before: i64,
+    /// The user sent it, and it waits to be taken back (Undo Send); else an AI agent's wait
+    pub undoable: bool,
 }
 
 /// The Outbox; free with `pe_outbox_free`
@@ -2594,6 +2603,7 @@ pub unsafe extern "C" fn pe_outbox(core: *const PeCore) -> *mut PeOutbox {
                 created: q.created,
                 problem: q.problem.as_deref().map_or(null(), |p| strings.add(p)),
                 not_before: q.not_before.unwrap_or(0),
+                undoable: q.undoable,
             })))
         })
     }
@@ -2833,6 +2843,78 @@ pub unsafe extern "C" fn pe_draft_open(core: *const PeCore, folder: i64, uid: u6
             _ => null_mut(),
         })
     }
+}
+
+/// Whether Edit > Undo takes back a message sent (`pe_undo_send`) rather than a move (`pe_undo`)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_undo_is_send(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.undo_is_send()) }
+}
+
+/// What the status bar says while the message the user sent last waits, counting down ("Sending “Plans” in 8
+/// seconds"), NULL once it went or was taken back: ask once a second after `SendWaiting`, and stop at NULL. Free with
+/// `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_send_waiting_text(core: *const PeCore) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.send_waiting_text().map_or(null_mut(), into_c_string)
+        })
+    }
+}
+
+/// Takes back the message the user sent last while it waits (`SendWaiting`): out of the Outbox, as a draft to open
+/// again from its account, in `account`; NULL when it went already. `status` gets what the status bar says either
+/// way (free with `pe_string_free`). Free the draft with `pe_draft_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `account` and `status` NULL or valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_undo_send(
+    core: *const PeCore,
+    account: *mut i64,
+    status: *mut *mut c_char,
+) -> *mut PeDraft {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok((taken, said)) = core.undo_send() else {
+                return null_mut();
+            };
+            if !status.is_null() {
+                // SAFETY: the caller gave a valid pointer
+                *status = into_c_string(said);
+            }
+            match taken {
+                Some((from, draft)) => {
+                    if !account.is_null() {
+                        // SAFETY: the caller gave a valid pointer
+                        *account = from;
+                    }
+                    draft_handle(&draft)
+                }
+                None => null_mut(),
+            }
+        })
+    }
+}
+
+/// Quitting: what the user sent and still waits goes now, not at the next start
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_send_waiting_now(core: *const PeCore) {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, (), |core| drop(core.send_waiting_now())) }
 }
 
 /// Saves a message being written in the Drafts folder of `account`, in place of the copy saved before (the one with
@@ -3871,6 +3953,50 @@ pub extern "C" fn pe_download_limit_text(index: usize) -> *mut c_char {
         pe_core::DOWNLOAD_LIMITS_MB.get(index).map_or(null_mut(), |&megabytes| {
             into_c_string(pe_core::download_limit_text(megabytes))
         })
+    })
+    .unwrap_or(null_mut())
+}
+
+/// Options' "Wait before sending", the place of the wait in the choices ([`pe_send_delay_text`])
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_send_delay_index(core: *const PeCore) -> usize {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, 0, |core| {
+            pe_core::send_delay_index(core.send_delay().unwrap_or(0))
+        })
+    }
+}
+
+/// Sets the wait to the choice at `index`
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_set_send_delay_index(core: *const PeCore, index: usize) -> bool {
+    let Some(&seconds) = pe_core::SEND_DELAYS.get(index) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_send_delay(seconds).is_ok()) }
+}
+
+/// How many waits Options offers
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_send_delay_count() -> usize {
+    pe_core::SEND_DELAYS.len()
+}
+
+/// The words of the wait at `index` ("Off", "10 seconds"), NULL past the last; freed with `pe_string_free`
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_send_delay_text(index: usize) -> *mut c_char {
+    guard(|| {
+        pe_core::SEND_DELAYS
+            .get(index)
+            .map_or(null_mut(), |&seconds| into_c_string(pe_core::send_delay_text(seconds)))
     })
     .unwrap_or(null_mut())
 }

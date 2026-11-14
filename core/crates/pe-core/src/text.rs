@@ -23,6 +23,23 @@ pub fn download_limit_index(megabytes: u64) -> usize {
         .unwrap_or(0)
 }
 
+/// The waits before a message goes that Options offers, in seconds (Undo Send)
+pub const SEND_DELAYS: [u64; 5] = [0, 5, 10, 20, 30];
+
+/// A wait of [`SEND_DELAYS`] as Options shows it: "Off", "10 seconds"
+pub fn send_delay_text(seconds: u64) -> String {
+    if seconds == 0 {
+        tr(Text::SendDelayOff)
+    } else {
+        tr_args(Text::SendDelaySeconds, &[("count", seconds.into())])
+    }
+}
+
+/// The place in [`SEND_DELAYS`] that Options shows for a wait: its own, or the nearest one below it
+pub fn send_delay_index(seconds: u64) -> usize {
+    SEND_DELAYS.iter().rposition(|&choice| choice <= seconds).unwrap_or(0)
+}
+
 /// The initials the list shows for a sender without a picture: the first letters of the first and the last word of
 /// the name ("Ann Lee", "Lee, Ann" and "Ann B. Lee" give AL), one for a name of one word (a Chinese name gives its first
 /// character), else the first letter of the address; empty when there is no letter (an emoji for a name)
@@ -136,6 +153,15 @@ pub fn list_counts(total: u64, unread: u64, selected: u64, searching: bool) -> S
         (true, true) => Text::ListCountsFoundSelected,
     };
     tr_args(text, &args)
+}
+
+/// A subject in the quotes of the language ("“Plans”"), or "(no subject)"
+pub fn quoted_subject(subject: &str) -> String {
+    if subject.is_empty() {
+        tr(Text::UiNoSubject)
+    } else {
+        tr_args(Text::UiQuoted, &[("subject", subject.into())])
+    }
 }
 
 /// The title and the text of the notification of new mail (`count` messages, the newest from `from` about
@@ -392,6 +418,15 @@ mod download_limit_tests {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn send_delays_in_words() {
+        assert_eq!(send_delay_text(0), "Off");
+        assert_eq!(send_delay_text(10), "10 seconds");
+        assert_eq!(send_delay_index(10), 2);
+        assert_eq!(send_delay_index(7), 1);
+        assert_eq!(send_delay_index(99), 4);
+    }
 
     #[test]
     fn initials_of_senders() {

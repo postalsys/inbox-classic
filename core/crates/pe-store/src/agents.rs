@@ -269,13 +269,12 @@ impl Store {
             .optional()
     }
 
-    /// The message of an account's Outbox with `message_id` in its header, None when it is not there (sent already)
+    /// The message of an account's Outbox with `message_id`, None when it is not there (sent already)
     pub fn outbox_with_message_id(&self, account: AccountId, message_id: &str) -> Result<Option<i64>> {
-        let header = format!("Message-ID: {message_id}");
         self.db
             .query_row(
-                "SELECT id FROM outbox WHERE account_id = ?1 AND instr(raw, CAST(?2 AS BLOB)) > 0",
-                params![account, header],
+                "SELECT id FROM outbox WHERE account_id = ?1 AND message_id = ?2",
+                params![account, message_id],
                 |row| row.get(0),
             )
             .optional()

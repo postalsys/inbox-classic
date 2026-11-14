@@ -132,6 +132,9 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_FOLDER_CREATED = 21,
   // The picture `uid` of `pe_picture_start` (a row's sender) is drawn, or there was none: `pe_picture_result`
   PE_EVENT_KIND_PICTURE_READY = 22,
+  // A message the user sent from `account` waits `count` seconds in the Outbox before it goes; `message` is its
+  // subject. `pe_undo_send` takes it back meanwhile.
+  PE_EVENT_KIND_SEND_WAITING = 23,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -874,8 +877,11 @@ typedef struct PeQueued {
   int64_t created;
   // Why the last try did not work, NULL before the first
   const char *problem;
-  // It waits until then before it goes (one an AI agent sent), seconds since the Unix epoch; 0 when it does not
+  // It waits until then before it goes (one an AI agent sent, or the user's while Undo Send can take it back),
+  // seconds since the Unix epoch; 0 when it does not
   int64_t not_before;
+  // The user sent it, and it waits to be taken back (Undo Send); else an AI agent's wait
+  bool undoable;
 } PeQueued;
 
 // The fields a compose window starts with
@@ -2281,6 +2287,36 @@ struct PeDraft *pe_draft_open(const struct PeCore *core,
                               int64_t folder,
                               uint64_t uid);
 
+// Whether Edit > Undo takes back a message sent (`pe_undo_send`) rather than a move (`pe_undo`)
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_undo_is_send(const struct PeCore *core);
+
+// What the status bar says while the message the user sent last waits, counting down ("Sending “Plans” in 8
+// seconds"), NULL once it went or was taken back: ask once a second after `SendWaiting`, and stop at NULL. Free with
+// `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_send_waiting_text(const struct PeCore *core);
+
+// Takes back the message the user sent last while it waits (`SendWaiting`): out of the Outbox, as a draft to open
+// again from its account, in `account`; NULL when it went already. `status` gets what the status bar says either
+// way (free with `pe_string_free`). Free the draft with `pe_draft_free`.
+//
+// # Safety
+// `core` must be a live handle, `account` and `status` NULL or valid pointers.
+struct PeDraft *pe_undo_send(const struct PeCore *core,
+                             int64_t *account,
+                             char **status);
+
+// Quitting: what the user sent and still waits goes now, not at the next start
+//
+// # Safety
+// `core` must be a live handle.
+void pe_send_waiting_now(const struct PeCore *core);
+
 // Saves a message being written in the Drafts folder of `account`, in place of the copy saved before (the one with
 // `message->message_id`), in the background: `Failed` when that does not work. True with the draft's Message-ID in
 // `message_id`, to pass in PeOutgoing from then on; false with the reason in `error` (an account without a Drafts
@@ -2612,6 +2648,24 @@ size_t pe_download_limit_count(void);
 
 // The words of the limit at `index` ("500 MB", "2 GB"), NULL past the last; freed with `pe_string_free`
 char *pe_download_limit_text(size_t index);
+
+// Options' "Wait before sending", the place of the wait in the choices ([`pe_send_delay_text`])
+//
+// # Safety
+// `core` must be a live handle.
+size_t pe_send_delay_index(const struct PeCore *core);
+
+// Sets the wait to the choice at `index`
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_set_send_delay_index(const struct PeCore *core, size_t index);
+
+// How many waits Options offers
+size_t pe_send_delay_count(void);
+
+// The words of the wait at `index` ("Off", "10 seconds"), NULL past the last; freed with `pe_string_free`
+char *pe_send_delay_text(size_t index);
 
 // Options' "Download pictures in all messages" (never in Junk E-mail)
 //

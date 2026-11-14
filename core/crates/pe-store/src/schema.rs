@@ -464,6 +464,13 @@ CREATE TABLE compose_recovery (
     attachments TEXT NOT NULL
 );
 "#,
+    // Undo Send: a message the user sent waits in the Outbox for a few seconds (the send_delay setting), found by its
+    // Message-ID to be taken back; undoable marks it as the user's (an agent's wait is for the user to stop it, and is
+    // kept when the app quits)
+    r#"
+ALTER TABLE outbox ADD COLUMN message_id TEXT;
+ALTER TABLE outbox ADD COLUMN undoable INTEGER NOT NULL DEFAULT 0;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

@@ -32,6 +32,7 @@ mod snippet;
 mod targets;
 mod text;
 pub mod timing;
+mod undo_send;
 pub mod unsubscribe;
 pub mod vcard;
 mod view;
@@ -87,9 +88,10 @@ pub use sign_in_apps::{
     SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_text, register_hint,
 };
 pub use text::{
-    DOWNLOAD_LIMITS_MB, HiddenUnread, ReaderState, account_label, account_shown_name, account_title, account_titles,
-    default_account_name, download_limit_index, download_limit_text, downloading_text, folder_kind, folder_name,
-    format_size, hidden_unread, initials, list_counts, messages, reader_page, retry_note, saved_text, sentence,
+    DOWNLOAD_LIMITS_MB, HiddenUnread, ReaderState, SEND_DELAYS, account_label, account_shown_name, account_title,
+    account_titles, default_account_name, download_limit_index, download_limit_text, downloading_text, folder_kind,
+    folder_name, format_size, hidden_unread, initials, list_counts, messages, quoted_subject, reader_page, retry_note,
+    saved_text, send_delay_index, send_delay_text, sentence,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};
@@ -187,6 +189,12 @@ pub enum Event {
         /// The notification's title and text, in the language in use: the apps show them as they are
         title: String,
         text: String,
+    },
+    /// A message the user sent waits `seconds` in the Outbox before it goes, to be taken back ([`Core::undo_send`])
+    SendWaiting {
+        account: AccountId,
+        subject: String,
+        seconds: u64,
     },
     /// A message was sent, and is in the Sent folder when the account has one
     MessageSent {
@@ -443,6 +451,8 @@ pub struct Core {
     next_request: std::sync::atomic::AtomicU64,
     /// What Edit > Undo takes back (selection.rs)
     undo: Mutex<Option<selection::Undo>>,
+    /// The message the user sent last while it waits to be taken back (undo_send.rs)
+    last_sent: undo_send::LastSent,
     /// What the last Undo brought back, by folder and Message-ID, for the window to select once it is there
     restored: Mutex<Vec<(FolderId, Vec<String>)>>,
 }
@@ -527,6 +537,7 @@ impl Core {
             oauth: OAuthProviders(Arc::new(options.oauth_providers)),
             next_request: std::sync::atomic::AtomicU64::new(1),
             undo: Mutex::new(None),
+            last_sent: Mutex::new(None),
             restored: Mutex::default(),
         })
     }
@@ -1552,21 +1563,6 @@ impl Core {
         write_invitation(&source, dir)
     }
 
-    /// Sends a message from an account in the background, through the Outbox: [`Event::MessageSent`] follows, or
-    /// [`Event::Failed`] with the message left waiting in the Outbox for the next Send/Recv. Recipients that are no
-    /// addresses and attachments that are not there fail right away.
-    pub fn send(&self, account: AccountId, outgoing: Outgoing) -> Result<()> {
-        // a typo in an address is told now, while the message is still open in its window
-        compose::check(&outgoing).map_err(Error::Compose)?;
-        self.send_command(
-            account,
-            Command::Send {
-                outgoing: Box::new(outgoing),
-                not_before: None,
-            },
-        )
-    }
-
     /// Saves a message being written in the Drafts folder of the account, in place of the copy saved before (the one
     /// with `outgoing.message_id`), in the background; [`Event::Failed`] when it did not work. The Message-ID of the
     /// draft, to pass in `outgoing` from then on, so the next save replaces this one and sending removes it.
@@ -1647,12 +1643,7 @@ impl Core {
         };
         let (mut draft, files) = compose::reopen(&source);
         if !files.is_empty() {
-            draft.attachments = write_out(&format!("draft-{folder}-{uid}"), files).map_err(|error| {
-                Error::Unavailable(tr_args(
-                    Text::ErrorDraftAttachment,
-                    &[("error", (&error.to_string()).into())],
-                ))
-            })?;
+            draft.attachments = attachments_out(&format!("draft-{folder}-{uid}"), files)?;
         }
         Ok(Some(draft))
     }
@@ -1706,12 +1697,7 @@ impl Core {
         if kind == DraftKind::Forward {
             let files = compose::forwarded_files(&source);
             if !files.is_empty() {
-                draft.attachments = write_out(&format!("forward-{folder}-{uid}"), files).map_err(|error| {
-                    Error::Unavailable(tr_args(
-                        Text::ErrorDraftAttachment,
-                        &[("error", (&error.to_string()).into())],
-                    ))
-                })?;
+                draft.attachments = attachments_out(&format!("forward-{folder}-{uid}"), files)?;
             }
         }
         Ok(Some(draft))
@@ -1741,12 +1727,7 @@ impl Core {
         if kind == DraftKind::Forward {
             let files = compose::forwarded_files(&source);
             if !files.is_empty() {
-                draft.attachments = write_out("forward-file", files).map_err(|error| {
-                    Error::Unavailable(tr_args(
-                        Text::ErrorDraftAttachment,
-                        &[("error", (&error.to_string()).into())],
-                    ))
-                })?;
+                draft.attachments = attachments_out("forward-file", files)?;
             }
         }
         Ok(draft)
@@ -2300,6 +2281,16 @@ pub(crate) fn junk_keywords(junk: bool) -> (&'static str, &'static str) {
 /// a folder of its own there so two of one name stay apart; their paths. Under the runtime folder on Linux (the system's
 /// temporary folder there is shared by every user), under the temporary folder elsewhere (the Mac's and Windows' are
 /// each user's own); readable by this user only.
+/// [`write_out`] for a message to write on: its files, or why they could not be written out, in words
+pub(crate) fn attachments_out(name: &str, files: Vec<(String, Vec<u8>)>) -> Result<Vec<PathBuf>> {
+    write_out(name, files).map_err(|error| {
+        Error::Unavailable(tr_args(
+            Text::ErrorDraftAttachment,
+            &[("error", (&error.to_string()).into())],
+        ))
+    })
+}
+
 fn write_out(name: &str, files: Vec<(String, Vec<u8>)>) -> std::io::Result<Vec<PathBuf>> {
     let base = private_dir(name)?;
     files

@@ -589,6 +589,7 @@ impl Core {
             crate::worker::Command::Send {
                 outgoing: Box::new(outgoing),
                 not_before: Some(at),
+                undoable: false,
             },
         )?;
         let to: Vec<&str> = ask.recipients.iter().map(|r| r.address.as_str()).collect();

@@ -21,10 +21,14 @@ pub struct Queued {
     pub problem: Option<String>,
     /// It waits until then before it goes, seconds since the Unix epoch
     pub not_before: Option<i64>,
+    /// Its Message-ID, by which Undo Send finds it
+    pub message_id: Option<String>,
+    /// Sent by the user, waiting for `not_before` so that it can be taken back (Undo Send): sent at once on quitting
+    pub undoable: bool,
 }
 
 /// Without the message itself, which only sending needs ([`Store::queued_raw`])
-const COLUMNS: &str = "id, account_id, envelope_from, envelope_to, subject, recipients, created, problem, not_before";
+const COLUMNS: &str = "id, account_id, envelope_from, envelope_to, subject, recipients, created, problem, not_before, message_id, undoable";
 
 fn from_row(row: &rusqlite::Row) -> rusqlite::Result<Queued> {
     let to: String = row.get(3)?;
@@ -38,15 +42,35 @@ fn from_row(row: &rusqlite::Row) -> rusqlite::Result<Queued> {
         created: row.get(6)?,
         problem: row.get(7)?,
         not_before: row.get(8)?,
+        message_id: row.get(9)?,
+        undoable: row.get(10)?,
     })
 }
 
+/// How many seconds a message the user sent waits to be taken back, out of the box
+pub const DEFAULT_SEND_DELAY: u64 = 10;
+/// and at most
+pub const MAX_SEND_DELAY: u64 = 30;
+const SEND_DELAY: &str = "send.delay";
+
 impl Store {
+    /// How many seconds a message the user sent waits in the Outbox before it goes, to be taken back (Undo Send)
+    pub fn send_delay(&self) -> Result<u64> {
+        Ok(self
+            .text_setting(SEND_DELAY)?
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(DEFAULT_SEND_DELAY))
+    }
+
+    pub fn set_send_delay(&self, seconds: u64) -> Result<()> {
+        self.set_text_setting(SEND_DELAY, &seconds.min(MAX_SEND_DELAY).to_string())
+    }
+
     /// Puts a message, built as `raw`, in the Outbox; its id
     pub fn queue(&self, message: &Queued, raw: &[u8]) -> Result<i64> {
         self.db.execute(
             "INSERT INTO outbox (account_id, envelope_from, envelope_to, raw, subject, recipients, created, problem, \
-             not_before) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+             not_before, message_id, undoable) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
             params![
                 message.account_id,
                 message.envelope_from,
@@ -57,6 +81,8 @@ impl Store {
                 message.created,
                 message.problem,
                 message.not_before,
+                message.message_id,
+                message.undoable,
             ],
         )?;
         Ok(self.db.last_insert_rowid())
@@ -100,6 +126,34 @@ impl Store {
             params![account, now],
         )?;
         Ok(())
+    }
+
+    /// Takes back the message with `message_id` that the user sent and that still waits at `now` (Undo Send): out of
+    /// the Outbox, its source to write it again, with its account; None once it is going or gone. A message whose time
+    /// came is never taken, so one the worker may be sending is not: taking it is one statement, which the worker's own reads
+    /// of the Outbox can not come between.
+    pub fn take_back(&self, message_id: &str, now: i64) -> Result<Option<(AccountId, Vec<u8>)>> {
+        self.db
+            .query_row(
+                "DELETE FROM outbox WHERE message_id = ?1 AND undoable = 1 AND not_before > ?2 \
+                 RETURNING account_id, raw",
+                params![message_id, now],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .optional()
+    }
+
+    /// The messages the user sent that still wait to be taken back go now (quitting): the accounts they are of
+    pub fn send_undoable_now(&self) -> Result<Vec<AccountId>> {
+        let mut statement = self
+            .db
+            .prepare_cached("SELECT DISTINCT account_id FROM outbox WHERE undoable = 1 AND not_before IS NOT NULL")?;
+        let accounts = statement
+            .query_map([], |row| row.get(0))?
+            .collect::<Result<Vec<AccountId>>>()?;
+        self.db
+            .execute("UPDATE outbox SET not_before = NULL WHERE undoable = 1", [])?;
+        Ok(accounts)
     }
 
     /// The message itself, as it goes over SMTP
@@ -156,6 +210,8 @@ mod tests {
             created: 1_700_000_000,
             not_before: None,
             problem: None,
+            message_id: None,
+            undoable: false,
         }
     }
 
@@ -220,5 +276,68 @@ mod tests {
         assert_eq!(store.queued(later).unwrap().unwrap().not_before, Some(1_000));
         store.unqueue(later).unwrap();
         assert_eq!(store.outbox_next_due(account).unwrap(), None);
+    }
+
+    #[test]
+    fn a_message_sent_can_be_taken_back_while_it_waits() {
+        let store = Store::open_in_memory().unwrap();
+        let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
+        let waiting = |subject: &str, id: &str, undoable| Queued {
+            not_before: Some(1_000),
+            message_id: Some(id.into()),
+            undoable,
+            ..queued(account, subject)
+        };
+        store.queue(&waiting("mine", "<1@x>", true), b"mine").unwrap();
+        store.queue(&waiting("agent", "<2@x>", false), b"agent").unwrap();
+        // an agent's message is not the user's to take back this way
+        assert_eq!(store.take_back("<2@x>", 990).unwrap(), None);
+        // its time came: it may be going
+        assert_eq!(store.take_back("<1@x>", 1_000).unwrap(), None);
+        assert_eq!(
+            store.take_back("<1@x>", 999).unwrap(),
+            Some((account, b"mine".to_vec()))
+        );
+        assert_eq!(store.take_back("<1@x>", 999).unwrap(), None);
+        assert_eq!(store.outbox_count(None).unwrap(), 1);
+    }
+
+    #[test]
+    fn the_wait_is_ten_seconds_until_set() {
+        let store = Store::open_in_memory().unwrap();
+        assert_eq!(store.send_delay().unwrap(), DEFAULT_SEND_DELAY);
+        store.set_send_delay(0).unwrap();
+        assert_eq!(store.send_delay().unwrap(), 0);
+        store.set_send_delay(600).unwrap();
+        assert_eq!(store.send_delay().unwrap(), MAX_SEND_DELAY);
+    }
+
+    #[test]
+    fn quitting_sends_what_the_user_sent_and_keeps_the_agents_wait() {
+        let store = Store::open_in_memory().unwrap();
+        let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
+        let mine = store
+            .queue(
+                &Queued {
+                    not_before: Some(1_000),
+                    undoable: true,
+                    ..queued(account, "mine")
+                },
+                b"raw",
+            )
+            .unwrap();
+        let agent = store
+            .queue(
+                &Queued {
+                    not_before: Some(1_000),
+                    ..queued(account, "agent")
+                },
+                b"raw",
+            )
+            .unwrap();
+        assert_eq!(store.send_undoable_now().unwrap(), [account]);
+        assert_eq!(store.queued(mine).unwrap().unwrap().not_before, None);
+        assert_eq!(store.queued(agent).unwrap().unwrap().not_before, Some(1_000));
+        assert!(store.send_undoable_now().unwrap().is_empty());
     }
 }
