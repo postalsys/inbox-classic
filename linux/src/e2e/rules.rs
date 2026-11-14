@@ -45,10 +45,12 @@ pub(super) async fn message_rules(d: &Driver) {
     select_folder("Inbox");
     let Some(rules) = open_rules(d).await else { return };
     let rules_widget = rules.clone().upcast::<gtk::Widget>();
-    d.check(
-        rules_listed(&rules_widget) == 0 && named_in(&rules_widget, "rules-none").is_some(),
-        "there are no rules yet, and the window says so",
-    );
+    // the placeholder is found once it is drawn
+    let empty = wait_until(5, || {
+        rules_listed(&rules_widget) == 0 && named_in(&rules_widget, "rules-none").is_some()
+    })
+    .await;
+    d.check(empty, "there are no rules yet, and the window says so");
     d.shot(&rules, "rules-1-list").await;
     click(&rules_widget, "rules-new");
     let Some(editor) = wait_dialog(10, "rule-dialog").await else {
