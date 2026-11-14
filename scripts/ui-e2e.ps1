@@ -1776,7 +1776,13 @@ public static class Dragger {
     Step 'the Flagged folder'
     $flaggedRow = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)) | Where-Object { $_ -like 'Flagged*' })
     Check ($flaggedRow.Count -eq 1) "Flagged is in the folder list ($($flaggedRow -join ', '))"
+    # opened, it lists as many messages as it counts, with the Folder column's names
+    $flaggedCount = if ($flaggedRow.Count -eq 1 -and $flaggedRow[0] -match '\((\d+)\)') { [int]$Matches[1] } else { 0 }
+    $flaggedItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $flaggedItem)
+    Check ([bool](WaitFor { (Rows) -gt 0 -and (Rows) -eq $flaggedCount } 15)) "Flagged lists the flagged messages of every folder ($(Rows) of $flaggedCount)"
     Shot $main 'main-10-flagged'
+    SelectFolder 0
     Step 'unsubscribing'
     # the list's server: a socket of the test, answered by hand
     $listServer = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Loopback, 0)
