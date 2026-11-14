@@ -12,8 +12,9 @@ use crate::ui;
 /// A row per message: subject, recipients, when it was queued, and whether it waits or why it did not go; the ids by
 /// row
 fn fill(list: &gtk::ListBox, ids: &RefCell<Vec<i64>>, select: usize, buttons: &[&gtk::Button]) {
-    while let Some(child) = list.first_child() {
-        list.remove(&child);
+    // the rows only: the list's first child can be its placeholder, the text of an empty Outbox
+    while let Some(row) = list.row_at_index(0) {
+        list.remove(&row);
     }
     let queued = shell().core.outbox().unwrap_or_default();
     let no_subject = t!(UiNoSubject);

@@ -46,6 +46,7 @@ fn context_of(window: &adw::ApplicationWindow) -> &'static str {
         Some("preferences-dialog") => "options",
         Some("sign-in-apps-dialog" | "sign-in-app-editor") => "sign-in-apps",
         Some("agents-dialog" | "agents-setup-dialog") => "agents",
+        Some("rules-dialog" | "rule-dialog") => "message-rules",
         _ => "main",
     }
 }

@@ -84,6 +84,8 @@ cmd-default-app = Make &Default Mail App...
 cmd-view-source = Message &Source
 cmd-ai-agents = &AI Agents...
 cmd-options = O&ptions...
+cmd-message-rules = Message &Rules...
+cmd-create-rule-from-message = Create &Rule from Message...
 cmd-select-all = Select A&ll
 cmd-undo = &Undo
 cmd-copy = &Copy to Folder...
@@ -410,6 +412,39 @@ ui-clear-agent-log-detail = This will not undo changes made by the agents.
 ui-let-agents-connect = &Let AI agents connect to Inbox Classic
 ui-change-button = Change…
 ui-undo-button = Undo
+ui-rules-title = Message Rules
+ui-rules-intro = Rules sort the new mail of your Inboxes as it arrives, while Inbox Classic runs. Each rule that matches a message does its part; one that moves the message away is the last for it.
+ui-rules-none = No rules yet. Click New to make one.
+ui-rule-new = &New...
+ui-rule-edit = &Edit...
+ui-rule-delete-button = &Delete
+ui-rule-title = Message Rule
+ui-rule-name = Name:
+ui-rule-account = For the new mail of:
+ui-rule-all-accounts = All accounts
+ui-rule-query = That matches:
+ui-rule-query-hint = Words as in the search box, such as from:ann@example.com, subject:invoice or list:news.example.com
+ui-rule-count = { $count ->
+    [one] 1 message in the Inbox matches now.
+   *[other] { $count } messages in the Inbox match now.
+}
+ui-rule-show = &Show
+ui-rule-actions = Do this:
+ui-rule-move = &Move it to:
+ui-rule-mark-read = Mark it as &read
+ui-rule-flag = &Flag it
+ui-rule-archive = &Archive it
+ui-rule-junk = Move it to &Junk E-mail
+ui-rule-delete = &Delete it
+ui-rule-quiet = Do &not notify me of it
+ui-rule-apply-now = Also apply it to the messages already in the &Inbox
+ui-rule-delete-ask = Delete the rule “{ $name }”?
+ui-create-rule = Create Rule...
+ui-rules-applied = { $count ->
+    [one] 1 message sorted by your rules
+   *[other] { $count } messages sorted by your rules
+}
+ui-col-rule-matches = Matches
 ui-clear-button = C&lear
 ui-how-to-connect = How to Connect an Agent…
 ui-agent-programs = Programs whose agents have requested access to your mail

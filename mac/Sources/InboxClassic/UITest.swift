@@ -511,6 +511,7 @@ final class UITest {
         try await undoSend()
         try await attachmentReminder()
         try await otherAddresses()
+        try await messageRules()
         try await outboxAndDrafts()
         try await draftsSavedAutomatically()
         try await textSize()

@@ -466,6 +466,151 @@ extension UITest {
         try await setOtherAddresses("")
     }
 
+    // ---- message rules ----
+
+    /// the rule editor opened by something done just now, its query as typed there
+    func waitRuleEditor() async -> (NSWindow, String)? {
+        guard let editor = await waitWindow("rule", 10) else { return nil }
+        let query: NSTextField? = find("rule.query", in: editor)
+        return (editor, query?.stringValue ?? "")
+    }
+
+    func cancelRuleEditor(_ editor: NSWindow) async {
+        press(find("rule.cancel", in: editor))
+        _ = await waitUntil(10) { !editor.isVisible }
+    }
+
+    func messageRules() async throws {
+        step("message rules")
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(20) { self.list.numberOfRows >= 4 && self.main.core.folders(self.main.mailbox.currentAccount).count > 1 }
+        command(.messageRules)
+        guard let rules = await waitWindow("rules", 10) else { throw Failed(description: "no Message Rules window") }
+        let table: NSTableView? = find("rules.list", in: rules)
+        let none: NSTextField? = find("rules.none", in: rules)
+        check(table?.numberOfRows == 0 && none?.isHidden == false, "Message Rules opens empty, saying how to make one")
+        await shot(rules, "rules-1-list")
+        press(find("rules.new", in: rules))
+        guard let editor = await waitWindow("rule", 10) else { throw Failed(description: "no rule editor") }
+        type("Newsletters", into: find("rule.name", in: editor))
+        type("from:news@example.com", into: find("rule.query", in: editor))
+        let count: NSTextField? = find("rule.count", in: editor)
+        // counted once typing stops
+        _ = await waitUntil(5) { count?.stringValue.contains("in the Inbox") == true }
+        check(count?.stringValue.contains("in the Inbox") == true, "the editor counts what the query matches in the Inbox (\(count?.stringValue ?? ""))")
+        let move: NSButton? = find("rule.move", in: editor)
+        let target: NSPopUpButton? = find("rule.target", in: editor)
+        onMain { move?.performClick(nil) }
+        _ = await waitUntil(5) { target?.isEnabled == true }
+        check(target?.isEnabled == true, "Move it to chooses its folder once checked")
+        if let target, let index = target.itemTitles.firstIndex(where: { $0.trimmingCharacters(in: .whitespaces) == "Archive" }) {
+            target.selectItem(at: index)
+        } else {
+            check(false, "Archive is among the folders a rule moves to (\(target?.itemTitles ?? []))")
+        }
+        let read: NSButton? = find("rule.read", in: editor)
+        onMain { read?.performClick(nil) }
+        _ = await waitUntil(5) { read?.state == .on }
+        await shot(editor, "rules-2-editor")
+        press(find("rule.ok", in: editor))
+        check(await waitUntil(10) { !editor.isVisible }, "OK saves the rule")
+        check(await waitUntil(5) { table?.numberOfRows == 1 && none?.isHidden == true }, "the list has the rule")
+        press(find("rules.close", in: rules))
+        _ = await waitUntil(10) { !rules.isVisible }
+
+        // new mail from the newsletter: sorted into Archive, read, and said in the status bar
+        try await addMessage("From: News <news@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Weekly news in the UI test\r\n"
+            + "Message-ID: <weekly@example.com>\r\nDate: \(rfc2822(Date()))\r\n\r\nThe news.\r\n")
+        let status: NSTextField? = find("status.text", in: main.window)
+        var said = ""
+        command(.sync)
+        let sorted = await waitUntil(30) {
+            if let text = status?.stringValue, text.contains("sorted by your rules") { said = text }
+            return await findMessage("Archive", "Subject: Weekly news in the UI test") != nil
+        }
+        check(sorted, "a rule moves new mail from news@example.com to Archive")
+        check(await findMessage("INBOX", "Subject: Weekly news in the UI test") == nil, "and it is not in the Inbox")
+        check(((await findMessage("Archive", "Subject: Weekly news in the UI test"))?["flags"] as? [String])?.contains("\\Seen") == true,
+              "and it is marked as read")
+        _ = await waitUntil(10) {
+            if let text = status?.stringValue, text.contains("sorted by your rules") { said = text }
+            return !said.isEmpty
+        }
+        check(said.contains("1 message sorted by your rules"), "the status bar says what the rules did (\(said))")
+        // Archive, with the message the rule put there, the status bar still saying so
+        selectFolder(named: "Archive")
+        if let row = await waitFor(10, { (0..<self.list.numberOfRows).first { self.main.mailbox.row($0)?.subject == "Weekly news in the UI test" } }) {
+            await selectRow(row)
+        }
+        main.setStatus(said)
+        await shot(main.window, "rules-5-applied")
+        selectFolder(named: "Inbox")
+
+        // a query with a folder in it is no rule's
+        command(.messageRules)
+        guard let rules2 = await waitWindow("rules", 10) else { throw Failed(description: "no Message Rules window") }
+        press(find("rules.new", in: rules2))
+        guard let bad = await waitWindow("rule", 10) else { throw Failed(description: "no rule editor") }
+        type("in:sent from:x", into: find("rule.query", in: bad))
+        let flag: NSButton? = find("rule.flag", in: bad)
+        onMain { flag?.performClick(nil) }
+        _ = await waitUntil(5) { flag?.state == .on }
+        press(find("rule.ok", in: bad))
+        if let alert = await waitWindow("alert", 10) {
+            let text = alertText(alert)
+            check(text.contains("folder") || text.contains("date"), "a query naming a folder is refused, saying why (\(text))")
+            await shot(alert, "rules-6-bad-query")
+            answer(alert, "OK")
+            _ = await waitUntil(5) { !alert.isVisible }
+        } else {
+            check(false, "a query naming a folder is refused")
+        }
+        check(bad.isVisible, "the editor stays open after a refusal")
+        await cancelRuleEditor(bad)
+        press(find("rules.close", in: rules2))
+        _ = await waitUntil(10) { !rules2.isVisible }
+
+        // Create Rule on the search bar: the words searched for
+        search("lunch")
+        _ = await waitUntil(10) { self.list.numberOfRows > 0 }
+        let createRule: NSButton? = find("search.rule", in: main.window)
+        check(createRule != nil && createRule?.isHiddenOrHasHiddenAncestor == false, "the search bar offers Create Rule")
+        press(createRule)
+        if let (editor, query) = await waitRuleEditor() {
+            check(query == "lunch", "Create Rule makes one of the words searched for (\(query))")
+            await shot(editor, "rules-3-from-search")
+            await cancelRuleEditor(editor)
+        } else {
+            check(false, "Create Rule opens the rule editor")
+        }
+        search("")
+
+        // Create Rule from Message: its sender
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(10) { self.list.numberOfRows > 0 }
+        let row = (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == "Photos from Saturday" } ?? 0
+        await selectRow(row)
+        command(.createRuleFromMessage)
+        if let (editor, query) = await waitRuleEditor() {
+            check(query.hasPrefix("from:"), "Create Rule from Message makes one of its sender (\(query))")
+            await shot(editor, "rules-4-from-message")
+            await cancelRuleEditor(editor)
+        } else {
+            check(false, "Create Rule from Message opens the rule editor")
+        }
+
+        // the rule deleted, so the later steps see new mail in the Inbox
+        command(.messageRules)
+        guard let rules3 = await waitWindow("rules", 10) else { throw Failed(description: "no Message Rules window") }
+        let table3: NSTableView? = find("rules.list", in: rules3)
+        onMain { table3?.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false) }
+        press(find("rules.delete", in: rules3))
+        if let ask = await waitWindow("alert", 10) { answer(ask, "Delete") }
+        check(await waitUntil(10) { table3?.numberOfRows == 0 }, "Delete takes the rule away")
+        press(find("rules.close", in: rules3))
+        _ = await waitUntil(10) { !rules3.isVisible }
+    }
+
     func rfc2822(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")

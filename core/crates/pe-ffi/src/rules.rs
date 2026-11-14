@@ -220,3 +220,65 @@ pub unsafe extern "C" fn pe_rule_query_of_message(core: *const PeCore, folder: i
         })
     }
 }
+
+/// A folder a rule can move messages to
+#[repr(C)]
+pub struct PeRuleTarget {
+    pub folder: i64,
+    pub account: i64,
+    /// The words shown: the folder, indented as in the tree, with its account when there are several
+    pub label: *const c_char,
+}
+
+/// The folders a rule can move messages to; free with `pe_rule_targets_free`
+pub struct PeRuleTargets(Rows<PeRuleTarget>);
+
+/// The folders a rule can move messages to, every account's in the tree's order, but the Inboxes; NULL on failure
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_rule_targets(core: *const PeCore) -> *mut PeRuleTargets {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(targets) = core.rule_targets() else {
+                return null_mut();
+            };
+            handed(PeRuleTargets(Rows::new(
+                &targets,
+                |(folder, account, label), strings| PeRuleTarget {
+                    folder: *folder,
+                    account: *account,
+                    label: strings.add(label),
+                },
+            )))
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_rule_targets_count(list: *const PeRuleTargets) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
+}
+
+/// Folder `index`, NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_rule_targets_get(list: *const PeRuleTargets, index: usize) -> *const PeRuleTarget {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_rule_targets_free(list: *mut PeRuleTargets) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
+}

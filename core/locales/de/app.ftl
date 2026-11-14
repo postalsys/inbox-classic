@@ -88,6 +88,10 @@ cmd-default-app = Als &Standard-E-Mail-Programm festlegen...
 cmd-view-source = Nachrichten-&Quelltext
 cmd-ai-agents = &KI-Agenten...
 cmd-options = &Optionen...
+# review: new
+cmd-message-rules = Nachrichten&regeln...
+# review: new
+cmd-create-rule-from-message = &Regel aus Nachricht erstellen...
 cmd-select-all = &Alles auswählen
 cmd-undo = &Rückgängig
 cmd-copy = In Ordner &kopieren...
@@ -417,6 +421,66 @@ ui-clear-agent-log-detail = Die von Agenten vorgenommenen Änderungen werden dad
 ui-let-agents-connect = KI-Agenten die Verbindung mit Inbox Classic &erlauben
 ui-change-button = Ändern…
 ui-undo-button = Rückgängig
+# review: new
+ui-rules-title = Nachrichtenregeln
+# review: new
+ui-rules-intro = Regeln sortieren neue Nachrichten in Ihren Posteingängen beim Eintreffen, solange Inbox Classic läuft. Jede Regel, die auf eine Nachricht passt, erledigt ihren Teil; eine, die die Nachricht wegverschiebt, ist die letzte für sie.
+# review: new
+ui-rules-none = Noch keine Regeln. Klicken Sie auf „Neu“, um eine zu erstellen.
+# review: new
+ui-rule-new = &Neu...
+# review: new
+ui-rule-edit = &Bearbeiten...
+# review: new
+ui-rule-delete-button = &Löschen
+# review: new
+ui-rule-title = Nachrichtenregel
+# review: new
+ui-rule-name = Name:
+# review: new
+ui-rule-account = Für neue Nachrichten von:
+# review: new
+ui-rule-all-accounts = Alle Konten
+# review: new
+ui-rule-query = Die passen auf:
+# review: new
+ui-rule-query-hint = Wörter wie im Suchfeld, etwa from:ann@example.com, subject:Rechnung oder list:news.example.com
+# review: new
+ui-rule-count = { $count ->
+    [one] 1 Nachricht im Posteingang passt jetzt.
+   *[other] { $count } Nachrichten im Posteingang passen jetzt.
+}
+# review: new
+ui-rule-show = &Anzeigen
+# review: new
+ui-rule-actions = Dies tun:
+# review: new
+ui-rule-move = &Verschieben nach:
+# review: new
+ui-rule-mark-read = Als &gelesen markieren
+# review: new
+ui-rule-flag = &Kennzeichnen
+# review: new
+ui-rule-archive = &Archivieren
+# review: new
+ui-rule-junk = In &Junk-E-Mail verschieben
+# review: new
+ui-rule-delete = &Löschen
+# review: new
+ui-rule-quiet = &Nicht benachrichtigen
+# review: new
+ui-rule-apply-now = Auch auf die Nachrichten anwenden, die schon im &Posteingang sind
+# review: new
+ui-rule-delete-ask = Die Regel „{ $name }“ löschen?
+# review: new
+ui-create-rule = Regel erstellen...
+# review: new
+ui-rules-applied = { $count ->
+    [one] 1 Nachricht von Ihren Regeln sortiert
+   *[other] { $count } Nachrichten von Ihren Regeln sortiert
+}
+# review: new
+ui-col-rule-matches = Passt auf
 ui-clear-button = &Leeren
 ui-how-to-connect = So verbinden Sie einen Agenten…
 ui-agent-programs = Programme, deren Agenten Zugriff auf Ihre E-Mails angefordert haben

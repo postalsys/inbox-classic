@@ -1600,6 +1600,148 @@ public static class Dragger {
     SelectFolder 0
     SetOtherAddresses ''
 
+    Step 'message rules'
+    # Tools > Message Rules and the rule editor (rules.cpp, RulesControlId in app.h)
+    $IDM_MESSAGE_RULES = 170; $IDM_CREATE_RULE_FROM_MESSAGE = 171; $IDC_SEARCH_RULE = 239
+    $IDC_RULES_LIST = 840; $IDC_RULES_NEW = 841; $IDC_RULES_DELETE = 843; $IDC_RULES_CLOSE = 846
+    $IDC_RULE_NAME = 850; $IDC_RULE_QUERY = 852; $IDC_RULE_COUNT = 854; $IDC_RULE_MOVE = 856; $IDC_RULE_MOVE_TO = 857
+    $IDC_RULE_MARK_READ = 858; $IDC_RULE_FLAG = 859; $IDC_RULE_ARCHIVE = 860
+    $BM_SETCHECK = 0x00F1; $BM_GETCHECK = 0x00F0
+    # a check box of the editor ticked as a click would: checked, then BN_CLICKED to the editor
+    function Tick([IntPtr]$editor, [int]$id) {
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($editor, $id), $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+        Click $editor $id
+        # the click handled before the next one: a check box ticked meanwhile would be taken for the one clicked
+        Start-Sleep -Milliseconds 300
+    }
+    function OpenRules {
+        Command $main $IDM_MESSAGE_RULES
+        WaitShown 'InboxClassicRules'
+    }
+    function CloseRules([IntPtr]$rules) {
+        Click $rules $IDC_RULES_CLOSE
+        [void](WaitFor { -not [Native.Win]::IsWindow($rules) } 10)
+    }
+    $rulesStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    $rules = OpenRules
+    Check ($null -ne $rules) 'Tools > Message Rules opens the rules'
+    if ($rules) {
+        $ruleList = [Native.Win]::GetDlgItem($rules, $IDC_RULES_LIST)
+        Check ((ListCount $ruleList) -eq 0) 'there are none at first'
+        Shot $rules 'rules-1-list'
+        Click $rules $IDC_RULES_NEW
+        $editor = WaitShown 'InboxClassicRule'
+        Check ($null -ne $editor) 'New opens the rule editor'
+        if ($editor) {
+            SetText $editor $IDC_RULE_NAME 'Newsletters'
+            SetText $editor $IDC_RULE_QUERY 'from:news@example.com'
+            # a message goes to one place: Move it to unticks Archive it
+            Tick $editor $IDC_RULE_ARCHIVE
+            Tick $editor $IDC_RULE_MOVE
+            $archiveTicked = { [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($editor, $IDC_RULE_ARCHIVE), $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 }
+            Check ([bool](WaitFor { -not (& $archiveTicked) } 5)) 'ticking Move it to unticks Archive it'
+            # the folder to move to: Archive, as the core labels it (indented as in the tree)
+            $moveTo = [Native.Win]::GetDlgItem($editor, $IDC_RULE_MOVE_TO)
+            $archiveIndex = -1
+            $targets = [int][Native.Win]::SendMessage($moveTo, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+            for ($i = 0; $i -lt $targets; $i++) {
+                $label = New-Object System.Text.StringBuilder 256
+                [void][Native.Win]::SendMessage($moveTo, $CB_GETLBTEXT, [IntPtr]$i, $label)
+                if ($label.ToString().Trim() -eq 'Archive') { $archiveIndex = $i }
+            }
+            Check ($archiveIndex -ge 0) "Move it to offers Archive (folders offered: $targets)"
+            Check ([Native.Win]::IsWindowEnabled($moveTo)) 'the folder can be chosen once Move it to is ticked'
+            [void][Native.Win]::SendMessage($moveTo, $CB_SETCURSEL, [IntPtr]$archiveIndex, [IntPtr]::Zero)
+            Tick $editor $IDC_RULE_MARK_READ
+            # the count follows the query a moment after it changed: the newsletter in the Inbox
+            $count = WaitFor { $t = GetText $editor $IDC_RULE_COUNT; if ($t -match 'in the Inbox match') { $t } } 5
+            Check ($null -ne $count) "the editor says how many messages in the Inbox match now ($(GetText $editor $IDC_RULE_COUNT))"
+            Shot $editor 'rules-2-editor'
+            Click $editor 1
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($editor) } 10)) 'OK saves the rule'
+        }
+        Check ([bool](WaitFor { (ListCount $ruleList) -eq 1 } 5)) 'the rule is listed'
+        Check ([Native.Win]::RemoteListText($ruleList, 0, 0) -eq 'Newsletters' -and [Native.Win]::RemoteListText($ruleList, 0, 1) -eq 'from:news@example.com') 'with its name and what it matches'
+        CloseRules $rules
+    }
+    # new mail it matches is read and moved to Archive as it arrives
+    AddMessage ("From: News <news@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Weekly news in the UI test`r`n" +
+        "Message-ID: <weekly-news@example.com>`r`nDate: Tue, 07 Oct 2025 08:00:00 +0000`r`n`r`nThis week's news.`r`n")
+    Command $main $IDM_SYNC
+    $sorted = WaitFor { Find 'Archive' 'Subject: Weekly news in the UI test' } 30
+    Check ($null -ne $sorted) 'the rule moves new mail it matches to Archive'
+    Check ($sorted -and $sorted.flags -contains '\Seen') 'and marks it read'
+    Check ($null -eq (Find 'INBOX' 'Subject: Weekly news in the UI test')) 'it is not left in the Inbox'
+    $said = WaitFor { $t = StatusPart $rulesStatus 0; if ($t -like '*sorted by your rules') { $t } } 15
+    Check ($null -ne $said) "the status bar says the rules sorted it ($(StatusPart $rulesStatus 0))"
+    SelectFolder 3
+    [void](WaitFor { @(SubjectRows 'Weekly news in the UI test').Count -gt 0 } 10)
+    Shot $main 'rules-5-applied'
+    SelectFolder 0
+
+    # a query that names a folder can not be a rule's: the editor says why and stays open
+    $rules = OpenRules
+    if ($rules) {
+        Click $rules $IDC_RULES_NEW
+        $editor = WaitShown 'InboxClassicRule'
+        if ($editor) {
+            SetText $editor $IDC_RULE_QUERY 'in:sent from:x'
+            Tick $editor $IDC_RULE_FLAG
+            Click $editor 1
+            $refused = WaitWindow '#32770' 'Message Rule' 10
+            Check ($refused -and (Statics $refused) -match 'folder or a date') "OK refuses a query with a folder, and says why ($(if ($refused) { Statics $refused }))"
+            if ($refused) {
+                Shot $refused 'rules-6-bad-query'
+                Click $refused 2
+                [void](WaitFor { -not [Native.Win]::IsWindow($refused) } 5)
+            }
+            Check ([Native.Win]::IsWindow($editor)) 'the editor stays open'
+            Click $editor 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($editor) } 5)
+        }
+        CloseRules $rules
+    }
+
+    # a rule from what was searched for: Create Rule on the search bar
+    $ruleFind = [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($main, 205), 204)
+    $inboxRows = Rows
+    [void][Native.Win]::SendMessage($ruleFind, $WM_SETTEXT, [IntPtr]::Zero, 'lunch')
+    Check ([bool](WaitFor { (Visible $main 208) -and (Visible $main $IDC_SEARCH_RULE) } 10)) 'the search bar has Create Rule'
+    Click $main $IDC_SEARCH_RULE
+    $editor = WaitShown 'InboxClassicRule'
+    Check ($editor -and (GetText $editor $IDC_RULE_QUERY) -eq 'lunch') "Create Rule opens the editor with the words searched for ($(if ($editor) { GetText $editor $IDC_RULE_QUERY }))"
+    if ($editor) {
+        Shot $editor 'rules-3-from-search'
+        Click $editor 2
+        [void](WaitFor { -not [Native.Win]::IsWindow($editor) } 5)
+    }
+    Click $main 209
+    [void](WaitFor { (Rows) -eq $inboxRows -and -not (Visible $main 208) } 10)
+
+    # a rule from a message: its sender
+    SelectFolder 0
+    SelectRow 0
+    Command $main $IDM_CREATE_RULE_FROM_MESSAGE
+    $editor = WaitShown 'InboxClassicRule'
+    Check ($editor -and (GetText $editor $IDC_RULE_QUERY) -like 'from:*') "Create Rule from Message starts with its sender ($(if ($editor) { GetText $editor $IDC_RULE_QUERY }))"
+    if ($editor) {
+        Shot $editor 'rules-4-from-message'
+        Click $editor 2
+        [void](WaitFor { -not [Native.Win]::IsWindow($editor) } 5)
+    }
+
+    # the rule deleted, so the steps after this one get their mail as before
+    $rules = OpenRules
+    if ($rules) {
+        $ruleList = [Native.Win]::GetDlgItem($rules, $IDC_RULES_LIST)
+        Click $rules $IDC_RULES_DELETE
+        $ask = WaitWindow '#32770' 'Message Rules' 10
+        Check ($ask -and (Statics $ask) -match 'Newsletters') 'Delete asks first, naming the rule'
+        if ($ask) { Click $ask 6 }
+        Check ([bool](WaitFor { (ListCount $ruleList) -eq 0 } 5)) 'and deletes it'
+        CloseRules $rules
+    }
+
     # ---- getting new mail ----
 
     Step 'Send/Recv'

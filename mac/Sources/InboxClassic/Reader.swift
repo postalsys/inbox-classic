@@ -834,14 +834,17 @@ final class InfoBar: NSView {
 
     required init?(coder: NSCoder) { fatalError() }
 
-    /// controls at the trailing edge of a bar without a link or button of its own (the rest of it is still clicked as
-    /// a whole)
+    /// controls at the trailing edge of a bar without a button of its own (without a link, the rest of it is still
+    /// clicked as a whole); a link stays right after the words
     func setAccessories(_ views: [NSView]) {
-        guard let row, action == nil else { return }
-        let spacer = NSView()
-        spacer.setContentHuggingPriority(.init(1), for: .horizontal)
-        spacer.setContentCompressionResistancePriority(.init(1), for: .horizontal)
-        row.addArrangedSubview(spacer)
+        guard let row, action == nil || action?.isBordered == false else { return }
+        // a bar with a link has its spacer after it already
+        if action == nil {
+            let spacer = NSView()
+            spacer.setContentHuggingPriority(.init(1), for: .horizontal)
+            spacer.setContentCompressionResistancePriority(.init(1), for: .horizontal)
+            row.addArrangedSubview(spacer)
+        }
         for view in views {
             view.setContentHuggingPriority(.required, for: .horizontal)
             view.setContentCompressionResistancePriority(.required, for: .horizontal)

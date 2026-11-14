@@ -118,7 +118,7 @@ impl Core {
     }
 
     /// Saves a rule (a new one, id 0, last); its id. A query that can not be a rule's, or a rule that does nothing,
-    /// is refused with the reason.
+    /// is refused with the reason; one without a name gets its query as its name.
     pub fn save_rule(&self, rule: &Rule) -> Result<RuleId> {
         if let Some(problem) = self.rule_query_problem(&rule.query) {
             return Err(Error::Invalid(problem));
@@ -129,7 +129,17 @@ impl Core {
         if !rule.acts() {
             return Err(Error::Invalid(pe_i18n::tr(Text::RuleNoAction)));
         }
-        Ok(self.store().save_rule(rule)?)
+        // a rule without a name is called by what it matches
+        let query = rule.query.trim().to_string();
+        let name = match rule.name.trim() {
+            "" => query.clone(),
+            name => name.to_string(),
+        };
+        Ok(self.store().save_rule(&Rule {
+            name,
+            query,
+            ..rule.clone()
+        })?)
     }
 
     pub fn delete_rule(&self, id: RuleId) -> Result<()> {
@@ -176,6 +186,44 @@ impl Core {
         }
         let message = store.message(folder, uid)?.ok_or(Error::NotFound)?;
         Ok(format!("from:{}", message.info.from_address))
+    }
+
+    /// The folders a rule can move messages to, for its editor: each account's, in the tree's order, but its Inbox,
+    /// its Sent Items, Drafts, Junk E-mail, Deleted Items and Gmail's all-mail folders, and the folders that hold no
+    /// messages, each as (folder, account, the words shown: the account and the folder,
+    /// indented as in the tree)
+    pub fn rule_targets(&self) -> Result<Vec<(FolderId, AccountId, String)>> {
+        let store = self.store();
+        let accounts = store.accounts()?;
+        let titles = crate::account_titles(&accounts);
+        let several = accounts.len() > 1;
+        let mut targets = Vec::new();
+        for (account, title) in accounts.iter().zip(&titles) {
+            let folders = store.folders(account.id)?;
+            let infos: Vec<&pe_store::FolderInfo> = folders.iter().map(|f| &f.info).collect();
+            let depths = crate::tree_depths(&infos);
+            for (folder, depth) in folders.iter().zip(depths) {
+                // nor the folders a rule would not move mail to (Junk and Deleted Items have actions of their own)
+                let special = folder.info.special_use.as_deref();
+                if !folder.info.selectable
+                    || folder.info.path.eq_ignore_ascii_case("INBOX")
+                    || matches!(
+                        special,
+                        Some("\\Sent" | "\\Drafts" | "\\Junk" | "\\Trash" | "\\All" | "\\Flagged")
+                    )
+                {
+                    continue;
+                }
+                let name = format!("{}{}", "    ".repeat(depth), crate::folder_name(&folder.info));
+                let label = if several {
+                    format!("{title}: {}", name.trim_start())
+                } else {
+                    name
+                };
+                targets.push((folder.id, account.id, label));
+            }
+        }
+        Ok(targets)
     }
 
     /// Runs one rule over the messages already in the Inbox (of its account or every account's), in the background

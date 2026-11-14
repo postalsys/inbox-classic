@@ -157,10 +157,21 @@ impl Mailbox {
         let clear = gtk::Button::with_label(&t!(UiClearSearch));
         clear.add_css_class("flat");
         clear.set_widget_name("search-clear");
+        // a rule of the words searched for, sorting the new mail that has them from now on
+        let create_rule = gtk::Button::with_label(&t!(UiCreateRule));
+        create_rule.add_css_class("flat");
+        create_rule.set_widget_name("search-create-rule");
+        let searched = find.downgrade();
+        create_rule.connect_clicked(move |_| {
+            let Some(find) = searched.upgrade() else { return };
+            let words = find.text().to_string();
+            crate::app::spawn(async move { crate::rules::create(&words).await });
+        });
         let search_bar = gtk::Box::new(gtk::Orientation::Horizontal, 8);
         search_bar.add_css_class("info-bar");
         search_bar.append(&gtk::Image::from_icon_name("ic-search-symbolic"));
         search_bar.append(&search_summary);
+        search_bar.append(&create_rule);
         search_bar.append(&clear);
         search_bar.set_visible(false);
         let (empty, empty_title, empty_more) = empty_list();
@@ -2475,6 +2486,7 @@ impl Mailbox {
             },
             None,
         );
+        add(&organize, Command::CreateRuleFromMessage, None);
         add(&organize, Command::Move, None);
         add(&organize, Command::Copy, None);
         add(&organize, Command::Delete, Some(&t!(UiTbDelete)));

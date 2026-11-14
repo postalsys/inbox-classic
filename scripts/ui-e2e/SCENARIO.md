@@ -284,6 +284,18 @@ Screenshots: `account-12-other-addresses`, `write-26-from-alias`, `write-27-repl
 - a reply to a message sent to it (in Archive, so the Inbox's rows stay as they are) goes from it
 - the other address is taken away again for the steps after
 
+## 19g. Message rules
+
+Screenshots: `rules-1-list`, `rules-2-editor`, `rules-5-applied`, `rules-6-bad-query`, `rules-3-from-search`, `rules-4-from-message`
+
+- Tools > Message Rules opens, empty
+- a new rule: Newsletters, `from:news@example.com`, moved to Archive and marked read; it is listed
+- a message from news@example.com arriving lands in Archive, not the Inbox, and the status bar says the rules sorted it
+- a query with `in:` is refused with the reason
+- Create Rule on the search bar starts a rule with the words searched for
+- Create Rule from Message starts a rule with `from:` the sender
+- the rule is deleted again for the steps after
+
 ## 20. Send/Recv
 
 Screenshots: `main-2-new-mail`, `main-3-sent-items`
