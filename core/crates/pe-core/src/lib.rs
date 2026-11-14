@@ -24,6 +24,7 @@ pub mod mailto;
 pub mod otp;
 pub mod pictures;
 mod requests;
+mod rules;
 mod search;
 mod secrets;
 mod selection;
@@ -190,6 +191,11 @@ pub enum Event {
         /// The notification's title and text, in the language in use: the apps show them as they are
         title: String,
         text: String,
+    },
+    /// The message rules sorted `count` messages of an account's new mail (or of its Inbox, applied there now)
+    RulesApplied {
+        account: AccountId,
+        count: usize,
     },
     /// A message the user sent waits `seconds` in the Outbox before it goes, to be taken back ([`Core::undo_send`])
     SendWaiting {

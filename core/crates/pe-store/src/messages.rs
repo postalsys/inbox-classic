@@ -48,6 +48,9 @@ pub struct MessageInfo {
     /// and BIMI-Selector), for the core to read once (`set_sender_auth`); None when they were not fetched. Written by
     /// `add_messages` for a message new to the store, never read back with the message
     pub auth_headers: Option<String>,
+    /// The mailing list it came through (its List-Id, the part in angle brackets, lowercase), for `list:`; written by
+    /// `add_messages`, never read back with the message
+    pub list_id: Option<String>,
 }
 
 /// The colour of a flag, as Apple Mail keeps it: `\\Flagged` with three keyword bits, `$MailFlagBit0` to
@@ -314,6 +317,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
             thread_id: row.get(21)?,
             bounce: row.get(22)?,
             auth_headers: None,
+            list_id: None,
         },
     })
 }
@@ -335,8 +339,9 @@ impl Store {
         let mut statement = self.db.prepare_cached(
             "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
              from_address, recipients, message_id, in_reply_to, has_attachments, sender_people, recipient_people, \
-             attachment_names, attachment_count, refs, bounce, auth_headers) \
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22) \
+             attachment_names, attachment_count, refs, bounce, auth_headers, list_id) \
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, \
+             ?23) \
              ON CONFLICT (folder_id, uid) DO UPDATE SET modseq = excluded.modseq, flags = excluded.flags, \
              seen = excluded.seen",
         )?;
@@ -368,7 +373,8 @@ impl Store {
                 m.attachment_count,
                 m.references.join(" "),
                 m.bounce,
-                m.auth_headers
+                m.auth_headers,
+                m.list_id
             ])?;
             // a message new to the store goes into its conversation at once (one already here keeps its own)
             if new {
@@ -458,6 +464,19 @@ impl Store {
             ))?
             .query_map(params![folder, uid], from_row)?
             .collect()
+    }
+
+    /// The mailing list a message came through (its List-Id), None when it is not known
+    pub fn list_id(&self, folder: FolderId, uid: u64) -> Result<Option<String>> {
+        Ok(self
+            .db
+            .query_row(
+                "SELECT list_id FROM messages WHERE folder_id = ?1 AND uid = ?2",
+                params![folder, uid],
+                |row| row.get(0),
+            )
+            .optional()?
+            .flatten())
     }
 
     /// Marks every unread message of a folder read; their UIDs, for the server

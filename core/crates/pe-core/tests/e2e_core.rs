@@ -2410,6 +2410,102 @@ fn a_message_goes_from_another_address_of_the_account() {
 }
 
 #[test]
+fn message_rules_sort_new_mail() {
+    let Some(s) = setup() else { return };
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let rule = |name: &str, query: &str| pe_store::Rule {
+        enabled: true,
+        name: name.into(),
+        query: query.into(),
+        ..Default::default()
+    };
+    // a query naming a folder or a date, or a rule that does nothing, is refused
+    assert!(
+        s.core
+            .save_rule(&pe_store::Rule {
+                mark_read: true,
+                ..rule("x", "in:sent")
+            })
+            .is_err()
+    );
+    assert!(s.core.save_rule(&rule("x", "from:ann")).is_err());
+    s.core
+        .save_rule(&pe_store::Rule {
+            move_to: Some(id("Archive")),
+            mark_read: true,
+            ..rule("Newsletters", "list:news.example.com")
+        })
+        .unwrap();
+    s.core
+        .save_rule(&pe_store::Rule {
+            flag: true,
+            ..rule("Invoices", "invoice")
+        })
+        .unwrap();
+    // the rule before it moved the newsletter away: the second does not see it
+    s.core
+        .save_rule(&pe_store::Rule {
+            flag: true,
+            ..rule("Everything from Ann", "from:ann")
+        })
+        .unwrap();
+    assert_eq!(s.core.rule_matches("from:ann", None).unwrap(), 0);
+
+    s.server.add_message(
+        "INBOX",
+        "From: News <news@example.com>\r\nTo: testuser@example.com\r\nList-Id: Weekly news <news.example.com>\r\n\
+         Subject: This week\r\nMessage-ID: <n1@example.com>\r\n\r\nThe news.\r\n",
+        &[],
+    );
+    s.server.add_message(
+        "INBOX",
+        "From: Ann <ann@example.com>\r\nTo: testuser@example.com\r\nSubject: For March\r\n\
+         Message-ID: <a1@example.com>\r\n\r\nHere is the invoice for March.\r\n",
+        &[],
+    );
+    s.core.sync(account).unwrap();
+    s.wait(|e| matches!(e, Event::RulesApplied { account: a, count: 2 } if *a == account));
+    // the newsletter moved to Archive, read; Ann's message flagged for a word of its text, and for its sender
+    eventually(
+        || s.server.subjects("Archive").contains(&"This week".to_string()),
+        "the newsletter in Archive",
+    );
+    let archived = s.server.messages("Archive");
+    let news = archived
+        .iter()
+        .find(|m| pe_testkit::raw_text(m).contains("This week"))
+        .unwrap();
+    assert!(news["flags"].to_string().contains("\\\\Seen"), "{news}");
+    assert_eq!(s.server.subjects("INBOX"), ["For March"]);
+    let ann = s.server.messages("INBOX")[0]["uid"].as_u64().unwrap();
+    eventually(
+        || s.server.flags("INBOX", ann).contains(&"\\Flagged".to_string()),
+        "Ann's message flagged",
+    );
+    assert_eq!(s.core.rule_matches("from:ann", None).unwrap(), 1);
+
+    // a rule run over the messages already there
+    let id_read = s
+        .core
+        .save_rule(&pe_store::Rule {
+            enabled: false,
+            mark_read: true,
+            ..rule("Read Ann", "from:ann")
+        })
+        .unwrap();
+    s.core.apply_rule_now(id_read).unwrap();
+    s.wait(|e| matches!(e, Event::RulesApplied { account: a, count: 1 } if *a == account));
+    eventually(
+        || s.server.flags("INBOX", ann).contains(&"\\Seen".to_string()),
+        "applied now, Ann's message is read",
+    );
+}
+
+#[test]
 fn drafts_are_saved_reopened_and_gone_once_sent() {
     let Some(s) = setup() else { return };
     let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();

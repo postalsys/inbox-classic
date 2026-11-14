@@ -60,6 +60,8 @@ pub struct Search {
     pub threads: Option<Vec<i64>>,
     /// View > Hide Ignored Conversations: the messages of ignored conversations left out
     pub hide_ignored: bool,
+    /// Only these messages of the folder of `scope` (the new mail a message rule looks at); None for all
+    pub uids: Option<Vec<u64>>,
     /// With `show` Unread, the messages read since this time (milliseconds since the epoch) stay in the list: those read
     /// since the list was turned to unread only, so a message does not leave it the moment it is read
     pub read_since: Option<i64>,
@@ -163,6 +165,17 @@ impl Search {
             Scope::Everywhere => {}
             Scope::Flagged => parts.push(format!("{IS_FLAGGED} AND folder_id IN ({FLAGGED_FROM})")),
         }
+        if let Some(uids) = &self.uids {
+            let listed: Vec<String> = uids
+                .iter()
+                .map(|&uid| value(&mut values, Value::Integer(uid as i64)))
+                .collect();
+            parts.push(if listed.is_empty() {
+                "0".into()
+            } else {
+                format!("uid IN ({})", listed.join(", "))
+            });
+        }
         // unread, or read since the list was turned to unread only
         if let (Show::Unread, Some(since)) = (self.show, self.read_since) {
             parts.push(format!(
@@ -223,6 +236,13 @@ impl Search {
                 }
                 Term::Smaller(size) => {
                     parts.push(format!("size < {}", value(&mut values, Value::Integer(*size as i64))))
+                }
+                Term::List { text, negated } => {
+                    let has = format!(
+                        "instr(lower(COALESCE(list_id, '')), {}) > 0",
+                        value(&mut values, Value::Text(text.to_lowercase()))
+                    );
+                    parts.push(if *negated { format!("NOT {has}") } else { has });
                 }
             }
         }
@@ -465,6 +485,24 @@ impl Store {
         Ok(())
     }
 
+    /// Which of the messages `uids` of `folder` the index does not have the text of yet (and the server has not
+    /// refused): (message id, folder, UID)
+    pub fn unindexed(&self, folder: FolderId, uids: &[u64]) -> Result<Vec<(i64, FolderId, u64)>> {
+        let mut statement = self.db.prepare_cached(
+            "SELECT id FROM messages WHERE folder_id = ?1 AND uid = ?2 AND text_indexed = 0 AND fetch_failed = 0",
+        )?;
+        let mut found = Vec::new();
+        for &uid in uids {
+            if let Some(id) = statement
+                .query_row(params![folder, uid as i64], |row| row.get(0))
+                .optional()?
+            {
+                found.push((id, folder, uid));
+            }
+        }
+        Ok(found)
+    }
+
     /// Messages of an account whose text the index does not have yet, newest first: (message id, folder, UID)
     pub fn messages_to_index(&self, account: AccountId, limit: usize) -> Result<Vec<(i64, FolderId, u64)>> {
         let mut statement = self.db.prepare_cached(
@@ -683,6 +721,7 @@ mod tests {
             threads: None,
             hide_ignored: false,
             read_since: None,
+            uids: None,
         };
         assert_eq!(found(&store, &search), [9]);
         // a message read since: still listed with the unread ones, by the time the store noted (in milliseconds)

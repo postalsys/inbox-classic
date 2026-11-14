@@ -8,6 +8,7 @@
 //!   (`label:` is the same); a search with `in:` looks in every account
 //! - `before:` `after:` a day (2025/01/31 or 2025-01-31), `older_than:` `newer_than:` (2d, 3m, 1y)
 //! - `larger:` `smaller:` a size in bytes, or with K, M or G (`larger:5M`)
+//! - `list:` a mailing list, by a part of its List-Id (`list:announce`)
 //!
 //! An operator that is not one of these is taken as a word, as are its value's quotes.
 
@@ -70,6 +71,11 @@ pub enum Term {
     /// Larger or smaller than this many bytes
     Larger(u64),
     Smaller(u64),
+    /// Of a mailing list whose List-Id has this text (lowercase); negated: not of it
+    List {
+        text: String,
+        negated: bool,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -147,6 +153,35 @@ impl Query {
 
     pub fn is_empty(&self) -> bool {
         self.terms.is_empty()
+    }
+
+    /// What a message rule can not hold, by the operator typed (`in:`, `before:`...): a rule is for the new mail of an
+    /// Inbox, so neither another folder nor a date means anything there
+    pub fn rule_problems(text: &str) -> Vec<String> {
+        let mut found: Vec<String> = Vec::new();
+        for raw in tokens(text) {
+            let Some(operator) = raw.operator.as_deref() else {
+                continue;
+            };
+            let refused = matches!(
+                operator,
+                "in" | "label" | "before" | "after" | "older_than" | "newer_than"
+            );
+            let name = format!("{operator}:");
+            if refused && !found.contains(&name) {
+                found.push(name);
+            }
+        }
+        found
+    }
+
+    /// Whether it has words to find in the text of a message (not only in its subject, people or files), which a new
+    /// message's text has to be fetched for first
+    pub fn needs_text(&self) -> bool {
+        self.terms.iter().any(|term| match term {
+            Term::Text { any_of, .. } => any_of.iter().any(|w| w.field == Field::Any),
+            _ => false,
+        })
     }
 }
 
@@ -255,6 +290,10 @@ fn term(raw: &Token, now: i64) -> Term {
         ("newer_than", span) => age(span).map(|age| Term::After(now - age)),
         ("larger", size) => bytes(size).map(Term::Larger),
         ("smaller", size) => bytes(size).map(Term::Smaller),
+        ("list", list) if !list.trim().is_empty() => Some(Term::List {
+            text: list.trim().to_string(),
+            negated: raw.negated,
+        }),
         _ => None,
     };
     known.unwrap_or_else(|| {
@@ -346,6 +385,31 @@ mod tests {
             }],
             negated: false,
         }
+    }
+
+    #[test]
+    fn a_mailing_list_and_what_a_rule_can_not_hold() {
+        let query = Query::parse("list:Announce -list:spam", 0);
+        assert_eq!(
+            query.terms,
+            [
+                Term::List {
+                    text: "announce".into(),
+                    negated: false
+                },
+                Term::List {
+                    text: "spam".into(),
+                    negated: true
+                }
+            ]
+        );
+        assert_eq!(
+            Query::rule_problems("from:ann in:sent older_than:2d in:archive"),
+            ["in:", "older_than:"]
+        );
+        assert!(Query::rule_problems("from:ann subject:invoice list:news").is_empty());
+        assert!(Query::parse("invoice", 0).needs_text());
+        assert!(!Query::parse("from:ann subject:invoice", 0).needs_text());
     }
 
     #[test]

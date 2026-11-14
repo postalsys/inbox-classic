@@ -12,6 +12,7 @@ mod core;
 mod help;
 mod layout;
 mod list_view;
+mod rules;
 mod selection;
 mod texts;
 #[cfg(windows)]
@@ -21,6 +22,7 @@ pub use agents::*;
 pub use book::*;
 pub use core::*;
 pub use list_view::*;
+pub use rules::*;
 pub use selection::*;
 pub use texts::*;
 

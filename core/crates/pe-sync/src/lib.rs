@@ -272,7 +272,7 @@ fn summary_query() -> FetchQuery {
         modseq: true,
         // the ids it answers, and Gmail's conversation, for conversations; the provider's verdicts on the sender,
         // for its picture in the list
-        headers: Some(summary::with_auth_fields(vec!["References".into()])),
+        headers: Some(summary::with_auth_fields(vec!["References".into(), "List-Id".into()])),
         gmail_thread: true,
         ..Default::default()
     }
