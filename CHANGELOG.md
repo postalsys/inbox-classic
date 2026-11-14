@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.17.0](https://github.com/postalsys/inbox-classic/compare/v0.16.0...v0.17.0) (2026-11-14)
+
+
+### Features
+
+* **linux:** the watch and ignore marks in the Columns rows ([c97ae83](https://github.com/postalsys/inbox-classic/commit/c97ae834a88dceea6b1e7030e11c5599c9e190cc))
+* **windows:** the sort arrow, a Folders toolbar button and a smallest window ([eaf1393](https://github.com/postalsys/inbox-classic/commit/eaf139371ff51bff5820175473b7ef793c0619c0))
+
+
+### Bug Fixes
+
+* column layout follow-ups (sort arrow, Folders button, Linux watch mark) ([f6f2992](https://github.com/postalsys/inbox-classic/commit/f6f299221cac0f7262401a70cb3d658e607c7008))
+
 ## [0.16.0](https://github.com/postalsys/inbox-classic/compare/v0.15.0...v0.16.0) (2026-11-13)
 
 
