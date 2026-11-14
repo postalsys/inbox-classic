@@ -1452,6 +1452,56 @@ public static class Dragger {
         Check (([Native.Win]::SendText($main, 0x43524153, '') - 10) -eq 0) 'closed, it is not opened again at the next start'
     }
 
+    Step 'Undo Send'
+    $IDC_OPTIONS_SEND_DELAY = 678; $IDC_UNDO_SEND = 225
+    Command $main 137
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        $delay = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_SEND_DELAY)
+        Check ($delay -ne [IntPtr]::Zero -and [int][Native.Win]::SendMessage($delay, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 5) 'Options offers the wait before sending'
+        [void][Native.Win]::SendMessage($delay, $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
+        Shot $o 'write-24-send-delay'
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
+    } else {
+        Check $false 'Tools > Options opens'
+    }
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    SetText $compose $IDC_TO 'Ida <ida@example.com>'
+    SetText $compose $IDC_SUBJECT 'Taken back in the UI test'
+    [void](TypeInEditor $compose 'On second thought.')
+    Command $compose $IDC_SEND
+    Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) })) 'Send closes the message'
+    $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    $counting = WaitFor { $t = StatusPart $mainStatus 1; if ($t -like 'Sending *Taken back in the UI test* in *') { $t } } 5
+    Check ($null -ne $counting) "the status bar counts down to sending ($(StatusPart $mainStatus 1))"
+    $undo = [Native.Win]::GetDlgItem($mainStatus, $IDC_UNDO_SEND)
+    Check ($undo -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($undo)) 'with an Undo button'
+    Shot $main 'write-22-undo-send'
+    Click $mainStatus $IDC_UNDO_SEND
+    $again = WaitCompose
+    Check ($null -ne $again -and (GetText $again $IDC_SUBJECT) -eq 'Taken back in the UI test') 'Undo opens the message again, as it was'
+    Check (-not [Native.Win]::IsWindowVisible($undo)) 'and the Undo button goes'
+    Check ((StatusPart $mainStatus 0) -like '*was not sent*') "the status bar says it was not sent ($(StatusPart $mainStatus 0))"
+    if ($again) { Shot $again 'write-23-undone' }
+    Start-Sleep -Seconds 12
+    Check (-not (Find 'INBOX' 'Subject: Taken back in the UI test')) 'taken back, it never goes'
+    if ($again) {
+        # sent again and left alone: it goes once its time came
+        Command $again $IDC_SEND
+        Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: Taken back in the UI test' } 40)) 'left alone, it goes once its time came'
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindowVisible($undo) } 10)) 'and the Undo button goes with it'
+    }
+    # back to sending at once for the steps after
+    Command $main 137
+    $o = WaitShown 'InboxClassicOptions' 10
+    if ($o) {
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_SEND_DELAY), $CB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
+        Click $o 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
+    }
+
     # ---- getting new mail ----
 
     Step 'Send/Recv'
@@ -1464,7 +1514,8 @@ public static class Dragger {
     Check ($null -ne (WaitFor { if ((Rows) -ge 2) { Rows } })) 'Sent Items has what was sent'
     SelectRow 0
     $firstTo = [Native.Win]::RemoteListText($list, 0, $COL_FROM)
-    Check ($firstTo -eq 'Fay') "Sent Items names whom each message went to, in a To column ($firstTo)"
+    # the newest sent: a recipient (Fay, or one of the later steps'), never the account's own name
+    Check ($firstTo -and $firstTo -ne 'Alex Morgan') "Sent Items names whom each message went to, in a To column ($firstTo)"
     Shot $main 'main-3-sent-items'
     SelectFolder 0
 

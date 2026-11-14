@@ -1005,6 +1005,27 @@ const sections = [
                 checked: ['The message opens again with its recipient', 'It says it was restored', 'Closed, it is not opened again']
             },
             {
+                shot: 'write-22-undo-send',
+                name: 'Undo Send',
+                what: 'A message sent waits a few seconds before it goes: the status bar counts down beside an Undo button, and Edit > Undo Send does the same. Quitting sends what waits at once.',
+                how: 'Send, then Undo in the status bar or Edit > Undo Send.',
+                checked: ['The status bar counts down', 'Edit names Undo Send', 'Left alone, it goes once its time came']
+            },
+            {
+                shot: 'write-23-undone',
+                name: 'Taken back, open again',
+                what: 'Undo opens the message again as it was, and the status bar says it was not sent. Nothing reaches the recipient.',
+                how: 'Undo while the message waits.',
+                checked: ['The message opens again with its recipient', 'The status bar says it was not sent', 'It never goes']
+            },
+            {
+                shot: 'write-24-send-delay',
+                name: 'Wait before sending',
+                what: 'How long a message waits to be taken back: Off, 5, 10 (out of the box), 20 or 30 seconds.',
+                how: 'Tools > Options (Settings on the Mac, Preferences on Linux).',
+                checked: ['The five waits are offered', '10 seconds chosen']
+            },
+            {
                 shot: 'write-11-sent',
                 name: 'Sent, and said so',
                 what: 'Once the server took a message, the middle of the main status bar says Sent with its subject and the time, and stays so until the next message goes; while it goes it says Sending, and a message that can not go is reported as waiting in the Outbox.',
