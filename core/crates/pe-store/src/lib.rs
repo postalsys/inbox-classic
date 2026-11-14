@@ -18,6 +18,7 @@ mod messages;
 mod outbox;
 mod query;
 mod recovery;
+mod rules;
 mod schema;
 mod search;
 mod selection;
@@ -42,6 +43,7 @@ pub use messages::{FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, Sort, SortF
 pub use outbox::Queued;
 pub use query::Query;
 pub use recovery::Recovery;
+pub use rules::{Rule, RuleId};
 pub use rusqlite::Error;
 pub use search::{IndexText, Scope, Search, Show};
 pub use selection::{MessageRef, Picked};

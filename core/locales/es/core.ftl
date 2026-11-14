@@ -347,6 +347,12 @@ error-no-recipients = el mensaje no tiene destinatarios
 error-bad-address = «{ $address }» no es una dirección de correo electrónico
 # review: new
 error-not-own-address = { $address } no es una de las direcciones de esta cuenta. Agréguela en Otras direcciones, en las propiedades de la cuenta.
+# review: new
+rule-query-refused = Una regla es para el correo nuevo de una Bandeja de entrada, así que no puede nombrar una carpeta ni una fecha ({ $words }).
+# review: new
+rule-no-query = Escriba lo que debe cumplir el correo nuevo.
+# review: new
+rule-no-action = Elija lo que hace la regla.
 error-attachment = no se pudo leer { $path }: { $error }
 error-no-drafts = la cuenta no tiene una carpeta Borradores donde guardar el mensaje
 error-draft-attachment = no se pudo conservar un archivo adjunto del borrador: { $error }

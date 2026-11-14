@@ -59,6 +59,7 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
     // the ids it answers, from the References header fetched with it, and the provider's verdicts
     let references = message.headers.as_deref().map(references_of).unwrap_or_default();
     let auth_headers = message.headers.as_deref().map(auth_fields);
+    let list_id = message.headers.as_deref().and_then(list_id_of);
     Some(MessageInfo {
         uid,
         modseq: message.modseq,
@@ -83,7 +84,23 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         thread_id: None,
         bounce,
         auth_headers,
+        list_id,
     })
+}
+
+/// The mailing list of a header block: its List-Id, the part in angle brackets (`<announce.example.com>`), lowercase,
+/// or the whole value without them; None without one
+pub(crate) fn list_id_of(header: &[u8]) -> Option<String> {
+    let (_, raw) = header_fields(header)
+        .into_iter()
+        .find(|(name, _)| name.eq_ignore_ascii_case("List-Id"))?;
+    let value = raw.split_once(':').map_or("", |(_, v)| v).replace(['\r', '\n'], " ");
+    let id = match (value.rfind('<'), value.rfind('>')) {
+        (Some(start), Some(end)) if start < end => &value[start + 1..end],
+        _ => value.trim(),
+    };
+    let id: String = id.trim().chars().take(255).collect::<String>().to_lowercase();
+    (!id.is_empty()).then_some(id)
 }
 
 /// The header fields of the provider's verdicts on the sender: Authentication-Results (DMARC, DKIM, BIMI), and

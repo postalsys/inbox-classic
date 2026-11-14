@@ -138,6 +138,11 @@ pub(crate) enum Command {
         /// Saved without being asked: a copy that could not be saved is told to the window only
         automatic: bool,
     },
+    /// The message rules run over the messages already in `folder` (an Inbox): all of them, or the one rule `rule`
+    ApplyRules {
+        folder: FolderId,
+        rule: Option<pe_store::RuleId>,
+    },
     /// Out of the Drafts folder: the copy the automatic saving made of a message closed without saving
     RemoveDraft {
         message_id: String,
@@ -876,7 +881,7 @@ impl Worker {
     /// Fetches the text parts of the newest messages `pending` gives (those the search index does not have the text
     /// of, or then those indexed before the store kept snippets), and indexes them; how many messages that was (0: none
     /// is left). A message with no text part is indexed without text.
-    async fn index_texts(&mut self, store: &mut Store, pending: PendingTexts) -> Result<usize, Failure> {
+    async fn index_texts(&mut self, store: &mut Store, pending: &PendingTexts) -> Result<usize, Failure> {
         // the newest message's folder, so a batch selects one folder
         let batch = pending(store, self.account, crate::search::TEXT_BATCH)?;
         let Some(&(_, folder, _)) = batch.first() else {
@@ -1097,6 +1102,18 @@ impl Worker {
                 undoable,
             } => self.send(store, *outgoing, not_before, undoable).await,
             Command::SaveDraft { outgoing, automatic } => self.save_draft(store, *outgoing, automatic).await,
+            Command::ApplyRules { folder, rule } => {
+                let uids = store.uids(folder)?;
+                // the rule chosen runs even while it is turned off: it was asked for
+                let rules: Vec<pe_store::Rule> = store
+                    .rules()?
+                    .into_iter()
+                    .filter(|r| rule.is_none_or(|id| r.id == id))
+                    .map(|r| pe_store::Rule { enabled: true, ..r })
+                    .collect();
+                Box::pin(self.apply_rules(store, folder, &uids, &rules)).await?;
+                Ok(())
+            }
             Command::RemoveDraft { message_id } => {
                 let account = self.account;
                 self.remove_draft_of(store, account, &message_id).await;
@@ -1482,7 +1499,17 @@ impl Worker {
             && !report.reset
             && let Some(next) = before.state.uid_next
         {
-            let fresh = crate::watch::arrived(&before.info, store.unseen_from(folder, next)?);
+            // the message rules first, on the Inbox's new mail read or not; what they keep quiet is not announced
+            let rules = store.rules()?;
+            let quiet =
+                if before.info.path.eq_ignore_ascii_case("INBOX") && rules.iter().any(|r| r.applies_to(self.account)) {
+                    let new: Vec<u64> = store.uids(folder)?.into_iter().filter(|&uid| uid >= next).collect();
+                    Box::pin(self.apply_rules(store, folder, &new, &rules)).await?
+                } else {
+                    Vec::new()
+                };
+            let mut fresh = crate::watch::arrived(&before.info, store.unseen_from(folder, next)?);
+            fresh.announced.retain(|m| !quiet.contains(&m.info.uid));
             self.read_ignored(store, folder, &fresh.read).await?;
             if let Some(newest) = fresh.announced.first() {
                 let from = newest.info.sender().to_string();
@@ -1505,6 +1532,104 @@ impl Worker {
                     text,
                 });
             }
+        }
+        Ok(())
+    }
+
+    /// Runs `rules` over the messages `uids` of the Inbox `folder`: their text fetched first when a rule looks for
+    /// words in it, then the flags set and the messages sent away, as the user's own commands would. Returns the UIDs
+    /// not to announce as new mail.
+    async fn apply_rules(
+        &mut self,
+        store: &mut Store,
+        folder: FolderId,
+        uids: &[u64],
+        rules: &[pe_store::Rule],
+    ) -> Result<Vec<u64>, Failure> {
+        let rules: Vec<pe_store::Rule> = rules.iter().filter(|r| r.applies_to(self.account)).cloned().collect();
+        if rules.is_empty() || uids.is_empty() {
+            return Ok(Vec::new());
+        }
+        let needs_text = rules
+            .iter()
+            .any(|r| pe_store::Query::parse(&r.query, unix_now()).needs_text());
+        if needs_text {
+            self.index_new(store, folder, uids).await?;
+        }
+        let plans = crate::rules::plan(store, self.account, folder, uids, &rules)?;
+        if plans.is_empty() {
+            return Ok(Vec::new());
+        }
+        let quiet: Vec<u64> = plans.iter().filter(|(_, p)| p.quiet).map(|(uid, _)| *uid).collect();
+        let pick = |want: &dyn Fn(&crate::rules::Plan) -> bool| -> Vec<u64> {
+            plans.iter().filter(|(_, p)| want(p)).map(|(uid, _)| *uid).collect()
+        };
+        // the flags first, which the server keeps on the messages as they move
+        let (junk_on, junk_off) = crate::junk_keywords(true);
+        let junked = pick(&|p| matches!(p.away, Some(crate::rules::Away::Junk(_))));
+        for (uids, add, remove) in [
+            (pick(&|p| p.read), vec!["\\Seen"], vec![]),
+            (pick(&|p| p.flag), vec!["\\Flagged"], vec![]),
+            (junked, vec![junk_on], vec![junk_off]),
+        ] {
+            let changed = store.change_flags_many(folder, &uids, &add, &remove)?;
+            if !changed.is_empty() {
+                let command = Command::SetFlags {
+                    folder,
+                    uids: changed,
+                    add,
+                    remove,
+                };
+                Box::pin(self.handle(store, command)).await?;
+            }
+        }
+        // then where each goes, a command per destination
+        let mut aways: Vec<crate::rules::Away> = plans.iter().filter_map(|(_, p)| p.away).collect();
+        aways.sort();
+        aways.dedup();
+        for away in aways {
+            let uids: Vec<u64> = plans
+                .iter()
+                .filter(|(_, p)| p.away == Some(away))
+                .map(|(uid, _)| *uid)
+                .collect();
+            let removed = uids
+                .iter()
+                .filter_map(|&uid| store.message(folder, uid).ok().flatten().map(|m| m.info))
+                .collect::<Vec<_>>();
+            store.remove_moving_messages(folder, &uids)?;
+            let command = match away {
+                crate::rules::Away::Archive => Command::Archive { folder, uids, removed },
+                crate::rules::Away::Move(to) | crate::rules::Away::Junk(to) | crate::rules::Away::Delete(to) => {
+                    Command::Move {
+                        folder,
+                        uids,
+                        to,
+                        removed,
+                    }
+                }
+            };
+            Box::pin(self.handle(store, command)).await?;
+        }
+        self.emit(Event::FolderChanged {
+            account: self.account,
+            folder,
+        });
+        self.emit(Event::RulesApplied {
+            account: self.account,
+            count: plans.len(),
+        });
+        Ok(quiet)
+    }
+
+    /// Indexes the text of messages just arrived, for a rule that looks for words in it (the background does the rest
+    /// later)
+    async fn index_new(&mut self, store: &mut Store, folder: FolderId, uids: &[u64]) -> Result<(), Failure> {
+        // a batch at a time, as the background does, and only what it has not indexed yet
+        for chunk in uids.chunks(crate::search::TEXT_BATCH) {
+            let wanted = chunk.to_vec();
+            let pending = move |store: &Store, _: AccountId, _: usize| store.unindexed(folder, &wanted);
+            self.index_texts(store, &pending).await?;
         }
         Ok(())
     }
@@ -1641,4 +1766,4 @@ impl Worker {
 
 /// Which messages [`Worker::index_texts`] fetches the text of: the store's `messages_to_index` or
 /// `messages_without_snippet` for an account, a batch at most
-pub(crate) type PendingTexts = fn(&Store, AccountId, usize) -> pe_store::Result<Vec<(i64, FolderId, u64)>>;
+pub(crate) type PendingTexts = dyn Fn(&Store, AccountId, usize) -> pe_store::Result<Vec<(i64, FolderId, u64)>> + Sync;

@@ -135,6 +135,8 @@ typedef enum PeEventKind {
   // A message the user sent from `account` waits `count` seconds in the Outbox before it goes; `message` is its
   // subject. `pe_undo_send` takes it back meanwhile.
   PE_EVENT_KIND_SEND_WAITING = 23,
+  // The message rules sorted `count` messages of `account`'s new mail, or of its Inbox when one was applied there
+  PE_EVENT_KIND_RULES_APPLIED = 24,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -415,6 +417,9 @@ typedef struct PePositions PePositions;
 // The messages that were being written when Inbox Classic last ended without closing their windows; free with
 // `pe_recovered_free`
 typedef struct PeRecovered PeRecovered;
+
+// The rules; free with `pe_rules_free`
+typedef struct PeRules PeRules;
 
 // Selected messages; free with `pe_selection_free`
 typedef struct PeSelection PeSelection;
@@ -1045,6 +1050,28 @@ typedef struct PeSelectionSummary {
   bool watched;
   bool ignored;
 } PeSelectionSummary;
+
+// A message rule: a search query and what to do with the new mail of an Inbox that matches it
+typedef struct PeRule {
+  // 0 for a new rule
+  int64_t id;
+  bool enabled;
+  const char *name;
+  // The account whose Inbox it is for, 0 for every account's
+  int64_t account;
+  // What the new mail has to match, in the search box's words
+  const char *query;
+  // The folder it moves the messages to, 0 for none
+  int64_t move_to;
+  bool mark_read;
+  bool flag;
+  bool archive;
+  bool junk;
+  // Into Deleted Items
+  bool remove;
+  // Not announced as new mail
+  bool quiet;
+} PeRule;
 
 // A row of the Move and Copy window; its strings belong to the list
 typedef struct PeTarget {
@@ -3081,6 +3108,87 @@ bool pe_list_view_leaves_list(const struct PeListView *view,
                               const struct PeSelectionSummary *summary,
                               enum PeAction action,
                               int64_t to);
+
+// The message rules, in their order; NULL on failure
+//
+// # Safety
+// `core` must be a live handle.
+struct PeRules *pe_rules(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_rules_count(const struct PeRules *list);
+
+// Rule `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeRule *pe_rules_get(const struct PeRules *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_rules_free(struct PeRules *list);
+
+// Saves a rule (a new one, id 0, last); its id, or 0 with the reason in `error` (free it with `pe_string_free`) for
+// a query that can not be a rule's or a rule that does nothing
+//
+// # Safety
+// `core` must be a live handle, `rule` a valid rule, `error` NULL or a valid pointer.
+int64_t pe_rule_save(const struct PeCore *core,
+                     const struct PeRule *rule,
+                     char **error);
+
+// Deletes a rule
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_rule_delete(const struct PeCore *core, int64_t id);
+
+// Moves a rule one place up (earlier) or down; false when it was first or last already
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_rule_move(const struct PeCore *core, int64_t id, bool up);
+
+// How many messages in the Inbox of `account` (0: of every account) `query` matches now, for the rule editor
+//
+// # Safety
+// `core` must be a live handle, `query` a valid string.
+uint64_t pe_rule_matches(const struct PeCore *core,
+                         const char *query,
+                         int64_t account);
+
+// Why `query` can not be a rule's (it names a folder or a date), NULL when it can; free with `pe_string_free`
+//
+// # Safety
+// `core` must be a live handle, `query` a valid string.
+char *pe_rule_query_problem(const struct PeCore *core,
+                            const char *query);
+
+// The words for the search box that show what `query` matches in the Inboxes (the rule editor's Show); free with
+// `pe_string_free`
+//
+// # Safety
+// `core` must be a live handle, `query` a valid string.
+char *pe_rule_search_text(const struct PeCore *core,
+                          const char *query);
+
+// Runs a rule over the messages already in the Inbox (of its account or every account's), in the background:
+// `RulesApplied` says how many it sorted
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_rule_apply_now(const struct PeCore *core,
+                       int64_t id);
+
+// The query a rule made from a message starts with: `from:` its sender, or `list:` its mailing list; empty when
+// there is no message. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_rule_query_of_message(const struct PeCore *core,
+                               int64_t folder,
+                               uint64_t uid);
 
 // An empty selection
 struct PeSelection *pe_selection_new(void);

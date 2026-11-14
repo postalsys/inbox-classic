@@ -222,6 +222,7 @@ impl ListView {
             threads: self.grouped.then(|| self.expanded.iter().copied().collect()),
             hide_ignored: self.hide_ignored,
             read_since: (self.show == Show::Unread).then_some(self.since),
+            uids: None,
         })
     }
 

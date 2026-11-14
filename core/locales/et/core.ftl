@@ -323,6 +323,12 @@ error-no-recipients = kirjal pole adressaate
 error-bad-address = „{ $address }“ pole e-posti aadress
 # review: new
 error-not-own-address = { $address } ei ole selle konto aadress. Lisage see konto atribuutides väljale „Muud aadressid“.
+# review: new
+rule-query-refused = Reegel on postkasti uutele kirjadele, seega ei saa see nimetada kausta ega kuupäeva ({ $words }).
+# review: new
+rule-no-query = Sisestage, millele uued kirjad peavad vastama.
+# review: new
+rule-no-action = Valige, mida reegel teeb.
 error-attachment = faili { $path } ei saanud lugeda: { $error }
 error-no-drafts = kontol pole mustandite kausta, kuhu kirja salvestada
 error-draft-attachment = mustandi manust ei saanud alles hoida: { $error }

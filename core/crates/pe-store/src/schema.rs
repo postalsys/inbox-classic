@@ -488,6 +488,26 @@ CREATE TABLE account_addresses (
     PRIMARY KEY (account_id, position)
 );
 "#,
+    // message rules (pe-core rules.rs): a search query and what to do with the new mail of an Inbox that matches it,
+    // in their order; the mailing list of each message (its List-Id, fetched with the summary) for `list:`
+    r#"
+CREATE TABLE rules (
+    id INTEGER PRIMARY KEY,
+    position INTEGER NOT NULL,
+    enabled INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    account_id INTEGER REFERENCES accounts(id) ON DELETE CASCADE,
+    query TEXT NOT NULL,
+    move_to INTEGER REFERENCES folders(id) ON DELETE SET NULL,
+    mark_read INTEGER NOT NULL,
+    flag INTEGER NOT NULL,
+    archive INTEGER NOT NULL,
+    junk INTEGER NOT NULL,
+    remove INTEGER NOT NULL,
+    quiet INTEGER NOT NULL
+);
+ALTER TABLE messages ADD COLUMN list_id TEXT;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

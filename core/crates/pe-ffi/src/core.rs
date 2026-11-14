@@ -139,6 +139,8 @@ pub enum PeEventKind {
     /// A message the user sent from `account` waits `count` seconds in the Outbox before it goes; `message` is its
     /// subject. `pe_undo_send` takes it back meanwhile.
     SendWaiting = 23,
+    /// The message rules sorted `count` messages of `account`'s new mail, or of its Inbox when one was applied there
+    RulesApplied = 24,
 }
 
 #[repr(C)]
@@ -219,6 +221,7 @@ impl Callback {
             Event::Failed { account, .. } => (PeEventKind::Failed, *account, 0, 0),
             Event::MessageSent { account, .. } => (PeEventKind::MessageSent, *account, 0, 0),
             Event::SendWaiting { account, .. } => (PeEventKind::SendWaiting, *account, 0, 0),
+            Event::RulesApplied { account, .. } => (PeEventKind::RulesApplied, *account, 0, 0),
             Event::DraftSaved { account, .. } => (PeEventKind::DraftSaved, *account, 0, 0),
             Event::AutoconfigDone { request } => (PeEventKind::AutoconfigDone, 0, 0, *request),
             Event::SignInDone { request } => (PeEventKind::SignInDone, 0, 0, *request),
@@ -240,6 +243,7 @@ impl Callback {
         let count = match &event {
             Event::NewMail { count, .. } => *count as u64,
             Event::SendWaiting { seconds, .. } => *seconds,
+            Event::RulesApplied { count, .. } => *count as u64,
             _ => 0,
         };
         let (failure, message, detail) = match event {
