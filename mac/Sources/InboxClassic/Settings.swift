@@ -74,7 +74,7 @@ enum Languages {
     }
 }
 
-/// Inbox Classic > Settings: the language of the windows, Notify of New Mail, Group messages by conversation, the
+/// Inbox Classic > Settings: the language of the windows, Notify of New Mail, Group messages by conversation, messages dark in a dark window, the
 /// pictures of every message and the trusted senders, .eml files, and what is downloaded before it is opened. As Mac settings windows do, a change counts at
 /// once; a language counts once the app starts again, which it offers to do.
 @MainActor
@@ -86,6 +86,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     let grouping: NSButton
     let signInCodes: NSButton
     let pictures: NSButton
+    /// Show messages on a dark background when the system is dark
+    let darkMessages: NSButton
     let listPictures: NSButton
     let downloadAhead = NSPopUpButton()
     let downloadLimit = NSPopUpButton()
@@ -120,6 +122,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grouping = NSButton(checkboxWithTitle: Text.uiGroupByConversation.text, target: nil, action: nil)
         signInCodes = NSButton(checkboxWithTitle: Text.uiCodesInNotifications.text, target: nil, action: nil)
         pictures = NSButton(checkboxWithTitle: Text.uiPicturesAlwaysOption.text, target: nil, action: nil)
+        darkMessages = NSButton(checkboxWithTitle: Text.uiDarkMessages.text, target: nil, action: nil)
         listPictures = NSButton(checkboxWithTitle: Text.uiListPictures.text, target: nil, action: nil)
         super.init()
         window.title = Text.macSettingsTitle.text
@@ -174,7 +177,11 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         let indented = NSStackView(views: [signInCodes])
         indented.edgeInsets = NSEdgeInsets(top: 0, left: 18, bottom: 0, right: 0)
 
-        // reading: the pictures of every message, with what that tells senders under it, and the senders trusted
+        // reading: messages dark in a dark window, then the pictures of every message, with what that tells senders under it, and the senders trusted
+        darkMessages.state = core.darkMessages ? .on : .off
+        darkMessages.target = self
+        darkMessages.action = #selector(darkMessagesChanged)
+        darkMessages.setAccessibilityIdentifier("settings.darkMessages")
         pictures.state = core.alwaysLoadPictures ? .on : .off
         pictures.target = self
         pictures.action = #selector(picturesChanged)
@@ -246,6 +253,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             [NSGridCell.emptyContentView, grouping],
             [NSGridCell.emptyContentView, listPictures],
             [NSGridCell.emptyContentView, listNoted],
+            [NSGridCell.emptyContentView, darkMessages],
             [NSGridCell.emptyContentView, pictures],
             [NSGridCell.emptyContentView, warned],
             [NSGridCell.emptyContentView, trusted],
@@ -261,7 +269,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grid.column(at: 0).xPlacement = .trailing
         // the rows by what is in them, so a row added between them does not move another's room
         let rowOf = { (view: NSView) in grid.cell(for: view)?.row }
-        for (view, padding) in [(layout, 8), (notify, 8), (pictures, 8), (trusted, 4), (eml, 8), (sendRow, 12), (aheadRow, 12)] as [(NSView, CGFloat)] {
+        for (view, padding) in [(layout, 8), (notify, 8), (darkMessages, 8), (pictures, 4), (trusted, 4), (eml, 8), (sendRow, 12), (aheadRow, 12)] as [(NSView, CGFloat)] {
             rowOf(view)?.topPadding = padding
         }
         // the labels on the pop-ups' text lines, as the other forms have them
@@ -319,6 +327,16 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         core.alwaysLoadPictures = pictures.state == .on
         // the message shown now as the setting has it
         AppDelegate.shared?.main?.mailbox.reader.reload()
+    }
+
+    @objc func darkMessagesChanged() {
+        core.darkMessages = darkMessages.state == .on
+        Preview.dark = core.darkMessages
+        // the messages shown now made again as the setting has it
+        AppDelegate.shared?.main?.mailbox.reader.reload()
+        for window in MessageWindow.open {
+            window.reader.reload()
+        }
     }
 
     @objc func downloadAheadChosen() {
