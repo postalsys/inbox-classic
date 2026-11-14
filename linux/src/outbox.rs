@@ -23,9 +23,10 @@ fn fill(list: &gtk::ListBox, ids: &RefCell<Vec<i64>>, select: usize, buttons: &[
         } else {
             &message.subject
         };
-        // one an AI agent sent waits a moment, while it can still be deleted
+        // one an AI agent sent waits a moment, while it can still be deleted; the user's while Undo takes it back
         let status = match (&message.problem, message.not_before) {
             (Some(problem), _) => t!(UiOutboxStatusNotSent, reason = problem),
+            (None, Some(at)) if message.undoable => t!(UiOutboxStatusUndo, time = &ui::format_time(at)),
             (None, Some(at)) => t!(UiOutboxStatusAgent, time = &ui::format_time(at)),
             (None, None) => t!(UiOutboxStatusWaiting),
         };

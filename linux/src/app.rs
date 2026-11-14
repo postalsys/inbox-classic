@@ -39,6 +39,8 @@ pub struct Shell {
     failing: RefCell<HashSet<i64>>,
     /// The last message sent, as the outgoing part of the status bar says once the Outbox is empty
     last_sent: RefCell<Option<(String, String)>>,
+    /// The timer that counts down the message the user sent in the status bar, in the core's words, while it waits
+    send_timer: RefCell<Option<glib::SourceId>>,
     /// Tools > Notify of New Mail
     pub notify: Cell<bool>,
     /// Quit was chosen: closing the window ends the app rather than hiding it in the tray
@@ -103,6 +105,7 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
         prompting: RefCell::default(),
         failing: RefCell::default(),
         last_sent: RefCell::default(),
+        send_timer: RefCell::default(),
         notify: Cell::new(notify),
         exiting: Cell::new(false),
         tray: RefCell::new(None),
@@ -301,6 +304,17 @@ impl Shell {
                     main.set_status(&said);
                 }
             }
+            Event::SendWaiting { .. } => {
+                if let Some(timer) = self.send_timer.take() {
+                    timer.remove();
+                }
+                let timer = glib::timeout_add_seconds_local(1, || {
+                    shell().show_outbox();
+                    glib::ControlFlow::Continue
+                });
+                *self.send_timer.borrow_mut() = Some(timer);
+                self.show_outbox();
+            }
             Event::MessageSent { subject, .. } => {
                 // shown by the OutboxChanged that follows it
                 *self.last_sent.borrow_mut() = Some((subject.clone(), ui::time_now()));
@@ -376,6 +390,11 @@ impl Shell {
     /// The outgoing part of the status bar, which other work does not write over: what is being sent, what waits in
     /// the Outbox and why, or the last message sent
     pub fn show_outbox(&self) {
+        // a message waiting to be sent says how long, with its Undo
+        if let Some(text) = self.send_waiting_text() {
+            self.main().set_outgoing(&text, true);
+            return;
+        }
         let waiting = self.core.outbox().unwrap_or_default();
         let text = match waiting.as_slice() {
             // in the words of now, which may be another language than when it went
@@ -390,7 +409,36 @@ impl Shell {
             [first] => t!(UiOutboxSending, subject = &quoted(&first.subject)),
             more => t!(UiOutboxWaiting, count = more.len()),
         };
-        self.main().set_outgoing(&text);
+        self.main().set_outgoing(&text, false);
+    }
+
+    /// The countdown of the message waiting to be sent; None once none waits
+    fn send_waiting_text(&self) -> Option<String> {
+        self.send_timer.borrow().as_ref()?;
+        let text = self.core.send_waiting_text();
+        if text.is_none() {
+            self.end_send_waiting();
+        }
+        text
+    }
+
+    /// No message waits to be sent any more: the countdown stops
+    fn end_send_waiting(&self) {
+        if let Some(timer) = self.send_timer.take() {
+            timer.remove();
+        }
+    }
+
+    /// Takes back the message that waits to be sent: it opens again as it was, or the status bar says it went
+    pub fn undo_send(&self) {
+        self.end_send_waiting();
+        if let Ok((taken, said)) = self.core.undo_send() {
+            if let Some((account, draft)) = taken {
+                compose::open(account, Some(draft));
+            }
+            self.main().set_status(&said);
+        }
+        self.show_outbox();
     }
 
     pub fn sync_all(&self) {
@@ -557,6 +605,8 @@ pub async fn quit() {
         shell.exiting.set(false);
         return;
     }
+    // what waits to be taken back goes now, not at the next start
+    let _ = shell.core.send_waiting_now();
     if let Some(tray) = shell.tray.borrow_mut().take() {
         tray.stop();
     }

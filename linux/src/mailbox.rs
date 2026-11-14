@@ -73,6 +73,8 @@ pub struct Mailbox {
     empty_more: gtk::Label,
     status: gtk::Label,
     outgoing: gtk::Label,
+    /// The status bar's Undo of a message waiting to be sent
+    undo_send: gtk::Button,
     counts: gtk::Label,
     junk: gtk::Button,
     /// The Edit submenu of the primary menu, whose Undo says what it takes back
@@ -207,7 +209,7 @@ impl Mailbox {
             shell().settings.set_int(key, paned.position());
         });
         panes.connect_position_notify(|paned| shell().settings.set_int(settings::TREE_WIDTH, paned.position()));
-        let (status_bar, status, outgoing, counts) = status_bar();
+        let (status_bar, status, outgoing, undo_send, counts) = status_bar();
         let content = gtk::Box::new(gtk::Orientation::Vertical, 0);
         content.append(&panes);
         content.append(&status_bar);
@@ -257,6 +259,7 @@ impl Mailbox {
             empty_more,
             status,
             outgoing,
+            undo_send,
             counts,
             junk: parts.junk.clone(),
             edit_menu: parts.edit_menu.clone(),
@@ -1462,10 +1465,16 @@ impl Mailbox {
         self.status.set_tooltip_text((!text.is_empty()).then_some(text));
     }
 
-    pub fn set_outgoing(&self, text: &str) {
+    pub fn set_outgoing(&self, text: &str, undo: bool) {
         self.outgoing.set_text(text);
         // the whole text as the tip, as a long subject is cut short
         self.outgoing.set_tooltip_text(Some(text));
+        self.undo_send.set_visible(undo);
+    }
+
+    #[cfg(feature = "e2e")]
+    pub fn undo_send_button(&self) -> gtk::Button {
+        self.undo_send.clone()
     }
 
     /// "12 messages, 3 unread" for the status bar ("12 found" for a search), and how many are selected when several are
@@ -1933,6 +1942,12 @@ impl Mailbox {
 
     /// Edit > Undo: the last move, delete or junk taken back
     pub async fn undo(&self) {
+        // the last thing done was sending a message that still waits: Undo Send
+        if shell().core.undo_is_send() {
+            shell().undo_send();
+            self.update_undo();
+            return;
+        }
         let outcome = shell().core.undo();
         self.update_undo();
         match outcome {
@@ -3286,7 +3301,7 @@ fn empty_list() -> (gtk::Box, gtk::Label, gtk::Label) {
 }
 
 /// The status bar: what the app is doing, the outgoing mail, the counts of the folder
-fn status_bar() -> (gtk::Box, gtk::Label, gtk::Label, gtk::Label) {
+fn status_bar() -> (gtk::Box, gtk::Label, gtk::Label, gtk::Button, gtk::Label) {
     let label = |name: &str| {
         let label = gtk::Label::new(None);
         label.set_xalign(0.0);
@@ -3301,6 +3316,12 @@ fn status_bar() -> (gtk::Box, gtk::Label, gtk::Label, gtk::Label) {
     let outgoing = label("outgoing");
     outgoing.set_width_chars(34);
     outgoing.set_max_width_chars(48);
+    // takes back the message that waits to be sent (Undo Send), shown while one does
+    let undo_send = gtk::Button::with_label(&crate::words::plain(crate::words::Text::UiUndoButton));
+    undo_send.add_css_class("flat");
+    undo_send.set_widget_name("undo-send");
+    undo_send.set_visible(false);
+    undo_send.connect_clicked(|_| shell().undo_send());
     let counts = label("counts");
     counts.set_width_chars(24);
     counts.set_xalign(1.0);
@@ -3309,9 +3330,10 @@ fn status_bar() -> (gtk::Box, gtk::Label, gtk::Label, gtk::Label) {
     bar.append(&status);
     bar.append(&gtk::Separator::new(gtk::Orientation::Vertical));
     bar.append(&outgoing);
+    bar.append(&undo_send);
     bar.append(&gtk::Separator::new(gtk::Orientation::Vertical));
     bar.append(&counts);
-    (bar, status, outgoing, counts)
+    (bar, status, outgoing, undo_send, counts)
 }
 
 /// The title of Import's windows: the command's name without its dots
