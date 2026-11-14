@@ -217,6 +217,21 @@ Screenshots: `write-0-main-in-front` (not yet on the Mac, not yet on Linux), `wr
 - and its draft is gone
 - the main window says what was sent
 
+
+## 19a. Drafts saved automatically
+
+Screenshots: `write-20-autosave`, `write-21-restored`
+
+- a message being written is saved in Drafts once typing stops, without pressing Save
+- the draft is in Drafts on the server
+- closing a message saved only automatically asks whether to keep it
+- No (Don't Save on the Mac) closes the window
+- and removes the copy saved automatically from Drafts
+- a message being written when the app crashed (the test drops its window without closing it) opens again
+- with its recipient
+- and says it was restored
+- closing it asks whether to keep it, and No leaves its draft in Drafts, as it may be one the user kept
+- closed, it is not opened again at the next start
 ## 20. Send/Recv
 
 Screenshots: `main-2-new-mail`, `main-3-sent-items`

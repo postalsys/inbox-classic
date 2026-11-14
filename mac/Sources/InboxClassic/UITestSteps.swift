@@ -224,6 +224,59 @@ extension UITest {
         await shot(main.window, "main-2-new-mail")
     }
 
+    func draftsSavedAutomatically() async throws {
+        step("drafts saved automatically")
+        command(.newMail)
+        guard var compose = await waitCompose() else { throw Failed(description: "no compose window") }
+        type("Gus <gus@example.com>", into: field("compose.to", compose))
+        type("Saved by itself in the UI test", into: field("compose.subject", compose))
+        _ = await typeInEditor(compose, "Not saved by hand.")
+        let status: NSTextField? = find("compose.status", in: compose)
+        check(await waitUntil(30) { status?.stringValue.hasPrefix("Saved in Drafts at") == true },
+              "a message being written is saved in Drafts once typing stops")
+        let saved = await waitFor(30) { await findMessage("Drafts", "Subject: Saved by itself") }
+        check(saved.map { raw($0).contains("Not saved by hand") } == true, "the draft is in Drafts on the server")
+        await shot(compose, "write-20-autosave")
+        // closed without saving: the copy only the automatic saving made goes
+        onMain { compose.performClose(nil) }
+        let ask = await waitWindow("alert", 10)
+        check(ask != nil, "closing a message saved only automatically asks whether to keep it")
+        answer(ask, "Don’t Save")
+        check(await waitUntil { !compose.isVisible }, "Don't Save closes the window")
+        check(await waitUntil(30) { await findMessage("Drafts", "Subject: Saved by itself") == nil },
+              "and removes the copy saved automatically from Drafts")
+
+        step("a message being written opened again after a crash")
+        command(.newMail)
+        guard let written = await waitCompose() else { throw Failed(description: "no compose window") }
+        compose = written
+        type("Hal <hal@example.com>", into: field("compose.to", compose))
+        type("Written when it crashed", into: field("compose.subject", compose))
+        _ = await typeInEditor(compose, "Kept for a crash.")
+        let writtenStatus: NSTextField? = find("compose.status", in: compose)
+        check(await waitUntil(30) { writtenStatus?.stringValue.hasPrefix("Saved in Drafts at") == true }, "saved by itself")
+        // the window gone as a crash takes it, without closing
+        onMain { ComposeWindow.open.first { $0.window === compose }?.abandon() }
+        _ = await waitUntil { !compose.isVisible }
+        onMain { ComposeWindow.openRecovered(core: self.main.core) }
+        guard let restored = await waitFor(10, { ComposeWindow.open.last.flatMap { $0.window.title == "Written when it crashed" ? $0.window : nil } })
+        else { throw Failed(description: "the message was not opened again") }
+        check(field("compose.to", restored)?.stringValue.contains("hal@example.com") == true, "it opens again with its recipient")
+        let restoredStatus: NSTextField? = find("compose.status", in: restored)
+        check(restoredStatus?.stringValue.hasPrefix("Restored") == true, "and says it was restored")
+        await shot(restored, "write-21-restored")
+        onMain { restored.performClose(nil) }
+        let again = await waitWindow("alert", 10)
+        check(again != nil, "closing it asks whether to keep it")
+        answer(again, "Don’t Save")
+        check(await waitUntil { !restored.isVisible }, "Don't Save closes it")
+        check(await findMessage("Drafts", "Subject: Written when it crashed") != nil,
+              "and leaves its draft in Drafts, as it may be one the user kept")
+        onMain { ComposeWindow.openRecovered(core: self.main.core) }
+        _ = await waitUntil(2) { false }
+        check(ComposeWindow.open.isEmpty, "closed, it is not opened again at the next start")
+    }
+
     func rfc2822(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
