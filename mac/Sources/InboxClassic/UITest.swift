@@ -440,8 +440,9 @@ final class UITest {
 
     /// the folder at `index` under the first account (Inbox first)
     func selectFolder(_ index: Int) {
-        let row = 1 + index
-        tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+        // the folders of the first account start under its heading (Flagged and All Inboxes above it)
+        let heading = (0..<tree.numberOfRows).first { tree.item(atRow: $0) is Mailbox.AccountNode } ?? 0
+        tree.selectRowIndexes(IndexSet(integer: heading + 1 + index), byExtendingSelection: false)
     }
 
     /// the folder of the first account the tree names `name` (Inbox, Sent Items, Drafts, Archive, Junk E-mail...)
@@ -515,6 +516,7 @@ final class UITest {
         try await searching()
         try await files()
         try await organizing()
+        try await flaggedFolder()
         try await listMail()
         try await folders()
         try await writingMore()

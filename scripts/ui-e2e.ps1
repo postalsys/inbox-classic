@@ -732,14 +732,21 @@ try {
     # while there are two), whose first row is named as the account after it (or which has none, before the accounts'
     # Inboxes are known)
     function FirstAccountItem {
-        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
-        $next = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item)
-        $child = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $item)
+        # the first account's row: not Flagged (no rows under it), nor All Inboxes (its rows named as the accounts)
         $bare = { param($i) ([Native.Win]::RemoteTreeText($tree, $i)) -replace ' \(\d+\)$', '' }
-        if ($next -ne [IntPtr]::Zero -and ($child -eq [IntPtr]::Zero -or (& $bare $child) -eq (& $bare $next))) {
-            $item = $next
+        $roots = @()
+        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+        while ($item -ne [IntPtr]::Zero) {
+            $roots += $item
+            $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item)
         }
-        $item
+        $names = @($roots | ForEach-Object { & $bare $_ })
+        foreach ($root in $roots) {
+            $child = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $root)
+            if ($child -eq [IntPtr]::Zero -or $names -contains (& $bare $child)) { continue }
+            return $root
+        }
+        $roots[0]
     }
     # the folders under the account: Inbox, Sent Items, Drafts, Archive, Junk E-mail, Deleted Items
     function SelectFolder([int]$index) {
@@ -1708,6 +1715,11 @@ public static class Dragger {
     Check ([bool](WaitFor { -not (Find 'Trash' 'Subject: One more thing') } 20)) 'and then it is gone from the server'
     SelectFolder 0
 
+
+    Step 'the Flagged folder'
+    $flaggedRow = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)) | Where-Object { $_ -like 'Flagged*' })
+    Check ($flaggedRow.Count -eq 1) "Flagged is in the folder list ($($flaggedRow -join ', '))"
+    Shot $main 'main-10-flagged'
     Step 'unsubscribing'
     # the list's server: a socket of the test, answered by hand
     $listServer = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Loopback, 0)
@@ -1841,7 +1853,7 @@ public static class Dragger {
 
     Step 'a collapsed account'
     # the account's own item, the first of the tree, and the Inbox under it
-    $accountItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+    $accountItem = (FirstAccountItem)
     $inboxItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $accountItem)
     $TVM_GETITEMSTATE = 0x1127; $TVIS_BOLD = 0x10; $VK_LEFT = 0x25; $VK_RIGHT = 0x27
     $bold = { param($item) ([int][Native.Win]::SendMessage($tree, $TVM_GETITEMSTATE, $item, [IntPtr]$TVIS_BOLD) -band $TVIS_BOLD) -ne 0 }
@@ -1982,7 +1994,7 @@ public static class Dragger {
     SelectFolder 0
     $inInbox = WaitFor { if ((Rows) -ge 2 -and [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT) -eq 'Drag me' -and [Native.Win]::RemoteListText($list, 1, $COL_SUBJECT) -eq 'Copy me') { Rows } } 30
     # the first row and Archive (the fourth folder) on the screen
-    $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
+    $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, (FirstAccountItem))
     for ($i = 0; $i -lt 3; $i++) { $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $archiveItem) }
     function Middle($rect) { @([int](($rect.Left + $rect.Right) / 2), [int](($rect.Top + $rect.Bottom) / 2)) }
     [void][Native.Win]::SetForegroundWindow($main)
@@ -2008,7 +2020,7 @@ public static class Dragger {
     Check ($null -ne (WaitFor { Find 'Archive' "Subject: $second" } 20)) "with Ctrl it is copied there ($second)"
     Check ($null -ne (Find 'INBOX' "Subject: $second")) 'and stays in the Inbox'
     # onto the folder it is in: nothing happens
-    $inboxItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
+    $inboxItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, (FirstAccountItem))
     $row = [Native.Win]::RemoteRect($list, 0x100E, [IntPtr]0, 0)
     $inbox = Middle ([Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $inboxItem.ToInt64()))
     $before = Rows
@@ -3294,7 +3306,7 @@ public static class Dragger {
     Check ([bool](WaitFor { (Mailboxes) -contains 'Archive/Projects' } 20)) 'New Folder makes Archive/Projects on the server'
     # the first folder in Archive, found again each time: the tree is built anew when the folders change
     function ArchiveChild {
-        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
+        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, (FirstAccountItem))
         for ($i = 0; $i -lt 3; $i++) { $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item) }
         $child = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $item)
         if ($child -ne [IntPtr]::Zero) { $child }
@@ -4046,7 +4058,9 @@ public static class Dragger {
         $roots = @()
         $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
         while ($item -ne [IntPtr]::Zero) {
-            $roots += & $bare ([Native.Win]::RemoteTreeText($tree, $item))
+            # the accounts' rows only: Flagged is under All Inboxes too
+            $name = & $bare ([Native.Win]::RemoteTreeText($tree, $item))
+            if ($name -ne 'Flagged') { $roots += $name }
             $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item)
         }
         $inboxes = @(AllInboxesRows | ForEach-Object { & $bare ([Native.Win]::RemoteTreeText($tree, $_)) })

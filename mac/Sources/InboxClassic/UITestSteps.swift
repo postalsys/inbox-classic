@@ -374,6 +374,40 @@ extension UITest {
         check(await waitUntil(5) { abs((pane?.pageZoom ?? 0) - 1) < 0.01 }, "Medium is the usual size again")
     }
 
+    func flaggedFolder() async throws {
+        step("the Flagged folder")
+        let flaggedRow = { (0..<self.tree.numberOfRows).first { self.tree.item(atRow: $0) is Mailbox.FlaggedNode } }
+        guard let row = flaggedRow() else {
+            check(false, "Flagged is in the folder list")
+            return
+        }
+        check(row < (0..<tree.numberOfRows).first { tree.item(atRow: $0) is Mailbox.FolderNode } ?? 0,
+              "Flagged is above the accounts' folders")
+        let before = main.core.flaggedCount
+        // a message of another folder flagged: it is listed too
+        selectFolder(named: "Archive")
+        _ = await waitUntil(10) { self.list.numberOfRows > 0 }
+        await selectRow(0)
+        let subject = main.mailbox.selectedRow?.subject ?? ""
+        command(.flag)
+        check(await waitUntil(10) { self.main.core.flaggedCount == before + 1 }, "flagging a message counts it under Flagged")
+        onMain { _ = self.tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false) }
+        check(await waitUntil(10) { self.list.numberOfRows == Int(before + 1) },
+              "Flagged lists the flagged messages of every folder (\(self.list.numberOfRows))")
+        check((0..<list.numberOfRows).contains { main.mailbox.row($0)?.subject == subject }, "the one from Archive among them")
+        let folderColumn = list.tableColumns.first { $0.identifier.rawValue == "folder" }
+        check(folderColumn?.title == "Folder", "with the Folder each is in (\(folderColumn?.title ?? "none"))")
+        check(main.window.title.hasPrefix("Flagged"), "the window is named Flagged (\(main.window.title))")
+        await shot(main.window, "main-10-flagged")
+        // unflagged in its own folder: it goes from Flagged
+        if let index = (0..<list.numberOfRows).first(where: { main.mailbox.row($0)?.subject == subject }) {
+            await selectRow(index)
+            command(.flag)
+            check(await waitUntil(10) { self.main.core.flaggedCount == before }, "unflagged, it is no longer counted")
+        }
+        selectFolder(named: "Inbox")
+    }
+
     func rfc2822(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
@@ -626,16 +660,18 @@ extension UITest {
         let rowLabel = { (row: Int) -> String in
             (self.tree.view(atColumn: 0, row: row, makeIfNecessary: true) as? NSTableCellView)?.accessibilityLabel() ?? ""
         }
-        let heading = { self.tree.view(atColumn: 0, row: 0, makeIfNecessary: true) as? HeadingCell }
+        // the account's heading, under Flagged
+        let head = (0..<tree.numberOfRows).first { tree.item(atRow: $0) is Mailbox.AccountNode } ?? 0
+        let heading = { self.tree.view(atColumn: 0, row: head, makeIfNecessary: true) as? HeadingCell }
         selectFolder(named: "Inbox")
-        let inboxRow = (0..<tree.numberOfRows).first { (tree.item(atRow: $0) as? Mailbox.FolderNode)?.folder.name == "Inbox" } ?? 1
+        let inboxRow = (0..<tree.numberOfRows).first { (tree.item(atRow: $0) as? Mailbox.FolderNode)?.folder.name == "Inbox" } ?? head + 1
         let inboxNode = tree.item(atRow: inboxRow) as? Mailbox.FolderNode
         let inboxUnread = inboxNode?.folder.unread ?? 0
         _ = await waitUntil(5) { self.main.mailbox.folder == inboxNode?.folder.id }
         let listed = main.mailbox.total
         check(inboxUnread >= 1, "the Inbox has unread messages (\(rowLabel(inboxRow)))")
-        check(tree.item(atRow: 0) is Mailbox.AccountNode && heading() != nil
-              && tree.delegate?.outlineView?(tree, shouldSelectItem: tree.item(atRow: 0) as Any) == false,
+        check(tree.item(atRow: head) is Mailbox.AccountNode && heading() != nil
+              && tree.delegate?.outlineView?(tree, shouldSelectItem: tree.item(atRow: head) as Any) == false,
               "the account is a heading over its folders, which can not be selected")
         // the arrow keys pass the heading by: up from the Inbox stays on the Inbox
         tree.window?.makeFirstResponder(tree)
@@ -646,18 +682,21 @@ extension UITest {
                                      isARepeat: false, keyCode: 126) {
             tree.keyDown(with: up)
         }
-        check(tree.selectedRow == inboxRow, "Up from the Inbox does not select the heading (row \(tree.selectedRow))")
-        main.mailbox.headingClicked(0)
+        check(tree.selectedRow != head, "Up from the Inbox does not select the heading (row \(tree.selectedRow))")
+        // Up passes the heading by to Flagged above it: the Inbox again
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(5) { self.main.mailbox.folder == inboxNode?.folder.id }
+        main.mailbox.headingClicked(head)
         check(await waitUntil(5) {
-            !self.tree.isItemExpanded(self.tree.item(atRow: 0)) && rowLabel(0).hasSuffix("unread")
+            !self.tree.isItemExpanded(self.tree.item(atRow: head)) && rowLabel(head).hasSuffix("unread")
                 && (heading()?.unreadShown ?? 0) >= inboxUnread
-        }, "a click on the heading closes the account, which shows the unread messages of its folders (\(rowLabel(0)))")
+        }, "a click on the heading closes the account, which shows the unread messages of its folders (\(rowLabel(head)))")
         check(main.mailbox.folder == inboxNode?.folder.id && main.mailbox.total == listed && tree.selectedRow < 0,
               "the Inbox it hides stays listed, and nothing is selected in the tree (folder \(main.mailbox.folder) of \(inboxNode?.folder.id ?? 0), \(main.mailbox.total) of \(listed), row \(tree.selectedRow))")
         await shot(main.window, "folders-5-collapsed")
-        main.mailbox.headingClicked(0)
-        check(await waitUntil(5) { !rowLabel(0).hasSuffix("unread") && rowLabel(inboxRow).hasSuffix("unread") && self.tree.selectedRow == inboxRow },
-              "a second click opens it again: the count is back on the Inbox, which is selected again (row \(tree.selectedRow) of \(inboxRow), \(rowLabel(0)) / \(rowLabel(inboxRow)))")
+        main.mailbox.headingClicked(head)
+        check(await waitUntil(5) { !rowLabel(head).hasSuffix("unread") && rowLabel(inboxRow).hasSuffix("unread") && self.tree.selectedRow == inboxRow },
+              "a second click opens it again: the count is back on the Inbox, which is selected again (row \(tree.selectedRow) of \(inboxRow), \(rowLabel(head)) / \(rowLabel(inboxRow)))")
 
         try await agent()
 

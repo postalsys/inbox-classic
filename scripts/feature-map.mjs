@@ -166,6 +166,13 @@ const sections = [
                 checked: ['All 7 folders of the account appear', 'The messages are listed', 'The title names the folder']
             },
             {
+                shot: 'main-10-flagged',
+                name: 'Flagged',
+                what: 'One row lists the flagged messages of every account and folder, with the Folder each is in and how many there are; not those in Deleted Items or Junk E-mail, and on Gmail each once.',
+                how: 'The Flagged row in the folder list.',
+                checked: ['Flagging a message counts it', 'Flagged lists the flagged messages of every folder', 'Unflagged, it is no longer counted']
+            },
+            {
                 shot: 'all-inboxes-1-list',
                 name: 'All Inboxes',
                 what: "With two or more accounts, All Inboxes at the top of the folder tree lists the mail of every account's Inbox in one list, newest first, with an Account column naming the account of each message and the unread count of all of them. The app opens on it, with the newest message selected. Reply, Forward, Move and Delete act on the message in its own account, and Create Mail starts from the account of the selected message. Mark All Read on it marks every Inbox read. It goes when only one account is left.",
