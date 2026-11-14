@@ -14,6 +14,14 @@ size-bytes = { $count ->
 size-kb = { $size } KB
 size-mb = { $size } MB
 size-gb = { $size } GB
+# review: new
+send-delay-off = Aus
+# review: new
+send-delay-seconds = { $count ->
+    [one] 1 Sekunde
+   *[other] { $count } Sekunden
+# review: new
+}
 list-counts = { $messages }, { $unread } ungelesen
 list-counts-selected = { $messages }, { $unread } ungelesen, { $selected } ausgewählt
 list-counts-found = { $found } gefunden, { $unread } ungelesen
@@ -204,6 +212,8 @@ undo-delete = Löschen rückgängig machen
 undo-archive = Archivieren rückgängig machen
 undo-junk = Als Junk markieren rückgängig machen
 undo-not-junk = Als Nicht-Junk markieren rückgängig machen
+# review: new
+undo-send = Senden rückgängig machen
 nothing-to-undo = Es gibt nichts rückgängig zu machen.
 messages-gone = Die Nachrichten sind nicht mehr da.
 folder-holds-no-messages = In diesem Ordner können keine Nachrichten gespeichert werden.

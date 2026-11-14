@@ -498,6 +498,22 @@ ui-download-ahead-recent = Mensajes recientes de hasta 1 MB
 ui-download-ahead-all = Todos los mensajes
 ui-download-ahead-never = Solo al abrirlos
 ui-download-limit = Espacio máximo por cuenta:
+# review: new
+ui-send-delay = Esperar antes de enviar:
+# review: new
+ui-send-delay-note = Mientras un mensaje espera, puede recuperarlo con Deshacer.
+# review: new
+ui-sending-in = Enviando { $subject } en { $count ->
+    [one] 1 segundo
+   *[other] { $count } segundos
+# review: new
+}
+# review: new
+ui-send-undone = { $subject } no se envió. Vuelve a estar abierto.
+# review: new
+ui-send-too-late = { $subject } ya se envió.
+# review: new
+ui-outbox-status-undo = Se envía a las { $time }
 ui-download-note = Los mensajes descargados con antelación se abren al instante. Cuando se supera el límite de almacenamiento, se eliminan las copias locales más antiguas y se vuelven a descargar al abrir los mensajes.
 ui-attachment-downloading = La descarga de este mensaje aún no ha terminado. Vuelva a intentarlo cuando finalice.
 ui-trusted-senders-button = Remitentes de confianza...

@@ -17,6 +17,11 @@ size-bytes = { $count ->
 size-kb = { $size } KB
 size-mb = { $size } MB
 size-gb = { $size } GB
+send-delay-off = Off
+send-delay-seconds = { $count ->
+    [one] 1 second
+   *[other] { $count } seconds
+}
 # the status bar: "12 messages, 3 unread"
 list-counts = { $messages }, { $unread } unread
 list-counts-selected = { $messages }, { $unread } unread, { $selected } selected
@@ -206,6 +211,7 @@ undo-delete = Undo Delete
 undo-archive = Undo Archive
 undo-junk = Undo Mark as Junk
 undo-not-junk = Undo Mark as Not Junk
+undo-send = Undo Send
 nothing-to-undo = There is nothing to undo.
 messages-gone = The messages are no longer there.
 # A non-selectable IMAP folder cannot contain messages; this does not mean it is empty.

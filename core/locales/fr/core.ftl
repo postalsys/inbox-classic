@@ -14,6 +14,14 @@ size-bytes = { $count ->
 size-kb = { $size } Ko
 size-mb = { $size } Mo
 size-gb = { $size } Go
+# review: new
+send-delay-off = Désactivé
+# review: new
+send-delay-seconds = { $count ->
+    [one] 1 seconde
+   *[other] { $count } secondes
+# review: new
+}
 list-counts = { $messages }, { $unread ->
     [one] { $unread } non lu
    *[other] { $unread } non lus
@@ -231,6 +239,8 @@ undo-delete = Annuler la suppression
 undo-archive = Annuler l'archivage
 undo-junk = Annuler le marquage comme indésirable
 undo-not-junk = Annuler le marquage comme non indésirable
+# review: new
+undo-send = Annuler l’envoi
 nothing-to-undo = Il n'y a rien à annuler.
 messages-gone = Les messages ne sont plus là.
 folder-holds-no-messages = Ce dossier ne peut pas contenir de messages.
