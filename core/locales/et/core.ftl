@@ -20,7 +20,6 @@ send-delay-off = Väljas
 send-delay-seconds = { $count ->
     [one] 1 sekund
    *[other] { $count } sekundit
-# review: new
 }
 list-counts = { $messages }, { $unread } lugemata
 list-counts-selected = { $messages }, { $unread } lugemata, { $selected } valitud

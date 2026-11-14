@@ -20,7 +20,6 @@ send-delay-off = Aus
 send-delay-seconds = { $count ->
     [one] 1 Sekunde
    *[other] { $count } Sekunden
-# review: new
 }
 list-counts = { $messages }, { $unread } ungelesen
 list-counts-selected = { $messages }, { $unread } ungelesen, { $selected } ausgewählt

@@ -506,7 +506,6 @@ ui-send-delay-note = Mientras un mensaje espera, puede recuperarlo con Deshacer.
 ui-sending-in = Enviando { $subject } en { $count ->
     [one] 1 segundo
    *[other] { $count } segundos
-# review: new
 }
 # review: new
 ui-send-undone = { $subject } no se envió. Vuelve a estar abierto.

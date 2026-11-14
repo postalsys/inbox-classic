@@ -506,7 +506,6 @@ ui-send-delay-note = Solange eine Nachricht wartet, können Sie sie mit „Rück
 ui-sending-in = { $subject } wird gesendet in { $count ->
     [one] 1 Sekunde
    *[other] { $count } Sekunden
-# review: new
 }
 # review: new
 ui-send-undone = { $subject } wurde nicht gesendet. Die Nachricht ist wieder geöffnet.

@@ -506,7 +506,6 @@ ui-send-delay-note = Kuni kiri ootab, saate selle nupuga Võta tagasi tagasi võ
 ui-sending-in = { $subject } saadetakse { $count ->
     [one] 1 sekundi pärast
    *[other] { $count } sekundi pärast
-# review: new
 }
 # review: new
 ui-send-undone = { $subject } jäi saatmata. Kiri on jälle avatud.

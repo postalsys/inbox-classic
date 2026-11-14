@@ -20,7 +20,6 @@ send-delay-off = Désactivé
 send-delay-seconds = { $count ->
     [one] 1 seconde
    *[other] { $count } secondes
-# review: new
 }
 list-counts = { $messages }, { $unread ->
     [one] { $unread } non lu
