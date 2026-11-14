@@ -91,7 +91,7 @@ impl ListView {
     /// Whether the list has messages of several folders: a search, All Inboxes or every folder (the lists with a
     /// Folder or Account column)
     pub fn several_folders(&self) -> bool {
-        self.searching() || matches!(self.scope, Some(Scope::AllInboxes | Scope::Everywhere))
+        self.searching() || matches!(self.scope, Some(Scope::AllInboxes | Scope::Everywhere | Scope::Flagged))
     }
 
     /// Whether the list lists anything: a folder, All Inboxes, or words; not an account's own item

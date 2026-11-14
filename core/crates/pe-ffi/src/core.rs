@@ -912,6 +912,16 @@ pub unsafe extern "C" fn pe_inbox_unread(core: *const PeCore) -> u64 {
     unsafe { with(core, 0, |core| core.inbox_unread().unwrap_or(0)) }
 }
 
+/// How many flagged messages the Flagged row lists, of every account (not bold: they are not new)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_flagged_count(core: *const PeCore) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 0, |core| core.flagged_count().unwrap_or(0)) }
+}
+
 // ---- completing addresses ----
 
 /// Someone (or a group of the address book) to complete an address with

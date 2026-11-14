@@ -1786,6 +1786,12 @@ uint64_t pe_unsubscribe(const struct PeCore *core,
 // `core` must be a live handle.
 uint64_t pe_inbox_unread(const struct PeCore *core);
 
+// How many flagged messages the Flagged row lists, of every account (not bold: they are not new)
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_flagged_count(const struct PeCore *core);
+
 // What completes an address field from `typed`: the people of the address book (each of their addresses) and its
 // groups whose name, nickname or address (a word of the name) starts with it, then those written to or heard from,
 // best first, at most `limit`, no address twice; NULL on failure
@@ -2789,6 +2795,13 @@ void pe_list_view_free(struct PeListView *view);
 bool pe_list_view_set_scope(struct PeListView *view,
                             int64_t folder,
                             bool all_inboxes);
+
+// The list of the Flagged row: the flagged messages of every account, but those in Deleted Items or Junk E-mail.
+// False when it was the one shown already (or for NULL).
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_set_flagged(struct PeListView *view);
 
 // The words typed in the Find box (UTF-8, NULL or empty for none), in Gmail's syntax: words, "phrases", -word, OR,
 // from: to: subject: filename: is:unread is:starred has:attachment in: before: after: older_than: newer_than: larger:

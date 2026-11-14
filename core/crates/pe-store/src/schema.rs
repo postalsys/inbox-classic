@@ -471,6 +471,11 @@ CREATE TABLE compose_recovery (
 ALTER TABLE outbox ADD COLUMN message_id TEXT;
 ALTER TABLE outbox ADD COLUMN undoable INTEGER NOT NULL DEFAULT 0;
 "#,
+    // the Flagged folder and its count: the flagged messages found without reading every message (the condition is
+    // search.rs IS_FLAGGED, word for word)
+    r#"
+CREATE INDEX messages_flagged ON messages (folder_id) WHERE instr(' ' || flags || ' ', ' \Flagged ') > 0;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
