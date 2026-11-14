@@ -1,19 +1,18 @@
-<!--review-->
 <h1>Bilder und Tracking</h1>
-<p class="summary">Warum Bilder aus dem Internet blockiert werden, und wie Sie sie für eine Nachricht oder einen Absender anzeigen, dem Sie vertrauen.</p>
-<p>Eine Nachricht kann Bilder zeigen, die der Absender im Internet bereithält. Wird ein solches Bild heruntergeladen, erfährt der Absender, dass Sie die Nachricht geöffnet haben, wann und von wo. Deshalb lädt Inbox Classic sie nicht herunter.</p>
-<p>Bilder, die in der Nachricht selbst mitgesendet wurden, werden angezeigt, da sie dem Absender nichts verraten.</p>
+<p class="summary">Warum externe Bilder blockiert werden und wie Sie sie in Nachrichten anzeigen können, denen Sie vertrauen.</p>
+<p>Eine Nachricht kann Bilder enthalten, die aus dem Internet geladen werden. Dabei kann der Absender erfahren, wann und von wo Sie die Nachricht geöffnet haben. Deshalb lädt Inbox Classic externe Bilder standardmäßig nicht herunter.</p>
+<p>Bilder, die mit der Nachricht selbst übertragen wurden, werden angezeigt. Beim Öffnen werden keine Informationen an den Absender gesendet.</p>
 <p>Enthält eine Nachricht Bilder aus dem Internet, meldet eine Leiste darüber, dass einige Bilder blockiert wurden. So sehen Sie sie bei einer Nachricht, der Sie vertrauen:</p>
 <ul>
     <li><!--os:windows,mac-->Klicken Sie auf die Leiste.<!--/os--><!--os:linux-->Klicken Sie in der Leiste auf <b data-text="gtk-download-pictures"></b>.<!--/os--></li>
     <li>Oder wählen Sie <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Das zeigt nur die Bilder dieser Nachricht. Die nächste Nachricht ist wieder blockiert.</p>
+<p>Damit werden nur die Bilder dieser Nachricht angezeigt. Externe Bilder in anderen Nachrichten bleiben blockiert.</p>
 <h2>Absender, denen Sie vertrauen</h2>
-<p>Um die Bilder eines Absenders jedes Mal zu bekommen, <!--os:windows-->klicken Sie auf den Pfeil am rechten Ende der Leiste<!--/os--><!--os:mac-->klicken Sie in der Leiste auf den Pfeil neben <b data-text="cmd-pictures"></b><!--/os--><!--os:linux-->klicken Sie in der Leiste auf den Pfeil neben <b data-text="gtk-download-pictures"></b><!--/os-->. Wählen Sie, ob Bilder immer von diesem Absender oder von allen seiner Domain heruntergeladen werden.</p>
-<p>Ihre Bilder werden dann von selbst geladen, aber nur, wenn Ihr E-Mail-Anbieter bestätigt, dass die Nachricht wirklich von dieser Domain kommt. Eine Nachricht, die sich nur als ihre ausgibt, fragt weiterhin, und die Leiste sagt, dass der Absender nicht bestätigt werden konnte. In <b data-text="folder-junk"></b> werden Bilder nie von selbst geladen.</p>
-<p>Um einen Absender von der Liste zu nehmen, verwenden Sie <b data-text="ui-trusted-senders-button"></b> in <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
+<p>Um Bilder in Nachrichten eines Absenders automatisch herunterzuladen, <!--os:windows-->klicken Sie auf den Pfeil am rechten Ende der Leiste<!--/os--><!--os:mac-->klicken Sie in der Leiste auf den Pfeil neben <b data-text="cmd-pictures"></b><!--/os--><!--os:linux-->klicken Sie in der Leiste auf den Pfeil neben <b data-text="gtk-download-pictures"></b><!--/os-->. Wählen Sie, ob Bilder in Nachrichten dieses Absenders oder aller Absender seiner Domain automatisch heruntergeladen werden sollen.</p>
+<p>Die Bilder werden nur dann automatisch heruntergeladen, wenn Ihr E-Mail-Anbieter bestätigt, dass die Nachricht von der Absenderdomain stammt. Kann die Herkunft nicht bestätigt werden, bleiben die Bilder blockiert und die Leiste zeigt einen entsprechenden Hinweis. Im Ordner <b data-text="folder-junk"></b> werden externe Bilder nie automatisch heruntergeladen.</p>
+<p>Um einen Absender aus der Liste zu entfernen, öffnen Sie <b data-text="ui-trusted-senders-button"></b> in <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
 <h2>Bilder in allen Nachrichten</h2>
-<p><b data-text="ui-pictures-always-option"></b> in <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os--> lädt die Bilder jeder Nachricht herunter, außer in <b data-text="folder-junk"></b>. Es ist anfangs aus, denn Absender können dann sehen, wann Sie ihre Nachrichten lesen.</p>
+<p><b data-text="ui-pictures-always-option"></b> in <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os--> lädt die Bilder jeder Nachricht herunter, außer in <b data-text="folder-junk"></b>. Diese Option ist standardmäßig deaktiviert, da Absender durch das Herunterladen erfahren können, wann Sie ihre Nachrichten lesen.</p>
 <p>Ein Markenlogo neben dem Nachrichtenkopf ist kein Tracking-Bild. Es ist von Ihrem Mailserver freigegeben und kommt von der Marke, nicht aus den Bildern des Absenders.</p>
-<nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav><!--/review-->
+<nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>

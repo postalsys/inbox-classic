@@ -1,19 +1,18 @@
-<!--review-->
 <h1>Imágenes y seguimiento</h1>
-<p class="summary">Por qué se bloquean las imágenes de internet y cómo mostrarlas en un mensaje o de un remitente de confianza.</p>
-<p>Un mensaje puede mostrar imágenes que el remitente guarda en internet. Al descargar una de esas imágenes, el remitente sabe que usted abrió el mensaje, cuándo y desde dónde. Por eso Inbox Classic no las descarga.</p>
-<p>Las imágenes enviadas dentro del mensaje sí se muestran, ya que no le dicen nada al remitente.</p>
+<p class="summary">Por qué se bloquean las imágenes externas y cómo mostrarlas en los mensajes en los que confía.</p>
+<p>Un mensaje puede incluir imágenes alojadas en internet. Al descargarlas, el remitente puede saber cuándo y desde dónde abrió el mensaje. Por eso Inbox Classic no descarga imágenes externas de forma predeterminada.</p>
+<p>Las imágenes incluidas en el propio mensaje sí se muestran, ya que al abrirlas no se envía información al remitente.</p>
 <p>Cuando un mensaje tiene imágenes de internet, una barra sobre él indica que se bloquearon algunas imágenes. Para verlas en un mensaje de confianza:</p>
 <ul>
     <li><!--os:windows,mac-->Haga clic en la barra.<!--/os--><!--os:linux-->Haga clic en <b data-text="gtk-download-pictures"></b> en la barra.<!--/os--></li>
     <li>O elija <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Así se muestran solo las imágenes de ese mensaje. El siguiente mensaje vuelve a empezar bloqueado.</p>
+<p>Así se muestran solo las imágenes de ese mensaje. Las imágenes externas de los demás mensajes siguen bloqueadas.</p>
 <h2>Remitentes de confianza</h2>
-<p>Para recibir siempre las imágenes de un remitente, <!--os:windows-->haga clic en la flecha del extremo derecho de la barra<!--/os--><!--os:mac-->haga clic en la flecha junto a <b data-text="cmd-pictures"></b> en la barra<!--/os--><!--os:linux-->haga clic en la flecha junto a <b data-text="gtk-download-pictures"></b> en la barra<!--/os-->. Elija descargar siempre las imágenes de ese remitente o de todos los de su dominio.</p>
-<p>Sus imágenes se cargan entonces solas, pero solo cuando su proveedor de correo confirma que el mensaje viene de verdad de ese dominio. Un mensaje que solo finge ser suyo sigue preguntando, y la barra dice que no se pudo confirmar el remitente. En <b data-text="folder-junk"></b>, las imágenes nunca se cargan solas.</p>
+<p>Para descargar automáticamente las imágenes de los mensajes de un remitente, <!--os:windows-->haga clic en la flecha del extremo derecho de la barra<!--/os--><!--os:mac-->haga clic en la flecha junto a <b data-text="cmd-pictures"></b> en la barra<!--/os--><!--os:linux-->haga clic en la flecha junto a <b data-text="gtk-download-pictures"></b> en la barra<!--/os-->. Elija descargar siempre las imágenes de ese remitente o de todos los de su dominio.</p>
+<p>Las imágenes solo se descargan automáticamente si su proveedor de correo confirma que el mensaje procede del dominio del remitente. Si no se puede verificar su origen, las imágenes siguen bloqueadas y la barra muestra un aviso. En la carpeta <b data-text="folder-junk"></b>, las imágenes externas nunca se descargan automáticamente.</p>
 <p>Para quitar un remitente de la lista, use <b data-text="ui-trusted-senders-button"></b> en <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
 <h2>Imágenes en todos los mensajes</h2>
-<p><b data-text="ui-pictures-always-option"></b>, en <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->, descarga las imágenes de todos los mensajes, salvo en <b data-text="folder-junk"></b>. Está desactivado al principio, porque así los remitentes pueden saber cuándo lee sus mensajes.</p>
+<p><b data-text="ui-pictures-always-option"></b>, en <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->, descarga las imágenes de todos los mensajes, salvo en <b data-text="folder-junk"></b>. Esta opción está desactivada de forma predeterminada, ya que la descarga de imágenes puede permitir a los remitentes saber cuándo lee sus mensajes.</p>
 <p>El logotipo de una marca junto al encabezado no es una imagen de seguimiento. Lo aprueba su servidor de correo y procede de la marca, no de las imágenes del remitente.</p>
-<nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav><!--/review-->
+<nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>

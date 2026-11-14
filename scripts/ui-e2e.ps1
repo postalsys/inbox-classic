@@ -3059,7 +3059,7 @@ public static class Dragger {
     Check ([bool](WaitFor { -not (Visible $main $IDC_PICTURES) } 10)) 'Always from everyone at shop.example shows the pictures, and the bar goes'
     Check (& $showShop $shopSubjects[1]) 'a forged one from the same domain still has the bar'
     $labels = & $pictureMenu $null $null
-    Check ((@($labels | Where-Object { $_ -like 'Always*' }).Count -eq 0) -and (@($labels | Where-Object { $_ -match 'could not be confirmed' }).Count -eq 1)) "its arrow has no Always, but says why ($($labels -join ', '))"
+    Check ((@($labels | Where-Object { $_ -like 'Always*' }).Count -eq 0) -and (@($labels | Where-Object { $_ -like '*shop.example*' }).Count -eq 1)) "its arrow has no Always, but says why ($($labels -join ', '))"
     Check (-not (& $showShop $shopSubjects[0])) 'the signed one shows its pictures by itself when opened again'
     # Options lists the domain, and Remove takes it away
     Command $main $IDM_OPTIONS

@@ -8,9 +8,7 @@ menu-view = &Ver
 menu-tools = &Herramientas
 menu-message = &Mensaje
 menu-help = Ay&uda
-# review: new
 menu-layout = &Diseño
-# review: new
 menu-sort-by = Ordenar &por
 menu-folder = Carpe&ta
 
@@ -60,28 +58,17 @@ ui-find-not-found = No se encontró «{ $words }» en este mensaje
 cmd-expand-all-threads = &Expandir todas las conversaciones
 cmd-collapse-all-threads = &Contraer todas las conversaciones
 ui-group-by-conversation = &Agrupar los mensajes por conversación
-# review: new
 cmd-folder-list = Lis&ta de carpetas
-# review: new
 cmd-layout-automatic = &Automático
-# review: new
 cmd-layout-classic = &Clásico
-# review: new
 cmd-layout-columns = C&olumnas
-# review: new
 cmd-sort-date = &Fecha
-# review: new
 cmd-sort-from = &De
-# review: new
 cmd-sort-subject = &Asunto
-# review: new
 cmd-sort-size = &Tamaño
-# review: new
 cmd-sort-ascending = Orden as&cendente
-# review: new
 cmd-sort-descending = Orden desce&ndente
 cmd-hide-ignored = &Ocultar las conversaciones ignoradas
-# review: new
 cmd-hide-read = Ocultar los mensajes &leídos
 cmd-notify = &Avisar de correo nuevo
 cmd-open = &Abrir Inbox Classic
@@ -142,7 +129,6 @@ ui-unknown-reason = motivo desconocido
 ui-checking = Buscando mensajes nuevos en { $account }...
 ui-done = Listo
 ui-sent-at = { $subject } enviado a las { $time }
-# review: changed
 ui-draft-saved = Mensaje guardado en Borradores
 ui-draft-not-saved = El mensaje no se guardó en Borradores: { $reason }
 ui-about-core = Núcleo { $version }
@@ -218,7 +204,6 @@ ui-signature = Firma
 ui-signature-hint = Se agrega a los mensajes nuevos, respuestas y reenvíos de esta cuenta.
 ui-signature-not-saved = No se pudo guardar la firma.
 ui-all-inboxes = Todas las bandejas de entrada
-# review: changed
 ui-all-folders = Todas las carpetas
 ui-the-account = la cuenta
 ui-folder-name = Nombre de la carpeta:
@@ -246,7 +231,6 @@ ui-cannot-unsubscribe = Este mensaje no permite cancelar la suscripción.
 ui-unsubscribed = Baja confirmada. La lista indica que dejará de enviarle estos mensajes.
 ui-not-unsubscribed = No se pudo cancelar la suscripción: { $reason }
 ui-event-span = { $start } a { $end }
-# review: changed
 ui-event-floating = { $when } (hora del remitente)
 ui-invitation = Invitación: { $title }
 ui-invitation-updated = Invitación actualizada: { $title }
@@ -283,7 +267,6 @@ ui-found-srv = Esta configuración se encontró en los registros DNS de su domin
 ui-found-autodiscover = Esta configuración se encontró mediante Microsoft Autodiscover (Exchange).
 ui-found-other = Esta configuración se encontró para esta dirección.
 ui-app-password-needed = { $provider } no acepta su contraseña normal en los programas de correo. Cree una contraseña de aplicación en su cuenta de { $provider } y escríbala en el campo Contraseña del siguiente formulario.
-# review: changed
 ui-app-password-open = ¿Abrir las instrucciones de { $provider } en su navegador?
 ui-plain-warning = Sin cifrado, cualquier persona que intercepte el tráfico de red podrá leer su contraseña y sus mensajes. Utilice esta conexión solo con un servidor en su propio equipo o en su red local.
 ui-continue-ask = ¿Continuar?
@@ -293,7 +276,6 @@ ui-off-here = Desactivado en este equipo.
 ui-why = ¿Por qué?
 ui-more-sign-in = Más opciones de inicio de sesión...
 ui-other-account = Para agregar otra cuenta de correo, introduzca su dirección y el nombre que verán los destinatarios. En el siguiente paso se buscará la configuración de los servidores.
-# review: new
 ui-field-account-name = Nombre de la cuenta:
 ui-field-name = Nombre para mostrar:
 ui-field-email = Dirección de correo:
@@ -309,8 +291,7 @@ ui-sign-in-not-started = No se pudo iniciar la sesión en el navegador.
 ui-sign-in-in-browser = Inicie sesión en { $account } en la ventana del navegador que se abrió y luego vuelva aquí.
 ui-sign-in-failed = No se pudo iniciar sesión: { $reason }
 ui-account-not-saved = No se pudo guardar la cuenta.
-# review: changed
-ui-start-intro = Gmail, Google Workspace, Outlook.com y Microsoft 365: inicie sesión en la página de Google o de Microsoft. Su contraseña se escribe allí, nunca en Inbox Classic.
+ui-start-intro = Gmail, Google Workspace, Outlook.com y Microsoft 365: inicie sesión en el sitio web de Google o de Microsoft. Introduzca allí su contraseña, sin compartirla con Inbox Classic.
 ui-start-intro-apps = Inicie sesión en el navegador con una de sus aplicaciones de inicio de sesión (Más opciones de inicio de sesión), o agregue abajo cualquier cuenta de correo con su nombre y su dirección.
 ui-use-app-password = Usar contraseña de aplicación
 ui-the-provider = su proveedor
@@ -325,7 +306,7 @@ ui-remove-account = Quitar cuenta
 ui-remove-account-ask = ¿Quitar esta cuenta de Inbox Classic? Los mensajes permanecerán en el servidor. Se eliminarán las copias de este equipo y la contraseña guardada.
 ui-col-email = Dirección de correo electrónico
 ui-col-incoming = Servidor de entrada
-ui-type-email = Escriba su dirección de correo, nombre@example.com.
+ui-type-email = Escriba su dirección de correo, por ejemplo nombre@example.com.
 ui-ai-agent = Agente de IA
 ui-ai-agent-access = Acceso de agentes de IA
 ui-ai-agents = Agentes de IA
@@ -370,7 +351,6 @@ ui-client-public = ID de cliente: { $client }, un cliente público (sin secreto)
 ui-no-accounts = Ninguna cuenta
 ui-remove-sign-in-app = Quitar aplicación de inicio de sesión
 ui-remove-sign-in-app-ask = ¿Quitar la aplicación de inicio de sesión { $name } y su secreto de cliente guardado?
-# review: changed
 ui-sign-in-app-not-removed = No se quitó la aplicación de inicio de sesión. { $reason }
 ui-sign-in-apps-intro = Las aplicaciones de inicio de sesión permiten que las cuentas inicien sesión en el navegador. Una que no esté marcada no se ofrece a las cuentas nuevas; las cuentas que ya la usan siguen funcionando.
 ui-col-issuer = Emisor
@@ -380,13 +360,9 @@ ui-new-folder-title = Nueva carpeta
 ui-rename-folder-title = Renombrar carpeta
 ui-delete-folder-question = ¿Eliminar la carpeta «{ $folder }», todos sus mensajes y sus subcarpetas? También se eliminarán del servidor.
 ui-properties = &Propiedades
-# review: new
 ui-account-sync = &Enviar y recibir
-# review: new
 ui-account-properties = P&ropiedades...
-# review: new
 ui-account-move-up = Mover &arriba
-# review: new
 ui-account-move-down = Mover a&bajo
 ui-menu-open = &Abrir
 ui-menu-flag = Marc&a
@@ -505,84 +481,45 @@ ui-book-exported = { $count ->
    *[other] { $count } contactos guardados en { $file }.
 }
 ui-book-not-exported = No se pudo guardar la libreta de direcciones: { $reason }
-# review: new
 ui-code-copied = Código copiado
-# review: new
 ui-codes-in-notifications = Mostrar los códigos de inicio de sesión en los avisos de correo nuevo
-# review: new
 ui-tool-unread-only = No leídos
-# review: new
 ui-no-unread = Aquí no hay mensajes sin leer.
-# review: new
 ui-pictures-always-sender = Descargar siempre las imágenes de { $sender }
-# review: new
-ui-pictures-always-domain = Descargar siempre las imágenes de todos en { $domain }
-# review: new
-ui-pictures-unconfirmed = No se pudo confirmar que el remitente sea { $domain }, así que sus imágenes no se descargan por sí solas.
-# review: new
+ui-pictures-always-domain = Descargar siempre las imágenes de los remitentes del dominio { $domain }
+ui-pictures-unconfirmed = No se pudo verificar el dominio del remitente ({ $domain }). Por eso, las imágenes de este mensaje no se descargan automáticamente.
 ui-pictures-always-option = Descargar las imágenes de todos los mensajes
-# review: new
 ui-pictures-always-warning = Los remitentes podrán saber cuándo lee sus mensajes.
-# review: new
 ui-download-heading = Descarga
-# review: new
-ui-download-ahead = Descargar mensajes por adelantado:
-# review: new
+ui-download-ahead = Descargar mensajes con antelación:
 ui-download-ahead-recent = Mensajes recientes de hasta 1 MB
-# review: new
 ui-download-ahead-all = Todos los mensajes
-# review: new
 ui-download-ahead-never = Solo al abrirlos
-# review: new
-ui-download-limit = Mensajes descargados que se guardan por cuenta:
-# review: new
-ui-download-note = Los mensajes descargados por adelantado se abren al instante. Por encima del límite, se quitan los más antiguos y se vuelven a descargar al abrirlos.
-# review: new
-ui-attachment-downloading = El resto de este mensaje aún se está descargando. Vuelva a intentarlo cuando haya llegado.
-# review: new
+ui-download-limit = Espacio máximo por cuenta:
+ui-download-note = Los mensajes descargados con antelación se abren al instante. Cuando se supera el límite de almacenamiento, se eliminan las copias locales más antiguas y se vuelven a descargar al abrir los mensajes.
+ui-attachment-downloading = La descarga de este mensaje aún no ha terminado. Vuelva a intentarlo cuando finalice.
 ui-trusted-senders-button = Remitentes de confianza...
-# review: new
 ui-trusted-senders-title = Remitentes de confianza
-# review: new
-ui-trusted-senders-note = Las imágenes de estos remitentes se descargan cuando su proveedor de correo confirma que el mensaje es suyo.
-# review: new
-ui-trusted-everyone-at = Todos en { $domain }
-# review: new
+ui-trusted-senders-note = Las imágenes de los mensajes de estos remitentes se descargan automáticamente cuando su proveedor de correo verifica el dominio del remitente.
+ui-trusted-everyone-at = Todos los remitentes del dominio { $domain }
 ui-trusted-senders-empty = Aún no hay remitentes de confianza.
-# review: new
 ui-eml-default = Abrir los archivos .eml con Inbox Classic
-# review: new
 ui-eml-default-done = Inbox Classic abre ahora los archivos .eml.
-# review: new
-ui-eml-default-failed = No se pudo hacer de Inbox Classic la aplicación para los archivos .eml: { $reason }
-# review: new
+ui-eml-default-failed = No se pudo establecer Inbox Classic como aplicación predeterminada para los archivos .eml: { $reason }
 ui-folders = Carpetas
-# review: new
-ui-sorted-by = Ordenado por { $field }
-# review: new
+ui-sorted-by = Orden: { $field }
 ui-layout-label = Diseño:
-# review: new
-ui-columns-note = La ventana es lo bastante ancha para el diseño en columnas. Ver > Diseño lo cambia.
-# review: new
+ui-columns-note = La ventana es lo bastante ancha para el diseño en columnas. Puede cambiar el diseño en Ver > Diseño.
 ui-row-unread = No leído
-# review: new
 ui-row-flagged = Marcado
-# review: new
 ui-row-attachments = Con archivos adjuntos
-# review: new
 ui-row-messages = { $count ->
     [one] { $count } mensaje
    *[other] { $count } mensajes
 }
-# review: new
 ui-list-pictures = Mostrar las imágenes de los remitentes en la lista de mensajes
-# review: new
-ui-list-pictures-note = Logotipos de marcas que el proveedor de correo confirmó; si no, las iniciales del remitente. Los logotipos se descargan una vez por marca, nunca por mensaje.
-# review: new
+ui-list-pictures-note = Muestra logotipos de marca o fotos de la libreta de direcciones para los remitentes verificados, e iniciales si no hay imagen disponible. Los logotipos se descargan una vez por marca, no por cada mensaje.
 ui-card-picture = Imagen:
-# review: new
 ui-card-picture-choose = &Elegir...
-# review: new
 ui-picture-not-picture = Este archivo no es una imagen PNG ni JPEG.
-# review: new
-ui-picture-too-large = Esta imagen es demasiado grande. Elija una de menos de 10 MB y 8000 píxeles de ancho.
+ui-picture-too-large = Esta imagen es demasiado grande. Elija una de un máximo de 10 MB, con un ancho y un alto de hasta 8000 píxeles.

@@ -67,7 +67,6 @@ win-click-to-retry = Haga clic aquí para volver a intentarlo.
 win-save-attachments = &Guardar archivos adjuntos...
 win-files-not-saved = Archivos sin guardar: { $failed } de { $count }.
 win-new-folder-in-highlighted = La nueva carpeta se creará dentro de la carpeta seleccionada.
-# review: changed
 win-delete-folder-ask = ¿Eliminar la carpeta «{ $folder }», todos sus mensajes y sus subcarpetas? También se eliminarán del servidor.
 win-rename = Re&nombrar...
 win-messages-not-saved = No se pudieron guardar los mensajes.
@@ -87,14 +86,11 @@ win-sign-in-apps-button = Aplicaciones de &inicio de sesión...
 
 ## Agentes de IA
 
-# review: changed
 win-dont-allow = &No permitir
 win-col-address = Dirección
 win-never-written-to = Nunca le ha escrito
-# review: new
 win-book-find-label = Escriba un nombre o una dirección de correo:
 win-send = &Enviar
-# review: changed
 win-dont-send = &No enviar
 win-forget-program-ask = ¿Quitar este programa, sus permisos y el historial de sus agentes? Se le volverá a pedir autorización la próxima vez que el programa se conecte.
 win-clear-log-ask = ¿Borrar el historial de los agentes? Esto no deshará los cambios realizados.
@@ -114,9 +110,6 @@ win-options-language-label = &Mostrar Inbox Classic en:
 win-options-restart-note = Reinicie Inbox Classic para aplicar el nuevo idioma.
 win-options-notify = &Avisarme cuando llegue correo nuevo
 win-restart-ask = Inbox Classic se mostrará en el idioma elegido ({ $language }) después de reiniciarse. ¿Reiniciar ahora?
-# review: new
 win-folders-hide = Ocultar la lista de carpetas
-# review: new
 win-folders-pin = Fijar la lista de carpetas junto a los mensajes
-# review: new
 win-folders-show = Mostrar las carpetas

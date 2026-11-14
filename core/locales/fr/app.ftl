@@ -8,9 +8,7 @@ menu-view = &Affichage
 menu-tools = &Outils
 menu-message = &Message
 menu-help = &?
-# review: new
 menu-layout = Dispositio&n
-# review: new
 menu-sort-by = T&rier par
 menu-folder = &Dossier
 
@@ -60,28 +58,17 @@ ui-find-not-found = Aucune occurrence de « { $words } » dans ce message
 cmd-expand-all-threads = &Développer toutes les conversations
 cmd-collapse-all-threads = Ré&duire toutes les conversations
 ui-group-by-conversation = &Regrouper les messages par conversation
-# review: new
 cmd-folder-list = Liste des d&ossiers
-# review: new
 cmd-layout-automatic = &Automatique
-# review: new
 cmd-layout-classic = &Classique
-# review: new
 cmd-layout-columns = C&olonnes
-# review: new
 cmd-sort-date = &Date
-# review: new
 cmd-sort-from = D&e
-# review: new
 cmd-sort-subject = &Objet
-# review: new
 cmd-sort-size = &Taille
-# review: new
 cmd-sort-ascending = Tri &croissant
-# review: new
 cmd-sort-descending = Tri déc&roissant
 cmd-hide-ignored = &Masquer les conversations ignorées
-# review: new
 cmd-hide-read = Masquer les messages &lus
 cmd-notify = &Signaler les nouveaux messages
 cmd-open = &Ouvrir Inbox Classic
@@ -142,7 +129,6 @@ ui-unknown-reason = raison inconnue
 ui-checking = Recherche de nouveaux messages sur { $account }...
 ui-done = Terminé
 ui-sent-at = { $subject } envoyé à { $time }
-# review: changed
 ui-draft-saved = Message enregistré dans le dossier Brouillons
 ui-draft-not-saved = Le message n'a pas été enregistré dans le dossier Brouillons : { $reason }
 ui-about-core = Noyau { $version }
@@ -218,7 +204,6 @@ ui-signature = Signature
 ui-signature-hint = Ajoutée aux nouveaux messages, aux réponses et aux transferts de ce compte.
 ui-signature-not-saved = La signature n'a pas pu être enregistrée.
 ui-all-inboxes = Toutes les boîtes
-# review: changed
 ui-all-folders = Tous les dossiers
 ui-the-account = le compte
 ui-folder-name = Nom du dossier :
@@ -240,14 +225,12 @@ ui-not-downloaded = Le message n'est pas encore téléchargé.
 ui-leave-list = Quitter cette liste de diffusion ?
 ui-leave-one-click = Inbox Classic envoie une demande de désabonnement à { $target }, sans ouvrir de page web ni envoyer d'e-mail.
 ui-leave-mail = Pour vous désabonner, vous devez envoyer un e-mail à { $target }. Inbox Classic le prépare pour vous. Envoyez-le pour confirmer votre désabonnement.
-# review: changed
 ui-leave-web = La page de désabonnement de la liste va s'ouvrir dans votre navigateur ({ $target }).
 ui-unsubscribing = Désabonnement de { $target }...
 ui-cannot-unsubscribe = Ce message ne permet pas de vous désabonner.
 ui-unsubscribed = Désabonnement confirmé. La liste indique que vous ne recevrez plus ces messages.
 ui-not-unsubscribed = Le désabonnement a échoué : { $reason }
 ui-event-span = { $start } à { $end }
-# review: changed
 ui-event-floating = { $when } (heure de l'expéditeur)
 ui-invitation = Invitation : { $title }
 ui-invitation-updated = Invitation mise à jour : { $title }
@@ -277,16 +260,13 @@ ui-email-invalid = L'adresse e-mail n'est pas valide.
 ui-ports-invalid = Les ports sont des nombres de 1 à 65535.
 ui-looking-up = Recherche des paramètres de { $domain }...
 ui-found-none = Saisissez les paramètres de compte fournis par votre service de messagerie.
-# review: changed
 ui-found-change = Modifiez ces paramètres si votre fournisseur vous en a indiqué d'autres.
 ui-found-guess = Aucun paramètre n'a été trouvé pour cette adresse. Les noms de serveurs proposés sont des suppositions. Vérifiez-les auprès de votre fournisseur.
 ui-found-mx = Inbox Classic a identifié votre fournisseur de messagerie et renseigné les serveurs correspondants.
 ui-found-srv = Ces paramètres ont été trouvés dans les enregistrements DNS de votre domaine.
-# review: changed
 ui-found-autodiscover = Ces paramètres ont été trouvés à l'aide de Microsoft Autodiscover (Exchange).
 ui-found-other = Ces paramètres ont été trouvés pour cette adresse.
 ui-app-password-needed = { $provider } n'accepte pas votre mot de passe habituel dans les programmes de messagerie. Créez un mot de passe d'application dans votre compte { $provider } et tapez-le dans le champ Mot de passe du formulaire suivant.
-# review: changed
 ui-app-password-open = Ouvrir les instructions de { $provider } dans votre navigateur ?
 ui-plain-warning = Sans chiffrement, toute personne qui intercepte le trafic réseau peut lire votre mot de passe et vos messages. Utilisez cette connexion uniquement avec un serveur sur votre ordinateur ou votre réseau local.
 ui-continue-ask = Continuer ?
@@ -295,9 +275,7 @@ ui-turned-off = La connexion avec { $name } est désactivée sur cet ordinateur.
 ui-off-here = Désactivé sur cet ordinateur.
 ui-why = Pourquoi ?
 ui-more-sign-in = Autres options de connexion...
-# review: changed
 ui-other-account = Pour ajouter un autre compte de messagerie, saisissez votre adresse e-mail et le nom à afficher pour vos destinataires. Les paramètres des serveurs seront recherchés à l'étape suivante.
-# review: new
 ui-field-account-name = Nom du compte :
 ui-field-name = Nom affiché :
 ui-field-email = Adresse e-mail :
@@ -313,8 +291,7 @@ ui-sign-in-not-started = La connexion par le navigateur n'a pas pu démarrer.
 ui-sign-in-in-browser = Connectez-vous à { $account } dans la fenêtre du navigateur qui s'est ouverte, puis revenez ici.
 ui-sign-in-failed = La connexion a échoué : { $reason }
 ui-account-not-saved = Le compte n'a pas pu être enregistré.
-# review: changed
-ui-start-intro = Gmail, Google Workspace, Outlook.com et Microsoft 365 : connectez-vous sur la page de Google ou de Microsoft. Votre mot de passe y est saisi, jamais dans Inbox Classic.
+ui-start-intro = Gmail, Google Workspace, Outlook.com et Microsoft 365 : connectez-vous sur le site de Google ou de Microsoft. Vous y saisissez votre mot de passe, sans le communiquer à Inbox Classic.
 ui-start-intro-apps = Connectez-vous par le navigateur avec l'une de vos applications de connexion (Autres options de connexion), ou ajoutez ci-dessous n'importe quel compte de messagerie avec votre nom et votre adresse.
 ui-use-app-password = Utiliser un mot de passe d'application
 ui-the-provider = votre fournisseur
@@ -323,14 +300,13 @@ ui-provider-intro-apps = Connectez-vous au compte { $email } sur le site de { $p
 ui-finish = Terminer
 ui-logon = Connexion
 ui-enter-password = Saisissez le mot de passe de { $account }.
-# review: changed
 ui-signs-in-with = Application de connexion : { $app }. La connexion s'effectue dans le navigateur et le compte utilise les serveurs de cette application.
 ui-keep-password = Laissez le champ du mot de passe vide pour conserver le mot de passe actuel.
 ui-remove-account = Supprimer le compte
 ui-remove-account-ask = Supprimer ce compte d'Inbox Classic ? Son courrier reste sur le serveur ; la copie sur cet ordinateur et le mot de passe enregistré sont supprimés.
 ui-col-email = Adresse e-mail
 ui-col-incoming = Serveur entrant
-ui-type-email = Tapez votre adresse e-mail, nom@example.com.
+ui-type-email = Saisissez votre adresse e-mail, par exemple nom@example.com.
 ui-ai-agent = Agent d'IA
 ui-ai-agent-access = Accès d'un agent d'IA
 ui-ai-agents = Agents d'IA
@@ -366,10 +342,8 @@ ui-scopes = Autorisations (scopes) :
 ui-imap-server = Serveur IMAP :
 ui-smtp-server = Serveur SMTP :
 ui-redirect-uri = Adresse de redirection :
-# review: changed
 ui-sign-in-app-intro = Une application de connexion est un client OAuth enregistré auprès de votre fournisseur pour vous connecter dans le navigateur. Choisissez un fournisseur pour préremplir les paramètres, puis ajoutez l'ID client et le secret client, si votre fournisseur en a attribué un.
 ui-remove-secret = Un secret client est enregistré. Saisissez-en un nouveau pour le remplacer ou supprimez celui qui est enregistré
-# review: changed
 ui-register-it = Enregistrer l'application auprès du fournisseur
 ui-built-in-note = { $name } est une application intégrée. Vous pouvez uniquement choisir de la proposer ou non aux nouveaux comptes.
 ui-client-with-secret = ID client : { $client }, avec un secret client.
@@ -377,7 +351,6 @@ ui-client-public = ID client : { $client }, un client public (sans secret).
 ui-no-accounts = Aucun compte
 ui-remove-sign-in-app = Supprimer l'application de connexion
 ui-remove-sign-in-app-ask = Supprimer l'application de connexion { $name } et son secret client enregistré ?
-# review: changed
 ui-sign-in-app-not-removed = L'application de connexion n'a pas été supprimée. { $reason }
 ui-sign-in-apps-intro = Les applications de connexion permettent aux comptes de se connecter par le navigateur. Une application non cochée n'est pas proposée aux nouveaux comptes ; les comptes qui l'utilisent déjà continuent de fonctionner.
 ui-col-issuer = Émetteur
@@ -387,13 +360,9 @@ ui-new-folder-title = Nouveau dossier
 ui-rename-folder-title = Renommer le dossier
 ui-delete-folder-question = Supprimer le dossier « { $folder } », tous ses messages et ses sous-dossiers ? Ils seront également supprimés du serveur.
 ui-properties = &Propriétés
-# review: new
 ui-account-sync = &Envoyer et recevoir
-# review: new
 ui-account-properties = &Propriétés...
-# review: new
 ui-account-move-up = &Monter
-# review: new
 ui-account-move-down = &Descendre
 ui-menu-open = &Ouvrir
 ui-menu-flag = Indi&cateur
@@ -419,7 +388,6 @@ ui-dont-send = Ne pas envoyer
 ui-edit-first = &Modifier d'abord
 ui-new-address = Nouvelle adresse
 ui-turn-away = &Refuser
-# review: changed
 ui-clear-agent-log = Effacer l'historique des agents ?
 ui-clear-agent-log-detail = Les modifications effectuées par les agents ne seront pas annulées.
 ui-let-agents-connect = &Laisser les agents d'IA se connecter à Inbox Classic
@@ -513,84 +481,45 @@ ui-book-exported = { $count ->
    *[other] { $count } contacts enregistrés dans { $file }.
 }
 ui-book-not-exported = Le carnet d'adresses n'a pas pu être enregistré : { $reason }
-# review: new
 ui-code-copied = Code copié
-# review: new
 ui-codes-in-notifications = Afficher les codes de connexion dans les notifications de nouveau courrier
-# review: new
 ui-tool-unread-only = Non lus
-# review: new
 ui-no-unread = Il n'y a aucun message non lu ici.
-# review: new
 ui-pictures-always-sender = Toujours télécharger les images de { $sender }
-# review: new
-ui-pictures-always-domain = Toujours télécharger les images de tous chez { $domain }
-# review: new
-ui-pictures-unconfirmed = L'expéditeur n'a pas pu être confirmé comme { $domain } : ses images ne sont donc pas téléchargées d'elles-mêmes.
-# review: new
+ui-pictures-always-domain = Toujours télécharger les images des expéditeurs du domaine { $domain }
+ui-pictures-unconfirmed = Le domaine de l'expéditeur ({ $domain }) n'a pas pu être vérifié. Les images de ce message ne sont donc pas téléchargées automatiquement.
 ui-pictures-always-option = Télécharger les images de tous les messages
-# review: new
 ui-pictures-always-warning = Les expéditeurs peuvent alors savoir quand vous lisez leurs messages.
-# review: new
 ui-download-heading = Téléchargement
-# review: new
 ui-download-ahead = Télécharger les messages à l’avance :
-# review: new
-ui-download-ahead-recent = Messages récents jusqu’à 1 Mo
-# review: new
+ui-download-ahead-recent = Messages récents de 1 Mo maximum
 ui-download-ahead-all = Tous les messages
-# review: new
 ui-download-ahead-never = Seulement à l’ouverture
-# review: new
-ui-download-limit = Messages téléchargés conservés par compte :
-# review: new
-ui-download-note = Les messages téléchargés à l’avance s’ouvrent aussitôt. Au-delà de la limite, les plus anciens sont supprimés et téléchargés de nouveau à l’ouverture.
-# review: new
-ui-attachment-downloading = La suite de ce message est encore en cours de téléchargement. Réessayez quand elle sera arrivée.
-# review: new
+ui-download-limit = Espace maximal par compte :
+ui-download-note = Les messages téléchargés à l'avance s'ouvrent immédiatement. Lorsque la limite de stockage est dépassée, les copies locales les plus anciennes sont supprimées, puis téléchargées à nouveau à l'ouverture des messages.
+ui-attachment-downloading = Le téléchargement de ce message est encore en cours. Réessayez une fois le téléchargement terminé.
 ui-trusted-senders-button = Expéditeurs de confiance...
-# review: new
 ui-trusted-senders-title = Expéditeurs de confiance
-# review: new
-ui-trusted-senders-note = Les images de ces expéditeurs sont téléchargées quand leur fournisseur de messagerie confirme que le message vient d'eux.
-# review: new
-ui-trusted-everyone-at = Tous chez { $domain }
-# review: new
-ui-trusted-senders-empty = Aucun expéditeur n'est encore approuvé.
-# review: new
+ui-trusted-senders-note = Les images des messages de ces expéditeurs sont téléchargées automatiquement lorsque votre fournisseur de messagerie vérifie le domaine de l'expéditeur.
+ui-trusted-everyone-at = Tous les expéditeurs du domaine { $domain }
+ui-trusted-senders-empty = Aucun expéditeur de confiance n'a encore été ajouté.
 ui-eml-default = Ouvrir les fichiers .eml avec Inbox Classic
-# review: new
 ui-eml-default-done = Inbox Classic ouvre maintenant les fichiers .eml.
-# review: new
-ui-eml-default-failed = Inbox Classic n'a pas pu devenir l'application des fichiers .eml : { $reason }
-# review: new
+ui-eml-default-failed = Impossible de définir Inbox Classic comme application par défaut pour les fichiers .eml : { $reason }
 ui-folders = Dossiers
-# review: new
-ui-sorted-by = Trié par { $field }
-# review: new
+ui-sorted-by = Tri : { $field }
 ui-layout-label = Disposition :
-# review: new
-ui-columns-note = La fenêtre est assez large pour la disposition en colonnes. Affichage > Disposition la change.
-# review: new
+ui-columns-note = La fenêtre est assez large pour la disposition en colonnes. Vous pouvez modifier la disposition dans Affichage > Disposition.
 ui-row-unread = Non lu
-# review: new
 ui-row-flagged = Avec indicateur
-# review: new
 ui-row-attachments = Avec pièces jointes
-# review: new
 ui-row-messages = { $count ->
     [one] { $count } message
    *[other] { $count } messages
 }
-# review: new
 ui-list-pictures = Afficher les images des expéditeurs dans la liste des messages
-# review: new
-ui-list-pictures-note = Les logos de marques confirmés par le fournisseur de messagerie, sinon les initiales de l'expéditeur. Les logos sont téléchargés une fois par marque, jamais pour chaque message.
-# review: new
+ui-list-pictures-note = Affiche les logos de marque ou les photos du carnet d'adresses pour les expéditeurs vérifiés, et les initiales si aucune image n'est disponible. Les logos sont téléchargés une seule fois par marque, et non à chaque message.
 ui-card-picture = Image :
-# review: new
 ui-card-picture-choose = &Choisir...
-# review: new
 ui-picture-not-picture = Ce fichier n'est pas une image PNG ou JPEG.
-# review: new
-ui-picture-too-large = Cette image est trop grande. Choisissez-en une de moins de 10 Mo et 8000 pixels de large.
+ui-picture-too-large = Cette image est trop grande. Choisissez une image de 10 Mo maximum, dont la largeur et la hauteur ne dépassent pas 8000 pixels.

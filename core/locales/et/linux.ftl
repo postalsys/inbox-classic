@@ -27,7 +27,7 @@ gtk-files-not-saved = { $total } failist { $failed } ei õnnestunud salvestada.
 gtk-unsubscribe-one-click =
     Kas lahkuda sellest meililistist?
 
-    Inbox Classic saadab aadressile { $target } tellimusest loobumise taotluse. Veebilehte ei avata ega e-kirja ei saadeta.
+    Inbox Classic saadab aadressile { $target } tellimusest loobumise taotluse. Veebilehte ei avata ega saadeta e-kirja.
 gtk-unsubscribe-mail =
     Kas lahkuda sellest meililistist?
 
@@ -40,7 +40,6 @@ gtk-unsubscribe-failed = Tellimusest ei õnnestunud loobuda: { $problem }
 gtk-toolbar-create-mail-menu = Koosta kiri valitud kontolt
 gtk-toolbar-send-recv-menu = Saada ja võta vastu valitud konto kirjad
 gtk-main-menu = Peamenüü
-# review: new
 gtk-folder-list = Kaustade loend
 gtk-quit = Lõpeta
 
@@ -71,7 +70,7 @@ gtk-outbox-row = Saaja: { $to }  ·  Lisatud järjekorda: { $queued }  ·  { $st
 
 gtk-still-running-detail = Inbox Classic kontrollib taustal uute kirjade saabumist. Rakenduse avamiseks või sulgemiseks kasutage ülaribal olevat ikooni.
 gtk-sign-in-again-ask =
-    Konto { $account } sisselogimine ebaõnnestus või seanss aegus.
+    Kontole { $account } sisselogimine lükati tagasi või seanss on aegunud.
 
     Kas logida brauseris uuesti sisse?
 gtk-default-app-not-installed = Inbox Classic pole paigaldatud, mistõttu ei kuvata seda süsteemi meilirakenduste loendis. Vaikerakenduseks valimiseks paigaldage Inbox Classic.
@@ -106,7 +105,6 @@ gtk-plain-warning =
     Krüptimata ühenduse korral saavad võrguliiklust jälgivad isikud lugeda teie parooli ja kirju. Kasutage seda ainult oma arvutis või kohalikus võrgus oleva serveriga.
 
     Kas jätkata?
-# review: new
 gtk-account-name-title = Konto nimi
 gtk-display-name-title = Kuvatav nimi
 gtk-turned-off-why = Valik „{ $button }“ on selles arvutis välja lülitatud. { $reason }
@@ -163,7 +161,6 @@ gtk-language = Keel
 gtk-language-subtitle = Rakenduse ja spikri keel
 gtk-new-mail-group = Uus post
 # the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-# review: new
 gtk-notify-new-mail = Teavita uuest postist
 gtk-notify-subtitle = Teavita uute kirjade saabumisest, kui aken on taustal
 gtk-restart-to-change = Inbox Classic taaskäivitub, et keelt muuta.
