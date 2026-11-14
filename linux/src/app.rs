@@ -39,6 +39,8 @@ pub struct Shell {
     failing: RefCell<HashSet<i64>>,
     /// The last message sent, as the outgoing part of the status bar says once the Outbox is empty
     last_sent: RefCell<Option<(String, String)>>,
+    /// What the message rules did in the sync going on, said over Done when it ends
+    rules_said: RefCell<Option<String>>,
     /// The timer that counts down the message the user sent in the status bar, in the core's words, while it waits
     send_timer: RefCell<Option<glib::SourceId>>,
     /// Tools > Notify of New Mail
@@ -105,6 +107,7 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
         prompting: RefCell::default(),
         failing: RefCell::default(),
         last_sent: RefCell::default(),
+        rules_said: RefCell::default(),
         send_timer: RefCell::default(),
         notify: Cell::new(notify),
         exiting: Cell::new(false),
@@ -286,9 +289,10 @@ impl Shell {
                 main.set_status(&t!(UiChecking, account = &main.account_name(*account)));
             }
             Event::SyncFinished { .. } => {
-                // a failure stays in the status bar until the account syncs without one
+                // a failure stays in the status bar until the account syncs without one; what the rules did, over Done
+                let rules_said = self.rules_said.take();
                 if self.failing.borrow().is_empty() {
-                    main.set_status(&t!(UiDone));
+                    main.set_status(&rules_said.unwrap_or_else(|| t!(UiDone)));
                 }
             }
             Event::AutoconfigDone { request } | Event::SignInDone { request } | Event::SignInAppChecked { request } => {
@@ -342,6 +346,11 @@ impl Shell {
             // messages going to another account, a large message opened: how far, and what was done
             Event::Transferring { text } => main.set_status(text),
             Event::FolderCreated { folder, .. } => crate::move_dialog::folder_created(*folder),
+            Event::RulesApplied { count, .. } => {
+                let said = t!(UiRulesApplied, count = *count);
+                main.set_status(&said);
+                *self.rules_said.borrow_mut() = (*count > 0).then_some(said);
+            }
             Event::Failed { account, kind, message } => {
                 self.failing.borrow_mut().insert(*account);
                 main.set_status(&format!("{}: {message}", main.account_name(*account)));
@@ -741,6 +750,8 @@ pub fn run_command(command: Command) {
         Command::CollapseAllThreads => main.expand_all_threads(false),
         Command::AddressBook => crate::address_book::open(),
         Command::AddSenderToBook => spawn(async move { main.add_sender_to_book().await }),
+        Command::MessageRules => spawn(async move { crate::rules::rules_dialog(main.window()).await }),
+        Command::CreateRuleFromMessage => spawn(crate::rules::from_message()),
         Command::ImportAddressBook => {
             spawn(async move { crate::address_book::import(main.window().upcast_ref()).await })
         }
