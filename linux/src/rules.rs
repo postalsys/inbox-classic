@@ -458,6 +458,9 @@ pub async fn rules_dialog(parent: &impl IsA<gtk::Widget>) {
     list.set_widget_name("rules-list");
     let none = ui::wrapped_label(&t!(UiRulesNone));
     none.set_widget_name("rules-none");
+    // in the middle of the empty list, as the Outbox's
+    none.set_xalign(0.5);
+    none.set_justify(gtk::Justification::Center);
     none.add_css_class("dim-label");
     none.set_margin_top(18);
     none.set_margin_bottom(18);
