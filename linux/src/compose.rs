@@ -384,7 +384,11 @@ struct File {
 pub struct Compose {
     pub window: adw::ApplicationWindow,
     account: Cell<i64>,
-    accounts: Vec<i64>,
+    /// What it can go from, in the order of the From list: an account, and one of its other addresses (None for its
+    /// own)
+    choices: Vec<(i64, Option<String>)>,
+    /// The other address it goes from, None for the account's own
+    from_address: RefCell<Option<String>>,
     from: gtk::DropDown,
     pub to: gtk::Entry,
     pub cc: gtk::Entry,
@@ -493,16 +497,17 @@ impl Compose {
 impl Compose {
     fn new(account: i64, draft: Option<&Draft>) -> Rc<Compose> {
         let shell = shell();
-        let accounts = shell.core.accounts().unwrap_or_default();
-        let labels: Vec<String> = accounts
-            .iter()
-            .map(|a| pe_core::account_label(&a.settings.name, &a.settings.email))
-            .collect();
-        let from = gtk::DropDown::from_strings(&labels.iter().map(String::as_str).collect::<Vec<_>>());
+        // each account with its other addresses after it
+        let choices = shell.core.from_choices().unwrap_or_default();
+        let labels: Vec<&str> = choices.iter().map(|(_, _, label)| label.as_str()).collect();
+        let from = gtk::DropDown::from_strings(&labels);
         from.set_hexpand(true);
         from.set_widget_name("compose-from");
-        let ids: Vec<i64> = accounts.iter().map(|a| a.id).collect();
-        if let Some(index) = ids.iter().position(|id| *id == account) {
+        let choices: Vec<(i64, Option<String>)> = choices.into_iter().map(|(a, address, _)| (a, address)).collect();
+        if let Some(index) = choices
+            .iter()
+            .position(|(a, address)| *a == account && address.is_none())
+        {
             from.set_selected(index as u32);
         }
         let to = field_entry("compose-to");
@@ -623,7 +628,8 @@ impl Compose {
         let compose = Rc::new(Compose {
             window,
             account: Cell::new(account),
-            accounts: ids,
+            choices,
+            from_address: RefCell::new(None),
             from,
             to,
             cc,
@@ -684,6 +690,8 @@ impl Compose {
         *self.message_id.borrow_mut() = draft.message_id.clone();
         self.kept.set(draft.message_id.is_some());
         self.draft_account.set(account);
+        // a reply from the address its message was sent to, a draft from the one it was saved with
+        self.select_from(draft.from.clone());
         for path in &draft.attachments {
             self.add_file(path);
         }
@@ -1017,16 +1025,32 @@ impl Compose {
 
     /// Another account chosen in From: the message goes from it, with its servers, Sent Items, Drafts and signature
     fn choose_from(&self) {
-        let Some(&account) = self.accounts.get(self.from.selected() as usize) else {
+        let Some((account, address)) = self.choices.get(self.from.selected() as usize).cloned() else {
             return;
         };
-        if account == self.account.get() || self.filling.get() {
+        if self.filling.get() || (account == self.account.get() && address == *self.from_address.borrow()) {
             return;
         }
-        self.account.set(account);
-        self.editor
-            .signature(&shell().core.signature_block(account).unwrap_or_default());
+        *self.from_address.borrow_mut() = address;
+        if account != self.account.get() {
+            self.account.set(account);
+            self.editor
+                .signature(&shell().core.signature_block(account).unwrap_or_default());
+        }
         self.changed();
+    }
+
+    /// The From list at the account's other `address` (None for its own)
+    fn select_from(&self, address: Option<String>) {
+        let account = self.account.get();
+        if let Some(index) = self
+            .choices
+            .iter()
+            .position(|(a, other)| *a == account && *other == address)
+        {
+            self.from.set_selected(index as u32);
+            *self.from_address.borrow_mut() = address;
+        }
     }
 
     // ---- files ----
@@ -1166,6 +1190,7 @@ impl Compose {
             message_id: self.message_id.borrow().clone(),
             // saved in another account's Drafts before From changed: the core moves it once this account has it
             draft_account: (draft_account != 0 && draft_account != account).then_some(draft_account),
+            from: self.from_address.borrow().clone(),
         }
     }
 
@@ -1312,6 +1337,12 @@ impl Compose {
             main.window().present();
         }
     }
+}
+
+/// The other address a compose window sends from, for the UI test
+#[cfg(feature = "e2e")]
+pub fn from_address(compose: &Compose) -> Option<String> {
+    compose.from_address.borrow().clone()
 }
 
 /// Opens again the messages that were being written when the app last ended without closing them

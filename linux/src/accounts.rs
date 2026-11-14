@@ -617,8 +617,9 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     };
     let account_name = stored.account_name;
     let stored = stored.settings;
+    let others = core.account_addresses_text(account).unwrap_or_default();
     if let Some(with) = signs_in_with {
-        // a browser sign-in account: the names only, the rest is the provider's
+        // a browser sign-in account: the names and the other addresses only, the rest is the provider's
         let intro = t!(UiSignsInWith, app = &with);
         let form = Form::new(
             parent,
@@ -627,25 +628,34 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
             vec![
                 Field::text(&t!(UiFieldAccountName), &account_name),
                 Field::text(&t!(UiFieldName), &stored.name),
+                Field::text(&t!(UiFieldOtherAddresses), &others),
             ],
             &t!(UiOk),
             0,
         );
         form.widget().set_widget_name("account-properties");
-        let ok = form.run().await;
-        let (named, name) = (form.value(0), form.value(1));
-        form.close();
-        if !ok {
-            return false;
+        let mut saved = false;
+        while form.run().await {
+            if !save_other_addresses(form.widget(), account, &form.value(2)).await {
+                continue;
+            }
+            let (named, name) = (form.value(0), form.value(1));
+            let settings = AccountSettings { name, ..stored.clone() };
+            saved = core.update_account(account, &settings).is_ok() && core.set_account_name(account, &named).is_ok();
+            break;
         }
-        let settings = AccountSettings { name, ..stored };
-        return core.update_account(account, &settings).is_ok() && core.set_account_name(account, &named).is_ok();
+        form.close();
+        return saved;
     }
+    // last, the other addresses it sends from
+    let mut fields = server_fields(&stored, &account_name);
+    let other_addresses = fields.len();
+    fields.push(Field::text(&t!(UiFieldOtherAddresses), &others));
     let form = Form::new(
         parent,
         &crate::words::plain(crate::words::Text::UiProperties),
         &t!(UiKeepPassword),
-        server_fields(&stored, &account_name),
+        fields,
         &t!(UiOk),
         0,
     );
@@ -680,6 +690,9 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
         {
             continue;
         }
+        if !save_other_addresses(form.widget(), account, &form.value(other_addresses)).await {
+            continue;
+        }
         if core.update_account(account, &settings).is_err() {
             ui::alert(
                 form.widget(),
@@ -699,6 +712,18 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     }
     form.close();
     saved
+}
+
+/// The other addresses of Properties saved, or why not said
+async fn save_other_addresses(parent: &impl IsA<gtk::Widget>, account: i64, text: &str) -> bool {
+    match shell().core.set_account_addresses_text(account, text) {
+        Ok(()) => true,
+        Err(error) => {
+            let title = crate::words::plain(crate::words::Text::UiProperties);
+            ui::alert(parent, &title, &pe_core::sentence(&error.to_string())).await;
+            false
+        }
+    }
 }
 
 /// An account's Properties from the folder tree's menu for it; true when it changed
