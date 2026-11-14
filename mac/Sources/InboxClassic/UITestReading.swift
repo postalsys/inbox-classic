@@ -446,7 +446,7 @@ extension UITest {
               && forged.first?.title == Command.pictures.label && forged.first?.isEnabled == true
               && note?.isEnabled == false && note?.title.contains("shop.example") == true && note?.toolTip == note?.title
               && !forged.contains { $0.tag == 1 } && !barWords.contains { $0.contains("shop.example") },
-              "but its menu has only Download Pictures and the greyed line that says the sender could not be confirmed, "
+              "but its menu has only Download Pictures and the greyed line that says the sender could not be verified, "
                   + "not in the bar (\(forged.map(\.title)))")
         await shot(main.window, "pictures-2-unconfirmed")
 
