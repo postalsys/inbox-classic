@@ -1061,6 +1061,8 @@ fn signs_in_with_oauth() {
         let _ = sender.send(event);
     })
     .unwrap();
+    // a message sent goes at once, as in the other tests
+    core.set_send_delay(0).unwrap();
     let wait = |accept: &dyn Fn(&Event) -> bool| loop {
         let event = events.recv_timeout(Duration::from_secs(10)).expect("an event");
         if accept(&event) {
@@ -1169,6 +1171,8 @@ fn signs_in_with_a_sign_in_app() {
         let _ = sender.send(event);
     })
     .unwrap();
+    // a message sent goes at once, as in the other tests
+    core.set_send_delay(0).unwrap();
     let wait = |accept: &dyn Fn(&Event) -> bool| loop {
         let event = events.recv_timeout(Duration::from_secs(10)).expect("an event");
         if accept(&event) {
