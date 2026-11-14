@@ -3976,6 +3976,36 @@ pub extern "C" fn pe_download_limit_text(index: usize) -> *mut c_char {
     .unwrap_or(null_mut())
 }
 
+/// View > Text Size: the size in use, 0 (Largest) to 4 (Smallest), in the order of its commands
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_text_size(core: *const PeCore) -> usize {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, pe_core::TEXT_SIZE_MEDIUM, |core| core.text_size()) }
+}
+
+/// Chooses the size at `size` (as `pe_text_size` counts)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_set_text_size(core: *const PeCore, size: usize) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_text_size(size).is_ok()) }
+}
+
+/// The zoom of the web views that show and write messages for the size in use: 1.0 for Medium
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_text_zoom(core: *const PeCore) -> f64 {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, 1.0, |core| core.text_zoom()) }
+}
+
 /// Options' "Wait before sending", the place of the wait in the choices ([`pe_send_delay_text`])
 ///
 /// # Safety

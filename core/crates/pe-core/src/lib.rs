@@ -89,10 +89,10 @@ pub use sign_in_apps::{
     SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_text, register_hint,
 };
 pub use text::{
-    DOWNLOAD_LIMITS_MB, HiddenUnread, ReaderState, SEND_DELAYS, account_label, account_shown_name, account_title,
-    account_titles, default_account_name, download_limit_index, download_limit_text, downloading_text, folder_kind,
-    folder_name, format_size, hidden_unread, initials, list_counts, messages, quoted_subject, reader_page, retry_note,
-    saved_text, send_delay_index, send_delay_text, sentence,
+    DOWNLOAD_LIMITS_MB, HiddenUnread, ReaderState, SEND_DELAYS, TEXT_SIZE_MEDIUM, TEXT_ZOOMS, account_label,
+    account_shown_name, account_title, account_titles, default_account_name, download_limit_index, download_limit_text,
+    downloading_text, folder_kind, folder_name, format_size, hidden_unread, initials, list_counts, messages,
+    quoted_subject, reader_page, retry_note, saved_text, send_delay_index, send_delay_text, sentence,
 };
 pub use view::{AttachmentView, MessageView};
 use worker::{Command, Role, Worker};
@@ -631,6 +631,28 @@ impl Core {
     /// The trusted senders, for Options' list
     pub fn trusted_senders(&self) -> Result<Vec<pe_store::TrustedSender>> {
         Ok(self.store().trusted_senders()?)
+    }
+
+    /// View > Text Size: the place of the size in use in [`TEXT_ZOOMS`], Medium until one is chosen
+    pub fn text_size(&self) -> usize {
+        self.store()
+            .text_size()
+            .ok()
+            .flatten()
+            .filter(|&size| size < TEXT_ZOOMS.len())
+            .unwrap_or(TEXT_SIZE_MEDIUM)
+    }
+
+    pub fn set_text_size(&self, size: usize) -> Result<()> {
+        if size >= TEXT_ZOOMS.len() {
+            return Err(Error::NotFound);
+        }
+        Ok(self.store().set_text_size(size)?)
+    }
+
+    /// The zoom of the web views that show and write messages for [`Core::text_size`] (1.0 for Medium)
+    pub fn text_zoom(&self) -> f64 {
+        TEXT_ZOOMS[self.text_size()]
     }
 
     /// Settings' "Download messages ahead": recent ones up to 1 MB (the default), all, or only when opened

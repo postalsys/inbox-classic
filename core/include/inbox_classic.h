@@ -2656,6 +2656,24 @@ size_t pe_download_limit_count(void);
 // The words of the limit at `index` ("500 MB", "2 GB"), NULL past the last; freed with `pe_string_free`
 char *pe_download_limit_text(size_t index);
 
+// View > Text Size: the size in use, 0 (Largest) to 4 (Smallest), in the order of its commands
+//
+// # Safety
+// `core` must be a live handle.
+size_t pe_text_size(const struct PeCore *core);
+
+// Chooses the size at `size` (as `pe_text_size` counts)
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_set_text_size(const struct PeCore *core, size_t size);
+
+// The zoom of the web views that show and write messages for the size in use: 1.0 for Medium
+//
+// # Safety
+// `core` must be a live handle.
+double pe_text_zoom(const struct PeCore *core);
+
 // Options' "Wait before sending", the place of the wait in the choices ([`pe_send_delay_text`])
 //
 // # Safety

@@ -86,6 +86,18 @@ impl Store {
             .query_row("SELECT value FROM settings WHERE key = 'profile'", [], |row| row.get(0))
     }
 
+    /// View > Text Size: the place of the size in use among the sizes offered (pe-core `TEXT_ZOOMS`), None when it
+    /// was never chosen
+    pub fn text_size(&self) -> Result<Option<usize>> {
+        Ok(self
+            .text_setting("view.text_size")?
+            .and_then(|value| value.parse().ok()))
+    }
+
+    pub fn set_text_size(&self, size: usize) -> Result<()> {
+        self.set_text_setting("view.text_size", &size.to_string())
+    }
+
     /// A setting that is on or off, `fallback` when it was never set
     pub(crate) fn bool_setting(&self, key: &str, fallback: bool) -> Result<bool> {
         Ok(self.text_setting(key)?.map_or(fallback, |value| value == "1"))
