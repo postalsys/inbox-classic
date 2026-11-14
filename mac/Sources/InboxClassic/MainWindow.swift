@@ -23,6 +23,8 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     private var prompting: Set<Int64> = []
     /// accounts whose last sync failed: their failure stays in the status bar
     private var failing: Set<Int64> = []
+    /// what the message rules did during a sync, kept in the status bar when the sync finishes
+    private var rulesSaid: String?
     /// the last message sent, as the outgoing pane says it once the Outbox is empty
     private var lastSent = ""
     private var junkItem: NSToolbarItem?
@@ -244,10 +246,15 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             failing.remove(event.account)
             setStatus(Text.macChecking.text(["account": mailbox.accountName(event.account)]))
         case PE_EVENT_KIND_SYNC_FINISHED:
-            // a failure stays in the status bar until the account syncs without one
+            // a failure stays in the status bar until the account syncs without one; what the rules did, over Done
             if failing.isEmpty {
-                setStatus(Text.uiDone.text)
+                setStatus(rulesSaid ?? Text.uiDone.text)
             }
+            rulesSaid = nil
+        case PE_EVENT_KIND_RULES_APPLIED:
+            let said = Text.uiRulesApplied.text(["count": event.count])
+            setStatus(said)
+            rulesSaid = event.count > 0 ? said : nil
         case PE_EVENT_KIND_AUTOCONFIG_DONE, PE_EVENT_KIND_SIGN_IN_DONE, PE_EVENT_KIND_SIGN_IN_APP_CHECKED:
             Waiting.requestDone(event.uid)
         case PE_EVENT_KIND_NEW_MAIL:
@@ -659,6 +666,14 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             return true
         }
         return false
+    }
+
+    /// `words` in the search box, searched for (a rule's Show)
+    func search(for words: String) {
+        show()
+        searchField.stringValue = words
+        searchChanged()
+        window.makeFirstResponder(searchField)
     }
 
     /// the search ended from the bar over the list

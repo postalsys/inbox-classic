@@ -208,6 +208,13 @@ public final class Mailbox: NSObject {
         searchBar.isHidden = true
         searchBar.clicked = { [weak self] in self?.clearFind() }
         searchBar.setAccessibilityIdentifier("search.bar")
+        // a rule that sorts what the search finds as it arrives
+        let createRule = NSButton(title: Text.uiCreateRule.text.replacingOccurrences(of: "...", with: "…"), target: self, action: #selector(createRuleFromSearch))
+        createRule.bezelStyle = .push
+        createRule.controlSize = .small
+        createRule.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        createRule.setAccessibilityIdentifier("search.rule")
+        searchBar.setAccessories([createRule])
         let barHeight = searchBar.heightAnchor.constraint(equalToConstant: 0)
         searchBar.heightConstraint = barHeight
         setUpSortBar()
@@ -1831,6 +1838,9 @@ public final class Mailbox: NSObject {
         menu.items.last?.state = summary.ignored ? .on : .off
         add(.archive)
         add(inJunk ? .notJunk : .junk)
+        if message != nil {
+            add(.createRuleFromMessage)
+        }
         add(.move)
         add(.copy)
         add(.delete, Text.uiTbDelete.text)
@@ -1845,6 +1855,18 @@ public final class Mailbox: NSObject {
             add(.addSenderToBook)
         }
         return menu
+    }
+
+    /// Create Rule from Message: the editor with a new rule for the sender of the message shown, or its mailing list
+    func createRuleFromMessage() {
+        guard uid != 0 else { return }
+        let query = taken(pe_rule_query_of_message(core.handle, messageFolder, uid)) ?? ""
+        RuleEditor.create(core: core, query: query)
+    }
+
+    /// the search bar's Create Rule: the editor with a new rule for the words searched for
+    @objc private func createRuleFromSearch() {
+        RuleEditor.create(core: core, query: findText)
     }
 
     /// Add Sender to Address Book for the message shown, what was done in the status bar
