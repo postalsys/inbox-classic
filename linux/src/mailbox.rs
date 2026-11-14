@@ -3270,6 +3270,7 @@ fn submenu_label(submenu: &str) -> String {
     match submenu {
         "layout" => plain(Text::MenuLayout),
         "sort_by" => plain(Text::MenuSortBy),
+        "text_size" => plain(Text::MenuTextSize),
         other => unreachable!("the catalog has no label for the submenu {other}"),
     }
 }
