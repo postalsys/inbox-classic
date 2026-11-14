@@ -12,7 +12,10 @@
 <p>To go on writing, double-click the draft in <b data-text="folder-drafts"></b>. It opens with its recipients, text and files. Once it is sent, the draft is removed.</p>
 <p>A message you write is a window of its own, so you can read mail while it stays open. Closing Inbox Classic first closes the messages you are writing, asking about those with changes.</p>
 <h2>The Outbox</h2>
-<p><b data-text="ui-tb-send"></b> puts the message in the Outbox and sends it right away. The status bar of the main window says when it is sent.</p>
+<p><b data-text="ui-tb-send"></b> puts the message in the Outbox, and it goes after a few seconds, while you can still take it back (see below). The status bar of the main window says when it is sent.</p>
 <p>When a message cannot go, for example without a connection, it stays in the Outbox. It goes with the next check for mail, so nothing you wrote is lost.</p>
 <p>To see what waits, choose <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. It lists each message with why it did not go. <b data-text="ui-outbox-send-all"></b> tries again at once, and you can delete a message there too.</p>
+<h2>Take back a message you sent</h2>
+<p>After you click <b data-text="ui-tb-send"></b>, the message waits a few seconds before it goes, and the status bar counts down. To take it back, click <b data-text="ui-undo-button"></b> beside the countdown, or choose <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>. The message opens again as it was, to change or to throw away.</p>
+<p>To choose how long a message waits, or to send it at once, choose <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os--> and set <b data-text="ui-send-delay"></b>. If you quit Inbox Classic while a message waits, it goes right away.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav>

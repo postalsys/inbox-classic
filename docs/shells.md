@@ -27,6 +27,7 @@ The three apps are thin windows on the same Rust core (`core/`). A feature that 
 | The web views and their lockdown            | `webview.cpp`, `preview.cpp`                             | `WebViews.swift` (content rules of the core)           | `webview.rs` (content rules of the core)      |
 | Compose window, format bar                  | `compose.cpp`                                            | `Compose.swift`                                        | `compose.rs`                                  |
 | Drafts saved as you write, restored         | `compose.cpp` (`WM_TIMER`), `main.cpp` (`FirstRun`)      | `Compose.swift`, `App.swift`                           | `compose.rs`, `app.rs` (`first_run`)          |
+| Undo Send: countdown, Undo, its Options     | `main.cpp` (status bar), `options.cpp`, `outbox.cpp`     | `MainWindow.swift`, `Settings.swift`, `Outbox.swift`   | `app.rs`, `mailbox.rs`, `preferences.rs`      |
 | HTML editor                                 | `editor.cpp`                                             | `Editor.swift`                                         | `editor.rs`                                   |
 | Address completion                          | `complete.cpp`                                           | `Compose.swift` (`AddressField`, `AddressEditor`)      | `complete.rs`                                 |
 | Address Book, Contact and Group Properties  | `addressbook.cpp`                                        | `AddressBook.swift`                                    | `address_book.rs`                             |
