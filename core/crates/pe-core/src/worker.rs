@@ -133,6 +133,12 @@ pub(crate) enum Command {
     /// Into the Drafts folder, in place of the earlier copy; `outgoing` has its Message-ID
     SaveDraft {
         outgoing: Box<crate::Outgoing>,
+        /// Saved without being asked: a copy that could not be saved is told to the window only
+        automatic: bool,
+    },
+    /// Out of the Drafts folder: the copy the automatic saving made of a message closed without saving
+    RemoveDraft {
+        message_id: String,
     },
 }
 
@@ -1075,7 +1081,12 @@ impl Worker {
                 self.sync_folder_list(store).await
             }
             Command::Send { outgoing, not_before } => self.send(store, *outgoing, not_before).await,
-            Command::SaveDraft { outgoing } => self.save_draft(store, *outgoing).await,
+            Command::SaveDraft { outgoing, automatic } => self.save_draft(store, *outgoing, automatic).await,
+            Command::RemoveDraft { message_id } => {
+                let account = self.account;
+                self.remove_draft_of(store, account, &message_id).await;
+                Ok(())
+            }
         }
     }
 
@@ -1166,7 +1177,7 @@ impl Worker {
 
     /// Saves a draft in the Drafts folder, in place of the copy saved before, through the uploader (upload.rs), which
     /// says how that went to the window it came from ([`Event::DraftSaved`])
-    async fn save_draft(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Outcome {
+    async fn save_draft(&mut self, store: &mut Store, outgoing: crate::Outgoing, automatic: bool) -> Outcome {
         let message_id = outgoing.message_id.clone().unwrap_or_default();
         match self.draft_upload(store, outgoing).await {
             Ok(upload) => {
@@ -1179,7 +1190,8 @@ impl Worker {
                     message_id,
                     problem: Some(failure.message.clone()),
                 });
-                Err(failure)
+                // saved without being asked: the window says it, the main window has nothing to tell
+                if automatic { Ok(()) } else { Err(failure) }
             }
         }
     }

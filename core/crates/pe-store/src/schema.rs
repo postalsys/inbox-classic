@@ -447,6 +447,18 @@ CREATE TABLE card_pictures (
     changed INTEGER NOT NULL
 );
 "#,
+    // the messages being written, as each was last saved (by hand or automatically), until their window closes: what
+    // a crash left here is opened again at the next start (pe-core compose.rs). The message without its files, which
+    // are named by their paths, one a line.
+    r#"
+CREATE TABLE compose_recovery (
+    message_id TEXT PRIMARY KEY,
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    source BLOB NOT NULL,
+    attachments TEXT NOT NULL,
+    saved INTEGER NOT NULL
+);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

@@ -150,6 +150,18 @@ fn recipients(text: &str) -> Result<Vec<ParsedAddress>, ComposeError> {
     Ok(list)
 }
 
+/// Saving while the user writes: once typing has stopped for this long (milliseconds)
+pub const AUTOSAVE_IDLE_MS: u64 = 5_000;
+/// and at least this often while typing goes on
+pub const AUTOSAVE_MOST_MS: u64 = 30_000;
+
+/// How long a compose window waits before it saves the message by itself ([`crate::Core::autosave_draft`]), just
+/// after a change, when the oldest change not saved yet was `unsaved_ms` ago: the window starts its timer again
+/// with this at each change, so the message is saved when typing stops, and every half a minute while it does not
+pub fn autosave_wait(unsaved_ms: u64) -> u64 {
+    AUTOSAVE_IDLE_MS.min(AUTOSAVE_MOST_MS.saturating_sub(unsaved_ms))
+}
+
 /// What can be checked before a message is queued: the recipients are addresses, the files are there
 pub fn check(outgoing: &Outgoing) -> Result<(), ComposeError> {
     let lists = [
@@ -471,6 +483,17 @@ pub fn address_label(name: &str, address: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn saves_when_typing_stops_and_every_half_minute() {
+        // just changed: once typing stops
+        assert_eq!(autosave_wait(0), AUTOSAVE_IDLE_MS);
+        assert_eq!(autosave_wait(20_000), AUTOSAVE_IDLE_MS);
+        // typing goes on: the half minute since the first change not saved is kept
+        assert_eq!(autosave_wait(27_000), 3_000);
+        assert_eq!(autosave_wait(30_000), 0);
+        assert_eq!(autosave_wait(90_000), 0);
+    }
 
     #[test]
     fn a_forward_takes_the_files_not_the_pictures_of_the_html() {
