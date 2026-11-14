@@ -398,8 +398,9 @@ impl RulesWindow {
 
     /// A row per rule in their order, its check box on when it is on; `select` stays selected
     fn fill(self: &Rc<Self>, select: usize) {
-        while let Some(child) = self.list.first_child() {
-            self.list.remove(&child);
+        // the rows only: the list's first child can be its placeholder, the text of an empty list
+        while let Some(row) = self.list.row_at_index(0) {
+            self.list.remove(&row);
         }
         let rules = shell().core.rules().unwrap_or_default();
         for (index, rule) in rules.iter().enumerate() {
