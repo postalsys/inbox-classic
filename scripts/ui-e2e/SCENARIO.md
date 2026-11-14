@@ -247,7 +247,6 @@ The UI tests send at once (the wait is set to Off at their start); this step tur
 - taken back, it never goes
 - sent again and left alone, it goes once its time came, and the Undo button goes with it
 
-
 ## 19c. A reminder when an attachment is missing
 
 Screenshot: `write-25-attachment-reminder`
@@ -265,6 +264,7 @@ Screenshot: `read-30-text-size`
 - it is kept for the next start
 - the text being written is that size too (the Mac and Linux)
 - Medium is the usual size again
+
 ## 20. Send/Recv
 
 Screenshots: `main-2-new-mail`, `main-3-sent-items`
