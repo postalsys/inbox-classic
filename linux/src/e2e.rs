@@ -1652,20 +1652,28 @@ async fn drafts_saved_automatically(d: &Driver) {
     d.check(said, "a message being written is saved in Drafts once typing stops");
     let saved = wait_for(30, || d.find("Drafts", "Subject: Saved by itself in the UI test")).await;
     d.check(
-        saved.as_ref().is_some_and(|m| raw_text(m).contains("Not saved by hand")),
+        saved
+            .as_ref()
+            .is_some_and(|m| raw_text(m).contains("Not saved by hand")),
         "the draft is in Drafts on the server",
     );
     d.shot(&c.window, "write-20-autosave").await;
     // closed without saving: the copy only the automatic saving made goes
     c.window.close();
     let ask = wait_alert(10).await;
-    d.check(ask.is_some(), "closing a message saved only automatically asks whether to keep it");
+    d.check(
+        ask.is_some(),
+        "closing a message saved only automatically asks whether to keep it",
+    );
     if let Some(ask) = ask {
         answer(&ask, "No");
     }
     d.check(wait_until(10, || !c.window.is_visible()).await, "No closes the window");
     d.check(
-        wait_until(30, || d.find("Drafts", "Subject: Saved by itself in the UI test").is_none()).await,
+        wait_until(30, || {
+            d.find("Drafts", "Subject: Saved by itself in the UI test").is_none()
+        })
+        .await,
         "and removes the copy saved automatically from Drafts",
     );
 
@@ -1689,7 +1697,10 @@ async fn drafts_saved_automatically(d: &Driver) {
         d.check(false, "the message opens again");
         return;
     };
-    d.check(r.subject.text() == "Written when it crashed", "it opens again with its subject");
+    d.check(
+        r.subject.text() == "Written when it crashed",
+        "it opens again with its subject",
+    );
     d.check(r.to.text().contains("hal@example.com"), "and its recipient");
     d.check(r.status.text().starts_with("Restored"), "and says it was restored");
     pause(500).await;
@@ -1707,7 +1718,10 @@ async fn drafts_saved_automatically(d: &Driver) {
     );
     crate::compose::open_recovered();
     pause(1000).await;
-    d.check(shell().composes.borrow().is_empty(), "closed, it is not opened again at the next start");
+    d.check(
+        shell().composes.borrow().is_empty(),
+        "closed, it is not opened again at the next start",
+    );
 }
 
 async fn send_receive(d: &Driver) {
