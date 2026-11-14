@@ -42,7 +42,8 @@ void FillOutbox(OutboxState* state, int select = 0) {
         if (queued->problem) {
             status = core::T(PE_TEXT_UI_OUTBOX_STATUS_NOT_SENT, {{"reason", Text(queued->problem)}});
         } else if (queued->not_before && UnixToSystemTime(queued->not_before, true, at)) {
-            status = core::T(PE_TEXT_UI_OUTBOX_STATUS_AGENT, {{"time", FormatTime(at)}});
+            // the user's while Undo Send can take it back, else an AI agent's wait
+            status = core::T(queued->undoable ? PE_TEXT_UI_OUTBOX_STATUS_UNDO : PE_TEXT_UI_OUTBOX_STATUS_AGENT, {{"time", FormatTime(at)}});
         }
         SetCell(state->list, row, COL_STATUS, status);
         state->ids.push_back(queued->id);
