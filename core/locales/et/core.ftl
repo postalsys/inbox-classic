@@ -321,6 +321,8 @@ error-folder-separator = kausta nimes ei tohi selles serveris olla märki „{ $
 error-folder-special = sisendkausta ja erikaustu ei saa ümber nimetada ega kustutada
 error-no-recipients = kirjal pole adressaate
 error-bad-address = „{ $address }“ pole e-posti aadress
+# review: new
+error-not-own-address = { $address } ei ole selle konto aadress. Lisage see konto atribuutides väljale „Muud aadressid“.
 error-attachment = faili { $path } ei saanud lugeda: { $error }
 error-no-drafts = kontol pole mustandite kausta, kuhu kirja salvestada
 error-draft-attachment = mustandi manust ei saanud alles hoida: { $error }

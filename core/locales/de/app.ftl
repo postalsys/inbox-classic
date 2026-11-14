@@ -309,6 +309,8 @@ ui-field-imap-security = IMAP-Sicherheit:
 ui-field-smtp-host = Postausgangsserver (SMTP):
 ui-field-smtp-port = SMTP-Port:
 ui-field-smtp-security = SMTP-Sicherheit:
+# review: new
+ui-field-other-addresses = Weitere Absenderadressen:
 ui-sign-in-not-started = Die Anmeldung im Browser konnte nicht gestartet werden.
 ui-sign-in-in-browser = Melden Sie sich im geöffneten Browserfenster bei { $account } an und kehren Sie dann hierher zurück.
 ui-sign-in-failed = Die Anmeldung ist fehlgeschlagen: { $reason }
