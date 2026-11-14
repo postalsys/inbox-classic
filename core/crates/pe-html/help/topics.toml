@@ -12,6 +12,7 @@ topics = [
     "find-messages",
     "conversations",
     "organize-mail",
+    "message-rules",
     "delete-and-undo",
     "folders",
     "write-message",
@@ -66,3 +67,4 @@ sign-in-apps = "sign-in-apps"
 agents = "agents-connect"
 address-book = "address-book"
 compose = "write-message"
+message-rules = "message-rules"
