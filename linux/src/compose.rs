@@ -1171,6 +1171,23 @@ impl Compose {
 
     /// Sends now, or with the next Send/Recv; a typo in an address or a file that is gone keeps the window open
     async fn send(&self, outgoing: Outgoing) {
+        // it says a file is attached and none is: Go Back is the default
+        if let Some(word) = pe_core::attachment_words::forgotten(&outgoing) {
+            let (back, anyway) = (t!(UiGoBack), t!(UiSendAnyway));
+            let answer = ui::ask(
+                &self.window,
+                TITLE,
+                &t!(UiAttachmentForgotten, word = word),
+                &[("back", back.as_str()), ("send", anyway.as_str())],
+                "back",
+                "back",
+                None,
+            )
+            .await;
+            if answer != "send" {
+                return;
+            }
+        }
         match shell().core.send(self.account.get(), outgoing) {
             Ok(()) => {
                 // the main window shows whether the server took it
