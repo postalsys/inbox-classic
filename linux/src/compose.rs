@@ -1178,7 +1178,7 @@ impl Compose {
                 &self.window,
                 TITLE,
                 &t!(UiAttachmentForgotten, word = word),
-                &[("back", back.as_str()), ("send", anyway.as_str())],
+                &[("send", anyway.as_str()), ("back", back.as_str())],
                 "back",
                 "back",
                 None,
