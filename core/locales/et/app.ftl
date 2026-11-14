@@ -10,6 +10,8 @@ menu-message = &Kiri
 menu-help = &Spikker
 menu-layout = Pai&gutus
 menu-sort-by = Sor&teeri
+# review: new
+menu-text-size = &Teksti suurus
 menu-folder = K&aust
 
 ## The commands
@@ -68,6 +70,16 @@ cmd-sort-subject = &Teema
 cmd-sort-size = Su&urus
 cmd-sort-ascending = Sorteeri kas&vavalt
 cmd-sort-descending = Sorteeri kaha&nevalt
+# review: new
+cmd-text-size-largest = Suu&rim
+# review: new
+cmd-text-size-larger = S&uurem
+# review: new
+cmd-text-size-medium = &Keskmine
+# review: new
+cmd-text-size-smaller = Vä&iksem
+# review: new
+cmd-text-size-smallest = &Väikseim
 cmd-hide-ignored = Peida &ignoreeritud vestlused
 cmd-hide-read = Peida &loetud kirjad
 cmd-notify = Teavita &uuest postist

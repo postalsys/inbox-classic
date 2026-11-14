@@ -12,6 +12,7 @@ menu-message = &Message
 menu-help = &Help
 menu-layout = &Layout
 menu-sort-by = Sort &By
+menu-text-size = &Text Size
 menu-folder = F&older
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
@@ -70,6 +71,11 @@ cmd-sort-subject = &Subject
 cmd-sort-size = Si&ze
 cmd-sort-ascending = Sort &Ascending
 cmd-sort-descending = Sort Desce&nding
+cmd-text-size-largest = &Largest
+cmd-text-size-larger = La&rger
+cmd-text-size-medium = &Medium
+cmd-text-size-smaller = &Smaller
+cmd-text-size-smallest = Smalle&st
 cmd-hide-ignored = &Hide Ignored Conversations
 cmd-hide-read = Hide &Read Messages
 cmd-notify = &Notify of New Mail
