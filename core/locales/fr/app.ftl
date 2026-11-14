@@ -172,6 +172,8 @@ ui-not-sent = Le message n'a pas pu être envoyé.
 ui-not-saved = Le message n'a pas pu être enregistré.
 ui-saving-draft = Enregistrement dans le dossier Brouillons...
 ui-compose-saved-at = Enregistré dans le dossier Brouillons à { $time }
+# review: new
+ui-compose-restored = Restauré après la fermeture inattendue d’Inbox Classic
 ui-compose-not-saved = Non enregistré dans le dossier Brouillons : { $reason }
 ui-save-changes-ask = Voulez-vous enregistrer les modifications de ce message dans le dossier Brouillons ?
 ui-new-message-title = Nouveau message

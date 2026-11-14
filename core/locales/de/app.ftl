@@ -172,6 +172,8 @@ ui-not-sent = Die Nachricht konnte nicht gesendet werden.
 ui-not-saved = Die Nachricht konnte nicht gespeichert werden.
 ui-saving-draft = Wird im Ordner „Entwürfe“ gespeichert...
 ui-compose-saved-at = Um { $time } im Ordner „Entwürfe“ gespeichert
+# review: new
+ui-compose-restored = Wiederhergestellt, nachdem Inbox Classic unerwartet beendet wurde
 ui-compose-not-saved = Nicht im Ordner „Entwürfe“ gespeichert: { $reason }
 ui-save-changes-ask = Möchten Sie die Änderungen an dieser Nachricht im Ordner „Entwürfe“ speichern?
 ui-new-message-title = Neue Nachricht

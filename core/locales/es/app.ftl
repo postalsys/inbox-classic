@@ -172,6 +172,8 @@ ui-not-sent = No se pudo enviar el mensaje.
 ui-not-saved = No se pudo guardar el mensaje.
 ui-saving-draft = Guardando en Borradores...
 ui-compose-saved-at = Guardado en Borradores a las { $time }
+# review: new
+ui-compose-restored = Recuperado después de que Inbox Classic se cerrara inesperadamente
 ui-compose-not-saved = No se guardó en Borradores: { $reason }
 ui-save-changes-ask = ¿Desea guardar los cambios de este mensaje en Borradores?
 ui-new-message-title = Mensaje nuevo
