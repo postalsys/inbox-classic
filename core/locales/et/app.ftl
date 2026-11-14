@@ -88,6 +88,10 @@ cmd-default-app = Määra &vaikimisi meiliprogrammiks...
 cmd-view-source = Kirja &lähtekood
 cmd-ai-agents = &Tehisintellekti agendid...
 cmd-options = &Seaded...
+# review: new
+cmd-message-rules = Kirjade &reeglid...
+# review: new
+cmd-create-rule-from-message = Loo kirjast &reegel...
 cmd-select-all = Vali &kõik
 cmd-undo = &Võta tagasi
 cmd-copy = Kopeeri k&austa...
@@ -417,6 +421,66 @@ ui-clear-agent-log-detail = Ajaloo tühjendamine ei võta agentide tehtud muudat
 ui-let-agents-connect = &Luba tehisintellekti agentidel Inbox Classicuga ühenduda
 ui-change-button = Muuda…
 ui-undo-button = Võta tagasi
+# review: new
+ui-rules-title = Kirjade reeglid
+# review: new
+ui-rules-intro = Reeglid sorteerivad teie postkastide uued kirjad nende saabumisel, kui Inbox Classic töötab. Iga reegel, mis kirjale sobib, teeb oma osa; reegel, mis kirja ära teisaldab, on selle jaoks viimane.
+# review: new
+ui-rules-none = Reegleid veel pole. Uue loomiseks klõpsake nuppu Uus.
+# review: new
+ui-rule-new = &Uus...
+# review: new
+ui-rule-edit = &Muuda...
+# review: new
+ui-rule-delete-button = &Kustuta
+# review: new
+ui-rule-title = Kirja reegel
+# review: new
+ui-rule-name = Nimi:
+# review: new
+ui-rule-account = Uute kirjade jaoks kontol:
+# review: new
+ui-rule-all-accounts = Kõik kontod
+# review: new
+ui-rule-query = Mis vastavad:
+# review: new
+ui-rule-query-hint = Sõnad nagu otsingukastis, näiteks from:ann@example.com, subject:arve või list:news.example.com
+# review: new
+ui-rule-count = { $count ->
+    [one] Postkastis vastab praegu 1 kiri.
+   *[other] Postkastis vastab praegu { $count } kirja.
+}
+# review: new
+ui-rule-show = &Näita
+# review: new
+ui-rule-actions = Tee järgmist:
+# review: new
+ui-rule-move = &Teisalda kausta:
+# review: new
+ui-rule-mark-read = Märgi &loetuks
+# review: new
+ui-rule-flag = Märgi &lipuga
+# review: new
+ui-rule-archive = &Arhiveeri
+# review: new
+ui-rule-junk = Teisalda &rämpsposti
+# review: new
+ui-rule-delete = &Kustuta
+# review: new
+ui-rule-quiet = Ära &teavita mind
+# review: new
+ui-rule-apply-now = Rakenda ka kirjadele, mis on juba &postkastis
+# review: new
+ui-rule-delete-ask = Kas kustutada reegel „{ $name }“?
+# review: new
+ui-create-rule = Loo reegel...
+# review: new
+ui-rules-applied = { $count ->
+    [one] Teie reeglid sorteerisid 1 kirja
+   *[other] Teie reeglid sorteerisid { $count } kirja
+}
+# review: new
+ui-col-rule-matches = Vastab
 ui-clear-button = &Tühjenda
 ui-how-to-connect = Kuidas agenti ühendada…
 ui-agent-programs = Programmid, mille agendid on taotlenud juurdepääsu teie e-postile

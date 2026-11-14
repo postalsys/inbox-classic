@@ -88,6 +88,10 @@ cmd-default-app = Usar como programa de correo &predeterminado...
 cmd-view-source = &Formato original del mensaje
 cmd-ai-agents = Agentes de &IA...
 cmd-options = &Opciones...
+# review: new
+cmd-message-rules = &Reglas de mensajes...
+# review: new
+cmd-create-rule-from-message = Crear &regla a partir del mensaje...
 cmd-select-all = Seleccionar &todo
 cmd-undo = &Deshacer
 cmd-copy = &Copiar a carpeta...
@@ -417,6 +421,66 @@ ui-clear-agent-log-detail = Esto no deshará los cambios realizados por los agen
 ui-let-agents-connect = &Permitir que los agentes de IA se conecten a Inbox Classic
 ui-change-button = Cambiar…
 ui-undo-button = Deshacer
+# review: new
+ui-rules-title = Reglas de mensajes
+# review: new
+ui-rules-intro = Las reglas ordenan el correo nuevo de sus Bandejas de entrada a medida que llega, mientras Inbox Classic está abierto. Cada regla que coincide con un mensaje hace su parte; la que lo mueve a otro sitio es la última para él.
+# review: new
+ui-rules-none = Aún no hay reglas. Haga clic en Nueva para crear una.
+# review: new
+ui-rule-new = &Nueva...
+# review: new
+ui-rule-edit = &Editar...
+# review: new
+ui-rule-delete-button = &Eliminar
+# review: new
+ui-rule-title = Regla de mensaje
+# review: new
+ui-rule-name = Nombre:
+# review: new
+ui-rule-account = Para el correo nuevo de:
+# review: new
+ui-rule-all-accounts = Todas las cuentas
+# review: new
+ui-rule-query = Que coincida con:
+# review: new
+ui-rule-query-hint = Palabras como en el cuadro de búsqueda, por ejemplo from:ana@example.com, subject:factura o list:news.example.com
+# review: new
+ui-rule-count = { $count ->
+    [one] Ahora coincide 1 mensaje de la Bandeja de entrada.
+   *[other] Ahora coinciden { $count } mensajes de la Bandeja de entrada.
+}
+# review: new
+ui-rule-show = &Mostrar
+# review: new
+ui-rule-actions = Hacer esto:
+# review: new
+ui-rule-move = &Moverlo a:
+# review: new
+ui-rule-mark-read = Marcarlo como &leído
+# review: new
+ui-rule-flag = &Marcarlo
+# review: new
+ui-rule-archive = &Archivarlo
+# review: new
+ui-rule-junk = Moverlo a &Correo no deseado
+# review: new
+ui-rule-delete = &Eliminarlo
+# review: new
+ui-rule-quiet = &No avisarme
+# review: new
+ui-rule-apply-now = Aplicarla también a los mensajes que ya están en la &Bandeja de entrada
+# review: new
+ui-rule-delete-ask = ¿Eliminar la regla «{ $name }»?
+# review: new
+ui-create-rule = Crear regla...
+# review: new
+ui-rules-applied = { $count ->
+    [one] Sus reglas ordenaron 1 mensaje
+   *[other] Sus reglas ordenaron { $count } mensajes
+}
+# review: new
+ui-col-rule-matches = Coincide con
 ui-clear-button = &Borrar
 ui-how-to-connect = Cómo conectar un agente…
 ui-agent-programs = Programas cuyos agentes pidieron usar su correo
