@@ -630,6 +630,48 @@ const sections = [
         intro: 'What is done to a message is done on the server too, so webmail and your other mail programs agree.',
         features: [
             {
+                shot: 'rules-1-list',
+                name: 'Message Rules',
+                what: 'Tools > Message Rules lists the rules that sort new mail, each with a check box to turn it off, in the order they run; New, Edit, Delete, Move Up and Move Down.',
+                how: 'Tools > Message Rules.',
+                checked: ['The list opens', 'A rule is added']
+            },
+            {
+                shot: 'rules-2-editor',
+                name: 'A rule: a search and what to do',
+                what: 'A rule is a query in the search box\'s words (from:, subject:, list:, words of the text) and what to do with the new Inbox mail that matches it: move it to a folder, mark it read, flag, archive, junk, delete, or not notify. It says how many messages in the Inbox match now.',
+                how: 'New or Edit in Message Rules.',
+                checked: ['Name, query, Move to Archive and Mark as read set']
+            },
+            {
+                shot: 'rules-5-applied',
+                name: 'New mail sorted by rules',
+                what: 'Mail that arrives in an Inbox is sorted by the rules while Inbox Classic runs; the status bar says how many messages they sorted.',
+                how: 'Automatic as new mail arrives.',
+                checked: ['The newsletter lands in Archive, not the Inbox', 'The status bar says it was sorted']
+            },
+            {
+                shot: 'rules-3-from-search',
+                name: 'A rule from a search',
+                what: 'Create Rule on the bar over search results starts a rule with the words searched for.',
+                how: 'Search, then Create Rule.',
+                checked: ['The editor opens with the words of the search']
+            },
+            {
+                shot: 'rules-4-from-message',
+                name: 'Create Rule from Message',
+                what: 'Message > Create Rule from Message starts a rule for the sender of the message selected, or its mailing list (list:).',
+                how: 'Message > Create Rule from Message, or the message\'s right-click menu.',
+                checked: ['The query starts with from:']
+            },
+            {
+                shot: 'rules-6-bad-query',
+                name: 'What a rule can not hold',
+                what: 'A rule is for the new mail of an Inbox, so a query naming a folder (in:) or a date is refused with the reason.',
+                how: 'Save a rule with in: or a date.',
+                checked: ['The reason is shown']
+            },
+            {
                 shot: 'organize-1-flagged',
                 name: 'Flag Message',
                 what: 'Flags a message (! in the list) or takes the flag away.',

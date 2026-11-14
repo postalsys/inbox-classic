@@ -40,6 +40,9 @@ mod layout;
 /// Pictures from trusted senders, and in every message
 mod pictures;
 
+/// Step 19g: Message Rules
+mod rules;
+
 const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
 const MINUTES: &str = "Minutes of the planning meeting";
@@ -962,6 +965,7 @@ async fn scenario(d: Rc<Driver>) {
     undo_send(&d).await;
     attachment_reminder(&d).await;
     other_addresses(&d).await;
+    rules::message_rules(&d).await;
     text_size(&d).await;
     send_receive(&d).await;
     finding(&d).await;
