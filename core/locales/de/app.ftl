@@ -589,6 +589,8 @@ ui-send-delay = Vor dem Senden warten:
 # review: new
 ui-send-delay-note = Solange eine Nachricht wartet, können Sie sie mit „Rückgängig“ zurückholen.
 # review: new
+ui-dark-messages = Nachrichten auf dunklem Hintergrund zeigen, wenn das System dunkel ist
+# review: new
 ui-sending-in = { $subject } wird gesendet in { $count ->
     [one] 1 Sekunde
    *[other] { $count } Sekunden

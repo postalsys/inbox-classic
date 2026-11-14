@@ -179,6 +179,9 @@ final class Preview: NSObject {
     private var shown = 0
     private var pending: (String, Bool)?
     private var ready = false
+    /// Settings' dark messages: whether the blank page between two messages may be dark too. The web views follow the
+    /// window's appearance (WebKit draws their background dark before a document loads); the documents carry both looks.
+    static var dark = false
     /// asked of a link clicked in the document before the browser opens it: true when the reading pane took it
     var links: ((String) -> Bool)? {
         get { navigation.links }
@@ -229,7 +232,11 @@ final class Preview: NSObject {
         if noMessage {
             showState(PE_READER_STATE_NO_MESSAGE)
         } else {
-            show("<!doctype html><html><head><meta name=\"color-scheme\" content=\"light\"><style>html{background:#fff}</style></head><body></body></html>")
+            // as dark as the message coming will be (pe_html's dark colors), so nothing flashes white
+            let (scheme, dark) = Preview.dark
+                ? ("light dark", "@media screen and (prefers-color-scheme:dark){html{background:#1e1f22}}") : ("light", "")
+            show("<!doctype html><html><head><meta name=\"color-scheme\" content=\"\(scheme)\">"
+                + "<style>html{background:#fff}\(dark)</style></head><body></body></html>")
         }
     }
 }
@@ -313,6 +320,9 @@ final class Printer: NSObject {
         panel = NSWindow(contentRect: view.frame, styleMask: [.borderless], backing: .buffered, defer: false)
         panel.title = title
         panel.contentView = view
+        // paper is light: the documents' dark colors apply to a dark screen only, and the view is never dark either
+        panel.appearance = NSAppearance(named: .aqua)
+        view.appearance = NSAppearance(named: .aqua)
         super.init()
         view.navigationDelegate = navigation
         view.uiDelegate = navigation

@@ -583,6 +583,18 @@ impl Reader {
         }
     }
 
+    /// The page shown made again, for what Preferences changed in how messages look (dark messages): the message's
+    /// view built again, or the empty page. The page over several messages is made again when it is shown next
+    pub fn reload(&self) {
+        if self.shows_message() {
+            if self.has_view() {
+                self.view_again();
+            }
+        } else if self.summary.borrow().is_none() {
+            self.preview.show(&no_message(!self.header.is_visible()), false);
+        }
+    }
+
     /// The view of the message shown built again (its pictures allowed now): a file's at once, a folder's message's
     /// on a worker
     fn view_again(&self) {

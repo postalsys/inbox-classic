@@ -589,6 +589,8 @@ ui-send-delay = Oota enne saatmist:
 # review: new
 ui-send-delay-note = Kuni kiri ootab, saate selle nupuga Võta tagasi tagasi võtta.
 # review: new
+ui-dark-messages = Näita kirju tumedal taustal, kui süsteem on tume
+# review: new
 ui-sending-in = { $subject } saadetakse { $count ->
     [one] 1 sekundi pärast
    *[other] { $count } sekundi pärast

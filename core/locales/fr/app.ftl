@@ -589,6 +589,8 @@ ui-send-delay = Attendre avant d’envoyer :
 # review: new
 ui-send-delay-note = Tant qu’un message attend, vous pouvez le reprendre avec Annuler.
 # review: new
+ui-dark-messages = Afficher les messages sur fond sombre quand le système est sombre
+# review: new
 ui-sending-in = Envoi de { $subject } dans { $count ->
     [one] 1 seconde
    *[other] { $count } secondes
