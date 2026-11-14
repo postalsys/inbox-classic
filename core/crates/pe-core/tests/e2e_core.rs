@@ -2417,6 +2417,20 @@ fn message_rules_sort_new_mail() {
     s.wait(|e| *e == Event::SyncFinished { account, failure: None });
     let folders = s.core.folders(account).unwrap();
     let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    // a rule moves mail to Archive or the user's own folders, not to the Inbox, Sent Items, Drafts, Junk or Trash
+    let targets: Vec<pe_store::FolderId> = s
+        .core
+        .rule_targets()
+        .unwrap()
+        .into_iter()
+        .map(|(folder, ..)| folder)
+        .collect();
+    assert!(targets.contains(&id("Archive")), "{targets:?}");
+    for path in ["INBOX", "Sent", "Drafts", "Junk", "Trash"] {
+        if let Some(folder) = folders.iter().find(|f| f.info.path == path) {
+            assert!(!targets.contains(&folder.id), "{path} offered");
+        }
+    }
     let rule = |name: &str, query: &str| pe_store::Rule {
         enabled: true,
         name: name.into(),
@@ -2433,6 +2447,20 @@ fn message_rules_sort_new_mail() {
             .is_err()
     );
     assert!(s.core.save_rule(&rule("x", "from:ann")).is_err());
+    // one without a name is called by what it matches
+    let unnamed = s
+        .core
+        .save_rule(&pe_store::Rule {
+            flag: true,
+            ..rule(" ", " subject:receipt ")
+        })
+        .unwrap();
+    let saved = s.core.rule(unnamed).unwrap().unwrap();
+    assert_eq!(
+        (saved.name.as_str(), saved.query.as_str()),
+        ("subject:receipt", "subject:receipt")
+    );
+    s.core.delete_rule(unnamed).unwrap();
     s.core
         .save_rule(&pe_store::Rule {
             move_to: Some(id("Archive")),

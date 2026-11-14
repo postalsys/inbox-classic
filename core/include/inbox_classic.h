@@ -418,6 +418,9 @@ typedef struct PePositions PePositions;
 // `pe_recovered_free`
 typedef struct PeRecovered PeRecovered;
 
+// The folders a rule can move messages to; free with `pe_rule_targets_free`
+typedef struct PeRuleTargets PeRuleTargets;
+
 // The rules; free with `pe_rules_free`
 typedef struct PeRules PeRules;
 
@@ -1072,6 +1075,14 @@ typedef struct PeRule {
   // Not announced as new mail
   bool quiet;
 } PeRule;
+
+// A folder a rule can move messages to
+typedef struct PeRuleTarget {
+  int64_t folder;
+  int64_t account;
+  // The words shown: the folder, indented as in the tree, with its account when there are several
+  const char *label;
+} PeRuleTarget;
 
 // A row of the Move and Copy window; its strings belong to the list
 typedef struct PeTarget {
@@ -3189,6 +3200,26 @@ bool pe_rule_apply_now(const struct PeCore *core,
 char *pe_rule_query_of_message(const struct PeCore *core,
                                int64_t folder,
                                uint64_t uid);
+
+// The folders a rule can move messages to, every account's in the tree's order, but the Inboxes; NULL on failure
+//
+// # Safety
+// `core` must be a live handle.
+struct PeRuleTargets *pe_rule_targets(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_rule_targets_count(const struct PeRuleTargets *list);
+
+// Folder `index`, NULL past the end
+//
+// # Safety
+// `list` must be NULL or live.
+const struct PeRuleTarget *pe_rule_targets_get(const struct PeRuleTargets *list, size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_rule_targets_free(struct PeRuleTargets *list);
 
 // An empty selection
 struct PeSelection *pe_selection_new(void);

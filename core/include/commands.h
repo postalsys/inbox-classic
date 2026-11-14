@@ -71,6 +71,8 @@ enum PeCommandId : unsigned short {
     IDM_AI_AGENTS = 133,
     IDM_OPTIONS = 137,
     IDM_ADDRESS_BOOK = 147,
+    IDM_MESSAGE_RULES = 170,
+    IDM_CREATE_RULE_FROM_MESSAGE = 171,
     IDM_ADD_SENDER_TO_BOOK = 148,
     IDM_IMPORT_ADDRESS_BOOK = 149,
     IDM_EXPORT_ADDRESS_BOOK = 150,
@@ -85,6 +87,7 @@ inline bool CommandNeedsOne(unsigned id) {
     case IDM_PRINT:
     case IDM_PROPERTIES:
     case IDM_VIEW_SOURCE:
+    case IDM_CREATE_RULE_FROM_MESSAGE:
     case IDM_ADD_SENDER_TO_BOOK:
         return true;
     default:
@@ -182,6 +185,8 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_AI_AGENTS: return PE_TEXT_CMD_AI_AGENTS;
     case IDM_OPTIONS: return PE_TEXT_CMD_OPTIONS;
     case IDM_ADDRESS_BOOK: return PE_TEXT_CMD_ADDRESS_BOOK;
+    case IDM_MESSAGE_RULES: return PE_TEXT_CMD_MESSAGE_RULES;
+    case IDM_CREATE_RULE_FROM_MESSAGE: return PE_TEXT_CMD_CREATE_RULE_FROM_MESSAGE;
     case IDM_ADD_SENDER_TO_BOOK: return PE_TEXT_CMD_ADD_SENDER_TO_BOOK;
     case IDM_IMPORT_ADDRESS_BOOK: return PE_TEXT_CMD_IMPORT_ADDRESS_BOOK;
     case IDM_EXPORT_ADDRESS_BOOK: return PE_TEXT_CMD_EXPORT_ADDRESS_BOOK;

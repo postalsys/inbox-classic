@@ -69,6 +69,8 @@ enum Command: Int, CaseIterable {
     case aiAgents = 133
     case options = 137
     case addressBook = 147
+    case messageRules = 170
+    case createRuleFromMessage = 171
     case addSenderToBook = 148
     case importAddressBook = 149
     case exportAddressBook = 150
@@ -142,6 +144,8 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return "tools"
         case .options: return "tools"
         case .addressBook: return "tools"
+        case .messageRules: return "tools"
+        case .createRuleFromMessage: return "message"
         case .addSenderToBook: return "tools"
         case .importAddressBook: return "file"
         case .exportAddressBook: return "file"
@@ -222,6 +226,8 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return .cmdAiAgents
         case .options: return .cmdOptions
         case .addressBook: return .cmdAddressBook
+        case .messageRules: return .cmdMessageRules
+        case .createRuleFromMessage: return .cmdCreateRuleFromMessage
         case .addSenderToBook: return .cmdAddSenderToBook
         case .importAddressBook: return .cmdImportAddressBook
         case .exportAddressBook: return .cmdExportAddressBook
@@ -297,6 +303,8 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return nil
         case .options: return (",", [.command])
         case .addressBook: return ("b", [.command, .shift])
+        case .messageRules: return nil
+        case .createRuleFromMessage: return nil
         case .addSenderToBook: return nil
         case .importAddressBook: return nil
         case .exportAddressBook: return nil
@@ -372,6 +380,8 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return false
         case .options: return false
         case .addressBook: return false
+        case .messageRules: return false
+        case .createRuleFromMessage: return false
         case .addSenderToBook: return false
         case .importAddressBook: return false
         case .exportAddressBook: return false
@@ -447,6 +457,8 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return false
         case .options: return false
         case .addressBook: return false
+        case .messageRules: return false
+        case .createRuleFromMessage: return false
         case .addSenderToBook: return false
         case .importAddressBook: return false
         case .exportAddressBook: return false
@@ -522,6 +534,8 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return false
         case .options: return false
         case .addressBook: return false
+        case .messageRules: return false
+        case .createRuleFromMessage: return true
         case .addSenderToBook: return true
         case .importAddressBook: return false
         case .exportAddressBook: return false
@@ -597,6 +611,8 @@ enum Command: Int, CaseIterable {
         case .aiAgents: return nil
         case .options: return nil
         case .addressBook: return nil
+        case .messageRules: return nil
+        case .createRuleFromMessage: return nil
         case .addSenderToBook: return nil
         case .importAddressBook: return nil
         case .exportAddressBook: return nil

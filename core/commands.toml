@@ -470,6 +470,19 @@ windows = 147
 menu = "tools"
 key = "Mod+Shift+B"
 
+# Tools > Message Rules: the rules that sort new mail, to add, change, turn off, order and delete
+[[command]]
+id = "message_rules"
+windows = 170
+menu = "tools"
+
+# a new rule from the message selected: its sender, or its mailing list; also on the message list's right-click menu
+[[command]]
+id = "create_rule_from_message"
+windows = 171
+menu = "message"
+one = true
+
 # the sender of the message selected into the Address Book; also on the message list's right-click menu
 [[command]]
 id = "add_sender_to_book"
