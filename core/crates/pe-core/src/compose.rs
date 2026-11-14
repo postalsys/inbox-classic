@@ -73,6 +73,8 @@ pub struct Outgoing {
     /// The account whose Drafts holds that saved copy, when it is not the one this goes from (From changed after it
     /// was saved): the copy there goes once this account has the message, so it is never in neither
     pub draft_account: Option<pe_store::AccountId>,
+    /// Another address of the account to send from (one of its other addresses, [`sender`]), None for its own
+    pub from: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -104,6 +106,9 @@ pub struct Draft {
     pub attachments: Vec<PathBuf>,
     /// The Message-ID of a saved draft opened again, for [`Outgoing::message_id`]
     pub message_id: Option<String>,
+    /// The account's other address it goes from ([`Outgoing::from`]): the one a reply's message was sent to, or a
+    /// saved draft's; None for the account's own
+    pub from: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -113,6 +118,8 @@ pub enum ComposeError {
     BadAddress(String),
     /// An attachment that could not be read
     Attachment(PathBuf, String),
+    /// A From address that is not one of the account's
+    NotOwnAddress(String),
 }
 
 impl std::fmt::Display for ComposeError {
@@ -122,6 +129,9 @@ impl std::fmt::Display for ComposeError {
             ComposeError::BadAddress(address) => {
                 f.write_str(&tr_args(Text::ErrorBadAddress, &[("address", address.into())]))
             }
+            ComposeError::NotOwnAddress(address) => {
+                f.write_str(&tr_args(Text::ErrorNotOwnAddress, &[("address", address.into())]))
+            }
             ComposeError::Attachment(path, error) => f.write_str(&tr_args(
                 Text::ErrorAttachment,
                 &[("path", (&path.display().to_string()).into()), ("error", error.into())],
@@ -130,8 +140,8 @@ impl std::fmt::Display for ComposeError {
     }
 }
 
-/// Recipients as typed, checked to be addresses
-fn recipients(text: &str) -> Result<Vec<ParsedAddress>, ComposeError> {
+/// Recipients (or an account's other addresses) as typed, checked to be addresses
+pub(crate) fn recipients(text: &str) -> Result<Vec<ParsedAddress>, ComposeError> {
     let list = parse_addresses(text);
     for mailbox in list.iter().flat_map(ParsedAddress::mailboxes) {
         let address = mailbox.address.trim();
@@ -336,6 +346,7 @@ pub(crate) fn recovery(account: pe_store::AccountId, outgoing: &Outgoing, messag
         in_reply_to: outgoing.in_reply_to.clone(),
         references: outgoing.references.clone(),
         attachments: outgoing.attachments.clone(),
+        from: outgoing.from.clone(),
     }
 }
 
@@ -355,6 +366,7 @@ pub(crate) fn recovered(recovery: pe_store::Recovery) -> Draft {
         body: recovery.html,
         attachments: recovery.attachments.into_iter().filter(|path| path.is_file()).collect(),
         message_id: Some(recovery.message_id),
+        from: recovery.from,
     }
 }
 
@@ -382,6 +394,11 @@ pub fn reopen(source: &[u8]) -> (Draft, Vec<(String, Vec<u8>)>) {
             .and_then(|r| parser::message_ids(r).pop()),
         references: message.reference_ids(),
         message_id: message.message_id.as_deref().and_then(draft_id),
+        // the address it goes from: the caller keeps it only when it is one of the account's other addresses
+        from: message
+            .from
+            .as_ref()
+            .and_then(|a| a.mailboxes().first().map(|m| m.address.clone())),
         ..Default::default()
     };
     (draft, attached(message))
@@ -428,16 +445,76 @@ pub(crate) fn prefixed(prefix: &str, subject: &str) -> String {
 }
 
 /// The addresses of `list` but `own`
-fn others(list: &[ParsedAddress], own: &str) -> Vec<ParsedAddress> {
+fn others(list: &[ParsedAddress], own: &[String]) -> Vec<ParsedAddress> {
     list.iter()
         .flat_map(ParsedAddress::mailboxes)
-        .filter(|m| !m.address.eq_ignore_ascii_case(own))
+        .filter(|m| !own.iter().any(|own| m.address.eq_ignore_ascii_case(own)))
         .map(|m| ParsedAddress::Mailbox(m.clone()))
         .collect()
 }
 
-/// The draft of a reply, a reply to all or a forward of the message in `source`, for the account `own` address
-pub fn draft(source: &[u8], kind: DraftKind, own: &str, date: Option<i64>) -> Draft {
+/// The account settings a message goes out with: those of the account, or with `from` one of its other addresses
+/// (`others`, as (address, name)), that address and its name (the account's when it has none). A `from` that is not
+/// the account's is refused, so neither a window nor anything in a message can send as someone else.
+pub fn sender(
+    mut settings: AccountSettings,
+    others: &[(String, String)],
+    from: Option<&str>,
+) -> Result<AccountSettings, ComposeError> {
+    let Some(from) = from
+        .map(str::trim)
+        .filter(|f| !f.is_empty() && !f.eq_ignore_ascii_case(&settings.email))
+    else {
+        return Ok(settings);
+    };
+    let (email, name) = others
+        .iter()
+        .find(|(email, _)| email.eq_ignore_ascii_case(from))
+        .ok_or_else(|| ComposeError::NotOwnAddress(from.to_string()))?;
+    settings.name = alias_name(name, &settings.name).to_string();
+    settings.email = email.clone();
+    Ok(settings)
+}
+
+/// The settings a message of `account` goes out with, from `from` ([`sender`]), read from the store
+pub(crate) fn sender_of(
+    store: &pe_store::Store,
+    account: pe_store::AccountId,
+    from: Option<&str>,
+) -> crate::Result<AccountSettings> {
+    let settings = store.account(account)?.settings;
+    let others = store.account_addresses(account)?;
+    sender(settings, &others, from).map_err(crate::Error::Compose)
+}
+
+/// The name mail from an other address goes out under: its own, or the account's when it has none
+pub(crate) fn alias_name<'a>(name: &'a str, account_name: &'a str) -> &'a str {
+    match name.trim() {
+        "" => account_name,
+        name => name,
+    }
+}
+
+/// The account's other address a message was sent to (in To or Cc), for its reply to go from; None
+/// when it was sent to the account's own address or to none of them
+fn sent_to(message: &parser::Message, own: &[String]) -> Option<String> {
+    let others = own.get(1..).unwrap_or_default();
+    let named: Vec<&str> = message
+        .to
+        .iter()
+        .chain(&message.cc)
+        .flat_map(ParsedAddress::mailboxes)
+        .map(|m| m.address.as_str())
+        .collect();
+    others
+        .iter()
+        .find(|other| named.iter().any(|named| named.eq_ignore_ascii_case(other)))
+        .cloned()
+}
+
+/// The draft of a reply, a reply to all or a forward of the message in `source`, for the account whose addresses are
+/// `own` (its own first, then its other addresses)
+pub fn draft(source: &[u8], kind: DraftKind, own: &[String], date: Option<i64>) -> Draft {
     let Ok(message) = parser::parse(source) else {
         return Draft::default();
     };
@@ -469,6 +546,7 @@ pub fn draft(source: &[u8], kind: DraftKind, own: &str, date: Option<i64>) -> Dr
         .map(|(name, value)| (name.as_str(), value.clone()))
         .collect();
     let mut draft = Draft {
+        from: sent_to(&message, own),
         quote: pe_html::quote_html(&header, &body, &images, reply),
         quote_folded: reply,
         quote_text: match (&message.html, &message.text) {
@@ -551,6 +629,62 @@ mod tests {
                 message_id: Some("<2@example.com>".into()),
                 ..Default::default()
             }
+        );
+    }
+
+    #[test]
+    fn a_reply_goes_from_the_other_address_the_message_was_sent_to() {
+        let source = b"From: Ann <ann@example.com>\r\nTo: Sales <sales@example.com>, bob@example.com\r\n\
+Cc: me@example.com\r\nSubject: Prices\r\nMessage-ID: <1@example.com>\r\n\r\nHow much?\r\n";
+        let own = ["me@example.com".to_string(), "sales@example.com".to_string()];
+        let reply = draft(source, DraftKind::Reply, &own, None);
+        assert_eq!(reply.from.as_deref(), Some("sales@example.com"));
+        // Reply All leaves out every address of the account
+        let all = draft(source, DraftKind::ReplyAll, &own, None);
+        assert_eq!(
+            (all.to.as_str(), all.cc.as_str()),
+            ("Ann <ann@example.com>, bob@example.com", "")
+        );
+        // sent to the account's own address: its own address
+        assert_eq!(draft(source, DraftKind::Reply, &own[..1], None).from, None);
+    }
+
+    #[test]
+    fn a_message_goes_out_from_the_account_or_one_of_its_other_addresses() {
+        let account = AccountSettings {
+            name: "Alex".into(),
+            email: "alex@example.com".into(),
+            username: "alex".into(),
+            imap_host: "imap.example.com".into(),
+            imap_port: 993,
+            imap_security: pe_store::Security::Tls,
+            smtp_host: "smtp.example.com".into(),
+            smtp_port: 465,
+            smtp_security: pe_store::Security::Tls,
+            auth: pe_store::Auth::Password,
+        };
+        let others = [
+            ("sales@example.com".to_string(), "Sales".to_string()),
+            ("alex@example.org".to_string(), String::new()),
+        ];
+        let from = |from| sender(account.clone(), &others, from).map(|s| (s.name, s.email));
+        assert_eq!(from(None), Ok(("Alex".into(), "alex@example.com".into())));
+        assert_eq!(
+            from(Some("SALES@example.com")),
+            Ok(("Sales".into(), "sales@example.com".into()))
+        );
+        // without a name of its own: the account's
+        assert_eq!(
+            from(Some("alex@example.org")),
+            Ok(("Alex".into(), "alex@example.org".into()))
+        );
+        assert_eq!(
+            from(Some("alex@example.com")),
+            Ok(("Alex".into(), "alex@example.com".into()))
+        );
+        assert_eq!(
+            from(Some("ceo@example.com")),
+            Err(ComposeError::NotOwnAddress("ceo@example.com".into()))
         );
     }
 
@@ -681,7 +815,12 @@ mod tests {
 
     #[test]
     fn replies() {
-        let reply = draft(ORIGINAL, DraftKind::Reply, "me@example.com", Some(1_759_744_800));
+        let reply = draft(
+            ORIGINAL,
+            DraftKind::Reply,
+            &["me@example.com".to_string()],
+            Some(1_759_744_800),
+        );
         assert_eq!(reply.to, "Ann <ann@example.com>");
         assert_eq!(reply.cc, "");
         assert_eq!(reply.subject, "Re: Plans");
@@ -700,18 +839,23 @@ mod tests {
         assert_eq!(reply.in_reply_to.as_deref(), Some("<m2@example.com>"));
         assert_eq!(reply.references, ["<m1@example.com>", "<m2@example.com>"]);
 
-        let all = draft(ORIGINAL, DraftKind::ReplyAll, "ME@example.com", None);
+        let all = draft(ORIGINAL, DraftKind::ReplyAll, &["ME@example.com".to_string()], None);
         assert_eq!(all.to, "Ann <ann@example.com>, bob@example.com");
         assert_eq!(all.cc, "carl@example.com");
 
         // names that would read as more recipients are quoted, and parse back to the same addresses
         let tricky = b"From: \"Smith, John\" <j@x.com>\r\nReply-To: \"a@b.c, <evil@y.com>\" <real@x.com>\r\nSubject: x\r\n\r\nx\r\n";
-        let reply = draft(tricky, DraftKind::Reply, "me@example.com", None);
+        let reply = draft(tricky, DraftKind::Reply, &["me@example.com".to_string()], None);
         let parsed = parse_addresses(&reply.to);
         assert_eq!(parsed.len(), 1, "{}", reply.to);
         assert_eq!(parsed[0].mailboxes()[0].address, "real@x.com");
         assert_eq!(parsed[0].mailboxes()[0].name, "a@b.c, <evil@y.com>");
-        let smith = draft(&tricky[..tricky.len()], DraftKind::ReplyAll, "real@x.com", None);
+        let smith = draft(
+            &tricky[..tricky.len()],
+            DraftKind::ReplyAll,
+            &["real@x.com".to_string()],
+            None,
+        );
         assert_eq!(
             parse_addresses(&smith.to).len(),
             0,
@@ -719,7 +863,7 @@ mod tests {
             smith.to
         );
 
-        let forward = draft(ORIGINAL, DraftKind::Forward, "me@example.com", None);
+        let forward = draft(ORIGINAL, DraftKind::Forward, &["me@example.com".to_string()], None);
         assert_eq!((forward.to.as_str(), forward.subject.as_str()), ("", "Fw: Plans"));
         assert!(forward.quote.contains("Let's meet.") && !forward.quote.contains("<blockquote"));
         assert!(!forward.quote_folded);
@@ -758,7 +902,7 @@ mod tests {
 
     #[test]
     fn html_messages() {
-        let reply = draft(ORIGINAL, DraftKind::Reply, "me@example.com", None);
+        let reply = draft(ORIGINAL, DraftKind::Reply, &["me@example.com".to_string()], None);
         let picture = format!("data:image/gif;base64,{}", "R0lGODlhAQABAAAAACw=");
         let outgoing = Outgoing {
             to: reply.to.clone(),
@@ -821,7 +965,7 @@ mod tests {
         // a reply to a plain text message, nothing formatted: plain text with the original's own lines quoted
         let original =
             b"From: Ann <ann@example.com>\r\nSubject: Plans\r\n\r\nLet's meet.\r\n  Room   4,\r\n\r\nTomorrow?\r\n";
-        let reply = draft(original, DraftKind::Reply, "me@example.com", None);
+        let reply = draft(original, DraftKind::Reply, &["me@example.com".to_string()], None);
         let quote_text = reply.quote_text.clone();
         assert!(quote_text.is_some());
         let plain = send("<div>Yes.</div>", Some(&reply.quote), true, quote_text);
@@ -846,7 +990,7 @@ mod tests {
         assert!(!text.contains("Tomorrow"), "{text}");
         // the original was HTML: the reply follows it
         let html = b"From: Ann <ann@example.com>\r\nSubject: Plans\r\nContent-Type: text/html\r\n\r\n<p>Let's <b>meet</b>.</p>\r\n";
-        let html_reply = draft(html, DraftKind::Reply, "me@example.com", None);
+        let html_reply = draft(html, DraftKind::Reply, &["me@example.com".to_string()], None);
         assert_eq!(html_reply.quote_text, None);
         assert!(
             send("<div>Yes.</div>", Some(&html_reply.quote), false, None)
@@ -854,7 +998,7 @@ mod tests {
                 .is_some()
         );
         // a forward of a plain message: its lines as they are, without "> "
-        let forward = draft(ORIGINAL, DraftKind::Forward, "me@example.com", None);
+        let forward = draft(ORIGINAL, DraftKind::Forward, &["me@example.com".to_string()], None);
         let text = send("<div>FYI</div>", Some(&forward.quote), true, forward.quote_text.clone())
             .text
             .unwrap();

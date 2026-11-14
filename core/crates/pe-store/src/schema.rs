@@ -476,6 +476,18 @@ ALTER TABLE outbox ADD COLUMN undoable INTEGER NOT NULL DEFAULT 0;
     r#"
 CREATE INDEX messages_flagged ON messages (folder_id) WHERE instr(' ' || flags || ' ', ' \Flagged ') > 0;
 "#,
+    // the other addresses an account sends from (aliases), in the order the user wrote them, each with the name its
+    // mail goes out under (empty: the account's)
+    r#"
+ALTER TABLE compose_recovery ADD COLUMN sender TEXT;
+CREATE TABLE account_addresses (
+    account_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    position INTEGER NOT NULL,
+    email TEXT NOT NULL,
+    name TEXT NOT NULL,
+    PRIMARY KEY (account_id, position)
+);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
