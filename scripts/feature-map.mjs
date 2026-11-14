@@ -1026,6 +1026,13 @@ const sections = [
                 checked: ['The five waits are offered', '10 seconds chosen']
             },
             {
+                shot: 'write-25-attachment-reminder',
+                name: 'Did you forget the attachment?',
+                what: 'A message whose subject or text says a file is attached (in English, German, Estonian, Spanish or French), with none attached, asks before it goes. The signature and the quoted message do not count.',
+                how: 'Happens on Send.',
+                checked: ['It asks, naming the word', 'Going back keeps the message open', 'Sending anyway sends it']
+            },
+            {
                 shot: 'write-11-sent',
                 name: 'Sent, and said so',
                 what: 'Once the server took a message, the middle of the main status bar says Sent with its subject and the time, and stays so until the next message goes; while it goes it says Sending, and a message that can not go is reported as waiting in the Outbox.',

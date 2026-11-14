@@ -2287,6 +2287,13 @@ struct PeDraft *pe_draft_open(const struct PeCore *core,
                               int64_t folder,
                               uint64_t uid);
 
+// The word of a message that says a file is attached when none is ("attached"), for the question before sending;
+// NULL when it has a file or says nothing of one. Free with `pe_string_free`.
+//
+// # Safety
+// `message` must be a valid message.
+char *pe_forgotten_attachment(const struct PeOutgoing *message);
+
 // Whether Edit > Undo takes back a message sent (`pe_undo_send`) rather than a move (`pe_undo`)
 //
 // # Safety

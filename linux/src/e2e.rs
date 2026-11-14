@@ -960,6 +960,7 @@ async fn scenario(d: Rc<Driver>) {
     drafts(&d).await;
     drafts_saved_automatically(&d).await;
     undo_send(&d).await;
+    attachment_reminder(&d).await;
     send_receive(&d).await;
     finding(&d).await;
     files(&d).await;
@@ -1805,6 +1806,37 @@ async fn undo_send(d: &Driver) {
         "and the Undo button goes with it",
     );
     let _ = shell().core.set_send_delay(0);
+}
+
+async fn attachment_reminder(d: &Driver) {
+    d.step("a reminder when an attachment is missing");
+    run_command(Command::NewMail);
+    let Some(c) = wait_compose(10).await else {
+        d.check(false, "Create Mail opens a compose window");
+        return;
+    };
+    c.to.set_text("Jo <jo@example.com>");
+    c.subject.set_text("Forgot the file in the UI test");
+    c.editor.type_text("Here is the attached plan.");
+    pause(500).await;
+    click(c.window.upcast_ref(), "compose-send");
+    let ask = wait_alert(10).await;
+    d.check(
+        ask.is_some(),
+        "a message that says a file is attached, with none, asks first",
+    );
+    if let Some(ask) = ask {
+        d.shot(&ask, "write-25-attachment-reminder").await;
+        answer(&ask, "Go Back");
+    }
+    pause(1000).await;
+    d.check(c.window.is_visible(), "Go Back keeps the message open");
+    click(c.window.upcast_ref(), "compose-send");
+    if let Some(ask) = wait_alert(10).await {
+        answer(&ask, "Send Anyway");
+    }
+    let sent = wait_for(30, || d.find("INBOX", "Subject: Forgot the file in the UI test")).await;
+    d.check(sent.is_some(), "Send Anyway sends it");
 }
 
 async fn send_receive(d: &Driver) {

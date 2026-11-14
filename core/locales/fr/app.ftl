@@ -169,6 +169,12 @@ ui-filter-pictures = Images
 ui-filter-messages = Messages électroniques
 ui-save-attachment-as = Enregistrer la pièce jointe sous
 ui-not-sent = Le message n'a pas pu être envoyé.
+# review: new
+ui-attachment-forgotten = Vous avez écrit « { $word } », mais aucun fichier n’est joint. Envoyer le message quand même ?
+# review: new
+ui-send-anyway = Envoyer quand même
+# review: new
+ui-go-back = Revenir
 ui-not-saved = Le message n'a pas pu être enregistré.
 ui-saving-draft = Enregistrement dans le dossier Brouillons...
 ui-compose-saved-at = Enregistré dans le dossier Brouillons à { $time }

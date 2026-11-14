@@ -169,6 +169,12 @@ ui-filter-pictures = Pildid
 ui-filter-messages = Meilikirjad
 ui-save-attachment-as = Salvesta manus nimega
 ui-not-sent = Kirja ei saanud saata.
+# review: new
+ui-attachment-forgotten = Kirjutasite „{ $word }“, kuid ühtegi faili pole lisatud. Kas saata kiri ikkagi?
+# review: new
+ui-send-anyway = Saada ikkagi
+# review: new
+ui-go-back = Mine tagasi
 ui-not-saved = Kirja ei saanud salvestada.
 ui-saving-draft = Salvestatakse mustanditesse...
 ui-compose-saved-at = Salvestati mustanditesse kell { $time }

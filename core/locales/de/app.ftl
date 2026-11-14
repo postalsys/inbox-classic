@@ -169,6 +169,12 @@ ui-filter-pictures = Bilder
 ui-filter-messages = E-Mail-Nachrichten
 ui-save-attachment-as = Anlage speichern unter
 ui-not-sent = Die Nachricht konnte nicht gesendet werden.
+# review: new
+ui-attachment-forgotten = Sie haben „{ $word }“ geschrieben, aber es ist keine Datei angehängt. Die Nachricht trotzdem senden?
+# review: new
+ui-send-anyway = Trotzdem senden
+# review: new
+ui-go-back = Zurück
 ui-not-saved = Die Nachricht konnte nicht gespeichert werden.
 ui-saving-draft = Wird im Ordner „Entwürfe“ gespeichert...
 ui-compose-saved-at = Um { $time } im Ordner „Entwürfe“ gespeichert

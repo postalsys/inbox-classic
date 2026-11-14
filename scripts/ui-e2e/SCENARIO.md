@@ -247,6 +247,14 @@ The UI tests send at once (the wait is set to Off at their start); this step tur
 - taken back, it never goes
 - sent again and left alone, it goes once its time came, and the Undo button goes with it
 
+
+## 19c. A reminder when an attachment is missing
+
+Screenshot: `write-25-attachment-reminder`
+
+- a message that says “the attached plan”, with no file, asks before it goes, naming the word
+- Go Back (No on Windows) keeps the message open
+- Send Anyway (Yes on Windows) sends it
 ## 20. Send/Recv
 
 Screenshots: `main-2-new-mail`, `main-3-sent-items`

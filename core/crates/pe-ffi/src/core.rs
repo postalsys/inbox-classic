@@ -2845,6 +2845,25 @@ pub unsafe extern "C" fn pe_draft_open(core: *const PeCore, folder: i64, uid: u6
     }
 }
 
+/// The word of a message that says a file is attached when none is ("attached"), for the question before sending;
+/// NULL when it has a file or says nothing of one. Free with `pe_string_free`.
+///
+/// # Safety
+/// `message` must be a valid message.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_forgotten_attachment(message: *const PeOutgoing) -> *mut c_char {
+    // SAFETY: as the caller guarantees; with files attached there is nothing to ask, so the message is not copied
+    if message.is_null() || unsafe { (*message).attachment_count } > 0 {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let Some(message) = (unsafe { outgoing(message) }) else {
+        return null_mut();
+    };
+    guard(|| pe_core::attachment_words::forgotten(&message).map_or(null_mut(), |word| into_c_string(word.to_string())))
+        .unwrap_or(null_mut())
+}
+
 /// Whether Edit > Undo takes back a message sent (`pe_undo_send`) rather than a move (`pe_undo`)
 ///
 /// # Safety

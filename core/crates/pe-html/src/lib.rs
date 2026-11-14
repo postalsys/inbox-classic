@@ -25,7 +25,7 @@ pub use bounce::{
 };
 pub use editor::{
     PICTURE_FILE_LIMIT, PICTURE_HEAD, Picture, draft_body, editor_document, is_plain, outgoing_html, picture_type,
-    picture_uri, quote_html, quote_parts, signature_block, signature_html,
+    picture_uri, quote_html, quote_parts, signature_block, signature_html, written_part,
 };
 pub use event::{EventCard, OPEN_CALENDAR_LINK, event_card, is_open_calendar_link};
 pub use help::{

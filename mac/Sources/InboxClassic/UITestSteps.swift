@@ -325,6 +325,28 @@ extension UITest {
         onMain { pe_set_send_delay_index(self.main.core.handle, 0) }
     }
 
+    func attachmentReminder() async throws {
+        step("a reminder when an attachment is missing")
+        command(.newMail)
+        guard let compose = await waitCompose() else { throw Failed(description: "no compose window") }
+        type("Jo <jo@example.com>", into: field("compose.to", compose))
+        type("Forgot the file in the UI test", into: field("compose.subject", compose))
+        _ = await typeInEditor(compose, "Here is the attached plan.")
+        send(compose)
+        let ask = await waitWindow("alert", 10)
+        check(ask != nil, "a message that says a file is attached, with none, asks first")
+        check(alertText(ask).contains("You wrote “attached”"), "naming the word (\(alertText(ask)))")
+        await shot(ask, "write-25-attachment-reminder")
+        answer(ask, "Go Back")
+        _ = await waitUntil(2) { false }
+        check(compose.isVisible, "Go Back keeps the message open")
+        send(compose)
+        let again = await waitWindow("alert", 10)
+        answer(again, "Send Anyway")
+        check(await waitFor(30) { await findMessage("INBOX", "Subject: Forgot the file in the UI test") } != nil,
+              "Send Anyway sends it")
+    }
+
     func rfc2822(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
@@ -860,9 +882,10 @@ extension UITest {
         check(opened.map(\.index) == [tripHead.index, tripHead.index + 1, tripHead.index + 2]
               && opened.dropFirst().allSatisfy { $0.message.threadDepth == 1 && $0.message.subject == "Re: Plans for the trip" },
               "right under it, oldest first")
-        let headLeft = subjectCell(tripHead.index)?.textField?.frame.minX ?? 0
-        let replyLeft = subjectCell(tripHead.index + 1)?.textField?.frame.minX ?? 0
-        check(replyLeft > headLeft, "indented (\(headLeft) and \(replyLeft))")
+        // the rows' cells are laid out on the next pass: wait for them
+        let left = { (row: Int) in self.subjectCell(row)?.textField?.frame.minX ?? 0 }
+        let indented = await waitUntil(5) { left(tripHead.index + 1) > left(tripHead.index) }
+        check(indented, "indented (\(left(tripHead.index)) and \(left(tripHead.index + 1)))")
         check(subjectCell(tripHead.index)?.textField?.font?.fontDescriptor.symbolicTraits.contains(.bold) == false,
               "the open conversation's first row in bold only when it is unread itself")
         await selectRow(tripHead.index + 1)

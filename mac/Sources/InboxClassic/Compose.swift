@@ -747,6 +747,11 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     private func send(_ html: String) {
         let strings = CStrings()
         var message = outgoing(html, strings)
+        // it says a file is attached and none is: Go Back is the default
+        if let word = taken(pe_forgotten_attachment(&message)),
+           ask(Text.uiAttachmentForgotten.text(["word": word]), yes: Text.uiGoBack.text, no: Text.uiSendAnyway.text) {
+            return
+        }
         var reason: UnsafeMutablePointer<CChar>?
         guard pe_message_send(core.handle, account, &message, &reason) else {
             // a typo in an address or a file that is gone: the message stays open to fix it
