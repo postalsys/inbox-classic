@@ -224,6 +224,8 @@ ui-signature = Signatur
 ui-signature-hint = Wird neuen Nachrichten, Antworten und Weiterleitungen von diesem Konto angefügt.
 ui-signature-not-saved = Die Signatur konnte nicht gespeichert werden.
 ui-all-inboxes = Alle Posteingänge
+# review: new
+ui-flagged-folder = Gekennzeichnet
 ui-all-folders = Alle Ordner
 ui-the-account = das Konto
 ui-folder-name = Ordnername:
