@@ -3399,6 +3399,15 @@ fn import_title() -> String {
     crate::words::title(crate::words::Text::CmdImport)
 }
 
+/// Flagged, with how many messages are flagged (no unread count: never bold)
+fn flagged_label() -> String {
+    let name = t!(UiFlaggedFolder);
+    match shell().core.flagged_count().unwrap_or(0) {
+        0 => name,
+        count => format!("{name} ({count})"),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3415,14 +3424,5 @@ mod tests {
         assert_eq!(list_key(gdk::Key::n, none), Some(Command::NextUnread));
         assert_eq!(list_key(gdk::Key::k, gdk::ModifierType::CONTROL_MASK), None);
         assert_eq!(list_key(gdk::Key::x, none), None);
-    }
-}
-
-/// Flagged, with how many messages are flagged (no unread count: never bold)
-fn flagged_label() -> String {
-    let name = t!(UiFlaggedFolder);
-    match shell().core.flagged_count().unwrap_or(0) {
-        0 => name,
-        count => format!("{name} ({count})"),
     }
 }
