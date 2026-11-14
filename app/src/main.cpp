@@ -129,6 +129,11 @@ void UpdateJunkButton() {
     Layout();
 }
 
+// the toolbar's Folders pressed while the folder list is shown
+void UpdateFolderListButton() {
+    SendMessageW(g_toolbar, TB_CHECKBUTTON, IDM_FOLDER_LIST, MAKELONG(g_folderList ? TRUE : FALSE, 0));
+}
+
 // the toolbar's Unread pressed while the list shows unread messages only
 void UpdateUnreadOnlyButton() {
     SendMessageW(g_toolbar, TB_CHECKBUTTON, IDM_HIDE_READ, MAKELONG(g_mailbox.UnreadOnly() ? TRUE : FALSE, 0));
@@ -687,6 +692,10 @@ void CreateToolbar(HWND hwnd) {
     };
     // in groups as Outlook Express has them: writing, answering, the message, getting mail, read state (0 separates)
     Button buttons[] = {
+        // the folder list on and off, pressed while it is shown (UpdateFolderListButton), as the Mac's and Linux's
+        // sidebar buttons
+        {IDM_FOLDER_LIST, PE_TEXT_UI_FOLDERS, ICON_PANEL_LEFT},
+        {0, PE_TEXT_MENU_FILE, 0},
         {IDM_NEW_MAIL, PE_TEXT_UI_TB_CREATE_MAIL, ICON_MAIL_ADD, BTNS_DROPDOWN},
         {0, PE_TEXT_MENU_FILE, 0},
         {IDM_REPLY, PE_TEXT_UI_TB_REPLY, ICON_ARROW_REPLY},
@@ -1165,6 +1174,7 @@ void ShowFolderPane() {
 void LoadPanes() {
     g_folderList = GetPreference(L"FolderList", 1) != 0;
     ShowFolderPane();
+    UpdateFolderListButton();
     g_layoutMode = static_cast<PeLayoutMode>(std::min<DWORD>(GetPreference(L"Layout", PE_LAYOUT_MODE_AUTOMATIC), PE_LAYOUT_MODE_COLUMNS));
     if (g_arguments.testHooks) {
         return;
@@ -1225,6 +1235,7 @@ void SetFolderList(bool on) {
         SetFocus(g_mailbox.List());
     }
     ShowFolderPane();
+    UpdateFolderListButton();
     Layout();
     InvalidateRect(g_folderBar, nullptr, TRUE);
 }
@@ -2006,6 +2017,12 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             return 0;
         }
         break;
+    case WM_GETMINMAXINFO: {
+        // small enough for half a screen, large enough that the toolbar, the panes and the status bar keep their room
+        auto* limits = reinterpret_cast<MINMAXINFO*>(lParam);
+        limits->ptMinTrackSize = {Scale(640), Scale(420)};
+        return 0;
+    }
     case WM_NCACTIVATE:
         // the window stays drawn active while the folder bar's drop-down has the keyboard, as under a menu
         if (!wParam && FolderDropOpen()) {
