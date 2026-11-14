@@ -4101,6 +4101,37 @@ pub extern "C" fn pe_download_limit_text(index: usize) -> *mut c_char {
     .unwrap_or(null_mut())
 }
 
+/// Options' "Show messages on a dark background when the system is dark" (the Mac and Linux)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_dark_messages(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.dark_messages()) }
+}
+
+/// Turns dark messages on or off, for the documents built from now on
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_set_dark_messages(core: *const PeCore, on: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_dark_messages(on).is_ok()) }
+}
+
+/// The documents follow a dark window as the setting says: the Mac calls it once at start (Windows never does, so its
+/// documents stay light)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_follow_dark_windows(core: *const PeCore) {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, (), |core| core.follow_dark_windows()) }
+}
+
 /// View > Text Size: the size in use, 0 (Largest) to 4 (Smallest), in the order of its commands
 ///
 /// # Safety

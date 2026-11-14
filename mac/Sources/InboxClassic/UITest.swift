@@ -246,8 +246,15 @@ final class UITest {
         }
         window.displayIfNeeded()
         await pause(0.3)
-        guard let rep = frame.bitmapImageRepForCachingDisplay(in: frame.bounds) else { return }
-        frame.cacheDisplay(in: frame.bounds, to: rep)
+        // the toolbar's glass platters come out as opaque white shapes in a cached drawing, which hide the icons of a
+        // dark window: they are left out of its picture (a light window's are white on white)
+        let dark = window.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        let glass = dark ? views(NSGlassEffectView.self, in: frame).filter { !$0.isHidden } : []
+        glass.forEach { $0.isHidden = true }
+        let rep = frame.bitmapImageRepForCachingDisplay(in: frame.bounds)
+        rep.map { frame.cacheDisplay(in: frame.bounds, to: $0) }
+        glass.forEach { $0.isHidden = false }
+        guard let rep else { return }
         let image = NSImage(size: frame.bounds.size)
         image.addRepresentation(rep)
         // the web views draw in their own process: their pictures, put where they are
@@ -536,6 +543,7 @@ final class UITest {
         try await contactPicture()
         try await trustedPictures()
         try await openEml()
+        try await darkMessages()
         try await accountsAndHelp()
         try await languages()
         try await openedFromStore()

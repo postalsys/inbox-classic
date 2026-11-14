@@ -89,6 +89,8 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
         fail_to_start(application, &why);
         return;
     };
+    // the documents follow a dark window, unless Preferences says not to
+    core.follow_dark_windows();
     let settings = Settings::load();
     let notify = settings.bool(settings::NOTIFY, true);
     pe_core::otp::set_in_notifications(settings.bool(settings::CODES_IN_NOTIFICATIONS, false));
@@ -119,6 +121,7 @@ pub fn start(application: &adw::Application, arguments: Arguments) {
         let _ = cell.set(state.clone());
     });
     install_app_actions(application);
+    crate::webview::follow_style();
     let main = Mailbox::new(application);
     *state.main.borrow_mut() = Some(main.clone());
     spawn(async move {

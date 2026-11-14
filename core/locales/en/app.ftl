@@ -549,6 +549,7 @@ ui-download-ahead-never = Only when opened
 ui-download-limit = Storage limit per account:
 ui-send-delay = Wait before sending:
 ui-send-delay-note = While a message waits, you can take it back with Undo.
+ui-dark-messages = Show messages on a dark background when the system is dark
 ui-sending-in = Sending { $subject } in { $count ->
     [one] 1 second
    *[other] { $count } seconds

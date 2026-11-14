@@ -4,16 +4,16 @@ The plan for the round of features chosen from the review of 14 November 2026 (a
 
 ## Scope
 
-| #   | Feature                                                                         | PRs  | Size |
-| --- | ------------------------------------------------------------------------------- | ---- | ---- |
-| 1   | Drafts saved automatically, and restored after a crash                          | 1    | M    |
-| 2   | Undo Send: a sent message waits a few seconds in the Outbox                     | 2    | M    |
-| 3   | "Did you forget the attachment?"                                                | 3    | S    |
-| 4   | Text Size in the View menu, no keys                                             | 4    | S    |
-| 5   | Flagged: one folder with the flagged messages of every account                  | 5    | M    |
-| 6   | Send from another address                                                       | 6    | M    |
-| 7   | Message Rules: a search query and the actions for new mail that matches it      | 7, 8 | L    |
-| 8   | Messages in dark mode on the Mac and Linux                                      | 9, 10 | L   |
+| #   | Feature                                                                    | PRs   | Size |
+| --- | -------------------------------------------------------------------------- | ----- | ---- |
+| 1   | Drafts saved automatically, and restored after a crash                     | 1     | M    |
+| 2   | Undo Send: a sent message waits a few seconds in the Outbox                | 2     | M    |
+| 3   | "Did you forget the attachment?"                                           | 3     | S    |
+| 4   | Text Size in the View menu, no keys                                        | 4     | S    |
+| 5   | Flagged: one folder with the flagged messages of every account             | 5     | M    |
+| 6   | Send from another address                                                  | 6     | M    |
+| 7   | Message Rules: a search query and the actions for new mail that matches it | 7, 8  | L    |
+| 8   | Messages in dark mode on the Mac and Linux                                 | 9, 10 | L    |
 
 Not in this round: Block Sender, saved searches, Send Later (the review's 4, 9 and the other half of 10).
 
@@ -214,3 +214,16 @@ PRs 7 and 9 touch only the core and can be built in worktrees alongside the PRs 
 - `build/windows-ux-pending.md` empty, or its open items listed with the reason.
 - `node scripts/i18n-review.mjs --html build/i18n-review.html` lists the draft translations to edit.
 - The homepage screenshots refreshed with `scripts/homepage-screenshots.sh` (dark mode gives the Mac and Linux a second set), as a PR in `postalsys/inboxclassic.com`.
+
+## As built: where the result differs from the plan
+
+- **Undo Send**: the countdown and its Undo button are in the status bar on all three platforms (Linux too, rather than a toast).
+- **Flagged**: a message whose flag is taken away leaves the list at once, so the list always matches its count. On an account with a folder of its flagged messages (Gmail's Starred) that folder is listed, so a starred message that was archived is not lost.
+- **Other addresses**: one field in Account Properties, `Name <address>` comma separated, instead of a list with Add, Edit and Remove.
+- **Message Rules**:
+    - Flag it has no color choice.
+    - Message Properties does not name the rule that handled a message; the status bar says how many messages the rules sorted.
+    - "Also apply it to the messages already in the Inbox" runs without a second question: the editor shows the count of those messages right above it.
+    - Move it to, Archive it, Move it to Junk E-mail and Delete it exclude each other in the editor, and Move it to offers only the chosen account's folders (never Sent Items, Drafts, Junk E-mail or Deleted Items).
+    - A rule without a name is called by its query.
+- **Dark mode**: PRs 9 and 10 became one pull request. The Mac's UI test checks the compose window's content for colors rather than sending it; the Linux test sends it and checks the message over ImapKit.

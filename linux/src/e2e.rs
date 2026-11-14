@@ -43,6 +43,9 @@ mod pictures;
 /// Step 19g: Message Rules
 mod rules;
 
+/// Messages in dark mode
+mod dark;
+
 const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
 const MINUTES: &str = "Minutes of the planning meeting";
@@ -1015,6 +1018,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::language_tour(&d).await;
     about_and_help(&d).await;
     printing(&d).await;
+    dark::dark_messages(&d).await;
     steps::opened_from_store(&d).await;
     steps::closing(&d).await;
 }

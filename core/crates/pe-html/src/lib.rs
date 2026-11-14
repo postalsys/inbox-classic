@@ -14,6 +14,7 @@ use base64::engine::general_purpose::STANDARD;
 
 mod bounce;
 mod card;
+mod dark;
 mod editor;
 mod event;
 mod help;
@@ -23,6 +24,7 @@ mod visible;
 pub use bounce::{
     BOUNCED_MESSAGE_LINK, BounceCard, CardDetail, CardPicture, CardReason, bounce_card, is_bounced_message_link,
 };
+pub use dark::{dark, set_dark};
 pub use editor::{
     PICTURE_FILE_LIMIT, PICTURE_HEAD, Picture, draft_body, editor_document, is_plain, outgoing_html, picture_type,
     picture_uri, quote_html, quote_parts, signature_block, signature_html, written_part,
@@ -352,6 +354,20 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str
     // a message can not add rules to a layer it can not name. Its lines have inline important styles, which beat
     // the message's too. (The header the window shows is outside the message and can not be touched.)
     let class = format!("pe-print-{}", editor::nonce());
+    // in a dark window: written mail dark (its own too dark colors lightened), designed mail light as it was made
+    let look = dark::look(body);
+    let marked;
+    let body = match look {
+        dark::Look::Dark { adapt: true } => {
+            marked = dark::mark_dark_text(body);
+            marked.as_str()
+        }
+        _ => body,
+    };
+    let (scheme, dark_style) = match look {
+        dark::Look::Light => ("light", ""),
+        dark::Look::Dark { .. } => ("light dark", dark::DOCUMENT_DARK),
+    };
     let shown = "display:block!important;visibility:visible!important;opacity:1!important;position:static!important;\
                  color:#000!important;font:10pt Arial,sans-serif!important";
     let printed: String = header
@@ -373,7 +389,7 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str
     format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
          <meta http-equiv=\"Content-Security-Policy\" {CSP_START}img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
-         <meta name=\"color-scheme\" content=\"light\">\
+         <meta name=\"color-scheme\" content=\"{scheme}\">\
          <style>html{{background:#fff}}body{{font:10pt Arial,sans-serif;margin:8px}}\
          div.pe-plain{{max-width:46em}}\
          details.pe-fold{{margin:6px 0}}\
@@ -384,6 +400,7 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str
          details.pe-fold>summary::-webkit-details-marker{{display:none}}\
          details.pe-fold>summary::marker{{content:\"\"}}\
          details.pe-fold>summary:hover{{background:#e2e2e2;color:#000}}\
+         {dark_style}\
          @page{{margin:0}}\
          @media print{{body{{margin:15mm}}}}\
          @layer {class}{{.{class}{{display:none}}\
@@ -399,6 +416,39 @@ mod tests {
 
     /// A whole document's title (a Stripe payout notice's "Your €1,910.91 payout ... is on the way") is not the
     /// body's first line: the text of an element a browser never shows goes with it, the body and its styles stay
+    /// In a dark window, written mail goes dark with its too dark colors marked, designed mail stays light, and the
+    /// CSP is the same either way
+    #[test]
+    fn written_mail_goes_dark_and_designed_mail_stays_light() {
+        set_dark(true);
+        let written = render_view(
+            "<div style=\"color:#222\">Hi Ann</div>",
+            &RenderOptions::default(),
+            &[],
+            &[],
+        )
+        .document;
+        let designed = render_view(
+            "<table bgcolor=\"#eee\"><tr><td>Sale</td></tr></table>",
+            &RenderOptions::default(),
+            &[],
+            &[],
+        )
+        .document;
+        set_dark(false);
+        assert!(
+            written.contains("content=\"light dark\"") && written.contains("data-pe-dark"),
+            "{written}"
+        );
+        assert!(written.contains("prefers-color-scheme:dark"), "{written}");
+        assert!(
+            designed.contains("content=\"light\"") && !designed.contains("prefers-color-scheme"),
+            "{designed}"
+        );
+        let csp = |d: &str| d[d.find(CSP_START).unwrap()..].split('>').next().unwrap().to_string();
+        assert_eq!(csp(&written), csp(&designed));
+    }
+
     #[test]
     fn a_title_is_not_shown_as_the_first_line() {
         let html = "<html><head><title>TITLE TEXT</title><style>p{color:red}</style></head>\

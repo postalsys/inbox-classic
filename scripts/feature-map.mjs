@@ -626,6 +626,58 @@ const sections = [
         ]
     },
     {
+        title: 'Messages in dark mode (the Mac and Linux)',
+        intro: "On the Mac and Linux, messages follow the system's appearance; Windows keeps the classic light look. How a message looks in the dark is decided in Rust while it is sanitized.",
+        features: [
+            {
+                shot: 'dark-1-plain',
+                name: 'A plain text message in the dark',
+                what: "A plain text message is shown light on a dark background when the system is dark. The document carries both looks, so a change of the system's appearance needs no reload.",
+                how: 'Automatic when the system is dark.',
+                checked: ['Shown on a dark background', 'Its document carries both looks (color-scheme: light dark)']
+            },
+            {
+                shot: 'dark-2-written',
+                name: 'A message as people write it, dark',
+                what: 'A message that sets no backgrounds of its own (what Gmail, Outlook and Apple Mail send) is shown dark too; text colors that would be too dark to read there are lightened, other colors stay. The earlier messages are folded under a dark ... button.',
+                how: 'Automatic when the system is dark.',
+                checked: [
+                    'Dark, as it sets no backgrounds of its own',
+                    'Its two too dark text colors marked and lightened, the red one not',
+                    'The quote folded under the ... button'
+                ]
+            },
+            {
+                shot: 'dark-3-newsletter',
+                name: 'Newsletters and receipts stay light',
+                what: 'A message with backgrounds of its own (newsletters, receipts) is shown as it was designed, light, as Apple Mail does. One that brings its own dark styles is shown as it asks.',
+                how: 'Automatic when the system is dark.',
+                checked: ['Shown light on white', 'Its document has only the light look']
+            },
+            {
+                shot: 'dark-4-cards',
+                name: 'The cards in the dark',
+                what: 'The cards above a message (a bounce, a one-time code, an invitation, an unsubscribe) and the pages shown while a message downloads have dark styles of their own.',
+                how: 'Automatic when the system is dark.',
+                checked: ["The delivery report's card is dark, Details open"]
+            },
+            {
+                shot: 'dark-5-compose',
+                name: 'Writing in the dark',
+                what: 'The editor of the compose window is dark too. Nothing about colors is added to what is sent: text without a color is sent without one. Printing is always light.',
+                how: 'Reply, Forward or New Message when the system is dark.',
+                checked: ["The editor's page is dark", 'What is written carries no colors']
+            },
+            {
+                shot: 'dark-6-switch-off',
+                name: 'Dark messages turned off',
+                what: 'Settings has "Show messages on a dark background when the system is dark", on by default. Turned off, messages are shown light in a dark window too; the message shown changes at once.',
+                how: 'On the Mac Inbox Classic > Settings, on Linux the main menu > Preferences.',
+                checked: ['Turning it off keeps it off', 'The message shown is made again, light on white', 'With its colors as sent']
+            }
+        ]
+    },
+    {
         title: 'Organizing mail',
         intro: 'What is done to a message is done on the server too, so webmail and your other mail programs agree.',
         features: [
@@ -1308,9 +1360,17 @@ const behind = [
     ]
 ];
 
-// the screenshots a platform's UI test does not take yet, each a gap to close; Windows has none
+// the screenshots a platform's UI test does not take yet, each a gap to close, or of a feature it does not have
 const notYet = {
-    windows: [],
+    windows: [
+        // the Mac and Linux only: Windows keeps the classic light look
+        'dark-1-plain',
+        'dark-2-written',
+        'dark-3-newsletter',
+        'dark-4-cards',
+        'dark-5-compose',
+        'dark-6-switch-off'
+    ],
     mac: [
         // the system's own file panels and the Dock or the top bar run in processes of their own: their pictures can
         // not be taken from inside the app (the test answers the panels in their place and checks what they did)

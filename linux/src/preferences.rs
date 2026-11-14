@@ -1,5 +1,5 @@
-//! Preferences (the main menu, Ctrl+,): the language of the windows, Group messages by conversation, the pictures of
-//! messages (every message's, the trusted senders), Notify of New Mail, the app for .eml files and what is downloaded
+//! Preferences (the main menu, Ctrl+,): the language of the windows, Group messages by conversation, messages on a
+//! dark background, the pictures of messages (every message's, the trusted senders), Notify of New Mail, the app for .eml files and what is downloaded
 //! before it is opened, in a libadwaita
 //! preferences dialog as GNOME apps have it. A language chosen is saved in settings.ini and used
 //! from the next start; the app offers to start again in it at once.
@@ -163,10 +163,20 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
     dialog.present(Some(parent.as_ref()));
 }
 
-/// Reading: Download pictures in all messages (with what it tells senders), and the trusted senders on a page of their
-/// own
+/// Reading: messages on a dark background when the system is dark, Download pictures in all messages (with what it
+/// tells senders), and the trusted senders on a page of their own
 fn pictures_group() -> adw::PreferencesGroup {
     let core = &shell().core;
+    let dark = adw::SwitchRow::builder()
+        .title(plain(Text::UiDarkMessages))
+        .active(core.dark_messages())
+        .build();
+    dark.set_widget_name("preferences-dark-messages");
+    dark.connect_active_notify(|row| {
+        if shell().core.dark_messages() != row.is_active() {
+            set_dark_messages(row.is_active());
+        }
+    });
     let always = adw::SwitchRow::builder()
         .title(plain(Text::UiPicturesAlwaysOption))
         .subtitle(plain(Text::UiPicturesAlwaysWarning))
@@ -191,9 +201,24 @@ fn pictures_group() -> adw::PreferencesGroup {
         }
     });
     let group = adw::PreferencesGroup::new();
+    group.add(&dark);
     group.add(&always);
     group.add(&trusted);
     group
+}
+
+/// Messages on a dark background when the system is dark, or not: kept, and what is shown made again in that look
+/// (the reading pane's message and those of the message windows; a compose window keeps its page until it closes)
+pub fn set_dark_messages(on: bool) {
+    let shell = shell();
+    if shell.core.set_dark_messages(on).is_err() {
+        return;
+    }
+    crate::webview::update_backgrounds();
+    shell.main().reader.reload();
+    for window in crate::message_window::windows() {
+        window.reader.reload();
+    }
 }
 
 /// Layout: Automatic, Classic or Columns, as View > Layout chooses

@@ -648,6 +648,24 @@ impl Core {
         Ok(self.store().trusted_senders()?)
     }
 
+    /// Options' "Show messages on a dark background when the system is dark" (the Mac and Linux): on until turned off
+    pub fn dark_messages(&self) -> bool {
+        self.store().dark_messages().unwrap_or(true)
+    }
+
+    /// Turns dark messages on or off, kept, and for the documents built from now on
+    pub fn set_dark_messages(&self, on: bool) -> Result<()> {
+        self.store().set_dark_messages(on)?;
+        pe_html::set_dark(on);
+        Ok(())
+    }
+
+    /// Lets the documents follow a dark window as the setting says: the Mac and Linux call it once at start; Windows
+    /// never does, so its documents stay light
+    pub fn follow_dark_windows(&self) {
+        pe_html::set_dark(self.dark_messages());
+    }
+
     /// View > Text Size: the place of the size in use in [`TEXT_ZOOMS`], Medium until one is chosen
     pub fn text_size(&self) -> usize {
         self.store()

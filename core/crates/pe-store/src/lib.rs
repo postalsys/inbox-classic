@@ -88,6 +88,15 @@ impl Store {
             .query_row("SELECT value FROM settings WHERE key = 'profile'", [], |row| row.get(0))
     }
 
+    /// Messages on a dark background when the window is dark (the Mac and Linux), on until turned off
+    pub fn dark_messages(&self) -> Result<bool> {
+        self.bool_setting("view.dark_messages", true)
+    }
+
+    pub fn set_dark_messages(&self, on: bool) -> Result<()> {
+        self.set_bool_setting("view.dark_messages", on)
+    }
+
     /// View > Text Size: the place of the size in use among the sizes offered (pe-core `TEXT_ZOOMS`), None when it
     /// was never chosen
     pub fn text_size(&self) -> Result<Option<usize>> {

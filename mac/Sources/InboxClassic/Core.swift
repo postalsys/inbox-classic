@@ -178,6 +178,12 @@ final class Core {
         set { pe_set_always_load_pictures(handle, newValue) }
     }
 
+    /// Settings' "Show messages on a dark background when the system is dark", for the documents built from then on
+    var darkMessages: Bool {
+        get { pe_dark_messages(handle) }
+        set { _ = pe_set_dark_messages(handle, newValue) }
+    }
+
     /// Settings' "Download messages ahead"
     var downloadAhead: PeDownloadAhead {
         get { pe_download_ahead(handle) }

@@ -2755,6 +2755,25 @@ size_t pe_download_limit_count(void);
 // The words of the limit at `index` ("500 MB", "2 GB"), NULL past the last; freed with `pe_string_free`
 char *pe_download_limit_text(size_t index);
 
+// Options' "Show messages on a dark background when the system is dark" (the Mac and Linux)
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_dark_messages(const struct PeCore *core);
+
+// Turns dark messages on or off, for the documents built from now on
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_set_dark_messages(const struct PeCore *core, bool on);
+
+// The documents follow a dark window as the setting says: the Mac calls it once at start (Windows never does, so its
+// documents stay light)
+//
+// # Safety
+// `core` must be a live handle.
+void pe_follow_dark_windows(const struct PeCore *core);
+
 // View > Text Size: the size in use, 0 (Largest) to 4 (Smallest), in the order of its commands
 //
 // # Safety

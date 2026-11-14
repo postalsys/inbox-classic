@@ -176,15 +176,20 @@ pub fn status_page(title: &str, detail: &str, busy: bool) -> String {
     } else {
         format!("<p class=\"detail\">{}</p>", crate::editor::text(detail))
     };
+    let (scheme, dark) = if crate::dark::dark() {
+        ("light dark", crate::dark::PAGE_DARK)
+    } else {
+        ("light", "")
+    };
     format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
          <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; style-src 'unsafe-inline'\">\
-         <meta name=\"color-scheme\" content=\"light\"><style>\
+         <meta name=\"color-scheme\" content=\"{scheme}\"><style>\
          html{{background:#fff}}body{{margin:0;padding:48px 24px;text-align:center;font:13px system-ui,-apple-system,'Segoe UI',sans-serif;color:#333}}\
          .title{{font-size:14px;font-weight:600;margin:0 0 6px}}.detail{{margin:0 auto;max-width:420px;line-height:1.45;color:#666}}\
          .spin{{width:22px;height:22px;margin:0 auto 14px;border:2px solid #d8d8d8;border-top-color:#777;border-radius:50%;\
          animation:spin .9s linear infinite}}@keyframes spin{{to{{transform:rotate(360deg)}}}}\
-         @media (prefers-reduced-motion:reduce){{.spin{{animation-duration:3s}}}}\
+         @media (prefers-reduced-motion:reduce){{.spin{{animation-duration:3s}}}}{dark}\
          </style></head><body role=\"status\">{spinner}<p class=\"title\">{}</p>{detail}</body></html>",
         crate::editor::text(title)
     )

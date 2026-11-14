@@ -216,6 +216,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             return
         }
         self.core = core
+        // the documents dark in a dark window, as Settings has it (Windows keeps them light)
+        pe_follow_dark_windows(core.handle)
+        Preview.dark = core.darkMessages
         TextSize.zoom = pe_text_zoom(core.handle)
         pe_set_codes_in_notifications(codesInNotifications)
         // where the user's AI agents reach this app (--mcp); another app with this store open keeps them

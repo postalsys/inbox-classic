@@ -589,6 +589,8 @@ ui-send-delay = Esperar antes de enviar:
 # review: new
 ui-send-delay-note = Mientras un mensaje espera, puede recuperarlo con Deshacer.
 # review: new
+ui-dark-messages = Mostrar los mensajes sobre fondo oscuro cuando el sistema esté oscuro
+# review: new
 ui-sending-in = Enviando { $subject } en { $count ->
     [one] 1 segundo
    *[other] { $count } segundos

@@ -43,10 +43,16 @@ pub fn editor_document(quote: Option<&str>, folded: bool, body: &str) -> String 
             quote_sanitizer(&[]).clean(quote)
         )
     });
+    // the page dark in a dark window: only how it is shown, nothing of it goes into what is sent
+    let (scheme, dark) = if crate::dark::dark() {
+        ("light dark", EDITOR_DARK)
+    } else {
+        ("light", "")
+    };
     format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
          <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'nonce-{nonce}'; style-src 'unsafe-inline'; img-src data:; font-src data:\">\
-         <meta name=\"color-scheme\" content=\"light\">\
+         <meta name=\"color-scheme\" content=\"{scheme}\">\
          <style>\
          html{{background:#fff}}\
          body{{margin:0;font:10pt Arial,sans-serif;color:#000}}\
@@ -60,6 +66,7 @@ pub fn editor_document(quote: Option<&str>, folded: bool, body: &str) -> String 
          border-radius:9px;padding:0 9px;height:17px;line-height:13px;cursor:pointer}}\
          #more:hover{{background:#e2e2e2;color:#000}}\
          #more:focus-visible{{outline:2px solid #036;outline-offset:1px}}\
+         {dark}\
          </style></head>\
          <body><div id=\"body\" contenteditable=\"true\" role=\"textbox\" aria-multiline=\"true\" aria-label=\"Message\">{body}</div>\
          {quote}<script nonce=\"{nonce}\">{EDITOR_SCRIPT}</script></body></html>"
@@ -79,6 +86,11 @@ pub fn written_part(html: &str) -> &str {
     ];
     &html[..ends.into_iter().flatten().min().unwrap_or(html.len())]
 }
+
+/// The editor's colors in a dark window
+const EDITOR_DARK: &str = "@media screen and (prefers-color-scheme:dark){html{background:#1e1f22}body{color:#e3e3e6}\
+    a{color:#8ab4f8}blockquote{border-left-color:#6a8fc0}\
+    #more{color:#c6c6ca;background:#36373b;border-color:#55565b}#more:hover{background:#45464b;color:#fff}}";
 
 /// The sanitizer of a quoted message: without style elements, which would restyle the whole page (the editor's, or
 /// the sent message above the quote); inline styles stay

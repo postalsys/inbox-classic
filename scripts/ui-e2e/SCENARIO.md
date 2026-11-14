@@ -820,6 +820,20 @@ With the second account still there:
 - the next Move to Folder offers Archive of the second account under Recent
 - a message dragged onto a folder of the second account is moved there
 
+## 43a. Messages in dark mode (the Mac and Linux)
+
+Screenshots: `dark-1-plain`, `dark-2-written`, `dark-3-newsletter`, `dark-4-cards`, `dark-5-compose`, `dark-6-switch-off` (Windows keeps the classic light look and has no such step: `notYet.windows` in `feature-map.mjs`)
+
+Three messages added to the Inbox (read, dated before the others): a plain one, one written in a mail program (a text color too dark for a dark background, a red one, a link, a quote) and a receipt with backgrounds of its own. Settings' "Show messages on a dark background when the system is dark" is on at first; the app is switched to the dark appearance:
+
+- the plain message is shown on a dark background, its document carrying both looks (`color-scheme: light dark`), so a change of the system's appearance needs no reload
+- the written message is dark too: its two too dark text colors are marked (`data-pe-dark`) and lightened, the red one is not, and its quote is folded under the dark "..." button
+- the receipt stays light, as it was designed (`color-scheme: light`, a white background)
+- the delivery report of 34f shows its card dark, Details open
+- a reply to the written message is written in a dark editor, and what is written carries no colors
+- the switch turned off in Settings: the written message shown is made again, light on white in the dark window, its colors as sent
+- the switch on again and the system's appearance back, for the steps after this one
+
 ## 44. Accounts
 
 Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, `accounts-3-after`

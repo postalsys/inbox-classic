@@ -127,6 +127,9 @@ pub(crate) fn style(class: &str, own: &[(&str, &str)]) -> String {
         css.push('}');
     }
     css.push_str(&format!("@media print{{.{class} .x{{display:none!important}}}}"));
+    if crate::dark::dark() {
+        css.push_str(&crate::dark::card_dark(class));
+    }
     css.push_str("}</style>");
     css
 }
