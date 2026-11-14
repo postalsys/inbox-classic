@@ -13,6 +13,10 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     private let statusText = NSTextField(labelWithString: Text.uiDone.text)  // as on Windows and Linux, until something happens
     private let outboxText = NSTextField(labelWithString: "")
     private let countsText = NSTextField(labelWithString: "")
+    /// takes back the message that waits to be sent (Undo Send), shown while one does
+    private let undoSendButton = NSButton(title: Text.uiUndoButton.text, target: nil, action: nil)
+    /// counts down the message that waits to be sent, in the core's words, while one does
+    private var sendTimer: Timer?
     let searchField = NSSearchField()
     private var syncTimer: Timer?
     /// accounts whose password prompt is open, so a second failure does not open another
@@ -59,6 +63,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         }
         mailbox.status = { [weak self] in self?.setStatus($0) }
         mailbox.openMailto = { [weak self] in self?.openMailto($0) }
+        mailbox.undoSend = { [weak self] in self?.undoSend() }
         showOutbox()
         showCounts()
         updateLayout()
@@ -69,7 +74,15 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     }
 
     private func makeContent() -> NSView {
-        let status = NSStackView(views: [statusText, outboxText, countsText])
+        undoSendButton.bezelStyle = .inline
+        undoSendButton.controlSize = .small
+        undoSendButton.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        undoSendButton.target = self
+        undoSendButton.action = #selector(undoSend)
+        undoSendButton.setAccessibilityIdentifier("status.undoSend")
+        undoSendButton.isHidden = true
+        let status = NSStackView(views: [statusText, outboxText, undoSendButton, countsText])
+        status.setCustomSpacing(6, after: outboxText)
         status.distribution = .fill
         status.spacing = 16
         status.edgeInsets = NSEdgeInsets(top: 0, left: 12, bottom: 0, right: 12)
@@ -171,6 +184,8 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
 
     /// the outgoing pane: what is being sent, what waits in the Outbox and why, or the last message sent
     func showOutbox() {
+        // a message waiting to be sent says how long, with its Undo
+        if showSendWaiting() { return }
         guard let outbox = pe_outbox(core.handle) else { return }
         defer { pe_outbox_free(outbox) }
         let waiting = pe_outbox_count(outbox)
@@ -188,6 +203,37 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         }
         outboxText.stringValue = said
         outboxText.toolTip = said
+    }
+
+    /// the countdown of the message waiting to be sent, with its Undo; false once none waits
+    private func showSendWaiting() -> Bool {
+        guard sendTimer != nil else { return false }
+        guard let said = taken(pe_send_waiting_text(core.handle)) else {
+            endSendWaiting()
+            return false
+        }
+        outboxText.stringValue = said
+        outboxText.toolTip = said
+        undoSendButton.isHidden = false
+        return true
+    }
+
+    private func endSendWaiting() {
+        sendTimer?.invalidate()
+        sendTimer = nil
+        undoSendButton.isHidden = true
+    }
+
+    /// takes back the message that waits to be sent: it opens again as it was, or the status bar says it went
+    @objc func undoSend() {
+        endSendWaiting()
+        var account: Int64 = 0
+        var status: UnsafeMutablePointer<CChar>?
+        if let draft = Draft(pe_undo_send(core.handle, &account, &status)) {
+            ComposeWindow.open(core: core, account: account, draft: draft)
+        }
+        setStatus(taken(status) ?? "")
+        showOutbox()
     }
 
     // ---- the core's events ----
@@ -211,6 +257,13 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
                 ?? MessageWindow.unsubscribed(event.uid, problem: event.message) {
                 setStatus(said)
             }
+        case PE_EVENT_KIND_SEND_WAITING:
+            sendTimer?.invalidate()
+            sendTimer = Timer(timeInterval: 1, repeats: true) { [weak self] _ in
+                MainActor.assumeIsolated { self?.showOutbox() }
+            }
+            RunLoop.main.add(sendTimer!, forMode: .common)
+            showOutbox()
         case PE_EVENT_KIND_MESSAGE_SENT:
             // shown by the OutboxChanged that follows it
             lastSent = Text.uiSentAt.text(["subject": quoted(event.message), "time": timeNow()])

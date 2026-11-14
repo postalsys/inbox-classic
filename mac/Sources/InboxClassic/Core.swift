@@ -190,6 +190,17 @@ final class Core {
         set { pe_set_download_limit_index(handle, newValue) }
     }
 
+    /// Settings' "Wait before sending": its place among `Core.sendDelays`
+    var sendDelayIndex: Int {
+        get { pe_send_delay_index(handle) }
+        set { pe_set_send_delay_index(handle, newValue) }
+    }
+
+    /// The waits before a message goes that Settings offers, in words ("Off", "10 seconds")
+    static var sendDelays: [String] {
+        (0..<pe_send_delay_count()).map { taken(pe_send_delay_text($0)) ?? "" }
+    }
+
     /// The limits of downloaded messages Settings offers, in words ("500 MB", "2 GB")
     static var downloadLimits: [String] {
         (0..<pe_download_limit_count()).map { taken(pe_download_limit_text($0)) ?? "" }

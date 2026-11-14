@@ -18,6 +18,8 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
         let problem: String?
         /// an AI agent's message waits until then, while it can still be deleted
         let notBefore: Int64
+        /// the user's, waiting to be taken back (Undo Send); else an AI agent's wait
+        let undoable: Bool
     }
 
     private let window: NSWindow
@@ -85,7 +87,7 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
                 guard let queued = pe_outbox_get(outbox, index)?.pointee else { continue }
                 rows.append(Queued(id: queued.id, subject: text(queued.subject), recipients: text(queued.recipients),
                                    created: queued.created, problem: queued.problem.map { String(cString: $0) },
-                                   notBefore: queued.not_before))
+                                   notBefore: queued.not_before, undoable: queued.undoable))
             }
         }
         table.reloadData()
@@ -123,7 +125,7 @@ private final class OutboxWindow: NSObject, NSTableViewDataSource, NSTableViewDe
             if let problem = queued.problem {
                 return Text.uiOutboxStatusNotSent.text(["reason": problem])
             } else if queued.notBefore != 0 {
-                return Text.uiOutboxStatusAgent.text(["time": timeOfDay(queued.notBefore)])
+                return (queued.undoable ? Text.uiOutboxStatusUndo : Text.uiOutboxStatusAgent).text(["time": timeOfDay(queued.notBefore)])
             }
             return Text.uiOutboxStatusWaiting.text
         }

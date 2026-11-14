@@ -89,6 +89,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     let listPictures: NSButton
     let downloadAhead = NSPopUpButton()
     let downloadLimit = NSPopUpButton()
+    /// Wait before sending (Undo Send)
+    let sendDelay = NSPopUpButton()
     /// Automatic, Classic, Columns: View > Layout's choice
     let layout = NSPopUpButton()
     private let core: Core
@@ -202,13 +204,22 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         downloadLimit.target = self
         downloadLimit.action = #selector(downloadLimitChosen)
         downloadLimit.setAccessibilityIdentifier("settings.downloadLimit")
+        sendDelay.addItems(withTitles: Core.sendDelays)
+        sendDelay.selectItem(at: core.sendDelayIndex)
+        sendDelay.target = self
+        sendDelay.action = #selector(sendDelayChosen)
+        sendDelay.setAccessibilityIdentifier("settings.sendDelay")
+        let sendRow = NSStackView(views: [NSTextField(labelWithString: Text.uiSendDelay.text), sendDelay])
+        let sendNote = NSTextField(wrappingLabelWithString: Text.uiSendDelayNote.text)
+        sendNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        sendNote.textColor = .secondaryLabelColor
         let downloadNote = NSTextField(wrappingLabelWithString: Text.uiDownloadNote.text)
         downloadNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
         downloadNote.textColor = .secondaryLabelColor
         // each label beside its pop-up, under the other settings: the language's label keeps the left column narrow
         let aheadRow = NSStackView(views: [NSTextField(labelWithString: Text.uiDownloadAhead.text), downloadAhead])
         let limitRow = NSStackView(views: [NSTextField(labelWithString: Text.uiDownloadLimit.text), downloadLimit])
-        for row in [aheadRow, limitRow] {
+        for row in [sendRow, aheadRow, limitRow] {
             row.alignment = .firstBaseline
             row.spacing = 8
         }
@@ -239,6 +250,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             [NSGridCell.emptyContentView, warned],
             [NSGridCell.emptyContentView, trusted],
             [NSGridCell.emptyContentView, eml],
+            [NSGridCell.emptyContentView, sendRow],
+            [NSGridCell.emptyContentView, sendNote],
             [NSGridCell.emptyContentView, aheadRow],
             [NSGridCell.emptyContentView, limitRow],
             [NSGridCell.emptyContentView, downloadNote],
@@ -248,7 +261,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         grid.column(at: 0).xPlacement = .trailing
         // the rows by what is in them, so a row added between them does not move another's room
         let rowOf = { (view: NSView) in grid.cell(for: view)?.row }
-        for (view, padding) in [(layout, 8), (notify, 8), (pictures, 8), (trusted, 4), (eml, 8), (aheadRow, 12)] as [(NSView, CGFloat)] {
+        for (view, padding) in [(layout, 8), (notify, 8), (pictures, 8), (trusted, 4), (eml, 8), (sendRow, 12), (aheadRow, 12)] as [(NSView, CGFloat)] {
             rowOf(view)?.topPadding = padding
         }
         // the labels on the pop-ups' text lines, as the other forms have them
@@ -271,6 +284,8 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             hint.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
             warning.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
             downloadNote.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
+            sendNote.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
+            listNote.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
         ])
         window.contentView = content
         window.setContentSize(content.fittingSize)
@@ -309,6 +324,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     @objc func downloadAheadChosen() {
         // the items are in the order of PeDownloadAhead
         core.downloadAhead = PeDownloadAhead(rawValue: UInt32(max(downloadAhead.indexOfSelectedItem, 0)))
+    }
+
+    @objc func sendDelayChosen() {
+        core.sendDelayIndex = sendDelay.indexOfSelectedItem
     }
 
     @objc func downloadLimitChosen() {
