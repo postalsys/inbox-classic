@@ -582,6 +582,15 @@ impl Core {
         }
     }
 
+    /// How many flagged messages the Flagged row lists, of every account
+    pub fn flagged_count(&self) -> Result<u64> {
+        let search = Search {
+            scope: Scope::Flagged,
+            ..Default::default()
+        };
+        Ok(self.store().count_search(&search)?.0)
+    }
+
     /// How many messages are unread in the Inboxes of all accounts
     pub fn inbox_unread(&self) -> Result<u64> {
         Ok(self.store().inbox_unread()?)

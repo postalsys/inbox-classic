@@ -15,7 +15,9 @@ use pe_store::Folder;
 
 use crate::app::{run_command, shell, spawn};
 use crate::commands::Command;
-use crate::folders::{ALL_INBOXES, Entry, FolderTree, Handlers, folder_of, is_under_all_inboxes, under_all_inboxes};
+use crate::folders::{
+    ALL_INBOXES, Entry, FLAGGED, FolderTree, Handlers, folder_of, is_under_all_inboxes, under_all_inboxes,
+};
 use crate::messages::MessageList;
 use crate::reader::{Loaded, Reader};
 use crate::settings;
@@ -103,6 +105,8 @@ pub struct Mailbox {
     folder: Cell<i64>,
     /// All Inboxes is shown: the mail of every account's Inbox
     all_inboxes: Cell<bool>,
+    /// The Flagged row is the list shown
+    flagged: Cell<bool>,
     /// select_start has run: later showings of the window keep what is selected
     started: Cell<bool>,
     /// What the Find box searches for, empty when the list is the folder's, and the one folder it names (in:sent)
@@ -278,6 +282,7 @@ impl Mailbox {
             selected_account: Cell::new(0),
             folder: Cell::new(0),
             all_inboxes: Cell::new(false),
+            flagged: Cell::new(false),
             started: Cell::new(false),
             find_place: RefCell::default(),
             total: Cell::new(0),
@@ -543,7 +548,9 @@ impl Mailbox {
             }),
             menu: Box::new(move |widget, x, y, id| {
                 if let Some(this) = menu.upgrade() {
-                    if id < 0 && id != crate::folders::ALL_INBOXES {
+                    if id == FLAGGED {
+                        // messages of every folder: no folder commands
+                    } else if crate::folders::is_heading(id) {
                         this.account_menu(widget, x, y, -id);
                     } else {
                         this.folder_menu(widget, x, y);
@@ -590,7 +597,9 @@ impl Mailbox {
         }
         *self.accounts.borrow_mut() = infos;
         self.fill_account_menus();
-        let shown = if self.all_inboxes.get() {
+        let shown = if self.flagged.get() {
+            FLAGGED
+        } else if self.all_inboxes.get() {
             ALL_INBOXES
         } else if self.under_all_inboxes.get() {
             under_all_inboxes(self.folder.get())
@@ -630,6 +639,19 @@ impl Mailbox {
             };
             (all, inboxes)
         });
+        // under it (or first, with one account), the flagged messages of every account
+        let flagged = (!accounts.is_empty()).then(|| {
+            let entry = Entry {
+                id: FLAGGED,
+                name: flagged_label(),
+                unread: 0,
+                below: 0,
+                icon: "ic-flag-symbolic",
+                depth: 0,
+            };
+            (entry, Vec::new())
+        });
+        let top: Vec<(Entry, Vec<Entry>)> = top.into_iter().chain(flagged).collect();
         self.reloading.set(true);
         let kept = self.folders.rebuild(top, entries, &closed_rows());
         if shown != 0 && kept {
@@ -641,7 +663,7 @@ impl Mailbox {
             let inbox = core.start_message().ok().flatten().map(|start| start.folder);
             let replaced = self.all_inboxes.get() && inbox.is_some_and(|inbox| self.folders.select(inbox));
             if !replaced {
-                self.on_folder_selected(0, false);
+                self.on_folder_selected(0, false, false);
             }
         }
         self.show_folder_name();
@@ -688,7 +710,7 @@ impl Mailbox {
         if is_under_all_inboxes(id) {
             self.folder_accounts.borrow().get(&folder_of(id)).copied()
         } else {
-            (id < 0 && id != ALL_INBOXES).then_some(-id)
+            crate::folders::is_heading(id).then_some(-id)
         }
     }
 
@@ -733,6 +755,7 @@ impl Mailbox {
             self.folders
                 .update(ALL_INBOXES, 0, shell().core.inbox_unread().unwrap_or(0));
         }
+        self.folders.rename(FLAGGED, &flagged_label());
     }
 
     /// The menus beside Create Mail (a message from one account) and Send/Recv (all accounts, or one)
@@ -772,30 +795,35 @@ impl Mailbox {
         }
         self.undone.set(false);
         let all_inboxes = id == ALL_INBOXES;
+        let flagged = id == FLAGGED;
         // a row under All Inboxes shows its folder, and says whose Inbox it is
         self.under_all_inboxes.set(is_under_all_inboxes(id));
         let id = folder_of(id);
         // an account has no messages of its own
-        self.selected_account.set(if id < 0 && !all_inboxes { -id } else { 0 });
-        if !self.on_folder_selected(id.max(0), all_inboxes) {
+        self.selected_account
+            .set(if id < 0 && !all_inboxes && !flagged { -id } else { 0 });
+        if !self.on_folder_selected(id.max(0), all_inboxes, flagged) {
             self.show_folder_name();
         }
         self.update_junk_button();
         // a folder chosen in the narrow window's popover closes it; an account's row only opens or closes the account
-        if id >= 0 || all_inboxes {
+        if id >= 0 || all_inboxes || flagged {
             self.folder_place.button.popdown();
         }
     }
 
     /// Another folder (or All Inboxes) shown; false when it was already the one shown
-    fn on_folder_selected(&self, folder: i64, all_inboxes: bool) -> bool {
-        if folder == self.folder.get() && all_inboxes == self.all_inboxes.get() {
+    fn on_folder_selected(&self, folder: i64, all_inboxes: bool, flagged: bool) -> bool {
+        if folder == self.folder.get() && all_inboxes == self.all_inboxes.get() && flagged == self.flagged.get() {
             return false;
         }
         // the message of the folder before is not this folder's, nor is the search
         self.folder.set(folder);
         self.all_inboxes.set(all_inboxes);
-        let scope = if all_inboxes {
+        self.flagged.set(flagged);
+        let scope = if flagged {
+            Some(pe_core::Scope::Flagged)
+        } else if all_inboxes {
             Some(pe_core::Scope::AllInboxes)
         } else {
             (folder != 0).then_some(pe_core::Scope::Folder(folder))
@@ -929,7 +957,7 @@ impl Mailbox {
         self.enable(Command::EmptyFolder, total > 0 && self.can_empty_folder());
         self.list
             .show_person_column(view.lists_recipients(core).unwrap_or(false));
-        let (title, values) = if self.searching() {
+        let (title, values) = if self.searching() || self.flagged.get() {
             (t!(UiColFolder), Vec::new())
         } else {
             let names = self.accounts.borrow().iter().map(|a| a.title.clone()).collect();
@@ -1010,7 +1038,7 @@ impl Mailbox {
                 more.push_str(&t!(GtkSearchStillIndexing, count = left));
             }
             (t!(UiNoMatch, words = &*self.find_text()), more)
-        } else if self.folder.get() != 0 || self.all_inboxes.get() {
+        } else if self.folder.get() != 0 || self.all_inboxes.get() || self.flagged.get() {
             let none = if hide_read() { t!(UiNoUnread) } else { t!(UiNoItems) };
             (none, String::new())
         } else if self.selected_account.get() != 0 {
@@ -1335,7 +1363,7 @@ impl Mailbox {
     /// The window shown the first time: All Inboxes (two or more accounts) or the first account's Inbox chosen, and
     /// its newest message selected
     pub fn select_start(&self) {
-        if self.started.replace(true) || self.folder.get() != 0 || self.all_inboxes.get() {
+        if self.started.replace(true) || self.folder.get() != 0 || self.all_inboxes.get() || self.flagged.get() {
             return;
         }
         let Ok(Some(start)) = shell().core.start_message() else {
@@ -1406,6 +1434,9 @@ impl Mailbox {
         }
         if self.all_inboxes.get() {
             return t!(UiAllInboxes);
+        }
+        if self.flagged.get() {
+            return t!(UiFlaggedFolder);
         }
         // an account's Inbox chosen under All Inboxes: which account's ("Inbox - Gmail")
         if self.under_all_inboxes.get()
@@ -1480,7 +1511,7 @@ impl Mailbox {
     /// "12 messages, 3 unread" for the status bar ("12 found" for a search), and how many are selected when several are
     pub fn show_counts(&self) {
         let (total, unread) = (self.total.get(), self.unread.get());
-        let text = if !self.searching() && self.folder.get() == 0 && !self.all_inboxes.get() {
+        let text = if !self.searching() && self.folder.get() == 0 && !self.all_inboxes.get() && !self.flagged.get() {
             String::new()
         } else {
             pe_core::list_counts(total, unread, self.list.selected_count(), self.searching())
@@ -3366,6 +3397,15 @@ fn status_bar() -> (gtk::Box, gtk::Label, gtk::Label, gtk::Button, gtk::Label) {
 /// The title of Import's windows: the command's name without its dots
 fn import_title() -> String {
     crate::words::title(crate::words::Text::CmdImport)
+}
+
+/// Flagged, with how many messages are flagged (no unread count: never bold)
+fn flagged_label() -> String {
+    let name = t!(UiFlaggedFolder);
+    match shell().core.flagged_count().unwrap_or(0) {
+        0 => name,
+        count => format!("{name} ({count})"),
+    }
 }
 
 #[cfg(test)]

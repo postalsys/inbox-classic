@@ -93,6 +93,8 @@ impl FolderItem {
 
 /// The id of All Inboxes, at the top of the tree: neither a folder (positive) nor an account (a negated id)
 pub const ALL_INBOXES: i64 = i64::MIN;
+/// The id of Flagged, under All Inboxes: the flagged messages of every account
+pub const FLAGGED: i64 = i64::MIN + 1;
 
 /// The mark of a row under All Inboxes in its id: the folder's id with this bit, positive as a folder's, never one
 const UNDER_ALL_INBOXES: i64 = 1 << 62;
@@ -270,7 +272,7 @@ impl FolderTree {
     /// when its folder is still there (false when it is gone)
     pub fn rebuild(
         &self,
-        top: Option<(Entry, Vec<Entry>)>,
+        top: Vec<(Entry, Vec<Entry>)>,
         accounts: Vec<(Entry, Vec<Entry>)>,
         closed: &std::collections::HashSet<i64>,
     ) -> bool {
@@ -279,7 +281,7 @@ impl FolderTree {
         self.root.remove_all();
         let mut items = HashMap::new();
         let mut parents = HashMap::new();
-        if let Some((entry, inboxes)) = top {
+        for (entry, inboxes) in top {
             let item = FolderItem::new(&entry);
             for inbox in inboxes {
                 let child = FolderItem::new(&inbox);
@@ -327,6 +329,14 @@ impl FolderTree {
         }
         self.reloading.set(false);
         kept || selected == 0
+    }
+
+    /// Row `id` named `name` (Flagged with its count, which is no unread count)
+    pub fn rename(&self, id: i64, name: &str) {
+        if let Some(item) = self.items.borrow().get(&id) {
+            *item.imp().name.borrow_mut() = name.to_string();
+            item.show();
+        }
     }
 
     /// The unread messages of a folder (or an account, its id negated) changed; false when the tree does not have it
@@ -502,8 +512,8 @@ impl FolderTree {
 }
 
 /// Whether item `id` is an account's heading (an account's id negated), not a folder or All Inboxes
-fn is_heading(id: i64) -> bool {
-    id < 0 && id != ALL_INBOXES
+pub(crate) fn is_heading(id: i64) -> bool {
+    id < 0 && id != ALL_INBOXES && id != FLAGGED
 }
 
 /// Whether row `id` can be dragged to put its account elsewhere: an account's heading, an Inbox's row under All Inboxes

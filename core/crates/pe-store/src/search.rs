@@ -29,10 +29,24 @@ pub enum Scope {
     /// Every folder of every account
     #[default]
     Everywhere,
+    /// The flagged messages of every account, but those in Deleted Items or Junk E-mail; from an account with a folder
+    /// of its flagged messages (Gmail's Starred) that folder's, so each is there once, archived ones too
+    Flagged,
 }
 
 /// The Inbox of every account, as SQL
 pub(crate) const INBOXES: &str = "SELECT id FROM folders WHERE path = 'INBOX' COLLATE NOCASE";
+
+/// A message is flagged, as SQL; the same words as the index `messages_flagged`, so SQLite can use it
+const IS_FLAGGED: &str = "instr(' ' || flags || ' ', ' \\Flagged ') > 0";
+
+/// The folders whose flagged messages [`Scope::Flagged`] lists: of an account with a folder of its flagged messages
+/// (Gmail's Starred, \Flagged) that one alone, as the others hold the same messages again; of any other account every
+/// folder but what was thrown away, junk and all mail
+const FLAGGED_FROM: &str = "SELECT id FROM folders f WHERE CASE \
+     WHEN EXISTS (SELECT 1 FROM folders s WHERE s.account_id = f.account_id AND s.special_use = '\\Flagged') \
+     THEN f.special_use = '\\Flagged' \
+     ELSE COALESCE(f.special_use, '') NOT IN ('\\Trash', '\\Junk', '\\All') END";
 
 /// What the message list shows
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -147,6 +161,7 @@ impl Search {
             Scope::AllInboxes if in_order => parts.push(format!("+folder_id IN ({INBOXES})")),
             Scope::AllInboxes => parts.push(format!("folder_id IN ({INBOXES})")),
             Scope::Everywhere => {}
+            Scope::Flagged => parts.push(format!("{IS_FLAGGED} AND folder_id IN ({FLAGGED_FROM})")),
         }
         // unread, or read since the list was turned to unread only
         if let (Show::Unread, Some(since)) = (self.show, self.read_since) {
@@ -155,7 +170,7 @@ impl Search {
                 value(&mut values, Value::Integer(since))
             ));
         }
-        let flagged = "instr(' ' || flags || ' ', ' \\Flagged ') > 0";
+        let flagged = IS_FLAGGED;
         let answered = "instr(' ' || flags || ' ', ' \\Answered ') > 0";
         let mut words: Vec<String> = Vec::new();
         let date = crate::messages::LIST_DATE;
@@ -695,6 +710,92 @@ mod tests {
             ..kept
         };
         assert_eq!(found(&store, &later).len(), 1, "read before the list began: gone");
+    }
+
+    #[test]
+    fn flagged_lists_every_flagged_message_once_and_not_the_thrown_away() {
+        let (store, inbox, archive) = setup();
+        let gmail = store.add_account(&AccountSettings::example("b@gmail.com")).unwrap();
+        let folder = |path: &str, special: Option<&str>| FolderInfo {
+            path: path.into(),
+            name: path.into(),
+            special_use: special.map(str::to_string),
+            selectable: true,
+            ..Default::default()
+        };
+        store
+            .set_folders(
+                gmail,
+                &[
+                    folder("INBOX", None),
+                    folder("[Gmail]/All Mail", Some("\\All")),
+                    folder("[Gmail]/Starred", Some("\\Flagged")),
+                    folder("[Gmail]/Trash", Some("\\Trash")),
+                    folder("[Gmail]/Spam", Some("\\Junk")),
+                ],
+            )
+            .unwrap();
+        let folders = store.folders(gmail).unwrap();
+        let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+        let flagged = ["\\Flagged"];
+        store
+            .add_messages(
+                inbox,
+                &[
+                    message(1, "Flagged here", "Ann", &flagged),
+                    message(2, "Not flagged", "Ann", &[]),
+                ],
+            )
+            .unwrap();
+        store
+            .add_messages(archive, &[message(3, "Flagged in Archive", "Ann", &flagged)])
+            .unwrap();
+        // on Gmail one message in its Inbox, All Mail and Starred, and one archived (All Mail and Starred): each listed
+        // once, from Starred
+        store
+            .add_messages(id("INBOX"), &[message(4, "Starred on Gmail", "Bob", &flagged)])
+            .unwrap();
+        store
+            .add_messages(
+                id("[Gmail]/All Mail"),
+                &[
+                    message(40, "Starred on Gmail", "Bob", &flagged),
+                    message(43, "Starred and archived", "Bob", &flagged),
+                ],
+            )
+            .unwrap();
+        store
+            .add_messages(
+                id("[Gmail]/Starred"),
+                &[
+                    message(41, "Starred on Gmail", "Bob", &flagged),
+                    message(42, "Starred and archived", "Bob", &flagged),
+                ],
+            )
+            .unwrap();
+        store
+            .add_messages(id("[Gmail]/Trash"), &[message(5, "Thrown away", "Bob", &flagged)])
+            .unwrap();
+        store
+            .add_messages(id("[Gmail]/Spam"), &[message(6, "Junk", "Bob", &flagged)])
+            .unwrap();
+        let search = Search {
+            scope: Scope::Flagged,
+            ..Default::default()
+        };
+        assert_eq!(found(&store, &search), [1, 3, 41, 42]);
+        assert_eq!(store.count_search(&search).unwrap().0, 4);
+        // SQLite finds them by the index of flagged messages, not by reading every message
+        let (condition, _) = search.condition(false);
+        let plan: String = store
+            .db
+            .query_row(
+                &format!("EXPLAIN QUERY PLAN SELECT COUNT(*) FROM messages WHERE {condition}"),
+                [],
+                |row| row.get::<_, String>(3),
+            )
+            .unwrap();
+        assert!(plan.contains("messages_flagged"), "{plan}");
     }
 
     #[test]

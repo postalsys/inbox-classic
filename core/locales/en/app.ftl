@@ -219,6 +219,7 @@ ui-signature = Signature
 ui-signature-hint = Added to new messages, replies and forwards from this account.
 ui-signature-not-saved = The signature could not be saved.
 ui-all-inboxes = All Inboxes
+ui-flagged-folder = Flagged
 ui-all-folders = All Folders
 ui-the-account = the account
 ui-folder-name = Folder name:

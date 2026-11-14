@@ -966,6 +966,7 @@ async fn scenario(d: Rc<Driver>) {
     finding(&d).await;
     files(&d).await;
     organizing(&d).await;
+    flagged_folder(&d).await;
     steps::unsubscribing(&d).await;
     steps::invitation_and_logo(&d).await;
     steps::collapsed_account(&d).await;
@@ -2061,6 +2062,56 @@ async fn files(d: &Driver) {
         imported.is_some(),
         "Import Messages puts the message in the folder, on the server",
     );
+    select_folder("Inbox");
+}
+
+fn main_window_title() -> String {
+    shell().main().window().title().unwrap_or_default().to_string()
+}
+
+async fn flagged_folder(d: &Driver) {
+    d.step("the Flagged folder");
+    let main = shell().main();
+    let core = &shell().core;
+    d.check(
+        main.folders.markup_of(crate::folders::FLAGGED).is_some(),
+        "Flagged is in the folder list",
+    );
+    let before = core.flagged_count().unwrap_or(0);
+    // a message of another folder flagged: it is listed too
+    select_folder("Archive");
+    wait_until(10, || rows() > 0).await;
+    select_row(0).await;
+    let subject = main.list.selected().map(|(_, m)| m.info.subject).unwrap_or_default();
+    run_command(Command::Flag);
+    d.check(
+        wait_until(10, || core.flagged_count().unwrap_or(0) == before + 1).await,
+        "flagging a message counts it under Flagged",
+    );
+    main.folders.select(crate::folders::FLAGGED);
+    d.check(
+        wait_until(10, || u64::from(rows()) == before + 1).await,
+        &format!("Flagged lists the flagged messages of every folder ({})", rows()),
+    );
+    d.check(
+        main_window_title().starts_with("Flagged"),
+        &format!("the window is named Flagged ({})", main_window_title()),
+    );
+    pause(800).await;
+    d.shot(&main_window(), "main-10-flagged").await;
+    // unflagged in its own folder: it goes from Flagged
+    for index in 0..rows() {
+        main.list.select(index);
+        pause(200).await;
+        if main.list.selected().is_some_and(|(_, m)| m.info.subject == subject) {
+            run_command(Command::Flag);
+            d.check(
+                wait_until(10, || core.flagged_count().unwrap_or(0) == before).await,
+                "unflagged, it is no longer counted",
+            );
+            break;
+        }
+    }
     select_folder("Inbox");
 }
 

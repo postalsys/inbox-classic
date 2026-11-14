@@ -111,6 +111,7 @@ public final class Mailbox: NSObject {
     private var folderNodes: [Int64: FolderNode] = [:]
     /// All Inboxes above the accounts (two or more of them)
     private var allInboxesNode: AllInboxesNode?
+    private var flaggedNode: FlaggedNode?
     /// the rows under All Inboxes by their folder: the same Inboxes `folderNodes` has under the accounts
     private var inboxAliases: [Int64: InboxAliasNode] = [:]
     private var accountInfo: [Int64: Account] = [:]
@@ -122,6 +123,8 @@ public final class Mailbox: NSObject {
     private(set) var folder: Int64 = 0
     /// All Inboxes is selected: the list has the mail of every account's Inbox
     private(set) var allInboxes = false
+    /// the Flagged row is the list shown
+    private(set) var flagged = false
     /// the folder is selected on its row under All Inboxes, not on its account's
     private(set) var underAllInboxes = false
     /// selectStart has run: later showings of the window keep what is selected
@@ -469,6 +472,11 @@ public final class Mailbox: NSObject {
         var children: [InboxAliasNode] = []
     }
 
+    /// the flagged messages of every account in one list, with how many there are (no unread count: never bold)
+    final class FlaggedNode {
+        var count: UInt64 = 0
+    }
+
     /// an account's Inbox again under All Inboxes, named as the account is: the same folder as its row under the
     /// account, without the folders under it
     final class InboxAliasNode {
@@ -488,14 +496,15 @@ public final class Mailbox: NSObject {
 
     static var allInboxesName: String { Text.uiAllInboxes.text }
 
-    /// the rows at the top of the tree: All Inboxes, then the accounts
+    /// the rows at the top of the tree: All Inboxes, Flagged, then the accounts
     private var topNodes: [Any] {
-        (allInboxesNode.map { [$0] } ?? []) + accounts
+        (allInboxesNode.map { [$0] } ?? []) + (flaggedNode.map { [$0] } ?? []) + accounts
     }
 
     public func reload() {
         let selected = folder
         let allSelected = allInboxes
+        let flaggedSelected = flagged
         let aliasSelected = underAllInboxes
         accounts = []
         folderNodes = [:]
@@ -509,6 +518,8 @@ public final class Mailbox: NSObject {
             node.children = core.inboxes().map(InboxAliasNode.init)
             node.children.forEach { inboxAliases[$0.folder] = $0 }
         }
+        flaggedNode = all.isEmpty ? nil : FlaggedNode()
+        flaggedNode?.count = core.flaggedCount
         for account in all {
             accountInfo[account.id] = account
             if firstAccount == 0 { firstAccount = account.id }
@@ -545,7 +556,9 @@ public final class Mailbox: NSObject {
         }
         let alias = aliasSelected ? inboxAliases[selected].flatMap { tree.row(forItem: $0) >= 0 ? $0 : nil } : nil
         let reselected: Any?
-        if allSelected {
+        if flaggedSelected, let node = flaggedNode {
+            reselected = node
+        } else if allSelected {
             reselected = allInboxesNode
         } else if let alias {
             reselected = alias
@@ -598,6 +611,10 @@ public final class Mailbox: NSObject {
             node.unread = core.inboxUnread
             tree.reloadItem(node)
         }
+        if let node = flaggedNode {
+            node.count = core.flaggedCount
+            tree.reloadItem(node)
+        }
     }
 
     func accountName(_ account: Int64) -> String {
@@ -621,10 +638,11 @@ public final class Mailbox: NSObject {
         return selectedAccount != 0 ? selectedAccount : firstAccount
     }
 
-    fileprivate func folderSelected(_ id: Int64, allInboxes all: Bool = false, underAllInboxes alias: Bool = false) {
+    fileprivate func folderSelected(_ id: Int64, allInboxes all: Bool = false, underAllInboxes alias: Bool = false,
+                                    flagged isFlagged: Bool = false) {
         // the same folder on its other row: the list stays, its name in the title changes
         underAllInboxes = alias
-        guard id != folder || all != allInboxes else {
+        guard id != folder || all != allInboxes || isFlagged != flagged else {
             changed()
             return
         }
@@ -632,7 +650,12 @@ public final class Mailbox: NSObject {
         // the message of the folder before is not this folder's, nor is the search
         folder = id
         allInboxes = all
-        listView.setScope(folder: id, allInboxes: all)
+        flagged = isFlagged
+        if isFlagged {
+            listView.setFlagged()
+        } else {
+            listView.setScope(folder: id, allInboxes: all)
+        }
         resetFind()
         clearReader()
         reloadList(keepSelection: false)
@@ -647,6 +670,9 @@ public final class Mailbox: NSObject {
         }
         if allInboxes {
             return Mailbox.allInboxesName
+        }
+        if flagged {
+            return Text.uiFlaggedFolder.text
         }
         if let node = folderNodes[folder] {
             // under All Inboxes the Inbox is told apart by its account: "Inbox - Gmail"
@@ -770,7 +796,7 @@ public final class Mailbox: NSObject {
     private func showFolderColumn() {
         // the column layout's rows name the folder themselves
         guard layout == PE_LAYOUT_CLASSIC else { return }
-        let title = searching ? Text.uiColFolder.text : Text.uiColAccount.text
+        let title = searching || flagged ? Text.uiColFolder.text : Text.uiColAccount.text
         list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(ColumnID.folder.rawValue))?.title = title
         guard severalFolders != folderColumn else { return }
         folderColumn = severalFolders
@@ -1013,7 +1039,7 @@ public final class Mailbox: NSObject {
                 if left > 0 {
                     more += "\n\n" + Text.macStillIndexingMore.text(["count": left])
                 }
-            } else if folder != 0 || allInboxes {
+            } else if folder != 0 || allInboxes || flagged {
                 title = AppDelegate.shared?.hideRead == true ? Text.uiNoUnread.text : Text.uiNoItems.text
             } else if selectedAccount != 0 {
                 title = Text.uiChooseFolder.text
@@ -1332,7 +1358,7 @@ public final class Mailbox: NSObject {
     func selectStart() {
         guard !started else { return }
         started = true
-        guard folder == 0, !allInboxes, let start = core.startMessage() else { return }
+        guard folder == 0, !allInboxes, !flagged, let start = core.startMessage() else { return }
         if !start.allInboxes {
             showMessage(folder: start.folder, uid: start.uid)
         } else if let node = allInboxesNode {
@@ -1669,10 +1695,10 @@ public final class Mailbox: NSObject {
     /// Items and Junk E-mail
     func folderMenu() -> NSMenu {
         let menu = NSMenu()
-        let someUnread = allInboxes ? core.inboxUnread > 0 : folder != 0 && core.folderCounts(folder).unread > 0
+        let someUnread = !flagged && (allInboxes ? core.inboxUnread > 0 : folder != 0 && core.folderCounts(folder).unread > 0)
         let editable = folder != 0 && !(folderNodes[folder]?.folder.fixed ?? true)
         // All Inboxes is no folder of one account: the folder commands never apply to it, so it has none
-        var folderCommands: [(Command, Bool)] = allInboxes ? []
+        var folderCommands: [(Command, Bool)] = allInboxes || flagged ? []
             : [(.newFolder, true), (.renameFolder, editable), (.deleteFolder, editable)]
         // Deleted Items and Junk E-mail can be emptied, as in Outlook Express
         if !allInboxes && folderNodes[folder]?.folder.emptiable == true {
@@ -2110,6 +2136,9 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
             let unread = outlineView.isItemExpanded(all) ? 0 : all.unread
             cell.show(name: Mailbox.allInboxesName, count: unread, icon: Icons.folder("mail_inbox"), bold: unread > 0)
             cell.setAccessibilityIdentifier("tree.allInboxes")
+        case let node as FlaggedNode:
+            cell.show(name: Text.uiFlaggedFolder.text, count: node.count, icon: Icons.folder("flag"), bold: false)
+            cell.setAccessibilityIdentifier("tree.flagged")
         case let alias as InboxAliasNode:
             // named by its account; a screen reader hears the folder too ("Inbox, Gmail")
             let folderName = folderNodes[alias.folder]?.folder.name ?? Text.folderInbox.text
@@ -2187,6 +2216,9 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
         if item is AllInboxesNode {
             selectedAccount = 0
             folderSelected(0, allInboxes: true)
+        } else if item is FlaggedNode {
+            selectedAccount = 0
+            folderSelected(0, flagged: true)
         } else if let alias = item as? InboxAliasNode {
             selectedAccount = 0
             folderSelected(alias.folder, underAllInboxes: true)

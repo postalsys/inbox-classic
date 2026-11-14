@@ -104,6 +104,17 @@ pub unsafe extern "C" fn pe_list_view_set_scope(view: *mut PeListView, folder: i
     unsafe { change(view, false, |view| view.set_scope(scope)) }
 }
 
+/// The list of the Flagged row: the flagged messages of every account, but those in Deleted Items or Junk E-mail.
+/// False when it was the one shown already (or for NULL).
+///
+/// # Safety
+/// `view` must be NULL or a live view.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_set_flagged(view: *mut PeListView) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { change(view, false, |view| view.set_scope(Some(Scope::Flagged))) }
+}
+
 /// The words typed in the Find box (UTF-8, NULL or empty for none), in Gmail's syntax: words, "phrases", -word, OR,
 /// from: to: subject: filename: is:unread is:starred has:attachment in: before: after: older_than: newer_than: larger:
 /// smaller:. With words the list is of every folder of every account (`in:` narrows that). Every conversation is

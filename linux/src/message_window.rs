@@ -300,7 +300,7 @@ impl MessageWindow {
     }
 
     /// Whether the list the window came from could have messages of `folder`: its own folder, an Inbox for All
-    /// Inboxes, any folder for a search
+    /// Inboxes, any folder for a search or the Flagged folder
     fn lists(&self, folder: i64) -> bool {
         match self.view.search().map(|search| search.scope) {
             Some(Scope::Folder(own)) => own == folder,
@@ -308,7 +308,7 @@ impl MessageWindow {
                 .core
                 .folder(folder)
                 .is_ok_and(|f| f.info.path.eq_ignore_ascii_case("INBOX")),
-            Some(Scope::Everywhere) => true,
+            Some(Scope::Everywhere | Scope::Flagged) => true,
             None => false,
         }
     }

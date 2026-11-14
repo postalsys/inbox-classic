@@ -265,6 +265,15 @@ Screenshot: `read-30-text-size`
 - the text being written is that size too (the Mac and Linux)
 - Medium is the usual size again
 
+## 19e. The Flagged folder
+
+Screenshot: `main-10-flagged`
+
+- Flagged is in the folder list, under All Inboxes or first with one account
+- flagging a message of Archive counts it under Flagged
+- Flagged lists the flagged messages of every folder, with the Folder column, and names the window
+- unflagged, it is no longer counted (the Mac and Linux; on Windows the row and its count are shown)
+
 ## 20. Send/Recv
 
 Screenshots: `main-2-new-mail`, `main-3-sent-items`

@@ -233,6 +233,8 @@ final class Core {
     }
 
     var inboxUnread: UInt64 { pe_inbox_unread(handle) }
+    /// the messages the Flagged folder lists
+    var flaggedCount: UInt64 { pe_flagged_count(handle) }
 
     /// each account's Inbox, in the accounts' order, named as the account is: the rows under All Inboxes
     func inboxes() -> [SpecialFolder] {
@@ -427,6 +429,12 @@ final class ListView {
     @discardableResult
     func setScope(folder: Int64, allInboxes: Bool) -> Bool {
         pe_list_view_set_scope(handle, folder, allInboxes)
+    }
+
+    /// the list of the Flagged row: the flagged messages of every account; false when it was shown already
+    @discardableResult
+    func setFlagged() -> Bool {
+        pe_list_view_set_flagged(handle)
     }
 
     /// the words typed in the search box, which search every folder; false when they are the same
