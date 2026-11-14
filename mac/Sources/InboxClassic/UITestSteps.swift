@@ -882,9 +882,10 @@ extension UITest {
         check(opened.map(\.index) == [tripHead.index, tripHead.index + 1, tripHead.index + 2]
               && opened.dropFirst().allSatisfy { $0.message.threadDepth == 1 && $0.message.subject == "Re: Plans for the trip" },
               "right under it, oldest first")
-        let headLeft = subjectCell(tripHead.index)?.textField?.frame.minX ?? 0
-        let replyLeft = subjectCell(tripHead.index + 1)?.textField?.frame.minX ?? 0
-        check(replyLeft > headLeft, "indented (\(headLeft) and \(replyLeft))")
+        // the rows' cells are laid out on the next pass: wait for them
+        let left = { (row: Int) in self.subjectCell(row)?.textField?.frame.minX ?? 0 }
+        let indented = await waitUntil(5) { left(tripHead.index + 1) > left(tripHead.index) }
+        check(indented, "indented (\(left(tripHead.index)) and \(left(tripHead.index + 1)))")
         check(subjectCell(tripHead.index)?.textField?.font?.fontDescriptor.symbolicTraits.contains(.bold) == false,
               "the open conversation's first row in bold only when it is unread itself")
         await selectRow(tripHead.index + 1)
