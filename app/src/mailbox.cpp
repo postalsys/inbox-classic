@@ -42,6 +42,8 @@ constexpr uint64_t kPageSize = 100;
 constexpr size_t kPagesKept = 8;
 // the data of the All Inboxes item: neither a folder (positive) nor an account (a negated id)
 constexpr LPARAM kAllInboxesItem = std::numeric_limits<LPARAM>::min();
+// the data of the Flagged item, likewise
+constexpr LPARAM kFlaggedItem = std::numeric_limits<LPARAM>::min() + 1;
 // the data of a row under All Inboxes: its folder id with this bit, so it is told from the account's row of the folder
 static_assert(sizeof(LPARAM) == 8);
 constexpr LPARAM kUnderAllInboxes = LPARAM{1} << 62;
@@ -54,11 +56,14 @@ struct TreePlace {
     int64_t account = 0;
     bool allInboxes = false;
     bool underAllInboxes = false;
+    bool flagged = false;
 };
 TreePlace PlaceOf(LPARAM data) {
     TreePlace place;
     if (data == kAllInboxesItem) {
         place.allInboxes = true;
+    } else if (data == kFlaggedItem) {
+        place.flagged = true;
     } else if (data < 0) {
         place.account = -data;
     } else {
@@ -548,6 +553,7 @@ bool Mailbox::OnCtlColor(HWND window, HDC dc, LRESULT& brush) {
 void Mailbox::Reload() {
     int64_t selected = folder_;
     bool allSelected = allInboxes_;
+    bool flaggedSelected = flagged_;
     bool underSelected = underAllInboxes_;
     int64_t accountSelected = selectedAccount_;
     // deleting the items changes the selection: not a folder the user picked
@@ -565,6 +571,7 @@ void Mailbox::Reload() {
     folderNames_.clear();
     unselectable_.clear();
     allInboxesItem_ = nullptr;
+    flaggedItem_ = nullptr;
     draftFolders_.clear();
     inboxFolders_.clear();
     junkFolders_.clear();
@@ -588,6 +595,13 @@ void Mailbox::Reload() {
         }
         ShowRow(allInboxesItem_);
     }
+    if (count > 0) {
+        // the flagged messages of every account, under All Inboxes (or first, with one account); its count is no
+        // unread count, so it is never bold
+        flaggedItem_ = InsertItem(tree_, TVI_ROOT, core::T(PE_TEXT_UI_FLAGGED_FOLDER), kFlaggedItem, false, FOLDER_FLAG);
+        rows_[flaggedItem_] = {core::T(PE_TEXT_UI_FLAGGED_FOLDER), 0, 0};
+        ShowFlaggedCount();
+    }
     for (size_t i = 0; i < count; i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
         accountNames_[account->id] = Text(account->title);
@@ -610,7 +624,9 @@ void Mailbox::Reload() {
     // what was selected, again; All Inboxes gone with one account left: that account's Inbox (as the window starts)
     HTREEITEM target = nullptr;
     bool same = true;
-    if (allSelected && allInboxesItem_) {
+    if (flaggedSelected && flaggedItem_) {
+        target = flaggedItem_;
+    } else if (allSelected && allInboxesItem_) {
         target = allInboxesItem_;
     } else if (allSelected) {
         bool all = false;
@@ -794,6 +810,15 @@ void Mailbox::UpdateFolders(int64_t account) {
         rows_[allInboxesItem_].below = pe_inbox_unread(core_);
         ShowRow(allInboxesItem_);
     }
+    ShowFlaggedCount();
+}
+
+void Mailbox::ShowFlaggedCount() {
+    if (!flaggedItem_) {
+        return;
+    }
+    rows_[flaggedItem_].name = CountedLabel(core::T(PE_TEXT_UI_FLAGGED_FOLDER), pe_flagged_count(core_));
+    ShowRow(flaggedItem_);
 }
 
 std::wstring Mailbox::AccountName(int64_t account) const {
@@ -873,7 +898,7 @@ bool Mailbox::SeveralFolders() const {
 // all in an Inbox, the Account column
 void Mailbox::ShowFolderColumn() {
     bool wanted = SeveralFolders();
-    std::wstring title = core::T(Searching() ? PE_TEXT_UI_COL_FOLDER : PE_TEXT_UI_COL_ACCOUNT);
+    std::wstring title = core::T(Searching() || flagged_ ? PE_TEXT_UI_COL_FOLDER : PE_TEXT_UI_COL_ACCOUNT);
     if (wanted && folderColumn_) {
         SetColumnTitle(list_, COL_FOLDER, title);
     }
@@ -1413,16 +1438,21 @@ bool Mailbox::SelectRestored() {
     return SelectPositions(at.get(), true);
 }
 
-bool Mailbox::OnFolderSelected(int64_t folder, bool allInboxes) {
-    if (folder == folder_ && allInboxes == allInboxes_) {
+bool Mailbox::OnFolderSelected(int64_t folder, bool allInboxes, bool flagged) {
+    if (folder == folder_ && allInboxes == allInboxes_ && flagged == flagged_) {
         return false;
     }
     // the message of the folder before is not this folder's, nor is the search; what Show shows stays
     folder_ = folder;
     allInboxes_ = allInboxes;
+    flagged_ = flagged;
     undoPending_ = false;
     // the view closes the conversations opened, which were the folder's
-    pe_list_view_set_scope(view_.get(), folder, allInboxes);
+    if (flagged) {
+        pe_list_view_set_flagged(view_.get());
+    } else {
+        pe_list_view_set_scope(view_.get(), folder, allInboxes);
+    }
     ResetFind();
     ClearReader();
     ReloadList(false);
@@ -1510,7 +1540,7 @@ void Mailbox::SelectStart() {
     bool allInboxes = false;
     int64_t folder = 0;
     uint64_t uid = 0;
-    if (folder_ || allInboxes_ || !pe_start_message(core_, &allInboxes, &folder, &uid)) {
+    if (folder_ || allInboxes_ || flagged_ || !pe_start_message(core_, &allInboxes, &folder, &uid)) {
         return;
     }
     if (!allInboxes) {
@@ -1738,6 +1768,10 @@ void Mailbox::FolderMenu() {
     }
     if (selectedAccount_ && !folder_ && !allInboxes_) {
         AccountMenu(screen);
+        return;
+    }
+    // Flagged lists messages of every folder: no folder commands, nothing to mark read as a whole
+    if (flagged_) {
         return;
     }
     HMENU menu = CreatePopupMenu();
@@ -2029,6 +2063,9 @@ std::wstring Mailbox::SelectedName() const {
     if (allInboxes_) {
         return AllInboxes();
     }
+    if (flagged_) {
+        return core::T(PE_TEXT_UI_FLAGGED_FOLDER);
+    }
     if (auto found = folderNames_.find(folder_); found != folderNames_.end()) {
         // a row under All Inboxes names its account too: "Inbox - Gmail"
         if (auto title = inboxTitles_.find(folder_); underAllInboxes_ && title != inboxTitles_.end()) {
@@ -2052,9 +2089,9 @@ void Mailbox::DrawEmptyList(HDC dc) const {
         if (uint64_t left = pe_search_unindexed_count(core_)) {
             more += L"\n\n" + core::T(PE_TEXT_WIN_NO_MATCH_INDEXING, {{"count", std::to_wstring(left)}});
         }
-    } else if ((folder_ || allInboxes_) && unreadOnly_) {
+    } else if ((folder_ || allInboxes_ || flagged_) && unreadOnly_) {
         title = core::T(PE_TEXT_UI_NO_UNREAD);
-    } else if (folder_ || allInboxes_) {
+    } else if (folder_ || allInboxes_ || flagged_) {
         title = core::T(PE_TEXT_UI_NO_ITEMS);
     } else if (selectedAccount_) {
         title = core::T(PE_TEXT_UI_CHOOSE_FOLDER);
@@ -2099,7 +2136,7 @@ bool Mailbox::FolderOf(int64_t folder, std::wstring& name, bool& fixed) const {
 
 void Mailbox::NewFolder(HWND owner) {
     int64_t account = CurrentAccount();
-    if (!account || allInboxes_) {
+    if (!account || allInboxes_ || flagged_) {
         return;
     }
     std::wstring where = core::T(folder_ ? PE_TEXT_UI_NEW_FOLDER_IN_SELECTED : PE_TEXT_UI_NEW_FOLDER_AT_TOP);
@@ -2384,7 +2421,7 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
             underAllInboxes_ = place.underAllInboxes;
             // the folder bar and the title name what is selected: an account too, from another account's item, and
             // the same Inbox from its other row
-            if (!OnFolderSelected(place.folder, place.allInboxes)) {
+            if (!OnFolderSelected(place.folder, place.allInboxes, place.flagged)) {
                 SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
             }
         }

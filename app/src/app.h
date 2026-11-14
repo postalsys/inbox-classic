@@ -790,7 +790,7 @@ private:
     // again where they are now) and only their numbers are taken
     void OnSelectionChanged(bool rebuild = true);
     // another folder (or All Inboxes) shown; false when it was already the one shown (and the main window was not told)
-    bool OnFolderSelected(int64_t folder, bool allInboxes = false);
+    bool OnFolderSelected(int64_t folder, bool allInboxes = false, bool flagged = false);
     // whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
     bool SeveralFolders() const;
     // the row of the message `uid` of `folder` selected in the list; false when it is not there
@@ -911,6 +911,10 @@ private:
     // All Inboxes at the top of the tree (two or more accounts), and whether it is selected
     HTREEITEM allInboxesItem_ = nullptr;
     bool allInboxes_ = false;
+    // the Flagged row (every account's flagged messages), and whether it is the list shown
+    HTREEITEM flaggedItem_ = nullptr;
+    bool flagged_ = false;
+    void ShowFlaggedCount();
     // a drag over the tree: the item under it and since when (one held over opens), where it would go
     struct DragOver {
         HTREEITEM over = nullptr;
