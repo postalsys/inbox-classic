@@ -23,6 +23,38 @@ def f(v):
     return "0" if s == "-0" else s
 
 
+def clip_polyline(pts, x0, y0, x1, y1):
+    """The part of a polyline inside a rectangle, as polylines (Liang-Barsky on each segment, joined where they meet).
+    The icons need no clipPath then: launchers that render SVG without clipping (Omarchy's) show the same picture."""
+    out = []
+    for (ax, ay), (bx, by) in zip(pts, pts[1:]):
+        dx, dy = bx - ax, by - ay
+        t0, t1 = 0.0, 1.0
+        for p_, q_ in ((-dx, ax - x0), (dx, x1 - ax), (-dy, ay - y0), (dy, y1 - ay)):
+            if p_ == 0:
+                if q_ < 0:
+                    t0, t1 = 1.0, 0.0
+                continue
+            t = q_ / p_
+            if p_ < 0:
+                t0 = max(t0, t)
+            else:
+                t1 = min(t1, t)
+        if t0 >= t1:
+            continue
+        a = (ax + dx * t0, ay + dy * t0)
+        b = (ax + dx * t1, ay + dy * t1)
+        if out and math.dist(out[-1][-1], a) < 1e-9:
+            out[-1].append(b)
+        else:
+            out.append([a, b])
+    return out
+
+
+def path_d(polylines):
+    return "".join("M" + "L".join(f"{f(x)} {f(y)}" for x, y in line) for line in polylines)
+
+
 # Envelope in local units: frame box 128 x 84, frame stroke 8, lines 7.
 FW, FH, FS, LS, GAP = 128.0, 84.0, 8.0, 7.0, 6.0
 
@@ -67,16 +99,16 @@ def envelope(cid, white=WHITE, coral=CORAL, mono=None, detail=True):
         f"A{f(r)} {f(r)} 0 0 1 {f(FW - r)} {f(FH)}H{f(r)}A{f(r)} {f(r)} 0 0 1 0 {f(FH - r)}V{f(r)}A{f(r)} {f(r)} 0 0 1 {f(r)} 0Z"
         f'M{f(ix)} {f(iy)}V{f(iy + ih)}H{f(ix + iw)}V{f(iy)}Z"/>'
     )
-    m = FS / 2  # clip into the frame, which is drawn on top, so no seam shows
-    o.append(f'<clipPath id="{cid}"><rect x="{f(ix - m)}" y="{f(iy - m)}" width="{f(iw + 2 * m)}" height="{f(ih + 2 * m)}"/></clipPath>')
-    o.append(f'<g clip-path="url(#{cid})" fill="none" stroke-width="{f(LS)}">')
+    # the lines end in the middle of the frame, which is drawn on top, so no seam shows: their butt ends, at most half a
+    # line wide past that middle, stay under it
+    m = FS / 2
+    box = (ix - m, iy - m, ix + iw + m, iy + ih + m)
+    # every line says fill="none" itself: some renderers do not take it from a group and fill the lines black
+    line = f'fill="none" stroke-width="{f(LS)}"'
     if detail:
-        a, b, e = arm_pts(cx, wy)
-        o.append(f'<path stroke="{w}" stroke-linejoin="miter" d="M{f(a[0])} {f(a[1])}L{f(b[0])} {f(b[1])}L{f(e[0])} {f(e[1])}"/>')
-        o.append(f'<path stroke="{w}" d="M{f(bl0[0])} {f(bl0[1])}L{f(bl1[0])} {f(bl1[1])}M{f(br0[0])} {f(br0[1])}L{f(br1[0])} {f(br1[1])}"/>')
-    a, b, e = arm_pts(cx, vy)
-    o.append(f'<path stroke="{c}" stroke-linejoin="round" d="M{f(a[0])} {f(a[1])}L{f(b[0])} {f(b[1])}L{f(e[0])} {f(e[1])}"/>')
-    o.append("</g>")
+        o.append(f'<path {line} stroke="{w}" stroke-linejoin="miter" d="{path_d(clip_polyline(arm_pts(cx, wy), *box))}"/>')
+        o.append(f'<path {line} stroke="{w}" d="{path_d(clip_polyline([bl0, bl1], *box) + clip_polyline([br0, br1], *box))}"/>')
+    o.append(f'<path {line} stroke="{c}" stroke-linejoin="round" d="{path_d(clip_polyline(arm_pts(cx, vy), *box))}"/>')
     o.append(frame)
     return "".join(o)
 
@@ -130,15 +162,13 @@ write("svg/app-icon-macos.svg", square_icon(1024, 100, 824, 185.4, "b"))
 fav = rrect(0, 0, 32, 32, 7, BLUE)
 fw, fh, fs = 24.0, 17.0, 2.75
 fx, fy = 4.0, 7.5
+iy = fy + fs
+# the coral V under the frame, ending in the frame's middle as the large icon's lines do
+fv = clip_polyline([(fx, iy - 2.5), (16, iy + 7.2), (fx + fw, iy - 2.5)], fx + fs / 2, fy + fs / 2, fx + fw - fs / 2, fy + fh - fs / 2)
+fav += f'<path fill="none" stroke="{CORAL}" stroke-width="{f(fs)}" stroke-linejoin="round" d="{path_d(fv)}"/>'
 fav += (
     f'<rect x="{f(fx + fs / 2)}" y="{f(fy + fs / 2)}" width="{f(fw - fs)}" height="{f(fh - fs)}" rx="1" fill="none" '
     f'stroke="{WHITE}" stroke-width="{f(fs)}"/>'
-)
-iy = fy + fs
-fav += (
-    f'<clipPath id="f"><rect x="{f(fx + fs)}" y="{f(iy)}" width="{f(fw - 2 * fs)}" height="{f(fh - 2 * fs)}"/></clipPath>'
-    f'<path clip-path="url(#f)" fill="none" stroke="{CORAL}" stroke-width="{f(fs)}" stroke-linejoin="round" '
-    f'd="M{f(fx)} {f(iy - 2.5)}L16 {f(iy + 7.2)}L{f(fx + fw)} {f(iy - 2.5)}"/>'
 )
 write("svg/favicon.svg", svg(32, 32, fav, "Inbox Classic"))
 

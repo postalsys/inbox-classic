@@ -4,6 +4,10 @@ Rebuilt by hand from the Gemini concept (`source/*.jpeg`) as clean SVG on a grid
 indigo `#4C5CC5`, coral `#F8485E`, wordmark `#3F3A8F`. `source/gen.py` regenerates every SVG in `svg/`
 (`python gen.py <out dir> <PT Sans Bold .ttf>`, needs fonttools and uharfbuzz).
 
+The SVGs use only what simple renderers draw: no `clipPath` (the lines are cut to the envelope in `gen.py`), and every
+stroked line carries its own `fill="none"`. Qt's SVG renderer, which Omarchy's app grid and dock use, supports neither
+clipping nor every attribute inherited from a group, and drew the envelope's lines past its edges and filled black.
+
 ## Files
 
 | File                                      | Use                                                                                                               |
