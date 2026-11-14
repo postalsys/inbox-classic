@@ -956,6 +956,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::large_message(&d).await;
     outbox(&d).await;
     drafts(&d).await;
+    drafts_saved_automatically(&d).await;
     send_receive(&d).await;
     finding(&d).await;
     files(&d).await;
@@ -1635,6 +1636,92 @@ async fn drafts(d: &Driver) {
     );
     d.shot(&main, "write-11-sent").await;
     select_folder("Inbox");
+}
+
+async fn drafts_saved_automatically(d: &Driver) {
+    d.step("drafts saved automatically");
+    run_command(Command::NewMail);
+    let Some(c) = wait_compose(10).await else {
+        d.check(false, "Create Mail opens a compose window");
+        return;
+    };
+    c.to.set_text("Gus <gus@example.com>");
+    c.subject.set_text("Saved by itself in the UI test");
+    c.editor.type_text("Not saved by hand.");
+    let said = wait_until(30, || c.status.text().starts_with("Saved in Drafts at ")).await;
+    d.check(said, "a message being written is saved in Drafts once typing stops");
+    let saved = wait_for(30, || d.find("Drafts", "Subject: Saved by itself in the UI test")).await;
+    d.check(
+        saved
+            .as_ref()
+            .is_some_and(|m| raw_text(m).contains("Not saved by hand")),
+        "the draft is in Drafts on the server",
+    );
+    d.shot(&c.window, "write-20-autosave").await;
+    // closed without saving: the copy only the automatic saving made goes
+    c.window.close();
+    let ask = wait_alert(10).await;
+    d.check(
+        ask.is_some(),
+        "closing a message saved only automatically asks whether to keep it",
+    );
+    if let Some(ask) = ask {
+        answer(&ask, "No");
+    }
+    d.check(wait_until(10, || !c.window.is_visible()).await, "No closes the window");
+    d.check(
+        wait_until(30, || {
+            d.find("Drafts", "Subject: Saved by itself in the UI test").is_none()
+        })
+        .await,
+        "and removes the copy saved automatically from Drafts",
+    );
+
+    d.step("a message being written opened again after a crash");
+    run_command(Command::NewMail);
+    let Some(c) = wait_compose(10).await else {
+        d.check(false, "Create Mail opens a compose window");
+        return;
+    };
+    c.to.set_text("Hal <hal@example.com>");
+    c.subject.set_text("Written when it crashed");
+    c.editor.type_text("Kept for a crash.");
+    d.check(
+        wait_until(30, || c.status.text().starts_with("Saved in Drafts at ")).await,
+        "saved by itself",
+    );
+    // the window gone as a crash takes it, without closing
+    crate::compose::abandon(&c.window);
+    crate::compose::open_recovered();
+    let Some(r) = wait_compose(10).await else {
+        d.check(false, "the message opens again");
+        return;
+    };
+    d.check(
+        r.subject.text() == "Written when it crashed",
+        "it opens again with its subject",
+    );
+    d.check(r.to.text().contains("hal@example.com"), "and its recipient");
+    d.check(r.status.text().starts_with("Restored"), "and says it was restored");
+    pause(500).await;
+    d.shot(&r.window, "write-21-restored").await;
+    r.window.close();
+    let ask = wait_alert(10).await;
+    d.check(ask.is_some(), "closing it asks whether to keep it");
+    if let Some(ask) = ask {
+        answer(&ask, "No");
+    }
+    d.check(wait_until(10, || !r.window.is_visible()).await, "No closes it");
+    d.check(
+        d.find("Drafts", "Subject: Written when it crashed").is_some(),
+        "and leaves its draft in Drafts, as it may be one the user kept",
+    );
+    crate::compose::open_recovered();
+    pause(1000).await;
+    d.check(
+        shell().composes.borrow().is_empty(),
+        "closed, it is not opened again at the next start",
+    );
 }
 
 async fn send_receive(d: &Driver) {

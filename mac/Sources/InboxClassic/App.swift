@@ -245,6 +245,10 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             } else {
                 core.syncAll()
             }
+            // what was being written when the app last ended without closing it
+            if !arguments.background {
+                ComposeWindow.openRecovered(core: core)
+            }
             if let link = arguments.mailto {
                 main.openMailto(link)
             }

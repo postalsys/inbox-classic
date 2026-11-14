@@ -1374,6 +1374,9 @@ constexpr ULONG_PTR kTestFromStore = 0x53544F52;
 constexpr ULONG_PTR kTestRowPicture = 0x50494354;
 // with --test-hooks only: where the list's top row starts, and whether its header is shown (TestListTop)
 constexpr ULONG_PTR kTestListTop = 0x4C544F50;
+// with --test-hooks only: the compose windows gone as a crash takes them, and opened again (TestAbandonCompose); how
+// many are open after, plus 10
+constexpr ULONG_PTR kTestCrashCompose = 0x43524153;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -1822,6 +1825,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (g_arguments.testHooks && data->dwData == kTestListTop) {
             return g_mailbox.TestListTop();
         }
+        if (g_arguments.testHooks && data->dwData == kTestCrashCompose) {
+            return static_cast<LRESULT>(TestAbandonCompose(hwnd, g_core.get()) + 10);
+        }
         if (g_arguments.testHooks && data->dwData == kTestRowPicture && data->cbData % sizeof(wchar_t) == 0) {
             std::wstring subject(static_cast<const wchar_t*>(data->lpData), data->cbData / sizeof(wchar_t));
             return g_mailbox.TestRowPicture(subject);
@@ -2091,6 +2097,8 @@ void FirstRun() {
         AddAccount();
     } else {
         SyncAll();
+        // what was being written when the app last ended without closing it
+        OpenRecoveredCompose(g_main, g_core.get());
     }
 }
 

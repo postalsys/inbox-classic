@@ -991,6 +991,20 @@ const sections = [
                 checked: ['The message window says when the draft is saved']
             },
             {
+                shot: 'write-20-autosave',
+                name: 'Saved as you write',
+                what: 'A message being written is saved in Drafts by itself a few seconds after typing stops, and every half a minute while it goes on; the status bar says when. Closing it still asks, and No (Don\'t Save on the Mac) removes a copy only the automatic saving made.',
+                how: 'Automatic while writing.',
+                checked: ['Saved in Drafts without pressing Save', 'The draft is on the server', 'No removes the copy saved automatically']
+            },
+            {
+                shot: 'write-21-restored',
+                name: 'Nothing lost in a crash',
+                what: 'The messages that were being written when Inbox Classic or the computer stopped unexpectedly open again at the next start, as they were last saved, and the status bar says they were restored. Closing one without saving leaves its draft in Drafts.',
+                how: 'Automatic at start.',
+                checked: ['The message opens again with its recipient', 'It says it was restored', 'Closed, it is not opened again']
+            },
+            {
                 shot: 'write-11-sent',
                 name: 'Sent, and said so',
                 what: 'Once the server took a message, the middle of the main status bar says Sent with its subject and the time, and stays so until the next message goes; while it goes it says Sending, and a message that can not go is reported as waiting in the Outbox.',

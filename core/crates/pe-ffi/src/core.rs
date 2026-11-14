@@ -2851,9 +2851,33 @@ pub unsafe extern "C" fn pe_draft_save(
     error: *mut *mut c_char,
 ) -> bool {
     // SAFETY: as the caller guarantees
+    unsafe { draft_save(core, account, message, message_id, error, false) }
+}
+
+/// `pe_draft_save` and `pe_draft_autosave`
+///
+/// # Safety
+/// As theirs.
+unsafe fn draft_save(
+    core: *const PeCore,
+    account: i64,
+    message: *const PeOutgoing,
+    message_id: *mut *mut c_char,
+    error: *mut *mut c_char,
+    automatic: bool,
+) -> bool {
+    // SAFETY: as the caller guarantees
     let result = match unsafe { outgoing(message) } {
         // SAFETY: as the caller guarantees
-        Some(message) => unsafe { with(core, Err(None), |core| core.save_draft(account, message).map_err(Some)) },
+        Some(message) => unsafe {
+            with(core, Err(None), |core| {
+                if automatic {
+                    core.autosave_draft(account, message).map_err(Some)
+                } else {
+                    core.save_draft(account, message).map_err(Some)
+                }
+            })
+        },
         None => Err(None),
     };
     // SAFETY: as the caller guarantees
@@ -2865,6 +2889,112 @@ pub unsafe extern "C" fn pe_draft_save(
         unsafe { *message_id = into_c_string(id) };
     }
     true
+}
+
+/// `pe_draft_save` while the user writes, without being asked (`pe_autosave_wait` says when): the same, but a copy
+/// that could not be saved is told only by `DraftSaved` with the reason, never by `Failed`
+///
+/// # Safety
+/// `core` must be a live handle, `message` a valid message, `message_id` and `error` NULL or valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_draft_autosave(
+    core: *const PeCore,
+    account: i64,
+    message: *const PeOutgoing,
+    message_id: *mut *mut c_char,
+    error: *mut *mut c_char,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { draft_save(core, account, message, message_id, error, true) }
+}
+
+/// How many milliseconds a compose window waits before it saves by itself (`pe_draft_autosave`), just after a
+/// change, when the oldest change not saved yet was `unsaved_ms` ago: start the timer again with this at each change
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_autosave_wait(unsaved_ms: u64) -> u64 {
+    pe_core::autosave_wait(unsaved_ms)
+}
+
+/// Removes the draft with `message_id` from the Drafts of `account` in the background: the copy only the automatic
+/// saving made, of a message closed without saving. Its copy kept for a crash goes too.
+///
+/// # Safety
+/// `core` must be a live handle, `message_id` a valid string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_draft_discard(core: *const PeCore, account: i64, message_id: *const c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(message_id) = (unsafe { arg(message_id) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.discard_draft(account, message_id).is_ok()) }
+}
+
+/// The window of the message whose draft has `message_id` closed (sent, saved or not kept): its copy kept for a
+/// crash goes
+///
+/// # Safety
+/// `core` must be a live handle, `message_id` a valid string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_compose_closed(core: *const PeCore, message_id: *const c_char) {
+    // SAFETY: as the caller guarantees
+    let Some(message_id) = (unsafe { arg(message_id) }) else {
+        return;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, (), |core| drop(core.compose_closed(message_id))) }
+}
+
+/// The messages that were being written when Inbox Classic last ended without closing their windows; free with
+/// `pe_recovered_free`
+pub struct PeRecovered(Vec<(i64, pe_core::Draft)>);
+
+/// The messages a crash left being written, oldest first, to open again; NULL on failure
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_recovered(core: *const PeCore) -> *mut PeRecovered {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| match core.recovered() {
+            Ok(drafts) => handed(PeRecovered(drafts)),
+            Err(_) => null_mut(),
+        })
+    }
+}
+
+/// # Safety
+/// `list` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_recovered_count(list: *const PeRecovered) -> usize {
+    // SAFETY: as the caller guarantees
+    unsafe { list.as_ref() }.map_or(0, |list| list.0.len())
+}
+
+/// Message `index` as a draft to open (free with `pe_draft_free`), its account in `account`; NULL past the end
+///
+/// # Safety
+/// `list` must be NULL or live, `account` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_recovered_get(list: *const PeRecovered, index: usize, account: *mut i64) -> *mut PeDraft {
+    // SAFETY: as the caller guarantees
+    let Some((from, draft)) = unsafe { list.as_ref() }.and_then(|list| list.0.get(index)) else {
+        return null_mut();
+    };
+    if !account.is_null() {
+        // SAFETY: the caller gave a valid pointer
+        unsafe { *account = *from };
+    }
+    draft_handle(draft)
+}
+
+/// # Safety
+/// `list` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_recovered_free(list: *mut PeRecovered) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(list) }
 }
 
 /// # Safety

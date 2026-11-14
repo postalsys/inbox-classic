@@ -406,6 +406,10 @@ typedef struct PeOutbox PeOutbox;
 // Positions in a list; free with `pe_positions_free`
 typedef struct PePositions PePositions;
 
+// The messages that were being written when Inbox Classic last ended without closing their windows; free with
+// `pe_recovered_free`
+typedef struct PeRecovered PeRecovered;
+
 // Selected messages; free with `pe_selection_free`
 typedef struct PeSelection PeSelection;
 
@@ -2289,6 +2293,60 @@ bool pe_draft_save(const struct PeCore *core,
                    const struct PeOutgoing *message,
                    char **message_id,
                    char **error);
+
+// `pe_draft_save` while the user writes, without being asked (`pe_autosave_wait` says when): the same, but a copy
+// that could not be saved is told only by `DraftSaved` with the reason, never by `Failed`
+//
+// # Safety
+// `core` must be a live handle, `message` a valid message, `message_id` and `error` NULL or valid pointers.
+bool pe_draft_autosave(const struct PeCore *core,
+                       int64_t account,
+                       const struct PeOutgoing *message,
+                       char **message_id,
+                       char **error);
+
+// How many milliseconds a compose window waits before it saves by itself (`pe_draft_autosave`), just after a
+// change, when the oldest change not saved yet was `unsaved_ms` ago: start the timer again with this at each change
+uint64_t pe_autosave_wait(uint64_t unsaved_ms);
+
+// Removes the draft with `message_id` from the Drafts of `account` in the background: the copy only the automatic
+// saving made, of a message closed without saving. Its copy kept for a crash goes too.
+//
+// # Safety
+// `core` must be a live handle, `message_id` a valid string.
+bool pe_draft_discard(const struct PeCore *core,
+                      int64_t account,
+                      const char *message_id);
+
+// The window of the message whose draft has `message_id` closed (sent, saved or not kept): its copy kept for a
+// crash goes
+//
+// # Safety
+// `core` must be a live handle, `message_id` a valid string.
+void pe_compose_closed(const struct PeCore *core,
+                       const char *message_id);
+
+// The messages a crash left being written, oldest first, to open again; NULL on failure
+//
+// # Safety
+// `core` must be a live handle.
+struct PeRecovered *pe_recovered(const struct PeCore *core);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_recovered_count(const struct PeRecovered *list);
+
+// Message `index` as a draft to open (free with `pe_draft_free`), its account in `account`; NULL past the end
+//
+// # Safety
+// `list` must be NULL or live, `account` NULL or a valid pointer.
+struct PeDraft *pe_recovered_get(const struct PeRecovered *list,
+                                 size_t index,
+                                 int64_t *account);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_recovered_free(struct PeRecovered *list);
 
 // # Safety
 // `draft` must be NULL or live.

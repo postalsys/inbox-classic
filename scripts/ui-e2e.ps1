@@ -1405,6 +1405,53 @@ public static class Dragger {
     }
     SelectFolder 0
 
+    Step 'drafts saved automatically'
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    SetText $compose $IDC_TO 'Gus <gus@example.com>'
+    SetText $compose $IDC_SUBJECT 'Saved by itself in the UI test'
+    [void](TypeInEditor $compose 'Not saved by hand.')
+    $composeStatus = [Native.Win]::FindWindowEx($compose, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    Check ($null -ne (WaitFor { $t = WindowText $composeStatus; if ($t -like 'Saved in Drafts at *') { $t } } 30)) 'a message being written is saved in Drafts once typing stops'
+    $saved = WaitFor { Find 'Drafts' 'Subject: Saved by itself in the UI test' } 30
+    Check ($saved -and (RawText $saved) -match 'Not saved by hand') 'the draft is in Drafts on the server'
+    Shot $compose 'write-20-autosave'
+    # closed without saving: the copy only the automatic saving made goes
+    [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+    $ask = WaitWindow '#32770' 'Inbox Classic' 10
+    Check ($null -ne $ask) 'closing a message saved only automatically asks whether to keep it'
+    if ($ask) { Click $ask 7 }
+    Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) })) 'No closes the window'
+    Check ([bool](WaitFor { -not (Find 'Drafts' 'Subject: Saved by itself in the UI test') } 30)) 'and removes the copy saved automatically from Drafts'
+
+    Step 'a message being written opened again after a crash'
+    Command $main $IDM_NEW_MAIL
+    $compose = WaitCompose
+    SetText $compose $IDC_TO 'Hal <hal@example.com>'
+    SetText $compose $IDC_SUBJECT 'Written when it crashed'
+    [void](TypeInEditor $compose 'Kept for a crash.')
+    $composeStatus = [Native.Win]::FindWindowEx($compose, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    Check ($null -ne (WaitFor { $t = WindowText $composeStatus; if ($t -like 'Saved in Drafts at *') { $t } } 30)) 'saved by itself'
+    # the window gone as a crash takes it, without closing, and what was kept opened as at the next start
+    $open = [Native.Win]::SendText($main, 0x43524153, '') - 10
+    Check ($open -eq 1) "it opens again ($open)"
+    $restored = WaitCompose
+    if ($restored) {
+        Check ((GetText $restored $IDC_SUBJECT) -eq 'Written when it crashed') 'with its subject'
+        Check ((GetText $restored $IDC_TO) -like '*hal@example.com*') 'and its recipient'
+        $restoredStatus = [Native.Win]::FindWindowEx($restored, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+        Check ((WindowText $restoredStatus) -like 'Restored*') "and says it was restored ($(WindowText $restoredStatus))"
+        Start-Sleep -Milliseconds 500
+        Shot $restored 'write-21-restored'
+        [void][Native.Win]::PostMessage($restored, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        $ask = WaitWindow '#32770' 'Inbox Classic' 10
+        Check ($null -ne $ask) 'closing it asks whether to keep it'
+        if ($ask) { Click $ask 7 }
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($restored) })) 'No closes it'
+        Check ($null -ne (Find 'Drafts' 'Subject: Written when it crashed')) 'and leaves its draft in Drafts, as it may be one the user kept'
+        Check (([Native.Win]::SendText($main, 0x43524153, '') - 10) -eq 0) 'closed, it is not opened again at the next start'
+    }
+
     # ---- getting new mail ----
 
     Step 'Send/Recv'

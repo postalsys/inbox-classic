@@ -253,7 +253,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// the account whose Drafts has that copy, 0 before the first save
     private var draftAccount: Int64 = 0
     private enum Pending {
-        case none, send, save, saveAndClose
+        case none, send, save, saveAndClose, autosave
     }
     private var pending = Pending.none
     private var quoteState = EditorQuote.folded
@@ -261,6 +261,18 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// something was typed: closing asks first
     private var dirty = false
     private var filling = true
+    /// changes made, counted: a save leaves the window clean only when nothing changed while it was asked for
+    private var changes = 0
+    /// the oldest change not saved yet, and the timer that saves it by itself (pe_autosave_wait)
+    private var unsavedSince: Date?
+    private var autosaveTimer: Timer?
+    /// the account has no Drafts folder: the automatic saving stops for this message
+    private var autosaveOff = false
+    /// the copy in Drafts is one the user kept (saved, or opened from Drafts): closing without saving leaves it there
+    private var kept = false
+    /// the copy in Drafts was saved automatically since: closing asks about it, and without saving removes it unless
+    /// it was kept
+    private var autosaved = false
 
     /// opens a compose window from `account`, with `draft` (a reply, a forward, a saved draft, a mailto: link)
     @discardableResult
@@ -299,6 +311,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             // a saved draft opened again: its files, and its Message-ID so the next save replaces it
             messageId = text(draft.message_id)
             draftAccount = account
+            kept = !messageId.isEmpty
             for index in 0..<draft.attachment_count {
                 if let path = draft.attachments[index] {
                     addFile(URL(fileURLWithPath: String(cString: path)))
@@ -565,6 +578,39 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             setStatus("")
         }
         dirty = true
+        changes += 1
+        scheduleAutosave()
+    }
+
+    /// the timer of the automatic saving, started again at each change: it saves once typing stops, and every half a
+    /// minute while it does not (the core's rule)
+    private func scheduleAutosave() {
+        guard !filling, !autosaveOff else { return }
+        let since = unsavedSince ?? Date()
+        unsavedSince = since
+        let wait = pe_autosave_wait(UInt64(max(0, Date().timeIntervalSince(since)) * 1000))
+        cancelAutosave()
+        autosaveTimer = after(TimeInterval(wait) / 1000) { [weak self] in self?.autosaveDue() }
+    }
+
+    private func cancelAutosave() {
+        autosaveTimer?.invalidate()
+        autosaveTimer = nil
+    }
+
+    private func autosaveDue() {
+        autosaveTimer = nil
+        if dirty && window.isVisible {
+            request(.autosave)
+        }
+    }
+
+    /// opened again after a crash (pe_recovered): closing asks about it, and without saving leaves its copy in Drafts,
+    /// as whether the user had kept it is not known
+    func restored() {
+        kept = true
+        autosaved = true
+        setStatus(Text.uiComposeRestored.text)
     }
 
     func controlTextDidChange(_ notification: Notification) {
@@ -655,9 +701,16 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         if pending == .none {
             syncFilesFromTokens()
             pending = action
+            requestedAt = changes
             editor.requestHtml()
+        } else if pending == .autosave && action != .autosave {
+            // the user's own Send or Save comes after the automatic save the HTML was asked for
+            pending = action
         }
     }
+
+    /// `changes` when the editor's HTML was asked for
+    private var requestedAt = 0
 
     private func htmlArrived(_ html: String, quote state: EditorQuote, edited: String) {
         quoteState = state
@@ -668,6 +721,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         case .send: send(html)
         case .save: save(html, close: false)
         case .saveAndClose: save(html, close: true)
+        case .autosave: autosave(html)
         case .none: break
         }
     }
@@ -721,13 +775,42 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         }
         draftAccount = account
         messageId = taken(id) ?? ""
-        dirty = false
-        editor.clean()
+        kept = true
+        autosaved = false
+        savedClean()
         // the server's answer follows (draftSaved)
         setStatus(Text.macSavingToDrafts.text)
         if close {
             closeNow()
         }
+    }
+
+    /// saved in Drafts without being asked; quietly not when it can not be (no Drafts folder), the window says so
+    private func autosave(_ html: String) {
+        let strings = CStrings()
+        var message = outgoing(html, strings)
+        var id: UnsafeMutablePointer<CChar>?
+        guard pe_draft_autosave(core.handle, account, &message, &id, nil) else {
+            autosaveOff = true
+            return
+        }
+        draftAccount = account
+        messageId = taken(id) ?? ""
+        autosaved = true
+        savedClean()
+        setStatus(Text.macSavingToDrafts.text)
+    }
+
+    /// the message as it was when its HTML was asked for is saved: clean unless it changed since
+    private func savedClean() {
+        cancelAutosave()
+        unsavedSince = nil
+        guard changes == requestedAt else {
+            scheduleAutosave()
+            return
+        }
+        dirty = false
+        editor.clean()
     }
 
     @objc func sendClicked() { request(.send) }
@@ -738,19 +821,33 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// whether the window may close now: when nothing changed since it was sent or saved, or the user does not want
     /// it saved. Save saves it in Drafts and closes the window after.
     func windowShouldClose(_ sender: NSWindow) -> Bool {
-        guard dirty else { return true }
+        guard dirty || autosaved else { return true }
         switch askYesNoCancel(Text.uiSaveChangesAsk.text, yes: Text.uiTbSave.text, no: Text.macDontSave.text) {
         case .yes:
             request(.saveAndClose)
             return false
         case .no:
+            discardAutosaved()
             return true
         case .cancel:
             return false
         }
     }
 
+    /// closed without saving: the copy only the automatic saving made goes from Drafts
+    private func discardAutosaved() {
+        if autosaved && !kept && !messageId.isEmpty {
+            _ = messageId.withCString { pe_draft_discard(core.handle, draftAccount, $0) }
+        }
+        autosaved = false
+    }
+
     func windowWillClose(_ notification: Notification) {
+        cancelAutosave()
+        // nothing left to open again after a crash
+        if !messageId.isEmpty {
+            messageId.withCString { pe_compose_closed(core.handle, $0) }
+        }
         editor.close()
         ComposeWindow.open.removeAll { $0 === self }
         AppDelegate.shared?.composeClosed()
@@ -773,6 +870,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         for compose in open {
             if compose.windowShouldClose(compose.window) {
                 compose.dirty = false
+                compose.autosaved = false
                 compose.closeNow()
                 continue
             }
@@ -781,6 +879,26 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             saving = true
         }
         return saving ? .saving : .closed
+    }
+
+    /// the UI test's crash: the window goes without closing, so its copy for a crash stays
+    func abandon() {
+        cancelAutosave()
+        window.delegate = nil
+        window.orderOut(nil)
+        editor.close()
+        ComposeWindow.open.removeAll { $0 === self }
+    }
+
+    /// opens again the messages that were being written when the app last ended without closing them
+    static func openRecovered(core: Core) {
+        guard let list = pe_recovered(core.handle) else { return }
+        defer { pe_recovered_free(list) }
+        for index in 0..<pe_recovered_count(list) {
+            var account: Int64 = 0
+            guard let draft = Draft(pe_recovered_get(list, index, &account)) else { continue }
+            open(core: core, account: account, draft: draft).restored()
+        }
     }
 
     /// the server's answer to a save: the window that saved it says so; false when no window has that draft

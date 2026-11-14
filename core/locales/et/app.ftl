@@ -172,6 +172,8 @@ ui-not-sent = Kirja ei saanud saata.
 ui-not-saved = Kirja ei saanud salvestada.
 ui-saving-draft = Salvestatakse mustanditesse...
 ui-compose-saved-at = Salvestati mustanditesse kell { $time }
+# review: new
+ui-compose-restored = Taastatud pärast seda, kui Inbox Classic ootamatult suleti
 ui-compose-not-saved = Mustanditesse ei salvestatud: { $reason }
 ui-save-changes-ask = Kas salvestada selle kirja muudatused mustanditesse?
 ui-new-message-title = Uus kiri

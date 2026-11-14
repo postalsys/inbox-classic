@@ -116,10 +116,12 @@ func onMain(_ block: @escaping @MainActor () -> Void) {
     CFRunLoopWakeUp(main)
 }
 
-/// Runs `block` on the main thread after `seconds`, also while a modal window runs
-func after(_ seconds: TimeInterval, _ block: @escaping @MainActor () -> Void) {
+/// Runs `block` on the main thread after `seconds`, also while a modal window runs; the timer, to stop it before
+@discardableResult
+func after(_ seconds: TimeInterval, _ block: @escaping @MainActor () -> Void) -> Timer {
     let timer = Timer(timeInterval: seconds, repeats: false) { _ in MainActor.assumeIsolated { block() } }
     RunLoop.main.add(timer, forMode: .common)
+    return timer
 }
 
 /// The open core: one mail store, its accounts and their workers

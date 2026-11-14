@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sending, Rules, Comfort Plan</title>
+<style>
+:root{
+  --bg:#f6f5f1;--panel:#fff;--ink:#1d1f24;--muted:#5d6370;--line:#e2e0d9;
+  --accent:#1f5fae;--soft:#e6eefa;--s:#1d7a46;--sbg:#e3f3ea;--m:#946200;--mbg:#fbf0d6;--l:#a3352b;--lbg:#f9e4e1;
+  --send:#1f5fae;--read:#1d7a46;--sort:#6b4fb3;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}}
+:root[data-theme="dark"]{
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:21px;margin:46px 0 6px}
+h3{font-size:16.5px;margin:0}
+p{margin:0 0 10px}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:3px 0}
+.lede{color:var(--muted);font-size:16px;max-width:780px}
+.meta{color:var(--muted);font-size:13px;margin-bottom:22px}
+.sub{color:var(--muted);margin-bottom:16px;max-width:780px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.road{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));margin-top:14px}
+.step{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--send);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.step.read{border-top-color:var(--read)}.step.sort{border-top-color:var(--sort)}
+.step b{display:block;font-size:14px}
+.step .n{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sz{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.sz.S{background:var(--sbg);color:var(--s)}.sz.M{background:var(--mbg);color:var(--m)}.sz.L{background:var(--lbg);color:var(--l)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin-top:10px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.feat{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--send);border-radius:10px;padding:18px 20px;margin:14px 0}
+.feat.read{border-left-color:var(--read)}.feat.sort{border-left-color:var(--sort)}
+.feat header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-bottom:8px}
+.pr{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.cols{display:grid;gap:8px 28px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:8px}
+.cols h4{margin:8px 0 2px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.cols ul{font-size:14px}
+.mock{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:10px;white-space:pre;overflow-x:auto}
+.flow{counter-reset:f;list-style:none;padding:0;margin:0}
+.flow li{counter-increment:f;position:relative;padding:9px 12px 9px 46px;border-bottom:1px solid var(--line);margin:0}
+.flow li:last-child{border-bottom:0}
+.flow li::before{content:counter(f);position:absolute;left:12px;top:9px;width:23px;height:23px;border-radius:50%;background:var(--soft);color:var(--accent);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.flow li.key{background:var(--soft)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td:first-child{font-weight:600;white-space:nowrap}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
+.small{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Safe sending, rules and comfort</h1>
+<p class="lede">The plan for eight features from the review: ten pull requests, each on Windows, the Mac and Linux at once, each tested end to end, reviewed from screenshots until nothing is left to improve, and merged to master before the next begins.</p>
+<p class="meta">14 November 2026 · from 0.17.1 · the full plan is <code>sending-rules-comfort-plan.md</code> beside this page</p>
+
+<div class="grid">
+  <div class="card">
+    <h3>Decided</h3>
+    <ul>
+      <li><b>A rule is a search query plus actions</b>, matched by the search code itself.</li>
+      <li><b>Three ways to make a rule</b>: Tools &gt; Message Rules, "Create Rule…" on the search bar, Create Rule from Message.</li>
+      <li>Rules run on <b>new Inbox mail only</b>; applying to mail already there is an opt-in.</li>
+      <li>Mail a rule moves is <b>still announced</b>, unless the rule says "Do not notify".</li>
+      <li>A rule refuses <code>in:</code> and dates; <b><code>list:</code> is added</b> to search and rules.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Decided, continued</h3>
+    <ul>
+      <li>Undo Send waits <b>10 seconds</b>; Options offers Off, 5, 10, 20, 30.</li>
+      <li>Closing a message <b>keeps asking</b>; "Don't Save" removes an automatic-only copy.</li>
+      <li><b>Text Size has no keys</b>; Ctrl+wheel and pinch are off too.</li>
+      <li><b>Flagged only</b>, no saved searches yet.</li>
+      <li>Dark messages on <b>the Mac and Linux only</b>.</li>
+      <li><b>Work starts when you say go</b>, each PR in its own worktree.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>The order of work</h2>
+<p class="sub">Sending first, since it protects what people write. The two large features are split into a core PR with no UI and an apps PR.</p>
+<div class="road">
+  <div class="step"><span class="n">PR 1</span><b>Drafts saved automatically <span class="sz M">M</span></b>and restored after a crash</div>
+  <div class="step"><span class="n">PR 2</span><b>Undo Send <span class="sz M">M</span></b>a wait in the Outbox</div>
+  <div class="step"><span class="n">PR 3</span><b>Attachment reminder <span class="sz S">S</span></b>one question on Send</div>
+  <div class="step read"><span class="n">PR 4</span><b>Text Size <span class="sz S">S</span></b>View menu, five sizes</div>
+  <div class="step sort"><span class="n">PR 5</span><b>Flagged <span class="sz M">M</span></b>every account in one list</div>
+  <div class="step"><span class="n">PR 6</span><b>Other addresses <span class="sz M">M</span></b>send and reply as an alias</div>
+  <div class="step sort"><span class="n">PR 7</span><b>Rules, core <span class="sz M">M</span></b>store, matching, the worker</div>
+  <div class="step sort"><span class="n">PR 8</span><b>Message Rules <span class="sz L">L</span></b>the windows, three ways in</div>
+  <div class="step read"><span class="n">PR 9</span><b>Dark documents, core <span class="sz M">M</span></b>pe-html decides and adjusts</div>
+  <div class="step read"><span class="n">PR 10</span><b>Dark mode <span class="sz M">M</span></b>the Mac and Linux</div>
+</div>
+<div class="legend"><span><span class="sw" style="background:var(--send)"></span>Sending</span><span><span class="sw" style="background:var(--sort)"></span>Sorting</span><span><span class="sw" style="background:var(--read)"></span>Reading comfort</span><span>PRs 7 and 9 are core only and can be built in worktrees alongside the ones before them</span></div>
+
+<h2>The features</h2>
+
+<div class="feat">
+<header><h3>1. Drafts saved automatically</h3><span class="sz M">M</span><span class="pr">PR 1</span></header>
+<p>Today a message is kept only when the user saves it. No compose window has a timer.</p>
+<div class="cols">
+<div><h4>How it behaves</h4><ul>
+<li>A recovery copy in the local store 3 seconds after the last change; works offline.</li>
+<li>The copy in Drafts on the server once typing stops for 10 seconds, at most every 30 seconds. The status bar's "Saved in Drafts 14:02" is the feedback.</li>
+<li>Nothing is saved until something is changed.</li>
+<li>Closing still asks. "Don't Save" removes a copy only the automatic saving made.</li>
+<li>After a crash, the messages being written open again, marked as restored.</li>
+</ul></div>
+<div><h4>How it is built</h4><ul>
+<li>The policy (when to save what) lives in <code>pe-core</code> compose, driven by a clock, so the three apps share it.</li>
+<li>New store table <code>compose_recovery</code>; the server copy is the existing <code>save_draft</code>.</li>
+<li>Apps: report changes, one timer, open what the core lists at start.</li>
+</ul><h4>Tests</h4><ul>
+<li>Policy with a fake clock; ImapKit: one draft, replaced, removed on "Don't Save".</li>
+<li>UI: type and wait; kill the app, start it, the message is back.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat">
+<header><h3>2. Undo Send</h3><span class="sz M">M</span><span class="pr">PR 2</span></header>
+<p>The Outbox already has a "not before" time, used for agents' 30 seconds. The user's Send gets one too.</p>
+<div class="cols">
+<div><h4>How it behaves</h4><ul>
+<li>Send closes the window. The main window says "Sending in 10 seconds" with <b>Undo</b>.</li>
+<li>It is the existing Undo: Edit &gt; <b>Undo Send</b>, Ctrl+Z or Cmd+Z, until the message goes.</li>
+<li>Undo opens the message again as it was, attachments included.</li>
+<li>Quitting sends what is waiting; it is never dropped.</li>
+<li>Options: Wait before sending: Off, 5, 10, 20, 30 seconds.</li>
+</ul></div>
+<div><h4>Where the Undo button is</h4><ul>
+<li>Windows: the status bar, where "Sent" shows today.</li>
+<li>Mac: a bar under the message list.</li>
+<li>Linux: a toast with a button, as GNOME apps do.</li>
+</ul><h4>Tests</h4><ul>
+<li>The race: undo just before and just after sending gives a window or a sent message, never both or neither.</li>
+<li>ImapKit: nothing reaches SMTP before the wait; undone, nothing ever does.</li>
+</ul></div>
+</div>
+<div class="mock">Windows status bar:   12 messages, 3 unread   |  Sending "Quarterly report" in 8 seconds   [ Undo ]  |  Working online</div>
+</div>
+
+<div class="feat">
+<header><h3>3. "Did you forget the attachment?"</h3><span class="sz S">S</span><span class="pr">PR 3</span></header>
+<div class="cols">
+<div><h4>How it behaves</h4><ul>
+<li>Only with no file attached, and only in what the user wrote: the subject and the text above the signature and the quote.</li>
+<li>Words of all five languages are checked whatever the language of the windows.</li>
+<li>"You wrote “attached”, but no file is attached." <b>Go Back</b> (default) or <b>Send Anyway</b>. No setting.</li>
+</ul></div>
+<div><h4>How it is built</h4><ul>
+<li>In the core, next to the address check that already runs on Send; the words come from the catalogs.</li>
+</ul><h4>Tests</h4><ul>
+<li>Per language; quoted text and signatures ignored; a word inside another word ignored.</li>
+<li>UI: asks, Go Back keeps the window, Send Anyway sends.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat read">
+<header><h3>4. Text Size</h3><span class="sz S">S</span><span class="pr">PR 4</span></header>
+<div class="cols">
+<div><h4>How it behaves</h4><ul>
+<li>View &gt; Text Size &gt; Smallest, Smaller, <b>Medium</b>, Larger, Largest, as Outlook Express had it. The check mark shows where it is.</li>
+<li>For the reading pane, message windows and the text being written (as shown, not as sent). Remembered.</li>
+<li><b>No keys, no Ctrl+wheel, no pinch</b>: it changes only when chosen.</li>
+</ul></div>
+<div><h4>How it is built</h4><ul>
+<li>Five radio commands in <code>commands.toml</code>; the core keeps the choice and gives the factor (80 to 140 percent).</li>
+<li>Each web view's own zoom; the accidental paths turned off.</li>
+</ul><h4>Tests</h4><ul>
+<li>UI: Larger, the factor the web view reports, kept over a restart, Medium again.</li>
+</ul></div>
+</div>
+<div class="mock">View
+  Layout                 ▸
+  Sort By                ▸
+  Text Size              ▸   ○ Smallest
+  ─────────────              ○ Smaller
+  Folder List                ● Medium
+  …                          ○ Larger
+                             ○ Largest</div>
+</div>
+
+<div class="feat sort">
+<header><h3>5. Flagged</h3><span class="sz M">M</span><span class="pr">PR 5</span></header>
+<div class="cols">
+<div><h4>How it behaves</h4><ul>
+<li>A <b>Flagged</b> row under All Inboxes, always there, with the number of flagged messages.</li>
+<li>Every flagged message of every account, with the Folder column of search results. Not Deleted Items or Junk; a Gmail message once.</li>
+<li>A message unflagged stays listed until another folder is chosen.</li>
+</ul></div>
+<div><h4>How it is built</h4><ul>
+<li>One more scope in the store's search, beside Folder, All Inboxes and Everywhere. A saved search can later be another row of the same kind.</li>
+</ul><h4>Tests</h4><ul>
+<li>Store: several accounts, Gmail duplicates, the count.</li>
+<li>ImapKit: a flag set by another client shows up and goes. UI: the row, the list, the empty state.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat">
+<header><h3>6. Send from another address</h3><span class="sz M">M</span><span class="pr">PR 6</span></header>
+<div class="cols">
+<div><h4>How it behaves</h4><ul>
+<li>Account Properties &gt; <b>Other addresses</b>: Add, Edit, Remove; an address and a name each.</li>
+<li>From lists them under their account.</li>
+<li><b>A reply goes from the address the message was sent to.</b> Reply All leaves all own addresses out.</li>
+<li>A server that refuses the address gets a plain explanation; the help covers Gmail's "Send mail as".</li>
+</ul></div>
+<div><h4>How it is built</h4><ul>
+<li>Store table of addresses per account; <code>Outgoing.from</code>, checked in the core against that list at send time.</li>
+<li>Everything that asks "is this me?" uses the set.</li>
+</ul><h4>Tests</h4><ul>
+<li>Reply address choice; pe-smtp conformance for From and the envelope.</li>
+<li>ImapKit: sent as the alias, replied as the alias, a refused sender explained.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat sort">
+<header><h3>7. Message Rules</h3><span class="sz L">L</span><span class="pr">PR 7 core</span><span class="pr">PR 8 windows</span></header>
+<p>A rule is one sentence: for new mail in the Inbox that matches <i>this search</i>, do <i>these things</i>.</p>
+<div class="mock">┌ New Rule ────────────────────────────────────────────────┐
+│ Name:            [ Newsletters from Acme               ] │
+│ For new mail in the Inbox of:  [ All accounts        ▾ ] │
+│ that matches:    [ from:news@acme.example              ] │
+│                  42 messages in the Inbox match.  [Show] │
+│ do this:                                                 │
+│   ☑ Move to folder      [ Newsletters ▾ ]                │
+│   ☑ Mark as read        ☐ Flag  [ Red ▾ ]                │
+│   ☐ Archive   ☐ Move to Junk E-mail   ☐ Delete           │
+│   ☐ Do not notify                                        │
+│ ☐ Also apply it to the messages already in the Inbox     │
+│                                   [ OK ]   [ Cancel ]    │
+└──────────────────────────────────────────────────────────┘</div>
+<div class="cols">
+<div><h4>Three ways in</h4><ul>
+<li><b>Create Rule…</b> on the search results bar, with the query filled in.</li>
+<li>Message &gt; <b>Create Rule from Message</b>, filled with <code>from:</code> the sender, or <code>list:</code> for a mailing list.</li>
+<li>Tools &gt; <b>Message Rules</b>: the list, with on and off, New, Edit, Delete, Move Up, Move Down.</li>
+</ul><h4>How rules run</h4><ul>
+<li>On mail arriving in an Inbox after the rule was made, while the app runs (it stays in the tray). Not on an account's first sync.</li>
+<li>Top to bottom; a rule that moves the message away is its last.</li>
+<li>Marked read, junked or deleted mail is not announced; moved mail is, and opens where it went.</li>
+<li>The status bar says "2 messages sorted by your rules"; Message Properties names the rule.</li>
+</ul></div>
+<div><h4>How it is built</h4><ul>
+<li>Matching is the search itself, limited to the UIDs that just arrived, so a rule and a search can never disagree.</li>
+<li>A rule with words for the text makes the worker fetch the new messages' text first.</li>
+<li>Actions go through the existing move, archive, junk, delete and flag operations (Gmail labels included).</li>
+<li>A message is handled once, so rules can not loop.</li>
+<li>Not allowed in a rule: <code>in:</code> and dates, refused in the editor with the reason. New for search too: <code>list:</code>.</li>
+</ul><h4>Tests</h4><ul>
+<li>ImapKit: mail arriving over IDLE is moved, flagged, marked read; body words; Gmail labels; 5,000 messages applied in batches; a deleted target folder skips the rule and says so.</li>
+<li>50 rules against a batch of new mail in under 20 ms on the 489,000 message store.</li>
+<li>UI on all three: list, editor with live count, from search, from message, a delivered message sorted, a bad query refused.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat read">
+<header><h3>8. Messages in dark mode</h3><span class="sz L">L</span><span class="pr">PR 9 core</span><span class="pr">PR 10 Mac and Linux</span></header>
+<p>The reading pane, the editor and the cards are fixed to light today, so a dark desktop shows a white page in a dark window.</p>
+<div class="tablewrap" style="margin:10px 0">
+<table>
+<thead><tr><th>The message</th><th>In a dark window</th></tr></thead>
+<tbody>
+<tr><td>Plain text, cards, fold button</td><td>Dark, with styles of their own.</td></tr>
+<tr><td>Brings its own dark styles</td><td>Shown as it asks.</td></tr>
+<tr><td>Sets no backgrounds</td><td>Dark; text colors too dark to read are lightened. This is what people write in Gmail, Outlook and Apple Mail.</td></tr>
+<tr><td>Has its own design</td><td>Left light, as designed (newsletters, receipts). Apple Mail does the same.</td></tr>
+<tr><td>Being written</td><td>Dark editor; nothing about colors is added to what is sent.</td></tr>
+<tr><td>Printed</td><td>Always light.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="cols">
+<div><h4>How it behaves</h4><ul>
+<li>Follows the system on the Mac and Linux. Windows stays classic and light.</li>
+<li>One switch in Options: "Show messages on a dark background when the system is dark", on.</li>
+<li>No white flash while a message loads.</li>
+</ul></div>
+<div><h4>How it is built and tested</h4><ul>
+<li>All of it in <code>pe-html</code>, in Rust, while sanitizing: no script, the CSP unchanged.</li>
+<li>A corpus of real-shaped mail with the expected decision for each; contrast tests.</li>
+<li>UI: the reading steps run once more in dark; a message written in dark is checked on the server to carry no colors.</li>
+</ul></div>
+</div>
+</div>
+
+<h2>How each pull request is done</h2>
+<div class="card" style="padding:4px 6px">
+<ol class="flow">
+<li><b>Branch from an up-to-date master</b>, in a git worktree of its own, since another session works in this checkout.</li>
+<li><b>The core and its tests</b>: unit and migration tests, and <code>e2e_core</code> against ImapKit for everything that talks IMAP or SMTP.</li>
+<li><b>Commands and the C API</b>, with the generated header and command tables committed.</li>
+<li><b>The three apps</b>: Windows, the Mac, Linux.</li>
+<li><b>Words and help</b>: English, then German, Estonian, Spanish and French drafts marked for your review; the help topics in each.</li>
+<li class="key"><b>UI end-to-end tests</b>: the step in the scenario and in each platform's test, the entry in the feature map; run on all three and <code>feature-map.mjs --check</code> for each.</li>
+<li class="key"><b>UX, UI and product review from the screenshots, until nothing is left</b>: as a principal UX designer and a mail client product expert, in English and the pseudo-language, light and dark: layout, spacing, wording, order, keyboard, focus, empty and error states, and how Outlook Express, Thunderbird, Apple Mail and Gmail do it. Note what could be better, fix it, take the screenshots again, review again. Stop when a round finds nothing.</li>
+<li class="key"><b>/simplify</b> over the changed code, with the maintainability check.</li>
+<li class="key"><b>/security-review</b> of the branch; fix what it finds, and go on.</li>
+<li><b>Format, clippy, the whole test suite</b>, prettier, <code>check-shells.sh</code>.</li>
+<li><b>Commit</b> in the usual order (<code>feat(core)</code>, each app, i18n, help, e2e, then <code>fix(ux)</code>, <code>refactor</code>, <code>fix</code>), <b>push, open the PR</b>, watch CI; real failures fixed, flaky jobs rerun at most 3 times.</li>
+<li class="key"><b>Merge</b> with a merge commit once CI is green and the last review round found nothing. The next PR starts from the new master.</li>
+</ol>
+</div>
+<p class="small" style="margin-top:10px">Windows screens that need the build machine's desktop while it is away are logged in <code>build/windows-ux-pending.md</code> and checked when it is back; CI's own Windows screenshots cover the rest.</p>
+
+<h2>Security notes</h2>
+<div class="tablewrap">
+<table>
+<tbody>
+<tr><td>Rules</td><td>No action sends anything or deletes for good. Queries become bound SQL values, as in search. Folder targets are ids, checked to exist. One handling per message. Agents have no way to make, change or run a rule. "Apply to the messages already there" asks with the count first.</td></tr>
+<tr><td>From address</td><td>Checked in the core against the account's own list when sending; that list changes only in Account Properties, never through an agent or anything in a message.</td></tr>
+<tr><td>Recovery copies</td><td>Unsent mail in the local store beside the cached mail, removed when the window closes. Attached files are read again on restore; a missing one is reported.</td></tr>
+<tr><td>Undo Send</td><td>The reopened message passes the editor's sanitizer like any draft. Agents' own wait and approval are not shortened by the new setting.</td></tr>
+<tr><td>Dark mode</td><td>Only color values the sanitizer already parsed are rewritten. No script, no new sources in the CSP, nothing fetched to decide.</td></tr>
+<tr><td>Text Size</td><td>Closes zoom paths; opens none.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>At the end</h2>
+<div class="card">
+<ul>
+<li>Ten PRs merged; release-please collects them as 0.18.0, left for you to merge.</li>
+<li>The list of draft translations to edit: <code>node scripts/i18n-review.mjs --html build/i18n-review.html</code>.</li>
+<li>Any Windows desktop checks still owed, listed with the reason.</li>
+<li>Homepage screenshots refreshed, with a dark set for the Mac and Linux.</li>
+</ul>
+</div>
+
+</main>
+</body>
+</html>

@@ -177,6 +177,7 @@ ui-not-sent = The message could not be sent.
 ui-not-saved = The message could not be saved.
 ui-saving-draft = Saving to Drafts...
 ui-compose-saved-at = Saved in Drafts at { $time }
+ui-compose-restored = Restored after Inbox Classic closed unexpectedly
 ui-compose-not-saved = Not saved in Drafts: { $reason }
 ui-save-changes-ask = Do you want to save changes to this message in Drafts?
 ui-new-message-title = New Message

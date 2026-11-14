@@ -73,7 +73,7 @@ pub struct SpecialFolder {
 }
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
-pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label};
+pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label, autosave_wait};
 pub use export::{Exported, write_file};
 /// The words of the windows in the language in use
 pub use pe_i18n as i18n;
@@ -1570,7 +1570,17 @@ impl Core {
     /// Saves a message being written in the Drafts folder of the account, in place of the copy saved before (the one
     /// with `outgoing.message_id`), in the background; [`Event::Failed`] when it did not work. The Message-ID of the
     /// draft, to pass in `outgoing` from then on, so the next save replaces this one and sending removes it.
-    pub fn save_draft(&self, account: AccountId, mut outgoing: Outgoing) -> Result<String> {
+    pub fn save_draft(&self, account: AccountId, outgoing: Outgoing) -> Result<String> {
+        self.save_draft_as(account, outgoing, false)
+    }
+
+    /// [`Core::save_draft`] while the user writes, without being asked ([`compose::autosave_wait`] says when): the
+    /// same, but a copy that could not be saved is told only to the window ([`Event::DraftSaved`]), not as a failure
+    pub fn autosave_draft(&self, account: AccountId, outgoing: Outgoing) -> Result<String> {
+        self.save_draft_as(account, outgoing, true)
+    }
+
+    fn save_draft_as(&self, account: AccountId, mut outgoing: Outgoing, automatic: bool) -> Result<String> {
         let email = self.store().account(account)?.settings.email;
         if compose::drafts_folder(&self.store(), account)?.is_none() {
             return Err(Error::Unavailable(tr(Text::ErrorNoDrafts)));
@@ -1582,13 +1592,51 @@ impl Core {
             .and_then(compose::draft_id)
             .unwrap_or_else(|| pe_smtp::message::new_message_id(&email));
         outgoing.message_id = Some(message_id.clone());
+        // kept here first, so that it is there to open again after a crash, with or without a connection
+        self.keep_recovery(account, &outgoing, &message_id)?;
         self.send_command(
             account,
             Command::SaveDraft {
                 outgoing: Box::new(outgoing),
+                automatic,
             },
         )?;
         Ok(message_id)
+    }
+
+    /// The message being written kept in the store as it is saved now, to open again after a crash
+    fn keep_recovery(&self, account: AccountId, outgoing: &Outgoing, message_id: &str) -> Result<()> {
+        self.store()
+            .keep_recovery(&compose::recovery(account, outgoing, message_id))?;
+        Ok(())
+    }
+
+    /// The window of the message with this draft Message-ID closed (sent, saved, or not kept): its copy kept for a
+    /// crash goes
+    pub fn compose_closed(&self, message_id: &str) -> Result<()> {
+        Ok(self.store().drop_recovery(message_id)?)
+    }
+
+    /// The messages that were being written when Inbox Classic last ended without closing their windows, oldest
+    /// first, each with its account, to open again: as saved drafts are reopened ([`Core::reopen_draft`]), with the
+    /// files they had that are still there
+    pub fn recovered(&self) -> Result<Vec<(AccountId, Draft)>> {
+        let recoveries = self.store().recoveries()?;
+        Ok(recoveries
+            .into_iter()
+            .map(|recovery| (recovery.account_id, compose::recovered(recovery)))
+            .collect())
+    }
+
+    /// Removes the draft with this Message-ID from the Drafts of `account`, in the background: a copy only the
+    /// automatic saving made, of a message closed without saving ([`Event::Failed`] when that does not work). Its
+    /// copy kept for a crash goes too.
+    pub fn discard_draft(&self, account: AccountId, message_id: &str) -> Result<()> {
+        self.store().drop_recovery(message_id)?;
+        let Some(message_id) = compose::draft_id(message_id) else {
+            return Ok(());
+        };
+        self.send_command(account, Command::RemoveDraft { message_id })
     }
 
     /// A saved draft (a message of the Drafts folder whose source is in the store) to go on writing; its attachments

@@ -2346,6 +2346,76 @@ fn drafts_are_saved_reopened_and_gone_once_sent() {
 }
 
 #[test]
+fn drafts_saved_automatically_are_kept_for_a_crash_and_discarded() {
+    let Some(s) = setup() else { return };
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let dir = TempDir::new("autosave");
+    let file = dir.path().join("notes.txt");
+    std::fs::write(&file, "notes").unwrap();
+    let gone = dir.path().join("gone.txt");
+    std::fs::write(&gone, "soon gone").unwrap();
+
+    // saved without being asked: in Drafts as a saved draft is, and kept here for a crash
+    let mut outgoing = pe_core::Outgoing {
+        to: "Ann <ann@example.com>".into(),
+        subject: "Half written".into(),
+        html: Some("<p>so far</p>".into()),
+        attachments: vec![file.clone(), gone.clone()],
+        ..Default::default()
+    };
+    let message_id = s.core.autosave_draft(account, outgoing.clone()).unwrap();
+    let saved = s.wait(|e| matches!(e, Event::DraftSaved { .. }));
+    assert_eq!(
+        saved,
+        Event::DraftSaved {
+            account,
+            message_id: message_id.clone(),
+            problem: None
+        }
+    );
+    eventually(
+        || s.server.subjects("Drafts") == ["Half written"],
+        "the draft in Drafts",
+    );
+
+    // saved again: one copy there, the newest, and here
+    outgoing.message_id = Some(message_id.clone());
+    outgoing.html = Some("<p>so far, and more</p>".into());
+    assert_eq!(s.core.autosave_draft(account, outgoing.clone()).unwrap(), message_id);
+    s.wait(|e| matches!(e, Event::DraftSaved { .. }));
+    eventually(|| s.server.messages("Drafts").len() == 1, "one draft");
+
+    // the app ended without closing the window: the message opens again as it was last saved, with the files
+    // that are still there
+    std::fs::remove_file(&gone).unwrap();
+    let recovered = s.core.recovered().unwrap();
+    assert_eq!(recovered.len(), 1);
+    let (from, draft) = &recovered[0];
+    assert_eq!(*from, account);
+    assert_eq!(
+        (draft.to.as_str(), draft.subject.as_str()),
+        ("Ann <ann@example.com>", "Half written")
+    );
+    assert!(draft.body.contains("so far, and more"), "{}", draft.body);
+    assert_eq!(draft.message_id.as_deref(), Some(message_id.as_str()));
+    assert_eq!(draft.attachments, std::slice::from_ref(&file));
+
+    // its window closed: nothing left to open again, the draft stays in Drafts
+    s.core.compose_closed(&message_id).unwrap();
+    assert!(s.core.recovered().unwrap().is_empty());
+    assert_eq!(s.server.subjects("Drafts"), ["Half written"]);
+
+    // closed without saving: the copy only the automatic saving made goes from Drafts too
+    s.core.autosave_draft(account, outgoing.clone()).unwrap();
+    s.wait(|e| matches!(e, Event::DraftSaved { .. }));
+    s.core.discard_draft(account, &message_id).unwrap();
+    eventually(|| s.server.subjects("Drafts").is_empty(), "the draft discarded");
+    assert!(s.core.recovered().unwrap().is_empty());
+}
+
+#[test]
 fn a_draft_follows_from_to_another_account() {
     let Some(s) = setup() else { return };
     // a second account on a server of its own (ImapKit has one mailbox a server)

@@ -505,6 +505,7 @@ final class UITest {
         try await notDownloaded()
         try await largeMessage()
         try await outboxAndDrafts()
+        try await draftsSavedAutomatically()
         try await searching()
         try await files()
         try await organizing()

@@ -109,7 +109,8 @@ struct Compose : Writing {
     // the core moves the copy over with the next save or send
     int64_t draftAccount = 0;
     // what to do with the editor's HTML once it comes: send, save in Drafts, or save and close the window
-    enum class Pending { None, Send, Save, SaveAndClose } pending = Pending::None;
+    // or save in Drafts without being asked (pe_autosave_wait says when)
+    enum class Pending { None, Send, Save, SaveAndClose, Autosave } pending = Pending::None;
     std::wstring html;
     // where the quote is (see EditorQuote), and the quote as the user left it once unfolded
     EditorQuote quoteState = EditorQuote::Folded;
@@ -117,6 +118,21 @@ struct Compose : Writing {
     // something was typed: closing asks first
     bool dirty = false;
     bool filling = true;
+    HWND window = nullptr;
+    // changes made, counted: a save leaves the window clean only when nothing changed while it was asked for
+    uint64_t changes = 0;
+    uint64_t requestedAt = 0;
+    // when the oldest change not saved yet was made (GetTickCount64), 0 when all is saved; its timer saves it
+    ULONGLONG unsavedSince = 0;
+    // the account has no Drafts folder: the automatic saving stops for this message
+    bool autosaveOff = false;
+    // the copy in Drafts is one the user kept (saved, or opened from Drafts): closing without saving leaves it there
+    bool kept = false;
+    // the copy in Drafts was saved automatically since: closing asks about it, and without saving removes it unless
+    // it was kept
+    bool autosaved = false;
+    // gone as a crash takes it (the UI test's TestAbandonCompose): its copy for a crash stays
+    bool abandoned = false;
     HWND toolbar = nullptr;
     // the rows of fields: From, To, Cc, Bcc, Subject, Attach
     static constexpr int kRows = 6;
@@ -158,12 +174,43 @@ void ShowLink(Compose* state, const std::wstring& link) {
     SendMessageW(state->status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(text.c_str()));
 }
 
+// the timer of the automatic saving
+constexpr UINT_PTR kAutosaveTimer = 1;
+
+// the timer of the automatic saving, started again at each change: it saves once typing stops, and every half a
+// minute while it does not (the core's rule)
+void ScheduleAutosave(Compose* state) {
+    if (state->filling || state->autosaveOff || !state->window) {
+        return;
+    }
+    ULONGLONG now = GetTickCount64();
+    if (state->unsavedSince == 0) {
+        state->unsavedSince = now;
+    }
+    UINT wait = static_cast<UINT>(pe_autosave_wait(now - state->unsavedSince));
+    SetTimer(state->window, kAutosaveTimer, std::max<UINT>(wait, USER_TIMER_MINIMUM), nullptr);
+}
+
 // the message changed since it was sent to Drafts or opened: a "saved" status no longer holds
 void Changed(Compose* state) {
     if (!state->dirty && !state->filling) {
         SetComposeStatus(state, L"");
     }
     state->dirty = true;
+    state->changes++;
+    ScheduleAutosave(state);
+}
+
+// the message as it was when its HTML was asked for is saved: clean unless it changed since
+void SavedClean(Compose* state) {
+    KillTimer(state->window, kAutosaveTimer);
+    state->unsavedSince = 0;
+    if (state->changes != state->requestedAt) {
+        ScheduleAutosave(state);
+        return;
+    }
+    state->dirty = false;
+    state->editor.Clean();
 }
 
 // a file of the Attach row, its name after the margin the edit fields keep before their text
@@ -440,8 +487,9 @@ void Save(HWND hwnd, Compose* state, const std::wstring& html, bool close) {
     core::String id(messageId);
     state->draftAccount = state->account;
     state->messageId = id ? id.get() : "";
-    state->dirty = false;
-    state->editor.Clean();
+    state->kept = true;
+    state->autosaved = false;
+    SavedClean(state);
     // the server's answer follows (ComposeDraftSaved)
     SetComposeStatus(state, core::T(PE_TEXT_UI_SAVING_DRAFT));
     if (close) {
@@ -449,12 +497,40 @@ void Save(HWND hwnd, Compose* state, const std::wstring& html, bool close) {
     }
 }
 
+// saved in Drafts without being asked; quietly not when it can not be (no Drafts folder)
+void Autosave(Compose* state, const std::wstring& html) {
+    Fields fields(state, html);
+    char* messageId = nullptr;
+    if (!pe_draft_autosave(state->core, state->account, &fields.outgoing, &messageId, nullptr)) {
+        state->autosaveOff = true;
+        return;
+    }
+    core::String id(messageId);
+    state->draftAccount = state->account;
+    state->messageId = id ? id.get() : "";
+    state->autosaved = true;
+    SavedClean(state);
+    SetComposeStatus(state, core::T(PE_TEXT_UI_SAVING_DRAFT));
+}
+
 // the editor's HTML is asked for first, the action follows when it comes
 void Request(Compose* state, Compose::Pending action) {
     if (state->pending == Compose::Pending::None) {
         state->pending = action;
+        state->requestedAt = state->changes;
         state->editor.Html();
+    } else if (state->pending == Compose::Pending::Autosave && action != Compose::Pending::Autosave) {
+        // the user's own Send or Save comes after the automatic save the HTML was asked for
+        state->pending = action;
     }
+}
+
+// closed without saving: the copy only the automatic saving made goes from Drafts
+void DiscardAutosaved(Compose* state) {
+    if (state->autosaved && !state->kept && !state->messageId.empty()) {
+        pe_draft_discard(state->core, state->draftAccount, state->messageId.c_str());
+    }
+    state->autosaved = false;
 }
 
 void ChooseTextColor(HWND hwnd, Writing* state) {
@@ -783,7 +859,7 @@ void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
 // whether the window may close now: when nothing changed since it was sent or saved, or the user does not want it
 // saved. Yes saves it in Drafts and closes the window after.
 bool MayClose(HWND hwnd, Compose* state) {
-    if (!state->dirty) {
+    if (!state->dirty && !state->autosaved) {
         return true;
     }
     switch (MessageBoxW(hwnd, core::T(PE_TEXT_UI_SAVE_CHANGES_ASK).c_str(), L"Inbox Classic", MB_YESNOCANCEL | MB_ICONQUESTION)) {
@@ -791,6 +867,7 @@ bool MayClose(HWND hwnd, Compose* state) {
         Request(state, Compose::Pending::SaveAndClose);
         return false;
     case IDNO:
+        DiscardAutosaved(state);
         return true;
     default:
         return false;
@@ -865,11 +942,23 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
             case Pending::SaveAndClose:
                 Save(hwnd, state, html, pending == Pending::SaveAndClose);
                 break;
+            case Pending::Autosave:
+                Autosave(state, html);
+                break;
             case Pending::None:
                 break;
             }
         }
         return 0;
+    case WM_TIMER:
+        if (state && wParam == kAutosaveTimer) {
+            KillTimer(hwnd, kAutosaveTimer);
+            if (state->dirty) {
+                Request(state, Compose::Pending::Autosave);
+            }
+            return 0;
+        }
+        break;
     case WM_VKEYTOITEM:
         // Delete in the Attach row takes the file off
         if (state && reinterpret_cast<HWND>(lParam) == state->attached && LOWORD(wParam) == VK_DELETE) {
@@ -903,6 +992,11 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         break;
     case WM_DESTROY:
         if (state) {
+            KillTimer(hwnd, kAutosaveTimer);
+            // nothing left to open again after a crash
+            if (!state->messageId.empty() && !state->abandoned) {
+                pe_compose_closed(state->core, state->messageId.c_str());
+            }
             state->editor.Close();
             // not owned, so Windows would hand the keyboard to whatever window is next: back to the main window, as
             // when it was the owner, unless it is minimized
@@ -1050,7 +1144,7 @@ bool ComposeKey(const MSG& msg) {
     return true;
 }
 
-void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* draft) {
+HWND OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* draft) {
     static bool registered = false;
     if (!registered) {
         WNDCLASSEXW windowClass = {sizeof(windowClass)};
@@ -1069,10 +1163,11 @@ void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* dr
                                 WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT, CW_USEDEFAULT, Scale(760), Scale(620), nullptr,
                                 nullptr, GetModuleHandleW(nullptr), nullptr);
     if (!hwnd) {
-        return;
+        return nullptr;
     }
     g_composeWindows.push_back(hwnd);
     auto* state = new Compose{{}, core, account, main};
+    state->window = hwnd;
     SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(state));
     CreateFields(hwnd, state);
     FillFrom(state);
@@ -1093,6 +1188,7 @@ void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* dr
         state->quotePlain = draft->quote_text != nullptr;
         // a saved draft opened again: its files, and its Message-ID so the next save replaces it
         state->messageId = draft->message_id ? draft->message_id : "";
+        state->kept = !state->messageId.empty();
         state->draftAccount = account;
         for (size_t i = 0; i < draft->attachment_count; i++) {
             AddFile(state, Text(draft->attachments[i]));
@@ -1109,6 +1205,7 @@ void OpenCompose(HWND main, PeCore* core, int64_t account, const PeDraftInfo* dr
     } else {
         SetFocus(state->to);
     }
+    return hwnd;
 }
 
 namespace {
@@ -1145,6 +1242,40 @@ void DestroyComposeWindows() {
     for (HWND hwnd : ComposeWindows()) {
         DestroyWindow(hwnd);
     }
+}
+
+void OpenRecoveredCompose(HWND main, PeCore* core) {
+    PeRecovered* list = pe_recovered(core);
+    if (!list) {
+        return;
+    }
+    for (size_t i = 0; i < pe_recovered_count(list); i++) {
+        int64_t account = 0;
+        core::Draft draft(pe_recovered_get(list, i, &account));
+        if (!draft) {
+            continue;
+        }
+        HWND hwnd = OpenCompose(main, core, account, pe_draft_info(draft.get()));
+        // closing asks about it, and without saving leaves its copy in Drafts, as whether the user had kept it is not
+        // known
+        if (Compose* state = hwnd ? StateOf(hwnd) : nullptr) {
+            state->kept = true;
+            state->autosaved = true;
+            SetComposeStatus(state, core::T(PE_TEXT_UI_COMPOSE_RESTORED));
+        }
+    }
+    pe_recovered_free(list);
+}
+
+size_t TestAbandonCompose(HWND main, PeCore* core) {
+    for (HWND hwnd : ComposeWindows()) {
+        if (Compose* state = StateOf(hwnd)) {
+            state->abandoned = true;
+        }
+        DestroyWindow(hwnd);
+    }
+    OpenRecoveredCompose(main, core);
+    return ComposeWindows().size();
 }
 
 bool ComposeDraftSaved(const std::string& messageId, const std::wstring& problem) {
