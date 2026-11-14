@@ -181,6 +181,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     static let layoutModes: [Command: PeLayoutMode] = [
         .layoutAutomatic: PE_LAYOUT_MODE_AUTOMATIC, .layoutClassic: PE_LAYOUT_MODE_CLASSIC, .layoutColumns: PE_LAYOUT_MODE_COLUMNS,
     ]
+    /// View > Text Size's commands, in the order the core counts the sizes (Largest first)
+    static let textSizes: [Command] = [.textSizeLargest, .textSizeLarger, .textSizeMedium, .textSizeSmaller, .textSizeSmallest]
     /// message files (and links) the system asked to open before the window was there
     private var pending: [URL] = []
     /// the app ends after the compose windows that are saving have closed
@@ -214,6 +216,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             return
         }
         self.core = core
+        TextSize.zoom = pe_text_zoom(core.handle)
         pe_set_codes_in_notifications(codesInNotifications)
         // where the user's AI agents reach this app (--mcp); another app with this store open keeps them
         pe_mcp_start(core.handle)
@@ -572,6 +575,10 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .hideRead: hideRead.toggle()
         case .folderList: folderList.toggle()
         case .layoutAutomatic, .layoutClassic, .layoutColumns: layoutMode = Self.layoutModes[command] ?? layoutMode
+        case .textSizeLargest, .textSizeLarger, .textSizeMedium, .textSizeSmaller, .textSizeSmallest:
+            if let size = Self.textSizes.firstIndex(of: command), pe_set_text_size(main.core.handle, size) {
+                TextSize.apply(pe_text_zoom(main.core.handle))
+            }
         case .sortDate, .sortFrom, .sortSubject, .sortSize:
             if let field = Mailbox.sortFields[command] { main.mailbox.sortBy(field) }
         case .sortAscending: main.mailbox.setAscending(true)
@@ -669,6 +676,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         }
         if let mode = Self.layoutModes[command] {
             item.state = layoutMode == mode ? .on : .off
+        }
+        if let size = Self.textSizes.firstIndex(of: command), let core {
+            item.state = pe_text_size(core.handle) == size ? .on : .off
         }
         if let main, let state = main.mailbox.sortState(command) {
             item.state = state ? .on : .off

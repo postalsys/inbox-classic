@@ -325,6 +325,13 @@ const sections = [
         intro: 'Messages are parsed in Rust and shown in a locked-down WebView2: scripts never run, nothing is loaded from the internet unless you ask, links open in your browser.',
         features: [
             {
+                shot: 'read-30-text-size',
+                name: 'Text Size',
+                what: 'View > Text Size shows messages, and the text being written, Largest to Smallest, as Outlook Express did; the size in use is checked and kept. It has no keys, and the web views\' own zoom is off, so it never changes by accident.',
+                how: 'View > Text Size.',
+                checked: ['Medium at first', 'Larger shows the message larger', 'Medium again']
+            },
+            {
                 shot: 'read-7-properties',
                 name: 'Message Properties',
                 what: 'The Internet headers of the message, as the Details tab of Outlook Express shows them: who sent it through which servers, its IDs and dates. Shown as text, to read and copy.',

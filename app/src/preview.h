@@ -38,6 +38,8 @@ public:
     // the keys that do not type (Esc, Delete, those with Ctrl or Alt) pressed while it has the keyboard, for its window:
     // true when the window handled one, which the page then does not get
     void SetKeys(std::function<bool(UINT key)> keys) { keys_ = std::move(keys); }
+    // before Create: not at View > Text Size's size, which is for messages (the help keeps its own)
+    void KeepOwnSize() { textZoom_ = false; }
     // a link clicked in the document that its window follows itself (the bounce card's): true when it took it, which
     // the browser then does not open
     void SetLinks(std::function<bool(const wchar_t* uri)> links) { links_ = std::move(links); }
@@ -69,6 +71,7 @@ private:
     // documents shown, for an address of each
     unsigned shown_ = 0;
     bool remoteImages_ = false;
+    bool textZoom_ = true;
     std::function<void(const std::wstring&)> onError_;
     std::function<bool(UINT key)> keys_;
     std::function<bool(const wchar_t* uri)> links_;

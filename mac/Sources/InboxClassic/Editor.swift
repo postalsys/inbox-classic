@@ -46,6 +46,7 @@ final class Editor: NSObject, WKScriptMessageHandler {
         configuration.userContentController.add(WeakHandler(self), name: "host")
         view.navigationDelegate = navigation
         view.uiDelegate = navigation
+        TextSize.register(view)
         view.isInspectable = false
         view.allowsBackForwardNavigationGestures = false
         view.setAccessibilityIdentifier("editor")

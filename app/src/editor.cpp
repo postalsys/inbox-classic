@@ -85,6 +85,8 @@ HWND Editor::Create(HWND parent, int id, const std::wstring& document, Handlers 
 void Editor::Configure() {
     // its own script; cut, copy, paste and the spelling suggestions stay in the context menu
     webview::LockDown(view_.Get(), true);
+    // what is written at View > Text Size's size
+    webview::TrackTextZoom(controller_.Get());
 
     // the page from memory, nothing from the network, pasted pictures from the web included
     webview::FilterRequests(
@@ -378,6 +380,7 @@ void Editor::Resize(const RECT& bounds) {
 
 void Editor::Close() {
     if (controller_) {
+        webview::UntrackTextZoom(controller_.Get());
         controller_->Close();
     }
     view_.Reset();

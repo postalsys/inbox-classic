@@ -139,6 +139,43 @@ menu = "view"
 submenu = "sort_by"
 toggle = true
 
+# View > Text Size: how large messages are shown and written, as Outlook Express had it; no keys, so it never
+# changes by accident (the web views' own zoom is off too). The size in use checked.
+[[command]]
+id = "text_size_largest"
+windows = 165
+menu = "view"
+submenu = "text_size"
+toggle = true
+
+[[command]]
+id = "text_size_larger"
+windows = 166
+menu = "view"
+submenu = "text_size"
+toggle = true
+
+[[command]]
+id = "text_size_medium"
+windows = 167
+menu = "view"
+submenu = "text_size"
+toggle = true
+
+[[command]]
+id = "text_size_smaller"
+windows = 168
+menu = "view"
+submenu = "text_size"
+toggle = true
+
+[[command]]
+id = "text_size_smallest"
+windows = 169
+menu = "view"
+submenu = "text_size"
+toggle = true
+
 [[command]]
 id = "pictures"
 windows = 105

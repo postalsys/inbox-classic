@@ -20,6 +20,11 @@ enum Command: Int, CaseIterable {
     case sortSize = 162
     case sortAscending = 163
     case sortDescending = 164
+    case textSizeLargest = 165
+    case textSizeLarger = 166
+    case textSizeMedium = 167
+    case textSizeSmaller = 168
+    case textSizeSmallest = 169
     case pictures = 105
     case about = 106
     case newMail = 107
@@ -88,6 +93,11 @@ enum Command: Int, CaseIterable {
         case .sortSize: return "view"
         case .sortAscending: return "view"
         case .sortDescending: return "view"
+        case .textSizeLargest: return "view"
+        case .textSizeLarger: return "view"
+        case .textSizeMedium: return "view"
+        case .textSizeSmaller: return "view"
+        case .textSizeSmallest: return "view"
         case .pictures: return "view"
         case .about: return "help"
         case .newMail: return "message"
@@ -163,6 +173,11 @@ enum Command: Int, CaseIterable {
         case .sortSize: return .cmdSortSize
         case .sortAscending: return .cmdSortAscending
         case .sortDescending: return .cmdSortDescending
+        case .textSizeLargest: return .cmdTextSizeLargest
+        case .textSizeLarger: return .cmdTextSizeLarger
+        case .textSizeMedium: return .cmdTextSizeMedium
+        case .textSizeSmaller: return .cmdTextSizeSmaller
+        case .textSizeSmallest: return .cmdTextSizeSmallest
         case .pictures: return .cmdPictures
         case .about: return .cmdAbout
         case .newMail: return .cmdNewMail
@@ -233,6 +248,11 @@ enum Command: Int, CaseIterable {
         case .sortSize: return nil
         case .sortAscending: return nil
         case .sortDescending: return nil
+        case .textSizeLargest: return nil
+        case .textSizeLarger: return nil
+        case .textSizeMedium: return nil
+        case .textSizeSmaller: return nil
+        case .textSizeSmallest: return nil
         case .pictures: return nil
         case .about: return nil
         case .newMail: return ("n", [.command])
@@ -303,6 +323,11 @@ enum Command: Int, CaseIterable {
         case .sortSize: return true
         case .sortAscending: return true
         case .sortDescending: return true
+        case .textSizeLargest: return true
+        case .textSizeLarger: return true
+        case .textSizeMedium: return true
+        case .textSizeSmaller: return true
+        case .textSizeSmallest: return true
         case .pictures: return false
         case .about: return false
         case .newMail: return false
@@ -373,6 +398,11 @@ enum Command: Int, CaseIterable {
         case .sortSize: return false
         case .sortAscending: return false
         case .sortDescending: return false
+        case .textSizeLargest: return false
+        case .textSizeLarger: return false
+        case .textSizeMedium: return false
+        case .textSizeSmaller: return false
+        case .textSizeSmallest: return false
         case .pictures: return false
         case .about: return false
         case .newMail: return false
@@ -443,6 +473,11 @@ enum Command: Int, CaseIterable {
         case .sortSize: return false
         case .sortAscending: return false
         case .sortDescending: return false
+        case .textSizeLargest: return false
+        case .textSizeLarger: return false
+        case .textSizeMedium: return false
+        case .textSizeSmaller: return false
+        case .textSizeSmallest: return false
         case .pictures: return true
         case .about: return false
         case .newMail: return false
@@ -513,6 +548,11 @@ enum Command: Int, CaseIterable {
         case .sortSize: return "sort_by"
         case .sortAscending: return "sort_by"
         case .sortDescending: return "sort_by"
+        case .textSizeLargest: return "text_size"
+        case .textSizeLarger: return "text_size"
+        case .textSizeMedium: return "text_size"
+        case .textSizeSmaller: return "text_size"
+        case .textSizeSmallest: return "text_size"
         case .pictures: return nil
         case .about: return nil
         case .newMail: return nil

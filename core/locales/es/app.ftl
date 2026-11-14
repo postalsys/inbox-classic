@@ -10,6 +10,8 @@ menu-message = &Mensaje
 menu-help = Ay&uda
 menu-layout = &Diseño
 menu-sort-by = Ordenar &por
+# review: new
+menu-text-size = &Tamaño del texto
 menu-folder = Carpe&ta
 
 ## The commands
@@ -68,6 +70,16 @@ cmd-sort-subject = &Asunto
 cmd-sort-size = &Tamaño
 cmd-sort-ascending = Orden as&cendente
 cmd-sort-descending = Orden desce&ndente
+# review: new
+cmd-text-size-largest = Muy gra&nde
+# review: new
+cmd-text-size-larger = &Grande
+# review: new
+cmd-text-size-medium = &Mediano
+# review: new
+cmd-text-size-smaller = &Pequeño
+# review: new
+cmd-text-size-smallest = Mu&y pequeño
 cmd-hide-ignored = &Ocultar las conversaciones ignoradas
 cmd-hide-read = Ocultar los mensajes &leídos
 cmd-notify = &Avisar de correo nuevo

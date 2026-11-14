@@ -23,6 +23,11 @@ pub fn download_limit_index(megabytes: u64) -> usize {
         .unwrap_or(0)
 }
 
+/// View > Text Size: how much larger or smaller than usual messages are shown and written, Largest to Smallest
+pub const TEXT_ZOOMS: [f64; 5] = [1.4, 1.2, 1.0, 0.9, 0.8];
+/// Medium, the usual size
+pub const TEXT_SIZE_MEDIUM: usize = 2;
+
 /// The waits before a message goes that Options offers, in seconds (Undo Send)
 pub const SEND_DELAYS: [u64; 5] = [0, 5, 10, 20, 30];
 
@@ -418,6 +423,12 @@ mod download_limit_tests {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn medium_is_the_usual_size() {
+        assert_eq!(TEXT_ZOOMS[TEXT_SIZE_MEDIUM], 1.0);
+        assert!(TEXT_ZOOMS.windows(2).all(|pair| pair[0] > pair[1]));
+    }
 
     #[test]
     fn send_delays_in_words() {
