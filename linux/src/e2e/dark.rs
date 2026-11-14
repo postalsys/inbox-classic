@@ -127,10 +127,6 @@ pub(super) async fn dark_messages(d: &Driver) {
         "the windows are dark, as the system's dark style makes them",
     );
     d.check(
-        gtk::Settings::default().is_some_and(|s| s.property::<bool>("gtk-application-prefer-dark-theme")),
-        "GTK says dark to WebKit, whose prefers-color-scheme follows it",
-    );
-    d.check(
         dark_background(&main.reader.preview.view),
         "the reading pane paints a dark background before its document, nothing flashes white",
     );

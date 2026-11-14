@@ -206,8 +206,8 @@ pub fn update_backgrounds() {
 }
 
 /// The web views follow the style of the windows: their background changes with it. The documents change by
-/// themselves: their `prefers-color-scheme` is WebKit's reading of GTK's gtk-application-prefer-dark-theme, which
-/// libadwaita sets as its style changes (and printing is light, the dark styles being for the screen only)
+/// themselves: WebKit's `prefers-color-scheme` follows the style libadwaita gives the windows (and printing is light,
+/// the dark styles being for the screen only)
 pub fn follow_style() {
     adw::StyleManager::default().connect_dark_notify(|_| update_backgrounds());
 }
