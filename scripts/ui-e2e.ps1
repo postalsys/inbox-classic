@@ -1646,6 +1646,8 @@ public static class Dragger {
     Check ($null -eq (Find 'INBOX' 'Subject: One more thing')) 'and takes it out of the Inbox'
     Check ([bool](WaitFor { (Rows) -eq $listed - 1 })) 'the list has one less'
     # the next one is selected: move it to Archive through the dialog
+    $selected = [int][Native.Win]::SendMessage($list, 0x100C, [IntPtr](-1), [IntPtr]2)
+    $next = [Native.Win]::RemoteListText($list, $selected, $COL_SUBJECT)
     Command $main $IDM_MOVE
     $move = WaitPicker 'Move Message'
     Check ($null -ne $move) 'Move to Folder asks where'
@@ -1653,8 +1655,8 @@ public static class Dragger {
         Check (PickIn $move 'inboxclassic.test' 'Archive') 'Archive can be chosen'
         Shot $move 'organize-2-move'
         Click $move 1
-        # the one selected after the delete: the newest, the message sent later
-        Check ($null -ne (WaitFor { Find 'Archive' 'Subject: Draft from the UI test' } 20)) 'the selected message is in Archive'
+        # the one selected after the delete, the newest left
+        Check ($null -ne (WaitFor { Find 'Archive' "Subject: $next" } 20)) "the selected message is in Archive ($next)"
         Check ([bool](WaitFor { (Rows) -eq $listed - 2 })) 'and out of the list'
     }
     Shot $main 'organize-3-after'
