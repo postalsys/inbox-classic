@@ -309,14 +309,18 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     searchBar_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | WS_BORDER | WS_CLIPSIBLINGS, IDC_SEARCH_BAR, {});
     searchClear_ = CreateChild(parent, L"STATIC", core::T(PE_TEXT_UI_CLEAR_SEARCH).c_str(), SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
                                IDC_SEARCH_CLEAR, {});
+    searchRule_ = CreateChild(parent, L"STATIC", core::Plain(PE_TEXT_UI_CREATE_RULE).c_str(), SS_NOTIFY | SS_CENTERIMAGE | SS_CENTER | SS_NOPREFIX,
+                              IDC_SEARCH_RULE, {});
     ShowWindow(searchBar_, SW_HIDE);
     ShowWindow(searchClear_, SW_HIDE);
+    ShowWindow(searchRule_, SW_HIDE);
 
     LOGFONTW font = {};
     GetObjectW(GetStockObject(DEFAULT_GUI_FONT), sizeof(font), &font);
     font.lfUnderline = TRUE;
     link_ = CreateFontIndirectW(&font);
     SendMessageW(searchClear_, WM_SETFONT, reinterpret_cast<WPARAM>(link_), FALSE);
+    SendMessageW(searchRule_, WM_SETFONT, reinterpret_cast<WPARAM>(link_), FALSE);
     font.lfUnderline = FALSE;
     font.lfWeight = FW_BOLD;
     bold_ = CreateFontIndirectW(&font);
@@ -440,10 +444,13 @@ void Mailbox::LayoutList() {
     if (IsWindowVisible(searchBar_)) {
         int height = Scale(22), edge = GetSystemMetrics(SM_CXBORDER);
         MoveWindow(searchBar_, list.left, list.top, width, height, TRUE);
-        // the link inside the bar's border, at its right, as wide as its words
+        // the links inside the bar's border, at its right, each as wide as its words: Create Rule, then Clear search
         int linkWidth = LinkWidth(searchClear_) + Scale(16);
         MoveWindow(searchClear_, list.right - edge - linkWidth, list.top + edge, linkWidth, height - 2 * edge, TRUE);
         SetWindowPos(searchClear_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+        int ruleWidth = LinkWidth(searchRule_) + Scale(16);
+        MoveWindow(searchRule_, list.right - edge - linkWidth - ruleWidth, list.top + edge, ruleWidth, height - 2 * edge, TRUE);
+        SetWindowPos(searchRule_, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
         list.top += height + Scale(2);
     }
     // the Columns list has no headings: "Sorted by" over it says the order, and changes it
@@ -518,6 +525,7 @@ void Mailbox::UpdateSearchBar() {
     if (shown != !summary.empty()) {
         ShowWindow(searchBar_, summary.empty() ? SW_HIDE : SW_SHOW);
         ShowWindow(searchClear_, summary.empty() ? SW_HIDE : SW_SHOW);
+        ShowWindow(searchRule_, summary.empty() ? SW_HIDE : SW_SHOW);
         LayoutList();
     }
 }
@@ -526,10 +534,10 @@ bool Mailbox::OnSetCursor(HWND window) {
     if (reader_.OnSetCursor(window)) {
         return true;
     }
-    if (window != searchClear_) {
+    if (window != searchClear_ && window != searchRule_) {
         return false;
     }
-    // the link on the information bar
+    // the links on the information bar
     SetCursor(LoadCursorW(nullptr, IDC_HAND));
     return true;
 }
@@ -538,7 +546,7 @@ bool Mailbox::OnCtlColor(HWND window, HDC dc, LRESULT& brush) {
     if (reader_.OnCtlColor(window, dc, brush)) {
         return true;
     }
-    if (window != searchClear_) {
+    if (window != searchClear_ && window != searchRule_) {
         return false;
     }
     // a link on the information bar
@@ -2663,6 +2671,15 @@ void Mailbox::AddSenderToBook(HWND owner) {
     }
 }
 
+void Mailbox::CreateRuleFromShown(HWND owner) {
+    if (!reader_.Uid()) {
+        MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
+        return;
+    }
+    core::String query(pe_rule_query_of_message(core_, reader_.Folder(), reader_.Uid()));
+    NewRuleDialog(owner, core_, query ? Text(query.get()) : L"");
+}
+
 void Mailbox::ShowSource(HWND owner) {
     if (!reader_.Uid()) {
         MessageBoxW(owner, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), L"Inbox Classic", MB_OK | MB_ICONINFORMATION);
@@ -2735,6 +2752,8 @@ void Mailbox::MessageMenu(POINT screen) {
     AppendMenuW(menu, MF_STRING | (CanArchive() ? 0 : MF_GRAYED), IDM_ARCHIVE, MenuItem(PE_TEXT_CMD_ARCHIVE, L"A").c_str());
     bool junk = summary_.in_junk;
     AppendMenuW(menu, MF_STRING, junk ? IDM_NOT_JUNK : IDM_JUNK, MenuItem(junk ? PE_TEXT_CMD_NOT_JUNK : PE_TEXT_CMD_JUNK).c_str());
+    AppendMenuW(menu, MF_STRING | (SelectedCount() > 1 ? MF_GRAYED : 0), IDM_CREATE_RULE_FROM_MESSAGE,
+                MenuItem(PE_TEXT_CMD_CREATE_RULE_FROM_MESSAGE).c_str());
     AppendMenuW(menu, MF_STRING, IDM_MOVE, MenuItem(PE_TEXT_CMD_MOVE).c_str());
     AppendMenuW(menu, MF_STRING, IDM_COPY, MenuItem(PE_TEXT_CMD_COPY).c_str());
     AppendMenuW(menu, MF_STRING, IDM_DELETE, MenuItem(PE_TEXT_WIN_DELETE_BUTTON).c_str());
@@ -2808,9 +2827,10 @@ bool Mailbox::OnDrawItem(const DRAWITEMSTRUCT& item) {
         int pad = Scale(6);
         ImageList_Draw(listIcons_, LIST_SEARCH, item.hDC, area.left + pad, (area.top + area.bottom - iconSize_) / 2, ILD_TRANSPARENT);
         area.left += pad + iconSize_ + pad;
-        RECT link;
-        GetWindowRect(searchClear_, &link);
-        area.right -= (link.right - link.left) + pad;
+        RECT clear, rule;
+        GetWindowRect(searchClear_, &clear);
+        GetWindowRect(searchRule_, &rule);
+        area.right -= (clear.right - clear.left) + (rule.right - rule.left) + pad;
         HGDIOBJ old = SelectObject(item.hDC, reinterpret_cast<HFONT>(SendMessageW(list_, WM_GETFONT, 0, 0)));
         SetTextColor(item.hDC, GetSysColor(COLOR_INFOTEXT));
         SetBkMode(item.hDC, TRANSPARENT);
@@ -2843,6 +2863,14 @@ void Mailbox::ResetFind() {
     find_.clear();
     pe_list_view_set_text(view_.get(), nullptr);
     findPlace_.clear();
+}
+
+void Mailbox::Search(const std::wstring& words) {
+    SetWindowTextW(findEdit_, words.c_str());
+    ShowWindow(findClear_, words.empty() ? SW_HIDE : SW_SHOW);
+    // at once, not a moment after the last key
+    OnTimer(TIMER_FIND);
+    SetFocus(list_);
 }
 
 bool Mailbox::ClearFind() {
@@ -2887,6 +2915,11 @@ bool Mailbox::OnCommand(WORD id, WORD code) {
     }
     if (id == IDC_SEARCH_CLEAR) {
         ClearFind();
+        return true;
+    }
+    if (id == IDC_SEARCH_RULE) {
+        // the words searched for, as the rule's: the editor says why when they can not be one's
+        NewRuleDialog(parent_, core_, find_);
         return true;
     }
     return reader_.OnCommand(id, code);

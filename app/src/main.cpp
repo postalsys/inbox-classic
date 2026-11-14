@@ -35,6 +35,9 @@ HWND g_status = nullptr;
 // the status bar's Undo of the message that waits to be sent, and whether one waits (the countdown runs)
 HWND g_undoSend = nullptr;
 bool g_sendWaiting = false;
+// what the rules sorted since the last sync finished (new mail of IDLE, or of the sync): the status bar says it again
+// when the sync is done, rather than "Done"
+std::wstring g_rulesSaid;
 // the band under the toolbar with the name of the selected folder, as Outlook Express has it
 HWND g_folderBar = nullptr;
 // its dark grey, under white text
@@ -522,8 +525,9 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_SYNC_FINISHED:
         // a failure stays in the status bar until the account syncs without one
         if (g_failing.empty()) {
-            SetStatus(core::T(PE_TEXT_UI_DONE));
+            SetStatus(g_rulesSaid.empty() ? core::T(PE_TEXT_UI_DONE) : g_rulesSaid);
         }
+        g_rulesSaid.clear();
         // how much text the search still has to read
         ShowFolderName();
         break;
@@ -571,6 +575,10 @@ void OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_AGENT_LOG_CHANGED:
         AgentsChanged();
+        break;
+    case PE_EVENT_KIND_RULES_APPLIED:
+        g_rulesSaid = core::T(PE_TEXT_UI_RULES_APPLIED, {{"count", std::to_wstring(event.count)}});
+        SetStatus(g_rulesSaid);
         break;
     case PE_EVENT_KIND_TRANSFERRING:
         // how far messages going to another account are, and what was done once they all went; how far a large
@@ -636,6 +644,8 @@ HMENU BuildMenu() {
     AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(compose, MF_STRING, IDM_WATCH_CONVERSATION, MenuItem(PE_TEXT_CMD_WATCH_CONVERSATION, L"W").c_str());
     AppendMenuW(compose, MF_STRING, IDM_IGNORE_CONVERSATION, MenuItem(PE_TEXT_CMD_IGNORE_CONVERSATION, L"K").c_str());
+    AppendMenuW(compose, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(compose, MF_STRING, IDM_CREATE_RULE_FROM_MESSAGE, MenuItem(PE_TEXT_CMD_CREATE_RULE_FROM_MESSAGE).c_str());
     HMENU edit = CreatePopupMenu();
     AppendMenuW(edit, MF_STRING | MF_GRAYED, IDM_UNDO, MenuItem(PE_TEXT_CMD_UNDO, L"Ctrl+Z").c_str());
     AppendMenuW(edit, MF_SEPARATOR, 0, nullptr);
@@ -688,6 +698,7 @@ HMENU BuildMenu() {
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(tools, MF_STRING, IDM_ADDRESS_BOOK, MenuItem(PE_TEXT_CMD_ADDRESS_BOOK, L"Ctrl+Shift+B").c_str());
     AppendMenuW(tools, MF_STRING, IDM_ADD_SENDER_TO_BOOK, MenuItem(PE_TEXT_CMD_ADD_SENDER_TO_BOOK).c_str());
+    AppendMenuW(tools, MF_STRING, IDM_MESSAGE_RULES, MenuItem(PE_TEXT_CMD_MESSAGE_RULES).c_str());
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(tools, MF_STRING, IDM_AI_AGENTS, MenuItem(PE_TEXT_CMD_AI_AGENTS).c_str());
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
@@ -1430,6 +1441,12 @@ void OpenMailto(const std::wstring& link, int64_t account) {
     OpenCompose(g_main, g_core.get(), account, pe_draft_info(draft.get()));
 }
 
+void SearchFor(const std::wstring& words) {
+    ShowMain();
+    g_mailbox.Search(words);
+    ShowCounts();
+}
+
 void WriteTo(const std::wstring& to) {
     int64_t account = g_mailbox.CurrentAccount();
     if (!account) {
@@ -1617,6 +1634,12 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_ADD_SENDER_TO_BOOK:
         g_mailbox.AddSenderToBook(g_main);
+        return;
+    case IDM_MESSAGE_RULES:
+        MessageRulesDialog(g_main, g_core.get());
+        return;
+    case IDM_CREATE_RULE_FROM_MESSAGE:
+        g_mailbox.CreateRuleFromShown(g_main);
         return;
     case IDM_IMPORT_ADDRESS_BOOK:
     case IDM_EXPORT_ADDRESS_BOOK:

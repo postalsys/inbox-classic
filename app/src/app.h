@@ -280,6 +280,14 @@ void SignInAppsDialog(HWND owner, PeCore* core);
 // the editor of a sign-in app: a new one when `app` is NULL; the id of the app saved, 0 when cancelled
 int64_t SignInAppEditor(HWND owner, PeCore* core, const PeSignInApp* app);
 
+// ---- rules.cpp ----
+
+// Tools > Message Rules: the rules that sort new mail, to turn on and off, add, change, order and delete
+void MessageRulesDialog(HWND owner, PeCore* core);
+// the editor of a new rule that matches `query`, named after it (Create Rule from Message, the search bar's Create
+// Rule); the id of the rule saved, 0 when cancelled
+int64_t NewRuleDialog(HWND owner, PeCore* core, const std::wstring& query);
+
 // ---- agents.cpp ----
 
 // a question of an AI agent for the user (the AgentAsk event): a program that connects for the first time, or a
@@ -469,6 +477,8 @@ void ContactPictureChanged();
 void OpenMailto(const std::wstring& link, int64_t account = 0);
 // a new message to `to` (as it goes in the To field), from the account of what the main window shows (Write To)
 void WriteTo(const std::wstring& to);
+// the words put into the Find box of the main window, which searches for them at once (the rule editor's Show)
+void SearchFor(const std::wstring& words);
 
 // ---- mailbox.cpp ----
 
@@ -482,7 +492,7 @@ struct UiEvent {
     std::wstring message;
     // the Message-ID of a draft, for DraftSaved; the notification's text, for NewMail (`message` its title)
     std::string detail;
-    // how many messages, for NewMail
+    // how many messages, for NewMail and RulesApplied
     uint64_t count = 0;
 };
 
@@ -596,6 +606,10 @@ public:
     void MarkJunk(bool junk);
     // out of the Inbox into the account's Archive (on Gmail every label taken off)
     void ArchiveSelected();
+    // Create Rule from Message: the editor of a new rule for the sender or the mailing list of the message shown
+    void CreateRuleFromShown(HWND owner);
+    // the words put into the Find box, searched for at once
+    void Search(const std::wstring& words);
     // every selected message can be archived
     bool CanArchive() const;
     // whether the selected messages, or else the folder, are in a Junk folder: the toolbar offers Not Junk there
@@ -867,6 +881,8 @@ private:
     RECT listArea_ = {};
     HWND searchBar_ = nullptr;
     HWND searchClear_ = nullptr;
+    // Create Rule on the search bar, left of Clear search
+    HWND searchRule_ = nullptr;
     std::wstring searchSummary_;
     // the one folder the words typed name (in:sent), empty for every folder
     std::wstring findPlace_;
@@ -1090,6 +1106,8 @@ enum ControlId : WORD {
     IDC_FOLDER_CAPTION_BUTTON,
     // over the list in the Columns layout, in place of the column headings: "Sorted by Date", a menu of the orders
     IDC_SORT_BUTTON,
+    // on the search bar, left of Clear search: a new rule that matches the words searched for
+    IDC_SEARCH_RULE,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag
@@ -1233,6 +1251,32 @@ enum HelpControlId : WORD {
     IDC_HELP_SEARCH,
     IDC_HELP_RESULTS,
     IDC_HELP_NONE,
+};
+
+// the controls of the Message Rules window and of the rule editor (rules.cpp), which the UI test finds by them
+enum RulesControlId : WORD {
+    IDC_RULES_LIST = 840,
+    IDC_RULES_NEW,
+    IDC_RULES_EDIT,
+    IDC_RULES_DELETE,
+    IDC_RULES_UP,
+    IDC_RULES_DOWN,
+    IDC_RULES_CLOSE,
+    IDC_RULE_NAME = 850,
+    IDC_RULE_ACCOUNT,
+    IDC_RULE_QUERY,
+    IDC_RULE_HINT,
+    IDC_RULE_COUNT,
+    IDC_RULE_SHOW,
+    IDC_RULE_MOVE,
+    IDC_RULE_MOVE_TO,
+    IDC_RULE_MARK_READ,
+    IDC_RULE_FLAG,
+    IDC_RULE_ARCHIVE,
+    IDC_RULE_JUNK,
+    IDC_RULE_DELETE,
+    IDC_RULE_QUIET,
+    IDC_RULE_APPLY_NOW,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;
