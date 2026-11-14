@@ -961,6 +961,7 @@ async fn scenario(d: Rc<Driver>) {
     drafts_saved_automatically(&d).await;
     undo_send(&d).await;
     attachment_reminder(&d).await;
+    text_size(&d).await;
     send_receive(&d).await;
     finding(&d).await;
     files(&d).await;
@@ -1837,6 +1838,60 @@ async fn attachment_reminder(d: &Driver) {
     }
     let sent = wait_for(30, || d.find("INBOX", "Subject: Forgot the file in the UI test")).await;
     d.check(sent.is_some(), "Send Anyway sends it");
+}
+
+/// Whether the menu item of a toggle command has its check mark
+fn action_on(command: Command) -> bool {
+    main_window()
+        .downcast_ref::<gtk::ApplicationWindow>()
+        .and_then(|w| w.lookup_action(command.name()))
+        .and_then(|a| a.state())
+        .and_then(|v| v.get::<bool>())
+        .unwrap_or(false)
+}
+
+async fn text_size(d: &Driver) {
+    d.step("Text Size");
+    select_folder("Inbox");
+    wait_until(10, || rows() > 0).await;
+    select_row(0).await;
+    let main = main_window();
+    let pane = || {
+        descendants::<webkit::WebView>(&main)
+            .into_iter()
+            .find(|v| v.is_mapped())
+    };
+    d.check(
+        action_on(Command::TextSizeMedium),
+        "View > Text Size is Medium at first",
+    );
+    d.check(
+        Command::TextSizeLarger.accel().is_none(),
+        "with no key, so it never changes by accident",
+    );
+    run_command(Command::TextSizeLarger);
+    let larger = wait_until(5, || pane().is_some_and(|v| (v.zoom_level() - 1.2).abs() < 0.01)).await;
+    d.check(larger, "Larger shows the message larger");
+    d.check(
+        action_on(Command::TextSizeLarger) && !action_on(Command::TextSizeMedium),
+        "and is checked in the menu",
+    );
+    d.check(shell().core.text_size() == 1, "it is kept for the next start");
+    pause(800).await;
+    d.shot(&main, "read-30-text-size").await;
+    run_command(Command::NewMail);
+    if let Some(c) = wait_compose(10).await {
+        let editor = descendants::<webkit::WebView>(c.window.upcast_ref()).into_iter().next();
+        d.check(
+            editor.is_some_and(|v| (v.zoom_level() - 1.2).abs() < 0.01),
+            "the text being written is that size too",
+        );
+        c.window.close();
+        wait_until(5, || !c.window.is_visible()).await;
+    }
+    run_command(Command::TextSizeMedium);
+    let medium = wait_until(5, || pane().is_some_and(|v| (v.zoom_level() - 1.0).abs() < 0.01)).await;
+    d.check(medium, "Medium is the usual size again");
 }
 
 async fn send_receive(d: &Driver) {

@@ -1522,6 +1522,20 @@ public static class Dragger {
     if ($ask) { Click $ask 6 }
     Check ($null -ne (WaitFor { Find 'INBOX' 'Subject: Forgot the file in the UI test' } 30)) 'Yes sends it'
 
+    Step 'Text Size'
+    $IDM_TEXT_SIZE_LARGER = 166; $IDM_TEXT_SIZE_MEDIUM = 167; $kTextZoom = 0x5A4F4F4D
+    SelectFolder 0
+    [void](WaitFor { if ((Rows) -ge 1) { Rows } } 20)
+    SelectRow 0
+    Start-Sleep -Milliseconds 800
+    Check (([Native.Win]::SendText($main, $kTextZoom, '') - 10) -eq 100) 'View > Text Size is Medium at first'
+    Command $main $IDM_TEXT_SIZE_LARGER
+    Check ([bool](WaitFor { ([Native.Win]::SendText($main, $kTextZoom, '') - 10) -eq 120 } 5)) 'Larger shows the message larger'
+    Start-Sleep -Milliseconds 800
+    Shot $main 'read-30-text-size'
+    Command $main $IDM_TEXT_SIZE_MEDIUM
+    Check ([bool](WaitFor { ([Native.Win]::SendText($main, $kTextZoom, '') - 10) -eq 100 } 5)) 'Medium is the usual size again'
+
     # ---- getting new mail ----
 
     Step 'Send/Recv'

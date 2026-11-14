@@ -347,6 +347,33 @@ extension UITest {
               "Send Anyway sends it")
     }
 
+    func textSize() async throws {
+        step("Text Size")
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(10) { self.list.numberOfRows > 0 }
+        await selectRow(0)
+        let pane: WKWebView? = find("preview", in: main.window)
+        check(menuItem(.textSizeMedium)?.state == .on, "View > Text Size is Medium at first")
+        check(menuItem(.textSizeLarger)?.keyEquivalent.isEmpty == true, "with no key, so it never changes by accident")
+        check(pane?.allowsMagnification == false, "and the reading pane's own zoom is off")
+        AppDelegate.shared.perform(.textSizeLarger)
+        check(await waitUntil(5) { abs((pane?.pageZoom ?? 0) - 1.2) < 0.01 }, "Larger shows the message larger (\(pane?.pageZoom ?? 0))")
+        check(menuItem(.textSizeLarger)?.state == .on && menuItem(.textSizeMedium)?.state == .off, "and is checked in the menu")
+        check(pe_text_size(main.core.handle) == 1, "it is kept for the next start")
+        await pause(1)
+        await shot(main.window, "read-30-text-size")
+        // a new message's editor writes at that size too
+        command(.newMail)
+        if let compose = await waitCompose() {
+            let editor = views(WKWebView.self, in: compose.contentView).first
+            check(abs((editor?.pageZoom ?? 0) - 1.2) < 0.01, "the text being written is that size too")
+            onMain { compose.performClose(nil) }
+            _ = await waitUntil(5) { !compose.isVisible }
+        }
+        AppDelegate.shared.perform(.textSizeMedium)
+        check(await waitUntil(5) { abs((pane?.pageZoom ?? 0) - 1) < 0.01 }, "Medium is the usual size again")
+    }
+
     func rfc2822(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")

@@ -511,6 +511,7 @@ final class UITest {
         try await attachmentReminder()
         try await outboxAndDrafts()
         try await draftsSavedAutomatically()
+        try await textSize()
         try await searching()
         try await files()
         try await organizing()
