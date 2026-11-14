@@ -174,12 +174,16 @@ What the core needs for it:
 - `Layout()` gets the mode: in Columns the second splitter is the vertical gap between list and reader; `g_listWidth`
   beside `g_listHeight`. The window's place, both splitters and the list's width are saved in the registry;
   `WM_GETMINMAXINFO` for a minimum size.
-- The list: `LVS_OWNERDRAWFIXED` has to be set when a ListView is made, so switching layouts makes the list again
-  (owner draw, `LVS_NOCOLUMNHEADER`, one column, the row height from `WM_MEASUREITEM`) and gives it the view, the
-  selection and the scroll place back. Rows drawn in `WM_DRAWITEM` with the fonts and system colors the custom draw
-  uses now; pictures as DIB sections with `AlphaBlend`, as `reader.cpp` does. **A spike first** (half a day) to
-  confirm owner draw with `LVS_OWNERDATA`, keyboard, multi-selection and MSAA names behave; if not, the fallback is a
-  tall small image list with custom draw.
+- The list: `LVS_OWNERDRAWFIXED` has to be set when a ListView is made, so switching layouts would make the list again
+  (owner draw, `LVS_NOCOLUMNHEADER`, one column, the row height from `WM_MEASUREITEM`). **Built with the fallback**
+  instead: the same list in both layouts, its header hidden in Columns, a small image list as tall as three lines
+  giving the rows their height, and custom draw drawing each row whole (`columnrow.cpp`). Making the list again would
+  have left the UI test, the OLE drop target, the subclass and the remembered focus holding a window that is gone;
+  keeping one list keeps them all, and the rows look the same. Pictures as DIB sections with `AlphaBlend`, as
+  `reader.cpp` does.
+- The classic header's sort arrow: the header of the classic controls has none of its own (`HDF_SORTUP` needs Common
+  Controls 6, which the app leaves out), so the app draws a small triangle as the sorted heading's bitmap
+  (`HDF_BITMAP_ON_RIGHT`).
 - The "Sorted by" strip: a flat button with a popup menu, in the row of the search bar.
 - The folder list: the caption with its close box, the folder bar's drop-down (a popup window holding the tree), a
   toolbar button.
@@ -256,7 +260,7 @@ Still open, to settle by trying it: the numbers (1320 up, 1200 down, 900 as the 
 
 ## Risks
 
-- **Windows' owner drawn list** is the one unknown; hence the spike, and the fallback.
+- **Windows' owner drawn list** was the one unknown; the fallback was built (see "In each app", Windows).
 - **Providers that say nothing about BIMI** (Gmail does not expose its verdict in Authentication-Results): fewer logos
   than Gmail's own page shows. A later step could look the record up itself over DNS-over-HTTPS
   (`default._bimi.<domain>`), which `pe-autoconfig/src/dns.rs` can nearly do (it has no TXT query yet), but without
