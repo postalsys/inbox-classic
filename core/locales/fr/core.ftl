@@ -363,6 +363,12 @@ error-no-recipients = le message n'a aucun destinataire
 error-bad-address = « { $address } » n'est pas une adresse de messagerie
 # review: new
 error-not-own-address = { $address } n’est pas une adresse de ce compte. Ajoutez-la dans Autres adresses, dans les propriétés du compte.
+# review: new
+rule-query-refused = Une règle s’applique au nouveau courrier d’une boîte de réception : elle ne peut donc pas nommer un dossier ni une date ({ $words }).
+# review: new
+rule-no-query = Tapez ce que le nouveau courrier doit contenir.
+# review: new
+rule-no-action = Choisissez ce que fait la règle.
 error-attachment = { $path } n'a pas pu être lu : { $error }
 error-no-drafts = le compte n'a pas de dossier Brouillons où enregistrer le message
 error-draft-attachment = une pièce jointe du brouillon n'a pas pu être conservée : { $error }
