@@ -199,6 +199,10 @@ fn first_run(arguments: Arguments) {
         } else {
             shell.sync_all();
         }
+        // what was being written when the app last ended without closing it
+        if !arguments.background {
+            crate::compose::open_recovered();
+        }
         open_arguments(arguments).await;
     });
 }

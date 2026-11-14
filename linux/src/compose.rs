@@ -362,6 +362,8 @@ enum Pending {
     Send,
     Save,
     SaveAndClose,
+    /// Saved without being asked (pe-core `autosave_wait` says when)
+    Autosave,
 }
 
 /// How closing a message window went
@@ -417,6 +419,19 @@ pub struct Compose {
     /// Something was typed: closing asks first
     dirty: Cell<bool>,
     filling: Cell<bool>,
+    /// Changes made, counted: a save leaves the window clean only when nothing changed while it was asked for
+    changes: Cell<u64>,
+    requested_at: Cell<u64>,
+    /// The oldest change not saved yet, and the timer that saves it by itself
+    unsaved_since: Cell<Option<std::time::Instant>>,
+    autosave_timer: RefCell<Option<glib::SourceId>>,
+    /// The account has no Drafts folder: the automatic saving stops for this message
+    autosave_off: Cell<bool>,
+    /// The copy in Drafts is one the user kept (saved, or opened from Drafts): closing without saving leaves it there
+    kept: Cell<bool>,
+    /// The copy in Drafts was saved automatically since: closing asks about it, and without saving removes it unless
+    /// it was kept
+    autosaved: Cell<bool>,
     /// Told when the window is gone
     gone: (async_channel::Sender<()>, async_channel::Receiver<()>),
 }
@@ -631,6 +646,13 @@ impl Compose {
             pending: Cell::new(Pending::None),
             dirty: Cell::new(false),
             filling: Cell::new(true),
+            changes: Cell::new(0),
+            requested_at: Cell::new(0),
+            unsaved_since: Cell::new(None),
+            autosave_timer: RefCell::default(),
+            autosave_off: Cell::new(false),
+            kept: Cell::new(false),
+            autosaved: Cell::new(false),
             gone: async_channel::bounded(1),
         });
         if let Some(draft) = draft {
@@ -654,6 +676,7 @@ impl Compose {
         self.quote_plain.set(draft.quote_text.is_some());
         // a saved draft opened again: its files, and its Message-ID so the next save replaces it
         *self.message_id.borrow_mut() = draft.message_id.clone();
+        self.kept.set(draft.message_id.is_some());
         self.draft_account.set(account);
         for path in &draft.attachments {
             self.add_file(path);
@@ -931,6 +954,41 @@ impl Compose {
             self.set_status("");
         }
         self.dirty.set(true);
+        self.changes.set(self.changes.get() + 1);
+        self.schedule_autosave();
+    }
+
+    /// The timer of the automatic saving, started again at each change: it saves once typing stops, and every half a
+    /// minute while it does not (the core's rule)
+    fn schedule_autosave(&self) {
+        if self.filling.get() || self.autosave_off.get() {
+            return;
+        }
+        let since = self.unsaved_since.get().unwrap_or_else(std::time::Instant::now);
+        self.unsaved_since.set(Some(since));
+        let wait = pe_core::autosave_wait(since.elapsed().as_millis() as u64);
+        if let Some(timer) = self.autosave_timer.take() {
+            timer.remove();
+        }
+        let window = self.window.clone();
+        let timer = glib::timeout_add_local_once(std::time::Duration::from_millis(wait), move || {
+            let composes = shell().composes.borrow().clone();
+            if let Some(this) = composes.iter().find(|c| c.window == window) {
+                this.autosave_timer.take();
+                if this.dirty.get() {
+                    this.request(Pending::Autosave);
+                }
+            }
+        });
+        *self.autosave_timer.borrow_mut() = Some(timer);
+    }
+
+    /// Opened again after a crash (`recovered`): closing asks about it, and without saving leaves its copy in Drafts,
+    /// as whether the user had kept it is not known
+    fn restored(&self) {
+        self.kept.set(true);
+        self.autosaved.set(true);
+        self.set_status(&t!(UiComposeRestored));
     }
 
     fn set_status(&self, text: &str) {
@@ -1043,7 +1101,11 @@ impl Compose {
     fn request(&self, action: Pending) {
         if self.pending.get() == Pending::None {
             self.pending.set(action);
+            self.requested_at.set(self.changes.get());
             self.editor.html();
+        } else if self.pending.get() == Pending::Autosave && action != Pending::Autosave {
+            // the user's own Send or Save comes after the automatic save the HTML was asked for
+            self.pending.set(action);
         }
     }
 
@@ -1056,6 +1118,7 @@ impl Compose {
             Pending::Save | Pending::SaveAndClose => {
                 spawn(async move { this.save(outgoing, pending == Pending::SaveAndClose).await })
             }
+            Pending::Autosave => self.autosave(outgoing),
             Pending::None => {}
         }
     }
@@ -1114,8 +1177,9 @@ impl Compose {
             Ok(message_id) => {
                 *self.message_id.borrow_mut() = Some(message_id);
                 self.draft_account.set(self.account.get());
-                self.dirty.set(false);
-                self.editor.clean();
+                self.kept.set(true);
+                self.autosaved.set(false);
+                self.saved_clean();
                 // the server's answer follows (draft_saved)
                 self.set_status(&t!(UiSavingDraft));
                 if close {
@@ -1126,10 +1190,50 @@ impl Compose {
         }
     }
 
+    /// Saved in Drafts without being asked; quietly not when it can not be (no Drafts folder)
+    fn autosave(&self, outgoing: Outgoing) {
+        match shell().core.autosave_draft(self.account.get(), outgoing) {
+            Ok(message_id) => {
+                *self.message_id.borrow_mut() = Some(message_id);
+                self.draft_account.set(self.account.get());
+                self.autosaved.set(true);
+                self.saved_clean();
+                self.set_status(&t!(UiSavingDraft));
+            }
+            Err(_) => self.autosave_off.set(true),
+        }
+    }
+
+    /// The message as it was when its HTML was asked for is saved: clean unless it changed since
+    fn saved_clean(&self) {
+        if let Some(timer) = self.autosave_timer.take() {
+            timer.remove();
+        }
+        self.unsaved_since.set(None);
+        if self.changes.get() != self.requested_at.get() {
+            self.schedule_autosave();
+            return;
+        }
+        self.dirty.set(false);
+        self.editor.clean();
+    }
+
+    /// Closed without saving: the copy only the automatic saving made goes from Drafts
+    fn discard_autosaved(&self) {
+        let message_id = self.message_id.borrow().clone();
+        if let Some(message_id) = message_id
+            && self.autosaved.get()
+            && !self.kept.get()
+        {
+            let _ = shell().core.discard_draft(self.draft_account.get(), &message_id);
+        }
+        self.autosaved.set(false);
+    }
+
     /// Whether the window may close now: when nothing changed since it was sent or saved, or the user does not want it
     /// saved. Yes saves it in Drafts and closes the window after.
     pub async fn ask_close(&self) -> Closing {
-        if !self.dirty.get() {
+        if !self.dirty.get() && !self.autosaved.get() {
             self.destroy();
             return Closing::Closed;
         }
@@ -1152,6 +1256,7 @@ impl Compose {
                 Closing::Saving
             }
             "no" => {
+                self.discard_autosaved();
                 self.destroy();
                 Closing::Closed
             }
@@ -1160,6 +1265,13 @@ impl Compose {
     }
 
     fn destroy(&self) {
+        if let Some(timer) = self.autosave_timer.take() {
+            timer.remove();
+        }
+        // nothing left to open again after a crash
+        if let Some(message_id) = self.message_id.borrow().as_deref() {
+            let _ = shell().core.compose_closed(message_id);
+        }
         shell().composes.borrow_mut().retain(|c| c.window != self.window);
         self.editor.release();
         self.window.destroy();
@@ -1169,6 +1281,33 @@ impl Compose {
         if main.window().is_visible() {
             main.window().present();
         }
+    }
+}
+
+/// Opens again the messages that were being written when the app last ended without closing them
+pub fn open_recovered() {
+    let Ok(recovered) = shell().core.recovered() else {
+        return;
+    };
+    for (account, draft) in recovered {
+        let compose = Compose::new(account, Some(&draft));
+        shell().composes.borrow_mut().push(compose.clone());
+        compose.window.present();
+        compose.restored();
+    }
+}
+
+/// The UI test's crash: the window goes without closing, so its copy for a crash stays
+#[cfg(feature = "e2e")]
+pub fn abandon(window: &adw::ApplicationWindow) {
+    let composes = shell().composes.borrow().clone();
+    if let Some(this) = composes.iter().find(|c| &c.window == window) {
+        if let Some(timer) = this.autosave_timer.take() {
+            timer.remove();
+        }
+        shell().composes.borrow_mut().retain(|c| &c.window != window);
+        this.editor.release();
+        this.window.destroy();
     }
 }
 
