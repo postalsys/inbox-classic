@@ -1146,6 +1146,117 @@ pub unsafe extern "C" fn pe_folder_list_free(list: *mut PeFolderList) {
     unsafe { take_back(list) }
 }
 
+/// What a row of the folder list is
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeTreeRowKind {
+    /// Every account's Inbox in one list (several accounts)
+    AllInboxes = 0,
+    /// An account's Inbox under All Inboxes, named after the account
+    AccountInbox = 1,
+    /// Every flagged message
+    Flagged = 2,
+    /// An account's heading (several accounts)
+    Account = 3,
+    /// A folder (with one account, its Inbox too)
+    Folder = 4,
+}
+
+/// A row of the folder list, in its order (`pe_folder_tree`)
+#[repr(C)]
+pub struct PeTreeRow {
+    pub kind: PeTreeRowKind,
+    /// 0 for All Inboxes and Flagged
+    pub account: i64,
+    /// 0 for All Inboxes, Flagged and a heading
+    pub folder: i64,
+    pub depth: u32,
+    pub label: *const c_char,
+    /// What the folder bar and the window's title say when it is chosen ("Inbox - Gmail")
+    pub title: *const c_char,
+    /// Its own unread messages (Flagged: how many are flagged, never bold)
+    pub unread: u64,
+    /// The unread messages under it, shown with its own while it is collapsed
+    pub hidden: u64,
+    /// It has rows under it
+    pub parent: bool,
+    pub selectable: bool,
+    /// Messages can be dropped on it
+    pub drop_target: bool,
+    /// It can be dragged among its own kind to order the accounts
+    pub reorders_accounts: bool,
+    /// Its icon's word: `inbox`, `sent`, `drafts`, `deleted`, `junk`, `archive`, `flagged`, or empty
+    pub icon: *const c_char,
+}
+
+/// The rows of the folder list; free with `pe_tree_free`
+pub struct PeTree(Rows<PeTreeRow>);
+
+/// The folder list of the main window, row by row in its order: one account starts with its Inbox and Flagged and
+/// has no heading; several have All Inboxes (each Inbox under it), Flagged, then each account's heading with its other
+/// folders. NULL on failure.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_folder_tree(core: *const PeCore) -> *mut PeTree {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(rows) = core.folder_tree() else {
+                return null_mut();
+            };
+            handed(PeTree(Rows::new(&rows, |row, strings| PeTreeRow {
+                kind: match row.kind {
+                    pe_core::tree::TreeRowKind::AllInboxes => PeTreeRowKind::AllInboxes,
+                    pe_core::tree::TreeRowKind::AccountInbox => PeTreeRowKind::AccountInbox,
+                    pe_core::tree::TreeRowKind::Flagged => PeTreeRowKind::Flagged,
+                    pe_core::tree::TreeRowKind::Account => PeTreeRowKind::Account,
+                    pe_core::tree::TreeRowKind::Folder => PeTreeRowKind::Folder,
+                },
+                account: row.account,
+                folder: row.folder,
+                depth: row.depth as u32,
+                label: strings.add(&row.label),
+                title: strings.add(&row.title),
+                unread: row.unread,
+                hidden: row.hidden,
+                parent: row.parent,
+                selectable: row.selectable,
+                drop_target: row.drop_target,
+                reorders_accounts: row.reorders_accounts,
+                icon: strings.add(row.icon),
+            })))
+        })
+    }
+}
+
+/// # Safety
+/// `tree` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_tree_count(tree: *const PeTree) -> usize {
+    // SAFETY: as the caller guarantees
+    Rows::count(unsafe { tree.as_ref() }.map(|tree| &tree.0))
+}
+
+/// Row `index`, NULL past the end
+///
+/// # Safety
+/// `tree` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_tree_get(tree: *const PeTree, index: usize) -> *const PeTreeRow {
+    // SAFETY: as the caller guarantees
+    Rows::get(unsafe { tree.as_ref() }.map(|tree| &tree.0), index)
+}
+
+/// # Safety
+/// `tree` must be NULL or a list that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_tree_free(tree: *mut PeTree) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(tree) }
+}
+
 /// The message counts of a folder; false when there is no such folder
 ///
 /// # Safety

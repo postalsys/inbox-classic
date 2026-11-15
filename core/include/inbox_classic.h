@@ -174,6 +174,20 @@ typedef enum PeSpecialUse {
   PE_SPECIAL_USE_TRASH = 8,
 } PeSpecialUse;
 
+// What a row of the folder list is
+typedef enum PeTreeRowKind {
+  // Every account's Inbox in one list (several accounts)
+  PE_TREE_ROW_KIND_ALL_INBOXES = 0,
+  // An account's Inbox under All Inboxes, named after the account
+  PE_TREE_ROW_KIND_ACCOUNT_INBOX = 1,
+  // Every flagged message
+  PE_TREE_ROW_KIND_FLAGGED = 2,
+  // An account's heading (several accounts)
+  PE_TREE_ROW_KIND_ACCOUNT = 3,
+  // A folder (with one account, its Inbox too)
+  PE_TREE_ROW_KIND_FOLDER = 4,
+} PeTreeRowKind;
+
 // A conversation's mark (Message > Watch Conversation, Ignore Conversation)
 typedef enum PeThreadMark {
   PE_THREAD_MARK_NONE = 0,
@@ -492,6 +506,9 @@ typedef struct PeTargetList PeTargetList;
 // Texts (file names, paths); free with `pe_text_list_free`
 typedef struct PeTextList PeTextList;
 
+// The rows of the folder list; free with `pe_tree_free`
+typedef struct PeTree PeTree;
+
 // The list of `pe_trusted_senders`
 typedef struct PeTrustedSenderList PeTrustedSenderList;
 
@@ -735,6 +752,32 @@ typedef struct PeFolder {
   // `unread + unread_below`, an expanded one `unread`
   uint64_t unread_below;
 } PeFolder;
+
+// A row of the folder list, in its order (`pe_folder_tree`)
+typedef struct PeTreeRow {
+  enum PeTreeRowKind kind;
+  // 0 for All Inboxes and Flagged
+  int64_t account;
+  // 0 for All Inboxes, Flagged and a heading
+  int64_t folder;
+  uint32_t depth;
+  const char *label;
+  // What the folder bar and the window's title say when it is chosen ("Inbox - Gmail")
+  const char *title;
+  // Its own unread messages (Flagged: how many are flagged, never bold)
+  uint64_t unread;
+  // The unread messages under it, shown with its own while it is collapsed
+  uint64_t hidden;
+  // It has rows under it
+  bool parent;
+  bool selectable;
+  // Messages can be dropped on it
+  bool drop_target;
+  // It can be dragged among its own kind to order the accounts
+  bool reorders_accounts;
+  // Its icon's word: `inbox`, `sent`, `drafts`, `deleted`, `junk`, `archive`, `flagged`, or empty
+  const char *icon;
+} PeTreeRow;
 
 // A row of the message list
 typedef struct PeMessage {
@@ -2036,6 +2079,28 @@ const struct PeFolder *pe_folder_list_get(const struct PeFolderList *list, size_
 // # Safety
 // `list` must be NULL or a list that was not freed yet.
 void pe_folder_list_free(struct PeFolderList *list);
+
+// The folder list of the main window, row by row in its order: one account starts with its Inbox and Flagged and
+// has no heading; several have All Inboxes (each Inbox under it), Flagged, then each account's heading with its other
+// folders. NULL on failure.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeTree *pe_folder_tree(const struct PeCore *core);
+
+// # Safety
+// `tree` must be NULL or live.
+size_t pe_tree_count(const struct PeTree *tree);
+
+// Row `index`, NULL past the end
+//
+// # Safety
+// `tree` must be NULL or live.
+const struct PeTreeRow *pe_tree_get(const struct PeTree *tree, size_t index);
+
+// # Safety
+// `tree` must be NULL or a list that was not freed yet.
+void pe_tree_free(struct PeTree *tree);
 
 // The message counts of a folder; false when there is no such folder
 //

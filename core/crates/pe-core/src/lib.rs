@@ -39,6 +39,7 @@ mod snippet;
 mod targets;
 mod text;
 pub mod timing;
+pub mod tree;
 mod undo_send;
 pub mod unsubscribe;
 pub mod vcard;
@@ -967,10 +968,12 @@ impl Core {
     /// after it, around to the first (Junk E-mail and Deleted Items left out, as the counts of collapsed folders leave
     /// them out): where Next Unread goes on, after asking. None when no other folder has unread mail.
     pub fn next_unread_folder(&self, folder: FolderId) -> Result<Option<FolderId>> {
+        // in the folder list's order: the Inboxes first
+        let order = self.folder_order()?;
         let store = self.store();
         let mut tree = Vec::new();
-        for account in store.accounts()? {
-            tree.extend(store.folders(account.id)?);
+        for id in order {
+            tree.push(store.folder(id)?);
         }
         let start = tree.iter().position(|f| f.id == folder).map_or(0, |at| at + 1);
         // Junk E-mail and Deleted Items, the folders that can be emptied, do not count

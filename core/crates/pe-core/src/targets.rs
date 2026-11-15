@@ -1,6 +1,7 @@
 //! The rows of the Move and Copy window, the same on every platform: the folders messages were moved or copied to
-//! last under "Recent", then every account with its folders as the folder tree shows them; which can be chosen, which
-//! is the one the messages are in; and what a filter typed over them leaves.
+//! last under "Recent", then every account with its folders in the folder list's order (with one account, its folders
+//! without a row for it, as the folder list has none); which can be chosen, which is the one the messages are in; and
+//! what a filter typed over them leaves.
 
 use pe_store::{AccountId, FolderId};
 use unicode_normalization::UnicodeNormalization;
@@ -61,12 +62,12 @@ impl Core {
         let filter = plain(filter.trim());
         let mut rows = Vec::new();
         let mut all = Vec::new();
+        // under a row of their account when there are several
+        let under = u32::from(accounts.len() > 1);
         for (account, title) in accounts.iter().zip(titles) {
-            let folders = self.folders(account.id)?;
-            let infos: Vec<&pe_store::FolderInfo> = folders.iter().map(|f| &f.info).collect();
-            let depths = crate::tree_depths(&infos);
+            let folders = crate::tree::ordered(self.folders(account.id)?);
             let mut own = Vec::with_capacity(folders.len());
-            for (folder, depth) in folders.iter().zip(depths) {
+            for (folder, depth) in &folders {
                 let name = crate::folder_name(&folder.info);
                 let is_current = current == Some(folder.id);
                 own.push((
@@ -79,7 +80,7 @@ impl Core {
                         } else {
                             name.clone()
                         },
-                        depth: depth as u32 + 1,
+                        depth: *depth as u32 + under,
                         icon: crate::folder_kind(&folder.info),
                         choosable: folder.info.selectable && !is_current,
                     },
@@ -142,15 +143,17 @@ impl Core {
             if !keep.iter().any(|k| *k) {
                 continue;
             }
-            rows.push(TargetRow {
-                kind: TargetKind::Account,
-                account: account.id,
-                folder: 0,
-                label: title,
-                depth: 0,
-                icon: "",
-                choosable: false,
-            });
+            if under == 1 {
+                rows.push(TargetRow {
+                    kind: TargetKind::Account,
+                    account: account.id,
+                    folder: 0,
+                    label: title,
+                    depth: 0,
+                    icon: "",
+                    choosable: false,
+                });
+            }
             rows.extend(own.into_iter().zip(keep).filter(|(_, k)| *k).map(|((row, _), _)| row));
         }
         Ok(rows)
