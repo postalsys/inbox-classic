@@ -583,3 +583,49 @@ pgp-file-name-public = Clave pública de { $who }.asc
 pgp-file-name-private = Copia de seguridad de la clave privada de { $who }.asc
 # review: new
 pgp-pending = Se encontró otra clave para { $address } el { $date }.
+
+## Reading signed and encrypted mail (protect.rs)
+# review: new
+pgp-part-verified = Firmado por { $signer }, clave verificada
+# review: new
+pgp-part-signed = Firmado por { $signer } (clave sin verificar)
+# review: new
+pgp-part-other = Firmado por { $signer }, que no es el remitente
+# review: new
+pgp-part-unknown-key = Firmado, pero no se conoce la clave
+# review: new
+pgp-part-not-signed = Sin firmar
+# review: new
+pgp-part-not-checked = Firma no comprobada
+# review: new
+pgp-part-encrypted = Cifrado. { $signature }
+# review: new
+pgp-part-no-key = Cifrado para una clave que no tiene
+# review: new
+pgp-part-changed = La parte cifrada se modificó por el camino y no se muestra
+# review: new
+pgp-part-unprotected = Cifrado sin protección contra cambios, no se muestra
+# review: new
+pgp-part-broken = La parte cifrada no se puede leer
+# review: new
+pgp-why-mismatch = La firma no corresponde a este texto
+# review: new
+pgp-why-weak-hash = La firma usa { $hash }, que ya no es seguro
+# review: new
+pgp-why-key-expired = Firmado después de que la clave caducara el { $date }
+# review: new
+pgp-why-key-revoked = Firmado con una clave revocada
+# review: new
+pgp-why-not-signing-key = Firmado con una clave que no puede firmar
+# review: new
+pgp-why-from-future = La firma tiene una fecha futura
+# review: new
+pgp-why-signature-expired = La firma ha caducado
+# review: new
+pgp-why-key-not-valid = Firmado con una clave no válida
+# review: new
+pgp-why-not-for-you = Firmado para otros destinatarios y reenviado a usted
+# review: new
+pgp-bar-mixed = Las partes de este mensaje están protegidas de forma distinta: cada parte indica cómo.
+# review: new
+pgp-part-pictures-loaded = { $label }. Se cargaron imágenes de internet

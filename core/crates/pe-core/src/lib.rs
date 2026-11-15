@@ -24,6 +24,7 @@ mod list_view;
 pub mod mailto;
 pub mod otp;
 pub mod pictures;
+pub mod protect;
 mod requests;
 mod rules;
 mod search;
@@ -1399,8 +1400,10 @@ impl Core {
                 None => (None, None),
             },
         };
+        let ring = source.as_ref().and_then(|source| self.ring_for(&store, source));
         Ok(source.map(|source| ViewSource {
             source,
+            ring,
             first,
             received,
             marked,
@@ -1573,8 +1576,27 @@ impl Core {
     /// The content of the `index`th attachment of [`MessageView::attachments`], with the name to
     /// save it under
     pub fn attachment(&self, folder: FolderId, uid: u64, index: usize) -> Result<Option<(String, Vec<u8>)>> {
-        let source = self.store().source(folder, uid)?;
+        let source = self.shown_source(folder, uid)?;
         Ok(source.and_then(|source| view::attachment(&source, index)))
+    }
+
+    /// A message's source as it is shown: for a signed or encrypted message, its parts as the reading pane shows
+    /// them (decrypted, without what was not shown, `protect::shown`); any other message's as it is
+    fn shown_source(&self, folder: FolderId, uid: u64) -> Result<Option<Vec<u8>>> {
+        let store = self.store();
+        let Some(source) = store.source(folder, uid)? else {
+            return Ok(None);
+        };
+        Ok(Some(self.shown(&store, source)))
+    }
+
+    /// `source` as it is shown ([`Core::shown_source`])
+    fn shown(&self, store: &Store, source: Vec<u8>) -> Vec<u8> {
+        let Some(ring) = self.ring_for(store, &source) else {
+            return source;
+        };
+        let from = from_addresses(&source);
+        protect::shown(&source, &ring, &from, worker::unix_now()).unwrap_or(source)
     }
 
     /// The `index`th listed attachment of a message with its name to save it under and its type, from one parse; None
@@ -1585,26 +1607,28 @@ impl Core {
         uid: u64,
         index: usize,
     ) -> Result<Option<(String, String, Vec<u8>)>> {
-        let source = self.store().source(folder, uid)?;
+        let source = self.shown_source(folder, uid)?;
         Ok(source.and_then(|source| view::attachment_with_type(&source, index)))
     }
 
     /// Saves every attachment of a message into `dir` (a folder the user chose), each under its safe name; a file of
     /// that name there is kept and the new one numbered. How many were saved; None when the message is not here yet.
     pub fn save_attachments(&self, folder: FolderId, uid: u64, dir: &Path) -> Result<Option<(usize, usize)>> {
-        let source = self.store().source(folder, uid)?;
+        let source = self.shown_source(folder, uid)?;
         Ok(source.map(|source| save_all(&source, dir)))
     }
 
     /// [`Core::attachment`] of a message file a window shows (`file_view`)
     pub fn file_attachment(&self, path: &Path, index: usize) -> Result<Option<(String, Vec<u8>)>> {
         let (source, _) = read_message_file(path)?;
+        let source = self.shown(&self.store(), source);
         Ok(view::attachment(&source, index))
     }
 
     /// [`Core::save_attachments`] of a message file
     pub fn file_save_attachments(&self, path: &Path, dir: &Path) -> Result<(usize, usize)> {
         let (source, _) = read_message_file(path)?;
+        let source = self.shown(&self.store(), source);
         Ok(save_all(&source, dir))
     }
 
@@ -1813,7 +1837,9 @@ impl Core {
             let store = self.store();
             let account = store.folder(folder)?.account_id;
             let date = store.message(folder, uid)?.and_then(|m| m.info.display_date());
-            (store.source(folder, uid)?, own_addresses(&store, account)?, date)
+            // a signed or encrypted message is quoted and forwarded as it was shown, never more
+            let source = store.source(folder, uid)?.map(|source| self.shown(&store, source));
+            (source, own_addresses(&store, account)?, date)
         };
         let Some(source) = source else {
             return Ok(None);
@@ -1834,11 +1860,13 @@ impl Core {
     pub fn file_view(&self, path: &std::path::Path, allow_remote_images: bool) -> Result<MessageView> {
         let (source, _) = read_message_file(path)?;
         let always = self.store().always_load_pictures()?;
+        let ring = self.ring_for(&self.store(), &source);
         let trust = view::Trust {
             pictures: pictures::Rules {
                 always,
                 ..Default::default()
             },
+            ring: ring.as_deref(),
             ..Default::default()
         };
         Ok(view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default())
@@ -1847,6 +1875,7 @@ impl Core {
     /// Reply, Reply All or Forward to a message file, from `account`
     pub fn file_draft(&self, path: &std::path::Path, account: AccountId, kind: DraftKind) -> Result<Draft> {
         let (source, date) = read_message_file(path)?;
+        let source = self.shown(&self.store(), source);
         let own = own_addresses(&self.store(), account)?;
         let mut draft = compose::draft(&source, kind, &own, date);
         if kind == DraftKind::Forward {
@@ -2666,6 +2695,8 @@ struct ViewSource {
     junk: bool,
     always_pictures: bool,
     trusted_senders: Vec<pe_store::TrustedSender>,
+    /// The keys to read it with, when it may be signed or encrypted
+    ring: Option<Arc<protect::KeyRing>>,
     account: AccountId,
     folder: FolderId,
     uid: u64,
@@ -2682,6 +2713,26 @@ fn write_invitation(source: &[u8], dir: &Path) -> Result<Option<PathBuf>> {
     };
     let written = std::fs::create_dir_all(dir).and_then(|_| view::write_new(dir, "invitation.ics", &part.content));
     written.map(Some).map_err(|error| Error::Unavailable(error.to_string()))
+}
+
+/// Every address of every From header of a message (two senders are nobody's signature)
+pub(crate) fn from_addresses(source: &[u8]) -> Vec<String> {
+    let Ok(message) = pe_mime::parser::parse(source) else {
+        return Vec::new();
+    };
+    message
+        .headers
+        .iter()
+        .filter(|header| header.key == "from")
+        .flat_map(|header| pe_mime::parser::parse_addresses(&header.value))
+        .flat_map(|address| {
+            address
+                .mailboxes()
+                .iter()
+                .map(|m| m.address.clone())
+                .collect::<Vec<_>>()
+        })
+        .collect()
 }
 
 /// Every attachment of `source` written into `dir` under its safe name, a file there kept and the new one numbered: how
@@ -2746,6 +2797,7 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
             junk: found.junk,
             senders: &found.trusted_senders,
         },
+        ring: found.ring.as_deref(),
     };
     let mut view = view::build_unless(&found.source, allow_remote_images, &trust, dropped, &find)?;
     // a large message's text first: its attachments without content, their sizes from its structure, listed by the

@@ -599,3 +599,49 @@ pgp-file-name-public = Clé publique de { $who }.asc
 pgp-file-name-private = Sauvegarde de la clé privée de { $who }.asc
 # review: new
 pgp-pending = Une autre clé pour { $address } a été trouvée le { $date }.
+
+## Reading signed and encrypted mail (protect.rs)
+# review: new
+pgp-part-verified = Signé par { $signer }, clé vérifiée
+# review: new
+pgp-part-signed = Signé par { $signer } (clé non vérifiée)
+# review: new
+pgp-part-other = Signé par { $signer }, qui n'est pas l'expéditeur
+# review: new
+pgp-part-unknown-key = Signé, mais la clé n'est pas connue
+# review: new
+pgp-part-not-signed = Non signé
+# review: new
+pgp-part-not-checked = Signature non vérifiée
+# review: new
+pgp-part-encrypted = Chiffré. { $signature }
+# review: new
+pgp-part-no-key = Chiffré pour une clé que vous n'avez pas
+# review: new
+pgp-part-changed = La partie chiffrée a été modifiée en route et n'est pas affichée
+# review: new
+pgp-part-unprotected = Chiffré sans protection contre les modifications, non affiché
+# review: new
+pgp-part-broken = La partie chiffrée ne peut pas être lue
+# review: new
+pgp-why-mismatch = La signature ne correspond pas à ce texte
+# review: new
+pgp-why-weak-hash = La signature utilise { $hash }, qui n'est plus sûr
+# review: new
+pgp-why-key-expired = Signé après l'expiration de la clé le { $date }
+# review: new
+pgp-why-key-revoked = Signé avec une clé révoquée
+# review: new
+pgp-why-not-signing-key = Signé avec une clé qui ne peut pas signer
+# review: new
+pgp-why-from-future = La signature est datée dans le futur
+# review: new
+pgp-why-signature-expired = La signature a expiré
+# review: new
+pgp-why-key-not-valid = Signé avec une clé non valide
+# review: new
+pgp-why-not-for-you = Signé pour d'autres destinataires et transmis à vous
+# review: new
+pgp-bar-mixed = Les parties de ce message sont protégées différemment : chaque partie indique comment.
+# review: new
+pgp-part-pictures-loaded = { $label }. Des images ont été chargées depuis Internet

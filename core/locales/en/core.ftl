@@ -554,3 +554,27 @@ pgp-error-mismatch = The private key does not belong to its public key. It may h
 pgp-file-name-public = { $who } public key.asc
 pgp-file-name-private = { $who } private key backup.asc
 pgp-pending = A different key for { $address } was found on { $date }.
+
+## Reading signed and encrypted mail (protect.rs)
+pgp-part-verified = Signed by { $signer }, key verified
+pgp-part-signed = Signed by { $signer } (key not verified)
+pgp-part-other = Signed by { $signer }, who is not the sender
+pgp-part-unknown-key = Signed, but the key is not known
+pgp-part-not-signed = Not signed
+pgp-part-not-checked = Signature not checked
+pgp-part-encrypted = Encrypted. { $signature }
+pgp-part-no-key = Encrypted to a key you do not have
+pgp-part-changed = The encrypted part was changed on the way and is not shown
+pgp-part-unprotected = Encrypted without protection against changes, not shown
+pgp-part-broken = The encrypted part can not be read
+pgp-why-mismatch = The signature does not match this text
+pgp-why-weak-hash = The signature uses { $hash }, which is no longer safe
+pgp-why-key-expired = Signed after the key expired on { $date }
+pgp-why-key-revoked = Signed with a key that was revoked
+pgp-why-not-signing-key = Signed with a key that may not sign
+pgp-why-from-future = The signature is dated in the future
+pgp-why-signature-expired = The signature has expired
+pgp-why-key-not-valid = Signed with a key that is not valid
+pgp-why-not-for-you = Signed for other recipients, and passed on to you
+pgp-bar-mixed = Parts of this message are protected differently: each part says how.
+pgp-part-pictures-loaded = { $label }. Pictures were loaded from the internet

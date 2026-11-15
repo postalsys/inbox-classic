@@ -21,7 +21,8 @@ use std::collections::HashMap;
 use std::fmt;
 
 pub use address::{ParsedAddress, parse_addresses};
-pub use node::{Header, HeaderLine};
+pub(crate) use node::parse_structured_header;
+pub use node::{Header, HeaderLine, StructuredHeader};
 pub use text::{escape_html, html_to_text, text_addresses, text_to_html};
 
 use crate::Address;

@@ -19,6 +19,7 @@ pe-imap = { path = "../crates/pe-imap" }
 pe-mime = { path = "../crates/pe-mime" }
 pe-otp = { path = "../crates/pe-otp" }
 pe-pgp = { path = "../crates/pe-pgp" }
+pe-core = { path = "../crates/pe-core" }
 
 [[bin]]
 name = "imap_response"
@@ -74,6 +75,20 @@ bench = false
 [[bin]]
 name = "autocrypt_header"
 path = "fuzz_targets/autocrypt_header.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "mime_outline"
+path = "fuzz_targets/mime_outline.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "pgp_unwrap"
+path = "fuzz_targets/pgp_unwrap.rs"
 test = false
 doc = false
 bench = false
