@@ -21,6 +21,7 @@ mod files;
 mod folders;
 mod help;
 mod hyprland;
+mod keys;
 mod mailbox;
 mod message_window;
 mod messages;

@@ -618,10 +618,13 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     let account_name = stored.account_name;
     let stored = stored.settings;
     let others = core.account_addresses_text(account).unwrap_or_default();
+    // the key of its addresses, after the rest
+    let security = crate::keys::AccountSecurity::new(account);
+    let more = Some(security.group.upcast_ref::<gtk::Widget>());
     if let Some(with) = signs_in_with {
         // a browser sign-in account: the names and the other addresses only, the rest is the provider's
         let intro = t!(UiSignsInWith, app = &with);
-        let form = Form::new(
+        let form = Form::with_more(
             parent,
             &crate::words::plain(crate::words::Text::UiProperties),
             &intro,
@@ -632,6 +635,7 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
             ],
             &t!(UiOk),
             0,
+            more,
         );
         form.widget().set_widget_name("account-properties");
         let mut saved = false;
@@ -642,6 +646,7 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
             let (named, name) = (form.value(0), form.value(1));
             let settings = AccountSettings { name, ..stored.clone() };
             saved = core.update_account(account, &settings).is_ok() && core.set_account_name(account, &named).is_ok();
+            security.apply(account);
             break;
         }
         form.close();
@@ -651,13 +656,14 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
     let mut fields = server_fields(&stored, &account_name);
     let other_addresses = fields.len();
     fields.push(Field::text(&t!(UiFieldOtherAddresses), &others));
-    let form = Form::new(
+    let form = Form::with_more(
         parent,
         &crate::words::plain(crate::words::Text::UiProperties),
         &t!(UiKeepPassword),
         fields,
         &t!(UiOk),
         0,
+        more,
     );
     form.widget().set_widget_name("account-properties");
     form.validate_with(validate);
@@ -707,6 +713,7 @@ async fn properties(parent: &gtk::Widget, account: i64, signs_in_with: Option<St
         if !password.is_empty() {
             core.set_password(account, &password);
         }
+        security.apply(account);
         saved = true;
         break;
     }

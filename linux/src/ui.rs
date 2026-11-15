@@ -55,6 +55,9 @@ row.drop-above, row.drop-below { background-image: linear-gradient(@accent_color
 row.drop-above { background-position: center top; }
 row.drop-below { background-position: center bottom; }
 .new-address { font-size: 0.8em; font-weight: bold; color: white; background-color: @error_bg_color; border-radius: 4px; padding: 1px 6px; }
+.fingerprint .subtitle { font-family: monospace; }
+.fingerprint-large { font-family: monospace; font-size: 1.9em; }
+.key-warning { padding: 10px 12px; border-radius: 12px; background-color: alpha(@warning_bg_color, 0.14); }
 ";
 
 /// The CSS class `class` on `widget` or off it
@@ -239,6 +242,20 @@ impl Form {
         ok_label: &str,
         focus: usize,
     ) -> Rc<Form> {
+        Form::with_more(parent, title, intro, fields, ok_label, focus, None)
+    }
+
+    /// [`Form::new`] with `more` under the fields (Account Properties' Security), the whole scrolled when it does not
+    /// fit
+    pub fn with_more(
+        parent: &impl IsA<gtk::Widget>,
+        title: &str,
+        intro: &str,
+        fields: Vec<Field>,
+        ok_label: &str,
+        focus: usize,
+        more: Option<&gtk::Widget>,
+    ) -> Rc<Form> {
         let (send, clicks) = async_channel::unbounded();
         let group = adw::PreferencesGroup::new();
         let rows: Vec<gtk::Widget> = fields.iter().enumerate().map(|(i, field)| form_row(i, field)).collect();
@@ -257,7 +274,21 @@ impl Form {
             content.append(&label);
         }
         content.append(&group);
-        let (dialog, ok) = dialog_with_buttons(title, &content, ok_label, 520);
+        let (dialog, ok) = match more {
+            Some(more) => {
+                // apart from the fields as GNOME's groups are
+                more.set_margin_top(12);
+                content.append(more);
+                let scrolled = gtk::ScrolledWindow::builder()
+                    .child(&content)
+                    .hscrollbar_policy(gtk::PolicyType::Never)
+                    .propagate_natural_height(true)
+                    .build();
+                scrolled.set_widget_name("form-scrolled");
+                dialog_with_buttons(title, &scrolled, ok_label, 520)
+            }
+            None => dialog_with_buttons(title, &content, ok_label, 520),
+        };
         let cancel_send = send.clone();
         dialog.connect_closed(move |_| {
             let _ = cancel_send.try_send(false);

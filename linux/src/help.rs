@@ -47,6 +47,10 @@ fn context_of(window: &adw::ApplicationWindow) -> &'static str {
         Some("sign-in-apps-dialog" | "sign-in-app-editor") => "sign-in-apps",
         Some("agents-dialog" | "agents-setup-dialog") => "agents",
         Some("rules-dialog" | "rule-dialog") => "message-rules",
+        Some("key-verify-dialog") => "verify-key",
+        Some(
+            "keys-dialog" | "key-new-dialog" | "key-backup-dialog" | "key-import-dialog" | "key-properties-dialog",
+        ) => "encryption-keys",
         _ => "main",
     }
 }
