@@ -40,6 +40,8 @@ impl Core {
         // a typo in an address is told now, while the message is still open in its window
         compose::check(&outgoing).map_err(Error::Compose)?;
         self.check_sender(account, &outgoing)?;
+        // the keys now, while the window is open: a missing one is told there, not after the message waited
+        let keys = self.outgoing_keys(account, &outgoing, false)?;
         let delay = self.store().send_delay()? as i64;
         if delay == 0 {
             return self.send_command(
@@ -48,6 +50,7 @@ impl Core {
                     outgoing: Box::new(outgoing),
                     not_before: None,
                     undoable: false,
+                    keys,
                 },
             );
         }
@@ -65,6 +68,7 @@ impl Core {
                 outgoing: Box::new(outgoing),
                 not_before: Some(until),
                 undoable: true,
+                keys,
             },
         )?;
         // the last thing done: Edit > Undo takes back this send, not a move before it
@@ -127,7 +131,7 @@ impl Core {
                 pe_i18n::tr_args(Text::UiSendTooLate, &[("subject", (&subject).into())]),
             ));
         };
-        let (mut draft, files) = compose::reopen(&raw);
+        let (mut draft, files) = self.reopen_protected(raw);
         draft.message_id = Some(waiting.message_id.clone());
         draft.from = self.other_address(account, draft.from.take())?;
         // a folder for the files named by the Message-ID's own letters and digits only

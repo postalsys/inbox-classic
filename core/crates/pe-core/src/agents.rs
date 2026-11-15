@@ -590,6 +590,8 @@ impl Core {
                 outgoing: Box::new(outgoing),
                 not_before: Some(at),
                 undoable: false,
+                // an agent can neither sign nor encrypt
+                keys: None,
             },
         )?;
         let to: Vec<&str> = ask.recipients.iter().map(|r| r.address.as_str()).collect();

@@ -124,6 +124,8 @@ pub(crate) enum Command {
         not_before: Option<i64>,
         /// The user's, waiting to be taken back (Undo Send)
         undoable: bool,
+        /// The keys it is signed or encrypted with (protect_out.rs), found when Send was pressed
+        keys: Option<Arc<crate::protect_out::OutgoingKeys>>,
     },
     SendOutbox,
     /// Edit > Undo: messages back to the folders they came from (selection.rs)
@@ -137,6 +139,8 @@ pub(crate) enum Command {
         outgoing: Box<crate::Outgoing>,
         /// Saved without being asked: a copy that could not be saved is told to the window only
         automatic: bool,
+        /// With Encrypt on: the sender's own key, the draft is encrypted to
+        keys: Option<Arc<crate::protect_out::OutgoingKeys>>,
     },
     /// The message rules run over the messages already in `folder` (an Inbox): all of them, or the one rule `rule`
     ApplyRules {
@@ -291,20 +295,28 @@ impl Worker {
     }
 }
 
-/// Builds a message from an account with `compose` (its attachments read now, off the threads that run the network)
+/// Builds a message from an account with `compose` (its attachments read now, off the threads that run the network),
+/// signed or encrypted with `keys` when it has them
 async fn build(
     settings: pe_store::AccountSettings,
     outgoing: crate::Outgoing,
     time: i64,
     compose: fn(&pe_store::AccountSettings, &crate::Outgoing, i64) -> Result<pe_smtp::Message, crate::ComposeError>,
+    keys: Option<Arc<crate::protect_out::OutgoingKeys>>,
 ) -> Result<pe_smtp::Built, Failure> {
-    tokio::task::spawn_blocking(move || compose(&settings, &outgoing, time).map(|message| pe_smtp::build(&message)))
-        .await
-        .map_err(|_| Failure {
-            kind: FailureKind::Other,
-            message: tr(Text::ErrorNotBuilt),
-        })?
-        .map_err(Failure::from)
+    tokio::task::spawn_blocking(move || {
+        let built = compose(&settings, &outgoing, time).map(|message| pe_smtp::build(&message))?;
+        match keys {
+            Some(keys) => crate::protect_out::protect(built, &keys, outgoing.encrypt, time),
+            None => Ok(built),
+        }
+    })
+    .await
+    .map_err(|_| Failure {
+        kind: FailureKind::Other,
+        message: tr(Text::ErrorNotBuilt),
+    })?
+    .map_err(Failure::from)
 }
 
 /// Seconds since the Unix epoch
@@ -1100,8 +1112,13 @@ impl Worker {
                 outgoing,
                 not_before,
                 undoable,
-            } => self.send(store, *outgoing, not_before, undoable).await,
-            Command::SaveDraft { outgoing, automatic } => self.save_draft(store, *outgoing, automatic).await,
+                keys,
+            } => self.send(store, *outgoing, not_before, undoable, keys).await,
+            Command::SaveDraft {
+                outgoing,
+                automatic,
+                keys,
+            } => self.save_draft(store, *outgoing, automatic, keys).await,
             Command::ApplyRules { folder, rule } => {
                 let uids = store.uids(folder)?;
                 // the rule chosen runs even while it is turned off: it was asked for
@@ -1151,6 +1168,7 @@ impl Worker {
         outgoing: crate::Outgoing,
         not_before: Option<i64>,
         undoable: bool,
+        keys: Option<Arc<crate::protect_out::OutgoingKeys>>,
     ) -> Outcome {
         let time = unix_now();
         let recipients = [outgoing.to.as_str(), outgoing.cc.as_str()]
@@ -1164,7 +1182,7 @@ impl Worker {
         let draft_account = outgoing.draft_account.unwrap_or(self.account);
         let message_id = outgoing.message_id.clone();
         let settings = self.sender(store, &outgoing)?;
-        let built = build(settings, outgoing, time, crate::compose::message).await?;
+        let built = build(settings, outgoing, time, crate::compose::message, keys).await?;
         store.queue(
             &pe_store::Queued {
                 id: 0,
@@ -1213,9 +1231,15 @@ impl Worker {
 
     /// Saves a draft in the Drafts folder, in place of the copy saved before, through the uploader (upload.rs), which
     /// says how that went to the window it came from ([`Event::DraftSaved`])
-    async fn save_draft(&mut self, store: &mut Store, outgoing: crate::Outgoing, automatic: bool) -> Outcome {
+    async fn save_draft(
+        &mut self,
+        store: &mut Store,
+        outgoing: crate::Outgoing,
+        automatic: bool,
+        keys: Option<Arc<crate::protect_out::OutgoingKeys>>,
+    ) -> Outcome {
         let message_id = outgoing.message_id.clone().unwrap_or_default();
-        match self.draft_upload(store, outgoing).await {
+        match self.draft_upload(store, outgoing, keys).await {
             Ok(upload) => {
                 self.upload_apart(upload);
                 Ok(())
@@ -1233,7 +1257,12 @@ impl Worker {
     }
 
     /// A draft built for the Drafts folder
-    async fn draft_upload(&mut self, store: &mut Store, outgoing: crate::Outgoing) -> Result<upload::Upload, Failure> {
+    async fn draft_upload(
+        &mut self,
+        store: &mut Store,
+        outgoing: crate::Outgoing,
+        keys: Option<Arc<crate::protect_out::OutgoingKeys>>,
+    ) -> Result<upload::Upload, Failure> {
         let drafts = crate::compose::drafts_folder(store, self.account)?.ok_or_else(|| Failure {
             kind: FailureKind::Other,
             message: tr(Text::ErrorNoDrafts),
@@ -1242,7 +1271,7 @@ impl Worker {
         let moved_from = outgoing.draft_account.filter(|from| *from != self.account);
         let time = unix_now();
         let settings = self.sender(store, &outgoing)?;
-        let built = build(settings, outgoing, time, crate::compose::draft_message).await?;
+        let built = build(settings, outgoing, time, crate::compose::draft_message, keys).await?;
         Ok(upload::Upload::Draft {
             drafts: drafts.id,
             raw: built.raw,

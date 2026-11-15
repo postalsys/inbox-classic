@@ -605,3 +605,12 @@ pgp-why-not-for-you = Allkirjastatud teistele saajatele ja sulle edasi saadetud
 pgp-bar-mixed = Selle kirja osad on kaitstud erinevalt: iga osa ütleb, kuidas.
 # review: new
 pgp-part-pictures-loaded = { $label }. Pildid laaditi internetist
+# review: new
+pgp-error-no-own-key = Sul pole aadressi { $address } jaoks võtit, millega allkirjastada või krüpteerida. Loo see menüüs Tööriistad > Krüpteerimisvõtmed või lülita allkirjastamine ja krüpteerimine välja.
+# review: new
+pgp-error-missing-keys = { $count ->
+    [one] Aadressil { $addresses } pole võtit, millele krüpteerida.
+   *[other] Neil saajatel pole võtit, millele krüpteerida: { $addresses }.
+}
+# review: new
+pgp-error-encrypted-quote = See kiri tsiteerib või edastab krüpteeritud kirja, seega saab selle saata ainult krüpteerituna. Lülita krüpteerimine sisse või eemalda tsiteeritud tekst.

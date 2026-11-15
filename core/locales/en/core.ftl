@@ -578,3 +578,9 @@ pgp-why-key-not-valid = Signed with a key that is not valid
 pgp-why-not-for-you = Signed for other recipients, and passed on to you
 pgp-bar-mixed = Parts of this message are protected differently: each part says how.
 pgp-part-pictures-loaded = { $label }. Pictures were loaded from the internet
+pgp-error-no-own-key = You have no key for { $address } to sign or encrypt with. Make one in Tools > Encryption Keys, or turn Sign and Encrypt off.
+pgp-error-missing-keys = { $count ->
+    [one] { $addresses } has no key to encrypt to.
+   *[other] These recipients have no key to encrypt to: { $addresses }.
+}
+pgp-error-encrypted-quote = This message quotes or forwards an encrypted message, so it can only be sent encrypted. Turn Encrypt on, or remove the quoted text.

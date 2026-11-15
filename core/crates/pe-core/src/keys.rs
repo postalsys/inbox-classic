@@ -823,6 +823,26 @@ impl<'a> Book<'a> {
         Ok(ring)
     }
 
+    /// The key of an own address, unwrapped: to sign with, and to encrypt to oneself
+    pub fn identity_key(&self, address: &str) -> Result<Option<SecretKey>> {
+        match self.store.pgp_identity(address)? {
+            Some(identity) => self.own_key(&identity.fingerprint).map(Some),
+            None => Ok(None),
+        }
+    }
+
+    /// The certificate in use for a correspondent
+    pub fn cert_for(&self, address: &str) -> Result<Option<Cert>> {
+        let Some(fingerprint) = self.store.pgp_peer(address)?.and_then(|peer| peer.fingerprint) else {
+            return Ok(None);
+        };
+        Ok(self
+            .store
+            .pgp_key(&fingerprint)?
+            .as_ref()
+            .and_then(|key| self.certs.get(key)))
+    }
+
     pub fn peer(&self, address: &str) -> Result<PeerKeys> {
         let address = normal_address(address);
         let peer = self.store.pgp_peer(&address)?.unwrap_or_default();

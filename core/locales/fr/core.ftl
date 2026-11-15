@@ -645,3 +645,12 @@ pgp-why-not-for-you = Signé pour d'autres destinataires et transmis à vous
 pgp-bar-mixed = Les parties de ce message sont protégées différemment : chaque partie indique comment.
 # review: new
 pgp-part-pictures-loaded = { $label }. Des images ont été chargées depuis Internet
+# review: new
+pgp-error-no-own-key = Vous n'avez pas de clé pour { $address } pour signer ou chiffrer. Créez-en une dans Outils > Clés de chiffrement, ou désactivez Signer et Chiffrer.
+# review: new
+pgp-error-missing-keys = { $count ->
+    [one] { $addresses } n'a pas de clé pour chiffrer.
+   *[other] Ces destinataires n'ont pas de clé pour chiffrer : { $addresses }.
+}
+# review: new
+pgp-error-encrypted-quote = Ce message cite ou transfère un message chiffré : il ne peut être envoyé que chiffré. Activez Chiffrer, ou supprimez le texte cité.

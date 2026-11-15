@@ -75,6 +75,12 @@ pub struct Outgoing {
     pub draft_account: Option<pe_store::AccountId>,
     /// Another address of the account to send from (one of its other addresses, [`sender`]), None for its own
     pub from: Option<String>,
+    /// Signed with the key of the address it goes from (OpenPGP, protect_out.rs)
+    pub sign: bool,
+    /// Encrypted to every recipient's key (and signed); a recipient without a key stops the send
+    pub encrypt: bool,
+    /// It quotes or forwards a message that was encrypted ([`Draft::quote_encrypted`]): it may not go unencrypted
+    pub quote_encrypted: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -109,6 +115,11 @@ pub struct Draft {
     /// The account's other address it goes from ([`Outgoing::from`]): the one a reply's message was sent to, or a
     /// saved draft's; None for the account's own
     pub from: Option<String>,
+    /// Encrypt and Sign start on: a reply to or a forward of an encrypted message, a draft saved encrypted
+    pub encrypt: bool,
+    pub sign: bool,
+    /// The quote or the forwarded message was encrypted ([`Outgoing::quote_encrypted`])
+    pub quote_encrypted: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -120,6 +131,12 @@ pub enum ComposeError {
     Attachment(PathBuf, String),
     /// A From address that is not one of the account's
     NotOwnAddress(String),
+    /// Sign or Encrypt, and the address it goes from has no key that opens
+    NoOwnKey(String),
+    /// Encrypt, and these recipients have no key to encrypt to
+    MissingKeys(Vec<String>),
+    /// Encrypt off for a message that quotes or forwards an encrypted one
+    EncryptedQuote,
 }
 
 impl std::fmt::Display for ComposeError {
@@ -132,6 +149,17 @@ impl std::fmt::Display for ComposeError {
             ComposeError::NotOwnAddress(address) => {
                 f.write_str(&tr_args(Text::ErrorNotOwnAddress, &[("address", address.into())]))
             }
+            ComposeError::NoOwnKey(address) => {
+                f.write_str(&tr_args(Text::PgpErrorNoOwnKey, &[("address", address.into())]))
+            }
+            ComposeError::MissingKeys(addresses) => f.write_str(&tr_args(
+                Text::PgpErrorMissingKeys,
+                &[
+                    ("addresses", (&addresses.join(", ")).into()),
+                    ("count", (addresses.len() as i64).into()),
+                ],
+            )),
+            ComposeError::EncryptedQuote => f.write_str(&tr(Text::PgpErrorEncryptedQuote)),
             ComposeError::Attachment(path, error) => f.write_str(&tr_args(
                 Text::ErrorAttachment,
                 &[("path", (&path.display().to_string()).into()), ("error", error.into())],
@@ -264,6 +292,7 @@ fn build(
         references: outgoing.references.clone(),
         date: now,
         message_id: outgoing.message_id.clone().unwrap_or_default(),
+        signed: outgoing.sign || outgoing.encrypt,
         ..Default::default()
     })
 }
@@ -367,6 +396,7 @@ pub(crate) fn recovered(recovery: pe_store::Recovery) -> Draft {
         attachments: recovery.attachments.into_iter().filter(|path| path.is_file()).collect(),
         message_id: Some(recovery.message_id),
         from: recovery.from,
+        ..Default::default()
     }
 }
 

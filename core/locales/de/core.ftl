@@ -618,3 +618,12 @@ pgp-why-not-for-you = Für andere Empfänger signiert und an Sie weitergegeben
 pgp-bar-mixed = Teile dieser Nachricht sind unterschiedlich geschützt: Jeder Teil sagt, wie.
 # review: new
 pgp-part-pictures-loaded = { $label }. Bilder wurden aus dem Internet geladen
+# review: new
+pgp-error-no-own-key = Sie haben keinen Schlüssel für { $address }, um zu signieren oder zu verschlüsseln. Erstellen Sie einen unter Extras > Verschlüsselungsschlüssel, oder schalten Sie Signieren und Verschlüsseln aus.
+# review: new
+pgp-error-missing-keys = { $count ->
+    [one] { $addresses } hat keinen Schlüssel zum Verschlüsseln.
+   *[other] Diese Empfänger haben keinen Schlüssel zum Verschlüsseln: { $addresses }.
+}
+# review: new
+pgp-error-encrypted-quote = Diese Nachricht zitiert oder leitet eine verschlüsselte Nachricht weiter und kann daher nur verschlüsselt gesendet werden. Schalten Sie Verschlüsseln ein, oder entfernen Sie den zitierten Text.

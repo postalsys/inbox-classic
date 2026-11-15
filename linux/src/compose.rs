@@ -1191,6 +1191,8 @@ impl Compose {
             // saved in another account's Drafts before From changed: the core moves it once this account has it
             draft_account: (draft_account != 0 && draft_account != account).then_some(draft_account),
             from: self.from_address.borrow().clone(),
+            // Sign and Encrypt come with the compose window's switches (the plan's PR 7)
+            ..Default::default()
         }
     }
 
