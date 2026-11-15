@@ -56,6 +56,12 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         Some(kind) if kind == "multipart/signed" => pe_store::PROTECTION_SIGNED,
         _ => 0,
     };
+    // an encrypted message's only "attachment" is its ciphertext: what it carries is known once it is opened
+    let attachments = if protection == pe_store::PROTECTION_ENCRYPTED {
+        Vec::new()
+    } else {
+        attachments
+    };
     let attachment_names: Vec<&str> = attachments.iter().filter_map(|part| part.filename()).collect();
     let attachment_names = attachment_names.join("\n");
     let attachment_count = attachments.len() as u32;
@@ -297,6 +303,23 @@ mod tests {
         );
         assert!(summary.has_attachments);
         assert!(!summary.bounce);
+
+        // encrypted: its ciphertext is no file of it, and the list marks it encrypted
+        let encrypted = FetchedMessage {
+            uid: Some(2),
+            body_structure: Some(BodyStructure {
+                content_type: "multipart/encrypted".into(),
+                children: vec![
+                    part("application/pgp-encrypted", None, None),
+                    part("application/octet-stream", Some("inline"), Some("encrypted.asc")),
+                ],
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+        let read = super::summary(encrypted).unwrap();
+        assert_eq!(read.protection, pe_store::PROTECTION_ENCRYPTED);
+        assert!(!read.has_attachments && read.attachment_names.is_empty());
     }
 
     #[test]
