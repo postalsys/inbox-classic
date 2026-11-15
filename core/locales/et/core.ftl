@@ -439,6 +439,8 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Seda kirja ei saa lugeda.
+# review: new
+agent-encrypted-original = See kiri on krüptitud: agent ei saa sellele vastata ega seda edastada, sest ta ei saa krüptida.
 agent-log-composed = Kiri „{ $subject }“ avati koostamisaknas, et saaksite selle valmis kirjutada
 agent-log-refused = Te ei saatnud kirja „{ $subject }“
 agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }
@@ -605,3 +607,14 @@ pgp-why-not-for-you = Allkirjastatud teistele saajatele ja sulle edasi saadetud
 pgp-bar-mixed = Selle kirja osad on kaitstud erinevalt: iga osa ütleb, kuidas.
 # review: new
 pgp-part-pictures-loaded = { $label }. Pildid laaditi internetist
+# review: new
+pgp-error-no-own-key = Sul pole aadressi { $address } jaoks võtit, millega allkirjastada või krüpteerida. Loo see menüüs Tööriistad > Krüpteerimisvõtmed või lülita allkirjastamine ja krüpteerimine välja.
+# review: new
+pgp-error-missing-keys = { $count ->
+    [one] Aadressil { $addresses } pole võtit, millele krüpteerida.
+   *[other] Neil saajatel pole võtit, millele krüpteerida: { $addresses }.
+}
+# review: new
+pgp-error-encrypted-quote = See kiri tsiteerib või edastab krüpteeritud kirja, seega saab selle saata ainult krüpteerituna. Lülita krüpteerimine sisse või eemalda tsiteeritud tekst.
+# review: new
+pgp-error-protect = Kirja ei saanud allkirjastada ega krüptida: { $reason }

@@ -2550,6 +2550,8 @@ unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
         quote_plain: o.quote_plain,
         quote_text: Some(text(o.quote_text)?).filter(|t| !t.is_empty()),
         from: Some(text(o.from)?).filter(|f| !f.is_empty()),
+        // Sign and Encrypt come with the compose window's switches (the plan's PR 7)
+        ..Default::default()
     })
 }
 

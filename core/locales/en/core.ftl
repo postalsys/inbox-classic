@@ -458,6 +458,7 @@ agent-accounts = { $count ->
 # "Read and organize; 1 account"
 agent-access = { $can }; { $accounts }
 agent-unreadable = This message can not be read.
+agent-encrypted-original = This message is encrypted: an agent can not reply to it or forward it, as it can not encrypt.
 agent-log-composed = Opened “{ $subject }” in a new message for you to finish
 agent-log-refused = You did not send “{ $subject }”
 agent-log-sent = Sent “{ $subject }” to { $to }
@@ -578,3 +579,10 @@ pgp-why-key-not-valid = Signed with a key that is not valid
 pgp-why-not-for-you = Signed for other recipients, and passed on to you
 pgp-bar-mixed = Parts of this message are protected differently: each part says how.
 pgp-part-pictures-loaded = { $label }. Pictures were loaded from the internet
+pgp-error-no-own-key = You have no key for { $address } to sign or encrypt with. Make one in Tools > Encryption Keys, or turn Sign and Encrypt off.
+pgp-error-missing-keys = { $count ->
+    [one] { $addresses } has no key to encrypt to.
+   *[other] These recipients have no key to encrypt to: { $addresses }.
+}
+pgp-error-encrypted-quote = This message quotes or forwards an encrypted message, so it can only be sent encrypted. Turn Encrypt on, or remove the quoted text.
+pgp-error-protect = The message could not be signed or encrypted: { $reason }

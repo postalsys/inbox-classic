@@ -224,6 +224,21 @@ pub fn read(raw: &[u8], ring: &KeyRing, from: &[String], now: i64) -> Option<Pro
     })
 }
 
+/// Whether a message has an encrypted part: a reply to it or a forward of it may go only encrypted, and a draft
+/// saved encrypted opens with Encrypt on
+pub(crate) fn has_encrypted(raw: &[u8]) -> bool {
+    if !may_be_protected(raw) {
+        return false;
+    }
+    let outline = outline(raw);
+    outline.parts.iter().any(is_encrypted)
+        || inline_texts(&outline).any(|index| {
+            pe_pgp::inline::blocks(&text_of(&outline, raw, index))
+                .iter()
+                .any(|block| block.kind == pe_pgp::inline::Kind::Message)
+        })
+}
+
 /// Whether a signed or encrypted layer is anywhere in the message
 fn has_layer(raw: &[u8]) -> bool {
     outline(raw)
@@ -270,7 +285,7 @@ pub(crate) fn shown(raw: &[u8], ring: &KeyRing, from: &[String], now: i64) -> Op
 }
 
 /// The header fields of a header block, each with its folded lines and its line break
-fn header_lines(block: &[u8]) -> Vec<&[u8]> {
+pub(crate) fn header_lines(block: &[u8]) -> Vec<&[u8]> {
     let mut fields: Vec<&[u8]> = Vec::new();
     let mut start = 0;
     let mut at = 0;

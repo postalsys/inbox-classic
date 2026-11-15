@@ -496,3 +496,61 @@ fn an_envelope_with_nothing_encrypted_is_broken() {
     assert_eq!(protection.tone, Tone::Warning, "{protection:?}");
     assert!(!view.document.contains("Hi Mallory"));
 }
+
+/// An agent can not encrypt: it neither replies to nor forwards encrypted mail, which would put what was encrypted on
+/// the server or to its recipients in the clear
+#[test]
+fn an_agent_does_not_answer_encrypted_mail() {
+    let w = world("pgp-agent-answer");
+    let raw = message(
+        "alice@example.org",
+        &encrypted_part(&text("The secret plan"), &[&w.me], Some(&w.alice), "e"),
+    );
+    let (account, folder) = {
+        let store = Store::open(w.dir.path().join("store.db")).unwrap();
+        let account = store.accounts().unwrap()[0].id;
+        let inbox = pe_store::FolderInfo {
+            path: "INBOX".into(),
+            name: "INBOX".into(),
+            selectable: true,
+            ..Default::default()
+        };
+        store.set_folders(account, &[inbox]).unwrap();
+        let folder = store.folders(account).unwrap()[0].id;
+        let info = pe_store::MessageInfo {
+            uid: 1,
+            subject: "...".into(),
+            from_address: "alice@example.org".into(),
+            ..Default::default()
+        };
+        store.add_messages(folder, &[info]).unwrap();
+        store.set_source(folder, 1, raw.as_bytes()).unwrap();
+        (account, folder)
+    };
+    let host = pe_store::AgentHost {
+        id: 1,
+        path: "/agent".into(),
+        name: "Agent".into(),
+        allowed: true,
+        levels: pe_store::AgentLevels(u32::MAX),
+        accounts: vec![account],
+        created: 0,
+        last_used: None,
+    };
+    for kind in [pe_core::DraftKind::Reply, pe_core::DraftKind::Forward] {
+        let outcome = w.core.agent_save_draft(
+            &host,
+            account,
+            Some((folder, 1, kind)),
+            pe_core::Outgoing::default(),
+            "Here you go",
+        );
+        match outcome {
+            Err(pe_core::Error::Unavailable(why)) => assert!(why.contains("encrypted"), "{why}"),
+            other => panic!("{kind:?}: {other:?}"),
+        }
+    }
+    // the user's own reply opens with Encrypt on and may go only encrypted
+    let draft = w.core.draft(folder, 1, pe_core::DraftKind::Reply).unwrap().unwrap();
+    assert!(draft.encrypt && draft.quote_encrypted);
+}

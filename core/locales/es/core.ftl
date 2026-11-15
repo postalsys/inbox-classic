@@ -463,6 +463,8 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Este mensaje no se puede leer.
+# review: new
+agent-encrypted-original = Este mensaje está cifrado: un agente no puede responderlo ni reenviarlo, porque no puede cifrar.
 agent-log-composed = Se abrió «{ $subject }» en la ventana de redacción para que termine de escribirlo
 agent-log-refused = No envió «{ $subject }»
 agent-log-sent = Se envió «{ $subject }» a { $to }
@@ -629,3 +631,14 @@ pgp-why-not-for-you = Firmado para otros destinatarios y reenviado a usted
 pgp-bar-mixed = Las partes de este mensaje están protegidas de forma distinta: cada parte indica cómo.
 # review: new
 pgp-part-pictures-loaded = { $label }. Se cargaron imágenes de internet
+# review: new
+pgp-error-no-own-key = No tiene ninguna clave para { $address } con la que firmar o cifrar. Cree una en Herramientas > Claves de cifrado, o desactive Firmar y Cifrar.
+# review: new
+pgp-error-missing-keys = { $count ->
+    [one] { $addresses } no tiene ninguna clave para cifrar.
+   *[other] Estos destinatarios no tienen ninguna clave para cifrar: { $addresses }.
+}
+# review: new
+pgp-error-encrypted-quote = Este mensaje cita o reenvía un mensaje cifrado, así que solo se puede enviar cifrado. Active Cifrar, o quite el texto citado.
+# review: new
+pgp-error-protect = No se pudo firmar ni cifrar el mensaje: { $reason }

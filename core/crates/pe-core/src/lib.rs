@@ -25,6 +25,7 @@ pub mod mailto;
 pub mod otp;
 pub mod pictures;
 pub mod protect;
+mod protect_out;
 mod requests;
 mod rules;
 mod search;
@@ -1590,6 +1591,29 @@ impl Core {
         Ok(Some(self.shown(&store, source)))
     }
 
+    /// A saved draft or a message taken back from the Outbox to go on writing ([`compose::reopen`]): an encrypted one
+    /// decrypted, and opened with Encrypt and Sign on again; a signed one with Sign on
+    fn reopen_protected(&self, raw: Vec<u8>) -> (Draft, Vec<(String, Vec<u8>)>) {
+        let encrypted = protect::has_encrypted(&raw);
+        let signed = !encrypted && protect::may_be_protected(&raw) && {
+            let outline = pe_mime::outline::outline(&raw);
+            outline
+                .root()
+                .is_some_and(|root| root.content_type == "multipart/signed")
+        };
+        let raw = if encrypted || signed {
+            self.shown(&self.store(), raw)
+        } else {
+            raw
+        };
+        let (mut draft, files) = compose::reopen(&raw);
+        draft.encrypt = encrypted;
+        draft.sign = encrypted || signed;
+        // what was encrypted may go only encrypted: it may quote encrypted mail
+        draft.quote_encrypted = encrypted;
+        (draft, files)
+    }
+
     /// `source` as it is shown ([`Core::shown_source`])
     fn shown(&self, store: &Store, source: Vec<u8>) -> Vec<u8> {
         let Some(ring) = self.ring_for(store, &source) else {
@@ -1674,11 +1698,14 @@ impl Core {
         outgoing.message_id = Some(message_id.clone());
         // kept here first, so that it is there to open again after a crash, with or without a connection
         self.keep_recovery(account, &outgoing, &message_id)?;
+        // with Encrypt on, the copy in Drafts on the server is encrypted to the sender's own key
+        let keys = self.outgoing_keys(account, &outgoing, true)?;
         self.send_command(
             account,
             Command::SaveDraft {
                 outgoing: Box::new(outgoing),
                 automatic,
+                keys,
             },
         )?;
         Ok(message_id)
@@ -1725,7 +1752,7 @@ impl Core {
         let Some(source) = self.store().source(folder, uid)? else {
             return Ok(None);
         };
-        let (mut draft, files) = compose::reopen(&source);
+        let (mut draft, files) = self.reopen_protected(source);
         let account = self.store().folder(folder)?.account_id;
         draft.from = self.other_address(account, draft.from.take())?;
         if !files.is_empty() {
@@ -1833,18 +1860,24 @@ impl Core {
     /// A reply, a reply to all or a forward of a message whose source is in the store; a forward with the message's
     /// files, written out as a reopened draft's are ([`Core::reopen_draft`]), to be attached
     pub fn draft(&self, folder: FolderId, uid: u64, kind: DraftKind) -> Result<Option<Draft>> {
-        let (source, own, date) = {
+        let (source, own, date, encrypted) = {
             let store = self.store();
             let account = store.folder(folder)?.account_id;
             let date = store.message(folder, uid)?.and_then(|m| m.info.display_date());
-            // a signed or encrypted message is quoted and forwarded as it was shown, never more
-            let source = store.source(folder, uid)?.map(|source| self.shown(&store, source));
-            (source, own_addresses(&store, account)?, date)
+            // a signed or encrypted message is quoted and forwarded as it was shown, never more; an encrypted one
+            // only encrypted
+            let source = store.source(folder, uid)?;
+            let encrypted = source.as_deref().is_some_and(protect::has_encrypted);
+            let source = source.map(|source| self.shown(&store, source));
+            (source, own_addresses(&store, account)?, date, encrypted)
         };
         let Some(source) = source else {
             return Ok(None);
         };
         let mut draft = compose::draft(&source, kind, &own, date);
+        draft.quote_encrypted = encrypted;
+        draft.encrypt = encrypted;
+        draft.sign = encrypted;
         if kind == DraftKind::Forward {
             let files = compose::forwarded_files(&source);
             if !files.is_empty() {
@@ -1875,9 +1908,13 @@ impl Core {
     /// Reply, Reply All or Forward to a message file, from `account`
     pub fn file_draft(&self, path: &std::path::Path, account: AccountId, kind: DraftKind) -> Result<Draft> {
         let (source, date) = read_message_file(path)?;
+        let encrypted = protect::has_encrypted(&source);
         let source = self.shown(&self.store(), source);
         let own = own_addresses(&self.store(), account)?;
         let mut draft = compose::draft(&source, kind, &own, date);
+        draft.quote_encrypted = encrypted;
+        draft.encrypt = encrypted;
+        draft.sign = encrypted;
         if kind == DraftKind::Forward {
             let files = compose::forwarded_files(&source);
             if !files.is_empty() {

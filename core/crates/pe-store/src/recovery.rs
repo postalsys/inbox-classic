@@ -28,6 +28,10 @@ pub struct Recovery {
     pub attachments: Vec<PathBuf>,
     /// The account's other address it goes from, None for its own
     pub from: Option<String>,
+    /// Encrypt and Sign as they were on, and whether it quotes encrypted mail (which may then go only encrypted)
+    pub encrypt: bool,
+    pub sign: bool,
+    pub quote_encrypted: bool,
 }
 
 /// A list kept a line each
@@ -52,7 +56,8 @@ impl Store {
     pub fn keep_recovery(&self, r: &Recovery) -> Result<()> {
         self.db.execute(
             "INSERT OR REPLACE INTO compose_recovery (message_id, account_id, recipients, subject, html, quote, \
-             quote_text, in_reply_to, refs, attachments, sender) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+             quote_text, in_reply_to, refs, attachments, sender, protection) \
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
             params![
                 r.message_id,
                 r.account_id,
@@ -66,6 +71,7 @@ impl Store {
                 lines(&r.references),
                 lines(r.attachments.iter().map(|p| p.to_string_lossy())),
                 r.from,
+                u8::from(r.encrypt) | u8::from(r.sign) << 1 | u8::from(r.quote_encrypted) << 2,
             ],
         )?;
         Ok(())
@@ -75,7 +81,7 @@ impl Store {
     pub fn recoveries(&self) -> Result<Vec<Recovery>> {
         let mut statement = self.db.prepare(
             "SELECT message_id, account_id, recipients, subject, html, quote, quote_text, in_reply_to, refs, \
-             attachments, sender FROM compose_recovery ORDER BY rowid",
+             attachments, sender, protection FROM compose_recovery ORDER BY rowid",
         )?;
         let rows = statement.query_map([], |row| {
             let recipients: String = row.get(2)?;
@@ -94,6 +100,9 @@ impl Store {
                 references: unlines(row.get(8)?).collect(),
                 attachments: unlines(row.get(9)?).map(PathBuf::from).collect(),
                 from: row.get(10)?,
+                encrypt: row.get::<_, u8>(11)? & 1 != 0,
+                sign: row.get::<_, u8>(11)? & 2 != 0,
+                quote_encrypted: row.get::<_, u8>(11)? & 4 != 0,
             })
         })?;
         rows.collect()
@@ -126,6 +135,9 @@ mod tests {
             references: vec!["<a@example.com>".into(), "<0@example.com>".into()],
             attachments: vec![PathBuf::from("/tmp/a.pdf"), PathBuf::from("/tmp/b c.txt")],
             from: Some("sales@example.com".into()),
+            // Encrypt on, quoting encrypted mail: kept, so a crash does not turn it off
+            encrypt: true,
+            quote_encrypted: true,
             ..Default::default()
         };
         store.keep_recovery(&recovery).unwrap();

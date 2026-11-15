@@ -42,6 +42,16 @@ pub struct Message {
     pub message_id: String,
     /// Bcc as a header too, for a draft kept to be finished later (nodemailer's `keepBcc`)
     pub keep_bcc: bool,
+    /// To be signed (OpenPGP): text that would go as 7bit but has a line with white space at its end goes
+    /// quoted-printable, which writes that space as `=20`: relays strip it, and a changed byte breaks the signature
+    /// (RFC 3156 section 3)
+    pub signed: bool,
+}
+
+/// Whether text has what relays change: white space before a line break
+fn relays_change(text: &str) -> bool {
+    text.split('\n')
+        .any(|line| line.strip_suffix('\r').unwrap_or(line).ends_with([' ', '\t']))
 }
 
 /// Who a message goes from and to in the SMTP transaction
@@ -150,6 +160,9 @@ impl<'a> Composer<'a> {
     fn text_node(&mut self, value: &str, content: &'a str) -> Node<'a> {
         let mut node = self.node(value, &[("charset", "utf-8")]);
         node.content = Some(content.as_bytes());
+        if self.message.signed && relays_change(content) && node.transfer_encoding().as_deref() == Some("7bit") {
+            node.set_header("Content-Transfer-Encoding", "quoted-printable".into());
+        }
         node
     }
 
@@ -523,6 +536,49 @@ pub fn build(message: &Message) -> Built {
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn signed_text_keeps_its_trailing_spaces() {
+        let message = Message {
+            from: Address {
+                name: String::new(),
+                address: "a@example.org".into(),
+            },
+            to: pe_mime::parser::parse_addresses("b@example.org"),
+            subject: "s".into(),
+            text: Some("Hello\n-- \nMe\n".into()),
+            date: 0,
+            message_id: "x@example.org".into(),
+            ..Default::default()
+        };
+        let plain = String::from_utf8(build(&message).raw).unwrap();
+        assert!(plain.contains("Content-Transfer-Encoding: 7bit"), "{plain}");
+        let signed = String::from_utf8(
+            build(&Message {
+                signed: true,
+                ..message.clone()
+            })
+            .raw,
+        )
+        .unwrap();
+        assert!(
+            signed.contains("Content-Transfer-Encoding: quoted-printable"),
+            "{signed}"
+        );
+        assert!(signed.contains("--=20"), "{signed}");
+        // text without a trailing space stays 7bit, signed or not
+        let clean = Message {
+            text: Some("Hello\nMe\n".into()),
+            signed: true,
+            ..message
+        };
+        assert!(
+            String::from_utf8(build(&clean).raw)
+                .unwrap()
+                .contains("Content-Transfer-Encoding: 7bit")
+        );
+    }
+
     use super::*;
 
     #[test]
