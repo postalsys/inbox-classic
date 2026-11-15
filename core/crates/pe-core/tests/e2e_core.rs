@@ -2294,7 +2294,7 @@ fn a_message_sent_waits_and_can_be_taken_back() {
         "the status bar counts down"
     );
     let (taken, said) = s.core.undo_send().unwrap();
-    assert_eq!(said, "“Taken back” was not sent. It is open again.");
+    assert_eq!(said, "“Taken back” was not sent. The message has reopened for editing.");
     let (from, draft) = taken.unwrap();
     assert_eq!(from, account);
     assert_eq!(
