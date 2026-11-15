@@ -43,6 +43,9 @@ mod pictures;
 /// Step 19g: Message Rules
 mod rules;
 
+/// Step 19h: Encryption Keys
+mod keys;
+
 /// Messages in dark mode
 mod dark;
 
@@ -974,6 +977,7 @@ async fn scenario(d: Rc<Driver>) {
     attachment_reminder(&d).await;
     other_addresses(&d).await;
     rules::message_rules(&d).await;
+    keys::encryption_keys(&d).await;
     text_size(&d).await;
     send_receive(&d).await;
     finding(&d).await;

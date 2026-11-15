@@ -309,7 +309,7 @@ The key files are `scripts/ui-e2e/keys/`: `bob.pub.asc` (Bob Example, bob@exampl
 - Import of `bob.pub.asc`: listed as Contact, Valid; the core's summary is shown
 - Import of `carol.sec.asc` asks for its passphrase (`keys-6-import-passphrase`); a wrong one says so and asks again; the right one imports it, and the window asks "Use this key for carol@example.org?" (`keys-7-use-for`); Use It makes it that address's key
 - Properties of Bob's key: names, the fingerprint in groups of four, Valid, created, expires Never, Ed25519, Imported from a file, bob@example.net (not verified) (`keys-8-properties`)
-- Verify on Bob's key: the fingerprint in large groups, the intro naming Bob, They Match and They Differ (`keys-9-verify`); They Match marks it: the list says Valid, verified
+- Verify on Bob's key: the fingerprint in large groups, the intro naming Bob, the addresses They Match marks, They Match and They Differ (`keys-9-verify`); They Match marks it: the list says Valid, verified
 - Export of Bob's key saves an armored public key named "Bob Example public key.asc"
 - Account Properties > Security: the account's key chosen, None and the other own keys offered, New Key, and Send my public key with my messages (on) (`keys-10-account-security`)
 - the Address Book's Bob (a card for bob@example.net, added by the test) shows his key's fingerprint and Valid, verified in his Properties (`keys-11-contact`)
