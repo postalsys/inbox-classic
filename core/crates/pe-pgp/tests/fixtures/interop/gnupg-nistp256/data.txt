@@ -1,0 +1,7 @@
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+Hello Bob,
+the contract is attached.
+-- 
+Alice

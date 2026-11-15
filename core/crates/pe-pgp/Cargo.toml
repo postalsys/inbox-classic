@@ -1,0 +1,19 @@
+[package]
+name = "pe-pgp"
+version.workspace = true
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+# no bzip2: no client this app talks to compresses with it, and every decompressor is one more parser of hostile data
+pgp = { version = "0.21.1", default-features = false }
+rand = "0.8.6"
+rsa = "0.9.10"
+base64.workspace = true
+zeroize = "1.8"
+hex = "0.4"
+
+[dev-dependencies]
+serde_json = "1"

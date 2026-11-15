@@ -18,6 +18,7 @@ pe-content = { path = "../crates/pe-content" }
 pe-imap = { path = "../crates/pe-imap" }
 pe-mime = { path = "../crates/pe-mime" }
 pe-otp = { path = "../crates/pe-otp" }
+pe-pgp = { path = "../crates/pe-pgp" }
 
 [[bin]]
 name = "imap_response"
@@ -52,6 +53,27 @@ bench = false
 [[bin]]
 name = "otp_detect"
 path = "fuzz_targets/otp_detect.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "pgp_cert"
+path = "fuzz_targets/pgp_cert.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "pgp_message"
+path = "fuzz_targets/pgp_message.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "autocrypt_header"
+path = "fuzz_targets/autocrypt_header.rs"
 test = false
 doc = false
 bench = false
