@@ -55,7 +55,7 @@ pub struct TreeRow {
     /// Inboxes
     pub reorders_accounts: bool,
     /// The kind of special folder it is, in a word for its icon (`inbox`, `sent`, `drafts`, `deleted`, `junk`,
-    /// `archive`, `flagged` for a server's own flagged folder), empty for any other
+    /// `archive`, `flagged` for a server's own flagged folder, `all` for one of all mail), empty for any other
     pub icon: &'static str,
 }
 
@@ -70,6 +70,7 @@ impl TreeRow {
 fn icon(folder: &Folder) -> &'static str {
     match folder.info.special_use.as_deref().and_then(SpecialUse::from_flag) {
         Some(SpecialUse::Flagged) => "flagged",
+        Some(SpecialUse::All) => "all",
         _ => text::folder_kind(&folder.info),
     }
 }
@@ -240,7 +241,10 @@ pub(crate) fn rows(accounts: Vec<(pe_store::Account, Vec<Folder>)>, flagged: u64
         counts.push(0);
         let skip = usize::from(folders.first().is_some_and(|(folder, _)| is_inbox(folder)));
         for (folder, depth) in &folders[skip..] {
-            rows.push(folder_row(folder, depth + 1));
+            let mut row = folder_row(folder, depth + 1);
+            // which account's, in the folder bar and the title: "Archive - Work"
+            row.title = format!("{} - {title}", row.label);
+            rows.push(row);
             counts.push(counted(folder));
         }
     }
@@ -387,6 +391,7 @@ mod tests {
         // All Inboxes counts both Inboxes; a heading hides its folders' unread (not Junk E-mail's)
         assert_eq!(rows[0].unread, 4);
         assert_eq!(rows[1].title, "Inbox - example.org");
+        assert_eq!(rows[6].title, "Sent Items - example.org");
         assert_eq!(rows[4].hidden, 4);
         assert!(!rows[4].selectable && rows[4].reorders_accounts && rows[1].reorders_accounts);
         assert!(rows[1].drop_target && !rows[0].drop_target && !rows[4].drop_target);

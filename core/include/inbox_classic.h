@@ -768,6 +768,9 @@ typedef struct PeTreeRow {
   uint64_t unread;
   // The unread messages under it, shown with its own while it is collapsed
   uint64_t hidden;
+  // Shown bold while open, and while collapsed (`TreeRow::bold`)
+  bool bold;
+  bool bold_collapsed;
   // It has rows under it
   bool parent;
   bool selectable;

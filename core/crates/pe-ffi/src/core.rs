@@ -1178,6 +1178,9 @@ pub struct PeTreeRow {
     pub unread: u64,
     /// The unread messages under it, shown with its own while it is collapsed
     pub hidden: u64,
+    /// Shown bold while open, and while collapsed (`TreeRow::bold`)
+    pub bold: bool,
+    pub bold_collapsed: bool,
     /// It has rows under it
     pub parent: bool,
     pub selectable: bool,
@@ -1221,6 +1224,8 @@ pub unsafe extern "C" fn pe_folder_tree(core: *const PeCore) -> *mut PeTree {
                 title: strings.add(&row.title),
                 unread: row.unread,
                 hidden: row.hidden,
+                bold: row.bold(false),
+                bold_collapsed: row.bold(true),
                 parent: row.parent,
                 selectable: row.selectable,
                 drop_target: row.drop_target,
