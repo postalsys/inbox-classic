@@ -518,3 +518,63 @@ event-attendees =
     }
 
 otp-notification = { $code } es su código para { $domain }
+
+## OpenPGP keys (keys.rs)
+# review: new
+pgp-key-valid = Válida
+# review: new
+pgp-key-expires = Válida hasta el { $date }
+# review: new
+pgp-key-expired = Caducó el { $date }
+# review: new
+pgp-key-revoked = Revocada
+# review: new
+pgp-key-revoked-why = Revocada: { $reason }
+# review: new
+pgp-key-not-valid = No válida
+# review: new
+pgp-key-locked = No se puede usar: la clave que la protege ya no está en { $store }. Vuelva a importar su copia de seguridad.
+# review: new
+pgp-source-own = Creada en Inbox Classic
+# review: new
+pgp-source-file = Importada de un archivo
+# review: new
+pgp-source-paste = Pegada
+# review: new
+pgp-source-attachment = De un mensaje
+# review: new
+pgp-source-vcard = De una tarjeta de contacto
+# review: new
+pgp-source-wkd = Del proveedor de correo del remitente
+# review: new
+pgp-source-keyserver = De keys.openpgp.org
+# review: new
+pgp-source-autocrypt = Del encabezado Autocrypt de un mensaje
+# review: new
+pgp-error-no-store = Las claves privadas se guardan protegidas por { $store }, que no se puede usar: { $error }
+# review: new
+pgp-error-wrong-passphrase = La frase de contraseña no es correcta.
+# review: new
+pgp-error-empty-passphrase = Elija una frase de contraseña para proteger la copia de seguridad.
+# review: new
+pgp-error-not-a-key = Esto no es una clave OpenPGP.
+# review: new
+pgp-error-too-large = La clave es demasiado grande.
+# review: new
+pgp-error-unusable = La clave usa criptografía antigua o débil y no se puede usar.
+# review: new
+pgp-imported-private = { $count ->
+    [one] Se importó su clave privada.
+   *[other] Se importaron { $count } claves privadas.
+}
+# review: new
+pgp-imported-public = { $count ->
+    [one] Se importó una clave.
+   *[other] Se importaron { $count } claves.
+}
+# review: new
+pgp-imported-pending = Ya se usa otra clave para { $addresses }: la nueva espera en el contacto hasta que la elija.
+# review: new
+pgp-error-needs-passphrase = La clave privada está protegida por una frase de contraseña. Escríbala para importar la clave.
+# review: new
+pgp-error-mismatch = La clave privada no corresponde a su clave pública. Puede haber sido alterada.

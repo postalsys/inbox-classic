@@ -518,3 +518,37 @@ event-attendees =
 
 # the first line of a new message's notification when it has a code, for a domain that signed it
 otp-notification = { $code } is your code for { $domain }
+
+## OpenPGP keys (keys.rs)
+pgp-key-valid = Valid
+pgp-key-expires = Valid until { $date }
+pgp-key-expired = Expired on { $date }
+pgp-key-revoked = Revoked
+pgp-key-revoked-why = Revoked: { $reason }
+pgp-key-not-valid = Not valid
+pgp-key-locked = Can not be used: the key that protects it is no longer in { $store }. Import its backup again.
+pgp-source-own = Made in Inbox Classic
+pgp-source-file = Imported from a file
+pgp-source-paste = Pasted
+pgp-source-attachment = From a message
+pgp-source-vcard = From a contact card
+pgp-source-wkd = From the sender's mail provider
+pgp-source-keyserver = From keys.openpgp.org
+pgp-source-autocrypt = From a message's Autocrypt header
+pgp-error-no-store = Private keys are kept protected by { $store }, which can not be used: { $error }
+pgp-error-wrong-passphrase = The passphrase is not right.
+pgp-error-empty-passphrase = Choose a passphrase to protect the backup.
+pgp-error-not-a-key = This is not an OpenPGP key.
+pgp-error-too-large = The key is too large.
+pgp-error-unusable = The key uses old or weak cryptography and can not be used.
+pgp-imported-private = { $count ->
+    [one] Your private key was imported.
+   *[other] { $count } private keys were imported.
+}
+pgp-imported-public = { $count ->
+    [one] One key was imported.
+   *[other] { $count } keys were imported.
+}
+pgp-imported-pending = Another key is already used for { $addresses }: the new one waits in the contact until you choose it.
+pgp-error-needs-passphrase = The private key is protected by a passphrase. Type it to import the key.
+pgp-error-mismatch = The private key does not belong to its public key. It may have been altered.

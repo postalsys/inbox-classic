@@ -75,9 +75,13 @@ pub fn read_vcards(text: &str) -> Vec<Card> {
                 let Some(card) = card.as_mut() else { continue };
                 // a picture the file carries; one it names by its address stays a line, never fetched
                 if name == "PHOTO"
-                    && let Some(bytes) = embedded_photo(&parameters, value)
+                    && let Some(bytes) = embedded_data(&parameters, value, None)
                 {
                     card.picture = crate::card_pictures::normalize(&bytes).ok();
+                    continue;
+                }
+                // an OpenPGP key goes to the key book (`read_keys`), not into the card
+                if name == "KEY" && pgp_key(&parameters, value).is_some() {
                     continue;
                 }
                 match name.as_str() {
@@ -120,9 +124,9 @@ pub fn read_vcards(text: &str) -> Vec<Card> {
     cards
 }
 
-/// The picture of a PHOTO line that carries it: base64 with ENCODING=b (vCard 3.0), or a data: URI (4.0); None for a
-/// PHOTO that names an address, or one that does not decode
-fn embedded_photo(parameters: &[(String, String)], value: &str) -> Option<Vec<u8>> {
+/// The data a PHOTO or KEY line carries: base64 with ENCODING=b (vCard 3.0), or a data: URI (4.0) of the media type
+/// `mime` when one is given; None for a line that names an address, or one that does not decode
+fn embedded_data(parameters: &[(String, String)], value: &str, mime: Option<&str>) -> Option<Vec<u8>> {
     let encoded = parameters
         .iter()
         .any(|(key, v)| key == "ENCODING" && (v.eq_ignore_ascii_case("b") || v.eq_ignore_ascii_case("base64")));
@@ -131,13 +135,43 @@ fn embedded_photo(parameters: &[(String, String)], value: &str) -> Option<Vec<u8
     } else {
         let (head, data) = value.split_once(',')?;
         let head = head.to_ascii_lowercase();
-        if !head.starts_with("data:") || !head.ends_with(";base64") {
+        let media = head.strip_prefix("data:")?.strip_suffix(";base64")?;
+        if mime.is_some_and(|mime| media != mime) {
             return None;
         }
         data
     };
     let compact: String = data.chars().filter(|c| !c.is_whitespace()).collect();
     base64::engine::general_purpose::STANDARD.decode(compact).ok()
+}
+
+/// The OpenPGP key of a KEY line: `KEY;TYPE=PGP;ENCODING=b:` (vCard 3.0) or `KEY:data:application/pgp-keys;base64,`
+/// (4.0)
+fn pgp_key(parameters: &[(String, String)], value: &str) -> Option<Vec<u8>> {
+    if value.to_ascii_lowercase().starts_with("data:") {
+        return embedded_data(parameters, value, Some("application/pgp-keys"));
+    }
+    has_type(parameters, "PGP")
+        .then(|| embedded_data(parameters, value, None))
+        .flatten()
+}
+
+/// The OpenPGP keys the cards of a vCard file carry
+pub fn read_keys(text: &str) -> Vec<Vec<u8>> {
+    unfold(text)
+        .iter()
+        .filter_map(|line| split(line))
+        .filter(|(name, _, _)| name == "KEY")
+        .filter_map(|(_, parameters, value)| pgp_key(&parameters, &value))
+        .collect()
+}
+
+/// The KEY line of a vCard 3.0 for a certificate
+pub fn key_line(cert: &[u8]) -> String {
+    format!(
+        "KEY;TYPE=PGP;ENCODING=b:{}",
+        base64::engine::general_purpose::STANDARD.encode(cert)
+    )
 }
 
 /// A vCard line, folded at 75 bytes as the standard has it (a fold never inside a character)
@@ -323,6 +357,24 @@ pub fn read_csv(text: &str) -> Vec<Card> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn openpgp_keys_in_cards() {
+        let cert = [0x99u8, 0x01, 0x02];
+        let v3 = format!(
+            "BEGIN:VCARD\r\nVERSION:3.0\r\nFN:Bob\r\nEMAIL:bob@example.net\r\n{}\r\nEND:VCARD\r\n",
+            key_line(&cert)
+        );
+        let v4 = "BEGIN:VCARD\r\nVERSION:4.0\r\nFN:Ann\r\nitem1.KEY:data:application/pgp-keys;base64,mQEC\r\n\
+                  KEY:https://example.org/ann.asc\r\nKEY;TYPE=X509;ENCODING=b:mQEC\r\nEND:VCARD\r\n";
+        assert_eq!(read_keys(&v3), [cert.to_vec()]);
+        assert_eq!(read_keys(v4), [cert.to_vec()]);
+        // the OpenPGP key is not kept in the card; the others stay as they came
+        assert!(!read_vcards(&v3)[0].extra.contains("KEY"));
+        let ann = &read_vcards(v4)[0];
+        assert!(ann.extra.contains("https://example.org/ann.asc") && ann.extra.contains("X509"));
+        assert!(!ann.extra.contains("pgp-keys"));
+    }
 
     #[test]
     fn reads_and_writes_photos_it_carries() {

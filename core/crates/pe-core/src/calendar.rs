@@ -465,6 +465,11 @@ pub(crate) fn local_date_time(seconds: i64) -> String {
     )
 }
 
+/// A day as the reader writes it: "3 May 2027" (when a key expires)
+pub(crate) fn local_date(seconds: i64) -> String {
+    instant(seconds, false, InstantPart::Date)
+}
+
 /// `2026-12-01` or `12:00`, in UTC
 fn iso_instant(seconds: i64, part: InstantPart) -> String {
     let (days, rest) = (seconds.div_euclid(86400), seconds.rem_euclid(86400));

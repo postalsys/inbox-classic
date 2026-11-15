@@ -2267,16 +2267,19 @@ dependencies = [
  "pe-net",
  "pe-oauth",
  "pe-otp",
+ "pe-pgp",
  "pe-smtp",
  "pe-store",
  "pe-sync",
  "pe-testkit",
  "resvg",
+ "ring",
  "serde_json",
  "tokio",
  "unicode-normalization",
  "windows-native-keyring-store",
  "zbus-secret-service-keyring-store",
+ "zeroize",
 ]
 
 [[package]]
