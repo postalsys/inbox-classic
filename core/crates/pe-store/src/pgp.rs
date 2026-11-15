@@ -270,6 +270,15 @@ impl Store {
         )?;
         Ok(())
     }
+
+    /// The address sends with no key
+    pub fn remove_pgp_identity(&self, address: &str) -> Result<()> {
+        self.db.execute(
+            "DELETE FROM pgp_identities WHERE address = ?1",
+            [normal_address(address)],
+        )?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]

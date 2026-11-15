@@ -691,6 +691,11 @@ ui-verify-intro = Demandez à { $name } de vous lire l'empreinte de sa clé depu
 # review: new
 ui-verify-fingerprint = L'empreinte de la clé que vous avez :
 # review: new
+ui-verify-marks = { $count ->
+    [one] S’ils correspondent, la clé est marquée comme la leur pour { $addresses }. Si cette adresse n’est pas la leur, cliquez sur « Elles diffèrent ».
+   *[other] S’ils correspondent, la clé est marquée comme la leur pour { $addresses }. Si l’une de ces adresses n’est pas la leur, cliquez sur « Elles diffèrent ».
+}
+# review: new
 ui-verify-match = Elles &correspondent
 # review: new
 ui-verify-differ = Elles &diffèrent

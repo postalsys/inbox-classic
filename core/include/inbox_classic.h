@@ -424,8 +424,6 @@ typedef struct PeHelpList PeHelpList;
 
 typedef struct PeIdentityList PeIdentityList;
 
-typedef struct PeKeyAddressList PeKeyAddressList;
-
 // A list of keys
 typedef struct PeKeyList PeKeyList;
 
@@ -1072,7 +1070,7 @@ typedef struct PeKey {
   const char *grouped;
   // The user ids valid now, one a line
   const char *user_ids;
-  // The addresses it holds, one a line (each with whether it is verified: `pe_pgp_key_addresses`)
+  // The addresses it holds, one a line (each with whether it is verified: `address_lines`)
   const char *addresses;
   // Whether every address it holds is verified (and it holds one)
   bool verified;
@@ -1089,14 +1087,28 @@ typedef struct PeKey {
   const char *algorithm;
   // Where it came from, in words
   const char *source;
+  // What it is called: the name of its first user id, else its first address, else its fingerprint
+  const char *name;
+  // What the Status column says: the state, ", verified" after it for a contact's key the user compared
+  const char *status;
+  // The name and the last four groups of the fingerprint, as a choice of keys shows it
+  const char *choice;
+  // The grouped fingerprint on two lines (split by "\n"), what Verify shows to read out
+  const char *fingerprint_lines;
+  // Back Up applies: an own key whose private part opens
+  bool can_back_up;
+  // Verify applies: a contact's key
+  bool can_verify;
+  // Each address it holds, one a line; a contact's with whether it is verified
+  const char *address_lines;
+  // What Remove asks first
+  const char *remove_question;
+  // What Verify Key says They Match marks: every address the key holds
+  const char *verify_marks;
+  // When it was made and until when it is valid ("Never"), in the user's way of writing a day
+  const char *created_text;
+  const char *expires_text;
 } PeKey;
-
-// An address a key holds
-typedef struct PeKeyAddress {
-  const char *address;
-  // The user compared the key's fingerprint with its owner
-  bool verified;
-} PeKeyAddress;
 
 // A correspondent's keys: the one in use and a newer one waiting for the user's decision
 typedef struct PePeerKeys {
@@ -2980,25 +2992,6 @@ const struct PeKey *pe_pgp_key_list_get(const struct PeKeyList *list, size_t ind
 // `list` must be NULL or a list that was not freed yet.
 void pe_pgp_key_list_free(struct PeKeyList *list);
 
-// The addresses of a key; NULL when there is no such key. Free with `pe_pgp_key_address_list_free`.
-//
-// # Safety
-// `core` must be a live handle, `fingerprint` a NUL-terminated string.
-struct PeKeyAddressList *pe_pgp_key_addresses(const struct PeCore *core, const char *fingerprint);
-
-// # Safety
-// `list` must be NULL or a list that was not freed yet.
-size_t pe_pgp_key_address_list_count(const struct PeKeyAddressList *list);
-
-// # Safety
-// `list` must be NULL or a list that was not freed yet.
-const struct PeKeyAddress *pe_pgp_key_address_list_get(const struct PeKeyAddressList *list,
-                                                       size_t index);
-
-// # Safety
-// `list` must be NULL or a list that was not freed yet.
-void pe_pgp_key_address_list_free(struct PeKeyAddressList *list);
-
 // Whether a private key made or imported now can still be used after a restart: false when passwords are kept in
 // memory only, where the windows say so first
 //
@@ -3053,14 +3046,21 @@ char *pe_pgp_backup(const struct PeCore *core,
 // `core` must be a live handle, `fingerprint` a NUL-terminated string.
 bool pe_pgp_remove(const struct PeCore *core, const char *fingerprint);
 
-// Marks whether the user compared the key's fingerprint with the owner of `address`
+// Marks whether the user compared the key's fingerprint with its owner's (Verify Key), for every address it holds
 //
 // # Safety
-// `core` must be a live handle, `fingerprint` and `address` NUL-terminated strings.
-bool pe_pgp_set_verified(const struct PeCore *core,
-                         const char *fingerprint,
-                         const char *address,
-                         bool verified);
+// `core` must be a live handle, `fingerprint` a NUL-terminated string.
+bool pe_pgp_set_key_verified(const struct PeCore *core,
+                             const char *fingerprint,
+                             bool verified);
+
+// Why a backup's passphrase, typed twice, is refused (they differ, or it is too short); NULL when it is good. Free
+// with `pe_string_free`.
+//
+// # Safety
+// `first` and `again` must be NULL or NUL-terminated strings.
+char *pe_pgp_passphrase_problem(const char *first,
+                                const char *again);
 
 // The keys of `address`; free with `pe_pgp_peer_free`.
 //
@@ -3098,13 +3098,27 @@ const struct PeIdentity *pe_pgp_identity_list_get(const struct PeIdentityList *l
 // `list` must be NULL or a list that was not freed yet.
 void pe_pgp_identity_list_free(struct PeIdentityList *list);
 
-// Own addresses one of the user's keys holds that use no key yet, each with that key (as identities): after a
-// backup was imported, the windows ask "Use this key for ...?" and call `pe_pgp_set_identity`. Free with
-// `pe_pgp_identity_list_free`.
+// What to ask after an import when own addresses one of the user's keys holds use no key yet ("Use this key for
+// ...?"), NULL when there are none: the answer Use It is `pe_pgp_claim_unclaimed`. Free with `pe_string_free`.
 //
 // # Safety
 // `core` must be a live handle.
-struct PeIdentityList *pe_pgp_unclaimed(const struct PeCore *core);
+char *pe_pgp_unclaimed_question(const struct PeCore *core);
+
+// Each of those addresses uses its key, with Autocrypt
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_pgp_claim_unclaimed(const struct PeCore *core);
+
+// The fingerprint of an account's key, NULL without one; `autocrypt` (when not NULL) set to whether its mail
+// carries it (true without a key, as a new key starts). Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle, `autocrypt` NULL or writable.
+char *pe_pgp_account_key(const struct PeCore *core,
+                         int64_t account,
+                         bool *autocrypt);
 
 // The file name a key is saved under: public, or a backup of the private key; NULL for no such key. Free with
 // `pe_string_free`.
@@ -3115,14 +3129,16 @@ char *pe_pgp_file_name(const struct PeCore *core,
                        const char *fingerprint,
                        bool private_);
 
-// Sets the key of an own address, and whether its mail carries the key in the Autocrypt header
+// Sets the key of an account (Account Properties): of its address and of its other addresses that used the
+// account's key or none; an empty `fingerprint` (None) takes the key away from them. Nothing changes when neither the
+// key nor `autocrypt` did.
 //
 // # Safety
-// `core` must be a live handle, `address` and `fingerprint` NUL-terminated strings.
-bool pe_pgp_set_identity(const struct PeCore *core,
-                         const char *address,
-                         const char *fingerprint,
-                         bool autocrypt);
+// `core` must be a live handle, `fingerprint` a NUL-terminated string.
+bool pe_pgp_set_account_key(const struct PeCore *core,
+                            int64_t account,
+                            const char *fingerprint,
+                            bool autocrypt);
 
 // The layout of a window `width` wide (96 DPI pixels, points or sp) that shows `current` now, for `mode`: Automatic
 // turns to Columns at 1320 and back to Classic below 1200; Columns chosen holds down to 900

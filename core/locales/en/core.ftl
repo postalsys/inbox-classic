@@ -537,7 +537,6 @@ pgp-source-keyserver = From keys.openpgp.org
 pgp-source-autocrypt = From a message's Autocrypt header
 pgp-error-no-store = Private keys are kept protected by { $store }, which can not be used: { $error }
 pgp-error-wrong-passphrase = The passphrase is not right.
-pgp-error-empty-passphrase = Choose a passphrase to protect the backup.
 pgp-error-not-a-key = This is not an OpenPGP key.
 pgp-error-too-large = The key is too large.
 pgp-error-unusable = The key uses old or weak cryptography and can not be used.

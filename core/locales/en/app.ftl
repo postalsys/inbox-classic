@@ -640,6 +640,10 @@ ui-key-address-not-verified = { $address } (not verified)
 ui-verify-title = Verify Key
 ui-verify-intro = Ask { $name } to read you the fingerprint of their key from their own app, in person or on a call. Do not compare it with one sent by email: whoever could change the key could change that too.
 ui-verify-fingerprint = The fingerprint of the key you have:
+ui-verify-marks = { $count ->
+    [one] If they match, the key is marked as theirs for { $addresses }. If that address is not theirs, click They Differ.
+   *[other] If they match, the key is marked as theirs for { $addresses }. If one of these addresses is not theirs, click They Differ.
+}
 ui-verify-match = They &Match
 ui-verify-differ = They &Differ
 ui-verify-differs = The key you have is not the one { $name } has. Remove it, and ask them for their key again.
@@ -652,5 +656,5 @@ ui-account-key-new = &New Key...
 ui-account-autocrypt = &Send my public key with my messages (Autocrypt)
 ui-contact-key = Encryption key:
 ui-contact-key-none = No key
-ui-contact-key-use-new = &Use the New Key
+ui-contact-key-use-new = Use the &New Key
 ui-contact-key-keep = &Keep the Current One

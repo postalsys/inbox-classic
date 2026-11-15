@@ -691,6 +691,11 @@ ui-verify-intro = Pida a { $name } que le lea la huella de su clave desde su pro
 # review: new
 ui-verify-fingerprint = La huella de la clave que tiene:
 # review: new
+ui-verify-marks = { $count ->
+    [one] Si coinciden, la clave se marca como suya para { $addresses }. Si esa dirección no es suya, haga clic en «No coinciden».
+   *[other] Si coinciden, la clave se marca como suya para { $addresses }. Si alguna de estas direcciones no es suya, haga clic en «No coinciden».
+}
+# review: new
 ui-verify-match = &Coinciden
 # review: new
 ui-verify-differ = &No coinciden

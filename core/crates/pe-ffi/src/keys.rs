@@ -9,7 +9,7 @@ use pe_core::keys::{ImportError, KeyInfo, KeySource, KeyState};
 use pe_store::PgpIdentity;
 
 use crate::core::{PeCore, Rows, arg, handed, refused, take_back, with};
-use crate::into_c_string;
+use crate::{guard, into_c_string};
 
 /// What a key is now
 #[repr(C)]
@@ -44,7 +44,7 @@ pub struct PeKey {
     pub grouped: *const c_char,
     /// The user ids valid now, one a line
     pub user_ids: *const c_char,
-    /// The addresses it holds, one a line (each with whether it is verified: `pe_pgp_key_addresses`)
+    /// The addresses it holds, one a line (each with whether it is verified: `address_lines`)
     pub addresses: *const c_char,
     /// Whether every address it holds is verified (and it holds one)
     pub verified: bool,
@@ -61,6 +61,27 @@ pub struct PeKey {
     pub algorithm: *const c_char,
     /// Where it came from, in words
     pub source: *const c_char,
+    /// What it is called: the name of its first user id, else its first address, else its fingerprint
+    pub name: *const c_char,
+    /// What the Status column says: the state, ", verified" after it for a contact's key the user compared
+    pub status: *const c_char,
+    /// The name and the last four groups of the fingerprint, as a choice of keys shows it
+    pub choice: *const c_char,
+    /// The grouped fingerprint on two lines (split by "\n"), what Verify shows to read out
+    pub fingerprint_lines: *const c_char,
+    /// Back Up applies: an own key whose private part opens
+    pub can_back_up: bool,
+    /// Verify applies: a contact's key
+    pub can_verify: bool,
+    /// Each address it holds, one a line; a contact's with whether it is verified
+    pub address_lines: *const c_char,
+    /// What Remove asks first
+    pub remove_question: *const c_char,
+    /// What Verify Key says They Match marks: every address the key holds
+    pub verify_marks: *const c_char,
+    /// When it was made and until when it is valid ("Never"), in the user's way of writing a day
+    pub created_text: *const c_char,
+    pub expires_text: *const c_char,
 }
 
 /// A list of keys
@@ -86,6 +107,17 @@ fn key_list(keys: &[KeyInfo]) -> *mut PeKeyList {
         expires: key.expires.unwrap_or(0),
         algorithm: strings.add(&key.algorithm),
         source: strings.add(&key.source),
+        name: strings.add(&key.name),
+        status: strings.add(&key.status),
+        choice: strings.add(&key.choice),
+        fingerprint_lines: strings.add(&key.fingerprint_lines),
+        can_back_up: key.can_back_up,
+        can_verify: key.can_verify,
+        address_lines: strings.add(&key.address_lines.join("\n")),
+        remove_question: strings.add(&key.remove_question),
+        verify_marks: strings.add(&key.verify_marks),
+        created_text: strings.add(&key.created_text),
+        expires_text: strings.add(&key.expires_text),
     })))
 }
 
@@ -141,71 +173,6 @@ pub unsafe extern "C" fn pe_pgp_key_list_get(list: *const PeKeyList, index: usiz
 /// `list` must be NULL or a list that was not freed yet.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_pgp_key_list_free(list: *mut PeKeyList) {
-    // SAFETY: as the caller guarantees
-    unsafe { take_back(list) }
-}
-
-/// An address a key holds
-#[repr(C)]
-pub struct PeKeyAddress {
-    pub address: *const c_char,
-    /// The user compared the key's fingerprint with its owner
-    pub verified: bool,
-}
-
-pub struct PeKeyAddressList(Rows<PeKeyAddress>);
-
-/// The addresses of a key; NULL when there is no such key. Free with `pe_pgp_key_address_list_free`.
-///
-/// # Safety
-/// `core` must be a live handle, `fingerprint` a NUL-terminated string.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_pgp_key_addresses(
-    core: *const PeCore,
-    fingerprint: *const c_char,
-) -> *mut PeKeyAddressList {
-    // SAFETY: as the caller guarantees
-    let fingerprint = unsafe { arg(fingerprint) }.unwrap_or_default();
-    // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, null_mut(), |core| {
-            let Ok(key) = core.pgp_key(fingerprint) else {
-                return null_mut();
-            };
-            handed(PeKeyAddressList(Rows::new(
-                &key.addresses,
-                |(address, verified), strings| PeKeyAddress {
-                    address: strings.add(address),
-                    verified: *verified,
-                },
-            )))
-        })
-    }
-}
-
-/// # Safety
-/// `list` must be NULL or a list that was not freed yet.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_pgp_key_address_list_count(list: *const PeKeyAddressList) -> usize {
-    // SAFETY: as the caller guarantees
-    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
-}
-
-/// # Safety
-/// `list` must be NULL or a list that was not freed yet.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_pgp_key_address_list_get(
-    list: *const PeKeyAddressList,
-    index: usize,
-) -> *const PeKeyAddress {
-    // SAFETY: as the caller guarantees
-    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
-}
-
-/// # Safety
-/// `list` must be NULL or a list that was not freed yet.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_pgp_key_address_list_free(list: *mut PeKeyAddressList) {
     // SAFETY: as the caller guarantees
     unsafe { take_back(list) }
 }
@@ -363,25 +330,36 @@ pub unsafe extern "C" fn pe_pgp_remove(core: *const PeCore, fingerprint: *const 
     unsafe { with(core, false, |core| core.pgp_remove(fingerprint).is_ok()) }
 }
 
-/// Marks whether the user compared the key's fingerprint with the owner of `address`
+/// Marks whether the user compared the key's fingerprint with its owner's (Verify Key), for every address it holds
 ///
 /// # Safety
-/// `core` must be a live handle, `fingerprint` and `address` NUL-terminated strings.
+/// `core` must be a live handle, `fingerprint` a NUL-terminated string.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_pgp_set_verified(
+pub unsafe extern "C" fn pe_pgp_set_key_verified(
     core: *const PeCore,
     fingerprint: *const c_char,
-    address: *const c_char,
     verified: bool,
 ) -> bool {
     // SAFETY: as the caller guarantees
-    let (fingerprint, address) = unsafe { (arg(fingerprint).unwrap_or_default(), arg(address).unwrap_or_default()) };
+    let fingerprint = unsafe { arg(fingerprint).unwrap_or_default() };
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, false, |core| {
-            core.pgp_set_verified(fingerprint, address, verified).is_ok()
+            core.pgp_set_key_verified(fingerprint, verified).is_ok()
         })
     }
+}
+
+/// Why a backup's passphrase, typed twice, is refused (they differ, or it is too short); NULL when it is good. Free
+/// with `pe_string_free`.
+///
+/// # Safety
+/// `first` and `again` must be NULL or NUL-terminated strings.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pgp_passphrase_problem(first: *const c_char, again: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let (first, again) = unsafe { (arg(first).unwrap_or_default(), arg(again).unwrap_or_default()) };
+    guard(|| pe_core::keys::passphrase_problem(first, again).map_or(null_mut(), into_c_string)).unwrap_or(null_mut())
 }
 
 /// A correspondent's keys: the one in use and a newer one waiting for the user's decision
@@ -510,28 +488,49 @@ pub unsafe extern "C" fn pe_pgp_identity_list_free(list: *mut PeIdentityList) {
     unsafe { take_back(list) }
 }
 
-/// Own addresses one of the user's keys holds that use no key yet, each with that key (as identities): after a
-/// backup was imported, the windows ask "Use this key for ...?" and call `pe_pgp_set_identity`. Free with
-/// `pe_pgp_identity_list_free`.
+/// What to ask after an import when own addresses one of the user's keys holds use no key yet ("Use this key for
+/// ...?"), NULL when there are none: the answer Use It is `pe_pgp_claim_unclaimed`. Free with `pe_string_free`.
 ///
 /// # Safety
 /// `core` must be a live handle.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_pgp_unclaimed(core: *const PeCore) -> *mut PeIdentityList {
+pub unsafe extern "C" fn pe_pgp_unclaimed_question(core: *const PeCore) -> *mut c_char {
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
-            let Ok(unclaimed) = core.pgp_unclaimed() else {
-                return null_mut();
-            };
-            handed(PeIdentityList(Rows::new(
-                &unclaimed,
-                |(address, fingerprint), strings| PeIdentity {
-                    address: strings.add(address),
-                    fingerprint: strings.add(fingerprint),
-                    autocrypt: true,
-                },
-            )))
+            core.pgp_unclaimed_question()
+                .ok()
+                .flatten()
+                .map_or(null_mut(), into_c_string)
+        })
+    }
+}
+
+/// Each of those addresses uses its key, with Autocrypt
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pgp_claim_unclaimed(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.pgp_claim_unclaimed().is_ok()) }
+}
+
+/// The fingerprint of an account's key, NULL without one; `autocrypt` (when not NULL) set to whether its mail
+/// carries it (true without a key, as a new key starts). Free with `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `autocrypt` NULL or writable.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pgp_account_key(core: *const PeCore, account: i64, autocrypt: *mut bool) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let identity = core.pgp_account_key(account).ok().flatten();
+            if !autocrypt.is_null() {
+                *autocrypt = identity.as_ref().is_none_or(|identity| identity.autocrypt);
+            }
+            identity.map_or(null_mut(), |identity| into_c_string(identity.fingerprint))
         })
     }
 }
@@ -558,23 +557,25 @@ pub unsafe extern "C" fn pe_pgp_file_name(
     }
 }
 
-/// Sets the key of an own address, and whether its mail carries the key in the Autocrypt header
+/// Sets the key of an account (Account Properties): of its address and of its other addresses that used the
+/// account's key or none; an empty `fingerprint` (None) takes the key away from them. Nothing changes when neither the
+/// key nor `autocrypt` did.
 ///
 /// # Safety
-/// `core` must be a live handle, `address` and `fingerprint` NUL-terminated strings.
+/// `core` must be a live handle, `fingerprint` a NUL-terminated string.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_pgp_set_identity(
+pub unsafe extern "C" fn pe_pgp_set_account_key(
     core: *const PeCore,
-    address: *const c_char,
+    account: i64,
     fingerprint: *const c_char,
     autocrypt: bool,
 ) -> bool {
     // SAFETY: as the caller guarantees
-    let (address, fingerprint) = unsafe { (arg(address).unwrap_or_default(), arg(fingerprint).unwrap_or_default()) };
+    let fingerprint = unsafe { arg(fingerprint).unwrap_or_default() };
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, false, |core| {
-            core.pgp_set_identity(address, fingerprint, autocrypt).is_ok()
+            core.pgp_set_account_key(account, fingerprint, autocrypt).is_ok()
         })
     }
 }

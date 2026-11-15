@@ -691,6 +691,11 @@ ui-verify-intro = Bitten Sie { $name }, Ihnen den Fingerabdruck des Schlüssels 
 # review: new
 ui-verify-fingerprint = Der Fingerabdruck des Schlüssels, den Sie haben:
 # review: new
+ui-verify-marks = { $count ->
+    [one] Wenn sie übereinstimmen, wird der Schlüssel als ihrer markiert für { $addresses }. Gehört diese Adresse nicht zu ihnen, klicken Sie auf „Sie unterscheiden sich“.
+   *[other] Wenn sie übereinstimmen, wird der Schlüssel als ihrer markiert für { $addresses }. Gehört eine dieser Adressen nicht zu ihnen, klicken Sie auf „Sie unterscheiden sich“.
+}
+# review: new
 ui-verify-match = Sie &stimmen überein
 # review: new
 ui-verify-differ = Sie &unterscheiden sich
@@ -717,4 +722,4 @@ ui-contact-key-none = Kein Schlüssel
 # review: new
 ui-contact-key-use-new = Den neuen Schlüssel &verwenden
 # review: new
-ui-contact-key-keep = Den bisherigen &behalten
+ui-contact-key-keep = &Den bisherigen behalten

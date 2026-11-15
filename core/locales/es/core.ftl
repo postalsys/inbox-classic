@@ -555,7 +555,6 @@ pgp-error-no-store = Las claves privadas se guardan protegidas por { $store }, q
 # review: new
 pgp-error-wrong-passphrase = La frase de contraseña no es correcta.
 # review: new
-pgp-error-empty-passphrase = Elija una frase de contraseña para proteger la copia de seguridad.
 # review: new
 pgp-error-not-a-key = Esto no es una clave OpenPGP.
 # review: new

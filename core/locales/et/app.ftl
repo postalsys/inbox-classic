@@ -691,6 +691,11 @@ ui-verify-intro = Palu kontaktil { $name } lugeda sulle oma rakendusest ette oma
 # review: new
 ui-verify-fingerprint = Sinu käes oleva võtme sõrmejälg:
 # review: new
+ui-verify-marks = { $count ->
+    [one] Kui need klapivad, märgitakse võti nende omaks aadressile { $addresses }. Kui see aadress pole nende oma, klõpsa „Need erinevad“.
+   *[other] Kui need klapivad, märgitakse võti nende omaks aadressidele { $addresses }. Kui mõni neist pole nende oma, klõpsa „Need erinevad“.
+}
+# review: new
 ui-verify-match = Need &ühtivad
 # review: new
 ui-verify-differ = Need &erinevad
@@ -715,6 +720,6 @@ ui-contact-key = Krüpteerimisvõti:
 # review: new
 ui-contact-key-none = Võtit pole
 # review: new
-ui-contact-key-use-new = &Kasuta uut võtit
+ui-contact-key-use-new = Kasuta &uut võtit
 # review: new
 ui-contact-key-keep = &Jäta senine

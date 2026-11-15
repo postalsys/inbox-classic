@@ -531,7 +531,6 @@ pgp-error-no-store = Privaatvõtmeid kaitseb { $store }, mida ei saa kasutada: {
 # review: new
 pgp-error-wrong-passphrase = Parool ei ole õige.
 # review: new
-pgp-error-empty-passphrase = Vali varukoopia kaitseks parool.
 # review: new
 pgp-error-not-a-key = See ei ole OpenPGP võti.
 # review: new
