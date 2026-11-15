@@ -248,7 +248,13 @@ mod tests {
         );
         // written to Bob, it is good for Bob
         let direct = crate::encrypt(&b"I approve."[..], &[bob.cert()], &[], Some(&alice), now).unwrap();
-        let opened = decrypt(direct.as_bytes(), std::slice::from_ref(&bob), &[alice.cert().clone()], now).unwrap();
+        let opened = decrypt(
+            direct.as_bytes(),
+            std::slice::from_ref(&bob),
+            &[alice.cert().clone()],
+            now,
+        )
+        .unwrap();
         assert_eq!(opened.signatures[0].status, crate::SigStatus::Good);
         assert_eq!(opened.signatures[0].intended, [bob.fingerprint()]);
     }
