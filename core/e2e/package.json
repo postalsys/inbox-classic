@@ -4,8 +4,8 @@
     "description": "ImapKit and its SMTP server for the end-to-end tests of the Rust core, started by pe-testkit; OpenPGP.js checks what is signed and encrypted",
     "type": "module",
     "dependencies": {
-        "imapkit": "5.3.0",
-        "smtp-server": "3.21.3",
-        "openpgp": "6.2.2"
+        "imapkit": "5.3.2",
+        "openpgp": "6.2.2",
+        "smtp-server": "3.21.3"
     }
 }
