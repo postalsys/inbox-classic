@@ -102,6 +102,20 @@ enum Icons {
         }
     }
 
+    /// the icon of a row of the folder tree, by its word from the core (`TreeRow.icon`); `fallback` for a row without one
+    static func treeIcon(_ word: String, fallback: String = "folder") -> String {
+        switch word {
+        case "inbox": return "mail_inbox"
+        case "sent": return "send"
+        case "drafts": return "drafts"
+        case "deleted": return "delete"
+        case "junk": return "mail_prohibited"
+        case "archive": return "archive"
+        case "flagged": return "flag"
+        default: return fallback
+        }
+    }
+
     /// a picture of the resources (the providers' sign-in buttons)
     static func picture(_ name: String) -> NSImage? {
         NSImage(contentsOf: resources.appendingPathComponent(name))

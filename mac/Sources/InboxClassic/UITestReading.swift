@@ -86,7 +86,7 @@ extension UITest {
               "the messages and the reading pane take the width")
         await shot(main.window, "layout-3-folders-hidden")
         selectFolder(named: "Sent Items")
-        check(await waitUntil(10) { main.mailbox.selectedName == "Sent Items" }, "a folder is still chosen while it is hidden")
+        check(await waitUntil(10) { main.mailbox.selectedName.hasPrefix("Sent Items") }, "a folder is still chosen while it is hidden (\(main.mailbox.selectedName))")
         selectFolder(named: "Inbox")
         pressToolbar("folderList")
         check(await waitUntil(10) { pane()?.isHidden == false && AppDelegate.shared.folderList && (pane()?.frame.width ?? 0) >= 160 },

@@ -376,13 +376,11 @@ extension UITest {
 
     func flaggedFolder() async throws {
         step("the Flagged folder")
-        let flaggedRow = { (0..<self.tree.numberOfRows).first { self.tree.item(atRow: $0) is Mailbox.FlaggedNode } }
-        guard let row = flaggedRow() else {
+        guard let row = treeRow(PE_TREE_ROW_KIND_FLAGGED) else {
             check(false, "Flagged is in the folder list")
             return
         }
-        check(row < (0..<tree.numberOfRows).first { tree.item(atRow: $0) is Mailbox.FolderNode } ?? 0,
-              "Flagged is above the accounts' folders")
+        check(row == 1 && folderRow("Inbox") == 0, "Flagged is in the folder list right under the Inbox (row \(row))")
         let before = main.core.flaggedCount
         // a message of another folder flagged: it is listed too
         selectFolder(named: "Archive")
@@ -859,47 +857,7 @@ extension UITest {
         await shot(main.window, "read-11-logo")
         search("")
 
-        step("a collapsed account")
-        let rowLabel = { (row: Int) -> String in
-            (self.tree.view(atColumn: 0, row: row, makeIfNecessary: true) as? NSTableCellView)?.accessibilityLabel() ?? ""
-        }
-        // the account's heading, under Flagged
-        let head = (0..<tree.numberOfRows).first { tree.item(atRow: $0) is Mailbox.AccountNode } ?? 0
-        let heading = { self.tree.view(atColumn: 0, row: head, makeIfNecessary: true) as? HeadingCell }
-        selectFolder(named: "Inbox")
-        let inboxRow = (0..<tree.numberOfRows).first { (tree.item(atRow: $0) as? Mailbox.FolderNode)?.folder.name == "Inbox" } ?? head + 1
-        let inboxNode = tree.item(atRow: inboxRow) as? Mailbox.FolderNode
-        let inboxUnread = inboxNode?.folder.unread ?? 0
-        _ = await waitUntil(5) { self.main.mailbox.folder == inboxNode?.folder.id }
-        let listed = main.mailbox.total
-        check(inboxUnread >= 1, "the Inbox has unread messages (\(rowLabel(inboxRow)))")
-        check(tree.item(atRow: head) is Mailbox.AccountNode && heading() != nil
-              && tree.delegate?.outlineView?(tree, shouldSelectItem: tree.item(atRow: head) as Any) == false,
-              "the account is a heading over its folders, which can not be selected")
-        // the arrow keys pass the heading by: up from the Inbox stays on the Inbox
-        tree.window?.makeFirstResponder(tree)
-        if let up = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
-                                     windowNumber: main.window.windowNumber, context: nil,
-                                     characters: String(UnicodeScalar(NSUpArrowFunctionKey)!),
-                                     charactersIgnoringModifiers: String(UnicodeScalar(NSUpArrowFunctionKey)!),
-                                     isARepeat: false, keyCode: 126) {
-            tree.keyDown(with: up)
-        }
-        check(tree.selectedRow != head, "Up from the Inbox does not select the heading (row \(tree.selectedRow))")
-        // Up passes the heading by to Flagged above it: the Inbox again
-        selectFolder(named: "Inbox")
-        _ = await waitUntil(5) { self.main.mailbox.folder == inboxNode?.folder.id }
-        main.mailbox.headingClicked(head)
-        check(await waitUntil(5) {
-            !self.tree.isItemExpanded(self.tree.item(atRow: head)) && rowLabel(head).hasSuffix("unread")
-                && (heading()?.unreadShown ?? 0) >= inboxUnread
-        }, "a click on the heading closes the account, which shows the unread messages of its folders (\(rowLabel(head)))")
-        check(main.mailbox.folder == inboxNode?.folder.id && main.mailbox.total == listed && tree.selectedRow < 0,
-              "the Inbox it hides stays listed, and nothing is selected in the tree (folder \(main.mailbox.folder) of \(inboxNode?.folder.id ?? 0), \(main.mailbox.total) of \(listed), row \(tree.selectedRow))")
-        await shot(main.window, "folders-5-collapsed")
-        main.mailbox.headingClicked(head)
-        check(await waitUntil(5) { !rowLabel(head).hasSuffix("unread") && rowLabel(inboxRow).hasSuffix("unread") && self.tree.selectedRow == inboxRow },
-              "a second click opens it again: the count is back on the Inbox, which is selected again (row \(tree.selectedRow) of \(inboxRow), \(rowLabel(head)) / \(rowLabel(inboxRow)))")
+        try await oneAccountTree()
 
         try await agent()
 
@@ -997,7 +955,7 @@ extension UITest {
         try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Unread in the archive\r\n"
             + "Message-ID: <unread-archive@example.com>\r\nDate: \(rfc2822(Date()))\r\n\r\nStill unread.\r\n", to: "Archive")
         command(.sync)
-        _ = await waitUntil(20) { (folderNode("Archive")?.folder.unread ?? 0) >= 1 }
+        _ = await waitUntil(20) { (folderNode("Archive")?.row.unread ?? 0) >= 1 }
         await selectRow(3)
         command(.markUnread)
         _ = await waitUntil(10) { main.mailbox.row(3)?.seen == false }
@@ -1019,10 +977,11 @@ extension UITest {
         command(.goToFolder)
         guard let goTo = await waitWindow("move", 10) else { throw Failed(description: "Go to Folder opened nothing") }
         // the folders fill in after the window opens
-        let everyAccount = await waitUntil(10) {
-            moveRows(goTo).contains { $0.kind == .account } && moveRows(goTo).contains { $0.name == "Sent Items" }
+        // with one account there is no row for the account, as in the folder list
+        let everyFolder = await waitUntil(10) {
+            !moveRows(goTo).contains { $0.kind == .account } && moveRows(goTo).contains { $0.name == "Sent Items" }
         }
-        check(goTo.title == "Go to Folder" && everyAccount, "Go to Folder shows the folders of every account (\(goTo.title))")
+        check(goTo.title == "Go to Folder" && everyFolder, "Go to Folder shows the account's folders, with no row for the account (\(goTo.title))")
         if let filter: NSSearchField = find("move.filter", in: goTo) {
             filter.stringValue = "sent"
             (goTo.delegate as? MoveWindow)?.controlTextDidChange(Notification(name: NSControl.textDidChangeNotification))
@@ -1194,7 +1153,7 @@ extension UITest {
         check(tripPromises.count == 3 && tripFiles.count == 3,
               "the closed conversation dragged to the Finder becomes its three .eml files (\(tripFiles.sorted().joined(separator: ", ")))")
         let tripRefs = tripPromises.compactMap { promise in promise.drag.map { $0.refs[promise.index] } }
-        if let archiveId = folderNode("Archive")?.folder.id {
+        if let archiveId = folderNode("Archive")?.row.folder {
             check(main.mailbox.drop(tripRefs, to: archiveId, copy: false), "dropped onto Archive, it is taken")
             check(await waitUntil(30) {
                 let moved = await messages("Archive").filter { raw($0).contains("Plans for the trip") }
@@ -1954,11 +1913,136 @@ extension UITest {
         // the Inbox is fixed: no Rename for it
         selectFolder(named: "Inbox")
         let menu = AppDelegate.shared.main.mailbox.list.window.map { _ in true } ?? false
-        check(menu && !(folderNode("Inbox")?.folder.fixed == false), "the Inbox can not be renamed or deleted")
+        check(menu && main.mailbox.info(ofFolder: folderNode("Inbox")?.row.folder ?? 0)?.fixed == true,
+              "the Inbox can not be renamed or deleted")
     }
 
-    func folderNode(_ name: String) -> Mailbox.FolderNode? {
-        (0..<tree.numberOfRows).compactMap { tree.item(atRow: $0) as? Mailbox.FolderNode }.first { $0.folder.name == name }
+    /// the tree's row of the first account's folder named `name`
+    func folderNode(_ name: String) -> Mailbox.TreeNode? {
+        folderRow(name).flatMap(treeNode)
+    }
+
+    /// Up pressed in the folder tree
+    func pressUp(in view: NSView) {
+        guard let up = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+                                        windowNumber: main.window.windowNumber, context: nil,
+                                        characters: String(UnicodeScalar(NSUpArrowFunctionKey)!),
+                                        charactersIgnoringModifiers: String(UnicodeScalar(NSUpArrowFunctionKey)!),
+                                        isARepeat: false, keyCode: 126) else { return }
+        view.window?.makeFirstResponder(view)
+        view.keyDown(with: up)
+    }
+
+    /// the menu a right-click on the tree's row `row` opens
+    func treeMenu(_ row: Int) -> NSMenu? {
+        let rect = tree.rect(ofRow: row)
+        let point = tree.convert(NSPoint(x: rect.midX, y: rect.midY), to: nil)
+        guard let click = NSEvent.mouseEvent(with: .rightMouseDown, location: point, modifierFlags: [], timestamp: 0,
+                                             windowNumber: main.window.windowNumber, context: nil, eventNumber: 0,
+                                             clickCount: 1, pressure: 1) else { return nil }
+        return tree.menu(for: click)
+    }
+
+    /// a folder made or deleted through the core, as the windows do; false when the core refused
+    func makeFolder(_ name: String, under parent: Int64) -> Bool {
+        var reason: UnsafeMutablePointer<CChar>?
+        let made = name.withCString { pe_folder_create(main.core.handle, main.mailbox.currentAccount, parent, $0, &reason) }
+        _ = taken(reason)
+        return made
+    }
+
+    func deleteFolder(_ id: Int64) {
+        var reason: UnsafeMutablePointer<CChar>?
+        _ = pe_folder_delete(main.core.handle, id, &reason)
+        _ = taken(reason)
+    }
+
+    /// one account: the Inbox first, Flagged second, then the other folders, with no heading; a folder the server keeps
+    /// in the Inbox listed a level up; the Inbox's menu a folder's; New Folder from Flagged at the top
+    func oneAccountTree() async throws {
+        step("the folder list of one account")
+        selectFolder(named: "Inbox")
+        let labels = { (0..<self.tree.numberOfRows).compactMap { self.treeNode($0)?.row.label } }
+        let kinds = (0..<tree.numberOfRows).compactMap { treeNode($0)?.kind }
+        check(folderRow("Inbox") == 0 && treeRow(PE_TREE_ROW_KIND_FLAGGED) == 1
+              && ["Sent Items", "Drafts", "Archive"].allSatisfy { (folderRow($0) ?? 0) > 1 },
+              "the Inbox is the first row, Flagged the second, then the other folders (\(labels()))")
+        check(!kinds.contains(PE_TREE_ROW_KIND_ACCOUNT) && !kinds.contains(PE_TREE_ROW_KIND_ALL_INBOXES) && tree.level(forRow: 0) == 0,
+              "there is no row for the account: no heading, nothing to collapse at the top")
+
+        // a folder kept in the Inbox on the server
+        let inbox = folderNode("Inbox")?.row.folder ?? 0
+        check(makeFolder("Receipts", under: inbox), "a folder is made inside the Inbox")
+        check(await waitUntil(20) { await mailboxes().contains { $0.hasPrefix("INBOX") && $0.hasSuffix("Receipts") } },
+              "on the server, inside the Inbox")
+        check(await waitUntil(10) { self.folderRow("Receipts") == 2 && self.tree.level(forRow: 2) == 0 }
+              && treeNode(0)?.row.parent == false,
+              "the Inbox holds no folders of its own: the folder in it is listed a level up, after Flagged (\(labels()))")
+        selectFolder(named: "Inbox")
+        _ = await waitUntil(5) { self.main.mailbox.folder == inbox }
+        await pause(0.5)
+        await shot(main.window, "folders-6-one-account")
+
+        let titles = treeMenu(0)?.items.filter { !$0.isSeparatorItem }.map(\.title) ?? []
+        check(titles.contains(Command.newFolder.label) && !titles.contains("Send and Receive") && !titles.contains { $0.hasPrefix("Properties") },
+              "right-clicking the Inbox gives the folder's menu, without the account's commands (\(titles))")
+
+        tree.selectRowIndexes(IndexSet(integer: 1), byExtendingSelection: false)
+        _ = await waitUntil(5) { self.main.mailbox.flagged }
+        command(.newFolder)
+        await answerName("New Folder", "Top level", shot: nil)
+        check(await waitUntil(20) { await mailboxes().contains("Top level") }, "New Folder with Flagged selected makes the folder at the top")
+        check(await waitUntil(10) { self.folderRow("Top level").map { self.tree.level(forRow: $0) == 0 } ?? false },
+              "and the tree lists it at the top (\(labels()))")
+
+        for name in ["Receipts", "Top level"] {
+            if let id = folderNode(name)?.row.folder {
+                deleteFolder(id)
+            }
+        }
+        let gone = await waitUntil(20) {
+            let all = await mailboxes()
+            return !all.isEmpty && !all.contains { $0.hasSuffix("Receipts") || $0 == "Top level" }
+        }
+        check(gone, "the two folders are deleted again on the server (\(await mailboxes()))")
+        check(await waitUntil(10) { self.folderRow("Receipts") == nil && self.folderRow("Top level") == nil },
+              "and leave the tree (\(labels()))")
+        selectFolder(named: "Inbox")
+    }
+
+    /// with two accounts an account is a heading over its folders that can not be selected (the arrow keys pass it
+    /// by); closed, it shows the unread messages of the folders it hides, and the folder listed stays listed
+    func collapsedAccount(_ account: Int64, folder: Int64) async {
+        step("a collapsed account")
+        let rowLabel = { (row: Int) -> String in
+            (self.tree.view(atColumn: 0, row: row, makeIfNecessary: true) as? NSTableCellView)?.accessibilityLabel() ?? ""
+        }
+        guard let head = treeRow(PE_TREE_ROW_KIND_ACCOUNT, account: account), let row = treeRow({ $0.folder == folder }) else {
+            check(false, "the first account's heading and its folder are in the tree")
+            return
+        }
+        let heading = { self.tree.view(atColumn: 0, row: head, makeIfNecessary: true) as? HeadingCell }
+        let unread = treeNode(row)?.row.unread ?? 0
+        check(unread >= 1, "a folder of the account has unread messages (\(rowLabel(row)))")
+        check(heading() != nil && tree.delegate?.outlineView?(tree, shouldSelectItem: tree.item(atRow: head) as Any) == false,
+              "the account is a heading over its folders, which can not be selected")
+        tree.selectRowIndexes(IndexSet(integer: head + 1), byExtendingSelection: false)
+        pressUp(in: tree)
+        check(tree.selectedRow != head, "Up from its first folder does not select the heading (row \(tree.selectedRow))")
+        tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+        _ = await waitUntil(5) { self.main.mailbox.folder == folder }
+        let listed = main.mailbox.total
+        main.mailbox.headingClicked(head)
+        check(await waitUntil(5) {
+            !self.tree.isItemExpanded(self.tree.item(atRow: head)) && rowLabel(head).hasSuffix("unread")
+                && (heading()?.unreadShown ?? 0) >= unread
+        }, "a click on the heading closes the account, which shows the unread messages of its folders (\(rowLabel(head)))")
+        check(main.mailbox.folder == folder && main.mailbox.total == listed && tree.selectedRow < 0,
+              "the folder it hides stays listed, and nothing is selected in the tree (\(main.mailbox.total) of \(listed), row \(tree.selectedRow))")
+        await shot(main.window, "folders-5-collapsed")
+        main.mailbox.headingClicked(head)
+        check(await waitUntil(5) { !rowLabel(head).hasSuffix("unread") && rowLabel(row).hasSuffix("unread") && self.tree.selectedRow == row },
+              "a second click opens it again: the count is back on the folder, which is selected again (row \(tree.selectedRow) of \(row))")
     }
 
     // ---- closing, links and completion ----
@@ -2134,7 +2218,7 @@ extension UITest {
     func inbox(ofAccount index: Int) -> Folder? {
         let accounts = main.mailbox.core.accounts()
         guard index < accounts.count else { return nil }
-        return main.mailbox.core.folderTree(accounts[index].id).folders.first { $0.specialUse == PE_SPECIAL_USE_INBOX }
+        return main.mailbox.core.folders(accounts[index].id).first { $0.specialUse == PE_SPECIAL_USE_INBOX }
     }
 
     // ---- All Inboxes ----
@@ -2152,8 +2236,18 @@ extension UITest {
             check(false, "both accounts have an Inbox")
             return
         }
-        check(tree.item(atRow: 0) is Mailbox.AllInboxesNode, "All Inboxes is at the top of the tree, above the accounts")
-        tree.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        let kinds = (0..<tree.numberOfRows).compactMap { treeNode($0)?.kind }
+        let headings = (0..<tree.numberOfRows).filter { treeNode($0)?.kind == PE_TREE_ROW_KIND_ACCOUNT }
+        check(kinds.first == PE_TREE_ROW_KIND_ALL_INBOXES && (treeRow(PE_TREE_ROW_KIND_FLAGGED) ?? .max) < (headings.first ?? 0)
+              && headings.count == 2,
+              "All Inboxes is at the top of the tree, then Flagged, then each account's heading")
+        // the second account's folders start with Sent Items; the first's with the folder step 27 left in its Inbox,
+        // which ImapKit lists again after it was deleted
+        let under = headings.map { treeNode($0 + 1)?.row.label ?? "" }
+        check(under.last == "Sent Items" && treeRow({ $0.label == "Sent Items" && $0.account == headings.first.flatMap(treeNode)?.row.account }) != nil
+              && treeRow({ ($0.folder == first || $0.folder == second) && $0.kind != PE_TREE_ROW_KIND_ACCOUNT_INBOX }) == nil,
+              "the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, starting with Sent Items (\(under))")
+        tree.selectRowIndexes(IndexSet(integer: treeRow(PE_TREE_ROW_KIND_ALL_INBOXES) ?? 0), byExtendingSelection: false)
         let expected = (inbox(ofAccount: 0)?.total ?? 0) + (inbox(ofAccount: 1)?.total ?? 0)
         // grouped by conversation the rows are fewer: the messages they list are counted
         check(await waitUntil(10) { main.mailbox.total == expected },
@@ -2221,8 +2315,8 @@ extension UITest {
             (inbox(ofAccount: 0)?.unread ?? 0) >= 1 && (inbox(ofAccount: 1)?.unread ?? 0) >= 1
                 && main.mailbox.core.folderCounts(archive).unread >= 1
         }
-        guard let first = inbox(ofAccount: 0), let second = inbox(ofAccount: 1),
-              let all = tree.item(atRow: 0) as? Mailbox.AllInboxesNode else {
+        guard let first = inbox(ofAccount: 0), let second = inbox(ofAccount: 1), let allRow = treeRow(PE_TREE_ROW_KIND_ALL_INBOXES),
+              let all = treeNode(allRow) else {
             check(false, "both accounts have an Inbox, and All Inboxes is at the top")
             return
         }
@@ -2230,22 +2324,26 @@ extension UITest {
         if !tree.isItemExpanded(all) {
             tree.expandItem(all)
         }
-        let rows = [1, 2].map { tree.item(atRow: $0) as? Mailbox.InboxAliasNode }
-        check(rows.map { $0?.folder } == [first.id, second.id] && rows.map { $0?.name } == accounts.map(\.title)
-              && tree.level(forRow: 1) == 1 && tree.level(forRow: 2) == 1,
-              "All Inboxes has a row for each account under it, in the accounts' order, named as the account is (\(rows.map { $0?.name ?? "" }))")
+        let firstRow = tree.row(forItem: all.children.first)
+        let secondRow = tree.row(forItem: all.children.last)
+        let rows = all.children.map(\.row)
+        check(rows.map(\.folder) == [first.id, second.id] && rows.map(\.label) == accounts.map(\.title)
+              && rows.allSatisfy { $0.kind == PE_TREE_ROW_KIND_ACCOUNT_INBOX }
+              && tree.level(forRow: firstRow) == 1 && tree.level(forRow: secondRow) == 1,
+              "All Inboxes has a row for each account under it, in the accounts' order, named as the account is (\(rows.map(\.label)))")
+        let inboxesUnread = first.unread + second.unread
         check(await waitUntil(10) {
-            self.folderCell(1)?.unreadShown == first.unread && self.folderCell(2)?.unreadShown == second.unread
-                && self.folderCell(1)?.isBold == true && self.folderCell(0)?.unreadShown == 0
-        }, "each row shows its Inbox's unread count, All Inboxes open shows none of its own (\(folderCell(1)?.unreadShown ?? 0), \(folderCell(2)?.unreadShown ?? 0))")
-        let spoken = folderCell(2)?.accessibilityLabel() ?? ""
+            self.folderCell(firstRow)?.unreadShown == first.unread && self.folderCell(secondRow)?.unreadShown == second.unread
+                && self.folderCell(firstRow)?.isBold == true && self.folderCell(allRow)?.unreadShown == inboxesUnread
+        }, "each row shows its Inbox's unread count, All Inboxes the count of all of them (\(folderCell(firstRow)?.unreadShown ?? 0) of \(first.unread), \(folderCell(secondRow)?.unreadShown ?? 0) of \(second.unread), \(folderCell(allRow)?.unreadShown ?? 0) of \(inboxesUnread))")
+        let spoken = folderCell(secondRow)?.accessibilityLabel() ?? ""
         check(spoken.hasPrefix("Inbox, Work"), "a screen reader hears the folder and the account (\(spoken))")
         tree.collapseItem(all)
-        check(await waitUntil(5) { self.folderCell(0)?.unreadShown == main.mailbox.core.inboxUnread },
-              "closed, All Inboxes shows the unread messages of every Inbox (\(folderCell(0)?.unreadShown ?? 0))")
+        check(await waitUntil(5) { self.folderCell(allRow)?.unreadShown == main.mailbox.core.inboxUnread && self.folderCell(allRow)?.isBold == true },
+              "closed, All Inboxes shows the unread messages of every Inbox, in bold (\(folderCell(allRow)?.unreadShown ?? 0))")
         tree.expandItem(all)
 
-        tree.selectRowIndexes(IndexSet(integer: 2), byExtendingSelection: false)
+        tree.selectRowIndexes(IndexSet(integer: secondRow), byExtendingSelection: false)
         check(await waitUntil(10) { main.mailbox.folder == second.id && main.mailbox.total == second.total },
               "the second account's row lists its Inbox (\(main.mailbox.total) of \(second.total))")
         let folders = Set((0..<list.numberOfRows).compactMap { main.mailbox.row($0)?.folder })
@@ -2259,18 +2357,23 @@ extension UITest {
 
         // a message of the first account's Inbox shown from outside the tree (a notification) keeps the selection
         // under All Inboxes
-        tree.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        tree.selectRowIndexes(IndexSet(integer: allRow), byExtendingSelection: false)
         let both = first.total + second.total
         check(await waitUntil(10) { main.mailbox.total == both }, "All Inboxes again lists both accounts' Inboxes (\(main.mailbox.total) of \(both))")
         let firstMessage = (0..<list.numberOfRows).compactMap { main.mailbox.row($0) }.first { $0.folder == first.id }
-        tree.selectRowIndexes(IndexSet(integer: 2), byExtendingSelection: false)
+        tree.selectRowIndexes(IndexSet(integer: secondRow), byExtendingSelection: false)
         _ = await waitUntil(10) { main.mailbox.folder == second.id }
         if let firstMessage {
+            // All Inboxes closed first: the row is shown to be selected
+            tree.collapseItem(all)
             main.showMessage(folder: first.id, uid: firstMessage.uid)
-            check(await waitUntil(10) { main.mailbox.folder == first.id && tree.selectedRow == 1 },
-                  "a message of the first Inbox opened from outside the tree selects its row under All Inboxes (row \(tree.selectedRow))")
+            check(await waitUntil(10) { main.mailbox.folder == first.id && tree.selectedRow == firstRow && tree.isItemExpanded(all) },
+                  "a message of the first Inbox opened from outside the tree selects its row under All Inboxes, opened (row \(tree.selectedRow))")
         }
-        tree.selectRowIndexes(IndexSet(integer: 0), byExtendingSelection: false)
+        tree.selectRowIndexes(IndexSet(integer: allRow), byExtendingSelection: false)
+
+        await collapsedAccount(accounts[0].id, folder: archive)
+        tree.selectRowIndexes(IndexSet(integer: allRow), byExtendingSelection: false)
 
         step("the account name")
         command(.accounts)
@@ -2291,11 +2394,10 @@ extension UITest {
         _ = await waitUntil(10) { !form.isVisible }
         press(find("accounts.close", in: window))
         _ = await waitUntil(10) { !window.isVisible }
-        let secondHeading = { (0..<self.tree.numberOfRows).compactMap { self.tree.item(atRow: $0) as? Mailbox.AccountNode }
-            .first { $0.account.id == accounts[1].id } }
-        check(await waitUntil(10) {
-            secondHeading()?.account.title == "Second" && (self.tree.item(atRow: 2) as? Mailbox.InboxAliasNode)?.name == "Second"
-        }, "set to Second, the account's heading and its row under All Inboxes say Second (\(secondHeading()?.account.title ?? ""))")
+        let secondLabels = { [PE_TREE_ROW_KIND_ACCOUNT, PE_TREE_ROW_KIND_ACCOUNT_INBOX].map {
+            self.treeRow($0, account: accounts[1].id).flatMap(self.treeNode)?.row.label ?? "" } }
+        check(await waitUntil(10) { secondLabels() == ["Second", "Second"] },
+              "set to Second, the account's heading and its row under All Inboxes say Second (\(secondLabels()))")
 
         step("the account's menu")
         let menu = main.mailbox.accountMenu(accounts[0].id)
@@ -2331,8 +2433,9 @@ extension UITest {
 
     /// the accounts of the tree's headings and of the rows under All Inboxes, top to bottom
     func treeOrder() -> (headings: [Int64], inboxes: [Int64]) {
-        let items = (0..<tree.numberOfRows).map { tree.item(atRow: $0) }
-        return (items.compactMap { ($0 as? Mailbox.AccountNode)?.account.id }, items.compactMap { ($0 as? Mailbox.InboxAliasNode)?.account })
+        let rows = (0..<tree.numberOfRows).compactMap { treeNode($0)?.row }
+        return (rows.filter { $0.kind == PE_TREE_ROW_KIND_ACCOUNT }.map(\.account),
+                rows.filter { $0.kind == PE_TREE_ROW_KIND_ACCOUNT_INBOX }.map(\.account))
     }
 
     /// the second account's row under All Inboxes dragged above the first's: both lists follow and the row stays
@@ -2340,7 +2443,7 @@ extension UITest {
     func accountOrder() async throws {
         step("the accounts' order")
         let ids = main.mailbox.core.accounts().map(\.id)
-        guard ids.count == 2, let all = tree.item(atRow: 0) as? Mailbox.AllInboxesNode, let second = inbox(ofAccount: 1) else {
+        guard ids.count == 2, let all = treeRow(PE_TREE_ROW_KIND_ALL_INBOXES).flatMap(treeNode), let second = inbox(ofAccount: 1) else {
             check(false, "two accounts and All Inboxes")
             return
         }
@@ -2353,15 +2456,19 @@ extension UITest {
         check(accountItem(ids[0], "Move Up")?.isEnabled == false && accountItem(ids[0], "Move Down")?.isEnabled == true
               && accountItem(ids[1], "Move Down")?.isEnabled == false,
               "Move Up is off for the first account, Move Down for the last")
-        tree.selectRowIndexes(IndexSet(integer: 2), byExtendingSelection: false)
+        let secondRow = treeRow(PE_TREE_ROW_KIND_ACCOUNT_INBOX, account: ids[1]) ?? -1
+        tree.selectRowIndexes(IndexSet(integer: secondRow), byExtendingSelection: false)
         _ = await waitUntil(10) { main.mailbox.folder == second.id }
 
-        let heading = (0..<tree.numberOfRows).compactMap { tree.item(atRow: $0) as? Mailbox.AccountNode }.first
+        let heading = treeRow(PE_TREE_ROW_KIND_ACCOUNT).flatMap(treeNode)
         let headingDrag = TestDrag(heading.flatMap { main.mailbox.outlineView(tree, pasteboardWriterForItem: $0) }, in: tree)
+        // the top rows: All Inboxes, Flagged and the two headings; below the last heading is a move for the first
+        let top = main.mailbox.outlineView(tree, numberOfChildrenOfItem: nil)
         check(main.mailbox.outlineView(tree, validateDrop: headingDrag, proposedItem: all, proposedChildIndex: 2) == []
-              && main.mailbox.outlineView(tree, validateDrop: headingDrag, proposedItem: nil, proposedChildIndex: 3) == .move,
-              "an account's heading drops between the headings, not among All Inboxes' rows")
-        guard let row = tree.item(atRow: 2) as? Mailbox.InboxAliasNode else {
+              && main.mailbox.outlineView(tree, validateDrop: headingDrag, proposedItem: nil, proposedChildIndex: top - 1) == []
+              && main.mailbox.outlineView(tree, validateDrop: headingDrag, proposedItem: nil, proposedChildIndex: top) == .move,
+              "an account's heading drops between the headings, not among All Inboxes' rows, and only where it moves")
+        guard let row = treeNode(secondRow), row.kind == PE_TREE_ROW_KIND_ACCOUNT_INBOX else {
             check(false, "the second account's row under All Inboxes")
             return
         }
@@ -2374,7 +2481,7 @@ extension UITest {
         check(dropped && treeOrder().headings == [ids[1], ids[0]] && treeOrder().inboxes == [ids[1], ids[0]]
               && main.mailbox.core.accounts().map(\.id) == [ids[1], ids[0]],
               "dropped above the first, the second account is first under All Inboxes and in the tree (\(treeOrder()))")
-        check(tree.selectedRow == 1 && main.mailbox.folder == second.id,
+        check(tree.selectedRow == treeRow(PE_TREE_ROW_KIND_ACCOUNT_INBOX) && main.mailbox.folder == second.id,
               "the moved row stays selected (row \(tree.selectedRow))")
         await selectRow(0)
         await shot(main.window, "all-inboxes-4-reorder")
@@ -2467,9 +2574,8 @@ extension UITest {
               "it is in the second account's Archive on its server, with its flags")
         check(await waitUntil(20) { await findMessage("INBOX", "Subject: \(subject)") == nil },
               "and gone from the first account's server")
-        if let node = (0..<tree.numberOfRows).compactMap({ tree.item(atRow: $0) as? Mailbox.FolderNode })
-            .first(where: { $0.folder.id == otherArchive }) {
-            tree.selectRowIndexes(IndexSet(integer: tree.row(forItem: node)), byExtendingSelection: false)
+        if let node = treeRow({ $0.folder == otherArchive }) {
+            tree.selectRowIndexes(IndexSet(integer: node), byExtendingSelection: false)
             _ = await waitUntil(10) { list.numberOfRows >= 1 }
             await selectRow(0)
             _ = await waitUntil(5) { main.mailbox.hasOne }
@@ -2509,8 +2615,7 @@ extension UITest {
         await selectRow(1)
         if let dragged = main.mailbox.row(1) {
             let pattern = NSRegularExpression.escapedPattern(for: dragged.subject)
-            let node = (0..<tree.numberOfRows).compactMap { tree.item(atRow: $0) as? Mailbox.FolderNode }
-                .first { $0.folder.id == otherArchive }
+            let node = treeRow { $0.folder == otherArchive }.flatMap(treeNode)
             check(main.mailbox.dropTarget(node, from: [dragged.folder]) == otherArchive
                   && main.mailbox.drop([(dragged.folder, dragged.uid)], to: otherArchive, copy: false),
                   "a folder of the second account takes a dragged message")

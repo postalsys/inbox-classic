@@ -720,7 +720,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .notJunk: return main.mailbox.hasSelection && main.mailbox.inJunk
         case .pictures: return main.mailbox.picturesBlocked
         // All Inboxes is no folder of one account to make a folder in or import into
-        case .newFolder, .import: return !main.mailbox.allInboxes
+        case .newFolder: return main.mailbox.canMakeFolder
+        case .import: return !main.mailbox.allInboxes
         case .emptyFolder: return main.mailbox.canEmptyFolder
         case .nextMessage, .previousMessage: return main.mailbox.list.numberOfRows > 0
         case .findInMessage: return main.mailbox.hasOne && main.mailbox.reader.messageView != nil
