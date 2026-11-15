@@ -23,6 +23,7 @@ struct FormState {
     std::vector<FormField>* fields;
     bool (*validate)(const std::vector<FormField>&, std::wstring&);
     std::vector<HWND> inputs;
+    FormPart* part = nullptr;
     bool done = false;
     bool accepted = false;
 };
@@ -58,8 +59,15 @@ LRESULT CALLBACK FormProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
             // moved, so no copy of a password is left behind
             *state->fields = std::move(values);
+            if (state->part) {
+                state->part->Accept(hwnd);
+            }
             state->accepted = true;
             state->done = true;
+            return 0;
+        }
+        if (state && state->part) {
+            state->part->Command(hwnd, LOWORD(wParam), HIWORD(wParam));
             return 0;
         }
         break;
@@ -462,7 +470,7 @@ void SetAccessibleDescription(HWND control, const std::wstring& text) {
 }
 
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,
-                bool (*validate)(const std::vector<FormField>&, std::wstring&), const wchar_t* okLabel, size_t focus) {
+                bool (*validate)(const std::vector<FormField>&, std::wstring&), const wchar_t* okLabel, size_t focus, FormPart* part) {
     RegisterDialogClass(kFormClass, FormProc);
     std::wstring ok = okLabel ? okLabel : core::T(PE_TEXT_UI_OK);
     std::wstring cancel = core::T(PE_TEXT_UI_CANCEL);
@@ -479,10 +487,12 @@ bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro
     if (!intro.empty()) {
         introHeight = std::max(Scale(36), static_cast<int>(MeasureText(intro, clientWidth - 2 * pad).cy) + Scale(8));
     }
-    int clientHeight = pad + introHeight + static_cast<int>(fields.size()) * (rowHeight + Scale(6)) + Scale(32) + pad;
+    int partHeight = part ? part->Height(clientWidth) + Scale(6) : 0;
+    int clientHeight = pad + introHeight + static_cast<int>(fields.size()) * (rowHeight + Scale(6)) + partHeight + Scale(32) + pad;
 
     HWND dialog = CreateModalWindow(owner, kFormClass, title.c_str(), clientWidth, clientHeight);
     FormState state{&fields, validate};
+    state.part = part;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
 
     int top = pad;
@@ -496,6 +506,9 @@ bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro
         state.inputs.push_back(
             CreateInput(dialog, fields[i], 100 + static_cast<int>(i), {pad + labelWidth, top, clientWidth - pad, top + rowHeight}));
         top += rowHeight + Scale(6);
+    }
+    if (part) {
+        part->Create(dialog, {pad, top, clientWidth - pad, top + partHeight - Scale(6)});
     }
     int buttonTop = clientHeight - pad - Scale(25);
     CreateChild(dialog, L"BUTTON", ok.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,

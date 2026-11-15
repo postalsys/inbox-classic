@@ -151,12 +151,23 @@ int ButtonWidth(const std::vector<std::wstring>& labels, int least = 80);
 int LabelWidth(std::initializer_list<std::wstring> labels, int least, int margin = 8);
 int LabelWidth(const std::vector<std::wstring>& labels, int least, int margin = 8);
 
+// a part of a form under its fields with controls of its own (Account Properties > Security): made in the form, told
+// of their commands, and what they hold taken when OK is accepted, before the form is gone
+struct FormPart {
+    virtual ~FormPart() = default;
+    // its height in a form `width` wide
+    virtual int Height(int width) const = 0;
+    virtual void Create(HWND form, const RECT& area) = 0;
+    virtual void Command(HWND form, int id, int code) = 0;
+    virtual void Accept(HWND form) = 0;
+};
+
 // a modal form with a label and an input for each field; true with the values filled in when OK was clicked.
 // `validate` gets the values and returns an error to show, or an empty string to accept them.
-// `okLabel`: the default button, OK when null. `focus`: the field to start in
+// `okLabel`: the default button, OK when null. `focus`: the field to start in. `part`: controls under the fields
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,
                 bool (*validate)(const std::vector<FormField>&, std::wstring& error) = nullptr, const wchar_t* okLabel = nullptr,
-                size_t focus = 0);
+                size_t focus = 0, FormPart* part = nullptr);
 // an owner-drawn button (CreateLinkButton) drawn as a link: underlined, in the link color, a focus rectangle around
 // the words
 void DrawLinkButton(const DRAWITEMSTRUCT& item);
@@ -287,6 +298,20 @@ void MessageRulesDialog(HWND owner, PeCore* core);
 // the editor of a new rule that matches `query`, named after it (Create Rule from Message, the search bar's Create
 // Rule); the id of the rule saved, 0 when cancelled
 int64_t NewRuleDialog(HWND owner, PeCore* core, const std::wstring& query);
+
+// ---- keys.cpp ----
+
+// Tools > Encryption Keys: the user's own OpenPGP keys and their contacts', to make, import, export, back up, verify,
+// look at and remove
+void EncryptionKeysDialog(HWND owner, PeCore* core);
+// Verify Key: the fingerprint of `fingerprint` large, to compare with its owner and mark the key verified, or no
+// longer; true when that changed
+bool VerifyKeyDialog(HWND owner, PeCore* core, const std::string& fingerprint);
+// a key's status as the windows say it: the core's words, with "verified" for a contact's key the user verified
+// Account Properties > Security of `account`: the key of its addresses and whether its mail carries the key
+// (Autocrypt); what OK took is applied by ApplyAccountSecurity once the account is saved
+std::unique_ptr<FormPart> AccountSecurityPart(PeCore* core, int64_t account);
+void ApplyAccountSecurity(FormPart& part);
 
 // ---- agents.cpp ----
 
@@ -1233,6 +1258,14 @@ enum BookControlId : WORD {
     IDC_PICK_TO_LIST = 780,
     IDC_PICK_CC_LIST,
     IDC_PICK_BCC_LIST,
+    // Contact Properties: the key of each of the card's addresses that has one (three at most), each row at
+    // IDC_CONTACT_KEY + 5 * row: its words and Verify, and a newer key waiting for the user's decision, its words and
+    // the two answers; with no key, the words that say so at IDC_CONTACT_KEY
+    IDC_CONTACT_KEY = 785,
+    IDC_CONTACT_KEY_VERIFY,
+    IDC_CONTACT_KEY_PENDING,
+    IDC_CONTACT_KEY_USE_NEW,
+    IDC_CONTACT_KEY_KEEP,
 };
 
 // the controls of the help window (help.cpp), which the UI test finds by them
@@ -1277,6 +1310,45 @@ enum RulesControlId : WORD {
     IDC_RULE_DELETE,
     IDC_RULE_QUIET,
     IDC_RULE_APPLY_NOW,
+};
+
+// the controls of the key windows (keys.cpp), which the UI test finds by them
+enum KeysControlId : WORD {
+    // Encryption Keys: the list and its buttons
+    IDC_KEYS_LIST = 870,
+    IDC_KEYS_NEW,
+    IDC_KEYS_IMPORT,
+    IDC_KEYS_EXPORT,
+    IDC_KEYS_BACKUP,
+    IDC_KEYS_VERIFY,
+    IDC_KEYS_PROPERTIES,
+    IDC_KEYS_REMOVE,
+    IDC_KEYS_CLOSE,
+    // New Key: the account, and the note under it (no account, or passwords in memory only)
+    IDC_KEY_ACCOUNT = 880,
+    IDC_KEY_NOTE,
+    // Back Up Key and Import Key: the passphrase, typed again, and why the one typed was not taken
+    IDC_KEY_PASSPHRASE,
+    IDC_KEY_PASSPHRASE_AGAIN,
+    IDC_KEY_PROBLEM,
+    // Key Properties: the values, and Verify
+    IDC_KEY_NAMES,
+    IDC_KEY_FINGERPRINT,
+    IDC_KEY_STATUS,
+    IDC_KEY_CREATED,
+    IDC_KEY_EXPIRES,
+    IDC_KEY_ALGORITHM,
+    IDC_KEY_SOURCE,
+    IDC_KEY_ADDRESSES,
+    IDC_KEY_VERIFY,
+    // Verify Key: the answers (or Mark as Not Verified)
+    IDC_VERIFY_MATCH,
+    IDC_VERIFY_DIFFER,
+    IDC_VERIFY_UNMARK,
+    // Account Properties > Security: the key, New Key, and Autocrypt
+    IDC_ACCOUNT_KEY,
+    IDC_ACCOUNT_KEY_NEW,
+    IDC_ACCOUNT_AUTOCRYPT,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

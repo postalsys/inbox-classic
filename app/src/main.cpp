@@ -699,6 +699,7 @@ HMENU BuildMenu() {
     AppendMenuW(tools, MF_STRING, IDM_ADDRESS_BOOK, MenuItem(PE_TEXT_CMD_ADDRESS_BOOK, L"Ctrl+Shift+B").c_str());
     AppendMenuW(tools, MF_STRING, IDM_ADD_SENDER_TO_BOOK, MenuItem(PE_TEXT_CMD_ADD_SENDER_TO_BOOK).c_str());
     AppendMenuW(tools, MF_STRING, IDM_MESSAGE_RULES, MenuItem(PE_TEXT_CMD_MESSAGE_RULES).c_str());
+    AppendMenuW(tools, MF_STRING, IDM_ENCRYPTION_KEYS, MenuItem(PE_TEXT_CMD_ENCRYPTION_KEYS).c_str());
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(tools, MF_STRING, IDM_AI_AGENTS, MenuItem(PE_TEXT_CMD_AI_AGENTS).c_str());
     AppendMenuW(tools, MF_SEPARATOR, 0, nullptr);
@@ -1637,6 +1638,9 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_MESSAGE_RULES:
         MessageRulesDialog(g_main, g_core.get());
+        return;
+    case IDM_ENCRYPTION_KEYS:
+        EncryptionKeysDialog(g_main, g_core.get());
         return;
     case IDM_CREATE_RULE_FROM_MESSAGE:
         g_mailbox.CreateRuleFromShown(g_main);

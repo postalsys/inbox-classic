@@ -875,19 +875,25 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
     };
     core::String others(pe_account_addresses(core, account));
     fields.push_back({core::T(PE_TEXT_UI_FIELD_OTHER_ADDRESSES), others ? Text(others.get()) : L""});
+    // Security under the fields: the key of the account's addresses, applied once the account is saved
+    std::unique_ptr<FormPart> keyPart = AccountSecurityPart(core, account);
     if (!signsInWith.empty()) {
         // a browser sign-in account: the names and the other addresses only, the rest is the provider's
         std::vector<FormField> names = {fields[ACCOUNT_NAME], fields[NAME], fields[OTHER_ADDRESSES]};
         std::wstring intro = core::T(PE_TEXT_UI_SIGNS_IN_WITH, {{"app", signsInWith}});
-        while (FormDialog(owner, title, intro, names)) {
+        while (FormDialog(owner, title, intro, names, nullptr, nullptr, 0, keyPart.get())) {
             if (!SaveOtherAddresses(owner, core, account, names[2].value)) {
                 continue;
             }
             fields[NAME] = names[1];
             std::string utf8[5];
             PeAccountSettings settings = SettingsOf(fields, utf8);
-            return pe_account_update(core, account, &settings) &&
-                   pe_account_set_name(core, account, core::Narrow(names[0].value).c_str());
+            bool saved = pe_account_update(core, account, &settings) &&
+                         pe_account_set_name(core, account, core::Narrow(names[0].value).c_str());
+            if (saved) {
+                ApplyAccountSecurity(*keyPart);
+            }
+            return saved;
         }
         return false;
     }
@@ -897,7 +903,7 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
     PeSecurity imapSecurity = stored->imap_security;
     PeSecurity smtpSecurity = stored->smtp_security;
     bool saved = false;
-    while (FormDialog(owner, title, intro, fields, Validate)) {
+    while (FormDialog(owner, title, intro, fields, Validate, nullptr, 0, keyPart.get())) {
         // warned for a side without encryption, unless it was so already to the same server: not each time such an
         // account is saved, but when the password would go readable somewhere new
         auto newlyPlain = [&](Field security, Field host, PeSecurity was, const std::wstring& wasHost) {
@@ -922,6 +928,7 @@ bool AccountProperties(HWND owner, PeCore* core, int64_t account) {
             pe_account_set_password(core, account, password.c_str());
             SecureZeroMemory(password.data(), password.size());
         }
+        ApplyAccountSecurity(*keyPart);
         saved = true;
         break;
     }
