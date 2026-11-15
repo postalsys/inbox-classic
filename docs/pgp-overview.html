@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenPGP Plan</title>
+<style>
+:root{
+  --bg:#f6f5f1;--panel:#fff;--ink:#1d1f24;--muted:#5d6370;--line:#e2e0d9;
+  --accent:#1f5fae;--soft:#e6eefa;--s:#1d7a46;--sbg:#e3f3ea;--m:#946200;--mbg:#fbf0d6;--l:#a3352b;--lbg:#f9e4e1;
+  --send:#1f5fae;--read:#1d7a46;--sort:#6b4fb3;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}}
+:root[data-theme="dark"]{
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--s:#6fd39b;--sbg:#173325;--m:#e8c05a;--mbg:#3a3018;--l:#f0897d;--lbg:#3d1f1c;
+  --send:#7fb0f0;--read:#6fd39b;--sort:#b39cf0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1040px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:21px;margin:46px 0 6px}
+h3{font-size:16.5px;margin:0}
+p{margin:0 0 10px}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:3px 0}
+.lede{color:var(--muted);font-size:16px;max-width:780px}
+.meta{color:var(--muted);font-size:13px;margin-bottom:22px}
+.sub{color:var(--muted);margin-bottom:16px;max-width:780px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.road{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));margin-top:14px}
+.step{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--send);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.step.read{border-top-color:var(--read)}.step.sort{border-top-color:var(--sort)}
+.step b{display:block;font-size:14px}
+.step .n{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sz{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.sz.S{background:var(--sbg);color:var(--s)}.sz.M{background:var(--mbg);color:var(--m)}.sz.L{background:var(--lbg);color:var(--l)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin-top:10px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
+.feat{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--send);border-radius:10px;padding:18px 20px;margin:14px 0}
+.feat.read{border-left-color:var(--read)}.feat.sort{border-left-color:var(--sort)}
+.feat header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;margin-bottom:8px}
+.pr{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.cols{display:grid;gap:8px 28px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:8px}
+.cols h4{margin:8px 0 2px;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.cols ul{font-size:14px}
+.mock{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-top:10px;white-space:pre;overflow-x:auto}
+.flow{counter-reset:f;list-style:none;padding:0;margin:0}
+.flow li{counter-increment:f;position:relative;padding:9px 12px 9px 46px;border-bottom:1px solid var(--line);margin:0}
+.flow li:last-child{border-bottom:0}
+.flow li::before{content:counter(f);position:absolute;left:12px;top:9px;width:23px;height:23px;border-radius:50%;background:var(--soft);color:var(--accent);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+.flow li.key{background:var(--soft)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+td:first-child{font-weight:600;white-space:nowrap}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--bg);padding:1px 5px;border-radius:4px;border:1px solid var(--line)}
+.small{font-size:13px;color:var(--muted)}
+.step.key{border-top-color:var(--sort)}.step.hard{border-top-color:var(--l)}
+.feat.key{border-left-color:var(--sort)}.feat.hard{border-left-color:var(--l)}
+.msg{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel);margin-top:12px;max-width:760px}
+.bar{padding:9px 14px;background:var(--soft);border-bottom:1px solid var(--line);font-size:13.5px}
+.bar b{color:var(--accent)}
+.bar .native,.page .native{float:right;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.page{padding:12px 14px 14px}
+.frame{border:2px solid var(--line);border-radius:8px;margin:10px 0 0;font-size:14px}
+.frame .lab{font-size:12.5px;font-weight:700;padding:4px 10px;border-bottom:1px solid var(--line)}
+.frame .txt{padding:8px 10px}
+.frame.ok{border-color:var(--s)}.frame.ok .lab{background:var(--sbg);color:var(--s);border-color:var(--s)}
+.frame.known{border-color:var(--accent)}.frame.known .lab{background:var(--soft);color:var(--accent);border-color:var(--accent)}
+.frame.warn{border-color:var(--m)}.frame.warn .lab{background:var(--mbg);color:var(--m);border-color:var(--m)}
+.frame.none .lab{color:var(--muted)}
+.fake{border:2px solid var(--s);border-radius:8px;margin-top:6px}
+.fake .lab{background:var(--sbg);color:var(--s);font-size:12.5px;font-weight:700;padding:4px 10px}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.pill.ok{background:var(--sbg);color:var(--s)}.pill.known{background:var(--soft);color:var(--accent)}.pill.warn{background:var(--mbg);color:var(--m)}.pill.none{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.pipe{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-top:12px}
+.pipe div{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:13px}
+.pipe b{display:block;font-size:13.5px}
+</style>
+</head>
+<body>
+<main>
+
+<h1>OpenPGP in Inbox Classic</h1>
+<p class="lede">Encrypted and signed mail, done entirely inside the app: the Rust core parses, checks, decrypts and signs, and the three apps show what it decided. Eleven pull requests, each on Windows, the Mac and Linux at once, released together at the end.</p>
+<p class="meta">15 November 2026 · from 0.18.0 · the full plan is <code>pgp-plan.md</code> beside this page · the work starts when you say go</p>
+
+<div class="grid">
+  <div class="card">
+    <h3>Decided</h3>
+    <ul>
+      <li><b>A master key in the keychain.</b> Private keys are kept wrapped under it in the local store. An imported key's passphrase is asked once. No prompts after that.</li>
+      <li><b>Encrypt and Sign are manual</b>, off for a new message, nothing remembered. A reply to encrypted mail starts encrypted.</li>
+      <li><b>Keys are looked up only when Encrypt is turned on</b>, or with Find Key: the domain's Web Key Directory first, then keys.openpgp.org.</li>
+      <li><b>Colored frames, a document for each part</b>: labels and mail never share a document, so a sender's CSS can not touch a label. The bar sums the parts up.</li>
+      <li><b>Fallback</b> if heights can not be measured with scripts off: one part at a time, from a native strip.</li>
+      <li><b>Only protected mail</b> is drawn this way; a message protected as a whole gets the bar and one label.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Decided, continued</h3>
+    <ul>
+      <li><b>Two levels of trust</b>: a found key is usable and shows blue; a key whose fingerprint you compared shows green. A new key for an address is never taken silently.</li>
+      <li><b>Autocrypt, read and sent</b>, never asking others to encrypt by default.</li>
+      <li><b>Decrypted text is indexed</b> for search and snippets (a switch in Options); the message stays encrypted on disk.</li>
+      <li><b>Protected headers are read, not written</b>: outgoing mail keeps its Subject as written.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Defaults I chose (say if otherwise)</h3>
+    <ul>
+      <li><b>rPGP</b> as the library: MIT, pure Rust, audited. The policy layer is ours; Sequoia checks our output in CI.</li>
+      <li>New keys: <b>Ed25519 and Curve25519</b>, version 4, no expiry.</li>
+      <li><b>Encrypt always signs</b> and always includes your own key.</li>
+      <li><b>No half encrypted mail</b>: Send stops if someone has no key.</li>
+      <li><b>Inline PGP</b>: decrypted, its signatures not checked.</li>
+      <li><b>Internet pictures in decrypted parts only on a click</b>, never remembered; after it the part no longer says "Encrypted".</li>
+      <li><b>Agents see no decrypted mail</b> and can not sign or encrypt.</li>
+      <li>A <b>backup</b> is offered right after a key is made.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>How a message with several parts is drawn</h2>
+<p class="sub">Each part is decrypted or checked by itself and is a document of its own, in a sandboxed <code>iframe</code>. The labels are in an outer page the core makes, which holds no markup from mail. The bar is native and counts the parts.</p>
+<div class="msg">
+  <div class="bar"><span class="native">native bar</span><b>3 parts:</b> 1 signed by Alice (verified), 1 not signed, 1 with a signature that does not match · Details</div>
+  <div class="page"><span class="native">web view</span>
+    <div class="frame ok"><div class="lab">Signed by Alice, key verified</div><div class="txt">Hello Bob, the contract is attached.</div></div>
+    <div class="frame none"><div class="lab">Not signed</div><div class="txt">Sent through the sales list. Unsubscribe…
+      <div class="fake"><div class="lab">Signed by Alice, key verified</div><div class="txt">An imitation a sender painted. It can only sit inside its own part, under the real label that says "Not signed". It can not reach the labels: they are in another document.</div></div></div></div>
+    <div class="frame warn"><div class="lab">The signature does not match this text</div><div class="txt">Please pay to account 12345.</div></div>
+  </div>
+</div>
+
+<div class="tablewrap" style="margin-top:14px"><table>
+<tr><th>Verdict</th><th>Frame</th><th>Words</th></tr>
+<tr><td>Verified</td><td><span class="pill ok">green</span></td><td>Signed by Alice, key verified</td></tr>
+<tr><td>Signed</td><td><span class="pill known">blue</span></td><td>Signed by alice@example.org (key not verified)</td></tr>
+<tr><td>Another person</td><td><span class="pill warn">amber</span></td><td>Signed by bob@example.net, who is not the sender</td></tr>
+<tr><td>Key not known</td><td><span class="pill none">grey</span></td><td>Signed, but the key is not known. Find Key</td></tr>
+<tr><td>Does not match</td><td><span class="pill warn">amber</span></td><td>The signature does not match this text, or why it is refused (old algorithm, key expired or revoked when it signed)</td></tr>
+<tr><td>Not signed</td><td><span class="pill none">grey</span></td><td>Not signed</td></tr>
+</table></div>
+<p class="small" style="margin-top:8px">Encryption adds a lock and "Encrypted" to the label. A part whose integrity is not protected is not shown at all. A failed signature never looks more dangerous than unsigned mail (RFC 9787).</p>
+
+<div class="grid" style="margin-top:14px">
+  <div class="card"><h3>A document for each part</h3><ul>
+    <li><b>The outer page holds no mail markup</b>: only the core's labels and one <code>iframe</code> a part.</li>
+    <li><b>A part can not draw outside its <code>iframe</code></b>: the browser's rule, not our CSS. Each has its sandbox, CSP and picture rule.</li>
+    <li><b>Label words come from the core</b>: the checked address and your Address Book's name, never the key's own name.</li>
+    <li><b>Heights</b> are measured by a script the app runs while page scripts stay off. <b>A spike on the three web views comes first</b>; if it fails anywhere, all three show one part at a time from a native strip.</li>
+    <li>Select All, Copy and Find work inside one part; print gets one document.</li>
+  </ul><p class="small" style="margin-top:8px">What remains: a look-alike painted inside a sender's own part, under its real label, or in a message with no layer and no bar.</p></div>
+  <div class="card"><h3>The rules behind a verdict</h3><ul>
+    <li>The <b>whole message's state</b> comes from the layers at its top only (RFC 9787); any other layer is just a part.</li>
+    <li>A signature counts for the sender only if the key has a user id with the address of the one <b>From</b>.</li>
+    <li>Validity is judged <b>at the time of signing</b>; MD5 never, SHA-1 only for old signatures, RSA from 2048 bits.</li>
+    <li><b>Integrity first</b>: no plaintext leaves the engine before the check passed.</li>
+    <li>Replies quote <b>only what was shown</b>; nothing is decrypted for a reply.</li>
+  </ul></div>
+</div>
+
+<h2>Private keys without prompts</h2>
+<div class="pipe">
+  <div><b>System store</b>Keychain, Credential Manager or Secret Service holds one random 32 byte master key, beside the mail passwords.</div>
+  <div><b>Local store</b>Each private key wrapped with ChaCha20-Poly1305, bound to its fingerprint and the profile.</div>
+  <div><b>In use</b>Unwrapped for one operation, wiped after it. Nothing decrypted stays in memory.</div>
+  <div><b>Import</b>The key's own passphrase is asked once and not kept.</div>
+  <div><b>Backup</b>Offered at once: the key under a passphrase you choose. The only passphrase ever typed.</div>
+  <div><b>No system store</b>Public keys only, and the app says so. A reset keychain means importing the backup.</div>
+</div>
+<p class="small" style="margin-top:8px">Why not the key itself in the system store: Windows Credential Manager takes 2560 bytes an entry, less than an RSA 4096 private key.</p>
+
+<h2>The order of work</h2>
+<p class="sub">The engine and the keys first, then reading, then writing. Large parts are split into a core PR without UI and an apps PR. Nothing is released until all eleven are in.</p>
+<div class="road">
+  <div class="step key"><span class="n">PR 1</span><b>The engine <span class="sz L">L</span></b>pe-pgp, the policy, cross-checks in CI</div>
+  <div class="step key"><span class="n">PR 2</span><b>Key store, core <span class="sz M">M</span></b>master key, wrapping, import, backup</div>
+  <div class="step key"><span class="n">PR 3</span><b>Encryption Keys <span class="sz L">L</span></b>My Keys, the Address Book, Verify</div>
+  <div class="step read"><span class="n">PR 4</span><b>Reading, core <span class="sz L">L</span></b>layers, sections, verdicts, frames</div>
+  <div class="step read"><span class="n">PR 5</span><b>The security bar <span class="sz L">L</span></b>bar, Details, in the three readers</div>
+  <div class="step"><span class="n">PR 6</span><b>Sending, core <span class="sz M">M</span></b>sign, encrypt, drafts, Sent, Bcc</div>
+  <div class="step"><span class="n">PR 7</span><b>Sign and Encrypt <span class="sz M">M</span></b>the compose window</div>
+  <div class="step key"><span class="n">PR 8</span><b>Finding keys <span class="sz M">M</span></b>Web Key Directory, keys.openpgp.org, Publish</div>
+  <div class="step key"><span class="n">PR 9</span><b>Autocrypt <span class="sz M">M</span></b>keys in the mail itself, changed keys</div>
+  <div class="step read"><span class="n">PR 10</span><b>Search, list, agents <span class="sz M">M</span></b>index, lock in the list, the wall for agents</div>
+  <div class="step hard"><span class="n">PR 11</span><b>Hardening <span class="sz M">M</span></b>whole feature review, fuzzing, interop report</div>
+</div>
+<div class="legend"><span><span class="sw" style="background:var(--sort)"></span>Keys</span><span><span class="sw" style="background:var(--read)"></span>Reading</span><span><span class="sw" style="background:var(--send)"></span>Writing</span><span><span class="sw" style="background:var(--l)"></span>Hardening</span><span>PRs 1, 2, 4 and 6 are core only</span></div>
+
+<h2>The parts</h2>
+
+<div class="feat key">
+<header><h3>1. The engine</h3><span class="sz L">L</span><span class="pr">PR 1</span></header>
+<p>A new crate, <code>pe-pgp</code>: pure functions over bytes on rPGP, no network, no files, no unsafe code of ours. Today the code base has no OpenPGP at all; a signed message shows its signature as an attachment and an encrypted one shows nothing.</p>
+<div class="cols">
+<div><h4>What it holds</h4><ul>
+<li>Certificates: parse, merge, minimize, validity at a given time.</li>
+<li><b>The policy</b>, one table: what is acceptable and since when. rPGP has none, so it is ours.</li>
+<li>Verify, decrypt (integrity mandatory, limits on size and nesting), sign, encrypt, generate, passphrase protection for import and backup, the Autocrypt header.</li>
+<li>A <code>sop</code> command line on the same functions, for the cross-checks.</li>
+</ul></div>
+<div><h4>Tests</h4><ul>
+<li>RFC 9580's vectors; fixtures made by GnuPG, Sequoia and OpenPGP.js.</li>
+<li>One test a row of the policy; one for each rPGP advisory of 2024 to 2026.</li>
+<li>Three fuzz targets.</li>
+<li>CI: our <code>sop</code> against Sequoia's, both directions, on every PR; the OpenPGP interoperability suite on a schedule.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat key">
+<header><h3>2. Keys</h3><span class="sz L">L</span><span class="pr">PR 2</span><span class="pr">PR 3</span></header>
+<div class="cols">
+<div><h4>My Keys</h4><ul>
+<li>Tools &gt; Encryption Keys, and a Security page in Account Properties: one key for each own address, aliases included.</li>
+<li>New Key, Import, Save a Backup, Export Public Key, Publish, Remove.</li>
+<li>Import from a file, the clipboard, a key attached to a message (a card with Import), a vCard.</li>
+</ul><h4>The Address Book</h4><ul>
+<li>A contact's window lists the keys of its addresses: fingerprint, where it came from, Verified or not.</li>
+<li>Find Key, Import, Verify (both fingerprints side by side), Export, Remove.</li>
+<li>A small key in the list for people who have one. vCard import and export carry <code>KEY</code>.</li>
+</ul></div>
+<div><h4>A changed key</h4><ul>
+<li>Another key for an address that has one is kept waiting: "A new key was found for a@example.org on 3 December", Use the New Key or Keep.</li>
+</ul><h4>Tests</h4><ul>
+<li>A wrapped key does not open with another master key, profile or row; the database file never holds a private key.</li>
+<li>The real system stores on the three systems (<code>PE_KEYRING_TESTS=1</code>).</li>
+<li>UI: <code>keys-1</code> to <code>keys-8</code>, with the case of no keychain on Linux.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat read">
+<header><h3>3. Reading</h3><span class="sz L">L</span><span class="pr">PR 4</span><span class="pr">PR 5</span></header>
+<div class="cols">
+<div><h4>How it is built</h4><ul>
+<li><code>pe-mime</code> gets <code>outline</code>: the tree of parts with their byte ranges in the source. A signature is checked over exact bytes, which the parser does not keep today.</li>
+<li><code>pe-core</code> cuts the message into sections, gives each a verdict; <code>pe-html</code> makes the outer page and each part's document; the view carries the summary for the bar.</li>
+<li>The bar sits where Outlook Express had its ribbon and lock, on all three.</li>
+<li>Inner Subject and addresses of protected headers are shown when their layer is valid.</li>
+</ul></div>
+<div><h4>Tests</h4><ul>
+<li><b>A corpus of mail</b> with the expected verdict of each: ordinary mail of seven clients, parts signed apart, EFAIL, "Johnny, you are fired", "Re: What's up Johnny", inline PGP, deep nesting.</li>
+<li>The spike first. The outer page holds nothing from a message but escaped label words, tested with hostile key names.</li>
+<li>Fuzz targets for the outline and the whole reading path.</li>
+<li>UI: <code>secure-1</code> to <code>secure-10</code>, the mixed parts and the fake frame among them, light and dark.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat">
+<header><h3>4. Writing</h3><span class="sz L">L</span><span class="pr">PR 6</span><span class="pr">PR 7</span></header>
+<div class="cols">
+<div><h4>How it behaves</h4><ul>
+<li><b>Sign</b> and <b>Encrypt</b> in the compose window, both off. Encrypt turns Sign on and needs a key for the From address.</li>
+<li>With Encrypt on, each recipient shows a lock or a warning; Send stops with the list of who has no key.</li>
+<li>The Sent copy is readable through your own key; drafts go to the server encrypted to it, unsigned.</li>
+<li>Bcc recipients are not named in the encrypted message.</li>
+<li>Removing Encrypt from a reply that quotes encrypted text is refused until the quote is gone.</li>
+<li>Attach My Public Key.</li>
+</ul></div>
+<div><h4>How it is built</h4><ul>
+<li>One place turns a message into bytes (<code>worker::build</code>); the protection goes there. <code>pe-smtp</code> builds the content apart and wraps it; ordinary mail is byte for byte as before.</li>
+<li>Undo Send and reopening a draft go through the reading path.</li>
+</ul><h4>Tests</h4><ul>
+<li><b>OpenPGP.js as the other person</b> in the ImapKit harness: it checks what we send and writes what we receive.</li>
+<li>The message on the server holds none of the text's words; UI: <code>write-30</code> to <code>write-35</code>.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat key">
+<header><h3>5. Finding keys</h3><span class="sz M">M</span><span class="pr">PR 8</span></header>
+<div class="cols">
+<div><h4>How it behaves</h4><ul>
+<li>The local keys, then the domain's Web Key Directory (only the recipient's own provider learns of it), then keys.openpgp.org.</li>
+<li>Only for a message being encrypted, or Find Key. A miss is remembered for a day. A switch in Options turns keys.openpgp.org off.</li>
+<li>A key is taken only if it names exactly the address asked for; it starts as "found", not verified.</li>
+<li>Publish: upload and ask for the confirmation mail, which lands in your own inbox.</li>
+</ul></div>
+<div><h4>Tests</h4><ul>
+<li>A loopback server playing both: found, 404, 429, 503, too large, a redirect, the wrong address, extra user ids.</li>
+<li>One live lookup each with <code>PE_NETWORK_TESTS=1</code>.</li>
+<li>UI: <code>keys-9</code> to <code>keys-11</code>, <code>write-36</code>.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat key">
+<header><h3>6. Autocrypt</h3><span class="sz M">M</span><span class="pr">PR 9</span></header>
+<div class="cols">
+<div><ul>
+<li>Read whenever a message is parsed: one From, the header's address equal to it, not Junk, not a report; ordered by date.</li>
+<li>Sent from an address with a key, unless turned off in Account Properties.</li>
+<li>Gossip of the other recipients' keys only inside encrypted mail.</li>
+</ul></div>
+<div><h4>Tests</h4><ul>
+<li>Autocrypt's own examples; the rules one by one; both directions with OpenPGP.js; UI: <code>keys-12</code>, <code>keys-13</code>.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat read">
+<header><h3>7. Search, the list, notifications, agents</h3><span class="sz M">M</span><span class="pr">PR 10</span></header>
+<div class="cols">
+<div><ul>
+<li>A lock or ribbon in the message list; <code>is:encrypted</code> and <code>is:signed</code>.</li>
+<li>Decrypted text is indexed when a message is opened, or in the background once its source is cached. The switch off removes it.</li>
+<li>A notification says the sender and "Encrypted message".</li>
+<li><b>Agents</b>: text that came from decryption is marked, and their list, search and read leave it out.</li>
+</ul></div>
+<div><h4>Tests</h4><ul>
+<li>Found by a word of its text after the background pass, not after the switch is off.</li>
+<li>The agents' tools never return decrypted words; none signs or encrypts.</li>
+</ul></div>
+</div>
+</div>
+
+<div class="feat hard">
+<header><h3>8. Hardening</h3><span class="sz M">M</span><span class="pr">PR 11</span></header>
+<ul>
+<li><b>/security-review</b> of everything since 0.18.0 as one piece, and the security audit skill over the engine, the reading path, the key store and the frames, with the threat table as its checklist.</li>
+<li>Every fuzz target run for an hour; the interoperability suite's report read, failures fixed or listed with the reason.</li>
+<li><b>/simplify</b> over the feature as a whole; the help complete in every language; CLAUDE.md gets the new crates and rules.</li>
+</ul>
+</div>
+
+<h2>How every PR is done</h2>
+<div class="card" style="padding:0">
+<ol class="flow">
+<li>A branch in a worktree of its own, from an updated master.</li>
+<li>The core and its tests: unit, corpus, migration, ImapKit end to end.</li>
+<li>Commands or the C API, the header committed; then the three apps.</li>
+<li>Translations in five languages, marked for review; the help in each.</li>
+<li>UI end to end on the three platforms, the feature map, the screenshots looked at.</li>
+<li>UX review until a round finds nothing; here also: can every state be told from every other without color?</li>
+<li class="key"><b>/simplify</b> over the changed code, with the maintainability check.</li>
+<li class="key"><b>/security-review</b> of the branch; fix what it finds and go on.</li>
+<li>fmt, clippy, the tests, prettier, <code>check-shells.sh</code>; push, watch CI, merge when green.</li>
+</ol>
+</div>
+
+<h2>How it is tested</h2>
+<div class="tablewrap"><table>
+<tr><th>Layer</th><th>What</th><th>Where</th></tr>
+<tr><td>Vectors</td><td>RFC 9580 appendix, rPGP's samples, Autocrypt's examples</td><td><code>pe-pgp/tests</code></td></tr>
+<tr><td>Other clients' data</td><td>Committed fixtures from GnuPG, Sequoia and OpenPGP.js, regenerated by a script</td><td><code>conformance.rs</code></td></tr>
+<tr><td>Live cross-check</td><td>Our <code>sop</code> against Sequoia's on every PR; the interoperability suite on a schedule</td><td>CI</td></tr>
+<tr><td>Policy</td><td>One test a row of the policy table</td><td><code>policy.rs</code></td></tr>
+<tr><td>Known attacks</td><td>The mail corpus with expected verdicts; advisory regressions</td><td><code>pe-core/tests/pgp_mail</code></td></tr>
+<tr><td>Fuzzing</td><td>Certificates, messages, Autocrypt headers, the outline, the whole reading path</td><td><code>core/fuzz</code></td></tr>
+<tr><td>Keys at rest</td><td>Wrapping, the file never holding a private key, the real system stores</td><td><code>pe-core</code></td></tr>
+<tr><td>Network</td><td>Loopback keys.openpgp.org and Web Key Directory; one live lookup</td><td><code>pe-keys/tests</code></td></tr>
+<tr><td>End to end, core</td><td>ImapKit with OpenPGP.js as the other person: send, receive, drafts, Sent, Bcc, Undo Send, search, agents</td><td><code>e2e_core.rs</code>, <code>pe-mcp</code></td></tr>
+<tr><td>End to end, apps</td><td><code>keys-*</code>, <code>secure-*</code>, <code>write-30</code> to <code>36</code>, three platforms, light and dark</td><td>UI tests</td></tr>
+</table></div>
+
+<h2>Threats and what answers them</h2>
+<div class="tablewrap"><table>
+<tr><th>Threat</th><th>Answer</th></tr>
+<tr><td>Changed ciphertext (EFAIL)</td><td>Integrity before any plaintext; sections sanitized apart; pictures in decrypted parts only on a click, then no longer called encrypted; the CSP</td></tr>
+<tr><td>A valid signature wrapped in another message</td><td>Only the top layers give the message's state; every other layer is a framed part; the From rule</td></tr>
+<tr><td>A painted "verified" frame</td><td>Labels and mail never share a document; label words from the core only; the bar's count; imitation tests</td></tr>
+<tr><td>A hidden part leaked by a reply</td><td>Replies quote what was shown; nothing is decrypted for a reply; an encrypted quote forces Encrypt</td></tr>
+<tr><td>A planted key</td><td>Two levels of trust; exact address match; no silent key change; the domain's directory before the key server</td></tr>
+<tr><td>A stolen store file</td><td>Private keys wrapped under the master key in the system's store, bound to their row and profile</td></tr>
+<tr><td>Malformed packets</td><td>Limits, fuzzing, <code>catch_unwind</code> at the C API, rPGP followed release by release</td></tr>
+<tr><td>Old cryptography</td><td>The policy table, judged at signing time</td></tr>
+<tr><td>Addresses disclosed by lookups</td><td>Only on Encrypt or Find Key; a cache; a switch</td></tr>
+<tr><td>An agent acting as the user</td><td>No decrypted text, snippet or search result; no tool reaches keys, Sign or Encrypt</td></tr>
+<tr><td>Half encrypted mail</td><td>Send stops on a missing key; drafts and the Sent copy are encrypted to the own key</td></tr>
+</table></div>
+
+<h2>Not in this round</h2>
+<p class="sub">S/MIME, smartcards and hardware keys, post-quantum keys, the Autocrypt Setup Message, loose <code>.pgp</code> files attached to ordinary mail, encrypting the Subject of outgoing mail.</p>
+
+</main>
+</body>
+</html>
