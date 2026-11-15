@@ -539,6 +539,10 @@ ui-pictures-always-domain = Bilder von allen Absendern der Domain { $domain } im
 ui-pictures-unconfirmed = Die Absenderdomain { $domain } konnte nicht bestätigt werden. Deshalb werden Bilder in dieser Nachricht nicht automatisch heruntergeladen.
 ui-pictures-always-option = Bilder in allen Nachrichten herunterladen
 ui-pictures-always-warning = Absender sehen dann, wann Sie ihre Nachrichten lesen.
+# review: new
+ui-protection-details = &Details...
+# review: new
+ui-protection-details-title = Sicherheitsdetails
 ui-download-heading = Herunterladen
 ui-download-ahead = Nachrichten vorab herunterladen:
 ui-download-ahead-recent = Neuere Nachrichten mit jeweils bis zu 1 MB

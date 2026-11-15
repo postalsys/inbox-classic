@@ -539,6 +539,10 @@ ui-pictures-always-domain = Descargar siempre las imágenes de los remitentes de
 ui-pictures-unconfirmed = No se pudo verificar el dominio del remitente ({ $domain }). Por eso, las imágenes de este mensaje no se descargan automáticamente.
 ui-pictures-always-option = Descargar las imágenes de todos los mensajes
 ui-pictures-always-warning = Los remitentes podrán saber cuándo lee sus mensajes.
+# review: new
+ui-protection-details = &Detalles...
+# review: new
+ui-protection-details-title = Detalles de seguridad
 ui-download-heading = Descarga
 ui-download-ahead = Descargar mensajes con antelación:
 ui-download-ahead-recent = Mensajes recientes de hasta 1 MB

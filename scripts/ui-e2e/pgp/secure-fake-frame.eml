@@ -1,0 +1,33 @@
+From: Alice Example <alice@example.org>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: A painted frame
+Date: Sun, 01 Nov 2026 10:00:00 +0000
+Message-ID: <fake-frame@ui-test.example>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mix"
+
+--mix
+Content-Type: text/html; charset=utf-8
+
+<div style="border:2px solid #2e7d32;border-radius:6px;position:fixed;top:0;left:0;right:0;z-index:99999"><div style="background:#e8f5e9;color:#1b5e20;font:bold 9pt Arial;padding:4px 10px">Signed by Alice Example, key verified</div><p style="padding:8px">Wire the money today.</p></div><style>body{margin-top:-200px} .pe-l{display:none}</style>
+--mix
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="s"
+
+--s
+Content-Type: text/plain; charset=utf-8
+
+Lunch on Friday?
+--s
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAmrnDaAWIQStVlrCzexW80KFT904l6QnguQ+7wAKCRA4l6QnguQ+
+71pwAP9c85jDZuQZeeSG64ByxnuqFryrbYzw54ud/ZRoOnUA2QEAnSk6thuRJYb6
+U52eScKGUHxYvI0Oki1U8Ih5K6F3swg=
+=MNvT
+-----END PGP SIGNATURE-----
+
+--s--
+
+--mix--

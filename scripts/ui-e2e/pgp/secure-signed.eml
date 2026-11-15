@@ -1,0 +1,24 @@
+From: Alice Example <alice@example.org>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: Signed by Alice
+Date: Sun, 01 Nov 2026 10:00:00 +0000
+Message-ID: <signed@ui-test.example>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="s"
+
+--s
+Content-Type: text/plain; charset=utf-8
+
+The contract is attached in words: we agree on the price.
+--s
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAmrnDaAWIQStVlrCzexW80KFT904l6QnguQ+7wAKCRA4l6QnguQ+
+7yU9AQC1urc9NqBXWiNl8NxVgoYxIU3OHU7Sgu8rVvhYwv4WVwEAt9iwCLZ4d0J+
+xbRxuYSbV8zHt8PHKZrmkYmj74DoSgc=
+=fQLV
+-----END PGP SIGNATURE-----
+
+--s--

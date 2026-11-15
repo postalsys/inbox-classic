@@ -539,6 +539,10 @@ ui-pictures-always-domain = Laadi domeenist { $domain } saabunud kirjade pildid 
 ui-pictures-unconfirmed = Ei õnnestunud kinnitada, et kiri pärineb domeenist { $domain }. Seetõttu ei laadita selle pilte automaatselt alla.
 ui-pictures-always-option = Laadi pildid alla kõigis kirjades
 ui-pictures-always-warning = Saatjad näevad siis, millal te nende kirju loete.
+# review: new
+ui-protection-details = Ü&ksikasjad...
+# review: new
+ui-protection-details-title = Turvalisuse üksikasjad
 ui-download-heading = Allalaadimine
 ui-download-ahead = Laadi kirjad eelnevalt alla:
 ui-download-ahead-recent = Hiljutised kirjad suurusega kuni 1 MB

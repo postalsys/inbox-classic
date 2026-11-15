@@ -1,0 +1,32 @@
+From: Alice Example <alice@example.org>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: Encrypted with a picture
+Date: Sun, 01 Nov 2026 10:00:00 +0000
+Message-ID: <pictures@ui-test.example>
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="e"
+
+--e
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--e
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wWwGFQTi0R+UqEMQ5651sz7JhZZde6q1ERIBB0BnrdiCW4KxZm/NpQvkq4GddBJX
+KFr2kJ7Wb6rzQD7KdjBcGpDcff4cd12iVmKKHWIbrV6hbdtHErCqeYyKwnECLEk3
+4kElI1vXlEJWR+PXzuHSwNwCCQIGmqSPVLx+wC0hYQYQwuG40b+9kvrmoC4cxy4E
+ySGxwegpnXzDIyCb5+Afe+LPUbv3cibO3aBcGQ8T5z3Pd/88S2NlGWuKRZ9uYT4K
+GwB8cPeh4fsOoQJG+qvcXK0Kp1RMpIRwihJ6WqY/dA4W6s2RQ6f350MmiIi26ICU
+IGjzFFMHrouFJ7+b9yZy4AeH9F3gmuPJdU5pLNfIKb301e+Y4g7BA9PM3gWZt2z2
+HE9dRVrkoy0+PC9DMkXFxkwevt0SEFRRmzZD3SoAYKU2YmFTUxW8GJ/HnRyDaRjA
+ZpqxWlduvHLGmb9UJ5qaZM7zeYMV37IhmdpXReXon662Fcm5qWD1nbvXXem53RqY
+RnyNJRLxbREfzu+WQf8v92XLEAvcxxow/LQ+roMXl2dV8wnA5DFK0JLdjYe9eqGH
+NrZlnrUrRiMmzu25nvSsnTytJGHHMFBpjG8UzCIWV1nhOXRmZ9j4ngAw9E0ODl1k
+rl1aOVSmTNFC0l3xeif7MXw89d5IdNzBNpa/lfatvC7GSWtbyOPwmJZSM3cZ
+=EHpg
+-----END PGP MESSAGE-----
+
+--e--

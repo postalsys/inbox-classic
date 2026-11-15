@@ -628,8 +628,6 @@ pgp-why-key-not-valid = Firmado con una clave no válida
 # review: new
 pgp-why-not-for-you = Firmado para otros destinatarios y reenviado a usted
 # review: new
-pgp-bar-mixed = Las partes de este mensaje están protegidas de forma distinta: cada parte indica cómo.
-# review: new
 pgp-part-pictures-loaded = { $label }. Se cargaron imágenes de internet
 # review: new
 pgp-error-no-own-key = No tiene ninguna clave para { $address } con la que firmar o cifrar. Cree una en Herramientas > Claves de cifrado, o desactive Firmar y Cifrar.
@@ -658,3 +656,33 @@ pgp-publish-done = Su clave está publicada en keys.openpgp.org para { $addresse
 pgp-publish-failed = No se pudo publicar la clave: { $error }
 # review: new
 pgp-keyserver-off = La búsqueda de claves en keys.openpgp.org está desactivada en Opciones.
+pgp-details-part = Parte { $number }: { $label }
+# review: new
+pgp-details-signed = Firmado { $when } con la clave { $key }
+# review: new
+pgp-details-unknown-key = Firmado con la clave { $key }, que usted no tiene
+# review: new
+pgp-details-opened = Cifrado para su clave { $key }
+# review: new
+pgp-details-for = Cifrado para { $keys }
+# review: new
+pgp-details-plain = Ni firmado ni cifrado
+# review: new
+pgp-bar-parts = Este mensaje tiene { $count } partes: { $list }. Cada parte indica cómo está protegida.
+# review: new
+pgp-bar-count-verified = { $count ->
+    [one] 1 verificada
+   *[other] { $count } verificadas
+}
+# review: new
+pgp-bar-count-good = { $count ->
+    [one] 1 firmada o cifrada
+   *[other] { $count } firmadas o cifradas
+}
+# review: new
+pgp-bar-count-warning = { $count ->
+    [one] 1 requiere atención
+   *[other] { $count } requieren atención
+}
+# review: new
+pgp-bar-count-neutral = { $count } sin firma confirmada

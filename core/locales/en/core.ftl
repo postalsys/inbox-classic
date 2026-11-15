@@ -577,7 +577,6 @@ pgp-why-from-future = The signature is dated in the future
 pgp-why-signature-expired = The signature has expired
 pgp-why-key-not-valid = Signed with a key that is not valid
 pgp-why-not-for-you = Signed for other recipients, and passed on to you
-pgp-bar-mixed = Parts of this message are protected differently: each part says how.
 pgp-part-pictures-loaded = { $label }. Pictures were loaded from the internet
 pgp-error-no-own-key = You have no key for { $address } to sign or encrypt with. Make one in Tools > Encryption Keys, or turn Sign and Encrypt off.
 pgp-error-missing-keys = { $count ->
@@ -594,3 +593,20 @@ pgp-publish-pending = keys.openpgp.org sent a confirmation link to { $addresses 
 pgp-publish-done = Your key is published on keys.openpgp.org for { $addresses }.
 pgp-publish-failed = The key could not be published: { $error }
 pgp-keyserver-off = Looking up keys on keys.openpgp.org is turned off in Options.
+pgp-details-part = Part { $number }: { $label }
+pgp-details-signed = Signed { $when } with the key { $key }
+pgp-details-unknown-key = Signed with the key { $key }, which you do not have
+pgp-details-opened = Encrypted to your key { $key }
+pgp-details-for = Encrypted to { $keys }
+pgp-details-plain = Not signed and not encrypted
+pgp-bar-parts = This message has { $count } parts: { $list }. Each part says how it is protected.
+pgp-bar-count-verified = { $count } verified
+pgp-bar-count-good = { $count ->
+    [one] 1 signed or encrypted
+   *[other] { $count } signed or encrypted
+}
+pgp-bar-count-warning = { $count ->
+    [one] 1 needs attention
+   *[other] { $count } need attention
+}
+pgp-bar-count-neutral = { $count } without a confirmed signature

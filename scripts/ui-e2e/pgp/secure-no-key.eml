@@ -1,0 +1,24 @@
+From: Dave <dave@example.com>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: A key you do not have
+Date: Sun, 01 Nov 2026 10:00:00 +0000
+Message-ID: <no-key@ui-test.example>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="s"
+
+--s
+Content-Type: text/plain; charset=utf-8
+
+Hello from Dave.
+--s
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAmrnDaAWIQTP0KpSgyenu7YqS1kLZXA9YKIx3gAKCRALZXA9YKIx
+3uE7AP47sEIJ14El8j/yaL9vbAMI+PrQHh3VZwo4o/AVah6b6wD/eJMA/L3tiuWi
+9ZEtFR1ExdMECde41Zd16SmvcVPD6ww=
+=lHrB
+-----END PGP SIGNATURE-----
+
+--s--

@@ -282,7 +282,17 @@ fn parts_signed_apart() {
     let view = w.view(&raw);
     assert_eq!(tones(&view), [Tone::Neutral, Tone::Good, Tone::Neutral]);
     let protection = view.protection.as_ref().unwrap();
-    assert!(protection.text.contains("differently"), "{}", protection.text);
+    assert!(
+        protection
+            .text
+            .contains("3 parts: 1 signed or encrypted, 2 without a confirmed signature"),
+        "{}",
+        protection.text
+    );
+    // Details: each part, the signed one with its key and time
+    let details = protection.details();
+    assert!(details.contains("Part 2: Signed by Alice Example"), "{details}");
+    assert!(details.contains(&pe_pgp::grouped(&w.alice.fingerprint())), "{details}");
     assert_eq!(protection.parts[0].label, "Not signed");
     // three documents, each its own frame
     assert_eq!(view.document.matches("<iframe").count(), 3);
