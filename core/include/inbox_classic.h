@@ -188,6 +188,18 @@ typedef enum PeTreeRowKind {
   PE_TREE_ROW_KIND_FOLDER = 4,
 } PeTreeRowKind;
 
+// The menu a row's right-click opens
+typedef enum PeTreeMenu {
+  // None (Flagged)
+  PE_TREE_MENU_NONE = 0,
+  // Mark All Read only (All Inboxes)
+  PE_TREE_MENU_MARK_READ = 1,
+  // A folder's: Mark All Read, New Folder, Rename, Delete, Empty
+  PE_TREE_MENU_FOLDER = 2,
+  // An account's
+  PE_TREE_MENU_ACCOUNT = 3,
+} PeTreeMenu;
+
 // A conversation's mark (Message > Watch Conversation, Ignore Conversation)
 typedef enum PeThreadMark {
   PE_THREAD_MARK_NONE = 0,
@@ -201,11 +213,6 @@ typedef enum PePictureKind {
   PE_PICTURE_KIND_LOGO = 1,
   PE_PICTURE_KIND_CONTACT = 2,
 } PePictureKind;
-
-// A special use whose folders the folder list gathers from every account
-typedef enum PeSpecialFolderKind {
-  PE_SPECIAL_FOLDER_KIND_INBOX,
-} PeSpecialFolderKind;
 
 // What a link clicked in the reading pane is to the app
 typedef enum PeReaderLink {
@@ -497,9 +504,6 @@ typedef struct PeSignInAppList PeSignInAppList;
 // The presets; free with `pe_sign_in_preset_list_free`
 typedef struct PeSignInPresetList PeSignInPresetList;
 
-// The list of `pe_special_folders`
-typedef struct PeSpecialFolderList PeSpecialFolderList;
-
 // The rows of the Move and Copy window; free with `pe_target_list_free`
 typedef struct PeTargetList PeTargetList;
 
@@ -748,26 +752,31 @@ typedef struct PeFolder {
   bool selectable;
   uint64_t total;
   uint64_t unread;
-  // The unread messages of the folders under it (not Junk E-mail or Deleted Items): a collapsed folder shows
-  // `unread + unread_below`, an expanded one `unread`
-  uint64_t unread_below;
 } PeFolder;
 
 // A row of the folder list, in its order (`pe_folder_tree`)
 typedef struct PeTreeRow {
   enum PeTreeRowKind kind;
+  // What stays the same for this row from one reading to the next (`inboxes`, `flagged`, `account:<id>`,
+  // `folder:<id>`): two readings with the same keys and depths in the same order have the same shape, and only
+  // their words and counts are to be updated; `pe_tree_reselect` finds the row to choose by it
+  const char *key;
   // 0 for All Inboxes and Flagged
   int64_t account;
   // 0 for All Inboxes, Flagged and a heading
   int64_t folder;
   uint32_t depth;
   const char *label;
-  // What the folder bar and the window's title say when it is chosen ("Inbox - Gmail")
+  // What the folder bar and the window's title say when it is chosen ("Inbox - Gmail"), and a screen reader's name
+  // for it
   const char *title;
   // Its own unread messages (Flagged: how many are flagged, never bold)
   uint64_t unread;
   // The unread messages under it, shown with its own while it is collapsed
   uint64_t hidden;
+  // The count it shows while open, and while collapsed (with those under it)
+  uint64_t count;
+  uint64_t count_collapsed;
   // Shown bold while open, and while collapsed (`TreeRow::bold`)
   bool bold;
   bool bold_collapsed;
@@ -776,9 +785,15 @@ typedef struct PeTreeRow {
   bool selectable;
   // Messages can be dropped on it
   bool drop_target;
-  // It can be dragged among its own kind to order the accounts
+  // It can be dragged among its own kind to order the accounts, and its menu has Move Up and Move Down
   bool reorders_accounts;
-  // Its icon's word: `inbox`, `sent`, `drafts`, `deleted`, `junk`, `archive`, `flagged`, or empty
+  enum PeTreeMenu menu;
+  // Where New Folder makes a folder with this row chosen: the account (0: New Folder does not apply) and the folder
+  // to make it in (0: the account's top)
+  int64_t new_folder_account;
+  int64_t new_folder_parent;
+  // Its icon's word: `inbox`, `sent`, `drafts`, `deleted`, `junk`, `archive`, `flagged`, `all`, `account` for a
+  // heading, or empty for any other folder
   const char *icon;
 } PeTreeRow;
 
@@ -839,17 +854,6 @@ typedef struct PeMessage {
   // One or two letters for a sender without a picture ("AL" for Ann Lee), empty when there is no letter
   const char *initials;
 } PeMessage;
-
-// An account's folder of a special use: a row under All Inboxes
-typedef struct PeSpecialFolder {
-  int64_t account;
-  int64_t folder;
-  // The account's title, as `PeAccount` `title` has it
-  const char *name;
-  // The folder told apart by its account, for the folder bar and the window's title: "Inbox - Gmail"
-  const char *title;
-  uint64_t unread;
-} PeSpecialFolder;
 
 // Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
 // day, short (`time` true), in the reader's locale and time zone, or as written when `floating` (the seconds are
@@ -1872,7 +1876,7 @@ bool pe_account_set_name(const struct PeCore *core,
                          const char *name);
 
 // Puts `account` at `index` in the accounts' order (0 first, past the end last), which `pe_accounts`, the folder list
-// and `pe_special_folders` follow. False when there is no such account.
+// and the folder list (`pe_folder_tree`) follow. False when there is no such account.
 //
 // # Safety
 // `core` must be a live handle.
@@ -2063,12 +2067,6 @@ bool pe_contact_forget(const struct PeCore *core,
 // `core` must be a live handle.
 struct PeFolderList *pe_folders(const struct PeCore *core, int64_t account);
 
-// The unread messages of the account of `list` (not Junk E-mail or Deleted Items): what its row shows collapsed
-//
-// # Safety
-// `list` must be NULL or live.
-uint64_t pe_folder_list_unread(const struct PeFolderList *list);
-
 // # Safety
 // `list` must be NULL or live.
 size_t pe_folder_list_count(const struct PeFolderList *list);
@@ -2101,6 +2099,15 @@ size_t pe_tree_count(const struct PeTree *tree);
 // `tree` must be NULL or live.
 const struct PeTreeRow *pe_tree_get(const struct PeTree *tree, size_t index);
 
+// The row to choose in `tree` after the list was read again, given the `key` of the row chosen before: the same row,
+// or when it is gone (All Inboxes, Flagged or a heading after an account came or went) its account's Inbox or the
+// first Inbox. -1 when the folder chosen is gone.
+//
+// # Safety
+// `tree` must be NULL or live, `key` NULL or a NUL-terminated string.
+int64_t pe_tree_reselect(const struct PeTree *tree,
+                         const char *key);
+
 // # Safety
 // `tree` must be NULL or a list that was not freed yet.
 void pe_tree_free(struct PeTree *tree);
@@ -2122,9 +2129,6 @@ bool pe_start_message(const struct PeCore *core,
                       bool *all_inboxes,
                       int64_t *folder,
                       uint64_t *uid);
-
-// Whether the folder tree has All Inboxes above the accounts, for this many accounts
-bool pe_all_inboxes_shown(size_t accounts);
 
 // Whether the message `uid` is (still) in `folder`: a single row looked up. False on failure.
 //
@@ -2197,29 +2201,6 @@ bool pe_mark_all_inboxes_read(const struct PeCore *core);
 // # Safety
 // `core` must be a live handle.
 bool pe_account_mark_all_read(const struct PeCore *core, int64_t account);
-
-// Each account's folder of a special use (its Inbox), in the accounts' order, for the rows under All Inboxes; NULL on
-// failure. Free with `pe_special_folder_list_free`.
-//
-// # Safety
-// `core` must be a live handle.
-struct PeSpecialFolderList *pe_special_folders(const struct PeCore *core,
-                                               enum PeSpecialFolderKind kind);
-
-// # Safety
-// `list` must be NULL or a list that was not freed yet.
-size_t pe_special_folder_list_count(const struct PeSpecialFolderList *list);
-
-// The row at `index`, NULL past the end; it lives as long as the list
-//
-// # Safety
-// `list` must be NULL or a list that was not freed yet.
-const struct PeSpecialFolder *pe_special_folder_list_get(const struct PeSpecialFolderList *list,
-                                                         size_t index);
-
-// # Safety
-// `list` must be NULL or a list that was not freed yet.
-void pe_special_folder_list_free(struct PeSpecialFolderList *list);
 
 // Creates the folder `name` (UTF-8) in `parent`, or at the top of the account when `parent` is 0:
 // `FoldersChanged` follows once the server has it. False with the reason in `error` (NULL or a pointer to a

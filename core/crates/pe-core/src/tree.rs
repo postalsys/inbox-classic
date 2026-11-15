@@ -8,7 +8,7 @@
 use pe_imap::SpecialUse;
 use pe_store::{AccountId, Folder, FolderId};
 
-use crate::{Core, Result, account_titles, emptiable, text};
+use crate::{Core, Result, account_titles, all_inboxes_shown, emptiable, text};
 
 /// What a row of the folder list is
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -25,10 +25,26 @@ pub enum TreeRowKind {
     Folder,
 }
 
+/// The menu a row's right-click opens
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TreeMenu {
+    /// None (Flagged: its messages are of every folder)
+    None,
+    /// Mark All Read only (All Inboxes, no folder of its own)
+    MarkRead,
+    /// A folder's: Mark All Read, New Folder, Rename, Delete, Empty
+    Folder,
+    /// An account's
+    Account,
+}
+
 /// One row of the folder list, in its order
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TreeRow {
     pub kind: TreeRowKind,
+    /// What stays the same for this row from one reading to the next, to keep its selection and opened state:
+    /// `inboxes`, `flagged`, `account:<id>` or `folder:<id>` (an Inbox keeps its key under All Inboxes or not)
+    pub key: String,
     /// The account it belongs to, 0 for All Inboxes and Flagged
     pub account: AccountId,
     /// The folder it shows, 0 for All Inboxes, Flagged and a heading
@@ -37,8 +53,9 @@ pub struct TreeRow {
     pub depth: usize,
     /// What it says
     pub label: String,
-    /// What the folder bar and the window's title say when it is chosen: "Inbox - Gmail" for an account's Inbox
-    /// under All Inboxes, else its label
+    /// What the folder bar and the window's title say when it is chosen, and what a screen reader says for it:
+    /// "Inbox - Gmail" for an account's Inbox under All Inboxes, else its label (with the account when there are
+    /// several)
     pub title: String,
     /// Its own unread messages (Flagged: how many messages are flagged, which is no reason for bold)
     pub unread: u64,
@@ -51,18 +68,56 @@ pub struct TreeRow {
     pub selectable: bool,
     /// Messages can be dropped on it: a folder that can be selected, or an account's Inbox under All Inboxes
     pub drop_target: bool,
-    /// It can be dragged up and down among its own kind to order the accounts: a heading, or an Inbox under All
-    /// Inboxes
+    /// It can be dragged up and down among its own kind to order the accounts (Move Up and Move Down in its menu): a
+    /// heading, or an Inbox under All Inboxes
     pub reorders_accounts: bool,
-    /// The kind of special folder it is, in a word for its icon (`inbox`, `sent`, `drafts`, `deleted`, `junk`,
-    /// `archive`, `flagged` for a server's own flagged folder, `all` for one of all mail), empty for any other
+    /// Its menu
+    pub menu: TreeMenu,
+    /// Where New Folder makes a folder with this row chosen: the account (0: New Folder does not apply here) and the
+    /// folder to make it in (0: the top of the account, as for the Inbox, which holds no folders in the list)
+    pub new_folder_account: AccountId,
+    pub new_folder_parent: FolderId,
+    /// A word for its icon: a special folder's (`inbox`, `sent`, `drafts`, `deleted`, `junk`, `archive`, `flagged`,
+    /// `all`), `account` for a heading, empty for any other folder
     pub icon: &'static str,
 }
 
 impl TreeRow {
+    /// The count it shows: its own unread, with those under it while it is collapsed
+    pub fn shown(&self, collapsed: bool) -> u64 {
+        self.unread + if collapsed { self.hidden } else { 0 }
+    }
+
     /// It is shown bold: unread mail in it, or (collapsed) under it; Flagged never is
     pub fn bold(&self, collapsed: bool) -> bool {
-        self.kind != TreeRowKind::Flagged && self.unread + if collapsed { self.hidden } else { 0 } > 0
+        self.kind != TreeRowKind::Flagged && self.shown(collapsed) > 0
+    }
+
+    /// A row of no folder
+    fn fixed(kind: TreeRowKind, key: String, account: AccountId, label: String, icon: &'static str) -> TreeRow {
+        TreeRow {
+            kind,
+            key,
+            account,
+            folder: 0,
+            depth: 0,
+            title: label.clone(),
+            label,
+            unread: 0,
+            hidden: 0,
+            parent: false,
+            selectable: kind != TreeRowKind::Account,
+            drop_target: false,
+            reorders_accounts: kind == TreeRowKind::Account,
+            menu: match kind {
+                TreeRowKind::AllInboxes => TreeMenu::MarkRead,
+                TreeRowKind::Account => TreeMenu::Account,
+                _ => TreeMenu::None,
+            },
+            new_folder_account: account,
+            new_folder_parent: 0,
+            icon,
+        }
     }
 }
 
@@ -75,8 +130,9 @@ fn icon(folder: &Folder) -> &'static str {
     }
 }
 
+/// The store's own rule for an Inbox, the one All Inboxes lists by
 fn is_inbox(folder: &Folder) -> bool {
-    text::folder_kind(&folder.info) == "inbox"
+    folder.info.path.eq_ignore_ascii_case("INBOX")
 }
 
 /// Counts toward a collapsed row: not Junk E-mail nor Deleted Items
@@ -100,14 +156,19 @@ pub(crate) fn ordered(folders: Vec<Folder>) -> Vec<(Folder, usize)> {
         .count();
     let mut inbox: Vec<(Folder, usize)> = rows.drain(at..at + 1 + held).collect();
     // the Inbox at the top, what it held a level up after it
-    for (_, depth) in inbox.iter_mut() {
-        *depth = depth.saturating_sub(inbox_depth);
-    }
-    for (_, depth) in inbox.iter_mut().skip(1) {
-        *depth -= 1;
+    for (i, (_, depth)) in inbox.iter_mut().enumerate() {
+        *depth = if i == 0 { 0 } else { *depth - inbox_depth - 1 };
     }
     inbox.extend(rows);
     inbox
+}
+
+/// An account's ordered folders split into its Inbox (first, when it has one) and the rest
+fn split_inbox(folders: &[(Folder, usize)]) -> (Option<&Folder>, &[(Folder, usize)]) {
+    match folders.split_first() {
+        Some(((inbox, _), rest)) if is_inbox(inbox) => (Some(inbox), rest),
+        _ => (None, folders),
+    }
 }
 
 /// A folder's row
@@ -115,6 +176,7 @@ fn folder_row(folder: &Folder, depth: usize) -> TreeRow {
     let label = text::folder_name(&folder.info);
     TreeRow {
         kind: TreeRowKind::Folder,
+        key: format!("folder:{}", folder.id),
         account: folder.account_id,
         folder: folder.id,
         depth,
@@ -126,19 +188,102 @@ fn folder_row(folder: &Folder, depth: usize) -> TreeRow {
         selectable: folder.info.selectable,
         drop_target: folder.info.selectable,
         reorders_accounts: false,
+        menu: TreeMenu::Folder,
+        new_folder_account: folder.account_id,
+        // the Inbox holds no folders in the list: a folder made from it goes at the top
+        new_folder_parent: if is_inbox(folder) { 0 } else { folder.id },
         icon: icon(folder),
     }
 }
 
-/// Each row's `hidden` and `parent` from the rows under it, by their depths
-fn fill_below(rows: &mut [TreeRow], counts: &[u64]) {
-    for i in 0..rows.len() {
-        let below: Vec<usize> = (i + 1..rows.len())
-            .take_while(|&j| rows[j].depth > rows[i].depth)
-            .collect();
-        rows[i].parent = !below.is_empty();
-        rows[i].hidden = below.iter().map(|&j| counts[j]).sum();
+/// Each row's `hidden` and `parent` from the rows under it, by their depths, in one pass from the bottom: a stack of
+/// the rows still open above, each with what was counted under it so far
+fn fill_below(rows: &mut [(TreeRow, u64)]) {
+    let mut open: Vec<(usize, u64)> = Vec::new();
+    for i in (0..rows.len()).rev() {
+        let depth = rows[i].0.depth;
+        let mut below = 0;
+        let mut parent = false;
+        // the rows after it that are deeper are under it
+        while let Some(&(j, sum)) = open.last() {
+            if rows[j].0.depth <= depth {
+                break;
+            }
+            // what is left on the stack deeper than it are its children: theirs were taken by them
+            open.pop();
+            parent = true;
+            below += sum + rows[j].1;
+        }
+        rows[i].0.parent = parent;
+        rows[i].0.hidden = below;
+        open.push((i, below));
     }
+}
+
+/// The rows of one account, with no heading: Inbox, Flagged, the rest
+fn one_account(folders: &[(Folder, usize)], account: AccountId, mut flagged: TreeRow) -> Vec<(TreeRow, u64)> {
+    let (inbox, rest) = split_inbox(folders);
+    let mut rows: Vec<(TreeRow, u64)> = inbox
+        .map(|inbox| (folder_row(inbox, 0), counted(inbox)))
+        .into_iter()
+        .collect();
+    // with one account New Folder from Flagged goes at its top
+    flagged.new_folder_account = account;
+    rows.push((flagged, 0));
+    rows.extend(
+        rest.iter()
+            .map(|(folder, depth)| (folder_row(folder, *depth), counted(folder))),
+    );
+    rows
+}
+
+/// The rows of several accounts: All Inboxes with each Inbox, Flagged, then each account's heading and folders
+fn several_accounts(
+    accounts: &[(AccountId, Vec<(Folder, usize)>)],
+    titles: &[String],
+    flagged: TreeRow,
+) -> Vec<(TreeRow, u64)> {
+    let mut rows = vec![(
+        TreeRow::fixed(
+            TreeRowKind::AllInboxes,
+            "inboxes".into(),
+            0,
+            pe_i18n::tr(pe_i18n::Text::UiAllInboxes),
+            "inbox",
+        ),
+        0,
+    )];
+    for ((account, folders), title) in accounts.iter().zip(titles) {
+        if let (Some(inbox), _) = split_inbox(folders) {
+            let row = TreeRow {
+                kind: TreeRowKind::AccountInbox,
+                account: *account,
+                label: title.clone(),
+                title: format!("{} - {title}", text::folder_name(&inbox.info)),
+                reorders_accounts: true,
+                ..folder_row(inbox, 1)
+            };
+            rows.push((row, counted(inbox)));
+        }
+    }
+    rows.push((flagged, 0));
+    for ((account, folders), title) in accounts.iter().zip(titles) {
+        let heading = TreeRow::fixed(
+            TreeRowKind::Account,
+            format!("account:{account}"),
+            *account,
+            title.clone(),
+            "account",
+        );
+        rows.push((heading, 0));
+        for (folder, depth) in split_inbox(folders).1 {
+            let mut row = folder_row(folder, depth + 1);
+            // which account's, in the folder bar and the title: "Archive - Work"
+            row.title = format!("{} - {title}", row.label);
+            rows.push((row, counted(folder)));
+        }
+    }
+    rows
 }
 
 /// The rows of the folder list of `accounts` (each with its folders, in the accounts' order) and the number of
@@ -148,107 +293,25 @@ pub(crate) fn rows(accounts: Vec<(pe_store::Account, Vec<Folder>)>, flagged: u64
         return Vec::new();
     }
     let titles = account_titles(&accounts.iter().map(|(a, _)| a.clone()).collect::<Vec<_>>());
-    let several = accounts.len() > 1;
-    let mut rows = Vec::new();
-    // what each row adds to a collapsed row above it
-    let mut counts = Vec::new();
-    let flagged_row = TreeRow {
-        kind: TreeRowKind::Flagged,
-        account: 0,
-        folder: 0,
-        depth: 0,
-        label: pe_i18n::tr(pe_i18n::Text::UiFlaggedFolder),
-        title: pe_i18n::tr(pe_i18n::Text::UiFlaggedFolder),
-        unread: flagged,
-        hidden: 0,
-        parent: false,
-        selectable: true,
-        drop_target: false,
-        reorders_accounts: false,
-        icon: "",
-    };
+    let mut flagged_row = TreeRow::fixed(
+        TreeRowKind::Flagged,
+        "flagged".into(),
+        0,
+        pe_i18n::tr(pe_i18n::Text::UiFlaggedFolder),
+        "flagged",
+    );
+    flagged_row.unread = flagged;
     let ordered: Vec<(AccountId, Vec<(Folder, usize)>)> = accounts
         .into_iter()
         .map(|(account, folders)| (account.id, ordered(folders)))
         .collect();
-    if !several {
-        let (_, folders) = &ordered[0];
-        let mut rest = folders.iter();
-        if let Some((folder, depth)) = folders.first().filter(|(folder, _)| is_inbox(folder)) {
-            rows.push(folder_row(folder, *depth));
-            counts.push(counted(folder));
-            rest.next();
-        }
-        rows.push(flagged_row);
-        counts.push(0);
-        for (folder, depth) in rest {
-            rows.push(folder_row(folder, *depth));
-            counts.push(counted(folder));
-        }
-        fill_below(&mut rows, &counts);
-        return rows;
-    }
-    let all_inboxes = pe_i18n::tr(pe_i18n::Text::UiAllInboxes);
-    rows.push(TreeRow {
-        kind: TreeRowKind::AllInboxes,
-        account: 0,
-        folder: 0,
-        depth: 0,
-        label: all_inboxes.clone(),
-        title: all_inboxes,
-        unread: 0,
-        hidden: 0,
-        parent: false,
-        selectable: true,
-        drop_target: false,
-        reorders_accounts: false,
-        icon: "inbox",
-    });
-    counts.push(0);
-    for ((account, folders), title) in ordered.iter().zip(&titles) {
-        if let Some((inbox, _)) = folders.first().filter(|(folder, _)| is_inbox(folder)) {
-            rows.push(TreeRow {
-                kind: TreeRowKind::AccountInbox,
-                account: *account,
-                depth: 1,
-                label: title.clone(),
-                title: format!("{} - {title}", text::folder_name(&inbox.info)),
-                drop_target: inbox.info.selectable,
-                reorders_accounts: true,
-                ..folder_row(inbox, 1)
-            });
-            counts.push(counted(inbox));
-        }
-    }
-    rows.push(flagged_row);
-    counts.push(0);
-    for ((account, folders), title) in ordered.iter().zip(&titles) {
-        rows.push(TreeRow {
-            kind: TreeRowKind::Account,
-            account: *account,
-            folder: 0,
-            depth: 0,
-            label: title.clone(),
-            title: title.clone(),
-            unread: 0,
-            hidden: 0,
-            parent: false,
-            selectable: false,
-            drop_target: false,
-            reorders_accounts: true,
-            icon: "",
-        });
-        counts.push(0);
-        let skip = usize::from(folders.first().is_some_and(|(folder, _)| is_inbox(folder)));
-        for (folder, depth) in &folders[skip..] {
-            let mut row = folder_row(folder, depth + 1);
-            // which account's, in the folder bar and the title: "Archive - Work"
-            row.title = format!("{} - {title}", row.label);
-            rows.push(row);
-            counts.push(counted(folder));
-        }
-    }
-    fill_below(&mut rows, &counts);
+    let mut rows = if all_inboxes_shown(ordered.len()) {
+        several_accounts(&ordered, &titles, flagged_row)
+    } else {
+        one_account(&ordered[0].1, ordered[0].0, flagged_row)
+    };
+    fill_below(&mut rows);
+    let mut rows: Vec<TreeRow> = rows.into_iter().map(|(row, _)| row).collect();
     // All Inboxes counts its Inboxes as a folder does (it is no folder of its own)
     if let Some(row) = rows.iter_mut().find(|row| row.kind == TreeRowKind::AllInboxes) {
         row.unread = row.hidden;
@@ -257,26 +320,56 @@ pub(crate) fn rows(accounts: Vec<(pe_store::Account, Vec<Folder>)>, flagged: u64
     rows
 }
 
+/// The row to choose after the list was read again, given the key of the one chosen before: the same row, or, when it
+/// is gone (All Inboxes, Flagged or a heading after an account came or went), the Inbox of its account or the first
+/// Inbox; None when the folder chosen is gone, for the app to start over
+pub fn reselect(rows: &[TreeRow], key: &str) -> Option<usize> {
+    if let Some(at) = rows.iter().position(|row| row.key == key) {
+        return Some(at);
+    }
+    if key.starts_with("folder:") {
+        return None;
+    }
+    let account: AccountId = key.strip_prefix("account:").and_then(|id| id.parse().ok()).unwrap_or(0);
+    let inbox = |row: &TreeRow| row.icon == "inbox" && row.folder != 0;
+    rows.iter()
+        .position(|row| inbox(row) && row.account == account)
+        .or_else(|| rows.iter().position(inbox))
+}
+
 impl Core {
+    /// Each account with its folders, in the accounts' order
+    fn accounts_with_folders(&self) -> Result<Vec<(pe_store::Account, Vec<Folder>)>> {
+        let store = self.store();
+        store
+            .accounts()?
+            .into_iter()
+            .map(|account| {
+                let folders = store.folders(account.id)?;
+                Ok((account, folders))
+            })
+            .collect()
+    }
+
     /// The folder list of the main window, row by row in its order ([`TreeRow`])
     pub fn folder_tree(&self) -> Result<Vec<TreeRow>> {
-        let store = self.store();
-        let mut accounts = Vec::new();
-        for account in store.accounts()? {
-            let folders = store.folders(account.id)?;
-            accounts.push((account, folders));
-        }
-        drop(store);
+        let accounts = self.accounts_with_folders()?;
         Ok(rows(accounts, self.flagged_count()?))
     }
 
-    /// Every folder in the order the folder list shows them (an Inbox once): the order Next Unread goes in
-    pub(crate) fn folder_order(&self) -> Result<Vec<FolderId>> {
-        let mut order: Vec<FolderId> = Vec::new();
-        for row in self.folder_tree()? {
-            if row.folder != 0 && !order.contains(&row.folder) {
-                order.push(row.folder);
-            }
+    /// Every folder in the order the folder list shows them, each with its counts: the order Next Unread goes in
+    pub(crate) fn folder_order(&self) -> Result<Vec<Folder>> {
+        let accounts = self.accounts_with_folders()?;
+        let several = all_inboxes_shown(accounts.len());
+        let ordered: Vec<Vec<(Folder, usize)>> = accounts.into_iter().map(|(_, folders)| ordered(folders)).collect();
+        let mut order = Vec::new();
+        // with several accounts the Inboxes come first, under All Inboxes
+        if several {
+            order.extend(ordered.iter().filter_map(|folders| split_inbox(folders).0.cloned()));
+        }
+        for folders in ordered {
+            let skip = usize::from(several && split_inbox(&folders).0.is_some());
+            order.extend(folders.into_iter().skip(skip).map(|(folder, _)| folder));
         }
         Ok(order)
     }
@@ -355,6 +448,60 @@ mod tests {
         assert_eq!((rows[5].parent, rows[5].hidden), (true, 3));
         assert!(!rows[0].parent, "the Inbox holds nothing now");
         assert!(rows.iter().all(|row| row.kind != TreeRowKind::Account));
+        // New Folder from the Inbox or Flagged goes at the top; from Projects into it
+        assert_eq!((rows[0].new_folder_account, rows[0].new_folder_parent), (1, 0));
+        assert_eq!((rows[1].new_folder_account, rows[1].new_folder_parent), (1, 0));
+        assert_eq!((rows[5].new_folder_account, rows[5].new_folder_parent), (1, 5));
+        assert_eq!((rows[1].menu, rows[1].icon), (TreeMenu::None, "flagged"));
+        assert_eq!(rows[0].menu, TreeMenu::Folder);
+        assert_eq!((rows[5].shown(false), rows[5].shown(true)), (0, 3));
+    }
+
+    #[test]
+    fn hidden_counts_every_level_below() {
+        pe_i18n::set_language("en");
+        let mut deep = folders(1, 0);
+        deep.push(folder(7, 1, "Projects/Alpha/Beta", None, 2));
+        deep.push(folder(8, 1, "Projects/Gamma", None, 1));
+        let rows = rows(vec![(account(1, "ann@example.org"), deep)], 0);
+        let at = |label: &str| rows.iter().find(|row| row.label == label).unwrap();
+        assert_eq!(
+            (at("Projects").hidden, at("Alpha").hidden, at("Beta").hidden),
+            (6, 2, 0)
+        );
+        assert!(at("Alpha").parent && !at("Beta").parent && !at("Gamma").parent);
+    }
+
+    #[test]
+    fn a_selection_survives_an_account_coming_and_going() {
+        pe_i18n::set_language("en");
+        let one = rows(vec![(account(1, "ann@example.org"), folders(1, 0))], 0);
+        let two = rows(
+            vec![
+                (account(1, "ann@example.org"), folders(1, 0)),
+                (account(2, "ann@work.example"), folders(2, 10)),
+            ],
+            0,
+        );
+        // an Inbox keeps its key under All Inboxes and as one account's first folder
+        assert_eq!(reselect(&two, &one[0].key), Some(1));
+        assert_eq!(reselect(&one, &two[1].key), Some(0));
+        // All Inboxes or a heading gone: that account's Inbox, else the first
+        assert_eq!(reselect(&one, "inboxes"), Some(0));
+        assert_eq!(reselect(&one, "account:1"), Some(0));
+        assert_eq!(reselect(&two, "account:2"), Some(10));
+        assert_eq!(reselect(&two, "flagged"), Some(3));
+        assert_eq!(reselect(&one, "folder:99"), None);
+        // a heading's menu, its New Folder at the account's top; All Inboxes only marks read
+        assert_eq!(
+            (two[4].menu, two[4].new_folder_account, two[4].icon),
+            (TreeMenu::Account, 1, "account")
+        );
+        assert_eq!((two[0].menu, two[0].new_folder_account), (TreeMenu::MarkRead, 0));
+        assert_eq!(
+            two[3].new_folder_account, 0,
+            "Flagged of several accounts makes no folder"
+        );
     }
 
     #[test]

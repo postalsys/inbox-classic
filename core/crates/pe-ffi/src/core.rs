@@ -542,7 +542,7 @@ pub unsafe extern "C" fn pe_account_set_name(core: *const PeCore, account: i64, 
 }
 
 /// Puts `account` at `index` in the accounts' order (0 first, past the end last), which `pe_accounts`, the folder list
-/// and `pe_special_folders` follow. False when there is no such account.
+/// and the folder list (`pe_folder_tree`) follow. False when there is no such account.
 ///
 /// # Safety
 /// `core` must be a live handle.
@@ -1066,13 +1066,10 @@ pub struct PeFolder {
     pub selectable: bool,
     pub total: u64,
     pub unread: u64,
-    /// The unread messages of the folders under it (not Junk E-mail or Deleted Items): a collapsed folder shows
-    /// `unread + unread_below`, an expanded one `unread`
-    pub unread_below: u64,
 }
 
 /// The folders of an account; free with `pe_folder_list_free`
-pub struct PeFolderList(Rows<PeFolder>, u64);
+pub struct PeFolderList(Rows<PeFolder>);
 
 /// The folders of an account, NULL on failure
 ///
@@ -1089,9 +1086,8 @@ pub unsafe extern "C" fn pe_folders(core: *const PeCore, account: i64) -> *mut P
             // the depth in the tree: listed ancestors only, so a folder whose parent is not listed is at the top
             let infos: Vec<_> = folders.iter().map(|f| &f.info).collect();
             let tree_depths = pe_core::tree_depths(&infos);
-            let hidden = pe_core::hidden_unread(&folders, &tree_depths);
-            let rows: Vec<_> = folders.iter().zip(tree_depths).zip(hidden.below).collect();
-            let rows = Rows::new(&rows, |((f, depth), below), strings| PeFolder {
+            let rows: Vec<_> = folders.iter().zip(tree_depths).collect();
+            let rows = Rows::new(&rows, |(f, depth), strings| PeFolder {
                 id: f.id,
                 account: f.account_id,
                 path: strings.add(&f.info.path),
@@ -1103,21 +1099,10 @@ pub unsafe extern "C" fn pe_folders(core: *const PeCore, account: i64) -> *mut P
                 selectable: f.info.selectable,
                 total: f.total,
                 unread: f.unread,
-                unread_below: *below,
             });
-            handed(PeFolderList(rows, hidden.account))
+            handed(PeFolderList(rows))
         })
     }
-}
-
-/// The unread messages of the account of `list` (not Junk E-mail or Deleted Items): what its row shows collapsed
-///
-/// # Safety
-/// `list` must be NULL or live.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_folder_list_unread(list: *const PeFolderList) -> u64 {
-    // SAFETY: as the caller guarantees
-    unsafe { list.as_ref() }.map_or(0, |list| list.1)
 }
 
 /// # Safety
@@ -1162,22 +1147,44 @@ pub enum PeTreeRowKind {
     Folder = 4,
 }
 
+/// The menu a row's right-click opens
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeTreeMenu {
+    /// None (Flagged)
+    None = 0,
+    /// Mark All Read only (All Inboxes)
+    MarkRead = 1,
+    /// A folder's: Mark All Read, New Folder, Rename, Delete, Empty
+    Folder = 2,
+    /// An account's
+    Account = 3,
+}
+
 /// A row of the folder list, in its order (`pe_folder_tree`)
 #[repr(C)]
 pub struct PeTreeRow {
     pub kind: PeTreeRowKind,
+    /// What stays the same for this row from one reading to the next (`inboxes`, `flagged`, `account:<id>`,
+    /// `folder:<id>`): two readings with the same keys and depths in the same order have the same shape, and only
+    /// their words and counts are to be updated; `pe_tree_reselect` finds the row to choose by it
+    pub key: *const c_char,
     /// 0 for All Inboxes and Flagged
     pub account: i64,
     /// 0 for All Inboxes, Flagged and a heading
     pub folder: i64,
     pub depth: u32,
     pub label: *const c_char,
-    /// What the folder bar and the window's title say when it is chosen ("Inbox - Gmail")
+    /// What the folder bar and the window's title say when it is chosen ("Inbox - Gmail"), and a screen reader's name
+    /// for it
     pub title: *const c_char,
     /// Its own unread messages (Flagged: how many are flagged, never bold)
     pub unread: u64,
     /// The unread messages under it, shown with its own while it is collapsed
     pub hidden: u64,
+    /// The count it shows while open, and while collapsed (with those under it)
+    pub count: u64,
+    pub count_collapsed: u64,
     /// Shown bold while open, and while collapsed (`TreeRow::bold`)
     pub bold: bool,
     pub bold_collapsed: bool,
@@ -1186,14 +1193,20 @@ pub struct PeTreeRow {
     pub selectable: bool,
     /// Messages can be dropped on it
     pub drop_target: bool,
-    /// It can be dragged among its own kind to order the accounts
+    /// It can be dragged among its own kind to order the accounts, and its menu has Move Up and Move Down
     pub reorders_accounts: bool,
-    /// Its icon's word: `inbox`, `sent`, `drafts`, `deleted`, `junk`, `archive`, `flagged`, or empty
+    pub menu: PeTreeMenu,
+    /// Where New Folder makes a folder with this row chosen: the account (0: New Folder does not apply) and the folder
+    /// to make it in (0: the account's top)
+    pub new_folder_account: i64,
+    pub new_folder_parent: i64,
+    /// Its icon's word: `inbox`, `sent`, `drafts`, `deleted`, `junk`, `archive`, `flagged`, `all`, `account` for a
+    /// heading, or empty for any other folder
     pub icon: *const c_char,
 }
 
 /// The rows of the folder list; free with `pe_tree_free`
-pub struct PeTree(Rows<PeTreeRow>);
+pub struct PeTree(Rows<PeTreeRow>, Vec<pe_core::tree::TreeRow>);
 
 /// The folder list of the main window, row by row in its order: one account starts with its Inbox and Flagged and
 /// has no heading; several have All Inboxes (each Inbox under it), Flagged, then each account's heading with its other
@@ -1209,29 +1222,43 @@ pub unsafe extern "C" fn pe_folder_tree(core: *const PeCore) -> *mut PeTree {
             let Ok(rows) = core.folder_tree() else {
                 return null_mut();
             };
-            handed(PeTree(Rows::new(&rows, |row, strings| PeTreeRow {
-                kind: match row.kind {
-                    pe_core::tree::TreeRowKind::AllInboxes => PeTreeRowKind::AllInboxes,
-                    pe_core::tree::TreeRowKind::AccountInbox => PeTreeRowKind::AccountInbox,
-                    pe_core::tree::TreeRowKind::Flagged => PeTreeRowKind::Flagged,
-                    pe_core::tree::TreeRowKind::Account => PeTreeRowKind::Account,
-                    pe_core::tree::TreeRowKind::Folder => PeTreeRowKind::Folder,
-                },
-                account: row.account,
-                folder: row.folder,
-                depth: row.depth as u32,
-                label: strings.add(&row.label),
-                title: strings.add(&row.title),
-                unread: row.unread,
-                hidden: row.hidden,
-                bold: row.bold(false),
-                bold_collapsed: row.bold(true),
-                parent: row.parent,
-                selectable: row.selectable,
-                drop_target: row.drop_target,
-                reorders_accounts: row.reorders_accounts,
-                icon: strings.add(row.icon),
-            })))
+            handed(PeTree(
+                Rows::new(&rows, |row, strings| PeTreeRow {
+                    kind: match row.kind {
+                        pe_core::tree::TreeRowKind::AllInboxes => PeTreeRowKind::AllInboxes,
+                        pe_core::tree::TreeRowKind::AccountInbox => PeTreeRowKind::AccountInbox,
+                        pe_core::tree::TreeRowKind::Flagged => PeTreeRowKind::Flagged,
+                        pe_core::tree::TreeRowKind::Account => PeTreeRowKind::Account,
+                        pe_core::tree::TreeRowKind::Folder => PeTreeRowKind::Folder,
+                    },
+                    key: strings.add(&row.key),
+                    account: row.account,
+                    folder: row.folder,
+                    depth: row.depth as u32,
+                    label: strings.add(&row.label),
+                    title: strings.add(&row.title),
+                    unread: row.unread,
+                    hidden: row.hidden,
+                    count: row.shown(false),
+                    count_collapsed: row.shown(true),
+                    bold: row.bold(false),
+                    bold_collapsed: row.bold(true),
+                    parent: row.parent,
+                    selectable: row.selectable,
+                    drop_target: row.drop_target,
+                    reorders_accounts: row.reorders_accounts,
+                    menu: match row.menu {
+                        pe_core::tree::TreeMenu::None => PeTreeMenu::None,
+                        pe_core::tree::TreeMenu::MarkRead => PeTreeMenu::MarkRead,
+                        pe_core::tree::TreeMenu::Folder => PeTreeMenu::Folder,
+                        pe_core::tree::TreeMenu::Account => PeTreeMenu::Account,
+                    },
+                    new_folder_account: row.new_folder_account,
+                    new_folder_parent: row.new_folder_parent,
+                    icon: strings.add(row.icon),
+                }),
+                rows,
+            ))
         })
     }
 }
@@ -1252,6 +1279,21 @@ pub unsafe extern "C" fn pe_tree_count(tree: *const PeTree) -> usize {
 pub unsafe extern "C" fn pe_tree_get(tree: *const PeTree, index: usize) -> *const PeTreeRow {
     // SAFETY: as the caller guarantees
     Rows::get(unsafe { tree.as_ref() }.map(|tree| &tree.0), index)
+}
+
+/// The row to choose in `tree` after the list was read again, given the `key` of the row chosen before: the same row,
+/// or when it is gone (All Inboxes, Flagged or a heading after an account came or went) its account's Inbox or the
+/// first Inbox. -1 when the folder chosen is gone.
+///
+/// # Safety
+/// `tree` must be NULL or live, `key` NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_tree_reselect(tree: *const PeTree, key: *const c_char) -> i64 {
+    // SAFETY: as the caller guarantees
+    let (Some(tree), Some(key)) = (unsafe { tree.as_ref() }, unsafe { arg(key) }) else {
+        return -1;
+    };
+    pe_core::tree::reselect(&tree.1, key).map_or(-1, |at| at as i64)
 }
 
 /// # Safety
@@ -1302,12 +1344,6 @@ pub unsafe extern "C" fn pe_start_message(
     // SAFETY: the caller gave valid pointers
     unsafe { (*all_inboxes, *folder, *uid) = (start.all_inboxes, start.folder, start.uid.unwrap_or(0)) };
     true
-}
-
-/// Whether the folder tree has All Inboxes above the accounts, for this many accounts
-#[unsafe(no_mangle)]
-pub extern "C" fn pe_all_inboxes_shown(accounts: usize) -> bool {
-    pe_core::all_inboxes_shown(accounts)
 }
 
 /// Which messages the message list shows by their state (`pe_list_view_set_show`)
@@ -1692,87 +1728,6 @@ pub unsafe extern "C" fn pe_mark_all_inboxes_read(core: *const PeCore) -> bool {
 pub unsafe extern "C" fn pe_account_mark_all_read(core: *const PeCore, account: i64) -> bool {
     // SAFETY: as the caller guarantees
     unsafe { with(core, false, |core| core.mark_account_read(account).is_ok()) }
-}
-
-/// A special use whose folders the folder list gathers from every account
-#[repr(C)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PeSpecialFolderKind {
-    Inbox,
-}
-
-/// An account's folder of a special use: a row under All Inboxes
-#[repr(C)]
-pub struct PeSpecialFolder {
-    pub account: i64,
-    pub folder: i64,
-    /// The account's title, as `PeAccount` `title` has it
-    pub name: *const c_char,
-    /// The folder told apart by its account, for the folder bar and the window's title: "Inbox - Gmail"
-    pub title: *const c_char,
-    pub unread: u64,
-}
-
-/// The list of `pe_special_folders`
-pub struct PeSpecialFolderList(Rows<PeSpecialFolder>);
-
-/// Each account's folder of a special use (its Inbox), in the accounts' order, for the rows under All Inboxes; NULL on
-/// failure. Free with `pe_special_folder_list_free`.
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_special_folders(
-    core: *const PeCore,
-    kind: PeSpecialFolderKind,
-) -> *mut PeSpecialFolderList {
-    // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, null_mut(), |core| {
-            let special = match kind {
-                PeSpecialFolderKind::Inbox => pe_core::SpecialFolderKind::Inbox,
-            };
-            let Ok(found) = core.special_folders(special) else {
-                return null_mut();
-            };
-            handed(PeSpecialFolderList(Rows::new(&found, |f, strings| PeSpecialFolder {
-                account: f.account,
-                folder: f.folder,
-                name: strings.add(&f.name),
-                title: strings.add(&f.title),
-                unread: f.unread,
-            })))
-        })
-    }
-}
-
-/// # Safety
-/// `list` must be NULL or a list that was not freed yet.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_special_folder_list_count(list: *const PeSpecialFolderList) -> usize {
-    // SAFETY: as the caller guarantees
-    Rows::count(unsafe { list.as_ref() }.map(|list| &list.0))
-}
-
-/// The row at `index`, NULL past the end; it lives as long as the list
-///
-/// # Safety
-/// `list` must be NULL or a list that was not freed yet.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_special_folder_list_get(
-    list: *const PeSpecialFolderList,
-    index: usize,
-) -> *const PeSpecialFolder {
-    // SAFETY: as the caller guarantees
-    Rows::get(unsafe { list.as_ref() }.map(|list| &list.0), index)
-}
-
-/// # Safety
-/// `list` must be NULL or a list that was not freed yet.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_special_folder_list_free(list: *mut PeSpecialFolderList) {
-    // SAFETY: as the caller guarantees
-    unsafe { take_back(list) }
 }
 
 // ---- folders ----
