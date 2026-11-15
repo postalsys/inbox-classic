@@ -58,6 +58,8 @@ pub enum Error {
     WrongKind,
     /// The key can not be used as asked (no usable signing or encryption key, refused by the policy).
     Unusable(CertProblem),
+    /// A private key's secret parts do not belong to its public key: forged, or broken.
+    Mismatch,
 }
 
 impl std::fmt::Display for Error {
@@ -68,6 +70,7 @@ impl std::fmt::Display for Error {
             Error::WrongPassphrase => write!(f, "wrong passphrase"),
             Error::WrongKind => write!(f, "not the kind of key expected"),
             Error::Unusable(problem) => write!(f, "the key can not be used: {problem:?}"),
+            Error::Mismatch => write!(f, "the private key does not belong to its public key"),
         }
     }
 }

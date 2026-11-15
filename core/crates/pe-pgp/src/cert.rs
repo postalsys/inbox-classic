@@ -742,7 +742,12 @@ impl std::fmt::Debug for SecretKey {
 }
 
 impl SecretKey {
+    /// A private key whose secret parts are checked against its public ones: a key file can carry someone's genuine
+    /// public key with secret bytes that do not belong to it, which would sign and decrypt nothing.
     pub(crate) fn new(key: SignedSecretKey) -> Result<SecretKey, Error> {
+        if !genuine(&key) {
+            return Err(Error::Mismatch);
+        }
         let cert = Cert::clean(key.to_public_key())?;
         Ok(SecretKey { key, cert })
     }
@@ -784,6 +789,51 @@ impl SecretKey {
         }
         key.to_armored_string(ArmorOptions::default()).map_err(malformed)
     }
+}
+
+/// Whether every secret part of `key` belongs to its public part: each one that can sign signs a test value its public
+/// key verifies, each one that can encrypt opens a test message encrypted to its public key.
+fn genuine(key: &SignedSecretKey) -> bool {
+    use pgp::crypto::hash::HashAlgorithm;
+    use pgp::types::{SigningKey, VerifyingKey};
+    let digest = [0x5au8; 32];
+    let signs = |secret: &dyn SigningKey, public: &dyn VerifyingKey| {
+        secret
+            .sign(&Password::empty(), HashAlgorithm::Sha256, &digest)
+            .is_ok_and(|sig| public.verify(HashAlgorithm::Sha256, &digest, &sig).is_ok())
+    };
+    let primary = &key.primary_key;
+    if primary.algorithm().can_sign() && !signs(primary, primary.public_key()) {
+        return false;
+    }
+    if primary.algorithm().can_encrypt() && !round_trip(key, primary.public_key()) {
+        return false;
+    }
+    key.secret_subkeys.iter().all(|sub| {
+        (!sub.key.algorithm().can_sign() || signs(&sub.key, sub.key.public_key()))
+            && (!sub.key.algorithm().can_encrypt() || round_trip(key, sub.key.public_key()))
+    })
+}
+
+/// Whether a message encrypted to `public` (a key of `key`) opens with `key`
+fn round_trip(key: &SignedSecretKey, public: &impl pgp::types::EncryptionKey) -> bool {
+    use pgp::composed::{Message, MessageBuilder};
+    let mut rng = rand::thread_rng();
+    let mut builder = MessageBuilder::from_bytes("", &b"check"[..])
+        .seipd_v1(&mut rng, pgp::crypto::sym::SymmetricKeyAlgorithm::AES128);
+    if builder.encrypt_to_key(&mut rng, public).is_err() {
+        return false;
+    }
+    let Ok(message) = builder.to_vec(&mut rng) else {
+        return false;
+    };
+    let Ok(parsed) = Message::from_bytes(&message[..]) else {
+        return false;
+    };
+    parsed
+        .decrypt(&Password::empty(), key)
+        .and_then(|mut opened| opened.as_data_vec().map_err(Into::into))
+        .is_ok_and(|data| data == b"check")
 }
 
 fn is_locked(key: &SignedSecretKey) -> bool {
@@ -840,6 +890,37 @@ pub fn read_secret_keys(bytes: &[u8], passphrase: &str) -> Result<Vec<SecretKey>
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn secret_parts_that_do_not_belong_are_refused() {
+        // Alice's genuine public key and self-signatures, with Mallory's secret bytes in the primary key packet
+        let alice = crate::generate("Alice", &["alice@example.org".into()], 1_794_700_800)
+            .unwrap()
+            .key;
+        let mallory = crate::generate("Mallory", &["m@example.org".into()], 1_794_700_800)
+            .unwrap()
+            .key;
+        let mut forged = alice.clone();
+        forged.primary_key = packet::SecretKey::new(
+            alice.primary_key.public_key().clone(),
+            mallory.primary_key.secret_params().clone(),
+        )
+        .unwrap();
+        let bytes = forged.to_bytes().unwrap();
+        assert_eq!(SecretKey::from_bytes(&bytes).unwrap_err(), Error::Mismatch);
+        // and in the encryption subkey
+        let mut forged = alice.clone();
+        forged.secret_subkeys[0].key = packet::SecretSubkey::new(
+            alice.secret_subkeys[0].key.public_key().clone(),
+            mallory.secret_subkeys[0].key.secret_params().clone(),
+        )
+        .unwrap();
+        assert_eq!(
+            SecretKey::from_bytes(&forged.to_bytes().unwrap()).unwrap_err(),
+            Error::Mismatch
+        );
+        assert!(SecretKey::from_bytes(&alice.to_bytes().unwrap()).is_ok());
+    }
 
     #[test]
     fn addresses_in_user_ids() {
