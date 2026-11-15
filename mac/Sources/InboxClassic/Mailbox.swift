@@ -170,6 +170,8 @@ public final class Mailbox: NSObject {
     private var dragWritten = 0
     private let promiseWriter = PromiseWriter()
     private var reloadTimer: Timer?
+    /// the folder list's counts read again a moment after folders changed
+    private var countsTimer: Timer?
 
     init(core: Core) {
         self.core = core
@@ -481,9 +483,6 @@ public final class Mailbox: NSObject {
         allInboxes ? allInboxesNode : flagged ? flaggedNode : folderRows[folder]
     }
 
-    /// an account's Inbox is listed from its row under All Inboxes
-    var underAllInboxes: Bool { selectedNode?.kind == PE_TREE_ROW_KIND_ACCOUNT_INBOX }
-
     /// the core's rows as nodes, each under the nearest row above it that is less deep
     private func build(_ rows: [TreeRow]) {
         topNodes = []
@@ -507,10 +506,17 @@ public final class Mailbox: NSObject {
         }
     }
 
+    /// the tree built again from the core's rows, the row chosen before chosen again (or its stand-in, as the core
+    /// says)
     public func reload() {
-        let selected = folder
-        let allSelected = allInboxes
-        let flaggedSelected = flagged
+        let read = core.folderTree(chosen: selectedNode?.row.key)
+        rebuild(read.rows, chosen: read.chosen)
+    }
+
+    /// the tree built from `rows`, then the row `chosen` chosen: the one chosen before chooses nothing again, another
+    /// (All Inboxes gone, its account's Inbox) is listed; nil with a row chosen before: that folder is gone
+    private func rebuild(_ rows: [TreeRow], chosen: Int?) {
+        let before = selectedNode?.row.key
         let all = core.accounts()
         accountInfo = Dictionary(all.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         accountOrder = all.map(\.id)
@@ -518,24 +524,48 @@ public final class Mailbox: NSObject {
         for account in all {
             core.folders(account.id).forEach { folderInfo[$0.id] = $0 }
         }
-        build(core.folderTree())
+        build(rows)
         reloading = true
         tree.reloadData()
         openRows.forget(except: accountOrder)
         openAsLeft()
-        let reselected = flaggedSelected ? flaggedNode : allSelected ? allInboxesNode : folderRows[selected]
-        if let node = reselected {
+        let node = chosen.map { treeNodes[$0] }
+        if let node {
             selectTreeNode(node)
         }
         reloading = false
-        if allSelected && allInboxesNode == nil, let start = core.startMessage(), let inbox = folderRows[start.folder] {
-            // one account left: its Inbox in place of All Inboxes (as the window starts)
-            selectTreeNode(inbox)
-        } else if (selected != 0 || allSelected || flaggedSelected) && reselected == nil {
+        if let node, node.row.key != before {
+            choose(node)
+        } else if before != nil && node == nil {
             // the folder is gone
             folderSelected(0)
         }
         changed()
+    }
+
+    /// the counts of the rows again from the core, once a moment after a folder changed however many changed
+    private func scheduleCounts() {
+        guard countsTimer == nil else { return }
+        countsTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.countsTimer = nil
+                self?.updateCounts()
+            }
+        }
+    }
+
+    /// the words and counts of the rows again from the core; rows of another shape (a folder new or gone) build the
+    /// tree again
+    private func updateCounts() {
+        let read = core.folderTree(chosen: selectedNode?.row.key)
+        guard read.rows.map({ "\($0.depth) \($0.key)" }) == treeNodes.map({ "\($0.row.depth) \($0.row.key)" }) else {
+            rebuild(read.rows, chosen: read.chosen)
+            return
+        }
+        for (node, row) in zip(treeNodes, read.rows) where !row.drawsLike(node.row) {
+            node.row = row
+            tree.reloadItem(node)
+        }
     }
 
     /// whether a row with rows under it is open: All Inboxes and the accounts as they were left at the last start, a
@@ -571,20 +601,6 @@ public final class Mailbox: NSObject {
         let row = tree.row(forItem: node)
         if row >= 0 {
             tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
-        }
-    }
-
-    /// the counts of the rows again from the core; rows of another shape (a folder new or gone) build the tree again
-    private func updateCounts() {
-        let rows = core.folderTree()
-        guard rows.map(\.key) == treeNodes.map(\.row.key) else {
-            reload()
-            return
-        }
-        for (node, row) in zip(treeNodes, rows)
-        where row.unread != node.row.unread || row.hidden != node.row.hidden || row.label != node.row.label {
-            node.row = row
-            tree.reloadItem(node)
         }
     }
 
@@ -1503,17 +1519,13 @@ public final class Mailbox: NSObject {
 
     // ---- folders ----
 
-    /// New Folder applies: in the folder selected, or with one account at its top from Flagged (with several Flagged
-    /// is no account's)
-    var canMakeFolder: Bool {
-        !allInboxes && (!flagged || accountOrder.count == 1)
-    }
+    /// New Folder applies where the row selected says it does
+    var canMakeFolder: Bool { (selectedNode?.row.newFolderAccount ?? 0) != 0 }
 
-    /// a new folder in the folder selected; an Inbox shows no folders under it, so from an Inbox (and from Flagged
-    /// with one account) at the top of the account
+    /// a new folder where the row selected says: in its folder, or at the top of its account
     func newFolder() {
-        guard canMakeFolder else { return }
-        newFolder(in: currentAccount, under: flagged || isInbox(folder) ? 0 : folder)
+        guard let row = selectedNode?.row, row.newFolderAccount != 0 else { return }
+        newFolder(in: row.newFolderAccount, under: row.newFolderParent)
     }
 
     /// a new folder in `account`, under the folder `parent` (0: at the top of the account)
@@ -1532,9 +1544,9 @@ public final class Mailbox: NSObject {
     func accountMenu(_ account: Int64) -> NSMenu {
         let menu = NSMenu()
         menu.autoenablesItems = false
-        // the count its row is drawn with: nothing unread, nothing to mark
         // the count its heading is drawn with collapsed: nothing unread, nothing to mark
-        let someUnread = treeNodes.first { $0.kind == PE_TREE_ROW_KIND_ACCOUNT && $0.row.account == account }.map { $0.row.hidden > 0 } ?? false
+        let someUnread = treeNodes.first { $0.kind == PE_TREE_ROW_KIND_ACCOUNT && $0.row.account == account }
+            .map { $0.row.countCollapsed > 0 } ?? false
         let items: [(String, Selector, Bool)?] = [
             (Text.uiAccountSync.text, #selector(accountMenuSync(_:)), true),
             (Command.markAllRead.label, #selector(accountMenuMarkRead(_:)), someUnread),
@@ -1658,24 +1670,22 @@ public final class Mailbox: NSObject {
         }
     }
 
-    /// the folder menu (a right-click in the tree): Mark All Read, New, Rename, Delete, and Empty Folder for Deleted
-    /// Items and Junk E-mail; an account's Inbox under All Inboxes adds Move Up and Move Down of its account
-    func folderMenu() -> NSMenu {
-        let menu = NSMenu()
-        let someUnread = !flagged && (allInboxes ? core.inboxUnread > 0 : folder != 0 && core.folderCounts(folder).unread > 0)
-        let editable = folder != 0 && !(folderInfo[folder]?.fixed ?? true)
-        // All Inboxes is no folder of one account: the folder commands never apply to it, so it has none; nor does
-        // Flagged but New Folder, with one account
-        var folderCommands: [(Command, Bool)] = allInboxes || flagged ? []
-            : [(.newFolder, true), (.renameFolder, editable), (.deleteFolder, editable)]
-        if flagged && canMakeFolder {
-            folderCommands = [(.newFolder, true)]
+    /// the menu of the row selected (a right-click in the tree), as the row says: none (Flagged), Mark All Read alone
+    /// (All Inboxes), or a folder's: Mark All Read, New, Rename, Delete, and Empty Folder for Deleted Items and Junk
+    /// E-mail; an account's Inbox under All Inboxes adds Move Up and Move Down of its account
+    func folderMenu() -> NSMenu? {
+        guard let row = selectedNode?.row, row.menu == PE_TREE_MENU_MARK_READ || row.menu == PE_TREE_MENU_FOLDER else {
+            return nil
         }
+        let menu = NSMenu()
+        let editable = !(folderInfo[row.folder]?.fixed ?? true)
+        var folderCommands: [(Command, Bool)] = row.menu == PE_TREE_MENU_FOLDER
+            ? [(.newFolder, row.newFolderAccount != 0), (.renameFolder, editable), (.deleteFolder, editable)] : []
         // Deleted Items and Junk E-mail can be emptied, as in Outlook Express
-        if !allInboxes && folderInfo[folder]?.emptiable == true {
+        if row.menu == PE_TREE_MENU_FOLDER && folderInfo[row.folder]?.emptiable == true {
             folderCommands.append((.emptyFolder, canEmptyFolder))
         }
-        for (command, enabled) in [(Command.markAllRead, someUnread)] + folderCommands {
+        for (command, enabled) in [(Command.markAllRead, row.unread > 0)] + folderCommands {
             let item = NSMenuItem(title: command.label, action: #selector(folderMenuItem(_:)), keyEquivalent: "")
             item.target = self
             item.tag = command.rawValue
@@ -1686,9 +1696,9 @@ public final class Mailbox: NSObject {
                 menu.addItem(.separator())
             }
         }
-        if underAllInboxes, let account = folderInfo[folder]?.account {
+        if row.reordersAccounts {
             menu.addItem(.separator())
-            addItems(moveItems(account), to: menu, account: account)
+            addItems(moveItems(row.account), to: menu, account: row.account)
         }
         menu.autoenablesItems = false
         return menu
@@ -2036,7 +2046,7 @@ public final class Mailbox: NSObject {
         case PE_EVENT_KIND_FOLDERS_CHANGED:
             reload()
         case PE_EVENT_KIND_FOLDER_CHANGED:
-            updateCounts()
+            scheduleCounts()
             if event.folder == folder && !searching {
                 reloadList(keepSelection: true)
             } else if severalFolders {
@@ -2115,25 +2125,10 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
             return heading
         }
         let cell = (outlineView.makeView(withIdentifier: FolderCell.identifier, owner: nil) as? FolderCell) ?? FolderCell()
-        cell.show(name: row.label, count: row.count(collapsed: collapsed), icon: Icons.folder(treeIcon(row)),
-                  bold: row.bold(collapsed: collapsed), spoken: spokenName(row))
+        cell.show(name: row.label, count: row.count(collapsed: collapsed), icon: Icons.folder(Icons.treeIcon(row.icon)),
+                  bold: row.bold(collapsed: collapsed), spoken: row.title)
         cell.setAccessibilityIdentifier(treeIdentifier(row))
         return cell
-    }
-
-    /// the icon of a row: the core's word for it; Flagged's flag, and a folder of no use the core names (Gmail's All
-    /// Mail) by its use
-    private func treeIcon(_ row: TreeRow) -> String {
-        let fallback = row.kind == PE_TREE_ROW_KIND_FLAGGED ? "flag"
-            : folderInfo[row.folder].map { Icons.folderIcon($0.specialUse) } ?? "folder"
-        return Icons.treeIcon(row.icon, fallback: fallback)
-    }
-
-    /// an account's Inbox under All Inboxes is named by its account; a screen reader hears the folder too ("Inbox,
-    /// Gmail")
-    private func spokenName(_ row: TreeRow) -> String? {
-        guard row.kind == PE_TREE_ROW_KIND_ACCOUNT_INBOX else { return nil }
-        return (folderInfo[row.folder]?.name ?? Text.folderInbox.text) + ", " + row.label
     }
 
     private func treeIdentifier(_ row: TreeRow) -> String {
@@ -2202,6 +2197,11 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
             reloading = false
             return
         }
+        choose(node)
+    }
+
+    /// the list of the row `node` shown
+    private func choose(_ node: TreeNode) {
         switch node.kind {
         case PE_TREE_ROW_KIND_ALL_INBOXES: folderSelected(0, allInboxes: true)
         case PE_TREE_ROW_KIND_FLAGGED: folderSelected(0, flagged: true)
@@ -2534,8 +2534,8 @@ final class FolderCell: NSTableCellView {
     private(set) var unreadShown: UInt64 = 0
     private(set) var isBold = false
 
-    /// `spoken`: what a screen reader names the row, when it is not its text
-    func show(name text: String, count unread: UInt64, icon image: NSImage?, bold: Bool, spoken: String? = nil) {
+    /// `spoken`: what a screen reader names the row
+    func show(name text: String, count unread: UInt64, icon image: NSImage?, bold: Bool, spoken: String) {
         unreadShown = unread
         isBold = bold
         name.stringValue = text
@@ -2544,8 +2544,7 @@ final class FolderCell: NSTableCellView {
         // without a count the name has the row up to its trailing edge
         count.isHidden = unread == 0
         icon.image = image
-        let label = spoken ?? text
-        setAccessibilityLabel(unread > 0 ? Text.macFolderUnread.text(["folder": label, "count": unread]) : label)
+        setAccessibilityLabel(unread > 0 ? Text.macFolderUnread.text(["folder": spoken, "count": unread]) : spoken)
     }
 }
 
@@ -2993,8 +2992,10 @@ public final class FolderOutline: NSOutlineView {
         let row = self.row(at: convert(event.locationInWindow, from: nil))
         // an account's heading has its own menu, and stays unselected
         if row >= 0, let node = item(atRow: row) as? Mailbox.TreeNode {
-            if node.kind == PE_TREE_ROW_KIND_ACCOUNT {
-                return mailbox?.accountMenu(node.row.account)
+            switch node.row.menu {
+            case PE_TREE_MENU_ACCOUNT: return mailbox?.accountMenu(node.row.account)
+            case PE_TREE_MENU_NONE: return nil
+            default: break
             }
             // a folder the server says holds no messages can not be selected, nor has a menu
             guard node.row.selectable else { return nil }

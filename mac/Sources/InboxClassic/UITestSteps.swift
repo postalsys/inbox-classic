@@ -1989,6 +1989,7 @@ extension UITest {
 
         tree.selectRowIndexes(IndexSet(integer: 1), byExtendingSelection: false)
         _ = await waitUntil(5) { self.main.mailbox.flagged }
+        check(treeMenu(1) == nil, "Flagged has no right-click menu: its messages are of every folder")
         command(.newFolder)
         await answerName("New Folder", "Top level", shot: nil)
         check(await waitUntil(20) { await mailboxes().contains("Top level") }, "New Folder with Flagged selected makes the folder at the top")
@@ -2262,7 +2263,7 @@ extension UITest {
         let counts: NSTextField? = find("status.counts", in: main.window)
         check(counts?.stringValue.hasPrefix("\(expected) messages") == true,
               "the status bar counts both Inboxes (\(counts?.stringValue ?? ""))")
-        let menu = main.mailbox.folderMenu().items.filter { !$0.isSeparatorItem }.map(\.title)
+        let menu = (main.mailbox.folderMenu()?.items ?? []).filter { !$0.isSeparatorItem }.map(\.title)
         check(menu == [Command.markAllRead.label], "its right-click menu has Mark All Read alone (\(menu))")
         await selectRow(0)
         await shot(main.window, "all-inboxes-1-list")
@@ -2337,7 +2338,7 @@ extension UITest {
                 && self.folderCell(firstRow)?.isBold == true && self.folderCell(allRow)?.unreadShown == inboxesUnread
         }, "each row shows its Inbox's unread count, All Inboxes the count of all of them (\(folderCell(firstRow)?.unreadShown ?? 0) of \(first.unread), \(folderCell(secondRow)?.unreadShown ?? 0) of \(second.unread), \(folderCell(allRow)?.unreadShown ?? 0) of \(inboxesUnread))")
         let spoken = folderCell(secondRow)?.accessibilityLabel() ?? ""
-        check(spoken.hasPrefix("Inbox, Work"), "a screen reader hears the folder and the account (\(spoken))")
+        check(spoken.hasPrefix("Inbox - Work"), "a screen reader hears the folder and the account (\(spoken))")
         tree.collapseItem(all)
         check(await waitUntil(5) { self.folderCell(allRow)?.unreadShown == main.mailbox.core.inboxUnread && self.folderCell(allRow)?.isBold == true },
               "closed, All Inboxes shows the unread messages of every Inbox, in bold (\(folderCell(allRow)?.unreadShown ?? 0))")

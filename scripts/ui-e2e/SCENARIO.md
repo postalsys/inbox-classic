@@ -422,6 +422,7 @@ Screenshot: `folders-6-one-account`
 - the Inbox holds no folders of its own: a folder the server keeps in the Inbox is listed a level up, after Flagged
 - right-clicking the Inbox gives the folder's menu (no account commands); File > Accounts and the Tools menu have the account's
 - New Folder with Flagged selected makes the folder at the top of the list
+- Flagged has no right-click menu: its messages are of every folder
 
 ## 28. An AI agent
 

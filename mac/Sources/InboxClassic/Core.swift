@@ -226,11 +226,15 @@ final class Core {
         return (0..<pe_folder_list_count(list)).compactMap { pe_folder_list_get(list, $0).map { Folder($0.pointee) } }
     }
 
-    /// the rows of the folder list, in its order, as the core lays it out
-    func folderTree() -> [TreeRow] {
-        guard let tree = pe_folder_tree(handle) else { return [] }
+    /// the rows of the folder list, in its order, as the core lays it out, and the row to choose given the key of the
+    /// row chosen before (nil when that folder is gone or nothing was chosen)
+    func folderTree(chosen key: String?) -> (rows: [TreeRow], chosen: Int?) {
+        guard let tree = pe_folder_tree(handle) else { return ([], nil) }
         defer { pe_tree_free(tree) }
-        return (0..<pe_tree_count(tree)).compactMap { pe_tree_get(tree, $0).map { TreeRow($0.pointee) } }
+        let rows = (0..<pe_tree_count(tree)).compactMap { pe_tree_get(tree, $0).map { TreeRow($0.pointee) } }
+        guard let key else { return (rows, nil) }
+        let index = key.withCString { pe_tree_reselect(tree, $0) }
+        return (rows, index >= 0 ? Int(index) : nil)
     }
 
     func sync(_ account: Int64) { pe_sync(handle, account) }
@@ -713,53 +717,67 @@ struct Account {
 /// A row of the folder list (`pe_folder_tree`): what it is, what it says and what it allows
 struct TreeRow {
     let kind: PeTreeRowKind
+    /// what it stands for, the same from one reading to the next (`inboxes`, `flagged`, `account:<id>`, `folder:<id>`)
+    let key: String
     /// 0 for All Inboxes and Flagged
     let account: Int64
     /// 0 for All Inboxes, Flagged and an account's heading
     let folder: Int64
     let depth: Int
     let label: String
-    /// what the folder bar and the window's title say while it is selected ("Inbox - Gmail")
+    /// what the folder bar, the window's title and a screen reader say for it ("Inbox - Gmail")
     let title: String
     /// its own unread messages (Flagged: how many are flagged)
     let unread: UInt64
-    /// the unread messages of the rows under it, shown with its own while it is collapsed
-    let hidden: UInt64
+    /// the count it shows while open, and while collapsed (with the rows under it)
+    let countOpen: UInt64
+    let countCollapsed: UInt64
     let boldOpen: Bool
     let boldCollapsed: Bool
     let parent: Bool
     let selectable: Bool
     let dropTarget: Bool
     let reordersAccounts: Bool
-    /// its icon's word: `inbox`, `sent`, `drafts`, `deleted`, `junk`, `archive`, `flagged`, or empty
+    let menu: PeTreeMenu
+    /// where New Folder makes a folder with it chosen: the account (0: New Folder does not apply) and the folder (0:
+    /// the account's top)
+    let newFolderAccount: Int64
+    let newFolderParent: Int64
+    /// its icon's word (`Icons.treeIcon`)
     let icon: String
 
     init(_ row: PeTreeRow) {
         kind = row.kind
+        key = text(row.key)
         account = row.account
         folder = row.folder
         depth = Int(row.depth)
         label = text(row.label)
         title = text(row.title)
         unread = row.unread
-        hidden = row.hidden
+        countOpen = row.count
+        countCollapsed = row.count_collapsed
         boldOpen = row.bold
         boldCollapsed = row.bold_collapsed
         parent = row.parent
         selectable = row.selectable
         dropTarget = row.drop_target
         reordersAccounts = row.reorders_accounts
+        menu = row.menu
+        newFolderAccount = row.new_folder_account
+        newFolderParent = row.new_folder_parent
         icon = text(row.icon)
     }
 
-    /// what it stands for, the same from one reload to the next
-    var key: String { "\(kind.rawValue).\(account).\(folder)" }
+    func count(collapsed: Bool) -> UInt64 { collapsed ? countCollapsed : countOpen }
 
-    /// the unread count it shows: its own, and while collapsed those under it
-    func count(collapsed: Bool) -> UInt64 { unread + (collapsed ? hidden : 0) }
-
-    /// bold, as the core says: unread mail in it, or under it while collapsed; Flagged never
     func bold(collapsed: Bool) -> Bool { collapsed ? boldCollapsed : boldOpen }
+
+    /// what the row draws: an update in place is needed when it changes
+    func drawsLike(_ other: TreeRow) -> Bool {
+        label == other.label && title == other.title && countOpen == other.countOpen
+            && countCollapsed == other.countCollapsed && boldOpen == other.boldOpen && boldCollapsed == other.boldCollapsed
+    }
 }
 
 struct Folder {

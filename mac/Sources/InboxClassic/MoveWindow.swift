@@ -25,7 +25,7 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
             default: kind = .folder
             }
             name = text(target.label)
-            icon = MoveWindow.iconName(kind, text(target.icon))
+            icon = Icons.treeIcon(kind == .account ? "account" : text(target.icon))
             folder = target.folder
             account = target.account
             choosable = target.choosable
@@ -117,20 +117,6 @@ final class MoveWindow: NSObject, NSWindowDelegate, NSOutlineViewDataSource, NSO
             highlight(recent.folder, inRecent: true)
         }
         update()
-    }
-
-    /// the app's icon for the core's name of one
-    nonisolated private static func iconName(_ kind: Node.Kind, _ name: String) -> String {
-        if kind == .account { return "mailbox" }
-        switch name {
-        case "inbox": return "mail_inbox"
-        case "sent": return "send"
-        case "drafts": return "drafts"
-        case "deleted": return "delete"
-        case "junk": return "mail_prohibited"
-        case "archive": return "archive"
-        default: return "folder"
-        }
     }
 
     // ---- the tree ----
