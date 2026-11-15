@@ -27,6 +27,9 @@ mod imp {
         pub markup: RefCell<String>,
         #[property(get, set)]
         pub icon: RefCell<String>,
+        /// What a screen reader says for it: the core's title ("Inbox - Work" under All Inboxes)
+        #[property(get, set)]
+        pub title: RefCell<String>,
         /// The core's row it shows
         pub row: RefCell<Option<TreeRow>>,
         pub expanded: Cell<bool>,
@@ -57,9 +60,12 @@ impl FolderItem {
     /// The row shown, again (its counts changed), and its label and icon with it
     fn set_row(&self, row: &TreeRow) {
         *self.imp().row.borrow_mut() = Some(row.clone());
-        let icon = icon_name(row);
+        let icon = crate::move_dialog::kind_icon(row.icon);
         if self.icon() != icon {
             self.set_icon(icon);
+        }
+        if self.title() != row.title {
+            self.set_title(row.title.as_str());
         }
         self.show();
     }
@@ -97,53 +103,28 @@ pub const ALL_INBOXES: i64 = i64::MIN;
 /// The id of Flagged: the flagged messages of every account
 pub const FLAGGED: i64 = i64::MIN + 1;
 
-/// The mark of a row under All Inboxes in its id: the folder's id with this bit, positive as a folder's, never one
-const UNDER_ALL_INBOXES: i64 = 1 << 62;
-
-/// The id of folder `folder`'s row under All Inboxes
-pub fn under_all_inboxes(folder: i64) -> i64 {
-    folder | UNDER_ALL_INBOXES
-}
-
-/// Whether a row's id is one under All Inboxes
-pub fn is_under_all_inboxes(id: i64) -> bool {
-    id > 0 && id & UNDER_ALL_INBOXES != 0
-}
-
-/// The folder of a row: a folder's own id, the folder of a row under All Inboxes; other ids as they are
-pub fn folder_of(id: i64) -> i64 {
-    if id > 0 { id & !UNDER_ALL_INBOXES } else { id }
-}
-
-/// The id the window knows a row by, kept in the settings for the rows closed: a folder's id, an account's negated, an
-/// Inbox's under All Inboxes [`under_all_inboxes`], [`ALL_INBOXES`], [`FLAGGED`]
+/// The id the window knows a row by, kept in the settings for the rows closed: a folder's id (an Inbox has one row,
+/// under All Inboxes or not), an account's negated, [`ALL_INBOXES`], [`FLAGGED`]; one for each of the core's keys
 pub fn row_id(row: &TreeRow) -> i64 {
     match row.kind {
         TreeRowKind::AllInboxes => ALL_INBOXES,
         TreeRowKind::Flagged => FLAGGED,
         TreeRowKind::Account => -row.account,
-        TreeRowKind::AccountInbox => under_all_inboxes(row.folder),
-        TreeRowKind::Folder => row.folder,
+        TreeRowKind::AccountInbox | TreeRowKind::Folder => row.folder,
     }
 }
 
 /// The label of a row as Pango markup: its name, with the count when there is one (bold but for Flagged, which
 /// counts flagged messages, not unread ones)
 fn label_markup(row: &TreeRow, collapsed: bool) -> String {
-    let count = row.unread + if collapsed { row.hidden } else { 0 };
+    let count = row.shown(collapsed);
     let name = glib::markup_escape_text(&row.label);
     match (count, row.bold(collapsed)) {
         (0, _) => name.to_string(),
+        // a heading is small and grey: the unread mail it hides is told in the text's full color, so it is not missed
+        (count, true) if row.kind == TreeRowKind::Account => format!("<b>{name} <span alpha=\"100%\">({count})</span></b>"),
         (count, true) => format!("<b>{name} ({count})</b>"),
         (count, false) => format!("{name} ({count})"),
-    }
-}
-
-/// The icon of a row: Flagged's flag, a special folder's own, else a folder (a heading has none)
-fn icon_name(row: &TreeRow) -> &'static str {
-    match row.kind {
-        TreeRowKind::Flagged => "ic-flag-symbolic",
-        _ => crate::move_dialog::kind_icon(row.icon),
     }
 }
 
@@ -208,8 +189,8 @@ pub struct FolderTree {
     selection: gtk::SingleSelection,
     root: gio::ListStore,
     items: RefCell<HashMap<i64, FolderItem>>,
-    /// The ids of the rows in their order, to tell new counts from a list of other rows
-    order: RefCell<Vec<i64>>,
+    /// The keys and depths of the rows in their order, to tell new counts from a list of other rows
+    order: RefCell<Vec<(String, usize)>>,
     /// The parent of each item, to open the way to one that is selected from elsewhere
     parents: RefCell<HashMap<i64, i64>>,
     /// While the tree is built again its selection changes (and its rows opened) are not the user's
@@ -304,10 +285,9 @@ impl FolderTree {
         *self.handlers.borrow_mut() = Some(handlers);
     }
 
-    /// The tree built again from the core's rows; All Inboxes and the headings open but those in `closed`; the
-    /// selection kept when its row is still there (false when it is gone)
-    pub fn rebuild(&self, rows: &[TreeRow], closed: &std::collections::HashSet<i64>) -> bool {
-        let selected = self.selected();
+    /// The tree built again from the core's rows, nothing selected; All Inboxes and the headings open but those in
+    /// `closed`
+    pub fn rebuild(&self, rows: &[TreeRow], closed: &std::collections::HashSet<i64>) {
         self.reloading.set(true);
         let mut items = HashMap::new();
         let mut parents = HashMap::new();
@@ -327,18 +307,14 @@ impl FolderTree {
             chain.push(item.clone());
             items.insert(item.id(), item);
         }
-        *self.order.borrow_mut() = rows.iter().map(row_id).collect();
+        *self.order.borrow_mut() = rows.iter().map(|row| (row.key.clone(), row.depth)).collect();
         *self.items.borrow_mut() = items;
         *self.parents.borrow_mut() = parents;
         self.arrows.set(rows.iter().any(|row| row.depth == 0 && row.parent));
         self.root.splice(0, self.root.n_items(), &top);
         self.open_remembered(closed);
-        let kept = selected != 0 && self.select(selected);
-        if !kept {
-            self.selection.set_selected(gtk::INVALID_LIST_POSITION);
-        }
+        self.selection.set_selected(gtk::INVALID_LIST_POSITION);
         self.reloading.set(false);
-        kept || selected == 0
     }
 
     /// All Inboxes and the headings opened, but those the user closed
@@ -356,9 +332,15 @@ impl FolderTree {
         }
     }
 
-    /// The counts of the core's rows shown again; false when they are other rows (the tree has to be built again)
+    /// The labels, titles, counts and bold of the core's rows shown again; false when they are other rows (other keys
+    /// or depths, or in another order: the tree has to be built again)
     pub fn update(&self, rows: &[TreeRow]) -> bool {
-        if !rows.iter().map(row_id).eq(self.order.borrow().iter().copied()) {
+        let same = rows.iter().map(|row| (row.key.as_str(), row.depth)).eq(self
+            .order
+            .borrow()
+            .iter()
+            .map(|(key, depth)| (key.as_str(), *depth)));
+        if !same {
             return false;
         }
         let items = self.items.borrow();
@@ -370,33 +352,9 @@ impl FolderTree {
         true
     }
 
-    /// The id of a row the tree has for `id`: itself, else the same folder's other row (an account's Inbox is a
-    /// folder's row with one account, a row under All Inboxes with several)
-    fn resolve(&self, id: i64) -> Option<i64> {
-        let items = self.items.borrow();
-        if items.contains_key(&id) {
-            return Some(id);
-        }
-        if id <= 0 {
-            return None;
-        }
-        let other = if is_under_all_inboxes(id) {
-            folder_of(id)
-        } else {
-            under_all_inboxes(id)
-        };
-        items.contains_key(&other).then_some(other)
-    }
-
-    /// The core's row of `id` (or of the same folder's other row, [`Self::resolve`])
+    /// The core's row of `id`
     pub fn row(&self, id: i64) -> Option<TreeRow> {
-        let id = self.resolve(id)?;
         self.items.borrow().get(&id).and_then(FolderItem::row)
-    }
-
-    /// The unread messages of row `id` and of the rows under it: an account's heading counts its folders'
-    pub fn unread_within(&self, id: i64) -> u64 {
-        self.row(id).map_or(0, |row| row.unread + row.hidden)
     }
 
     /// The label of item `id` as it shows now, for the e2e driver
@@ -411,7 +369,7 @@ impl FolderTree {
     }
 
     /// The core's row selected
-    fn selected_row(&self) -> Option<TreeRow> {
+    pub fn selected_row(&self) -> Option<TreeRow> {
         self.selection
             .selected_item()
             .and_downcast::<gtk::TreeListRow>()
@@ -420,11 +378,12 @@ impl FolderTree {
             .and_then(|item| item.row())
     }
 
-    /// Selects row `id` (or the same folder's other row, [`Self::resolve`]), the rows around it opened to it; false
-    /// when there is none (the selection unchanged)
+    /// Selects row `id`, the rows around it opened to it; false when there is none (the selection unchanged)
     pub fn select(&self, id: i64) -> bool {
         let Some(model) = self.tree_model() else { return false };
-        let Some(id) = self.resolve(id) else { return false };
+        if !self.items.borrow().contains_key(&id) {
+            return false;
+        }
         let mut ancestors = Vec::new();
         let mut at = id;
         while let Some(parent) = self.parents.borrow().get(&at).copied() {
@@ -481,6 +440,14 @@ impl FolderTree {
                 .is_some_and(|r| toggles(&r))
         {
             row.set_expanded(!row.is_expanded());
+        }
+    }
+
+    /// The right-click menu of row `id` at (`x`, `y`) of `widget`, as a right-click opens it, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn open_menu(&self, widget: &gtk::Widget, x: f64, y: f64, id: i64) {
+        if let (Some(row), Some(handlers)) = (self.row(id), &*self.handlers.borrow()) {
+            (handlers.menu)(widget, x, y, &row);
         }
     }
 
@@ -622,6 +589,10 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>, arrows: Rc<Cell<bool>>) -> g
         folder
             .chain_property::<FolderItem>("icon")
             .bind(&icon, "icon-name", gtk::Widget::NONE);
+        // a screen reader says the row's title, which names the account where the label alone does not
+        folder
+            .chain_property::<FolderItem>("title")
+            .bind(item, "accessible-label", gtk::Widget::NONE);
         add_drop_target(&expander, item, handlers.clone());
         add_drag_source(&expander, item);
         add_row_drop_target(&expander, item, handlers.clone());
@@ -884,6 +855,7 @@ mod tests {
     fn row(kind: TreeRowKind, account: i64, folder: i64) -> TreeRow {
         TreeRow {
             kind,
+            key: String::new(),
             account,
             folder,
             depth: 0,
@@ -895,6 +867,9 @@ mod tests {
             selectable: kind != TreeRowKind::Account,
             drop_target: false,
             reorders_accounts: matches!(kind, TreeRowKind::Account | TreeRowKind::AccountInbox),
+            menu: pe_core::tree::TreeMenu::Folder,
+            new_folder_account: account,
+            new_folder_parent: folder,
             icon: "",
         }
     }
@@ -922,8 +897,8 @@ mod tests {
         assert_eq!(row_id(&row(TreeRowKind::Flagged, 0, 0)), FLAGGED);
         assert_eq!(row_id(&row(TreeRowKind::Account, 3, 0)), -3);
         assert_eq!(row_id(&row(TreeRowKind::Folder, 3, 7)), 7);
-        let under = row_id(&row(TreeRowKind::AccountInbox, 3, 7));
-        assert!(is_under_all_inboxes(under) && folder_of(under) == 7);
+        // an Inbox has one row, under All Inboxes or not
+        assert_eq!(row_id(&row(TreeRowKind::AccountInbox, 3, 7)), 7);
     }
 
     #[test]

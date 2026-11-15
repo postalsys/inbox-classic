@@ -224,7 +224,7 @@ pub async fn one_account_tree(d: &Driver) {
     pause(500).await;
     d.shot(&main_window(), "folders-6-one-account").await;
     let tree: gtk::Widget = main.folders.view.clone().upcast();
-    main.folder_menu(&tree, 120.0, 20.0);
+    main.folders.open_menu(&tree, 120.0, 20.0, inbox);
     let labels = menu_labels(main.folder_popover.borrow().as_ref());
     d.check(
         labels.iter().any(|l| l == "New Folder\u{2026}") && !labels.iter().any(|l| l == "Properties\u{2026}"),
@@ -233,10 +233,15 @@ pub async fn one_account_tree(d: &Driver) {
             labels.join(", ")
         ),
     );
-    if let Some(popover) = main.folder_popover.borrow().as_ref() {
+    if let Some(popover) = main.folder_popover.borrow_mut().take() {
         popover.popdown();
     }
     main.folders.select(FLAGGED);
+    main.folders.open_menu(&tree, 120.0, 40.0, FLAGGED);
+    d.check(
+        main.folder_popover.borrow().is_none(),
+        "Flagged has no right-click menu: its messages are of every folder",
+    );
     command(Command::NewFolder);
     answer_name(d, "New Folder", "Trips", None).await;
     d.check(
@@ -2501,7 +2506,7 @@ pub async fn all_inboxes(d: &Driver) {
     d.shot(&main_window(), "all-inboxes-1-list").await;
     // its right-click menu: Mark All Read alone, no folder commands
     let tree: gtk::Widget = main.folders.view.clone().upcast();
-    main.folder_menu(&tree, 180.0, 20.0);
+    main.folders.open_menu(&tree, 180.0, 20.0, crate::folders::ALL_INBOXES);
     let labels = menu_labels(main.folder_popover.borrow().as_ref());
     d.check(
         labels == ["Mark All Read"],
@@ -2543,7 +2548,7 @@ pub async fn all_inboxes(d: &Driver) {
 /// SCENARIO 42: All Inboxes first with each account's Inbox under it, Flagged, then each account's heading over its
 /// folders but the Inbox, starting with Sent Items
 fn tree_of_two_accounts(d: &Driver, inbox: i64, second: i64) {
-    use crate::folders::{ALL_INBOXES, FLAGGED, under_all_inboxes};
+    use crate::folders::{ALL_INBOXES, FLAGGED};
     let main = shell().main();
     let accounts: Vec<i64> = shell()
         .core
@@ -2556,12 +2561,8 @@ fn tree_of_two_accounts(d: &Driver, inbox: i64, second: i64) {
     let headings: Vec<i64> = accounts.iter().map(|a| -a).collect();
     let at = |id: i64| ids.iter().position(|&i| i == id);
     d.check(
-        ids.starts_with(&[
-            ALL_INBOXES,
-            under_all_inboxes(inbox),
-            under_all_inboxes(second),
-            FLAGGED,
-        ]) && headings.first().and_then(|&h| at(h)) == Some(4)
+        ids.starts_with(&[ALL_INBOXES, inbox, second, FLAGGED])
+            && headings.first().and_then(|&h| at(h)) == Some(4)
             && headings.iter().all(|&h| at(h).is_some()),
         &format!("All Inboxes is at the top of the tree, then Flagged, then each account's heading ({ids:?})"),
     );
@@ -2578,7 +2579,10 @@ fn tree_of_two_accounts(d: &Driver, inbox: i64, second: i64) {
             .unwrap_or_default()
     };
     d.check(
-        !ids.contains(&inbox) && !ids.contains(&second) && headings.iter().all(|&h| after(h) == "Sent Items"),
+        [inbox, second]
+            .iter()
+            .all(|f| ids.iter().filter(|&id| id == f).count() == 1)
+            && headings.iter().all(|&h| after(h) == "Sent Items"),
         &format!(
             "the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, \
              starting with Sent Items ({} / {})",
@@ -2591,7 +2595,7 @@ fn tree_of_two_accounts(d: &Driver, inbox: i64, second: i64) {
 /// SCENARIO 42a: each account's Inbox under All Inboxes, named as the account, listing that Inbox alone; the account
 /// name set in Properties; the account's menu and its Mark All Read
 pub async fn all_inboxes_by_account(d: &Driver) {
-    use crate::folders::{ALL_INBOXES, under_all_inboxes};
+    use crate::folders::ALL_INBOXES;
     d.step("All Inboxes by account, account names, the account's menu");
     let main = shell().main();
     let core = &shell().core;
@@ -2621,7 +2625,7 @@ pub async fn all_inboxes_by_account(d: &Driver) {
     command(Command::Sync);
     let unread = |f: i64| core.folder(f).map_or(0, |f| f.unread);
     wait_until(20, || unread(inbox) >= 1 && unread(second) >= 1).await;
-    let row = |folder: i64| main.folders.markup_of(under_all_inboxes(folder)).unwrap_or_default();
+    let row = |folder: i64| main.folders.markup_of(folder).unwrap_or_default();
     d.check(
         row(inbox).contains("inboxclassic.test") && row(second).contains("Work"),
         &format!(
@@ -2634,7 +2638,7 @@ pub async fn all_inboxes_by_account(d: &Driver) {
         wait_until(10, || row(second).contains(&format!("({})", unread(second)))).await,
         &format!("each row shows its Inbox's unread count ({})", row(second)),
     );
-    main.folders.select(under_all_inboxes(second));
+    main.folders.select(second);
     let total = core.folder(second).map_or(0, |f| f.total);
     d.check(
         wait_until(10, || u64::from(messages_listed()) == total).await,
@@ -2759,7 +2763,6 @@ pub async fn all_inboxes_by_account(d: &Driver) {
 /// SCENARIO 42b: the second account's row under All Inboxes dragged above the first's puts the accounts in that order,
 /// its heading too, the row staying selected; Move Down from its menu puts it back
 pub async fn reorder_accounts(d: &Driver) {
-    use crate::folders::under_all_inboxes;
     d.step("accounts reordered by dragging and by Move Down");
     let main = shell().main();
     let core = &shell().core;
@@ -2776,24 +2779,23 @@ pub async fn reorder_accounts(d: &Driver) {
     let second_first = || {
         (
             at(-second_account) < at(-first_account),
-            at(under_all_inboxes(second)) < at(under_all_inboxes(inbox)),
+            at(second) < at(inbox),
             core.accounts().unwrap_or_default().first().map(|a| a.id) == Some(second_account),
         )
     };
-    main.folders.select(under_all_inboxes(second));
+    main.folders.select(second);
     d.check(
-        main.folders.show_drop_line(under_all_inboxes(inbox), Some(false)),
+        main.folders.show_drop_line(inbox, Some(false)),
         "held over the first account's row under All Inboxes, a drag shows a line above it",
     );
     d.shot(&main_window(), "all-inboxes-4-drag").await;
-    main.folders.show_drop_line(under_all_inboxes(inbox), None);
+    main.folders.show_drop_line(inbox, None);
     d.check(
-        !main.folders.drop_row(under_all_inboxes(second), -first_account, false),
+        !main.folders.drop_row(second, -first_account, false),
         "a row under All Inboxes is not taken by an account's heading",
     );
     d.check(
-        main.folders
-            .drop_row(under_all_inboxes(second), under_all_inboxes(inbox), false),
+        main.folders.drop_row(second, inbox, false),
         "the second account's row under All Inboxes is dropped above the first's",
     );
     d.check(
@@ -2803,10 +2805,7 @@ pub async fn reorder_accounts(d: &Driver) {
             second_first()
         ),
     );
-    d.check(
-        main.folders.selected() == under_all_inboxes(second),
-        "the row moved stays selected",
-    );
+    d.check(main.folders.selected() == second, "the row moved stays selected");
     d.shot(&main_window(), "all-inboxes-4-reorder").await;
     // its menu: Move Up turned off, first as it is; Move Down puts it back
     let tree: gtk::Widget = main.folders.view.clone().upcast();

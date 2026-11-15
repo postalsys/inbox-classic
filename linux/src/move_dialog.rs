@@ -246,11 +246,11 @@ fn target_row(target: &TargetRow, current: Option<i64>) -> gtk::ListBoxRow {
     }
     let line = gtk::Box::new(gtk::Orientation::Horizontal, 8);
     line.set_margin_start(6 + 18 * target.depth as i32);
-    let icon = if target.kind == TargetKind::Account {
-        "ic-mailbox-symbolic"
+    let icon = kind_icon(if target.kind == TargetKind::Account {
+        "account"
     } else {
-        kind_icon(target.icon)
-    };
+        target.icon
+    });
     let text = gtk::Label::new(Some(&target.label));
     text.set_halign(gtk::Align::Start);
     text.set_ellipsize(gtk::pango::EllipsizeMode::End);
@@ -274,9 +274,10 @@ fn target_row(target: &TargetRow, current: Option<i64>) -> gtk::ListBoxRow {
     row
 }
 
-/// The icon of a folder by what the core says it is for (`folder_kind`)
+/// The icon of a row by the core's word for it (a folder's `folder_kind`, `flagged`, `all`, `account` for an account)
 pub(crate) fn kind_icon(kind: &str) -> &'static str {
     match kind {
+        "account" => "ic-mailbox-symbolic",
         "inbox" => "ic-mail-inbox-symbolic",
         "sent" => "ic-send-symbolic",
         "drafts" => "ic-drafts-symbolic",
