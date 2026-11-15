@@ -315,6 +315,24 @@ The key files are `scripts/ui-e2e/keys/`: `bob.pub.asc` (Bob Example, bob@exampl
 - the Address Book's Bob (a card for bob@example.net, added by the test) shows his key's fingerprint and Valid, verified in his Properties (`keys-11-contact`)
 - Remove of Bob's key asks first and removes it; Carol's key and the account's stay for the steps after
 
+## 19i. Signed and encrypted mail
+
+Screenshots: `secure-1-verified`, `secure-2-signed-unverified`, `secure-3-encrypted`, `secure-4-mixed-parts`, `secure-5-bad-signature`, `secure-6-wrong-signer`, `secure-7-no-key`, `secure-8-fake-frame`, `secure-9-details`, `secure-10-inline`, `secure-11-pictures-in-decrypted`, `secure-12-resized`, and on the Mac and Linux `secure-13-dark`
+
+The keys and messages are `scripts/ui-e2e/pgp/` (made by pe-pgp's `ui_fixtures` example; `pe-core/tests/ui_fixtures.rs` checks what each reads as): `me.asc`, a private key of testuser@inboxclassic.test protected by the passphrase in `me.passphrase`; `alice.asc` and `mallory.asc`, public keys; Dave's key is in no file. Each `secure-*.eml` is put in the Inbox over ImapKit's API, and taken away after.
+
+- Import of `me.asc` (with its passphrase), `alice.asc` and `mallory.asc` in Encryption Keys, as in 19h
+- `secure-signed.eml`: the bar is blue with the ribbon and says "Signed by alice@example.org (key not verified)", the part has one frame labelled the same (`secure-2-signed-unverified`); after Verify of Alice's key (They Match) the same message shows green, "key verified" (`secure-1-verified`)
+- `secure-encrypted.eml`: the bar has the lock and says "Encrypted. Signed by alice@example.org, key verified", the text "old mill" is shown (`secure-3-encrypted`)
+- `secure-mixed.eml`: three frames, each with its own label (Not signed, Signed by..., Not signed), the bar counts them: "This message has 3 parts: 1 verified, 2 without a confirmed signature" (`secure-4-mixed-parts`)
+- `secure-bad.eml`: amber, "does not match" (`secure-5-bad-signature`); `secure-wrong-signer.eml`: amber, signed by mallory@example.net, "who is not the sender" (`secure-6-wrong-signer`); `secure-no-key.eml`: grey, "Signed, but the key is not known" (`secure-7-no-key`)
+- `secure-fake-frame.eml`: the painted green label stays inside its own frame, under the real label "Not signed"; the bar counts 2 parts; the real labels are all there (`secure-8-fake-frame`)
+- Details (on the bar, and a click on a part's label) opens the window with each part, the key that signed it and when (`secure-9-details`)
+- `secure-inline.eml`: the inline encrypted block is a part of its own, "4711" shown, the text around it in frames of their own (`secure-10-inline`)
+- `secure-pictures.eml`: the pictures bar shows without the "always" choices; nothing was asked of the internet; after its click the label says pictures were loaded (`secure-11-pictures-in-decrypted`)
+- `secure-long.eml`: the frame is as tall as its part (its last line shown without a scroll bar inside the frame), and grows when "..." is unfolded and when the window is made narrower (`secure-12-resized`)
+- in dark mode, the bar and the labels keep their colours readable (`secure-13-dark`, the Mac and Linux)
+
 ## 20. Send/Recv
 
 Screenshots: `main-2-new-mail`, `main-3-sent-items`
