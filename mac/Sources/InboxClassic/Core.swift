@@ -854,6 +854,14 @@ final class MessageView {
 
     var info: UnsafePointer<PeMessageInfo>? { pe_message_view_info(handle) }
 
+    /// the document of part `index` of a signed or encrypted message, copied; nil past the end or for a part with
+    /// nothing to show
+    func part(_ index: Int) -> String? {
+        guard index >= 0, let document = pe_message_view_part(handle, index) else { return nil }
+        let copied = String(cString: document)
+        return copied.isEmpty ? nil : copied
+    }
+
     func attachment(_ index: Int) -> (name: String, size: UInt64)? {
         guard let attachment = pe_message_view_attachment(handle, index) else { return nil }
         return (text(attachment.pointee.filename), attachment.pointee.size)
