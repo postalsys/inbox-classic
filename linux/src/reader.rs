@@ -1,5 +1,6 @@
 //! The reading pane: the header of the message (the brand's logo beside it, Unsubscribe and the paper clip with the
-//! files at its right), the bar that says pictures from the internet are blocked, and the message itself (with the
+//! files at its right), the security bar of a signed or encrypted message, the bar that says pictures from the
+//! internet are blocked, and the message itself (with the
 //! cards of the core above it: a calendar event, a bounce, a one-time code), the sanitized document of the core in a locked down web view. The main window has one
 //! under its list, and each message window one of its own: the reader keeps the message it shows, asks the core for
 //! it, follows the core's events about it and answers its own buttons (the files, the pictures, Try Again, the
@@ -13,6 +14,7 @@ use std::rc::Rc;
 use webkit::prelude::*;
 
 use crate::app::{shell, spawn};
+use crate::security::SecurityBar;
 use crate::ui::{self, TITLE};
 use crate::webview::{DocumentView, no_message};
 
@@ -43,6 +45,8 @@ pub struct Reader {
     /// The paper clip with the files of the message
     pub attachments: gtk::MenuButton,
     attachments_label: gtk::Label,
+    /// The security bar of a signed or encrypted message, under the header
+    pub security: SecurityBar,
     /// The bar that says pictures from the internet are blocked; its button shows them, its menu beside it trusts
     /// the sender, or its second line says why it cannot
     pictures: gtk::Box,
@@ -192,6 +196,7 @@ impl Reader {
         header.append(&text);
         header.append(&attachments);
 
+        let security = SecurityBar::new();
         let (pictures, download_pictures, pictures_always) = pictures_bar();
 
         let note_retry = gtk::Label::new(Some(&pe_core::retry_note()));
@@ -216,6 +221,7 @@ impl Reader {
         let (find_bar, find_entry) = find_bar();
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 0);
         widget.append(&header);
+        widget.append(&security.widget);
         widget.append(&retry);
         widget.append(&pictures);
         widget.append(&find_bar);
@@ -233,6 +239,7 @@ impl Reader {
             unsubscribe,
             attachments,
             attachments_label,
+            security,
             pictures,
             download_pictures,
             pictures_always,
@@ -278,6 +285,8 @@ impl Reader {
         self.download_pictures.connect_clicked(move |_| pictures());
         let again = on(|this| this.retry());
         self.try_again.connect_clicked(move |_| again());
+        let details = on(|this| this.show_details());
+        self.security.details.connect_clicked(move |_| details());
         let calendar = on(|this| {
             let this = this.clone();
             spawn(async move { this.open_in_calendar().await });
@@ -302,7 +311,21 @@ impl Reader {
         });
         // Copy on a one-time code's card: the code the core found on the clipboard (nothing is read from the link)
         let copy = on(|this| this.copy_code());
+        // a part's label of a signed or encrypted message: its Details, and nothing else
+        let part = on(|this| {
+            // after the view's signal, as a dialog opened inside it would be
+            let this = Rc::downgrade(this);
+            glib::idle_add_local_once(move || {
+                if let Some(this) = this.upgrade() {
+                    this.show_details();
+                }
+            });
+        });
         self.preview.set_links(move |uri| {
+            if pe_html::part_link(uri).is_some() {
+                part();
+                return true;
+            }
             if pe_html::is_copy_code_link(uri) {
                 copy();
                 return true;
@@ -458,6 +481,13 @@ impl Reader {
     /// The subject of the message on screen
     pub fn subject(&self) -> Option<String> {
         self.view.borrow().as_ref().map(|v| v.subject.clone())
+    }
+
+    /// Security Details of the signed or encrypted message on screen
+    pub fn show_details(&self) {
+        if let Some(view) = self.view.borrow().as_ref() {
+            crate::security::details_dialog(&self.widget, view);
+        }
     }
 
     /// The one-time code of the card on screen, when there is one
@@ -651,25 +681,20 @@ impl Reader {
         let _ = shell().core.open_message(self.folder.get(), self.uid.get());
     }
 
-    /// The message as it is shown, with the pictures the user allowed, through the print dialog over `window`
+    /// The message as it is shown, with the pictures the user allowed, through the print dialog over `window`. A
+    /// signed or encrypted message prints the core's document of it (a printer prints no frames): every part's text,
+    /// with the bar's words and the parts' labels in its header
     pub fn print(&self, window: &impl IsA<gtk::Window>) {
         if !self.shows_message() || !self.has_view() {
             return;
         }
-        let operation = webkit::PrintOperation::new(&self.preview.view);
-        // WebKit destroys its print dialog when run_dialog returns, holding no reference of its own; closed with its
-        // close button or Escape, GTK has destroyed it already and it may be freed. Held here until then
-        let toplevels = gtk::Window::toplevels();
-        let held: Rc<RefCell<Vec<gtk::PrintUnixDialog>>> = Rc::default();
-        let kept = held.clone();
-        let added = toplevels.connect_items_changed(move |list, position, _, count| {
-            let dialogs =
-                (position..position + count).filter_map(|i| list.item(i).and_downcast::<gtk::PrintUnixDialog>());
-            kept.borrow_mut().extend(dialogs);
-        });
-        operation.run_dialog(Some(window));
-        toplevels.disconnect(added);
-        drop(held);
+        let printed = self.view.borrow().as_ref().and_then(|v| v.print_document.clone());
+        let Some(document) = printed else {
+            print_dialog(&self.preview.view, window.as_ref());
+            return;
+        };
+        let pictures = self.remote_images.get() || self.view.borrow().as_ref().is_some_and(|v| v.pictures_loaded);
+        print_document(&document, pictures, window.as_ref().clone());
     }
 
     /// Emptied; saying there is no message selected unless one is `loading`. The bars of the message before stay
@@ -691,6 +716,7 @@ impl Reader {
         self.summary.borrow_mut().take();
         if !loading {
             self.attachments.set_visible(false);
+            self.security.hide();
             self.pictures.set_visible(false);
         }
         self.unsubscribe.set_visible(false);
@@ -767,6 +793,7 @@ impl Reader {
     pub fn not_downloaded(&self, kind: pe_core::FailureKind, reason: &str) {
         self.stop_downloading_note();
         self.attachments.set_visible(false);
+        self.security.hide();
         self.pictures.set_visible(false);
         self.retry.set_visible(true);
         self.preview.show(
@@ -787,6 +814,7 @@ impl Reader {
         self.note.set_text(&t!(UiNotShown));
         self.note.set_visible(true);
         self.attachments.set_visible(false);
+        self.security.hide();
         self.pictures.set_visible(false);
     }
 
@@ -811,7 +839,14 @@ impl Reader {
         self.unsubscribe.set_visible(view.unsubscribe.is_some());
         self.show_attachments(view);
         // shown when asked for, or by themselves (a trusted sender, or every message's)
-        self.preview.show(&view.document, remote_images || view.pictures_loaded);
+        self.preview.show_parts(
+            &view.document,
+            &view.part_documents,
+            remote_images || view.pictures_loaded,
+        );
+        // a signed or encrypted message's parts are frames, each sized to its document
+        self.preview.measure_frames(view.protection.is_some());
+        self.security.show(view);
         self.show_pictures_bar(view);
     }
 
@@ -1113,6 +1148,59 @@ impl Reader {
             Some(problem) => t!(GtkUnsubscribeFailed, problem = problem),
         }
     }
+}
+
+thread_local! {
+    /// The web view of a document being printed, kept until its print dialog is done
+    static PRINTING: RefCell<Option<DocumentView>> = const { RefCell::new(None) };
+}
+
+/// `document` printed from a web view of its own, locked down as the reading pane's (no scripts at all), once it has
+/// loaded
+fn print_document(document: &str, pictures: bool, window: gtk::Window) {
+    let view = DocumentView::new("print", false);
+    let started = Cell::new(false);
+    view.view.connect_load_changed(move |_, event| {
+        if event != webkit::LoadEvent::Finished || started.replace(true) {
+            return;
+        }
+        let window = window.clone();
+        // after WebKit's signal: the dialog runs a loop of its own
+        glib::idle_add_local_once(move || {
+            if let Some(printing) = PRINTING.with(|p| p.borrow().clone()) {
+                print_dialog(&printing.view, &window);
+                printing.release();
+            }
+            PRINTING.with(|p| p.borrow_mut().take());
+        });
+    });
+    view.show(document, pictures);
+    if let Some(before) = PRINTING.with(|p| p.borrow_mut().replace(view)) {
+        before.release();
+    }
+}
+
+/// The document being printed (the UI test reads it); None when nothing is
+#[cfg(feature = "e2e")]
+pub fn printing() -> Option<String> {
+    PRINTING.with(|p| p.borrow().as_ref().map(|view| view.shown()))
+}
+
+/// The page of `view` through the print dialog over `window`
+fn print_dialog(view: &webkit::WebView, window: &gtk::Window) {
+    let operation = webkit::PrintOperation::new(view);
+    // WebKit destroys its print dialog when run_dialog returns, holding no reference of its own; closed with its
+    // close button or Escape, GTK has destroyed it already and it may be freed. Held here until then
+    let toplevels = gtk::Window::toplevels();
+    let held: Rc<RefCell<Vec<gtk::PrintUnixDialog>>> = Rc::default();
+    let kept = held.clone();
+    let added = toplevels.connect_items_changed(move |list, position, _, count| {
+        let dialogs = (position..position + count).filter_map(|i| list.item(i).and_downcast::<gtk::PrintUnixDialog>());
+        kept.borrow_mut().extend(dialogs);
+    });
+    operation.run_dialog(Some(window));
+    toplevels.disconnect(added);
+    drop(held);
 }
 
 /// Every label under `root`
