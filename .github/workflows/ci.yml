@@ -97,6 +97,25 @@ jobs:
                   # the autoconfig lookups against the real ISPDB and providers, once is enough
                   PE_NETWORK_TESTS: ${{ matrix.os == 'ubuntu-24.04' && '1' || '' }}
 
+    pgp-interop:
+        name: OpenPGP against Sequoia and GnuPG
+        runs-on: ubuntu-latest
+        container: debian:trixie
+        timeout-minutes: 20
+        steps:
+            - uses: actions/checkout@v6
+            # sqop is Sequoia's Stateless OpenPGP command line, a code base that shares nothing with rPGP
+            - name: Sequoia, GnuPG and a compiler
+              run: |
+                  apt-get update -qq
+                  apt-get install -y -qq sqop gnupg curl ca-certificates gcc git
+            - uses: dtolnay/rust-toolchain@stable
+            - uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: core
+            # what each makes, the other opens and verifies, both ways
+            - run: scripts/pgp-interop.sh --inside
+
     windows:
         name: Build and test the Windows app
         runs-on: windows-latest
