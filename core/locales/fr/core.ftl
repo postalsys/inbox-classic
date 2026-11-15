@@ -658,3 +658,16 @@ pgp-error-missing-keys = { $count ->
 pgp-error-encrypted-quote = Ce message cite ou transfère un message chiffré : il ne peut être envoyé que chiffré. Activez Chiffrer, ou supprimez le texte cité.
 # review: new
 pgp-error-protect = Le message n’a pas pu être signé ou chiffré : { $reason }
+pgp-found-keys = La clé de { $addresses } a été trouvée.
+# review: new
+pgp-found-none = Aucune clé n'a été trouvée pour { $addresses }. Demandez-lui de vous envoyer sa clé publique.
+# review: new
+pgp-found-no-key = Aucune clé n'a été trouvée.
+# review: new
+pgp-find-unavailable = Les clés ne peuvent pas être recherchées pour l'instant : { $error }
+# review: new
+pgp-publish-pending = keys.openpgp.org a envoyé un lien de confirmation à { $addresses }. Votre clé y est publiée dès que vous cliquez dessus.
+# review: new
+pgp-publish-done = Votre clé est publiée sur keys.openpgp.org pour { $addresses }.
+# review: new
+pgp-publish-failed = La clé n'a pas pu être publiée : { $error }

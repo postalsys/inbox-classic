@@ -1,0 +1,17 @@
+[package]
+name = "pe-keys"
+version.workspace = true
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+pe-net.workspace = true
+pe-pgp = { path = "../pe-pgp" }
+# SHA-1 of the Web Key Directory's address hash (not a signature: the hash only names a file)
+ring = "0.17.14"
+serde_json = "1"
+
+[dev-dependencies]
+tokio = { version = "1.54.1", features = ["rt", "macros", "net", "io-util"] }

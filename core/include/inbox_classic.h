@@ -137,6 +137,10 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_SEND_WAITING = 23,
   // The message rules sorted `count` messages of `account`'s new mail, or of its Inbox when one was applied there
   PE_EVENT_KIND_RULES_APPLIED = 24,
+  // OpenPGP keys were looked up (`pe_pgp_find`, `pe_pgp_find_handle`): `pe_pgp_find_result` with the request in `uid`
+  PE_EVENT_KIND_KEYS_FOUND = 25,
+  // An own key was published (`pe_pgp_publish`): `pe_pgp_publish_result` with the request in `uid`
+  PE_EVENT_KIND_KEY_PUBLISHED = 26,
 } PeEventKind;
 
 typedef enum PeSecurity {

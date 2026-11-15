@@ -21,6 +21,7 @@ mod fold;
 pub mod keys;
 pub mod layout;
 mod list_view;
+mod lookup;
 pub mod mailto;
 pub mod otp;
 pub mod pictures;
@@ -81,6 +82,7 @@ use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label, autosave_wait};
 pub use export::{Exported, write_file};
+pub use lookup::{FindOutcome, PublishOutcome};
 /// The words of the windows in the language in use
 pub use pe_i18n as i18n;
 /// The rules of the folder tree the windows show: how deep a folder is, and which stay as they are
@@ -220,6 +222,14 @@ pub enum Event {
     },
     /// The servers of an address were looked up: [`Core::autoconfig_result`]
     AutoconfigDone {
+        request: u64,
+    },
+    /// OpenPGP keys were looked up: [`Core::pgp_find_result`]
+    KeysFound {
+        request: u64,
+    },
+    /// An own key was published: [`Core::pgp_publish_result`]
+    KeyPublished {
         request: u64,
     },
     /// A sign-in in the browser finished: [`Core::sign_in_result`]
@@ -397,6 +407,9 @@ pub struct Options {
     pub passwords: PasswordStore,
     /// OAuth providers in place of the built-in ones of the same kind (tests, a mock provider)
     pub oauth_providers: Vec<pe_oauth::Provider>,
+    /// Where OpenPGP keys are looked up and published, in place of keys.openpgp.org and the domains' own directories
+    /// (tests)
+    pub pgp_servers: Option<pe_keys::Servers>,
 }
 
 pub struct Core {
@@ -441,6 +454,10 @@ pub struct Core {
     agent_asks: Mutex<agents::Asks>,
     /// Lookups of servers; None when the address has no domain
     autoconfig: Requests<Option<pe_autoconfig::Settings>>,
+    /// Lookups of OpenPGP keys and their result, learned when taken (lookup.rs)
+    pgp_lookups: Requests<lookup::Fetched>,
+    pgp_publishes: Requests<lookup::PublishOutcome>,
+    pgp_servers: Option<pe_keys::Servers>,
     /// BIMI logos being drawn, as pixels once done
     logos: Requests<Option<Vec<u8>>>,
     /// The pictures of the list's rows being drawn, as pixels once done
@@ -538,6 +555,9 @@ impl Core {
             closed,
             agent_asks: Mutex::default(),
             autoconfig: Requests::default(),
+            pgp_lookups: Requests::default(),
+            pgp_publishes: Requests::default(),
+            pgp_servers: options.pgp_servers.clone(),
             logos: Requests::default(),
             pictures: Requests::default(),
             logo_downloads: Arc::default(),
