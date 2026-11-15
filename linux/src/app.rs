@@ -172,6 +172,8 @@ fn open_core(
         trust,
         passwords,
         oauth_providers: Vec::new(),
+        // keys are looked up on keys.openpgp.org and the domains' own directories
+        pgp_servers: None,
     };
     pe_core::Core::open_with(store, options, events).ok()
 }

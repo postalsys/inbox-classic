@@ -546,6 +546,15 @@ CREATE TABLE pgp_identities (
     // a message being written with Encrypt or Sign on, or quoting encrypted mail, keeps it after a crash: 1 encrypt,
     // 2 sign, 4 the quote was encrypted
     "ALTER TABLE compose_recovery ADD COLUMN protection INTEGER NOT NULL DEFAULT 0;",
+    // the keys looked up for an address (pe-core lookup.rs): when, and whether one was found, so that a miss is not
+    // asked again for a day
+    r#"
+CREATE TABLE pgp_lookups (
+    address TEXT PRIMARY KEY COLLATE NOCASE,
+    checked INTEGER NOT NULL,
+    found INTEGER NOT NULL
+);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

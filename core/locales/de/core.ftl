@@ -631,3 +631,19 @@ pgp-error-missing-keys = { $count ->
 pgp-error-encrypted-quote = Diese Nachricht zitiert oder leitet eine verschlüsselte Nachricht weiter und kann daher nur verschlüsselt gesendet werden. Schalten Sie Verschlüsseln ein, oder entfernen Sie den zitierten Text.
 # review: new
 pgp-error-protect = Die Nachricht konnte nicht signiert oder verschlüsselt werden: { $reason }
+# review: new
+pgp-found-keys = Der Schlüssel von { $addresses } wurde gefunden.
+# review: new
+pgp-found-none = Für { $addresses } wurde kein Schlüssel gefunden. Bitten Sie darum, Ihnen den öffentlichen Schlüssel zu senden.
+# review: new
+pgp-found-no-key = Es wurde kein Schlüssel gefunden.
+# review: new
+pgp-find-unavailable = Schlüssel können gerade nicht gesucht werden: { $error }
+# review: new
+pgp-publish-pending = keys.openpgp.org hat einen Bestätigungslink an { $addresses } gesendet. Ihr Schlüssel wird dort veröffentlicht, sobald Sie darauf klicken.
+# review: new
+pgp-publish-done = Ihr Schlüssel ist auf keys.openpgp.org für { $addresses } veröffentlicht.
+# review: new
+pgp-publish-failed = Der Schlüssel konnte nicht veröffentlicht werden: { $error }
+# review: new
+pgp-keyserver-off = Die Suche nach Schlüsseln auf keys.openpgp.org ist in den Optionen ausgeschaltet.

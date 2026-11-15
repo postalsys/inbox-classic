@@ -2263,6 +2263,7 @@ dependencies = [
  "pe-html",
  "pe-i18n",
  "pe-imap",
+ "pe-keys",
  "pe-mime",
  "pe-net",
  "pe-oauth",
@@ -2344,6 +2345,17 @@ name = "pe-jsre"
 version = "0.18.0"
 dependencies = [
  "regex",
+]
+
+[[package]]
+name = "pe-keys"
+version = "0.18.0"
+dependencies = [
+ "pe-net",
+ "pe-pgp",
+ "ring",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]

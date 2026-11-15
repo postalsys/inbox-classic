@@ -281,6 +281,40 @@ impl Store {
     }
 }
 
+/// Options' "Look up keys on keys.openpgp.org"
+const KEYSERVER: &str = "pgp.keyserver";
+
+impl Store {
+    /// When `address`'s key was last looked up and whether one was found; None when it never was
+    pub fn pgp_lookup(&self, address: &str) -> Result<Option<(i64, bool)>> {
+        self.db
+            .query_row(
+                "SELECT checked, found FROM pgp_lookups WHERE address = ?1",
+                [normal_address(address)],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .optional()
+    }
+
+    pub fn set_pgp_lookup(&self, address: &str, checked: i64, found: bool) -> Result<()> {
+        self.db.execute(
+            "INSERT INTO pgp_lookups (address, checked, found) VALUES (?1, ?2, ?3) \
+             ON CONFLICT (address) DO UPDATE SET checked = excluded.checked, found = excluded.found",
+            params![normal_address(address), checked, found],
+        )?;
+        Ok(())
+    }
+
+    /// Options' "Look up keys on keys.openpgp.org", on out of the box
+    pub fn pgp_keyserver(&self) -> Result<bool> {
+        self.bool_setting(KEYSERVER, true)
+    }
+
+    pub fn set_pgp_keyserver(&self, on: bool) -> Result<()> {
+        self.set_bool_setting(KEYSERVER, on)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -398,6 +432,19 @@ mod tests {
             .pgp_transaction(|| store.save_pgp_key(&key("AA", None), &["bob@example.org".into()]))
             .unwrap();
         assert!(store.pgp_key("AA").unwrap().is_some());
+    }
+
+    #[test]
+    fn lookups_and_the_keyserver_setting() {
+        let store = Store::open_in_memory().unwrap();
+        assert_eq!(store.pgp_lookup("bob@example.org").unwrap(), None);
+        store.set_pgp_lookup("Bob@Example.org", 100, false).unwrap();
+        assert_eq!(store.pgp_lookup("bob@example.org").unwrap(), Some((100, false)));
+        store.set_pgp_lookup("bob@example.org", 200, true).unwrap();
+        assert_eq!(store.pgp_lookup("bob@example.org").unwrap(), Some((200, true)));
+        assert!(store.pgp_keyserver().unwrap());
+        store.set_pgp_keyserver(false).unwrap();
+        assert!(!store.pgp_keyserver().unwrap());
     }
 
     #[test]

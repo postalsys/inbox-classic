@@ -642,3 +642,19 @@ pgp-error-missing-keys = { $count ->
 pgp-error-encrypted-quote = Este mensaje cita o reenvía un mensaje cifrado, así que solo se puede enviar cifrado. Active Cifrar, o quite el texto citado.
 # review: new
 pgp-error-protect = No se pudo firmar ni cifrar el mensaje: { $reason }
+# review: new
+pgp-found-keys = Se encontró la clave de { $addresses }.
+# review: new
+pgp-found-none = No se encontró ninguna clave para { $addresses }. Pídale que le envíe su clave pública.
+# review: new
+pgp-found-no-key = No se encontró ninguna clave.
+# review: new
+pgp-find-unavailable = Ahora no se pueden buscar claves: { $error }
+# review: new
+pgp-publish-pending = keys.openpgp.org envió un enlace de confirmación a { $addresses }. Su clave se publica allí en cuanto haga clic en él.
+# review: new
+pgp-publish-done = Su clave está publicada en keys.openpgp.org para { $addresses }.
+# review: new
+pgp-publish-failed = No se pudo publicar la clave: { $error }
+# review: new
+pgp-keyserver-off = La búsqueda de claves en keys.openpgp.org está desactivada en Opciones.

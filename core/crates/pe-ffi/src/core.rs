@@ -141,6 +141,10 @@ pub enum PeEventKind {
     SendWaiting = 23,
     /// The message rules sorted `count` messages of `account`'s new mail, or of its Inbox when one was applied there
     RulesApplied = 24,
+    /// OpenPGP keys were looked up (`pe_pgp_find`, `pe_pgp_find_handle`): `pe_pgp_find_result` with the request in `uid`
+    KeysFound = 25,
+    /// An own key was published (`pe_pgp_publish`): `pe_pgp_publish_result` with the request in `uid`
+    KeyPublished = 26,
 }
 
 #[repr(C)]
@@ -224,6 +228,8 @@ impl Callback {
             Event::RulesApplied { account, .. } => (PeEventKind::RulesApplied, *account, 0, 0),
             Event::DraftSaved { account, .. } => (PeEventKind::DraftSaved, *account, 0, 0),
             Event::AutoconfigDone { request } => (PeEventKind::AutoconfigDone, 0, 0, *request),
+            Event::KeysFound { request } => (PeEventKind::KeysFound, 0, 0, *request),
+            Event::KeyPublished { request } => (PeEventKind::KeyPublished, 0, 0, *request),
             Event::SignInDone { request } => (PeEventKind::SignInDone, 0, 0, *request),
             Event::SignInAppChecked { request } => (PeEventKind::SignInAppChecked, 0, 0, *request),
             Event::ViewReady { request } => (PeEventKind::ViewReady, 0, 0, *request),
@@ -366,6 +372,7 @@ fn open(
             trust,
             passwords,
             oauth_providers: Vec::new(),
+            pgp_servers: None,
         };
         let core = Core::open_with(path, options, move |event| {
             if let Some(callback) = &callback {

@@ -586,3 +586,11 @@ pgp-error-missing-keys = { $count ->
 }
 pgp-error-encrypted-quote = This message quotes or forwards an encrypted message, so it can only be sent encrypted. Turn Encrypt on, or remove the quoted text.
 pgp-error-protect = The message could not be signed or encrypted: { $reason }
+pgp-found-keys = Found the key of { $addresses }.
+pgp-found-none = No key was found for { $addresses }. Ask them to send you their public key.
+pgp-found-no-key = No key was found.
+pgp-find-unavailable = Keys could not be looked up now: { $error }
+pgp-publish-pending = keys.openpgp.org sent a confirmation link to { $addresses }. Your key is published there once you click it.
+pgp-publish-done = Your key is published on keys.openpgp.org for { $addresses }.
+pgp-publish-failed = The key could not be published: { $error }
+pgp-keyserver-off = Looking up keys on keys.openpgp.org is turned off in Options.
