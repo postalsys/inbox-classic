@@ -656,3 +656,5 @@ pgp-error-missing-keys = { $count ->
 }
 # review: new
 pgp-error-encrypted-quote = Ce message cite ou transfère un message chiffré : il ne peut être envoyé que chiffré. Activez Chiffrer, ou supprimez le texte cité.
+# review: new
+pgp-error-protect = Le message n’a pas pu être signé ou chiffré : { $reason }

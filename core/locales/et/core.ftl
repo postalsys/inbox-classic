@@ -616,3 +616,5 @@ pgp-error-missing-keys = { $count ->
 }
 # review: new
 pgp-error-encrypted-quote = See kiri tsiteerib või edastab krüpteeritud kirja, seega saab selle saata ainult krüpteerituna. Lülita krüpteerimine sisse või eemalda tsiteeritud tekst.
+# review: new
+pgp-error-protect = Kirja ei saanud allkirjastada ega krüptida: { $reason }

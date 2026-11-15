@@ -831,6 +831,17 @@ impl<'a> Book<'a> {
         }
     }
 
+    /// The certificate of an own address's key, not unwrapped: to encrypt a draft to oneself
+    pub fn identity_cert(&self, address: &str) -> Result<Option<Cert>> {
+        let Some(identity) = self.store.pgp_identity(address)? else {
+            return Ok(None);
+        };
+        Ok(self
+            .store
+            .pgp_key(&identity.fingerprint)?
+            .and_then(|key| self.certs.get(&key)))
+    }
+
     /// The certificate in use for a correspondent
     pub fn cert_for(&self, address: &str) -> Result<Option<Cert>> {
         let Some(fingerprint) = self.store.pgp_peer(address)?.and_then(|peer| peer.fingerprint) else {

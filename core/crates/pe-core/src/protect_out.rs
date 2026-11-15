@@ -71,17 +71,18 @@ impl Core {
             Some(other) => normal_address(other),
             None => normal_address(&self.store().account(account)?.settings.email),
         };
+        let no_key = || crate::Error::Compose(ComposeError::NoOwnKey(from.clone()));
         self.book(|book| {
-            let own = book
-                .identity_key(&from)?
-                .ok_or_else(|| crate::Error::Compose(ComposeError::NoOwnKey(from.clone())))?;
+            // a draft is encrypted to the sender's own certificate: nothing unwrapped for it
             if draft {
+                let own = book.identity_cert(&from)?.ok_or_else(no_key)?;
                 return Ok(Some(OutgoingKeys {
                     signer: None,
-                    recipients: vec![own.cert().clone()],
+                    recipients: vec![own],
                     hidden: Vec::new(),
                 }));
             }
+            let own = book.identity_key(&from)?.ok_or_else(no_key)?;
             if !outgoing.encrypt {
                 return Ok(Some(OutgoingKeys {
                     signer: Some(own),
@@ -149,7 +150,7 @@ pub(crate) fn protect(
     keys: &OutgoingKeys,
     now: i64,
 ) -> std::result::Result<pe_smtp::Built, ComposeError> {
-    let failed = |error: pe_pgp::Error| ComposeError::Attachment(std::path::PathBuf::new(), error.to_string());
+    let failed = |error: pe_pgp::Error| ComposeError::Protect(error.to_string());
     let raw = &built.raw;
     let outline = pe_mime::outline::outline(raw);
     // never sent unprotected when it was to be protected
@@ -172,8 +173,7 @@ pub(crate) fn protect(
     let wrapped = if !keys.recipients.is_empty() {
         let recipients: Vec<&Cert> = keys.recipients.iter().collect();
         let hidden: Vec<&Cert> = keys.hidden.iter().collect();
-        let armored =
-            pe_pgp::encrypt(content.clone(), &recipients, &hidden, keys.signer.as_ref(), now).map_err(failed)?;
+        let armored = pe_pgp::encrypt(content, &recipients, &hidden, keys.signer.as_ref(), now).map_err(failed)?;
         let b = boundary(&[armored.as_bytes()]);
         format!(
             "Content-Type: multipart/encrypted;\r\n protocol=\"application/pgp-encrypted\";\r\n boundary=\"{b}\"\r\n\r\n\

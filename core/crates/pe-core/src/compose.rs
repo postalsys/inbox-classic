@@ -137,6 +137,8 @@ pub enum ComposeError {
     MissingKeys(Vec<String>),
     /// Encrypt off for a message that quotes or forwards an encrypted one
     EncryptedQuote,
+    /// Signing or encrypting failed, and why
+    Protect(String),
 }
 
 impl std::fmt::Display for ComposeError {
@@ -160,6 +162,7 @@ impl std::fmt::Display for ComposeError {
                 ],
             )),
             ComposeError::EncryptedQuote => f.write_str(&tr(Text::PgpErrorEncryptedQuote)),
+            ComposeError::Protect(why) => f.write_str(&tr_args(Text::PgpErrorProtect, &[("reason", why.into())])),
             ComposeError::Attachment(path, error) => f.write_str(&tr_args(
                 Text::ErrorAttachment,
                 &[("path", (&path.display().to_string()).into()), ("error", error.into())],

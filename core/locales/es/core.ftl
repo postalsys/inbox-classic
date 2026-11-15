@@ -640,3 +640,5 @@ pgp-error-missing-keys = { $count ->
 }
 # review: new
 pgp-error-encrypted-quote = Este mensaje cita o reenvía un mensaje cifrado, así que solo se puede enviar cifrado. Active Cifrar, o quite el texto citado.
+# review: new
+pgp-error-protect = No se pudo firmar ni cifrar el mensaje: { $reason }

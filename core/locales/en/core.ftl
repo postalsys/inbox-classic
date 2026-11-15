@@ -585,3 +585,4 @@ pgp-error-missing-keys = { $count ->
    *[other] These recipients have no key to encrypt to: { $addresses }.
 }
 pgp-error-encrypted-quote = This message quotes or forwards an encrypted message, so it can only be sent encrypted. Turn Encrypt on, or remove the quoted text.
+pgp-error-protect = The message could not be signed or encrypted: { $reason }
