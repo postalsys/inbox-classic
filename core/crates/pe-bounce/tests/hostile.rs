@@ -18,10 +18,16 @@ fn notice(text: &str) -> Vec<u8> {
     .into_bytes()
 }
 
+/// The best of three runs: a busy machine stops a single run now and then, which is no measure of the work
 fn time(raw: &[u8]) -> Duration {
-    let start = Instant::now();
-    detect(raw);
-    start.elapsed()
+    (0..3)
+        .map(|_| {
+            let start = Instant::now();
+            detect(raw);
+            start.elapsed()
+        })
+        .min()
+        .unwrap_or_default()
 }
 
 /// Doubling the input must not much more than double the time. The floor keeps timer noise on
