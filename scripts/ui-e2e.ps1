@@ -4312,7 +4312,8 @@ public static class Dragger {
     Check ($null -ne $accounts) 'File > Accounts lists the accounts'
     if ($accounts) {
         $accountList = [Native.Win]::GetDlgItem($accounts, 400)
-        Check ((ListCount $accountList) -eq 2) 'both accounts are listed'
+        # filled a moment after the window appears
+        Check ([bool](WaitFor { (ListCount $accountList) -eq 2 } 10)) "both accounts are listed ($(ListCount $accountList))"
         Shot $accounts 'accounts-1-list'
         # Properties of the first: a new display name
         # the first account is selected when the list opens, and stays so after a change

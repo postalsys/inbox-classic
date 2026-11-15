@@ -840,7 +840,12 @@ fn dialog_named(name: &str) -> Option<adw::Dialog> {
 }
 
 async fn wait_dialog(seconds: u64, name: &str) -> Option<adw::Dialog> {
-    wait_for(seconds, || dialog_named(name)).await
+    let dialog = wait_for(seconds, || dialog_named(name)).await?;
+    // its contents are found, clicked and filled once they are drawn, which a slow machine does a moment after the
+    // dialog appears
+    wait_until(5, || dialog.child().is_some_and(|content| content.is_mapped())).await;
+    pause(150).await;
+    Some(dialog)
 }
 
 async fn wait_gone(seconds: u64, name: &str) -> bool {
@@ -1042,6 +1047,8 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     };
     d.check(true, &format!("the account form opens ({name})"));
     let first = first.upcast::<gtk::Widget>();
+    // its fields are found, and filled, once the form is drawn: a slow machine draws it a moment after it opens
+    wait_until(10, || named_in(&first, "start-email").is_some()).await;
     if shots {
         let google = named_in(&first, "sign-in-google").is_some();
         let microsoft = named_in(&first, "sign-in-microsoft").is_some();
@@ -2351,9 +2358,13 @@ async fn accounts(d: &Driver) {
         return;
     };
     let accounts = accounts.upcast::<gtk::Widget>();
-    let listed = named_in(&accounts, "accounts-list")
-        .map(|l| descendants::<adw::ActionRow>(&l).len())
-        .unwrap_or(0);
+    let count = || {
+        named_in(&accounts, "accounts-list")
+            .map(|l| descendants::<adw::ActionRow>(&l).len())
+            .unwrap_or(0)
+    };
+    wait_until(5, || count() == 2).await;
+    let listed = count();
     d.check(listed == 2, &format!("both accounts are listed ({listed})"));
     d.shot(&accounts, "accounts-1-list").await;
     click(&accounts, "accounts-properties");

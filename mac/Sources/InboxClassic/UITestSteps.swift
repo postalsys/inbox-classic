@@ -1456,7 +1456,9 @@ extension UITest {
         try await addMessage(message(false, "", unsigned, "code-unsigned", code("771204")), flags: ["\\Seen"])
         command(.sync)
         selectFolder(named: "Inbox")
-        guard let row = await waitFor(30, { listIndex(subject: signed) }) else {
+        // all three listed first: one arriving after the row was found would move the selection to another message
+        _ = await waitUntil(30) { [signed, byHeader, unsigned].allSatisfy { self.listIndex(subject: $0) != nil } }
+        guard let row = listIndex(subject: signed) else {
             throw Failed(description: "the message with a code did not arrive")
         }
         list.scrollRowToVisible(row)
