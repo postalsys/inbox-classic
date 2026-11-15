@@ -848,6 +848,9 @@ typedef struct PeMessageInfo {
   bool has_date;
   // The sanitized document for the preview, with its CSP
   const char *document;
+  // The document to print (for `pe_print_page`): `document` for most messages; for one with signed or encrypted
+  // parts, one document of every part's text with the labels as words, as a printer prints no frames
+  const char *print_document;
   size_t attachment_count;
   // The message has pictures on the internet, blocked until it is shown again with remote images allowed
   bool remote_images;

@@ -1852,6 +1852,9 @@ pub struct PeMessageInfo {
     pub has_date: bool,
     /// The sanitized document for the preview, with its CSP
     pub document: *const c_char,
+    /// The document to print (for `pe_print_page`): `document` for most messages; for one with signed or encrypted
+    /// parts, one document of every part's text with the labels as words, as a printer prints no frames
+    pub print_document: *const c_char,
     pub attachment_count: usize,
     /// The message has pictures on the internet, blocked until it is shown again with remote images allowed
     pub remote_images: bool,
@@ -1992,6 +1995,7 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         date: view.date.unwrap_or(0),
         has_date: view.date.is_some(),
         document: strings.add(&view.document),
+        print_document: strings.add(view.print_document.as_deref().unwrap_or(&view.document)),
         attachment_count: attachments.len(),
         remote_images: view.remote_images,
         unsubscribe,

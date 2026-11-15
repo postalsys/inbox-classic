@@ -91,6 +91,11 @@ fn each_case_reads_as_the_ui_tests_expect() {
         "the picture waits for a click"
     );
     assert!(view.sender.is_none(), "no \"always\" for encrypted mail");
+    // printed: one document of every part's text, the bar and the labels as words in its header
+    let (_, text, view) = bar("secure-mixed.eml");
+    let print = view.print_document.as_deref().unwrap();
+    assert!(print.contains("A note added on the way") && print.contains("The signed paragraph"));
+    assert!(print.contains(&text) && print.contains("Part 2") && !print.contains("<iframe"));
     let (_, _, view) = bar("secure-long.eml");
     assert!(shown(&view).contains("Line 40 of the long part"));
 }

@@ -70,6 +70,10 @@ header-to = Para
 header-cc = CC
 header-sent = Enviado
 header-subject = Asunto
+# review: new
+header-security = Seguridad
+# review: new
+header-part = Parte { $number }
 quote-original = ----- Mensaje original -----
 fold-show-earlier = Mostrar los mensajes anteriores
 

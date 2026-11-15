@@ -58,6 +58,10 @@ header-to = Saaja
 header-cc = Koopia
 header-sent = Saadetud
 header-subject = Teema
+# review: new
+header-security = Turvalisus
+# review: new
+header-part = Osa { $number }
 quote-original = ----- Algne kiri -----
 fold-show-earlier = Näita varasemaid kirju
 

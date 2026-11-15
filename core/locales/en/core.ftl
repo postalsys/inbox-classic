@@ -63,6 +63,8 @@ header-to = To
 header-cc = Cc
 header-sent = Sent
 header-subject = Subject
+header-security = Security
+header-part = Part { $number }
 quote-original = ----- Original Message -----
 fold-show-earlier = Show the earlier messages
 

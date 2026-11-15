@@ -58,6 +58,10 @@ header-to = An
 header-cc = Cc
 header-sent = Gesendet
 header-subject = Betreff
+# review: new
+header-security = Sicherheit
+# review: new
+header-part = Teil { $number }
 quote-original = ----- Ursprüngliche Nachricht -----
 fold-show-earlier = Frühere Nachrichten anzeigen
 
