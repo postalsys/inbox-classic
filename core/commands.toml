@@ -476,6 +476,13 @@ id = "message_rules"
 windows = 170
 menu = "tools"
 
+# Tools > Encryption Keys: the user's OpenPGP keys and their contacts' (keys.rs): make, import, back up, export,
+# verify, remove
+[[command]]
+id = "encryption_keys"
+windows = 172
+menu = "tools"
+
 # a new rule from the message selected: its sender, or its mailing list; also on the message list's right-click menu
 [[command]]
 id = "create_rule_from_message"

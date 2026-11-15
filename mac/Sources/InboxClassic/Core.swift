@@ -386,6 +386,193 @@ final class Core {
     }
 }
 
+// ---- encryption keys ----
+
+/// An OpenPGP key as the windows show it, the core's words and decisions
+struct PgpKey {
+    let fingerprint: String
+    /// in groups of four, for comparing
+    let grouped: String
+    let userIds: [String]
+    let addresses: [String]
+    /// every address it holds is verified
+    let verified: Bool
+    /// the user's own, with its private part
+    let own: Bool
+    let state: PeKeyState
+    /// "Valid", "Valid until 3 May 2027", "Revoked: key compromised"
+    let stateText: String
+    let created: Int64
+    /// 0 when it does not expire
+    let expires: Int64
+    let algorithm: String
+    let source: String
+    /// what it is called, the Status column's words, how a choice of keys names it: the core's
+    let name: String
+    let status: String
+    let choice: String
+    /// the grouped fingerprint on two lines, to read out
+    let fingerprintLines: String
+    let canBackUp: Bool
+    let canVerify: Bool
+    /// each address, a contact's with whether it is verified
+    let addressLines: String
+    let removeQuestion: String
+    /// what They Match marks: every address of the key
+    let verifyMarks: String
+    let createdText: String
+    let expiresText: String
+
+    init(_ key: PeKey) {
+        fingerprint = text(key.fingerprint)
+        grouped = text(key.grouped)
+        userIds = text(key.user_ids).split(separator: "\n").map(String.init)
+        addresses = text(key.addresses).split(separator: "\n").map(String.init)
+        verified = key.verified
+        own = key.own
+        state = key.state
+        stateText = text(key.state_text)
+        created = key.created
+        expires = key.expires
+        algorithm = text(key.algorithm)
+        source = text(key.source)
+        name = text(key.name)
+        status = text(key.status)
+        choice = text(key.choice)
+        fingerprintLines = text(key.fingerprint_lines)
+        canBackUp = key.can_back_up
+        canVerify = key.can_verify
+        addressLines = text(key.address_lines)
+        removeQuestion = text(key.remove_question)
+        verifyMarks = text(key.verify_marks)
+        createdText = text(key.created_text)
+        expiresText = text(key.expires_text)
+    }
+}
+
+extension Core {
+    /// every key, own keys first
+    func pgpKeys() -> [PgpKey] {
+        keyRows(pe_pgp_keys(handle))
+    }
+
+    func pgpKey(_ fingerprint: String) -> PgpKey? {
+        keyRows(fingerprint.withCString { pe_pgp_key(handle, $0) }).first
+    }
+
+    private func keyRows(_ list: OpaquePointer?) -> [PgpKey] {
+        guard let list else { return [] }
+        defer { pe_pgp_key_list_free(list) }
+        return (0..<pe_pgp_key_list_count(list)).compactMap { pe_pgp_key_list_get(list, $0).map { PgpKey($0.pointee) } }
+    }
+
+    /// false when passwords are kept in memory only: a private key made now is gone after a restart
+    var privateKeysKept: Bool { pe_pgp_private_keys_kept(handle) }
+
+    /// a new key for the account and its other addresses: its fingerprint, or why not
+    func pgpGenerate(_ account: Int64) -> Result<String, Refusal> {
+        var error: UnsafeMutablePointer<CChar>?
+        if let fingerprint = taken(pe_pgp_generate(handle, account, &error)) {
+            return .success(fingerprint)
+        }
+        return .failure(Refusal(taken(error) ?? Text.uiUnknownReason.text))
+    }
+
+    /// the keys of a file's bytes imported, private ones unlocked with `passphrase`; how it ended and the core's words
+    func pgpImport(_ data: Data, passphrase: String?) -> (outcome: PeImportOutcome, message: String) {
+        var message: UnsafeMutablePointer<CChar>?
+        let strings = CStrings()
+        defer { strings.wipe() }
+        let outcome = data.withUnsafeBytes { bytes in
+            pe_pgp_import(handle, bytes.bindMemory(to: UInt8.self).baseAddress, data.count, passphrase.map(strings.add),
+                          PE_KEY_SOURCE_FILE, &message)
+        }
+        return (outcome, taken(message) ?? "")
+    }
+
+    /// the public key, armored
+    func pgpExport(_ fingerprint: String) -> String? {
+        fingerprint.withCString { taken(pe_pgp_export(handle, $0)) }
+    }
+
+    /// the private key protected by `passphrase`, armored, or why not
+    func pgpBackup(_ fingerprint: String, passphrase: String) -> Result<String, Refusal> {
+        let strings = CStrings()
+        defer { strings.wipe() }
+        var error: UnsafeMutablePointer<CChar>?
+        if let armored = fingerprint.withCString({ taken(pe_pgp_backup(handle, $0, strings.add(passphrase), &error)) }) {
+            return .success(armored)
+        }
+        return .failure(Refusal(taken(error) ?? Text.uiUnknownReason.text))
+    }
+
+    /// the name a key is saved under: public, or a backup of the private key
+    func pgpFileName(_ fingerprint: String, private: Bool) -> String {
+        fingerprint.withCString { taken(pe_pgp_file_name(handle, $0, `private`)) } ?? ""
+    }
+
+    @discardableResult
+    func pgpRemove(_ fingerprint: String) -> Bool {
+        fingerprint.withCString { pe_pgp_remove(handle, $0) }
+    }
+
+    /// every address of the key marked as compared with its owner, or not
+    func pgpSetKeyVerified(_ fingerprint: String, _ verified: Bool) {
+        _ = fingerprint.withCString { pe_pgp_set_key_verified(handle, $0, verified) }
+    }
+
+    /// why a backup's passphrase typed twice is refused, nil when it is good
+    func pgpPassphraseProblem(_ first: String, _ again: String) -> String? {
+        let strings = CStrings()
+        defer { strings.wipe() }
+        return taken(pe_pgp_passphrase_problem(strings.add(first), strings.add(again)))
+    }
+
+    /// the key in use for a correspondent's address, and a newer one waiting for the user's decision
+    func pgpPeer(_ address: String) -> (inUse: String?, pending: String?, pendingText: String) {
+        guard let peer = address.withCString({ pe_pgp_peer(handle, $0) }) else { return (nil, nil, "") }
+        defer { pe_pgp_peer_free(peer) }
+        let some = { (pointer: UnsafeMutablePointer<CChar>?) in pointer.map { String(cString: $0) } }
+        return (some(peer.pointee.in_use), some(peer.pointee.pending), some(peer.pointee.pending_text) ?? "")
+    }
+
+    /// the user's decision about the key waiting for `address`
+    func pgpDecide(_ address: String, useNew: Bool) {
+        _ = address.withCString { pe_pgp_decide(handle, $0, useNew) }
+    }
+
+    /// "Use this key for ...?" when own addresses an own key holds use no key yet, nil when none
+    func pgpUnclaimedQuestion() -> String? {
+        taken(pe_pgp_unclaimed_question(handle))
+    }
+
+    /// the answer Use It: those addresses use their keys
+    func pgpClaimUnclaimed() {
+        _ = pe_pgp_claim_unclaimed(handle)
+    }
+
+    /// the key of each own address that has one
+    func pgpIdentities() -> [(address: String, fingerprint: String, autocrypt: Bool)] {
+        guard let list = pe_pgp_identities(handle) else { return [] }
+        defer { pe_pgp_identity_list_free(list) }
+        return (0..<pe_pgp_identity_list_count(list)).compactMap { index in
+            pe_pgp_identity_list_get(list, index).map { (text($0.pointee.address), text($0.pointee.fingerprint), $0.pointee.autocrypt) }
+        }
+    }
+
+    /// the fingerprint of an account's key (nil for none) and whether its mail carries it
+    func pgpAccountKey(_ account: Int64) -> (fingerprint: String?, autocrypt: Bool) {
+        var autocrypt = true
+        let fingerprint = taken(pe_pgp_account_key(handle, account, &autocrypt))
+        return (fingerprint, autocrypt)
+    }
+
+    /// the key of an account's address and of its other ones without a key of their own; "" takes it away
+    func pgpSetAccountKey(_ account: Int64, fingerprint: String, autocrypt: Bool) {
+        _ = fingerprint.withCString { pe_pgp_set_account_key(handle, account, $0, autocrypt) }
+    }
+}
+
 /// What Next Unread does next, as the core decides: select a message of the list, ask before going on to the folder
 /// with unread mail (a heading, a blank line, the question), or nothing is left
 enum NextUnread {

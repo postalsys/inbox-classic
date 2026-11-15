@@ -571,7 +571,6 @@ pgp-error-no-store = Les clés privées sont protégées par { $store }, qui ne 
 # review: new
 pgp-error-wrong-passphrase = La phrase secrète n'est pas correcte.
 # review: new
-pgp-error-empty-passphrase = Choisissez une phrase secrète pour protéger la sauvegarde.
 # review: new
 pgp-error-not-a-key = Ceci n'est pas une clé OpenPGP.
 # review: new
@@ -594,3 +593,9 @@ pgp-imported-pending = Une autre clé est déjà utilisée pour { $addresses } :
 pgp-error-needs-passphrase = La clé privée est protégée par une phrase secrète. Saisissez-la pour importer la clé.
 # review: new
 pgp-error-mismatch = La clé privée ne correspond pas à sa clé publique. Elle a peut-être été modifiée.
+# review: new
+pgp-file-name-public = Clé publique de { $who }.asc
+# review: new
+pgp-file-name-private = Sauvegarde de la clé privée de { $who }.asc
+# review: new
+pgp-pending = Une autre clé pour { $address } a été trouvée le { $date }.

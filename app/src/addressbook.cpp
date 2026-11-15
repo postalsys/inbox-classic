@@ -437,14 +437,37 @@ struct ContactState {
     std::shared_ptr<struct PictureJobs> jobs;
     // the bold font of the well's initials, made once
     HFONT wellFont = nullptr;
+    // the key in use for each of the card's addresses that has one, three at most (IDC_CONTACT_KEY), and whether a
+    // newer one waits for the user's decision
+    struct Key {
+        std::string address;
+        std::string fingerprint;
+        // what its row says, and the words of a newer key waiting for a decision (empty when none waits)
+        std::wstring line;
+        std::wstring pending;
+    };
+    std::vector<Key> keys;
     int64_t saved = 0;
     bool done = false;
 };
+
+// the most addresses whose keys Contact Properties shows, and the ids of each one's controls
+constexpr size_t kMostKeyRows = 3;
+constexpr int kKeyRowIds = IDC_CONTACT_KEY_KEEP - IDC_CONTACT_KEY + 1;
 
 // the display name made of `first` and `last` (the core's)
 std::wstring DisplayName(const std::wstring& first, const std::wstring& last) {
     core::String name(pe_book_display_name(core::Narrow(first).c_str(), core::Narrow(last).c_str()));
     return name ? Text(name.get()) : L"";
+}
+
+// what a key row says, the address on a line of its own so the fingerprint and its status stay together beside
+// Verify: "bob@example.net:" and "8A3F 21C0 ... (Valid, verified)"
+std::wstring KeyLine(PeCore* core, const ContactState::Key& key) {
+    core::KeyList found(pe_pgp_key(core, key.fingerprint.c_str()));
+    const PeKey* row = pe_pgp_key_list_get(found.get(), 0);
+    std::wstring address = core::Widen(key.address);
+    return row ? address + L":\r\n" + Text(row->grouped) + L" (" + Text(row->status) + L")" : address;
 }
 
 // card `id` into `state`; its id left 0 when there is none
@@ -469,6 +492,24 @@ void LoadContact(PeCore* core, int64_t id, ContactState& state) {
         state.phones.push_back({card->phones[i].kind, Text(card->phones[i].number)});
     }
     state.displayTyped = !state.display.empty() && state.display != DisplayName(state.first, state.last);
+    for (const std::wstring& address : state.addresses) {
+        if (state.keys.size() == kMostKeyRows) {
+            break;
+        }
+        std::string utf8 = core::Narrow(address);
+        core::PeerKeys peer(pe_pgp_peer(core, utf8.c_str()));
+        if (peer && peer->in_use) {
+            ContactState::Key key{utf8, peer->in_use};
+            key.pending = peer->pending_text ? Text(peer->pending_text) : L"";
+            key.line = KeyLine(core, key);
+            state.keys.push_back(std::move(key));
+        }
+    }
+}
+
+// the width of a key row's words: beside its Verify button
+int KeyTextWidth(int dialogWidth) {
+    return dialogWidth - 2 * Scale(10) - ButtonWidth({core::T(PE_TEXT_UI_KEYS_VERIFY)}) - Scale(6);
 }
 
 void ShowAddresses(HWND dialog, const ContactState& state, int select) {
@@ -823,6 +864,9 @@ void OnNameChanged(HWND dialog, ContactState& state, WORD id) {
     }
 }
 
+// a key row's buttons (made with the rows under the notes)
+void OnKeyCommand(HWND dialog, ContactState& state, int id);
+
 void OnContactCommand(HWND dialog, ContactState& state, WORD id, WORD code) {
     if (code == EN_CHANGE) {
         if (id == IDC_CONTACT_FIRST || id == IDC_CONTACT_LAST || id == IDC_CONTACT_DISPLAY) {
@@ -832,6 +876,10 @@ void OnContactCommand(HWND dialog, ContactState& state, WORD id, WORD code) {
                 InvalidateRect(GetDlgItem(dialog, IDC_CONTACT_PICTURE), nullptr, FALSE);
             }
         }
+        return;
+    }
+    if (id >= IDC_CONTACT_KEY && id < IDC_CONTACT_KEY + static_cast<int>(kMostKeyRows) * kKeyRowIds) {
+        OnKeyCommand(dialog, state, id);
         return;
     }
     int address = static_cast<int>(SendDlgItemMessageW(dialog, IDC_CONTACT_ADDRESSES, LB_GETCURSEL, 0, 0));
@@ -941,11 +989,13 @@ struct ContactLayout {
     int phones = Scale(56);
     int notes = Scale(56);
     int buttonWidth = ButtonWidth({core::T(PE_TEXT_UI_CONTACT_ADD), core::T(PE_TEXT_UI_CONTACT_SET_DEFAULT), core::T(PE_TEXT_UI_REMOVE)}, 90);
+    // the keys under the notes, as tall as their rows (KeysHeight)
+    int keys = 0;
     int buttonLeft() const { return width - pad - buttonWidth; }
     int addressesBlock() const { return std::max(addresses, 2 * button + gap); }
     int height() const {
-        return pad + 5 * (row + gap) + label + (row + gap) + addressesBlock() + gap + label + (row + gap) + phones + gap + label + notes + pad +
-               button + pad;
+        return pad + 5 * (row + gap) + label + (row + gap) + addressesBlock() + gap + label + (row + gap) + phones + gap + label + notes + gap +
+               label + keys + pad + button + pad;
     }
 };
 
@@ -1024,11 +1074,106 @@ int BuildPhones(HWND dialog, const ContactLayout& at, int y) {
     return y + at.phones + at.gap;
 }
 
-void BuildNotes(HWND dialog, const ContactState& state, const ContactLayout& at, int y) {
+int BuildNotes(HWND dialog, const ContactState& state, const ContactLayout& at, int y) {
     MakeLabel(dialog, core::T(PE_TEXT_UI_CONTACT_NOTES), {at.pad, y, at.width - at.pad, y + at.label});
     y += at.label;
     MakeEdit(dialog, IDC_CONTACT_NOTES, state.notes, {at.pad, y, at.width - at.pad, y + at.notes},
              ES_MULTILINE | ES_WANTRETURN | ES_AUTOVSCROLL | WS_VSCROLL);
+    return y + at.notes + at.gap;
+}
+
+
+// the height of the words of a key waiting for a decision, and of its two answers' row
+int PendingHeight(const std::wstring& text, const ContactLayout& at) {
+    return static_cast<int>(MeasureText(text, at.width - 2 * at.pad - Scale(16)).cy) + at.gap + at.button + at.gap;
+}
+
+// the height of the keys' rows: each one's words (wrapped) beside Verify, and under one whose newer key waits, its
+// words and answers; one line with no key
+int KeysHeight(const ContactState& state, const ContactLayout& at) {
+    if (state.keys.empty()) {
+        return at.label;
+    }
+    int height = 0;
+    for (const ContactState::Key& key : state.keys) {
+        height += std::max(at.button, static_cast<int>(MeasureText(key.line, KeyTextWidth(at.width)).cy)) + at.gap;
+        if (!key.pending.empty()) {
+            height += PendingHeight(key.pending, at);
+        }
+    }
+    return height - at.gap;
+}
+
+// the key of each address with Verify beside it, a newer key's words and answers under it; "No key" for none
+void BuildKeys(HWND dialog, const ContactState& state, const ContactLayout& at, int y) {
+    MakeLabel(dialog, core::T(PE_TEXT_UI_CONTACT_KEY), {at.pad, y, at.width - at.pad, y + at.label});
+    y += at.label;
+    if (state.keys.empty()) {
+        CreateChild(dialog, L"STATIC", core::T(PE_TEXT_UI_CONTACT_KEY_NONE).c_str(), SS_LEFT | SS_NOPREFIX, IDC_CONTACT_KEY,
+                    {at.pad, y, at.width - at.pad, y + at.label});
+        return;
+    }
+    std::wstring verify = core::T(PE_TEXT_UI_KEYS_VERIFY);
+    int verifyWidth = ButtonWidth({verify});
+    int textWidth = KeyTextWidth(at.width);
+    for (size_t i = 0; i < state.keys.size(); i++) {
+        const ContactState::Key& key = state.keys[i];
+        int base = IDC_CONTACT_KEY + static_cast<int>(i) * kKeyRowIds;
+        const std::wstring& line = key.line;
+        int lineHeight = std::max(at.button, static_cast<int>(MeasureText(line, textWidth).cy));
+        CreateChild(dialog, L"STATIC", line.c_str(), SS_LEFT | SS_NOPREFIX, base, {at.pad, y, at.pad + textWidth, y + lineHeight});
+        // Verify in the middle of the row's height
+        int verifyTop = y + (lineHeight - at.button) / 2;
+        CreateChild(dialog, L"BUTTON", verify.c_str(), WS_TABSTOP, base + 1,
+                    {at.width - at.pad - verifyWidth, verifyTop, at.width - at.pad, verifyTop + at.button});
+        y += lineHeight + at.gap;
+        if (key.pending.empty()) {
+            continue;
+        }
+        // in from the row it is about
+        const std::wstring& pending = key.pending;
+        int left = at.pad + Scale(16);
+        int textHeight = static_cast<int>(MeasureText(pending, at.width - at.pad - left).cy);
+        CreateChild(dialog, L"STATIC", pending.c_str(), SS_LEFT | SS_NOPREFIX, base + 2, {left, y, at.width - at.pad, y + textHeight});
+        y += textHeight + at.gap;
+        std::wstring useNew = core::T(PE_TEXT_UI_CONTACT_KEY_USE_NEW), keep = core::T(PE_TEXT_UI_CONTACT_KEY_KEEP);
+        int useWidth = ButtonWidth({useNew}), keepWidth = ButtonWidth({keep});
+        CreateChild(dialog, L"BUTTON", useNew.c_str(), WS_TABSTOP, base + 3, {left, y, left + useWidth, y + at.button});
+        CreateChild(dialog, L"BUTTON", keep.c_str(), WS_TABSTOP, base + 4,
+                    {left + useWidth + at.gap, y, left + useWidth + at.gap + keepWidth, y + at.button});
+        y += at.button + at.gap;
+    }
+}
+
+// Verify of a key row, or the decision about its newer key: the row says what the key is now; a decided row's
+// question goes away
+void OnKeyCommand(HWND dialog, ContactState& state, int id) {
+    size_t row = static_cast<size_t>((id - IDC_CONTACT_KEY) / kKeyRowIds);
+    int base = IDC_CONTACT_KEY + static_cast<int>(row) * kKeyRowIds;
+    if (row >= state.keys.size()) {
+        return;
+    }
+    ContactState::Key& key = state.keys[row];
+    if (id == base + 1) {
+        if (!VerifyKeyDialog(dialog, state.core, key.fingerprint)) {
+            return;
+        }
+    } else if (id == base + 3 || id == base + 4) {
+        pe_pgp_decide(state.core, key.address.c_str(), id == base + 3);
+        core::PeerKeys peer(pe_pgp_peer(state.core, key.address.c_str()));
+        if (peer && peer->in_use) {
+            key.fingerprint = peer->in_use;
+        }
+        key.pending.clear();
+        for (int part = 2; part <= 4; part++) {
+            ShowWindow(GetDlgItem(dialog, base + part), SW_HIDE);
+        }
+        SetFocus(GetDlgItem(dialog, base + 1));
+    } else {
+        return;
+    }
+    key.line = KeyLine(state.core, key);
+    SetDlgItemTextW(dialog, base, key.line.c_str());
 }
 
 // Contact Properties of card `id`, a new one for 0: the id of the card saved, 0 when cancelled
@@ -1037,6 +1182,7 @@ int64_t ContactProperties(HWND owner, PeCore* core, int64_t id) {
     ContactState state;
     LoadContact(core, id, state);
     ContactLayout at;
+    at.keys = KeysHeight(state, at);
     int height = at.height();
     std::wstring title = state.id ? core::T(PE_TEXT_UI_CONTACT_TITLE, {{"name", state.display}}) : core::Plain(PE_TEXT_UI_NEW_CONTACT_TITLE);
     HWND dialog = CreateModalWindow(owner, kContactClass, title.c_str(), at.width, height);
@@ -1045,7 +1191,8 @@ int64_t ContactProperties(HWND owner, PeCore* core, int64_t id) {
     BuildPicture(dialog, state, at);
     y = BuildAddresses(dialog, at, y);
     y = BuildPhones(dialog, at, y);
-    BuildNotes(dialog, state, at, y);
+    y = BuildNotes(dialog, state, at, y);
+    BuildKeys(dialog, state, at, y);
     OkCancel(dialog, at.width, height - at.pad - at.button);
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     ShowAddresses(dialog, state, 0);

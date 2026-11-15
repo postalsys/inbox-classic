@@ -54,6 +54,11 @@ using Positions = std::unique_ptr<PePositions, Deleter<pe_positions_free>>;
 using ListView = std::unique_ptr<PeListView, Deleter<pe_list_view_free>>;
 using TextList = std::unique_ptr<PeTextList, Deleter<pe_text_list_free>>;
 using Export = std::unique_ptr<PeExport, Deleter<pe_export_free>>;
+// OpenPGP keys: the key book's rows, the addresses of a key, a correspondent's keys, the keys of own addresses
+using KeyList = std::unique_ptr<PeKeyList, Deleter<pe_pgp_key_list_free>>;
+using PeerKeys = std::unique_ptr<PePeerKeys, Deleter<pe_pgp_peer_free>>;
+using IdentityList = std::unique_ptr<PeIdentityList, Deleter<pe_pgp_identity_list_free>>;
+using FromChoices = std::unique_ptr<PeFromChoices, Deleter<pe_from_choices_free>>;
 
 std::wstring Widen(std::string_view utf8);
 std::string Narrow(std::wstring_view utf16);

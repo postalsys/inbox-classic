@@ -83,6 +83,14 @@ extension UITest {
         } else {
             check(false, "File > New Account opens the form")
         }
+        command(.encryptionKeys)
+        if let keys = await waitWindow("keys", 10) {
+            checkCatalogWords(in: keys, "the Encryption Keys window")
+            press(find("keys.close", in: keys))
+            _ = await waitUntil { !keys.isVisible }
+        } else {
+            check(false, "Tools > Encryption Keys opens")
+        }
 
         step("back in English")
         await startIn("en")

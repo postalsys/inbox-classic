@@ -1744,6 +1744,310 @@ public static class Dragger {
         CloseRules $rules
     }
 
+    Step 'encryption keys'
+    # Tools > Encryption Keys and its windows (keys.cpp, KeysControlId in app.h); the key files of scripts/ui-e2e/keys
+    $IDM_ENCRYPTION_KEYS = 172
+    $IDC_KEYS_LIST = 870; $IDC_KEYS_NEW = 871; $IDC_KEYS_IMPORT = 872; $IDC_KEYS_EXPORT = 873; $IDC_KEYS_BACKUP = 874
+    $IDC_KEYS_VERIFY = 875; $IDC_KEYS_PROPERTIES = 876; $IDC_KEYS_REMOVE = 877; $IDC_KEYS_CLOSE = 878
+    $IDC_KEY_ACCOUNT = 880; $IDC_KEY_NOTE = 881; $IDC_KEY_PASSPHRASE = 882; $IDC_KEY_PASSPHRASE_AGAIN = 883; $IDC_KEY_PROBLEM = 884
+    $IDC_KEY_NAMES = 885; $IDC_KEY_FINGERPRINT = 886; $IDC_KEY_STATUS = 887; $IDC_KEY_CREATED = 888; $IDC_KEY_EXPIRES = 889
+    $IDC_KEY_ALGORITHM = 890; $IDC_KEY_SOURCE = 891; $IDC_KEY_ADDRESSES = 892; $IDC_VERIFY_MATCH = 894; $IDC_VERIFY_DIFFER = 895
+    $IDC_ACCOUNT_KEY = 897; $IDC_ACCOUNT_KEY_NEW = 898; $IDC_ACCOUNT_AUTOCRYPT = 899; $IDC_CONTACT_KEY = 785
+    $keyFiles = Resolve-Path (Join-Path $PSScriptRoot 'ui-e2e\keys')
+    $keysOut = Resolve-Path $Out
+    function OpenKeys {
+        Command $main $IDM_ENCRYPTION_KEYS
+        WaitShown 'InboxClassicKeys'
+    }
+    function CloseKeys([IntPtr]$keys) {
+        Click $keys $IDC_KEYS_CLOSE
+        [void](WaitFor { -not [Native.Win]::IsWindow($keys) } 10)
+    }
+    function Enabled([IntPtr]$window, [int]$id) { [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($window, $id)) }
+    # the row of the key list whose Name is $name selected as the arrow keys do, its index (-1 when it is not there)
+    function SelectKey([IntPtr]$keys, [string]$name) {
+        $l = [Native.Win]::GetDlgItem($keys, $IDC_KEYS_LIST)
+        $at = -1
+        for ($i = 0; $i -lt (ListCount $l); $i++) { if ([Native.Win]::RemoteListText($l, $i, 0) -eq $name) { $at = $i } }
+        if ($at -lt 0) { return -1 }
+        Key $l $VK_HOME
+        for ($i = 0; $i -lt $at; $i++) { Key $l $VK_DOWN }
+        Start-Sleep -Milliseconds 300
+        $at
+    }
+    function KeyRow([IntPtr]$keys, [int]$row) {
+        $l = [Native.Win]::GetDlgItem($keys, $IDC_KEYS_LIST)
+        @(0..3 | ForEach-Object { [Native.Win]::RemoteListText($l, $row, $_) }) -join ' | '
+    }
+    # a message box of the key windows once its words are there: its words, after which OK closes it
+    function Told([string]$title, [string]$pattern) {
+        $box = WaitWindow '#32770' $title 10
+        $said = if ($box) { WaitFor { $t = Statics $box; if ($t -match $pattern) { $t } } 5 }
+        $all = if ($box) { Statics $box } else { '' }
+        if ($box) {
+            Click $box 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($box) } 5)
+        }
+        if ($said) { $said } else { "(not said: $all)" }
+    }
+    # the question of the key windows with answers of their own
+    function Asked([string]$pattern) {
+        WaitFor { $w = [Native.Win]::FindWindow('InboxClassicAsk', [NullString]::Value); if ($w -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($w) -and (Statics $w) -match $pattern) { $w } } 10
+    }
+    # the passphrase window, the one that says why when $problem
+    function PassphraseWindow([bool]$problem = $false) {
+        WaitFor {
+            $w = [Native.Win]::FindWindow('InboxClassicPassphrase', [NullString]::Value)
+            if ($w -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($w) -and (-not $problem -or [Native.Win]::GetDlgItem($w, $IDC_KEY_PROBLEM) -ne [IntPtr]::Zero)) { $w }
+        } 15
+    }
+
+    $keys = OpenKeys
+    Check ($null -ne $keys) 'Tools > Encryption Keys opens the keys'
+    if ($keys) {
+        $keyList = [Native.Win]::GetDlgItem($keys, $IDC_KEYS_LIST)
+        Check ((ListCount $keyList) -eq 0) 'there are none at first'
+        Check ((Enabled $keys $IDC_KEYS_NEW) -and (Enabled $keys $IDC_KEYS_IMPORT)) 'New Key and Import can be used'
+        $greyed = @($IDC_KEYS_EXPORT, $IDC_KEYS_BACKUP, $IDC_KEYS_VERIFY, $IDC_KEYS_PROPERTIES, $IDC_KEYS_REMOVE | Where-Object { Enabled $keys $_ })
+        Check ($greyed.Count -eq 0) "Export, Back Up, Verify, Properties and Remove are greyed without a key ($($greyed -join ', '))"
+        Shot $keys 'keys-1-empty'
+
+        # New Key: for the only account, which is chosen; passwords in memory only, so the key will not outlive the run
+        Click $keys $IDC_KEYS_NEW
+        $newKey = WaitShown 'InboxClassicNewKey'
+        Check ($null -ne $newKey) 'New Key opens'
+        if ($newKey) {
+            $choice = [Native.Win]::GetDlgItem($newKey, $IDC_KEY_ACCOUNT)
+            $accountText = WindowText $choice
+            Check ([int][Native.Win]::SendMessage($choice, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 -and $accountText -match 'testuser@inboxclassic\.test') "it names the account, chosen ($accountText)"
+            Check ((GetText $newKey $IDC_KEY_NOTE) -match 'memory only') "it says passwords are kept in memory only ($(GetText $newKey $IDC_KEY_NOTE))"
+            Shot $newKey 'keys-2-new-key'
+            Click $newKey 1
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($newKey) } 30)) 'Make Key makes it'
+        }
+        $offer = Asked 'backup'
+        Check ($null -ne $offer) 'a backup is offered at once'
+        if ($offer) {
+            Shot $offer 'keys-3-backup-offer'
+            Click $offer 1
+        }
+
+        # Back Up: the passphrase twice, two different ones and a short one refused
+        $backup = PassphraseWindow
+        Check ($null -ne $backup -and (WindowText $backup) -eq 'Back Up Key') "Save a Backup asks for a passphrase ($(if ($backup) { WindowText $backup }))"
+        if ($backup) {
+            SetText $backup $IDC_KEY_PASSPHRASE 'correct horse battery staple'
+            SetText $backup $IDC_KEY_PASSPHRASE_AGAIN 'correct horse battery stable'
+            Shot $backup 'keys-4-backup'
+            Click $backup 1
+            $said = Told 'Back Up Key' 'not the same'
+            Check ($said -match 'not the same') "two different passphrases are refused ($said)"
+            SetText $backup $IDC_KEY_PASSPHRASE 'short'
+            SetText $backup $IDC_KEY_PASSPHRASE_AGAIN 'short'
+            Click $backup 1
+            $said = Told 'Back Up Key' 'at least 8'
+            Check ($said -match 'at least 8') "a short one is refused ($said)"
+            Check ([Native.Win]::IsWindow($backup)) 'the window stays open for another'
+            SetText $backup $IDC_KEY_PASSPHRASE 'correct horse battery staple'
+            SetText $backup $IDC_KEY_PASSPHRASE_AGAIN 'correct horse battery staple'
+            Click $backup 1
+            $backupFile = Join-Path $keysOut 'own-key-backup.asc'
+            Remove-Item -Force -ErrorAction SilentlyContinue $backupFile
+            Check (AnswerFileDialog 'Save a Backup' $backupFile $null '*private key*') 'a good one asks where to save the backup, under the name the core gave'
+            $said = Told 'Back Up Key' 'saved'
+            Check ($said -match 'saved') "it says the backup was saved ($said)"
+            $armored = if (Test-Path $backupFile) { Get-Content -Raw $backupFile } else { '' }
+            Check ($armored -match '^-----BEGIN PGP PRIVATE KEY BLOCK-----') 'the file is an armored private key'
+        }
+        Check ([bool](WaitFor { (ListCount $keyList) -eq 1 } 5)) 'the new key is listed'
+        $own = KeyRow $keys 0
+        Check ($own -eq 'Alex Morgan | testuser@inboxclassic.test | Your key | Valid') "with the account's name and address, Your key, Valid ($own)"
+        Shot $keys 'keys-5-list'
+
+        # the backup asks for its passphrase when it is imported (and is not imported here)
+        if ($armored) {
+            Click $keys $IDC_KEYS_IMPORT
+            Check (AnswerFileDialog 'Import' $backupFile $null) 'Import asks for a key file'
+            $asks = PassphraseWindow
+            Check ($null -ne $asks) 'the backup asks for its passphrase'
+            if ($asks) {
+                Click $asks 2
+                [void](WaitFor { -not [Native.Win]::IsWindow($asks) } 5)
+            }
+        }
+
+        # Bob's public key: a contact's, Valid, and the core's summary said
+        Click $keys $IDC_KEYS_IMPORT
+        Check (AnswerFileDialog 'Import' (Join-Path $keyFiles 'bob.pub.asc') $null) 'Import of a public key'
+        $said = Told 'Import Key' '.'
+        Check ($said -notmatch '^\(not said') "the core's summary is shown ($said)"
+        Check ([bool](WaitFor { (ListCount $keyList) -eq 2 } 5)) 'it is listed'
+        $bob = -1
+        for ($i = 0; $i -lt (ListCount $keyList); $i++) { if ([Native.Win]::RemoteListText($keyList, $i, 0) -eq 'Bob Example') { $bob = $i } }
+        Check ($bob -ge 0 -and (KeyRow $keys $bob) -eq 'Bob Example | bob@example.net | Contact | Valid') "as Bob's, a contact's, Valid ($(if ($bob -ge 0) { KeyRow $keys $bob }))"
+        CloseKeys $keys
+    }
+
+    # Carol's private key holds an address of the account: the window asks whether to use it for that address
+    SetOtherAddresses 'carol@example.org'
+    $keys = OpenKeys
+    if ($keys) {
+        $keyList = [Native.Win]::GetDlgItem($keys, $IDC_KEYS_LIST)
+        Click $keys $IDC_KEYS_IMPORT
+        Check (AnswerFileDialog 'Import' (Join-Path $keyFiles 'carol.sec.asc') $null) 'Import of a protected private key'
+        $asks = PassphraseWindow
+        Check ($null -ne $asks -and (WindowText $asks) -eq 'Import Key') 'it asks for the passphrase'
+        if ($asks) {
+            Shot $asks 'keys-6-import-passphrase'
+            SetText $asks $IDC_KEY_PASSPHRASE 'wrong horse'
+            Click $asks 1
+            $again = PassphraseWindow $true
+            Check ($null -ne $again) "a wrong one says so and asks again ($(if ($again) { GetText $again $IDC_KEY_PROBLEM }))"
+            if ($again) {
+                Shot $again 'keys-6b-wrong-passphrase'
+                SetText $again $IDC_KEY_PASSPHRASE 'correct horse battery'
+                Click $again 1
+                $said = Told 'Import Key' '.'
+                Check ($said -notmatch '^\(not said') "the right one imports it ($said)"
+                $useFor = Asked 'carol@example\.org'
+                Check ($null -ne $useFor) 'the window asks "Use this key for carol@example.org?"'
+                if ($useFor) {
+                    Shot $useFor 'keys-7-use-for'
+                    Click $useFor 1
+                    Check ([bool](WaitFor { -not [Native.Win]::IsWindow($useFor) } 5)) 'Use It makes it that address''s key'
+                }
+            }
+        }
+        Check ([bool](WaitFor { (ListCount $keyList) -eq 3 } 5)) "Carol's key is listed ($(ListCount $keyList))"
+        Check ((KeyRow $keys 1) -eq 'Carol Example | carol@example.org | Your key | Valid') "as the user's own, after the account's ($(KeyRow $keys 1))"
+
+        # Bob's Properties: every line filled in
+        Check ((SelectKey $keys 'Bob Example') -ge 0) "Bob's key can be selected"
+        Check (-not (Enabled $keys $IDC_KEYS_BACKUP) -and (Enabled $keys $IDC_KEYS_VERIFY)) 'a contact''s key can be verified, not backed up'
+        Click $keys $IDC_KEYS_PROPERTIES
+        $properties = WaitShown 'InboxClassicKeyProperties'
+        Check ($null -ne $properties) 'Properties opens'
+        if ($properties) {
+            $values = @{}
+            foreach ($id in $IDC_KEY_NAMES, $IDC_KEY_FINGERPRINT, $IDC_KEY_STATUS, $IDC_KEY_CREATED, $IDC_KEY_EXPIRES, $IDC_KEY_ALGORITHM, $IDC_KEY_SOURCE, $IDC_KEY_ADDRESSES) {
+                $values[$id] = GetText $properties $id
+            }
+            Write-Host "   properties: $(($values.Values | ForEach-Object { $_ -replace "`r`n", ' / ' }) -join ' | ')"
+            Check ($values[$IDC_KEY_NAMES] -eq 'Bob Example <bob@example.net>') "the names ($($values[$IDC_KEY_NAMES]))"
+            Check ($values[$IDC_KEY_FINGERPRINT] -match '^([0-9A-F]{4} ){9}[0-9A-F]{4}$') "the fingerprint in groups of four ($($values[$IDC_KEY_FINGERPRINT]))"
+            Check ($values[$IDC_KEY_STATUS] -eq 'Valid' -and $values[$IDC_KEY_CREATED] -match '\d' -and $values[$IDC_KEY_EXPIRES] -eq 'Never') 'Valid, created, expires Never'
+            Check ($values[$IDC_KEY_ALGORITHM] -eq 'Ed25519' -and $values[$IDC_KEY_SOURCE] -match 'file') "Ed25519, imported from a file ($($values[$IDC_KEY_SOURCE]))"
+            Check ($values[$IDC_KEY_ADDRESSES] -eq 'bob@example.net (not verified)') "bob@example.net, not verified ($($values[$IDC_KEY_ADDRESSES]))"
+            Shot $properties 'keys-8-properties'
+            Click $properties 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($properties) } 5)
+        }
+
+        # Verify: the fingerprint large, They Match marks it
+        Click $keys $IDC_KEYS_VERIFY
+        $verify = WaitShown 'InboxClassicVerify'
+        Check ($null -ne $verify) 'Verify opens'
+        if ($verify) {
+            Check ((Statics $verify) -match 'Ask Bob Example') "the intro names Bob ($(Statics $verify))"
+            Check ((Statics $verify) -match 'marked as theirs for bob@example\.net') "and the addresses They Match marks ($(Statics $verify))"
+            $large = GetText $verify $IDC_KEY_FINGERPRINT
+            Check ($large -match '^([0-9A-F]{4} ){4}[0-9A-F]{4}\r\n([0-9A-F]{4} ){4}[0-9A-F]{4}$') "the fingerprint in two lines of five groups ($($large -replace "`r`n", ' / '))"
+            Check ((GetText $verify $IDC_VERIFY_MATCH) -match 'Match' -and (GetText $verify $IDC_VERIFY_DIFFER) -match 'Differ') 'They Match and They Differ'
+            Shot $verify 'keys-9-verify'
+            Click $verify $IDC_VERIFY_MATCH
+            [void](WaitFor { -not [Native.Win]::IsWindow($verify) } 5)
+        }
+        $bob = SelectKey $keys 'Bob Example'
+        Check ($bob -ge 0 -and [Native.Win]::RemoteListText($keyList, $bob, 3) -eq 'Valid, verified') "They Match marks it: Valid, verified ($(if ($bob -ge 0) { [Native.Win]::RemoteListText($keyList, $bob, 3) }))"
+
+        # Export: an armored public key, named after Bob
+        $exported = Join-Path $keysOut 'bob-exported.asc'
+        Remove-Item -Force -ErrorAction SilentlyContinue $exported
+        Click $keys $IDC_KEYS_EXPORT
+        Check (AnswerFileDialog 'Export' $exported $null 'Bob Example public key*') 'Export offers "Bob Example public key.asc"'
+        Check ([bool](WaitFor { (Test-Path $exported) -and (Get-Content -Raw $exported) -match '^-----BEGIN PGP PUBLIC KEY BLOCK-----' } 5)) 'and saves an armored public key'
+        CloseKeys $keys
+    }
+
+    # Account Properties > Security: the account's key chosen, None and Carol's offered, New Key, Autocrypt on
+    Command $main $IDM_ACCOUNTS
+    $accountsList = WaitWindow 'InboxClassicAccounts' 'Accounts'
+    if ($accountsList) {
+        Click $accountsList 402
+        $form = WaitFor { $f = PropertiesForm; if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, $IDC_ACCOUNT_KEY) -ne [IntPtr]::Zero) { $f } }
+        Check ($null -ne $form) 'Account Properties has Security'
+        if ($form) {
+            $keyChoice = [Native.Win]::GetDlgItem($form, $IDC_ACCOUNT_KEY)
+            $offered = @()
+            for ($i = 0; $i -lt [int][Native.Win]::SendMessage($keyChoice, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); $i++) {
+                $label = New-Object System.Text.StringBuilder 256
+                [void][Native.Win]::SendMessage($keyChoice, $CB_GETLBTEXT, [IntPtr]$i, $label)
+                $offered += $label.ToString()
+            }
+            Check ((WindowText $keyChoice) -match '^Alex Morgan \(([0-9A-F]{4} ){3}[0-9A-F]{4}\)$') "the account's key is chosen ($(WindowText $keyChoice))"
+            Check ($offered.Count -eq 3 -and $offered[0] -eq 'None' -and ($offered -match '^Carol Example \(').Count -eq 1) "None and the other own keys are offered ($($offered -join ', '))"
+            Check ((Visible $form $IDC_ACCOUNT_KEY_NEW) -and [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($form, $IDC_ACCOUNT_AUTOCRYPT), 0x00F0, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1) 'New Key, and Send my public key with my messages, on'
+            Shot $form 'keys-10-account-security'
+            Click $form 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($form) } 10)
+        }
+        [void][Native.Win]::PostMessage($accountsList, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($accountsList) } 10)
+    }
+
+    # Bob in the Address Book: his Properties show his key, verified; the card goes again for the Address Book's steps
+    $IDM_ADDRESS_BOOK = 147; $IDC_BOOK_LIST = 701; $IDC_BOOK_NEW_CONTACT = 710; $IDC_BOOK_PROPERTIES = 712; $IDC_BOOK_DELETE = 713
+    $IDC_CONTACT_FIRST = 720; $IDC_CONTACT_LAST = 721; $IDC_CONTACT_ADDRESS = 725; $IDC_CONTACT_ADD = 726; $IDC_CONTACT_ADDRESSES = 727
+    Command $main $IDM_ADDRESS_BOOK
+    $book = WaitShown 'InboxClassicAddressBook' 10
+    if ($book) {
+        $bookList = [Native.Win]::GetDlgItem($book, $IDC_BOOK_LIST)
+        Click $book $IDC_BOOK_NEW_CONTACT
+        $contact = WaitShown 'InboxClassicContact' 10
+        if ($contact) {
+            SetText $contact $IDC_CONTACT_FIRST 'Bob'
+            SetText $contact $IDC_CONTACT_LAST 'Example'
+            SetText $contact $IDC_CONTACT_ADDRESS 'bob@example.net'
+            Click $contact $IDC_CONTACT_ADD
+            [void](WaitFor { (ListBoxCount ([Native.Win]::GetDlgItem($contact, $IDC_CONTACT_ADDRESSES))) -eq 1 } 5)
+            Click $contact 1
+            [void](WaitFor { -not [Native.Win]::IsWindow($contact) } 10)
+        }
+        Check ([bool](WaitFor { (ListCount $bookList) -eq 1 } 10)) 'a card for Bob is added'
+        Key $bookList $VK_HOME
+        Start-Sleep -Milliseconds 300
+        Click $book $IDC_BOOK_PROPERTIES
+        $contact = WaitShown 'InboxClassicContact' 10
+        if ($contact) {
+            $line = GetText $contact $IDC_CONTACT_KEY
+            Check ($line -match '^bob@example\.net:\s+([0-9A-F]{4} ){9}[0-9A-F]{4} \(Valid, verified\)$') "his Properties show his key's fingerprint and Valid, verified ($line)"
+            Shot $contact 'keys-11-contact'
+            Click $contact 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($contact) } 5)
+        }
+        Click $book $IDC_BOOK_DELETE
+        $ask = WaitWindow '#32770' 'Inbox Classic' 10
+        if ($ask) { Click $ask 6 }
+        Check ([bool](WaitFor { (ListCount $bookList) -eq 0 } 5)) 'and the card goes again'
+        [void][Native.Win]::PostMessage($book, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($book) } 10)
+    }
+
+    # Remove of Bob's key asks first; Carol's key and the account's stay
+    $keys = OpenKeys
+    if ($keys) {
+        $keyList = [Native.Win]::GetDlgItem($keys, $IDC_KEYS_LIST)
+        [void](SelectKey $keys 'Bob Example')
+        Click $keys $IDC_KEYS_REMOVE
+        $ask = WaitWindow '#32770' 'Encryption Keys' 10
+        $question = if ($ask) { WaitFor { $t = Statics $ask; if ($t -match 'Bob Example') { $t } } 5 }
+        Check ($null -ne $question) "Remove asks first, naming Bob ($(if ($ask) { Statics $ask }))"
+        if ($ask) { Click $ask 6 }
+        Check ([bool](WaitFor { (ListCount $keyList) -eq 2 } 5)) 'and removes it, the two own keys staying'
+        CloseKeys $keys
+    }
+    SetOtherAddresses ''
+
     # ---- getting new mail ----
 
     Step 'Send/Recv'
@@ -5051,6 +5355,24 @@ public static bool HasIcon(IntPtr window) {
             CheckPseudo $options 'Options'
             Shot $options 'lang-4-pseudo-options'
             Click $options 2
+        }
+
+        # the key windows' longer words: Encryption Keys (with the two own keys of its step) and New Key
+        Command $main 172
+        $keys = WaitShown 'InboxClassicKeys'
+        if ($keys) {
+            CheckPseudo $keys 'Encryption Keys'
+            Shot $keys 'lang-5-pseudo-keys'
+            Click $keys 871
+            $newKey = WaitShown 'InboxClassicNewKey'
+            if ($newKey) {
+                CheckPseudo $newKey 'New Key'
+                Shot $newKey 'lang-6-pseudo-new-key'
+                Click $newKey 2
+                [void](WaitFor { -not [Native.Win]::IsWindow($newKey) } 5)
+            }
+            Click $keys 878
+            [void](WaitFor { -not [Native.Win]::IsWindow($keys) } 5)
         }
 
         Command $main $IDM_NEW_ACCOUNT

@@ -635,13 +635,12 @@ pub async fn contact(parent: &impl IsA<gtk::Widget>, id: CardId) -> Option<CardI
     let addresses = addresses_section(&card, &dialog_ref);
     let phones = phones_section(&card);
     let (notes_group, notes) = notes_section(&card);
-    let content = page(&[
-        &picture.group,
-        &names.group,
-        &addresses.group,
-        &phones.group,
-        &notes_group,
-    ]);
+    // the keys of the addresses saved, after them
+    let keys = crate::keys::contact_keys(&card.addresses);
+    let mut groups = vec![&picture.group, &names.group, &addresses.group];
+    groups.extend(keys.as_ref());
+    groups.extend([&phones.group, &notes_group]);
+    let content = page(&groups);
     let (dialog, clicks) = present(parent, &title, &content, "contact-dialog", 680);
     dialog_ref.set(Some(&dialog));
     names.first.grab_focus();

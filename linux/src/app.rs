@@ -755,6 +755,7 @@ pub fn run_command(command: Command) {
         Command::AddSenderToBook => spawn(async move { main.add_sender_to_book().await }),
         Command::MessageRules => spawn(async move { crate::rules::rules_dialog(main.window()).await }),
         Command::CreateRuleFromMessage => spawn(crate::rules::from_message()),
+        Command::EncryptionKeys => spawn(async move { crate::keys::keys_dialog(main.window()).await }),
         Command::ImportAddressBook => {
             spawn(async move { crate::address_book::import(main.window().upcast_ref()).await })
         }

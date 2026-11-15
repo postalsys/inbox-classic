@@ -83,6 +83,8 @@ cmd-view-source = &Formato original del mensaje
 cmd-ai-agents = Agentes de &IA...
 cmd-options = &Opciones...
 cmd-message-rules = &Reglas de mensajes...
+# review: new
+cmd-encryption-keys = Claves de &cifrado...
 cmd-create-rule-from-message = Crear regla a partir del mensa&je...
 cmd-select-all = Seleccionar &todo
 cmd-undo = &Deshacer
@@ -580,3 +582,144 @@ ui-card-picture = Imagen:
 ui-card-picture-choose = &Elegir...
 ui-picture-not-picture = Este archivo no es una imagen PNG ni JPEG.
 ui-picture-too-large = Esta imagen es demasiado grande. Elija una de un máximo de 10 MB, con un ancho y un alto de hasta 8000 píxeles.
+
+## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
+# review: new
+ui-keys-title = Claves de cifrado
+# review: new
+ui-keys-intro = Sus claves firman sus mensajes y abren el correo cifrado para usted. Las claves de sus contactos comprueban sus firmas y cifran el correo para ellos.
+# review: new
+ui-keys-empty = Aún no hay claves. Haga clic en Nueva clave para crear la suya, o en Importar para añadir una que ya tenga.
+# review: new
+ui-keys-col-name = Nombre
+# review: new
+ui-keys-col-address = Dirección
+# review: new
+ui-keys-col-kind = Tipo
+# review: new
+ui-keys-col-status = Estado
+# review: new
+ui-keys-kind-own = Su clave
+# review: new
+ui-keys-kind-contact = Contacto
+# review: new
+ui-keys-status-verified = { $status }, verificada
+# review: new
+ui-keys-new = &Nueva clave...
+# review: new
+ui-keys-import = &Importar...
+# review: new
+ui-keys-export = &Exportar...
+# review: new
+ui-keys-backup = Copia de &seguridad...
+# review: new
+ui-keys-verify = &Verificar...
+# review: new
+ui-keys-new-title = Nueva clave
+# review: new
+ui-keys-new-for = Crear una clave para:
+# review: new
+ui-keys-new-make = &Crear clave
+# review: new
+ui-keys-no-account = Añada primero una cuenta de correo: la clave se crea para las direcciones de una cuenta.
+# review: new
+ui-keys-memory-only = Las contraseñas se guardan solo en memoria, así que una clave privada creada o importada ahora no se podrá usar después de cerrar Inbox Classic.
+# review: new
+ui-keys-backup-offer = Su nueva clave está lista. ¿Guardar ahora una copia de seguridad? Si este equipo se pierde o se restablece, la clave solo se puede recuperar de una copia.
+# review: new
+ui-keys-backup-now = &Guardar una copia...
+# review: new
+ui-keys-later = &Más tarde
+# review: new
+ui-keys-backup-title = Copia de seguridad de la clave
+# review: new
+ui-keys-backup-intro = La copia está protegida por una frase de contraseña. Guarde el archivo y la frase en lugares seguros distintos: necesita ambos para recuperar la clave.
+# review: new
+ui-keys-passphrase = &Frase de contraseña:
+# review: new
+ui-keys-passphrase-again = &Repítala:
+# review: new
+ui-keys-passphrase-differ = Las frases de contraseña no coinciden.
+# review: new
+ui-keys-passphrase-short = Use una frase de contraseña de al menos 8 caracteres.
+# review: new
+ui-keys-backup-saved = Se guardó la copia de seguridad.
+# review: new
+ui-keys-import-title = Importar clave
+# review: new
+ui-keys-import-passphrase = Esta clave privada está protegida por una frase de contraseña. Escríbala para importar la clave:
+# review: new
+ui-keys-file-filter = Claves OpenPGP
+# review: new
+ui-keys-use-for = ¿Usar esta clave para { $addresses }? Sus mensajes desde allí se firmarán con ella, y el correo cifrado para ella se podrá leer aquí.
+# review: new
+ui-keys-use = &Usarla
+# review: new
+ui-keys-not-now = &Ahora no
+# review: new
+ui-keys-remove-own = ¿Quitar su clave { $fingerprint }? El correo cifrado para ella ya no se podrá leer aquí, salvo que vuelva a importar su copia de seguridad.
+# review: new
+ui-keys-remove-contact = ¿Quitar la clave de { $name }? No se podrán comprobar sus firmas ni cifrar correo para esa persona hasta que vuelva a añadir su clave.
+# review: new
+ui-key-properties-title = Propiedades de la clave
+# review: new
+ui-key-names = Nombres:
+# review: new
+ui-key-fingerprint = Huella:
+# review: new
+ui-key-status = Estado:
+# review: new
+ui-key-created = Creada:
+# review: new
+ui-key-expires = Caduca:
+# review: new
+ui-key-never = Nunca
+# review: new
+ui-key-algorithm = Algoritmo:
+# review: new
+ui-key-source = Origen:
+# review: new
+ui-key-addresses = Direcciones:
+# review: new
+ui-key-address-verified = { $address } (verificada)
+# review: new
+ui-key-address-not-verified = { $address } (sin verificar)
+# review: new
+ui-verify-title = Verificar clave
+# review: new
+ui-verify-intro = Pida a { $name } que le lea la huella de su clave desde su propia aplicación, en persona o por teléfono. No la compare con una enviada por correo: quien pudiera cambiar la clave también podría cambiar eso.
+# review: new
+ui-verify-fingerprint = La huella de la clave que tiene:
+# review: new
+ui-verify-marks = { $count ->
+    [one] Si coinciden, la clave se marca como suya para { $addresses }. Si esa dirección no es suya, haga clic en «No coinciden».
+   *[other] Si coinciden, la clave se marca como suya para { $addresses }. Si alguna de estas direcciones no es suya, haga clic en «No coinciden».
+}
+# review: new
+ui-verify-match = &Coinciden
+# review: new
+ui-verify-differ = &No coinciden
+# review: new
+ui-verify-differs = La clave que tiene no es la de { $name }. Quítela y pídale su clave de nuevo.
+# review: new
+ui-verify-unmark = Marcar como &no verificada
+# review: new
+ui-account-security = Seguridad
+# review: new
+ui-account-security-intro = Con una clave, sus mensajes se pueden firmar y otras personas le pueden enviar correo cifrado.
+# review: new
+ui-account-key = &Clave de esta cuenta:
+# review: new
+ui-account-key-none = Ninguna
+# review: new
+ui-account-key-new = &Nueva clave...
+# review: new
+ui-account-autocrypt = &Enviar mi clave pública con mis mensajes (Autocrypt)
+# review: new
+ui-contact-key = Clave de cifrado:
+# review: new
+ui-contact-key-none = Sin clave
+# review: new
+ui-contact-key-use-new = &Usar la nueva clave
+# review: new
+ui-contact-key-keep = &Mantener la actual

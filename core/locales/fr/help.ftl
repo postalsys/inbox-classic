@@ -8,6 +8,8 @@ help-section-get-started = Prise en main
 help-section-everyday = Tâches courantes
 help-section-accounts = Plusieurs comptes
 help-section-message-features = Fonctions des messages
+# review: new
+help-section-encrypted-mail = Courrier chiffré et signé
 help-section-settings = Paramètres
 help-section-agents = Agents d'IA
 help-section-reference = Référence

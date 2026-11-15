@@ -107,6 +107,58 @@ pub struct KeyInfo {
     pub algorithm: String,
     /// Where it came from, in words
     pub source: String,
+    /// What it is called: the name of its first user id, else its first address, else its fingerprint
+    pub name: String,
+    /// What the Status column says: the state, ", verified" after it for a contact's key the user compared
+    pub status: String,
+    /// The name and the last four groups of the fingerprint, as a choice of keys shows it
+    pub choice: String,
+    /// The grouped fingerprint on two lines, half its groups on each: what Verify shows to read out
+    pub fingerprint_lines: String,
+    /// Back Up applies: an own key whose private part opens
+    pub can_back_up: bool,
+    /// Verify applies: a contact's key
+    pub can_verify: bool,
+    /// Each address it holds, for a contact's key with whether it is verified, one a line
+    pub address_lines: Vec<String>,
+    /// What Remove asks first
+    pub remove_question: String,
+    /// What Verify Key says They Match marks: every address it holds, so one that is not the person's is seen
+    pub verify_marks: String,
+    /// When it was made, and until when it is valid ("Never"), as the user's locale writes a day
+    pub created_text: String,
+    pub expires_text: String,
+}
+
+/// The shortest passphrase a backup takes
+pub const SHORTEST_PASSPHRASE: usize = 8;
+
+/// Why a backup's passphrase, typed twice, is refused; None when it is good
+pub fn passphrase_problem(first: &str, again: &str) -> Option<String> {
+    if first != again {
+        Some(tr(Text::UiKeysPassphraseDiffer))
+    } else if first.chars().count() < SHORTEST_PASSPHRASE {
+        Some(tr(Text::UiKeysPassphraseShort))
+    } else {
+        None
+    }
+}
+
+/// The name part of a user id ("Alice Example" of `"Alice Example" <alice@example.org>`), empty for an address alone
+fn user_name(user_id: &str) -> &str {
+    let (name, bracketed) = match user_id.split_once('<') {
+        Some((name, _)) => (name, true),
+        None => (user_id, false),
+    };
+    let name = name.trim_matches(|c: char| c.is_whitespace() || c == '"');
+    if !bracketed && name.contains('@') { "" } else { name }
+}
+
+/// The grouped fingerprint on two lines, half its groups on each
+fn two_lines(grouped: &str) -> String {
+    let groups: Vec<&str> = grouped.split_whitespace().collect();
+    let half = groups.len().div_ceil(2);
+    format!("{}\n{}", groups[..half].join(" "), groups[half..].join(" "))
 }
 
 /// A correspondent's keys: the fingerprints of the one in use and of a newer one waiting for the user's decision
@@ -116,6 +168,8 @@ pub struct PeerKeys {
     pub in_use: Option<String>,
     pub pending: Option<String>,
     pub pending_since: Option<i64>,
+    /// "A different key for bob@example.net was found on 3 May 2027.", when one waits
+    pub pending_text: Option<String>,
 }
 
 /// What became of an address when a key was imported or found
@@ -358,7 +412,12 @@ impl<'a> Book<'a> {
 
     pub fn get(&self, fingerprint: &str) -> Result<KeyInfo> {
         let key = self.store.pgp_key(fingerprint)?.ok_or(Error::NotFound)?;
-        let master = master(self.secrets, false)?;
+        // a contact's key has no private part to open: the system's store is not asked
+        let master = if key.secret.is_some() {
+            master(self.secrets, false)?
+        } else {
+            None
+        };
         let held = self.store.pgp_key_addresses(Some(fingerprint))?;
         let held = held.into_iter().map(|held| (held.address, held.verified)).collect();
         self.info(&key, master.as_deref(), held).ok_or(Error::NotFound)
@@ -389,19 +448,65 @@ impl<'a> Book<'a> {
             Err(pe_pgp::CertProblem::Revoked { reason: None }) => (KeyState::Revoked, tr(Text::PgpKeyRevoked)),
             Err(_) => (KeyState::NotValid, tr(Text::PgpKeyNotValid)),
         };
+        let grouped = pe_pgp::grouped(&key.fingerprint);
+        let users = cert.user_ids(now);
+        let primary = users.iter().find(|user| user.primary).or(users.first());
+        let name = primary
+            .map(|user| user_name(&user.text))
+            .filter(|name| !name.is_empty())
+            .map(str::to_string)
+            .or_else(|| addresses.first().map(|(address, _)| address.clone()))
+            .unwrap_or_else(|| grouped.clone());
+        let verified = !addresses.is_empty() && addresses.iter().all(|(_, verified)| *verified);
+        let status = if verified && !own {
+            tr_args(Text::UiKeysStatusVerified, &[("status", (&state_text).into())])
+        } else {
+            state_text.clone()
+        };
+        let tail: Vec<&str> = grouped.split(' ').filter(|group| !group.is_empty()).collect();
+        let choice = format!("{name} ({})", tail[tail.len().saturating_sub(4)..].join(" "));
+        let address_lines = addresses
+            .iter()
+            .map(|(address, verified)| match (own, verified) {
+                (true, _) => address.clone(),
+                (false, true) => tr_args(Text::UiKeyAddressVerified, &[("address", address.into())]),
+                (false, false) => tr_args(Text::UiKeyAddressNotVerified, &[("address", address.into())]),
+            })
+            .collect();
+        let held: Vec<&str> = addresses.iter().map(|(address, _)| address.as_str()).collect();
+        let verify_marks = tr_args(
+            Text::UiVerifyMarks,
+            &[("addresses", (&held.join(", ")).into()), ("count", held.len().into())],
+        );
+        let remove_question = if own {
+            tr_args(Text::UiKeysRemoveOwn, &[("fingerprint", (&grouped).into())])
+        } else {
+            tr_args(Text::UiKeysRemoveContact, &[("name", (&name).into())])
+        };
         Some(KeyInfo {
-            grouped: pe_pgp::grouped(&key.fingerprint),
+            fingerprint_lines: two_lines(&grouped),
             fingerprint: key.fingerprint.clone(),
-            user_ids: cert.user_ids(now).into_iter().map(|user| user.text).collect(),
-            verified: !addresses.is_empty() && addresses.iter().all(|(_, verified)| *verified),
+            user_ids: users.into_iter().map(|user| user.text).collect(),
+            verified,
             addresses,
             own,
+            can_back_up: own && state != KeyState::Locked,
+            can_verify: !own,
             state,
             state_text,
+            status,
             created: cert.created(),
             expires: cert.expires(now),
             algorithm: cert.algorithm(),
             source: KeySource::words(&key.source),
+            name,
+            choice,
+            address_lines,
+            remove_question,
+            verify_marks,
+            created_text: date(cert.created()),
+            expires_text: cert.expires(now).map_or_else(|| tr(Text::UiKeyNever), date),
+            grouped,
         })
     }
 
@@ -616,8 +721,8 @@ impl<'a> Book<'a> {
 
     /// The private key protected by `passphrase`, armored, for a backup
     pub fn backup(&self, fingerprint: &str, passphrase: &str) -> Result<String> {
-        if passphrase.is_empty() {
-            return Err(Error::Invalid(tr(Text::PgpErrorEmptyPassphrase)));
+        if let Some(why) = passphrase_problem(passphrase, passphrase) {
+            return Err(Error::Invalid(why));
         }
         self.own_key(fingerprint)?
             .backup(passphrase)
@@ -634,14 +739,76 @@ impl<'a> Book<'a> {
         SecretKey::from_bytes(&plain).map_err(|error| Error::Invalid(words(&error)))
     }
 
+    /// The user's own addresses that one of their keys holds but that use no key yet (after a backup was imported),
+    /// each with that key: what the windows offer "Use this key for ...?" for
+    pub fn unclaimed(&self) -> Result<Vec<(String, String)>> {
+        let own = self.own_addresses()?;
+        let claimed: HashSet<String> = self
+            .store
+            .pgp_identities()?
+            .into_iter()
+            .map(|identity| identity.address)
+            .collect();
+        let mut out = Vec::new();
+        for key in self.store.pgp_keys()?.iter().filter(|key| key.secret.is_some()) {
+            for held in self.store.pgp_key_addresses(Some(&key.fingerprint))? {
+                // an address two own keys hold is offered once, with the first
+                if own.contains(&held.address)
+                    && !claimed.contains(&held.address)
+                    && !out.iter().any(|(address, _)| *address == held.address)
+                {
+                    out.push((held.address, key.fingerprint.clone()));
+                }
+            }
+        }
+        Ok(out)
+    }
+
+    /// The name a key is saved under: "Alice Example public key.asc", or "... private key backup.asc"
+    pub fn file_name(&self, fingerprint: &str, private: bool) -> Result<String> {
+        let key = self.store.pgp_key(fingerprint)?.ok_or(Error::NotFound)?;
+        let cert = self.certs.get(&key).ok_or(Error::NotFound)?;
+        let users = cert.user_ids(unix_now());
+        let user = users.iter().find(|user| user.primary).or(users.first());
+        let who = match user {
+            Some(user) => match user_name(&user.text) {
+                "" => user.address.clone().unwrap_or_default(),
+                name => name.to_string(),
+            },
+            None => fingerprint
+                .chars()
+                .rev()
+                .take(8)
+                .collect::<String>()
+                .chars()
+                .rev()
+                .collect(),
+        };
+        let text = if private {
+            Text::PgpFileNamePrivate
+        } else {
+            Text::PgpFileNamePublic
+        };
+        let name = tr_args(text, &[("who", (&who).into())]);
+        Ok(pe_mime::parser::safe_filename(Some(&name), "application/pgp-keys"))
+    }
+
     pub fn peer(&self, address: &str) -> Result<PeerKeys> {
         let address = normal_address(address);
         let peer = self.store.pgp_peer(&address)?.unwrap_or_default();
+        let pending_text = peer.pending.as_ref().map(|_| {
+            let date = crate::calendar::local_date(peer.pending_since.unwrap_or_else(unix_now));
+            tr_args(
+                Text::PgpPending,
+                &[("address", (&address).into()), ("date", (&date).into())],
+            )
+        });
         Ok(PeerKeys {
             address,
             in_use: peer.fingerprint,
             pending: peer.pending,
             pending_since: peer.pending_since,
+            pending_text,
         })
     }
 
@@ -728,6 +895,57 @@ impl Core {
         Ok(self.store().set_pgp_verified(fingerprint, address, verified)?)
     }
 
+    /// Own addresses one of the user's keys holds that use no key yet, each with that key
+    pub fn pgp_unclaimed(&self) -> Result<Vec<(String, String)>> {
+        self.book(|book| book.unclaimed())
+    }
+
+    /// What the windows ask after an import when own addresses an own key holds use no key yet: "Use this key for
+    /// ...?"; None when there are none
+    pub fn pgp_unclaimed_question(&self) -> Result<Option<String>> {
+        let unclaimed = self.pgp_unclaimed()?;
+        if unclaimed.is_empty() {
+            return Ok(None);
+        }
+        let addresses: Vec<&str> = unclaimed.iter().map(|(address, _)| address.as_str()).collect();
+        Ok(Some(tr_args(
+            Text::UiKeysUseFor,
+            &[("addresses", (&addresses.join(", ")).into())],
+        )))
+    }
+
+    /// The answer Use It: each of those addresses uses its key, with Autocrypt
+    pub fn pgp_claim_unclaimed(&self) -> Result<()> {
+        for (address, fingerprint) in self.pgp_unclaimed()? {
+            self.pgp_set_identity(&address, &fingerprint, true)?;
+        }
+        Ok(())
+    }
+
+    /// Every address of a key marked as compared by the user (Verify Key's They Match), or not
+    pub fn pgp_set_key_verified(&self, fingerprint: &str, verified: bool) -> Result<()> {
+        let store = self.store();
+        store.pgp_transaction(|| {
+            for held in store.pgp_key_addresses(Some(fingerprint))? {
+                store.set_pgp_verified(fingerprint, &held.address, verified)?;
+            }
+            Ok(())
+        })?;
+        Ok(())
+    }
+
+    /// The key of an account (its address's) and whether its mail carries it, None without one
+    pub fn pgp_account_key(&self, account: AccountId) -> Result<Option<PgpIdentity>> {
+        let store = self.store();
+        let email = store.account(account)?.settings.email;
+        Ok(store.pgp_identity(&email)?)
+    }
+
+    /// The file name a key is saved under, public or (`private`) a backup
+    pub fn pgp_file_name(&self, fingerprint: &str, private: bool) -> Result<String> {
+        self.book(|book| book.file_name(fingerprint, private))
+    }
+
     /// A correspondent's key in use and the one waiting for a decision
     pub fn pgp_peer(&self, address: &str) -> Result<PeerKeys> {
         self.book(|book| book.peer(address))
@@ -749,6 +967,53 @@ impl Core {
             autocrypt,
         };
         Ok(self.store().set_pgp_identity(&identity)?)
+    }
+
+    /// Sets the key of an account (Account Properties): of its address, and of its other addresses that used the
+    /// account's key before or none (one with a key of its own keeps it); an empty `fingerprint` (None) takes the key
+    /// away from them, so their mail goes unsigned
+    pub fn pgp_set_account_key(&self, account: AccountId, fingerprint: &str, autocrypt: bool) -> Result<()> {
+        let store = self.store();
+        let email = normal_address(&store.account(account)?.settings.email);
+        let keys: HashMap<String, PgpIdentity> = store
+            .pgp_identities()?
+            .into_iter()
+            .map(|identity| (identity.address.clone(), identity))
+            .collect();
+        let before = keys.get(&email);
+        // nothing changed: the other addresses keep what they have (one added since may be meant for its own key)
+        let unchanged = match before {
+            Some(identity) => identity.fingerprint == fingerprint && identity.autocrypt == autocrypt,
+            None => fingerprint.is_empty(),
+        };
+        if unchanged {
+            return Ok(());
+        }
+        let before = before.map(|identity| identity.fingerprint.clone());
+        let mut addresses = vec![email];
+        for (address, _) in store.account_addresses(account)? {
+            let theirs = keys
+                .get(&normal_address(&address))
+                .map(|identity| &identity.fingerprint);
+            if theirs.is_none() || theirs == before.as_ref() {
+                addresses.push(address);
+            }
+        }
+        store.pgp_transaction(|| {
+            for address in addresses {
+                if fingerprint.is_empty() {
+                    store.remove_pgp_identity(&address)?;
+                } else {
+                    store.set_pgp_identity(&PgpIdentity {
+                        address,
+                        fingerprint: fingerprint.into(),
+                        autocrypt,
+                    })?;
+                }
+            }
+            Ok(())
+        })?;
+        Ok(())
     }
 }
 

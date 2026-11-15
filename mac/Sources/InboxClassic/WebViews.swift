@@ -252,6 +252,9 @@ enum Help {
         "account.start": "account-form", "accounts": "account-properties", "settings": "options",
         "signin.apps": "sign-in-apps", "signin.editor": "sign-in-apps", "agents": "agents", "addressbook": "address-book",
         "contact": "address-book", "group": "address-book", "pick": "address-book", "compose": "compose",
+        "keys": "encryption-keys", "key.new": "encryption-keys", "key.backup": "encryption-keys",
+        "key.import": "encryption-keys", "key.properties": "encryption-keys", "account.security": "encryption-keys",
+        "key.verify": "verify-key",
     ]
 
     /// opens the help at the topic of `context` (`main`, `account-form`, `options`, ...)

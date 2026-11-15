@@ -681,6 +681,7 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
             button(Text.macAddButton.text, #selector(add), "accounts.add"),
             button(Text.macPropertiesButton.text, #selector(properties), "accounts.properties"),
             button(Text.macSignatureButton.text, #selector(signature), "accounts.signature"),
+            button(Text.macSecurityButton.text, #selector(security), "accounts.security"),
             button(Text.uiRemove.text, #selector(remove), "accounts.remove"),
             button(Text.macSignInAppsButton.text, #selector(signInApps), "accounts.apps"),
         ])
@@ -755,6 +756,12 @@ private final class AccountsWindow: NSObject, NSTableViewDataSource, NSTableView
     @objc private func signature() {
         guard let account = selected else { return }
         SignatureEditor.edit(core: core, account: account.id, name: account.name)
+    }
+
+    /// the key of the account's addresses
+    @objc private func security() {
+        guard let account = selected else { return }
+        AccountSecurityWindow.run(core: core, account: account)
     }
 
     @objc private func remove() {

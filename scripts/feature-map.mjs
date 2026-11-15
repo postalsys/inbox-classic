@@ -678,6 +678,89 @@ const sections = [
         ]
     },
     {
+        title: 'Encryption keys',
+        intro: 'OpenPGP keys are kept inside Inbox Classic: the private ones protected by a key in the system\'s password store, so no passphrase is typed once a key is in. Nothing outside the app (no GnuPG) is used.',
+        features: [
+            {
+                shot: 'keys-1-empty',
+                name: 'Encryption Keys',
+                what: 'Tools > Encryption Keys lists the user\'s own keys and their contacts\' keys: name, address, kind and status. New Key, Import, Export, Back Up, Verify, Properties and Remove.',
+                how: 'Tools > Encryption Keys.',
+                checked: ['Opens empty with what to do', 'The buttons for one key are greyed without one']
+            },
+            {
+                shot: 'keys-2-new-key',
+                name: 'A new key',
+                what: 'New Key makes an Ed25519 key for an account and its other addresses, which use it from then on. With passwords kept in memory only, the window says the key will not outlive the run.',
+                how: 'New Key in Encryption Keys, or in Account Properties > Security.',
+                checked: ['The account is named', 'The memory only note']
+            },
+            {
+                shot: 'keys-3-backup-offer',
+                name: 'A backup offered at once',
+                what: 'Right after a key is made, the user is asked to save a backup: the only way back if the computer is lost or reset.',
+                how: 'Make Key.',
+                checked: ['Save a Backup and Later']
+            },
+            {
+                shot: 'keys-4-backup',
+                name: 'A backup with a passphrase',
+                what: 'A backup is the private key protected by a passphrase of the user\'s choice, typed twice, at least 8 characters: the only passphrase ever typed. Every OpenPGP program reads it.',
+                how: 'Back Up in Encryption Keys.',
+                checked: ['Different passphrases refused', 'A short one refused', 'The file asks for the passphrase']
+            },
+            {
+                shot: 'keys-5-list',
+                name: 'Keys listed',
+                what: 'Each key with its name, address, whether it is the user\'s or a contact\'s, and its status in words: Valid, Valid until a date, Expired, Revoked, or Locked when its protection is gone from the system\'s store.',
+                how: 'Encryption Keys.',
+                checked: ['The new key is Your key, Valid']
+            },
+            {
+                shot: 'keys-6-import-passphrase',
+                name: 'Importing a protected key',
+                what: 'Import reads public and private keys. A private key protected by a passphrase asks for it once; it is then kept protected by the system\'s store and the passphrase is not kept.',
+                how: 'Import in Encryption Keys.',
+                checked: ['A wrong passphrase is said and asked again', 'The right one imports it']
+            },
+            {
+                shot: 'keys-7-use-for',
+                name: 'An imported key used for an address',
+                what: 'An imported private key never takes the user\'s addresses by itself (a key file can come from anyone): the window asks whether to use it for the addresses it holds.',
+                how: 'After importing a private key.',
+                checked: ['Use It makes it the address\'s key']
+            },
+            {
+                shot: 'keys-8-properties',
+                name: 'Key properties',
+                what: 'A key\'s names, its fingerprint in groups of four, status, dates, algorithm, where it came from, and each address with whether it is verified.',
+                how: 'Properties in Encryption Keys, or a double click.',
+                checked: ['Every line is filled in']
+            },
+            {
+                shot: 'keys-9-verify',
+                name: 'Verifying a key',
+                what: 'Verify shows the fingerprint large for comparing with the owner, in person or on a call, never with one sent by email. They Match marks the key verified; signatures from a verified key show green.',
+                how: 'Verify in Encryption Keys or in a contact.',
+                checked: ['The owner is named', 'They Match marks it']
+            },
+            {
+                shot: 'keys-10-account-security',
+                name: 'An account\'s key',
+                what: 'Account Properties > Security chooses the key of the account\'s addresses (or none), makes a new one, and sets whether the public key goes with the account\'s messages (Autocrypt).',
+                how: 'Account Properties > Security.',
+                checked: ['The account\'s key chosen']
+            },
+            {
+                shot: 'keys-11-contact',
+                name: 'A contact\'s key',
+                what: 'A contact\'s Properties show the key used for each of their addresses with its fingerprint and status. Another key found for an address waits there until the user chooses it.',
+                how: 'A contact\'s Properties in the Address Book.',
+                checked: ['The fingerprint and Valid, verified']
+            }
+        ]
+    },
+    {
         title: 'Organizing mail',
         intro: 'What is done to a message is done on the server too, so webmail and your other mail programs agree.',
         features: [

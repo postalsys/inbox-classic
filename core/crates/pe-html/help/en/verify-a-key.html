@@ -1,0 +1,14 @@
+<h1>Verify a contact’s key</h1>
+<p class="summary">Compare a key’s fingerprint with its owner to be sure the key is really theirs.</p>
+<p>A key can come from anywhere: a message, a key server, a file. Anyone can make a key with your contact’s name and address. Verifying confirms that the key you have is the one your contact has.</p>
+<p>To verify a key:</p>
+<ol>
+    <li>Choose <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, select the contact’s key and click <b data-text="ui-keys-verify"></b>. You can also click it in the contact’s properties in the Address Book.</li>
+    <li>Ask your contact to read you the fingerprint of their key from their own app, in person or on a call.</li>
+    <li>If every group of four is the same, click <b data-text="ui-verify-match"></b>. The key shows as verified.</li>
+    <li>The window lists the addresses this marks. A key can name any address, so if one of them is not your contact’s, click <b data-text="ui-verify-differ"></b> instead.</li>
+</ol>
+<aside class="warning">Do not compare the fingerprint with one sent by email. Whoever could change the key in a message could change the fingerprint too.</aside>
+<p>If the fingerprints differ, click <b data-text="ui-verify-differ"></b>. The key you have is not your contact’s: remove it, and ask your contact to send their key again.</p>
+<p>Signatures made with a verified key show in green. A key you have not verified still works for encryption, and its signatures show in blue.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>

@@ -519,6 +519,7 @@ final class UITest {
         try await attachmentReminder()
         try await otherAddresses()
         try await messageRules()
+        try await encryptionKeys()
         try await outboxAndDrafts()
         try await draftsSavedAutomatically()
         try await textSize()

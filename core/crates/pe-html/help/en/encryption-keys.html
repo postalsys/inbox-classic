@@ -1,0 +1,17 @@
+<h1>Encryption keys</h1>
+<p class="summary">Make a key to sign your messages and receive encrypted mail, and keep your contacts’ keys.</p>
+<p>Inbox Classic signs and encrypts mail with OpenPGP keys. Your own key has two halves: a public key that you give to others, and a private key that stays on your computer. Your contacts’ keys let you check their signatures and encrypt mail to them.</p>
+<p>To make your key:</p>
+<ol>
+    <li>Choose <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, then click <b data-text="ui-keys-new"></b>.</li>
+    <li>Choose the account and click <b data-text="ui-keys-new-make"></b>. The key is used for the account’s address and its other addresses.</li>
+    <li>Click <b data-text="ui-keys-backup-now"></b> and choose a passphrase. Keep the file and the passphrase in different safe places.</li>
+</ol>
+<aside class="warning">Without a backup, your key cannot be recovered if this computer is lost or reset, and mail encrypted to it can no longer be read.</aside>
+<h2>Keys stay protected without passphrases</h2>
+<p>Your private keys are protected by a key kept in <!--os:windows-->the Credential Manager<!--/os--><!--os:mac-->the keychain<!--/os--><!--os:linux-->the system keyring<!--/os-->, so you never type a passphrase to use them. You choose a passphrase only for a backup. If your key shows as locked, that protection was reset: click <b data-text="ui-keys-import"></b> and choose its backup.</p>
+<h2>Adding keys</h2>
+<p>Click <b data-text="ui-keys-import"></b> to add a key from a file, such as one a contact sent you or a backup of your own. A private key protected by a passphrase asks for it once. Inbox Classic then asks whether to use an imported key of yours for your addresses.</p>
+<p>A contact’s key is used for their address from then on. If a different key for the same address turns up later, the current one stays in use until you choose the new one in the contact’s properties.</p>
+<p>To share your public key, select it and click <b data-text="ui-keys-export"></b>. You can also choose your account’s key in its properties, on the <b data-text="ui-account-security"></b> tab.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>

@@ -72,6 +72,39 @@ fn a_new_key_for_an_account() {
 }
 
 #[test]
+fn an_accounts_key_chosen_and_taken_away() {
+    let dir = pe_testkit::TempDir::new("core-keys-account");
+    let (core, account) = open_core(&dir);
+    let first = core.pgp_generate(account).unwrap();
+    let second = core.pgp_generate(account).unwrap();
+    // the other address gets a key of its own, which a change of the account's key leaves alone
+    let own = pe_pgp::generate("Work", &["a@work.example".into()], now() - 60).unwrap();
+    core.pgp_import(
+        own.backup("passphrase!").unwrap().as_bytes(),
+        Some("passphrase!"),
+        KeySource::File,
+    )
+    .unwrap();
+    core.pgp_set_identity("a@work.example", &own.fingerprint(), true)
+        .unwrap();
+    core.pgp_set_account_key(account, &first, false).unwrap();
+    let key_of = |address: &str| {
+        core.pgp_identities()
+            .unwrap()
+            .into_iter()
+            .find(|i| i.address == address)
+            .map(|i| (i.fingerprint, i.autocrypt))
+    };
+    assert_ne!(first, second);
+    assert_eq!(key_of("alice@example.org"), Some((first.clone(), false)));
+    assert_eq!(key_of("a@work.example"), Some((own.fingerprint(), true)));
+    // None: the address sends with no key; the one with its own keeps it
+    core.pgp_set_account_key(account, "", true).unwrap();
+    assert_eq!(key_of("alice@example.org"), None);
+    assert_eq!(key_of("a@work.example"), Some((own.fingerprint(), true)));
+}
+
+#[test]
 fn the_store_never_holds_a_private_key_in_the_clear() {
     let dir = pe_testkit::TempDir::new("core-keys-clear");
     let (core, account) = open_core(&dir);
@@ -145,7 +178,24 @@ fn a_backup_and_its_import() {
             ("a@work.example".to_string(), fingerprint.clone())
         ]
     );
+    let mut unclaimed = other.pgp_unclaimed().unwrap();
+    unclaimed.sort();
+    let mut own = imported.own.clone();
+    own.sort();
+    assert_eq!(unclaimed, own);
     other.pgp_set_identity("alice@example.org", &fingerprint, true).unwrap();
+    assert_eq!(
+        other.pgp_unclaimed().unwrap(),
+        [("a@work.example".to_string(), fingerprint.clone())]
+    );
+    assert_eq!(
+        other.pgp_file_name(&fingerprint, true).unwrap(),
+        "Alice Example private key backup.asc"
+    );
+    assert_eq!(
+        other.pgp_file_name(&fingerprint, false).unwrap(),
+        "Alice Example public key.asc"
+    );
     assert_eq!(other.pgp_identities().unwrap()[0].fingerprint, fingerprint);
 }
 
@@ -180,6 +230,7 @@ fn a_correspondent_key_and_a_changed_one() {
     assert_eq!(peer.in_use.unwrap(), bob.fingerprint());
     assert_eq!(peer.pending.unwrap(), other.fingerprint());
     assert!(peer.pending_since.is_some());
+    assert!(peer.pending_text.unwrap().contains("bob@example.net"));
 
     core.pgp_decide("bob@example.net", false).unwrap();
     let peer = core.pgp_peer("bob@example.net").unwrap();
@@ -294,5 +345,80 @@ fn without_the_master_key_an_own_key_is_locked() {
     let keys = core.pgp_keys().unwrap();
     assert_eq!(keys[0].state, KeyState::Locked);
     assert!(keys[0].state_text.contains("backup"), "{}", keys[0].state_text);
-    assert!(core.pgp_backup(&keys[0].fingerprint, "pw").is_err());
+    assert!(core.pgp_backup(&keys[0].fingerprint, "a long passphrase").is_err());
+}
+
+#[test]
+fn the_words_of_a_key_come_from_the_core() {
+    let dir = pe_testkit::TempDir::new("core-keys-words");
+    let (core, account) = open_core(&dir);
+    let mine = core.pgp_generate(account).unwrap();
+    let mine = core.pgp_key(&mine).unwrap();
+    assert_eq!(mine.name, "Alice Example");
+    assert!(mine.can_back_up && !mine.can_verify);
+    assert_eq!(mine.address_lines, ["a@work.example", "alice@example.org"]);
+    assert!(mine.remove_question.contains(&mine.grouped), "{}", mine.remove_question);
+    let groups: Vec<&str> = mine.grouped.split(' ').collect();
+    assert_eq!(
+        mine.choice,
+        format!("Alice Example ({})", groups[groups.len() - 4..].join(" "))
+    );
+    assert_eq!(
+        mine.fingerprint_lines,
+        format!("{}\n{}", groups[..5].join(" "), groups[5..].join(" "))
+    );
+    assert_eq!(mine.expires_text, "Never");
+    // a contact's key whose user id is an address alone: named by its address; verified for all its addresses at once
+    let bob = pe_pgp::generate("", &["bob@example.net".into()], now() - 60).unwrap();
+    core.pgp_import(bob.cert().armored().as_bytes(), None, KeySource::Paste)
+        .unwrap();
+    let key = core.pgp_key(&bob.fingerprint()).unwrap();
+    assert_eq!(key.name, "bob@example.net");
+    assert!(key.can_verify && !key.can_back_up);
+    assert_eq!(key.address_lines, ["bob@example.net (not verified)"]);
+    assert!(key.remove_question.contains("bob@example.net"));
+    assert!(key.verify_marks.contains("bob@example.net"), "{}", key.verify_marks);
+    core.pgp_set_key_verified(&bob.fingerprint(), true).unwrap();
+    let key = core.pgp_key(&bob.fingerprint()).unwrap();
+    assert!(key.verified);
+    assert_eq!(key.status, format!("{}, verified", key.state_text));
+    assert_eq!(key.address_lines, ["bob@example.net (verified)"]);
+}
+
+#[test]
+fn a_backup_passphrase_is_typed_twice_and_long_enough() {
+    use pe_core::keys::passphrase_problem;
+    assert!(passphrase_problem("correct horse", "correct horse").is_none());
+    assert!(
+        passphrase_problem("correct horse", "correct hors")
+            .unwrap()
+            .contains("not the same")
+    );
+    assert!(passphrase_problem("short", "short").unwrap().contains("8"));
+    let dir = pe_testkit::TempDir::new("core-keys-short");
+    let (core, account) = open_core(&dir);
+    let mine = core.pgp_generate(account).unwrap();
+    assert!(core.pgp_backup(&mine, "short").is_err());
+}
+
+#[test]
+fn an_imported_backup_asks_once_for_its_addresses() {
+    let dir = pe_testkit::TempDir::new("core-keys-unclaimed");
+    let (core, account) = open_core(&dir);
+    assert_eq!(core.pgp_unclaimed_question().unwrap(), None);
+    let own = pe_pgp::generate("Alice", &["alice@example.org".into()], now() - 60).unwrap();
+    core.pgp_import(
+        own.backup("passphrase!").unwrap().as_bytes(),
+        Some("passphrase!"),
+        KeySource::File,
+    )
+    .unwrap();
+    let question = core.pgp_unclaimed_question().unwrap().unwrap();
+    assert!(question.contains("alice@example.org"), "{question}");
+    core.pgp_claim_unclaimed().unwrap();
+    assert_eq!(core.pgp_unclaimed_question().unwrap(), None);
+    assert_eq!(
+        core.pgp_account_key(account).unwrap().unwrap().fingerprint,
+        own.fingerprint()
+    );
 }

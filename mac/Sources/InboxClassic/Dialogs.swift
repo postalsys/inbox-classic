@@ -323,7 +323,7 @@ func textDialog(title: String, intro: String?, text: String, ok: String = Text.u
     window.orderOut(nil)
 }
 
-/// The window of [`textDialog`]: Esc closes it, as Close does
+/// The window of [`textDialog`] (and of the key windows): Esc closes it, as Close does
 final class TextDialogWindow: NSWindow {
     override func cancelOperation(_ sender: Any?) {
         NSApp.stopModal()
