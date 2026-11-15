@@ -508,6 +508,41 @@ CREATE TABLE rules (
 );
 ALTER TABLE messages ADD COLUMN list_id TEXT;
 "#,
+    // OpenPGP (pe-core keys.rs): every key known, public or with its private part wrapped under the master key in the
+    // system's password store, the addresses each holds and whether the user compared its fingerprint; the key in use
+    // for each correspondent with a newer one waiting for the user's decision, and Autocrypt's bookkeeping; the key of
+    // each of the user's own addresses
+    r#"
+CREATE TABLE pgp_keys (
+    fingerprint TEXT PRIMARY KEY,
+    cert BLOB NOT NULL,
+    secret BLOB,
+    source TEXT NOT NULL,
+    added INTEGER NOT NULL,
+    changed INTEGER NOT NULL
+);
+CREATE TABLE pgp_key_addresses (
+    fingerprint TEXT NOT NULL REFERENCES pgp_keys(fingerprint) ON DELETE CASCADE,
+    address TEXT NOT NULL COLLATE NOCASE,
+    verified INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (fingerprint, address)
+);
+CREATE INDEX pgp_key_addresses_address ON pgp_key_addresses (address);
+CREATE TABLE pgp_peers (
+    address TEXT PRIMARY KEY COLLATE NOCASE,
+    fingerprint TEXT REFERENCES pgp_keys(fingerprint) ON DELETE SET NULL,
+    pending TEXT REFERENCES pgp_keys(fingerprint) ON DELETE SET NULL,
+    pending_since INTEGER,
+    autocrypt_seen INTEGER,
+    autocrypt_key_seen INTEGER,
+    mutual INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE pgp_identities (
+    address TEXT PRIMARY KEY COLLATE NOCASE,
+    fingerprint TEXT NOT NULL REFERENCES pgp_keys(fingerprint) ON DELETE CASCADE,
+    autocrypt INTEGER NOT NULL DEFAULT 1
+);
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
