@@ -116,7 +116,9 @@ pub(crate) fn index_text(source: &[u8]) -> IndexText {
     let (from, sender) = (one(&message.from), one(&message.sender));
     let attachments: Vec<&parser::Attachment> = message.attachments.iter().filter(|a| !a.related).collect();
     let names: Vec<&str> = attachments.iter().filter_map(|a| a.filename.as_deref()).collect();
+    // an encrypted message's text is ciphertext: none until it is opened (and then only when the user lets it be kept)
     let mut body = match (&message.text, &message.html) {
+        _ if crate::protect::has_encrypted(source) => String::new(),
         (Some(text), _) => text.clone(),
         (None, Some(html)) => parser::html_to_text(html),
         (None, None) => String::new(),

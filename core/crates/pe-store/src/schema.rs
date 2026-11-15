@@ -724,6 +724,13 @@ CREATE INDEX messages_all_by_subject ON messages (",
 CREATE INDEX messages_read_at ON messages (seen_at) WHERE seen_at IS NOT NULL;
 "
     ),
+    // OpenPGP in the list and the search (pe-core): whether a message is signed (1) or encrypted (2), from its
+    // structure as the server gave it; and whether its text in the index came from decrypting it, which AI agents never
+    // search or see
+    r#"
+ALTER TABLE messages ADD COLUMN protection INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE messages ADD COLUMN decrypted INTEGER NOT NULL DEFAULT 0;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

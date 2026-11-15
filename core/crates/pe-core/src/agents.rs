@@ -365,15 +365,25 @@ pub(crate) fn agent_message(source: &[u8]) -> AgentMessage {
             ..Default::default()
         };
     };
-    let text = visible_text(&message);
-    let (written, earlier) = written_and_earlier(&message, &text);
-    AgentMessage {
+    let envelope = AgentMessage {
         from: parser::text_addresses(message.from.as_slice()),
         reply_to: parser::text_addresses(&message.reply_to),
         to: parser::text_addresses(&message.to),
         cc: parser::text_addresses(&message.cc),
         date: message.timestamp,
         subject: message.subject.clone().unwrap_or_default(),
+        ..Default::default()
+    };
+    // encrypted for the user alone: who sent it and when, never what it says or carries
+    if crate::protect::has_encrypted(source) {
+        return AgentMessage {
+            written: tr(Text::AgentEncrypted),
+            ..envelope
+        };
+    }
+    let text = visible_text(&message);
+    let (written, earlier) = written_and_earlier(&message, &text);
+    AgentMessage {
         written,
         earlier,
         attachments: message
@@ -382,6 +392,7 @@ pub(crate) fn agent_message(source: &[u8]) -> AgentMessage {
             .filter(|a| !a.related)
             .map(|a| (a.safe_filename(), a.mime_type.clone(), a.content.len() as u64))
             .collect(),
+        ..envelope
     }
 }
 
@@ -858,6 +869,23 @@ impl Core {
     /// What a program may do now (the user may have changed it since it connected), None once it is forgotten
     pub fn agent_host(&self, id: AgentHostId) -> Result<Option<AgentHost>> {
         Ok(self.store().agent_host(id)?)
+    }
+
+    /// An attachment as an agent reads it (name, type, content), from the message as it came: an encrypted message's
+    /// are refused, as they are never decrypted for an agent; None when the message or the attachment is not here
+    pub fn agent_attachment(
+        &self,
+        folder: FolderId,
+        uid: u64,
+        index: usize,
+    ) -> Result<Option<(String, String, Vec<u8>)>> {
+        let Some(source) = self.store().source(folder, uid)? else {
+            return Ok(None);
+        };
+        if crate::protect::has_encrypted(&source) {
+            return Err(Error::Unavailable(tr(Text::AgentEncrypted)));
+        }
+        Ok(crate::view::attachment_with_type(&source, index))
     }
 
     /// A message as an agent reads it, None when its source is not here yet ([`Core::open_message`] fetches it)

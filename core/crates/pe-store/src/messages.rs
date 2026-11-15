@@ -51,7 +51,15 @@ pub struct MessageInfo {
     /// The mailing list it came through (its List-Id, the part in angle brackets, lowercase), for `list:`; written by
     /// `add_messages`, never read back with the message
     pub list_id: Option<String>,
+    /// OpenPGP: [`PROTECTION_SIGNED`] or [`PROTECTION_ENCRYPTED`] from its structure (`multipart/signed`,
+    /// `multipart/encrypted`); 0 neither
+    pub protection: u8,
 }
+
+/// [`MessageInfo::protection`] of a `multipart/signed` message
+pub const PROTECTION_SIGNED: u8 = 1;
+/// [`MessageInfo::protection`] of a `multipart/encrypted` message
+pub const PROTECTION_ENCRYPTED: u8 = 2;
 
 /// The colour of a flag, as Apple Mail keeps it: `\\Flagged` with three keyword bits, `$MailFlagBit0` to
 /// `$MailFlagBit2`, none of them for red. Other mail programs see a flag; Apple Mail and this one see its colour.
@@ -285,7 +293,7 @@ pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_da
       ORDER BY a.card_id LIMIT 1), \
      (SELECT p.changed FROM card_addresses a JOIN card_pictures p ON p.card_id = a.card_id \
       WHERE a.address = messages.from_address COLLATE NOCASE AND messages.from_address != '' \
-      ORDER BY a.card_id LIMIT 1)";
+      ORDER BY a.card_id LIMIT 1), protection";
 
 pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
     let junk: bool = row.get(27)?;
@@ -328,6 +336,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
             bounce: row.get(22)?,
             auth_headers: None,
             list_id: None,
+            protection: row.get(30)?,
         },
     })
 }
@@ -351,8 +360,8 @@ impl Store {
             "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
              from_address, recipients, message_id, in_reply_to, has_attachments, sender_people, recipient_people, \
              attachment_names, attachment_count, refs, bounce, auth_headers, list_id, sort_from, sort_subject, thread_id, \
-             id) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, \
-             ?22, ?23, ?24, ?25, ?26, (SELECT high + 1 FROM message_ids)) \
+             protection, id) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, \
+             ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, (SELECT high + 1 FROM message_ids)) \
              ON CONFLICT (folder_id, uid) DO UPDATE SET modseq = excluded.modseq, flags = excluded.flags, \
              seen = excluded.seen",
         )?;
@@ -395,7 +404,8 @@ impl Store {
                     &m.from_name
                 }),
                 crate::fold::fold(&m.subject),
-                thread
+                thread,
+                m.protection
             ])?;
         }
         Ok(())

@@ -96,6 +96,9 @@ pub struct MessageView {
     /// What is printed of such a message, None for any other (its `document` is): one document of every part's
     /// text, as a printer prints no frames, the bar's words and each part's label in its printed header
     pub print_document: Option<String>,
+    /// An encrypted message's text, decrypted, for the search index (when Options lets it keep it), stored when the
+    /// window takes the view
+    pub(crate) decrypted: Option<(pe_store::FolderId, u64, pe_store::IndexText)>,
 }
 
 /// What a signed or encrypted message is, for the bar over it (which mail can not draw) and its Details
@@ -310,6 +313,7 @@ pub(crate) fn build_unless(
         autocrypt: crate::autocrypt::seen(&message, trust.pictures.junk, crate::worker::unix_now()),
         part_documents: Vec::new(),
         print_document: None,
+        decrypted: None,
     })
 }
 

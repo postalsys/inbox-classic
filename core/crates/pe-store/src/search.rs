@@ -114,6 +114,9 @@ pub struct Search {
     /// Only the messages stored up to this one ([`Store::newest_message`]): Select All's, which acts on what was there
     /// when it was chosen, never on mail stored after it. None for all.
     pub up_to: Option<i64>,
+    /// Leaves out the messages whose text in the index came from decrypting them when it looks for words: an agent's
+    /// search never matches what only the user can read (its other terms, such as `is:encrypted`, still find them)
+    pub no_decrypted: bool,
 }
 
 /// A word as FTS5 reads it, and nothing else: quoted (its own quotes dropped, so no FTS5 syntax can be typed), in its
@@ -330,6 +333,9 @@ impl Search {
                 }),
                 Term::Attachment(on) => parts.push(format!("has_attachments = {}", i64::from(*on))),
                 Term::Bounce(on) => parts.push(format!("bounce = {}", i64::from(*on))),
+                Term::Protection(level, on) => {
+                    parts.push(format!("protection {} {level}", if *on { "=" } else { "!=" }))
+                }
                 Term::In { place, negated } => {
                     let folders = match place {
                         Place::Anywhere => continue,
@@ -367,6 +373,11 @@ impl Search {
                     parts.push(if *negated { format!("NOT {has}") } else { has });
                 }
             }
+        }
+        // words looked for (or left out) would match what was decrypted: such a search passes over those messages
+        let has_text = query.terms.iter().any(|term| matches!(term, Term::Text { .. }));
+        if self.no_decrypted && has_text {
+            parts.push("decrypted = 0".into());
         }
         if self.hide_ignored {
             parts.push(format!(
@@ -665,6 +676,74 @@ impl Store {
         Ok(())
     }
 
+    /// [`Store::set_indexed`] with the text of an encrypted message, decrypted when it was opened: marked, so that the
+    /// switch in Options can take it out again and AI agents never search it
+    pub fn set_indexed_decrypted(&self, message: i64, text: &IndexText) -> Result<()> {
+        self.set_indexed(message, text)?;
+        self.db
+            .prepare_cached("UPDATE messages SET decrypted = 1 WHERE id = ?1")?
+            .execute([message])?;
+        Ok(())
+    }
+
+    /// Takes the decrypted text of every encrypted message out of the index and the list (Options' switch turned off):
+    /// each is indexed again as it came, by its envelope alone, without the people and the names of the files inside
+    pub fn forget_decrypted(&self) -> Result<()> {
+        let tx = self.db.unchecked_transaction()?;
+        tx.execute(
+            "UPDATE messages SET snippet = '', sender_people = '', recipient_people = '', attachment_names = '', \
+             attachment_count = 0 WHERE decrypted = 1",
+            [],
+        )?;
+        tx.execute(
+            "DELETE FROM messages_fts WHERE rowid IN (SELECT id FROM messages WHERE decrypted = 1)",
+            [],
+        )?;
+        tx.execute(
+            &format!(
+                "INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) \
+                 SELECT id, {}, '' FROM messages WHERE decrypted = 1",
+                fts_columns("")
+            ),
+            [],
+        )?;
+        tx.execute("UPDATE messages SET decrypted = 0 WHERE decrypted = 1", [])?;
+        tx.commit()
+    }
+
+    /// Whether the text of the message `uid` of `folder` should be indexed decrypted, now that it was: the user lets
+    /// the index keep it (Options), and it was not yet
+    pub fn wants_decrypted_text(&self, folder: FolderId, uid: u64) -> Result<bool> {
+        if !self.pgp_index_encrypted()? {
+            return Ok(false);
+        }
+        Ok(self
+            .db
+            .query_row(
+                "SELECT decrypted = 0 FROM messages WHERE folder_id = ?1 AND uid = ?2",
+                params![folder, uid as i64],
+                |row| row.get(0),
+            )
+            .optional()?
+            .unwrap_or(false))
+    }
+
+    /// The decrypted text of the message `uid` of `folder` into the index ([`Store::set_indexed_decrypted`])
+    pub fn index_decrypted(&self, folder: FolderId, uid: u64, text: &IndexText) -> Result<()> {
+        let id: Option<i64> = self
+            .db
+            .query_row(
+                "SELECT id FROM messages WHERE folder_id = ?1 AND uid = ?2",
+                params![folder, uid as i64],
+                |row| row.get(0),
+            )
+            .optional()?;
+        match id {
+            Some(id) => self.set_indexed_decrypted(id, text),
+            None => Ok(()),
+        }
+    }
+
     /// Which of the messages `uids` of `folder` the index does not have the text of yet (and the server has not
     /// refused): (message id, folder, UID)
     pub fn unindexed(&self, folder: FolderId, uids: &[u64]) -> Result<Vec<(i64, FolderId, u64)>> {
@@ -901,6 +980,7 @@ mod tests {
             threads: None,
             hide_ignored: false,
             read_since: None,
+            no_decrypted: false,
             uids: None,
             up_to: None,
         };
@@ -922,11 +1002,13 @@ mod tests {
             scope: Scope::Everywhere,
             show: Show::Unread,
             read_since: Some(since),
+            no_decrypted: false,
             ..Default::default()
         };
         assert_eq!(found(&store, &kept).len(), 2, "the one read stays");
         let later = Search {
             read_since: Some(since + 3_600_000),
+            no_decrypted: false,
             ..kept
         };
         assert_eq!(found(&store, &later).len(), 1, "read before the list began: gone");

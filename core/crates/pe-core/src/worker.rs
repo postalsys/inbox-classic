@@ -1680,9 +1680,16 @@ impl Worker {
                 let from = newest.info.sender().to_string();
                 let count = fresh.announced.len();
                 let watched = newest.mark == pe_store::ThreadMark::Watch;
-                let (title, mut text) = crate::text::new_mail_words(count, &from, &newest.info.subject, watched);
+                // an encrypted message says so, not its outer subject (often "..."), and has no code to offer
+                let encrypted = newest.info.protection == pe_store::PROTECTION_ENCRYPTED;
+                let subject = if encrypted {
+                    pe_i18n::tr(pe_i18n::Text::ListEncrypted)
+                } else {
+                    newest.info.subject.clone()
+                };
+                let (title, mut text) = crate::text::new_mail_words(count, &from, &subject, watched);
                 // a one-time code of a fresh message, named first when the app asks for it
-                if let Some(code) = self.code_of_new(store, folder, newest).await {
+                if !encrypted && let Some(code) = self.code_of_new(store, folder, newest).await {
                     text = crate::otp::notification_text(&code, &text);
                 }
                 self.emit(Event::NewMail {
@@ -1691,7 +1698,7 @@ impl Worker {
                     uid: newest.info.uid,
                     count,
                     from,
-                    subject: newest.info.subject.clone(),
+                    subject,
                     watched,
                     title,
                     text,

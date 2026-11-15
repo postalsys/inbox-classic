@@ -608,3 +608,23 @@ pub unsafe extern "C" fn pe_pgp_set_account_key(
         })
     }
 }
+
+/// Options > Security: whether the search index keeps the text of encrypted messages once they are opened
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pgp_index_encrypted(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.pgp_index_encrypted().unwrap_or(false)) }
+}
+
+/// Turns it on or off; off, the text decrypted so far leaves the index
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pgp_set_index_encrypted(core: *const PeCore, on: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_pgp_index_encrypted(on).is_ok()) }
+}

@@ -910,7 +910,7 @@ impl Core {
     /// A page of what `search` finds (Gmail's syntax, see [`pe_store::Query`]), in the order of `sort`
     pub fn search(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
         let sort = self.list_sort(search, sort)?;
-        Ok(self.store().search(search, sort, offset, limit)?)
+        Ok(encrypted_lines(self.store().search(search, sort, offset, limit)?))
     }
 
     /// [`Core::search`] read from a row next to the page or from the end of the list (`anchor`, see
@@ -924,7 +924,9 @@ impl Core {
         anchor: pe_store::Anchor,
     ) -> Result<Vec<Message>> {
         let sort = self.list_sort(search, sort)?;
-        Ok(self.store().search_from(search, sort, offset, limit, anchor)?)
+        Ok(encrypted_lines(
+            self.store().search_from(search, sort, offset, limit, anchor)?,
+        ))
     }
 
     /// What the store holds now: equal values mean nothing was written in between, so what was read then is still so
@@ -1505,6 +1507,9 @@ impl Core {
     fn learned(&self, mut view: MessageView) -> MessageView {
         if let Some(seen) = view.autocrypt.take() {
             let _ = self.learn_autocrypt(&seen);
+        }
+        if let Some((folder, uid, text)) = view.decrypted.take() {
+            let _ = self.store().index_decrypted(folder, uid, &text);
         }
         view
     }
@@ -2870,6 +2875,19 @@ fn read_limited(path: &std::path::Path) -> Result<Vec<u8>> {
     Ok(raw)
 }
 
+/// The rows of a list: an encrypted message not opened yet (or whose text the index does not keep) says so on its
+/// line of first words
+fn encrypted_lines(mut found: Vec<Message>) -> Vec<Message> {
+    for message in &mut found {
+        if message.info.protection == pe_store::PROTECTION_ENCRYPTED
+            && message.snippet.as_deref().is_none_or(str::is_empty)
+        {
+            message.snippet = Some(pe_i18n::tr(pe_i18n::Text::ListEncrypted));
+        }
+    }
+    found
+}
+
 /// The view of a message's source, its date the server's when it has no Date header; None when `dropped` said to
 /// give up. `store` gives the store a bounce needs: the message it returns is looked up there, and a bounce the list
 /// did not mark yet (one found by the heuristics) is marked, with `events` told the folder changed.
@@ -2899,6 +2917,16 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
         ring: found.ring.as_deref(),
     };
     let mut view = view::build_unless(&found.source, allow_remote_images, &trust, dropped, &find)?;
+    // decrypted: its text for the search index, when the user lets the index keep it and it does not have it yet
+    if let Some(ring) = &found.ring
+        && view.protection.as_ref().is_some_and(|protection| protection.encrypted)
+        && store().is_some_and(|store| store.wants_decrypted_text(found.folder, found.uid).unwrap_or(false))
+    {
+        let from = from_addresses(&found.source);
+        if let Some((shown, true)) = protect::shown_decrypted(&found.source, ring, &from, worker::unix_now()) {
+            view.decrypted = Some((found.folder, found.uid, search::index_text(&shown)));
+        }
+    }
     // a large message's text first: its attachments without content, their sizes from its structure, listed by the
     // same rules
     if let Some(first) = found

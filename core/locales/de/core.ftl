@@ -458,6 +458,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Diese Nachricht kann nicht gelesen werden.
 # review: new
 agent-encrypted-original = Diese Nachricht ist verschlüsselt: Ein Agent kann nicht darauf antworten und sie nicht weiterleiten, da er nicht verschlüsseln kann.
+# review: new
+agent-encrypted = Diese Nachricht ist verschlüsselt. Nur der Benutzer kann sie in Inbox Classic lesen.
+# review: new
+list-encrypted = Verschlüsselte Nachricht
 agent-log-composed = „{ $subject }“ zum Fertigstellen im Nachrichtenfenster geöffnet
 agent-log-refused = Sie haben „{ $subject }“ nicht gesendet
 agent-log-sent = „{ $subject }“ an { $to } gesendet

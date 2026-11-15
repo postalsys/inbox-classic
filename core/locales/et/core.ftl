@@ -445,6 +445,10 @@ agent-access = { $can }; { $accounts }
 agent-unreadable = Seda kirja ei saa lugeda.
 # review: new
 agent-encrypted-original = See kiri on krüptitud: agent ei saa sellele vastata ega seda edastada, sest ta ei saa krüptida.
+# review: new
+agent-encrypted = See kiri on krüptitud. Seda saab lugeda ainult kasutaja, Inbox Classicus.
+# review: new
+list-encrypted = Krüptitud kiri
 agent-log-composed = Kiri „{ $subject }“ avati koostamisaknas, et saaksite selle valmis kirjutada
 agent-log-refused = Te ei saatnud kirja „{ $subject }“
 agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }

@@ -46,6 +46,16 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         .map(|b| b.attachments())
         .unwrap_or_default();
     let bounce = message.body_structure.as_ref().is_some_and(is_delivery_report);
+    // OpenPGP: the message's own type says it (RFC 3156); a part of it signed or encrypted is found when it is opened
+    let protection = match message
+        .body_structure
+        .as_ref()
+        .map(|b| b.content_type.to_ascii_lowercase())
+    {
+        Some(kind) if kind == "multipart/encrypted" => pe_store::PROTECTION_ENCRYPTED,
+        Some(kind) if kind == "multipart/signed" => pe_store::PROTECTION_SIGNED,
+        _ => 0,
+    };
     let attachment_names: Vec<&str> = attachments.iter().filter_map(|part| part.filename()).collect();
     let attachment_names = attachment_names.join("\n");
     let attachment_count = attachments.len() as u32;
@@ -83,6 +93,7 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         gmail_thread: message.thread_id,
         thread_id: None,
         bounce,
+        protection,
         auth_headers,
         list_id,
     })

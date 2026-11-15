@@ -768,3 +768,80 @@ fn a_message_files_attachments_open() {
         Err(pe_core::Error::Unavailable(why)) if why.contains("statement")
     ));
 }
+
+/// An encrypted message in the Inbox: its text is searched only once it was opened and while Options lets the index
+/// keep it, never by an agent, whose reading of it says only that it is encrypted
+#[test]
+fn decrypted_text_in_the_search_but_never_for_agents() {
+    use pe_core::{Scope, Search, Show};
+    use pe_store::Sort;
+    let w = world("pgp-search");
+    let raw = message(
+        "alice@example.org",
+        &encrypted_part(&text("The zebrafish plan"), &[&w.me], Some(&w.alice), "e"),
+    );
+    let folder = {
+        let store = Store::open(w.dir.path().join("store.db")).unwrap();
+        let account = store.accounts().unwrap()[0].id;
+        let inbox = pe_store::FolderInfo {
+            path: "INBOX".into(),
+            name: "INBOX".into(),
+            selectable: true,
+            ..Default::default()
+        };
+        store.set_folders(account, &[inbox]).unwrap();
+        let folder = store.folders(account).unwrap()[0].id;
+        let info = pe_store::MessageInfo {
+            uid: 1,
+            subject: "Test".into(),
+            from_address: "alice@example.org".into(),
+            protection: 2,
+            ..Default::default()
+        };
+        store.add_messages(folder, &[info]).unwrap();
+        store.set_source(folder, 1, raw.as_bytes()).unwrap();
+        folder
+    };
+    let found = |no_decrypted: bool| {
+        let search = Search {
+            scope: Scope::Everywhere,
+            show: Show::All,
+            text: "zebrafish".into(),
+            no_decrypted,
+            ..Default::default()
+        };
+        w.core.search(&search, Sort::default(), 0, 10).unwrap().len()
+    };
+    let encrypted = |text: &str| {
+        let search = Search {
+            scope: Scope::Everywhere,
+            show: Show::All,
+            text: text.into(),
+            ..Default::default()
+        };
+        w.core.search(&search, Sort::default(), 0, 10).unwrap().len()
+    };
+    assert_eq!(encrypted("is:encrypted"), 1);
+    assert_eq!(encrypted("is:signed"), 0);
+    assert_eq!(found(false), 0, "not opened yet");
+    assert!(w.core.pgp_index_encrypted().unwrap(), "on out of the box");
+    let view = w.core.message_view(folder, 1, false).unwrap().unwrap();
+    assert!(view.document.contains("zebrafish"));
+    assert_eq!(found(false), 1, "opened: its text is searched");
+    assert_eq!(found(true), 0, "but never by an agent");
+    let agent = w.core.agent_message(folder, 1).unwrap().unwrap();
+    assert!(
+        !agent.written.contains("zebrafish") && agent.written.contains("encrypted"),
+        "{agent:?}"
+    );
+    assert!(agent.attachments.is_empty() && agent.earlier.is_empty());
+    // nor its attachments, which would be decrypted
+    assert!(w.core.agent_attachment(folder, 1, 0).is_err());
+    assert_eq!(agent.from, "alice@example.org");
+    // turned off: forgotten, and not indexed again when opened
+    w.core.set_pgp_index_encrypted(false).unwrap();
+    assert_eq!(found(false), 0);
+    assert_eq!(encrypted("alice"), 1, "its sender is still searched");
+    w.core.message_view(folder, 1, false).unwrap().unwrap();
+    assert_eq!(found(false), 0);
+}

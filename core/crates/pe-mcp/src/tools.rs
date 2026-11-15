@@ -600,6 +600,7 @@ fn search_messages(call: &Call, args: &Args) -> Outcome {
         scope: Scope::Everywhere,
         show: Show::All,
         text: query,
+        no_decrypted: true,
         ..Default::default()
     };
     // the search covers every account: what this agent may not see is passed over, page by page
@@ -706,7 +707,7 @@ async fn get_attachment(call: &Call<'_>, args: &Args<'_>) -> Outcome {
     downloaded(call, folder.id, uid).await?;
     let (name, mime_type, content) = call
         .core
-        .attachment_with_type(folder.id, uid, index)
+        .agent_attachment(folder.id, uid, index)
         .map_err(engine)?
         .ok_or("the message has no such attachment")?;
     let textual = mime_type.starts_with("text/")

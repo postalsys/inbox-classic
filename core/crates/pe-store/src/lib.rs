@@ -49,7 +49,9 @@ pub use contacts::Contact;
 pub use download::{Ahead, AheadRule, DEFAULT_LIMIT_MB, Downloaded, RECENT_DAYS, RECENT_MAX_SIZE, ToDownload};
 pub use folders::{Folder, FolderId, FolderInfo, SyncState};
 pub use marks::{Conversation, ThreadMark};
-pub use messages::{FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, Sort, SortField};
+pub use messages::{
+    FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, PROTECTION_ENCRYPTED, PROTECTION_SIGNED, Sort, SortField,
+};
 pub use outbox::Queued;
 pub use pgp::{KeyAddress, PgpIdentity, PgpPeer, StoredKey, normal_address};
 pub use query::Query;

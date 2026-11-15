@@ -1666,6 +1666,27 @@ pub struct PeMessage {
     pub picture: u64,
     /// One or two letters for a sender without a picture ("AL" for Ann Lee), empty when there is no letter
     pub initials: *const c_char,
+    /// The message is signed or encrypted as a whole (OpenPGP, from its structure): the list marks it
+    pub protection: PeProtection,
+}
+
+/// Whether a message is signed or encrypted as a whole
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeProtection {
+    None = 0,
+    Signed = 1,
+    Encrypted = 2,
+}
+
+impl PeProtection {
+    fn of(level: u8) -> Self {
+        match level {
+            pe_store::PROTECTION_ENCRYPTED => PeProtection::Encrypted,
+            pe_store::PROTECTION_SIGNED => PeProtection::Signed,
+            _ => PeProtection::None,
+        }
+    }
 }
 
 /// What picture a row of the list has: none (the apps draw the initials), a brand's logo, or a contact's picture
@@ -1744,6 +1765,7 @@ pub(crate) fn message_list(messages: &[pe_store::Message]) -> *mut PeMessageList
             picture_kind: picture_kind.into(),
             picture,
             initials: strings.add(&pe_core::initials(&info.from_name, &info.from_address)),
+            protection: PeProtection::of(info.protection),
         }
     })))
 }
