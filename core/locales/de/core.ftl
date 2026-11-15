@@ -452,6 +452,8 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Diese Nachricht kann nicht gelesen werden.
+# review: new
+agent-encrypted-original = Diese Nachricht ist verschlüsselt: Ein Agent kann nicht darauf antworten und sie nicht weiterleiten, da er nicht verschlüsseln kann.
 agent-log-composed = „{ $subject }“ zum Fertigstellen im Nachrichtenfenster geöffnet
 agent-log-refused = Sie haben „{ $subject }“ nicht gesendet
 agent-log-sent = „{ $subject }“ an { $to } gesendet

@@ -376,6 +376,9 @@ pub(crate) fn recovery(account: pe_store::AccountId, outgoing: &Outgoing, messag
         references: outgoing.references.clone(),
         attachments: outgoing.attachments.clone(),
         from: outgoing.from.clone(),
+        encrypt: outgoing.encrypt,
+        sign: outgoing.sign,
+        quote_encrypted: outgoing.quote_encrypted,
     }
 }
 
@@ -396,7 +399,9 @@ pub(crate) fn recovered(recovery: pe_store::Recovery) -> Draft {
         attachments: recovery.attachments.into_iter().filter(|path| path.is_file()).collect(),
         message_id: Some(recovery.message_id),
         from: recovery.from,
-        ..Default::default()
+        encrypt: recovery.encrypt,
+        sign: recovery.sign,
+        quote_encrypted: recovery.quote_encrypted,
     }
 }
 

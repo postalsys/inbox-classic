@@ -225,6 +225,31 @@ fn signed_and_encrypted_mail_through_a_server() {
     assert!(opened["data"].as_str().unwrap().contains("Unfinished thoughts"));
     assert_eq!(opened["signed"], false);
 
+    // a draft quoting encrypted mail with Encrypt turned off: still saved encrypted, what was encrypted never reaches
+    // the server in the clear
+    let quoting = Outgoing {
+        to: "bob@example.net".into(),
+        subject: "Re: the plan".into(),
+        text: "Quoting the plan".into(),
+        quote: Some("<blockquote>The secret plan</blockquote>".into()),
+        quote_encrypted: true,
+        ..Default::default()
+    };
+    s.core.save_draft(account, quoting).unwrap();
+    s.wait(|e| matches!(e, Event::DraftSaved { problem: None, .. }));
+    let drafts = loop {
+        let drafts = s.raw("Drafts");
+        if drafts.iter().any(|raw| raw != &saved) {
+            break drafts;
+        }
+        std::thread::sleep(Duration::from_millis(100));
+    };
+    for raw in &drafts {
+        assert!(
+            raw.contains("multipart/encrypted") && !raw.contains("secret plan") && !raw.contains("Quoting the plan")
+        );
+    }
+
     // a recipient without a key stops the send, by name
     let nobody = Outgoing {
         to: "bob@example.net, nokey@example.org".into(),
@@ -306,6 +331,8 @@ fn an_encrypted_message_taken_back_opens_decrypted() {
     let (draft, _) = s.core.undo_send().unwrap();
     let (_, draft) = draft.expect("taken back");
     assert!(draft.encrypt && draft.sign);
+    // what was encrypted may go only encrypted
+    assert!(draft.quote_encrypted);
     assert!(draft.body.contains("Second thoughts"), "{}", draft.body);
     assert_eq!(draft.subject, "Take me back");
 }

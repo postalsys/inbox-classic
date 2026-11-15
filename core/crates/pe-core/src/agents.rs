@@ -635,6 +635,10 @@ impl Core {
             draft = self
                 .draft(folder, uid, kind)?
                 .ok_or_else(|| Error::Unavailable(tr(Text::AgentOriginalNotDownloaded)))?;
+            // an agent can not encrypt: what was encrypted is neither quoted nor forwarded by one
+            if draft.quote_encrypted {
+                return Err(Error::Unavailable(tr(Text::AgentEncryptedOriginal)));
+            }
             answered = self.store().message(folder, uid)?.map(|m| (kind, m.info.subject));
             if outgoing.to.trim().is_empty() {
                 outgoing.to = draft.to.clone();

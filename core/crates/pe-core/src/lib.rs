@@ -1609,6 +1609,8 @@ impl Core {
         let (mut draft, files) = compose::reopen(&raw);
         draft.encrypt = encrypted;
         draft.sign = encrypted || signed;
+        // what was encrypted may go only encrypted: it may quote encrypted mail
+        draft.quote_encrypted = encrypted;
         (draft, files)
     }
 

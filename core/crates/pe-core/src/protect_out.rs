@@ -61,7 +61,10 @@ impl Core {
         if outgoing.quote_encrypted && !outgoing.encrypt && !draft {
             return Err(crate::Error::Compose(ComposeError::EncryptedQuote));
         }
-        if !(outgoing.encrypt || (outgoing.sign && !draft)) {
+        // a draft quoting encrypted mail is saved encrypted to the sender's key, whatever Encrypt says: what was
+        // encrypted never reaches the server in the clear
+        let encrypt = outgoing.encrypt || (draft && outgoing.quote_encrypted);
+        if !(encrypt || (outgoing.sign && !draft)) {
             return Ok(None);
         }
         let from = match outgoing.from.as_deref() {
@@ -139,17 +142,20 @@ fn boundary(parts: &[&[u8]]) -> String {
     boundary
 }
 
-/// `built` signed (`encrypt` false), or signed and encrypted, with `keys`
+/// `built` signed, or encrypted (and signed when `keys` has a signer) when `keys` has recipients: the keys decide,
+/// so a draft that must go encrypted is, whatever Encrypt says
 pub(crate) fn protect(
     built: pe_smtp::Built,
     keys: &OutgoingKeys,
-    encrypt: bool,
     now: i64,
 ) -> std::result::Result<pe_smtp::Built, ComposeError> {
     let failed = |error: pe_pgp::Error| ComposeError::Attachment(std::path::PathBuf::new(), error.to_string());
     let raw = &built.raw;
     let outline = pe_mime::outline::outline(raw);
-    let Some(root) = outline.root() else { return Ok(built) };
+    // never sent unprotected when it was to be protected
+    let Some(root) = outline.root() else {
+        return Err(failed(pe_pgp::Error::Malformed("no message to protect".into())));
+    };
     // the top headers stay; the content's own (its type and encoding) go with the content
     let mut top = Vec::new();
     let mut content = Vec::new();
@@ -163,7 +169,7 @@ pub(crate) fn protect(
     }
     content.extend_from_slice(b"\r\n");
     content.extend_from_slice(&raw[root.body..]);
-    let wrapped = if encrypt {
+    let wrapped = if !keys.recipients.is_empty() {
         let recipients: Vec<&Cert> = keys.recipients.iter().collect();
         let hidden: Vec<&Cert> = keys.hidden.iter().collect();
         let armored =

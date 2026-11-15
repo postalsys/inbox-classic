@@ -543,6 +543,9 @@ CREATE TABLE pgp_identities (
     autocrypt INTEGER NOT NULL DEFAULT 1
 );
 "#,
+    // a message being written with Encrypt or Sign on, or quoting encrypted mail, keeps it after a crash: 1 encrypt,
+    // 2 sign, 4 the quote was encrypted
+    "ALTER TABLE compose_recovery ADD COLUMN protection INTEGER NOT NULL DEFAULT 0;",
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

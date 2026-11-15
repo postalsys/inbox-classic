@@ -307,7 +307,7 @@ async fn build(
     tokio::task::spawn_blocking(move || {
         let built = compose(&settings, &outgoing, time).map(|message| pe_smtp::build(&message))?;
         match keys {
-            Some(keys) => crate::protect_out::protect(built, &keys, outgoing.encrypt, time),
+            Some(keys) => crate::protect_out::protect(built, &keys, time),
             None => Ok(built),
         }
     })

@@ -463,6 +463,8 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Este mensaje no se puede leer.
+# review: new
+agent-encrypted-original = Este mensaje está cifrado: un agente no puede responderlo ni reenviarlo, porque no puede cifrar.
 agent-log-composed = Se abrió «{ $subject }» en la ventana de redacción para que termine de escribirlo
 agent-log-refused = No envió «{ $subject }»
 agent-log-sent = Se envió «{ $subject }» a { $to }
