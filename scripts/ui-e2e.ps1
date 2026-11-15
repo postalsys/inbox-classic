@@ -2048,6 +2048,322 @@ public static class Dragger {
     }
     SetOtherAddresses ''
 
+    # ---- signed and encrypted mail ----
+
+    Step 'signed and encrypted mail'
+    # the security bar under the header and its Details button, a child of the bar (app.h); the test hooks of the
+    # reading pane: its parts' frames, and its requests to the internet (main.cpp)
+    $IDC_SECURITY_BAR = 240; $IDC_SECURITY_DETAILS = 241; $IDC_PICTURES_MENU = 234; $IDM_FIND_IN_MESSAGE = 144
+    $kTestFrames = 0x46524D53; $kTestRemote = 0x4E455452
+    $pgpFiles = Resolve-Path (Join-Path $PSScriptRoot 'ui-e2e\pgp')
+    $secureStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+    $securityBar = [Native.Win]::GetDlgItem($main, $IDC_SECURITY_BAR)
+    $detailsButton = [Native.Win]::GetDlgItem($securityBar, $IDC_SECURITY_DETAILS)
+    # a key file imported in Encryption Keys, with its passphrase when it has one; what the core said
+    function ImportKeyFile([IntPtr]$keys, [string]$file, [string]$passphrase = $null) {
+        Click $keys $IDC_KEYS_IMPORT
+        if (-not (AnswerFileDialog 'Import' (Join-Path $pgpFiles $file) $null)) { return '(no file window)' }
+        if ($passphrase) {
+            $asks = PassphraseWindow
+            if (-not $asks) { return '(no passphrase asked)' }
+            SetText $asks $IDC_KEY_PASSPHRASE $passphrase
+            Click $asks 1
+        }
+        $said = Told 'Import Key' '.'
+        # an address of the account with no key of its own would be offered: not now
+        $offer = WaitFor { $w = [Native.Win]::FindWindow('InboxClassicAsk', [NullString]::Value); if ($w -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($w)) { $w } } 2
+        if ($offer) { Click $offer 2 }
+        $said
+    }
+    # the bar's fill, its frame and the words on it: a pixel inside its frame, as the screen shows it
+    function BarFill {
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($main)
+        Start-Sleep -Milliseconds 400
+        $box = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect($securityBar, [ref]$box)
+        $picture = New-Object System.Drawing.Bitmap 1, 1
+        CopyScreen $picture ($box.Left + 3) ($box.Top + 3)
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+        $p = $picture.GetPixel(0, 0)
+        '{0:x2}{1:x2}{2:x2}' -f $p.R, $p.G, $p.B
+    }
+    $fills = @{ verified = 'e8f5e9'; good = 'e6eefa'; warning = 'fff4e0'; neutral = 'f2f2f2' }
+    # the rows of the message pane, top down, where a colour is first found (within 6 of each part): a part's frame
+    # border, say; -1 when it is not there
+    $securePane = [Native.Win]::FindDescendants($main, 'Chrome_RenderWidgetHostHWND') | Select-Object -First 1
+    function PaneRow([int]$r, [int]$g, [int]$b) {
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($main)
+        Start-Sleep -Milliseconds 400
+        $box = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect($securePane, [ref]$box)
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+        $w = [Math]::Min(400, $box.Right - $box.Left); $h = [Math]::Min(400, $box.Bottom - $box.Top)
+        if ($w -le 0 -or $h -le 0) { return -1 }
+        $picture = New-Object System.Drawing.Bitmap $w, $h
+        CopyScreen $picture $box.Left $box.Top
+        for ($y = 0; $y -lt $h; $y++) {
+            for ($x = 0; $x -lt $w; $x += 2) {
+                $p = $picture.GetPixel($x, $y)
+                if ([Math]::Abs($p.R - $r) -le 6 -and [Math]::Abs($p.G - $g) -le 6 -and [Math]::Abs($p.B - $b) -le 6) { return $y }
+            }
+        }
+        -1
+    }
+    # the frames of the message shown: how many, whether each is as tall as its document, their height; once the
+    # reading pane answered a look (each look answers the one before)
+    function Frames {
+        $v = WaitFor { $a = [Native.Win]::SendText($main, $kTestFrames, ''); if ($a -ge 0) { "$a" } } 5
+        if (-not $v) { return [pscustomobject]@{ Count = -1; Fit = $false; Height = 0 } }
+        $v = [int64]$v
+        [pscustomobject]@{ Count = [int]($v % 100); Fit = ($v % 1000) -ge 100; Height = [int][Math]::Floor($v / 1000) }
+    }
+    # frames once there are $count of them, each as tall as its document
+    function FramesFit([int]$count) {
+        WaitFor { $f = Frames; if ($f.Count -eq $count -and $f.Fit) { $f } } 15
+    }
+    # words of the message shown found by Find in This Message (which looks into the parts' frames too)
+    # (asked again a few times: a part's frame may still be loading its document)
+    function FoundInSecure([string]$words) {
+        for ($try = 0; $try -lt 3; $try++) {
+            Command $main $IDM_FIND_IN_MESSAGE
+            $form = WaitWindow 'InboxClassicForm' 'Find in This Message' 10
+            if (-not $form) { return $false }
+            SetText $form 100 $words
+            Click $form 1
+            Start-Sleep -Milliseconds 1500
+            if ((StatusPart $secureStatus 0) -notmatch 'not in this message') { return $true }
+        }
+        $false
+    }
+    # a message of scripts/ui-e2e/pgp put in the Inbox and shown: the words of its bar once the bar is there (an
+    # encrypted one's subject is "..." in the list until it is read)
+    # the row of the Inbox with this subject or "..." (an encrypted message's until it is read) selected; the words of
+    # the bar once it is there
+    function SelectSecure([string]$subject) {
+        SelectFolder 0
+        $row = WaitFor { $r = @(SubjectRows $subject) + @(SubjectRows '...'); if ($r.Count -gt 0) { "$($r[0])" } } 30
+        if ($null -eq $row) { return "(not listed: $subject)" }
+        SelectRow ([int]$row)
+        $words = WaitFor { if ([Native.Win]::IsWindowVisible($securityBar)) { $t = WindowText $securityBar; if ($t) { $t } } } 20
+        if ($words) { $words } else { '(no bar)' }
+    }
+    # a message of scripts/ui-e2e/pgp put in the Inbox and shown
+    function ShowSecure([string]$file, [string]$subject) {
+        AddMessage ([IO.File]::ReadAllText((Join-Path $pgpFiles $file))) @('\Seen')
+        Command $main $IDM_SYNC
+        SelectSecure $subject
+    }
+    # the message of `file` taken away again, and out of the list
+    function RemoveSecure([string]$file, [string]$subject) {
+        $raw = [IO.File]::ReadAllText((Join-Path $pgpFiles $file))
+        if ($raw -match '(?m)^Message-ID: (<[^>\r\n]+>)') {
+            $added = Find 'INBOX' ([regex]::Escape($Matches[1]))
+            if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
+        }
+        Command $main $IDM_SYNC
+        [void](WaitFor { @(SubjectRows $subject).Count -eq 0 -and @(SubjectRows '...').Count -eq 0 } 20)
+    }
+    # the Details window once it opens, its text; closed after
+    function DetailsText([string]$shot = $null) {
+        $details = WaitShown 'InboxClassicSecurityDetails' 10
+        if (-not $details) { return $null }
+        $text = GetText $details $IDC_SECURITY_DETAILS
+        $title = WindowText $details
+        if ($shot) { Shot $details $shot }
+        Click $details 2
+        [void](WaitFor { -not [Native.Win]::IsWindow($details) } 5)
+        [pscustomobject]@{ Title = $title; Text = $text }
+    }
+
+    # the keys: the user's own (me.asc, with its passphrase), Alice's and Mallory's
+    $keys = OpenKeys
+    if ($keys) {
+        $passphrase = (Get-Content -Raw (Join-Path $pgpFiles 'me.passphrase')).Trim()
+        $said = ImportKeyFile $keys 'me.asc' $passphrase
+        Check ($said -notmatch '^\(') "the user's key of the messages is imported with its passphrase ($said)"
+        foreach ($file in 'alice.asc', 'mallory.asc') {
+            $said = ImportKeyFile $keys $file
+            Check ($said -notmatch '^\(') "$file is imported ($said)"
+        }
+        CloseKeys $keys
+    }
+
+    # signed by Alice, her key not verified: blue, the ribbon; one frame labelled the same
+    $words = ShowSecure 'secure-signed.eml' 'Signed by Alice'
+    Check ($words -eq 'Signed by alice@example.org (key not verified)') "a signed message has the bar, its words the signer's address, not verified ($words)"
+    Check ((BarFill) -eq $fills.good) "the bar is blue ($(BarFill))"
+    Check ($null -ne (FramesFit 1)) "the part is one frame, as tall as its document ($(Frames))"
+    Check ((PaneRow 0x1f 0x5f 0xae) -ge 0) 'the part has its label in blue'
+    Shot $main 'secure-2-signed-unverified'
+
+    # They Match on Alice's key: the same message green, "key verified"
+    $keys = OpenKeys
+    if ($keys) {
+        Check ((SelectKey $keys 'Alice Example') -ge 0) "Alice's key is listed"
+        Click $keys $IDC_KEYS_VERIFY
+        $verify = WaitShown 'InboxClassicVerify'
+        if ($verify) {
+            Click $verify $IDC_VERIFY_MATCH
+            [void](WaitFor { -not [Native.Win]::IsWindow($verify) } 5)
+        }
+        CloseKeys $keys
+    }
+    SelectRow ([int](@(SubjectRows 'Signed by Alice')[0]))
+    $words = WaitFor { $t = WindowText $securityBar; if ($t -match 'key verified') { $t } } 15
+    Check ($null -ne $words) "after They Match the bar says the key is verified ($(WindowText $securityBar))"
+    Check ((BarFill) -eq $fills.verified) "and is green ($(BarFill))"
+    Shot $main 'secure-1-verified'
+
+    # Details by the bar's button: the words, each part with the key that signed it, Close
+    Click $securityBar $IDC_SECURITY_DETAILS
+    $details = DetailsText
+    Check ($null -ne $details -and $details.Title -eq 'Security Details') "Details opens the Security Details window ($(if ($details) { $details.Title }))"
+    Check ($null -ne $details -and $details.Text -match 'Part 1' -and $details.Text -match 'with the key') "it names the part and the key that signed it ($(if ($details) { $details.Text -replace "`r`n", ' / ' }))"
+    # a click on the part's label opens it too, and nothing else
+    $labelTop = PaneRow 0x2e 0x7d 0x32
+    if ($labelTop -ge 0) {
+        $box = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect($securePane, [ref]$box)
+        [void][Native.Win]::SetForegroundWindow($main)
+        [Native.Win]::MouseClick($box.Left + 60, $box.Top + $labelTop + 8)
+    }
+    $details = DetailsText
+    Check ($null -ne $details) "a click on the part's label opens Details (its frame at row $labelTop)"
+    # the keyboard: Tab reaches Details, Alt with its letter presses it
+    Check ([bool]([Native.Win]::GetWindowLong($detailsButton, -16) -band 0x00010000) -and [Native.Win]::IsWindowEnabled($detailsButton)) 'Details is a Tab stop'
+    Check ((WindowText $detailsButton) -eq '&Details...') "with an access key ($(WindowText $detailsButton))"
+    SelectRow ([int](@(SubjectRows 'Signed by Alice')[0]))
+    [void](WaitFor { [Native.Win]::IsWindowVisible($securityBar) } 10)
+    [void][Native.Win]::SetForegroundWindow($main)
+    $focusClass = New-Object System.Text.StringBuilder 64
+    [void][Native.Win]::GetClassName([Native.Win]::FocusOf($main), $focusClass, 64)
+    [System.Windows.Forms.SendKeys]::SendWait('%d')
+    $details = DetailsText
+    Check ($null -ne $details) "Alt+D opens Details from the list (the focus in $focusClass)"
+    # and from the message, which has the keyboard after a click into its text
+    if ($labelTop -ge 0) {
+        $box = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect($securePane, [ref]$box)
+        [void][Native.Win]::SetForegroundWindow($main)
+        [Native.Win]::MouseClick($box.Left + 300, $box.Top + $labelTop + 40)
+        Start-Sleep -Milliseconds 500
+        [System.Windows.Forms.SendKeys]::SendWait('%d')
+        Check ($null -ne (DetailsText)) 'Alt+D opens Details from the message too'
+    }
+    RemoveSecure 'secure-signed.eml' 'Signed by Alice'
+
+    # encrypted to the user's key, signed by Alice: the lock, and the text
+    $words = ShowSecure 'secure-encrypted.eml' 'Encrypted'
+    Check ($words -match '^Encrypted\. Signed by alice@example\.org, key verified') "an encrypted message's bar has the lock's words and the signer ($words)"
+    Check ((BarFill) -eq $fills.verified) "green, signed by a verified key ($(BarFill))"
+    Check ([bool](FoundInSecure 'old mill')) 'the text is decrypted and shown'
+    Shot $main 'secure-3-encrypted'
+    RemoveSecure 'secure-encrypted.eml' 'Encrypted'
+
+    # three parts each with their own label, the bar counting them
+    $words = ShowSecure 'secure-mixed.eml' 'Parts signed apart'
+    Check ($words -match '3 parts' -and $words -match '1 verified' -and $words -match '2 without a confirmed signature') "the bar counts the parts ($words)"
+    Check ($null -ne (FramesFit 3)) "three frames, each as tall as its part ($(Frames))"
+    Check ((BarFill) -eq $fills.neutral) "grey, as its least part ($(BarFill))"
+    Shot $main 'secure-4-mixed-parts'
+    # Details names each part, the signed one with its key
+    Click $securityBar $IDC_SECURITY_DETAILS
+    $details = DetailsText 'secure-9-details'
+    Check ($null -ne $details -and $details.Text -match 'Part 2: Signed by alice@example\.org' -and $details.Text -match 'Part 3' -and $details.Text -match 'with the key') "Details names Part 2, signed by Alice, and its key ($(if ($details) { $details.Text -replace "`r`n", ' / ' }))"
+    # Print: the core's one document of every part (a printer prints no frames), with the bar's words and the labels
+    Command $main $IDM_PRINT
+    $print = WaitWindow 'InboxClassicPrint' $null 20
+    Check ($null -ne $print) 'Print of a message of parts opens the print preview'
+    if ($print) {
+        Start-Sleep -Seconds 5
+        Shot $print 'secure-14-print'
+        [void][Native.Win]::PostMessage($print, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($print) } 10)
+    }
+    RemoveSecure 'secure-mixed.eml' 'Parts signed apart'
+
+    # a changed text, a stranger's signature, a key not known
+    $words = ShowSecure 'secure-bad.eml' 'A changed text'
+    Check ($words -match 'does not match') "a changed text: the signature does not match ($words)"
+    Check ((BarFill) -eq $fills.warning) "amber ($(BarFill))"
+    Shot $main 'secure-5-bad-signature'
+    RemoveSecure 'secure-bad.eml' 'A changed text'
+    $words = ShowSecure 'secure-wrong-signer.eml' 'Signed by someone else'
+    Check ($words -match 'mallory@example\.net' -and $words -match 'not the sender') "signed by someone else: who, and that it is not the sender ($words)"
+    Check ((BarFill) -eq $fills.warning) "amber ($(BarFill))"
+    Shot $main 'secure-6-wrong-signer'
+    RemoveSecure 'secure-wrong-signer.eml' 'Signed by someone else'
+    $words = ShowSecure 'secure-no-key.eml' 'A key you do not have'
+    Check ($words -eq 'Signed, but the key is not known') "a key not known ($words)"
+    Check ((BarFill) -eq $fills.neutral) "grey ($(BarFill))"
+    Shot $main 'secure-7-no-key'
+    RemoveSecure 'secure-no-key.eml' 'A key you do not have'
+
+    # a label painted in the sender's own part stays in its frame, under the real label
+    $words = ShowSecure 'secure-fake-frame.eml' 'A painted frame'
+    Check ($words -match '2 parts') "the bar counts 2 parts ($words)"
+    $fake = FramesFit 2
+    Check ($null -ne $fake) "two frames, their labels the app's ($(Frames))"
+    Check ($null -ne $fake -and $fake.Height -ge 96) "the painted part out of the flow still has a frame of its own, at least 48 pixels ($(if ($fake) { $fake.Height }))"
+    $real = PaneRow 0x9e 0x9e 0x9e
+    $painted = PaneRow 0x2e 0x7d 0x32
+    Check ($real -ge 0 -and ($painted -lt 0 -or $painted -gt $real)) "the real label Not signed is at the top, the painted green one under it (rows $real and $painted)"
+    Shot $main 'secure-8-fake-frame'
+    RemoveSecure 'secure-fake-frame.eml' 'A painted frame'
+
+    # an encrypted block in plain text: a part of its own between the text around it
+    $words = ShowSecure 'secure-inline.eml' 'Inline encrypted'
+    Check ($words -match '3 parts') "the inline block and the text around it are 3 parts ($words)"
+    Check ($null -ne (FramesFit 3)) "three frames ($(Frames))"
+    Check ([bool](FoundInSecure '4711')) 'the block is decrypted in its frame'
+    Shot $main 'secure-10-inline'
+    RemoveSecure 'secure-inline.eml' 'Inline encrypted'
+
+    # pictures in an encrypted part: the bar without "always", nothing asked of the internet before the click
+    $words = ShowSecure 'secure-pictures.eml' 'Encrypted with a picture'
+    Check ($words -match '^Encrypted\.' -and $words -notmatch 'Pictures were loaded') "an encrypted message with a picture ($words)"
+    Check ([bool](WaitFor { Visible $main $IDC_PICTURES } 10)) 'the pictures bar is there'
+    Check (-not (Visible $main $IDC_PICTURES_MENU)) 'without its arrow: there is no "always" for encrypted mail'
+    Start-Sleep -Seconds 2
+    $asked = [Native.Win]::SendText($main, $kTestRemote, '') - 10
+    Check ($asked -eq 0) "nothing was asked of the internet ($asked)"
+    Shot $main 'secure-11b-pictures-blocked'
+    Click $main $IDC_PICTURES
+    $words = WaitFor { $t = WindowText $securityBar; if ($t -match 'Pictures were loaded') { $t } } 15
+    Check ($null -ne $words) "after the click the bar says pictures were loaded ($(WindowText $securityBar))"
+    Check (-not (Visible $main $IDC_PICTURES)) 'and the pictures bar goes'
+    Check ([bool](WaitFor { ([Native.Win]::SendText($main, $kTestRemote, '') - 10) -gt 0 } 10)) 'the picture is asked for'
+    Shot $main 'secure-11-pictures-in-decrypted'
+    # opened again: nothing loads until the next click
+    SelectFolder 1
+    Start-Sleep -Seconds 1
+    $words = SelectSecure 'Encrypted with a picture'
+    Start-Sleep -Seconds 2
+    Check ((Visible $main $IDC_PICTURES) -and ([Native.Win]::SendText($main, $kTestRemote, '') - 10) -eq 0) "opened again, the pictures wait for a click again ($words)"
+    RemoveSecure 'secure-pictures.eml' 'Encrypted with a picture'
+
+    # a long part: its frame as tall as it, again when "..." unfolds and when the pane is narrower
+    $words = ShowSecure 'secure-long.eml' 'A long encrypted message'
+    $long = FramesFit 1
+    Check ($null -ne $long) "a long part's frame is as tall as it: no scroll bar inside it ($(Frames))"
+    Check ([bool](FoundInSecure 'Line 40 of the long part')) 'its last lines are there'
+    Check ([bool](FoundInSecure 'The earlier message, folded')) 'Find unfolds the "..."'
+    $unfolded = WaitFor { $f = Frames; if ($f.Fit -and $long -and $f.Height -gt $long.Height) { $f } } 10
+    Check ($null -ne $unfolded) "unfolded, the frame grows to what it holds ($(if ($long) { $long.Height }) to $(if ($unfolded) { $unfolded.Height }))"
+    $place = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect($main, [ref]$place)
+    [void][Native.Win]::SetWindowPos($main, [IntPtr]::Zero, 0, 0, 520, ($place.Bottom - $place.Top), 0x16)
+    $before = if ($unfolded) { $unfolded.Height } else { 0 }
+    # (its lines are short: at the narrowest the window goes they do not wrap, so it keeps its height)
+    Start-Sleep -Seconds 1
+    $narrow = WaitFor { $f = Frames; if ($f.Fit -and $f.Height -ge $before) { $f } } 10
+    Check ($null -ne $narrow) "made narrower, it still shows all of its part ($before to $(if ($narrow) { $narrow.Height }), $(Frames))"
+    Shot $main 'secure-12-resized'
+    [void][Native.Win]::SetWindowPos($main, [IntPtr]::Zero, 0, 0, ($place.Right - $place.Left), ($place.Bottom - $place.Top), 0x16)
+    RemoveSecure 'secure-long.eml' 'A long encrypted message'
+
     # ---- getting new mail ----
 
     Step 'Send/Recv'

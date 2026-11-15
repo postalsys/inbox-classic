@@ -49,6 +49,9 @@ mod keys;
 /// Messages in dark mode
 mod dark;
 
+/// Step 19i: signed and encrypted mail
+mod secure;
+
 const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
 const MINUTES: &str = "Minutes of the planning meeting";
@@ -978,6 +981,7 @@ async fn scenario(d: Rc<Driver>) {
     other_addresses(&d).await;
     rules::message_rules(&d).await;
     keys::encryption_keys(&d).await;
+    secure::signed_and_encrypted(&d).await;
     text_size(&d).await;
     send_receive(&d).await;
     finding(&d).await;

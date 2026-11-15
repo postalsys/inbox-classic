@@ -16,7 +16,7 @@ fn key_file(name: &str) -> PathBuf {
 }
 
 /// The rows of the Encryption Keys window, each as its words
-fn keys_listed(dialog: &gtk::Widget) -> Vec<String> {
+pub(super) fn keys_listed(dialog: &gtk::Widget) -> Vec<String> {
     named_in(dialog, "keys-list")
         .map(|list| descendants::<adw::ActionRow>(&list))
         .unwrap_or_default()
@@ -39,7 +39,7 @@ fn sensitive(root: &gtk::Widget, name: &str) -> bool {
 }
 
 /// Selects the row of the key list whose words have `needle`
-fn select_key(dialog: &gtk::Widget, needle: &str) -> bool {
+pub(super) fn select_key(dialog: &gtk::Widget, needle: &str) -> bool {
     let Some(list) = named_in(dialog, "keys-list").and_downcast::<gtk::ListBox>() else {
         return false;
     };
@@ -50,14 +50,14 @@ fn select_key(dialog: &gtk::Widget, needle: &str) -> bool {
     true
 }
 
-async fn open_keys(d: &Driver) -> Option<gtk::Widget> {
+pub(super) async fn open_keys(d: &Driver) -> Option<gtk::Widget> {
     command(Command::EncryptionKeys);
     let dialog = wait_dialog(10, "keys-dialog").await;
     d.check(dialog.is_some(), "Tools > Encryption Keys opens the window");
     dialog.map(|dialog| dialog.upcast())
 }
 
-async fn close_keys(dialog: &gtk::Widget) {
+pub(super) async fn close_keys(dialog: &gtk::Widget) {
     if let Some(dialog) = dialog.downcast_ref::<adw::Dialog>() {
         dialog.close();
     }
