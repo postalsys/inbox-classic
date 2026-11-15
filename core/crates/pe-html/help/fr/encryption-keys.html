@@ -1,0 +1,19 @@
+<!--review-->
+<h1>Clés de chiffrement</h1>
+<p class="summary">Créez une clé pour signer vos messages et recevoir du courrier chiffré, et conservez les clés de vos contacts.</p>
+<p>Inbox Classic signe et chiffre le courrier avec des clés OpenPGP. Votre clé a deux moitiés : une clé publique que vous donnez aux autres, et une clé privée qui reste sur votre ordinateur. Les clés de vos contacts vous permettent de vérifier leurs signatures et de leur chiffrer du courrier.</p>
+<p>Pour créer votre clé :</p>
+<ol>
+    <li>Choisissez <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, puis cliquez sur <b data-text="ui-keys-new"></b>.</li>
+    <li>Choisissez le compte et cliquez sur <b data-text="ui-keys-new-make"></b>. La clé sert pour l’adresse du compte et ses autres adresses.</li>
+    <li>Cliquez sur <b data-text="ui-keys-backup-now"></b> et choisissez une phrase secrète. Gardez le fichier et la phrase dans des endroits sûrs différents.</li>
+</ol>
+<aside class="warning">Sans sauvegarde, votre clé ne peut pas être récupérée si cet ordinateur est perdu ou réinitialisé, et le courrier chiffré pour elle ne peut plus être lu.</aside>
+<h2>Protégées sans phrase secrète</h2>
+<p>Vos clés privées sont protégées par une clé conservée dans <!--os:windows-->le Gestionnaire d’identification<!--/os--><!--os:mac-->le trousseau<!--/os--><!--os:linux-->le trousseau du système<!--/os-->, vous ne saisissez donc jamais de phrase secrète pour les utiliser. Vous en choisissez une seulement pour une sauvegarde. Si votre clé apparaît verrouillée, cette protection a été réinitialisée : cliquez sur <b data-text="ui-keys-import"></b> et choisissez sa sauvegarde.</p>
+<h2>Ajouter des clés</h2>
+<p>Cliquez sur <b data-text="ui-keys-import"></b> pour ajouter une clé depuis un fichier, par exemple une clé envoyée par un contact ou une sauvegarde de la vôtre. Une clé privée protégée par une phrase secrète la demande une fois. Inbox Classic demande ensuite s’il faut utiliser votre clé importée pour vos adresses.</p>
+<p>La clé d’un contact sert ensuite pour son adresse. Si une autre clé pour la même adresse apparaît plus tard, l’actuelle reste utilisée jusqu’à ce que vous choisissiez la nouvelle dans les propriétés du contact.</p>
+<p>Pour partager votre clé publique, sélectionnez-la et cliquez sur <b data-text="ui-keys-export"></b>. Vous pouvez aussi choisir la clé de votre compte dans ses propriétés, sous l’onglet <b data-text="ui-account-security"></b>.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
+<!--/review-->

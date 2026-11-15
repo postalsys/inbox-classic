@@ -6,6 +6,7 @@ help-section-get-started = Get started
 help-section-everyday = Everyday tasks
 help-section-accounts = Several accounts
 help-section-message-features = Message features
+help-section-encrypted-mail = Encrypted and signed mail
 help-section-settings = Settings
 help-section-agents = AI agents
 help-section-reference = Reference

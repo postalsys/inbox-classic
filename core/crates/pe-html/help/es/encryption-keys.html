@@ -1,0 +1,19 @@
+<!--review-->
+<h1>Claves de cifrado</h1>
+<p class="summary">Cree una clave para firmar sus mensajes y recibir correo cifrado, y guarde las claves de sus contactos.</p>
+<p>Inbox Classic firma y cifra el correo con claves OpenPGP. Su propia clave tiene dos mitades: una clave pública que da a los demás y una clave privada que se queda en su equipo. Las claves de sus contactos le permiten comprobar sus firmas y cifrarles el correo.</p>
+<p>Para crear su clave:</p>
+<ol>
+    <li>Elija <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> y haga clic en <b data-text="ui-keys-new"></b>.</li>
+    <li>Elija la cuenta y haga clic en <b data-text="ui-keys-new-make"></b>. La clave se usa para la dirección de la cuenta y sus otras direcciones.</li>
+    <li>Haga clic en <b data-text="ui-keys-backup-now"></b> y elija una frase de contraseña. Guarde el archivo y la frase en lugares seguros distintos.</li>
+</ol>
+<aside class="warning">Sin una copia de seguridad, su clave no se puede recuperar si este equipo se pierde o se restablece, y el correo cifrado para ella ya no se podrá leer.</aside>
+<h2>Protegidas sin frases de contraseña</h2>
+<p>Sus claves privadas están protegidas por una clave guardada en <!--os:windows-->el Administrador de credenciales<!--/os--><!--os:mac-->el llavero<!--/os--><!--os:linux-->el llavero del sistema<!--/os-->, así que nunca escribe una frase de contraseña para usarlas. Solo elige una para una copia de seguridad. Si su clave aparece bloqueada, esa protección se restableció: haga clic en <b data-text="ui-keys-import"></b> y elija su copia de seguridad.</p>
+<h2>Añadir claves</h2>
+<p>Haga clic en <b data-text="ui-keys-import"></b> para añadir una clave de un archivo, como una que le envió un contacto o una copia de seguridad de la suya. Una clave privada protegida por una frase de contraseña la pide una vez. Después, Inbox Classic pregunta si usar una clave suya importada para sus direcciones.</p>
+<p>La clave de un contacto se usa para su dirección desde entonces. Si más adelante aparece otra clave para la misma dirección, la actual sigue en uso hasta que elija la nueva en las propiedades del contacto.</p>
+<p>Para compartir su clave pública, selecciónela y haga clic en <b data-text="ui-keys-export"></b>. También puede elegir la clave de su cuenta en sus propiedades, en la pestaña <b data-text="ui-account-security"></b>.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
+<!--/review-->

@@ -34,6 +34,10 @@ id = "message-features"
 topics = ["sign-in-codes", "delivery-problems", "invitations", "unsubscribe", "brand-logos"]
 
 [[section]]
+id = "encrypted-mail"
+topics = ["encryption-keys", "verify-a-key"]
+
+[[section]]
 id = "settings"
 topics = ["options-language", "download-ahead", "account-security", "default-mail-program", "updates"]
 
@@ -68,3 +72,5 @@ agents = "agents-connect"
 address-book = "address-book"
 compose = "write-message"
 message-rules = "message-rules"
+encryption-keys = "encryption-keys"
+verify-key = "verify-a-key"
