@@ -14,9 +14,7 @@ size-bytes = { $count ->
 size-kb = { $size } KB
 size-mb = { $size } MB
 size-gb = { $size } GB
-# review: new
 send-delay-off = Väljas
-# review: new
 send-delay-seconds = { $count ->
     [one] 1 sekund
    *[other] { $count } sekundit
@@ -205,7 +203,6 @@ undo-delete = Võta kustutamine tagasi
 undo-archive = Võta arhiveerimine tagasi
 undo-junk = Võta rämpspostiks märkimine tagasi
 undo-not-junk = Võta tavapostiks märkimine tagasi
-# review: new
 undo-send = Tühista saatmine
 nothing-to-undo = Pole midagi tagasi võtta.
 messages-gone = Neid kirju pole enam.
@@ -321,13 +318,9 @@ error-folder-separator = kausta nimes ei tohi selles serveris olla märki „{ $
 error-folder-special = sisendkausta ja erikaustu ei saa ümber nimetada ega kustutada
 error-no-recipients = kirjal pole adressaate
 error-bad-address = „{ $address }“ pole e-posti aadress
-# review: new
 error-not-own-address = { $address } ei kuulu selle konto saatja-aadresside hulka. Lisage see konto atribuutides väljale „Muud saatja-aadressid“.
-# review: new
 rule-query-refused = Reegli tingimustes ei saa kasutada kausta ega kuupäeva filtreid ({ $words }).
-# review: new
 rule-no-query = Sisestage saabuvate kirjade otsingutingimused.
-# review: new
 rule-no-action = Valige reeglile vähemalt üks toiming.
 error-attachment = faili { $path } ei saanud lugeda: { $error }
 error-no-drafts = kontol pole mustandite kausta, kuhu kirja salvestada

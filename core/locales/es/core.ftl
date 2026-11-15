@@ -14,9 +14,7 @@ size-bytes = { $count ->
 size-kb = { $size } KB
 size-mb = { $size } MB
 size-gb = { $size } GB
-# review: new
 send-delay-off = Desactivado
-# review: new
 send-delay-seconds = { $count ->
     [one] 1 segundo
    *[other] { $count } segundos
@@ -222,7 +220,6 @@ undo-delete = Deshacer Eliminar
 undo-archive = Deshacer Archivar
 undo-junk = Deshacer Marcar como correo no deseado
 undo-not-junk = Deshacer Marcar como correo deseado
-# review: new
 undo-send = Deshacer envío
 nothing-to-undo = No hay nada que deshacer.
 messages-gone = Los mensajes ya no están.
@@ -345,13 +342,9 @@ error-folder-separator = un nombre de carpeta no puede contener «{ $separator }
 error-folder-special = la Bandeja de entrada y las carpetas especiales no se pueden renombrar ni eliminar
 error-no-recipients = el mensaje no tiene destinatarios
 error-bad-address = «{ $address }» no es una dirección de correo electrónico
-# review: new
 error-not-own-address = { $address } no es una de las direcciones de envío de esta cuenta. Añádala al campo «Otras direcciones de envío» en las propiedades de la cuenta.
-# review: new
 rule-query-refused = Las reglas no admiten filtros de carpeta ni de fecha ({ $words }).
-# review: new
 rule-no-query = Introduzca los criterios de búsqueda para los mensajes entrantes.
-# review: new
 rule-no-action = Elija al menos una acción para la regla.
 error-attachment = no se pudo leer { $path }: { $error }
 error-no-drafts = la cuenta no tiene una carpeta Borradores donde guardar el mensaje

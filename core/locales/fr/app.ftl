@@ -10,7 +10,6 @@ menu-message = &Message
 menu-help = &?
 menu-layout = Dispositio&n
 menu-sort-by = T&rier par
-# review: new
 menu-text-size = Taille du te&xte
 menu-folder = &Dossier
 
@@ -70,15 +69,10 @@ cmd-sort-subject = &Objet
 cmd-sort-size = &Taille
 cmd-sort-ascending = Tri &croissant
 cmd-sort-descending = Tri déc&roissant
-# review: new
 cmd-text-size-largest = Très gra&nde
-# review: new
 cmd-text-size-larger = &Grande
-# review: new
 cmd-text-size-medium = &Moyenne
-# review: new
 cmd-text-size-smaller = &Petite
-# review: new
 cmd-text-size-smallest = &Très petite
 cmd-hide-ignored = &Masquer les conversations ignorées
 cmd-hide-read = Masquer les messages &lus
@@ -88,9 +82,7 @@ cmd-default-app = Définir comme programme de &messagerie par défaut...
 cmd-view-source = Code &source du message
 cmd-ai-agents = &Agents d'IA...
 cmd-options = &Options...
-# review: new
 cmd-message-rules = &Règles de message...
-# review: new
 cmd-create-rule-from-message = Créer une règl&e à partir du message...
 cmd-select-all = Sélectionner &tout
 cmd-undo = &Annuler
@@ -185,16 +177,12 @@ ui-filter-pictures = Images
 ui-filter-messages = Messages électroniques
 ui-save-attachment-as = Enregistrer la pièce jointe sous
 ui-not-sent = Le message n'a pas pu être envoyé.
-# review: new
 ui-attachment-forgotten = Vous avez écrit « { $word } », mais aucun fichier n’est joint. Envoyer le message quand même ?
-# review: new
 ui-send-anyway = Envoyer quand même
-# review: new
 ui-go-back = Revenir
 ui-not-saved = Le message n'a pas pu être enregistré.
 ui-saving-draft = Enregistrement dans le dossier Brouillons...
 ui-compose-saved-at = Enregistré dans le dossier Brouillons à { $time }
-# review: new
 ui-compose-restored = Restauré après la fermeture inattendue d’Inbox Classic
 ui-compose-not-saved = Non enregistré dans le dossier Brouillons : { $reason }
 ui-save-changes-ask = Voulez-vous enregistrer les modifications de ce message dans le dossier Brouillons ?
@@ -228,7 +216,6 @@ ui-signature = Signature
 ui-signature-hint = Ajoutée aux nouveaux messages, aux réponses et aux transferts de ce compte.
 ui-signature-not-saved = La signature n'a pas pu être enregistrée.
 ui-all-inboxes = Toutes les boîtes
-# review: new
 ui-flagged-folder = Avec indicateur
 ui-all-folders = Tous les dossiers
 ui-the-account = le compte
@@ -313,7 +300,6 @@ ui-field-imap-security = Sécurité IMAP :
 ui-field-smtp-host = Serveur sortant (SMTP) :
 ui-field-smtp-port = Port SMTP :
 ui-field-smtp-security = Sécurité SMTP :
-# review: new
 ui-field-other-addresses = Autres adresses d’envoi :
 ui-sign-in-not-started = La connexion par le navigateur n'a pas pu démarrer.
 ui-sign-in-in-browser = Connectez-vous à { $account } dans la fenêtre du navigateur qui s'est ouverte, puis revenez ici.
@@ -421,65 +407,38 @@ ui-clear-agent-log-detail = Les modifications effectuées par les agents ne sero
 ui-let-agents-connect = &Laisser les agents d'IA se connecter à Inbox Classic
 ui-change-button = Modifier…
 ui-undo-button = Annuler
-# review: new
 ui-rules-title = Règles de message
-# review: new
 ui-rules-intro = Les règles trient les nouveaux messages reçus tant qu’Inbox Classic est ouvert. Les règles dont les critères sont remplis s’appliquent dans l’ordre. Dès qu’une règle déplace un message hors de la boîte de réception, les suivantes ne s’appliquent plus à ce message.
-# review: new
 ui-rules-none = Aucune règle pour l’instant. Cliquez sur Nouvelle pour en créer une.
-# review: new
 ui-rule-new = &Nouvelle...
-# review: new
 ui-rule-edit = M&odifier...
-# review: new
 ui-rule-delete-button = &Supprimer
-# review: new
 ui-rule-title = Règle de message
-# review: new
 ui-rule-name = Nom :
-# review: new
 ui-rule-account = Compte :
-# review: new
 ui-rule-all-accounts = Tous les comptes
-# review: new
 ui-rule-query = Critères de recherche :
-# review: new
 ui-rule-query-hint = Utilisez les mêmes termes que dans la zone de recherche, par exemple from:anne@example.com, subject:facture ou list:news.example.com.
-# review: new
 ui-rule-count = { $count ->
     [one] { $count } message de la boîte de réception correspond actuellement à ces critères.
    *[other] { $count } messages de la boîte de réception correspondent actuellement à ces critères.
 }
-# review: new
 ui-rule-show = A&fficher
-# review: new
 ui-rule-actions = Actions :
-# review: new
 ui-rule-move = Le &déplacer vers :
-# review: new
 ui-rule-mark-read = Le marquer comme &lu
-# review: new
 ui-rule-flag = Lui ajouter un &indicateur
-# review: new
 ui-rule-archive = L’&archiver
-# review: new
 ui-rule-junk = Le déplacer dans le &Courrier indésirable
-# review: new
 ui-rule-delete = Le &supprimer
-# review: new
 ui-rule-quiet = Ne &pas me prévenir
-# review: new
 ui-rule-apply-now = L’appliquer aussi aux messages déjà dans la &boîte de réception
-# review: new
 ui-rule-delete-ask = Supprimer la règle « { $name } » ?
-# review: new
 ui-create-rule = Créer une règle...
-# review: new
 ui-rules-applied = { $count ->
     [one] { $count } message trié selon vos règles
    *[other] { $count } messages triés selon vos règles
 }
-# review: new
 ui-col-rule-matches = Critères
 ui-clear-button = &Effacer
 ui-how-to-connect = Comment connecter un agent…
@@ -584,22 +543,15 @@ ui-download-ahead-recent = Messages récents de 1 Mo maximum
 ui-download-ahead-all = Tous les messages
 ui-download-ahead-never = Seulement à l’ouverture
 ui-download-limit = Espace maximal par compte :
-# review: new
 ui-send-delay = Délai avant l’envoi :
-# review: new
 ui-send-delay-note = Tant qu’un message est en attente d’envoi, vous pouvez annuler son envoi avec le bouton Annuler.
-# review: new
 ui-dark-messages = Afficher les messages sur fond sombre lorsque le système est en mode sombre
-# review: new
 ui-sending-in = Envoi de { $subject } dans { $count ->
     [one] { $count } seconde
    *[other] { $count } secondes
 }
-# review: new
 ui-send-undone = { $subject } n’a pas été envoyé. Le message est à nouveau ouvert pour être modifié.
-# review: new
 ui-send-too-late = { $subject } a déjà été envoyé.
-# review: new
 ui-outbox-status-undo = Envoi à { $time }
 ui-download-note = Les messages téléchargés à l'avance s'ouvrent immédiatement. Lorsque la limite de stockage est dépassée, les copies locales les plus anciennes sont supprimées, puis téléchargées à nouveau à l'ouverture des messages.
 ui-attachment-downloading = Le téléchargement de ce message est encore en cours. Réessayez une fois le téléchargement terminé.

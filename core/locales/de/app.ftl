@@ -10,7 +10,6 @@ menu-message = &Nachricht
 menu-help = &Hilfe
 menu-layout = &Layout
 menu-sort-by = &Sortieren nach
-# review: new
 menu-text-size = Schri&ftgröße
 menu-folder = &Ordner
 
@@ -70,15 +69,10 @@ cmd-sort-subject = &Betreff
 cmd-sort-size = &Größe
 cmd-sort-ascending = &Aufsteigend sortieren
 cmd-sort-descending = Ab&steigend sortieren
-# review: new
 cmd-text-size-largest = Sehr &groß
-# review: new
 cmd-text-size-larger = G&roß
-# review: new
 cmd-text-size-medium = &Mittel
-# review: new
 cmd-text-size-smaller = &Klein
-# review: new
 cmd-text-size-smallest = Sehr k&lein
 cmd-hide-ignored = &Ignorierte Unterhaltungen ausblenden
 cmd-hide-read = &Gelesene Nachrichten ausblenden
@@ -88,9 +82,7 @@ cmd-default-app = Als &Standard-E-Mail-Programm festlegen...
 cmd-view-source = Nachrichten-&Quelltext
 cmd-ai-agents = &KI-Agenten...
 cmd-options = &Optionen...
-# review: new
 cmd-message-rules = Nachrichten&regeln...
-# review: new
 cmd-create-rule-from-message = Regel au&s Nachricht erstellen...
 cmd-select-all = &Alles auswählen
 cmd-undo = &Rückgängig
@@ -185,16 +177,12 @@ ui-filter-pictures = Bilder
 ui-filter-messages = E-Mail-Nachrichten
 ui-save-attachment-as = Anlage speichern unter
 ui-not-sent = Die Nachricht konnte nicht gesendet werden.
-# review: new
 ui-attachment-forgotten = Sie haben „{ $word }“ geschrieben, aber es ist keine Datei angehängt. Die Nachricht trotzdem senden?
-# review: new
 ui-send-anyway = Trotzdem senden
-# review: new
 ui-go-back = Zurück
 ui-not-saved = Die Nachricht konnte nicht gespeichert werden.
 ui-saving-draft = Wird im Ordner „Entwürfe“ gespeichert...
 ui-compose-saved-at = Um { $time } im Ordner „Entwürfe“ gespeichert
-# review: new
 ui-compose-restored = Wiederhergestellt, nachdem Inbox Classic unerwartet beendet wurde
 ui-compose-not-saved = Nicht im Ordner „Entwürfe“ gespeichert: { $reason }
 ui-save-changes-ask = Möchten Sie die Änderungen an dieser Nachricht im Ordner „Entwürfe“ speichern?
@@ -228,7 +216,6 @@ ui-signature = Signatur
 ui-signature-hint = Wird neuen Nachrichten, Antworten und Weiterleitungen von diesem Konto angefügt.
 ui-signature-not-saved = Die Signatur konnte nicht gespeichert werden.
 ui-all-inboxes = Alle Posteingänge
-# review: new
 ui-flagged-folder = Gekennzeichnet
 ui-all-folders = Alle Ordner
 ui-the-account = das Konto
@@ -313,7 +300,6 @@ ui-field-imap-security = IMAP-Sicherheit:
 ui-field-smtp-host = Postausgangsserver (SMTP):
 ui-field-smtp-port = SMTP-Port:
 ui-field-smtp-security = SMTP-Sicherheit:
-# review: new
 ui-field-other-addresses = Weitere Absenderadressen:
 ui-sign-in-not-started = Die Anmeldung im Browser konnte nicht gestartet werden.
 ui-sign-in-in-browser = Melden Sie sich im geöffneten Browserfenster bei { $account } an und kehren Sie dann hierher zurück.
@@ -421,65 +407,38 @@ ui-clear-agent-log-detail = Die von Agenten vorgenommenen Änderungen werden dad
 ui-let-agents-connect = KI-Agenten die Verbindung mit Inbox Classic &erlauben
 ui-change-button = Ändern…
 ui-undo-button = Rückgängig
-# review: new
 ui-rules-title = Nachrichtenregeln
-# review: new
 ui-rules-intro = Regeln sortieren neu eingehende Nachrichten, solange Inbox Classic läuft. Passende Regeln werden der Reihe nach angewendet. Sobald eine Regel eine Nachricht aus dem Posteingang verschiebt, werden für diese Nachricht keine weiteren Regeln ausgeführt.
-# review: new
 ui-rules-none = Noch keine Regeln. Klicken Sie auf „Neu“, um eine zu erstellen.
-# review: new
 ui-rule-new = &Neu...
-# review: new
 ui-rule-edit = &Bearbeiten...
-# review: new
 ui-rule-delete-button = &Löschen
-# review: new
 ui-rule-title = Nachrichtenregel
-# review: new
 ui-rule-name = Name:
-# review: new
 ui-rule-account = Konto:
-# review: new
 ui-rule-all-accounts = Alle Konten
-# review: new
 ui-rule-query = Suchkriterien:
-# review: new
 ui-rule-query-hint = Verwenden Sie Suchbegriffe wie im Suchfeld, zum Beispiel from:ann@example.com, subject:Rechnung oder list:news.example.com.
-# review: new
 ui-rule-count = { $count ->
     [one] 1 Nachricht im Posteingang entspricht derzeit diesen Kriterien.
    *[other] { $count } Nachrichten im Posteingang entsprechen derzeit diesen Kriterien.
 }
-# review: new
 ui-rule-show = An&zeigen
-# review: new
 ui-rule-actions = Aktionen:
-# review: new
 ui-rule-move = &Verschieben nach:
-# review: new
 ui-rule-mark-read = Als &gelesen markieren
-# review: new
 ui-rule-flag = &Kennzeichnen
-# review: new
 ui-rule-archive = &Archivieren
-# review: new
 ui-rule-junk = In &Junk-E-Mail verschieben
-# review: new
 ui-rule-delete = &Löschen
-# review: new
 ui-rule-quiet = &Nicht benachrichtigen
-# review: new
 ui-rule-apply-now = Auch auf die Nachrichten anwenden, die schon im &Posteingang sind
-# review: new
 ui-rule-delete-ask = Die Regel „{ $name }“ löschen?
-# review: new
 ui-create-rule = Regel erstellen...
-# review: new
 ui-rules-applied = { $count ->
     [one] 1 Nachricht nach Ihren Regeln sortiert
    *[other] { $count } Nachrichten nach Ihren Regeln sortiert
 }
-# review: new
 ui-col-rule-matches = Kriterien
 ui-clear-button = &Leeren
 ui-how-to-connect = So verbinden Sie einen Agenten…
@@ -584,22 +543,15 @@ ui-download-ahead-recent = Neuere Nachrichten mit jeweils bis zu 1 MB
 ui-download-ahead-all = Alle Nachrichten
 ui-download-ahead-never = Erst beim Öffnen
 ui-download-limit = Maximaler Speicherplatz pro Konto:
-# review: new
 ui-send-delay = Verzögerung vor dem Senden:
-# review: new
 ui-send-delay-note = Solange eine Nachricht auf den Versand wartet, können Sie das Senden mit „Rückgängig“ abbrechen.
-# review: new
 ui-dark-messages = Nachrichten auf dunklem Hintergrund anzeigen, wenn der Dunkelmodus des Systems aktiv ist
-# review: new
 ui-sending-in = { $subject } wird in { $count ->
     [one] 1 Sekunde
    *[other] { $count } Sekunden
 } gesendet
-# review: new
 ui-send-undone = { $subject } wurde nicht gesendet. Die Nachricht ist wieder zur Bearbeitung geöffnet.
-# review: new
 ui-send-too-late = { $subject } wurde bereits gesendet.
-# review: new
 ui-outbox-status-undo = Wird um { $time } gesendet
 ui-download-note = Vorab heruntergeladene Nachrichten lassen sich sofort öffnen. Wird das Speicherlimit überschritten, werden die ältesten lokalen Kopien entfernt und beim Öffnen erneut heruntergeladen.
 ui-attachment-downloading = Diese Nachricht wird noch heruntergeladen. Versuchen Sie es erneut, sobald der Download abgeschlossen ist.

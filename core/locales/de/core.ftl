@@ -14,9 +14,7 @@ size-bytes = { $count ->
 size-kb = { $size } KB
 size-mb = { $size } MB
 size-gb = { $size } GB
-# review: new
 send-delay-off = Aus
-# review: new
 send-delay-seconds = { $count ->
     [one] 1 Sekunde
    *[other] { $count } Sekunden
@@ -211,7 +209,6 @@ undo-delete = Löschen rückgängig machen
 undo-archive = Archivieren rückgängig machen
 undo-junk = Als Junk markieren rückgängig machen
 undo-not-junk = Als Nicht-Junk markieren rückgängig machen
-# review: new
 undo-send = Senden rückgängig machen
 nothing-to-undo = Es gibt nichts rückgängig zu machen.
 messages-gone = Die Nachrichten sind nicht mehr da.
@@ -334,13 +331,9 @@ error-folder-separator = ein Ordnername darf auf diesem Server kein „{ $separa
 error-folder-special = der Posteingang und die Spezialordner können nicht umbenannt oder gelöscht werden
 error-no-recipients = die Nachricht hat keine Empfänger
 error-bad-address = „{ $address }“ ist keine E-Mail-Adresse
-# review: new
 error-not-own-address = { $address } gehört nicht zu den Absenderadressen dieses Kontos. Fügen Sie die Adresse in den Kontoeigenschaften unter „Weitere Absenderadressen“ hinzu.
-# review: new
 rule-query-refused = Regeln unterstützen keine Ordner- oder Datumsfilter ({ $words }).
-# review: new
 rule-no-query = Geben Sie Suchkriterien für eingehende Nachrichten ein.
-# review: new
 rule-no-action = Wählen Sie mindestens eine Aktion für die Regel aus.
 error-attachment = { $path } konnte nicht gelesen werden: { $error }
 error-no-drafts = das Konto hat keinen Entwürfe-Ordner, in dem die Nachricht gespeichert werden kann
