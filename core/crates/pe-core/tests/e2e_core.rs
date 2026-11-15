@@ -3771,9 +3771,18 @@ fn the_reader_is_connected_before_the_first_open() {
 fn a_dead_reader_connection_is_replaced_within_seconds() {
     let Some(s) = setup() else { return };
     let (_, inbox, uids) = synced_with(&s, &["One"]);
-    eventually(|| reader_session(&s.server).is_some(), "the reader connects");
+    // the session found is kept: asked again, the background connection may be idle too for a moment, which makes
+    // the reader's not tell apart
+    let found = std::cell::Cell::new(None);
+    eventually(
+        || {
+            found.set(reader_session(&s.server));
+            found.get().is_some()
+        },
+        "the reader connects",
+    );
     // from now on the reader's session gets no answer, as one a NAT forgot
-    let reader = reader_session(&s.server).expect("the reader's session");
+    let reader = found.get().expect("the reader's session");
     s.server.request(
         "POST",
         "/v1/script/rules",
