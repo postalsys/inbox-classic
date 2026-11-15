@@ -14,9 +14,7 @@ size-bytes = { $count ->
 size-kb = { $size } Ko
 size-mb = { $size } Mo
 size-gb = { $size } Go
-# review: new
 send-delay-off = Désactivé
-# review: new
 send-delay-seconds = { $count ->
     [one] { $count } seconde
    *[other] { $count } secondes
@@ -238,7 +236,6 @@ undo-delete = Annuler la suppression
 undo-archive = Annuler l'archivage
 undo-junk = Annuler le marquage comme indésirable
 undo-not-junk = Annuler le marquage comme non indésirable
-# review: new
 undo-send = Annuler l’envoi
 nothing-to-undo = Il n'y a rien à annuler.
 messages-gone = Les messages ne sont plus là.
@@ -361,13 +358,9 @@ error-folder-separator = un nom de dossier ne peut pas contenir « { $separator 
 error-folder-special = la Boîte de réception et les dossiers spéciaux ne peuvent pas être renommés ni supprimés
 error-no-recipients = le message n'a aucun destinataire
 error-bad-address = « { $address } » n'est pas une adresse de messagerie
-# review: new
 error-not-own-address = { $address } ne fait pas partie des adresses d’envoi de ce compte. Ajoutez-la au champ « Autres adresses d’envoi » dans les propriétés du compte.
-# review: new
 rule-query-refused = Les règles n’acceptent pas les filtres de dossier ou de date ({ $words }).
-# review: new
 rule-no-query = Saisissez les critères de recherche pour les messages entrants.
-# review: new
 rule-no-action = Choisissez au moins une action pour la règle.
 error-attachment = { $path } n'a pas pu être lu : { $error }
 error-no-drafts = le compte n'a pas de dossier Brouillons où enregistrer le message

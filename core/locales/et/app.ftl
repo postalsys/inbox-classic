@@ -10,7 +10,6 @@ menu-message = &Kiri
 menu-help = &Spikker
 menu-layout = Pai&gutus
 menu-sort-by = Sor&teeri
-# review: new
 menu-text-size = Teksti &suurus
 menu-folder = K&aust
 
@@ -70,15 +69,10 @@ cmd-sort-subject = &Teema
 cmd-sort-size = Su&urus
 cmd-sort-ascending = Sorteeri kas&vavalt
 cmd-sort-descending = Sorteeri kaha&nevalt
-# review: new
 cmd-text-size-largest = Suu&rim
-# review: new
 cmd-text-size-larger = S&uurem
-# review: new
 cmd-text-size-medium = &Keskmine
-# review: new
 cmd-text-size-smaller = Vä&iksem
-# review: new
 cmd-text-size-smallest = &Väikseim
 cmd-hide-ignored = Peida &ignoreeritud vestlused
 cmd-hide-read = Peida &loetud kirjad
@@ -88,9 +82,7 @@ cmd-default-app = Määra &vaikimisi meiliprogrammiks...
 cmd-view-source = Kirja &lähtekood
 cmd-ai-agents = &Tehisintellekti agendid...
 cmd-options = &Seaded...
-# review: new
 cmd-message-rules = Kirjade &reeglid...
-# review: new
 cmd-create-rule-from-message = L&oo kirjast reegel...
 cmd-select-all = Vali &kõik
 cmd-undo = &Võta tagasi
@@ -185,16 +177,12 @@ ui-filter-pictures = Pildid
 ui-filter-messages = Meilikirjad
 ui-save-attachment-as = Salvesta manus nimega
 ui-not-sent = Kirja ei saanud saata.
-# review: new
 ui-attachment-forgotten = Kirjutasite „{ $word }“, kuid ühtegi faili pole lisatud. Kas saata kiri ikkagi?
-# review: new
 ui-send-anyway = Saada ikkagi
-# review: new
 ui-go-back = Tagasi
 ui-not-saved = Kirja ei saanud salvestada.
 ui-saving-draft = Salvestatakse mustanditesse...
 ui-compose-saved-at = Salvestati mustanditesse kell { $time }
-# review: new
 ui-compose-restored = Taastatud pärast seda, kui Inbox Classic ootamatult suleti
 ui-compose-not-saved = Mustanditesse ei salvestatud: { $reason }
 ui-save-changes-ask = Kas salvestada selle kirja muudatused mustanditesse?
@@ -228,7 +216,6 @@ ui-signature = Allkiri
 ui-signature-hint = Lisatakse sellelt kontolt saadetavatele uutele kirjadele, vastustele ja edastatud kirjadele.
 ui-signature-not-saved = Allkirja ei saanud salvestada.
 ui-all-inboxes = Kõik sisendkaustad
-# review: new
 ui-flagged-folder = Lipuga
 ui-all-folders = Kõik kaustad
 ui-the-account = konto
@@ -313,7 +300,6 @@ ui-field-imap-security = IMAP-turve:
 ui-field-smtp-host = Väljamineva posti server (SMTP):
 ui-field-smtp-port = SMTP-port:
 ui-field-smtp-security = SMTP-turve:
-# review: new
 ui-field-other-addresses = Muud saatja-aadressid:
 ui-sign-in-not-started = Brauseris sisselogimist ei saanud alustada.
 ui-sign-in-in-browser = Logige avanenud brauseriaknas sisse kontole { $account } ja tulge siis siia tagasi.
@@ -391,7 +377,6 @@ ui-properties = &Atribuudid
 ui-account-sync = Saada ja võta &vastu
 ui-account-properties = Atri&buudid...
 ui-account-move-up = Liiguta ü&les
-# review: changed
 ui-account-move-down = Liiguta &alla
 ui-menu-open = &Ava
 ui-menu-flag = L&ipp
@@ -422,65 +407,38 @@ ui-clear-agent-log-detail = Ajaloo tühjendamine ei võta agentide tehtud muudat
 ui-let-agents-connect = &Luba tehisintellekti agentidel Inbox Classicuga ühenduda
 ui-change-button = Muuda…
 ui-undo-button = Võta tagasi
-# review: new
 ui-rules-title = Kirjade reeglid
-# review: new
 ui-rules-intro = Reeglid sorteerivad sisendkaustadesse saabuvaid kirju, kui Inbox Classic töötab. Sobivaid reegleid rakendatakse loendi järjekorras. Kui reegel teisaldab kirja sisendkaustast mujale, siis sellele kirjale järgmisi reegleid enam ei rakendata.
-# review: new
 ui-rules-none = Reegleid veel pole. Uue loomiseks klõpsake nuppu Uus.
-# review: new
 ui-rule-new = &Uus...
-# review: new
 ui-rule-edit = &Muuda...
-# review: new
 ui-rule-delete-button = &Kustuta
-# review: new
 ui-rule-title = Kirja reegel
-# review: new
 ui-rule-name = Nimi:
-# review: new
 ui-rule-account = Konto:
-# review: new
 ui-rule-all-accounts = Kõik kontod
-# review: new
 ui-rule-query = Otsingutingimused:
-# review: new
 ui-rule-query-hint = Kasutage samu otsingutingimusi nagu otsingukastis, näiteks from:ann@example.com, subject:arve või list:news.example.com.
-# review: new
 ui-rule-count = { $count ->
     [one] Sisendkaustas vastab praegu tingimustele 1 kiri.
    *[other] Sisendkaustas vastab praegu tingimustele { $count } kirja.
 }
-# review: new
 ui-rule-show = &Näita
-# review: new
 ui-rule-actions = Toimingud:
-# review: new
 ui-rule-move = &Teisalda kausta:
-# review: new
 ui-rule-mark-read = Märgi &loetuks
-# review: new
 ui-rule-flag = Märgi li&puga
-# review: new
 ui-rule-archive = &Arhiveeri
-# review: new
 ui-rule-junk = Teisalda &rämpsposti
-# review: new
 ui-rule-delete = &Kustuta
-# review: new
 ui-rule-quiet = Ära t&eavita mind
-# review: new
 ui-rule-apply-now = Rakenda ka juba &sisendkaustas olevatele kirjadele
-# review: new
 ui-rule-delete-ask = Kas kustutada reegel „{ $name }“?
-# review: new
 ui-create-rule = Loo reegel...
-# review: new
 ui-rules-applied = { $count ->
     [one] Reeglite järgi sorditi 1 kiri
    *[other] Reeglite järgi sorditi { $count } kirja
 }
-# review: new
 ui-col-rule-matches = Tingimused
 ui-clear-button = &Tühjenda
 ui-how-to-connect = Kuidas agenti ühendada…
@@ -585,22 +543,15 @@ ui-download-ahead-recent = Hiljutised kirjad suurusega kuni 1 MB
 ui-download-ahead-all = Kõik kirjad
 ui-download-ahead-never = Ainult avamisel
 ui-download-limit = Mahupiir konto kohta:
-# review: new
 ui-send-delay = Viivitus enne saatmist:
-# review: new
 ui-send-delay-note = Kuni kiri ootab saatmist, saate saatmise tühistada nupuga „Võta tagasi“.
-# review: new
 ui-dark-messages = Kuva kirju tumedal taustal, kui süsteem kasutab tumedat režiimi
-# review: new
 ui-sending-in = { $subject } saadetakse { $count ->
     [one] 1 sekundi pärast
    *[other] { $count } sekundi pärast
 }
-# review: new
 ui-send-undone = { $subject } jäi saatmata. Kiri on taas muutmiseks avatud.
-# review: new
 ui-send-too-late = { $subject } on juba saadetud.
-# review: new
 ui-outbox-status-undo = Saadetakse kell { $time }
 ui-download-note = Eelnevalt alla laaditud kirjad avanevad kohe. Mahupiiri ületamisel eemaldatakse arvutist vanimate kirjade koopiad. Kirjade avamisel laaditakse need uuesti alla.
 ui-attachment-downloading = Kirja allalaadimine on veel pooleli. Proovige uuesti, kui allalaadimine on lõppenud.

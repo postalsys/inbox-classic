@@ -10,7 +10,6 @@ menu-message = &Mensaje
 menu-help = Ay&uda
 menu-layout = &Diseño
 menu-sort-by = Ordenar &por
-# review: new
 menu-text-size = Tamaño del te&xto
 menu-folder = Carpe&ta
 
@@ -70,15 +69,10 @@ cmd-sort-subject = &Asunto
 cmd-sort-size = &Tamaño
 cmd-sort-ascending = Orden as&cendente
 cmd-sort-descending = Orden desce&ndente
-# review: new
 cmd-text-size-largest = Muy gra&nde
-# review: new
 cmd-text-size-larger = &Grande
-# review: new
 cmd-text-size-medium = &Mediano
-# review: new
 cmd-text-size-smaller = &Pequeño
-# review: new
 cmd-text-size-smallest = Mu&y pequeño
 cmd-hide-ignored = &Ocultar las conversaciones ignoradas
 cmd-hide-read = Ocultar los mensajes &leídos
@@ -88,9 +82,7 @@ cmd-default-app = Usar como programa de correo &predeterminado...
 cmd-view-source = &Formato original del mensaje
 cmd-ai-agents = Agentes de &IA...
 cmd-options = &Opciones...
-# review: new
 cmd-message-rules = &Reglas de mensajes...
-# review: new
 cmd-create-rule-from-message = Crear regla a partir del mensa&je...
 cmd-select-all = Seleccionar &todo
 cmd-undo = &Deshacer
@@ -185,16 +177,12 @@ ui-filter-pictures = Imágenes
 ui-filter-messages = Mensajes de correo
 ui-save-attachment-as = Guardar archivo adjunto como
 ui-not-sent = No se pudo enviar el mensaje.
-# review: new
 ui-attachment-forgotten = Escribió «{ $word }», pero no hay ningún archivo adjunto. ¿Desea enviar el mensaje de todos modos?
-# review: new
 ui-send-anyway = Enviar de todos modos
-# review: new
 ui-go-back = Volver
 ui-not-saved = No se pudo guardar el mensaje.
 ui-saving-draft = Guardando en Borradores...
 ui-compose-saved-at = Guardado en Borradores a las { $time }
-# review: new
 ui-compose-restored = Recuperado después de que Inbox Classic se cerrara inesperadamente
 ui-compose-not-saved = No se guardó en Borradores: { $reason }
 ui-save-changes-ask = ¿Desea guardar los cambios de este mensaje en Borradores?
@@ -228,7 +216,6 @@ ui-signature = Firma
 ui-signature-hint = Se agrega a los mensajes nuevos, respuestas y reenvíos de esta cuenta.
 ui-signature-not-saved = No se pudo guardar la firma.
 ui-all-inboxes = Todas las bandejas de entrada
-# review: new
 ui-flagged-folder = Marcados
 ui-all-folders = Todas las carpetas
 ui-the-account = la cuenta
@@ -313,7 +300,6 @@ ui-field-imap-security = Seguridad IMAP:
 ui-field-smtp-host = Servidor saliente (SMTP):
 ui-field-smtp-port = Puerto SMTP:
 ui-field-smtp-security = Seguridad SMTP:
-# review: new
 ui-field-other-addresses = Otras direcciones de envío:
 ui-sign-in-not-started = No se pudo iniciar la sesión en el navegador.
 ui-sign-in-in-browser = Inicie sesión en { $account } en la ventana del navegador que se abrió y luego vuelva aquí.
@@ -421,65 +407,38 @@ ui-clear-agent-log-detail = Esto no deshará los cambios realizados por los agen
 ui-let-agents-connect = &Permitir que los agentes de IA se conecten a Inbox Classic
 ui-change-button = Cambiar…
 ui-undo-button = Deshacer
-# review: new
 ui-rules-title = Reglas de mensajes
-# review: new
 ui-rules-intro = Las reglas organizan los mensajes nuevos que llegan a sus bandejas de entrada mientras Inbox Classic está abierto. Las reglas cuyos criterios se cumplen se aplican por orden. Cuando una mueve un mensaje fuera de la Bandeja de entrada, no se le aplican más reglas.
-# review: new
 ui-rules-none = Aún no hay reglas. Haga clic en Nueva para crear una.
-# review: new
 ui-rule-new = &Nueva...
-# review: new
 ui-rule-edit = &Editar...
-# review: new
 ui-rule-delete-button = Eli&minar
-# review: new
 ui-rule-title = Regla de mensaje
-# review: new
 ui-rule-name = Nombre:
-# review: new
 ui-rule-account = Cuenta:
-# review: new
 ui-rule-all-accounts = Todas las cuentas
-# review: new
 ui-rule-query = Criterios de búsqueda:
-# review: new
 ui-rule-query-hint = Use los mismos términos que en el cuadro de búsqueda, por ejemplo from:ana@example.com, subject:factura o list:news.example.com.
-# review: new
 ui-rule-count = { $count ->
     [one] Actualmente, 1 mensaje de la Bandeja de entrada cumple estos criterios.
    *[other] Actualmente, { $count } mensajes de la Bandeja de entrada cumplen estos criterios.
 }
-# review: new
 ui-rule-show = M&ostrar
-# review: new
 ui-rule-actions = Acciones:
-# review: new
 ui-rule-move = &Moverlo a:
-# review: new
 ui-rule-mark-read = Marcarlo como &leído
-# review: new
 ui-rule-flag = Ma&rcarlo
-# review: new
 ui-rule-archive = &Archivarlo
-# review: new
 ui-rule-junk = Moverlo a &Correo no deseado
-# review: new
 ui-rule-delete = &Eliminarlo
-# review: new
 ui-rule-quiet = &No avisarme
-# review: new
 ui-rule-apply-now = Aplicarla también a los mensajes que ya están en la &Bandeja de entrada
-# review: new
 ui-rule-delete-ask = ¿Eliminar la regla «{ $name }»?
-# review: new
 ui-create-rule = Crear regla...
-# review: new
 ui-rules-applied = { $count ->
     [one] Sus reglas ordenaron 1 mensaje
    *[other] Sus reglas ordenaron { $count } mensajes
 }
-# review: new
 ui-col-rule-matches = Criterios
 ui-clear-button = &Borrar
 ui-how-to-connect = Cómo conectar un agente…
@@ -584,22 +543,15 @@ ui-download-ahead-recent = Mensajes recientes de hasta 1 MB
 ui-download-ahead-all = Todos los mensajes
 ui-download-ahead-never = Solo al abrirlos
 ui-download-limit = Espacio máximo por cuenta:
-# review: new
 ui-send-delay = Retraso antes de enviar:
-# review: new
 ui-send-delay-note = Mientras un mensaje esté pendiente de envío, puede cancelar el envío con Deshacer.
-# review: new
 ui-dark-messages = Mostrar los mensajes sobre fondo oscuro cuando el sistema esté en modo oscuro
-# review: new
 ui-sending-in = Se enviará { $subject } en { $count ->
     [one] 1 segundo
    *[other] { $count } segundos
 }
-# review: new
 ui-send-undone = { $subject } no se envió. El mensaje se ha vuelto a abrir para editarlo.
-# review: new
 ui-send-too-late = { $subject } ya se envió.
-# review: new
 ui-outbox-status-undo = Se envía a las { $time }
 ui-download-note = Los mensajes descargados con antelación se abren al instante. Cuando se supera el límite de almacenamiento, se eliminan las copias locales más antiguas y se vuelven a descargar al abrir los mensajes.
 ui-attachment-downloading = La descarga de este mensaje aún no ha terminado. Vuelva a intentarlo cuando finalice.
