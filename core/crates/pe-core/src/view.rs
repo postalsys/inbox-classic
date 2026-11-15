@@ -303,8 +303,8 @@ fn protected_view(
     // a part whose pictures did not load: the pictures bar shows
     let mut blocked = false;
     // the printout: every part's text in one document (a printer prints no frames), under the labels as words
-    let mut print_bodies = Vec::new();
-    let mut print_images = Vec::new();
+    // each part's words (no markup of the message: one part's styles could hide another on the paper), by its place
+    let mut print_texts: Vec<(usize, String)> = Vec::new();
     // parsed first: the printout's pictures borrow from them
     let parsed: Vec<Option<parser::Message>> = protected
         .sections
@@ -344,8 +344,7 @@ fn protected_view(
                 label = pe_i18n::tr_args(pe_i18n::Text::PgpPartPicturesLoaded, &[("label", (&label).into())]);
             }
             attachments.extend(listed(&part.attachments).map(AttachmentView::of));
-            print_bodies.push(body);
-            print_images.extend(images);
+            print_texts.push((parts.len(), parser::html_to_text(&body)));
             rendered.document
         });
         documents.push(document);
@@ -385,14 +384,7 @@ fn protected_view(
         .sections
         .iter()
         .any(|section| section.verdict.as_ref().is_some_and(|verdict| verdict.encrypted));
-    let print_document = print_document(
-        message,
-        &text,
-        &parts,
-        &print_bodies.join("<hr>"),
-        &print_images,
-        clicked || (allow_remote_images && !any_encrypted),
-    );
+    let print_document = print_document(message, &text, &parts, &print_texts);
     let subject = protected
         .subject
         .clone()
@@ -426,19 +418,13 @@ fn protected_view(
 
 /// The printout of a message with signed or encrypted parts: the header a printout has, then the bar's words and each
 /// part's label (in the header, where the message's styles can not reach them), then each part's text, in order
-fn print_document(
-    message: &parser::Message,
-    bar: &str,
-    parts: &[PartView],
-    body: &str,
-    images: &[pe_html::InlineImage],
-    allow_remote_images: bool,
-) -> String {
+fn print_document(message: &parser::Message, bar: &str, parts: &[PartView], texts: &[(usize, String)]) -> String {
     use pe_i18n::{Text, tr, tr_args};
     let date = message
         .timestamp
         .map(crate::calendar::local_date_time)
         .unwrap_or_default();
+    let part_name = |index: usize| tr_args(Text::HeaderPart, &[("number", (index + 1).into())]);
     let mut lines: Vec<(String, String)> = vec![
         (tr(Text::HeaderFrom), text_addresses(message.from.as_slice())),
         (tr(Text::HeaderDate), date),
@@ -448,23 +434,39 @@ fn print_document(
         (tr(Text::HeaderSecurity), bar.to_string()),
     ];
     for (index, part) in parts.iter().enumerate() {
-        lines.push((
-            tr_args(Text::HeaderPart, &[("number", (index + 1).into())]),
-            part.label.clone(),
-        ));
+        lines.push((part_name(index), part.label.clone()));
     }
     let header: Vec<(&str, &str)> = lines
         .iter()
         .map(|(name, value)| (name.as_str(), value.as_str()))
         .collect();
+    // each part as plain text under its label in bold: no part has markup, so the bold labels can only be ours
+    let body: String = texts
+        .iter()
+        .map(|(index, text)| {
+            let label = format!("{}: {}", part_name(*index), parts[*index].label);
+            format!("<p><b>{}</b></p>{}", escape_html(&label), text_to_html(text))
+        })
+        .collect::<Vec<_>>()
+        .join("<hr>");
     pe_html::render_view_cards(
-        body,
-        &RenderOptions { allow_remote_images },
-        images,
+        &body,
+        &RenderOptions {
+            allow_remote_images: false,
+        },
+        &[],
         &header,
         &pe_html::Cards::default(),
     )
     .document
+}
+
+/// Text as HTML text
+fn escape_html(text: &str) -> String {
+    text.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
 }
 
 /// The bar of a message whose parts differ: how many parts, and how many of each tone

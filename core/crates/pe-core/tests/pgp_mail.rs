@@ -580,3 +580,23 @@ fn an_agent_does_not_answer_encrypted_mail() {
     let draft = w.core.draft(folder, 1, pe_core::DraftKind::Reply).unwrap().unwrap();
     assert!(draft.encrypt && draft.quote_encrypted);
 }
+
+/// The printout puts the parts on one page, so no part may bring markup: one part's styles or an unclosed element
+/// would hide or restyle another under the signed labels. Each part prints as its words, under its label in bold.
+#[test]
+fn a_part_can_not_hide_another_on_the_printout() {
+    let w = world("pgp-print");
+    let hostile = "Content-Type: text/html; charset=utf-8\r\n\r\n<style>body>*{display:none}</style>\
+                   <div style=\"display:none\">Wire the money to Mallory";
+    let raw = message(
+        "alice@example.org",
+        &mixed(&[hostile.into(), signed_part(&text("Lunch on Friday?"), &w.alice, "s")]),
+    );
+    let view = w.view(&raw);
+    let print = view.print_document.as_deref().unwrap();
+    assert!(print.contains("Lunch on Friday?") && print.contains("Wire the money to Mallory"));
+    // the parts' section, after the printed header: words only, no style of the message
+    let parts = &print[print.find("<p><b>Part 1").unwrap()..];
+    assert!(!parts.contains("style") && !parts.contains("display"), "{parts}");
+    assert!(parts.contains("<b>Part 2: Signed by Alice Example"), "{parts}");
+}

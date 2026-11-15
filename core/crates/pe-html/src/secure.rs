@@ -124,7 +124,6 @@ pub fn secure_page(parts: &[SecurePart], remote_images: bool) -> String {
          .pe-g{{--c:#7fb0f0;--b:#1f2c40;--t:#bcd6f7}}\
          .pe-w{{--c:#f0b45a;--b:#3a2c14;--t:#f6d29c}}\
          .pe-n{{--c:#777;--b:#2a2a2a;--t:#ccc}}}}\
-         @media print{{.pe-d{{height:auto}}}}\
          </style></head><body>{body}</body></html>"
     )
 }

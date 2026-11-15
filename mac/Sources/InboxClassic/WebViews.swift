@@ -385,11 +385,11 @@ final class Printer: NSObject {
     private weak var owner: NSWindow?
 
     /// the page of a signed or encrypted message with its `parts`, each frame then as tall as its part
-    static func print(_ document: String, pictures: Bool, title: String, owner: NSWindow?, parts: ((Int) -> String?)? = nil) {
-        current = Printer(document, pictures: pictures, title: title, owner: owner, parts: parts)
+    static func print(_ document: String, pictures: Bool, title: String, owner: NSWindow?) {
+        current = Printer(document, pictures: pictures, title: title, owner: owner)
     }
 
-    private init(_ document: String, pictures: Bool, title: String, owner: NSWindow?, parts: ((Int) -> String?)?) {
+    private init(_ document: String, pictures: Bool, title: String, owner: NSWindow?) {
         self.owner = owner
         view = WKWebView(frame: NSRect(x: 0, y: 0, width: 640, height: 900),
                          configuration: lockedConfiguration(server: server, scripts: false))
@@ -403,16 +403,11 @@ final class Printer: NSObject {
         super.init()
         view.navigationDelegate = navigation
         view.uiDelegate = navigation
-        navigation.loaded = { [weak self] in
-            guard let self else { return }
-            guard parts != nil else { return run() }
-            // each part's frame as tall as its document, so all of it is on the paper
-            view.evaluateJavaScript(Preview.measureScript, in: nil, in: .defaultClient) { [weak self] _ in self?.run() }
-        }
+        navigation.loaded = { [weak self] in self?.run() }
         ContentRules.whenReady { [weak self] in
             guard let self else { return }
             ContentRules.apply(to: view.configuration.userContentController, pictures: pictures)
-            view.load(URLRequest(url: server.serve(document, host: "print", path: "1", parts: parts)))
+            view.load(URLRequest(url: server.serve(document, host: "print", path: "1")))
         }
     }
 

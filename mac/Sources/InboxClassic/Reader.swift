@@ -623,7 +623,7 @@ final class Reader: NSObject {
         guard showsMessage, let info = messageView?.info else { return }
         // the core's printout: for a protected message one document of every part's text, as no frame prints
         Printer.print(text(info.pointee.print_document), pictures: info.pointee.pictures_loaded || remoteImages,
-                      title: text(info.pointee.subject), owner: view.window, parts: nil)
+                      title: text(info.pointee.subject), owner: view.window)
     }
 
     // ---- Find in This Message ----
