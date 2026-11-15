@@ -205,6 +205,8 @@ typedef enum PeReaderLink {
   // Open in Calendar on the card of a calendar event: the event of the view (`pe_invitation_file`) opened in the
   // calendar app
   PE_READER_LINK_OPEN_CALENDAR = 3,
+  // The label of a signed or encrypted part: the Details window of the message (`protection_details`)
+  PE_READER_LINK_PART = 4,
 } PeReaderLink;
 
 // How a message lets its reader leave its mailing list
@@ -226,6 +228,19 @@ typedef enum PeInvitationKind {
   PE_INVITATION_KIND_CANCEL = 2,
   PE_INVITATION_KIND_REPLY = 3,
 } PeInvitationKind;
+
+// The colour of the security bar: green, blue, amber, grey; none without one
+typedef enum PeProtectionTone {
+  PE_PROTECTION_TONE_NONE = 0,
+  // Signed by the sender with a key the user verified
+  PE_PROTECTION_TONE_VERIFIED = 1,
+  // Signed by the sender, or encrypted
+  PE_PROTECTION_TONE_GOOD = 2,
+  // Something is not right
+  PE_PROTECTION_TONE_WARNING = 3,
+  // Not signed, or not confirmed
+  PE_PROTECTION_TONE_NEUTRAL = 4,
+} PeProtectionTone;
 
 typedef enum PeDraftKind {
   PE_DRAFT_KIND_REPLY = 0,
@@ -833,6 +848,9 @@ typedef struct PeMessageInfo {
   bool has_date;
   // The sanitized document for the preview, with its CSP
   const char *document;
+  // The document to print (for `pe_print_page`): `document` for most messages; for one with signed or encrypted
+  // parts, one document of every part's text with the labels as words, as a printer prints no frames
+  const char *print_document;
   size_t attachment_count;
   // The message has pictures on the internet, blocked until it is shown again with remote images allowed
   bool remote_images;
@@ -871,6 +889,18 @@ typedef struct PeMessageInfo {
   const char *pictures_always_sender;
   const char *pictures_always_domain;
   const char *pictures_unconfirmed;
+  // A message with signed or encrypted parts: the colour of the bar over it (NONE: no bar), its words, whether the
+  // whole message is encrypted (the bar's lock), and the text of its Details window. Each part's label in
+  // `document` links to Details (`pe_reader_link` says `PE_READER_LINK_PART`); the app sizes each part's frame
+  // with `pe_measure_script`.
+  enum PeProtectionTone protection;
+  const char *protection_text;
+  bool protection_encrypted;
+  const char *protection_details;
+  // The parts of such a message: the page's frames load `part-N` beside the page's own address (served from
+  // memory as the page is; `pe_part_document` says which part an address asks for), whose document
+  // `pe_message_view_part` gives
+  size_t part_count;
 } PeMessageInfo;
 
 typedef struct PeAttachment {
@@ -2200,6 +2230,11 @@ void pe_set_instant_format(PeFormatInstant format,
 // `uri` must be NULL or a NUL-terminated string.
 enum PeReaderLink pe_reader_link(const char *uri);
 
+// The script the app runs in a message's page (page scripts stay off; the app's own runs) once it loaded, after
+// pictures loaded, when "..." unfolded and when the width or text size changed: each part's frame as tall as its
+// document. A static string, not freed.
+const char *pe_measure_script(void);
+
 // The view of a message whose source is in the store (after `MessageReady`), NULL otherwise. Built on the
 // calling thread; the app's windows use `pe_message_view_start`, which builds it on a worker.
 //
@@ -2244,6 +2279,20 @@ const struct PeMessageInfo *pe_message_view_info(const struct PeMessageView *vie
 // `view` must be NULL or live.
 const struct PeAttachment *pe_message_view_attachment(const struct PeMessageView *view,
                                                       size_t index);
+
+// The document of part `index` of a signed or encrypted message, owned by the view; NULL past the end. Empty for a
+// part with nothing to show (its frame is not in the page).
+//
+// # Safety
+// `view` must be NULL or live.
+const char *pe_message_view_part(const struct PeMessageView *view,
+                                 size_t index);
+
+// Which part's document an address the page asks for is (`part-N` as its last segment), -1 for none
+//
+// # Safety
+// `address` must be NULL or a NUL-terminated string.
+int64_t pe_part_document(const char *address);
 
 // # Safety
 // `view` must be NULL or a view that was not freed yet.

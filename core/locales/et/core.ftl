@@ -58,6 +58,10 @@ header-to = Saaja
 header-cc = Koopia
 header-sent = Saadetud
 header-subject = Teema
+# review: new
+header-security = Turvalisus
+# review: new
+header-part = Osa { $number }
 quote-original = ----- Algne kiri -----
 fold-show-earlier = Näita varasemaid kirju
 
@@ -604,8 +608,6 @@ pgp-why-key-not-valid = Allkirjastatud kehtetu võtmega
 # review: new
 pgp-why-not-for-you = Allkirjastatud teistele saajatele ja sulle edasi saadetud
 # review: new
-pgp-bar-mixed = Selle kirja osad on kaitstud erinevalt: iga osa ütleb, kuidas.
-# review: new
 pgp-part-pictures-loaded = { $label }. Pildid laaditi internetist
 # review: new
 pgp-error-no-own-key = Sul pole aadressi { $address } jaoks võtit, millega allkirjastada või krüpteerida. Loo see menüüs Tööriistad > Krüpteerimisvõtmed või lülita allkirjastamine ja krüpteerimine välja.
@@ -634,3 +636,25 @@ pgp-publish-done = Sinu võti on keys.openpgp.org lehel avaldatud aadressi { $ad
 pgp-publish-failed = Võtit ei saanud avaldada: { $error }
 # review: new
 pgp-keyserver-off = Võtmete otsimine saidilt keys.openpgp.org on suvandites välja lülitatud.
+# review: new
+pgp-details-part = Osa { $number }: { $label }
+# review: new
+pgp-details-signed = Allkirjastatud { $when } võtmega { $key }
+# review: new
+pgp-details-unknown-key = Allkirjastatud võtmega { $key }, mida sul pole
+# review: new
+pgp-details-opened = Krüptitud sinu võtmele { $key }
+# review: new
+pgp-details-for = Krüptitud võtmetele { $keys }
+# review: new
+pgp-details-plain = Pole allkirjastatud ega krüptitud
+# review: new
+pgp-bar-parts = Sellel kirjal on { $count } osa: { $list }. Iga osa ütleb, kuidas see on kaitstud.
+# review: new
+pgp-bar-count-verified = { $count } kontrollitud
+# review: new
+pgp-bar-count-good = { $count } allkirjastatud või krüptitud
+# review: new
+pgp-bar-count-warning = { $count } vajab tähelepanu
+# review: new
+pgp-bar-count-neutral = { $count } kinnitatud allkirjata

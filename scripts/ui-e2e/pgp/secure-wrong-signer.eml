@@ -1,0 +1,24 @@
+From: Alice Example <alice@example.org>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: Signed by someone else
+Date: Sun, 01 Nov 2026 10:00:00 +0000
+Message-ID: <wrong-signer@ui-test.example>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="s"
+
+--s
+Content-Type: text/plain; charset=utf-8
+
+I am Alice, honestly.
+--s
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAmrnDaAWIQQzEM0wxxFwNR57+dGn/lToeTNpiAAKCRCn/lToeTNp
+iOxfAQCKs6yts/kUijo2MuT52creY8EOrFPLJjyrWINViRNrjgD6A/ykXzrMiEFH
+pDXDA01XsuTMGMIiRVrYTei44ckJpwE=
+=PeXM
+-----END PGP SIGNATURE-----
+
+--s--

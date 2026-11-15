@@ -1852,6 +1852,9 @@ pub struct PeMessageInfo {
     pub has_date: bool,
     /// The sanitized document for the preview, with its CSP
     pub document: *const c_char,
+    /// The document to print (for `pe_print_page`): `document` for most messages; for one with signed or encrypted
+    /// parts, one document of every part's text with the labels as words, as a printer prints no frames
+    pub print_document: *const c_char,
     pub attachment_count: usize,
     /// The message has pictures on the internet, blocked until it is shown again with remote images allowed
     pub remote_images: bool,
@@ -1890,12 +1893,51 @@ pub struct PeMessageInfo {
     pub pictures_always_sender: *const c_char,
     pub pictures_always_domain: *const c_char,
     pub pictures_unconfirmed: *const c_char,
+    /// A message with signed or encrypted parts: the colour of the bar over it (NONE: no bar), its words, whether the
+    /// whole message is encrypted (the bar's lock), and the text of its Details window. Each part's label in
+    /// `document` links to Details (`pe_reader_link` says `PE_READER_LINK_PART`); the app sizes each part's frame
+    /// with `pe_measure_script`.
+    pub protection: PeProtectionTone,
+    pub protection_text: *const c_char,
+    pub protection_encrypted: bool,
+    pub protection_details: *const c_char,
+    /// The parts of such a message: the page's frames load `part-N` beside the page's own address (served from
+    /// memory as the page is; `pe_part_document` says which part an address asks for), whose document
+    /// `pe_message_view_part` gives
+    pub part_count: usize,
+}
+
+/// The colour of the security bar: green, blue, amber, grey; none without one
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeProtectionTone {
+    None = 0,
+    /// Signed by the sender with a key the user verified
+    Verified = 1,
+    /// Signed by the sender, or encrypted
+    Good = 2,
+    /// Something is not right
+    Warning = 3,
+    /// Not signed, or not confirmed
+    Neutral = 4,
+}
+
+impl From<pe_html::PartTone> for PeProtectionTone {
+    fn from(tone: pe_html::PartTone) -> Self {
+        match tone {
+            pe_html::PartTone::Verified => PeProtectionTone::Verified,
+            pe_html::PartTone::Good => PeProtectionTone::Good,
+            pe_html::PartTone::Warning => PeProtectionTone::Warning,
+            pe_html::PartTone::Neutral => PeProtectionTone::Neutral,
+        }
+    }
 }
 
 /// A message as the preview shows it; free with `pe_message_view_free`
 pub struct PeMessageView {
     info: PeMessageInfo,
     attachments: Vec<PeAttachment>,
+    parts: Vec<*const c_char>,
     _invitation: Option<Box<PeInvitation>>,
     _strings: Strings,
 }
@@ -1953,6 +1995,7 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         date: view.date.unwrap_or(0),
         has_date: view.date.is_some(),
         document: strings.add(&view.document),
+        print_document: strings.add(view.print_document.as_deref().unwrap_or(&view.document)),
         attachment_count: attachments.len(),
         remote_images: view.remote_images,
         unsubscribe,
@@ -1972,10 +2015,24 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         pictures_always_sender: strings.add(&words.always_sender),
         pictures_always_domain: strings.add(&words.always_domain),
         pictures_unconfirmed: strings.add(&words.unconfirmed),
+        protection: view
+            .protection
+            .as_ref()
+            .map_or(PeProtectionTone::None, |p| p.tone.into()),
+        protection_text: strings.add(view.protection.as_ref().map_or("", |p| p.text.as_str())),
+        protection_encrypted: view.protection.as_ref().is_some_and(|p| p.encrypted),
+        protection_details: strings.add(&view.protection.as_ref().map(|p| p.details()).unwrap_or_default()),
+        part_count: view.part_documents.len(),
     };
+    let parts = view
+        .part_documents
+        .iter()
+        .map(|document| strings.add(document))
+        .collect();
     handed(PeMessageView {
         info,
         attachments,
+        parts,
         _invitation: invitation,
         _strings: strings,
     })
@@ -2015,6 +2072,8 @@ pub enum PeReaderLink {
     /// Open in Calendar on the card of a calendar event: the event of the view (`pe_invitation_file`) opened in the
     /// calendar app
     OpenCalendar = 3,
+    /// The label of a signed or encrypted part: the Details window of the message (`protection_details`)
+    Part = 4,
 }
 
 /// Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
@@ -2096,11 +2155,24 @@ pub unsafe extern "C" fn pe_reader_link(uri: *const c_char) -> PeReaderLink {
             PeReaderLink::CopyCode
         } else if pe_html::is_open_calendar_link(uri) {
             PeReaderLink::OpenCalendar
+        } else if pe_html::part_link(uri).is_some() {
+            PeReaderLink::Part
         } else {
             PeReaderLink::Other
         }
     })
     .unwrap_or(PeReaderLink::Other)
+}
+
+/// The script the app runs in a message's page (page scripts stay off; the app's own runs) once it loaded, after
+/// pictures loaded, when "..." unfolded and when the width or text size changed: each part's frame as tall as its
+/// document. A static string, not freed.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_measure_script() -> *const c_char {
+    static SCRIPT: std::sync::OnceLock<std::ffi::CString> = std::sync::OnceLock::new();
+    SCRIPT
+        .get_or_init(|| std::ffi::CString::new(pe_html::MEASURE_SCRIPT).unwrap_or_default())
+        .as_ptr()
 }
 
 /// The view of a message whose source is in the store (after `MessageReady`), NULL otherwise. Built on the
@@ -2189,6 +2261,30 @@ pub unsafe extern "C" fn pe_message_view_attachment(view: *const PeMessageView, 
     unsafe { view.as_ref() }
         .and_then(|view| view.attachments.get(index))
         .map_or(null(), |row| row)
+}
+
+/// The document of part `index` of a signed or encrypted message, owned by the view; NULL past the end. Empty for a
+/// part with nothing to show (its frame is not in the page).
+///
+/// # Safety
+/// `view` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_view_part(view: *const PeMessageView, index: usize) -> *const c_char {
+    // SAFETY: as the caller guarantees
+    unsafe { view.as_ref() }
+        .and_then(|view| view.parts.get(index).copied())
+        .unwrap_or(null())
+}
+
+/// Which part's document an address the page asks for is (`part-N` as its last segment), -1 for none
+///
+/// # Safety
+/// `address` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_part_document(address: *const c_char) -> i64 {
+    // SAFETY: as the caller guarantees
+    let address = unsafe { arg(address) }.unwrap_or_default();
+    guard(|| pe_html::part_document(address).map_or(-1, |index| index as i64)).unwrap_or(-1)
 }
 
 /// # Safety

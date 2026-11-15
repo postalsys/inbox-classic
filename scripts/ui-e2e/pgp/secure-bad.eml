@@ -1,0 +1,24 @@
+From: Alice Example <alice@example.org>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: A changed text
+Date: Sun, 01 Nov 2026 10:00:00 +0000
+Message-ID: <bad@ui-test.example>
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="s"
+
+--s
+Content-Type: text/plain; charset=utf-8
+
+Pay 900 euros.
+--s
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAmrnDaAWIQStVlrCzexW80KFT904l6QnguQ+7wAKCRA4l6QnguQ+
+7z3TAP4hbjyHWTO/N6Xby8SiHCBwmcMizeb7sUEvRQ0/5LIoVQD+M4O+3X4STm4U
+QFOaXVpW+BySts+A3NgdGBhHoOu8uAQ=
+=XD87
+-----END PGP SIGNATURE-----
+
+--s--

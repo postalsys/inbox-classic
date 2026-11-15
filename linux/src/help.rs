@@ -37,10 +37,21 @@ pub fn show(context: &str) {
     open(topic);
 }
 
+/// The help of the dialog a message window shows (Security Details), or the window's
+pub fn show_for_message_window(window: &adw::ApplicationWindow) {
+    let dialog = window.visible_dialog().map(|d| d.widget_name().to_string());
+    show(if dialog.as_deref() == Some(crate::security::DIALOG_NAME) {
+        crate::security::HELP_CONTEXT
+    } else {
+        "main"
+    });
+}
+
 /// The help of the main window's context: the dialog it shows (Add Mail Account, Preferences, ...), or the window's
 fn context_of(window: &adw::ApplicationWindow) -> &'static str {
     let dialog = window.visible_dialog().map(|d| d.widget_name().to_string());
     match dialog.as_deref() {
+        Some(crate::security::DIALOG_NAME) => crate::security::HELP_CONTEXT,
         Some("account-start" | "account-servers") => "account-form",
         Some("account-properties" | "accounts-dialog") => "account-properties",
         Some("preferences-dialog") => "options",

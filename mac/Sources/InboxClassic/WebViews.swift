@@ -11,25 +11,42 @@ import WebKit
 /// The scheme the documents are served from (pe_html::DOCUMENT_SCHEME)
 let documentScheme = "inboxclassic"
 
-/// Serves the documents of a web view from memory, by the path of their address
+/// Serves the documents of a web view from memory, by the path of their address; the page of a signed or encrypted
+/// message also its parts, each its frame's document (`part-N` beside the page's address), from the message's view
 final class DocumentServer: NSObject, WKURLSchemeHandler {
     private var documents: [String: Data] = [:]
+    /// the parts of the page served last: under which path, and the document of part N (nil or empty for none)
+    private var parts: (path: String, document: (Int) -> String?)?
 
-    /// `html` at inboxclassic://<host>/<path>; its address
-    func serve(_ html: String, host: String, path: String) -> URL {
+    /// `html` at inboxclassic://<host>/<path>; its address. With `parts` the address ends in "/", and the page's
+    /// frames ask for the parts beside it.
+    func serve(_ html: String, host: String, path: String, parts: ((Int) -> String?)? = nil) -> URL {
         documents[host + "/" + path] = Data(html.utf8)
-        return URL(string: "\(documentScheme)://\(host)/\(path)")!
+        self.parts = parts.map { (host + "/" + path + "/", $0) }
+        return URL(string: "\(documentScheme)://\(host)/\(path)\(parts == nil ? "" : "/")")!
     }
 
     /// the documents served before, given up
     func clear() {
         documents.removeAll()
+        parts = nil
+    }
+
+    /// a part of the page served last, asked for by its frame; nil for any other address
+    private func part(_ url: URL, key: String) -> Data? {
+        guard let parts, key.hasPrefix(parts.path) else { return nil }
+        let index = url.absoluteString.withCString { pe_part_document($0) }
+        guard index >= 0, let document = parts.document(Int(index)), !document.isEmpty else { return nil }
+        return Data(document.utf8)
     }
 
     func webView(_ webView: WKWebView, start task: WKURLSchemeTask) {
-        guard let url = task.request.url, let host = url.host,
-              let data = documents[host + "/" + url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))]
-        else {
+        guard let url = task.request.url, let host = url.host else {
+            task.didFailWithError(URLError(.fileDoesNotExist))
+            return
+        }
+        let key = host + "/" + url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        guard let data = documents[key] ?? part(url, key: key) else {
             task.didFailWithError(URLError(.fileDoesNotExist))
             return
         }
@@ -177,8 +194,12 @@ final class Preview: NSObject {
     private let server = DocumentServer()
     private let navigation = StayOnPage()
     private var shown = 0
-    private var pending: (String, Bool)?
+    private var pending: (document: String, pictures: Bool, parts: ((Int) -> String?)?)?
     private var ready = false
+    /// the document shown has parts in frames, which the core's script sizes (pe_measure_script)
+    private var measuring = false
+    /// while it does: measured again every 400 ms (pictures loading, "..." unfolded, the width or text size changed)
+    private var measureTimer: Timer?
     /// Settings' dark messages: whether the blank page between two messages may be dark too. The web views follow the
     /// window's appearance (WebKit draws their background dark before a document loads); the documents carry both looks.
     static var dark = false
@@ -197,29 +218,81 @@ final class Preview: NSObject {
         TextSize.register(view)
         view.isInspectable = false
         view.setAccessibilityIdentifier("preview")
+        navigation.loaded = { [weak self] in self?.pageLoaded() }
         ContentRules.whenReady { [weak self] in
             guard let self else { return }
             ready = true
-            if let (document, pictures) = pending {
-                show(document, pictures: pictures)
+            if let pending {
+                show(pending.document, pictures: pending.pictures, parts: pending.parts)
             } else {
                 clear()
             }
         }
     }
 
-    /// a document of the core; with `pictures` its pictures from the internet are let through
-    func show(_ document: String, pictures: Bool = false) {
+    deinit {
+        measureTimer?.invalidate()
+    }
+
+    /// a document of the core; with `pictures` its pictures from the internet are let through. A signed or encrypted
+    /// message's page has `parts`, the document of each of its frames: they are served beside it, and the frames are
+    /// sized to their documents once it loaded, and again every 400 ms while it is shown.
+    func show(_ document: String, pictures: Bool = false, parts: ((Int) -> String?)? = nil) {
+        stopMeasuring()
         guard ready else {
-            pending = (document, pictures)
+            pending = (document, pictures, parts)
             return
         }
         pending = nil
+        measuring = parts != nil
         ContentRules.apply(to: view.configuration.userContentController, pictures: pictures)
         // a new address for each document, so it is loaded again rather than taken from history
         shown += 1
         server.clear()
-        view.load(URLRequest(url: server.serve(document, host: "preview", path: "\(shown)")))
+        view.load(URLRequest(url: server.serve(document, host: "preview", path: "\(shown)", parts: parts)))
+    }
+
+    // ---- the frames of a message's parts ----
+
+    private func pageLoaded() {
+        guard measuring else { return }
+        measure()
+        let timer = Timer(timeInterval: 0.4, repeats: true) { [weak self] timer in
+            MainActor.assumeIsolated {
+                guard let self else {
+                    timer.invalidate()
+                    return
+                }
+                self.measure()
+            }
+        }
+        // on also while a modal window or a menu runs
+        RunLoop.main.add(timer, forMode: .common)
+        measureTimer = timer
+    }
+
+    private func stopMeasuring() {
+        measuring = false
+        measureTimer?.invalidate()
+        measureTimer = nil
+    }
+
+    /// the core's script run in the page, in the app's own world: the page's scripts stay off
+    /// (allowsContentJavaScript), and the app's script sees the page and its frames but none of their globals
+    private func measure() {
+        guard view.window != nil else { return }
+        view.evaluateJavaScript(Self.measureScript, in: nil, in: .defaultClient) { _ in }
+    }
+
+    static let measureScript = String(cString: pe_measure_script())
+
+    /// what a script of the app's own (`script`, an expression) says of the page, as a string; for the UI test
+    func pageAnswer(_ script: String) async -> String {
+        await withCheckedContinuation { done in
+            view.evaluateJavaScript("String(\(script))", in: nil, in: .defaultClient) { result in
+                done.resume(returning: (try? result.get()) as? String ?? "")
+            }
+        }
     }
 
     /// the core's page for `state` (no message selected, downloading, why it could not be downloaded)
@@ -254,7 +327,7 @@ enum Help {
         "contact": "address-book", "group": "address-book", "pick": "address-book", "compose": "compose",
         "keys": "encryption-keys", "key.new": "encryption-keys", "key.backup": "encryption-keys",
         "key.import": "encryption-keys", "key.properties": "encryption-keys", "account.security": "encryption-keys",
-        "key.verify": "verify-key",
+        "key.verify": "verify-key", "protection.details": "protection-details",
     ]
 
     /// opens the help at the topic of `context` (`main`, `account-form`, `options`, ...)
@@ -311,6 +384,7 @@ final class Printer: NSObject {
     private let panel: NSWindow
     private weak var owner: NSWindow?
 
+    /// the page of a signed or encrypted message with its `parts`, each frame then as tall as its part
     static func print(_ document: String, pictures: Bool, title: String, owner: NSWindow?) {
         current = Printer(document, pictures: pictures, title: title, owner: owner)
     }
@@ -343,11 +417,17 @@ final class Printer: NSObject {
         info.horizontalPagination = .fit
         info.verticalPagination = .automatic
         info.isVerticallyCentered = false
+        // the UI test prints to a file, without the Print panel
+        let file = TestHooks.printTo
+        if let file {
+            info.jobDisposition = .save
+            info.dictionary()[NSPrintInfo.AttributeKey.jobSavingURL] = file
+        }
         let operation = view.printOperation(with: info)
         operation.jobTitle = panel.title
         operation.view?.frame = view.bounds
-        operation.showsPrintPanel = true
-        operation.showsProgressPanel = true
+        operation.showsPrintPanel = file == nil
+        operation.showsProgressPanel = file == nil
         if let owner {
             operation.runModal(for: owner, delegate: self, didRun: #selector(done), contextInfo: nil)
         } else {
@@ -358,5 +438,6 @@ final class Printer: NSObject {
 
     @objc private func done(_ operation: NSPrintOperation, success: Bool, contextInfo: UnsafeMutableRawPointer?) {
         Printer.current = nil
+        TestHooks.printed?(success)
     }
 }

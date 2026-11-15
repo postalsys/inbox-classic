@@ -520,6 +520,7 @@ final class UITest {
         try await otherAddresses()
         try await messageRules()
         try await encryptionKeys()
+        try await secureMail()
         try await outboxAndDrafts()
         try await draftsSavedAutomatically()
         try await textSize()

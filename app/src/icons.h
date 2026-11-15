@@ -12,6 +12,10 @@ constexpr IconStrip kToolbarStrips[] = {{10, 24, 0xF0F0F0}, {11, 30, 0xF0F0F0}, 
 constexpr IconStrip kFormatStrips[] = {{20, 16, 0xF0F0F0}, {21, 20, 0xF0F0F0}, {22, 24, 0xF0F0F0}, {23, 32, 0xF0F0F0}};
 constexpr IconStrip kFolderStrips[] = {{30, 16, 0xFFFFFF}, {31, 20, 0xFFFFFF}, {32, 24, 0xFFFFFF}, {33, 32, 0xFFFFFF}};
 constexpr IconStrip kListStrips[] = {{40, 16, 0xFFFFFF}, {41, 20, 0xFFFFFF}, {42, 24, 0xFFFFFF}, {43, 32, 0xFFFFFF}};
+constexpr IconStrip kSecureVerifiedStrips[] = {{50, 16, 0xE8F5E9}, {51, 20, 0xE8F5E9}, {52, 24, 0xE8F5E9}, {53, 32, 0xE8F5E9}};
+constexpr IconStrip kSecureGoodStrips[] = {{60, 16, 0xE6EEFA}, {61, 20, 0xE6EEFA}, {62, 24, 0xE6EEFA}, {63, 32, 0xE6EEFA}};
+constexpr IconStrip kSecureWarningStrips[] = {{70, 16, 0xFFF4E0}, {71, 20, 0xFFF4E0}, {72, 24, 0xFFF4E0}, {73, 32, 0xFFF4E0}};
+constexpr IconStrip kSecureNeutralStrips[] = {{80, 16, 0xF2F2F2}, {81, 20, 0xF2F2F2}, {82, 24, 0xF2F2F2}, {83, 32, 0xF2F2F2}};
 
 enum ToolbarIcon : int {
     ICON_MAIL_ADD = 0,
@@ -80,4 +84,11 @@ enum ListIcon : int {
     LIST_MAIL_ERROR = 5,
     LIST_GLASSES = 6,
     LIST_SPEAKER_MUTE = 7,
+};
+
+enum SecureIcon : int {
+    SECURE_LOCK_CLOSED = 0,
+    SECURE_SHIELD_CHECKMARK = 1,
+    SECURE_RIBBON = 2,
+    SECURE_WARNING = 3,
 };

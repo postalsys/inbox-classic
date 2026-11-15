@@ -1,0 +1,38 @@
+From: Alice Example <alice@example.org>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: Parts signed apart
+Date: Sun, 01 Nov 2026 10:00:00 +0000
+Message-ID: <mixed@ui-test.example>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mix"
+
+--mix
+Content-Type: text/plain; charset=utf-8
+
+A note added on the way, not signed.
+--mix
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="s"
+
+--s
+Content-Type: text/plain; charset=utf-8
+
+The signed paragraph.
+--s
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAmrnDaAWIQStVlrCzexW80KFT904l6QnguQ+7wAKCRA4l6QnguQ+
+7yaUAQCFTeuiCsynkFJN12OE0sX+iDsJtCaiQ/BIqKZjGUhFJAD/Yrtf9S4tng68
+VKHnz2oVvIoEl3Wtosm81stAw6yvfQ4=
+=yPsw
+-----END PGP SIGNATURE-----
+
+--s--
+
+--mix
+Content-Type: text/plain; charset=utf-8
+
+-- 
+Sent through the example list
+--mix--

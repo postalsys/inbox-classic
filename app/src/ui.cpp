@@ -455,6 +455,49 @@ LRESULT CALLBACK KeyboardLinkProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM
 
 }  // namespace
 
+namespace {
+
+// the letter a control's text marks with & (&& is an &), 0 for none
+wchar_t MnemonicOf(const std::wstring& text) {
+    for (size_t at = text.find(L'&'); at != std::wstring::npos && at + 1 < text.size(); at = text.find(L'&', at + 2)) {
+        if (text[at + 1] != L'&') {
+            return static_cast<wchar_t>(towlower(text[at + 1]));
+        }
+    }
+    return 0;
+}
+
+}  // namespace
+
+bool ClickMnemonic(HWND root, wchar_t letter) {
+    struct Search {
+        wchar_t letter;
+        HWND found;
+    } search = {static_cast<wchar_t>(towlower(letter)), nullptr};
+    EnumChildWindows(
+        root,
+        [](HWND child, LPARAM data) -> BOOL {
+            auto* search = reinterpret_cast<Search*>(data);
+            wchar_t className[16] = L"";
+            GetClassNameW(child, className, 16);
+            LONG_PTR type = GetWindowLongPtrW(child, GWL_STYLE) & BS_TYPEMASK;
+            if (_wcsicmp(className, L"Button") != 0 || (type != BS_PUSHBUTTON && type != BS_DEFPUSHBUTTON) || !IsWindowVisible(child) ||
+                !IsWindowEnabled(child) || MnemonicOf(GetWindowString(child)) != search->letter) {
+                return TRUE;
+            }
+            search->found = child;
+            return FALSE;
+        },
+        reinterpret_cast<LPARAM>(&search));
+    if (!search.found) {
+        return false;
+    }
+    // after the key's own handling is over, as a click would come
+    PostMessageW(GetParent(search.found), WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(search.found), BN_CLICKED),
+                 reinterpret_cast<LPARAM>(search.found));
+    return true;
+}
+
 void KeyboardLink(HWND label) {
     SetWindowLongPtrW(label, GWL_STYLE, GetWindowLongPtrW(label, GWL_STYLE) | WS_TABSTOP);
     SetWindowSubclass(label, KeyboardLinkProc, 0, 0);
@@ -851,10 +894,17 @@ void SetColumnTitle(HWND list, int index, const std::wstring& title) {
 // ---- toolbars ----
 
 HIMAGELIST IconList(IconSet set) {
-    std::span<const IconStrip> strips = set == IconSet::Toolbar ? std::span<const IconStrip>(kToolbarStrips)
-                                         : set == IconSet::Format ? std::span<const IconStrip>(kFormatStrips)
-                                         : set == IconSet::Folders ? std::span<const IconStrip>(kFolderStrips)
-                                                                   : std::span<const IconStrip>(kListStrips);
+    std::span<const IconStrip> strips;
+    switch (set) {
+    case IconSet::Toolbar: strips = kToolbarStrips; break;
+    case IconSet::Format: strips = kFormatStrips; break;
+    case IconSet::Folders: strips = kFolderStrips; break;
+    case IconSet::List: strips = kListStrips; break;
+    case IconSet::SecureVerified: strips = kSecureVerifiedStrips; break;
+    case IconSet::SecureGood: strips = kSecureGoodStrips; break;
+    case IconSet::SecureWarning: strips = kSecureWarningStrips; break;
+    case IconSet::SecureNeutral: strips = kSecureNeutralStrips; break;
+    }
     // the strip closest to the DPI, at least as large
     const IconStrip* chosen = &strips.back();
     for (const IconStrip& strip : strips) {

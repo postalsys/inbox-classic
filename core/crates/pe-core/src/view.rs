@@ -66,6 +66,12 @@ pub struct MessageView {
     pub protection: Option<ProtectionView>,
     /// What the message says for Autocrypt, learned when the window takes the view ([`crate::Core::learn_autocrypt`])
     pub autocrypt: Option<crate::autocrypt::Seen>,
+    /// The document of each part of such a message, in order, served at `part-N` beside the page
+    /// ([`pe_html::part_document`]); empty for a part with nothing to show
+    pub part_documents: Vec<String>,
+    /// What is printed of such a message, None for any other (its `document` is): one document of every part's
+    /// text, as a printer prints no frames, the bar's words and each part's label in its printed header
+    pub print_document: Option<String>,
 }
 
 /// What a signed or encrypted message is, for the bar over it (which mail can not draw) and its Details
@@ -81,10 +87,28 @@ pub struct ProtectionView {
     pub encrypted: bool,
 }
 
+impl ProtectionView {
+    /// The Details window's text: each part, its label and what there is to know of it
+    pub fn details(&self) -> String {
+        let mut out = vec![self.text.clone()];
+        for (index, part) in self.parts.iter().enumerate() {
+            out.push(String::new());
+            out.push(pe_i18n::tr_args(
+                pe_i18n::Text::PgpDetailsPart,
+                &[("number", (index + 1).into()), ("label", (&part.label).into())],
+            ));
+            out.extend(part.details.iter().map(|line| format!("    {line}")));
+        }
+        out.join("\n")
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PartView {
     pub tone: crate::protect::Tone,
     pub label: String,
+    /// What Details says of it beyond its label
+    pub details: Vec<String>,
 }
 
 /// Whose word counts for a message: the domains whose Authentication-Results verdicts the account's provider gives,
@@ -254,6 +278,8 @@ pub(crate) fn build_unless(
         otp_code: code.map(|code| code.code),
         protection: None,
         autocrypt: crate::autocrypt::seen(&message, trust.pictures.junk, crate::worker::unix_now()),
+        part_documents: Vec::new(),
+        print_document: None,
     })
 }
 
@@ -274,7 +300,18 @@ fn protected_view(
     let mut parts = Vec::new();
     let mut attachments = Vec::new();
     let mut remote_images = false;
-    for section in &protected.sections {
+    // a part whose pictures did not load: the pictures bar shows
+    let mut blocked = false;
+    // the printout: every part's text in one document (a printer prints no frames), under the labels as words
+    // each part's words (no markup of the message: one part's styles could hide another on the paper), by its place
+    let mut print_texts: Vec<(usize, String)> = Vec::new();
+    // parsed first: the printout's pictures borrow from them
+    let parsed: Vec<Option<parser::Message>> = protected
+        .sections
+        .iter()
+        .map(|section| section.entity.as_deref().and_then(|entity| parser::parse(entity).ok()))
+        .collect();
+    for (section, part) in protected.sections.iter().zip(&parsed) {
         let encrypted = section.verdict.as_ref().is_some_and(|verdict| verdict.encrypted);
         let allow = if encrypted { clicked } else { allow_remote_images };
         let mut label = match &section.verdict {
@@ -285,31 +322,33 @@ fn protected_view(
             .verdict
             .as_ref()
             .map_or(Tone::Neutral, crate::protect::Verdict::tone);
-        let document = section
-            .entity
-            .as_deref()
-            .and_then(|entity| parser::parse(entity).ok())
-            .map(|part| {
-                let body = crate::fold::body(&part);
-                let images = crate::compose::inline_images(&part);
-                let rendered = pe_html::render_view_cards(
-                    &body,
-                    &RenderOptions {
-                        allow_remote_images: allow,
-                    },
-                    &images,
-                    &[],
-                    &pe_html::Cards::default(),
-                );
-                remote_images |= rendered.remote_images;
-                if encrypted && allow && rendered.remote_images {
-                    label = pe_i18n::tr_args(pe_i18n::Text::PgpPartPicturesLoaded, &[("label", (&label).into())]);
-                }
-                attachments.extend(listed(&part.attachments).map(AttachmentView::of));
-                rendered.document
-            });
+        let details = section.verdict.as_ref().map_or_else(
+            || vec![pe_i18n::tr(pe_i18n::Text::PgpDetailsPlain)],
+            crate::protect::Verdict::details,
+        );
+        let document = part.as_ref().map(|part| {
+            let body = crate::fold::body(part);
+            let images = crate::compose::inline_images(part);
+            let rendered = pe_html::render_view_cards(
+                &body,
+                &RenderOptions {
+                    allow_remote_images: allow,
+                },
+                &images,
+                &[],
+                &pe_html::Cards::default(),
+            );
+            remote_images |= rendered.remote_images;
+            blocked |= rendered.remote_images && !allow;
+            if encrypted && allow && rendered.remote_images {
+                label = pe_i18n::tr_args(pe_i18n::Text::PgpPartPicturesLoaded, &[("label", (&label).into())]);
+            }
+            attachments.extend(listed(&part.attachments).map(AttachmentView::of));
+            print_texts.push((parts.len(), parser::html_to_text(&body)));
+            rendered.document
+        });
         documents.push(document);
-        parts.push(PartView { tone, label });
+        parts.push(PartView { tone, label, details });
     }
     let page_parts: Vec<pe_html::SecurePart> = parts
         .iter()
@@ -317,12 +356,14 @@ fn protected_view(
         .map(|(part, document)| pe_html::SecurePart {
             tone: part.tone,
             label: &part.label,
-            document: document.as_deref(),
+            shown: document.is_some(),
         })
         .collect();
     let document = pe_html::secure_page(&page_parts, clicked || allow_remote_images);
-    // the bar: the envelope's words when the message is one part; with several, that they differ
-    let differ = parts.windows(2).any(|pair| pair[0] != pair[1]);
+    // the bar: the envelope's words when the message is one part; with several that differ, how many of each
+    let differ = parts
+        .windows(2)
+        .any(|pair| (pair[0].tone, &pair[0].label) != (pair[1].tone, &pair[1].label));
     let (tone, text) = match (&protected.envelope, differ) {
         (Some(envelope), false) => (
             envelope.tone(),
@@ -336,9 +377,14 @@ fn protected_view(
                 Tone::Good => 2,
                 Tone::Verified => 3,
             });
-            (worst.unwrap_or(Tone::Neutral), pe_i18n::tr(pe_i18n::Text::PgpBarMixed))
+            (worst.unwrap_or(Tone::Neutral), counted(&parts))
         }
     };
+    let any_encrypted = protected
+        .sections
+        .iter()
+        .any(|section| section.verdict.as_ref().is_some_and(|verdict| verdict.encrypted));
+    let print_document = print_document(message, &text, &parts, &print_texts);
     let subject = protected
         .subject
         .clone()
@@ -352,11 +398,14 @@ fn protected_view(
         date: message.timestamp,
         document,
         remote_images,
-        pictures_loaded: clicked || allow_remote_images,
-        sender,
+        pictures_loaded: !blocked,
+        // pictures of encrypted mail load on a click only, never remembered: the bar offers no "always"
+        sender: if any_encrypted { None } else { sender },
         attachments,
         unsubscribe: crate::unsubscribe::of(&message.headers, trust.domains),
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
+        part_documents: documents.into_iter().map(Option::unwrap_or_default).collect(),
+        print_document: Some(print_document),
         protection: Some(ProtectionView {
             tone,
             text,
@@ -365,6 +414,82 @@ fn protected_view(
         }),
         ..Default::default()
     }
+}
+
+/// The printout of a message with signed or encrypted parts: the header a printout has, then the bar's words and each
+/// part's label (in the header, where the message's styles can not reach them), then each part's text, in order
+fn print_document(message: &parser::Message, bar: &str, parts: &[PartView], texts: &[(usize, String)]) -> String {
+    use pe_i18n::{Text, tr, tr_args};
+    let date = message
+        .timestamp
+        .map(crate::calendar::local_date_time)
+        .unwrap_or_default();
+    let part_name = |index: usize| tr_args(Text::HeaderPart, &[("number", (index + 1).into())]);
+    let mut lines: Vec<(String, String)> = vec![
+        (tr(Text::HeaderFrom), text_addresses(message.from.as_slice())),
+        (tr(Text::HeaderDate), date),
+        (tr(Text::HeaderTo), text_addresses(&message.to)),
+        (tr(Text::HeaderCc), text_addresses(&message.cc)),
+        (tr(Text::HeaderSubject), message.subject.clone().unwrap_or_default()),
+        (tr(Text::HeaderSecurity), bar.to_string()),
+    ];
+    for (index, part) in parts.iter().enumerate() {
+        lines.push((part_name(index), part.label.clone()));
+    }
+    let header: Vec<(&str, &str)> = lines
+        .iter()
+        .map(|(name, value)| (name.as_str(), value.as_str()))
+        .collect();
+    // each part as plain text under its label in bold: no part has markup, so the bold labels can only be ours
+    let body: String = texts
+        .iter()
+        .map(|(index, text)| {
+            let label = format!("{}: {}", part_name(*index), parts[*index].label);
+            format!("<p><b>{}</b></p>{}", escape_html(&label), text_to_html(text))
+        })
+        .collect::<Vec<_>>()
+        .join("<hr>");
+    pe_html::render_view_cards(
+        &body,
+        &RenderOptions {
+            allow_remote_images: false,
+        },
+        &[],
+        &header,
+        &pe_html::Cards::default(),
+    )
+    .document
+}
+
+/// Text as HTML text
+fn escape_html(text: &str) -> String {
+    text.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+        .replace('"', "&quot;")
+}
+
+/// The bar of a message whose parts differ: how many parts, and how many of each tone
+fn counted(parts: &[PartView]) -> String {
+    use crate::protect::Tone;
+    use pe_i18n::Text;
+    let kinds = [
+        (Tone::Verified, Text::PgpBarCountVerified),
+        (Tone::Good, Text::PgpBarCountGood),
+        (Tone::Warning, Text::PgpBarCountWarning),
+        (Tone::Neutral, Text::PgpBarCountNeutral),
+    ];
+    let list: Vec<String> = kinds
+        .iter()
+        .filter_map(|(tone, text)| {
+            let count = parts.iter().filter(|part| part.tone == *tone).count();
+            (count > 0).then(|| pe_i18n::tr_args(*text, &[("count", count.into())]))
+        })
+        .collect();
+    pe_i18n::tr_args(
+        Text::PgpBarParts,
+        &[("count", parts.len().into()), ("list", (&list.join(", ")).into())],
+    )
 }
 
 /// The most of a header block shown in Message Properties; the store reads no more of a message than this

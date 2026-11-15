@@ -539,6 +539,10 @@ ui-pictures-always-domain = Toujours télécharger les images des expéditeurs d
 ui-pictures-unconfirmed = Le domaine de l'expéditeur ({ $domain }) n'a pas pu être vérifié. Les images de ce message ne sont donc pas téléchargées automatiquement.
 ui-pictures-always-option = Télécharger les images de tous les messages
 ui-pictures-always-warning = Les expéditeurs peuvent alors savoir quand vous lisez leurs messages.
+# review: new
+ui-protection-details = &Détails...
+# review: new
+ui-protection-details-title = Détails de sécurité
 ui-download-heading = Téléchargement
 ui-download-ahead = Télécharger les messages à l’avance :
 ui-download-ahead-recent = Messages récents de 1 Mo maximum

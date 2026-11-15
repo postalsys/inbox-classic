@@ -34,6 +34,7 @@ mod recipients;
 mod row_pictures;
 mod rows;
 mod rules;
+mod security;
 mod settings;
 mod sign_in_apps;
 mod tray;

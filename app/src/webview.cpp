@@ -56,8 +56,24 @@ bool IsOwnPage(const wchar_t* uri, const wchar_t* url) {
         return false;
     }
     size_t length = wcslen(url);
-    // the page, the page with a query (a new document), or about:blank and about:srcdoc of its frames
-    return (_wcsnicmp(uri, url, length) == 0 && (uri[length] == L'\0' || uri[length] == L'?')) || StartsWith(uri, L"about:");
+    if (StartsWith(uri, L"about:")) {
+        // about:blank and about:srcdoc of its frames
+        return true;
+    }
+    if (_wcsnicmp(uri, url, length) != 0) {
+        return false;
+    }
+    // the page, the page with a query (a new document), or the page in a folder of its own named by a number (a new
+    // document whose frames have addresses beside it)
+    const wchar_t* rest = uri + length;
+    if (*rest == L'\0' || *rest == L'?') {
+        return true;
+    }
+    const wchar_t* digits = rest;
+    while (*rest >= L'0' && *rest <= L'9') {
+        rest++;
+    }
+    return rest > digits && rest[0] == L'/' && rest[1] == L'\0';
 }
 
 bool IsRemoteImage(const wchar_t* uri, COREWEBVIEW2_WEB_RESOURCE_CONTEXT context, const wchar_t* url) {
@@ -144,12 +160,14 @@ void Create(HWND parent, std::function<void(ICoreWebView2Environment*, ICoreWebV
 }
 
 void FilterRequests(ICoreWebView2* view, ICoreWebView2Environment* environment, const wchar_t* url,
-                    std::function<const std::wstring&()> serve, std::function<bool(const wchar_t*, COREWEBVIEW2_WEB_RESOURCE_CONTEXT)> allow) {
+                    std::function<const std::wstring&()> serve, std::function<bool(const wchar_t*, COREWEBVIEW2_WEB_RESOURCE_CONTEXT)> allow,
+                    std::function<bool(const wchar_t* uri, std::string& document)> part) {
     ComPtr<ICoreWebView2Environment> env = environment;
     std::wstring page = url;
     view->AddWebResourceRequestedFilter(L"*", COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL);
     view->add_WebResourceRequested(
-        Callback<ICoreWebView2WebResourceRequestedEventHandler>([env, page, serve, allow](ICoreWebView2*, ICoreWebView2WebResourceRequestedEventArgs* args) {
+        Callback<ICoreWebView2WebResourceRequestedEventHandler>([env, page, serve, allow, part](ICoreWebView2*,
+                                                                                              ICoreWebView2WebResourceRequestedEventArgs* args) {
             ComPtr<ICoreWebView2WebResourceRequest> request;
             args->get_Request(&request);
             LPWSTR uri = nullptr;
@@ -157,7 +175,16 @@ void FilterRequests(ICoreWebView2* view, ICoreWebView2Environment* environment, 
             COREWEBVIEW2_WEB_RESOURCE_CONTEXT context = COREWEBVIEW2_WEB_RESOURCE_CONTEXT_ALL;
             args->get_ResourceContext(&context);
             ComPtr<ICoreWebView2WebResourceResponse> response;
-            if (context == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT && IsOwnPage(uri, page.c_str()) && !StartsWith(uri, L"about:")) {
+            std::string partDocument;
+            if (part && StartsWith(uri, page.c_str()) && !IsOwnPage(uri, page.c_str()) && part(uri, partDocument)) {
+                if (partDocument.empty()) {
+                    env->CreateWebResourceResponse(nullptr, 404, L"Not Found", L"", &response);
+                } else {
+                    ComPtr<IStream> stream;
+                    stream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(partDocument.data()), static_cast<UINT>(partDocument.size())));
+                    env->CreateWebResourceResponse(stream.Get(), 200, L"OK", L"Content-Type: text/html; charset=utf-8", &response);
+                }
+            } else if (context == COREWEBVIEW2_WEB_RESOURCE_CONTEXT_DOCUMENT && IsOwnPage(uri, page.c_str()) && !StartsWith(uri, L"about:")) {
                 std::string body = Utf8(serve());
                 ComPtr<IStream> stream;
                 stream.Attach(SHCreateMemStream(reinterpret_cast<const BYTE*>(body.data()), static_cast<UINT>(body.size())));

@@ -40,12 +40,12 @@ pub use pe_html::PartTone as Tone;
 pub enum Signature {
     /// Not signed
     None,
-    /// By the sender, the key verified by the user
-    Verified { signer: String, at: i64 },
+    /// By the sender, the key verified by the user (`key`, its fingerprint)
+    Verified { signer: String, at: i64, key: String },
     /// By the sender, the key not verified
-    Signed { signer: String, at: i64 },
+    Signed { signer: String, at: i64, key: String },
     /// A good signature by someone who is not the sender
-    OtherPerson { signer: String, at: i64 },
+    OtherPerson { signer: String, at: i64, key: String },
     /// Signed with a key that is not known here (its id, to look it up)
     UnknownKey { key: String },
     /// A signature that does not count, and why, in words
@@ -74,6 +74,8 @@ pub struct Verdict {
     pub signature: Signature,
     /// Encrypted data that could not be opened: the section has nothing to show but this
     pub sealed: Option<Sealed>,
+    /// The fingerprint of the user's key that opened the encryption, when it was opened
+    pub opened_by: Option<String>,
 }
 
 impl Verdict {
@@ -83,6 +85,7 @@ impl Verdict {
             encrypted,
             signature: Signature::NotChecked,
             sealed: None,
+            opened_by: None,
         }
     }
 
@@ -92,6 +95,7 @@ impl Verdict {
             encrypted: true,
             signature: Signature::None,
             sealed: Some(why),
+            opened_by: None,
         }
     }
 
@@ -106,6 +110,43 @@ impl Verdict {
             Signature::None | Signature::NotChecked if self.encrypted => Tone::Good,
             Signature::None | Signature::UnknownKey { .. } | Signature::NotChecked => Tone::Neutral,
         }
+    }
+
+    /// What Details says of it beyond its label: who signed it with which key and when, which key of the user's
+    /// opened it, or for whom it was encrypted
+    pub fn details(&self) -> Vec<String> {
+        let mut lines = Vec::new();
+        match &self.signature {
+            Signature::Verified { at, key, .. }
+            | Signature::Signed { at, key, .. }
+            | Signature::OtherPerson { at, key, .. } => {
+                lines.push(tr_args(
+                    Text::PgpDetailsSigned,
+                    &[
+                        ("when", (&crate::calendar::local_date_time(*at)).into()),
+                        ("key", (&pe_pgp::grouped(key)).into()),
+                    ],
+                ));
+            }
+            Signature::UnknownKey { key } => {
+                lines.push(tr_args(
+                    Text::PgpDetailsUnknownKey,
+                    &[("key", (&pe_pgp::grouped(key)).into())],
+                ));
+            }
+            _ => {}
+        }
+        if let Some(key) = &self.opened_by {
+            lines.push(tr_args(
+                Text::PgpDetailsOpened,
+                &[("key", (&pe_pgp::grouped(key)).into())],
+            ));
+        }
+        if let Some(Sealed::NoKey(keys)) = &self.sealed {
+            let keys: Vec<String> = keys.iter().map(|key| pe_pgp::grouped(key)).collect();
+            lines.push(tr_args(Text::PgpDetailsFor, &[("keys", (&keys.join(", ")).into())]));
+        }
+        lines
     }
 
     /// The label of the section, in words
@@ -412,6 +453,7 @@ impl Reader<'_> {
                 Ok(opened) => {
                     let mut verdict = Verdict::not_checked(true);
                     verdict.signature = self.signature(&opened.signatures);
+                    verdict.opened_by = opened.key.clone();
                     // a signed layer inside the encryption (RFC 3156 6.1), its signature judged for the key that
                     // opened this
                     let inner = self.unwrap_layers(opened.data, depth + 1, opened.key.as_deref());
@@ -448,6 +490,7 @@ impl Reader<'_> {
                     },
                 },
                 sealed: None,
+                opened_by: None,
             };
             return Unwrapped {
                 verdict: Some(verdict),
@@ -596,12 +639,24 @@ impl Reader<'_> {
                 match sender {
                     Some(sender) if addresses.contains(&sender) => {
                         if self.ring.verified.contains(&(cert.fingerprint(), sender)) {
-                            Signature::Verified { signer: name, at }
+                            Signature::Verified {
+                                signer: name,
+                                at,
+                                key: cert.fingerprint(),
+                            }
                         } else {
-                            Signature::Signed { signer: name, at }
+                            Signature::Signed {
+                                signer: name,
+                                at,
+                                key: cert.fingerprint(),
+                            }
                         }
                     }
-                    _ => Signature::OtherPerson { signer: name, at },
+                    _ => Signature::OtherPerson {
+                        signer: name,
+                        at,
+                        key: cert.fingerprint(),
+                    },
                 }
             }
         }
@@ -648,6 +703,7 @@ fn combine(inherited: Option<&Verdict>, own: Verdict) -> Verdict {
             own.signature
         },
         sealed: own.sealed,
+        opened_by: own.opened_by.or_else(|| outer.opened_by.clone()),
     }
 }
 

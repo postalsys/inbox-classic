@@ -426,6 +426,9 @@ enum TestHooks {
     static var notified: ((String, String) -> Void)?
     /// the anchor of the help topic asked for, in place of Help Viewer, which runs in a process of its own
     static var help: ((String) -> Void)?
+    /// a file to print to in place of the Print panel, and whether printing ended well
+    static var printTo: URL?
+    static var printed: ((Bool) -> Void)?
 }
 
 /// Where to save a file, starting from the safe name the core made, in Downloads; nil when cancelled

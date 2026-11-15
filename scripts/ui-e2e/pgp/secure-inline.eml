@@ -1,0 +1,21 @@
+From: Alice Example <alice@example.org>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: Inline encrypted
+Date: Sun, 01 Nov 2026 10:00:00 +0000
+Message-ID: <inline@ui-test.example>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+
+Here it is:
+
+-----BEGIN PGP MESSAGE-----
+
+wWwGFQTi0R+UqEMQ5651sz7JhZZde6q1ERIBB0CnLsk/qMtalx4GcmjPNdRNd+eA
+ijqAyHRPhQ9T0/ptOjCSSvK7yrqPsFlfVLvNpi3UQjvI2IAQt/Zd1wHr+NfY99ZX
+RlWlfN5sIhkTCFqJaHnSagIJAgZM6ZymGTgAXZR5fPDDtwxugmiEWJVafOI+fA5G
+eYTKaRf6sXh+ttzxTiKVmeEGkAJv3/DlbTnj65Ia76TS3dQ1Ge2thUKjkg94RXe4
+2EHewOCFxWgVfSPbbAqtMiFPEVorJPjLyLA=
+=f/Tq
+-----END PGP MESSAGE-----
+
+Bye

@@ -1,7 +1,8 @@
 // The reading pane: a message's header (the brand's logo at its left, the Unsubscribe link and the paper clip of its
-// files at its right), the bars under it (a download that failed, an invitation, blocked pictures) and the message
-// itself in the locked-down WebView2 (preview.h). The main window has one under its list, each message window one of
-// its own. Every string shown was decoded by the core; the body is the sanitized document the core made.
+// files at its right), the bars under it (a signed or encrypted message's security bar, a download that failed,
+// blocked pictures) and the message itself in the locked-down WebView2 (preview.h). The main window has one under its
+// list, each message window one of its own. Every string shown was decoded by the core; the body is the sanitized
+// document the core made.
 #pragma once
 
 #include <windows.h>
@@ -74,6 +75,9 @@ public:
     bool FollowLink(const wchar_t* uri);
     // called when the bounce card's "Show the message that bounced" is clicked, with the message it names
     std::function<void(int64_t folder, uint64_t uid)> onBouncedMessage;
+    // the UI test's look at the parts' frames of the message shown and its requests to the internet (preview.h)
+    int64_t TestFrames() { return preview_.TestFrames(); }
+    int RemoteRequests() const { return preview_.RemoteRequests(); }
 
     void OnEvent(const UiEvent& event);
     bool OnCommand(WORD id, WORD code);
@@ -91,6 +95,12 @@ private:
     void ShowInfo();
     void ShowHeader(const PeMessageInfo* info);
     void ShowBars(bool files, bool pictures);
+    // the security bar of a signed or encrypted message, shown or hidden as `info` has it (none: hidden)
+    void ShowSecurity(const PeMessageInfo* info);
+    // its height `width` wide, 0 when it is hidden
+    int SecurityHeight(int width) const;
+    // the Details window of the message shown, at part `part` (-1 for the top)
+    void ShowSecurityDetails(int part);
     // the menu of the pictures bar's arrow: Always from the sender or from everyone at their domain (only when the
     // provider confirmed the sender, else why not), and Download Pictures
     void ChoosePictures();
@@ -119,6 +129,13 @@ private:
     HWND pictures_ = nullptr;
     HWND picturesMenu_ = nullptr;
     HWND retry_ = nullptr;
+    // the security bar over a signed or encrypted message (owner-drawn, its words its text) with its Details button,
+    // the state it shows, and the part whose label was clicked for the Details window it opens
+    HWND security_ = nullptr;
+    HWND securityDetails_ = nullptr;
+    PeProtectionTone securityTone_ = PE_PROTECTION_TONE_NONE;
+    bool securityLock_ = false;
+    int detailsPart_ = -1;
     HWND previewHost_ = nullptr;
     HFONT bold_ = nullptr;
     HFONT link_ = nullptr;

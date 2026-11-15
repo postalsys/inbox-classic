@@ -58,6 +58,10 @@ header-to = An
 header-cc = Cc
 header-sent = Gesendet
 header-subject = Betreff
+# review: new
+header-security = Sicherheit
+# review: new
+header-part = Teil { $number }
 quote-original = ----- Ursprüngliche Nachricht -----
 fold-show-earlier = Frühere Nachrichten anzeigen
 
@@ -617,8 +621,6 @@ pgp-why-key-not-valid = Mit einem ungültigen Schlüssel signiert
 # review: new
 pgp-why-not-for-you = Für andere Empfänger signiert und an Sie weitergegeben
 # review: new
-pgp-bar-mixed = Teile dieser Nachricht sind unterschiedlich geschützt: Jeder Teil sagt, wie.
-# review: new
 pgp-part-pictures-loaded = { $label }. Bilder wurden aus dem Internet geladen
 # review: new
 pgp-error-no-own-key = Sie haben keinen Schlüssel für { $address }, um zu signieren oder zu verschlüsseln. Erstellen Sie einen unter Extras > Verschlüsselungsschlüssel, oder schalten Sie Signieren und Verschlüsseln aus.
@@ -647,3 +649,28 @@ pgp-publish-done = Ihr Schlüssel ist auf keys.openpgp.org für { $addresses } v
 pgp-publish-failed = Der Schlüssel konnte nicht veröffentlicht werden: { $error }
 # review: new
 pgp-keyserver-off = Die Suche nach Schlüsseln auf keys.openpgp.org ist in den Optionen ausgeschaltet.
+# review: new
+pgp-details-part = Teil { $number }: { $label }
+# review: new
+pgp-details-signed = Signiert { $when } mit dem Schlüssel { $key }
+# review: new
+pgp-details-unknown-key = Signiert mit dem Schlüssel { $key }, den Sie nicht haben
+# review: new
+pgp-details-opened = Verschlüsselt für Ihren Schlüssel { $key }
+# review: new
+pgp-details-for = Verschlüsselt für { $keys }
+# review: new
+pgp-details-plain = Weder signiert noch verschlüsselt
+# review: new
+pgp-bar-parts = Diese Nachricht hat { $count } Teile: { $list }. Jeder Teil sagt, wie er geschützt ist.
+# review: new
+pgp-bar-count-verified = { $count } überprüft
+# review: new
+pgp-bar-count-good = { $count } signiert oder verschlüsselt
+# review: new
+pgp-bar-count-warning = { $count ->
+    [one] 1 braucht Aufmerksamkeit
+   *[other] { $count } brauchen Aufmerksamkeit
+}
+# review: new
+pgp-bar-count-neutral = { $count } ohne bestätigte Signatur

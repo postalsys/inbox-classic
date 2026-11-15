@@ -761,6 +761,103 @@ const sections = [
         ]
     },
     {
+        title: 'Signed and encrypted mail',
+        intro: 'The bar over a message says whether it is signed by its sender and whether it was encrypted; each part of a message is a document of its own with a label nothing in the message can reach.',
+        features: [
+            {
+                shot: 'secure-2-signed-unverified',
+                name: 'A signed message',
+                what: 'The bar over a signed message says who signed it, with the ribbon, in blue while the key is not verified. Labels name the signer by the Address Book or the address that was checked, never by what the key says of itself.',
+                how: 'Open a signed message.',
+                checked: ['Blue, the ribbon', 'The signer\'s address']
+            },
+            {
+                shot: 'secure-1-verified',
+                name: 'A verified signature',
+                what: 'Signed with a key the user verified: green, "key verified".',
+                how: 'Verify the signer\'s key, then open their message.',
+                checked: ['Green']
+            },
+            {
+                shot: 'secure-3-encrypted',
+                name: 'An encrypted message',
+                what: 'Encrypted mail is opened with the user\'s key with nothing typed; the bar shows the lock and how it was signed.',
+                how: 'Open an encrypted message.',
+                checked: ['The lock', 'The text shown']
+            },
+            {
+                shot: 'secure-4-mixed-parts',
+                name: 'Parts protected differently',
+                what: 'Each part of a message is a document of its own in a frame with its own label, so nothing a sender writes can reach a label. The bar counts the parts of each kind.',
+                how: 'Open a message with a signed part among others.',
+                checked: ['Three frames', 'The bar counts them']
+            },
+            {
+                shot: 'secure-5-bad-signature',
+                name: 'A signature that does not match',
+                what: 'A text changed after it was signed is shown amber, with why.',
+                how: 'Open the message.',
+                checked: ['Amber', 'Does not match']
+            },
+            {
+                shot: 'secure-6-wrong-signer',
+                name: 'Signed by someone else',
+                what: 'A good signature by someone who is not the sender is amber and names who signed.',
+                how: 'Open the message.',
+                checked: ['Amber', 'Not the sender']
+            },
+            {
+                shot: 'secure-7-no-key',
+                name: 'A key not known',
+                what: 'A signature whose key is not here is grey.',
+                how: 'Open the message.',
+                checked: ['Grey']
+            },
+            {
+                shot: 'secure-8-fake-frame',
+                name: 'A painted label',
+                what: 'A sender can paint a frame that looks like a label in their own part; it stays inside that part, under the real label.',
+                how: 'Open the message.',
+                checked: ['The real labels are there', 'The painted one stays in its frame']
+            },
+            {
+                shot: 'secure-9-details',
+                name: 'Details',
+                what: 'Details lists every part, the key that signed it and when, and the key that opened it.',
+                how: 'Details on the bar, or a click on a part\'s label.',
+                checked: ['Each part', 'The key and the time']
+            },
+            {
+                shot: 'secure-10-inline',
+                name: 'Inline PGP',
+                what: 'An encrypted or signed block in plain text is a part of its own.',
+                how: 'Open the message.',
+                checked: ['The block decrypted in its frame']
+            },
+            {
+                shot: 'secure-11-pictures-in-decrypted',
+                name: 'Pictures in encrypted mail',
+                what: 'Pictures from the internet in an encrypted part load only on a click, every time, and the label then says so.',
+                how: 'Click the pictures bar.',
+                checked: ['No "always" choices', 'The label changes']
+            },
+            {
+                shot: 'secure-12-resized',
+                name: 'Frames as tall as their parts',
+                what: 'Each frame is sized to its part, again when pictures load, "..." unfolds or the window changes.',
+                how: 'Open a long message, unfold, resize.',
+                checked: ['No scroll bar in a frame', 'It grows']
+            },
+            {
+                shot: 'secure-13-dark',
+                name: 'In dark mode',
+                what: 'The bar and the labels in dark colours.',
+                how: 'Dark mode.',
+                checked: ['Readable']
+            }
+        ]
+    },
+    {
         title: 'Organizing mail',
         intro: 'What is done to a message is done on the server too, so webmail and your other mail programs agree.',
         features: [
@@ -1452,7 +1549,8 @@ const notYet = {
         'dark-3-newsletter',
         'dark-4-cards',
         'dark-5-compose',
-        'dark-6-switch-off'
+        'dark-6-switch-off',
+        'secure-13-dark'
     ],
     mac: [
         // the system's own file panels and the Dock or the top bar run in processes of their own: their pictures can

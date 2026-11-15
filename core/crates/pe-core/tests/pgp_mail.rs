@@ -137,6 +137,15 @@ fn mixed(parts: &[String]) -> String {
     out
 }
 
+/// All that is shown of a view: its page and every part's document
+fn shown(view: &pe_core::MessageView) -> String {
+    let mut all = view.document.clone();
+    for document in &view.part_documents {
+        all.push_str(document);
+    }
+    all
+}
+
 fn tones(view: &pe_core::MessageView) -> Vec<Tone> {
     view.protection
         .as_ref()
@@ -152,7 +161,7 @@ fn plain_mail_is_as_before() {
     let w = world("pgp-plain");
     let view = w.view(&message("alice@example.org", &text("Hello")));
     assert!(view.protection.is_none());
-    assert!(!view.document.contains("<section class=\"pe-p"));
+    assert!(!shown(&view).contains("<section class=\"pe-p"));
 }
 
 #[test]
@@ -171,7 +180,7 @@ fn signed_by_the_sender() {
         protection.text
     );
     assert!(!protection.encrypted);
-    assert!(view.document.contains("Hello Bob"));
+    assert!(shown(&view).contains("Hello Bob"));
     // verified, it is green
     w.core
         .pgp_set_verified(&w.alice.fingerprint(), "alice@example.org", true)
@@ -233,7 +242,7 @@ fn encrypted_and_signed() {
     assert_eq!(protection.tone, Tone::Good);
     assert!(protection.text.starts_with("Encrypted."), "{}", protection.text);
     assert!(protection.text.contains("Alice"), "{}", protection.text);
-    assert!(view.document.contains("The secret plan"));
+    assert!(shown(&view).contains("The secret plan"));
 }
 
 #[test]
@@ -247,7 +256,7 @@ fn encrypted_to_someone_else() {
     let protection = view.protection.as_ref().unwrap();
     assert_eq!(protection.tone, Tone::Warning);
     assert!(protection.text.contains("do not have"), "{}", protection.text);
-    assert!(!view.document.contains("Not for you"));
+    assert!(!shown(&view).contains("Not for you"));
 }
 
 #[test]
@@ -265,7 +274,7 @@ fn changed_ciphertext_is_not_shown() {
     let view = w.view(&String::from_utf8(changed).unwrap());
     let protection = view.protection.as_ref().unwrap();
     assert_eq!(protection.tone, Tone::Warning);
-    assert!(!view.document.contains("Original"));
+    assert!(!shown(&view).contains("Original"));
 }
 
 #[test]
@@ -282,7 +291,17 @@ fn parts_signed_apart() {
     let view = w.view(&raw);
     assert_eq!(tones(&view), [Tone::Neutral, Tone::Good, Tone::Neutral]);
     let protection = view.protection.as_ref().unwrap();
-    assert!(protection.text.contains("differently"), "{}", protection.text);
+    assert!(
+        protection
+            .text
+            .contains("3 parts: 1 signed or encrypted, 2 without a confirmed signature"),
+        "{}",
+        protection.text
+    );
+    // Details: each part, the signed one with its key and time
+    let details = protection.details();
+    assert!(details.contains("Part 2: Signed by Alice Example"), "{details}");
+    assert!(details.contains(&pe_pgp::grouped(&w.alice.fingerprint())), "{details}");
     assert_eq!(protection.parts[0].label, "Not signed");
     // three documents, each its own frame
     assert_eq!(view.document.matches("<iframe").count(), 3);
@@ -298,13 +317,20 @@ fn efail_a_decrypted_part_can_not_be_wrapped_by_its_neighbours() {
     let raw = message("alice@example.org", &mixed(&[open.into(), secret, close.into()]));
     let view = w.view(&raw);
     assert_eq!(view.protection.as_ref().unwrap().parts.len(), 3);
-    // the decrypted text is only ever inside its own frame's document, never next to the attacker's address
-    let page = &view.document;
-    let secret_at = page.find("The secret plan").unwrap();
-    let frame_start = page[..secret_at].rfind("<iframe").unwrap();
-    assert!(!page[frame_start..secret_at].contains("attacker.example"));
+    // the decrypted text is only ever in its own part's document, never in one with the attacker's address
+    let with_secret: Vec<&String> = view
+        .part_documents
+        .iter()
+        .filter(|document| document.contains("The secret plan"))
+        .collect();
+    assert_eq!(with_secret.len(), 1);
+    assert!(!with_secret[0].contains("attacker.example"));
+    assert!(
+        !view.document.contains("The secret plan"),
+        "the page holds no part's text"
+    );
     // and no part of the page loads anything from the internet
-    assert!(page.contains("img-src data:;"));
+    assert!(view.document.contains("img-src data:;"));
 }
 
 #[test]
@@ -368,7 +394,7 @@ fn inline_encrypted_and_inline_signed() {
     let protection = view.protection.as_ref().unwrap();
     assert_eq!(protection.parts.len(), 3, "{protection:?}");
     assert!(protection.parts[1].label.contains("Signature not checked"));
-    assert!(view.document.contains("Inline secret"));
+    assert!(shown(&view).contains("Inline secret"));
 }
 
 #[test]
@@ -469,8 +495,8 @@ fn efail_encrypted_neighbours_are_documents_of_their_own() {
     let protection = view.protection.as_ref().unwrap();
     assert_eq!(protection.parts.len(), 3, "{protection:?}");
     // the secret is drawn as text of its own document, never inside another's attribute
-    assert!(view.document.contains("The secret plan"));
-    assert!(!view.document.contains("x=The secret plan") && !view.document.contains("x=\nThe secret"));
+    assert!(shown(&view).contains("The secret plan"));
+    assert!(!shown(&view).contains("x=The secret plan") && !shown(&view).contains("x=\nThe secret"));
 }
 
 /// A "multipart/encrypted" holding OpenPGP data that is not encrypted (a literal data packet here; a signed message
@@ -494,7 +520,7 @@ fn an_envelope_with_nothing_encrypted_is_broken() {
     let view = w.view(&raw);
     let protection = view.protection.as_ref().unwrap();
     assert_eq!(protection.tone, Tone::Warning, "{protection:?}");
-    assert!(!view.document.contains("Hi Mallory"));
+    assert!(!shown(&view).contains("Hi Mallory"));
 }
 
 /// An agent can not encrypt: it neither replies to nor forwards encrypted mail, which would put what was encrypted on
@@ -553,4 +579,24 @@ fn an_agent_does_not_answer_encrypted_mail() {
     // the user's own reply opens with Encrypt on and may go only encrypted
     let draft = w.core.draft(folder, 1, pe_core::DraftKind::Reply).unwrap().unwrap();
     assert!(draft.encrypt && draft.quote_encrypted);
+}
+
+/// The printout puts the parts on one page, so no part may bring markup: one part's styles or an unclosed element
+/// would hide or restyle another under the signed labels. Each part prints as its words, under its label in bold.
+#[test]
+fn a_part_can_not_hide_another_on_the_printout() {
+    let w = world("pgp-print");
+    let hostile = "Content-Type: text/html; charset=utf-8\r\n\r\n<style>body>*{display:none}</style>\
+                   <div style=\"display:none\">Wire the money to Mallory";
+    let raw = message(
+        "alice@example.org",
+        &mixed(&[hostile.into(), signed_part(&text("Lunch on Friday?"), &w.alice, "s")]),
+    );
+    let view = w.view(&raw);
+    let print = view.print_document.as_deref().unwrap();
+    assert!(print.contains("Lunch on Friday?") && print.contains("Wire the money to Mallory"));
+    // the parts' section, after the printed header: words only, no style of the message
+    let parts = &print[print.find("<p><b>Part 1").unwrap()..];
+    assert!(!parts.contains("style") && !parts.contains("display"), "{parts}");
+    assert!(parts.contains("<b>Part 2: Signed by Alice Example"), "{parts}");
 }

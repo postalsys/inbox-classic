@@ -1,9 +1,11 @@
 //! The web views, locked down the way the Windows app locks WebView2 down: the core's documents are served from the
-//! app's own scheme (`inboxclassic://preview/<n>`, `inboxclassic://compose/<n>`, `inboxclassic://help/`) out of
-//! memory, every other load is blocked by the content rules the core gives (only the pictures of a message the user
-//! allowed get through), nothing navigates away from the document, links open in the browser, no window opens, no
-//! dev tools, an ephemeral network session (nothing on disk). JavaScript is off but in the editor, whose page runs
-//! only its own script (allowed by a nonce in its CSP).
+//! app's own scheme (`inboxclassic://preview/<n>/`, `inboxclassic://compose/<n>/`) out of memory, and the parts of a
+//! signed or encrypted message beside its page (`inboxclassic://preview/<n>/part-N`, each in a frame of the page).
+//! Every other load is blocked by the content rules the core gives (only the pictures of a message the user allowed
+//! get through), nothing navigates away from the document, links open in the browser, no window opens, no
+//! dev tools, an ephemeral network session (nothing on disk). Page scripts are off but in the editor, whose page runs
+//! only its own script (allowed by a nonce in its CSP); the reading pane runs the app's own script (the core's, which
+//! sizes the frames of a signed or encrypted message's parts) with the page's scripts still off.
 
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -17,13 +19,19 @@ use webkit::prelude::*;
 pub struct Web {
     context: webkit::WebContext,
     session: webkit::NetworkSession,
-    /// The documents the scheme serves, by their URI
-    documents: RefCell<HashMap<String, Rc<str>>>,
+    /// The documents the scheme serves, by their URI, each with the documents of its parts (`part-N` beside it)
+    documents: RefCell<HashMap<String, Served>>,
     next: Cell<u64>,
     /// The rules that block every load, and those that let a message's pictures through; None until compiled
     filters: RefCell<Option<(webkit::UserContentFilter, webkit::UserContentFilter)>>,
     /// Loads waiting for the rules: no document is shown without them
     waiting: RefCell<Vec<Box<dyn FnOnce()>>>,
+}
+
+/// A page and the documents of its frames
+struct Served {
+    page: Rc<str>,
+    parts: Rc<[String]>,
 }
 
 thread_local! {
@@ -67,9 +75,17 @@ impl Web {
         web
     }
 
+    /// The page at `uri`, or the document of one of its parts; None for any other address, or a part not shown
     fn document(&self, uri: &str) -> Option<Rc<str>> {
-        let uri = uri.split('#').next().unwrap_or(uri);
-        self.documents.borrow().get(uri).cloned()
+        let uri = uri.split(['#', '?']).next().unwrap_or(uri);
+        let documents = self.documents.borrow();
+        if let Some(served) = documents.get(uri) {
+            return Some(served.page.clone());
+        }
+        let index = pe_html::part_document(uri)?;
+        let page = &uri[..=uri.rfind('/')?];
+        let part = documents.get(page)?.parts.get(index)?;
+        (!part.is_empty()).then(|| Rc::from(part.as_str()))
     }
 
     /// The content rules of the core compiled once (WebKit keeps them in a store on disk, in the cache folder)
@@ -110,16 +126,21 @@ impl Web {
         }
     }
 
-    /// A new URI under `kind` serving `document`, and the one it replaces given up
-    fn serve(&self, kind: &str, document: &str, replaces: Option<&str>) -> String {
+    /// A new URI under `kind` serving `document` and its `parts` beside it, and the one it replaces given up. It ends
+    /// in `/`, so the page's frames (`part-N`) ask for addresses under it
+    fn serve(&self, kind: &str, document: &str, parts: &[String], replaces: Option<&str>) -> String {
         let n = self.next.get() + 1;
         self.next.set(n);
-        let uri = format!("{}://{kind}/{n}", pe_html::DOCUMENT_SCHEME);
+        let uri = format!("{}://{kind}/{n}/", pe_html::DOCUMENT_SCHEME);
         let mut documents = self.documents.borrow_mut();
         if let Some(old) = replaces {
             documents.remove(old);
         }
-        documents.insert(uri.clone(), Rc::from(document));
+        let served = Served {
+            page: Rc::from(document),
+            parts: Rc::from(parts),
+        };
+        documents.insert(uri.clone(), served);
         uri
     }
 
@@ -128,10 +149,12 @@ impl Web {
     }
 }
 
-/// The settings of every web view: `javascript` only for the editor
-fn settings(javascript: bool) -> webkit::Settings {
+/// The settings of every web view: `javascript` (the page's own scripts) only for the editor; `app_scripts` lets the
+/// app run its own script in the page (`enable-javascript`) while the page's scripts, its `<script>` elements, event
+/// attributes and `javascript:` links, stay off (`enable-javascript-markup`)
+fn settings(javascript: bool, app_scripts: bool) -> webkit::Settings {
     let settings = webkit::Settings::new();
-    settings.set_enable_javascript(javascript);
+    settings.set_enable_javascript(javascript || app_scripts);
     settings.set_enable_javascript_markup(javascript);
     settings.set_enable_developer_extras(false);
     settings.set_enable_html5_local_storage(false);
@@ -165,6 +188,9 @@ pub struct DocumentView {
     current: Rc<RefCell<String>>,
     /// The links clicked in the document that its owner follows itself, shared with the view's policy decisions
     links: Links,
+    /// Whether the document shown has frames to size ([`DocumentView::measure_frames`]), and the timer that sizes them
+    measuring: Rc<Cell<bool>>,
+    measure_timer: Rc<RefCell<Option<glib::SourceId>>>,
 }
 
 /// Asked of a link clicked in a document before the browser opens it: true when the owner took it (the bounce card's)
@@ -220,7 +246,7 @@ impl DocumentView {
         let view = webkit::WebView::builder()
             .web_context(&web.context)
             .network_session(&web.session)
-            .settings(&settings(javascript))
+            .settings(&settings(javascript, kind == "preview"))
             .user_content_manager(&manager)
             .build();
         view.set_vexpand(true);
@@ -242,13 +268,48 @@ impl DocumentView {
             keep_useful(menu);
             false
         });
+        let measuring: Rc<Cell<bool>> = Rc::default();
+        let measure = measuring.clone();
+        view.connect_load_changed(move |view, event| {
+            if event == webkit::LoadEvent::Finished && measure.get() {
+                size_frames(view);
+            }
+        });
         DocumentView {
             view,
             manager,
             kind,
             current,
             links,
+            measuring,
+            measure_timer: Rc::default(),
         }
+    }
+
+    /// The frames of the document shown (a signed or encrypted message's parts) sized to their documents with the
+    /// core's script: once the page has loaded, then every 400 ms (pictures loading, "..." unfolded, the width or the
+    /// text size changed) until another document is shown or the view goes; `on` false stops it
+    pub fn measure_frames(&self, on: bool) {
+        if let Some(timer) = self.measure_timer.borrow_mut().take() {
+            timer.remove();
+        }
+        self.measuring.set(on);
+        if !on {
+            return;
+        }
+        if !self.view.is_loading() {
+            size_frames(&self.view);
+        }
+        let view = self.view.downgrade();
+        let measuring = self.measuring.clone();
+        let timer = glib::timeout_add_local(std::time::Duration::from_millis(400), move || match view.upgrade() {
+            Some(view) if measuring.get() => {
+                size_frames(&view);
+                glib::ControlFlow::Continue
+            }
+            _ => glib::ControlFlow::Break,
+        });
+        self.measure_timer.replace(Some(timer));
     }
 
     /// `links` is asked of a link clicked in the document before the browser opens it: true when it took the link
@@ -263,9 +324,22 @@ impl DocumentView {
 
     /// Shows `document`, with the message's pictures from the internet only when `remote_images`
     pub fn show(&self, document: &str, remote_images: bool) {
+        self.show_parts(document, &[], remote_images);
+    }
+
+    /// Shows `document` whose frames show `parts` (a signed or encrypted message's), with the message's pictures
+    /// from the internet only when `remote_images`
+    pub fn show_parts(&self, document: &str, parts: &[String], remote_images: bool) {
+        // the frames of the document before are not this one's
+        self.measure_frames(false);
         let web = web();
         let previous = self.current.borrow().clone();
-        let uri = web.serve(self.kind, document, (!previous.is_empty()).then_some(previous.as_str()));
+        let uri = web.serve(
+            self.kind,
+            document,
+            parts,
+            (!previous.is_empty()).then_some(previous.as_str()),
+        );
         *self.current.borrow_mut() = uri.clone();
         let this = self.clone();
         web.when_ready(move || {
@@ -291,10 +365,31 @@ impl DocumentView {
             .unwrap_or_default()
     }
 
+    /// What the e2e driver checks: the document shown and the documents of its parts
+    #[cfg(feature = "e2e")]
+    pub fn shown_with_parts(&self) -> String {
+        let current = self.current.borrow();
+        let documents = web()
+            .documents
+            .borrow()
+            .get(current.as_str())
+            .map(|s| (s.page.clone(), s.parts.clone()));
+        documents
+            .map(|(page, parts)| format!("{page}{}", parts.join("")))
+            .unwrap_or_default()
+    }
+
     /// The document dropped (the view is going away)
     pub fn release(&self) {
+        self.measure_frames(false);
         web().forget(&self.current.borrow());
     }
+}
+
+/// The core's script that makes each frame of the page as tall as its document, run as the app's (the page's own
+/// scripts stay off)
+fn size_frames(view: &webkit::WebView) {
+    view.evaluate_javascript(pe_html::MEASURE_SCRIPT, None, None, gio::Cancellable::NONE, |_| {});
 }
 
 /// What a document may do: show itself (and its own anchors), nothing else; a link the user follows opens in the
@@ -309,15 +404,24 @@ fn decide(
     use webkit::PolicyDecisionType as Kind;
     match kind {
         Kind::NavigationAction | Kind::NewWindowAction => {
-            let uri = decision
+            let action = decision
                 .downcast_ref::<webkit::NavigationPolicyDecision>()
-                .and_then(|navigation| navigation.navigation_action())
+                .and_then(|navigation| navigation.navigation_action());
+            let uri = action
+                .as_ref()
                 .and_then(|action| action.request())
                 .and_then(|request| request.uri())
                 .map(|uri| uri.to_string())
                 .unwrap_or_default();
             let same = uri.split('#').next() == Some(own);
-            if kind == Kind::NavigationAction && same {
+            // a frame of the page loading its part's document beside it, never a link the user followed
+            let frame = !own.is_empty()
+                && uri.starts_with(own)
+                && pe_html::part_document(&uri).is_some()
+                && action
+                    .as_ref()
+                    .is_some_and(|action| action.navigation_type() == webkit::NavigationType::Other);
+            if kind == Kind::NavigationAction && (same || frame) {
                 decision.use_();
             } else {
                 decision.ignore();

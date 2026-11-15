@@ -1,5 +1,6 @@
 // The reading pane: the header of the message (From, Date, To, Cc, Subject) with the brand's logo at its left and the
-// attachments and Unsubscribe at its right; under it the bar that offers the pictures from the internet; then the
+// attachments and Unsubscribe at its right; under it the security bar of a signed or encrypted message
+// (SecurityBar.swift) and the bar that offers the pictures from the internet; then the
 // message itself, with the cards of the core above it (a calendar event, a bounce, a one-time code). Every string shown is the core's, decoded and checked there.
 // It asks the core for the message it shows and hears its events, so the main window's pane and a message's own window
 // (MessageWindow.swift) are each one of these.
@@ -9,7 +10,7 @@ import WebKit
 
 @MainActor
 final class Reader: NSObject {
-    let view = NSStackView()
+    let view = ReaderStack()
     let core: Core
     /// what it has to say in the main window's status bar (leaving a mailing list)
     var status: (String) -> Void = { _ in }
@@ -51,6 +52,8 @@ final class Reader: NSObject {
     private let headerLine = NSBox()
     private let attachments = NSPopUpButton(frame: .zero, pullsDown: true)
     private let unsubscribe = NSButton(title: Text.uiUnsubscribe.text, target: nil, action: nil)
+    /// over a signed or encrypted message: its state, and Details
+    let security = SecurityBar()
     private let pictures = InfoBar(icon: "image", link: nil)
     /// the bar's Download Pictures with its menu: the Always choices for a sender the provider confirmed, the
     /// greyed line that says why there are none for one it did not
@@ -128,6 +131,8 @@ final class Reader: NSObject {
         // the links of the document's own cards: the core says which link it is, the view has what it needs
         preview.links = { [weak self] link in self?.followLink(link) ?? false }
         pictures.isHidden = true
+        security.details = { [weak self] in self?.showSecurityDetails() }
+        view.security = security
 
         view.orientation = .vertical
         view.spacing = 0
@@ -137,7 +142,7 @@ final class Reader: NSObject {
             guard let self else { return }
             view.window?.makeFirstResponder(preview.view)
         }
-        for part in [headerBox, headerLine, retry, pictures, findBar, preview.view] as [NSView] {
+        for part in [headerBox, headerLine, security, retry, pictures, findBar, preview.view] as [NSView] {
             view.addArrangedSubview(part)
             part.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
         }
@@ -181,6 +186,8 @@ final class Reader: NSObject {
             picturesOffered = false
         }
         unsubscribe.isHidden = true
+        // never the bar of the message before over the next one
+        security.hide()
         logo.isHidden = true
         logo.image = nil
         // says so rather than a blank pane, unless a message is about to be shown
@@ -224,6 +231,7 @@ final class Reader: NSObject {
         attachments.isHidden = true
         pictures.isHidden = true
         picturesOffered = false
+        security.hide()
         retry.isHidden = false
         preview.showState(PE_READER_STATE_FAILED, failure: kind, reason: reason)
     }
@@ -234,6 +242,7 @@ final class Reader: NSObject {
         downloadingTimer?.invalidate()
         showHeader(true)
         header.stringValue = problem
+        security.hide()
         attachments.isHidden = true
         pictures.isHidden = true
         picturesOffered = false
@@ -254,7 +263,10 @@ final class Reader: NSObject {
         unsubscribe.isHidden = info.unsubscribe == PE_UNSUBSCRIBE_NONE || file != nil
         // asked for, or loaded by themselves (Settings, a trusted sender the provider confirmed): the core says
         let allowed = info.pictures_loaded || remoteImages
-        preview.show(text(info.document), pictures: allowed)
+        security.show(info)
+        // the parts of a signed or encrypted message are documents of their own, in frames the app sizes to them
+        let parts = info.part_count > 0 ? { [view] (index: Int) in view.part(index) } : nil
+        preview.show(text(info.document), pictures: allowed, parts: parts)
         // offered only for a message with pictures on the internet, until they are shown
         picturesOffered = info.remote_images && !allowed
         pictures.isHidden = !picturesOffered
@@ -560,9 +572,24 @@ final class Reader: NSObject {
         case PE_READER_LINK_OPEN_CALENDAR:
             openInCalendar()
             return true
+        case PE_READER_LINK_PART:
+            // after the web view's question is answered: the window runs modally
+            onMain { [weak self] in self?.showSecurityDetails() }
+            return true
         default:
             return false
         }
+    }
+
+    /// Security Details: the core's words of every part of the message shown
+    func showSecurityDetails() {
+        guard let info = messageView?.info?.pointee, info.protection != PE_PROTECTION_TONE_NONE else { return }
+        SecurityDetails.run(text(info.protection_details), owner: view.window)
+    }
+
+    /// what the app's own script `script` says of the message's page, for the UI test
+    func pageAnswer(_ script: String) async -> String {
+        await preview.pageAnswer(script)
     }
 
     /// the code card's Copy: the code the core found, on the clipboard (nothing is read from the link)
@@ -594,7 +621,8 @@ final class Reader: NSObject {
     /// the message as it is shown, with the pictures it shows
     func print() {
         guard showsMessage, let info = messageView?.info else { return }
-        Printer.print(text(info.pointee.document), pictures: info.pointee.pictures_loaded || remoteImages,
+        // the core's printout: for a protected message one document of every part's text, as no frame prints
+        Printer.print(text(info.pointee.print_document), pictures: info.pointee.pictures_loaded || remoteImages,
                       title: text(info.pointee.subject), owner: view.window)
     }
 
@@ -1034,6 +1062,19 @@ final class FindBar: NSView, NSSearchFieldDelegate {
             return true
         }
         return super.performKeyEquivalent(with: event)
+    }
+}
+
+/// The reading pane's stack: a screen reader reads the security bar first for the message, before its header
+final class ReaderStack: NSStackView {
+    weak var security: NSView?
+
+    override func accessibilityChildren() -> [Any]? {
+        guard let children = super.accessibilityChildren(), let security, !security.isHidden else {
+            return super.accessibilityChildren()
+        }
+        let bar = children.filter { ($0 as AnyObject) === security }
+        return bar + children.filter { ($0 as AnyObject) !== security }
     }
 }
 
