@@ -129,10 +129,9 @@ fn trimmed(bytes: &[u8], address: &str, now: i64) -> Option<Vec<u8>> {
         .map(|cert| cert.to_bytes())
 }
 
+/// https only (and http to the loopback host, for the tests, as pe-net allows it)
 async fn get(url: &str) -> Result<http::Response, http::HttpError> {
-    let mut request = Request::get(url, TIMEOUT);
-    request.plain_http = url.starts_with("http://127.0.0.1") || url.starts_with("http://localhost");
-    http::send(request).await
+    http::send(Request::get(url, TIMEOUT)).await
 }
 
 /// What an answer of a lookup is: a key (checked by `accept`), none, or try later
@@ -236,7 +235,6 @@ async fn post_json(url: &str, body: &serde_json::Value) -> Result<Published, Str
     request.method = Method::Post;
     request.headers = &[("Content-Type", "application/json"), ("Accept", "application/json")];
     request.body = body.as_bytes();
-    request.plain_http = url.starts_with("http://127.0.0.1");
     let response = http::send(request).await.map_err(|error| error.to_string())?;
     if response.status != 200 {
         let value: serde_json::Value = serde_json::from_slice(&response.body).unwrap_or_default();

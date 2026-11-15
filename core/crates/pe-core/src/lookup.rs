@@ -104,13 +104,22 @@ impl Core {
         let now = unix_now();
         let work = async move {
             let found = match wanted {
+                // the addresses at once (each still asks its domain's directory before the key server), in order
                 Wanted::Addresses(addresses) => {
-                    let mut found = Vec::new();
-                    for address in addresses {
-                        let result = pe_keys::find(&address, &servers, use_keyserver, now).await;
-                        found.push((address, result));
+                    let mut lookups = tokio::task::JoinSet::new();
+                    for (index, address) in addresses.into_iter().enumerate() {
+                        let servers = servers.clone();
+                        lookups.spawn(async move {
+                            let result = pe_keys::find(&address, &servers, use_keyserver, now).await;
+                            (index, address, result)
+                        });
                     }
+                    let mut found = lookups.join_all().await;
+                    found.sort_by_key(|(index, _, _)| *index);
                     found
+                        .into_iter()
+                        .map(|(_, address, result)| (address, result))
+                        .collect()
                 }
                 Wanted::Handle(handle) => vec![(String::new(), pe_keys::by_fingerprint(&handle, &servers).await)],
             };
