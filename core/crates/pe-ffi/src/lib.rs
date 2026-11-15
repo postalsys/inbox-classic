@@ -10,6 +10,7 @@ mod agents;
 mod book;
 mod core;
 mod help;
+mod keys;
 mod layout;
 mod list_view;
 mod rules;

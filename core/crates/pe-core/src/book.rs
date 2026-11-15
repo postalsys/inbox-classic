@@ -381,7 +381,12 @@ impl Core {
         .iter()
         .map(checked)
         .collect();
-        Ok(self.store().import_cards(&cards)?)
+        let counts = self.store().import_cards(&cards)?;
+        // the OpenPGP keys the cards carry go to the key book, as any key found does
+        if vcard {
+            self.book(|book| book.learn_vcard_keys(&text))?;
+        }
+        Ok(counts)
     }
 
     /// Sets a card's picture to `png`, one [`crate::card_pictures::prepare`] made (a window prepares it, shows it, and
@@ -419,7 +424,7 @@ impl Core {
                 .filter_map(|&id| store.card(id).transpose())
                 .collect::<pe_store::Result<_>>()?
         };
-        // with their pictures
+        // with their pictures, and the OpenPGP key in use for each of their addresses
         let cards = listed
             .into_iter()
             .map(|card| {
@@ -428,9 +433,33 @@ impl Core {
             })
             .collect::<pe_store::Result<Vec<Card>>>()?;
         drop(store);
+        let cards = cards
+            .into_iter()
+            .map(|card| {
+                Ok(Card {
+                    extra: self.with_keys(&card)?,
+                    ..card
+                })
+            })
+            .collect::<Result<Vec<Card>>>()?;
         std::fs::write(path, crate::vcard::write_vcards(&cards))
             .map_err(|error| Error::Unavailable(error.to_string()))?;
         Ok(cards.len() as u64)
+    }
+
+    /// A card's other vCard lines with a KEY line for each of its addresses whose key is known (a card read in
+    /// carries none of its own: they went to the key book)
+    fn with_keys(&self, card: &Card) -> Result<String> {
+        let mut extra = card.extra.clone();
+        for address in &card.addresses {
+            if let Some(cert) = self.book(|book| book.minimal_cert_for(address))? {
+                if !extra.is_empty() && !extra.ends_with('\n') {
+                    extra.push('\n');
+                }
+                extra.push_str(&crate::vcard::key_line(&cert));
+            }
+        }
+        Ok(extra)
     }
 
     /// What completes an address field from `typed`: the address book's people (each of their addresses) and groups

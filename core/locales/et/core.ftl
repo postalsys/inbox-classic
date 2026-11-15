@@ -494,3 +494,63 @@ event-attendees =
     }
 
 otp-notification = { $code } on teie kood domeeni { $domain } jaoks
+
+## OpenPGP keys (keys.rs)
+# review: new
+pgp-key-valid = Kehtiv
+# review: new
+pgp-key-expires = Kehtiv kuni { $date }
+# review: new
+pgp-key-expired = Aegus { $date }
+# review: new
+pgp-key-revoked = Tühistatud
+# review: new
+pgp-key-revoked-why = Tühistatud: { $reason }
+# review: new
+pgp-key-not-valid = Ei kehti
+# review: new
+pgp-key-locked = Ei saa kasutada: { $store } ei sisalda enam seda kaitsvat võtit. Impordi selle varukoopia uuesti.
+# review: new
+pgp-source-own = Loodud Inbox Classicus
+# review: new
+pgp-source-file = Imporditud failist
+# review: new
+pgp-source-paste = Kleebitud
+# review: new
+pgp-source-attachment = Kirjast
+# review: new
+pgp-source-vcard = Kontaktikaardilt
+# review: new
+pgp-source-wkd = Saatja e-posti teenusepakkujalt
+# review: new
+pgp-source-keyserver = Saidilt keys.openpgp.org
+# review: new
+pgp-source-autocrypt = Kirja Autocrypti päisest
+# review: new
+pgp-error-no-store = Privaatvõtmeid kaitseb { $store }, mida ei saa kasutada: { $error }
+# review: new
+pgp-error-wrong-passphrase = Parool ei ole õige.
+# review: new
+pgp-error-empty-passphrase = Vali varukoopia kaitseks parool.
+# review: new
+pgp-error-not-a-key = See ei ole OpenPGP võti.
+# review: new
+pgp-error-too-large = Võti on liiga suur.
+# review: new
+pgp-error-unusable = Võti kasutab vana või nõrka krüptograafiat ja seda ei saa kasutada.
+# review: new
+pgp-imported-private = { $count ->
+    [one] Sinu privaatvõti imporditi.
+   *[other] Imporditi { $count } privaatvõtit.
+}
+# review: new
+pgp-imported-public = { $count ->
+    [one] Imporditi üks võti.
+   *[other] Imporditi { $count } võtit.
+}
+# review: new
+pgp-imported-pending = Aadressi { $addresses } jaoks on juba kasutusel teine võti: uus ootab kontaktis, kuni selle valid.
+# review: new
+pgp-error-needs-passphrase = Privaatvõtit kaitseb parool. Võtme importimiseks sisesta see.
+# review: new
+pgp-error-mismatch = Privaatvõti ei kuulu oma avaliku võtme juurde. See võib olla muudetud.

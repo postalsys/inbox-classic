@@ -18,6 +18,7 @@ mod compose;
 mod contentline;
 mod export;
 mod fold;
+pub mod keys;
 pub mod layout;
 mod list_view;
 pub mod mailto;
@@ -428,6 +429,8 @@ pub struct Core {
     /// The accounts whose main worker finished a sync, for their readers to connect after
     synced: Arc<worker::Synced>,
     secrets: Secrets,
+    /// The OpenPGP certificates read from the store, each read once (keys.rs)
+    pgp_certs: keys::CertCache,
     trust: Trust,
     events: EventSink,
     /// Set when closing: no event is delivered after
@@ -523,6 +526,7 @@ impl Core {
             tokens: worker::Tokens::default(),
             timings: timing::Timings::default(),
             secrets,
+            pgp_certs: Default::default(),
             trust,
             events: Arc::new(move |event| {
                 if !open.load(Ordering::Acquire) {
@@ -2403,7 +2407,7 @@ pub(crate) fn junk_keywords(junk: bool) -> (&'static str, &'static str) {
 /// temporary folder there is shared by every user), under the temporary folder elsewhere (the Mac's and Windows' are
 /// each user's own); readable by this user only.
 /// The addresses of an account, its own first and then its other ones, for a reply to tell them from the others
-fn own_addresses(store: &pe_store::Store, account: AccountId) -> Result<Vec<String>> {
+pub(crate) fn own_addresses(store: &pe_store::Store, account: AccountId) -> Result<Vec<String>> {
     let mut own = vec![store.account(account)?.settings.email];
     own.extend(store.account_addresses(account)?.into_iter().map(|(email, _)| email));
     Ok(own)

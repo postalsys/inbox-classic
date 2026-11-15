@@ -13,6 +13,8 @@ use pe_store::{AccountId, SignInAppId};
 pub(crate) enum Key {
     Account(AccountId),
     App(SignInAppId),
+    /// The master key that wraps the private OpenPGP keys (keys.rs)
+    Pgp,
 }
 
 impl From<AccountId> for Key {
@@ -54,17 +56,7 @@ mod native {
         profile: String,
     }
 
-    /// What the store is called in messages to the user
-    fn name() -> String {
-        use pe_i18n::{Text, tr};
-        if cfg!(windows) {
-            tr(Text::SecretsWindows)
-        } else if cfg!(target_os = "macos") {
-            tr(Text::SecretsMac)
-        } else {
-            tr(Text::SecretsLinux)
-        }
-    }
+    use super::store_name as name;
 
     #[cfg(windows)]
     fn open() -> keyring_core::Result<Arc<dyn CredentialStoreApi + Send + Sync>> {
@@ -96,6 +88,7 @@ mod native {
             let name = match key {
                 Key::Account(account) => format!("{}/{account}", self.profile),
                 Key::App(app) => format!("{}/app/{app}", self.profile),
+                Key::Pgp => format!("{}/pgp", self.profile),
             };
             self.store.build("InboxClassic", &name, None).ok()
         }
@@ -118,6 +111,18 @@ mod native {
                 let _ = entry.delete_credential();
             }
         }
+    }
+}
+
+/// What the system's password store is called in messages to the user
+pub(crate) fn store_name() -> String {
+    use pe_i18n::{Text, tr};
+    if cfg!(windows) {
+        tr(Text::SecretsWindows)
+    } else if cfg!(target_os = "macos") {
+        tr(Text::SecretsMac)
+    } else {
+        tr(Text::SecretsLinux)
     }
 }
 
@@ -205,6 +210,12 @@ impl Secrets {
         }
     }
 
+    /// Whether what is set here outlives the process: false with memory passwords (tests, a shared computer), where
+    /// a private OpenPGP key kept today can not be opened after a restart
+    pub(crate) fn persistent(&self) -> bool {
+        self.backend.is_some()
+    }
+
     /// Whether a refused password is news: true the first time after it was set
     pub(crate) fn first_refusal(&self, account: AccountId) -> bool {
         self.map().refused.insert(account)
@@ -269,6 +280,18 @@ mod tests {
                 .as_deref(),
             Some("app secret")
         );
+        // the master key of the OpenPGP keys is a credential of its own
+        second.set(Key::Pgp, "master").unwrap();
+        assert_eq!(
+            Secrets::new(PasswordStore::System, &profile).get(Key::Pgp).as_deref(),
+            Some("master")
+        );
+        assert_eq!(
+            Secrets::new(PasswordStore::System, &profile).get(7).as_deref(),
+            Some("kept between runs")
+        );
+        second.remove(Key::Pgp);
+        assert_eq!(Secrets::new(PasswordStore::System, &profile).get(Key::Pgp), None);
         second.remove(7);
         second.remove(Key::App(7));
         assert_eq!(Secrets::new(PasswordStore::System, &profile).get(7), None);

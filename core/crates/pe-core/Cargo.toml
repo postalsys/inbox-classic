@@ -19,6 +19,7 @@ pe-mime.workspace = true
 pe-net.workspace = true
 pe-oauth = { path = "../pe-oauth" }
 pe-otp = { path = "../pe-otp" }
+pe-pgp = { path = "../pe-pgp" }
 pe-smtp = { path = "../pe-smtp" }
 pe-store = { path = "../pe-store" }
 pe-sync = { path = "../pe-sync" }
@@ -29,6 +30,9 @@ image = { version = "0.25", default-features = false, features = ["png", "jpeg"]
 tokio = { version = "1.54.1", features = ["rt-multi-thread", "sync", "macros"] }
 # folder names found whatever their accents (the Move and Copy window's filter)
 unicode-normalization = "0.1.26"
+# the wrapping of private OpenPGP keys under the master key (keys.rs)
+ring = "0.17.14"
+zeroize = "1.8"
 
 [target.'cfg(any(windows, target_os = "macos", target_os = "linux"))'.dependencies]
 keyring-core = "1.0.1"
