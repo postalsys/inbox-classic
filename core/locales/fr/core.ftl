@@ -18,7 +18,7 @@ size-gb = { $size } Go
 send-delay-off = Désactivé
 # review: new
 send-delay-seconds = { $count ->
-    [one] 1 seconde
+    [one] { $count } seconde
    *[other] { $count } secondes
 }
 list-counts = { $messages }, { $unread ->
@@ -362,13 +362,13 @@ error-folder-special = la Boîte de réception et les dossiers spéciaux ne peuv
 error-no-recipients = le message n'a aucun destinataire
 error-bad-address = « { $address } » n'est pas une adresse de messagerie
 # review: new
-error-not-own-address = { $address } n’est pas une adresse de ce compte. Ajoutez-la dans Autres adresses, dans les propriétés du compte.
+error-not-own-address = { $address } ne fait pas partie des adresses d’envoi de ce compte. Ajoutez-la au champ « Autres adresses d’envoi » dans les propriétés du compte.
 # review: new
-rule-query-refused = Une règle s’applique au nouveau courrier d’une boîte de réception : elle ne peut donc pas nommer un dossier ni une date ({ $words }).
+rule-query-refused = Les règles n’acceptent pas les filtres de dossier ou de date ({ $words }).
 # review: new
-rule-no-query = Tapez ce que le nouveau courrier doit contenir.
+rule-no-query = Saisissez les critères de recherche pour les messages entrants.
 # review: new
-rule-no-action = Choisissez ce que fait la règle.
+rule-no-action = Choisissez au moins une action pour la règle.
 error-attachment = { $path } n'a pas pu être lu : { $error }
 error-no-drafts = le compte n'a pas de dossier Brouillons où enregistrer le message
 error-draft-attachment = une pièce jointe du brouillon n'a pas pu être conservée : { $error }

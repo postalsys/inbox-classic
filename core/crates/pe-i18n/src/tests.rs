@@ -120,6 +120,19 @@ fn words_in_the_language_set() {
     );
     assert_eq!(language(), "de");
     assert_eq!(tr_args(Text::Messages, &[("count", 3u64.into())]), "3 Nachrichten");
+    set_language("fr");
+    // French's singular branch includes zero: it must show the supplied count, not a literal 1.
+    for count in [0u64, 1, 2] {
+        for text in [Text::UiRuleCount, Text::UiRulesApplied, Text::SendDelaySeconds] {
+            let rendered = tr_args(text, &[("count", count.into())]);
+            assert!(rendered.starts_with(&format!("{count} ")), "{rendered}");
+        }
+        let countdown = tr_args(
+            Text::UiSendingIn,
+            &[("subject", "Test".into()), ("count", count.into())],
+        );
+        assert!(countdown.contains(&format!("dans {count} seconde")), "{countdown}");
+    }
     set_language("qps");
     assert!(tr_args(Text::Messages, &[("count", 3u64.into())]).starts_with("[3 "));
     // the words made over, not what goes into them: an account's name stays as the user wrote it

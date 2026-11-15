@@ -4,7 +4,7 @@ The words of the windows live in the Fluent files of this folder, one folder a l
 says (the same on every platform), `app.ftl` for the windows (menus, commands, dialogs, and the words the windows of
 more than one platform share, `ui-` ids), and `windows.ftl`, `mac.ftl` and `linux.ftl` for words only one platform
 has. English (`en`) is the source;
-a word a language does not have yet is shown in English. The user help is `core/crates/pe-html/src/help.<lang>.html`.
+a word a language does not have yet is shown in English. The user help is `core/crates/pe-html/help/<lang>/<topic>.html`.
 
 **Status: the German, Estonian, French and Spanish files and help pages have had a native review. A change to the
 English words needs the same review in every language before a release.**
@@ -96,6 +96,14 @@ Context notes:
 - Search covers subjects, senders, recipients, attachment names and message text. Name those fields rather than
   translating the English draft's vague "people" literally.
 - An agent's message shown in the Outbox is queued for a delayed send. It has not been sent yet.
+- Undo Send cancels a message during the delay before sending and reopens it for editing. It does not recall
+  delivered mail. `$subject` in send-status messages is already quoted by the caller.
+- Message rules process new Inbox messages in list order while the app runs. Matching rules accumulate their
+  actions until one moves the message out of the Inbox. `ui-col-rule-matches` labels the search criteria, not a count.
+- The sender-address error should name the actual `ui-field-other-addresses` field in account properties.
+- Text size changes the display zoom for reading and composing, not the formatting recipients see. Dark mode
+  concerns background colors, not encryption; messages with their own backgrounds retain their design unless
+  they provide a dark version.
 - Removing an agent program deletes its permissions and activity history; the next connection asks for permission
   again. Clearing the history alone does not undo the agents' changes.
 - `folder-holds-no-messages` refers to a folder that cannot contain messages (IMAP `\Noselect`), not an empty folder.

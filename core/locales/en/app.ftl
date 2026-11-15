@@ -75,7 +75,7 @@ cmd-text-size-largest = &Largest
 cmd-text-size-larger = La&rger
 cmd-text-size-medium = &Medium
 cmd-text-size-smaller = &Smaller
-cmd-text-size-smallest = Smalle&st
+cmd-text-size-smallest = Smalles&t
 cmd-hide-ignored = &Hide Ignored Conversations
 cmd-hide-read = Hide &Read Messages
 cmd-notify = &Notify of New Mail
@@ -85,7 +85,7 @@ cmd-view-source = Message &Source
 cmd-ai-agents = &AI Agents...
 cmd-options = O&ptions...
 cmd-message-rules = Message &Rules...
-cmd-create-rule-from-message = Create &Rule from Message...
+cmd-create-rule-from-message = Crea&te Rule from Message...
 cmd-select-all = Select A&ll
 cmd-undo = &Undo
 cmd-copy = &Copy to Folder...
@@ -413,23 +413,23 @@ ui-let-agents-connect = &Let AI agents connect to Inbox Classic
 ui-change-button = Change…
 ui-undo-button = Undo
 ui-rules-title = Message Rules
-ui-rules-intro = Rules sort the new mail of your Inboxes as it arrives, while Inbox Classic runs. Each rule that matches a message does its part; one that moves the message away is the last for it.
+ui-rules-intro = Rules sort new Inbox messages while Inbox Classic is running. Matching rules run in order. Once a rule moves a message out of the Inbox, no further rules apply to it.
 ui-rules-none = No rules yet. Click New to make one.
 ui-rule-new = &New...
 ui-rule-edit = &Edit...
-ui-rule-delete-button = &Delete
+ui-rule-delete-button = De&lete
 ui-rule-title = Message Rule
 ui-rule-name = Name:
-ui-rule-account = For the new mail of:
+ui-rule-account = Account:
 ui-rule-all-accounts = All accounts
-ui-rule-query = That matches:
-ui-rule-query-hint = Words as in the search box, such as from:ann@example.com, subject:invoice or list:news.example.com
+ui-rule-query = Search criteria:
+ui-rule-query-hint = Use search terms such as from:ann@example.com, subject:invoice or list:news.example.com, just as in the search box.
 ui-rule-count = { $count ->
-    [one] 1 message in the Inbox matches now.
-   *[other] { $count } messages in the Inbox match now.
+    [one] 1 Inbox message currently matches these criteria.
+   *[other] { $count } Inbox messages currently match these criteria.
 }
 ui-rule-show = &Show
-ui-rule-actions = Do this:
+ui-rule-actions = Actions:
 ui-rule-move = &Move it to:
 ui-rule-mark-read = Mark it as &read
 ui-rule-flag = &Flag it
@@ -444,7 +444,7 @@ ui-rules-applied = { $count ->
     [one] 1 message sorted by your rules
    *[other] { $count } messages sorted by your rules
 }
-ui-col-rule-matches = Matches
+ui-col-rule-matches = Criteria
 ui-clear-button = C&lear
 ui-how-to-connect = How to Connect an Agent…
 ui-agent-programs = Programs whose agents have requested access to your mail
@@ -547,14 +547,14 @@ ui-download-ahead-recent = Recent messages up to 1 MB each
 ui-download-ahead-all = All messages
 ui-download-ahead-never = Only when opened
 ui-download-limit = Storage limit per account:
-ui-send-delay = Wait before sending:
-ui-send-delay-note = While a message waits, you can take it back with Undo.
-ui-dark-messages = Show messages on a dark background when the system is dark
+ui-send-delay = Delay before sending:
+ui-send-delay-note = While a message is waiting to be sent, you can cancel sending with Undo.
+ui-dark-messages = Show messages on a dark background when the system is in dark mode
 ui-sending-in = Sending { $subject } in { $count ->
     [one] 1 second
    *[other] { $count } seconds
 }
-ui-send-undone = { $subject } was not sent. It is open again.
+ui-send-undone = { $subject } was not sent. The message has reopened for editing.
 ui-send-too-late = { $subject } was already sent.
 ui-outbox-status-undo = Sends at { $time }
 ui-download-note = Messages downloaded in advance open immediately. When the storage limit is exceeded, the oldest local copies are removed and downloaded again when you open them.

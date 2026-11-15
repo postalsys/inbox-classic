@@ -11,7 +11,7 @@ menu-help = &?
 menu-layout = Dispositio&n
 menu-sort-by = T&rier par
 # review: new
-menu-text-size = &Taille du texte
+menu-text-size = Taille du te&xte
 menu-folder = &Dossier
 
 ## The commands
@@ -91,7 +91,7 @@ cmd-options = &Options...
 # review: new
 cmd-message-rules = &Règles de message...
 # review: new
-cmd-create-rule-from-message = Créer une &règle à partir du message...
+cmd-create-rule-from-message = Créer une règl&e à partir du message...
 cmd-select-all = Sélectionner &tout
 cmd-undo = &Annuler
 cmd-copy = &Copier vers un dossier...
@@ -424,13 +424,13 @@ ui-undo-button = Annuler
 # review: new
 ui-rules-title = Règles de message
 # review: new
-ui-rules-intro = Les règles trient le nouveau courrier de vos boîtes de réception à son arrivée, tant qu’Inbox Classic est ouvert. Chaque règle qui correspond à un message fait sa part ; celle qui le déplace ailleurs est la dernière pour lui.
+ui-rules-intro = Les règles trient les nouveaux messages reçus tant qu’Inbox Classic est ouvert. Les règles dont les critères sont remplis s’appliquent dans l’ordre. Dès qu’une règle déplace un message hors de la boîte de réception, les suivantes ne s’appliquent plus à ce message.
 # review: new
 ui-rules-none = Aucune règle pour l’instant. Cliquez sur Nouvelle pour en créer une.
 # review: new
 ui-rule-new = &Nouvelle...
 # review: new
-ui-rule-edit = &Modifier...
+ui-rule-edit = M&odifier...
 # review: new
 ui-rule-delete-button = &Supprimer
 # review: new
@@ -438,24 +438,24 @@ ui-rule-title = Règle de message
 # review: new
 ui-rule-name = Nom :
 # review: new
-ui-rule-account = Pour le nouveau courrier de :
+ui-rule-account = Compte :
 # review: new
 ui-rule-all-accounts = Tous les comptes
 # review: new
-ui-rule-query = Qui correspond à :
+ui-rule-query = Critères de recherche :
 # review: new
-ui-rule-query-hint = Des mots comme dans la zone de recherche, par exemple from:anne@example.com, subject:facture ou list:news.example.com
+ui-rule-query-hint = Utilisez les mêmes termes que dans la zone de recherche, par exemple from:anne@example.com, subject:facture ou list:news.example.com.
 # review: new
 ui-rule-count = { $count ->
-    [one] 1 message de la boîte de réception correspond maintenant.
-   *[other] { $count } messages de la boîte de réception correspondent maintenant.
+    [one] { $count } message de la boîte de réception correspond actuellement à ces critères.
+   *[other] { $count } messages de la boîte de réception correspondent actuellement à ces critères.
 }
 # review: new
-ui-rule-show = &Afficher
+ui-rule-show = A&fficher
 # review: new
-ui-rule-actions = Faire ceci :
+ui-rule-actions = Actions :
 # review: new
-ui-rule-move = &Le déplacer vers :
+ui-rule-move = Le &déplacer vers :
 # review: new
 ui-rule-mark-read = Le marquer comme &lu
 # review: new
@@ -476,11 +476,11 @@ ui-rule-delete-ask = Supprimer la règle « { $name } » ?
 ui-create-rule = Créer une règle...
 # review: new
 ui-rules-applied = { $count ->
-    [one] 1 message trié par vos règles
-   *[other] { $count } messages triés par vos règles
+    [one] { $count } message trié selon vos règles
+   *[other] { $count } messages triés selon vos règles
 }
 # review: new
-ui-col-rule-matches = Correspond à
+ui-col-rule-matches = Critères
 ui-clear-button = &Effacer
 ui-how-to-connect = Comment connecter un agent…
 ui-agent-programs = Programmes dont les agents ont demandé à utiliser votre courrier
@@ -585,18 +585,18 @@ ui-download-ahead-all = Tous les messages
 ui-download-ahead-never = Seulement à l’ouverture
 ui-download-limit = Espace maximal par compte :
 # review: new
-ui-send-delay = Attendre avant d’envoyer :
+ui-send-delay = Délai avant l’envoi :
 # review: new
-ui-send-delay-note = Tant qu’un message attend, vous pouvez le reprendre avec Annuler.
+ui-send-delay-note = Tant qu’un message est en attente d’envoi, vous pouvez annuler son envoi avec le bouton Annuler.
 # review: new
-ui-dark-messages = Afficher les messages sur fond sombre quand le système est sombre
+ui-dark-messages = Afficher les messages sur fond sombre lorsque le système est en mode sombre
 # review: new
 ui-sending-in = Envoi de { $subject } dans { $count ->
-    [one] 1 seconde
+    [one] { $count } seconde
    *[other] { $count } secondes
 }
 # review: new
-ui-send-undone = { $subject } n’a pas été envoyé. Il est de nouveau ouvert.
+ui-send-undone = { $subject } n’a pas été envoyé. Le message est à nouveau ouvert pour être modifié.
 # review: new
 ui-send-too-late = { $subject } a déjà été envoyé.
 # review: new

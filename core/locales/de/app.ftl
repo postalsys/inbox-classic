@@ -11,7 +11,7 @@ menu-help = &Hilfe
 menu-layout = &Layout
 menu-sort-by = &Sortieren nach
 # review: new
-menu-text-size = &Schriftgrad
+menu-text-size = Schri&ftgröße
 menu-folder = &Ordner
 
 ## The commands
@@ -73,11 +73,11 @@ cmd-sort-descending = Ab&steigend sortieren
 # review: new
 cmd-text-size-largest = Sehr &groß
 # review: new
-cmd-text-size-larger = G&rößer
+cmd-text-size-larger = G&roß
 # review: new
 cmd-text-size-medium = &Mittel
 # review: new
-cmd-text-size-smaller = &Kleiner
+cmd-text-size-smaller = &Klein
 # review: new
 cmd-text-size-smallest = Sehr k&lein
 cmd-hide-ignored = &Ignorierte Unterhaltungen ausblenden
@@ -91,7 +91,7 @@ cmd-options = &Optionen...
 # review: new
 cmd-message-rules = Nachrichten&regeln...
 # review: new
-cmd-create-rule-from-message = &Regel aus Nachricht erstellen...
+cmd-create-rule-from-message = Regel au&s Nachricht erstellen...
 cmd-select-all = &Alles auswählen
 cmd-undo = &Rückgängig
 cmd-copy = In Ordner &kopieren...
@@ -424,7 +424,7 @@ ui-undo-button = Rückgängig
 # review: new
 ui-rules-title = Nachrichtenregeln
 # review: new
-ui-rules-intro = Regeln sortieren neue Nachrichten in Ihren Posteingängen beim Eintreffen, solange Inbox Classic läuft. Jede Regel, die auf eine Nachricht passt, erledigt ihren Teil; eine, die die Nachricht wegverschiebt, ist die letzte für sie.
+ui-rules-intro = Regeln sortieren neu eingehende Nachrichten, solange Inbox Classic läuft. Passende Regeln werden der Reihe nach angewendet. Sobald eine Regel eine Nachricht aus dem Posteingang verschiebt, werden für diese Nachricht keine weiteren Regeln ausgeführt.
 # review: new
 ui-rules-none = Noch keine Regeln. Klicken Sie auf „Neu“, um eine zu erstellen.
 # review: new
@@ -438,22 +438,22 @@ ui-rule-title = Nachrichtenregel
 # review: new
 ui-rule-name = Name:
 # review: new
-ui-rule-account = Für neue Nachrichten von:
+ui-rule-account = Konto:
 # review: new
 ui-rule-all-accounts = Alle Konten
 # review: new
-ui-rule-query = Die passen auf:
+ui-rule-query = Suchkriterien:
 # review: new
-ui-rule-query-hint = Wörter wie im Suchfeld, etwa from:ann@example.com, subject:Rechnung oder list:news.example.com
+ui-rule-query-hint = Verwenden Sie Suchbegriffe wie im Suchfeld, zum Beispiel from:ann@example.com, subject:Rechnung oder list:news.example.com.
 # review: new
 ui-rule-count = { $count ->
-    [one] 1 Nachricht im Posteingang passt jetzt.
-   *[other] { $count } Nachrichten im Posteingang passen jetzt.
+    [one] 1 Nachricht im Posteingang entspricht derzeit diesen Kriterien.
+   *[other] { $count } Nachrichten im Posteingang entsprechen derzeit diesen Kriterien.
 }
 # review: new
-ui-rule-show = &Anzeigen
+ui-rule-show = An&zeigen
 # review: new
-ui-rule-actions = Dies tun:
+ui-rule-actions = Aktionen:
 # review: new
 ui-rule-move = &Verschieben nach:
 # review: new
@@ -476,11 +476,11 @@ ui-rule-delete-ask = Die Regel „{ $name }“ löschen?
 ui-create-rule = Regel erstellen...
 # review: new
 ui-rules-applied = { $count ->
-    [one] 1 Nachricht von Ihren Regeln sortiert
-   *[other] { $count } Nachrichten von Ihren Regeln sortiert
+    [one] 1 Nachricht nach Ihren Regeln sortiert
+   *[other] { $count } Nachrichten nach Ihren Regeln sortiert
 }
 # review: new
-ui-col-rule-matches = Passt auf
+ui-col-rule-matches = Kriterien
 ui-clear-button = &Leeren
 ui-how-to-connect = So verbinden Sie einen Agenten…
 ui-agent-programs = Programme, deren Agenten Zugriff auf Ihre E-Mails angefordert haben
@@ -585,18 +585,18 @@ ui-download-ahead-all = Alle Nachrichten
 ui-download-ahead-never = Erst beim Öffnen
 ui-download-limit = Maximaler Speicherplatz pro Konto:
 # review: new
-ui-send-delay = Vor dem Senden warten:
+ui-send-delay = Verzögerung vor dem Senden:
 # review: new
-ui-send-delay-note = Solange eine Nachricht wartet, können Sie sie mit „Rückgängig“ zurückholen.
+ui-send-delay-note = Solange eine Nachricht auf den Versand wartet, können Sie das Senden mit „Rückgängig“ abbrechen.
 # review: new
-ui-dark-messages = Nachrichten auf dunklem Hintergrund zeigen, wenn das System dunkel ist
+ui-dark-messages = Nachrichten auf dunklem Hintergrund anzeigen, wenn der Dunkelmodus des Systems aktiv ist
 # review: new
-ui-sending-in = { $subject } wird gesendet in { $count ->
+ui-sending-in = { $subject } wird in { $count ->
     [one] 1 Sekunde
    *[other] { $count } Sekunden
-}
+} gesendet
 # review: new
-ui-send-undone = { $subject } wurde nicht gesendet. Die Nachricht ist wieder geöffnet.
+ui-send-undone = { $subject } wurde nicht gesendet. Die Nachricht ist wieder zur Bearbeitung geöffnet.
 # review: new
 ui-send-too-late = { $subject } wurde bereits gesendet.
 # review: new

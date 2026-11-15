@@ -206,7 +206,7 @@ undo-archive = Võta arhiveerimine tagasi
 undo-junk = Võta rämpspostiks märkimine tagasi
 undo-not-junk = Võta tavapostiks märkimine tagasi
 # review: new
-undo-send = Võta saatmine tagasi
+undo-send = Tühista saatmine
 nothing-to-undo = Pole midagi tagasi võtta.
 messages-gone = Neid kirju pole enam.
 folder-holds-no-messages = Selles kaustas ei saa kirju hoida.
@@ -322,13 +322,13 @@ error-folder-special = sisendkausta ja erikaustu ei saa ümber nimetada ega kust
 error-no-recipients = kirjal pole adressaate
 error-bad-address = „{ $address }“ pole e-posti aadress
 # review: new
-error-not-own-address = { $address } ei ole selle konto aadress. Lisage see konto atribuutides väljale „Muud aadressid“.
+error-not-own-address = { $address } ei kuulu selle konto saatja-aadresside hulka. Lisage see konto atribuutides väljale „Muud saatja-aadressid“.
 # review: new
-rule-query-refused = Reegel on postkasti uutele kirjadele, seega ei saa see nimetada kausta ega kuupäeva ({ $words }).
+rule-query-refused = Reegli tingimustes ei saa kasutada kausta ega kuupäeva filtreid ({ $words }).
 # review: new
-rule-no-query = Sisestage, millele uued kirjad peavad vastama.
+rule-no-query = Sisestage saabuvate kirjade otsingutingimused.
 # review: new
-rule-no-action = Valige, mida reegel teeb.
+rule-no-action = Valige reeglile vähemalt üks toiming.
 error-attachment = faili { $path } ei saanud lugeda: { $error }
 error-no-drafts = kontol pole mustandite kausta, kuhu kirja salvestada
 error-draft-attachment = mustandi manust ei saanud alles hoida: { $error }
