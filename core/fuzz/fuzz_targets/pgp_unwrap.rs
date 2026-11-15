@@ -15,7 +15,11 @@ fn ring() -> &'static KeyRing {
         let secret = include_bytes!("../../crates/pe-pgp/tests/fixtures/interop/gnupg-ed25519/secret.asc");
         let keys = pe_pgp::read_secret_keys(secret, "").unwrap();
         let certs = keys.iter().map(|key| key.cert().clone()).collect();
-        KeyRing { keys, certs, verified: Default::default() }
+        KeyRing {
+            keys,
+            certs,
+            ..Default::default()
+        }
     })
 }
 
