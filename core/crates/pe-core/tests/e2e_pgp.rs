@@ -336,3 +336,80 @@ fn an_encrypted_message_taken_back_opens_decrypted() {
     assert!(draft.body.contains("Second thoughts"), "{}", draft.body);
     assert_eq!(draft.subject, "Take me back");
 }
+
+#[test]
+fn autocrypt_goes_with_the_mail() {
+    let Some(s) = setup() else { return };
+    let mut settings = s.server.account_settings();
+    settings.smtp_security = pe_store::Security::StartTls;
+    let me = settings.email.clone();
+    let account = s.core.add_account(&settings, PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let mine = s.core.pgp_generate(account).unwrap();
+    let bob = pe_pgp::generate("Bob", &["bob@example.net".into()], now() - 60).unwrap();
+    let carol = pe_pgp::generate("Carol", &["carol@example.net".into()], now() - 60).unwrap();
+    for key in [&bob, &carol] {
+        s.core
+            .pgp_import(key.cert().armored().as_bytes(), None, KeySource::Paste)
+            .unwrap();
+    }
+
+    // a plain message carries my key
+    let plain = Outgoing {
+        to: "bob@example.net".into(),
+        subject: "Plain".into(),
+        text: "Hi".into(),
+        ..Default::default()
+    };
+    s.core.send(account, plain).unwrap();
+    s.wait(|e| matches!(e, Event::MessageSent { .. }));
+    let raw = s.raw("INBOX").pop().unwrap();
+    let message = pe_mime::parser::parse(raw.as_bytes()).unwrap();
+    let header = message
+        .headers
+        .iter()
+        .find(|h| h.key == "autocrypt")
+        .expect("an Autocrypt header");
+    let parsed = pe_pgp::autocrypt::parse(&header.value).unwrap();
+    assert_eq!(parsed.addr, me.to_lowercase());
+    assert!(!parsed.mutual);
+    assert_eq!(pe_pgp::read_certs(&parsed.keydata).unwrap()[0].fingerprint(), mine);
+    assert!(raw.contains("Hi"), "the message itself as before");
+
+    // encrypted to Bob and Carol: each gets the other's key inside, gossip is never outside
+    let both = Outgoing {
+        to: "bob@example.net, carol@example.net".into(),
+        subject: "Both".into(),
+        text: "To you both".into(),
+        encrypt: true,
+        sign: true,
+        ..Default::default()
+    };
+    s.core.send(account, both).unwrap();
+    s.wait(|e| matches!(e, Event::MessageSent { .. }));
+    let raw = s.raw("INBOX").pop().unwrap();
+    assert!(raw.contains("Autocrypt: ") && !raw.contains("Autocrypt-Gossip"));
+    let opened = pe_pgp::decrypt(pe_core_part(&raw).as_bytes(), std::slice::from_ref(&bob), &[], now()).unwrap();
+    let inner = String::from_utf8(opened.data).unwrap();
+    assert_eq!(inner.matches("Autocrypt-Gossip:").count(), 2, "{inner}");
+
+    // the switch off: no header
+    s.core.pgp_set_identity(&me, &mine, false).unwrap();
+    let quiet = Outgoing {
+        to: "bob@example.net".into(),
+        subject: "Quiet".into(),
+        text: "Hi".into(),
+        ..Default::default()
+    };
+    s.core.send(account, quiet).unwrap();
+    s.wait(|e| matches!(e, Event::MessageSent { .. }));
+    assert!(!s.raw("INBOX").pop().unwrap().contains("Autocrypt:"));
+}
+
+/// The armored OpenPGP message of a multipart/encrypted message
+fn pe_core_part(raw: &str) -> String {
+    let start = raw.find("-----BEGIN PGP MESSAGE-----").unwrap();
+    let end = raw.find("-----END PGP MESSAGE-----").unwrap() + "-----END PGP MESSAGE-----".len();
+    raw[start..end].to_string()
+}

@@ -23,6 +23,10 @@ pub(crate) struct OutgoingKeys {
     pub recipients: Vec<Cert>,
     /// Encrypted to these without naming them (Bcc)
     pub hidden: Vec<Cert>,
+    /// Header fields added to the top: the sender's `Autocrypt`
+    pub headers: Vec<String>,
+    /// Header fields added inside the encryption: the other recipients' keys (`Autocrypt-Gossip`)
+    pub gossip: Vec<String>,
 }
 
 impl std::fmt::Debug for OutgoingKeys {
@@ -61,17 +65,31 @@ impl Core {
         if outgoing.quote_encrypted && !outgoing.encrypt && !draft {
             return Err(crate::Error::Compose(ComposeError::EncryptedQuote));
         }
-        // a draft quoting encrypted mail is saved encrypted to the sender's key, whatever Encrypt says: what was
-        // encrypted never reaches the server in the clear
-        let encrypt = outgoing.encrypt || (draft && outgoing.quote_encrypted);
-        if !(encrypt || (outgoing.sign && !draft)) {
-            return Ok(None);
-        }
         let from = match outgoing.from.as_deref() {
             Some(other) => normal_address(other),
             None => normal_address(&self.store().account(account)?.settings.email),
         };
         let no_key = || crate::Error::Compose(ComposeError::NoOwnKey(from.clone()));
+        // the sender's key in the Autocrypt header, unless its switch is off; not in a draft
+        let autocrypt = match draft {
+            true => None,
+            false => self.autocrypt_header(&from)?,
+        };
+        // a draft quoting encrypted mail is saved encrypted to the sender's key, whatever Encrypt says: what was
+        // encrypted never reaches the server in the clear
+        let encrypt = outgoing.encrypt || (draft && outgoing.quote_encrypted);
+        if !(encrypt || (outgoing.sign && !draft)) {
+            return Ok(autocrypt.map(|header| {
+                std::sync::Arc::new(OutgoingKeys {
+                    signer: None,
+                    recipients: Vec::new(),
+                    hidden: Vec::new(),
+                    headers: vec![header],
+                    gossip: Vec::new(),
+                })
+            }));
+        }
+        let headers: Vec<String> = autocrypt.into_iter().collect();
         self.book(|book| {
             // a draft is encrypted to the sender's own certificate: nothing unwrapped for it
             if draft {
@@ -80,6 +98,8 @@ impl Core {
                     signer: None,
                     recipients: vec![own],
                     hidden: Vec::new(),
+                    headers: Vec::new(),
+                    gossip: Vec::new(),
                 }));
             }
             let own = book.identity_key(&from)?.ok_or_else(no_key)?;
@@ -88,10 +108,13 @@ impl Core {
                     signer: Some(own),
                     recipients: Vec::new(),
                     hidden: Vec::new(),
+                    headers,
+                    gossip: Vec::new(),
                 }));
             }
             let now = unix_now();
             let mut missing = Vec::new();
+            let mut visible: Vec<(String, Cert)> = Vec::new();
             let mut usable = |address: String| -> Result<Option<Cert>> {
                 match book.cert_for(&address)?.filter(|cert| cert.can_encrypt(now).is_ok()) {
                     Some(cert) => Ok(Some(cert)),
@@ -106,7 +129,8 @@ impl Core {
             };
             let mut recipients = vec![own.cert().clone()];
             for address in addresses(&outgoing.to).into_iter().chain(addresses(&outgoing.cc)) {
-                if let Some(cert) = usable(address)? {
+                if let Some(cert) = usable(address.clone())? {
+                    visible.push((address, cert.clone()));
                     recipients.push(cert);
                 }
             }
@@ -119,13 +143,37 @@ impl Core {
             if !missing.is_empty() {
                 return Err(crate::Error::Compose(ComposeError::MissingKeys(missing)));
             }
+            // each visible recipient gets the others' keys, to answer all of them encrypted (never the Bcc's)
+            let gossip = if visible.len() > 1 {
+                visible
+                    .iter()
+                    .filter_map(|(address, cert)| crate::autocrypt::gossip_header(address, cert, now))
+                    .collect()
+            } else {
+                Vec::new()
+            };
             Ok(Some(OutgoingKeys {
                 signer: Some(own),
                 recipients,
                 hidden,
+                headers,
+                gossip,
             }))
         })
         .map(|keys| keys.map(std::sync::Arc::new))
+    }
+
+    /// The `Autocrypt` header of an own address, when it has a key and its switch is on
+    fn autocrypt_header(&self, address: &str) -> Result<Option<String>> {
+        let Some(identity) = self
+            .store()
+            .pgp_identity(address)?
+            .filter(|identity| identity.autocrypt)
+        else {
+            return Ok(None);
+        };
+        let key = self.pgp_cert(&identity.fingerprint)?;
+        Ok(key.and_then(|cert| crate::autocrypt::header(address, &cert, unix_now())))
     }
 }
 
@@ -170,7 +218,18 @@ pub(crate) fn protect(
     }
     content.extend_from_slice(b"\r\n");
     content.extend_from_slice(&raw[root.body..]);
+    for header in &keys.headers {
+        top.extend_from_slice(header.as_bytes());
+    }
     let wrapped = if !keys.recipients.is_empty() {
+        // the gossip goes with the content, inside the encryption
+        let mut inner: Vec<u8> = keys
+            .gossip
+            .iter()
+            .flat_map(|header| header.as_bytes().to_vec())
+            .collect();
+        inner.extend_from_slice(&content);
+        let content = inner;
         let recipients: Vec<&Cert> = keys.recipients.iter().collect();
         let hidden: Vec<&Cert> = keys.hidden.iter().collect();
         let armored = pe_pgp::encrypt(content, &recipients, &hidden, keys.signer.as_ref(), now).map_err(failed)?;
@@ -184,10 +243,7 @@ pub(crate) fn protect(
              {armored}\r\n--{b}--\r\n"
         )
         .into_bytes()
-    } else {
-        let Some(signer) = keys.signer.as_ref() else {
-            return Ok(built);
-        };
+    } else if let Some(signer) = keys.signer.as_ref() {
         let signed = pe_pgp::sign_detached(&content, signer, now).map_err(failed)?;
         let b = boundary(&[&content]);
         let mut out = format!(
@@ -207,6 +263,9 @@ pub(crate) fn protect(
             .as_bytes(),
         );
         out
+    } else {
+        // neither signed nor encrypted: the content as it was, under the top headers with the new ones
+        content
     };
     let mut raw = top;
     raw.extend_from_slice(b"MIME-Version: 1.0\r\n");

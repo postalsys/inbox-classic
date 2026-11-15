@@ -64,6 +64,8 @@ pub struct MessageView {
     /// For a message with signed or encrypted parts: what the bar over it says and what each part is; None for
     /// any other message
     pub protection: Option<ProtectionView>,
+    /// What the message says for Autocrypt, learned when the window takes the view ([`crate::Core::learn_autocrypt`])
+    pub autocrypt: Option<crate::autocrypt::Seen>,
 }
 
 /// What a signed or encrypted message is, for the bar over it (which mail can not draw) and its Details
@@ -157,14 +159,13 @@ pub(crate) fn build_unless(
     if let Some(ring) = trust.ring {
         let from = crate::from_addresses(source);
         if let Some(protected) = crate::protect::read(source, ring, &from, crate::worker::unix_now()) {
-            return Some(protected_view(
-                &message,
-                protected,
-                clicked,
-                allow_remote_images,
-                sender,
-                trust,
-            ));
+            let mut seen = crate::autocrypt::seen(&message, trust.pictures.junk, crate::worker::unix_now());
+            if let Some(seen) = seen.as_mut() {
+                seen.gossip = protected.gossip.clone();
+            }
+            let mut view = protected_view(&message, protected, clicked, allow_remote_images, sender, trust);
+            view.autocrypt = seen;
+            return Some(view);
         }
     }
     let options = RenderOptions { allow_remote_images };
@@ -252,6 +253,7 @@ pub(crate) fn build_unless(
         bounced_message,
         otp_code: code.map(|code| code.code),
         protection: None,
+        autocrypt: crate::autocrypt::seen(&message, trust.pictures.junk, crate::worker::unix_now()),
     })
 }
 
