@@ -1491,6 +1491,10 @@ constexpr ULONG_PTR kTestListTop = 0x4C544F50;
 constexpr ULONG_PTR kTestCrashCompose = 0x43524153;
 // with --test-hooks only: the reading pane's zoom in percent (View > Text Size), plus 10
 constexpr ULONG_PTR kTestTextZoom = 0x5A4F4F4D;
+// with --test-hooks only: the reading pane's look at the parts' frames of the message shown (Preview::TestFrames)
+constexpr ULONG_PTR kTestFrames = 0x46524D53;
+// with --test-hooks only: the requests to the internet of the message shown, plus 10
+constexpr ULONG_PTR kTestRemoteRequests = 0x4E455452;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -1963,6 +1967,12 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (g_arguments.testHooks && data->dwData == kTestListTop) {
             return g_mailbox.TestListTop();
         }
+        if (g_arguments.testHooks && data->dwData == kTestFrames) {
+            return static_cast<LRESULT>(g_mailbox.TestFrames());
+        }
+        if (g_arguments.testHooks && data->dwData == kTestRemoteRequests) {
+            return static_cast<LRESULT>(g_mailbox.TestRemoteRequests() + 10);
+        }
         if (g_arguments.testHooks && data->dwData == kTestTextZoom) {
             return static_cast<LRESULT>(webview::TestTextZoom() + 10);
         }
@@ -2108,6 +2118,9 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             SyncAll();
         } else if (wParam == TIMER_SEND_WAITING) {
             ShowOutbox();
+        } else if (wParam == TIMER_MEASURE) {
+            // the parts of a signed or encrypted message measured, often: no counts change
+            g_mailbox.OnTimer(wParam);
         } else {
             g_mailbox.OnTimer(wParam);
             // a reload or a search changes the counts
@@ -2323,6 +2336,11 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
             continue;
         }
         if (ComposeKey(msg) || MessageWindowKey(msg)) {
+            continue;
+        }
+        // Alt with a letter: a button of the main window's panes that has it (the security bar's Details), which the
+        // dialog keys below would not find inside the bar
+        if (msg.message == WM_SYSCHAR && GetAncestor(msg.hwnd, GA_ROOT) == hwnd && ClickMnemonic(hwnd, static_cast<wchar_t>(msg.wParam))) {
             continue;
         }
         // Tab moves between the panes of the main window and the fields of a compose window

@@ -26,9 +26,11 @@ void CreateIn(HWND parent, ICoreWebView2Environment* environment,
               std::function<void(ICoreWebView2Environment*, ICoreWebView2Controller*)> ready, std::function<void(const std::wstring&)> failed);
 
 // answers every request: `serve` gives the document for the address of the page (`url` is its prefix), anything else
-// from the network is refused unless `allow` says otherwise
+// from the network is refused unless `allow` says otherwise. `part`, when there is one, answers the other addresses
+// under `url` it knows (a signed or encrypted message's parts): true with the document in UTF-8, empty for none (404)
 void FilterRequests(ICoreWebView2* view, ICoreWebView2Environment* environment, const wchar_t* url,
-                    std::function<const std::wstring&()> serve, std::function<bool(const wchar_t* uri, COREWEBVIEW2_WEB_RESOURCE_CONTEXT)> allow);
+                    std::function<const std::wstring&()> serve, std::function<bool(const wchar_t* uri, COREWEBVIEW2_WEB_RESOURCE_CONTEXT)> allow,
+                    std::function<bool(const wchar_t* uri, std::string& document)> part = nullptr);
 
 // a picture from the internet, which a page loads only when the user allowed it for the message shown: http(s), an
 // image, not the page's own address `url`
@@ -57,7 +59,8 @@ bool IsLinkScheme(const wchar_t* uri);
 // a link opened in the default browser or mail program: http, https and mailto only, anything else is ignored
 void OpenExternally(const wchar_t* uri);
 
-// whether `uri` is the page itself (`url`, with or without a query) or one of the documents a page has of its own
+// whether `uri` is the page itself (`url`, with or without a query, or a folder of it named by a number, `url` 12/)
+// or one of the documents a page has of its own (about:blank)
 bool IsOwnPage(const wchar_t* uri, const wchar_t* url);
 
 }  // namespace webview

@@ -97,7 +97,8 @@ void SetCell(HWND list, int row, int column, const std::wstring& text);
 void SelectRow(HWND list, int row);
 
 // the icon strips of app/res/toolbar (icons.h): their image list at the size closest to the DPI, loaded once
-enum class IconSet { Toolbar, Format, Folders, List };
+// the security bar's are drawn over the fill of its tone, in the color of its words
+enum class IconSet { Toolbar, Format, Folders, List, SecureVerified, SecureGood, SecureWarning, SecureNeutral };
 HIMAGELIST IconList(IconSet set);
 // text for a menu item: a & in it stays a & rather than making the next character a shortcut
 std::wstring MenuText(std::wstring text);
@@ -176,6 +177,9 @@ HWND CreateLinkButton(HWND parent, const wchar_t* text, int id, const RECT& boun
 // a label clicked as a link (SS_NOTIFY) that the keyboard reaches too: a Tab stop with a focus rectangle, Enter or Space
 // clicks it (STN_CLICKED to its window)
 void KeyboardLink(HWND label);
+// Alt with a letter in a window that is no dialog (the main window, a message window): the push button anywhere in
+// `root` whose text marks that letter (&Details...), visible and enabled, clicked; false when there is none
+bool ClickMnemonic(HWND root, wchar_t letter);
 // for WM_SETCURSOR of the window with the links: the hand over a link; true when it set it
 bool SetLinkCursor(HWND hwnd, WPARAM wParam);
 // what a screen reader says about a control besides its name (the reason a button is turned off)
@@ -336,6 +340,20 @@ void OutboxDialog(HWND owner, PeCore* core);
 // preview opens; it closes once the preview does
 // (`environment`: the reading pane's WebView2 environment to start from, or NULL for one of its own)
 void OpenPrintWindow(HWND owner, ICoreWebView2Environment* environment, const char* document, bool remoteImages, const std::wstring& subject);
+
+// ---- securitybar.cpp ----
+
+// the security bar of a signed or encrypted message's state (`tone`, not NONE) drawn in `area`: the tone's fill and
+// frame, the lock when `encrypted` and the tone's own picture (a shield with a check, a ribbon, a warning sign; none
+// for neutral), and `words` wrapped in `font`, leaving `reserved` pixels free at its right (the Details button)
+void DrawSecurityBar(HDC dc, const RECT& area, PeProtectionTone tone, bool encrypted, const std::wstring& words, HFONT font, int reserved);
+// the height of that bar `width` wide: one line keeps the same height from message to message, more lines make it taller
+int SecurityBarHeight(PeProtectionTone tone, bool encrypted, const std::wstring& words, HFONT font, int width, int reserved);
+// the Security Details window over `owner`: the state as the bar shows it (`summary`), the core's `details` of each
+// part to read and copy, Close; F1 opens the help of signed and encrypted mail. `part`: the part whose label was
+// clicked (0 the first) at the top of the text, -1 for the top
+void SecurityDetailsDialog(HWND owner, PeProtectionTone tone, bool encrypted, const std::wstring& summary, const std::wstring& details,
+                           int part);
 
 // ---- help.cpp ----
 
@@ -571,6 +589,10 @@ public:
     int TestDragOut(const std::wstring& dir);
     // the UI test's click on a link of the message shown: whether it was one of the document's own
     bool TestLink(const std::wstring& uri) { return reader_.FollowLink(uri.c_str()); }
+    // the UI test's look at the parts of a signed or encrypted message shown (Reader::TestFrames)
+    int64_t TestFrames() { return reader_.TestFrames(); }
+    // the UI test's count of requests of the message shown to the internet (Preview::RemoteRequests)
+    int TestRemoteRequests() const { return reader_.RemoteRequests(); }
     DWORD TestDropFiles(HTREEITEM item, const std::vector<std::wstring>& paths);
     // what a background save or forward of several messages finished with (WM_FILES_DONE)
     void FilesDone(LPARAM done);
@@ -1133,6 +1155,10 @@ enum ControlId : WORD {
     IDC_SORT_BUTTON,
     // on the search bar, left of Clear search: a new rule that matches the words searched for
     IDC_SEARCH_RULE,
+    // under the header of a signed or encrypted message: its security bar, and the bar's Details button (also sent,
+    // with no control, when a part's label is clicked)
+    IDC_SECURITY_BAR,
+    IDC_SECURITY_DETAILS,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag
@@ -1364,6 +1390,9 @@ constexpr UINT_PTR TIMER_DOWNLOADING = 6;
 constexpr UINT_PTR TIMER_SELECTION = 7;
 // a moment after a find in a message started, how many places it found is told as it is then
 constexpr UINT_PTR TIMER_FIND_SETTLED = 8;
+// while a signed or encrypted message is shown: its parts' frames measured again (pictures loaded, "..." unfolded, the
+// width or the text size changed)
+constexpr UINT_PTR TIMER_MEASURE = 9;
 // the main window's: counts down the message that waits to be sent, in the status bar (Undo Send); apart from the
 // list's timers above, which the main window hands to the list
 constexpr UINT_PTR TIMER_SEND_WAITING = 20;

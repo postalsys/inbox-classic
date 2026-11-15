@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <utility>
 
+#include "app.h"
 #include "core.h"
 #include "webview.h"
 
@@ -21,6 +22,17 @@ namespace {
 // where the documents are served from memory (webview.h); .invalid never resolves
 const wchar_t* kPageUrl = L"https://preview.inboxclassic.invalid/";
 
+// the UI test's look at a page of parts: how many frames, whether each is as tall as its document, their heights
+const wchar_t* kFramesCheck =
+    L"(()=>{let n=0,fit=100,sum=0;for(const f of document.querySelectorAll('iframe')){n++;const d=f.contentDocument;"
+    L"const h=d&&d.documentElement?d.documentElement.scrollHeight:1e9;if(f.offsetHeight<h)fit=0;sum+=f.offsetHeight}"
+    L"return n+fit+1000*sum})()";
+
+// the core's script that sizes each frame to its document
+const std::wstring& MeasureScript() {
+    static const std::wstring script = core::Widen(pe_measure_script());
+    return script;
+}
 
 }  // namespace
 
@@ -54,13 +66,34 @@ void Preview::Configure() {
     if (textZoom_) {
         webview::TrackTextZoom(controller_.Get());
     }
+    // the classic light look, also when Windows uses dark mode: the labels of a signed or encrypted message's parts
+    // in the colours of the security bar over them
+    ComPtr<ICoreWebView2_13> withProfile;
+    ComPtr<ICoreWebView2Profile> profile;
+    if (SUCCEEDED(view_.As(&withProfile)) && SUCCEEDED(withProfile->get_Profile(&profile)) && profile) {
+        profile->put_PreferredColorScheme(COREWEBVIEW2_PREFERRED_COLOR_SCHEME_LIGHT);
+    }
 
     // the document from memory; nothing from the network, also not what a CSP would let through, but images when the
     // user asked for them
     webview::FilterRequests(
         view_.Get(), environment_.Get(), kPageUrl, [this]() -> const std::wstring& { return document_; },
         [this](const wchar_t* uri, COREWEBVIEW2_WEB_RESOURCE_CONTEXT context) {
+            if ((StartsWith(uri, L"http://") || StartsWith(uri, L"https://")) && !StartsWith(uri, kPageUrl)) {
+                remoteRequests_++;
+            }
             return remoteImages_ && webview::IsRemoteImage(uri, context, kPageUrl);
+        },
+        // the parts' documents, beside the page: the core says which part an address asks for
+        [this](const wchar_t* uri, std::string& document) {
+            int64_t index = pe_part_document(core::Narrow(uri).c_str());
+            if (index < 0) {
+                return false;
+            }
+            if (static_cast<size_t>(index) < parts_.size()) {
+                document = parts_[static_cast<size_t>(index)];
+            }
+            return true;
         });
 
     // links open in the browser, the pane only ever shows the documents it is given
@@ -81,6 +114,32 @@ void Preview::Configure() {
             return S_OK;
         }).Get(),
         nullptr);
+    // a part's frame (a signed or encrypted message's) loads its document beside the page, by the page's doing only;
+    // a link clicked in it leaves the frame where it is and opens in the browser, never as one of the page's own links,
+    // which only the page's labels are
+    view_->add_FrameNavigationStarting(
+        Callback<ICoreWebView2NavigationStartingEventHandler>([](ICoreWebView2*, ICoreWebView2NavigationStartingEventArgs* args) {
+            LPWSTR uri = nullptr;
+            args->get_Uri(&uri);
+            BOOL user = FALSE;
+            args->get_IsUserInitiated(&user);
+            bool part = !user && StartsWith(uri, kPageUrl) && pe_part_document(core::Narrow(uri).c_str()) >= 0;
+            if (!part && !StartsWith(uri, L"about:")) {
+                args->put_Cancel(TRUE);
+                if (user) {
+                    OpenExternally(uri);
+                }
+            }
+            CoTaskMemFree(uri);
+            return S_OK;
+        }).Get(),
+        nullptr);
+    // the frames of a page of parts sized once it loaded, its frames' documents with it
+    view_->add_NavigationCompleted(Callback<ICoreWebView2NavigationCompletedEventHandler>([this](ICoreWebView2*, ICoreWebView2NavigationCompletedEventArgs*) {
+                                       Measure();
+                                       return S_OK;
+                                   }).Get(),
+                                   nullptr);
     view_->add_NewWindowRequested(
         Callback<ICoreWebView2NewWindowRequestedEventHandler>([this](ICoreWebView2*, ICoreWebView2NewWindowRequestedEventArgs* args) {
             LPWSTR uri = nullptr;
@@ -102,6 +161,10 @@ void Preview::Configure() {
                 // the help of the window, as F1 in any of its controls opens it (the message loop takes the key)
                 args->put_Handled(TRUE);
                 PostMessageW(GetAncestor(parent_, GA_ROOT), WM_KEYDOWN, VK_F1, 0);
+            } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_SYSTEM_KEY_DOWN && key >= 'A' && key <= 'Z' && mnemonics_ &&
+                       ClickMnemonic(GetAncestor(parent_, GA_ROOT), static_cast<wchar_t>(key))) {
+                // Alt with a letter while the message has the keyboard: a button of its window that has it (Details)
+                args->put_Handled(TRUE);
             } else if (keys_ && kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && keys_(key)) {
                 args->put_Handled(TRUE);
             }
@@ -134,7 +197,7 @@ void Preview::Configure() {
         controller_->MoveFocus(COREWEBVIEW2_MOVE_FOCUS_REASON_PROGRAMMATIC);
     }
     if (pending_) {
-        Show(document_, remoteImages_);
+        Show(document_, remoteImages_, parts_);
     } else {
         Clear();
     }
@@ -147,19 +210,41 @@ void Preview::Follow(const wchar_t* uri) {
     OpenExternally(uri);
 }
 
-void Preview::Show(const std::wstring& html, bool remoteImages) {
+void Preview::Show(const std::wstring& html, bool remoteImages, std::vector<std::string> parts) {
     // the places found were in the document before
     StopFind();
     remoteImages_ = remoteImages;
+    parts_ = std::move(parts);
+    remoteRequests_ = 0;
+    testFrames_ = -1;
     document_ = html;
     if (!view_) {
         pending_ = true;
         return;
     }
     pending_ = false;
-    // a new address for each document, so it is loaded again rather than taken from history
-    std::wstring url = std::wstring(kPageUrl) + L"?" + std::to_wstring(++shown_);
+    // a new address for each document, so it is loaded again rather than taken from history; a folder, so the frames of
+    // a page of parts ask for theirs beside it (part-N)
+    std::wstring url = std::wstring(kPageUrl) + std::to_wstring(++shown_) + L"/";
     view_->Navigate(url.c_str());
+}
+
+void Preview::Measure() {
+    // the page's own scripts are off (IsScriptEnabled); a script the app runs still runs
+    if (view_ && !parts_.empty()) {
+        view_->ExecuteScript(MeasureScript().c_str(), nullptr);
+    }
+}
+
+int64_t Preview::TestFrames() {
+    int64_t last = testFrames_;
+    if (view_) {
+        view_->ExecuteScript(kFramesCheck, Callback<ICoreWebView2ExecuteScriptCompletedHandler>([this](HRESULT result, LPCWSTR json) {
+                                               testFrames_ = SUCCEEDED(result) && json ? _wtoi64(json) : -1;
+                                               return S_OK;
+                                           }).Get());
+    }
+    return last;
 }
 
 void Preview::Clear(bool noMessage) {

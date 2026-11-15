@@ -616,12 +616,16 @@ void MessageWindowsEvent(const UiEvent& event) {
 }
 
 bool MessageWindowKey(const MSG& msg) {
-    if (msg.message != WM_KEYDOWN) {
+    if (msg.message != WM_KEYDOWN && msg.message != WM_SYSCHAR) {
         return false;
     }
     HWND root = GetAncestor(msg.hwnd, GA_ROOT);
     if (std::find(g_messageWindows.begin(), g_messageWindows.end(), root) == g_messageWindows.end()) {
         return false;
+    }
+    // Alt with a letter: the security bar's Details
+    if (msg.message == WM_SYSCHAR) {
+        return ClickMnemonic(root, static_cast<wchar_t>(msg.wParam));
     }
     WPARAM command = KeyCommand(static_cast<UINT>(msg.wParam));
     if (!command) {

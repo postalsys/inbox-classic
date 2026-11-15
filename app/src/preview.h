@@ -5,6 +5,7 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 
 #include <wrl.h>
 
@@ -18,8 +19,19 @@ public:
     // a find waits for its count on the timer `findTimer` of `owner`, which hands it to FindSettled (none for a view
     // that never finds, the help)
     void Create(HWND parent, std::function<void(const std::wstring&)> onError, HWND owner = nullptr, UINT_PTR findTimer = 0);
-    // remoteImages lets images from the network load, for this document only
-    void Show(const std::wstring& html, bool remoteImages = false);
+    // remoteImages lets images from the network load, for this document only. `parts`: the documents of a page of
+    // parts (a signed or encrypted message, UTF-8), each in a frame of its own that asks for `part-N` beside the page;
+    // their frames are sized to their documents once it loaded and on each Measure()
+    void Show(const std::wstring& html, bool remoteImages = false, std::vector<std::string> parts = {});
+    // the frames of the page shown sized again to their documents (the core's script, run by the app with the page's
+    // own scripts off), when it is a page of parts
+    void Measure();
+    // the UI test's look at the frames of the page shown: the answer to the last look (how many frames, plus 100 when
+    // each is as tall as its document, plus 1000 times their heights in pixels; -1 before there is one), and looks
+    // again
+    int64_t TestFrames();
+    // the requests to the internet the document shown made (allowed or refused), for the UI test
+    int RemoteRequests() const { return remoteRequests_; }
     // empty; with "There is no message selected." centered in it, as Outlook Express has it, when `noMessage`
     void Clear(bool noMessage = false);
     // the core's page for a message that is not here: being downloaded, or why it could not be (`reason` in UTF-8)
@@ -38,6 +50,8 @@ public:
     // the keys that do not type (Esc, Delete, those with Ctrl or Alt) pressed while it has the keyboard, for its window:
     // true when the window handled one, which the page then does not get
     void SetKeys(std::function<bool(UINT key)> keys) { keys_ = std::move(keys); }
+    // Alt with a letter while it has the keyboard clicks the button of its window that has that letter (ClickMnemonic)
+    void TakeMnemonics() { mnemonics_ = true; }
     // before Create: not at View > Text Size's size, which is for messages (the help keeps its own)
     void KeepOwnSize() { textZoom_ = false; }
     // a link clicked in the document that its window follows itself (the bounce card's): true when it took it, which
@@ -71,7 +85,12 @@ private:
     // documents shown, for an address of each
     unsigned shown_ = 0;
     bool remoteImages_ = false;
+    // the documents of the parts of the page shown, in frames sized by Measure(); none for another page
+    std::vector<std::string> parts_;
+    int remoteRequests_ = 0;
+    int64_t testFrames_ = -1;
     bool textZoom_ = true;
+    bool mnemonics_ = false;
     std::function<void(const std::wstring&)> onError_;
     std::function<bool(UINT key)> keys_;
     std::function<bool(const wchar_t* uri)> links_;

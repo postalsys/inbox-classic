@@ -7,6 +7,7 @@
 #include <shellapi.h>
 
 #include <algorithm>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -89,6 +90,30 @@ LRESULT CALLBACK BodyHostProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPa
     return DefSubclassProc(hwnd, message, wParam, lParam);
 }
 
+// the security bar: its Details button is its child, whose click goes on to the reading pane's window; the bar draws
+// all of itself (WM_DRAWITEM)
+LRESULT CALLBACK SecurityBarProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR) {
+    switch (message) {
+    case WM_COMMAND:
+        return SendMessageW(GetParent(hwnd), message, wParam, lParam);
+    case WM_ERASEBKGND:
+        return TRUE;
+    case WM_NCDESTROY:
+        RemoveWindowSubclass(hwnd, SecurityBarProc, 0);
+        break;
+    }
+    return DefSubclassProc(hwnd, message, wParam, lParam);
+}
+
+// the Details button's height and its margin from the bar's right end
+int DetailsHeight() {
+    return Scale(23);
+}
+
+int DetailsMargin() {
+    return Scale(4);
+}
+
 }  // namespace
 
 void Reader::Create(HWND parent, PeCore* core) {
@@ -104,6 +129,15 @@ void Reader::Create(HWND parent, PeCore* core) {
     attachments_ = CreateBar(parent, CCS_NODIVIDER | CCS_NOPARENTALIGN | CCS_NORESIZE, IDC_ATTACHMENTS, BarIcons::Big);
     // a label from the start, so the bar keeps a row for it under the icon ("2 files" once a message is shown)
     AddButton(attachments_, IDC_ATTACHMENTS, core::T(PE_TEXT_WIN_FILES, {{"count", L"1"}}).c_str(), BTNS_WHOLEDROPDOWN, ICON_ATTACH);
+    // the security bar of a signed or encrypted message, first under the header (and first for a screen reader, its
+    // words its name), its Details button at its right end: Tab and Alt with its letter reach it
+    security_ = CreateChild(parent, L"STATIC", L"", SS_OWNERDRAW | SS_NOPREFIX | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, IDC_SECURITY_BAR, {},
+                            WS_EX_CONTROLPARENT);
+    SetWindowSubclass(security_, SecurityBarProc, 0, 0);
+    securityDetails_ = CreateChild(security_, L"BUTTON", core::T(PE_TEXT_UI_PROTECTION_DETAILS).c_str(), WS_TABSTOP | BS_PUSHBUTTON,
+                                   IDC_SECURITY_DETAILS, {});
+    ShowWindow(security_, SW_HIDE);
+    EnableWindow(securityDetails_, FALSE);
     // the information bar of Outlook Express over a message whose pictures on the internet are blocked; a click
     // shows them
     std::wstring blocked = L" " + core::T(PE_TEXT_UI_PICTURES_BLOCKED);
@@ -127,6 +161,7 @@ void Reader::Create(HWND parent, PeCore* core) {
     // the message itself is a Tab stop too: its host hands the keyboard to the WebView2
     previewHost_ = CreateChild(parent, L"STATIC", nullptr, SS_SUNKEN | WS_CLIPCHILDREN | WS_TABSTOP, 0, {});
     SetWindowSubclass(previewHost_, BodyHostProc, 0, reinterpret_cast<DWORD_PTR>(&preview_));
+    preview_.TakeMnemonics();
     preview_.Create(previewHost_, [this](const std::wstring& error) { SetWindowTextW(previewHost_, error.c_str()); }, parent,
                     TIMER_FIND_SETTLED);
     preview_.SetLinks([this](const wchar_t* uri) { return FollowLink(uri); });
@@ -142,6 +177,7 @@ void Reader::Create(HWND parent, PeCore* core) {
 }
 
 void Reader::Destroy() {
+    KillTimer(parent_, TIMER_MEASURE);
     if (viewRequest_) {
         pe_message_view_cancel(core_, viewRequest_);
         viewRequest_ = 0;
@@ -169,6 +205,14 @@ bool Reader::FollowLink(const wchar_t* uri) {
     case PE_READER_LINK_OPEN_CALENDAR:
         OpenInCalendar();
         return true;
+    case PE_READER_LINK_PART: {
+        // a part's label: the Details window at that part, once the WebView2's event is over (the link names the
+        // part's number after its prefix)
+        const wchar_t* number = wcsrchr(uri, L'-');
+        detailsPart_ = number ? _wtoi(number + 1) : -1;
+        PostMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_SECURITY_DETAILS, 0), 0);
+        return true;
+    }
     case PE_READER_LINK_COPY_CODE:
         if (const PeMessageInfo* info = Info(); info && info->otp_code && *info->otp_code &&
                                                 CopyText(parent_, core::Widen(info->otp_code)) && onFound) {
@@ -186,13 +230,58 @@ const PeMessageInfo* Reader::Info() const {
 
 // the paper clip and the information bar shown or not, the pane laid out again only when that changes
 void Reader::ShowBars(bool files, bool pictures) {
-    bool changed = (IsWindowVisible(attachments_) != FALSE) != files || (IsWindowVisible(pictures_) != FALSE) != pictures;
+    // the arrow only when its menu has more than the bar's own click: an Always, or why there is none (encrypted mail
+    // has neither, its pictures load for a click only)
+    const PeMessageInfo* info = Info();
+    bool arrow = pictures && info &&
+                 ((info->pictures_always_sender && *info->pictures_always_sender) || (info->pictures_always_domain && *info->pictures_always_domain) ||
+                  (info->pictures_unconfirmed && *info->pictures_unconfirmed));
+    bool changed = (IsWindowVisible(attachments_) != FALSE) != files || (IsWindowVisible(pictures_) != FALSE) != pictures ||
+                   (IsWindowVisible(picturesMenu_) != FALSE) != arrow;
     ShowWindow(attachments_, files ? SW_SHOW : SW_HIDE);
     ShowWindow(pictures_, pictures ? SW_SHOW : SW_HIDE);
-    ShowWindow(picturesMenu_, pictures ? SW_SHOW : SW_HIDE);
+    ShowWindow(picturesMenu_, arrow ? SW_SHOW : SW_HIDE);
     if (changed || files) {
         Layout();
     }
+}
+
+void Reader::ShowSecurity(const PeMessageInfo* info) {
+    bool shown = info && info->protection != PE_PROTECTION_TONE_NONE;
+    if (!shown) {
+        KillTimer(parent_, TIMER_MEASURE);
+    }
+    securityTone_ = shown ? info->protection : PE_PROTECTION_TONE_NONE;
+    securityLock_ = shown && info->protection_encrypted;
+    std::wstring words = shown ? Text(info->protection_text) : L"";
+    SetWindowTextW(security_, words.c_str());
+    // a screen reader on the button says what it is about
+    SetAccessibleDescription(securityDetails_, words);
+    EnableWindow(securityDetails_, shown);
+    if ((IsWindowVisible(security_) != FALSE) != shown) {
+        if (!shown && GetFocus() == securityDetails_) {
+            SetFocus(previewHost_);
+        }
+        ShowWindow(security_, shown ? SW_SHOW : SW_HIDE);
+        Layout();
+    }
+}
+
+int Reader::SecurityHeight(int width) const {
+    if (!IsWindowVisible(security_)) {
+        return 0;
+    }
+    int reserved = ButtonWidth({GetWindowString(securityDetails_)}) + DetailsMargin();
+    return SecurityBarHeight(securityTone_, securityLock_, GetWindowString(security_), bold_, width, reserved);
+}
+
+void Reader::ShowSecurityDetails(int part) {
+    const PeMessageInfo* info = Info();
+    if (!info || info->protection == PE_PROTECTION_TONE_NONE) {
+        return;
+    }
+    SecurityDetailsDialog(parent_, info->protection, info->protection_encrypted, Text(info->protection_text), Text(info->protection_details),
+                          part);
 }
 
 void Reader::ShowRetry(bool shown) {
@@ -267,6 +356,13 @@ void Reader::Layout() {
                    TRUE);
     }
     int top = reader.top + headerHeight + Scale(2);
+    if (int barHeight = SecurityHeight(width); barHeight > 0) {
+        MoveWindow(security_, reader.left, top, width, barHeight, TRUE);
+        int buttonWidth = ButtonWidth({GetWindowString(securityDetails_)});
+        MoveWindow(securityDetails_, width - buttonWidth - DetailsMargin(), (barHeight - DetailsHeight()) / 2, buttonWidth, DetailsHeight(), TRUE);
+        InvalidateRect(security_, nullptr, FALSE);
+        top += barHeight + Scale(2);
+    }
     if (IsWindowVisible(retry_)) {
         int barHeight = Scale(22);
         MoveWindow(retry_, reader.left, top, width, barHeight, TRUE);
@@ -274,8 +370,8 @@ void Reader::Layout() {
     }
     if (IsWindowVisible(pictures_)) {
         int barHeight = Scale(22);
-        // the arrow's border over the bar's right one
-        int arrowWidth = Scale(22);
+        // the arrow's border over the bar's right one; without the arrow, the bar is the whole width
+        int arrowWidth = IsWindowVisible(picturesMenu_) ? Scale(22) : 1;
         MoveWindow(pictures_, reader.left, top, width - arrowWidth + 1, barHeight, TRUE);
         MoveWindow(picturesMenu_, reader.left + width - arrowWidth, top, arrowWidth, barHeight, TRUE);
         top += barHeight + Scale(2);
@@ -299,6 +395,8 @@ void Reader::Clear(bool loading) {
     view_.reset();
     KillTimer(parent_, TIMER_DOWNLOADING);
     ShowRetry(false);
+    // the security bar never stays over another message than its own
+    ShowSecurity(nullptr);
     // the bars of the message before stay while the next one loads, and go when it is there without them: the
     // message does not jump down and up again
     if (!loading) {
@@ -392,6 +490,7 @@ void Reader::ShowInfo() {
         return;
     }
     ShowHeader(info);
+    ShowSecurity(info);
     // a mailing list that says how to leave it
     unsubscribeKind_ = file ? PE_UNSUBSCRIBE_NONE : info->unsubscribe;
     unsubscribeLink_ = Text(info->unsubscribe_link);
@@ -400,7 +499,20 @@ void Reader::ShowInfo() {
     ShowLogo(info->has_logo && !file, file ? 0 : info->picture);
     Layout();
     InvalidateRect(unsubscribe_, nullptr, TRUE);
-    preview_.Show(Text(info->document), info->pictures_loaded || remoteImages_);
+    // a signed or encrypted message is a page of parts, each in a frame sized to its document: once it loaded, and
+    // again while it is shown (pictures loading, "..." unfolded, another width or text size)
+    std::vector<std::string> parts;
+    for (size_t i = 0; info->protection != PE_PROTECTION_TONE_NONE && i < info->part_count; i++) {
+        const char* part = pe_message_view_part(view_.get(), i);
+        parts.emplace_back(part ? part : "");
+    }
+    bool measured = !parts.empty();
+    preview_.Show(Text(info->document), info->pictures_loaded || remoteImages_, std::move(parts));
+    if (measured) {
+        SetTimer(parent_, TIMER_MEASURE, 400, nullptr);
+    } else {
+        KillTimer(parent_, TIMER_MEASURE);
+    }
     // offered only for a message with pictures on the internet, until they are shown (asked for, or by themselves)
     ShowBars(info->attachment_count > 0, info->remote_images && !info->pictures_loaded && !remoteImages_);
     if (onShown) {
@@ -583,7 +695,7 @@ void Reader::ChoosePictures() {
 void Reader::Print(HWND owner) {
     if (const PeMessageInfo* info = Info()) {
         // the message as it is shown, with the pictures the user allowed or the core loaded
-        OpenPrintWindow(owner, preview_.Environment(), info->document, PicturesShown(), Text(info->subject));
+        OpenPrintWindow(owner, preview_.Environment(), info->print_document, PicturesShown(), Text(info->subject));
     }
 }
 
@@ -701,6 +813,11 @@ bool Reader::OnDrawItem(const DRAWITEMSTRUCT& item) {
         DeleteObject(ink);
         return true;
     }
+    if (item.hwndItem == security_) {
+        int reserved = ButtonWidth({GetWindowString(securityDetails_)}) + DetailsMargin();
+        DrawSecurityBar(item.hDC, item.rcItem, securityTone_, securityLock_, GetWindowString(security_), bold_, reserved);
+        return true;
+    }
     if (item.hwndItem == logo_) {
         // the logo, its own transparency kept, in the middle of its place beside the header
         FillRect(item.hDC, &item.rcItem, GetSysColorBrush(COLOR_BTNFACE));
@@ -737,6 +854,9 @@ bool Reader::OnCommand(WORD id, WORD) {
     case IDC_RETRY:
         Retry();
         return true;
+    case IDC_SECURITY_DETAILS:
+        ShowSecurityDetails(std::exchange(detailsPart_, -1));
+        return true;
     case IDC_BOUNCED_MESSAGE:
         if (const PeMessageInfo* info = Info(); info && info->has_bounced_message && onBouncedMessage) {
             onBouncedMessage(info->bounced_folder, info->bounced_uid);
@@ -749,6 +869,13 @@ bool Reader::OnCommand(WORD id, WORD) {
 bool Reader::OnTimer(UINT_PTR id) {
     if (id == TIMER_FIND_SETTLED) {
         preview_.FindSettled();
+        return true;
+    }
+    if (id == TIMER_MEASURE) {
+        // not while the pane is hidden: it is measured once it shows again
+        if (IsWindowVisible(previewHost_)) {
+            preview_.Measure();
+        }
         return true;
     }
     if (id != TIMER_DOWNLOADING) {
