@@ -1042,6 +1042,8 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
     };
     d.check(true, &format!("the account form opens ({name})"));
     let first = first.upcast::<gtk::Widget>();
+    // its fields are found, and filled, once the form is drawn: a slow machine draws it a moment after it opens
+    wait_until(10, || named_in(&first, "start-email").is_some()).await;
     if shots {
         let google = named_in(&first, "sign-in-google").is_some();
         let microsoft = named_in(&first, "sign-in-microsoft").is_some();
