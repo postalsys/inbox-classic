@@ -917,6 +917,12 @@ impl Core {
         work(&book)
     }
 
+    /// A stored key's certificate, read once
+    pub(crate) fn pgp_cert(&self, fingerprint: &str) -> Result<Option<Cert>> {
+        let key = self.store().pgp_key(fingerprint)?;
+        Ok(key.as_ref().and_then(|key| self.pgp_certs.get(key)))
+    }
+
     /// Every key, own keys first
     pub fn pgp_keys(&self) -> Result<Vec<KeyInfo>> {
         self.book(|book| book.list())

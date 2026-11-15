@@ -9,6 +9,7 @@
 pub mod agents;
 pub mod attachment_words;
 mod authres;
+pub mod autocrypt;
 pub mod bimi;
 pub mod book;
 mod bounce;
@@ -1454,7 +1455,7 @@ impl Core {
         let Some(found) = self.view_source(folder, uid)? else {
             return Ok(None);
         };
-        Ok(finish_view(
+        let view = finish_view(
             &found,
             allow_remote_images,
             &|| false,
@@ -1463,7 +1464,16 @@ impl Core {
             &|event| {
                 let _ = self.post(event);
             },
-        ))
+        );
+        Ok(view.map(|view| self.learned(view)))
+    }
+
+    /// A view taken by its window: what it said for Autocrypt learned now, with the key book at hand
+    fn learned(&self, mut view: MessageView) -> MessageView {
+        if let Some(seen) = view.autocrypt.take() {
+            let _ = self.learn_autocrypt(&seen);
+        }
+        view
     }
 
     /// Builds the view of a message in the background: [`Event::ViewReady`] follows with the request this returns.
@@ -1499,7 +1509,7 @@ impl Core {
     /// The view a [`Core::message_view_start`] built, once: None while it is built, for an unknown request, or when
     /// the source was not in the store
     pub fn message_view_result(&self, request: u64) -> Option<MessageView> {
-        self.views.take(request).flatten()
+        self.views.take(request).flatten().map(|view| self.learned(view))
     }
 
     /// Drops a view no longer waited for (another message was selected)
@@ -1922,7 +1932,8 @@ impl Core {
             ring: ring.as_deref(),
             ..Default::default()
         };
-        Ok(view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default())
+        let view = view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default();
+        Ok(self.learned(view))
     }
 
     /// Reply, Reply All or Forward to a message file, from `account`

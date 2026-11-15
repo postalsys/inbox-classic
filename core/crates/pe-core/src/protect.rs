@@ -154,6 +154,8 @@ pub struct Protected {
     pub sections: Vec<Section>,
     /// The Subject inside the protection (RFC 9788, or protected-headers="v1"), when the envelope is good
     pub subject: Option<String>,
+    /// The other recipients' keys the sender gossiped inside the encryption (Autocrypt)
+    pub gossip: Vec<(String, Vec<u8>)>,
 }
 
 /// Whether a message may be protected at all: the cheap look before the real one
@@ -217,10 +219,21 @@ pub fn read(raw: &[u8], ring: &KeyRing, from: &[String], now: i64) -> Option<Pro
         (Some(verdict), Some(payload)) if envelope_good(verdict) => inner_subject(payload),
         _ => None,
     };
+    // gossip counts only inside an encryption that opened
+    let gossip = match (&envelope, &payload) {
+        (Some(verdict), Some(payload)) if verdict.encrypted && verdict.sealed.is_none() => {
+            let outer = pe_mime::parser::parse(raw)
+                .map(|m| crate::autocrypt::recipients(&m))
+                .unwrap_or_default();
+            crate::autocrypt::gossip(payload, &outer)
+        }
+        _ => Vec::new(),
+    };
     Some(Protected {
         envelope,
         sections: merge_plain(sections),
         subject,
+        gossip,
     })
 }
 
