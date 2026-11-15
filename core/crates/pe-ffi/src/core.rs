@@ -1898,6 +1898,10 @@ pub struct PeMessageInfo {
     pub protection_text: *const c_char,
     pub protection_encrypted: bool,
     pub protection_details: *const c_char,
+    /// The parts of such a message: the page's frames load `part-N` beside the page's own address (served from
+    /// memory as the page is; `pe_part_document` says which part an address asks for), whose document
+    /// `pe_message_view_part` gives
+    pub part_count: usize,
 }
 
 /// The colour of the security bar: green, blue, amber, grey; none without one
@@ -1930,6 +1934,7 @@ impl From<pe_html::PartTone> for PeProtectionTone {
 pub struct PeMessageView {
     info: PeMessageInfo,
     attachments: Vec<PeAttachment>,
+    parts: Vec<*const c_char>,
     _invitation: Option<Box<PeInvitation>>,
     _strings: Strings,
 }
@@ -2013,10 +2018,17 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
         protection_text: strings.add(view.protection.as_ref().map_or("", |p| p.text.as_str())),
         protection_encrypted: view.protection.as_ref().is_some_and(|p| p.encrypted),
         protection_details: strings.add(&view.protection.as_ref().map(|p| p.details()).unwrap_or_default()),
+        part_count: view.part_documents.len(),
     };
+    let parts = view
+        .part_documents
+        .iter()
+        .map(|document| strings.add(document))
+        .collect();
     handed(PeMessageView {
         info,
         attachments,
+        parts,
         _invitation: invitation,
         _strings: strings,
     })
@@ -2245,6 +2257,30 @@ pub unsafe extern "C" fn pe_message_view_attachment(view: *const PeMessageView, 
     unsafe { view.as_ref() }
         .and_then(|view| view.attachments.get(index))
         .map_or(null(), |row| row)
+}
+
+/// The document of part `index` of a signed or encrypted message, owned by the view; NULL past the end. Empty for a
+/// part with nothing to show (its frame is not in the page).
+///
+/// # Safety
+/// `view` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_message_view_part(view: *const PeMessageView, index: usize) -> *const c_char {
+    // SAFETY: as the caller guarantees
+    unsafe { view.as_ref() }
+        .and_then(|view| view.parts.get(index).copied())
+        .unwrap_or(null())
+}
+
+/// Which part's document an address the page asks for is (`part-N` as its last segment), -1 for none
+///
+/// # Safety
+/// `address` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_part_document(address: *const c_char) -> i64 {
+    // SAFETY: as the caller guarantees
+    let address = unsafe { arg(address) }.unwrap_or_default();
+    guard(|| pe_html::part_document(address).map_or(-1, |index| index as i64)).unwrap_or(-1)
 }
 
 /// # Safety

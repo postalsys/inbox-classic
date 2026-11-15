@@ -2,10 +2,11 @@
 //!
 //! The labels say what each part is ("Signed by Alice, key verified"), so nothing a sender writes may reach them.
 //! This page holds no markup of the message: each part is a complete document of [`crate::render_view_cards`] in an
-//! `iframe` of its own (`srcdoc`), sandboxed (no scripts, forms, popups or navigation of the page around it). A
-//! document can not draw outside its frame or style another document, which CSS rules of ours could only try to
-//! prevent. `allow-same-origin` lets the app (never the message: it runs no script) measure each part's height and
-//! size its frame to it ([`MEASURE_SCRIPT`]).
+//! `iframe` of its own, sandboxed (no scripts, forms, popups or navigation of the page around it). A document can not
+//! draw outside its frame or style another document, which CSS rules of ours could only try to prevent. The apps serve
+//! the page at an address that ends in `/` and each part at `part-N` beside it ([`part_document`]), out of memory as
+//! they serve the page (not `srcdoc`, which WebKit drops while page scripts are off). `allow-same-origin` lets the app
+//! (never the message: it runs no script) measure each part's height and size its frame to it ([`MEASURE_SCRIPT`]).
 
 use crate::editor;
 
@@ -41,17 +42,31 @@ impl PartTone {
     }
 }
 
-/// One part: its label in words, its tone, and its document (None: nothing of it can be shown, the label says why)
+/// One part: its label in words, its tone, and whether it has a document to show (false: nothing of it can be shown,
+/// the label says why); the apps serve its document at `part-N`, N its place among the parts
 pub struct SecurePart<'a> {
     pub tone: PartTone,
     pub label: &'a str,
-    pub document: Option<&'a str>,
+    pub shown: bool,
+}
+
+/// What the address of a part's document ends with, after the page's own address: `part-N`
+pub const PART_DOCUMENT: &str = "part-";
+
+/// Which part's document an address (or its path) asks for: its last segment `part-N`
+pub fn part_document(address: &str) -> Option<usize> {
+    let path = address.split(['?', '#']).next().unwrap_or(address);
+    path.rsplit('/').next()?.strip_prefix(PART_DOCUMENT)?.parse().ok()
 }
 
 /// The script the app runs in the page (page scripts are off; an app's script still runs) after it loaded, after
 /// the pictures of a part loaded and when the window's width changed: each frame as tall as its document
+/// The body's height with its margins, not the document's scroll height (never less than the frame's own height), so a
+/// frame shrinks too when its part needs less room.
 pub const MEASURE_SCRIPT: &str = "for(const f of document.querySelectorAll('iframe.pe-d')){const d=f.contentDocument;\
-if(d&&d.documentElement){f.style.height=Math.max(d.documentElement.scrollHeight,d.body?d.body.scrollHeight:0)+'px'}}";
+const b=d&&d.body;if(!b)continue;const s=d.defaultView.getComputedStyle(b);\
+const h=Math.ceil(b.getBoundingClientRect().height+parseFloat(s.marginTop)+parseFloat(s.marginBottom))+'px';\
+if(f.style.height!==h)f.style.height=h}";
 
 /// A text as the value of an attribute
 fn attribute(text: &str) -> String {
@@ -79,19 +94,18 @@ pub fn secure_page(parts: &[SecurePart], remote_images: bool) -> String {
         body.push_str(&format!(
             "<section class=\"pe-p pe-{tone}\"><a class=\"pe-l\" href=\"{PART_LINK}{index}\">{label}</a>"
         ));
-        if let Some(document) = part.document {
+        if part.shown {
             body.push_str(&format!(
-                "<iframe class=\"pe-d\" sandbox=\"allow-same-origin\" title=\"{}\" srcdoc=\"{}\"></iframe>",
+                "<iframe class=\"pe-d\" sandbox=\"allow-same-origin\" title=\"{}\" src=\"{PART_DOCUMENT}{index}\"></iframe>",
                 attribute(part.label),
-                attribute(document)
             ));
         }
         body.push_str("</section>");
     }
     format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
-         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src {images}; \
-         style-src 'unsafe-inline'; font-src data:\">\
+         <meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; frame-src 'self'; \
+         img-src {images}; style-src 'unsafe-inline'; font-src data:\">\
          <meta name=\"color-scheme\" content=\"light dark\">\
          <style>\
          html{{background:Canvas}}body{{margin:6px 8px;font:10pt Arial,sans-serif}}\
@@ -120,32 +134,41 @@ mod tests {
 
     #[test]
     fn labels_are_ours_and_parts_are_documents_of_their_own() {
-        let document = "<!doctype html><html><body><p class=\"x\">Hi \"there\" &amp; you</p></body></html>";
         let page = secure_page(
             &[
                 SecurePart {
                     tone: PartTone::Verified,
                     label: "Signed by Alice <a@x.org>",
-                    document: Some(document),
+                    shown: true,
                 },
                 SecurePart {
                     tone: PartTone::Warning,
                     label: "Not shown",
-                    document: None,
+                    shown: false,
                 },
             ],
             false,
         );
-        // the label escaped as text, the part only inside its srcdoc attribute, nothing of it as markup of the page
+        // the label escaped as text, the part a document of its own at its address, nothing of it in the page
         assert!(page.contains("Signed by Alice &lt;a@x.org&gt;"));
         assert!(page.contains("sandbox=\"allow-same-origin\""));
         assert!(!page.contains("allow-scripts"));
-        assert!(!page.contains("<p class=\"x\">"), "a part's markup is never the page's");
-        assert!(page.contains("srcdoc=\"&lt;!doctype html&gt;"));
-        assert!(page.contains("&quot;there&quot; &amp;amp; you"));
+        assert!(page.contains("src=\"part-0\""));
+        assert!(page.contains("frame-src 'self'"));
         assert_eq!(page.matches("<iframe").count(), 1);
         assert!(page.contains(&format!("href=\"{PART_LINK}1\"")));
         assert!(page.contains("img-src data:;"));
+    }
+
+    #[test]
+    fn part_documents() {
+        assert_eq!(part_document("inboxclassic://preview/7/part-2"), Some(2));
+        assert_eq!(
+            part_document("https://preview.inboxclassic.invalid/7/part-0?x"),
+            Some(0)
+        );
+        assert_eq!(part_document("inboxclassic://preview/7/"), None);
+        assert_eq!(part_document("part-x"), None);
     }
 
     #[test]

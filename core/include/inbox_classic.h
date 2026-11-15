@@ -894,6 +894,10 @@ typedef struct PeMessageInfo {
   const char *protection_text;
   bool protection_encrypted;
   const char *protection_details;
+  // The parts of such a message: the page's frames load `part-N` beside the page's own address (served from
+  // memory as the page is; `pe_part_document` says which part an address asks for), whose document
+  // `pe_message_view_part` gives
+  size_t part_count;
 } PeMessageInfo;
 
 typedef struct PeAttachment {
@@ -2272,6 +2276,20 @@ const struct PeMessageInfo *pe_message_view_info(const struct PeMessageView *vie
 // `view` must be NULL or live.
 const struct PeAttachment *pe_message_view_attachment(const struct PeMessageView *view,
                                                       size_t index);
+
+// The document of part `index` of a signed or encrypted message, owned by the view; NULL past the end. Empty for a
+// part with nothing to show (its frame is not in the page).
+//
+// # Safety
+// `view` must be NULL or live.
+const char *pe_message_view_part(const struct PeMessageView *view,
+                                 size_t index);
+
+// Which part's document an address the page asks for is (`part-N` as its last segment), -1 for none
+//
+// # Safety
+// `address` must be NULL or a NUL-terminated string.
+int64_t pe_part_document(const char *address);
 
 // # Safety
 // `view` must be NULL or a view that was not freed yet.

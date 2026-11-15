@@ -27,6 +27,15 @@ fn core(dir: &pe_testkit::TempDir) -> Core {
     core
 }
 
+/// All that is shown of a view: its page and every part's document
+fn shown(view: &pe_core::MessageView) -> String {
+    let mut all = view.document.clone();
+    for document in &view.part_documents {
+        all.push_str(document);
+    }
+    all
+}
+
 fn view(core: &Core, name: &str) -> pe_core::MessageView {
     core.file_view(&fixtures().join(name), false).unwrap()
 }
@@ -48,7 +57,7 @@ fn each_case_reads_as_the_ui_tests_expect() {
     let (tone, text, view) = bar("secure-encrypted.eml");
     assert_eq!(tone, Tone::Good);
     assert!(text.starts_with("Encrypted. Signed by alice@example.org"), "{text}");
-    assert!(view.document.contains("old mill"));
+    assert!(shown(&view).contains("old mill"));
     assert!(view.protection.as_ref().unwrap().encrypted);
     let (tone, text, view) = bar("secure-mixed.eml");
     assert_eq!(tone, Tone::Neutral);
@@ -74,7 +83,7 @@ fn each_case_reads_as_the_ui_tests_expect() {
     let (tone, text, view) = bar("secure-inline.eml");
     assert!(text.contains("3 parts"), "{text}");
     assert_eq!(tone, Tone::Neutral);
-    assert!(view.document.contains("4711"));
+    assert!(shown(&view).contains("4711"));
     let (_, text, view) = bar("secure-pictures.eml");
     assert!(text.starts_with("Encrypted."), "{text}");
     assert!(
@@ -83,5 +92,5 @@ fn each_case_reads_as_the_ui_tests_expect() {
     );
     assert!(view.sender.is_none(), "no \"always\" for encrypted mail");
     let (_, _, view) = bar("secure-long.eml");
-    assert!(view.document.contains("Line 40 of the long part"));
+    assert!(shown(&view).contains("Line 40 of the long part"));
 }

@@ -66,6 +66,9 @@ pub struct MessageView {
     pub protection: Option<ProtectionView>,
     /// What the message says for Autocrypt, learned when the window takes the view ([`crate::Core::learn_autocrypt`])
     pub autocrypt: Option<crate::autocrypt::Seen>,
+    /// The document of each part of such a message, in order, served at `part-N` beside the page
+    /// ([`pe_html::part_document`]); empty for a part with nothing to show
+    pub part_documents: Vec<String>,
 }
 
 /// What a signed or encrypted message is, for the bar over it (which mail can not draw) and its Details
@@ -272,6 +275,7 @@ pub(crate) fn build_unless(
         otp_code: code.map(|code| code.code),
         protection: None,
         autocrypt: crate::autocrypt::seen(&message, trust.pictures.junk, crate::worker::unix_now()),
+        part_documents: Vec::new(),
     })
 }
 
@@ -342,7 +346,7 @@ fn protected_view(
         .map(|(part, document)| pe_html::SecurePart {
             tone: part.tone,
             label: &part.label,
-            document: document.as_deref(),
+            shown: document.is_some(),
         })
         .collect();
     let document = pe_html::secure_page(&page_parts, clicked || allow_remote_images);
@@ -389,6 +393,7 @@ fn protected_view(
         attachments,
         unsubscribe: crate::unsubscribe::of(&message.headers, trust.domains),
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
+        part_documents: documents.into_iter().map(Option::unwrap_or_default).collect(),
         protection: Some(ProtectionView {
             tone,
             text,
