@@ -95,6 +95,8 @@ mac-files =
         [one] { $count } archivo
        *[other] { $count } archivos
     }
+# review: new
+mac-attachment-not-opened = No se puede abrir «{ $name }»
 
 ## Accounts
 

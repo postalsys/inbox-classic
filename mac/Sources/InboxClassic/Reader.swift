@@ -1,5 +1,5 @@
 // The reading pane: the header of the message (From, Date, To, Cc, Subject) with the brand's logo at its left and the
-// attachments and Unsubscribe at its right; under it the security bar of a signed or encrypted message
+// attachments and Unsubscribe at its right; under it the strip of its files to open (Attachments.swift), the security bar of a signed or encrypted message
 // (SecurityBar.swift) and the bar that offers the pictures from the internet; then the
 // message itself, with the cards of the core above it (a calendar event, a bounce, a one-time code). Every string shown is the core's, decoded and checked there.
 // It asks the core for the message it shows and hears its events, so the main window's pane and a message's own window
@@ -51,6 +51,8 @@ final class Reader: NSObject {
     private let headerBox = NSView()
     private let headerLine = NSBox()
     private let attachments = NSPopUpButton(frame: .zero, pullsDown: true)
+    /// the files under the header, to open
+    let strip = AttachmentStrip()
     private let unsubscribe = NSButton(title: Text.uiUnsubscribe.text, target: nil, action: nil)
     /// over a signed or encrypted message: its state, and Details
     let security = SecurityBar()
@@ -132,6 +134,8 @@ final class Reader: NSObject {
         preview.links = { [weak self] link in self?.followLink(link) ?? false }
         pictures.isHidden = true
         security.details = { [weak self] in self?.showSecurityDetails() }
+        strip.opened = { [weak self] index in self?.openAttachment(index) }
+        strip.menuOf = { [weak self] index in self?.fileMenu(index) ?? NSMenu() }
         view.security = security
 
         view.orientation = .vertical
@@ -142,7 +146,7 @@ final class Reader: NSObject {
             guard let self else { return }
             view.window?.makeFirstResponder(preview.view)
         }
-        for part in [headerBox, headerLine, security, retry, pictures, findBar, preview.view] as [NSView] {
+        for part in [headerBox, strip, headerLine, security, retry, pictures, findBar, preview.view] as [NSView] {
             view.addArrangedSubview(part)
             part.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
         }
@@ -179,6 +183,8 @@ final class Reader: NSObject {
         header.stringValue = ""
         // no empty band over the pane's "no message" or several messages' page; a message about to load keeps it
         showHeader(loading)
+        // the files of the message before are never offered for the next one
+        strip.clear()
         // the bars of the message before stay while the next one loads, and go when it is there without them
         if !loading {
             attachments.isHidden = true
@@ -229,6 +235,7 @@ final class Reader: NSObject {
     func showFailed(kind: PeFailureKind, reason: String) {
         downloadingTimer?.invalidate()
         attachments.isHidden = true
+        strip.clear()
         pictures.isHidden = true
         picturesOffered = false
         security.hide()
@@ -244,6 +251,7 @@ final class Reader: NSObject {
         header.stringValue = problem
         security.hide()
         attachments.isHidden = true
+        strip.clear()
         pictures.isHidden = true
         picturesOffered = false
     }
@@ -259,6 +267,7 @@ final class Reader: NSObject {
         // the title item of a pull-down button: the paper clip and how many files there are
         attachments.addItem(withTitle: Text.macFiles.text(["count": files]))
         attachments.item(at: 0)?.image = Icons.list("attach")
+        strip.show(view.attachments)
         // a mailing list that says how to leave it
         unsubscribe.isHidden = info.unsubscribe == PE_UNSUBSCRIBE_NONE || file != nil
         // asked for, or loaded by themselves (Settings, a trusted sender the provider confirmed): the core says
@@ -668,26 +677,96 @@ final class Reader: NSObject {
     }
 
     @objc private func saveAttachment(_ sender: NSMenuItem) {
+        saveAttachment(at: sender.tag)
+    }
+
+    private func saveAttachment(at index: Int) {
         var length = 0
         var name: UnsafeMutablePointer<CChar>?
         // the core reads it from the store, or from the message file shown
         let bytes = file.map { path in
-            path.withCString { pe_file_attachment_data(core.handle, $0, sender.tag, &length, &name) }
-        } ?? pe_attachment_data(core.handle, folder, uid, sender.tag, &length, &name)
+            path.withCString { pe_file_attachment_data(core.handle, $0, index, &length, &name) }
+        } ?? pe_attachment_data(core.handle, folder, uid, index, &length, &name)
         let data = takenBytes(bytes, length)
         let safeName = taken(name) ?? "attachment"
         guard let data else {
-            // a large message shows its text before the rest of it is here
-            if file == nil && pe_message_downloading(core.handle, folder, uid) {
-                inform(Text.uiAttachmentDownloading.text)
-            } else {
-                inform(Text.uiAttachmentNotRead.text, style: .error)
-            }
+            notHere()
             return
         }
         if let url = saveFilePanel(name: safeName), !writeDownloaded(data, to: url) {
             inform(Text.uiAttachmentNotSaved.text, style: .error)
         }
+    }
+
+    /// a file of the message could not be read: a large message shows its text before the rest of it is here
+    private func notHere() {
+        if file == nil && pe_message_downloading(core.handle, folder, uid) {
+            inform(Text.uiAttachmentDownloading.text)
+        } else {
+            inform(Text.uiAttachmentNotRead.text, style: .error)
+        }
+    }
+
+    /// attachment `index` opened with the program the system has for it: the core writes it into a private folder of
+    /// the user's, or refuses a file that can run programs and says why; an encrypted message's file comes with a note
+    /// to show first (once). The file is marked as from the internet, as a download is.
+    func openAttachment(_ index: Int) {
+        guard showsMessage else { return }
+        var note: UnsafeMutablePointer<CChar>?
+        var error: UnsafeMutablePointer<CChar>?
+        let written = file.map { path in
+            path.withCString { pe_file_attachment_open(core.handle, $0, index, &note, &error) }
+        } ?? pe_attachment_open(core.handle, folder, uid, index, &note, &error)
+        let path = taken(written)
+        let said = taken(note)
+        if let refused = taken(error) {
+            // the file named, as a Mac alert's title, and the core's reason under it
+            let name = messageView?.attachment(index)?.name ?? ""
+            inform(Text.macAttachmentNotOpened.text(["name": name]) + "\n\n" + refused, style: .warning)
+            return
+        }
+        guard let path else {
+            notHere()
+            return
+        }
+        if let said {
+            inform(Text.uiAttachmentNoteTitle.text + "\n\n" + said)
+        }
+        let url = URL(fileURLWithPath: path)
+        markFromInternet(url)
+        if let test = TestHooks.openFile {
+            test(url)
+            return
+        }
+        NSWorkspace.shared.open(url, configuration: NSWorkspace.OpenConfiguration()) { _, failed in
+            guard let failed else { return }
+            onMain { inform(failed.localizedDescription, style: .warning) }
+        }
+    }
+
+    /// the menu of a file of the strip: Open (off for a file that can run programs), Save As, Save All
+    func fileMenu(_ index: Int) -> NSMenu {
+        let menu = NSMenu()
+        menu.autoenablesItems = false
+        guard let attachment = messageView?.attachment(index) else { return menu }
+        let ellipsis = { (text: Text) in text.text.replacingOccurrences(of: "...", with: "\u{2026}") }
+        let open = menu.addItem(withTitle: Text.uiAttachmentOpen.text, action: #selector(openChosen(_:)), keyEquivalent: "")
+        open.isEnabled = attachment.canOpen
+        if !attachment.canOpen {
+            open.toolTip = Text.uiAttachmentProgramTip.text
+        }
+        menu.addItem(.separator())
+        menu.addItem(withTitle: ellipsis(.uiAttachmentSaveAs), action: #selector(saveAttachment(_:)), keyEquivalent: "")
+        menu.addItem(withTitle: ellipsis(.uiAttachmentSaveAll), action: #selector(saveAllAttachments), keyEquivalent: "")
+        for item in menu.items where !item.isSeparatorItem {
+            item.target = self
+            item.tag = index
+        }
+        return menu
+    }
+
+    @objc private func openChosen(_ sender: NSMenuItem) {
+        openAttachment(sender.tag)
     }
 
     @objc private func saveAllAttachments() {

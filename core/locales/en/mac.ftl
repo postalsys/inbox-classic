@@ -100,6 +100,7 @@ mac-files =
         [one] { $count } file
        *[other] { $count } files
     }
+mac-attachment-not-opened = Can’t open “{ $name }”
 
 ## Accounts
 

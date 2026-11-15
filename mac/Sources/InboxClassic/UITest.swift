@@ -546,6 +546,7 @@ final class UITest {
         onMain { pe_set_send_delay_index(self.main.core.handle, 0) }
         try await addAccount()
         try await reading()
+        try await openingAttachments()
         try await writing()
         try await notDownloaded()
         try await largeMessage()
@@ -556,6 +557,7 @@ final class UITest {
         try await messageRules()
         try await encryptionKeys()
         try await secureMail()
+        try await encryptedAttachment()
         try await outboxAndDrafts()
         try await draftsSavedAutomatically()
         try await textSize()

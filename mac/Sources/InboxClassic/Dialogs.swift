@@ -429,6 +429,8 @@ enum TestHooks {
     /// a file to print to in place of the Print panel, and whether printing ended well
     static var printTo: URL?
     static var printed: ((Bool) -> Void)?
+    /// a file the system would open with its program (an attachment), handed to the test instead: nothing launches
+    static var openFile: ((URL) -> Void)?
 }
 
 /// Where to save a file, starting from the safe name the core made, in Downloads; nil when cancelled
