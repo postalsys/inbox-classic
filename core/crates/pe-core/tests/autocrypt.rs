@@ -159,3 +159,27 @@ fn gossip_inside_an_encrypted_message() {
     w.open(&plain);
     assert!(w.core.pgp_peer("carol@example.org").unwrap().in_use.is_none());
 }
+
+/// A key in a header that also names someone else (a user id anyone can add to their own key) is learned for the
+/// sender alone: the other address gets no key from it
+#[test]
+fn a_header_key_plants_nothing_for_other_addresses() {
+    let w = world("autocrypt-extra-ids");
+    let mallory = pe_pgp::generate(
+        "Mallory",
+        &["mallory@evil.example".into(), "cfo@victim.example".into()],
+        now() - 600,
+    )
+    .unwrap();
+    let all = pe_pgp::autocrypt::build("mallory@evil.example", &mallory.cert().to_bytes(), false).replace(' ', "\r\n ");
+    w.open(&message(
+        "mallory@evil.example",
+        "Sun, 15 Nov 2026 10:00:00 +0000",
+        &all,
+    ));
+    assert_eq!(
+        w.core.pgp_peer("mallory@evil.example").unwrap().in_use.as_deref(),
+        Some(mallory.fingerprint().as_str())
+    );
+    assert!(w.core.pgp_peer("cfo@victim.example").unwrap().in_use.is_none());
+}

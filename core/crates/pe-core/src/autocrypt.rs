@@ -138,11 +138,13 @@ impl Core {
         if peer.autocrypt_seen.is_some_and(|last| seen.date <= last) {
             return Ok(());
         }
+        // only for the address it was checked for: other user ids a stranger put on the key change nobody's key
         let cert = seen
             .keydata
             .as_deref()
             .and_then(|bytes| pe_pgp::read_certs(bytes).ok())
-            .and_then(|certs| certs.into_iter().find(|cert| cert.has_address(&seen.address, now)));
+            .and_then(|certs| certs.into_iter().find(|cert| cert.has_address(&seen.address, now)))
+            .and_then(|cert| cert.minimal(&seen.address, now));
         if let Some(cert) = &cert {
             self.book(|book| book.learn(cert, KeySource::Autocrypt))?;
         }
@@ -173,7 +175,7 @@ impl Core {
             else {
                 continue;
             };
-            if cert.has_address(address, now) {
+            if let Some(cert) = cert.minimal(address, now) {
                 let learned = self.book(|book| book.learn(&cert, KeySource::Autocrypt))?;
                 debug_assert!(learned.iter().all(|(_, what)| *what != Learned::Pending));
             }
