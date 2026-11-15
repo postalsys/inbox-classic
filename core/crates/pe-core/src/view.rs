@@ -13,12 +13,16 @@ pub struct AttachmentView {
     pub safe_filename: String,
     pub mime_type: String,
     pub size: u64,
+    /// What kind of file it is: its icon in the strip, and whether it may be opened (not a file that runs code)
+    pub kind: crate::opening::FileKind,
 }
 
 impl AttachmentView {
     fn of(attachment: &Attachment) -> AttachmentView {
+        let safe_filename = attachment.safe_filename();
         AttachmentView {
-            safe_filename: attachment.safe_filename(),
+            kind: crate::opening::file_kind(&safe_filename, &attachment.mime_type),
+            safe_filename,
             filename: attachment.display_filename(),
             mime_type: attachment.mime_type.clone(),
             size: attachment.content.len() as u64,
@@ -699,7 +703,8 @@ mod tests {
                 filename: "../../report.pdf".into(),
                 safe_filename: "report.pdf".into(),
                 mime_type: "application/pdf".into(),
-                size: 4
+                size: 4,
+                kind: crate::opening::FileKind::Pdf,
             }]
         );
         assert_eq!(attachment(MESSAGE, 0), Some(("report.pdf".into(), b"%PDF".to_vec())));

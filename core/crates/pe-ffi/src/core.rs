@@ -1934,6 +1934,12 @@ pub struct PeAttachment {
     pub safe_filename: *const c_char,
     pub mime_type: *const c_char,
     pub size: u64,
+    /// Its size in words ("240 KB"), its icon's word (`image`, `pdf`, `document`, `spreadsheet`, `presentation`,
+    /// `archive`, `audio`, `video`, `calendar`, `contact`, `key`, `text`, `mail`, `program`, `other`), and whether it
+    /// may be opened from the message (`pe_attachment_open`): never a file that can run code, which can be saved
+    pub size_text: *const c_char,
+    pub kind: *const c_char,
+    pub can_open: bool,
 }
 
 /// What the calendar part of a message asks
@@ -2094,6 +2100,9 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
             safe_filename: strings.add(&a.safe_filename),
             mime_type: strings.add(&a.mime_type),
             size: a.size,
+            size_text: strings.add(&pe_core::format_size(a.size)),
+            kind: strings.add(a.kind.word()),
+            can_open: a.kind.can_open(),
         })
         .collect();
     let invitation = view.invitation.as_ref().map(|event| {
@@ -2476,6 +2485,101 @@ pub unsafe extern "C" fn pe_save_attachments(
         }
     }
     true
+}
+
+/// What opening an attachment gave back: the path for the app to open, or why not
+fn opened(
+    found: pe_core::Result<Option<pe_core::opening::Opened>>,
+    note: *mut *mut c_char,
+    error: *mut *mut c_char,
+) -> *mut c_char {
+    match found {
+        Ok(Some(opened)) => {
+            if let (false, Some(text)) = (note.is_null(), opened.note) {
+                // SAFETY: the caller gave NULL or a valid pointer
+                unsafe { *note = into_c_string(text) };
+            }
+            into_c_string(opened.path.to_string_lossy().into_owned())
+        }
+        Ok(None) => null_mut(),
+        Err(why) => {
+            if !error.is_null() {
+                // SAFETY: the caller gave NULL or a valid pointer
+                unsafe { *error = into_c_string(why.to_string()) };
+            }
+            null_mut()
+        }
+    }
+}
+
+/// Writes attachment `index` of a message into a private folder for the app to open with the system's program; its
+/// path (free with `pe_string_free`). NULL when it is not here, or refused (a file that can run code is never opened
+/// from a message: `error` then says why). `note`, when set, is to be shown before opening (once: an encrypted
+/// message's file is stored decrypted while it is open). `note` and `error` may be NULL; free what they get.
+///
+/// # Safety
+/// `core` must be a live handle; `note` and `error` NULL or valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_attachment_open(
+    core: *const PeCore,
+    folder: i64,
+    uid: u64,
+    index: usize,
+    note: *mut *mut c_char,
+    error: *mut *mut c_char,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            opened(core.open_attachment(folder, uid, index), note, error)
+        })
+    }
+}
+
+/// [`pe_attachment_open`] of a message file a window shows (`pe_file_view`), its path UTF-8
+///
+/// # Safety
+/// `core` must be a live handle, `path` NULL or a NUL-terminated string; `note` and `error` NULL or valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_file_attachment_open(
+    core: *const PeCore,
+    path: *const c_char,
+    index: usize,
+    note: *mut *mut c_char,
+    error: *mut *mut c_char,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let Some(path) = (unsafe { arg(path) }).map(str::to_string) else {
+        return null_mut();
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            opened(
+                core.file_open_attachment(std::path::Path::new(&path), index),
+                note,
+                error,
+            )
+        })
+    }
+}
+
+/// A new private folder of the user's for files the system opens (a calendar invitation), cleaned at start once a
+/// day old; NULL on failure. Free with `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `name` a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_private_folder(core: *const PeCore, name: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let name = unsafe { arg(name) }.unwrap_or("files").to_string();
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.private_folder(&name)
+                .map_or(null_mut(), |dir| into_c_string(dir.to_string_lossy().into_owned()))
+        })
+    }
 }
 
 /// The content of attachment `index` of a message, NULL on failure. `len` gets its length and

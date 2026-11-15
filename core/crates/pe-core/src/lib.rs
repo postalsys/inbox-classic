@@ -24,6 +24,7 @@ pub mod layout;
 mod list_view;
 mod lookup;
 pub mod mailto;
+pub mod opening;
 pub mod otp;
 pub mod pictures;
 pub mod protect;

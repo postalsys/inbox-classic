@@ -1054,6 +1054,12 @@ typedef struct PeAttachment {
   const char *safe_filename;
   const char *mime_type;
   uint64_t size;
+  // Its size in words ("240 KB"), its icon's word (`image`, `pdf`, `document`, `spreadsheet`, `presentation`,
+  // `archive`, `audio`, `video`, `calendar`, `contact`, `key`, `text`, `mail`, `program`, `other`), and whether it
+  // may be opened from the message (`pe_attachment_open`): never a file that can run code, which can be saved
+  const char *size_text;
+  const char *kind;
+  bool can_open;
 } PeAttachment;
 
 // A choice of the From list: an account, or one of its other addresses
@@ -2517,6 +2523,38 @@ bool pe_save_attachments(const struct PeCore *core,
                          const char *dir,
                          size_t *saved,
                          size_t *total);
+
+// Writes attachment `index` of a message into a private folder for the app to open with the system's program; its
+// path (free with `pe_string_free`). NULL when it is not here, or refused (a file that can run code is never opened
+// from a message: `error` then says why). `note`, when set, is to be shown before opening (once: an encrypted
+// message's file is stored decrypted while it is open). `note` and `error` may be NULL; free what they get.
+//
+// # Safety
+// `core` must be a live handle; `note` and `error` NULL or valid pointers.
+char *pe_attachment_open(const struct PeCore *core,
+                         int64_t folder,
+                         uint64_t uid,
+                         size_t index,
+                         char **note,
+                         char **error);
+
+// [`pe_attachment_open`] of a message file a window shows (`pe_file_view`), its path UTF-8
+//
+// # Safety
+// `core` must be a live handle, `path` NULL or a NUL-terminated string; `note` and `error` NULL or valid pointers.
+char *pe_file_attachment_open(const struct PeCore *core,
+                              const char *path,
+                              size_t index,
+                              char **note,
+                              char **error);
+
+// A new private folder of the user's for files the system opens (a calendar invitation), cleaned at start once a
+// day old; NULL on failure. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle, `name` a NUL-terminated string.
+char *pe_private_folder(const struct PeCore *core,
+                        const char *name);
 
 // The content of attachment `index` of a message, NULL on failure. `len` gets its length and
 // `filename` the name to save it under (free it with `pe_string_free`). Free the bytes with

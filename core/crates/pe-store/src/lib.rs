@@ -112,6 +112,15 @@ impl Store {
     }
 
     /// A setting that is on or off, `fallback` when it was never set
+    /// The note that an encrypted message's attachment is stored decrypted while it is open was shown
+    pub fn decrypted_open_noted(&self) -> Result<bool> {
+        self.bool_setting("attachments.decrypted_noted", false)
+    }
+
+    pub fn set_decrypted_open_noted(&self) -> Result<()> {
+        self.set_bool_setting("attachments.decrypted_noted", true)
+    }
+
     pub(crate) fn bool_setting(&self, key: &str, fallback: bool) -> Result<bool> {
         Ok(self.text_setting(key)?.map_or(fallback, |value| value == "1"))
     }
