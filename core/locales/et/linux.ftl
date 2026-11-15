@@ -83,6 +83,11 @@ gtk-default-app-failed = Inbox Classicut ei õnnestunud vaikimisi meilirakenduse
 
 gtk-reader-date = Kuupäev:
 gtk-reader-files = Kirja manused
+# review: new
+gtk-files = { $count ->
+    [one] { $count } fail
+   *[other] { $count } faili
+}
 gtk-pictures-blocked = Mõned pildid blokeeriti, et saatja ei saaks teie arvutit tuvastada.
 gtk-download-pictures = Laadi pildid alla
 gtk-save-attachments-menu = Salvesta manused...

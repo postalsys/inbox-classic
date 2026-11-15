@@ -54,6 +54,8 @@ mod secure;
 
 /// Step 45a: settings and accounts to another computer
 mod setup;
+/// Step 8a: opening attachments (after 19i, for the account's key)
+mod attach;
 
 const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
@@ -985,6 +987,7 @@ async fn scenario(d: Rc<Driver>) {
     rules::message_rules(&d).await;
     keys::encryption_keys(&d).await;
     secure::signed_and_encrypted(&d).await;
+    attach::opening_attachments(&d).await;
     text_size(&d).await;
     send_receive(&d).await;
     finding(&d).await;
