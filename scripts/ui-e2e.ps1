@@ -1654,7 +1654,7 @@ public static class Dragger {
             [void][Native.Win]::SendMessage($moveTo, $CB_SETCURSEL, [IntPtr]$archiveIndex, [IntPtr]::Zero)
             Tick $editor $IDC_RULE_MARK_READ
             # the count follows the query a moment after it changed: the newsletter in the Inbox
-            $count = WaitFor { $t = GetText $editor $IDC_RULE_COUNT; if ($t -match 'in the Inbox match') { $t } } 5
+            $count = WaitFor { $t = GetText $editor $IDC_RULE_COUNT; if ($t -match 'Inbox messages? currentl') { $t } } 5
             Check ($null -ne $count) "the editor says how many messages in the Inbox match now ($(GetText $editor $IDC_RULE_COUNT))"
             Shot $editor 'rules-2-editor'
             Click $editor 1
@@ -1689,7 +1689,7 @@ public static class Dragger {
             Tick $editor $IDC_RULE_FLAG
             Click $editor 1
             $refused = WaitWindow '#32770' 'Message Rule' 10
-            Check ($refused -and (Statics $refused) -match 'folder or a date') "OK refuses a query with a folder, and says why ($(if ($refused) { Statics $refused }))"
+            Check ($refused -and (Statics $refused) -match 'folder or (a )?date') "OK refuses a query with a folder, and says why ($(if ($refused) { Statics $refused }))"
             if ($refused) {
                 Shot $refused 'rules-6-bad-query'
                 Click $refused 2
