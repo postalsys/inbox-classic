@@ -18,8 +18,11 @@ fn now() -> i64 {
         .as_secs() as i64
 }
 
+/// What the server answers each path with: a status and a body
+type Routes = Arc<Mutex<HashMap<String, (u16, Vec<u8>)>>>;
+
 /// A plain HTTP server on a thread: each path (without its query) answered with a status and a body
-fn serve(routes: Arc<Mutex<HashMap<String, (u16, Vec<u8>)>>>, asked: Arc<Mutex<Vec<String>>>) -> String {
+fn serve(routes: Routes, asked: Arc<Mutex<Vec<String>>>) -> String {
     let listener = TcpListener::bind("127.0.0.1:0").unwrap();
     let base = format!("http://{}", listener.local_addr().unwrap());
     std::thread::spawn(move || {
@@ -58,7 +61,7 @@ fn serve(routes: Arc<Mutex<HashMap<String, (u16, Vec<u8>)>>>, asked: Arc<Mutex<V
 struct World {
     core: Core,
     events: Receiver<Event>,
-    routes: Arc<Mutex<HashMap<String, (u16, Vec<u8>)>>>,
+    routes: Routes,
     asked: Arc<Mutex<Vec<String>>>,
     _dir: pe_testkit::TempDir,
 }
