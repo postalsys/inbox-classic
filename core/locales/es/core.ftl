@@ -642,6 +642,7 @@ pgp-error-missing-keys = { $count ->
 pgp-error-encrypted-quote = Este mensaje cita o reenvía un mensaje cifrado, así que solo se puede enviar cifrado. Active Cifrar, o quite el texto citado.
 # review: new
 pgp-error-protect = No se pudo firmar ni cifrar el mensaje: { $reason }
+# review: new
 pgp-found-keys = Se encontró la clave de { $addresses }.
 # review: new
 pgp-found-none = No se encontró ninguna clave para { $addresses }. Pídale que le envíe su clave pública.

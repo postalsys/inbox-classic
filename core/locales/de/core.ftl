@@ -631,6 +631,7 @@ pgp-error-missing-keys = { $count ->
 pgp-error-encrypted-quote = Diese Nachricht zitiert oder leitet eine verschlüsselte Nachricht weiter und kann daher nur verschlüsselt gesendet werden. Schalten Sie Verschlüsseln ein, oder entfernen Sie den zitierten Text.
 # review: new
 pgp-error-protect = Die Nachricht konnte nicht signiert oder verschlüsselt werden: { $reason }
+# review: new
 pgp-found-keys = Der Schlüssel von { $addresses } wurde gefunden.
 # review: new
 pgp-found-none = Für { $addresses } wurde kein Schlüssel gefunden. Bitten Sie darum, Ihnen den öffentlichen Schlüssel zu senden.

@@ -658,6 +658,7 @@ pgp-error-missing-keys = { $count ->
 pgp-error-encrypted-quote = Ce message cite ou transfère un message chiffré : il ne peut être envoyé que chiffré. Activez Chiffrer, ou supprimez le texte cité.
 # review: new
 pgp-error-protect = Le message n’a pas pu être signé ou chiffré : { $reason }
+# review: new
 pgp-found-keys = La clé de { $addresses } a été trouvée.
 # review: new
 pgp-found-none = Aucune clé n'a été trouvée pour { $addresses }. Demandez-lui de vous envoyer sa clé publique.

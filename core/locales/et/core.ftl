@@ -618,6 +618,7 @@ pgp-error-missing-keys = { $count ->
 pgp-error-encrypted-quote = See kiri tsiteerib või edastab krüpteeritud kirja, seega saab selle saata ainult krüpteerituna. Lülita krüpteerimine sisse või eemalda tsiteeritud tekst.
 # review: new
 pgp-error-protect = Kirja ei saanud allkirjastada ega krüptida: { $reason }
+# review: new
 pgp-found-keys = Leiti aadressi { $addresses } võti.
 # review: new
 pgp-found-none = Aadressi { $addresses } jaoks võtit ei leitud. Palu neil saata sulle oma avalik võti.
