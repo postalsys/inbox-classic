@@ -275,7 +275,7 @@ fn target_row(target: &TargetRow, current: Option<i64>) -> gtk::ListBoxRow {
 }
 
 /// The icon of a folder by what the core says it is for (`folder_kind`)
-fn kind_icon(kind: &str) -> &'static str {
+pub(crate) fn kind_icon(kind: &str) -> &'static str {
     match kind {
         "inbox" => "ic-mail-inbox-symbolic",
         "sent" => "ic-send-symbolic",
@@ -283,6 +283,8 @@ fn kind_icon(kind: &str) -> &'static str {
         "deleted" => "ic-delete-symbolic",
         "junk" => "ic-mail-prohibited-symbolic",
         "archive" => "ic-archive-symbolic",
+        "flagged" => "ic-flag-symbolic",
+        "all" => "ic-mail-multiple-symbolic",
         _ => "ic-folder-symbolic",
     }
 }
