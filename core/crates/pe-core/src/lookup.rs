@@ -57,10 +57,19 @@ impl Core {
     pub fn pgp_find(&self, addresses: &[String]) -> Result<Option<u64>> {
         let now = unix_now();
         let store = self.store();
+        // the user's own addresses are never asked about: their keys are their own
+        let mut own = std::collections::HashSet::new();
+        for account in store.accounts()? {
+            own.extend(
+                crate::own_addresses(&store, account.id)?
+                    .iter()
+                    .map(|a| pe_store::normal_address(a)),
+            );
+        }
         let mut wanted = Vec::new();
         for address in addresses {
             let address = pe_store::normal_address(address);
-            if address.is_empty() || wanted.contains(&address) {
+            if address.is_empty() || wanted.contains(&address) || own.contains(&address) {
                 continue;
             }
             let has_key = store.pgp_peer(&address)?.and_then(|peer| peer.fingerprint).is_some();
@@ -80,8 +89,12 @@ impl Core {
     }
 
     /// Looks up the key with `handle` (a fingerprint or key id) on keys.openpgp.org: for a signature by a key not
-    /// known here. Asking by fingerprint tells the server no address. [`Event::KeysFound`] follows.
+    /// known here. Asking by fingerprint tells the server no address. [`Event::KeysFound`] follows. Refused while
+    /// the user turned the key server off.
     pub fn pgp_find_handle(&self, handle: &str) -> Result<u64> {
+        if !self.store().pgp_keyserver()? {
+            return Err(crate::Error::Unavailable(pe_i18n::tr(pe_i18n::Text::PgpKeyserverOff)));
+        }
         self.start_lookup(Wanted::Handle(handle.to_string()), true)
     }
 

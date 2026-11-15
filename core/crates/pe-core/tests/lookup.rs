@@ -146,6 +146,20 @@ fn found_used_and_a_miss_remembered() {
 }
 
 #[test]
+fn own_addresses_are_never_asked_about() {
+    let w = world("lookup-own");
+    let store = pe_store::Store::open(w._dir.path().join("store.db")).unwrap();
+    let settings = pe_store::AccountSettings {
+        email: "me@example.org".into(),
+        ..Default::default()
+    };
+    store.add_account(&settings).unwrap();
+    drop(store);
+    assert_eq!(w.core.pgp_find(&["Me@Example.org".into()]).unwrap(), None);
+    assert!(w.asked.lock().unwrap().is_empty());
+}
+
+#[test]
 fn the_key_server_turned_off() {
     let w = world("lookup-off");
     let bob = pe_pgp::generate("Bob", &["bob@example.org".into()], now() - 60).unwrap();
@@ -157,6 +171,9 @@ fn the_key_server_turned_off() {
     assert!(!w.core.pgp_keyserver().unwrap());
     let request = w.core.pgp_find(&["bob@example.org".into()]).unwrap().unwrap();
     assert_eq!(w.result(request).addresses, [("bob@example.org".to_string(), false)]);
+    assert!(w.asked.lock().unwrap().iter().all(|path| !path.contains("/vks/")));
+    // nor by fingerprint, for a signature's unknown key
+    assert!(w.core.pgp_find_handle(&bob.fingerprint()).is_err());
     assert!(w.asked.lock().unwrap().iter().all(|path| !path.contains("/vks/")));
 }
 

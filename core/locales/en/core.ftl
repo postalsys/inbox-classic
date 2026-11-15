@@ -593,3 +593,4 @@ pgp-find-unavailable = Keys could not be looked up now: { $error }
 pgp-publish-pending = keys.openpgp.org sent a confirmation link to { $addresses }. Your key is published there once you click it.
 pgp-publish-done = Your key is published on keys.openpgp.org for { $addresses }.
 pgp-publish-failed = The key could not be published: { $error }
+pgp-keyserver-off = Looking up keys on keys.openpgp.org is turned off in Options.

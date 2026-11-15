@@ -644,3 +644,5 @@ pgp-publish-pending = keys.openpgp.org hat einen Bestätigungslink an { $address
 pgp-publish-done = Ihr Schlüssel ist auf keys.openpgp.org für { $addresses } veröffentlicht.
 # review: new
 pgp-publish-failed = Der Schlüssel konnte nicht veröffentlicht werden: { $error }
+# review: new
+pgp-keyserver-off = Die Suche nach Schlüsseln auf keys.openpgp.org ist in den Optionen ausgeschaltet.
