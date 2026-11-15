@@ -64,8 +64,9 @@ pub fn part_document(address: &str) -> Option<usize> {
 ///
 /// The root's own height, not the document's scroll height (never less than the frame's own height), so a frame
 /// shrinks too when its part needs less room; the root, not the body, as a child's margin can collapse out of the body.
+/// Never under 48 pixels: a part whose content is all out of the flow (fixed, pushed up) still shows what it draws.
 pub const MEASURE_SCRIPT: &str = "for(const f of document.querySelectorAll('iframe.pe-d')){const d=f.contentDocument;\
-const r=d&&d.documentElement;if(!r)continue;const h=Math.ceil(r.getBoundingClientRect().height)+'px';\
+const r=d&&d.documentElement;if(!r)continue;const h=Math.max(48,Math.ceil(r.getBoundingClientRect().height))+'px';\
 if(f.style.height!==h)f.style.height=h}";
 
 /// A text as the value of an attribute
