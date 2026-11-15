@@ -554,3 +554,9 @@ pgp-imported-pending = Aadressi { $addresses } jaoks on juba kasutusel teine võ
 pgp-error-needs-passphrase = Privaatvõtit kaitseb parool. Võtme importimiseks sisesta see.
 # review: new
 pgp-error-mismatch = Privaatvõti ei kuulu oma avaliku võtme juurde. See võib olla muudetud.
+# review: new
+pgp-file-name-public = { $who } avalik võti.asc
+# review: new
+pgp-file-name-private = { $who } privaatvõtme varukoopia.asc
+# review: new
+pgp-pending = Aadressi { $address } jaoks leiti { $date } teine võti.

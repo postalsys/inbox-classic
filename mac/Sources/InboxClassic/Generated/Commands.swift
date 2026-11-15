@@ -70,6 +70,7 @@ enum Command: Int, CaseIterable {
     case options = 137
     case addressBook = 147
     case messageRules = 170
+    case encryptionKeys = 172
     case createRuleFromMessage = 171
     case addSenderToBook = 148
     case importAddressBook = 149
@@ -145,6 +146,7 @@ enum Command: Int, CaseIterable {
         case .options: return "tools"
         case .addressBook: return "tools"
         case .messageRules: return "tools"
+        case .encryptionKeys: return "tools"
         case .createRuleFromMessage: return "message"
         case .addSenderToBook: return "tools"
         case .importAddressBook: return "file"
@@ -227,6 +229,7 @@ enum Command: Int, CaseIterable {
         case .options: return .cmdOptions
         case .addressBook: return .cmdAddressBook
         case .messageRules: return .cmdMessageRules
+        case .encryptionKeys: return .cmdEncryptionKeys
         case .createRuleFromMessage: return .cmdCreateRuleFromMessage
         case .addSenderToBook: return .cmdAddSenderToBook
         case .importAddressBook: return .cmdImportAddressBook
@@ -304,6 +307,7 @@ enum Command: Int, CaseIterable {
         case .options: return (",", [.command])
         case .addressBook: return ("b", [.command, .shift])
         case .messageRules: return nil
+        case .encryptionKeys: return nil
         case .createRuleFromMessage: return nil
         case .addSenderToBook: return nil
         case .importAddressBook: return nil
@@ -381,6 +385,7 @@ enum Command: Int, CaseIterable {
         case .options: return false
         case .addressBook: return false
         case .messageRules: return false
+        case .encryptionKeys: return false
         case .createRuleFromMessage: return false
         case .addSenderToBook: return false
         case .importAddressBook: return false
@@ -458,6 +463,7 @@ enum Command: Int, CaseIterable {
         case .options: return false
         case .addressBook: return false
         case .messageRules: return false
+        case .encryptionKeys: return false
         case .createRuleFromMessage: return false
         case .addSenderToBook: return false
         case .importAddressBook: return false
@@ -535,6 +541,7 @@ enum Command: Int, CaseIterable {
         case .options: return false
         case .addressBook: return false
         case .messageRules: return false
+        case .encryptionKeys: return false
         case .createRuleFromMessage: return true
         case .addSenderToBook: return true
         case .importAddressBook: return false
@@ -612,6 +619,7 @@ enum Command: Int, CaseIterable {
         case .options: return nil
         case .addressBook: return nil
         case .messageRules: return nil
+        case .encryptionKeys: return nil
         case .createRuleFromMessage: return nil
         case .addSenderToBook: return nil
         case .importAddressBook: return nil

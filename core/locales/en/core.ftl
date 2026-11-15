@@ -552,3 +552,6 @@ pgp-imported-public = { $count ->
 pgp-imported-pending = Another key is already used for { $addresses }: the new one waits in the contact until you choose it.
 pgp-error-needs-passphrase = The private key is protected by a passphrase. Type it to import the key.
 pgp-error-mismatch = The private key does not belong to its public key. It may have been altered.
+pgp-file-name-public = { $who } public key.asc
+pgp-file-name-private = { $who } private key backup.asc
+pgp-pending = A different key for { $address } was found on { $date }.

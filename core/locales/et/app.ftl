@@ -83,6 +83,8 @@ cmd-view-source = Kirja &lähtekood
 cmd-ai-agents = &Tehisintellekti agendid...
 cmd-options = &Seaded...
 cmd-message-rules = Kirjade &reeglid...
+# review: new
+cmd-encryption-keys = Krü&pteerimisvõtmed...
 cmd-create-rule-from-message = L&oo kirjast reegel...
 cmd-select-all = Vali &kõik
 cmd-undo = &Võta tagasi
@@ -580,3 +582,139 @@ ui-card-picture = Pilt:
 ui-card-picture-choose = &Vali...
 ui-picture-not-picture = See fail ei ole PNG- ega JPEG-pilt.
 ui-picture-too-large = See pilt on liiga suur. Valige kuni 10 MB suurune pilt, mille laius ja kõrgus ei ületa 8000 pikslit.
+
+## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
+# review: new
+ui-keys-title = Krüpteerimisvõtmed
+# review: new
+ui-keys-intro = Sinu võtmed allkirjastavad sinu kirju ja avavad sulle krüpteeritud kirju. Kontaktide võtmed kontrollivad nende allkirju ja krüpteerivad neile saadetavad kirjad.
+# review: new
+ui-keys-empty = Võtmeid veel pole. Klõpsa „Uus võti“, et enda oma luua, või „Impordi“, et lisada olemasolev võti.
+# review: new
+ui-keys-col-name = Nimi
+# review: new
+ui-keys-col-address = Aadress
+# review: new
+ui-keys-col-kind = Liik
+# review: new
+ui-keys-col-status = Olek
+# review: new
+ui-keys-kind-own = Sinu võti
+# review: new
+ui-keys-kind-contact = Kontakt
+# review: new
+ui-keys-status-verified = { $status }, kontrollitud
+# review: new
+ui-keys-new = &Uus võti...
+# review: new
+ui-keys-import = &Impordi...
+# review: new
+ui-keys-export = &Ekspordi...
+# review: new
+ui-keys-backup = &Varunda...
+# review: new
+ui-keys-verify = &Kontrolli...
+# review: new
+ui-keys-new-title = Uus võti
+# review: new
+ui-keys-new-for = Loo võti kontole:
+# review: new
+ui-keys-new-make = &Loo võti
+# review: new
+ui-keys-no-account = Lisa kõigepealt e-posti konto: võti luuakse konto aadressidele.
+# review: new
+ui-keys-memory-only = Paroole hoitakse ainult mälus, seega praegu loodud või imporditud privaatvõtit ei saa pärast Inbox Classicu sulgemist kasutada.
+# review: new
+ui-keys-backup-offer = Sinu uus võti on valmis. Kas salvestada sellest kohe varukoopia? Kui see arvuti kaob või lähtestatakse, saab võtme tagasi ainult varukoopiast.
+# review: new
+ui-keys-backup-now = &Salvesta varukoopia...
+# review: new
+ui-keys-later = &Hiljem
+# review: new
+ui-keys-backup-title = Varunda võti
+# review: new
+ui-keys-backup-intro = Varukoopiat kaitseb parool. Hoia faili ja parooli eri turvalistes kohtades: võtme taastamiseks on vaja mõlemat.
+# review: new
+ui-keys-passphrase = &Parool:
+# review: new
+ui-keys-passphrase-again = &Korda parooli:
+# review: new
+ui-keys-passphrase-differ = Paroolid ei ole samad.
+# review: new
+ui-keys-passphrase-short = Kasuta vähemalt 8 märgist parooli.
+# review: new
+ui-keys-backup-saved = Varukoopia salvestati.
+# review: new
+ui-keys-import-title = Impordi võti
+# review: new
+ui-keys-import-passphrase = Seda privaatvõtit kaitseb parool. Võtme importimiseks sisesta see:
+# review: new
+ui-keys-file-filter = OpenPGP võtmed
+# review: new
+ui-keys-use-for = Kas kasutada seda võtit aadressi { $addresses } jaoks? Sealt saadetud kirjad allkirjastatakse sellega ja sellele krüpteeritud kirju saab siin lugeda.
+# review: new
+ui-keys-use = &Kasuta
+# review: new
+ui-keys-not-now = &Mitte praegu
+# review: new
+ui-keys-remove-own = Kas eemaldada sinu võti { $fingerprint }? Sellele krüpteeritud kirju ei saa siin enam lugeda, kui sa selle varukoopiat uuesti ei impordi.
+# review: new
+ui-keys-remove-contact = Kas eemaldada kontakti { $name } võti? Tema allkirju ei saa kontrollida ega talle kirju krüpteerida, kuni lisad tema võtme uuesti.
+# review: new
+ui-key-properties-title = Võtme omadused
+# review: new
+ui-key-names = Nimed:
+# review: new
+ui-key-fingerprint = Sõrmejälg:
+# review: new
+ui-key-status = Olek:
+# review: new
+ui-key-created = Loodud:
+# review: new
+ui-key-expires = Aegub:
+# review: new
+ui-key-never = Mitte kunagi
+# review: new
+ui-key-algorithm = Algoritm:
+# review: new
+ui-key-source = Päritolu:
+# review: new
+ui-key-addresses = Aadressid:
+# review: new
+ui-key-address-verified = { $address } (kontrollitud)
+# review: new
+ui-key-address-not-verified = { $address } (kontrollimata)
+# review: new
+ui-verify-title = Kontrolli võtit
+# review: new
+ui-verify-intro = Palu kontaktil { $name } lugeda sulle oma rakendusest ette oma võtme sõrmejälg, silmast silma või telefonis. Ära võrdle seda e-kirjaga saadetuga: kes saaks võtit muuta, saaks muuta ka seda.
+# review: new
+ui-verify-fingerprint = Sinu käes oleva võtme sõrmejälg:
+# review: new
+ui-verify-match = Need &ühtivad
+# review: new
+ui-verify-differ = Need &erinevad
+# review: new
+ui-verify-differs = Sinu käes olev võti ei ole see, mis on kontaktil { $name }. Eemalda see ja küsi temalt võti uuesti.
+# review: new
+ui-verify-unmark = Märgi &kontrollimata
+# review: new
+ui-account-security = Turvalisus
+# review: new
+ui-account-security-intro = Võtmega saab sinu kirju allkirjastada ja teised saavad sulle krüpteeritud kirju saata.
+# review: new
+ui-account-key = &Selle konto võti:
+# review: new
+ui-account-key-none = Puudub
+# review: new
+ui-account-key-new = &Uus võti...
+# review: new
+ui-account-autocrypt = &Saada oma avalik võti kirjadega kaasa (Autocrypt)
+# review: new
+ui-contact-key = Krüpteerimisvõti:
+# review: new
+ui-contact-key-none = Võtit pole
+# review: new
+ui-contact-key-use-new = &Kasuta uut võtit
+# review: new
+ui-contact-key-keep = &Jäta senine

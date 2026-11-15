@@ -1106,6 +1106,8 @@ typedef struct PePeerKeys {
   char *pending;
   // When the waiting key was found, seconds since the Unix epoch; 0 when none waits
   int64_t pending_since;
+  // "A different key for bob@example.net was found on 3 May 2027.", NULL when none waits
+  char *pending_text;
 } PePeerKeys;
 
 // One of the user's own addresses and its key
@@ -3095,6 +3097,23 @@ const struct PeIdentity *pe_pgp_identity_list_get(const struct PeIdentityList *l
 // # Safety
 // `list` must be NULL or a list that was not freed yet.
 void pe_pgp_identity_list_free(struct PeIdentityList *list);
+
+// Own addresses one of the user's keys holds that use no key yet, each with that key (as identities): after a
+// backup was imported, the windows ask "Use this key for ...?" and call `pe_pgp_set_identity`. Free with
+// `pe_pgp_identity_list_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeIdentityList *pe_pgp_unclaimed(const struct PeCore *core);
+
+// The file name a key is saved under: public, or a backup of the private key; NULL for no such key. Free with
+// `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle, `fingerprint` a NUL-terminated string.
+char *pe_pgp_file_name(const struct PeCore *core,
+                       const char *fingerprint,
+                       bool private_);
 
 // Sets the key of an own address, and whether its mail carries the key in the Autocrypt header
 //

@@ -83,6 +83,8 @@ cmd-view-source = Code &source du message
 cmd-ai-agents = &Agents d'IA...
 cmd-options = &Options...
 cmd-message-rules = &Règles de message...
+# review: new
+cmd-encryption-keys = Clés de c&hiffrement...
 cmd-create-rule-from-message = Créer une règl&e à partir du message...
 cmd-select-all = Sélectionner &tout
 cmd-undo = &Annuler
@@ -580,3 +582,139 @@ ui-card-picture = Image :
 ui-card-picture-choose = &Choisir...
 ui-picture-not-picture = Ce fichier n'est pas une image PNG ou JPEG.
 ui-picture-too-large = Cette image est trop grande. Choisissez une image de 10 Mo maximum, dont la largeur et la hauteur ne dépassent pas 8000 pixels.
+
+## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
+# review: new
+ui-keys-title = Clés de chiffrement
+# review: new
+ui-keys-intro = Vos clés signent vos messages et ouvrent le courrier chiffré pour vous. Les clés de vos contacts vérifient leurs signatures et chiffrent le courrier qui leur est destiné.
+# review: new
+ui-keys-empty = Aucune clé pour l'instant. Cliquez sur Nouvelle clé pour créer la vôtre, ou sur Importer pour ajouter une clé que vous avez déjà.
+# review: new
+ui-keys-col-name = Nom
+# review: new
+ui-keys-col-address = Adresse
+# review: new
+ui-keys-col-kind = Type
+# review: new
+ui-keys-col-status = État
+# review: new
+ui-keys-kind-own = Votre clé
+# review: new
+ui-keys-kind-contact = Contact
+# review: new
+ui-keys-status-verified = { $status }, vérifiée
+# review: new
+ui-keys-new = &Nouvelle clé...
+# review: new
+ui-keys-import = &Importer...
+# review: new
+ui-keys-export = &Exporter...
+# review: new
+ui-keys-backup = &Sauvegarder...
+# review: new
+ui-keys-verify = &Vérifier...
+# review: new
+ui-keys-new-title = Nouvelle clé
+# review: new
+ui-keys-new-for = Créer une clé pour :
+# review: new
+ui-keys-new-make = &Créer la clé
+# review: new
+ui-keys-no-account = Ajoutez d'abord un compte de messagerie : une clé est créée pour les adresses d'un compte.
+# review: new
+ui-keys-memory-only = Les mots de passe sont gardés en mémoire seulement : une clé privée créée ou importée maintenant ne pourra plus servir après la fermeture d'Inbox Classic.
+# review: new
+ui-keys-backup-offer = Votre nouvelle clé est prête. Enregistrer une sauvegarde maintenant ? Si cet ordinateur est perdu ou réinitialisé, la clé ne pourra revenir que d'une sauvegarde.
+# review: new
+ui-keys-backup-now = &Enregistrer une sauvegarde...
+# review: new
+ui-keys-later = &Plus tard
+# review: new
+ui-keys-backup-title = Sauvegarder la clé
+# review: new
+ui-keys-backup-intro = La sauvegarde est protégée par une phrase secrète. Gardez le fichier et la phrase dans des endroits sûrs différents : il faut les deux pour récupérer la clé.
+# review: new
+ui-keys-passphrase = &Phrase secrète :
+# review: new
+ui-keys-passphrase-again = &Saisissez-la à nouveau :
+# review: new
+ui-keys-passphrase-differ = Les phrases secrètes ne sont pas identiques.
+# review: new
+ui-keys-passphrase-short = Utilisez une phrase secrète d'au moins 8 caractères.
+# review: new
+ui-keys-backup-saved = La sauvegarde a été enregistrée.
+# review: new
+ui-keys-import-title = Importer une clé
+# review: new
+ui-keys-import-passphrase = Cette clé privée est protégée par une phrase secrète. Saisissez-la pour importer la clé :
+# review: new
+ui-keys-file-filter = Clés OpenPGP
+# review: new
+ui-keys-use-for = Utiliser cette clé pour { $addresses } ? Vos messages envoyés de là seront signés avec elle, et le courrier chiffré pour elle pourra être lu ici.
+# review: new
+ui-keys-use = &Utiliser
+# review: new
+ui-keys-not-now = &Pas maintenant
+# review: new
+ui-keys-remove-own = Supprimer votre clé { $fingerprint } ? Le courrier chiffré pour elle ne pourra plus être lu ici, sauf si vous importez à nouveau sa sauvegarde.
+# review: new
+ui-keys-remove-contact = Supprimer la clé de { $name } ? Ses signatures ne pourront pas être vérifiées ni le courrier lui être chiffré tant que vous n'aurez pas ajouté sa clé à nouveau.
+# review: new
+ui-key-properties-title = Propriétés de la clé
+# review: new
+ui-key-names = Noms :
+# review: new
+ui-key-fingerprint = Empreinte :
+# review: new
+ui-key-status = État :
+# review: new
+ui-key-created = Créée le :
+# review: new
+ui-key-expires = Expire le :
+# review: new
+ui-key-never = Jamais
+# review: new
+ui-key-algorithm = Algorithme :
+# review: new
+ui-key-source = Origine :
+# review: new
+ui-key-addresses = Adresses :
+# review: new
+ui-key-address-verified = { $address } (vérifiée)
+# review: new
+ui-key-address-not-verified = { $address } (non vérifiée)
+# review: new
+ui-verify-title = Vérifier la clé
+# review: new
+ui-verify-intro = Demandez à { $name } de vous lire l'empreinte de sa clé depuis sa propre application, en personne ou au téléphone. Ne la comparez pas avec une empreinte reçue par courriel : qui pourrait changer la clé pourrait aussi changer celle-ci.
+# review: new
+ui-verify-fingerprint = L'empreinte de la clé que vous avez :
+# review: new
+ui-verify-match = Elles &correspondent
+# review: new
+ui-verify-differ = Elles &diffèrent
+# review: new
+ui-verify-differs = La clé que vous avez n'est pas celle de { $name }. Supprimez-la et redemandez sa clé.
+# review: new
+ui-verify-unmark = Marquer comme &non vérifiée
+# review: new
+ui-account-security = Sécurité
+# review: new
+ui-account-security-intro = Avec une clé, vos messages peuvent être signés et d'autres personnes peuvent vous envoyer du courrier chiffré.
+# review: new
+ui-account-key = &Clé de ce compte :
+# review: new
+ui-account-key-none = Aucune
+# review: new
+ui-account-key-new = &Nouvelle clé...
+# review: new
+ui-account-autocrypt = &Envoyer ma clé publique avec mes messages (Autocrypt)
+# review: new
+ui-contact-key = Clé de chiffrement :
+# review: new
+ui-contact-key-none = Aucune clé
+# review: new
+ui-contact-key-use-new = &Utiliser la nouvelle clé
+# review: new
+ui-contact-key-keep = &Garder l'actuelle

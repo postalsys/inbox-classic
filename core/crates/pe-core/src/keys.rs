@@ -116,6 +116,8 @@ pub struct PeerKeys {
     pub in_use: Option<String>,
     pub pending: Option<String>,
     pub pending_since: Option<i64>,
+    /// "A different key for bob@example.net was found on 3 May 2027.", when one waits
+    pub pending_text: Option<String>,
 }
 
 /// What became of an address when a key was imported or found
@@ -634,14 +636,73 @@ impl<'a> Book<'a> {
         SecretKey::from_bytes(&plain).map_err(|error| Error::Invalid(words(&error)))
     }
 
+    /// The user's own addresses that one of their keys holds but that use no key yet (after a backup was imported),
+    /// each with that key: what the windows offer "Use this key for ...?" for
+    pub fn unclaimed(&self) -> Result<Vec<(String, String)>> {
+        let own = self.own_addresses()?;
+        let claimed: HashSet<String> = self
+            .store
+            .pgp_identities()?
+            .into_iter()
+            .map(|identity| identity.address)
+            .collect();
+        let mut out = Vec::new();
+        for key in self.store.pgp_keys()?.iter().filter(|key| key.secret.is_some()) {
+            for held in self.store.pgp_key_addresses(Some(&key.fingerprint))? {
+                if own.contains(&held.address) && !claimed.contains(&held.address) {
+                    out.push((held.address, key.fingerprint.clone()));
+                }
+            }
+        }
+        Ok(out)
+    }
+
+    /// The name a key is saved under: "Alice Example public key.asc", or "... private key backup.asc"
+    pub fn file_name(&self, fingerprint: &str, private: bool) -> Result<String> {
+        let key = self.store.pgp_key(fingerprint)?.ok_or(Error::NotFound)?;
+        let cert = self.certs.get(&key).ok_or(Error::NotFound)?;
+        let users = cert.user_ids(unix_now());
+        let user = users.iter().find(|user| user.primary).or(users.first());
+        let who = match user {
+            Some(user) => {
+                let name = user.text.split('<').next().unwrap_or("").trim();
+                if name.is_empty() {
+                    user.address.clone().unwrap_or_default()
+                } else {
+                    name.to_string()
+                }
+            }
+            None => fingerprint
+                .chars()
+                .rev()
+                .take(8)
+                .collect::<String>()
+                .chars()
+                .rev()
+                .collect(),
+        };
+        let text = if private {
+            Text::PgpFileNamePrivate
+        } else {
+            Text::PgpFileNamePublic
+        };
+        let name = tr_args(text, &[("who", (&who).into())]);
+        Ok(pe_mime::parser::safe_filename(Some(&name), "application/pgp-keys"))
+    }
+
     pub fn peer(&self, address: &str) -> Result<PeerKeys> {
         let address = normal_address(address);
         let peer = self.store.pgp_peer(&address)?.unwrap_or_default();
+        let pending_text = peer.pending.as_ref().map(|_| {
+            let date = crate::calendar::local_date(peer.pending_since.unwrap_or_else(unix_now));
+            tr_args(Text::PgpPending, &[("address", (&address).into()), ("date", (&date).into())])
+        });
         Ok(PeerKeys {
             address,
             in_use: peer.fingerprint,
             pending: peer.pending,
             pending_since: peer.pending_since,
+            pending_text,
         })
     }
 
@@ -726,6 +787,16 @@ impl Core {
 
     pub fn pgp_set_verified(&self, fingerprint: &str, address: &str, verified: bool) -> Result<()> {
         Ok(self.store().set_pgp_verified(fingerprint, address, verified)?)
+    }
+
+    /// Own addresses one of the user's keys holds that use no key yet, each with that key
+    pub fn pgp_unclaimed(&self) -> Result<Vec<(String, String)>> {
+        self.book(|book| book.unclaimed())
+    }
+
+    /// The file name a key is saved under, public or (`private`) a backup
+    pub fn pgp_file_name(&self, fingerprint: &str, private: bool) -> Result<String> {
+        self.book(|book| book.file_name(fingerprint, private))
     }
 
     /// A correspondent's key in use and the one waiting for a decision

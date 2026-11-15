@@ -567,3 +567,9 @@ pgp-imported-pending = Für { $addresses } wird bereits ein anderer Schlüssel v
 pgp-error-needs-passphrase = Der private Schlüssel ist durch eine Passphrase geschützt. Geben Sie sie ein, um den Schlüssel zu importieren.
 # review: new
 pgp-error-mismatch = Der private Schlüssel gehört nicht zu seinem öffentlichen Schlüssel. Er wurde möglicherweise verändert.
+# review: new
+pgp-file-name-public = { $who } öffentlicher Schlüssel.asc
+# review: new
+pgp-file-name-private = { $who } Sicherung des privaten Schlüssels.asc
+# review: new
+pgp-pending = Für { $address } wurde am { $date } ein anderer Schlüssel gefunden.

@@ -393,6 +393,8 @@ pub struct PePeerKeys {
     pub pending: *mut c_char,
     /// When the waiting key was found, seconds since the Unix epoch; 0 when none waits
     pub pending_since: i64,
+    /// "A different key for bob@example.net was found on 3 May 2027.", NULL when none waits
+    pub pending_text: *mut c_char,
 }
 
 /// The keys of `address`; free with `pe_pgp_peer_free`.
@@ -414,6 +416,7 @@ pub unsafe extern "C" fn pe_pgp_peer(core: *const PeCore, address: *const c_char
                 in_use: text(peer.in_use),
                 pending: text(peer.pending),
                 pending_since: peer.pending_since.unwrap_or(0),
+                pending_text: text(peer.pending_text),
             })
         })
     }
@@ -432,6 +435,7 @@ pub unsafe extern "C" fn pe_pgp_peer_free(peer: *mut PePeerKeys) {
     unsafe {
         crate::pe_string_free(peer.in_use);
         crate::pe_string_free(peer.pending);
+        crate::pe_string_free(peer.pending_text);
     }
 }
 
@@ -504,6 +508,54 @@ pub unsafe extern "C" fn pe_pgp_identity_list_get(list: *const PeIdentityList, i
 pub unsafe extern "C" fn pe_pgp_identity_list_free(list: *mut PeIdentityList) {
     // SAFETY: as the caller guarantees
     unsafe { take_back(list) }
+}
+
+/// Own addresses one of the user's keys holds that use no key yet, each with that key (as identities): after a
+/// backup was imported, the windows ask "Use this key for ...?" and call `pe_pgp_set_identity`. Free with
+/// `pe_pgp_identity_list_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pgp_unclaimed(core: *const PeCore) -> *mut PeIdentityList {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            let Ok(unclaimed) = core.pgp_unclaimed() else {
+                return null_mut();
+            };
+            handed(PeIdentityList(Rows::new(
+                &unclaimed,
+                |(address, fingerprint), strings| PeIdentity {
+                    address: strings.add(address),
+                    fingerprint: strings.add(fingerprint),
+                    autocrypt: true,
+                },
+            )))
+        })
+    }
+}
+
+/// The file name a key is saved under: public, or a backup of the private key; NULL for no such key. Free with
+/// `pe_string_free`.
+///
+/// # Safety
+/// `core` must be a live handle, `fingerprint` a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pgp_file_name(
+    core: *const PeCore,
+    fingerprint: *const c_char,
+    private: bool,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let fingerprint = unsafe { arg(fingerprint) }.unwrap_or_default();
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.pgp_file_name(fingerprint, private)
+                .map_or(null_mut(), into_c_string)
+        })
+    }
 }
 
 /// Sets the key of an own address, and whether its mail carries the key in the Autocrypt header

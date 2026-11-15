@@ -296,6 +296,25 @@ Screenshots: `rules-1-list`, `rules-2-editor`, `rules-5-applied`, `rules-6-bad-q
 - Create Rule from Message starts a rule with `from:` the sender
 - the rule is deleted again for the steps after
 
+## 19h. Encryption keys
+
+Screenshots: `keys-1-empty`, `keys-2-new-key`, `keys-3-backup-offer`, `keys-4-backup`, `keys-5-list`, `keys-6-import-passphrase`, `keys-7-use-for`, `keys-8-properties`, `keys-9-verify`, `keys-10-account-security`, `keys-11-contact`
+
+The key files are `scripts/ui-e2e/keys/`: `bob.pub.asc` (Bob Example, bob@example.net, a public key) and `carol.sec.asc` (Carol Example, carol@example.org, a private key protected by the passphrase `correct horse battery`). The account's address is added to Carol's key for the "Use this key" question: the test imports Carol's key after adding `carol@example.org` as another address of the account, and takes it away after.
+
+- Tools > Encryption Keys opens with no keys: the empty words, New Key, Import; Export, Back Up, Verify, Properties and Remove greyed (`keys-1-empty`)
+- New Key: the window names the account the key is for (the only one, chosen) and says that passwords are kept in memory only (the tests run with `--memory-passwords`) (`keys-2-new-key`); Make Key makes it, and the backup is offered at once (`keys-3-backup-offer`)
+- Save a Backup asks for a passphrase twice (`keys-4-backup`): two different ones are refused, a short one is refused, then a good one saves the file (the system's save panel answered by the test); the file read back is an armored private key that asks for that passphrase
+- the list shows the new key: the account's name and address, Your key, Valid (`keys-5-list`); Account Properties > Security names it as the account's key
+- Import of `bob.pub.asc`: listed as Contact, Valid; the core's summary is shown
+- Import of `carol.sec.asc` asks for its passphrase (`keys-6-import-passphrase`); a wrong one says so and asks again; the right one imports it, and the window asks "Use this key for carol@example.org?" (`keys-7-use-for`); Use It makes it that address's key
+- Properties of Bob's key: names, the fingerprint in groups of four, Valid, created, expires Never, Ed25519, Imported from a file, bob@example.net (not verified) (`keys-8-properties`)
+- Verify on Bob's key: the fingerprint in large groups, the intro naming Bob, They Match and They Differ (`keys-9-verify`); They Match marks it: the list says Valid, verified
+- Export of Bob's key saves an armored public key named "Bob Example public key.asc"
+- Account Properties > Security: the account's key chosen, None and the other own keys offered, New Key, and Send my public key with my messages (on) (`keys-10-account-security`)
+- the Address Book's Bob (a card for bob@example.net, added by the test) shows his key's fingerprint and Valid, verified in his Properties (`keys-11-contact`)
+- Remove of Bob's key asks first and removes it; Carol's key and the account's stay for the steps after
+
 ## 20. Send/Recv
 
 Screenshots: `main-2-new-mail`, `main-3-sent-items`

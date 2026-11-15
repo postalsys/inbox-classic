@@ -578,3 +578,9 @@ pgp-imported-pending = Ya se usa otra clave para { $addresses }: la nueva espera
 pgp-error-needs-passphrase = La clave privada está protegida por una frase de contraseña. Escríbala para importar la clave.
 # review: new
 pgp-error-mismatch = La clave privada no corresponde a su clave pública. Puede haber sido alterada.
+# review: new
+pgp-file-name-public = Clave pública de { $who }.asc
+# review: new
+pgp-file-name-private = Copia de seguridad de la clave privada de { $who }.asc
+# review: new
+pgp-pending = Se encontró otra clave para { $address } el { $date }.

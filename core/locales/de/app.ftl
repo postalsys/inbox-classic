@@ -83,6 +83,8 @@ cmd-view-source = Nachrichten-&Quelltext
 cmd-ai-agents = &KI-Agenten...
 cmd-options = &Optionen...
 cmd-message-rules = Nachrichten&regeln...
+# review: new
+cmd-encryption-keys = &Verschlüsselungsschlüssel...
 cmd-create-rule-from-message = Regel au&s Nachricht erstellen...
 cmd-select-all = &Alles auswählen
 cmd-undo = &Rückgängig
@@ -580,3 +582,139 @@ ui-card-picture = Bild:
 ui-card-picture-choose = Aus&wählen...
 ui-picture-not-picture = Diese Datei ist kein PNG- oder JPEG-Bild.
 ui-picture-too-large = Dieses Bild ist zu groß. Wählen Sie ein Bild mit höchstens 10 MB und maximal 8000 Pixeln Breite und Höhe.
+
+## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
+# review: new
+ui-keys-title = Verschlüsselungsschlüssel
+# review: new
+ui-keys-intro = Ihre Schlüssel signieren Ihre Nachrichten und öffnen an Sie verschlüsselte E-Mails. Die Schlüssel Ihrer Kontakte prüfen deren Signaturen und verschlüsseln E-Mails an sie.
+# review: new
+ui-keys-empty = Noch keine Schlüssel. Klicken Sie auf „Neuer Schlüssel“, um Ihren zu erstellen, oder auf „Importieren“, um einen vorhandenen hinzuzufügen.
+# review: new
+ui-keys-col-name = Name
+# review: new
+ui-keys-col-address = Adresse
+# review: new
+ui-keys-col-kind = Art
+# review: new
+ui-keys-col-status = Status
+# review: new
+ui-keys-kind-own = Ihr Schlüssel
+# review: new
+ui-keys-kind-contact = Kontakt
+# review: new
+ui-keys-status-verified = { $status }, überprüft
+# review: new
+ui-keys-new = &Neuer Schlüssel...
+# review: new
+ui-keys-import = &Importieren...
+# review: new
+ui-keys-export = &Exportieren...
+# review: new
+ui-keys-backup = &Sichern...
+# review: new
+ui-keys-verify = Ü&berprüfen...
+# review: new
+ui-keys-new-title = Neuer Schlüssel
+# review: new
+ui-keys-new-for = Schlüssel erstellen für:
+# review: new
+ui-keys-new-make = Schlüssel &erstellen
+# review: new
+ui-keys-no-account = Fügen Sie zuerst ein E-Mail-Konto hinzu: Ein Schlüssel wird für die Adressen eines Kontos erstellt.
+# review: new
+ui-keys-memory-only = Kennwörter werden nur im Arbeitsspeicher gehalten. Ein jetzt erstellter oder importierter privater Schlüssel ist nach dem Schließen von Inbox Classic nicht mehr verwendbar.
+# review: new
+ui-keys-backup-offer = Ihr neuer Schlüssel ist bereit. Jetzt eine Sicherung speichern? Geht dieser Computer verloren oder wird er zurückgesetzt, lässt sich der Schlüssel nur aus einer Sicherung wiederherstellen.
+# review: new
+ui-keys-backup-now = Sicherung &speichern...
+# review: new
+ui-keys-later = &Später
+# review: new
+ui-keys-backup-title = Schlüssel sichern
+# review: new
+ui-keys-backup-intro = Die Sicherung ist durch eine Passphrase geschützt. Bewahren Sie Datei und Passphrase an verschiedenen sicheren Orten auf: Sie brauchen beide, um den Schlüssel wiederherzustellen.
+# review: new
+ui-keys-passphrase = &Passphrase:
+# review: new
+ui-keys-passphrase-again = &Wiederholen:
+# review: new
+ui-keys-passphrase-differ = Die Passphrasen stimmen nicht überein.
+# review: new
+ui-keys-passphrase-short = Verwenden Sie eine Passphrase mit mindestens 8 Zeichen.
+# review: new
+ui-keys-backup-saved = Die Sicherung wurde gespeichert.
+# review: new
+ui-keys-import-title = Schlüssel importieren
+# review: new
+ui-keys-import-passphrase = Dieser private Schlüssel ist durch eine Passphrase geschützt. Geben Sie sie ein, um den Schlüssel zu importieren:
+# review: new
+ui-keys-file-filter = OpenPGP-Schlüssel
+# review: new
+ui-keys-use-for = Diesen Schlüssel für { $addresses } verwenden? Ihre Nachrichten von dort werden damit signiert, und damit verschlüsselte E-Mails können hier gelesen werden.
+# review: new
+ui-keys-use = &Verwenden
+# review: new
+ui-keys-not-now = &Nicht jetzt
+# review: new
+ui-keys-remove-own = Ihren Schlüssel { $fingerprint } entfernen? Damit verschlüsselte E-Mails können hier nicht mehr gelesen werden, außer Sie importieren seine Sicherung erneut.
+# review: new
+ui-keys-remove-contact = Den Schlüssel von { $name } entfernen? Deren Signaturen können nicht geprüft und E-Mails an sie nicht verschlüsselt werden, bis Sie den Schlüssel wieder hinzufügen.
+# review: new
+ui-key-properties-title = Schlüsseleigenschaften
+# review: new
+ui-key-names = Namen:
+# review: new
+ui-key-fingerprint = Fingerabdruck:
+# review: new
+ui-key-status = Status:
+# review: new
+ui-key-created = Erstellt:
+# review: new
+ui-key-expires = Läuft ab:
+# review: new
+ui-key-never = Nie
+# review: new
+ui-key-algorithm = Algorithmus:
+# review: new
+ui-key-source = Herkunft:
+# review: new
+ui-key-addresses = Adressen:
+# review: new
+ui-key-address-verified = { $address } (überprüft)
+# review: new
+ui-key-address-not-verified = { $address } (nicht überprüft)
+# review: new
+ui-verify-title = Schlüssel überprüfen
+# review: new
+ui-verify-intro = Bitten Sie { $name }, Ihnen den Fingerabdruck des Schlüssels aus der eigenen App vorzulesen, persönlich oder am Telefon. Vergleichen Sie ihn nicht mit einem per E-Mail gesendeten: Wer den Schlüssel ändern könnte, könnte auch diesen ändern.
+# review: new
+ui-verify-fingerprint = Der Fingerabdruck des Schlüssels, den Sie haben:
+# review: new
+ui-verify-match = Sie &stimmen überein
+# review: new
+ui-verify-differ = Sie &unterscheiden sich
+# review: new
+ui-verify-differs = Der Schlüssel, den Sie haben, ist nicht der von { $name }. Entfernen Sie ihn, und bitten Sie erneut um den Schlüssel.
+# review: new
+ui-verify-unmark = Als &nicht überprüft markieren
+# review: new
+ui-account-security = Sicherheit
+# review: new
+ui-account-security-intro = Mit einem Schlüssel können Ihre Nachrichten signiert werden, und andere können Ihnen verschlüsselte E-Mails senden.
+# review: new
+ui-account-key = &Schlüssel für dieses Konto:
+# review: new
+ui-account-key-none = Keiner
+# review: new
+ui-account-key-new = &Neuer Schlüssel...
+# review: new
+ui-account-autocrypt = Meinen öffentlichen Schlüssel mit meinen Nachrichten &senden (Autocrypt)
+# review: new
+ui-contact-key = Verschlüsselungsschlüssel:
+# review: new
+ui-contact-key-none = Kein Schlüssel
+# review: new
+ui-contact-key-use-new = Den neuen Schlüssel &verwenden
+# review: new
+ui-contact-key-keep = Den bisherigen &behalten

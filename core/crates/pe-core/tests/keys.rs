@@ -145,7 +145,24 @@ fn a_backup_and_its_import() {
             ("a@work.example".to_string(), fingerprint.clone())
         ]
     );
+    let mut unclaimed = other.pgp_unclaimed().unwrap();
+    unclaimed.sort();
+    let mut own = imported.own.clone();
+    own.sort();
+    assert_eq!(unclaimed, own);
     other.pgp_set_identity("alice@example.org", &fingerprint, true).unwrap();
+    assert_eq!(
+        other.pgp_unclaimed().unwrap(),
+        [("a@work.example".to_string(), fingerprint.clone())]
+    );
+    assert_eq!(
+        other.pgp_file_name(&fingerprint, true).unwrap(),
+        "Alice Example private key backup.asc"
+    );
+    assert_eq!(
+        other.pgp_file_name(&fingerprint, false).unwrap(),
+        "Alice Example public key.asc"
+    );
     assert_eq!(other.pgp_identities().unwrap()[0].fingerprint, fingerprint);
 }
 
@@ -180,6 +197,7 @@ fn a_correspondent_key_and_a_changed_one() {
     assert_eq!(peer.in_use.unwrap(), bob.fingerprint());
     assert_eq!(peer.pending.unwrap(), other.fingerprint());
     assert!(peer.pending_since.is_some());
+    assert!(peer.pending_text.unwrap().contains("bob@example.net"));
 
     core.pgp_decide("bob@example.net", false).unwrap();
     let peer = core.pgp_peer("bob@example.net").unwrap();
