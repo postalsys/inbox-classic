@@ -840,7 +840,12 @@ fn dialog_named(name: &str) -> Option<adw::Dialog> {
 }
 
 async fn wait_dialog(seconds: u64, name: &str) -> Option<adw::Dialog> {
-    wait_for(seconds, || dialog_named(name)).await
+    let dialog = wait_for(seconds, || dialog_named(name)).await?;
+    // its contents are found, clicked and filled once they are drawn, which a slow machine does a moment after the
+    // dialog appears
+    wait_until(5, || dialog.child().is_some_and(|content| content.is_mapped())).await;
+    pause(150).await;
+    Some(dialog)
 }
 
 async fn wait_gone(seconds: u64, name: &str) -> bool {
@@ -2353,9 +2358,13 @@ async fn accounts(d: &Driver) {
         return;
     };
     let accounts = accounts.upcast::<gtk::Widget>();
-    let listed = named_in(&accounts, "accounts-list")
-        .map(|l| descendants::<adw::ActionRow>(&l).len())
-        .unwrap_or(0);
+    let count = || {
+        named_in(&accounts, "accounts-list")
+            .map(|l| descendants::<adw::ActionRow>(&l).len())
+            .unwrap_or(0)
+    };
+    wait_until(5, || count() == 2).await;
+    let listed = count();
     d.check(listed == 2, &format!("both accounts are listed ({listed})"));
     d.shot(&accounts, "accounts-1-list").await;
     click(&accounts, "accounts-properties");
