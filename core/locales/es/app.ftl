@@ -11,7 +11,7 @@ menu-help = Ay&uda
 menu-layout = &Diseño
 menu-sort-by = Ordenar &por
 # review: new
-menu-text-size = &Tamaño del texto
+menu-text-size = Tamaño del te&xto
 menu-folder = Carpe&ta
 
 ## The commands
@@ -91,7 +91,7 @@ cmd-options = &Opciones...
 # review: new
 cmd-message-rules = &Reglas de mensajes...
 # review: new
-cmd-create-rule-from-message = Crear &regla a partir del mensaje...
+cmd-create-rule-from-message = Crear regla a partir del mensa&je...
 cmd-select-all = Seleccionar &todo
 cmd-undo = &Deshacer
 cmd-copy = &Copiar a carpeta...
@@ -424,7 +424,7 @@ ui-undo-button = Deshacer
 # review: new
 ui-rules-title = Reglas de mensajes
 # review: new
-ui-rules-intro = Las reglas ordenan el correo nuevo de sus Bandejas de entrada a medida que llega, mientras Inbox Classic está abierto. Cada regla que coincide con un mensaje hace su parte; la que lo mueve a otro sitio es la última para él.
+ui-rules-intro = Las reglas organizan los mensajes nuevos que llegan a sus bandejas de entrada mientras Inbox Classic está abierto. Las reglas cuyos criterios se cumplen se aplican por orden. Cuando una mueve un mensaje fuera de la Bandeja de entrada, no se le aplican más reglas.
 # review: new
 ui-rules-none = Aún no hay reglas. Haga clic en Nueva para crear una.
 # review: new
@@ -432,34 +432,34 @@ ui-rule-new = &Nueva...
 # review: new
 ui-rule-edit = &Editar...
 # review: new
-ui-rule-delete-button = &Eliminar
+ui-rule-delete-button = Eli&minar
 # review: new
 ui-rule-title = Regla de mensaje
 # review: new
 ui-rule-name = Nombre:
 # review: new
-ui-rule-account = Para el correo nuevo de:
+ui-rule-account = Cuenta:
 # review: new
 ui-rule-all-accounts = Todas las cuentas
 # review: new
-ui-rule-query = Que coincida con:
+ui-rule-query = Criterios de búsqueda:
 # review: new
-ui-rule-query-hint = Palabras como en el cuadro de búsqueda, por ejemplo from:ana@example.com, subject:factura o list:news.example.com
+ui-rule-query-hint = Use los mismos términos que en el cuadro de búsqueda, por ejemplo from:ana@example.com, subject:factura o list:news.example.com.
 # review: new
 ui-rule-count = { $count ->
-    [one] Ahora coincide 1 mensaje de la Bandeja de entrada.
-   *[other] Ahora coinciden { $count } mensajes de la Bandeja de entrada.
+    [one] Actualmente, 1 mensaje de la Bandeja de entrada cumple estos criterios.
+   *[other] Actualmente, { $count } mensajes de la Bandeja de entrada cumplen estos criterios.
 }
 # review: new
-ui-rule-show = &Mostrar
+ui-rule-show = M&ostrar
 # review: new
-ui-rule-actions = Hacer esto:
+ui-rule-actions = Acciones:
 # review: new
 ui-rule-move = &Moverlo a:
 # review: new
 ui-rule-mark-read = Marcarlo como &leído
 # review: new
-ui-rule-flag = &Marcarlo
+ui-rule-flag = Ma&rcarlo
 # review: new
 ui-rule-archive = &Archivarlo
 # review: new
@@ -480,7 +480,7 @@ ui-rules-applied = { $count ->
    *[other] Sus reglas ordenaron { $count } mensajes
 }
 # review: new
-ui-col-rule-matches = Coincide con
+ui-col-rule-matches = Criterios
 ui-clear-button = &Borrar
 ui-how-to-connect = Cómo conectar un agente…
 ui-agent-programs = Programas cuyos agentes pidieron usar su correo
@@ -585,18 +585,18 @@ ui-download-ahead-all = Todos los mensajes
 ui-download-ahead-never = Solo al abrirlos
 ui-download-limit = Espacio máximo por cuenta:
 # review: new
-ui-send-delay = Esperar antes de enviar:
+ui-send-delay = Retraso antes de enviar:
 # review: new
-ui-send-delay-note = Mientras un mensaje espera, puede recuperarlo con Deshacer.
+ui-send-delay-note = Mientras un mensaje esté pendiente de envío, puede cancelar el envío con Deshacer.
 # review: new
-ui-dark-messages = Mostrar los mensajes sobre fondo oscuro cuando el sistema esté oscuro
+ui-dark-messages = Mostrar los mensajes sobre fondo oscuro cuando el sistema esté en modo oscuro
 # review: new
-ui-sending-in = Enviando { $subject } en { $count ->
+ui-sending-in = Se enviará { $subject } en { $count ->
     [one] 1 segundo
    *[other] { $count } segundos
 }
 # review: new
-ui-send-undone = { $subject } no se envió. Vuelve a estar abierto.
+ui-send-undone = { $subject } no se envió. El mensaje se ha vuelto a abrir para editarlo.
 # review: new
 ui-send-too-late = { $subject } ya se envió.
 # review: new

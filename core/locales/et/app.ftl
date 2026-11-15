@@ -11,7 +11,7 @@ menu-help = &Spikker
 menu-layout = Pai&gutus
 menu-sort-by = Sor&teeri
 # review: new
-menu-text-size = &Teksti suurus
+menu-text-size = Teksti &suurus
 menu-folder = K&aust
 
 ## The commands
@@ -91,7 +91,7 @@ cmd-options = &Seaded...
 # review: new
 cmd-message-rules = Kirjade &reeglid...
 # review: new
-cmd-create-rule-from-message = Loo kirjast &reegel...
+cmd-create-rule-from-message = L&oo kirjast reegel...
 cmd-select-all = Vali &kõik
 cmd-undo = &Võta tagasi
 cmd-copy = Kopeeri k&austa...
@@ -190,7 +190,7 @@ ui-attachment-forgotten = Kirjutasite „{ $word }“, kuid ühtegi faili pole l
 # review: new
 ui-send-anyway = Saada ikkagi
 # review: new
-ui-go-back = Mine tagasi
+ui-go-back = Tagasi
 ui-not-saved = Kirja ei saanud salvestada.
 ui-saving-draft = Salvestatakse mustanditesse...
 ui-compose-saved-at = Salvestati mustanditesse kell { $time }
@@ -314,7 +314,7 @@ ui-field-smtp-host = Väljamineva posti server (SMTP):
 ui-field-smtp-port = SMTP-port:
 ui-field-smtp-security = SMTP-turve:
 # review: new
-ui-field-other-addresses = Muud saatja aadressid:
+ui-field-other-addresses = Muud saatja-aadressid:
 ui-sign-in-not-started = Brauseris sisselogimist ei saanud alustada.
 ui-sign-in-in-browser = Logige avanenud brauseriaknas sisse kontole { $account } ja tulge siis siia tagasi.
 ui-sign-in-failed = Sisselogimine ei õnnestunud: { $reason }
@@ -391,7 +391,8 @@ ui-properties = &Atribuudid
 ui-account-sync = Saada ja võta &vastu
 ui-account-properties = Atri&buudid...
 ui-account-move-up = Liiguta ü&les
-ui-account-move-down = Liiguta a&lla
+# review: changed
+ui-account-move-down = Liiguta &alla
 ui-menu-open = &Ava
 ui-menu-flag = L&ipp
 ui-menu-view-source = Vaata &lähtekoodi
@@ -424,7 +425,7 @@ ui-undo-button = Võta tagasi
 # review: new
 ui-rules-title = Kirjade reeglid
 # review: new
-ui-rules-intro = Reeglid sorteerivad teie postkastide uued kirjad nende saabumisel, kui Inbox Classic töötab. Iga reegel, mis kirjale sobib, teeb oma osa; reegel, mis kirja ära teisaldab, on selle jaoks viimane.
+ui-rules-intro = Reeglid sorteerivad sisendkaustadesse saabuvaid kirju, kui Inbox Classic töötab. Sobivaid reegleid rakendatakse loendi järjekorras. Kui reegel teisaldab kirja sisendkaustast mujale, siis sellele kirjale järgmisi reegleid enam ei rakendata.
 # review: new
 ui-rules-none = Reegleid veel pole. Uue loomiseks klõpsake nuppu Uus.
 # review: new
@@ -438,28 +439,28 @@ ui-rule-title = Kirja reegel
 # review: new
 ui-rule-name = Nimi:
 # review: new
-ui-rule-account = Uute kirjade jaoks kontol:
+ui-rule-account = Konto:
 # review: new
 ui-rule-all-accounts = Kõik kontod
 # review: new
-ui-rule-query = Mis vastavad:
+ui-rule-query = Otsingutingimused:
 # review: new
-ui-rule-query-hint = Sõnad nagu otsingukastis, näiteks from:ann@example.com, subject:arve või list:news.example.com
+ui-rule-query-hint = Kasutage samu otsingutingimusi nagu otsingukastis, näiteks from:ann@example.com, subject:arve või list:news.example.com.
 # review: new
 ui-rule-count = { $count ->
-    [one] Postkastis vastab praegu 1 kiri.
-   *[other] Postkastis vastab praegu { $count } kirja.
+    [one] Sisendkaustas vastab praegu tingimustele 1 kiri.
+   *[other] Sisendkaustas vastab praegu tingimustele { $count } kirja.
 }
 # review: new
 ui-rule-show = &Näita
 # review: new
-ui-rule-actions = Tee järgmist:
+ui-rule-actions = Toimingud:
 # review: new
 ui-rule-move = &Teisalda kausta:
 # review: new
 ui-rule-mark-read = Märgi &loetuks
 # review: new
-ui-rule-flag = Märgi &lipuga
+ui-rule-flag = Märgi li&puga
 # review: new
 ui-rule-archive = &Arhiveeri
 # review: new
@@ -467,20 +468,20 @@ ui-rule-junk = Teisalda &rämpsposti
 # review: new
 ui-rule-delete = &Kustuta
 # review: new
-ui-rule-quiet = Ära &teavita mind
+ui-rule-quiet = Ära t&eavita mind
 # review: new
-ui-rule-apply-now = Rakenda ka kirjadele, mis on juba &postkastis
+ui-rule-apply-now = Rakenda ka juba &sisendkaustas olevatele kirjadele
 # review: new
 ui-rule-delete-ask = Kas kustutada reegel „{ $name }“?
 # review: new
 ui-create-rule = Loo reegel...
 # review: new
 ui-rules-applied = { $count ->
-    [one] Teie reeglid sorteerisid 1 kirja
-   *[other] Teie reeglid sorteerisid { $count } kirja
+    [one] Reeglite järgi sorditi 1 kiri
+   *[other] Reeglite järgi sorditi { $count } kirja
 }
 # review: new
-ui-col-rule-matches = Vastab
+ui-col-rule-matches = Tingimused
 ui-clear-button = &Tühjenda
 ui-how-to-connect = Kuidas agenti ühendada…
 ui-agent-programs = Programmid, mille agendid on taotlenud juurdepääsu teie e-postile
@@ -585,18 +586,18 @@ ui-download-ahead-all = Kõik kirjad
 ui-download-ahead-never = Ainult avamisel
 ui-download-limit = Mahupiir konto kohta:
 # review: new
-ui-send-delay = Oota enne saatmist:
+ui-send-delay = Viivitus enne saatmist:
 # review: new
-ui-send-delay-note = Kuni kiri ootab, saate selle nupuga Võta tagasi tagasi võtta.
+ui-send-delay-note = Kuni kiri ootab saatmist, saate saatmise tühistada nupuga „Võta tagasi“.
 # review: new
-ui-dark-messages = Näita kirju tumedal taustal, kui süsteem on tume
+ui-dark-messages = Kuva kirju tumedal taustal, kui süsteem kasutab tumedat režiimi
 # review: new
 ui-sending-in = { $subject } saadetakse { $count ->
     [one] 1 sekundi pärast
    *[other] { $count } sekundi pärast
 }
 # review: new
-ui-send-undone = { $subject } jäi saatmata. Kiri on jälle avatud.
+ui-send-undone = { $subject } jäi saatmata. Kiri on taas muutmiseks avatud.
 # review: new
 ui-send-too-late = { $subject } on juba saadetud.
 # review: new

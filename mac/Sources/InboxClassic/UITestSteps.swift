@@ -496,8 +496,8 @@ extension UITest {
         type("from:news@example.com", into: find("rule.query", in: editor))
         let count: NSTextField? = find("rule.count", in: editor)
         // counted once typing stops
-        _ = await waitUntil(5) { count?.stringValue.contains("in the Inbox") == true }
-        check(count?.stringValue.contains("in the Inbox") == true, "the editor counts what the query matches in the Inbox (\(count?.stringValue ?? ""))")
+        _ = await waitUntil(5) { count?.stringValue.contains("Inbox message") == true }
+        check(count?.stringValue.contains("Inbox message") == true, "the editor counts what the query matches in the Inbox (\(count?.stringValue ?? ""))")
         let move: NSButton? = find("rule.move", in: editor)
         let target: NSPopUpButton? = find("rule.target", in: editor)
         onMain { move?.performClick(nil) }

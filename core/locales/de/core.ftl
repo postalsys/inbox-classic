@@ -335,13 +335,13 @@ error-folder-special = der Posteingang und die Spezialordner können nicht umben
 error-no-recipients = die Nachricht hat keine Empfänger
 error-bad-address = „{ $address }“ ist keine E-Mail-Adresse
 # review: new
-error-not-own-address = { $address } ist keine Adresse dieses Kontos. Fügen Sie sie in den Eigenschaften des Kontos unter „Weitere Adressen“ hinzu.
+error-not-own-address = { $address } gehört nicht zu den Absenderadressen dieses Kontos. Fügen Sie die Adresse in den Kontoeigenschaften unter „Weitere Absenderadressen“ hinzu.
 # review: new
-rule-query-refused = Eine Regel gilt für neue Nachrichten in einem Posteingang und kann daher keinen Ordner und kein Datum nennen ({ $words }).
+rule-query-refused = Regeln unterstützen keine Ordner- oder Datumsfilter ({ $words }).
 # review: new
-rule-no-query = Geben Sie ein, was neue Nachrichten erfüllen müssen.
+rule-no-query = Geben Sie Suchkriterien für eingehende Nachrichten ein.
 # review: new
-rule-no-action = Wählen Sie, was die Regel tun soll.
+rule-no-action = Wählen Sie mindestens eine Aktion für die Regel aus.
 error-attachment = { $path } konnte nicht gelesen werden: { $error }
 error-no-drafts = das Konto hat keinen Entwürfe-Ordner, in dem die Nachricht gespeichert werden kann
 error-draft-attachment = eine Anlage des Entwurfs konnte nicht übernommen werden: { $error }

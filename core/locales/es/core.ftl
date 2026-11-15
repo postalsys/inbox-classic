@@ -223,7 +223,7 @@ undo-archive = Deshacer Archivar
 undo-junk = Deshacer Marcar como correo no deseado
 undo-not-junk = Deshacer Marcar como correo deseado
 # review: new
-undo-send = Deshacer Enviar
+undo-send = Deshacer envío
 nothing-to-undo = No hay nada que deshacer.
 messages-gone = Los mensajes ya no están.
 folder-holds-no-messages = Esta carpeta no puede contener mensajes.
@@ -346,13 +346,13 @@ error-folder-special = la Bandeja de entrada y las carpetas especiales no se pue
 error-no-recipients = el mensaje no tiene destinatarios
 error-bad-address = «{ $address }» no es una dirección de correo electrónico
 # review: new
-error-not-own-address = { $address } no es una de las direcciones de esta cuenta. Agréguela en Otras direcciones, en las propiedades de la cuenta.
+error-not-own-address = { $address } no es una de las direcciones de envío de esta cuenta. Añádala al campo «Otras direcciones de envío» en las propiedades de la cuenta.
 # review: new
-rule-query-refused = Una regla es para el correo nuevo de una Bandeja de entrada, así que no puede nombrar una carpeta ni una fecha ({ $words }).
+rule-query-refused = Las reglas no admiten filtros de carpeta ni de fecha ({ $words }).
 # review: new
-rule-no-query = Escriba lo que debe cumplir el correo nuevo.
+rule-no-query = Introduzca los criterios de búsqueda para los mensajes entrantes.
 # review: new
-rule-no-action = Elija lo que hace la regla.
+rule-no-action = Elija al menos una acción para la regla.
 error-attachment = no se pudo leer { $path }: { $error }
 error-no-drafts = la cuenta no tiene una carpeta Borradores donde guardar el mensaje
 error-draft-attachment = no se pudo conservar un archivo adjunto del borrador: { $error }
