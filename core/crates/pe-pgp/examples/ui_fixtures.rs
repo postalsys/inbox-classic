@@ -204,4 +204,20 @@ fn main() {
             &encrypted(&html(&long), &me, Some(&alice), "e"),
         ),
     );
+    // an encrypted message with a file attached: opening it stores it decrypted (the note, once)
+    let plan = mixed(&[
+        text("The plan is in the file."),
+        "Content-Type: text/plain; name=\"plan.txt\"\r\nContent-Disposition: attachment; filename=\"plan.txt\"\r\n\r\nthe secret plan, in a file"
+            .to_string(),
+    ]);
+    write(
+        dir,
+        "secure-attachment.eml",
+        &message(
+            alice_from,
+            "An encrypted file",
+            "attachment",
+            &encrypted(&plan, &me, Some(&alice), "e"),
+        ),
+    );
 }
