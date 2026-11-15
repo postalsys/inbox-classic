@@ -860,6 +860,8 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     /// the name shown follows the first and last name until it is typed in
     private var displayFollows: Bool
     private var saved: Int64 = 0
+    /// the encryption key of each of its addresses
+    private let keys: ContactKeys
 
     private static let kinds: [(PePhoneKind, Text)] = [(PE_PHONE_KIND_MOBILE, .uiPhoneMobile), (PE_PHONE_KIND_HOME, .uiPhoneHome),
                                                        (PE_PHONE_KIND_WORK, .uiPhoneWork), (PE_PHONE_KIND_OTHER, .uiPhoneOther)]
@@ -868,6 +870,7 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         self.core = core
         let editing = card ?? BookCard()
         self.card = editing
+        keys = ContactKeys(core: core)
         let made = bookDisplayName(first: editing.first, last: editing.last)
         displayFollows = card == nil || editing.name.isEmpty || editing.name == made
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 540, height: 600), styleMask: [.titled], backing: .buffered,
@@ -894,6 +897,8 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         phoneKind.setAccessibilityIdentifier("contact.phone.kind")
         window.contentView = layout()
         window.initialFirstResponder = first
+        keys.show(self.card.addresses)
+        keys.resized = { [weak self] in self?.fitContent() }
         showStoredPicture()
         updateButtons()
     }
@@ -1044,6 +1049,7 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
             [formLabel(Text.uiContactPhones.text), phoneRow],
             [NSGridCell.emptyContentView, phoneBox],
             [formLabel(Text.uiContactNotes.text), notesScroll],
+            [formLabel(Text.uiContactKey.text), keys.view],
         ])
         let labelWidth: CGFloat = 130
         let fieldWidth: CGFloat = 400
@@ -1070,6 +1076,10 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         more.cell(atColumnIndex: 0, rowIndex: 4).yPlacement = .top
         more.row(at: 2).topPadding = 10
         more.row(at: 4).topPadding = 10
+        more.row(at: 5).topPadding = 10
+        // the keys' words level with their label, the buttons under them
+        more.row(at: 5).rowAlignment = .none
+        more.row(at: 5).yPlacement = .top
         let line = NSBox()
         line.boxType = .separator
 
@@ -1089,6 +1099,13 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         line.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -40).isActive = true
         buttons.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -40).isActive = true
         return stack
+    }
+
+    /// as tall as what it shows, once the keys of its addresses changed
+    private func fitContent() {
+        guard let content = window.contentView, window.isVisible else { return }
+        content.layoutSubtreeIfNeeded()
+        window.setContentSize(content.fittingSize)
     }
 
     /// the well with Choose and Remove beside it, Remove only while there is a picture
@@ -1175,6 +1192,7 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         addressField.stringValue = ""
         addressList.reloadData()
         updateButtons()
+        keys.show(card.addresses)
         return true
     }
 
@@ -1206,6 +1224,7 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
         card.addresses.remove(at: row)
         addressList.reloadData()
         updateButtons()
+        keys.show(card.addresses)
     }
 
     @objc func addPhoneClicked() {

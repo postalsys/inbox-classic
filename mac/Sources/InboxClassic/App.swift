@@ -608,6 +608,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .importAddressBook: AddressBookFiles.importFile(core: core)
         case .exportAddressBook: AddressBookFiles.exportFile(core: core)
         case .messageRules: RulesWindow.open(core: core)
+        case .encryptionKeys: KeysWindow.open(core: core)
         case .createRuleFromMessage: main.mailbox.createRuleFromMessage()
         }
     }
