@@ -649,6 +649,7 @@ pgp-publish-done = Ihr Schlüssel ist auf keys.openpgp.org für { $addresses } v
 pgp-publish-failed = Der Schlüssel konnte nicht veröffentlicht werden: { $error }
 # review: new
 pgp-keyserver-off = Die Suche nach Schlüsseln auf keys.openpgp.org ist in den Optionen ausgeschaltet.
+# review: new
 pgp-details-part = Teil { $number }: { $label }
 # review: new
 pgp-details-signed = Signiert { $when } mit dem Schlüssel { $key }

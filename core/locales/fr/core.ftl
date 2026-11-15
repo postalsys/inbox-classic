@@ -676,6 +676,7 @@ pgp-publish-done = Votre clé est publiée sur keys.openpgp.org pour { $addresse
 pgp-publish-failed = La clé n'a pas pu être publiée : { $error }
 # review: new
 pgp-keyserver-off = La recherche de clés sur keys.openpgp.org est désactivée dans les Options.
+# review: new
 pgp-details-part = Partie { $number } : { $label }
 # review: new
 pgp-details-signed = Signé { $when } avec la clé { $key }

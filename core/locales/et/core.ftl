@@ -636,6 +636,7 @@ pgp-publish-done = Sinu võti on keys.openpgp.org lehel avaldatud aadressi { $ad
 pgp-publish-failed = Võtit ei saanud avaldada: { $error }
 # review: new
 pgp-keyserver-off = Võtmete otsimine saidilt keys.openpgp.org on suvandites välja lülitatud.
+# review: new
 pgp-details-part = Osa { $number }: { $label }
 # review: new
 pgp-details-signed = Allkirjastatud { $when } võtmega { $key }
