@@ -13,7 +13,8 @@
 //!   blocks are decrypted into a section of their own.
 //! - Nothing is shown of encrypted data whose integrity does not check.
 
-use std::collections::HashSet;
+use std::cell::Cell;
+use std::collections::{HashMap, HashSet};
 
 use pe_i18n::{Text, tr, tr_args};
 use pe_mime::outline::{Outline, outline};
@@ -26,20 +27,13 @@ pub struct KeyRing {
     pub certs: Vec<Cert>,
     /// (fingerprint, address) pairs the user verified
     pub verified: HashSet<(String, String)>,
+    /// The Address Book's name of an address a key holds: the words a label names a signer by (never the key's own
+    /// free text, which anyone writes)
+    pub names: HashMap<String, String>,
 }
 
-/// How a part's colour and words read: from the strongest to none
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Tone {
-    /// Signed by the sender, with a key the user verified: green
-    Verified,
-    /// Signed by the sender with a key found, not verified; or encrypted and not signed: blue
-    Good,
-    /// Something is not right (a signature that does not match, another signer): amber
-    Warning,
-    /// Not signed, or the key is not known: grey
-    Neutral,
-}
+/// How a part's colour and words read (green, blue, amber, grey): the page's own tones
+pub use pe_html::PartTone as Tone;
 
 /// What a part's signature is worth
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -83,11 +77,21 @@ pub struct Verdict {
 }
 
 impl Verdict {
-    fn unsigned(encrypted: bool) -> Verdict {
+    /// Opened, its signature not checked here (inline blocks: their signatures are not read)
+    fn not_checked(encrypted: bool) -> Verdict {
         Verdict {
             encrypted,
-            signature: Signature::None,
+            signature: Signature::NotChecked,
             sealed: None,
+        }
+    }
+
+    /// Encrypted, and not shown: why
+    fn sealed(why: Sealed) -> Verdict {
+        Verdict {
+            encrypted: true,
+            signature: Signature::None,
+            sealed: Some(why),
         }
     }
 
@@ -137,6 +141,9 @@ impl Verdict {
 pub struct Section {
     pub entity: Option<Vec<u8>>,
     pub verdict: Option<Verdict>,
+    /// The layer it came from (0 for none): only sections of one layer are ever drawn in one document, so a part
+    /// someone else encrypted can not wrap another's plaintext
+    pub(crate) layer: u32,
 }
 
 /// A message with protection somewhere in it
@@ -179,16 +186,27 @@ pub fn read(raw: &[u8], ring: &KeyRing, from: &[String], now: i64) -> Option<Pro
     if !may_be_protected(raw) {
         return None;
     }
-    let reader = Reader { ring, from, now };
+    let reader = Reader {
+        ring,
+        from,
+        now,
+        layers: Cell::new(0),
+    };
     // the envelope: the layers from the top
-    let (envelope, payload) = reader.unwrap_layers(raw.to_vec(), 0);
+    let Unwrapped {
+        verdict: envelope,
+        payload,
+        key,
+    } = reader.unwrap_layers(raw.to_vec(), 0, None);
+    let within = Within {
+        verdict: envelope.as_ref(),
+        layer: if envelope.is_some() { reader.new_layer() } else { 0 },
+        key: key.as_deref(),
+    };
     let mut sections = Vec::new();
     match &payload {
-        Some(payload) => reader.sections(payload, envelope.as_ref(), 0, &mut sections),
-        None => sections.push(Section {
-            entity: None,
-            verdict: envelope.clone(),
-        }),
+        Some(payload) => reader.sections(payload, within, 0, &mut sections),
+        None => sections.push(within.section(None)),
     }
     // armor that is only a key, or a layer type this does not read, is no protection; a layer anywhere (even one
     // that is not shown) frames every part, so a frame a sender paints is never alone
@@ -295,44 +313,91 @@ fn inner_subject(payload: &[u8]) -> Option<String> {
     headers.subject.filter(|subject| !subject.trim().is_empty())
 }
 
+/// What the layers at the top of an entity were, what is inside them, and the user's key that opened them
+struct Unwrapped {
+    verdict: Option<Verdict>,
+    /// None when nothing could be opened
+    payload: Option<Vec<u8>>,
+    key: Option<String>,
+}
+
+/// The layer a part is inside: its verdict (None outside any), its number, and the user's key that opened it
+#[derive(Clone, Copy)]
+struct Within<'a> {
+    verdict: Option<&'a Verdict>,
+    layer: u32,
+    key: Option<&'a str>,
+}
+
+impl Within<'_> {
+    fn section(&self, entity: Option<Vec<u8>>) -> Section {
+        Section {
+            entity,
+            verdict: self.verdict.cloned(),
+            layer: self.layer,
+        }
+    }
+}
+
 struct Reader<'a> {
     ring: &'a KeyRing,
     from: &'a [String],
     now: i64,
+    /// The layers numbered so far
+    layers: Cell<u32>,
 }
 
 impl Reader<'_> {
-    /// The layers at the top of `entity`: what they are, and the entity inside them (None when nothing could be
-    /// opened). No layer: (None, the entity).
-    fn unwrap_layers(&self, entity: Vec<u8>, depth: usize) -> (Option<Verdict>, Option<Vec<u8>>) {
+    fn new_layer(&self) -> u32 {
+        self.layers.set(self.layers.get() + 1);
+        self.layers.get()
+    }
+
+    /// The layers at the top of `entity`. No layer: no verdict, the entity itself. `recipient` is the user's key
+    /// that opened an encryption around it: a signature made for other recipients is not for the user (a signed
+    /// message forwarded inside someone else's encryption).
+    fn unwrap_layers(&self, entity: Vec<u8>, depth: usize, recipient: Option<&str>) -> Unwrapped {
+        let none = |payload| Unwrapped {
+            verdict: None,
+            payload,
+            key: recipient.map(str::to_string),
+        };
         if depth >= MAX_LAYERS {
-            return (None, Some(entity));
+            return none(Some(entity));
         }
         let outline = outline(&entity);
         let Some(root) = outline.root() else {
-            return (None, Some(entity));
+            return none(Some(entity));
         };
         if is_encrypted(root) {
             let ciphertext = transfer_decoded(&outline, &entity, root.children[1]);
             let opened = pe_pgp::decrypt(&ciphertext, &self.ring.keys, &self.ring.certs, self.now);
+            let sealed_with = |why| Unwrapped {
+                verdict: Some(Verdict::sealed(why)),
+                payload: None,
+                key: None,
+            };
             return match opened {
-                Err(error) => {
-                    let mut verdict = Verdict::unsigned(true);
-                    verdict.sealed = Some(sealed(error));
-                    (Some(verdict), None)
-                }
+                Err(error) => sealed_with(sealed(error)),
+                // a "multipart/encrypted" with nothing encrypted in it is no encryption, whatever it holds
+                Ok(opened) if !opened.encrypted => sealed_with(Sealed::Broken),
                 Ok(opened) => {
-                    let mut verdict = Verdict::unsigned(true);
+                    let mut verdict = Verdict::not_checked(true);
                     verdict.signature = self.signature(&opened.signatures);
-                    // a signed layer inside the encryption (RFC 3156 6.1)
-                    let (inner, payload) = self.unwrap_layers(opened.data, depth + 1);
-                    if let Some(inner) = inner {
+                    // a signed layer inside the encryption (RFC 3156 6.1), its signature judged for the key that
+                    // opened this
+                    let inner = self.unwrap_layers(opened.data, depth + 1, opened.key.as_deref());
+                    if let Some(inner) = inner.verdict {
                         if verdict.signature == Signature::None {
                             verdict.signature = inner.signature;
                         }
                         verdict.sealed = inner.sealed;
                     }
-                    (Some(verdict), payload)
+                    Unwrapped {
+                        verdict: Some(verdict),
+                        payload: inner.payload,
+                        key: opened.key,
+                    }
                 }
             };
         }
@@ -344,21 +409,30 @@ impl Reader<'_> {
             let verdict = Verdict {
                 encrypted: false,
                 signature: match checks {
-                    Ok(checks) => self.signature(&checks),
+                    Ok(mut checks) => {
+                        for check in &mut checks {
+                            not_for(check, recipient);
+                        }
+                        self.signature(&checks)
+                    }
                     Err(_) => Signature::Bad {
                         why: tr(Text::PgpWhyMismatch),
                     },
                 },
                 sealed: None,
             };
-            return (Some(verdict), Some(outline.bytes(&entity, content).to_vec()));
+            return Unwrapped {
+                verdict: Some(verdict),
+                payload: Some(outline.bytes(&entity, content).to_vec()),
+                key: recipient.map(str::to_string),
+            };
         }
-        (None, Some(entity))
+        none(Some(entity))
     }
 
     /// The sections of `entity` (a payload, or a whole message without an envelope), each protected subtree one,
-    /// `inherited` the protection of the envelope around them
-    fn sections(&self, entity: &[u8], inherited: Option<&Verdict>, depth: usize, out: &mut Vec<Section>) {
+    /// `within` the layer around them
+    fn sections(&self, entity: &[u8], within: Within<'_>, depth: usize, out: &mut Vec<Section>) {
         let outline = outline(entity);
         let has_layer = outline
             .parts
@@ -368,13 +442,10 @@ impl Reader<'_> {
         let has_armor =
             inline_texts(&outline).any(|index| !pe_pgp::inline::blocks(&text_of(&outline, entity, index)).is_empty());
         if depth >= MAX_LAYERS || (!has_layer && !has_armor) {
-            out.push(Section {
-                entity: Some(entity.to_vec()),
-                verdict: inherited.cloned(),
-            });
+            out.push(within.section(Some(entity.to_vec())));
             return;
         }
-        self.walk(&outline, entity, 0, inherited, depth, out);
+        self.walk(&outline, entity, 0, within, depth, out);
     }
 
     fn walk(
@@ -382,94 +453,80 @@ impl Reader<'_> {
         outline: &Outline,
         entity: &[u8],
         index: usize,
-        inherited: Option<&Verdict>,
+        within: Within<'_>,
         depth: usize,
         out: &mut Vec<Section>,
     ) {
         let part = &outline.parts[index];
         if is_signed(part) || is_encrypted(part) {
-            // an errant layer: its part is a section with its own verdict, combined with the envelope's
-            let (verdict, payload) = self.unwrap_layers(outline.bytes(entity, index).to_vec(), 0);
-            let verdict = verdict.map(|own| combine(inherited, own));
-            match payload {
-                Some(payload) => self.sections(&payload, verdict.as_ref(), depth + 1, out),
-                None => out.push(Section { entity: None, verdict }),
+            // an errant layer: a layer of its own, its verdict combined with the envelope's
+            let unwrapped = self.unwrap_layers(outline.bytes(entity, index).to_vec(), 0, within.key);
+            let verdict = unwrapped.verdict.map(|own| combine(within.verdict, own));
+            let inner = Within {
+                verdict: verdict.as_ref(),
+                layer: self.new_layer(),
+                key: unwrapped.key.as_deref(),
+            };
+            match unwrapped.payload {
+                Some(payload) => self.sections(&payload, inner, depth + 1, out),
+                None => out.push(inner.section(None)),
             }
             return;
         }
-        let splits = matches!(part.content_type.as_str(), "multipart/mixed" | "multipart/related")
-            || (part.is_multipart() && part.content_type != "multipart/alternative");
-        if splits && !part.children.is_empty() {
+        if part.is_multipart() && part.content_type != "multipart/alternative" && !part.children.is_empty() {
             for &child in &part.children {
-                self.walk(outline, entity, child, inherited, depth, out);
+                self.walk(outline, entity, child, within, depth, out);
             }
             return;
         }
         if part.content_type == "text/plain" && part.disposition != "attachment" {
             let text = text_of(outline, entity, index);
             if !pe_pgp::inline::blocks(&text).is_empty() {
-                self.inline(&text, inherited, out);
+                self.inline(&text, within, out);
                 return;
             }
         }
-        out.push(Section {
-            entity: Some(outline.bytes(entity, index).to_vec()),
-            verdict: inherited.cloned(),
-        });
+        out.push(within.section(Some(outline.bytes(entity, index).to_vec())));
     }
 
-    /// Text with inline PGP blocks: the text between them as it is, each encrypted or signed block a section
-    fn inline(&self, text: &str, inherited: Option<&Verdict>, out: &mut Vec<Section>) {
+    /// Text with inline PGP blocks: the text between them as it is, each encrypted or signed block a section of a
+    /// layer of its own
+    fn inline(&self, text: &str, within: Within<'_>, out: &mut Vec<Section>) {
         let mut at = 0;
         for block in pe_pgp::inline::blocks(text) {
-            plain_text(&text[at..block.start], inherited, out);
+            plain_text(&text[at..block.start], within, out);
             at = block.end;
             let armored = &text[block.start..block.end];
-            match block.kind {
+            let (entity, own) = match block.kind {
                 pe_pgp::inline::Kind::Message => {
-                    let opened = pe_pgp::decrypt(armored.as_bytes(), &self.ring.keys, &self.ring.certs, self.now);
-                    let section = match opened {
-                        Ok(opened) => Section {
-                            entity: Some(text_entity(&String::from_utf8_lossy(&opened.data))),
-                            verdict: Some(combine(
-                                inherited,
-                                Verdict {
-                                    encrypted: opened.encrypted,
-                                    signature: Signature::NotChecked,
-                                    sealed: None,
-                                },
-                            )),
-                        },
-                        Err(error) => Section {
-                            entity: None,
-                            verdict: Some(Verdict {
-                                encrypted: true,
-                                signature: Signature::None,
-                                sealed: Some(sealed(error)),
-                            }),
-                        },
-                    };
-                    out.push(section);
+                    match pe_pgp::decrypt(armored.as_bytes(), &self.ring.keys, &self.ring.certs, self.now) {
+                        Ok(opened) => (
+                            Some(text_entity(&String::from_utf8_lossy(&opened.data))),
+                            combine(within.verdict, Verdict::not_checked(opened.encrypted)),
+                        ),
+                        Err(error) => (None, Verdict::sealed(sealed(error))),
+                    }
                 }
                 pe_pgp::inline::Kind::Signed => {
                     let shown = pe_pgp::inline::cleartext(armored).unwrap_or_else(|| armored.to_string());
-                    out.push(Section {
-                        entity: Some(text_entity(&shown)),
-                        verdict: Some(combine(
-                            inherited,
-                            Verdict {
-                                encrypted: false,
-                                signature: Signature::NotChecked,
-                                sealed: None,
-                            },
-                        )),
-                    });
+                    (
+                        Some(text_entity(&shown)),
+                        combine(within.verdict, Verdict::not_checked(false)),
+                    )
                 }
                 // keys and loose signatures stay text
-                _ => plain_text(armored, inherited, out),
-            }
+                _ => {
+                    plain_text(armored, within, out);
+                    continue;
+                }
+            };
+            out.push(Section {
+                entity,
+                verdict: Some(own),
+                layer: self.new_layer(),
+            });
         }
-        plain_text(&text[at..], inherited, out);
+        plain_text(&text[at..], within, out);
     }
 
     /// What the checks of a part's signatures make of it: the best one counts
@@ -507,7 +564,7 @@ impl Reader<'_> {
                     [one] => Some(one.trim().to_lowercase()),
                     _ => None,
                 };
-                let name = signer_name(cert, sender.as_deref(), at);
+                let name = signer_name(self.ring, cert, sender.as_deref(), at);
                 match sender {
                     Some(sender) if addresses.contains(&sender) => {
                         if self.ring.verified.contains(&(cert.fingerprint(), sender)) {
@@ -536,15 +593,19 @@ fn rank(signature: &Signature) -> u8 {
     }
 }
 
-/// The name a signer is shown by: the user id with the sender's address, else the first one
-fn signer_name(cert: &Cert, sender: Option<&str>, at: i64) -> String {
-    let users = cert.user_ids(at.max(cert.created()));
-    let user = users
-        .iter()
-        .find(|user| user.address.as_deref() == sender && sender.is_some())
-        .or(users.first());
-    user.map(|user| user.text.clone())
-        .unwrap_or_else(|| pe_pgp::grouped(&cert.fingerprint()))
+/// The name a signer is shown by: the Address Book's name of the address checked (the sender's, or the key's first
+/// address for someone else), else that address; never the key's own free text, which anyone writes ("Alice (key
+/// verified)" gains nothing)
+fn signer_name(ring: &KeyRing, cert: &Cert, sender: Option<&str>, at: i64) -> String {
+    let addresses = cert.addresses(at.max(cert.created()));
+    let address = sender
+        .filter(|sender| addresses.iter().any(|address| address == sender))
+        .map(str::to_string)
+        .or_else(|| addresses.first().cloned());
+    match address {
+        Some(address) => ring.names.get(&address).cloned().unwrap_or(address),
+        None => pe_pgp::grouped(&cert.fingerprint()),
+    }
 }
 
 /// An errant layer inside an envelope: encrypted if either is, and its own signature if it has one, else the
@@ -636,7 +697,7 @@ fn text_of(outline: &Outline, raw: &[u8], index: usize) -> String {
         .unwrap_or_default()
 }
 
-/// A MIME entity of plain text, UTF-8, quoted-printable so that any line length passes
+/// A MIME entity of plain text, UTF-8, base64 so that any line length passes
 fn text_entity(text: &str) -> Vec<u8> {
     let mut out = b"Content-Type: text/plain; charset=utf-8\r\nContent-Transfer-Encoding: base64\r\n\r\n".to_vec();
     let encoded = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, text.as_bytes());
@@ -647,30 +708,61 @@ fn text_entity(text: &str) -> Vec<u8> {
     out
 }
 
-fn plain_text(text: &str, inherited: Option<&Verdict>, out: &mut Vec<Section>) {
+fn plain_text(text: &str, within: Within<'_>, out: &mut Vec<Section>) {
     if !text.trim().is_empty() {
-        out.push(Section {
-            entity: Some(text_entity(text)),
-            verdict: inherited.cloned(),
-        });
+        out.push(within.section(Some(text_entity(text))));
     }
 }
 
-/// Neighbouring sections of the same protection made one: a run of unprotected parts is one section, as is a run of
-/// parts under one envelope
+/// A signature made for other recipients than the user's key that opened the encryption around it: not for the user
+fn not_for(check: &mut SigCheck, recipient: Option<&str>) {
+    if let Some(recipient) = recipient
+        && check.is_good()
+        && !check.intended.is_empty()
+        && !check.intended.iter().any(|fingerprint| fingerprint == recipient)
+    {
+        check.status = SigStatus::Bad(Problem::NotForYou);
+    }
+}
+
+/// Neighbouring sections of one layer, with one verdict, made one document: the parts under one envelope, a run of
+/// unprotected parts. Sections of different layers are never joined, even with equal verdicts: anyone can encrypt a
+/// part to the user, and one drawn with another's plaintext could carry it away (EFAIL).
 fn merge_plain(sections: Vec<Section>) -> Vec<Section> {
     let mut out: Vec<Section> = Vec::new();
+    let mut run: Vec<Section> = Vec::new();
     for section in sections {
-        if let Some(last) = out.last_mut()
-            && last.verdict == section.verdict
-            && let (Some(a), Some(b)) = (&last.entity, &section.entity)
-        {
-            last.entity = Some(mixed(&[a.as_slice(), b.as_slice()]));
-            continue;
+        let joins = section.entity.is_some()
+            && run
+                .last()
+                .is_some_and(|last| last.layer == section.layer && last.verdict == section.verdict);
+        if !joins {
+            flush(&mut run, &mut out);
         }
-        out.push(section);
+        if section.entity.is_some() {
+            run.push(section);
+        } else {
+            out.push(section);
+        }
     }
+    flush(&mut run, &mut out);
     out
+}
+
+/// A run of sections to join, one entity for all of them
+fn flush(run: &mut Vec<Section>, out: &mut Vec<Section>) {
+    if run.len() < 2 {
+        out.append(run);
+        return;
+    }
+    let entities: Vec<&[u8]> = run.iter().filter_map(|section| section.entity.as_deref()).collect();
+    let entity = mixed(&entities);
+    let first = run.swap_remove(0);
+    run.clear();
+    out.push(Section {
+        entity: Some(entity),
+        ..first
+    });
 }
 
 /// Entities joined into one multipart/mixed, with a boundary none of them holds
@@ -686,7 +778,6 @@ fn mixed(entities: &[&[u8]]) -> Vec<u8> {
     }
     let mut out = format!("Content-Type: multipart/mixed; boundary=\"{boundary}\"\r\n\r\n").into_bytes();
     for entity in entities {
-        // an entity that is itself a joined multipart is opened up, so the joined one stays flat
         out.extend_from_slice(format!("--{boundary}\r\n").as_bytes());
         out.extend_from_slice(entity);
         out.extend_from_slice(b"\r\n");

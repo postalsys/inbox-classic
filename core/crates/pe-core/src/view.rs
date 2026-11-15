@@ -15,6 +15,17 @@ pub struct AttachmentView {
     pub size: u64,
 }
 
+impl AttachmentView {
+    fn of(attachment: &Attachment) -> AttachmentView {
+        AttachmentView {
+            safe_filename: attachment.safe_filename(),
+            filename: attachment.display_filename(),
+            mime_type: attachment.mime_type.clone(),
+            size: attachment.content.len() as u64,
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct MessageView {
     pub subject: String,
@@ -232,14 +243,7 @@ pub(crate) fn build_unless(
         remote_images: rendered.remote_images,
         pictures_loaded: allow_remote_images,
         sender,
-        attachments: listed(&message.attachments)
-            .map(|a| AttachmentView {
-                safe_filename: a.safe_filename(),
-                filename: a.display_filename(),
-                mime_type: a.mime_type.clone(),
-                size: a.content.len() as u64,
-            })
-            .collect(),
+        attachments: listed(&message.attachments).map(AttachmentView::of).collect(),
         unsubscribe: crate::unsubscribe::of(&message.headers, trust.domains),
         has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
         picture: 0,
@@ -299,12 +303,7 @@ fn protected_view(
                 if encrypted && allow && rendered.remote_images {
                     label = pe_i18n::tr_args(pe_i18n::Text::PgpPartPicturesLoaded, &[("label", (&label).into())]);
                 }
-                attachments.extend(listed(&part.attachments).map(|a| AttachmentView {
-                    safe_filename: a.safe_filename(),
-                    filename: a.display_filename(),
-                    mime_type: a.mime_type.clone(),
-                    size: a.content.len() as u64,
-                }));
+                attachments.extend(listed(&part.attachments).map(AttachmentView::of));
                 rendered.document
             });
         documents.push(document);
@@ -314,7 +313,7 @@ fn protected_view(
         .iter()
         .zip(&documents)
         .map(|(part, document)| pe_html::SecurePart {
-            tone: part_tone(part.tone),
+            tone: part.tone,
             label: &part.label,
             document: document.as_deref(),
         })
@@ -363,15 +362,6 @@ fn protected_view(
             encrypted: protected.envelope.as_ref().is_some_and(|envelope| envelope.encrypted),
         }),
         ..Default::default()
-    }
-}
-
-fn part_tone(tone: crate::protect::Tone) -> pe_html::PartTone {
-    match tone {
-        crate::protect::Tone::Verified => pe_html::PartTone::Verified,
-        crate::protect::Tone::Good => pe_html::PartTone::Good,
-        crate::protect::Tone::Warning => pe_html::PartTone::Warning,
-        crate::protect::Tone::Neutral => pe_html::PartTone::Neutral,
     }
 }
 

