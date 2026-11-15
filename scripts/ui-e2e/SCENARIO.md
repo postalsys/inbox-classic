@@ -75,6 +75,21 @@ Screenshots: `read-3-attachments` (not yet on the Mac), `read-4-save` (not yet o
 - the attachment is saved as it was sent
 - and marked as from the internet
 
+## 8a. Opening an attachment
+
+Screenshots: `attach-1-strip`, `attach-2-menu`, `attach-3-refused`, `attach-4-encrypted-note`
+
+A message with a PDF and a program (`setup.exe`) attached, and an encrypted message with a text file attached
+(`scripts/ui-e2e/pgp`). Opening a file goes to the test hooks in place of the system, so nothing is launched.
+
+- the strip under the header shows each file with its icon, name and size
+- double-clicking the PDF opens it: the file handed to the system is in the private folder, byte for byte what was sent
+- Tab reaches the strip, the arrow keys move between the files and Enter opens the one chosen
+- a right-click offers Open, Save As... and Save All...
+- the program's Open is greyed, and trying to open it says it can run programs and is only saved
+- the encrypted message's file opens, and the first time a note says it is stored decrypted; the second time no note
+- in a message's own window the strip is there and opens the same way
+
 ## 9. Marking unread and read
 
 Screenshots: `read-5-unread`

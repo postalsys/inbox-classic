@@ -544,6 +544,39 @@ const sections = [
                 checked: ['The menu offers the file']
             },
             {
+                shot: 'attach-1-strip',
+                name: 'Opening attachments',
+                what: "A strip under the message header shows each attached file with its icon, name and size, in the reading pane and in a message's own window. Double-click or Enter opens a file with the program the system uses for it, from a private folder of the user's that is emptied after a day; the file is marked as from the internet. The core decides what each file is.",
+                how: 'Double-click a file in the strip, or Tab to the strip, choose with the arrow keys and press Enter.',
+                checked: [
+                    'Each file shows with its icon, name and size',
+                    'The file opened is byte for byte what was sent, in the private folder',
+                    'The keyboard reaches and opens the files',
+                    'The message window has the strip too'
+                ]
+            },
+            {
+                shot: 'attach-2-menu',
+                name: "An attachment's menu",
+                what: 'A right-click on a file in the strip offers Open, Save As... and Save All...',
+                how: 'Right-click a file in the strip, or press the context menu key.',
+                checked: ['The menu offers Open, Save As and Save All']
+            },
+            {
+                shot: 'attach-3-refused',
+                name: 'Files that can run programs',
+                what: 'A file that can run code (a program, script, installer, shortcut, disk image, web page or an Office file with macros) is never opened from a message: Open is greyed and the app says why. It can be saved, to be opened by the user knowingly.',
+                how: 'Double-click such a file in the strip.',
+                checked: ['Open is greyed for a program', 'Trying to open it says why, and nothing is opened']
+            },
+            {
+                shot: 'attach-4-encrypted-note',
+                name: "An encrypted message's attachments",
+                what: "An encrypted message's attachment opens like any other. The first time, a note says that to open it the file is stored decrypted on this computer, in a private folder emptied after a day.",
+                how: 'Double-click a file of an encrypted message.',
+                checked: ['The note shows the first time only', 'The decrypted file opens']
+            },
+            {
                 shot: 'read-4-save',
                 name: 'Saving an attachment',
                 what: 'The standard Save dialog, suggesting the safe name, starting in Downloads (after that, where you saved last).',
