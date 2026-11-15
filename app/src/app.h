@@ -783,11 +783,38 @@ private:
         core::MessageList rows;
     };
 
-    void FillAccount(HTREEITEM root, int64_t account);
-    // the rows under All Inboxes: each account's Inbox, named as the account
-    void FillAllInboxes();
-    // the row a folder chosen from outside the tree is selected on: its row under All Inboxes while the selection is
-    // there (All Inboxes or a row under it), its account's row otherwise; nullptr when the tree has none
+    // what each row of the tree is, as the core gives it (pe_folder_tree): a tree item's data is its index in treeRows_
+    struct TreeRow {
+        PeTreeRowKind kind = PE_TREE_ROW_KIND_FOLDER;
+        int64_t account = 0;
+        int64_t folder = 0;
+        // how far in: 0 at the top
+        uint32_t depth = 0;
+        std::wstring label;
+        // what the folder bar and the title say while it is selected ("Inbox - Work")
+        std::wstring title;
+        uint64_t unread = 0;
+        // the unread messages under it, shown with its own while it is collapsed
+        uint64_t hidden = 0;
+        bool bold = false;
+        bool boldCollapsed = false;
+        bool dropTarget = false;
+        bool reordersAccounts = false;
+        int icon = 0;
+    };
+    static TreeRow RowFrom(const PeTreeRow& row);
+    // the core's rows of the folder list, in their order
+    std::vector<TreeRow> ReadTree() const;
+    // the rows inserted into the tree, each under the last row one level up
+    void FillTree(const std::vector<TreeRow>& rows);
+    // what the account's folders are for (drafts, Inbox, junk, emptiable), their names and their account
+    void LoadFolderFacts(int64_t account);
+    // the row of a tree item, nullptr for none
+    const TreeRow* RowAt(HTREEITEM item) const;
+    // what was selected before the tree was built again, selected again (or what stands for it now)
+    void Reselect();
+    // the row a folder chosen from outside the tree is selected on (an account's Inbox is under All Inboxes with
+    // several accounts); nullptr when the tree has none
     HTREEITEM RowOf(int64_t folder) const;
     // the right-click menu of an account's own row
     void AccountMenu(POINT screen);
@@ -798,8 +825,8 @@ private:
     void DragAccount(const NMTREEVIEWW& drag);
     // the rows a drag of `item` moves it among: the accounts' own rows, or the Inboxes under All Inboxes
     std::vector<HTREEITEM> SiblingRows(HTREEITEM item) const;
-    // the account of a row's data: an account's own row or its Inbox under All Inboxes; 0 for another row
-    int64_t AccountOfRow(LPARAM data) const;
+    // the account a row orders: an account's own row or its Inbox under All Inboxes; 0 for another row
+    int64_t AccountOfRow(HTREEITEM item) const;
     // the account ids in their order, as the tree shows them
     std::vector<int64_t> AccountOrder() const;
     // where among `rows` a drop at `client` (the tree's pixels) puts the row: before the row at that index, or after
@@ -807,14 +834,15 @@ private:
     size_t DropGap(const std::vector<HTREEITEM>& rows, POINT client) const;
     // the insert mark at the gap `gap` among `rows`, none for kNoGap
     void ShowGap(const std::vector<HTREEITEM>& rows, size_t gap);
-    // `account` put at `index` of the accounts' order, the tree built again with the row of data `row` selected
-    void PlaceAccount(int64_t account, size_t index, LPARAM row);
+    // `account` put at `index` of the accounts' order, the tree built again with its row of kind `kind` selected
+    void PlaceAccount(int64_t account, size_t index, PeTreeRowKind kind);
     // which rows are closed (All Inboxes, accounts by id), kept for the next start; read in Reload, written when a
     // row is opened or closed
     void LoadClosedRows(const std::vector<int64_t>& accounts);
     void SaveClosedRows() const;
     void OnRowExpanded(const NMTREEVIEWW& change);
-    void UpdateFolders(int64_t account);
+    // the counts and bold of the rows from the core's rows again; the tree built again when its rows changed
+    void UpdateCounts();
     void ShowRow(HTREEITEM item);
     void ReloadList(bool keepSelection);
     // whether the list has what words typed found, in every folder (with a Folder column), rather than a folder
@@ -939,28 +967,18 @@ private:
     // the icons the list draws on its rows, and their size
     HIMAGELIST listIcons_ = nullptr;
     int iconSize_ = 16;
-    // the tree items of the folders under their accounts, by folder id; a tree item's data is its folder id, the
-    // account's id negated for an account, kAllInboxesItem for All Inboxes, the folder id with kUnderAllInboxes for
-    // the rows under All Inboxes
+    // the rows of the tree as the core gave them, and their items, by the same index
+    std::vector<TreeRow> treeRows_;
+    std::vector<HTREEITEM> treeItems_;
+    // the item of each folder (a folder has one row: an account's Inbox is under All Inboxes with several accounts)
     std::unordered_map<int64_t, HTREEITEM> items_;
-    // the rows under All Inboxes, each account's Inbox, by folder id
-    std::unordered_map<int64_t, HTREEITEM> inboxItems_;
-    // their titles, "Inbox - Gmail", for the folder bar and the window's
-    std::unordered_map<int64_t, std::wstring> inboxTitles_;
-    // the selected row is one under All Inboxes (its folder is folder_)
-    bool underAllInboxes_ = false;
+    // the kind of the selected row
+    PeTreeRowKind selectedKind_ = PE_TREE_ROW_KIND_FOLDER;
     // the rows closed by the user: All Inboxes, and accounts by id (the others are open)
     bool allInboxesClosed_ = false;
     std::unordered_set<int64_t> closedAccounts_;
-    // the account's own item of each account
+    // the account's own item of each account (with several accounts)
     std::unordered_map<int64_t, HTREEITEM> accountItems_;
-    // what each row of the tree shows: its name, its own unread messages and those of the folders under it
-    struct TreeRow {
-        std::wstring name;
-        uint64_t own = 0;
-        uint64_t below = 0;
-    };
-    std::unordered_map<HTREEITEM, TreeRow> rows_;
     HMENU lastMenu_ = nullptr;
     std::unordered_map<int64_t, std::wstring> accountNames_;
     std::unordered_map<int64_t, std::wstring> accountEmails_;
@@ -977,7 +995,6 @@ private:
     // the Flagged row (every account's flagged messages), and whether it is the list shown
     HTREEITEM flaggedItem_ = nullptr;
     bool flagged_ = false;
-    void ShowFlaggedCount();
     // a drag over the tree: the item under it and since when (one held over opens), where it would go
     struct DragOver {
         HTREEITEM over = nullptr;

@@ -728,49 +728,63 @@ try {
     $FOLDER_COLUMNS = 5
     $folders = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -ge 7) { $n } }
     Check ($null -ne $folders) "the folders of the account are in the tree ($folders)"
-    # the first account's item: the first at the top of the tree, or the one after All Inboxes (above the accounts
-    # while there are two), whose first row is named as the account after it (or which has none, before the accounts'
-    # Inboxes are known)
-    function FirstAccountItem {
-        # the first account's row: not Flagged (no rows under it), nor All Inboxes (its rows named as the accounts)
-        $bare = { param($i) ([Native.Win]::RemoteTreeText($tree, $i)) -replace ' \(\d+\)$', '' }
-        $roots = @()
-        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+    # a tree row's text without its unread count
+    function Bare([IntPtr]$item) { ([Native.Win]::RemoteTreeText($tree, $item)) -replace ' \(\d+\)$', '' }
+    # the rows under `parent` (the top rows for Zero), top to bottom
+    function ChildRows([IntPtr]$parent) {
+        $rows = @()
+        $item = if ($parent -eq [IntPtr]::Zero) { [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero) } else { [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $parent) }
         while ($item -ne [IntPtr]::Zero) {
-            $roots += $item
+            $rows += $item
             $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item)
         }
-        $names = @($roots | ForEach-Object { & $bare $_ })
-        foreach ($root in $roots) {
-            $child = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $root)
-            if ($child -eq [IntPtr]::Zero -or $names -contains (& $bare $child)) { continue }
-            return $root
-        }
-        $roots[0]
+        $rows
     }
-    # the folders under the account: Inbox, Sent Items, Drafts, Archive, Junk E-mail, Deleted Items
+    # the first row named `name` under `parent` (the top rows for Zero); Zero when there is none
+    function NamedRow([IntPtr]$parent, [string]$name) {
+        foreach ($row in @(ChildRows $parent)) { if ((Bare $row) -eq $name) { return $row } }
+        [IntPtr]::Zero
+    }
+    # a folder of the first account, by its name: with one account the folders are the top rows (the Inbox first);
+    # with two the Inbox is the first row under All Inboxes and the others are under the first account's heading,
+    # the first top row after All Inboxes and Flagged
+    function FolderItem([string]$folder) {
+        $all = NamedRow ([IntPtr]::Zero) 'All Inboxes'
+        if ($all -eq [IntPtr]::Zero) { return (NamedRow ([IntPtr]::Zero) $folder) }
+        if ($folder -eq 'Inbox') { return [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $all) }
+        $heading = @(ChildRows ([IntPtr]::Zero) | Where-Object { $_ -ne $all -and (Bare $_) -ne 'Flagged' }) | Select-Object -First 1
+        if ($null -eq $heading) { return [IntPtr]::Zero }
+        NamedRow $heading $folder
+    }
+    # the folders of the account by their place on the server: Inbox, Sent Items, Drafts, Archive, Junk E-mail,
+    # Deleted Items
+    $FOLDER_NAMES = @('Inbox', 'Sent Items', 'Drafts', 'Archive', 'Junk E-mail', 'Deleted Items')
     function SelectFolder([int]$index) {
-        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, (FirstAccountItem))
-        for ($i = 0; $i -lt $index; $i++) { $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item) }
+        $item = FolderItem $FOLDER_NAMES[$index]
         [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $item)
     }
     function Rows { ListCount $list }
     # the rows of the list with this subject
     function SubjectRows([string]$s) { @(0..([Math]::Max(0, (Rows) - 1)) | Where-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) -eq $s }) }
-    # a tree's row by its account and folder, their unread counts and "(current)" left out; Zero when it is not there
+    # a tree's row by its account and folder, their unread counts and "(current)" left out; Zero when it is not there.
+    # A tree without a row for the account (one account) has the folders at the top
     function TreeRow([IntPtr]$t, [string]$account, [string]$folder) {
         $name = { param($item) ([Native.Win]::RemoteTreeText($t, $item)) -replace ' \((\d+|current)\)$', '' }
+        $tops = @()
         $item = [Native.Win]::SendMessage($t, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
         while ($item -ne [IntPtr]::Zero) {
+            $tops += $item
             if ((& $name $item) -eq $account) {
                 $child = [Native.Win]::SendMessage($t, $TVM_GETNEXTITEM, [IntPtr]4, $item)
                 while ($child -ne [IntPtr]::Zero) {
                     if ((& $name $child) -eq $folder) { return $child }
                     $child = [Native.Win]::SendMessage($t, $TVM_GETNEXTITEM, [IntPtr]1, $child)
                 }
+                return [IntPtr]::Zero
             }
             $item = [Native.Win]::SendMessage($t, $TVM_GETNEXTITEM, [IntPtr]1, $item)
         }
+        foreach ($top in $tops) { if ((& $name $top) -eq $folder) { return $top } }
         [IntPtr]::Zero
     }
     # the texts of the rows a tree shows, top to bottom
@@ -2539,10 +2553,11 @@ public static class Dragger {
 
     Step 'the Flagged folder'
     $flaggedRow = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)) | Where-Object { $_ -like 'Flagged*' })
-    Check ($flaggedRow.Count -eq 1) "Flagged is in the folder list ($($flaggedRow -join ', '))"
+    $topRows = @(ChildRows ([IntPtr]::Zero) | ForEach-Object { Bare $_ })
+    Check ($flaggedRow.Count -eq 1 -and $topRows[0] -eq 'Inbox' -and $topRows[1] -eq 'Flagged') "Flagged is in the folder list right under the Inbox ($($topRows -join ', '))"
     # opened, it lists as many messages as it counts, with the Folder column's names
     $flaggedCount = if ($flaggedRow.Count -eq 1 -and $flaggedRow[0] -match '\((\d+)\)') { [int]$Matches[1] } else { 0 }
-    $flaggedItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
+    $flaggedItem = NamedRow ([IntPtr]::Zero) 'Flagged'
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $flaggedItem)
     Check ([bool](WaitFor { (Rows) -gt 0 -and (Rows) -eq $flaggedCount } 15)) "Flagged lists the flagged messages of every folder ($(Rows) of $flaggedCount)"
     Shot $main 'main-10-flagged'
@@ -2678,28 +2693,61 @@ public static class Dragger {
     Shot $main 'read-11-logo'
     [void][Native.Win]::SendMessage($findBox, $WM_SETTEXT, [IntPtr]::Zero, '')
 
-    Step 'a collapsed account'
-    # the account's own item, the first of the tree, and the Inbox under it
-    $accountItem = (FirstAccountItem)
-    $inboxItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $accountItem)
+    Step 'the folder list of one account'
     $TVM_GETITEMSTATE = 0x1127; $TVIS_BOLD = 0x10; $VK_LEFT = 0x25; $VK_RIGHT = 0x27
     $bold = { param($item) ([int][Native.Win]::SendMessage($tree, $TVM_GETITEMSTATE, $item, [IntPtr]$TVIS_BOLD) -band $TVIS_BOLD) -ne 0 }
-    $inboxText = [Native.Win]::RemoteTreeText($tree, $inboxItem)
-    Check ($inboxText -match '\((\d+)\)$') "the Inbox has unread messages ($inboxText)"
-    $inboxUnread = if ($inboxText -match '\((\d+)\)$') { [int]$Matches[1] } else { 0 }
-    # collapsed with the keyboard, as a user would, so the tree tells the window (TVM_EXPAND would not)
-    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $accountItem)
+    $topNames = { @(ChildRows ([IntPtr]::Zero) | ForEach-Object { Bare $_ }) }
+    $serverFolders = { @(Invoke-RestMethod $rest) | ForEach-Object { $_.path } }
+    # a folder kept in the Inbox on the server, as another client would make it
+    [void](Invoke-RestMethod -Method Post -ContentType 'application/json' $rest -Body (@{ path = 'INBOX/Receipts'; subscribed = $true } | ConvertTo-Json))
+    Command $main $IDM_SYNC
+    [void](WaitFor { (& $topNames) -contains 'Receipts' } 20)
+    $names = & $topNames
+    Check ($names[0] -eq 'Inbox' -and $names[1] -eq 'Flagged' -and $names -contains 'Sent Items' -and $names -contains 'Archive') "the Inbox is the first row of the tree, Flagged the second, then the account's other folders ($($names -join ', '))"
+    Check (-not ($names -contains 'inboxclassic.test') -and -not ($names -contains 'All Inboxes')) "there is no row for the account ($($names -join ', '))"
+    $inboxRow = FolderItem 'Inbox'
+    Check ($names[2] -eq 'Receipts' -and [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $inboxRow) -eq [IntPtr]::Zero) "the Inbox holds no folders: a folder the server keeps in the Inbox is listed a level up, after Flagged ($($names -join ', '))"
+    Check ((& $bold $inboxRow) -eq ([Native.Win]::RemoteTreeText($tree, $inboxRow) -match '\(\d+\)$')) "the Inbox is bold while it counts unread mail ($([Native.Win]::RemoteTreeText($tree, $inboxRow)))"
+    Check (-not (& $bold (NamedRow ([IntPtr]::Zero) 'Flagged'))) 'Flagged is never bold'
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $inboxRow)
+    Check ([bool](WaitFor { (WindowText $main) -eq 'Inbox - Inbox Classic' } 10)) "the title names the Inbox alone ($(WindowText $main))"
+    Shot $main 'folders-6-one-account'
+    # the Inbox's right-click menu: the folder's, no account commands
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
     [void][Native.Win]::SetForegroundWindow($main)
-    [void][Native.Win]::SendMessage($tree, $WM_KEYDOWN, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
-    [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
-    $collapsed = WaitFor { $t = [Native.Win]::RemoteTreeText($tree, $accountItem); if ($t -match '\((\d+)\)$' -and [int]$Matches[1] -ge $inboxUnread) { $t } } 5
-    Check ([bool]$collapsed) "collapsed, the account shows the unread messages of its folders ($([Native.Win]::RemoteTreeText($tree, $accountItem)))"
-    Check (& $bold $accountItem) 'and is bold'
-    Shot $main 'folders-5-collapsed'
-    [void][Native.Win]::SendMessage($tree, $WM_KEYDOWN, [IntPtr]$VK_RIGHT, [IntPtr]::Zero)
-    [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_RIGHT, [IntPtr]::Zero)
-    $expanded = WaitFor { $t = [Native.Win]::RemoteTreeText($tree, $accountItem); if ($t -notmatch '\(\d+\)$') { $t } } 5
-    Check ([bool]$expanded -and -not (& $bold $accountItem) -and ([Native.Win]::RemoteTreeText($tree, $inboxItem)) -match '\(\d+\)$') 'expanded, the count is back on the Inbox alone'
+    Start-Sleep -Milliseconds 300
+    $box = [Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $inboxRow.ToInt64())
+    $at = @([int](($box.Left + $box.Right) / 2), [int](($box.Top + $box.Bottom) / 2))
+    foreach ($button in @(0, 0x0008, 0x0010)) { [Native.Win]::Mouse($at[0], $at[1], $button) }
+    $menu = WaitWindow '#32768' $null 10
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+    $labels = if ($menu) { @([Native.Win]::MenuLabels([Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero))) } else { @() }
+    Check (($labels -contains 'New Folder...') -and -not ($labels -contains 'Properties...') -and -not ($labels -contains 'Send and Receive')) "right-clicking the Inbox gives the folder's menu, no account commands ($($labels -join ', '))"
+    if ($menu) {
+        Key $menu $VK_ESCAPE
+        [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+    }
+    # New Folder with Flagged selected: at the top
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, (NamedRow ([IntPtr]::Zero) 'Flagged'))
+    Command $main $IDM_NEW_FOLDER
+    $form = WaitFor {
+        $f = [Native.Win]::FindWindow('InboxClassicForm', 'New Folder')
+        if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, 100) -ne [IntPtr]::Zero) { $f }
+    }
+    Check ($null -ne $form -and (Statics $form) -match 'top') "New Folder asks for a name, at the top ($(if ($form) { Statics $form }))"
+    if ($form) {
+        SetText $form 100 'Trips'
+        Click $form 1
+    }
+    Check ([bool](WaitFor { (& $serverFolders) -contains 'Trips' } 20)) "New Folder with Flagged selected makes the folder at the top of the list ($((& $serverFolders) -join ', '))"
+    Check ([bool](WaitFor { (& $topNames) -contains 'Trips' } 20)) "and it is a top row of the tree ($((& $topNames) -join ', '))"
+    # the folders made here go again, for the steps after (ImapKit may keep listing Receipts)
+    foreach ($path in @('Trips', 'INBOX/Receipts')) {
+        [void](Invoke-RestMethod -Method Delete "$rest/$([uri]::EscapeDataString($path))")
+    }
+    Command $main $IDM_SYNC
+    [void](WaitFor { -not ((& $topNames) -contains 'Trips') } 20)
+    SelectFolder 0
 
     Step 'an AI agent'
     $IDC_AGENT_LEVEL = 600; $IDC_AGENT_PATH = 611; $IDC_AGENT_RECIPIENTS = 612; $IDC_AGENT_WARNING = 614; $IDC_AGENT_SEND = 615
@@ -2820,9 +2868,8 @@ public static class Dragger {
     Command $main $IDM_SYNC
     SelectFolder 0
     $inInbox = WaitFor { if ((Rows) -ge 2 -and [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT) -eq 'Drag me' -and [Native.Win]::RemoteListText($list, 1, $COL_SUBJECT) -eq 'Copy me') { Rows } } 30
-    # the first row and Archive (the fourth folder) on the screen
-    $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, (FirstAccountItem))
-    for ($i = 0; $i -lt 3; $i++) { $archiveItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $archiveItem) }
+    # the first row and Archive on the screen
+    $archiveItem = FolderItem 'Archive'
     function Middle($rect) { @([int](($rect.Left + $rect.Right) / 2), [int](($rect.Top + $rect.Bottom) / 2)) }
     [void][Native.Win]::SetForegroundWindow($main)
     function DragFirstRow([bool]$copy, [string]$shot) {
@@ -2847,7 +2894,7 @@ public static class Dragger {
     Check ($null -ne (WaitFor { Find 'Archive' "Subject: $second" } 20)) "with Ctrl it is copied there ($second)"
     Check ($null -ne (Find 'INBOX' "Subject: $second")) 'and stays in the Inbox'
     # onto the folder it is in: nothing happens
-    $inboxItem = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, (FirstAccountItem))
+    $inboxItem = FolderItem 'Inbox'
     $row = [Native.Win]::RemoteRect($list, 0x100E, [IntPtr]0, 0)
     $inbox = Middle ([Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $inboxItem.ToInt64()))
     $before = Rows
@@ -3351,7 +3398,8 @@ public static class Dragger {
     if ($goTo) {
         $pickerTree = [Native.Win]::GetDlgItem($goTo, 102)
         $texts = @(TreeTexts $pickerTree)
-        Check (($texts -contains 'inboxclassic.test') -and ($texts -contains 'Sent Items')) "it shows the folders of every account ($($texts -join ', '))"
+        # with one account, no row for it: its folders at the top
+        Check (-not ($texts -contains 'inboxclassic.test') -and ($texts -contains 'Sent Items') -and ($texts -contains 'Inbox')) "it shows the folders of the account, with no row for the one account ($($texts -join ', '))"
         Check (-not (Visible $goTo 103)) 'without New Folder'
         SetText $goTo 101 'sent'
         $narrowed = @(TreeTexts $pickerTree)
@@ -4133,9 +4181,7 @@ public static class Dragger {
     Check ([bool](WaitFor { (Mailboxes) -contains 'Archive/Projects' } 20)) 'New Folder makes Archive/Projects on the server'
     # the first folder in Archive, found again each time: the tree is built anew when the folders change
     function ArchiveChild {
-        $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, (FirstAccountItem))
-        for ($i = 0; $i -lt 3; $i++) { $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item) }
-        $child = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $item)
+        $child = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, (FolderItem 'Archive'))
         if ($child -ne [IntPtr]::Zero) { $child }
     }
     $projects = WaitFor { ArchiveChild }
@@ -4635,7 +4681,8 @@ public static class Dragger {
         SetText $logon 100 'testpass2'
         Click $logon 1
         $synced = WaitFor {
-            $work = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, (FirstAccountItem))
+            # the second account's heading, with its folders under it
+            $work = NamedRow ([IntPtr]::Zero) 'Work'
             if ($work -ne [IntPtr]::Zero -and [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $work) -ne [IntPtr]::Zero) { $work }
         } 30
         Check ($null -ne $synced) 'with the right password typed, the account syncs'
@@ -4649,7 +4696,14 @@ public static class Dragger {
     AddMessage "From: Maria Lopez <maria@example.org>`r`nTo: testuser@inboxclassic.test`r`nSubject: Photos from the trip`r`nDate: $date`r`nMessage-ID: <trip-photos@example.org>`r`n`r`nThe photos from the trip are in the shared album.`r`n"
     Command $main $IDM_SYNC
     $top = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
-    Check (([Native.Win]::RemoteTreeText($tree, $top)) -match '^All Inboxes') "All Inboxes is at the top of the tree, above the accounts ($([Native.Win]::RemoteTreeText($tree, $top)))"
+    $tops = @(ChildRows ([IntPtr]::Zero) | ForEach-Object { Bare $_ })
+    Check (($tops -join '|') -eq 'All Inboxes|Flagged|inboxclassic.test|Work') "All Inboxes is at the top of the tree, then Flagged, then each account's heading ($($tops -join ', '))"
+    # the first folder under each heading; ImapKit keeps a deleted folder of the Inbox (Receipts of step 27) listed
+    $firstUnder = { param($name) @(ChildRows (NamedRow ([IntPtr]::Zero) $name) | ForEach-Object { Bare $_ } | Where-Object { $_ -ne 'Receipts' }) | Select-Object -First 1 }
+    $underAll = @(ChildRows $top | ForEach-Object { Bare $_ })
+    $headingsOk = (& $firstUnder 'inboxclassic.test') -eq 'Sent Items' -and (& $firstUnder 'Work') -eq 'Sent Items'
+    $noInbox = -not ((ChildRows (NamedRow ([IntPtr]::Zero) 'inboxclassic.test') | ForEach-Object { Bare $_ }) -contains 'Inbox')
+    Check ($headingsOk -and $noInbox -and ($underAll -join '|') -eq 'inboxclassic.test|Work') "the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, starting with Sent Items ($($underAll -join ', '); $(& $firstUnder 'inboxclassic.test') / $(& $firstUnder 'Work'))"
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $top)
     $expected = (Messages 'INBOX').Count + (Messages 'INBOX' $rest2).Count
     # grouped by conversation the rows are fewer (replies share a row): the messages the list has are counted
@@ -4809,7 +4863,8 @@ public static class Dragger {
             $texts.Count -eq 2 -and $texts[0] -eq (& $counted 'inboxclassic.test' $rest) -and $texts[1] -eq (& $counted 'Work' $rest2) -and (& $unreadOn $rest2) -gt 0
         } 30)
     Check $named "All Inboxes has a row for each account, in their order, named as the account with its Inbox's unread count ($((& $rowTexts) -join ', '))"
-    Check (([Native.Win]::RemoteTreeText($tree, $top)) -eq 'All Inboxes') "open, All Inboxes shows no count of its own ($([Native.Win]::RemoteTreeText($tree, $top)))"
+    $inboxesUnread = (& $unreadOn $rest) + (& $unreadOn $rest2)
+    Check ([bool](WaitFor { ([Native.Win]::RemoteTreeText($tree, $top)) -eq "All Inboxes ($inboxesUnread)" } 10)) "All Inboxes counts the unread mail of every Inbox ($([Native.Win]::RemoteTreeText($tree, $top)), $inboxesUnread)"
     $workInbox = @(AllInboxesRows)[1]
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $workInbox)
     $workCount = (Messages 'INBOX' $rest2).Count
@@ -4836,8 +4891,26 @@ public static class Dragger {
     }
     $renamed = [bool](WaitFor { (AccountRow 'Second') -ne [IntPtr]::Zero -and @(& $rowTexts)[-1] -match '^Second( \(\d+\))?$' } 20)
     Check $renamed "set to Second, the account's heading and its row under All Inboxes say Second ($((& $rowTexts) -join ', '))"
-    # the first account's right-click menu, as a right-click on its row opens it
+    # the first account collapsed with the keyboard, as a user would, so the tree tells the window (TVM_EXPAND would
+    # not): it counts the unread mail of the folders it hides (Kept for later in Archive)
     $alex = AccountRow 'inboxclassic.test'
+    $archiveRow = NamedRow $alex 'Archive'
+    $archiveUnread = [bool](WaitFor { ([Native.Win]::RemoteTreeText($tree, $archiveRow)) -match '\((\d+)\)$' } 20)
+    $hiddenUnread = if (([Native.Win]::RemoteTreeText($tree, $archiveRow)) -match '\((\d+)\)$') { [int]$Matches[1] } else { 0 }
+    Check ($archiveUnread -and (& $bold $archiveRow) -and -not (& $bold $alex)) "open, the account's heading counts nothing, its Archive counts its unread mail ($([Native.Win]::RemoteTreeText($tree, $archiveRow)))"
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $alex)
+    [void][Native.Win]::SetForegroundWindow($main)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYDOWN, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
+    $collapsed = WaitFor { $t = [Native.Win]::RemoteTreeText($tree, $alex); if ($t -match '\((\d+)\)$' -and [int]$Matches[1] -ge $hiddenUnread -and $hiddenUnread -gt 0) { $t } } 5
+    Check ([bool]$collapsed -and (& $bold $alex)) "collapsed, the account shows the unread messages of the folders it hides, in bold ($([Native.Win]::RemoteTreeText($tree, $alex)))"
+    Check ((& $folderBar) -eq ' inboxclassic.test' -and (Rows) -eq 0) "the account's row is selected and lists nothing ($(& $folderBar), $(Rows) rows)"
+    Shot $main 'folders-5-collapsed'
+    [void][Native.Win]::SendMessage($tree, $WM_KEYDOWN, [IntPtr]$VK_RIGHT, [IntPtr]::Zero)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_RIGHT, [IntPtr]::Zero)
+    $expanded = WaitFor { $t = [Native.Win]::RemoteTreeText($tree, $alex); if ($t -notmatch '\(\d+\)$') { $t } } 5
+    Check ([bool]$expanded -and -not (& $bold $alex) -and ([Native.Win]::RemoteTreeText($tree, $archiveRow)) -match '\(\d+\)$') "expanded again, the count goes back to the folders ($([Native.Win]::RemoteTreeText($tree, $archiveRow)))"
+    # the first account's right-click menu, as a right-click on its row opens it
     [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
     [void][Native.Win]::SetForegroundWindow($main)
     Start-Sleep -Milliseconds 300
@@ -4980,8 +5053,8 @@ public static class Dragger {
         [void](WaitFor { -not [Native.Win]::IsWindow($accounts) })
         $after = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -lt $before) { $n } }
         Check ($null -ne $after) "the account leaves the tree ($before items before)"
-        $top = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
-        Check (([Native.Win]::RemoteTreeText($tree, $top)) -notmatch '^All Inboxes') 'All Inboxes goes with the second account'
+        $tops = @(ChildRows ([IntPtr]::Zero) | ForEach-Object { Bare $_ })
+        Check ($tops[0] -eq 'Inbox' -and $tops[1] -eq 'Flagged' -and -not ($tops -contains 'All Inboxes') -and -not ($tops -contains 'inboxclassic.test')) "All Inboxes goes with the second account, and the tree is the one account's again: the Inbox first, then Flagged, no heading ($($tops -join ', '))"
         Shot $main 'accounts-3-after'
     }
 
@@ -5595,7 +5668,8 @@ public static bool HasIcon(IntPtr window) {
         Check ($tools[-1] -eq $de['cmd-options']) "Tools ends with $($de['cmd-options'])"
         Check ((ToolbarText $main $IDM_NEW_MAIL) -eq $de['ui-tb-create-mail']) "the toolbar is German ($(ToolbarText $main $IDM_NEW_MAIL))"
         $folders = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)))
-        Check (@($folders | Where-Object { $_ -like "$($de['folder-inbox'])*" }).Count -gt 0) "the folders are German ($($folders -join ', '))"
+        # with two accounts the Inboxes are named as their accounts under All Inboxes: Sent Items is looked for
+        Check (@($folders | Where-Object { $_ -like "$($de['folder-sent'])*" }).Count -gt 0) "the folders are German ($($folders -join ', '))"
         $status = [Native.Win]::FindDescendants($main, 'msctls_statusbar32') | Select-Object -First 1
         Write-Host "   status bar: $(StatusPart $status 0) | $(StatusPart $status 1)"
         Shot $main 'lang-1-german'
