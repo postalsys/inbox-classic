@@ -793,6 +793,29 @@ impl<'a> Book<'a> {
         Ok(pe_mime::parser::safe_filename(Some(&name), "application/pgp-keys"))
     }
 
+    /// The keys a message is read with: every own key that opens, every certificate, and what the user verified
+    pub fn ring(&self) -> Result<crate::protect::KeyRing> {
+        let master = master(self.secrets, false)?;
+        let mut ring = crate::protect::KeyRing::default();
+        for key in self.store.pgp_keys()? {
+            if let Some(cert) = self.certs.get(&key) {
+                ring.certs.push(cert);
+            }
+            if let (Some(master), Some(wrapped)) = (master.as_deref(), key.secret.as_deref())
+                && let Some(plain) = unwrap(master, &self.profile, &key.fingerprint, wrapped)
+                && let Ok(secret) = SecretKey::from_bytes(&plain)
+            {
+                ring.keys.push(secret);
+            }
+        }
+        for held in self.store.pgp_key_addresses(None)? {
+            if held.verified {
+                ring.verified.insert((held.fingerprint, held.address));
+            }
+        }
+        Ok(ring)
+    }
+
     pub fn peer(&self, address: &str) -> Result<PeerKeys> {
         let address = normal_address(address);
         let peer = self.store.pgp_peer(&address)?.unwrap_or_default();
@@ -838,6 +861,15 @@ fn words(error: &pe_pgp::Error) -> String {
 }
 
 impl Core {
+    /// The keys to read `source` with, when it may be signed or encrypted at all
+    pub(crate) fn ring_for(&self, store: &Store, source: &[u8]) -> Option<std::sync::Arc<crate::protect::KeyRing>> {
+        if !crate::protect::may_be_protected(source) {
+            return None;
+        }
+        let book = Book::new(store, &self.secrets, &self.pgp_certs).ok()?;
+        book.ring().ok().map(std::sync::Arc::new)
+    }
+
     pub(crate) fn book<T, E: From<Error>>(
         &self,
         work: impl FnOnce(&Book<'_>) -> std::result::Result<T, E>,

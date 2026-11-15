@@ -559,3 +559,49 @@ pgp-file-name-public = { $who } avalik võti.asc
 pgp-file-name-private = { $who } privaatvõtme varukoopia.asc
 # review: new
 pgp-pending = Aadressi { $address } jaoks leiti { $date } teine võti.
+
+## Reading signed and encrypted mail (protect.rs)
+# review: new
+pgp-part-verified = Allkirjastanud { $signer }, võti kontrollitud
+# review: new
+pgp-part-signed = Allkirjastanud { $signer } (võti kontrollimata)
+# review: new
+pgp-part-other = Allkirjastanud { $signer }, kes ei ole saatja
+# review: new
+pgp-part-unknown-key = Allkirjastatud, kuid võti pole teada
+# review: new
+pgp-part-not-signed = Allkirjastamata
+# review: new
+pgp-part-not-checked = Allkirja ei kontrollitud
+# review: new
+pgp-part-encrypted = Krüpteeritud. { $signature }
+# review: new
+pgp-part-no-key = Krüpteeritud võtmele, mida sul pole
+# review: new
+pgp-part-changed = Krüpteeritud osa muudeti teel ja seda ei näidata
+# review: new
+pgp-part-unprotected = Krüpteeritud ilma muutmise vastase kaitseta, ei näidata
+# review: new
+pgp-part-broken = Krüpteeritud osa ei saa lugeda
+# review: new
+pgp-why-mismatch = Allkiri ei vasta sellele tekstile
+# review: new
+pgp-why-weak-hash = Allkiri kasutab algoritmi { $hash }, mis pole enam turvaline
+# review: new
+pgp-why-key-expired = Allkirjastatud pärast võtme aegumist { $date }
+# review: new
+pgp-why-key-revoked = Allkirjastatud tühistatud võtmega
+# review: new
+pgp-why-not-signing-key = Allkirjastatud võtmega, mis ei tohi allkirjastada
+# review: new
+pgp-why-from-future = Allkiri on dateeritud tulevikku
+# review: new
+pgp-why-signature-expired = Allkiri on aegunud
+# review: new
+pgp-why-key-not-valid = Allkirjastatud kehtetu võtmega
+# review: new
+pgp-why-not-for-you = Allkirjastatud teistele saajatele ja sulle edasi saadetud
+# review: new
+pgp-bar-mixed = Selle kirja osad on kaitstud erinevalt: iga osa ütleb, kuidas.
+# review: new
+pgp-part-pictures-loaded = { $label }. Pildid laaditi internetist

@@ -572,3 +572,49 @@ pgp-file-name-public = { $who } öffentlicher Schlüssel.asc
 pgp-file-name-private = { $who } Sicherung des privaten Schlüssels.asc
 # review: new
 pgp-pending = Für { $address } wurde am { $date } ein anderer Schlüssel gefunden.
+
+## Reading signed and encrypted mail (protect.rs)
+# review: new
+pgp-part-verified = Signiert von { $signer }, Schlüssel überprüft
+# review: new
+pgp-part-signed = Signiert von { $signer } (Schlüssel nicht überprüft)
+# review: new
+pgp-part-other = Signiert von { $signer }, nicht vom Absender
+# review: new
+pgp-part-unknown-key = Signiert, aber der Schlüssel ist nicht bekannt
+# review: new
+pgp-part-not-signed = Nicht signiert
+# review: new
+pgp-part-not-checked = Signatur nicht geprüft
+# review: new
+pgp-part-encrypted = Verschlüsselt. { $signature }
+# review: new
+pgp-part-no-key = Verschlüsselt für einen Schlüssel, den Sie nicht haben
+# review: new
+pgp-part-changed = Der verschlüsselte Teil wurde unterwegs verändert und wird nicht angezeigt
+# review: new
+pgp-part-unprotected = Ohne Schutz gegen Veränderung verschlüsselt, nicht angezeigt
+# review: new
+pgp-part-broken = Der verschlüsselte Teil kann nicht gelesen werden
+# review: new
+pgp-why-mismatch = Die Signatur passt nicht zu diesem Text
+# review: new
+pgp-why-weak-hash = Die Signatur verwendet { $hash }, das nicht mehr sicher ist
+# review: new
+pgp-why-key-expired = Signiert, nachdem der Schlüssel am { $date } abgelaufen war
+# review: new
+pgp-why-key-revoked = Mit einem widerrufenen Schlüssel signiert
+# review: new
+pgp-why-not-signing-key = Mit einem Schlüssel signiert, der nicht signieren darf
+# review: new
+pgp-why-from-future = Die Signatur ist in die Zukunft datiert
+# review: new
+pgp-why-signature-expired = Die Signatur ist abgelaufen
+# review: new
+pgp-why-key-not-valid = Mit einem ungültigen Schlüssel signiert
+# review: new
+pgp-why-not-for-you = Für andere Empfänger signiert und an Sie weitergegeben
+# review: new
+pgp-bar-mixed = Teile dieser Nachricht sind unterschiedlich geschützt: Jeder Teil sagt, wie.
+# review: new
+pgp-part-pictures-loaded = { $label }. Bilder wurden aus dem Internet geladen

@@ -50,6 +50,28 @@ pub struct MessageView {
     pub bounced_message: Option<MessageRef>,
     /// The one-time code of the card at the top of the document (Copy puts it on the clipboard), None without one
     pub otp_code: Option<String>,
+    /// For a message with signed or encrypted parts: what the bar over it says and what each part is; None for
+    /// any other message
+    pub protection: Option<ProtectionView>,
+}
+
+/// What a signed or encrypted message is, for the bar over it (which mail can not draw) and its Details
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ProtectionView {
+    /// The colour of the bar: the whole message's, or the most worrying part's
+    pub tone: crate::protect::Tone,
+    /// What the bar says
+    pub text: String,
+    /// Each part as the page labels it, in order
+    pub parts: Vec<PartView>,
+    /// The message's envelope (the layers at its top) is encrypted
+    pub encrypted: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PartView {
+    pub tone: crate::protect::Tone,
+    pub label: String,
 }
 
 /// Whose word counts for a message: the domains whose Authentication-Results verdicts the account's provider gives,
@@ -60,6 +82,8 @@ pub(crate) struct Trust<'a> {
     pub codes: bool,
     /// Whether pictures load without the user's click (pictures.rs)
     pub pictures: crate::pictures::Rules<'a>,
+    /// The keys to read a signed or encrypted message with; None for a message that is neither
+    pub ring: Option<&'a crate::protect::KeyRing>,
 }
 
 /// Finds a message of the account by its Message-ID, for the link of a bounce's card
@@ -117,7 +141,21 @@ pub(crate) fn build_unless(
     };
     // a trusted sender the provider confirmed, or every message's when the user said so: the pictures load
     let sender = crate::pictures::sender(&message, trust.domains);
+    let clicked = allow_remote_images;
     let allow_remote_images = allow_remote_images || crate::pictures::load(&trust.pictures, sender.as_ref());
+    if let Some(ring) = trust.ring {
+        let from = crate::from_addresses(source);
+        if let Some(protected) = crate::protect::read(source, ring, &from, crate::worker::unix_now()) {
+            return Some(protected_view(
+                &message,
+                protected,
+                clicked,
+                allow_remote_images,
+                sender,
+                trust,
+            ));
+        }
+    }
     let options = RenderOptions { allow_remote_images };
     let images = crate::compose::inline_images(&message);
     if dropped() {
@@ -209,7 +247,132 @@ pub(crate) fn build_unless(
         bounce: bounce.is_some(),
         bounced_message,
         otp_code: code.map(|code| code.code),
+        protection: None,
     })
+}
+
+/// The view of a message with signed or encrypted parts: the page of its sections ([`pe_html::secure_page`]), each
+/// rendered as any message is, its attachments from the sections, and what the bar says. Pictures from the internet
+/// load in a decrypted part only on the user's click (`clicked`): never by the sender's trust or the "always"
+/// setting, which `allow_remote_images` includes, and its label then says they were loaded.
+fn protected_view(
+    message: &parser::Message,
+    protected: crate::protect::Protected,
+    clicked: bool,
+    allow_remote_images: bool,
+    sender: Option<crate::pictures::Sender>,
+    trust: &Trust,
+) -> MessageView {
+    use crate::protect::Tone;
+    let mut documents = Vec::new();
+    let mut parts = Vec::new();
+    let mut attachments = Vec::new();
+    let mut remote_images = false;
+    for section in &protected.sections {
+        let encrypted = section.verdict.as_ref().is_some_and(|verdict| verdict.encrypted);
+        let allow = if encrypted { clicked } else { allow_remote_images };
+        let mut label = match &section.verdict {
+            Some(verdict) => verdict.label(),
+            None => pe_i18n::tr(pe_i18n::Text::PgpPartNotSigned),
+        };
+        let tone = section
+            .verdict
+            .as_ref()
+            .map_or(Tone::Neutral, crate::protect::Verdict::tone);
+        let document = section
+            .entity
+            .as_deref()
+            .and_then(|entity| parser::parse(entity).ok())
+            .map(|part| {
+                let body = crate::fold::body(&part);
+                let images = crate::compose::inline_images(&part);
+                let rendered = pe_html::render_view_cards(
+                    &body,
+                    &RenderOptions {
+                        allow_remote_images: allow,
+                    },
+                    &images,
+                    &[],
+                    &pe_html::Cards::default(),
+                );
+                remote_images |= rendered.remote_images;
+                if encrypted && allow && rendered.remote_images {
+                    label = pe_i18n::tr_args(pe_i18n::Text::PgpPartPicturesLoaded, &[("label", (&label).into())]);
+                }
+                attachments.extend(listed(&part.attachments).map(|a| AttachmentView {
+                    safe_filename: a.safe_filename(),
+                    filename: a.display_filename(),
+                    mime_type: a.mime_type.clone(),
+                    size: a.content.len() as u64,
+                }));
+                rendered.document
+            });
+        documents.push(document);
+        parts.push(PartView { tone, label });
+    }
+    let page_parts: Vec<pe_html::SecurePart> = parts
+        .iter()
+        .zip(&documents)
+        .map(|(part, document)| pe_html::SecurePart {
+            tone: part_tone(part.tone),
+            label: &part.label,
+            document: document.as_deref(),
+        })
+        .collect();
+    let document = pe_html::secure_page(&page_parts, clicked || allow_remote_images);
+    // the bar: the envelope's words when the message is one part; with several, that they differ
+    let differ = parts.windows(2).any(|pair| pair[0] != pair[1]);
+    let (tone, text) = match (&protected.envelope, differ) {
+        (Some(envelope), false) => (
+            envelope.tone(),
+            parts.first().map_or_else(|| envelope.label(), |p| p.label.clone()),
+        ),
+        _ if parts.len() == 1 => (parts[0].tone, parts[0].label.clone()),
+        _ => {
+            let worst = parts.iter().map(|part| part.tone).min_by_key(|tone| match tone {
+                Tone::Warning => 0,
+                Tone::Neutral => 1,
+                Tone::Good => 2,
+                Tone::Verified => 3,
+            });
+            (worst.unwrap_or(Tone::Neutral), pe_i18n::tr(pe_i18n::Text::PgpBarMixed))
+        }
+    };
+    let subject = protected
+        .subject
+        .clone()
+        .or_else(|| message.subject.clone())
+        .unwrap_or_default();
+    MessageView {
+        subject,
+        from: text_addresses(message.from.as_slice()),
+        to: text_addresses(&message.to),
+        cc: text_addresses(&message.cc),
+        date: message.timestamp,
+        document,
+        remote_images,
+        pictures_loaded: clicked || allow_remote_images,
+        sender,
+        attachments,
+        unsubscribe: crate::unsubscribe::of(&message.headers, trust.domains),
+        has_logo: crate::bimi::of(&message.headers, trust.domains).is_some(),
+        protection: Some(ProtectionView {
+            tone,
+            text,
+            parts,
+            encrypted: protected.envelope.as_ref().is_some_and(|envelope| envelope.encrypted),
+        }),
+        ..Default::default()
+    }
+}
+
+fn part_tone(tone: crate::protect::Tone) -> pe_html::PartTone {
+    match tone {
+        crate::protect::Tone::Verified => pe_html::PartTone::Verified,
+        crate::protect::Tone::Good => pe_html::PartTone::Good,
+        crate::protect::Tone::Warning => pe_html::PartTone::Warning,
+        crate::protect::Tone::Neutral => pe_html::PartTone::Neutral,
+    }
 }
 
 /// The most of a header block shown in Message Properties; the store reads no more of a message than this
