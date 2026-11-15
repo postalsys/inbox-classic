@@ -60,12 +60,12 @@ pub fn part_document(address: &str) -> Option<usize> {
 }
 
 /// The script the app runs in the page (page scripts are off; an app's script still runs) after it loaded, after
-/// the pictures of a part loaded and when the window's width changed: each frame as tall as its document
-/// The body's height with its margins, not the document's scroll height (never less than the frame's own height), so a
-/// frame shrinks too when its part needs less room.
+/// the pictures of a part loaded and when the window's width changed: each frame as tall as its document.
+///
+/// The root's own height, not the document's scroll height (never less than the frame's own height), so a frame
+/// shrinks too when its part needs less room; the root, not the body, as a child's margin can collapse out of the body.
 pub const MEASURE_SCRIPT: &str = "for(const f of document.querySelectorAll('iframe.pe-d')){const d=f.contentDocument;\
-const b=d&&d.body;if(!b)continue;const s=d.defaultView.getComputedStyle(b);\
-const h=Math.ceil(b.getBoundingClientRect().height+parseFloat(s.marginTop)+parseFloat(s.marginBottom))+'px';\
+const r=d&&d.documentElement;if(!r)continue;const h=Math.ceil(r.getBoundingClientRect().height)+'px';\
 if(f.style.height!==h)f.style.height=h}";
 
 /// A text as the value of an attribute
