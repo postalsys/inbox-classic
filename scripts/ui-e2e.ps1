@@ -1689,7 +1689,9 @@ public static class Dragger {
             Tick $editor $IDC_RULE_FLAG
             Click $editor 1
             $refused = WaitWindow '#32770' 'Message Rule' 10
-            Check ($refused -and (Statics $refused) -match 'folder or (a )?date') "OK refuses a query with a folder, and says why ($(if ($refused) { Statics $refused }))"
+            # the alert's text is read once it is there, not as the window appears
+            $why = if ($refused) { WaitFor { $t = (Statics $refused) -join ' '; if ($t -match 'folder or (a )?date') { $t } } 5 }
+            Check ($null -ne $why) "OK refuses a query with a folder, and says why ($(if ($refused) { Statics $refused }))"
             if ($refused) {
                 Shot $refused 'rules-6-bad-query'
                 Click $refused 2
