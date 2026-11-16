@@ -330,20 +330,27 @@ impl MessageWindow {
         }
     }
 
-    /// A reply, a reply to all or a forward of the message, from its account
-    fn reply(&self, kind: DraftKind) {
+    /// A reply, a reply to all or a forward of the message, from its account, made off the window thread: its
+    /// compose window opens once it is (closing this window first drops it)
+    fn reply(self: &Rc<Self>, kind: DraftKind) {
         if let Some(path) = &self.file {
             self.reply_to_file(path, kind);
             return;
         }
         let message = self.message.get();
-        match shell().core.draft(message.folder, message.uid, kind) {
-            Ok(Some(draft)) => crate::compose::open(shell().main().folder_account(message.folder), Some(draft)),
-            _ => {
-                let window = self.window.clone();
-                spawn(async move { ui::alert(&window, TITLE, &t!(UiNotDownloaded)).await });
+        let Ok(request) = shell().core.draft_start(message.folder, message.uid, kind) else {
+            return;
+        };
+        let this = self.clone();
+        spawn(async move {
+            if !ui::wait_read(&this.window, request).await {
+                return;
             }
-        }
+            match shell().core.draft_result(request) {
+                Some(draft) => crate::compose::open(shell().main().folder_account(message.folder), Some(draft)),
+                None => ui::alert(&this.window, TITLE, &t!(UiNotDownloaded)).await,
+            }
+        });
     }
 
     /// A reply, a reply to all or a forward of the message file, from the account of what the main window shows

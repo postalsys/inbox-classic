@@ -650,6 +650,109 @@ pub async fn dragging(d: &Driver) {
     d.check(d.find("INBOX", "Subject: Copy me").is_some(), "and stays in the Inbox");
 }
 
+/// SCENARIO: actions on many messages run off the window thread. Reply opens its compose window once the core has made
+/// the reply; a move the server refuses (its folder deleted there by another client) comes back, the bar over the
+/// list saying so in the core's words until dismissed; Select All then Delete takes the whole list, the status bar
+/// saying what it did. In a folder of its own, Bulk, with five messages.
+pub async fn many_messages(d: &Driver) {
+    d.step("actions on many messages");
+    let main = shell().main();
+    let core = &shell().core;
+    let account = core.accounts().ok().and_then(|a| a.first().map(|a| a.id)).unwrap_or(0);
+    for name in ["Bulk", "Gone"] {
+        let _ = core.create_folder(account, None, name);
+    }
+    let Some((bulk, gone)) = wait_for(20, || Some((folder_id("Bulk")?, folder_id("Gone")?))).await else {
+        d.check(false, "the folders Bulk and Gone are made");
+        return;
+    };
+    for n in 1..=5 {
+        let raw = format!(
+            "From: Robin <robin@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Bulk {n}\r\nDate: {}\r\n\
+             Message-ID: <bulk-{n}@example.com>\r\n\r\nOne of five in the UI test.\r\n",
+            date_now(-n)
+        );
+        if let Err(error) = d.add_message_to("Bulk", &raw) {
+            d.check(false, &format!("a message went into Bulk ({error})"));
+        }
+    }
+    run_command(Command::Sync);
+    main.folders.select(bulk, false);
+    let listed = wait_until(30, || main.list_view().own_folder() == Some(bulk) && rows() == 5).await;
+    d.check(listed, &format!("Bulk lists its five messages ({})", rows()));
+
+    // Reply: the draft made off the window thread, the compose window opening when it is
+    main.list.select(0);
+    let shown = wait_until(20, || main.reader.uid() != 0 && main.reader.has_view()).await;
+    run_command(Command::Reply);
+    let compose = wait_compose(20).await;
+    d.check(
+        shown
+            && compose
+                .as_ref()
+                .is_some_and(|c| c.to.text().contains("robin@example.com") && c.subject.text().starts_with("Re: Bulk")),
+        "Reply opens the compose window with the reply, made off the window thread",
+    );
+    if let Some(compose) = compose {
+        close_compose(&compose).await;
+    }
+
+    // another client deletes Gone: the move there is refused, and the messages come back with the bar saying why
+    let _ = http(d.ports.rest, "DELETE", "/v1/mailboxes/Gone", None);
+    run_command(Command::SelectAll);
+    let all = wait_until(10, || main.list.selected_count() == 5).await;
+    let refs = main.selected_refs();
+    d.check(
+        all && refs.len() == 5,
+        &format!("Select All selects the five rows, counted at once ({})", refs.len()),
+    );
+    main.drop_message(&refs, gone, false);
+    let said = wait_for(30, || main.undone_said()).await.unwrap_or_default();
+    d.check(
+        said.starts_with("The server did not move 5 messages to Gone, so they are back in Bulk: "),
+        &format!("a move the server refuses is said in the bar over the list, in the core's words ({said})"),
+    );
+    d.check(
+        !main.status_texts().0.contains("to Gone"),
+        "the status bar no longer says they moved",
+    );
+    let back = wait_until(20, || rows() == 5).await;
+    d.check(
+        back,
+        &format!("and the five messages are back in the list ({})", rows()),
+    );
+    d.shot(&main_window(), "many-1-refused").await;
+    let styles = adw::StyleManager::default();
+    styles.set_color_scheme(adw::ColorScheme::ForceDark);
+    wait_until(5, || styles.is_dark()).await;
+    d.shot(&main_window(), "many-2-refused-dark").await;
+    styles.set_color_scheme(adw::ColorScheme::Default);
+    let bar = main.undone_bar();
+    let dismissed = click(bar.upcast_ref(), "undone-dismiss") && main.undone_said().is_none();
+    d.check(dismissed, "the bar's close button dismisses it");
+
+    // Select All then Delete: the whole list into Deleted Items, the status bar saying so
+    run_command(Command::SelectAll);
+    wait_until(10, || main.list.selected_count() == 5).await;
+    run_command(Command::Delete);
+    let status = wait_for(20, || {
+        let status = main.status_texts().0;
+        // into Deleted Items: "Moved 5 messages to Deleted Items"
+        (status.contains("5 messages") && status.contains("Deleted Items")).then_some(status)
+    })
+    .await;
+    let gone_from_list = wait_until(20, || rows() == 0).await;
+    d.check(
+        status.is_some() && gone_from_list,
+        &format!("Select All then Delete takes the whole list, the status bar saying so ({status:?})"),
+    );
+    d.check(
+        wait_until(20, || d.messages("Bulk").is_empty()).await,
+        "and on the server",
+    );
+    d.shot(&main_window(), "many-3-deleted-all").await;
+}
+
 pub async fn several_messages(d: &Driver) {
     d.step("several messages");
     let main = shell().main();
@@ -2529,10 +2632,18 @@ async fn clicked_list_paints_first(d: &Driver, inbox: i64) {
     run_command(Command::Sync);
     let kept = main.list_load.waiting();
     run_command(Command::SelectAll);
-    let read = !main.list_load.waiting() && main.list.selected_count() == u64::from(main.list.rows());
+    let reading = !main.list_load.waiting();
     main.list_load.hold(false);
+    // the list is read off the window thread: Select All selects its rows once it is drawn
+    let sent = folder_id("Sent Items").unwrap_or(inbox);
+    let read = wait_until(10, || {
+        main.list_view().scope() == Some(pe_core::Scope::Folder(sent))
+            && main.list.rows() > 0
+            && main.list.selected_count() == u64::from(main.list.rows())
+    })
+    .await;
     d.check(
-        kept && read,
+        kept && reading && read,
         "a list waiting stays so for Send/Recv, and is read before Select All selects its rows",
     );
     main.folders.select(crate::folders::ALL_INBOXES, false);
@@ -2548,8 +2659,10 @@ pub(super) async fn waiting_shots(d: &Driver, to: i64, name: &str) {
     d.shot(main.window(), &format!("{name}-1-waiting")).await;
     let note = main.list_load.note().is_visible();
     main.list_load.hold(false);
+    // read off the window thread: drawn when the core has it
+    let drawn = wait_until(10, || main.list.shown().is_sensitive()).await;
     d.check(
-        note && main.list.shown().is_sensitive() && main.folders.selected() == to,
+        note && drawn && main.folders.selected() == to,
         "a list that takes long says Loading... over the one before, then shows",
     );
     pause(300).await;

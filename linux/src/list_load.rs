@@ -1,7 +1,8 @@
 //! A list chosen in the folder tree loads after the tree has drawn the row chosen: the click is answered within the
-//! frame, the store is read after it. Until the new list is drawn the one before stays, dimmed and taking no clicks or
-//! keys; "Loading..." shows over it only when the load has not been done in 400 ms from the first choice. A newer
-//! choice replaces the load waiting, so only the newest runs, and does not start the 400 ms again.
+//! frame, the store is read after it, off the window thread (the core's `list_load`, answered by `ListReady`). Until
+//! the new list is drawn the one before stays, dimmed and taking no clicks or keys; "Loading..." shows over it only
+//! when the new one is not drawn 400 ms after the first choice. A newer choice replaces the load waiting, so only the
+//! newest runs, and does not start the 400 ms again.
 
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -45,6 +46,10 @@ pub struct ListLoad {
     /// "Loading...", over the list
     note: gtk::Label,
     waiting: RefCell<Waiting>,
+    /// The list is being read off the window thread: asked of the core, not drawn yet
+    reading: std::cell::Cell<bool>,
+    /// The list is dimmed now
+    dimmed: std::cell::Cell<bool>,
     note_timer: RefCell<Option<glib::SourceId>>,
     /// What happened in order and when, for the e2e driver: "painted" when the tree drew the row chosen, "loaded" when
     /// the list was read
@@ -69,6 +74,8 @@ impl ListLoad {
             list: list.clone().upcast(),
             note,
             waiting: RefCell::default(),
+            reading: Default::default(),
+            dimmed: Default::default(),
             note_timer: RefCell::default(),
             #[cfg(feature = "e2e")]
             order: RefCell::default(),
@@ -93,7 +100,7 @@ impl ListLoad {
         let mut waiting = self.waiting.borrow_mut();
         waiting.cancel();
         // a choice while one waits: the list stays dimmed, "Loading..." on the first one's time
-        if waiting.load.replace(Box::new(load)).is_none() {
+        if waiting.load.replace(Box::new(load)).is_none() && !self.dimmed.get() {
             self.dim(true);
         }
         let weak = Rc::downgrade(self);
@@ -166,17 +173,36 @@ impl ListLoad {
         }
     }
 
-    /// The list is being read now (the one waiting or another reload): nothing waits for the paint any longer
-    pub fn loading(&self) {
-        let mut waiting = self.waiting.borrow_mut();
-        waiting.cancel();
-        waiting.load = None;
+    /// The list is being read now (the one waiting or another reload), off the window thread: nothing waits for the
+    /// paint any longer; another list than the one shown (`another`) dims the one shown until it is drawn
+    pub fn loading(self: &Rc<Self>, another: bool) {
+        {
+            let mut waiting = self.waiting.borrow_mut();
+            waiting.cancel();
+            waiting.load = None;
+        }
+        self.reading.set(true);
+        if another && !self.dimmed.get() {
+            self.dim(true);
+        }
         #[cfg(feature = "e2e")]
         self.order.borrow_mut().push(("loaded", std::time::Instant::now()));
     }
 
+    /// Whether a list asked for is not drawn yet: chosen and waiting for the paint, or being read
+    #[cfg(feature = "e2e")]
+    pub fn busy(&self) -> bool {
+        self.waiting() || self.reading.get()
+    }
+
+    /// Whether the list shown is dimmed, taking no clicks: another is coming in its place
+    pub fn dimmed(&self) -> bool {
+        self.dimmed.get()
+    }
+
     /// The new list drawn as it is: no longer dimmed
     pub fn loaded(self: &Rc<Self>) {
+        self.reading.set(false);
         if !self.waiting() {
             self.dim(false);
         }
@@ -187,6 +213,7 @@ impl ListLoad {
         if let Some(timer) = self.note_timer.borrow_mut().take() {
             timer.remove();
         }
+        self.dimmed.set(on);
         self.list.set_sensitive(!on);
         self.list.set_opacity(if on { 1.0 - pe_core::LIST_DIM } else { 1.0 });
         if !on {
