@@ -308,6 +308,26 @@ typedef enum PeProtectionTone {
   PE_PROTECTION_TONE_NEUTRAL = 4,
 } PeProtectionTone;
 
+// What kind of file an attachment is: its icon in the strip
+typedef enum PeFileKind {
+  PE_FILE_KIND_OTHER = 0,
+  PE_FILE_KIND_IMAGE = 1,
+  PE_FILE_KIND_PDF = 2,
+  PE_FILE_KIND_DOCUMENT = 3,
+  PE_FILE_KIND_SPREADSHEET = 4,
+  PE_FILE_KIND_PRESENTATION = 5,
+  PE_FILE_KIND_ARCHIVE = 6,
+  PE_FILE_KIND_AUDIO = 7,
+  PE_FILE_KIND_VIDEO = 8,
+  PE_FILE_KIND_CALENDAR = 9,
+  PE_FILE_KIND_CONTACT = 10,
+  PE_FILE_KIND_KEY = 11,
+  PE_FILE_KIND_TEXT = 12,
+  PE_FILE_KIND_MAIL = 13,
+  // It can run code: never opened from a message
+  PE_FILE_KIND_PROGRAM = 14,
+} PeFileKind;
+
 typedef enum PeDraftKind {
   PE_DRAFT_KIND_REPLY = 0,
   PE_DRAFT_KIND_REPLY_ALL = 1,
@@ -1054,12 +1074,17 @@ typedef struct PeAttachment {
   const char *safe_filename;
   const char *mime_type;
   uint64_t size;
-  // Its size in words ("240 KB"), its icon's word (`image`, `pdf`, `document`, `spreadsheet`, `presentation`,
-  // `archive`, `audio`, `video`, `calendar`, `contact`, `key`, `text`, `mail`, `program`, `other`), and whether it
-  // may be opened from the message (`pe_attachment_open`): never a file that can run code, which can be saved
+  // Its size in words ("240 KB")
   const char *size_text;
-  const char *kind;
+  // What kind of file it is, for its icon
+  enum PeFileKind kind;
+  // Whether it may be opened from the message (`pe_attachment_open`): never a file that can run code, which can
+  // be saved
   bool can_open;
+  // The strip's tooltip, shown as it is: the full name and size, and why it does not open when it does not
+  const char *tooltip;
+  // What to say when it is opened while `can_open` is false, naming it (empty when it opens)
+  const char *refusal;
 } PeAttachment;
 
 // A choice of the From list: an account, or one of its other addresses

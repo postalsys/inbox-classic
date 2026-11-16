@@ -1934,12 +1934,62 @@ pub struct PeAttachment {
     pub safe_filename: *const c_char,
     pub mime_type: *const c_char,
     pub size: u64,
-    /// Its size in words ("240 KB"), its icon's word (`image`, `pdf`, `document`, `spreadsheet`, `presentation`,
-    /// `archive`, `audio`, `video`, `calendar`, `contact`, `key`, `text`, `mail`, `program`, `other`), and whether it
-    /// may be opened from the message (`pe_attachment_open`): never a file that can run code, which can be saved
+    /// Its size in words ("240 KB")
     pub size_text: *const c_char,
-    pub kind: *const c_char,
+    /// What kind of file it is, for its icon
+    pub kind: PeFileKind,
+    /// Whether it may be opened from the message (`pe_attachment_open`): never a file that can run code, which can
+    /// be saved
     pub can_open: bool,
+    /// The strip's tooltip, shown as it is: the full name and size, and why it does not open when it does not
+    pub tooltip: *const c_char,
+    /// What to say when it is opened while `can_open` is false, naming it (empty when it opens)
+    pub refusal: *const c_char,
+}
+
+/// What kind of file an attachment is: its icon in the strip
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeFileKind {
+    Other = 0,
+    Image = 1,
+    Pdf = 2,
+    Document = 3,
+    Spreadsheet = 4,
+    Presentation = 5,
+    Archive = 6,
+    Audio = 7,
+    Video = 8,
+    Calendar = 9,
+    Contact = 10,
+    Key = 11,
+    Text = 12,
+    Mail = 13,
+    /// It can run code: never opened from a message
+    Program = 14,
+}
+
+impl From<pe_core::opening::FileKind> for PeFileKind {
+    fn from(kind: pe_core::opening::FileKind) -> Self {
+        use pe_core::opening::FileKind;
+        match kind {
+            FileKind::Image => PeFileKind::Image,
+            FileKind::Pdf => PeFileKind::Pdf,
+            FileKind::Document => PeFileKind::Document,
+            FileKind::Spreadsheet => PeFileKind::Spreadsheet,
+            FileKind::Presentation => PeFileKind::Presentation,
+            FileKind::Archive => PeFileKind::Archive,
+            FileKind::Audio => PeFileKind::Audio,
+            FileKind::Video => PeFileKind::Video,
+            FileKind::Calendar => PeFileKind::Calendar,
+            FileKind::Contact => PeFileKind::Contact,
+            FileKind::Key => PeFileKind::Key,
+            FileKind::Text => PeFileKind::Text,
+            FileKind::Mail => PeFileKind::Mail,
+            FileKind::Program => PeFileKind::Program,
+            FileKind::Other => PeFileKind::Other,
+        }
+    }
 }
 
 /// What the calendar part of a message asks
@@ -2100,9 +2150,11 @@ fn view_handle(view: pe_core::MessageView) -> *mut PeMessageView {
             safe_filename: strings.add(&a.safe_filename),
             mime_type: strings.add(&a.mime_type),
             size: a.size,
-            size_text: strings.add(&pe_core::format_size(a.size)),
-            kind: strings.add(a.kind.word()),
+            size_text: strings.add(&a.size_text),
+            kind: a.kind.into(),
             can_open: a.kind.can_open(),
+            tooltip: strings.add(&a.tooltip),
+            refusal: strings.add(a.refusal.as_deref().unwrap_or_default()),
         })
         .collect();
     let invitation = view.invitation.as_ref().map(|event| {

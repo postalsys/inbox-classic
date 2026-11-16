@@ -897,6 +897,6 @@ setup-file-name = Configuración y cuentas de Inbox Classic
 # review: new
 setup-skipped-unreachable = Se omitió { $name }: no se pudo contactar con su servicio de inicio de sesión. Vuelva a agregarla en Aplicaciones de inicio de sesión.
 # review: new
-attachment-runs-programs = Este tipo de archivo puede ejecutar programas, así que Inbox Classic no lo abre. Guárdelo y ábralo usted mismo si confía en su origen.
+attachment-runs-programs = «{ $name }» puede ejecutar programas, así que Inbox Classic no lo abre. Guárdelo y ábralo usted mismo si confía en su origen.
 # review: new
 attachment-decrypted-note = Este adjunto viene de un mensaje cifrado. Para abrirlo, Inbox Classic lo guarda descifrado en este equipo, en una carpeta suya que Inbox Classic vacía al cabo de un día.

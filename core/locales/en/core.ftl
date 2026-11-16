@@ -752,4 +752,5 @@ setup-account-servers = { $imap } and { $smtp } ({ $signin })
 setup-file-name = Inbox Classic settings and accounts
 setup-skipped-unreachable = { $name } was skipped: its sign-in service could not be reached. Add it again in Sign-in Apps.
 attachment-runs-programs = This kind of file can run programs, so Inbox Classic does not open it. Save it, then open it yourself if you trust where it comes from.
+attachment-runs-programs = “{ $name }” can run programs, so Inbox Classic does not open it. Save it, then open it yourself if you trust where it comes from.
 attachment-decrypted-note = This attachment comes from an encrypted message. To open it, Inbox Classic stores it decrypted on this computer, in a folder of yours that Inbox Classic empties after a day.

@@ -303,10 +303,14 @@ fn has_layer(raw: &[u8]) -> bool {
 
 /// The message as it is shown: its own header fields (the protected Subject in place of the outer one) over the
 /// sections that have something to show, joined. What replies quote, forwards carry and attachments are saved from,
-/// so nothing that was not shown (a part not decrypted, a hidden one) ever is. None for a message without
-/// protection.
-pub(crate) fn shown(raw: &[u8], ring: &KeyRing, from: &[String], now: i64) -> Option<Vec<u8>> {
+/// so nothing that was not shown (a part not decrypted, a hidden one) ever is; with whether a section of it was
+/// decrypted (an attachment opened from it is then stored decrypted). None for a message without protection.
+pub(crate) fn shown_decrypted(raw: &[u8], ring: &KeyRing, from: &[String], now: i64) -> Option<(Vec<u8>, bool)> {
     let protected = read(raw, ring, from, now)?;
+    let decrypted = protected
+        .sections
+        .iter()
+        .any(|section| section.entity.is_some() && section.verdict.as_ref().is_some_and(|v| v.encrypted));
     let entities: Vec<&[u8]> = protected
         .sections
         .iter()
@@ -335,7 +339,7 @@ pub(crate) fn shown(raw: &[u8], ring: &KeyRing, from: &[String], now: i64) -> Op
     }
     out.extend_from_slice(b"MIME-Version: 1.0\r\n");
     out.extend_from_slice(&body);
-    Some(out)
+    Some((out, decrypted))
 }
 
 /// The header fields of a header block, each with its folded lines and its line break

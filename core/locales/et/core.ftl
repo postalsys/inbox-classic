@@ -864,6 +864,6 @@ setup-file-name = Inbox Classicu seaded ja kontod
 # review: new
 setup-skipped-unreachable = { $name } jäeti vahele: selle sisselogimisteenusega ei saadud ühendust. Lisage see uuesti sisselogimisrakenduste all.
 # review: new
-attachment-runs-programs = Seda tüüpi fail võib käivitada programme, seega Inbox Classic seda ei ava. Salvesta see ja ava ise, kui usaldad selle päritolu.
+attachment-runs-programs = „{ $name }“ võib käivitada programme, seega Inbox Classic seda ei ava. Salvesta see ja ava ise, kui usaldad selle päritolu.
 # review: new
 attachment-decrypted-note = See manus on pärit krüptitud kirjast. Avamiseks salvestab Inbox Classic selle dekrüptituna sellesse arvutisse, sinu kausta, mille Inbox Classic päeva pärast tühjendab.

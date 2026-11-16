@@ -1,12 +1,19 @@
 //! Attachments opened from a message (the strip under its header): what kind of file each is, for its icon, and
 //! whether it may be opened at all. A file that can run code (a program, a script, an installer, a shortcut, a disk
-//! image, an Office file with macros) is never opened from a message; it can be saved. Any other is written into a
-//! private folder of the user's (cleaned at start and after a day), marked as from the internet, and the app opens it
-//! with the system's program for it.
+//! image, an Office file with macros, a page) is never opened from a message; it can be saved. Any other is written
+//! into a private folder of the user's (cleaned at start and after a day), and the app opens it with the system's
+//! program for it.
+//!
+//! Marked as from the internet: on Windows the core writes the file's Zone.Identifier stream itself
+//! ([`crate::view::write_new`]), so SmartScreen and Office's Protected View look at it. The Mac's quarantine is an
+//! extended attribute the core can not set without unsafe code or another dependency: the Mac app sets
+//! `com.apple.quarantine` on the path it is given before opening it. Linux has no such mark.
 
+use std::collections::{HashMap, VecDeque};
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 
-use pe_i18n::{Text, tr};
+use pe_i18n::{Text, tr, tr_args};
 use pe_store::FolderId;
 
 use crate::{Core, Error, Result};
@@ -33,27 +40,6 @@ pub enum FileKind {
 }
 
 impl FileKind {
-    /// The word of its icon
-    pub fn word(self) -> &'static str {
-        match self {
-            FileKind::Image => "image",
-            FileKind::Pdf => "pdf",
-            FileKind::Document => "document",
-            FileKind::Spreadsheet => "spreadsheet",
-            FileKind::Presentation => "presentation",
-            FileKind::Archive => "archive",
-            FileKind::Audio => "audio",
-            FileKind::Video => "video",
-            FileKind::Calendar => "calendar",
-            FileKind::Contact => "contact",
-            FileKind::Key => "key",
-            FileKind::Text => "text",
-            FileKind::Mail => "mail",
-            FileKind::Program => "program",
-            FileKind::Other => "other",
-        }
-    }
-
     pub fn can_open(self) -> bool {
         self != FileKind::Program
     }
@@ -338,35 +324,155 @@ pub struct Opened {
     pub note: Option<String>,
 }
 
+/// The words of the strip about a file: its tooltip (the full name and size, and why it does not open when it does
+/// not, a line each)
+pub fn tooltip(filename: &str, size_text: &str, kind: FileKind) -> String {
+    let mut tip = format!("{filename} ({size_text})");
+    if !kind.can_open() {
+        tip.push('\n');
+        tip.push_str(&tr(Text::UiAttachmentProgramTip));
+    }
+    tip
+}
+
+/// What is said when a file that can run code is opened anyway, naming it; None for a file that opens
+pub fn refusal(filename: &str, kind: FileKind) -> Option<String> {
+    (!kind.can_open()).then(|| tr_args(Text::AttachmentRunsPrograms, &[("name", filename.into())]))
+}
+
+/// Whose attachment: a message of a folder, or a message file a window shows
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+enum Owner {
+    Message(FolderId, u64),
+    File(PathBuf),
+}
+
+/// What the core knows of the attachments of the messages shown lately (their kinds, from the views built), so a file
+/// that can run code is refused before the message is read again, and the files written for opening, so opening one
+/// again opens the same file rather than another copy
+#[derive(Default)]
+pub(crate) struct Files {
+    known: Mutex<Known>,
+}
+
+#[derive(Default)]
+struct Known {
+    /// The newest last; a few messages' worth
+    listed: VecDeque<(Owner, Vec<(FileKind, String)>)>,
+    written: HashMap<(Owner, usize), PathBuf>,
+}
+
+/// How many messages' attachments are kept
+const KEPT: usize = 16;
+
+impl Files {
+    fn known(&self) -> std::sync::MutexGuard<'_, Known> {
+        self.known.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
+    }
+
+    fn remember(&self, owner: Owner, attachments: &[crate::view::AttachmentView]) {
+        let mut known = self.known();
+        known.listed.retain(|(at, _)| *at != owner);
+        if known.listed.len() >= KEPT {
+            known.listed.pop_front();
+        }
+        let listed = attachments.iter().map(|a| (a.kind, a.filename.clone())).collect();
+        known.listed.push_back((owner, listed));
+    }
+
+    /// The words refusing attachment `index` of `owner`, when its view said it can run code
+    fn refusal(&self, owner: &Owner, index: usize) -> Option<String> {
+        let known = self.known();
+        let (_, listed) = known.listed.iter().find(|(at, _)| at == owner)?;
+        let (kind, name) = listed.get(index)?;
+        refusal(name, *kind)
+    }
+
+    /// The file written for attachment `index` of `owner` before, while it is still there
+    fn written(&self, owner: &Owner, index: usize) -> Option<PathBuf> {
+        let mut known = self.known();
+        let key = (owner.clone(), index);
+        let path = known.written.get(&key)?.clone();
+        if std::fs::symlink_metadata(&path).is_ok_and(|meta| meta.is_file()) {
+            Some(path)
+        } else {
+            known.written.remove(&key);
+            None
+        }
+    }
+
+    fn wrote(&self, owner: Owner, index: usize, path: PathBuf) {
+        self.known().written.insert((owner, index), path);
+    }
+}
+
+/// The attachments of a view built for a message of a folder, remembered for [`Core::open_attachment`] (from the
+/// thread the view was built on)
+pub(crate) fn remember_message(files: &Files, folder: FolderId, uid: u64, view: &crate::view::MessageView) {
+    files.remember(Owner::Message(folder, uid), &view.attachments);
+}
+
 impl Core {
+    pub(crate) fn remember_attachments(&self, folder: FolderId, uid: u64, view: &crate::view::MessageView) {
+        remember_message(&self.attachment_files, folder, uid, view);
+    }
+
+    /// The same for a message file's view
+    pub(crate) fn remember_file_attachments(&self, path: &Path, view: &crate::view::MessageView) {
+        self.attachment_files
+            .remember(Owner::File(path.to_path_buf()), &view.attachments);
+    }
+
     /// Writes attachment `index` of a message where it can be opened, for the app to open with the system's program:
-    /// refused for a file that can run code (it can be saved), None when the message or the attachment is not here
+    /// refused for a file that can run code (it can be saved), before the message is read when its view said so;
+    /// None when the message or the attachment is not here. Opened again, the file written before is given again.
     pub fn open_attachment(&self, folder: FolderId, uid: u64, index: usize) -> Result<Option<Opened>> {
+        let owner = Owner::Message(folder, uid);
+        if let Some(opened) = self.opened_before(&owner, index)? {
+            return Ok(Some(opened));
+        }
         let Some(source) = self.store().source(folder, uid)? else {
             return Ok(None);
         };
-        self.open_from(source, index)
+        self.open_from(owner, source, index)
     }
 
-    /// [`Core::open_attachment`] of a message file a window shows (`file_view`)
+    /// [`Core::open_attachment`] of a message file a window shows (`file_view`, which read it as mail already)
     pub fn file_open_attachment(&self, path: &Path, index: usize) -> Result<Option<Opened>> {
-        let (source, _) = crate::read_message_file(path)?;
-        self.open_from(source, index)
+        let owner = Owner::File(path.to_path_buf());
+        if let Some(opened) = self.opened_before(&owner, index)? {
+            return Ok(Some(opened));
+        }
+        let source = crate::read_limited(path)?;
+        self.open_from(owner, source, index)
     }
 
-    fn open_from(&self, source: Vec<u8>, index: usize) -> Result<Option<Opened>> {
-        let encrypted = crate::protect::has_encrypted(&source);
-        let shown = self.shown(&self.store(), source);
-        let Some((name, mime_type, content)) = crate::view::attachment_with_type(&shown, index) else {
+    /// A refusal from what the view knew, or the file written for it before
+    fn opened_before(&self, owner: &Owner, index: usize) -> Result<Option<Opened>> {
+        if let Some(words) = self.attachment_files.refusal(owner, index) {
+            return Err(Error::Unavailable(words));
+        }
+        Ok(self
+            .attachment_files
+            .written(owner, index)
+            .map(|path| Opened { path, note: None }))
+    }
+
+    fn open_from(&self, owner: Owner, source: Vec<u8>, index: usize) -> Result<Option<Opened>> {
+        let (shown, decrypted) = self.shown_decrypted(&self.store(), source);
+        let Some(attachment) = crate::view::take_attachment(&shown, index) else {
             return Ok(None);
         };
-        if !file_kind_of(&name, &mime_type, &content).can_open() {
-            return Err(Error::Unavailable(tr(Text::AttachmentRunsPrograms)));
+        drop(shown);
+        let kind = file_kind_of(&attachment.name, &attachment.mime_type, &attachment.content);
+        if let Some(words) = refusal(&attachment.display_name, kind) {
+            return Err(Error::Unavailable(words));
         }
         let dir = crate::private_dir("open").map_err(|error| Error::Unavailable(error.to_string()))?;
-        let path =
-            crate::view::write_new(&dir, &name, &content).map_err(|error| Error::Unavailable(error.to_string()))?;
-        let note = if encrypted && !self.store().decrypted_open_noted()? {
+        let path = crate::view::write_new(&dir, &attachment.name, &attachment.content)
+            .map_err(|error| Error::Unavailable(error.to_string()))?;
+        self.attachment_files.wrote(owner, index, path.clone());
+        let note = if decrypted && !self.store().decrypted_open_noted()? {
             self.store().set_decrypted_open_noted()?;
             Some(tr(Text::AttachmentDecryptedNote))
         } else {
@@ -442,6 +548,17 @@ mod tests {
         // a name that says what it is keeps its kind: a text file quoting HTML is text
         assert_eq!(file_kind_of("notes.txt", "text/plain", page), FileKind::Text);
         assert_eq!(file_kind_of("report.pdf", "application/pdf", page), FileKind::Pdf);
+    }
+
+    #[test]
+    fn the_strip_says_why_a_file_does_not_open() {
+        assert_eq!(tooltip("a.pdf", "2 KB", FileKind::Pdf), "a.pdf (2 KB)");
+        assert!(refusal("a.pdf", FileKind::Pdf).is_none());
+        let tip = tooltip("run.exe", "2 KB", FileKind::Program);
+        let lines: Vec<&str> = tip.lines().collect();
+        assert_eq!(lines.len(), 2, "{tip}");
+        assert_eq!(lines[0], "run.exe (2 KB)");
+        assert!(refusal("run.exe", FileKind::Program).is_some_and(|words| words.contains("run.exe")));
     }
 
     #[test]

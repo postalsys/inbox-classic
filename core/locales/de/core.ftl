@@ -880,6 +880,6 @@ setup-file-name = Inbox Classic-Einstellungen und -Konten
 # review: new
 setup-skipped-unreachable = { $name } wurde übersprungen: Der Anmeldedienst war nicht erreichbar. Fügen Sie die Anmelde-App unter „Anmelde-Apps“ erneut hinzu.
 # review: new
-attachment-runs-programs = Diese Art von Datei kann Programme ausführen, daher öffnet Inbox Classic sie nicht. Speichern Sie sie und öffnen Sie sie selbst, wenn Sie der Herkunft vertrauen.
+attachment-runs-programs = „{ $name }“ kann Programme ausführen, daher öffnet Inbox Classic die Datei nicht. Speichern Sie sie und öffnen Sie sie selbst, wenn Sie der Herkunft vertrauen.
 # review: new
 attachment-decrypted-note = Dieser Anhang stammt aus einer verschlüsselten Nachricht. Zum Öffnen speichert Inbox Classic ihn entschlüsselt auf diesem Computer, in einem Ordner von Ihnen, den Inbox Classic nach einem Tag leert.
