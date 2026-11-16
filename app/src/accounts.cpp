@@ -284,22 +284,11 @@ const SignInButton kSignIns[] = {
      L"Microsoft", IDC_WHY_MICROSOFT},
 };
 
-// the resource of picture `file` in the language in use, as app.rc names it: brands/google-sign-in.de.png is
-// GOOGLE_SIGN_IN_DE
+// the resource of picture `file` in the language in use, as the core names it in sign-in-buttons.rc:
+// brands/google-sign-in.png is GOOGLE_SIGN_IN_PT_BR in Brazilian Portuguese
 std::wstring PictureResource(const char* file) {
-    core::String localized(pe_localized_picture(file));
-    std::string name = localized ? localized.get() : file;
-    if (name.starts_with("brands/")) {
-        name.erase(0, 7);
-    }
-    if (name.ends_with(".png")) {
-        name.resize(name.size() - 4);
-    }
-    std::wstring resource;
-    for (char c : name) {
-        resource += (c == '-' || c == '.') ? L'_' : static_cast<wchar_t>(std::toupper(static_cast<unsigned char>(c)));
-    }
-    return resource;
+    core::String resource(pe_localized_picture_resource(file));
+    return resource ? Text(resource.get()) : std::wstring();
 }
 
 // the button of the command `id` (its own or its "Why?"), or of `provider`

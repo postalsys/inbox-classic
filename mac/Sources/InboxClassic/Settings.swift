@@ -12,20 +12,13 @@ enum Languages {
     /// languages (its own AppleLanguages, the system's otherwise) there is a catalog of, English when none
     static func apply(_ override: String?) {
         let wanted = override ?? resolve(Locale.preferredLanguages)
-        // the code of the catalog the core took (de-AT is de, a language without one English), the pseudo-language's
-        // dates English
-        let used = taken(wanted.withCString { pe_set_language($0) }) ?? "en"
-        let code = used == "qps" ? "en" : used
-        locale = Locale(identifier: localeIdentifier(code, region: Locale.current.region?.identifier))
+        // the catalog the core takes (de-AT is de, a language without one English), and the core's locale of its dates:
+        // its own region (pt_BR) or the system's (de_EE), English for the pseudo-language
+        _ = taken(wanted.withCString { pe_set_language($0) })
+        let region = Locale.current.region?.identifier
+        let identifier = region.map { r in r.withCString { taken(pe_date_locale($0)) } } ?? taken(pe_date_locale(nil))
+        locale = Locale(identifier: identifier ?? "en")
         instantLocale = locale
-    }
-
-    /// The locale of a catalog's tag with the system's region: `de_EE`; a tag with its own region keeps it (`pt_BR`),
-    /// one with a script takes the region after it (`sr_Latn_RS`)
-    static func localeIdentifier(_ code: String, region: String?) -> String {
-        let parts = code.split(separator: "-").map(String.init)
-        if parts.count > 1, parts[1].count == 2 { return parts.joined(separator: "_") }
-        return ([parts.joined(separator: "_")] + (region.map { [$0] } ?? [])).joined(separator: "_")
     }
 
     /// The code of the language the windows are in now
