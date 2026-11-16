@@ -892,7 +892,7 @@ pub unsafe extern "C" fn pe_file_invitation_file(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_picture_start(core: *const PeCore, key: u64, size: u32) -> u64 {
     // SAFETY: as the caller guarantees
-    unsafe { with(core, 0, |core| core.picture_start(key, size).unwrap_or(0)) }
+    unsafe { with_shared(core, 0, |core| core.picture_start(key, size).unwrap_or(0)) }
 }
 
 /// The pixels of a drawn picture: `size` x `size` BGRA with the alpha multiplied in, `len` bytes; NULL when there was
@@ -928,7 +928,7 @@ pub unsafe extern "C" fn pe_picture_result(core: *const PeCore, request: u64, le
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_logo_start(core: *const PeCore, folder: i64, uid: u64, size: u32) -> u64 {
     // SAFETY: as the caller guarantees
-    unsafe { with(core, 0, |core| core.logo_start(folder, uid, size).unwrap_or(0)) }
+    unsafe { with_shared(core, 0, |core| core.logo_start(folder, uid, size).unwrap_or(0)) }
 }
 
 /// The pixels of a drawn logo: `size` x `size` BGRA with the alpha multiplied in, `len` bytes; NULL when there was

@@ -1,7 +1,7 @@
 //! The store connections of the work the core does off the window thread. The windows read through the core's own
 //! connection ([`Core::store`] on their threads); a list loaded in the background, a message's source read for the
-//! reading pane, a draft and an attachment, and the user's actions on many messages each read and write through a
-//! connection of their own, so the window thread never waits behind them (SQLite in WAL mode lets them read while
+//! reading pane, a draft and an attachment, the user's actions on many messages, and the pictures of the list each read
+//! and write through a connection of their own, so the window thread never waits behind them (SQLite in WAL mode lets them read while
 //! another writes).
 //!
 //! The code of the core asks [`Core::store`] for its connection wherever it runs: on a thread doing background work
@@ -26,6 +26,8 @@ pub(crate) enum Connection {
     Reads,
     /// The user's actions on messages, one after another
     Actions,
+    /// The pictures of the list and the reading pane: contact pictures and the brands' logos kept
+    Pictures,
 }
 
 thread_local! {
@@ -93,6 +95,7 @@ pub(crate) struct Connections {
     pub(crate) lists: Mutex<Option<Store>>,
     pub(crate) reads: Mutex<Option<Store>>,
     pub(crate) actions: Mutex<Option<Store>>,
+    pub(crate) pictures: Mutex<Option<Store>>,
     /// Where the actions' work goes, started with the first
     queue: OnceLock<tokio::sync::mpsc::UnboundedSender<Job>>,
 }

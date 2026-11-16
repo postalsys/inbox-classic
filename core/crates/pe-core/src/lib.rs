@@ -56,7 +56,7 @@ use std::collections::HashMap;
 use std::fmt;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{Arc, Mutex};
 
 pub use list_view::{FIND_PAUSE_MS, LIST_DIM, LIST_GATHER_MS, LIST_LOADING_MS, LIST_PAGE, ListLoad, ListView};
 use pe_i18n::{Text, tr, tr_args};
@@ -504,7 +504,6 @@ pub struct Core {
     newest_view: Arc<std::sync::atomic::AtomicU64>,
     /// The connection the views built in the background look up and mark bounces with, opened by the first that
     /// needs it
-    view_store: ViewStore,
     /// Sign-ins in the browser: the provider and the refresh token, or why not
     sign_ins: Requests<std::result::Result<SignedIn, String>>,
     /// Checks of a sign-in app's issuer, and the discovery documents they read
@@ -605,7 +604,6 @@ impl Core {
             logo_downloads: Arc::default(),
             views: Requests::default(),
             newest_view: Arc::default(),
-            view_store: Arc::default(),
             sign_ins: Requests::default(),
             checks: Requests::default(),
             discoveries: Discoveries::default(),
@@ -628,6 +626,7 @@ impl Core {
             Connection::Lists => Some(&self.connections.lists),
             Connection::Reads => Some(&self.connections.reads),
             Connection::Actions => Some(&self.connections.actions),
+            Connection::Pictures => Some(&self.connections.pictures),
         };
         // a panic while the store was held left nothing half written: transactions roll back
         match own.and_then(|own| connections::open(own, &self.path)) {
@@ -1184,7 +1183,7 @@ impl Core {
     /// [`Event::LogoReady`] follows with the request this returns. The SVG of BIMI-Indicator is drawn as it is; one
     /// at a BIMI-Location is the list's logo of that address, downloaded once and kept (see [`Self::picture_start`]).
     /// Refused for a message without a logo the receiving server passed, or not downloaded yet.
-    pub fn logo_start(&self, folder: FolderId, uid: u64, size: u32) -> Result<u64> {
+    pub fn logo_start(self: &Arc<Self>, folder: FolderId, uid: u64, size: u32) -> Result<u64> {
         let start = self
             .store()
             .source_start(folder, uid, view::MAX_HEADER_TEXT)?
@@ -1217,7 +1216,7 @@ impl Core {
     /// [`Event::PictureReady`] follows with the request this returns. A brand's logo is downloaded once and kept
     /// ([`pe_store::LOGO_KEPT_MS`]; a failure is not tried again for [`pe_store::LOGO_RETRY_MS`]), never a message at
     /// a time. Refused for a key that names no picture.
-    pub fn picture_start(&self, key: u64, size: u32) -> Result<u64> {
+    pub fn picture_start(self: &Arc<Self>, key: u64, size: u32) -> Result<u64> {
         if let Some(card) = senders::contact_card(key) {
             return self.contact_picture_start(card, size);
         }
@@ -1240,29 +1239,23 @@ impl Core {
     }
 
     /// Where the kept logos are read and written off the window thread
-    fn logo_source(&self) -> LogoSource {
+    fn logo_source(self: &Arc<Self>) -> LogoSource {
         LogoSource {
-            path: self.path.clone(),
-            view_store: self.view_store.clone(),
+            core: Arc::downgrade(self),
             downloads: self.logo_downloads.clone(),
         }
     }
 
     /// A card's picture drawn `size` square for the list or the reading pane, as [`Core::picture_start`] draws one: its
-    /// PNG read and drawn off the window thread, on the views' store connection; [`Event::PictureReady`] without
+    /// PNG read and drawn off the window thread, on the pictures' store connection; [`Event::PictureReady`] without
     /// pixels when the card has no picture (any more)
-    fn contact_picture_start(&self, card: pe_store::CardId, size: u32) -> Result<u64> {
+    fn contact_picture_start(self: &Arc<Self>, card: pe_store::CardId, size: u32) -> Result<u64> {
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
-        let (path, view_store) = (self.path.clone(), self.view_store.clone());
-        let work = async move {
-            tokio::task::spawn_blocking(move || {
-                let (png, _) = OpenStore::open(&view_store, &path)?.card_picture(card).ok()??;
-                card_pictures::bgra(&png, size)
-            })
-            .await
-            .ok()
-            .flatten()
-        };
+        let drawn = self.in_background(Connection::Pictures, move |core| {
+            let (png, _) = core.store().card_picture(card).ok()??;
+            card_pictures::bgra(&png, size)
+        });
+        let work = async move { drawn.await.flatten() };
         self.pictures
             .start(self.runtime()?, request, work, self.events.clone(), |request| {
                 Event::PictureReady { request }
@@ -2731,29 +2724,35 @@ enum KeptLogo {
     At(String),
 }
 
-/// The kept logos, read and written on a store connection of their own ([`ViewStore`]), off the window thread
+/// The kept logos, read and written on the pictures' store connection, off the window thread
 #[derive(Clone)]
 struct LogoSource {
-    path: PathBuf,
-    view_store: ViewStore,
+    core: std::sync::Weak<Core>,
     downloads: LogoDownloads,
 }
 
 impl LogoSource {
+    /// `work` on the pictures' store connection, off the window thread; None once the core is closing
+    async fn in_store<T: Send + 'static>(&self, work: impl FnOnce(&Store) -> T + Send + 'static) -> Option<T> {
+        let work = self
+            .core
+            .upgrade()?
+            .in_background(Connection::Pictures, move |core| work(&core.store()));
+        work.await
+    }
+
     /// The SVG of a logo: kept and fresh, or downloaded once however many ask at the same time and kept (or its
     /// failure, so it is not tried again for a day); None when there is none to have
     async fn svg(&self, logo: KeptLogo) -> Option<Vec<u8>> {
-        let source = self.clone();
-        let (id, kept) = tokio::task::spawn_blocking(move || {
-            let store = OpenStore::open(&source.view_store, &source.path)?;
-            let id = match logo {
-                KeptLogo::Row(id) => id,
-                KeptLogo::At(url) => store.logo_id(&url).ok()?.0,
-            };
-            Some((id, store.logo(id).ok()??))
-        })
-        .await
-        .ok()??;
+        let (id, kept) = self
+            .in_store(move |store| {
+                let id = match logo {
+                    KeptLogo::Row(id) => id,
+                    KeptLogo::At(url) => store.logo_id(&url).ok()?.0,
+                };
+                Some((id, store.logo(id).ok()??))
+            })
+            .await??;
         let now = list_view::now_ms();
         if let Some(svg) = kept.fresh_svg(now) {
             return Some(svg.to_vec());
@@ -2771,11 +2770,9 @@ impl LogoSource {
         let svg = cell
             .get_or_init(|| async {
                 let svg = bimi::fetch_svg(&kept.url).await;
-                let (fetched, source) = (svg.clone(), self.clone());
-                let _ = tokio::task::spawn_blocking(move || {
-                    if let Some(store) = OpenStore::open(&source.view_store, &source.path) {
-                        let _ = store.set_logo_download(id, fetched.as_deref(), list_view::now_ms());
-                    }
+                let fetched = svg.clone();
+                self.in_store(move |store| {
+                    let _ = store.set_logo_download(id, fetched.as_deref(), list_view::now_ms());
                 })
                 .await;
                 svg
@@ -2785,32 +2782,6 @@ impl LogoSource {
         // the next ask reads the store
         self.downloads.lock().unwrap_or_else(|p| p.into_inner()).remove(&id);
         svg
-    }
-}
-
-/// The store connection of the views built in the background (a connection of its own, opened only for a bounce, to
-/// find the message it returns and mark it), None until one needs it
-type ViewStore = Arc<Mutex<Option<Store>>>;
-
-/// [`ViewStore`]'s connection, held while it is used
-struct OpenStore<'a>(MutexGuard<'a, Option<Store>>);
-
-impl<'a> OpenStore<'a> {
-    /// The connection, opened when it is not yet; None when it can not be
-    fn open(store: &'a ViewStore, path: &Path) -> Option<Self> {
-        let mut held = store.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-        if held.is_none() {
-            *held = Store::open(path).ok();
-        }
-        held.is_some().then_some(OpenStore(held))
-    }
-}
-
-impl std::ops::Deref for OpenStore<'_> {
-    type Target = Store;
-
-    fn deref(&self) -> &Store {
-        self.0.as_ref().expect("opened")
     }
 }
 
