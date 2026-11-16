@@ -1,0 +1,14 @@
+<!--review--><h1>Inbox Classicin muodostamat yhteydet</h1>
+<p class="summary">Mihin Inbox Classic muodostaa yhteyden ja miksi, teknisesti uteliaille.</p>
+<ul>
+    <li><b>Sähköpostipalvelimesi</b>: IMAP postin lukemiseen ja SMTP sen lähettämiseen. Yhteydet salataan TLS:llä, ja jokaisen palvelimen varmenne tarkistetaan järjestelmäsi luottamia varmenteita vasten. Inbox Classic hylkää palvelimen, jossa ei ole salausta, ellet valitse kohtaa <b data-text="ui-security-none"></b> ja vahvista valintaa.</li>
+    <li><b>Kun lisäät tilin</b>, sen palvelimet haetaan. Inbox Classic lukee verkkotunnuksesi DNS-tietueet DNS over HTTPS -yhteydellä (Cloudflare, sitten Google), ei koskaan tavallisella DNS:llä. Se kokeilee myös palveluntarjoajasi autoconfig-tiedostoa ja Thunderbirdin palveluntarjoajaluetteloa (ISPDB). Exchangen kohdalla se kysyy Microsoft Autodiscoverilta, joka saa salasanasi vain pyytäessään sitä HTTPS:n kautta. Salaamatonta palvelinta ei koskaan valita.</li>
+    <li><b>Kirjautuminen selaimessa</b>: OAuth 2.0 ja PKCE, Googleen, Microsoftiin tai kirjautumissovelluksesi palveluntarjoajaan. Selain palaa vain tämän tietokoneen Inbox Classiciin.</li>
+    <li><b>Tuotemerkkien logot</b> (BIMI): tuotemerkin HTTPS-osoitteesta, kun viesti ei sisällä logoa, kerran jokaista Inbox Classicin käyttökertaa kohden. Tämä tapahtuu vain, kun sähköpostipalvelimesi on hyväksynyt viestin DMARC-tarkistuksen ja logon.</li>
+    <li><b>Kuvat internetistä</b>: vain kun pyydät niitä.</li>
+    <li><b>Tilauksen peruminen</b>: vain kun napsautat sitä. Yhden napsautuksen pyyntö (RFC 8058) lähetetään vain, kun lista on allekirjoittanut viestin DKIM:llä.</li>
+    <!--os:mac--><li><b>Päivitykset</b>: inboxclassic.comista, jotta nähdään, onko uusi versio julkaistu.</li><!--/os-->
+</ul>
+<p>Kirjautumiskoodeja tarjotaan vain, kun palveluntarjoajasi Authentication-Results-otsikkotieto kertoo, että verkkotunnus on allekirjoittanut viestin (DKIM). Tämä ei vaadi omaa yhteyttä.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
+<!--/review-->

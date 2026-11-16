@@ -1,0 +1,18 @@
+<!--review--><h1>Krypteringsnøgler</h1>
+<p class="summary">Opret en nøgle til at signere dine meddelelser og modtage krypteret mail, og gem dine kontakters nøgler.</p>
+<p>Inbox Classic signerer og krypterer mail med OpenPGP-nøgler. Din egen nøgle har to halvdele: en offentlig nøgle, som du giver til andre, og en privat nøgle, som bliver på din computer. Dine kontakters nøgler lader dig kontrollere deres signaturer og kryptere mail til dem.</p>
+<p>Sådan opretter du din nøgle:</p>
+<ol>
+    <li>Vælg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, og klik så på <b data-text="ui-keys-new"></b>.</li>
+    <li>Vælg kontoen, og klik på <b data-text="ui-keys-new-make"></b>. Nøglen bruges til kontoens adresse og dens andre adresser.</li>
+    <li>Klik på <b data-text="ui-keys-backup-now"></b>, og vælg en adgangsfrase. Opbevar filen og adgangsfrasen forskellige sikre steder.</li>
+</ol>
+<aside class="warning">Uden en sikkerhedskopi kan din nøgle ikke gendannes, hvis computeren bliver væk eller nulstilles, og mail, der er krypteret til den, kan ikke længere læses.</aside>
+<h2>Nøgler forbliver beskyttet uden adgangsfraser</h2>
+<p>Dine private nøgler er beskyttet af en nøgle, der gemmes i <!--os:windows-->Legitimationsstyring<!--/os--><!--os:mac-->nøgleringen<!--/os--><!--os:linux-->systemets nøglering<!--/os-->, så du skal aldrig skrive en adgangsfrase for at bruge dem. Du vælger kun en adgangsfrase til en sikkerhedskopi. Hvis din nøgle vises som låst, er den beskyttelse blevet nulstillet: klik på <b data-text="ui-keys-import"></b>, og vælg sikkerhedskopien af den.</p>
+<h2>Tilføje nøgler</h2>
+<p>Klik på <b data-text="ui-keys-import"></b> for at tilføje en nøgle fra en fil, fx en, som en kontakt har sendt dig, eller en sikkerhedskopi af din egen. En privat nøgle, der er beskyttet af en adgangsfrase, beder om den én gang. Inbox Classic spørger derefter, om en importeret nøgle, der er din, skal bruges til dine adresser.</p>
+<p>En kontakts nøgle bruges derefter til kontaktens adresse. Hvis der senere dukker en anden nøgle op til samme adresse, bruges den nuværende fortsat, indtil du vælger den nye i kontaktens egenskaber.</p>
+<p>Hvis du vil dele din offentlige nøgle, skal du markere den og klikke på <b data-text="ui-keys-export"></b>. Du kan også vælge kontoens nøgle i dens egenskaber under fanen <b data-text="ui-account-security"></b>.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
+<!--/review-->

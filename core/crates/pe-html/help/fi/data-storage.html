@@ -1,0 +1,10 @@
+<!--review--><h1>Missä postiasi ja salasanojasi säilytetään</h1>
+<p class="summary">Mitä Inbox Classic säilyttää tietokoneessasi ja missä.</p>
+<ul>
+    <li><b>Ladattu posti ja tilien asetukset</b> ovat tiedostossa <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. Postisi säilyy myös palvelimella. Täällä oleva kopio on nopeaa lukemista, verkotonta käyttöä ja hakua varten.</li>
+    <li><b>Salasanat</b>, selainkirjautumiset ja kirjautumissovellusten salaisuudet ovat <!--os:windows-->Windowsin Tunnistetietojen hallinnassa nimellä <i>InboxClassic</i>, salattuina Windows-tilillesi.<!--/os--><!--os:mac-->kirjautumisavainnipussasi nimellä <i>InboxClassic</i>, salattuina Mac-tilillesi. Avainnippujen hallinta näyttää ne.<!--/os--><!--os:linux-->järjestelmän avainnipussa (GNOME Keyring) nimellä <i>InboxClassic</i>, salattuina kirjautumistasi varten. Ilman avainnippua niitä säilytetään vain siihen asti, kun Inbox Classic suljetaan.<!--/os--> Ne eivät ole koskaan postivarastossa.</li>
+</ul>
+<p>Haku, palautuneiden viestien selitykset, keskusteluiksi ryhmittely ja kirjautumiskoodien tunnistus tapahtuvat kaikki tietokoneessasi. Mitään postistasi ei lähetetä niitä varten minnekään.</p>
+<p>Tekoälyagentit näkevät postisi vain, kun päästät ne sisään, ja vain valitsemasi tilit. Katso <a href="topic:agents-permissions"></a>.</p>
+<nav class="related"><a href="topic:connections"></a> <a href="topic:removing"></a> <a href="topic:account-security"></a></nav>
+<!--/review-->

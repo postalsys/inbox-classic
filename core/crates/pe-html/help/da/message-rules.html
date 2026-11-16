@@ -1,0 +1,18 @@
+<!--review--><h1>Sorter ny mail med regler</h1>
+<p class="summary">Flyt, marker som læst, sæt flag på eller arkiver automatisk indgående meddelelser, der opfylder dine kriterier.</p>
+<p>En regel kombinerer søgekriterier med handlinger, der udføres på de meddelelser, der passer, når de kommer i din Indbakke. En regel med <code>from:news@example.com</code> kan fx flytte nyhedsbreve fra den adresse til en særskilt mappe og markere dem som læst.</p>
+<p>Sådan opretter du en regel:</p>
+<ol>
+    <li>Vælg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>, og klik på <b data-text="ui-rule-new"></b>.</li>
+    <li>Angiv et navn, og udfyld <b data-text="ui-rule-query"></b> med de samme søgeord som i søgefeltet, fx <code>from:</code>, <code>subject:</code> eller <code>list:</code>. Linjen nedenunder viser, hvor mange meddelelser i Indbakke der passer med kriterierne nu.</li>
+    <li>Vælg en eller flere handlinger for de meddelelser, der passer: flyt dem til en mappe, marker dem som læst, sæt flag på dem, arkiver dem, flyt dem til Uønsket mail, slet dem eller undlad at give besked.</li>
+    <li>Klik på <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Du kan også oprette en regel ud fra en meddelelse eller en søgning. Vælg <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> for at udfylde den markerede meddelelses afsender eller mailingliste. Klik på <b data-text="ui-create-rule"></b> over søgeresultaterne for at bruge dine aktuelle søgekriterier.</p>
+<h2>Sådan virker regler</h2>
+<p>Regler behandler nye meddelelser i Indbakke, mens Inbox Classic kører, også når programmet er minimeret til meddelelsesområdet. Eksisterende meddelelser påvirkes kun, hvis du markerer <b data-text="ui-rule-apply-now"></b>. Regler, der passer, køres i den rækkefølge, listen viser. Når en regel flytter en meddelelse ud af Indbakke, gælder ingen flere regler for den. Fjern fluebenet ud for en regel på listen for at slå den fra uden at slette den.</p>
+<h2>Ret regler</h2>
+<p>Du retter en regel ved at markere den på listen og klikke på <b data-text="ui-rule-edit"></b> eller ved at dobbeltklikke på den. Brug <b data-text="ui-account-move-up"></b> og <b data-text="ui-account-move-down"></b> til at ændre rækkefølgen, eller <b data-text="ui-rule-delete-button"></b> til at slette reglen. Klik på <b data-text="ui-rule-show"></b> i regeleditoren for at se de meddelelser, der passer nu, i hovedvinduet.</p>
+<p>Regler gælder nye meddelelser i Indbakke, så filtre på mappe og dato understøttes ikke. Hvis du bruger <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> eller <code>newer_than:</code>, forklarer en besked, hvorfor de ikke kan bruges. Regler kan ikke sende meddelelser eller slette dem permanent: <b data-text="ui-rule-delete"></b> flytter dem til <b data-text="folder-deleted"></b>.</p>
+<aside class="note">Regler kører på denne computer. Brug din mailudbyders filtre, hvis mailen skal sorteres, mens computeren er slukket.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav><!--/review-->
