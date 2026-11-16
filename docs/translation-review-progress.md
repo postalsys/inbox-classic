@@ -14,7 +14,7 @@ behavior and surrounding controls to establish meaning. Preserve the original sc
 - Initial inventory: 241 marked messages and 14 marked help passages per language (de, es, et, fr), 964 messages
   and 56 help passages altogether. Each language has ten affected help pages. Other languages named in the guide
   are not present in this checkout. `scripts/check-language.mjs` is also absent here.
-- Current next step: French help (ten pages), then the final source consistency pass.
+- Current next step: final English/source consistency pass, validation and review-baseline update.
   Estonian is complete for the starting snapshot. Spanish and French follow. Review existing wording outside
   marked entries when needed for context or terminology consistency.
 
@@ -139,7 +139,17 @@ Reviewed all 143 core messages and four platform/help labels; improved 62 core v
 and import results, clarified key protection and stored credentials, and corrected French singular-category
 counts so zero cannot appear as one. All 68 tests, catalog invariants and `git diff --check` passed.
 
-Next: French help, then the final English/source consistency pass. Estonian, German and Spanish
+Checkpoint commit: `74078651`.
+
+### fr-help-2026-11-16
+
+Reviewed all 14 marked passages across ten French help pages. Rewrote new topics and corrected attachment
+handling, folder layout, hidden unread counts and verification order. Preserved all tags, links, control
+references, platform branches and keyboard names. All 68 tests and `git diff --check` passed; all 965 unmarked
+catalog entries and 279 help lines match the completed inventory. File/source hashes match. The regenerated
+review HTML has no remaining marked drafts.
+
+Next: final English/source consistency pass and baseline update. Estonian, German, Spanish and French
 catalog/help review is complete for the starting snapshot. Revisit it only for newly
 arriving changes or the final cross-language consistency checks below.
 
