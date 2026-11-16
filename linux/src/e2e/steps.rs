@@ -1790,13 +1790,14 @@ pub(super) fn document_text(document: &str) -> String {
 /// The row of the message of `folder` with `subject` selected in the list (the folder shown), and its view there
 pub(super) async fn open_by_subject(folder: i64, subject: &str) -> bool {
     let main = shell().main();
-    // the list's own rows: grouped by conversation, a row is not a message's place in the folder
-    let found = main
-        .list_view()
-        .rows(&shell().core, 0, 500)
-        .unwrap_or_default()
-        .iter()
-        .position(|m| m.folder_id == folder && m.info.subject == subject);
+    // the list's own rows as it shows them: grouped by conversation, a row is not a message's place in the folder
+    let found = wait_for(10, || {
+        main.list
+            .shown_messages(500)
+            .iter()
+            .position(|m| m.folder_id == folder && m.info.subject == subject)
+    })
+    .await;
     let Some(row) = found.and_then(|at| u32::try_from(at).ok()) else {
         return false;
     };
@@ -1848,10 +1849,23 @@ pub async fn bounces(d: &Driver) {
     select_folder("Inbox");
     wait_until(10, || main.selected_name() == "Inbox").await;
     let opened = open_by_subject(inbox, "Delivery Status Notification (Failure)").await;
-    let marked = main.list.selected().is_some_and(|(_, m)| m.info.bounce);
+    // the core tells it is a bounce once it has read it: the row shows it when the list takes the change in
+    let marked = wait_until(5, || {
+        main.list.selected().is_some_and(|(_, m)| m.info.bounce) && undelivered_marks() > 0
+    })
+    .await;
     d.check(
-        opened && marked && wait_until(5, || undelivered_marks() > 0).await,
-        "the report's row has the undelivered mark in the attachment column's place",
+        opened && marked,
+        &format!(
+            "the report's row has the undelivered mark in the attachment column's place (opened {opened}, selected {:?}, \
+             scrolled {:?} of {} rows)",
+            main.list.selected().map(|(at, m)| (at, m.info.subject, m.info.bounce)),
+            main.list
+                .view
+                .vadjustment()
+                .map(|a| (a.value(), a.upper(), a.page_size())),
+            main.list.rows(),
+        ),
     );
     let failed = wait_for(15, || {
         let text = document_text(&main.reader.preview.shown());
@@ -2473,6 +2487,63 @@ pub fn second_inbox() -> Option<i64> {
 }
 
 /// The mail of both accounts' Inboxes in one list, a reply from the account of a message, Mark All Read of both
+/// A click on All Inboxes, from the first account's Inbox: the tree draws the row selected before the list is read
+/// (the list before dimmed until then), and a second click before that replaces the load waiting, so only the newest
+/// list is read. The order of what happened is asserted, not a time, but for a generous bound.
+async fn clicked_list_paints_first(d: &Driver, inbox: i64) {
+    let main = shell().main();
+    main.folders.select(inbox);
+    let load = main.list_load.clone();
+    load.order.borrow_mut().clear();
+    let clicked = std::time::Instant::now();
+    // two clicks in a row, as a click does it (not the app's own select)
+    main.folders.choose(folder_id("Sent Items").unwrap_or(inbox));
+    main.folders.choose(crate::folders::ALL_INBOXES);
+    let waiting = load.waiting() && !main.list.shown().is_sensitive();
+    d.check(
+        main.folders.selected() == crate::folders::ALL_INBOXES && waiting,
+        "a click selects All Inboxes at once, its list waiting for the paint, the one before dimmed",
+    );
+    let loaded = wait_until(10, || !load.waiting()).await;
+    let order: Vec<(&str, std::time::Duration)> = load
+        .order
+        .borrow()
+        .iter()
+        .map(|(what, at)| (*what, at.duration_since(clicked)))
+        .collect();
+    // the first two: a reload for a sync's changes may follow
+    let names: Vec<&str> = order.iter().map(|(what, _)| *what).collect();
+    let painted = order.first().map_or(std::time::Duration::MAX, |(_, at)| *at);
+    d.check(
+        loaded && names.starts_with(&["painted", "loaded"]) && painted < std::time::Duration::from_secs(2),
+        &format!("the row is drawn selected first, then its list is read, once ({order:?}; a sync may read it again)"),
+    );
+    d.check(
+        main.list.shown().is_sensitive() && main.list.rows() > 0,
+        "then the list shows, no longer dimmed",
+    );
+    waiting_shots(d, inbox, "list-wait").await;
+    main.folders.select(crate::folders::ALL_INBOXES);
+}
+
+/// Pictures of a click on the folder `to` from the list shown, for the review of the wait: the load held after the
+/// paint (the row chosen highlighted, the list before dimmed, "Loading..." over it as after 400 ms), then let go (the
+/// new list). Named `{name}-1-waiting` and `{name}-2-loaded`.
+pub(super) async fn waiting_shots(d: &Driver, to: i64, name: &str) {
+    let main = shell().main();
+    main.list_load.hold(true);
+    main.folders.choose(to);
+    d.shot(main.window(), &format!("{name}-1-waiting")).await;
+    let note = main.list_load.note().is_visible();
+    main.list_load.hold(false);
+    d.check(
+        note && main.list.shown().is_sensitive() && main.folders.selected() == to,
+        "a list that takes long says Loading... over the one before, then shows",
+    );
+    pause(300).await;
+    d.shot(main.window(), &format!("{name}-2-loaded")).await;
+}
+
 pub async fn all_inboxes(d: &Driver) {
     d.step("All Inboxes");
     let main = shell().main();
@@ -2490,7 +2561,7 @@ pub async fn all_inboxes(d: &Driver) {
     command(Command::Sync);
     wait_until(20, || shell().core.folder(inbox).is_ok_and(|f| f.unread >= 1)).await;
     tree_of_two_accounts(d, inbox, second);
-    main.folders.select(crate::folders::ALL_INBOXES);
+    clicked_list_paints_first(d, inbox).await;
     let both = |f: i64| shell().core.folder(f).map_or(0, |f| f.total);
     let expected = both(inbox) + both(second);
     d.check(

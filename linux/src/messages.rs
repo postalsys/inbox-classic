@@ -18,6 +18,11 @@ use crate::ui::set_class;
 const PAGE: u32 = 100;
 /// Pages kept while the list scrolls, the least recently used dropped first
 const PAGES_KEPT: usize = 8;
+
+/// The page the list reads the row at `position` with: its offset and length
+pub fn page_of(position: u32) -> (u64, u64) {
+    (u64::from(position / PAGE * PAGE), u64::from(PAGE))
+}
 /// The widths the Subject and Folder columns start with; the Subject column takes what the others leave, so in a
 /// wide window it is wider
 const SUBJECT_WIDTH: i32 = 200;
@@ -484,12 +489,37 @@ impl MessageList {
         )
     }
 
-    /// The list again: the rows of `view`, `total` of them, the rows `select` selected
-    pub fn reset(self: &Rc<Self>, view: pe_core::ListView, total: u64, select: &[u64]) {
+    /// The list again: the rows of `view`, `total` of them, the rows `select` selected; scrolled as it was when it
+    /// is the same list read again (`same`, GTK keeps the place), else from the top
+    pub fn reset(self: &Rc<Self>, view: pe_core::ListView, total: u64, select: &[u64], same: bool) {
         self.clock.set(crate::rows::Clock::now());
         self.model.reset(view, total);
         self.select_positions(select);
+        // another list starts at its top (GTK keeps the place it had), unless a selection is shown
+        if !same && select.is_empty() && self.model.n_items() > 0 {
+            self.scroll_to(0, gtk::ListScrollFlags::NONE);
+        }
         self.reveal(select);
+    }
+
+    /// The scrolling of the list shown
+    fn adjustment(&self) -> Option<gtk::Adjustment> {
+        self.shown()
+            .dynamic_cast::<gtk::Scrollable>()
+            .ok()
+            .and_then(|s| s.vadjustment())
+    }
+
+    /// The messages at the rows `ranges` (start included, end not), as the view the rows were read with says: from
+    /// the pages it read when the rows shown are among them (a click selects what its row shows without the core
+    /// grouping the whole list again)
+    pub fn refs_in_ranges(&self, ranges: &[(u64, u64)]) -> Vec<MessageRef> {
+        self.model
+            .imp()
+            .view
+            .borrow()
+            .refs_in_ranges(&shell().core, ranges)
+            .unwrap_or_default()
     }
 
     /// Scrolls only as far as the rows at `positions` (ascending) need to be seen: to the top when they fit under the
@@ -506,23 +536,24 @@ impl MessageList {
             let (Ok(first), Ok(last)) = (u32::try_from(first), u32::try_from(last)) else {
                 return;
             };
-            if rows == 0 || first >= rows {
+            // nothing to do when the selection changed meanwhile (a click scrolls to its row itself)
+            let selected = list.selection.selection();
+            if rows == 0
+                || first >= rows
+                || selected.is_empty()
+                || (selected.minimum(), selected.maximum()) != (first, last)
+            {
                 return;
             }
-            let adjustment = list
-                .shown()
-                .dynamic_cast::<gtk::Scrollable>()
-                .ok()
-                .and_then(|s| s.vadjustment());
-            let Some(adjustment) = adjustment else {
+            let Some(adjustment) = list.adjustment() else {
                 list.scroll_to(first, gtk::ListScrollFlags::NONE);
                 return;
             };
             let row = adjustment.upper() / f64::from(rows);
-            let (top, page) = (adjustment.value(), adjustment.page_size());
-            if row <= 0.0 || f64::from(last.min(rows - 1) + 1) * row <= page {
+            if row > 0.0 && f64::from(last.min(rows - 1) + 1) * row <= adjustment.page_size() {
                 adjustment.set_value(0.0);
-            } else if f64::from(first) * row < top || f64::from(first + 1) * row > top + page {
+            } else {
+                // GTK scrolls only as far as the row needs, not at all when it is in sight
                 list.scroll_to(first, gtk::ListScrollFlags::NONE);
             }
         });
@@ -530,6 +561,15 @@ impl MessageList {
 
     pub fn rows(&self) -> u32 {
         self.model.n_items()
+    }
+
+    /// The messages of the first `limit` rows as the list shows them now, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn shown_messages(&self, limit: u32) -> Vec<Message> {
+        (0..self.model.n_items().min(limit))
+            .filter_map(|at| self.model.item(at).and_downcast::<MessageRow>())
+            .filter_map(|row| row.with(Message::clone))
+            .collect()
     }
 
     /// How many rows are selected

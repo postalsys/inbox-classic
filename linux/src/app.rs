@@ -254,6 +254,12 @@ impl Shell {
         self.main.borrow().clone().expect("the main window")
     }
 
+    /// The main window, None before it is made
+    #[cfg(feature = "e2e")]
+    pub fn try_main(&self) -> Option<Rc<Mailbox>> {
+        self.main.borrow().clone()
+    }
+
     /// The main window made again in the language in use now, in place of the one there was (the UI test, which
     /// changes the language without starting again)
     #[cfg(feature = "e2e")]

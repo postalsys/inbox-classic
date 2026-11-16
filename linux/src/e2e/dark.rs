@@ -130,6 +130,12 @@ pub(super) async fn dark_messages(d: &Driver) {
         dark_background(&main.reader.preview.view),
         "the reading pane paints a dark background before its document, nothing flashes white",
     );
+    // a click on another list, dark: the list before dimmed under Loading..., then the new one
+    if let Some(sent) = folder_id("Sent Items") {
+        super::steps::waiting_shots(d, sent, "dark-list-wait").await;
+        select_folder("Inbox");
+        wait_until(10, || main.selected_name() == "Inbox").await;
+    }
 
     let plain = open_shown(inbox, PLAIN).await;
     d.check(

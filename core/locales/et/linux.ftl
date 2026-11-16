@@ -21,6 +21,8 @@ gtk-search-indexing = { $count ->
     [one] { $count } kirja teksti indekseeritakse veel
    *[other] { $count } kirja teksti indekseeritakse veel
 }
+# review: new
+gtk-list-loading = Laadimine...
 gtk-menu-rename = Nimeta ümber...
 gtk-import-one-question = Kas importida kiri { $file } kausta { $folder }?
 gtk-files-not-saved = { $total } failist { $failed } ei õnnestunud salvestada.

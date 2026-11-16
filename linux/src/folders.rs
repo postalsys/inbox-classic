@@ -155,10 +155,13 @@ type FilesDropped = Box<dyn Fn(i64, Vec<std::path::PathBuf>)>;
 type Menu = Box<dyn Fn(&gtk::Widget, f64, f64, &TreeRow)>;
 type Opened = Box<dyn Fn(&TreeRow, bool)>;
 type Moved = Box<dyn Fn(i64, i64, bool)>;
+type Selected = Box<dyn Fn(&TreeRow, bool)>;
 
 /// What the tree tells the window: a row chosen, messages dropped onto a folder, and the accounts reordered
 pub struct Handlers {
-    pub selected: Box<dyn Fn(&TreeRow)>,
+    /// A row selected: by the user (true; a click or a key, whose list loads after the tree has drawn the row), or
+    /// from the app ([`FolderTree::select`], listed at once)
+    pub selected: Selected,
     /// Whether the messages dragged may go to folder `to`
     pub can_drop: CanDrop,
     /// The drop: the messages, the folder, and whether to copy (Ctrl held) rather than move
@@ -209,6 +212,8 @@ pub struct FolderTree {
     /// The item last selected: closing an account takes the selection off a folder it hides, which stays the one
     /// listed, and is selected again when the account opens
     last: Cell<i64>,
+    /// While the app selects a row ([`FolderTree::select`]): not the user's choice
+    selecting: Cell<bool>,
     handlers: Rc<RefCell<Option<Handlers>>>,
     /// A row at the top has rows under it: every row keeps the room of an arrow, so the icons line up; else the top
     /// rows start at the edge (one account's list, with no heading)
@@ -244,6 +249,7 @@ impl FolderTree {
             parents: RefCell::default(),
             reloading,
             last: Cell::new(0),
+            selecting: Cell::new(false),
             handlers,
             arrows,
         });
@@ -270,7 +276,7 @@ impl FolderTree {
             let Some(row) = tree.selected_row() else { return };
             tree.last.set(row_id(&row));
             if let Some(handlers) = &*tree.handlers.borrow() {
-                (handlers.selected)(&row);
+                (handlers.selected)(&row, !tree.selecting.get());
             }
         });
         let weak = Rc::downgrade(self);
@@ -388,8 +394,24 @@ impl FolderTree {
             .and_then(|item| item.row())
     }
 
-    /// Selects row `id`, the rows around it opened to it; false when there is none (the selection unchanged)
+    /// Selects row `id`, the rows around it opened to it, listed at once; false when there is none (the selection
+    /// unchanged)
     pub fn select(&self, id: i64) -> bool {
+        let before = self.selecting.replace(true);
+        let selected = self.select_row(id);
+        self.selecting.set(before);
+        selected
+    }
+
+    /// Selects row `id` as a click on it does: its list loads after the tree has drawn it
+    pub fn choose(&self, id: i64) -> bool {
+        let before = self.selecting.replace(false);
+        let selected = self.select_row(id);
+        self.selecting.set(before);
+        selected
+    }
+
+    fn select_row(&self, id: i64) -> bool {
         let Some(model) = self.tree_model() else { return false };
         if !self.items.borrow().contains_key(&id) {
             return false;

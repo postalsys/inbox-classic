@@ -508,18 +508,28 @@ async fn pause(ms: u64) {
     glib::timeout_future(Duration::from_millis(ms)).await;
 }
 
-/// Waits up to `seconds` for `condition` to give something, which it returns
+/// Waits up to `seconds` for `condition` to give something, which it returns. Not while the message list is about to
+/// be read again (the changes of a sync are taken in 300 ms after the first, a folder chosen after the paint), so
+/// what the core says and what the list shows agree when it returns.
 async fn wait_for<T>(seconds: u64, mut condition: impl FnMut() -> Option<T>) -> Option<T> {
     let deadline = Instant::now() + Duration::from_secs(seconds);
     loop {
-        if let Some(value) = condition() {
+        let late = Instant::now() > deadline;
+        if (late || !list_settling())
+            && let Some(value) = condition()
+        {
             return Some(value);
         }
-        if Instant::now() > deadline {
+        if late {
             return None;
         }
         pause(250).await;
     }
+}
+
+/// The main window's list is about to be read again
+fn list_settling() -> bool {
+    shell().try_main().is_some_and(|main| main.list_settling())
 }
 
 async fn wait_until(seconds: u64, mut condition: impl FnMut() -> bool) -> bool {
