@@ -229,8 +229,17 @@ status text, installer account scope and Linux store descriptions. Catalan now h
 All 75 tests, structural checks, 32 shortcut scopes, inventory/hash reconciliation and git diff --check pass.
 Generated installer/Linux text rebuilt and inspected. UI checkpoint: `e07f6640`. All 52 help topics remain pending.
 
-Current totals: 6,719 catalog entries and 212 help pages reviewed; 1,067 catalog values improved. Remaining:
-25,289 catalog entries and 1,040 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Catalan first 21 help topics
+
+Reviewed setup, window layouts, reading/searching/conversations, organization/deletion, folders, writing/replies,
+signatures, attachments/files, drafts/outbox, contacts, notifications, combined folders, account management/transfer
+and provider sign-in. Corrected old folder navigation, temporary-attachment lifetime, domain authentication,
+transferred credentials and rule-folder matching. Fixed platform-specific contractions and improved natural prose.
+All 75 tests, structure, inventory/hash reconciliation, inline spacing and git diff --check pass.
+Catalog completion checkpoint: `e6e56cff`. The final 31 help topics are pending.
+
+Current totals: 6,719 catalog entries and 233 help pages reviewed; 1,067 catalog values improved. Remaining:
+25,289 catalog entries and 1,019 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
