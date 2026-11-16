@@ -1,0 +1,18 @@
+<!--review--><h1>Errors de certificat</h1>
+<p class="summary">Què cal fer quan Inbox Classic no pot confirmar que parla amb el servidor de correu real.</p>
+<p>Podeu veure un d’aquests missatges:</p>
+<ul>
+    <li>A la barra d’estat: «TLS error: …»</li>
+    <li>A la subfinestra de lectura: «No s’ha pogut establir una connexió segura amb el servidor de correu (…).»</li>
+</ul>
+<p>Inbox Classic no ha pogut confirmar que el servidor és qui diu ser, i per això no ha enviat la contrasenya.</p>
+<p>Per solucionar-ho:</p>
+<ol>
+    <li>Obriu les propietats del compte a <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Comproveu els noms dels servidors. Han de ser els noms per als quals s’ha fet el certificat del servidor. Sovint és el nom del proveïdor, com ara <code>imap.proveidor.com</code>, no el vostre domini.</li>
+    <li>Comproveu que la data i l’hora de l’ordinador són correctes.</li>
+</ol>
+<p>En una xarxa que inspecciona el trànsit xifrat, com ara algunes xarxes d’oficines o escoles, pregunteu-ho a l’administrador.</p>
+<aside class="note">No hi ha cap opció per acceptar qualsevol certificat. Acceptar-ne un de fals permetria que algú de la xarxa llegís la vostra contrasenya i el vostre correu.</aside>
+<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

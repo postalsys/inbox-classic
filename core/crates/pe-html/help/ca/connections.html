@@ -1,0 +1,14 @@
+<!--review--><h1>Les connexions que fa Inbox Classic</h1>
+<p class="summary">On es connecta Inbox Classic, i per què, per als curiosos de la tècnica.</p>
+<ul>
+    <li><b>Els vostres servidors de correu</b>, per IMAP per llegir el correu i per SMTP per enviar-lo. Les connexions es xifren amb TLS, i el certificat de cada servidor es comprova amb els certificats en què confia el vostre sistema. Inbox Classic rebutja un servidor sense xifratge, tret que trieu <b data-text="ui-security-none"></b> i ho confirmeu.</li>
+    <li><b>Quan afegiu un compte</b>, per cercar-ne els servidors. Inbox Classic llegeix els registres DNS del vostre domini amb DNS per HTTPS (Cloudflare i després Google), mai amb DNS normal. També prova el fitxer de configuració automàtica del vostre proveïdor i la llista de proveïdors de Thunderbird (ISPDB). Per a Exchange, ho pregunta a Microsoft Autodiscover, que només rep la contrasenya quan la demana per HTTPS. Mai no es tria un servidor sense xifratge.</li>
+    <li><b>L’inici de sessió al navegador</b>, amb OAuth 2.0 i PKCE, a Google, Microsoft o el proveïdor de la vostra aplicació d’inici de sessió. El navegador només torna a Inbox Classic en aquest ordinador.</li>
+    <li><b>Els logotips de marca</b> (BIMI), des de l’adreça HTTPS de la marca quan el missatge no porta el logotip, una vegada cada cop que s’executa Inbox Classic. Només passa quan el vostre servidor de correu ha comprovat el DMARC del missatge i ha aprovat el logotip.</li>
+    <li><b>Les imatges d’Internet</b>, només quan les demaneu.</li>
+    <li><b>La cancel·lació de la subscripció</b>, només quan hi feu clic. Una sol·licitud d’un sol clic (RFC 8058) només s’envia quan la llista ha signat el missatge amb DKIM.</li>
+    <!--os:mac--><li><b>Les actualitzacions</b>, des d’inboxclassic.com, per veure si ha sortit una versió nova.</li><!--/os-->
+</ul>
+<p>Els codis d’inici de sessió només s’ofereixen quan la capçalera Authentication-Results del vostre proveïdor diu que el domini ha signat el missatge (DKIM). Això no necessita cap connexió pròpia.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
+<!--/review-->
