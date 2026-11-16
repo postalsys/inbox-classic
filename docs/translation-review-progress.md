@@ -16,7 +16,7 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Turkish (`tr`): all catalogs and help pending. Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
+- Resume with Turkish (`tr`): shared UI complete; finish core/platform catalogs and all 52 help topics. Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
   Norwegian Bokmål and Serbian Latin are complete: each has 1,331 catalog entries and 52 help topics.
   Seventeen languages still have pending content, with exact IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
@@ -306,8 +306,17 @@ All 75 tests, structure, inventory/hash reconciliation, inline spacing and git d
 HTML is regenerated. Everyday-help checkpoint: `a4bdb41a`. Turkish is next. The source branch remains
 `cf13ec99`, with no new catalog/help translations since the integrated source checkpoint.
 
-Current totals: 9,381 catalog entries and 368 help pages reviewed; 1,453 catalog values improved. Remaining:
-22,627 catalog entries and 884 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Turkish UI catalog
+
+Reviewed all 626 shared UI entries and two coupled core/Windows entries, improving 75 values. Reworked
+sign-in, rule processing, queued sending, fingerprint verification, credential transfer and image privacy.
+The sender-address error now quotes the exact field label. All 14 catalog tests, structural checks,
+32 actual shortcut scopes, inventory/hash reconciliation and git diff --check pass. Two native letters
+avoid artificially lengthened commands; dotted/dotless i is excluded. Glossary decisions are recorded.
+Serbian Latin completion checkpoint: `ad3fe778`. Remaining 703 catalog entries and 52 help topics are pending.
+
+Current totals: 10,009 catalog entries and 368 help pages reviewed; 1,528 catalog values improved. Remaining:
+21,999 catalog entries and 884 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

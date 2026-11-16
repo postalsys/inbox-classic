@@ -518,8 +518,7 @@ error-folder-special = Gelen Kutusu ve özel klasörler yeniden adlandırılamaz
 error-no-recipients = iletinin alıcısı yok
 # review: new
 error-bad-address = “{ $address }” bir e-posta adresi değil
-# review: new
-error-not-own-address = { $address } bu hesabın gönderen adreslerinden biri değil. Hesabın özelliklerinde “Gönderdiğiniz diğer adresler” alanına ekleyin.
+error-not-own-address = { $address } bu hesabın gönderen adreslerinden biri değil. Hesap özelliklerindeki “Diğer gönderen adresleri” alanına ekleyin.
 # review: new
 rule-query-refused = Kurallar klasöre veya tarihe göre süzemez ({ $words }).
 # review: new

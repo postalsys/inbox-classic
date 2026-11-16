@@ -147,8 +147,7 @@ win-dont-send = Gö&nderme
 win-forget-program-ask = Bu program, izinleri ve aracılarının etkinlik geçmişi kaldırılsın mı? Bir sonraki bağlantısında yeniden izin istenecek.
 # review: new
 win-clear-log-ask = Aracıların etkinlik geçmişi temizlensin mi? Bu, aracıların yaptığı değişiklikleri geri almaz.
-# review: new
-win-agent-programs = Aracıları postanıza erişim isteyen &programlar:
+win-agent-programs = Postanıza erişim isteyen aracıların &programları:
 # review: new
 win-change = &Değiştir...
 # review: new

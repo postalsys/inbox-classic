@@ -625,8 +625,9 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 ileti"
   ("sağlayıcı") fits.
 - Brand names that are not placeables take a suffix after an apostrophe ("Inbox Classic'i", "Gmail'de").
 - Quotes “…” (as the app's English uses).
-- Access keys avoid i, ı, İ and I (the dotted/dotless pair maps differently in Turkish case folding) and prefer ASCII
-  letters; ğ, ş, ç, ö, ü are avoided too.
+- Access keys avoid i, ı, İ and I (the dotted/dotless pair maps differently in Turkish case folding). Prefer ASCII
+  letters; native ç, ğ, ö, ş and ü may be used where the actual menu scopes need more distinct letters.
+  Do not lengthen otherwise natural commands just to obtain ASCII access keys.
 - Keys Ctrl / Shift / Del / Enter, as Turkish keyboards print them.
 - Review first: "ileti" versus "e-posta" for message, "Gereksiz E-posta" pair, "istemci gizli dizisi", "aracı" for
   agent.
@@ -639,6 +640,14 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 ileti"
   "seçeneğini" (checkboxes), so the catalog value never takes a suffix.
 - Raw network errors quoted in the help ("connection error: …", "the server did not answer in time") stay English, as
   the core does not translate them.
+- Round 2: the sender-address field is "Diğer gönderen adresleri:"; the validation error quotes that name.
+  Rules "işler" messages. Address-book Write To is "İleti Yaz". Use "dijital imza" to distinguish
+  cryptographic signatures from the signature appended to message text.
+- "Oturum açma bilgileri" includes passwords and OAuth credentials. Unprotected setup files require
+  another password or browser sign-in. Key verification checks every listed address before accepting it.
+  "Eşleşiyor" / "Eşleşmiyor" are the matching and mismatching fingerprint buttons.
+- Bilgi/Gizli keep Alt+B/Alt+G; help preserves original keyboard tags and explains these localized keys.
+
 - The checker reads a message only up to a `}` in column 0, so selectors that English puts first stay first
   (`done-flagged-color` ends with the colour; the Linux search result counts come before a colon).
 
