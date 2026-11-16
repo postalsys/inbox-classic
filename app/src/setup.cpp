@@ -1,9 +1,13 @@
 // File > Export Settings and Accounts and Import Settings and Accounts: the setup file to take to another computer.
 // The core writes and reads the file and words what it holds (pe_setup_*); these windows show that, hand back what is
-// chosen, and carry the app preferences between the registry and the core by the names the three apps share.
+// chosen, and carry the app preferences between the registry and the core by the names the three apps share. Reading,
+// writing and importing run on a thread of their own (a sealed file's key takes a moment, an import reaches the
+// sign-in services), the window waiting meanwhile.
 #include "app.h"
 
 #include <algorithm>
+#include <atomic>
+#include <thread>
 
 namespace {
 
@@ -11,26 +15,21 @@ const wchar_t* kExportClass = L"InboxClassicSetupExport";
 const wchar_t* kImportClass = L"InboxClassicSetupImport";
 const wchar_t* kDoneClass = L"InboxClassicSetupDone";
 
-// the parts in the core's order (Parts::EACH), with the names the windows give them
-struct Part {
-    uint32_t flag;
-    PeText name;
-};
-const Part kParts[] = {
-    {PE_SETUP_ACCOUNTS, PE_TEXT_UI_SETUP_PART_ACCOUNTS}, {PE_SETUP_SIGN_IN_APPS, PE_TEXT_UI_SETUP_PART_SIGN_IN_APPS},
-    {PE_SETUP_SETTINGS, PE_TEXT_UI_SETUP_PART_SETTINGS}, {PE_SETUP_PREFERENCES, PE_TEXT_UI_SETUP_PART_PREFERENCES},
-    {PE_SETUP_CONTACTS, PE_TEXT_UI_SETUP_PART_CONTACTS}, {PE_SETUP_KEYS, PE_TEXT_UI_SETUP_PART_KEYS},
-    {PE_SETUP_RULES, PE_TEXT_UI_SETUP_PART_RULES},       {PE_SETUP_TRUSTED_SENDERS, PE_TEXT_UI_SETUP_PART_TRUSTED},
-};
-
-// the place of the part `flag` in kParts, -1 for none
-int PartIndex(uint32_t flag) {
-    for (int i = 0; i < static_cast<int>(std::size(kParts)); i++) {
-        if (kParts[i].flag == flag) {
-            return i;
-        }
+// the parts in the core's order (pe_setup_parts): a part's check box is IDC_SETUP_PART + its place here
+std::vector<uint32_t> PartFlags() {
+    std::vector<uint32_t> flags;
+    core::SetupLines parts(pe_setup_parts());
+    for (size_t i = 0; i < pe_setup_lines_count(parts.get()); i++) {
+        flags.push_back(pe_setup_lines_get(parts.get(), i)->part);
     }
-    return -1;
+    return flags;
+}
+
+// the check box of the part `flag`, 0 for a flag the core does not list
+int PartId(uint32_t flag) {
+    static const std::vector<uint32_t> flags = PartFlags();
+    auto found = std::find(flags.begin(), flags.end(), flag);
+    return found == flags.end() ? 0 : IDC_SETUP_PART + static_cast<int>(found - flags.begin());
 }
 
 // the app preferences a setup carries, by their shared names, and where this app keeps them: the registry values of
@@ -80,26 +79,93 @@ bool Checked(HWND dialog, int id) {
     return SendMessageW(Item(dialog, id), BM_GETCHECK, 0, 0) == BST_CHECKED;
 }
 
+void Check(HWND dialog, int id, bool on) {
+    SendMessageW(Item(dialog, id), BM_SETCHECK, on ? BST_CHECKED : BST_UNCHECKED, 0);
+}
+
 // a check box as wide as its words
 int CheckWidth(const std::wstring& text) {
     return static_cast<int>(MeasureText(text).cx) + GetSystemMetrics(SM_CXMENUCHECK) + Scale(10);
 }
 
-// the small system icon `icon` (IDI_WARNING, IDI_INFORMATION) in a static at `left`, `top`; shared, not destroyed
-HWND SmallIcon(HWND dialog, const wchar_t* icon, int id, int left, int top) {
-    int size = GetSystemMetrics(SM_CXSMICON);
-    auto picture = static_cast<HICON>(LoadImageW(nullptr, icon, IMAGE_ICON, size, size, LR_SHARED));
-    HWND sign = CreateChild(dialog, L"STATIC", nullptr, SS_ICON | SS_REALSIZECONTROL, id, {left, top, left + size, top + size});
-    SendMessageW(sign, STM_SETICON, reinterpret_cast<WPARAM>(picture), 0);
-    return sign;
+// `text` wrapped in `width`: its height
+int Wrapped(const std::wstring& text, int width) {
+    return static_cast<int>(MeasureText(text, width).cy);
 }
 
-// the default button `ok` and Cancel at the bottom right of a window `width` wide, their top at `top`
-void BottomButtons(HWND dialog, int width, int top, const std::wstring& ok, const std::wstring& cancel) {
-    int pad = Scale(10), buttonWidth = ButtonWidth({ok, cancel});
-    CreateChild(dialog, L"BUTTON", ok.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
-                {width - pad - 2 * buttonWidth - Scale(6), top, width - pad - buttonWidth - Scale(6), top + Scale(25)});
-    CreateChild(dialog, L"BUTTON", cancel.c_str(), WS_TABSTOP, IDCANCEL, {width - pad - buttonWidth, top, width - pad, top + Scale(25)});
+HWND Label(HWND dialog, const std::wstring& text, int id, int left, int top, int right, int height) {
+    return CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, id, {left, top, right, top + height});
+}
+
+// a window laid out top to bottom: each row measured once, the window made as tall as they are, then each made at its
+// place
+struct Row {
+    int height;
+    // the room under it
+    int gap;
+    std::function<void(HWND dialog, int top)> make;
+};
+
+int RowsHeight(const std::vector<Row>& rows) {
+    int height = 0;
+    for (const Row& row : rows) {
+        height += row.height + row.gap;
+    }
+    return height;
+}
+
+void PlaceRows(HWND dialog, const std::vector<Row>& rows, int top) {
+    for (const Row& row : rows) {
+        row.make(dialog, top);
+        top += row.height + row.gap;
+    }
+}
+
+// `work` on a thread of its own while the window `waiting` waits for it: it keeps painting, takes no input meanwhile
+// (its OK button off, the wait cursor over it), and goes on once the thread is done
+void RunWaiting(HWND waiting, const std::function<void()>& work) {
+    HWND ok = Item(waiting, IDOK);
+    bool okOn = ok && IsWindowEnabled(ok);
+    if (ok) {
+        EnableWindow(ok, FALSE);
+    }
+    std::atomic<bool> finished = false;
+    DWORD windowThread = GetCurrentThreadId();
+    std::thread worker([&] {
+        work();
+        finished = true;
+        // wakes the loop below
+        PostThreadMessageW(windowThread, WM_NULL, 0, 0);
+    });
+    HCURSOR wait = LoadCursorW(nullptr, IDC_WAIT);
+    SetCursor(wait);
+    MSG msg = {};
+    bool quit = false;
+    while (!finished && !quit) {
+        if (GetMessageW(&msg, nullptr, 0, 0) <= 0) {
+            quit = true;
+            break;
+        }
+        bool keys = msg.message >= WM_KEYFIRST && msg.message <= WM_KEYLAST;
+        bool mouse = (msg.message >= WM_MOUSEFIRST && msg.message <= WM_MOUSELAST) || (msg.message >= WM_NCMOUSEMOVE && msg.message <= WM_NCXBUTTONDBLCLK);
+        if (keys || mouse) {
+            if (msg.message == WM_MOUSEMOVE || msg.message == WM_NCMOUSEMOVE) {
+                SetCursor(wait);
+            }
+            continue;
+        }
+        TranslateMessage(&msg);
+        DispatchMessageW(&msg);
+    }
+    worker.join();
+    if (quit) {
+        // kept for the main loop
+        PostQuitMessage(static_cast<int>(msg.wParam));
+    }
+    if (ok) {
+        EnableWindow(ok, okOn);
+    }
+    SetCursor(LoadCursorW(nullptr, IDC_ARROW));
 }
 
 // ---- what was done: the lines of the core, and Done ----
@@ -120,6 +186,14 @@ LRESULT CALLBACK DoneProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     return DefWindowProcW(hwnd, message, wParam, lParam);
 }
 
+// the small system icon `icon` (IDI_INFORMATION) in a static at `left`, `top`; shared, not destroyed
+void SmallIcon(HWND dialog, const wchar_t* icon, int left, int top) {
+    int size = GetSystemMetrics(SM_CXSMICON);
+    auto picture = static_cast<HICON>(LoadImageW(nullptr, icon, IMAGE_ICON, size, size, LR_SHARED));
+    HWND sign = CreateChild(dialog, L"STATIC", nullptr, SS_ICON | SS_REALSIZECONTROL, 0, {left, top, left + size, top + size});
+    SendMessageW(sign, STM_SETICON, reinterpret_cast<WPARAM>(picture), 0);
+}
+
 // the lines of an export or an import with Done: `intro` over them when not empty; a part's line as its name beside
 // what it holds, what was added and skipped as they are, a note with the information sign before it
 void DoneDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const PeSetupLines* lines) {
@@ -130,56 +204,57 @@ void DoneDialog(HWND owner, const std::wstring& title, const std::wstring& intro
     std::vector<std::wstring> names;
     for (size_t i = 0; i < count; i++) {
         const PeSetupLine* line = pe_setup_lines_get(lines, i);
-        if (line->kind == PE_SETUP_LINE_KIND_PART && PartIndex(line->part) >= 0) {
-            names.push_back(core::T(kParts[PartIndex(line->part)].name));
+        if (line->kind == PE_SETUP_LINE_KIND_PART) {
+            names.push_back(Text(line->name));
         }
     }
     int nameWidth = names.empty() ? 0 : LabelWidth(names, 60, 16);
-    // each line's place and height first, then the window as tall as they need
-    struct Row {
-        const PeSetupLine* line;
-        int top;
-        int height;
-    };
     std::vector<Row> rows;
-    int introHeight = intro.empty() ? 0 : static_cast<int>(MeasureText(intro, width - 2 * pad).cy) + Scale(10);
-    int top = pad + introHeight;
+    if (!intro.empty()) {
+        int height = Wrapped(intro, width - 2 * pad);
+        rows.push_back({height, Scale(10), [=](HWND dialog, int top) { Label(dialog, intro, 0, pad, top, width - pad, height); }});
+    }
     for (size_t i = 0; i < count; i++) {
         const PeSetupLine* line = pe_setup_lines_get(lines, i);
-        std::wstring text = Text(line->text);
-        int left = line->kind == PE_SETUP_LINE_KIND_PART ? nameWidth : line->kind == PE_SETUP_LINE_KIND_NOTE ? icon : 0;
-        int height = static_cast<int>(MeasureText(text, width - 2 * pad - left).cy);
-        if (line->kind == PE_SETUP_LINE_KIND_NOTE) {
+        std::wstring text = Text(line->text), name = Text(line->name);
+        bool part = line->kind == PE_SETUP_LINE_KIND_PART, note = line->kind == PE_SETUP_LINE_KIND_NOTE;
+        int left = pad + (part ? nameWidth : note ? icon : 0);
+        int height = Wrapped(text, width - pad - left);
+        if (note) {
             height = std::max(height, GetSystemMetrics(SM_CYSMICON));
         }
-        rows.push_back({line, top, height});
-        top += height + gap;
+        rows.push_back({height, gap, [=](HWND dialog, int top) {
+                            if (part) {
+                                Label(dialog, name, 0, pad, top, pad + nameWidth, height);
+                            } else if (note) {
+                                SmallIcon(dialog, IDI_INFORMATION, pad, top);
+                            }
+                            Label(dialog, text, 0, left, top, width - pad, height);
+                        }});
     }
-    int height = top + Scale(10) + Scale(25) + pad;
+    int height = pad + RowsHeight(rows) + Scale(10) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kDoneClass, title.c_str(), width, height);
     DoneState state;
-    if (!intro.empty()) {
-        CreateChild(dialog, L"STATIC", intro.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, pad, width - pad, pad + introHeight});
-    }
-    for (const Row& row : rows) {
-        std::wstring text = Text(row.line->text);
-        int left = pad;
-        if (row.line->kind == PE_SETUP_LINE_KIND_PART && PartIndex(row.line->part) >= 0) {
-            std::wstring name = core::T(kParts[PartIndex(row.line->part)].name);
-            CreateChild(dialog, L"STATIC", name.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, row.top, pad + nameWidth, row.top + row.height});
-            left += nameWidth;
-        } else if (row.line->kind == PE_SETUP_LINE_KIND_NOTE) {
-            SmallIcon(dialog, IDI_INFORMATION, 0, pad, row.top);
-            left += icon;
-        }
-        CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, 0, {left, row.top, width - pad, row.top + row.height});
-    }
+    PlaceRows(dialog, rows, pad);
     std::wstring done = core::T(PE_TEXT_UI_SETUP_DONE);
     int buttonWidth = ButtonWidth({done});
     HWND button = CreateChild(dialog, L"BUTTON", done.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDOK,
                               {width - pad - buttonWidth, height - pad - Scale(25), width - pad, height - pad});
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     RunModal(dialog, button, state.done);
+}
+
+// the parts whose check boxes are ticked
+uint32_t ChosenParts(HWND dialog) {
+    uint32_t parts = 0;
+    core::SetupLines all(pe_setup_parts());
+    for (size_t i = 0; i < pe_setup_lines_count(all.get()); i++) {
+        uint32_t flag = pe_setup_lines_get(all.get(), i)->part;
+        if (Item(dialog, PartId(flag)) && Checked(dialog, PartId(flag))) {
+            parts |= flag;
+        }
+    }
+    return parts;
 }
 
 // ---- Export ----
@@ -193,68 +268,35 @@ struct ExportState {
     bool done = false;
 };
 
-uint32_t ChosenParts(HWND dialog) {
-    uint32_t parts = 0;
-    for (int i = 0; i < static_cast<int>(std::size(kParts)); i++) {
-        if (Item(dialog, IDC_SETUP_PART + i) && Checked(dialog, IDC_SETUP_PART + i)) {
-            parts |= kParts[i].flag;
-        }
-    }
-    return parts;
-}
+const std::initializer_list<int> kExportFields = {IDC_SETUP_PASSPHRASE, IDC_SETUP_PASSPHRASE_AGAIN};
 
-// the core's words for what is wrong with the passphrase typed, as it is typed: too short once something is typed,
-// typed differently once the second field has something; and whether it can be taken
-std::wstring PassphraseProblem(HWND dialog, bool& good) {
-    std::string first = ReadSecret(Item(dialog, IDC_SETUP_PASSPHRASE));
-    std::string again = ReadSecret(Item(dialog, IDC_SETUP_PASSPHRASE_AGAIN));
-    core::String alone(pe_pgp_passphrase_problem(first.c_str(), first.c_str()));
-    core::String both(pe_pgp_passphrase_problem(first.c_str(), again.c_str()));
-    good = !first.empty() && !both;
-    std::wstring problem = first.empty() ? L"" : alone ? Text(alone.get()) : !again.empty() && both ? Text(both.get()) : L"";
-    Wipe(first);
-    Wipe(again);
-    return problem;
-}
-
-// the window as what is chosen and typed allows: the passphrase fields with the check box, why a passphrase is not
-// taken under them, Export only with a part and, when wanted, a passphrase that can be taken
+// the window as what is chosen and typed allows: the passphrase fields with the check box, what the core says of the
+// passphrase under them, Export only with a part and, when wanted, a passphrase the core takes
 void UpdateExport(HWND dialog) {
     bool protect = Checked(dialog, IDC_SETUP_USE_PASSPHRASE);
-    for (int id : {IDC_SETUP_PASSPHRASE, IDC_SETUP_PASSPHRASE_AGAIN}) {
+    for (int id : kExportFields) {
         EnableWindow(Item(dialog, id), protect);
         // the label before the field
         EnableWindow(GetWindow(Item(dialog, id), GW_HWNDPREV), protect);
     }
     bool good = true;
-    std::wstring problem = protect ? PassphraseProblem(dialog, good) : L"";
-    HWND words = Item(dialog, IDC_SETUP_PROBLEM);
-    if (GetWindowString(words) != problem) {
-        SetWindowTextW(words, problem.c_str());
+    if (protect) {
+        good = ShowPassphraseFeedback(dialog, IDC_SETUP_PASSPHRASE, IDC_SETUP_PASSPHRASE_AGAIN, IDC_SETUP_PROBLEM);
+    } else {
+        ShowWindow(Item(dialog, IDC_SETUP_PROBLEM), SW_HIDE);
+        ShowWindow(GetWindow(Item(dialog, IDC_SETUP_PROBLEM), GW_HWNDPREV), SW_HIDE);
     }
-    ShowWindow(words, problem.empty() ? SW_HIDE : SW_SHOW);
-    ShowWindow(GetWindow(words, GW_HWNDPREV), problem.empty() ? SW_HIDE : SW_SHOW);
-    SetAccessibleDescription(Item(dialog, IDC_SETUP_PASSPHRASE_AGAIN), problem);
     EnableWindow(Item(dialog, IDOK), ChosenParts(dialog) != 0 && good);
-}
-
-// the fields' own copies written over before the window goes, as far as the edit control lets them be
-void WipeFields(HWND dialog) {
-    for (int id : {IDC_SETUP_PASSPHRASE, IDC_SETUP_PASSPHRASE_AGAIN}) {
-        HWND edit = Item(dialog, id);
-        int length = GetWindowTextLengthW(edit);
-        SetWindowTextW(edit, std::wstring(static_cast<size_t>(length), L' ').c_str());
-        SetWindowTextW(edit, L"");
-    }
 }
 
 // Export: where to save asked, then the file written with what is chosen; the window stays when it could not be
 void WriteExport(HWND dialog, ExportState& state) {
-    uint32_t parts = ChosenParts(dialog);
-    core::SetupExport setup(pe_setup_export_new(parts));
+    core::SetupExport setup(pe_setup_export_new(ChosenParts(dialog)));
     HandPrefs(setup.get());
-    std::wstring filter = FileFilter({{core::T(PE_TEXT_UI_SETUP_FILE_FILTER), L"*.inboxclassic"}});
-    std::wstring path = SaveFileDialog(dialog, L"Inbox Classic.inboxclassic", state.title.c_str(), filter.c_str(), L"inboxclassic");
+    std::wstring extension = Text(pe_setup_extension());
+    std::wstring filter = FileFilter({{core::T(PE_TEXT_UI_SETUP_FILE_FILTER), L"*." + extension}});
+    core::String name(pe_setup_default_name());
+    std::wstring path = SaveFileDialog(dialog, Text(name.get()), state.title.c_str(), filter.c_str(), extension.c_str());
     if (path.empty()) {
         return;
     }
@@ -263,10 +305,10 @@ void WriteExport(HWND dialog, ExportState& state) {
         pe_setup_export_set_passphrase(setup.get(), passphrase.c_str());
         Wipe(passphrase);
     }
-    HCURSOR old = SetCursor(LoadCursorW(nullptr, IDC_WAIT));
+    std::string utf8 = core::Narrow(path);
     char* error = nullptr;
-    core::SetupLines lines(pe_setup_export_write(state.core, setup.get(), core::Narrow(path).c_str(), &error));
-    SetCursor(old);
+    core::SetupLines lines;
+    RunWaiting(dialog, [&] { lines.reset(pe_setup_export_write(state.core, setup.get(), utf8.c_str(), &error)); });
     // the passphrase leaves memory with the export
     setup.reset();
     if (!lines) {
@@ -277,7 +319,7 @@ void WriteExport(HWND dialog, ExportState& state) {
     state.path = path;
     state.lines = std::move(lines);
     state.done = true;
-    WipeFields(dialog);
+    WipeFields(dialog, kExportFields);
 }
 
 LRESULT CALLBACK ExportProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -294,7 +336,7 @@ LRESULT CALLBACK ExportProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
                 WriteExport(hwnd, *state);
             }
         } else if (id == IDCANCEL) {
-            WipeFields(hwnd);
+            WipeFields(hwnd, kExportFields);
             state->done = true;
         } else if (HIWORD(wParam) == EN_CHANGE || HIWORD(wParam) == BN_CLICKED) {
             UpdateExport(hwnd);
@@ -302,7 +344,7 @@ LRESULT CALLBACK ExportProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
         return 0;
     }
     case WM_CLOSE:
-        WipeFields(hwnd);
+        WipeFields(hwnd, kExportFields);
         state->done = true;
         return 0;
     case WM_CTLCOLORSTATIC:
@@ -317,51 +359,46 @@ struct ImportState {
     PeCore* core = nullptr;
     const PeSetupFile* file = nullptr;
     std::wstring title;
-    // the file's account of each account check box, and whether it can be chosen
+    // the file's account of each account check box, and whether an import can add it
     std::vector<size_t> accounts;
-    std::vector<bool> choosable;
+    std::vector<bool> importable;
     uint32_t parts = 0;
     core::SetupLines lines;
     bool done = false;
 };
 
-// the Accounts part and its accounts kept together after the check box `id` was clicked: the part ticks or unticks
-// every account that can be imported, an account ticks the part while one is ticked; Import only with a part
+// after the check box `id` was clicked: Accounts ticks or unticks every account an import can add, and is ticked while
+// one of them is; Import only with a part or an account
 void UpdateImport(HWND dialog, const ImportState& state, int id) {
-    int accountsPart = IDC_SETUP_PART + PartIndex(PE_SETUP_ACCOUNTS);
+    int accountsPart = PartId(PE_SETUP_ACCOUNTS);
     int count = static_cast<int>(state.accounts.size());
-    if (id == accountsPart) {
-        bool on = Checked(dialog, accountsPart);
-        for (int i = 0; i < count; i++) {
-            if (state.choosable[i]) {
-                SendMessageW(Item(dialog, IDC_SETUP_ACCOUNT + i), BM_SETCHECK, on ? BST_CHECKED : BST_UNCHECKED, 0);
-            }
+    bool any = false;
+    for (int i = 0; i < count; i++) {
+        if (state.importable[i] && id == accountsPart) {
+            Check(dialog, IDC_SETUP_ACCOUNT + i, Checked(dialog, accountsPart));
         }
-    } else if (id >= IDC_SETUP_ACCOUNT && id < IDC_SETUP_ACCOUNT + count) {
-        bool any = false;
-        for (int i = 0; i < count; i++) {
-            any = any || (state.choosable[i] && Checked(dialog, IDC_SETUP_ACCOUNT + i));
-        }
-        SendMessageW(Item(dialog, accountsPart), BM_SETCHECK, any ? BST_CHECKED : BST_UNCHECKED, 0);
+        any = any || (state.importable[i] && Checked(dialog, IDC_SETUP_ACCOUNT + i));
+    }
+    if (Item(dialog, accountsPart)) {
+        Check(dialog, accountsPart, any);
     }
     EnableWindow(Item(dialog, IDOK), ChosenParts(dialog) != 0);
 }
 
-// Import: what is chosen imported; the window stays when nothing could be
+// Import: what is chosen imported, on a thread of its own (it reaches the sign-in services); the window stays when
+// nothing could be
 void RunImport(HWND dialog, ImportState& state) {
-    uint32_t parts = ChosenParts(dialog);
+    // Accounts comes from the accounts named
+    uint32_t parts = ChosenParts(dialog) & ~static_cast<uint32_t>(PE_SETUP_ACCOUNTS);
     std::vector<size_t> accounts;
-    if (parts & PE_SETUP_ACCOUNTS) {
-        for (size_t i = 0; i < state.accounts.size(); i++) {
-            if (state.choosable[i] && Checked(dialog, IDC_SETUP_ACCOUNT + static_cast<int>(i))) {
-                accounts.push_back(state.accounts[i]);
-            }
+    for (size_t i = 0; i < state.accounts.size(); i++) {
+        if (state.importable[i] && Checked(dialog, IDC_SETUP_ACCOUNT + static_cast<int>(i))) {
+            accounts.push_back(state.accounts[i]);
         }
     }
-    HCURSOR old = SetCursor(LoadCursorW(nullptr, IDC_WAIT));
     char* error = nullptr;
-    core::SetupLines lines(pe_setup_import(state.core, state.file, parts, accounts.data(), accounts.size(), &error));
-    SetCursor(old);
+    core::SetupLines lines;
+    RunWaiting(dialog, [&] { lines.reset(pe_setup_import(state.core, state.file, parts, accounts.data(), accounts.size(), &error)); });
     if (!lines) {
         MessageBoxW(dialog, ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON).c_str(), state.title.c_str(), MB_OK | MB_ICONWARNING);
         return;
@@ -400,8 +437,8 @@ LRESULT CALLBACK ImportProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
     return DefWindowProcW(hwnd, message, wParam, lParam);
 }
 
-// the setup file at `path` read, its passphrase asked for while the core wants one; NULL when it could not be read
-// (said) or the passphrase was not given
+// the setup file at `path` read on a thread of its own (a sealed file's key takes a moment), its passphrase asked for
+// while the core wants one; NULL when it could not be read (said) or the passphrase was not given
 core::SetupFile ReadSetup(HWND owner, PeCore* core, const std::wstring& path, const std::wstring& title) {
     std::string utf8 = core::Narrow(path);
     std::string passphrase;
@@ -409,7 +446,8 @@ core::SetupFile ReadSetup(HWND owner, PeCore* core, const std::wstring& path, co
     for (;;) {
         PeSetupError kind = PE_SETUP_ERROR_NONE;
         char* error = nullptr;
-        core::SetupFile file(pe_setup_read(core, utf8.c_str(), asked ? passphrase.c_str() : nullptr, &kind, &error));
+        core::SetupFile file;
+        RunWaiting(owner, [&] { file.reset(pe_setup_read(core, utf8.c_str(), asked ? passphrase.c_str() : nullptr, &kind, &error)); });
         Wipe(passphrase);
         std::wstring said = ReasonText(error, PE_TEXT_UI_UNKNOWN_REASON);
         if (file) {
@@ -428,121 +466,92 @@ core::SetupFile ReadSetup(HWND owner, PeCore* core, const std::wstring& path, co
     }
 }
 
+// the rows of an account: its check box (ticked and on only when an import can add it), its servers, and what an
+// import does with it
+void AccountRows(std::vector<Row>& rows, const PeSetupAccount* account, int id, int left, int right) {
+    int checkHeight = Scale(20), textLeft = left + GetSystemMetrics(SM_CXMENUCHECK) + Scale(4);
+    std::wstring label = Text(account->label), servers = Text(account->servers), note = Text(account->note);
+    bool importable = account->importable;
+    rows.push_back({checkHeight, 0, [=](HWND dialog, int top) {
+                        HWND box = CreateChild(dialog, L"BUTTON", label.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX | (importable ? 0 : WS_DISABLED),
+                                               id, {left, top, right, top + checkHeight});
+                        SendMessageW(box, BM_SETCHECK, importable ? BST_CHECKED : BST_UNCHECKED, 0);
+                        SetAccessibleDescription(box, servers + L". " + note);
+                    }});
+    int serversHeight = static_cast<int>(MeasureText(servers).cy);
+    rows.push_back({serversHeight, 0, [=](HWND dialog, int top) {
+                        CreateChild(dialog, L"STATIC", servers.c_str(), SS_LEFT | SS_NOPREFIX | SS_ENDELLIPSIS, 0,
+                                    {textLeft, top, right, top + serversHeight});
+                    }});
+    int noteHeight = note.empty() ? 0 : Wrapped(note, right - textLeft);
+    rows.push_back({noteHeight, Scale(8), [=](HWND dialog, int top) {
+                        if (!note.empty()) {
+                            Label(dialog, note, 0, textLeft, top, right, noteHeight);
+                        }
+                    }});
+}
+
 // the import window over the file read: what it holds to choose from; true with what was imported in `state`
 bool ChooseImport(HWND owner, ImportState& state) {
     RegisterDialogClass(kImportClass, ImportProc);
     const PeSetupInfo* info = pe_setup_file_info(state.file);
     std::wstring intro = core::T(PE_TEXT_UI_SETUP_IMPORT_INTRO);
     std::wstring from = core::T(PE_TEXT_UI_SETUP_FROM, {{"version", Text(info->app_version)}, {"date", Text(info->created_text)}});
-    int pad = Scale(12), width = Scale(500), gap = Scale(4), checkHeight = Scale(20), indent = Scale(20);
-    int warning = GetSystemMetrics(SM_CXSMICON) + Scale(6);
+    int pad = Scale(12), width = Scale(500), checkHeight = Scale(20), indent = Scale(20);
 
-    // the parts the file holds, their names a column before the core's words for what each holds
-    size_t partCount = pe_setup_file_part_count(state.file);
+    // the parts the file holds something in, their names a column before the core's words for what each holds
     std::vector<const PeSetupLine*> parts;
     int nameWidth = 0;
-    for (size_t i = 0; i < partCount; i++) {
+    for (size_t i = 0; i < pe_setup_file_part_count(state.file); i++) {
         const PeSetupLine* part = pe_setup_file_part(state.file, i);
-        if (PartIndex(part->part) >= 0) {
+        if (PartId(part->part)) {
             parts.push_back(part);
-            nameWidth = std::max(nameWidth, CheckWidth(core::T(kParts[PartIndex(part->part)].name)) + Scale(12));
+            nameWidth = std::max(nameWidth, CheckWidth(Text(part->name)) + Scale(12));
         }
     }
     nameWidth = std::min(nameWidth, (width - 2 * pad) / 2);
     int wordsWidth = width - 2 * pad - nameWidth;
-    // each account: its check box, its servers and how it signs in, and what an import does with it
-    struct AccountRows {
-        std::wstring label, servers, note;
-        int noteHeight;
-    };
-    std::vector<AccountRows> accountRows;
-    int textLeft = indent + GetSystemMetrics(SM_CXMENUCHECK) + Scale(4);
-    for (size_t i = 0; i < pe_setup_file_account_count(state.file); i++) {
-        const PeSetupAccount* account = pe_setup_file_account(state.file, i);
-        std::wstring email = Text(account->email), title = Text(account->title);
-        std::wstring label = title.empty() || title == email ? email : title + L" (" + email + L")";
-        std::wstring servers = Text(account->imap) + L", " + Text(account->smtp) + L", " + Text(account->sign_in);
-        std::wstring note = Text(account->problem ? account->problem : account->note);
-        int noteHeight = note.empty() ? 0 : static_cast<int>(MeasureText(note, width - 2 * pad - textLeft).cy);
-        accountRows.push_back({label, servers, note, noteHeight});
-        state.accounts.push_back(account->index);
-        state.choosable.push_back(!account->here && !account->problem);
-    }
-    std::vector<std::wstring> notes;
-    for (size_t i = 0; i < pe_setup_file_note_count(state.file); i++) {
-        notes.push_back(Text(pe_setup_file_note(state.file, i)));
-    }
 
-    // the height of everything, to make the window as tall
-    int introHeight = static_cast<int>(MeasureText(intro, width - 2 * pad).cy);
-    int fromHeight = static_cast<int>(MeasureText(from, width - 2 * pad).cy);
-    int lineHeight = static_cast<int>(MeasureText(L"Ag").cy);
-    int height = pad + introHeight + Scale(6) + fromHeight + Scale(12);
+    std::vector<Row> rows;
+    int introHeight = Wrapped(intro, width - 2 * pad), fromHeight = Wrapped(from, width - 2 * pad);
+    rows.push_back({introHeight, Scale(6), [=](HWND dialog, int top) { Label(dialog, intro, 0, pad, top, width - pad, introHeight); }});
+    rows.push_back({fromHeight, Scale(12), [=](HWND dialog, int top) { Label(dialog, from, IDC_SETUP_FROM, pad, top, width - pad, fromHeight); }});
     for (const PeSetupLine* part : parts) {
-        height += std::max(checkHeight, static_cast<int>(MeasureText(Text(part->text), wordsWidth).cy) + Scale(3)) + gap;
-        if (part->part == PE_SETUP_ACCOUNTS) {
-            for (const AccountRows& row : accountRows) {
-                height += checkHeight + lineHeight + row.noteHeight + Scale(8);
-            }
-        }
-    }
-    for (const std::wstring& note : notes) {
-        height += std::max(GetSystemMetrics(SM_CYSMICON), static_cast<int>(MeasureText(note, width - 2 * pad - warning).cy)) + Scale(6);
-    }
-    height += Scale(10) + Scale(25) + pad;
-
-    HWND dialog = CreateModalWindow(owner, kImportClass, state.title.c_str(), width, height);
-    int top = pad;
-    CreateChild(dialog, L"STATIC", intro.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + introHeight});
-    top += introHeight + Scale(6);
-    CreateChild(dialog, L"STATIC", from.c_str(), SS_LEFT | SS_NOPREFIX, IDC_SETUP_FROM, {pad, top, width - pad, top + fromHeight});
-    top += fromHeight + Scale(12);
-    HWND first = nullptr;
-    for (const PeSetupLine* part : parts) {
-        std::wstring words = Text(part->text);
-        int rowHeight = std::max(checkHeight, static_cast<int>(MeasureText(words, wordsWidth).cy) + Scale(3));
-        HWND check = CreateChild(dialog, L"BUTTON", core::T(kParts[PartIndex(part->part)].name).c_str(), WS_TABSTOP | BS_AUTOCHECKBOX,
-                                 IDC_SETUP_PART + PartIndex(part->part), {pad, top, pad + nameWidth - Scale(8), top + checkHeight});
-        SendMessageW(check, BM_SETCHECK, BST_CHECKED, 0);
-        SetAccessibleDescription(check, words);
-        first = first ? first : check;
-        CreateChild(dialog, L"STATIC", words.c_str(), SS_LEFT | SS_NOPREFIX, 0,
-                    {pad + nameWidth, top + Scale(3), width - pad, top + rowHeight});
-        top += rowHeight + gap;
+        std::wstring name = Text(part->name), words = Text(part->text);
+        int id = PartId(part->part);
+        int height = std::max(checkHeight, Wrapped(words, wordsWidth) + Scale(3));
+        rows.push_back({height, Scale(4), [=](HWND dialog, int top) {
+                            HWND check = CreateChild(dialog, L"BUTTON", name.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, id,
+                                                     {pad, top, pad + nameWidth - Scale(8), top + checkHeight});
+                            SendMessageW(check, BM_SETCHECK, BST_CHECKED, 0);
+                            SetAccessibleDescription(check, words);
+                            Label(dialog, words, 0, pad + nameWidth, top + Scale(3), width - pad, height - Scale(3));
+                        }});
         if (part->part != PE_SETUP_ACCOUNTS) {
             continue;
         }
-        for (size_t i = 0; i < accountRows.size(); i++) {
-            const AccountRows& row = accountRows[i];
-            HWND box = CreateChild(dialog, L"BUTTON", row.label.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX | (state.choosable[i] ? 0 : WS_DISABLED), IDC_SETUP_ACCOUNT + static_cast<int>(i),
-                                   {pad + indent, top, width - pad, top + checkHeight});
-            SendMessageW(box, BM_SETCHECK, state.choosable[i] ? BST_CHECKED : BST_UNCHECKED, 0);
-            SetAccessibleDescription(box, row.servers + L". " + row.note);
-            top += checkHeight;
-            CreateChild(dialog, L"STATIC", row.servers.c_str(), SS_LEFT | SS_NOPREFIX | SS_ENDELLIPSIS, 0,
-                        {pad + textLeft, top, width - pad, top + lineHeight});
-            top += lineHeight;
-            if (!row.note.empty()) {
-                CreateChild(dialog, L"STATIC", row.note.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad + textLeft, top, width - pad, top + row.noteHeight});
-                top += row.noteHeight;
-            }
-            top += Scale(8);
+        for (size_t i = 0; i < pe_setup_file_account_count(state.file); i++) {
+            const PeSetupAccount* account = pe_setup_file_account(state.file, i);
+            AccountRows(rows, account, IDC_SETUP_ACCOUNT + static_cast<int>(i), pad + indent, width - pad);
+            state.accounts.push_back(account->index);
+            state.importable.push_back(account->importable);
         }
     }
-    for (const std::wstring& note : notes) {
-        int noteHeight = std::max(GetSystemMetrics(SM_CYSMICON), static_cast<int>(MeasureText(note, width - 2 * pad - warning).cy));
-        SmallIcon(dialog, IDI_WARNING, 0, pad, top);
-        CreateChild(dialog, L"STATIC", note.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad + warning, top, width - pad, top + noteHeight});
-        top += noteHeight + Scale(6);
+    // what the file holds that can not be used
+    for (const std::wstring& note : Texts(core::TextList(pe_setup_file_notes(state.file)))) {
+        int warning = GetSystemMetrics(SM_CXSMICON) + Scale(6);
+        int height = std::max(GetSystemMetrics(SM_CYSMICON), Wrapped(note, width - 2 * pad - warning));
+        rows.push_back({height, Scale(6), [=](HWND dialog, int top) { WarningNote(dialog, 0, note, pad, top, width - pad); }});
     }
+    int height = pad + RowsHeight(rows) + Scale(10) + Scale(25) + pad;
+
+    HWND dialog = CreateModalWindow(owner, kImportClass, state.title.c_str(), width, height);
+    PlaceRows(dialog, rows, pad);
     BottomButtons(dialog, width, height - pad - Scale(25), core::T(PE_TEXT_UI_SETUP_IMPORT_BUTTON), core::T(PE_TEXT_UI_CANCEL));
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
-    // with no account that can be imported (all here already, or with a problem), Accounts is unticked and off; its
-    // accounts stay listed with what keeps each out
-    if (std::find(state.choosable.begin(), state.choosable.end(), true) == state.choosable.end()) {
-        HWND accountsPart = Item(dialog, IDC_SETUP_PART + PartIndex(PE_SETUP_ACCOUNTS));
-        SendMessageW(accountsPart, BM_SETCHECK, BST_UNCHECKED, 0);
-        EnableWindow(accountsPart, FALSE);
+    // with no account an import can add, Accounts is unticked and off; its accounts stay listed with why
+    if (std::find(state.importable.begin(), state.importable.end(), true) == state.importable.end()) {
+        EnableWindow(Item(dialog, PartId(PE_SETUP_ACCOUNTS)), FALSE);
     }
     UpdateImport(dialog, state, 0);
     // Enter imports what is chosen; Tab goes through the parts first
@@ -560,51 +569,53 @@ void ExportSetupDialog(HWND owner, PeCore* core) {
     std::wstring note = core::T(PE_TEXT_UI_SETUP_PASSPHRASE_NOTE);
     // the fields' labels without their letters: P is Protect's here
     std::wstring label = core::Plain(PE_TEXT_UI_KEYS_PASSPHRASE), againLabel = core::Plain(PE_TEXT_UI_KEYS_PASSPHRASE_AGAIN);
-    int pad = Scale(12), width = Scale(460), checkHeight = Scale(20), row = Scale(22), gap = Scale(6), indent = Scale(20);
-    int warning = GetSystemMetrics(SM_CXSMICON) + Scale(6);
-    int introHeight = static_cast<int>(MeasureText(intro, width - 2 * pad).cy);
-    int noteHeight = static_cast<int>(MeasureText(note, width - 2 * pad - indent).cy);
+    core::String longest(pe_passphrase_feedback_longest());
+    std::wstring feedback = longest ? Text(longest.get()) : L"";
+    int pad = Scale(12), width = Scale(460), checkHeight = Scale(20), field = Scale(22), indent = Scale(20);
     int labelWidth = LabelWidth({label, againLabel}, 90);
-    // room under the fields for the longer of the two refusals, so the window keeps its size while typing
-    core::String shortWords(pe_pgp_passphrase_problem("", ""));
-    core::String differWords(pe_pgp_passphrase_problem("passphrase one", "passphrase two"));
-    int problemHeight = GetSystemMetrics(SM_CYSMICON);
-    for (const core::String* words : {&shortWords, &differWords}) {
-        if (*words) {
-            problemHeight = std::max(problemHeight, static_cast<int>(MeasureText(Text(words->get()), width - 2 * pad - indent - warning).cy));
-        }
-    }
-    int partsHeight = static_cast<int>(std::size(kParts)) * checkHeight;
-    int height = pad + introHeight + Scale(10) + partsHeight + Scale(12) + 2 + Scale(10) + checkHeight + Scale(2) + noteHeight + Scale(8) +
-                 2 * (row + gap) + problemHeight + Scale(14) + Scale(25) + pad;
-    HWND dialog = CreateModalWindow(owner, kExportClass, state.title.c_str(), width, height);
+    int warning = GetSystemMetrics(SM_CXSMICON) + Scale(6);
 
-    int top = pad;
-    CreateChild(dialog, L"STATIC", intro.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, top, width - pad, top + introHeight});
-    top += introHeight + Scale(10);
-    for (int i = 0; i < static_cast<int>(std::size(kParts)); i++) {
-        HWND check = CreateChild(dialog, L"BUTTON", core::T(kParts[i].name).c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_SETUP_PART + i,
-                                 {pad, top, width - pad, top + checkHeight});
-        SendMessageW(check, BM_SETCHECK, BST_CHECKED, 0);
-        top += checkHeight;
+    std::vector<Row> rows;
+    int introHeight = Wrapped(intro, width - 2 * pad);
+    rows.push_back({introHeight, Scale(10), [=](HWND dialog, int top) { Label(dialog, intro, 0, pad, top, width - pad, introHeight); }});
+    // a check box for each part, all ticked
+    core::SetupLines parts(pe_setup_parts());
+    for (size_t i = 0; i < pe_setup_lines_count(parts.get()); i++) {
+        const PeSetupLine* part = pe_setup_lines_get(parts.get(), i);
+        std::wstring name = Text(part->name);
+        int id = PartId(part->part);
+        rows.push_back({checkHeight, 0, [=](HWND dialog, int top) {
+                            CreateChild(dialog, L"BUTTON", name.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, id, {pad, top, width - pad, top + checkHeight});
+                            Check(dialog, id, true);
+                        }});
     }
-    top += Scale(12);
-    CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {pad, top, width - pad, top + 2});
-    top += 2 + Scale(10);
-    CreateChild(dialog, L"BUTTON", protect.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_SETUP_USE_PASSPHRASE, {pad, top, width - pad, top + checkHeight});
-    top += checkHeight + Scale(2);
-    CreateChild(dialog, L"STATIC", note.c_str(), SS_LEFT | SS_NOPREFIX, IDC_SETUP_PASSPHRASE_NOTE,
-                {pad + indent, top, width - pad, top + noteHeight});
-    top += noteHeight + Scale(8);
-    const std::pair<const std::wstring*, int> fields[] = {{&label, IDC_SETUP_PASSPHRASE}, {&againLabel, IDC_SETUP_PASSPHRASE_AGAIN}};
-    for (const auto& [text, id] : fields) {
-        CreateChild(dialog, L"STATIC", text->c_str(), SS_LEFT, 0, {pad + indent, top + Scale(3), pad + indent + labelWidth, top + row});
-        CreateChild(dialog, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL | ES_PASSWORD, id, {pad + indent + labelWidth, top, width - pad, top + row},
-                    WS_EX_CLIENTEDGE);
-        top += row + gap;
+    // a line between the parts and the passphrase, with room over it
+    rows.push_back({Scale(12) + 2, Scale(10), [=](HWND dialog, int top) {
+                        CreateChild(dialog, L"STATIC", L"", SS_ETCHEDHORZ, 0, {pad, top + Scale(12), width - pad, top + Scale(12) + 2});
+                    }});
+    rows.push_back({checkHeight, Scale(2), [=](HWND dialog, int top) {
+                        CreateChild(dialog, L"BUTTON", protect.c_str(), WS_TABSTOP | BS_AUTOCHECKBOX, IDC_SETUP_USE_PASSPHRASE,
+                                    {pad, top, width - pad, top + checkHeight});
+                    }});
+    int noteHeight = Wrapped(note, width - 2 * pad - indent);
+    rows.push_back({noteHeight, Scale(8), [=](HWND dialog, int top) {
+                        Label(dialog, note, IDC_SETUP_PASSPHRASE_NOTE, pad + indent, top, width - pad, noteHeight);
+                    }});
+    for (const auto& [text, id] : {std::pair{label, IDC_SETUP_PASSPHRASE}, std::pair{againLabel, IDC_SETUP_PASSPHRASE_AGAIN}}) {
+        rows.push_back({field, Scale(6), [=, text = text, id = id](HWND dialog, int top) {
+                            CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT, 0, {pad + indent, top + Scale(3), pad + indent + labelWidth, top + field});
+                            CreateChild(dialog, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL | ES_PASSWORD, id,
+                                        {pad + indent + labelWidth, top, width - pad, top + field}, WS_EX_CLIENTEDGE);
+                        }});
     }
-    SmallIcon(dialog, IDI_WARNING, 0, pad + indent, top);
-    CreateChild(dialog, L"STATIC", L"", SS_LEFT | SS_NOPREFIX, IDC_SETUP_PROBLEM, {pad + indent + warning, top, width - pad, top + problemHeight});
+    // room for the longest of what the core says of the passphrase, so the window keeps its size while typing
+    int feedbackHeight = std::max(GetSystemMetrics(SM_CYSMICON), Wrapped(feedback, width - pad - (pad + indent + warning)));
+    rows.push_back({feedbackHeight, Scale(14), [=](HWND dialog, int top) {
+                        WarningNote(dialog, IDC_SETUP_PROBLEM, feedback, pad + indent, top, width - pad);
+                    }});
+    int height = pad + RowsHeight(rows) + Scale(25) + pad;
+    HWND dialog = CreateModalWindow(owner, kExportClass, state.title.c_str(), width, height);
+    PlaceRows(dialog, rows, pad);
     BottomButtons(dialog, width, height - pad - Scale(25), core::T(PE_TEXT_UI_SETUP_EXPORT_BUTTON), core::T(PE_TEXT_UI_CANCEL));
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     UpdateExport(dialog);
@@ -618,8 +629,8 @@ SetupImported ImportSetupDialog(HWND owner, PeCore* core) {
     HelpScope help("setup");
     SetupImported result;
     std::wstring title = core::Plain(PE_TEXT_UI_SETUP_IMPORT_TITLE);
-    std::wstring filter =
-        FileFilter({{core::T(PE_TEXT_UI_SETUP_FILE_FILTER), L"*.inboxclassic"}, {core::T(PE_TEXT_UI_FILTER_ALL), L"*.*"}});
+    std::wstring extension = Text(pe_setup_extension());
+    std::wstring filter = FileFilter({{core::T(PE_TEXT_UI_SETUP_FILE_FILTER), L"*." + extension}, {core::T(PE_TEXT_UI_FILTER_ALL), L"*.*"}});
     std::wstring path = OpenFileDialog(owner, title.c_str(), filter.c_str());
     if (path.empty()) {
         return result;
@@ -640,7 +651,7 @@ SetupImported ImportSetupDialog(HWND owner, PeCore* core) {
     if (state.parts & PE_SETUP_PREFERENCES) {
         for (size_t i = 0; i < pe_setup_file_pref_count(file.get()); i++) {
             const PeSetupPref* pref = pe_setup_file_pref(file.get(), i);
-            result.prefs.emplace_back(pref->name, pref->value);
+            result.prefs.push_back({pref->name, pref->value, pref->restart});
         }
     }
     DoneDialog(owner, title, L"", state.lines.get());

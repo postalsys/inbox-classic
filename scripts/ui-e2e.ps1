@@ -1878,24 +1878,22 @@ public static class Dragger {
             Click $offer 1
         }
 
-        # Back Up: the passphrase twice, two different ones and a short one refused
+        # Back Up: the passphrase twice; what the core says of it as it is typed, OK only once it takes it
         $backup = PassphraseWindow
         Check ($null -ne $backup -and (WindowText $backup) -eq 'Back Up Key') "Save a Backup asks for a passphrase ($(if ($backup) { WindowText $backup }))"
         if ($backup) {
+            $feedback = { if ([Native.Win]::IsWindowVisible([Native.Win]::GetDlgItem($backup, $IDC_KEY_PROBLEM))) { GetText $backup $IDC_KEY_PROBLEM } else { '' } }
+            Check (-not (Enabled $backup 1) -and (& $feedback) -eq '') 'OK waits for a passphrase, nothing said before one is typed'
             SetText $backup $IDC_KEY_PASSPHRASE 'correct horse battery staple'
             SetText $backup $IDC_KEY_PASSPHRASE_AGAIN 'correct horse battery stable'
+            Check ([bool](WaitFor { (& $feedback) -match 'not the same' -and -not (Enabled $backup 1) } 5)) "two different passphrases are refused as they are typed ($(& $feedback))"
             Shot $backup 'keys-4-backup'
-            Click $backup 1
-            $said = Told 'Back Up Key' 'not the same'
-            Check ($said -match 'not the same') "two different passphrases are refused ($said)"
             SetText $backup $IDC_KEY_PASSPHRASE 'short'
             SetText $backup $IDC_KEY_PASSPHRASE_AGAIN 'short'
-            Click $backup 1
-            $said = Told 'Back Up Key' 'at least 8'
-            Check ($said -match 'at least 8') "a short one is refused ($said)"
-            Check ([Native.Win]::IsWindow($backup)) 'the window stays open for another'
+            Check ([bool](WaitFor { (& $feedback) -match 'at least 8' -and -not (Enabled $backup 1) } 5)) "a short one is refused ($(& $feedback))"
             SetText $backup $IDC_KEY_PASSPHRASE 'correct horse battery staple'
             SetText $backup $IDC_KEY_PASSPHRASE_AGAIN 'correct horse battery staple'
+            Check ([bool](WaitFor { (& $feedback) -eq '' -and (Enabled $backup 1) } 5)) 'the same one twice is taken, OK on'
             Click $backup 1
             $backupFile = Join-Path $keysOut 'own-key-backup.asc'
             Remove-Item -Force -ErrorAction SilentlyContinue $backupFile
@@ -5456,7 +5454,6 @@ public static class Dragger {
     function IsChecked([IntPtr]$window, [int]$id) {
         [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($window, $id), $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1
     }
-    function Enabled([IntPtr]$window, [int]$id) { [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($window, $id)) }
     # a check box set as a click sets it, its window told
     function SetCheck([IntPtr]$window, [int]$id, [bool]$on) {
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($window, $id), $BM_SETCHECK, [IntPtr]([int]$on), [IntPtr]::Zero)
@@ -5537,6 +5534,7 @@ public static class Dragger {
         $accountBoxes = @(0..9 | Where-Object { [Native.Win]::GetDlgItem($import, $IDC_SETUP_ACCOUNT + $_) -ne [IntPtr]::Zero })
         $here = @($accountBoxes | Where-Object { -not (IsChecked $import ($IDC_SETUP_ACCOUNT + $_)) -and -not (Enabled $import ($IDC_SETUP_ACCOUNT + $_)) })
         $words = Statics $import
+        Check ((GetText $import $IDC_SETUP_ACCOUNT) -match '<testuser@inboxclassic\.test>$' -and $words -match '127\.0\.0\.1 and 127\.0\.0\.1 \(Password\)') "each account with the core's label and its servers ($(GetText $import $IDC_SETUP_ACCOUNT))"
         Check ($accountBoxes.Count -eq 2 -and $here.Count -eq 2 -and ([regex]::Matches($words, 'It is set up here already, so it is skipped\.')).Count -eq 2) "the accounts, both marked as already here and not chosen ($($accountBoxes.Count) accounts, $($here.Count) here)"
         Check (-not (IsChecked $import $IDC_SETUP_PART) -and -not (Enabled $import $IDC_SETUP_PART)) 'with no account to import, Accounts is not chosen and can not be'
         # the parts with something in them: the test has no rules and no trusted senders, which are not offered

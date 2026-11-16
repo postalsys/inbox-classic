@@ -580,6 +580,23 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_AGENT_LOG_CHANGED:
         AgentsChanged();
         break;
+    case PE_EVENT_KIND_ACCOUNTS_CHANGED:
+        // accounts added by an import: the folder list with them (the core syncs them)
+        g_mailbox.Reload();
+        break;
+    case PE_EVENT_KIND_SETTINGS_CHANGED:
+        // settings an import replaced: the text size of the messages (the rest is read where it is used)
+        webview::SetTextZoom(pe_text_zoom(g_core.get()));
+        break;
+    case PE_EVENT_KIND_ADDRESS_BOOK_CHANGED:
+        // contacts an import added: an open Address Book, and the list's pictures of their addresses
+        AddressBookChanged();
+        ContactPictureChanged();
+        break;
+    case PE_EVENT_KIND_KEYS_CHANGED:
+        // keys an import added: read where they are used (the Encryption Keys window, which is not open meanwhile,
+        // and the security bar of the next message opened)
+        break;
     case PE_EVENT_KIND_RULES_APPLIED:
         g_rulesSaid = core::T(PE_TEXT_UI_RULES_APPLIED, {{"count", std::to_wstring(event.count)}});
         SetStatus(g_rulesSaid);
@@ -1456,13 +1473,16 @@ void SearchFor(const std::wstring& words) {
 
 namespace {
 
-// the app preferences an import brought, by their shared names, set as the menus and Options set them; the language
-// asks to restart for it as Options does
-void ApplySetupPrefs(HWND owner, const std::vector<std::pair<std::string, std::string>>& prefs) {
+// the app preferences an import brought, by their shared names and as the core checked them, set as the menus and
+// Options set them; one that counts after a restart (the language) asks to restart as Options does
+void ApplySetupPrefs(HWND owner, const std::vector<SetupPref>& prefs) {
     bool restart = false;
-    for (const auto& [name, value] : prefs) {
-        bool on = value == "1";
-        if (name == "notify_new_mail") {
+    for (const SetupPref& pref : prefs) {
+        const std::string& name = pref.name;
+        bool on = pref.value == "1";
+        if (pref.restart) {
+            restart = ChooseLanguage(owner, core::Widen(pref.value)) || restart;
+        } else if (name == "notify_new_mail") {
             SetNotify(on);
         } else if (name == "codes_in_notifications") {
             SetPreference(kCodesPreference, on ? 1 : 0);
@@ -1478,10 +1498,8 @@ void ApplySetupPrefs(HWND owner, const std::vector<std::pair<std::string, std::s
             SetFolderList(on);
         } else if (name == "list_pictures") {
             g_mailbox.SetListPictures(on);
-        } else if (name == "layout" && value.size() == 1 && value[0] >= '0' && value[0] <= '0' + PE_LAYOUT_MODE_COLUMNS) {
-            SetLayoutMode(static_cast<PeLayoutMode>(value[0] - '0'));
-        } else if (name == "language") {
-            restart = ChooseLanguage(owner, core::Widen(value));
+        } else if (name == "layout") {
+            SetLayoutMode(static_cast<PeLayoutMode>(std::atoi(pref.value.c_str())));
         }
     }
     if (restart) {
@@ -1499,10 +1517,6 @@ int64_t ImportSetup(HWND owner) {
     if (!imported.imported) {
         return 0;
     }
-    // the accounts added (the core syncs them), the contacts, rules and keys that came in
-    g_mailbox.Reload();
-    AddressBookChanged();
-    ShowCounts();
     ApplySetupPrefs(owner, imported.prefs);
     return imported.accounts.empty() ? 0 : imported.accounts.front();
 }

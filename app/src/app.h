@@ -325,6 +325,17 @@ bool PassphraseDialog(HWND owner, const std::wstring& title, const std::wstring&
 // what is typed in the hidden field `edit` as UTF-8, its copies here wiped; and a secret gone from memory
 std::string ReadSecret(HWND edit);
 void Wipe(std::string& secret);
+// the fields `ids` of `dialog` written over before the window goes, as far as the edit control lets them be
+void WipeFields(HWND dialog, std::initializer_list<int> ids);
+// what the core says of the passphrase typed in the fields `first` and `again`, shown in the warning note `line`
+// (hidden while there is nothing to say); whether the core takes it
+bool ShowPassphraseFeedback(HWND dialog, int first, int again, int line);
+// a note with the system's warning sign before it, `text` wrapped between `left` and `right`: its height. A warning
+// to keep in mind, not an error
+int WarningNote(HWND dialog, int id, const std::wstring& text, int left, int top, int right);
+// OK and Cancel (or the words given) at the bottom right of a window `width` wide, their top at `top`; the first is
+// the default unless `cancelDefault`
+void BottomButtons(HWND dialog, int width, int top, const std::wstring& ok, const std::wstring& cancel, bool cancelDefault = false);
 
 // ---- setup.cpp ----
 
@@ -333,10 +344,17 @@ void Wipe(std::string& secret);
 void ExportSetupDialog(HWND owner, PeCore* core);
 // what an import did, for the main window to show: the accounts added (they sync), and the app preferences of the
 // file by their shared names when Window preferences were imported
+struct SetupPref {
+    std::string name;
+    // checked by the core, ready to set
+    std::string value;
+    // it counts once the app starts again (the language)
+    bool restart = false;
+};
 struct SetupImported {
     bool imported = false;
     std::vector<int64_t> accounts;
-    std::vector<std::pair<std::string, std::string>> prefs;
+    std::vector<SetupPref> prefs;
 };
 // File > Import Settings and Accounts: a setup file chosen, its passphrase asked for when it has one, what it holds
 // chosen and imported, and what was added and skipped said
@@ -551,7 +569,8 @@ void WriteTo(const std::wstring& to);
 // the words put into the Find box of the main window, which searches for them at once (the rule editor's Show)
 void SearchFor(const std::wstring& words);
 // File > Import Settings and Accounts (and Add Mail Account's link before the first account): the import, then the
-// folder list, the address book and the app preferences it brought shown; the first account added, 0 for none
+// app preferences it brought set (what else it changed comes as the core's events); the first account added, 0 for
+// none
 int64_t ImportSetup(HWND owner);
 
 // ---- mailbox.cpp ----
