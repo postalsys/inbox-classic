@@ -16,9 +16,9 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Greek (el): 704 core/platform/help-title catalog entries, then all 52 help topics.
-  Shared UI and the Windows Delete button are reviewed: 627 entries, 64 improved values. Together with
-  the three late loading labels, Greek has 630 reviewed entries.
+- Resume with Greek (el): 255 platform/help-title catalog entries, then all 52 help topics.
+  Shared UI, core and the Windows Delete button are reviewed: 1,076 entries, 174 improved values.
+  Together with the three late loading labels, Greek has 1,079 reviewed entries.
   Thirteen languages still have pending content. All 84 late list-loading labels are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
   Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
@@ -537,8 +537,18 @@ Structural checks, complete placeholder sets, exact inventories/hashes and git d
 tour screenshots are available. Review HTML regenerated; no test suite was run per user instruction.
 Logo-cache followup checkpoint: `01e480de`.
 
-Current totals: 15,416 catalog entries and 576 help pages reviewed; 2,335 catalog values improved. Remaining:
-16,676 catalog entries and 676 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Greek core catalog
+
+Reviewed all 449 core entries and improved 110 values. Fixed independent unread/search counts and singular
+permanent deletions, Greek case around counted messages, delivery explanations and queued agent sends.
+Corrected key ownership, publication confirmation for every address, decryption details, credentials and
+settings-file terminology. Temporary-attachment guidance now describes cleanup at startup, not after a day
+regardless of app state. Relevant caller conditions were checked directly. Structural checks, full placeholder
+sets, exact inventory/file/source hashes and git diff --check pass; review HTML regenerated. No test suite
+was run per user instruction. Shared UI checkpoint: `3e78559d`.
+
+Current totals: 15,865 catalog entries and 576 help pages reviewed; 2,445 catalog values improved. Remaining:
+16,227 catalog entries and 676 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
