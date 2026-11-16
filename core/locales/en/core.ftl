@@ -617,7 +617,7 @@ setup-part-settings = Settings
 setup-part-preferences = Window preferences
 setup-part-accounts = Accounts
 setup-part-sign-in-apps = Sign-in apps
-setup-part-contacts = Contacts
+setup-part-contacts = Contacts and groups
 setup-part-keys = Encryption keys
 setup-part-rules = Message rules
 setup-part-trusted-senders = Trusted senders
@@ -748,3 +748,6 @@ setup-added-trusted-senders = { $count ->
    *[other] Added { $count } trusted senders.
 }
 setup-nothing = Nothing was imported.
+setup-account-servers = { $imap } and { $smtp } ({ $signin })
+setup-file-name = Inbox Classic settings and accounts
+setup-skipped-unreachable = { $name } was skipped: its sign-in service could not be reached. Add it again in Sign-in Apps.

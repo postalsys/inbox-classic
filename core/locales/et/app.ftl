@@ -742,22 +742,6 @@ ui-setup-import-title = Impordi seaded ja kontod
 # review: new
 ui-setup-export-intro = Vali, mida teise arvutisse kaasa võtta. Fail ei sisalda kirju: need laaditakse seal uuesti.
 # review: new
-ui-setup-part-settings = Seaded
-# review: new
-ui-setup-part-preferences = Akna eelistused
-# review: new
-ui-setup-part-accounts = Kontod
-# review: new
-ui-setup-part-sign-in-apps = Sisselogimise rakendused
-# review: new
-ui-setup-part-contacts = Kontaktid ja grupid
-# review: new
-ui-setup-part-keys = Krüptimisvõtmed
-# review: new
-ui-setup-part-rules = Kirjareeglid
-# review: new
-ui-setup-part-trusted = Usaldusväärsed saatjad
-# review: new
 ui-setup-use-passphrase = &Kaitse faili paroolifraasiga
 # review: new
 ui-setup-passphrase-note = Paroolifraasiga on fail krüptitud ja sisaldab ka sinu paroole, sisselogimisi ja privaatvõtmeid. Ilma selleta küsib iga konto teises arvutis oma parooli.

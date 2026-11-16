@@ -35,7 +35,7 @@ pub(crate) fn of(text: &str) -> String {
 }
 
 /// The start of `text`, at most `bytes` long, cut at a character
-fn head(text: &str, bytes: usize) -> &str {
+pub(crate) fn head(text: &str, bytes: usize) -> &str {
     if text.len() <= bytes {
         return text;
     }

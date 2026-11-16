@@ -8,7 +8,7 @@ use pe_testkit::TempDir;
 
 use super::*;
 use crate::secrets::Key;
-use crate::{Core, Options, PasswordStore};
+use crate::{Core, Event, Options, PasswordStore};
 
 const PASSPHRASE: &str = "correct horse battery";
 
@@ -57,16 +57,60 @@ fn folder(path: &str) -> FolderInfo {
     }
 }
 
+/// An OpenID Connect issuer on this computer: every request gets its discovery document, which names its own
+/// `/authorize` and `/token`; its issuer
+fn issuer_here() -> String {
+    use std::io::{Read, Write};
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let issuer = format!("http://127.0.0.1:{}", listener.local_addr().unwrap().port());
+    let body = serde_json::json!({
+        "issuer": issuer,
+        "authorization_endpoint": format!("{issuer}/authorize"),
+        "token_endpoint": format!("{issuer}/token"),
+        "code_challenge_methods_supported": ["S256"],
+        "authorization_response_iss_parameter_supported": true,
+    })
+    .to_string();
+    std::thread::spawn(move || {
+        for mut stream in listener.incoming().flatten() {
+            let mut request = Vec::new();
+            let mut buffer = [0u8; 1024];
+            while !request.windows(4).any(|w| w == b"\r\n\r\n") {
+                match stream.read(&mut buffer) {
+                    Ok(0) | Err(_) => break,
+                    Ok(n) => request.extend_from_slice(&buffer[..n]),
+                }
+            }
+            let response = format!(
+                "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+                body.len()
+            );
+            let _ = stream.write_all(response.as_bytes());
+        }
+    });
+    issuer
+}
+
+/// An issuer nobody answers for
+const NOWHERE: &str = "http://127.0.0.1:9";
+
 /// What the first store holds
 struct Filled {
     ann: AccountId,
     own_key: String,
     contact_key: String,
+    /// The issuer of its sign-in app
+    issuer: String,
 }
 
 /// A store with something in every part: three accounts (a password, Google, a sign-in app), settings, contacts with a
 /// picture and a group, an own key and a contact's verified key, two rules and two trusted senders
 fn fill(core: &Core) -> Filled {
+    fill_with(core, &issuer_here())
+}
+
+/// [`fill`], its sign-in app at `issuer`
+fn fill_with(core: &Core, issuer: &str) -> Filled {
     let ann = core.add_account(&settings("ann@example.com"), "ann-pw").unwrap();
     core.set_account_name(ann, "Work").unwrap();
     core.set_signature(ann, "<p>Ann <b>Example</b></p>").unwrap();
@@ -83,12 +127,12 @@ fn fill(core: &Core) -> Filled {
         let app = store
             .add_sign_in_app(&SignInApp {
                 name: "Acme".into(),
-                issuer: "https://login.acme.example".into(),
+                issuer: issuer.into(),
                 client_id: "acme-client".into(),
                 has_secret: true,
                 scopes: "openid email".into(),
-                authorize_url: "https://login.acme.example/authorize".into(),
-                token_url: "https://login.acme.example/token".into(),
+                authorize_url: format!("{issuer}/authorize"),
+                token_url: format!("{issuer}/token"),
                 response_issuer: None,
                 imap_host: "127.0.0.1".into(),
                 imap_port: 9,
@@ -186,6 +230,7 @@ fn fill(core: &Core) -> Filled {
         ann,
         own_key,
         contact_key,
+        issuer: issuer.to_string(),
     }
 }
 
@@ -237,7 +282,7 @@ fn every_part_round_trips_without_a_passphrase() {
     assert!(!file.encrypted);
     assert_eq!(file.app_version, crate::VERSION);
     assert_eq!(file.parts, Parts::ALL);
-    let counts = file.counts;
+    let counts = file.counts();
     assert_eq!(
         (counts.accounts, counts.sign_in_apps, counts.contacts, counts.groups),
         (3, 1, 2, 1)
@@ -256,16 +301,17 @@ fn every_part_round_trips_without_a_passphrase() {
         file.prefs,
         [
             ("hide_read".to_string(), "1".to_string()),
-            ("language".to_string(), "de".to_string()),
-            ("layout".to_string(), "2".to_string())
+            ("layout".to_string(), "2".to_string()),
+            ("language".to_string(), "de".to_string())
         ]
     );
     let ann_row = &file.accounts[0];
     assert_eq!(
-        (ann_row.email.as_str(), ann_row.title.as_str(), ann_row.imap.as_str()),
-        ("ann@example.com", "Work", "127.0.0.1:9")
+        (ann_row.email.as_str(), ann_row.title.as_str(), ann_row.label.as_str()),
+        ("ann@example.com", "Work", "Work <ann@example.com>")
     );
-    assert!(!ann_row.here && !ann_row.has_secret && ann_row.problem.is_none());
+    assert_eq!(ann_row.servers, "127.0.0.1 and 127.0.0.1 (Password)");
+    assert!(!ann_row.here && !ann_row.has_secret && ann_row.problem.is_none() && ann_row.importable);
     assert_eq!(ann_row.note, tr(Text::SetupAccountAsksPassword));
     assert_eq!(file.accounts[1].sign_in, "Inbox Classic for Google");
     assert_eq!(file.accounts[1].note, tr(Text::SetupAccountSignsInAgain));
@@ -313,7 +359,7 @@ fn every_part_round_trips_without_a_passphrase() {
     let keys = b.pgp_keys().unwrap();
     assert_eq!(keys.len(), 1, "a contact's key, no private key without a passphrase");
     assert_eq!(keys[0].fingerprint, filled.contact_key);
-    assert!(keys[0].verified);
+    assert!(!keys[0].verified, "a mark only from a sealed file");
     assert_eq!(
         b.pgp_peer("dave@example.net").unwrap().in_use,
         Some(filled.contact_key.clone())
@@ -413,7 +459,7 @@ fn secrets_and_own_keys_travel_with_a_passphrase() {
     assert!(file.accounts.iter().all(|account| account.has_secret));
     assert_eq!(file.accounts[0].note, tr(Text::SetupAccountSecretPassword));
     assert_eq!(file.accounts[1].note, tr(Text::SetupAccountSecretToken));
-    assert_eq!((file.counts.own_keys, file.counts.contact_keys), (1, 1));
+    assert_eq!((file.counts().own_keys, file.counts().contact_keys), (1, 1));
 
     b.import_setup(&file, &everything(&file)).unwrap();
     let ann = account_of(&b, "ann@example.com");
@@ -424,6 +470,10 @@ fn secrets_and_own_keys_travel_with_a_passphrase() {
     assert_eq!(b.secrets.get(carol.id).as_deref(), Some("refresh-c1"));
     let app = &b.store().sign_in_apps().unwrap()[0];
     assert!(app.app.has_secret);
+    assert!(
+        b.pgp_key(&filled.contact_key).unwrap().verified,
+        "the mark of a sealed file"
+    );
     assert_eq!(b.secrets.get(Key::App(app.id)).as_deref(), Some("client-secret"));
 
     // the own key, wrapped again under the second store's master key: it signs and decrypts there
@@ -669,4 +719,128 @@ fn empty_parts_are_not_offered_for_import() {
         offered.contains(&Parts::SIGN_IN_APPS),
         "the built-in sign-in apps' switches"
     );
+}
+
+#[test]
+fn a_sign_in_app_takes_its_endpoints_from_its_issuer() {
+    let (dir_a, dir_b) = (TempDir::new("setup-a"), TempDir::new("setup-b"));
+    let (a, b) = (opened(&dir_a), opened(&dir_b));
+    let filled = fill(&a);
+    let path = dir_a.path().join("apps.inboxclassic");
+    a.export_setup(&path, Parts::ALL, None, &[]).unwrap();
+    // a file that names endpoints of its own, at another origin
+    let mut document: serde_json::Value = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+    let app = &mut document["sign_in_apps"]["apps"][0];
+    assert!(app.get("token_url").is_none(), "no endpoints written");
+    app["token_url"] = "https://evil.example/token".into();
+    app["authorize_url"] = "https://evil.example/authorize".into();
+    app["response_issuer"] = "https://evil.example".into();
+    std::fs::write(&path, serde_json::to_vec(&document).unwrap()).unwrap();
+    let file = b.read_setup(&path, None).unwrap();
+    assert!(file.accounts[2].importable);
+    b.import_setup(&file, &everything(&file)).unwrap();
+    let apps = b.store().sign_in_apps().unwrap();
+    assert_eq!(apps.len(), 1);
+    let app = &apps[0].app;
+    assert_eq!(app.token_url, format!("{}/token", filled.issuer));
+    assert_eq!(app.authorize_url, format!("{}/authorize", filled.issuer));
+    assert_eq!(app.response_issuer.as_deref(), Some(filled.issuer.as_str()));
+    assert!(account_of(&b, "carol@acme.example").id > 0);
+}
+
+#[test]
+fn a_sign_in_app_whose_issuer_is_not_reached_is_left_out_with_its_accounts() {
+    let (dir_a, dir_b) = (TempDir::new("setup-a"), TempDir::new("setup-b"));
+    let (a, b) = (opened(&dir_a), opened(&dir_b));
+    fill_with(&a, NOWHERE);
+    let path = dir_a.path().join("nowhere.inboxclassic");
+    a.export_setup(&path, Parts::ALL, None, &[]).unwrap();
+    let file = b.read_setup(&path, None).unwrap();
+    let summary = b.import_setup(&file, &everything(&file)).unwrap();
+    assert!(b.store().sign_in_apps().unwrap().is_empty());
+    let emails: Vec<String> = b.accounts().unwrap().into_iter().map(|a| a.settings.email).collect();
+    assert_eq!(emails, ["ann@example.com", "bob@gmail.example"]);
+    let skipped: Vec<&str> = summary
+        .lines
+        .iter()
+        .filter(|line| line.kind == ImportLineKind::Skipped)
+        .map(|line| line.text.as_str())
+        .collect();
+    assert_eq!(
+        skipped,
+        [
+            tr_args(Text::SetupSkippedUnreachable, &[("name", "Acme".into())]),
+            tr_args(Text::SetupSkippedUnreachable, &[("name", "carol@acme.example".into())]),
+        ]
+    );
+}
+
+#[test]
+fn a_mark_comes_only_with_the_key_in_use() {
+    let (dir_a, dir_b) = (TempDir::new("setup-a"), TempDir::new("setup-b"));
+    let (a, b) = (opened(&dir_a), opened(&dir_b));
+    let filled = fill(&a);
+    let path = dir_a.path().join("keys.inboxclassic");
+    a.export_setup(&path, Parts::KEYS, Some(PASSPHRASE), &[]).unwrap();
+    // the second store uses another key for Dave: the file's waits, unmarked
+    let now = crate::worker::unix_now();
+    let other = pe_pgp::generate("Dave", &["dave@example.net".into()], now).unwrap();
+    b.pgp_import(other.cert().armored().as_bytes(), None, crate::keys::KeySource::File)
+        .unwrap();
+    let file = b.read_setup(&path, Some(PASSPHRASE)).unwrap();
+    b.import_setup(&file, &everything(&file)).unwrap();
+    assert_eq!(
+        b.pgp_peer("dave@example.net").unwrap().pending,
+        Some(filled.contact_key.clone())
+    );
+    assert!(!b.pgp_key(&filled.contact_key).unwrap().verified);
+}
+
+#[test]
+fn an_import_tells_the_windows_what_changed() {
+    let (dir_a, dir_b) = (TempDir::new("setup-a"), TempDir::new("setup-b"));
+    let a = opened(&dir_a);
+    fill(&a);
+    let path = dir_a.path().join("events");
+    a.export_setup(&path, Parts::ALL, None, &[]).unwrap();
+    let path = path.with_extension("inboxclassic");
+    assert!(path.exists(), "the extension added");
+    let (sender, events) = std::sync::mpsc::channel();
+    let options = Options {
+        passwords: PasswordStore::Memory,
+        ..Default::default()
+    };
+    let b = Core::open_with(dir_b.path().join("store.db"), options, move |event| {
+        let _ = sender.send(event);
+    })
+    .unwrap();
+    let file = b.read_setup(&path, None).unwrap();
+    // the accounts part follows from the accounts chosen
+    let choice = ImportChoice {
+        parts: Parts::CONTACTS.with(Parts::KEYS).with(Parts::SETTINGS),
+        accounts: vec![0],
+    };
+    b.import_setup(&file, &choice).unwrap();
+    assert_eq!(b.accounts().unwrap().len(), 1);
+    let mut seen = Vec::new();
+    while let Ok(event) = events.recv_timeout(std::time::Duration::from_secs(2)) {
+        if matches!(
+            event,
+            Event::AccountsChanged | Event::SettingsChanged | Event::AddressBookChanged | Event::KeysChanged
+        ) && !seen.contains(&event)
+        {
+            seen.push(event);
+        }
+        if seen.len() == 4 {
+            break;
+        }
+    }
+    assert_eq!(seen.len(), 4, "{seen:?}");
+    // accounts listed, the part left out
+    let choice = ImportChoice {
+        parts: Parts::ACCOUNTS.with(Parts::RULES),
+        accounts: vec![],
+    };
+    b.import_setup(&file, &choice).unwrap();
+    assert_eq!(b.accounts().unwrap().len(), 1);
 }

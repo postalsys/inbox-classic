@@ -684,7 +684,7 @@ setup-part-accounts = Konten
 # review: new
 setup-part-sign-in-apps = Anmelde-Apps
 # review: new
-setup-part-contacts = Kontakte
+setup-part-contacts = Kontakte und Gruppen
 # review: new
 setup-part-keys = Verschlüsselungsschlüssel
 # review: new
@@ -873,3 +873,9 @@ setup-added-trusted-senders = { $count ->
 }
 # review: new
 setup-nothing = Es wurde nichts importiert.
+# review: new
+setup-account-servers = { $imap } und { $smtp } ({ $signin })
+# review: new
+setup-file-name = Inbox Classic-Einstellungen und -Konten
+# review: new
+setup-skipped-unreachable = { $name } wurde übersprungen: Der Anmeldedienst war nicht erreichbar. Fügen Sie die Anmelde-App unter „Anmelde-Apps“ erneut hinzu.

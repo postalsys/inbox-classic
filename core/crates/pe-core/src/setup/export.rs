@@ -1,7 +1,7 @@
 //! Writing a setup file: the parts chosen, from the store and the system's password store, as the JSON of `file.rs`,
 //! sealed with the passphrase when there is one.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::path::Path;
 
 use base64::Engine;
@@ -27,7 +27,7 @@ impl Core {
     /// backup's) the whole file is sealed with it and carries the secrets too: the accounts' passwords and refresh
     /// tokens, the sign-in apps' client secrets, the user's own private keys. `prefs` are the app's preferences by
     /// the names of [`super::PREFERENCES`], as text; others are left out. Returns each part written with what it
-    /// holds, in words.
+    /// holds, in words. A `path` without an extension gets [`super::EXTENSION`].
     pub fn export_setup(
         &self,
         path: &Path,
@@ -44,26 +44,28 @@ impl Core {
             return Err(Error::Invalid(why));
         }
         let (document, counts) = self.setup_document(parts, passphrase.is_some(), prefs)?;
-        let json = Zeroizing::new(serde_json::to_vec(&document).map_err(|e| Error::Invalid(e.to_string()))?);
+        let mut json = Zeroizing::new(serde_json::to_vec(&document).map_err(|e| Error::Invalid(e.to_string()))?);
         drop(document);
         if json.len() > MAX_FILE {
             return Err(Error::Invalid(tr(Text::SetupErrorTooLarge)));
         }
-        let bytes = match passphrase {
-            Some(passphrase) => Zeroizing::new(
-                pe_pgp::sealed::seal(json.to_vec(), passphrase)
+        let sealed = match passphrase {
+            // moved into the sealing, not copied
+            Some(passphrase) => Some(Zeroizing::new(
+                pe_pgp::sealed::seal(std::mem::take(&mut *json), passphrase)
                     .map_err(|e| Error::Invalid(e.to_string()))?
                     .into_bytes(),
-            ),
-            None => json,
+            )),
+            None => None,
         };
-        write_private(path, &bytes).map_err(|error| {
+        let bytes: &[u8] = sealed.as_deref().map_or(&json, |sealed| sealed);
+        write_private(&super::with_extension(path), bytes).map_err(|error| {
             Error::Unavailable(tr_args(
                 Text::SetupErrorWrite,
                 &[("error", (&error.to_string()).into())],
             ))
         })?;
-        Ok(part_lines(parts, &counts))
+        Ok(part_lines(parts, &counts, false))
     }
 
     /// The document of `parts`, with the secrets when `secrets`, and how much each part holds
@@ -103,6 +105,7 @@ impl Core {
         if parts.has(Parts::SIGN_IN_APPS) {
             let apps = self.apps_part(&store, secrets)?;
             counts.sign_in_apps = apps.apps.len();
+            counts.builtin = 2;
             document.sign_in_apps = Some(apps);
         }
         if parts.has(Parts::CONTACTS) {
@@ -194,9 +197,6 @@ impl Core {
                     issuer: app.issuer,
                     client_id: app.client_id,
                     scopes: app.scopes,
-                    authorize_url: app.authorize_url,
-                    token_url: app.token_url,
-                    response_issuer: app.response_issuer,
                     enabled: app.enabled,
                     secret,
                 }
@@ -234,10 +234,7 @@ fn contacts_part(store: &Store) -> Result<(ContactsPart, usize)> {
         })
         .collect::<pe_store::Result<Vec<Card>>>()?;
     let mut groups = Vec::new();
-    for listed in store.groups("")? {
-        let Some(group) = store.group(listed.id)? else {
-            continue;
-        };
+    for group in store.groups("")? {
         groups.push(GroupEntry {
             name: group.name,
             members: group
@@ -288,10 +285,13 @@ fn keys_part(store: &Store, book: &Book<'_>, secrets: bool) -> Result<KeysPart> 
         }
         let mut in_use = false;
         for address in &held {
-            in_use |= store
+            in_use = store
                 .pgp_peer(&address.address)?
                 .and_then(|peer| peer.fingerprint)
                 .is_some_and(|used| used == key.fingerprint);
+            if in_use {
+                break;
+            }
         }
         if in_use {
             part.contacts.push(ContactKeyEntry {
@@ -307,29 +307,26 @@ fn keys_part(store: &Store, book: &Book<'_>, secrets: bool) -> Result<KeysPart> 
     Ok(part)
 }
 
-/// An account as a rule names it in a file
-fn account_ref(store: &Store, account: AccountId) -> Result<AccountRef> {
-    let settings = store.account(account)?.settings;
-    Ok(AccountRef {
-        email: settings.email,
-        imap_host: settings.imap_host,
-    })
-}
-
 fn rule_entries(store: &Store) -> Result<Vec<RuleEntry>> {
+    let accounts: HashMap<AccountId, AccountRef> = store
+        .accounts()?
+        .iter()
+        .map(|account| (account.id, AccountRef::of(&account.settings)))
+        .collect();
+    let named = |id: AccountId| accounts.get(&id).cloned().ok_or(Error::NotFound);
     let mut entries = Vec::new();
     for rule in store.rules()? {
-        let account = rule.account.map(|id| account_ref(store, id)).transpose()?;
+        let account = rule.account.map(named).transpose()?;
         let move_to = match (rule.move_to, store.rule_pending_target(rule.id)?) {
             (Some(folder), _) => match store.folder(folder) {
                 Ok(folder) => Some(FolderRef {
-                    account: account_ref(store, folder.account_id)?,
+                    account: named(folder.account_id)?,
                     path: folder.info.path,
                 }),
                 Err(_) => None,
             },
             (None, Some((account, path))) => Some(FolderRef {
-                account: account_ref(store, account)?,
+                account: named(account)?,
                 path,
             }),
             (None, None) => None,

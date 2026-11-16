@@ -36,6 +36,19 @@ pub(crate) const FORMAT: &str = "inbox-classic-setup";
 /// The file name extension, without its dot
 pub const EXTENSION: &str = "inboxclassic";
 
+/// The name an export offers to save as, in the language in use: "Inbox Classic settings and accounts.inboxclassic"
+pub fn default_name() -> String {
+    format!("{}.{EXTENSION}", tr(Text::SetupFileName))
+}
+
+/// `path` with the setup file's extension when it has none
+pub fn with_extension(path: &std::path::Path) -> std::path::PathBuf {
+    match path.extension() {
+        Some(_) => path.to_path_buf(),
+        None => path.with_extension(EXTENSION),
+    }
+}
+
 /// The parts of a setup file, as flags
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Hash)]
 pub struct Parts(pub u32);
@@ -108,7 +121,8 @@ pub enum PrefKind {
 }
 
 /// The app preferences a setup file carries, by the names the three apps share; each app keeps them in its own place
-/// (the registry, the user defaults, settings.ini) and hands them in and takes them back by these names. Left out:
+/// (the registry, the user defaults, settings.ini) and hands them in and takes them back by these names; the values a
+/// file gives back are checked, ready to apply, in this order, the language last. Left out:
 /// the widths and heights of the panes and the window (each screen differs), the rows of the folder list turned open
 /// or closed (they name this store's accounts), and the notes shown once (the tray, the dock, the column layout).
 pub const PREFERENCES: [(&str, PrefKind); 9] = [
@@ -122,6 +136,13 @@ pub const PREFERENCES: [(&str, PrefKind); 9] = [
     ("layout", PrefKind::Number(2)),
     ("language", PrefKind::Language),
 ];
+
+/// Whether a preference counts only once the app starts again (the language), which the import window says
+pub fn pref_restarts(name: &str) -> bool {
+    PREFERENCES
+        .iter()
+        .any(|(known, kind)| *known == name && *kind == PrefKind::Language)
+}
 
 /// `value` as preference `name` keeps it, None when there is no such preference or the value is not one of it
 pub fn pref_value(name: &str, value: &str) -> Option<String> {
@@ -191,6 +212,17 @@ mod tests {
         assert_eq!(pref_value("language", "xx"), None);
         assert_eq!(pref_value("language", "qps"), None);
         assert_eq!(pref_value("TreeWidth", "200"), None);
+    }
+
+    #[test]
+    fn file_names() {
+        assert!(default_name().ends_with(".inboxclassic"));
+        let path = std::path::Path::new("/tmp/Ann");
+        assert_eq!(with_extension(path), std::path::Path::new("/tmp/Ann.inboxclassic"));
+        let named = std::path::Path::new("/tmp/Ann.setup");
+        assert_eq!(with_extension(named), named);
+        assert!(pref_restarts("language") && !pref_restarts("layout"));
+        assert_eq!(PREFERENCES.last().unwrap().0, "language");
     }
 
     #[test]

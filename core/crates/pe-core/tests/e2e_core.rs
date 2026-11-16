@@ -4329,7 +4329,8 @@ fn a_setup_moves_two_accounts_to_an_empty_store() {
 
     let (b, events_b) = core_trusting(&dir_b, &[&first, &second]);
     let file = b.read_setup(&path, Some(passphrase)).unwrap();
-    assert!(file.accounts.iter().all(|account| account.has_secret && !account.here));
+    assert!(file.accounts.iter().all(|account| account.importable
+        && account.note == pe_core::i18n::tr(pe_core::i18n::Text::SetupAccountSecretPassword)));
     let choice = pe_core::setup::ImportChoice {
         parts: pe_core::setup::Parts::ALL,
         accounts: vec![0, 1],

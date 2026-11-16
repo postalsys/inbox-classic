@@ -742,22 +742,6 @@ ui-setup-import-title = Einstellungen und Konten importieren
 # review: new
 ui-setup-export-intro = Wählen Sie, was Sie auf einen anderen Computer mitnehmen. Die Datei enthält keine Nachrichten: Sie werden dort erneut geladen.
 # review: new
-ui-setup-part-settings = Einstellungen
-# review: new
-ui-setup-part-preferences = Fenstereinstellungen
-# review: new
-ui-setup-part-accounts = Konten
-# review: new
-ui-setup-part-sign-in-apps = Anmelde-Apps
-# review: new
-ui-setup-part-contacts = Kontakte und Gruppen
-# review: new
-ui-setup-part-keys = Verschlüsselungsschlüssel
-# review: new
-ui-setup-part-rules = Nachrichtenregeln
-# review: new
-ui-setup-part-trusted = Vertrauenswürdige Absender
-# review: new
 ui-setup-use-passphrase = Datei mit einer &Passphrase schützen
 # review: new
 ui-setup-passphrase-note = Mit einer Passphrase ist die Datei verschlüsselt und enthält auch Ihre Kennwörter, Anmeldungen und privaten Schlüssel. Ohne sie fragt jedes Konto auf dem anderen Computer nach seinem Kennwort.

@@ -717,7 +717,7 @@ setup-part-accounts = Comptes
 # review: new
 setup-part-sign-in-apps = Applications de connexion
 # review: new
-setup-part-contacts = Contacts
+setup-part-contacts = Contacts et groupes
 # review: new
 setup-part-keys = Clés de chiffrement
 # review: new
@@ -906,3 +906,9 @@ setup-added-trusted-senders = { $count ->
 }
 # review: new
 setup-nothing = Rien n'a été importé.
+# review: new
+setup-account-servers = { $imap } et { $smtp } ({ $signin })
+# review: new
+setup-file-name = Paramètres et comptes Inbox Classic
+# review: new
+setup-skipped-unreachable = { $name } a été ignoré : son service de connexion n'a pas pu être joint. Ajoutez-le de nouveau dans Applications de connexion.

@@ -742,22 +742,6 @@ ui-setup-import-title = Importer les paramètres et comptes
 # review: new
 ui-setup-export-intro = Choisissez ce que vous emportez sur un autre ordinateur. Le fichier ne contient aucun message : ils seront téléchargés à nouveau là-bas.
 # review: new
-ui-setup-part-settings = Paramètres
-# review: new
-ui-setup-part-preferences = Préférences des fenêtres
-# review: new
-ui-setup-part-accounts = Comptes
-# review: new
-ui-setup-part-sign-in-apps = Applications de connexion
-# review: new
-ui-setup-part-contacts = Contacts et groupes
-# review: new
-ui-setup-part-keys = Clés de chiffrement
-# review: new
-ui-setup-part-rules = Règles de messages
-# review: new
-ui-setup-part-trusted = Expéditeurs de confiance
-# review: new
 ui-setup-use-passphrase = &Protéger le fichier par une phrase secrète
 # review: new
 ui-setup-passphrase-note = Avec une phrase secrète, le fichier est chiffré et contient aussi vos mots de passe, connexions et clés privées. Sans elle, chaque compte demande son mot de passe sur l’autre ordinateur.

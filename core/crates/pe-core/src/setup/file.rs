@@ -1,7 +1,7 @@
 //! The setup file's JSON, and reading it: parsed, every value checked as the window that makes it checks it, and what
 //! it holds summed up for the import window. Pure: no store, no file system, no network (the fuzz target reads here).
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
@@ -9,11 +9,12 @@ use pe_i18n::{Text, tr, tr_args};
 use pe_oauth::ProviderKind;
 use pe_pgp::sealed::{self, OpenError};
 use pe_pgp::{Cert, SecretKey};
-use pe_store::{AccountSettings, Ahead, Card, Rule, Security, SignInApp};
+use pe_store::{AccountSettings, Ahead, Card, Rule, Security};
 use serde::{Deserialize, Serialize};
 use zeroize::Zeroizing;
 
 use super::{FORMAT, MAX_FILE, Parts, SetupError, VERSION, count_text, pref_value};
+use crate::SignInAppForm;
 
 /// The most of each list a setup file may hold; more is refused as damaged
 const MAX_ACCOUNTS: usize = 500;
@@ -204,10 +205,8 @@ pub(crate) struct AppEntry {
     pub issuer: String,
     pub client_id: String,
     pub scopes: String,
-    pub authorize_url: String,
-    pub token_url: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub response_issuer: Option<String>,
+    // no endpoints: an import reads them from the issuer's discovery document, as the sign-in apps window does (a
+    // file written before this carries authorize_url, token_url and response_issuer, which are not read)
     pub imap: Server,
     pub smtp: Server,
     #[serde(default = "yes")]
@@ -288,6 +287,13 @@ impl AccountRef {
         })
     }
 
+    pub fn of(settings: &AccountSettings) -> AccountRef {
+        AccountRef {
+            email: settings.email.clone(),
+            imap_host: settings.imap_host.clone(),
+        }
+    }
+
     pub fn is(&self, settings: &AccountSettings) -> bool {
         self.email.eq_ignore_ascii_case(settings.email.trim())
             && self.imap_host.eq_ignore_ascii_case(&settings.imap_host)
@@ -362,8 +368,16 @@ pub(crate) struct FileRule {
 
 /// A sign-in app of a file, checked
 pub(crate) struct FileApp {
-    pub app: SignInApp,
+    /// What the sign-in apps window would save, checked as it checks it
+    pub form: SignInAppForm,
+    pub enabled: bool,
     pub secret: Option<Zeroizing<String>>,
+}
+
+impl FileApp {
+    pub fn is(&self, issuer: &str, client_id: &str) -> bool {
+        self.form.issuer == issuer && self.form.client_id == client_id
+    }
 }
 
 /// A group of a file: its name and its members (name, address)
@@ -376,7 +390,8 @@ pub(crate) struct FileGroup {
 #[derive(Default)]
 pub(crate) struct Data {
     pub settings: Option<SettingsPart>,
-    pub accounts: Vec<FileAccount>,
+    /// Each account of the file beside its row of [`SetupFile::accounts`], None for one that can not be imported
+    pub accounts: Vec<Option<FileAccount>>,
     pub builtin: Vec<(ProviderKind, bool)>,
     pub apps: Vec<FileApp>,
     pub cards: Vec<Card>,
@@ -387,6 +402,25 @@ pub(crate) struct Data {
     pub trusted: Vec<(String, bool)>,
 }
 
+impl Data {
+    /// How much of each part there is, the preferences but
+    fn counts(&self) -> SetupCounts {
+        SetupCounts {
+            settings: self.settings.as_ref().map_or(0, SettingsPart::count),
+            preferences: 0,
+            accounts: self.accounts.iter().flatten().count(),
+            sign_in_apps: self.apps.len(),
+            builtin: self.builtin.len(),
+            contacts: self.cards.len(),
+            groups: self.groups.len(),
+            own_keys: self.own_keys.len(),
+            contact_keys: self.contact_keys.len(),
+            rules: self.rules.len(),
+            trusted_senders: self.trusted.len(),
+        }
+    }
+}
+
 /// An account of a setup file as the import window lists it
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct SetupAccount {
@@ -395,21 +429,22 @@ pub struct SetupAccount {
     pub email: String,
     /// What the folder list will call it
     pub title: String,
-    /// `imap.example.com:993`
-    pub imap: String,
-    pub smtp: String,
+    /// The title with the address, as the import window lists it: "Work <ann@example.com>"
+    pub label: String,
+    /// Its servers and how it signs in, one line: "imap.example.com and smtp.example.com (Password)"
+    pub servers: String,
     /// How it signs in, in words: "Password", or the sign-in app's name
     pub sign_in: String,
-    /// Its password or sign-in is in the file
-    pub has_secret: bool,
     /// One like it (the same address and IMAP server) is set up here already: an import skips it
     pub here: bool,
-    /// A server is reached without encryption
-    pub plain: bool,
-    /// Why it can not be imported, in words; None when it can
+    /// An import can add it: it is not here, nothing is wrong with it, and what it signs in with is usable
+    pub importable: bool,
+    /// Why it can not be imported, in words; None when it can (or when it is only here already)
     pub problem: Option<String>,
     /// What an import does with it, in words: skipped as it is here, its password in the file, asks for it, ...
     pub note: String,
+    /// Its password or sign-in is in the file
+    pub(crate) has_secret: bool,
 }
 
 /// How much of each part a setup file holds
@@ -419,6 +454,8 @@ pub struct SetupCounts {
     pub preferences: usize,
     pub accounts: usize,
     pub sign_in_apps: usize,
+    /// The switches of the built-in sign-in apps
+    pub builtin: usize,
     pub contacts: usize,
     pub groups: usize,
     pub own_keys: usize,
@@ -433,14 +470,13 @@ pub struct SetupFile {
     pub encrypted: bool,
     /// The version of Inbox Classic that saved it
     pub app_version: String,
-    /// When, seconds since 1970, and as the user's locale writes a day
+    /// When, seconds since 1970, and as the user's locale writes a day (empty for no day a calendar writes)
     pub created: i64,
     pub created_text: String,
     /// The parts it holds
     pub parts: Parts,
     pub accounts: Vec<SetupAccount>,
-    pub counts: SetupCounts,
-    /// The app preferences it holds, by name, each value checked
+    /// The app preferences it holds, by name, each value checked and ready to apply, the language last
     pub prefs: Vec<(String, String)>,
     /// What it holds that can not be used and is left out, a line each in words
     pub notes: Vec<String>,
@@ -454,7 +490,6 @@ impl std::fmt::Debug for SetupFile {
             .field("app_version", &self.app_version)
             .field("parts", &self.parts)
             .field("accounts", &self.accounts)
-            .field("counts", &self.counts)
             .field("prefs", &self.prefs)
             .field("notes", &self.notes)
             .finish_non_exhaustive()
@@ -462,56 +497,68 @@ impl std::fmt::Debug for SetupFile {
 }
 
 impl SetupFile {
-    /// Each part it holds something in, with what it holds in words, in the order the windows list them:
-    /// (part, "2 accounts"); a part with nothing in it (no rules, no trusted senders) is not offered for import
+    /// How much of each part it holds
+    pub fn counts(&self) -> SetupCounts {
+        SetupCounts {
+            preferences: self.prefs.len(),
+            ..self.data.counts()
+        }
+    }
+
+    /// Each part it holds something in, with its name and what it holds in words, in the order the windows list
+    /// them: (part, "2 accounts"); a part with nothing in it (no rules, no trusted senders) is not offered for import
     pub fn part_lines(&self) -> Vec<(Parts, String)> {
-        let c = &self.counts;
-        let empty = |part: Parts| match part {
-            Parts::SETTINGS => c.settings == 0,
-            Parts::PREFERENCES => c.preferences == 0,
-            Parts::ACCOUNTS => c.accounts == 0,
-            Parts::CONTACTS => c.contacts == 0 && c.groups == 0,
-            Parts::KEYS => c.own_keys == 0 && c.contact_keys == 0,
-            Parts::RULES => c.rules == 0,
-            Parts::TRUSTED_SENDERS => c.trusted_senders == 0,
-            // the switches of the built-in sign-in apps are always there
-            _ => false,
-        };
-        part_lines(self.parts, c)
-            .into_iter()
-            .filter(|(part, _)| !empty(*part))
-            .collect()
+        part_lines(self.parts, &self.counts(), true)
     }
 }
 
-/// What each part of `parts` holds in words
-pub(crate) fn part_lines(parts: Parts, counts: &SetupCounts) -> Vec<(Parts, String)> {
+/// What `part` holds in words, and whether it holds nothing
+fn holds(part: Parts, c: &SetupCounts) -> (String, bool) {
+    let both =
+        |first: Text, n: usize, second: Text, m: usize| format!("{}, {}", count_text(first, n), count_text(second, m));
+    match part {
+        Parts::SETTINGS => (count_text(Text::SetupHoldsSettings, c.settings), c.settings == 0),
+        Parts::PREFERENCES => (
+            count_text(Text::SetupHoldsPreferences, c.preferences),
+            c.preferences == 0,
+        ),
+        Parts::ACCOUNTS => (count_text(Text::SetupHoldsAccounts, c.accounts), c.accounts == 0),
+        Parts::SIGN_IN_APPS if c.sign_in_apps == 0 => (tr(Text::SetupHoldsBuiltIn), c.builtin == 0),
+        Parts::SIGN_IN_APPS => (count_text(Text::SetupHoldsSignInApps, c.sign_in_apps), false),
+        Parts::CONTACTS => (
+            both(Text::SetupHoldsContacts, c.contacts, Text::SetupHoldsGroups, c.groups),
+            c.contacts == 0 && c.groups == 0,
+        ),
+        Parts::KEYS if c.own_keys == 0 => (
+            count_text(Text::SetupHoldsContactKeys, c.contact_keys),
+            c.contact_keys == 0,
+        ),
+        Parts::KEYS => (
+            both(
+                Text::SetupHoldsOwnKeys,
+                c.own_keys,
+                Text::SetupHoldsContactKeys,
+                c.contact_keys,
+            ),
+            false,
+        ),
+        Parts::RULES => (count_text(Text::SetupHoldsRules, c.rules), c.rules == 0),
+        _ => (
+            count_text(Text::SetupHoldsTrustedSenders, c.trusted_senders),
+            c.trusted_senders == 0,
+        ),
+    }
+}
+
+/// What each part of `parts` holds in words, in the order the windows list them; with `offered`, only the parts that
+/// hold something (what an import offers)
+pub(crate) fn part_lines(parts: Parts, counts: &SetupCounts, offered: bool) -> Vec<(Parts, String)> {
     Parts::EACH
         .into_iter()
         .filter(|part| parts.has(*part))
-        .map(|part| {
-            let c = counts;
-            let words = match part {
-                Parts::SETTINGS => count_text(Text::SetupHoldsSettings, c.settings),
-                Parts::PREFERENCES => count_text(Text::SetupHoldsPreferences, c.preferences),
-                Parts::ACCOUNTS => count_text(Text::SetupHoldsAccounts, c.accounts),
-                Parts::SIGN_IN_APPS if c.sign_in_apps == 0 => tr(Text::SetupHoldsBuiltIn),
-                Parts::SIGN_IN_APPS => count_text(Text::SetupHoldsSignInApps, c.sign_in_apps),
-                Parts::CONTACTS => format!(
-                    "{}, {}",
-                    count_text(Text::SetupHoldsContacts, c.contacts),
-                    count_text(Text::SetupHoldsGroups, c.groups)
-                ),
-                Parts::KEYS if c.own_keys == 0 => count_text(Text::SetupHoldsContactKeys, c.contact_keys),
-                Parts::KEYS => format!(
-                    "{}, {}",
-                    count_text(Text::SetupHoldsOwnKeys, c.own_keys),
-                    count_text(Text::SetupHoldsContactKeys, c.contact_keys)
-                ),
-                Parts::RULES => count_text(Text::SetupHoldsRules, c.rules),
-                _ => count_text(Text::SetupHoldsTrustedSenders, c.trusted_senders),
-            };
-            (part, words)
+        .filter_map(|part| {
+            let (words, empty) = holds(part, counts);
+            (!offered || !empty).then_some((part, words))
         })
         .collect()
 }
@@ -576,12 +623,7 @@ pub fn parse(bytes: &[u8], passphrase: Option<&str>) -> Result<SetupFile, SetupE
 /// A name or other short text from a file: no control characters, trimmed, at most [`MAX_TEXT`] bytes
 fn text(value: &str) -> String {
     let clean: String = value.chars().filter(|c| !c.is_control()).collect();
-    let clean = clean.trim();
-    let mut end = clean.len().min(MAX_TEXT);
-    while !clean.is_char_boundary(end) {
-        end -= 1;
-    }
-    clean[..end].to_string()
+    crate::snippet::head(clean.trim(), MAX_TEXT).to_string()
 }
 
 fn too_many<T>(list: &[T], max: usize) -> Result<(), SetupError> {
@@ -608,7 +650,6 @@ fn checked(document: Document, encrypted: bool) -> Result<SetupFile, SetupError>
         },
         parts: Parts::NONE,
         accounts: Vec::new(),
-        counts: SetupCounts::default(),
         prefs: Vec::new(),
         notes: Vec::new(),
         data: Data::default(),
@@ -616,16 +657,15 @@ fn checked(document: Document, encrypted: bool) -> Result<SetupFile, SetupError>
     if let Some(settings) = &document.settings {
         let settings = settings.checked();
         file.parts = file.parts.with(Parts::SETTINGS);
-        file.counts.settings = settings.count();
         file.data.settings = Some(settings);
     }
     if let Some(prefs) = &document.preferences {
         file.parts = file.parts.with(Parts::PREFERENCES);
-        file.prefs = prefs
+        // in the order of the list, the language last
+        file.prefs = super::PREFERENCES
             .iter()
-            .filter_map(|(name, value)| Some((name.clone(), pref_value(name, value)?)))
+            .filter_map(|(name, _)| Some((name.to_string(), pref_value(name, prefs.get(*name)?)?)))
             .collect();
-        file.counts.preferences = file.prefs.len();
     }
     if let Some(apps) = &document.sign_in_apps {
         too_many(&apps.apps, MAX_APPS)?;
@@ -679,48 +719,23 @@ fn secret(value: &Option<String>, encrypted: bool) -> Option<Zeroizing<String>> 
         .map(|secret| Zeroizing::new(secret.to_string()))
 }
 
-/// An endpoint of a sign-in app as discovery accepts one: https, or on this computer when the issuer is
-fn endpoint_ok(url: &str, issuer: &str) -> bool {
-    pe_net::http::parse_url(url).is_some()
-        && !url.contains('#')
-        && !url.chars().any(|c| c.is_control() || c.is_whitespace())
-        && (url.starts_with("https://") || !issuer.starts_with("https://"))
-}
-
-/// A sign-in app of a file checked as the sign-in apps window checks it, and its endpoints as discovery does
-fn checked_app(entry: &AppEntry) -> Option<SignInApp> {
-    let issuer = pe_oauth::issuer(&entry.issuer).ok()?;
+/// A sign-in app of a file as the sign-in apps window would save it, checked as it checks it
+fn checked_app(entry: &AppEntry) -> Option<SignInAppForm> {
     let (imap_host, imap_port, imap_security) = entry.imap.checked()?;
     let (smtp_host, smtp_port, smtp_security) = entry.smtp.checked()?;
-    let scopes = entry.scopes.split_whitespace().collect::<Vec<_>>().join(" ");
-    let response_issuer = entry.response_issuer.as_deref().map(text);
-    let usable = !text(&entry.name).is_empty()
-        && !entry.client_id.trim().is_empty()
-        && !entry.client_id.chars().any(char::is_control)
-        && !scopes.is_empty()
-        && !scopes.chars().any(char::is_control)
-        && endpoint_ok(&entry.authorize_url, &issuer)
-        && endpoint_ok(&entry.token_url, &issuer)
-        // the access token goes to these servers: never without encryption
-        && imap_security != Security::Plain
-        && smtp_security != Security::Plain;
-    usable.then(|| SignInApp {
+    let form = SignInAppForm {
         name: text(&entry.name),
-        issuer,
-        client_id: text(&entry.client_id),
-        has_secret: false,
-        scopes,
-        authorize_url: entry.authorize_url.clone(),
-        token_url: entry.token_url.clone(),
-        response_issuer,
+        issuer: entry.issuer.clone(),
+        client_id: entry.client_id.clone(),
+        scopes: entry.scopes.clone(),
         imap_host,
         imap_port,
         imap_security,
         smtp_host,
         smtp_port,
         smtp_security,
-        enabled: entry.enabled,
-    })
+    };
+    crate::sign_in_apps::checked_form(&form).ok()
 }
 
 fn read_apps(file: &mut SetupFile, part: &AppsPart, encrypted: bool) {
@@ -735,14 +750,14 @@ fn read_apps(file: &mut SetupFile, part: &AppsPart, encrypted: bool) {
     let mut refused = 0;
     for entry in &part.apps {
         match checked_app(entry) {
-            Some(app) => file.data.apps.push(FileApp {
-                app,
+            Some(form) => file.data.apps.push(FileApp {
+                form,
+                enabled: entry.enabled,
                 secret: secret(&entry.secret, encrypted),
             }),
             None => refused += 1,
         }
     }
-    file.counts.sign_in_apps = file.data.apps.len();
     left_out(file, Parts::SIGN_IN_APPS, refused);
 }
 
@@ -818,60 +833,65 @@ fn sign_in_words(sign_in: &SignInRef, apps: &[FileApp]) -> String {
         SignInRef::Builtin(kind) => crate::builtin_name(*kind).to_string(),
         SignInRef::App { issuer, client_id } => apps
             .iter()
-            .find(|app| app.app.issuer == *issuer && app.app.client_id == *client_id)
-            .map_or_else(|| issuer.clone(), |app| app.app.name.clone()),
+            .find(|app| app.is(issuer, client_id))
+            .map_or_else(|| issuer.clone(), |app| app.form.name.clone()),
     }
 }
 
 fn read_accounts(file: &mut SetupFile, entries: &[AccountEntry], encrypted: bool) {
     for (index, entry) in entries.iter().enumerate() {
-        let row = match checked_account(entry, encrypted) {
-            Ok(account) => {
-                let settings = &account.settings;
+        let (row, account) = match checked_account(entry, encrypted) {
+            Ok(account) => (account_row(index, &account, &file.data.apps), Some(account)),
+            // kept in the list with the reason, so the import window shows what will not come
+            Err(problem) => {
+                let email = text(&entry.email);
                 let row = SetupAccount {
                     index,
-                    email: settings.email.clone(),
-                    title: match account.account_name.as_str() {
-                        "" => crate::default_account_name(&settings.email),
-                        name => name.to_string(),
-                    },
-                    imap: format!("{}:{}", settings.imap_host, settings.imap_port),
-                    smtp: format!("{}:{}", settings.smtp_host, settings.smtp_port),
-                    sign_in: sign_in_words(&account.sign_in, &file.data.apps),
-                    has_secret: account.secret.is_some(),
-                    plain: settings.imap_security == Security::Plain || settings.smtp_security == Security::Plain,
-                    ..SetupAccount::default()
-                };
-                file.data.accounts.push(account);
-                row
-            }
-            Err(problem) => {
-                // kept in the list with the reason, so the import window shows what will not come
-                file.data.accounts.push(FileAccount {
-                    settings: AccountSettings::default(),
-                    sign_in: SignInRef::Password,
-                    account_name: String::new(),
-                    signature: String::new(),
-                    addresses: Vec::new(),
-                    secret: None,
-                });
-                SetupAccount {
-                    index,
-                    email: text(&entry.email),
-                    title: text(&entry.email),
+                    title: email.clone(),
+                    label: email.clone(),
+                    email,
                     problem: Some(problem),
                     ..SetupAccount::default()
-                }
+                };
+                (row, None)
             }
         };
         file.accounts.push(row);
+        file.data.accounts.push(account);
     }
-    file.counts.accounts = file.accounts.iter().filter(|a| a.problem.is_none()).count();
+}
+
+/// An account as the import window lists it, before what is here is known
+fn account_row(index: usize, account: &FileAccount, apps: &[FileApp]) -> SetupAccount {
+    let settings = &account.settings;
+    let title = match account.account_name.as_str() {
+        "" => crate::default_account_name(&settings.email),
+        name => name.to_string(),
+    };
+    let sign_in = sign_in_words(&account.sign_in, apps);
+    SetupAccount {
+        index,
+        email: settings.email.clone(),
+        label: crate::account_label(&title, &settings.email),
+        title,
+        servers: tr_args(
+            Text::SetupAccountServers,
+            &[
+                ("imap", (&settings.imap_host).into()),
+                ("smtp", (&settings.smtp_host).into()),
+                ("signin", (&sign_in).into()),
+            ],
+        ),
+        sign_in,
+        importable: true,
+        has_secret: account.secret.is_some(),
+        ..SetupAccount::default()
+    }
 }
 
 fn read_contacts(file: &mut SetupFile, part: &ContactsPart) {
     let cards: Vec<Card> = crate::vcard::read_vcards(&part.vcards)
-        .iter()
+        .into_iter()
         .map(crate::book::checked)
         .collect();
     let mut refused = 0;
@@ -890,8 +910,6 @@ fn read_contacts(file: &mut SetupFile, part: &ContactsPart) {
             .collect();
         file.data.groups.push(FileGroup { name, members });
     }
-    file.counts.contacts = cards.len();
-    file.counts.groups = file.data.groups.len();
     file.data.cards = cards;
     left_out(file, Parts::CONTACTS, refused);
 }
@@ -940,17 +958,11 @@ fn read_keys(file: &mut SetupFile, part: &KeysPart, encrypted: bool) {
             }
         }
     }
-    file.counts.contact_keys = file.data.contact_keys.len();
-    file.counts.own_keys = file.data.own_keys.len();
     left_out(file, Parts::KEYS, refused);
 }
 
 /// A rule of a file checked as the rule editor checks it
 fn checked_rule(entry: &RuleEntry) -> Option<FileRule> {
-    let query = text(&entry.query);
-    if query.is_empty() || !pe_store::Query::rule_problems(&query).is_empty() {
-        return None;
-    }
     let account = match &entry.account {
         Some(account) => Some(account.checked()?),
         None => None,
@@ -971,12 +983,9 @@ fn checked_rule(entry: &RuleEntry) -> Option<FileRule> {
     let rule = Rule {
         id: 0,
         enabled: entry.enabled,
-        name: match text(&entry.name) {
-            name if name.is_empty() => query.clone(),
-            name => name,
-        },
+        name: text(&entry.name),
         account: None,
-        query,
+        query: text(&entry.query),
         move_to: None,
         mark_read: entry.mark_read,
         flag: entry.flag,
@@ -985,7 +994,8 @@ fn checked_rule(entry: &RuleEntry) -> Option<FileRule> {
         remove: entry.remove,
         quiet: entry.quiet,
     };
-    (rule.acts() || move_to.is_some()).then_some(FileRule { rule, account, move_to })
+    let rule = crate::rules::checked_rule(&rule, move_to.is_some()).ok()?;
+    Some(FileRule { rule, account, move_to })
 }
 
 fn read_rules(file: &mut SetupFile, entries: &[RuleEntry]) {
@@ -996,12 +1006,12 @@ fn read_rules(file: &mut SetupFile, entries: &[RuleEntry]) {
             None => refused += 1,
         }
     }
-    file.counts.rules = file.data.rules.len();
     left_out(file, Parts::RULES, refused);
 }
 
 fn read_trusted(file: &mut SetupFile, entries: &[TrustedEntry]) {
     let mut refused = 0;
+    let mut seen = HashSet::new();
     for entry in entries {
         let value = entry.value.trim().to_lowercase();
         let usable = !value.is_empty()
@@ -1010,13 +1020,12 @@ fn read_trusted(file: &mut SetupFile, entries: &[TrustedEntry]) {
             && !value
                 .chars()
                 .any(|c| c.is_control() || c.is_whitespace() || "<>,;\"".contains(c));
-        if usable && !file.data.trusted.iter().any(|(known, _)| *known == value) {
-            file.data.trusted.push((value, entry.domain));
-        } else if !usable {
+        if !usable {
             refused += 1;
+        } else if seen.insert(value.clone()) {
+            file.data.trusted.push((value, entry.domain));
         }
     }
-    file.counts.trusted_senders = file.data.trusted.len();
     left_out(file, Parts::TRUSTED_SENDERS, refused);
 }
 
@@ -1123,17 +1132,18 @@ mod tests {
             account("bob@example.com", "imap example com"),
         ]}));
         let file = parse(&bytes, None).unwrap();
-        assert_eq!(file.counts.accounts, 1);
+        assert_eq!(file.counts().accounts, 1);
         let ann = &file.accounts[0];
         assert_eq!(
-            (ann.title.as_str(), ann.imap.as_str()),
-            ("Work", "imap.example.com:993")
+            (ann.title.as_str(), ann.label.as_str()),
+            ("Work", "Work <ann@example.com>")
         );
-        assert!(ann.plain);
+        assert_eq!(ann.servers, "imap.example.com and smtp.example.com (Password)");
         assert!(!ann.has_secret, "a file that is not sealed carries no secret");
         assert!(file.accounts[1].problem.as_deref().unwrap().contains("not an address"));
         assert!(file.accounts[2].problem.as_deref().unwrap().contains("IMAP"));
-        let data = &file.data.accounts[0];
+        assert!(file.data.accounts[1].is_none() && !file.accounts[1].importable);
+        let data = file.data.accounts[0].as_ref().unwrap();
         assert!(!data.signature.contains("script"), "{}", data.signature);
         assert_eq!(data.addresses, [("ann@other.example".to_string(), "Ann".to_string())]);
         assert!(data.secret.is_none());
@@ -1163,10 +1173,11 @@ mod tests {
             "trusted_senders": [{"value": "Shop.Example", "domain": true}, {"value": "a@shop.example"}, {"value": "a@shop.example", "domain": true}, {"value": "x y"}]
         }));
         let file = parse(&bytes, None).unwrap();
-        assert_eq!(file.counts.sign_in_apps, 2);
+        // the endpoints a file names are not read: the issuer's are, at the import
+        assert_eq!(file.counts().sign_in_apps, 3);
         assert_eq!(file.data.builtin, [(ProviderKind::Google, true)]);
         assert!(file.data.apps.iter().all(|app| app.secret.is_none()));
-        assert_eq!(file.counts.rules, 2);
+        assert_eq!(file.counts().rules, 2);
         assert_eq!(file.data.rules[0].rule.name, "list:news");
         assert_eq!(
             file.data.rules[1].move_to.as_ref().unwrap().account.imap_host,

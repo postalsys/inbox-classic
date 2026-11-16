@@ -100,6 +100,37 @@ pub(crate) fn plan(
     Ok(plans)
 }
 
+/// Why `query` can not be a rule's, in words; None when it can
+fn query_problem(query: &str) -> Option<String> {
+    let refused = pe_store::Query::rule_problems(query);
+    (!refused.is_empty()).then(|| tr_args(Text::RuleQueryRefused, &[("words", (&refused.join(", ")).into())]))
+}
+
+/// A rule as the editor and a setup file's import check it: its query one a rule can have, doing something (with
+/// `moves_later`, a folder to move to that is not here yet counts), its query trimmed and its name the query when
+/// it has none; or why not, in words
+pub(crate) fn checked_rule(rule: &Rule, moves_later: bool) -> std::result::Result<Rule, String> {
+    let query = rule.query.trim().to_string();
+    if let Some(problem) = query_problem(&query) {
+        return Err(problem);
+    }
+    if query.is_empty() {
+        return Err(pe_i18n::tr(Text::RuleNoQuery));
+    }
+    if !rule.acts() && !moves_later {
+        return Err(pe_i18n::tr(Text::RuleNoAction));
+    }
+    let name = match rule.name.trim() {
+        "" => query.clone(),
+        name => name.to_string(),
+    };
+    Ok(Rule {
+        name,
+        query,
+        ..rule.clone()
+    })
+}
+
 impl Core {
     /// The message rules, in their order
     pub fn rules(&self) -> Result<Vec<Rule>> {
@@ -113,33 +144,14 @@ impl Core {
     /// Why a rule's query can not be one, in words: it names a folder or a date (a rule is for the new mail of an
     /// Inbox); None when it can
     pub fn rule_query_problem(&self, query: &str) -> Option<String> {
-        let refused = pe_store::Query::rule_problems(query);
-        (!refused.is_empty()).then(|| tr_args(Text::RuleQueryRefused, &[("words", (&refused.join(", ")).into())]))
+        query_problem(query)
     }
 
     /// Saves a rule (a new one, id 0, last); its id. A query that can not be a rule's, or a rule that does nothing,
     /// is refused with the reason; one without a name gets its query as its name.
     pub fn save_rule(&self, rule: &Rule) -> Result<RuleId> {
-        if let Some(problem) = self.rule_query_problem(&rule.query) {
-            return Err(Error::Invalid(problem));
-        }
-        if rule.query.trim().is_empty() {
-            return Err(Error::Invalid(pe_i18n::tr(Text::RuleNoQuery)));
-        }
-        if !rule.acts() {
-            return Err(Error::Invalid(pe_i18n::tr(Text::RuleNoAction)));
-        }
-        // a rule without a name is called by what it matches
-        let query = rule.query.trim().to_string();
-        let name = match rule.name.trim() {
-            "" => query.clone(),
-            name => name.to_string(),
-        };
-        Ok(self.store().save_rule(&Rule {
-            name,
-            query,
-            ..rule.clone()
-        })?)
+        let rule = checked_rule(rule, false).map_err(Error::Invalid)?;
+        Ok(self.store().save_rule(&rule)?)
     }
 
     pub fn delete_rule(&self, id: RuleId) -> Result<()> {

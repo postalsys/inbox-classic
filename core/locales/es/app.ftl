@@ -742,22 +742,6 @@ ui-setup-import-title = Importar configuración y cuentas
 # review: new
 ui-setup-export-intro = Elija qué llevar a otro equipo. El archivo no contiene mensajes: se descargan de nuevo allí.
 # review: new
-ui-setup-part-settings = Configuración
-# review: new
-ui-setup-part-preferences = Preferencias de ventana
-# review: new
-ui-setup-part-accounts = Cuentas
-# review: new
-ui-setup-part-sign-in-apps = Aplicaciones de inicio de sesión
-# review: new
-ui-setup-part-contacts = Contactos y grupos
-# review: new
-ui-setup-part-keys = Claves de cifrado
-# review: new
-ui-setup-part-rules = Reglas de mensajes
-# review: new
-ui-setup-part-trusted = Remitentes de confianza
-# review: new
 ui-setup-use-passphrase = &Proteger el archivo con una frase de contraseña
 # review: new
 ui-setup-passphrase-note = Con una frase de contraseña, el archivo se cifra y contiene también sus contraseñas, inicios de sesión y claves privadas. Sin ella, cada cuenta pide su contraseña en el otro equipo.

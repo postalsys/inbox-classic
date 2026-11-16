@@ -668,7 +668,7 @@ setup-part-accounts = Kontod
 # review: new
 setup-part-sign-in-apps = Sisselogimisrakendused
 # review: new
-setup-part-contacts = Kontaktid
+setup-part-contacts = Kontaktid ja grupid
 # review: new
 setup-part-keys = Krüpteerimisvõtmed
 # review: new
@@ -857,3 +857,9 @@ setup-added-trusted-senders = { $count ->
 }
 # review: new
 setup-nothing = Midagi ei imporditud.
+# review: new
+setup-account-servers = { $imap } ja { $smtp } ({ $signin })
+# review: new
+setup-file-name = Inbox Classicu seaded ja kontod
+# review: new
+setup-skipped-unreachable = { $name } jäeti vahele: selle sisselogimisteenusega ei saadud ühendust. Lisage see uuesti sisselogimisrakenduste all.

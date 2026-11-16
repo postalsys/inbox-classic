@@ -701,7 +701,7 @@ setup-part-accounts = Cuentas
 # review: new
 setup-part-sign-in-apps = Aplicaciones de inicio de sesión
 # review: new
-setup-part-contacts = Contactos
+setup-part-contacts = Contactos y grupos
 # review: new
 setup-part-keys = Claves de cifrado
 # review: new
@@ -890,3 +890,9 @@ setup-added-trusted-senders = { $count ->
 }
 # review: new
 setup-nothing = No se importó nada.
+# review: new
+setup-account-servers = { $imap } y { $smtp } ({ $signin })
+# review: new
+setup-file-name = Configuración y cuentas de Inbox Classic
+# review: new
+setup-skipped-unreachable = Se omitió { $name }: no se pudo contactar con su servicio de inicio de sesión. Vuelva a agregarla en Aplicaciones de inicio de sesión.
