@@ -31,12 +31,10 @@ win-list-loading = Indlæser...
 
 ## Buttons and words used in many windows
 
-# review: new
-win-delete-button = &Slet
+win-delete-button = Sle&t
 # review: new
 win-find-label = &Find:
-# review: new
-win-save-as-button = Gem &som...
+win-save-as-button = Ge&m som...
 # review: new
 win-too-many-files = For mange filer på én gang: vælg færre.
 

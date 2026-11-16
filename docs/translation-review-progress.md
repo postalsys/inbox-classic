@@ -16,11 +16,14 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Danish (da): review the app catalog, then remaining catalogs and all 52 help topics.
+- Resume with Danish (da): app catalog and two shared Windows controls reviewed. Review the remaining
+  703 catalog entries, then all 52 help topics.
   All 84 late list-loading labels have been reviewed. Bulgarian, Czech, Dutch, Italian, Portuguese (Portugal),
   Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are complete: each has
   1,334 catalog entries and 52 help topics. Fourteen languages still have pending content,
-  with exact IDs/topics in the state file. No language is considered complete merely because checks pass.
+  with exact IDs/topics in the state file. A newly identified logo-cache followup affects 42 help files in
+  14 already-reviewed languages; these also require a consistency pass. No language is considered complete
+  merely because checks pass.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
   not yet on `master` or `origin/master`. They are included in the isolated review checkout;
@@ -454,10 +457,25 @@ inventory/file/source hashes pass. Review HTML regenerated; no test suite was ru
 First-help checkpoint: `bdf0dc0b`.
 
 Fresh upstream check: origin/master advanced to `65988ba4` with release-review tooling changes only; no catalog
-or help content changed. Local/remote wave1 remain `8df686a4`. Integrate updated tooling after this checkpoint.
+or help content changed. Local/remote wave1 remain `8df686a4`. Merged updated tooling as `4cb0158b`; no conflicts. Updated --since and full inventory/hash checks reconcile.
 
-Current totals: 13,458 catalog entries and 524 help pages reviewed; 2,080 catalog values improved. Remaining:
-18,634 catalog entries and 728 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Danish shared UI catalog
+
+Reviewed 626 app entries and two Windows controls shared with context menus, improving 58 values. Corrected
+rule processing, account-transfer login details, cryptographic terminology, recipient/key grammar, sender-image
+context and natural Danish instructions. Checked actual message-sent events, rule counts and key dialogs.
+Resolved access-key conflicts across 32 menu/dialog scopes, including all four message-context variants.
+Structural checks, exact inventory/file/source hashes and git diff --check pass; review HTML regenerated.
+No test suite was run per user instruction. Czech completion checkpoint: `a1d1de33`.
+
+A source-context followup is recorded with 42 exact help paths across the 14 already-reviewed languages:
+brand-logos, connections and pictures-tracking. LogoSource now reuses a persistent cache (30-day lifetime,
+one-day failure backoff), while English help describes once-per-run downloads. Check those translated timing
+claims and retain the explanation of what a server sees when a download actually occurs. This followup must
+be completed in addition to the pending language queue; English/app code remain outside this task.
+
+Current totals: 14,086 catalog entries and 524 help pages reviewed; 2,138 catalog values improved. Remaining:
+18,006 catalog entries and 728 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

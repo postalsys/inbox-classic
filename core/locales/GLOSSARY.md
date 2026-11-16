@@ -242,8 +242,16 @@ Outlook Express).
 - Past-tense status lines agree with the count ("Markerede 1 meddelelse som læst" / "... som læste"); colours agree
   with the neuter "flag" ("Satte rødt/gult/grønt/blåt/gråt flag på").
 - Keys Ctrl / Skift / Delete / Enter; Options, Settings and Preferences are all "Indstillinger".
-- Review first: "meddelelse" versus "besked" or "e-mail", "Adressekartotek" versus "Adressebog", "adgangsfrase" for
-  passphrase, "Legitimationsstyring" for the Credential Manager.
+- Keep "meddelelse" for a message, "mail" for mail generally, and "Adressekartotek" for the address book.
+  "Adgangsfrase" is a passphrase; "Legitimationsstyring" is the Windows Credential Manager.
+- Rules "behandler" messages; "sorterer" is reserved for ordering a list. Criteria are "opfyldt".
+- The appended message footer is "signatur"; cryptography uses "digital signatur" and "signere digitalt".
+  Key ownership is "bekræftet"; use "fingeraftrykkene stemmer overens" for the comparison.
+- "Loginoplysninger" includes passwords and browser sign-in tokens. Transfer without a passphrase requires
+  signing in again, which may mean entering a password or using the browser.
+- Use "Tilslut" for connecting an agent and "Rediger" for changing its permissions. Cc / Bcc retain Alt+C / Alt+B.
+- A key label can be a name, address or fingerprint. Use "nøglen { $name }" where the owner is not known.
+- Logos are cached and reused across messages; avoid implying a fresh download on every app launch.
 
 ### Hrvatski (hr)
 
