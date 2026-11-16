@@ -38,6 +38,8 @@ base64 = { version = "0.22", optional = true }
 
 [build-dependencies]
 glib-build-tools = "0.22"
+# the languages, for their sign-in button pictures
+pe-i18n = { path = "../core/crates/pe-i18n" }
 
 [features]
 # the in-process driver of the UI end-to-end test (scripts/linux-ui-e2e.sh); never in a release

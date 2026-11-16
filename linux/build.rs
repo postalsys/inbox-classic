@@ -29,8 +29,16 @@ fn main() {
         )
         .unwrap();
     }
-    // the sign-in buttons, in English and each language with its own words (scripts/build-sign-in-buttons.sh)
-    for language in ["", ".de", ".es", ".et", ".fr"] {
+    // the sign-in buttons, in English and each language of pe_i18n::LANGUAGES with its own words
+    // (scripts/build-sign-in-buttons.sh)
+    let languages = pe_i18n::LANGUAGES.iter().map(|(code, _)| {
+        if *code == "en" {
+            String::new()
+        } else {
+            format!(".{code}")
+        }
+    });
+    for language in languages {
         for provider in ["google", "microsoft"] {
             let name = format!("brands/{provider}-sign-in{language}.png");
             writeln!(xml, "    <file alias=\"{name}\">app/res/{name}</file>").unwrap();
