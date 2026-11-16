@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue remaining 31 Portuguese (Portugal) help topics. Encryption/key topics read but not edited yet. Then Brazilian Portuguese from feat/languages-wave1 in an isolated checkout. All 21 other unfinished languages remain in scope.",
+  "next_batch": "Continue in build/i18n-wave1 on i18n/review-wave1, merging this review checkpoint into that isolated branch first. Start Brazilian Portuguese (pt-BR); 21 languages remain. Treat the review workspace state/progress as authoritative from that point.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -17678,39 +17678,7 @@
     },
     "pt": {
       "pending_catalogs": {},
-      "pending_help": [
-        "account-security.html",
-        "agents-connect.html",
-        "agents-permissions.html",
-        "agents-sending.html",
-        "brand-logos.html",
-        "certificate-errors.html",
-        "command-line.html",
-        "connections.html",
-        "data-storage.html",
-        "default-mail-program.html",
-        "delivery-problems.html",
-        "download-ahead.html",
-        "encrypted-and-signed-mail.html",
-        "encryption-errors.html",
-        "encryption-keys.html",
-        "invitations.html",
-        "keyboard-shortcuts.html",
-        "links-scripts.html",
-        "message-not-shown.html",
-        "message-rules.html",
-        "no-connection.html",
-        "options-language.html",
-        "password-not-accepted.html",
-        "pictures-tracking.html",
-        "removing.html",
-        "search-words.html",
-        "sign-in-apps.html",
-        "sign-in-codes.html",
-        "unsubscribe.html",
-        "updates.html",
-        "verify-a-key.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "pt-app-round2",
@@ -19125,7 +19093,7 @@
           "files": {
             "core/crates/pe-html/help/pt/add-account.html": "e6cf1b8212fa2b4fe02ebc5a27a85373e14637654523cbed212da92087d54755",
             "core/crates/pe-html/help/pt/gmail-outlook.html": "bdfe0f5552fc7d49ddf6a36947309362478d15a90e0356368b4608862464cb32",
-            "core/crates/pe-html/help/pt/main-window.html": "b48db26ddc6f590c6252a0c76ed8c3874c348157463baa5ec003646dbc8a8b04",
+            "core/crates/pe-html/help/pt/main-window.html": "0eed7ba3cca32a8845cb4453e3264bc865a7e6a92ee41f121731ff4c17262459",
             "core/crates/pe-html/help/pt/layouts.html": "3062d025a8b6825c23db99c3adc5aeef604b348a2e26584f331528234cde7f9c",
             "core/crates/pe-html/help/pt/read-messages.html": "6ca2c8d849491d1eb5a3756006c0285e2bef44f3e3d9c0d9e9c6c9e02dc96bcb",
             "core/crates/pe-html/help/pt/find-messages.html": "ded3d7a171ab79d267482c68566a647c8448397effb17c5f5ce225ac0b36b01b"
@@ -19138,7 +19106,7 @@
             "core/crates/pe-html/help/en/read-messages.html": "f4b67aaac301a14d8590439037ee0626bfdc75a0045fa0d1b34d865ff877e763",
             "core/crates/pe-html/help/en/find-messages.html": "3cde4173761e98f4e4af66ff67cc8be4b045346c6a741ee17bf6588d8dce6e73"
           },
-          "validation": "All 72 pe-i18n/pe-html tests pass after these 21 topics. Structural checks pass with only intentionally removed review marks. Completed inventory and source/file hashes reconcile; git diff --check passes.",
+          "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
           "notes": "Reviewed account setup, folder navigation, layouts, reading and search against UI/caller behavior. Corrected combined-folder order and collapsed unread totals; clarified indexing versus marking messages read, quoted text and platform-specific instructions."
         },
         {
@@ -19155,7 +19123,7 @@
           "changed_values": 0,
           "files": {
             "core/crates/pe-html/help/pt/conversations.html": "ad9bb361946ba2042abe296f4acd0562b26d5555c8da5638069e910974ddc426",
-            "core/crates/pe-html/help/pt/organize-mail.html": "d5cbce31980dfb0eb0bed2fb8fe350f8e1febd17d8d15237a525e198b156a3cb",
+            "core/crates/pe-html/help/pt/organize-mail.html": "789c1113953b19721db58dcda93ca636b762fcecf0e7d5104c6d484b8bc58fb0",
             "core/crates/pe-html/help/pt/delete-and-undo.html": "5a99b46aff160fe6fd66af088a65598b6437fa20f8ab3526e063b756a0d39c1c",
             "core/crates/pe-html/help/pt/folders.html": "8944c5959dfc6187cb0da58d3c6739a10e71e94d6b52ab1fd1f441f4ab220a48",
             "core/crates/pe-html/help/pt/write-message.html": "fc7812eb87488aeb5a45022c0828ee7799c5f8cbdbff6f37324cc8dc84e73731",
@@ -19169,7 +19137,7 @@
             "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9",
             "core/crates/pe-html/help/en/reply-forward.html": "67f77f7ce6fb74698b0924028b6fd6085f2983ca19587969d5aa15c81d7c78f8"
           },
-          "validation": "All 72 pe-i18n/pe-html tests pass after these 21 topics. Structural checks pass with only intentionally removed review marks. Completed inventory and source/file hashes reconcile; git diff --check passes.",
+          "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
           "notes": "Reviewed conversation actions, notifications, organization, deletion, folder creation and composing/replies. Improved natural wording and aligned folder-navigation instructions and undo examples with actual controls."
         },
         {
@@ -19197,7 +19165,7 @@
             "core/crates/pe-html/help/en/drafts-outbox.html": "119b7e27c2d69405d51018ff33f4c5ebc34944086bfe97409a8e10a0b388d634",
             "core/crates/pe-html/help/en/address-book.html": "5b5c8d345f153c33f75ee6bcea399a1d36abbc0043efc210445c007acd1c2e53"
           },
-          "validation": "All 72 pe-i18n/pe-html tests pass after these 21 topics. Structural checks pass with only intentionally removed review marks. Completed inventory and source/file hashes reconcile; git diff --check passes.",
+          "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
           "notes": "Reviewed signatures, attachments, message files, drafts/outbox and contacts. Corrected decrypted temporary-copy lifetime and startup cleanup, platform origin marking, domain-authentication limits, queued-send wording and natural task instructions."
         },
         {
@@ -19222,8 +19190,192 @@
             "core/crates/pe-html/help/en/manage-accounts.html": "7267a73e572221d410c18461ae1be3eccacfa522e9154a6917ec0aa37c39e8e7",
             "core/crates/pe-html/help/en/move-computer.html": "636274cd347b79ccb1edaa0116514699f1f2dd4c294d78e918f42571e6e7574e"
           },
-          "validation": "All 72 pe-i18n/pe-html tests pass after these 21 topics. Structural checks pass with only intentionally removed review marks. Completed inventory and source/file hashes reconcile; git diff --check passes.",
+          "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
           "notes": "Reviewed notifications, unified folders, account properties and settings transfer. Fixed single-account command locations, combined folder text, reauthentication including browser credentials, rule destination matching and imported key selection."
+        },
+        {
+          "id": "pt-help-keys-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "verify-a-key.html",
+            "encryption-errors.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/encrypted-and-signed-mail.html": "4288d3ae445ff4e65f3236cbf0d5e6292d70cbb4912082777dbe2add1382690b",
+            "core/crates/pe-html/help/pt/encryption-keys.html": "2494139de841cf5fd22e2a27942db58cf65342ead26026621c4477464357ec72",
+            "core/crates/pe-html/help/pt/verify-a-key.html": "b9fe9e97575877a68c58886c12c2417ac74e9c2795992a8f89c24b9a25077ebe",
+            "core/crates/pe-html/help/pt/encryption-errors.html": "a38186ed25107053ea2829d17103b2368fb4e19206e830927022a84221567608"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "b11ff6a5da8cc4f36f352fe5d7a6a43f0aa04e7ac1f67ea0608ef43559ba100e",
+            "core/crates/pe-html/help/en/encryption-keys.html": "67693bc89f3d12b183ff3a86f11495213a2f58ea0c9e16dea30649d931621d6a",
+            "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153",
+            "core/crates/pe-html/help/en/encryption-errors.html": "a5a998593987b3275e7f6cf44f81d459ff641215dda884f275cbf9d8d0d710f1"
+          },
+          "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
+          "notes": "Reviewed signature validity versus verified ownership, decryption keys, protection status, key backup recovery and verification order. Corrected the TLS-required response: it does not confirm password validity. Kept raw error headings matching server/core messages."
+        },
+        {
+          "id": "pt-help-privacy-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "pictures-tracking.html",
+            "brand-logos.html",
+            "links-scripts.html",
+            "account-security.html",
+            "data-storage.html",
+            "download-ahead.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/pictures-tracking.html": "cda879e1a22552b1601735b338a6d846b4fbc65853e211249d5c77a45ccc8afe",
+            "core/crates/pe-html/help/pt/brand-logos.html": "5ee207b5b90daa3aae9fe942156e386618d877cea733c7786d78b1be7c259dfa",
+            "core/crates/pe-html/help/pt/links-scripts.html": "457e895bc2dfd50e4df282e496b618bf9b0bf6eeee4ec1a39295d1b72ffc2169",
+            "core/crates/pe-html/help/pt/account-security.html": "e4b1b461d9e83d794dcb72bc7265ce32eaa15b687b34a32f7e8d40384e46cb89",
+            "core/crates/pe-html/help/pt/data-storage.html": "958d06299d44961b42c4cff6afbd2f50b8c2499a363c6e4ea1eb85a4c8784504",
+            "core/crates/pe-html/help/pt/download-ahead.html": "2a00bc95adcdd648c408796e4fbc2df93b9077ae1b1c3ce1bc2fbea7d11a2536"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/links-scripts.html": "94ed69e6dc2262c5f189568583c6f98bdd9c829584be36b89a6956e7cdc0bc53",
+            "core/crates/pe-html/help/en/account-security.html": "adf8cbee09afd1c8bcaaf46181d1cbf6667a67e1b3ce6f35c13af4d1c016ed44",
+            "core/crates/pe-html/help/en/data-storage.html": "cd7a5abea6effa876efa6948daee25b444604e4dbe1616333cdae59421c842ed",
+            "core/crates/pe-html/help/en/download-ahead.html": "bd7fce66d3a898cacebd699b56fb445e89fd7cd29bcd8c5cc8a1eb2599a4c332"
+          },
+          "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
+          "notes": "Reviewed remote images, logo/domain authentication, external attachment opening, connection security, stored credentials and download limits. Removed absolute tracking/identity claims, distinguished per-account disk space from message counts, and preserved source markup."
+        },
+        {
+          "id": "pt-help-agents-rules-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "agents-connect.html",
+            "agents-permissions.html",
+            "agents-sending.html",
+            "message-rules.html",
+            "options-language.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/agents-connect.html": "eada3e3b8e9d0ef0901c62ac309650453fa3f511c5a729fd196739c58b5227bf",
+            "core/crates/pe-html/help/pt/agents-permissions.html": "47c458dd9789c5a5e51c64bbd59f56f68ca82221d1a1aa3de5de66ece56d1533",
+            "core/crates/pe-html/help/pt/agents-sending.html": "e69853e8334cc26917afa58ad449c65814ec005cd22b17d2e04b402c5afecddb",
+            "core/crates/pe-html/help/pt/message-rules.html": "ddb1653f1a2335bcde98b6b22719bbc3cf49bad4c119fe7caa4dfbdc2a4441a7",
+            "core/crates/pe-html/help/pt/options-language.html": "a5ed18fe1a7ccebbb29f38a3e94cc9edc454fa981b54b02f9f860acc9d112186"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70",
+            "core/crates/pe-html/help/en/agents-permissions.html": "3f65b6b651950e2b6750417611854b8c899c5893f3e12b1b6c5f1c4a4077bb6d",
+            "core/crates/pe-html/help/en/agents-sending.html": "dffb12a981ffed82aa8cf6566ee4118d64b200c54dcc3b9d77fcd95ee0ffd75e",
+            "core/crates/pe-html/help/en/message-rules.html": "50f114b3f1de58156b49d24f24c6b1c13f6ddd25d386b0f5ed10e30f0ed4f41d",
+            "core/crates/pe-html/help/en/options-language.html": "f01b936ddf998f5db9b63cc6ec8c07d64c85c93fad9da8e2937e3c07307aa1b2"
+          },
+          "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
+          "notes": "Reviewed MCP setup/permissions, per-message agent consent and 30-second queued sending, rule processing and application settings. Improved natural instructions and distinguished pending send from delivery and action permission from user behavior."
+        },
+        {
+          "id": "pt-help-troubleshooting-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "no-connection.html",
+            "password-not-accepted.html",
+            "certificate-errors.html",
+            "message-not-shown.html",
+            "delivery-problems.html",
+            "unsubscribe.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/no-connection.html": "5e8703132e64f86e8a2b7496296464a477980c6465c3b6509f69857f8ec9dd81",
+            "core/crates/pe-html/help/pt/password-not-accepted.html": "063f252df3661a89c7ff74ec81c67831449d781941a89132c9aee1825601e271",
+            "core/crates/pe-html/help/pt/certificate-errors.html": "8b8489aca4a5748b3ff71128b42d6d84ed602f1bf9fd38433426e53bad47883d",
+            "core/crates/pe-html/help/pt/message-not-shown.html": "c977e8e7a26d945909b09d79d2dd56dbda6182607bcdcd259d7ab78e38f52b43",
+            "core/crates/pe-html/help/pt/delivery-problems.html": "7dadee795afd14a94190968b830b81216be25076f4819e54c1ffb890660dd943",
+            "core/crates/pe-html/help/pt/unsubscribe.html": "04024200d700bc906e149b9493aaf6fc190d3925af9e12612fa0b3c5e03a4d8e"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/no-connection.html": "b928c6371c171c099fc80ad0fef4e13d3e022593bbdc44c1f27904b5139d3ef0",
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab",
+            "core/crates/pe-html/help/en/certificate-errors.html": "8f4eccaaf38ef9767695c2a3a62aebe94238f4f3cbaf8c76f7e98105978a2c84",
+            "core/crates/pe-html/help/en/message-not-shown.html": "85e732ccaedb1c1eb60f30ddcef9992d7f1ee4820bb4ceaa6a59e5200a4bef0d",
+            "core/crates/pe-html/help/en/delivery-problems.html": "b01b4f074dce1c3bce5c63f2c5a5bd05a7613153eb558c179ed1f4fcbfae1c0e",
+            "core/crates/pe-html/help/en/unsubscribe.html": "a80419bc5ca6a65992c8168d29636f505dc1281ccbeff81ff25412ba2dd3611c"
+          },
+          "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
+          "notes": "Reviewed connection/authentication/certificate errors against raw network and localized core strings. Corrected message-download timing, unreadable-message scope, conditional app-password guidance and delivery/unsubscribe task wording."
+        },
+        {
+          "id": "pt-help-setup-reference-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "connections.html",
+            "sign-in-apps.html",
+            "sign-in-codes.html",
+            "invitations.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/connections.html": "651a39e787a41a7f73d688e07ef8541dd6c4ea140a212862571567eb375fafd2",
+            "core/crates/pe-html/help/pt/sign-in-apps.html": "8c171d48c4f2b958443864d5dceed7b541752f1258224eb2a77744beecaf98ee",
+            "core/crates/pe-html/help/pt/sign-in-codes.html": "37aa926158c61eda5b063b638295b7a42cefcb6f201a817a6487f6de3e22f6d4",
+            "core/crates/pe-html/help/pt/invitations.html": "e8b9413727ad64ff895b0b4f11b256a26408ae712805d27f8178057cb6e101b9"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/sign-in-apps.html": "c092b49a13a0eab86b8571ec49c3fe49696b16b2e71bc1cc1020bcbc0222c1b1",
+            "core/crates/pe-html/help/en/sign-in-codes.html": "c787a5e3fe4836c3e7c48fc644c4210d0107e29767c0fbacff1f7f083b6cc408",
+            "core/crates/pe-html/help/en/invitations.html": "d4a72136a9c92b8f37bf139b5f577630da9a6b40a921b88bec47bcd06060010d"
+          },
+          "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
+          "notes": "Reviewed connections, OAuth client setup, authenticated one-time-code display and calendar invitations. Clarified actual network authorization, setup terminology, domain verification and local time-zone display."
+        },
+        {
+          "id": "pt-help-platform-reference-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "default-mail-program.html",
+            "removing.html",
+            "updates.html",
+            "command-line.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/default-mail-program.html": "6f87be7532787605035be3faff11eb99cdffae7ac4cd7310c7672b5feb01aae4",
+            "core/crates/pe-html/help/pt/removing.html": "2f3e3c96da8aca8f75f7f969e97f7b47e70135e5800f5ddcea149e5d7e9c9ccd",
+            "core/crates/pe-html/help/pt/updates.html": "12298e728175e0fdfa794ea9138b0948d446b09bc297b5e0cc70039ed76d804f",
+            "core/crates/pe-html/help/pt/command-line.html": "309c9227137fda9b46f054f846ba66699fe18d7f3b833a537bbabc76470955cf"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/default-mail-program.html": "6934a7cc1e6c28786d77d488146d201f81e253b79965a6d3c63093708bdc33ad",
+            "core/crates/pe-html/help/en/removing.html": "46bcd4ef3c9ae9e051c63de8eb9810f179b723d4297cc001dce3951b76a9515e",
+            "core/crates/pe-html/help/en/updates.html": "faa50b2269cf71de11f9a361fd48a5476a9380883e99829aae2c67bb12028e59",
+            "core/crates/pe-html/help/en/command-line.html": "39216fa072adf81b4ce1480e5df5729a4ef7524d25d69aef5e1f374044c18e70"
+          },
+          "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
+          "notes": "Reviewed default-app setup, removal, updates and command-line options. Clarified installer versus portable behavior, native update flow, database terminology and sign-in-page-file writing a URL rather than HTML."
+        },
+        {
+          "id": "pt-help-search-shortcuts-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "search-words.html",
+            "keyboard-shortcuts.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/search-words.html": "9d26aeb4cae21e7ed9c114b59ce31aaa3cd67d22642e7bc6754f0896d0f2f872",
+            "core/crates/pe-html/help/pt/keyboard-shortcuts.html": "ef0ef63c8360dc859226c505de42bf3958f26de77503e53dccfce61e90a18dbf"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/search-words.html": "5393319f111f177dde773bb10018564696772b16067b60fa8e2bad14f643ebbb",
+            "core/crates/pe-html/help/en/keyboard-shortcuts.html": "8cef6a16af1925987835d490d608aac7614be8c13650d0b3875ff21753d39b5b"
+          },
+          "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
+          "notes": "Reviewed all search operators and keyboard tables. Checked recipient search maps to the combined recipient field, message list has no size column, and actual Portuguese Cc/Bcc mnemonics remain Alt+C/Alt+B. Preserved literal keyboard markup."
         }
       ]
     },
@@ -34749,5 +34901,10 @@
     }
   ],
   "total_catalog_entries": 32008,
-  "total_help_pages": 1252
+  "total_help_pages": 1252,
+  "review_workspace": {
+    "path": "/Users/andris/Projects/PostalExpress/build/i18n-wave1",
+    "branch": "i18n/review-wave1",
+    "note": "Isolated checkout created for the five additional languages. Continue the entire review there after merging this latest review checkpoint locally. Master is not receiving the unmerged feature implementation. The state/progress files in this checkout will be authoritative for subsequent batches."
+  }
 }

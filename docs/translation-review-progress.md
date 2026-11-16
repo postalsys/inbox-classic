@@ -12,10 +12,12 @@ Commit completed batches regularly and preserve an exact resume point.
   52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
 - `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
   and git history before resuming, so later source or translation changes are not missed.
-- Resume with the remaining 31 Portuguese (Portugal) help topics. The first 21 are recorded in the state file;
-  all 1,331 Portuguese catalog entries are reviewed. Brazilian Portuguese is next.
+- Continue in `/Users/andris/Projects/PostalExpress/build/i18n-wave1` on `i18n/review-wave1`.
+  Merge this latest master review checkpoint into that isolated branch first. Its state/progress files then
+  become authoritative for later batches; this master copy is the handoff checkpoint.
+- Resume with Brazilian Portuguese (`pt-BR`), then the other pending languages. Portuguese (Portugal),
   Italian and Dutch are fully reviewed: each has 1,331 catalog entries and 52 help topics.
-  Twenty-two languages still have pending content, with exact IDs/topics in the state file.
+  Twenty-one languages still have pending content, with exact IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
@@ -158,8 +160,17 @@ folder matching. All markup, keyboard tags and platform branches are preserved.
 All 72 tests pass. Structural checks and inventory/hash reconciliation pass; git diff --check passes.
 Portuguese catalog completion checkpoint: `21f45cd7`.
 
-Current totals: 4,057 catalog entries and 129 help pages reviewed; 625 catalog values improved. Remaining:
-27,951 catalog entries and 1,123 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Portuguese help completed
+
+Reviewed the remaining 31 help topics, completing all 52. Corrected signature validity versus key ownership,
+key-verification order, private-key recovery, logo/domain authentication, image loading, queued agent sending,
+connection failures and setup/reference instructions. Checked raw error strings, search fields and native
+keyboard shortcuts against the implementation. Preserved markup, control references and all literal keys.
+All 72 tests pass; structure, inventory/hash reconciliation, inline control spacing and git diff --check pass.
+The review HTML is regenerated. Portuguese first-help and expanded-inventory checkpoint: `a6f1d948`.
+
+Current totals: 4,057 catalog entries and 160 help pages reviewed; 625 catalog values improved. Remaining:
+27,951 catalog entries and 1,092 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
