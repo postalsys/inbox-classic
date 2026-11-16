@@ -345,6 +345,23 @@ fn group_order(sort: Sort) -> String {
     format!("{first} {direction}, t {direction}")
 }
 
+/// The messages of the conversations `threads` in what `search` finds, as a WHERE with its values: found by the
+/// conversations' index, the words searched for checked on each ([`Search::condition_of_threads`])
+fn of_threads(search: &Search, threads: &[i64]) -> (String, Vec<Value>) {
+    let (condition, mut values) = search.condition_of_threads();
+    let marks = id_list(&mut values, threads);
+    (format!("{condition} AND thread_id IN ({marks})"), values)
+}
+
+/// How many rows a grouped list has, as SQL: its conversations, grouped in one pass over what `condition` finds, one
+/// row each and, for the open ones (`open`, an `IN` list), one for each of their other messages
+fn row_count_sql(condition: &str, open: &str) -> String {
+    format!(
+        "WITH g AS (SELECT thread_id AS t, COUNT(*) AS n FROM messages WHERE {condition} GROUP BY thread_id) \
+         SELECT COUNT(*) + COALESCE(SUM(CASE WHEN t IN ({open}) THEN n - 1 ELSE 0 END), 0) FROM g"
+    )
+}
+
 impl Store {
     /// The conversations in what `search` finds, in the order of `sort` ([`group_order`]): `limit` of them from
     /// `offset` on, with how many messages each has there and how many of those are unread. One pass over the
@@ -419,12 +436,10 @@ impl Store {
         if threads.is_empty() {
             return Ok(HashMap::new());
         }
-        let (condition, mut values) = search.condition(false);
-        let marks = id_list(&mut values, threads);
+        let (wanted, values) = of_threads(search, threads);
         let mut statement = self.db.prepare(&format!(
             "SELECT {COLUMNS} FROM messages WHERE id IN (SELECT id FROM (SELECT id, ROW_NUMBER() OVER \
-             (PARTITION BY thread_id ORDER BY {ARRIVED}, uid, id) AS k FROM messages \
-             WHERE {condition} AND thread_id IN ({marks})) WHERE k = 1)"
+             (PARTITION BY thread_id ORDER BY {ARRIVED}, uid, id) AS k FROM messages WHERE {wanted}) WHERE k = 1)"
         ))?;
         statement
             .query_map(params_from_iter(values), from_row)?
@@ -439,11 +454,10 @@ impl Store {
         if threads.is_empty() {
             return Ok(lists);
         }
-        let (condition, mut values) = search.condition(false);
-        let marks = id_list(&mut values, threads);
+        let (wanted, values) = of_threads(search, threads);
         let mut statement = self.db.prepare(&format!(
             // the conversations' rows found by their index, then ordered (+ keeps the planner off the date index)
-            "SELECT {COLUMNS} FROM messages WHERE {condition} AND thread_id IN ({marks}) ORDER BY +{ARRIVED}, uid, id"
+            "SELECT {COLUMNS} FROM messages WHERE {wanted} ORDER BY +{ARRIVED}, uid, id"
         ))?;
         for found in statement.query_map(params_from_iter(values), from_row)? {
             let message = found?;
@@ -468,11 +482,9 @@ impl Store {
         if threads.is_empty() {
             return Ok(());
         }
-        let (condition, mut values) = search.condition(false);
-        let marks = id_list(&mut values, &threads);
+        let (wanted, values) = of_threads(search, &threads);
         let mut statement = self.db.prepare(&format!(
-            "SELECT thread_id, MAX({WHEN}), MAX(internal_date) FROM messages WHERE {condition} AND thread_id IN ({marks}) \
-             GROUP BY thread_id"
+            "SELECT thread_id, MAX({WHEN}), MAX(internal_date) FROM messages WHERE {wanted} GROUP BY thread_id"
         ))?;
         let newest: HashMap<i64, (Option<i64>, Option<i64>)> = statement
             .query_map(params_from_iter(values), |row| {
@@ -569,23 +581,20 @@ impl Store {
     /// conversation, and the others of the open ones' messages
     pub(crate) fn count_thread_rows(&self, search: &Search, expanded: &[i64]) -> Result<u64> {
         let (condition, mut values) = search.condition(false);
-        let conversations: u64 = self
-            .db
-            .prepare_cached(&format!(
-                "SELECT COUNT(DISTINCT thread_id) FROM messages WHERE {condition}"
-            ))?
-            .query_row(params_from_iter(values.clone()), |row| row.get(0))?;
         if expanded.is_empty() {
-            return Ok(conversations);
+            return self
+                .db
+                .prepare_cached(&format!(
+                    "SELECT COUNT(DISTINCT thread_id) FROM messages WHERE {condition}"
+                ))?
+                .query_row(params_from_iter(values), |row| row.get(0));
         }
-        let marks = id_list(&mut values, expanded);
-        let mut statement = self.db.prepare(&format!(
-            "SELECT COUNT(*) FROM messages WHERE {condition} AND thread_id IN ({marks}) GROUP BY thread_id"
-        ))?;
-        let opened = statement
-            .query_map(params_from_iter(values), |row| row.get::<_, u64>(0))?
-            .try_fold(0u64, |sum, n| Ok::<_, crate::Error>(sum + n?.saturating_sub(1)))?;
-        Ok(conversations + opened)
+        // the conversations first, then which are open: never the open ones' messages looked up for every message the
+        // words find, as `thread_id IN` beside a search's `id IN` makes SQLite do
+        let open = id_list(&mut values, expanded);
+        self.db
+            .prepare(&row_count_sql(&condition, &open))?
+            .query_row(params_from_iter(values), |row| row.get(0))
     }
 
     /// `limit` rows of the list grouped by conversation from `offset` on: each conversation's first message, and
@@ -802,11 +811,9 @@ impl Store {
         if threads.is_empty() {
             return Ok(Vec::new());
         }
-        let (condition, mut values) = search.condition(false);
-        let marks = id_list(&mut values, threads);
+        let (wanted, values) = of_threads(search, threads);
         let mut statement = self.db.prepare(&format!(
-            "SELECT thread_id, folder_id, uid FROM messages WHERE {condition} AND thread_id IN ({marks}) \
-             ORDER BY +{ARRIVED}, uid, id"
+            "SELECT thread_id, folder_id, uid FROM messages WHERE {wanted} ORDER BY +{ARRIVED}, uid, id"
         ))?;
         statement
             .query_map(params_from_iter(values), |row| {
@@ -1469,6 +1476,74 @@ mod tests {
         assert_eq!(store.refs_in_ranges(&open, newest, &[(0, 8)]).unwrap(), refs);
         assert!(store.next_unread(&open, newest, inbox, 0).unwrap().is_some());
         assert_eq!(store.hidden_in(&open, inbox, 4).unwrap(), None);
+    }
+
+    /// The query plan of `sql` with `values`, its steps joined
+    fn plan(store: &Store, sql: &str, values: Vec<Value>) -> String {
+        let steps: Vec<String> = store
+            .db
+            .prepare(&format!("EXPLAIN QUERY PLAN {sql}"))
+            .unwrap()
+            .query_map(params_from_iter(values), |row| row.get::<_, String>(3))
+            .unwrap()
+            .map(|step| step.unwrap())
+            .collect();
+        steps.join("; ")
+    }
+
+    /// A search grouped with conversations open: what the words find is read once, never every open conversation's
+    /// messages looked up for each message found (with Expand All on 4,365 conversations of a search in 230,000
+    /// messages that took 6.7 seconds)
+    #[test]
+    fn a_search_with_open_conversations_reads_what_it_finds_once() {
+        let (store, inbox, _) = four_conversations();
+        let thread = |uid: u64| store.message(inbox, uid).unwrap().unwrap().info.thread_id.unwrap();
+        let (a, e, g) = (thread(1), thread(5), thread(7));
+        let words = |threads: Vec<i64>| Search {
+            scope: crate::Scope::Everywhere,
+            text: "x".into(),
+            threads: Some(threads),
+            ..Default::default()
+        };
+        // a few open, and more than go into a statement one by one (Expand All, `id_list`)
+        let many: Vec<i64> = [a, e, g].into_iter().chain(1_000_000..1_001_000).collect();
+        for open in [vec![a, e], many] {
+            let search = words(open.clone());
+            let what = format!("{} open", open.len());
+            // the same rows as every folder without words, as the words find every message here
+            let all = store.search(&search, Sort::default(), 0, 100).unwrap();
+            assert_eq!(store.count_rows(&search).unwrap(), all.len() as u64, "{what}");
+            let plain = Search {
+                text: String::new(),
+                ..search.clone()
+            };
+            assert_eq!(
+                subjects(&all),
+                subjects(&store.search(&plain, Sort::default(), 0, 100).unwrap())
+            );
+            assert_eq!(all.len(), if open.len() == 2 { 8 } else { 9 }, "{what}");
+
+            // no step looks up a conversation's messages by the words' ids
+            let crossed = |plan: &str| {
+                plan.split("; ")
+                    .any(|step| step.contains("thread_id=?") && step.contains("rowid=?"))
+            };
+            let (condition, mut values) = search.condition(false);
+            let marks = id_list(&mut values, &open);
+            let counted = plan(&store, &row_count_sql(&condition, &marks), values);
+            assert!(!crossed(&counted), "{what}: {counted}");
+            assert!(
+                counted.contains("INTEGER PRIMARY KEY"),
+                "from what the words find: {counted}"
+            );
+            let (wanted, values) = of_threads(&search, &open);
+            let members = plan(&store, &format!("SELECT id FROM messages WHERE {wanted}"), values);
+            assert!(!crossed(&members), "{what}: {members}");
+            assert!(
+                members.contains("thread_id=?"),
+                "by the conversations' index: {members}"
+            );
+        }
     }
 
     #[test]
