@@ -83,7 +83,6 @@ cmd-view-source = Nachrichten-&Quelltext
 cmd-ai-agents = &KI-Agenten...
 cmd-options = &Optionen...
 cmd-message-rules = Nachrichten&regeln...
-# review: new
 cmd-encryption-keys = &Verschlüsselungsschlüssel...
 cmd-create-rule-from-message = Regel au&s Nachricht erstellen...
 cmd-select-all = &Alles auswählen
@@ -93,9 +92,7 @@ cmd-address-book = &Adressbuch...
 cmd-add-sender-to-book = Absender zum Adressbuch &hinzufügen
 cmd-import-address-book = &Adressbuch importieren...
 cmd-export-address-book = Adressbuch e&xportieren...
-# review: new
-cmd-export-setup = Einstellungen und &Konten exportieren...
-# review: new
+cmd-export-setup = Einstellun&gen und Konten exportieren...
 cmd-import-setup = Einstellungen und Konten im&portieren...
 
 ## The tray icon's menu
@@ -222,9 +219,7 @@ ui-signature = Signatur
 ui-signature-hint = Wird neuen Nachrichten, Antworten und Weiterleitungen von diesem Konto angefügt.
 ui-signature-not-saved = Die Signatur konnte nicht gespeichert werden.
 ui-all-inboxes = Alle Posteingänge
-# review: new
-ui-all-sent = Alle gesendeten
-# review: new
+ui-all-sent = Alle gesendeten Nachrichten
 ui-all-drafts = Alle Entwürfe
 ui-flagged-folder = Gekennzeichnet
 ui-all-folders = Alle Ordner
@@ -392,18 +387,12 @@ ui-menu-open = Ö&ffnen
 ui-menu-flag = Kenn&zeichnung
 ui-menu-view-source = &Quelltext anzeigen
 ui-save-attachments = Anlagen speichern
-# review: new
 ui-attachment-open = Öffnen
-# review: new
 ui-attachment-save-as = Speichern unter...
-# review: new
 ui-attachment-save-all = Alle speichern...
-# review: new
 ui-attachments-strip = Anlagen
-# review: new
-ui-attachment-note-title = Diese Datei öffnen
-# review: new
-ui-attachment-program-tip = Öffnen ist für diese Art von Datei aus: Sie kann Programme ausführen. Speichern Sie sie, um sie selbst zu öffnen.
+ui-attachment-note-title = Anlage öffnen
+ui-attachment-program-tip = Inbox Classic öffnet diesen Dateityp nicht, da er Programme ausführen kann. Bei Bedarf können Sie die Datei speichern und selbst öffnen.
 ui-clear-flag = Kennzeichnung &löschen
 ui-button-move = &Verschieben
 ui-button-copy = &Kopieren
@@ -413,7 +402,7 @@ ui-outbox-send-all = Alle jetzt &senden
 ui-yes = Ja
 ui-no = Nein
 ui-try-again = Erneut versuchen
-ui-remove = &Entfernen
+ui-remove = Ent&fernen
 ui-signature-of = Signatur - { $account }
 ui-sign-in-with = Mit { $provider } anmelden
 ui-sign-in-in-browser-yours = Melden Sie sich im geöffneten Browserfenster bei Ihrem Konto an und kehren Sie dann hierher zurück.
@@ -559,9 +548,7 @@ ui-pictures-always-domain = Bilder von allen Absendern der Domain { $domain } im
 ui-pictures-unconfirmed = Die Absenderdomain { $domain } konnte nicht bestätigt werden. Deshalb werden Bilder in dieser Nachricht nicht automatisch heruntergeladen.
 ui-pictures-always-option = Bilder in allen Nachrichten herunterladen
 ui-pictures-always-warning = Absender sehen dann, wann Sie ihre Nachrichten lesen.
-# review: new
 ui-protection-details = &Details...
-# review: new
 ui-protection-details-title = Sicherheitsdetails
 ui-download-heading = Herunterladen
 ui-download-ahead = Nachrichten vorab herunterladen:
@@ -608,168 +595,87 @@ ui-picture-not-picture = Diese Datei ist kein PNG- oder JPEG-Bild.
 ui-picture-too-large = Dieses Bild ist zu groß. Wählen Sie ein Bild mit höchstens 10 MB und maximal 8000 Pixeln Breite und Höhe.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
-# review: new
 ui-keys-title = Verschlüsselungsschlüssel
-# review: new
-ui-keys-intro = Ihre Schlüssel signieren Ihre Nachrichten und öffnen an Sie verschlüsselte E-Mails. Die Schlüssel Ihrer Kontakte prüfen deren Signaturen und verschlüsseln E-Mails an sie.
-# review: new
-ui-keys-empty = Noch keine Schlüssel. Klicken Sie auf „Neuer Schlüssel“, um Ihren zu erstellen, oder auf „Importieren“, um einen vorhandenen hinzuzufügen.
-# review: new
+ui-keys-intro = Mit Ihren Schlüsseln signieren Sie Nachrichten und lesen verschlüsselte Nachrichten, die Sie erhalten haben. Mit den Schlüsseln Ihrer Kontakte prüfen Sie deren Signaturen und verschlüsseln Nachrichten für sie.
+ui-keys-empty = Es sind noch keine Schlüssel vorhanden. Mit „Neuer Schlüssel“ erstellen Sie einen eigenen Schlüssel. Mit „Importieren“ fügen Sie einen vorhandenen hinzu.
 ui-keys-col-name = Name
-# review: new
 ui-keys-col-address = Adresse
-# review: new
 ui-keys-col-kind = Art
-# review: new
 ui-keys-col-status = Status
-# review: new
 ui-keys-kind-own = Ihr Schlüssel
-# review: new
 ui-keys-kind-contact = Kontakt
-# review: new
 ui-keys-status-verified = { $status }, überprüft
-# review: new
 ui-keys-new = &Neuer Schlüssel...
-# review: new
 ui-keys-import = &Importieren...
-# review: new
-ui-keys-export = &Exportieren...
-# review: new
+ui-keys-export = E&xportieren...
 ui-keys-backup = &Sichern...
-# review: new
 ui-keys-verify = Ü&berprüfen...
-# review: new
 ui-keys-new-title = Neuer Schlüssel
-# review: new
 ui-keys-new-for = Schlüssel erstellen für:
-# review: new
 ui-keys-new-make = Schlüssel &erstellen
-# review: new
-ui-keys-no-account = Fügen Sie zuerst ein E-Mail-Konto hinzu: Ein Schlüssel wird für die Adressen eines Kontos erstellt.
-# review: new
-ui-keys-memory-only = Kennwörter werden nur im Arbeitsspeicher gehalten. Ein jetzt erstellter oder importierter privater Schlüssel ist nach dem Schließen von Inbox Classic nicht mehr verwendbar.
-# review: new
-ui-keys-backup-offer = Ihr neuer Schlüssel ist bereit. Jetzt eine Sicherung speichern? Geht dieser Computer verloren oder wird er zurückgesetzt, lässt sich der Schlüssel nur aus einer Sicherung wiederherstellen.
-# review: new
-ui-keys-backup-now = Sicherung &speichern...
-# review: new
+ui-keys-no-account = Fügen Sie zuerst ein E-Mail-Konto hinzu. Der Schlüssel wird für die Adressen dieses Kontos erstellt.
+ui-keys-memory-only = Kennwörter werden nur im Arbeitsspeicher gespeichert. In diesem Modus erstellte oder importierte private Schlüssel sind nach dem Beenden von Inbox Classic nicht mehr nutzbar.
+ui-keys-backup-offer = Ihr neuer Schlüssel wurde erstellt. Möchten Sie jetzt eine Sicherungskopie speichern? Falls dieser Computer verloren geht oder zurückgesetzt wird, können Sie den Schlüssel nur daraus wiederherstellen.
+ui-keys-backup-now = Sicherung spei&chern...
 ui-keys-later = &Später
-# review: new
 ui-keys-backup-title = Schlüssel sichern
-# review: new
-ui-keys-backup-intro = Die Sicherung ist durch eine Passphrase geschützt. Bewahren Sie Datei und Passphrase an verschiedenen sicheren Orten auf: Sie brauchen beide, um den Schlüssel wiederherzustellen.
-# review: new
+ui-keys-backup-intro = Die Sicherung wird mit einer Passphrase geschützt. Bewahren Sie Datei und Passphrase getrennt voneinander an sicheren Orten auf. Zum Wiederherstellen des Schlüssels benötigen Sie beides.
 ui-keys-passphrase = &Passphrase:
-# review: new
 ui-keys-passphrase-again = &Wiederholen:
-# review: new
 ui-keys-passphrase-differ = Die Passphrasen stimmen nicht überein.
-# review: new
 ui-keys-passphrase-short = Verwenden Sie eine Passphrase mit mindestens 8 Zeichen.
-# review: new
 ui-keys-backup-saved = Die Sicherung wurde gespeichert.
-# review: new
 ui-keys-import-title = Schlüssel importieren
-# review: new
 ui-keys-import-passphrase = Dieser private Schlüssel ist durch eine Passphrase geschützt. Geben Sie sie ein, um den Schlüssel zu importieren:
-# review: new
 ui-keys-file-filter = OpenPGP-Schlüssel
-# review: new
-ui-keys-use-for = Diesen Schlüssel für { $addresses } verwenden? Ihre Nachrichten von dort werden damit signiert, und damit verschlüsselte E-Mails können hier gelesen werden.
-# review: new
+ui-keys-use-for = Diesen Schlüssel für folgende Adressen verwenden: { $addresses }? Ausgehende Nachrichten von diesen Adressen werden damit signiert. Nachrichten, die mit diesem Schlüssel für Sie verschlüsselt wurden, können Sie hier lesen.
 ui-keys-use = &Verwenden
-# review: new
 ui-keys-not-now = &Nicht jetzt
-# review: new
-ui-keys-remove-own = Ihren Schlüssel { $fingerprint } entfernen? Damit verschlüsselte E-Mails können hier nicht mehr gelesen werden, außer Sie importieren seine Sicherung erneut.
-# review: new
-ui-keys-remove-contact = Den Schlüssel von { $name } entfernen? Deren Signaturen können nicht geprüft und E-Mails an sie nicht verschlüsselt werden, bis Sie den Schlüssel wieder hinzufügen.
-# review: new
+ui-keys-remove-own = Ihren Schlüssel { $fingerprint } entfernen? Damit verschlüsselte Nachrichten lassen sich hier erst wieder lesen, wenn Sie die Sicherung des Schlüssels importieren.
+ui-keys-remove-contact = Den Schlüssel von { $name } entfernen? Bis Sie ihn erneut hinzufügen, können Sie die Signaturen dieses Kontakts nicht prüfen und keine Nachrichten an ihn verschlüsseln.
 ui-key-properties-title = Schlüsseleigenschaften
-# review: new
 ui-key-names = Namen:
-# review: new
 ui-key-fingerprint = Fingerabdruck:
-# review: new
 ui-key-status = Status:
-# review: new
 ui-key-created = Erstellt:
-# review: new
 ui-key-expires = Läuft ab:
-# review: new
 ui-key-never = Nie
-# review: new
 ui-key-algorithm = Algorithmus:
-# review: new
 ui-key-source = Herkunft:
-# review: new
 ui-key-addresses = Adressen:
-# review: new
 ui-key-address-verified = { $address } (überprüft)
-# review: new
 ui-key-address-not-verified = { $address } (nicht überprüft)
-# review: new
 ui-verify-title = Schlüssel überprüfen
-# review: new
-ui-verify-intro = Bitten Sie { $name }, Ihnen den Fingerabdruck des Schlüssels aus der eigenen App vorzulesen, persönlich oder am Telefon. Vergleichen Sie ihn nicht mit einem per E-Mail gesendeten: Wer den Schlüssel ändern könnte, könnte auch diesen ändern.
-# review: new
-ui-verify-fingerprint = Der Fingerabdruck des Schlüssels, den Sie haben:
-# review: new
+ui-verify-intro = Vergleichen Sie den Fingerabdruck persönlich oder telefonisch mit { $name }. Bitten Sie Ihren Kontakt, ihn aus der eigenen App vorzulesen. Verwenden Sie dafür keinen per E-Mail zugesandten Fingerabdruck: Dieser könnte ebenso wie der Schlüssel ausgetauscht worden sein.
+ui-verify-fingerprint = Fingerabdruck des hier gespeicherten Schlüssels:
 ui-verify-marks = { $count ->
-    [one] Wenn sie übereinstimmen, wird der Schlüssel als ihrer markiert für { $addresses }. Gehört diese Adresse nicht zu ihnen, klicken Sie auf „Sie unterscheiden sich“.
-   *[other] Wenn sie übereinstimmen, wird der Schlüssel als ihrer markiert für { $addresses }. Gehört eine dieser Adressen nicht zu ihnen, klicken Sie auf „Sie unterscheiden sich“.
+    [one] Wenn die Fingerabdrücke übereinstimmen, können Sie den Schlüssel für diese Adresse als überprüft markieren: { $addresses }. Gehört die Adresse nicht Ihrem Kontakt, wählen Sie „Stimmen nicht überein“.
+   *[other] Wenn die Fingerabdrücke übereinstimmen, können Sie den Schlüssel für diese Adressen als überprüft markieren: { $addresses }. Gehört eine davon nicht Ihrem Kontakt, wählen Sie „Stimmen nicht überein“.
 }
-# review: new
-ui-verify-match = Sie &stimmen überein
-# review: new
-ui-verify-differ = Sie &unterscheiden sich
-# review: new
-ui-verify-differs = Der Schlüssel, den Sie haben, ist nicht der von { $name }. Entfernen Sie ihn, und bitten Sie erneut um den Schlüssel.
-# review: new
+ui-verify-match = Stimmen &überein
+ui-verify-differ = Stimmen &nicht überein
+ui-verify-differs = Der gespeicherte Schlüssel stimmt nicht mit dem Schlüssel von { $name } überein. Entfernen Sie ihn und bitten Sie Ihren Kontakt erneut um den Schlüssel.
 ui-verify-unmark = Als &nicht überprüft markieren
-# review: new
 ui-account-security = Sicherheit
-# review: new
 ui-account-security-intro = Mit einem Schlüssel können Ihre Nachrichten signiert werden, und andere können Ihnen verschlüsselte E-Mails senden.
-# review: new
-ui-account-key = &Schlüssel für dieses Konto:
-# review: new
+ui-account-key = Schlüssel für dieses &Konto:
 ui-account-key-none = Keiner
-# review: new
 ui-account-key-new = &Neuer Schlüssel...
-# review: new
 ui-account-autocrypt = Meinen öffentlichen Schlüssel mit meinen Nachrichten &senden (Autocrypt)
-# review: new
 ui-contact-key = Verschlüsselungsschlüssel:
-# review: new
 ui-contact-key-none = Kein Schlüssel
-# review: new
 ui-contact-key-use-new = Den neuen Schlüssel &verwenden
-# review: new
-ui-contact-key-keep = &Den bisherigen behalten
-# review: new
+ui-contact-key-keep = &Bisherigen Schlüssel behalten
 ui-setup-export-title = Einstellungen und Konten exportieren
-# review: new
 ui-setup-import-title = Einstellungen und Konten importieren
-# review: new
-ui-setup-export-intro = Wählen Sie, was Sie auf einen anderen Computer mitnehmen. Die Datei enthält keine Nachrichten: Sie werden dort erneut geladen.
-# review: new
-ui-setup-use-passphrase = Datei mit einer &Passphrase schützen
-# review: new
-ui-setup-passphrase-note = Mit einer Passphrase ist die Datei verschlüsselt und enthält auch Ihre Kennwörter, Anmeldungen und privaten Schlüssel. Ohne sie fragt jedes Konto auf dem anderen Computer nach seinem Kennwort.
-# review: new
+ui-setup-export-intro = Wählen Sie die Daten aus, die Sie auf einen anderen Computer übertragen möchten. Nachrichten sind nicht enthalten; sie werden dort erneut heruntergeladen.
+ui-setup-use-passphrase = Datei mit einer Passphrase s&chützen
+ui-setup-passphrase-note = Mit einer Passphrase wird die Datei verschlüsselt und enthält auch gespeicherte Kennwörter, Anmeldedaten und private Schlüssel. Ohne Passphrase müssen Sie sich auf dem anderen Computer erneut bei Ihren Konten anmelden.
 ui-setup-export-button = &Exportieren...
-# review: new
-ui-setup-file-filter = Inbox Classic-Einstellungen und -Konten
-# review: new
-ui-setup-ask-passphrase = Diese Datei ist durch eine Passphrase geschützt. Geben Sie sie ein, um zu sehen, was die Datei enthält:
-# review: new
-ui-setup-import-intro = Wählen Sie, was importiert wird. Konten, die schon auf diesem Computer sind, bleiben, wie sie sind.
-# review: new
-ui-setup-from = Gespeichert von Inbox Classic { $version } am { $date }.
-# review: new
+ui-setup-file-filter = Einstellungen und Konten (Inbox Classic)
+ui-setup-ask-passphrase = Diese Datei ist mit einer Passphrase geschützt. Geben Sie die Passphrase ein, um den Inhalt anzuzeigen:
+ui-setup-import-intro = Wählen Sie die Daten aus, die Sie importieren möchten. Bereits auf diesem Computer eingerichtete Konten bleiben unverändert.
+ui-setup-from = Am { $date } mit Inbox Classic { $version } gespeichert.
 ui-setup-import-button = &Importieren
-# review: new
 ui-setup-done = Fertig
-# review: new
 ui-setup-first-run = Einstellungen und Konten von einem anderen Computer importieren...

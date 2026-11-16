@@ -14,7 +14,7 @@ behavior and surrounding controls to establish meaning. Preserve the original sc
 - Initial inventory: 241 marked messages and 14 marked help passages per language (de, es, et, fr), 964 messages
   and 56 help passages altogether. Each language has ten affected help pages. Other languages named in the guide
   are not present in this checkout. `scripts/check-language.mjs` is also absent here.
-- Current next step: German `app.ftl` (94 marked UI entries), then its core/platform catalogs and help.
+- Current next step: German `core.ftl` (143 marked entries), then its platform labels and help.
   Estonian is complete for the starting snapshot. Spanish and French follow. Review existing wording outside
   marked entries when needed for context or terminology consistency.
 
@@ -66,9 +66,19 @@ control references and platform branches are preserved. All 68 tests and `git di
 accounts for all 241 unmarked catalog entries and 69 unmarked help lines. The review HTML was regenerated;
 723 messages and 42 help passages remain in the other languages.
 
-Next: German catalogs (241 marked messages), then its ten help pages. Spanish and French are also untouched.
-Estonian catalog and help review is complete for the starting snapshot. Revisit it only for newly arriving changes
-or the final cross-language consistency checks below.
+Checkpoint commit: `f596775a`.
+
+### de-app-2026-11-16
+
+Reviewed the 94 marked German UI messages and the shared Remove button (95 entries in the batch). Improved 31
+values, including literal key/verification instructions, settings transfer, the All Sent label and shortcuts.
+The extra Remove mnemonic avoids collisions with Properties and Export in the new key window and Accounts.
+IDs, placeholders, plural branches and mnemonic presence are preserved. Dialog and new menu shortcut checks
+pass; all 68 tests and `git diff --check` passed.
+
+Next: German core messages and four platform/help labels, then its ten help pages. Spanish and French are
+untouched. Estonian catalog and help review is complete for the starting snapshot. Revisit it only for newly
+arriving changes or the final cross-language consistency checks below.
 
 Source wording to revisit in the final consistency pass: `ui-setup-passphrase-note` says every account asks for a
 password after importing an unprotected file. OAuth accounts instead require signing in again; the reviewed
