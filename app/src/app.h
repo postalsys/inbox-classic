@@ -680,6 +680,16 @@ public:
     void ResetFind();
     void OnTimer(UINT_PTR id);
     void OnEvent(const UiEvent& event);
+    // a folder was clicked and its list is read once the click is painted (TIMER_LOAD_LIST): meanwhile the list before
+    // stays, dimmed, and the status bar keeps its counts
+    bool ListPending() const { return listPending_; }
+    // that list read now, before a command acts on it
+    void FlushListLoad();
+    // the UI test's look at the last folder clicked: 9 its list not read yet, 10 none clicked, 11 its list read before
+    // the highlight was painted, 12 the highlight painted first
+    int TestListOrder() const { return testListOrder_ + 10; }
+    // the UI test holds the list of a folder clicked unread (`hold`), to see it waiting, and lets it go
+    void TestHoldList(bool hold);
     // the accounts changed: builds the tree again
     void Reload();
     // a contact's picture changed: the rows (and their picture keys) read again, the selection kept
@@ -960,8 +970,25 @@ private:
     // the selection taken again; with `rebuild` false the messages selected stay as they were (a reload selected them
     // again where they are now) and only their numbers are taken
     void OnSelectionChanged(bool rebuild = true);
-    // another folder (or All Inboxes) shown; false when it was already the one shown (and the main window was not told)
-    bool OnFolderSelected(int64_t folder, PeTreeList list);
+    // another folder (or All Inboxes) shown; false when it was already the one shown (and the main window was not told).
+    // `later`: clicked, so its list is read after the paint (DeferList)
+    bool OnFolderSelected(int64_t folder, PeTreeList list, bool later = false);
+    // the list of the folder chosen read once the tree's highlight, the folder bar and the title are painted; the list
+    // before dimmed meanwhile. A newer click replaces it
+    void DeferList();
+    // TIMER_LOAD_LIST: the list deferred read now
+    void LoadPendingList();
+    // the list ends waiting: its timers stopped, the UI test told whether the highlight was painted first
+    void EndPending();
+    // over the list while it waits: the window colour at half strength, and "Loading..." once it waited a while
+    void DrawPending(HDC dc) const;
+    // the tree's NM_CUSTOMDRAW while a list waits: whether the row chosen was painted highlighted
+    void TreeCustomDraw(NMTVCUSTOMDRAW* draw, LRESULT& result);
+    // a folder changed: the list read again once for the changes of 300 ms (TIMER_RELOAD)
+    void ScheduleReload();
+    // the row the message shown is at after a reload, from the selected row `was` when it is still there, or moved by
+    // `shift` rows (mail came above it); -1 when it is at neither
+    int64_t KeptRow(int was, int64_t shift);
     // whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
     bool SeveralFolders() const;
     // the row of the message `uid` of `folder` selected in the list; false when it is not there
@@ -1180,6 +1207,22 @@ private:
     std::vector<Page> pages_;
     // true while the list is reloaded: its selection changes are the reload's, not the user's
     bool reloading_ = false;
+    // a folder clicked whose list waits for the paint (DeferList); the list before is shown dimmed and takes no input,
+    // and its rows are only those already read
+    bool listPending_ = false;
+    // it waited long enough to say "Loading..."
+    bool listLoadingShown_ = false;
+    // the next selection of the tree is read after the paint, as a click is (SelectStart), and the message selected
+    // in its list once read (folder, uid)
+    bool deferNext_ = false;
+    std::pair<int64_t, uint64_t> startMessage_{};
+    // the tree painted the row chosen highlighted while its list waited
+    bool highlightPainted_ = false;
+    // what TestListOrder tells, less 10; the UI test holds a list waiting (TestHoldList)
+    int testListOrder_ = 0;
+    bool holdList_ = false;
+    // TIMER_RELOAD is running
+    bool reloadPending_ = false;
     // ChooseRow is opening the rows above the one chosen: not the user's opening, so it is not kept
     bool revealing_ = false;
     // how many times the tree was built: a drag of an account ends when its rows are built again under it
@@ -1510,6 +1553,10 @@ constexpr UINT_PTR TIMER_FIND_SETTLED = 8;
 constexpr UINT_PTR TIMER_MEASURE = 9;
 // a moment after a folder changed, the tree's counts follow (once for the changes of a whole sync)
 constexpr UINT_PTR TIMER_COUNTS = 10;
+// a folder clicked in the tree: its list read once the highlight is painted (WM_TIMER comes after WM_PAINT)
+constexpr UINT_PTR TIMER_LOAD_LIST = 11;
+// a folder clicked whose list is still not read after a while: "Loading..." over the dimmed list
+constexpr UINT_PTR TIMER_LIST_LOADING = 12;
 // the main window's: counts down the message that waits to be sent, in the status bar (Undo Send); apart from the
 // list's timers above, which the main window hands to the list
 constexpr UINT_PTR TIMER_SEND_WAITING = 20;

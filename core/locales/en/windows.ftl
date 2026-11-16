@@ -16,6 +16,7 @@ win-print-title-of = Print - { $subject }
 win-no-bodies = Message bodies can not be shown.
 win-webview-failed = Creating the WebView2 failed.
 win-webview-missing = The WebView2 runtime is not available.
+win-list-loading = Loading...
 
 ## Buttons and words used in many windows
 

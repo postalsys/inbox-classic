@@ -4939,7 +4939,21 @@ public static class Dragger {
         $headingsOk = $headingsOk -and $under.Count -gt 0 -and -not ($under | Where-Object { $_ -in @('Inbox', 'Sent Items', 'Drafts') })
     }
     Check ($headingsOk -and ($underAll -join '|') -eq 'inboxclassic.test|Work') "the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, without Sent Items and Drafts ($($underAll -join ', '); $((& $foldersUnder 'inboxclassic.test') -join ', ') / $((& $foldersUnder 'Work') -join ', '))"
-    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $top)
+    # chosen with a key, as a click chooses it: the row is highlighted and painted before its list is read, which then
+    # follows (the app's hook: 12 the highlight painted first, 11 the list read before it, 9 not read yet). Held unread
+    # for a moment by the test, the list before stays dimmed, with "Loading..." over it after 400 ms
+    $kTestListOrder = 0x4C4F5244; $kTestHoldList = 0x484F4C44
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, (ChildRows $top)[0])
+    [void](WaitFor { (Rows) -ge 1 } 10)
+    [void][Native.Win]::SendText($main, $kTestHoldList, '1')
+    Key $tree $VK_HOME
+    [void](WaitFor { [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]9, [IntPtr]::Zero) -eq $top } 5)
+    Shot $main 'folder-click-waiting'
+    Check ([Native.Win]::SendText($main, $kTestListOrder, '') -eq 9) 'while it waits, the list of the folder chosen is not read'
+    [void][Native.Win]::SendText($main, $kTestHoldList, '0')
+    $order = WaitFor { $o = [Native.Win]::SendText($main, $kTestListOrder, ''); if ($o -ge 11) { $o } } 10
+    Check ($order -eq 12) "a folder chosen in the tree is highlighted before its list is read ($order)"
+    Check ([Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]9, [IntPtr]::Zero) -eq $top) 'and the key chose All Inboxes'
     $expected = (Messages 'INBOX').Count + (Messages 'INBOX' $rest2).Count
     # grouped by conversation the rows are fewer (replies share a row): the messages the list has are counted
     $mainStatus = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
