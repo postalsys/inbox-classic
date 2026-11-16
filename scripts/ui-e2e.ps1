@@ -2727,6 +2727,20 @@ public static class Dragger {
         Key $menu $VK_ESCAPE
         [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
     }
+    # Flagged has no right-click menu: its messages are of every folder
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+    [void][Native.Win]::SetForegroundWindow($main)
+    Start-Sleep -Milliseconds 300
+    $flaggedBox = [Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, (NamedRow ([IntPtr]::Zero) 'Flagged').ToInt64())
+    $at = @([int](($flaggedBox.Left + $flaggedBox.Right) / 2), [int](($flaggedBox.Top + $flaggedBox.Bottom) / 2))
+    foreach ($button in @(0, 0x0008, 0x0010)) { [Native.Win]::Mouse($at[0], $at[1], $button) }
+    $menu = WaitWindow '#32768' $null 3
+    [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+    Check ($null -eq $menu -and [Native.Win]::RemoteTreeText($tree, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]9, [IntPtr]::Zero)) -like 'Flagged*') "Flagged has no right-click menu: its messages are of every folder (the right-click selected $([Native.Win]::RemoteTreeText($tree, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]9, [IntPtr]::Zero))))"
+    if ($menu) {
+        Key $menu $VK_ESCAPE
+        [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+    }
     # New Folder with Flagged selected: at the top
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, (NamedRow ([IntPtr]::Zero) 'Flagged'))
     Command $main $IDM_NEW_FOLDER

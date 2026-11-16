@@ -71,6 +71,8 @@ struct FolderPick {
 };
 // shows it until a folder is chosen (its id) or it is cancelled (0)
 int64_t PickFolder(HWND owner, FolderPick& pick);
+// the folder strip's icon for the core's word for a folder list row ("inbox", "account"; a plain folder for any other)
+int FolderIcon(const char* word);
 // the open one shows its folders again (they changed), with `highlight` highlighted when not 0
 void RefreshFolderPick(int64_t highlight);
 
@@ -721,7 +723,9 @@ public:
     // the account of the selected folder, the first account without one; 0 when there is none
     int64_t CurrentAccount() const;
     // the account whose own row is selected in the tree (the account row's menu is for it), 0 when another row is
-    int64_t SelectedAccount() const { return selectedAccount_; }
+    int64_t SelectedAccount() const;
+    // File > Folder > New Folder applies to the row selected in the tree
+    bool CanNewFolder() const;
     // the selected account row, or the selected Inbox under All Inboxes, moved `step` places in the accounts' order (-1
     // up, 1 down): the account menu's Move Up and Move Down
     void MoveAccount(int step);
@@ -786,6 +790,8 @@ private:
     // what each row of the tree is, as the core gives it (pe_folder_tree): a tree item's data is its index in treeRows_
     struct TreeRow {
         PeTreeRowKind kind = PE_TREE_ROW_KIND_FOLDER;
+        // the same from one reading to the next ("folder:12"): the shape of the tree and the row to select again
+        std::string key;
         int64_t account = 0;
         int64_t folder = 0;
         // how far in: 0 at the top
@@ -793,29 +799,39 @@ private:
         std::wstring label;
         // what the folder bar and the title say while it is selected ("Inbox - Work")
         std::wstring title;
-        uint64_t unread = 0;
-        // the unread messages under it, shown with its own while it is collapsed
-        uint64_t hidden = 0;
+        // the count shown while open, and while collapsed
+        uint64_t count = 0;
+        uint64_t countCollapsed = 0;
         bool bold = false;
         bool boldCollapsed = false;
         bool dropTarget = false;
         bool reordersAccounts = false;
+        PeTreeMenu menu = PE_TREE_MENU_NONE;
+        // where New Folder makes a folder with this row selected: the account (0: not here) and the parent (0: the top)
+        int64_t newFolderAccount = 0;
+        int64_t newFolderParent = 0;
         int icon = 0;
     };
     static TreeRow RowFrom(const PeTreeRow& row);
-    // the core's rows of the folder list, in their order
-    std::vector<TreeRow> ReadTree() const;
+    // the rows of a reading of the folder list, in their order
+    static std::vector<TreeRow> RowsOf(const PeTree* tree);
+    // the tree built again from `rows`, read from `tree`, the row selected before selected again
+    void Rebuild(const PeTree* tree, std::vector<TreeRow> rows);
     // the rows inserted into the tree, each under the last row one level up
-    void FillTree(const std::vector<TreeRow>& rows);
+    void FillTree(std::vector<TreeRow> rows);
     // what the account's folders are for (drafts, Inbox, junk, emptiable), their names and their account
     void LoadFolderFacts(int64_t account);
     // the row of a tree item, nullptr for none
     const TreeRow* RowAt(HTREEITEM item) const;
-    // what was selected before the tree was built again, selected again (or what stands for it now)
-    void Reselect();
+    // the row selected in the tree, nullptr for none
+    const TreeRow* SelectedTreeRow() const;
+    // the row of `key` selected again after the tree was built from `tree` (or what the core says stands for it now)
+    void Reselect(const PeTree* tree, const std::string& key);
+    // the item of the row with `key`, nullptr when the tree has none
+    HTREEITEM FindRow(const std::string& key) const;
     // the row a folder chosen from outside the tree is selected on (an account's Inbox is under All Inboxes with
     // several accounts); nullptr when the tree has none
-    HTREEITEM RowOf(int64_t folder) const;
+    HTREEITEM RowOf(int64_t folder) const { return FindRow("folder:" + std::to_string(folder)); }
     // the right-click menu of an account's own row
     void AccountMenu(POINT screen);
     // Move Up and Move Down in `menu` for the selected account row or Inbox under All Inboxes, greyed at the ends
@@ -834,8 +850,8 @@ private:
     size_t DropGap(const std::vector<HTREEITEM>& rows, POINT client) const;
     // the insert mark at the gap `gap` among `rows`, none for kNoGap
     void ShowGap(const std::vector<HTREEITEM>& rows, size_t gap);
-    // `account` put at `index` of the accounts' order, the tree built again with its row of kind `kind` selected
-    void PlaceAccount(int64_t account, size_t index, PeTreeRowKind kind);
+    // `account` put at `index` of the accounts' order, the tree built again with the row of `key` selected
+    void PlaceAccount(int64_t account, size_t index, std::string key);
     // which rows are closed (All Inboxes, accounts by id), kept for the next start; read in Reload, written when a
     // row is opened or closed
     void LoadClosedRows(const std::vector<int64_t>& accounts);
@@ -843,6 +859,8 @@ private:
     void OnRowExpanded(const NMTREEVIEWW& change);
     // the counts and bold of the rows from the core's rows again; the tree built again when its rows changed
     void UpdateCounts();
+    // a folder changed: the counts updated a moment later, once for many changes (TIMER_COUNTS)
+    void ScheduleCounts();
     void ShowRow(HTREEITEM item);
     void ReloadList(bool keepSelection);
     // whether the list has what words typed found, in every folder (with a Folder column), rather than a folder
@@ -970,15 +988,9 @@ private:
     // the rows of the tree as the core gave them, and their items, by the same index
     std::vector<TreeRow> treeRows_;
     std::vector<HTREEITEM> treeItems_;
-    // the item of each folder (a folder has one row: an account's Inbox is under All Inboxes with several accounts)
-    std::unordered_map<int64_t, HTREEITEM> items_;
-    // the kind of the selected row
-    PeTreeRowKind selectedKind_ = PE_TREE_ROW_KIND_FOLDER;
     // the rows closed by the user: All Inboxes, and accounts by id (the others are open)
     bool allInboxesClosed_ = false;
     std::unordered_set<int64_t> closedAccounts_;
-    // the account's own item of each account (with several accounts)
-    std::unordered_map<int64_t, HTREEITEM> accountItems_;
     HMENU lastMenu_ = nullptr;
     std::unordered_map<int64_t, std::wstring> accountNames_;
     std::unordered_map<int64_t, std::wstring> accountEmails_;
@@ -989,12 +1001,12 @@ private:
     std::unordered_map<int64_t, std::pair<std::wstring, bool>> folderNames_;
     // the folders that hold no messages (only other folders)
     std::unordered_set<int64_t> unselectable_;
-    // All Inboxes at the top of the tree (two or more accounts), and whether it is selected
-    HTREEITEM allInboxesItem_ = nullptr;
+    // All Inboxes is the list shown (two or more accounts)
     bool allInboxes_ = false;
-    // the Flagged row (every account's flagged messages), and whether it is the list shown
-    HTREEITEM flaggedItem_ = nullptr;
+    // Flagged (every account's flagged messages) is the list shown
     bool flagged_ = false;
+    // a folder changed and TIMER_COUNTS will update the tree's counts
+    bool countsPending_ = false;
     // a drag over the tree: the item under it and since when (one held over opens), where it would go
     struct DragOver {
         HTREEITEM over = nullptr;
@@ -1058,8 +1070,6 @@ private:
     // the selected draft opens once its source is fetched
     bool openWhenReady_ = false;
     int64_t firstAccount_ = 0;
-    // the account whose own item is selected in the tree, 0 when a folder is
-    int64_t selectedAccount_ = 0;
     // what the Find box searches for, empty when the list is the folder's
     std::wstring find_;
     // the search field: a white sunken window with the magnifier, the box and the clear button in it
@@ -1410,6 +1420,8 @@ constexpr UINT_PTR TIMER_FIND_SETTLED = 8;
 // while a signed or encrypted message is shown: its parts' frames measured again (pictures loaded, "..." unfolded, the
 // width or the text size changed)
 constexpr UINT_PTR TIMER_MEASURE = 9;
+// a moment after a folder changed, the tree's counts follow (once for the changes of a whole sync)
+constexpr UINT_PTR TIMER_COUNTS = 10;
 // the main window's: counts down the message that waits to be sent, in the status bar (Undo Send); apart from the
 // list's timers above, which the main window hands to the list
 constexpr UINT_PTR TIMER_SEND_WAITING = 20;

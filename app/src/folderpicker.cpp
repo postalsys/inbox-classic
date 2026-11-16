@@ -5,6 +5,8 @@
 
 #include <algorithm>
 #include <string>
+#include <string_view>
+#include <utility>
 
 #include "icons.h"
 
@@ -46,24 +48,6 @@ struct PickerState {
 
 // the one open picker, for RefreshFolderPick
 PickerState* g_open = nullptr;
-
-// the folder strip's icon for the core's name of one; the heading and a plain folder have the plain folder
-int IconOf(PeTargetKind kind, const char* icon) {
-    if (kind == PE_TARGET_KIND_ACCOUNT) {
-        return FOLDER_MAILBOX;
-    }
-    static const std::pair<const char*, int> kIcons[] = {
-        {"inbox", FOLDER_MAIL_INBOX}, {"sent", FOLDER_SEND},    {"drafts", FOLDER_DRAFTS},
-        {"deleted", FOLDER_DELETE},   {"junk", FOLDER_MAIL_PROHIBITED}, {"archive", FOLDER_ARCHIVE},
-    };
-    std::string name = icon ? icon : "";
-    for (const auto& [known, index] : kIcons) {
-        if (name == known) {
-            return index;
-        }
-    }
-    return FOLDER_FOLDER;
-}
 
 const Row* RowOf(const PickerState& state, HTREEITEM item) {
     TVITEMW data = {};
@@ -110,7 +94,7 @@ void Fill(PickerState& state) {
         }
         bool bold = target->kind == PE_TARGET_KIND_HEADING;
         HTREEITEM item = InsertItem(state.tree, parent, Text(target->label), static_cast<LPARAM>(i), bold,
-                                    IconOf(target->kind, target->icon));
+                                    FolderIcon(target->kind == PE_TARGET_KIND_ACCOUNT ? "account" : target->icon));
         if (target->kind == PE_TARGET_KIND_HEADING) {
             heading = item;
         } else if (target->kind == PE_TARGET_KIND_ACCOUNT) {
@@ -270,6 +254,21 @@ LRESULT CALLBACK PickerProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
 }
 
 }  // namespace
+
+int FolderIcon(const char* word) {
+    static const std::pair<std::string_view, int> kIcons[] = {
+        {"inbox", FOLDER_MAIL_INBOX}, {"sent", FOLDER_SEND},   {"drafts", FOLDER_DRAFTS},
+        {"deleted", FOLDER_DELETE},   {"junk", FOLDER_MAIL_PROHIBITED}, {"archive", FOLDER_ARCHIVE},
+        {"flagged", FOLDER_FLAG},     {"all", FOLDER_MAIL_MULTIPLE},     {"account", FOLDER_MAILBOX},
+    };
+    std::string_view name = word ? word : "";
+    for (const auto& [known, index] : kIcons) {
+        if (name == known) {
+            return index;
+        }
+    }
+    return FOLDER_FOLDER;
+}
 
 int64_t PickFolder(HWND owner, FolderPick& pick) {
     RegisterDialogClass(kPickerClass, PickerProc);
