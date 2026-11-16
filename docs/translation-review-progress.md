@@ -16,9 +16,8 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Greek (el): 255 platform/help-title catalog entries, then all 52 help topics.
-  Shared UI, core and the Windows Delete button are reviewed: 1,076 entries, 174 improved values.
-  Together with the three late loading labels, Greek has 1,079 reviewed entries.
+- Resume with Greek (el) help: all 1,334 catalog entries are reviewed, with 211 values improved.
+  Review all 52 help topics, starting with add-account, gmail-outlook, main-window and layouts.
   Thirteen languages still have pending content. All 84 late list-loading labels are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
   Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
@@ -547,8 +546,19 @@ regardless of app state. Relevant caller conditions were checked directly. Struc
 sets, exact inventory/file/source hashes and git diff --check pass; review HTML regenerated. No test suite
 was run per user instruction. Shared UI checkpoint: `3e78559d`.
 
-Current totals: 15,865 catalog entries and 576 help pages reviewed; 2,445 catalog values improved. Remaining:
-16,227 catalog entries and 676 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Greek catalogs completed
+
+Reviewed the remaining 255 Windows/macOS/GTK/installer/store/help-navigation entries and improved 37 values.
+All 1,334 Greek catalog entries are now reviewed; all 52 help topics remain. Corrected failed-file counts,
+placeholder grammar, agent removal, Windows account scope and natural Linux store descriptions. Preserved
+provider-branded sign-in labels and localized Cc/Bcc shortcuts. Core checkpoint: `a092514b`.
+
+All catalog structures, full placeholder sets, 32 shortcut scopes and exact inventory/file/source hashes pass.
+An offline pe-ffi build in the isolated Cargo target regenerated three installer and five store values, which
+were inspected. Review HTML regenerated and git diff --check passes. No test suite was run per user instruction.
+
+Current totals: 16,120 catalog entries and 576 help pages reviewed; 2,482 catalog values improved. Remaining:
+15,972 catalog entries and 676 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
