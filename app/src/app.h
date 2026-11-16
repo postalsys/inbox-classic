@@ -807,6 +807,12 @@ private:
         bool dropTarget = false;
         bool reordersAccounts = false;
         PeTreeMenu menu = PE_TREE_MENU_NONE;
+        // what it lists when selected (pe_list_view_set_list with `folder`)
+        PeTreeList list = PE_TREE_LIST_NONE;
+        // it has rows under it, which show when it starts open; the user's opening and closing of it kept by `key`
+        bool parent = false;
+        bool startsOpen = false;
+        bool remembersOpen = false;
         // where New Folder makes a folder with this row selected: the account (0: not here) and the parent (0: the top)
         int64_t newFolderAccount = 0;
         int64_t newFolderParent = 0;
@@ -852,10 +858,12 @@ private:
     void ShowGap(const std::vector<HTREEITEM>& rows, size_t gap);
     // `account` put at `index` of the accounts' order, the tree built again with the row of `key` selected
     void PlaceAccount(int64_t account, size_t index, std::string key);
-    // which rows are closed (All Inboxes, accounts by id), kept for the next start; read in Reload, written when a
-    // row is opened or closed
-    void LoadClosedRows(const std::vector<int64_t>& accounts);
-    void SaveClosedRows() const;
+    // the rows opened or closed the other way than they start, kept for the next start by their keys; read in Reload,
+    // written when a row is opened or closed
+    void LoadFlippedRows(const std::vector<int64_t>& accounts);
+    void SaveFlippedRows() const;
+    // the list shown gathers one folder of each account (All Inboxes, All Sent, All Drafts), with an Account column
+    bool GatheredList() const;
     void OnRowExpanded(const NMTREEVIEWW& change);
     // the counts and bold of the rows from the core's rows again; the tree built again when its rows changed
     void UpdateCounts();
@@ -897,7 +905,7 @@ private:
     // again where they are now) and only their numbers are taken
     void OnSelectionChanged(bool rebuild = true);
     // another folder (or All Inboxes) shown; false when it was already the one shown (and the main window was not told)
-    bool OnFolderSelected(int64_t folder, bool allInboxes = false, bool flagged = false);
+    bool OnFolderSelected(int64_t folder, PeTreeList list);
     // whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
     bool SeveralFolders() const;
     // the row of the message `uid` of `folder` selected in the list; false when it is not there
@@ -988,9 +996,9 @@ private:
     // the rows of the tree as the core gave them, and their items, by the same index
     std::vector<TreeRow> treeRows_;
     std::vector<HTREEITEM> treeItems_;
-    // the rows closed by the user: All Inboxes, and accounts by id (the others are open)
-    bool allInboxesClosed_ = false;
-    std::unordered_set<int64_t> closedAccounts_;
+    // the keys of the rows the user opened or closed the other way than they start (All Inboxes, All Sent, All
+    // Drafts, the accounts)
+    std::unordered_set<std::string> flippedRows_;
     HMENU lastMenu_ = nullptr;
     std::unordered_map<int64_t, std::wstring> accountNames_;
     std::unordered_map<int64_t, std::wstring> accountEmails_;
@@ -1001,10 +1009,9 @@ private:
     std::unordered_map<int64_t, std::pair<std::wstring, bool>> folderNames_;
     // the folders that hold no messages (only other folders)
     std::unordered_set<int64_t> unselectable_;
-    // All Inboxes is the list shown (two or more accounts)
-    bool allInboxes_ = false;
-    // Flagged (every account's flagged messages) is the list shown
-    bool flagged_ = false;
+    // the list shown: a folder's, or All Inboxes', All Sent's, All Drafts' or Flagged's (two or more accounts but
+    // Flagged); none for a heading
+    PeTreeList shownList_ = PE_TREE_LIST_NONE;
     // a folder changed and TIMER_COUNTS will update the tree's counts
     bool countsPending_ = false;
     // a drag over the tree: the item under it and since when (one held over opens), where it would go
