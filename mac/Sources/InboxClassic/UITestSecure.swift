@@ -101,7 +101,7 @@ extension UITest {
     func secureMail() async throws {
         step("signed and encrypted mail")
         let core = main.core
-        search("")
+        await search("")
         selectFolder(named: "Inbox")
         let read = { (name: String) in (try? Data(contentsOf: self.pgpFixtures.appendingPathComponent(name))) ?? Data() }
         let passphrase = String(decoding: read("me.passphrase"), as: UTF8.self).trimmingCharacters(in: .whitespacesAndNewlines)

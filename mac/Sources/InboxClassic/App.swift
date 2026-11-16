@@ -545,6 +545,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         // a folder chosen a moment ago: a command on the list or its selection is about its list
         if command.actsOnList {
             main.mailbox.loadPending()
+            // being read off the window thread: the command runs once it is drawn
+            if main.mailbox.listWaiting {
+                main.mailbox.afterListed { [weak self] in self?.perform(command) }
+                return
+            }
         }
         switch command {
         case .newAccount: main.addAccount()
