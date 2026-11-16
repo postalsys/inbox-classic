@@ -1,10 +1,10 @@
-//! The folder tree: each account a heading over its folders, as the core lists them in tree order with their depth.
-//! A heading opens and closes (a click, Enter) and is never selected, so it is not taken for a mailbox; All Inboxes,
-//! above them, is a row like the folders, with each account's Inbox again under it (the same folder, a second row:
-//! [`under_all_inboxes`]). A folder with unread messages is bold with their count, as in Outlook Express. Messages
-//! dragged from the list are dropped onto a folder here. An account's heading, and its Inbox's row under All Inboxes,
-//! are dragged among the rows of their kind to put the accounts in another order. Which of the top rows are open is the
-//! window's to keep.
+//! The folder list, drawn from the core's rows ([`TreeRow`]) in their order and depth: with one account its Inbox,
+//! Flagged and its other folders; with several, All Inboxes (each account's Inbox under it), Flagged, and a heading for
+//! each account over its folders. A heading opens and closes (a click, Enter) and is never selected, so it is not taken
+//! for a mailbox. A row with unread messages is bold with their count, as in Outlook Express; a collapsed one counts
+//! what it hides. Messages dragged from the list are dropped onto the rows that take them. An account's heading, and
+//! its Inbox's row under All Inboxes, are dragged among the rows of their kind to put the accounts in another order.
+//! Which of All Inboxes and the headings are open is the window's to keep.
 
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -14,6 +14,7 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
 use pe_core::MessageRef;
+use pe_core::tree::{TreeRow, TreeRowKind};
 
 mod imp {
     use super::*;
@@ -21,17 +22,16 @@ mod imp {
     #[derive(Default, glib::Properties)]
     #[properties(wrapper_type = super::FolderItem)]
     pub struct FolderItem {
-        /// The name with its unread count, as Pango markup (bold with unread messages)
+        /// The label with its unread count, as Pango markup (bold with unread messages)
         #[property(get, set)]
         pub markup: RefCell<String>,
         #[property(get, set)]
         pub icon: RefCell<String>,
-        /// The folder's id, or an account's id negated for the account's own item
-        pub id: Cell<i64>,
-        /// The name, its own unread messages and those of the folders under it, which it shows while collapsed
-        pub name: RefCell<String>,
-        pub unread: Cell<u64>,
-        pub below: Cell<u64>,
+        /// What a screen reader says for it: the core's title ("Inbox - Work" under All Inboxes)
+        #[property(get, set)]
+        pub title: RefCell<String>,
+        /// The core's row it shows
+        pub row: RefCell<Option<TreeRow>>,
         pub expanded: Cell<bool>,
         pub children: RefCell<Option<gio::ListStore>>,
     }
@@ -51,35 +51,42 @@ glib::wrapper! {
 }
 
 impl FolderItem {
-    fn new(entry: &Entry) -> FolderItem {
-        let item: FolderItem = glib::Object::builder().property("icon", entry.icon).build();
-        let imp = item.imp();
-        imp.id.set(entry.id);
-        *imp.name.borrow_mut() = entry.name.clone();
-        imp.unread.set(entry.unread);
-        imp.below.set(entry.below);
-        item.show();
+    fn new(row: &TreeRow) -> FolderItem {
+        let item: FolderItem = glib::Object::new();
+        item.set_row(row);
         item
+    }
+
+    /// The row shown, again (its counts changed), and its label and icon with it
+    fn set_row(&self, row: &TreeRow) {
+        *self.imp().row.borrow_mut() = Some(row.clone());
+        let icon = crate::move_dialog::kind_icon(row.icon);
+        if self.icon() != icon {
+            self.set_icon(icon);
+        }
+        if self.title() != row.title {
+            self.set_title(row.title.as_str());
+        }
+        self.show();
     }
 
     /// The label: the name, with the unread count, bold, when there is one: its own while expanded, with what it
     /// hides while collapsed
     fn show(&self) {
-        let imp = self.imp();
-        let unread = imp.unread.get() + if imp.expanded.get() { 0 } else { imp.below.get() };
-        let name = glib::markup_escape_text(&imp.name.borrow());
-        let markup = if unread > 0 {
-            format!("<b>{name} ({unread})</b>")
-        } else {
-            name.to_string()
-        };
+        let Some(row) = self.row() else { return };
+        let markup = label_markup(&row, row.parent && !self.imp().expanded.get());
         if self.markup() != markup {
             self.set_markup(markup);
         }
     }
 
+    /// The core's row it shows
+    pub fn row(&self) -> Option<TreeRow> {
+        self.imp().row.borrow().clone()
+    }
+
     pub fn id(&self) -> i64 {
-        self.imp().id.get()
+        self.imp().row.borrow().as_ref().map_or(0, row_id)
     }
 
     fn add_child(&self, child: &FolderItem) {
@@ -91,76 +98,101 @@ impl FolderItem {
     }
 }
 
-/// The id of All Inboxes, at the top of the tree: neither a folder (positive) nor an account (a negated id)
+/// The id of All Inboxes: neither a folder (positive) nor an account (a negated id)
 pub const ALL_INBOXES: i64 = i64::MIN;
-/// The id of Flagged, under All Inboxes: the flagged messages of every account
+/// The id of Flagged: the flagged messages of every account
 pub const FLAGGED: i64 = i64::MIN + 1;
 
-/// The mark of a row under All Inboxes in its id: the folder's id with this bit, positive as a folder's, never one
-const UNDER_ALL_INBOXES: i64 = 1 << 62;
-
-/// The id of folder `folder`'s row under All Inboxes
-pub fn under_all_inboxes(folder: i64) -> i64 {
-    folder | UNDER_ALL_INBOXES
+/// The id the window knows a row by, kept in the settings for the rows closed: a folder's id (an Inbox has one row,
+/// under All Inboxes or not), an account's negated, [`ALL_INBOXES`], [`FLAGGED`]; one for each of the core's keys
+pub fn row_id(row: &TreeRow) -> i64 {
+    match row.kind {
+        TreeRowKind::AllInboxes => ALL_INBOXES,
+        TreeRowKind::Flagged => FLAGGED,
+        TreeRowKind::Account => -row.account,
+        TreeRowKind::AccountInbox | TreeRowKind::Folder => row.folder,
+    }
 }
 
-/// Whether a row's id is one under All Inboxes
-pub fn is_under_all_inboxes(id: i64) -> bool {
-    id > 0 && id & UNDER_ALL_INBOXES != 0
+/// The label of a row as Pango markup: its name, with the count when there is one (bold but for Flagged, which
+/// counts flagged messages, not unread ones)
+fn label_markup(row: &TreeRow, collapsed: bool) -> String {
+    let count = row.shown(collapsed);
+    let name = glib::markup_escape_text(&row.label);
+    match (count, row.bold(collapsed)) {
+        (0, _) => name.to_string(),
+        // a heading is small and grey: the unread mail it hides is told in the text's full color, so it is not missed
+        (count, true) if row.kind == TreeRowKind::Account => {
+            format!("<b>{name} <span alpha=\"100%\">({count})</span></b>")
+        }
+        (count, true) => format!("<b>{name} ({count})</b>"),
+        (count, false) => format!("{name} ({count})"),
+    }
 }
 
-/// The folder of a row: a folder's own id, the folder of a row under All Inboxes; other ids as they are
-pub fn folder_of(id: i64) -> i64 {
-    if id > 0 { id & !UNDER_ALL_INBOXES } else { id }
+/// Whether the user's opening and closing of a row is kept: All Inboxes and the accounts' headings
+fn remembered(row: &TreeRow) -> bool {
+    matches!(row.kind, TreeRowKind::AllInboxes | TreeRowKind::Account)
 }
 
-/// An item of the tree as it is built: its id, its name, its unread messages and those of the folders under it, the
-/// icon and its depth under the account
-pub struct Entry {
-    pub id: i64,
-    pub name: String,
-    pub unread: u64,
-    pub below: u64,
-    pub icon: &'static str,
-    pub depth: usize,
+/// Whether a click (or Enter) opens and closes the row rather than selecting it: a heading, or a folder that can not
+/// be selected with folders in it
+fn toggles(row: &TreeRow) -> bool {
+    !row.selectable && row.parent
 }
 
 type CanDrop = Box<dyn Fn(&[MessageRef], i64) -> bool>;
 type Dropped = Box<dyn Fn(&[MessageRef], i64, bool)>;
 type FilesDropped = Box<dyn Fn(i64, Vec<std::path::PathBuf>)>;
-type Menu = Box<dyn Fn(&gtk::Widget, f64, f64, i64)>;
+type Menu = Box<dyn Fn(&gtk::Widget, f64, f64, &TreeRow)>;
 type Opened = Box<dyn Fn(i64, bool)>;
 type Moved = Box<dyn Fn(i64, i64, bool)>;
 
-/// What the tree tells the window: a folder (or an account, negated) chosen, and messages dropped onto a folder
+/// What the tree tells the window: a row chosen, messages dropped onto a folder, and the accounts reordered
 pub struct Handlers {
-    pub selected: Box<dyn Fn(i64)>,
+    pub selected: Box<dyn Fn(&TreeRow)>,
     /// Whether the messages dragged may go to folder `to`
     pub can_drop: CanDrop,
     /// The drop: the messages, the folder, and whether to copy (Ctrl held) rather than move
     pub dropped: Dropped,
     /// .eml files dropped onto folder `to` from outside the app, to put in it
     pub files_dropped: FilesDropped,
-    /// The right-click menu at a point of the widget clicked, for the item clicked: the selected folder, or an
-    /// account's heading (its id negated), which stays unselected
+    /// The right-click menu at a point of the widget clicked, for the row clicked: selected first when it can be, a
+    /// heading stays unselected
     pub menu: Menu,
-    /// A top row (All Inboxes or an account's heading) opened or closed by the user, for the window to keep
+    /// All Inboxes or an account's heading opened or closed by the user (its id), for the window to keep
     pub opened: Opened,
-    /// An account's row dragged onto another of its kind: the row dragged, the row it was dropped on, and whether
-    /// below it (else above)
+    /// An account's row dragged onto another of its kind: the account dragged, the account of the row it was dropped
+    /// on, and whether below it (else above)
     pub moved: Moved,
 }
 
-/// An account's row dragged inside the tree, by its id: a type of its own, so no other program or row takes it
+/// An account's row dragged inside the tree: a type of its own, so no other program or row takes it
 #[derive(Clone, Copy, Debug, PartialEq, Eq, glib::Boxed)]
 #[boxed_type(name = "InboxClassicAccountRow")]
-pub struct DraggedRow(pub i64);
+pub struct DraggedRow {
+    pub id: i64,
+    pub kind: TreeRowKind,
+    pub account: i64,
+}
+
+impl DraggedRow {
+    fn of(row: &TreeRow) -> Option<DraggedRow> {
+        row.reorders_accounts.then(|| DraggedRow {
+            id: row_id(row),
+            kind: row.kind,
+            account: row.account,
+        })
+    }
+}
 
 pub struct FolderTree {
     pub view: gtk::ListView,
     selection: gtk::SingleSelection,
     root: gio::ListStore,
     items: RefCell<HashMap<i64, FolderItem>>,
+    /// The keys and depths of the rows in their order, to tell new counts from a list of other rows
+    order: RefCell<Vec<(String, usize)>>,
     /// The parent of each item, to open the way to one that is selected from elsewhere
     parents: RefCell<HashMap<i64, i64>>,
     /// While the tree is built again its selection changes (and its rows opened) are not the user's
@@ -169,6 +201,9 @@ pub struct FolderTree {
     /// listed, and is selected again when the account opens
     last: Cell<i64>,
     handlers: Rc<RefCell<Option<Handlers>>>,
+    /// A row at the top has rows under it: every row keeps the room of an arrow, so the icons line up; else the top
+    /// rows start at the edge (one account's list, with no heading)
+    arrows: Rc<Cell<bool>>,
 }
 
 impl FolderTree {
@@ -176,36 +211,17 @@ impl FolderTree {
         let root = gio::ListStore::new::<FolderItem>();
         let handlers: Rc<RefCell<Option<Handlers>>> = Rc::default();
         let reloading = Rc::new(Cell::new(false));
-        let (told, quiet) = (handlers.clone(), reloading.clone());
+        let arrows = Rc::new(Cell::new(true));
         let tree = gtk::TreeListModel::new(root.clone(), false, false, |item| {
             item.downcast_ref::<FolderItem>()
                 .and_then(|folder| folder.imp().children.borrow().clone())
                 .map(|children| children.upcast())
         });
-        // a row opened or closed changes the rows after it: each item learns whether it is expanded, and shows the
-        // unread messages it hides while it is not
-        // only the row before the change (the one opened or closed) and the rows it added can have changed
-        tree.connect_items_changed(move |model, position, _, added| {
-            for index in position.saturating_sub(1)..position + added {
-                let Some(row) = model.row(index) else { continue };
-                if let Some(item) = row.item().and_downcast::<FolderItem>()
-                    && item.imp().expanded.replace(row.is_expanded()) != row.is_expanded()
-                {
-                    item.show();
-                    // a top row the user opened or closed: the window keeps it
-                    if row.depth() == 0
-                        && !quiet.get()
-                        && let Some(handlers) = &*told.borrow()
-                    {
-                        (handlers.opened)(item.id(), row.is_expanded());
-                    }
-                }
-            }
-        });
+        connect_expanded(&tree, handlers.clone(), reloading.clone());
         let selection = gtk::SingleSelection::new(Some(tree));
         selection.set_autoselect(false);
         selection.set_can_unselect(true);
-        let view = gtk::ListView::new(Some(selection.clone()), Some(factory(handlers.clone())));
+        let view = gtk::ListView::new(Some(selection.clone()), Some(factory(handlers.clone(), arrows.clone())));
         view.add_css_class("navigation-sidebar");
         view.set_widget_name("folder-tree");
         // Tab goes on to the next control, not through every row (the arrow keys move between them)
@@ -215,30 +231,41 @@ impl FolderTree {
             selection,
             root,
             items: RefCell::default(),
+            order: RefCell::default(),
             parents: RefCell::default(),
             reloading,
             last: Cell::new(0),
             handlers,
+            arrows,
         });
+        this.connect_selection();
         let weak = Rc::downgrade(&this);
-        this.selection.connect_selection_changed(move |_, _, _| {
-            if let Some(tree) = weak.upgrade()
-                && !tree.reloading.get()
-            {
-                let id = tree.selected();
-                // nothing selected: an account was closed over the folder shown, which stays shown
-                if id == 0 {
-                    return;
-                }
-                tree.last.set(id);
-                if let Some(handlers) = &*tree.handlers.borrow() {
-                    (handlers.selected)(id);
-                }
+        this.view.connect_activate(move |_, position| {
+            if let Some(tree) = weak.upgrade() {
+                tree.toggle_heading(position);
             }
         });
-        // an account opened again: the folder shown is selected again once its row is back
-        let weak = Rc::downgrade(&this);
-        this.selection.connect_items_changed(move |_, _, _, added| {
+        this
+    }
+
+    /// The window told of the row the user selects; an account closed over the row selected and opened again selects
+    /// it again
+    fn connect_selection(self: &Rc<Self>) {
+        let weak = Rc::downgrade(self);
+        self.selection.connect_selection_changed(move |_, _, _| {
+            let Some(tree) = weak.upgrade() else { return };
+            if tree.reloading.get() {
+                return;
+            }
+            // nothing selected: an account was closed over the folder shown, which stays shown
+            let Some(row) = tree.selected_row() else { return };
+            tree.last.set(row_id(&row));
+            if let Some(handlers) = &*tree.handlers.borrow() {
+                (handlers.selected)(&row);
+            }
+        });
+        let weak = Rc::downgrade(self);
+        self.selection.connect_items_changed(move |_, _, _, added| {
             let Some(tree) = weak.upgrade() else { return };
             if added == 0 || tree.reloading.get() || tree.selected() != 0 || tree.last.get() == 0 {
                 return;
@@ -254,115 +281,82 @@ impl FolderTree {
                 }
             });
         });
-        let weak = Rc::downgrade(&this);
-        this.view.connect_activate(move |_, position| {
-            if let Some(tree) = weak.upgrade() {
-                tree.toggle_heading(position);
-            }
-        });
-        this
     }
 
     pub fn set_handlers(&self, handlers: Handlers) {
         *self.handlers.borrow_mut() = Some(handlers);
     }
 
-    /// The tree built again from the accounts, each with its entries in tree order, under `top` (All Inboxes, with a
-    /// row for each account's Inbox) when there is one; the top rows open but those in `closed`; the selection kept
-    /// when its folder is still there (false when it is gone)
-    pub fn rebuild(
-        &self,
-        top: Vec<(Entry, Vec<Entry>)>,
-        accounts: Vec<(Entry, Vec<Entry>)>,
-        closed: &std::collections::HashSet<i64>,
-    ) -> bool {
-        let selected = self.selected();
+    /// The tree built again from the core's rows, nothing selected; All Inboxes and the headings open but those in
+    /// `closed`
+    pub fn rebuild(&self, rows: &[TreeRow], closed: &std::collections::HashSet<i64>) {
         self.reloading.set(true);
-        self.root.remove_all();
         let mut items = HashMap::new();
         let mut parents = HashMap::new();
-        for (entry, inboxes) in top {
-            let item = FolderItem::new(&entry);
-            for inbox in inboxes {
-                let child = FolderItem::new(&inbox);
-                item.add_child(&child);
-                parents.insert(inbox.id, entry.id);
-                items.insert(inbox.id, child);
+        let mut top = Vec::new();
+        // the last item at each depth, the parent of the next deeper one
+        let mut chain: Vec<FolderItem> = Vec::new();
+        for row in rows {
+            let item = FolderItem::new(row);
+            chain.truncate(row.depth.min(chain.len()));
+            match chain.last() {
+                Some(parent) => {
+                    parent.add_child(&item);
+                    parents.insert(item.id(), parent.id());
+                }
+                None => top.push(item.clone()),
             }
-            items.insert(entry.id, item.clone());
-            self.root.append(&item);
+            chain.push(item.clone());
+            items.insert(item.id(), item);
         }
-        for (account, folders) in accounts {
-            let top = FolderItem::new(&account);
-            items.insert(account.id, top.clone());
-            // the last item at each depth, the parent of the next deeper one
-            let mut chain = vec![top.clone()];
-            for folder in folders {
-                let depth = folder.depth.min(chain.len() - 1);
-                let item = FolderItem::new(&folder);
-                chain[depth].add_child(&item);
-                parents.insert(folder.id, chain[depth].id());
-                chain.truncate(depth + 1);
-                chain.push(item.clone());
-                items.insert(folder.id, item);
-            }
-            self.root.append(&top);
-        }
+        *self.order.borrow_mut() = rows.iter().map(|row| (row.key.clone(), row.depth)).collect();
         *self.items.borrow_mut() = items;
         *self.parents.borrow_mut() = parents;
-        // the top rows open but those closed before, their folders as they come
-        if let Some(model) = self.tree_model() {
-            let mut position = 0;
-            while let Some(row) = model.row(position) {
-                if row.depth() == 0
-                    && let Some(item) = row.item().and_downcast::<FolderItem>()
-                    && !closed.contains(&item.id())
-                {
-                    row.set_expanded(true);
-                }
-                position += 1;
-            }
-        }
-        let kept = selected != 0 && self.select(selected);
-        if !kept {
-            self.selection.set_selected(gtk::INVALID_LIST_POSITION);
-        }
+        self.arrows.set(rows.iter().any(|row| row.depth == 0 && row.parent));
+        self.root.splice(0, self.root.n_items(), &top);
+        self.open_remembered(closed);
+        self.selection.set_selected(gtk::INVALID_LIST_POSITION);
         self.reloading.set(false);
-        kept || selected == 0
     }
 
-    /// Row `id` named `name` (Flagged with its count, which is no unread count)
-    pub fn rename(&self, id: i64, name: &str) {
-        if let Some(item) = self.items.borrow().get(&id) {
-            *item.imp().name.borrow_mut() = name.to_string();
-            item.show();
+    /// All Inboxes and the headings opened, but those the user closed
+    fn open_remembered(&self, closed: &std::collections::HashSet<i64>) {
+        let Some(model) = self.tree_model() else { return };
+        let mut position = 0;
+        while let Some(row) = model.row(position) {
+            if let Some(item) = row.item().and_downcast::<FolderItem>()
+                && item.row().is_some_and(|r| remembered(&r))
+                && !closed.contains(&item.id())
+            {
+                row.set_expanded(true);
+            }
+            position += 1;
         }
     }
 
-    /// The unread messages of a folder (or an account, its id negated) changed; false when the tree does not have it
-    /// (and has to be built again)
-    pub fn update(&self, id: i64, unread: u64, below: u64) -> bool {
-        let items = self.items.borrow();
-        let Some(item) = items.get(&id) else {
+    /// The labels, titles, counts and bold of the core's rows shown again; false when they are other rows (other keys
+    /// or depths, or in another order: the tree has to be built again)
+    pub fn update(&self, rows: &[TreeRow]) -> bool {
+        let same = rows.iter().map(|row| (row.key.as_str(), row.depth)).eq(self
+            .order
+            .borrow()
+            .iter()
+            .map(|(key, depth)| (key.as_str(), *depth)));
+        if !same {
             return false;
-        };
-        item.imp().unread.set(unread);
-        item.imp().below.set(below);
-        item.show();
-        // an Inbox's row under All Inboxes counts the same, its subfolders being under the account only
-        if let Some(again) = items.get(&under_all_inboxes(id)).filter(|_| id > 0) {
-            again.imp().unread.set(unread);
-            again.show();
+        }
+        let items = self.items.borrow();
+        for row in rows {
+            if let Some(item) = items.get(&row_id(row)) {
+                item.set_row(row);
+            }
         }
         true
     }
 
-    /// The unread messages of row `id` and of the rows under it: an account's heading counts its folders'
-    pub fn unread_within(&self, id: i64) -> u64 {
-        self.items
-            .borrow()
-            .get(&id)
-            .map_or(0, |item| item.imp().unread.get() + item.imp().below.get())
+    /// The core's row of `id`
+    pub fn row(&self, id: i64) -> Option<TreeRow> {
+        self.items.borrow().get(&id).and_then(FolderItem::row)
     }
 
     /// The label of item `id` as it shows now, for the e2e driver
@@ -371,17 +365,22 @@ impl FolderTree {
         self.items.borrow().get(&id).map(|item| item.markup())
     }
 
-    /// The id of what is selected: a folder, an account negated, [`ALL_INBOXES`], 0 for nothing
+    /// The id of what is selected ([`row_id`]), 0 for nothing
     pub fn selected(&self) -> i64 {
+        self.selected_row().as_ref().map_or(0, row_id)
+    }
+
+    /// The core's row selected
+    pub fn selected_row(&self) -> Option<TreeRow> {
         self.selection
             .selected_item()
             .and_downcast::<gtk::TreeListRow>()
             .and_then(|row| row.item())
             .and_downcast::<FolderItem>()
-            .map_or(0, |item| item.id())
+            .and_then(|item| item.row())
     }
 
-    /// Selects the item `id`, the folders around it opened to it; false when there is none (the selection unchanged)
+    /// Selects row `id`, the rows around it opened to it; false when there is none (the selection unchanged)
     pub fn select(&self, id: i64) -> bool {
         let Some(model) = self.tree_model() else { return false };
         if !self.items.borrow().contains_key(&id) {
@@ -411,35 +410,12 @@ impl FolderTree {
 
     /// Selects item `id` when its row is in view, leaving closed accounts closed
     fn select_shown(&self, id: i64) {
-        let Some(model) = self.tree_model() else { return };
-        let mut position = 0;
-        while let Some(row) = model.row(position) {
-            if row
-                .item()
-                .and_downcast::<FolderItem>()
-                .is_some_and(|item| item.id() == id)
-            {
-                self.selection.set_selected(position);
-                return;
-            }
-            position += 1;
+        if let Some(position) = self.position_of(id) {
+            self.selection.set_selected(position);
         }
     }
 
-    /// Opens or closes the account heading at `position`, when there is one there
-    pub fn toggle_heading(&self, position: u32) {
-        if let Some(row) = self.tree_model().and_then(|model| model.row(position))
-            && row
-                .item()
-                .and_downcast::<FolderItem>()
-                .is_some_and(|item| is_heading(item.id()))
-        {
-            row.set_expanded(!row.is_expanded());
-        }
-    }
-
-    /// The position of the heading of account `id` (negated), for the e2e driver
-    #[cfg(feature = "e2e")]
+    /// The position of row `id` among the rows in view
     pub fn position_of(&self, id: i64) -> Option<u32> {
         let model = self.tree_model()?;
         let mut position = 0;
@@ -456,6 +432,27 @@ impl FolderTree {
         None
     }
 
+    /// Opens or closes the heading at `position`, when there is one there
+    pub fn toggle_heading(&self, position: u32) {
+        if let Some(row) = self.tree_model().and_then(|model| model.row(position))
+            && row
+                .item()
+                .and_downcast::<FolderItem>()
+                .and_then(|item| item.row())
+                .is_some_and(|r| toggles(&r))
+        {
+            row.set_expanded(!row.is_expanded());
+        }
+    }
+
+    /// The right-click menu of row `id` at (`x`, `y`) of `widget`, as a right-click opens it, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn open_menu(&self, widget: &gtk::Widget, x: f64, y: f64, id: i64) {
+        if let (Some(row), Some(handlers)) = (self.row(id), &*self.handlers.borrow()) {
+            (handlers.menu)(widget, x, y, &row);
+        }
+    }
+
     /// Whether the row at `position` can be selected, for the e2e driver
     #[cfg(feature = "e2e")]
     pub fn selectable(&self, position: u32) -> bool {
@@ -463,13 +460,8 @@ impl FolderTree {
             .and_then(|model| model.row(position))
             .and_then(|row| row.item())
             .and_downcast::<FolderItem>()
-            .is_some_and(|item| !is_heading(item.id()))
-    }
-
-    /// The id of the first row of the tree, for the e2e driver
-    #[cfg(feature = "e2e")]
-    pub fn top_id(&self) -> Option<i64> {
-        self.root.item(0).and_downcast::<FolderItem>().map(|item| item.id())
+            .and_then(|item| item.row())
+            .is_some_and(|row| row.selectable)
     }
 
     /// The visible rows, as the e2e driver counts them
@@ -478,13 +470,31 @@ impl FolderTree {
         self.selection.n_items()
     }
 
+    /// The rows in view, in their order: each one's id and how far in it is, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn shown(&self) -> Vec<(i64, u32)> {
+        let Some(model) = self.tree_model() else {
+            return Vec::new();
+        };
+        (0..model.n_items())
+            .filter_map(|position| model.row(position))
+            .map(|row| {
+                let id = row.item().and_downcast::<FolderItem>().map_or(0, |item| item.id());
+                (id, row.depth())
+            })
+            .collect()
+    }
+
     /// Row `dragged` dropped above or below row `onto`, as a drag with the mouse does it, for the e2e driver
     #[cfg(feature = "e2e")]
     pub fn drop_row(&self, dragged: i64, onto: i64, below: bool) -> bool {
-        if !same_kind(dragged, onto) {
+        let (Some(dragged), Some(onto)) = (self.row(dragged), self.row(onto)) else {
             return false;
-        }
-        moved_later(&self.handlers, dragged, onto, below);
+        };
+        let Some(dragged) = DraggedRow::of(&dragged).filter(|d| same_kind(d, &onto)) else {
+            return false;
+        };
+        moved_later(&self.handlers, dragged.account, onto.account, below);
         true
     }
 
@@ -511,35 +521,49 @@ impl FolderTree {
     }
 }
 
-/// Whether item `id` is an account's heading (an account's id negated), not a folder or All Inboxes
-pub(crate) fn is_heading(id: i64) -> bool {
-    id < 0 && id != ALL_INBOXES && id != FLAGGED
-}
-
-/// Whether row `id` can be dragged to put its account elsewhere: an account's heading, an Inbox's row under All Inboxes
-fn movable(id: i64) -> bool {
-    is_heading(id) || is_under_all_inboxes(id)
+/// A row opened or closed changes the rows after it: each item learns whether it is expanded, and shows the unread
+/// messages it hides while it is not; All Inboxes and the headings opened or closed by the user are kept by the window
+fn connect_expanded(tree: &gtk::TreeListModel, told: Rc<RefCell<Option<Handlers>>>, quiet: Rc<Cell<bool>>) {
+    // only the row before the change (the one opened or closed) and the rows it added can have changed
+    tree.connect_items_changed(move |model, position, _, added| {
+        for index in position.saturating_sub(1)..position + added {
+            let Some(row) = model.row(index) else { continue };
+            let Some(item) = row.item().and_downcast::<FolderItem>() else {
+                continue;
+            };
+            if item.imp().expanded.replace(row.is_expanded()) == row.is_expanded() {
+                continue;
+            }
+            item.show();
+            if !quiet.get()
+                && item.row().is_some_and(|r| remembered(&r))
+                && let Some(handlers) = &*told.borrow()
+            {
+                (handlers.opened)(item.id(), row.is_expanded());
+            }
+        }
+    });
 }
 
 /// Whether row `dragged` may be dropped beside row `onto`: headings among headings, rows under All Inboxes among
 /// themselves, not onto itself
-fn same_kind(dragged: i64, onto: i64) -> bool {
-    dragged != onto && movable(dragged) && movable(onto) && is_heading(dragged) == is_heading(onto)
+fn same_kind(dragged: &DraggedRow, onto: &TreeRow) -> bool {
+    onto.reorders_accounts && dragged.kind == onto.kind && dragged.id != row_id(onto)
 }
 
-/// The window told of a row moved once the drop is over, as it builds the tree, and the row dropped, again
-fn moved_later(handlers: &Rc<RefCell<Option<Handlers>>>, dragged: i64, onto: i64, below: bool) {
+/// The window told of an account moved once the drop is over, as it builds the tree, and the row dropped, again
+fn moved_later(handlers: &Rc<RefCell<Option<Handlers>>>, account: i64, beside: i64, below: bool) {
     let handlers = handlers.clone();
     glib::idle_add_local_once(move || {
         if let Some(handlers) = &*handlers.borrow() {
-            (handlers.moved)(dragged, onto, below);
+            (handlers.moved)(account, beside, below);
         }
     });
 }
 
 /// The rows: the expander, the icon and the name; a drop target for messages, the right-click menu. An account's row
 /// is a heading: small and grey, without an icon, never selected; a click or Enter opens and closes it.
-fn factory(handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::SignalListItemFactory {
+fn factory(handlers: Rc<RefCell<Option<Handlers>>>, arrows: Rc<Cell<bool>>) -> gtk::SignalListItemFactory {
     let factory = gtk::SignalListItemFactory::new();
     factory.connect_setup(move |_, item| {
         let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
@@ -555,7 +579,6 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::SignalListItemFactor
         row.append(&label);
         let expander = gtk::TreeExpander::new();
         expander.set_child(Some(&row));
-        expander.set_indent_for_icon(true);
         item.set_child(Some(&expander));
         // the row, its folder's icon and label follow the item the list item shows, and later changes of the label
         // (the unread count) while it shows it
@@ -568,57 +591,29 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::SignalListItemFactor
         folder
             .chain_property::<FolderItem>("icon")
             .bind(&icon, "icon-name", gtk::Widget::NONE);
+        // a screen reader says the row's title, which names the account where the label alone does not
+        folder
+            .chain_property::<FolderItem>("title")
+            .bind(item, "accessible-label", gtk::Widget::NONE);
         add_drop_target(&expander, item, handlers.clone());
         add_drag_source(&expander, item);
         add_row_drop_target(&expander, item, handlers.clone());
-        let click = gtk::GestureClick::new();
-        click.set_button(gtk::gdk::BUTTON_SECONDARY);
-        let weak_item = item.downgrade();
-        let menu_handlers = handlers.clone();
-        click.connect_pressed(move |gesture, _, x, y| {
-            let Some(item) = weak_item.upgrade() else { return };
-            let id = item_id(&item);
-            // the folder under the mouse is the one the menu is for; a heading has its own menu and stays unselected
-            if !is_heading(id)
-                && let Some(view) = gesture.widget().and_then(|w| w.ancestor(gtk::ListView::static_type()))
-                && let Some(selection) = view.downcast_ref::<gtk::ListView>().and_then(|v| v.model())
-            {
-                selection.select_item(item.position(), true);
-            }
-            if let (Some(widget), Some(handlers)) = (gesture.widget(), &*menu_handlers.borrow()) {
-                (handlers.menu)(&widget, x, y, id);
-            }
-        });
-        expander.add_controller(click);
-        // a click anywhere on a heading opens or closes it, not only on its arrow
-        let open = gtk::GestureClick::new();
-        open.set_button(gtk::gdk::BUTTON_PRIMARY);
-        let weak_item = item.downgrade();
-        open.connect_released(move |gesture, _, _, _| {
-            let Some(item) = weak_item.upgrade() else { return };
-            if is_heading(item_id(&item))
-                && let Some(row) = item.item().and_downcast::<gtk::TreeListRow>()
-            {
-                row.set_expanded(!row.is_expanded());
-                gesture.set_state(gtk::EventSequenceState::Claimed);
-            }
-        });
-        expander.add_controller(open);
+        add_clicks(&expander, item, handlers.clone());
     });
     // a heading: not selectable, activated (Enter) to open or close, in the heading style without an icon
-    factory.connect_bind(|_, item| {
+    factory.connect_bind(move |_, item| {
         let Some(item) = item.downcast_ref::<gtk::ListItem>() else {
             return;
         };
-        let heading = is_heading(item_id(item));
-        item.set_selectable(!heading);
-        item.set_activatable(heading);
+        let Some(row) = row_of(item) else { return };
+        let heading = row.kind == TreeRowKind::Account;
+        item.set_selectable(row.selectable);
+        item.set_activatable(toggles(&row));
         if let Some(expander) = item.child() {
-            if heading {
-                expander.add_css_class("account-heading");
-            } else {
-                expander.remove_css_class("account-heading");
+            if let Some(expander) = expander.downcast_ref::<gtk::TreeExpander>() {
+                expander.set_indent_for_icon(arrows.get());
             }
+            crate::ui::set_class(&expander, "account-heading", heading);
             if let Some(icon) = expander
                 .downcast_ref::<gtk::TreeExpander>()
                 .and_then(|e| e.child())
@@ -631,17 +626,53 @@ fn factory(handlers: Rc<RefCell<Option<Handlers>>>) -> gtk::SignalListItemFactor
     factory
 }
 
-/// The id of the item a list item shows: a folder, an account negated, [`ALL_INBOXES`], 0 for none
-fn item_id(item: &gtk::ListItem) -> i64 {
+/// The right-click menu of a row (the row selected first when it can be), and a click anywhere on a heading opening or
+/// closing it, not only on its arrow
+fn add_clicks(expander: &gtk::TreeExpander, item: &gtk::ListItem, handlers: Rc<RefCell<Option<Handlers>>>) {
+    let click = gtk::GestureClick::new();
+    click.set_button(gtk::gdk::BUTTON_SECONDARY);
+    let weak_item = item.downgrade();
+    click.connect_pressed(move |gesture, _, x, y| {
+        let Some(item) = weak_item.upgrade() else { return };
+        let Some(row) = row_of(&item) else { return };
+        // the row under the mouse is the one the menu is for; a heading has its own menu and stays unselected
+        if row.selectable
+            && let Some(view) = gesture.widget().and_then(|w| w.ancestor(gtk::ListView::static_type()))
+            && let Some(selection) = view.downcast_ref::<gtk::ListView>().and_then(|v| v.model())
+        {
+            selection.select_item(item.position(), true);
+        }
+        if let (Some(widget), Some(handlers)) = (gesture.widget(), &*handlers.borrow()) {
+            (handlers.menu)(&widget, x, y, &row);
+        }
+    });
+    expander.add_controller(click);
+    let open = gtk::GestureClick::new();
+    open.set_button(gtk::gdk::BUTTON_PRIMARY);
+    let weak_item = item.downgrade();
+    open.connect_released(move |gesture, _, _, _| {
+        let Some(item) = weak_item.upgrade() else { return };
+        if row_of(&item).is_some_and(|row| toggles(&row))
+            && let Some(row) = item.item().and_downcast::<gtk::TreeListRow>()
+        {
+            row.set_expanded(!row.is_expanded());
+            gesture.set_state(gtk::EventSequenceState::Claimed);
+        }
+    });
+    expander.add_controller(open);
+}
+
+/// The core's row a list item shows
+fn row_of(item: &gtk::ListItem) -> Option<TreeRow> {
     item.item()
         .and_downcast::<gtk::TreeListRow>()
         .and_then(|row| row.item())
         .and_downcast::<FolderItem>()
-        .map_or(0, |folder| folder.id())
+        .and_then(|folder| folder.row())
 }
 
-/// What is dropped onto the row of a folder: messages dragged from the list (moved, copied with Ctrl), or .eml files
-/// from a file manager (put in it, as Import does)
+/// What is dropped onto a row that takes messages: messages dragged from the list (moved, copied with Ctrl), or .eml
+/// files from a file manager (put in it, as Import does)
 fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: Rc<RefCell<Option<Handlers>>>) {
     let target = gtk::DropTarget::new(
         glib::Type::INVALID,
@@ -653,14 +684,14 @@ fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: R
         gtk::gdk::FileList::static_type(),
     ]);
     target.set_preload(true);
+    // the folder dropped on, when the row takes messages
     let folder_of = {
         let item = item.downgrade();
         move || {
             item.upgrade()
-                .and_then(|item| item.item())
-                .and_downcast::<gtk::TreeListRow>()
-                .and_then(|row| row.item())
-                .and_downcast::<FolderItem>()
+                .and_then(|item| row_of(&item))
+                .filter(|row| row.drop_target)
+                .map(|row| row.folder)
         }
     };
     let action_for = |target: &gtk::DropTarget| {
@@ -679,7 +710,7 @@ fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: R
             return (handlers.can_drop)(&dragged.0, folder).then(|| action_for(target));
         }
         let files = crate::files::paths_of(&value.get::<gtk::gdk::FileList>().ok()?);
-        (folder > 0 && crate::files::takes(&files)).then_some(gtk::gdk::DragAction::COPY)
+        crate::files::takes(&files).then_some(gtk::gdk::DragAction::COPY)
     };
     let can = handlers.clone();
     let folder = folder_of.clone();
@@ -715,7 +746,7 @@ fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: R
         let (Some(value), Some(folder), Some(handlers)) = (target.value(), folder(), &*can.borrow()) else {
             return gtk::gdk::DragAction::empty();
         };
-        takes(handlers, &value, folder.id(), target).unwrap_or(gtk::gdk::DragAction::empty())
+        takes(handlers, &value, folder, target).unwrap_or(gtk::gdk::DragAction::empty())
     });
     target.connect_drop(move |target, value, _, _| {
         if let Some(id) = opening.borrow_mut().take() {
@@ -724,14 +755,14 @@ fn add_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handlers: R
         let (Some(folder), Some(handlers)) = (folder_of(), &*handlers.borrow()) else {
             return false;
         };
-        if takes(handlers, value, folder.id(), target).is_none() {
+        if takes(handlers, value, folder, target).is_none() {
             return false;
         }
         if let Ok(dragged) = value.get::<crate::files::DraggedMessages>() {
             let copy = action_for(target) == gtk::gdk::DragAction::COPY;
-            (handlers.dropped)(&dragged.0, folder.id(), copy);
+            (handlers.dropped)(&dragged.0, folder, copy);
         } else if let Ok(list) = value.get::<gtk::gdk::FileList>() {
-            (handlers.files_dropped)(folder.id(), crate::files::paths_of(&list));
+            (handlers.files_dropped)(folder, crate::files::paths_of(&list));
         }
         true
     });
@@ -745,8 +776,11 @@ fn add_drag_source(widget: &gtk::TreeExpander, item: &gtk::ListItem) {
     source.set_actions(gtk::gdk::DragAction::MOVE);
     let item = item.downgrade();
     source.connect_prepare(move |_, _, _| {
-        let id = item.upgrade().map_or(0, |item| item_id(&item));
-        movable(id).then(|| gtk::gdk::ContentProvider::for_value(&DraggedRow(id).to_value()))
+        let dragged = item
+            .upgrade()
+            .and_then(|item| row_of(&item))
+            .and_then(|row| DraggedRow::of(&row))?;
+        Some(gtk::gdk::ContentProvider::for_value(&dragged.to_value()))
     });
     let row = widget.downgrade();
     source.connect_drag_begin(move |source, _| {
@@ -764,7 +798,7 @@ fn add_row_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handler
     target.set_preload(true);
     let onto = {
         let item = item.downgrade();
-        move || item.upgrade().map_or(0, |item| item_id(&item))
+        move || item.upgrade().and_then(|item| row_of(&item))
     };
     let below = |target: &gtk::DropTarget, y: f64| target.widget().is_some_and(|w| y > f64::from(w.height()) / 2.0);
     let dragged = |target: &gtk::DropTarget| target.value().and_then(|v| v.get::<DraggedRow>().ok());
@@ -773,7 +807,9 @@ fn add_row_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handler
         let Some(widget) = target.widget() else {
             return gtk::gdk::DragAction::empty();
         };
-        let takes = dragged(target).is_some_and(|row| same_kind(row.0, over()));
+        let takes = dragged(target)
+            .zip(over())
+            .is_some_and(|(row, onto)| same_kind(&row, &onto));
         mark_drop(&widget, takes.then(|| below(target, y)));
         if takes {
             gtk::gdk::DragAction::MOVE
@@ -790,13 +826,13 @@ fn add_row_drop_target(widget: &gtk::TreeExpander, item: &gtk::ListItem, handler
         if let Some(widget) = target.widget() {
             mark_drop(&widget, None);
         }
-        let (Ok(row), id) = (value.get::<DraggedRow>(), onto()) else {
+        let (Ok(row), Some(onto)) = (value.get::<DraggedRow>(), onto()) else {
             return false;
         };
-        if !same_kind(row.0, id) {
+        if !same_kind(&row, &onto) {
             return false;
         }
-        moved_later(&handlers, row.0, id, below(target, y));
+        moved_later(&handlers, row.account, onto.account, below(target, y));
         true
     });
     widget.add_controller(target);
@@ -818,17 +854,75 @@ fn mark_drop(widget: &gtk::Widget, below: Option<bool>) {
 mod tests {
     use super::*;
 
+    fn row(kind: TreeRowKind, account: i64, folder: i64) -> TreeRow {
+        TreeRow {
+            kind,
+            key: String::new(),
+            account,
+            folder,
+            depth: 0,
+            label: "Inbox & more".into(),
+            title: String::new(),
+            unread: 0,
+            hidden: 0,
+            parent: false,
+            selectable: kind != TreeRowKind::Account,
+            drop_target: false,
+            reorders_accounts: matches!(kind, TreeRowKind::Account | TreeRowKind::AccountInbox),
+            menu: pe_core::tree::TreeMenu::Folder,
+            new_folder_account: account,
+            new_folder_parent: folder,
+            icon: "",
+        }
+    }
+
     #[test]
     fn account_rows_go_among_their_kind() {
+        let heading = |account| row(TreeRowKind::Account, account, 0);
+        let inbox = |account, folder| row(TreeRowKind::AccountInbox, account, folder);
+        let dragged = |r: &TreeRow| DraggedRow::of(r).expect("a row that moves");
         // headings among headings, rows under All Inboxes among themselves
-        assert!(same_kind(-1, -2));
-        assert!(same_kind(under_all_inboxes(10), under_all_inboxes(20)));
-        assert!(!same_kind(-1, under_all_inboxes(20)));
-        assert!(!same_kind(under_all_inboxes(10), -2));
+        assert!(same_kind(&dragged(&heading(1)), &heading(2)));
+        assert!(same_kind(&dragged(&inbox(1, 10)), &inbox(2, 20)));
+        assert!(!same_kind(&dragged(&heading(1)), &inbox(2, 20)));
+        assert!(!same_kind(&dragged(&inbox(1, 10)), &heading(2)));
         // not onto itself, a folder or All Inboxes; a folder is not dragged
-        assert!(!same_kind(-1, -1));
-        assert!(!same_kind(-1, 20));
-        assert!(!same_kind(under_all_inboxes(10), ALL_INBOXES));
-        assert!(!same_kind(10, 20));
+        assert!(!same_kind(&dragged(&heading(1)), &heading(1)));
+        assert!(!same_kind(&dragged(&heading(1)), &row(TreeRowKind::Folder, 2, 20)));
+        assert!(!same_kind(&dragged(&inbox(1, 10)), &row(TreeRowKind::AllInboxes, 0, 0)));
+        assert!(DraggedRow::of(&row(TreeRowKind::Folder, 1, 10)).is_none());
+    }
+
+    #[test]
+    fn rows_keep_their_ids() {
+        assert_eq!(row_id(&row(TreeRowKind::AllInboxes, 0, 0)), ALL_INBOXES);
+        assert_eq!(row_id(&row(TreeRowKind::Flagged, 0, 0)), FLAGGED);
+        assert_eq!(row_id(&row(TreeRowKind::Account, 3, 0)), -3);
+        assert_eq!(row_id(&row(TreeRowKind::Folder, 3, 7)), 7);
+        // an Inbox has one row, under All Inboxes or not
+        assert_eq!(row_id(&row(TreeRowKind::AccountInbox, 3, 7)), 7);
+    }
+
+    #[test]
+    fn labels_count_and_bold_as_the_core_says() {
+        let mut folder = row(TreeRowKind::Folder, 1, 5);
+        assert_eq!(label_markup(&folder, false), "Inbox &amp; more");
+        folder.unread = 2;
+        folder.hidden = 3;
+        assert_eq!(label_markup(&folder, false), "<b>Inbox &amp; more (2)</b>");
+        assert_eq!(label_markup(&folder, true), "<b>Inbox &amp; more (5)</b>");
+        // Flagged counts flagged messages: never bold
+        let mut flagged = row(TreeRowKind::Flagged, 0, 0);
+        flagged.unread = 4;
+        assert_eq!(label_markup(&flagged, false), "Inbox &amp; more (4)");
+        // a heading counts what it hides only while closed
+        let mut heading = row(TreeRowKind::Account, 1, 0);
+        heading.hidden = 3;
+        assert_eq!(label_markup(&heading, false), "Inbox &amp; more");
+        // in the text's full color, not the heading's grey
+        assert_eq!(
+            label_markup(&heading, true),
+            "<b>Inbox &amp; more <span alpha=\"100%\">(3)</span></b>"
+        );
     }
 }

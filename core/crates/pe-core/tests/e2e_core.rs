@@ -777,7 +777,13 @@ fn all_inboxes_list_and_mark_every_account() {
         .find(|f| f.info.path == "INBOX")
         .unwrap()
         .id;
-    let rows = s.core.special_folders(pe_core::SpecialFolderKind::Inbox).unwrap();
+    let inboxes = |core: &pe_core::Core| -> Vec<pe_core::tree::TreeRow> {
+        let rows = core.folder_tree().unwrap();
+        rows.into_iter()
+            .filter(|r| r.kind == pe_core::tree::TreeRowKind::AccountInbox)
+            .collect()
+    };
+    let rows = inboxes(&s.core);
     assert_eq!(
         rows.iter().map(|r| (r.account, r.folder, r.unread)).collect::<Vec<_>>(),
         [(first, inbox1, 1), (second, inbox2, 0)]
@@ -790,16 +796,16 @@ fn all_inboxes_list_and_mark_every_account() {
         "a new account is named by its provider or domain"
     );
     s.core.set_account_name(first, "Work").unwrap();
-    let rows = s.core.special_folders(pe_core::SpecialFolderKind::Inbox).unwrap();
+    let rows = inboxes(&s.core);
     assert_eq!(
-        (rows[0].name.as_str(), rows[0].title.as_str()),
+        (rows[0].label.as_str(), rows[0].title.as_str()),
         ("Work", "Inbox - Work")
     );
     // the second account dragged first: the accounts and All Inboxes' rows in that order; then back
     s.core.move_account(second, 0).unwrap();
     let order = |core: &pe_core::Core| core.accounts().unwrap().iter().map(|a| a.id).collect::<Vec<_>>();
     assert_eq!(order(&s.core), [second, first]);
-    let rows = s.core.special_folders(pe_core::SpecialFolderKind::Inbox).unwrap();
+    let rows = inboxes(&s.core);
     assert_eq!(rows.iter().map(|r| r.account).collect::<Vec<_>>(), [second, first]);
     s.core.move_account(second, 1).unwrap();
     assert_eq!(order(&s.core), [first, second]);

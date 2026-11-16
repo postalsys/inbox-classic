@@ -990,7 +990,7 @@ async fn scenario(d: Rc<Driver>) {
     flagged_folder(&d).await;
     steps::unsubscribing(&d).await;
     steps::invitation_and_logo(&d).await;
-    steps::collapsed_account(&d).await;
+    steps::one_account_tree(&d).await;
     steps::agent(&d).await;
     steps::mark_all_read(&d).await;
     steps::dragging(&d).await;
@@ -2205,9 +2205,10 @@ async fn flagged_folder(d: &Driver) {
     d.step("the Flagged folder");
     let main = shell().main();
     let core = &shell().core;
+    let top: Vec<i64> = main.folders.shown().iter().take(2).map(|(id, _)| *id).collect();
     d.check(
-        main.folders.markup_of(crate::folders::FLAGGED).is_some(),
-        "Flagged is in the folder list",
+        top == [steps::folder_id("Inbox").unwrap_or(0), crate::folders::FLAGGED],
+        &format!("Flagged is in the folder list right under the Inbox ({top:?})"),
     );
     let before = core.flagged_count().unwrap_or(0);
     // a message of another folder flagged: it is listed too
@@ -2415,12 +2416,28 @@ async fn accounts(d: &Driver) {
         dialog.close();
     }
     wait_gone(10, "accounts-dialog").await;
+    let one_account = || {
+        let top: Vec<i64> = shell()
+            .main()
+            .folders
+            .shown()
+            .iter()
+            .take(2)
+            .map(|(id, _)| *id)
+            .collect();
+        shell().main().folders.markup_of(crate::folders::ALL_INBOXES).is_none()
+            && top == [steps::folder_id("Inbox").unwrap_or(0), crate::folders::FLAGGED]
+            && !shell()
+                .main()
+                .folders
+                .shown()
+                .iter()
+                .any(|(id, _)| *id < 0 && *id != crate::folders::FLAGGED && *id != crate::folders::ALL_INBOXES)
+    };
     d.check(
-        wait_until(10, || {
-            shell().main().folders.markup_of(crate::folders::ALL_INBOXES).is_none()
-        })
-        .await,
-        "All Inboxes goes with the second account",
+        wait_until(10, one_account).await,
+        "All Inboxes goes with the second account, and the tree is the one account's again: the Inbox first, then \
+         Flagged, no heading",
     );
     d.shot(&main_window(), "accounts-3-after").await;
 }

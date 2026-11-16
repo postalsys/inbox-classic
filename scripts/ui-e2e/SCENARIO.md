@@ -269,7 +269,7 @@ Screenshot: `read-30-text-size`
 
 Screenshot: `main-10-flagged`
 
-- Flagged is in the folder list, under All Inboxes or first with one account
+- Flagged is in the folder list right under the Inbox with one account (under All Inboxes with several)
 - flagging a message of Archive counts it under Flagged
 - Flagged lists the flagged messages of every folder, with the Folder column, and names the window
 - unflagged, it is no longer counted (the Mac and Linux; on Windows the row and its count are shown)
@@ -413,17 +413,16 @@ Screenshots: `read-11-logo`
 
 - a sender whose logo the server passed has it beside the header
 
-## 27. A collapsed account
+## 27. The folder list of one account
 
-Screenshots: `folders-5-collapsed`
+Screenshot: `folders-6-one-account`
 
-- the Inbox has unread messages
-- the Mac and Linux: the account is a heading over its folders, which can not be selected (the arrow keys pass it by);
-  a click on it closes it, the Inbox it hides stays listed with nothing selected in the tree, and a second click opens
-  it again with the Inbox selected. Windows keeps Outlook Express's tree, where the account is an item that can be
-  selected
-- collapsed, the account shows the unread messages of its folders (Windows: in bold)
-- expanded, the count is back on the Inbox alone
+- the Inbox is the first row of the tree, Flagged the second, then the account's other folders (Sent Items, Drafts, Archive and the rest)
+- there is no row for the account: no heading, nothing to collapse at the top
+- the Inbox holds no folders of its own: a folder the server keeps in the Inbox is listed a level up, after Flagged
+- right-clicking the Inbox gives the folder's menu (no account commands); File > Accounts and the Tools menu have the account's
+- New Folder with Flagged selected makes the folder at the top of the list
+- Flagged has no right-click menu: its messages are of every folder
 
 ## 28. An AI agent
 
@@ -795,7 +794,8 @@ The second account is on a second ImapKit server (`second` in the harness config
 
 Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the test checks the menu's items there without a picture of it)
 
-- All Inboxes is at the top of the tree, above the accounts
+- All Inboxes is at the top of the tree, then Flagged, then each account's heading
+- the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, starting with Sent Items
 - it lists the mail of both accounts' Inboxes
 - newest first, the two accounts' messages among each other
 - the Account column names the account of each
@@ -806,7 +806,7 @@ Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the
 
 ## 42a. All Inboxes by account, account names, the account's menu
 
-Screenshots: `all-inboxes-3-accounts`, `account-menu`
+Screenshots: `all-inboxes-3-accounts`, `account-menu`, `folders-5-collapsed`
 
 - the first account kept the account name Add Mail Account offered from its address ("inboxclassic.test"); the second was named "Work" there
 - All Inboxes has a row for each account under it, in the accounts' order, named as the account is
@@ -818,6 +818,8 @@ Screenshots: `all-inboxes-3-accounts`, `account-menu`
 - the first account's right-click menu has Send and Receive, Mark All Read, New Folder and Properties
 - its Mark All Read marks every folder of the first account read on the server, the second account's mail stays unread
 - its Properties opens that account's Properties
+- the Mac and Linux: the account is a heading over its folders, which can not be selected (the arrow keys pass it by); Windows keeps Outlook Express's tree, where the account is an item that can be selected (it lists nothing)
+- an account collapsed (a click on the heading on the Mac and Linux, the tree's button on Windows) shows the unread messages of the folders it hides (`folders-5-collapsed`); expanded again, the count goes back to the folders
 
 ## 42b. Omarchy's title bar (Linux)
 
@@ -834,7 +836,7 @@ Screenshot: `all-inboxes-4-reorder`
 
 With the two accounts of 42a:
 
-- the second account dragged above the first (or Move Up on its menu): All Inboxes lists its row first, and its folders come first in the tree
+- the second account dragged above the first (or Move Up on its menu): All Inboxes lists its row first, and its heading comes first in the tree
 - Move Down on its menu puts it back: the first account first again in both places
 - Move Up is greyed for the first account, Move Down for the last
 
@@ -884,7 +886,7 @@ Screenshots: `accounts-1-list`, `accounts-2-properties`, `accounts-unexpected`, 
 - Remove (or Delete) asks first
 - and removes it
 - the account leaves the tree
-- All Inboxes goes with the second account
+- All Inboxes goes with the second account, and the tree is the one account's again: the Inbox first, then Flagged, no heading
 
 ## 45. Sign-in apps
 

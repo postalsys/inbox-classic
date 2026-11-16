@@ -445,23 +445,32 @@ final class UITest {
     var tree: FolderOutline { main.mailbox.tree }
     var list: MessageTable { main.mailbox.list }
 
-    /// the folder at `index` under the first account (Inbox first)
-    func selectFolder(_ index: Int) {
-        // the folders of the first account start under its heading (Flagged and All Inboxes above it)
-        let heading = (0..<tree.numberOfRows).first { tree.item(atRow: $0) is Mailbox.AccountNode } ?? 0
-        tree.selectRowIndexes(IndexSet(integer: heading + 1 + index), byExtendingSelection: false)
+    /// the tree's row at `row`
+    func treeNode(_ row: Int) -> Mailbox.TreeNode? {
+        tree.item(atRow: row) as? Mailbox.TreeNode
     }
 
-    /// the folder of the first account the tree names `name` (Inbox, Sent Items, Drafts, Archive, Junk E-mail...)
+    /// the first row of the tree shown that `matches`
+    func treeRow(_ matches: (TreeRow) -> Bool) -> Int? {
+        (0..<tree.numberOfRows).first { treeNode($0).map { matches($0.row) } ?? false }
+    }
+
+    /// the first row of the kind `kind` (of `account` when it is not 0)
+    func treeRow(_ kind: PeTreeRowKind, account: Int64 = 0) -> Int? {
+        treeRow { $0.kind == kind && (account == 0 || $0.account == account) }
+    }
+
+    /// the row of the folder of the first account the tree shows named `name` (Inbox, Sent Items, Archive...): an
+    /// Inbox by its folder's name, also under All Inboxes, where its row is named by its account
+    func folderRow(_ name: String) -> Int? {
+        treeRow { $0.folder != 0 && main.mailbox.info(ofFolder: $0.folder)?.name == name }
+    }
+
     @discardableResult
     func selectFolder(named name: String) -> Bool {
-        for row in 0..<tree.numberOfRows {
-            if let node = tree.item(atRow: row) as? Mailbox.FolderNode, node.folder.name == name {
-                tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
-                return true
-            }
-        }
-        return false
+        guard let row = folderRow(name) else { return false }
+        tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+        return true
     }
 
     func search(_ words: String) {
@@ -603,7 +612,7 @@ final class UITest {
         main.window.center()
         main.mailbox.view.layoutSubtreeIfNeeded()
         main.mailbox.placeDividers()
-        selectFolder(0)
+        selectFolder(named: "Inbox")
         let rows = await waitFor { list.numberOfRows >= 4 ? list.numberOfRows : nil }
         check(rows == 4, "the messages are in the list")
         list.window?.makeFirstResponder(list)
@@ -830,7 +839,7 @@ final class UITest {
         await shot(main.window, "write-11-sent")
 
         step("Sent Items")
-        selectFolder(1)
+        selectFolder(named: "Sent Items")
         _ = await waitUntil { list.numberOfRows >= 2 }
         await selectRow(0)
         let person = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("from"))
@@ -839,7 +848,7 @@ final class UITest {
         check(person?.title == "To" && firstTo == "Dave",
               "Sent Items names whom each message went to, in a To column (\(person?.title ?? ""): \(firstTo ?? ""))")
         await shot(main.window, "main-3-sent-items")
-        selectFolder(0)
+        selectFolder(named: "Inbox")
         _ = await waitUntil { list.numberOfRows >= 5 }
     }
 

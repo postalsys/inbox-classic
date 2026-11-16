@@ -87,17 +87,19 @@ enum Icons {
     static func folder(_ name: String) -> NSImage? { icon(name, size: 16, small: true) }
     static func format(_ name: String) -> NSImage? { icon(name, size: 16, small: true) }
 
-    /// the icon of a folder in the tree, by what it is for
-    static func folderIcon(_ use: PeSpecialUse) -> String {
-        switch use {
-        case PE_SPECIAL_USE_INBOX: return "mail_inbox"
-        case PE_SPECIAL_USE_SENT: return "send"
-        case PE_SPECIAL_USE_DRAFTS: return "drafts"
-        case PE_SPECIAL_USE_TRASH: return "delete"
-        case PE_SPECIAL_USE_JUNK: return "mail_prohibited"
-        case PE_SPECIAL_USE_ARCHIVE: return "archive"
-        case PE_SPECIAL_USE_FLAGGED: return "flag"
-        case PE_SPECIAL_USE_ALL: return "mail_multiple"
+    /// the icon of a folder, by the core's word for it (`TreeRow.icon`, `PeTarget.icon`): the folder list's and the
+    /// Move window's
+    nonisolated static func treeIcon(_ word: String) -> String {
+        switch word {
+        case "inbox": return "mail_inbox"
+        case "sent": return "send"
+        case "drafts": return "drafts"
+        case "deleted": return "delete"
+        case "junk": return "mail_prohibited"
+        case "archive": return "archive"
+        case "flagged": return "flag"
+        case "all": return "mail_multiple"
+        case "account": return "mailbox"
         default: return "folder"
         }
     }

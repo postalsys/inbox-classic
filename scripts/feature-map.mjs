@@ -161,14 +161,14 @@ const sections = [
             {
                 shot: 'main-1-inbox',
                 name: 'Folders and the message list',
-                what: 'Laid out as Outlook Express: each account with its folders, each with its icon (Inbox, Sent Items, Drafts, Archive, Junk E-mail, Deleted Items), folders with unread mail bold with the count. The grey folder bar and the title name the selected folder. In the list unread mail is bold, with columns for the paper clip and the flag. Click a column heading to sort, again to reverse. With nothing selected the reading pane says so. The toolbar has the Fluent icons over their labels, in groups.',
+                what: 'Laid out as Outlook Express: the folder list starts with the Inbox and Flagged, then the other folders, each with its icon (Inbox, Sent Items, Drafts, Archive, Junk E-mail, Deleted Items), folders with unread mail bold with the count. The grey folder bar and the title name the selected folder. In the list unread mail is bold, with columns for the paper clip and the flag. Click a column heading to sort, again to reverse. With nothing selected the reading pane says so. The toolbar has the Fluent icons over their labels, in groups.',
                 how: 'Always there. Drag the borders between the parts to resize them.',
                 checked: ['All 7 folders of the account appear', 'The messages are listed', 'The title names the folder']
             },
             {
                 shot: 'main-10-flagged',
                 name: 'Flagged',
-                what: 'One row lists the flagged messages of every account and folder, with the Folder each is in and how many there are; not those in Deleted Items or Junk E-mail, and on Gmail each once.',
+                what: 'One row, right under the Inbox (under All Inboxes with several accounts), lists the flagged messages of every account and folder, with the Folder each is in and how many there are; not those in Deleted Items or Junk E-mail, and on Gmail each once.',
                 how: 'The Flagged row in the folder list.',
                 checked: ['Flagging a message counts it', 'Flagged lists the flagged messages of every folder', 'Unflagged, it is no longer counted']
             },
@@ -178,7 +178,8 @@ const sections = [
                 what: "With two or more accounts, All Inboxes at the top of the folder tree lists the mail of every account's Inbox in one list, newest first, with an Account column naming the account of each message and the unread count of all of them. The app opens on it, with the newest message selected. Reply, Forward, Move and Delete act on the message in its own account, and Create Mail starts from the account of the selected message. Mark All Read on it marks every Inbox read. It goes when only one account is left.",
                 how: 'Select All Inboxes at the top of the folder tree.',
                 checked: [
-                    'It is at the top of the tree, above the accounts',
+                    'It is at the top of the tree, then Flagged, then the accounts',
+                    "An account's heading lists its folders but the Inbox, which is under All Inboxes",
                     "It lists the mail of both accounts' Inboxes, newest first, with the Account column naming each",
                     'The status bar counts both Inboxes',
                     'A reply goes from the account of the message',
@@ -188,7 +189,7 @@ const sections = [
             {
                 shot: 'all-inboxes-3-accounts',
                 name: 'All Inboxes by account',
-                what: "Under All Inboxes each account's Inbox has a row of its own, named as the account is, with its unread count: the same Inbox the account's own section has, a second way to it. All Inboxes lists every Inbox's mail; a row under it lists that Inbox alone, and the folder bar names the Inbox and the account. The folder list remembers which rows were open. Each account has an Account name of its own (Gmail, Work), set in its Properties; a new one starts with its provider's name or its domain.",
+                what: "Under All Inboxes each account's Inbox has a row of its own, named as the account is, with its unread count: the one place each account's Inbox is, as the account's heading lists its other folders. All Inboxes lists every Inbox's mail; a row under it lists that Inbox alone, and the folder bar names the Inbox and the account. The folder list remembers which rows were open. Each account has an Account name of its own (Gmail, Work), set in its Properties; a new one starts with its provider's name or its domain.",
                 how: "Open All Inboxes in the folder tree and select an account's row under it; File > Accounts > Properties for the Account name.",
                 checked: [
                     'All Inboxes has a row for each account, with its unread count',
@@ -209,7 +210,7 @@ const sections = [
             {
                 shot: 'all-inboxes-4-reorder',
                 name: 'Reorder accounts',
-                what: "The accounts have an order of your own: drag an account, or its Inbox under All Inboxes, above or below another, and a line shows where it lands. The rows under All Inboxes and the accounts' folders below follow the same order. Move Up and Move Down on the account's menu do the same from the keyboard.",
+                what: "With two or more accounts, they have an order of your own: drag an account's heading, or its Inbox under All Inboxes, above or below another, and a line shows where it lands. The rows under All Inboxes and the accounts' headings below follow the same order. Move Up and Move Down on the account's menu do the same from the keyboard.",
                 how: 'Drag an account or its row under All Inboxes; or right-click it and choose Move Up or Move Down.',
                 checked: [
                     'Moving the second account first puts it first under All Inboxes and in the folder tree',
@@ -1047,13 +1048,20 @@ const sections = [
             {
                 shot: 'folders-5-collapsed',
                 name: 'Unread mail in a collapsed account',
-                what: 'A collapsed account, or a collapsed folder with folders in it, shows the unread messages of the folders it hides, so new mail is not out of sight. Junk E-mail and Deleted Items do not count. Expanded, each folder shows its own again. On the Mac and Linux an account is a heading over its folders, as in Mail: a click opens or closes it, it is never selected, and the folder listed stays listed while its account is closed.',
+                what: 'With several accounts a collapsed account, or a collapsed folder with folders in it, shows the unread messages of the folders it hides, so new mail is not out of sight. Junk E-mail and Deleted Items do not count. Expanded, each folder shows its own again. On the Mac and Linux an account is a heading over its folders, as in Mail: a click opens or closes it, it is never selected, and the folder listed stays listed while its account is closed.',
                 how: 'Click an account (on Windows its arrow) or the arrow beside a folder to collapse it.',
                 checked: [
                     'Collapsed, the account shows the unread messages of its folders',
                     'The account is a heading that can not be selected (Mac, Linux)',
-                    'Expanded, the count is back on the Inbox alone'
+                    'Expanded, the count is back on the folders'
                 ]
+            },
+            {
+                shot: 'folders-6-one-account',
+                name: 'The folder list of one account',
+                what: 'With one account the folder list reads as a mail program does: the Inbox first, Flagged second, then the other folders, with no row for the account. A folder the server keeps inside the Inbox is listed a level up. The account\'s commands are in File > Accounts and the Tools menu.',
+                how: 'Always so with one account.',
+                checked: ['The Inbox is first, Flagged second', 'There is no account row', 'New Folder with Flagged selected makes a folder at the top']
             }
         ]
     },

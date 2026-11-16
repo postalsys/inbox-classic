@@ -13,6 +13,7 @@
 #include <cwctype>
 #include <limits>
 #include <span>
+#include <string_view>
 #include <thread>
 #include <utility>
 
@@ -40,41 +41,8 @@ const wchar_t* kListPicturesPreference = L"ListPictures";
 constexpr uint64_t kPageSize = 100;
 // pages kept around while the list scrolls
 constexpr size_t kPagesKept = 8;
-// the data of the All Inboxes item: neither a folder (positive) nor an account (a negated id)
-constexpr LPARAM kAllInboxesItem = std::numeric_limits<LPARAM>::min();
-// the data of the Flagged item, likewise
-constexpr LPARAM kFlaggedItem = std::numeric_limits<LPARAM>::min() + 1;
-// the data of a row under All Inboxes: its folder id with this bit, so it is told from the account's row of the folder
-static_assert(sizeof(LPARAM) == 8);
-constexpr LPARAM kUnderAllInboxes = LPARAM{1} << 62;
 // the rows of the tree the user closed, kept for the next start: "all" for All Inboxes and the ids of accounts
 const wchar_t* kClosedRowsPreference = L"ClosedFolderRows";
-
-// what a tree row is, from its data
-struct TreePlace {
-    int64_t folder = 0;
-    int64_t account = 0;
-    bool allInboxes = false;
-    bool underAllInboxes = false;
-    bool flagged = false;
-};
-TreePlace PlaceOf(LPARAM data) {
-    TreePlace place;
-    if (data == kAllInboxesItem) {
-        place.allInboxes = true;
-    } else if (data == kFlaggedItem) {
-        place.flagged = true;
-    } else if (data < 0) {
-        place.account = -data;
-    } else {
-        place.underAllInboxes = (data & kUnderAllInboxes) != 0;
-        place.folder = data & ~kUnderAllInboxes;
-    }
-    return place;
-}
-std::wstring AllInboxes() {
-    return core::T(PE_TEXT_UI_ALL_INBOXES);
-}
 
 // as Outlook Express has them: the paper clip, the flag and the Watch column (glasses, or the sign of an ignored
 // conversation), then the text columns; no read and unread column: bold says it
@@ -150,6 +118,14 @@ HWND CreateFindField(HWND parent) {
     return CreateChild(parent, L"InboxClassicSearchField", L"", WS_CLIPCHILDREN, IDC_FIND_FIELD, {}, WS_EX_CLIENTEDGE | WS_EX_CONTROLPARENT);
 }
 
+// the data of a tree row: its index in the rows of the tree, -1 for none
+LPARAM RowData(HWND tree, HTREEITEM item) {
+    TVITEMW data = {};
+    data.mask = TVIF_PARAM;
+    data.hItem = item;
+    return TreeView_GetItem(tree, &data) ? data.lParam : -1;
+}
+
 // a row's name with an unread count after it, when there is one
 std::wstring CountedLabel(const std::wstring& name, uint64_t unread) {
     return unread > 0 ? name + L" (" + std::to_wstring(unread) + L")" : name;
@@ -163,30 +139,6 @@ PeSortField SortOf(int column) {
         return PE_SORT_FIELD_SUBJECT;
     default:
         return PE_SORT_FIELD_DATE;
-    }
-}
-
-// the icon of a folder in the tree, by what it is for
-int IconOfFolder(PeSpecialUse use) {
-    switch (use) {
-    case PE_SPECIAL_USE_INBOX:
-        return FOLDER_MAIL_INBOX;
-    case PE_SPECIAL_USE_SENT:
-        return FOLDER_SEND;
-    case PE_SPECIAL_USE_DRAFTS:
-        return FOLDER_DRAFTS;
-    case PE_SPECIAL_USE_TRASH:
-        return FOLDER_DELETE;
-    case PE_SPECIAL_USE_JUNK:
-        return FOLDER_MAIL_PROHIBITED;
-    case PE_SPECIAL_USE_ARCHIVE:
-        return FOLDER_ARCHIVE;
-    case PE_SPECIAL_USE_FLAGGED:
-        return FOLDER_FLAG;
-    case PE_SPECIAL_USE_ALL:
-        return FOLDER_MAIL_MULTIPLE;
-    default:
-        return FOLDER_FOLDER;
     }
 }
 
@@ -558,28 +510,93 @@ bool Mailbox::OnCtlColor(HWND window, HDC dc, LRESULT& brush) {
 
 // ---- the folder tree ----
 
+Mailbox::TreeRow Mailbox::RowFrom(const PeTreeRow& row) {
+    TreeRow made;
+    made.kind = row.kind;
+    made.key = row.key ? row.key : "";
+    made.account = row.account;
+    made.folder = row.folder;
+    made.depth = row.depth;
+    made.label = Text(row.label);
+    made.title = Text(row.title);
+    made.count = row.count;
+    made.countCollapsed = row.count_collapsed;
+    made.bold = row.bold;
+    made.boldCollapsed = row.bold_collapsed;
+    made.dropTarget = row.drop_target;
+    made.reordersAccounts = row.reorders_accounts;
+    made.menu = row.menu;
+    made.newFolderAccount = row.new_folder_account;
+    made.newFolderParent = row.new_folder_parent;
+    made.icon = FolderIcon(row.icon);
+    return made;
+}
+
+std::vector<Mailbox::TreeRow> Mailbox::RowsOf(const PeTree* tree) {
+    std::vector<TreeRow> rows;
+    size_t count = pe_tree_count(tree);
+    rows.reserve(count);
+    for (size_t i = 0; i < count; i++) {
+        if (const PeTreeRow* row = pe_tree_get(tree, i)) {
+            rows.push_back(RowFrom(*row));
+        }
+    }
+    return rows;
+}
+
+const Mailbox::TreeRow* Mailbox::RowAt(HTREEITEM item) const {
+    if (!item) {
+        return nullptr;
+    }
+    LPARAM index = RowData(tree_, item);
+    return index >= 0 && static_cast<size_t>(index) < treeRows_.size() ? &treeRows_[static_cast<size_t>(index)] : nullptr;
+}
+
+const Mailbox::TreeRow* Mailbox::SelectedTreeRow() const {
+    return RowAt(TreeView_GetSelection(tree_));
+}
+
+HTREEITEM Mailbox::FindRow(const std::string& key) const {
+    for (size_t i = 0; i < treeRows_.size(); i++) {
+        if (treeRows_[i].key == key) {
+            return treeItems_[i];
+        }
+    }
+    return nullptr;
+}
+
+int64_t Mailbox::SelectedAccount() const {
+    const TreeRow* row = SelectedTreeRow();
+    return row && row->kind == PE_TREE_ROW_KIND_ACCOUNT ? row->account : 0;
+}
+
+bool Mailbox::CanNewFolder() const {
+    const TreeRow* row = SelectedTreeRow();
+    return row && row->newFolderAccount;
+}
+
 void Mailbox::Reload() {
-    int64_t selected = folder_;
-    bool allSelected = allInboxes_;
-    bool flaggedSelected = flagged_;
-    bool underSelected = underAllInboxes_;
-    int64_t accountSelected = selectedAccount_;
+    core::FolderTree tree(pe_folder_tree(core_));
+    Rebuild(tree.get(), RowsOf(tree.get()));
+}
+
+void Mailbox::Rebuild(const PeTree* tree, std::vector<TreeRow> rows) {
+    std::wstring shown = SelectedName();
+    const TreeRow* selected = SelectedTreeRow();
+    std::string key = selected ? selected->key : "";
     // deleting the items changes the selection: not a folder the user picked
     reloading_ = true;
     treeBuilds_++;
     TreeView_DeleteAllItems(tree_);
     reloading_ = false;
-    items_.clear();
-    inboxItems_.clear();
-    inboxTitles_.clear();
-    rows_.clear();
-    accountItems_.clear();
+    treeRows_.clear();
+    treeItems_.clear();
     accountNames_.clear();
+    accountEmails_.clear();
+    accountSignIns_.clear();
     folderAccounts_.clear();
     folderNames_.clear();
     unselectable_.clear();
-    allInboxesItem_ = nullptr;
-    flaggedItem_ = nullptr;
     draftFolders_.clear();
     inboxFolders_.clear();
     junkFolders_.clear();
@@ -589,93 +606,92 @@ void Mailbox::Reload() {
     size_t count = pe_account_list_count(accounts.get());
     std::vector<int64_t> ids;
     for (size_t i = 0; i < count; i++) {
-        ids.push_back(pe_account_list_get(accounts.get(), i)->id);
-    }
-    LoadClosedRows(ids);
-    if (pe_all_inboxes_shown(count)) {
-        // above the accounts, the mail of every Inbox, with each account's Inbox under it; its unread count is theirs,
-        // shown while it is closed as a folder's with closed subfolders
-        allInboxesItem_ = InsertItem(tree_, TVI_ROOT, AllInboxes(), kAllInboxesItem, false, FOLDER_MAIL_INBOX);
-        rows_[allInboxesItem_] = {AllInboxes(), 0, pe_inbox_unread(core_)};
-        FillAllInboxes();
-        if (!allInboxesClosed_) {
-            TreeView_Expand(tree_, allInboxesItem_, TVE_EXPAND);
-        }
-        ShowRow(allInboxesItem_);
-    }
-    if (count > 0) {
-        // the flagged messages of every account, under All Inboxes (or first, with one account); its count is no
-        // unread count, so it is never bold
-        flaggedItem_ = InsertItem(tree_, TVI_ROOT, core::T(PE_TEXT_UI_FLAGGED_FOLDER), kFlaggedItem, false, FOLDER_FLAG);
-        rows_[flaggedItem_] = {core::T(PE_TEXT_UI_FLAGGED_FOLDER), 0, 0};
-        ShowFlaggedCount();
-    }
-    for (size_t i = 0; i < count; i++) {
         const PeAccount* account = pe_account_list_get(accounts.get(), i);
+        ids.push_back(account->id);
         accountNames_[account->id] = Text(account->title);
         accountEmails_[account->id] = Text(account->email);
         accountSignIns_[account->id] = {account->oauth, account->app};
         if (!firstAccount_) {
             firstAccount_ = account->id;
         }
-        // an account's own item carries its id negated, so selecting it tells which account it is
-        HTREEITEM root = InsertItem(tree_, TVI_ROOT, Text(account->title), static_cast<LPARAM>(-account->id), false, FOLDER_MAILBOX);
-        accountItems_[account->id] = root;
-        rows_[root] = {Text(account->title), 0, 0};
-        FillAccount(root, account->id);
-        // open unless the user closed it; TVM_EXPAND sends no TVN_ITEMEXPANDED, so the row is shown here
-        if (!closedAccounts_.contains(account->id)) {
-            TreeView_Expand(tree_, root, TVE_EXPAND);
-        }
-        ShowRow(root);
+        LoadFolderFacts(account->id);
     }
-    // what was selected, again; All Inboxes gone with one account left: that account's Inbox (as the window starts)
-    HTREEITEM target = nullptr;
-    bool same = true;
-    if (flaggedSelected && flaggedItem_) {
-        target = flaggedItem_;
-    } else if (allSelected && allInboxesItem_) {
-        target = allInboxesItem_;
-    } else if (allSelected) {
-        bool all = false;
-        int64_t inbox = 0;
-        uint64_t uid = 0;
-        if (pe_start_message(core_, &all, &inbox, &uid) && items_.contains(inbox)) {
-            target = items_[inbox];
-            same = false;
-        }
-    } else if (auto inbox = inboxItems_.find(selected); underSelected && inbox != inboxItems_.end()) {
-        target = inbox->second;
-    } else if (auto item = items_.find(selected); item != items_.end()) {
-        target = item->second;
-        // a row under All Inboxes gone with All Inboxes: the account's row is another place
-        same = !underSelected;
-    } else if (auto root = accountItems_.find(accountSelected); !selected && root != accountItems_.end()) {
-        target = root->second;
-    }
-    if (target) {
-        // the same folder again is no folder the user picked; the Inbox in place of All Inboxes is shown
-        reloading_ = same;
-        TreeView_SelectItem(tree_, target);
-        reloading_ = false;
-    } else if (selected || allSelected) {
-        // the folder is gone
-        OnFolderSelected(0);
+    LoadClosedRows(ids);
+    FillTree(std::move(rows));
+    Reselect(tree, key);
+    // the folder bar and the title follow a row whose title changed ("Inbox - Work" became "Inbox")
+    if (SelectedName() != shown) {
+        SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
     }
 }
 
-void Mailbox::FillAllInboxes() {
-    core::SpecialFolderList inboxes(pe_special_folders(core_, PE_SPECIAL_FOLDER_KIND_INBOX));
-    size_t count = pe_special_folder_list_count(inboxes.get());
+void Mailbox::FillTree(std::vector<TreeRow> rows) {
+    treeRows_ = std::move(rows);
+    // the last item at each depth, the parent of the next deeper one
+    std::vector<HTREEITEM> parents;
+    for (size_t i = 0; i < treeRows_.size(); i++) {
+        const TreeRow& row = treeRows_[i];
+        size_t depth = std::min<size_t>(row.depth, parents.size());
+        HTREEITEM item = InsertItem(tree_, depth ? parents[depth - 1] : TVI_ROOT, row.label, static_cast<LPARAM>(i), false, row.icon);
+        treeItems_.push_back(item);
+        parents.resize(depth);
+        parents.push_back(item);
+    }
+    // All Inboxes and the accounts open unless the user closed them; TVM_EXPAND sends no TVN_ITEMEXPANDED, so every
+    // row's label and bold are set here
+    for (size_t i = 0; i < treeRows_.size(); i++) {
+        const TreeRow& row = treeRows_[i];
+        bool open = row.kind == PE_TREE_ROW_KIND_ALL_INBOXES ? !allInboxesClosed_
+                    : row.kind == PE_TREE_ROW_KIND_ACCOUNT  ? !closedAccounts_.contains(row.account)
+                                                            : false;
+        if (open) {
+            TreeView_Expand(tree_, treeItems_[i], TVE_EXPAND);
+        }
+        ShowRow(treeItems_[i]);
+    }
+}
+
+void Mailbox::Reselect(const PeTree* tree, const std::string& key) {
+    if (key.empty()) {
+        return;
+    }
+    // the same row, or what the core says stands for it now (All Inboxes gone with one account left: its Inbox)
+    int64_t at = pe_tree_reselect(tree, key.c_str());
+    if (at >= 0 && static_cast<size_t>(at) < treeItems_.size()) {
+        // the same row again is no folder the user picked; the Inbox in place of All Inboxes is shown
+        reloading_ = treeRows_[static_cast<size_t>(at)].key == key;
+        TreeView_SelectItem(tree_, treeItems_[static_cast<size_t>(at)]);
+        reloading_ = false;
+        return;
+    }
+    // the folder is gone
+    if (!OnFolderSelected(0)) {
+        SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
+    }
+}
+
+void Mailbox::LoadFolderFacts(int64_t account) {
+    core::FolderList folders(pe_folders(core_, account));
+    size_t count = pe_folder_list_count(folders.get());
     for (size_t i = 0; i < count; i++) {
-        const PeSpecialFolder* inbox = pe_special_folder_list_get(inboxes.get(), i);
-        // named as the account; no subfolders here, those are under the account
-        std::wstring name = Text(inbox->name);
-        HTREEITEM item = InsertItem(tree_, allInboxesItem_, CountedLabel(name, inbox->unread), static_cast<LPARAM>(inbox->folder) | kUnderAllInboxes,
-                                    inbox->unread > 0, FOLDER_MAIL_INBOX);
-        inboxItems_[inbox->folder] = item;
-        inboxTitles_[inbox->folder] = Text(inbox->title);
-        rows_[item] = {name, inbox->unread, 0};
+        const PeFolder* folder = pe_folder_list_get(folders.get(), i);
+        folderAccounts_[folder->id] = account;
+        folderNames_[folder->id] = {Text(folder->name), folder->fixed};
+        if (!folder->selectable) {
+            unselectable_.insert(folder->id);
+        }
+        if (folder->special_use == PE_SPECIAL_USE_DRAFTS) {
+            draftFolders_.insert(folder->id);
+        }
+        if (folder->special_use == PE_SPECIAL_USE_INBOX) {
+            inboxFolders_.insert(folder->id);
+        }
+        if (folder->special_use == PE_SPECIAL_USE_JUNK) {
+            junkFolders_.insert(folder->id);
+        }
+        if (folder->emptiable) {
+            emptiableFolders_.insert(folder->id);
+        }
     }
 }
 
@@ -719,114 +735,78 @@ void Mailbox::SaveClosedRows() const {
 // a row opened or closed by the user: its unread count shown again, and All Inboxes and the accounts remembered
 void Mailbox::OnRowExpanded(const NMTREEVIEWW& change) {
     ShowRow(change.itemNew.hItem);
-    if (change.action != TVE_EXPAND && change.action != TVE_COLLAPSE) {
+    const TreeRow* row = RowAt(change.itemNew.hItem);
+    if (!row || (change.action != TVE_EXPAND && change.action != TVE_COLLAPSE)) {
         return;
     }
     bool closed = change.action == TVE_COLLAPSE;
-    TreePlace place = PlaceOf(change.itemNew.lParam);
-    if (place.allInboxes) {
+    if (row->kind == PE_TREE_ROW_KIND_ALL_INBOXES) {
         allInboxesClosed_ = closed;
-    } else if (place.account && closed) {
-        closedAccounts_.insert(place.account);
-    } else if (place.account) {
-        closedAccounts_.erase(place.account);
+    } else if (row->kind == PE_TREE_ROW_KIND_ACCOUNT && closed) {
+        closedAccounts_.insert(row->account);
+    } else if (row->kind == PE_TREE_ROW_KIND_ACCOUNT) {
+        closedAccounts_.erase(row->account);
     } else {
         return;
     }
     SaveClosedRows();
 }
 
-void Mailbox::FillAccount(HTREEITEM root, int64_t account) {
-    core::FolderList folders(pe_folders(core_, account));
-    size_t count = pe_folder_list_count(folders.get());
-    // the last item at each depth, the parent of the next deeper one
-    std::vector<HTREEITEM> parents = {root};
-    for (size_t i = 0; i < count; i++) {
-        const PeFolder* folder = pe_folder_list_get(folders.get(), i);
-        size_t depth = std::min<size_t>(folder->depth, parents.size() - 1);
-        HTREEITEM item = InsertItem(tree_, parents[depth], CountedLabel(Text(folder->name), folder->unread), static_cast<LPARAM>(folder->id),
-                                    folder->unread > 0, IconOfFolder(folder->special_use));
-        items_[folder->id] = item;
-        rows_[item] = {Text(folder->name), folder->unread, folder->unread_below};
-        folderAccounts_[folder->id] = account;
-        folderNames_[folder->id] = {Text(folder->name), folder->fixed};
-        if (!folder->selectable) {
-            unselectable_.insert(folder->id);
-        }
-        if (folder->special_use == PE_SPECIAL_USE_DRAFTS) {
-            draftFolders_.insert(folder->id);
-        }
-        if (folder->special_use == PE_SPECIAL_USE_INBOX) {
-            inboxFolders_.insert(folder->id);
-        }
-        if (folder->special_use == PE_SPECIAL_USE_JUNK) {
-            junkFolders_.insert(folder->id);
-        }
-        if (folder->emptiable) {
-            emptiableFolders_.insert(folder->id);
-        }
-        parents.resize(depth + 1);
-        parents.push_back(item);
-    }
-    rows_[root].below = pe_folder_list_unread(folders.get());
-}
-
-// a row with its unread count: its own while expanded, with what it hides while collapsed (an account's row has
-// none of its own), bold when there is one
+// a row with its unread count: its own while expanded, with what it hides while collapsed, bold as the core says
 void Mailbox::ShowRow(HTREEITEM item) {
-    auto row = rows_.find(item);
-    if (row == rows_.end()) {
+    const TreeRow* row = RowAt(item);
+    if (!row) {
         return;
     }
-    bool expanded = (TreeView_GetItemState(tree_, item, TVIS_EXPANDED) & TVIS_EXPANDED) != 0;
-    uint64_t unread = row->second.own + (expanded ? 0 : row->second.below);
-    std::wstring label = CountedLabel(row->second.name, unread);
+    bool collapsed = (TreeView_GetItemState(tree_, item, TVIS_EXPANDED) & TVIS_EXPANDED) == 0;
+    uint64_t count = collapsed ? row->countCollapsed : row->count;
+    std::wstring label = CountedLabel(row->label, count);
     TVITEMW update = {};
-    update.mask = TVIF_TEXT | TVIF_STATE;
+    update.mask = TVIF_TEXT | TVIF_STATE | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
     update.hItem = item;
     update.pszText = label.data();
     update.stateMask = TVIS_BOLD;
-    update.state = unread > 0 ? TVIS_BOLD : 0;
+    update.state = (collapsed ? row->boldCollapsed : row->bold) ? TVIS_BOLD : 0;
+    update.iImage = row->icon;
+    update.iSelectedImage = row->icon;
     TreeView_SetItem(tree_, &update);
 }
 
-// the labels and bold states of the folders of an account; a folder the tree does not have yet builds it again
-void Mailbox::UpdateFolders(int64_t account) {
-    core::FolderList folders(pe_folders(core_, account));
-    size_t count = pe_folder_list_count(folders.get());
-    for (size_t i = 0; i < count; i++) {
-        const PeFolder* folder = pe_folder_list_get(folders.get(), i);
-        auto item = items_.find(folder->id);
-        if (item == items_.end()) {
-            Reload();
-            return;
-        }
-        rows_[item->second] = {Text(folder->name), folder->unread, folder->unread_below};
-        ShowRow(item->second);
-        // its row under All Inboxes, with the same count
-        if (auto inbox = inboxItems_.find(folder->id); inbox != inboxItems_.end()) {
-            rows_[inbox->second].own = folder->unread;
-            ShowRow(inbox->second);
-        }
+void Mailbox::ScheduleCounts() {
+    // left running while more changes come: the counts follow within a moment, once for all of them
+    if (!countsPending_) {
+        countsPending_ = true;
+        SetTimer(parent_, TIMER_COUNTS, 250, nullptr);
     }
-    auto root = accountItems_.find(account);
-    if (root != accountItems_.end()) {
-        rows_[root->second].below = pe_folder_list_unread(folders.get());
-        ShowRow(root->second);
-    }
-    if (allInboxesItem_) {
-        rows_[allInboxesItem_].below = pe_inbox_unread(core_);
-        ShowRow(allInboxesItem_);
-    }
-    ShowFlaggedCount();
 }
 
-void Mailbox::ShowFlaggedCount() {
-    if (!flaggedItem_) {
+void Mailbox::UpdateCounts() {
+    core::FolderTree tree(pe_folder_tree(core_));
+    std::vector<TreeRow> rows = RowsOf(tree.get());
+    auto sameShape = [](const TreeRow& a, const TreeRow& b) { return a.key == b.key && a.depth == b.depth; };
+    if (!std::equal(rows.begin(), rows.end(), treeRows_.begin(), treeRows_.end(), sameShape)) {
+        // a folder or an account came or went
+        Rebuild(tree.get(), std::move(rows));
         return;
     }
-    rows_[flaggedItem_].name = CountedLabel(core::T(PE_TEXT_UI_FLAGGED_FOLDER), pe_flagged_count(core_));
-    ShowRow(flaggedItem_);
+    HTREEITEM selected = TreeView_GetSelection(tree_);
+    bool retitled = false;
+    for (size_t i = 0; i < rows.size(); i++) {
+        TreeRow& row = treeRows_[i];
+        const TreeRow& now = rows[i];
+        if (row.label == now.label && row.title == now.title && row.count == now.count &&
+            row.countCollapsed == now.countCollapsed && row.bold == now.bold && row.boldCollapsed == now.boldCollapsed &&
+            row.icon == now.icon) {
+            continue;
+        }
+        retitled |= treeItems_[i] == selected && row.title != now.title;
+        row = std::move(rows[i]);
+        ShowRow(treeItems_[i]);
+    }
+    // the folder bar and the title name the selected row as it is called now
+    if (retitled) {
+        SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
+    }
 }
 
 std::wstring Mailbox::AccountName(int64_t account) const {
@@ -849,7 +829,8 @@ int64_t Mailbox::CurrentAccount() const {
     if (int64_t account = AccountOf(reader_.Folder() ? reader_.Folder() : folder_)) {
         return account;
     }
-    return selectedAccount_ ? selectedAccount_ : firstAccount_;
+    int64_t selected = SelectedAccount();
+    return selected ? selected : firstAccount_;
 }
 
 int64_t Mailbox::AccountOf(int64_t folder) const {
@@ -940,9 +921,7 @@ void Mailbox::ShowPersonColumn() {
 std::wstring Mailbox::RowFolder(int64_t folder) const {
     auto account = folderAccounts_.find(folder);
     if (allInboxes_ && !Searching()) {
-        auto title = account != folderAccounts_.end() ? accountItems_.find(account->second) : accountItems_.end();
-        auto row = title != accountItems_.end() ? rows_.find(title->second) : rows_.end();
-        return row != rows_.end() ? row->second.name : L"";
+        return account != folderAccounts_.end() ? AccountName(account->second) : L"";
     }
     auto name = folderNames_.find(folder);
     std::wstring text = name != folderNames_.end() ? name->second.first : L"";
@@ -1483,16 +1462,6 @@ void Mailbox::MarkAllRead() {
     }
 }
 
-HTREEITEM Mailbox::RowOf(int64_t folder) const {
-    if (allInboxes_ || underAllInboxes_) {
-        if (auto inbox = inboxItems_.find(folder); inbox != inboxItems_.end()) {
-            return inbox->second;
-        }
-    }
-    auto item = items_.find(folder);
-    return item != items_.end() ? item->second : nullptr;
-}
-
 void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
     HTREEITEM row = RowOf(folder);
     if (!row) {
@@ -1553,8 +1522,8 @@ void Mailbox::SelectStart() {
     }
     if (!allInboxes) {
         ShowMessage(folder, uid);
-    } else if (allInboxesItem_) {
-        TreeView_SelectItem(tree_, allInboxesItem_);
+    } else if (HTREEITEM all = FindRow("inboxes")) {
+        TreeView_SelectItem(tree_, all);
         SelectInList(folder, uid);
     }
 }
@@ -1774,37 +1743,34 @@ void Mailbox::FolderMenu() {
     if (HTREEITEM item = TreeView_HitTest(tree_, &hit)) {
         TreeView_SelectItem(tree_, item);
     }
-    if (selectedAccount_ && !folder_ && !allInboxes_) {
+    const TreeRow* row = SelectedTreeRow();
+    if (!row || row->menu == PE_TREE_MENU_NONE) {
+        // Flagged lists messages of every folder: no folder commands, nothing to mark read as a whole
+        return;
+    }
+    if (row->menu == PE_TREE_MENU_ACCOUNT) {
         AccountMenu(screen);
         return;
     }
-    // Flagged lists messages of every folder: no folder commands, nothing to mark read as a whole
-    if (flagged_) {
-        return;
-    }
     HMENU menu = CreatePopupMenu();
-    // Mark All Read first, as Outlook Express has it, for a folder with unread messages
-    uint64_t total = 0, unread = 0;
-    bool someUnread = allInboxes_ ? pe_inbox_unread(core_) > 0
-                                  : folder_ && pe_folder_counts(core_, folder_, &total, &unread) && unread > 0;
-    AppendMenuW(menu, someUnread ? MF_STRING : MF_STRING | MF_GRAYED, IDM_MARK_ALL_READ, MenuItem(PE_TEXT_CMD_MARK_ALL_READ).c_str());
-    // All Inboxes is no folder of one account: the folder commands never apply to it, so it has none
-    if (!allInboxes_) {
+    // Mark All Read first, as Outlook Express has it, for a folder (or All Inboxes) with unread messages
+    AppendMenuW(menu, row->count > 0 ? MF_STRING : MF_STRING | MF_GRAYED, IDM_MARK_ALL_READ, MenuItem(PE_TEXT_CMD_MARK_ALL_READ).c_str());
+    if (row->menu == PE_TREE_MENU_FOLDER) {
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-        AppendMenuW(menu, MF_STRING, IDM_NEW_FOLDER, MenuItem(PE_TEXT_CMD_NEW_FOLDER).c_str());
+        AppendMenuW(menu, row->newFolderAccount ? MF_STRING : MF_STRING | MF_GRAYED, IDM_NEW_FOLDER, MenuItem(PE_TEXT_CMD_NEW_FOLDER).c_str());
         std::wstring name;
         bool fixed = true;
-        UINT special = folder_ && FolderOf(folder_, name, fixed) && !fixed ? MF_STRING : MF_STRING | MF_GRAYED;
+        UINT special = FolderOf(row->folder, name, fixed) && !fixed ? MF_STRING : MF_STRING | MF_GRAYED;
         AppendMenuW(menu, special, IDM_RENAME_FOLDER, MenuItem(PE_TEXT_WIN_RENAME).c_str());
         AppendMenuW(menu, special, IDM_DELETE_FOLDER, MenuItem(PE_TEXT_WIN_DELETE_BUTTON).c_str());
         // Deleted Items and Junk E-mail can be emptied, as in Outlook Express
-        if (emptiableFolders_.contains(folder_)) {
+        if (emptiableFolders_.contains(row->folder)) {
             AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
             AppendMenuW(menu, CanEmptyFolder() ? MF_STRING : MF_STRING | MF_GRAYED, IDM_EMPTY_FOLDER, MenuItem(PE_TEXT_CMD_EMPTY_FOLDER).c_str());
         }
     }
     // an Inbox under All Inboxes stands for its account there: its place in the accounts' order
-    if (underAllInboxes_) {
+    if (row->reordersAccounts) {
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
         AppendMoveItems(menu);
     }
@@ -1813,16 +1779,18 @@ void Mailbox::FolderMenu() {
 }
 
 void Mailbox::AccountMenu(POINT screen) {
-    // Mark All Read while some folder of the account has unread mail, as its row counts it
-    auto root = accountItems_.find(selectedAccount_);
-    bool someUnread = root != accountItems_.end() && rows_.contains(root->second) && rows_.at(root->second).below > 0;
+    // Mark All Read while some folder of the account has unread mail, as its row counts it collapsed
+    const TreeRow* row = SelectedTreeRow();
+    bool someUnread = row && row->countCollapsed > 0;
     HMENU menu = CreatePopupMenu();
     AppendMenuW(menu, MF_STRING, IDM_ACCOUNT_SYNC, core::T(PE_TEXT_UI_ACCOUNT_SYNC).c_str());
     AppendMenuW(menu, someUnread ? MF_STRING : MF_STRING | MF_GRAYED, IDM_ACCOUNT_MARK_ALL_READ, MenuItem(PE_TEXT_CMD_MARK_ALL_READ).c_str());
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMenuW(menu, MF_STRING, IDM_NEW_FOLDER, MenuItem(PE_TEXT_CMD_NEW_FOLDER).c_str());
-    AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
-    AppendMoveItems(menu);
+    AppendMenuW(menu, row && row->newFolderAccount ? MF_STRING : MF_STRING | MF_GRAYED, IDM_NEW_FOLDER, MenuItem(PE_TEXT_CMD_NEW_FOLDER).c_str());
+    if (row && row->reordersAccounts) {
+        AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
+        AppendMoveItems(menu);
+    }
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, IDM_ACCOUNT_PROPERTIES, core::T(PE_TEXT_UI_ACCOUNT_PROPERTIES).c_str());
     TrackPopupMenu(menu, TPM_RIGHTBUTTON, screen.x, screen.y, 0, parent_, nullptr);
@@ -1838,29 +1806,20 @@ constexpr size_t kNoGap = std::numeric_limits<size_t>::max();
 // while an account is dragged: a moment to scroll the tree when held at its top or bottom edge
 constexpr UINT_PTR kDragScrollTimer = 0x41434354;
 
-// the data of a tree row
-LPARAM RowData(HWND tree, HTREEITEM item) {
-    TVITEMW data = {};
-    data.mask = TVIF_PARAM;
-    data.hItem = item;
-    return TreeView_GetItem(tree, &data) ? data.lParam : 0;
-}
-
 }  // namespace
 
-int64_t Mailbox::AccountOfRow(LPARAM data) const {
-    TreePlace place = PlaceOf(data);
-    if (place.account) {
-        return place.account;
-    }
-    return place.underAllInboxes ? AccountOf(place.folder) : 0;
+int64_t Mailbox::AccountOfRow(HTREEITEM item) const {
+    const TreeRow* row = RowAt(item);
+    return row && row->reordersAccounts ? row->account : 0;
 }
 
 std::vector<HTREEITEM> Mailbox::SiblingRows(HTREEITEM item) const {
     std::vector<HTREEITEM> rows;
+    const TreeRow* of = RowAt(item);
     HTREEITEM parent = TreeView_GetParent(tree_, item);
-    for (HTREEITEM row = parent ? TreeView_GetChild(tree_, parent) : TreeView_GetRoot(tree_); row; row = TreeView_GetNextSibling(tree_, row)) {
-        if (row != allInboxesItem_) {
+    for (HTREEITEM row = parent ? TreeView_GetChild(tree_, parent) : TreeView_GetRoot(tree_); of && row; row = TreeView_GetNextSibling(tree_, row)) {
+        // those that order the accounts: not All Inboxes or Flagged among them
+        if (const TreeRow* sibling = RowAt(row); sibling && sibling->reordersAccounts) {
             rows.push_back(row);
         }
     }
@@ -1869,9 +1828,9 @@ std::vector<HTREEITEM> Mailbox::SiblingRows(HTREEITEM item) const {
 
 std::vector<int64_t> Mailbox::AccountOrder() const {
     std::vector<int64_t> order;
-    for (HTREEITEM row = TreeView_GetRoot(tree_); row; row = TreeView_GetNextSibling(tree_, row)) {
-        if (int64_t account = PlaceOf(RowData(tree_, row)).account) {
-            order.push_back(account);
+    for (const TreeRow& row : treeRows_) {
+        if (row.kind == PE_TREE_ROW_KIND_ACCOUNT) {
+            order.push_back(row.account);
         }
     }
     return order;
@@ -1879,8 +1838,7 @@ std::vector<int64_t> Mailbox::AccountOrder() const {
 
 void Mailbox::AppendMoveItems(HMENU menu) const {
     std::vector<int64_t> order = AccountOrder();
-    int64_t account = selectedAccount_ ? selectedAccount_ : AccountOf(folder_);
-    auto at = std::find(order.begin(), order.end(), account);
+    auto at = std::find(order.begin(), order.end(), AccountOfRow(TreeView_GetSelection(tree_)));
     bool up = at != order.end() && at != order.begin();
     bool down = at != order.end() && at + 1 != order.end();
     AppendMenuW(menu, up ? MF_STRING : MF_STRING | MF_GRAYED, IDM_ACCOUNT_MOVE_UP, core::T(PE_TEXT_UI_ACCOUNT_MOVE_UP).c_str());
@@ -1889,8 +1847,8 @@ void Mailbox::AppendMoveItems(HMENU menu) const {
 
 void Mailbox::MoveAccount(int step) {
     HTREEITEM selected = TreeView_GetSelection(tree_);
-    LPARAM row = selected ? RowData(tree_, selected) : 0;
-    int64_t account = selected ? AccountOfRow(row) : 0;
+    const TreeRow* row = RowAt(selected);
+    int64_t account = AccountOfRow(selected);
     std::vector<int64_t> order = AccountOrder();
     auto at = std::find(order.begin(), order.end(), account);
     if (at == order.end()) {
@@ -1900,21 +1858,18 @@ void Mailbox::MoveAccount(int step) {
     if (index < 0 || index >= static_cast<ptrdiff_t>(order.size())) {
         return;
     }
-    PlaceAccount(account, static_cast<size_t>(index), row);
+    PlaceAccount(account, static_cast<size_t>(index), row->key);
 }
 
-void Mailbox::PlaceAccount(int64_t account, size_t index, LPARAM row) {
+void Mailbox::PlaceAccount(int64_t account, size_t index, std::string key) {
     if (!pe_account_move(core_, account, static_cast<uint32_t>(index))) {
         return;
     }
     Reload();
     // the row moved selected (it may have been another), and in view
-    TreePlace place = PlaceOf(row);
-    auto& rows = place.account ? accountItems_ : inboxItems_;
-    auto found = rows.find(place.account ? place.account : place.folder);
-    if (found != rows.end()) {
-        TreeView_SelectItem(tree_, found->second);
-        TreeView_EnsureVisible(tree_, found->second);
+    if (HTREEITEM item = FindRow(key)) {
+        TreeView_SelectItem(tree_, item);
+        TreeView_EnsureVisible(tree_, item);
     }
 }
 
@@ -1955,8 +1910,9 @@ void Mailbox::ShowGap(const std::vector<HTREEITEM>& rows, size_t gap) {
 
 void Mailbox::DragAccount(const NMTREEVIEWW& drag) {
     HTREEITEM item = drag.itemNew.hItem;
-    LPARAM data = RowData(tree_, item);
-    int64_t account = AccountOfRow(data);
+    int64_t account = AccountOfRow(item);
+    const TreeRow* dragged = RowAt(item);
+    std::string key = dragged ? dragged->key : "";
     std::vector<HTREEITEM> rows = account ? SiblingRows(item) : std::vector<HTREEITEM>{};
     size_t from = std::find(rows.begin(), rows.end(), item) - rows.begin();
     if (rows.size() < 2 || from == rows.size()) {
@@ -2055,12 +2011,12 @@ void Mailbox::DragAccount(const NMTREEVIEWW& drag) {
     std::vector<int64_t> order = AccountOrder();
     std::erase(order, account);
     bool after = gap == rows.size();
-    int64_t neighbour = AccountOfRow(RowData(tree_, rows[after ? rows.size() - 1 : gap]));
+    int64_t neighbour = AccountOfRow(rows[after ? rows.size() - 1 : gap]);
     auto at = std::find(order.begin(), order.end(), neighbour);
     if (at == order.end()) {
         return;
     }
-    PlaceAccount(account, static_cast<size_t>(at - order.begin()) + (after ? 1 : 0), data);
+    PlaceAccount(account, static_cast<size_t>(at - order.begin()) + (after ? 1 : 0), key);
 }
 
 std::wstring Mailbox::SelectedName() const {
@@ -2068,24 +2024,9 @@ std::wstring Mailbox::SelectedName() const {
         // where the search looks; what it found is on the search bar
         return findPlace_.empty() ? core::T(PE_TEXT_UI_ALL_FOLDERS) : findPlace_;
     }
-    if (allInboxes_) {
-        return AllInboxes();
-    }
-    if (flagged_) {
-        return core::T(PE_TEXT_UI_FLAGGED_FOLDER);
-    }
-    if (auto found = folderNames_.find(folder_); found != folderNames_.end()) {
-        // a row under All Inboxes names its account too: "Inbox - Gmail"
-        if (auto title = inboxTitles_.find(folder_); underAllInboxes_ && title != inboxTitles_.end()) {
-            return title->second;
-        }
-        return found->second.first;
-    }
-    // an account by its row's name, its Account name when it has one
-    if (auto root = accountItems_.find(selectedAccount_); root != accountItems_.end() && rows_.contains(root->second)) {
-        return rows_.at(root->second).name;
-    }
-    return L"";
+    // as the core titles the selected row: a folder with its account's name when there are several ("Inbox - Gmail")
+    const TreeRow* row = RowAt(TreeView_GetSelection(tree_));
+    return row ? row->title : L"";
 }
 
 // what an empty list says in its middle: why there is nothing, and what to do about it
@@ -2101,7 +2042,7 @@ void Mailbox::DrawEmptyList(HDC dc) const {
         title = core::T(PE_TEXT_UI_NO_UNREAD);
     } else if (folder_ || allInboxes_ || flagged_) {
         title = core::T(PE_TEXT_UI_NO_ITEMS);
-    } else if (selectedAccount_) {
+    } else if (SelectedAccount()) {
         title = core::T(PE_TEXT_UI_CHOOSE_FOLDER);
     } else {
         return;
@@ -2143,17 +2084,21 @@ bool Mailbox::FolderOf(int64_t folder, std::wstring& name, bool& fixed) const {
 }
 
 void Mailbox::NewFolder(HWND owner) {
-    int64_t account = CurrentAccount();
-    if (!account || allInboxes_ || flagged_) {
+    // where the core says for the selected row: in the folder, or at the account's top (from the Inbox, which holds no
+    // folders in the tree, an account's heading, or Flagged with one account)
+    const TreeRow* row = SelectedTreeRow();
+    if (!row || !row->newFolderAccount) {
         return;
     }
-    std::wstring where = core::T(folder_ ? PE_TEXT_UI_NEW_FOLDER_IN_SELECTED : PE_TEXT_UI_NEW_FOLDER_AT_TOP);
+    int64_t account = row->newFolderAccount;
+    int64_t parent = row->newFolderParent;
+    std::wstring where = core::T(parent ? PE_TEXT_UI_NEW_FOLDER_IN_SELECTED : PE_TEXT_UI_NEW_FOLDER_AT_TOP);
     std::wstring name = AskFolderName(owner, PE_TEXT_CMD_NEW_FOLDER, where, L"");
     if (name.empty()) {
         return;
     }
     char* reason = nullptr;
-    if (!pe_folder_create(core_, account, folder_, core::Narrow(name).c_str(), &reason)) {
+    if (!pe_folder_create(core_, account, parent, core::Narrow(name).c_str(), &reason)) {
         ShowRefusal(owner, reason, PE_TEXT_UI_FOLDER_NOT_CREATED);
     }
 }
@@ -2252,9 +2197,8 @@ void Mailbox::GoToFolder(HWND owner) {
     pick.title = core::Title(PE_TEXT_CMD_GO_TO_FOLDER);
     pick.prompt = core::T(PE_TEXT_UI_GO_TO_PROMPT);
     pick.verb = core::T(PE_TEXT_UI_OK);
-    auto item = items_.find(PickFolder(owner, pick));
-    if (item != items_.end()) {
-        TreeView_SelectItem(tree_, item->second);
+    if (HTREEITEM item = RowOf(PickFolder(owner, pick))) {
+        TreeView_SelectItem(tree_, item);
         SetFocus(list_);
     }
 }
@@ -2423,13 +2367,12 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
     if (header->hwndFrom == tree_) {
         if (header->code == TVN_SELCHANGEDW && !reloading_) {
             auto* change = reinterpret_cast<NMTREEVIEWW*>(header);
-            TreePlace place = change->itemNew.hItem ? PlaceOf(change->itemNew.lParam) : TreePlace{};
-            // an account has no messages of its own
-            selectedAccount_ = place.account;
-            underAllInboxes_ = place.underAllInboxes;
-            // the folder bar and the title name what is selected: an account too, from another account's item, and
+            const TreeRow* row = RowAt(change->itemNew.hItem);
+            TreeRow none;
+            const TreeRow& place = row ? *row : none;
+            // an account has no messages of its own (folder 0); the folder bar and the title name what is selected: an account too, from another account's item, and
             // the same Inbox from its other row
-            if (!OnFolderSelected(place.folder, place.allInboxes, place.flagged)) {
+            if (!OnFolderSelected(place.folder, place.kind == PE_TREE_ROW_KIND_ALL_INBOXES, place.kind == PE_TREE_ROW_KIND_FLAGGED)) {
                 SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_TREE, 0), 0);
             }
         }
@@ -2961,10 +2904,10 @@ int64_t Mailbox::DropFolder(DropFrom from, POINT screen, HTREEITEM& over) const 
         over = nullptr;
         return 0;
     }
-    // an account's own item (its id negated), All Inboxes, the folder they are all in, or one that holds no messages:
-    // not there. A folder of another account takes them too, the core moves them across; a row under All Inboxes is
-    // that account's Inbox
-    int64_t folder = PlaceOf(RowData(tree_, over)).folder;
+    // a row the core says takes no messages (an account's own, All Inboxes, Flagged), the folder they are all in, or
+    // one that holds no messages: not there. A folder of another account takes them too, the core moves them across
+    const TreeRow* row = RowAt(over);
+    int64_t folder = row && row->dropTarget ? row->folder : 0;
     if (folder <= 0 || unselectable_.count(folder) || !folderAccounts_.contains(folder)) {
         return 0;
     }
@@ -3128,6 +3071,12 @@ void Mailbox::OnTimer(UINT_PTR id) {
     if (reader_.OnTimer(id)) {
         return;
     }
+    if (id == TIMER_COUNTS) {
+        KillTimer(parent_, TIMER_COUNTS);
+        countsPending_ = false;
+        UpdateCounts();
+        return;
+    }
     if (id == TIMER_RELOAD) {
         KillTimer(parent_, TIMER_RELOAD);
         ReloadList(true);
@@ -3177,7 +3126,7 @@ void Mailbox::OnEvent(const UiEvent& event) {
         }
         break;
     case PE_EVENT_KIND_FOLDER_CHANGED:
-        UpdateFolders(event.account);
+        ScheduleCounts();
         if (event.folder == folder_ && !Searching()) {
             ReloadList(true);
         } else if (SeveralFolders()) {

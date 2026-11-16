@@ -182,64 +182,162 @@ pub async fn invitation_and_logo(d: &Driver) {
     search("").await;
 }
 
-pub async fn collapsed_account(d: &Driver) {
-    d.step("a collapsed account");
+/// SCENARIO 27: one account's folder list: the Inbox first, Flagged second, then its other folders, with no row for
+/// the account; a folder the server keeps in the Inbox listed a level up; the Inbox's menu the folder's; New Folder with
+/// Flagged selected makes the folder at the top
+pub async fn one_account_tree(d: &Driver) {
+    use crate::folders::{ALL_INBOXES, FLAGGED};
+    d.step("the folder list of one account");
+    let main = shell().main();
     let core = &shell().core;
     let account = core.accounts().ok().and_then(|a| a.first().map(|a| a.id)).unwrap_or(0);
-    let inbox = core
-        .folders(account)
-        .unwrap_or_default()
-        .into_iter()
-        .find(|f| pe_core::folder_name(&f.info) == "Inbox");
-    let inbox_unread = inbox.as_ref().map_or(0, |f| f.unread);
-    let inbox_id = inbox.map_or(0, |f| f.id);
-    let tree = || shell().main().folders.clone();
-    let label = |id: i64| tree().markup_of(id).unwrap_or_default();
-    d.check(
-        inbox_unread >= 1,
-        &format!("the Inbox has unread messages ({})", label(inbox_id)),
-    );
-    // the Inbox listed; the account a heading over it, which can not be selected
+    let Some(inbox) = folder_id("Inbox") else {
+        d.check(false, "the account has an Inbox");
+        return;
+    };
+    // a folder kept in the Inbox on the server
+    let _ = core.create_folder(account, Some(inbox), "Receipts");
+    let receipts = wait_for(20, || {
+        folder_id("Receipts").filter(|&id| main.folders.position_of(id).is_some())
+    })
+    .await;
     select_folder("Inbox");
-    wait_until(5, || shell().main().folder_id() == inbox_id).await;
-    let listed = messages_listed();
-    let heading = tree().position_of(-account);
+    let shown = main.folders.shown();
+    let ids: Vec<i64> = shown.iter().map(|(id, _)| *id).collect();
+    let names: Vec<String> = ids
+        .iter()
+        .map(|&id| main.folders.row(id).map(|r| r.label).unwrap_or_default())
+        .collect();
     d.check(
-        heading.is_some_and(|at| !tree().selectable(at)),
+        ids.first() == Some(&inbox) && ids.get(1) == Some(&FLAGGED) && names.iter().any(|n| n == "Sent Items"),
+        &format!("the Inbox is the first row of the tree, Flagged the second, then the other folders ({names:?})"),
+    );
+    d.check(
+        !ids.iter().any(|&id| id < 0 && id != FLAGGED) && !ids.contains(&ALL_INBOXES),
+        "there is no row for the account: no heading, nothing to collapse at the top",
+    );
+    d.check(
+        receipts.is_some_and(|r| shown.get(2) == Some(&(r, 0)))
+            && main.folders.row(inbox).is_some_and(|row| !row.parent),
+        &format!("a folder the server keeps in the Inbox is listed a level up, after Flagged ({names:?})"),
+    );
+    pause(500).await;
+    d.shot(&main_window(), "folders-6-one-account").await;
+    let tree: gtk::Widget = main.folders.view.clone().upcast();
+    main.folders.open_menu(&tree, 120.0, 20.0, inbox);
+    let labels = menu_labels(main.folder_popover.borrow().as_ref());
+    d.check(
+        labels.iter().any(|l| l == "New Folder\u{2026}") && !labels.iter().any(|l| l == "Properties\u{2026}"),
+        &format!(
+            "right-clicking the Inbox gives the folder's menu, no account commands ({})",
+            labels.join(", ")
+        ),
+    );
+    if let Some(popover) = main.folder_popover.borrow_mut().take() {
+        popover.popdown();
+    }
+    main.folders.select(FLAGGED);
+    main.folders.open_menu(&tree, 120.0, 40.0, FLAGGED);
+    d.check(
+        main.folder_popover.borrow().is_none(),
+        "Flagged has no right-click menu: its messages are of every folder",
+    );
+    command(Command::NewFolder);
+    answer_name(d, "New Folder", "Trips", None).await;
+    d.check(
+        wait_until(20, || d.mailboxes().iter().any(|m| m == "Trips")).await,
+        &format!(
+            "New Folder with Flagged selected makes the folder at the top ({:?})",
+            d.mailboxes()
+        ),
+    );
+    // the folders made here go again, for the steps after
+    for (name, path) in [("Trips", "Trips"), ("Receipts", "INBOX/Receipts")] {
+        let deleted = match wait_for(20, || folder_id(name)).await {
+            Some(folder) => core.delete_folder(folder).map_err(|e| e.to_string()),
+            None => Err("not in the tree".into()),
+        };
+        d.check(
+            deleted.is_ok() && wait_until(20, || !d.mailboxes().iter().any(|m| m == path)).await,
+            &format!("{path}, made for this step, is deleted again ({deleted:?})"),
+        );
+    }
+    select_folder("Inbox");
+}
+
+/// The unread count a label of the tree shows, 0 for none
+fn counted(markup: &str) -> u64 {
+    // the text without its markup: "Name (3)"
+    let mut text = String::new();
+    let mut in_tag = false;
+    for c in markup.chars() {
+        match c {
+            '<' => in_tag = true,
+            '>' => in_tag = false,
+            c if !in_tag => text.push(c),
+            _ => {}
+        }
+    }
+    text.rsplit_once(" (")
+        .and_then(|(_, n)| n.trim_end_matches(')').parse::<u64>().ok())
+        .unwrap_or(0)
+}
+
+/// SCENARIO 42a: an account's heading over its folders, not selected; collapsed, it counts the unread messages of the
+/// folders it hides, the folder listed staying listed; opened again, the counts go back to the folders
+async fn collapsed_account(d: &Driver, account: i64) {
+    let main = shell().main();
+    let core = &shell().core;
+    let Some(archive) = folder_id("Archive") else {
+        d.check(false, "the first account has Archive");
+        return;
+    };
+    // an unread message in a folder under the heading (the Inbox is under All Inboxes)
+    let raw = format!(
+        "From: Lena Fox <lena@example.org>\r\nTo: testuser@inboxclassic.test\r\nSubject: Hotel booking\r\n\
+         Date: {}\r\nMessage-ID: <hotel-booking@example.org>\r\n\r\nThe booking is confirmed.\r\n",
+        date_now(5)
+    );
+    let _ = d.add_message_in(d.ports.rest, "Archive", &raw, &[]);
+    command(Command::Sync);
+    wait_until(20, || core.folder(archive).is_ok_and(|f| f.unread >= 1)).await;
+    let unread = core.folder(archive).map_or(0, |f| f.unread);
+    let label = |id: i64| main.folders.markup_of(id).unwrap_or_default();
+    main.folders.select(archive);
+    wait_until(5, || main.folder_id() == archive).await;
+    let listed = messages_listed();
+    let heading = main.folders.position_of(-account);
+    d.check(
+        heading.is_some_and(|at| !main.folders.selectable(at)),
         "the account is a heading over its folders, which can not be selected",
     );
     // a click on the heading closes it (Enter, or a click, activates it)
     if let Some(at) = heading {
-        tree().toggle_heading(at);
+        main.folders.toggle_heading(at);
     }
-    let counted = |markup: &str| {
-        markup
-            .rsplit_once(" (")
-            .and_then(|(_, n)| n.trim_end_matches(")</b>").parse::<u64>().ok())
-            .unwrap_or(0)
-    };
     d.check(
-        wait_until(5, || counted(&label(-account)) >= inbox_unread).await,
+        wait_until(5, || counted(&label(-account)) >= unread).await,
         &format!(
-            "collapsed, the account shows the unread messages of its folders ({})",
+            "collapsed, the account shows the unread messages of the folders it hides ({})",
             label(-account)
         ),
     );
     d.check(
-        shell().main().folder_id() == inbox_id && messages_listed() == listed && tree().selected() == 0,
-        "the Inbox it hides stays listed, and nothing is selected in the tree",
+        main.folder_id() == archive && messages_listed() == listed && main.folders.selected() == 0,
+        "the folder it hides stays listed, and nothing is selected in the tree",
     );
     d.shot(&main_window(), "folders-5-collapsed").await;
     if let Some(at) = heading {
-        tree().toggle_heading(at);
+        main.folders.toggle_heading(at);
     }
     d.check(
         wait_until(5, || {
-            counted(&label(-account)) == 0 && counted(&label(inbox_id)) == inbox_unread && tree().selected() == inbox_id
+            counted(&label(-account)) == 0 && counted(&label(archive)) == unread && main.folders.selected() == archive
         })
         .await,
-        "a second click opens it again: the count is back on the Inbox, which is selected again",
+        "expanded again, the count goes back to the folders, the folder selected again",
     );
+    let _ = core.mark_account_read(account);
 }
 
 /// The lines the test's agent (scripts/ui-e2e/agent.mjs) wrote: the result of `step`
@@ -2383,11 +2481,7 @@ pub async fn all_inboxes(d: &Driver) {
     let _ = d.add_message(&raw, &[]);
     command(Command::Sync);
     wait_until(20, || shell().core.folder(inbox).is_ok_and(|f| f.unread >= 1)).await;
-    d.check(
-        main.folders.markup_of(crate::folders::ALL_INBOXES).is_some()
-            && main.folders.top_id() == Some(crate::folders::ALL_INBOXES),
-        "All Inboxes is at the top of the tree, above the accounts",
-    );
+    tree_of_two_accounts(d, inbox, second);
     main.folders.select(crate::folders::ALL_INBOXES);
     let both = |f: i64| shell().core.folder(f).map_or(0, |f| f.total);
     let expected = both(inbox) + both(second);
@@ -2422,7 +2516,7 @@ pub async fn all_inboxes(d: &Driver) {
     d.shot(&main_window(), "all-inboxes-1-list").await;
     // its right-click menu: Mark All Read alone, no folder commands
     let tree: gtk::Widget = main.folders.view.clone().upcast();
-    main.folder_menu(&tree, 180.0, 20.0);
+    main.folders.open_menu(&tree, 180.0, 20.0, crate::folders::ALL_INBOXES);
     let labels = menu_labels(main.folder_popover.borrow().as_ref());
     d.check(
         labels == ["Mark All Read"],
@@ -2461,10 +2555,57 @@ pub async fn all_inboxes(d: &Driver) {
     );
 }
 
+/// SCENARIO 42: All Inboxes first with each account's Inbox under it, Flagged, then each account's heading over its
+/// folders but the Inbox, starting with Sent Items
+fn tree_of_two_accounts(d: &Driver, inbox: i64, second: i64) {
+    use crate::folders::{ALL_INBOXES, FLAGGED};
+    let main = shell().main();
+    let accounts: Vec<i64> = shell()
+        .core
+        .accounts()
+        .unwrap_or_default()
+        .iter()
+        .map(|a| a.id)
+        .collect();
+    let ids: Vec<i64> = main.folders.shown().iter().map(|(id, _)| *id).collect();
+    let headings: Vec<i64> = accounts.iter().map(|a| -a).collect();
+    let at = |id: i64| ids.iter().position(|&i| i == id);
+    d.check(
+        ids.starts_with(&[ALL_INBOXES, inbox, second, FLAGGED])
+            && headings.first().and_then(|&h| at(h)) == Some(4)
+            && headings.iter().all(|&h| at(h).is_some()),
+        &format!("All Inboxes is at the top of the tree, then Flagged, then each account's heading ({ids:?})"),
+    );
+    // the first folder under a heading; ImapKit keeps a deleted folder of the Inbox (Receipts of step 27) listed, so
+    // that one is passed by
+    let after = |heading: i64| {
+        at(heading)
+            .map(|i| &ids[i + 1..])
+            .unwrap_or_default()
+            .iter()
+            .filter_map(|&id| main.folders.row(id))
+            .map(|row| row.label)
+            .find(|label| label != "Receipts")
+            .unwrap_or_default()
+    };
+    d.check(
+        [inbox, second]
+            .iter()
+            .all(|f| ids.iter().filter(|&id| id == f).count() == 1)
+            && headings.iter().all(|&h| after(h) == "Sent Items"),
+        &format!(
+            "the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, \
+             starting with Sent Items ({} / {})",
+            headings.first().map(|&h| after(h)).unwrap_or_default(),
+            headings.get(1).map(|&h| after(h)).unwrap_or_default()
+        ),
+    );
+}
+
 /// SCENARIO 42a: each account's Inbox under All Inboxes, named as the account, listing that Inbox alone; the account
 /// name set in Properties; the account's menu and its Mark All Read
 pub async fn all_inboxes_by_account(d: &Driver) {
-    use crate::folders::{ALL_INBOXES, under_all_inboxes};
+    use crate::folders::ALL_INBOXES;
     d.step("All Inboxes by account, account names, the account's menu");
     let main = shell().main();
     let core = &shell().core;
@@ -2494,7 +2635,7 @@ pub async fn all_inboxes_by_account(d: &Driver) {
     command(Command::Sync);
     let unread = |f: i64| core.folder(f).map_or(0, |f| f.unread);
     wait_until(20, || unread(inbox) >= 1 && unread(second) >= 1).await;
-    let row = |folder: i64| main.folders.markup_of(under_all_inboxes(folder)).unwrap_or_default();
+    let row = |folder: i64| main.folders.markup_of(folder).unwrap_or_default();
     d.check(
         row(inbox).contains("inboxclassic.test") && row(second).contains("Work"),
         &format!(
@@ -2507,7 +2648,7 @@ pub async fn all_inboxes_by_account(d: &Driver) {
         wait_until(10, || row(second).contains(&format!("({})", unread(second)))).await,
         &format!("each row shows its Inbox's unread count ({})", row(second)),
     );
-    main.folders.select(under_all_inboxes(second));
+    main.folders.select(second);
     let total = core.folder(second).map_or(0, |f| f.total);
     d.check(
         wait_until(10, || u64::from(messages_listed()) == total).await,
@@ -2626,12 +2767,12 @@ pub async fn all_inboxes_by_account(d: &Driver) {
         }
         None => d.check(false, "its Properties opens that account's Properties"),
     }
+    collapsed_account(d, first_account).await;
 }
 
 /// SCENARIO 42b: the second account's row under All Inboxes dragged above the first's puts the accounts in that order,
 /// its heading too, the row staying selected; Move Down from its menu puts it back
 pub async fn reorder_accounts(d: &Driver) {
-    use crate::folders::under_all_inboxes;
     d.step("accounts reordered by dragging and by Move Down");
     let main = shell().main();
     let core = &shell().core;
@@ -2648,24 +2789,23 @@ pub async fn reorder_accounts(d: &Driver) {
     let second_first = || {
         (
             at(-second_account) < at(-first_account),
-            at(under_all_inboxes(second)) < at(under_all_inboxes(inbox)),
+            at(second) < at(inbox),
             core.accounts().unwrap_or_default().first().map(|a| a.id) == Some(second_account),
         )
     };
-    main.folders.select(under_all_inboxes(second));
+    main.folders.select(second);
     d.check(
-        main.folders.show_drop_line(under_all_inboxes(inbox), Some(false)),
+        main.folders.show_drop_line(inbox, Some(false)),
         "held over the first account's row under All Inboxes, a drag shows a line above it",
     );
     d.shot(&main_window(), "all-inboxes-4-drag").await;
-    main.folders.show_drop_line(under_all_inboxes(inbox), None);
+    main.folders.show_drop_line(inbox, None);
     d.check(
-        !main.folders.drop_row(under_all_inboxes(second), -first_account, false),
+        !main.folders.drop_row(second, -first_account, false),
         "a row under All Inboxes is not taken by an account's heading",
     );
     d.check(
-        main.folders
-            .drop_row(under_all_inboxes(second), under_all_inboxes(inbox), false),
+        main.folders.drop_row(second, inbox, false),
         "the second account's row under All Inboxes is dropped above the first's",
     );
     d.check(
@@ -2675,10 +2815,7 @@ pub async fn reorder_accounts(d: &Driver) {
             second_first()
         ),
     );
-    d.check(
-        main.folders.selected() == under_all_inboxes(second),
-        "the row moved stays selected",
-    );
+    d.check(main.folders.selected() == second, "the row moved stays selected");
     d.shot(&main_window(), "all-inboxes-4-reorder").await;
     // its menu: Move Up turned off, first as it is; Move Down puts it back
     let tree: gtk::Widget = main.folders.view.clone().upcast();

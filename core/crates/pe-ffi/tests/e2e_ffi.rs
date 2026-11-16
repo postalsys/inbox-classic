@@ -178,10 +178,6 @@ fn reads_mail_through_the_c_api() {
         .find(|f| f.special_use == PeSpecialUse::Sent)
         .expect("Sent")
         .id;
-    // what a collapsed account shows: the unread messages of its folders, none hidden under the Inbox
-    assert_eq!(inbox.unread_below, 0);
-    assert_eq!(unsafe { pe_folder_list_unread(folders) }, 1);
-    assert_eq!(unsafe { pe_folder_list_unread(std::ptr::null()) }, 0);
     let inbox = inbox.id;
     unsafe { pe_folder_list_free(folders) };
 
@@ -241,17 +237,26 @@ fn reads_mail_through_the_c_api() {
     unsafe { pe_list_view_free(grouped) };
     watches_and_ignores(core, all_inboxes);
     unsafe { pe_list_view_free(all_inboxes) };
-    assert!(!pe_all_inboxes_shown(1) && pe_all_inboxes_shown(2));
-    // the rows under All Inboxes: the one account's Inbox, its unread count, the account's title
-    let specials = unsafe { pe_special_folders(core, PeSpecialFolderKind::Inbox) };
-    assert_eq!(unsafe { pe_special_folder_list_count(specials) }, 1);
-    let row = unsafe { &*pe_special_folder_list_get(specials, 0) };
-    assert_eq!((row.folder, row.unread), (inbox, 1));
-    assert!(!unsafe { CStr::from_ptr(row.name) }.to_str().unwrap().is_empty());
-    let title = unsafe { CStr::from_ptr(row.title) }.to_str().unwrap();
-    assert!(title.starts_with("Inbox - "), "{title}");
+    // the folder list of one account: its Inbox first, with its unread count, then Flagged
+    let tree = unsafe { pe_folder_tree(core) };
+    assert!(unsafe { pe_tree_count(tree) } >= 2);
+    let row = unsafe { &*pe_tree_get(tree, 0) };
+    let text = |p: *const std::ffi::c_char| unsafe { CStr::from_ptr(p) }.to_str().unwrap().to_string();
+    assert_eq!(
+        (row.kind, row.folder, row.count, row.menu),
+        (PeTreeRowKind::Folder, inbox, 1, PeTreeMenu::Folder)
+    );
+    assert_eq!(text(row.key), format!("folder:{inbox}"));
+    // New Folder from the Inbox goes at the account's top
+    assert_eq!((row.new_folder_account, row.new_folder_parent), (row.account, 0));
+    let flagged = unsafe { &*pe_tree_get(tree, 1) };
+    assert_eq!((flagged.kind, flagged.menu), (PeTreeRowKind::Flagged, PeTreeMenu::None));
+    assert_eq!(text(flagged.icon), "flagged");
+    // All Inboxes gone (one account): its Inbox is chosen instead
+    let inboxes = CString::new("inboxes").unwrap();
+    assert_eq!(unsafe { pe_tree_reselect(tree, inboxes.as_ptr()) }, 0);
     let row_account = row.account;
-    unsafe { pe_special_folder_list_free(specials) };
+    unsafe { pe_tree_free(tree) };
     // an account name of its own is the account's title
     let named = CString::new("Work").unwrap();
     assert!(unsafe { pe_account_set_name(core, row_account, named.as_ptr()) });

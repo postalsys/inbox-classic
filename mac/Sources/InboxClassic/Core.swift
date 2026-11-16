@@ -221,15 +221,20 @@ final class Core {
     }
 
     func folders(_ account: Int64) -> [Folder] {
-        folderTree(account).folders
+        guard let list = pe_folders(handle, account) else { return [] }
+        defer { pe_folder_list_free(list) }
+        return (0..<pe_folder_list_count(list)).compactMap { pe_folder_list_get(list, $0).map { Folder($0.pointee) } }
     }
 
-    /// the folders of an account with the unread messages its row shows collapsed (not Junk E-mail or Deleted Items)
-    func folderTree(_ account: Int64) -> (folders: [Folder], unread: UInt64) {
-        guard let list = pe_folders(handle, account) else { return ([], 0) }
-        defer { pe_folder_list_free(list) }
-        let folders = (0..<pe_folder_list_count(list)).compactMap { pe_folder_list_get(list, $0).map { Folder($0.pointee) } }
-        return (folders, pe_folder_list_unread(list))
+    /// the rows of the folder list, in its order, as the core lays it out, and the row to choose given the key of the
+    /// row chosen before (nil when that folder is gone or nothing was chosen)
+    func folderTree(chosen key: String?) -> (rows: [TreeRow], chosen: Int?) {
+        guard let tree = pe_folder_tree(handle) else { return ([], nil) }
+        defer { pe_tree_free(tree) }
+        let rows = (0..<pe_tree_count(tree)).compactMap { pe_tree_get(tree, $0).map { TreeRow($0.pointee) } }
+        guard let key else { return (rows, nil) }
+        let index = key.withCString { pe_tree_reselect(tree, $0) }
+        return (rows, index >= 0 ? Int(index) : nil)
     }
 
     func sync(_ account: Int64) { pe_sync(handle, account) }
@@ -242,14 +247,6 @@ final class Core {
     /// the messages the Flagged folder lists
     var flaggedCount: UInt64 { pe_flagged_count(handle) }
 
-    /// each account's Inbox, in the accounts' order, named as the account is: the rows under All Inboxes
-    func inboxes() -> [SpecialFolder] {
-        guard let list = pe_special_folders(handle, PE_SPECIAL_FOLDER_KIND_INBOX) else { return [] }
-        defer { pe_special_folder_list_free(list) }
-        return (0..<pe_special_folder_list_count(list)).compactMap {
-            pe_special_folder_list_get(list, $0).map { SpecialFolder($0.pointee) }
-        }
-    }
 
     // ---- the message list ----
 
@@ -717,21 +714,69 @@ struct Account {
     }
 }
 
-/// An account's folder of a special use (its Inbox), with the account's title and the folder's unread messages
-struct SpecialFolder {
+/// A row of the folder list (`pe_folder_tree`): what it is, what it says and what it allows
+struct TreeRow {
+    let kind: PeTreeRowKind
+    /// what it stands for, the same from one reading to the next (`inboxes`, `flagged`, `account:<id>`, `folder:<id>`)
+    let key: String
+    /// 0 for All Inboxes and Flagged
     let account: Int64
+    /// 0 for All Inboxes, Flagged and an account's heading
     let folder: Int64
-    let name: String
-    /// "Inbox - Gmail", for the folder bar and the title
+    let depth: Int
+    let label: String
+    /// what the folder bar, the window's title and a screen reader say for it ("Inbox - Gmail")
     let title: String
+    /// its own unread messages (Flagged: how many are flagged)
     let unread: UInt64
+    /// the count it shows while open, and while collapsed (with the rows under it)
+    let countOpen: UInt64
+    let countCollapsed: UInt64
+    let boldOpen: Bool
+    let boldCollapsed: Bool
+    let parent: Bool
+    let selectable: Bool
+    let dropTarget: Bool
+    let reordersAccounts: Bool
+    let menu: PeTreeMenu
+    /// where New Folder makes a folder with it chosen: the account (0: New Folder does not apply) and the folder (0:
+    /// the account's top)
+    let newFolderAccount: Int64
+    let newFolderParent: Int64
+    /// its icon's word (`Icons.treeIcon`)
+    let icon: String
 
-    init(_ row: PeSpecialFolder) {
+    init(_ row: PeTreeRow) {
+        kind = row.kind
+        key = text(row.key)
         account = row.account
         folder = row.folder
-        name = text(row.name)
+        depth = Int(row.depth)
+        label = text(row.label)
         title = text(row.title)
         unread = row.unread
+        countOpen = row.count
+        countCollapsed = row.count_collapsed
+        boldOpen = row.bold
+        boldCollapsed = row.bold_collapsed
+        parent = row.parent
+        selectable = row.selectable
+        dropTarget = row.drop_target
+        reordersAccounts = row.reorders_accounts
+        menu = row.menu
+        newFolderAccount = row.new_folder_account
+        newFolderParent = row.new_folder_parent
+        icon = text(row.icon)
+    }
+
+    func count(collapsed: Bool) -> UInt64 { collapsed ? countCollapsed : countOpen }
+
+    func bold(collapsed: Bool) -> Bool { collapsed ? boldCollapsed : boldOpen }
+
+    /// what the row draws: an update in place is needed when it changes
+    func drawsLike(_ other: TreeRow) -> Bool {
+        label == other.label && title == other.title && countOpen == other.countOpen
+            && countCollapsed == other.countCollapsed && boldOpen == other.boldOpen && boldCollapsed == other.boldCollapsed
     }
 }
 
@@ -748,8 +793,6 @@ struct Folder {
     let selectable: Bool
     let total: UInt64
     let unread: UInt64
-    /// the unread messages of the folders under it, which its row shows while collapsed
-    let unreadBelow: UInt64
 
     init(_ folder: PeFolder) {
         id = folder.id
@@ -763,7 +806,6 @@ struct Folder {
         selectable = folder.selectable
         total = folder.total
         unread = folder.unread
-        unreadBelow = folder.unread_below
     }
 }
 

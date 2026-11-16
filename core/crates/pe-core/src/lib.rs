@@ -39,6 +39,7 @@ mod snippet;
 mod targets;
 mod text;
 pub mod timing;
+pub mod tree;
 mod undo_send;
 pub mod unsubscribe;
 pub mod vcard;
@@ -61,24 +62,6 @@ pub use pe_store::{MessageRef, Scope, Search, Show, ThreadMark};
 pub use selection::{Action, Summary, color_name};
 pub use targets::{TargetKind, TargetRow};
 
-/// A special use whose folders the folder list gathers from every account (`Core::special_folders`); All Sent and All
-/// Drafts would add theirs
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum SpecialFolderKind {
-    Inbox,
-}
-
-/// An account's folder of a special use: a row under All Inboxes
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SpecialFolder {
-    pub account: AccountId,
-    pub folder: FolderId,
-    /// The account's title, as the folder tree's heading for it has it
-    pub name: String,
-    /// The folder told apart by its account, for the folder bar and the window's title: "Inbox - Gmail"
-    pub title: String,
-    pub unread: u64,
-}
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label, autosave_wait};
@@ -96,10 +79,10 @@ pub use sign_in_apps::{
     SecretChange, SignInAppEntry, SignInAppForm, SignInWith, builtin_name, builtin_off_text, register_hint,
 };
 pub use text::{
-    DOWNLOAD_LIMITS_MB, HiddenUnread, ReaderState, SEND_DELAYS, TEXT_SIZE_MEDIUM, TEXT_ZOOMS, account_label,
-    account_shown_name, account_title, account_titles, default_account_name, download_limit_index, download_limit_text,
-    downloading_text, folder_kind, folder_name, format_size, hidden_unread, initials, list_counts, messages,
-    quoted_subject, reader_page, retry_note, saved_text, send_delay_index, send_delay_text, sentence,
+    DOWNLOAD_LIMITS_MB, ReaderState, SEND_DELAYS, TEXT_SIZE_MEDIUM, TEXT_ZOOMS, account_label, account_shown_name,
+    account_title, account_titles, default_account_name, download_limit_index, download_limit_text, downloading_text,
+    folder_kind, folder_name, format_size, initials, list_counts, messages, quoted_subject, reader_page, retry_note,
+    saved_text, send_delay_index, send_delay_text, sentence,
 };
 pub use view::{AttachmentView, MessageView, PartView, ProtectionView};
 use worker::{Command, Role, Worker};
@@ -760,39 +743,6 @@ impl Core {
         Ok(self.store().move_account(account, index)?)
     }
 
-    /// Each account's folder of a special use (its Inbox), in the accounts' order, with the account's title and the
-    /// folder's unread count: the rows under All Inboxes. An account without that folder yet has no row
-    pub fn special_folders(&self, special: SpecialFolderKind) -> Result<Vec<SpecialFolder>> {
-        let store = self.store();
-        let accounts = store.accounts()?;
-        let titles = account_titles(&accounts);
-        let folders = match special {
-            // the store's own rule, the one All Inboxes' list uses
-            SpecialFolderKind::Inbox => store.inboxes()?,
-        };
-        let mut found = Vec::new();
-        for folder in folders {
-            let folder = store.folder(folder)?;
-            let Some(at) = accounts.iter().position(|a| a.id == folder.account_id) else {
-                continue;
-            };
-            // one row an account, should a server have two that match
-            if found.iter().any(|f: &SpecialFolder| f.account == folder.account_id) {
-                continue;
-            }
-            found.push(SpecialFolder {
-                account: folder.account_id,
-                folder: folder.id,
-                title: format!("{} - {}", text::folder_name(&folder.info), titles[at]),
-                name: titles[at].clone(),
-                unread: folder.unread,
-            });
-        }
-        // in the accounts' order
-        found.sort_by_key(|f| accounts.iter().position(|a| a.id == f.account));
-        Ok(found)
-    }
-
     /// Changes the settings of an account; how it signs in stays, only signing in again changes that
     pub fn update_account(&self, id: AccountId, settings: &AccountSettings) -> Result<()> {
         let mut settings = settings.clone();
@@ -967,11 +917,8 @@ impl Core {
     /// after it, around to the first (Junk E-mail and Deleted Items left out, as the counts of collapsed folders leave
     /// them out): where Next Unread goes on, after asking. None when no other folder has unread mail.
     pub fn next_unread_folder(&self, folder: FolderId) -> Result<Option<FolderId>> {
-        let store = self.store();
-        let mut tree = Vec::new();
-        for account in store.accounts()? {
-            tree.extend(store.folders(account.id)?);
-        }
+        // in the folder list's order: the Inboxes first
+        let tree = self.folder_order()?;
         let start = tree.iter().position(|f| f.id == folder).map_or(0, |at| at + 1);
         // Junk E-mail and Deleted Items, the folders that can be emptied, do not count
         let counted = |f: &Folder| f.info.selectable && f.unread > 0 && !emptiable(&f.info);
