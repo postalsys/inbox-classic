@@ -1,9 +1,9 @@
-<!--review--><h1>Hvor e-posten og passordene dine oppbevares</h1>
+<h1>Hvor e-posten og passordene dine oppbevares</h1>
 <p class="summary">Hva Inbox Classic oppbevarer på datamaskinen din, og hvor.</p>
 <ul>
     <li><b>Nedlastet e-post og kontoinnstillinger</b> ligger i <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. E-posten din blir også liggende på serveren. Kopien her er for rask lesing og lesing uten nett, og for søk.</li>
-    <li><b>Passord</b>, pålogginger i nettleseren og hemmelighetene til påloggingsapper ligger i <!--os:windows-->Legitimasjonsbehandling i Windows, under <i>InboxClassic</i>, kryptert for Windows-kontoen din.<!--/os--><!--os:mac-->påloggingsnøkkelringen din, under <i>InboxClassic</i>, kryptert for Mac-kontoen din. Nøkkelringtilgang viser dem.<!--/os--><!--os:linux-->nøkkelringen din (GNOME Keyring), under <i>InboxClassic</i>, kryptert for påloggingen din. Uten en nøkkelring oppbevares de bare til Inbox Classic avsluttes.<!--/os--> De ligger aldri i e-postlageret.</li>
+    <li><b>Passord</b>, OAuth-påloggingsopplysninger og klienthemmeligheter for påloggingsapper ligger i <!--os:windows-->Legitimasjonsbehandling i Windows, under <i>InboxClassic</i>, kryptert for Windows-kontoen din.<!--/os--><!--os:mac-->påloggingsnøkkelringen din, under <i>InboxClassic</i>, kryptert for Mac-kontoen din. Nøkkelringtilgang viser dem.<!--/os--><!--os:linux-->systemets nøkkelring (for eksempel GNOME Keyring), under <i>InboxClassic</i>, kryptert for påloggingen din. Uten en nøkkelring oppbevares de bare til Inbox Classic avsluttes.<!--/os--> De ligger aldri i e-postlageret.</li>
 </ul>
-<p>Søket, forklaringen av returnerte meldinger, grupperingen i samtaler og funn av påloggingskoder kjører på datamaskinen din. Ingenting av e-posten din sendes noe sted for dette.</p>
-<p>KI-agenter ser e-posten din bare når du slipper dem inn, og bare kontoene du velger. Se <a href="topic:agents-permissions"></a>.</p>
-<nav class="related"><a href="topic:connections"></a> <a href="topic:removing"></a> <a href="topic:account-security"></a></nav><!--/review-->
+<p>Søk, forklaringer av leveringsfeil, gruppering i samtaler og gjenkjenning av påloggingskoder utføres lokalt på datamaskinen. E-postinnholdet sendes ikke til eksterne tjenester for disse funksjonene.</p>
+<p>KI-agenter ser e-posten din bare når du gir dem tilgang, og bare kontoene du velger. Se <a href="topic:agents-permissions"></a>.</p>
+<nav class="related"><a href="topic:connections"></a> <a href="topic:removing"></a> <a href="topic:account-security"></a></nav>

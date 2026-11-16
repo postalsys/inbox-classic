@@ -19,7 +19,7 @@ Commit completed batches regularly and preserve an exact resume point.
 - Resume with Brazilian Portuguese (`pt-BR`): the remaining 448 core entries, then 248 platform/help-title
   entries and all 52 help topics. All 626 app entries and nine coupled controls are reviewed. Portuguese (Portugal),
   Italian and Dutch are fully reviewed: each has 1,331 catalog entries and 52 help topics.
-  Nineteen languages still have pending content, with exact IDs/topics in the state file.
+  Eighteen languages still have pending content, with exact IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
@@ -263,8 +263,17 @@ attachment handling and transfer instructions. All 75 tests, structure, inventor
 spacing, 32 shortcut scopes and git diff --check pass. Generated installer/Linux text rebuilt and inspected;
 the review HTML is regenerated. UI checkpoint: `257675e2`. The final 31 help topics remain pending.
 
-Current totals: 8,050 catalog entries and 285 help pages reviewed; 1,234 catalog values improved. Remaining:
-23,958 catalog entries and 967 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Norwegian Bokmål help completed
+
+Reviewed the final 31 help topics, completing all 52. Corrected signature validity versus ownership,
+private-key recovery, domain/logo checks, image privacy, queued agent sending, credential troubleshooting
+and command-line/reference guidance. Quoted localized errors match the catalogs; original keyboard tags
+are preserved with Norwegian Kopi/Blindkopi access keys explained. All 75 tests, structure, inventory/hash
+reconciliation, inline spacing and git diff --check pass. The review HTML is regenerated.
+Catalog/everyday-help checkpoint: `d0370fc9`. Serbian Latin is next; the source branch has no new translation changes.
+
+Current totals: 8,050 catalog entries and 316 help pages reviewed; 1,234 catalog values improved. Remaining:
+23,958 catalog entries and 936 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

@@ -1,8 +1,8 @@
-<!--review--><h1>Meldinger som ikke ble levert</h1>
+<h1>Meldinger som ikke ble levert</h1>
 <p class="summary">Når en melding du har sendt, blir returnert eller forsinket, forklarer Inbox Classic hvorfor og hva du kan gjøre.</p>
-<p>Et leveringsvarsel har et ikke-levert-merke i meldingslisten. Når du åpner det, sier et kort over det om meldingen din ikke ble levert eller bare er forsinket.</p>
+<p>Et leveringsvarsel har et symbol for leveringsfeil i meldingslisten. Når du åpner det, viser et kort over meldingen om leveringen mislyktes eller er forsinket.</p>
 <img src="picture:bounce-1-failed" alt="Et leveringsvarsel med et kort som sier at meldingen ikke ble levert, med mottakeren, årsaken og hva du kan gjøre">
-<p>Kortet viser hver mottaker med årsaken i vanlige ord og hva du kan gjøre. <b data-text="bounce-details"></b> viser ordene fra mottakerserveren selv.</p>
+<p>For hver mottaker forklarer kortet årsaken med enkle ord og foreslår hva du kan gjøre. <b data-text="bounce-details"></b> viser det opprinnelige svaret fra mottakerserveren.</p>
 <ul>
     <li><b data-text="bounce-show-message"></b> merker meldingen du sendte.</li>
     <li>Ved en forsinkelse merker <b data-text="bounce-show-delayed"></b> den. E-postserveren din prøver fortsatt, så du trenger ikke sende den på nytt.</li>
@@ -11,10 +11,10 @@
 <table>
     <tr><th>Kortet sier</th><th>Hva du gjør</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Kontroller stavingen av adressen, eller spør personen om adressen de bruker nå.</td></tr>
-    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Send den på nytt om noen dager, eller nå personen på en annen måte.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Send den på nytt om noen dager, eller kontakt mottakeren på en annen måte.</td></tr>
     <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Send den på nytt uten det som ser ut som søppelpost, for eksempel mange lenker eller et stort vedlegg.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Videresend varselet til e-postleverandøren din. Det er ikke meldingen som er problemet.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Ingenting. Den blir vanligvis levert innen en time.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Vent på det automatiske leveringsforsøket. Meldingen blir vanligvis levert innen en time.</td></tr>
 </table>
-<p>Vil du finne alle leveringsvarsler, søker du etter <code>is:bounce</code>. Årsaken finnes på datamaskinen din, og ingenting sendes noe sted.</p>
-<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav><!--/review-->
+<p>Vil du finne alle leveringsvarsler, søker du etter <code>is:bounce</code>. Årsaken analyseres på datamaskinen din, uten at innholdet sendes til eksterne tjenester.</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>

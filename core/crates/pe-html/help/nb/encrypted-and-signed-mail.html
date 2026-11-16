@@ -1,16 +1,16 @@
-<!--review--><h1>Kryptert og signert e-post</h1>
+<h1>Kryptert og signert e-post</h1>
 <p class="summary">Linjen over en melding viser om den er signert av avsenderen, og om den ble kryptert til deg.</p>
-<p>En signert melding beviser hvem som skrev den, og at ingen endret den underveis. En kryptert melding kan bare leses med nøkkelen din.</p>
+<p>En gyldig digital signatur viser at det signerte innholdet ikke er endret, og at det er signert med den tilhørende private nøkkelen. For å vite hvem nøkkelen tilhører, må du bekrefte den med eieren. En kryptert melding kan leses med en av de private nøklene den er kryptert til.</p>
 <p>Linjen over meldingen gjelder meldingen som helhet:</p>
 <table>
     <tr><th>Farge</th><th>Hva den betyr</th></tr>
     <tr><td>Grønn</td><td>Signert av avsenderen, med en nøkkel du har bekreftet.</td></tr>
     <tr><td>Blå</td><td>Signert av avsenderen med en nøkkel du ikke har bekreftet, eller kryptert til deg.</td></tr>
-    <tr><td>Ravgul</td><td>Noe stemmer ikke: signaturen passer ikke, en annen enn avsenderen har signert, eller en del kunne ikke leses.</td></tr>
-    <tr><td>Grå</td><td>Ikke signert, eller signert med en nøkkel du ikke har.</td></tr>
+    <tr><td>Oransje</td><td>Noe stemmer ikke: signaturen passer ikke, en annen enn avsenderen har signert, eller en del kunne ikke leses.</td></tr>
+    <tr><td>Grå</td><td>Ikke signert, ukjent signeringsnøkkel eller signatur som ikke er kontrollert.</td></tr>
 </table>
 <p>En melding med deler som er beskyttet forskjellig, viser hver del i en egen ramme med en egen etikett. Linjen teller da delene av hver type. Klikk på en etikett, eller på <b data-text="ui-protection-details"></b> på linjen, for å se hvem som signerte hver del, med hvilken nøkkel og når.</p>
-<aside class="warning">Bare linjen og etikettene over rammene skrives av Inbox Classic. En avsender kan tegne hva som helst inne i sin egen melding, også noe som ser ut som en etikett. Se på linjen.</aside>
-<p>Bilder fra Internett i en kryptert del lastes bare når du klikker på bildelinjen, hver gang. Etiketten viser da at bilder ble lastet.</p>
+<aside class="warning">Bare sikkerhetslinjen og etikettene over rammene kommer fra Inbox Classic. En avsender kan tegne hva som helst inne i sin egen melding, også noe som ser ut som en etikett. Se på linjen.</aside>
+<p>Bilder fra internett i en kryptert del lastes bare ned når du klikker på bildelinjen. Du må tillate dette på nytt hver gang du åpner meldingen. Etiketten viser da at bilder ble lastet.</p>
 <p>Når du svarer eller videresender, siteres bare det som ble vist.</p>
-<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>
