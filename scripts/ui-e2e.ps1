@@ -780,9 +780,14 @@ try {
     # the folders of the account by their place on the server: Inbox, Sent Items, Drafts, Archive, Junk E-mail,
     # Deleted Items
     $FOLDER_NAMES = @('Inbox', 'Sent Items', 'Drafts', 'Archive', 'Junk E-mail', 'Deleted Items')
+    # the list read off the window thread: waits until the load of the list shown is drawn (the app's hook: 9 while a
+    # load of it is not here yet)
+    $kTestListOrder = 0x4C4F5244
+    function Settled { [void](WaitFor { [Native.Win]::SendText($main, $kTestListOrder, '') -ne 9 } 10) }
     function SelectFolder([int]$index) {
         $item = FolderItem $FOLDER_NAMES[$index]
         [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $item)
+        Settled
     }
     function Rows { ListCount $list }
     # the rows of the list with this subject
@@ -3201,6 +3206,50 @@ public static class Dragger {
     Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match ", $(Rows) selected$" } 10)) "Select All selects every message of the list ($(StatusPart $mainStatus 2))"
     SelectRow 0
     Check ([bool](WaitFor { (StatusPart $mainStatus 2) -notmatch 'selected' -and (& $enabled $IDM_REPLY) } 10)) 'one message selected again is shown in the reading pane'
+
+    Step 'many messages at once'
+    # a folder of its own, its messages made on the server as another client would, and a folder about to go
+    $IDC_UNDONE_BAR = 244; $IDC_UNDONE_CLOSE = 245
+    $topNames = { @(ChildRows ([IntPtr]::Zero) | ForEach-Object { Bare $_ }) }
+    foreach ($path in @('Bulk', 'Gone')) {
+        [void](Invoke-RestMethod -Method Post -ContentType 'application/json' $rest -Body (@{ path = $path; subscribed = $true } | ConvertTo-Json))
+    }
+    foreach ($i in 1..4) {
+        $date = [DateTime]::UtcNow.AddMinutes(-$i).ToString('r')
+        AddMessage "From: Bulk Sender <bulk@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: Bulk $i`r`nDate: $date`r`nMessage-ID: <bulk-$i@example.com>`r`n`r`nOne of many.`r`n" @('\Seen') 'Bulk'
+    }
+    Command $main $IDM_SYNC
+    [void](WaitFor { (& $topNames) -contains 'Bulk' -and (& $topNames) -contains 'Gone' } 30)
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, (NamedRow ([IntPtr]::Zero) 'Bulk'))
+    $bulk = WaitFor { if ((Rows) -eq 4 -and [Native.Win]::SendText($main, $kTestListOrder, '') -ne 9) { Rows } } 30
+    Check ($bulk -eq 4) "a folder chosen lists its messages once its list is read off the window thread ($(Rows) rows)"
+    # another client deletes Gone: the server refuses a move there, and the message comes back with why over the list
+    SelectRow 0
+    $refused = [Native.Win]::RemoteListText($list, 0, $COL_SUBJECT)
+    [void](Invoke-RestMethod -Method Delete "$rest/Gone")
+    Command $main $IDM_MOVE
+    $move = WaitPicker 'Move Message'
+    Check ($null -ne $move -and (PickIn $move 'inboxclassic.test' 'Gone')) 'the folder deleted elsewhere is still offered (the app has not synced since)'
+    if ($move) { Click $move 1 }
+    $undoneBar = [Native.Win]::GetDlgItem($main, $IDC_UNDONE_BAR)
+    $said = WaitFor { if ([Native.Win]::IsWindowVisible($undoneBar)) { WindowText $undoneBar } } 30
+    Check ($said -match '^The server did not move 1 message to Gone, so (it is|they are) back in Bulk: .+') "a move the server refuses is taken back, a bar over the list saying why in the core's words ($said)"
+    Check ([bool](WaitFor { (Rows) -eq 4 -and (SubjectRows $refused).Count -eq 1 } 20)) "and its row is back in the list ($(Rows) rows)"
+    Shot $main 'many-1-refused'
+    Click $main $IDC_UNDONE_CLOSE
+    Check ([bool](WaitFor { -not [Native.Win]::IsWindowVisible($undoneBar) } 5)) 'the bar closes with its button'
+    # Select All counts the list at once; Delete moves them all off the window thread and says so
+    Command $main $IDM_SELECT_ALL
+    Check ([bool](WaitFor { (StatusPart $mainStatus 2) -match ', 4 selected$' } 10)) "Select All selects the four ($(StatusPart $mainStatus 2))"
+    Command $main $IDM_DELETE
+    Check ([bool](WaitFor { (Rows) -eq 0 } 20)) "Select All, then Delete: the list is empty ($(Rows) rows)"
+    Check ([bool](WaitFor { (StatusPart $mainStatus 0) -match '^Moved 4 messages to Deleted Items' } 10)) "the status bar says what was done ($(StatusPart $mainStatus 0))"
+    Check ([bool](WaitFor { @(Messages 'Bulk').Count -eq 0 } 20)) 'and the server has them in Deleted Items'
+    Shot $main 'many-2-deleted'
+    [void](Invoke-RestMethod -Method Delete "$rest/Bulk")
+    Command $main $IDM_SYNC
+    [void](WaitFor { -not ((& $topNames) -contains 'Bulk') -and -not ((& $topNames) -contains 'Gone') } 20)
+    SelectFolder 0
 
     Step 'messages as files'
     $kDragOut = 0x44524F55; $kDropFiles = 0x44524F50

@@ -1668,12 +1668,17 @@ void MakeDefaultMailApp() {
 }
 
 void Reply(PeDraftKind kind) {
-    core::Draft draft = g_mailbox.DraftOfShown(kind);
-    if (!draft) {
+    // made off the window thread: the compose window opens once it is
+    bool started = g_mailbox.DraftOfShown(kind, [](core::Draft draft, int64_t account) {
+        if (!draft) {
+            MessageBoxW(g_main, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+            return;
+        }
+        OpenCompose(g_main, g_core.get(), account, pe_draft_info(draft.get()));
+    });
+    if (!started) {
         MessageBoxW(g_main, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
-        return;
     }
-    OpenCompose(g_main, g_core.get(), g_mailbox.CurrentAccount(), pe_draft_info(draft.get()));
 }
 
 void OnCommand(WORD id, WORD code) {
@@ -1890,7 +1895,7 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_ACCOUNT_MARK_ALL_READ:
         if (int64_t account = g_mailbox.SelectedAccount()) {
-            pe_account_mark_all_read(g_core.get(), account);
+            g_mailbox.MarkAccountRead(account);
         }
         return;
     case IDM_ACCOUNT_PROPERTIES:

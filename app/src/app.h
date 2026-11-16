@@ -53,6 +53,12 @@ bool CopyText(HWND owner, const std::wstring& text);
 LRESULT ButtonFaceColor(HDC dc);
 // the reason the core gave for a refusal (freed here), or `fallback` when it gave none
 std::wstring ReasonText(char* reason, PeText fallback);
+// a read of the core started off the window thread (a reply, a draft, an attachment) and done: the busy pointer over
+// the app's windows once one has taken longer than 400 ms, until every one is done
+void BusyStart();
+void BusyEnd();
+// WM_SETCURSOR of a window of the app: the busy pointer set while it is shown; false when it is not
+bool BusyCursor();
 // the Junk button of a toolbar (main and message windows) as Not Junk for messages in a Junk folder (`inJunk`), or
 // back as Junk; true when it changed, the toolbar sized again then
 bool SetJunkButton(HWND toolbar, bool inJunk);
@@ -680,14 +686,15 @@ public:
     void ResetFind();
     void OnTimer(UINT_PTR id);
     void OnEvent(const UiEvent& event);
-    // a folder was clicked and its list is read once the click is painted (TIMER_LOAD_LIST): meanwhile the list before
-    // stays, dimmed, and the status bar keeps its counts
+    // a folder was clicked, or the list's order or grouping changed, and its list is read off the window thread
+    // (pe_list_view_load, after the click is painted): meanwhile the list before stays, dimmed, and the status bar
+    // keeps its counts
     bool ListPending() const { return listPending_; }
     // that list read now, before a command acts on it
     void FlushListLoad();
-    // the UI test's look at the last folder clicked: 9 its list not read yet, 10 none clicked, 11 its list read before
-    // the highlight was painted, 12 the highlight painted first
-    int TestListOrder() const { return testListOrder_ + 10; }
+    // the UI test's look at the list: 9 a load of it not here yet, else of the last folder clicked: 10 none clicked, 11
+    // its list read before the highlight was painted, 12 the highlight painted first
+    int TestListOrder() const { return listPending_ || loadRequest_ ? 9 : testListOrder_ + 10; }
     // the UI test holds the list of a folder clicked unread (`hold`), to see it waiting, and lets it go
     void TestHoldList(bool hold);
     // the accounts changed: builds the tree again
@@ -707,8 +714,10 @@ public:
     void Undo();
     std::wstring UndoLabel() const;
     // every message of the selected folder read, or of every Inbox from All Inboxes (Edit > Mark All Read, the folder's
-    // menu); nothing while searching
+    // menu); nothing while searching. Off the window thread, the status bar told once done (Acted)
     void MarkAllRead();
+    // every message of `account` read (the account row's menu), as MarkAllRead
+    void MarkAccountRead(int64_t account);
     // the message `uid` of `folder` shown: its folder chosen in the tree, the message selected in the list
     void ShowMessage(int64_t folder, uint64_t uid);
     // the window shown the first time: All Inboxes (two or more accounts) or the first account's Inbox chosen, and its
@@ -798,11 +807,14 @@ public:
     int64_t AccountOf(int64_t folder) const;
     // whether `folder` is the Inbox of its account
     bool IsInbox(int64_t folder) const { return inboxFolders_.contains(folder); }
-    // a reply, reply to all or forward of the message shown, empty when no message is shown
-    core::Draft DraftOfShown(PeDraftKind kind) const;
+    // a reply, reply to all or forward of the message shown, made off the window thread: `done` gets it (empty when the
+    // message is not here) with the account to write from; false when no message is shown
+    bool DraftOfShown(PeDraftKind kind, std::function<void(core::Draft, int64_t)> done);
     // the selected message in a window of its own (double-click or Enter); a draft in a compose window instead, to go
     // on writing it, once it is fetched when it is not yet
     void OpenSelected();
+    // the saved draft read for OpenSelected is here (ReadDone): in a compose window
+    void OpenDraftRead();
     // the list as it is now: what it shows and in which order, for Previous and Next in a message window
     MessageListOrder ListOrder() const;
     // whether the list has a row a conversation (Tools > Options, kept for the next start), and turning that on or off
@@ -936,15 +948,62 @@ private:
     // a row chosen by the app (not clicked): every closed row above it opened so it is seen, which is not kept as the
     // user's opening, then selected
     void ChooseRow(HTREEITEM item);
-    void ReloadList(bool keepSelection);
+    // what to do with a list once it is read: keep the selection (the message shown found again where it is now), or
+    // select the message `selectUid` of `selectFolder` (opening the folder's row when the list does not have it, with
+    // `chooseFolder`), or the row `after` (where the rows an action took out of the list were)
+    struct LoadPlan {
+        bool keepSelection = false;
+        int64_t shownFolder = 0;
+        uint64_t shownUid = 0;
+        // the row the message shown had, for the core to look near first
+        int was = -1;
+        int64_t selectFolder = 0;
+        uint64_t selectUid = 0;
+        bool chooseFolder = false;
+        int after = -1;
+    };
+    // what a list load read: its counts, its first rows and the row of the message asked about (-1 for none)
+    struct ListData {
+        uint64_t total = 0;
+        uint64_t unread = 0;
+        uint64_t rows = 0;
+        bool listsRecipients = false;
+        int64_t index = -1;
+        Page first;
+    };
+    // the list read again off the window thread, the selection kept (`keepSelection`) or not; with `dim` the list before
+    // dimmed meanwhile, as it is going to show something else (another order, a search, the conversations grouped)
+    void ReloadList(bool keepSelection, bool dim = false);
+    // the list read off the window thread (pe_list_view_load) for `plan`; with `dim` the list before dimmed and not
+    // taking input until it is drawn (the order, the grouping, what it shows changed)
+    void LoadList(const LoadPlan& plan, bool dim);
+    // the load for `plan` asked of the core, the one before dropped
+    void StartLoad(const LoadPlan& plan);
+    // a ListReady or ListPageReady
+    void OnListLoaded(const UiEvent& event);
+    // the list read on the window thread, for a command that acts on it now
+    ListData ReadListNow(const LoadPlan& plan) const;
+    // the list as it was read drawn, and the plan carried out
+    void ApplyList(const LoadPlan& plan, ListData data);
+    // the list dimmed while it waits for a load (step 1's wait), the selection cleared too with `clearSelection`
+    void BeginWait(bool clearSelection);
+    // the page of rows at `offset` asked for, unless it is here or asked for already
+    void RequestPage(uint64_t offset);
+    // the loads and reads not waited for any more: the window closes
+    void CancelLoads();
     // whether the list has what words typed found, in every folder (with a Folder column), rather than a folder
     bool Searching() const;
     void ShowFolderColumn();
-    void ShowPersonColumn();
+    // From or To as the core says (`recipients`: Sent Items and Drafts list To)
+    void ShowPersonColumn(bool recipients);
     std::wstring RowFolder(int64_t folder) const;
+    // the row `index` for drawing: nullptr while its page is not here, which is then asked for (with the page after it)
+    // off the window thread, its rows drawn once it is here
     const PeMessage* Row(int index);
     // the row `index` if its page is read already, nullptr otherwise; reads nothing
     const PeMessage* CachedRow(int index) const;
+    // the row `index` for a command: its page read now when it is not here (nullptr while the list itself loads)
+    const PeMessage* RowNow(int index);
     const PeMessage* SelectedRow();
     // the reading pane emptied; with "There is no message selected." in it unless a message is `loading`
     void ClearReader(bool loading = false);
@@ -952,16 +1011,26 @@ private:
     void OnMessageShown();
     // in the middle of the list while it has no rows: why, and what to do about it
     void DrawEmptyList(HDC dc) const;
-    void SelectAfterRemoval(int index);
     // the selection taken from the list again (a message, or the positions of several), its summary, and with several
     // the reading pane saying how many
     void TakeSelection(bool rebuild);
     std::vector<int> SelectedRows() const;
     // the rows at `positions` selected, the first focused and in view with `focusFirst`; false for none
     bool SelectPositions(const PePositions* positions, bool focusFirst);
-    // `action` done to the selected messages, the status bar told what was done, and the row after them selected when
-    // they left the list; true when it was done
+    // `action` done to the selected messages off the window thread (pe_selection_act_start); once done (Acted) the status
+    // bar told what was done, and the row after them selected when they left the list; true when it was started
     bool Act(PeAction action, int64_t to = 0);
+    // an Acted of an action started here
+    void OnActed(const UiEvent& event);
+    // the summary of a whole list's selection (Select All), counted off the window thread, counted now for a command
+    // that needs it
+    void EnsureSummary();
+    // the reading pane's page saying how many messages are selected, with several
+    void ShowSummaryPage();
+    // the messages of a whole list's selection listed, for what goes through them one by one (a drag, a save)
+    void ListSelection();
+    // ActionUndone: the core's words in a bar over the list, until its close button is clicked (`text` empty hides it)
+    void ShowUndone(const std::wstring& text);
     // the list changed its selection: taken once it is done changing it (TIMER_SELECTION)
     void ScheduleSelection();
     // the row the selection is replaced by once the selected rows left the list: the one after the last of them
@@ -973,12 +1042,12 @@ private:
     // again where they are now) and only their numbers are taken
     void OnSelectionChanged(bool rebuild = true);
     // another folder (or All Inboxes) shown; false when it was already the one shown (and the main window was not told).
-    // `later`: clicked, so its list is read after the paint (DeferList)
-    bool OnFolderSelected(int64_t folder, PeTreeList list, bool later = false);
+    // Its list is read after the paint (DeferList)
+    bool OnFolderSelected(int64_t folder, PeTreeList list);
     // the list of the folder chosen read once the tree's highlight, the folder bar and the title are painted; the list
     // before dimmed meanwhile. A newer click replaces it
     void DeferList();
-    // TIMER_LOAD_LIST: the list deferred read now
+    // TIMER_LOAD_LIST: the load of the list deferred started
     void LoadPendingList();
     // the list ends waiting: its timers stopped, the UI test told whether the highlight was painted first
     void EndPending();
@@ -991,13 +1060,15 @@ private:
     void ScheduleReload();
     // whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
     bool SeveralFolders() const;
-    // the row of the message `uid` of `folder` selected in the list; false when it is not there
-    bool SelectInList(int64_t folder, uint64_t uid);
+    // the row of the message `uid` of `folder` selected in the list once it is read again (its conversation opened);
+    // with `chooseFolder`, its folder chosen in the tree when the list does not have it
+    void SelectInList(int64_t folder, uint64_t uid, bool chooseFolder = false);
     void CustomDraw(NMLVCUSTOMDRAW* draw, LRESULT& result);
     // a row's font: bold as the core says (unread, or a collapsed conversation with an unread message), or the list's
     HFONT RowFont(const PeMessage& row) const;
-    // the selected messages in numbers (summary_), as the core knows them now
-    void RefreshSummary();
+    // the selected messages in numbers (summary_), as the core knows them now: a whole list's counted off the window
+    // thread unless `now`
+    void RefreshSummary(bool now = false);
     // the text of an ignored conversation's row grey, unless the row is selected
     void RowColors(NMLVCUSTOMDRAW* draw, int index, const PeMessage* row) const;
     // the Subject cell of a list grouped by conversation, drawn whole: a conversation's + or - box, the subject indented
@@ -1159,6 +1230,19 @@ private:
     std::unordered_set<int64_t> junkFolders_;
     // the selected draft opens once its source is fetched
     bool openWhenReady_ = false;
+    // the saved draft being read to open in a compose window (pe_draft_open_start), its message and account
+    uint64_t draftRequest_ = 0;
+    std::pair<int64_t, uint64_t> draftMessage_{};
+    int64_t draftAccount_ = 0;
+    // the summary of a whole list's selection being counted (pe_selection_summary_start)
+    uint64_t summaryRequest_ = 0;
+    // the actions started and not done yet, by request: the row to select once done when the messages left the list
+    // (-1: they stay, the list read again with the selection kept)
+    std::unordered_map<uint64_t, int> actions_;
+    // the bar over the list when the server did not do an action: its words and its close button
+    HWND undoneBar_ = nullptr;
+    HWND undoneClose_ = nullptr;
+    std::wstring undoneText_;
     int64_t firstAccount_ = 0;
     // what the Find box searches for, empty when the list is the folder's
     std::wstring find_;
@@ -1207,15 +1291,22 @@ private:
     std::vector<Page> pages_;
     // true while the list is reloaded: its selection changes are the reload's, not the user's
     bool reloading_ = false;
-    // a folder clicked whose list waits for the paint (DeferList); the list before is shown dimmed and takes no input,
-    // and its rows are only those already read
+    // a folder clicked whose list waits for the paint and its load (DeferList), or a list loaded again with its order
+    // or what it shows changed; the list before is shown dimmed and takes no input, and its rows are only those already
+    // read
     bool listPending_ = false;
+    // the list waited for is another list (a folder chosen): nothing selected in the one before stays selected
+    bool newList_ = false;
     // it waited long enough to say "Loading..."
     bool listLoadingShown_ = false;
-    // the next selection of the tree is read after the paint, as a click is (SelectStart), and the message selected
-    // in its list once read (folder, uid)
-    bool deferNext_ = false;
+    // the message selected in the list of the folder chosen once read (folder, uid)
     std::pair<int64_t, uint64_t> startMessage_{};
+    // the loads of the list off the window thread: the window's number of the newest (pages are asked for with it),
+    // the load waited for (0 for none) and its plan, the pages asked for by their offset
+    uint64_t listGeneration_ = 0;
+    uint64_t loadRequest_ = 0;
+    LoadPlan loadPlan_;
+    std::unordered_map<uint64_t, uint64_t> pageRequests_;
     // the tree painted the row chosen highlighted while its list waited
     bool highlightPainted_ = false;
     // what TestListOrder tells, less 10; the UI test holds a list waiting (TestHoldList)
@@ -1298,6 +1389,9 @@ enum ControlId : WORD {
     IDC_ATTACHMENT_STRIP,
     // the frame around it, the strip its child
     IDC_ATTACHMENT_FRAME,
+    // over the list when the server did not do an action on messages: why, and its close button
+    IDC_UNDONE_BAR,
+    IDC_UNDONE_CLOSE,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag

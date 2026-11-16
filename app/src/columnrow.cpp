@@ -348,7 +348,7 @@ void Mailbox::SetAscending(bool ascending) {
 
 void Mailbox::ApplySort() {
     pe_list_view_set_sort(view_.get(), sort_, ascending_);
-    ReloadList(true);
+    ReloadList(true, true);
     UpdateSortButton();
     UpdateSortArrow();
 }
@@ -489,7 +489,7 @@ int Mailbox::TestListTop() const {
 int Mailbox::TestRowPicture(const std::wstring& subject) {
     int count = ListView_GetItemCount(list_);
     for (int index = 0; index < count; index++) {
-        const PeMessage* row = Row(index);
+        const PeMessage* row = RowNow(index);
         if (!row || Text(row->subject) != subject) {
             continue;
         }
