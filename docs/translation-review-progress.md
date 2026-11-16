@@ -12,7 +12,7 @@ Commit completed batches regularly and preserve an exact resume point.
   52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
 - `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
   and git history before resuming, so later source or translation changes are not missed.
-- Resume with Dutch message-context-menu shortcut follow-up, then Italian `core.ftl` (449 entries),
+- Resume with Italian `core.ftl` (449 entries),
   its remaining platform/help catalogs (255 entries) and all 52 help topics. Italian app.ftl is reviewed.
   Dutch is fully reviewed: 1,331 catalog entries and 52 help topics. Eighteen new languages remain.
   No language is considered complete merely because automated checks pass.
@@ -88,10 +88,12 @@ dialogs. Resolved shortcut collisions across shared controls and recorded Italia
 Improved key ownership, backup/transfer credentials, grammar and provider-name placeholders.
 All 72 localization/help tests, structural checks and inventory/hash reconciliation passed.
 
-The expanded context-menu check found six shortcut collisions in Dutch; apply a focused follow-up before
-continuing Italian core messages. Dutch help checkpoint: `7e7dd500`.
+The expanded context-menu check found six shortcut collisions in Dutch. Eight mnemonic placements were
+changed to resolve them across shared menus; visible wording is unchanged. All 11 catalog tests passed afterward.
+Dutch now has 193 improved catalog
+values. Dutch help checkpoint: `7e7dd500`; Italian UI checkpoint: `9ee040ad`.
 
-Current totals: 2,022 catalog entries and 56 help pages reviewed; 285 catalog values improved. Remaining:
+Current totals: 2,022 catalog entries and 56 help pages reviewed; 293 catalog values improved. Remaining:
 23,331 catalog entries and 936 help pages. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final

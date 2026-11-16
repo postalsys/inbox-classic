@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Italian core.ftl: all 449 entries, then remaining platform/help catalogs (255 entries) and all 52 help topics. Dutch is reviewed; check the newly expanded message-context-menu mnemonic scopes for Dutch as a follow-up.",
+  "next_batch": "Italian core.ftl: all 449 entries, then remaining platform/help catalogs (255 entries) and all 52 help topics. Dutch is fully reviewed, including expanded context-menu shortcut checks. Seventeen other new languages await review.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -15938,6 +15938,33 @@
           },
           "validation": "Passed all 72 pe-i18n/pe-html tests after complete Dutch review; structural checks pass except intentionally cleared markers; git diff --check and review inventory/hash reconciliation pass.",
           "notes": "Reviewed final seven privacy/advanced topics. Clarified external images, default attachment handlers, local mail versus credential storage, removal, OAuth setup and command-line switches. All Dutch help topics now reviewed."
+        },
+        {
+          "id": "nl-message-context-mnemonics-followup-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "amended_ids": {
+            "app.ftl": [
+              "cmd-mark-read",
+              "cmd-reply-all",
+              "cmd-forward",
+              "cmd-flag",
+              "cmd-junk",
+              "cmd-not-junk",
+              "cmd-create-rule-from-message",
+              "ui-properties"
+            ]
+          },
+          "changed_values": 8,
+          "amended_values": 8,
+          "files": {
+            "core/locales/nl/app.ftl": "9ed090a033f2fd0dc94cefba54b9bfcb78df9f6427d9908930ac899104370123"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "All expanded menu/dialog scopes have unique mnemonics; all 11 pe-i18n tests passed after the change; review inventory/file hashes reconcile; git diff --check passed.",
+          "notes": "Expanded mnemonic check now includes all four message-context-menu variants and address-book context menu, alongside main menus and key/setup dialogs. Eight mnemonic placements changed; visible wording unchanged. changed_values counts only newly changed entries against the round-start draft, excluding amendments to already improved values."
         }
       ]
     },
