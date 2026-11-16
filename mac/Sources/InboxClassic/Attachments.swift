@@ -2,8 +2,8 @@
 // are a Reader): a tile for each file with the icon of its kind, its name (shortened in the middle, the whole name in
 // its tooltip) and its size, wrapping into rows and scrolling past three. A double-click, Return or Enter opens the
 // file chosen; a right-click, Shift+F10 or the menu key offers Open, Save As and Save All. The core says what each file
-// is, its size in words and whether it may be opened: a file that can run programs looks the same, says why in its
-// tooltip, and is never opened.
+// is, its size in words, whether it may be opened, its tooltip and what to say when it may not: a file that can run
+// programs looks the same, says why in its tooltip, and is never opened.
 import AppKit
 import CInboxClassic
 
@@ -64,6 +64,7 @@ final class AttachmentStrip: NSView {
             return tile
         }
         selected = nil
+        restyle()
         isHidden = files.isEmpty
         scroll.contentView.scroll(to: .zero)
         needsLayout = true
@@ -71,6 +72,18 @@ final class AttachmentStrip: NSView {
 
     func clear() {
         show([])
+    }
+
+    /// every tile's colours again: the choice or the keyboard moved, the window became key or stopped being key
+    func restyle() {
+        tiles.forEach { $0.restyle() }
+    }
+
+    /// the tile of the file being opened shown busy, nil for none
+    func busy(_ index: Int?) {
+        for tile in tiles {
+            tile.alphaValue = tile.index == index ? 0.45 : 1
+        }
     }
 
     // ---- layout ----
@@ -116,9 +129,7 @@ final class AttachmentStrip: NSView {
     func select(_ index: Int?) {
         let index = index.map { min(max($0, 0), files.count - 1) }
         selected = files.isEmpty ? nil : index
-        for tile in tiles {
-            tile.needsDisplay = true
-        }
+        restyle()
         if let selected {
             let tile = tiles[selected]
             tile.scrollToVisible(tile.bounds)
@@ -139,12 +150,13 @@ final class AttachmentStrip: NSView {
         if selected == nil && !files.isEmpty {
             select(0)
         }
-        tiles.forEach { $0.needsDisplay = true }
+        // after it took the keyboard, as `focused` asks the window
+        onMain { [weak self] in self?.restyle() }
         return true
     }
 
     override func resignFirstResponder() -> Bool {
-        tiles.forEach { $0.needsDisplay = true }
+        onMain { [weak self] in self?.restyle() }
         return true
     }
 
@@ -155,7 +167,7 @@ final class AttachmentStrip: NSView {
         guard let window else { return }
         for name in [NSWindow.didBecomeKeyNotification, NSWindow.didResignKeyNotification] {
             observers.append(NotificationCenter.default.addObserver(forName: name, object: window, queue: nil) { [weak self] _ in
-                MainActor.assumeIsolated { self?.tiles.forEach { $0.needsDisplay = true } }
+                MainActor.assumeIsolated { self?.restyle() }
             })
         }
     }
@@ -228,6 +240,10 @@ final class AttachmentTile: NSView {
     private let name = NSTextField(labelWithString: "")
     private let size = NSTextField(labelWithString: "")
     private var hovering = false
+    /// as wide as its name or size needs, within the narrowest and widest a tile is
+    let wanted: CGFloat
+    /// its fill, set with its other colours when its state changes (`restyle`)
+    private var fill = NSColor.clear
 
     private static let nameFont = NSFont.systemFont(ofSize: 12)
     private static let sizeFont = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
@@ -239,6 +255,9 @@ final class AttachmentTile: NSView {
     init(_ file: Attachment, index: Int) {
         self.file = file
         self.index = index
+        let words = max(file.name.size(withAttributes: [.font: Self.nameFont]).width,
+                        file.sizeText.size(withAttributes: [.font: Self.sizeFont]).width)
+        wanted = min(max(Self.padding + Self.iconSide + 6 + ceil(words) + 4 + Self.padding, Self.narrowest), Self.widest)
         super.init(frame: .zero)
         icon.imageScaling = .scaleProportionallyDown
         name.stringValue = file.name
@@ -253,12 +272,12 @@ final class AttachmentTile: NSView {
             label.refusesFirstResponder = true
         }
         [icon, name, size].forEach(addSubview)
-        // the whole name, and why a program is not opened
-        toolTip = file.canOpen ? file.name : file.name + "\n\n" + Text.uiAttachmentProgramTip.text
+        // the core's: the whole name and size, and why a program is not opened
+        toolTip = file.tooltip
         setAccessibilityElement(true)
         setAccessibilityRole(.button)
         setAccessibilityLabel("\(file.name), \(file.sizeText)")
-        setAccessibilityHelp(file.canOpen ? nil : Text.uiAttachmentProgramTip.text)
+        setAccessibilityHelp(file.canOpen ? nil : file.refusal)
         setAccessibilityIdentifier("reader.attachment.\(index)")
         addTrackingArea(NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],
                                        owner: self, userInfo: nil))
@@ -267,14 +286,6 @@ final class AttachmentTile: NSView {
     required init?(coder: NSCoder) { fatalError() }
 
     override var isFlipped: Bool { true }
-
-    /// as wide as its name or size needs, within the narrowest and widest a tile is
-    var wanted: CGFloat {
-        let words = max(file.name.size(withAttributes: [.font: Self.nameFont]).width,
-                        file.sizeText.size(withAttributes: [.font: Self.sizeFont]).width)
-        let width = Self.padding + Self.iconSide + 6 + ceil(words) + 4 + Self.padding
-        return min(max(width, Self.narrowest), Self.widest)
-    }
 
     var isSelected: Bool { strip?.selected == index }
 
@@ -288,9 +299,10 @@ final class AttachmentTile: NSView {
         size.frame = NSRect(x: left, y: 21, width: width, height: 14)
     }
 
-    override func draw(_ dirtyRect: NSRect) {
+    /// its colours for its state: chosen (in the accent colour while the strip has the keyboard), under the mouse, or
+    /// neither; dynamic colours, which follow the appearance by themselves
+    func restyle() {
         let emphasized = isSelected && strip?.focused == true
-        let fill: NSColor
         if emphasized {
             fill = .selectedContentBackgroundColor
         } else if isSelected {
@@ -298,21 +310,25 @@ final class AttachmentTile: NSView {
         } else {
             fill = NSColor.labelColor.withAlphaComponent(hovering ? 0.10 : 0.055)
         }
-        fill.setFill()
-        NSBezierPath(roundedRect: bounds, xRadius: 6, yRadius: 6).fill()
         name.textColor = emphasized ? .alternateSelectedControlTextColor : .labelColor
         size.textColor = emphasized ? .alternateSelectedControlTextColor.withAlphaComponent(0.85) : .secondaryLabelColor
         icon.image = Self.icon(file.kind, color: emphasized ? .white : nil)
+        needsDisplay = true
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        fill.setFill()
+        NSBezierPath(roundedRect: bounds, xRadius: 6, yRadius: 6).fill()
     }
 
     override func mouseEntered(with event: NSEvent) {
         hovering = true
-        needsDisplay = true
+        restyle()
     }
 
     override func mouseExited(with event: NSEvent) {
         hovering = false
-        needsDisplay = true
+        restyle()
     }
 
     override func mouseDown(with event: NSEvent) {
@@ -340,30 +356,31 @@ final class AttachmentTile: NSView {
     // ---- the icons ----
 
     /// the SF Symbol of a kind of file the core names, and its colour
-    static func symbol(_ kind: String) -> (name: String, color: NSColor) {
+    static func symbol(_ kind: PeFileKind) -> (name: String, color: NSColor) {
         switch kind {
-        case "image": ("photo", .systemTeal)
-        case "pdf": ("doc.richtext", .systemRed)
-        case "document": ("doc.text", .systemBlue)
-        case "spreadsheet": ("tablecells", .systemGreen)
-        case "presentation": ("chart.bar.doc.horizontal", .systemOrange)
-        case "archive": ("archivebox", .systemBrown)
-        case "audio": ("waveform", .systemPink)
-        case "video": ("film", .systemPurple)
-        case "calendar": ("calendar", .systemRed)
-        case "contact": ("person.crop.square", .systemGray)
-        case "key": ("key", .systemIndigo)
-        case "text": ("doc.plaintext", .secondaryLabelColor)
-        case "mail": ("envelope", .systemBlue)
-        case "program": ("gearshape", .systemGray)
+        case PE_FILE_KIND_IMAGE: ("photo", .systemTeal)
+        case PE_FILE_KIND_PDF: ("doc.richtext", .systemRed)
+        case PE_FILE_KIND_DOCUMENT: ("doc.text", .systemBlue)
+        case PE_FILE_KIND_SPREADSHEET: ("tablecells", .systemGreen)
+        case PE_FILE_KIND_PRESENTATION: ("chart.bar.doc.horizontal", .systemOrange)
+        case PE_FILE_KIND_ARCHIVE: ("archivebox", .systemBrown)
+        case PE_FILE_KIND_AUDIO: ("waveform", .systemPink)
+        case PE_FILE_KIND_VIDEO: ("film", .systemPurple)
+        case PE_FILE_KIND_CALENDAR: ("calendar", .systemRed)
+        case PE_FILE_KIND_CONTACT: ("person.crop.square", .systemGray)
+        case PE_FILE_KIND_KEY: ("key", .systemIndigo)
+        case PE_FILE_KIND_TEXT: ("doc.plaintext", .secondaryLabelColor)
+        case PE_FILE_KIND_MAIL: ("envelope", .systemBlue)
+        case PE_FILE_KIND_PROGRAM: ("gearshape", .systemGray)
+        case PE_FILE_KIND_OTHER: ("doc", .secondaryLabelColor)
         default: ("doc", .secondaryLabelColor)
         }
     }
 
     private static var cache: [String: NSImage] = [:]
 
-    static func icon(_ kind: String, color: NSColor? = nil) -> NSImage? {
-        let key = "\(kind)@\(color == nil ? "own" : "white")"
+    static func icon(_ kind: PeFileKind, color: NSColor? = nil) -> NSImage? {
+        let key = "\(kind.rawValue)@\(color == nil ? "own" : "white")"
         if let image = cache[key] { return image }
         let (name, own) = symbol(kind)
         let config = NSImage.SymbolConfiguration(pointSize: 19, weight: .regular)

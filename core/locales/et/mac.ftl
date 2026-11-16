@@ -98,8 +98,6 @@ mac-files =
         [one] { $count } fail
        *[other] { $count } faili
     }
-# review: new
-mac-attachment-not-opened = Faili „{ $name }“ ei saa avada
 
 ## Accounts
 

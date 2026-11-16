@@ -911,7 +911,8 @@ final class MessageView {
     func attachment(_ index: Int) -> Attachment? {
         guard let attachment = pe_message_view_attachment(handle, index)?.pointee else { return nil }
         return Attachment(name: text(attachment.filename), size: attachment.size, sizeText: text(attachment.size_text),
-                          kind: text(attachment.kind), canOpen: attachment.can_open)
+                          kind: attachment.kind, canOpen: attachment.can_open, tooltip: text(attachment.tooltip),
+                          refusal: text(attachment.refusal))
     }
 
     /// every attached file, in order
@@ -921,13 +922,16 @@ final class MessageView {
 }
 
 /// A file attached to a message, as the core describes it: its name for display, its size in bytes and in words, its
-/// icon's word (`pdf`, `image`, `program`...) and whether it may be opened from the message
+/// kind (its icon), whether it may be opened from the message, the strip's tooltip and what is said when a file that
+/// may not be opened is (empty for one that may)
 struct Attachment: Equatable {
     let name: String
     let size: UInt64
     let sizeText: String
-    let kind: String
+    let kind: PeFileKind
     let canOpen: Bool
+    let tooltip: String
+    let refusal: String
 }
 
 /// A draft of the core (a reply, a forward, a saved draft, a mailto: link); freed with it

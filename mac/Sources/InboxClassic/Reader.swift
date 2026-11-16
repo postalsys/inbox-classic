@@ -31,6 +31,8 @@ final class Reader: NSObject {
     private(set) var messageView: MessageView?
     /// a message file (.eml) shown, of no folder, instead of a message of the store
     private(set) var file: String?
+    /// the file of the strip being opened, one at a time
+    private var opening: Int?
     /// the size of the message asked for, from the list, for the page shown while it is downloaded
     private var loadingSize: UInt64 = 0
     /// its pictures from the internet were asked for
@@ -707,30 +709,48 @@ final class Reader: NSObject {
         }
     }
 
-    /// attachment `index` opened with the program the system has for it: the core writes it into a private folder of
-    /// the user's, or refuses a file that can run programs and says why; an encrypted message's file comes with a note
-    /// to show first (once). The file is marked as from the internet, as a download is.
+    /// attachment `index` opened with the program the system has for it: refused from its row, in the core's words,
+    /// for a file that can run programs; else the core writes it into a private folder of the user's on a background
+    /// thread (reading and decrypting a large message takes a while; its tile shows it is busy after 400 ms), with an
+    /// encrypted message's note to show first (once). The file is marked as from the internet, as a download is.
     func openAttachment(_ index: Int) {
-        guard showsMessage else { return }
-        var note: UnsafeMutablePointer<CChar>?
-        var error: UnsafeMutablePointer<CChar>?
-        let written = file.map { path in
-            path.withCString { pe_file_attachment_open(core.handle, $0, index, &note, &error) }
-        } ?? pe_attachment_open(core.handle, folder, uid, index, &note, &error)
-        let path = taken(written)
-        let said = taken(note)
-        if let refused = taken(error) {
-            // the file named, as a Mac alert's title, and the core's reason under it
-            let name = messageView?.attachment(index)?.name ?? ""
-            inform(Text.macAttachmentNotOpened.text(["name": name]) + "\n\n" + refused, style: .warning)
+        guard showsMessage, let attachment = messageView?.attachment(index) else { return }
+        guard attachment.canOpen else {
+            inform(attachment.refusal, style: .warning)
+            return
+        }
+        guard opening == nil else { return }
+        opening = index
+        let busy = after(0.4) { [weak self] in self?.strip.busy(index) }
+        let handle = core.handle
+        let (file, folder, uid) = (file, folder, uid)
+        inBackground({
+            var note: UnsafeMutablePointer<CChar>?
+            var error: UnsafeMutablePointer<CChar>?
+            let written = file.map { path in
+                path.withCString { pe_file_attachment_open(handle, $0, index, &note, &error) }
+            } ?? pe_attachment_open(handle, folder, uid, index, &note, &error)
+            return (taken(written), taken(note), taken(error))
+        }, then: { [weak self] (path, note, refused) in
+            busy.invalidate()
+            self?.opened(path: path, note: note, refused: refused)
+        })
+    }
+
+    /// what the core gave for the file being opened: the file, shown after its note; or why there is none
+    private func opened(path: String?, note: String?, refused: String?) {
+        opening = nil
+        strip.busy(nil)
+        if let refused {
+            inform(refused, style: .warning)
             return
         }
         guard let path else {
             notHere()
             return
         }
-        if let said {
-            inform(Text.uiAttachmentNoteTitle.text + "\n\n" + said)
+        if let note {
+            inform(Text.uiAttachmentNoteTitle.text + "\n\n" + note)
         }
         let url = URL(fileURLWithPath: path)
         markFromInternet(url)
@@ -753,7 +773,7 @@ final class Reader: NSObject {
         let open = menu.addItem(withTitle: Text.uiAttachmentOpen.text, action: #selector(openChosen(_:)), keyEquivalent: "")
         open.isEnabled = attachment.canOpen
         if !attachment.canOpen {
-            open.toolTip = Text.uiAttachmentProgramTip.text
+            open.toolTip = attachment.tooltip
         }
         menu.addItem(.separator())
         menu.addItem(withTitle: ellipsis(.uiAttachmentSaveAs), action: #selector(saveAttachment(_:)), keyEquivalent: "")
@@ -787,7 +807,11 @@ final class Reader: NSObject {
 
     /// the calendar part as a file of its own (the core writes it, and only it), for the calendar app
     func openInCalendar() {
-        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("InboxClassic/Invitations").path
+        // into a private folder of the user's, which the core cleans once a day old
+        guard let dir = taken(pe_private_folder(core.handle, "invitations")) else {
+            inform(Text.uiInvitationNotRead.text, style: .error)
+            return
+        }
         // the core reads it from the store, or from the message file shown
         let written = dir.withCString { dir in
             file.map { path in path.withCString { pe_file_invitation_file(core.handle, $0, dir) } }

@@ -90,16 +90,20 @@ extension UITest {
             + part("application/x-msdownload", "setup.exe", Data("MZ, a program of the Mac UI test".utf8))
             + part("image/jpeg", longName, Data(repeating: 0xd8, count: 48_000))
             + part("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Budget 2026.xlsx", Data(repeating: 0x50, count: 9_000))
+            // pages, which a browser would run the scripts of: one by its extension, one by what it holds
+            + part("application/octet-stream", "statement.xht", Data("<p>a statement</p>\n".utf8))
+            + part("application/octet-stream", "statement", Data("<!DOCTYPE html><html><script>alert(1)</script></html>\n".utf8))
             + "--trip--\r\n"
         let uid = try await postMessage(raw)
         try await showInbox(uid)
         let reader = main.mailbox.reader
         let strip = reader.strip
-        check(await waitUntil(10) { !strip.isHidden && strip.files.count == 4 }, "the strip under the header shows the four files")
-        check(strip.files.map(\.name) == ["Itinerary.pdf", "setup.exe", longName, "Budget 2026.xlsx"]
-              && strip.files.map(\.kind) == ["pdf", "program", "image", "spreadsheet"]
+        check(await waitUntil(10) { !strip.isHidden && strip.files.count == 6 }, "the strip under the header shows the six files")
+        check(strip.files.map(\.name) == ["Itinerary.pdf", "setup.exe", longName, "Budget 2026.xlsx", "statement.xht", "statement"]
+              && strip.files.map(\.kind) == [PE_FILE_KIND_PDF, PE_FILE_KIND_PROGRAM, PE_FILE_KIND_IMAGE, PE_FILE_KIND_SPREADSHEET,
+                                              PE_FILE_KIND_PROGRAM, PE_FILE_KIND_PROGRAM]
               && strip.files.allSatisfy { !$0.sizeText.isEmpty } && strip.tiles.allSatisfy { $0.toolTip?.hasPrefix($0.file.name) == true },
-              "each with its icon, name and size, the whole name in its tooltip (\(strip.files.map { "\($0.name) \($0.kind) \($0.sizeText)" }))")
+              "each with its icon, name and size, the whole name in its tooltip (\(strip.files.map { "\($0.name) \($0.kind.rawValue) \($0.sizeText)" }))")
         let header: NSTextField? = find("reader.header", in: main.window)
         if let header, let first = strip.tiles.first {
             let headerLeft = header.convert(header.bounds, to: nil).minX
@@ -121,6 +125,9 @@ extension UITest {
               "the file handed to the system is byte for byte what was sent, under its name")
         checkPrivate(opened.first, "in a new private folder of the user's, marked as from the internet")
         check(window("alert") == nil, "a message that is not encrypted opens without a note")
+        // opened again: the same file, no second copy
+        doubleClick(strip, 0)
+        check(await waitUntil(10) { opened.count == 2 } && opened.last == opened.first, "opened again, the same file is handed over")
 
         // the menu: Open, Save As, Save All; a program's Open greyed
         let menu = strip.menu(for: strip.tiles[0])
@@ -132,6 +139,20 @@ extension UITest {
         check(programMenu.items.first?.isEnabled == false && programMenu.items.dropFirst().allSatisfy { $0.isSeparatorItem || $0.isEnabled },
               "the program's Open is greyed; it can be saved")
         check(strip.tiles[1].toolTip?.contains(Text.uiAttachmentProgramTip.text) == true, "and its tooltip says why")
+        for page in [4, 5] {
+            let name = strip.files[page].name
+            check(strip.menu(for: strip.tiles[page]).items.first?.isEnabled == false, "a page's Open is greyed (\(name))")
+            doubleClick(strip, page)
+            if let refused = await waitWindow("alert", 10) {
+                let words = alertText(refused)
+                check(words.contains("\u{201C}\(name)\u{201D}") && words.contains("can run programs"),
+                      "opening \(name) is refused, naming it (\(words))")
+                answer(refused, "OK")
+                _ = await waitUntil(5) { window("alert") == nil }
+            } else {
+                check(false, "opening \(name) says why")
+            }
+        }
         if let saveAs = programMenu.items.first(where: { $0.title.hasPrefix("Save As") }), let action = saveAs.action {
             let target = out.appendingPathComponent("setup-saved.exe")
             try? FileManager.default.removeItem(at: target)
@@ -157,7 +178,7 @@ extension UITest {
         } else {
             check(false, "trying to open the program says why")
         }
-        check(opened.count == 1, "and nothing is opened")
+        check(opened.count == 2, "and nothing is opened")
 
         // the keyboard: Tab reaches the strip, the arrows move, Enter opens
         let window = main.window
@@ -181,10 +202,9 @@ extension UITest {
         await shot(window, "attach-5-keyboard")
         // after this returns: a file that is refused says so modally
         onMain { self.pressKey(window, 36, "\r") }
-        check(await waitUntil(10) { opened.count == 2 }, "Enter opens the file chosen")
-        check(opened.last.flatMap { try? Data(contentsOf: $0) } == tripPdf, "the same file, in a folder of its own")
-        check(opened.count == 2 && opened[0].deletingLastPathComponent() != opened[1].deletingLastPathComponent(),
-              "each opening writes a new folder")
+        check(await waitUntil(10) { opened.count == 3 }, "Enter opens the file chosen")
+        check(opened.last.flatMap { try? Data(contentsOf: $0) } == tripPdf && opened.last == opened.first,
+              "the same file as before, while it is there")
 
         // dark: the strip keeps its look
         let before = NSApp.appearance
@@ -201,9 +221,9 @@ extension UITest {
         onMain { if let enter { self.list.keyDown(with: enter) } }
         if let shown = await waitWindow("message", 10), let own = MessageWindow.open.last {
             let ownStrip = own.reader.strip
-            check(await waitUntil(15) { !ownStrip.isHidden && ownStrip.files.count == 4 }, "in a message's own window the strip is there")
+            check(await waitUntil(15) { !ownStrip.isHidden && ownStrip.files.count == 6 }, "in a message's own window the strip is there")
             doubleClick(ownStrip, 0)
-            check(await waitUntil(10) { opened.count == 3 }, "and opens the same way")
+            check(await waitUntil(10) { opened.count == 4 }, "and opens the same way")
             check(opened.last.flatMap { try? Data(contentsOf: $0) } == tripPdf, "the same file")
             await pause(0.5)
             await shot(shown, "attach-7-window")
