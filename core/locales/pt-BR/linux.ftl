@@ -139,8 +139,7 @@ gtk-format-hyperlink = Hiperlink (Ctrl+K)
 gtk-font = Fonte
 # review: new
 gtk-show-cc = _Cc
-# review: new
-gtk-show-bcc = _Bcc
+gtk-show-bcc = Cc_o
 # review: new
 gtk-save-tip = Salvar (Ctrl+S)
 # review: new
@@ -166,10 +165,8 @@ gtk-turned-off-why-long =
     { $reason }
 # review: new
 gtk-next = Avançar >
-# review: new
-gtk-provider-sign-in = Faça login em { $address } no site do provedor ({ $provider }). Sua senha não é compartilhada com o Inbox Classic. Você também pode usar uma senha de app criada nas configurações de segurança da sua conta.
-# review: new
-gtk-provider-sign-in-apps = Faça login em { $address } no site do provedor ({ $provider }) com um dos seus aplicativos de login (Mais opções de login). Você também pode usar uma senha de app criada nas configurações de segurança da sua conta.
+gtk-provider-sign-in = { $provider }: faça login em { $address } no site do provedor. Sua senha não é compartilhada com o Inbox Classic. Você também pode usar uma senha de app criada nas configurações de segurança da conta.
+gtk-provider-sign-in-apps = { $provider }: faça login em { $address } no site do provedor usando um dos seus aplicativos de login (Mais opções de login). Você também pode usar uma senha de app criada nas configurações de segurança da conta.
 # review: new
 gtk-accounts-add = Adicionar...
 # review: new

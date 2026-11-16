@@ -426,6 +426,15 @@ Plurals: CLDR's `pt` (pe-i18n gives the catalog that locale), where 0 and 1 are 
 - Review first: "Arquivo Morto", "Acompanhar conversa", the Junk wording (Lixo / Não é lixo), "frase secreta",
   "chaveiro", "fazer login" against "entrar", and the Google and Microsoft settings paths in the help (Verificação em
   duas etapas, Senhas de app).
+- Use “Cc” and “Cco” for copy and blind copy; the Cco controls use Alt+O on Windows/Linux. Keep literal
+  English keyboard tags in help and explain the localized shortcut alongside them.
+- Prefer “Marcar como lixo eletrônico” / “Marcar como e-mail legítimo”; the short toolbar labels stay “Lixo” /
+  “Não é lixo”. Rules “processam” messages; “ordenar” describes the display order.
+- Use “assinatura digital” where text signatures could be confused with cryptographic signatures. Verify all
+  addresses before confirming key ownership. A settings export without a passphrase requires signing in again,
+  which may use the browser; “credenciais de login” includes tokens as well as passwords.
+- The additional sender-address field is “Outros endereços de envio”; use that exact label in errors and help.
+  Use “ID do cliente” / “segredo do cliente” consistently for OAuth fields.
 
 ### Português (pt, Portugal)
 

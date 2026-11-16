@@ -13,16 +13,18 @@ Commit completed batches regularly and preserve an exact resume point.
 - `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
   and git history before resuming, so later source or translation changes are not missed.
 - Continue in `/Users/andris/Projects/PostalExpress/build/i18n-wave1` on `i18n/review-wave1`.
-  Merge this latest master review checkpoint into that isolated branch first. Its state/progress files then
-  become authoritative for later batches; this master copy is the handoff checkpoint.
-- Resume with Brazilian Portuguese (`pt-BR`), then the other pending languages. Portuguese (Portugal),
+  This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
+  and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
+  All five new language structures pass, and all 75 localization/help tests pass after integration.
+- Resume with Brazilian Portuguese (`pt-BR`): the remaining 448 core entries, then 248 platform/help-title
+  entries and all 52 help topics. All 626 app entries and nine coupled controls are reviewed. Portuguese (Portugal),
   Italian and Dutch are fully reviewed: each has 1,331 catalog entries and 52 help topics.
   Twenty-one languages still have pending content, with exact IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
-  not yet on `master` or `origin/master`. Review them in an isolated checkout of that branch when reached;
-  preserve its unrelated feature implementation and do not merge it merely to access the translations.
+  not yet on `master` or `origin/master`. They are included in the isolated review checkout;
+  the feature implementation remains on the isolated branch and has not been merged into master.
   This adds 6,655 catalog entries and 260 help topics: total scope is now 32,008 entries and 1,252 topics.
   The state records exact inventories and the source commit. Recheck the branch and master for later edits.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
@@ -169,8 +171,19 @@ keyboard shortcuts against the implementation. Preserved markup, control referen
 All 72 tests pass; structure, inventory/hash reconciliation, inline control spacing and git diff --check pass.
 The review HTML is regenerated. Portuguese first-help and expanded-inventory checkpoint: `a6f1d948`.
 
-Current totals: 4,057 catalog entries and 160 help pages reviewed; 625 catalog values improved. Remaining:
-27,951 catalog entries and 1,092 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Brazilian Portuguese UI catalog
+
+Reviewed all 626 app entries and nine coupled core/platform controls, improving 88 catalog values. Corrected
+queued-send tense, rule processing, required-field grammar, provider fallbacks, OAuth client terminology, key
+ownership checks and settings-transfer credentials. Standardized Brazilian Cco controls and their access key.
+All actual main menus, four message-context variants and key/setup/agent/rule/contact/recipient dialog scopes
+have unique mnemonics. Recorded terminology and coupled field-label changes in the glossary.
+All 75 tests, structural checks, inventory/hash reconciliation and git diff --check pass. The root review HTML
+now includes the five additional languages. The remaining catalogs and all help topics are still pending.
+Portuguese completion checkpoint: `5573ee4b`.
+
+Current totals: 4,692 catalog entries and 160 help pages reviewed; 713 catalog values improved. Remaining:
+27,316 catalog entries and 1,092 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

@@ -544,8 +544,7 @@ error-folder-special = não é possível renomear nem excluir a Caixa de Entrada
 error-no-recipients = a mensagem não tem destinatários
 # review: new
 error-bad-address = “{ $address }” não é um endereço de e-mail
-# review: new
-error-not-own-address = { $address } não é um dos endereços de remetente desta conta. Adicione-o a “Outros endereços dos quais você envia” nas propriedades da conta.
+error-not-own-address = { $address } não é um dos endereços de remetente desta conta. Adicione-o a “Outros endereços de envio” nas propriedades da conta.
 # review: new
 rule-query-refused = As regras não podem filtrar por pasta nem por data ({ $words }).
 # review: new

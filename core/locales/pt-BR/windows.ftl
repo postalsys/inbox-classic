@@ -30,12 +30,10 @@ win-webview-missing = O runtime do WebView2 não está disponível.
 
 ## Buttons and words used in many windows
 
-# review: new
-win-delete-button = &Excluir
+win-delete-button = E&xcluir
 # review: new
 win-find-label = &Localizar:
-# review: new
-win-save-as-button = Salvar &como...
+win-save-as-button = &Salvar como...
 # review: new
 win-too-many-files = Arquivos demais de uma vez: escolha menos.
 
@@ -58,8 +56,7 @@ win-format-underline = Sublinhado ({ $ctrl }+U)
 win-format-link = Hiperlink ({ $ctrl }+K)
 # review: new
 win-show-cc = &Cc
-# review: new
-win-show-bcc = &Bcc
+win-show-bcc = Cc&o
 # review: new
 win-signature-title = Assinatura: { $account }
 
@@ -148,8 +145,7 @@ win-dont-send = &Não enviar
 win-forget-program-ask = Remover este programa, as permissões dele e o histórico de atividade dos seus agentes? Ele precisará pedir autorização novamente na próxima vez que se conectar.
 # review: new
 win-clear-log-ask = Limpar o histórico de atividade dos agentes? Isso não desfaz as alterações feitas pelos agentes.
-# review: new
-win-agent-programs = &Programas cujos agentes pediram acesso ao seu e-mail:
+win-agent-programs = Pro&gramas cujos agentes pediram acesso ao seu e-mail:
 # review: new
 win-change = &Alterar...
 # review: new

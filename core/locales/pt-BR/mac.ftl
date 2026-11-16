@@ -133,8 +133,7 @@ mac-bold = Negrito
 mac-italic = Itálico
 # review: new
 mac-underline = Sublinhado
-# review: new
-mac-bcc = Bcc
+mac-bcc = Cco
 # review: new
 mac-command-click-to-open = ⌘-clique para abrir
 # review: new
