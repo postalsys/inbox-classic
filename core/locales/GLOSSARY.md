@@ -17,10 +17,10 @@ with a region or script where the language is written differently there (`pt-BR`
 matched by its language, then its region or script, then the language's own catalog (`pt` for any Portuguese but
 Brazil's), then its first (`sr-Latn` for any Serbian). `node
 scripts/check-language.mjs <code>` checks the catalogs and the help against English first. Everything else follows the
-list: building the core writes the installer's languages, the sign-in buttons' Windows resources and the Linux desktop
-entry and metainfo again (commit them), and `scripts/build-sign-in-buttons.sh` makes the language's sign-in button
-pictures (commit them too); the Mac's localizations, the Help Books, the homepage's help and the UI tests read the list
-themselves.
+list: building the core writes the installer's languages, the sign-in buttons' Windows resources, the Linux desktop
+entry and metainfo and `core/include/languages.tsv` (the list for the scripts) again (commit them), and
+`scripts/build-sign-in-buttons.sh` makes the language's sign-in button pictures (commit them too); the Mac's
+localizations, the Help Books, the homepage's help and the UI tests read the list themselves.
 
 **Drafts waiting for review.** `REVIEWED` holds the commit of the last native review. A message translated after it
 (new, or its English changed) has `# review: new` or `# review: changed` on the line above it, and a new or changed

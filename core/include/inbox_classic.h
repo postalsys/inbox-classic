@@ -4440,6 +4440,22 @@ char *pe_language(void);
 // `name` must be a NUL-terminated string.
 char *pe_localized_picture(const char *name);
 
+// The Windows resource of [`pe_localized_picture`]'s picture, as `app/res/sign-in-buttons.rc` names it
+// (`brands/google-sign-in.png` as `GOOGLE_SIGN_IN_PT_BR` in Brazilian Portuguese); NULL for a name that is not UTF-8.
+// Free with `pe_string_free`.
+//
+// # Safety
+// `name` must be a NUL-terminated string.
+char *pe_localized_picture_resource(const char *name);
+
+// The locale of the dates of the windows in the language in use, with the system's `region` (`EE`, NULL for none)
+// where the language has no region of its own: an ICU identifier (`de_EE`, `pt_BR`, `sr_Latn_RS`), English's for the
+// pseudo-language. Free with `pe_string_free`.
+//
+// # Safety
+// `region` must be NULL or a NUL-terminated string.
+char *pe_date_locale(const char *region);
+
 #ifdef __cplusplus
 }  // extern "C"
 #endif  // __cplusplus

@@ -149,6 +149,8 @@ fn chooses_by_region_and_script() {
 fn tags_as_gettext_writes_them() {
     assert_eq!(gettext_locale("pt-BR"), "pt_BR");
     assert_eq!(gettext_locale("sr-Latn"), "sr@latin");
+    assert_eq!(gettext_locale("sr-Latn-RS"), "sr_RS@latin");
+    assert_eq!(gettext_locale("sr-Cyrl"), "sr@cyrillic");
     assert_eq!(gettext_locale("nb"), "nb");
     assert_eq!(gettext_locale("de"), "de");
 }
@@ -263,50 +265,49 @@ fn a_message_by_its_id_in_a_language() {
 }
 
 #[test]
-fn the_scripts_read_the_list_of_languages() {
-    // scripts/languages.sh (and ui-e2e.ps1) read LANGUAGES from this file, one `    ("code", "Name"),` a line
-    let source = include_str!("lib.rs");
-    let start = source.find("pub const LANGUAGES").expect("the list");
-    let end = start + source[start..].find("\n];").expect("its end");
-    let read: Vec<(String, String)> = source[start..end]
-        .lines()
-        .filter_map(|line| {
-            // a Windows checkout ends its lines in CR LF
-            let rest = line
-                .trim_end_matches('\r')
-                .strip_prefix("    (\"")?
-                .strip_suffix("\"),")?;
-            let (code, name) = rest.split_once("\", \"")?;
-            Some((code.to_string(), name.to_string()))
-        })
-        .collect();
-    let listed: Vec<(String, String)> = LANGUAGES
-        .iter()
-        .map(|(code, name)| (code.to_string(), name.to_string()))
-        .collect();
-    assert_eq!(read, listed, "one language a line, as scripts/languages.sh reads them");
+fn the_list_of_languages() {
     assert_eq!(LANGUAGES[0].0, "en", "English first");
     for (code, _) in LANGUAGES {
-        // the language's two letters, and a region (`pt-BR`) or a script (`sr-Latn`), as the pictures and scripts
-        // take them
-        let (language, more) = code.split_once('-').unwrap_or((code, ""));
+        // the language's two letters, then a script or a region, nothing else
+        let tag = Tag::parse(code);
         assert!(
-            language.len() == 2 && language.bytes().all(|b| b.is_ascii_lowercase()),
+            tag.language.len() == 2 && tag.language.bytes().all(|b| b.is_ascii_lowercase()),
             "{code}: the language's two letters"
         );
-        assert!(
-            more.is_empty()
-                || (more.len() == 2 && more.bytes().all(|b| b.is_ascii_uppercase()))
-                || (more.len() == 4
-                    && more.as_bytes()[0].is_ascii_uppercase()
-                    && more.bytes().skip(1).all(|b| b.is_ascii_lowercase())),
-            "{code}: a region or a script after the language"
+        let rebuilt: Vec<&str> = [Some(tag.language), tag.script, tag.region]
+            .into_iter()
+            .flatten()
+            .collect();
+        assert_eq!(
+            rebuilt.join("-"),
+            *code,
+            "{code}: a script or a region after the language"
         );
         assert!(
             CATALOGS.iter().any(|(c, _)| c == code),
             "{code}: a catalog in core/locales/{code}"
         );
     }
+}
+
+#[test]
+fn tags_in_their_parts() {
+    let tag = Tag::parse("sr-Latn-RS");
+    assert_eq!((tag.language, tag.script, tag.region), ("sr", Some("Latn"), Some("RS")));
+    let tag = Tag::parse("es_419");
+    assert_eq!((tag.language, tag.script, tag.region), ("es", None, Some("419")));
+    let tag = Tag::parse("ca-ES-valencia");
+    assert_eq!((tag.language, tag.script, tag.region), ("ca", None, Some("ES")));
+    assert_eq!(date_locale("de", Some("EE")), "de_EE");
+    assert_eq!(date_locale("de", None), "de");
+    assert_eq!(date_locale("pt-BR", Some("US")), "pt_BR");
+    assert_eq!(date_locale("sr-Latn", Some("RS")), "sr_Latn_RS");
+    assert_eq!(date_locale(PSEUDO, Some("EE")), "en_EE");
+    assert_eq!(
+        picture_resource("brands/google-sign-in.pt-BR.png"),
+        "GOOGLE_SIGN_IN_PT_BR"
+    );
+    assert_eq!(picture_resource("brands/microsoft-sign-in.png"), "MICROSOFT_SIGN_IN");
 }
 
 #[test]
