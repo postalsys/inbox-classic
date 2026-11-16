@@ -68,6 +68,18 @@ enum Languages {
         }
     }
 
+    /// `code` (nil for the system's) chosen for the windows, and the app started again when the user wants it now
+    static func choose(_ code: String?) {
+        guard code != chosen else { return }
+        chosen = code
+        // asked only when the windows would change: System default that is German, then Deutsch, needs no new start
+        guard (code ?? system) != current else { return }
+        if ask(Text.macRestartQuestion.text, yes: Text.uiRestartNow.text, no: Text.uiRestartLater.text,
+               style: .information) {
+            AppDelegate.shared?.restart()
+        }
+    }
+
     /// A language's name in itself
     static func name(_ code: String) -> String {
         all.first { $0.code == code }?.name ?? code
@@ -377,15 +389,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     @objc func languageChosen() {
         let index = language.indexOfSelectedItem
         guard codes.indices.contains(index) else { return }
-        let code = codes[index]
-        guard code != Languages.chosen else { return }
-        Languages.chosen = code
-        // asked only when the windows would change: System default that is German, then Deutsch, needs no new start
-        guard (code ?? Languages.system) != Languages.current else { return }
-        if ask(Text.macRestartQuestion.text, yes: Text.uiRestartNow.text, no: Text.uiRestartLater.text,
-               style: .information) {
-            AppDelegate.shared?.restart()
-        }
+        Languages.choose(codes[index])
     }
 }
 

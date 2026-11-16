@@ -20,7 +20,7 @@ private final class FingerprintPanel: NSView {
 
 /// A window of these, centred and run modally until one of its buttons stops it
 @MainActor
-private func runKeyWindow(_ window: NSWindow) {
+func runKeyWindow(_ window: NSWindow) {
     window.center()
     Modal.opened(window)
     NSApp.runModal(for: window)
@@ -30,7 +30,7 @@ private func runKeyWindow(_ window: NSWindow) {
 
 /// A window of the size its content asks for, `id` for the UI test and the help; Esc closes it as Cancel or Close does
 @MainActor
-private func keyWindow(_ title: String, id: String, resizable: Bool = false) -> NSWindow {
+func keyWindow(_ title: String, id: String, resizable: Bool = false) -> NSWindow {
     let window = TextDialogWindow(contentRect: NSRect(x: 0, y: 0, width: 480, height: 200),
                           styleMask: resizable ? [.titled, .resizable] : [.titled], backing: .buffered, defer: true)
     window.autorecalculatesKeyViewLoop = true
@@ -41,7 +41,7 @@ private func keyWindow(_ title: String, id: String, resizable: Bool = false) -> 
 
 /// The stack a window's parts go in, top to bottom, each `width` wide, 20pt from its edges, as tall as they are
 @MainActor
-private func windowStack(_ views: [NSView], in window: NSWindow, width: CGFloat) -> NSStackView {
+func windowStack(_ views: [NSView], in window: NSWindow, width: CGFloat) -> NSStackView {
     let stack = NSStackView(views: views)
     stack.orientation = .vertical
     stack.alignment = .leading
@@ -57,7 +57,7 @@ private func windowStack(_ views: [NSView], in window: NSWindow, width: CGFloat)
 
 /// A button with the accessibility identifier `id`
 @MainActor
-private func keyButton(_ title: String, _ target: AnyObject, _ action: Selector, _ id: String) -> NSButton {
+func keyButton(_ title: String, _ target: AnyObject, _ action: Selector, _ id: String) -> NSButton {
     let button = NSButton(title: title, target: target, action: action)
     button.setAccessibilityIdentifier(id)
     return button
@@ -65,7 +65,7 @@ private func keyButton(_ title: String, _ target: AnyObject, _ action: Selector,
 
 /// A note in the warning look: the triangle beside words that wrap
 @MainActor
-private func warningNote(_ words: String, id: String) -> NSStackView {
+func warningNote(_ words: String, id: String) -> NSStackView {
     let label = wrappingLabel(words)
     label.textColor = .secondaryLabelColor
     label.setAccessibilityIdentifier(id)
@@ -171,13 +171,13 @@ enum KeyActions {
 /// A small window asking for a passphrase, once or twice, in hidden fields; `check` refuses what was typed with the
 /// reason, and the fields are emptied once it is closed
 @MainActor
-private final class PassphraseWindow: NSObject {
+final class PassphraseWindow: NSObject {
     private let window: NSWindow
     private var fields: [NSSecureTextField] = []
     private let check: (([String]) -> String?)?
     private var typed: String?
 
-    init(title: String, intro: String, labels: [String], problem: String?, id: String,
+    init(title: String, intro: String, labels: [String], problem: String?, id: String, help: String = "encryption-keys",
          check: (([String]) -> String?)?) {
         self.check = check
         window = keyWindow(title, id: id)
@@ -211,7 +211,7 @@ private final class PassphraseWindow: NSObject {
         cancel.keyEquivalent = "\u{1b}"
         let ok = keyButton(Text.uiOk.text, self, #selector(okClicked), "\(id).ok")
         ok.keyEquivalent = "\r"
-        let buttons = buttonRow([cancel, ok], help: "encryption-keys")
+        let buttons = buttonRow([cancel, ok], help: help)
         parts.append(buttons)
         let stack = windowStack(parts, in: window, width: 380)
         stack.setCustomSpacing(20, after: parts[parts.count - 2])

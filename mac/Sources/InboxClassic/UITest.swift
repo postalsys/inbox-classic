@@ -583,14 +583,16 @@ final class UITest {
         try await openEml()
         try await darkMessages()
         try await accountsAndHelp()
+        try await setupFile()
         try await languages()
         try await openedFromStore()
     }
 
     func addAccount() async throws {
         step("adding the account")
-        guard let first = await waitWindow("account.start") else { throw Failed(description: "no account form") }
+        guard let opened = await waitWindow("account.start") else { throw Failed(description: "no account form") }
         check(true, "the form opens on the first start")
+        let first = try await firstRunImport(opened)
         let google: NSButton? = find("account.google", in: first)
         let microsoft: NSButton? = find("account.microsoft", in: first)
         check(google?.accessibilityLabel() == "Sign in with Google" && microsoft?.accessibilityLabel() == "Sign in with Microsoft",

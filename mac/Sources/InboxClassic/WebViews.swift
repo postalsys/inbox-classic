@@ -328,6 +328,7 @@ enum Help {
         "keys": "encryption-keys", "key.new": "encryption-keys", "key.backup": "encryption-keys",
         "key.import": "encryption-keys", "key.properties": "encryption-keys", "account.security": "encryption-keys",
         "key.verify": "verify-key", "protection.details": "protection-details",
+        "setup.export": "setup", "setup.import": "setup", "setup.passphrase": "setup", "setup.done": "setup",
     ]
 
     /// opens the help at the topic of `context` (`main`, `account-form`, `options`, ...)
