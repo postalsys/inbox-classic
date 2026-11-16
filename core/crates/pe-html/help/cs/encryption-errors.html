@@ -1,0 +1,16 @@
+<!--review--><h1>Chyby šifrování</h1>
+<p class="summary">Co dělat, když server nenabízí šifrování, nebo je vyžaduje tam, kde je vypnuté.</p>
+<h2>„the server does not offer STARTTLS“</h2>
+<p>Účet je nastaven na STARTTLS, ale server šifrování nenabídl. Inbox Classic se zastavil, takže vaše heslo nebylo odesláno.</p>
+<ol>
+    <li>Otevřete vlastnosti účtu v nabídce <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Nastavte zabezpečení na SSL/TLS s portem 993 pro příchozí poštu nebo 465 pro odchozí poštu.</li>
+    <li>Klikněte na <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Pokud nic jiného nefunguje, server nelze bezpečně používat.</p>
+<h2>„the server takes the password only over an encrypted connection“</h2>
+<p>Server odchozí pošty je nastaven na <b data-text="ui-security-none"></b>. Vaše heslo je v pořádku. Změňte <b data-text="ui-field-smtp-security"></b> na STARTTLS s portem 587, nebo na SSL/TLS s portem 465.</p>
+<h2>Upozornění na spojení bez šifrování</h2>
+<p>Když zvolíte <b data-text="ui-security-none"></b>, Inbox Classic upozorní, že kdokoli, kdo zachytí váš síťový provoz, může číst vaše heslo i zprávy. Pokračujte jen u serveru na vlastním počítači nebo v místní síti.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

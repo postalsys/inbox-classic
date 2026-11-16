@@ -1,0 +1,20 @@
+<!--review-->
+<h1>Triedenie novej pošty pravidlami</h1>
+<p class="summary">Automaticky presúvajte, označujte ako prečítané, označujte príznakom alebo archivujte prichádzajúce správy, ktoré spĺňajú vaše kritériá.</p>
+<p>Pravidlo spája kritériá vyhľadávania s akciami, ktoré sa použijú na zodpovedajúce správy, keď prídu do priečinka Doručená pošta. Napríklad pravidlo s výrazom <code>from:news@example.com</code> môže presúvať bulletiny z tejto adresy do samostatného priečinka a označovať ich ako prečítané.</p>
+<p>Vytvorenie pravidla:</p>
+<ol>
+    <li>Vyberte <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b> a kliknite na <b data-text="ui-rule-new"></b>.</li>
+    <li>Zadajte názov a vyplňte <b data-text="ui-rule-query"></b> rovnakými výrazmi ako v poli hľadania, napríklad <code>from:</code>, <code>subject:</code> alebo <code>list:</code>. Riadok pod tým ukazuje, koľko existujúcich správ v priečinku Doručená pošta týmto kritériám zodpovedá.</li>
+    <li>Vyberte jednu alebo viac akcií pre zodpovedajúce správy: presunúť ich do priečinka, označiť ako prečítané, označiť príznakom, archivovať, presunúť do priečinka Nevyžiadaná pošta, odstrániť alebo potlačiť upozornenia.</li>
+    <li>Kliknite na <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Pravidlo môžete vytvoriť aj zo správy alebo z hľadania. Príkaz <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> vyplní odosielateľa alebo zoznam adresátov vybratej správy. Kliknutím na <b data-text="ui-create-rule"></b> nad výsledkami hľadania použijete aktuálne kritériá vyhľadávania.</p>
+<h2>Ako pravidlá fungujú</h2>
+<p>Pravidlá spracúvajú nové správy v priečinku Doručená pošta, kým je Inbox Classic spustený, aj keď je minimalizovaný v oblasti oznámení. Existujúce správy ovplyvnia, iba ak začiarknete <b data-text="ui-rule-apply-now"></b>. Zodpovedajúce pravidlá sa použijú v poradí, v akom sú v zozname. Keď pravidlo presunie správu z priečinka Doručená pošta, ďalšie pravidlá sa na ňu už nepoužijú. Ak chcete pravidlo vypnúť bez odstránenia, zrušte jeho začiarknutie v zozname.</p>
+<h2>Zmena pravidiel</h2>
+<p>Ak chcete pravidlo upraviť, vyberte ho v zozname a kliknite na <b data-text="ui-rule-edit"></b>, alebo naň dvakrát kliknite. Tlačidlami <b data-text="ui-account-move-up"></b> a <b data-text="ui-account-move-down"></b> zmeníte poradie a tlačidlom <b data-text="ui-rule-delete-button"></b> pravidlo odstránite. V editore pravidla kliknite na <b data-text="ui-rule-show"></b> a v hlavnom okne uvidíte správy, ktoré mu teraz zodpovedajú.</p>
+<p>Pravidlá sa používajú na nové správy v priečinku Doručená pošta, preto filtre podľa priečinka a dátumu nie sú podporované. Ak použijete <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> alebo <code>newer_than:</code>, hlásenie vysvetlí, prečo tieto filtre nemožno použiť. Pravidlá nemôžu správy odosielať ani ich natrvalo odstraňovať: <b data-text="ui-rule-delete"></b> ich presunie do priečinka <b data-text="folder-deleted"></b>.</p>
+<aside class="note">Pravidlá sa vykonávajú v tomto počítači. Ak chcete triediť poštu, aj keď je vypnutý, použite filtre svojho poskytovateľa pošty.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
+<!--/review-->

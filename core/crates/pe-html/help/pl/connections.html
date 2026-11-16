@@ -1,0 +1,13 @@
+<!--review--><h1>Połączenia nawiązywane przez Inbox Classic</h1>
+<p class="summary">Z czym i po co łączy się Inbox Classic, dla zainteresowanych szczegółami technicznymi.</p>
+<ul>
+    <li><b>Twoje serwery poczty</b>, przez IMAP do czytania poczty i SMTP do wysyłania. Połączenia są szyfrowane przez TLS, a certyfikat każdego serwera jest sprawdzany na podstawie certyfikatów zaufanych przez system. Inbox Classic odrzuca serwer bez szyfrowania, chyba że wybierzesz <b data-text="ui-security-none"></b> i potwierdzisz.</li>
+    <li><b>Przy dodawaniu konta</b>, aby wyszukać jego serwery. Inbox Classic odczytuje rekordy DNS Twojej domeny przez DNS over HTTPS (Cloudflare, potem Google), nigdy przez zwykły DNS. Próbuje też pliku autoconfig dostawcy i listy dostawców Thunderbirda (ISPDB). W przypadku Exchange pyta Microsoft Autodiscover, który dostaje Twoje hasło tylko wtedy, gdy o nie poprosi przez HTTPS. Serwer bez szyfrowania nigdy nie jest wybierany.</li>
+    <li><b>Logowanie przez przeglądarkę</b>, z OAuth 2.0 i PKCE, do Google, Microsoft lub dostawcy Twojej aplikacji logowania. Przeglądarka wraca tylko do Inbox Classic na tym komputerze.</li>
+    <li><b>Logo marek</b> (BIMI), z adresu HTTPS marki, gdy wiadomość nie zawiera logo, raz przy każdym uruchomieniu Inbox Classic. Dzieje się to tylko wtedy, gdy serwer poczty potwierdził kontrolę DMARC wiadomości i zatwierdził logo.</li>
+    <li><b>Obrazy z internetu</b>, tylko gdy o nie poprosisz.</li>
+    <li><b>Wypisywanie się</b>, tylko po kliknięciu. Prośba jednym kliknięciem (RFC 8058) jest wysyłana tylko wtedy, gdy lista podpisała wiadomość przez DKIM.</li>
+    <!--os:mac--><li><b>Uaktualnienia</b>, z inboxclassic.com, aby sprawdzić, czy jest nowa wersja.</li><!--/os-->
+</ul>
+<p>Kody logowania są proponowane tylko wtedy, gdy nagłówek Authentication-Results od dostawcy mówi, że domena podpisała wiadomość (DKIM). Nie wymaga to osobnego połączenia.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav><!--/review-->

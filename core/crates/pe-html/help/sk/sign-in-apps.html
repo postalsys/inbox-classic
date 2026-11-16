@@ -1,0 +1,18 @@
+<!--review-->
+<h1>Prihlasovacie aplikácie</h1>
+<p class="summary">Zaregistrujte si vlastnú prihlasovaciu aplikáciu u Googlu, Microsoftu alebo ľubovoľného poskytovateľa OpenID Connect, aby ste sa mohli prihlasovať cez prehliadač.</p>
+<p>Prihlásenie cez prehliadač používa klienta OAuth zaregistrovaného u poskytovateľa. Inbox Classic má vlastného pre Google a Microsoft. Kým Google aplikáciu neoverí, povoľuje klienta Inbox Classic iba testovacím používateľom, preto je tlačidlo <b data-text="win-sign-in-google"></b> na začiatku vypnuté. Môžete si zaregistrovať vlastného klienta: vo svojom projekte Google Cloud, vo svojom nájomníkovi Microsoft Entra alebo u ľubovoľného poskytovateľa OpenID Connect.</p>
+<p>Pridanie prihlasovacej aplikácie:</p>
+<ol>
+    <li>Vyberte <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Kliknite na <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os--> a potom na <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>Vedľa položky <b data-text="ui-fill-in-for"></b> kliknite na Google alebo Microsoft, aby sa vyplnil vydavateľ, oprávnenia a servery. Pri inom poskytovateľovi ich zadajte.</li>
+    <li>Zaregistrujte klienta u poskytovateľa podľa vysvetlenia v poli dole. Zaregistrujte <b data-text="ui-redirect-uri"></b>, ktoré je tam uvedené.</li>
+    <li>Zadajte <b data-text="ui-client-id"></b> a <b data-text="ui-client-secret"></b>, ak vám ho poskytovateľ dal. Tajný kód sa uchováva v <!--os:windows-->Správcovi poverení systému Windows<!--/os--><!--os:mac-->vašej prihlasovacej kľúčenke<!--/os--><!--os:linux-->vašej kľúčenke<!--/os--> a už sa nikdy nezobrazí.</li>
+    <li>Kliknutím na <b data-text="ui-check"></b> overíte, či je vydavateľ správny, a potom kliknite na <b data-text="ui-ok"></b>.</li>
+    <li>Konto pridajte pomocou <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> na prvej strane okna <b data-text="ui-add-account-title"></b>.</li>
+</ol>
+<p>V okne <b data-text="ui-sign-in-apps"></b> <!--os:windows,mac-->začiarkavacie políčko každej aplikácie<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> určuje, či sa aplikácia ponúka pre nové kontá, vrátane vstavaných. Kontá, ktoré už aplikáciu používajú, fungujú ďalej. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> aplikáciu zmení a <b data-text="ui-remove"></b> ju odstráni, keď ju už žiadne konto nepoužíva.</p>
+<p>Ak poštový server odmietne token aplikácie, skontrolujte, či jej oprávnenia dávajú prístup k pošte.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
+<!--/review-->

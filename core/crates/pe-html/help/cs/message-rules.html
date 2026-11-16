@@ -1,0 +1,19 @@
+<!--review--><h1>Třídění nové pošty pravidly</h1>
+<p class="summary">Automaticky přesouvejte, označujte jako přečtené, označujte příznakem nebo archivujte příchozí zprávy, které splňují vaše kritéria.</p>
+<p>Pravidlo spojuje kritéria hledání s akcemi, které se provedou u odpovídajících zpráv, jakmile dorazí do složky Doručená pošta. Například pravidlo s <code>from:news@example.com</code> může zpravodaje z této adresy přesunout do samostatné složky a označit je jako přečtené.</p>
+<p>Jak vytvořit pravidlo:</p>
+<ol>
+    <li>Zvolte <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b> a klikněte na <b data-text="ui-rule-new"></b>.</li>
+    <li>Zadejte název a vyplňte <b data-text="ui-rule-query"></b> stejnými výrazy jako ve vyhledávacím poli, například <code>from:</code>, <code>subject:</code> nebo <code>list:</code>. Řádek pod ním ukazuje, kolik zpráv ve složce Doručená pošta těmto kritériím odpovídá.</li>
+    <li>Zvolte jednu nebo více akcí pro odpovídající zprávy: přesunout do složky, označit jako přečtené, označit příznakem, archivovat, přesunout do Nevyžádané pošty, odstranit nebo potlačit oznámení.</li>
+    <li>Klikněte na <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Pravidlo můžete vytvořit také ze zprávy nebo z hledání. Zvolte <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> a vyplní se odesílatel nebo poštovní konference vybrané zprávy. Klikněte na <b data-text="ui-create-rule"></b> nad výsledky hledání a použijí se vaše aktuální kritéria hledání.</p>
+<h2>Jak pravidla fungují</h2>
+<p>Pravidla zpracovávají nové zprávy ve složce Doručená pošta, dokud Inbox Classic běží, i když je minimalizovaný do oznamovací oblasti. Stávajících zpráv se týkají, jen pokud zaškrtnete <b data-text="ui-rule-apply-now"></b>. Odpovídající pravidla se provádějí v pořadí, v jakém jsou v seznamu. Jakmile pravidlo přesune zprávu ze složky Doručená pošta, žádné další pravidlo se na ni už nepoužije. Zrušením zaškrtnutí pravidla v seznamu je vypnete, aniž byste je odstranili.</p>
+<h2>Změna pravidel</h2>
+<p>Chcete-li pravidlo upravit, vyberte je v seznamu a klikněte na <b data-text="ui-rule-edit"></b>, nebo na ně poklepejte. Pořadí změníte tlačítky <b data-text="ui-account-move-up"></b> a <b data-text="ui-account-move-down"></b>, pravidlo odstraníte tlačítkem <b data-text="ui-rule-delete-button"></b>. V editoru pravidla klikněte na <b data-text="ui-rule-show"></b> a v hlavním okně uvidíte zprávy, které právě odpovídají.</p>
+<p>Pravidla se týkají nových zpráv ve složce Doručená pošta, proto nepodporují filtry podle složky a data. Pokud použijete <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> nebo <code>newer_than:</code>, zobrazí se vysvětlení, proč tyto filtry nelze použít. Pravidla nemohou zprávy odesílat ani je odstraňovat natrvalo: <b data-text="ui-rule-delete"></b> je přesune do složky <b data-text="folder-deleted"></b>.</p>
+<aside class="note">Pravidla běží v tomto počítači. Chcete-li třídit poštu, i když je vypnutý, použijte filtry svého poskytovatele pošty.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
+<!--/review-->

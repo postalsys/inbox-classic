@@ -1,0 +1,13 @@
+<!--review--><h1>Ustawienia zabezpieczeń konta</h1>
+<p class="summary">Ustawienia zabezpieczeń serwerów konta i znaczenie każdego z nich.</p>
+<p>Każde konto ma pole <b data-text="ui-field-imap-security"></b> dla serwera poczty przychodzącej i <b data-text="ui-field-smtp-security"></b> dla serwera poczty wychodzącej. Inbox Classic wypełnia je, gdy znajdzie ustawienia dostawcy. Aby je zmienić, otwórz właściwości konta w <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<table>
+    <tr><th>Ustawienie</th><th>Znaczenie</th></tr>
+    <tr><td>SSL/TLS</td><td>Połączenie jest szyfrowane od początku. Zwykle port 993 dla poczty przychodzącej i 465 dla wychodzącej.</td></tr>
+    <tr><td>STARTTLS</td><td>Połączenie jest szyfrowane zaraz po otwarciu. Zwykle port 143 dla poczty przychodzącej i 587 dla wychodzącej. Inbox Classic przerywa połączenie, jeśli serwer nie oferuje szyfrowania.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Twoje hasło i poczta przesyłane są w postaci czytelnej dla każdego w sieci.</td></tr>
+</table>
+<aside class="warning">Używaj ustawienia <b data-text="ui-security-none"></b> tylko dla serwera na własnym komputerze lub w sieci lokalnej. Inbox Classic ostrzega przed jego użyciem.</aside>
+<p>Inbox Classic sprawdza, czy każdy serwer jest tym, za kogo się podaje, na podstawie certyfikatów zaufanych przez system. Nie ma przełącznika, który akceptuje dowolny certyfikat.</p>
+<p>Twoje hasło jest przechowywane w <!--os:windows-->Menedżerze poświadczeń systemu Windows<!--/os--><!--os:mac-->pęku kluczy logowania<!--/os--><!--os:linux-->pęku kluczy<!--/os-->, nigdy w magazynie poczty. Konto, które loguje się przez przeglądarkę, nie przechowuje żadnego hasła.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav><!--/review-->

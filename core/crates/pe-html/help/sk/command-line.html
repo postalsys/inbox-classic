@@ -1,0 +1,18 @@
+<!--review-->
+<h1>Možnosti príkazového riadka</h1>
+<p class="summary">Možnosti spustenia Inbox Classic z terminálu, na testovanie a pre AI agentov.</p>
+<p>Spustite program <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> s týmito možnosťami:</p>
+<table>
+    <tr><th>Možnosť</th><th>Čo robí</th></tr>
+    <tr><td><code>--store &lt;súbor&gt;</code></td><td>Použije iné úložisko pošty, napríklad na testovanie</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Uchová heslá iba pre toto spustenie, nikdy nie v úložisku hesiel systému</td></tr>
+    <tr><td><code>--pin-certificate &lt;súbor&gt;</code></td><td>Prijme iba certifikát servera v tomto súbore (PEM alebo DER), pre testovací server so svojpomocne podpísaným certifikátom</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;súbor&gt;</code></td><td>Namiesto otvorenia prehliadača zapíše stránku prihlásenia cez prehliadač do tohto súboru</td></tr>
+    <tr><td><code>--language &lt;kód&gt;</code></td><td>Pri tomto spustení zobrazí okná v tomto jazyku, napríklad <code>sk</code></td></tr>
+    <tr><td><code>--background</code></td><td>Spustí sa bez okna</td></tr>
+    <tr><td><code>--mcp</code></td><td>Pripojí AI agenta k Inbox Classic. Spúšťa to program agenta, nie vy</td></tr>
+    <tr><td><code>--version</code></td><td>Vypíše verziu a skončí</td></tr>
+</table>
+<p>Odkaz <code>mailto:</code> zadaný ako argument otvorí novú správu, rovnako ako e-mailový odkaz.</p>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

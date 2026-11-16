@@ -1,0 +1,17 @@
+<!--review--><h1>Klucze szyfrowania</h1>
+<p class="summary">Utwórz klucz do podpisywania wiadomości i odbierania zaszyfrowanej poczty oraz przechowuj klucze kontaktów.</p>
+<p>Inbox Classic podpisuje i szyfruje pocztę kluczami OpenPGP. Twój klucz ma dwie połowy: klucz publiczny, który dajesz innym, i klucz prywatny, który zostaje na Twoim komputerze. Klucze kontaktów pozwalają sprawdzać ich podpisy i szyfrować dla nich pocztę.</p>
+<p>Aby utworzyć klucz:</p>
+<ol>
+    <li>Wybierz <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, a potem kliknij <b data-text="ui-keys-new"></b>.</li>
+    <li>Wybierz konto i kliknij <b data-text="ui-keys-new-make"></b>. Klucz jest używany dla adresu konta i jego innych adresów.</li>
+    <li>Kliknij <b data-text="ui-keys-backup-now"></b> i wybierz frazę hasła. Przechowuj plik i frazę hasła w różnych bezpiecznych miejscach.</li>
+</ol>
+<aside class="warning">Bez kopii zapasowej Twojego klucza nie da się odzyskać, jeśli ten komputer zginie lub zostanie zresetowany, a poczty zaszyfrowanej dla niego nie będzie już można odczytać.</aside>
+<h2>Klucze są chronione bez fraz hasła</h2>
+<p>Twoje klucze prywatne chroni klucz przechowywany w <!--os:windows-->Menedżerze poświadczeń<!--/os--><!--os:mac-->pęku kluczy<!--/os--><!--os:linux-->systemowym pęku kluczy<!--/os-->, więc nigdy nie wpisujesz frazy hasła, aby ich użyć. Frazę hasła wybierasz tylko dla kopii zapasowej. Jeśli Twój klucz jest pokazywany jako zablokowany, ta ochrona została zresetowana: kliknij <b data-text="ui-keys-import"></b> i wybierz jego kopię zapasową.</p>
+<h2>Dodawanie kluczy</h2>
+<p>Kliknij <b data-text="ui-keys-import"></b>, aby dodać klucz z pliku, na przykład przysłany przez kontakt albo własną kopię zapasową. Klucz prywatny chroniony frazą hasła raz o nią poprosi. Inbox Classic zapyta potem, czy używać zaimportowanego Twojego klucza dla Twoich adresów.</p>
+<p>Klucz kontaktu jest od tej chwili używany dla jego adresu. Jeśli później pojawi się inny klucz dla tego samego adresu, bieżący pozostaje w użyciu, dopóki nie wybierzesz nowego we właściwościach kontaktu.</p>
+<p>Aby udostępnić swój klucz publiczny, zaznacz go i kliknij <b data-text="ui-keys-export"></b>. Klucz konta możesz też wybrać w jego właściwościach, na karcie <b data-text="ui-account-security"></b>.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav><!--/review-->
