@@ -3235,6 +3235,16 @@ public static class Dragger {
     $said = WaitFor { if ([Native.Win]::IsWindowVisible($undoneBar)) { WindowText $undoneBar } } 30
     Check ($said -match '^The server did not move 1 message to Gone, so (it is|they are) back in Bulk: .+') "a move the server refuses is taken back, a bar over the list saying why in the core's words ($said)"
     Check ([bool](WaitFor { (Rows) -eq 4 -and (SubjectRows $refused).Count -eq 1 } 20)) "and its row is back in the list ($(Rows) rows)"
+    Check ((StatusPart $mainStatus 0) -notmatch 'to Gone') "the status bar no longer says it moved ($(StatusPart $mainStatus 0))"
+    # selected again, in view, as what Undo brings back is
+    $reselected = {
+        $rows = @(& $selectedRows)
+        $names = @($rows | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_SUBJECT) })
+        $top = [int][Native.Win]::SendMessage($list, 0x1027, [IntPtr]::Zero, [IntPtr]::Zero)
+        $page = [int][Native.Win]::SendMessage($list, 0x1028, [IntPtr]::Zero, [IntPtr]::Zero)
+        $rows.Count -eq 1 -and ($names -join '|') -eq $refused -and $rows[0] -ge $top -and $rows[0] -lt $top + $page
+    }
+    Check ([bool](WaitFor $reselected 20)) "and the message that came back is selected, in view ($((& $selectedRows) -join ', '))"
     Shot $main 'many-1-refused'
     Click $main $IDC_UNDONE_CLOSE
     Check ([bool](WaitFor { -not [Native.Win]::IsWindowVisible($undoneBar) } 5)) 'the bar closes with its button'

@@ -1153,9 +1153,11 @@ void Mailbox::ApplyList(const LoadPlan& plan, ListData data) {
     ShowPersonColumn(data.listsRecipients);
     int count = static_cast<int>(std::min<uint64_t>(rowCount_, INT_MAX));
     // the message shown follows to where it is now, without a flicker of the reading pane; several selected messages
-    // are found again where they are now; a whole list's selection is the whole list again
+    // are found again where they are now; a whole list's selection is the whole list again while no mail came since
+    // Select All, otherwise the messages it had (pe_list_view_select_all_again lists them), the newer rows not selected
     int64_t index = follow && shown == plan.shownUid && reader_.Folder() == plan.shownFolder ? data.index : -1;
-    bool all = keepSelection && !pending && pe_selection_is_all(selection_.get());
+    bool all = keepSelection && !pending && pe_selection_is_all(selection_.get()) &&
+               pe_list_view_select_all_again(core_, view_.get(), selection_.get());
     core::Positions several(keepSelection && !all && (pending || !shown) && pe_selection_count(selection_.get()) > 0
                                 ? pe_list_view_positions(core_, view_.get(), selection_.get())
                                 : nullptr);
@@ -1178,6 +1180,8 @@ void Mailbox::ApplyList(const LoadPlan& plan, ListData data) {
     }
     if (all && count > 0) {
         ListView_SetItemState(list_, -1, LVIS_SELECTED, LVIS_SELECTED);
+        // the same Select All, counted again: not a new one that would take mail stored since
+        kept = true;
     } else if (!plan.selectUid && plan.after < 0) {
         // the messages selected before are still the selection where they are now: only their numbers change
         kept = SelectPositions(several.get(), false);
@@ -3738,6 +3742,9 @@ void Mailbox::OnEvent(const UiEvent& event) {
         // the rows are back already (FolderChanged): why, over the list; the status bar no longer says it was done
         ShowUndone(event.message);
         Say(L"");
+        // the messages back in the list now, and selected there as what Undo brings back is
+        undoPending_ = true;
+        ReloadList(true, false);
         break;
     case PE_EVENT_KIND_READ_DONE:
         if (summaryRequest_ && event.uid == summaryRequest_) {
