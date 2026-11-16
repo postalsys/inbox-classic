@@ -2618,6 +2618,8 @@ dependencies = [
  "pe-sync",
  "resvg",
  "ring",
+ "serde",
+ "serde_json",
  "tokio",
  "unicode-normalization",
  "windows-native-keyring-store",
