@@ -433,8 +433,8 @@ fn whole_names() -> gtk::SignalListItemFactory {
     factory
 }
 
-/// The language changes at the next start: now, or later
-async fn ask_restart(parent: &adw::PreferencesDialog) {
+/// The language changes at the next start: now, or later; `parent` closes first when it is a dialog
+pub async fn ask_restart(parent: &impl IsA<gtk::Widget>) {
     let (later, now) = (
         crate::words::plain(crate::words::Text::UiRestartLater),
         crate::words::plain(crate::words::Text::UiRestartNow),
@@ -451,7 +451,9 @@ async fn ask_restart(parent: &adw::PreferencesDialog) {
     )
     .await;
     if answer == "restart" {
-        parent.close();
+        if let Some(dialog) = parent.as_ref().downcast_ref::<adw::Dialog>() {
+            dialog.close();
+        }
         spawn(crate::app::restart());
     }
 }

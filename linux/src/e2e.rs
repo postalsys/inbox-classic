@@ -52,6 +52,9 @@ mod dark;
 /// Step 19i: signed and encrypted mail
 mod secure;
 
+/// Step 45a: settings and accounts to another computer
+mod setup;
+
 const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
 const MINUTES: &str = "Minutes of the planning meeting";
@@ -1028,6 +1031,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::between_accounts(&d).await;
     accounts(&d).await;
     sign_in_apps(&d).await;
+    setup::settings_and_accounts(&d).await;
     steps::languages(&d).await;
     steps::language_tour(&d).await;
     about_and_help(&d).await;
@@ -1068,6 +1072,12 @@ async fn add_account(d: &Driver, name: &str, user: &str, password: &str, shots: 
         d.check(
             named_in(&first, "form-3").is_none(),
             "and asks no password before the servers are known",
+        );
+        setup::first_run(d, &first).await;
+    } else {
+        d.check(
+            named_in(&first, "setup-first-run").is_none(),
+            &format!("with an account here, the account form offers no import ({name})"),
         );
     }
     set_text(&first, "start-name", name);

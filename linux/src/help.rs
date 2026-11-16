@@ -59,6 +59,7 @@ fn context_of(window: &adw::ApplicationWindow) -> &'static str {
         Some("agents-dialog" | "agents-setup-dialog") => "agents",
         Some("rules-dialog" | "rule-dialog") => "message-rules",
         Some("key-verify-dialog") => "verify-key",
+        Some(name) if crate::setup::DIALOGS.contains(&name) => "setup",
         Some(
             "keys-dialog" | "key-new-dialog" | "key-backup-dialog" | "key-import-dialog" | "key-properties-dialog",
         ) => "encryption-keys",

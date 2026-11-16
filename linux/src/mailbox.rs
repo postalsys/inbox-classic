@@ -1677,6 +1677,12 @@ impl Mailbox {
         self.show_checks("text_size");
     }
 
+    /// The text size the core keeps changed elsewhere (an import of settings): every message view at it, its check mark
+    pub fn text_size_changed(&self) {
+        crate::webview::set_text_zoom(shell().core.text_zoom());
+        self.show_checks("text_size");
+    }
+
     /// The check marks of the items of a submenu ("layout", "sort_by") as things are now
     fn show_checks(&self, group: &str) {
         for &command in Command::ALL.iter().filter(|c| c.submenu() == Some(group)) {

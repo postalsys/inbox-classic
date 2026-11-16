@@ -764,6 +764,8 @@ pub fn run_command(command: Command) {
         Command::ExportAddressBook => {
             spawn(async move { crate::address_book::export(main.window().upcast_ref()).await })
         }
+        Command::ExportSetup => crate::setup::run_export(),
+        Command::ImportSetup => crate::setup::run_import(),
     }
 }
 
