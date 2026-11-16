@@ -1,0 +1,16 @@
+<!--review--><h1>Påloggingsapper</h1>
+<p class="summary">Registrer din egen påloggingsapp hos Google, Microsoft eller en hvilken som helst OpenID Connect-leverandør, for å logge på via nettleseren.</p>
+<p>Pålogging via nettleseren bruker en OAuth-klient som er registrert hos leverandøren. Inbox Classic har sine egne for Google og Microsoft. Google lar bare testbrukere bruke klienten til Inbox Classic til appen er bekreftet, så <b data-text="win-sign-in-google"></b> er av til å begynne med. Du kan registrere en egen klient: i Google Cloud-prosjektet ditt, i Microsoft Entra-leietakeren din eller hos en hvilken som helst OpenID Connect-leverandør.</p>
+<p>Slik legger du til en påloggingsapp:</p>
+<ol>
+    <li>Velg <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Klikk på <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->, og deretter på <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>Ved siden av <b data-text="ui-fill-in-for"></b> klikker du på Google eller Microsoft for å fylle inn utsteder, tillatelser og servere. For en annen leverandør skriver du dem inn.</li>
+    <li>Registrer klienten hos leverandøren slik boksen nederst forklarer. Registrer <b data-text="ui-redirect-uri"></b> som vises der.</li>
+    <li>Skriv inn <b data-text="ui-client-id"></b>, og <b data-text="ui-client-secret"></b> hvis leverandøren ga deg en. Hemmeligheten lagres i <!--os:windows-->Legitimasjonsbehandling i Windows<!--/os--><!--os:mac-->påloggingsnøkkelringen din<!--/os--><!--os:linux-->nøkkelringen din<!--/os--> og vises aldri igjen.</li>
+    <li>Klikk på <b data-text="ui-check"></b> for å se at utstederen er riktig, og deretter på <b data-text="ui-ok"></b>.</li>
+    <li>Legg til kontoen med <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> på den første siden i <b data-text="ui-add-account-title"></b>.</li>
+</ol>
+<p>I <b data-text="ui-sign-in-apps"></b> viser <!--os:windows,mac-->avmerkingsboksen til hver app<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> om appen tilbys for nye kontoer, de innebygde medregnet. Kontoene som allerede bruker en app, fortsetter å virke. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> endrer en app, og <b data-text="ui-remove"></b> fjerner en når ingen kontoer bruker den.</p>
+<p>Hvis e-postserveren avviser tokenet til appen, kontrollerer du at tillatelsene gir tilgang til e-post.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav><!--/review-->
