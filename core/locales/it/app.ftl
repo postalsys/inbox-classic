@@ -456,7 +456,7 @@ ui-rules-applied = { $count ->
    *[other] { $count } messaggi elaborati dalle tue regole
 }
 ui-col-rule-matches = Criteri
-ui-clear-button = &Cancella
+ui-clear-button = Canc&ella
 ui-how-to-connect = Come collegare un agente…
 ui-agent-programs = Programmi i cui agenti hanno chiesto l’accesso alla tua posta
 ui-what-agents-did = Attività degli agenti

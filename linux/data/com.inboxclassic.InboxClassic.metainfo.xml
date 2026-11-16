@@ -104,9 +104,9 @@
       przez przeglądarkę.
     </p>
     <p xml:lang="pt">
-      O Inbox Classic lê e escreve e-mail com as pastas à esquerda, as mensagens em cima e a mensagem por baixo, como os
-      programas de correio de antigamente. Funciona com qualquer conta IMAP e SMTP e inicia sessão no Outlook.com e no
-      Microsoft 365 através do browser.
+      O Inbox Classic permite ler e escrever correio eletrónico numa interface familiar: pastas à esquerda, lista de
+      mensagens em cima e conteúdo da mensagem selecionada por baixo. Funciona com qualquer conta IMAP e SMTP e permite
+      iniciar sessão no Outlook.com e no Microsoft 365 através do browser.
     </p>
     <p xml:lang="ro">
       Inbox Classic citește și scrie e-mailuri cu folderele în stânga, mesajele sus și mesajul dedesubt, ca programele
@@ -210,10 +210,10 @@
       <li xml:lang="pl">Wyszukiwanie słów w temacie, nadawcach i odbiorcach, nazwach plików i treści, z operatorami Gmaila</li>
       <li xml:lang="pl">Odpowiedzi zwijają cytowane wcześniejsze wiadomości</li>
       <li xml:lang="pl">Poczta jest dostępna offline; hasła są przechowywane w Twoim pęku kluczy</li>
-      <li xml:lang="pt">Cada mensagem é mostrada limpa, sem scripts, e as imagens da Internet só quando as permitir</li>
-      <li xml:lang="pt">Uma pesquisa que encontra palavras no assunto, nas pessoas, nos nomes dos ficheiros e no texto, com os operadores do Gmail</li>
-      <li xml:lang="pt">As respostas recolhem as mensagens anteriores que citam</li>
-      <li xml:lang="pt">O correio continua legível sem ligação; as palavras-passe ficam guardadas no seu porta-chaves</li>
+      <li xml:lang="pt">As mensagens são apresentadas sem scripts nem outros conteúdos potencialmente perigosos; as imagens da internet só são carregadas com a sua autorização</li>
+      <li xml:lang="pt">Pesquisa no assunto, nos remetentes, nos destinatários, nos nomes dos anexos e no texto das mensagens, com suporte para os operadores do Gmail</li>
+      <li xml:lang="pt">O texto das mensagens anteriores citado nas respostas fica recolhido e pode ser expandido quando necessário</li>
+      <li xml:lang="pt">O correio já transferido pode ser lido sem ligação à internet; as palavras-passe ficam guardadas no porta-chaves</li>
       <li xml:lang="ro">Fiecare mesaj este afișat curățat, fără scripturi, iar imaginile de pe internet doar când le permiteți</li>
       <li xml:lang="ro">O căutare care găsește cuvinte în subiect, în expeditori și destinatari, în numele fișierelor și în text, cu operatorii din Gmail</li>
       <li xml:lang="ro">Răspunsurile pliază mesajele anterioare pe care le citează</li>

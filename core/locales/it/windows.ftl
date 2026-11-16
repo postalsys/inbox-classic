@@ -96,7 +96,7 @@ win-forget-program-ask = Rimuovere questo programma, le sue autorizzazioni e la 
 win-clear-log-ask = Cancellare la cronologia delle attività degli agenti? Le modifiche fatte dagli agenti non verranno annullate.
 win-agent-programs = &Programmi i cui agenti hanno chiesto l’accesso alla tua posta:
 win-change = &Modifica...
-win-what-agents-did = &Attività degli agenti:
+win-what-agents-did = At&tività degli agenti:
 win-how-to-connect = Come connettere un agente
 
 ## Sign-in apps

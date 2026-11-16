@@ -12,8 +12,7 @@ Commit completed batches regularly and preserve an exact resume point.
   52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
 - `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
   and git history before resuming, so later source or translation changes are not missed.
-- Resume with Portuguese (Portugal), `pt/core.ftl` (449 entries), then its 256 platform/help-title entries
-  and all 52 help topics. All 626 Portuguese app entries are reviewed.
+- Resume with all 52 Portuguese (Portugal) help topics. All 1,331 Portuguese catalog entries are reviewed.
   Italian and Dutch are fully reviewed: each has 1,331 catalog entries and 52 help topics.
   Seventeen new languages remain, with exact pending IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
@@ -129,8 +128,21 @@ placements without changing the platform catalogs. Portuguese glossary notes rec
 All 11 catalog tests, structural checks and inventory/hash reconciliation pass. Menu and dialog access keys
 are unique; git diff --check passes. Italian completion checkpoint: `f3251bd3`.
 
-Current totals: 3,352 catalog entries and 108 help pages reviewed; 489 catalog values improved. Remaining:
-22,001 catalog entries and 884 help pages. `REVIEWED` remains unchanged until the full round is complete.
+### Portuguese catalogs completed
+
+Reviewed all 449 core entries and the remaining 256 platform/help-title entries, improving 133 values.
+Corrected count agreement, failure guidance, undo labels, queued agent messages, key publication/decryption,
+transferred credentials and temporary-attachment cleanup. Improved native platform and installer/store wording.
+All 1,331 Portuguese catalog entries are now reviewed, with 202 values improved. Its 52 help topics remain.
+
+The expanded Windows AI Agents dialog check also found three shortcut collisions in previously reviewed Dutch
+and Italian controls. Corrected those mnemonic placements; visible wording is unchanged. Dutch now has 194
+improved values and Italian 192. Existing German/Spanish/Estonian/French dialog shortcuts pass unchanged.
+All 72 tests pass; structural checks, expanded menu/dialog checks and inventory/hash reconciliation pass.
+Generated installer/Linux metadata is inspected and git diff --check passes. Portuguese UI checkpoint: `c3509da7`.
+
+Current totals: 4,057 catalog entries and 108 help pages reviewed; 625 catalog values improved. Remaining:
+21,296 catalog entries and 884 help pages. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

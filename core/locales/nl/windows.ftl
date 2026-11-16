@@ -95,7 +95,7 @@ win-dont-send = &Niet verzenden
 win-forget-program-ask = Dit programma verwijderen, met de machtigingen en de activiteitengeschiedenis van de agents? Bij de volgende verbinding wordt opnieuw om toestemming gevraagd.
 win-clear-log-ask = De activiteitengeschiedenis van de agents wissen? Wijzigingen die de agents hebben gemaakt, worden hiermee niet ongedaan gemaakt.
 win-agent-programs = &Programma’s waarvan agents toegang tot je e-mail hebben gevraagd:
-win-change = &Wijzigen...
+win-change = Wi&jzigen...
 win-what-agents-did = &Activiteit van agents:
 win-how-to-connect = Een agent verbinden
 
