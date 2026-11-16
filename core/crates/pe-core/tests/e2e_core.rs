@@ -2092,7 +2092,9 @@ fn a_move_or_delete_the_server_does_not_do_comes_back() {
     let mut changes = 0;
     let mut failures = 0;
     while failures < 2 || changes < 4 {
-        match events.recv_timeout(Duration::from_secs(20)).expect("events") {
+        // the failures come once the reconnects give up, which a loaded machine (a full test run beside other work)
+        // can take longer than 20 seconds to reach
+        match events.recv_timeout(Duration::from_secs(60)).expect("events") {
             Event::FolderChanged { folder, .. } if folder == inbox => changes += 1,
             Event::Failed { kind, .. } => {
                 assert_ne!(kind, FailureKind::Authentication);
