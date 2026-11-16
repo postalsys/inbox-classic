@@ -1,19 +1,17 @@
-<!--review-->
 <h1>Verschlüsselungsschlüssel</h1>
-<p class="summary">Erstellen Sie einen Schlüssel, um Ihre Nachrichten zu signieren und verschlüsselte E-Mails zu empfangen, und verwalten Sie die Schlüssel Ihrer Kontakte.</p>
-<p>Inbox Classic signiert und verschlüsselt E-Mails mit OpenPGP-Schlüsseln. Ihr eigener Schlüssel hat zwei Hälften: einen öffentlichen Schlüssel, den Sie anderen geben, und einen privaten Schlüssel, der auf Ihrem Computer bleibt. Mit den Schlüsseln Ihrer Kontakte prüfen Sie deren Signaturen und verschlüsseln E-Mails an sie.</p>
+<p class="summary">Erstellen Sie einen eigenen Schlüssel zum Signieren und Entschlüsseln und verwalten Sie die Schlüssel Ihrer Kontakte.</p>
+<p>Inbox Classic verwendet OpenPGP-Schlüssel zum Signieren und Verschlüsseln. Ihr Schlüsselpaar besteht aus einem öffentlichen Schlüssel zum Weitergeben und einem privaten Schlüssel, den Sie sicher aufbewahren. Mit den öffentlichen Schlüsseln Ihrer Kontakte prüfen Sie deren Signaturen und verschlüsseln Nachrichten für sie.</p>
 <p>So erstellen Sie Ihren Schlüssel:</p>
 <ol>
     <li>Wählen Sie <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> und klicken Sie auf <b data-text="ui-keys-new"></b>.</li>
-    <li>Wählen Sie das Konto und klicken Sie auf <b data-text="ui-keys-new-make"></b>. Der Schlüssel wird für die Adresse des Kontos und seine weiteren Adressen verwendet.</li>
-    <li>Klicken Sie auf <b data-text="ui-keys-backup-now"></b> und wählen Sie eine Passphrase. Bewahren Sie Datei und Passphrase an verschiedenen sicheren Orten auf.</li>
+    <li>Wählen Sie das Konto und klicken Sie auf <b data-text="ui-keys-new-make"></b>. Der Schlüssel gilt für die Hauptadresse und die weiteren Adressen des Kontos.</li>
+    <li>Klicken Sie auf <b data-text="ui-keys-backup-now"></b> und wählen Sie eine Passphrase. Bewahren Sie die Sicherungsdatei und die Passphrase getrennt und sicher auf.</li>
 </ol>
-<aside class="warning">Ohne Sicherung lässt sich Ihr Schlüssel nicht wiederherstellen, wenn dieser Computer verloren geht oder zurückgesetzt wird, und damit verschlüsselte E-Mails sind nicht mehr lesbar.</aside>
-<h2>Geschützt ohne Passphrase</h2>
-<p>Ihre privaten Schlüssel sind durch einen Schlüssel in <!--os:windows-->der Anmeldeinformationsverwaltung<!--/os--><!--os:mac-->dem Schlüsselbund<!--/os--><!--os:linux-->dem Systemschlüsselbund<!--/os--> geschützt, daher geben Sie für ihre Verwendung nie eine Passphrase ein. Eine Passphrase wählen Sie nur für eine Sicherung. Wird Ihr Schlüssel als gesperrt angezeigt, wurde dieser Schutz zurückgesetzt: Klicken Sie auf <b data-text="ui-keys-import"></b> und wählen Sie seine Sicherung.</p>
+<aside class="warning">Geht der Computer verloren oder wird er zurückgesetzt, benötigen Sie eine Sicherung Ihres privaten Schlüssels. Ohne sie können Sie damit verschlüsselte Nachrichten nicht mehr lesen.</aside>
+<h2>Schutz ohne tägliche Passphrase-Eingabe</h2>
+<p>Ihre privaten Schlüssel werden durch einen weiteren Schlüssel geschützt. Dieser liegt in <!--os:windows-->der Anmeldeinformationsverwaltung<!--/os--><!--os:mac-->dem Schlüsselbund<!--/os--><!--os:linux-->dem Systemschlüsselbund<!--/os-->. Beim Signieren und Entschlüsseln brauchen Sie deshalb keine Passphrase einzugeben. Eine Passphrase schützt nur die Sicherungsdatei. Fehlt der Schlüssel zum Entsperren, klicken Sie auf <b data-text="ui-keys-import"></b> und wählen Sie die Sicherung Ihres privaten Schlüssels.</p>
 <h2>Schlüssel hinzufügen</h2>
-<p>Klicken Sie auf <b data-text="ui-keys-import"></b>, um einen Schlüssel aus einer Datei hinzuzufügen, etwa einen, den Ihnen ein Kontakt geschickt hat, oder eine Sicherung Ihres eigenen. Ein durch eine Passphrase geschützter privater Schlüssel fragt einmal danach. Danach fragt Inbox Classic, ob ein importierter eigener Schlüssel für Ihre Adressen verwendet werden soll.</p>
-<p>Der Schlüssel eines Kontakts wird ab dann für dessen Adresse verwendet. Taucht später ein anderer Schlüssel für dieselbe Adresse auf, bleibt der bisherige in Gebrauch, bis Sie den neuen in den Eigenschaften des Kontakts wählen.</p>
-<p>Um Ihren öffentlichen Schlüssel weiterzugeben, wählen Sie ihn aus und klicken Sie auf <b data-text="ui-keys-export"></b>. Den Schlüssel Ihres Kontos können Sie auch in dessen Eigenschaften auf der Registerkarte <b data-text="ui-account-security"></b> wählen.</p>
+<p>Über <b data-text="ui-keys-import"></b> laden Sie Schlüssel aus Dateien, etwa den öffentlichen Schlüssel eines Kontakts oder Ihre eigene Sicherung. Bei geschützten privaten Schlüsseln geben Sie einmalig die Passphrase ein. Anschließend können Sie eigene Schlüssel Ihren Adressen zuordnen.</p>
+<p>Der importierte Schlüssel eines Kontakts wird für dessen Adresse verwendet. Ist dafür bereits ein Schlüssel hinterlegt, bleibt dieser aktiv. Den neuen wählen Sie bei Bedarf in den Kontakteigenschaften aus.</p>
+<p>Zum Weitergeben Ihres öffentlichen Schlüssels wählen Sie ihn aus und klicken auf <b data-text="ui-keys-export"></b>. Den Schlüssel für ein Konto wählen Sie in dessen Eigenschaften unter <b data-text="ui-account-security"></b>.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

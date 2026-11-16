@@ -14,7 +14,7 @@ behavior and surrounding controls to establish meaning. Preserve the original sc
 - Initial inventory: 241 marked messages and 14 marked help passages per language (de, es, et, fr), 964 messages
   and 56 help passages altogether. Each language has ten affected help pages. Other languages named in the guide
   are not present in this checkout. `scripts/check-language.mjs` is also absent here.
-- Current next step: German help (ten pages), then Spanish and French.
+- Current next step: Spanish `app.ftl` (94 marked entries), then its core/platform catalogs and help.
   Estonian is complete for the starting snapshot. Spanish and French follow. Review existing wording outside
   marked entries when needed for context or terminology consistency.
 
@@ -85,8 +85,18 @@ key-owner verification, encryption errors, filenames, account credentials and ex
 attachment notice now describes cleanup at startup of copies older than a day. Removed all German catalog
 review marks. All 68 tests, catalog invariants and `git diff --check` passed.
 
-Next: German help (ten pages). Spanish and French are
-untouched. Estonian catalog and help review is complete for the starting snapshot. Revisit it only for newly
+Checkpoint commit: `d3ea269f`.
+
+### de-help-2026-11-16
+
+Reviewed all 14 marked passages across ten German help pages. Rewrote key management, fingerprint verification,
+encrypted-mail and migration explanations. Corrected attachment cleanup, folder navigation, hidden unread counts
+and the order of verification steps. All tags, links, control references, platform branches and keyboard names
+are preserved. All 68 tests and `git diff --check` passed; the inventory accounts for every unmarked change
+(483 catalog entries and 141 help lines). Regenerated `build/i18n-review.html`.
+
+Next: Spanish UI (94 marked entries), core/platform catalogs and help, then French. Estonian and German
+catalog/help review is complete for the starting snapshot. Revisit it only for newly
 arriving changes or the final cross-language consistency checks below.
 
 Source wording to revisit in the final consistency pass: `ui-setup-passphrase-note` says every account asks for a
