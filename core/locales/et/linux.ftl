@@ -83,7 +83,6 @@ gtk-default-app-failed = Inbox Classicut ei õnnestunud vaikimisi meilirakenduse
 
 gtk-reader-date = Kuupäev:
 gtk-reader-files = Kirja manused
-# review: new
 gtk-files = { $count ->
     [one] { $count } fail
    *[other] { $count } faili

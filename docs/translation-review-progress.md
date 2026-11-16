@@ -43,9 +43,24 @@ to the glossary. 32 values were improved; the remaining labels were retained aft
 Validation: all 68 `pe-i18n`/`pe-html` tests passed; IDs, placeholders, plural branches, access-key presence and
 new-dialog shortcut uniqueness passed; `git diff --check` passed. The 94 removed marks are intentional.
 
-Next: Estonian `core.ftl` (143 messages), the four marked platform/help labels, then the ten affected help topics.
-The other three languages are untouched.
+Checkpoint commit: `150faf9e`.
+
+### et-core-2026-11-16
+
+Reviewed all 143 marked core messages and the four marked entries in `help.ftl`, `linux.ftl` and `mac.ftl`.
+Improved 71 core values: formal address, signature versus key-owner verification, natural error/result wording,
+address lists, filenames without inflected placeholders, and settings-transfer terminology. The attachment notice
+now accurately describes cleanup at startup of temporary copies older than a day. Review marks removed;
+all 68 tests and catalog invariant checks passed. All 241 unmarked catalog entries exactly match the two
+completed batches; there are no untracked omissions.
+
+Next: the ten affected Estonian help topics. The other three languages are untouched.
 
 Source wording to revisit in the final consistency pass: `ui-setup-passphrase-note` says every account asks for a
 password after importing an unprotected file. OAuth accounts instead require signing in again; the reviewed
 Estonian text covers both methods. Source evidence: `setup/export.rs` and `setup/import.rs`.
+
+Also revisit English `attachment-decrypted-note` and attachment help: temporary files are removed by
+`clear_private_dirs()` at startup if over 24 hours old, not necessarily after exactly a day. The Estonian notice
+already reflects this. `pgp-details-opened` identifies the key that successfully decrypted the message; it can
+say "Decrypted with your key" more directly than "Encrypted to your key".
