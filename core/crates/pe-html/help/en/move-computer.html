@@ -1,0 +1,19 @@
+<h1>Move to another computer</h1>
+<p class="summary">Take your accounts, settings, contacts, keys and rules to another computer in one file.</p>
+<h2>Export them</h2>
+<ol>
+    <li>Choose <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
+    <li>Choose what to take: <b data-text="ui-setup-part-settings"></b>, <b data-text="ui-setup-part-preferences"></b>, <b data-text="ui-setup-part-accounts"></b>, <b data-text="ui-setup-part-sign-in-apps"></b>, <b data-text="ui-setup-part-contacts"></b>, <b data-text="ui-setup-part-keys"></b>, <b data-text="ui-setup-part-rules"></b> and <b data-text="ui-setup-part-trusted"></b>.</li>
+    <li>To take your passwords and private keys too, turn on <b data-text="ui-setup-use-passphrase"></b> and type a passphrase of at least 8 characters twice.</li>
+    <li>Click <b data-text="ui-setup-export-button"></b> and choose where to save the file.</li>
+</ol>
+<p>The file holds no messages: they download again on the other computer. With a passphrase, the whole file is encrypted. Without one, it holds no passwords or private keys, and each account asks for its password once on the other computer.</p>
+<aside class="warning">Keep the file and its passphrase apart, and delete the file once you have imported it. Anyone with both can read your mail.</aside>
+<h2>Import them</h2>
+<ol>
+    <li>On the other computer, choose <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Before you add your first account, <b data-text="ui-add-account-title"></b> has a link for it too.</li>
+    <li>Choose the file, and type its passphrase if it has one.</li>
+    <li>The window shows what the file holds. Choose the parts and accounts to import, and click <b data-text="ui-setup-import-button"></b>.</li>
+</ol>
+<p>An account that is already on this computer is left as it is. Contacts are added to your address book, settings and window preferences are replaced, and a rule whose folder is not there yet waits until the account has synced. A different key for one of your contacts waits for you to decide, as an imported key does.</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>
