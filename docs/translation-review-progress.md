@@ -16,10 +16,10 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Bulgarian help: 21 everyday topics reviewed; final 31 topics remain. All 84 late list-loading labels have been reviewed.
-  Bulgarian has 1,334 reviewed catalog entries. Dutch, Italian,
-  Portuguese (Portugal), Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are
-  complete: each has 1,334 catalog entries and 52 help topics. Sixteen languages still have pending content,
+- Resume with Czech (cs): 1,331 catalog entries and 52 help topics remain; its three list-loading labels are reviewed.
+  All 84 late list-loading labels have been reviewed. Bulgarian, Dutch, Italian, Portuguese (Portugal),
+  Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are complete: each has
+  1,334 catalog entries and 52 help topics. Fifteen languages still have pending content,
   with exact IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
@@ -403,8 +403,20 @@ matching. Structure, markup/keyboard preservation, inline spacing, inventory/has
 --check pass. Review HTML regenerated. No test suite was run per user instruction. Catalog checkpoint:
 `a5c0a9e9`; late-loading checkpoint: `4a038b57`. The final 31 Bulgarian help topics remain pending.
 
-Current totals: 12,127 catalog entries and 441 help pages reviewed; 1,884 catalog values improved. Remaining:
-19,965 catalog entries and 811 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Bulgarian help completed
+
+Reviewed the remaining 31 topics: security/encryption, privacy, rules, agents, troubleshooting and reference.
+Corrected key ownership versus signature validity, verification order, recovery, logo limits, queued sending,
+credential guidance and the sign-in URL file. Preserved all markup and literal keys; explained Bulgarian access
+keys beside the literal shortcut table. All 52 Bulgarian topics are now reviewed. Structural checks, exact
+inventory/hash reconciliation and git diff --check pass; review HTML regenerated. Test suite not run per user
+instruction. First-help checkpoint: `fdd65857`.
+
+Fresh upstream check: master remains `fd7feeaf`; local/remote wave1 advanced to `8df686a4`, whose change since
+`e932e78f` has no catalog/help edits. The final late-arrival audit remains required after the current queue.
+
+Current totals: 12,127 catalog entries and 472 help pages reviewed; 1,884 catalog values improved. Remaining:
+19,965 catalog entries and 780 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

@@ -1,18 +1,18 @@
-<!--review--><h1>Думи за търсене</h1>
-<p class="summary">Думите и знаците, които полето за търсене разбира, за да намерите точно съобщенията, които искате.</p>
-<p>Полето за търсене приема същите думи като Gmail. Комбинирайте колкото искате: съобщението трябва да отговаря на всички тях. Посочете полето за търсене, за да видите кратък списък.</p>
+<h1>Оператори за търсене</h1>
+<p class="summary">Уточнете търсенето по подател, получател, тема, папка, дата или други свойства на съобщенията.</p>
+<p>Полето за търсене поддържа оператори, познати от Gmail. Комбинирайте ги според нуждите си: съобщението трябва да отговаря на всички тях. Посочете полето за търсене, за да видите кратък списък.</p>
 <table>
     <tr><th>Въведете</th><th>Намира</th></tr>
-    <tr><td><code>бюджет</code></td><td>Съобщения с дума, която започва с <i>бюджет</i>, където и да е в тях</td></tr>
+    <tr><td><code>бюджет</code></td><td>Съобщения с дума, която започва с <i>бюджет</i>, в темата, подателя, получателите, имената на прикачените файлове или текста</td></tr>
     <tr><td><code>"точен израз"</code></td><td>Тези думи в този ред</td></tr>
     <tr><td><code>-дума</code></td><td>Съобщения без думата. Минусът действа пред всяка дума за търсене, например <code>-is:unread</code></td></tr>
     <tr><td><code>това OR онова</code></td><td>Съобщения с едната или другата дума. Пишете <code>OR</code> с главни букви</td></tr>
-    <tr><td><code>from:ani</code></td><td>Поща от Ани</td></tr>
-    <tr><td><code>to:ani</code>, <code>cc:</code>, <code>bcc:</code></td><td>Поща до Ани, в който и да е ред за получатели</td></tr>
+    <tr><td><code>from:ani</code></td><td>Съобщения с подател, съответстващ на ani по име или адрес</td></tr>
+    <tr><td><code>to:ani</code>, <code>cc:</code>, <code>bcc:</code></td><td>Съобщения с получател, съответстващ на ani. Търсенето обхваща „До“, „Копие“ и „Скрито копие“</td></tr>
     <tr><td><code>subject:обяд</code></td><td>Думата в темата</td></tr>
     <tr><td><code>filename:pdf</code></td><td>Думата в името на прикачен файл</td></tr>
     <tr><td><code>list:news.example.com</code></td><td>Поща от пощенски списък, по неговия List-Id</td></tr>
-    <tr><td><code>has:attachment</code></td><td>Съобщения с файлове</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Съобщения с прикачени файлове</td></tr>
     <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Непрочетени или прочетени съобщения</td></tr>
     <tr><td><code>is:starred</code> или <code>is:flagged</code></td><td>Съобщения с флаг</td></tr>
     <tr><td><code>is:answered</code></td><td>Съобщения, на които сте отговорили</td></tr>
@@ -21,10 +21,9 @@
     <tr><td><code>in:projects</code></td><td>Само папката с това име</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Всички папки</td></tr>
     <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Поща преди или след даден ден. <code>2025-01-31</code> също работи</td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Поща, по-стара или по-нова от дни (<code>d</code>), месеци (<code>m</code>) или години (<code>y</code>)</td></tr>
-    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Поща, по-голяма или по-малка от даден размер, в байтове или с <code>K</code>, <code>M</code> или <code>G</code></td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Съобщения, по-стари или по-нови от посочения брой дни (<code>d</code>), месеци (<code>m</code>) или години (<code>y</code>)</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Съобщения, по-големи или по-малки от посочения размер, в байтове или с <code>K</code>, <code>M</code> или <code>G</code></td></tr>
 </table>
-<p>Ударенията и главните букви нямат значение. Дума за търсене, която Inbox Classic не познава, се търси като обикновена дума.</p>
-<p>Списъкът не показва размери. За да видите колко голямо е съобщението, изберете <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<p>Ударенията и главните букви нямат значение. Неразпознатите оператори се търсят като обикновен текст.</p>
+<p>Списъкът със съобщения няма колона за размер. За да видите колко голямо е съобщението, изберете <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
-<!--/review-->
