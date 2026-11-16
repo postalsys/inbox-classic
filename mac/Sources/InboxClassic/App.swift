@@ -192,7 +192,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     private var restarting = false
     /// updates from the appcast (Info.plist SUFeedURL), checked daily and with Check for Updates; not in a test or a
     /// build without its key
-    private var updater: SPUStandardUpdaterController?
+    private var updaterController: SPUStandardUpdaterController?
+    /// Sparkle's updater, whose "check automatically" Settings shows; nil in a test or a build without updates
+    var updater: SPUUpdater? { updaterController?.updater }
 
     public init(_ arguments: Arguments) {
         self.arguments = arguments
@@ -243,7 +245,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
             UNUserNotificationCenter.current().delegate = self
         }
         if isBundled && !TestHooks.testing && !(Bundle.main.object(forInfoDictionaryKey: "SUPublicEDKey") as? String ?? "").isEmpty {
-            updater = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+            updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
         }
         // the first start: an account to read mail from
         onMain { [self] in
@@ -484,11 +486,11 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     }
 
     @objc func checkForUpdates() {
-        guard let updater else {
+        guard let updaterController else {
             inform(Text.macNoUpdates.text)
             return
         }
-        updater.checkForUpdates(nil)
+        updaterController.checkForUpdates(nil)
     }
 
     @objc func showMain() {
