@@ -1142,9 +1142,15 @@ public static class Dragger {
             Thread.Sleep(300);
             for (int i = 1; i <= 25; i++) {
                 Mouse(fromX + (toX - fromX) * i / 25, fromY + (toY - fromY) * i / 25, 0);
-                Thread.Sleep(40);
+                Thread.Sleep(60);
             }
-            Thread.Sleep(500);
+            // a few small moves over the target and a pause: WebView2 takes the drop only once it has seen the drag
+            // over it, which a busy machine is slow to tell it
+            for (int i = 0; i < 4; i++) {
+                Mouse(toX + (i % 2 == 0 ? 2 : -2), toY, 0);
+                Thread.Sleep(150);
+            }
+            Thread.Sleep(600);
             Mouse(toX, toY, UP);
         }) { IsBackground = true }.Start();
         Application.Run(form);
@@ -1165,9 +1171,17 @@ public static class Dragger {
     $editorRect = New-Object Native.Win+RECT
     [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($compose, $IDC_BODY), [ref]$editorRect)
     $toX = [int](($editorRect.Left + $editorRect.Right) / 2); $toY = [int](($editorRect.Top + $editorRect.Bottom) / 2)
-    $dropped = [Dragger]::Drag(@($pictureFile, $noteFile), 40, 40, $toX, $toY)
-    Check $dropped 'the text takes files dropped on it'
     $attached = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
+    # a drag the system ended without a drop (the editor not told of it in time on a busy machine) is tried again;
+    # one that dropped is never repeated
+    $dropped = $false
+    for ($try = 0; $try -lt 3 -and -not $dropped; $try++) {
+        [void][Native.Win]::SetForegroundWindow($compose)
+        $dropped = [Dragger]::Drag(@($pictureFile, $noteFile), 40, 40, $toX, $toY)
+        # a drop that landed though the drag said not: its file arrives in a moment, and then it is not tried again
+        if (-not $dropped -and [bool](WaitFor { (ListBoxCount $attached) -gt 0 } 2)) { break }
+    }
+    Check $dropped 'the text takes files dropped on it'
     Check ([bool](WaitFor { (ListBoxCount $attached) -eq 1 } 10)) 'a file that is no picture is attached'
     Start-Sleep -Seconds 1
     Shot $compose 'write-13-dropped-picture'
