@@ -16,7 +16,7 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Serbian Latin (`sr-Latn`): catalogs complete; continue all 52 help topics. Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan and
+- Resume with Serbian Latin (`sr-Latn`): catalogs and 21 help topics complete; continue the remaining 31 topics. Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan and
   Norwegian Bokmål are complete: each has 1,331 catalog entries and 52 help topics.
   Eighteen languages still have pending content, with exact IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
@@ -288,8 +288,17 @@ cleanup. Improved platform guidance, installer user scope and Linux store text. 
 inventory/hash reconciliation, 32 shortcut scopes and git diff --check pass. Generated installer/Linux metadata
 rebuilt and inspected; the review HTML is regenerated. UI checkpoint: `1af7454e`. All 52 help topics are pending.
 
-Current totals: 9,381 catalog entries and 316 help pages reviewed; 1,453 catalog values improved. Remaining:
-22,627 catalog entries and 936 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Serbian Latin first 21 help topics
+
+Reviewed everyday help from setup and navigation through writing, attachments, contacts, account transfer
+and provider sign-in. Corrected current folder navigation and unread counts, domain authentication,
+temporary-attachment lifetime, transferred credentials and rule-folder matching. Improved natural Serbian
+instructions and preserved markup, keyboard tags and platform branches. All 75 tests, structure,
+inventory/hash reconciliation, inline spacing and git diff --check pass. The review HTML is regenerated.
+Catalog completion checkpoint: `bd8902d4`. The remaining 31 help topics are pending.
+
+Current totals: 9,381 catalog entries and 337 help pages reviewed; 1,453 catalog values improved. Remaining:
+22,627 catalog entries and 915 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

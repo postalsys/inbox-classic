@@ -1,20 +1,19 @@
-<!--review--><h1>Prelazak na drugi računar</h1>
+<h1>Prelazak na drugi računar</h1>
 <p class="summary">Prenesite svoje naloge, podešavanja, kontakte, ključeve i pravila na drugi računar u jednoj datoteci.</p>
 <h2>Izvoz</h2>
 <ol>
     <li>Izaberite <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
     <li>Izaberite šta želite da prenesete: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> i <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Da biste preneli i lozinke i privatne ključeve, uključite <b data-text="ui-setup-use-passphrase"></b> i dvaput unesite pristupnu frazu od najmanje 8 znakova.</li>
+    <li>Da biste preneli i lozinke, ostale podatke za prijavu i privatne ključeve, uključite <b data-text="ui-setup-use-passphrase"></b> i dvaput unesite pristupnu frazu od najmanje 8 znakova.</li>
     <li>Kliknite na <b data-text="ui-setup-export-button"></b> i izaberite gde želite da sačuvate datoteku.</li>
 </ol>
-<p>Datoteka ne sadrži poruke: one se na drugom računaru ponovo preuzimaju. Sa pristupnom frazom cela datoteka je šifrovana. Bez nje datoteka ne sadrži lozinke ni privatne ključeve, a svaki nalog na drugom računaru jednom traži svoju lozinku.</p>
-<aside class="warning">Datoteku i njenu pristupnu frazu čuvajte odvojeno, a datoteku izbrišite kad je uvezete. Ko ima oboje, može da čita vašu poštu.</aside>
+<p>Datoteka ne sadrži poruke: one se na drugom računaru ponovo preuzimaju. Sa pristupnom frazom cela datoteka je šifrovana. Bez pristupne fraze izostavljaju se lozinke, OAuth podaci za prijavu, tajne klijenata i privatni ključevi. Na drugom računaru moraćete ponovo da se prijavite na naloge, lozinkom ili putem pregledača.</p>
+<aside class="warning">Datoteku i njenu pristupnu frazu čuvajte odvojeno, a datoteku izbrišite kad je uvezete. Ko ima i datoteku i frazu, može da pristupi vašoj pošti.</aside>
 <h2>Uvoz</h2>
 <ol>
     <li>Na drugom računaru izaberite <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Pre nego što dodate prvi nalog, i prozor <b data-text="ui-add-account-title"></b> ima vezu za to.</li>
     <li>Izaberite datoteku i unesite njenu pristupnu frazu, ako je ima.</li>
     <li>Prozor prikazuje šta datoteka sadrži. Izaberite delove i naloge koje želite da uvezete i kliknite na <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Nalog koji već postoji na ovom računaru ostaje nepromenjen. Kontakti se dodaju u adresar, podešavanja i podešavanja prozora se zamenjuju, a pravilo čija fascikla još ne postoji čeka dok se nalog ne sinhronizuje. Drugačiji ključ nekog vašeg kontakta čeka vašu odluku, kao i uvezeni ključ.</p>
+<p>Postojeći nalozi ostaju nepromenjeni. Kontakti se dodaju u Adresar, a grupe se dopunjuju uvezenim članovima. Podešavanja programa i prozora se zamenjuju. Ako odredišna fascikla za premeštanje po pravilu još nije dostupna, povezuje se sa pravilom kada se pronađe pri sinhronizaciji. Novi ključ postojećeg kontakta morate da izaberete u svojstvima kontakta pre nego što počne da se koristi.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->
