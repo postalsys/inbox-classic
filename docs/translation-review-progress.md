@@ -16,8 +16,8 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with the attachment-reminder context followup: 11 already-reviewed write-message topics.
-  Then review the remaining 31 Greek help topics (security/privacy, agents, troubleshooting and reference).
+- Resume with the remaining 31 Greek help topics, starting encrypted-and-signed-mail, encryption-keys
+  and verify-a-key, then privacy, agents, troubleshooting and reference. Both context followups are complete.
   Greek catalogs: 1,334 reviewed, 211 values improved; help: 21 of 52 reviewed.
   Thirteen languages still have pending content. All 84 late list-loading labels are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
@@ -572,6 +572,17 @@ New source-context finding: `attachment_words.rs` recognizes attachment reminder
 Estonian, Spanish and French. The Greek help now uses a recognized English example and names this limitation.
 Eleven previously reviewed write-message topics need the same check, recorded as a separate context followup.
 Check this limitation while reviewing the twelve remaining languages. English and app code are unchanged.
+
+### Attachment-reminder context followup completed
+
+Corrected all 11 previously reviewed write-message paragraphs in bg/ca/cs/da/it/nb/nl/pt/pt-BR/sr-Latn/tr.
+Each now uses the recognized English example “attached” and states that the reminder detects selected words
+only in English, German, Estonian, Spanish and French. The code currently has no keywords for the other
+languages. Greek received this correction in its initial help batch; check the remaining languages likewise.
+These are separate re-reviews, not additional initial-scope completions. All 11 structures pass; markup,
+attributes, keyboard literals and inline joins are preserved. Exact inventories/file/source hashes reconcile,
+git diff --check passes, and the review HTML is regenerated. No test suite was run. Greek first-help checkpoint:
+`a41119fe`.
 
 Current totals: 16,120 catalog entries and 597 help pages reviewed; 2,482 catalog values improved. Remaining:
 15,972 catalog entries and 655 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.

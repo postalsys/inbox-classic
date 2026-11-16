@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Finish the attachment-reminder-languages context followup for 11 already-reviewed write-message topics, then review the remaining 31 Greek help topics (security/privacy, agents, troubleshooting and reference). Greek catalogs 1334/1334, 211 improvements; help 21/52. Recheck late additions after Greek completion and again after all pending languages. Do not run tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Review the remaining 31 Greek help topics, starting encrypted-and-signed-mail, encryption-keys and verify-a-key; then privacy, agents, troubleshooting and reference. Greek catalogs 1334/1334, 211 improvements; help 21/52. Both context followups complete. Recheck late additions after Greek completion and after all pending languages. Do not run tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -1649,6 +1649,29 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "bg-attachment-reminder-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "attachment-reminder-languages",
+          "followup_reviewed_ids": {},
+          "followup_reviewed_help": [
+            "write-message.html"
+          ],
+          "followup_changed_values": 0,
+          "followup_changed_help": [
+            "write-message.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/bg/write-message.html": "8a70e1176e7a3cb80e9ebf3650d0fb8400db00f4bcc2b752281fd3e4d1e1809a"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9"
+          },
+          "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
         }
       ]
     },
@@ -3287,6 +3310,29 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "cs-attachment-reminder-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "attachment-reminder-languages",
+          "followup_reviewed_ids": {},
+          "followup_reviewed_help": [
+            "write-message.html"
+          ],
+          "followup_changed_values": 0,
+          "followup_changed_help": [
+            "write-message.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/cs/write-message.html": "e4ea74601a0df840c44fbd92311ed6c9c7a077791059cf1fc818b3bc2d3e1065"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9"
+          },
+          "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
         }
       ]
     },
@@ -4888,6 +4934,29 @@
           },
           "validation": "Structural checker passes after accounting for 1386 expected mark-only diagnostics. All 31 topics preserve tags/attributes and literal keyboard shortcuts; inline joins and dash checks pass. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed remaining Danish help against English and current app behavior: key ownership and verification order, cached logos and domain-authentication limits, attachment handlers, rule processing, queued agent sending, credential transfer/storage, troubleshooting errors, URL output and all-recipient search aliases. Preserved tags, attributes, platform branches and literal keyboard shortcuts. No tests per user instruction."
+        },
+        {
+          "id": "da-attachment-reminder-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "attachment-reminder-languages",
+          "followup_reviewed_ids": {},
+          "followup_reviewed_help": [
+            "write-message.html"
+          ],
+          "followup_changed_values": 0,
+          "followup_changed_help": [
+            "write-message.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/da/write-message.html": "6547382903e0075fbc818dc002173794fd9418c81d6150073b73637b3e5ad395"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9"
+          },
+          "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
         }
       ]
     },
@@ -12954,6 +13023,29 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "it-attachment-reminder-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "attachment-reminder-languages",
+          "followup_reviewed_ids": {},
+          "followup_reviewed_help": [
+            "write-message.html"
+          ],
+          "followup_changed_values": 0,
+          "followup_changed_help": [
+            "write-message.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/it/write-message.html": "aa11a490d5c37cc72d7c15d04051ef470dd5f25db88cabdb242aba0554bce1dd"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9"
+          },
+          "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
         }
       ]
     },
@@ -17617,6 +17709,29 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "nl-attachment-reminder-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "attachment-reminder-languages",
+          "followup_reviewed_ids": {},
+          "followup_reviewed_help": [
+            "write-message.html"
+          ],
+          "followup_changed_values": 0,
+          "followup_changed_help": [
+            "write-message.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/nl/write-message.html": "19fd9999cb1da3a3431012635ec9b45f7e18e8ee3b821fd1c6f3e97c38279283"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9"
+          },
+          "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
         }
       ]
     },
@@ -20815,6 +20930,29 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "pt-attachment-reminder-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "attachment-reminder-languages",
+          "followup_reviewed_ids": {},
+          "followup_reviewed_help": [
+            "write-message.html"
+          ],
+          "followup_changed_values": 0,
+          "followup_changed_help": [
+            "write-message.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/pt/write-message.html": "c7ce7992a4197aad1cefdff4736bce3486a23d2a3efafe912a8b810a7adc006b"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9"
+          },
+          "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
         }
       ]
     },
@@ -31103,6 +31241,29 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "ca-attachment-reminder-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "attachment-reminder-languages",
+          "followup_reviewed_ids": {},
+          "followup_reviewed_help": [
+            "write-message.html"
+          ],
+          "followup_changed_values": 0,
+          "followup_changed_help": [
+            "write-message.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/ca/write-message.html": "84ffb4a606212c403a65ae894a41012b28aec9cf546bd2412b4e1df5080f780f"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9"
+          },
+          "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -32770,6 +32931,29 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "nb-attachment-reminder-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "attachment-reminder-languages",
+          "followup_reviewed_ids": {},
+          "followup_reviewed_help": [
+            "write-message.html"
+          ],
+          "followup_changed_values": 0,
+          "followup_changed_help": [
+            "write-message.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/nb/write-message.html": "942c99e6ca64d7b4abf809c31aaa49d0b93f0fc48e383894ee18795d6ea1e62e"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9"
+          },
+          "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -34452,6 +34636,29 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "pt-BR-attachment-reminder-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "attachment-reminder-languages",
+          "followup_reviewed_ids": {},
+          "followup_reviewed_help": [
+            "write-message.html"
+          ],
+          "followup_changed_values": 0,
+          "followup_changed_help": [
+            "write-message.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/pt-BR/write-message.html": "e9484313d8cc81d49cee0fa1ac1e287fcd79f3ef49510fe88bc617aa6241cbd3"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9"
+          },
+          "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -36105,6 +36312,29 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "sr-Latn-attachment-reminder-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "attachment-reminder-languages",
+          "followup_reviewed_ids": {},
+          "followup_reviewed_help": [
+            "write-message.html"
+          ],
+          "followup_changed_values": 0,
+          "followup_changed_help": [
+            "write-message.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/sr-Latn/write-message.html": "143e9e5956cc819facfbb7831c89b6d492edb5704d532c77065a0dd1c91db2ba"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9"
+          },
+          "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -37749,6 +37979,29 @@
           },
           "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
+        },
+        {
+          "id": "tr-attachment-reminder-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "attachment-reminder-languages",
+          "followup_reviewed_ids": {},
+          "followup_reviewed_help": [
+            "write-message.html"
+          ],
+          "followup_changed_values": 0,
+          "followup_changed_help": [
+            "write-message.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/tr/write-message.html": "3af8d907ed08d1821663e7410b3014255f5e951b08901bf436eca2309089b36e"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9"
+          },
+          "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -38023,7 +38276,7 @@
     },
     {
       "id": "attachment-reminder-languages",
-      "status": "pending",
+      "status": "complete",
       "issue": "The forgotten-attachment reminder only recognizes English, German, Estonian, Spanish and French keywords. Newly drafted help translates examples into unsupported languages, promising reminders the implementation will not show. Correct the Greek current batch and re-review previously completed write-message passages. Record this source limitation without changing app code or English.",
       "evidence": [
         "core/crates/pe-core/src/attachment_words.rs: WORDS, forgotten, own_lines"
@@ -38041,7 +38294,14 @@
         "core/crates/pe-html/help/sr-Latn/write-message.html",
         "core/crates/pe-html/help/tr/write-message.html"
       ],
-      "note": "Greek is corrected as part of its initial help review. Apply the same context check to the twelve remaining languages. Re-review counts are separate from initial scope."
+      "note": "Greek is corrected as part of its initial help review. Apply the same context check to the twelve remaining languages. Re-review counts are separate from initial scope.",
+      "reviewed_help_count": 11,
+      "changed_help_count": 11,
+      "reviewed_catalog_count": 0,
+      "changed_catalog_values": 0,
+      "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
+      "checkpoint_parent": "a41119feead6230ac5e6c620226437d1f5bb14e4",
+      "counting": "Eleven already-reviewed help paragraphs re-reviewed; do not add to initial-scope totals. Greek corrected as part of its initial first-21 help batch."
     }
   ]
 }
