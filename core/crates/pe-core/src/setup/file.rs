@@ -577,11 +577,19 @@ fn too_many<T>(list: &[T], max: usize) -> Result<(), SetupError> {
 
 /// What `document` holds, checked; `encrypted` says whether its secrets count (a file that is not sealed has none)
 fn checked(document: Document, encrypted: bool) -> Result<SetupFile, SetupError> {
+    let created = Some(document.created)
+        .filter(|at| (0..=253_402_300_799).contains(at))
+        .unwrap_or(0);
     let mut file = SetupFile {
         encrypted,
         app_version: text(&document.app_version),
-        created: document.created,
-        created_text: crate::calendar::local_date(document.created),
+        created,
+        // a day the platform's calendar can write: from 1970 to the year 9999
+        created_text: if created > 0 {
+            crate::calendar::local_date(created)
+        } else {
+            String::new()
+        },
         parts: Parts::NONE,
         accounts: Vec::new(),
         counts: SetupCounts::default(),
@@ -1061,6 +1069,12 @@ mod tests {
         assert!(!file.encrypted);
         assert_eq!(file.parts, Parts::NONE);
         assert_eq!(file.app_version, "0.18.0");
+        assert!(!file.created_text.is_empty());
+        // a date no calendar writes is no date
+        for created in [-1, i64::MAX] {
+            let file = parse(&document(serde_json::json!({"created": created})), None).unwrap();
+            assert_eq!((file.created, file.created_text.as_str()), (0, ""));
+        }
         // a byte order mark and spaces before it
         let mut marked = "\u{feff}  ".as_bytes().to_vec();
         marked.extend(document(
