@@ -1,15 +1,15 @@
-<!--review--><h1>Şifreleme hataları</h1>
-<p class="summary">Bir sunucu şifreleme sunmadığında veya şifreleme kapalıyken onu istediğinde ne yapmalı.</p>
+<h1>Şifreleme hataları</h1>
+<p class="summary">Sunucu şifrelemeyi desteklemiyorsa veya şifreli bağlantı istiyorsa yapabilecekleriniz.</p>
 <h2>“the server does not offer STARTTLS”</h2>
-<p>Hesap STARTTLS kullanacak şekilde ayarlı, ancak sunucu şifreleme sunmadı. Inbox Classic durdu, bu yüzden parolanız gönderilmedi.</p>
+<p>Hesap STARTTLS kullanacak şekilde ayarlı, ancak sunucu şifreleme sunmadı. Inbox Classic bağlantıyı sonlandırdığı için parolanız gönderilmedi.</p>
 <ol>
     <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> içinden hesabın özelliklerini açın.</li>
-    <li>Güvenliği SSL/TLS olarak ayarlayın; gelen posta için 993, giden posta için 465 numaralı bağlantı noktasını kullanın.</li>
+    <li>Sağlayıcınızın bağlantı ayarlarını denetleyin. SSL/TLS destekleniyorsa bu seçeneği kullanın; bağlantı noktası genellikle gelen posta için 993, giden posta için 465 olur.</li>
     <li><b data-text="ui-ok"></b> düğmesine tıklayın.</li>
 </ol>
-<p>Başka hiçbir şey işe yaramazsa sunucu güvenli biçimde kullanılamaz.</p>
+<p>Sunucu ne STARTTLS ne de SSL/TLS destekliyorsa şifreli bağlantı kurulamaz.</p>
 <h2>“the server takes the password only over an encrypted connection”</h2>
-<p>Giden posta sunucusu <b data-text="ui-security-none"></b> olarak ayarlı. Parolanızda sorun yok. <b data-text="ui-field-smtp-security"></b> ayarını 587 numaralı bağlantı noktasıyla STARTTLS veya 465 ile SSL/TLS olarak değiştirin.</p>
+<p>Giden posta sunucusu <b data-text="ui-security-none"></b> olarak ayarlı. Bu hata parolanın doğru olduğunu göstermez. <b data-text="ui-field-smtp-security"></b> ayarını 587 numaralı bağlantı noktasıyla STARTTLS veya 465 ile SSL/TLS olarak değiştirin; sağlayıcınızın verdiği ayarları kullanın.</p>
 <h2>Şifresiz bağlantı uyarısı</h2>
 <p><b data-text="ui-security-none"></b> seçeneğini seçtiğinizde Inbox Classic, ağ trafiğinizi ele geçiren herkesin parolanızı ve iletilerinizi okuyabileceği konusunda uyarır. Yalnızca kendi bilgisayarınızdaki veya yerel ağınızdaki bir sunucu için devam edin.</p>
-<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav><!--/review-->
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>

@@ -1,16 +1,16 @@
-<!--review--><h1>Şifreli ve imzalı postalar</h1>
-<p class="summary">İletinin üstündeki çubuk, iletinin gönderen tarafından imzalanıp imzalanmadığını ve size şifreli gönderilip gönderilmediğini söyler.</p>
-<p>İmzalı bir ileti, onu kimin yazdığını ve yolda kimsenin değiştirmediğini kanıtlar. Şifreli bir ileti yalnızca sizin anahtarınızla okunabilir.</p>
+<h1>Şifreli ve imzalı postalar</h1>
+<p class="summary">İletinin üstündeki çubuk, dijital imza ve şifreleme durumunu gösterir.</p>
+<p>Geçerli bir dijital imza, içeriğin ilgili anahtarla imzalandığını ve sonradan değiştirilmediğini doğrular. Anahtarın kime ait olduğundan emin olmak için sahibiyle doğrulama yapmanız gerekir. Şifreli bir iletiyi okumak için uygun gizli anahtar gerekir. Aynı iletiye erişim sağlayan anahtara sahip diğer alıcılar da iletiyi okuyabilir.</p>
 <p>İletinin üstündeki çubuk iletinin bütününü değerlendirir:</p>
 <table>
     <tr><th>Renk</th><th>Anlamı</th></tr>
-    <tr><td>Yeşil</td><td>Gönderen tarafından, doğruladığınız bir anahtarla imzalanmış.</td></tr>
-    <tr><td>Mavi</td><td>Gönderen tarafından doğrulamadığınız bir anahtarla imzalanmış veya size şifreli gönderilmiş.</td></tr>
+    <tr><td>Yeşil</td><td>Gönderenin imzası geçerli ve anahtarının sahibini doğrulamışsınız.</td></tr>
+    <tr><td>Mavi</td><td>Gönderenin imzası geçerli, ancak anahtarının sahibini doğrulamamışsınız; veya ileti imzasız olarak şifrelenmiş.</td></tr>
     <tr><td>Kehribar</td><td>Bir sorun var: imza uyuşmuyor, gönderenden başka biri imzalamış veya bir bölüm okunamadı.</td></tr>
-    <tr><td>Gri</td><td>İmzasız veya sizde olmayan bir anahtarla imzalanmış.</td></tr>
+    <tr><td>Gri</td><td>İmza yok, imza anahtarı bulunamıyor veya imza denetlenmemiş.</td></tr>
 </table>
-<p>Bölümleri farklı korunan bir ileti, her bölümü kendi etiketiyle ayrı bir çerçevede gösterir. Çubuk da her türden kaç bölüm olduğunu sayar. Her bölümü kimin, hangi anahtarla ve ne zaman imzaladığını görmek için bir etikete veya çubuktaki <b data-text="ui-protection-details"></b> düğmesine tıklayın.</p>
-<aside class="warning">Yalnızca çubuğu ve çerçevelerin üstündeki etiketleri Inbox Classic yazar. Gönderen, kendi iletisinin içine etikete benzeyen bir şey de dahil her şeyi çizebilir. Çubuğa bakın.</aside>
-<p>Şifreli bir bölümdeki internetten gelen resimler, her seferinde yalnızca resim çubuğuna tıkladığınızda yüklenir. Çubuğun etiketi de resimlerin yüklendiğini söyler.</p>
+<p>Bir iletinin bölümleri farklı biçimde korunuyorsa her bölüm ayrı bir çerçevede, kendi etiketiyle gösterilir. Üstteki çubuk, her türden kaç bölüm bulunduğunu gösterir. Bölümlerin imza ve şifreleme ayrıntılarını, kullanılan anahtarları ve imza zamanını görmek için bir etikete veya çubuktaki <b data-text="ui-protection-details"></b> düğmesine tıklayın.</p>
+<aside class="warning">Yalnızca üstteki çubuk ve bölüm çerçevelerinin üzerindeki etiketler Inbox Classic tarafından oluşturulur. Gönderen, ileti içeriğine bu etiketlere benzeyen resimler veya metinler ekleyebilir. Durumu üstteki çubuktan denetleyin.</aside>
+<p>Şifreli bölümlerdeki internet resimlerini yüklemek için iletiyi her açtığınızda resim çubuğundan izin vermeniz gerekir. Resimler yüklendiğinde bu durum bölüm etiketinde belirtilir.</p>
 <p>Yanıtlarken veya iletirken yalnızca gösterilen kısım alıntılanır.</p>
-<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>

@@ -1,17 +1,17 @@
-<!--review--><h1>Şifreleme anahtarları</h1>
+<h1>Şifreleme anahtarları</h1>
 <p class="summary">İletilerinizi imzalamak ve şifreli posta almak için bir anahtar oluşturun, kişilerinizin anahtarlarını saklayın.</p>
-<p>Inbox Classic postaları OpenPGP anahtarlarıyla imzalar ve şifreler. Kendi anahtarınızın iki yarısı vardır: başkalarına verdiğiniz ortak anahtar ve bilgisayarınızda kalan gizli anahtar. Kişilerinizin anahtarlarıyla onların imzalarını denetleyebilir ve onlara şifreli posta gönderebilirsiniz.</p>
+<p>Inbox Classic postaları OpenPGP anahtarlarıyla imzalar ve şifreler. Anahtarınız iki bölümden oluşur: başkalarına verdiğiniz ortak anahtar ve bilgisayarınızda kalan gizli anahtar. Kişilerinizin anahtarlarıyla onların imzalarını denetleyebilir ve onlara şifreli posta gönderebilirsiniz.</p>
 <p>Anahtarınızı oluşturmak için:</p>
 <ol>
     <li><b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> öğesini seçin, ardından <b data-text="ui-keys-new"></b> düğmesine tıklayın.</li>
-    <li>Hesabı seçin ve <b data-text="ui-keys-new-make"></b> düğmesine tıklayın. Anahtar, hesabın adresi ve diğer adresleri için kullanılır.</li>
+    <li>Hesabı seçin ve <b data-text="ui-keys-new-make"></b> düğmesine tıklayın. Anahtar, hesabın adresi ve diğer gönderen adresleri için kullanılır.</li>
     <li><b data-text="ui-keys-backup-now"></b> düğmesine tıklayın ve bir anahtar parolası seçin. Dosyayı ve anahtar parolasını ayrı, güvenli yerlerde saklayın.</li>
 </ol>
-<aside class="warning">Yedek olmadan, bu bilgisayar kaybolur veya sıfırlanırsa anahtarınız kurtarılamaz ve ona şifrelenmiş postalar artık okunamaz.</aside>
-<h2>Anahtarlar anahtar parolası olmadan da korunur</h2>
-<p>Gizli anahtarlarınız <!--os:windows-->Kimlik Bilgileri Yöneticisi'nde<!--/os--><!--os:mac-->anahtar zincirinde<!--/os--><!--os:linux-->sistem anahtarlığında<!--/os--> saklanan bir anahtarla korunur, bu yüzden onları kullanmak için hiçbir zaman anahtar parolası yazmazsınız. Anahtar parolasını yalnızca yedek için seçersiniz. Anahtarınız kilitli görünüyorsa bu koruma sıfırlanmıştır: <b data-text="ui-keys-import"></b> düğmesine tıklayın ve anahtarın yedeğini seçin.</p>
+<aside class="warning">Bilgisayar kaybolur veya sıfırlanırsa gizli anahtarın yedeği olmadan anahtarınızı geri yükleyemez, onunla şifrelenmiş iletileri okuyamazsınız.</aside>
+<h2>Anahtarları parola girmeden kullanma</h2>
+<p>Gizli anahtarlarınız <!--os:windows-->Kimlik Bilgileri Yöneticisi'nde<!--/os--><!--os:mac-->anahtar zincirinde<!--/os--><!--os:linux-->sistem anahtarlığında<!--/os--> saklanan bir anahtarla korunur, böylece günlük kullanımda her seferinde anahtar parolası girmeniz gerekmez. Anahtar parolasını yalnızca yedek için seçersiniz. Anahtarınız kilitli görünüyorsa onu koruyan anahtara artık erişilemiyordur: <b data-text="ui-keys-import"></b> düğmesine tıklayın ve gizli anahtarın yedeğini seçin.</p>
 <h2>Anahtar ekleme</h2>
-<p>Bir kişinin size gönderdiği anahtar veya kendi yedeğiniz gibi bir dosyadan anahtar eklemek için <b data-text="ui-keys-import"></b> düğmesine tıklayın. Anahtar parolasıyla korunan bir gizli anahtar bu parolayı bir kez sorar. Ardından Inbox Classic, içe aktarılan kendi anahtarınızın adresleriniz için kullanılıp kullanılmayacağını sorar.</p>
+<p>Bir kişinin size gönderdiği anahtar veya kendi yedeğiniz gibi bir dosyadan anahtar eklemek için <b data-text="ui-keys-import"></b> düğmesine tıklayın. Gizli anahtar bir parolayla korunuyorsa içe aktarırken bu parolayı bir kez girmeniz gerekir. Ardından Inbox Classic, içe aktardığınız gizli anahtarı kendi adreslerinizle kullanmak isteyip istemediğinizi sorar.</p>
 <p>Bir kişinin anahtarı o andan itibaren o kişinin adresi için kullanılır. Daha sonra aynı adres için farklı bir anahtar gelirse, siz kişinin özelliklerinde yenisini seçene kadar geçerli anahtar kullanılmaya devam eder.</p>
 <p>Ortak anahtarınızı paylaşmak için onu seçip <b data-text="ui-keys-export"></b> düğmesine tıklayın. Hesabınızın anahtarını, hesabın özelliklerindeki <b data-text="ui-account-security"></b> sekmesinde de seçebilirsiniz.</p>
-<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav><!--/review-->
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>

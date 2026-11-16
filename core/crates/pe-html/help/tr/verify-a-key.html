@@ -1,15 +1,14 @@
-<!--review--><h1>Bir kişinin anahtarını doğrulama</h1>
-<p class="summary">Anahtarın gerçekten sahibine ait olduğundan emin olmak için parmak izini sahibiyle karşılaştırın.</p>
-<p>Bir anahtar her yerden gelebilir: bir iletiden, bir anahtar sunucusundan, bir dosyadan. Herkes, kişinizin adı ve adresiyle bir anahtar oluşturabilir. Doğrulama, elinizdeki anahtarın kişinizdeki anahtarla aynı olduğunu onaylar.</p>
+<h1>Bir kişinin anahtarını doğrulama</h1>
+<p class="summary">Elinizdeki anahtarın parmak izini, sahibinin kendi uygulamasında gördüğü parmak iziyle karşılaştırın.</p>
+<p>Anahtarlar iletilerden, anahtar sunucularından veya dosyalardan gelebilir. Herhangi biri, tanıdığınız bir kişinin adı ve adresiyle anahtar oluşturabilir. Doğrulama işlemi, elinizdeki anahtarın o kişinin kullandığı anahtarla aynı olduğunu denetlemenizi sağlar.</p>
 <p>Bir anahtarı doğrulamak için:</p>
 <ol>
     <li><b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> komutunu seçin, kişinin anahtarını seçin ve <b data-text="ui-keys-verify"></b> düğmesine tıklayın. Bu düğmeye Adres Defteri'nde kişinin özelliklerinden de tıklayabilirsiniz.</li>
-    <li>Kişinizden, kendi uygulamasındaki anahtarının parmak izini size yüz yüze veya bir aramada okumasını isteyin.</li>
-    <li>Dörtlü grupların hepsi aynıysa <b data-text="ui-verify-match"></b> düğmesine tıklayın. Anahtar doğrulanmış olarak görünür.</li>
-    <li>Pencere, bunun işaretlediği adresleri listeler. Bir anahtar herhangi bir adresi içerebilir; bu yüzden bunlardan biri kişinize ait değilse bunun yerine <b data-text="ui-verify-differ"></b> düğmesine tıklayın.</li>
+    <li>Anahtarın sahibinden, kendi uygulamasında gördüğü parmak izini yüz yüze veya telefonda size okumasını isteyin. Listelenen tüm adreslerin de bu kişiye ait olduğunu denetleyin.</li>
+    <li>Dörder karakterlik grupların tümü eşleşiyor ve listedeki tüm adresler bu kişiye aitse <b data-text="ui-verify-match"></b> düğmesine tıklayın. Anahtar doğrulanmış olarak görünür.</li>
+    <li>Parmak izleri eşleşse bile listelenen adreslerden biri bu kişiye ait değilse <b data-text="ui-verify-differ"></b> düğmesine tıklayın.</li>
 </ol>
 <aside class="warning">Parmak izini e-postayla gönderilmiş bir parmak iziyle karşılaştırmayın. Bir iletideki anahtarı değiştirebilen kişi parmak izini de değiştirebilir.</aside>
-<p>Parmak izleri farklıysa <b data-text="ui-verify-differ"></b> düğmesine tıklayın. Elinizdeki anahtar kişinize ait değildir: kaldırın ve kişinizden anahtarını yeniden göndermesini isteyin.</p>
-<p>Doğrulanmış bir anahtarla yapılan imzalar yeşil görünür. Doğrulamadığınız bir anahtar şifreleme için yine çalışır ve imzaları mavi görünür.</p>
+<p>Parmak izleri farklıysa <b data-text="ui-verify-differ"></b> düğmesine tıklayın. Elinizdeki anahtar bu kişinin kullandığı anahtarla eşleşmiyordur. Anahtarı kaldırın ve kişiden anahtarını yeniden göndermesini isteyin.</p>
+<p>Gönderenin geçerli imzası, anahtarının sahibini doğruladıysanız yeşil, doğrulamadıysanız mavi görünür. Sahibini doğrulamadığınız bir anahtar da şifreleme için kullanılabilir.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->
