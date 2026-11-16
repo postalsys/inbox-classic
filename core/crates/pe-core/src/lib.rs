@@ -55,7 +55,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
-pub use list_view::ListView;
+pub use list_view::{FIND_PAUSE_MS, LIST_DIM, LIST_GATHER_MS, LIST_LOADING_MS, ListView};
 use pe_i18n::{Text, tr, tr_args};
 use pe_net::Trust;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};

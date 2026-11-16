@@ -36,6 +36,21 @@
 // (test runs, a shared computer)
 #define PE_OPEN_MEMORY_PASSWORDS 1
 
+// How long the changes to the list shown are gathered before it is read again (a sync writes many in a row), in
+// milliseconds; when the timer runs out, `pe_list_view_stale` says whether the list needs reading at all
+#define PE_LIST_GATHER_MS 300
+
+// How long a folder chosen waits for its list before the list says "Loading...", in milliseconds, counted from the
+// first click of the wait (later clicks while it waits do not start it again)
+#define PE_LIST_LOADING_MS 400
+
+// How long the Address Book's find boxes wait after the last key before they search, in milliseconds
+#define PE_FIND_PAUSE_MS 150
+
+// How strongly the window's colour covers the rows of the list shown while the list of a folder chosen waits
+// (the rows show through at 45 percent)
+#define PE_LIST_DIM 0.55
+
 // The parts of a setup file, as flags
 #define PE_SETUP_SETTINGS 1
 
@@ -3681,6 +3696,40 @@ bool pe_list_view_counts(const struct PeCore *core,
                          const struct PeListView *view,
                          uint64_t *total,
                          uint64_t *unread);
+
+// The counts of `pe_list_view_counts` and the row count of `pe_list_view_row_count` at once, as a list read again
+// wants them; false on failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view, `total`, `unread` and `rows` valid pointers.
+bool pe_list_view_counts_and_rows(const struct PeCore *core,
+                                  const struct PeListView *view,
+                                  uint64_t *total,
+                                  uint64_t *unread,
+                                  uint64_t *rows);
+
+// Whether something was written to the store since the list was last counted (`pe_list_view_counts`,
+// `pe_list_view_counts_and_rows`), or it was never counted: read again, it might show something else. The list read
+// again `PE_LIST_GATHER_MS` after a change skips that when it is not stale, as the user's own command read it at once.
+// True on failure; false for a view listing nothing.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view.
+bool pe_list_view_stale(const struct PeCore *core,
+                        const struct PeListView *view);
+
+// The row of the message `uid` of `folder` as `pe_list_view_index` finds it, looked for first in the rows read since
+// the list was counted, nearest `hint` (the row it had before the list was read again; read the page with that row
+// first): the message shown found where it was, or a few rows lower as mail came above it, without going through
+// the whole list. A negative `hint` is `pe_list_view_index`. -1 when it is not in the list.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view.
+int64_t pe_list_view_index_near(const struct PeCore *core,
+                                const struct PeListView *view,
+                                int64_t folder,
+                                uint64_t uid,
+                                int64_t hint);
 
 // The row of the message `uid` of `folder` (its conversation's while that is collapsed), -1 when it is not in the
 // list

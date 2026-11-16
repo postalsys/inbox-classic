@@ -19,6 +19,26 @@ use crate::selection::{PeAction, PePositions, PeSelection, PeSelectionSummary, a
 /// What a message list shows; free with `pe_list_view_free`
 pub struct PeListView(ListView);
 
+/// How long the changes to the list shown are gathered before it is read again (a sync writes many in a row), in
+/// milliseconds; when the timer runs out, `pe_list_view_stale` says whether the list needs reading at all
+pub const PE_LIST_GATHER_MS: u32 = 300;
+/// How long a folder chosen waits for its list before the list says "Loading...", in milliseconds, counted from the
+/// first click of the wait (later clicks while it waits do not start it again)
+pub const PE_LIST_LOADING_MS: u32 = 400;
+/// How long the Address Book's find boxes wait after the last key before they search, in milliseconds
+pub const PE_FIND_PAUSE_MS: u32 = 150;
+/// How strongly the window's colour covers the rows of the list shown while the list of a folder chosen waits
+/// (the rows show through at 45 percent)
+pub const PE_LIST_DIM: f64 = 0.55;
+
+// the same as the core's, which the Linux app reads (cbindgen writes literals only)
+const _: () = assert!(
+    PE_LIST_GATHER_MS == pe_core::LIST_GATHER_MS
+        && PE_LIST_LOADING_MS == pe_core::LIST_LOADING_MS
+        && PE_FIND_PAUSE_MS == pe_core::FIND_PAUSE_MS
+        && PE_LIST_DIM == pe_core::LIST_DIM
+);
+
 /// Reads the view, `fallback` for NULL or a panic
 ///
 /// # Safety
@@ -376,6 +396,74 @@ pub unsafe extern "C" fn pe_list_view_counts(
     // SAFETY: the caller gave valid pointers
     unsafe { (*total, *unread) = counts };
     true
+}
+
+/// The counts of `pe_list_view_counts` and the row count of `pe_list_view_row_count` at once, as a list read again
+/// wants them; false on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `view` NULL or a live view, `total`, `unread` and `rows` valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_counts_and_rows(
+    core: *const PeCore,
+    view: *const PeListView,
+    total: *mut u64,
+    unread: *mut u64,
+    rows: *mut u64,
+) -> bool {
+    if total.is_null() || unread.is_null() || rows.is_null() {
+        return false;
+    }
+    // SAFETY: as the caller guarantees
+    let Some(counts) = (unsafe { listed(core, view, None, |core, view| view.counts_and_rows(core).ok()) }) else {
+        return false;
+    };
+    // SAFETY: the caller gave valid pointers
+    unsafe { (*total, *unread, *rows) = counts };
+    true
+}
+
+/// Whether something was written to the store since the list was last counted (`pe_list_view_counts`,
+/// `pe_list_view_counts_and_rows`), or it was never counted: read again, it might show something else. The list read
+/// again `PE_LIST_GATHER_MS` after a change skips that when it is not stale, as the user's own command read it at once.
+/// True on failure; false for a view listing nothing.
+///
+/// # Safety
+/// `core` must be a live handle, `view` NULL or a live view.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_stale(core: *const PeCore, view: *const PeListView) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { listed(core, view, true, |core, view| view.stale(core).unwrap_or(true)) }
+}
+
+/// The row of the message `uid` of `folder` as `pe_list_view_index` finds it, looked for first in the rows read since
+/// the list was counted, nearest `hint` (the row it had before the list was read again; read the page with that row
+/// first): the message shown found where it was, or a few rows lower as mail came above it, without going through
+/// the whole list. A negative `hint` is `pe_list_view_index`. -1 when it is not in the list.
+///
+/// # Safety
+/// `core` must be a live handle, `view` NULL or a live view.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_index_near(
+    core: *const PeCore,
+    view: *const PeListView,
+    folder: i64,
+    uid: u64,
+    hint: i64,
+) -> i64 {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        listed(core, view, -1, |core, view| {
+            let found = match u64::try_from(hint) {
+                Ok(hint) => view.index_of_near(core, folder, uid, hint),
+                Err(_) => view.index_of(core, folder, uid),
+            };
+            match found {
+                Ok(Some(index)) => i64::try_from(index).unwrap_or(-1),
+                _ => -1,
+            }
+        })
+    }
 }
 
 /// The row of the message `uid` of `folder` (its conversation's while that is collapsed), -1 when it is not in the

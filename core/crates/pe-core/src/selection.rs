@@ -187,7 +187,7 @@ impl Core {
 
     /// The messages of `rows` of the list `search` makes, read by [`Core::search`]: a collapsed conversation's row
     /// stands for its messages. What selecting rows already shown takes, without reading the list again.
-    pub fn refs_of_rows(&self, search: &Search, rows: &[pe_store::Message]) -> Result<Vec<MessageRef>> {
+    pub fn refs_of_rows(&self, search: &Search, rows: &[pe_store::RowRef]) -> Result<Vec<MessageRef>> {
         Ok(self.store().refs_of_rows(search, rows)?)
     }
 

@@ -284,6 +284,24 @@ type Unthreaded = (i64, Option<String>, Option<String>, String);
 /// A conversation of the grouped list: its id, how many messages it has in the list and how many of them are unread
 type Group = (i64, u32, u32);
 
+/// A row of a list as a click on it sees it: the message it shows and, when it is a collapsed conversation's row, that
+/// conversation, whose messages in the list it stands for. What a list view keeps of the pages it read.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct RowRef {
+    pub at: MessageRef,
+    pub collapsed: Option<i64>,
+}
+
+impl RowRef {
+    /// The row that `message`, as [`Store::search`] read it, has
+    pub fn of(message: &Message) -> RowRef {
+        RowRef {
+            at: message.at(),
+            collapsed: message.thread.filter(ThreadPlace::collapsed).map(|place| place.thread),
+        }
+    }
+}
+
 /// A row of the grouped list as an action on it sees it
 enum RowRefs {
     /// A message of its own
@@ -776,18 +794,19 @@ impl Store {
         for &(start, end) in ranges {
             rows.extend(self.search(search, sort, start, end - start)?);
         }
+        let rows: Vec<RowRef> = rows.iter().map(RowRef::of).collect();
         self.refs_of_rows(search, &rows)
     }
 
     /// The messages of `rows` of the list `search` makes (rows [`Store::search`] read), in their order: a collapsed
     /// conversation's row stands for all of its messages in the list, as they arrived, in its place. What a click
     /// selects from the rows shown, without reading the list again.
-    pub fn refs_of_rows(&self, search: &Search, rows: &[Message]) -> Result<Vec<MessageRef>> {
+    pub fn refs_of_rows(&self, search: &Search, rows: &[RowRef]) -> Result<Vec<MessageRef>> {
         let rows: Vec<RowRefs> = rows
             .iter()
-            .map(|message| match message.thread.filter(ThreadPlace::collapsed) {
-                Some(place) if search.threads.is_some() => RowRefs::Conversation(place.thread),
-                _ => RowRefs::Message(message.at()),
+            .map(|row| match row.collapsed {
+                Some(thread) if search.threads.is_some() => RowRefs::Conversation(thread),
+                _ => RowRefs::Message(row.at),
             })
             .collect();
         let collapsed: Vec<i64> = rows

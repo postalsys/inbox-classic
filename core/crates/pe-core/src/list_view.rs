@@ -6,13 +6,13 @@
 //!
 //! Every list call builds the [`Search`] the store reads from the view, so the queries are those of [`Core::search`]
 //! and its kin. What they read is kept ([`Memo`]): the counts while the store is unchanged, which a list of one row a
-//! message has as its row count too, and the pages shown, whose rows a click then selects without reading the whole
-//! list again.
+//! message has as its row count too, and which messages the rows of the pages shown are, which a click then selects
+//! without reading the whole list again.
 
 use std::collections::BTreeSet;
 use std::sync::Mutex;
 
-use pe_store::{FolderId, Generation, Message, MessageRef, Scope, Search, Show, Sort};
+use pe_store::{FolderId, Generation, Message, MessageRef, RowRef, Scope, Search, Show, Sort};
 
 use crate::{Action, Core, NextUnread, Result, Summary};
 
@@ -28,6 +28,21 @@ pub(crate) fn now_ms() -> i64 {
 
 /// The pages of rows a view keeps at most ([`Memo`]): those shown and one or two around them
 const KEPT_PAGES: usize = 4;
+
+/// The waits of the three apps' lists, stated once. How long the changes to the list shown are gathered before it is
+/// read again (a sync writes many in a row), in milliseconds
+pub const LIST_GATHER_MS: u32 = 300;
+
+/// How long a folder chosen waits for its list before the list says "Loading...", in milliseconds, from the first
+/// click of the wait (later clicks while it waits do not start it again)
+pub const LIST_LOADING_MS: u32 = 400;
+
+/// How long the Address Book's find boxes wait after the last key before they search, in milliseconds
+pub const FIND_PAUSE_MS: u32 = 150;
+
+/// How strongly the window's colour covers the rows of the list shown while the list of a folder chosen waits
+/// (the rows show through at 45 percent)
+pub const LIST_DIM: f64 = 0.55;
 
 /// What a view read last, of the list it lists now (its search and order). Its counts and the pages it read answer
 /// again while nothing was written to the store ([`Generation`]) in the same minute (words like `newer_than:` count
@@ -48,12 +63,12 @@ struct Kept {
     pages: Vec<Page>,
 }
 
-/// A page of rows of the list, and when it was read
+/// Which messages a page of rows of the list shows (what a click on them selects), and when it was read
 struct Page {
     offset: u64,
     limit: u64,
     at: When,
-    rows: Vec<Message>,
+    rows: Vec<RowRef>,
 }
 
 /// What the store held and the minute, when something was read
@@ -136,14 +151,6 @@ impl Kept {
         Ok(value)
     }
 
-    /// The page from `offset` of `limit` rows, read at `at`
-    fn page(&self, offset: u64, limit: u64, at: When) -> Option<&Vec<Message>> {
-        self.pages
-            .iter()
-            .find(|p| (p.offset, p.limit, p.at) == (offset, limit, at))
-            .map(|p| &p.rows)
-    }
-
     /// A page read, in place of one read before from the same offset
     fn keep(&mut self, page: Page) {
         self.pages.retain(|p| (p.offset, p.limit) != (page.offset, page.limit));
@@ -155,7 +162,7 @@ impl Kept {
 
     /// The rows at `ranges` as the pages read show them (the last read first), None when one of them is not there.
     /// Rows past the end of the list, where the last page shorter than asked for ends, are none.
-    fn rows_at(&self, ranges: &[(u64, u64)]) -> Option<Vec<Message>> {
+    fn rows_at(&self, ranges: &[(u64, u64)]) -> Option<Vec<RowRef>> {
         let end = self
             .pages
             .iter()
@@ -170,10 +177,27 @@ impl Kept {
                     .iter()
                     .rev()
                     .find(|p| at >= p.offset && at - p.offset < p.rows.len() as u64)?;
-                found.push(page.rows[(at - page.offset) as usize].clone());
+                found.push(page.rows[(at - page.offset) as usize]);
             }
         }
         Some(found)
+    }
+
+    /// The row of `wanted` in the pages read at `at` (the list as it is now), the one nearest `hint` should it be in
+    /// several; None when they do not have it
+    fn row_near(&self, wanted: MessageRef, hint: u64, at: When) -> Option<u64> {
+        self.pages
+            .iter()
+            .filter(|p| p.at == at)
+            .flat_map(|p| (p.offset..).zip(&p.rows))
+            .filter(|(_, row)| row.at == wanted)
+            .map(|(index, _)| index)
+            .min_by_key(|index| index.abs_diff(hint))
+    }
+
+    /// Whether the list was counted at `at` (nothing was written since)
+    fn counted_at(&self, at: When) -> bool {
+        self.at == at && self.counts.is_some()
     }
 }
 
@@ -430,21 +454,15 @@ impl ListView {
         f(&search, moment)
     }
 
-    /// A page of the list's rows, from `offset` on
+    /// A page of the list's rows, from `offset` on; which messages they are is kept for a click on them
     pub fn rows(&self, core: &Core, offset: u64, limit: u64) -> Result<Vec<Message>> {
         self.remembered(core, Vec::new(), |search, moment| {
-            if let Some(rows) = self
-                .memo
-                .with(moment, |kept| kept.page(offset, limit, moment.at).cloned())
-            {
-                return Ok(rows);
-            }
             let rows = core.search(search, self.sort, offset, limit)?;
             let page = Page {
                 offset,
                 limit,
                 at: moment.at,
-                rows: rows.clone(),
+                rows: rows.iter().map(RowRef::of).collect(),
             };
             self.memo.with(moment, |kept| kept.keep(page));
             Ok(rows)
@@ -472,10 +490,52 @@ impl ListView {
         })
     }
 
+    /// [`ListView::counts`] and [`ListView::row_count`] together, as a list read again wants them: the messages, the
+    /// unread ones and the rows
+    pub fn counts_and_rows(&self, core: &Core) -> Result<(u64, u64, u64)> {
+        self.remembered(core, (0, 0, 0), |search, moment| {
+            self.memo.with(moment, |kept| {
+                let (total, unread) = kept.counted(|k| &mut k.counts, || core.list_counts(search))?;
+                let rows = match self.grouped {
+                    true => kept.counted(|k| &mut k.rows, || core.count_rows(search))?,
+                    false => total,
+                };
+                Ok((total, unread, rows))
+            })
+        })
+    }
+
+    /// Whether something was written to the store since the list was last counted (or it was not counted yet): read
+    /// again, it might show something else. A change the user's own command made, read again at once, does not need
+    /// the reload that the change's event asks for a moment later.
+    pub fn stale(&self, core: &Core) -> Result<bool> {
+        self.remembered(core, false, |search, moment| {
+            let kept = self.memo.0.lock().unwrap_or_else(|e| e.into_inner());
+            Ok(!kept
+                .as_ref()
+                .is_some_and(|k| k.sort == moment.sort && k.search == *search && k.counted_at(moment.at)))
+        })
+    }
+
     /// The row of the message `uid` of `folder` (its conversation's while that is collapsed); None when it is not in
     /// the list
     pub fn index_of(&self, core: &Core, folder: FolderId, uid: u64) -> Result<Option<u64>> {
         self.listed(None, |search| core.search_index(search, self.sort, folder, uid))
+    }
+
+    /// [`ListView::index_of`], looked for first in the rows read since the list was counted, nearest `hint` (the row
+    /// the message had before the list was read again): a list read again with the message shown where it was, or a
+    /// few rows lower as mail came above it, finds it without going through the whole list. Read the page with the
+    /// hint's row first.
+    pub fn index_of_near(&self, core: &Core, folder: FolderId, uid: u64, hint: u64) -> Result<Option<u64>> {
+        let wanted = MessageRef { folder, uid };
+        let near = self.remembered(core, None, |_, moment| {
+            Ok(self.memo.with(moment, |kept| kept.row_near(wanted, hint, moment.at)))
+        })?;
+        match near {
+            Some(index) => Ok(Some(index)),
+            None => self.index_of(core, folder, uid),
+        }
     }
 
     /// The messages before and after the message `uid` of `folder` (see [`Core::neighbours`])
@@ -782,6 +842,146 @@ mod tests {
             [at(7), at(4)],
             "counted again: from the list"
         );
+    }
+
+    /// The pages a view keeps say which messages the rows are, as a fresh read of the list does
+    #[test]
+    fn the_pages_kept_are_the_rows_read() {
+        let dir = pe_testkit::TempDir::new("core-list-view-kept");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let a = thread(&core, inbox, 1);
+        for (grouped, open) in [(false, None), (true, None), (true, Some(a))] {
+            let mut view = ListView::new();
+            view.set_scope(Some(Scope::Folder(inbox)));
+            view.set_grouped(grouped);
+            if let Some(thread) = open {
+                view.expand(thread);
+            }
+            let search = view.search().unwrap();
+            view.counts_and_rows(&core).unwrap();
+            view.rows(&core, 0, 2).unwrap();
+            view.rows(&core, 2, 10).unwrap();
+            let fresh: Vec<RowRef> = core
+                .search(&search, view.sort(), 0, 10)
+                .unwrap()
+                .iter()
+                .map(RowRef::of)
+                .collect();
+            let kept = view.memo.0.lock().unwrap();
+            let pages = &kept.as_ref().unwrap().pages;
+            let kept: Vec<RowRef> = pages.iter().flat_map(|p| p.rows.iter().copied()).collect();
+            assert_eq!(kept, fresh, "grouped {grouped}, open {open:?}");
+            assert_eq!(
+                kept.iter().any(|r| r.collapsed.is_some()),
+                grouped,
+                "grouped {grouped}, open {open:?}"
+            );
+        }
+    }
+
+    /// The counts and the row count together, as each alone gives them
+    #[test]
+    fn counts_and_rows_together() {
+        let dir = pe_testkit::TempDir::new("core-list-view-counts");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let mut view = ListView::new();
+        assert_eq!(view.counts_and_rows(&core).unwrap(), (0, 0, 0), "no folder");
+        view.set_scope(Some(Scope::Folder(inbox)));
+        core.set_seen(inbox, 2, false).unwrap();
+        assert_eq!(view.counts_and_rows(&core).unwrap(), (6, 1, 6));
+        view.set_grouped(true);
+        assert_eq!(view.counts_and_rows(&core).unwrap(), (6, 1, 3));
+        view.expand(thread(&core, inbox, 1));
+        assert_eq!(view.counts_and_rows(&core).unwrap(), (6, 1, 5));
+        assert_eq!(
+            (view.counts(&core).unwrap(), view.row_count(&core).unwrap()),
+            ((6, 1), 5)
+        );
+    }
+
+    /// A list is stale until it is counted, again after a write, and not after a read
+    #[test]
+    fn stale_after_a_write_not_after_a_read() {
+        let dir = pe_testkit::TempDir::new("core-list-view-stale");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let mut view = ListView::new();
+        assert!(!view.stale(&core).unwrap(), "it lists nothing");
+        view.set_scope(Some(Scope::Folder(inbox)));
+        assert!(view.stale(&core).unwrap(), "not counted yet");
+        view.counts_and_rows(&core).unwrap();
+        assert!(!view.stale(&core).unwrap(), "counted");
+        view.rows(&core, 0, 10).unwrap();
+        core.store().message(inbox, 1).unwrap();
+        assert!(!view.stale(&core).unwrap(), "a read changes nothing");
+        core.set_seen(inbox, 1, false).unwrap();
+        assert!(view.stale(&core).unwrap(), "a write");
+        view.counts(&core).unwrap();
+        assert!(!view.stale(&core).unwrap(), "counted again");
+        view.set_sort(Sort {
+            ascending: true,
+            ..view.sort()
+        });
+        assert!(view.stale(&core).unwrap(), "another order is another list");
+        view.counts_and_rows(&core).unwrap();
+        // a write by another connection, as a worker's
+        let other = pe_store::Store::open(dir.path().join("store.db")).unwrap();
+        other.add_messages(inbox, &[mail(8, 800, "<h@x>", &[])]).unwrap();
+        assert!(view.stale(&core).unwrap(), "another connection's write");
+    }
+
+    /// The row of the message shown after the list is read again: from the pages read, nearest the hint, or from the
+    /// whole list when they do not have it
+    #[test]
+    fn index_of_near_looks_near_then_everywhere() {
+        let dir = pe_testkit::TempDir::new("core-list-view-near");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let a = thread(&core, inbox, 1);
+        for (grouped, open) in [(false, None), (true, None), (true, Some(a))] {
+            let mut view = ListView::new();
+            view.set_scope(Some(Scope::Folder(inbox)));
+            view.set_grouped(grouped);
+            if let Some(thread) = open {
+                view.expand(thread);
+            }
+            let what = format!("grouped {grouped}, open {open:?}");
+            view.counts_and_rows(&core).unwrap();
+            view.rows(&core, 0, 2).unwrap();
+            for uid in 1..=6 {
+                let whole = view.index_of(&core, inbox, uid).unwrap();
+                for hint in [0, 1, 3, 40] {
+                    assert_eq!(
+                        view.index_of_near(&core, inbox, uid, hint).unwrap(),
+                        whole,
+                        "{what}, uid {uid}, hint {hint}"
+                    );
+                }
+            }
+            assert_eq!(view.index_of_near(&core, inbox, 99, 0).unwrap(), None, "{what}");
+
+            // found in the pages read: the first rows, and none once the store changed since they were read
+            let first = view.rows(&core, 0, 2).unwrap()[0].at();
+            let found = |view: &ListView| {
+                let moment_at = When {
+                    generation: core.generation().unwrap(),
+                    minute: now_ms() / 60_000,
+                };
+                let kept = view.memo.0.lock().unwrap();
+                kept.as_ref().unwrap().row_near(first, 1, moment_at)
+            };
+            assert_eq!(found(&view), Some(0), "{what}");
+            core.set_seen(first.folder, first.uid, false).unwrap();
+            assert_eq!(found(&view), None, "{what}: read before the write");
+            assert_eq!(
+                view.index_of_near(&core, first.folder, first.uid, 0).unwrap(),
+                Some(0),
+                "{what}"
+            );
+            core.set_seen(first.folder, first.uid, true).unwrap();
+        }
     }
 
     #[test]
