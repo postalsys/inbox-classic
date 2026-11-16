@@ -1,0 +1,164 @@
+# The settings window, once for the three platforms: its pages, their groups and their settings, in the order every
+# platform shows them (Windows' Tools > Options, the Mac's Inbox Classic > Settings, Linux's Main Menu > Preferences).
+# pe-ffi's build.rs turns it into
+#   core/include/settings.h                               the tables of the Windows app (app/src/options.cpp)
+#   mac/Sources/InboxClassic/Generated/SettingsPages.swift  the Mac's SettingsPage, SettingsGroup and Setting enums
+#   linux/src/generated/settings_pages.rs                 the same for Linux
+# All three are committed and CI checks they match this file. Each app lays out the pages and groups from them and
+# builds each setting in one exhaustive switch or match, so a setting added here fails the build of a platform that
+# does not show it yet, and the three orders cannot drift apart. The help names a page with
+# <b data-settings="reading"></b> (pe-html help.rs reads the pages from here too).
+#
+# [[page]]          a page: a tab on Windows, a toolbar pane on the Mac, an AdwPreferencesPage on Linux
+#   id              the name in code and in the help's data-settings
+#   label           its catalog message: the tab, the pane's toolbar item and window title, the view switcher
+#   mac_symbol      the SF Symbol of its toolbar item on the Mac
+#   linux_icon      the icon of its view switcher button on Linux
+# [[page.group]]    a group of the page: a group box on Windows, extra space between groups on the Mac (no heading,
+#                   as Apple's own panes), an AdwPreferencesGroup on Linux
+#   id              the name in code
+#   label           its title; none for the one group of a page, which the page titles, or a group only the Mac
+#                   has, which shows no headings
+#                   (a group shows on the platforms that have one of its settings)
+#   note            a note under the group (Linux: its description)
+# [[page.group.setting]]
+#   id              the name in code (snake_case here, PE_SETTING_SEND_DELAY in C, sendDelay in Swift, SendDelay in
+#                   Rust)
+#   kind            switch (a check box, AdwSwitchRow), choice (a list, pop-up or combo row with its label), button
+#                   (opens a window or acts at once)
+#   label           its catalog message; & marks its Windows access key, unique within its page with OK, Cancel and
+#                   Apply in every language (pe-ffi tests/settings.rs)
+#   note            a note under it (Linux: the row's subtitle or the group's description)
+#   platforms       the platforms that have it, all three when left out
+#   depends_on      a switch before it in its group: this one is disabled while that one is off
+
+[[page]]
+id = "general"
+label = "ui-settings-general"
+mac_symbol = "gearshape"
+linux_icon = "emblem-system-symbolic"
+
+[[page.group]]
+id = "language"
+label = "ui-language-label"
+
+[[page.group.setting]]
+id = "language"
+kind = "choice"
+label = "ui-language-label"
+note = "ui-restart-note"
+
+[[page.group]]
+id = "new_mail"
+label = "ui-settings-new-mail"
+
+[[page.group.setting]]
+id = "notify_new_mail"
+kind = "switch"
+label = "ui-notify-new-mail"
+
+[[page.group.setting]]
+id = "codes_in_notifications"
+kind = "switch"
+label = "ui-codes-in-notifications"
+depends_on = "notify_new_mail"
+
+[[page.group]]
+id = "sending"
+label = "ui-settings-sending"
+
+[[page.group.setting]]
+id = "send_delay"
+kind = "choice"
+label = "ui-send-delay"
+note = "ui-send-delay-note"
+
+[[page.group]]
+id = "default_apps"
+label = "ui-settings-default-apps"
+
+[[page.group.setting]]
+id = "default_mail_app"
+kind = "button"
+label = "cmd-default-app"
+
+[[page.group.setting]]
+id = "eml_default"
+kind = "button"
+label = "ui-eml-default"
+
+[[page.group]]
+id = "updates"
+
+[[page.group.setting]]
+id = "check_for_updates"
+kind = "switch"
+label = "mac-check-updates-automatically"
+platforms = ["mac"]
+
+[[page]]
+id = "reading"
+label = "ui-settings-reading"
+mac_symbol = "eyeglasses"
+linux_icon = "mail-read-symbolic"
+
+[[page.group]]
+id = "message_list"
+label = "ui-settings-message-list"
+
+[[page.group.setting]]
+id = "layout"
+kind = "choice"
+label = "ui-layout-label"
+
+[[page.group.setting]]
+id = "group_by_conversation"
+kind = "switch"
+label = "ui-group-by-conversation"
+
+[[page.group.setting]]
+id = "list_pictures"
+kind = "switch"
+label = "ui-list-pictures"
+note = "ui-list-pictures-note"
+
+[[page.group]]
+id = "messages"
+label = "ui-settings-messages"
+
+[[page.group.setting]]
+id = "dark_messages"
+kind = "switch"
+label = "ui-dark-messages"
+platforms = ["mac", "linux"]
+
+[[page.group.setting]]
+id = "pictures_always"
+kind = "switch"
+label = "ui-pictures-always-option"
+note = "ui-pictures-always-warning"
+
+[[page.group.setting]]
+id = "trusted_senders"
+kind = "button"
+label = "ui-trusted-senders-button"
+
+[[page]]
+id = "downloading"
+label = "ui-download-heading"
+mac_symbol = "arrow.down.circle"
+linux_icon = "folder-download-symbolic"
+
+[[page.group]]
+id = "downloading"
+note = "ui-download-note"
+
+[[page.group.setting]]
+id = "download_ahead"
+kind = "choice"
+label = "ui-download-ahead"
+
+[[page.group.setting]]
+id = "download_limit"
+kind = "choice"
+label = "ui-download-limit"
