@@ -209,3 +209,12 @@ fn translated_only_from_the_language_itself() {
         Some("2 messages")
     );
 }
+
+#[test]
+fn portuguese_plurals_follow_portugal() {
+    // pt-PT: only 1 is `one`, so no catalog needs a `[0]` branch to say "0 mensagens"
+    let selected = |count: u64| translated("pt", "selection-title", &[("count", count.into())]);
+    assert_eq!(selected(0).as_deref(), Some("0 mensagens selecionadas"));
+    assert_eq!(selected(1).as_deref(), Some("1 mensagem selecionada"));
+    assert_eq!(selected(2).as_deref(), Some("2 mensagens selecionadas"));
+}

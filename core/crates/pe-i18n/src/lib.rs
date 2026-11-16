@@ -17,10 +17,29 @@ include!(concat!(env!("OUT_DIR"), "/texts.rs"));
 /// one language a line as it is, `scripts/languages.sh` reads them so (a test checks it).
 pub const LANGUAGES: &[(&str, &str)] = &[
     ("en", "English"),
+    ("cs", "Čeština"),
+    ("da", "Dansk"),
     ("de", "Deutsch"),
     ("et", "Eesti"),
     ("es", "Español"),
     ("fr", "Français"),
+    ("hr", "Hrvatski"),
+    ("it", "Italiano"),
+    ("lv", "Latviešu"),
+    ("lt", "Lietuvių"),
+    ("hu", "Magyar"),
+    ("nl", "Nederlands"),
+    ("pl", "Polski"),
+    ("pt", "Português"),
+    ("ro", "Română"),
+    ("sk", "Slovenčina"),
+    ("sl", "Slovenščina"),
+    ("fi", "Suomi"),
+    ("sv", "Svenska"),
+    ("el", "Ελληνικά"),
+    ("bg", "Български"),
+    ("ru", "Русский"),
+    ("uk", "Українська"),
 ];
 
 /// The pseudo-language for tests
@@ -33,8 +52,17 @@ struct Language {
     bundle: Arc<Bundle>,
 }
 
+/// The locale a catalog's plurals follow: `pt` is the Portuguese of Portugal, where only 1 is `one` (CLDR's `pt` is
+/// Brazil's, where 0 is `one` too)
+fn locale(code: &str) -> &str {
+    match code {
+        "pt" => "pt-PT",
+        other => other,
+    }
+}
+
 fn bundle(code: &str) -> Bundle {
-    let tag: unic_langid::LanguageIdentifier = code.parse().unwrap_or_default();
+    let tag: unic_langid::LanguageIdentifier = locale(code).parse().unwrap_or_default();
     let mut bundle = Bundle::new_concurrent(vec![tag]);
     // the windows show the words as they are, without the marks that keep a name's direction apart
     bundle.set_use_isolating(false);
