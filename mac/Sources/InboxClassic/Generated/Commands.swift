@@ -563,6 +563,86 @@ enum Command: Int, CaseIterable {
         }
     }
 
+    /// Acts on the message list or its selection: a list waiting to be read is read before it runs
+    var actsOnList: Bool {
+        switch self {
+        case .newAccount: return false
+        case .exit: return false
+        case .sync: return false
+        case .undo: return true
+        case .selectAll: return true
+        case .markRead: return true
+        case .markUnread: return true
+        case .layoutAutomatic: return false
+        case .layoutClassic: return false
+        case .layoutColumns: return false
+        case .folderList: return false
+        case .sortDate: return true
+        case .sortFrom: return true
+        case .sortSubject: return true
+        case .sortSize: return true
+        case .sortAscending: return true
+        case .sortDescending: return true
+        case .textSizeLargest: return false
+        case .textSizeLarger: return false
+        case .textSizeMedium: return false
+        case .textSizeSmaller: return false
+        case .textSizeSmallest: return false
+        case .pictures: return true
+        case .about: return false
+        case .newMail: return false
+        case .reply: return true
+        case .replyAll: return true
+        case .forward: return true
+        case .help: return false
+        case .delete: return true
+        case .move: return true
+        case .copy: return true
+        case .flag: return true
+        case .newFolder: return false
+        case .renameFolder: return false
+        case .deleteFolder: return false
+        case .nextMessage: return true
+        case .previousMessage: return true
+        case .nextUnread: return true
+        case .goToFolder: return false
+        case .findInMessage: return false
+        case .emptyFolder: return false
+        case .accounts: return false
+        case .find: return false
+        case .saveAs: return true
+        case .print: return true
+        case .import: return false
+        case .outbox: return false
+        case .properties: return true
+        case .markAllRead: return true
+        case .junk: return true
+        case .notJunk: return true
+        case .archive: return true
+        case .watchConversation: return true
+        case .ignoreConversation: return true
+        case .notify: return false
+        case .open: return false
+        case .defaultApp: return false
+        case .viewSource: return true
+        case .expandAllThreads: return true
+        case .collapseAllThreads: return true
+        case .hideIgnored: return true
+        case .hideRead: return true
+        case .aiAgents: return false
+        case .options: return false
+        case .addressBook: return false
+        case .messageRules: return false
+        case .encryptionKeys: return false
+        case .createRuleFromMessage: return true
+        case .addSenderToBook: return true
+        case .importAddressBook: return false
+        case .exportAddressBook: return false
+        case .exportSetup: return false
+        case .importSetup: return false
+        }
+    }
+
     /// The submenu of its menu it is in ("layout"), labelled by the catalog's menu-<submenu>; nil for none
     var submenu: String? {
         switch self {
