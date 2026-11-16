@@ -16,8 +16,8 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Czech (cs) help: all 1,334 catalog entries are reviewed, with 196 values improved.
-  All 52 help topics remain; the first four were read alongside English but not yet edited.
+- Resume with Czech (cs) help: all 1,334 catalog entries and 21 everyday help topics are reviewed.
+  Final 31 topics remain; security/encryption topics have been read alongside English but not yet edited.
   All 84 late list-loading labels have been reviewed. Bulgarian, Dutch, Italian, Portuguese (Portugal),
   Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are complete: each has
   1,334 catalog entries and 52 help topics. Fifteen languages still have pending content,
@@ -437,8 +437,17 @@ Structural checks, 32 actual menu/dialog shortcut scopes, exact inventory/source
 `/Users/andris/Projects/PostalExpress/build/cargo-translation-review` target directory. Review HTML regenerated.
 No tests were run, per user instruction.
 
-Current totals: 13,458 catalog entries and 472 help pages reviewed; 2,080 catalog values improved. Remaining:
-18,634 catalog entries and 780 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Czech first 21 help topics
+
+Reviewed everyday help from account setup through account transfer. Corrected combined-folder navigation,
+unread counts, search indexing, conversation actions, signatures, attachment cleanup, domain-authentication
+limits and sign-in credentials. Improved Czech instructions throughout while preserving all markup, platform
+branches and literal keyboard tags. Structural checks, inline spacing, exact inventory/source/file hashes and
+git diff --check pass. Review HTML regenerated. Test suite not run per user instruction.
+Catalog completion checkpoint: `c13d96a7`.
+
+Current totals: 13,458 catalog entries and 493 help pages reviewed; 2,080 catalog values improved. Remaining:
+18,634 catalog entries and 759 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

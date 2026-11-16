@@ -1,22 +1,21 @@
-<!--review--><h1>Koncepty a Pošta k odeslání</h1>
-<p class="summary">Uložte zprávu a dokončete ji později a podívejte se, co čeká na odeslání.</p>
+<h1>Koncepty a Pošta k odeslání</h1>
+<p class="summary">Ukládejte rozepsané zprávy na později a sledujte zprávy čekající na odeslání.</p>
 <h2>Uložení konceptu</h2>
 <p>Klikněte na <b data-text="ui-tb-save"></b> nebo stiskněte <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->. Zpráva se uloží do složky <b data-text="folder-drafts"></b> účtu na serveru. Další uložení nahradí předchozí kopii. Stavový řádek zprávy uvádí, kdy byla uložena.</p>
-<p>Inbox Classic také zprávu ukládá automaticky několik sekund poté, co přestanete psát, nebo každých třicet sekund, dokud píšete. Pokud se Inbox Classic nebo váš počítač nečekaně vypne, nedokončené zprávy se znovu otevřou při příštím spuštění Inbox Classic.</p>
+<p>Inbox Classic také zprávu ukládá automaticky několik sekund poté, co přestanete psát, nebo každých třicet sekund, dokud píšete. Po neočekávaném ukončení aplikace Inbox Classic nebo vypnutí počítače se nedokončené zprávy otevřou při příštím spuštění aplikace.</p>
 <p>Při zavření zprávy se změnami se Inbox Classic zeptá, zda je uložit:</p>
 <ul>
     <li><!--os:windows,linux--><b data-text="ui-yes"></b><!--/os--><!--os:mac--><b data-text="ui-tb-save"></b><!--/os--> ji uloží do složky <b data-text="folder-drafts"></b>.</li>
     <li><!--os:windows,linux--><b data-text="ui-no"></b><!--/os--><!--os:mac--><b data-text="mac-dont-save"></b><!--/os--> změny zahodí. Pokud byl koncept uložen jen automaticky, odstraní se také ze složky <b data-text="folder-drafts"></b>.</li>
     <li><b data-text="ui-cancel"></b> vás vrátí ke zprávě.</li>
 </ul>
-<p>Chcete-li pokračovat v psaní, poklepejte na koncept ve složce <b data-text="folder-drafts"></b>. Otevře se s příjemci, textem a soubory. Po odeslání se koncept odstraní.</p>
-<p>Zpráva, kterou píšete, má vlastní okno, takže můžete číst poštu, zatímco zůstává otevřená. Zavření Inbox Classic nejprve zavře rozepsané zprávy a u těch se změnami se zeptá.</p>
+<p>Chcete-li pokračovat v psaní, poklepejte na koncept ve složce <b data-text="folder-drafts"></b>. Otevře se s příjemci, textem a přílohami. Po odeslání se koncept odstraní.</p>
+<p>Rozepsaná zpráva má samostatné okno, takže při psaní můžete zároveň číst ostatní poštu. Při ukončování aplikace Inbox Classic se nejprve zavřou rozepsané zprávy. U neuložených změn se zobrazí dotaz na uložení.</p>
 <h2>Pošta k odeslání</h2>
 <p><b data-text="ui-tb-send"></b> vloží zprávu do složky Pošta k odeslání. Ve výchozím nastavení se odešle po několika sekundách. Během této doby můžete odeslání zrušit (viz níže). Stavový řádek hlavního okna uvádí, kdy byla odeslána.</p>
-<p>Když zprávu nelze odeslat, například bez připojení, zůstane ve složce Pošta k odeslání. Odejde při příští kontrole pošty, takže nic z toho, co jste napsali, se neztratí.</p>
-<p>Co čeká, uvidíte volbou <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. Seznam uvádí každou zprávu a proč neodešla. <b data-text="ui-outbox-send-all"></b> to okamžitě zkusí znovu a zprávu tam můžete také odstranit.</p>
+<p>Když zprávu nelze odeslat, například bez připojení, zůstane ve složce Pošta k odeslání. Při příští kontrole pošty se aplikace pokusí zprávu znovu odeslat. Rozepsaný text se neztratí.</p>
+<p>Čekající zprávy zobrazíte příkazem <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. Seznam uvádí stav každé zprávy a případný důvod neodeslání. Tlačítkem <b data-text="ui-outbox-send-all"></b> spustíte další pokus ihned. Zprávy zde můžete také odstranit.</p>
 <h2>Zrušení odeslání zprávy</h2>
-<p>Ve výchozím nastavení zpráva po kliknutí na <b data-text="ui-tb-send"></b> čeká několik sekund, než se odešle. Stavový řádek ukazuje odpočet. Během této doby klikněte na <b data-text="ui-undo-button"></b> vedle odpočtu, nebo zvolte <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>, a odeslání se zruší. Zpráva se znovu otevře, abyste ji mohli upravit nebo zahodit. Tato možnost je k dispozici, jen dokud zpráva čeká na odeslání.</p>
+<p>Ve výchozím nastavení zpráva po kliknutí na <b data-text="ui-tb-send"></b> čeká několik sekund, než se odešle. Stavový řádek ukazuje odpočet. Během této doby klikněte na <b data-text="ui-undo-button"></b> vedle odpočtu, nebo zvolte <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>, a odeslání se zruší. Zpráva se znovu otevře, abyste ji mohli upravit nebo zahodit. Tato možnost funguje jen u zpráv čekajících na odeslání. Již odeslanou zprávu neodvolá.</p>
 <p>Chcete-li změnit prodlevu nebo odesílat zprávy okamžitě, zvolte <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os--> a upravte <b data-text="ui-send-delay"></b>. Pokud Inbox Classic ukončíte, zatímco zpráva čeká, aplikace se ji pokusí odeslat okamžitě.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->
