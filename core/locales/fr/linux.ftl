@@ -84,7 +84,6 @@ gtk-default-app-failed = Impossible de définir Inbox Classic comme application 
 
 gtk-reader-date = Date :
 gtk-reader-files = Pièces jointes du message
-# review: new
 gtk-files = { $count ->
     [one] { $count } fichier
    *[other] { $count } fichiers
