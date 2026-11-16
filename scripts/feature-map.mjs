@@ -194,6 +194,27 @@ const sections = [
                 checked: ["The compose window is from the draft's account, with its text"]
             },
             {
+                shot: 'setup-1-export',
+                name: 'Export Settings and Accounts',
+                what: "File > Export Settings and Accounts writes one file to take to another computer: settings, window preferences, accounts, sign-in apps, contacts with their groups, encryption keys, message rules and trusted senders, each part chosen. With a passphrase (8 characters or more, typed twice) the whole file is encrypted as an OpenPGP message and also holds the passwords, sign-ins and private keys; without one it holds no secrets. Messages are never in it.",
+                how: 'File > Export Settings and Accounts.',
+                checked: ['The parts are listed and chosen', 'A short or mistyped passphrase is refused', 'The file is written encrypted']
+            },
+            {
+                shot: 'setup-3-import-choose',
+                name: 'Import Settings and Accounts',
+                what: 'File > Import Settings and Accounts reads such a file: the passphrase first when it has one, then what it holds (the accounts, marked when one is already here, and how many contacts, keys and rules), each part and account chosen. Accounts already here are left as they are, contacts merge, and the summary says what was added and skipped. Everything in the file is checked as the windows check what is typed.',
+                how: 'File > Import Settings and Accounts, or the link in Add Mail Account before the first account.',
+                checked: ['A wrong passphrase is refused', 'What the file holds is shown before anything changes', 'Accounts already here are skipped, a deleted contact comes back']
+            },
+            {
+                shot: 'setup-5-first-run',
+                name: 'Import on the first run',
+                what: 'Before the first account, Add Mail Account offers to import settings and accounts from another computer.',
+                how: 'The link in Add Mail Account.',
+                checked: ['The link opens the import']
+            },
+            {
                 shot: 'all-inboxes-1-list',
                 name: 'All Inboxes',
                 what: "With two or more accounts, All Inboxes at the top of the folder tree lists the mail of every account's Inbox in one list, newest first, with an Account column naming the account of each message and the unread count of all of them. The app opens on it, with the newest message selected. Reply, Forward, Move and Delete act on the message in its own account, and Create Mail starts from the account of the selected message. Mark All Read on it marks every Inbox read. It goes when only one account is left.",
