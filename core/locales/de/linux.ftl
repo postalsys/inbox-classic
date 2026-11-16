@@ -83,7 +83,6 @@ gtk-default-app-failed = Inbox Classic konnte nicht als Standard-E-Mail-Programm
 
 gtk-reader-date = Datum:
 gtk-reader-files = Anlagen der Nachricht
-# review: new
 gtk-files = { $count ->
     [one] { $count } Datei
    *[other] { $count } Dateien

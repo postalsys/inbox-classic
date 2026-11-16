@@ -14,7 +14,7 @@ behavior and surrounding controls to establish meaning. Preserve the original sc
 - Initial inventory: 241 marked messages and 14 marked help passages per language (de, es, et, fr), 964 messages
   and 56 help passages altogether. Each language has ten affected help pages. Other languages named in the guide
   are not present in this checkout. `scripts/check-language.mjs` is also absent here.
-- Current next step: German `core.ftl` (143 marked entries), then its platform labels and help.
+- Current next step: German help (ten pages), then Spanish and French.
   Estonian is complete for the starting snapshot. Spanish and French follow. Review existing wording outside
   marked entries when needed for context or terminology consistency.
 
@@ -76,7 +76,16 @@ The extra Remove mnemonic avoids collisions with Properties and Export in the ne
 IDs, placeholders, plural branches and mnemonic presence are preserved. Dialog and new menu shortcut checks
 pass; all 68 tests and `git diff --check` passed.
 
-Next: German core messages and four platform/help labels, then its ten help pages. Spanish and French are
+Checkpoint commit: `6c6cc9ac`.
+
+### de-core-2026-11-16
+
+Reviewed all 143 marked core messages and four platform/help labels. Improved 60 core values, including
+key-owner verification, encryption errors, filenames, account credentials and export/import results. The
+attachment notice now describes cleanup at startup of copies older than a day. Removed all German catalog
+review marks. All 68 tests, catalog invariants and `git diff --check` passed.
+
+Next: German help (ten pages). Spanish and French are
 untouched. Estonian catalog and help review is complete for the starting snapshot. Revisit it only for newly
 arriving changes or the final cross-language consistency checks below.
 
