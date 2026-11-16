@@ -275,6 +275,9 @@ fn topic_body(id: &str, platform: Platform, language: &str, target: HelpTarget) 
     let html = fill(&html, "<b data-text=\"", "\"></b>", |message| {
         format!("<b>{}</b>", words(language, message))
     });
+    let html = fill(&html, "<b data-settings=\"", "\"></b>", |page| {
+        settings_path(page, platform, language)
+    });
     let html = fill(&html, "<div data-generate=\"", "\"></div>", |what| match what {
         "shortcuts" => shortcuts_table(platform, language),
         _ => String::new(),
@@ -295,6 +298,21 @@ fn topic_body(id: &str, platform: Platform, language: &str, target: HelpTarget) 
         format!("href=\"{}\"", topic_link(topic, target))
     });
     Some(old_keys(&html, platform, language))
+}
+
+/// The way to a page of the settings window (`reading`) as the platform names it: Tools > Options > Reading,
+/// Inbox Classic > Settings > Reading, Main Menu > Preferences > Reading; the window alone for an empty `page`
+fn settings_path(page: &str, platform: Platform, language: &str) -> String {
+    let b = |id: &str| format!("<b>{}</b>", words(language, id));
+    let mut path = match platform {
+        Platform::Windows => format!("{} &gt; {}", b("menu-tools"), b("cmd-options")),
+        Platform::Mac => format!("Inbox Classic &gt; {}", b("mac-settings")),
+        Platform::Linux => format!("{} &gt; {}", b("gtk-main-menu"), b("gtk-preferences")),
+    };
+    if let Some((_, label)) = SETTINGS_PAGES.iter().find(|(id, _)| *id == page) {
+        path.push_str(&format!(" &gt; {}", b(label)));
+    }
+    path
 }
 
 /// Where a link to the topic `id` goes: the viewer opens `topic:` itself, the exported pages are files
@@ -712,6 +730,31 @@ mod tests {
     }
 
     #[test]
+    fn the_way_to_a_settings_page_on_each_platform() {
+        assert_eq!(
+            settings_path("reading", Platform::Windows, "en"),
+            "<b>Tools</b> &gt; <b>Options</b> &gt; <b>Reading</b>"
+        );
+        assert_eq!(
+            settings_path("downloading", Platform::Mac, "en"),
+            "Inbox Classic &gt; <b>Settings</b> &gt; <b>Downloading</b>"
+        );
+        assert_eq!(
+            settings_path("general", Platform::Linux, "en"),
+            "<b>Main Menu</b> &gt; <b>Preferences</b> &gt; <b>General</b>"
+        );
+        assert_eq!(
+            settings_path("", Platform::Windows, "de"),
+            "<b>Extras</b> &gt; <b>Optionen</b>"
+        );
+        let page = help_topic("drafts-outbox", Platform::Mac, "en").unwrap();
+        assert!(
+            page.contains("Inbox Classic &gt; <b>Settings</b> &gt; <b>General</b>"),
+            "{page}"
+        );
+    }
+
+    #[test]
     fn filling_and_plain_text() {
         let html = fill(
             "a <x data=\"1\"></x> b <x data=\"2\"></x>",
@@ -749,6 +792,12 @@ mod tests {
                     "{language}/{id}: no message {message}"
                 );
             }
+            for page in between_all(html, "data-settings=\"", "\"") {
+                assert!(
+                    page.is_empty() || SETTINGS_PAGES.iter().any(|(id, _)| *id == page),
+                    "{language}/{id}: no settings page {page}"
+                );
+            }
             for link in between_all(html, "href=\"topic:", "\"") {
                 assert!(listed.contains(&link), "{language}/{id}: no topic {link}");
             }
@@ -768,7 +817,7 @@ mod tests {
             for platform in [Platform::Windows, Platform::Mac, Platform::Linux] {
                 let page = help_topic(id, platform, "en").unwrap();
                 assert!(
-                    !page.contains("data-text") && !page.contains("data-command"),
+                    !page.contains("data-text") && !page.contains("data-command") && !page.contains("data-settings"),
                     "{id}: left unfilled"
                 );
             }

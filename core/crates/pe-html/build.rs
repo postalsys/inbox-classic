@@ -1,6 +1,6 @@
 // The help built in (help.rs): the topics of help/<language>/<id>.html, their order and sections from
-// help/topics.toml, the pictures of help/pictures/<platform>/<shot>.png, and the keys of core/commands.toml, which the
-// topics name by command so a key is never written by hand
+// help/topics.toml, the pictures of help/pictures/<platform>/<shot>.png, the keys of core/commands.toml, which the
+// topics name by command so a key is never written by hand, and the pages of core/settings.toml, which they name by id
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 
@@ -13,11 +13,16 @@ fn main() {
         .expect("core/commands.toml");
     println!("cargo:rerun-if-changed={}", help.display());
     println!("cargo:rerun-if-changed={}", commands.display());
+    let settings = manifest
+        .join("../../settings.toml")
+        .canonicalize()
+        .expect("core/settings.toml");
     let mut out = String::new();
     write_order(&mut out, &help.join("topics.toml"));
     write_topics(&mut out, &help);
     write_pictures(&mut out, &help.join("pictures"));
     write_commands(&mut out, &commands);
+    write_settings_pages(&mut out, &settings);
     let target = PathBuf::from(std::env::var("OUT_DIR").unwrap()).join("help.rs");
     std::fs::write(target, out).unwrap();
 }
@@ -106,6 +111,22 @@ fn write_commands(out: &mut String, path: &Path) {
             "    ({:?}, {:?}, {key:?}, {mac:?}, {linux:?}),",
             get("id").unwrap(),
             get("menu").unwrap_or("")
+        )
+        .unwrap();
+    }
+    out.push_str("];\n");
+}
+
+/// SETTINGS_PAGES: each page of the settings window, its id and its catalog message, in order
+fn write_settings_pages(out: &mut String, path: &Path) {
+    let settings = toml_file(path);
+    out.push_str("pub(crate) static SETTINGS_PAGES: &[(&str, &str)] = &[\n");
+    for page in settings["page"].as_array().unwrap() {
+        writeln!(
+            out,
+            "    ({:?}, {:?}),",
+            page["id"].as_str().unwrap(),
+            page["label"].as_str().unwrap()
         )
         .unwrap();
     }
