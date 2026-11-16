@@ -28,6 +28,8 @@ gtk-search-indexing = { $count ->
    *[other] { $count } iletinin metni hâlâ dizinleniyor
 }
 # review: new
+gtk-list-loading = Yükleniyor...
+# review: new
 gtk-menu-rename = Yeniden Adlandır...
 # review: new
 gtk-import-one-question = { $file } iletisi içe aktarılsın mı? Hedef: { $folder }

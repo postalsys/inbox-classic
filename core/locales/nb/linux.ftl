@@ -29,6 +29,8 @@ gtk-search-indexing = { $count ->
    *[other] indekserer fortsatt teksten i { $count } meldinger
 }
 # review: new
+gtk-list-loading = Laster inn...
+# review: new
 gtk-menu-rename = Gi nytt navn...
 # review: new
 gtk-import-one-question = Vil du importere meldingen { $file } til { $folder }?

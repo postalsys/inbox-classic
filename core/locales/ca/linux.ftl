@@ -29,6 +29,8 @@ gtk-search-indexing = { $count ->
    *[other] encara s’està indexant el text de { $count } missatges
 }
 # review: new
+gtk-list-loading = S'està carregant...
+# review: new
 gtk-menu-rename = Canvia el nom...
 # review: new
 gtk-import-one-question = Voleu importar el missatge { $file } a la carpeta { $folder }?

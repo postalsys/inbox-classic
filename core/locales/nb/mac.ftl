@@ -124,6 +124,8 @@ mac-no-calendar-app = Ingen kalenderapp på denne Macen kan åpne invitasjoner (
 mac-file-not-saved = Filen kunne ikke lagres.
 # review: new
 mac-unsubscribing = Melder av { $target }…
+# review: new
+mac-loading-list = Laster inn…
 
 ## The compose window
 

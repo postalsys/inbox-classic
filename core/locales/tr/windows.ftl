@@ -26,6 +26,8 @@ win-no-bodies = İleti gövdeleri gösterilemiyor.
 win-webview-failed = WebView2 oluşturulamadı.
 # review: new
 win-webview-missing = WebView2 çalışma zamanı kullanılamıyor.
+# review: new
+win-list-loading = Yükleniyor...
 
 ## Birçok pencerede kullanılan düğmeler ve sözcükler
 

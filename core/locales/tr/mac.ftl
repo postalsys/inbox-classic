@@ -124,6 +124,8 @@ mac-no-calendar-app = Bu Mac'te davetleri (.ics dosyaları) açacak bir takvim u
 mac-file-not-saved = Dosya kaydedilemedi.
 # review: new
 mac-unsubscribing = Abonelikten çıkılıyor: { $target }…
+# review: new
+mac-loading-list = Yükleniyor…
 
 ## İleti yazma penceresi
 

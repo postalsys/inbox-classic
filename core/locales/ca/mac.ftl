@@ -124,6 +124,8 @@ mac-no-calendar-app = En aquest Mac no hi ha cap aplicació de calendari per obr
 mac-file-not-saved = No s’ha pogut desar el fitxer.
 # review: new
 mac-unsubscribing = S’està cancel·lant la subscripció a { $target }…
+# review: new
+mac-loading-list = S'està carregant…
 
 ## La finestra de redacció
 

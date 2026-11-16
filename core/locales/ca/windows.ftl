@@ -26,6 +26,8 @@ win-no-bodies = No es pot mostrar el cos dels missatges.
 win-webview-failed = No s’ha pogut crear el WebView2.
 # review: new
 win-webview-missing = L’entorn d’execució WebView2 no està disponible.
+# review: new
+win-list-loading = S'està carregant...
 
 ## Botons i paraules de moltes finestres
 

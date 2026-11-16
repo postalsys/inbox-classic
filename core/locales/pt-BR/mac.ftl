@@ -124,6 +124,8 @@ mac-no-calendar-app = Não há nenhum aplicativo de calendário neste Mac para a
 mac-file-not-saved = Não foi possível salvar o arquivo.
 # review: new
 mac-unsubscribing = Cancelando a inscrição em { $target }…
+# review: new
+mac-loading-list = Carregando…
 
 ## The compose window
 
