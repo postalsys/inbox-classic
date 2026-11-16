@@ -91,6 +91,16 @@ The terms of Outlook Express and Outlook in each language, kept the same everywh
 
 Forms of address: German uses "Sie", French "vous", Spanish "usted", Estonian the polite plural ("teie").
 
+### Estonian encryption and settings transfer
+
+- Use the polite plural in explanations and questions; short commands stay imperative ("Impordi", "Kontrolli").
+- Use "krüpteerima", "avalik võti", "privaatvõti" and "võtme sõrmejälg" consistently. Key verification means
+  comparing the fingerprint with the owner, not merely checking a cryptographic signature.
+- Use "parool" for the password protecting a key backup or settings file, as in the existing key dialogs.
+  "Sisselogimisandmed" includes saved sign-in tokens; it does not mean only a login password.
+- A list of addresses must work for one or several entries. Introduce it with a colon instead of forcing a
+  singular case onto the placeholder. Contact names can be placed in parentheses to avoid requiring inflection.
+
 Context notes:
 
 - Search covers subjects, senders, recipients, attachment names and message text. Name those fields rather than
