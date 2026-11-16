@@ -113,6 +113,8 @@ enum Woke {
     KeepAlive,
     /// The main worker's first sync is done, or it took too long: time to connect
     Synced,
+    /// The search text of a message opened was read, for its index row
+    Parsed((i64, Option<pe_store::IndexText>)),
     /// The computer woke from sleep
     Slept,
     /// A second reader without opens for a while: its connection goes
@@ -144,6 +146,7 @@ impl Worker {
                     }
                 }, if first_wait => Woke::Synced,
                 Ok(()) = self.ctx.wake.changed() => Woke::Slept,
+                parsed = Self::next_parsed(&mut self.parsing), if !self.parsing.is_empty() => Woke::Parsed(parsed),
             };
             match woke {
                 Woke::Command(None) => break,
@@ -171,6 +174,9 @@ impl Worker {
                         self.connect_reader(store).await;
                     }
                 }
+                Woke::Parsed(parsed) => {
+                    let _ = Self::index_parsed(store, parsed);
+                }
                 Woke::KeepAlive => self.keep_alive(store).await,
                 Woke::Idle => self.log_out().await,
                 Woke::Synced => {
@@ -182,6 +188,7 @@ impl Worker {
                 Woke::Slept => {}
             }
         }
+        let _ = self.index_all_parsed(store).await;
         self.log_out().await;
     }
 
@@ -318,13 +325,44 @@ impl Worker {
         if !shown {
             self.emit(Event::MessageReady { folder, uid });
         }
-        // the search finds it by what the parser reads in it from now on, after the window has it
+        // the search finds it by what the parser reads in it from now on, after the window has it: read on the
+        // blocking pool, as parsing (and the first use of the patterns that find what a sender wrote) would hold the
+        // async threads the syncs and the next open need; indexed when it is read
         if let (Some(source), Some(message)) = (source, store.message(folder, uid)?) {
-            match crate::search::read_index_text(&source) {
-                // its index row replaced at once, never missing for a search meanwhile
-                Some(text) => store.transaction(|store| store.set_indexed(message.id, &text))?,
-                None => store.mark_fetch_failed(message.id)?,
-            }
+            let parse = tokio::task::spawn_blocking(move || crate::search::read_index_text(&source));
+            self.parsing.push_back((message.id, parse));
+        }
+        Ok(())
+    }
+
+    /// The oldest message opened whose search text is read, with it (None when the parser could not read it, or the
+    /// parse ended without a result); pending while there is none
+    pub(super) async fn next_parsed(
+        parsing: &mut std::collections::VecDeque<super::Parsing>,
+    ) -> (i64, Option<pe_store::IndexText>) {
+        let Some((message, parse)) = parsing.front_mut() else {
+            return std::future::pending().await;
+        };
+        let (message, text) = (*message, parse.await.ok().flatten());
+        parsing.pop_front();
+        (message, text)
+    }
+
+    /// The index row of a message opened, from its search text read on the blocking pool: replaced at once, never
+    /// missing for a search meanwhile; a message the parser could not read is marked
+    pub(super) fn index_parsed(store: &mut Store, (message, text): (i64, Option<pe_store::IndexText>)) -> Outcome {
+        match text {
+            Some(text) => store.transaction(|store| store.set_indexed(message, &text))?,
+            None => store.mark_fetch_failed(message)?,
+        }
+        Ok(())
+    }
+
+    /// Indexes every message opened whose search text is being read, waiting for each
+    pub(super) async fn index_all_parsed(&mut self, store: &mut Store) -> Outcome {
+        while !self.parsing.is_empty() {
+            let parsed = Self::next_parsed(&mut self.parsing).await;
+            Self::index_parsed(store, parsed)?;
         }
         Ok(())
     }
@@ -435,6 +473,62 @@ mod tests {
         assert!(!slept(tick, Duration::from_secs(80)));
         assert!(slept(tick, Duration::from_secs(91)));
         assert!(slept(tick, Duration::from_secs(3600)));
+    }
+
+    #[tokio::test]
+    async fn an_opened_message_is_indexed_when_its_text_is_read() {
+        let mut store = Store::open_in_memory().unwrap();
+        let account = store
+            .add_account(&pe_store::AccountSettings {
+                email: "a@example.com".into(),
+                ..Default::default()
+            })
+            .unwrap();
+        let folder_info = pe_store::FolderInfo {
+            path: "INBOX".into(),
+            name: "INBOX".into(),
+            selectable: true,
+            ..Default::default()
+        };
+        store.set_folders(account, &[folder_info]).unwrap();
+        let folder = store.find_folder(account, "INBOX").unwrap().unwrap().id;
+        let summary = pe_store::MessageInfo {
+            uid: 1,
+            subject: "Report".into(),
+            ..Default::default()
+        };
+        store.add_messages(folder, &[summary]).unwrap();
+        let source = b"From: Ann <ann@example.com>\r\nSubject: Report\r\n\r\nThe numbers mention a zebra.\r\n".to_vec();
+        store.set_source(folder, 1, &source).unwrap();
+        let message = store.message(folder, 1).unwrap().unwrap().id;
+        // two opens: the texts read on the blocking pool, indexed in the order they were opened
+        let mut parsing = std::collections::VecDeque::new();
+        for source in [source.clone(), b"not a message".to_vec()] {
+            let parse = tokio::task::spawn_blocking(move || crate::search::read_index_text(&source));
+            parsing.push_back((message, parse));
+        }
+        let first = Worker::next_parsed(&mut parsing).await;
+        assert!(
+            first.1.as_ref().is_some_and(|text| text.body.contains("zebra")),
+            "{first:?}"
+        );
+        assert_eq!(parsing.len(), 1, "the next one waits its turn");
+        assert!(Worker::index_parsed(&mut store, first).is_ok());
+        assert!(
+            store.sources_to_index(10).unwrap().is_empty(),
+            "its source counts as indexed"
+        );
+        let search = pe_store::Search {
+            scope: pe_store::Scope::Folder(folder),
+            text: "zebra".into(),
+            ..Default::default()
+        };
+        assert_eq!(store.search(&search, Default::default(), 0, 10).unwrap().len(), 1);
+        Worker::next_parsed(&mut parsing).await;
+        assert!(parsing.is_empty());
+        // none is pending: the reader's select waits on its other arms
+        let pending = tokio::time::timeout(Duration::from_millis(50), Worker::next_parsed(&mut parsing)).await;
+        assert!(pending.is_err());
     }
 
     #[tokio::test]
