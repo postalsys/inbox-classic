@@ -143,9 +143,8 @@
       brskalnika.
     </p>
     <p xml:lang="sr@latin">
-      Inbox Classic čita i piše e-poštu sa fasciklama sa leve strane, porukama na vrhu i porukom ispod, kao što su to
-      nekada radili programi za poštu. Radi sa svakim IMAP i SMTP nalogom, a na Outlook.com i Microsoft 365 prijavljuje
-      se putem pregledača.
+      Inbox Classic je program za e-poštu sa fasciklama levo, listom poruka gore i prikazom izabrane poruke ispod.
+      Podržava IMAP i SMTP naloge, kao i prijavu na Outlook.com i Microsoft 365 putem pregledača.
     </p>
     <p xml:lang="fi">
       Inbox Classic lukee ja kirjoittaa sähköpostia niin kuin sähköpostiohjelmat ennen: kansiot vasemmalla, viestit
@@ -266,10 +265,10 @@
       <li xml:lang="sl">Iskanje, ki najde besede v zadevi, osebah, imenih datotek in besedilu, z Gmailovimi operatorji</li>
       <li xml:lang="sl">Odgovori skrijejo starejša sporočila, ki jih navajajo</li>
       <li xml:lang="sl">Pošta je berljiva tudi brez povezave; gesla so shranjena v vaši shrambi ključev</li>
-      <li xml:lang="sr@latin">Svaka poruka se prikazuje prečišćena, bez skripti, a slike sa interneta samo kada ih dozvolite</li>
-      <li xml:lang="sr@latin">Pretraga koja pronalazi reči u temi, imenima ljudi, nazivima datoteka i tekstu, sa Gmail operatorima</li>
-      <li xml:lang="sr@latin">Odgovori skupljaju ranije poruke koje citiraju</li>
-      <li xml:lang="sr@latin">Pošta ostaje čitljiva i bez veze sa internetom; lozinke se čuvaju u vašem privesku ključeva</li>
+      <li xml:lang="sr@latin">Poruke se prikazuju bez skripti i drugog nebezbednog sadržaja. Slike sa interneta preuzimaju se samo uz vašu dozvolu</li>
+      <li xml:lang="sr@latin">Pretraga tema, pošiljalaca, primalaca, naziva priloga i teksta poruka, uz operatore kao u Gmailu</li>
+      <li xml:lang="sr@latin">Citirane poruke u odgovorima su sažete i mogu da se prošire po potrebi</li>
+      <li xml:lang="sr@latin">Čitajte preuzetu poštu i bez interneta. Lozinke se čuvaju u sistemskom privesku ključeva</li>
       <li xml:lang="fi">Jokainen viesti näytetään puhdistettuna, ilman skriptejä, ja internetin kuvat vain, kun sallit ne</li>
       <li xml:lang="fi">Haku, joka löytää sanat aiheesta, henkilöistä, tiedostonimistä ja tekstistä Gmailin hakuoperaattoreilla</li>
       <li xml:lang="fi">Vastaukset piilottavat lainaamansa aiemmat viestit</li>
