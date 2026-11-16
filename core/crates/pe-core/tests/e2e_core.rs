@@ -2209,7 +2209,7 @@ fn an_action_the_server_refuses_is_taken_back_and_said() {
         }
     }
     assert_eq!(said.unwrap().unwrap(), "Marked 1 message as read");
-    assert!(undone.unwrap().contains("so they are unread again"));
+    assert!(undone.unwrap().contains("so it is unread again"));
     let message = s.core.message(trash, trashed).unwrap().unwrap();
     assert!(!message.info.flags.iter().any(|f| f == "\\Seen"), "unread again");
 }
