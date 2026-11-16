@@ -329,17 +329,7 @@ fn reads_mail_through_the_c_api() {
 
     let mut len = 0usize;
     let mut filename: *mut c_char = null_mut();
-    let data = unsafe { pe_attachment_data(core, inbox, uid, 0, &mut len, &mut filename) };
-    assert!(!data.is_null());
-    assert_eq!(unsafe { std::slice::from_raw_parts(data, len) }, b"%PDF");
-    assert_eq!(text(filename), "evil.pdf");
-    unsafe {
-        pe_bytes_free(data, len);
-        pe_string_free(filename);
-    }
-    assert!(unsafe { pe_attachment_data(core, inbox, uid, 1, &mut len, &mut filename) }.is_null());
-
-    // the same off the window thread: the attachment, a reply, the list and its next page, Select All and an action
+    // off the window thread: the attachment, a reply, the list and its next page, Select All and an action
     let request = unsafe { pe_attachment_data_start(core, inbox, uid, 0) };
     wait(&events, |e| e.kind == PeEventKind::ReadDone && e.uid == request);
     let data = unsafe { pe_attachment_data_result(core, request, &mut len, &mut filename) };
@@ -349,6 +339,9 @@ fn reads_mail_through_the_c_api() {
         pe_bytes_free(data, len);
         pe_string_free(filename);
     }
+    let request = unsafe { pe_attachment_data_start(core, inbox, uid, 1) };
+    wait(&events, |e| e.kind == PeEventKind::ReadDone && e.uid == request);
+    assert!(unsafe { pe_attachment_data_result(core, request, &mut len, &mut filename) }.is_null());
     let request = unsafe { pe_message_draft_start(core, inbox, uid, PeDraftKind::Reply) };
     wait(&events, |e| e.kind == PeEventKind::ReadDone && e.uid == request);
     let draft = unsafe { pe_draft_result(core, request) };
@@ -491,7 +484,8 @@ fn reads_mail_through_the_c_api() {
 
     assert!(unsafe { pe_message_set_seen(core, inbox, uid, true) });
     wait(&events, |e| e.kind == PeEventKind::FolderChanged && e.folder == inbox);
-    assert!(unsafe { pe_folder_mark_all_read(core, inbox) });
+    let request = unsafe { pe_mark_read_start(core, PeMarkRead::Folder, inbox) };
+    wait(&events, |e| e.kind == PeEventKind::Acted && e.uid == request);
     assert_eq!(unsafe { pe_inbox_unread(core) }, 0);
     assert_eq!(unsafe { pe_inbox_unread(std::ptr::null()) }, 0);
 
@@ -538,10 +532,14 @@ fn reads_mail_through_the_c_api() {
     );
     unsafe { pe_contact_list_free(contacts) };
     assert!(unsafe { pe_book_delete(core, 0, &card, 1, std::ptr::null(), 0) });
-    assert!(!unsafe { pe_folder_mark_all_read(core, 999_999) });
+    let request = unsafe { pe_mark_read_start(core, PeMarkRead::Folder, 999_999) };
+    let refused = wait(&events, |e| e.kind == PeEventKind::Acted && e.uid == request);
+    assert_eq!(refused.failure, PeFailureKind::Other);
 
     // a reply drafted in Rust, sent through the C API
-    let draft = unsafe { pe_message_draft(core, inbox, uid, PeDraftKind::Reply) };
+    let request = unsafe { pe_message_draft_start(core, inbox, uid, PeDraftKind::Reply) };
+    wait(&events, |e| e.kind == PeEventKind::ReadDone && e.uid == request);
+    let draft = unsafe { pe_draft_result(core, request) };
     let info = unsafe { &*pe_draft_info(draft) };
     assert_eq!(
         (text(info.to), text(info.subject)),
@@ -1050,7 +1048,7 @@ fn null_and_bad_arguments() {
         let missing = CString::new("/no/such/file.eml").unwrap();
         assert!(!pe_message_import(core, 1, missing.as_ptr(), null_mut()));
         // drafts: nothing to open, no account to save in
-        assert!(pe_draft_open(core, 1, 1).is_null());
+        assert!(pe_draft_result(core, 1).is_null());
         assert!(pe_message_headers(core, 1, 1).is_null());
         let dir = CString::new(".").unwrap();
         assert!(!pe_save_attachments(core, 1, 1, dir.as_ptr(), null_mut(), null_mut()));
@@ -1063,7 +1061,6 @@ fn null_and_bad_arguments() {
             null_mut()
         ));
         assert!(pe_message_headers(std::ptr::null(), 1, 1).is_null());
-        assert!(pe_draft_open(std::ptr::null(), 1, 1).is_null());
         let mut id: *mut c_char = null_mut();
         assert!(!pe_draft_save(core, 42, std::ptr::null(), &mut id, null_mut()));
         assert!(id.is_null());

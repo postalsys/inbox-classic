@@ -1144,8 +1144,8 @@ typedef struct PeAttachment {
   const char *size_text;
   // What kind of file it is, for its icon
   enum PeFileKind kind;
-  // Whether it may be opened from the message (`pe_attachment_open`): never a file that can run code, which can
-  // be saved
+  // Whether it may be opened from the message (`pe_attachment_open_start`): never a file that can run code, which
+  // can be saved
   bool can_open;
   // The strip's tooltip, shown as it is: the full name and size, and why it does not open when it does not
   const char *tooltip;
@@ -2459,25 +2459,6 @@ bool pe_message_open(const struct PeCore *core, int64_t folder, uint64_t uid);
 // `core` must be a live handle.
 bool pe_message_set_seen(const struct PeCore *core, int64_t folder, uint64_t uid, bool seen);
 
-// Marks every message of a folder read: in the store now (`FolderChanged` follows), on the server in the background
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_folder_mark_all_read(const struct PeCore *core,
-                             int64_t folder);
-
-// Marks every message of every account's Inbox read, as `pe_folder_mark_all_read` marks one folder
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_mark_all_inboxes_read(const struct PeCore *core);
-
-// Marks every message of every folder of an account read (the account's Mark All Read)
-//
-// # Safety
-// `core` must be a live handle.
-bool pe_account_mark_all_read(const struct PeCore *core, int64_t account);
-
 // Creates the folder `name` (UTF-8) in `parent`, or at the top of the account when `parent` is 0:
 // `FoldersChanged` follows once the server has it. False with the reason in `error` (NULL or a pointer to a
 // string to free with `pe_string_free`) for a name that can not be one.
@@ -2636,21 +2617,10 @@ bool pe_save_attachments(const struct PeCore *core,
                          size_t *saved,
                          size_t *total);
 
-// Writes attachment `index` of a message into a private folder for the app to open with the system's program; its
-// path (free with `pe_string_free`). NULL when it is not here, or refused (a file that can run code is never opened
-// from a message: `error` then says why). `note`, when set, is to be shown before opening (once: an encrypted
-// message's file is stored decrypted while it is open). `note` and `error` may be NULL; free what they get.
-//
-// # Safety
-// `core` must be a live handle; `note` and `error` NULL or valid pointers.
-char *pe_attachment_open(const struct PeCore *core,
-                         int64_t folder,
-                         uint64_t uid,
-                         size_t index,
-                         char **note,
-                         char **error);
-
-// [`pe_attachment_open`] of a message file a window shows (`pe_file_view`), its path UTF-8
+// Writes attachment `index` of a message file a window shows (`pe_file_view`, its path UTF-8) into a private folder
+// for the app to open with the system's program; its path (free with `pe_string_free`). NULL when it is not there, or
+// refused (a file that can run code is never opened from a message: `error` then says why). `note`, when set, is to
+// be shown before opening. `note` and `error` may be NULL; free what they get.
 //
 // # Safety
 // `core` must be a live handle, `path` NULL or a NUL-terminated string; `note` and `error` NULL or valid pointers.
@@ -2668,19 +2638,6 @@ char *pe_file_attachment_open(const struct PeCore *core,
 char *pe_private_folder(const struct PeCore *core,
                         const char *name);
 
-// The content of attachment `index` of a message, NULL on failure. `len` gets its length and
-// `filename` the name to save it under (free it with `pe_string_free`). Free the bytes with
-// `pe_bytes_free`.
-//
-// # Safety
-// `core` must be a live handle; `len` and `filename` must be valid pointers.
-uint8_t *pe_attachment_data(const struct PeCore *core,
-                            int64_t folder,
-                            uint64_t uid,
-                            size_t index,
-                            size_t *len,
-                            char **filename);
-
 // Reads attachment `index` of a message off the window thread (parsed, and decrypted when the message is
 // encrypted, there): `ReadDone` with the request this returns in `uid` follows, then `pe_attachment_data_result`.
 // 0 on failure.
@@ -2692,7 +2649,7 @@ uint64_t pe_attachment_data_start(const struct PeCore *core,
                                   uint64_t uid,
                                   size_t index);
 
-// What `pe_attachment_data_start` read, once, as `pe_attachment_data` gives it: the bytes (free with
+// What `pe_attachment_data_start` read, once: the bytes (free with
 // `pe_bytes_free`), their length in `len` and the name to save them under in `filename` (free with
 // `pe_string_free`); NULL when the message or the attachment is not here, or for another request.
 //
@@ -2703,9 +2660,9 @@ uint8_t *pe_attachment_data_result(const struct PeCore *core,
                                    size_t *len,
                                    char **filename);
 
-// Writes attachment `index` of a message where it can be opened, as `pe_attachment_open` does, off the window
-// thread: `ReadDone` with the request this returns in `uid` follows, then `pe_attachment_open_result`. 0 on
-// failure.
+// Writes attachment `index` of a message into a private folder for the app to open with the system's program, off
+// the window thread: `ReadDone` with the request this returns in `uid` follows, then `pe_attachment_open_result`. 0
+// on failure.
 //
 // # Safety
 // `core` must be a live handle.
@@ -2714,8 +2671,10 @@ uint64_t pe_attachment_open_start(const struct PeCore *core,
                                   uint64_t uid,
                                   size_t index);
 
-// What `pe_attachment_open_start` wrote, once, as `pe_attachment_open` gives it: the path to open, or NULL with
-// `note` and `error` as there
+// What `pe_attachment_open_start` wrote, once: the path to open (free with `pe_string_free`), or NULL when the
+// attachment is not here or refused (a file that can run code is never opened from a message: `error` then says
+// why). `note`, when set, is to be shown before opening (once: an encrypted message's file is stored decrypted while
+// it is open). `note` and `error` may be NULL; free what they get.
 //
 // # Safety
 // `core` must be a live handle; `note` and `error` NULL or valid pointers.
@@ -2732,7 +2691,9 @@ char *pe_attachment_open_result(const struct PeCore *core,
 void pe_read_cancel(const struct PeCore *core,
                     uint64_t request);
 
-// [`pe_attachment_data`] of a message file a window shows (`pe_file_view`), its path UTF-8
+// The content of attachment `index` of a message file a window shows (`pe_file_view`, its path UTF-8), NULL on
+// failure. `len` gets its length and `filename` the name to save it under (free it with `pe_string_free`). Free the
+// bytes with `pe_bytes_free`.
 //
 // # Safety
 // `core` must be a live handle, `path` NULL or a NUL-terminated string; `len` and `filename` must be valid pointers.
@@ -2811,7 +2772,7 @@ bool pe_message_import(const struct PeCore *core,
                        const char *path,
                        char **error);
 
-// Frees bytes from `pe_attachment_data` and `pe_message_source`
+// Frees bytes from `pe_attachment_data_result`, `pe_file_attachment_data` and `pe_message_source`
 //
 // # Safety
 // `data` must be NULL or bytes from this library of `len` bytes, not freed yet.
@@ -2899,18 +2860,9 @@ bool pe_outbox_delete(const struct PeCore *core, int64_t id);
 // `core` must be a live handle.
 bool pe_outbox_send(const struct PeCore *core);
 
-// A reply, a reply to all or a forward of a message whose source is in the store (after
-// `MessageReady`), NULL otherwise
-//
-// # Safety
-// `core` must be a live handle.
-struct PeDraft *pe_message_draft(const struct PeCore *core,
-                                 int64_t folder,
-                                 uint64_t uid,
-                                 enum PeDraftKind kind);
-
-// `pe_message_draft` off the window thread (the message parsed, and decrypted when it is encrypted, there): `ReadDone`
-// with the request this returns in `uid` follows, then `pe_draft_result`. 0 on failure.
+// A reply, a reply to all or a forward of a message whose source is in the store (after `MessageReady`), made off the
+// window thread (the message parsed, and decrypted when it is encrypted, there): `ReadDone` with the request this
+// returns in `uid` follows, then `pe_draft_result`. 0 on failure.
 //
 // # Safety
 // `core` must be a live handle.
@@ -2919,8 +2871,8 @@ uint64_t pe_message_draft_start(const struct PeCore *core,
                                 uint64_t uid,
                                 enum PeDraftKind kind);
 
-// `pe_draft_open` off the window thread: `ReadDone` with the request this returns in `uid` follows, then
-// `pe_draft_result`. 0 on failure.
+// A saved draft of the Drafts folder (its source in the store, after `MessageReady`) to go on writing, read off the
+// window thread: `ReadDone` with the request this returns in `uid` follows, then `pe_draft_result`. 0 on failure.
 //
 // # Safety
 // `core` must be a live handle.
@@ -2963,15 +2915,6 @@ struct PeDraft *pe_file_draft(const struct PeCore *core,
 // # Safety
 // `link` must be NULL or a NUL-terminated string.
 struct PeDraft *pe_mailto_draft(const char *link);
-
-// A saved draft of the Drafts folder (its source in the store, after `MessageReady`) to go on writing, NULL
-// otherwise
-//
-// # Safety
-// `core` must be a live handle.
-struct PeDraft *pe_draft_open(const struct PeCore *core,
-                              int64_t folder,
-                              uint64_t uid);
 
 // The word of a message that says a file is attached when none is ("attached"), for the question before sending;
 // NULL when it has a file or says nothing of one. Free with `pe_string_free`.

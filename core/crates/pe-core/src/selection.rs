@@ -631,21 +631,11 @@ impl Core {
     /// the status bar says ("Marked 3 messages as read")
     pub fn mark_read_start(self: &Arc<Self>, what: MarkRead) -> Result<u64> {
         self.start_action(move |core| {
-            let folders = match what {
-                MarkRead::Folder(folder) => vec![folder],
-                MarkRead::Account(account) => core
-                    .store()
-                    .folders(account)?
-                    .iter()
-                    .filter(|f| f.unread > 0)
-                    .map(|f| f.id)
-                    .collect(),
-                MarkRead::AllInboxes => core.store().inboxes()?,
+            let count = match what {
+                MarkRead::Folder(folder) => core.mark_all_read(folder)?,
+                MarkRead::Account(account) => core.mark_account_read(account)?,
+                MarkRead::AllInboxes => core.mark_all_inboxes_read()?,
             };
-            let mut count = 0;
-            for folder in folders {
-                count += core.mark_folder_read(folder)?;
-            }
             Ok(tr_args(
                 Text::DoneRead,
                 &[("messages", (&messages(count)).into()), ("count", count.into())],

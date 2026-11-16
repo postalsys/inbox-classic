@@ -2010,13 +2010,8 @@ impl Core {
         self.set_flag_many(folder, &[uid], flag, on)
     }
 
-    /// Marks every message of a folder read: in the store now, on the server in the background
-    pub fn mark_all_read(&self, folder: FolderId) -> Result<()> {
-        self.mark_folder_read(folder).map(|_| ())
-    }
-
-    /// [`Core::mark_all_read`], and how many messages it marked
-    pub(crate) fn mark_folder_read(&self, folder: FolderId) -> Result<u64> {
+    /// Marks every message of a folder read: in the store now, on the server in the background; how many it marked
+    pub fn mark_all_read(&self, folder: FolderId) -> Result<u64> {
         let (account, uids) = {
             let store = self.store();
             (store.folder(folder)?.account_id, store.mark_all_seen(folder)?)
@@ -2039,21 +2034,16 @@ impl Core {
     }
 
     /// Marks every message of every folder of an account read, as [`Core::mark_all_read`] marks one folder
-    pub fn mark_account_read(&self, account: AccountId) -> Result<()> {
+    pub fn mark_account_read(&self, account: AccountId) -> Result<u64> {
         let folders = self.store().folders(account)?;
-        for folder in folders.iter().filter(|f| f.unread > 0) {
-            self.mark_all_read(folder.id)?;
-        }
-        Ok(())
+        let unread = folders.iter().filter(|f| f.unread > 0);
+        unread.map(|folder| self.mark_all_read(folder.id)).sum()
     }
 
     /// Marks every message of every account's Inbox read, as [`Core::mark_all_read`] marks one folder
-    pub fn mark_all_inboxes_read(&self) -> Result<()> {
+    pub fn mark_all_inboxes_read(&self) -> Result<u64> {
         let inboxes = self.store().inboxes()?;
-        for inbox in inboxes {
-            self.mark_all_read(inbox)?;
-        }
-        Ok(())
+        inboxes.into_iter().map(|inbox| self.mark_all_read(inbox)).sum()
     }
 
     /// Moves messages to another folder of their account with one command, as a move of one would.
