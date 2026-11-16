@@ -157,8 +157,9 @@
       Microsoft 365 via webbläsaren.
     </p>
     <p xml:lang="tr">
-      Inbox Classic, eski posta programlarındaki gibi solda klasörler, üstte iletiler ve altta ileti ile e-posta okur ve
-      yazar. Her IMAP ve SMTP hesabıyla çalışır, Outlook.com ve Microsoft 365'te tarayıcı üzerinden oturum açar.
+      Inbox Classic, alışılmış e-posta düzenini sunar: solda klasörler, üstte ileti listesi, altta okuma bölmesi. IMAP
+      ve SMTP hesaplarıyla çalışır; Outlook.com ve Microsoft 365 hesaplarında tarayıcı üzerinden oturum açmayı
+      destekler.
     </p>
     <p xml:lang="el">
       Το Inbox Classic διαβάζει και γράφει email με τους φακέλους αριστερά, τα μηνύματα επάνω και το μήνυμα από κάτω,
@@ -277,10 +278,10 @@
       <li xml:lang="sv">En sökning som hittar ord i ämnet, personerna, filnamnen och texten, med Gmails operatorer</li>
       <li xml:lang="sv">Svar fäller ihop de tidigare meddelanden som de citerar</li>
       <li xml:lang="sv">E-posten går att läsa offline; lösenorden förvaras i din nyckelring</li>
-      <li xml:lang="tr">Her ileti betikler olmadan temizlenmiş olarak, internetten gelen resimler yalnızca siz izin verdiğinizde gösterilir</li>
-      <li xml:lang="tr">Konuda, kişilerde, dosya adlarında ve metinde sözcük bulan, Gmail'in işleçlerini kullanan bir arama</li>
-      <li xml:lang="tr">Yanıtlar, alıntıladıkları önceki iletileri katlar</li>
-      <li xml:lang="tr">Posta çevrimdışıyken de okunabilir; parolalar anahtarlığınızda saklanır</li>
+      <li xml:lang="tr">İletiler, betikler ve güvenli olmayan içerikler temizlenerek gösterilir. İnternetteki resimler yalnızca izin verdiğinizde yüklenir</li>
+      <li xml:lang="tr">Konularda, gönderenlerde, alıcılarda, ek adlarında ve ileti metninde arama yapın; Gmail tarzı arama ifadeleriyle sonuçları daraltın</li>
+      <li xml:lang="tr">Yanıtlardaki önceki iletiler, gerektiğinde açılabilecek şekilde gizlenir</li>
+      <li xml:lang="tr">Önceden indirilen iletileri çevrimdışı okuyun. Parolalarınız sistemin güvenli kimlik bilgileri deposunda saklanır</li>
       <li xml:lang="el">Κάθε μήνυμα εμφανίζεται καθαρισμένο, χωρίς σενάρια εντολών, και οι εικόνες από το διαδίκτυο μόνο όταν το επιτρέψετε</li>
       <li xml:lang="el">Αναζήτηση που βρίσκει λέξεις στο θέμα, στους αποστολείς και παραλήπτες, στα ονόματα αρχείων και στο κείμενο, με τους τελεστές του Gmail</li>
       <li xml:lang="el">Οι απαντήσεις αναδιπλώνουν τα προηγούμενα μηνύματα που παραθέτουν</li>
