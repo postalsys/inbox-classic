@@ -190,7 +190,11 @@ fn the_scripts_read_the_list_of_languages() {
     let read: Vec<(String, String)> = source[start..end]
         .lines()
         .filter_map(|line| {
-            let rest = line.strip_prefix("    (\"")?.strip_suffix("\"),")?;
+            // a Windows checkout ends its lines in CR LF
+            let rest = line
+                .trim_end_matches('\r')
+                .strip_prefix("    (\"")?
+                .strip_suffix("\"),")?;
             let (code, name) = rest.split_once("\", \"")?;
             Some((code.to_string(), name.to_string()))
         })
