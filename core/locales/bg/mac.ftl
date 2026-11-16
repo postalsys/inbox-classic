@@ -124,6 +124,8 @@ mac-no-calendar-app = На този Mac няма програма за кале�
 mac-file-not-saved = Файлът не можа да бъде запазен.
 # review: new
 mac-unsubscribing = Отписване от { $target }…
+# review: new
+mac-loading-list = Зареждане…
 
 ## The compose window
 

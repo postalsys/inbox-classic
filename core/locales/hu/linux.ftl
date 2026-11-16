@@ -29,6 +29,8 @@ gtk-search-indexing = { $count ->
    *[other] { $count } üzenet szövegének indexelése még folyamatban
 }
 # review: new
+gtk-list-loading = Betöltés...
+# review: new
 gtk-menu-rename = Átnevezés...
 # review: new
 gtk-import-one-question = Importálja ezt az üzenetet: { $file }? Célmappa: { $folder }

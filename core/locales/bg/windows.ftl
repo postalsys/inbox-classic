@@ -27,6 +27,8 @@ win-no-bodies = Текстът на съобщенията не може да б
 win-webview-failed = Създаването на WebView2 не успя.
 # review: new
 win-webview-missing = Средата за изпълнение WebView2 не е налична.
+# review: new
+win-list-loading = Зареждане...
 
 ## Buttons and words used in many windows
 

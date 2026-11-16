@@ -26,6 +26,8 @@ win-no-bodies = Non è possibile mostrare il testo dei messaggi.
 win-webview-failed = Non è stato possibile creare WebView2.
 # review: new
 win-webview-missing = Il runtime WebView2 non è disponibile.
+# review: new
+win-list-loading = Caricamento...
 
 ## Buttons and words used in many windows
 

@@ -27,6 +27,8 @@ win-no-bodies = Невозможно показать текст сообщен�
 win-webview-failed = Не удалось создать WebView2.
 # review: new
 win-webview-missing = Среда выполнения WebView2 недоступна.
+# review: new
+win-list-loading = Загрузка...
 
 ## Buttons and words used in many windows
 

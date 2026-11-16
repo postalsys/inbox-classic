@@ -26,6 +26,8 @@ win-no-bodies = Obsah zpráv nelze zobrazit.
 win-webview-failed = Vytvoření WebView2 se nezdařilo.
 # review: new
 win-webview-missing = Modul runtime WebView2 není k dispozici.
+# review: new
+win-list-loading = Načítání...
 
 ## Buttons and words used in many windows
 

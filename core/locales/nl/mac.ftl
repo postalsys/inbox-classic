@@ -123,6 +123,8 @@ mac-no-calendar-app = Er is op deze Mac geen agenda-app om uitnodigingen (.ics-b
 mac-file-not-saved = Het bestand kon niet worden bewaard.
 # review: new
 mac-unsubscribing = Afmelden bij { $target }…
+# review: new
+mac-loading-list = Laden…
 
 ## The compose window
 

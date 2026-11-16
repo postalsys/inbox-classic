@@ -28,6 +28,8 @@ gtk-search-indexing = { $count ->
    *[other] de tekst van { $count } berichten wordt nog geïndexeerd
 }
 # review: new
+gtk-list-loading = Laden...
+# review: new
 gtk-menu-rename = Hernoemen...
 # review: new
 gtk-import-one-question = Het bericht { $file } importeren in { $folder }?
