@@ -377,6 +377,15 @@ Lim inn, Gjør om, Minimer).
 - Review first: "Svar avsender" versus "Svar", "Merk alt" (Windows) versus Apple's "Marker alt", "Søppelpost" pair,
   "passfrase", "Legitimasjonsbehandling".
 
+Review notes (round 2):
+- Retain direct du prose, imperative commands, Kopi/Blindkopi, KI-agent and passfrase.
+- Rules behandler messages; matching is based on kriterier. Folding a conversation is "Trekk sammen",
+  distinct from hiding messages. Digital signatures and confirmed key ownership are separate checks.
+- "Påloggingsopplysninger" covers saved passwords and OAuth credentials; transfer without protection
+  requires another password or browser sign-in. Domain authentication does not verify a person's identity.
+- Actual menu/context/dialog access keys were checked in 32 scopes, including Norwegian Ø where needed.
+  Recipient controls use Alt+K and Alt+B, which help must explain beside unchanged English keyboard tags.
+
 ### Polski (pl)
 
 Terms: Skrzynka odbiorcza; Skrzynka nadawcza; Elementy wysłane; Elementy usunięte; Wersje robocze; Wiadomości-śmieci;

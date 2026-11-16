@@ -246,8 +246,15 @@ Preserved markup, platform branches and literal keyboard tags. All 75 tests pass
 inventory/hash reconciliation, inline spacing and git diff --check. The review HTML is regenerated.
 Everyday-help checkpoint: `37a547aa`. Norwegian Bokmål is next.
 
-Current totals: 6,719 catalog entries and 264 help pages reviewed; 1,067 catalog values improved. Remaining:
-25,289 catalog entries and 988 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Norwegian Bokmål UI catalog
+
+Reviewed all 626 shared UI entries and three coupled Windows controls, improving 54 values. Corrected rule
+processing, key ownership checks, credential transfer and domain-authentication wording. Resolved shortcut
+collisions in 32 actual menu and dialog scopes. All 14 catalog tests, structure, inventory/hash reconciliation
+and git diff --check pass. Catalan completion checkpoint: `21f37354`. The remaining catalogs and help are pending.
+
+Current totals: 7,348 catalog entries and 264 help pages reviewed; 1,121 catalog values improved. Remaining:
+24,660 catalog entries and 988 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

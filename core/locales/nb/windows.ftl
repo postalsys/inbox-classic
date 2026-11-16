@@ -30,12 +30,10 @@ win-webview-missing = WebView2-kjøretiden er ikke tilgjengelig.
 
 ## Buttons and words used in many windows
 
-# review: new
-win-delete-button = &Slett
+win-delete-button = Sle&tt
 # review: new
 win-find-label = &Finn:
-# review: new
-win-save-as-button = Lagre &som...
+win-save-as-button = La&gre som...
 # review: new
 win-too-many-files = For mange filer på en gang: velg færre.
 
@@ -152,8 +150,7 @@ win-clear-log-ask = Vil du tømme aktivitetsloggen til agentene? Dette angrer ik
 win-agent-programs = &Programmer der agenter har bedt om tilgang til e-posten din:
 # review: new
 win-change = &Endre...
-# review: new
-win-what-agents-did = Agent&aktivitet:
+win-what-agents-did = Age&ntaktivitet:
 # review: new
 win-how-to-connect = Slik kobler du til en agent
 
