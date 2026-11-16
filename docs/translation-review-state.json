@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review the remaining 31 Greek help topics, starting encrypted-and-signed-mail, encryption-keys and verify-a-key; then privacy, agents, troubleshooting and reference. Greek catalogs 1334/1334, 211 improvements; help 21/52. Both context followups complete. Recheck late additions after Greek completion and after all pending languages. Do not run tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Greek: review remaining 18 help topics, starting message-rules, agents-connect, agents-permissions and agents-sending, then troubleshooting and reference. Catalogs 1334/1334, 211 improvements; help 34/52. Both context followups complete. Recheck upstream and late edits after Greek completion and again after all languages. No test suite. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -5078,37 +5078,24 @@
     "el": {
       "pending_catalogs": {},
       "pending_help": [
-        "account-security.html",
         "agents-connect.html",
         "agents-permissions.html",
         "agents-sending.html",
-        "brand-logos.html",
         "certificate-errors.html",
         "command-line.html",
-        "connections.html",
-        "data-storage.html",
         "default-mail-program.html",
         "delivery-problems.html",
-        "download-ahead.html",
-        "encrypted-and-signed-mail.html",
         "encryption-errors.html",
-        "encryption-keys.html",
-        "invitations.html",
         "keyboard-shortcuts.html",
-        "links-scripts.html",
         "message-not-shown.html",
         "message-rules.html",
         "no-connection.html",
         "options-language.html",
         "password-not-accepted.html",
-        "pictures-tracking.html",
         "removing.html",
         "search-words.html",
         "sign-in-apps.html",
-        "sign-in-codes.html",
-        "unsubscribe.html",
-        "updates.html",
-        "verify-a-key.html"
+        "updates.html"
       ],
       "completed_batches": [
         {
@@ -6612,6 +6599,58 @@
           },
           "validation": "Structural checker passes after accounting for intentionally cleared marks; no structural exceptions. HTML tags/attributes, literal keys and platform branches match HEAD. No en/em dashes or broken inline joins. Exact inventory and file/English-source hashes reconcile. git diff --check passes. Review HTML regenerated. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed account setup, main-window/layouts, reading/searching/conversations, organizing/deleting/folders, composing/replies/signatures, attachments/files, drafts/outbox, contacts, notifications, combined folders, account management and transfer. Corrected actual folder navigation, independent unread totals, indexing, queued sending, attachment cleanup and platform marking, authenticated-domain limits and password/OAuth transfer. Checked attachment reminder and reply-all implementation; Greek reminder text now names supported languages and uses a recognized English example. Eleven already-reviewed write-message topics are recorded for followup. Preserve all HTML, attributes, literal keyboard text and platform branches. No test suite run per user instruction."
+        },
+        {
+          "id": "el-security-privacy-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "verify-a-key.html",
+            "account-security.html",
+            "brand-logos.html",
+            "pictures-tracking.html",
+            "connections.html",
+            "data-storage.html",
+            "download-ahead.html",
+            "links-scripts.html",
+            "sign-in-codes.html",
+            "unsubscribe.html",
+            "invitations.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/el/encrypted-and-signed-mail.html": "1f59d3f38658f02db00fc65d7ca9226fe358780f21dd889d58780dceaeca2442",
+            "core/crates/pe-html/help/el/encryption-keys.html": "961afff483263dce03a491fd86d2edf8cc69036456dc78562cfa41824bb57a10",
+            "core/crates/pe-html/help/el/verify-a-key.html": "e740073a9f0e23519895c1c5a4f69285b5f56e8bdd84f15d7c2cbf697ee9469f",
+            "core/crates/pe-html/help/el/account-security.html": "3ef5e65d50b847e7e8530ba40956f174473caeb949d07d9d4523c0df6f87b3a9",
+            "core/crates/pe-html/help/el/brand-logos.html": "b3beca85c22390dd2c71979dc209cf727a106f805631254af3f52d79d06406fd",
+            "core/crates/pe-html/help/el/pictures-tracking.html": "cb0949e4b046d5cad4630bc8ab56ae4687eb701107b0e6717fafc0f16dc4adf3",
+            "core/crates/pe-html/help/el/connections.html": "0fbc85eff2176ad7a3bd65f3f3a076abedf75dcd1f2aa92df66b343b829c3437",
+            "core/crates/pe-html/help/el/data-storage.html": "c93ecf7449f07463293e0a73d4a71f0d938084ff83af540b6e0bbad521cd3e13",
+            "core/crates/pe-html/help/el/download-ahead.html": "3191b0240dde1599fac278dd992c8a0baa896d5c7e3054eba9ff956a14ec0016",
+            "core/crates/pe-html/help/el/links-scripts.html": "e8475c1ca9ae8f1cc496c0cd8cd54e77fe899b2429f19d27c186cd670eb90812",
+            "core/crates/pe-html/help/el/sign-in-codes.html": "0ca96ac80b88f45a11c6b4c11ba94045e4cb41a496daf72c182d5fb98744a238",
+            "core/crates/pe-html/help/el/unsubscribe.html": "5536521d5b9726133f5c619fc8195d1ae2438d1b1b0c29f325b6b7a4975a25f3",
+            "core/crates/pe-html/help/el/invitations.html": "c0468d64117c803a0b07b8006af94194c773af2f17218a288096473719adcb8b"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "b11ff6a5da8cc4f36f352fe5d7a6a43f0aa04e7ac1f67ea0608ef43559ba100e",
+            "core/crates/pe-html/help/en/encryption-keys.html": "67693bc89f3d12b183ff3a86f11495213a2f58ea0c9e16dea30649d931621d6a",
+            "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153",
+            "core/crates/pe-html/help/en/account-security.html": "adf8cbee09afd1c8bcaaf46181d1cbf6667a67e1b3ce6f35c13af4d1c016ed44",
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/data-storage.html": "cd7a5abea6effa876efa6948daee25b444604e4dbe1616333cdae59421c842ed",
+            "core/crates/pe-html/help/en/download-ahead.html": "bd7fce66d3a898cacebd699b56fb445e89fd7cd29bcd8c5cc8a1eb2599a4c332",
+            "core/crates/pe-html/help/en/links-scripts.html": "94ed69e6dc2262c5f189568583c6f98bdd9c829584be36b89a6956e7cdc0bc53",
+            "core/crates/pe-html/help/en/sign-in-codes.html": "c787a5e3fe4836c3e7c48fc644c4210d0107e29767c0fbacff1f7f083b6cc408",
+            "core/crates/pe-html/help/en/unsubscribe.html": "a80419bc5ca6a65992c8168d29636f505dc1281ccbeff81ff25412ba2dd3611c",
+            "core/crates/pe-html/help/en/invitations.html": "d4a72136a9c92b8f37bf139b5f577630da9a6b40a921b88bec47bcd06060010d"
+          },
+          "validation": "Greek structural checker passes after accounting for intentionally removed marks; no exceptions. Markup/attributes, platform branches and literal keys preserved, no en/em dashes or broken inline joins. Exact inventories and translation/English-source hashes reconcile. git diff --check passes and report regenerated. Test suite skipped per user instruction.",
+          "notes": "Reviewed encryption/key verification, account security, sender logos/remote pictures/connections, storage/download-ahead, links/scripts, sign-in codes, unsubscribe and calendar invitations. Corrected validity versus ownership, address checks before accepting keys, private-key recovery, persisted logo cache and request privacy, domain-authentication limits, external attachment handlers and credentials. Clarified localized controls and natural Greek wording. Markup and keyboard literals preserved. No test suite per user instruction."
         }
       ]
     },

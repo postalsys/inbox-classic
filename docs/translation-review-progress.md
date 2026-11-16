@@ -16,9 +16,9 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with the remaining 31 Greek help topics, starting encrypted-and-signed-mail, encryption-keys
-  and verify-a-key, then privacy, agents, troubleshooting and reference. Both context followups are complete.
-  Greek catalogs: 1,334 reviewed, 211 values improved; help: 21 of 52 reviewed.
+- Resume with the remaining 18 Greek help topics, starting message-rules, agents-connect,
+  agents-permissions and agents-sending, then troubleshooting and reference. Both context followups are complete.
+  Greek catalogs: 1,334 reviewed, 211 values improved; help: 34 of 52 reviewed.
   Thirteen languages still have pending content. All 84 late list-loading labels are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
   Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
@@ -584,8 +584,19 @@ attributes, keyboard literals and inline joins are preserved. Exact inventories/
 git diff --check passes, and the review HTML is regenerated. No test suite was run. Greek first-help checkpoint:
 `a41119fe`.
 
-Current totals: 16,120 catalog entries and 597 help pages reviewed; 2,482 catalog values improved. Remaining:
-15,972 catalog entries and 655 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Greek security and privacy help
+
+Reviewed 13 more topics: encrypted/signed mail, keys and verification, account security, logos, remote images,
+connections, storage, download-ahead, links/scripts, sign-in codes, unsubscribe and invitations. Corrected
+signature validity versus ownership, verifying every address before accepting a key, private-key recovery,
+persistent logo reuse, request privacy and domain-authentication limits. Clarified attachment opening through
+external applications, per-account storage limits, OAuth credentials and natural Greek instructions.
+All markup, attributes, literal keys and platform branches are preserved. Structural checks, inline joins,
+exact inventory/file/source hashes and git diff --check pass; report regenerated. No test suite was run.
+Greek help is now 34/52. Attachment-reminder followup checkpoint: `d982d60b`.
+
+Current totals: 16,120 catalog entries and 610 help pages reviewed; 2,482 catalog values improved. Remaining:
+15,972 catalog entries and 642 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
