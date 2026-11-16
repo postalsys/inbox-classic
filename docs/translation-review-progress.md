@@ -12,10 +12,17 @@ Commit completed batches regularly and preserve an exact resume point.
   52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
 - `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
   and git history before resuming, so later source or translation changes are not missed.
-- Resume with all 52 Portuguese (Portugal) help topics. All 1,331 Portuguese catalog entries are reviewed.
+- Resume with the remaining 31 Portuguese (Portugal) help topics. The first 21 are recorded in the state file;
+  all 1,331 Portuguese catalog entries are reviewed. Brazilian Portuguese is next.
   Italian and Dutch are fully reviewed: each has 1,331 catalog entries and 52 help topics.
-  Seventeen new languages remain, with exact pending IDs/topics in the state file.
+  Twenty-two languages still have pending content, with exact IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
+- Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
+  (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
+  not yet on `master` or `origin/master`. Review them in an isolated checkout of that branch when reached;
+  preserve its unrelated feature implementation and do not merge it merely to access the translations.
+  This adds 6,655 catalog entries and 260 help topics: total scope is now 32,008 entries and 1,252 topics.
+  The state records exact inventories and the source commit. Recheck the branch and master for later edits.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
 
 ## Review and checkpoint rules
@@ -141,8 +148,18 @@ improved values and Italian 192. Existing German/Spanish/Estonian/French dialog 
 All 72 tests pass; structural checks, expanded menu/dialog checks and inventory/hash reconciliation pass.
 Generated installer/Linux metadata is inspected and git diff --check passes. Portuguese UI checkpoint: `c3509da7`.
 
-Current totals: 4,057 catalog entries and 108 help pages reviewed; 625 catalog values improved. Remaining:
-21,296 catalog entries and 884 help pages. `REVIEWED` remains unchanged until the full round is complete.
+### Portuguese first 21 help topics
+
+Reviewed account setup, main window/layouts, reading/searching/conversations, organization/deletion, folders,
+composing/replies/signatures, attachments, message files, drafts/outbox, contacts, new-mail notifications,
+combined folders, account management and moving to another computer. Corrected old folder navigation,
+attachment cleanup and origin marking, domain-authentication limits, reauthentication after transfer and rule
+folder matching. All markup, keyboard tags and platform branches are preserved.
+All 72 tests pass. Structural checks and inventory/hash reconciliation pass; git diff --check passes.
+Portuguese catalog completion checkpoint: `21f45cd7`.
+
+Current totals: 4,057 catalog entries and 129 help pages reviewed; 625 catalog values improved. Remaining:
+27,951 catalog entries and 1,123 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
