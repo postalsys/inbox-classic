@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Greek: review remaining 18 help topics, starting message-rules, agents-connect, agents-permissions and agents-sending, then troubleshooting and reference. Catalogs 1334/1334, 211 improvements; help 34/52. Both context followups complete. Recheck upstream and late edits after Greek completion and again after all languages. No test suite. Active checkout build/i18n-wave1.",
+  "next_batch": "Greek complete: 1334 catalog entries, 211 improved values, 52 help topics. Finish upstream integration/audit against new origin/master 76f67e82 (merges the already-reviewed wave1 content, no new localization relative to 8df686a4), then review Finnish (fi) app.ftl in app context and proceed through remaining catalogs/help. Both context followups complete. Do not run tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -5077,26 +5077,7 @@
     },
     "el": {
       "pending_catalogs": {},
-      "pending_help": [
-        "agents-connect.html",
-        "agents-permissions.html",
-        "agents-sending.html",
-        "certificate-errors.html",
-        "command-line.html",
-        "default-mail-program.html",
-        "delivery-problems.html",
-        "encryption-errors.html",
-        "keyboard-shortcuts.html",
-        "message-not-shown.html",
-        "message-rules.html",
-        "no-connection.html",
-        "options-language.html",
-        "password-not-accepted.html",
-        "removing.html",
-        "search-words.html",
-        "sign-in-apps.html",
-        "updates.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "el-loading-round2",
@@ -6651,6 +6632,73 @@
           },
           "validation": "Greek structural checker passes after accounting for intentionally removed marks; no exceptions. Markup/attributes, platform branches and literal keys preserved, no en/em dashes or broken inline joins. Exact inventories and translation/English-source hashes reconcile. git diff --check passes and report regenerated. Test suite skipped per user instruction.",
           "notes": "Reviewed encryption/key verification, account security, sender logos/remote pictures/connections, storage/download-ahead, links/scripts, sign-in codes, unsubscribe and calendar invitations. Corrected validity versus ownership, address checks before accepting keys, private-key recovery, persisted logo cache and request privacy, domain-authentication limits, external attachment handlers and credentials. Clarified localized controls and natural Greek wording. Markup and keyboard literals preserved. No test suite per user instruction."
+        },
+        {
+          "id": "el-final-help-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "agents-connect.html",
+            "agents-permissions.html",
+            "agents-sending.html",
+            "certificate-errors.html",
+            "command-line.html",
+            "default-mail-program.html",
+            "delivery-problems.html",
+            "encryption-errors.html",
+            "keyboard-shortcuts.html",
+            "message-not-shown.html",
+            "message-rules.html",
+            "no-connection.html",
+            "options-language.html",
+            "password-not-accepted.html",
+            "removing.html",
+            "search-words.html",
+            "sign-in-apps.html",
+            "updates.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/el/agents-connect.html": "b1ff280c044df694443023fa437609715613eeb2e437f2db31372537092f4a34",
+            "core/crates/pe-html/help/el/agents-permissions.html": "cba0e48fcf0f32e00ba8acc06824edd8bbcfa286d22ce2b6fc8c3be0c5b5c7b8",
+            "core/crates/pe-html/help/el/agents-sending.html": "1d55f92b1e6e26d106c50f6dccbaa4ca3c6133600181f7a00956b36cca555129",
+            "core/crates/pe-html/help/el/certificate-errors.html": "73ee99656ffa1224a862daa5f00b22ceaead5cec2993e603a9e5a31531890059",
+            "core/crates/pe-html/help/el/command-line.html": "7d7913c344153998103ffeb4bb4e1b39505e197b21eb47253db0f6e21c2bf896",
+            "core/crates/pe-html/help/el/default-mail-program.html": "a01c8fcfd4c335fe8f2c20fc7071444b906f2052bb1962a0f1437bb49a98524e",
+            "core/crates/pe-html/help/el/delivery-problems.html": "c67a87e5019b3f79be3609012738dc0e7c423a60b6063be22b9f7b6ce3ea1526",
+            "core/crates/pe-html/help/el/encryption-errors.html": "aebe68ee8711b2fc640b2543c74bd803dfcc6f64027c26190adf48b3cd83711a",
+            "core/crates/pe-html/help/el/keyboard-shortcuts.html": "1300f994b8453f66a1cb713bd551c7dfab5c4ccf7da377653c2089ef37a1bb73",
+            "core/crates/pe-html/help/el/message-not-shown.html": "0e179206681ddcf3bdde664e3a383fe6f7d5055167566bfce8cb31f07262519e",
+            "core/crates/pe-html/help/el/message-rules.html": "e81af17e96787a89051b0b2776747a852d6984b54f4f7afafe23c83ec9c7c896",
+            "core/crates/pe-html/help/el/no-connection.html": "e6cf62705258fc95d8ae0ba253661cc1ad70184e7df52f71070973c463eba7b4",
+            "core/crates/pe-html/help/el/options-language.html": "1f164dba3c95256f6391320b024f921bb2281999a0c0266fd47139f7c0c4cbdf",
+            "core/crates/pe-html/help/el/password-not-accepted.html": "c2cdee3c0a27105c82803d09d42bfe65f20b8d9bcef7f37bd5906b760628a205",
+            "core/crates/pe-html/help/el/removing.html": "61071430bc01c1064796e04de9f18f5c178ede98740b20cf9ccc682407952d64",
+            "core/crates/pe-html/help/el/search-words.html": "fe9400270bfd825b5e39ac12d4043ad423dc591f67a0a85e52b4f44ba96d4650",
+            "core/crates/pe-html/help/el/sign-in-apps.html": "d00c3657b653cb97d7de499ff825ea77fb89f6760fa5946e64e4b518a1b9019b",
+            "core/crates/pe-html/help/el/updates.html": "b4ff8dc7385a70ccaa39dd0d9b68cb502619c6923e744a82b8038dc1058fd0fa"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70",
+            "core/crates/pe-html/help/en/agents-permissions.html": "3f65b6b651950e2b6750417611854b8c899c5893f3e12b1b6c5f1c4a4077bb6d",
+            "core/crates/pe-html/help/en/agents-sending.html": "dffb12a981ffed82aa8cf6566ee4118d64b200c54dcc3b9d77fcd95ee0ffd75e",
+            "core/crates/pe-html/help/en/certificate-errors.html": "8f4eccaaf38ef9767695c2a3a62aebe94238f4f3cbaf8c76f7e98105978a2c84",
+            "core/crates/pe-html/help/en/command-line.html": "39216fa072adf81b4ce1480e5df5729a4ef7524d25d69aef5e1f374044c18e70",
+            "core/crates/pe-html/help/en/default-mail-program.html": "6934a7cc1e6c28786d77d488146d201f81e253b79965a6d3c63093708bdc33ad",
+            "core/crates/pe-html/help/en/delivery-problems.html": "b01b4f074dce1c3bce5c63f2c5a5bd05a7613153eb558c179ed1f4fcbfae1c0e",
+            "core/crates/pe-html/help/en/encryption-errors.html": "a5a998593987b3275e7f6cf44f81d459ff641215dda884f275cbf9d8d0d710f1",
+            "core/crates/pe-html/help/en/keyboard-shortcuts.html": "8cef6a16af1925987835d490d608aac7614be8c13650d0b3875ff21753d39b5b",
+            "core/crates/pe-html/help/en/message-not-shown.html": "85e732ccaedb1c1eb60f30ddcef9992d7f1ee4820bb4ceaa6a59e5200a4bef0d",
+            "core/crates/pe-html/help/en/message-rules.html": "50f114b3f1de58156b49d24f24c6b1c13f6ddd25d386b0f5ed10e30f0ed4f41d",
+            "core/crates/pe-html/help/en/no-connection.html": "b928c6371c171c099fc80ad0fef4e13d3e022593bbdc44c1f27904b5139d3ef0",
+            "core/crates/pe-html/help/en/options-language.html": "f01b936ddf998f5db9b63cc6ec8c07d64c85c93fad9da8e2937e3c07307aa1b2",
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab",
+            "core/crates/pe-html/help/en/removing.html": "46bcd4ef3c9ae9e051c63de8eb9810f179b723d4297cc001dce3951b76a9515e",
+            "core/crates/pe-html/help/en/search-words.html": "5393319f111f177dde773bb10018564696772b16067b60fa8e2bad14f643ebbb",
+            "core/crates/pe-html/help/en/sign-in-apps.html": "c092b49a13a0eab86b8571ec49c3fe49696b16b2e71bc1cc1020bcbc0222c1b1",
+            "core/crates/pe-html/help/en/updates.html": "faa50b2269cf71de11f9a361fd48a5476a9380883e99829aae2c67bb12028e59"
+          },
+          "validation": "All Greek catalog/help structures pass after accounting for intentionally cleared marks; no structural exceptions. Tags, attributes, literal keys and platform branches preserved. No prohibited dashes or broken inline joins. Exact inventory and translation/English-source hashes reconcile. git diff --check passes; report regenerated. No test suite run per user instruction.",
+          "notes": "Reviewed all final 18 topics: rules, agents, connection/authentication/TLS/message/delivery troubleshooting, custom OAuth apps, language/defaults/updates/removal, CLI/search/keyboard references. Corrected queued sends and permission scope, rule processing, TLS-required not proving passwords, TLS failures not only certificate errors, app-specific malformed-message display, persisted credentials and native instructions. Search aliases cover all recipients; Greek name examples use actual Greek text. Preserved literal English keyboard tags and explained Greek Alt+Κ/Alt+Ι beside them. CLI sign-in-page-file is a URL, not HTML. All Greek help reviewed; no test suite run."
         }
       ]
     },
@@ -38148,7 +38196,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Fetched origin after Danish completion 4d43ead4. Master/origin-master remain 5573ee4b/65988ba4; local/remote feat/languages-wave1 remain 8df686a4. No new catalog/help content. Captured --since audit reports no newly pending entries; full pending inventory and completed hashes reconciled separately. Final late-arrival audit still required.",
+    "latest_source_audit": "Fetched origin during Greek completion. Local master remains 5573ee4b; origin/master advanced to 76f67e82 by merging feat/languages-wave1. Local/remote wave1 remain 8df686a4. No catalog/help/commands differences between that recorded feature tip and new origin/master. This content is already in the review inventory. Integrate and reconcile the new mainline ancestry after committing Greek help. Final late-arrival audit still required.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review"
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",

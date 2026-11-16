@@ -16,10 +16,10 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with the remaining 18 Greek help topics, starting message-rules, agents-connect,
-  agents-permissions and agents-sending, then troubleshooting and reference. Both context followups are complete.
-  Greek catalogs: 1,334 reviewed, 211 values improved; help: 34 of 52 reviewed.
-  Thirteen languages still have pending content. All 84 late list-loading labels are reviewed.
+- Resume with upstream integration/audit against origin/master `76f67e82`, which merged the already
+  inventoried wave1 languages. Then review Finnish (fi), starting app.ftl and its actual menu/dialog contexts.
+  Greek is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. Both context followups
+  are complete. Twelve languages still have pending content. All 84 late list-loading labels are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
   Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
   The persistent-logo-cache followup is now complete: 42 help topics checked (37 changed, five retained)
@@ -595,8 +595,24 @@ All markup, attributes, literal keys and platform branches are preserved. Struct
 exact inventory/file/source hashes and git diff --check pass; report regenerated. No test suite was run.
 Greek help is now 34/52. Attachment-reminder followup checkpoint: `d982d60b`.
 
-Current totals: 16,120 catalog entries and 610 help pages reviewed; 2,482 catalog values improved. Remaining:
-15,972 catalog entries and 642 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Greek help completed
+
+Reviewed the final 18 topics: rules, agents, troubleshooting and reference. Corrected queued-send behavior,
+agent permission scope, rule processing, TLS-required responses, certificate-error causes, app-specific message
+rendering failures and transferred sign-in credentials. Search to/cc/bcc aliases correctly cover every recipient
+field. Greek name examples use Greek text, and localized Alt+Κ/Alt+Ι are explained beside the preserved literal
+English shortcuts. The CLI sign-in-page-file description correctly identifies a URL. All 52 Greek help topics
+are reviewed. Structural checks, preserved markup/keys, inline joins and exact inventories/hashes pass;
+git diff --check passes and report regenerated. No test suite was run. Security-help checkpoint: `fd00285e`.
+
+Fresh upstream discovery: origin/master is now `76f67e82`, merging the wave1 feature branch already included
+in this review round. Local master remains `5573ee4b`; local/remote wave1 remain `8df686a4`. Comparing that
+feature tip with new origin/master shows no localization/help/command changes. Integrate mainline ancestry
+and reconcile after this Greek checkpoint before continuing Finnish. The full late-arrival audit is still
+required once all twelve pending languages are complete.
+
+Current totals: 16,120 catalog entries and 628 help pages reviewed; 2,482 catalog values improved. Remaining:
+15,972 catalog entries and 624 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
