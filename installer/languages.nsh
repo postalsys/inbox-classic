@@ -93,7 +93,7 @@ LangString StartApp ${LANG_RUSSIAN} "Запустить Inbox Classic"
 LangString StartApp ${LANG_UKRAINIAN} "Запустити Inbox Classic"
 
 LangString WelcomeNew ${LANG_ENGLISH} "This will install Inbox Classic ${VERSION}, an e-mail program.$\r$\n$\r$\nNo administrator rights are needed, it is installed for your account only."
-LangString WelcomeNew ${LANG_CATALAN} "Això instal·larà Inbox Classic ${VERSION}, un programa de correu electrònic.$\r$\n$\r$\nNo calen permisos d’administrador: s’instal·la només per al vostre compte."
+LangString WelcomeNew ${LANG_CATALAN} "Aquest assistent instal·larà Inbox Classic ${VERSION}, un programa de correu electrònic.$\r$\n$\r$\nNo calen permisos d’administrador: la instal·lació només afecta el vostre compte d’usuari del Windows."
 LangString WelcomeNew ${LANG_CZECH} "Tímto se nainstaluje Inbox Classic ${VERSION}, poštovní program.$\r$\n$\r$\nNejsou potřeba oprávnění správce, instaluje se jen pro váš účet."
 LangString WelcomeNew ${LANG_DANISH} "Dette installerer Inbox Classic ${VERSION}, et e-mailprogram.$\r$\n$\r$\nDer kræves ingen administratorrettigheder, det installeres kun til din konto."
 LangString WelcomeNew ${LANG_GERMAN} "Das E-Mail-Programm Inbox Classic ${VERSION} wird installiert.$\r$\n$\r$\nDie Installation gilt nur für Ihr Benutzerkonto. Administratorrechte sind nicht erforderlich."
@@ -123,7 +123,7 @@ LangString WelcomeNew ${LANG_RUSSIAN} "Будет установлена поч�
 LangString WelcomeNew ${LANG_UKRAINIAN} "Буде встановлено Inbox Classic ${VERSION}, програму електронної пошти.$\r$\n$\r$\nПрава адміністратора не потрібні, програму буде встановлено лише для вашого облікового запису."
 
 LangString WelcomeSame ${LANG_ENGLISH} "Inbox Classic ${VERSION} is installed already. This will install it again.$\r$\n$\r$\nYour accounts and mail are kept."
-LangString WelcomeSame ${LANG_CATALAN} "Inbox Classic ${VERSION} ja està instal·lat. Això el tornarà a instal·lar.$\r$\n$\r$\nEs conserven els vostres comptes i el vostre correu."
+LangString WelcomeSame ${LANG_CATALAN} "Inbox Classic ${VERSION} ja està instal·lat. Aquest assistent el tornarà a instal·lar.$\r$\n$\r$\nEs conservaran els vostres comptes i el vostre correu."
 LangString WelcomeSame ${LANG_CZECH} "Inbox Classic ${VERSION} už je nainstalován. Tímto se nainstaluje znovu.$\r$\n$\r$\nVaše účty a pošta zůstanou zachovány."
 LangString WelcomeSame ${LANG_DANISH} "Inbox Classic ${VERSION} er allerede installeret. Dette installerer det igen.$\r$\n$\r$\nDine konti og din mail bevares."
 LangString WelcomeSame ${LANG_GERMAN} "Inbox Classic ${VERSION} ist bereits installiert und wird erneut installiert.$\r$\n$\r$\nIhre Konten und E-Mails bleiben erhalten."
@@ -153,7 +153,7 @@ LangString WelcomeSame ${LANG_RUSSIAN} "Inbox Classic ${VERSION} уже уста
 LangString WelcomeSame ${LANG_UKRAINIAN} "Inbox Classic ${VERSION} уже встановлено. Програму буде встановлено ще раз.$\r$\n$\r$\nВаші облікові записи й пошту буде збережено."
 
 LangString WelcomeUpdate ${LANG_ENGLISH} "This will update Inbox Classic $InstalledVersion to ${VERSION}.$\r$\n$\r$\nIf it is running it is closed first. Your accounts and mail are kept."
-LangString WelcomeUpdate ${LANG_CATALAN} "Això actualitzarà Inbox Classic $InstalledVersion a la versió ${VERSION}.$\r$\n$\r$\nSi s’està executant, primer es tanca. Es conserven els vostres comptes i el vostre correu."
+LangString WelcomeUpdate ${LANG_CATALAN} "Aquest assistent actualitzarà Inbox Classic $InstalledVersion a la versió ${VERSION}.$\r$\n$\r$\nSi s’està executant, primer es tancarà. Es conservaran els vostres comptes i el vostre correu."
 LangString WelcomeUpdate ${LANG_CZECH} "Tímto se Inbox Classic $InstalledVersion aktualizuje na verzi ${VERSION}.$\r$\n$\r$\nPokud je spuštěný, nejdřív se ukončí. Vaše účty a pošta zůstanou zachovány."
 LangString WelcomeUpdate ${LANG_DANISH} "Dette opdaterer Inbox Classic $InstalledVersion til ${VERSION}.$\r$\n$\r$\nHvis programmet kører, lukkes det først. Dine konti og din mail bevares."
 LangString WelcomeUpdate ${LANG_GERMAN} "Inbox Classic wird von Version $InstalledVersion auf Version ${VERSION} aktualisiert.$\r$\n$\r$\nFalls das Programm geöffnet ist, wird es vorher geschlossen. Ihre Konten und E-Mails bleiben erhalten."

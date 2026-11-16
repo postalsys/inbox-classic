@@ -220,8 +220,17 @@ shared commands, with terminology recorded in the glossary. All 14 catalog tests
 reconciliation and git diff --check pass. Brazilian Portuguese completion checkpoint: `1b5b0c22`.
 Catalan's remaining 697 catalog entries and all 52 help topics are pending.
 
-Current totals: 6,022 catalog entries and 212 help pages reviewed; 919 catalog values improved. Remaining:
-25,986 catalog entries and 1,040 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Catalan catalogs completed
+
+Reviewed the remaining 448 core and 249 platform/help-title entries, improving 148 values. Corrected independent
+counts, singular permanent-deletion subsets and verified parts, bounce/undo guidance, queued agent activity,
+missing credentials, key lookup/publication/decryption, transfer errors and attachment cleanup. Improved native
+status text, installer account scope and Linux store descriptions. Catalan now has 218 improved catalog values.
+All 75 tests, structural checks, 32 shortcut scopes, inventory/hash reconciliation and git diff --check pass.
+Generated installer/Linux text rebuilt and inspected. UI checkpoint: `e07f6640`. All 52 help topics remain pending.
+
+Current totals: 6,719 catalog entries and 212 help pages reviewed; 1,067 catalog values improved. Remaining:
+25,289 catalog entries and 1,040 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

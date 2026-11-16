@@ -45,9 +45,9 @@
       through the browser.
     </p>
     <p xml:lang="ca">
-      Inbox Classic llegeix i escriu correu electrònic amb les carpetes a l’esquerra, els missatges a dalt i el missatge
-      a sota, com feien els programes de correu d’abans. Funciona amb qualsevol compte IMAP i SMTP, i inicia la sessió a
-      Outlook.com i Microsoft 365 a través del navegador.
+      Inbox Classic permet llegir i escriure correu electrònic amb una disposició familiar: carpetes a l’esquerra,
+      llista de missatges a dalt i contingut del missatge seleccionat a sota. Funciona amb qualsevol compte IMAP i SMTP
+      i permet iniciar la sessió a Outlook.com i Microsoft 365 a través del navegador.
     </p>
     <p xml:lang="cs">
       Inbox Classic čte a píše e-maily se složkami vlevo, zprávami nahoře a zprávou pod nimi, jak to poštovní programy
@@ -187,10 +187,10 @@
       <li>A search that finds words in the subject, the people, the file names and the text, with Gmail's operators</li>
       <li>Replies fold away the earlier messages they quote</li>
       <li>Mail stays readable offline; passwords are kept in your keyring</li>
-      <li xml:lang="ca">Cada missatge es mostra netejat, sense scripts, i les imatges d’Internet només quan les permeteu</li>
-      <li xml:lang="ca">Una cerca que troba paraules a l’assumpte, les persones, els noms de fitxer i el text, amb els operadors del Gmail</li>
-      <li xml:lang="ca">Les respostes plegen els missatges anteriors que citen</li>
-      <li xml:lang="ca">El correu es pot llegir sense connexió; les contrasenyes es guarden al vostre anell de claus</li>
+      <li xml:lang="ca">Els missatges es mostren sense scripts ni altres continguts potencialment perillosos; les imatges d’internet només es carreguen amb la vostra autorització</li>
+      <li xml:lang="ca">Cerca a l’assumpte, els remitents, els destinataris, els noms dels fitxers adjunts i el text dels missatges, amb els operadors del Gmail</li>
+      <li xml:lang="ca">El text de missatges anteriors citat a les respostes queda plegat i es pot desplegar quan calgui</li>
+      <li xml:lang="ca">El correu ja baixat es pot llegir sense connexió; les contrasenyes es desen a l’anell de claus del sistema</li>
       <li xml:lang="cs">Každá zpráva se zobrazuje očištěná, bez skriptů, a obrázky z internetu jen tehdy, když je povolíte</li>
       <li xml:lang="cs">Hledání, které najde slova v předmětu, u odesílatelů a příjemců, v názvech souborů i v textu, s operátory Gmailu</li>
       <li xml:lang="cs">Odpovědi skryjí starší zprávy, které citují</li>
