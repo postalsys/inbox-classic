@@ -16,8 +16,16 @@ enum Languages {
         // dates English
         let used = taken(wanted.withCString { pe_set_language($0) }) ?? "en"
         let code = used == "qps" ? "en" : used
-        locale = Locale(identifier: Locale.current.region.map { "\(code)_\($0.identifier)" } ?? code)
+        locale = Locale(identifier: localeIdentifier(code, region: Locale.current.region?.identifier))
         instantLocale = locale
+    }
+
+    /// The locale of a catalog's tag with the system's region: `de_EE`; a tag with its own region keeps it (`pt_BR`),
+    /// one with a script takes the region after it (`sr_Latn_RS`)
+    static func localeIdentifier(_ code: String, region: String?) -> String {
+        let parts = code.split(separator: "-").map(String.init)
+        if parts.count > 1, parts[1].count == 2 { return parts.joined(separator: "_") }
+        return ([parts.joined(separator: "_")] + (region.map { [$0] } ?? [])).joined(separator: "_")
     }
 
     /// The code of the language the windows are in now

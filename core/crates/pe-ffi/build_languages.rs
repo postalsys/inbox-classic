@@ -4,12 +4,14 @@
 //   app/res/sign-in-buttons.rc                            the Windows resources of the sign-in button pictures
 //   linux/data/com.inboxclassic.InboxClassic.desktop      the desktop entry with its translations (linux.ftl)
 //   linux/data/com.inboxclassic.InboxClassic.metainfo.xml the software stores' page with its translations (linux.ftl)
+// Each writes a language's tag the way its platform does: NSIS by its language file's name (PortugueseBR), Windows'
+// resources in capitals with an underscore (PT_BR), Linux's files as gettext locales (pt_BR, sr@latin).
 // A language a catalog has no message of is left out of the Linux files (they show English then); the installer
 // takes the English words for it.
 use std::fmt::Write as _;
 use std::path::Path;
 
-use pe_i18n::{Arg, LANGUAGES, translated};
+use pe_i18n::{Arg, LANGUAGES, gettext_locale, translated};
 
 /// The languages but English, which the files have as their default
 fn others() -> impl Iterator<Item = &'static str> {
@@ -29,8 +31,8 @@ pub fn write_all(root: &Path, write: fn(&Path, &str)) {
     );
 }
 
-/// NSIS's language files (Contrib/Language files/<name>.nsh) by language code. A language NSIS has none of installs
-/// in English.
+/// NSIS's language files (Contrib/Language files/<name>.nsh) by the tags of pe_i18n::LANGUAGES. A language NSIS has
+/// none of installs in English.
 const NSIS_LANGUAGES: &[(&str, &str)] = &[
     ("af", "Afrikaans"),
     ("ar", "Arabic"),
@@ -79,14 +81,17 @@ const NSIS_LANGUAGES: &[(&str, &str)] = &[
     ("nn", "NorwegianNynorsk"),
     ("pl", "Polish"),
     ("ps", "Pashto"),
-    // Portuguese as written in Portugal; Brazil's is PortugueseBR
+    // Portuguese as written in Portugal, and in Brazil
     ("pt", "Portuguese"),
+    ("pt-BR", "PortugueseBR"),
     ("ro", "Romanian"),
     ("ru", "Russian"),
     ("sk", "Slovak"),
     ("sl", "Slovenian"),
     ("sq", "Albanian"),
+    // Serbian in Cyrillic, and in Latin script
     ("sr", "Serbian"),
+    ("sr-Latn", "SerbianLatin"),
     ("sv", "Swedish"),
     ("th", "Thai"),
     ("tr", "Turkish"),
@@ -167,10 +172,11 @@ fn sign_in_buttons() -> String {
         let name = format!("{}_SIGN_IN", provider.to_uppercase());
         writeln!(out, "{name} RCDATA \"brands/{provider}-sign-in.png\"").unwrap();
         for code in others() {
+            // a resource name has no hyphen: PT_BR, as PictureResource in accounts.cpp makes it
             writeln!(
                 out,
                 "{name}_{} RCDATA \"brands/{provider}-sign-in.{code}.png\"",
-                code.to_uppercase()
+                code.to_uppercase().replace('-', "_")
             )
             .unwrap();
         }
@@ -196,7 +202,7 @@ fn desktop() -> String {
         writeln!(out, "{key}={}", english(id)).unwrap();
         for code in others() {
             if let Some(words) = line(code, id) {
-                writeln!(out, "{key}[{code}]={words}").unwrap();
+                writeln!(out, "{key}[{}]={words}", gettext_locale(code)).unwrap();
             }
         }
     }
@@ -205,7 +211,7 @@ fn desktop() -> String {
     writeln!(out, "Keywords={keywords}").unwrap();
     for code in others() {
         if let Some(words) = line(code, "gtk-desktop-keywords") {
-            writeln!(out, "Keywords[{code}]={keywords}{words}").unwrap();
+            writeln!(out, "Keywords[{}]={keywords}{words}", gettext_locale(code)).unwrap();
         }
     }
     out.push_str(
@@ -257,7 +263,13 @@ fn metainfo() -> String {
     writeln!(out, "  <summary>{}</summary>", xml(&english("gtk-metainfo-summary"))).unwrap();
     for code in others() {
         if let Some(words) = line(code, "gtk-metainfo-summary") {
-            writeln!(out, "  <summary xml:lang=\"{code}\">{}</summary>", xml(&words)).unwrap();
+            writeln!(
+                out,
+                "  <summary xml:lang=\"{}\">{}</summary>",
+                gettext_locale(code),
+                xml(&words)
+            )
+            .unwrap();
         }
     }
     out.push_str(
@@ -272,7 +284,7 @@ fn metainfo() -> String {
     paragraph(&mut out, "", &english("gtk-metainfo-description"));
     for code in others() {
         if let Some(words) = line(code, "gtk-metainfo-description") {
-            paragraph(&mut out, &format!(" xml:lang=\"{code}\""), &words);
+            paragraph(&mut out, &format!(" xml:lang=\"{}\"", gettext_locale(code)), &words);
         }
     }
     out.push_str("    <ul>\n");
@@ -282,7 +294,13 @@ fn metainfo() -> String {
     for code in others() {
         for id in FEATURES {
             if let Some(words) = line(code, id) {
-                writeln!(out, "      <li xml:lang=\"{code}\">{}</li>", xml(&words)).unwrap();
+                writeln!(
+                    out,
+                    "      <li xml:lang=\"{}\">{}</li>",
+                    gettext_locale(code),
+                    xml(&words)
+                )
+                .unwrap();
             }
         }
     }

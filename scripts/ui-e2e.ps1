@@ -5794,7 +5794,7 @@ public static class Dragger {
         $names = @(foreach ($line in Get-Content -Encoding UTF8 (Join-Path $PSScriptRoot '..\core\crates\pe-i18n\src\lib.rs')) {
             if ($line -like 'pub const LANGUAGES*') { $inList = $true; continue }
             if ($line -eq '];') { $inList = $false }
-            if ($inList -and $line -match '^    \("[a-z]+", "(.+)"\),$') { $Matches[1] }
+            if ($inList -and $line -match '^    \("[a-zA-Z-]+", "(.+)"\),$') { $Matches[1] }
         })
         Check ($items.Count -eq $names.Count + 1 -and $items[0] -like 'System default (*)') "Language starts with System default and the language it is now ($($items[0]))"
         Check ((($items | Select-Object -Skip 1) -join ',') -eq ($names -join ',')) "and lists every language by its own name ($($items -join ', '))"
