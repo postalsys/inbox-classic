@@ -12,9 +12,9 @@ Commit completed batches regularly and preserve an exact resume point.
   52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
 - `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
   and git history before resuming, so later source or translation changes are not missed.
-- Resume with Dutch `core.ftl`: 448 pending entries, then its platform/help catalogs (256 entries) and 52 help
-  topics. Dutch UI is reviewed. The other 18 new languages follow. No language is considered complete merely
-  because automated checks pass.
+- Resume with Dutch help: 44 topics remain, starting with message-rules, delete-and-undo and folders.
+  All 1,331 Dutch catalog entries and the first eight help topics are reviewed. The other 18 new languages follow.
+  No language is considered complete merely because automated checks pass.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
 
 ## Review and checkpoint rules
@@ -54,8 +54,22 @@ The additional sender-address error in `nl/core.ftl` is also reviewed and now na
 “Andere afzenderadressen”. All 11 catalog tests passed after that one-string follow-up. Dutch glossary notes
 record the field name, rule-processing terminology and digital-signature distinction.
 
-Current totals: 691 catalog entries and four help pages reviewed; 111 catalog values improved. Remaining:
-24,662 catalog entries and 988 help pages. `REVIEWED` remains unchanged until the full round is complete.
+### Dutch core, platform catalogs and first eight help topics
+
+Reviewed the remaining 448 core entries and all 256 platform/help-title entries, improving 111 more values.
+Corrected failure and count grammar, queued agent messages, key lookup/publication and decryption details,
+settings imports and temporary-attachment cleanup. Native Mac menu conventions are preserved.
+All 72 localization/help tests passed; pe-ffi regenerated installer/Linux metadata. The structural checker
+reports only intentionally removed marks. Capture its output to a file: piped console output can truncate.
+
+Reviewed eight help topics: add-account, gmail-outlook, main-window, layouts, read-messages, find-messages,
+conversations and organize-mail. Improved instructions and updated combined-folder order, unread totals,
+search indexing and quoted-message folding from actual app behavior. All 61 help tests passed afterward.
+
+Checkpoint `3eeae77a` saved the first 691 entries and round-1 archive.
+
+Current totals: 1,395 catalog entries and 12 help pages reviewed; 222 catalog values improved. Remaining:
+23,958 catalog entries and 980 help pages. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

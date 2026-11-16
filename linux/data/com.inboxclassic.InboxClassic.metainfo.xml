@@ -94,9 +94,9 @@
       az Outlook.com és a Microsoft 365 szolgáltatásba.
     </p>
     <p xml:lang="nl">
-      Inbox Classic leest en schrijft e-mail met de mappen links, de berichten bovenaan en het bericht daaronder, zoals
-      e-mailprogramma’s vroeger deden. Het werkt met elk IMAP- en SMTP-account en meldt zich via de browser aan bij
-      Outlook.com en Microsoft 365.
+      Inbox Classic is een e-mailprogramma met een vertrouwde indeling: mappen links, de berichtenlijst bovenaan en het
+      geselecteerde bericht eronder. Het werkt met IMAP- en SMTP-accounts. Bij Outlook.com en Microsoft 365 meld je je
+      aan via de browser.
     </p>
     <p xml:lang="pl">
       Inbox Classic czyta i pisze pocztę e-mail z folderami po lewej, wiadomościami u góry i treścią wiadomości poniżej,
@@ -202,10 +202,10 @@
       <li xml:lang="hu">Keresés, amely megtalálja a szavakat a tárgyban, a feladókban és címzettekben, a fájlnevekben és a szövegben, a Gmail keresőoperátoraival</li>
       <li xml:lang="hu">A válaszok elrejtik az általuk idézett korábbi üzeneteket</li>
       <li xml:lang="hu">A levelek internet nélkül is olvashatók; a jelszavak a kulcstartójában vannak</li>
-      <li xml:lang="nl">Elk bericht wordt opgeschoond getoond, zonder scripts, en afbeeldingen van internet alleen als je dat toestaat</li>
-      <li xml:lang="nl">Zoeken naar woorden in het onderwerp, de personen, de bestandsnamen en de tekst, met de zoekoperatoren van Gmail</li>
-      <li xml:lang="nl">Antwoorden vouwen de eerdere berichten die ze citeren weg</li>
-      <li xml:lang="nl">E-mail blijft offline leesbaar; wachtwoorden worden bewaard in je sleutelbos</li>
+      <li xml:lang="nl">Berichten worden weergegeven zonder scripts; afbeeldingen van internet worden alleen geladen als je dat toestaat</li>
+      <li xml:lang="nl">Zoeken in onderwerp, afzender, ontvangers, bijlagenamen en berichttekst, met de zoekoperatoren van Gmail</li>
+      <li xml:lang="nl">Geciteerde eerdere berichten in antwoorden worden ingeklapt</li>
+      <li xml:lang="nl">Gedownloade e-mail blijft offline leesbaar; wachtwoorden worden bewaard in de sleutelbos van je systeem</li>
       <li xml:lang="pl">Każda wiadomość jest wyświetlana oczyszczona, bez skryptów, a obrazy z internetu tylko wtedy, gdy na to pozwolisz</li>
       <li xml:lang="pl">Wyszukiwanie słów w temacie, nadawcach i odbiorcach, nazwach plików i treści, z operatorami Gmaila</li>
       <li xml:lang="pl">Odpowiedzi zwijają cytowane wcześniejsze wiadomości</li>
