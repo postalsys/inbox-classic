@@ -904,7 +904,8 @@ impl Core {
             Scope::Folder(folder) => folder,
             _ => return Ok(false),
         };
-        let special = self.store().folder(folder)?.info.special_use;
+        let (_, info) = self.store().folder_info(folder)?;
+        let special = info.special_use;
         Ok(matches!(
             special.as_deref().and_then(SpecialUse::from_flag),
             Some(SpecialUse::Sent | SpecialUse::Drafts)
@@ -1337,7 +1338,7 @@ impl Core {
     /// so it does not wait for a sync. [`Event::MessageReady`] follows, right away when it is cached, or
     /// [`Event::MessageFailed`] when it can not be downloaded
     pub fn open_message(&self, folder: FolderId, uid: u64) -> Result<()> {
-        let account = self.store().folder(folder)?.account_id;
+        let (account, _) = self.store().folder_info(folder)?;
         // a large download under way is not waited for: the click goes to a second reader
         let reader = match self.opening.large_download(account) {
             true => Kind::Spare,
@@ -1377,16 +1378,12 @@ impl Core {
             .message(folder, uid)?
             .map_or((None, false), |m| (m.info.internal_date, m.info.bounce));
         // with the store at hand: trusted() takes it again
-        let place = store.folder(folder)?;
-        let account = place.account_id;
+        let (account, place) = store.folder_info(folder)?;
         let trusted = authres::trusted(&store.account(account)?.settings);
         // a code in Junk E-mail may be bait, and one in Sent Items or Drafts is the user's own
-        let codes = !matches!(
-            place.info.special_use.as_deref(),
-            Some("\\Junk" | "\\Sent" | "\\Drafts")
-        );
+        let codes = !matches!(place.special_use.as_deref(), Some("\\Junk" | "\\Sent" | "\\Drafts"));
         // pictures load by themselves for the senders the user trusts, or every message's; never in Junk E-mail
-        let junk = place.info.special_use.as_deref() == Some("\\Junk");
+        let junk = place.special_use.as_deref() == Some("\\Junk");
         let always_pictures = store.always_load_pictures()?;
         // the list matters only where it can load pictures
         let trusted_senders = match junk || always_pictures {
@@ -2169,7 +2166,7 @@ impl Core {
 
     /// Whether messages of `folder` can be archived (see [`archivable`])
     pub fn can_archive(&self, folder: FolderId) -> Result<bool> {
-        Ok(archivable(&self.store().folder(folder)?.info))
+        Ok(archivable(&self.store().folder_info(folder)?.1))
     }
 
     /// Archives messages: out of the list now, into the account's Archive folder on the server (made when it has
@@ -2188,7 +2185,7 @@ impl Core {
 
     /// Whether `folder` can be emptied (see [`emptiable`])
     pub fn can_empty(&self, folder: FolderId) -> Result<bool> {
-        Ok(emptiable(&self.store().folder(folder)?.info))
+        Ok(emptiable(&self.store().folder_info(folder)?.1))
     }
 
     /// What to ask before emptying `folder`: "Empty Deleted Items?", a blank line, and that its 12 messages go for
@@ -2455,10 +2452,9 @@ pub fn is_message_file(path: &std::path::Path) -> bool {
 
 /// The Deleted Items folder a message of `folder` goes to in `store`, None when it is that folder or there is none
 pub(crate) fn trash_in(store: &Store, folder: FolderId) -> Result<Option<FolderId>> {
-    let account = store.folder(folder)?.account_id;
+    let (account, _) = store.folder_info(folder)?;
     Ok(store
-        .special_folder(account, "\\Trash")?
-        .map(|trash| trash.id)
+        .special_folder_id(account, "\\Trash")?
         .filter(|&trash| trash != folder))
 }
 

@@ -124,12 +124,36 @@ impl Store {
         statement.query_map([account], from_row)?.collect()
     }
 
+    /// A folder with its counts, which read its messages (on the folder index); [`Store::folder_info`] is the folder
+    /// alone
     pub fn folder(&self, id: FolderId) -> Result<Folder> {
-        self.db.query_row(
-            &format!("SELECT {COLUMNS} FROM folders f WHERE f.id = ?1"),
-            [id],
-            from_row,
-        )
+        self.db
+            .prepare_cached(&format!("SELECT {COLUMNS} FROM folders f WHERE f.id = ?1"))?
+            .query_row([id], from_row)
+    }
+
+    /// A folder's account and what it is, without its counts: for the calls of a click (which folder a message is
+    /// in, whether it is Sent Items or Junk E-mail), which should not count a big folder's messages each time
+    pub fn folder_info(&self, id: FolderId) -> Result<(AccountId, FolderInfo)> {
+        self.db
+            .prepare_cached(
+                "SELECT account_id, path, name, delimiter, flags, special_use, subscribed, selectable \
+                 FROM folders WHERE id = ?1",
+            )?
+            .query_row([id], |row| {
+                Ok((
+                    row.get(0)?,
+                    FolderInfo {
+                        path: row.get(1)?,
+                        name: row.get(2)?,
+                        delimiter: row.get(3)?,
+                        flags: crate::messages::split_flags(&row.get::<_, String>(4)?),
+                        special_use: row.get(5)?,
+                        subscribed: row.get(6)?,
+                        selectable: row.get(7)?,
+                    },
+                ))
+            })
     }
 
     pub fn find_folder(&self, account: AccountId, path: &str) -> Result<Option<Folder>> {
@@ -150,6 +174,14 @@ impl Store {
                 params![account, flag],
                 from_row,
             )
+            .optional()
+    }
+
+    /// The id of the folder of an account with this special-use flag, `\\Trash`, without its counts
+    pub fn special_folder_id(&self, account: AccountId, flag: &str) -> Result<Option<FolderId>> {
+        self.db
+            .prepare_cached("SELECT id FROM folders WHERE account_id = ?1 AND special_use = ?2 LIMIT 1")?
+            .query_row(params![account, flag], |row| row.get(0))
             .optional()
     }
 
@@ -221,6 +253,13 @@ mod tests {
             folders[0].id
         );
         assert!(store.special_folder(account, "\\Trash").unwrap().is_none());
+        assert_eq!(store.special_folder_id(account, "\\Sent").unwrap(), Some(folders[0].id));
+        assert_eq!(store.special_folder_id(account, "\\Trash").unwrap(), None);
+        assert_eq!(
+            store.folder_info(folders[0].id).unwrap(),
+            (account, folders[0].info.clone())
+        );
+        assert!(store.folder_info(-1).is_err(), "no such folder");
         assert_eq!((folders[1].info.depth(), folders[2].info.depth()), (0, 1));
         assert!(store.find_folder(account, "Old").unwrap().is_none());
 

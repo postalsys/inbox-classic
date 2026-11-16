@@ -204,11 +204,11 @@ impl Core {
         let mut accounts = BTreeSet::new();
         let mut colors = BTreeSet::new();
         for (folder, group) in by_folder(&picked) {
-            let info = store.folder(folder)?;
-            accounts.insert(info.account_id);
+            let (account, info) = store.folder_info(folder)?;
+            accounts.insert(account);
             summary.folders += 1;
-            summary.in_junk &= info.info.special_use.as_deref() == Some("\\Junk");
-            summary.archivable &= crate::archivable(&info.info);
+            summary.in_junk &= info.special_use.as_deref() == Some("\\Junk");
+            summary.archivable &= crate::archivable(&info);
             if crate::trash_in(&store, folder)?.is_none() {
                 summary.for_good += group.len() as u64;
             }
@@ -266,7 +266,7 @@ impl Core {
         for (folder, group) in &groups {
             let uids: Vec<u64> = group.iter().map(|p| p.at.uid).collect();
             let crosses = match target {
-                Some(account) => self.store().folder(*folder)?.account_id != account,
+                Some(account) => self.store().folder_info(*folder)?.0 != account,
                 None => false,
             };
             crossed |= crosses;
