@@ -787,11 +787,11 @@ pub fn text_dialog_sized(
 
 // ---- waiting for the core ----
 
-/// How long a read off the window thread runs before the window shows the busy cursor
-const BUSY_AFTER: std::time::Duration = std::time::Duration::from_millis(400);
+/// How long a read off the window thread runs before the window shows the busy cursor, as long as a list waits
+const BUSY_AFTER: std::time::Duration = std::time::Duration::from_millis(pe_core::LIST_LOADING_MS as u64);
 
 /// Waits for the `ReadDone` of `request`, a read off the window thread (a reply made, a draft, an attachment) for the
-/// window of `widget`: the busy cursor over the window when it takes longer than 400 ms; false when the window closed
+/// window of `widget`: the busy cursor over the window when it takes longer than `LIST_LOADING_MS`; false when the window closed
 /// first, which drops the read
 pub async fn wait_read(widget: &impl IsA<gtk::Widget>, request: u64) -> bool {
     let (send, answers) = async_channel::bounded::<bool>(2);

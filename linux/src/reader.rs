@@ -1101,7 +1101,7 @@ impl Reader {
 
     /// Attachment `index` opened with the system's program for it: a file that can run programs refused from its row,
     /// in the core's words; any other written by the core into a private folder of the user's on a thread of its own
-    /// (a large or encrypted message takes a while: its item dims after 400 ms), the note it gives shown first
+    /// (a large or encrypted message takes a while: its item dims after `LIST_LOADING_MS`), the note it gives shown first
     async fn open_attachment(&self, index: usize) {
         let Some(window) = self.window() else { return };
         let Some(file) = self.strip.file(index) else { return };
@@ -1114,7 +1114,8 @@ impl Reader {
         let done = Rc::new(Cell::new(false));
         let strip = self.strip.clone();
         let waited = done.clone();
-        glib::timeout_add_local_once(std::time::Duration::from_millis(400), move || {
+        let busy_after = std::time::Duration::from_millis(pe_core::LIST_LOADING_MS.into());
+        glib::timeout_add_local_once(busy_after, move || {
             if !waited.get() {
                 strip.busy(Some(index));
             }

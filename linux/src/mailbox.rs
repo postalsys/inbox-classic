@@ -5,11 +5,14 @@
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
-use pe_core::{Action, DraftKind, Event, FlagColor, MarkRead, MessageRef, Selected, SignInWith, Summary};
+use pe_core::{
+    Action, DraftKind, Event, FlagColor, MarkRead, MessageRef, Reselect, Reselected, Reselection, Selected, SignInWith,
+    Summary,
+};
 use pe_store::Folder;
 
 use crate::app::{run_command, shell, spawn};
@@ -41,14 +44,21 @@ type AfterList = Box<dyn FnOnce(&Mailbox)>;
 /// A load of the list asked of the core and not drawn yet ([`Mailbox::read_list`])
 struct Pending {
     request: u64,
-    /// The selection follows the messages to where they are in the new list
-    keep_selection: bool,
     /// The same list read again: its scrolling kept
     same: bool,
-    /// The message shown when it was asked for, whose row the load finds
-    place: Option<(i64, u64)>,
+    /// The user's changes of the selection when it was asked for ([`Mailbox::picks`]): another since, and the load
+    /// selected what is no longer selected
+    picks: u64,
     /// What waits for the new list's rows
     then: Vec<AfterList>,
+}
+
+/// A message the app chose to show (the start, Next Unread, a notification), selected once a load finds it
+#[derive(Clone, Copy, PartialEq)]
+struct Chosen {
+    message: MessageRef,
+    /// Not in the list (All Inboxes without it): shown in its own folder instead
+    elsewhere: bool,
 }
 
 /// An account as the window knows it
@@ -129,6 +139,12 @@ pub struct Mailbox {
     /// An Undo brought messages back: they are selected once their folder shows them, unless the user selected
     /// something else or another folder first
     undone: Cell<bool>,
+    /// The row selected in place of the selection once the list is read again after messages left it
+    after: Cell<Option<u64>>,
+    /// The message the app chose to show, selected once the list is read again
+    chosen: Cell<Option<Chosen>>,
+    /// How often the user changed the selection: a load asked for before the latest is asked for again
+    picks: Cell<u64>,
     /// What Edit > Undo says now
     undo_label: RefCell<Option<String>>,
     /// The selected draft opens once its source is fetched
@@ -137,8 +153,6 @@ pub struct Mailbox {
     reloading: Cell<bool>,
     mark_read: RefCell<Option<glib::SourceId>>,
     reload_later: RefCell<Option<glib::SourceId>>,
-    /// Itself, for the work a method of `&self` leaves for later (the list read again after a moment)
-    me: Weak<Mailbox>,
     /// The folder list's counts read again a moment after the first of a run of folder changes
     counts_later: RefCell<Option<glib::SourceId>>,
     /// What the list shows, kept by the core: the folder, the words of the Find box, the order, the grouping and the
@@ -154,6 +168,8 @@ pub struct Mailbox {
     all: RefCell<Option<Selected>>,
     /// The summary of Select All being counted off the window thread, 0 for none
     summary_request: Cell<u64>,
+    /// Select All's summary is the core's count, not the number alone shown meanwhile
+    all_counted: Cell<bool>,
     /// The actions asked of the core and not done yet, each with the row selected after it when it takes the
     /// selection out of the list
     actions: RefCell<HashMap<u64, Option<u32>>>,
@@ -287,8 +303,7 @@ impl Mailbox {
         });
         narrow_layout(&window, &parts, &folder_place, &status_bar, &list);
         folder_place.update();
-        let mailbox = Rc::new_cyclic(|me| Mailbox {
-            me: me.clone(),
+        let mailbox = Rc::new(Mailbox {
             window,
             title,
             folders,
@@ -333,6 +348,9 @@ impl Mailbox {
             refs: RefCell::default(),
             summary: RefCell::default(),
             undone: Cell::new(false),
+            after: Cell::new(None),
+            chosen: Cell::new(None),
+            picks: Cell::new(0),
             undo_label: RefCell::default(),
             open_when_ready: Cell::new(false),
             reloading: Cell::new(false),
@@ -345,6 +363,7 @@ impl Mailbox {
             page_requests: RefCell::default(),
             all: RefCell::default(),
             summary_request: Cell::new(0),
+            all_counted: Cell::new(false),
             actions: RefCell::default(),
             undone_bar,
             undone_text,
@@ -354,7 +373,7 @@ impl Mailbox {
         mailbox.connect_layout(&panes);
         mailbox.update_undo();
         mailbox.reload();
-        mailbox.reload_list(false);
+        mailbox.reload_list();
         mailbox
     }
 
@@ -456,7 +475,7 @@ impl Mailbox {
         };
         let changed = on(|this| {
             if !this.reloading.get() {
-                this.undone.set(false);
+                this.user_picked();
             }
             this.on_selection_changed();
         });
@@ -468,7 +487,7 @@ impl Mailbox {
         let sorted = on(|this| {
             this.view.borrow_mut().set_sort(this.list.sort());
             this.show_sort_checks();
-            this.reload_list(true);
+            this.reload_list();
         });
         self.list.connect_sort(sorted);
         let searched = on(|this| this.on_find_changed());
@@ -663,7 +682,7 @@ impl Mailbox {
             Some((_, None)) => {
                 self.reloading.set(false);
                 if self.choose_list(0, TreeList::None) {
-                    self.reload_list(false);
+                    self.reload_list();
                 }
             }
             None => self.reloading.set(false),
@@ -825,6 +844,8 @@ impl Mailbox {
             return;
         }
         self.undone.set(false);
+        self.after.set(None);
+        self.chosen.set(None);
         // an account has no messages of its own
         self.selected_account.set(if row.kind == TreeRowKind::Account {
             row.account
@@ -836,7 +857,7 @@ impl Mailbox {
         } else if by_user {
             self.load_list_after_paint(None);
         } else {
-            self.reload_list(false);
+            self.reload_list();
         }
         self.enable(Command::NewFolder, row.new_folder_account != 0);
         self.update_junk_button();
@@ -875,15 +896,15 @@ impl Mailbox {
         self.selection_shown();
     }
 
-    /// The list chosen loaded once the tree has drawn the row chosen (in place of one waiting), then the message
+    /// The list chosen loaded once the tree has drawn the row chosen (in place of one waiting), with the message
     /// `then` selected in it
     fn load_list_after_paint(self: &Rc<Self>, then: Option<MessageRef>) {
         let this = Rc::downgrade(self);
         self.list_load.after_paint(&self.folders.view, move || {
             let Some(this) = this.upgrade() else { return };
-            this.reload_list(false);
-            if let Some(message) = then {
-                this.select_in_list(message.folder, message.uid);
+            match then {
+                Some(message) => this.select_in_list(message.folder, message.uid),
+                None => this.reload_list(),
             }
         });
     }
@@ -892,7 +913,7 @@ impl Mailbox {
     /// the list or its selection)
     pub fn load_waiting_list(&self) {
         if self.list_load.waiting() {
-            self.reload_list(false);
+            self.reload_list();
         }
     }
 
@@ -989,60 +1010,43 @@ impl Mailbox {
 
     /// A contact's picture changed in the Address Book: the list draws its senders again (their keys change with it)
     pub fn senders_changed(&self) {
-        self.reload_list(true);
+        self.reload_list();
     }
 
     /// Preferences' senders' pictures in the Columns list turned on or off: kept, and the rows again
     pub fn set_list_pictures(&self, on: bool) {
         shell().settings.set_bool(settings::LIST_PICTURES, on);
         self.list.set_pictures(on);
-        self.reload_list(true);
+        self.reload_list();
     }
 
-    /// The list read again, the selection kept (`keep_selection`) or not
-    fn reload_list(&self, keep_selection: bool) {
-        self.read_list(keep_selection, false);
+    /// The list read again, what is selected selected again where it is then
+    fn reload_list(&self) {
+        self.read_list(false);
     }
 
     /// The same list read again after a change of its messages (a sync, the user's command): the selection and the
     /// scrolling kept
     fn refresh_list(&self) {
-        self.read_list(true, true);
+        self.read_list(true);
     }
 
-    /// The list read again off the window thread (the core's list load, drawn when `ListReady` comes): the
-    /// selection kept (`keep_selection`) or not, its scrolling kept when it is the `same` list. Another list dims the
-    /// one shown meanwhile; a refresh of the same one leaves it as it is.
-    fn read_list(&self, keep_selection: bool, same: bool) {
-        // a list chosen and waiting for the paint is another list than the one shown
-        let same = same && !self.list_load.waiting() && self.loading.borrow().as_ref().is_none_or(|p| p.same);
+    /// The list read again off the window thread (the core's list load, drawn when `ListReady` comes), the core
+    /// selecting again what is selected; its scrolling kept when it is the `same` list. Another list dims the one
+    /// shown meanwhile; a refresh of the same one leaves it as it is.
+    fn read_list(&self, same: bool) {
+        // a list chosen and waiting for the paint or being read is another list than the one shown
+        let same = same
+            && !self.list_load.waiting()
+            && !self.list_load.dimmed()
+            && self.loading.borrow().as_ref().is_none_or(|p| p.same);
         self.list_load.loading(!same);
         let core = &shell().core;
-        // the row the message shown has, which the core looks near first
-        let hint = self.list.selected().map(|(at, _)| u64::from(at));
         self.list.set_view(self.list_view());
-        let place = (keep_selection && !self.several() && self.reader.uid() != 0)
-            .then(|| (self.reader.folder(), self.reader.uid()));
-        let reselect = pe_core::Reselect {
-            selected: Selected::Listed(
-                place
-                    .map(|(folder, uid)| vec![MessageRef { folder, uid }])
-                    .unwrap_or_default(),
-            ),
-            hint,
-            ..pe_core::Reselect::default()
-        };
-        let asked = core.list_load(&self.list.view(), reselect);
+        let asked = core.list_load(&self.list.view(), self.reselect());
         // a load before it is not drawn (the core drops it when it is of the same view), nor the pages of the list
         // shown
-        let before = self.loading.borrow_mut().take();
-        let then = match before {
-            Some(before) => {
-                core.list_load_cancel(before.request);
-                before.then
-            }
-            None => Vec::new(),
-        };
+        let then = self.drop_load().map(|before| before.then).unwrap_or_default();
         self.cancel_pages();
         let Ok(request) = asked else {
             self.list_load.loaded();
@@ -1050,11 +1054,38 @@ impl Mailbox {
         };
         *self.loading.borrow_mut() = Some(Pending {
             request,
-            keep_selection,
             same,
-            place,
+            picks: self.picks.get(),
             then,
         });
+    }
+
+    /// What the core selects again in the list it loads: the message the app chose, else what is selected (Select
+    /// All, several messages, the one shown near its row), or the row after a removal, or what Undo brought back
+    fn reselect(&self) -> Reselect {
+        let mut reselect = Reselect {
+            after: self.after.get(),
+            restored: self.undone.get(),
+            ..Reselect::default()
+        };
+        if let Some(chosen) = self.chosen.get() {
+            reselect.selected = Selected::Listed(vec![chosen.message]);
+        } else if let Some(all) = &*self.all.borrow() {
+            reselect.selected = all.clone();
+        } else if self.several() {
+            reselect.selected = Selected::Listed(self.refs.borrow().clone());
+        } else if let Some(shown) = self.reader.message() {
+            reselect.selected = Selected::Listed(vec![shown]);
+            reselect.hint = self.list.selected().map(|(at, _)| u64::from(at));
+        }
+        reselect
+    }
+
+    /// The load asked for and not drawn yet dropped
+    fn drop_load(&self) -> Option<Pending> {
+        let pending = self.loading.borrow_mut().take()?;
+        shell().core.list_load_cancel(pending.request);
+        Some(pending)
     }
 
     /// `then` once the list asked for is drawn, or now when none is being read
@@ -1066,38 +1097,67 @@ impl Mailbox {
         then(self);
     }
 
-    /// The list loaded off the window thread is here: drawn when it is the newest asked for
+    /// The list loaded off the window thread is here: drawn when it is the newest asked for, asked for again when the
+    /// user chose other rows meanwhile; one that could not be read leaves the list as it is and says why
     fn list_ready(&self, request: u64) {
-        let ours = self.loading.borrow().as_ref().is_some_and(|p| p.request == request);
-        if !ours {
+        let pending = self.loading.borrow().as_ref().map(|p| (p.request, p.picks, p.same));
+        let Some((_, picks, same)) = pending.filter(|(asked, ..)| *asked == request) else {
+            return;
+        };
+        if picks != self.picks.get() {
+            self.read_list(same);
             return;
         }
         let Some(pending) = self.loading.borrow_mut().take() else {
             return;
         };
-        // a load that failed draws an empty list, as a read on the window thread did
-        let load = shell()
-            .core
-            .list_load_result(request)
-            .and_then(Result::ok)
-            .unwrap_or_default();
-        self.draw_list(pending, load);
+        match shell().core.list_load_result(request) {
+            Some(Ok(load)) => self.draw_list(pending, load),
+            failed => {
+                self.list_load.loaded();
+                if let Some(Err(why)) = failed {
+                    self.set_status(&why);
+                }
+            }
+        }
     }
 
     /// The list `load` read drawn: its counts, its rows from its first page (the others as they are scrolled to),
-    /// the columns its folders need, the selection where its messages are now
+    /// the columns its folders need, the rows the core selected again
     fn draw_list(&self, pending: Pending, load: pe_core::ListLoad) {
-        let core = &shell().core;
         self.total.set(load.total);
         self.unread.set(load.unread);
+        self.show_list_columns(load.lists_recipients);
+        let reselected = load.reselected;
+        self.reloading.set(true);
+        self.list.reset(
+            load.rows,
+            Some((load.offset, load.messages)),
+            &reselected.rows,
+            pending.same,
+        );
+        self.reloading.set(false);
+        // no longer dimmed: the selection drawn is the new list's
+        self.list_load.loaded();
+        self.show_empty_list();
+        self.show_counts();
+        self.reselected(reselected);
+        for then in pending.then {
+            then(self);
+        }
+    }
+
+    /// The commands and columns that follow the list: Expand and Collapse All, Empty Folder, Mark All Read, whom the
+    /// messages went to, their folder or account
+    fn show_list_columns(&self, lists_recipients: bool) {
         let view = self.list.view();
         let on = view.grouped() && view.active();
         self.enable(Command::ExpandAllThreads, on);
         self.enable(Command::CollapseAllThreads, on);
         // Deleted Items or Junk E-mail with messages
-        self.enable(Command::EmptyFolder, load.total > 0 && self.can_empty_folder());
+        self.enable(Command::EmptyFolder, self.total.get() > 0 && self.can_empty_folder());
         self.enable(Command::MarkAllRead, view.marks_all_read());
-        self.list.show_person_column(load.lists_recipients);
+        self.list.show_person_column(lists_recipients);
         let (title, values) = if view.gathers_accounts() {
             let names = self.accounts.borrow().iter().map(|a| a.title.clone()).collect();
             (t!(UiColAccount), names)
@@ -1105,48 +1165,58 @@ impl Mailbox {
             (t!(UiColFolder), Vec::new())
         };
         self.list.show_folder_column(view.several_folders(), &title, &values);
-        // Select All still the whole list while no mail came since; otherwise the messages it had, the newer rows not
-        // selected
-        let all = pending.keep_selection && self.all_again(&view);
-        // the selection follows the messages to where they are now, without a flicker of the reading pane
-        let positions: Vec<u64> = if !pending.keep_selection || all {
-            Vec::new()
-        } else if self.several() {
-            view.positions(core, &self.refs.borrow()).unwrap_or_default()
-        } else if self.reader.uid() == 0 {
-            Vec::new()
-        } else if pending.place == Some((self.reader.folder(), self.reader.uid())) {
-            load.reselected.rows.first().copied().into_iter().collect()
-        } else {
-            // another message chosen while the list was read: found where it is now
-            let hint = self.list.selected().map_or(u64::MAX, |(at, _)| u64::from(at));
-            view.index_of_near(core, self.reader.folder(), self.reader.uid(), hint)
-                .ok()
-                .flatten()
-                .into_iter()
-                .collect()
-        };
-        drop(view);
-        self.reloading.set(true);
-        self.list
-            .reset(load.rows, Some((load.offset, load.messages)), &positions, pending.same);
-        self.reloading.set(false);
-        // no longer dimmed: the selection drawn is the new list's
-        self.list_load.loaded();
-        self.show_empty_list();
-        self.show_counts();
-        if all {
-            // the same Select All, counted again: not a new one that would take mail stored since
-            let again = self.all.borrow().clone();
-            if let Some(again) = again {
-                self.select_every_row_as(again);
+    }
+
+    /// The selection the core found in the list drawn: Select All kept, the messages selected before (only their
+    /// numbers changed), or a new one (what Undo brought back, the row after a removal, the message the app chose),
+    /// focused; the message chosen and not in All Inboxes shown in its folder
+    fn reselected(&self, reselected: Reselected) {
+        self.after.set(None);
+        let chosen = self.chosen.take();
+        match (reselected.how, chosen) {
+            (Reselection::All, _) => self.select_every_row_as(reselected.selection),
+            (Reselection::Kept, None) => self.selection_kept(reselected.selection),
+            (
+                Reselection::None,
+                Some(Chosen {
+                    message,
+                    elsewhere: true,
+                }),
+            ) => self.show_in_folder(message),
+            (how, _) => {
+                if how == Reselection::Restored {
+                    self.undone.set(false);
+                }
+                if let Some(focus) = reselected.focus.and_then(|f| u32::try_from(f).ok()) {
+                    self.list.scroll_to(focus, gtk::ListScrollFlags::FOCUS);
+                }
+                if chosen.is_some() {
+                    self.list.focus();
+                }
+                self.on_selection_changed();
             }
-        } else if !self.select_restored() {
-            self.selection_reloaded();
         }
-        for then in pending.then {
-            then(self);
+    }
+
+    /// The messages selected before, where they are now: only their numbers changed, the message shown stays
+    fn selection_kept(&self, selection: Selected) {
+        let rows = self.list.selected_count();
+        if rows == 0 || (rows == 1 && self.reader.shows_summary()) {
+            self.on_selection_changed();
+            return;
         }
+        // Select All once mail came: the messages it had
+        self.forget_all();
+        if let Selected::Listed(refs) = selection
+            && rows > 1
+        {
+            *self.refs.borrow_mut() = refs;
+        }
+        *self.summary.borrow_mut() = shell().core.summary(&self.refs.borrow()).unwrap_or_default();
+        if rows > 1 {
+            self.reader.summary(&self.summary.borrow());
+        }
+        self.selection_shown();
     }
 
     /// A page of the list shown asked of the core, as its rows are drawn; not while another list is being read (its
@@ -1192,61 +1262,18 @@ impl Mailbox {
 
     /// The window closed: the loads and reads it waits for dropped
     fn cancel_loads(&self) {
-        let core = &shell().core;
-        if let Some(pending) = self.loading.borrow_mut().take() {
-            core.list_load_cancel(pending.request);
-        }
+        self.drop_load();
         self.cancel_pages();
-        let summary = self.summary_request.replace(0);
-        if summary != 0 {
-            core.read_cancel(summary);
-        }
+        self.cancel_summary();
     }
 
-    /// The list again with the selection kept: several messages stay the ones they were (only their numbers may have
-    /// changed); anything else as a change of the selection
-    fn selection_reloaded(&self) {
-        if self.several() && self.list.selected_count() > 1 {
-            *self.summary.borrow_mut() = shell().core.summary(&self.refs.borrow()).unwrap_or_default();
-            self.reader.summary(&self.summary.borrow());
-            self.selection_shown();
-        } else {
-            self.on_selection_changed();
-        }
-    }
-
-    /// The messages the last Undo brought back, or the store took back of a refused action, selected once the list has
-    /// them; false when it does not (yet)
-    fn select_restored(&self) -> bool {
-        if !self.undone.get() {
-            return false;
-        }
-        // the rows of the list as it was counted, the view it was read through
-        let restored = self.list.view().restored(&shell().core);
-        let positions = match restored {
-            Ok(Some(positions)) => positions,
-            // back after the list was counted: its rows are others than the core's, so it is read again first
-            Ok(None) => {
-                if let Some(me) = self.me.upgrade() {
-                    me.reload_soon();
-                }
-                return false;
-            }
-            Err(_) => return false,
-        };
-        let Some(&first) = positions.first() else {
-            return false;
-        };
-        // first: the selection set here is no choice of the user's that would end it
+    /// The user changed the selection: what the window was to select in its place is forgotten, and a load asked for
+    /// before is asked for again ([`Self::list_ready`])
+    fn user_picked(&self) {
+        self.picks.set(self.picks.get() + 1);
         self.undone.set(false);
-        self.list.select_positions(&positions);
-        if let Ok(first) = u32::try_from(first) {
-            self.list.scroll_to(first, gtk::ListScrollFlags::FOCUS);
-        }
-        // the focus on the first, then only as much scrolling as they need
-        self.list.reveal(&positions);
-        self.on_selection_changed();
-        true
+        self.after.set(None);
+        self.chosen.set(None);
     }
 
     /// In the middle of an empty list: why there is nothing, and what to do about it
@@ -1418,11 +1445,16 @@ impl Mailbox {
 
     /// The selection is no longer every message of the list: its summary is not waited for
     fn forget_all(&self) {
-        if self.all.borrow_mut().take().is_none() {
-            return;
+        if self.all.borrow_mut().take().is_some() {
+            self.cancel_summary();
         }
+    }
+
+    /// The summary of Select All being counted dropped, and a command waiting for it ([`Self::summary_counted`])
+    fn cancel_summary(&self) {
         let request = self.summary_request.replace(0);
         if request != 0 {
+            shell().cancel_request(request);
             shell().core.read_cancel(request);
         }
     }
@@ -1516,16 +1548,25 @@ impl Mailbox {
     /// The message `uid` of `folder` shown: its folder chosen in the tree (which ends a search), the message
     /// selected in the list
     pub fn show_message(&self, folder: i64, uid: u64) {
-        // All Inboxes (All Sent, All Drafts) stays when it has the message, its list up to date with it
+        let message = MessageRef { folder, uid };
+        // All Inboxes (All Sent, All Drafts) stays when it has the message, its list up to date with it; else the
+        // message is shown in its folder once the list is read
         if self.view.borrow().gathers_accounts() {
             if let Some(timer) = self.reload_later.borrow_mut().take() {
                 timer.remove();
             }
-            self.reload_list(true);
-            if self.select_in_list(folder, uid) {
-                return;
-            }
+            self.choose(Chosen {
+                message,
+                elsewhere: true,
+            });
+            return;
         }
+        self.show_in_folder(message);
+    }
+
+    /// `message` shown in its folder, chosen in the tree
+    fn show_in_folder(&self, message: MessageRef) {
+        let folder = message.folder;
         // selecting another folder ends a search; the folder selected already is not selected again, its search is
         // ended here
         if self.searching() && self.folder.get() == folder && self.listed.get() == TreeList::Folder {
@@ -1534,31 +1575,25 @@ impl Mailbox {
         if !self.folders.select(folder, false) || self.folder.get() != folder {
             return;
         }
-        self.select_in_list(folder, uid);
+        self.select_in_list(folder, message.uid);
     }
 
-    /// The row of the message `uid` of `folder` selected in the list, its conversation opened when it is a reply hidden
-    /// in it; false when it is not there
-    fn select_in_list(&self, folder: i64, uid: u64) -> bool {
-        self.load_waiting_list();
-        let core = &shell().core;
-        let revealed = self.view.borrow_mut().reveal(core, folder, uid).unwrap_or(false);
-        if revealed {
-            self.reload_list(true);
-        }
-        let index = self.view.borrow().index_of(core, folder, uid);
-        let Ok(Some(index)) = index else {
-            return false;
-        };
-        let Ok(index) = u32::try_from(index) else {
-            return false;
-        };
-        // selected once the list being read is drawn
-        self.after_list(move |this| {
-            this.list.select(index);
-            this.list.focus();
+    /// The row of the message `uid` of `folder` selected in the list once the core finds it there, its conversation
+    /// opened when it is a reply hidden in it
+    fn select_in_list(&self, folder: i64, uid: u64) {
+        self.choose(Chosen {
+            message: MessageRef { folder, uid },
+            elsewhere: false,
         });
-        true
+    }
+
+    /// The list read again for the message `chosen` (its conversation opened), selected and focused when it is there
+    fn choose(&self, chosen: Chosen) {
+        let MessageRef { folder, uid } = chosen.message;
+        let _ = self.view.borrow_mut().reveal(&shell().core, folder, uid);
+        self.after.set(None);
+        self.chosen.set(Some(chosen));
+        self.refresh_list();
     }
 
     /// The conversation `thread` opened (its other messages under its first) or closed, the selection kept on its
@@ -1573,14 +1608,14 @@ impl Mailbox {
             }
         };
         if changed {
-            self.reload_list(true);
+            self.reload_list();
         }
     }
 
     /// The + or - of a conversation's row: the conversation `thread` opened or closed
     pub fn toggle_thread(&self, thread: i64) {
         self.view.borrow_mut().toggle(thread);
-        self.reload_list(true);
+        self.reload_list();
     }
 
     /// View > Expand All Conversations (`open`) and Collapse All Conversations
@@ -1594,7 +1629,7 @@ impl Mailbox {
             }
         };
         if changed {
-            self.reload_list(true);
+            self.reload_list();
         }
     }
 
@@ -1602,7 +1637,7 @@ impl Mailbox {
     pub fn regroup(&self) {
         let changed = self.view.borrow_mut().set_grouped(grouped());
         if changed {
-            self.reload_list(true);
+            self.reload_list();
         }
     }
 
@@ -1643,11 +1678,11 @@ impl Mailbox {
         let row = if start.all_inboxes { ALL_INBOXES } else { start.folder };
         // the window shows with the tree first, then the list and its message
         if self.folders.select(row, true) {
-            let uid = start.uid.unwrap_or(0);
-            self.load_list_after_paint(Some(MessageRef {
+            let newest = start.uid.map(|uid| MessageRef {
                 folder: start.folder,
                 uid,
-            }));
+            });
+            self.load_list_after_paint(newest);
         }
     }
 
@@ -1661,7 +1696,7 @@ impl Mailbox {
         }
         *self.find_place.borrow_mut() = pe_core::Core::search_place(&text).unwrap_or_default();
         self.view.borrow_mut().set_text(&text);
-        self.reload_list(true);
+        self.reload_list();
         self.show_folder_name();
     }
 
@@ -1689,7 +1724,7 @@ impl Mailbox {
             return false;
         }
         self.reset_find();
-        self.reload_list(true);
+        self.reload_list();
         self.show_folder_name();
         self.list.focus();
         true
@@ -1900,6 +1935,7 @@ impl Mailbox {
         if self.all.borrow().is_none() {
             return;
         }
+        self.all_counted.set(true);
         *self.summary.borrow_mut() = summary;
         self.reader.summary(&self.summary.borrow());
         self.selection_shown();
@@ -2036,7 +2072,7 @@ impl Mailbox {
         shell().settings.set_bool(settings::HIDE_IGNORED, on);
         self.set_toggled(Command::HideIgnored, on);
         self.view.borrow_mut().set_hide_ignored(on);
-        self.reload_list(true);
+        self.reload_list();
     }
 
     /// View > Hide Read Messages turned on or off, for every folder: kept, and the list again (a message read while
@@ -2045,7 +2081,7 @@ impl Mailbox {
         shell().settings.set_bool(settings::HIDE_READ, on);
         self.set_toggled(Command::HideRead, on);
         self.view.borrow_mut().set_show(show_for(on));
-        self.reload_list(true);
+        self.reload_list();
     }
 
     /// View > Folder List turned on or off: kept, and the folder list beside the messages or in the folder button's
@@ -2215,7 +2251,7 @@ impl Mailbox {
         self.list.show_sort(sort);
         self.view.borrow_mut().set_sort(sort);
         self.show_sort_checks();
-        self.reload_list(true);
+        self.reload_list();
     }
 
     /// The check marks of View > Sort By: the field and the direction of the order now
@@ -2230,13 +2266,9 @@ impl Mailbox {
 
     /// After messages left the list: the one that took the place of the last of them selected, or the last one
     fn select_after_removal(&self, index: u32) {
-        self.reload_list(false);
-        self.after_list(move |this| {
-            let rows = this.list.rows();
-            if rows > 0 {
-                this.list.select(index.min(rows - 1));
-            }
-        });
+        self.chosen.set(None);
+        self.after.set(Some(index.into()));
+        self.reload_list();
     }
 
     /// The selected messages into Deleted Items (for good when they are in there, asked first)
@@ -2245,7 +2277,9 @@ impl Mailbox {
             return;
         }
         // whether any go for good, asked first: after Select All once the core has counted them
-        self.summary_counted().await;
+        if !self.summary_counted().await {
+            return;
+        }
         let question = self.summary.borrow().delete_question();
         if let Some(question) = question
             && !ui::confirm(&self.window, TITLE, &question, true).await
@@ -2265,7 +2299,9 @@ impl Mailbox {
         let Some(first) = first else {
             return;
         };
-        self.summary_counted().await;
+        if !self.summary_counted().await {
+            return;
+        }
         let summary = self.summary.borrow().clone();
         let request = crate::move_dialog::Request {
             title: summary.move_title(copy),
@@ -2359,24 +2395,6 @@ impl Mailbox {
         self.select_every_row_as(all);
     }
 
-    /// The list read again while Select All is its selection: whether it still is the whole list, counted again
-    /// (`ListView::select_all_again`); when it is not, the messages it had become the selection, to be found where
-    /// they are now
-    fn all_again(&self, view: &pe_core::ListView) -> bool {
-        let Some(mut all) = self.all.borrow().clone() else {
-            return false;
-        };
-        if view.select_all_again(&shell().core, &mut all).unwrap_or(false) {
-            *self.all.borrow_mut() = Some(all);
-            return true;
-        }
-        self.forget_all();
-        if let Selected::Listed(refs) = all {
-            *self.refs.borrow_mut() = refs;
-        }
-        false
-    }
-
     /// Every row selected, `all` (Select All of the list) the selection, its summary counted off the window thread
     fn select_every_row_as(&self, all: Selected) {
         let core = &shell().core;
@@ -2395,6 +2413,7 @@ impl Mailbox {
             ..Summary::default()
         };
         *self.all.borrow_mut() = Some(all.clone());
+        self.all_counted.set(false);
         if !self.reader.shows_summary() {
             self.clear_reader(false);
         }
@@ -2405,14 +2424,17 @@ impl Mailbox {
         }
     }
 
-    /// Once the summary of Select All is counted, when it is being counted (a few seconds at most)
-    async fn summary_counted(&self) {
-        for _ in 0..200 {
-            if self.summary_request.get() == 0 {
-                return;
-            }
-            glib::timeout_future(std::time::Duration::from_millis(25)).await;
+    /// Once the summary of Select All is counted, when it is being counted (its `ReadDone`, the busy pointer after a
+    /// moment): false when it could not be counted or the selection changed meanwhile, which drops the command
+    async fn summary_counted(&self) -> bool {
+        if self.all.borrow().is_none() {
+            return true;
         }
+        let request = self.summary_request.get();
+        if request != 0 && !ui::wait_read(&self.window, request).await {
+            return false;
+        }
+        self.all.borrow().is_some() && self.all_counted.get()
     }
 
     /// Edit > Undo: the last move, delete or junk taken back

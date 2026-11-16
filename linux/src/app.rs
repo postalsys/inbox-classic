@@ -284,6 +284,13 @@ impl Shell {
         self.requests.borrow_mut().remove(&request);
     }
 
+    /// A request dropped before its event: whoever waits for it hears false
+    pub fn cancel_request(&self, request: u64) {
+        if let Some(done) = self.requests.borrow_mut().remove(&request) {
+            let _ = done.try_send(false);
+        }
+    }
+
     fn request_done(&self, request: u64) {
         if let Some(done) = self.requests.borrow_mut().remove(&request) {
             let _ = done.try_send(true);
