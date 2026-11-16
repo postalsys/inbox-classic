@@ -16,14 +16,12 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Danish (da) help: all 1,334 catalog entries and 21 everyday help topics are reviewed.
-  Review the final 31 topics. First five security/encryption topics read alongside English, not yet edited.
-  All 84 late list-loading labels have been reviewed. Bulgarian, Czech, Dutch, Italian, Portuguese (Portugal),
-  Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are complete: each has
-  1,334 catalog entries and 52 help topics. Fourteen languages still have pending content,
-  with exact IDs/topics in the state file. A newly identified logo-cache followup affects 42 help files in
-  14 already-reviewed languages; these also require a consistency pass. No language is considered complete
-  merely because checks pass.
+- Danish (da) is complete: all 1,334 catalog entries and 52 help topics reviewed.
+  Next resolve the persistent-logo-cache context followup (42 exact paths in state), then review Greek (el)
+  and the remaining languages. Thirteen languages still have pending content. All 84 late list-loading
+  labels are reviewed. Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese,
+  Catalan, Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews. The logo-cache
+  followup still affects 14 previously reviewed languages and must be completed before the final audit.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
   not yet on `master` or `origin/master`. They are included in the isolated review checkout;
@@ -496,8 +494,18 @@ markup, platform branches and keyboard literals. Structural checks, inline joins
 hashes and git diff --check pass. Review HTML regenerated. No test suite was run per user instruction.
 Catalog completion checkpoint: `e1680ea3`.
 
-Current totals: 14,789 catalog entries and 545 help pages reviewed; 2,271 catalog values improved. Remaining:
-17,303 catalog entries and 707 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Danish help completed
+
+Reviewed the final 31 topics, including security/privacy, agent permissions, troubleshooting and reference.
+Corrected key ownership versus signature validity, persistent logo caching, domain authentication, attachment
+opening, queued agent sending and sign-in credentials. Error quotations match the catalogs; search aliases
+correctly describe all recipient fields. Preserved tags, attributes, platform branches and literal shortcuts.
+All 52 Danish help topics are reviewed. Structural checks, inline joins, exact inventory/file/source hashes
+and git diff --check pass. Review HTML regenerated. No test suite was run per user instruction.
+First-help checkpoint: `a0d3cb72`.
+
+Current totals: 14,789 catalog entries and 576 help pages reviewed; 2,271 catalog values improved. Remaining:
+17,303 catalog entries and 676 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

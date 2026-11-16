@@ -1,19 +1,18 @@
-<!--review--><h1>Billeder og sporing</h1>
+<h1>Billeder og sporing</h1>
 <p class="summary">Hvorfor billeder fra internettet blokeres, og hvordan du viser dem for en meddelelse eller en afsender, du stoler på.</p>
-<p>En meddelelse kan vise billeder, som afsenderen har liggende på internettet. Når et sådant billede hentes, får afsenderen at vide, at du har åbnet meddelelsen, hvornår og hvorfra. Derfor henter Inbox Classic dem ikke.</p>
+<p>En meddelelse kan vise billeder, som afsenderen har liggende på internettet. Når et sådant billede hentes, kan afsenderen se tidspunktet og din IP-adresse og dermed ofte udlede, at du har åbnet meddelelsen. Derfor blokerer Inbox Classic som udgangspunkt disse billeder.</p>
 <p>Billeder, der er sendt inde i selve meddelelsen, vises, da de ikke fortæller afsenderen noget.</p>
 <p>Når en meddelelse har billeder fra internettet, viser en bjælke hen over den, at nogle billeder er blokeret. Sådan ser du dem i en meddelelse, du stoler på:</p>
 <ul>
     <li><!--os:windows,mac-->Klik på bjælken.<!--/os--><!--os:linux-->Klik på <b data-text="gtk-download-pictures"></b> på bjælken.<!--/os--></li>
     <li>Eller vælg <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Det viser kun billederne i den meddelelse. Den næste meddelelse er blokeret igen.</p>
+<p>Tilladelsen gælder kun billederne i denne meddelelse. Billeder i andre meddelelser er fortsat blokeret.</p>
 <h2>Afsendere, du stoler på</h2>
 <p>Hvis du vil se en afsenders billeder hver gang, skal du <!--os:windows-->klikke på pilen yderst til højre på bjælken<!--/os--><!--os:mac-->klikke på pilen ved siden af <b data-text="cmd-pictures"></b> på bjælken<!--/os--><!--os:linux-->klikke på pilen ved siden af <b data-text="gtk-download-pictures"></b> på bjælken<!--/os-->. Vælg altid at hente billeder fra den afsender eller fra alle på afsenderens domæne.</p>
-<p>Deres billeder hentes så automatisk, men kun når din mailudbyder bekræfter, at meddelelsen virkelig kommer fra det domæne. En meddelelse, der kun udgiver sig for at være fra dem, spørger stadig, og bjælken siger, at afsenderen ikke kunne bekræftes. I <b data-text="folder-junk"></b> hentes billeder aldrig automatisk.</p>
+<p>Billederne hentes derefter automatisk, men kun hvis din mailudbyder bekræfter afsenderens domæne. Ellers kræver billederne stadig din tilladelse, og bjælken viser, at afsenderen ikke kunne bekræftes. I <b data-text="folder-junk"></b> hentes billeder aldrig automatisk.</p>
 <p>Hvis du vil fjerne en afsender fra listen, skal du bruge <b data-text="ui-trusted-senders-button"></b> under <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
 <h2>Billeder i alle meddelelser</h2>
-<p><b data-text="ui-pictures-always-option"></b> under <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os--> henter billederne i alle meddelelser, undtagen i <b data-text="folder-junk"></b>. Den er slået fra fra starten, fordi afsendere så kan se, hvornår du læser deres meddelelser.</p>
-<p>Et brandlogo ved siden af headeren er ikke et sporingsbillede. Det er godkendt af din mailserver, og det kommer fra brandet, ikke fra afsenderens billeder.</p>
+<p><b data-text="ui-pictures-always-option"></b> under <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os--> henter billederne i alle meddelelser, undtagen i <b data-text="folder-junk"></b>. Indstillingen er som udgangspunkt slået fra, fordi automatisk hentning kan afsløre, hvornår du læser en meddelelse.</p>
+<p>Et brandlogo ved siden af meddelelseshovedet håndteres særskilt fra billeder i meddelelsen og kræver mailserverens godkendelse. Hentede logoer gemmes og genbruges. Ved selve hentningen kan logoserveren se tidspunktet og din IP-adresse.</p>
 <nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

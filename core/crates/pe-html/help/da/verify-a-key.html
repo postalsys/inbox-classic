@@ -1,15 +1,14 @@
-<!--review--><h1>Bekræfte en kontakts nøgle</h1>
+<h1>Bekræft en kontakts nøgle</h1>
 <p class="summary">Sammenlign en nøgles fingeraftryk med ejeren for at være sikker på, at nøglen virkelig er ejerens.</p>
 <p>En nøgle kan komme alle steder fra: en meddelelse, en nøgleserver, en fil. Alle kan oprette en nøgle med din kontakts navn og adresse. Når du bekræfter nøglen, sikrer du dig, at den nøgle, du har, er den samme, som din kontakt har.</p>
 <p>Sådan bekræfter du en nøgle:</p>
 <ol>
     <li>Vælg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, marker kontaktens nøgle, og klik på <b data-text="ui-keys-verify"></b>. Du kan også klikke på knappen i kontaktens egenskaber i adressekartoteket.</li>
-    <li>Bed din kontakt om at læse fingeraftrykket af sin nøgle op for dig fra sit eget program, ansigt til ansigt eller i et opkald.</li>
-    <li>Hvis alle grupper på fire tegn er ens, skal du klikke på <b data-text="ui-verify-match"></b>. Nøglen vises som bekræftet.</li>
-    <li>Vinduet viser de adresser, der markeres. En nøgle kan angive en hvilken som helst adresse, så hvis en af dem ikke er din kontakts, skal du i stedet klikke på <b data-text="ui-verify-differ"></b>.</li>
+    <li>Bed kontakten om at læse nøglens fingeraftryk op fra sit eget program, personligt eller i telefonen. Kontrollér også, at alle adresser i vinduet tilhører kontakten.</li>
+    <li>Hvis alle grupper på fire tegn stemmer overens, og alle adresser tilhører kontakten, skal du klikke på <b data-text="ui-verify-match"></b>. Nøglen vises som bekræftet.</li>
+    <li>Hvis blot én adresse ikke tilhører kontakten, skal du også ved ens fingeraftryk klikke på <b data-text="ui-verify-differ"></b>.</li>
 </ol>
 <aside class="warning">Sammenlign ikke fingeraftrykket med et, der er sendt med e-mail. Den, der kan ændre nøglen i en meddelelse, kan også ændre fingeraftrykket.</aside>
 <p>Hvis fingeraftrykkene er forskellige, skal du klikke på <b data-text="ui-verify-differ"></b>. Den nøgle, du har, er ikke din kontakts: fjern den, og bed din kontakt om at sende sin nøgle igen.</p>
-<p>Signaturer lavet med en bekræftet nøgle vises med grønt. En nøgle, du ikke har bekræftet, virker stadig til kryptering, og dens signaturer vises med blåt.</p>
+<p>En gyldig digital signatur fra afsenderen vises med grønt, hvis du har bekræftet nøglens ejerskab, ellers med blåt. En nøgle uden bekræftet ejerskab kan stadig bruges til kryptering.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

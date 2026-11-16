@@ -1,16 +1,15 @@
-<!--review--><h1>Krypteringsfejl</h1>
-<p class="summary">Hvad du gør, når en server ikke tilbyder kryptering, eller kræver den, hvor den er slået fra.</p>
+<h1>Krypteringsfejl</h1>
+<p class="summary">Hvad du kan gøre, når serveren ikke tilbyder kryptering eller kræver en krypteret forbindelse.</p>
 <h2>»the server does not offer STARTTLS«</h2>
 <p>Kontoen er indstillet til STARTTLS, men serveren tilbød ikke kryptering. Inbox Classic stoppede, så din adgangskode blev ikke sendt.</p>
 <ol>
     <li>Åbn kontoens egenskaber under <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Sæt sikkerheden til SSL/TLS med port 993 til indgående mail eller 465 til udgående mail.</li>
+    <li>Kontrollér indstillingerne hos udbyderen. Hvis serveren understøtter SSL/TLS, bruges normalt port 993 til indgående mail og 465 til udgående mail.</li>
     <li>Klik på <b data-text="ui-ok"></b>.</li>
 </ol>
-<p>Hvis intet andet virker, kan serveren ikke bruges sikkert.</p>
+<p>En server uden kryptering kan ikke bruges sikkert over internettet.</p>
 <h2>»the server takes the password only over an encrypted connection«</h2>
-<p>Den udgående server er sat til <b data-text="ui-security-none"></b>. Din adgangskode er i orden. Skift <b data-text="ui-field-smtp-security"></b> til STARTTLS med port 587 eller SSL/TLS med port 465.</p>
+<p>Den udgående server er sat til <b data-text="ui-security-none"></b>. Denne fejl fortæller ikke, om adgangskoden er korrekt. Følg udbyderens anvisninger, og skift <b data-text="ui-field-smtp-security"></b> til STARTTLS med port 587 eller SSL/TLS med port 465.</p>
 <h2>Advarslen om en forbindelse uden kryptering</h2>
 <p>Når du vælger <b data-text="ui-security-none"></b>, advarer Inbox Classic om, at alle, der opsnapper din netværkstrafik, kan læse din adgangskode og dine meddelelser. Fortsæt kun for en server på din egen computer eller dit lokale netværk.</p>
 <nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

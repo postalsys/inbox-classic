@@ -1,14 +1,13 @@
-<!--review--><h1>De forbindelser, Inbox Classic opretter</h1>
-<p class="summary">Hvor Inbox Classic opretter forbindelse, og hvorfor, for de teknisk nysgerrige.</p>
+<h1>De forbindelser, Inbox Classic opretter</h1>
+<p class="summary">En teknisk oversigt over programmets netværksforbindelser og deres formål.</p>
 <ul>
-    <li><b>Dine mailservere</b>, via IMAP for at læse mail og SMTP for at sende den. Forbindelserne krypteres med TLS, og hver servers certifikat kontrolleres mod dem, dit system har tillid til. Inbox Classic afviser en server uden kryptering, medmindre du vælger <b data-text="ui-security-none"></b> og bekræfter.</li>
-    <li><b>Når du tilføjer en konto</b>, for at slå dens servere op. Inbox Classic læser dit domænes DNS-poster via DNS over HTTPS (Cloudflare, derefter Google), aldrig almindelig DNS. Programmet prøver også din udbyders autoconfig-fil og Thunderbirds liste over udbydere (ISPDB). For Exchange spørger det Microsoft Autodiscover, som kun får din adgangskode, når den beder om den via HTTPS. En server uden kryptering bliver aldrig valgt.</li>
-    <li><b>Login via browser</b>, med OAuth 2.0 og PKCE, hos Google, Microsoft eller udbyderen af din login-app. Browseren vender kun tilbage til Inbox Classic på denne computer.</li>
-    <li><b>Brandlogoer</b> (BIMI), fra brandets HTTPS-adresse, når meddelelsen ikke selv har logoet med, én gang hver gang Inbox Classic kører. Det sker kun, når din mailserver har godkendt meddelelsens DMARC-kontrol og logoet.</li>
-    <li><b>Billeder fra internettet</b>, kun når du beder om dem.</li>
+    <li><b>Dine mailservere</b>, via IMAP for at læse mail og SMTP for at sende den. Forbindelserne krypteres med TLS, og hver servers certifikat kontrolleres ved hjælp af systemets betroede certifikater. Inbox Classic afviser en server uden kryptering, medmindre du vælger <b data-text="ui-security-none"></b> og bekræfter.</li>
+    <li><b>Når du tilføjer en konto</b>, for at slå dens servere op. Inbox Classic læser dit domænes DNS-poster via DNS over HTTPS (Cloudflare, derefter Google), aldrig almindelig DNS. Programmet prøver også din udbyders autoconfig-fil og Thunderbirds liste over udbydere (ISPDB). For Exchange spørger det Microsoft Autodiscover, som kun får adgangskoden, hvis tjenesten anmoder om den via HTTPS. En server uden kryptering bliver aldrig valgt.</li>
+    <li><b>Login via browser</b>, med OAuth 2.0 og PKCE, hos Google, Microsoft eller udbyderen af din login-app. Resultatet af login sendes tilbage til Inbox Classic via en lokal adresse på denne computer.</li>
+    <li><b>Brandlogoer</b> (BIMI), fra brandets HTTPS-adresse, når meddelelsen ikke indeholder logoet, og et gemt logo ikke kan genbruges. Logoer gemmes og genbruges, også efter genstart. Det sker kun, når din mailserver har godkendt meddelelsens DMARC-kontrol og logoet.</li>
+    <li><b>Billeder fra internettet</b>, når du tillader det for meddelelsen, afsenderen eller domænet eller har slået automatisk hentning til i indstillingerne.</li>
     <li><b>Afmelding</b>, kun når du klikker på den. En anmodning med ét klik (RFC 8058) sendes kun, når listen har signeret meddelelsen med DKIM.</li>
     <!--os:mac--><li><b>Opdateringer</b>, fra inboxclassic.com, for at se, om der er kommet en ny version.</li><!--/os-->
 </ul>
-<p>Loginkoder tilbydes kun, når din udbyders Authentication-Results-header siger, at domænet har signeret meddelelsen (DKIM). Det kræver ingen forbindelse i sig selv.</p>
+<p>Loginkoder vises kun særskilt, når udbyderens Authentication-Results-header bekræfter afsenderens domæne via DKIM. Genkendelsen foregår lokalt og kræver ingen særskilt forbindelse.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->
