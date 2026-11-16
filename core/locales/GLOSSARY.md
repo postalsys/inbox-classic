@@ -221,6 +221,14 @@ Plurals: `[one]` 1, `[few]` 2 to 4, `*[other]` 0 and 5 or more; `[many]` (fracti
 - Folder names do not inflect: "(cíl: { $folder })", or "do složky { $folder }" only where `$folder` is always a real
   folder name; `their-folders` = "původní složky", `transfer-another-account` = "jiný účet".
 - Quotes „…“; keys Ctrl / Shift / Del as on Czech keyboards.
+- Rules process messages: "zpracovávat", not "třídit", because actions also include marking and notifications.
+- Use "digitální podpis" for cryptographic signatures and "podpis" for text appended to a message.
+  A valid signature and verified ownership of a key are separate states. "Otisk" identifies a key;
+  a displayed key name can instead be an address or fingerprint, so phrase around it without inflection.
+- Use "přihlašovací údaje" when passwords and browser/OAuth credentials are both meant. Transferred accounts
+  without credentials need sign-in again, not necessarily a password prompt.
+- Compose fields: "Kopie" and "Skrytá kopie" (Windows Alt+K / Alt+S). Address-book compose action:
+  "Napsat zprávu". Native letters with diacritics are valid menu access keys; check all shared menus/dialogs.
 
 ### Dansk (da)
 

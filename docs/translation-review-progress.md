@@ -16,7 +16,8 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Czech (cs): 1,331 catalog entries and 52 help topics remain; its three list-loading labels are reviewed.
+- Resume with Czech (cs): 701 catalog entries and 52 help topics remain. All 626 app entries, four shared
+  Windows controls and three list-loading labels are reviewed.
   All 84 late list-loading labels have been reviewed. Bulgarian, Dutch, Italian, Portuguese (Portugal),
   Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are complete: each has
   1,334 catalog entries and 52 help topics. Fifteen languages still have pending content,
@@ -415,8 +416,17 @@ instruction. First-help checkpoint: `fdd65857`.
 Fresh upstream check: master remains `fd7feeaf`; local/remote wave1 advanced to `8df686a4`, whose change since
 `e932e78f` has no catalog/help edits. The final late-arrival audit remains required after the current queue.
 
-Current totals: 12,127 catalog entries and 472 help pages reviewed; 1,884 catalog values improved. Remaining:
-19,965 catalog entries and 780 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Czech shared UI catalog
+
+Reviewed 626 app entries and four shared Windows controls, improving 66 values. Corrected rule processing,
+queued messages, provider/name grammar, digital signatures, multiple key addresses and sign-in credentials in
+settings transfer. Resolved shortcut collisions across 32 actual menus/dialogs, including context-menu variants.
+Recorded Czech terminology and Kopie / Skrytá kopie shortcuts. Structural checks, inventory/source/file hashes
+and git diff --check pass. Review HTML regenerated. Test suite not run per user instruction.
+Bulgarian completion checkpoint: `7ff487c3`.
+
+Current totals: 12,757 catalog entries and 472 help pages reviewed; 1,950 catalog values improved. Remaining:
+19,335 catalog entries and 780 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

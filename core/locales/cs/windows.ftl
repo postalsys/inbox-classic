@@ -30,8 +30,7 @@ win-list-loading = Načítání...
 
 ## Buttons and words used in many windows
 
-# review: new
-win-delete-button = &Odstranit
+win-delete-button = Odst&ranit
 # review: new
 win-find-label = &Najít:
 # review: new
@@ -58,8 +57,7 @@ win-format-underline = Podtržené ({ $ctrl }+U)
 win-format-link = Hypertextový odkaz ({ $ctrl }+K)
 # review: new
 win-show-cc = &Kopie
-# review: new
-win-show-bcc = &Skrytá
+win-show-bcc = &Skrytá kopie
 # review: new
 win-signature-title = Podpis: { $account }
 
@@ -151,10 +149,8 @@ win-dont-send = &Neodesílat
 win-forget-program-ask = Odebrat tento program, jeho oprávnění a historii činnosti jeho agentů? Při příštím připojení budete znovu požádáni o svolení.
 # review: new
 win-clear-log-ask = Vymazat historii činnosti agentů? Změny provedené agenty se tím nevrátí zpět.
-# review: new
-win-agent-programs = &Programy, jejichž agenti požádali o přístup k vaší poště:
-# review: new
-win-change = &Změnit...
+win-agent-programs = Programy, jejic&hž agenti požádali o přístup k vaší poště:
+win-change = Zm&ěnit...
 # review: new
 win-what-agents-did = Či&nnost agentů:
 # review: new
