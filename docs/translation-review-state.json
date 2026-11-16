@@ -697,18 +697,7 @@
     },
     "es": {
       "pending_catalogs": {},
-      "pending_help": [
-        "all-inboxes.html",
-        "attachments.html",
-        "encrypted-and-signed-mail.html",
-        "encryption-keys.html",
-        "folders.html",
-        "main-window.html",
-        "manage-accounts.html",
-        "move-computer.html",
-        "organize-mail.html",
-        "verify-a-key.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "es-app-2026-11-16",
@@ -1000,6 +989,51 @@
             "Reviewed all 143 core entries and four platform/help labels; improved 63 core values.",
             "Clarified key ownership, unavailable private keys, address lists, import results and temporary attachment cleanup. Standardized contraseña and añadir."
           ]
+        },
+        {
+          "id": "es-help-2026-11-16",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "all-inboxes.html",
+            "attachments.html",
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "folders.html",
+            "main-window.html",
+            "manage-accounts.html",
+            "move-computer.html",
+            "organize-mail.html",
+            "verify-a-key.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/es/all-inboxes.html": "a4fd2994986c9db7f48ce4ca5393e97e413dd8d5fa7dabf8776cf6c036f00dfb",
+            "core/crates/pe-html/help/es/attachments.html": "9429ae3e2c3e9faa18e066aa912a8989ddc01b209d90aeecc45b17cd18811c40",
+            "core/crates/pe-html/help/es/encrypted-and-signed-mail.html": "d14032f56a824a3b025a4172d9995e37d2dd2a191a5b49a5adbeeae0950d17f0",
+            "core/crates/pe-html/help/es/encryption-keys.html": "46c4d2aca00b6d57285f11394c480d775f6030b9361e6b881a3ae4cac304fa9a",
+            "core/crates/pe-html/help/es/folders.html": "18c1a6118811d38cc51f2f54abae21735ae3d9c4bc4b9f09b6dee148a326d335",
+            "core/crates/pe-html/help/es/main-window.html": "7c3230239d6e05ccbed79a4284e7291efbd31e941144c4e5da56ac4ac3262843",
+            "core/crates/pe-html/help/es/manage-accounts.html": "04476b76b9760dcdbb35710346e1a0e28914e275805ccb0a20da2b819b1c09af",
+            "core/crates/pe-html/help/es/move-computer.html": "87d3acdc3134df7b555057d293f48c0bb681e837b7955c45b8c38871e5e5e5be",
+            "core/crates/pe-html/help/es/organize-mail.html": "4971b9f582ebae68b8159bc729b4654f3a7b32d71c374e8cb64e110d9cf29f1a",
+            "core/crates/pe-html/help/es/verify-a-key.html": "682b32ae032fe38fc0f2f99d42711ec1b3e0d22fb712a936e4e67c4c399a7bf8"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/all-inboxes.html": "4c79d7df5307fffeb3316cf05acae6e4f8005d7a220d242268a8d233b138eb70",
+            "core/crates/pe-html/help/en/attachments.html": "329cc3b62eaf4f06e0d110b69abe93b565b2239202850dae589fdca215b6c301",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "cc7f61133fda39f4130436a0ebf3031e6ffce3e7aa8dbb7c45a2a306840eeb04",
+            "core/crates/pe-html/help/en/encryption-keys.html": "67693bc89f3d12b183ff3a86f11495213a2f58ea0c9e16dea30649d931621d6a",
+            "core/crates/pe-html/help/en/folders.html": "4d74130d29ed25e2eb9042e1470853c7f12566664217927e09c4dcd45f844b3c",
+            "core/crates/pe-html/help/en/main-window.html": "93fecb9e210fc6535ad3eb857a182286f61eacd7b08c84b9ce7ad447fdc6aad0",
+            "core/crates/pe-html/help/en/manage-accounts.html": "65950a65e86fac8b79d7d22108ac246c0954a88796e4f4a32f5f91037b7b41b2",
+            "core/crates/pe-html/help/en/move-computer.html": "46c0a64f8f03831e3419d8ae212532edce46e436292a77b354df77f5fd10f8f0",
+            "core/crates/pe-html/help/en/organize-mail.html": "ada25d8118b4453fe32380c1662bbc61199f2dd1908e8ccafc494f90209588d4",
+            "core/crates/pe-html/help/en/verify-a-key.html": "2962fdcfe4f3a4e3dbbaf1122459b0a6c291454f8ec99f8b4c3bd50a30c4e4dc"
+          },
+          "validation": "Passed all 68 pe-i18n/pe-html tests, help markup/keyboard preservation, git diff --check, completed-file/source hash checks and review inventory reconciliation (724 entries and 210 help lines).",
+          "notes": [
+            "Reviewed all 14 marked passages across ten help topics; rewrote key management, verification, encrypted mail and settings migration in natural Spanish.",
+            "Corrected folder layout, hidden unread counts, attachment cleanup/platform behavior and verification order. Preserved tags, links, control references, platform branches and keyboard names."
+          ]
         }
       ]
     },
@@ -1272,5 +1306,5 @@
       "completed_batches": []
     }
   },
-  "next_batch": "Spanish ten help topics, then French UI, core/platform catalogs and help."
+  "next_batch": "French app.ftl (94 entries), core/platform catalogs (147 entries) and ten help topics, then final English/source consistency pass."
 }

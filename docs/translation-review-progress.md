@@ -14,7 +14,7 @@ behavior and surrounding controls to establish meaning. Preserve the original sc
 - Initial inventory: 241 marked messages and 14 marked help passages per language (de, es, et, fr), 964 messages
   and 56 help passages altogether. Each language has ten affected help pages. Other languages named in the guide
   are not present in this checkout. `scripts/check-language.mjs` is also absent here.
-- Current next step: Spanish help (ten pages), then French catalogs and help.
+- Current next step: French `app.ftl` (94 entries), then core/platform catalogs and ten help pages.
   Estonian is complete for the starting snapshot. Spanish and French follow. Review existing wording outside
   marked entries when needed for context or terminology consistency.
 
@@ -113,7 +113,17 @@ errors, address lists, key discovery, stored credentials, import results, missin
 attachment cleanup. Removed all Spanish catalog review marks. All 68 tests, catalog invariants and
 `git diff --check` passed.
 
-Next: Spanish help (ten pages), then French. Estonian and German
+Checkpoint commit: `fd172449`.
+
+### es-help-2026-11-16
+
+Reviewed all 14 marked passages across ten Spanish help pages. Rewrote the new encryption, verification and
+migration topics; corrected attachment handling, combined folder views and unread counts. Preserved all tags,
+links, control references, platform branches and keyboard names. All 68 tests and `git diff --check` passed;
+724 unmarked catalog entries and 210 help lines match the completed inventory. All completed file/source
+hashes match. Regenerated `build/i18n-review.html`.
+
+Next: French catalogs and help, then the final English/source consistency pass. Estonian, German and Spanish
 catalog/help review is complete for the starting snapshot. Revisit it only for newly
 arriving changes or the final cross-language consistency checks below.
 
