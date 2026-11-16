@@ -189,10 +189,19 @@ count agreement, undo descriptions, queued agent logs, credential transfer, key 
 attachment cleanup and native platform wording. All 1,331 catalog entries are reviewed, with 224 values improved.
 All 75 localization/help tests pass. Structural checks, inventory/hash reconciliation and git diff --check pass.
 Generated installer and Linux store text rebuilt and inspected. UI checkpoint: `8b2ed15c`.
-All 52 Brazilian Portuguese help topics remain pending.
+Catalog completion checkpoint: `ce700774`.
 
-Current totals: 5,388 catalog entries and 160 help pages reviewed; 849 catalog values improved. Remaining:
-26,620 catalog entries and 1,092 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Brazilian Portuguese first 21 help topics
+
+Reviewed account setup, window layouts, reading/searching/conversations, organization/deletion, folders,
+writing/replies/signatures, attachments, files, drafts/outbox, contacts, notifications, combined folders,
+account management/transfer and provider sign-in. Corrected obsolete folder navigation, Cco terminology,
+domain-authentication claims, temporary-attachment lifetime and transferred credentials. Preserved all
+markup, control references, keyboard tags and platform branches. All 75 tests, structural checks,
+inventory/hash reconciliation, inline spacing and git diff --check pass. The remaining 31 topics are pending.
+
+Current totals: 5,388 catalog entries and 181 help pages reviewed; 849 catalog values improved. Remaining:
+26,620 catalog entries and 1,071 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

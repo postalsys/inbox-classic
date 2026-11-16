@@ -1,4 +1,4 @@
-<!--review--><h1>Alterar, ordenar e remover contas</h1>
+<h1>Alterar, ordenar e remover contas</h1>
 <p class="summary">Renomeie uma conta, altere as configurações ou a senha, coloque as contas na ordem que preferir, ou remova uma.</p>
 <h2>Alterar uma conta</h2>
 <ol>
@@ -8,23 +8,23 @@
 </ol>
 <ul>
     <li><!--os:windows,mac--><b data-text="ui-field-account-name"></b><!--/os--><!--os:linux--><b data-text="gtk-account-name-title"></b><!--/os--> é o nome da conta na lista de pastas, como <i>Gmail</i> ou <i>Trabalho</i>.</li>
-    <li><!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os--> é o nome que as pessoas para quem você escreve veem.</li>
+    <li><!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os--> é o nome que os destinatários veem nas suas mensagens.</li>
     <li>Para manter a senha, deixe <b data-text="ui-field-password"></b> vazio.</li>
     <li>Uma conta que faz login pelo navegador indica qual aplicativo de login ela usa.</li>
-    <li><b data-text="ui-field-other-addresses"></b> indica outros endereços a partir dos quais você envia com esta conta, como um alias, separados por vírgulas: <code>Vendas &lt;vendas@example.com&gt;</code> ou só o endereço. <b data-text="ui-field-from"></b> oferece então cada um deles na conta.</li>
+    <li><b data-text="ui-field-other-addresses"></b> permite informar outros endereços de envio desta conta, como aliases, separados por vírgulas: <code>Vendas &lt;vendas@example.com&gt;</code> ou só o endereço. <b data-text="ui-field-from"></b> passa a oferecer esses endereços como opções de remetente.</li>
 </ul>
 <p><!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os--> na mesma janela adiciona outra conta.</p>
 <h2>Ordenar as contas</h2>
-<p>Com duas ou mais contas, arraste uma conta na lista de pastas, ou a linha dela em <b data-text="ui-all-inboxes"></b>, para cima ou para baixo de outra. Uma linha mostra para onde vai. Ou clique na conta com o botão direito do mouse e escolha <b data-text="ui-account-move-up"></b> ou <b data-text="ui-account-move-down"></b>. A lista de pastas e as linhas em <b data-text="ui-all-inboxes"></b> seguem ambas a nova ordem.</p>
+<p>Com duas ou mais contas, arraste uma conta na lista de pastas, ou a linha dela em <b data-text="ui-all-inboxes"></b>, para cima ou para baixo de outra. Uma linha indica a nova posição. Ou clique na conta com o botão direito do mouse e escolha <b data-text="ui-account-move-up"></b> ou <b data-text="ui-account-move-down"></b>. A lista de pastas e as linhas em <b data-text="ui-all-inboxes"></b> passam a seguir a nova ordem.</p>
 <h2>O menu da conta</h2>
-<p>Com duas ou mais contas, clique em uma conta da lista de pastas com o botão direito do mouse para ter estes comandos. Com uma só conta, a lista de pastas não tem uma linha para ela: <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> e o menu <b data-text="menu-tools"></b> têm esses comandos.</p>
+<p>Com duas ou mais contas, clique em uma conta da lista de pastas com o botão direito do mouse para acessar os comandos abaixo. Com uma só conta, a lista de pastas não tem uma linha para ela: <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> e o menu <b data-text="menu-tools"></b> têm esses comandos.</p>
 <ul>
     <li><b data-text="ui-account-sync"></b> verifica só essa conta.</li>
     <li><b data-text="cmd-mark-all-read"></b> marca todas as pastas da conta como lidas.</li>
     <li><b data-text="cmd-new-folder"></b>, <b data-text="ui-account-properties"></b>, <b data-text="ui-account-move-up"></b> e <b data-text="ui-account-move-down"></b>.</li>
 </ul>
 <h2>Remover uma conta</h2>
-<aside class="note">Remover uma conta exclui deste computador os e-mails baixados para ela e a senha salva. Os e-mails no servidor continuam lá.</aside>
+<aside class="note">Remover uma conta exclui deste computador os e-mails baixados para ela e as credenciais de login salvas. Os e-mails no servidor são preservados.</aside>
 <p>Para remover uma conta:</p>
 <ol>
     <li>Escolha <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
@@ -32,4 +32,3 @@
     <li>Confirme. A conta é removida da lista de pastas.</li>
 </ol>
 <nav class="related"><a href="topic:add-account"></a> <a href="topic:all-inboxes"></a> <a href="topic:signatures"></a></nav>
-<!--/review-->
