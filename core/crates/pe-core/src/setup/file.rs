@@ -462,9 +462,25 @@ impl std::fmt::Debug for SetupFile {
 }
 
 impl SetupFile {
-    /// Each part it holds with what it holds in words, in the order the windows list them: (part, "2 accounts")
+    /// Each part it holds something in, with what it holds in words, in the order the windows list them:
+    /// (part, "2 accounts"); a part with nothing in it (no rules, no trusted senders) is not offered for import
     pub fn part_lines(&self) -> Vec<(Parts, String)> {
-        part_lines(self.parts, &self.counts)
+        let c = &self.counts;
+        let empty = |part: Parts| match part {
+            Parts::SETTINGS => c.settings == 0,
+            Parts::PREFERENCES => c.preferences == 0,
+            Parts::ACCOUNTS => c.accounts == 0,
+            Parts::CONTACTS => c.contacts == 0 && c.groups == 0,
+            Parts::KEYS => c.own_keys == 0 && c.contact_keys == 0,
+            Parts::RULES => c.rules == 0,
+            Parts::TRUSTED_SENDERS => c.trusted_senders == 0,
+            // the switches of the built-in sign-in apps are always there
+            _ => false,
+        };
+        part_lines(self.parts, c)
+            .into_iter()
+            .filter(|(part, _)| !empty(*part))
+            .collect()
     }
 }
 

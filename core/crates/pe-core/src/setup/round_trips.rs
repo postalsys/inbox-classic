@@ -645,3 +645,28 @@ fn a_different_key_for_an_address_waits_for_the_user() {
         "{summary:?}"
     );
 }
+
+/// A part with nothing in it is written (the export says "0 rules") but not offered for import
+#[test]
+fn empty_parts_are_not_offered_for_import() {
+    let dir = TempDir::new("setup-empty");
+    let core = opened(&dir);
+    let path = dir.path().join("empty.inboxclassic");
+    let written = core.export_setup(&path, Parts::ALL, None, &[]).unwrap();
+    assert!(written.iter().any(|(part, _)| *part == Parts::RULES), "{written:?}");
+    let file = core.read_setup(&path, None).unwrap();
+    let offered: Vec<Parts> = file.part_lines().into_iter().map(|(part, _)| part).collect();
+    for part in [
+        Parts::ACCOUNTS,
+        Parts::CONTACTS,
+        Parts::KEYS,
+        Parts::RULES,
+        Parts::TRUSTED_SENDERS,
+    ] {
+        assert!(!offered.contains(&part), "{part:?} in {offered:?}");
+    }
+    assert!(
+        offered.contains(&Parts::SIGN_IN_APPS),
+        "the built-in sign-in apps' switches"
+    );
+}
