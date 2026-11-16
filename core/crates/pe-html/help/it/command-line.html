@@ -1,0 +1,17 @@
+<!--review--><h1>Opzioni della riga di comando</h1>
+<p class="summary">Opzioni per avviare Inbox Classic da un terminale, per i test e per gli agenti IA.</p>
+<p>Avvia il programma <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> con queste opzioni:</p>
+<table>
+    <tr><th>Opzione</th><th>Effetto</th></tr>
+    <tr><td><code>--store &lt;file&gt;</code></td><td>Usa un altro archivio della posta, per esempio uno per i test</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Conserva le password solo per questa esecuzione, mai nell’archivio delle password del sistema</td></tr>
+    <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Accetta solo il certificato del server contenuto in questo file (PEM o DER), per un server di prova con un certificato autofirmato</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Scrive in questo file la pagina di un accesso tramite browser invece di aprire il browser</td></tr>
+    <tr><td><code>--language &lt;code&gt;</code></td><td>Mostra le finestre in questa lingua per questa esecuzione, per esempio <code>de</code></td></tr>
+    <tr><td><code>--background</code></td><td>Si avvia senza la finestra</td></tr>
+    <tr><td><code>--mcp</code></td><td>Collega un agente IA a Inbox Classic. Lo avvia il programma dell’agente, non tu</td></tr>
+    <tr><td><code>--version</code></td><td>Mostra la versione ed esce</td></tr>
+</table>
+<p>Un link <code>mailto:</code> passato come argomento apre un nuovo messaggio, come fa un link di posta elettronica.</p>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

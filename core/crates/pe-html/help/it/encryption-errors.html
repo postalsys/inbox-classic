@@ -1,0 +1,15 @@
+<!--review--><h1>Errori di crittografia</h1>
+<p class="summary">Cosa fare quando un server non offre la crittografia, o la richiede dove è disattivata.</p>
+<h2>“the server does not offer STARTTLS”</h2>
+<p>L’account è impostato su STARTTLS, ma il server non ha offerto la crittografia. Inbox Classic si è fermato, quindi la password non è stata inviata.</p>
+<ol>
+    <li>Apri le proprietà dell’account in <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Imposta la sicurezza su SSL/TLS, con la porta 993 per la posta in arrivo o 465 per la posta in uscita.</li>
+    <li>Fai clic su <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Se non funziona nient’altro, il server non si può usare in modo sicuro.</p>
+<h2>“the server takes the password only over an encrypted connection”</h2>
+<p>Il server della posta in uscita è impostato su <b data-text="ui-security-none"></b>. La password è corretta. Cambia <b data-text="ui-field-smtp-security"></b> in STARTTLS con la porta 587, oppure in SSL/TLS con la porta 465.</p>
+<h2>L’avviso su una connessione senza crittografia</h2>
+<p>Quando scegli <b data-text="ui-security-none"></b>, Inbox Classic avverte che chiunque intercetti il traffico della tua rete può leggere la password e i messaggi. Continua solo per un server sul tuo computer o sulla tua rete locale.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav><!--/review-->

@@ -1,0 +1,17 @@
+<!--review--><h1>Sleutels voor versleuteling</h1>
+<p class="summary">Maak een sleutel om je berichten te ondertekenen en versleutelde e-mail te ontvangen, en bewaar de sleutels van je contactpersonen.</p>
+<p>Inbox Classic ondertekent en versleutelt e-mail met OpenPGP-sleutels. Je eigen sleutel bestaat uit twee helften: een openbare sleutel die je aan anderen geeft, en een privésleutel die op je computer blijft. Met de sleutels van je contactpersonen controleer je hun handtekeningen en versleutel je e-mail aan hen.</p>
+<p>Zo maak je je sleutel:</p>
+<ol>
+    <li>Kies <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> en klik op <b data-text="ui-keys-new"></b>.</li>
+    <li>Kies het account en klik op <b data-text="ui-keys-new-make"></b>. De sleutel wordt gebruikt voor het adres van het account en voor de andere adressen ervan.</li>
+    <li>Klik op <b data-text="ui-keys-backup-now"></b> en kies een wachtwoordzin. Bewaar het bestand en de wachtwoordzin op twee verschillende veilige plekken.</li>
+</ol>
+<aside class="warning">Zonder back-up kan je sleutel niet worden hersteld als deze computer verloren gaat of opnieuw wordt ingesteld, en kan e-mail die ermee is versleuteld niet meer worden gelezen.</aside>
+<h2>Sleutels blijven beschermd zonder wachtwoordzinnen</h2>
+<p>Je privésleutels worden beschermd door een sleutel in <!--os:windows-->Referentiebeheer<!--/os--><!--os:mac-->de sleutelhanger<!--/os--><!--os:linux-->de sleutelbos van het systeem<!--/os-->, dus je typt nooit een wachtwoordzin om ze te gebruiken. Je kiest alleen een wachtwoordzin voor een back-up. Staat je sleutel op vergrendeld, dan is die bescherming opnieuw ingesteld: klik op <b data-text="ui-keys-import"></b> en kies de back-up.</p>
+<h2>Sleutels toevoegen</h2>
+<p>Klik op <b data-text="ui-keys-import"></b> om een sleutel uit een bestand toe te voegen, zoals een sleutel die een contactpersoon je stuurde of een back-up van je eigen sleutel. Een privésleutel die met een wachtwoordzin is beveiligd, vraagt daar één keer om. Daarna vraagt Inbox Classic of een geïmporteerde eigen sleutel voor je adressen moet worden gebruikt.</p>
+<p>De sleutel van een contactpersoon wordt vanaf dan gebruikt voor diens adres. Duikt er later een andere sleutel voor hetzelfde adres op, dan blijft de huidige in gebruik tot je de nieuwe kiest in de eigenschappen van de contactpersoon.</p>
+<p>Om je openbare sleutel te delen, selecteer je hem en klik je op <b data-text="ui-keys-export"></b>. Je kunt de sleutel van je account ook kiezen in de eigenschappen ervan, op het tabblad <b data-text="ui-account-security"></b>.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav><!--/review-->
