@@ -1,0 +1,17 @@
+<!--review--><h1>Приложения за влизане</h1>
+<p class="summary">Регистрирайте собствено приложение за влизане в Google, Microsoft или при който и да е доставчик на OpenID Connect, за да влизате чрез браузъра.</p>
+<p>Влизането чрез браузъра използва OAuth клиент, регистриран при доставчика. Inbox Classic има собствени клиенти за Google и Microsoft. Google позволява само на тестови потребители да използват клиента на Inbox Classic, докато не потвърди приложението, затова <b data-text="win-sign-in-google"></b> отначало е изключено. Можете да регистрирате собствен клиент: в своя проект в Google Cloud, в своя клиент (tenant) в Microsoft Entra или при който и да е доставчик на OpenID Connect.</p>
+<p>За да добавите приложение за влизане:</p>
+<ol>
+    <li>Изберете <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Щракнете върху <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->, след това върху <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>До <b data-text="ui-fill-in-for"></b> щракнете върху Google или Microsoft, за да се попълнят издателят, обхватите и сървърите. За друг доставчик ги въведете сами.</li>
+    <li>Регистрирайте клиента при доставчика, както обяснява полето отдолу. Регистрирайте показания там <b data-text="ui-redirect-uri"></b>.</li>
+    <li>Въведете <b data-text="ui-client-id"></b> и <b data-text="ui-client-secret"></b>, ако доставчикът ви е дал такава. Тайната се пази в <!--os:windows-->Диспечера на идентификационни данни на Windows<!--/os--><!--os:mac-->ключодържателя ви за вход<!--/os--><!--os:linux-->ключодържателя ви<!--/os--> и повече не се показва.</li>
+    <li>Щракнете върху <b data-text="ui-check"></b>, за да проверите дали издателят е правилен, след това върху <b data-text="ui-ok"></b>.</li>
+    <li>Добавете акаунта с <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> на първата страница на <b data-text="ui-add-account-title"></b>.</li>
+</ol>
+<p>В <b data-text="ui-sign-in-apps"></b> <!--os:windows,mac-->отметката на всяко приложение<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> показва дали то се предлага за нови акаунти, включително вградените. Акаунтите, които вече използват приложение, продължават да работят. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> променя приложение, а <b data-text="ui-remove"></b> го премахва, когато вече никой акаунт не го използва.</p>
+<p>Ако пощенският сървър откаже маркера на приложението, проверете дали обхватите му дават достъп до пощата.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
+<!--/review-->
