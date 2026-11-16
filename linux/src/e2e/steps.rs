@@ -217,6 +217,14 @@ pub async fn one_account_tree(d: &Driver) {
         "there is no row for the account: no heading, nothing to collapse at the top",
     );
     d.check(
+        !ids.contains(&crate::folders::ALL_SENT)
+            && !ids.contains(&crate::folders::ALL_DRAFTS)
+            && ["Sent Items", "Drafts"]
+                .iter()
+                .all(|name| folder_id(name).is_some_and(|f| ids.contains(&f))),
+        &format!("there is no All Sent or All Drafts: Sent Items and Drafts are the account's own folders ({names:?})"),
+    );
+    d.check(
         receipts.is_some_and(|r| shown.get(2) == Some(&(r, 0)))
             && main.folders.row(inbox).is_some_and(|row| !row.parent),
         &format!("a folder the server keeps in the Inbox is listed a level up, after Flagged ({names:?})"),
@@ -2555,10 +2563,10 @@ pub async fn all_inboxes(d: &Driver) {
     );
 }
 
-/// SCENARIO 42: All Inboxes first with each account's Inbox under it, Flagged, then each account's heading over its
-/// folders but the Inbox, starting with Sent Items
+/// SCENARIO 42: All Inboxes first with each account's Inbox under it, All Sent and All Drafts, Flagged, then each
+/// account's heading over its folders but the Inbox, Sent Items and Drafts
 fn tree_of_two_accounts(d: &Driver, inbox: i64, second: i64) {
-    use crate::folders::{ALL_INBOXES, FLAGGED};
+    use crate::folders::{ALL_DRAFTS, ALL_INBOXES, ALL_SENT, FLAGGED};
     let main = shell().main();
     let accounts: Vec<i64> = shell()
         .core
@@ -2571,10 +2579,15 @@ fn tree_of_two_accounts(d: &Driver, inbox: i64, second: i64) {
     let headings: Vec<i64> = accounts.iter().map(|a| -a).collect();
     let at = |id: i64| ids.iter().position(|&i| i == id);
     d.check(
-        ids.starts_with(&[ALL_INBOXES, inbox, second, FLAGGED])
-            && headings.first().and_then(|&h| at(h)) == Some(4)
+        ids.starts_with(&[ALL_INBOXES, inbox, second, ALL_SENT])
+            && at(ALL_DRAFTS) > at(ALL_SENT)
+            && at(FLAGGED) > at(ALL_DRAFTS)
+            && headings.first().and_then(|&h| at(h)) == at(FLAGGED).map(|f| f + 1)
             && headings.iter().all(|&h| at(h).is_some()),
-        &format!("All Inboxes is at the top of the tree, then Flagged, then each account's heading ({ids:?})"),
+        &format!(
+            "All Inboxes is at the top of the tree, then All Sent, All Drafts and Flagged, then each account's heading \
+             ({ids:?})"
+        ),
     );
     // the first folder under a heading; ImapKit keeps a deleted folder of the Inbox (Receipts of step 27) listed, so
     // that one is passed by
@@ -2588,14 +2601,23 @@ fn tree_of_two_accounts(d: &Driver, inbox: i64, second: i64) {
             .find(|label| label != "Receipts")
             .unwrap_or_default()
     };
+    // the icons of the folders under the headings: no Sent Items or Drafts among them
+    let first_heading = headings.first().and_then(|&h| at(h)).unwrap_or(ids.len());
+    let under: Vec<&'static str> = ids[first_heading.min(ids.len())..]
+        .iter()
+        .filter_map(|&id| main.folders.row(id))
+        .filter(|row| row.kind != pe_core::tree::TreeRowKind::Account)
+        .map(|row| row.icon)
+        .collect();
     d.check(
         [inbox, second]
             .iter()
             .all(|f| ids.iter().filter(|&id| id == f).count() == 1)
-            && headings.iter().all(|&h| after(h) == "Sent Items"),
+            && headings.iter().all(|&h| !after(h).is_empty())
+            && !under.iter().any(|icon| *icon == "sent" || *icon == "drafts"),
         &format!(
             "the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, \
-             starting with Sent Items ({} / {})",
+             without Sent Items and Drafts ({} / {}: {under:?})",
             headings.first().map(|&h| after(h)).unwrap_or_default(),
             headings.get(1).map(|&h| after(h)).unwrap_or_default()
         ),
@@ -2850,6 +2872,315 @@ pub async fn reorder_accounts(d: &Driver) {
         ),
     );
     main.folders.select(crate::folders::ALL_INBOXES);
+}
+
+/// SCENARIO 42d: All Sent and All Drafts after All Inboxes, closed at first, with a row per account; All Sent lists
+/// both accounts' Sent Items with the To and Account columns, a row under it one account's alone; a draft listed in
+/// All Drafts opens in the compose window of its account; neither has a menu of its own, the rows under them the
+/// folder's
+pub async fn all_sent_and_drafts(d: &Driver) {
+    use crate::folders::{ALL_DRAFTS, ALL_INBOXES, ALL_SENT, FLAGGED};
+    d.step("All Sent and All Drafts");
+    let main = shell().main();
+    let core = &shell().core;
+    let (Some(sent), Some(sent2), Some(drafts), Some(drafts2)) = (
+        folder_id("Sent Items"),
+        folder_of(1, "Sent Items"),
+        folder_id("Drafts"),
+        folder_of(1, "Drafts"),
+    ) else {
+        d.check(false, "both accounts have Sent Items and Drafts");
+        return;
+    };
+    let titles = pe_core::account_titles(&core.accounts().unwrap_or_default());
+    // a message in each account's Sent Items, the second's the newer; a draft in the first account's Drafts
+    let message = |from: &str, to: &str, subject: &str, body: &str, minutes: i32| {
+        format!(
+            "From: {from}\r\nTo: {to}\r\nSubject: {subject}\r\nDate: {}\r\nMessage-ID: <{}@inboxclassic.test>\r\n\r\n\
+             {body}\r\n",
+            date_now(minutes),
+            subject.replace(' ', "-")
+        )
+    };
+    let seeded = [
+        d.add_message_in(
+            d.ports.rest,
+            "Sent",
+            &message(
+                "Alex Morgan <testuser@inboxclassic.test>",
+                "Ruth Olsen <ruth@example.org>",
+                "Minutes from Monday",
+                "The minutes are attached below.",
+                2,
+            ),
+            &["\\Seen"],
+        ),
+        d.add_message_in(
+            d.ports.second_rest,
+            "Sent",
+            &message(
+                "Work <testuser2@inboxclassic.test>",
+                "Priya Shah <priya@work.example>",
+                "Venue for the offsite",
+                "The venue is booked for both days.",
+                3,
+            ),
+            &["\\Seen"],
+        ),
+        d.add_message_in(
+            d.ports.rest,
+            "Drafts",
+            &message(
+                "Alex Morgan <testuser@inboxclassic.test>",
+                "Ruth Olsen <ruth@example.org>",
+                "Notes for the review",
+                "Still to add the figures.",
+                0,
+            ),
+            &["\\Seen", "\\Draft"],
+        ),
+    ];
+    d.check(
+        seeded.iter().all(Result::is_ok),
+        "a message is put into each account's Sent and a draft into the first account's Drafts",
+    );
+    command(Command::Sync);
+    let total = |f: i64| core.folder(f).map_or(0, |f| f.total);
+    let has = |folder: i64, subject: &str| {
+        listed_in(pe_core::Scope::Folder(folder), 0, 200)
+            .iter()
+            .any(|m| m.info.subject == subject)
+    };
+    wait_until(30, || {
+        has(sent, "Minutes from Monday") && has(sent2, "Venue for the offsite") && has(drafts, "Notes for the review")
+    })
+    .await;
+
+    // the tree: closed at first, after All Inboxes and before Flagged
+    main.folders.select(ALL_INBOXES);
+    let ids = || -> Vec<i64> { main.folders.shown().iter().map(|(id, _)| *id).collect() };
+    let at = |id: i64| ids().iter().position(|&i| i == id);
+    // the last row under All Inboxes
+    let inboxes_end = [folder_id("Inbox"), second_inbox()]
+        .into_iter()
+        .flatten()
+        .filter_map(at)
+        .max()
+        .map(|last| last + 1);
+    d.check(
+        at(ALL_SENT)
+            .is_some_and(|s| Some(s) == inboxes_end && at(ALL_DRAFTS) == Some(s + 1) && at(FLAGGED) == Some(s + 2))
+            && !main.folders.is_open(ALL_SENT)
+            && !main.folders.is_open(ALL_DRAFTS),
+        &format!(
+            "All Sent and All Drafts follow All Inboxes, before Flagged, closed at first ({:?})",
+            ids()
+        ),
+    );
+    // a folder under All Sent chosen from elsewhere: All Sent opens to show it, which is not kept as the user's opening
+    command(Command::GoToFolder);
+    match wait_dialog(10, "move-dialog").await {
+        Some(dialog) => {
+            pick_folder(&dialog, sent);
+            click(dialog.upcast_ref(), "dialog-ok");
+            let kept = || {
+                shell()
+                    .settings
+                    .text(crate::settings::OPENED_ROWS)
+                    .unwrap_or_default()
+                    .split(',')
+                    .any(|id| id == ALL_SENT.to_string())
+            };
+            d.check(
+                wait_until(10, || main.folders.selected() == sent).await
+                    && main.folders.is_open(ALL_SENT)
+                    && main.folders.position_of(sent).is_some()
+                    && !kept(),
+                &format!(
+                    "the first account's Sent Items chosen by Go to Folder while All Sent is closed: All Sent opens and \
+                     the row is selected, not kept as the user's opening ({}, {})",
+                    main.folders.is_open(ALL_SENT),
+                    main.selected_name()
+                ),
+            );
+        }
+        None => d.check(false, "Go to Folder asks which folder"),
+    }
+    main.folders.select(ALL_INBOXES);
+    main.folders.set_open(ALL_SENT, false);
+    pause(500).await;
+    d.shot(&main_window(), "all-sent-0-closed").await;
+    let label = |id: i64| main.folders.row(id).map(|row| row.label).unwrap_or_default();
+    main.folders.set_open(ALL_SENT, true);
+    main.folders.set_open(ALL_DRAFTS, true);
+    let shown = main.folders.shown();
+    let under = |parent: i64| -> Vec<i64> {
+        let Some(start) = shown.iter().position(|(id, _)| *id == parent) else {
+            return Vec::new();
+        };
+        shown[start + 1..]
+            .iter()
+            .take_while(|(_, depth)| *depth > shown[start].1)
+            .map(|(id, _)| *id)
+            .collect()
+    };
+    let names = |parent: i64| under(parent).iter().map(|&id| label(id)).collect::<Vec<_>>();
+    d.check(
+        under(ALL_SENT) == [sent, sent2] && under(ALL_DRAFTS) == [drafts, drafts2] && names(ALL_SENT) == titles,
+        &format!(
+            "opened, each has a row per account named as the account is ({:?} / {:?})",
+            names(ALL_SENT),
+            names(ALL_DRAFTS)
+        ),
+    );
+    let ids_now = ids();
+    d.check(
+        [sent, sent2, drafts, drafts2]
+            .iter()
+            .all(|f| ids_now.iter().filter(|&id| id == f).count() == 1 && at(*f) < at(FLAGGED)),
+        "the account headings list neither Sent Items nor Drafts",
+    );
+
+    // All Sent: both accounts' Sent Items, newest first, with the To and Account columns
+    main.folders.select(ALL_SENT);
+    let expected = total(sent) + total(sent2);
+    d.check(
+        wait_until(10, || u64::from(messages_listed()) == expected).await,
+        &format!(
+            "All Sent lists both accounts' sent messages ({} of {expected})",
+            messages_listed()
+        ),
+    );
+    // the rows as the list has them, from the core, sorted by the date the list shows (the earlier of the Date header
+    // and the arrival)
+    let listed = listed_in(pe_core::Scope::AllSent, 0, 50);
+    let dates: Vec<i64> = listed
+        .iter()
+        .map(|m| match (m.info.date, m.info.internal_date) {
+            (Some(date), Some(arrived)) => date.min(arrived),
+            (date, arrived) => date.or(arrived).unwrap_or(0),
+        })
+        .collect();
+    let folders: Vec<i64> = listed.iter().map(|m| m.folder_id).collect();
+    d.check(
+        dates.windows(2).all(|pair| pair[0] >= pair[1]) && folders.contains(&sent) && folders.contains(&sent2),
+        &format!("newest first, the two accounts' messages among each other ({folders:?})"),
+    );
+    let (person, recipients) = main.list.person_column();
+    let column = main.list.columns.folder.title().unwrap_or_default();
+    let account = main.row_folder(sent2);
+    d.check(
+        person == "To" && recipients && column == "Account" && account == "Work",
+        &format!("with the To column and the Account column ({person}, {column}: {account})"),
+    );
+    select_row(0).await;
+    pause(500).await;
+    d.shot(&main_window(), "all-sent-1-list").await;
+    // for a look at the tree dark and in a narrow window
+    let styles = adw::StyleManager::default();
+    styles.set_color_scheme(adw::ColorScheme::ForceDark);
+    wait_until(5, || styles.is_dark()).await;
+    pause(800).await;
+    d.shot(&main_window(), "all-sent-1b-dark").await;
+    styles.set_color_scheme(adw::ColorScheme::Default);
+    let window = main.window().clone();
+    let (width, height) = (window.width(), window.height());
+    window.set_default_size(820, height);
+    wait_until(10, || window.width() <= 860).await;
+    pause(800).await;
+    d.shot(&main_window(), "all-sent-1c-narrow").await;
+    window.set_default_size(width, height);
+    wait_until(10, || window.width() == width).await;
+
+    // one account's row under it
+    main.folders.select(sent2);
+    d.check(
+        wait_until(10, || u64::from(messages_listed()) == total(sent2)).await
+            && listed_in(pe_core::Scope::Folder(sent2), 0, 200)
+                .iter()
+                .all(|m| m.folder_id == sent2),
+        &format!(
+            "the row of one account under All Sent lists that account's Sent Items alone ({} of {})",
+            messages_listed(),
+            total(sent2)
+        ),
+    );
+    let name = main.selected_name();
+    d.check(
+        name == "Sent Items - Work",
+        &format!("the folder bar says Sent Items and the account's name ({name})"),
+    );
+
+    // the menus: none of their own, the folder's for the rows under them
+    let tree: gtk::Widget = main.folders.view.clone().upcast();
+    for row in [ALL_SENT, ALL_DRAFTS] {
+        main.folder_popover.borrow_mut().take();
+        main.folders.open_menu(&tree, 120.0, 40.0, row);
+        d.check(
+            main.folder_popover.borrow().is_none(),
+            &format!("{} has no right-click menu", label(row)),
+        );
+    }
+    main.folders.open_menu(&tree, 120.0, 60.0, sent2);
+    let labels = menu_labels(main.folder_popover.borrow().as_ref());
+    d.check(
+        labels.iter().any(|l| l == "Mark All Read") && labels.iter().any(|l| l == "New Folder\u{2026}"),
+        &format!("the rows under them have the folder's menu ({})", labels.join(", ")),
+    );
+    if let Some(popover) = main.folder_popover.borrow().as_ref() {
+        popover.popdown();
+    }
+
+    // All Drafts: the draft, opened in the compose window of its account
+    main.folders.select(ALL_DRAFTS);
+    let draft_at = || {
+        main.list_view()
+            .rows(core, 0, 50)
+            .unwrap_or_default()
+            .iter()
+            .position(|m| m.info.subject == "Notes for the review")
+    };
+    d.check(
+        wait_until(10, || draft_at().is_some()).await,
+        &format!("All Drafts lists the draft ({} listed)", messages_listed()),
+    );
+    select_row(draft_at().unwrap_or(0) as u32).await;
+    pause(500).await;
+    d.shot(&main_window(), "all-drafts-1-list").await;
+    main.open_selected();
+    match wait_compose(20).await {
+        Some(c) => {
+            let from = compose_from(&c);
+            let text = c
+                .editor
+                .document
+                .view
+                .evaluate_javascript_future("document.body.innerText", None, None)
+                .await
+                .map(|v| v.to_str().to_string())
+                .unwrap_or_default();
+            d.check(
+                from.contains("testuser@inboxclassic.test")
+                    && c.subject.text() == "Notes for the review"
+                    && text.contains("Still to add the figures."),
+                &format!(
+                    "opening it opens the compose window from the first account, with the draft's text ({from}: {})",
+                    text.trim()
+                ),
+            );
+            d.shot(&c.window, "all-drafts-2-open").await;
+            close_compose(&c).await;
+        }
+        None => d.check(false, "opening the draft from All Drafts opens a compose window"),
+    }
+    d.check(
+        wait_until(10, || d.find("Drafts", "Subject: Notes for the review").is_some()).await,
+        "closed unchanged, the draft stays in Drafts",
+    );
+    // as they were for the steps after
+    main.folders.set_open(ALL_SENT, false);
+    main.folders.set_open(ALL_DRAFTS, false);
+    main.folders.select(ALL_INBOXES);
 }
 
 /// SCENARIO 41: Move and Copy to Folder offer every account's folders in a tree with a filter; a message moved to the

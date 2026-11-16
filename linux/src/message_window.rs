@@ -302,14 +302,22 @@ impl MessageWindow {
     }
 
     /// Whether the list the window came from could have messages of `folder`: its own folder, an Inbox for All
-    /// Inboxes, any folder for a search or the Flagged folder
+    /// Inboxes, a Sent Items or Drafts folder for All Sent or All Drafts, any folder for a search or the Flagged folder
     fn lists(&self, folder: i64) -> bool {
+        let special = |special: &str| {
+            shell()
+                .core
+                .folder(folder)
+                .is_ok_and(|f| f.info.special_use.as_deref() == Some(special))
+        };
         match self.view.search().map(|search| search.scope) {
             Some(Scope::Folder(own)) => own == folder,
             Some(Scope::AllInboxes) => shell()
                 .core
                 .folder(folder)
                 .is_ok_and(|f| f.info.path.eq_ignore_ascii_case("INBOX")),
+            Some(Scope::AllSent) => special("\\Sent"),
+            Some(Scope::AllDrafts) => special("\\Drafts"),
             Some(Scope::Everywhere | Scope::Flagged) => true,
             None => false,
         }

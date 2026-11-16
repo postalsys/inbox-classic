@@ -14,13 +14,13 @@ use pe_store::Folder;
 
 use crate::app::{run_command, shell, spawn};
 use crate::commands::Command;
-use crate::folders::{ALL_INBOXES, FLAGGED, FolderTree, Handlers};
+use crate::folders::{ALL_DRAFTS, ALL_INBOXES, ALL_SENT, FLAGGED, FolderTree, Handlers};
 use crate::messages::MessageList;
 use crate::reader::{Loaded, Reader};
 use crate::settings;
 use crate::ui::{self, TITLE};
 use pe_core::layout::{Layout, LayoutMode};
-use pe_core::tree::{TreeMenu, TreeRow, TreeRowKind};
+use pe_core::tree::{TreeList, TreeMenu, TreeRow, TreeRowKind};
 
 /// What the Find box takes, shown when the mouse rests on it: the words of the catalogs, then the syntax, which is
 /// the same in every language
@@ -97,10 +97,9 @@ pub struct Mailbox {
     selected_account: Cell<i64>,
     /// The folder shown, 0 for none
     folder: Cell<i64>,
-    /// All Inboxes is shown: the mail of every account's Inbox
-    all_inboxes: Cell<bool>,
-    /// The Flagged row is the list shown
-    flagged: Cell<bool>,
+    /// What is listed, as the tree's row says: a folder's ([`Self::folder`]), All Inboxes, All Sent, All Drafts,
+    /// Flagged, or nothing
+    listed: Cell<TreeList>,
     /// select_start has run: later showings of the window keep what is selected
     started: Cell<bool>,
     /// What the Find box searches for, empty when the list is the folder's, and the one folder it names (in:sent)
@@ -286,8 +285,7 @@ impl Mailbox {
             junk_folders: RefCell::default(),
             selected_account: Cell::new(0),
             folder: Cell::new(0),
-            all_inboxes: Cell::new(false),
-            flagged: Cell::new(false),
+            listed: Cell::new(TreeList::None),
             started: Cell::new(false),
             find_place: RefCell::default(),
             total: Cell::new(0),
@@ -579,7 +577,8 @@ impl Mailbox {
         self.fill_account_menus();
         let shown = self.folders.row(self.shown_row()).map(|row| row.key);
         self.reloading.set(true);
-        self.folders.rebuild(&rows, &closed_rows());
+        let (closed, opened) = (kept_rows(settings::CLOSED_ROWS), kept_rows(settings::OPENED_ROWS));
+        self.folders.rebuild(&rows, |row| starts_open(row, &closed, &opened));
         let again = shown.as_deref().map(|key| (key, pe_core::tree::reselect(&rows, key)));
         match again {
             // the same row: selected quietly, what it lists stays
@@ -594,7 +593,7 @@ impl Mailbox {
             }
             Some((_, None)) => {
                 self.reloading.set(false);
-                self.on_folder_selected(0, false, false);
+                self.on_folder_selected(0, TreeList::None);
             }
             None => self.reloading.set(false),
         }
@@ -613,13 +612,24 @@ impl Mailbox {
         self.folders.row(self.shown_row())
     }
 
+    /// The list shown gathers one folder of every account: All Inboxes, All Sent or All Drafts
+    fn gathering(&self) -> bool {
+        matches!(
+            self.listed.get(),
+            TreeList::AllInboxes | TreeList::AllSent | TreeList::AllDrafts
+        )
+    }
+
     /// The row of the tree that stands for what is listed ([`crate::folders::row_id`]), 0 for none
     fn shown_row(&self) -> i64 {
-        if self.flagged.get() {
-            FLAGGED
-        } else if self.all_inboxes.get() {
-            ALL_INBOXES
-        } else if self.folder.get() != 0 {
+        match self.listed.get() {
+            TreeList::Flagged => return FLAGGED,
+            TreeList::AllInboxes => return ALL_INBOXES,
+            TreeList::AllSent => return ALL_SENT,
+            TreeList::AllDrafts => return ALL_DRAFTS,
+            TreeList::Folder | TreeList::None => {}
+        }
+        if self.folder.get() != 0 {
             self.folder.get()
         } else {
             -self.selected_account.get()
@@ -755,15 +765,13 @@ impl Mailbox {
             return;
         }
         self.undone.set(false);
-        let all_inboxes = row.kind == TreeRowKind::AllInboxes;
-        let flagged = row.kind == TreeRowKind::Flagged;
         // an account has no messages of its own
         self.selected_account.set(if row.kind == TreeRowKind::Account {
             row.account
         } else {
             0
         });
-        if !self.on_folder_selected(row.folder, all_inboxes, flagged) {
+        if !self.on_folder_selected(row.folder, row.list) {
             self.show_folder_name();
         }
         self.enable(Command::NewFolder, row.new_folder_account != 0);
@@ -774,23 +782,22 @@ impl Mailbox {
         }
     }
 
-    /// Another folder (or All Inboxes) shown; false when it was already the one shown
-    fn on_folder_selected(&self, folder: i64, all_inboxes: bool, flagged: bool) -> bool {
-        if folder == self.folder.get() && all_inboxes == self.all_inboxes.get() && flagged == self.flagged.get() {
+    /// Another list shown, as a row of the tree says (`list`, of `folder` for a folder's own); false when it was
+    /// already the one shown
+    fn on_folder_selected(&self, folder: i64, list: TreeList) -> bool {
+        // a folder's list without a folder (none chosen): nothing is listed
+        let list = if list == TreeList::Folder && folder == 0 {
+            TreeList::None
+        } else {
+            list
+        };
+        if folder == self.folder.get() && list == self.listed.get() {
             return false;
         }
         // the message of the folder before is not this folder's, nor is the search
         self.folder.set(folder);
-        self.all_inboxes.set(all_inboxes);
-        self.flagged.set(flagged);
-        let scope = if flagged {
-            Some(pe_core::Scope::Flagged)
-        } else if all_inboxes {
-            Some(pe_core::Scope::AllInboxes)
-        } else {
-            (folder != 0).then_some(pe_core::Scope::Folder(folder))
-        };
-        self.view.borrow_mut().set_scope(scope);
+        self.listed.set(list);
+        self.view.borrow_mut().set_scope(list.scope(folder));
         self.reset_find();
         self.clear_reader(false);
         self.reload_list(false);
@@ -847,9 +854,9 @@ impl Mailbox {
     }
 
     /// The folder of a row in a list of several folders: its name, with its account's when there are several; in All
-    /// Inboxes the account alone, as the tree names it
+    /// Inboxes, All Sent and All Drafts the account alone, as the tree names it
     pub fn row_folder(&self, folder: i64) -> String {
-        if self.all_inboxes.get() && !self.searching() {
+        if self.gathering() && !self.searching() {
             let account = self.folder_accounts.borrow().get(&folder).copied();
             return self
                 .accounts
@@ -919,7 +926,7 @@ impl Mailbox {
         self.enable(Command::EmptyFolder, total > 0 && self.can_empty_folder());
         self.list
             .show_person_column(view.lists_recipients(core).unwrap_or(false));
-        let (title, values) = if self.searching() || self.flagged.get() {
+        let (title, values) = if self.searching() || self.listed.get() == TreeList::Flagged {
             (t!(UiColFolder), Vec::new())
         } else {
             let names = self.accounts.borrow().iter().map(|a| a.title.clone()).collect();
@@ -1000,7 +1007,7 @@ impl Mailbox {
                 more.push_str(&t!(GtkSearchStillIndexing, count = left));
             }
             (t!(UiNoMatch, words = &*self.find_text()), more)
-        } else if self.folder.get() != 0 || self.all_inboxes.get() || self.flagged.get() {
+        } else if self.listed.get() != TreeList::None {
             let none = if hide_read() { t!(UiNoUnread) } else { t!(UiNoItems) };
             (none, String::new())
         } else if self.selected_account.get() != 0 {
@@ -1205,8 +1212,8 @@ impl Mailbox {
     /// The message `uid` of `folder` shown: its folder chosen in the tree (which ends a search), the message
     /// selected in the list
     pub fn show_message(&self, folder: i64, uid: u64) {
-        // All Inboxes stays when it has the message (of an Inbox), its list up to date with it
-        if self.all_inboxes.get() && !self.searching() {
+        // All Inboxes (All Sent, All Drafts) stays when it has the message, its list up to date with it
+        if self.gathering() && !self.searching() {
             if let Some(timer) = self.reload_later.borrow_mut().take() {
                 timer.remove();
             }
@@ -1217,7 +1224,7 @@ impl Mailbox {
         }
         // selecting another folder ends a search; the folder selected already is not selected again, its search is
         // ended here
-        if self.searching() && self.folder.get() == folder && !self.all_inboxes.get() {
+        if self.searching() && self.folder.get() == folder && self.listed.get() == TreeList::Folder {
             self.clear_find();
         }
         if !self.folders.select(folder) || self.folder.get() != folder {
@@ -1317,7 +1324,7 @@ impl Mailbox {
     /// The window shown the first time: All Inboxes (two or more accounts) or the first account's Inbox chosen, and
     /// its newest message selected
     pub fn select_start(&self) {
-        if self.started.replace(true) || self.folder.get() != 0 || self.all_inboxes.get() || self.flagged.get() {
+        if self.started.replace(true) || self.listed.get() != TreeList::None {
             return;
         }
         let Ok(Some(start)) = shell().core.start_message() else {
@@ -1456,7 +1463,7 @@ impl Mailbox {
     /// "12 messages, 3 unread" for the status bar ("12 found" for a search), and how many are selected when several are
     pub fn show_counts(&self) {
         let (total, unread) = (self.total.get(), self.unread.get());
-        let text = if !self.searching() && self.folder.get() == 0 && !self.all_inboxes.get() && !self.flagged.get() {
+        let text = if !self.searching() && self.listed.get() == TreeList::None {
             String::new()
         } else {
             pe_core::list_counts(total, unread, self.list.selected_count(), self.searching())
@@ -1588,9 +1595,9 @@ impl Mailbox {
         if self.searching() {
             return;
         }
-        if self.all_inboxes.get() {
+        if self.listed.get() == TreeList::AllInboxes {
             let _ = shell().core.mark_all_inboxes_read();
-        } else if self.folder.get() != 0 {
+        } else if self.listed.get() == TreeList::Folder {
             let _ = shell().core.mark_all_read(self.folder.get());
         }
     }
@@ -2136,9 +2143,11 @@ impl Mailbox {
         shell().core.empty_folder_question(self.folder.get()).ok().flatten()
     }
 
-    /// The folder shown is Deleted Items or Junk E-mail, not All Inboxes or a search
+    /// The folder shown is Deleted Items or Junk E-mail, not a list of several or a search
     fn can_empty_folder(&self) -> bool {
-        !self.all_inboxes.get() && !self.searching() && shell().core.can_empty(self.folder.get()).unwrap_or(false)
+        self.listed.get() == TreeList::Folder
+            && !self.searching()
+            && shell().core.can_empty(self.folder.get()).unwrap_or(false)
     }
 
     /// Deleted Items or Junk E-mail emptied for good, after asking (the core words the question, with how many go)
@@ -2858,28 +2867,50 @@ fn command_toggle(icons: &[&str], label: &str, command: Command, name: &str) -> 
     button
 }
 
-/// The top rows of the folder tree the user closed, from the settings
-fn closed_rows() -> std::collections::HashSet<i64> {
+/// The rows of the folder tree the user closed ([`settings::CLOSED_ROWS`]) or opened ([`settings::OPENED_ROWS`]),
+/// from the settings
+fn kept_rows(name: &str) -> HashSet<i64> {
     shell()
         .settings
-        .text(settings::CLOSED_ROWS)
+        .text(name)
         .unwrap_or_default()
         .split(',')
         .filter_map(|id| id.trim().parse().ok())
         .collect()
 }
 
-/// A top row opened or closed by the user, kept for the next start
-fn remember_opened(id: i64, open: bool) {
-    let mut closed = closed_rows();
-    let changed = if open { closed.remove(&id) } else { closed.insert(id) };
+/// Whether a row starts open: as the core says, or as the user left it when the core says that is kept (a row that
+/// starts open is kept among the ones closed, one that starts closed among the ones opened)
+fn starts_open(row: &TreeRow, closed: &HashSet<i64>, opened: &HashSet<i64>) -> bool {
+    let id = crate::folders::row_id(row);
+    match (row.remembers_open, row.starts_open) {
+        (false, open) => open,
+        (true, true) => !closed.contains(&id),
+        (true, false) => opened.contains(&id),
+    }
+}
+
+/// A row opened or closed by the user, kept for the next start when it differs from how the row starts
+fn remember_opened(row: &TreeRow, open: bool) {
+    let name = if row.starts_open {
+        settings::CLOSED_ROWS
+    } else {
+        settings::OPENED_ROWS
+    };
+    let id = crate::folders::row_id(row);
+    let mut ids = kept_rows(name);
+    let changed = if open == row.starts_open {
+        ids.remove(&id)
+    } else {
+        ids.insert(id)
+    };
     if changed {
-        let mut ids: Vec<i64> = closed.into_iter().collect();
+        let mut ids: Vec<i64> = ids.into_iter().collect();
         ids.sort_unstable();
         let text = ids.iter().map(i64::to_string).collect::<Vec<_>>().join(",");
         shell()
             .settings
-            .set_text(settings::CLOSED_ROWS, (!text.is_empty()).then_some(text.as_str()));
+            .set_text(name, (!text.is_empty()).then_some(text.as_str()));
     }
 }
 

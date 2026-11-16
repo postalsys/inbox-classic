@@ -1,10 +1,11 @@
 //! The folder list, drawn from the core's rows ([`TreeRow`]) in their order and depth: with one account its Inbox,
-//! Flagged and its other folders; with several, All Inboxes (each account's Inbox under it), Flagged, and a heading for
-//! each account over its folders. A heading opens and closes (a click, Enter) and is never selected, so it is not taken
+//! Flagged and its other folders; with several, All Inboxes (each account's Inbox under it), All Sent and All Drafts
+//! (each account's folder under them), Flagged, and a heading for each account over its folders. A heading opens and closes (a click, Enter) and is never selected, so it is not taken
 //! for a mailbox. A row with unread messages is bold with their count, as in Outlook Express; a collapsed one counts
 //! what it hides. Messages dragged from the list are dropped onto the rows that take them. An account's heading, and
 //! its Inbox's row under All Inboxes, are dragged among the rows of their kind to put the accounts in another order.
-//! Which of All Inboxes and the headings are open is the window's to keep.
+//! Which rows start open, and whose opening and closing the window keeps, the core says (All Inboxes, All Sent, All
+//! Drafts and the headings).
 
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -102,12 +103,19 @@ impl FolderItem {
 pub const ALL_INBOXES: i64 = i64::MIN;
 /// The id of Flagged: the flagged messages of every account
 pub const FLAGGED: i64 = i64::MIN + 1;
+/// The id of All Sent: every account's Sent Items
+pub const ALL_SENT: i64 = i64::MIN + 2;
+/// The id of All Drafts: every account's Drafts
+pub const ALL_DRAFTS: i64 = i64::MIN + 3;
 
-/// The id the window knows a row by, kept in the settings for the rows closed: a folder's id (an Inbox has one row,
-/// under All Inboxes or not), an account's negated, [`ALL_INBOXES`], [`FLAGGED`]; one for each of the core's keys
+/// The id the window knows a row by, kept in the settings for the rows opened or closed: a folder's id (a folder has
+/// one row, under All Inboxes, All Sent or All Drafts or not), an account's negated, [`ALL_INBOXES`], [`ALL_SENT`],
+/// [`ALL_DRAFTS`], [`FLAGGED`]; one for each of the core's keys
 pub fn row_id(row: &TreeRow) -> i64 {
     match row.kind {
         TreeRowKind::AllInboxes => ALL_INBOXES,
+        TreeRowKind::AllSent => ALL_SENT,
+        TreeRowKind::AllDrafts => ALL_DRAFTS,
         TreeRowKind::Flagged => FLAGGED,
         TreeRowKind::Account => -row.account,
         TreeRowKind::AccountInbox | TreeRowKind::Folder => row.folder,
@@ -130,11 +138,6 @@ fn label_markup(row: &TreeRow, collapsed: bool) -> String {
     }
 }
 
-/// Whether the user's opening and closing of a row is kept: All Inboxes and the accounts' headings
-fn remembered(row: &TreeRow) -> bool {
-    matches!(row.kind, TreeRowKind::AllInboxes | TreeRowKind::Account)
-}
-
 /// Whether a click (or Enter) opens and closes the row rather than selecting it: a heading, or a folder that can not
 /// be selected with folders in it
 fn toggles(row: &TreeRow) -> bool {
@@ -145,7 +148,7 @@ type CanDrop = Box<dyn Fn(&[MessageRef], i64) -> bool>;
 type Dropped = Box<dyn Fn(&[MessageRef], i64, bool)>;
 type FilesDropped = Box<dyn Fn(i64, Vec<std::path::PathBuf>)>;
 type Menu = Box<dyn Fn(&gtk::Widget, f64, f64, &TreeRow)>;
-type Opened = Box<dyn Fn(i64, bool)>;
+type Opened = Box<dyn Fn(&TreeRow, bool)>;
 type Moved = Box<dyn Fn(i64, i64, bool)>;
 
 /// What the tree tells the window: a row chosen, messages dropped onto a folder, and the accounts reordered
@@ -160,7 +163,8 @@ pub struct Handlers {
     /// The right-click menu at a point of the widget clicked, for the row clicked: selected first when it can be, a
     /// heading stays unselected
     pub menu: Menu,
-    /// All Inboxes or an account's heading opened or closed by the user (its id), for the window to keep
+    /// A row whose opening the core says is kept (All Inboxes, All Sent, All Drafts, a heading) opened or closed by
+    /// the user, for the window to keep
     pub opened: Opened,
     /// An account's row dragged onto another of its kind: the account dragged, the account of the row it was dropped
     /// on, and whether below it (else above)
@@ -287,9 +291,9 @@ impl FolderTree {
         *self.handlers.borrow_mut() = Some(handlers);
     }
 
-    /// The tree built again from the core's rows, nothing selected; All Inboxes and the headings open but those in
-    /// `closed`
-    pub fn rebuild(&self, rows: &[TreeRow], closed: &std::collections::HashSet<i64>) {
+    /// The tree built again from the core's rows, nothing selected; each row with rows under it open or closed as
+    /// `open` says (the user's choice kept, else as the core says it starts)
+    pub fn rebuild(&self, rows: &[TreeRow], open: impl Fn(&TreeRow) -> bool) {
         self.reloading.set(true);
         let mut items = HashMap::new();
         let mut parents = HashMap::new();
@@ -314,19 +318,18 @@ impl FolderTree {
         *self.parents.borrow_mut() = parents;
         self.arrows.set(rows.iter().any(|row| row.depth == 0 && row.parent));
         self.root.splice(0, self.root.n_items(), &top);
-        self.open_remembered(closed);
+        self.open_rows(open);
         self.selection.set_selected(gtk::INVALID_LIST_POSITION);
         self.reloading.set(false);
     }
 
-    /// All Inboxes and the headings opened, but those the user closed
-    fn open_remembered(&self, closed: &std::collections::HashSet<i64>) {
+    /// The rows with rows under them opened as `open` says; the rows inside a closed one are opened once it opens
+    fn open_rows(&self, open: impl Fn(&TreeRow) -> bool) {
         let Some(model) = self.tree_model() else { return };
         let mut position = 0;
         while let Some(row) = model.row(position) {
             if let Some(item) = row.item().and_downcast::<FolderItem>()
-                && item.row().is_some_and(|r| remembered(&r))
-                && !closed.contains(&item.id())
+                && item.row().is_some_and(|r| r.parent && open(&r))
             {
                 row.set_expanded(true);
             }
@@ -400,8 +403,11 @@ impl FolderTree {
                 self.view.scroll_to(position, gtk::ListScrollFlags::NONE, None);
                 return true;
             }
-            if ancestors.contains(&item_id) {
+            // opened to show the row chosen from elsewhere, not by the user: not kept for the next start
+            if ancestors.contains(&item_id) && !row.is_expanded() {
+                let quiet = self.reloading.replace(true);
                 row.set_expanded(true);
+                self.reloading.set(quiet);
             }
             position += 1;
         }
@@ -451,6 +457,26 @@ impl FolderTree {
         if let (Some(row), Some(handlers)) = (self.row(id), &*self.handlers.borrow()) {
             (handlers.menu)(widget, x, y, &row);
         }
+    }
+
+    /// Row `id` opened or closed, as its arrow does it, for the e2e driver; false when it is not in view
+    #[cfg(feature = "e2e")]
+    pub fn set_open(&self, id: i64, open: bool) -> bool {
+        let row = self
+            .position_of(id)
+            .and_then(|position| self.tree_model().and_then(|model| model.row(position)));
+        row.is_some_and(|row| {
+            row.set_expanded(open);
+            true
+        })
+    }
+
+    /// Whether row `id` is open, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn is_open(&self, id: i64) -> bool {
+        self.position_of(id)
+            .and_then(|position| self.tree_model().and_then(|model| model.row(position)))
+            .is_some_and(|row| row.is_expanded())
     }
 
     /// Whether the row at `position` can be selected, for the e2e driver
@@ -522,7 +548,8 @@ impl FolderTree {
 }
 
 /// A row opened or closed changes the rows after it: each item learns whether it is expanded, and shows the unread
-/// messages it hides while it is not; All Inboxes and the headings opened or closed by the user are kept by the window
+/// messages it hides while it is not; the rows the core says keep their opening are told to the window when the user
+/// opens or closes them
 fn connect_expanded(tree: &gtk::TreeListModel, told: Rc<RefCell<Option<Handlers>>>, quiet: Rc<Cell<bool>>) {
     // only the row before the change (the one opened or closed) and the rows it added can have changed
     tree.connect_items_changed(move |model, position, _, added| {
@@ -536,10 +563,10 @@ fn connect_expanded(tree: &gtk::TreeListModel, told: Rc<RefCell<Option<Handlers>
             }
             item.show();
             if !quiet.get()
-                && item.row().is_some_and(|r| remembered(&r))
+                && let Some(r) = item.row().filter(|r| r.remembers_open)
                 && let Some(handlers) = &*told.borrow()
             {
-                (handlers.opened)(item.id(), row.is_expanded());
+                (handlers.opened)(&r, row.is_expanded());
             }
         }
     });
@@ -870,6 +897,9 @@ mod tests {
             drop_target: false,
             reorders_accounts: matches!(kind, TreeRowKind::Account | TreeRowKind::AccountInbox),
             menu: pe_core::tree::TreeMenu::Folder,
+            list: pe_core::tree::TreeList::Folder,
+            starts_open: true,
+            remembers_open: false,
             new_folder_account: account,
             new_folder_parent: folder,
             icon: "",
@@ -897,10 +927,20 @@ mod tests {
     fn rows_keep_their_ids() {
         assert_eq!(row_id(&row(TreeRowKind::AllInboxes, 0, 0)), ALL_INBOXES);
         assert_eq!(row_id(&row(TreeRowKind::Flagged, 0, 0)), FLAGGED);
+        assert_eq!(row_id(&row(TreeRowKind::AllSent, 0, 0)), ALL_SENT);
+        assert_eq!(row_id(&row(TreeRowKind::AllDrafts, 0, 0)), ALL_DRAFTS);
         assert_eq!(row_id(&row(TreeRowKind::Account, 3, 0)), -3);
         assert_eq!(row_id(&row(TreeRowKind::Folder, 3, 7)), 7);
         // an Inbox has one row, under All Inboxes or not
         assert_eq!(row_id(&row(TreeRowKind::AccountInbox, 3, 7)), 7);
+        // the ids of the rows of no folder are all different
+        let fixed = [ALL_INBOXES, ALL_SENT, ALL_DRAFTS, FLAGGED];
+        assert!(
+            fixed
+                .iter()
+                .enumerate()
+                .all(|(i, a)| fixed[i + 1..].iter().all(|b| a != b))
+        );
     }
 
     #[test]
