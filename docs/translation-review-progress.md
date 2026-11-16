@@ -16,7 +16,7 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Bulgarian (`bg`): all 1,331 catalog entries and 52 help topics remain. Dutch, Italian,
+- Resume with Bulgarian (`bg`): UI reviewed; 702 core/platform/help-title entries and all 52 help topics remain. Dutch, Italian,
   Portuguese (Portugal), Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are
   complete: each has 1,331 catalog entries and 52 help topics. Sixteen languages still have pending content,
   with exact IDs/topics in the state file.
@@ -34,6 +34,8 @@ Commit completed batches regularly and preserve an exact resume point.
 - Check callers, surrounding controls and actual behavior. Preserve variables, appropriate plurals, literal
   keyboard names, control references, links and platform-specific help branches. Keep terminology consistent.
 - Remove marks only for messages/passages actually reviewed. Leave uncertain content marked and explain it.
+- After the current queue is complete, check master, the source feature branch and this worktree for new
+  languages, new strings and later edits, including already reviewed content. Process those before completion.
 - Keep `REVIEWED` unchanged until the full round is complete. During partial review, reconcile the review
   checker's unmarked-change reports with the completed inventory.
 - `scripts/check-language.mjs` now exists but requires every message/help page to remain marked. Its mark-only
@@ -343,8 +345,16 @@ explained. All 75 tests, structure, inventory/hash reconciliation, inline spacin
 The review HTML is regenerated. Everyday-help checkpoint: `4eda4a34`. Bulgarian is next. Master and the
 feature branch have no new catalog/help translations since the last source audit.
 
-Current totals: 10,712 catalog entries and 420 help pages reviewed; 1,662 catalog values improved. Remaining:
-21,296 catalog entries and 832 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Bulgarian UI catalog
+
+Reviewed all 626 shared UI entries and three coupled core/Windows entries, improving 68 values. Corrected
+literal phrasing, send statuses, rules, provider fallback grammar, sender aliases, key ownership verification
+and credential transfer. Resolved seven shortcut placements across 32 actual menu and dialog scopes.
+All 14 catalog tests, structure, inventory/hash reconciliation and git diff --check pass. Turkish completion
+checkpoint: `36dc6ce6`. Remaining catalogs and all 52 Bulgarian help topics are pending.
+
+Current totals: 11,341 catalog entries and 420 help pages reviewed; 1,730 catalog values improved. Remaining:
+20,667 catalog entries and 832 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

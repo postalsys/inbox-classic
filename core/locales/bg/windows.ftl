@@ -34,8 +34,7 @@ win-webview-missing = Средата за изпълнение WebView2 не е 
 win-delete-button = &Изтриване
 # review: new
 win-find-label = &Търсене:
-# review: new
-win-save-as-button = &Запазване като...
+win-save-as-button = Запазване ка&то...
 # review: new
 win-too-many-files = Твърде много файлове наведнъж: изберете по-малко.
 
@@ -150,8 +149,7 @@ win-forget-program-ask = Да се премахне ли тази програм
 win-clear-log-ask = Да се изчисти ли историята на действията на агентите? Това няма да отмени промените, направени от агентите.
 # review: new
 win-agent-programs = &Програми, чиито агенти са поискали достъп до пощата ви:
-# review: new
-win-change = Про&мяна...
+win-change = Пром&яна...
 # review: new
 win-what-agents-did = &Действия на агентите:
 # review: new

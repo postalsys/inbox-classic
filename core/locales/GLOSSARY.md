@@ -681,6 +681,10 @@ keep the normal plural.
 - `ui-the-provider` = "доставчика", `ui-the-account` = "акаунта" (the short article, after a preposition); `$store`
   names stand without an article.
 - Quotes „…“; sizes КБ, МБ, ГБ; day names lowercase; access keys Cyrillic.
+- Account aliases: „Допълнителни адреси за изпращане“ in the field and its error. Rules „обработват“ messages;
+  „цифров подпис“ distinguishes cryptographic signatures from the signature text appended to mail.
+- „Данни за влизане“ includes passwords and browser sign-in tokens. Key verification confirms the owner
+  and every listed address before „Съвпадат“; the displayed name may be a fingerprint.
 
 ### Русский (ru)
 

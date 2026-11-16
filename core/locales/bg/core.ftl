@@ -531,8 +531,7 @@ error-folder-special = „Входящи“ и специалните папки
 error-no-recipients = съобщението няма получатели
 # review: new
 error-bad-address = „{ $address }“ не е имейл адрес
-# review: new
-error-not-own-address = { $address } не е сред адресите за изпращане на този акаунт. Добавете го в „Други адреси, от които изпращате“ в свойствата на акаунта.
+error-not-own-address = { $address } не е сред адресите за изпращане на този акаунт. Добавете го в „Допълнителни адреси за изпращане“ в свойствата на акаунта.
 # review: new
 rule-query-refused = Правилата не могат да филтрират по папка или дата ({ $words }).
 # review: new
