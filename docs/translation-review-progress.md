@@ -1,180 +1,61 @@
-# Translation review, November 2026
+# Translation review, round 2, November 2026
 
-Objective: make the translations read as natural UI and help text in each language, using the actual application
-behavior and surrounding controls to establish meaning. Preserve the original scope across sessions.
+Review all newly added language drafts and later edits for fluent, natural wording in the actual app context.
+Commit completed batches regularly and preserve an exact resume point.
 
-## Completed review
+## Resume here
 
-- Starting checkout: `27616ee9` on `master`; initial review baseline: `94577d0`.
-- Read `/Users/andris/Downloads/inbox-classic-translation-guide.md`, `core/locales/GLOSSARY.md`, and
-  `core/crates/pe-html/help/FORMAT.md` before continuing.
-- `translation-review-state.json` lists the exact pending catalog IDs and help pages. Completed batches record
-  their reviewed files and content hashes. Check `git log` and `git status` before using this record: new work may
-  have landed since the last batch. Review any subsequent source or translation changes as well.
-- Initial inventory: 241 marked messages and 14 marked help passages per language (de, es, et, fr), 964 messages
-  and 56 help passages altogether. Each language has ten affected help pages. Other languages named in the guide
-  are not present in this checkout. `scripts/check-language.mjs` is also absent here.
-- All four translation sets and the final English/source consistency pass are complete.
-- Review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`. `--check` passes with zero pending drafts or unmarked changes.
-- No pending work remains from this review. For new changes, compare against the recorded file/source hashes.
+- Starting checkout: `e99f7e59`; review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
+- Read `/Users/andris/Downloads/inbox-classic-translation-guide.md`, `core/locales/GLOSSARY.md` (including the
+  language's own notes), and `core/crates/pe-html/help/FORMAT.md`.
+- Initial scope: 25,353 catalog entries and 992 help pages. Nineteen new languages each have 1,331 entries and
+  52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
+- `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
+  and git history before resuming, so later source or translation changes are not missed.
+- Resume with Dutch `core.ftl`: 448 pending entries, then its platform/help catalogs (256 entries) and 52 help
+  topics. Dutch UI is reviewed. The other 18 new languages follow. No language is considered complete merely
+  because automated checks pass.
+- Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
 
-## Checkpoint rules
+## Review and checkpoint rules
 
-- Work in small, completed batches and commit only the reviewed language's files and these progress records
-  (plus glossary changes when needed). Never include `build/` or unrelated user files.
-- Follow the supplied guide: remove review marks only after checking the complete message or help passage.
-  Retain uncertain entries and record the reason. Do not advance `REVIEWED` during partial review.
-- The current review checker compares unmarked text to a single old baseline; it will report reviewed entries
-  as unmarked during this round. Match these reports to the completed batch inventory. After every language is
-  finished, commit the reviewed state, advance `REVIEWED` to that commit, then require a clean review check.
-- Check catalog syntax, IDs, placeholder sets, plural behavior, access keys in their actual menus, and help
-  structure. Run `cargo test -p pe-i18n -p pe-html` from `core` for completed batches. Refresh
-  `build/i18n-review.html`; this generated file is not committed.
-- Preserve the unrelated untracked feedback, language-planning and responsiveness documents in `docs/`.
+- Check callers, surrounding controls and actual behavior. Preserve variables, appropriate plurals, literal
+  keyboard names, control references, links and platform-specific help branches. Keep terminology consistent.
+- Remove marks only for messages/passages actually reviewed. Leave uncertain content marked and explain it.
+- Keep `REVIEWED` unchanged until the full round is complete. During partial review, reconcile the review
+  checker's unmarked-change reports with the completed inventory.
+- `scripts/check-language.mjs` now exists but requires every message/help page to remain marked. Its mark-only
+  failures are expected for completed content; require all structural checks to pass. Do not restore marks.
+- Run the existing localization/help tests for completed batches and `git diff --check`. Regenerate
+  `build/i18n-review.html` without committing it.
+- Commit only reviewed files, relevant glossary changes and progress records. Broad Git approval is already
+  saved. Preserve the seven unrelated untracked planning/overview documents in `docs/`.
+- Do not use the unfiltered `node scripts/i18n-review.mjs` listing: this round produces several MB of output.
+  Use `--html`, or capture `--check` and report only the totals/unexpected findings.
 
 ## Completed batches
 
-### et-app-2026-11-16
+### Existing-language additions
 
-Reviewed all 94 marked entries in `core/locales/et/app.ftl`, including encryption-key management, attachment
-actions and settings transfer. Removed their review marks. Corrected formal address, awkward literal wording,
-address-list grammar, key verification instructions, and access-key collisions. Added Estonian terminology notes
-to the glossary. 32 values were improved; the remaining labels were retained after review.
+Reviewed all 64 new installer/Linux entries and the four changed language-setting help passages in de/es/et/fr.
+Improved 37 values, including literal store descriptions, actual search fields, quoted-message folding, offline
+mail availability and Windows user-account installation. No pending content remains in those four languages.
+All 72 localization/help tests passed. The installer strings and Linux desktop/metainfo files were regenerated
+with `cargo build -p pe-ffi` and inspected; include those generated files in this checkpoint.
 
-Validation: all 68 `pe-i18n`/`pe-html` tests passed; IDs, placeholders, plural branches, access-key presence and
-new-dialog shortcut uniqueness passed; `git diff --check` passed. The 94 removed marks are intentional.
+### Dutch app catalog
 
-Checkpoint commit: `150faf9e`.
+Reviewed all 626 entries in `nl/app.ftl` in two batches (300 and 326). Improved 73 values. Corrected literal
+phrasing, incomplete labels, failure messages, rules-versus-sort wording, contact imports, key verification,
+backup/restore and account reauthentication after transfer. Fixed the export-dialog mnemonic collision.
+All main-menu and new-dialog access keys are unique; all 72 tests and structural catalog checks passed.
 
-### et-core-2026-11-16
+The additional sender-address error in `nl/core.ftl` is also reviewed and now names the exact UI field
+“Andere afzenderadressen”. All 11 catalog tests passed after that one-string follow-up. Dutch glossary notes
+record the field name, rule-processing terminology and digital-signature distinction.
 
-Reviewed all 143 marked core messages and the four marked entries in `help.ftl`, `linux.ftl` and `mac.ftl`.
-Improved 71 core values: formal address, signature versus key-owner verification, natural error/result wording,
-address lists, filenames without inflected placeholders, and settings-transfer terminology. The attachment notice
-now accurately describes cleanup at startup of temporary copies older than a day. Review marks removed;
-all 68 tests and catalog invariant checks passed. All 241 unmarked catalog entries exactly match the two
-completed batches; there are no untracked omissions.
+Current totals: 691 catalog entries and four help pages reviewed; 111 catalog values improved. Remaining:
+24,662 catalog entries and 988 help pages. `REVIEWED` remains unchanged until the full round is complete.
 
-Checkpoint commit: `2e34851e`.
-
-### et-help-2026-11-16
-
-Reviewed all 14 marked passages across the ten pending Estonian help pages. Rewrote the new key management,
-verification, encrypted-mail and migration topics; corrected attachments and folder/account navigation text.
-Formal address, terms and control names now match the catalogs. Removed the review marks. All help tags, links,
-control references and platform branches are preserved. All 68 tests and `git diff --check` passed. The tracker
-accounts for all 241 unmarked catalog entries and 69 unmarked help lines. The review HTML was regenerated;
-723 messages and 42 help passages remain in the other languages.
-
-Checkpoint commit: `f596775a`.
-
-### de-app-2026-11-16
-
-Reviewed the 94 marked German UI messages and the shared Remove button (95 entries in the batch). Improved 31
-values, including literal key/verification instructions, settings transfer, the All Sent label and shortcuts.
-The extra Remove mnemonic avoids collisions with Properties and Export in the new key window and Accounts.
-IDs, placeholders, plural branches and mnemonic presence are preserved. Dialog and new menu shortcut checks
-pass; all 68 tests and `git diff --check` passed.
-
-Checkpoint commit: `6c6cc9ac`.
-
-### de-core-2026-11-16
-
-Reviewed all 143 marked core messages and four platform/help labels. Improved 60 core values, including
-key-owner verification, encryption errors, filenames, account credentials and export/import results. The
-attachment notice now describes cleanup at startup of copies older than a day. Removed all German catalog
-review marks. All 68 tests, catalog invariants and `git diff --check` passed.
-
-Checkpoint commit: `d3ea269f`.
-
-### de-help-2026-11-16
-
-Reviewed all 14 marked passages across ten German help pages. Rewrote key management, fingerprint verification,
-encrypted-mail and migration explanations. Corrected attachment cleanup, folder navigation, hidden unread counts
-and the order of verification steps. All tags, links, control references, platform branches and keyboard names
-are preserved. All 68 tests and `git diff --check` passed; the inventory accounts for every unmarked change
-(483 catalog entries and 141 help lines). Regenerated `build/i18n-review.html`.
-
-Checkpoint commit: `c088888d`.
-
-### es-app-2026-11-16
-
-Reviewed all 94 marked Spanish UI messages and improved 28 values. Replaced literal key-management and
-verification phrasing, clarified saved credentials and signing in again, and standardized backup/export
-protection as "contraseña". Added the terminology decisions to the glossary. All 68 tests, catalog invariants,
-dialog/menu shortcut checks and `git diff --check` passed.
-
-Checkpoint commit: `ca9d02b0`.
-
-### es-core-2026-11-16
-
-Reviewed all 143 core messages and four platform/help labels; improved 63 core values. Clarified private-key
-errors, address lists, key discovery, stored credentials, import results, missing rule folders and temporary
-attachment cleanup. Removed all Spanish catalog review marks. All 68 tests, catalog invariants and
-`git diff --check` passed.
-
-Checkpoint commit: `fd172449`.
-
-### es-help-2026-11-16
-
-Reviewed all 14 marked passages across ten Spanish help pages. Rewrote the new encryption, verification and
-migration topics; corrected attachment handling, combined folder views and unread counts. Preserved all tags,
-links, control references, platform branches and keyboard names. All 68 tests and `git diff --check` passed;
-724 unmarked catalog entries and 210 help lines match the completed inventory. All completed file/source
-hashes match. Regenerated `build/i18n-review.html`.
-
-Checkpoint commit: `209fe6e2`.
-
-### fr-app-2026-11-16
-
-Reviewed all 94 marked French UI messages; improved 24 values. Rewrote literal key-management and verification
-phrasing, clarified transferred credentials, and fixed three shortcut collisions. All 68 tests, catalog
-invariants, dialog/menu mnemonic checks and `git diff --check` passed.
-
-Checkpoint commit: `91355d31`.
-
-### fr-core-2026-11-16
-
-Reviewed all 143 core messages and four platform/help labels; improved 62 core values. Reworked literal errors
-and import results, clarified key protection and stored credentials, and corrected French singular-category
-counts so zero cannot appear as one. All 68 tests, catalog invariants and `git diff --check` passed.
-
-Checkpoint commit: `74078651`.
-
-### fr-help-2026-11-16
-
-Reviewed all 14 marked passages across ten French help pages. Rewrote new topics and corrected attachment
-handling, folder layout, hidden unread counts and verification order. Preserved all tags, links, control
-references, platform branches and keyboard names. All 68 tests and `git diff --check` passed; all 965 unmarked
-catalog entries and 279 help lines match the completed inventory. File/source hashes match. The regenerated
-review HTML has no remaining marked drafts.
-
-Checkpoint commit: `3deaae10`.
-
-### Final consistency pass
-
-All 965 catalog entries (the original 964 plus the shared German Remove button) and all 40 affected translated
-help pages are reviewed. In total, 372 translated catalog values were improved. Every pending list is empty.
-Five English catalog values and eight English help topics were corrected to match the application. The final
-cross-language checks cover:
-
-- Sign-in credentials and OAuth reauthentication after importing an unprotected export (`setup/export.rs`,
-  `setup/import.rs`), and rule destination folders resolved after account synchronization.
-- Decryption-key identification, valid signatures versus verified key ownership, and multi-recipient encryption
-  (`protect.rs`). Key searches can find several keys; publication confirms each address separately (`lookup.rs`).
-- Temporary attachment copies removed at startup when older than a day (`clear_private_dirs()`), and
-  Internet-origin marking on Windows/macOS (`opening.rs` and platform file-opening code).
-- Combined Inbox, Sent and Drafts views, root-level folders, and collapsed unread counts excluding Junk and
-  Deleted Items (`tree.rs`).
-- Fingerprints and contact addresses checked before confirming verification (`keys.rs` and the dialog code).
-
-Validation: all 68 `pe-i18n`/`pe-html` tests pass. The full-round checks preserve catalog IDs, variables, plural
-branches and mnemonic presence; reviewed menu/dialog shortcuts are unique. Help tags, control references, links,
-platform branches and keyboard names are preserved. Completed file and English-source hashes match the ledger.
-All unmarked changes match the completed inventory (965 catalog entries and 279 help lines). No review marks
-remain. `git diff --check` passes. UI behavior and shortcut scopes were checked in source; no GUI was launched.
-
-Final reviewed-content commit: `7c0b1672581c9bd7a33c226f35da16cedca4b528`. `core/locales/REVIEWED` points to this commit.
-The review checker passes: 0 pending messages, 0 pending help passages, and 0 unmarked changes.
-`build/i18n-review.html` was regenerated and is not committed. Unrelated untracked feedback, language-planning
-and responsiveness documents remain untouched.
+Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
+consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

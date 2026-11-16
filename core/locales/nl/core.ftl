@@ -522,8 +522,7 @@ error-folder-special = Postvak IN en de speciale mappen kunnen niet worden herno
 error-no-recipients = het bericht heeft geen ontvangers
 # review: new
 error-bad-address = “{ $address }” is geen e-mailadres
-# review: new
-error-not-own-address = { $address } is niet een van de afzenderadressen van dit account. Voeg het toe aan “Andere adressen waarvan je verzendt” in de eigenschappen van het account.
+error-not-own-address = { $address } is geen afzenderadres van dit account. Voeg dit adres toe aan het veld “Andere afzenderadressen” in de accounteigenschappen.
 # review: new
 rule-query-refused = Regels kunnen niet filteren op map of datum ({ $words }).
 # review: new

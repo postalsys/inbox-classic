@@ -171,21 +171,12 @@ gtk-restart-to-change = Inbox Classic taaskäivitub, et keelt muuta.
 
 ## The desktop entry and the page of the software stores
 
-# review: new
-gtk-desktop-generic-name = E-posti klient
-# review: new
+gtk-desktop-generic-name = Meiliprogramm
 gtk-desktop-comment = Lugege ja kirjutage e-kirju: kiire ja lihtne meiliprogramm
-# review: new
 gtk-desktop-keywords = post;e-post;kiri;
-# review: new
 gtk-metainfo-summary = Kiire ja lihtne meiliprogramm
-# review: new
-gtk-metainfo-description = Inbox Classic loeb ja kirjutab e-kirju nii, et kaustad on vasakul, kirjad üleval ja kiri nende all, nagu meiliprogrammides varem. See töötab mis tahes IMAP- ja SMTP-kontoga ning logib brauseri kaudu sisse Outlook.com-i ja Microsoft 365-sse.
-# review: new
-gtk-metainfo-feature-sanitized = Iga kiri kuvatakse puhastatuna, ilma skriptideta, ja Interneti pildid ainult siis, kui te seda lubate
-# review: new
-gtk-metainfo-feature-search = Otsing, mis leiab sõnu teemast, inimestest, failinimedest ja tekstist, Gmaili operaatoritega
-# review: new
-gtk-metainfo-feature-replies = Vastused peidavad varasemad kirjad, mida nad tsiteerivad
-# review: new
-gtk-metainfo-feature-offline = Post jääb võrguühenduseta loetavaks; paroolid hoitakse teie võtmerõngas
+gtk-metainfo-description = Inbox Classic on tuttava paigutusega meiliprogramm: kaustad vasakul, kirjade loend üleval ja lugemispaan selle all. Rakendus toetab IMAP- ja SMTP-kontosid. Outlook.comi ja Microsoft 365 kontodele saab sisse logida brauseri kaudu.
+gtk-metainfo-feature-sanitized = Kirju kuvatakse ilma skriptideta ning veebipilte laaditakse ainult teie loal
+gtk-metainfo-feature-search = Otsige teema, saatjate, adressaatide, manuste nimede ja kirja sisu järgi, kasutades ka Gmaili otsinguoperaatoreid
+gtk-metainfo-feature-replies = Vastustes on varasemate kirjade tsitaadid kokku ahendatud
+gtk-metainfo-feature-offline = Allalaaditud kirju saab lugeda ka võrguühenduseta; paroolid salvestatakse süsteemi paroolihoidlasse

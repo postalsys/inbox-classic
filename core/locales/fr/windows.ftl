@@ -116,26 +116,19 @@ win-folders-show = Afficher les dossiers
 
 ## The installer
 
-# review: new
 win-installer-start = Démarrer Inbox Classic
-# review: new
 win-installer-welcome-new =
-    Ceci va installer Inbox Classic { $version }, un programme de messagerie.
+    Inbox Classic { $version }, un logiciel de messagerie, va être installé.
 
-    Aucun droit d'administrateur n'est nécessaire, il est installé pour votre compte uniquement.
-# review: new
+    L’installation concerne uniquement votre compte utilisateur. Aucun droit d’administrateur n’est nécessaire.
 win-installer-welcome-same =
-    Inbox Classic { $version } est déjà installé. Ceci va le réinstaller.
+    Inbox Classic { $version } est déjà installé et va être réinstallé.
 
-    Vos comptes et votre courrier sont conservés.
-# review: new
+    Vos comptes et vos messages seront conservés.
 win-installer-welcome-update =
-    Ceci va mettre à jour Inbox Classic { $installed } vers { $version }.
+    Inbox Classic va passer de la version { $installed } à la version { $version }.
 
-    S'il est ouvert, il est d'abord fermé. Vos comptes et votre courrier sont conservés.
-# review: new
+    Si le logiciel est ouvert, il sera fermé avant la mise à jour. Vos comptes et vos messages seront conservés.
 win-installer-older-ask = Inbox Classic { $installed } est installé et plus récent que { $version }. Installer quand même l'ancienne version ?
-# review: new
 win-installer-still-running = Inbox Classic est toujours ouvert. Fermez-le et réessayez.
-# review: new
-win-installer-remove-mail-ask = Supprimer aussi les comptes et le courrier qu'Inbox Classic garde sur cet ordinateur ? Le courrier sur les serveurs reste.
+win-installer-remove-mail-ask = Supprimer également les comptes et les messages enregistrés par Inbox Classic sur cet ordinateur ? Les messages présents sur les serveurs seront conservés.

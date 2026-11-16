@@ -279,6 +279,11 @@ Terms: Postvak IN; Postvak UIT; Verzonden items; Verwijderde items; Concepten; O
 - Finished actions use the participle without a verb ("{ $messages } verplaatst naar ..."); ongoing ones choose
   "wordt/worden" by `$count`.
 - Destinations read "naar { $folder }", which also works with `their-folders`.
+- Message rules "verwerken" messages; reserve "sorteren" for the display order of a message list.
+- Use "digitale handtekening" where needed to distinguish a cryptographic signature from the account signature
+  added below a message. Key verification confirms ownership by comparing fingerprints.
+- The account field for additional sender addresses is "Andere afzenderadressen". Refer to this exact label in
+  errors and instructions.
 - Keys Ctrl / Shift / Del as Dutch keyboards print them. Google's button "Inloggen met Google", Microsoft's
   "Aanmelden met Microsoft".
 

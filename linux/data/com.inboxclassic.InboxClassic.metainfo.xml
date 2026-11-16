@@ -49,24 +49,24 @@
       Microsoft 365 via browseren.
     </p>
     <p xml:lang="de">
-      Inbox Classic liest und schreibt E-Mails mit den Ordnern links, den Nachrichten oben und der Nachricht darunter,
-      wie es E-Mail-Programme früher taten. Es funktioniert mit jedem IMAP- und SMTP-Konto und meldet sich über den
-      Browser bei Outlook.com und Microsoft 365 an.
+      Inbox Classic bietet die klassische E-Mail-Ansicht: Ordner links, die Nachrichtenliste oben und den Lesebereich
+      darunter. Es unterstützt IMAP- und SMTP-Konten. Bei Outlook.com und Microsoft 365 können Sie sich über den Browser
+      anmelden.
     </p>
     <p xml:lang="et">
-      Inbox Classic loeb ja kirjutab e-kirju nii, et kaustad on vasakul, kirjad üleval ja kiri nende all, nagu
-      meiliprogrammides varem. See töötab mis tahes IMAP- ja SMTP-kontoga ning logib brauseri kaudu sisse Outlook.com-i
-      ja Microsoft 365-sse.
+      Inbox Classic on tuttava paigutusega meiliprogramm: kaustad vasakul, kirjade loend üleval ja lugemispaan selle
+      all. Rakendus toetab IMAP- ja SMTP-kontosid. Outlook.comi ja Microsoft 365 kontodele saab sisse logida brauseri
+      kaudu.
     </p>
     <p xml:lang="es">
-      Inbox Classic lee y escribe correo con las carpetas a la izquierda, los mensajes arriba y el mensaje debajo, como
-      lo hacían los programas de correo. Funciona con cualquier cuenta IMAP y SMTP, e inicia sesión en Outlook.com y
-      Microsoft 365 mediante el navegador.
+      Inbox Classic ofrece la distribución clásica del correo: carpetas a la izquierda, lista de mensajes arriba y panel
+      de lectura debajo. Admite cuentas IMAP y SMTP, y permite iniciar sesión en Outlook.com y Microsoft 365 desde el
+      navegador.
     </p>
     <p xml:lang="fr">
-      Inbox Classic lit et écrit les e-mails avec les dossiers à gauche, les messages en haut et le message en dessous,
-      comme le faisaient les programmes de messagerie. Il fonctionne avec tout compte IMAP et SMTP, et se connecte à
-      Outlook.com et Microsoft 365 par le navigateur.
+      Inbox Classic retrouve la disposition classique des logiciels de messagerie : dossiers à gauche, liste des
+      messages en haut et volet de lecture en dessous. Il prend en charge les comptes IMAP et SMTP et permet de se
+      connecter à Outlook.com et Microsoft 365 dans le navigateur.
     </p>
     <p xml:lang="hr">
       Inbox Classic čita i piše e-poštu s mapama s lijeve strane, porukama na vrhu i porukom ispod, kao što su to nekad
@@ -166,22 +166,22 @@
       <li xml:lang="da">En søgning, der finder ord i emnet, afsendere og modtagere, filnavne og teksten, med Gmails søgeoperatorer</li>
       <li xml:lang="da">Svar folder de tidligere meddelelser, de citerer, sammen</li>
       <li xml:lang="da">Mailen kan læses offline; adgangskoder gemmes i din nøglering</li>
-      <li xml:lang="de">Jede Nachricht wird bereinigt angezeigt, ohne Skripte, und Bilder aus dem Internet nur, wenn Sie es erlauben</li>
-      <li xml:lang="de">Eine Suche, die Wörter im Betreff, in den Personen, in den Dateinamen und im Text findet, mit den Operatoren von Gmail</li>
-      <li xml:lang="de">Antworten falten die früheren Nachrichten ein, die sie zitieren</li>
-      <li xml:lang="de">E-Mails bleiben offline lesbar; Kennwörter liegen in Ihrem Schlüsselbund</li>
-      <li xml:lang="et">Iga kiri kuvatakse puhastatuna, ilma skriptideta, ja Interneti pildid ainult siis, kui te seda lubate</li>
-      <li xml:lang="et">Otsing, mis leiab sõnu teemast, inimestest, failinimedest ja tekstist, Gmaili operaatoritega</li>
-      <li xml:lang="et">Vastused peidavad varasemad kirjad, mida nad tsiteerivad</li>
-      <li xml:lang="et">Post jääb võrguühenduseta loetavaks; paroolid hoitakse teie võtmerõngas</li>
-      <li xml:lang="es">Cada mensaje se muestra depurado, sin scripts, y las imágenes de Internet solo cuando usted lo permite</li>
-      <li xml:lang="es">Una búsqueda que encuentra palabras en el asunto, las personas, los nombres de archivo y el texto, con los operadores de Gmail</li>
-      <li xml:lang="es">Las respuestas pliegan los mensajes anteriores que citan</li>
-      <li xml:lang="es">El correo sigue legible sin conexión; las contraseñas se guardan en su llavero</li>
-      <li xml:lang="fr">Chaque message est affiché nettoyé, sans scripts, et les images d'Internet seulement quand vous le permettez</li>
-      <li xml:lang="fr">Une recherche qui trouve des mots dans l'objet, les personnes, les noms de fichiers et le texte, avec les opérateurs de Gmail</li>
-      <li xml:lang="fr">Les réponses replient les messages précédents qu'elles citent</li>
-      <li xml:lang="fr">Le courrier reste lisible hors ligne ; les mots de passe sont gardés dans votre trousseau</li>
+      <li xml:lang="de">Nachrichten werden ohne Skripte angezeigt; Bilder aus dem Internet werden nur mit Ihrer Erlaubnis geladen</li>
+      <li xml:lang="de">Suche in Betreff, Absendern, Empfängern, Anlagennamen und Nachrichtentext mit den Suchoperatoren von Gmail</li>
+      <li xml:lang="de">Zitierte Nachrichten in Antworten werden eingeklappt</li>
+      <li xml:lang="de">Heruntergeladene E-Mails lassen sich auch offline lesen; Kennwörter werden in Ihrem Schlüsselbund gespeichert</li>
+      <li xml:lang="et">Kirju kuvatakse ilma skriptideta ning veebipilte laaditakse ainult teie loal</li>
+      <li xml:lang="et">Otsige teema, saatjate, adressaatide, manuste nimede ja kirja sisu järgi, kasutades ka Gmaili otsinguoperaatoreid</li>
+      <li xml:lang="et">Vastustes on varasemate kirjade tsitaadid kokku ahendatud</li>
+      <li xml:lang="et">Allalaaditud kirju saab lugeda ka võrguühenduseta; paroolid salvestatakse süsteemi paroolihoidlasse</li>
+      <li xml:lang="es">Los mensajes se muestran sin scripts; las imágenes de internet solo se cargan con su permiso</li>
+      <li xml:lang="es">Busque en el asunto, los remitentes, los destinatarios, los nombres de los adjuntos y el texto con los operadores de búsqueda de Gmail</li>
+      <li xml:lang="es">Los mensajes citados en las respuestas se muestran contraídos</li>
+      <li xml:lang="es">Lea el correo descargado sin conexión; las contraseñas se guardan en el llavero del sistema</li>
+      <li xml:lang="fr">Les messages sont affichés sans scripts ; les images provenant d’Internet ne sont chargées qu’avec votre accord</li>
+      <li xml:lang="fr">Recherchez dans l’objet, les expéditeurs, les destinataires, les noms des pièces jointes et le texte avec les opérateurs de recherche de Gmail</li>
+      <li xml:lang="fr">Les messages cités dans les réponses sont repliés</li>
+      <li xml:lang="fr">Le courrier téléchargé reste accessible hors connexion ; les mots de passe sont enregistrés dans le trousseau du système</li>
       <li xml:lang="hr">Svaka se poruka prikazuje pročišćena, bez skripti, a slike s interneta samo kad ih dopustite</li>
       <li xml:lang="hr">Pretraživanje koje pronalazi riječi u predmetu, osobama, nazivima datoteka i tekstu, s Gmailovim operatorima</li>
       <li xml:lang="hr">Odgovori sažimaju ranije poruke koje citiraju</li>
