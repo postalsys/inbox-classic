@@ -2986,7 +2986,7 @@ pub async fn all_sent_and_drafts(d: &Driver) {
             let kept = || {
                 shell()
                     .settings
-                    .text(crate::settings::OPENED_ROWS)
+                    .text(crate::settings::CLOSED_ROWS)
                     .unwrap_or_default()
                     .split(',')
                     .any(|id| id == ALL_SENT.to_string())

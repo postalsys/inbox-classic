@@ -14,7 +14,7 @@ use pe_store::Folder;
 
 use crate::app::{run_command, shell, spawn};
 use crate::commands::Command;
-use crate::folders::{ALL_DRAFTS, ALL_INBOXES, ALL_SENT, FLAGGED, FolderTree, Handlers};
+use crate::folders::{ALL_INBOXES, FolderTree, Handlers};
 use crate::messages::MessageList;
 use crate::reader::{Loaded, Reader};
 use crate::settings;
@@ -577,8 +577,8 @@ impl Mailbox {
         self.fill_account_menus();
         let shown = self.folders.row(self.shown_row()).map(|row| row.key);
         self.reloading.set(true);
-        let (closed, opened) = (kept_rows(settings::CLOSED_ROWS), kept_rows(settings::OPENED_ROWS));
-        self.folders.rebuild(&rows, |row| starts_open(row, &closed, &opened));
+        let flipped = flipped_rows();
+        self.folders.rebuild(&rows, |row| opens(row, &flipped));
         let again = shown.as_deref().map(|key| (key, pe_core::tree::reselect(&rows, key)));
         match again {
             // the same row: selected quietly, what it lists stays
@@ -612,28 +612,15 @@ impl Mailbox {
         self.folders.row(self.shown_row())
     }
 
-    /// The list shown gathers one folder of every account: All Inboxes, All Sent or All Drafts
-    fn gathering(&self) -> bool {
-        matches!(
-            self.listed.get(),
-            TreeList::AllInboxes | TreeList::AllSent | TreeList::AllDrafts
-        )
-    }
-
     /// The row of the tree that stands for what is listed ([`crate::folders::row_id`]), 0 for none
     fn shown_row(&self) -> i64 {
-        match self.listed.get() {
-            TreeList::Flagged => return FLAGGED,
-            TreeList::AllInboxes => return ALL_INBOXES,
-            TreeList::AllSent => return ALL_SENT,
-            TreeList::AllDrafts => return ALL_DRAFTS,
-            TreeList::Folder | TreeList::None => {}
-        }
-        if self.folder.get() != 0 {
-            self.folder.get()
-        } else {
-            -self.selected_account.get()
-        }
+        crate::folders::list_id(self.listed.get(), self.folder.get(), self.selected_account.get())
+    }
+
+    /// The folder of a one-folder list without words (the core says): what Empty Folder, Import Messages and files
+    /// dropped on the list act on
+    fn own_folder(&self) -> Option<i64> {
+        self.view.borrow().own_folder()
     }
 
     /// What the window keeps of the accounts and of each of their folders
@@ -785,12 +772,6 @@ impl Mailbox {
     /// Another list shown, as a row of the tree says (`list`, of `folder` for a folder's own); false when it was
     /// already the one shown
     fn on_folder_selected(&self, folder: i64, list: TreeList) -> bool {
-        // a folder's list without a folder (none chosen): nothing is listed
-        let list = if list == TreeList::Folder && folder == 0 {
-            TreeList::None
-        } else {
-            list
-        };
         if folder == self.folder.get() && list == self.listed.get() {
             return false;
         }
@@ -856,7 +837,7 @@ impl Mailbox {
     /// The folder of a row in a list of several folders: its name, with its account's when there are several; in All
     /// Inboxes, All Sent and All Drafts the account alone, as the tree names it
     pub fn row_folder(&self, folder: i64) -> String {
-        if self.gathering() && !self.searching() {
+        if self.view.borrow().gathers_accounts() {
             let account = self.folder_accounts.borrow().get(&folder).copied();
             return self
                 .accounts
@@ -924,13 +905,14 @@ impl Mailbox {
         self.enable(Command::CollapseAllThreads, on);
         // Deleted Items or Junk E-mail with messages: the folder read for the counts above says
         self.enable(Command::EmptyFolder, total > 0 && self.can_empty_folder());
+        self.enable(Command::MarkAllRead, view.marks_all_read());
         self.list
             .show_person_column(view.lists_recipients(core).unwrap_or(false));
-        let (title, values) = if self.searching() || self.listed.get() == TreeList::Flagged {
-            (t!(UiColFolder), Vec::new())
-        } else {
+        let (title, values) = if view.gathers_accounts() {
             let names = self.accounts.borrow().iter().map(|a| a.title.clone()).collect();
             (t!(UiColAccount), names)
+        } else {
+            (t!(UiColFolder), Vec::new())
         };
         self.list.show_folder_column(several, &title, &values);
         // the selection follows the messages to where they are now, without a flicker of the reading pane
@@ -1213,7 +1195,7 @@ impl Mailbox {
     /// selected in the list
     pub fn show_message(&self, folder: i64, uid: u64) {
         // All Inboxes (All Sent, All Drafts) stays when it has the message, its list up to date with it
-        if self.gathering() && !self.searching() {
+        if self.view.borrow().gathers_accounts() {
             if let Some(timer) = self.reload_later.borrow_mut().take() {
                 timer.remove();
             }
@@ -1590,16 +1572,16 @@ impl Mailbox {
         self.act(Action::Read(seen));
     }
 
-    /// Every message of the selected folder read, or of every Inbox from All Inboxes; nothing while searching
+    /// Every message of the folder listed read, or of every Inbox from All Inboxes, when the core says Mark All Read
+    /// applies to the list
     pub fn mark_all_read(&self) {
-        if self.searching() {
+        if !self.view.borrow().marks_all_read() {
             return;
         }
-        if self.listed.get() == TreeList::AllInboxes {
-            let _ = shell().core.mark_all_inboxes_read();
-        } else if self.listed.get() == TreeList::Folder {
-            let _ = shell().core.mark_all_read(self.folder.get());
-        }
+        let _ = match self.own_folder() {
+            Some(folder) => shell().core.mark_all_read(folder),
+            None => shell().core.mark_all_inboxes_read(),
+        };
     }
 
     pub fn load_pictures(&self) {
@@ -1975,7 +1957,7 @@ impl Mailbox {
     /// .eml files dropped from a file manager onto folder `to`, or onto the list (None: the folder it shows): put in
     /// it as Import does
     pub async fn drop_files(&self, to: Option<i64>, files: Vec<PathBuf>) {
-        let folder = to.unwrap_or(self.folder.get());
+        let folder = to.or_else(|| self.own_folder()).unwrap_or(0);
         if folder <= 0 || !self.folder_accounts.borrow().contains_key(&folder) {
             ui::alert(&self.window, &import_title(), &t!(UiImportChooseFolder)).await;
             return;
@@ -2137,22 +2119,23 @@ impl Mailbox {
         *self.folder_popover.borrow_mut() = Some(popup_menu(widget, &menu, x, y));
     }
 
-    /// What to ask before emptying the folder shown (Deleted Items or Junk E-mail with messages); None when Empty
-    /// Folder does not apply
-    fn empty_question(&self) -> Option<String> {
-        shell().core.empty_folder_question(self.folder.get()).ok().flatten()
+    /// The folder listed and what to ask before emptying it (Deleted Items or Junk E-mail with messages); None when
+    /// Empty Folder does not apply
+    fn empty_question(&self) -> Option<(i64, String)> {
+        let folder = self.own_folder()?;
+        let question = shell().core.empty_folder_question(folder).ok().flatten()?;
+        Some((folder, question))
     }
 
-    /// The folder shown is Deleted Items or Junk E-mail, not a list of several or a search
+    /// The folder listed is Deleted Items or Junk E-mail, not a list of several or a search
     fn can_empty_folder(&self) -> bool {
-        self.listed.get() == TreeList::Folder
-            && !self.searching()
-            && shell().core.can_empty(self.folder.get()).unwrap_or(false)
+        self.own_folder()
+            .is_some_and(|folder| shell().core.can_empty(folder).unwrap_or(false))
     }
 
     /// Deleted Items or Junk E-mail emptied for good, after asking (the core words the question, with how many go)
     pub async fn empty_folder(&self) {
-        let Some(question) = self.empty_question() else {
+        let Some((folder, question)) = self.empty_question() else {
             return;
         };
         // the question as the heading, what happens under it, as GNOME's dialogs have it
@@ -2163,7 +2146,7 @@ impl Mailbox {
         if ui::ask(&self.window, heading, body, &buttons, "cancel", "cancel", Some("empty")).await != "empty" {
             return;
         }
-        match shell().core.empty_folder(self.folder.get()) {
+        match shell().core.empty_folder(folder) {
             Ok(done) => self.set_status(&done),
             Err(reason) => ui::alert(&self.window, TITLE, &reason.to_string()).await,
         }
@@ -2488,18 +2471,14 @@ impl Mailbox {
     /// File > Import Messages: .eml files into the selected folder
     pub async fn import(&self) {
         let window = self.window.clone().upcast::<gtk::Window>();
-        if self.folder.get() == 0 {
+        let Some(folder) = self.own_folder() else {
             ui::alert(&window, &import_title(), &t!(UiImportChooseFolder)).await;
             return;
-        }
+        };
         let kind = t!(UiFilterMessages);
         let patterns = Some((kind.as_str(), &["*.eml"][..]));
         let files = ui::open_files(&window, &import_title(), patterns).await;
-        self.import_files(&files).await;
-    }
-
-    async fn import_files(&self, files: &[std::path::PathBuf]) {
-        self.import_into(self.folder.get(), files).await;
+        self.import_into(folder, &files).await;
     }
 
     async fn import_into(&self, folder: i64, files: &[std::path::PathBuf]) {
@@ -2515,9 +2494,9 @@ impl Mailbox {
         }
     }
 
-    /// A message file opened with the app (from the file manager): into the selected folder, asked first
+    /// A message file opened with the app (from the file manager): into the folder listed, asked first
     pub async fn import_file(&self, file: &Path) {
-        let folder = self.folder.get();
+        let folder = self.own_folder().unwrap_or(0);
         let Some((folder_name, _)) = self.folder_names.borrow().get(&folder).cloned() else {
             ui::alert(&self.window, &import_title(), &t!(UiImportChooseFolder)).await;
             return;
@@ -2528,7 +2507,7 @@ impl Mailbox {
             .unwrap_or_default();
         let question = t!(GtkImportOneQuestion, file = &*name, folder = &*folder_name);
         if ui::confirm(&self.window, &import_title(), &question, false).await {
-            self.import_files(&[file.to_path_buf()]).await;
+            self.import_into(folder, &[file.to_path_buf()]).await;
         }
     }
 }
@@ -2867,38 +2846,27 @@ fn command_toggle(icons: &[&str], label: &str, command: Command, name: &str) -> 
     button
 }
 
-/// The rows of the folder tree the user closed ([`settings::CLOSED_ROWS`]) or opened ([`settings::OPENED_ROWS`]),
-/// from the settings
-fn kept_rows(name: &str) -> HashSet<i64> {
+/// The rows of the folder tree the user turned the other way from how they start ([`settings::CLOSED_ROWS`])
+fn flipped_rows() -> HashSet<i64> {
     shell()
         .settings
-        .text(name)
+        .text(settings::CLOSED_ROWS)
         .unwrap_or_default()
         .split(',')
         .filter_map(|id| id.trim().parse().ok())
         .collect()
 }
 
-/// Whether a row starts open: as the core says, or as the user left it when the core says that is kept (a row that
-/// starts open is kept among the ones closed, one that starts closed among the ones opened)
-fn starts_open(row: &TreeRow, closed: &HashSet<i64>, opened: &HashSet<i64>) -> bool {
-    let id = crate::folders::row_id(row);
-    match (row.remembers_open, row.starts_open) {
-        (false, open) => open,
-        (true, true) => !closed.contains(&id),
-        (true, false) => opened.contains(&id),
-    }
+/// Whether a row is open after a rebuild: as the core says it starts, turned the other way when the user did so and
+/// the core says that is kept
+fn opens(row: &TreeRow, flipped: &HashSet<i64>) -> bool {
+    row.starts_open != (row.remembers_open && flipped.contains(&crate::folders::row_id(row)))
 }
 
-/// A row opened or closed by the user, kept for the next start when it differs from how the row starts
+/// A row opened or closed by the user, kept for the next start while it differs from how the row starts
 fn remember_opened(row: &TreeRow, open: bool) {
-    let name = if row.starts_open {
-        settings::CLOSED_ROWS
-    } else {
-        settings::OPENED_ROWS
-    };
     let id = crate::folders::row_id(row);
-    let mut ids = kept_rows(name);
+    let mut ids = flipped_rows();
     let changed = if open == row.starts_open {
         ids.remove(&id)
     } else {
@@ -2910,7 +2878,7 @@ fn remember_opened(row: &TreeRow, open: bool) {
         let text = ids.iter().map(i64::to_string).collect::<Vec<_>>().join(",");
         shell()
             .settings
-            .set_text(name, (!text.is_empty()).then_some(text.as_str()));
+            .set_text(settings::CLOSED_ROWS, (!text.is_empty()).then_some(text.as_str()));
     }
 }
 

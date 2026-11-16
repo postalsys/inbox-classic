@@ -15,7 +15,7 @@ use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::{gio, glib};
 use pe_core::MessageRef;
-use pe_core::tree::{TreeRow, TreeRowKind};
+use pe_core::tree::{TreeList, TreeRow, TreeRowKind};
 
 mod imp {
     use super::*;
@@ -112,13 +112,18 @@ pub const ALL_DRAFTS: i64 = i64::MIN + 3;
 /// one row, under All Inboxes, All Sent or All Drafts or not), an account's negated, [`ALL_INBOXES`], [`ALL_SENT`],
 /// [`ALL_DRAFTS`], [`FLAGGED`]; one for each of the core's keys
 pub fn row_id(row: &TreeRow) -> i64 {
-    match row.kind {
-        TreeRowKind::AllInboxes => ALL_INBOXES,
-        TreeRowKind::AllSent => ALL_SENT,
-        TreeRowKind::AllDrafts => ALL_DRAFTS,
-        TreeRowKind::Flagged => FLAGGED,
-        TreeRowKind::Account => -row.account,
-        TreeRowKind::AccountInbox | TreeRowKind::Folder => row.folder,
+    list_id(row.list, row.folder, row.account)
+}
+
+/// The id of the row that lists `list`: of `folder` for a folder's own, an account's heading (`account`) for none
+pub fn list_id(list: TreeList, folder: i64, account: i64) -> i64 {
+    match list {
+        TreeList::AllInboxes => ALL_INBOXES,
+        TreeList::AllSent => ALL_SENT,
+        TreeList::AllDrafts => ALL_DRAFTS,
+        TreeList::Flagged => FLAGGED,
+        TreeList::Folder => folder,
+        TreeList::None => -account,
     }
 }
 
@@ -897,7 +902,14 @@ mod tests {
             drop_target: false,
             reorders_accounts: matches!(kind, TreeRowKind::Account | TreeRowKind::AccountInbox),
             menu: pe_core::tree::TreeMenu::Folder,
-            list: pe_core::tree::TreeList::Folder,
+            list: match kind {
+                TreeRowKind::AllInboxes => TreeList::AllInboxes,
+                TreeRowKind::AllSent => TreeList::AllSent,
+                TreeRowKind::AllDrafts => TreeList::AllDrafts,
+                TreeRowKind::Flagged => TreeList::Flagged,
+                TreeRowKind::Account => TreeList::None,
+                TreeRowKind::AccountInbox | TreeRowKind::Folder => TreeList::Folder,
+            },
             starts_open: true,
             remembers_open: false,
             new_folder_account: account,
