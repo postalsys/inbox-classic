@@ -31,8 +31,7 @@ win-list-loading = Φόρτωση...
 
 ## Buttons and words used in many windows
 
-# review: new
-win-delete-button = &Διαγραφή
+win-delete-button = Διαγ&ραφή
 # review: new
 win-find-label = &Εύρεση:
 # review: new

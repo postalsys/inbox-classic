@@ -684,6 +684,17 @@ Terms: Εισερχόμενα; Εξερχόμενα; Απεσταλμένα; Δ�
   λογαριασμός).
 - In the help `data-text` names are always nominative, after "στο/στα/στην", "το κουμπί", never a genitive article.
 - Access keys are Greek capitals without accents; the reply header is "----- Αρχικό μήνυμα -----".
+- Rules επεξεργάζονται messages; use πληρούν τα κριτήρια for matches and reserve ταξινόμηση for list order.
+- Distinguish ψηφιακή υπογραφή from the signature text appended to messages. Key ownership is a separate
+  check (επαληθευμένος κάτοχος). Verify every address before selecting Ταιριάζουν. A key's displayed name
+  may be an address or fingerprint, so put it in parentheses without treating it as a person's name.
+- Στοιχεία σύνδεσης includes passwords and browser/OAuth tokens. Importing an unprotected settings file
+  requires signing in again, possibly in a browser. Keep φράση πρόσβασης for protected exports and backups.
+- Account/provider names and nominative fallbacks can lead a sentence followed by a colon. The Address Book
+  action Σύνταξη μηνύματος opens the compose window. Cc/Bcc remain Κοιν. / Ιδ. κοιν., with Alt+Κ / Alt+Ι
+  in Windows/Linux; explain these beside the unchanged literal English keyboard tags in help.
+- Menu access letters may appear lowercase in a label; their uppercase form must be an unaccented Greek
+  letter. Check shared menu/dialog scopes, including the two separate flag entries in the Message menu.
 
 ### Български (bg)
 
