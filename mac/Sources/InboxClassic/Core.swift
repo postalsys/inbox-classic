@@ -615,16 +615,11 @@ final class ListView {
         pe_list_view_clone(handle).map { ListView(handle: $0) }
     }
 
-    /// the folder, or with `folder` 0 every Inbox (`allInboxes`) or nothing; false when it was shown already
+    /// the list of a row of the folder tree (its `list` and `folder`): a folder's, All Inboxes', All Sent's, All
+    /// Drafts', Flagged's or none; false when it was shown already
     @discardableResult
-    func setScope(folder: Int64, allInboxes: Bool) -> Bool {
-        pe_list_view_set_scope(handle, folder, allInboxes)
-    }
-
-    /// the list of the Flagged row: the flagged messages of every account; false when it was shown already
-    @discardableResult
-    func setFlagged() -> Bool {
-        pe_list_view_set_flagged(handle)
+    func setList(_ list: PeTreeList, folder: Int64) -> Bool {
+        pe_list_view_set_list(handle, list, folder)
     }
 
     /// the words typed in the search box, which search every folder; false when they are the same
@@ -717,7 +712,8 @@ struct Account {
 /// A row of the folder list (`pe_folder_tree`): what it is, what it says and what it allows
 struct TreeRow {
     let kind: PeTreeRowKind
-    /// what it stands for, the same from one reading to the next (`inboxes`, `flagged`, `account:<id>`, `folder:<id>`)
+    /// what it stands for, the same from one reading to the next (`inboxes`, `sent`, `drafts`, `flagged`,
+    /// `account:<id>`, `folder:<id>`)
     let key: String
     /// 0 for All Inboxes and Flagged
     let account: Int64
@@ -739,6 +735,11 @@ struct TreeRow {
     let dropTarget: Bool
     let reordersAccounts: Bool
     let menu: PeTreeMenu
+    /// what it lists when chosen (`ListView.setList` with it and `folder`)
+    let list: PeTreeList
+    /// with rows under it: whether it starts open, and whether the user's opening and closing of it is kept (by `key`)
+    let startsOpen: Bool
+    let remembersOpen: Bool
     /// where New Folder makes a folder with it chosen: the account (0: New Folder does not apply) and the folder (0:
     /// the account's top)
     let newFolderAccount: Int64
@@ -764,6 +765,9 @@ struct TreeRow {
         dropTarget = row.drop_target
         reordersAccounts = row.reorders_accounts
         menu = row.menu
+        list = row.list
+        startsOpen = row.starts_open
+        remembersOpen = row.remembers_open
         newFolderAccount = row.new_folder_account
         newFolderParent = row.new_folder_parent
         icon = text(row.icon)

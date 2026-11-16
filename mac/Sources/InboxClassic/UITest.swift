@@ -466,8 +466,34 @@ final class UITest {
         treeRow { $0.folder != 0 && main.mailbox.info(ofFolder: $0.folder)?.name == name }
     }
 
+    /// the first row of the first account's folder named `name` among all the tree's rows, shown or not
+    func anyFolderNode(_ name: String) -> Mailbox.TreeNode? {
+        func first(_ nodes: [Mailbox.TreeNode]) -> Mailbox.TreeNode? {
+            for node in nodes {
+                if node.row.folder != 0 && main.mailbox.info(ofFolder: node.row.folder)?.name == name { return node }
+                if let found = first(node.children) { return found }
+            }
+            return nil
+        }
+        let top = (0..<main.mailbox.outlineView(tree, numberOfChildrenOfItem: nil)).compactMap {
+            main.mailbox.outlineView(tree, child: $0, ofItem: nil) as? Mailbox.TreeNode
+        }
+        return first(top)
+    }
+
+    /// the folder named `name` selected, the rows above it opened first when they hide it (with two accounts, Sent
+    /// Items and Drafts are under All Sent and All Drafts, which start closed)
     @discardableResult
     func selectFolder(named name: String) -> Bool {
+        if folderRow(name) == nil, let node = anyFolderNode(name) {
+            var above: [Mailbox.TreeNode] = []
+            var parent = node.parent
+            while let up = parent {
+                above.insert(up, at: 0)
+                parent = up.parent
+            }
+            above.forEach { tree.expandItem($0) }
+        }
         guard let row = folderRow(name) else { return false }
         tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         return true
@@ -546,6 +572,7 @@ final class UITest {
         try await allInboxes()
         try await allInboxesByAccount()
         try await accountOrder()
+        try await allSentAndDrafts()
         try await betweenAccounts()
         try await unreadOnly()
         try await folderList()

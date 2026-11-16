@@ -1933,6 +1933,16 @@ extension UITest {
         view.keyDown(with: up)
     }
 
+    /// an arrow key (`key`, an NS...ArrowFunctionKey, with its `keyCode`) pressed in `view`
+    func pressArrow(_ key: Int, _ keyCode: UInt16, in view: NSView) {
+        let character = String(UnicodeScalar(key)!)
+        guard let event = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [.numericPad, .function], timestamp: 0,
+                                           windowNumber: main.window.windowNumber, context: nil, characters: character,
+                                           charactersIgnoringModifiers: character, isARepeat: false, keyCode: keyCode) else { return }
+        view.window?.makeFirstResponder(view)
+        view.keyDown(with: event)
+    }
+
     /// the menu a right-click on the tree's row `row` opens
     func treeMenu(_ row: Int) -> NSMenu? {
         let rect = tree.rect(ofRow: row)
@@ -1969,6 +1979,8 @@ extension UITest {
               "the Inbox is the first row, Flagged the second, then the other folders (\(labels()))")
         check(!kinds.contains(PE_TREE_ROW_KIND_ACCOUNT) && !kinds.contains(PE_TREE_ROW_KIND_ALL_INBOXES) && tree.level(forRow: 0) == 0,
               "there is no row for the account: no heading, nothing to collapse at the top")
+        check(!kinds.contains(PE_TREE_ROW_KIND_ALL_SENT) && !kinds.contains(PE_TREE_ROW_KIND_ALL_DRAFTS),
+              "with one account there is no All Sent or All Drafts: Sent Items and Drafts are the account's own folders")
 
         // a folder kept in the Inbox on the server
         let inbox = folderNode("Inbox")?.row.folder ?? 0
@@ -2242,12 +2254,11 @@ extension UITest {
         check(kinds.first == PE_TREE_ROW_KIND_ALL_INBOXES && (treeRow(PE_TREE_ROW_KIND_FLAGGED) ?? .max) < (headings.first ?? 0)
               && headings.count == 2,
               "All Inboxes is at the top of the tree, then Flagged, then each account's heading")
-        // the second account's folders start with Sent Items; the first's with the folder step 27 left in its Inbox,
-        // which ImapKit lists again after it was deleted
-        let under = headings.map { treeNode($0 + 1)?.row.label ?? "" }
-        check(under.last == "Sent Items" && treeRow({ $0.label == "Sent Items" && $0.account == headings.first.flatMap(treeNode)?.row.account }) != nil
+        // the headings list the accounts' other folders, without the Inbox, Sent Items and Drafts (step 42d)
+        let under = headings.compactMap(treeNode).map { $0.children.map(\.row.label) }
+        check(under.allSatisfy { !$0.isEmpty && !$0.contains("Inbox") && !$0.contains("Sent Items") && !$0.contains("Drafts") }
               && treeRow({ ($0.folder == first || $0.folder == second) && $0.kind != PE_TREE_ROW_KIND_ACCOUNT_INBOX }) == nil,
-              "the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, starting with Sent Items (\(under))")
+              "the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, without Sent Items and Drafts (\(under))")
         tree.selectRowIndexes(IndexSet(integer: treeRow(PE_TREE_ROW_KIND_ALL_INBOXES) ?? 0), byExtendingSelection: false)
         let expected = (inbox(ofAccount: 0)?.total ?? 0) + (inbox(ofAccount: 1)?.total ?? 0)
         // grouped by conversation the rows are fewer: the messages they list are counted
@@ -2495,6 +2506,144 @@ extension UITest {
         }
         check(await waitUntil(10) { self.treeOrder().headings == ids && self.treeOrder().inboxes == ids },
               "Move Down on its menu puts it back below the first (\(treeOrder()))")
+    }
+
+    // ---- All Sent and All Drafts ----
+
+    /// the editor's text in a compose window
+    func editorText(_ compose: NSWindow) async -> String {
+        guard let editor: EditorView = views(EditorView.self, in: compose.contentView).first else { return "" }
+        _ = await waitUntil(10) { (try? await editor.evaluateJavaScript("!!window.pe")) as? Bool == true }
+        return (try? await editor.evaluateJavaScript("document.getElementById('body').innerText") as? String) ?? ""
+    }
+
+    /// what every account sent, and every account's drafts, in one list each with a row per account under it; a
+    /// draft from All Drafts opened in the compose window of its account
+    func allSentAndDrafts() async throws {
+        step("All Sent and All Drafts")
+        let accounts = main.mailbox.core.accounts()
+        let sent = [folder(ofAccount: 0, named: "Sent Items"), folder(ofAccount: 1, named: "Sent Items")]
+        let drafts = [folder(ofAccount: 0, named: "Drafts"), folder(ofAccount: 1, named: "Drafts")]
+        guard accounts.count == 2, !sent.contains(0), !drafts.contains(0) else {
+            check(false, "two accounts, each with Sent Items and Drafts")
+            return
+        }
+        let sentBefore = sent.map { main.mailbox.core.folderCounts($0).total }
+        let draftsBefore = main.mailbox.core.folderCounts(drafts[0]).total
+        try await addMessage("From: Alex Morgan <testuser@inboxclassic.test>\r\nTo: Nina Park <nina@example.org>\r\n"
+            + "Subject: Slides for Tuesday\r\nDate: \(rfc2822(Date(timeIntervalSinceNow: -60)))\r\n"
+            + "Message-ID: <slides-tuesday@inboxclassic.test>\r\n\r\nThe slides for Tuesday are attached to the invite.\r\n",
+            flags: ["\\Seen"], to: "Sent")
+        try await addMessage("From: Work <testuser2@inboxclassic.test>\r\nTo: Priya Shah <priya@work.example>\r\n"
+            + "Subject: Signed contract\r\nDate: \(rfc2822(Date()))\r\n"
+            + "Message-ID: <signed-contract@inboxclassic.test>\r\n\r\nThe signed contract is back with you.\r\n",
+            flags: ["\\Seen"], at: secondRest, to: "Sent")
+        try await addMessage("From: Alex Morgan <testuser@inboxclassic.test>\r\nTo: Leo Grant <leo@example.org>\r\n"
+            + "Subject: Trip plans\r\nDate: \(rfc2822(Date()))\r\nMessage-ID: <trip-plans-draft@inboxclassic.test>\r\n"
+            + "MIME-Version: 1.0\r\nContent-Type: text/plain; charset=utf-8\r\n\r\nThe train leaves at nine on Saturday.\r\n",
+            flags: ["\\Seen", "\\Draft"], to: "Drafts")
+        command(.sync)
+        let counts = { sent.map { self.main.mailbox.core.folderCounts($0).total } }
+        let synced = await waitUntil(30) {
+            zip(counts(), sentBefore).allSatisfy { $0 > $1 } && self.main.mailbox.core.folderCounts(drafts[0]).total > draftsBefore
+        }
+        check(synced, "the sent messages and the draft are in the app (\(counts()) of \(sentBefore))")
+
+        let top = (0..<main.mailbox.outlineView(tree, numberOfChildrenOfItem: nil)).compactMap {
+            main.mailbox.outlineView(tree, child: $0, ofItem: nil) as? Mailbox.TreeNode
+        }
+        guard let allSent = top.first(where: { $0.kind == PE_TREE_ROW_KIND_ALL_SENT }),
+              let allDrafts = top.first(where: { $0.kind == PE_TREE_ROW_KIND_ALL_DRAFTS }) else {
+            check(false, "All Sent and All Drafts are in the tree (\(top.map(\.row.label)))")
+            return
+        }
+        check(top.map(\.kind) == [PE_TREE_ROW_KIND_ALL_INBOXES, PE_TREE_ROW_KIND_ALL_SENT, PE_TREE_ROW_KIND_ALL_DRAFTS,
+                                  PE_TREE_ROW_KIND_FLAGGED, PE_TREE_ROW_KIND_ACCOUNT, PE_TREE_ROW_KIND_ACCOUNT]
+              && allSent.row.label == "All Sent" && allDrafts.row.label == "All Drafts",
+              "All Sent and All Drafts follow All Inboxes, before Flagged (\(top.map(\.row.label)))")
+        check(!tree.isItemExpanded(allSent) && !tree.isItemExpanded(allDrafts), "both start closed")
+        await shot(main.window, "all-sent-0-closed")
+        // with the keyboard: Right opens All Sent, Down goes into its rows, Left back up to it
+        tree.selectRowIndexes(IndexSet(integer: tree.row(forItem: allSent)), byExtendingSelection: false)
+        pressArrow(NSRightArrowFunctionKey, 124, in: tree)
+        check(tree.isItemExpanded(allSent), "Right opens All Sent")
+        pressArrow(NSDownArrowFunctionKey, 125, in: tree)
+        check(await waitUntil(5) { self.tree.selectedRow == self.tree.row(forItem: allSent.children.first) && self.main.mailbox.folder == sent[0] },
+              "Down goes to its first account's row, which lists that Sent Items (row \(tree.selectedRow))")
+        pressArrow(NSLeftArrowFunctionKey, 123, in: tree)
+        check(tree.selectedRow == tree.row(forItem: allSent), "Left goes back up to All Sent (row \(tree.selectedRow))")
+        tree.expandItem(allDrafts)
+        for (node, folders) in [(allSent, sent), (allDrafts, drafts)] {
+            let rows = node.children.map(\.row)
+            let levels = node.children.map { tree.level(forRow: tree.row(forItem: $0)) }
+            check(rows.map(\.folder) == folders && rows.map(\.label) == accounts.map(\.title)
+                  && rows.allSatisfy { $0.kind == PE_TREE_ROW_KIND_FOLDER } && levels == [1, 1],
+                  "opened, \(node.row.label) has a row per account named as the account is (\(rows.map(\.label)))")
+        }
+        let headings = top.filter { $0.kind == PE_TREE_ROW_KIND_ACCOUNT }
+        func below(_ node: Mailbox.TreeNode) -> [Int64] { node.children.flatMap { [$0.row.folder] + below($0) } }
+        check(headings.allSatisfy { Set(below($0)).isDisjoint(with: sent + drafts) },
+              "the account headings list neither Sent Items nor Drafts (\(headings.map { $0.children.map(\.row.label) }))")
+
+        step("All Sent's list")
+        tree.selectRowIndexes(IndexSet(integer: tree.row(forItem: allSent)), byExtendingSelection: false)
+        let both = counts().reduce(0, +)
+        check(await waitUntil(10) { main.mailbox.total == both },
+              "All Sent lists both accounts' sent messages (\(main.mailbox.total) of \(both))")
+        let newest = (0..<list.numberOfRows).compactMap { main.mailbox.row($0) }
+        let dates = newest.map { $0.date ?? 0 }
+        check(dates == dates.sorted(by: >) && Set(newest.prefix(3).map(\.folder)) == Set(sent)
+              && newest.first?.subject == "Signed contract",
+              "newest first, the two accounts' messages among each other (\(newest.prefix(3).map(\.subject)))")
+        let column = { (id: String) in self.list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id)) }
+        let cell = column("folder").flatMap { list.column(withIdentifier: $0.identifier) }
+            .flatMap { list.view(atColumn: $0, row: 0, makeIfNecessary: true) as? NSTableCellView }
+        check(column("from")?.title == "To" && newest.first?.recipients.contains("Priya Shah") == true,
+              "it names whom each message went to, in the To column (\(column("from")?.title ?? ""): \(newest.first?.recipients ?? ""))")
+        check(column("folder")?.title == "Account" && cell?.textField?.stringValue == accounts[1].title,
+              "the Account column names the account of each (\(column("folder")?.title ?? ""): \(cell?.textField?.stringValue ?? ""))")
+        check(main.mailbox.selectedName == "All Sent" && main.window.title == "All Sent",
+              "the title says All Sent (\(main.window.title))")
+        check(treeMenu(tree.row(forItem: allSent)) == nil && treeMenu(tree.row(forItem: allDrafts)) == nil,
+              "All Sent and All Drafts have no right-click menu")
+        await selectRow(0)
+        await shot(main.window, "all-sent-1-list")
+
+        if let secondRow = allSent.children.last.map({ tree.row(forItem: $0) }) {
+            tree.selectRowIndexes(IndexSet(integer: secondRow), byExtendingSelection: false)
+            let own = counts()[1]
+            check(await waitUntil(10) { main.mailbox.folder == sent[1] && main.mailbox.total == own },
+                  "the second account's row under All Sent lists its Sent Items (\(main.mailbox.total) of \(own))")
+            check(Set((0..<list.numberOfRows).compactMap { main.mailbox.row($0)?.folder }) == [sent[1]],
+                  "and that account's alone")
+            check(main.mailbox.selectedName == "Sent Items - \(accounts[1].title)",
+                  "the folder bar says Sent Items and the account's name (\(main.mailbox.selectedName))")
+            let titles = treeMenu(secondRow)?.items.filter { !$0.isSeparatorItem }.map(\.title) ?? []
+            check(titles.contains(Command.markAllRead.label) && titles.contains(Command.newFolder.label),
+                  "a row under All Sent has the folder's menu (\(titles))")
+        }
+
+        step("All Drafts")
+        tree.selectRowIndexes(IndexSet(integer: tree.row(forItem: allDrafts)), byExtendingSelection: false)
+        let draftRow = { (0..<self.list.numberOfRows).first { self.main.mailbox.row($0)?.subject == "Trip plans" } }
+        check(await waitUntil(10) { draftRow() != nil && main.mailbox.selectedName == "All Drafts" },
+              "All Drafts lists the draft (\(main.mailbox.total) messages)")
+        guard let row = draftRow() else { return }
+        await selectRow(row)
+        await shot(main.window, "all-drafts-1-list")
+        main.mailbox.openSelected()
+        guard let compose = await waitCompose() else {
+            check(false, "opening the draft opens the compose window")
+            return
+        }
+        await pause(1)
+        let from: NSPopUpButton? = find("compose.from", in: compose)
+        let text = await editorText(compose)
+        check(from?.titleOfSelectedItem?.contains("testuser@inboxclassic.test") == true
+              && field("compose.subject", compose)?.stringValue == "Trip plans" && text.contains("The train leaves at nine"),
+              "opening it opens the compose window from the first account, with the draft's text (\(from?.titleOfSelectedItem ?? ""): \(text))")
+        await shot(compose, "all-drafts-2-open")
+        await closeCompose(compose)
     }
 
     // ---- moving between accounts ----
