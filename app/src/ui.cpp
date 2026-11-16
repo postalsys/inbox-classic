@@ -1013,7 +1013,7 @@ void RefreshCursor() {
 
 void BusyStart() {
     if (g_busy++ == 0) {
-        g_busyTimer = SetTimer(nullptr, 0, 400, BusyTimer);
+        g_busyTimer = SetTimer(nullptr, 0, PE_LIST_LOADING_MS, BusyTimer);
     }
 }
 

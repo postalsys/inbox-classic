@@ -715,16 +715,9 @@ void Reader::SaveAttachment(size_t index) {
         return;
     }
     // read (and decrypted) off the window thread: the dialog once it is here (ReadDone)
-    if (saveRequest_) {
-        pe_read_cancel(core_, std::exchange(saveRequest_, 0));
-        BusyEnd();
-    }
-    saveRequest_ = pe_attachment_data_start(core_, folder_, uid_, index);
-    if (!saveRequest_) {
+    if (!saveRead_.Start(core_, pe_attachment_data_start(core_, folder_, uid_, index))) {
         SayNotHere();
-        return;
     }
-    BusyStart();
 }
 
 void Reader::SaveRead(uint8_t* data, size_t length, char* name) {
@@ -881,7 +874,7 @@ void Reader::OpenAttachment(int item) {
         opener_.join();
     }
     openingItem_ = item;
-    SetTimer(strip_, TIMER_STRIP_BUSY, 400, nullptr);
+    SetTimer(strip_, TIMER_STRIP_BUSY, PE_LIST_LOADING_MS, nullptr);
     // reading (and decrypting) the message and writing the file off the window thread: a folder's message by the core
     // (ReadDone), a message file on a thread of its own whose result comes back to the strip, or is dropped with it
     // when the window closed first
@@ -1137,27 +1130,17 @@ bool Reader::DraftOf(PeDraftKind kind, int64_t account, std::function<void(core:
         return false;
     }
     // the message read (and decrypted) off the window thread: `done` once it is (ReadDone)
-    if (draftRequest_) {
-        pe_read_cancel(core_, std::exchange(draftRequest_, 0));
-        BusyEnd();
-    }
-    draftRequest_ = pe_message_draft_start(core_, folder_, uid_, kind);
-    if (!draftRequest_) {
+    if (!draftRead_.Start(core_, pe_message_draft_start(core_, folder_, uid_, kind))) {
         done(core::Draft());
         return true;
     }
     draftDone_ = std::move(done);
-    BusyStart();
     return true;
 }
 
 void Reader::CancelReads() {
-    for (uint64_t* request : {&draftRequest_, &saveRequest_}) {
-        if (*request) {
-            pe_read_cancel(core_, std::exchange(*request, 0));
-            BusyEnd();
-        }
-    }
+    draftRead_.Reset();
+    saveRead_.Reset();
     draftDone_ = nullptr;
 }
 
@@ -1360,17 +1343,13 @@ void Reader::OnReadDone(uint64_t request) {
     if (!request) {
         return;
     }
-    if (request == draftRequest_) {
-        draftRequest_ = 0;
-        BusyEnd();
+    if (draftRead_.Done(request)) {
         auto done = std::exchange(draftDone_, nullptr);
         core::Draft draft(pe_draft_result(core_, request));
         if (done) {
             done(std::move(draft));
         }
-    } else if (request == saveRequest_) {
-        saveRequest_ = 0;
-        BusyEnd();
+    } else if (saveRead_.Done(request)) {
         size_t length = 0;
         char* name = nullptr;
         uint8_t* data = pe_attachment_data_result(core_, request, &length, &name);

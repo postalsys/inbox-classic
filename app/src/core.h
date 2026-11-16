@@ -12,6 +12,48 @@
 #include "inbox_classic.h"
 #include "texts.h"
 
+// a read of the core started off the window thread (a reply, a draft, an attachment) and done: the busy pointer over
+// the app's windows once one has taken longer than PE_LIST_LOADING_MS, until every one is done
+void BusyStart();
+void BusyEnd();
+// one such read waited for, with the busy pointer while it runs: a newer one, or Reset, cancels it (not on
+// destruction: the core may be closed by then)
+class PendingRead {
+public:
+    // `request` (0: it did not start, false) waited for in place of the one before
+    bool Start(PeCore* core, uint64_t request) {
+        Reset();
+        if (!request) {
+            return false;
+        }
+        core_ = core;
+        request_ = request;
+        BusyStart();
+        return true;
+    }
+    // the read not waited for any more: cancelled
+    void Reset() {
+        if (request_) {
+            pe_read_cancel(core_, std::exchange(request_, 0));
+            BusyEnd();
+        }
+    }
+    // whether `request` is the one waited for, which is then done (not waited for any more)
+    bool Done(uint64_t request) {
+        if (!request_ || request != request_) {
+            return false;
+        }
+        request_ = 0;
+        BusyEnd();
+        return true;
+    }
+    explicit operator bool() const { return request_ != 0; }
+
+private:
+    PeCore* core_ = nullptr;
+    uint64_t request_ = 0;
+};
+
 namespace core {
 
 // frees what the core returned with the core's own function
@@ -50,6 +92,7 @@ using AgentHostList = std::unique_ptr<PeAgentHostList, Deleter<pe_agent_host_lis
 using AgentLog = std::unique_ptr<PeAgentLog, Deleter<pe_agent_log_free>>;
 using Selection = std::unique_ptr<PeSelection, Deleter<pe_selection_free>>;
 using Positions = std::unique_ptr<PePositions, Deleter<pe_positions_free>>;
+using ListLoad = std::unique_ptr<PeListLoad, Deleter<pe_list_load_free>>;
 // what a message list shows (its folder, words, order, grouping and open conversations), kept by the core
 using ListView = std::unique_ptr<PeListView, Deleter<pe_list_view_free>>;
 using TextList = std::unique_ptr<PeTextList, Deleter<pe_text_list_free>>;

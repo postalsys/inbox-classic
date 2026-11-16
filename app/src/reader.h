@@ -165,9 +165,9 @@ private:
     int openingItem_ = -1;
     uint64_t openRequest_ = 0;
     // the reads of the core waited for (ReadDone): a reply or forward and what takes it, a file to save
-    uint64_t draftRequest_ = 0;
+    PendingRead draftRead_;
     std::function<void(core::Draft)> draftDone_;
-    uint64_t saveRequest_ = 0;
+    PendingRead saveRead_;
     // ShowInfo lays the pane out once, at its end
     bool holdLayout_ = false;
     HWND pictures_ = nullptr;

@@ -348,7 +348,7 @@ void Mailbox::SetAscending(bool ascending) {
 
 void Mailbox::ApplySort() {
     pe_list_view_set_sort(view_.get(), sort_, ascending_);
-    ReloadList(true, true);
+    ReloadList(true);
     UpdateSortButton();
     UpdateSortArrow();
 }
