@@ -765,6 +765,10 @@ mod tests {
         }
         for id in &listed {
             assert!(source("en", id).is_some(), "en/{id}.html is missing");
+            // a topic a language lacks is shown in English: a new or rewritten topic must reach every language
+            for (language, _) in pe_i18n::LANGUAGES {
+                assert!(source(language, id).is_some(), "{language}/{id}.html is missing");
+            }
             for platform in [Platform::Windows, Platform::Mac, Platform::Linux] {
                 let page = help_topic(id, platform, "en").unwrap();
                 assert!(

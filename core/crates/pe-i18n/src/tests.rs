@@ -64,6 +64,18 @@ fn every_catalog_matches_english() {
 }
 
 #[test]
+fn every_catalog_has_every_english_message() {
+    // a message a language lacks is shown in English: a feature's words added in English must reach every catalog
+    // (as drafts marked for review), or the windows mix languages
+    let english: BTreeSet<String> = catalog("en").into_iter().map(|(id, _)| id).collect();
+    for (code, _) in LANGUAGES {
+        let has: BTreeSet<String> = catalog(code).into_iter().map(|(id, _)| id).collect();
+        let missing: Vec<&String> = english.difference(&has).collect();
+        assert!(missing.is_empty(), "{code} lacks {} English messages: {missing:?}", missing.len());
+    }
+}
+
+#[test]
 fn no_dashes_in_any_catalog() {
     // the house style: commas and sentences, never an en or em dash
     for (code, files) in CATALOGS {
