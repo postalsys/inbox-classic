@@ -1,0 +1,14 @@
+<!--review--><h1>As conexões que o Inbox Classic faz</h1>
+<p class="summary">Onde o Inbox Classic se conecta e por quê, para os mais curiosos em termos técnicos.</p>
+<ul>
+    <li><b>Seus servidores de e-mail</b>, por IMAP para ler os e-mails e por SMTP para enviá-los. As conexões são criptografadas com TLS, e o certificado de cada servidor é verificado com base nos certificados em que o seu sistema confia. O Inbox Classic recusa um servidor sem criptografia, a não ser que você escolha <b data-text="ui-security-none"></b> e confirme.</li>
+    <li><b>Quando você adiciona uma conta</b>, para procurar os servidores dela. O Inbox Classic lê os registros DNS do seu domínio por DNS over HTTPS (Cloudflare e depois Google), nunca por DNS simples. Ele também tenta o arquivo autoconfig do seu provedor e a lista de provedores do Thunderbird (ISPDB). Para o Exchange, ele consulta a Descoberta Automática da Microsoft, que só recebe a sua senha quando a pede por HTTPS. Um servidor sem criptografia nunca é escolhido.</li>
+    <li><b>Login pelo navegador</b>, com OAuth 2.0 e PKCE, no Google, na Microsoft ou no provedor do seu aplicativo de login. O navegador volta para o Inbox Classic apenas neste computador.</li>
+    <li><b>Logotipos de marcas</b> (BIMI), a partir do endereço HTTPS da marca quando a mensagem não traz o logotipo, uma vez a cada execução do Inbox Classic. Isso só acontece quando o seu servidor de e-mail aprovou a verificação DMARC da mensagem e o logotipo.</li>
+    <li><b>Imagens da internet</b>, só quando você pede.</li>
+    <li><b>Cancelar inscrição</b>, só quando você clica nesse botão. Uma solicitação com um clique (RFC 8058) só é enviada quando a lista assinou a mensagem com DKIM.</li>
+    <!--os:mac--><li><b>Atualizações</b>, a partir de inboxclassic.com, para ver se saiu uma versão nova.</li><!--/os-->
+</ul>
+<p>Os códigos de login só são oferecidos quando o cabeçalho Authentication-Results do seu provedor indica que o domínio assinou a mensagem (DKIM). Isso não precisa de nenhuma conexão própria.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
+<!--/review-->
