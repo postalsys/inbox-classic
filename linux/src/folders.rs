@@ -122,7 +122,9 @@ fn label_markup(row: &TreeRow, collapsed: bool) -> String {
     match (count, row.bold(collapsed)) {
         (0, _) => name.to_string(),
         // a heading is small and grey: the unread mail it hides is told in the text's full color, so it is not missed
-        (count, true) if row.kind == TreeRowKind::Account => format!("<b>{name} <span alpha=\"100%\">({count})</span></b>"),
+        (count, true) if row.kind == TreeRowKind::Account => {
+            format!("<b>{name} <span alpha=\"100%\">({count})</span></b>")
+        }
         (count, true) => format!("<b>{name} ({count})</b>"),
         (count, false) => format!("{name} ({count})"),
     }
@@ -917,6 +919,10 @@ mod tests {
         let mut heading = row(TreeRowKind::Account, 1, 0);
         heading.hidden = 3;
         assert_eq!(label_markup(&heading, false), "Inbox &amp; more");
-        assert_eq!(label_markup(&heading, true), "<b>Inbox &amp; more (3)</b>");
+        // in the text's full color, not the heading's grey
+        assert_eq!(
+            label_markup(&heading, true),
+            "<b>Inbox &amp; more <span alpha=\"100%\">(3)</span></b>"
+        );
     }
 }

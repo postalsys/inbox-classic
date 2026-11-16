@@ -267,9 +267,19 @@ pub async fn one_account_tree(d: &Driver) {
 
 /// The unread count a label of the tree shows, 0 for none
 fn counted(markup: &str) -> u64 {
-    markup
-        .rsplit_once(" (")
-        .and_then(|(_, n)| n.trim_end_matches(")</b>").trim_end_matches(')').parse::<u64>().ok())
+    // the text without its markup: "Name (3)"
+    let mut text = String::new();
+    let mut in_tag = false;
+    for c in markup.chars() {
+        match c {
+            '<' => in_tag = true,
+            '>' => in_tag = false,
+            c if !in_tag => text.push(c),
+            _ => {}
+        }
+    }
+    text.rsplit_once(" (")
+        .and_then(|(_, n)| n.trim_end_matches(')').parse::<u64>().ok())
         .unwrap_or(0)
 }
 
