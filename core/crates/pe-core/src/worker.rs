@@ -432,6 +432,8 @@ pub(crate) struct Context {
     pub(crate) opening: Arc<Opening>,
     /// The text shown first of the large messages being downloaded (large.rs)
     pub(crate) partials: Partials,
+    /// The messages taken back in the store when the server refused an action, for the window to select
+    pub(crate) restored: crate::selection::Restored,
 }
 
 pub(crate) struct Worker {
@@ -1211,6 +1213,12 @@ impl Worker {
         store.add_messages(folder, removed)?;
         let uids: Vec<u64> = removed.iter().map(|m| m.uid).collect();
         store.restore_moved_sources(folder, &uids)?;
+        // selected again where they are, as what Undo brings back is
+        self.ctx
+            .restored
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .push(crate::selection::Back::There(folder, uids));
         self.emit(Event::FolderChanged {
             account: self.account,
             folder,

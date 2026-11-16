@@ -516,8 +516,9 @@ pub struct Core {
     undo: Mutex<Option<selection::Undo>>,
     /// The message the user sent last while it waits to be taken back (undo_send.rs)
     last_sent: undo_send::LastSent,
-    /// What the last Undo brought back, by folder and Message-ID, for the window to select once it is there
-    restored: Mutex<Vec<(FolderId, Vec<String>)>>,
+    /// What the last Undo brought back and what the store took back of an action the server refused, for the window
+    /// to select once it is there
+    restored: selection::Restored,
     /// The store connections of the work done off the window thread (connections.rs)
     connections: connections::Connections,
     /// Lists loaded off the window thread (list_load.rs)
@@ -612,7 +613,7 @@ impl Core {
             next_request: std::sync::atomic::AtomicU64::new(1),
             undo: Mutex::new(None),
             last_sent: Mutex::new(None),
-            restored: Mutex::default(),
+            restored: Arc::default(),
             connections: Default::default(),
             list_loads: Default::default(),
             reads: Default::default(),
@@ -932,7 +933,12 @@ impl Core {
     /// find
     pub fn list_counts(&self, search: &Search) -> Result<(u64, u64)> {
         match search.scope {
-            Scope::Folder(folder) if search.text.is_empty() && search.show == Show::All && !search.hide_ignored => {
+            Scope::Folder(folder)
+                if search.text.is_empty()
+                    && search.show == Show::All
+                    && !search.hide_ignored
+                    && search.up_to.is_none() =>
+            {
                 let folder = self.folder(folder)?;
                 Ok((folder.total, folder.unread))
             }
@@ -2425,6 +2431,7 @@ impl Core {
             opened: self.opened.clone(),
             opening: self.opening.clone(),
             partials: self.partials.clone(),
+            restored: self.restored.clone(),
         }
     }
 

@@ -2190,6 +2190,11 @@ fn an_action_the_server_refuses_is_taken_back_and_said() {
     );
     assert_eq!(uids(inbox), [first, second], "back as they were");
     assert!(uids(archive).is_empty());
+    // and for the window to select again, as what Undo brings back: once
+    let mut restored = s.core.restored().unwrap();
+    restored.sort_by_key(|r| r.uid);
+    assert_eq!(restored, [at(first), at(second)]);
+    assert!(s.core.restored().unwrap().is_empty());
 
     // Mark All Read: read in the store at once, unread again when the server refuses
     let request = s.core.mark_read_start(pe_core::MarkRead::Folder(trash)).unwrap();

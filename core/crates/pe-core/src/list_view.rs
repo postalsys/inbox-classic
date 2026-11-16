@@ -442,6 +442,7 @@ impl ListView {
             hide_ignored: self.hide_ignored,
             read_since: (self.show == Show::Unread).then_some(self.since),
             uids: None,
+            up_to: None,
         })
     }
 
@@ -590,18 +591,75 @@ impl ListView {
     }
 
     /// Select All: every message of the list (a collapsed conversation's too), counted, not listed: counted from what
-    /// the view kept when nothing was written since it counted the list. Listed by [`Core::selected_refs`] when a
-    /// command needs them.
+    /// the view kept when nothing was written since it counted the list. Bound to the messages stored when it is
+    /// chosen ([`Search::up_to`]): mail stored after it is neither counted nor acted on. Listed by
+    /// [`Core::selected_refs`] when a command needs them.
     pub fn select_all(&self, core: &Core) -> Result<Selected> {
         let Some(search) = self.search() else {
             return Ok(Selected::default());
         };
-        let count = self.counts(core)?.0;
+        let (up_to, count) = self.bounded_count(core)?;
         Ok(Selected::All {
-            search,
+            search: Search {
+                up_to: Some(up_to),
+                ..search
+            },
             sort: self.sort,
             count,
         })
+    }
+
+    /// The list read again with every row selected (`selected` Select All of this list): whether it still is the
+    /// whole list, no message stored since in it; then `selected` is counted again with its bound (those gone since
+    /// left out). Otherwise a Select All is listed, the messages it had, for the window to select where they are now,
+    /// the newer ones not.
+    pub fn select_all_again(&self, core: &Core, selected: &mut Selected) -> Result<bool> {
+        let Selected::All { search: chosen, .. } = &*selected else {
+            return Ok(false);
+        };
+        let up_to = chosen.up_to.unwrap_or(i64::MAX);
+        let this_list = self.search().is_some_and(|s| {
+            Search {
+                up_to: None,
+                ..chosen.clone()
+            } == s
+        });
+        if this_list {
+            let before = core.generation()?;
+            let newer = core.store().found_after(chosen, up_to)?;
+            if !newer {
+                let count = self.counts(core)?.0;
+                if core.generation()? == before {
+                    *selected = Selected::All {
+                        search: chosen.clone(),
+                        sort: self.sort,
+                        count,
+                    };
+                    return Ok(true);
+                }
+            }
+        }
+        *selected = Selected::Listed(core.selected_refs(selected)?);
+        Ok(false)
+    }
+
+    /// The newest message stored and the messages of the list, counted at the same moment: from what the view kept
+    /// when nothing is written meanwhile, otherwise counted with the bound
+    fn bounded_count(&self, core: &Core) -> Result<(i64, u64)> {
+        for _ in 0..3 {
+            let before = core.generation()?;
+            let up_to = core.store().newest_message()?;
+            let count = self.counts(core)?.0;
+            if core.generation()? == before {
+                return Ok((up_to, count));
+            }
+        }
+        let up_to = core.store().newest_message()?;
+        let search = Search {
+            up_to: Some(up_to),
+            ..self.search().unwrap_or_default()
+        };
+        Ok((up_to, core.count_search(&search)?.0))
     }
 
     /// Where the messages `refs` are now, ascending; those no longer in the list left out
@@ -609,8 +667,8 @@ impl ListView {
         self.listed(Vec::new(), |search| core.positions(search, self.sort, refs))
     }
 
-    /// The rows of the messages the last Undo brought back ([`Core::undo`]), for the window to select them once its list
-    /// has them: empty while none is back yet. None when something was written since the list was last counted: the
+    /// The rows of the messages the last Undo brought back ([`Core::undo`]), and of those the store took back of an
+    /// action the server refused, for the window to select them once its list has them: empty while none is back yet. None when something was written since the list was last counted: the
     /// rows found now could be other rows of the list shown (the messages back in the store, the list counted before
     /// them), so the list is read again first and the messages kept for then.
     pub fn restored(&self, core: &Core) -> Result<Option<Vec<u64>>> {
@@ -1132,7 +1190,10 @@ mod tests {
         assert_eq!(view.restored(&core).unwrap(), Some(vec![]), "no Undo");
 
         // Undo of two moved away, the list counted before they are back
-        *core.restored.lock().unwrap() = vec![(inbox, vec!["<g@x>".into(), "<h@x>".into()])];
+        *core.restored.lock().unwrap() = vec![crate::selection::Back::Moving(
+            inbox,
+            vec!["<g@x>".into(), "<h@x>".into()],
+        )];
         assert_eq!(view.restored(&core).unwrap(), Some(vec![]), "none back yet");
         // back in the store, as the worker's sync writes them: the list counted before is behind
         let other = pe_store::Store::open(dir.path().join("store.db")).unwrap();

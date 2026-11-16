@@ -98,6 +98,9 @@ pub struct Search {
     /// With `show` Unread, the messages read since this time (milliseconds since the epoch) stay in the list: those read
     /// since the list was turned to unread only, so a message does not leave it the moment it is read
     pub read_since: Option<i64>,
+    /// Only the messages stored up to this one ([`Store::newest_message`]): Select All's, which acts on what was there
+    /// when it was chosen, never on mail stored after it. None for all.
+    pub up_to: Option<i64>,
 }
 
 /// A word as FTS5 reads it, and nothing else: quoted (its own quotes dropped, so no FTS5 syntax can be typed), in its
@@ -242,6 +245,10 @@ impl Search {
                 format!("uid IN ({})", listed.join(", "))
             });
         }
+        // stored up to Select All's bound (the + keeps SQLite on the indexes of the list)
+        if let Some(up_to) = self.up_to {
+            parts.push(format!("+id <= {}", value(&mut values, Value::Integer(up_to))));
+        }
         // unread, or read since the list was turned to unread only
         if let (Show::Unread, Some(since)) = (self.show, self.read_since) {
             parts.push(format!(
@@ -373,6 +380,31 @@ impl Store {
     pub fn inboxes(&self) -> Result<Vec<FolderId>> {
         let mut statement = self.db.prepare_cached(&format!("{INBOXES} ORDER BY account_id, id"))?;
         statement.query_map([], |row| row.get(0))?.collect()
+    }
+
+    /// The newest message stored, by its id: one stored later always has a higher id (the ids are never given
+    /// again, see the `message_ids` migration), which bounds what Select All acts on ([`Search::up_to`])
+    pub fn newest_message(&self) -> Result<i64> {
+        self.db
+            .prepare_cached("SELECT high FROM message_ids")?
+            .query_row([], |row| row.get(0))
+    }
+
+    /// Whether `search`, without its bound, finds a message stored after the message `id` ([`Store::newest_message`]):
+    /// read from those stored since, so it takes what they are, not what the list is
+    pub fn found_after(&self, search: &Search, id: i64) -> Result<bool> {
+        let unbounded = Search {
+            up_to: None,
+            threads: None,
+            ..search.clone()
+        };
+        let (condition, mut values) = unbounded.condition(false);
+        values.push(Value::Integer(id));
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT EXISTS (SELECT 1 FROM messages WHERE id IN (SELECT id FROM messages WHERE id > ?{}) AND {condition})",
+            values.len()
+        ))?;
+        statement.query_row(params_from_iter(values), |row| row.get(0))
     }
 
     /// How many messages `search` finds, and how many of them are unread, grouped by conversation or not (see
@@ -789,6 +821,7 @@ mod tests {
             hide_ignored: false,
             read_since: None,
             uids: None,
+            up_to: None,
         };
         assert_eq!(found(&store, &search), [9]);
         // a message read since: still listed with the unread ones, by the time the store noted (in milliseconds)

@@ -3,7 +3,7 @@
 //! call it in the status bar; and Edit > Undo for the last move, delete or junk.
 
 use std::collections::{BTreeMap, BTreeSet};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use pe_store::{FLAG_COLOR_BITS, FlagColor, FolderId, MessageRef, Picked, Search, Sort};
 
@@ -499,8 +499,11 @@ impl Core {
             self.send_command(account, Command::UndoMoves { moves })?;
         }
         let back: u64 = undo.moves.iter().map(|m| m.message_ids.len() as u64).sum();
-        *self.restored.lock().unwrap_or_else(|e| e.into_inner()) =
-            undo.moves.iter().map(|m| (m.from, m.message_ids.clone())).collect();
+        *self.restored.lock().unwrap_or_else(|e| e.into_inner()) = undo
+            .moves
+            .iter()
+            .map(|m| Back::Moving(m.from, m.message_ids.clone()))
+            .collect();
         let folder = self.places(undo.moves.iter().map(|m| m.from))?;
         Ok(tr_args(
             Text::DoneMovedBack,
@@ -513,29 +516,50 @@ impl Core {
     }
 
     /// The messages the last Undo brought back that are in their folders again (they get there once the server has
-    /// moved them and the folder is synced). Forgotten once all are there.
+    /// moved them and the folder is synced), and those the store took back as the server refused an action (there at
+    /// once), for the window to select them. Each folder's forgotten once all of it is there.
     pub fn restored(&self) -> Result<Vec<MessageRef>> {
         self.take_restored(|found| Ok(Some(found.to_vec())))
             .map(Option::unwrap_or_default)
     }
 
-    /// `f` with the messages the last Undo brought back that are in their folders again; they are forgotten once all
-    /// are there and `f` took them (gave Some), and kept for the next time when it did not
+    /// `f` with the messages the last Undo brought back that are in their folders again, and those the store took back
+    /// of a refused action; when `f` took them (gave Some) those are forgotten, and what Undo still waits for is kept,
+    /// all of them kept for the next time when it did not
     pub(crate) fn take_restored<T>(&self, f: impl FnOnce(&[MessageRef]) -> Result<Option<T>>) -> Result<Option<T>> {
         let mut restored = self.restored.lock().unwrap_or_else(|e| e.into_inner());
         let mut found = Vec::new();
-        let mut all = true;
-        for (folder, ids) in restored.iter() {
-            let uids = self.store().uids_of_message_ids(*folder, ids)?;
-            all &= uids.len() >= ids.len();
-            found.extend(uids.into_iter().map(|uid| MessageRef { folder: *folder, uid }));
+        let mut waiting = Vec::new();
+        for back in restored.iter() {
+            let (folder, uids) = match back {
+                Back::There(folder, uids) => (*folder, uids.clone()),
+                Back::Moving(folder, ids) => {
+                    let uids = self.store().uids_of_message_ids(*folder, ids)?;
+                    if uids.len() < ids.len() {
+                        waiting.push(Back::Moving(*folder, ids.clone()));
+                    }
+                    (*folder, uids)
+                }
+            };
+            found.extend(uids.into_iter().map(|uid| MessageRef { folder, uid }));
         }
         let taken = f(&found)?;
-        if all && taken.is_some() {
-            restored.clear();
+        // taken: what is there is forgotten, what Undo still waits for kept
+        if taken.is_some() {
+            *restored = waiting;
         }
         Ok(taken)
     }
+}
+
+/// The messages for the window to select once they are in its list ([`Core::restored`]), shared with the workers
+pub(crate) type Restored = Arc<Mutex<Vec<Back>>>;
+
+pub(crate) enum Back {
+    /// Brought back by Undo, by Message-ID: in the folder again once the server has moved them and it is synced
+    Moving(FolderId, Vec<String>),
+    /// Taken back in the store as the server refused an action, by UID: in the folder already
+    There(FolderId, Vec<u64>),
 }
 
 impl Core {
@@ -722,6 +746,67 @@ mod background_tests {
             Selected::default(),
             "no list"
         );
+    }
+
+    /// Select All acts on what was there when it was chosen: mail stored after it (in the place of a message deleted
+    /// meanwhile too, whose id SQLite would give again) is neither counted nor acted on, and the list read again with
+    /// such mail in it no longer takes it as the whole list
+    #[test]
+    fn select_all_leaves_out_mail_stored_after_it() {
+        let dir = pe_testkit::TempDir::new("core-select-all-bound");
+        let (core, inbox, events) = opened(&dir, 30);
+        let mut view = ListView::new();
+        view.set_scope(Some(Scope::Folder(inbox)));
+        let all = view.select_all(&core).unwrap();
+        assert_eq!(all.count(), 30);
+        // the newest message goes, and two come
+        core.store().remove_messages(inbox, &[30]).unwrap();
+        let new = |uid| pe_store::MessageInfo {
+            uid,
+            date: Some(10_000),
+            subject: format!("new {uid}"),
+            ..Default::default()
+        };
+        core.store().add_messages(inbox, &[new(100), new(101)]).unwrap();
+        let refs = core.selected_refs(&all).unwrap();
+        assert_eq!(refs.len(), 29, "the one gone is not acted on");
+        assert!(refs.iter().all(|r| r.uid < 30), "nor are those stored after Select All");
+        assert_eq!(core.summary_of(&all).unwrap().count, 29);
+
+        // the action takes only them
+        let flagged = core.act_start(all.clone(), Action::Flag(true)).unwrap();
+        loop {
+            if let Event::Acted { request, said } = events.recv_timeout(Duration::from_secs(20)).unwrap() {
+                assert_eq!(request, flagged);
+                assert_eq!(said, Ok("Flagged 29 messages".to_string()));
+                break;
+            }
+        }
+        let is_flagged = |uid| {
+            let message = core.store().message(inbox, uid).unwrap().unwrap();
+            message.info.flags.iter().any(|f| f == "\\Flagged")
+        };
+        assert!(is_flagged(1) && is_flagged(29));
+        assert!(
+            !is_flagged(100) && !is_flagged(101),
+            "mail stored after Select All is not flagged"
+        );
+
+        // read again, the list has newer mail: no longer the whole list, but what Select All had, listed
+        let mut again = all.clone();
+        assert!(!view.select_all_again(&core, &mut again).unwrap());
+        assert_eq!(again, Selected::Listed(refs));
+        // chosen now, it is the whole list and stays so while nothing comes
+        let mut all = view.select_all(&core).unwrap();
+        assert_eq!(all.count(), 31);
+        assert!(view.select_all_again(&core, &mut all).unwrap());
+        assert_eq!(all.count(), 31);
+        core.store().remove_messages(inbox, &[1]).unwrap();
+        assert!(
+            view.select_all_again(&core, &mut all).unwrap(),
+            "one gone: still the whole list"
+        );
+        assert_eq!(all.count(), 30, "counted again");
     }
 
     /// The actions run off the calling thread one after another in the order asked, and say what they did

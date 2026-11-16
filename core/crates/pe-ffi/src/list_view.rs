@@ -595,7 +595,8 @@ pub unsafe extern "C" fn pe_list_view_select_ranges(
 
 /// Select All: fills `selection` with every message of the list (a collapsed conversation's too) without listing them,
 /// counted (`pe_selection_count`) from what the list counted last; the calls taking the selection list them when they
-/// need them (`pe_selection_act_start` off the window thread). False on failure.
+/// need them (`pe_selection_act_start` off the window thread). Only the messages stored by then: mail that comes after
+/// it is neither counted nor acted on. False on failure.
 ///
 /// # Safety
 /// `core` must be a live handle, `view` NULL or a live view, `selection` NULL or a live selection.
@@ -616,6 +617,30 @@ pub unsafe extern "C" fn pe_list_view_select_all(
             true
         }
         None => false,
+    }
+}
+
+/// The list read again while `selection` is its Select All: true when it still is the whole list (no message stored
+/// since in it), counted again, and every row is selected again; false when it is not, and then `selection` lists the
+/// messages Select All had, for `pe_list_view_positions` to find (the newer rows not selected). False on failure too.
+///
+/// # Safety
+/// `core` must be a live handle, `view` NULL or a live view, `selection` NULL or a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_select_all_again(
+    core: *const PeCore,
+    view: *const PeListView,
+    selection: *mut PeSelection,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(selection) = (unsafe { selection.as_mut() }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        listed(core, view, false, |core, view| {
+            view.select_all_again(core, &mut selection.0).unwrap_or(false)
+        })
     }
 }
 
@@ -644,8 +669,9 @@ pub unsafe extern "C" fn pe_list_view_positions(
     }
 }
 
-/// The rows of the messages the last `pe_undo` brought back, for the app to select once its list has them: none while
-/// none is back yet. With `behind` set true and no rows, something was written since the list was last counted (with
+/// The rows of the messages the last `pe_undo` brought back, and of those the store took back when the server refused
+/// an action (`PE_EVENT_KIND_ACTION_UNDONE`), for the app to select once its list has them: none while none is back
+/// yet. With `behind` set true and no rows, something was written since the list was last counted (with
 /// `pe_list_view_counts_and_rows`): the rows found now could be others of the list shown, so the app reads the list
 /// again (as after `PE_EVENT_KIND_FOLDER_CHANGED`) and asks then; the messages are kept for it. Free with
 /// `pe_positions_free`. NULL on failure.
