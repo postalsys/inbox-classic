@@ -191,7 +191,12 @@ fn loaded(code: &'static str) -> Arc<Bundle> {
 /// placeables filled: what the help names a control by. None for an id no catalog has.
 pub fn message_in(language: &str, id: &str) -> Option<String> {
     let code = supported(language).filter(|code| *code != PSEUDO).unwrap_or("en");
-    format(&loaded(code), id, &[]).or_else(|| format(english(), id, &[]))
+    or_english(&loaded(code), id, &[])
+}
+
+/// The message `id` of `bundle`, or English's when the bundle lacks it: a message not translated yet shows in English
+fn or_english(bundle: &Bundle, id: &str, args: &[(&str, Arg)]) -> Option<String> {
+    format(bundle, id, args).or_else(|| format(english(), id, args))
 }
 
 /// The message `id` of the catalog of `language` itself, its placeables filled from `args`: None when that catalog
@@ -268,8 +273,7 @@ pub fn tr_args(text: Text, args: &[(&str, Arg)]) -> String {
     if code == PSEUDO {
         return pseudo_args(&bundle, text, args);
     }
-    let formatted = format(&bundle, text.id(), args).or_else(|| format(english(), text.id(), args));
-    formatted.unwrap_or_else(|| text.id().to_string())
+    or_english(&bundle, text.id(), args).unwrap_or_else(|| text.id().to_string())
 }
 
 /// `text` in the pseudo-language: its own words accented and padded, what goes into them (a name, an address, a

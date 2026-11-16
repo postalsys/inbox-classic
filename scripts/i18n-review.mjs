@@ -8,11 +8,19 @@
 //   node scripts/i18n-review.mjs                       lists what waits for a review, by language
 //   node scripts/i18n-review.mjs --html out.html       the same as a page, English and the draft side by side
 //   node scripts/i18n-review.mjs --check               fails when a new or changed message or help passage has no mark
+//   node scripts/i18n-review.mjs --check --warn        the same as GitHub warnings and a job summary, never failing:
+//                                                      CI, where translations never block a pull request (a release
+//                                                      does, scripts/release.sh)
+//   node scripts/i18n-review.mjs --since <commit>      only what waits now and did not wait at <commit> (the start of
+//                                                      a review round): a new mark, a new message, or one whose English
+//                                                      or translation changed since; a help passage marked or changed
+//   node scripts/i18n-review.mjs --language <code>     only this language (with any of the above)
+//   node scripts/i18n-review.mjs --summary             the count by language; fails while anything waits (release.sh)
 //
 // Once the drafts are reviewed: remove their marks, and when none are left, put the commit in core/locales/REVIEWED.
 
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, existsSync, appendFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -20,7 +28,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const locales = join(root, 'core/locales');
 const helpDir = join(root, 'core/crates/pe-html/src');
 // every language there is a catalog of but the English one, which is the source
-const languages = readdirSync(locales, { withFileTypes: true })
+const allLanguages = readdirSync(locales, { withFileTypes: true })
     .filter(entry => entry.isDirectory() && entry.name !== 'en')
     .map(entry => entry.name)
     .sort();
@@ -32,11 +40,42 @@ const args = process.argv.slice(2);
 const checking = args.includes('--check');
 const htmlAt = args.indexOf('--html');
 const htmlOut = htmlAt >= 0 ? args[htmlAt + 1] : null;
+const summary = args.includes('--summary');
+const warnOnly = args.includes('--warn');
+const option = name => {
+    const at = args.indexOf(name);
+    if (at < 0) {
+        return null;
+    }
+    if (!args[at + 1] || args[at + 1].startsWith('--')) {
+        console.error(`${name} needs a value`);
+        process.exit(2);
+    }
+    return args[at + 1];
+};
+const sinceArg = option('--since');
+const onlyLanguage = option('--language');
+if (onlyLanguage && !allLanguages.includes(onlyLanguage)) {
+    console.error(`No catalog of "${onlyLanguage}"; there are: ${allLanguages.join(', ')}`);
+    process.exit(2);
+}
+const languages = onlyLanguage ? [onlyLanguage] : allLanguages;
 
 const reviewed = readFileSync(join(locales, 'REVIEWED'), 'utf8').trim();
 
 function git(...rest) {
     return execFileSync('git', rest, { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
+}
+
+// the commit of --since, resolved once so a branch name means the same commit for every file
+let since = null;
+if (sinceArg) {
+    try {
+        since = git('rev-parse', '--verify', '--quiet', `${sinceArg}^{commit}`).trim();
+    } catch {
+        console.error(`No commit "${sinceArg}"`);
+        process.exit(2);
+    }
 }
 
 // the messages of a catalog: id, its text (with its continuation lines and attributes), and its review mark
@@ -98,14 +137,26 @@ function catalogs(language, commit = null) {
 const englishNow = catalogs('en');
 const englishThen = catalogs('en', reviewed);
 
+const englishSince = since ? catalogs('en', since) : null;
+const pair = (english, message) => `${english.text.trimEnd()}\u0000${message.text.trimEnd()}`;
+
 const waiting = [];
 const unmarked = [];
 for (const language of languages) {
     const now = catalogs(language);
     const then = catalogs(language, reviewed);
+    // with --since: the messages that waited then, as the pair they were, so a draft changed since counts again
+    const waitedThen = new Set();
+    if (since) {
+        for (const [id, message] of catalogs(language, since)) {
+            const english = englishSince.get(id);
+            if (message.mark && english) {
+                waitedThen.add(`${id}\u0000${pair(english, message)}`);
+            }
+        }
+    }
     // the pairs (English, translation) the review saw: under the same id, or under an id that is gone now (a message
     // moved to another id or file). The same words reviewed in another place do not count, the context differs.
-    const pair = (english, message) => `${english.text.trimEnd()}\u0000${message.text.trimEnd()}`;
     const moved = new Set();
     for (const [id, message] of then) {
         const english = englishThen.get(id);
@@ -123,7 +174,9 @@ for (const language of languages) {
         const seen = (before && beforeEnglish && pair(beforeEnglish, before) === pair(english, message)) || moved.has(pair(english, message));
         const entry = { language, file: message.file, id, english: english.text, draft: message.text, mark: message.mark };
         if (message.mark) {
-            waiting.push(entry);
+            if (!waitedThen.has(`${id}\u0000${pair(english, message)}`)) {
+                waiting.push(entry);
+            }
         } else if (!seen) {
             unmarked.push({ ...entry, kind: then.has(id) ? 'changed' : 'new' });
         }
@@ -139,23 +192,25 @@ for (const language of languages) {
     helpPages.push({ language, path: `core/crates/pe-html/src/help.${language}.html`, name: `help.${language}.html` });
     const topics = join(root, 'core/crates/pe-html/help', language);
     if (existsSync(topics)) {
-        for (const file of readdirSync(topics).filter(f => f.endsWith('.html')).sort()) {
+        for (const file of readdirSync(topics)
+            .filter(f => f.endsWith('.html'))
+            .sort()) {
             helpPages.push({ language, path: `core/crates/pe-html/help/${language}/${file}`, name: `help/${language}/${file}` });
         }
     }
 }
-for (const { language, path, name } of helpPages) {
-    if (!existsSync(join(root, path))) {
-        continue;
-    }
-    const page = readFileSync(join(root, path), 'utf8');
-    let before = '';
+// a page as it was at `commit`, empty when it did not exist then
+function pageAt(commit, path) {
     try {
-        before = git('show', `${reviewed}:${path}`);
+        return git('show', `${commit}:${path}`);
     } catch {
-        // a help page the review did not have: every line of it is new
+        return '';
     }
-    const known = new Set(before.split('\n').map(l => l.trim()));
+}
+// the passages of a page between review marks, and (given the lines the review knew) its new lines outside them
+function scanHelp(page, known = new Set()) {
+    const passages = [];
+    const outside = [];
     let inside = false;
     let passage = [];
     page.split('\n').forEach((line, index) => {
@@ -176,13 +231,76 @@ for (const { language, path, name } of helpPages) {
             .replace(/<[^>]*>/g, '')
             .replace(/[\s,.;:()]/g, '');
         if (!inside && words && !known.has(bare)) {
-            helpUnmarked.push({ language, name, line: index + 1, text: bare });
+            outside.push({ line: index + 1, text: bare });
         }
         if (closes) {
             inside = false;
-            helpWaiting.push({ language, text: passage.join('\n') });
+            passages.push(passage.join('\n'));
         }
     });
+    return { passages, outside };
+}
+for (const { language, path, name } of helpPages) {
+    if (!existsSync(join(root, path))) {
+        continue;
+    }
+    const page = readFileSync(join(root, path), 'utf8');
+    // a help page the review did not have: every line of it is new
+    const known = new Set(
+        pageAt(reviewed, path)
+            .split('\n')
+            .map(l => l.trim())
+    );
+    const { passages, outside } = scanHelp(page, known);
+    // with --since: a passage that waited then, word for word, in the same page, is not new to the round
+    const waitedThen = new Set(since ? scanHelp(pageAt(since, path)).passages : []);
+    for (const text of passages) {
+        if (!waitedThen.has(text)) {
+            helpWaiting.push({ language, text });
+        }
+    }
+    for (const u of outside) {
+        helpUnmarked.push({ language, name, ...u });
+    }
+}
+
+// GitHub annotations for the unmarked ones and a job summary of what waits, by language
+function warn(bad) {
+    const clean = text => text.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A');
+    for (const u of unmarked) {
+        console.log(`::warning file=core/locales/${u.language}/${u.file}::${clean(`${u.id} is ${u.kind} but has no "# review: ${u.kind}" mark`)}`);
+    }
+    for (const u of helpUnmarked) {
+        console.log(`::warning file=core/crates/pe-html/${u.name},line=${u.line}::${clean(`new outside <!--review--> marks: ${u.text.slice(0, 80)}`)}`);
+    }
+    if (waiting.length + helpWaiting.length) {
+        console.log(
+            `::warning::${waiting.length} messages and ${helpWaiting.length} help passages wait for a review; a release needs none (scripts/release.sh)`
+        );
+    }
+    const out = process.env.GITHUB_STEP_SUMMARY;
+    if (!out) {
+        return;
+    }
+    const lines = ['## Translations', '', 'Translations never block a pull request; `scripts/release.sh` builds no release until none wait.', ''];
+    lines.push('| Language | Messages to review | Help passages to review |', '| --- | --- | --- |');
+    for (const language of languages) {
+        const messages = waiting.filter(w => w.language === language).length;
+        const passages = helpWaiting.filter(h => h.language === language).length;
+        if (messages || passages) {
+            lines.push(`| ${language} | ${messages} | ${passages} |`);
+        }
+    }
+    if (bad) {
+        lines.push('', `### ${bad} new or changed without a review mark`, '');
+        for (const u of unmarked) {
+            lines.push(`- \`${u.language}/${u.file}\` \`${u.id}\` (${u.kind})`);
+        }
+        for (const u of helpUnmarked) {
+            lines.push(`- \`${u.name}:${u.line}\` ${escape(u.text.slice(0, 80))}`);
+        }
+    }
+    appendFileSync(out, lines.join('\n') + '\n');
 }
 
 function escape(text) {
@@ -198,7 +316,26 @@ if (checking) {
     }
     const bad = unmarked.length + helpUnmarked.length;
     console.log(`${waiting.length} messages and ${helpWaiting.length} help passages wait for a review; ${bad} new or changed without a mark`);
+    if (warnOnly) {
+        warn(bad);
+        process.exit(0);
+    }
     process.exit(bad ? 1 : 0);
+}
+
+const scope = since ? ` and did not wait at ${sinceArg} (${since.slice(0, 8)})` : '';
+
+if (summary) {
+    let total = 0;
+    for (const language of languages) {
+        const messages = waiting.filter(w => w.language === language).length;
+        const passages = helpWaiting.filter(h => h.language === language).length;
+        if (messages || passages) {
+            console.log(`${language}: ${messages} messages, ${passages} help passages`);
+        }
+        total += messages + passages;
+    }
+    process.exit(total ? 1 : 0);
 }
 
 if (htmlOut) {
@@ -215,12 +352,17 @@ if (htmlOut) {
         htmlOut,
         `<!doctype html><meta charset="utf-8"><title>Translations to review</title>
 <style>body{font:14px system-ui,sans-serif;margin:24px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:6px;vertical-align:top;text-align:left}th{background:#eee}</style>
-<h1>Translations to review</h1><p>Since ${reviewed}: ${waiting.length} messages, ${helpWaiting.length} help passages.</p>
+<h1>Translations to review</h1>${
+            since
+                ? `<p><strong>Only what is new since ${escape(sinceArg)} (commit ${since.slice(0, 8)}):</strong> marked or changed after it, not waiting at it.</p>`
+                : ''
+        }<p>Since the last review (${reviewed}): ${waiting.length} messages, ${helpWaiting.length} help passages.</p>
 <table><tr><th>Language</th><th>File</th><th>Id</th><th>English</th><th>Draft</th></tr>${rows}</table>
 <h2>Help passages</h2><table><tr><th>Language</th><th colspan="4">Passage</th></tr>${help}</table>`
     );
     console.log(`wrote ${htmlOut}`);
 } else {
+    console.log(`Waiting for a review since ${reviewed}${scope}: ${waiting.length} messages, ${helpWaiting.length} help passages`);
     for (const language of languages) {
         const mine = waiting.filter(w => w.language === language);
         const pages = helpWaiting.filter(h => h.language === language);

@@ -42,7 +42,7 @@ jobs:
               run: git diff --exit-code -- include ../mac/Sources/InboxClassic/Generated ../linux/src/generated ../installer/languages.nsh ../app/res/sign-in-buttons.rc ../linux/data
 
     translations:
-        name: New translations marked for review
+        name: Translations waiting for a review (warnings)
         runs-on: ubuntu-latest
         timeout-minutes: 5
         steps:
@@ -50,8 +50,9 @@ jobs:
               with:
                   fetch-depth: 0
             # a translated message or help passage that is new or changed since core/locales/REVIEWED carries a review
-            # mark, so the drafts can be found and reviewed later
-            - run: node scripts/i18n-review.mjs --check
+            # mark, so the drafts can be found and reviewed later. Warnings only: translations never block a pull
+            # request; scripts/release.sh builds no release while any wait or lack a mark
+            - run: node scripts/i18n-review.mjs --check --warn
 
     shells:
         name: Every app changed with what they share

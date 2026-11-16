@@ -6,6 +6,7 @@
 #   BUILD_ONLY=yes scripts/release.sh        builds, signs and checks, uploads nothing
 #   PLATFORMS=mac scripts/release.sh         builds only these (windows, mac, linux, comma separated) and uploads
 #                                            what is in dist/, to finish a release one of whose builds failed
+#   ALLOW_UNREVIEWED=1 scripts/release.sh    releases although translations wait for a review (it refuses otherwise)
 #
 # release-please drafts the release and pushes the tag when its release PR is merged (.github/workflows/release.yaml).
 # This builds from that tag:
@@ -53,6 +54,36 @@ building() {
 # everything that can stop the release is checked before the builds, which take a while
 if [ -n "$(git status --porcelain)" ]; then
     fail "The working tree has changes, the release is built from the files on disk and must match the tag"
+fi
+# translations never block a pull request, a release they do: every one reviewed (no marks left), every new or changed
+# one marked, every language with every message and help topic. ALLOW_UNREVIEWED=1 releases anyway.
+translations_ok=yes
+if ! waiting=$(node scripts/i18n-review.mjs --summary); then
+    translations_ok=no
+    echo "Translations wait for a native review (node scripts/i18n-review.mjs [--language <code>] [--html out.html] lists them):" >&2
+    echo "$waiting" | sed 's/^/  /' >&2
+fi
+if ! unmarked=$(node scripts/i18n-review.mjs --check 2>&1); then
+    translations_ok=no
+    echo "New or changed translations without a review mark (node scripts/i18n-review.mjs --check):" >&2
+    echo "$unmarked" | sed 's/^/  /' >&2
+fi
+if ! complete=$(cd core && cargo test -q --locked -p pe-i18n -p pe-html -- --ignored 2>&1); then
+    translations_ok=no
+    echo "A language lacks messages or help topics (cd core && cargo test -p pe-i18n -p pe-html -- --ignored):" >&2
+    echo "$complete" | grep -E "panicked|lacks|missing" | sed 's/^/  /' >&2 || true
+fi
+if [ "$translations_ok" = "no" ]; then
+    if [ "${ALLOW_UNREVIEWED:-}" = "1" ]; then
+        echo "" >&2
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >&2
+        echo "!!  ALLOW_UNREVIEWED=1: releasing with the translations above NOT reviewed     !!" >&2
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" >&2
+        echo "" >&2
+        sleep 5
+    else
+        fail "No release while translations wait: review them on master first, or ALLOW_UNREVIEWED=1 to release anyway"
+    fi
 fi
 if building windows; then
     [ -n "${SIGN_WIN_ACCOUNT:-}" ] && [ -n "${SIGN_WIN_PROFILE:-}" ] || fail "SIGN_WIN_ACCOUNT and SIGN_WIN_PROFILE are not set, a release is always signed"
