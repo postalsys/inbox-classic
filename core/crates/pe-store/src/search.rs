@@ -38,6 +38,29 @@ pub enum Scope {
     Flagged,
 }
 
+impl Scope {
+    /// The folders an All list gathers from every account, as SQL: All Inboxes', All Sent's, All Drafts'
+    fn gathered(self) -> Option<&'static str> {
+        match self {
+            Scope::AllInboxes => Some(INBOXES),
+            Scope::AllSent => Some(SENT),
+            Scope::AllDrafts => Some(DRAFTS),
+            _ => None,
+        }
+    }
+
+    /// Whether the list of an All row (All Inboxes, All Sent, All Drafts) holds the messages of `folder`: the rule its
+    /// SQL has, for the folder list and a message's window to follow
+    pub fn includes(self, folder: &crate::FolderInfo) -> bool {
+        match self {
+            Scope::AllInboxes => folder.path.eq_ignore_ascii_case("INBOX"),
+            Scope::AllSent => folder.special_use.as_deref() == Some("\\Sent"),
+            Scope::AllDrafts => folder.special_use.as_deref() == Some("\\Drafts"),
+            _ => false,
+        }
+    }
+}
+
 /// The Inbox of every account, as SQL
 pub(crate) const INBOXES: &str = "SELECT id FROM folders WHERE path = 'INBOX' COLLATE NOCASE";
 
@@ -169,13 +192,17 @@ impl Search {
         match self.scope {
             _ if query.spans_folders() => {}
             Scope::Folder(folder) => parts.push(format!("folder_id = {}", value(&mut values, Value::Integer(folder)))),
-            // the + keeps SQLite off the folder indexes, which would sort every message of the Inboxes for a page
-            Scope::AllInboxes if in_order => parts.push(format!("+folder_id IN ({INBOXES})")),
-            Scope::AllInboxes => parts.push(format!("folder_id IN ({INBOXES})")),
-            Scope::AllSent if in_order => parts.push(format!("+folder_id IN ({SENT})")),
-            Scope::AllSent => parts.push(format!("folder_id IN ({SENT})")),
-            Scope::AllDrafts if in_order => parts.push(format!("+folder_id IN ({DRAFTS})")),
-            Scope::AllDrafts => parts.push(format!("folder_id IN ({DRAFTS})")),
+            scope @ (Scope::AllInboxes | Scope::AllSent | Scope::AllDrafts) => {
+                let folders = scope.gathered().unwrap_or_default();
+                // the + keeps SQLite off the folder indexes, which would sort every message of the Inboxes for a page;
+                // Sent Items and Drafts hold a small part of the mail, which the folder indexes find at once
+                let plus = if in_order && scope == Scope::AllInboxes {
+                    "+"
+                } else {
+                    ""
+                };
+                parts.push(format!("{plus}folder_id IN ({folders})"));
+            }
             Scope::Everywhere => {}
             Scope::Flagged => parts.push(format!("{IS_FLAGGED} AND folder_id IN ({FLAGGED_FROM})")),
         }

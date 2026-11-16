@@ -100,9 +100,11 @@ fn a_list_view_through_the_c_api() {
     assert!(rows(core, view).is_empty());
 
     // the Inbox, newest first, one row a message
-    assert!(unsafe { pe_list_view_set_scope(view, inbox, false) });
+    assert!(unsafe { pe_list_view_set_list(view, PeTreeList::Folder, inbox) });
+    assert_eq!(unsafe { pe_list_view_own_folder(view) }, inbox);
+    assert!(!unsafe { pe_list_view_gathers_accounts(view) } && unsafe { pe_list_view_marks_all_read(view) });
     assert!(
-        !unsafe { pe_list_view_set_scope(view, inbox, false) },
+        !unsafe { pe_list_view_set_list(view, PeTreeList::Folder, inbox) },
         "the same folder"
     );
     assert!(unsafe { pe_list_view_active(view) } && !unsafe { pe_list_view_several_folders(view) });
@@ -215,9 +217,15 @@ fn a_list_view_through_the_c_api() {
     assert!(!unsafe { pe_list_view_searching(view) });
     // another folder closes them too
     unsafe { pe_list_view_expand(view, a) };
-    assert!(unsafe { pe_list_view_set_scope(view, 0, true) });
+    assert!(unsafe { pe_list_view_set_list(view, PeTreeList::AllInboxes, 0) });
     assert!(!unsafe { pe_list_view_is_expanded(view, a) });
     assert_eq!(counts(core, view), (4, 1), "All Inboxes");
+    // All Inboxes gathers the accounts and marks read, but is no folder of its own
+    assert!(unsafe { pe_list_view_gathers_accounts(view) } && unsafe { pe_list_view_marks_all_read(view) });
+    assert_eq!(unsafe { pe_list_view_own_folder(view) }, 0);
+    assert!(unsafe { pe_list_view_set_list(view, PeTreeList::AllSent, 0) });
+    assert!(unsafe { pe_list_view_gathers_accounts(view) } && !unsafe { pe_list_view_marks_all_read(view) });
+    assert!(unsafe { pe_list_view_set_list(view, PeTreeList::AllInboxes, 0) });
     unsafe { pe_list_view_set_show(view, PeShow::Unread) };
     assert_eq!(counts(core, view), (1, 1));
 
@@ -232,7 +240,7 @@ fn a_list_view_takes_null() {
     unsafe {
         pe_list_view_free(null_mut());
         assert!(pe_list_view_clone(null()).is_null());
-        assert!(!pe_list_view_set_scope(null_mut(), 1, false));
+        assert!(!pe_list_view_set_list(null_mut(), PeTreeList::Folder, 1));
         assert!(!pe_list_view_set_text(null_mut(), null()));
         pe_list_view_set_show(null_mut(), PeShow::Unread);
         pe_list_view_set_sort(null_mut(), PeSortField::Subject, true);
@@ -280,7 +288,7 @@ fn a_list_view_takes_null() {
     // a live view without a core
     let view = pe_list_view_new();
     unsafe {
-        assert!(pe_list_view_set_scope(view, 1, false));
+        assert!(pe_list_view_set_list(view, PeTreeList::Folder, 1));
         assert!(!pe_list_view_expand_all(null(), view));
         assert!(!pe_list_view_reveal(null(), view, 1, 1));
         assert!(pe_list_view_messages(null(), view, 0, 10).is_null());

@@ -56,17 +56,23 @@ pub enum TreeList {
 }
 
 impl TreeList {
-    /// The list's scope, `folder` for a folder's own
+    /// The list's scope, `folder` for a folder's own; None for a heading's, or a folder's without one
     pub fn scope(self, folder: FolderId) -> Option<pe_store::Scope> {
         use pe_store::Scope;
         match self {
             TreeList::None => None,
+            TreeList::Folder if folder == 0 => None,
             TreeList::Folder => Some(Scope::Folder(folder)),
             TreeList::AllInboxes => Some(Scope::AllInboxes),
             TreeList::Flagged => Some(Scope::Flagged),
             TreeList::AllSent => Some(Scope::AllSent),
             TreeList::AllDrafts => Some(Scope::AllDrafts),
         }
+    }
+
+    /// One folder of every account (All Inboxes, All Sent, All Drafts): their messages show the account they are of
+    pub fn gathers(self) -> bool {
+        matches!(self, TreeList::AllInboxes | TreeList::AllSent | TreeList::AllDrafts)
     }
 }
 
@@ -183,17 +189,25 @@ fn is_inbox(folder: &Folder) -> bool {
     folder.info.path.eq_ignore_ascii_case("INBOX")
 }
 
-/// The special uses the folder list gathers from every account under rows of their own, with several accounts:
-/// All Sent and All Drafts, after All Inboxes; the store's rule, the one their lists use
-const GATHERED: [(&str, TreeRowKind, &str, pe_i18n::Text); 2] = [
-    ("\\Sent", TreeRowKind::AllSent, "sent", pe_i18n::Text::UiAllSent),
-    ("\\Drafts", TreeRowKind::AllDrafts, "drafts", pe_i18n::Text::UiAllDrafts),
+/// The lists of every account's folder of a kind, after All Inboxes, with several accounts: All Sent and All Drafts,
+/// their folders by the store's own rule ([`pe_store::Scope::includes`])
+const GATHERED: [(pe_store::Scope, TreeRowKind, &str, pe_i18n::Text); 2] = [
+    (
+        pe_store::Scope::AllSent,
+        TreeRowKind::AllSent,
+        "sent",
+        pe_i18n::Text::UiAllSent,
+    ),
+    (
+        pe_store::Scope::AllDrafts,
+        TreeRowKind::AllDrafts,
+        "drafts",
+        pe_i18n::Text::UiAllDrafts,
+    ),
 ];
 
 fn gathered(folder: &Folder) -> bool {
-    GATHERED
-        .iter()
-        .any(|(special, ..)| folder.info.special_use.as_deref() == Some(*special))
+    GATHERED.iter().any(|(scope, ..)| scope.includes(&folder.info))
 }
 
 /// Counts toward a collapsed row: not Junk E-mail nor Deleted Items
@@ -301,6 +315,40 @@ fn one_account(folders: &[(Folder, usize)], account: AccountId, mut flagged: Tre
     rows
 }
 
+/// All Sent and All Drafts, each with every account's folder of its kind under it, named after the account; none
+/// when no account has one
+fn gathered_rows(accounts: &[(AccountId, Vec<(Folder, usize)>)], titles: &[String]) -> Vec<(TreeRow, u64)> {
+    let mut rows = Vec::new();
+    for (scope, kind, key, label) in GATHERED {
+        let under: Vec<(TreeRow, u64)> = accounts
+            .iter()
+            .zip(titles)
+            .flat_map(|((_, folders), title)| {
+                folders
+                    .iter()
+                    .filter(|(folder, _)| scope.includes(&folder.info))
+                    .map(move |(folder, _)| (account_folder_row(folder, title), counted(folder)))
+            })
+            .collect();
+        if !under.is_empty() {
+            rows.push((TreeRow::fixed(kind, key.into(), 0, pe_i18n::tr(label), key), 0));
+            rows.extend(under);
+        }
+    }
+    rows
+}
+
+/// An account's folder under All Sent or All Drafts: named after the account
+fn account_folder_row(folder: &Folder, title: &str) -> TreeRow {
+    TreeRow {
+        label: title.to_string(),
+        title: format!("{} - {title}", text::folder_name(&folder.info)),
+        // its folders are listed under the account's heading: one made from here goes there
+        new_folder_parent: 0,
+        ..folder_row(folder, 1)
+    }
+}
+
 /// The rows of several accounts: All Inboxes with each Inbox, All Sent and All Drafts with each account's, Flagged,
 /// then each account's heading and its other folders
 fn several_accounts(
@@ -331,31 +379,7 @@ fn several_accounts(
             rows.push((row, counted(inbox)));
         }
     }
-    for (special, kind, key, label) in GATHERED {
-        let under: Vec<(TreeRow, u64)> = accounts
-            .iter()
-            .zip(titles)
-            .flat_map(|((_, folders), title)| {
-                folders
-                    .iter()
-                    .filter(|(folder, _)| folder.info.special_use.as_deref() == Some(special))
-                    .map(move |(folder, _)| {
-                        let row = TreeRow {
-                            label: title.clone(),
-                            title: format!("{} - {title}", text::folder_name(&folder.info)),
-                            // its folders are listed under the account's heading: one made from here goes there
-                            new_folder_parent: 0,
-                            ..folder_row(folder, 1)
-                        };
-                        (row, counted(folder))
-                    })
-            })
-            .collect();
-        if !under.is_empty() {
-            rows.push((TreeRow::fixed(kind, key.into(), 0, pe_i18n::tr(label), key), 0));
-            rows.extend(under);
-        }
-    }
+    rows.extend(gathered_rows(accounts, titles));
     rows.push((flagged, 0));
     for ((account, folders), title) in accounts.iter().zip(titles) {
         let heading = TreeRow::fixed(
@@ -414,12 +438,7 @@ pub(crate) fn rows(accounts: Vec<(pe_store::Account, Vec<Folder>)>, flagged: u64
     fill_below(&mut rows);
     let mut rows: Vec<TreeRow> = rows.into_iter().map(|(row, _)| row).collect();
     // All Inboxes, All Sent and All Drafts count their folders as a folder does (they are no folders of their own)
-    for row in rows.iter_mut().filter(|row| {
-        matches!(
-            row.kind,
-            TreeRowKind::AllInboxes | TreeRowKind::AllSent | TreeRowKind::AllDrafts
-        )
-    }) {
+    for row in rows.iter_mut().filter(|row| row.list.gathers()) {
         row.unread = row.hidden;
         row.hidden = 0;
     }

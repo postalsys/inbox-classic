@@ -3295,16 +3295,6 @@ struct PeListView *pe_list_view_clone(const struct PeListView *view);
 // `view` must be NULL or a view that was not freed yet.
 void pe_list_view_free(struct PeListView *view);
 
-// The folder the list shows: `folder`, or with `folder` 0 the Inbox of every account (`all_inboxes`) or no folder
-// (an account's own item, which lists nothing without words). Every conversation is closed when it is another one.
-// False when it was the one shown already (or for NULL).
-//
-// # Safety
-// `view` must be NULL or a live view.
-bool pe_list_view_set_scope(struct PeListView *view,
-                            int64_t folder,
-                            bool all_inboxes);
-
 // The list of a row of the folder list (`PeTreeRow` `list` and `folder`): its folder's, All Inboxes', All Sent's,
 // All Drafts' or Flagged's, or none (a heading, which lists nothing without words). Every conversation is closed when
 // it is another one. False when it was the one shown already (or for NULL).
@@ -3314,13 +3304,6 @@ bool pe_list_view_set_scope(struct PeListView *view,
 bool pe_list_view_set_list(struct PeListView *view,
                            enum PeTreeList list,
                            int64_t folder);
-
-// The list of the Flagged row: the flagged messages of every account, but those in Deleted Items or Junk E-mail.
-// False when it was the one shown already (or for NULL).
-//
-// # Safety
-// `view` must be NULL or a live view.
-bool pe_list_view_set_flagged(struct PeListView *view);
 
 // The words typed in the Find box (UTF-8, NULL or empty for none), in Gmail's syntax: words, "phrases", -word, OR,
 // from: to: subject: filename: is:unread is:starred has:attachment in: before: after: older_than: newer_than: larger:
@@ -3372,6 +3355,26 @@ bool pe_list_view_searching(const struct PeListView *view);
 // # Safety
 // `view` must be NULL or a live view.
 bool pe_list_view_several_folders(const struct PeListView *view);
+
+// Whether it lists one folder of every account (All Inboxes, All Sent, All Drafts, no words): its place column is
+// Account, not Folder, and names the account alone; a message shown from elsewhere that is in it stays in it
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_gathers_accounts(const struct PeListView *view);
+
+// The folder it lists without words, for Empty Folder, Import Messages and files dropped on the list; 0 for a list
+// of several folders
+//
+// # Safety
+// `view` must be NULL or a live view.
+int64_t pe_list_view_own_folder(const struct PeListView *view);
+
+// Whether Mark All Read applies to it: a folder's list or All Inboxes, without words
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_marks_all_read(const struct PeListView *view);
 
 // Whether the list lists anything: a folder, All Inboxes or words; not an account's own item. Expand All and
 // Collapse All apply to a grouped list that does.

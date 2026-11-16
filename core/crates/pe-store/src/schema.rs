@@ -677,18 +677,25 @@ mod tests {
             }
         }
         // over the Inboxes of every account (search.rs keeps it off the folder indexes for these orders)
-        // All Inboxes, All Sent and All Drafts
-        let gathered = [crate::search::INBOXES, crate::search::SENT, crate::search::DRAFTS];
-        for (field, folders) in [crate::SortField::Date, crate::SortField::Received]
-            .into_iter()
-            .flat_map(|field| gathered.map(|folders| (field, folders)))
-        {
+        for field in [crate::SortField::Date, crate::SortField::Received] {
             let order = crate::Sort {
                 field,
                 ascending: false,
             }
             .order_by();
-            let sql = format!("SELECT id FROM messages WHERE +folder_id IN ({folders}) ORDER BY {order} LIMIT 10");
+            // All Sent and All Drafts read their few folders by the folder indexes
+            for folders in [crate::search::SENT, crate::search::DRAFTS] {
+                let sql = format!("SELECT id FROM messages WHERE folder_id IN ({folders}) ORDER BY {order} LIMIT 10");
+                let plan = plan(&db, &sql);
+                assert!(
+                    plan.contains("folder_id=?"),
+                    "{field:?} of {folders} by the folder index: {plan}"
+                );
+            }
+            let sql = format!(
+                "SELECT id FROM messages WHERE +folder_id IN ({}) ORDER BY {order} LIMIT 10",
+                crate::search::INBOXES
+            );
             let plan = plan(&db, &sql);
             assert!(
                 !plan.contains("TEMP B-TREE"),

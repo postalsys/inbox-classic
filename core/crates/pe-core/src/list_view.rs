@@ -98,6 +98,27 @@ impl ListView {
             )
     }
 
+    /// Whether it lists one folder of every account (All Inboxes, All Sent, All Drafts, no words): its place column
+    /// is Account (a search's and Flagged's is Folder), naming the account alone, and a message shown from elsewhere
+    /// that is in it stays in it
+    pub fn gathers_accounts(&self) -> bool {
+        !self.searching() && matches!(self.scope, Some(Scope::AllInboxes | Scope::AllSent | Scope::AllDrafts))
+    }
+
+    /// The folder it lists, without words: what Empty Folder, Import Messages and files dropped on the list act on;
+    /// None for a list of several folders
+    pub fn own_folder(&self) -> Option<pe_store::FolderId> {
+        match self.scope {
+            Some(Scope::Folder(folder)) if !self.searching() => Some(folder),
+            _ => None,
+        }
+    }
+
+    /// Whether Mark All Read applies to it: a folder's list or All Inboxes, without words
+    pub fn marks_all_read(&self) -> bool {
+        self.own_folder().is_some() || (!self.searching() && self.scope == Some(Scope::AllInboxes))
+    }
+
     /// Whether the list lists anything: a folder, All Inboxes, or words; not an account's own item
     pub fn active(&self) -> bool {
         self.searching() || self.scope.is_some()
