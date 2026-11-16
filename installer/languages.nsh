@@ -118,7 +118,7 @@ LangString WelcomeNew ${LANG_FINNISH} "Tämä asentaa sähköpostiohjelman Inbox
 LangString WelcomeNew ${LANG_SWEDISH} "Inbox Classic ${VERSION}, ett e-postprogram, installeras nu.$\r$\n$\r$\nInga administratörsrättigheter behövs, programmet installeras bara för ditt konto."
 LangString WelcomeNew ${LANG_TURKISH} "Inbox Classic e-posta uygulamasının ${VERSION} sürümü yüklenecek.$\r$\n$\r$\nYönetici izni gerekmez. Uygulama yalnızca mevcut Windows kullanıcı hesabınız için yüklenir."
 LangString WelcomeNew ${LANG_GREEK} "Θα εγκατασταθεί το Inbox Classic ${VERSION}, ένα πρόγραμμα ηλεκτρονικού ταχυδρομείου.$\r$\n$\r$\nΔεν χρειάζονται δικαιώματα διαχειριστή· εγκαθίσταται μόνο για τον λογαριασμό σας."
-LangString WelcomeNew ${LANG_BULGARIAN} "Това ще инсталира Inbox Classic ${VERSION}, програма за електронна поща.$\r$\n$\r$\nНе са нужни администраторски права, програмата се инсталира само за вашия акаунт."
+LangString WelcomeNew ${LANG_BULGARIAN} "Ще бъде инсталирана Inbox Classic ${VERSION}, програма за електронна поща.$\r$\n$\r$\nНе са нужни администраторски права. Програмата се инсталира само за вашия потребителски акаунт в Windows."
 LangString WelcomeNew ${LANG_RUSSIAN} "Будет установлена почтовая программа Inbox Classic ${VERSION}.$\r$\n$\r$\nПрава администратора не нужны: программа устанавливается только для вашей учетной записи."
 LangString WelcomeNew ${LANG_UKRAINIAN} "Буде встановлено Inbox Classic ${VERSION}, програму електронної пошти.$\r$\n$\r$\nПрава адміністратора не потрібні, програму буде встановлено лише для вашого облікового запису."
 
@@ -148,7 +148,7 @@ LangString WelcomeSame ${LANG_FINNISH} "Inbox Classic ${VERSION} on jo asennettu
 LangString WelcomeSame ${LANG_SWEDISH} "Inbox Classic ${VERSION} är redan installerat. Det installeras nu igen.$\r$\n$\r$\nDina konton och din e-post behålls."
 LangString WelcomeSame ${LANG_TURKISH} "Inbox Classic ${VERSION} zaten yüklü. Aynı sürüm yeniden yüklenecek.$\r$\n$\r$\nHesaplarınız ve postanız korunur."
 LangString WelcomeSame ${LANG_GREEK} "Το Inbox Classic ${VERSION} είναι ήδη εγκατεστημένο. Θα εγκατασταθεί ξανά.$\r$\n$\r$\nΟι λογαριασμοί και η αλληλογραφία σας διατηρούνται."
-LangString WelcomeSame ${LANG_BULGARIAN} "Inbox Classic ${VERSION} вече е инсталирана. Това ще я инсталира отново.$\r$\n$\r$\nАкаунтите и пощата ви се запазват."
+LangString WelcomeSame ${LANG_BULGARIAN} "Inbox Classic ${VERSION} вече е инсталирана. Ще бъде извършено повторно инсталиране.$\r$\n$\r$\nАкаунтите и пощата ви се запазват."
 LangString WelcomeSame ${LANG_RUSSIAN} "Inbox Classic ${VERSION} уже установлена. Она будет установлена заново.$\r$\n$\r$\nВаши учетные записи и почта сохранятся."
 LangString WelcomeSame ${LANG_UKRAINIAN} "Inbox Classic ${VERSION} уже встановлено. Програму буде встановлено ще раз.$\r$\n$\r$\nВаші облікові записи й пошту буде збережено."
 
@@ -178,7 +178,7 @@ LangString WelcomeUpdate ${LANG_FINNISH} "Tämä päivittää Inbox Classicin ve
 LangString WelcomeUpdate ${LANG_SWEDISH} "Inbox Classic $InstalledVersion uppdateras nu till ${VERSION}.$\r$\n$\r$\nOm programmet körs stängs det först. Dina konton och din e-post behålls."
 LangString WelcomeUpdate ${LANG_TURKISH} "Inbox Classic, $InstalledVersion sürümünden ${VERSION} sürümüne güncellenecek.$\r$\n$\r$\nUygulama çalışıyorsa önce kapatılır. Hesaplarınız ve postanız korunur."
 LangString WelcomeUpdate ${LANG_GREEK} "Το Inbox Classic $InstalledVersion θα ενημερωθεί στην έκδοση ${VERSION}.$\r$\n$\r$\nΑν εκτελείται, θα κλείσει πρώτα. Οι λογαριασμοί και η αλληλογραφία σας διατηρούνται."
-LangString WelcomeUpdate ${LANG_BULGARIAN} "Това ще обнови Inbox Classic $InstalledVersion до ${VERSION}.$\r$\n$\r$\nАко програмата работи, тя първо ще бъде затворена. Акаунтите и пощата ви се запазват."
+LangString WelcomeUpdate ${LANG_BULGARIAN} "Inbox Classic ще бъде обновена от версия $InstalledVersion до ${VERSION}.$\r$\n$\r$\nАко програмата работи, първо ще бъде затворена. Акаунтите и пощата ви се запазват."
 LangString WelcomeUpdate ${LANG_RUSSIAN} "Inbox Classic $InstalledVersion будет обновлена до версии ${VERSION}.$\r$\n$\r$\nЕсли программа запущена, сначала она будет закрыта. Ваши учетные записи и почта сохранятся."
 LangString WelcomeUpdate ${LANG_UKRAINIAN} "Inbox Classic $InstalledVersion буде оновлено до версії ${VERSION}.$\r$\n$\r$\nЯкщо програма працює, її спершу буде закрито. Ваші облікові записи й пошту буде збережено."
 
@@ -268,6 +268,6 @@ LangString RemoveMailAsk ${LANG_FINNISH} "Poistetaanko myös tilit ja posti, jot
 LangString RemoveMailAsk ${LANG_SWEDISH} "Vill du även ta bort kontona och e-posten som Inbox Classic sparar på den här datorn? E-posten på servrarna finns kvar."
 LangString RemoveMailAsk ${LANG_TURKISH} "Inbox Classic'in bu bilgisayarda sakladığı hesap bilgileri ve ileti kopyaları da silinsin mi? Sunuculardaki postanız korunur."
 LangString RemoveMailAsk ${LANG_GREEK} "Να καταργηθούν επίσης οι λογαριασμοί και η αλληλογραφία που κρατά το Inbox Classic σε αυτόν τον υπολογιστή; Η αλληλογραφία στους διακομιστές παραμένει."
-LangString RemoveMailAsk ${LANG_BULGARIAN} "Да се премахнат ли и акаунтите и пощата, които Inbox Classic пази на този компютър? Пощата на сървърите остава."
+LangString RemoveMailAsk ${LANG_BULGARIAN} "Искате ли да премахнете и акаунтите и локалните копия на пощата, запазени от Inbox Classic на този компютър? Пощата на сървърите се запазва."
 LangString RemoveMailAsk ${LANG_RUSSIAN} "Удалить также учетные записи и почту, которые Inbox Classic хранит на этом компьютере? Почта на серверах останется."
 LangString RemoveMailAsk ${LANG_UKRAINIAN} "Вилучити також облікові записи й пошту, які Inbox Classic зберігає на цьому комп’ютері? Пошта на серверах залишиться."

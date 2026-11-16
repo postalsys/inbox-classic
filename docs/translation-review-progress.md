@@ -16,7 +16,7 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Bulgarian (`bg`): UI reviewed; 702 core/platform/help-title entries and all 52 help topics remain. Dutch, Italian,
+- Resume with Bulgarian (`bg`): all catalogs reviewed; all 52 help topics remain. Dutch, Italian,
   Portuguese (Portugal), Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are
   complete: each has 1,331 catalog entries and 52 help topics. Sixteen languages still have pending content,
   with exact IDs/topics in the state file.
@@ -353,8 +353,22 @@ and credential transfer. Resolved seven shortcut placements across 32 actual men
 All 14 catalog tests, structure, inventory/hash reconciliation and git diff --check pass. Turkish completion
 checkpoint: `36dc6ce6`. Remaining catalogs and all 52 Bulgarian help topics are pending.
 
-Current totals: 11,341 catalog entries and 420 help pages reviewed; 1,730 catalog values improved. Remaining:
-20,667 catalog entries and 832 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Bulgarian catalogs completed
+
+Reviewed the remaining 448 core and 254 platform/help-title entries, improving 151 values. All 1,331 Bulgarian
+catalog entries are reviewed, with 219 values improved. Corrected delivery/count wording, queued agent logs,
+key lookup and recovery, credential transfer, temporary-attachment cleanup, native controls and installer/store
+text. All 75 tests, structural checks, 32 shortcut scopes, inventory/hash reconciliation and git diff --check
+pass. Generated installer/Linux metadata rebuilt and inspected; the review HTML is regenerated.
+UI checkpoint: `5594397a`. All 52 Bulgarian help topics remain pending. Some everyday topics have been read,
+but no help passages are recorded as reviewed or edited yet.
+
+The user requested a translation-editor skill during this batch. Installed and validated it at
+`~/.codex/skills/translation-editor/SKILL.md`, based on `~/Downloads/translation-editor-skill.md`.
+It retains the final late-arrival audit before round completion and resumes from these records.
+
+Current totals: 12,043 catalog entries and 420 help pages reviewed; 1,881 catalog values improved. Remaining:
+19,965 catalog entries and 832 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
