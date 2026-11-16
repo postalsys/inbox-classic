@@ -2,7 +2,8 @@
 //! file, its icon by the kind the core gave it, its name and its size. Double-click or Enter opens a file (the reader
 //! asks the core for it and opens what the core wrote with the system's program); a right-click or the menu key offers
 //! Open, Save As... and Save All... through the reader's actions. A file that can run programs looks the same, says so
-//! in its tooltip, and its Open is greyed. Nothing here reads mail data: the names, sizes and kinds are the core's.
+//! in its tooltip, and its Open is greyed. Nothing here reads mail data: the names, sizes, kinds, tooltips and the
+//! words refusing a file are the core's.
 
 use std::cell::RefCell;
 use std::path::Path;
@@ -40,17 +41,12 @@ fn icon_names(kind: FileKind) -> &'static [&'static str] {
     }
 }
 
-/// A file of the strip as the core described it
-struct File {
-    name: String,
-    can_open: bool,
-}
-
 pub struct Strip {
     /// The strip, scrolling when there are more files than [`ROWS_SHOWN`] rows hold
     pub widget: gtk::ScrolledWindow,
     pub flow: gtk::FlowBox,
-    files: RefCell<Vec<File>>,
+    /// The files shown, as the core described them
+    files: RefCell<Vec<AttachmentView>>,
 }
 
 impl Strip {
@@ -82,21 +78,29 @@ impl Strip {
         strip
     }
 
-    /// The files of a message: one item each, the strip hidden when there are none
+    /// The files of a message: one item each, the strip hidden when there are none. The same files as shown (the
+    /// message shown again, with its pictures, say) keep their items, and the one chosen
     pub fn show(&self, attachments: &[AttachmentView]) {
+        self.widget.set_visible(!attachments.is_empty());
+        if *self.files.borrow() == attachments {
+            return;
+        }
         self.flow.remove_all();
-        let mut files = self.files.borrow_mut();
-        files.clear();
         for (index, file) in attachments.iter().enumerate() {
             self.flow.append(&item(index, file));
-            files.push(File {
-                name: file.filename.clone(),
-                can_open: file.kind.can_open(),
-            });
         }
-        self.widget.set_visible(!files.is_empty());
-        drop(files);
+        *self.files.borrow_mut() = attachments.to_vec();
         self.fit_height();
+    }
+
+    /// The item of the file being opened shown busy (dimmed), None for none
+    pub fn busy(&self, index: Option<usize>) {
+        let mut at = 0;
+        while let Some(child) = self.flow.child_at_index(at) {
+            let busy = usize::try_from(at).ok() == index;
+            child.set_opacity(if busy { 0.45 } else { 1.0 });
+            at += 1;
+        }
     }
 
     pub fn hide(&self) {
@@ -140,9 +144,9 @@ impl Strip {
         usize::try_from(child.index()).ok()
     }
 
-    /// The name of file `index` and whether it may be opened
-    pub fn file(&self, index: usize) -> Option<(String, bool)> {
-        self.files.borrow().get(index).map(|f| (f.name.clone(), f.can_open))
+    /// File `index` as the core described it
+    pub fn file(&self, index: usize) -> Option<AttachmentView> {
+        self.files.borrow().get(index).cloned()
     }
 
     /// A right-click on a file, or the menu key (Shift+F10) on the one chosen: its menu
@@ -182,9 +186,9 @@ impl Strip {
     /// The menu of the file of `child`: Open (greyed for a file that can run programs), Save As..., Save All...;
     /// where the click was, or under the file
     pub fn popup_menu(&self, child: &gtk::FlowBoxChild, at: Option<(f64, f64)>) {
-        let Some((index, (_, can_open))) = usize::try_from(child.index())
+        let Some((index, can_open)) = usize::try_from(child.index())
             .ok()
-            .and_then(|index| Some((index, self.file(index)?)))
+            .and_then(|index| Some((index, self.file(index)?.kind.can_open())))
         else {
             return;
         };
@@ -302,8 +306,7 @@ fn item(index: usize, file: &AttachmentView) -> gtk::FlowBoxChild {
     name.set_ellipsize(gtk::pango::EllipsizeMode::Middle);
     name.set_max_width_chars(28);
     name.set_single_line_mode(true);
-    let size_text = pe_core::format_size(file.size);
-    let size = gtk::Label::new(Some(&size_text));
+    let size = gtk::Label::new(Some(&file.size_text));
     size.set_widget_name("attachment-size");
     size.set_xalign(0.0);
     size.add_css_class("dim-label");
@@ -319,18 +322,14 @@ fn item(index: usize, file: &AttachmentView) -> gtk::FlowBoxChild {
     child.set_child(Some(&content));
     child.add_css_class("attachment-file");
     child.set_widget_name(&format!("attachment-{index}"));
-    let tooltip = if file.kind.can_open() {
-        file.filename.clone()
-    } else {
-        format!("{}\n{}", file.filename, t!(UiAttachmentProgramTip))
-    };
-    child.set_tooltip_text(Some(&tooltip));
+    // the core's: the whole name and size, and why a file that can run programs does not open
+    child.set_tooltip_text(Some(&file.tooltip));
     child.update_property(&[gtk::accessible::Property::Label(&format!(
-        "{}, {size_text}",
-        file.filename
+        "{}, {}",
+        file.filename, file.size_text
     ))]);
-    if !file.kind.can_open() {
-        child.update_property(&[gtk::accessible::Property::Description(&t!(UiAttachmentProgramTip))]);
+    if let Some(refusal) = &file.refusal {
+        child.update_property(&[gtk::accessible::Property::Description(refusal)]);
     }
     child
 }

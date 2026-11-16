@@ -77,6 +77,8 @@ pub struct Reader {
     size: Cell<u64>,
     /// A message file shown (a message window opened for a .eml), in place of a message of a folder
     file: RefCell<Option<std::path::PathBuf>>,
+    /// A file of the strip is being opened: one at a time
+    opening: Cell<bool>,
     /// Its view once the core built it, with its pictures from the internet when `remote_images`
     view: RefCell<Option<MessageView>>,
     remote_images: Cell<bool>,
@@ -259,6 +261,7 @@ impl Reader {
             downloading: Rc::default(),
             summary: RefCell::default(),
             account: Cell::new(0),
+            opening: Cell::new(false),
             folder: Cell::new(0),
             uid: Cell::new(0),
             size: Cell::default(),
@@ -922,7 +925,7 @@ impl Reader {
         self.attachments_label.set_text(&t!(GtkFiles, count = count));
         let files = gio::Menu::new();
         for (index, file) in view.attachments.iter().enumerate() {
-            let label = format!("{} ({})", file.filename, pe_core::format_size(file.size));
+            let label = format!("{} ({})", file.filename, file.size_text);
             let item = gio::MenuItem::new(Some(&label), None);
             item.set_action_and_target_value(Some("reader.save-attachment"), Some(&(index as u32).to_variant()));
             files.append_item(&item);
@@ -1093,19 +1096,41 @@ impl Reader {
         }
     }
 
-    /// Attachment `index` opened with the system's program for it: the core writes it into a private folder of the
-    /// user's (or says why not: a file that can run programs is never opened), the note it gives shown first
+    /// Attachment `index` opened with the system's program for it: a file that can run programs refused from its row,
+    /// in the core's words; any other written by the core into a private folder of the user's on a thread of its own
+    /// (a large or encrypted message takes a while: its item dims after 400 ms), the note it gives shown first
     async fn open_attachment(&self, index: usize) {
         let Some(window) = self.window() else { return };
-        let core = &shell().core;
-        let opened = match self.file.borrow().as_deref() {
-            Some(path) => core.file_open_attachment(path, index),
-            None => core.open_attachment(self.folder.get(), self.uid.get(), index),
-        };
+        let Some(file) = self.strip.file(index) else { return };
+        if let Some(refusal) = &file.refusal {
+            return ui::alert(&window, TITLE, refusal).await;
+        }
+        if self.opening.replace(true) {
+            return;
+        }
+        let done = Rc::new(Cell::new(false));
+        let strip = self.strip.clone();
+        let waited = done.clone();
+        glib::timeout_add_local_once(std::time::Duration::from_millis(400), move || {
+            if !waited.get() {
+                strip.busy(Some(index));
+            }
+        });
+        let core = shell().core.clone();
+        let path = self.file.borrow().clone();
+        let (folder, uid) = (self.folder.get(), self.uid.get());
+        let opened = gio::spawn_blocking(move || match path {
+            Some(path) => core.file_open_attachment(&path, index),
+            None => core.open_attachment(folder, uid, index),
+        })
+        .await;
+        done.set(true);
+        self.strip.busy(None);
+        self.opening.set(false);
         let opened = match opened {
-            Ok(Some(opened)) => opened,
-            Ok(None) => return ui::alert(&window, TITLE, &self.not_read()).await,
-            Err(refused) => return ui::alert(&window, TITLE, &refused.to_string()).await,
+            Ok(Ok(Some(opened))) => opened,
+            Ok(Err(refused)) => return ui::alert(&window, TITLE, &refused.to_string()).await,
+            _ => return ui::alert(&window, TITLE, &self.not_read()).await,
         };
         if let Some(note) = &opened.note {
             ui::alert(&window, &t!(UiAttachmentNoteTitle), note).await;

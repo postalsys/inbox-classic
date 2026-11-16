@@ -19,7 +19,8 @@ fn encrypted_raw() -> String {
     std::fs::read_to_string(path).unwrap_or_default()
 }
 
-/// The message with files: a PDF, a program, a spreadsheet with a long name and a picture
+/// The message with files: a PDF, a program, a spreadsheet with a long name, a picture, and two pages (a browser
+/// would run their scripts): one known by its extension, one by what it holds
 fn files_raw() -> String {
     let b64 = |bytes: &[u8]| base64::engine::general_purpose::STANDARD.encode(bytes);
     let part = |kind: &str, name: &str, bytes: &[u8]| {
@@ -33,7 +34,7 @@ fn files_raw() -> String {
         "From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: {FILES}\r\n\
          Message-ID: {FILES_ID}\r\nDate: {}\r\nMIME-Version: 1.0\r\n\
          Content-Type: multipart/mixed; boundary=\"files\"\r\n\r\n--files\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n\
-         Here is everything for the trip: the route, the budget and a photo of the cabin.\r\n{}{}{}{}--files--\r\n",
+         Here is everything for the trip: the route, the budget and a photo of the cabin.\r\n{}{}{}{}{}{}--files--\r\n",
         steps::date_now(-5),
         part("application/pdf", "route.pdf", PDF.as_bytes()),
         part("application/octet-stream", "setup.exe", b"MZ not a real program"),
@@ -43,6 +44,12 @@ fn files_raw() -> String {
             b"PK a spreadsheet"
         ),
         part("image/jpeg", "cabin.jpg", b"\xff\xd8\xff a picture"),
+        part("application/octet-stream", "statement.xht", b"<p>a statement</p>"),
+        part(
+            "application/octet-stream",
+            "statement",
+            b"<!DOCTYPE html><html><script>alert(1)</script></html>"
+        ),
     )
 }
 
@@ -126,7 +133,7 @@ pub(super) async fn opening_attachments(d: &Driver) {
 
     let strip = &main.reader.strip;
     open_by_subject(inbox, FILES).await;
-    let shown = wait_for(10, || Some(strip.shown()).filter(|s| s.len() == 4))
+    let shown = wait_for(10, || Some(strip.shown()).filter(|s| s.len() == 6))
         .await
         .unwrap_or_default();
     d.check(
@@ -144,7 +151,9 @@ pub(super) async fn opening_attachments(d: &Driver) {
         "the PDF and the program have their own icons",
     );
     d.check(
-        shown.get(2).is_some_and(|f| f.tooltip == LONG_NAME),
+        shown
+            .get(2)
+            .is_some_and(|f| f.tooltip.starts_with(&format!("{LONG_NAME} ("))),
         "a long name is shortened in the strip, the whole of it in the tooltip",
     );
     d.check(
@@ -166,6 +175,13 @@ pub(super) async fn opening_attachments(d: &Driver) {
     d.check(
         std::fs::read(&pdf).is_ok_and(|bytes| bytes == PDF.as_bytes()),
         "the file opened is byte for byte what was sent",
+    );
+    // opened again: the same file, no second copy
+    activate(strip, 0);
+    let again = opened(10).await;
+    d.check(
+        again == [pdf.clone()],
+        &format!("opened again, the same file ({again:?})"),
     );
 
     // the keyboard: Tab from the paper clip reaches the strip, the arrows move, Enter opens
@@ -242,6 +258,36 @@ pub(super) async fn opening_attachments(d: &Driver) {
     pause(500).await;
     d.check(take_opened().is_empty(), "and nothing is opened");
 
+    // pages: Open greyed, and opening one refused naming it, for the one known by its extension and the one known
+    // by what it holds
+    for (index, name) in [(4, "statement.xht"), (5, "statement")] {
+        if let Some(page) = strip.flow.child_at_index(index) {
+            page.grab_focus();
+        }
+        press(strip, gdk::Key::Menu, gdk::ModifierType::empty());
+        let menu = wait_for(5, || strip.open_menu()).await;
+        let open = menu.as_ref().and_then(|m| menu_item_sensitive(m, "Open"));
+        d.check(
+            open == Some(false),
+            &format!("a page's Open is greyed ({name}: {open:?})"),
+        );
+        close_menu(strip).await;
+        activate(strip, index);
+        match wait_alert(10).await {
+            Some(refused) => {
+                let text = alert_text(&refused);
+                d.check(
+                    text.contains(&format!("\u{201c}{name}\u{201d}")) && text.contains("can run programs"),
+                    &format!("opening {name} is refused, naming it ({text})"),
+                );
+                answer(&refused, "OK");
+            }
+            None => d.check(false, &format!("opening {name} says why not")),
+        }
+    }
+    pause(500).await;
+    d.check(take_opened().is_empty(), "and no page is opened");
+
     in_window(d, inbox).await;
     encrypted(d, inbox).await;
     remove_messages(d, inbox).await;
@@ -266,7 +312,7 @@ async fn in_window(d: &Driver, inbox: i64) {
         return;
     };
     let strip = &window.reader.strip;
-    let shown = wait_for(15, || Some(strip.shown()).filter(|s| s.len() == 4)).await;
+    let shown = wait_for(15, || Some(strip.shown()).filter(|s| s.len() == 6)).await;
     d.check(
         shown.is_some() && strip.widget.is_visible(),
         "a message window has the strip",
