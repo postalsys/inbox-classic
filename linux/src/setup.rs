@@ -1,9 +1,10 @@
 //! Export and Import Settings and Accounts (the main menu's File): one file to take what was set up here to another
-//! computer. The core writes and reads the file (`pe_core::setup`), checks everything in it and says in words what
-//! each part holds and what an import did; these windows choose the parts, hand in the app's own preferences by their
-//! shared names (settings.ini keeps them) and apply the ones that come back.
+//! computer. The core writes and reads the file (`pe_core::setup`), checks everything in it, names the parts and says
+//! in words what each holds, what each account would do and what an import did; it tells the windows what an import
+//! changed by its events (`app.rs`). These windows choose the parts, hand in the app's own preferences by their shared
+//! names (settings.ini keeps them) and apply the ones that come back.
 
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::rc::Rc;
 
 use adw::prelude::*;
@@ -12,14 +13,8 @@ use pe_core::setup::{ImportChoice, ImportLineKind, Parts, SetupError, SetupFile}
 
 use crate::app::{shell, spawn};
 use crate::settings;
-use crate::ui;
-use crate::words::{Text, field_title, plain};
-
-/// The file name offered by Export
-const FILE_NAME: &str = "Inbox Classic.inboxclassic";
-
-/// The pattern of the file type, before All files
-const PATTERNS: [&str; 1] = ["*.inboxclassic"];
+use crate::ui::{self, Attempt};
+use crate::words::{Text, plain};
 
 /// The width of the windows: their titles whole between the header's buttons in German too
 const WIDTH: i32 = 640;
@@ -32,18 +27,12 @@ pub const DIALOGS: [&str; 4] = [
     "setup-summary-dialog",
 ];
 
-/// A part's name as the windows list it
-fn part_name(part: Parts) -> String {
-    plain(match part {
-        Parts::SETTINGS => Text::UiSetupPartSettings,
-        Parts::PREFERENCES => Text::UiSetupPartPreferences,
-        Parts::ACCOUNTS => Text::UiSetupPartAccounts,
-        Parts::SIGN_IN_APPS => Text::UiSetupPartSignInApps,
-        Parts::CONTACTS => Text::UiSetupPartContacts,
-        Parts::KEYS => Text::UiSetupPartKeys,
-        Parts::RULES => Text::UiSetupPartRules,
-        _ => Text::UiSetupPartTrusted,
-    })
+/// The file type of the save and open dialogs: its name and pattern
+fn file_type() -> (String, [String; 1]) {
+    (
+        plain(Text::UiSetupFileFilter),
+        [format!("*.{}", pe_core::setup::EXTENSION)],
+    )
 }
 
 fn window(parent: &impl IsA<gtk::Widget>) -> gtk::Window {
@@ -59,47 +48,12 @@ fn content_box() -> gtk::Box {
     content
 }
 
-/// A row with a check box before its title (the row clicks it), named `name`
-fn check_row(title: &str, subtitle: &str, name: &str, active: bool) -> (adw::ActionRow, gtk::CheckButton) {
-    let check = gtk::CheckButton::builder()
-        .active(active)
-        .valign(gtk::Align::Center)
-        .build();
-    check.set_widget_name(name);
-    check.update_property(&[gtk::accessible::Property::Label(title)]);
-    let row = adw::ActionRow::builder()
-        .title(gtk::glib::markup_escape_text(title))
-        .activatable_widget(&check)
-        .build();
-    if !subtitle.is_empty() {
-        row.set_subtitle(&gtk::glib::markup_escape_text(subtitle));
-    }
-    row.add_prefix(&check);
-    (row, check)
-}
-
-/// The text of a passphrase field, the field emptied
-fn take(row: &adw::PasswordEntryRow) -> String {
-    let text = row.text().to_string();
-    row.set_text("");
-    text
-}
-
-/// Runs `work` with the core on a thread of its own (the passphrase's key derivation takes a while), meanwhile the
-/// window taking no clicks and its OK button off (the focus stays where it is)
-async fn off_thread<T: Send + 'static>(
-    dialog: &adw::Dialog,
-    ok: &gtk::Button,
-    work: impl FnOnce(&pe_core::Core) -> T + Send + 'static,
-) -> Option<T> {
-    let core = shell().core.clone();
-    let was = ok.is_sensitive();
-    dialog.set_can_target(false);
-    ok.set_sensitive(false);
-    let done = gio::spawn_blocking(move || work(&core)).await.ok();
-    dialog.set_can_target(true);
-    ok.set_sensitive(was);
-    done
+/// The parts whose boxes are ticked
+fn chosen(checks: &[(Parts, gtk::CheckButton)]) -> Parts {
+    checks
+        .iter()
+        .filter(|(_, check)| check.is_active())
+        .fold(Parts::NONE, |all, (part, _)| all.with(*part))
 }
 
 // ---- the app's preferences, by the names the three apps share ----
@@ -128,13 +82,13 @@ fn preferences() -> Vec<(String, String)> {
         .collect()
 }
 
-/// The preferences of a file kept and applied, as Preferences and the View menu apply them; true when the language
-/// changed, which takes a new start
+/// The preferences of a file, checked by the core, kept and applied as Preferences and the View menu apply them; true
+/// when one of them counts only from the next start and changed (the language)
 fn apply_preferences(prefs: &[(String, String)]) -> bool {
     use pe_core::layout::LayoutMode;
     let shell = shell();
     let main = shell.main();
-    let mut language = false;
+    let mut restart = false;
     for (name, value) in prefs {
         let on = value == "1";
         match name.as_str() {
@@ -162,50 +116,36 @@ fn apply_preferences(prefs: &[(String, String)]) -> bool {
                 }
             }
             "language" => {
-                let chosen = pe_core::i18n::supported(value);
+                let chosen = (!value.is_empty()).then_some(value.as_str());
                 shell.settings.set_text(settings::LANGUAGE, chosen);
-                let words = chosen.unwrap_or_else(crate::words::system_language);
-                language = words != pe_core::i18n::language();
+                let words = chosen
+                    .and_then(pe_core::i18n::supported)
+                    .unwrap_or_else(crate::words::system_language);
+                restart |= pe_core::setup::pref_restarts(name) && words != pe_core::i18n::language();
             }
             _ => {}
         }
     }
-    language
-}
-
-/// The core's settings an import replaced, shown: messages on a dark background or not, the text size
-fn apply_settings() {
-    let shell = shell();
-    crate::preferences::set_dark_messages(shell.core.dark_messages());
-    shell.main().text_size_changed();
+    restart
 }
 
 // ---- the summary ----
 
 /// A window of what was done, a row each, and Done
-async fn summary(
-    parent: &impl IsA<gtk::Widget>,
-    title: &str,
-    heading: &str,
-    rows: Vec<(Option<&str>, String, String)>,
-) {
+async fn summary(parent: &impl IsA<gtk::Widget>, title: &str, heading: &str, rows: Vec<(&str, String, String)>) {
     let group = adw::PreferencesGroup::new();
     if !heading.is_empty() {
         group.set_title(&gtk::glib::markup_escape_text(heading));
     }
     group.set_widget_name("setup-summary");
     for (icon, title, subtitle) in rows {
-        let row = adw::ActionRow::builder()
-            .title(gtk::glib::markup_escape_text(&title))
-            .build();
+        let row = adw::ActionRow::builder().title(title).use_markup(false).build();
         if !subtitle.is_empty() {
-            row.set_subtitle(&gtk::glib::markup_escape_text(&subtitle));
+            row.set_subtitle(&subtitle);
         }
-        if let Some(icon) = icon {
-            let image = gtk::Image::from_icon_name(icon);
-            image.set_valign(gtk::Align::Center);
-            row.add_prefix(&image);
-        }
+        let image = gtk::Image::from_icon_name(icon);
+        image.set_valign(gtk::Align::Center);
+        row.add_prefix(&image);
         group.add(&row);
     }
     let content = content_box();
@@ -260,11 +200,7 @@ pub async fn export(parent: &impl IsA<gtk::Widget>) {
     let half = Parts::EACH.len().div_ceil(2);
     for (at, part) in Parts::EACH.into_iter().enumerate() {
         // its words wrapped where the window is narrow, not cut off
-        let words = gtk::Label::builder()
-            .label(part_name(part))
-            .wrap(true)
-            .xalign(0.0)
-            .build();
+        let words = gtk::Label::builder().label(part.name()).wrap(true).xalign(0.0).build();
         let check = gtk::CheckButton::builder().child(&words).active(true).build();
         check.set_widget_name(&format!("setup-part-{}", part.0));
         grid.attach(&check, (at / half) as i32, (at % half) as i32, 1, 1);
@@ -291,54 +227,32 @@ pub async fn export(parent: &impl IsA<gtk::Widget>) {
     protecting.append(&protect);
     protecting.append(&note);
     content.append(&protecting);
-    let passphrase = adw::PasswordEntryRow::builder()
-        .title(field_title(Text::UiKeysPassphrase))
-        .activates_default(true)
-        .build();
-    passphrase.set_widget_name("setup-passphrase");
-    let again = adw::PasswordEntryRow::builder()
-        .title(field_title(Text::UiKeysPassphraseAgain))
-        .activates_default(true)
-        .build();
-    again.set_widget_name("setup-passphrase-again");
-    let secret_group = adw::PreferencesGroup::builder().visible(false).build();
-    secret_group.add(&passphrase);
-    secret_group.add(&again);
-    content.append(&secret_group);
-    let problem = ui::wrapped_label("");
-    problem.add_css_class("error");
-    problem.set_widget_name("setup-passphrase-problem");
-    problem.set_visible(false);
-    content.append(&problem);
+    let pair = Rc::new(ui::PassphrasePair::new("setup-passphrase"));
+    let secret = gtk::Box::new(gtk::Orientation::Vertical, 12);
+    secret.append(&pair.group);
+    secret.append(&pair.feedback);
+    secret.set_visible(false);
+    content.append(&secret);
 
     // no scrolling: the window grows to show the passphrase fields when they come
     let (dialog, ok) = ui::dialog_with_buttons(&title, &content, &plain(Text::UiSetupExportButton), WIDTH);
     dialog.set_widget_name("setup-export-dialog");
 
-    // what is chosen and typed decides whether Export is on, and the words of a passphrase that will not do
+    // what is chosen and typed decides whether Export is on
     let checks = Rc::new(checks);
     let update: Rc<dyn Fn()> = {
-        let (checks, protect, secret_group, passphrase, again, problem, ok) = (
+        let (checks, protect, secret, pair, ok) = (
             checks.clone(),
             protect.clone(),
-            secret_group.clone(),
-            passphrase.clone(),
-            again.clone(),
-            problem.clone(),
+            secret.clone(),
+            pair.clone(),
             ok.clone(),
         );
         Rc::new(move || {
-            let any = checks.iter().any(|(_, check)| check.is_active());
             let on = protect.is_active();
-            secret_group.set_visible(on);
-            let why = on
-                .then(|| pe_core::keys::passphrase_problem(&passphrase.text(), &again.text()))
-                .flatten();
-            // said once the second is typed into, not while the first is
-            let shown = why.as_ref().filter(|_| !again.text().is_empty());
-            problem.set_text(shown.map_or("", String::as_str));
-            problem.set_visible(shown.is_some());
-            ok.set_sensitive(any && why.is_none());
+            secret.set_visible(on);
+            let acceptable = !on || pair.check();
+            ok.set_sensitive(!chosen(&checks).is_empty() && acceptable);
         })
     };
     for (_, check) in checks.iter() {
@@ -346,47 +260,42 @@ pub async fn export(parent: &impl IsA<gtk::Widget>) {
         check.connect_active_notify(move |_| update());
     }
     {
-        let (update, passphrase) = (update.clone(), passphrase.clone());
+        let (update, pair) = (update.clone(), pair.clone());
         protect.connect_active_notify(move |check| {
             update();
             if check.is_active() {
-                passphrase.grab_focus();
+                pair.first.grab_focus();
             }
         });
     }
-    for field in [&passphrase, &again] {
+    {
         let update = update.clone();
-        field.connect_changed(move |_| update());
+        pair.connect_changed(move || update());
     }
     update();
 
     let clicks = ui::answers(&dialog, &ok);
     dialog.present(Some(parent.as_ref()));
     ok.grab_focus();
+    let (filter, patterns) = file_type();
+    let patterns: Vec<&str> = patterns.iter().map(String::as_str).collect();
     while let Ok(true) = clicks.recv().await {
         if !ok.is_sensitive() {
             continue;
         }
-        let filter = plain(Text::UiSetupFileFilter);
-        let Some(path) = ui::save_file(&window(&dialog), &title, FILE_NAME, Some((&filter, &PATTERNS))).await else {
+        let name = pe_core::setup::default_name();
+        let Some(path) = ui::save_file(&window(&dialog), &title, &name, Some((&filter, &patterns))).await else {
             continue;
         };
-        let path = with_extension(path);
-        let parts = Parts(
-            checks
-                .iter()
-                .filter(|(_, c)| c.is_active())
-                .fold(0, |all, (part, _)| all | part.0),
-        );
-        let secret = protect.is_active().then(|| take(&passphrase));
-        again.set_text("");
+        let parts = chosen(&checks);
+        let passphrase = protect.is_active().then(|| pair.take());
         let prefs = preferences();
         let written = {
             let path = path.clone();
-            off_thread(&dialog, &ok, move |core| {
-                let done = core.export_setup(&path, parts, secret.as_deref(), &prefs);
-                if let Some(secret) = secret {
-                    wipe(secret);
+            ui::off_thread(&dialog, &ok, move |core| {
+                let done = core.export_setup(&path, parts, passphrase.as_deref(), &prefs);
+                if let Some(passphrase) = passphrase {
+                    ui::wipe(passphrase);
                 }
                 done.map_err(|e| e.to_string())
             })
@@ -395,13 +304,13 @@ pub async fn export(parent: &impl IsA<gtk::Widget>) {
         match written {
             Some(Ok(lines)) => {
                 dialog.close();
-                let heading = path
+                let heading = pe_core::setup::with_extension(&path)
                     .file_name()
                     .map(|n| n.to_string_lossy().into_owned())
                     .unwrap_or_default();
                 let rows = lines
                     .into_iter()
-                    .map(|(part, words)| (Some("object-select-symbolic"), part_name(part), words))
+                    .map(|(part, words)| ("object-select-symbolic", part.name(), words))
                     .collect();
                 summary(parent, &title, &heading, rows).await;
                 return;
@@ -410,26 +319,8 @@ pub async fn export(parent: &impl IsA<gtk::Widget>) {
             None => {}
         }
     }
-    passphrase.set_text("");
-    again.set_text("");
+    pair.clear();
     dialog.close();
-}
-
-/// The path with the file type's extension when the name typed has none
-fn with_extension(path: PathBuf) -> PathBuf {
-    if path.extension().is_some() {
-        return path;
-    }
-    let mut name = path.file_name().map(|n| n.to_os_string()).unwrap_or_default();
-    name.push(format!(".{}", pe_core::setup::EXTENSION));
-    path.with_file_name(name)
-}
-
-/// A passphrase's bytes overwritten before they are let go
-fn wipe(passphrase: String) {
-    let mut bytes = passphrase.into_bytes();
-    bytes.fill(0);
-    std::hint::black_box(&bytes);
 }
 
 // ---- Import ----
@@ -438,8 +329,9 @@ fn wipe(passphrase: String) {
 /// done. The accounts added (they sync by themselves), none when nothing was imported or it was cancelled
 pub async fn import(parent: &impl IsA<gtk::Widget>) -> Vec<i64> {
     let title = plain(Text::UiSetupImportTitle);
-    let filter = plain(Text::UiSetupFileFilter);
-    let Some(path) = ui::open_file(&window(parent), &title, Some((&filter, &PATTERNS))).await else {
+    let (filter, patterns) = file_type();
+    let patterns: Vec<&str> = patterns.iter().map(String::as_str).collect();
+    let Some(path) = ui::open_file(&window(parent), &title, Some((&filter, &patterns))).await else {
         return Vec::new();
     };
     let read = {
@@ -451,7 +343,11 @@ pub async fn import(parent: &impl IsA<gtk::Widget>) -> Vec<i64> {
         Ok(Ok(setup)) => setup,
         Ok(Err(SetupError::NeedsPassphrase | SetupError::WrongPassphrase)) => {
             match ask_passphrase(parent, &path).await {
-                Some(setup) => setup,
+                Some(Ok(setup)) => setup,
+                Some(Err(why)) => {
+                    ui::alert(parent, &title, &why.text()).await;
+                    return Vec::new();
+                }
                 None => return Vec::new(),
             }
         }
@@ -464,62 +360,25 @@ pub async fn import(parent: &impl IsA<gtk::Widget>) -> Vec<i64> {
     choose_and_import(parent, setup).await
 }
 
-/// The passphrase of a sealed file asked for until it opens it or Cancel
-async fn ask_passphrase(parent: &impl IsA<gtk::Widget>, path: &Path) -> Option<SetupFile> {
-    let error = ui::wrapped_label("");
-    error.add_css_class("error");
-    error.set_widget_name("setup-passphrase-error");
-    error.set_visible(false);
-    let passphrase = adw::PasswordEntryRow::builder()
-        .title(field_title(Text::UiKeysPassphrase))
-        .activates_default(true)
-        .build();
-    passphrase.set_widget_name("setup-import-passphrase");
-    let group = adw::PreferencesGroup::new();
-    group.add(&passphrase);
-    let content = content_box();
-    content.append(&ui::wrapped_label(&plain(Text::UiSetupAskPassphrase)));
-    content.append(&group);
-    content.append(&error);
-    let (dialog, ok) = ui::dialog_with_buttons(&plain(Text::UiSetupImportTitle), &content, &t!(UiOk), 480);
-    dialog.set_widget_name("setup-passphrase-dialog");
-    let clicks = ui::answers(&dialog, &ok);
-    dialog.present(Some(parent.as_ref()));
-    passphrase.grab_focus();
-    let mut opened = None;
-    while let Ok(true) = clicks.recv().await {
-        let typed = take(&passphrase);
-        if typed.is_empty() {
-            passphrase.grab_focus();
-            continue;
-        }
-        let path = path.to_path_buf();
-        let tried = off_thread(&dialog, &ok, move |core| {
+/// The passphrase of a sealed file asked for until it opens it or Cancel; a file that can not be read at all is not
+/// asked about again
+async fn ask_passphrase(parent: &impl IsA<gtk::Widget>, path: &Path) -> Option<Result<SetupFile, SetupError>> {
+    let path = path.to_path_buf();
+    ui::ask_passphrase(
+        parent,
+        &plain(Text::UiSetupImportTitle),
+        &plain(Text::UiSetupAskPassphrase),
+        "setup-passphrase",
+        move |core, typed| {
             let read = core.read_setup(&path, Some(&typed));
-            wipe(typed);
-            read
-        })
-        .await;
-        match tried {
-            Some(Ok(setup)) => {
-                opened = Some(setup);
-                break;
+            ui::wipe(typed);
+            match read {
+                Err(why @ (SetupError::NeedsPassphrase | SetupError::WrongPassphrase)) => Attempt::Again(why.text()),
+                done => Attempt::Done(done),
             }
-            Some(Err(why)) => {
-                error.set_text(&why.text());
-                error.set_visible(true);
-                passphrase.grab_focus();
-                // a file that can not be read at all is not asked about again
-                if matches!(why, SetupError::Invalid(_)) {
-                    ui::alert(&dialog, &plain(Text::UiSetupImportTitle), &why.text()).await;
-                    break;
-                }
-            }
-            None => break,
-        }
-    }
-    dialog.close();
-    opened
+        },
+    )
+    .await
 }
 
 /// The import window: what the file holds, each part and account to choose; Import imports them and says what it did
@@ -541,32 +400,32 @@ async fn choose_and_import(parent: &impl IsA<gtk::Widget>, setup: SetupFile) -> 
     let group = adw::PreferencesGroup::new();
     group.set_widget_name("setup-parts");
     let mut parts = Vec::new();
-    let mut accounts: Vec<(usize, gtk::CheckButton, adw::ActionRow)> = Vec::new();
+    let mut accounts_part = None;
+    let mut accounts: Vec<(usize, gtk::CheckButton)> = Vec::new();
     for (part, words) in setup.part_lines() {
-        let (row, check) = check_row(&part_name(part), &words, &format!("setup-part-{}", part.0), true);
+        let (row, check) = ui::check_row(&part.name(), Some(&words), &format!("setup-part-{}", part.0), true);
         group.add(&row);
-        if part == Parts::ACCOUNTS {
-            for account in &setup.accounts {
-                let usable = !account.here && account.problem.is_none();
-                let note = account.problem.as_deref().unwrap_or(&account.note);
-                let subtitle = format!("{}, {}\n{note}", account.imap, account.smtp);
-                let (row, check) = check_row(
-                    &account.email,
-                    &subtitle,
-                    &format!("setup-account-{}", account.index),
-                    usable,
-                );
-                row.set_widget_name(&format!("setup-account-row-{}", account.index));
-                // under Accounts, set in as its parts
-                let indent = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-                indent.set_size_request(18, -1);
-                row.add_prefix(&indent);
-                row.set_sensitive(usable);
-                group.add(&row);
-                accounts.push((account.index, check, row));
+        if part != Parts::ACCOUNTS {
+            parts.push((part, check));
+            continue;
+        }
+        for account in &setup.accounts {
+            let subtitle = format!("{}\n{}", account.servers, account.note);
+            let name = format!("setup-account-{}", account.index);
+            let (account_row, account_check) =
+                ui::check_row(&account.label, Some(&subtitle), &name, account.importable);
+            account_row.set_widget_name(&format!("setup-account-row-{}", account.index));
+            // under Accounts, set in as its parts
+            let indent = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+            indent.set_size_request(18, -1);
+            account_row.add_prefix(&indent);
+            account_row.set_sensitive(account.importable);
+            group.add(&account_row);
+            if account.importable {
+                accounts.push((account.index, account_check));
             }
         }
-        parts.push((part, check));
+        accounts_part = Some((row, check));
     }
     content.append(&group);
     for note in &setup.notes {
@@ -586,51 +445,19 @@ async fn choose_and_import(parent: &impl IsA<gtk::Widget>, setup: SetupFile) -> 
 
     let parts = Rc::new(parts);
     let accounts = Rc::new(accounts);
-    let accounts_part = parts
-        .iter()
-        .find(|(p, _)| *p == Parts::ACCOUNTS)
-        .map(|(_, c)| c.clone());
-    // the Accounts part follows its accounts: none to import turns it off for good, the last one unticked unticks
-    // it and one ticked ticks it; ticking it ticks every account that can be imported, unticking it unticks them
-    if let Some(part) = &accounts_part {
-        let usable = accounts.iter().any(|(_, _, row)| row.is_sensitive());
-        part.set_active(usable);
-        // greyed with its words, as its accounts are
-        match part.ancestor(adw::ActionRow::static_type()) {
-            Some(row) => row.set_sensitive(usable),
-            None => part.set_sensitive(usable),
-        }
-        let syncing = Rc::new(std::cell::Cell::new(false));
-        {
-            let (accounts, syncing) = (accounts.clone(), syncing.clone());
-            part.connect_active_notify(move |part| {
-                if syncing.replace(true) {
-                    return;
-                }
-                for (_, check, _) in accounts.iter().filter(|(_, _, row)| row.is_sensitive()) {
-                    check.set_active(part.is_active());
-                }
-                syncing.set(false);
-            });
-        }
-        for (_, check, _) in accounts.iter() {
-            let (accounts, syncing, part) = (accounts.clone(), syncing.clone(), part.clone());
-            check.connect_active_notify(move |_| {
-                if syncing.replace(true) {
-                    return;
-                }
-                part.set_active(accounts.iter().any(|(_, c, row)| c.is_active() && row.is_sensitive()));
-                syncing.set(false);
-            });
-        }
-    }
     let update: Rc<dyn Fn()> = {
-        let (parts, ok) = (parts.clone(), ok.clone());
-        Rc::new(move || ok.set_sensitive(parts.iter().any(|(_, c)| c.is_active())))
+        let (parts, accounts, ok) = (parts.clone(), accounts.clone(), ok.clone());
+        Rc::new(move || {
+            let any_account = accounts.iter().any(|(_, check)| check.is_active());
+            ok.set_sensitive(any_account || !chosen(&parts).is_empty());
+        })
     };
-    for (_, check) in parts.iter() {
+    for check in parts.iter().map(|(_, c)| c).chain(accounts.iter().map(|(_, c)| c)) {
         let update = update.clone();
         check.connect_active_notify(move |_| update());
+    }
+    if let Some((row, part)) = &accounts_part {
+        select_all(row, part, &accounts);
     }
     update();
 
@@ -638,32 +465,28 @@ async fn choose_and_import(parent: &impl IsA<gtk::Widget>, setup: SetupFile) -> 
     dialog.present(Some(parent.as_ref()));
     ok.grab_focus();
     let setup = std::sync::Arc::new(setup);
-    let mut added = Vec::new();
     while let Ok(true) = clicks.recv().await {
         if !ok.is_sensitive() {
             continue;
         }
+        // the core takes the accounts part from the accounts named
         let choice = ImportChoice {
-            parts: Parts(
-                parts
-                    .iter()
-                    .filter(|(_, c)| c.is_active())
-                    .fold(0, |all, (p, _)| all | p.0),
-            ),
+            parts: chosen(&parts),
             accounts: accounts
                 .iter()
-                .filter(|(_, c, row)| c.is_active() && row.is_sensitive())
-                .map(|(index, _, _)| *index)
+                .filter(|(_, check)| check.is_active())
+                .map(|(index, _)| *index)
                 .collect(),
         };
         let file = setup.clone();
         let wanted = choice.clone();
-        let done = off_thread(&dialog, &ok, move |core| {
+        // it may reach the network (the sign-in apps' issuers)
+        let done = ui::off_thread(&dialog, &ok, move |core| {
             core.import_setup(&file, &wanted).map_err(|e| e.to_string())
         })
         .await;
-        let summary_lines = match done {
-            Some(Ok(done)) => done,
+        let imported = match done {
+            Some(Ok(imported)) => imported,
             Some(Err(why)) => {
                 ui::alert(&dialog, &title, &why).await;
                 continue;
@@ -671,9 +494,9 @@ async fn choose_and_import(parent: &impl IsA<gtk::Widget>, setup: SetupFile) -> 
             None => continue,
         };
         dialog.close();
-        added = summary_lines.accounts.clone();
-        let restart = imported(&setup, choice.parts, !added.is_empty());
-        let rows = summary_lines
+        // the core's events refresh what it changed; the app's own preferences are the app's to apply
+        let restart = choice.parts.has(Parts::PREFERENCES) && apply_preferences(&setup.prefs);
+        let rows = imported
             .lines
             .into_iter()
             .map(|line| {
@@ -682,31 +505,48 @@ async fn choose_and_import(parent: &impl IsA<gtk::Widget>, setup: SetupFile) -> 
                     ImportLineKind::Skipped => "action-unavailable-symbolic",
                     ImportLineKind::Note => "dialog-information-symbolic",
                 };
-                (Some(icon), line.text, String::new())
+                (icon, line.text, String::new())
             })
             .collect();
         summary(parent, &title, "", rows).await;
         if restart {
             crate::preferences::ask_restart(parent).await;
         }
-        return added;
+        return imported.accounts;
     }
     dialog.close();
-    added
+    Vec::new()
 }
 
-/// What an import changed shown in the windows: the preferences kept and applied, the settings, the accounts in the
-/// folder list. True when the language changed
-fn imported(setup: &SetupFile, parts: Parts, accounts: bool) -> bool {
-    let shell = shell();
-    let restart = parts.has(Parts::PREFERENCES) && apply_preferences(&setup.prefs);
-    if parts.has(Parts::SETTINGS) {
-        apply_settings();
+/// The Accounts box as "select all" of the accounts that can be imported: ticking it ticks them, unticking it unticks
+/// them, and it is ticked while one of them is; with none to import it is unticked and greyed
+fn select_all(row: &adw::ActionRow, part: &gtk::CheckButton, accounts: &Rc<Vec<(usize, gtk::CheckButton)>>) {
+    let any = !accounts.is_empty();
+    part.set_active(any);
+    row.set_sensitive(any);
+    let syncing = Rc::new(std::cell::Cell::new(false));
+    {
+        let (accounts, syncing) = (accounts.clone(), syncing.clone());
+        part.connect_active_notify(move |part| {
+            if syncing.replace(true) {
+                return;
+            }
+            for (_, check) in accounts.iter() {
+                check.set_active(part.is_active());
+            }
+            syncing.set(false);
+        });
     }
-    if accounts {
-        shell.main().reload();
+    for (_, check) in accounts.iter() {
+        let (accounts, syncing, part) = (accounts.clone(), syncing.clone(), part.clone());
+        check.connect_active_notify(move |_| {
+            if syncing.replace(true) {
+                return;
+            }
+            part.set_active(accounts.iter().any(|(_, c)| c.is_active()));
+            syncing.set(false);
+        });
     }
-    restart
 }
 
 /// Command::ExportSetup
@@ -728,22 +568,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn a_name_without_a_type_gets_the_setup_files() {
-        assert_eq!(
-            with_extension(PathBuf::from("/tmp/Moving")),
-            PathBuf::from("/tmp/Moving.inboxclassic")
-        );
-        assert_eq!(
-            with_extension(PathBuf::from("/tmp/a.inboxclassic")),
-            PathBuf::from("/tmp/a.inboxclassic")
-        );
-    }
-
-    #[test]
-    fn every_part_has_a_name_and_every_window_its_help() {
-        for part in Parts::EACH {
-            assert!(!part_name(part).is_empty());
-        }
+    fn every_window_has_its_help() {
         assert!(DIALOGS.iter().all(|name| name.starts_with("setup-")));
+        assert_eq!(file_type().1, ["*.inboxclassic".to_string()]);
     }
 }

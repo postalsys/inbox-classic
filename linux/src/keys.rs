@@ -19,20 +19,6 @@ use crate::words::{self, Text, field_title, plain};
 /// The file kinds of a key file, before All files
 const KEY_FILES: [&str; 4] = ["*.asc", "*.gpg", "*.pgp", "*.key"];
 
-/// The text of a passphrase field, the field emptied
-fn take_passphrase(row: &adw::PasswordEntryRow) -> String {
-    let text = row.text().to_string();
-    row.set_text("");
-    text
-}
-
-/// A passphrase's bytes overwritten before they are let go
-fn wipe(passphrase: String) {
-    let mut bytes = passphrase.into_bytes();
-    bytes.fill(0);
-    std::hint::black_box(&bytes);
-}
-
 /// `text` written to `path`; false, with the reason said, when it could not be
 async fn write_out(parent: &impl IsA<gtk::Widget>, title: &str, path: &Path, text: &str) -> bool {
     match std::fs::write(path, text) {
@@ -150,53 +136,41 @@ fn memory_only() -> gtk::Box {
     warning
 }
 
-/// Back Up Key: a passphrase typed twice, then the file to save the key under it to
+/// Back Up Key: a passphrase typed twice, what the core says of it under the fields and OK only once it can be used,
+/// then the file to save the key under it to
 pub async fn backup(parent: &impl IsA<gtk::Widget>, fingerprint: &str) {
     let title = t!(UiKeysBackupTitle);
-    let passphrase = adw::PasswordEntryRow::builder()
-        .title(field_title(Text::UiKeysPassphrase))
-        .activates_default(true)
-        .build();
-    passphrase.set_widget_name("key-passphrase");
-    let again = adw::PasswordEntryRow::builder()
-        .title(field_title(Text::UiKeysPassphraseAgain))
-        .activates_default(true)
-        .build();
-    again.set_widget_name("key-passphrase-again");
-    let group = adw::PreferencesGroup::new();
-    group.add(&passphrase);
-    group.add(&again);
+    let pair = Rc::new(ui::PassphrasePair::new("key-passphrase"));
     let content = gtk::Box::new(gtk::Orientation::Vertical, 12);
     content.set_margin_start(18);
     content.set_margin_end(18);
     content.set_margin_top(12);
     content.set_margin_bottom(18);
     content.append(&ui::wrapped_label(&t!(UiKeysBackupIntro)));
-    content.append(&group);
+    content.append(&pair.group);
+    content.append(&pair.feedback);
     let (dialog, ok) = ui::dialog_with_buttons(&title, &content, &t!(UiOk), 480);
     dialog.set_widget_name("key-backup-dialog");
+    {
+        let (checked, ok) = (pair.clone(), ok.clone());
+        pair.connect_changed(move || ok.set_sensitive(checked.check()));
+    }
+    ok.set_sensitive(pair.check());
     let clicks = ui::answers(&dialog, &ok);
     dialog.present(Some(parent.as_ref()));
-    passphrase.grab_focus();
+    pair.first.grab_focus();
     let file_name = shell().core.pgp_file_name(fingerprint, true).unwrap_or_default();
     while let Ok(true) = clicks.recv().await {
-        let (first, second) = (passphrase.text(), again.text());
-        let problem = pe_core::keys::passphrase_problem(&first, &second);
-        if let Some(problem) = problem {
-            ui::alert(&dialog, &title, &problem).await;
-            again.set_text("");
-            passphrase.grab_focus();
-            passphrase.select_region(0, -1);
+        if !pair.check() {
             continue;
         }
         let filter = t!(UiKeysFileFilter);
         let Some(path) = ui::save_file(&window(&dialog), &title, &file_name, Some((&filter, &KEY_FILES))).await else {
             continue;
         };
-        let chosen = take_passphrase(&passphrase);
-        again.set_text("");
+        let chosen = pair.take();
         let made = shell().core.pgp_backup(fingerprint, &chosen);
-        wipe(chosen);
+        ui::wipe(chosen);
         match made {
             Ok(text) => {
                 if write_out(&dialog, &title, &path, &text).await {
@@ -207,8 +181,7 @@ pub async fn backup(parent: &impl IsA<gtk::Widget>, fingerprint: &str) {
         }
         break;
     }
-    passphrase.set_text("");
-    again.set_text("");
+    pair.clear();
     dialog.close();
 }
 
@@ -249,49 +222,24 @@ async fn import(parent: &impl IsA<gtk::Widget>) {
 
 /// The passphrase of a protected key asked for until it opens it or Cancel; what the import with it did
 async fn import_with_passphrase(parent: &impl IsA<gtk::Widget>, bytes: &[u8]) -> Option<Result<Imported, ImportError>> {
-    let error = ui::wrapped_label("");
-    error.add_css_class("error");
-    error.set_widget_name("key-import-error");
-    error.set_visible(false);
-    let passphrase = adw::PasswordEntryRow::builder()
-        .title(field_title(Text::UiKeysPassphrase))
-        .activates_default(true)
-        .build();
-    passphrase.set_widget_name("key-import-passphrase");
-    let group = adw::PreferencesGroup::new();
-    group.add(&passphrase);
-    let content = gtk::Box::new(gtk::Orientation::Vertical, 12);
-    content.set_margin_start(18);
-    content.set_margin_end(18);
-    content.set_margin_top(12);
-    content.set_margin_bottom(18);
-    content.append(&ui::wrapped_label(&t!(UiKeysImportPassphrase)));
-    content.append(&error);
-    content.append(&group);
-    let (dialog, ok) = ui::dialog_with_buttons(&t!(UiKeysImportTitle), &content, &t!(UiOk), 480);
-    dialog.set_widget_name("key-import-dialog");
-    let clicks = ui::answers(&dialog, &ok);
-    dialog.present(Some(parent.as_ref()));
-    passphrase.grab_focus();
-    let mut outcome = None;
-    while let Ok(true) = clicks.recv().await {
-        let typed = take_passphrase(&passphrase);
-        let tried = shell().core.pgp_import(bytes, Some(&typed), KeySource::File);
-        wipe(typed);
-        match tried {
-            Err(wrong @ (ImportError::WrongPassphrase | ImportError::NeedsPassphrase)) => {
-                error.set_text(&wrong.text());
-                error.set_visible(true);
-                passphrase.grab_focus();
+    let bytes = bytes.to_vec();
+    ui::ask_passphrase(
+        parent,
+        &t!(UiKeysImportTitle),
+        &t!(UiKeysImportPassphrase),
+        "key-import",
+        move |core, typed| {
+            let tried = core.pgp_import(&bytes, Some(&typed), KeySource::File);
+            ui::wipe(typed);
+            match tried {
+                Err(wrong @ (ImportError::WrongPassphrase | ImportError::NeedsPassphrase)) => {
+                    ui::Attempt::Again(wrong.text())
+                }
+                done => ui::Attempt::Done(done),
             }
-            done => {
-                outcome = Some(done);
-                break;
-            }
-        }
-    }
-    dialog.close();
-    outcome
+        },
+    )
+    .await
 }
 
 /// "Use this key for ...?" for the user's addresses an own key holds that use no key yet

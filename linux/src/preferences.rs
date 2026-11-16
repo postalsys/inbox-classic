@@ -214,8 +214,13 @@ pub fn set_dark_messages(on: bool) {
     if shell.core.set_dark_messages(on).is_err() {
         return;
     }
+    dark_messages_changed();
+}
+
+/// Messages on a dark background turned on or off (here or by an import): every message view shows it
+pub fn dark_messages_changed() {
     crate::webview::update_backgrounds();
-    shell.main().reader.reload();
+    shell().main().reader.reload();
     for window in crate::message_window::windows() {
         window.reader.reload();
     }

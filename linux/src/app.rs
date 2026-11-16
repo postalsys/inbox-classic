@@ -351,6 +351,17 @@ impl Shell {
             // messages going to another account, a large message opened: how far, and what was done
             Event::Transferring { text } => main.set_status(text),
             Event::FolderCreated { folder, .. } => crate::move_dialog::folder_created(*folder),
+            // an import of a setup file: what it changed shown again
+            Event::AccountsChanged => main.reload(),
+            Event::SettingsChanged => {
+                crate::preferences::dark_messages_changed();
+                main.text_size_changed();
+            }
+            Event::AddressBookChanged => {
+                crate::address_book::refresh();
+                main.senders_changed();
+            }
+            Event::KeysChanged => main.reader.reload(),
             Event::RulesApplied { count, .. } => {
                 let said = t!(UiRulesApplied, count = *count);
                 main.set_status(&said);

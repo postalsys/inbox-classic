@@ -105,7 +105,7 @@ pub(super) async fn settings_and_accounts(d: &Driver) {
     set_text(&e, "setup-passphrase", PASSPHRASE);
     set_text(&e, "setup-passphrase-again", PASSPHRASE);
     d.check(
-        sensitive(&e, "dialog-ok") && named_in(&e, "setup-passphrase-problem").is_none(),
+        sensitive(&e, "dialog-ok") && label_of(&e, "setup-passphrase-problem").is_empty(),
         "the right one turns Export on",
     );
     let file = d.out.join("setup.inboxclassic");
@@ -161,7 +161,7 @@ pub(super) async fn settings_and_accounts(d: &Driver) {
         "File > Import Settings and Accounts on that file asks for the passphrase",
     );
     let a = ask.clone().upcast::<gtk::Widget>();
-    set_text(&a, "setup-import-passphrase", "not the passphrase at all");
+    set_text(&a, "setup-passphrase-passphrase", "not the passphrase at all");
     click(&a, "dialog-ok");
     let wrong = wait_for(60, || {
         let said = label_of(&a, "setup-passphrase-error");
@@ -173,7 +173,7 @@ pub(super) async fn settings_and_accounts(d: &Driver) {
         wrong.contains("not the passphrase"),
         &format!("a wrong one is refused with words ({wrong})"),
     );
-    set_text(&a, "setup-import-passphrase", PASSPHRASE);
+    set_text(&a, "setup-passphrase-passphrase", PASSPHRASE);
     click(&a, "dialog-ok");
     let Some(import) = wait_dialog(60, "setup-import-dialog").await else {
         d.check(false, "the right one shows what the file holds");
