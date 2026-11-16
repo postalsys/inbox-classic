@@ -699,11 +699,12 @@ public final class Mailbox: NSObject {
         return folderInfo[uid != 0 ? messageFolder : folder]?.specialUse == PE_SPECIAL_USE_JUNK
     }
 
-    /// one message or more selected: the commands of the selection apply
-    var hasSelection: Bool { selectedCount > 0 }
+    /// one message or more selected: the commands of the selection apply. The list of a row chosen that waits to
+    /// load has nothing selected yet
+    var hasSelection: Bool { !listWaiting && selectedCount > 0 }
 
     /// exactly one message selected, the one shown: the commands of one message apply (Reply, Print, Source)
-    var hasOne: Bool { selectedCount == 1 && uid != 0 }
+    var hasOne: Bool { hasSelection && selectedCount == 1 && uid != 0 }
 
     var picturesBlocked: Bool { reader.picturesBlocked }
 
@@ -873,14 +874,19 @@ public final class Mailbox: NSObject {
         showPersonColumn()
         // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
         // conversations what they find; an account lists nothing. Grouped by conversation the list has fewer rows than
-        // messages: the core counts them
-        (total, unread) = core.counts(listView)
-        rows = grouped && total > 0 ? core.rowCount(listView) : total
+        // messages
+        (total, unread, rows) = core.countsAndRows(listView)
         indentSubjectHeader()
         // the selection follows the messages to where they are now, without a flicker of the reading pane
         let several = keepSelection && selectedCount > 1
             ? core.positions(of: selection, in: listView) : nil
-        let index = keepSelection && several == nil && uid != 0 ? placeOfShown(near: shownAt) : -1
+        // the row of the message shown, as the core finds it nearest the row it had: its page read first, which the
+        // list draws anyway
+        var index: Int64 = -1
+        if keepSelection && several == nil && uid != 0 {
+            _ = row(shownAt)
+            index = core.messageIndex(listView, folder: messageFolder, uid: uid, near: shownAt)
+        }
         reloading = true
         list.reloadData()
         if let several, !several.isEmpty {
@@ -899,16 +905,6 @@ public final class Mailbox: NSObject {
         if restorePending {
             selectRestored()
         }
-    }
-
-    /// the row of the message shown in the list read again: on the page of the row it was on, which the list draws
-    /// anyway, when that page still has it; otherwise as the core finds it
-    private func placeOfShown(near old: Int) -> Int64 {
-        if old >= 0, row(old) != nil, let page = pages.last,
-           let at = page.rows.firstIndex(where: { $0.folder == messageFolder && $0.uid == uid }) {
-            return Int64(page.offset) + Int64(at)
-        }
-        return core.messageIndex(listView, folder: messageFolder, uid: uid)
     }
 
     /// the messages Undo brought back selected, once they are in the list
@@ -1426,14 +1422,25 @@ public final class Mailbox: NSObject {
     /// whether the list is the one before, dimmed while another loads
     var listCovered: Bool { !listCover.isHidden }
 
+    /// a row chosen whose list has not loaded yet
+    var listWaiting: Bool { pendingNode != nil }
+
+    /// the list before covered while another loads; "Loading..." counted from the first row chosen of the wait, so
+    /// rows chosen one after another while it waits do not start it again
     private func coverList(_ on: Bool) {
+        guard on != listCovered else { return }
         loadingTimer?.invalidate()
         loadingTimer = nil
         listCover.loading = false
         listCover.isHidden = !on
         guard on else { return }
-        loadingTimer = after(0.4) { [weak self] in self?.listCover.loading = true }
+        loadingTimer = after(Mailbox.loadingWait) { [weak self] in self?.listCover.loading = true }
     }
+
+    /// the waits of the list, the same in the three apps: changes gathered before the list is read again, and how
+    /// long a list chosen waits before it says "Loading..."
+    static let gatherWait = TimeInterval(PE_LIST_GATHER_MS) / 1000
+    static let loadingWait = TimeInterval(PE_LIST_LOADING_MS) / 1000
 
     // ---- the message's own actions ----
 
@@ -1463,9 +1470,17 @@ public final class Mailbox: NSObject {
         reader.draft(kind)
     }
 
-    /// `action` on `messages` (the selected ones by default): what was done in the status bar, or why not
+    /// `action` on `messages` (the selected ones by default): what was done in the status bar, or why not, and the
+    /// list read again at once, the selection kept
     @discardableResult
     private func act(_ action: PeAction, to: Int64 = 0, on messages: OpaquePointer? = nil, quiet: Bool = false) -> Bool {
+        guard apply(action, to: to, on: messages, quiet: quiet) else { return false }
+        listChanged(keepSelection: true)
+        return true
+    }
+
+    /// `action` done, as `act`, the list not read again
+    private func apply(_ action: PeAction, to: Int64 = 0, on messages: OpaquePointer? = nil, quiet: Bool = false) -> Bool {
         switch core.act(messages ?? selection, action, to: to) {
         case .success(let done):
             if !quiet {
@@ -1476,6 +1491,13 @@ public final class Mailbox: NSObject {
             inform(refusal.reason, style: .warning)
             return false
         }
+    }
+
+    /// the user's own command changed the list: read again at once, not a moment later when its change is reported
+    /// (that reload then finds the list read)
+    private func listChanged(keepSelection: Bool) {
+        reloadList(keepSelection: keepSelection)
+        changed()
     }
 
     /// `quiet`: the shown message read after a moment on screen, which the status bar does not announce
@@ -1496,19 +1518,20 @@ public final class Mailbox: NSObject {
         } else {
             pe_mark_all_inboxes_read(core.handle)
         }
+        listChanged(keepSelection: true)
     }
 
     /// `action` takes the selected messages out of the list: the row after the last of them is selected then
     @discardableResult
     private func actAndRemove(_ action: PeAction, to: Int64 = 0, on messages: OpaquePointer? = nil) -> Bool {
         let next = (list.selectedRowIndexes.last ?? -1) + 1 - selectedCount
-        guard act(action, to: to, on: messages) else { return false }
+        guard apply(action, to: to, on: messages) else { return false }
         selectAfterRemoval(next)
         return true
     }
 
     /// every selected message can be archived (from the Inbox or a folder of the user's)
-    var canArchive: Bool { summary.archivable }
+    var canArchive: Bool { hasSelection && summary.archivable }
 
     /// out of the Inbox into the account's Archive (on Gmail every label taken off)
     func archiveSelected() {
@@ -1569,7 +1592,7 @@ public final class Mailbox: NSObject {
 
     /// after messages left the list: the one that took their place selected, or the last one
     private func selectAfterRemoval(_ index: Int) {
-        reloadList(keepSelection: false)
+        listChanged(keepSelection: false)
         if index >= 0 && rows > 0 {
             let next = min(index, Int(rows) - 1)
             list.selectRowIndexes(IndexSet(integer: next), byExtendingSelection: false)
@@ -1622,7 +1645,7 @@ public final class Mailbox: NSObject {
         case .success(let done):
             status(done)
             restorePending = true
-            selectRestored()
+            listChanged(keepSelection: true)
         case .failure(let refusal):
             inform(refusal.reason, style: .warning)
         }
@@ -2164,11 +2187,12 @@ public final class Mailbox: NSObject {
         case PE_EVENT_KIND_FOLDER_CHANGED:
             scheduleCounts()
             // a list of several folders has messages of any of them. The changes of a sync are gathered for a moment
-            // and the list read once, not after each
+            // and the list read once, not after each; not at all when the user's own command read it since
             if (event.folder == folder && !searching) || severalFolders, reloadTimer?.isValid != true {
-                reloadTimer = after(0.3) { [weak self] in
-                    self?.reloadList(keepSelection: true)
-                    self?.changed()
+                reloadTimer = after(Mailbox.gatherWait) { [weak self] in
+                    guard let self, core.stale(listView) else { return }
+                    reloadList(keepSelection: true)
+                    changed()
                 }
             }
         case PE_EVENT_KIND_SYNC_FINISHED:
@@ -3117,15 +3141,18 @@ public final class FolderOutline: NSOutlineView {
 
     // a row chosen with the mouse or the keyboard is drawn selected before its list loads
     public override func mouseDown(with event: NSEvent) {
-        mailbox?.deferChoice = true
-        defer { mailbox?.deferChoice = false }
-        super.mouseDown(with: event)
+        deferring { super.mouseDown(with: event) }
     }
 
     public override func keyDown(with event: NSEvent) {
+        deferring { super.keyDown(with: event) }
+    }
+
+    /// `body` run as the user's choice, whose list loads after the tree is drawn
+    private func deferring(_ body: () -> Void) {
         mailbox?.deferChoice = true
         defer { mailbox?.deferChoice = false }
-        super.keyDown(with: event)
+        body()
     }
 
     // Edit > Select All and Undo from the tree are the message list's: a folder is selected alone and has no undo
@@ -3271,9 +3298,9 @@ final class ListCover: NSView {
 
     required init?(coder: NSCoder) { fatalError() }
 
-    /// the list's own background, half covering it, in light and dark
+    /// the list's own background, covering it as much as the core says, in light and dark
     override func draw(_ dirtyRect: NSRect) {
-        NSColor.controlBackgroundColor.withAlphaComponent(0.55).setFill()
+        NSColor.controlBackgroundColor.withAlphaComponent(PE_LIST_DIM).setFill()
         dirtyRect.fill(using: .sourceOver)
     }
 

@@ -517,7 +517,7 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     }
 
     /// how long the find box waits after the last key before it searches
-    static let findPause: TimeInterval = 0.15
+    static let findPause = TimeInterval(PE_FIND_PAUSE_MS) / 1000
 
     // ---- the tables ----
 

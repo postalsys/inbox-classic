@@ -387,7 +387,10 @@ extension UITest {
         _ = await waitUntil(10) { self.list.numberOfRows > 0 }
         await selectRow(0)
         let subject = main.mailbox.selectedRow?.subject ?? ""
-        command(.flag)
+        AppDelegate.shared.perform(.flag)
+        // the app's own command reads the list again at once, not when the change is reported a moment later
+        check(main.mailbox.selectedRow?.flagged == true && main.mailbox.selectedRow?.subject == subject,
+              "the row is flagged as soon as the command is done, still selected")
         check(await waitUntil(10) { self.main.core.flaggedCount == before + 1 }, "flagging a message counts it under Flagged")
         onMain { _ = self.tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false) }
         check(await waitUntil(10) { self.list.numberOfRows == Int(before + 1) },
@@ -1938,7 +1941,7 @@ extension UITest {
             mailbox.holdPending = true
             pressUp(in: tree)
             await shot(main.window, "all-inboxes-0a-dimmed")
-            await pause(0.2)
+            _ = await waitUntil(Mailbox.loadingWait + 2) { loading?.isHidden == false }
             main.window.appearance = NSAppearance(named: .darkAqua)
             await shot(main.window, "all-inboxes-0b-loading-dark")
             main.window.appearance = nil
