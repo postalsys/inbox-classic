@@ -487,8 +487,13 @@ private final class SetupImportWindow: NSObject {
         partList.spacing = 8
         for line in file.parts {
             guard let name = setupParts.first(where: { $0.flag == line.part })?.name else { continue }
-            let box = checkBox(name.text, self, #selector(changed), id: "setup.part.\(line.part)")
-            box.state = .on
+            let accountsPart = line.part == UInt32(PE_SETUP_ACCOUNTS)
+            let box = checkBox(name.text, self, accountsPart ? #selector(accountsPartChanged) : #selector(changed),
+                               id: "setup.part.\(line.part)")
+            // Accounts with no account to import is no choice: off, its accounts listed with why
+            let some = file.accounts.contains { $0.importable }
+            box.state = !accountsPart || some ? .on : .off
+            box.isEnabled = !accountsPart || some
             parts.append((line.part, box))
             // what it holds under its name, as an account's servers are under its address: words of any length wrap
             // in the width of the window, not beside a name as long as German makes it
@@ -535,7 +540,7 @@ private final class SetupImportWindow: NSObject {
         list.alignment = .leading
         list.spacing = 10
         for account in file.accounts {
-            let box = checkBox(account.email, self, #selector(changed), id: "setup.account.\(account.index)")
+            let box = checkBox(account.email, self, #selector(accountChanged), id: "setup.account.\(account.index)")
             box.state = account.importable ? .on : .off
             let servers = secondaryLabel([account.imap, account.smtp, account.signIn].filter { !$0.isEmpty }
                 .joined(separator: " \u{00b7} "), small: true)
@@ -590,17 +595,31 @@ private final class SetupImportWindow: NSObject {
         chosen(UInt32(PE_SETUP_ACCOUNTS)) ? accounts.filter { $0.box.state == .on }.map(\.account.index) : []
     }
 
-    /// the accounts can be chosen while Accounts is; Import while something would be imported
+    /// Import while something would be imported
     private func update() {
-        let withAccounts = chosen(UInt32(PE_SETUP_ACCOUNTS))
         for entry in accounts {
-            entry.box.isEnabled = withAccounts && entry.account.importable
+            entry.box.isEnabled = entry.account.importable
         }
         let others = chosenParts & ~UInt32(PE_SETUP_ACCOUNTS)
         importButton.isEnabled = others != 0 || !chosenAccounts.isEmpty
     }
 
     @objc private func changed() {
+        update()
+    }
+
+    /// Accounts ticked ticks every account that can be imported, unticked unticks them
+    @objc private func accountsPartChanged(_ sender: NSButton) {
+        for entry in accounts where entry.account.importable {
+            entry.box.state = sender.state
+        }
+        update()
+    }
+
+    /// Accounts is ticked while one of its accounts is
+    @objc private func accountChanged() {
+        let any = accounts.contains { $0.box.state == .on }
+        parts.first { $0.flag == UInt32(PE_SETUP_ACCOUNTS) }?.box.state = any ? .on : .off
         update()
     }
 

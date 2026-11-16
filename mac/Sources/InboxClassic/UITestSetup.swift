@@ -123,10 +123,17 @@ extension UITest {
         let from = words("setup.import.from", in: choose)
         check(from.hasPrefix("Saved by Inbox Classic \(Core.version) on "), "it says when and by which version it was saved (\(from))")
         let parts: [NSButton] = flags.compactMap { find("setup.part.\($0)", in: choose) }
-        check(parts.count == 8 && parts.allSatisfy { $0.state == .on }, "every part it holds is listed and chosen")
+        let accountsPart: NSButton? = find("setup.part.\(UInt32(PE_SETUP_ACCOUNTS))", in: choose)
+        let others = parts.filter { $0 !== accountsPart }
+        check(others.count >= 5 && others.allSatisfy { $0.state == .on && $0.isEnabled },
+              "the parts it holds are listed and chosen (\(parts.map(\.title)))")
+        check(find("setup.part.\(UInt32(PE_SETUP_RULES))", in: choose) as NSButton? == nil,
+              "a part with nothing in it is not offered (Message rules: none)")
+        check(accountsPart?.state == .off && accountsPart?.isEnabled == false,
+              "with no account to import, Accounts is unticked and greyed")
         let contacts = words("setup.holds.\(UInt32(PE_SETUP_CONTACTS))", in: choose)
-        let rules = words("setup.holds.\(UInt32(PE_SETUP_RULES))", in: choose)
-        check(contacts.contains("contact") && rules.contains("rule"), "with what each holds (\(contacts); \(rules))")
+        let keys = words("setup.holds.\(UInt32(PE_SETUP_KEYS))", in: choose)
+        check(contacts.contains("contact") && keys.contains("key"), "with what each holds (\(contacts); \(keys))")
         let accountBoxes: [NSButton] = (0..<accountsBefore.count).compactMap { find("setup.account.\($0)", in: choose) }
         let notes = (0..<accountsBefore.count).map { words("setup.account.\($0).note", in: choose) }
         check(accountBoxes.count == accountsBefore.count && accountBoxes.count > 1 && accountBoxes.allSatisfy { $0.state == .off && !$0.isEnabled }
@@ -135,7 +142,7 @@ extension UITest {
         await shot(choose, "setup-3-import-choose")
 
         // Contacts alone
-        for part in parts where part.accessibilityIdentifier() != "setup.part.\(UInt32(PE_SETUP_CONTACTS))" {
+        for part in others where part.accessibilityIdentifier() != "setup.part.\(UInt32(PE_SETUP_CONTACTS))" {
             press(part)
         }
         _ = await waitUntil(5) { parts.filter { $0.state == .on }.count == 1 }
