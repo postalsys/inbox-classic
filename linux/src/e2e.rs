@@ -52,10 +52,10 @@ mod dark;
 /// Step 19i: signed and encrypted mail
 mod secure;
 
-/// Step 45a: settings and accounts to another computer
-mod setup;
 /// Step 8a: opening attachments (after 19i, for the account's key)
 mod attach;
+/// Step 45a: settings and accounts to another computer
+mod setup;
 
 const SUBJECT: &str = "Photos from Saturday";
 const NEWSLETTER: &str = "October newsletter";
