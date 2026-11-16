@@ -1055,6 +1055,18 @@ const sections = [
                 checked: ['The status bar says the messages were moved to Archive', 'Edit > Undo Move brings them back to the Inbox, on the server']
             },
             {
+                shot: 'many-1-refused',
+                name: 'Many messages at once, and what the server refuses',
+                what: "Select All, Move, Delete and Mark All Read act on the list at once and run off the window thread, however many messages they take; the status bar says what was done. When the server refuses (a folder another client deleted, a connection lost), the messages come back as they were, selected again, and a bar over the list says what was not done and the server's reason, until its close button hides it.",
+                how: 'Edit > Select All (Ctrl+A), then Move to Folder or Delete.',
+                checked: [
+                    'A move to a folder the server no longer has comes back: the bar says so in the core\'s words, the status bar no longer says they moved',
+                    'The messages are back in the list and selected, in sight',
+                    "The bar's close button hides it",
+                    'Select All then Delete empties the list, the status bar says how many went to Deleted Items, and the server has each there once'
+                ]
+            },
+            {
                 shot: 'flags-1-colors',
                 name: 'Flag colours',
                 what: 'Messages are flagged in the seven colours of Apple Mail (red, orange, yellow, green, blue, purple, gray), kept on the server as Apple Mail keeps them: \\Flagged with the keywords $MailFlagBit0 to $MailFlagBit2. A message Apple Mail flagged shows its colour here and the other way round; other mail programs see a flag. The flag column shows the colour.',
