@@ -16,8 +16,9 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Greek (el) help: all 1,334 catalog entries are reviewed, with 211 values improved.
-  Review all 52 help topics, starting with add-account, gmail-outlook, main-window and layouts.
+- Resume with the attachment-reminder context followup: 11 already-reviewed write-message topics.
+  Then review the remaining 31 Greek help topics (security/privacy, agents, troubleshooting and reference).
+  Greek catalogs: 1,334 reviewed, 211 values improved; help: 21 of 52 reviewed.
   Thirteen languages still have pending content. All 84 late list-loading labels are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
   Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
@@ -557,8 +558,23 @@ All catalog structures, full placeholder sets, 32 shortcut scopes and exact inve
 An offline pe-ffi build in the isolated Cargo target regenerated three installer and five store values, which
 were inspected. Review HTML regenerated and git diff --check passes. No test suite was run per user instruction.
 
-Current totals: 16,120 catalog entries and 576 help pages reviewed; 2,482 catalog values improved. Remaining:
-15,972 catalog entries and 676 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Greek first 21 help topics
+
+Reviewed everyday help from account setup through account transfer. Improved natural Greek instructions,
+matched control names and corrected combined-folder navigation, unread totals, indexing, bulk actions,
+signatures, attachments, queued sending and transferred credentials. Clarified temporary attachment cleanup
+at startup and its platform-specific origin marking. Sender-picture authentication confirms the domain,
+not the person or message content. Preserved tags, attributes, keyboard literals and platform branches.
+Structural checks, inline joins, exact inventory/file/source hashes and git diff --check pass; review HTML
+regenerated. No test suite was run per user instruction. Catalog completion checkpoint: `4274d4d3`.
+
+New source-context finding: `attachment_words.rs` recognizes attachment reminders only in English, German,
+Estonian, Spanish and French. The Greek help now uses a recognized English example and names this limitation.
+Eleven previously reviewed write-message topics need the same check, recorded as a separate context followup.
+Check this limitation while reviewing the twelve remaining languages. English and app code are unchanged.
+
+Current totals: 16,120 catalog entries and 597 help pages reviewed; 2,482 catalog values improved. Remaining:
+15,972 catalog entries and 655 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
