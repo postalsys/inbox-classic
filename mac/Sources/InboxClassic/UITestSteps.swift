@@ -2381,6 +2381,9 @@ extension UITest {
             main.showMessage(folder: first.id, uid: firstMessage.uid)
             check(await waitUntil(10) { main.mailbox.folder == first.id && tree.selectedRow == firstRow && tree.isItemExpanded(all) },
                   "a message of the first Inbox opened from outside the tree selects its row under All Inboxes, opened (row \(tree.selectedRow))")
+            // that opening only showed the row, it is not kept: the user opens All Inboxes again for the steps after
+            tree.collapseItem(all)
+            tree.expandItem(all)
         }
         tree.selectRowIndexes(IndexSet(integer: allRow), byExtendingSelection: false)
 
@@ -2552,17 +2555,40 @@ extension UITest {
         let top = (0..<main.mailbox.outlineView(tree, numberOfChildrenOfItem: nil)).compactMap {
             main.mailbox.outlineView(tree, child: $0, ofItem: nil) as? Mailbox.TreeNode
         }
-        guard let allSent = top.first(where: { $0.kind == PE_TREE_ROW_KIND_ALL_SENT }),
-              let allDrafts = top.first(where: { $0.kind == PE_TREE_ROW_KIND_ALL_DRAFTS }) else {
+        guard let shownSent = top.first(where: { $0.kind == PE_TREE_ROW_KIND_ALL_SENT }),
+              let shownDrafts = top.first(where: { $0.kind == PE_TREE_ROW_KIND_ALL_DRAFTS }) else {
             check(false, "All Sent and All Drafts are in the tree (\(top.map(\.row.label)))")
             return
         }
         check(top.map(\.kind) == [PE_TREE_ROW_KIND_ALL_INBOXES, PE_TREE_ROW_KIND_ALL_SENT, PE_TREE_ROW_KIND_ALL_DRAFTS,
                                   PE_TREE_ROW_KIND_FLAGGED, PE_TREE_ROW_KIND_ACCOUNT, PE_TREE_ROW_KIND_ACCOUNT]
-              && allSent.row.label == "All Sent" && allDrafts.row.label == "All Drafts",
+              && shownSent.row.label == "All Sent" && shownDrafts.row.label == "All Drafts",
               "All Sent and All Drafts follow All Inboxes, before Flagged (\(top.map(\.row.label)))")
-        check(!tree.isItemExpanded(allSent) && !tree.isItemExpanded(allDrafts), "both start closed")
+        check(!tree.isItemExpanded(shownSent) && !tree.isItemExpanded(shownDrafts), "both start closed")
         await shot(main.window, "all-sent-0-closed")
+        // a folder chosen from outside the tree is never hidden: Go to Folder opens the rows above it, without keeping
+        // that as the user's opening
+        main.mailbox.goToFolder(sent[0])
+        check(await waitUntil(5) {
+            self.tree.isItemExpanded(shownSent) && self.tree.selectedRow >= 0
+                && self.tree.selectedRow == self.tree.row(forItem: shownSent.children.first) && self.main.mailbox.folder == sent[0]
+        }, "Go to Folder to the first account's Sent Items opens All Sent and highlights its row (row \(tree.selectedRow))")
+        // closed by the user while it is chosen, then the tree built again (as a new account builds it): opened again
+        tree.collapseItem(shownSent)
+        main.mailbox.reload()
+        let firstSentRow = { self.treeRow { $0.folder == sent[0] } }
+        check(await waitUntil(5) { firstSentRow() != nil && self.tree.selectedRow == firstSentRow() },
+              "the tree built again with Sent Items chosen opens All Sent to show it highlighted (row \(tree.selectedRow))")
+        if let inboxes = treeRow(PE_TREE_ROW_KIND_ALL_INBOXES) {
+            tree.selectRowIndexes(IndexSet(integer: inboxes), byExtendingSelection: false)
+        }
+        _ = await waitUntil(5) { self.main.mailbox.allInboxes }
+        main.mailbox.reload()
+        let sentNode = { self.treeRow(PE_TREE_ROW_KIND_ALL_SENT).flatMap(self.treeNode) }
+        check(sentNode().map { !tree.isItemExpanded($0) } == true,
+              "with another folder chosen, the tree built again has All Sent closed as the user left it")
+        // the tree's rows are new ones
+        guard let allSent = sentNode(), let allDrafts = treeRow(PE_TREE_ROW_KIND_ALL_DRAFTS).flatMap(treeNode) else { return }
         // with the keyboard: Right opens All Sent, Down goes into its rows, Left back up to it
         tree.selectRowIndexes(IndexSet(integer: tree.row(forItem: allSent)), byExtendingSelection: false)
         pressArrow(NSRightArrowFunctionKey, 124, in: tree)

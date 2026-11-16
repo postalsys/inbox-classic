@@ -125,6 +125,8 @@ public final class Mailbox: NSObject {
     /// the other rows with rows under them (folders) the user opened or closed, by their keys, kept while the app runs
     private var openedOrClosed: [String: Bool] = [:]
     private var reloading = false
+    /// the rows above the row chosen are being opened to show it, which is not the user's opening
+    private var revealing = false
 
     // the list: the folder or the search, its order and its rows
     private(set) var folder: Int64 = 0
@@ -594,18 +596,18 @@ public final class Mailbox: NSObject {
         parents.reversed().filter { !isOpen($0) }.forEach { tree.collapseItem($0) }
     }
 
-    /// the row of `node` in the tree selected when it is shown; `reveal` opens the rows above it first, for a folder
-    /// chosen from outside the tree
-    private func selectTreeNode(_ node: TreeNode, reveal: Bool = false) {
-        if reveal {
-            var above: [TreeNode] = []
-            var parent = node.parent
-            while let row = parent {
-                above.insert(row, at: 0)
-                parent = row.parent
-            }
-            above.filter { !tree.isItemExpanded($0) }.forEach { tree.expandItem($0) }
+    /// the row of `node` in the tree selected, the closed rows above it opened first so the row chosen is never
+    /// hidden; that opening is not the user's, so it is not kept
+    private func selectTreeNode(_ node: TreeNode) {
+        var above: [TreeNode] = []
+        var parent = node.parent
+        while let row = parent {
+            above.insert(row, at: 0)
+            parent = row.parent
         }
+        revealing = true
+        above.filter { !tree.isItemExpanded($0) }.forEach { tree.expandItem($0) }
+        revealing = false
         let row = tree.row(forItem: node)
         if row >= 0 {
             tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
@@ -1189,7 +1191,7 @@ public final class Mailbox: NSObject {
         if searching && folder == id {
             clearFind()
         }
-        selectTreeNode(node, reveal: true)
+        selectTreeNode(node)
         guard folder == id else { return }
         selectInList(folder: id, uid: message)
     }
@@ -1216,7 +1218,7 @@ public final class Mailbox: NSObject {
         case .ask(let next, let question):
             guard ask(question, style: .information), let node = folderRows[next] else { return }
             clearFind()
-            selectTreeNode(node, reveal: true)
+            selectTreeNode(node)
             // from the top of that folder's list, which the core may answer with another question
             if case .message(let folder, let uid) = core.nextUnread(listView, folder: 0, uid: 0) {
                 selectInList(folder: folder, uid: uid)
@@ -1291,7 +1293,7 @@ public final class Mailbox: NSObject {
     func goToFolder(_ id: Int64) {
         guard let node = folderRows[id] else { return }
         clearFind()
-        selectTreeNode(node, reveal: true)
+        selectTreeNode(node)
     }
 
     /// Go to Folder: the folders of every account to choose one of, as Move to Folder shows them
@@ -2168,7 +2170,7 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
     /// a row opened or closed by the user: kept for the next start when the core says to remember it, else while the
     /// app runs
     private func rememberOpen(_ notification: Notification, _ open: Bool) {
-        guard !reloading, let node = notification.userInfo?["NSObject"] as? TreeNode else { return }
+        guard !reloading, !revealing, let node = notification.userInfo?["NSObject"] as? TreeNode else { return }
         if node.row.remembersOpen {
             openRows.set(node.row, open)
         } else {
