@@ -36,6 +36,26 @@
 // (test runs, a shared computer)
 #define PE_OPEN_MEMORY_PASSWORDS 1
 
+// The parts of a setup file, as flags
+#define PE_SETUP_SETTINGS 1
+
+// The window preferences the app hands in (`pe_setup_export_set_pref`) and takes back (`pe_setup_file_pref`)
+#define PE_SETUP_PREFERENCES 2
+
+#define PE_SETUP_ACCOUNTS 4
+
+#define PE_SETUP_SIGN_IN_APPS 8
+
+#define PE_SETUP_CONTACTS 16
+
+#define PE_SETUP_KEYS 32
+
+#define PE_SETUP_RULES 64
+
+#define PE_SETUP_TRUSTED_SENDERS 128
+
+#define PE_SETUP_ALL 255
+
 // What the reading pane shows instead of a message (`pe_reader_page`)
 typedef enum PeReaderState {
   // No message is selected
@@ -428,6 +448,35 @@ typedef enum PeTargetKind {
   PE_TARGET_KIND_FOLDER = 3,
 } PeTargetKind;
 
+// What kind of value an app preference takes, written as text: `1` or `0`; a number from 0 to its `max`; a
+// language code (`de`), or empty for the system's language
+typedef enum PeSetupPrefKind {
+  PE_SETUP_PREF_KIND_BOOL = 0,
+  PE_SETUP_PREF_KIND_NUMBER = 1,
+  PE_SETUP_PREF_KIND_LANGUAGE = 2,
+} PeSetupPrefKind;
+
+// What a line of words tells
+typedef enum PeSetupLineKind {
+  // What a part holds ("2 accounts"), its `part` set
+  PE_SETUP_LINE_KIND_PART = 0,
+  PE_SETUP_LINE_KIND_ADDED = 1,
+  PE_SETUP_LINE_KIND_SKIPPED = 2,
+  // Something to know or to do: an account that asks for its password, a key that waits for a decision
+  PE_SETUP_LINE_KIND_NOTE = 3,
+} PeSetupLineKind;
+
+// Why a setup file could not be read
+typedef enum PeSetupError {
+  PE_SETUP_ERROR_NONE = 0,
+  // It is sealed with a passphrase: ask for it and read again
+  PE_SETUP_ERROR_NEEDS_PASSPHRASE = 1,
+  // The passphrase does not open it: ask again
+  PE_SETUP_ERROR_WRONG_PASSPHRASE = 2,
+  // Anything else, said in `error`
+  PE_SETUP_ERROR_INVALID = 3,
+} PeSetupError;
+
 // The accounts; free with `pe_account_list_free`
 typedef struct PeAccountList PeAccountList;
 
@@ -513,6 +562,20 @@ typedef struct PeRules PeRules;
 
 // Selected messages; free with `pe_selection_free`
 typedef struct PeSelection PeSelection;
+
+// An export being set up: its parts, its passphrase, the app's preferences; free with `pe_setup_export_free`
+typedef struct PeSetupExport PeSetupExport;
+
+// A setup file read: what it holds, for the import window, and what `pe_setup_import` writes; free with
+// `pe_setup_file_free`
+typedef struct PeSetupFile PeSetupFile;
+
+// Lines of words, what an export wrote or an import did, and the accounts an import added; free with
+// `pe_setup_lines_free`
+typedef struct PeSetupLines PeSetupLines;
+
+// The app preferences a setup file carries; free with `pe_setup_pref_names_free`
+typedef struct PeSetupPrefNames PeSetupPrefNames;
 
 // The sign-in apps; free with `pe_sign_in_app_list_free`
 typedef struct PeSignInAppList PeSignInAppList;
@@ -1304,6 +1367,75 @@ typedef struct PeTarget {
   // Messages can go there
   bool choosable;
 } PeTarget;
+
+// An app preference a setup file carries, by the name the three apps share
+typedef struct PeSetupPrefName {
+  // `layout`, `hide_read`, `language`, ...
+  const char *name;
+  enum PeSetupPrefKind kind;
+  // The largest number of a `Number`, 0 for the others
+  uint32_t max;
+} PeSetupPrefName;
+
+typedef struct PeSetupLine {
+  enum PeSetupLineKind kind;
+  // The part (`PE_SETUP_*`) of a `Part` line, 0 for the others
+  uint32_t part;
+  const char *text;
+} PeSetupLine;
+
+// What a setup file is and holds
+typedef struct PeSetupInfo {
+  // Sealed with a passphrase (and only then does it carry passwords, sign-ins and private keys)
+  bool encrypted;
+  // The version of Inbox Classic that saved it
+  const char *app_version;
+  // When, seconds since 1970, and as the user's locale writes a day
+  int64_t created;
+  const char *created_text;
+  // The parts it holds, `PE_SETUP_*` flags
+  uint32_t parts;
+  size_t settings;
+  size_t preferences;
+  size_t accounts;
+  size_t sign_in_apps;
+  size_t contacts;
+  size_t groups;
+  size_t own_keys;
+  size_t contact_keys;
+  size_t rules;
+  size_t trusted_senders;
+} PeSetupInfo;
+
+// An account of a setup file as the import window lists it
+typedef struct PeSetupAccount {
+  // Its place in the file: what `pe_setup_import` takes
+  size_t index;
+  const char *email;
+  // What the folder list will call it
+  const char *title;
+  // `imap.example.com:993`
+  const char *imap;
+  const char *smtp;
+  // How it signs in, in words: "Password", or the sign-in app's name
+  const char *sign_in;
+  // Its password or sign-in is in the file
+  bool has_secret;
+  // One like it (the same address and IMAP server) is set up here: an import skips it
+  bool here;
+  // A server is reached without encryption
+  bool plain;
+  // Why it can not be imported, NULL when it can
+  const char *problem;
+  // What an import does with it, in words
+  const char *note;
+} PeSetupAccount;
+
+// An app preference a setup file carries, its value checked
+typedef struct PeSetupPref {
+  const char *name;
+  const char *value;
+} PeSetupPref;
 
 // A language there is a catalog of
 typedef struct PeLanguage {
@@ -3950,6 +4082,157 @@ char *pe_selection_downloading_text(const struct PeCore *core,
 // The name of the flag colour `color` (1 red to 7 gray) as the Flag menu lists it ("Orange"); NULL for another
 // number. Free with `pe_string_free`.
 char *pe_flag_color_name(uint8_t color);
+
+// The app preferences a setup file carries, by name and kind: what an app hands to `pe_setup_export_set_pref`
+struct PeSetupPrefNames *pe_setup_pref_names(void);
+
+// # Safety
+// `list` must be NULL or live.
+size_t pe_setup_pref_names_count(const struct PeSetupPrefNames *list);
+
+// # Safety
+// `list` must be NULL or live.
+const struct PeSetupPrefName *pe_setup_pref_names_get(const struct PeSetupPrefNames *list,
+                                                      size_t index);
+
+// # Safety
+// `list` must be NULL or a list that was not freed yet.
+void pe_setup_pref_names_free(struct PeSetupPrefNames *list);
+
+// # Safety
+// `lines` must be NULL or live.
+size_t pe_setup_lines_count(const struct PeSetupLines *lines);
+
+// Line `index`, NULL past the end
+//
+// # Safety
+// `lines` must be NULL or live.
+const struct PeSetupLine *pe_setup_lines_get(const struct PeSetupLines *lines, size_t index);
+
+// The accounts an import added, which are syncing: their ids, `count` of them; NULL for none
+//
+// # Safety
+// `lines` must be NULL or live, `count` a valid pointer.
+const int64_t *pe_setup_lines_accounts(const struct PeSetupLines *lines, size_t *count);
+
+// # Safety
+// `lines` must be NULL or lines that were not freed yet.
+void pe_setup_lines_free(struct PeSetupLines *lines);
+
+// A new export of `parts` (`PE_SETUP_*` flags), without a passphrase
+struct PeSetupExport *pe_setup_export_new(uint32_t parts);
+
+// Seals the file with `passphrase` (NULL or empty for none), so that it carries the secrets too. The rule of key
+// backups applies (`pe_pgp_passphrase_problem`); `pe_setup_export_write` refuses a shorter one.
+//
+// # Safety
+// `export` must be live, `passphrase` NULL or a NUL-terminated string.
+void pe_setup_export_set_passphrase(struct PeSetupExport *export_,
+                                    const char *passphrase);
+
+// Hands in an app preference by its name (`pe_setup_pref_names`) and its value as text; false when there is no
+// such preference or the value is not one of it (it is left out)
+//
+// # Safety
+// `export` must be live, `name` and `value` NUL-terminated strings.
+bool pe_setup_export_set_pref(struct PeSetupExport *export_,
+                              const char *name,
+                              const char *value);
+
+// Writes the setup file at `path` (UTF-8): each part written with what it holds, as `Part` lines; NULL with the
+// reason in `error` (free it with `pe_string_free`) when it could not be written
+//
+// # Safety
+// `core` and `export` must be live, `path` a NUL-terminated string, `error` NULL or a valid pointer.
+struct PeSetupLines *pe_setup_export_write(const struct PeCore *core,
+                                           const struct PeSetupExport *export_,
+                                           const char *path,
+                                           char **error);
+
+// # Safety
+// `export` must be NULL or an export that was not freed yet.
+void pe_setup_export_free(struct PeSetupExport *export_);
+
+// Reads the setup file at `path` (UTF-8), opened with `passphrase` (NULL for none) when it is sealed. NULL when it
+// can not be read: `kind` says whether a passphrase is needed or wrong, `error` (NULL or a pointer to a string to
+// free with `pe_string_free`) says why in words. Nothing changes until `pe_setup_import`.
+//
+// # Safety
+// `core` must be live, `path` a NUL-terminated string, `passphrase` NULL or one, `kind` and `error` NULL or valid
+// pointers.
+struct PeSetupFile *pe_setup_read(const struct PeCore *core,
+                                  const char *path,
+                                  const char *passphrase,
+                                  enum PeSetupError *kind,
+                                  char **error);
+
+// What the file is and holds; NULL for a NULL handle. Lives as long as the handle.
+//
+// # Safety
+// `file` must be NULL or live.
+const struct PeSetupInfo *pe_setup_file_info(const struct PeSetupFile *file);
+
+// # Safety
+// `file` must be NULL or live.
+size_t pe_setup_file_account_count(const struct PeSetupFile *file);
+
+// Account `index` of the file (in its order), NULL past the end
+//
+// # Safety
+// `file` must be NULL or live.
+const struct PeSetupAccount *pe_setup_file_account(const struct PeSetupFile *file, size_t index);
+
+// # Safety
+// `file` must be NULL or live.
+size_t pe_setup_file_part_count(const struct PeSetupFile *file);
+
+// Part `index` the file holds, with what it holds in words, in the order the windows list them; NULL past the end
+//
+// # Safety
+// `file` must be NULL or live.
+const struct PeSetupLine *pe_setup_file_part(const struct PeSetupFile *file,
+                                             size_t index);
+
+// # Safety
+// `file` must be NULL or live.
+size_t pe_setup_file_pref_count(const struct PeSetupFile *file);
+
+// App preference `index` the file carries, its value checked: what the app sets after an import of
+// `PE_SETUP_PREFERENCES`; NULL past the end
+//
+// # Safety
+// `file` must be NULL or live.
+const struct PeSetupPref *pe_setup_file_pref(const struct PeSetupFile *file, size_t index);
+
+// # Safety
+// `file` must be NULL or live.
+size_t pe_setup_file_note_count(const struct PeSetupFile *file);
+
+// Note `index`: what the file holds that can not be used and is left out, in words; NULL past the end. Lives as
+// long as the handle.
+//
+// # Safety
+// `file` must be NULL or live.
+const char *pe_setup_file_note(const struct PeSetupFile *file,
+                               size_t index);
+
+// # Safety
+// `file` must be NULL or a handle that was not freed yet.
+void pe_setup_file_free(struct PeSetupFile *file);
+
+// Imports the `parts` (`PE_SETUP_*`) of `file` and its accounts at the places `accounts` names (`count` of them,
+// `PeSetupAccount.index`): lines of what was added and skipped, and the accounts added (`pe_setup_lines_accounts`),
+// which start syncing. The app sets the preferences itself (`pe_setup_file_pref`). NULL with the reason in `error`
+// (free it with `pe_string_free`) when nothing could be imported.
+//
+// # Safety
+// `core` and `file` must be live, `accounts` NULL or `count` values, `error` NULL or a valid pointer.
+struct PeSetupLines *pe_setup_import(const struct PeCore *core,
+                                     const struct PeSetupFile *file,
+                                     uint32_t parts,
+                                     const size_t *accounts,
+                                     size_t count,
+                                     char **error);
 
 // Word `text` (PE_TEXT_...) in the language in use, `&` marking a menu letter as the catalog has it. Free with
 // `pe_string_free`; NULL for a number that is no word.

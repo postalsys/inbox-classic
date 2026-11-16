@@ -15,6 +15,7 @@ mod layout;
 mod list_view;
 mod rules;
 mod selection;
+mod setup;
 mod texts;
 #[cfg(windows)]
 mod windows;
@@ -25,6 +26,7 @@ pub use core::*;
 pub use list_view::*;
 pub use rules::*;
 pub use selection::*;
+pub use setup::*;
 pub use texts::*;
 
 use std::ffi::{CString, c_char};
