@@ -746,13 +746,14 @@ try {
         [IntPtr]::Zero
     }
     # a folder of the first account, by its name: with one account the folders are the top rows (the Inbox first);
-    # with two the Inbox is the first row under All Inboxes and the others are under the first account's heading,
-    # the first top row after All Inboxes and Flagged
+    # with two the Inbox, Sent Items and Drafts are the first rows under All Inboxes, All Sent and All Drafts, and the
+    # others are under the first account's heading, the first top row after those and Flagged
     function FolderItem([string]$folder) {
         $all = NamedRow ([IntPtr]::Zero) 'All Inboxes'
         if ($all -eq [IntPtr]::Zero) { return (NamedRow ([IntPtr]::Zero) $folder) }
-        if ($folder -eq 'Inbox') { return [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $all) }
-        $heading = @(ChildRows ([IntPtr]::Zero) | Where-Object { $_ -ne $all -and (Bare $_) -ne 'Flagged' }) | Select-Object -First 1
+        $gathered = @{ 'Inbox' = $all; 'Sent Items' = (NamedRow ([IntPtr]::Zero) 'All Sent'); 'Drafts' = (NamedRow ([IntPtr]::Zero) 'All Drafts') }
+        if ($gathered.ContainsKey($folder)) { return [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $gathered[$folder]) }
+        $heading = @(ChildRows ([IntPtr]::Zero) | Where-Object { (Bare $_) -notin @('All Inboxes', 'All Sent', 'All Drafts', 'Flagged') }) | Select-Object -First 1
         if ($null -eq $heading) { return [IntPtr]::Zero }
         NamedRow $heading $folder
     }
@@ -4711,13 +4712,16 @@ public static class Dragger {
     Command $main $IDM_SYNC
     $top = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero)
     $tops = @(ChildRows ([IntPtr]::Zero) | ForEach-Object { Bare $_ })
-    Check (($tops -join '|') -eq 'All Inboxes|Flagged|inboxclassic.test|Work') "All Inboxes is at the top of the tree, then Flagged, then each account's heading ($($tops -join ', '))"
-    # the first folder under each heading; ImapKit keeps a deleted folder of the Inbox (Receipts of step 27) listed
-    $firstUnder = { param($name) @(ChildRows (NamedRow ([IntPtr]::Zero) $name) | ForEach-Object { Bare $_ } | Where-Object { $_ -ne 'Receipts' }) | Select-Object -First 1 }
+    Check (($tops -join '|') -eq 'All Inboxes|All Sent|All Drafts|Flagged|inboxclassic.test|Work') "All Inboxes is at the top of the tree, then All Sent, All Drafts and Flagged, then each account's heading ($($tops -join ', '))"
+    # the folders under each heading; ImapKit keeps a deleted folder of the Inbox (Receipts of step 27) listed
+    $foldersUnder = { param($name) @(ChildRows (NamedRow ([IntPtr]::Zero) $name) | ForEach-Object { Bare $_ } | Where-Object { $_ -ne 'Receipts' }) }
     $underAll = @(ChildRows $top | ForEach-Object { Bare $_ })
-    $headingsOk = (& $firstUnder 'inboxclassic.test') -eq 'Sent Items' -and (& $firstUnder 'Work') -eq 'Sent Items'
-    $noInbox = -not ((ChildRows (NamedRow ([IntPtr]::Zero) 'inboxclassic.test') | ForEach-Object { Bare $_ }) -contains 'Inbox')
-    Check ($headingsOk -and $noInbox -and ($underAll -join '|') -eq 'inboxclassic.test|Work') "the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, starting with Sent Items ($($underAll -join ', '); $(& $firstUnder 'inboxclassic.test') / $(& $firstUnder 'Work'))"
+    $headingsOk = $true
+    foreach ($name in @('inboxclassic.test', 'Work')) {
+        $under = @(& $foldersUnder $name)
+        $headingsOk = $headingsOk -and $under.Count -gt 0 -and -not ($under | Where-Object { $_ -in @('Inbox', 'Sent Items', 'Drafts') })
+    }
+    Check ($headingsOk -and ($underAll -join '|') -eq 'inboxclassic.test|Work') "the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, without Sent Items and Drafts ($($underAll -join ', '); $((& $foldersUnder 'inboxclassic.test') -join ', ') / $((& $foldersUnder 'Work') -join ', '))"
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $top)
     $expected = (Messages 'INBOX').Count + (Messages 'INBOX' $rest2).Count
     # grouped by conversation the rows are fewer (replies share a row): the messages the list has are counted
@@ -4757,6 +4761,129 @@ public static class Dragger {
     Command $main $IDM_MARK_ALL_READ
     $unreadOn = { param($server) @(Messages 'INBOX' $server | Where-Object { $_.flags -notcontains '\Seen' }).Count }
     Check ([bool](WaitFor { (& $unreadOn $rest) -eq 0 -and (& $unreadOn $rest2) -eq 0 } 20)) "Mark All Read marks both Inboxes read on the servers ($(& $unreadOn $rest) and $(& $unreadOn $rest2) unread)"
+
+    # ---- All Sent and All Drafts ----
+
+    Step 'All Sent and All Drafts'
+    $TVIS_EXPANDED = 0x20
+    $isOpen = { param($item) ([int][Native.Win]::SendMessage($tree, $TVM_GETITEMSTATE, $item, [IntPtr]$TVIS_EXPANDED) -band $TVIS_EXPANDED) -ne 0 }
+    # a message in each account's Sent Items, a draft in the first account's Drafts
+    $sentFirst = 'Notes from the planning call'; $sentWork = 'Slides for the review'; $drafted = 'Draft in All Drafts'
+    AddMessage ("From: Alex Morgan <testuser@inboxclassic.test>`r`nTo: Nina Park <nina@example.org>`r`nSubject: $sentFirst`r`n" +
+        "Date: $([DateTime]::UtcNow.AddMinutes(-2).ToString('r'))`r`nMessage-ID: <planning-notes@inboxclassic.test>`r`n`r`nThe notes are attached.`r`n") @('\Seen') 'Sent'
+    AddMessage ("From: Work <testuser2@inboxclassic.test>`r`nTo: Omar Haddad <omar@work.example>`r`nSubject: $sentWork`r`n" +
+        "Date: $([DateTime]::UtcNow.AddMinutes(-1).ToString('r'))`r`nMessage-ID: <review-slides@inboxclassic.test>`r`n`r`nHere are the slides.`r`n") @('\Seen') 'Sent' $rest2
+    AddMessage ("From: Alex Morgan <testuser@inboxclassic.test>`r`nTo: Fay <fay@example.com>`r`nSubject: $drafted`r`n" +
+        "Date: $([DateTime]::UtcNow.ToString('r'))`r`nMessage-ID: <all-drafts@inboxclassic.test>`r`nMIME-Version: 1.0`r`nContent-Type: text/plain; charset=utf-8`r`n`r`nStarted in the first account.`r`n") @('\Seen', '\Draft') 'Drafts'
+    Command $main $IDM_SYNC
+    $allSent = NamedRow ([IntPtr]::Zero) 'All Sent'
+    $allDrafts = NamedRow ([IntPtr]::Zero) 'All Drafts'
+    Check ($allSent -ne [IntPtr]::Zero -and $allDrafts -ne [IntPtr]::Zero -and -not (& $isOpen $allSent) -and -not (& $isOpen $allDrafts)) 'All Sent and All Drafts follow All Inboxes, before Flagged, closed at first'
+    # a folder under a closed row chosen from elsewhere: the row opens so the folder is seen, selected
+    Command $main $IDM_GO_TO_FOLDER
+    $goTo = WaitPicker 'Go to Folder'
+    Check ($goTo -and (PickIn $goTo 'inboxclassic.test' 'Sent Items')) 'Go to Folder offers the first account''s Sent Items'
+    if ($goTo) {
+        Click $goTo 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($goTo) } 10)
+    }
+    $firstSent = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $allSent)
+    $chosen = WaitFor { $c = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]9, [IntPtr]::Zero); if ($c -eq $firstSent) { $c } } 10
+    Check ($null -ne $chosen -and (& $isOpen $allSent) -and (& $folderBar) -eq ' Sent Items - inboxclassic.test') "Sent Items chosen by Go to Folder while All Sent is closed: All Sent opens and its row is selected ($(& $folderBar))"
+    # closed again with the keyboard, which selects All Sent
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $allSent)
+    [void][Native.Win]::SetForegroundWindow($main)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYDOWN, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
+    Check (-not (& $isOpen $allSent)) 'and closes again with the Left key'
+    # opened with the keyboard, as a user would, so the tree tells the window
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $allSent)
+    [void][Native.Win]::SetForegroundWindow($main)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYDOWN, [IntPtr]$VK_RIGHT, [IntPtr]::Zero)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_RIGHT, [IntPtr]::Zero)
+    $sentRows = @(ChildRows $allSent | ForEach-Object { Bare $_ })
+    $draftRows = @(ChildRows $allDrafts | ForEach-Object { Bare $_ })
+    Check ((& $isOpen $allSent) -and ($sentRows -join '|') -eq 'inboxclassic.test|Work' -and ($draftRows -join '|') -eq 'inboxclassic.test|Work') "opened, each has a row per account named as the account is ($($sentRows -join ', '); $($draftRows -join ', '))"
+    $headingFolders = @(@('inboxclassic.test', 'Work') | ForEach-Object { ChildRows (NamedRow ([IntPtr]::Zero) $_) } | ForEach-Object { Bare $_ })
+    Check (-not ($headingFolders -contains 'Sent Items') -and -not ($headingFolders -contains 'Drafts')) "the account headings list neither Sent Items nor Drafts ($($headingFolders -join ', '))"
+    $listed = WaitFor { if (@(SubjectRows $sentFirst).Count -eq 1 -and @(SubjectRows $sentWork).Count -eq 1) { Rows } } 30
+    Check ($null -ne $listed) "All Sent lists both accounts' sent messages ($(Rows) rows)"
+    $at = { param($s) @(SubjectRows $s) | Select-Object -First 1 }
+    $iFirst = & $at $sentFirst; $iWork = & $at $sentWork
+    if ($null -ne $iFirst -and $null -ne $iWork) {
+        Check ($iWork -lt $iFirst) "newest first ($sentWork at $iWork, $sentFirst at $iFirst)"
+        $to = @([Native.Win]::RemoteListText($list, $iFirst, $COL_FROM), [Native.Win]::RemoteListText($list, $iWork, $COL_FROM))
+        $accountsShown = @([Native.Win]::RemoteListText($list, $iFirst, $COL_FOLDER), [Native.Win]::RemoteListText($list, $iWork, $COL_FOLDER))
+        Check (($to -join '|') -eq 'Nina Park|Omar Haddad') "with the To column, naming whom each went to ($($to -join ', '))"
+        Check ((& $columns) -eq ($FOLDER_COLUMNS + 1) -and ($accountsShown -join '|') -eq 'inboxclassic.test|Work') "and the Account column ($($accountsShown -join ', '))"
+        SelectRow $iFirst
+    }
+    Check ((& $folderBar) -eq ' All Sent' -and (WindowText $main) -eq 'All Sent - Inbox Classic') "the folder bar and the title say All Sent ($(& $folderBar); $(WindowText $main))"
+    Shot $main 'all-sent-1-list'
+    # the second account's row under All Sent: its Sent Items alone
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, (NamedRow $allSent 'Work'))
+    $alone = [bool](WaitFor { @(SubjectRows $sentWork).Count -eq 1 -and @(SubjectRows $sentFirst).Count -eq 0 } 20)
+    Check ($alone -and (& $folderBar) -eq ' Sent Items - Work') "the row of one account under All Sent lists its Sent Items alone, named with the account ($(& $folderBar))"
+    # right-clicks: none on All Sent, the folder's menu on a row under it
+    $menuOf = {
+        param($item)
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($main)
+        Start-Sleep -Milliseconds 300
+        $point = Middle ([Native.Win]::RemoteRect($tree, 0x1104, [IntPtr]1, $item.ToInt64()))
+        foreach ($button in @(0, 0x0008, 0x0010)) { [Native.Win]::Mouse($point[0], $point[1], $button) }
+        $m = WaitWindow '#32768' $null 3
+        [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+        if (-not $m) { return $null }
+        $labels = @([Native.Win]::MenuLabels([Native.Win]::SendMessage($m, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)))
+        Key $m $VK_ESCAPE
+        [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 5)
+        return , $labels
+    }
+    $noMenu = & $menuOf $allSent
+    $folderMenu = & $menuOf (NamedRow $allSent 'inboxclassic.test')
+    Check ($null -eq $noMenu) "All Sent has no right-click menu ($($noMenu -join ', '))"
+    Check ($folderMenu -and $folderMenu[0] -eq 'Mark All Read' -and $folderMenu -contains 'New Folder...') "a row under it has the folder's menu ($($folderMenu -join ', '))"
+    $noMenu = & $menuOf $allDrafts
+    Check ($null -eq $noMenu) "All Drafts has none either ($($noMenu -join ', '))"
+    # All Drafts lists the draft; opening it opens the compose window from the first account
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $allDrafts)
+    Check ([bool](WaitFor { @(SubjectRows $drafted).Count -eq 1 } 30)) "All Drafts lists the draft ($(Rows) rows)"
+    Check ((& $folderBar) -eq ' All Drafts') "the folder bar says All Drafts ($(& $folderBar))"
+    $draftRow = & $at $drafted
+    if ($null -ne $draftRow) { SelectRow $draftRow }
+    Shot $main 'all-drafts-1-list'
+    Key $list $VK_RETURN
+    $compose = WaitCompose
+    Check ($null -ne $compose) 'opening the draft opens a compose window'
+    if ($compose) {
+        $from = GetText $compose $IDC_FROM
+        Check ((GetText $compose $IDC_SUBJECT) -eq $drafted -and (GetText $compose $IDC_TO) -like '*fay@example.com*') "with the draft's subject and recipient ($(GetText $compose $IDC_SUBJECT))"
+        Check ($from -like '*testuser@inboxclassic.test*') "from the first account ($from)"
+        Start-Sleep -Milliseconds 800
+        Shot $compose 'all-drafts-2-open'
+        # written on and saved, it replaces the draft in the first account's Drafts, the draft's text kept
+        [void](TypeInEditor $compose 'Finished in All Drafts. ')
+        Command $compose $IDC_SAVE
+        $resaved = WaitFor { $d = @(Messages 'Drafts' | Where-Object { (RawText $_) -match "Subject: $drafted" }); if ($d.Count -eq 1 -and (RawText $d[0]) -match 'Started in the first account' -and (RawText $d[0]) -match 'Finished in All Drafts') { $d } } 30
+        Check ($null -ne $resaved) "with the draft's text: written on and saved, it replaces the draft in the first account's Drafts"
+        Check (@(Messages 'Drafts' $rest2).Count -eq 0) "and nothing goes to the second account's Drafts"
+        CloseCompose $compose
+    }
+    # what the step added taken away again, All Sent and All Drafts closed again as they start
+    foreach ($m in @(@('Sent', $rest, $sentFirst), @('Sent', $rest2, $sentWork), @('Drafts', $rest, $drafted))) {
+        foreach ($found in @(Messages $m[0] $m[1] | Where-Object { (RawText $_) -match "Subject: $($m[2])" })) {
+            [void](Invoke-RestMethod -Method Delete "$($m[1])/$($m[0])/messages/$($found.uid)")
+        }
+    }
+    foreach ($row in @($allSent, $allDrafts)) {
+        if (& $isOpen $row) {
+            [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $row)
+            [void][Native.Win]::SendMessage($tree, $WM_KEYDOWN, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
+            [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
+        }
+    }
+    Command $main $IDM_SYNC
 
     Step 'moving between accounts'
     $IDM_COPY = 136
@@ -4972,9 +5099,9 @@ public static class Dragger {
         $roots = @()
         $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]0, [IntPtr]::Zero))
         while ($item -ne [IntPtr]::Zero) {
-            # the accounts' rows only: Flagged is under All Inboxes too
+            # the accounts' rows only: All Sent, All Drafts and Flagged are under All Inboxes too
             $name = & $bare ([Native.Win]::RemoteTreeText($tree, $item))
-            if ($name -ne 'Flagged') { $roots += $name }
+            if ($name -notin @('All Sent', 'All Drafts', 'Flagged')) { $roots += $name }
             $item = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]1, $item)
         }
         $inboxes = @(AllInboxesRows | ForEach-Object { & $bare ([Native.Win]::RemoteTreeText($tree, $_)) })
@@ -5068,7 +5195,7 @@ public static class Dragger {
         $after = WaitFor { $n = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); if ($n -lt $before) { $n } }
         Check ($null -ne $after) "the account leaves the tree ($before items before)"
         $tops = @(ChildRows ([IntPtr]::Zero) | ForEach-Object { Bare $_ })
-        Check ($tops[0] -eq 'Inbox' -and $tops[1] -eq 'Flagged' -and -not ($tops -contains 'All Inboxes') -and -not ($tops -contains 'inboxclassic.test')) "All Inboxes goes with the second account, and the tree is the one account's again: the Inbox first, then Flagged, no heading ($($tops -join ', '))"
+        Check ($tops[0] -eq 'Inbox' -and $tops[1] -eq 'Flagged' -and -not ($tops -contains 'All Inboxes') -and -not ($tops -contains 'All Sent') -and -not ($tops -contains 'All Drafts') -and ($tops -contains 'Sent Items') -and ($tops -contains 'Drafts') -and -not ($tops -contains 'inboxclassic.test')) "All Inboxes, All Sent and All Drafts go with the second account, and the tree is the one account's again: the Inbox first, then Flagged, Sent Items and Drafts its own, no heading ($($tops -join ', '))"
         Shot $main 'accounts-3-after'
     }
 
@@ -5682,8 +5809,9 @@ public static bool HasIcon(IntPtr window) {
         Check ($tools[-1] -eq $de['cmd-options']) "Tools ends with $($de['cmd-options'])"
         Check ((ToolbarText $main $IDM_NEW_MAIL) -eq $de['ui-tb-create-mail']) "the toolbar is German ($(ToolbarText $main $IDM_NEW_MAIL))"
         $folders = @(TreeTexts ([Native.Win]::GetDlgItem($main, $IDC_TREE)))
-        # with two accounts the Inboxes are named as their accounts under All Inboxes: Sent Items is looked for
-        Check (@($folders | Where-Object { $_ -like "$($de['folder-sent'])*" }).Count -gt 0) "the folders are German ($($folders -join ', '))"
+        # with two accounts the Inboxes are named as their accounts under All Inboxes: Sent Items, or All Sent with
+        # two accounts, is looked for
+        Check (@($folders | Where-Object { $_ -like "$($de['folder-sent'])*" -or $_ -like "$($de['ui-all-sent'])*" }).Count -gt 0) "the folders are German ($($folders -join ', '))"
         $status = [Native.Win]::FindDescendants($main, 'msctls_statusbar32') | Select-Object -First 1
         Write-Host "   status bar: $(StatusPart $status 0) | $(StatusPart $status 1)"
         Shot $main 'lang-1-german'

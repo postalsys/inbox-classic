@@ -301,15 +301,14 @@ impl MessageWindow {
         }
     }
 
-    /// Whether the list the window came from could have messages of `folder`: its own folder, an Inbox for All
-    /// Inboxes, any folder for a search or the Flagged folder
+    /// Whether the list the window came from could have messages of `folder`: its own folder, one the core says All
+    /// Inboxes, All Sent or All Drafts holds, any folder for a search or the Flagged folder
     fn lists(&self, folder: i64) -> bool {
         match self.view.search().map(|search| search.scope) {
             Some(Scope::Folder(own)) => own == folder,
-            Some(Scope::AllInboxes) => shell()
-                .core
-                .folder(folder)
-                .is_ok_and(|f| f.info.path.eq_ignore_ascii_case("INBOX")),
+            Some(scope @ (Scope::AllInboxes | Scope::AllSent | Scope::AllDrafts)) => {
+                shell().core.folder(folder).is_ok_and(|f| scope.includes(&f.info))
+            }
             Some(Scope::Everywhere | Scope::Flagged) => true,
             None => false,
         }

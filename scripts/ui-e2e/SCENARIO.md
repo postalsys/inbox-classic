@@ -795,7 +795,7 @@ The second account is on a second ImapKit server (`second` in the harness config
 Screenshots: `all-inboxes-1-list`, `all-inboxes-2-menu` (not yet on the Mac: the test checks the menu's items there without a picture of it)
 
 - All Inboxes is at the top of the tree, then Flagged, then each account's heading
-- the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, starting with Sent Items
+- the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, without Sent Items and Drafts (step 42d)
 - it lists the mail of both accounts' Inboxes
 - newest first, the two accounts' messages among each other
 - the Account column names the account of each
@@ -839,6 +839,21 @@ With the two accounts of 42a:
 - the second account dragged above the first (or Move Up on its menu): All Inboxes lists its row first, and its heading comes first in the tree
 - Move Down on its menu puts it back: the first account first again in both places
 - Move Up is greyed for the first account, Move Down for the last
+
+## 42d. All Sent and All Drafts
+
+Screenshots: `all-sent-1-list`, `all-drafts-1-list`, `all-drafts-2-open`
+
+A message is in each account's Sent Items and a draft in the first account's Drafts.
+
+- All Sent and All Drafts follow All Inboxes, before Flagged, closed at first; opened, each has a row per account named as the account is
+- the account headings list neither Sent Items nor Drafts
+- All Sent lists both accounts' sent messages, newest first, with the To column and the Account column
+- the row of one account under All Sent lists that account's Sent Items alone, and the folder bar says "Sent Items - " and the account's name
+- All Drafts lists the draft, and opening it opens the compose window from the first account, with the draft's text
+- All Sent and All Drafts have no right-click menu; the rows under them have the folder's menu
+- a folder chosen while the row above it is closed (Go to Folder picks the first account's Sent Items with All Sent closed) is shown: All Sent opens and the row is selected
+- with one account there is no All Sent or All Drafts: Sent Items and Drafts are the account's own folders
 
 ## 43. Moving between accounts
 

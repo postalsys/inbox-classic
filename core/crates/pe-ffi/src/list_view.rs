@@ -7,7 +7,7 @@
 use std::ffi::c_char;
 use std::ptr::null_mut;
 
-use pe_core::{ListView, Scope, Summary};
+use pe_core::{ListView, Summary};
 
 use crate::core::{
     PeCore, PeMessageList, PeNextUnread, PeShow, PeSortField, arg, handed, message_list, put_neighbours,
@@ -87,32 +87,21 @@ pub unsafe extern "C" fn pe_list_view_free(view: *mut PeListView) {
     unsafe { take_back(view) }
 }
 
-/// The folder the list shows: `folder`, or with `folder` 0 the Inbox of every account (`all_inboxes`) or no folder
-/// (an account's own item, which lists nothing without words). Every conversation is closed when it is another one.
-/// False when it was the one shown already (or for NULL).
+/// The list of a row of the folder list (`PeTreeRow` `list` and `folder`): its folder's, All Inboxes', All Sent's,
+/// All Drafts' or Flagged's, or none (a heading, which lists nothing without words). Every conversation is closed when
+/// it is another one. False when it was the one shown already (or for NULL).
 ///
 /// # Safety
 /// `view` must be NULL or a live view.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_list_view_set_scope(view: *mut PeListView, folder: i64, all_inboxes: bool) -> bool {
-    let scope = match (folder, all_inboxes) {
-        (0, true) => Some(Scope::AllInboxes),
-        (0, false) => None,
-        (folder, _) => Some(Scope::Folder(folder)),
-    };
+pub unsafe extern "C" fn pe_list_view_set_list(
+    view: *mut PeListView,
+    list: crate::core::PeTreeList,
+    folder: i64,
+) -> bool {
+    let scope = pe_core::tree::TreeList::from(list).scope(folder);
     // SAFETY: as the caller guarantees
     unsafe { change(view, false, |view| view.set_scope(scope)) }
-}
-
-/// The list of the Flagged row: the flagged messages of every account, but those in Deleted Items or Junk E-mail.
-/// False when it was the one shown already (or for NULL).
-///
-/// # Safety
-/// `view` must be NULL or a live view.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_list_view_set_flagged(view: *mut PeListView) -> bool {
-    // SAFETY: as the caller guarantees
-    unsafe { change(view, false, |view| view.set_scope(Some(Scope::Flagged))) }
 }
 
 /// The words typed in the Find box (UTF-8, NULL or empty for none), in Gmail's syntax: words, "phrases", -word, OR,
@@ -191,6 +180,38 @@ pub unsafe extern "C" fn pe_list_view_searching(view: *const PeListView) -> bool
 pub unsafe extern "C" fn pe_list_view_several_folders(view: *const PeListView) -> bool {
     // SAFETY: as the caller guarantees
     unsafe { read(view, false, ListView::several_folders) }
+}
+
+/// Whether it lists one folder of every account (All Inboxes, All Sent, All Drafts, no words): its place column is
+/// Account, not Folder, and names the account alone; a message shown from elsewhere that is in it stays in it
+///
+/// # Safety
+/// `view` must be NULL or a live view.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_gathers_accounts(view: *const PeListView) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { read(view, false, ListView::gathers_accounts) }
+}
+
+/// The folder it lists without words, for Empty Folder, Import Messages and files dropped on the list; 0 for a list
+/// of several folders
+///
+/// # Safety
+/// `view` must be NULL or a live view.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_own_folder(view: *const PeListView) -> i64 {
+    // SAFETY: as the caller guarantees
+    unsafe { read(view, 0, |view| view.own_folder().unwrap_or(0)) }
+}
+
+/// Whether Mark All Read applies to it: a folder's list or All Inboxes, without words
+///
+/// # Safety
+/// `view` must be NULL or a live view.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_marks_all_read(view: *const PeListView) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { read(view, false, ListView::marks_all_read) }
 }
 
 /// Whether the list lists anything: a folder, All Inboxes or words; not an account's own item. Expand All and

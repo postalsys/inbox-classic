@@ -103,8 +103,8 @@ pub const GROUP_BY_CONVERSATION: &str = "GroupByConversation";
 pub const HIDE_IGNORED: &str = "HideIgnoredConversations";
 /// Whether a new message's notification names its sign-in code (the core does it), off unless chosen
 pub const CODES_IN_NOTIFICATIONS: &str = "CodesInNotifications";
-/// The top rows of the folder tree the user closed (All Inboxes, accounts by their negated ids), comma separated; the
-/// others open at the start
+/// The rows of the folder tree the user turned the other way from how the core says they start: closed All Inboxes
+/// and headings, opened All Sent and All Drafts; by [`crate::folders::row_id`], comma separated
 pub const CLOSED_ROWS: &str = "ClosedFolderRows";
 /// View > Hide Read Messages, for every folder (off when not set)
 pub const HIDE_READ: &str = "HideReadMessages";

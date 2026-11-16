@@ -1024,6 +1024,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::all_inboxes_by_account(&d).await;
     steps::omarchy_title_bar(&d).await;
     steps::reorder_accounts(&d).await;
+    steps::all_sent_and_drafts(&d).await;
     steps::between_accounts(&d).await;
     accounts(&d).await;
     sign_in_apps(&d).await;

@@ -521,7 +521,17 @@ fn reads_mail_through_the_c_api() {
 /// A list view of `folder` (0 for All Inboxes), searching for `text` when given
 fn view_of(folder: i64, text: Option<&str>) -> *mut PeListView {
     let view = pe_list_view_new();
-    assert!(unsafe { pe_list_view_set_scope(view, folder, folder == 0) });
+    assert!(unsafe {
+        pe_list_view_set_list(
+            view,
+            if folder == 0 {
+                PeTreeList::AllInboxes
+            } else {
+                PeTreeList::Folder
+            },
+            folder,
+        )
+    });
     if let Some(text) = text {
         let text = CString::new(text).unwrap();
         assert!(unsafe { pe_list_view_set_text(view, text.as_ptr()) });

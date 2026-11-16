@@ -17,6 +17,10 @@ pub enum TreeRowKind {
     AllInboxes,
     /// An account's Inbox under All Inboxes, named after the account (several accounts)
     AccountInbox,
+    /// Every account's Sent Items in one list, each under it named after the account (several accounts)
+    AllSent,
+    /// Every account's Drafts in one list, each under it named after the account (several accounts)
+    AllDrafts,
     /// Every flagged message of every account
     Flagged,
     /// An account's heading, with its folders under it (several accounts)
@@ -38,12 +42,47 @@ pub enum TreeMenu {
     Account,
 }
 
+/// The messages a row lists when it is chosen
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TreeList {
+    /// None (a heading)
+    None,
+    /// Its folder's
+    Folder,
+    AllInboxes,
+    Flagged,
+    AllSent,
+    AllDrafts,
+}
+
+impl TreeList {
+    /// The list's scope, `folder` for a folder's own; None for a heading's, or a folder's without one
+    pub fn scope(self, folder: FolderId) -> Option<pe_store::Scope> {
+        use pe_store::Scope;
+        match self {
+            TreeList::None => None,
+            TreeList::Folder if folder == 0 => None,
+            TreeList::Folder => Some(Scope::Folder(folder)),
+            TreeList::AllInboxes => Some(Scope::AllInboxes),
+            TreeList::Flagged => Some(Scope::Flagged),
+            TreeList::AllSent => Some(Scope::AllSent),
+            TreeList::AllDrafts => Some(Scope::AllDrafts),
+        }
+    }
+
+    /// One folder of every account (All Inboxes, All Sent, All Drafts): their messages show the account they are of
+    pub fn gathers(self) -> bool {
+        matches!(self, TreeList::AllInboxes | TreeList::AllSent | TreeList::AllDrafts)
+    }
+}
+
 /// One row of the folder list, in its order
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct TreeRow {
     pub kind: TreeRowKind,
     /// What stays the same for this row from one reading to the next, to keep its selection and opened state:
-    /// `inboxes`, `flagged`, `account:<id>` or `folder:<id>` (an Inbox keeps its key under All Inboxes or not)
+    /// `inboxes`, `sent`, `drafts`, `flagged`, `account:<id>` or `folder:<id>` (a folder keeps its key under All
+    /// Inboxes, All Sent or All Drafts or not)
     pub key: String,
     /// The account it belongs to, 0 for All Inboxes and Flagged
     pub account: AccountId,
@@ -73,6 +112,12 @@ pub struct TreeRow {
     pub reorders_accounts: bool,
     /// Its menu
     pub menu: TreeMenu,
+    /// What it lists when chosen
+    pub list: TreeList,
+    /// A row with rows under it starts open (All Inboxes, a heading) or closed (All Sent, All Drafts); whether the
+    /// user's opening and closing of it is kept (All Inboxes, All Sent, All Drafts and the headings)
+    pub starts_open: bool,
+    pub remembers_open: bool,
     /// Where New Folder makes a folder with this row chosen: the account (0: New Folder does not apply here) and the
     /// folder to make it in (0: the top of the account, as for the Inbox, which holds no folders in the list)
     pub new_folder_account: AccountId,
@@ -114,6 +159,15 @@ impl TreeRow {
                 TreeRowKind::Account => TreeMenu::Account,
                 _ => TreeMenu::None,
             },
+            list: match kind {
+                TreeRowKind::AllInboxes => TreeList::AllInboxes,
+                TreeRowKind::AllSent => TreeList::AllSent,
+                TreeRowKind::AllDrafts => TreeList::AllDrafts,
+                TreeRowKind::Flagged => TreeList::Flagged,
+                _ => TreeList::None,
+            },
+            starts_open: !matches!(kind, TreeRowKind::AllSent | TreeRowKind::AllDrafts),
+            remembers_open: kind != TreeRowKind::Flagged,
             new_folder_account: account,
             new_folder_parent: 0,
             icon,
@@ -133,6 +187,27 @@ fn icon(folder: &Folder) -> &'static str {
 /// The store's own rule for an Inbox, the one All Inboxes lists by
 fn is_inbox(folder: &Folder) -> bool {
     folder.info.path.eq_ignore_ascii_case("INBOX")
+}
+
+/// The lists of every account's folder of a kind, after All Inboxes, with several accounts: All Sent and All Drafts,
+/// their folders by the store's own rule ([`pe_store::Scope::includes`])
+const GATHERED: [(pe_store::Scope, TreeRowKind, &str, pe_i18n::Text); 2] = [
+    (
+        pe_store::Scope::AllSent,
+        TreeRowKind::AllSent,
+        "sent",
+        pe_i18n::Text::UiAllSent,
+    ),
+    (
+        pe_store::Scope::AllDrafts,
+        TreeRowKind::AllDrafts,
+        "drafts",
+        pe_i18n::Text::UiAllDrafts,
+    ),
+];
+
+fn gathered(folder: &Folder) -> bool {
+    GATHERED.iter().any(|(scope, ..)| scope.includes(&folder.info))
 }
 
 /// Counts toward a collapsed row: not Junk E-mail nor Deleted Items
@@ -189,6 +264,9 @@ fn folder_row(folder: &Folder, depth: usize) -> TreeRow {
         drop_target: folder.info.selectable,
         reorders_accounts: false,
         menu: TreeMenu::Folder,
+        list: TreeList::Folder,
+        starts_open: true,
+        remembers_open: false,
         new_folder_account: folder.account_id,
         // the Inbox holds no folders in the list: a folder made from it goes at the top
         new_folder_parent: if is_inbox(folder) { 0 } else { folder.id },
@@ -237,7 +315,42 @@ fn one_account(folders: &[(Folder, usize)], account: AccountId, mut flagged: Tre
     rows
 }
 
-/// The rows of several accounts: All Inboxes with each Inbox, Flagged, then each account's heading and folders
+/// All Sent and All Drafts, each with every account's folder of its kind under it, named after the account; none
+/// when no account has one
+fn gathered_rows(accounts: &[(AccountId, Vec<(Folder, usize)>)], titles: &[String]) -> Vec<(TreeRow, u64)> {
+    let mut rows = Vec::new();
+    for (scope, kind, key, label) in GATHERED {
+        let under: Vec<(TreeRow, u64)> = accounts
+            .iter()
+            .zip(titles)
+            .flat_map(|((_, folders), title)| {
+                folders
+                    .iter()
+                    .filter(|(folder, _)| scope.includes(&folder.info))
+                    .map(move |(folder, _)| (account_folder_row(folder, title), counted(folder)))
+            })
+            .collect();
+        if !under.is_empty() {
+            rows.push((TreeRow::fixed(kind, key.into(), 0, pe_i18n::tr(label), key), 0));
+            rows.extend(under);
+        }
+    }
+    rows
+}
+
+/// An account's folder under All Sent or All Drafts: named after the account
+fn account_folder_row(folder: &Folder, title: &str) -> TreeRow {
+    TreeRow {
+        label: title.to_string(),
+        title: format!("{} - {title}", text::folder_name(&folder.info)),
+        // its folders are listed under the account's heading: one made from here goes there
+        new_folder_parent: 0,
+        ..folder_row(folder, 1)
+    }
+}
+
+/// The rows of several accounts: All Inboxes with each Inbox, All Sent and All Drafts with each account's, Flagged,
+/// then each account's heading and its other folders
 fn several_accounts(
     accounts: &[(AccountId, Vec<(Folder, usize)>)],
     titles: &[String],
@@ -266,6 +379,7 @@ fn several_accounts(
             rows.push((row, counted(inbox)));
         }
     }
+    rows.extend(gathered_rows(accounts, titles));
     rows.push((flagged, 0));
     for ((account, folders), title) in accounts.iter().zip(titles) {
         let heading = TreeRow::fixed(
@@ -276,7 +390,18 @@ fn several_accounts(
             "account",
         );
         rows.push((heading, 0));
+        // a gathered folder has its row under All Sent or All Drafts: the folders it holds move up a level in its place
+        let mut lifted: Option<usize> = None;
         for (folder, depth) in split_inbox(folders).1 {
+            let mut depth = *depth;
+            match lifted {
+                Some(at) if depth > at => depth -= 1,
+                _ => lifted = None,
+            }
+            if gathered(folder) {
+                lifted = Some(depth);
+                continue;
+            }
             let mut row = folder_row(folder, depth + 1);
             // which account's, in the folder bar and the title: "Archive - Work"
             row.title = format!("{} - {title}", row.label);
@@ -312,8 +437,8 @@ pub(crate) fn rows(accounts: Vec<(pe_store::Account, Vec<Folder>)>, flagged: u64
     };
     fill_below(&mut rows);
     let mut rows: Vec<TreeRow> = rows.into_iter().map(|(row, _)| row).collect();
-    // All Inboxes counts its Inboxes as a folder does (it is no folder of its own)
-    if let Some(row) = rows.iter_mut().find(|row| row.kind == TreeRowKind::AllInboxes) {
+    // All Inboxes, All Sent and All Drafts count their folders as a folder does (they are no folders of their own)
+    for row in rows.iter_mut().filter(|row| row.list.gathers()) {
         row.unread = row.hidden;
         row.hidden = 0;
     }
@@ -360,18 +485,15 @@ impl Core {
     /// Every folder in the order the folder list shows them, each with its counts: the order Next Unread goes in
     pub(crate) fn folder_order(&self) -> Result<Vec<Folder>> {
         let accounts = self.accounts_with_folders()?;
-        let several = all_inboxes_shown(accounts.len());
-        let ordered: Vec<Vec<(Folder, usize)>> = accounts.into_iter().map(|(_, folders)| ordered(folders)).collect();
-        let mut order = Vec::new();
-        // with several accounts the Inboxes come first, under All Inboxes
-        if several {
-            order.extend(ordered.iter().filter_map(|folders| split_inbox(folders).0.cloned()));
-        }
-        for folders in ordered {
-            let skip = usize::from(several && split_inbox(&folders).0.is_some());
-            order.extend(folders.into_iter().skip(skip).map(|(folder, _)| folder));
-        }
-        Ok(order)
+        let mut folders: std::collections::HashMap<FolderId, Folder> = accounts
+            .iter()
+            .flat_map(|(_, folders)| folders.iter().map(|folder| (folder.id, folder.clone())))
+            .collect();
+        // the rows' order, without counting the flagged messages it does not need
+        Ok(rows(accounts, 0)
+            .into_iter()
+            .filter_map(|row| folders.remove(&row.folder))
+            .collect())
     }
 }
 
@@ -483,33 +605,46 @@ mod tests {
             ],
             0,
         );
-        // an Inbox keeps its key under All Inboxes and as one account's first folder
+        let at = |rows: &[TreeRow], key: &str| rows.iter().position(|row| row.key == key);
+        // a folder keeps its key under All Inboxes or All Sent and as one account's own
         assert_eq!(reselect(&two, &one[0].key), Some(1));
         assert_eq!(reselect(&one, &two[1].key), Some(0));
-        // All Inboxes or a heading gone: that account's Inbox, else the first
+        assert_eq!(reselect(&one, "folder:3"), at(&one, "folder:3"));
+        // All Inboxes, All Sent or a heading gone: that account's Inbox, else the first
         assert_eq!(reselect(&one, "inboxes"), Some(0));
+        assert_eq!(reselect(&one, "sent"), Some(0));
         assert_eq!(reselect(&one, "account:1"), Some(0));
-        assert_eq!(reselect(&two, "account:2"), Some(10));
-        assert_eq!(reselect(&two, "flagged"), Some(3));
+        assert_eq!(reselect(&two, "account:2"), at(&two, "account:2"));
         assert_eq!(reselect(&one, "folder:99"), None);
-        // a heading's menu, its New Folder at the account's top; All Inboxes only marks read
+        // a heading's menu, its New Folder at the account's top; All Inboxes only marks read, All Sent has no menu
+        let heading = &two[at(&two, "account:1").unwrap()];
         assert_eq!(
-            (two[4].menu, two[4].new_folder_account, two[4].icon),
+            (heading.menu, heading.new_folder_account, heading.icon),
             (TreeMenu::Account, 1, "account")
         );
         assert_eq!((two[0].menu, two[0].new_folder_account), (TreeMenu::MarkRead, 0));
+        let flagged = &two[at(&two, "flagged").unwrap()];
         assert_eq!(
-            two[3].new_folder_account, 0,
+            flagged.new_folder_account, 0,
             "Flagged of several accounts makes no folder"
+        );
+        let sent = &two[at(&two, "sent").unwrap()];
+        assert_eq!(
+            (sent.menu, sent.list, sent.icon),
+            (TreeMenu::None, TreeList::AllSent, "sent")
         );
     }
 
     #[test]
-    fn several_accounts_keep_the_inboxes_under_all_inboxes() {
+    fn several_accounts_gather_inboxes_sent_and_drafts() {
         pe_i18n::set_language("en");
+        let mut first = folders(1, 0);
+        first.push(folder(7, 1, "Drafts", Some("\\Drafts"), 1));
+        // listed after its parent, as servers list them
+        first.insert(3, folder(8, 1, "Sent/2024", None, 2));
         let rows = rows(
             vec![
-                (account(1, "ann@example.org"), folders(1, 0)),
+                (account(1, "ann@example.org"), first),
                 (account(2, "ann@work.example"), folders(2, 10)),
             ],
             0,
@@ -520,28 +655,40 @@ mod tests {
                 "AllInboxes All Inboxes",
                 "  AccountInbox example.org",
                 "  AccountInbox work.example",
+                "AllSent All Sent",
+                "  Folder example.org",
+                "  Folder work.example",
+                "AllDrafts All Drafts",
+                "  Folder example.org",
                 "Flagged Flagged",
                 "Account example.org",
                 "  Folder Receipts",
-                "  Folder Sent Items",
+                "  Folder 2024",
                 "  Folder Junk E-mail",
                 "  Folder Projects",
                 "    Folder Alpha",
                 "Account work.example",
                 "  Folder Receipts",
-                "  Folder Sent Items",
                 "  Folder Junk E-mail",
                 "  Folder Projects",
                 "    Folder Alpha",
             ]
         );
-        // All Inboxes counts both Inboxes; a heading hides its folders' unread (not Junk E-mail's)
+        // All Inboxes counts both Inboxes, All Drafts its draft; a heading hides its folders' unread (not Junk E-mail's)
         assert_eq!(rows[0].unread, 4);
+        assert_eq!((rows[6].unread, rows[6].hidden), (1, 0));
         assert_eq!(rows[1].title, "Inbox - example.org");
-        assert_eq!(rows[6].title, "Sent Items - example.org");
-        assert_eq!(rows[4].hidden, 4);
-        assert!(!rows[4].selectable && rows[4].reorders_accounts && rows[1].reorders_accounts);
-        assert!(rows[1].drop_target && !rows[0].drop_target && !rows[4].drop_target);
+        assert_eq!(rows[4].title, "Sent Items - example.org");
+        assert_eq!(rows[9].hidden, 6, "Receipts, 2024 and Alpha");
+        // All Sent and All Drafts start closed and list their folders together, To first
+        assert!(!rows[3].starts_open && rows[3].remembers_open && rows[0].starts_open);
+        assert_eq!((rows[3].list, rows[4].list), (TreeList::AllSent, TreeList::Folder));
+        assert_eq!(
+            rows[4].new_folder_parent, 0,
+            "a folder made from Sent Items goes to the account's top"
+        );
+        assert!(!rows[9].selectable && rows[9].reorders_accounts && rows[1].reorders_accounts);
+        assert!(rows[1].drop_target && !rows[0].drop_target && !rows[9].drop_target && !rows[3].drop_target);
     }
 
     #[test]

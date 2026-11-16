@@ -615,16 +615,11 @@ final class ListView {
         pe_list_view_clone(handle).map { ListView(handle: $0) }
     }
 
-    /// the folder, or with `folder` 0 every Inbox (`allInboxes`) or nothing; false when it was shown already
+    /// the list of a row of the folder tree (its `list` and `folder`): a folder's, All Inboxes', All Sent's, All
+    /// Drafts', Flagged's or none; false when it was shown already
     @discardableResult
-    func setScope(folder: Int64, allInboxes: Bool) -> Bool {
-        pe_list_view_set_scope(handle, folder, allInboxes)
-    }
-
-    /// the list of the Flagged row: the flagged messages of every account; false when it was shown already
-    @discardableResult
-    func setFlagged() -> Bool {
-        pe_list_view_set_flagged(handle)
+    func setList(_ list: PeTreeList, folder: Int64) -> Bool {
+        pe_list_view_set_list(handle, list, folder)
     }
 
     /// the words typed in the search box, which search every folder; false when they are the same
@@ -655,6 +650,13 @@ final class ListView {
     var searching: Bool { pe_list_view_searching(handle) }
     /// a search or All Inboxes: messages of several folders
     var severalFolders: Bool { pe_list_view_several_folders(handle) }
+    /// one folder of every account (All Inboxes, All Sent, All Drafts, no words): the place column is Account and names
+    /// the account alone, and a message shown from elsewhere that is in it stays in it
+    var gathersAccounts: Bool { pe_list_view_gathers_accounts(handle) }
+    /// the folder of a one-folder list without words (Empty Folder, Import Messages, files dropped on it), else 0
+    var ownFolder: Int64 { pe_list_view_own_folder(handle) }
+    /// Mark All Read applies: a folder's list or All Inboxes, without words
+    var marksAllRead: Bool { pe_list_view_marks_all_read(handle) }
     /// a folder, All Inboxes or words: not an account's own item
     var active: Bool { pe_list_view_active(handle) }
     var grouped: Bool { pe_list_view_grouped(handle) }
@@ -717,7 +719,8 @@ struct Account {
 /// A row of the folder list (`pe_folder_tree`): what it is, what it says and what it allows
 struct TreeRow {
     let kind: PeTreeRowKind
-    /// what it stands for, the same from one reading to the next (`inboxes`, `flagged`, `account:<id>`, `folder:<id>`)
+    /// what it stands for, the same from one reading to the next (`inboxes`, `sent`, `drafts`, `flagged`,
+    /// `account:<id>`, `folder:<id>`)
     let key: String
     /// 0 for All Inboxes and Flagged
     let account: Int64
@@ -739,6 +742,11 @@ struct TreeRow {
     let dropTarget: Bool
     let reordersAccounts: Bool
     let menu: PeTreeMenu
+    /// what it lists when chosen (`ListView.setList` with it and `folder`)
+    let list: PeTreeList
+    /// with rows under it: whether it starts open, and whether the user's opening and closing of it is kept (by `key`)
+    let startsOpen: Bool
+    let remembersOpen: Bool
     /// where New Folder makes a folder with it chosen: the account (0: New Folder does not apply) and the folder (0:
     /// the account's top)
     let newFolderAccount: Int64
@@ -764,6 +772,9 @@ struct TreeRow {
         dropTarget = row.drop_target
         reordersAccounts = row.reorders_accounts
         menu = row.menu
+        list = row.list
+        startsOpen = row.starts_open
+        remembersOpen = row.remembers_open
         newFolderAccount = row.new_folder_account
         newFolderParent = row.new_folder_parent
         icon = text(row.icon)

@@ -173,13 +173,34 @@ const sections = [
                 checked: ['Flagging a message counts it', 'Flagged lists the flagged messages of every folder', 'Unflagged, it is no longer counted']
             },
             {
+                shot: 'all-sent-1-list',
+                name: 'All Sent',
+                what: "With two or more accounts, All Sent after All Inboxes lists what every account sent in one list, newest first, with the To column and an Account column. Opened, it has a row per account for that account's Sent Items alone; the account headings no longer list Sent Items. It starts closed.",
+                how: 'Select All Sent in the folder tree, or open it with its arrow for one account\'s Sent Items.',
+                checked: ["It lists both accounts' sent messages with the To and Account columns", "Its row for one account lists that account's Sent Items alone", 'The account headings have no Sent Items']
+            },
+            {
+                shot: 'all-drafts-1-list',
+                name: 'All Drafts',
+                what: "With two or more accounts, All Drafts lists every account's drafts in one list, with a row per account under it, as All Sent does. A draft opened from it is written on in the compose window of its own account.",
+                how: 'Select All Drafts in the folder tree.',
+                checked: ["It lists the drafts of every account", 'The account headings have no Drafts']
+            },
+            {
+                shot: 'all-drafts-2-open',
+                name: 'A draft from All Drafts',
+                what: 'Opening a draft listed in All Drafts opens the compose window from the account it was saved in, with its text, as from that account\'s Drafts.',
+                how: 'Double-click a draft in All Drafts.',
+                checked: ["The compose window is from the draft's account, with its text"]
+            },
+            {
                 shot: 'all-inboxes-1-list',
                 name: 'All Inboxes',
                 what: "With two or more accounts, All Inboxes at the top of the folder tree lists the mail of every account's Inbox in one list, newest first, with an Account column naming the account of each message and the unread count of all of them. The app opens on it, with the newest message selected. Reply, Forward, Move and Delete act on the message in its own account, and Create Mail starts from the account of the selected message. Mark All Read on it marks every Inbox read. It goes when only one account is left.",
                 how: 'Select All Inboxes at the top of the folder tree.',
                 checked: [
                     'It is at the top of the tree, then Flagged, then the accounts',
-                    "An account's heading lists its folders but the Inbox, which is under All Inboxes",
+                    "An account's heading lists its folders but the Inbox, Sent Items and Drafts, which are under All Inboxes, All Sent and All Drafts",
                     "It lists the mail of both accounts' Inboxes, newest first, with the Account column naming each",
                     'The status bar counts both Inboxes',
                     'A reply goes from the account of the message',

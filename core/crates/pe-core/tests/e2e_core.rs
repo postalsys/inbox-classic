@@ -4182,3 +4182,86 @@ fn a_large_message_shows_its_text_before_its_attachment() {
     let view = s.core.message_view(inbox, big, false).unwrap().unwrap();
     assert_eq!(view.attachments[0].size, 3 * 1024 * 1024);
 }
+
+/// All Sent and All Drafts: every account's Sent Items and Drafts in one list each, naming whom the messages went to,
+/// each message in its own account's folder; the tree's rows for them and Next Unread passing over neither
+#[test]
+fn all_sent_and_all_drafts_list_every_account() {
+    let Some(s) = setup() else { return };
+    let Some(other_server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let mail = |subject: &str, date: &str| {
+        format!(
+            "From: Me <me@example.com>\r\nTo: Pat <pat@example.com>\r\nSubject: {subject}\r\nDate: {date}\r\n\r\nHi\r\n"
+        )
+    };
+    s.server.add_message(
+        "Sent",
+        &mail("Sent from the first", "Mon, 6 Oct 2025 10:00:00 +0000"),
+        &["\\Seen"],
+    );
+    s.server.add_message(
+        "Drafts",
+        &mail("Draft of the first", "Mon, 6 Oct 2025 11:00:00 +0000"),
+        &["\\Seen", "\\Draft"],
+    );
+    other_server.add_message(
+        "Sent",
+        &mail("Sent from the second", "Tue, 7 Oct 2025 10:00:00 +0000"),
+        &["\\Seen"],
+    );
+    let first = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    let second = s.core.add_account(&settings(&other_server), PASSWORD).unwrap();
+    for account in [first, second] {
+        s.core.sync(account).unwrap();
+        s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    }
+    let listed = |scope: pe_core::Scope| -> Vec<(String, pe_store::AccountId)> {
+        let search = pe_core::Search {
+            scope,
+            ..Default::default()
+        };
+        let mut found: Vec<(String, pe_store::AccountId)> = s
+            .core
+            .search(&search, Sort::default(), 0, 50)
+            .unwrap()
+            .into_iter()
+            .map(|m| {
+                let mine = s.core.folders(first).unwrap().iter().any(|f| f.id == m.folder_id);
+                let account = if mine { first } else { second };
+                (m.info.subject, account)
+            })
+            .collect();
+        found.sort();
+        found
+    };
+    assert_eq!(
+        listed(pe_core::Scope::AllSent),
+        [
+            ("Sent from the first".to_string(), first),
+            ("Sent from the second".to_string(), second)
+        ]
+    );
+    assert_eq!(
+        listed(pe_core::Scope::AllDrafts),
+        [("Draft of the first".to_string(), first)]
+    );
+    // their person column is To, as a Sent Items folder's is
+    let sent = pe_core::Search {
+        scope: pe_core::Scope::AllSent,
+        ..Default::default()
+    };
+    assert!(s.core.lists_recipients(&sent).unwrap());
+
+    // the tree: All Sent with both accounts' Sent Items under it, All Drafts with the first's; neither under a heading
+    let rows = s.core.folder_tree().unwrap();
+    let kinds: Vec<pe_core::tree::TreeRowKind> = rows.iter().map(|r| r.kind).collect();
+    let at = |kind| kinds.iter().position(|k| *k == kind).unwrap();
+    use pe_core::tree::TreeRowKind::{AllDrafts, AllSent, Flagged};
+    assert!(at(AllSent) < at(AllDrafts) && at(AllDrafts) < at(Flagged));
+    assert_eq!(rows[at(AllSent) + 1].account, first);
+    assert_eq!(rows[at(AllSent) + 2].account, second);
+    let sent_rows = rows.iter().filter(|r| r.icon == "sent" && r.folder != 0).count();
+    assert_eq!(sent_rows, 2, "each Sent Items has one row, under All Sent");
+}
