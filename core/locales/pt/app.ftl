@@ -764,6 +764,18 @@ ui-menu-view-source = Ver código-&fonte
 # review: new
 ui-save-attachments = Guardar anexos
 # review: new
+ui-attachment-open = Abrir
+# review: new
+ui-attachment-save-as = Guardar como...
+# review: new
+ui-attachment-save-all = Guardar todos...
+# review: new
+ui-attachments-strip = Anexos
+# review: new
+ui-attachment-note-title = Abrir este ficheiro
+# review: new
+ui-attachment-program-tip = Abrir está desativado para este tipo de ficheiro, que pode executar programas. Guarde-o e abra-o por sua conta.
+# review: new
 ui-clear-flag = &Limpar sinalizador
 # review: new
 ui-button-move = &Mover

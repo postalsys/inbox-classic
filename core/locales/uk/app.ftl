@@ -765,6 +765,18 @@ ui-menu-view-source = Переглянути &джерело
 # review: new
 ui-save-attachments = Зберегти вкладення
 # review: new
+ui-attachment-open = Відкрити
+# review: new
+ui-attachment-save-as = Зберегти як...
+# review: new
+ui-attachment-save-all = Зберегти всі...
+# review: new
+ui-attachments-strip = Вкладення
+# review: new
+ui-attachment-note-title = Відкриття цього файлу
+# review: new
+ui-attachment-program-tip = Команда «Відкрити» недоступна для файлів цього типу: вони можуть запускати програми. Збережіть файл і відкрийте його самостійно.
+# review: new
 ui-clear-flag = &Зняти прапорець
 # review: new
 ui-button-move = &Перемістити

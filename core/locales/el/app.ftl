@@ -763,6 +763,18 @@ ui-menu-view-source = Προβολή &κώδικα
 # review: new
 ui-save-attachments = Αποθήκευση συνημμένων
 # review: new
+ui-attachment-open = Άνοιγμα
+# review: new
+ui-attachment-save-as = Αποθήκευση ως...
+# review: new
+ui-attachment-save-all = Αποθήκευση όλων...
+# review: new
+ui-attachments-strip = Συνημμένα
+# review: new
+ui-attachment-note-title = Άνοιγμα αυτού του αρχείου
+# review: new
+ui-attachment-program-tip = Το Άνοιγμα είναι ανενεργό για αυτό το είδος αρχείου: μπορεί να εκτελέσει προγράμματα. Αποθηκεύστε το για να το ανοίξετε μόνοι σας.
+# review: new
 ui-clear-flag = &Κατάργηση σημαίας
 # review: new
 ui-button-move = &Μετακίνηση

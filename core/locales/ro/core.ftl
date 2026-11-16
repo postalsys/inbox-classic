@@ -1265,3 +1265,7 @@ setup-account-servers = { $imap } și { $smtp } ({ $signin })
 setup-file-name = Setări și conturi Inbox Classic
 # review: new
 setup-skipped-unreachable = { $name } a fost omis: serviciul lui de conectare nu a putut fi contactat. Adăugați-l din nou în Aplicații de conectare.
+# review: new
+attachment-runs-programs = „{ $name }” poate rula programe, de aceea Inbox Classic nu îl deschide. Salvați-l, apoi deschideți-l dvs. dacă aveți încredere în sursa lui.
+# review: new
+attachment-decrypted-note = Această atașare provine dintr-un mesaj criptat. Pentru a o deschide, Inbox Classic o stochează decriptată pe acest computer, într-un folder al dvs. pe care Inbox Classic îl golește după o zi.

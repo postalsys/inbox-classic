@@ -1180,3 +1180,7 @@ setup-account-servers = { $imap } és { $smtp } ({ $signin })
 setup-file-name = Inbox Classic beállítások és fiókok
 # review: new
 setup-skipped-unreachable = Kimaradt: { $name }. A bejelentkezési szolgáltatása nem volt elérhető. Adja hozzá újra a Bejelentkezési alkalmazások ablakban.
+# review: new
+attachment-runs-programs = „{ $name }” programokat futtathat, ezért az Inbox Classic nem nyitja meg. Mentse, majd nyissa meg saját maga, ha megbízik a forrásában.
+# review: new
+attachment-decrypted-note = Ez a melléklet titkosított üzenetből származik. A megnyitásához az Inbox Classic visszafejtve tárolja ezen a számítógépen, egy saját mappában, amelyet az Inbox Classic egy nap után kiürít.

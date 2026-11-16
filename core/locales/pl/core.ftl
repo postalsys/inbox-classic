@@ -1288,3 +1288,7 @@ setup-account-servers = { $imap } i { $smtp } ({ $signin })
 setup-file-name = Ustawienia i konta Inbox Classic
 # review: new
 setup-skipped-unreachable = Pominięto { $name }: nie można połączyć się z jego usługą logowania. Dodaj ją ponownie w oknie Aplikacje logowania.
+# review: new
+attachment-runs-programs = Plik „{ $name }” może uruchamiać programy, więc Inbox Classic go nie otwiera. Zapisz go, a potem otwórz samodzielnie, jeśli ufasz jego źródłu.
+# review: new
+attachment-decrypted-note = Ten załącznik pochodzi z zaszyfrowanej wiadomości. Aby go otworzyć, Inbox Classic przechowuje go odszyfrowany na tym komputerze, w Twoim folderze, który Inbox Classic opróżnia po jednym dniu.

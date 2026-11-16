@@ -115,6 +115,12 @@ gtk-reader-date = Datum:
 # review: new
 gtk-reader-files = Přílohy zprávy
 # review: new
+gtk-files = { $count ->
+    [one] { $count } soubor
+    [few] { $count } soubory
+   *[other] { $count } souborů
+}
+# review: new
 gtk-pictures-blocked = Některé obrázky byly zablokovány, aby odesílatel nemohl identifikovat váš počítač.
 # review: new
 gtk-download-pictures = Stáhnout obrázky

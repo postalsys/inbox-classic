@@ -118,6 +118,12 @@ gtk-reader-date = Dată:
 # review: new
 gtk-reader-files = Atașările mesajului
 # review: new
+gtk-files = { $count ->
+    [one] { $count } fișier
+    [few] { $count } fișiere
+   *[other] { $count } de fișiere
+}
+# review: new
 gtk-pictures-blocked = Unele imagini au fost blocate, ca expeditorul să nu vă poată identifica computerul.
 # review: new
 gtk-download-pictures = Descărcare imagini

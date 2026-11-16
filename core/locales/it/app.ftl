@@ -763,6 +763,18 @@ ui-menu-view-source = Visualizza &origine
 # review: new
 ui-save-attachments = Salva allegati
 # review: new
+ui-attachment-open = Apri
+# review: new
+ui-attachment-save-as = Salva con nome...
+# review: new
+ui-attachment-save-all = Salva tutti...
+# review: new
+ui-attachments-strip = Allegati
+# review: new
+ui-attachment-note-title = Apertura di questo file
+# review: new
+ui-attachment-program-tip = Apri è disattivato per questo tipo di file: può eseguire programmi. Salvalo per aprirlo tu stesso.
+# review: new
 ui-clear-flag = &Rimuovi contrassegno
 # review: new
 ui-button-move = &Sposta

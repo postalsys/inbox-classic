@@ -114,6 +114,11 @@ gtk-reader-date = Ημερομηνία:
 # review: new
 gtk-reader-files = Συνημμένα μηνύματος
 # review: new
+gtk-files = { $count ->
+    [one] { $count } αρχείο
+   *[other] { $count } αρχεία
+}
+# review: new
 gtk-pictures-blocked = Ορισμένες εικόνες αποκλείστηκαν, ώστε να μην μπορεί ο αποστολέας να αναγνωρίσει τον υπολογιστή σας.
 # review: new
 gtk-download-pictures = Λήψη εικόνων

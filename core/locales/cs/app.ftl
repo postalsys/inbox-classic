@@ -760,6 +760,18 @@ ui-menu-view-source = Zobrazit &zdrojový kód
 # review: new
 ui-save-attachments = Uložit přílohy
 # review: new
+ui-attachment-open = Otevřít
+# review: new
+ui-attachment-save-as = Uložit jako...
+# review: new
+ui-attachment-save-all = Uložit vše...
+# review: new
+ui-attachments-strip = Přílohy
+# review: new
+ui-attachment-note-title = Otevření tohoto souboru
+# review: new
+ui-attachment-program-tip = Otevření je u tohoto typu souboru vypnuto: může spouštět programy. Uložte ho a otevřete ho sami.
+# review: new
 ui-clear-flag = Zr&ušit příznak
 # review: new
 ui-button-move = &Přesunout

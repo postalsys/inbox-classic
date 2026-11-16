@@ -119,6 +119,12 @@ gtk-reader-date = Datums:
 # review: new
 gtk-reader-files = Ziņojuma pielikumi
 # review: new
+gtk-files = { $count ->
+    [zero] { $count } failu
+    [one] { $count } fails
+   *[other] { $count } faili
+}
+# review: new
 gtk-pictures-blocked = Daži attēli ir bloķēti, lai sūtītājs nevarētu identificēt jūsu datoru.
 # review: new
 gtk-download-pictures = Lejupielādēt attēlus

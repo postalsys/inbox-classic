@@ -114,6 +114,11 @@ gtk-reader-date = Päivämäärä:
 # review: new
 gtk-reader-files = Viestin liitteet
 # review: new
+gtk-files = { $count ->
+    [one] { $count } tiedosto
+   *[other] { $count } tiedostoa
+}
+# review: new
 gtk-pictures-blocked = Joitakin kuvia on estetty, jotta lähettäjä ei voisi tunnistaa tietokonettasi.
 # review: new
 gtk-download-pictures = Lataa kuvat

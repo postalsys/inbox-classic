@@ -763,6 +763,18 @@ ui-menu-view-source = Visa &källkod
 # review: new
 ui-save-attachments = Spara bilagor
 # review: new
+ui-attachment-open = Öppna
+# review: new
+ui-attachment-save-as = Spara som...
+# review: new
+ui-attachment-save-all = Spara alla...
+# review: new
+ui-attachments-strip = Bilagor
+# review: new
+ui-attachment-note-title = Öppna den här filen
+# review: new
+ui-attachment-program-tip = Öppna är avstängt för den här typen av fil eftersom den kan köra program. Spara den och öppna den själv.
+# review: new
 ui-clear-flag = &Ta bort flagga
 # review: new
 ui-button-move = &Flytta

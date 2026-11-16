@@ -1236,3 +1236,7 @@ setup-account-servers = { $imap } e { $smtp } ({ $signin })
 setup-file-name = Definições e contas do Inbox Classic
 # review: new
 setup-skipped-unreachable = { $name } foi ignorada: não foi possível contactar o respetivo serviço de início de sessão. Adicione-a novamente em Aplicações de início de sessão.
+# review: new
+attachment-runs-programs = «{ $name }» pode executar programas, por isso o Inbox Classic não o abre. Guarde-o e, se confiar na sua origem, abra-o por sua conta.
+# review: new
+attachment-decrypted-note = Este anexo provém de uma mensagem encriptada. Para o abrir, o Inbox Classic guarda-o desencriptado neste computador, numa pasta sua que o Inbox Classic esvazia ao fim de um dia.

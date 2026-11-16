@@ -766,6 +766,18 @@ ui-menu-view-source = Pokaži &izvorno kodo
 # review: new
 ui-save-attachments = Shrani priponke
 # review: new
+ui-attachment-open = Odpri
+# review: new
+ui-attachment-save-as = Shrani kot...
+# review: new
+ui-attachment-save-all = Shrani vse...
+# review: new
+ui-attachments-strip = Priponke
+# review: new
+ui-attachment-note-title = Odpiranje te datoteke
+# review: new
+ui-attachment-program-tip = Odpiranje je za to vrsto datoteke izklopljeno, ker lahko zažene programe. Shranite jo in jo odprite sami.
+# review: new
 ui-clear-flag = &Odstrani zastavico
 # review: new
 ui-button-move = &Premakni

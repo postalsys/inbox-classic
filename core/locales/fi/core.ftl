@@ -1200,3 +1200,7 @@ setup-account-servers = { $imap } ja { $smtp } ({ $signin })
 setup-file-name = Inbox Classicin asetukset ja tilit
 # review: new
 setup-skipped-unreachable = { $name } ohitettiin: sen kirjautumispalveluun ei saatu yhteyttä. Lisää se uudelleen kohdassa Kirjautumissovellukset.
+# review: new
+attachment-runs-programs = ”{ $name }” voi suorittaa ohjelmia, joten Inbox Classic ei avaa sitä. Tallenna se ja avaa se sitten itse, jos luotat sen lähteeseen.
+# review: new
+attachment-decrypted-note = Tämä liite on peräisin salatusta viestistä. Jotta liitteen voi avata, Inbox Classic tallentaa sen salaamattomana tähän tietokoneeseen omaan kansioosi, jonka Inbox Classic tyhjentää vuorokauden kuluttua.

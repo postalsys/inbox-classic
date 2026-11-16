@@ -114,6 +114,11 @@ gtk-reader-date = Dátum:
 # review: new
 gtk-reader-files = Az üzenet mellékletei
 # review: new
+gtk-files = { $count ->
+    [one] { $count } fájl
+   *[other] { $count } fájl
+}
+# review: new
 gtk-pictures-blocked = Néhány kép le lett tiltva, hogy a feladó ne azonosíthassa a számítógépét.
 # review: new
 gtk-download-pictures = Képek letöltése

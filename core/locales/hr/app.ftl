@@ -761,6 +761,18 @@ ui-menu-view-source = Prikaži izvorni &kod
 # review: new
 ui-save-attachments = Spremi privitke
 # review: new
+ui-attachment-open = Otvori
+# review: new
+ui-attachment-save-as = Spremi kao...
+# review: new
+ui-attachment-save-all = Spremi sve...
+# review: new
+ui-attachments-strip = Privici
+# review: new
+ui-attachment-note-title = Otvaranje ove datoteke
+# review: new
+ui-attachment-program-tip = Otvaranje je isključeno za ovu vrstu datoteke: može pokretati programe. Spremite je pa je sami otvorite.
+# review: new
 ui-clear-flag = &Ukloni zastavicu
 # review: new
 ui-button-move = &Premjesti

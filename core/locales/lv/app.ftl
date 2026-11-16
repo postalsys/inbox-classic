@@ -766,6 +766,18 @@ ui-menu-view-source = Skatīt &pirmkodu
 # review: new
 ui-save-attachments = Saglabāt pielikumus
 # review: new
+ui-attachment-open = Atvērt
+# review: new
+ui-attachment-save-as = Saglabāt kā...
+# review: new
+ui-attachment-save-all = Saglabāt visus...
+# review: new
+ui-attachments-strip = Pielikumi
+# review: new
+ui-attachment-note-title = Šī faila atvēršana
+# review: new
+ui-attachment-program-tip = Šāda veida failiem atvēršana ir izslēgta: tie var palaist programmas. Saglabājiet failu, lai to atvērtu paši.
+# review: new
 ui-clear-flag = &Notīrīt karodziņu
 # review: new
 ui-button-move = &Pārvietot

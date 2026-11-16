@@ -123,6 +123,13 @@ gtk-reader-date = Data:
 # review: new
 gtk-reader-files = Załączniki wiadomości
 # review: new
+gtk-files = { $count ->
+    [one] { $count } plik
+    [few] { $count } pliki
+    [many] { $count } plików
+   *[other] { $count } plików
+}
+# review: new
 gtk-pictures-blocked = Niektóre obrazy zostały zablokowane, aby nadawca nie mógł zidentyfikować Twojego komputera.
 # review: new
 gtk-download-pictures = Pobierz obrazy

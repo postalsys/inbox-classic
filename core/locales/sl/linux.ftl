@@ -119,6 +119,13 @@ gtk-reader-date = Datum:
 # review: new
 gtk-reader-files = Priponke sporočila
 # review: new
+gtk-files = { $count ->
+    [one] { $count } datoteka
+    [two] { $count } datoteki
+    [few] { $count } datoteke
+   *[other] { $count } datotek
+}
+# review: new
 gtk-pictures-blocked = Nekatere slike so bile blokirane, da pošiljatelj ne bi mogel prepoznati vašega računalnika.
 # review: new
 gtk-download-pictures = Prenesi slike

@@ -1281,3 +1281,7 @@ setup-account-servers = { $imap } in { $smtp } ({ $signin })
 setup-file-name = Nastavitve in računi Inbox Classic
 # review: new
 setup-skipped-unreachable = { $name } je bil preskočen: njegove storitve za prijavo ni bilo mogoče doseči. Znova ga dodajte v Aplikacijah za prijavo.
+# review: new
+attachment-runs-programs = Datoteka »{ $name }« lahko zažene programe, zato je Inbox Classic ne odpre. Shranite jo in jo nato odprite sami, če zaupate njenemu izvoru.
+# review: new
+attachment-decrypted-note = Ta priponka je iz šifriranega sporočila. Da jo lahko odpre, jo Inbox Classic shrani dešifrirano v ta računalnik, v vašo mapo, ki jo Inbox Classic po enem dnevu izprazni.

@@ -762,6 +762,18 @@ ui-menu-view-source = &Forrás megtekintése
 # review: new
 ui-save-attachments = Mellékletek mentése
 # review: new
+ui-attachment-open = Megnyitás
+# review: new
+ui-attachment-save-as = Mentés másként...
+# review: new
+ui-attachment-save-all = Az összes mentése...
+# review: new
+ui-attachments-strip = Mellékletek
+# review: new
+ui-attachment-note-title = A fájl megnyitása
+# review: new
+ui-attachment-program-tip = Az ilyen fájloknál a Megnyitás ki van kapcsolva, mert programokat futtathatnak. Mentse a fájlt, és nyissa meg saját maga.
+# review: new
 ui-clear-flag = Jelölő &törlése
 # review: new
 ui-button-move = Á&thelyezés

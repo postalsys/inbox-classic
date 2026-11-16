@@ -764,6 +764,18 @@ ui-menu-view-source = Näytä lä&hdekoodi
 # review: new
 ui-save-attachments = Tallenna liitteet
 # review: new
+ui-attachment-open = Avaa
+# review: new
+ui-attachment-save-as = Tallenna nimellä...
+# review: new
+ui-attachment-save-all = Tallenna kaikki...
+# review: new
+ui-attachments-strip = Liitteet
+# review: new
+ui-attachment-note-title = Tämän tiedoston avaaminen
+# review: new
+ui-attachment-program-tip = Avaaminen ei ole käytössä tälle tiedostotyypille: se voi suorittaa ohjelmia. Tallenna tiedosto ja avaa se itse.
+# review: new
 ui-clear-flag = &Poista lippu
 # review: new
 ui-button-move = &Siirrä

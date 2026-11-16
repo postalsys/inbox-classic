@@ -1250,3 +1250,7 @@ setup-account-servers = { $imap } ir { $smtp } ({ $signin })
 setup-file-name = Inbox Classic nustatymai ir paskyros
 # review: new
 setup-skipped-unreachable = { $name } praleista: nepavyko pasiekti jos prisijungimo paslaugos. Pridėkite ją dar kartą lange „Prisijungimo programos“.
+# review: new
+attachment-runs-programs = Failas „{ $name }“ gali paleisti programas, todėl Inbox Classic jo neatidaro. Įrašykite jį, tada atidarykite patys, jei pasitikite jo šaltiniu.
+# review: new
+attachment-decrypted-note = Šis priedas yra iš užšifruoto laiško. Kad galėtų jį atidaryti, Inbox Classic laiko jį iššifruotą šiame kompiuteryje, jūsų aplanke, kurį Inbox Classic ištuština po paros.

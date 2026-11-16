@@ -1200,3 +1200,7 @@ setup-account-servers = { $imap } og { $smtp } ({ $signin })
 setup-file-name = Inbox Classic-indstillinger og -konti
 # review: new
 setup-skipped-unreachable = { $name } blev sprunget over: dens logintjeneste kunne ikke nås. Tilføj den igen under Login-apps.
+# review: new
+attachment-runs-programs = Filen »{ $name }« kan køre programmer, så Inbox Classic åbner den ikke. Gem den, og åbn den selv, hvis du stoler på, hvor den kommer fra.
+# review: new
+attachment-decrypted-note = Denne vedhæftede fil kommer fra en krypteret meddelelse. For at åbne den gemmer Inbox Classic den dekrypteret på denne computer i en af dine mapper, som Inbox Classic tømmer efter et døgn.

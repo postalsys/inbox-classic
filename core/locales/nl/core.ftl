@@ -1201,3 +1201,7 @@ setup-account-servers = { $imap } en { $smtp } ({ $signin })
 setup-file-name = Instellingen en accounts van Inbox Classic
 # review: new
 setup-skipped-unreachable = { $name } is overgeslagen: de aanmeldservice kon niet worden bereikt. Voeg hem opnieuw toe bij Aanmeldapps.
+# review: new
+attachment-runs-programs = “{ $name }” kan programma’s uitvoeren, dus Inbox Classic opent het niet. Sla het op en open het daarna zelf als je vertrouwt waar het vandaan komt.
+# review: new
+attachment-decrypted-note = Deze bijlage komt uit een versleuteld bericht. Om de bijlage te openen, bewaart Inbox Classic hem ontsleuteld op deze computer, in een map van jou die Inbox Classic na een dag leegmaakt.

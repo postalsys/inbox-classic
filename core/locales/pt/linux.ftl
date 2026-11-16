@@ -113,6 +113,11 @@ gtk-reader-date = Data:
 # review: new
 gtk-reader-files = Anexos da mensagem
 # review: new
+gtk-files = { $count ->
+    [one] { $count } ficheiro
+   *[other] { $count } ficheiros
+}
+# review: new
 gtk-pictures-blocked = Algumas imagens foram bloqueadas para ajudar a impedir que o remetente identifique o seu computador.
 # review: new
 gtk-download-pictures = Transferir imagens

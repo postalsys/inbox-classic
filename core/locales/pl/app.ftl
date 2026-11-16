@@ -764,6 +764,18 @@ ui-menu-view-source = Pokaż ź&ródło
 # review: new
 ui-save-attachments = Zapisz załączniki
 # review: new
+ui-attachment-open = Otwórz
+# review: new
+ui-attachment-save-as = Zapisz jako...
+# review: new
+ui-attachment-save-all = Zapisz wszystkie...
+# review: new
+ui-attachments-strip = Załączniki
+# review: new
+ui-attachment-note-title = Otwieranie tego pliku
+# review: new
+ui-attachment-program-tip = Otwieranie jest wyłączone dla tego typu plików: mogą one uruchamiać programy. Zapisz plik, aby otworzyć go samodzielnie.
+# review: new
 ui-clear-flag = &Usuń flagę
 # review: new
 ui-button-move = &Przenieś

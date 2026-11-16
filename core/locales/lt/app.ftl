@@ -763,6 +763,18 @@ ui-menu-view-source = Rodyti šal&tinį
 # review: new
 ui-save-attachments = Įrašyti priedus
 # review: new
+ui-attachment-open = Atidaryti
+# review: new
+ui-attachment-save-as = Įrašyti kaip...
+# review: new
+ui-attachment-save-all = Įrašyti visus...
+# review: new
+ui-attachments-strip = Priedai
+# review: new
+ui-attachment-note-title = Šio failo atidarymas
+# review: new
+ui-attachment-program-tip = Šio tipo failų atidaryti negalima: jie gali paleisti programas. Įrašykite failą ir atidarykite jį patys.
+# review: new
 ui-clear-flag = &Nuimti vėliavėlę
 # review: new
 ui-button-move = &Perkelti

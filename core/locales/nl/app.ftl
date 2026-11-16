@@ -763,6 +763,18 @@ ui-menu-view-source = Bron &weergeven
 # review: new
 ui-save-attachments = Bijlagen opslaan
 # review: new
+ui-attachment-open = Openen
+# review: new
+ui-attachment-save-as = Opslaan als...
+# review: new
+ui-attachment-save-all = Alles opslaan...
+# review: new
+ui-attachments-strip = Bijlagen
+# review: new
+ui-attachment-note-title = Dit bestand openen
+# review: new
+ui-attachment-program-tip = Openen staat uit voor dit soort bestand: het kan programma’s uitvoeren. Sla het op om het zelf te openen.
+# review: new
 ui-clear-flag = Markering &wissen
 # review: new
 ui-button-move = &Verplaatsen

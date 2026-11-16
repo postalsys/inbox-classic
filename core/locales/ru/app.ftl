@@ -762,6 +762,18 @@ ui-menu-view-source = &Исходный текст
 # review: new
 ui-save-attachments = Сохранить вложения
 # review: new
+ui-attachment-open = Открыть
+# review: new
+ui-attachment-save-as = Сохранить как...
+# review: new
+ui-attachment-save-all = Сохранить все...
+# review: new
+ui-attachments-strip = Вложения
+# review: new
+ui-attachment-note-title = Открытие этого файла
+# review: new
+ui-attachment-program-tip = Команда «Открыть» недоступна для файлов этого типа: они могут запускать программы. Сохраните файл и откройте его сами.
+# review: new
 ui-clear-flag = &Снять флажок
 # review: new
 ui-button-move = &Переместить

@@ -763,6 +763,18 @@ ui-menu-view-source = Vis &kilde
 # review: new
 ui-save-attachments = Gem vedhæftede filer
 # review: new
+ui-attachment-open = Åbn
+# review: new
+ui-attachment-save-as = Gem som...
+# review: new
+ui-attachment-save-all = Gem alle...
+# review: new
+ui-attachments-strip = Vedhæftede filer
+# review: new
+ui-attachment-note-title = Åbning af denne fil
+# review: new
+ui-attachment-program-tip = Åbn er slået fra for denne filtype: den kan køre programmer. Gem den for selv at åbne den.
+# review: new
 ui-clear-flag = Fje&rn flag
 # review: new
 ui-button-move = &Flyt

@@ -1249,3 +1249,7 @@ setup-account-servers = { $imap } un { $smtp } ({ $signin })
 setup-file-name = Inbox Classic iestatījumi un konti
 # review: new
 setup-skipped-unreachable = { $name } tika izlaista: ar tās pierakstīšanās pakalpojumu nevarēja sazināties. Pievienojiet to vēlreiz sadaļā Pierakstīšanās lietotnes.
+# review: new
+attachment-runs-programs = Fails „{ $name }” var palaist programmas, tāpēc Inbox Classic to neatver. Saglabājiet to un pēc tam atveriet paši, ja uzticaties tā izcelsmei.
+# review: new
+attachment-decrypted-note = Šis pielikums ir no šifrēta ziņojuma. Lai to atvērtu, Inbox Classic glabā to atšifrētu šajā datorā, jūsu mapē, ko Inbox Classic iztukšo pēc vienas dienas.

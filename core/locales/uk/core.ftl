@@ -1302,3 +1302,7 @@ setup-account-servers = { $imap } і { $smtp } ({ $signin })
 setup-file-name = Параметри й облікові записи Inbox Classic
 # review: new
 setup-skipped-unreachable = { $name } пропущено: його служба входу недоступна. Додайте його знову в розділі «Застосунки для входу».
+# review: new
+attachment-runs-programs = «{ $name }» може запускати програми, тому Inbox Classic не відкриває цей файл. Збережіть його й відкрийте самостійно, якщо довіряєте його джерелу.
+# review: new
+attachment-decrypted-note = Це вкладення із зашифрованого повідомлення. Щоб його відкрити, Inbox Classic зберігає розшифровану копію на цьому комп’ютері, у вашій папці, яку Inbox Classic очищає через добу.

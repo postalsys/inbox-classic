@@ -1210,3 +1210,7 @@ setup-account-servers = { $imap } и { $smtp } ({ $signin })
 setup-file-name = Настройки и акаунти на Inbox Classic
 # review: new
 setup-skipped-unreachable = { $name } беше пропуснат: услугата му за влизане беше недостъпна. Добавете го отново в „Приложения за влизане“.
+# review: new
+attachment-runs-programs = Файлът „{ $name }“ може да стартира програми, затова Inbox Classic не го отваря. Запазете го и след това го отворете сами, ако имате доверие на източника му.
+# review: new
+attachment-decrypted-note = Този прикачен файл е от шифровано съобщение. За да го отвори, Inbox Classic го съхранява дешифриран на този компютър, в ваша папка, която Inbox Classic изпразва след един ден.

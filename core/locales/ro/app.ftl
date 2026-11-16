@@ -765,6 +765,18 @@ ui-menu-view-source = Vizualizare &sursă
 # review: new
 ui-save-attachments = Salvare atașări
 # review: new
+ui-attachment-open = Deschidere
+# review: new
+ui-attachment-save-as = Salvare ca...
+# review: new
+ui-attachment-save-all = Salvare toate...
+# review: new
+ui-attachments-strip = Atașări
+# review: new
+ui-attachment-note-title = Deschiderea acestui fișier
+# review: new
+ui-attachment-program-tip = Deschiderea este dezactivată pentru acest tip de fișier, deoarece poate rula programe. Salvați-l și deschideți-l dvs.
+# review: new
 ui-clear-flag = &Eliminare semnalizare
 # review: new
 ui-button-move = &Mutare

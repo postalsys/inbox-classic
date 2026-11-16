@@ -115,6 +115,12 @@ gtk-reader-date = Data:
 # review: new
 gtk-reader-files = Laiško priedai
 # review: new
+gtk-files = { $count ->
+    [one] { $count } failas
+    [few] { $count } failai
+   *[other] { $count } failų
+}
+# review: new
 gtk-pictures-blocked = Kai kurie paveikslėliai užblokuoti, kad siuntėjas negalėtų atpažinti jūsų kompiuterio.
 # review: new
 gtk-download-pictures = Atsisiųsti paveikslėlius

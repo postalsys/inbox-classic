@@ -764,6 +764,18 @@ ui-menu-view-source = Преглед на &източника
 # review: new
 ui-save-attachments = Запазване на прикачените файлове
 # review: new
+ui-attachment-open = Отваряне
+# review: new
+ui-attachment-save-as = Запазване като...
+# review: new
+ui-attachment-save-all = Запазване на всички...
+# review: new
+ui-attachments-strip = Прикачени файлове
+# review: new
+ui-attachment-note-title = Отваряне на този файл
+# review: new
+ui-attachment-program-tip = „Отваряне“ е изключено за този вид файл: той може да стартира програми. Запазете го, за да го отворите сами.
+# review: new
 ui-clear-flag = Пре&махване на флага
 # review: new
 ui-button-move = Пре&местване

@@ -1210,3 +1210,7 @@ setup-account-servers = { $imap } e { $smtp } ({ $signin })
 setup-file-name = Impostazioni e account di Inbox Classic
 # review: new
 setup-skipped-unreachable = { $name } è stato saltato: il suo servizio di accesso non era raggiungibile. Aggiungilo di nuovo in App di accesso.
+# review: new
+attachment-runs-programs = “{ $name }” può eseguire programmi, quindi Inbox Classic non lo apre. Salvalo, poi aprilo tu stesso se ti fidi della sua provenienza.
+# review: new
+attachment-decrypted-note = Questo allegato proviene da un messaggio crittografato. Per aprirlo, Inbox Classic lo conserva decrittografato su questo computer, in una tua cartella che Inbox Classic svuota dopo un giorno.

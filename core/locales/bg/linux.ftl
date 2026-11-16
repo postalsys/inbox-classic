@@ -114,6 +114,11 @@ gtk-reader-date = Дата:
 # review: new
 gtk-reader-files = Прикачени файлове на съобщението
 # review: new
+gtk-files = { $count ->
+    [one] { $count } файл
+   *[other] { $count } файла
+}
+# review: new
 gtk-pictures-blocked = Някои изображения са блокирани, за да не може подателят да разпознае компютъра ви.
 # review: new
 gtk-download-pictures = Изтегляне на изображенията

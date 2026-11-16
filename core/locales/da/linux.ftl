@@ -114,6 +114,11 @@ gtk-reader-date = Dato:
 # review: new
 gtk-reader-files = Vedhæftede filer
 # review: new
+gtk-files = { $count ->
+    [one] { $count } fil
+   *[other] { $count } filer
+}
+# review: new
 gtk-pictures-blocked = Nogle billeder er blokeret for at forhindre afsenderen i at identificere din computer.
 # review: new
 gtk-download-pictures = Hent billeder

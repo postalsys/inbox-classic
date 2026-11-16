@@ -1242,3 +1242,7 @@ setup-account-servers = { $imap } a { $smtp } ({ $signin })
 setup-file-name = Inbox Classic nastavení a účty
 # review: new
 setup-skipped-unreachable = { $name } byl přeskočen: jeho přihlašovací služba není dostupná. Přidejte ho znovu v okně Přihlašovací aplikace.
+# review: new
+attachment-runs-programs = Soubor „{ $name }“ může spouštět programy, proto ho Inbox Classic neotevře. Uložte ho a otevřete ho sami, pokud důvěřujete jeho původu.
+# review: new
+attachment-decrypted-note = Tato příloha pochází ze šifrované zprávy. Aby ji Inbox Classic mohl otevřít, uloží ji dešifrovanou do tohoto počítače, do vaší složky, kterou Inbox Classic po jednom dni vyprázdní.
