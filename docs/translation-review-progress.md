@@ -16,8 +16,8 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Danish (da) help: all 1,334 catalog entries are reviewed, with 191 values improved.
-  Review all 52 help topics next.
+- Resume with Danish (da) help: all 1,334 catalog entries and 21 everyday help topics are reviewed.
+  Review the final 31 topics. First five security/encryption topics read alongside English, not yet edited.
   All 84 late list-loading labels have been reviewed. Bulgarian, Czech, Dutch, Italian, Portuguese (Portugal),
   Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are complete: each has
   1,334 catalog entries and 52 help topics. Fourteen languages still have pending content,
@@ -487,8 +487,17 @@ file restored byte-for-byte before this commit; its source hash now matches. Fou
 Linux store strings regenerated and inspected with an offline pe-ffi build in the isolated target directory.
 Review HTML regenerated and git diff --check passes. No test suite was run per user instruction.
 
-Current totals: 14,789 catalog entries and 524 help pages reviewed; 2,271 catalog values improved. Remaining:
-17,303 catalog entries and 728 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Danish first 21 help topics
+
+Reviewed everyday help from account setup through account transfer. Improved natural instructions and corrected
+combined-folder navigation, unread counts, search indexing, signatures, attachment cleanup and domain-authentication
+claims. Clarified queued sending, account removal/transfer credentials and rule-folder matching. Preserved all
+markup, platform branches and keyboard literals. Structural checks, inline joins, exact inventory/file/source
+hashes and git diff --check pass. Review HTML regenerated. No test suite was run per user instruction.
+Catalog completion checkpoint: `e1680ea3`.
+
+Current totals: 14,789 catalog entries and 545 help pages reviewed; 2,271 catalog values improved. Remaining:
+17,303 catalog entries and 707 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
