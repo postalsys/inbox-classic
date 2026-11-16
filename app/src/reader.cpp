@@ -4,6 +4,7 @@
 #include "icons.h"
 #include "webview.h"
 
+#include <share.h>
 #include <shellapi.h>
 #include <windowsx.h>
 
@@ -197,7 +198,8 @@ void OpenWithSystem(HWND owner, const std::wstring& path) {
         ShellExecuteW(owner, L"open", path.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
         return;
     }
-    if (FILE* log = nullptr; _wfopen_s(&log, g_openedFilesLog.c_str(), L"ab") == 0 && log) {
+    // shared, so the test can read it while a line is written
+    if (FILE* log = _wfsopen(g_openedFilesLog.c_str(), L"ab", _SH_DENYNO)) {
         std::string line = core::Narrow(path) + "\n";
         fwrite(line.data(), 1, line.size(), log);
         fclose(log);

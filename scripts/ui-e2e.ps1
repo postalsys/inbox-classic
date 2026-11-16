@@ -2419,7 +2419,13 @@ public static class Dragger {
     function StripOf([IntPtr]$window) { [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($window, $IDC_ATTACHMENT_FRAME), $IDC_ATTACHMENT_STRIP) }
     $strip = StripOf $main
     # the files the app opened (--opened-files-log), a path a line
-    function OpenedFiles { if (Test-Path $openedLog) { @([IO.File]::ReadAllLines($openedLog) | Where-Object { $_ }) } else { @() } }
+    # read sharing the file with the app, which may be writing a line
+    function OpenedFiles {
+        if (-not (Test-Path $openedLog)) { return @() }
+        $stream = [IO.File]::Open($openedLog, 'Open', 'Read', 'ReadWrite')
+        try { $text = (New-Object IO.StreamReader($stream)).ReadToEnd() } finally { $stream.Dispose() }
+        @($text -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    }
     # where the core writes the files it opens: a folder of its own in the user's temporary folder
     $privateRoot = (Join-Path ([IO.Path]::GetFullPath([IO.Path]::GetTempPath())) 'InboxClassic').ToLowerInvariant()
     # the files opened after the first `before`, once there is a new one (the newest), or $null
