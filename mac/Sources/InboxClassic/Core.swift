@@ -650,6 +650,13 @@ final class ListView {
     var searching: Bool { pe_list_view_searching(handle) }
     /// a search or All Inboxes: messages of several folders
     var severalFolders: Bool { pe_list_view_several_folders(handle) }
+    /// one folder of every account (All Inboxes, All Sent, All Drafts, no words): the place column is Account and names
+    /// the account alone, and a message shown from elsewhere that is in it stays in it
+    var gathersAccounts: Bool { pe_list_view_gathers_accounts(handle) }
+    /// the folder of a one-folder list without words (Empty Folder, Import Messages, files dropped on it), else 0
+    var ownFolder: Int64 { pe_list_view_own_folder(handle) }
+    /// Mark All Read applies: a folder's list or All Inboxes, without words
+    var marksAllRead: Bool { pe_list_view_marks_all_read(handle) }
     /// a folder, All Inboxes or words: not an account's own item
     var active: Bool { pe_list_view_active(handle) }
     var grouped: Bool { pe_list_view_grouped(handle) }

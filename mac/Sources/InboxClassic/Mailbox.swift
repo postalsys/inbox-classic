@@ -137,10 +137,6 @@ public final class Mailbox: NSObject {
     var allInboxes: Bool { shownList == PE_TREE_LIST_ALL_INBOXES }
     /// the Flagged row is the list shown
     var flagged: Bool { shownList == PE_TREE_LIST_FLAGGED }
-    /// All Inboxes, All Sent or All Drafts is shown: one folder of every account, each told apart by its account
-    var gathersAccounts: Bool {
-        [PE_TREE_LIST_ALL_INBOXES, PE_TREE_LIST_ALL_SENT, PE_TREE_LIST_ALL_DRAFTS].contains(shownList)
-    }
     /// selectStart has run: later showings of the window keep what is selected
     private var started = false
     private var sort = PE_SORT_FIELD_DATE
@@ -482,19 +478,16 @@ public final class Mailbox: NSObject {
         var kind: PeTreeRowKind { row.kind }
     }
 
-    private func topNode(_ kind: PeTreeRowKind) -> TreeNode? {
-        topNodes.first { $0.kind == kind }
+    /// the top row that lists `list` (All Inboxes, All Sent, All Drafts, Flagged)
+    private func topNode(_ list: PeTreeList) -> TreeNode? {
+        topNodes.first { $0.row.folder == 0 && $0.row.list == list }
     }
-
-    /// All Inboxes, at the top with two or more accounts
-    private var allInboxesNode: TreeNode? { topNode(PE_TREE_ROW_KIND_ALL_INBOXES) }
     private var firstAccount: Int64 { accountOrder.first ?? 0 }
 
     /// the row of what the list shows: the folder's, or the row of All Inboxes, All Sent, All Drafts or Flagged
     private var selectedNode: TreeNode? {
         if folder != 0 { return folderRows[folder] }
-        guard shownList != PE_TREE_LIST_NONE else { return nil }
-        return topNodes.first { $0.row.folder == 0 && $0.row.list == shownList }
+        return shownList == PE_TREE_LIST_NONE ? nil : topNode(shownList)
     }
 
     /// the core's rows as nodes, each under the nearest row above it that is less deep
@@ -771,7 +764,7 @@ public final class Mailbox: NSObject {
     private func showFolderColumn() {
         // the column layout's rows name the folder themselves
         guard layout == PE_LAYOUT_CLASSIC else { return }
-        let title = searching || flagged ? Text.uiColFolder.text : Text.uiColAccount.text
+        let title = listView.gathersAccounts ? Text.uiColAccount.text : Text.uiColFolder.text
         list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(ColumnID.folder.rawValue))?.title = title
         guard severalFolders != folderColumn else { return }
         folderColumn = severalFolders
@@ -820,7 +813,7 @@ public final class Mailbox: NSObject {
     /// in All Inboxes the account alone, as the tree names it
     private func rowFolder(_ id: Int64) -> String {
         guard let info = folderInfo[id] else { return "" }
-        if gathersAccounts && !searching {
+        if listView.gathersAccounts {
             return accountInfo[info.account]?.title ?? ""
         }
         var text = info.name
@@ -1181,7 +1174,7 @@ public final class Mailbox: NSObject {
     func showMessage(folder id: Int64, uid message: UInt64) {
         guard let node = folderRows[id] else { return }
         // All Inboxes (All Sent, All Drafts) stays when it has the message, its list up to date with it
-        if gathersAccounts && !searching {
+        if listView.gathersAccounts {
             reloadTimer?.invalidate()
             reloadList(keepSelection: true)
             if selectInList(folder: id, uid: message) { return }
@@ -1329,7 +1322,7 @@ public final class Mailbox: NSObject {
         guard shownList == PE_TREE_LIST_NONE, let start = core.startMessage() else { return }
         if !start.allInboxes {
             showMessage(folder: start.folder, uid: start.uid)
-        } else if let node = allInboxesNode {
+        } else if let node = topNode(PE_TREE_LIST_ALL_INBOXES) {
             selectTreeNode(node)
             selectInList(folder: start.folder, uid: start.uid)
         }
@@ -1384,12 +1377,17 @@ public final class Mailbox: NSObject {
         act(seen ? PE_ACTION_READ : PE_ACTION_UNREAD, quiet: quiet)
     }
 
+    /// Mark All Read applies to the list shown (the core says): a folder's or All Inboxes'
+    var marksAllRead: Bool { listView.marksAllRead }
+
+    /// the folder's messages, or every Inbox's, marked read
     func markAllRead() {
-        guard !searching else { return }
-        if allInboxes {
+        guard listView.marksAllRead else { return }
+        let own = listView.ownFolder
+        if own != 0 {
+            pe_folder_mark_all_read(core.handle, own)
+        } else {
             pe_mark_all_inboxes_read(core.handle)
-        } else if folder != 0 {
-            pe_folder_mark_all_read(core.handle, folder)
         }
     }
 
@@ -1661,11 +1659,12 @@ public final class Mailbox: NSObject {
     /// what to ask before emptying the folder shown (Deleted Items or Junk E-mail with messages), nil when Empty
     /// Folder does not apply
     var canEmptyFolder: Bool {
-        !allInboxes && !searching && folderInfo[folder]?.emptiable == true && total > 0
+        folderInfo[listView.ownFolder]?.emptiable == true && total > 0
     }
 
     /// Deleted Items or Junk E-mail emptied for good, after asking (the core words the question, with how many go)
     func emptyFolder() {
+        let folder = listView.ownFolder
         guard canEmptyFolder, let question = taken(pe_folder_empty_question(core.handle, folder)),
               ask(question, yes: Text.uiEmptyButton.text, no: Text.uiCancel.text, destructive: true) else { return }
         var reason: UnsafeMutablePointer<CChar>?
@@ -1863,7 +1862,11 @@ public final class Mailbox: NSObject {
         reader.print()
     }
 
+    /// the folder Import Messages puts messages in: the one listed, not a list of several folders
+    var importFolder: Int64 { listView.ownFolder }
+
     func importMessages() {
+        let folder = importFolder
         guard folder != 0 else {
             inform(Text.uiImportChooseFolder.text, title: Text.macImportMessages.text)
             return
@@ -2264,9 +2267,10 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
         return true
     }
 
-    /// the folder files dropped on the message list go into: the one shown, not a search or All Inboxes
+    /// the folder files dropped on the message list go into: the one listed, not a list of several folders
     var listDropFolder: Int64? {
-        folder != 0 && !searching && !allInboxes ? folder : nil
+        let own = listView.ownFolder
+        return own != 0 ? own : nil
     }
 
     /// the files on a drag's pasteboard
