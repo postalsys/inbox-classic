@@ -11,7 +11,10 @@ use fluent_bundle::{FluentArgs, FluentResource, FluentValue};
 
 include!(concat!(env!("OUT_DIR"), "/texts.rs"));
 
-/// The languages there is a catalog of, by code, with their names in themselves, as the language choice lists them
+/// The languages there is a catalog of, by code, with their names in themselves, as the language choice lists them.
+/// Everything made per language follows this list: the installer's languages and words, the sign-in buttons, the
+/// Linux desktop entry and metainfo, the Mac's localizations and Help Book, the homepage's help, the UI tests. Keep
+/// one language a line as it is, `scripts/languages.sh` reads them so (a test checks it).
 pub const LANGUAGES: &[(&str, &str)] = &[
     ("en", "English"),
     ("de", "Deutsch"),
@@ -99,33 +102,41 @@ pub fn language() -> &'static str {
         .map_or("en", |l| l.code)
 }
 
-/// A language's catalog, made once for [`message_in`]
+/// A language's catalog, made once for [`message_in`] and [`translated`]
 type Loaded = (&'static str, Arc<Bundle>);
+
+/// The catalog of `code` (a code of [`LANGUAGES`]), made the first time it is asked for
+fn loaded(code: &'static str) -> Arc<Bundle> {
+    static BUNDLES: OnceLock<std::sync::Mutex<Vec<Loaded>>> = OnceLock::new();
+    let mut bundles = BUNDLES
+        .get_or_init(Default::default)
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
+    if let Some((_, bundle)) = bundles.iter().find(|(c, _)| *c == code) {
+        return bundle.clone();
+    }
+    let made = if code == "en" {
+        english().clone()
+    } else {
+        Arc::new(bundle(code))
+    };
+    bundles.push((code, made.clone()));
+    made
+}
 
 /// The message `id` of the catalog of `language` (English for a message or language it has not), without its
 /// placeables filled: what the help names a control by. None for an id no catalog has.
 pub fn message_in(language: &str, id: &str) -> Option<String> {
-    static BUNDLES: OnceLock<std::sync::Mutex<Vec<Loaded>>> = OnceLock::new();
     let code = supported(language).filter(|code| *code != PSEUDO).unwrap_or("en");
-    let bundle = {
-        let mut bundles = BUNDLES
-            .get_or_init(Default::default)
-            .lock()
-            .unwrap_or_else(|e| e.into_inner());
-        match bundles.iter().find(|(c, _)| *c == code) {
-            Some((_, bundle)) => bundle.clone(),
-            None => {
-                let made = if code == "en" {
-                    english().clone()
-                } else {
-                    Arc::new(bundle(code))
-                };
-                bundles.push((code, made.clone()));
-                made
-            }
-        }
-    };
-    format(&bundle, id, &[]).or_else(|| format(english(), id, &[]))
+    format(&loaded(code), id, &[]).or_else(|| format(english(), id, &[]))
+}
+
+/// The message `id` of the catalog of `language` itself, its placeables filled from `args`: None when that catalog
+/// does not have it (no English in its place) or the language is not one of [`LANGUAGES`]. For the files made per
+/// language at build time, which leave out a language's line rather than repeat the English one.
+pub fn translated(language: &str, id: &str, args: &[(&str, Arg)]) -> Option<String> {
+    let code = supported(language).filter(|code| *code != PSEUDO)?;
+    format(&loaded(code), id, args)
 }
 
 /// A value for a placeable of a message: a name, or a number (plurals are chosen by it)

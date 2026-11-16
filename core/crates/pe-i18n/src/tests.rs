@@ -164,3 +164,48 @@ fn a_message_by_its_id_in_a_language() {
     assert_eq!(message_in("xx", "cmd-mark-read").as_deref(), Some("Mark as &Read"));
     assert_eq!(message_in("en", "no-such-message"), None);
 }
+
+#[test]
+fn the_scripts_read_the_list_of_languages() {
+    // scripts/languages.sh (and ui-e2e.ps1) read LANGUAGES from this file, one `    ("code", "Name"),` a line
+    let source = include_str!("lib.rs");
+    let start = source.find("pub const LANGUAGES").expect("the list");
+    let end = start + source[start..].find("\n];").expect("its end");
+    let read: Vec<(String, String)> = source[start..end]
+        .lines()
+        .filter_map(|line| {
+            let rest = line.strip_prefix("    (\"")?.strip_suffix("\"),")?;
+            let (code, name) = rest.split_once("\", \"")?;
+            Some((code.to_string(), name.to_string()))
+        })
+        .collect();
+    let listed: Vec<(String, String)> = LANGUAGES
+        .iter()
+        .map(|(code, name)| (code.to_string(), name.to_string()))
+        .collect();
+    assert_eq!(read, listed, "one language a line, as scripts/languages.sh reads them");
+    assert_eq!(LANGUAGES[0].0, "en", "English first");
+    for (code, _) in LANGUAGES {
+        assert!(
+            code.len() == 2 && code.bytes().all(|b| b.is_ascii_lowercase()),
+            "{code}: a two-letter code, as the pictures and scripts take it"
+        );
+        assert!(
+            CATALOGS.iter().any(|(c, _)| c == code),
+            "{code}: a catalog in core/locales/{code}"
+        );
+    }
+}
+
+#[test]
+fn translated_only_from_the_language_itself() {
+    assert_eq!(translated("de", "menu-file", &[]).as_deref(), Some("&Datei"));
+    assert_eq!(translated("en", "menu-file", &[]).as_deref(), Some("&File"));
+    assert_eq!(translated("de", "no-such-message", &[]), None);
+    assert_eq!(translated("ja", "menu-file", &[]), None);
+    assert_eq!(translated(PSEUDO, "menu-file", &[]), None);
+    assert_eq!(
+        translated("en", "messages", &[("count", 2u64.into())]).as_deref(),
+        Some("2 messages")
+    );
+}
