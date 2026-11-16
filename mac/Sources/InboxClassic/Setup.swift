@@ -190,14 +190,17 @@ private enum SetupPrefs {
     /// offers to start again when one that counts only then changed
     static func apply(_ prefs: [(name: String, value: String, restart: Bool)]) {
         guard let app = AppDelegate.shared else { return }
-        var restart = false
+        var restart: String??
         for pref in prefs {
             guard let access = all[pref.name], access.get(app) != pref.value else { continue }
             access.set(app, pref.value)
-            restart = restart || pref.restart
+            if pref.restart {
+                // the language: empty for the system's
+                restart = .some(pref.value.isEmpty ? nil : pref.value)
+            }
         }
-        if restart {
-            Languages.offerRestart()
+        if let code = restart {
+            Languages.offerRestart(for: code)
         }
     }
 }

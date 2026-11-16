@@ -72,13 +72,14 @@ enum Languages {
     static func choose(_ code: String?) {
         guard code != chosen else { return }
         chosen = code
-        offerRestart()
+        offerRestart(for: code)
     }
 
-    /// the app started again when the user wants it now, for the language chosen to count
-    static func offerRestart() {
+    /// the app started again when the user wants it now, for `code` (nil for the system's), the language just chosen,
+    /// to count: the language chosen is passed in, as a test run keeps nothing in the user's settings
+    static func offerRestart(for code: String?) {
         // asked only when the windows would change: System default that is German, then Deutsch, needs no new start
-        guard (chosen ?? system) != current else { return }
+        guard (code ?? system) != current else { return }
         if ask(Text.macRestartQuestion.text, yes: Text.uiRestartNow.text, no: Text.uiRestartLater.text,
                style: .information) {
             AppDelegate.shared?.restart()
