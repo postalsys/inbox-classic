@@ -50,8 +50,9 @@
       i permet iniciar la sessió a Outlook.com i Microsoft 365 a través del navegador.
     </p>
     <p xml:lang="cs">
-      Inbox Classic čte a píše e-maily se složkami vlevo, zprávami nahoře a zprávou pod nimi, jak to poštovní programy
-      dělávaly. Funguje s každým účtem IMAP a SMTP a k Outlook.com a Microsoft 365 se přihlašuje přes prohlížeč.
+      Inbox Classic je aplikace pro čtení a psaní e-mailů s klasickým rozložením: složky vlevo, seznam zpráv nahoře a
+      obsah vybrané zprávy pod ním. Podporuje účty IMAP a SMTP. K Outlook.com a Microsoft 365 se přihlásíte přes
+      prohlížeč.
     </p>
     <p xml:lang="da">
       Inbox Classic læser og skriver e-mail med mapperne til venstre, meddelelserne øverst og meddelelsen nedenunder,
@@ -190,10 +191,10 @@
       <li xml:lang="ca">Cerca a l’assumpte, els remitents, els destinataris, els noms dels fitxers adjunts i el text dels missatges, amb els operadors del Gmail</li>
       <li xml:lang="ca">El text de missatges anteriors citat a les respostes queda plegat i es pot desplegar quan calgui</li>
       <li xml:lang="ca">El correu ja baixat es pot llegir sense connexió; les contrasenyes es desen a l’anell de claus del sistema</li>
-      <li xml:lang="cs">Každá zpráva se zobrazuje očištěná, bez skriptů, a obrázky z internetu jen tehdy, když je povolíte</li>
-      <li xml:lang="cs">Hledání, které najde slova v předmětu, u odesílatelů a příjemců, v názvech souborů i v textu, s operátory Gmailu</li>
-      <li xml:lang="cs">Odpovědi skryjí starší zprávy, které citují</li>
-      <li xml:lang="cs">Pošta zůstane čitelná i offline; hesla se uchovávají ve vaší klíčence</li>
+      <li xml:lang="cs">Zprávy se zobrazují bez skriptů a dalšího nebezpečného obsahu. Obrázky z internetu se stahují jen s vaším svolením</li>
+      <li xml:lang="cs">Vyhledávání v předmětech, odesílatelích, příjemcích, názvech příloh a textu zpráv s podporou operátorů známých z Gmailu</li>
+      <li xml:lang="cs">Starší zprávy citované v odpovědích se sbalí a můžete je znovu rozbalit</li>
+      <li xml:lang="cs">Staženou poštu lze číst i bez připojení. Hesla jsou uložena v systémové klíčence</li>
       <li xml:lang="da">Alle meddelelser vises renset, uden scripts, og billeder fra internettet kun, når du tillader det</li>
       <li xml:lang="da">En søgning, der finder ord i emnet, afsendere og modtagere, filnavne og teksten, med Gmails søgeoperatorer</li>
       <li xml:lang="da">Svar folder de tidligere meddelelser, de citerer, sammen</li>

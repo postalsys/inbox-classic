@@ -16,8 +16,8 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Czech (cs): 701 catalog entries and 52 help topics remain. All 626 app entries, four shared
-  Windows controls and three list-loading labels are reviewed.
+- Resume with Czech (cs) help: all 1,334 catalog entries are reviewed, with 196 values improved.
+  All 52 help topics remain; the first four were read alongside English but not yet edited.
   All 84 late list-loading labels have been reviewed. Bulgarian, Dutch, Italian, Portuguese (Portugal),
   Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are complete: each has
   1,334 catalog entries and 52 help topics. Fifteen languages still have pending content,
@@ -425,8 +425,20 @@ Recorded Czech terminology and Kopie / Skrytá kopie shortcuts. Structural check
 and git diff --check pass. Review HTML regenerated. Test suite not run per user instruction.
 Bulgarian completion checkpoint: `7ff487c3`.
 
-Current totals: 12,757 catalog entries and 472 help pages reviewed; 1,950 catalog values improved. Remaining:
-19,335 catalog entries and 780 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Czech catalogs completed
+
+Reviewed the remaining 701 entries, improving 130 values. Corrected delivery errors, queued agent log messages,
+key publication/decryption, sign-in credentials, file counts and startup cleanup of temporary attachments.
+Unified Skrytá kopie across platforms and improved the installer and Linux app description. All 1,334 Czech
+catalog entries are reviewed; all 52 help topics remain. Shared UI checkpoint: `4f30e962`.
+
+Structural checks, 32 actual menu/dialog shortcut scopes, exact inventory/source/file hashes and git diff
+--check pass. Installer/store text regenerated and inspected with an offline pe-ffi build using the separate
+`/Users/andris/Projects/PostalExpress/build/cargo-translation-review` target directory. Review HTML regenerated.
+No tests were run, per user instruction.
+
+Current totals: 13,458 catalog entries and 472 help pages reviewed; 2,080 catalog values improved. Remaining:
+18,634 catalog entries and 780 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
