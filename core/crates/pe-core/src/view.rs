@@ -21,7 +21,7 @@ impl AttachmentView {
     fn of(attachment: &Attachment) -> AttachmentView {
         let safe_filename = attachment.safe_filename();
         AttachmentView {
-            kind: crate::opening::file_kind(&safe_filename, &attachment.mime_type),
+            kind: crate::opening::file_kind_of(&safe_filename, &attachment.mime_type, &attachment.content),
             safe_filename,
             filename: attachment.display_filename(),
             mime_type: attachment.mime_type.clone(),

@@ -203,6 +203,21 @@ const PROGRAMS: &[&str] = &[
     "ppam",
     "ppsm",
     "sldm",
+    // other files a system program runs or installs: remote desktop and update packages, OneNote, zipped Python,
+    // themes, the Mac's web archives, server links and configuration profiles
+    "rdp",
+    "msu",
+    "one",
+    "onepkg",
+    "pyz",
+    "pyzw",
+    "theme",
+    "themepack",
+    "deskthemepack",
+    "search-ms",
+    "webarchive",
+    "afploc",
+    "mobileconfig",
 ];
 
 /// The extension of a file name, lowercase: the last one, so "invoice.pdf.exe" is an exe
@@ -214,14 +229,12 @@ fn extension(name: &str) -> String {
     }
 }
 
-/// What kind of file `name` of type `mime_type` is. Its name decides first (the system opens a file by its name);
-/// the type only where the name says nothing
-pub fn file_kind(name: &str, mime_type: &str) -> FileKind {
-    let extension = extension(name);
-    if PROGRAMS.contains(&extension.as_str()) {
-        return FileKind::Program;
+/// The kind a file's extension says, None for an extension the list does not know
+fn kind_by_name(extension: &str) -> Option<FileKind> {
+    if PROGRAMS.contains(&extension) {
+        return Some(FileKind::Program);
     }
-    let by_name = match extension.as_str() {
+    match extension {
         "jpg" | "jpeg" | "png" | "gif" | "webp" | "heic" | "heif" | "bmp" | "tif" | "tiff" | "avif" | "ico" => {
             Some(FileKind::Image)
         }
@@ -237,12 +250,18 @@ pub fn file_kind(name: &str, mime_type: &str) -> FileKind {
         "asc" | "gpg" | "pgp" | "sig" | "pem" | "cer" | "crt" => Some(FileKind::Key),
         "txt" | "md" | "log" | "json" | "xml" => Some(FileKind::Text),
         "eml" | "msg" | "mbox" => Some(FileKind::Mail),
-        // pages: opened in a browser they run their scripts (a way in that mail is known for), and "svg" can carry
-        // script too
-        "html" | "htm" | "xhtml" | "shtml" | "mht" | "mhtml" | "svg" => Some(FileKind::Program),
+        // pages: opened in a browser they run their scripts (a way in that mail is known for); SVG and XSL can
+        // carry script too
+        "html" | "htm" | "xhtml" | "xht" | "xhtm" | "shtml" | "shtm" | "mht" | "mhtml" | "svg" | "svgz" | "xsl"
+        | "xslt" => Some(FileKind::Program),
         _ => None,
-    };
-    if let Some(kind) = by_name {
+    }
+}
+
+/// What kind of file `name` of type `mime_type` is. Its name decides first (the system opens a file by its name);
+/// the type only where the name says nothing
+pub fn file_kind(name: &str, mime_type: &str) -> FileKind {
+    if let Some(kind) = kind_by_name(&extension(name)) {
         return kind;
     }
     let mime = mime_type.to_ascii_lowercase();
@@ -259,6 +278,9 @@ pub fn file_kind(name: &str, mime_type: &str) -> FileKind {
         {
             FileKind::Program
         }
+        // a page's types, which a browser opens and runs the scripts of
+        ("text", "html" | "xml" | "xsl") | ("image", "svg+xml") | ("multipart", "related") => FileKind::Program,
+        ("application", "xhtml+xml" | "xml" | "xslt+xml" | "x-mimearchive") => FileKind::Program,
         ("image", _) => FileKind::Image,
         ("audio", _) => FileKind::Audio,
         ("video", _) => FileKind::Video,
@@ -270,6 +292,42 @@ pub fn file_kind(name: &str, mime_type: &str) -> FileKind {
         ("application", "pgp-keys") | ("application", "pgp-signature") => FileKind::Key,
         _ => FileKind::Other,
     }
+}
+
+/// [`file_kind`], and for a name whose extension says nothing (none, or one the list does not know) what the
+/// content starts with too: a system that sniffs it (Linux opens such a file by its content) would open a page in
+/// a browser
+pub fn file_kind_of(name: &str, mime_type: &str, content: &[u8]) -> FileKind {
+    let kind = file_kind(name, mime_type);
+    if kind == FileKind::Program || kind_by_name(&extension(name)).is_some() {
+        return kind;
+    }
+    if looks_like_a_page(content) {
+        FileKind::Program
+    } else {
+        kind
+    }
+}
+
+/// The start of a page or of markup a browser renders: HTML, SVG, XML (which a stylesheet can make a page)
+fn looks_like_a_page(content: &[u8]) -> bool {
+    let head = &content[..content.len().min(1024)];
+    let head = head.strip_prefix(b"\xef\xbb\xbf").unwrap_or(head);
+    let start = head.iter().position(|b| !b.is_ascii_whitespace()).unwrap_or(head.len());
+    let head = head[start..].to_ascii_lowercase();
+    [
+        &b"<!doctype html"[..],
+        b"<html",
+        b"<head",
+        b"<body",
+        b"<script",
+        b"<svg",
+        b"<?xml",
+        b"<iframe",
+        b"<!--",
+    ]
+    .iter()
+    .any(|marker| head.starts_with(marker))
 }
 
 /// What opening an attachment gave: the file to open, and the note to show first (once: an encrypted message's file
@@ -302,7 +360,7 @@ impl Core {
         let Some((name, mime_type, content)) = crate::view::attachment_with_type(&shown, index) else {
             return Ok(None);
         };
-        if !file_kind(&name, &mime_type).can_open() {
+        if !file_kind_of(&name, &mime_type, &content).can_open() {
             return Err(Error::Unavailable(tr(Text::AttachmentRunsPrograms)));
         }
         let dir = crate::private_dir("open").map_err(|error| Error::Unavailable(error.to_string()))?;
@@ -353,6 +411,37 @@ mod tests {
             FileKind::Program,
             "a page runs its scripts"
         );
+    }
+
+    #[test]
+    fn pages_are_refused_by_any_name_type_or_content() {
+        for name in ["statement.xht", "a.xhtm", "a.shtm", "a.svgz", "style.xsl", "t.xslt"] {
+            assert_eq!(file_kind(name, "application/octet-stream"), FileKind::Program, "{name}");
+        }
+        for mime in [
+            "text/html",
+            "application/xhtml+xml",
+            "image/svg+xml",
+            "text/xml",
+            "multipart/related",
+        ] {
+            assert_eq!(file_kind("statement", mime), FileKind::Program, "{mime}");
+            assert_eq!(file_kind("statement.dat", mime), FileKind::Program, "{mime}");
+        }
+        // a name that says nothing: what it starts with decides, as a system that sniffs it would
+        let page = b"\n  <!DOCTYPE html><html><script>alert(1)</script>";
+        assert_eq!(
+            file_kind_of("statement", "application/octet-stream", page),
+            FileKind::Program
+        );
+        assert_eq!(
+            file_kind_of("statement.dat", "text/plain", b"\xef\xbb\xbf<svg onload=x()>"),
+            FileKind::Program
+        );
+        assert_eq!(file_kind_of("notes", "text/plain", b"just some words"), FileKind::Text);
+        // a name that says what it is keeps its kind: a text file quoting HTML is text
+        assert_eq!(file_kind_of("notes.txt", "text/plain", page), FileKind::Text);
+        assert_eq!(file_kind_of("report.pdf", "application/pdf", page), FileKind::Pdf);
     }
 
     #[test]
