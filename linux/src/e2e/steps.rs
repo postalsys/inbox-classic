@@ -721,6 +721,26 @@ pub async fn many_messages(d: &Driver) {
         back,
         &format!("and the five messages are back in the list ({})", rows()),
     );
+    // and selected again, in sight, as what Undo brings back is
+    let selected_subjects = || {
+        let mut found: Vec<String> = main
+            .selected_refs()
+            .iter()
+            .filter_map(|r| core.message(r.folder, r.uid).ok().flatten())
+            .map(|m| m.info.subject)
+            .collect();
+        found.sort();
+        found
+    };
+    let expected: Vec<String> = (1..=5).map(|n| format!("Bulk {n}")).collect();
+    let reselected = wait_until(20, || selected_subjects() == expected && main.list.selection_in_sight()).await;
+    d.check(
+        reselected,
+        &format!(
+            "the five that came back are selected, in sight ({})",
+            selected_subjects().join(", ")
+        ),
+    );
     d.shot(&main_window(), "many-1-refused").await;
     let styles = adw::StyleManager::default();
     styles.set_color_scheme(adw::ColorScheme::ForceDark);

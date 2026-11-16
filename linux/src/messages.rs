@@ -674,6 +674,23 @@ impl MessageList {
         self.model.n_items()
     }
 
+    /// Whether every selected row is in sight, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn selection_in_sight(&self) -> bool {
+        let selected = self.selection.selection();
+        let rows = self.model.n_items();
+        if selected.is_empty() || rows == 0 {
+            return false;
+        }
+        let Some(adjustment) = self.adjustment() else {
+            return true;
+        };
+        let row = adjustment.upper() / f64::from(rows);
+        let top = adjustment.value();
+        f64::from(selected.minimum()) * row >= top - 0.5
+            && f64::from(selected.maximum() + 1) * row <= top + adjustment.page_size() + 0.5
+    }
+
     /// The messages of the first `limit` rows as the list shows them now, for the e2e driver
     #[cfg(feature = "e2e")]
     pub fn shown_messages(&self, limit: u32) -> Vec<Message> {

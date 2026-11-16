@@ -1106,7 +1106,9 @@ impl Mailbox {
             (t!(UiColFolder), Vec::new())
         };
         self.list.show_folder_column(view.several_folders(), &title, &values);
-        let all = pending.keep_selection && self.all.borrow().is_some();
+        // Select All still the whole list while no mail came since; otherwise the messages it had, the newer rows not
+        // selected
+        let all = pending.keep_selection && self.all_again(&view);
         // the selection follows the messages to where they are now, without a flicker of the reading pane
         let positions: Vec<u64> = if !pending.keep_selection || all {
             Vec::new()
@@ -1135,7 +1137,11 @@ impl Mailbox {
         self.show_empty_list();
         self.show_counts();
         if all {
-            self.select_every_row();
+            // the same Select All, counted again: not a new one that would take mail stored since
+            let again = self.all.borrow().clone();
+            if let Some(again) = again {
+                self.select_every_row_as(again);
+            }
         } else if !self.select_restored() {
             self.selection_reloaded();
         }
@@ -1212,7 +1218,8 @@ impl Mailbox {
         }
     }
 
-    /// The messages the last Undo brought back selected, once the list has them; false when it does not (yet)
+    /// The messages the last Undo brought back, or the store took back of a refused action, selected once the list has
+    /// them; false when it does not (yet)
     fn select_restored(&self) -> bool {
         if !self.undone.get() {
             return false;
@@ -1842,7 +1849,12 @@ impl Mailbox {
             Event::ListPageReady { request, generation } => self.page_ready(*request, *generation),
             Event::ReadDone { request } => self.summary_ready(*request),
             Event::Acted { request, said } => self.acted(*request, said),
-            Event::ActionUndone { text, .. } => self.show_undone(text),
+            Event::ActionUndone { text, .. } => {
+                self.show_undone(text);
+                // the messages back in the list now, and selected there as what Undo brings back is
+                self.undone.set(true);
+                self.refresh_list();
+            }
             _ => {}
         }
     }
@@ -2344,10 +2356,33 @@ impl Mailbox {
 
     /// Every row of the list drawn selected, and the selection every message of its list
     fn select_every_row(&self) {
-        let core = &shell().core;
-        let Ok(all) = self.list.view().select_all(core) else {
+        let Ok(all) = self.list.view().select_all(&shell().core) else {
             return;
         };
+        self.select_every_row_as(all);
+    }
+
+    /// The list read again while Select All is its selection: whether it still is the whole list, counted again
+    /// (`ListView::select_all_again`); when it is not, the messages it had become the selection, to be found where
+    /// they are now
+    fn all_again(&self, view: &pe_core::ListView) -> bool {
+        let Some(mut all) = self.all.borrow().clone() else {
+            return false;
+        };
+        if view.select_all_again(&shell().core, &mut all).unwrap_or(false) {
+            *self.all.borrow_mut() = Some(all);
+            return true;
+        }
+        self.forget_all();
+        if let Selected::Listed(refs) = all {
+            *self.refs.borrow_mut() = refs;
+        }
+        false
+    }
+
+    /// Every row selected, `all` (Select All of the list) the selection, its summary counted off the window thread
+    fn select_every_row_as(&self, all: Selected) {
+        let core = &shell().core;
         self.forget_all();
         self.reloading.set(true);
         self.list.select_all();
