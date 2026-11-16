@@ -1,0 +1,13 @@
+<!--review--><h1>Povezave, ki jih vzpostavlja Inbox Classic</h1>
+<p class="summary">Kam se Inbox Classic povezuje in zakaj, za tehnično radovedne.</p>
+<ul>
+    <li><b>Vaši poštni strežniki</b>, prek IMAP za branje pošte in SMTP za pošiljanje. Povezave so šifrirane s TLS, potrdilo vsakega strežnika pa se preveri glede na potrdila, ki jim zaupa vaš sistem. Inbox Classic zavrne strežnik brez šifriranja, razen če izberete <b data-text="ui-security-none"></b> in to potrdite.</li>
+    <li><b>Ko dodate račun</b>, da poišče njegove strežnike. Inbox Classic bere zapise DNS vaše domene prek DNS over HTTPS (Cloudflare, nato Google), nikoli prek navadnega DNS. Poskusi tudi datoteko autoconfig vašega ponudnika in Thunderbirdov seznam ponudnikov (ISPDB). Za Exchange vpraša Microsoft Autodiscover, ki dobi vaše geslo samo, ko ga zahteva prek HTTPS. Strežnik brez šifriranja ni nikoli izbran.</li>
+    <li><b>Prijava v brskalniku</b>, z OAuth 2.0 in PKCE, pri Googlu, Microsoftu ali ponudniku vaše aplikacije za prijavo. Brskalnik se vrne samo v Inbox Classic v tem računalniku.</li>
+    <li><b>Logotipi blagovnih znamk</b> (BIMI), z naslova HTTPS blagovne znamke, kadar sporočilo logotipa ne prinese, enkrat ob vsakem zagonu programa Inbox Classic. To se zgodi samo, kadar je sporočilo pri vašem poštnem strežniku prestalo preverjanje DMARC in je strežnik logotip odobril.</li>
+    <li><b>Slike z interneta</b>, samo kadar jih zahtevate.</li>
+    <li><b>Odjava</b>, samo kadar jo kliknete. Zahteva z enim klikom (RFC 8058) se pošlje samo, kadar je seznam sporočilo podpisal z DKIM.</li>
+    <!--os:mac--><li><b>Posodobitve</b>, s strani inboxclassic.com, da preveri, ali je na voljo nova različica.</li><!--/os-->
+</ul>
+<p>Kode za prijavo so ponujene samo, kadar glava Authentication-Results vašega ponudnika pove, da je domena podpisala sporočilo (DKIM). Za to ni potrebna nobena posebna povezava.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav><!--/review-->

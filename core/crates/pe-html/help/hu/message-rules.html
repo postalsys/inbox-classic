@@ -1,0 +1,18 @@
+<!--review--><h1>Új levelek rendezése szabályokkal</h1>
+<p class="summary">A feltételeinek megfelelő bejövő üzenetek automatikus áthelyezése, olvasottként megjelölése, megjelölése jelölővel vagy archiválása.</p>
+<p>Egy szabály keresési feltételeket kapcsol össze műveletekkel, amelyeket a program a Beérkezett üzenetek mappába érkező egyező üzeneteken hajt végre. Például egy <code>from:news@example.com</code> feltételű szabály az erről a címről érkező hírleveleket külön mappába helyezheti és olvasottnak jelölheti.</p>
+<p>Szabály létrehozása:</p>
+<ol>
+    <li>Válassza ezt: <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>, majd kattintson erre: <b data-text="ui-rule-new"></b>.</li>
+    <li>Adjon meg egy nevet, és töltse ki ezt a mezőt: <b data-text="ui-rule-query"></b>, a keresőmezőben is használt kifejezésekkel, például <code>from:</code>, <code>subject:</code> vagy <code>list:</code>. Az alatta lévő sor mutatja, hány meglévő üzenet felel meg a feltételeknek a Beérkezett üzenetek mappában.</li>
+    <li>Válasszon egy vagy több műveletet az egyező üzenetekhez: áthelyezés egy mappába, megjelölés olvasottként, megjelölés jelölővel, archiválás, áthelyezés a Levélszemét mappába, törlés vagy az értesítések letiltása.</li>
+    <li>Kattintson az <b data-text="ui-ok"></b> gombra.</li>
+</ol>
+<p>Szabályt egy üzenetből vagy egy keresésből is létrehozhat. Ezzel kitöltheti a kijelölt üzenet feladóját vagy levelezőlistáját: <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b>. Ha az aktuális keresési feltételeket szeretné használni, kattintson a keresési találatok fölött erre: <b data-text="ui-create-rule"></b>.</p>
+<h2>Hogyan működnek a szabályok?</h2>
+<p>A szabályok az új üzeneteket a Beérkezett üzenetek mappában dolgozzák fel, amíg az Inbox Classic fut, akkor is, ha az értesítési területre van kicsinyítve. A meglévő üzenetekre csak akkor vonatkoznak, ha bejelöli ezt: <b data-text="ui-rule-apply-now"></b>. Az egyező szabályok a listában látható sorrendben futnak. Ha egy szabály kihelyez egy üzenetet a Beérkezett üzenetek mappából, arra az üzenetre további szabály már nem vonatkozik. Ha egy szabályt törlés nélkül szeretne kikapcsolni, törölje a jelölőnégyzetét a listában.</p>
+<h2>Szabályok módosítása</h2>
+<p>Egy szabály szerkesztéséhez jelölje ki a listában, és kattintson erre: <b data-text="ui-rule-edit"></b>, vagy kattintson rá duplán. A sorrendet ezekkel módosíthatja: <b data-text="ui-account-move-up"></b> és <b data-text="ui-account-move-down"></b>, a szabályt pedig ezzel törölheti: <b data-text="ui-rule-delete-button"></b>. A szabályszerkesztőben erre kattintva a főablakban láthatja az éppen egyező üzeneteket: <b data-text="ui-rule-show"></b>.</p>
+<p>A szabályok az új üzenetekre vonatkoznak a Beérkezett üzenetek mappában, ezért mappa és dátum szerinti szűrést nem támogatnak. Ha ezeket használja: <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> vagy <code>newer_than:</code>, egy üzenet elmagyarázza, miért nem használhatók. A szabályok nem tudnak üzenetet küldeni vagy véglegesen törölni: <b data-text="ui-rule-delete"></b>, ez a művelet a <b data-text="folder-deleted"></b> mappába helyezi őket.</p>
+<aside class="note">A szabályok ezen a számítógépen futnak. Ha akkor is rendezni szeretné a leveleket, amikor a gép ki van kapcsolva, használja a levelezési szolgáltatója szűrőit.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav><!--/review-->

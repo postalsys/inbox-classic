@@ -1,0 +1,17 @@
+<!--review--><h1>Aplikacije za prijavo</h1>
+<p class="summary">Registrirajte svojo aplikacijo za prijavo pri Googlu, Microsoftu ali katerem koli ponudniku OpenID Connect, da se prijavljate prek brskalnika.</p>
+<p>Prijava prek brskalnika uporablja odjemalca OAuth, ki je registriran pri ponudniku. Inbox Classic ima svojega za Google in Microsoft. Google dovoli uporabo odjemalca programa Inbox Classic samo preizkusnim uporabnikom, dokler aplikacije ne preveri, zato je <b data-text="win-sign-in-google"></b> na začetku izklopljena. Registrirate lahko svojega odjemalca: v svojem projektu Google Cloud, v svojem najemniku Microsoft Entra ali pri katerem koli ponudniku OpenID Connect.</p>
+<p>Če želite dodati aplikacijo za prijavo:</p>
+<ol>
+    <li>Izberite <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Kliknite <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os--> in nato <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>Ob <b data-text="ui-fill-in-for"></b> kliknite Google ali Microsoft, da izpolnite izdajatelja, dovoljenja (scopes) in strežnike. Za drugega ponudnika jih vnesite sami.</li>
+    <li>Odjemalca registrirajte pri ponudniku, kot pojasnjuje polje na dnu. Registrirajte <b data-text="ui-redirect-uri"></b>, ki je prikazan tam.</li>
+    <li>Vnesite <b data-text="ui-client-id"></b> in <b data-text="ui-client-secret"></b>, če vam ga je ponudnik dal. Skrivnost se hrani v <!--os:windows-->Upravitelju poverilnic sistema Windows<!--/os--><!--os:mac-->vašem obesku za ključe za prijavo<!--/os--><!--os:linux-->vaši shrambi ključev<!--/os--> in ni nikoli več prikazana.</li>
+    <li>Kliknite <b data-text="ui-check"></b>, da preverite, ali je izdajatelj pravilen, nato <b data-text="ui-ok"></b>.</li>
+    <li>Račun dodajte z možnostjo <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> na prvi strani okna <b data-text="ui-add-account-title"></b>.</li>
+</ol>
+<p>V oknu <b data-text="ui-sign-in-apps"></b> <!--os:windows,mac-->potrditveno polje vsake aplikacije<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> pove, ali je na voljo za nove račune, tudi pri vgrajenih. Računi, ki aplikacijo že uporabljajo, delujejo naprej. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> spremeni aplikacijo, <b data-text="ui-remove"></b> pa jo odstrani, ko je ne uporablja noben račun več.</p>
+<p>Če poštni strežnik zavrne žeton aplikacije, preverite, ali njena dovoljenja (scopes) omogočajo dostop do pošte.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
+<!--/review-->

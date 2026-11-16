@@ -1,0 +1,14 @@
+<!--review--><h1>Setările de securitate ale contului</h1>
+<p class="summary">Setările de securitate ale serverelor unui cont și ce înseamnă fiecare.</p>
+<p>Fiecare cont are <b data-text="ui-field-imap-security"></b> pentru serverul de intrare și <b data-text="ui-field-smtp-security"></b> pentru cel de ieșire. Inbox Classic le completează când găsește setările furnizorului dvs. Pentru a le schimba, deschideți proprietățile contului din <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<table>
+    <tr><th>Setare</th><th>Semnificație</th></tr>
+    <tr><td>SSL/TLS</td><td>Conexiunea este criptată de la început. De obicei portul 993 pentru e-mailul primit și 465 pentru cel trimis.</td></tr>
+    <tr><td>STARTTLS</td><td>Conexiunea este criptată imediat după deschidere. De obicei portul 143 pentru e-mailul primit și 587 pentru cel trimis. Inbox Classic se oprește dacă serverul nu oferă criptare.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Parola și e-mailurile circulă în clar, oricine din rețea le poate citi.</td></tr>
+</table>
+<aside class="warning">Folosiți <b data-text="ui-security-none"></b> doar pentru un server de pe propriul computer sau din rețeaua locală. Inbox Classic vă avertizează înainte să o folosească.</aside>
+<p>Inbox Classic verifică dacă fiecare server este cel care pretinde că este, pe baza certificatelor în care are încredere sistemul. Nu există nicio opțiune care să accepte orice certificat.</p>
+<p>Parola este păstrată în <!--os:windows-->Managerul de acreditări Windows<!--/os--><!--os:mac-->portcheiul de autentificare<!--/os--><!--os:linux-->portcheiul dvs.<!--/os-->, niciodată în stocarea de e-mail. Un cont care se conectează prin browser nu păstrează deloc parolă.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

@@ -1,0 +1,14 @@
+<!--review--><h1>Veze koje Inbox Classic uspostavlja</h1>
+<p class="summary">Kamo se Inbox Classic povezuje i zašto, za one koje zanimaju tehničke pojedinosti.</p>
+<ul>
+    <li><b>Vaši poslužitelji e-pošte</b>, putem protokola IMAP za čitanje pošte i SMTP za slanje. Veze su šifrirane protokolom TLS, a certifikat svakog poslužitelja provjerava se prema certifikatima kojima vaš sustav vjeruje. Inbox Classic odbija poslužitelj bez šifriranja, osim ako odaberete <b data-text="ui-security-none"></b> i to potvrdite.</li>
+    <li><b>Kad dodajete račun</b>, radi traženja njegovih poslužitelja. Inbox Classic čita DNS zapise vaše domene putem DNS-a preko HTTPS-a (Cloudflare, zatim Google), nikad putem običnog DNS-a. Pokušava i datoteku autoconfig vašeg davatelja usluge te Thunderbirdov popis davatelja (ISPDB). Za Exchange pita Microsoft Autodiscover, koji vašu lozinku dobiva samo kad je zatraži putem HTTPS-a. Poslužitelj bez šifriranja nikad se ne odabire.</li>
+    <li><b>Prijava putem preglednika</b>, protokolom OAuth 2.0 s PKCE-om, kod Googlea, Microsofta ili davatelja vaše aplikacije za prijavu. Preglednik se vraća samo programu Inbox Classic na ovom računalu.</li>
+    <li><b>Logotipi robnih marki</b> (BIMI), s HTTPS adrese robne marke kad poruka ne sadrži logotip, jednom pri svakom pokretanju programa Inbox Classic. To se događa samo kad je vaš poslužitelj e-pošte potvrdio provjeru DMARC poruke i odobrio logotip.</li>
+    <li><b>Slike s interneta</b>, samo kad ih zatražite.</li>
+    <li><b>Otkazivanje pretplate</b>, samo kad ga kliknete. Zahtjev jednim klikom (RFC 8058) šalje se samo ako je popis potpisao poruku DKIM-om.</li>
+    <!--os:mac--><li><b>Ažuriranja</b>, s inboxclassic.com, radi provjere je li izašla nova verzija.</li><!--/os-->
+</ul>
+<p>Kodovi za prijavu nude se samo kad zaglavlje Authentication-Results vašeg davatelja usluge kaže da je domena potpisala poruku (DKIM). Za to nije potrebna nikakva posebna veza.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
+<!--/review-->

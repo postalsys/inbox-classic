@@ -1,0 +1,30 @@
+<!--review--><h1>Keresőszavak</h1>
+<p class="summary">A keresőmező által ismert szavak és jelek, amelyekkel pontosan a kívánt üzeneteket találhatja meg.</p>
+<p>A keresőmező ugyanazokat a szavakat ismeri, mint a Gmail. Tetszőleges számút kombinálhat: az üzenetnek mindegyiknek meg kell felelnie. Ha a keresőmezőre mutat, egy rövid lista jelenik meg.</p>
+<table>
+    <tr><th>Beírás</th><th>Találat</th></tr>
+    <tr><td><code>költségvetés</code></td><td>Üzenetek, amelyekben bárhol van egy <i>költségvetés</i> kezdetű szó</td></tr>
+    <tr><td><code>"pontos kifejezés"</code></td><td>Ezek a szavak, ebben a sorrendben</td></tr>
+    <tr><td><code>-szó</code></td><td>Üzenetek, amelyekben nincs benne a szó. A mínuszjel bármelyik keresőszó előtt működik, például: <code>-is:unread</code></td></tr>
+    <tr><td><code>ez OR az</code></td><td>Üzenetek, amelyekben a két szó bármelyike szerepel. Az <code>OR</code> szót nagybetűvel írja</td></tr>
+    <tr><td><code>from:anna</code></td><td>Annától érkezett levelek</td></tr>
+    <tr><td><code>to:anna</code>, <code>cc:</code>, <code>bcc:</code></td><td>Annának szóló levelek, bármelyik címzettsorban</td></tr>
+    <tr><td><code>subject:ebéd</code></td><td>A szó a tárgyban</td></tr>
+    <tr><td><code>filename:pdf</code></td><td>A szó egy csatolt fájl nevében</td></tr>
+    <tr><td><code>list:news.example.com</code></td><td>Egy levelezőlista levelei, a List-Id fejléc alapján</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Mellékletet tartalmazó üzenetek</td></tr>
+    <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Olvasatlan vagy olvasott üzenetek</td></tr>
+    <tr><td><code>is:starred</code> vagy <code>is:flagged</code></td><td>Megjelölt üzenetek</td></tr>
+    <tr><td><code>is:answered</code></td><td>Üzenetek, amelyekre válaszolt</td></tr>
+    <tr><td><code>is:bounce</code></td><td>Értesítések nem kézbesített vagy késő üzenetekről</td></tr>
+    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Csak az a mappa, minden fiókban</td></tr>
+    <tr><td><code>in:projektek</code></td><td>Csak az ilyen nevű mappa</td></tr>
+    <tr><td><code>in:anywhere</code></td><td>Minden mappa</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Egy nap előtti vagy utáni levelek. A <code>2025-01-31</code> alak is működik</td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Adott számú napnál (<code>d</code>), hónapnál (<code>m</code>) vagy évnél (<code>y</code>) régebbi vagy újabb levelek</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Adott méretnél nagyobb vagy kisebb levelek, bájtban vagy <code>K</code>, <code>M</code>, <code>G</code> egységgel</td></tr>
+</table>
+<p>Az ékezetek és a kis- és nagybetűk nem számítanak. Az Inbox Classic által nem ismert keresőszót közönséges szóként keresi.</p>
+<p>A lista nem mutat méreteket. Egy üzenet méretének megtekintéséhez válassza a <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b> parancsot.</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
+<!--/review-->

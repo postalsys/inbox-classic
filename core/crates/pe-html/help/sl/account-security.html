@@ -1,0 +1,13 @@
+<!--review--><h1>Varnostne nastavitve računa</h1>
+<p class="summary">Varnostne nastavitve strežnikov računa in kaj vsaka od njih pomeni.</p>
+<p>Vsak račun ima <b data-text="ui-field-imap-security"></b> za strežnik za dohodno pošto in <b data-text="ui-field-smtp-security"></b> za strežnik za odhodno pošto. Inbox Classic ju izpolni, ko najde nastavitve vašega ponudnika. Če ju želite spremeniti, odprite lastnosti računa v meniju <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<table>
+    <tr><th>Nastavitev</th><th>Pomen</th></tr>
+    <tr><td>SSL/TLS</td><td>Povezava je šifrirana od začetka. Navadno vrata 993 za dohodno pošto in 465 za odhodno pošto.</td></tr>
+    <tr><td>STARTTLS</td><td>Povezava se šifrira takoj, ko se odpre. Navadno vrata 143 za dohodno pošto in 587 za odhodno pošto. Inbox Classic se ustavi, če strežnik ne ponudi šifriranja.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Vaše geslo in pošta potujeta tako, da ju lahko prebere vsakdo v omrežju.</td></tr>
+</table>
+<aside class="warning"><b data-text="ui-security-none"></b> uporabljajte samo za strežnik v svojem računalniku ali lokalnem omrežju. Inbox Classic vas opozori, preden to uporabi.</aside>
+<p>Inbox Classic za vsak strežnik preveri, ali je res tisti, za katerega se izdaja, s potrdili, ki jim zaupa vaš sistem. Stikala, ki bi sprejelo katero koli potrdilo, ni.</p>
+<p>Vaše geslo je shranjeno v <!--os:windows-->Upravitelju poverilnic sistema Windows<!--/os--><!--os:mac-->vašem obesku za ključe za prijavo<!--/os--><!--os:linux-->vaši shrambi ključev<!--/os-->, nikoli v poštni shrambi. Račun, ki se prijavlja prek brskalnika, sploh ne hrani gesla.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav><!--/review-->
