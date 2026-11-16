@@ -212,6 +212,10 @@ account (masculine, invariable); allegato; contrassegno (contrassegnare); Rispon
 "da leggere".
 
 - Informal "tu" ("Fai clic", "Scegli", "Inserisci").
+- Message rules "elaborano" messages; reserve "ordinare" for the display order of a message list.
+- Use "firma digitale" where needed to distinguish cryptographic signatures from account signatures.
+- Keep "passphrase", "chiave privata", "chiave pubblica" and "impronta digitale" consistent; key verification
+  confirms ownership and requires checking every listed address before confirming.
 - Participles agreeing with `$messages` choose by `$count` ("spostato" / "spostati"); "messaggio" is masculine,
   "posta" feminine ("Segna come indesiderata").
 - `their-folders` = "cartelle diverse", so "spostati in { $folder }" works without an article;

@@ -12,7 +12,8 @@ Commit completed batches regularly and preserve an exact resume point.
   52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
 - `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
   and git history before resuming, so later source or translation changes are not missed.
-- Resume with Italian `app.ftl` (626 entries), followed by its other catalogs and all 52 help topics.
+- Resume with Dutch message-context-menu shortcut follow-up, then Italian `core.ftl` (449 entries),
+  its remaining platform/help catalogs (255 entries) and all 52 help topics. Italian app.ftl is reviewed.
   Dutch is fully reviewed: 1,331 catalog entries and 52 help topics. Eighteen new languages remain.
   No language is considered complete merely because automated checks pass.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
@@ -79,8 +80,19 @@ catalog and 52 help marks intentionally removed. Inventory and source hashes rec
 Checkpoint `d7e3090e` saved Dutch core/platform catalogs and the first eight help topics. Dutch catalog edits
 total 185 improved values; the existing-language additions account for the other 37.
 
-Current totals: 1,395 catalog entries and 56 help pages reviewed; 222 catalog values improved. Remaining:
-23,958 catalog entries and 936 help pages. `REVIEWED` remains unchanged until the full round is complete.
+### Italian UI catalog
+
+Reviewed all 626 app entries and one shared Windows Save-to-file button, improving 63 catalog values.
+Checked main menus, four message-context-menu variants, the address-book context menu and new key/setup
+dialogs. Resolved shortcut collisions across shared controls and recorded Italian rule/cryptography terminology.
+Improved key ownership, backup/transfer credentials, grammar and provider-name placeholders.
+All 72 localization/help tests, structural checks and inventory/hash reconciliation passed.
+
+The expanded context-menu check found six shortcut collisions in Dutch; apply a focused follow-up before
+continuing Italian core messages. Dutch help checkpoint: `7e7dd500`.
+
+Current totals: 2,022 catalog entries and 56 help pages reviewed; 285 catalog values improved. Remaining:
+23,331 catalog entries and 936 help pages. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

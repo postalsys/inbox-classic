@@ -33,8 +33,7 @@ win-webview-missing = Il runtime WebView2 non è disponibile.
 win-delete-button = &Elimina
 # review: new
 win-find-label = &Trova:
-# review: new
-win-save-as-button = Salva &con nome...
+win-save-as-button = Salva su &file...
 # review: new
 win-too-many-files = Troppi file in una volta: scegline meno.
 
