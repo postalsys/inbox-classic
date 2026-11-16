@@ -1,14 +1,13 @@
-<!--review--><h1>Bezbednosna podešavanja naloga</h1>
-<p class="summary">Bezbednosna podešavanja servera jednog naloga i šta svako od njih znači.</p>
-<p>Svaki nalog ima <b data-text="ui-field-imap-security"></b> za server dolazne pošte i <b data-text="ui-field-smtp-security"></b> za server odlazne pošte. Inbox Classic ih popunjava kada pronađe podešavanja vašeg dobavljača. Da biste ih promenili, otvorite svojstva naloga u meniju <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<h1>Bezbednosna podešavanja naloga</h1>
+<p class="summary">Izaberite kako se nalog bezbedno povezuje sa serverima e-pošte.</p>
+<p>Svaki nalog ima <b data-text="ui-field-imap-security"></b> za server dolazne pošte i <b data-text="ui-field-smtp-security"></b> za server odlazne pošte. Inbox Classic ih popunjava kada pronađe podešavanja pružaoca usluge e-pošte. Da biste ih promenili, otvorite svojstva naloga u meniju <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
 <table>
     <tr><th>Podešavanje</th><th>Značenje</th></tr>
     <tr><td>SSL/TLS</td><td>Veza je šifrovana od samog početka. Obično port 993 za dolaznu i 465 za odlaznu poštu.</td></tr>
     <tr><td>STARTTLS</td><td>Veza se šifruje odmah nakon otvaranja. Obično port 143 za dolaznu i 587 za odlaznu poštu. Inbox Classic prekida vezu ako server ne nudi šifrovanje.</td></tr>
-    <tr><td><b data-text="ui-security-none"></b></td><td>Vaša lozinka i pošta putuju mrežom tako da svako može da ih pročita.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Lozinka i pošta prenose se bez šifrovanja i može da ih pročita neko ko presretne mrežni saobraćaj.</td></tr>
 </table>
 <aside class="warning"><b data-text="ui-security-none"></b> koristite samo za server na sopstvenom računaru ili u lokalnoj mreži. Inbox Classic vas upozorava pre nego što ga upotrebi.</aside>
-<p>Inbox Classic proverava da li je svaki server zaista onaj za koji se predstavlja, prema sertifikatima kojima vaš sistem veruje. Ne postoji prekidač kojim bi se prihvatio bilo koji sertifikat.</p>
-<p>Vaša lozinka se čuva u <!--os:windows-->Upravljaču akreditivima sistema Windows<!--/os--><!--os:mac-->vašem privesku ključeva za prijavljivanje<!--/os--><!--os:linux-->vašem privesku ključeva<!--/os-->, nikada u skladištu pošte. Nalog koji se prijavljuje preko pregledača uopšte ne čuva lozinku.</p>
+<p>Inbox Classic proverava da li je svaki server zaista onaj za koji se predstavlja, prema sertifikatima kojima vaš sistem veruje. Provera sertifikata ne može da se isključi.</p>
+<p>Vaša lozinka se čuva u <!--os:windows-->Upravljaču akreditivima sistema Windows<!--/os--><!--os:mac-->vašem privesku ključeva za prijavljivanje<!--/os--><!--os:linux-->vašem privesku ključeva<!--/os-->, nikada u skladištu pošte. Za nalog sa prijavom putem pregledača čuvaju se podaci potrebni za obnavljanje pristupa, a ne vaša lozinka.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

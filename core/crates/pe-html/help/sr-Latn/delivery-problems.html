@@ -1,11 +1,11 @@
-<!--review--><h1>Poruke koje nisu isporučene</h1>
+<h1>Poruke koje nisu isporučene</h1>
 <p class="summary">Kada se poruka koju ste poslali vrati ili kasni, Inbox Classic objašnjava zašto i šta možete da uradite.</p>
-<p>Obaveštenje o isporuci ima na listi poruka oznaku neisporučene poruke. Kada ga otvorite, kartica iznad njega kaže da li vaša poruka nije isporučena ili samo kasni.</p>
+<p>Obaveštenje o neuspešnoj ili odloženoj isporuci ima posebnu oznaku na listi poruka. Kada ga otvorite, kartica iznad teksta pokazuje da li isporuka nije uspela ili još kasni.</p>
 <img src="picture:bounce-1-failed" alt="Obaveštenje o isporuci sa karticom koja kaže da poruka nije isporučena, sa primaocem, razlogom i onim što možete da uradite">
-<p>Kartica navodi svakog primaoca sa razlogom napisanim jednostavnim rečima i onim što možete da uradite. <b data-text="bounce-details"></b> prikazuje izvorne reči servera primaoca.</p>
+<p>Kartica za svakog primaoca objašnjava razlog jednostavnim rečima i predlaže šta možete da uradite. <b data-text="bounce-details"></b> prikazuje izvorni odgovor servera primaoca.</p>
 <ul>
     <li><b data-text="bounce-show-message"></b> bira poruku koju ste poslali.</li>
-    <li>Kod kašnjenja je bira <b data-text="bounce-show-delayed"></b>. Vaš server e-pošte još uvek pokušava, pa ne morate ponovo da je šaljete.</li>
+    <li>Za poruku čija isporuka kasni koristite <b data-text="bounce-show-delayed"></b>. Vaš server e-pošte još uvek pokušava, pa ne morate ponovo da je šaljete.</li>
 </ul>
 <p>Neki česti razlozi:</p>
 <table>
@@ -13,9 +13,8 @@
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Proverite da li je adresa tačno napisana ili pitajte osobu koju adresu sada koristi.</td></tr>
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Pošaljite je ponovo za nekoliko dana ili se toj osobi javite na drugi način.</td></tr>
     <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Pošaljite je ponovo bez onoga što liči na neželjenu poštu, na primer mnogo veza ili velikog priloga.</td></tr>
-    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Prosledite obaveštenje svom dobavljaču e-pošte. Problem nije u poruci.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Ništa. Poruka se obično isporuči u roku od sat vremena.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Prosledite obaveštenje pružaocu usluge e-pošte. Problem nije u poruci.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Sačekajte da server ponovo pokuša. Kod privremenog odbijanja ovog tipa poruka se obično isporuči u roku od sat vremena.</td></tr>
 </table>
-<p>Da biste pronašli sva obaveštenja o isporuci, potražite <code>is:bounce</code>. Razlog se utvrđuje na vašem računaru i ništa se nikuda ne šalje.</p>
+<p>Da biste pronašli sva obaveštenja o isporuci, potražite <code>is:bounce</code>. Objašnjenje se priprema na vašem računaru, bez slanja sadržaja poruke drugim uslugama.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

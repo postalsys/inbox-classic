@@ -1,6 +1,6 @@
-<!--review--><h1>Tasterske prečice</h1>
-<p class="summary">Tasteri svih komandi i tasteri koji rade u listama, u uređivaču i u Adresaru.</p>
-<p>Prva tabela navodi, po menijima, svaku komandu koja ima taster. Tabele posle nje navode tastere koji rade samo na jednom mestu.</p>
+<h1>Tasterske prečice</h1>
+<p class="summary">Prečice za komande i rad sa listama, uređivačem poruka i Adresarom.</p>
+<p>Prva tabela prikazuje komande sa prečicama, grupisane po menijima. Ostale tabele navode prečice koje važe u određenom delu programa.</p>
 <div data-generate="shortcuts"></div>
 <h2>U listi poruka</h2>
 <table>
@@ -8,7 +8,7 @@
     <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Bira poruku iznad ili ispod</td></tr>
     <tr><td><kbd>Shift</kbd>+<kbd>↑</kbd> <kbd>Shift</kbd>+<kbd>↓</kbd></td><td>Dodaje poruku iznad ili ispod u izbor</td></tr>
     <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>Click</kbd><!--/os--><!--os:mac--><kbd>⌘</kbd>+<kbd>Click</kbd><!--/os--></td><td>Dodaje poruku u izbor ili je uklanja iz njega</td></tr>
-    <tr><td><kbd>Shift</kbd>+<kbd>Click</kbd></td><td>Bira sve poruke od izabrane do ove</td></tr>
+    <tr><td><kbd>Shift</kbd>+<kbd>Click</kbd></td><td>Bira sve poruke od već izabrane do one na koju kliknete</td></tr>
     <tr><td><!--os:windows,linux--><kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Return</kbd><!--/os--></td><td>Otvara poruku u posebnom prozoru</td></tr>
     <tr><td><kbd>→</kbd> <kbd>←</kbd></td><td>Prikazuje ili skriva ostale poruke razgovora</td></tr>
     <tr><td><kbd>N</kbd></td><td>Prelazi na sledeću nepročitanu poruku</td></tr>
@@ -16,7 +16,7 @@
     <tr><td><kbd>W</kbd></td><td>Prati razgovor</td></tr>
     <tr><td><kbd>K</kbd></td><td>Zanemaruje razgovor</td></tr>
     <tr><td><kbd>Tab</kbd></td><td>Prelazi između liste fascikli, liste poruka i okna za čitanje</td></tr>
-    <!--os:windows,linux--><tr><td><kbd>Menu</kbd></td><td>Otvara meni desnog klika za izabranu poruku</td></tr><!--/os-->
+    <!--os:windows,linux--><tr><td><kbd>Menu</kbd></td><td>Otvara kontekstni meni izabrane poruke</td></tr><!--/os-->
     <tr><td><kbd>Esc</kbd></td><td>Završava pretragu i ponovo prikazuje fasciklu</td></tr>
 </table>
 <h2>Dok pišete</h2>
@@ -27,18 +27,18 @@
     <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>U</kbd><!--/os--><!--os:mac--><kbd>⌘U</kbd><!--/os--></td><td>Podvučeno</td></tr>
     <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>K</kbd><!--/os--><!--os:mac--><kbd>⌘K</kbd><!--/os--></td><td>Dodaje vezu ili menja vezu na mestu kursora</td></tr>
     <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>Click</kbd><!--/os--><!--os:mac--><kbd>⌘</kbd>+<kbd>Click</kbd><!--/os--></td><td>Otvara vezu u pregledaču</td></tr>
-    <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os--></td><td>Bira sve, uključujući skupljenu originalnu poruku u odgovoru</td></tr>
+    <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>A</kbd><!--/os--><!--os:mac--><kbd>⌘A</kbd><!--/os--></td><td>Bira sve, uključujući skrivenu izvornu poruku u odgovoru</td></tr>
     <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os--></td><td>Čuva poruku u fascikli Radne verzije</td></tr>
     <tr><td><!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>⌘Return</kbd><!--/os--></td><td>Šalje poruku</td></tr>
     <!--os:windows,linux--><tr><td><kbd>Alt</kbd>+<kbd>C</kbd>, <kbd>Alt</kbd>+<kbd>B</kbd></td><td>Prikazuje red Cc ili Bcc</td></tr><!--/os-->
 </table>
-<h2>U listi adresa dok kucate</h2>
+<h2>U listi predloženih adresa</h2>
 <table>
     <tr><th>Tasteri</th><th>Radnja</th></tr>
-    <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Bira osobu</td></tr>
-    <tr><td><!--os:windows,linux--><kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Return</kbd><!--/os--> ili <kbd>Tab</kbd></td><td>Prihvata izabranu osobu</td></tr>
+    <tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td>Bira predloženu adresu</td></tr>
+    <tr><td><!--os:windows,linux--><kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Return</kbd><!--/os--> ili <kbd>Tab</kbd></td><td>Prihvata izabranu adresu</td></tr>
     <tr><td><kbd>Esc</kbd></td><td>Zatvara listu</td></tr>
-    <!--os:windows,linux--><tr><td><kbd>Shift</kbd>+<kbd>Delete</kbd></td><td>Trajno uklanja izabranu osobu sa liste</td></tr><!--/os-->
+    <!--os:windows,linux--><tr><td><kbd>Shift</kbd>+<kbd>Delete</kbd></td><td>Trajno uklanja izabranu adresu sa liste predloga</td></tr><!--/os-->
 </table>
 <h2>U Adresaru</h2>
 <table>
@@ -47,4 +47,3 @@
     <tr><td><kbd>Esc</kbd></td><td>Zatvara kontakt ili grupu bez čuvanja</td></tr>
 </table>
 <nav class="related"><a href="topic:search-words"></a> <a href="topic:read-messages"></a> <a href="topic:write-message"></a></nav>
-<!--/review-->
