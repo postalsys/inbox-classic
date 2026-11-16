@@ -24,3 +24,10 @@ pe-i18n = { path = "crates/pe-i18n" }
 [profile.release]
 lto = "thin"
 codegen-units = 1
+
+# a passphrase sealed with Argon2 (pe-pgp sealed.rs) derives 64 MiB: unoptimized, each test that opens one takes seconds
+[profile.dev.package.argon2]
+opt-level = 3
+
+[profile.dev.package.blake2]
+opt-level = 3
