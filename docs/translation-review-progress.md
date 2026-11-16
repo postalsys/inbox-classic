@@ -182,8 +182,17 @@ All 75 tests, structural checks, inventory/hash reconciliation and git diff --ch
 now includes the five additional languages. The remaining catalogs and all help topics are still pending.
 Portuguese completion checkpoint: `5573ee4b`.
 
-Current totals: 4,692 catalog entries and 160 help pages reviewed; 713 catalog values improved. Remaining:
-27,316 catalog entries and 1,092 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Brazilian Portuguese catalogs completed
+
+Reviewed the remaining 448 core entries and 248 platform/help-title entries, improving 136 values. Corrected
+count agreement, undo descriptions, queued agent logs, credential transfer, key lookup/publication/decryption,
+attachment cleanup and native platform wording. All 1,331 catalog entries are reviewed, with 224 values improved.
+All 75 localization/help tests pass. Structural checks, inventory/hash reconciliation and git diff --check pass.
+Generated installer and Linux store text rebuilt and inspected. UI checkpoint: `8b2ed15c`.
+All 52 Brazilian Portuguese help topics remain pending.
+
+Current totals: 5,388 catalog entries and 160 help pages reviewed; 849 catalog values improved. Remaining:
+26,620 catalog entries and 1,092 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

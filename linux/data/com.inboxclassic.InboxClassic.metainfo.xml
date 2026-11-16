@@ -119,9 +119,9 @@
       przez przeglądarkę.
     </p>
     <p xml:lang="pt_BR">
-      O Inbox Classic lê e escreve e-mails com as pastas à esquerda, as mensagens em cima e a mensagem embaixo, como os
-      programas de e-mail de antigamente. Funciona com qualquer conta IMAP e SMTP e faz login no Outlook.com e no
-      Microsoft 365 pelo navegador.
+      O Inbox Classic permite ler e escrever e-mails em uma interface familiar: pastas à esquerda, lista de mensagens na
+      parte superior e conteúdo da mensagem selecionada logo abaixo. Funciona com qualquer conta IMAP e SMTP e permite
+      fazer login no Outlook.com e no Microsoft 365 pelo navegador.
     </p>
     <p xml:lang="pt">
       O Inbox Classic permite ler e escrever correio eletrónico numa interface familiar: pastas à esquerda, lista de
@@ -247,10 +247,10 @@
       <li xml:lang="pl">Wyszukiwanie słów w temacie, nadawcach i odbiorcach, nazwach plików i treści, z operatorami Gmaila</li>
       <li xml:lang="pl">Odpowiedzi zwijają cytowane wcześniejsze wiadomości</li>
       <li xml:lang="pl">Poczta jest dostępna offline; hasła są przechowywane w Twoim pęku kluczy</li>
-      <li xml:lang="pt_BR">Cada mensagem é mostrada limpa, sem scripts, e as imagens da internet só quando você permitir</li>
-      <li xml:lang="pt_BR">Uma pesquisa que encontra palavras no assunto, nas pessoas, nos nomes dos arquivos e no texto, com os operadores do Gmail</li>
-      <li xml:lang="pt_BR">As respostas recolhem as mensagens anteriores que citam</li>
-      <li xml:lang="pt_BR">Os e-mails continuam legíveis offline; as senhas ficam armazenadas no seu chaveiro</li>
+      <li xml:lang="pt_BR">As mensagens são exibidas sem scripts ou outros conteúdos potencialmente perigosos; as imagens da internet só são carregadas com sua autorização</li>
+      <li xml:lang="pt_BR">Pesquisa no assunto, nos remetentes, nos destinatários, nos nomes dos anexos e no texto das mensagens, com suporte aos operadores do Gmail</li>
+      <li xml:lang="pt_BR">O texto de mensagens anteriores citado nas respostas fica recolhido e pode ser expandido quando necessário</li>
+      <li xml:lang="pt_BR">Os e-mails já baixados podem ser lidos sem conexão à internet; as senhas ficam armazenadas no chaveiro do sistema</li>
       <li xml:lang="pt">As mensagens são apresentadas sem scripts nem outros conteúdos potencialmente perigosos; as imagens da internet só são carregadas com a sua autorização</li>
       <li xml:lang="pt">Pesquisa no assunto, nos remetentes, nos destinatários, nos nomes dos anexos e no texto das mensagens, com suporte para os operadores do Gmail</li>
       <li xml:lang="pt">O texto das mensagens anteriores citado nas respostas fica recolhido e pode ser expandido quando necessário</li>
