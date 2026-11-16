@@ -111,6 +111,8 @@ impl Store {
         }
         self.db
             .execute("DELETE FROM folders WHERE account_id = ?1 AND position = -1", [account])?;
+        // rules imported before this account's folders were here find theirs now
+        self.resolve_rule_targets()?;
         Ok(())
     }
 

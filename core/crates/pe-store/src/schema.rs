@@ -555,6 +555,12 @@ CREATE TABLE pgp_lookups (
     found INTEGER NOT NULL
 );
 "#,
+    // a rule imported from a setup file (pe-core setup.rs) whose folder is not here yet: the account and path it
+    // moves to, until the folder is synced and becomes its move_to
+    r#"
+ALTER TABLE rules ADD COLUMN move_account INTEGER REFERENCES accounts(id) ON DELETE SET NULL;
+ALTER TABLE rules ADD COLUMN move_path TEXT;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

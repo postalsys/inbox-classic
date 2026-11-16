@@ -23,7 +23,8 @@ pub enum Ahead {
 }
 
 impl Ahead {
-    fn key(self) -> &'static str {
+    /// As the store keeps it, and a setup file carries it
+    pub fn key(self) -> &'static str {
         match self {
             Ahead::Recent => "recent",
             Ahead::All => "all",
@@ -31,12 +32,18 @@ impl Ahead {
         }
     }
 
-    fn of(key: &str) -> Ahead {
+    /// The choice kept as `key`, None for no choice of these
+    pub fn of_key(key: &str) -> Option<Ahead> {
         match key {
-            "all" => Ahead::All,
-            "never" => Ahead::Never,
-            _ => Ahead::Recent,
+            "recent" => Some(Ahead::Recent),
+            "all" => Some(Ahead::All),
+            "never" => Some(Ahead::Never),
+            _ => None,
         }
+    }
+
+    fn of(key: &str) -> Ahead {
+        Ahead::of_key(key).unwrap_or_default()
     }
 }
 
