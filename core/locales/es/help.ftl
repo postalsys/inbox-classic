@@ -6,7 +6,6 @@ help-section-get-started = Primeros pasos
 help-section-everyday = Tareas habituales
 help-section-accounts = Varias cuentas
 help-section-message-features = Funciones de los mensajes
-# review: new
 help-section-encrypted-mail = Correo cifrado y firmado
 help-section-settings = Configuración
 help-section-agents = Agentes de IA

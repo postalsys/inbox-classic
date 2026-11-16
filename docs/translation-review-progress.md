@@ -14,7 +14,7 @@ behavior and surrounding controls to establish meaning. Preserve the original sc
 - Initial inventory: 241 marked messages and 14 marked help passages per language (de, es, et, fr), 964 messages
   and 56 help passages altogether. Each language has ten affected help pages. Other languages named in the guide
   are not present in this checkout. `scripts/check-language.mjs` is also absent here.
-- Current next step: Spanish `core.ftl` (143 marked entries), then platform labels and help.
+- Current next step: Spanish help (ten pages), then French catalogs and help.
   Estonian is complete for the starting snapshot. Spanish and French follow. Review existing wording outside
   marked entries when needed for context or terminology consistency.
 
@@ -104,7 +104,16 @@ verification phrasing, clarified saved credentials and signing in again, and sta
 protection as "contraseña". Added the terminology decisions to the glossary. All 68 tests, catalog invariants,
 dialog/menu shortcut checks and `git diff --check` passed.
 
-Next: Spanish core/platform catalogs and help, then French. Estonian and German
+Checkpoint commit: `ca9d02b0`.
+
+### es-core-2026-11-16
+
+Reviewed all 143 core messages and four platform/help labels; improved 63 core values. Clarified private-key
+errors, address lists, key discovery, stored credentials, import results, missing rule folders and temporary
+attachment cleanup. Removed all Spanish catalog review marks. All 68 tests, catalog invariants and
+`git diff --check` passed.
+
+Next: Spanish help (ten pages), then French. Estonian and German
 catalog/help review is complete for the starting snapshot. Revisit it only for newly
 arriving changes or the final cross-language consistency checks below.
 
