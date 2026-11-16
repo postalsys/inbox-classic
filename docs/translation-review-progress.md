@@ -16,8 +16,8 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Danish (da): app catalog and two shared Windows controls reviewed. Review the remaining
-  703 catalog entries, then all 52 help topics.
+- Resume with Danish (da) help: all 1,334 catalog entries are reviewed, with 191 values improved.
+  Review all 52 help topics next.
   All 84 late list-loading labels have been reviewed. Bulgarian, Czech, Dutch, Italian, Portuguese (Portugal),
   Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are complete: each has
   1,334 catalog entries and 52 help topics. Fourteen languages still have pending content,
@@ -474,8 +474,21 @@ one-day failure backoff), while English help describes once-per-run downloads. C
 claims and retain the explanation of what a server sees when a download actually occurs. This followup must
 be completed in addition to the pending language queue; English/app code remain outside this task.
 
-Current totals: 14,086 catalog entries and 524 help pages reviewed; 2,138 catalog values improved. Remaining:
-18,006 catalog entries and 728 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Danish catalogs completed
+
+Reviewed the remaining 703 core/platform/help-title entries and improved 133 values. Corrected independent
+unread counts, singular file failures, delivery guidance, queued agent messages, key publication/decryption,
+transferred credentials and temporary-attachment cleanup. Improved installer and Linux store descriptions.
+All Danish catalog entries are now reviewed; 52 help topics remain. Shared UI checkpoint: `d8506557`.
+
+Structural checks, complete placeholder sets, 32 menu/dialog shortcut scopes and exact inventory/file/source
+hashes pass. A bookkeeping path-variable error was caught by reconciliation and the untouched Turkish help
+file restored byte-for-byte before this commit; its source hash now matches. Four installer strings and five
+Linux store strings regenerated and inspected with an offline pe-ffi build in the isolated target directory.
+Review HTML regenerated and git diff --check passes. No test suite was run per user instruction.
+
+Current totals: 14,789 catalog entries and 524 help pages reviewed; 2,271 catalog values improved. Remaining:
+17,303 catalog entries and 728 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

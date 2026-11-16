@@ -55,9 +55,8 @@
       prohlížeč.
     </p>
     <p xml:lang="da">
-      Inbox Classic læser og skriver e-mail med mapperne til venstre, meddelelserne øverst og meddelelsen nedenunder,
-      som mailprogrammer plejede at gøre. Det virker med enhver IMAP- og SMTP-konto og logger på Outlook.com og
-      Microsoft 365 via browseren.
+      Inbox Classic er et klassisk mailprogram med mapper til venstre, meddelelsesliste øverst og læserude nedenunder.
+      Det understøtter IMAP- og SMTP-konti samt login på Outlook.com og Microsoft 365 via browseren.
     </p>
     <p xml:lang="de">
       Inbox Classic bietet die klassische E-Mail-Ansicht: Ordner links, die Nachrichtenliste oben und den Lesebereich
@@ -195,10 +194,10 @@
       <li xml:lang="cs">Vyhledávání v předmětech, odesílatelích, příjemcích, názvech příloh a textu zpráv s podporou operátorů známých z Gmailu</li>
       <li xml:lang="cs">Starší zprávy citované v odpovědích se sbalí a můžete je znovu rozbalit</li>
       <li xml:lang="cs">Staženou poštu lze číst i bez připojení. Hesla jsou uložena v systémové klíčence</li>
-      <li xml:lang="da">Alle meddelelser vises renset, uden scripts, og billeder fra internettet kun, når du tillader det</li>
-      <li xml:lang="da">En søgning, der finder ord i emnet, afsendere og modtagere, filnavne og teksten, med Gmails søgeoperatorer</li>
-      <li xml:lang="da">Svar folder de tidligere meddelelser, de citerer, sammen</li>
-      <li xml:lang="da">Mailen kan læses offline; adgangskoder gemmes i din nøglering</li>
+      <li xml:lang="da">Meddelelser renses for scripts og andet aktivt indhold. Billeder fra internettet hentes kun med din tilladelse</li>
+      <li xml:lang="da">Søg i emner, afsendere, modtagere, navne på vedhæftede filer og meddelelsestekst med søgeoperatorer som i Gmail</li>
+      <li xml:lang="da">Citerede tidligere meddelelser foldes sammen i svar</li>
+      <li xml:lang="da">Hentede meddelelser kan læses uden internetforbindelse. Adgangskoder gemmes i din nøglering</li>
       <li xml:lang="de">Nachrichten werden ohne Skripte angezeigt; Bilder aus dem Internet werden nur mit Ihrer Erlaubnis geladen</li>
       <li xml:lang="de">Suche in Betreff, Absendern, Empfängern, Anlagennamen und Nachrichtentext mit den Suchoperatoren von Gmail</li>
       <li xml:lang="de">Zitierte Nachrichten in Antworten werden eingeklappt</li>
