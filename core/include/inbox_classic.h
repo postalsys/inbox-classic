@@ -51,6 +51,9 @@
 // (the rows show through at 45 percent)
 #define PE_LIST_DIM 0.55
 
+// The rows a list load reads at a time (`pe_list_view_load`, `pe_list_view_load_page`)
+#define PE_LIST_PAGE 100
+
 // The parts of a setup file, as flags
 #define PE_SETUP_SETTINGS 1
 
@@ -185,6 +188,23 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_ADDRESS_BOOK_CHANGED = 29,
   // The OpenPGP keys changed other than through their window (an import)
   PE_EVENT_KIND_KEYS_CHANGED = 30,
+  // The list load `uid` of `pe_list_view_load` is read: `pe_list_load_result`; `count` is the generation the window
+  // gave it
+  PE_EVENT_KIND_LIST_READY = 31,
+  // The page `uid` of `pe_list_view_load_page` is read: `pe_list_load_result`; `count` is its generation
+  PE_EVENT_KIND_LIST_PAGE_READY = 32,
+  // The read `uid` started off the window thread is done: `pe_draft_result` (`pe_message_draft_start`,
+  // `pe_draft_open_start`), `pe_attachment_data_result` (`pe_attachment_data_start`),
+  // `pe_attachment_open_result` (`pe_attachment_open_start`) or `pe_selection_summary_result`
+  // (`pe_selection_summary_start`)
+  PE_EVENT_KIND_READ_DONE = 33,
+  // The server did not do what the user asked of `count` messages of `folder` of `account` (a move, a delete, Mark
+  // All Read), so the store took it back: the rows are as they were again (a `FolderChanged` came first), and
+  // `message` says what and why, for a bar over the list
+  PE_EVENT_KIND_ACTION_UNDONE = 34,
+  // The action `uid` of `pe_selection_act_start` or `pe_mark_read_start` is done in the store and handed to the
+  // server: `message` is what the status bar says; with `failure` `Other` it was refused, and `message` says why
+  PE_EVENT_KIND_ACTED = 35,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -481,6 +501,16 @@ typedef enum PeAction {
   PE_ACTION_IGNORE = 13,
 } PeAction;
 
+// What Mark All Read marks (`pe_mark_read_start`)
+typedef enum PeMarkRead {
+  // The folder `id`
+  PE_MARK_READ_FOLDER = 0,
+  // Every folder of the account `id`
+  PE_MARK_READ_ACCOUNT = 1,
+  // Every account's Inbox (`id` not used)
+  PE_MARK_READ_ALL_INBOXES = 2,
+} PeMarkRead;
+
 typedef enum PeTargetKind {
   // "Recent", over the folders used last
   PE_TARGET_KIND_HEADING = 0,
@@ -579,6 +609,9 @@ typedef struct PeKeyList PeKeyList;
 // The languages; free with `pe_language_list_free`
 typedef struct PeLanguageList PeLanguageList;
 
+// A list load's result; free with `pe_list_load_free`
+typedef struct PeListLoad PeListLoad;
+
 // What a message list shows; free with `pe_list_view_free`
 typedef struct PeListView PeListView;
 
@@ -604,7 +637,8 @@ typedef struct PeRuleTargets PeRuleTargets;
 // The rules; free with `pe_rules_free`
 typedef struct PeRules PeRules;
 
-// Selected messages; free with `pe_selection_free`
+// Selected messages: listed, or every message of a list (`pe_list_view_select_all`), listed only when a call needs
+// them; free with `pe_selection_free`
 typedef struct PeSelection PeSelection;
 
 // An export being set up: its parts, its passphrase, the app's preferences; free with `pe_setup_export_free`
@@ -791,12 +825,14 @@ typedef struct PeEvent {
   int64_t folder;
   uint64_t uid;
   enum PeFailureKind failure;
-  // UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; the
+  // UTF-8: why, for `Failed`; what was taken back and why, for `ActionUndone`; what was done or why not, for
+  // `Acted`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; the
   // notification's title, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
   const char *message;
   // UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`. NULL otherwise
   const char *detail;
-  // How many messages, for `NewMail`; 0 otherwise
+  // How many messages, for `NewMail`; the window's generation of the load, for `ListReady` and `ListPageReady`;
+  // 0 otherwise
   uint64_t count;
 } PeEvent;
 
@@ -1376,6 +1412,24 @@ typedef struct PeSelectionSummary {
   bool watched;
   bool ignored;
 } PeSelectionSummary;
+
+// What a list load read, besides its rows
+typedef struct PeListLoadInfo {
+  // The window's number for the load, as it gave it
+  uint64_t generation;
+  // Where its rows start in the list
+  uint64_t offset;
+  // A load of the list (`pe_list_view_load`), with the counts; false for a page, whose counts are 0
+  bool counted;
+  // The counts of the status bar (`pe_list_view_counts`) and the row count (`pe_list_view_row_count`)
+  uint64_t total;
+  uint64_t unread;
+  uint64_t rows;
+  // As `pe_list_view_lists_recipients`
+  bool lists_recipients;
+  // The row of the message the load was asked about, -1 when it is not in the list or none was asked about
+  int64_t index;
+} PeListLoadInfo;
 
 // A message rule: a search query and what to do with the new mail of an Inbox that matches it
 typedef struct PeRule {
@@ -2498,8 +2552,8 @@ struct PeMessageView *pe_message_view(const struct PeCore *core,
                                       uint64_t uid,
                                       bool allow_remote_images);
 
-// Builds the view of a message whose source is in the store (after `MessageReady`) on a worker thread:
-// `ViewReady` with this request in `uid` follows. 0 on failure.
+// Builds the view of a message whose source is in the store (after `MessageReady`) off the window thread, its source
+// read there too: `ViewReady` with this request in `uid` follows. 0 on failure.
 //
 // # Safety
 // `core` must be a live handle.
@@ -2608,6 +2662,57 @@ uint8_t *pe_attachment_data(const struct PeCore *core,
                             size_t index,
                             size_t *len,
                             char **filename);
+
+// Reads attachment `index` of a message off the window thread (parsed, and decrypted when the message is
+// encrypted, there): `ReadDone` with the request this returns in `uid` follows, then `pe_attachment_data_result`.
+// 0 on failure.
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_attachment_data_start(const struct PeCore *core,
+                                  int64_t folder,
+                                  uint64_t uid,
+                                  size_t index);
+
+// What `pe_attachment_data_start` read, once, as `pe_attachment_data` gives it: the bytes (free with
+// `pe_bytes_free`), their length in `len` and the name to save them under in `filename` (free with
+// `pe_string_free`); NULL when the message or the attachment is not here, or for another request.
+//
+// # Safety
+// `core` must be a live handle; `len` and `filename` must be valid pointers.
+uint8_t *pe_attachment_data_result(const struct PeCore *core,
+                                   uint64_t request,
+                                   size_t *len,
+                                   char **filename);
+
+// Writes attachment `index` of a message where it can be opened, as `pe_attachment_open` does, off the window
+// thread: `ReadDone` with the request this returns in `uid` follows, then `pe_attachment_open_result`. 0 on
+// failure.
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_attachment_open_start(const struct PeCore *core,
+                                  int64_t folder,
+                                  uint64_t uid,
+                                  size_t index);
+
+// What `pe_attachment_open_start` wrote, once, as `pe_attachment_open` gives it: the path to open, or NULL with
+// `note` and `error` as there
+//
+// # Safety
+// `core` must be a live handle; `note` and `error` NULL or valid pointers.
+char *pe_attachment_open_result(const struct PeCore *core,
+                                uint64_t request,
+                                char **note,
+                                char **error);
+
+// Drops a read started off the window thread that nobody waits for any more (`pe_message_draft_start`,
+// `pe_draft_open_start`, `pe_attachment_data_start`, `pe_attachment_open_start`)
+//
+// # Safety
+// `core` must be a live handle.
+void pe_read_cancel(const struct PeCore *core,
+                    uint64_t request);
 
 // [`pe_attachment_data`] of a message file a window shows (`pe_file_view`), its path UTF-8
 //
@@ -2785,6 +2890,33 @@ struct PeDraft *pe_message_draft(const struct PeCore *core,
                                  int64_t folder,
                                  uint64_t uid,
                                  enum PeDraftKind kind);
+
+// `pe_message_draft` off the window thread (the message parsed, and decrypted when it is encrypted, there): `ReadDone`
+// with the request this returns in `uid` follows, then `pe_draft_result`. 0 on failure.
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_message_draft_start(const struct PeCore *core,
+                                int64_t folder,
+                                uint64_t uid,
+                                enum PeDraftKind kind);
+
+// `pe_draft_open` off the window thread: `ReadDone` with the request this returns in `uid` follows, then
+// `pe_draft_result`. 0 on failure.
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_draft_open_start(const struct PeCore *core,
+                             int64_t folder,
+                             uint64_t uid);
+
+// The draft `pe_message_draft_start` or `pe_draft_open_start` made, once, after its `ReadDone`; NULL when the
+// message was not in the store, or for another request. Free with `pe_draft_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeDraft *pe_draft_result(const struct PeCore *core,
+                                uint64_t request);
 
 // The view of a message file (`.eml`) opened from Finder or File Explorer, for a message window of no folder; NULL
 // with the reason in `error` (NULL or a pointer to a string to free with `pe_string_free`) for a file that can not
@@ -3792,6 +3924,16 @@ bool pe_list_view_select_ranges(const struct PeCore *core,
                                 const uint64_t *ends,
                                 size_t count);
 
+// Select All: fills `selection` with every message of the list (a collapsed conversation's too) without listing them,
+// counted (`pe_selection_count`) from what the list counted last; the calls taking the selection list them when they
+// need them (`pe_selection_act_start` off the window thread). False on failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view, `selection` NULL or a live selection.
+bool pe_list_view_select_all(const struct PeCore *core,
+                             const struct PeListView *view,
+                             struct PeSelection *selection);
+
 // Where the messages of `selection` are now in the list, ascending, to select them again after it changed; those no
 // longer in it are left out. Free with `pe_positions_free`. NULL on failure.
 //
@@ -3822,6 +3964,66 @@ bool pe_list_view_leaves_list(const struct PeListView *view,
                               const struct PeSelectionSummary *summary,
                               enum PeAction action,
                               int64_t to);
+
+// Loads the list `view` shows on a store connection of the core's own, off the window thread: its counts, its row
+// count, the first `PE_LIST_PAGE` rows and, when `folder` is not 0, the row of the message `uid` of `folder` (looked
+// for first in those rows, nearest `hint`, the row it had; -1 when not known). `ListReady` follows with the request
+// this returns in `uid` and `generation` (the window's number for the load, any it likes) in `count`. A newer load
+// of the same view cancels this one and the pages asked for before it: their events never come. What it read is
+// kept for the view, as its calls on the window thread keep what they read (a click selects from its rows,
+// `pe_list_view_stale` is false until the store changes). 0 on failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view.
+uint64_t pe_list_view_load(const struct PeCore *core,
+                           const struct PeListView *view,
+                           uint64_t generation,
+                           int64_t folder,
+                           uint64_t uid,
+                           int64_t hint);
+
+// Loads `PE_LIST_PAGE` rows of the list `view` shows from `offset` on, off the window thread as `pe_list_view_load`
+// does: `ListPageReady` follows with the request this returns in `uid` and `generation` in `count`. Ask for the page
+// after the one shown too, so it is there when scrolled to. Dropped (no event) when a load of the whole list comes
+// after it. 0 on failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view.
+uint64_t pe_list_view_load_page(const struct PeCore *core,
+                                const struct PeListView *view,
+                                uint64_t generation,
+                                uint64_t offset);
+
+// What the load `request` read, after its `ListReady` or `ListPageReady`, taken once; NULL for a request that failed,
+// was dropped or is unknown. Free with `pe_list_load_free`.
+//
+// # Safety
+// `core` must be a live handle.
+struct PeListLoad *pe_list_load_result(const struct PeCore *core,
+                                       uint64_t request);
+
+// Drops a load nobody waits for any more (its window closed): its event does not come
+//
+// # Safety
+// `core` must be a live handle.
+void pe_list_load_cancel(const struct PeCore *core, uint64_t request);
+
+// What the load read besides its rows, owned by it
+//
+// # Safety
+// `load` must be NULL or live.
+const struct PeListLoadInfo *pe_list_load_info(const struct PeListLoad *load);
+
+// The rows the load read (from `offset` on), as `pe_list_view_messages` gives them; free with
+// `pe_message_list_free`. NULL for NULL.
+//
+// # Safety
+// `load` must be NULL or live.
+struct PeMessageList *pe_list_load_messages(const struct PeListLoad *load);
+
+// # Safety
+// `load` must be NULL or a load that was not freed yet.
+void pe_list_load_free(struct PeListLoad *load);
 
 // The message rules, in their order; NULL on failure
 //
@@ -3937,19 +4139,38 @@ void pe_selection_free(struct PeSelection *selection);
 // `selection` must be NULL or a live selection.
 void pe_selection_clear(struct PeSelection *selection);
 
-// Adds the message `uid` of `folder`
+// Adds the message `uid` of `folder`; to a whole list's selection (`pe_list_view_select_all`), in its place
 //
 // # Safety
 // `selection` must be NULL or a live selection.
-void pe_selection_add(struct PeSelection *selection, int64_t folder, uint64_t uid);
+void pe_selection_add(struct PeSelection *selection,
+                      int64_t folder,
+                      uint64_t uid);
 
-// How many messages it has
+// How many messages it has; for a whole list's (`pe_list_view_select_all`), how many the list had then, without
+// listing them
 //
 // # Safety
 // `selection` must be NULL or a live selection.
 size_t pe_selection_count(const struct PeSelection *selection);
 
-// Message `index` of it (in the list's order when it was filled from ranges); false past the end
+// Whether it is a whole list's (`pe_list_view_select_all`), its messages not listed: `pe_selection_get` gives none
+// until `pe_selection_list` lists them
+//
+// # Safety
+// `selection` must be NULL or a live selection.
+bool pe_selection_is_all(const struct PeSelection *selection);
+
+// Lists the messages of a whole list's selection, in the list's order, for `pe_selection_get` (the calls taking a
+// selection list them by themselves); on the calling thread, as long as reading the list takes. False on failure.
+//
+// # Safety
+// `core` must be a live handle, `selection` NULL or a live selection.
+bool pe_selection_list(const struct PeCore *core,
+                       struct PeSelection *selection);
+
+// Message `index` of it (in the list's order when it was filled from ranges); false past the end, and for a whole
+// list's selection not listed (`pe_selection_list`)
 //
 // # Safety
 // `selection` must be NULL or a live selection, `folder` and `uid` valid pointers.
@@ -3973,13 +4194,31 @@ uint64_t pe_positions_get(const struct PePositions *positions,
 // `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, freed once.
 void pe_positions_free(struct PePositions *positions);
 
-// Fills `summary`; false on failure
+// Fills `summary`; false on failure. A whole list's selection is counted where its messages are, never listed (its
+// `flag_color` is 0).
 //
 // # Safety
 // `core` must be a live handle, `selection` a live selection, `summary` a valid pointer.
 bool pe_selection_summary(const struct PeCore *core,
                           const struct PeSelection *selection,
                           struct PeSelectionSummary *summary);
+
+// `pe_selection_summary` off the window thread, for a whole list's selection (`pe_list_view_select_all`), which
+// counts every message of the list: `ReadDone` with the request this returns in `uid` follows, then
+// `pe_selection_summary_result`. Meanwhile `pe_selection_count` is there at once. 0 on failure.
+//
+// # Safety
+// `core` must be a live handle, `selection` NULL or a live selection.
+uint64_t pe_selection_summary_start(const struct PeCore *core,
+                                    const struct PeSelection *selection);
+
+// What `pe_selection_summary_start` counted, once, into `summary`; false for another request or on failure
+//
+// # Safety
+// `core` must be a live handle, `summary` a valid pointer.
+bool pe_selection_summary_result(const struct PeCore *core,
+                                 uint64_t request,
+                                 struct PeSelectionSummary *summary);
 
 // The reading pane's page over several messages ("3 messages selected", "2 unread" under it), in the style of
 // `pe_reader_page`. Free with `pe_string_free`.
@@ -4024,6 +4263,29 @@ char *pe_selection_act(const struct PeCore *core,
                        enum PeAction action,
                        int64_t to,
                        char **error);
+
+// Does `action` to the selected messages as `pe_selection_act` does, off the window thread: the messages listed (a
+// whole list's too), changed in the store on a connection of the core's own (`FolderChanged` follows, and the list
+// shows the change) and handed to the server, after the actions asked for before it. `Acted` follows with the request
+// this returns in `uid` and what the status bar says, or why not. When the server does not do it, the store takes it
+// back and `ActionUndone` says so. 0 on failure (a flag colour that is none).
+//
+// # Safety
+// `core` must be a live handle, `selection` NULL or a live selection.
+uint64_t pe_selection_act_start(const struct PeCore *core,
+                                const struct PeSelection *selection,
+                                enum PeAction action,
+                                int64_t to);
+
+// Mark All Read off the window thread, as `pe_selection_act_start` does an action: `Acted` follows with the request
+// this returns in `uid` and what the status bar says ("Marked 3 messages as read"); `ActionUndone` when the server
+// refuses. 0 on failure.
+//
+// # Safety
+// `core` must be a live handle.
+uint64_t pe_mark_read_start(const struct PeCore *core,
+                            enum PeMarkRead what,
+                            int64_t id);
 
 // The rows of the Move and Copy window for messages all in `current` (0 for messages of several folders), what
 // `filter` (UTF-8, NULL or empty for none) leaves of them: "Recent" and the folders used last while nothing is typed,

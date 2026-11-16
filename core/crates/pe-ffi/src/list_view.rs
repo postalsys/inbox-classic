@@ -11,7 +11,7 @@ use pe_core::{ListView, Summary};
 
 use crate::core::{
     PeCore, PeMessageList, PeNextUnread, PeShow, PeSortField, arg, handed, message_list, put_neighbours,
-    put_next_unread, sort_of, take_back, with,
+    put_next_unread, sort_of, take_back, with, with_shared,
 };
 use crate::guard;
 use crate::selection::{PeAction, PePositions, PeSelection, PeSelectionSummary, action_of, ranges_of};
@@ -589,8 +589,34 @@ pub unsafe extern "C" fn pe_list_view_select_ranges(
     let Some(refs) = refs else {
         return false;
     };
-    selection.0 = refs;
+    selection.0 = pe_core::Selected::Listed(refs);
     true
+}
+
+/// Select All: fills `selection` with every message of the list (a collapsed conversation's too) without listing them,
+/// counted (`pe_selection_count`) from what the list counted last; the calls taking the selection list them when they
+/// need them (`pe_selection_act_start` off the window thread). False on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `view` NULL or a live view, `selection` NULL or a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_select_all(
+    core: *const PeCore,
+    view: *const PeListView,
+    selection: *mut PeSelection,
+) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(selection) = (unsafe { selection.as_mut() }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    match unsafe { listed(core, view, None, |core, view| view.select_all(core).ok()) } {
+        Some(all) => {
+            selection.0 = all;
+            true
+        }
+        None => false,
+    }
 }
 
 /// Where the messages of `selection` are now in the list, ascending, to select them again after it changed; those no
@@ -611,7 +637,8 @@ pub unsafe extern "C" fn pe_list_view_positions(
     // SAFETY: as the caller guarantees
     unsafe {
         listed(core, view, null_mut(), |core, view| {
-            view.positions(core, &selection.0)
+            let refs = core.selected_refs(&selection.0).unwrap_or_default();
+            view.positions(core, &refs)
                 .map_or(null_mut(), |found| handed(PePositions(found)))
         })
     }
@@ -665,4 +692,162 @@ pub unsafe extern "C" fn pe_list_view_leaves_list(
             action_of(action, to).is_some_and(|action| view.leaves_list(&Summary::from(summary), action))
         })
     }
+}
+
+// ---- loaded off the window thread ----
+
+/// The rows a list load reads at a time (`pe_list_view_load`, `pe_list_view_load_page`)
+pub const PE_LIST_PAGE: u64 = 100;
+
+const _: () = assert!(PE_LIST_PAGE == pe_core::LIST_PAGE);
+
+/// What a list load read, besides its rows
+#[repr(C)]
+#[derive(Debug, Clone, Copy, Default)]
+pub struct PeListLoadInfo {
+    /// The window's number for the load, as it gave it
+    pub generation: u64,
+    /// Where its rows start in the list
+    pub offset: u64,
+    /// A load of the list (`pe_list_view_load`), with the counts; false for a page, whose counts are 0
+    pub counted: bool,
+    /// The counts of the status bar (`pe_list_view_counts`) and the row count (`pe_list_view_row_count`)
+    pub total: u64,
+    pub unread: u64,
+    pub rows: u64,
+    /// As `pe_list_view_lists_recipients`
+    pub lists_recipients: bool,
+    /// The row of the message the load was asked about, -1 when it is not in the list or none was asked about
+    pub index: i64,
+}
+
+/// A list load's result; free with `pe_list_load_free`
+pub struct PeListLoad {
+    info: PeListLoadInfo,
+    messages: Vec<pe_store::Message>,
+}
+
+/// Loads the list `view` shows on a store connection of the core's own, off the window thread: its counts, its row
+/// count, the first `PE_LIST_PAGE` rows and, when `folder` is not 0, the row of the message `uid` of `folder` (looked
+/// for first in those rows, nearest `hint`, the row it had; -1 when not known). `ListReady` follows with the request
+/// this returns in `uid` and `generation` (the window's number for the load, any it likes) in `count`. A newer load
+/// of the same view cancels this one and the pages asked for before it: their events never come. What it read is
+/// kept for the view, as its calls on the window thread keep what they read (a click selects from its rows,
+/// `pe_list_view_stale` is false until the store changes). 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `view` NULL or a live view.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_load(
+    core: *const PeCore,
+    view: *const PeListView,
+    generation: u64,
+    folder: i64,
+    uid: u64,
+    hint: i64,
+) -> u64 {
+    // SAFETY: as the caller guarantees
+    let Some(view) = (unsafe { view.as_ref() }) else {
+        return 0;
+    };
+    let place = (folder != 0).then(|| (folder, uid, u64::try_from(hint).ok()));
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, 0, |core| core.list_load(&view.0, generation, place).unwrap_or(0)) }
+}
+
+/// Loads `PE_LIST_PAGE` rows of the list `view` shows from `offset` on, off the window thread as `pe_list_view_load`
+/// does: `ListPageReady` follows with the request this returns in `uid` and `generation` in `count`. Ask for the page
+/// after the one shown too, so it is there when scrolled to. Dropped (no event) when a load of the whole list comes
+/// after it. 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `view` NULL or a live view.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_load_page(
+    core: *const PeCore,
+    view: *const PeListView,
+    generation: u64,
+    offset: u64,
+) -> u64 {
+    // SAFETY: as the caller guarantees
+    let Some(view) = (unsafe { view.as_ref() }) else {
+        return 0;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with_shared(core, 0, |core| {
+            core.list_load_page(&view.0, generation, offset).unwrap_or(0)
+        })
+    }
+}
+
+/// What the load `request` read, after its `ListReady` or `ListPageReady`, taken once; NULL for a request that failed,
+/// was dropped or is unknown. Free with `pe_list_load_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_load_result(core: *const PeCore, request: u64) -> *mut PeListLoad {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.list_load_result(request).map_or(null_mut(), |load| {
+                handed(PeListLoad {
+                    info: PeListLoadInfo {
+                        generation: load.generation,
+                        offset: load.offset,
+                        counted: load.counted,
+                        total: load.total,
+                        unread: load.unread,
+                        rows: load.rows,
+                        lists_recipients: load.lists_recipients,
+                        index: load.index.and_then(|i| i64::try_from(i).ok()).unwrap_or(-1),
+                    },
+                    messages: load.messages,
+                })
+            })
+        })
+    }
+}
+
+/// Drops a load nobody waits for any more (its window closed): its event does not come
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_load_cancel(core: *const PeCore, request: u64) {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, (), |core| core.list_load_cancel(request)) }
+}
+
+/// What the load read besides its rows, owned by it
+///
+/// # Safety
+/// `load` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_load_info(load: *const PeListLoad) -> *const PeListLoadInfo {
+    // SAFETY: as the caller guarantees
+    unsafe { load.as_ref() }.map_or(std::ptr::null(), |load| &load.info)
+}
+
+/// The rows the load read (from `offset` on), as `pe_list_view_messages` gives them; free with
+/// `pe_message_list_free`. NULL for NULL.
+///
+/// # Safety
+/// `load` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_load_messages(load: *const PeListLoad) -> *mut PeMessageList {
+    // SAFETY: as the caller guarantees
+    let Some(load) = (unsafe { load.as_ref() }) else {
+        return null_mut();
+    };
+    guard(|| message_list(&load.messages)).unwrap_or(null_mut())
+}
+
+/// # Safety
+/// `load` must be NULL or a load that was not freed yet.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_load_free(load: *mut PeListLoad) {
+    // SAFETY: as the caller guarantees
+    unsafe { take_back(load) }
 }

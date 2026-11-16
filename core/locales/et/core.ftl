@@ -867,3 +867,27 @@ setup-skipped-unreachable = { $name } jäeti vahele: selle sisselogimisteenusega
 attachment-runs-programs = „{ $name }“ võib käivitada programme, seega Inbox Classic seda ei ava. Salvesta see ja ava ise, kui usaldad selle päritolu.
 # review: new
 attachment-decrypted-note = See manus on pärit krüptitud kirjast. Avamiseks salvestab Inbox Classic selle dekrüptituna sellesse arvutisse, sinu kausta, mille Inbox Classic päeva pärast tühjendab.
+# review: new
+undone-move = { $count ->
+   *[other] Server ei teisaldanud { $messages } kausta { $folder }, need on taas kaustas { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+   *[other] Server ei kustutanud { $messages }, need on taas kaustas { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+   *[other] Server ei arhiveerinud { $messages }, need on taas kaustas { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+   *[other] Server ei märkinud { $messages } loetuks, need on taas lugemata: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+   *[other] Server ei märkinud { $messages } lugemata, need on taas loetud: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+   *[other] Server ei muutnud { $messages } lippe, need on nagu enne: { $reason }
+}

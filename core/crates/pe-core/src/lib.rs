@@ -16,11 +16,13 @@ mod bounce;
 pub mod calendar;
 pub mod card_pictures;
 mod compose;
+mod connections;
 mod contentline;
 mod export;
 mod fold;
 pub mod keys;
 pub mod layout;
+mod list_load;
 mod list_view;
 mod lookup;
 pub mod mailto;
@@ -29,6 +31,7 @@ pub mod otp;
 pub mod pictures;
 pub mod protect;
 mod protect_out;
+mod reads;
 mod requests;
 mod rules;
 mod search;
@@ -55,18 +58,19 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
-pub use list_view::{FIND_PAUSE_MS, LIST_DIM, LIST_GATHER_MS, LIST_LOADING_MS, ListView};
+pub use list_view::{FIND_PAUSE_MS, LIST_DIM, LIST_GATHER_MS, LIST_LOADING_MS, LIST_PAGE, ListLoad, ListView};
 use pe_i18n::{Text, tr, tr_args};
 use pe_net::Trust;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
 pub use pe_store::{Ahead, DEFAULT_LIMIT_MB, FlagColor};
 pub use pe_store::{MessageRef, Scope, Search, Show, ThreadMark};
-pub use selection::{Action, Summary, color_name};
+pub use selection::{Action, MarkRead, Selected, Summary, color_name};
 pub use targets::{TargetKind, TargetRow};
 
 use tokio::sync::mpsc::{UnboundedSender, unbounded_channel};
 
 pub use compose::{ComposeError, Draft, DraftKind, Outgoing, address_label, autosave_wait};
+use connections::Connection;
 pub use export::{Exported, write_file};
 pub use lookup::{FindOutcome, PublishOutcome};
 /// The words of the windows in the language in use
@@ -267,6 +271,38 @@ pub enum Event {
     AddressBookChanged,
     /// The OpenPGP keys changed other than through their window (an import of a setup file)
     KeysChanged,
+    /// A list loaded in the background ([`Core::list_load`]) is read: [`Core::list_load_result`]. `generation` is the
+    /// window's number for the load.
+    ListReady {
+        request: u64,
+        generation: u64,
+    },
+    /// A page of a list read in the background ([`Core::list_load_page`]): [`Core::list_load_result`]
+    ListPageReady {
+        request: u64,
+        generation: u64,
+    },
+    /// The server did not do what the user asked of `count` messages of `folder` (a move, a delete, Mark All Read),
+    /// so the store took the change back: the rows are as they were, and `text` says what and why, for a bar over the
+    /// list
+    ActionUndone {
+        account: AccountId,
+        folder: FolderId,
+        count: u64,
+        text: String,
+    },
+    /// What the user asked of messages in the background ([`Core::act_start`], [`Core::mark_read_start`]) is done in
+    /// the store and handed to the server: `said` is what the status bar says, or why it was refused
+    Acted {
+        request: u64,
+        said: std::result::Result<String, String>,
+    },
+    /// A draft or an attachment read off the window thread is there ([`Core::draft_start`],
+    /// [`Core::attachment_start`] and their kin): [`Core::draft_result`], [`Core::attachment_result`],
+    /// [`Core::open_attachment_result`]
+    ReadDone {
+        request: u64,
+    },
 }
 
 /// What a failure asks of the user
@@ -482,6 +518,12 @@ pub struct Core {
     last_sent: undo_send::LastSent,
     /// What the last Undo brought back, by folder and Message-ID, for the window to select once it is there
     restored: Mutex<Vec<(FolderId, Vec<String>)>>,
+    /// The store connections of the work done off the window thread (connections.rs)
+    connections: connections::Connections,
+    /// Lists loaded off the window thread (list_load.rs)
+    list_loads: list_load::ListLoads,
+    /// Drafts and attachments read off the window thread (reads.rs)
+    reads: reads::Reads,
 }
 
 impl Core {
@@ -571,12 +613,26 @@ impl Core {
             undo: Mutex::new(None),
             last_sent: Mutex::new(None),
             restored: Mutex::default(),
+            connections: Default::default(),
+            list_loads: Default::default(),
+            reads: Default::default(),
         })
     }
 
-    fn store(&self) -> MutexGuard<'_, Store> {
+    /// The store connection of the code running on this thread: the windows' own, or the one of the background work
+    /// running here ([`connections::on`])
+    fn store(&self) -> connections::Held<'_> {
+        let own = match connections::current() {
+            Connection::Window => None,
+            Connection::Lists => Some(&self.connections.lists),
+            Connection::Reads => Some(&self.connections.reads),
+            Connection::Actions => Some(&self.connections.actions),
+        };
         // a panic while the store was held left nothing half written: transactions roll back
-        self.store.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+        match own.and_then(|own| connections::open(own, &self.path)) {
+            Some(held) => held,
+            None => connections::Held::Window(self.store.lock().unwrap_or_else(|poisoned| poisoned.into_inner())),
+        }
     }
 
     fn runtime(&self) -> Result<&tokio::runtime::Runtime> {
@@ -1461,32 +1517,29 @@ impl Core {
     }
 
     /// Builds the view of a message in the background: [`Event::ViewReady`] follows with the request this returns.
-    /// The source is read now; parsing, folding and sanitizing it happen on a worker thread. A view started after
-    /// it, or [`Core::message_view_cancel`], makes it give up between those steps: one is shown at a time.
-    pub fn message_view_start(&self, folder: FolderId, uid: u64, allow_remote_images: bool) -> Result<u64> {
-        let found = self.view_source(folder, uid)?;
+    /// Its source is read off the window thread too, on a store connection of the core's own; parsing, folding and
+    /// sanitizing it follow there. A view started after it, or [`Core::message_view_cancel`], makes it give up between
+    /// those steps: one is shown at a time.
+    pub fn message_view_start(self: &Arc<Self>, folder: FolderId, uid: u64, allow_remote_images: bool) -> Result<u64> {
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
         self.newest_view.store(request, Ordering::Relaxed);
         let newest = self.newest_view.clone();
-        let path = self.path.clone();
-        let view_store = self.view_store.clone();
         let events = self.events.clone();
-        let timings = self.timings.clone();
-        let files = self.attachment_files.clone();
-        let work = async move {
-            let found = found?;
+        let work = self.in_background(Connection::Reads, move |core| {
             let dropped = move || newest.load(Ordering::Relaxed) != request;
-            let built = tokio::task::spawn_blocking(move || {
-                let opened = || OpenStore::open(&view_store, &path);
-                let view = finish_view(&found, allow_remote_images, &dropped, opened, &*events);
-                timings.view_built(found.folder, found.uid, std::time::Instant::now());
-                if let Some(view) = &view {
-                    opening::remember_message(&files, found.folder, found.uid, view);
-                }
-                view
-            });
-            built.await.ok().flatten()
-        };
+            if dropped() {
+                return None;
+            }
+            let found = core.view_source(folder, uid).ok().flatten()?;
+            let view = finish_view(&found, allow_remote_images, &dropped, || Some(core.store()), &*events);
+            core.timings
+                .view_built(found.folder, found.uid, std::time::Instant::now());
+            if let Some(view) = &view {
+                core.remember_attachments(found.folder, found.uid, view);
+            }
+            view
+        });
+        let work = async move { work.await.flatten() };
         self.views
             .start(self.runtime()?, request, work, self.events.clone(), |request| {
                 Event::ViewReady { request }
@@ -1960,13 +2013,19 @@ impl Core {
 
     /// Marks every message of a folder read: in the store now, on the server in the background
     pub fn mark_all_read(&self, folder: FolderId) -> Result<()> {
+        self.mark_folder_read(folder).map(|_| ())
+    }
+
+    /// [`Core::mark_all_read`], and how many messages it marked
+    pub(crate) fn mark_folder_read(&self, folder: FolderId) -> Result<u64> {
         let (account, uids) = {
             let store = self.store();
             (store.folder(folder)?.account_id, store.mark_all_seen(folder)?)
         };
         if uids.is_empty() {
-            return Ok(());
+            return Ok(0);
         }
+        let count = uids.len() as u64;
         self.post(Event::FolderChanged { account, folder })?;
         self.send_command(
             account,
@@ -1976,7 +2035,8 @@ impl Core {
                 flag: "\\Seen",
                 on: true,
             },
-        )
+        )?;
+        Ok(count)
     }
 
     /// Marks every message of every folder of an account read, as [`Core::mark_all_read`] marks one folder
@@ -2643,6 +2703,12 @@ impl Drop for Core {
             workers.lock().unwrap_or_else(|p| p.into_inner()).clear();
         }
         if let Some(runtime) = self.runtime.take() {
+            // dropped by background work that held it last, on one of the runtime's own threads: that can not wait for
+            // the runtime to end
+            if tokio::runtime::Handle::try_current().is_ok() {
+                runtime.shutdown_background();
+                return;
+            }
             // workers that are waiting for the network are cancelled
             runtime.shutdown_timeout(SHUTDOWN_GRACE);
         }

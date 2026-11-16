@@ -10,11 +10,12 @@
 //! without reading the whole list again.
 
 use std::collections::BTreeSet;
-use std::sync::Mutex;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{Arc, Mutex};
 
 use pe_store::{FolderId, Generation, Message, MessageRef, RowRef, Scope, Search, Show, Sort};
 
-use crate::{Action, Core, NextUnread, Result, Summary};
+use crate::{Action, Core, NextUnread, Result, Selected, Summary};
 
 /// When a list begins, in milliseconds since the epoch, as the store notes when a message became read: a tenth of a
 /// second early, as SQLite's clock (`seen_at`) can lag behind this one (on Windows by a tick of about 16 ms)
@@ -48,8 +49,22 @@ pub const LIST_DIM: f64 = 0.55;
 /// again while nothing was written to the store ([`Generation`]) in the same minute (words like `newer_than:` count
 /// from now). The pages also say which messages the rows show until the list is counted again, as the apps do when
 /// they read it again: a click selects what its row shows. A copy of the view starts without.
-#[derive(Default)]
-struct Memo(Mutex<Option<Kept>>);
+/// Shared by a view and the loads it started in the background ([`ListView::snapshot`]), which keep what they read
+/// in it; `id` tells the view apart from others for its loads (the newest wins)
+struct Memo {
+    id: u64,
+    kept: Arc<Mutex<Option<Kept>>>,
+}
+
+impl Default for Memo {
+    fn default() -> Memo {
+        static NEXT: AtomicU64 = AtomicU64::new(1);
+        Memo {
+            id: NEXT.fetch_add(1, Ordering::Relaxed),
+            kept: Arc::default(),
+        }
+    }
+}
 
 /// What [`Memo`] keeps, and of which list
 struct Kept {
@@ -73,7 +88,7 @@ struct Page {
 
 /// What the store held and the minute, when something was read
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct When {
+pub(crate) struct When {
     generation: Generation,
     minute: i64,
 }
@@ -111,7 +126,7 @@ impl Memo {
     /// `f` with what is kept of the list read at `moment`: nothing when it was another list, no counts when they were
     /// read before a write or in another minute
     fn with<T>(&self, moment: Moment, f: impl FnOnce(&mut Kept) -> T) -> T {
-        let mut kept = self.0.lock().unwrap_or_else(|e| e.into_inner());
+        let mut kept = self.kept.lock().unwrap_or_else(|e| e.into_inner());
         let same_list = kept
             .as_ref()
             .is_some_and(|k| k.sort == moment.sort && k.search == *moment.search);
@@ -510,7 +525,7 @@ impl ListView {
     /// the reload that the change's event asks for a moment later.
     pub fn stale(&self, core: &Core) -> Result<bool> {
         self.remembered(core, false, |search, moment| {
-            let kept = self.memo.0.lock().unwrap_or_else(|e| e.into_inner());
+            let kept = self.memo.kept.lock().unwrap_or_else(|e| e.into_inner());
             Ok(!kept
                 .as_ref()
                 .is_some_and(|k| k.sort == moment.sort && k.search == *search && k.counted_at(moment.at)))
@@ -574,6 +589,21 @@ impl ListView {
         })
     }
 
+    /// Select All: every message of the list (a collapsed conversation's too), counted, not listed: counted from what
+    /// the view kept when nothing was written since it counted the list. Listed by [`Core::selected_refs`] when a
+    /// command needs them.
+    pub fn select_all(&self, core: &Core) -> Result<Selected> {
+        let Some(search) = self.search() else {
+            return Ok(Selected::default());
+        };
+        let count = self.counts(core)?.0;
+        Ok(Selected::All {
+            search,
+            sort: self.sort,
+            count,
+        })
+    }
+
     /// Where the messages `refs` are now, ascending; those no longer in the list left out
     pub fn positions(&self, core: &Core, refs: &[MessageRef]) -> Result<Vec<u64>> {
         self.listed(Vec::new(), |search| core.positions(search, self.sort, refs))
@@ -587,7 +617,7 @@ impl ListView {
         self.remembered(core, Some(Vec::new()), |search, moment| {
             let counted = self
                 .memo
-                .0
+                .kept
                 .lock()
                 .unwrap_or_else(|e| e.into_inner())
                 .as_ref()
@@ -620,6 +650,130 @@ impl ListView {
     pub fn leaves_list(&self, summary: &Summary, action: Action) -> bool {
         summary.leaves_list(action, self.hide_ignored)
     }
+
+    /// Which view this is, for its loads in the background (a copy is another view)
+    pub(crate) fn view_id(&self) -> u64 {
+        self.memo.id
+    }
+
+    /// A copy of the view for a load in the background: what it reads is kept for this view too
+    pub(crate) fn snapshot(&self) -> ListView {
+        ListView {
+            memo: Memo {
+                id: self.memo.id,
+                kept: self.memo.kept.clone(),
+            },
+            ..self.clone()
+        }
+    }
+
+    /// What the store holds now and the minute, read on the windows' connection: what a load started now is kept as
+    /// (a write after it makes the list stale, so it is never older than what it read)
+    pub(crate) fn moment_now(core: &Core) -> Result<When> {
+        Ok(When {
+            generation: core.generation()?,
+            minute: now_ms() / 60_000,
+        })
+    }
+
+    /// Reads the list as a load does, on the connection of the thread: the counts, the row count and the page at
+    /// `offset` (with `counted`; otherwise the page alone), and the row of `place` (a message and the row it had, if
+    /// known). None when `dropped` says a newer load took its place, between the steps. Kept for the view as read at
+    /// `at`, as the calls of the window thread keep what they read.
+    pub(crate) fn load(
+        &self,
+        core: &Core,
+        at: When,
+        offset: u64,
+        counted: bool,
+        place: Option<(MessageRef, Option<u64>)>,
+        dropped: &dyn Fn() -> bool,
+    ) -> Result<Option<ListLoad>> {
+        let Some(search) = self.search() else {
+            return Ok(Some(ListLoad {
+                offset,
+                counted,
+                ..ListLoad::default()
+            }));
+        };
+        let mut load = ListLoad {
+            offset,
+            counted,
+            ..ListLoad::default()
+        };
+        if counted {
+            load.lists_recipients = core.lists_recipients(&search)?;
+            (load.total, load.unread) = core.list_counts(&search)?;
+            load.rows = match self.grouped {
+                true => core.count_rows(&search)?,
+                false => load.total,
+            };
+            if dropped() {
+                return Ok(None);
+            }
+        }
+        load.messages = core.search(&search, self.sort, offset, LIST_PAGE)?;
+        let page = Page {
+            offset,
+            limit: LIST_PAGE,
+            at,
+            rows: load.messages.iter().map(RowRef::of).collect(),
+        };
+        if let Some((wanted, hint)) = place {
+            if dropped() {
+                return Ok(None);
+            }
+            let shown = (offset..).zip(&page.rows).filter(|(_, row)| row.at == wanted);
+            let near = shown
+                .map(|(index, _)| index)
+                .min_by_key(|index| index.abs_diff(hint.unwrap_or(0)));
+            load.index = match near {
+                Some(index) => Some(index),
+                None => core.search_index(&search, self.sort, wanted.folder, wanted.uid)?,
+            };
+        }
+        if dropped() {
+            return Ok(None);
+        }
+        let moment = Moment {
+            search: &search,
+            sort: self.sort,
+            at,
+        };
+        self.memo.with(moment, |kept| {
+            if counted {
+                kept.counts = Some((load.total, load.unread));
+                kept.rows = Some(load.rows);
+                kept.pages.clear();
+            }
+            kept.keep(page);
+        });
+        Ok(Some(load))
+    }
+}
+
+/// The rows a list load reads at a time
+pub const LIST_PAGE: u64 = 100;
+
+/// What a list load read in the background ([`Core::list_load`], [`Core::list_load_page`])
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ListLoad {
+    /// The number the window gave the load, as it was asked
+    pub generation: u64,
+    /// Where its rows start in the list
+    pub offset: u64,
+    /// It read the counts (a load of the list); a page alone did not, and has them 0
+    pub counted: bool,
+    /// The messages of the list, the unread ones, and its rows (one a conversation when grouped)
+    pub total: u64,
+    pub unread: u64,
+    pub rows: u64,
+    /// Whether the list names whom its messages went to ([`Core::lists_recipients`])
+    pub lists_recipients: bool,
+    /// The rows from `offset` on, [`LIST_PAGE`] at most
+    pub messages: Vec<Message>,
+    /// The row of the message asked about, None when it is not in the list or none was asked about
+    pub index: Option<u64>,
 }
 
 #[cfg(test)]
@@ -900,7 +1054,7 @@ mod tests {
                 .iter()
                 .map(RowRef::of)
                 .collect();
-            let kept = view.memo.0.lock().unwrap();
+            let kept = view.memo.kept.lock().unwrap();
             let pages = &kept.as_ref().unwrap().pages;
             let kept: Vec<RowRef> = pages.iter().flat_map(|p| p.rows.iter().copied()).collect();
             assert_eq!(kept, fresh, "grouped {grouped}, open {open:?}");
@@ -1037,7 +1191,7 @@ mod tests {
                     generation: core.generation().unwrap(),
                     minute: now_ms() / 60_000,
                 };
-                let kept = view.memo.0.lock().unwrap();
+                let kept = view.memo.kept.lock().unwrap();
                 kept.as_ref().unwrap().row_near(first, 1, moment_at)
             };
             assert_eq!(found(&view), Some(0), "{what}");

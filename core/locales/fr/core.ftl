@@ -916,3 +916,27 @@ setup-skipped-unreachable = { $name } a été ignoré : son service de connexion
 attachment-runs-programs = « { $name } » peut lancer des programmes, Inbox Classic ne l’ouvre donc pas. Enregistrez-le, puis ouvrez-le vous-même si vous faites confiance à sa provenance.
 # review: new
 attachment-decrypted-note = Cette pièce jointe vient d’un message chiffré. Pour l’ouvrir, Inbox Classic l’enregistre déchiffrée sur cet ordinateur, dans un dossier à vous qu’Inbox Classic vide au bout d’un jour.
+# review: new
+undone-move = { $count ->
+   *[other] Le serveur n’a pas déplacé { $messages } vers { $folder }, ils sont donc de retour dans { $from } : { $reason }
+}
+# review: new
+undone-delete = { $count ->
+   *[other] Le serveur n’a pas supprimé { $messages }, ils sont donc de retour dans { $from } : { $reason }
+}
+# review: new
+undone-archive = { $count ->
+   *[other] Le serveur n’a pas archivé { $messages }, ils sont donc de retour dans { $from } : { $reason }
+}
+# review: new
+undone-read = { $count ->
+   *[other] Le serveur n’a pas marqué { $messages } comme lus, ils sont donc de nouveau non lus : { $reason }
+}
+# review: new
+undone-unread = { $count ->
+   *[other] Le serveur n’a pas marqué { $messages } comme non lus, ils sont donc de nouveau lus : { $reason }
+}
+# review: new
+undone-flags = { $count ->
+   *[other] Le serveur n’a pas modifié les indicateurs de { $messages }, ils sont donc comme avant : { $reason }
+}

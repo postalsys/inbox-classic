@@ -153,6 +153,20 @@ pub(crate) enum Command {
     },
 }
 
+/// What a command the store took back had asked, for the words of [`Event::ActionUndone`]
+#[derive(Debug, Clone, Copy)]
+enum Undone {
+    /// Moved to this folder (deleted into Deleted Items, junk)
+    Moved(FolderId),
+    /// Deleted for good
+    Deleted,
+    Archived,
+    Flag {
+        flag: &'static str,
+        on: bool,
+    },
+}
+
 /// A failed command, for [`Event::Failed`]
 struct Failure {
     kind: FailureKind,
@@ -172,6 +186,14 @@ impl From<pe_imap::Error> for Failure {
 }
 
 impl Failure {
+    /// A failure told to the user already ([`Event::ActionUndone`]): nothing more to say
+    fn told() -> Failure {
+        Failure {
+            kind: FailureKind::Other,
+            message: String::new(),
+        }
+    }
+
     /// A failure in words for the status bar: a refused sign-in and a broken connection said plainly, with the
     /// server's or the system's own words after it, the rest as they came
     fn said(kind: FailureKind, detail: String) -> Failure {
@@ -657,7 +679,7 @@ impl Worker {
                     .map_err(Failure::from),
                 Err(failure) => Err(failure),
             };
-            let became = self.restore_on_failure(store, m.to, &removed, moved)?;
+            let became = self.restore_on_failure(store, m.to, &removed, Undone::Moved(m.from), moved)?;
             let synced = self.sync_one(store, m.from).await;
             store.adopt_moved_sources(m.to, m.from, &uids, &became)?;
             synced?;
@@ -994,6 +1016,9 @@ impl Worker {
 
     fn fail(&mut self, failure: Failure) {
         self.reset_after(&failure);
+        if failure.message.is_empty() && failure.kind == FailureKind::Other {
+            return;
+        }
         // a refused password is told once, not again for each command until the user gives another
         if failure.kind == FailureKind::Authentication && !self.ctx.secrets.first_refusal(self.account) {
             return;
@@ -1041,7 +1066,25 @@ impl Worker {
                 Ok(())
             }
             Command::SetFlag { folder, uids, flag, on } => {
-                Ok(set_flag(self.client(store).await?, store, folder, &uids, flag, on).await?)
+                let set = match self.client(store).await {
+                    Ok(client) => set_flag(client, store, folder, &uids, flag, on)
+                        .await
+                        .map_err(Failure::from),
+                    Err(failure) => Err(failure),
+                };
+                match set {
+                    // refused by the server: the store as it was, said in a bar over the list; offline, the store keeps
+                    // the change, which the next sync puts right
+                    Err(failure) if failure.kind == FailureKind::Other => {
+                        store.set_flag_many(folder, &uids, flag, !on)?;
+                        self.emit(Event::FolderChanged {
+                            account: self.account,
+                            folder,
+                        });
+                        Err(self.undone(store, folder, uids.len(), Undone::Flag { flag, on }, failure))
+                    }
+                    other => other,
+                }
             }
             Command::SetFlags {
                 folder,
@@ -1061,7 +1104,7 @@ impl Worker {
                         .map_err(Failure::from),
                     Err(failure) => Err(failure),
                 };
-                let became = self.restore_on_failure(store, folder, &removed, moved)?;
+                let became = self.restore_on_failure(store, folder, &removed, Undone::Moved(to), moved)?;
                 // the message shows up in the folder it went to, with its source when it was downloaded
                 let synced = self.sync_one(store, to).await;
                 store.adopt_moved_sources(folder, to, &uids, &became)?;
@@ -1070,7 +1113,7 @@ impl Worker {
             Command::UndoMoves { moves } => self.undo_moves(store, moves).await,
             Command::Archive { folder, uids, removed } => {
                 let archived = self.archive(store, folder, &uids, &removed).await;
-                self.restore_on_failure(store, folder, &removed, archived)
+                self.restore_on_failure(store, folder, &removed, Undone::Archived, archived)
             }
             Command::Copy { folder, uids, to } => {
                 copy_messages(self.client(store).await?, store, folder, &uids, to).await?;
@@ -1084,7 +1127,7 @@ impl Worker {
                         .map_err(Failure::from),
                     Err(failure) => Err(failure),
                 };
-                self.restore_on_failure(store, folder, &removed, expunged)?;
+                self.restore_on_failure(store, folder, &removed, Undone::Deleted, expunged)?;
                 // gone for good: their sources too
                 Ok(store.adopt_moved_sources(folder, folder, &uids, &[])?)
             }
@@ -1151,26 +1194,70 @@ impl Worker {
         }
     }
 
-    /// A message the windows took out of a folder before the server moved or deleted it: back in when the server did
-    /// not (offline, refused), so it is not lost from view while it is still on the server
     /// The rows taken out of the store for a command back in it, with their sources, when the command failed
+    /// (offline, refused), so they are not lost from view while they are still on the server; [`Event::ActionUndone`]
+    /// says so and why. A refusal is told by that alone; a failure of the connection is told as before too.
     fn restore_on_failure<T>(
         &mut self,
         store: &mut Store,
         folder: FolderId,
         removed: &[pe_store::MessageInfo],
+        undone: Undone,
         outcome: Result<T, Failure>,
     ) -> Result<T, Failure> {
-        if outcome.is_err() {
-            store.add_messages(folder, removed)?;
-            let uids: Vec<u64> = removed.iter().map(|m| m.uid).collect();
-            store.restore_moved_sources(folder, &uids)?;
-            self.emit(Event::FolderChanged {
-                account: self.account,
-                folder,
-            });
+        let Err(failure) = outcome else {
+            return outcome;
+        };
+        store.add_messages(folder, removed)?;
+        let uids: Vec<u64> = removed.iter().map(|m| m.uid).collect();
+        store.restore_moved_sources(folder, &uids)?;
+        self.emit(Event::FolderChanged {
+            account: self.account,
+            folder,
+        });
+        Err(self.undone(store, folder, removed.len(), undone, failure))
+    }
+
+    /// Tells the windows that the store took back what a command asked of `count` messages of `folder`, as the server
+    /// did not do it: [`Event::ActionUndone`] with why. The failure to pass on: none to tell when the server refused
+    /// ([`Failure::told`]), the connection's when it failed.
+    fn undone(&self, store: &Store, folder: FolderId, count: usize, undone: Undone, failure: Failure) -> Failure {
+        let name = |id: FolderId| {
+            store
+                .folder(id)
+                .map(|f| crate::text::folder_name(&f.info))
+                .unwrap_or_default()
+        };
+        let (text, to) = match undone {
+            Undone::Moved(to) => (Text::UndoneMove, Some(to)),
+            Undone::Deleted => (Text::UndoneDelete, None),
+            Undone::Archived => (Text::UndoneArchive, None),
+            Undone::Flag { flag, on } if flag.eq_ignore_ascii_case("\\Seen") => {
+                (if on { Text::UndoneRead } else { Text::UndoneUnread }, None)
+            }
+            Undone::Flag { .. } => (Text::UndoneFlags, None),
+        };
+        let reason = failure.message.trim_end_matches('.').to_string();
+        let said = tr_args(
+            text,
+            &[
+                ("messages", (&crate::text::messages(count as u64)).into()),
+                ("count", (count as u64).into()),
+                ("folder", (&to.map(name).unwrap_or_default()).into()),
+                ("from", (&name(folder)).into()),
+                ("reason", (&reason).into()),
+            ],
+        );
+        self.emit(Event::ActionUndone {
+            account: self.account,
+            folder,
+            count: count as u64,
+            text: said,
+        });
+        match failure.kind {
+            FailureKind::Other => Failure::told(),
+            _ => failure,
         }
-        outcome
     }
 
     /// Builds a message (its attachments read now), puts it in the Outbox and sends the Outbox

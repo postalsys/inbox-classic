@@ -3,6 +3,7 @@
 //! call it in the status bar; and Edit > Undo for the last move, delete or junk.
 
 use std::collections::{BTreeMap, BTreeSet};
+use std::sync::Arc;
 
 use pe_store::{FLAG_COLOR_BITS, FlagColor, FolderId, MessageRef, Picked, Search, Sort};
 
@@ -161,6 +162,45 @@ pub(crate) struct Undo {
     /// What Edit > Undo says, "Undo Move"
     what: Text,
     moves: Vec<UndoMove>,
+}
+
+/// Messages chosen in a list: listed, or every message of a list (Select All), listed only when a command needs them
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Selected {
+    Listed(Vec<MessageRef>),
+    /// Every message of the list `search` and `sort` make (a collapsed conversation's too), `count` of them when
+    /// selected
+    All {
+        search: Search,
+        sort: Sort,
+        count: u64,
+    },
+}
+
+impl Default for Selected {
+    fn default() -> Selected {
+        Selected::Listed(Vec::new())
+    }
+}
+
+impl Selected {
+    /// How many messages: those listed, or those the list had when it was selected
+    pub fn count(&self) -> u64 {
+        match self {
+            Selected::Listed(refs) => refs.len() as u64,
+            Selected::All { count, .. } => *count,
+        }
+    }
+}
+
+/// What Mark All Read marks ([`Core::mark_read_start`])
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum MarkRead {
+    Folder(FolderId),
+    /// Every folder of an account
+    Account(pe_store::AccountId),
+    /// Every account's Inbox
+    AllInboxes,
 }
 
 /// Messages to move back, by the worker of the account they are in now ([`Command::UndoMoves`]): it runs after the
@@ -498,6 +538,108 @@ impl Core {
     }
 }
 
+impl Core {
+    /// The messages of `selected`, in the list's order: for a selection of a whole list, listed now
+    pub fn selected_refs(&self, selected: &Selected) -> Result<Vec<MessageRef>> {
+        match selected {
+            Selected::Listed(refs) => Ok(refs.clone()),
+            Selected::All { search, sort, .. } => {
+                // one row a message: a collapsed conversation's messages each in their place
+                let search = Search {
+                    threads: None,
+                    ..search.clone()
+                };
+                self.refs_in_ranges(&search, *sort, &[(0, i64::MAX as u64)])
+            }
+        }
+    }
+
+    /// [`Core::summary`] of `selected`; a whole list's counted where its messages are, never listed, so it takes what
+    /// a count takes whatever the size of the list (its flag colour is not told)
+    pub fn summary_of(&self, selected: &Selected) -> Result<Summary> {
+        let search = match selected {
+            Selected::Listed(refs) => return self.summary(refs),
+            Selected::All { search, .. } => search,
+        };
+        let folders = self.store().search_summary(search)?;
+        let mut summary = Summary {
+            in_junk: !folders.is_empty(),
+            archivable: !folders.is_empty(),
+            ..Summary::default()
+        };
+        let (mut watched, mut ignored) = (0, 0);
+        let mut accounts = BTreeSet::new();
+        for found in &folders {
+            let store = self.store();
+            let (account, info) = store.folder_info(found.folder)?;
+            accounts.insert(account);
+            summary.folders += 1;
+            summary.count += found.count;
+            summary.unread += found.unread;
+            summary.flagged += found.flagged;
+            summary.in_junk &= info.special_use.as_deref() == Some("\\Junk");
+            summary.archivable &= crate::archivable(&info);
+            if crate::trash_in(&store, found.folder)?.is_none() {
+                summary.for_good += found.count;
+            }
+            watched += found.watched;
+            ignored += found.ignored;
+        }
+        summary.accounts = accounts.len() as u64;
+        summary.watched = summary.count > 0 && watched == summary.count;
+        summary.ignored = summary.count > 0 && ignored == summary.count;
+        Ok(summary)
+    }
+
+    /// [`Core::act`] off the window thread: the messages of `selected` listed, changed in the store on a connection
+    /// of the core's own (the list shows it with the [`Event::FolderChanged`] that follows) and handed to the server,
+    /// after the actions asked for before it; then [`Event::Acted`] with the request this returns and what the
+    /// status bar says, or why not. When the server does not do it, the store takes it back:
+    /// [`Event::ActionUndone`].
+    pub fn act_start(self: &Arc<Self>, selected: Selected, action: Action) -> Result<u64> {
+        self.start_action(move |core| {
+            let refs = core.selected_refs(&selected)?;
+            core.act(&refs, action)
+        })
+    }
+
+    /// Mark All Read off the window thread, as [`Core::act_start`] does an action: [`Event::Acted`] follows with what
+    /// the status bar says ("Marked 3 messages as read")
+    pub fn mark_read_start(self: &Arc<Self>, what: MarkRead) -> Result<u64> {
+        self.start_action(move |core| {
+            let folders = match what {
+                MarkRead::Folder(folder) => vec![folder],
+                MarkRead::Account(account) => core
+                    .store()
+                    .folders(account)?
+                    .iter()
+                    .filter(|f| f.unread > 0)
+                    .map(|f| f.id)
+                    .collect(),
+                MarkRead::AllInboxes => core.store().inboxes()?,
+            };
+            let mut count = 0;
+            for folder in folders {
+                count += core.mark_folder_read(folder)?;
+            }
+            Ok(tr_args(
+                Text::DoneRead,
+                &[("messages", (&messages(count)).into()), ("count", count.into())],
+            ))
+        })
+    }
+
+    /// Queues the action `act`: [`Event::Acted`] with the request this returns once it ran
+    fn start_action(self: &Arc<Self>, act: impl FnOnce(&Core) -> Result<String> + Send + 'static) -> Result<u64> {
+        let request = self.next_request.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        self.queue_action(Box::new(move |core| {
+            let said = act(core).map_err(|error| error.to_string());
+            (core.events)(crate::Event::Acted { request, said });
+        }))?;
+        Ok(request)
+    }
+}
+
 /// The picked messages by folder, in folder order, each folder's in the order picked
 fn by_folder(picked: &[Picked]) -> BTreeMap<FolderId, Vec<&Picked>> {
     let mut groups: BTreeMap<FolderId, Vec<&Picked>> = BTreeMap::new();
@@ -531,5 +673,91 @@ fn color_id(color: FlagColor) -> &'static str {
         FlagColor::Blue => "blue",
         FlagColor::Purple => "purple",
         FlagColor::Gray => "gray",
+    }
+}
+
+#[cfg(test)]
+mod background_tests {
+    use super::*;
+    use crate::list_load::tests::opened;
+    use crate::{Event, ListView, Scope};
+    use std::time::{Duration, Instant};
+
+    /// Select All counts the list without listing it, grouped or not, and its summary and messages are those of
+    /// every row selected
+    #[test]
+    fn select_all_counts_without_listing() {
+        let dir = pe_testkit::TempDir::new("core-select-all");
+        let (core, inbox, _events) = opened(&dir, 30);
+        core.store().set_flag(inbox, 4, "\\Flagged", true).unwrap();
+        for (grouped, open) in [(false, false), (true, false), (true, true)] {
+            let mut view = ListView::new();
+            view.set_scope(Some(Scope::Folder(inbox)));
+            view.set_grouped(grouped);
+            if open {
+                view.expand_all(&core).unwrap();
+            }
+            let all = view.select_all(&core).unwrap();
+            assert_eq!(all.count(), 30, "grouped {grouped}, open {open}");
+            let rows = view.row_count(&core).unwrap();
+            let listed = view.refs_in_ranges(&core, &[(0, rows)]).unwrap();
+            let mut refs = core.selected_refs(&all).unwrap();
+            assert_eq!(refs.len(), 30);
+            refs.sort();
+            let mut by_rows = listed.clone();
+            by_rows.sort();
+            assert_eq!(refs, by_rows, "grouped {grouped}, open {open}");
+            let summary = core.summary_of(&all).unwrap();
+            assert_eq!(
+                summary,
+                Summary {
+                    flag_color: None,
+                    ..core.summary(&listed).unwrap()
+                }
+            );
+            assert_eq!((summary.count, summary.unread, summary.flagged), (30, 10, 1));
+        }
+        assert_eq!(
+            ListView::new().select_all(&core).unwrap(),
+            Selected::default(),
+            "no list"
+        );
+    }
+
+    /// The actions run off the calling thread one after another in the order asked, and say what they did
+    #[test]
+    fn actions_run_in_the_background_in_order() {
+        let dir = pe_testkit::TempDir::new("core-act-start");
+        let (core, inbox, events) = opened(&dir, 30);
+        let at = |uid| MessageRef { folder: inbox, uid };
+        // the calls return at once whatever the actions' connection is doing
+        let held = crate::connections::open(&core.connections.actions, &dir.path().join("store.db")).unwrap();
+        let asked = Instant::now();
+        let read = core.mark_read_start(MarkRead::Folder(inbox)).unwrap();
+        let unread = core
+            .act_start(Selected::Listed(vec![at(1), at(2)]), Action::Read(false))
+            .unwrap();
+        let gone = core
+            .act_start(Selected::Listed(vec![at(99)]), Action::Read(true))
+            .unwrap();
+        assert!(asked.elapsed() < Duration::from_millis(100));
+        assert_eq!(core.folder(inbox).unwrap().unread, 10, "nothing done yet");
+        drop(held);
+        let mut said = Vec::new();
+        while said.len() < 3 {
+            if let Event::Acted { request, said: done } = events.recv_timeout(Duration::from_secs(20)).unwrap() {
+                said.push((request, done));
+            }
+        }
+        assert_eq!(
+            said,
+            [
+                (read, Ok("Marked 10 messages as read".to_string())),
+                (unread, Ok("Marked 2 messages as unread".to_string())),
+                (gone, Err("The messages are no longer there.".to_string())),
+            ],
+            "in the order asked"
+        );
+        assert_eq!(core.folder(inbox).unwrap().unread, 2);
     }
 }
