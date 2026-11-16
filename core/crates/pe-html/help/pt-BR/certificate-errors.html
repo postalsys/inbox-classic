@@ -1,18 +1,17 @@
-<!--review--><h1>Erros de certificado</h1>
+<h1>Erros de certificado</h1>
 <p class="summary">O que fazer quando o Inbox Classic não consegue confirmar que está se comunicando com o verdadeiro servidor de e-mail.</p>
 <p>Você pode ver uma destas mensagens:</p>
 <ul>
     <li>Na barra de status: “TLS error: …”</li>
     <li>No painel de leitura: “Não foi possível tornar segura a conexão com o servidor de e-mail (…).”</li>
 </ul>
-<p>O Inbox Classic não conseguiu confirmar que o servidor é quem diz ser, por isso não enviou a sua senha.</p>
+<p>O Inbox Classic não conseguiu confirmar a identidade do servidor, por isso não enviou a sua senha.</p>
 <p>Para resolver:</p>
 <ol>
     <li>Abra as propriedades da conta em <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
     <li>Verifique os nomes dos servidores. Eles precisam ser os nomes para os quais o certificado do servidor foi emitido. Muitas vezes é o nome do seu provedor, como <code>imap.provider.com</code>, e não o seu próprio domínio.</li>
-    <li>Verifique se a data e a hora do computador estão certas.</li>
+    <li>Confira a data e a hora do computador.</li>
 </ol>
-<p>Em uma rede que inspeciona o tráfego criptografado, como algumas redes de escritórios ou escolas, pergunte ao administrador dela.</p>
+<p>Em uma rede que inspeciona o tráfego criptografado, como algumas redes de escritórios ou escolas, peça ajuda ao administrador da rede.</p>
 <aside class="note">Não existe nenhuma opção para aceitar qualquer certificado. Aceitar um certificado falso permitiria que alguém na rede lesse sua senha e seus e-mails.</aside>
 <nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

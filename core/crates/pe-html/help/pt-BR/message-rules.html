@@ -1,19 +1,18 @@
-<!--review--><h1>Organizar os e-mails novos com regras</h1>
+<h1>Organizar os e-mails novos com regras</h1>
 <p class="summary">Mova, marque como lidas, sinalize ou arquive automaticamente as mensagens recebidas que atendem aos seus critérios.</p>
 <p>Uma regra combina critérios de pesquisa com ações a aplicar às mensagens correspondentes quando elas chegam à sua Caixa de Entrada. Por exemplo, uma regra com <code>from:news@example.com</code> pode mover os boletins desse endereço para uma pasta separada e marcá-los como lidos.</p>
 <p>Para criar uma regra:</p>
 <ol>
     <li>Escolha <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b> e clique em <b data-text="ui-rule-new"></b>.</li>
-    <li>Digite um nome e preencha <b data-text="ui-rule-query"></b> com os mesmos termos da caixa de pesquisa, como <code>from:</code>, <code>subject:</code> ou <code>list:</code>. A linha abaixo mostra quantas mensagens da Caixa de Entrada correspondem a esses critérios.</li>
+    <li>Digite um nome e preencha <b data-text="ui-rule-query"></b> com os mesmos termos da caixa de pesquisa, como <code>from:</code>, <code>subject:</code> ou <code>list:</code>. A linha abaixo mostra quantas mensagens já presentes na Caixa de Entrada correspondem a esses critérios.</li>
     <li>Escolha uma ou mais ações para as mensagens correspondentes: movê-las para uma pasta, marcá-las como lidas, sinalizá-las, arquivá-las, movê-las para Lixo Eletrônico, excluí-las ou não mostrar notificações.</li>
     <li>Clique em <b data-text="ui-ok"></b>.</li>
 </ol>
 <p>Você também pode criar uma regra a partir de uma mensagem ou de uma pesquisa. Escolha <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> para preencher o remetente ou a lista de e-mails da mensagem selecionada. Clique em <b data-text="ui-create-rule"></b> acima dos resultados da pesquisa para usar os critérios da pesquisa atual.</p>
 <h2>Como as regras funcionam</h2>
-<p>As regras processam as mensagens novas da Caixa de Entrada enquanto o Inbox Classic está em execução, inclusive quando ele está minimizado na área de notificação. As mensagens que já existem só são afetadas se você marcar <b data-text="ui-rule-apply-now"></b>. As regras correspondentes são executadas na ordem da lista. Quando uma regra move uma mensagem para fora da Caixa de Entrada, as regras seguintes não se aplicam mais a essa mensagem. Desmarque a caixa de seleção de uma regra na lista para desativá-la sem excluí-la.</p>
+<p>As regras processam as mensagens novas da Caixa de Entrada enquanto o Inbox Classic está em execução, inclusive quando a janela está fechada e o aplicativo continua em segundo plano. As mensagens que já existem só são afetadas se você marcar <b data-text="ui-rule-apply-now"></b>. As regras correspondentes são executadas na ordem da lista. Quando uma regra move uma mensagem para fora da Caixa de Entrada, as regras seguintes não se aplicam mais a essa mensagem. Desmarque a caixa de seleção de uma regra na lista para desativá-la sem excluí-la.</p>
 <h2>Alterar regras</h2>
-<p>Para editar uma regra, selecione-a na lista e clique em <b data-text="ui-rule-edit"></b>, ou clique duas vezes nela. Use <b data-text="ui-account-move-up"></b> e <b data-text="ui-account-move-down"></b> para mudar a ordem, ou <b data-text="ui-rule-delete-button"></b> para excluir a regra. No editor de regras, clique em <b data-text="ui-rule-show"></b> para ver na janela principal as mensagens que correspondem no momento.</p>
+<p>Para editar uma regra, selecione-a na lista e clique em <b data-text="ui-rule-edit"></b>, ou clique duas vezes nela. Use <b data-text="ui-account-move-up"></b> e <b data-text="ui-account-move-down"></b> para mudar a ordem, ou <b data-text="ui-rule-delete-button"></b> para excluir a regra. No editor de regras, clique em <b data-text="ui-rule-show"></b> para ver na janela principal as mensagens que correspondem aos critérios atuais.</p>
 <p>As regras se aplicam às mensagens novas da Caixa de Entrada, por isso os filtros de pasta e de data não são suportados. Se você usar <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> ou <code>newer_than:</code>, uma mensagem explica por que não é possível usar esses filtros. As regras não podem enviar mensagens nem excluí-las permanentemente: <b data-text="ui-rule-delete"></b> as move para <b data-text="folder-deleted"></b>.</p>
 <aside class="note">As regras são executadas neste computador. Para organizar os e-mails enquanto ele está desligado, use os filtros do seu provedor de e-mail.</aside>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
-<!--/review-->

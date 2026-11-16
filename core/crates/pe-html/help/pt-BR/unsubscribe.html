@@ -1,18 +1,17 @@
-<!--review--><h1>Sair de uma lista de e-mails</h1>
+<h1>Sair de uma lista de e-mails</h1>
 <p class="summary">Pare de receber as mensagens de uma lista de e-mails com o botão Cancelar inscrição.</p>
-<p>Uma mensagem de uma lista de e-mails que indica como sair dela tem <b data-text="ui-unsubscribe"></b> à direita do cabeçalho.</p>
+<p>Se uma mensagem inclui instruções para sair da lista de e-mails, ela mostra o botão <b data-text="ui-unsubscribe"></b> à direita do cabeçalho.</p>
 <p>Para sair da lista:</p>
 <ol>
-    <li>Clique em <b data-text="ui-unsubscribe"></b>. O Inbox Classic diz o que vai acontecer e pergunta primeiro.</li>
+    <li>Clique em <b data-text="ui-unsubscribe"></b>. O Inbox Classic explica o que será feito e pede confirmação.</li>
     <li>Confirme. Dependendo da lista, acontece uma de três coisas:
         <ul>
-            <li>O Inbox Classic pede à lista que pare. Nenhuma página abre e nenhuma mensagem é enviada.</li>
-            <li>O Inbox Classic escreve a mensagem que a lista pede. Clique em <b data-text="ui-tb-send"></b> para enviá-la.</li>
-            <li>A página da lista abre no seu navegador, onde você termina o processo.</li>
+            <li>O Inbox Classic envia uma solicitação direta de cancelamento. Nenhuma página é aberta e nenhum e-mail é enviado.</li>
+            <li>O Inbox Classic prepara o e-mail exigido pela lista para cancelar a inscrição. Clique em <b data-text="ui-tb-send"></b> para enviá-la.</li>
+            <li>A página da lista abre no seu navegador, onde você conclui o cancelamento.</li>
         </ul>
     </li>
 </ol>
 <p>A barra de status indica quando a lista aceitou o pedido.</p>
-<aside class="note">O Inbox Classic só pede à lista que pare por conta própria quando o servidor da lista assinou a mensagem. Uma mensagem falsa não pode usar isso para atingir outra pessoa.</aside>
+<aside class="note">O Inbox Classic só envia a solicitação direta de cancelamento quando a lista assinou a mensagem com DKIM. Isso ajuda a impedir que mensagens falsificadas usem esse recurso para enviar solicitações indevidas.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

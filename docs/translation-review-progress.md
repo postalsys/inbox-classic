@@ -200,8 +200,19 @@ domain-authentication claims, temporary-attachment lifetime and transferred cred
 markup, control references, keyboard tags and platform branches. All 75 tests, structural checks,
 inventory/hash reconciliation, inline spacing and git diff --check pass. The remaining 31 topics are pending.
 
-Current totals: 5,388 catalog entries and 181 help pages reviewed; 849 catalog values improved. Remaining:
-26,620 catalog entries and 1,071 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Brazilian Portuguese help completed
+
+Reviewed the final 31 help topics, completing all 52. Corrected key ownership/verification, private-key recovery,
+domain authentication, image privacy, queued agent sends, connection guidance and command-line behavior.
+Checked the rule editor's live match count separately from the rule list's criteria column. Preserved all
+markup and literal keyboard tags, with the Brazilian Cco access key explained beside the English shortcuts.
+All 75 tests pass, along with structure, inventory/hash reconciliation, inline spacing and git diff --check.
+The root review HTML is regenerated. Everyday-help checkpoint: `a879c8ee`.
+
+The feature branch advanced to `cf13ec99`, but its catalog/help translations are unchanged. Catalan is next.
+
+Current totals: 5,388 catalog entries and 212 help pages reviewed; 849 catalog values improved. Remaining:
+26,620 catalog entries and 1,040 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
