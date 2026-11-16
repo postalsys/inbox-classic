@@ -148,7 +148,7 @@ extension UITest {
                 check(words.contains("\u{201C}\(name)\u{201D}") && words.contains("can run programs"),
                       "opening \(name) is refused, naming it (\(words))")
                 answer(refused, "OK")
-                _ = await waitUntil(5) { window("alert") == nil }
+                _ = await waitUntil(5) { self.window("alert") == nil }
             } else {
                 check(false, "opening \(name) says why")
             }
@@ -174,7 +174,7 @@ extension UITest {
             check(words.contains("can run programs") && words.contains("setup.exe"), "trying to open the program says it can run programs (\(words))")
             await shot(refused, "attach-3-refused")
             answer(refused, "OK")
-            _ = await waitUntil(5) { window("alert") == nil }
+            _ = await waitUntil(5) { self.window("alert") == nil }
         } else {
             check(false, "trying to open the program says why")
         }
@@ -330,7 +330,7 @@ extension UITest {
         let saved = opened.first.flatMap { try? String(contentsOf: $0, encoding: .utf8) } ?? ""
         check(saved.contains("the secret plan, in a file"), "decrypted, as it was written (\(saved))")
         checkPrivate(opened.first, "in a private folder of the user's")
-        _ = await waitUntil(5) { window("alert") == nil }
+        _ = await waitUntil(5) { self.window("alert") == nil }
         doubleClick(strip, 0)
         check(await waitUntil(10) { opened.count == 2 }, "opened again, it opens")
         check(window("alert") == nil, "the second time without the note")
