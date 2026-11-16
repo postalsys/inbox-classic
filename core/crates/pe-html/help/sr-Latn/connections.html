@@ -1,0 +1,14 @@
+<!--review--><h1>Veze koje Inbox Classic uspostavlja</h1>
+<p class="summary">Gde se Inbox Classic povezuje i zašto, za one koje zanimaju tehnički detalji.</p>
+<ul>
+    <li><b>Vaši serveri e-pošte</b>, preko protokola IMAP za čitanje pošte i SMTP za slanje. Veze su šifrovane protokolom TLS, a sertifikat svakog servera se proverava prema sertifikatima kojima vaš sistem veruje. Inbox Classic odbija server bez šifrovanja, osim ako izaberete <b data-text="ui-security-none"></b> i to potvrdite.</li>
+    <li><b>Kada dodajete nalog</b>, radi traženja njegovih servera. Inbox Classic čita DNS zapise vašeg domena preko DNS-a preko HTTPS-a (Cloudflare, zatim Google), nikada preko običnog DNS-a. Pokušava i sa autoconfig datotekom vašeg dobavljača i sa Thunderbird-ovom listom dobavljača (ISPDB). Za Exchange pita Microsoft Autodiscover, koji dobija vašu lozinku samo kada je zatraži preko HTTPS-a. Server bez šifrovanja se nikada ne bira.</li>
+    <li><b>Prijava preko pregledača</b>, protokolom OAuth 2.0 sa PKCE-om, kod Google-a, Microsoft-a ili dobavljača vaše aplikacije za prijavljivanje. Pregledač se vraća samo programu Inbox Classic na ovom računaru.</li>
+    <li><b>Logotipi brendova</b> (BIMI), sa HTTPS adrese brenda kada poruka ne sadrži logotip, jednom pri svakom pokretanju programa Inbox Classic. To se dešava samo kada je poruka prošla DMARC proveru na vašem serveru e-pošte i kada je on odobrio logotip.</li>
+    <li><b>Slike sa interneta</b>, samo kada ih zatražite.</li>
+    <li><b>Otkazivanje pretplate</b>, samo kada kliknete na njega. Zahtev jednim klikom (RFC 8058) šalje se samo ako je lista potpisala poruku DKIM-om.</li>
+    <!--os:mac--><li><b>Ažuriranja</b>, sa sajta inboxclassic.com, radi provere da li je izašla nova verzija.</li><!--/os-->
+</ul>
+<p>Kodovi za prijavu nude se samo kada zaglavlje Authentication-Results vašeg dobavljača kaže da je domen potpisao poruku (DKIM). Za to nije potrebna posebna veza.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
+<!--/review-->
