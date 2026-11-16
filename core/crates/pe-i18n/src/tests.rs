@@ -105,6 +105,47 @@ fn chooses_the_language() {
 }
 
 #[test]
+fn chooses_by_region_and_script() {
+    // Brazil's Portuguese for Brazil, Portugal's for every other Portuguese
+    for tag in ["pt-BR", "pt_BR", "pt_BR.UTF-8", "PT-br", "pt-Latn-BR", "pt_BR@euro"] {
+        assert_eq!(supported(tag), Some("pt-BR"), "{tag}");
+    }
+    for tag in ["pt", "pt-PT", "pt_PT.UTF-8", "pt-AO", "pt-MZ", "PT"] {
+        assert_eq!(supported(tag), Some("pt"), "{tag}");
+    }
+    // Serbian in Latin script, whichever script the system writes
+    for tag in [
+        "sr",
+        "sr-RS",
+        "sr-Cyrl",
+        "sr-Cyrl-RS",
+        "sr-Latn",
+        "sr-Latn-RS",
+        "sr_RS.UTF-8",
+        "sr_RS@latin",
+        "SR-LATN-ME",
+    ] {
+        assert_eq!(supported(tag), Some("sr-Latn"), "{tag}");
+    }
+    // Norwegian is Bokmål; Nynorsk is a language of its own there is no catalog of
+    for tag in ["no", "nb", "nb-NO", "nb_NO.UTF-8", "no_NO", "NB"] {
+        assert_eq!(supported(tag), Some("nb"), "{tag}");
+    }
+    assert_eq!(supported("nn-NO"), None);
+    assert_eq!(supported("tr-TR"), Some("tr"));
+    assert_eq!(supported("ca-ES-valencia"), Some("ca"));
+    assert_eq!(supported("ca_AD.UTF-8"), Some("ca"));
+    // the codes of the list are themselves
+    for (code, _) in LANGUAGES {
+        assert_eq!(supported(code), Some(*code));
+    }
+    assert_eq!(resolve(&["ja-JP", "pt-BR", "pt-PT"]), "pt-BR");
+    assert_eq!(resolve(&["pt-PT", "pt-BR"]), "pt");
+    assert_eq!(resolve(&["sr-Cyrl-RS", "en"]), "sr-Latn");
+    assert_eq!(resolve(&["nn", "no", "en"]), "nb");
+}
+
+#[test]
 fn tags_as_gettext_writes_them() {
     assert_eq!(gettext_locale("pt-BR"), "pt_BR");
     assert_eq!(gettext_locale("sr-Latn"), "sr@latin");
