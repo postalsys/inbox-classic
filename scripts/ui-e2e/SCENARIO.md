@@ -852,6 +852,7 @@ A message is in each account's Sent Items and a draft in the first account's Dra
 - the row of one account under All Sent lists that account's Sent Items alone, and the folder bar says "Sent Items - " and the account's name
 - All Drafts lists the draft, and opening it opens the compose window from the first account, with the draft's text
 - All Sent and All Drafts have no right-click menu; the rows under them have the folder's menu
+- a folder chosen while the row above it is closed (Go to Folder picks the first account's Sent Items with All Sent closed) is shown: All Sent opens and the row is selected
 - with one account there is no All Sent or All Drafts: Sent Items and Drafts are the account's own folders
 
 ## 43. Moving between accounts

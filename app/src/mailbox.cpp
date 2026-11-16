@@ -663,7 +663,7 @@ void Mailbox::Reselect(const PeTree* tree, const std::string& key) {
     if (at >= 0 && static_cast<size_t>(at) < treeItems_.size()) {
         // the same row again is no folder the user picked; the Inbox in place of All Inboxes is shown
         reloading_ = treeRows_[static_cast<size_t>(at)].key == key;
-        TreeView_SelectItem(tree_, treeItems_[static_cast<size_t>(at)]);
+        ChooseRow(treeItems_[static_cast<size_t>(at)]);
         reloading_ = false;
         return;
     }
@@ -743,7 +743,7 @@ void Mailbox::SaveFlippedRows() const {
 void Mailbox::OnRowExpanded(const NMTREEVIEWW& change) {
     ShowRow(change.itemNew.hItem);
     const TreeRow* row = RowAt(change.itemNew.hItem);
-    if (!row || !row->remembersOpen || (change.action != TVE_EXPAND && change.action != TVE_COLLAPSE)) {
+    if (!row || revealing_ || !row->remembersOpen || (change.action != TVE_EXPAND && change.action != TVE_COLLAPSE)) {
         return;
     }
     bool open = change.action == TVE_EXPAND;
@@ -753,6 +753,17 @@ void Mailbox::OnRowExpanded(const NMTREEVIEWW& change) {
         flippedRows_.erase(row->key);
     }
     SaveFlippedRows();
+}
+
+void Mailbox::ChooseRow(HTREEITEM item) {
+    revealing_ = true;
+    TreeView_EnsureVisible(tree_, item);
+    revealing_ = false;
+    // the rows opened above it count their own unread messages again, whether or not the tree told of the opening
+    for (HTREEITEM above = TreeView_GetParent(tree_, item); above; above = TreeView_GetParent(tree_, above)) {
+        ShowRow(above);
+    }
+    TreeView_SelectItem(tree_, item);
 }
 
 // a row with its unread count: its own while expanded, with what it hides while collapsed, bold as the core says
@@ -1483,7 +1494,7 @@ void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
     if (Searching() && shownList_ == PE_TREE_LIST_FOLDER && folder_ == folder) {
         ClearFind();
     }
-    TreeView_SelectItem(tree_, row);
+    ChooseRow(row);
     if (folder_ == folder) {
         SelectInList(folder, uid);
     }
@@ -1526,7 +1537,7 @@ void Mailbox::SelectStart() {
     if (!allInboxes) {
         ShowMessage(folder, uid);
     } else if (HTREEITEM all = FindRow("inboxes")) {
-        TreeView_SelectItem(tree_, all);
+        ChooseRow(all);
         SelectInList(folder, uid);
     }
 }
@@ -1872,8 +1883,7 @@ void Mailbox::PlaceAccount(int64_t account, size_t index, std::string key) {
     Reload();
     // the row moved selected (it may have been another), and in view
     if (HTREEITEM item = FindRow(key)) {
-        TreeView_SelectItem(tree_, item);
-        TreeView_EnsureVisible(tree_, item);
+        ChooseRow(item);
     }
 }
 
@@ -2185,7 +2195,7 @@ void Mailbox::NextUnread(HWND owner) {
     if (MessageBoxW(owner, Text(asked.get()).c_str(), L"Inbox Classic", MB_YESNO | MB_ICONQUESTION) != IDYES) {
         return;
     }
-    TreeView_SelectItem(tree_, row);
+    ChooseRow(row);
     int64_t first = folder;
     char* again = nullptr;
     step = pe_list_view_next_unread_step(core_, view_.get(), first, 0, &folder, &uid, &again);
@@ -2202,7 +2212,7 @@ void Mailbox::GoToFolder(HWND owner) {
     pick.prompt = core::T(PE_TEXT_UI_GO_TO_PROMPT);
     pick.verb = core::T(PE_TEXT_UI_OK);
     if (HTREEITEM item = RowOf(PickFolder(owner, pick))) {
-        TreeView_SelectItem(tree_, item);
+        ChooseRow(item);
         SetFocus(list_);
     }
 }

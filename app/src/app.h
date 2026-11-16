@@ -870,6 +870,9 @@ private:
     // a folder changed: the counts updated a moment later, once for many changes (TIMER_COUNTS)
     void ScheduleCounts();
     void ShowRow(HTREEITEM item);
+    // a row chosen by the app (not clicked): every closed row above it opened so it is seen, which is not kept as the
+    // user's opening, then selected
+    void ChooseRow(HTREEITEM item);
     void ReloadList(bool keepSelection);
     // whether the list has what words typed found, in every folder (with a Folder column), rather than a folder
     bool Searching() const;
@@ -1124,6 +1127,8 @@ private:
     std::vector<Page> pages_;
     // true while the list is reloaded: its selection changes are the reload's, not the user's
     bool reloading_ = false;
+    // ChooseRow is opening the rows above the one chosen: not the user's opening, so it is not kept
+    bool revealing_ = false;
     // how many times the tree was built: a drag of an account ends when its rows are built again under it
     uint64_t treeBuilds_ = 0;
     // SelectStart has run: later showings of the window keep what is selected

@@ -4779,6 +4779,23 @@ public static class Dragger {
     $allSent = NamedRow ([IntPtr]::Zero) 'All Sent'
     $allDrafts = NamedRow ([IntPtr]::Zero) 'All Drafts'
     Check ($allSent -ne [IntPtr]::Zero -and $allDrafts -ne [IntPtr]::Zero -and -not (& $isOpen $allSent) -and -not (& $isOpen $allDrafts)) 'All Sent and All Drafts follow All Inboxes, before Flagged, closed at first'
+    # a folder under a closed row chosen from elsewhere: the row opens so the folder is seen, selected
+    Command $main $IDM_GO_TO_FOLDER
+    $goTo = WaitPicker 'Go to Folder'
+    Check ($goTo -and (PickIn $goTo 'inboxclassic.test' 'Sent Items')) 'Go to Folder offers the first account''s Sent Items'
+    if ($goTo) {
+        Click $goTo 1
+        [void](WaitFor { -not [Native.Win]::IsWindow($goTo) } 10)
+    }
+    $firstSent = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]4, $allSent)
+    $chosen = WaitFor { $c = [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]9, [IntPtr]::Zero); if ($c -eq $firstSent) { $c } } 10
+    Check ($null -ne $chosen -and (& $isOpen $allSent) -and (& $folderBar) -eq ' Sent Items - inboxclassic.test') "Sent Items chosen by Go to Folder while All Sent is closed: All Sent opens and its row is selected ($(& $folderBar))"
+    # closed again with the keyboard, which selects All Sent
+    [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $allSent)
+    [void][Native.Win]::SetForegroundWindow($main)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYDOWN, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
+    [void][Native.Win]::SendMessage($tree, $WM_KEYUP, [IntPtr]$VK_LEFT, [IntPtr]::Zero)
+    Check (-not (& $isOpen $allSent)) 'and closes again with the Left key'
     # opened with the keyboard, as a user would, so the tree tells the window
     [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $allSent)
     [void][Native.Win]::SetForegroundWindow($main)
