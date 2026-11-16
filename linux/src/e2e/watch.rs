@@ -9,12 +9,13 @@ use super::*;
 const TRIP: &str = "Plans for the trip";
 const FOOTBALL: &str = "Fantasy football picks";
 
-/// The row of the conversation whose first message has `subject`, and that message
+/// The row of the conversation whose first message has `subject`, and that message, as the list shows them (which
+/// follows the changes of a sync 300 ms after the first of them)
 fn head_of(subject: &str) -> Option<(u32, pe_store::Message)> {
-    let main = shell().main();
-    main.list_view()
-        .rows(&shell().core, 0, 500)
-        .ok()?
+    shell()
+        .main()
+        .list
+        .shown_messages(500)
         .into_iter()
         .enumerate()
         .find(|(_, m)| m.info.subject == subject && m.thread.is_some_and(|t| t.depth == 0))

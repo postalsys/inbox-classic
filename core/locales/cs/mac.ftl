@@ -124,6 +124,8 @@ mac-no-calendar-app = V tomto Macu není k dispozici žádná kalendářová apl
 mac-file-not-saved = Soubor nelze uložit.
 # review: new
 mac-unsubscribing = Odhlašování z { $target }…
+# review: new
+mac-loading-list = Načítání…
 
 ## The compose window
 

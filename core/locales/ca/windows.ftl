@@ -16,6 +16,8 @@ win-print-title-of = Imprimeix: { $subject }
 win-no-bodies = No es pot mostrar el contingut dels missatges.
 win-webview-failed = No s’ha pogut inicialitzar el WebView2.
 win-webview-missing = L’entorn d’execució WebView2 no està disponible.
+# review: new
+win-list-loading = S'està carregant...
 
 ## Botons i paraules de moltes finestres
 

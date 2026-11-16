@@ -170,8 +170,6 @@ impl Search {
         }
     }
 
-    /// The WHERE of the search and its values, ?1 on. `in_order`: for a page in an order that has an index over every
-    /// folder (date, received), which then walks it rather than sort all the Inboxes have.
     /// What it finds with each message's place in the order of `sort` (from 0): `folder_id`, `uid`, `position`, as SQL
     /// to select from, with its values
     pub(crate) fn positioned(&self, sort: Sort) -> (String, Vec<Value>) {
@@ -183,7 +181,23 @@ impl Search {
         (sql, values)
     }
 
+    /// The WHERE of the search and its values, ?1 on. `in_order`: for a page in an order that has an index over every
+    /// folder (date, received), which then walks it rather than sort all the Inboxes have.
     pub(crate) fn condition(&self, in_order: bool) -> (String, Vec<Value>) {
+        self.condition_with(in_order, true)
+    }
+
+    /// [`Search::condition`] for a query that reads the messages of some conversations (`thread_id IN (...)`): the
+    /// words searched for checked on each of their messages, never an index SQLite combines with the conversations',
+    /// which would look up every message found for every conversation (a search with every conversation open took
+    /// seconds)
+    pub(crate) fn condition_of_threads(&self) -> (String, Vec<Value>) {
+        self.condition_with(false, false)
+    }
+
+    /// [`Search::condition`]; `words_lead`: the messages the words find may be where SQLite starts (a search's list),
+    /// otherwise only checked (`+id`)
+    fn condition_with(&self, in_order: bool, words_lead: bool) -> (String, Vec<Value>) {
         let mut query = Query::parse(&self.text, now());
         // the Show choice is a term like the one typed for it
         query.terms.extend(match self.show {
@@ -306,8 +320,9 @@ impl Search {
         }
         if !words.is_empty() {
             let matched = value(&mut values, Value::Text(words.join(" AND ")));
+            let id = if words_lead { "id" } else { "+id" };
             parts.push(format!(
-                "id IN (SELECT rowid FROM messages_fts WHERE messages_fts MATCH {matched})"
+                "{id} IN (SELECT rowid FROM messages_fts WHERE messages_fts MATCH {matched})"
             ));
         }
         let condition = if parts.is_empty() {

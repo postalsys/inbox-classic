@@ -28,6 +28,8 @@ win-no-bodies = Ziņojumu saturu nevar parādīt.
 win-webview-failed = Neizdevās izveidot WebView2.
 # review: new
 win-webview-missing = WebView2 izpildlaiks nav pieejams.
+# review: new
+win-list-loading = Ielādē...
 
 ## Buttons and words used in many windows
 

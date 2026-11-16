@@ -22,6 +22,8 @@ gtk-search-indexing = { $count ->
     [one] ainda indexando o texto de { $count } mensagem
    *[other] ainda indexando o texto de { $count } mensagens
 }
+# review: new
+gtk-list-loading = Carregando...
 gtk-menu-rename = Renomear...
 gtk-import-one-question = Importar a mensagem { $file } para { $folder }?
 gtk-files-not-saved = Arquivos que não foi possível salvar: { $failed } de { $total }.

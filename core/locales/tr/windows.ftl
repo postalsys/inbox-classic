@@ -16,6 +16,8 @@ win-print-title-of = Yazdır - { $subject }
 win-no-bodies = İleti içerikleri gösterilemiyor.
 win-webview-failed = WebView2 başlatılamadı.
 win-webview-missing = WebView2 çalışma zamanı kullanılamıyor.
+# review: new
+win-list-loading = Yükleniyor...
 
 ## Birçok pencerede kullanılan düğmeler ve sözcükler
 

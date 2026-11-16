@@ -129,6 +129,8 @@ mac-no-calendar-app = V tem Macu ni koledarskega programa, ki bi odprl povabila 
 mac-file-not-saved = Datoteke ni bilo mogoče shraniti.
 # review: new
 mac-unsubscribing = Odjavljanje od { $target }…
+# review: new
+mac-loading-list = Nalaganje…
 
 ## The compose window
 

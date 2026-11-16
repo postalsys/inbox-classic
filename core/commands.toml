@@ -15,6 +15,8 @@
 #   toggle   a menu item with a check mark
 #   one      acts on one message only: off while several are selected
 #   some     acts on one or several messages: off with none selected
+#   list     acts on the message list or its selection (one and some do too): a list still waiting to be read after a
+#            folder was chosen is read before it runs; other commands run without waiting for it
 #   submenu  the submenu of its menu it is in (layout: View > Layout), labelled by the catalog's menu-<submenu>; its
 #            items one after another here
 
@@ -41,12 +43,14 @@ id = "undo"
 windows = 135
 menu = "edit"
 key = "Mod+Z"
+list = true
 
 [[command]]
 id = "select_all"
 windows = 134
 menu = "edit"
 key = "Mod+A"
+list = true
 
 [[command]]
 id = "mark_read"
@@ -103,6 +107,7 @@ windows = 159
 menu = "view"
 submenu = "sort_by"
 toggle = true
+list = true
 
 [[command]]
 id = "sort_from"
@@ -110,6 +115,7 @@ windows = 160
 menu = "view"
 submenu = "sort_by"
 toggle = true
+list = true
 
 [[command]]
 id = "sort_subject"
@@ -117,6 +123,7 @@ windows = 161
 menu = "view"
 submenu = "sort_by"
 toggle = true
+list = true
 
 [[command]]
 id = "sort_size"
@@ -124,6 +131,7 @@ windows = 162
 menu = "view"
 submenu = "sort_by"
 toggle = true
+list = true
 
 [[command]]
 id = "sort_ascending"
@@ -131,6 +139,7 @@ windows = 163
 menu = "view"
 submenu = "sort_by"
 toggle = true
+list = true
 
 [[command]]
 id = "sort_descending"
@@ -138,6 +147,7 @@ windows = 164
 menu = "view"
 submenu = "sort_by"
 toggle = true
+list = true
 
 # View > Text Size: how large messages are shown and written, as Outlook Express had it; no keys, so it never
 # changes by accident (the web views' own zoom is off too). The size in use checked.
@@ -273,6 +283,7 @@ windows = 140
 menu = "view"
 key = "Mod+."
 mac = "Mod+]"
+list = true
 
 [[command]]
 id = "previous_message"
@@ -281,12 +292,14 @@ menu = "view"
 key = "Mod+,"
 mac = "Mod+["
 linux = "Mod+Shift+,"
+list = true
 
 # the first unread message below the one shown, on to the next folder with unread mail after asking; N in the list
 [[command]]
 id = "next_unread"
 windows = 142
 menu = "view"
+list = true
 
 # a folder chosen from the tree of every account, typed to find it (Outlook Express's Ctrl+Y)
 [[command]]
@@ -361,6 +374,7 @@ windows = 126
 menu = "edit"
 key = "Mod+Shift+A"
 mac = "Mod+Alt+Shift+A"
+list = true
 
 [[command]]
 id = "junk"
@@ -382,6 +396,7 @@ some = true
 id = "archive"
 windows = 138
 menu = "message"
+list = true
 
 # Watch and Ignore Conversation: the conversations of the selected messages marked, or the mark taken away when all of
 # them have it (the check mark: PeSelectionSummary.watched and .ignored). W and K in the message list, as in
@@ -429,11 +444,13 @@ one = true
 id = "expand_all_threads"
 windows = 145
 menu = "view"
+list = true
 
 [[command]]
 id = "collapse_all_threads"
 windows = 146
 menu = "view"
+list = true
 
 # the messages of ignored conversations left out of the list (pe_list_view_set_hide_ignored), a setting each app keeps
 [[command]]
@@ -441,6 +458,7 @@ id = "hide_ignored"
 windows = 153
 menu = "view"
 toggle = true
+list = true
 
 # the list's unread messages only (Outlook Express's View > Current View > Hide Read Messages); a message read stays
 # listed until the folder changes (pe-core list_view.rs)
@@ -449,6 +467,7 @@ id = "hide_read"
 windows = 154
 menu = "view"
 toggle = true
+list = true
 
 [[command]]
 id = "ai_agents"

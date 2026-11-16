@@ -26,6 +26,8 @@ win-no-bodies = Laiškų turinio parodyti negalima.
 win-webview-failed = Nepavyko sukurti WebView2.
 # review: new
 win-webview-missing = WebView2 vykdymo aplinka nepasiekiama.
+# review: new
+win-list-loading = Įkeliama...
 
 ## Buttons and words used in many windows
 

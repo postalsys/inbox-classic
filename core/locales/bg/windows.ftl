@@ -17,6 +17,8 @@ win-print-title-of = Печат: { $subject }
 win-no-bodies = Текстът на съобщенията не може да бъде показан.
 win-webview-failed = Компонентът WebView2 не можа да бъде стартиран.
 win-webview-missing = Средата за изпълнение WebView2 не е налична.
+# review: new
+win-list-loading = Зареждане...
 
 ## Buttons and words used in many windows
 

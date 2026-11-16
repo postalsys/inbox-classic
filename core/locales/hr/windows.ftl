@@ -26,6 +26,8 @@ win-no-bodies = Tijela poruka ne mogu se prikazati.
 win-webview-failed = Stvaranje komponente WebView2 nije uspjelo.
 # review: new
 win-webview-missing = Okruženje za izvođenje WebView2 nije dostupno.
+# review: new
+win-list-loading = Učitavanje...
 
 ## Buttons and words used in many windows
 

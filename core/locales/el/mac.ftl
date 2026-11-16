@@ -124,6 +124,8 @@ mac-no-calendar-app = Δεν υπάρχει εφαρμογή ημερολογί�
 mac-file-not-saved = Δεν ήταν δυνατή η αποθήκευση του αρχείου.
 # review: new
 mac-unsubscribing = Κατάργηση εγγραφής από { $target }…
+# review: new
+mac-loading-list = Φόρτωση…
 
 ## The compose window
 

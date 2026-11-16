@@ -28,6 +28,8 @@ gtk-search-indexing = { $count ->
     [few] još se indeksira tekst poruka; preostalo: { $count }
    *[other] još se indeksira tekst poruka; preostalo: { $count }
 }
+# review: new
+gtk-list-loading = Učitavanje...
 gtk-menu-rename = Preimenuj...
 gtk-import-one-question = Da li želite da uvezete poruku { $file } u fasciklu { $folder }?
 gtk-files-not-saved = Ukupno datoteka: { $total }; nije sačuvano: { $failed }.

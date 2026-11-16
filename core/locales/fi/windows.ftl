@@ -27,6 +27,8 @@ win-no-bodies = Viestien sisältöä ei voi näyttää.
 win-webview-failed = WebView2:n luominen epäonnistui.
 # review: new
 win-webview-missing = WebView2-suoritusympäristö ei ole käytettävissä.
+# review: new
+win-list-loading = Ladataan...
 
 ## Buttons and words used in many windows
 

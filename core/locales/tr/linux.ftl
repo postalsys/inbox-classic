@@ -22,6 +22,8 @@ gtk-search-indexing = { $count ->
     [one] 1 iletinin metni hâlâ dizinleniyor
    *[other] { $count } iletinin metni hâlâ dizinleniyor
 }
+# review: new
+gtk-list-loading = Yükleniyor...
 gtk-menu-rename = Yeniden Adlandır...
 gtk-import-one-question = { $file } iletisi içe aktarılsın mı? Hedef: { $folder }
 gtk-files-not-saved = { $total } dosyadan { $failed } tanesi kaydedilemedi.

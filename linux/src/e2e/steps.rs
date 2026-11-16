@@ -244,7 +244,7 @@ pub async fn one_account_tree(d: &Driver) {
     if let Some(popover) = main.folder_popover.borrow_mut().take() {
         popover.popdown();
     }
-    main.folders.select(FLAGGED);
+    main.folders.select(FLAGGED, false);
     main.folders.open_menu(&tree, 120.0, 40.0, FLAGGED);
     d.check(
         main.folder_popover.borrow().is_none(),
@@ -311,7 +311,7 @@ async fn collapsed_account(d: &Driver, account: i64) {
     wait_until(20, || core.folder(archive).is_ok_and(|f| f.unread >= 1)).await;
     let unread = core.folder(archive).map_or(0, |f| f.unread);
     let label = |id: i64| main.folders.markup_of(id).unwrap_or_default();
-    main.folders.select(archive);
+    main.folders.select(archive, false);
     wait_until(5, || main.folder_id() == archive).await;
     let listed = messages_listed();
     let heading = main.folders.position_of(-account);
@@ -1790,13 +1790,14 @@ pub(super) fn document_text(document: &str) -> String {
 /// The row of the message of `folder` with `subject` selected in the list (the folder shown), and its view there
 pub(super) async fn open_by_subject(folder: i64, subject: &str) -> bool {
     let main = shell().main();
-    // the list's own rows: grouped by conversation, a row is not a message's place in the folder
-    let found = main
-        .list_view()
-        .rows(&shell().core, 0, 500)
-        .unwrap_or_default()
-        .iter()
-        .position(|m| m.folder_id == folder && m.info.subject == subject);
+    // the list's own rows as it shows them: grouped by conversation, a row is not a message's place in the folder
+    let found = wait_for(10, || {
+        main.list
+            .shown_messages(500)
+            .iter()
+            .position(|m| m.folder_id == folder && m.info.subject == subject)
+    })
+    .await;
     let Some(row) = found.and_then(|at| u32::try_from(at).ok()) else {
         return false;
     };
@@ -1848,10 +1849,23 @@ pub async fn bounces(d: &Driver) {
     select_folder("Inbox");
     wait_until(10, || main.selected_name() == "Inbox").await;
     let opened = open_by_subject(inbox, "Delivery Status Notification (Failure)").await;
-    let marked = main.list.selected().is_some_and(|(_, m)| m.info.bounce);
+    // the core tells it is a bounce once it has read it: the row shows it when the list takes the change in
+    let marked = wait_until(5, || {
+        main.list.selected().is_some_and(|(_, m)| m.info.bounce) && undelivered_marks() > 0
+    })
+    .await;
     d.check(
-        opened && marked && wait_until(5, || undelivered_marks() > 0).await,
-        "the report's row has the undelivered mark in the attachment column's place",
+        opened && marked,
+        &format!(
+            "the report's row has the undelivered mark in the attachment column's place (opened {opened}, selected {:?}, \
+             scrolled {:?} of {} rows)",
+            main.list.selected().map(|(at, m)| (at, m.info.subject, m.info.bounce)),
+            main.list
+                .view
+                .vadjustment()
+                .map(|a| (a.value(), a.upper(), a.page_size())),
+            main.list.rows(),
+        ),
     );
     let failed = wait_for(15, || {
         let text = document_text(&main.reader.preview.shown());
@@ -1959,7 +1973,7 @@ pub async fn folders(d: &Driver) {
     let projects = wait_for(20, || folder_id("Projects")).await;
     d.check(projects.is_some(), "and it is in the tree");
     if let Some(projects) = projects {
-        shell().main().folders.select(projects);
+        shell().main().folders.select(projects, false);
         pause(500).await;
         d.shot(&main_window(), "folders-2-tree").await;
         command(Command::RenameFolder);
@@ -1971,7 +1985,7 @@ pub async fn folders(d: &Driver) {
         .await;
         d.check(renamed, "Rename renames it on the server");
         if let Some(plans) = wait_for(20, || folder_id("Plans")).await {
-            shell().main().folders.select(plans);
+            shell().main().folders.select(plans, false);
             pause(300).await;
         }
         command(Command::DeleteFolder);
@@ -2473,6 +2487,75 @@ pub fn second_inbox() -> Option<i64> {
 }
 
 /// The mail of both accounts' Inboxes in one list, a reply from the account of a message, Mark All Read of both
+/// A click on All Inboxes, from the first account's Inbox: the tree draws the row selected before the list is read
+/// (the list before dimmed until then), and a second click before that replaces the load waiting, so only the newest
+/// list is read. The order of what happened is asserted, not a time, but for a generous bound.
+async fn clicked_list_paints_first(d: &Driver, inbox: i64) {
+    let main = shell().main();
+    main.folders.select(inbox, false);
+    let load = main.list_load.clone();
+    load.order.borrow_mut().clear();
+    let clicked = std::time::Instant::now();
+    // two clicks in a row, as a click does it (not the app's own select)
+    main.folders.select(folder_id("Sent Items").unwrap_or(inbox), true);
+    main.folders.select(crate::folders::ALL_INBOXES, true);
+    let waiting = load.waiting() && !main.list.shown().is_sensitive();
+    d.check(
+        main.folders.selected() == crate::folders::ALL_INBOXES && waiting,
+        "a click selects All Inboxes at once, its list waiting for the paint, the one before dimmed",
+    );
+    let loaded = wait_until(10, || !load.waiting()).await;
+    let order: Vec<(&str, std::time::Duration)> = load
+        .order
+        .borrow()
+        .iter()
+        .map(|(what, at)| (*what, at.duration_since(clicked)))
+        .collect();
+    // the first two: a reload for a sync's changes may follow
+    let names: Vec<&str> = order.iter().map(|(what, _)| *what).collect();
+    let painted = order.first().map_or(std::time::Duration::MAX, |(_, at)| *at);
+    d.check(
+        loaded && names.starts_with(&["painted", "loaded"]) && painted < std::time::Duration::from_secs(2),
+        &format!("the row is drawn selected first, then its list is read, once ({order:?}; a sync may read it again)"),
+    );
+    d.check(
+        main.list.shown().is_sensitive() && main.list.rows() > 0,
+        "then the list shows, no longer dimmed",
+    );
+    waiting_shots(d, inbox, "list-wait").await;
+    // a list waiting is read first by a command on the list, not by another
+    main.list_load.hold(true);
+    main.folders.select(folder_id("Sent Items").unwrap_or(inbox), true);
+    run_command(Command::Sync);
+    let kept = main.list_load.waiting();
+    run_command(Command::SelectAll);
+    let read = !main.list_load.waiting() && main.list.selected_count() == u64::from(main.list.rows());
+    main.list_load.hold(false);
+    d.check(
+        kept && read,
+        "a list waiting stays so for Send/Recv, and is read before Select All selects its rows",
+    );
+    main.folders.select(crate::folders::ALL_INBOXES, false);
+}
+
+/// Pictures of a click on the folder `to` from the list shown, for the review of the wait: the load held after the
+/// paint (the row chosen highlighted, the list before dimmed, "Loading..." over it as after 400 ms), then let go (the
+/// new list). Named `{name}-1-waiting` and `{name}-2-loaded`.
+pub(super) async fn waiting_shots(d: &Driver, to: i64, name: &str) {
+    let main = shell().main();
+    main.list_load.hold(true);
+    main.folders.select(to, true);
+    d.shot(main.window(), &format!("{name}-1-waiting")).await;
+    let note = main.list_load.note().is_visible();
+    main.list_load.hold(false);
+    d.check(
+        note && main.list.shown().is_sensitive() && main.folders.selected() == to,
+        "a list that takes long says Loading... over the one before, then shows",
+    );
+    pause(300).await;
+    d.shot(main.window(), &format!("{name}-2-loaded")).await;
+}
+
 pub async fn all_inboxes(d: &Driver) {
     d.step("All Inboxes");
     let main = shell().main();
@@ -2490,7 +2573,7 @@ pub async fn all_inboxes(d: &Driver) {
     command(Command::Sync);
     wait_until(20, || shell().core.folder(inbox).is_ok_and(|f| f.unread >= 1)).await;
     tree_of_two_accounts(d, inbox, second);
-    main.folders.select(crate::folders::ALL_INBOXES);
+    clicked_list_paints_first(d, inbox).await;
     let both = |f: i64| shell().core.folder(f).map_or(0, |f| f.total);
     let expected = both(inbox) + both(second);
     d.check(
@@ -2670,7 +2753,7 @@ pub async fn all_inboxes_by_account(d: &Driver) {
         wait_until(10, || row(second).contains(&format!("({})", unread(second)))).await,
         &format!("each row shows its Inbox's unread count ({})", row(second)),
     );
-    main.folders.select(second);
+    main.folders.select(second, false);
     let total = core.folder(second).map_or(0, |f| f.total);
     d.check(
         wait_until(10, || u64::from(messages_listed()) == total).await,
@@ -2685,7 +2768,7 @@ pub async fn all_inboxes_by_account(d: &Driver) {
         &format!("the folder bar names the Inbox and the account ({name})"),
     );
     d.shot(&main_window(), "all-inboxes-3-accounts").await;
-    main.folders.select(ALL_INBOXES);
+    main.folders.select(ALL_INBOXES, false);
     let both = core.folder(inbox).map_or(0, |f| f.total) + total;
     d.check(
         wait_until(10, || u64::from(messages_listed()) == both).await,
@@ -2815,7 +2898,7 @@ pub async fn reorder_accounts(d: &Driver) {
             core.accounts().unwrap_or_default().first().map(|a| a.id) == Some(second_account),
         )
     };
-    main.folders.select(second);
+    main.folders.select(second, false);
     d.check(
         main.folders.show_drop_line(inbox, Some(false)),
         "held over the first account's row under All Inboxes, a drag shows a line above it",
@@ -2871,7 +2954,7 @@ pub async fn reorder_accounts(d: &Driver) {
             second_first()
         ),
     );
-    main.folders.select(crate::folders::ALL_INBOXES);
+    main.folders.select(crate::folders::ALL_INBOXES, false);
 }
 
 /// SCENARIO 42d: All Sent and All Drafts after All Inboxes, closed at first, with a row per account; All Sent lists
@@ -2957,7 +3040,7 @@ pub async fn all_sent_and_drafts(d: &Driver) {
     .await;
 
     // the tree: closed at first, after All Inboxes and before Flagged
-    main.folders.select(ALL_INBOXES);
+    main.folders.select(ALL_INBOXES, false);
     let ids = || -> Vec<i64> { main.folders.shown().iter().map(|(id, _)| *id).collect() };
     let at = |id: i64| ids().iter().position(|&i| i == id);
     // the last row under All Inboxes
@@ -3006,7 +3089,7 @@ pub async fn all_sent_and_drafts(d: &Driver) {
         }
         None => d.check(false, "Go to Folder asks which folder"),
     }
-    main.folders.select(ALL_INBOXES);
+    main.folders.select(ALL_INBOXES, false);
     main.folders.set_open(ALL_SENT, false);
     pause(500).await;
     d.shot(&main_window(), "all-sent-0-closed").await;
@@ -3042,7 +3125,7 @@ pub async fn all_sent_and_drafts(d: &Driver) {
     );
 
     // All Sent: both accounts' Sent Items, newest first, with the To and Account columns
-    main.folders.select(ALL_SENT);
+    main.folders.select(ALL_SENT, false);
     let expected = total(sent) + total(sent2);
     d.check(
         wait_until(10, || u64::from(messages_listed()) == expected).await,
@@ -3093,7 +3176,7 @@ pub async fn all_sent_and_drafts(d: &Driver) {
     wait_until(10, || window.width() == width).await;
 
     // one account's row under it
-    main.folders.select(sent2);
+    main.folders.select(sent2, false);
     d.check(
         wait_until(10, || u64::from(messages_listed()) == total(sent2)).await
             && listed_in(pe_core::Scope::Folder(sent2), 0, 200)
@@ -3132,7 +3215,7 @@ pub async fn all_sent_and_drafts(d: &Driver) {
     }
 
     // All Drafts: the draft, opened in the compose window of its account
-    main.folders.select(ALL_DRAFTS);
+    main.folders.select(ALL_DRAFTS, false);
     let draft_at = || {
         main.list_view()
             .rows(core, 0, 50)
@@ -3180,7 +3263,7 @@ pub async fn all_sent_and_drafts(d: &Driver) {
     // as they were for the steps after
     main.folders.set_open(ALL_SENT, false);
     main.folders.set_open(ALL_DRAFTS, false);
-    main.folders.select(ALL_INBOXES);
+    main.folders.select(ALL_INBOXES, false);
 }
 
 /// SCENARIO 41: Move and Copy to Folder offer every account's folders in a tree with a filter; a message moved to the
@@ -3322,7 +3405,7 @@ pub async fn between_accounts(d: &Driver) {
     );
     // the second account's Archive, with the message there
     wait_until(20, || core.folder(archive2).is_ok_and(|f| f.total >= 1)).await;
-    main.folders.select(archive2);
+    main.folders.select(archive2, false);
     wait_until(10, || rows() >= 1).await;
     select_row(0).await;
     d.shot(&main_window(), "move-2-accounts").await;

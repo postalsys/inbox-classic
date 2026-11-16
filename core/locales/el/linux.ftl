@@ -29,6 +29,8 @@ gtk-search-indexing = { $count ->
    *[other] γίνεται ακόμη ευρετηρίαση του κειμένου { $count } μηνυμάτων
 }
 # review: new
+gtk-list-loading = Φόρτωση...
+# review: new
 gtk-menu-rename = Μετονομασία...
 # review: new
 gtk-import-one-question = Να εισαχθεί το μήνυμα { $file } στον φάκελο «{ $folder }»;

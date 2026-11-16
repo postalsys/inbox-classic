@@ -26,6 +26,8 @@ win-no-bodies = Meddelandetexter kan inte visas.
 win-webview-failed = Det gick inte att skapa WebView2.
 # review: new
 win-webview-missing = WebView2-körningen är inte tillgänglig.
+# review: new
+win-list-loading = Läser in...
 
 ## Buttons and words used in many windows
 

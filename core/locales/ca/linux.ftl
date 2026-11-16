@@ -23,6 +23,8 @@ gtk-search-indexing = { $count ->
     [one] encara s’està indexant el text d’un missatge
    *[other] encara s’està indexant el text de { $count } missatges
 }
+# review: new
+gtk-list-loading = S'està carregant...
 gtk-menu-rename = Canvia el nom...
 gtk-import-one-question = Voleu importar el missatge { $file } a la carpeta { $folder }?
 gtk-files-not-saved = Fitxers no desats: { $failed } de { $total }.

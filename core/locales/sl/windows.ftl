@@ -28,6 +28,8 @@ win-no-bodies = Vsebine sporočil ni mogoče prikazati.
 win-webview-failed = Ustvarjanje komponente WebView2 ni uspelo.
 # review: new
 win-webview-missing = Izvajalno okolje WebView2 ni na voljo.
+# review: new
+win-list-loading = Nalaganje...
 
 ## Buttons and words used in many windows
 

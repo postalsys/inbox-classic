@@ -22,6 +22,8 @@ gtk-search-indexing = { $count ->
     [one] de tekst van { $count } bericht wordt nog geïndexeerd
    *[other] de tekst van { $count } berichten wordt nog geïndexeerd
 }
+# review: new
+gtk-list-loading = Laden...
 gtk-menu-rename = Hernoemen...
 gtk-import-one-question = Het bericht { $file } importeren in { $folder }?
 gtk-files-not-saved = Opslaan mislukt voor { $failed } van de { $total } bestanden.

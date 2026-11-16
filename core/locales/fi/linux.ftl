@@ -29,6 +29,8 @@ gtk-search-indexing = { $count ->
    *[other] { $count } viestin tekstiä indeksoidaan vielä
 }
 # review: new
+gtk-list-loading = Ladataan...
+# review: new
 gtk-menu-rename = Nimeä uudelleen...
 # review: new
 gtk-import-one-question = Tuodaanko viesti { $file } kansioon { $folder }?

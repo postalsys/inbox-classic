@@ -43,6 +43,7 @@ flowboxchild.attachment-file:hover { background-color: alpha(currentColor, 0.07)
 .status-bar { padding: 3px 10px; font-size: 0.9em; border-top: 1px solid alpha(@borders, 0.6); }
 .empty-list .title { font-weight: bold; opacity: 0.6; }
 .empty-list .more { opacity: 0.6; }
+.list-loading-note { padding: 4px 12px; border-radius: 6px; background-color: @view_bg_color; color: alpha(@view_fg_color, 0.7); box-shadow: 0 1px 3px alpha(black, 0.2); }
 .compose-fields { padding: 6px 10px; }
 .compose-fields label.field { opacity: 0.8; }
 .compose-fields button.field-button { padding: 2px 6px; min-height: 0; margin-right: -6px; }

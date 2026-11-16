@@ -4,15 +4,25 @@
   "starting_commit": "e99f7e59248bed137903150db7ef417e27755d18",
   "starting_review_baseline": "7c0b1672581c9bd7a33c226f35da16cedca4b528",
   "guide": "/Users/andris/Downloads/inbox-classic-translation-guide.md",
-  "guide_sha256": "763b4f82a99ffa484d3f366c7fac8253084c1b7482eec96841d5f63478380888",
+  "guide_sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
   "previous_round": {
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Bulgarian (bg): all 1331 catalog entries reviewed, 219 values improved. All 52 help topics remain pending. First everyday topics have been read but no help edits/mark removals recorded yet. Active workspace build/i18n-wave1. Translation-editor skill installed at ~/.codex/skills/translation-editor/SKILL.md.",
+  "next_batch": "Review the 84 new list-loading labels (3 per language), then Bulgarian help. Do not run the test suite per user instruction.",
   "languages": {
     "bg": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [
         "account-security.html",
         "add-account.html",
@@ -2658,7 +2668,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -2727,7 +2738,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -2802,7 +2814,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -4060,7 +4073,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -4129,7 +4143,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -4204,7 +4219,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -4264,7 +4280,17 @@
       "completed_batches": []
     },
     "de": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -5512,7 +5538,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -5581,7 +5608,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -5656,7 +5684,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -5716,7 +5745,17 @@
       "completed_batches": []
     },
     "es": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -5766,7 +5805,17 @@
       ]
     },
     "et": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -7014,7 +7063,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -7083,7 +7133,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -7158,7 +7209,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -7218,7 +7270,17 @@
       "completed_batches": []
     },
     "fr": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -8466,7 +8528,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -8535,7 +8598,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -8610,7 +8674,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -9868,7 +9933,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -9937,7 +10003,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -10012,7 +10079,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -10072,7 +10140,17 @@
       "completed_batches": []
     },
     "it": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -12978,7 +13056,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -13047,7 +13126,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -13122,7 +13202,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -14380,7 +14461,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -14449,7 +14531,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -14524,7 +14607,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -14584,7 +14668,17 @@
       "completed_batches": []
     },
     "nl": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -17519,7 +17613,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -17588,7 +17683,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -17663,7 +17759,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -17723,7 +17820,17 @@
       "completed_batches": []
     },
     "pt": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -20624,7 +20731,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -20693,7 +20801,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -20768,7 +20877,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -22026,7 +22136,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -22095,7 +22206,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -22170,7 +22282,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -23428,7 +23541,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -23497,7 +23611,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -23572,7 +23687,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -24830,7 +24946,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -24899,7 +25016,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -24974,7 +25092,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -26232,7 +26351,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -26301,7 +26421,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -26376,7 +26497,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -27634,7 +27756,8 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline"
+          "gtk-metainfo-feature-offline",
+          "gtk-list-loading"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -27703,7 +27826,8 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link"
+          "mac-edit-link",
+          "mac-loading-list"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -27778,7 +27902,8 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask"
+          "win-installer-remove-mail-ask",
+          "win-list-loading"
         ]
       },
       "pending_help": [
@@ -27838,7 +27963,17 @@
       "completed_batches": []
     },
     "ca": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -29478,7 +29613,17 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "nb": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -31080,7 +31225,17 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "pt-BR": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -32697,7 +32852,17 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "sr-Latn": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -34286,7 +34451,17 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "tr": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "windows.ftl": [
+          "win-list-loading"
+        ],
+        "mac.ftl": [
+          "mac-loading-list"
+        ],
+        "linux.ftl": [
+          "gtk-list-loading"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -35947,16 +36122,34 @@
       "catalog_entries": 6655,
       "help_pages": 260,
       "note": "User requested inclusion of newly added languages. Found in local feature branch; origin/master still lacks them. Do not merge unrelated feature implementation solely to review translations."
+    },
+    {
+      "kind": "late loading-status strings",
+      "sources": {
+        "master": "fd7feeaf",
+        "feature": "e932e78f"
+      },
+      "catalog_entries": 84,
+      "help_pages": 0,
+      "notes": "Three list-loading status messages per translated language; imported with existing reviewed values and marks preserved. These are not network-download or index-progress labels."
     }
   ],
-  "total_catalog_entries": 32008,
+  "total_catalog_entries": 32092,
   "total_help_pages": 1252,
   "review_workspace": {
     "path": "/Users/andris/Projects/PostalExpress/build/i18n-wave1",
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "feat/languages-wave1 advanced to cf13ec99; no catalog or help translation changes since 8f2d9848. New changes are locale/resource refactors; no merge needed for translation review."
+    "latest_source_audit": "Merged origin/master fd7feeaf and imported the 15 added platform messages from local feat/languages-wave1 e932e78f. All previously reviewed catalog values retained. No later help changes found in these source commits."
   },
-  "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED."
+  "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
+  "guide_updates": [
+    {
+      "previous_sha256": "763b4f82a99ffa484d3f366c7fac8253084c1b7482eec96841d5f63478380888",
+      "sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
+      "notes": "Reread current guide when hash mismatch detected on resume."
+    }
+  ],
+  "validation_policy": "User instruction: do not run the test suite; other sessions are running it. Continue structural checks, markup/placeholder/mnemonic checks, inventory/hash reconciliation and git diff --check. Report skipped suite execution honestly; do not claim other sessions validated this checkout without evidence."
 }

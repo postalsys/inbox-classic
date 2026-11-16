@@ -123,6 +123,8 @@ mac-no-calendar-app = Ezen a Macen nincs naptáralkalmazás, amely megnyithatná
 mac-file-not-saved = A fájlt nem sikerült menteni.
 # review: new
 mac-unsubscribing = Leiratkozás: { $target }…
+# review: new
+mac-loading-list = Betöltés…
 
 ## The compose window
 

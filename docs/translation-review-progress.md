@@ -16,7 +16,8 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Bulgarian (`bg`): all catalogs reviewed; all 52 help topics remain. Dutch, Italian,
+- Resume with 84 newly arrived list-loading labels across all 28 translated languages, then Bulgarian help.
+  All 52 Bulgarian help topics remain. Dutch, Italian,
   Portuguese (Portugal), Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are
   complete: each has 1,331 catalog entries and 52 help topics. Sixteen languages still have pending content,
   with exact IDs/topics in the state file.
@@ -40,7 +41,9 @@ Commit completed batches regularly and preserve an exact resume point.
   checker's unmarked-change reports with the completed inventory.
 - `scripts/check-language.mjs` now exists but requires every message/help page to remain marked. Its mark-only
   failures are expected for completed content; require all structural checks to pass. Do not restore marks.
-- Run the existing localization/help tests for completed batches and `git diff --check`. Regenerate
+- User instruction: do not run the test suite; other sessions are running it. Continue structural checks,
+  exact inventory/hash reconciliation and `git diff --check`. Record the suite as skipped, without claiming
+  that another session tested this review checkout. Regenerate
   `build/i18n-review.html` without committing it.
 - Commit only reviewed files, relevant glossary changes and progress records. Broad Git approval is already
   saved. Preserve the seven unrelated untracked planning/overview documents in `docs/`.
@@ -367,8 +370,17 @@ The user requested a translation-editor skill during this batch. Installed and v
 `~/.codex/skills/translation-editor/SKILL.md`, based on `~/Downloads/translation-editor-skill.md`.
 It retains the final late-arrival audit before round completion and resumes from these records.
 
+### Late source integration: list loading
+
+Fetched upstream and incorporated `origin/master` at `fd7feeaf`, then imported the 15 new platform entries
+from local `feat/languages-wave1` at `e932e78f`. This adds 84 entries across all 28 translated languages,
+three per language, for a total scope of 32,092 catalog entries. Existing catalog values/comments/marks are
+verified unchanged. Resolved the store initialization merge by retaining Unicode fold registration and
+upstream list-view state. No test suite was run, as requested. The current guide was reread after its hash
+changed. Review the new list-loading labels next; the baseline remains unchanged.
+
 Current totals: 12,043 catalog entries and 420 help pages reviewed; 1,881 catalog values improved. Remaining:
-19,965 catalog entries and 832 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+20,049 catalog entries and 832 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

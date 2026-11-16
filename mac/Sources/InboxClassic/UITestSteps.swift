@@ -387,7 +387,10 @@ extension UITest {
         _ = await waitUntil(10) { self.list.numberOfRows > 0 }
         await selectRow(0)
         let subject = main.mailbox.selectedRow?.subject ?? ""
-        command(.flag)
+        AppDelegate.shared.perform(.flag)
+        // the app's own command reads the list again at once, not when the change is reported a moment later
+        check(main.mailbox.selectedRow?.flagged == true && main.mailbox.selectedRow?.subject == subject,
+              "the row is flagged as soon as the command is done, still selected")
         check(await waitUntil(10) { self.main.core.flaggedCount == before + 1 }, "flagging a message counts it under Flagged")
         onMain { _ = self.tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false) }
         check(await waitUntil(10) { self.list.numberOfRows == Int(before + 1) },
@@ -1753,8 +1756,10 @@ extension UITest {
             }
             return true
         }, "Blue on two selected messages flags both blue: $MailFlagBit2")
-        check(menu?.items.first { $0.tag == 5 }.map { item in _ = AppDelegate.shared.validateMenuItem(item); return item.state == .on } == true,
-              "the Flag menu checks Blue for them")
+        // the list read again once the sync's changes are gathered
+        check(await waitUntil(5) {
+            menu?.items.first { $0.tag == 5 }.map { item in _ = AppDelegate.shared.validateMenuItem(item); return item.state == .on } == true
+        }, "the Flag menu checks Blue for them")
         // one of the blue ones selected: its flag white on the selection, the others in their colours
         await selectRow(index(subjects[1]) ?? 0)
         await shot(main.window, "flags-1-colors")
@@ -1915,6 +1920,54 @@ extension UITest {
         let menu = AppDelegate.shared.main.mailbox.list.window.map { _ in true } ?? false
         check(menu && main.mailbox.info(ofFolder: folderNode("Inbox")?.row.folder ?? 0)?.fixed == true,
               "the Inbox can not be renamed or deleted")
+    }
+
+    /// the tree's row `row` (All Inboxes) chosen by the user, with Up from the row below it (the same handler as a
+    /// click): the row is selected and the title says it at once, the list before dimmed and taking no keys, and the
+    /// list loads on a later turn of the run loop, after the tree is drawn
+    func clickPaintsFirst(_ row: Int) async {
+        guard let node = treeNode(row), row + 1 < tree.numberOfRows else {
+            check(false, "the tree has the row to choose and one below it")
+            return
+        }
+        let mailbox = main.mailbox
+        // held while it loads, for its pictures: the list before dimmed at once, and "Loading..." after a moment, in
+        // light and dark. A sync that changes the folders loads it at once (the tree is built again): then again
+        let loading: NSTextField? = find("list.loading", in: main.window)
+        var held = false
+        for _ in 0..<5 where !held {
+            tree.selectRowIndexes(IndexSet(integer: row + 1), byExtendingSelection: false)
+            _ = await waitUntil(5) { tree.selectedRow == row + 1 && !mailbox.listCovered }
+            mailbox.holdPending = true
+            pressUp(in: tree)
+            await shot(main.window, "all-inboxes-0a-dimmed")
+            _ = await waitUntil(Mailbox.loadingWait + 2) { loading?.isHidden == false }
+            main.window.appearance = NSAppearance(named: .darkAqua)
+            await shot(main.window, "all-inboxes-0b-loading-dark")
+            main.window.appearance = nil
+            held = mailbox.listCovered && loading?.isHidden == false
+            mailbox.holdPending = false
+            mailbox.loadPending()
+        }
+        check(held, "a list that takes a while to load says Loading... over the list before")
+        check(mailbox.allInboxes && !mailbox.listCovered && loading?.isHidden == true, "and goes once the list is loaded")
+        // from the list of the row below
+        tree.selectRowIndexes(IndexSet(integer: row + 1), byExtendingSelection: false)
+        _ = await waitUntil(5) { !mailbox.listCovered && tree.selectedRow == row + 1 }
+        let before = mailbox.allInboxes
+        mailbox.paintOrder = []
+        let started = Date()
+        pressUp(in: tree)
+        let selectedIn = Date().timeIntervalSince(started)
+        check(tree.selectedRow == row && main.window.title == node.row.title && !before && !mailbox.allInboxes
+              && mailbox.listCovered,
+              "choosing \(node.row.label) selects its row and names it in the title at once, the list before dimmed while it loads (row \(tree.selectedRow), \(main.window.title), covered \(mailbox.listCovered))")
+        // generous: a busy runner; the list is not read in the key press
+        check(selectedIn < 0.5, "the row is selected within the key press, its list not read in it (\(Int(selectedIn * 1000)) ms)")
+        check(await waitUntil(10) { mailbox.allInboxes && !mailbox.listCovered },
+              "then its list loads and the list is no longer dimmed")
+        check(mailbox.paintOrder == ["selected \(node.row.key)", "loaded \(node.row.key)"],
+              "the row was drawn selected before the list was loaded (\(mailbox.paintOrder))")
     }
 
     /// the tree's row of the first account's folder named `name`
@@ -2259,10 +2312,13 @@ extension UITest {
         check(under.allSatisfy { !$0.isEmpty && !$0.contains("Inbox") && !$0.contains("Sent Items") && !$0.contains("Drafts") }
               && treeRow({ ($0.folder == first || $0.folder == second) && $0.kind != PE_TREE_ROW_KIND_ACCOUNT_INBOX }) == nil,
               "the Inbox of each account is under All Inboxes only: an account's heading lists its other folders, without Sent Items and Drafts (\(under))")
-        tree.selectRowIndexes(IndexSet(integer: treeRow(PE_TREE_ROW_KIND_ALL_INBOXES) ?? 0), byExtendingSelection: false)
-        let expected = (inbox(ofAccount: 0)?.total ?? 0) + (inbox(ofAccount: 1)?.total ?? 0)
+        await clickPaintsFirst(treeRow(PE_TREE_ROW_KIND_ALL_INBOXES) ?? 0)
+        var expected: UInt64 = 0
         // grouped by conversation the rows are fewer: the messages they list are counted
-        check(await waitUntil(10) { main.mailbox.total == expected },
+        check(await waitUntil(10) {
+            expected = (inbox(ofAccount: 0)?.total ?? 0) + (inbox(ofAccount: 1)?.total ?? 0)
+            return main.mailbox.total == expected
+        },
               "it lists the mail of both accounts' Inboxes (\(main.mailbox.total) of \(expected))")
         let folders = (0..<min(4, list.numberOfRows)).compactMap { main.mailbox.row($0)?.folder }
         check(folders.contains(first) && folders.contains(second), "newest first, the two accounts' messages among each other")
@@ -2984,9 +3040,12 @@ extension UITest {
         check(core().bookCard(mary)?.addresses == ["mary@example.com", "mary.smith@work.example"], "both addresses kept, the first the default")
         book.find("smi")
         check(bookNames(book) == ["Mary Smith"], "the find box finds her by \"smi\"")
-        book.find("zed")
-        check(book.rows.isEmpty && (find("book.empty", in: bookWindow) as NSTextField?)?.stringValue.contains("zed") == true,
-              "and lists no one for \"zed\"")
+        // typed: the book is searched once the typing pauses, not at each key
+        book.searchField.stringValue = "zed"
+        _ = book.searchField.sendAction(book.searchField.action, to: book.searchField.target)
+        check(book.rows.count == 1, "a key typed into the find box does not search at once")
+        check(await waitUntil(5) { book.rows.isEmpty } && (find("book.empty", in: bookWindow) as NSTextField?)?.stringValue.contains("zed") == true,
+              "and lists no one for \"zed\" a moment after the typing")
         book.find("")
 
         // a group of her and a typed address

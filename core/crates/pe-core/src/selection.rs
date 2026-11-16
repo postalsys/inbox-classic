@@ -185,6 +185,12 @@ impl Core {
         Ok(self.store().refs_in_ranges(search, sort, ranges)?)
     }
 
+    /// The messages of `rows` of the list `search` makes, read by [`Core::search`]: a collapsed conversation's row
+    /// stands for its messages. What selecting rows already shown takes, without reading the list again.
+    pub fn refs_of_rows(&self, search: &Search, rows: &[pe_store::RowRef]) -> Result<Vec<MessageRef>> {
+        Ok(self.store().refs_of_rows(search, rows)?)
+    }
+
     /// Where the messages `refs` are now in that list, ascending, to select them again after it changed
     pub fn positions(&self, search: &Search, sort: Sort, refs: &[MessageRef]) -> Result<Vec<u64>> {
         let sort = self.list_sort(search, sort)?;
@@ -204,11 +210,11 @@ impl Core {
         let mut accounts = BTreeSet::new();
         let mut colors = BTreeSet::new();
         for (folder, group) in by_folder(&picked) {
-            let info = store.folder(folder)?;
-            accounts.insert(info.account_id);
+            let (account, info) = store.folder_info(folder)?;
+            accounts.insert(account);
             summary.folders += 1;
-            summary.in_junk &= info.info.special_use.as_deref() == Some("\\Junk");
-            summary.archivable &= crate::archivable(&info.info);
+            summary.in_junk &= info.special_use.as_deref() == Some("\\Junk");
+            summary.archivable &= crate::archivable(&info);
             if crate::trash_in(&store, folder)?.is_none() {
                 summary.for_good += group.len() as u64;
             }
@@ -266,7 +272,7 @@ impl Core {
         for (folder, group) in &groups {
             let uids: Vec<u64> = group.iter().map(|p| p.at.uid).collect();
             let crosses = match target {
-                Some(account) => self.store().folder(*folder)?.account_id != account,
+                Some(account) => self.store().folder_info(*folder)?.0 != account,
                 None => false,
             };
             crossed |= crosses;
@@ -467,8 +473,15 @@ impl Core {
     }
 
     /// The messages the last Undo brought back that are in their folders again (they get there once the server has
-    /// moved them and the folder is synced), for the window to select them. Forgotten once all are there.
+    /// moved them and the folder is synced). Forgotten once all are there.
     pub fn restored(&self) -> Result<Vec<MessageRef>> {
+        self.take_restored(|found| Ok(Some(found.to_vec())))
+            .map(Option::unwrap_or_default)
+    }
+
+    /// `f` with the messages the last Undo brought back that are in their folders again; they are forgotten once all
+    /// are there and `f` took them (gave Some), and kept for the next time when it did not
+    pub(crate) fn take_restored<T>(&self, f: impl FnOnce(&[MessageRef]) -> Result<Option<T>>) -> Result<Option<T>> {
         let mut restored = self.restored.lock().unwrap_or_else(|e| e.into_inner());
         let mut found = Vec::new();
         let mut all = true;
@@ -477,10 +490,11 @@ impl Core {
             all &= uids.len() >= ids.len();
             found.extend(uids.into_iter().map(|uid| MessageRef { folder: *folder, uid }));
         }
-        if all {
+        let taken = f(&found)?;
+        if all && taken.is_some() {
             restored.clear();
         }
-        Ok(found)
+        Ok(taken)
     }
 }
 

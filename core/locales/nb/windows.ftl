@@ -17,6 +17,8 @@ win-print-title-of = Skriv ut - { $subject }
 win-no-bodies = Meldingsinnhold kan ikke vises.
 win-webview-failed = Kunne ikke starte meldingsvisningen (WebView2).
 win-webview-missing = Komponenten WebView2 som viser meldinger, er ikke tilgjengelig.
+# review: new
+win-list-loading = Laster inn...
 
 ## Buttons and words used in many windows
 

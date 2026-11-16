@@ -83,6 +83,8 @@ mac-files-not-saved =
 mac-no-calendar-app = Ingen kalenderapp på denne Macen kan åpne invitasjoner (.ics-filer).
 mac-file-not-saved = Filen kunne ikke lagres.
 mac-unsubscribing = Sender avmelding til { $target }…
+# review: new
+mac-loading-list = Laster inn…
 
 ## The compose window
 

@@ -5,11 +5,14 @@
 //! folder changes, Expand All, a message hidden in a collapsed conversation opened to be shown) are here once.
 //!
 //! Every list call builds the [`Search`] the store reads from the view, so the queries are those of [`Core::search`]
-//! and its kin.
+//! and its kin. What they read is kept ([`Memo`]): the counts while the store is unchanged, which a list of one row a
+//! message has as its row count too, and which messages the rows of the pages shown are, which a click then selects
+//! without reading the whole list again.
 
 use std::collections::BTreeSet;
+use std::sync::Mutex;
 
-use pe_store::{FolderId, Message, MessageRef, Scope, Search, Show, Sort};
+use pe_store::{FolderId, Generation, Message, MessageRef, RowRef, Scope, Search, Show, Sort};
 
 use crate::{Action, Core, NextUnread, Result, Summary};
 
@@ -21,6 +24,181 @@ pub(crate) fn now_ms() -> i64 {
         .duration_since(std::time::UNIX_EPOCH)
         .map_or(0, |d| d.as_millis() as i64)
         - SLACK
+}
+
+/// The pages of rows a view keeps at most ([`Memo`]): those shown and one or two around them
+const KEPT_PAGES: usize = 4;
+
+/// The waits of the three apps' lists, stated once. How long the changes to the list shown are gathered before it is
+/// read again (a sync writes many in a row), in milliseconds
+pub const LIST_GATHER_MS: u32 = 300;
+
+/// How long a folder chosen waits for its list before the list says "Loading...", in milliseconds, from the first
+/// click of the wait (later clicks while it waits do not start it again)
+pub const LIST_LOADING_MS: u32 = 400;
+
+/// How long the Address Book's find boxes wait after the last key before they search, in milliseconds
+pub const FIND_PAUSE_MS: u32 = 150;
+
+/// How strongly the window's colour covers the rows of the list shown while the list of a folder chosen waits
+/// (the rows show through at 45 percent)
+pub const LIST_DIM: f64 = 0.55;
+
+/// What a view read last, of the list it lists now (its search and order). Its counts and the pages it read answer
+/// again while nothing was written to the store ([`Generation`]) in the same minute (words like `newer_than:` count
+/// from now). The pages also say which messages the rows show until the list is counted again, as the apps do when
+/// they read it again: a click selects what its row shows. A copy of the view starts without.
+#[derive(Default)]
+struct Memo(Mutex<Option<Kept>>);
+
+/// What [`Memo`] keeps, and of which list
+struct Kept {
+    search: Search,
+    sort: Sort,
+    /// When the counts were read
+    at: When,
+    counts: Option<(u64, u64)>,
+    rows: Option<u64>,
+    /// The pages read since the list was last counted, the last read last
+    pages: Vec<Page>,
+}
+
+/// Which messages a page of rows of the list shows (what a click on them selects), and when it was read
+struct Page {
+    offset: u64,
+    limit: u64,
+    at: When,
+    rows: Vec<RowRef>,
+}
+
+/// What the store held and the minute, when something was read
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct When {
+    generation: Generation,
+    minute: i64,
+}
+
+impl Clone for Memo {
+    fn clone(&self) -> Memo {
+        Memo::default()
+    }
+}
+
+/// Views are alike by what they list, whatever they kept
+impl PartialEq for Memo {
+    fn eq(&self, _: &Memo) -> bool {
+        true
+    }
+}
+
+impl Eq for Memo {}
+
+impl std::fmt::Debug for Memo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("Memo")
+    }
+}
+
+/// Which list is read, and when
+#[derive(Clone, Copy)]
+struct Moment<'a> {
+    search: &'a Search,
+    sort: Sort,
+    at: When,
+}
+
+impl Memo {
+    /// `f` with what is kept of the list read at `moment`: nothing when it was another list, no counts when they were
+    /// read before a write or in another minute
+    fn with<T>(&self, moment: Moment, f: impl FnOnce(&mut Kept) -> T) -> T {
+        let mut kept = self.0.lock().unwrap_or_else(|e| e.into_inner());
+        let same_list = kept
+            .as_ref()
+            .is_some_and(|k| k.sort == moment.sort && k.search == *moment.search);
+        let kept = match kept.as_mut() {
+            Some(k) if same_list => k,
+            _ => kept.insert(Kept {
+                search: moment.search.clone(),
+                sort: moment.sort,
+                at: moment.at,
+                counts: None,
+                rows: None,
+                pages: Vec::new(),
+            }),
+        };
+        if kept.at != moment.at {
+            kept.at = moment.at;
+            kept.counts = None;
+            kept.rows = None;
+        }
+        f(kept)
+    }
+}
+
+impl Kept {
+    /// The count `field` picks, read with `read` when it is not kept; counting the list again starts its pages anew
+    fn counted<T: Copy>(
+        &mut self,
+        field: fn(&mut Kept) -> &mut Option<T>,
+        read: impl FnOnce() -> Result<T>,
+    ) -> Result<T> {
+        if let Some(value) = *field(self) {
+            return Ok(value);
+        }
+        let value = read()?;
+        *field(self) = Some(value);
+        self.pages.clear();
+        Ok(value)
+    }
+
+    /// A page read, in place of one read before from the same offset
+    fn keep(&mut self, page: Page) {
+        self.pages.retain(|p| (p.offset, p.limit) != (page.offset, page.limit));
+        if self.pages.len() >= KEPT_PAGES {
+            self.pages.remove(0);
+        }
+        self.pages.push(page);
+    }
+
+    /// The rows at `ranges` as the pages read show them (the last read first), None when one of them is not there.
+    /// Rows past the end of the list, where the last page shorter than asked for ends, are none.
+    fn rows_at(&self, ranges: &[(u64, u64)]) -> Option<Vec<RowRef>> {
+        let end = self
+            .pages
+            .iter()
+            .rev()
+            .find(|p| (p.rows.len() as u64) < p.limit)
+            .map_or(u64::MAX, |p| p.offset + p.rows.len() as u64);
+        let mut found = Vec::new();
+        for &(start, stop) in ranges {
+            for at in start..stop.min(end) {
+                let page = self
+                    .pages
+                    .iter()
+                    .rev()
+                    .find(|p| at >= p.offset && at - p.offset < p.rows.len() as u64)?;
+                found.push(page.rows[(at - page.offset) as usize]);
+            }
+        }
+        Some(found)
+    }
+
+    /// The row of `wanted` in the pages read at `at` (the list as it is now), the one nearest `hint` should it be in
+    /// several; None when they do not have it
+    fn row_near(&self, wanted: MessageRef, hint: u64, at: When) -> Option<u64> {
+        self.pages
+            .iter()
+            .filter(|p| p.at == at)
+            .flat_map(|p| (p.offset..).zip(&p.rows))
+            .filter(|(_, row)| row.at == wanted)
+            .map(|(index, _)| index)
+            .min_by_key(|index| index.abs_diff(hint))
+    }
+
+    /// Whether the list was counted at `at` (nothing was written since)
+    fn counted_at(&self, at: When) -> bool {
+        self.at == at && self.counts.is_some()
+    }
 }
 
 /// A message list's view: see the module's comment
@@ -42,6 +220,7 @@ pub struct ListView {
     /// With Show Unread: when this list began (milliseconds since the epoch); the messages read since stay in it, until
     /// another folder, other words or another Show
     since: i64,
+    memo: Memo,
 }
 
 impl ListView {
@@ -259,25 +438,104 @@ impl ListView {
         }
     }
 
-    /// A page of the list's rows, from `offset` on
-    pub fn rows(&self, core: &Core, offset: u64, limit: u64) -> Result<Vec<Message>> {
-        self.listed(Vec::new(), |search| core.search(search, self.sort, offset, limit))
+    /// `f` with the search of the list and the moment it is read at ([`Memo`]), `empty` when it lists nothing
+    fn remembered<T>(&self, core: &Core, empty: T, f: impl FnOnce(&Search, Moment) -> Result<T>) -> Result<T> {
+        let Some(search) = self.search() else {
+            return Ok(empty);
+        };
+        let moment = Moment {
+            search: &search,
+            sort: self.sort,
+            at: When {
+                generation: core.generation()?,
+                minute: now_ms() / 60_000,
+            },
+        };
+        f(&search, moment)
     }
 
-    /// How many rows the list has: grouped, one a conversation and the other messages of the open ones
+    /// A page of the list's rows, from `offset` on; which messages they are is kept for a click on them
+    pub fn rows(&self, core: &Core, offset: u64, limit: u64) -> Result<Vec<Message>> {
+        self.remembered(core, Vec::new(), |search, moment| {
+            let rows = core.search(search, self.sort, offset, limit)?;
+            let page = Page {
+                offset,
+                limit,
+                at: moment.at,
+                rows: rows.iter().map(RowRef::of).collect(),
+            };
+            self.memo.with(moment, |kept| kept.keep(page));
+            Ok(rows)
+        })
+    }
+
+    /// How many rows the list has: grouped, one a conversation and the other messages of the open ones; otherwise its
+    /// messages, as [`ListView::counts`] has them
     pub fn row_count(&self, core: &Core) -> Result<u64> {
-        self.listed(0, |search| core.count_rows(search))
+        if !self.grouped {
+            return Ok(self.counts(core)?.0);
+        }
+        self.remembered(core, 0, |search, moment| {
+            self.memo
+                .with(moment, |kept| kept.counted(|k| &mut k.rows, || core.count_rows(search)))
+        })
     }
 
     /// The messages of the list and how many of them are unread, for the status bar (see [`Core::list_counts`])
     pub fn counts(&self, core: &Core) -> Result<(u64, u64)> {
-        self.listed((0, 0), |search| core.list_counts(search))
+        self.remembered(core, (0, 0), |search, moment| {
+            self.memo.with(moment, |kept| {
+                kept.counted(|k| &mut k.counts, || core.list_counts(search))
+            })
+        })
+    }
+
+    /// [`ListView::counts`] and [`ListView::row_count`] together, as a list read again wants them: the messages, the
+    /// unread ones and the rows
+    pub fn counts_and_rows(&self, core: &Core) -> Result<(u64, u64, u64)> {
+        self.remembered(core, (0, 0, 0), |search, moment| {
+            self.memo.with(moment, |kept| {
+                let (total, unread) = kept.counted(|k| &mut k.counts, || core.list_counts(search))?;
+                let rows = match self.grouped {
+                    true => kept.counted(|k| &mut k.rows, || core.count_rows(search))?,
+                    false => total,
+                };
+                Ok((total, unread, rows))
+            })
+        })
+    }
+
+    /// Whether something was written to the store since the list was last counted (or it was not counted yet): read
+    /// again, it might show something else. A change the user's own command made, read again at once, does not need
+    /// the reload that the change's event asks for a moment later.
+    pub fn stale(&self, core: &Core) -> Result<bool> {
+        self.remembered(core, false, |search, moment| {
+            let kept = self.memo.0.lock().unwrap_or_else(|e| e.into_inner());
+            Ok(!kept
+                .as_ref()
+                .is_some_and(|k| k.sort == moment.sort && k.search == *search && k.counted_at(moment.at)))
+        })
     }
 
     /// The row of the message `uid` of `folder` (its conversation's while that is collapsed); None when it is not in
     /// the list
     pub fn index_of(&self, core: &Core, folder: FolderId, uid: u64) -> Result<Option<u64>> {
         self.listed(None, |search| core.search_index(search, self.sort, folder, uid))
+    }
+
+    /// [`ListView::index_of`], looked for first in the rows read since the list was counted, nearest `hint` (the row
+    /// the message had before the list was read again): a list read again with the message shown where it was, or a
+    /// few rows lower as mail came above it, finds it without going through the whole list. Read the page with the
+    /// hint's row first.
+    pub fn index_of_near(&self, core: &Core, folder: FolderId, uid: u64, hint: u64) -> Result<Option<u64>> {
+        let wanted = MessageRef { folder, uid };
+        let near = self.remembered(core, None, |_, moment| {
+            Ok(self.memo.with(moment, |kept| kept.row_near(wanted, hint, moment.at)))
+        })?;
+        match near {
+            Some(index) => Ok(Some(index)),
+            None => self.index_of(core, folder, uid),
+        }
     }
 
     /// The messages before and after the message `uid` of `folder` (see [`Core::neighbours`])
@@ -299,14 +557,58 @@ impl ListView {
         })
     }
 
-    /// The messages at the rows `ranges` (start included, end not), in the list's order
+    /// The messages at the rows `ranges` (start included, end not), in the list's order: those the rows show, from the
+    /// pages read since the list was last counted when they have those rows (a click on a row shown, whatever was
+    /// written since), otherwise from the list as it is now
     pub fn refs_in_ranges(&self, core: &Core, ranges: &[(u64, u64)]) -> Result<Vec<MessageRef>> {
-        self.listed(Vec::new(), |search| core.refs_in_ranges(search, self.sort, ranges))
+        // one row a message, the list's order whatever the order of the ranges, as the store reads them
+        let mut ordered = ranges.to_vec();
+        if !self.grouped {
+            ordered.sort_unstable();
+        }
+        self.remembered(core, Vec::new(), |search, moment| {
+            match self.memo.with(moment, |kept| kept.rows_at(&ordered)) {
+                Some(rows) => core.refs_of_rows(search, &rows),
+                None => core.refs_in_ranges(search, self.sort, ranges),
+            }
+        })
     }
 
     /// Where the messages `refs` are now, ascending; those no longer in the list left out
     pub fn positions(&self, core: &Core, refs: &[MessageRef]) -> Result<Vec<u64>> {
         self.listed(Vec::new(), |search| core.positions(search, self.sort, refs))
+    }
+
+    /// The rows of the messages the last Undo brought back ([`Core::undo`]), for the window to select them once its list
+    /// has them: empty while none is back yet. None when something was written since the list was last counted: the
+    /// rows found now could be other rows of the list shown (the messages back in the store, the list counted before
+    /// them), so the list is read again first and the messages kept for then.
+    pub fn restored(&self, core: &Core) -> Result<Option<Vec<u64>>> {
+        self.remembered(core, Some(Vec::new()), |search, moment| {
+            let counted = self
+                .memo
+                .0
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .as_ref()
+                .is_some_and(|k| {
+                    k.sort == moment.sort
+                        && k.search == *search
+                        && k.counts.is_some()
+                        && k.at.generation == moment.at.generation
+                });
+            if !counted {
+                return Ok(None);
+            }
+            core.take_restored(|refs| {
+                if refs.is_empty() {
+                    return Ok(Some(Vec::new()));
+                }
+                let rows = core.positions(search, self.sort, refs)?;
+                // a write meanwhile: the rows may already be another list's
+                Ok((core.generation()? == moment.at.generation).then_some(rows))
+            })
+        })
     }
 
     /// Whether the list names whom its messages went to (see [`Core::lists_recipients`])
@@ -466,6 +768,288 @@ mod tests {
         assert_eq!(view.row_count(&core).unwrap(), 1);
         view.set_show(Show::All);
         assert_eq!(view.row_count(&core).unwrap(), all.len() as u64);
+    }
+
+    /// What a view keeps answers as the store does, and only while nothing was written: rows a click selects from
+    /// the pages shown, the counts, the row count
+    #[test]
+    fn what_a_view_keeps_answers_as_the_store_does() {
+        let dir = pe_testkit::TempDir::new("core-list-view-memo");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let a = thread(&core, inbox, 1);
+        let ranges: [&[(u64, u64)]; 6] = [
+            &[(0, 1)],
+            &[(1, 2)],
+            &[(0, 3)],
+            &[(2, 3), (0, 1)],
+            &[(0, 2), (1, 3)],
+            &[(1, 40)],
+        ];
+        for (grouped, open) in [(false, None), (true, None), (true, Some(a))] {
+            let mut view = ListView::new();
+            view.set_scope(Some(Scope::Folder(inbox)));
+            view.set_grouped(grouped);
+            if let Some(thread) = open {
+                view.expand(thread);
+            }
+            let search = view.search().unwrap();
+            let what = format!("grouped {grouped}, open {open:?}");
+            // before any page is read, then from the pages read: a short one, which ends the list, and a page of one
+            for read in [None, Some((0, 2)), Some((2, 10))] {
+                if let Some((offset, limit)) = read {
+                    view.rows(&core, offset, limit).unwrap();
+                }
+                for wanted in ranges {
+                    assert_eq!(
+                        view.refs_in_ranges(&core, wanted).unwrap(),
+                        core.refs_in_ranges(&search, view.sort(), wanted).unwrap(),
+                        "{what}, {read:?} read, rows {wanted:?}"
+                    );
+                }
+            }
+            let messages = core.count_search(&search).unwrap();
+            assert_eq!(view.counts(&core).unwrap(), messages, "{what}");
+            assert_eq!(
+                view.row_count(&core).unwrap(),
+                core.count_rows(&search).unwrap(),
+                "{what}"
+            );
+            if !grouped {
+                assert_eq!(view.row_count(&core).unwrap(), messages.0, "one row a message");
+            }
+
+            // a write: what was kept is read again
+            core.set_seen(inbox, 4, false).unwrap();
+            assert_eq!(view.counts(&core).unwrap(), (messages.0, messages.1 + 1), "{what}");
+            core.store()
+                .add_messages(inbox, &[mail(7, 500, "<g@x>", &["<a@x>"])])
+                .unwrap();
+            assert_eq!(
+                view.row_count(&core).unwrap(),
+                core.count_rows(&search).unwrap(),
+                "{what}"
+            );
+            let page = view.rows(&core, 0, 10).unwrap();
+            assert_eq!(page, core.search(&search, view.sort(), 0, 10).unwrap(), "{what}");
+            assert!(
+                page.iter().any(|m| m.info.uid == 7) || (grouped && open.is_none()),
+                "{what}"
+            );
+            core.store().remove_messages(inbox, &[7]).unwrap();
+            core.set_seen(inbox, 4, true).unwrap();
+        }
+    }
+
+    /// A click selects what its row shows: mail that came after the page was read moves the list, not the rows shown,
+    /// until the list is counted and read again, as the apps do when it changes
+    #[test]
+    fn a_click_selects_what_its_row_shows() {
+        let dir = pe_testkit::TempDir::new("core-list-view-click");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let mut view = ListView::new();
+        view.set_scope(Some(Scope::Folder(inbox)));
+        let at = |uid: u64| MessageRef { folder: inbox, uid };
+        view.counts(&core).unwrap();
+        let shown = view.rows(&core, 0, 10).unwrap();
+        assert_eq!(shown[0].info.uid, 4, "the newest on top");
+        core.store()
+            .add_messages(inbox, &[mail(7, 900, "<new@x>", &[])])
+            .unwrap();
+        assert_eq!(view.refs_in_ranges(&core, &[(0, 1)]).unwrap(), [at(4)], "the row shown");
+        assert_eq!(
+            view.rows(&core, 0, 10).unwrap()[0].info.uid,
+            7,
+            "a page read again is read anew"
+        );
+        assert_eq!(
+            view.refs_in_ranges(&core, &[(0, 1)]).unwrap(),
+            [at(7)],
+            "as that page shows"
+        );
+        view.counts(&core).unwrap();
+        assert_eq!(
+            view.refs_in_ranges(&core, &[(0, 2)]).unwrap(),
+            [at(7), at(4)],
+            "counted again: from the list"
+        );
+    }
+
+    /// The pages a view keeps say which messages the rows are, as a fresh read of the list does
+    #[test]
+    fn the_pages_kept_are_the_rows_read() {
+        let dir = pe_testkit::TempDir::new("core-list-view-kept");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let a = thread(&core, inbox, 1);
+        for (grouped, open) in [(false, None), (true, None), (true, Some(a))] {
+            let mut view = ListView::new();
+            view.set_scope(Some(Scope::Folder(inbox)));
+            view.set_grouped(grouped);
+            if let Some(thread) = open {
+                view.expand(thread);
+            }
+            let search = view.search().unwrap();
+            view.counts_and_rows(&core).unwrap();
+            view.rows(&core, 0, 2).unwrap();
+            view.rows(&core, 2, 10).unwrap();
+            let fresh: Vec<RowRef> = core
+                .search(&search, view.sort(), 0, 10)
+                .unwrap()
+                .iter()
+                .map(RowRef::of)
+                .collect();
+            let kept = view.memo.0.lock().unwrap();
+            let pages = &kept.as_ref().unwrap().pages;
+            let kept: Vec<RowRef> = pages.iter().flat_map(|p| p.rows.iter().copied()).collect();
+            assert_eq!(kept, fresh, "grouped {grouped}, open {open:?}");
+            assert_eq!(
+                kept.iter().any(|r| r.collapsed.is_some()),
+                grouped,
+                "grouped {grouped}, open {open:?}"
+            );
+        }
+    }
+
+    /// The counts and the row count together, as each alone gives them
+    #[test]
+    fn counts_and_rows_together() {
+        let dir = pe_testkit::TempDir::new("core-list-view-counts");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let mut view = ListView::new();
+        assert_eq!(view.counts_and_rows(&core).unwrap(), (0, 0, 0), "no folder");
+        view.set_scope(Some(Scope::Folder(inbox)));
+        core.set_seen(inbox, 2, false).unwrap();
+        assert_eq!(view.counts_and_rows(&core).unwrap(), (6, 1, 6));
+        view.set_grouped(true);
+        assert_eq!(view.counts_and_rows(&core).unwrap(), (6, 1, 3));
+        view.expand(thread(&core, inbox, 1));
+        assert_eq!(view.counts_and_rows(&core).unwrap(), (6, 1, 5));
+        assert_eq!(
+            (view.counts(&core).unwrap(), view.row_count(&core).unwrap()),
+            ((6, 1), 5)
+        );
+    }
+
+    /// A list is stale until it is counted, again after a write, and not after a read
+    #[test]
+    fn stale_after_a_write_not_after_a_read() {
+        let dir = pe_testkit::TempDir::new("core-list-view-stale");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let mut view = ListView::new();
+        assert!(!view.stale(&core).unwrap(), "it lists nothing");
+        view.set_scope(Some(Scope::Folder(inbox)));
+        assert!(view.stale(&core).unwrap(), "not counted yet");
+        view.counts_and_rows(&core).unwrap();
+        assert!(!view.stale(&core).unwrap(), "counted");
+        view.rows(&core, 0, 10).unwrap();
+        core.store().message(inbox, 1).unwrap();
+        assert!(!view.stale(&core).unwrap(), "a read changes nothing");
+        core.set_seen(inbox, 1, false).unwrap();
+        assert!(view.stale(&core).unwrap(), "a write");
+        view.counts(&core).unwrap();
+        assert!(!view.stale(&core).unwrap(), "counted again");
+        view.set_sort(Sort {
+            ascending: true,
+            ..view.sort()
+        });
+        assert!(view.stale(&core).unwrap(), "another order is another list");
+        view.counts_and_rows(&core).unwrap();
+        // a write by another connection, as a worker's
+        let other = pe_store::Store::open(dir.path().join("store.db")).unwrap();
+        other.add_messages(inbox, &[mail(8, 800, "<h@x>", &[])]).unwrap();
+        assert!(view.stale(&core).unwrap(), "another connection's write");
+    }
+
+    /// What Undo brought back is given as rows only of the list as it was counted: messages back in the store after
+    /// the count wait for the list to be read again, and are kept until then
+    #[test]
+    fn restored_rows_only_of_the_list_counted() {
+        let dir = pe_testkit::TempDir::new("core-list-view-restored");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let mut view = ListView::new();
+        view.set_scope(Some(Scope::Folder(inbox)));
+        assert_eq!(view.restored(&core).unwrap(), None, "not counted yet");
+        view.counts_and_rows(&core).unwrap();
+        assert_eq!(view.restored(&core).unwrap(), Some(vec![]), "no Undo");
+
+        // Undo of two moved away, the list counted before they are back
+        *core.restored.lock().unwrap() = vec![(inbox, vec!["<g@x>".into(), "<h@x>".into()])];
+        assert_eq!(view.restored(&core).unwrap(), Some(vec![]), "none back yet");
+        // back in the store, as the worker's sync writes them: the list counted before is behind
+        let other = pe_store::Store::open(dir.path().join("store.db")).unwrap();
+        other
+            .add_messages(inbox, &[mail(7, 900, "<g@x>", &[]), mail(8, 800, "<h@x>", &[])])
+            .unwrap();
+        assert_eq!(view.restored(&core).unwrap(), None, "the list shown does not have them");
+        assert_eq!(view.restored(&core).unwrap(), None, "kept until it is read again");
+        assert_eq!(view.counts_and_rows(&core).unwrap().0, 8);
+        assert_eq!(
+            view.restored(&core).unwrap(),
+            Some(vec![0, 1]),
+            "the newest two, at the top"
+        );
+        assert_eq!(
+            view.restored(&core).unwrap(),
+            Some(vec![]),
+            "forgotten once all were given"
+        );
+    }
+
+    /// The row of the message shown after the list is read again: from the pages read, nearest the hint, or from the
+    /// whole list when they do not have it
+    #[test]
+    fn index_of_near_looks_near_then_everywhere() {
+        let dir = pe_testkit::TempDir::new("core-list-view-near");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let a = thread(&core, inbox, 1);
+        for (grouped, open) in [(false, None), (true, None), (true, Some(a))] {
+            let mut view = ListView::new();
+            view.set_scope(Some(Scope::Folder(inbox)));
+            view.set_grouped(grouped);
+            if let Some(thread) = open {
+                view.expand(thread);
+            }
+            let what = format!("grouped {grouped}, open {open:?}");
+            view.counts_and_rows(&core).unwrap();
+            view.rows(&core, 0, 2).unwrap();
+            for uid in 1..=6 {
+                let whole = view.index_of(&core, inbox, uid).unwrap();
+                for hint in [0, 1, 3, 40] {
+                    assert_eq!(
+                        view.index_of_near(&core, inbox, uid, hint).unwrap(),
+                        whole,
+                        "{what}, uid {uid}, hint {hint}"
+                    );
+                }
+            }
+            assert_eq!(view.index_of_near(&core, inbox, 99, 0).unwrap(), None, "{what}");
+
+            // found in the pages read: the first rows, and none once the store changed since they were read
+            let first = view.rows(&core, 0, 2).unwrap()[0].at();
+            let found = |view: &ListView| {
+                let moment_at = When {
+                    generation: core.generation().unwrap(),
+                    minute: now_ms() / 60_000,
+                };
+                let kept = view.memo.0.lock().unwrap();
+                kept.as_ref().unwrap().row_near(first, 1, moment_at)
+            };
+            assert_eq!(found(&view), Some(0), "{what}");
+            core.set_seen(first.folder, first.uid, false).unwrap();
+            assert_eq!(found(&view), None, "{what}: read before the write");
+            assert_eq!(
+                view.index_of_near(&core, first.folder, first.uid, 0).unwrap(),
+                Some(0),
+                "{what}"
+            );
+            core.set_seen(first.folder, first.uid, true).unwrap();
+        }
     }
 
     #[test]

@@ -31,6 +31,8 @@ gtk-search-indexing = { $count ->
    *[other] еще индексируется текст { $count } сообщений
 }
 # review: new
+gtk-list-loading = Загрузка...
+# review: new
 gtk-menu-rename = Переименовать...
 # review: new
 gtk-import-one-question = Импортировать сообщение { $file } в папку «{ $folder }»?
