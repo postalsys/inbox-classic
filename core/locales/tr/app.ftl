@@ -592,7 +592,7 @@ ui-row-messages = { $count ->
    *[other] { $count } ileti
 }
 ui-list-pictures = İleti listesinde gönderenlerin resimlerini göster
-ui-list-pictures-note = Gönderenin etki alanı doğrulandığında marka logosunu veya Adres Defteri resmini gösterir. Resim yoksa baş harfler kullanılır. Logolar, uygulama her başlatıldığında marka başına bir kez indirilir.
+ui-list-pictures-note = Gönderenin etki alanı doğrulandığında marka logosunu veya Adres Defteri resmini gösterir. Resim yoksa baş harfler kullanılır. İndirilen logolar kaydedilir ve farklı iletilerde yeniden kullanılır.
 ui-card-picture = Resim:
 ui-card-picture-choose = &Seç...
 ui-picture-not-picture = Bu dosya PNG veya JPEG resmi değil.

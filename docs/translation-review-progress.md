@@ -16,12 +16,12 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Danish (da) is complete: all 1,334 catalog entries and 52 help topics reviewed.
-  Next resolve the persistent-logo-cache context followup (42 exact paths in state), then review Greek (el)
-  and the remaining languages. Thirteen languages still have pending content. All 84 late list-loading
-  labels are reviewed. Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese,
-  Catalan, Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews. The logo-cache
-  followup still affects 14 previously reviewed languages and must be completed before the final audit.
+- Resume with Greek (el): shared UI catalog, then core/platform catalogs and all 52 help topics.
+  Thirteen languages still have pending content. All 84 late list-loading labels are reviewed.
+  Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
+  Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
+  The persistent-logo-cache followup is now complete: 42 help topics checked (37 changed, five retained)
+  and 14 already-reviewed settings descriptions corrected. These re-reviews are counted separately.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
   not yet on `master` or `origin/master`. They are included in the isolated review checkout;
@@ -503,6 +503,27 @@ correctly describe all recipient fields. Preserved tags, attributes, platform br
 All 52 Danish help topics are reviewed. Structural checks, inline joins, exact inventory/file/source hashes
 and git diff --check pass. Review HTML regenerated. No test suite was run per user instruction.
 First-help checkpoint: `a0d3cb72`.
+
+### Persistent logo-cache context followup completed
+
+Checked all 42 recorded help paths in 14 previously reviewed languages. Improved 37 files; five generic
+pictures-tracking passages needed no change. Also reviewed and corrected ui-list-pictures-note in those
+14 languages. Logos are saved and reused across restarts, with a 30-day cache and one-day failure backoff in
+the implementation; help describes reuse without promising a download once per run or absolute privacy.
+An actual download can reveal the request time and IP address. Clarified domain authentication and Address
+Book pictures where the older wording was misleading. English/help source inconsistencies remain a maintainer
+note; no English or application code was changed.
+
+These are context re-reviews, not newly completed initial-scope entries. State batches record them separately
+as followup_reviewed_ids/help, with new translation/source hashes. Reconciliation includes the four old
+catalog IDs and changed help passages in de/es/et/fr without inflating the initial-scope totals below.
+Structural checks in all 14 languages pass after accounting for marks and the same seven independently
+verified parser false positives. Tags, attributes, keyboard text and inline joins are preserved. Exact
+inventories/hashes and git diff --check pass; review HTML regenerated. No test suite was run.
+
+Fresh upstream check after Danish completion: origin/master remains 65988ba4 and local/remote wave1 remain
+8df686a4; no new catalog/help changes. Captured --since audit found no newly pending entries. The final audit
+remains required after the current queue. Danish completion checkpoint: `4d43ead4`.
 
 Current totals: 14,789 catalog entries and 576 help pages reviewed; 2,271 catalog values improved. Remaining:
 17,303 catalog entries and 676 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.

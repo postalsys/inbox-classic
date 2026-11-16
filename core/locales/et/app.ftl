@@ -588,7 +588,7 @@ ui-row-messages = { $count ->
    *[other] { $count } kirja
 }
 ui-list-pictures = Näita kirjade loendis saatjate pilte
-ui-list-pictures-note = Kui saatja on kinnitatud, kuvatakse brändilogo või aadressiraamatu pilt. Pildi puudumisel kuvatakse saatja initsiaalid. Logod laaditakse alla kord brändi, mitte iga kirja kohta.
+ui-list-pictures-note = Kui saatja domeen on kinnitatud, kuvatakse kaubamärgi logo või Aadressiraamatu pilt. Pildi puudumisel kuvatakse saatja initsiaalid. Allalaaditud logod salvestatakse ja neid kasutatakse mitme kirja juures.
 ui-card-picture = Pilt:
 ui-card-picture-choose = &Vali...
 ui-picture-not-picture = See fail ei ole PNG- ega JPEG-pilt.

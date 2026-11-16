@@ -592,7 +592,7 @@ ui-row-messages = { $count ->
    *[other] { $count } messaggi
 }
 ui-list-pictures = Mostra le immagini dei mittenti nell’elenco dei messaggi
-ui-list-pictures-note = Mostra i loghi dei marchi o le immagini della Rubrica per i mittenti verificati, e le iniziali quando non c’è un’immagine. I loghi vengono scaricati una volta per marchio, non per ogni messaggio.
+ui-list-pictures-note = Mostra i loghi dei marchi o le immagini della Rubrica quando il dominio del mittente è verificato. Se non c’è un’immagine, mostra le iniziali. I loghi scaricati vengono salvati e riutilizzati per più messaggi.
 ui-card-picture = Immagine:
 ui-card-picture-choose = &Scegli...
 ui-picture-not-picture = Questo file non è un’immagine PNG o JPEG.

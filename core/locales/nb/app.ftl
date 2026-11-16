@@ -593,7 +593,7 @@ ui-row-messages = { $count ->
    *[other] { $count } meldinger
 }
 ui-list-pictures = Vis bilder av avsendere i meldingslisten
-ui-list-pictures-note = Viser merkelogoer eller bilder fra adresseboken når avsenderdomenet er bekreftet, og initialer når det ikke finnes noe bilde. Logoer lastes ned én gang per merke mens programmet kjører.
+ui-list-pictures-note = Viser merkelogoer eller bilder fra adresseboken når avsenderdomenet er bekreftet, og initialer når det ikke finnes noe bilde. Nedlastede logoer lagres og gjenbrukes i flere meldinger.
 ui-card-picture = Bilde:
 ui-card-picture-choose = &Velg...
 ui-picture-not-picture = Denne filen er ikke et PNG- eller JPEG-bilde.

@@ -604,7 +604,7 @@ ui-row-messages = { $count ->
    *[other] { $count } poruka
 }
 ui-list-pictures = Prikazuj slike pošiljalaca na listi poruka
-ui-list-pictures-note = Prikazuje logotipe brendova ili slike iz Adresara kada je potvrđen domen pošiljaoca. Ako nema slike, prikazuju se inicijali. Logotip se preuzima jednom po brendu tokom rada programa.
+ui-list-pictures-note = Prikazuje logotipe brendova ili slike iz Adresara kada je potvrđen domen pošiljaoca. Ako nema slike, prikazuju se inicijali. Preuzeti logotipi se čuvaju i ponovo koriste za više poruka.
 ui-card-picture = Slika:
 ui-card-picture-choose = &Izaberi...
 ui-picture-not-picture = Ova datoteka nije PNG ili JPEG slika.

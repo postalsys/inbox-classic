@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Danish (da) complete: 1334 catalog entries and all 52 help topics reviewed. Resolve persistent-logo-cache context followup (42 exact paths), then continue Greek (el) and the remaining languages. Fresh source audit required after queue. Do not run the test suite. Active workspace build/i18n-wave1.",
+  "next_batch": "Continue Greek (el) shared UI catalog, then core/platform catalogs and all 52 help topics. Danish is complete and the persistent-logo-cache followup is complete (42 help topics, 14 settings descriptions). Thirteen full languages remain. Fresh late-arrival audit required after queue. Do not run the test suite. Active workspace build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -1613,6 +1613,42 @@
           },
           "validation": "Structural checks, preserved markup/keyboard literals, inventory/source/file hash reconciliation and git diff --check pass. Review HTML regenerated. Test suite not run per user instruction.",
           "notes": "Completed security/privacy/agent/troubleshooting/reference help. Corrected signature validity versus ownership, verification order, key recovery, domain/logo limits, queued sending, credential guidance and URL-file behavior. Kept literal shortcuts with Bulgarian Alt+К/Alt+С explained. Test suite not run per user instruction."
+        },
+        {
+          "id": "bg-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/bg/brand-logos.html": "fea846834b39be631cff918f5ac33d0012307efb6534f3da305e4aaa5a8ca7c2",
+            "core/crates/pe-html/help/bg/connections.html": "d835b7aceecb1ac873372755d8c63d91a5c9b673b938dc444090273d23f0049a",
+            "core/crates/pe-html/help/bg/pictures-tracking.html": "130b983e847787e2b0aea611978f14f4264d6afe8663d2ce5424098632a5ca27",
+            "core/locales/bg/app.ftl": "fb992b4a4e2797422dd4bb1a32b1aac7bd51bfc6dcb8b70960133e71ced35e4a"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ]
     },
@@ -3214,6 +3250,43 @@
           },
           "validation": "Structural checks, preserved markup/keyboard literals, inline spacing, exact inventory/file/source hash reconciliation and git diff --check pass. Review HTML regenerated. Test suite not run per user instruction.",
           "notes": "Reviewed security, privacy, rules, agents, troubleshooting and reference against app behavior. Corrected key verification, queued sending, sign-in credentials/URL, search aliases, localized access keys and natural Czech instructions; kept all tags and literal keyboard text."
+        },
+        {
+          "id": "cs-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/cs/brand-logos.html": "c7556da1f757448d7520ae2c80bdf38fa0c41e0ea0da9bdf21eef38c971ae0b5",
+            "core/crates/pe-html/help/cs/connections.html": "042db352654c973e3524b140a0c5fe2441150c7378cdf6074667a64e40949193",
+            "core/crates/pe-html/help/cs/pictures-tracking.html": "a92b21df81deab9a879e0a5733e270cbfea1c669f2205c99f5bcb826db30db65",
+            "core/locales/cs/app.ftl": "48b6b91e9398957df44aa753bc0fae8c50272bb01dd7422b700ad47b307eddf3"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ]
     },
@@ -4893,6 +4966,43 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "de-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/de/brand-logos.html": "0c0893bcd2a538f7ad7a38b6d61365a9520f93d90ba02c19fd33b1e90de1da63",
+            "core/crates/pe-html/help/de/connections.html": "b8a0196b5950691181806b207ded8f997b8e7c49edc3d47e64e2864eefd9c452",
+            "core/crates/pe-html/help/de/pictures-tracking.html": "792bd4e6984c1087f138430c1c4fc92a27ad687eb00de3c57f510f090569fd21",
+            "core/locales/de/app.ftl": "b2854404677d8f4b7476607bd91151a056ffc392ea64184f98b44fdd130eb256"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ]
     },
@@ -6402,6 +6512,43 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "es-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/es/brand-logos.html": "76c7e6ec1728522c1f5531e0605d7b9c5e65731837b71fdcabdbce440e8726a8",
+            "core/crates/pe-html/help/es/connections.html": "e86bff9cd02238f37abbce6aaef62eb4f880aadf704c38f82e721af00c6e36eb",
+            "core/crates/pe-html/help/es/pictures-tracking.html": "9e69b44bd8bc06efc2782118b17249ef0831ab5363825fe19ac58ebc82e43484",
+            "core/locales/es/app.ftl": "3a87862372b12e440c8ddd1fa9527cc91fbf2bc05866e6e677c14a0080f4b57f"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ]
     },
@@ -6480,6 +6627,43 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "et-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/et/brand-logos.html": "a01efa7cf5fe815339c465bcc01547b8f168e97d99d2ffc2a2c1ae7963b88e25",
+            "core/crates/pe-html/help/et/connections.html": "d1f3970bf0a804c3da5b33ca81cc5fee21f5906341281658fe0159f7411f725b",
+            "core/crates/pe-html/help/et/pictures-tracking.html": "38d07d41d283b8a0608f419256b15e5731724fe5807b1376695b88c6f5f6a568",
+            "core/locales/et/app.ftl": "e9007053911e5057849ffff843d32c116d837f74e4ae6669b836182320b12fad"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ]
     },
@@ -7989,6 +8173,43 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "fr-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/fr/brand-logos.html": "47e78af3670c47333701ed1ba6743e3a52e159e4f8751fe9099d80ff0becc374",
+            "core/crates/pe-html/help/fr/connections.html": "9911a24690dbc76b6d2af69757fd1c78dc2a7049f0e3c119ff3ba0ad5fb6b19b",
+            "core/crates/pe-html/help/fr/pictures-tracking.html": "e05801d4a0e4271b27e8cde6949dc4922a3e6e850cba0913bdb1d7c0eb2e2753",
+            "core/locales/fr/app.ftl": "fef0d11fb2f61504e32edb6bd04a7c023b24d479935352e8fdeb801cc137fd18"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ]
     },
@@ -12587,6 +12808,43 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "it-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/it/brand-logos.html": "00d7e3a033cb0313477e38d9a562d698a77c5c0a7bf331c64574591266a245a1",
+            "core/crates/pe-html/help/it/connections.html": "bc9b57993bbf61311d6ade10142499f767046a3fff0ca193e363f81ce861e7d8",
+            "core/crates/pe-html/help/it/pictures-tracking.html": "29246896b9da5af9df94e5728dd2afe05ac6da66da2d680bbe215a386b18edda",
+            "core/locales/it/app.ftl": "161f80beb041fc1ac8a52f3719adb0008f83a283703e6897feb57ca9503ef7ae"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ]
     },
@@ -17214,6 +17472,42 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "nl-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/nl/brand-logos.html": "f11668953b7b7db0290ae8f8789fb5259a36fa5c09febd954a232fd4d34de2ea",
+            "core/crates/pe-html/help/nl/connections.html": "fd6857d518155688d81db7faa8cb5b1c14317afc98a5ed284a7f49adee88ded3",
+            "core/crates/pe-html/help/nl/pictures-tracking.html": "d5fed8e84863288cc113497090616925cffc88bf1d9a6971c0abc9b4305a7c59",
+            "core/locales/nl/app.ftl": "54c16bd0fcb14509a0a70a8726ace3a8107ae6e29834522309ae0566d949f479"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ]
     },
@@ -20376,6 +20670,42 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "pt-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/pt/brand-logos.html": "428ded5ddfa7b7bfcf974df42105461acaebaa7fa13aba0283c1304fe2f104d1",
+            "core/crates/pe-html/help/pt/connections.html": "988bee98a1adf0341d0e2eb2173de3fd6dada379802b3dded0ea31de02df395e",
+            "core/crates/pe-html/help/pt/pictures-tracking.html": "cda879e1a22552b1601735b338a6d846b4fbc65853e211249d5c77a45ccc8afe",
+            "core/locales/pt/app.ftl": "4a09d8037e4315d3bba749a85cb6e75a835d257b5a322852fc3ae58c7d1c5d38"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ]
     },
@@ -30627,6 +30957,43 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "ca-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/ca/brand-logos.html": "7e543bf006744521324da87ab30bdcc3ca24fee1cf60615fc52c5475c52c2315",
+            "core/crates/pe-html/help/ca/connections.html": "acc9fee39e44eabe7770a296cfe7267c78885a2905142dbd32f9c75a7ed346b0",
+            "core/crates/pe-html/help/ca/pictures-tracking.html": "ffa4ec20b11c2d6260f50dfc0da21f90451919f90636555234aff7ce20c4d04b",
+            "core/locales/ca/app.ftl": "ca8b89781dd87b13c42c887f4a3792c508cde0696f1a79ded57a3d9b6b8d9977"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -32257,6 +32624,43 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "nb-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/nb/brand-logos.html": "e5b7c12ed5486bd6e575aca183600581d640e31ebd81f46fafe0287f6bd509da",
+            "core/crates/pe-html/help/nb/connections.html": "cb07d856e5920d7fdab96548e48c67e9f3e4c0ff2f39aae0817099858cf6b551",
+            "core/crates/pe-html/help/nb/pictures-tracking.html": "076a865b3488a0232e3ae7f7878fe2b11206cc417732c872403983be0e4e1ea7",
+            "core/locales/nb/app.ftl": "0991f0adb71d3875e14ea7cee521ccc9a2c2445707de15a8bc24119e53ea8774"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -33902,6 +34306,43 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "pt-BR-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/pt-BR/brand-logos.html": "a0ed3008fe4adb5aa85117300d76eccaba42120ce63a029d0eae2af2ab2ed4f7",
+            "core/crates/pe-html/help/pt-BR/connections.html": "64cf0eb1ca4f412df1e32f88a7ef93677a100a882ad41963efb74e5040e04f8a",
+            "core/crates/pe-html/help/pt-BR/pictures-tracking.html": "313a4fe663b483ef5d0b989d6691a610fcc4cf75d11105fce5123cc939ae3885",
+            "core/locales/pt-BR/app.ftl": "3bffa265dde14bf9dc539687ee990be977c399ad5a5873c36e5023bd397a9b1d"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -35519,6 +35960,42 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "sr-Latn-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/sr-Latn/brand-logos.html": "5b36335d6ba7fc2ca2ad80b308f03d6709fda05ab30dbc3f683fc10c60450468",
+            "core/crates/pe-html/help/sr-Latn/connections.html": "0d6abd168cbaa61b52db8af81e54e4e8593db5b9028d30387082532655715d5e",
+            "core/crates/pe-html/help/sr-Latn/pictures-tracking.html": "2b6ea202c1e9e29f1872e1ce28dfb945c4045ccc4bf4ee2c359f7bf2e75086ac",
+            "core/locales/sr-Latn/app.ftl": "4017f2c9c42f0c692ab0b058d11a43be59b87f018c066900b0b974d6d327b047"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -37127,6 +37604,42 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "tr-persistent-logo-cache-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "followup_id": "persistent-logo-cache",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-list-pictures-note"
+            ]
+          },
+          "followup_reviewed_help": [
+            "brand-logos.html",
+            "connections.html",
+            "pictures-tracking.html"
+          ],
+          "followup_changed_values": 1,
+          "followup_changed_help": [
+            "brand-logos.html",
+            "connections.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/tr/brand-logos.html": "b09f21a169a87456577e2405d9614861a70e10752287909055a8f1d2ceeee81b",
+            "core/crates/pe-html/help/tr/connections.html": "f5edab1ed6fcbcae1119ae23bf18974c829634a1bad6a2350d7d39533803c0ad",
+            "core/crates/pe-html/help/tr/pictures-tracking.html": "168a0bb98cf6ddb2ba33b4d751f6da8ba2479e024c04286391e628d7e72c2c3c",
+            "core/locales/tr/app.ftl": "1230a841373de4077f2edc31a232a6003eec273ff5a97882dd36a7a407c3cd22"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba"
+          },
+          "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Separate source-context re-review: persistent logo caching across restarts, actual-download privacy and domain authentication. Initial-scope reviewed counts are not incremented. No English or app-code changes. Five generic pictures-tracking passages across the languages needed no edit."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -37234,7 +37747,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Fetched origin after Czech completion and merged origin/master 65988ba4 as 4cb0158b. Upstream changed review/release tooling only, no catalog/help content. Local/remote feat/languages-wave1 remain 8df686a4. Updated --since audit and full inventory/hash reconciliation found no new pending translations at this checkpoint.",
+    "latest_source_audit": "Fetched origin after Danish completion 4d43ead4. Master/origin-master remain 5573ee4b/65988ba4; local/remote feat/languages-wave1 remain 8df686a4. No new catalog/help content. Captured --since audit reports no newly pending entries; full pending inventory and completed hashes reconciled separately. Final late-arrival audit still required.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review"
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
@@ -37261,7 +37774,7 @@
   "context_followups": [
     {
       "id": "persistent-logo-cache",
-      "status": "pending",
+      "status": "complete",
       "issue": "Source-context consistency pass: logos are cached persistently for 30 days with one-day retry backoff, not necessarily downloaded on each app run. English help still describes once-per-run behavior. Review affected already-reviewed translated passages and replace misleading download timing with cached/reused wording; retain privacy explanation about requests when downloads occur. Do not edit English or app code.",
       "evidence": [
         "core/crates/pe-core/src/lib.rs: LogoSource::svg",
@@ -37310,7 +37823,94 @@
         "core/crates/pe-html/help/tr/brand-logos.html",
         "core/crates/pe-html/help/tr/connections.html",
         "core/crates/pe-html/help/tr/pictures-tracking.html"
-      ]
+      ],
+      "catalogs": {
+        "bg": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "ca": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "cs": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "de": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "es": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "et": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "fr": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "it": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "nl": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "pt": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "nb": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "pt-BR": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "sr-Latn": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        },
+        "tr": {
+          "app.ftl": [
+            "ui-list-pictures-note"
+          ]
+        }
+      },
+      "note": "Expanded after reading the settings descriptions: update the same cache and sender-domain claims in 14 already-reviewed catalog values. The 13 pending languages will receive this correction during their normal review. Followup counts are separate from the initial-scope totals.",
+      "reviewed_help_count": 42,
+      "changed_help_count": 37,
+      "reviewed_catalog_count": 14,
+      "changed_catalog_values": 14,
+      "unchanged_files": [
+        "core/crates/pe-html/help/bg/pictures-tracking.html",
+        "core/crates/pe-html/help/nl/pictures-tracking.html",
+        "core/crates/pe-html/help/pt/pictures-tracking.html",
+        "core/crates/pe-html/help/sr-Latn/pictures-tracking.html",
+        "core/crates/pe-html/help/tr/pictures-tracking.html"
+      ],
+      "validation": "Structural checks pass after accounting for reviewed marks and the same seven recorded multiline-parser false positives; full variable sets independently verified. Help markup, attributes, keyboard literals and inline joins preserved. Exact inventory/file/source hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+      "checkpoint_parent": "4d43ead4bc202b1a3caae98f07f8c29e36828869",
+      "counting": "These 42 help topics and 14 catalog values are a separate context re-review. Do not add them to initial-scope completion or changed-value counts; four catalog IDs in de/es/et/fr were reviewed before the current round."
     }
   ]
 }

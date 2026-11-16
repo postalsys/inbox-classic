@@ -599,7 +599,7 @@ ui-row-messages = { $count ->
    *[other] { $count } mensagens
 }
 ui-list-pictures = Mostrar as imagens dos remetentes na lista de mensagens
-ui-list-pictures-note = Mostra logótipos de marcas ou imagens do Livro de Endereços quando o domínio do remetente é verificado. Se não houver imagem, mostra as iniciais. Cada logótipo é transferido uma vez por marca e por sessão, não por mensagem.
+ui-list-pictures-note = Mostra logótipos de marcas ou imagens do Livro de Endereços quando o domínio do remetente é verificado. Se não houver imagem, mostra as iniciais. Os logótipos transferidos são guardados e reutilizados em várias mensagens.
 ui-card-picture = Imagem:
 ui-card-picture-choose = &Escolher...
 ui-picture-not-picture = Este ficheiro não é uma imagem PNG ou JPEG.

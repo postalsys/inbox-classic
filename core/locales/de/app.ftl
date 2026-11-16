@@ -588,7 +588,7 @@ ui-row-messages = { $count ->
    *[other] { $count } Nachrichten
 }
 ui-list-pictures = Bilder der Absender in der Nachrichtenliste anzeigen
-ui-list-pictures-note = Zeigt bei bestätigten Absendern Markenlogos oder Bilder aus dem Adressbuch an. Ist kein Bild verfügbar, erscheinen die Initialen. Logos werden einmal pro Marke heruntergeladen, nicht für jede Nachricht.
+ui-list-pictures-note = Zeigt bei bestätigter Absenderdomäne Markenlogos oder Bilder aus dem Adressbuch an. Ist kein Bild verfügbar, erscheinen die Initialen. Heruntergeladene Logos werden gespeichert und für mehrere Nachrichten verwendet.
 ui-card-picture = Bild:
 ui-card-picture-choose = Aus&wählen...
 ui-picture-not-picture = Diese Datei ist kein PNG- oder JPEG-Bild.

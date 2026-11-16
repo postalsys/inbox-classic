@@ -592,7 +592,7 @@ ui-row-messages = { $count ->
    *[other] { $count } berichten
 }
 ui-list-pictures = Afbeeldingen van afzenders tonen in de berichtenlijst
-ui-list-pictures-note = Toont merklogo’s of afbeeldingen uit het Adresboek voor geverifieerde afzenders, en initialen als er geen afbeelding is. Logo’s worden één keer per merk gedownload, niet voor elk bericht.
+ui-list-pictures-note = Toont merklogo’s of afbeeldingen uit het Adresboek als het afzenderdomein is bevestigd, en initialen als er geen afbeelding is. Gedownloade logo’s worden opgeslagen en voor meerdere berichten gebruikt.
 ui-card-picture = Afbeelding:
 ui-card-picture-choose = K&iezen...
 ui-picture-not-picture = Dit bestand is geen PNG- of JPEG-afbeelding.

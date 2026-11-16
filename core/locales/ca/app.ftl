@@ -592,7 +592,7 @@ ui-row-messages = { $count ->
    *[other] { $count } missatges
 }
 ui-list-pictures = Mostra les imatges dels remitents a la llista de missatges
-ui-list-pictures-note = Mostra logotips de marques o imatges de la Llibreta d’adreces quan es verifica el domini del remitent. Si no hi ha cap imatge, mostra les inicials. Cada logotip es baixa una vegada per marca durant cada execució de l’aplicació.
+ui-list-pictures-note = Mostra logotips de marques o imatges de la Llibreta d’adreces quan es verifica el domini del remitent. Si no hi ha cap imatge, mostra les inicials. Els logotips baixats es desen i es reutilitzen en diversos missatges.
 ui-card-picture = Imatge:
 ui-card-picture-choose = &Tria...
 ui-picture-not-picture = Aquest fitxer no és una imatge PNG o JPEG.

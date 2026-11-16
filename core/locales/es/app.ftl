@@ -588,7 +588,7 @@ ui-row-messages = { $count ->
    *[other] { $count } mensajes
 }
 ui-list-pictures = Mostrar las imágenes de los remitentes en la lista de mensajes
-ui-list-pictures-note = Muestra logotipos de marca o fotos de la libreta de direcciones para los remitentes verificados, e iniciales si no hay imagen disponible. Los logotipos se descargan una vez por marca, no por cada mensaje.
+ui-list-pictures-note = Muestra logotipos de marca o fotos de la Libreta de direcciones si el dominio del remitente está confirmado. Si no hay imagen disponible, muestra sus iniciales. Los logotipos descargados se guardan y reutilizan en distintos mensajes.
 ui-card-picture = Imagen:
 ui-card-picture-choose = &Elegir...
 ui-picture-not-picture = Este archivo no es una imagen PNG ni JPEG.

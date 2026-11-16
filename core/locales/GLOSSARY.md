@@ -146,6 +146,9 @@ Context notes:
 - `ui-pictures-*` and the trusted-sender settings concern external images inside messages. `ui-list-pictures-*`
   concerns the sender's picture beside a message: a verified brand logo, then an Address Book picture for a verified
   sender domain, otherwise initials. Do not describe these as the same kind of picture.
+- Downloaded brand logos are stored and reused across app restarts, not once per run. Describe cached reuse
+  across messages, not a promise of exactly one download per brand. When a download occurs, the logo server
+  can see the request time and IP address. The English logo help still contains the older timing claims.
 - `ui-download-limit` labels a storage-size selector (MB or GB) for each account. Exceeding the limit removes local
   downloaded copies; the messages remain on the server and can be downloaded again.
 - `ui-picture-too-large` applies to an Address Book picture: at most 10 MB, with both width and height at most 8000

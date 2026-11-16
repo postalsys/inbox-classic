@@ -588,7 +588,7 @@ ui-row-messages = { $count ->
    *[other] { $count } messages
 }
 ui-list-pictures = Afficher les images des expéditeurs dans la liste des messages
-ui-list-pictures-note = Affiche les logos de marque ou les photos du carnet d'adresses pour les expéditeurs vérifiés, et les initiales si aucune image n'est disponible. Les logos sont téléchargés une seule fois par marque, et non à chaque message.
+ui-list-pictures-note = Affiche les logos de marque ou les photos du Carnet d'adresses si le domaine de l'expéditeur est confirmé, et ses initiales si aucune image n'est disponible. Les logos téléchargés sont conservés et réutilisés pour plusieurs messages.
 ui-card-picture = Image :
 ui-card-picture-choose = &Choisir...
 ui-picture-not-picture = Ce fichier n'est pas une image PNG ou JPEG.

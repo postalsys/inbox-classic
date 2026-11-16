@@ -597,7 +597,7 @@ ui-row-messages = { $count ->
    *[other] { $count } zpráv
 }
 ui-list-pictures = Zobrazovat obrázky odesílatelů v seznamu zpráv
-ui-list-pictures-note = Zobrazuje loga značek nebo obrázky z Adresáře, pokud je doména odesílatele ověřená. Jinak zobrazí iniciály. Při každém spuštění se logo stáhne jen jednou pro danou značku, nikoli pro každou zprávu.
+ui-list-pictures-note = Zobrazuje loga značek nebo obrázky z Adresáře, pokud je doména odesílatele ověřená. Není-li obrázek dostupný, zobrazí iniciály. Stažená loga se ukládají a používají znovu pro více zpráv.
 ui-card-picture = Obrázek:
 ui-card-picture-choose = Vyb&rat...
 ui-picture-not-picture = Tento soubor není obrázek PNG ani JPEG.
