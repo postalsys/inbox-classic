@@ -71,7 +71,11 @@ fn every_catalog_has_every_english_message() {
     for (code, _) in LANGUAGES {
         let has: BTreeSet<String> = catalog(code).into_iter().map(|(id, _)| id).collect();
         let missing: Vec<&String> = english.difference(&has).collect();
-        assert!(missing.is_empty(), "{code} lacks {} English messages: {missing:?}", missing.len());
+        assert!(
+            missing.is_empty(),
+            "{code} lacks {} English messages: {missing:?}",
+            missing.len()
+        );
     }
 }
 
