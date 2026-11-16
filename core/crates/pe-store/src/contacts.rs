@@ -17,9 +17,9 @@ pub struct Contact {
 const SENT_WEIGHT: i64 = 3;
 
 /// The LIKE patterns of what is typed, matched at the start (`typed%`) and at the start of a word after the first
-/// (`% typed%`), its wildcards taken as themselves
+/// (`% typed%`), its wildcards taken as themselves, folded ([`crate::fold`]) to match `fold(column)`
 pub(crate) fn like_starts(typed: &str) -> (String, String) {
-    let escaped = like_escaped(typed.trim());
+    let escaped = like_escaped(&crate::fold::fold(typed.trim()));
     (format!("{escaped}%"), format!("% {escaped}%"))
 }
 
@@ -88,7 +88,7 @@ impl Store {
         let (start, word) = like_starts(typed);
         let mut statement = self.db.prepare_cached(
             "SELECT name, address FROM contacts WHERE hidden = 0 \
-             AND (address LIKE ?1 ESCAPE '\\' OR name LIKE ?1 ESCAPE '\\' OR name LIKE ?2 ESCAPE '\\') \
+             AND (fold(address) LIKE ?1 ESCAPE '\\' OR fold(name) LIKE ?1 ESCAPE '\\' OR fold(name) LIKE ?2 ESCAPE '\\') \
              ORDER BY sent * ?3 + received DESC, last DESC, address LIMIT ?4",
         )?;
         statement

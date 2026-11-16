@@ -132,9 +132,9 @@ impl Store {
     pub fn cards(&self, filter: &str) -> Result<Vec<Card>> {
         let (start, word) = filter_patterns(filter);
         let mut statement = self.db.prepare_cached(
-            "SELECT id FROM cards WHERE ?1 = '%' OR name LIKE ?1 ESCAPE '\\' OR name LIKE ?2 ESCAPE '\\' \
-             OR nickname LIKE ?1 ESCAPE '\\' OR company LIKE ?1 ESCAPE '\\' \
-             OR id IN (SELECT card_id FROM card_addresses WHERE address LIKE ?1 ESCAPE '\\') \
+            "SELECT id FROM cards WHERE ?1 = '%' OR fold(name) LIKE ?1 ESCAPE '\\' OR fold(name) LIKE ?2 ESCAPE '\\' \
+             OR fold(nickname) LIKE ?1 ESCAPE '\\' OR fold(company) LIKE ?1 ESCAPE '\\' \
+             OR id IN (SELECT card_id FROM card_addresses WHERE fold(address) LIKE ?1 ESCAPE '\\') \
              ORDER BY name COLLATE NOCASE, id",
         )?;
         let ids: Vec<CardId> = statement
@@ -376,7 +376,7 @@ impl Store {
     pub fn groups(&self, filter: &str) -> Result<Vec<Group>> {
         let (start, word) = filter_patterns(filter);
         let mut statement = self.db.prepare_cached(
-            "SELECT id FROM card_groups WHERE ?1 = '%' OR name LIKE ?1 ESCAPE '\\' OR name LIKE ?2 ESCAPE '\\' \
+            "SELECT id FROM card_groups WHERE ?1 = '%' OR fold(name) LIKE ?1 ESCAPE '\\' OR fold(name) LIKE ?2 ESCAPE '\\' \
              ORDER BY name COLLATE NOCASE, id",
         )?;
         let ids: Vec<GroupId> = statement
@@ -395,10 +395,10 @@ impl Store {
              COALESCE((SELECT address FROM card_addresses a WHERE a.card_id = m.card_id ORDER BY position LIMIT 1), \
              m.address), COALESCE(c.phones, ''), COALESCE(c.company, '') \
              FROM card_members m LEFT JOIN cards c ON c.id = m.card_id WHERE m.group_id = ?1 AND (?2 = '%' \
-             OR COALESCE(c.name, m.name) LIKE ?2 ESCAPE '\\' OR COALESCE(c.name, m.name) LIKE ?3 ESCAPE '\\' \
-             OR c.nickname LIKE ?2 ESCAPE '\\' OR c.company LIKE ?2 ESCAPE '\\' \
-             OR (m.card_id IS NULL AND m.address LIKE ?2 ESCAPE '\\') \
-             OR m.card_id IN (SELECT card_id FROM card_addresses WHERE address LIKE ?2 ESCAPE '\\')) \
+             OR fold(COALESCE(c.name, m.name)) LIKE ?2 ESCAPE '\\' OR fold(COALESCE(c.name, m.name)) LIKE ?3 ESCAPE '\\' \
+             OR fold(c.nickname) LIKE ?2 ESCAPE '\\' OR fold(c.company) LIKE ?2 ESCAPE '\\' \
+             OR (m.card_id IS NULL AND fold(m.address) LIKE ?2 ESCAPE '\\') \
+             OR m.card_id IN (SELECT card_id FROM card_addresses WHERE fold(address) LIKE ?2 ESCAPE '\\')) \
              ORDER BY m.position",
         )?;
         let rows = statement
@@ -499,14 +499,15 @@ impl Store {
         let (start, word) = like_starts(typed);
         let mut statement = self.db.prepare_cached(
             "SELECT c.name, a.address FROM cards c JOIN card_addresses a ON a.card_id = c.id \
-             WHERE c.name LIKE ?1 ESCAPE '\\' OR c.name LIKE ?2 ESCAPE '\\' OR c.nickname LIKE ?1 ESCAPE '\\' \
-             OR a.address LIKE ?1 ESCAPE '\\' ORDER BY c.name COLLATE NOCASE, a.position LIMIT ?3",
+             WHERE fold(c.name) LIKE ?1 ESCAPE '\\' OR fold(c.name) LIKE ?2 ESCAPE '\\' \
+             OR fold(c.nickname) LIKE ?1 ESCAPE '\\' OR fold(a.address) LIKE ?1 ESCAPE '\\' \
+             ORDER BY c.name COLLATE NOCASE, a.position LIMIT ?3",
         )?;
         let people = statement
             .query_map(params![start, word, limit as i64], |row| Ok((row.get(0)?, row.get(1)?)))?
             .collect::<rusqlite::Result<_>>()?;
         let mut statement = self.db.prepare_cached(
-            "SELECT id FROM card_groups WHERE name LIKE ?1 ESCAPE '\\' OR name LIKE ?2 ESCAPE '\\' \
+            "SELECT id FROM card_groups WHERE fold(name) LIKE ?1 ESCAPE '\\' OR fold(name) LIKE ?2 ESCAPE '\\' \
              ORDER BY name COLLATE NOCASE LIMIT ?3",
         )?;
         let ids: Vec<GroupId> = statement

@@ -561,6 +561,39 @@ CREATE TABLE pgp_lookups (
 ALTER TABLE rules ADD COLUMN move_account INTEGER REFERENCES accounts(id) ON DELETE SET NULL;
 ALTER TABLE rules ADD COLUMN move_path TEXT;
 "#,
+    // Turkish's dotless ı as i (fold.rs), which SQLite's NOCASE and FTS5's unicode61 keep a letter of their own: the
+    // From and Subject orders by it, and the search index, whose messages with one are indexed again (their text read
+    // again by the workers)
+    r#"
+DROP INDEX messages_by_from;
+CREATE INDEX messages_by_from ON messages (folder_id,
+    replace(replace((CASE from_name WHEN '' THEN from_address ELSE from_name END), 'İ', 'i'), 'ı', 'i') COLLATE NOCASE,
+    uid);
+DROP INDEX messages_by_subject;
+CREATE INDEX messages_by_subject ON messages (folder_id, replace(replace(subject, 'İ', 'i'), 'ı', 'i') COLLATE NOCASE, uid);
+DROP TRIGGER messages_fts_add;
+CREATE TRIGGER messages_fts_add AFTER INSERT ON messages BEGIN
+    INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) VALUES (
+        new.id, replace(new.subject, 'ı', 'i'),
+        replace(CASE new.sender_people WHEN '' THEN new.from_name || ' ' || new.from_address ELSE new.sender_people END,
+            'ı', 'i'),
+        replace(CASE new.recipient_people WHEN '' THEN new.recipients ELSE new.recipient_people END, 'ı', 'i'),
+        replace(new.attachment_names, 'ı', 'i'), ''
+    );
+END;
+CREATE TEMP TABLE dotless AS SELECT id FROM messages WHERE instr(subject || from_name || sender_people || recipients
+    || recipient_people || attachment_names || COALESCE(snippet, ''), 'ı') > 0;
+DELETE FROM messages_fts WHERE rowid IN (SELECT id FROM dotless);
+INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body)
+    SELECT id, replace(subject, 'ı', 'i'),
+        replace(CASE sender_people WHEN '' THEN from_name || ' ' || from_address ELSE sender_people END, 'ı', 'i'),
+        replace(CASE recipient_people WHEN '' THEN recipients ELSE recipient_people END, 'ı', 'i'),
+        replace(attachment_names, 'ı', 'i'), ''
+    FROM messages WHERE id IN (SELECT id FROM dotless);
+UPDATE messages SET text_indexed = 0 WHERE id IN (SELECT id FROM dotless);
+UPDATE bodies SET indexed = 0 WHERE message_id IN (SELECT id FROM dotless);
+DROP TABLE dotless;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
@@ -585,6 +618,56 @@ mod tests {
         migrate(&mut db).unwrap();
         let version: usize = db.pragma_query_value(None, "user_version", |row| row.get(0)).unwrap();
         assert_eq!(version, MIGRATIONS.len());
+    }
+
+    #[test]
+    fn messages_with_a_dotless_i_are_indexed_again() {
+        let mut db = Connection::open_in_memory().unwrap();
+        // the schema before ı was indexed as i
+        let before = MIGRATIONS
+            .iter()
+            .position(|m| m.contains("DROP TRIGGER messages_fts_add"))
+            .unwrap();
+        for migration in &MIGRATIONS[..before] {
+            db.execute_batch(migration).unwrap();
+        }
+        db.pragma_update(None, "user_version", before).unwrap();
+        db.execute_batch(
+            "INSERT INTO accounts (id, name, email, username, imap_host, imap_port, imap_security, smtp_host, \
+             smtp_port, smtp_security) VALUES (1, 'A', 'a@x', 'a', 'h', 993, 'tls', 'h', 465, 'tls');
+             INSERT INTO folders (id, account_id, path, name, flags, subscribed, selectable, position) \
+             VALUES (1, 1, 'INBOX', 'INBOX', '', 1, 1, 0);
+             INSERT INTO messages (id, folder_id, uid, flags, seen, subject, from_name, from_address, recipients, \
+             has_attachments, text_indexed) VALUES (1, 1, 1, '', 0, 'Işık', '', '', '', 0, 1), \
+             (2, 1, 2, '', 0, 'Ankara', '', '', '', 0, 1);
+             INSERT INTO bodies (message_id, source, indexed) VALUES (1, x'00', 1), (2, x'00', 1);",
+        )
+        .unwrap();
+        let found = |db: &Connection, word: &str| -> Vec<i64> {
+            let mut statement = db
+                .prepare("SELECT rowid FROM messages_fts WHERE messages_fts MATCH ?1 ORDER BY rowid")
+                .unwrap();
+            statement
+                .query_map([word], |row| row.get(0))
+                .unwrap()
+                .map(Result::unwrap)
+                .collect()
+        };
+        assert_eq!(found(&db, "isik"), [] as [i64; 0]);
+        migrate(&mut db).unwrap();
+        assert_eq!(found(&db, "isik"), [1]);
+        assert_eq!(found(&db, "ankara"), [2]);
+        // its text read again; the other's as it was
+        let indexed = |id: i64| -> (i64, i64) {
+            db.query_row(
+                "SELECT m.text_indexed, b.indexed FROM messages m JOIN bodies b ON b.message_id = m.id WHERE m.id = ?1",
+                [id],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .unwrap()
+        };
+        assert_eq!(indexed(1), (0, 0));
+        assert_eq!(indexed(2), (1, 1));
     }
 
     #[test]

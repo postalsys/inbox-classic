@@ -219,12 +219,12 @@ impl Sort {
     /// The ORDER BY, each matching an index of the schema
     pub(crate) fn order_by(self) -> String {
         let column = match self.field {
-            SortField::Date => LIST_DATE,
-            SortField::Received => "internal_date",
-            SortField::From => "(CASE from_name WHEN '' THEN from_address ELSE from_name END) COLLATE NOCASE",
-            SortField::To => "recipients COLLATE NOCASE",
-            SortField::Subject => "subject COLLATE NOCASE",
-            SortField::Size => "size",
+            SortField::Date => LIST_DATE.to_string(),
+            SortField::Received => "internal_date".to_string(),
+            SortField::From => crate::fold::order_key(FROM_KEY),
+            SortField::To => crate::fold::order_key("recipients"),
+            SortField::Subject => crate::fold::order_key("subject"),
+            SortField::Size => "size".to_string(),
         };
         let direction = if self.ascending { "ASC" } else { "DESC" };
         // the id last: the same UID in two folders has one order across folders too (an index ends with the rowid, so
@@ -256,6 +256,9 @@ fn is_seen(canonical: &str) -> bool {
 
 /// [`Message::display_date`] in SQL: the Date header, never later than the arrival; what the Date order and its
 /// indexes (schema.rs) sort by
+/// What the From order sorts by: the sender's name, their address when the message has none
+pub(crate) const FROM_KEY: &str = "(CASE from_name WHEN '' THEN from_address ELSE from_name END)";
+
 pub(crate) const LIST_DATE: &str = "COALESCE(MIN(date, internal_date), date, internal_date)";
 
 /// [`LIST_DATE`] of the messages of a table named `alias` in a query
