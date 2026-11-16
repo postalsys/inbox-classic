@@ -348,6 +348,59 @@
             "Preserved help tags, links, control references and platform branches.",
             "Corrected temporary-file lifetime, signature identity claims, folder ordering and OAuth reauthentication wording."
           ]
+        },
+        {
+          "id": "et-consistency-2026-11-16",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-setup-passphrase-note"
+            ],
+            "core.ftl": [
+              "pgp-details-opened",
+              "attachment-decrypted-note",
+              "pgp-found-keys",
+              "pgp-publish-pending"
+            ]
+          },
+          "reviewed_help": [
+            "attachments.html",
+            "encrypted-and-signed-mail.html",
+            "folders.html",
+            "main-window.html",
+            "manage-accounts.html",
+            "move-computer.html",
+            "organize-mail.html",
+            "verify-a-key.html"
+          ],
+          "files": {
+            "core/locales/et/app.ftl": "cc4d51bbe47d61f29274907ee5dcb6005d17f3a76fb6caac42a149230381e11d",
+            "core/locales/et/core.ftl": "b93436d3acc1fa559498056adc280c82797fc3ce4b879014f80669fc40d8b280",
+            "core/crates/pe-html/help/et/attachments.html": "89b29182fb9039bdfa83f2f22d3450c631fd6544c05c937210159ed964a4418e",
+            "core/crates/pe-html/help/et/encrypted-and-signed-mail.html": "6645162b8a460d1b97aa4a74e816e0a32bbff6712be78e3b96ff64cf89602d3b",
+            "core/crates/pe-html/help/et/folders.html": "26fde702c75787b08002b9d8dc11c605b8931dcfb034ffd602405ee6264b14e1",
+            "core/crates/pe-html/help/et/main-window.html": "f5e8423fb778fe21bf898a22ea6df30301386304f0bed7dcdad3cd70905227ea",
+            "core/crates/pe-html/help/et/manage-accounts.html": "44a61f982694441c1477cb36122049bb1111542e45f09c93285cd90dd54d6d82",
+            "core/crates/pe-html/help/et/move-computer.html": "8b2367891f2b2329f9996e9277e2933c83eab28aa36bd8b08c096de1284a0c91",
+            "core/crates/pe-html/help/et/organize-mail.html": "8d79a1363c2d25244ab136d2e4d3f2bd65506384223901add68e9289e6a739ef",
+            "core/crates/pe-html/help/et/verify-a-key.html": "76883423f8cfb9761bd157aee7725261a3dccd2600cbc5d3fc115fb7f1492b45"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/core.ftl": "c86d5015ca9cbaa6e99c2e75331b8a1d2380f4c2952197dc460f095ec528f016",
+            "core/crates/pe-html/help/en/attachments.html": "e88d54aad038c2f9860965b6edc4403609c943f79d8e29ea07e88be139ecc468",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "b11ff6a5da8cc4f36f352fe5d7a6a43f0aa04e7ac1f67ea0608ef43559ba100e",
+            "core/crates/pe-html/help/en/folders.html": "2f0aeafa43c1642a3f9df4c6dcae159e96892feb819988b206fb6831808ecfef",
+            "core/crates/pe-html/help/en/main-window.html": "1bda497c507b83039b305560b2c14c93e38bc07f72709634bdbb54e8cc65d6b5",
+            "core/crates/pe-html/help/en/manage-accounts.html": "7267a73e572221d410c18461ae1be3eccacfa522e9154a6917ec0aa37c39e8e7",
+            "core/crates/pe-html/help/en/move-computer.html": "636274cd347b79ccb1edaa0116514699f1f2dd4c294d78e918f42571e6e7574e",
+            "core/crates/pe-html/help/en/organize-mail.html": "a63b4edf72374937db37a8b40e34a222102d3b13d0d575930e08db9a9f96ebc8",
+            "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153"
+          },
+          "validation": "Passed all 68 pe-i18n/pe-html tests, full-round catalog invariants, help markup/keyboard preservation, mnemonic scopes, file/source hashes and git diff --check. Every unmarked change is accounted for (965 catalog entries and 279 help lines).",
+          "notes": [
+            "Rechecked translations against corrected English source: OAuth re-login, decryption key, attachment lifetime/platform handling, signatures and key ownership, navigation/unread counts, verification order and imported rule folders.",
+            "Key lookup wording now covers one or several keys; address publication is confirmed separately for each address."
+          ]
         }
       ]
     },
@@ -690,6 +743,59 @@
           "notes": [
             "Reviewed all 14 marked passages across ten help topics; rewrote key management, verification, encrypted mail and settings migration.",
             "Corrected attachment cleanup and platform differences, folder navigation, hidden unread counts and verification order. All tags, control references, links, platform branches and keyboard names preserved."
+          ]
+        },
+        {
+          "id": "de-consistency-2026-11-16",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-setup-passphrase-note"
+            ],
+            "core.ftl": [
+              "pgp-details-opened",
+              "attachment-decrypted-note",
+              "pgp-found-keys",
+              "pgp-publish-pending"
+            ]
+          },
+          "reviewed_help": [
+            "attachments.html",
+            "encrypted-and-signed-mail.html",
+            "folders.html",
+            "main-window.html",
+            "manage-accounts.html",
+            "move-computer.html",
+            "organize-mail.html",
+            "verify-a-key.html"
+          ],
+          "files": {
+            "core/locales/de/app.ftl": "8b5b4e9c8e28edd309fcabd76fed70a896677c438de7e87ef65f337cebaabc12",
+            "core/locales/de/core.ftl": "220557d52c978b60f69c2667437d326c6d69a4ff78d1b26b4c3f269a1687859b",
+            "core/crates/pe-html/help/de/attachments.html": "d9161df1128393dd2a919c33b858dec8e0010c81f79d95c87e4356a609a6687b",
+            "core/crates/pe-html/help/de/encrypted-and-signed-mail.html": "16914877be846c0d4a6bb3915f499a2d7fb0469e39f09a9e27c144ec3643e918",
+            "core/crates/pe-html/help/de/folders.html": "fe7fdb9cc7f7dfcc5f0e69e056c6483e38c41d15323627e81044dc637e6e7dc0",
+            "core/crates/pe-html/help/de/main-window.html": "4e641e81f4eb74b7e62ce21de96ee87e6eba06958a43fa41e2382730a35973e7",
+            "core/crates/pe-html/help/de/manage-accounts.html": "e36ea793ac174aeb77d94d1c95a55201114660e7897563da22930fed8cdb96ff",
+            "core/crates/pe-html/help/de/move-computer.html": "3c6f21e3e6f4a754388492edb11b8f501363c52debdfa979361f840e1b281cc4",
+            "core/crates/pe-html/help/de/organize-mail.html": "6c4e33011d08484f90563d23a402f2e74b75e2f7d9c8c1139489d92a85a634c9",
+            "core/crates/pe-html/help/de/verify-a-key.html": "684709b73e9fa37fce88c44905d9712eed68ffb6bdfebbb7eba2091ca42fb040"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/core.ftl": "c86d5015ca9cbaa6e99c2e75331b8a1d2380f4c2952197dc460f095ec528f016",
+            "core/crates/pe-html/help/en/attachments.html": "e88d54aad038c2f9860965b6edc4403609c943f79d8e29ea07e88be139ecc468",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "b11ff6a5da8cc4f36f352fe5d7a6a43f0aa04e7ac1f67ea0608ef43559ba100e",
+            "core/crates/pe-html/help/en/folders.html": "2f0aeafa43c1642a3f9df4c6dcae159e96892feb819988b206fb6831808ecfef",
+            "core/crates/pe-html/help/en/main-window.html": "1bda497c507b83039b305560b2c14c93e38bc07f72709634bdbb54e8cc65d6b5",
+            "core/crates/pe-html/help/en/manage-accounts.html": "7267a73e572221d410c18461ae1be3eccacfa522e9154a6917ec0aa37c39e8e7",
+            "core/crates/pe-html/help/en/move-computer.html": "636274cd347b79ccb1edaa0116514699f1f2dd4c294d78e918f42571e6e7574e",
+            "core/crates/pe-html/help/en/organize-mail.html": "a63b4edf72374937db37a8b40e34a222102d3b13d0d575930e08db9a9f96ebc8",
+            "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153"
+          },
+          "validation": "Passed all 68 pe-i18n/pe-html tests, full-round catalog invariants, help markup/keyboard preservation, mnemonic scopes, file/source hashes and git diff --check. Every unmarked change is accounted for (965 catalog entries and 279 help lines).",
+          "notes": [
+            "Rechecked translations against corrected English source: OAuth re-login, decryption key, attachment lifetime/platform handling, signatures and key ownership, navigation/unread counts, verification order and imported rule folders.",
+            "Key lookup wording now covers one or several keys; address publication is confirmed separately for each address."
           ]
         }
       ],
@@ -1034,6 +1140,59 @@
             "Reviewed all 14 marked passages across ten help topics; rewrote key management, verification, encrypted mail and settings migration in natural Spanish.",
             "Corrected folder layout, hidden unread counts, attachment cleanup/platform behavior and verification order. Preserved tags, links, control references, platform branches and keyboard names."
           ]
+        },
+        {
+          "id": "es-consistency-2026-11-16",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-setup-passphrase-note"
+            ],
+            "core.ftl": [
+              "pgp-details-opened",
+              "attachment-decrypted-note",
+              "pgp-found-keys",
+              "pgp-publish-pending"
+            ]
+          },
+          "reviewed_help": [
+            "attachments.html",
+            "encrypted-and-signed-mail.html",
+            "folders.html",
+            "main-window.html",
+            "manage-accounts.html",
+            "move-computer.html",
+            "organize-mail.html",
+            "verify-a-key.html"
+          ],
+          "files": {
+            "core/locales/es/app.ftl": "d9acb0b757d8a2e837ebef4b71902b84c59cbdebbf64c25d1284922856419d1c",
+            "core/locales/es/core.ftl": "7fb029193d77f8a6e056855a696fdf1d6d1655c475bae0b031095bf185c350c1",
+            "core/crates/pe-html/help/es/attachments.html": "9429ae3e2c3e9faa18e066aa912a8989ddc01b209d90aeecc45b17cd18811c40",
+            "core/crates/pe-html/help/es/encrypted-and-signed-mail.html": "d14032f56a824a3b025a4172d9995e37d2dd2a191a5b49a5adbeeae0950d17f0",
+            "core/crates/pe-html/help/es/folders.html": "18c1a6118811d38cc51f2f54abae21735ae3d9c4bc4b9f09b6dee148a326d335",
+            "core/crates/pe-html/help/es/main-window.html": "7c3230239d6e05ccbed79a4284e7291efbd31e941144c4e5da56ac4ac3262843",
+            "core/crates/pe-html/help/es/manage-accounts.html": "04476b76b9760dcdbb35710346e1a0e28914e275805ccb0a20da2b819b1c09af",
+            "core/crates/pe-html/help/es/move-computer.html": "87d3acdc3134df7b555057d293f48c0bb681e837b7955c45b8c38871e5e5e5be",
+            "core/crates/pe-html/help/es/organize-mail.html": "4971b9f582ebae68b8159bc729b4654f3a7b32d71c374e8cb64e110d9cf29f1a",
+            "core/crates/pe-html/help/es/verify-a-key.html": "682b32ae032fe38fc0f2f99d42711ec1b3e0d22fb712a936e4e67c4c399a7bf8"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/core.ftl": "c86d5015ca9cbaa6e99c2e75331b8a1d2380f4c2952197dc460f095ec528f016",
+            "core/crates/pe-html/help/en/attachments.html": "e88d54aad038c2f9860965b6edc4403609c943f79d8e29ea07e88be139ecc468",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "b11ff6a5da8cc4f36f352fe5d7a6a43f0aa04e7ac1f67ea0608ef43559ba100e",
+            "core/crates/pe-html/help/en/folders.html": "2f0aeafa43c1642a3f9df4c6dcae159e96892feb819988b206fb6831808ecfef",
+            "core/crates/pe-html/help/en/main-window.html": "1bda497c507b83039b305560b2c14c93e38bc07f72709634bdbb54e8cc65d6b5",
+            "core/crates/pe-html/help/en/manage-accounts.html": "7267a73e572221d410c18461ae1be3eccacfa522e9154a6917ec0aa37c39e8e7",
+            "core/crates/pe-html/help/en/move-computer.html": "636274cd347b79ccb1edaa0116514699f1f2dd4c294d78e918f42571e6e7574e",
+            "core/crates/pe-html/help/en/organize-mail.html": "a63b4edf72374937db37a8b40e34a222102d3b13d0d575930e08db9a9f96ebc8",
+            "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153"
+          },
+          "validation": "Passed all 68 pe-i18n/pe-html tests, full-round catalog invariants, help markup/keyboard preservation, mnemonic scopes, file/source hashes and git diff --check. Every unmarked change is accounted for (965 catalog entries and 279 help lines).",
+          "notes": [
+            "Rechecked translations against corrected English source: OAuth re-login, decryption key, attachment lifetime/platform handling, signatures and key ownership, navigation/unread counts, verification order and imported rule folders.",
+            "Key lookup wording now covers one or several keys; address publication is confirmed separately for each address."
+          ]
         }
       ]
     },
@@ -1376,9 +1535,85 @@
             "Reviewed all 14 marked passages across ten French help topics; rewrote key management, verification, encrypted mail and settings migration.",
             "Corrected folder layout, hidden unread counts, attachment cleanup/platform behavior and verification order. Preserved tags, links, control references, platform branches and keyboard names."
           ]
+        },
+        {
+          "id": "fr-consistency-2026-11-16",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-setup-passphrase-note"
+            ],
+            "core.ftl": [
+              "pgp-details-opened",
+              "attachment-decrypted-note",
+              "pgp-found-keys",
+              "pgp-publish-pending",
+              "pgp-error-unusable"
+            ]
+          },
+          "reviewed_help": [
+            "attachments.html",
+            "encrypted-and-signed-mail.html",
+            "folders.html",
+            "main-window.html",
+            "manage-accounts.html",
+            "move-computer.html",
+            "organize-mail.html",
+            "verify-a-key.html"
+          ],
+          "files": {
+            "core/locales/fr/app.ftl": "d84c6d65a73e507397ee9124c51cdd065a203eca5684f4a31d88183c5ddb147e",
+            "core/locales/fr/core.ftl": "83ca62c1b5e1044a8f49132b374159308b496ea060d3af1802fad6b7423c2d04",
+            "core/crates/pe-html/help/fr/attachments.html": "bcd699ea74264fd755152269105050ffda7c9f3ae41a3c492e78c42fd163d1a8",
+            "core/crates/pe-html/help/fr/encrypted-and-signed-mail.html": "b5cf9b5a81f55d874c5b34c517df00793b3176173b565de2b986782a563fd2fc",
+            "core/crates/pe-html/help/fr/folders.html": "d6332c9d2b3a391d6d83e1ce4b6de0b8630036980e46407381a43c6b20812238",
+            "core/crates/pe-html/help/fr/main-window.html": "f2e1ccb95b3e1e6235b0d403d72b78db42633a62c563019e4359f20e1551629e",
+            "core/crates/pe-html/help/fr/manage-accounts.html": "734586cd9d94b91ff7a27368f0a526baa1847d86eb33d0bd500edd6ac1219ba8",
+            "core/crates/pe-html/help/fr/move-computer.html": "835c60663232cabefc47e79b39f89018e0c939e09bdac0cd5c366fb127e96cd8",
+            "core/crates/pe-html/help/fr/organize-mail.html": "ccc16f6a395b69c00e36adafa5bc67e3917b197badb77eaef7896abc2cf49b8d",
+            "core/crates/pe-html/help/fr/verify-a-key.html": "275dfa8406fa209a907ae47fd957b58430e08b2a7d46697f0d1f31af065924b8"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/core.ftl": "c86d5015ca9cbaa6e99c2e75331b8a1d2380f4c2952197dc460f095ec528f016",
+            "core/crates/pe-html/help/en/attachments.html": "e88d54aad038c2f9860965b6edc4403609c943f79d8e29ea07e88be139ecc468",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "b11ff6a5da8cc4f36f352fe5d7a6a43f0aa04e7ac1f67ea0608ef43559ba100e",
+            "core/crates/pe-html/help/en/folders.html": "2f0aeafa43c1642a3f9df4c6dcae159e96892feb819988b206fb6831808ecfef",
+            "core/crates/pe-html/help/en/main-window.html": "1bda497c507b83039b305560b2c14c93e38bc07f72709634bdbb54e8cc65d6b5",
+            "core/crates/pe-html/help/en/manage-accounts.html": "7267a73e572221d410c18461ae1be3eccacfa522e9154a6917ec0aa37c39e8e7",
+            "core/crates/pe-html/help/en/move-computer.html": "636274cd347b79ccb1edaa0116514699f1f2dd4c294d78e918f42571e6e7574e",
+            "core/crates/pe-html/help/en/organize-mail.html": "a63b4edf72374937db37a8b40e34a222102d3b13d0d575930e08db9a9f96ebc8",
+            "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153"
+          },
+          "validation": "Passed all 68 pe-i18n/pe-html tests, full-round catalog invariants, help markup/keyboard preservation, mnemonic scopes, file/source hashes and git diff --check. Every unmarked change is accounted for (965 catalog entries and 279 help lines).",
+          "notes": [
+            "Rechecked translations against corrected English source: OAuth re-login, decryption key, attachment lifetime/platform handling, signatures and key ownership, navigation/unread counts, verification order and imported rule folders.",
+            "Key lookup wording now covers one or several keys; address publication is confirmed separately for each address."
+          ]
         }
       ]
     }
   },
-  "next_batch": "Final English/source consistency pass, cross-language checks, then advance REVIEWED baseline."
+  "next_batch": "Advance REVIEWED to the final reviewed-content commit, require a clean review check, and record completion.",
+  "final_source_consistency": {
+    "files": {
+      "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+      "core/locales/en/core.ftl": "c86d5015ca9cbaa6e99c2e75331b8a1d2380f4c2952197dc460f095ec528f016",
+      "core/crates/pe-html/help/en/attachments.html": "e88d54aad038c2f9860965b6edc4403609c943f79d8e29ea07e88be139ecc468",
+      "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "b11ff6a5da8cc4f36f352fe5d7a6a43f0aa04e7ac1f67ea0608ef43559ba100e",
+      "core/crates/pe-html/help/en/folders.html": "2f0aeafa43c1642a3f9df4c6dcae159e96892feb819988b206fb6831808ecfef",
+      "core/crates/pe-html/help/en/main-window.html": "1bda497c507b83039b305560b2c14c93e38bc07f72709634bdbb54e8cc65d6b5",
+      "core/crates/pe-html/help/en/manage-accounts.html": "7267a73e572221d410c18461ae1be3eccacfa522e9154a6917ec0aa37c39e8e7",
+      "core/crates/pe-html/help/en/move-computer.html": "636274cd347b79ccb1edaa0116514699f1f2dd4c294d78e918f42571e6e7574e",
+      "core/crates/pe-html/help/en/organize-mail.html": "a63b4edf72374937db37a8b40e34a222102d3b13d0d575930e08db9a9f96ebc8",
+      "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153"
+    },
+    "validation": "Passed all 68 pe-i18n/pe-html tests, full-round catalog invariants, help markup/keyboard preservation, mnemonic scopes, file/source hashes and git diff --check. Every unmarked change is accounted for (965 catalog entries and 279 help lines).",
+    "notes": [
+      "Five English catalog values and eight help topics corrected to match the code and reviewed translations.",
+      "Small final adjustments to German and Estonian help and key lookup/publication wording across languages."
+    ]
+  },
+  "reviewed_catalog_entries": 965,
+  "improved_translation_values": 372,
+  "reviewed_help_pages": 40
 }

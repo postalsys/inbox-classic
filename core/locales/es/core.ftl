@@ -587,7 +587,7 @@ pgp-error-missing-keys = { $count ->
 }
 pgp-error-encrypted-quote = Este mensaje incluye contenido de un mensaje cifrado. Active la opción Cifrar o quite el contenido citado antes de enviarlo.
 pgp-error-protect = No se pudo firmar ni cifrar el mensaje: { $reason }
-pgp-found-keys = Se encontró una clave para estas direcciones: { $addresses }.
+pgp-found-keys = Claves encontradas para: { $addresses }.
 pgp-found-none = No se encontró ninguna clave para estas direcciones: { $addresses }. Pida a los destinatarios que le envíen sus claves públicas.
 pgp-found-no-key = No se encontró ninguna clave.
 pgp-find-unavailable = La búsqueda de claves no está disponible en este momento: { $error }

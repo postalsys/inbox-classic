@@ -563,11 +563,11 @@ pgp-error-missing-keys = { $count ->
 }
 pgp-error-encrypted-quote = See kiri sisaldab tsitaati krüpteeritud kirjast või edastab krüpteeritud kirja. Seetõttu saab seda saata ainult krüpteerituna. Lülitage krüpteerimine sisse või eemaldage tsiteeritud sisu.
 pgp-error-protect = Kirja ei saanud allkirjastada ega krüpteerida: { $reason }
-pgp-found-keys = Võti leiti järgmiste aadresside jaoks: { $addresses }.
+pgp-found-keys = Võtmed leiti järgmiste aadresside jaoks: { $addresses }.
 pgp-found-none = Võtit ei leitud järgmiste aadresside jaoks: { $addresses }. Paluge nende aadresside omanikel saata teile oma avalik võti.
 pgp-found-no-key = Võtit ei leitud.
 pgp-find-unavailable = Võtmeid ei saa praegu otsida: { $error }
-pgp-publish-pending = keys.openpgp.org saatis kinnituslingi järgmistele aadressidele: { $addresses }. Võtme avaldamiseks avage kinnituslink.
+pgp-publish-pending = keys.openpgp.org saatis kinnituslingi järgmistele aadressidele: { $addresses }. Kinnitage iga aadress, et teie võtit saaks selle aadressi järgi leida.
 pgp-publish-done = Teie võti on saidil keys.openpgp.org avaldatud järgmiste aadresside jaoks: { $addresses }.
 pgp-publish-failed = Võtit ei saanud avaldada: { $error }
 pgp-keyserver-off = Võtmete otsimine saidilt keys.openpgp.org on suvandites välja lülitatud.

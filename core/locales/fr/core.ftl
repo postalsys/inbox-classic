@@ -558,7 +558,7 @@ pgp-error-no-store = Le gestionnaire de mots de passe nécessaire à la protecti
 pgp-error-wrong-passphrase = La phrase secrète n'est pas correcte.
 pgp-error-not-a-key = Ceci n'est pas une clé OpenPGP.
 pgp-error-too-large = La clé est trop grande.
-pgp-error-unusable = Cette clé utilise des méthodes de chiffrement obsolètes ou peu sûres et ne peut pas être utilisée.
+pgp-error-unusable = Cette clé utilise des méthodes cryptographiques obsolètes ou peu sûres et ne peut pas être utilisée.
 pgp-imported-private = { $count ->
     [one] { $count } clé privée importée.
    *[other] { $count } clés privées importées.
@@ -603,7 +603,7 @@ pgp-error-missing-keys = { $count ->
 }
 pgp-error-encrypted-quote = Ce message contient des passages d’un message chiffré. Activez l’option Chiffrer ou retirez les passages cités avant de l’envoyer.
 pgp-error-protect = Le message n’a pas pu être signé ou chiffré : { $reason }
-pgp-found-keys = Une clé a été trouvée pour les adresses suivantes : { $addresses }.
+pgp-found-keys = Clés trouvées pour : { $addresses }.
 pgp-found-none = Aucune clé n’a été trouvée pour les adresses suivantes : { $addresses }. Demandez aux destinataires de vous envoyer leurs clés publiques.
 pgp-found-no-key = Aucune clé n'a été trouvée.
 pgp-find-unavailable = La recherche de clés est momentanément indisponible : { $error }

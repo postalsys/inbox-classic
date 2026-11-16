@@ -14,9 +14,8 @@ behavior and surrounding controls to establish meaning. Preserve the original sc
 - Initial inventory: 241 marked messages and 14 marked help passages per language (de, es, et, fr), 964 messages
   and 56 help passages altogether. Each language has ten affected help pages. Other languages named in the guide
   are not present in this checkout. `scripts/check-language.mjs` is also absent here.
-- Current next step: final English/source consistency pass, validation and review-baseline update.
-  Estonian is complete for the starting snapshot. Spanish and French follow. Review existing wording outside
-  marked entries when needed for context or terminology consistency.
+- All four translation sets and the final English/source consistency pass are complete.
+- Next step: commit the final reviewed content, advance the baseline, and require a clean review check.
 
 ## Checkpoint rules
 
@@ -149,26 +148,30 @@ references, platform branches and keyboard names. All 68 tests and `git diff --c
 catalog entries and 279 help lines match the completed inventory. File/source hashes match. The regenerated
 review HTML has no remaining marked drafts.
 
-Next: final English/source consistency pass and baseline update. Estonian, German, Spanish and French
-catalog/help review is complete for the starting snapshot. Revisit it only for newly
-arriving changes or the final cross-language consistency checks below.
+Checkpoint commit: `3deaae10`.
 
-Source wording to revisit in the final consistency pass: `ui-setup-passphrase-note` says every account asks for a
-password after importing an unprotected file. OAuth accounts instead require signing in again; the reviewed
-Estonian text covers both methods. Source evidence: `setup/export.rs` and `setup/import.rs`.
+### Final consistency pass
 
-Also revisit English `attachment-decrypted-note` and attachment help: temporary files are removed by
-`clear_private_dirs()` at startup if over 24 hours old, not necessarily after exactly a day. The Estonian notice
-already reflects this. `pgp-details-opened` identifies the key that successfully decrypted the message; it can
-say "Decrypted with your key" more directly than "Encrypted to your key".
+All 965 catalog entries (the original 964 plus the shared German Remove button) and all 40 affected translated
+help pages are reviewed. In total, 372 translated catalog values were improved. Every pending list is empty.
+Five English catalog values and eight English help topics were corrected to match the application. The final
+cross-language checks cover:
 
-Other consistency findings to carry through German, Spanish, French and the English source:
+- Sign-in credentials and OAuth reauthentication after importing an unprotected export (`setup/export.rs`,
+  `setup/import.rs`), and rule destination folders resolved after account synchronization.
+- Decryption-key identification, valid signatures versus verified key ownership, and multi-recipient encryption
+  (`protect.rs`). Key searches can find several keys; publication confirms each address separately (`lookup.rs`).
+- Temporary attachment copies removed at startup when older than a day (`clear_private_dirs()`), and
+  Internet-origin marking on Windows/macOS (`opening.rs` and platform file-opening code).
+- Combined Inbox, Sent and Drafts views, root-level folders, and collapsed unread counts excluding Junk and
+  Deleted Items (`tree.rs`).
+- Fingerprints and contact addresses checked before confirming verification (`keys.rs` and the dialog code).
 
-- The encrypted-mail help must not claim an unchecked signature proves the sender's identity. Nor can a
-  multi-recipient encrypted message be read only with this user's key: each recipient's private key can open it.
-- The multi-account tree is All Inboxes, All Sent, All Drafts, Flagged, then accounts' remaining folders.
-  Main-window/organize-mail text must not imply Flagged comes immediately after All Inboxes.
-- Collapsed unread totals exclude Junk and Deleted Items (`tree.rs::counted`).
-- Internet-origin attachment marking is implemented on Windows and macOS; avoid a blanket Linux claim.
-- Check the contact's listed addresses before confirming its fingerprint, not after closing the verification
-  dialog. The Estonian steps now include both checks before confirmation.
+Validation: all 68 `pe-i18n`/`pe-html` tests pass. The full-round checks preserve catalog IDs, variables, plural
+branches and mnemonic presence; reviewed menu/dialog shortcuts are unique. Help tags, control references, links,
+platform branches and keyboard names are preserved. Completed file and English-source hashes match the ledger.
+All unmarked changes match the completed inventory (965 catalog entries and 279 help lines). No review marks
+remain. `git diff --check` passes. UI behavior and shortcut scopes were checked in source; no GUI was launched.
+
+Only the review-baseline checkpoint remains. The generated review HTML is not committed. Unrelated untracked
+feedback, language-planning and responsiveness documents remain untouched.
