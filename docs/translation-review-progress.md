@@ -12,7 +12,8 @@ Commit completed batches regularly and preserve an exact resume point.
   52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
 - `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
   and git history before resuming, so later source or translation changes are not missed.
-- Resume with Portuguese (Portugal), `pt/app.ftl`, then its other catalogs and all 52 help topics.
+- Resume with Portuguese (Portugal), `pt/core.ftl` (449 entries), then its 256 platform/help-title entries
+  and all 52 help topics. All 626 Portuguese app entries are reviewed.
   Italian and Dutch are fully reviewed: each has 1,331 catalog entries and 52 help topics.
   Seventeen new languages remain, with exact pending IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
@@ -119,8 +120,17 @@ All 72 localization/help tests pass after the final edits. Structural checks rep
 52 help marks intentionally removed. Inventory and source/file hashes reconcile, git diff --check passes, and
 `build/i18n-review.html` is regenerated. Italian core/platform/everyday-help checkpoint: `3c90b946`.
 
-Current totals: 2,726 catalog entries and 108 help pages reviewed; 420 catalog values improved. Remaining:
-22,627 catalog entries and 884 help pages. `REVIEWED` remains unchanged until the full round is complete.
+### Portuguese UI catalog
+
+Reviewed all 626 app entries and improved 69 values. Corrected queued-send tense, rule-processing wording,
+field-label agreement, provider fallback grammar, OAuth credentials, settings transfer and key verification.
+Checked actual main/context menus and key/setup/rule/contact/recipient dialogs; resolved nine shortcut
+placements without changing the platform catalogs. Portuguese glossary notes record terminology choices.
+All 11 catalog tests, structural checks and inventory/hash reconciliation pass. Menu and dialog access keys
+are unique; git diff --check passes. Italian completion checkpoint: `f3251bd3`.
+
+Current totals: 3,352 catalog entries and 108 help pages reviewed; 489 catalog values improved. Remaining:
+22,001 catalog entries and 884 help pages. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

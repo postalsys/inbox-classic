@@ -327,7 +327,13 @@ Plurals: the catalog's plurals follow pt-PT (pe-i18n gives the bundle that local
 - `$messages` is feminine plural: status texts agree ("movidas") by `$count`; `done-flagged-color` and
   `done-unflagged` are phrased without agreement. Destinations read "para { $folder }".
 - Quotes « »; day names lowercase.
-- Review first: Marcar como lixo / não lixo, "Seguir conversa", "Esquema" for Layout.
+- Use "Marcar como lixo eletrónico" / "Marcar como correio legítimo" in message commands; the short toolbar
+  labels "Lixo" / "Não é lixo" remain suitable. Keep "Seguir conversa" and "Esquema" for Layout.
+- Rules "processam" messages; reserve "ordenar" for their display order.
+- Use "assinatura digital" for cryptographic signatures, "frase de acesso", "chave privada", "chave pública"
+  and "impressão digital". Confirm every address before completing key verification.
+- "Credenciais de início de sessão" includes saved browser tokens. An unprotected export requires signing in
+  again, not necessarily entering a password. Use "ID do cliente" and "segredo do cliente" for OAuth fields.
 
 ### Română (ro)
 
