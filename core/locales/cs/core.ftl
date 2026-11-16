@@ -1246,3 +1246,40 @@ setup-skipped-unreachable = { $name } byl přeskočen: jeho přihlašovací slu�
 attachment-runs-programs = Soubor „{ $name }“ může spouštět programy, proto ho Inbox Classic neotevře. Uložte ho a otevřete ho sami, pokud důvěřujete jeho původu.
 # review: new
 attachment-decrypted-note = Tato příloha pochází ze šifrované zprávy. Aby ji Inbox Classic mohl otevřít, uloží ji dešifrovanou do tohoto počítače, do vaší složky, kterou Inbox Classic po jednom dni vyprázdní.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Server nepřesunul zprávu do složky { $folder }, takže { $messages } je zpět ve složce { $from }: { $reason }
+    [few] Server nepřesunul zprávy do složky { $folder }, takže { $messages } jsou zpět ve složce { $from }: { $reason }
+   *[other] Server nepřesunul zprávy do složky { $folder }, takže { $messages } je zpět ve složce { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Server neodstranil zprávu, takže { $messages } je zpět ve složce { $from }: { $reason }
+    [few] Server neodstranil zprávy, takže { $messages } jsou zpět ve složce { $from }: { $reason }
+   *[other] Server neodstranil zprávy, takže { $messages } je zpět ve složce { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Server nearchivoval zprávu, takže { $messages } je zpět ve složce { $from }: { $reason }
+    [few] Server nearchivoval zprávy, takže { $messages } jsou zpět ve složce { $from }: { $reason }
+   *[other] Server nearchivoval zprávy, takže { $messages } je zpět ve složce { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Server neoznačil zprávu jako přečtenou, takže { $messages } je opět nepřečtená: { $reason }
+    [few] Server neoznačil zprávy jako přečtené, takže { $messages } jsou opět nepřečtené: { $reason }
+   *[other] Server neoznačil zprávy jako přečtené, takže { $messages } je opět nepřečteno: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Server neoznačil zprávu jako nepřečtenou, takže { $messages } je opět přečtená: { $reason }
+    [few] Server neoznačil zprávy jako nepřečtené, takže { $messages } jsou opět přečtené: { $reason }
+   *[other] Server neoznačil zprávy jako nepřečtené, takže { $messages } je opět přečteno: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Server nezměnil příznaky zprávy, takže { $messages } zůstává beze změny: { $reason }
+    [few] Server nezměnil příznaky zpráv, takže { $messages } zůstávají beze změny: { $reason }
+   *[other] Server nezměnil příznaky zpráv, takže { $messages } zůstává beze změny: { $reason }
+}

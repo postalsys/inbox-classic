@@ -1246,15 +1246,12 @@ impl Worker {
             Undone::Flag { .. } => (Text::UndoneFlags, None),
         };
         let reason = failure.message.trim_end_matches('.').to_string();
-        let said = tr_args(
+        let said = crate::text::undone_text(
             text,
-            &[
-                ("messages", (&crate::text::messages(count as u64)).into()),
-                ("count", (count as u64).into()),
-                ("folder", (&to.map(name).unwrap_or_default()).into()),
-                ("from", (&name(folder)).into()),
-                ("reason", (&reason).into()),
-            ],
+            count as u64,
+            &to.map(name).unwrap_or_default(),
+            &name(folder),
+            &reason,
         );
         self.emit(Event::ActionUndone {
             account: self.account,

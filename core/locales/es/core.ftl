@@ -902,25 +902,31 @@ attachment-runs-programs = «{ $name }» puede ejecutar programas, así que Inbo
 attachment-decrypted-note = Este adjunto viene de un mensaje cifrado. Para abrirlo, Inbox Classic lo guarda descifrado en este equipo, en una carpeta suya que Inbox Classic vacía al cabo de un día.
 # review: new
 undone-move = { $count ->
+    [one] El servidor no movió { $messages } a { $folder }, así que vuelve a estar en { $from }: { $reason }
    *[other] El servidor no movió { $messages } a { $folder }, así que vuelven a estar en { $from }: { $reason }
 }
 # review: new
 undone-delete = { $count ->
+    [one] El servidor no eliminó { $messages }, así que vuelve a estar en { $from }: { $reason }
    *[other] El servidor no eliminó { $messages }, así que vuelven a estar en { $from }: { $reason }
 }
 # review: new
 undone-archive = { $count ->
+    [one] El servidor no archivó { $messages }, así que vuelve a estar en { $from }: { $reason }
    *[other] El servidor no archivó { $messages }, así que vuelven a estar en { $from }: { $reason }
 }
 # review: new
 undone-read = { $count ->
+    [one] El servidor no marcó { $messages } como leído, así que vuelve a estar sin leer: { $reason }
    *[other] El servidor no marcó { $messages } como leídos, así que vuelven a estar sin leer: { $reason }
 }
 # review: new
 undone-unread = { $count ->
+    [one] El servidor no marcó { $messages } como no leído, así que vuelve a estar leído: { $reason }
    *[other] El servidor no marcó { $messages } como no leídos, así que vuelven a estar leídos: { $reason }
 }
 # review: new
 undone-flags = { $count ->
+    [one] El servidor no cambió las marcas de { $messages }, así que está como antes: { $reason }
    *[other] El servidor no cambió las marcas de { $messages }, así que están como antes: { $reason }
 }

@@ -114,6 +114,21 @@ pub fn saved_text(count: u64, place: &std::path::Path) -> String {
     )
 }
 
+/// The bar over the list when the server did not do what was asked of `count` messages of `from`, so they are as
+/// they were again: `text` is one of the `Undone*` sentences, `folder` the destination of a move.
+pub fn undone_text(text: Text, count: u64, folder: &str, from: &str, reason: &str) -> String {
+    tr_args(
+        text,
+        &[
+            ("messages", (&messages(count)).into()),
+            ("count", count.into()),
+            ("folder", folder.into()),
+            ("from", from.into()),
+            ("reason", reason.into()),
+        ],
+    )
+}
+
 /// What the status bar says while a large message opened is downloaded: "Downloading 4.2 MB of 15.0 MB"
 pub fn download_progress_text(done: u64, total: u64) -> String {
     tr_args(
@@ -389,6 +404,20 @@ mod tests {
     fn medium_is_the_usual_size() {
         assert_eq!(TEXT_ZOOMS[TEXT_SIZE_MEDIUM], 1.0);
         assert!(TEXT_ZOOMS.windows(2).all(|pair| pair[0] > pair[1]));
+    }
+
+    #[test]
+    fn a_refused_move_says_one_message_as_one() {
+        let one = undone_text(Text::UndoneMove, 1, "Archive", "Inbox", "Refused");
+        assert_eq!(
+            one,
+            "The server did not move 1 message to Archive, so it is back in Inbox: Refused"
+        );
+        let more = undone_text(Text::UndoneMove, 3, "Archive", "Inbox", "Refused");
+        assert!(
+            more.contains("3 messages") && more.contains("so they are back in Inbox"),
+            "{more}"
+        );
     }
 
     #[test]

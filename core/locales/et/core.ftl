@@ -869,25 +869,31 @@ attachment-runs-programs = „{ $name }“ võib käivitada programme, seega Inb
 attachment-decrypted-note = See manus on pärit krüptitud kirjast. Avamiseks salvestab Inbox Classic selle dekrüptituna sellesse arvutisse, sinu kausta, mille Inbox Classic päeva pärast tühjendab.
 # review: new
 undone-move = { $count ->
-   *[other] Server ei teisaldanud { $messages } kausta { $folder }, need on taas kaustas { $from }: { $reason }
+    [one] Server ei teisaldanud kirja kausta { $folder }, seega on { $messages } taas kaustas { $from }: { $reason }
+   *[other] Server ei teisaldanud kirju kausta { $folder }, seega on { $messages } taas kaustas { $from }: { $reason }
 }
 # review: new
 undone-delete = { $count ->
-   *[other] Server ei kustutanud { $messages }, need on taas kaustas { $from }: { $reason }
+    [one] Server ei kustutanud kirja, seega on { $messages } taas kaustas { $from }: { $reason }
+   *[other] Server ei kustutanud kirju, seega on { $messages } taas kaustas { $from }: { $reason }
 }
 # review: new
 undone-archive = { $count ->
-   *[other] Server ei arhiveerinud { $messages }, need on taas kaustas { $from }: { $reason }
+    [one] Server ei arhiveerinud kirja, seega on { $messages } taas kaustas { $from }: { $reason }
+   *[other] Server ei arhiveerinud kirju, seega on { $messages } taas kaustas { $from }: { $reason }
 }
 # review: new
 undone-read = { $count ->
-   *[other] Server ei märkinud { $messages } loetuks, need on taas lugemata: { $reason }
+    [one] Server ei märkinud kirja loetuks, seega on { $messages } taas lugemata: { $reason }
+   *[other] Server ei märkinud kirju loetuks, seega on { $messages } taas lugemata: { $reason }
 }
 # review: new
 undone-unread = { $count ->
-   *[other] Server ei märkinud { $messages } lugemata, need on taas loetud: { $reason }
+    [one] Server ei märkinud kirja lugemata kirjaks, seega on { $messages } taas loetud: { $reason }
+   *[other] Server ei märkinud kirju lugemata kirjadeks, seega on { $messages } taas loetud: { $reason }
 }
 # review: new
 undone-flags = { $count ->
-   *[other] Server ei muutnud { $messages } lippe, need on nagu enne: { $reason }
+    [one] Server ei muutnud kirja lippe, seega on { $messages } nagu enne: { $reason }
+   *[other] Server ei muutnud kirjade lippe, seega on { $messages } nagu enne: { $reason }
 }

@@ -918,25 +918,31 @@ attachment-runs-programs = « { $name } » peut lancer des programmes, Inbox Cla
 attachment-decrypted-note = Cette pièce jointe vient d’un message chiffré. Pour l’ouvrir, Inbox Classic l’enregistre déchiffrée sur cet ordinateur, dans un dossier à vous qu’Inbox Classic vide au bout d’un jour.
 # review: new
 undone-move = { $count ->
+    [one] Le serveur n’a pas déplacé { $messages } vers { $folder }, il est donc de retour dans { $from } : { $reason }
    *[other] Le serveur n’a pas déplacé { $messages } vers { $folder }, ils sont donc de retour dans { $from } : { $reason }
 }
 # review: new
 undone-delete = { $count ->
+    [one] Le serveur n’a pas supprimé { $messages }, il est donc de retour dans { $from } : { $reason }
    *[other] Le serveur n’a pas supprimé { $messages }, ils sont donc de retour dans { $from } : { $reason }
 }
 # review: new
 undone-archive = { $count ->
+    [one] Le serveur n’a pas archivé { $messages }, il est donc de retour dans { $from } : { $reason }
    *[other] Le serveur n’a pas archivé { $messages }, ils sont donc de retour dans { $from } : { $reason }
 }
 # review: new
 undone-read = { $count ->
+    [one] Le serveur n’a pas marqué { $messages } comme lu, il est donc de nouveau non lu : { $reason }
    *[other] Le serveur n’a pas marqué { $messages } comme lus, ils sont donc de nouveau non lus : { $reason }
 }
 # review: new
 undone-unread = { $count ->
+    [one] Le serveur n’a pas marqué { $messages } comme non lu, il est donc de nouveau lu : { $reason }
    *[other] Le serveur n’a pas marqué { $messages } comme non lus, ils sont donc de nouveau lus : { $reason }
 }
 # review: new
 undone-flags = { $count ->
+    [one] Le serveur n’a pas modifié les indicateurs de { $messages }, il est donc comme avant : { $reason }
    *[other] Le serveur n’a pas modifié les indicateurs de { $messages }, ils sont donc comme avant : { $reason }
 }

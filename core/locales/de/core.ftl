@@ -885,25 +885,31 @@ attachment-runs-programs = „{ $name }“ kann Programme ausführen, daher öff
 attachment-decrypted-note = Dieser Anhang stammt aus einer verschlüsselten Nachricht. Zum Öffnen speichert Inbox Classic ihn entschlüsselt auf diesem Computer, in einem Ordner von Ihnen, den Inbox Classic nach einem Tag leert.
 # review: new
 undone-move = { $count ->
+    [one] Der Server hat { $messages } nicht in { $folder } verschoben, daher ist sie wieder in { $from }: { $reason }
    *[other] Der Server hat { $messages } nicht in { $folder } verschoben, daher sind sie wieder in { $from }: { $reason }
 }
 # review: new
 undone-delete = { $count ->
+    [one] Der Server hat { $messages } nicht gelöscht, daher ist sie wieder in { $from }: { $reason }
    *[other] Der Server hat { $messages } nicht gelöscht, daher sind sie wieder in { $from }: { $reason }
 }
 # review: new
 undone-archive = { $count ->
+    [one] Der Server hat { $messages } nicht archiviert, daher ist sie wieder in { $from }: { $reason }
    *[other] Der Server hat { $messages } nicht archiviert, daher sind sie wieder in { $from }: { $reason }
 }
 # review: new
 undone-read = { $count ->
+    [one] Der Server hat { $messages } nicht als gelesen markiert, daher ist sie wieder ungelesen: { $reason }
    *[other] Der Server hat { $messages } nicht als gelesen markiert, daher sind sie wieder ungelesen: { $reason }
 }
 # review: new
 undone-unread = { $count ->
+    [one] Der Server hat { $messages } nicht als ungelesen markiert, daher ist sie wieder gelesen: { $reason }
    *[other] Der Server hat { $messages } nicht als ungelesen markiert, daher sind sie wieder gelesen: { $reason }
 }
 # review: new
 undone-flags = { $count ->
-   *[other] Der Server hat die Markierungen von { $messages } nicht geändert, daher sind sie wie zuvor: { $reason }
+    [one] Der Server hat die Kennzeichnungen von { $messages } nicht geändert, daher ist sie wie zuvor: { $reason }
+   *[other] Der Server hat die Kennzeichnungen von { $messages } nicht geändert, daher sind sie wie zuvor: { $reason }
 }

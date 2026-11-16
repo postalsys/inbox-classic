@@ -1240,3 +1240,34 @@ setup-skipped-unreachable = { $name } foi ignorada: não foi possível contactar
 attachment-runs-programs = «{ $name }» pode executar programas, por isso o Inbox Classic não o abre. Guarde-o e, se confiar na sua origem, abra-o por sua conta.
 # review: new
 attachment-decrypted-note = Este anexo provém de uma mensagem encriptada. Para o abrir, o Inbox Classic guarda-o desencriptado neste computador, numa pasta sua que o Inbox Classic esvazia ao fim de um dia.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] O servidor não moveu { $messages } para { $folder }, por isso está de novo em { $from }: { $reason }
+   *[other] O servidor não moveu { $messages } para { $folder }, por isso estão de novo em { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] O servidor não eliminou { $messages }, por isso está de novo em { $from }: { $reason }
+   *[other] O servidor não eliminou { $messages }, por isso estão de novo em { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] O servidor não arquivou { $messages }, por isso está de novo em { $from }: { $reason }
+   *[other] O servidor não arquivou { $messages }, por isso estão de novo em { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] O servidor não marcou { $messages } como lida, por isso está de novo por ler: { $reason }
+   *[other] O servidor não marcou { $messages } como lidas, por isso estão de novo por ler: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] O servidor não marcou { $messages } como não lida, por isso está de novo lida: { $reason }
+   *[other] O servidor não marcou { $messages } como não lidas, por isso estão de novo lidas: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] O servidor não alterou os sinalizadores de { $messages }, por isso está como estava: { $reason }
+   *[other] O servidor não alterou os sinalizadores de { $messages }, por isso estão como estavam: { $reason }
+}

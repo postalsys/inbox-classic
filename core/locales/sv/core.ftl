@@ -1204,3 +1204,34 @@ setup-skipped-unreachable = { $name } hoppades över: dess inloggningstjänst ku
 attachment-runs-programs = ”{ $name }” kan köra program, så Inbox Classic öppnar den inte. Spara den och öppna den sedan själv om du litar på var den kommer ifrån.
 # review: new
 attachment-decrypted-note = Den här bilagan kommer från ett krypterat meddelande. För att kunna öppna den sparar Inbox Classic den dekrypterad på den här datorn, i en mapp som tillhör dig och som Inbox Classic tömmer efter en dag.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Servern flyttade inte { $messages } till { $folder }, så det ligger i { $from } igen: { $reason }
+   *[other] Servern flyttade inte { $messages } till { $folder }, så de ligger i { $from } igen: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Servern tog inte bort { $messages }, så det ligger i { $from } igen: { $reason }
+   *[other] Servern tog inte bort { $messages }, så de ligger i { $from } igen: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Servern arkiverade inte { $messages }, så det ligger i { $from } igen: { $reason }
+   *[other] Servern arkiverade inte { $messages }, så de ligger i { $from } igen: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Servern markerade inte { $messages } som läst, så det är oläst igen: { $reason }
+   *[other] Servern markerade inte { $messages } som lästa, så de är olästa igen: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Servern markerade inte { $messages } som oläst, så det är läst igen: { $reason }
+   *[other] Servern markerade inte { $messages } som olästa, så de är lästa igen: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Servern ändrade inte flaggorna för { $messages }, så det är som förut: { $reason }
+   *[other] Servern ändrade inte flaggorna för { $messages }, så de är som förut: { $reason }
+}
