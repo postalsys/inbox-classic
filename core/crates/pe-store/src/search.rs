@@ -104,7 +104,7 @@ pub struct Search {
 /// column, matched at the start of a word so that results come while typing (a phrase: its last word whole). None when
 /// it has no word in it (only punctuation).
 fn fts_word(word: &Word) -> Option<String> {
-    let text = word.text.replace('"', "");
+    let text = crate::fold::indexed(&word.text.replace('"', ""));
     if !text.chars().any(char::is_alphanumeric) {
         return None;
     }
@@ -133,6 +133,17 @@ fn fts_term(any_of: &[Word]) -> Option<String> {
         1 => words.into_iter().next(),
         _ => Some(format!("({})", words.join(" OR "))),
     }
+}
+
+/// The subject, senders, recipients and file names of a message as the search index has them, of the row `row`
+/// (`new.` in the schema's trigger, empty in a SELECT): ı as i, which unicode61 does not fold
+pub(crate) fn fts_columns(row: &str) -> String {
+    format!(
+        "replace({row}subject, 'ı', 'i'), \
+         replace(CASE {row}sender_people WHEN '' THEN {row}from_name || ' ' || {row}from_address ELSE {row}sender_people END, 'ı', 'i'), \
+         replace(CASE {row}recipient_people WHEN '' THEN {row}recipients ELSE {row}recipient_people END, 'ı', 'i'), \
+         replace({row}attachment_names, 'ı', 'i')"
+    )
 }
 
 /// The current time, for `older_than:`
@@ -525,13 +536,13 @@ impl Store {
         self.db
             .prepare_cached("DELETE FROM messages_fts WHERE rowid = ?1")?
             .execute([message])?;
-        self.db.prepare_cached(
-            "INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) \
-             SELECT id, subject, CASE sender_people WHEN '' THEN from_name || ' ' || from_address ELSE sender_people END, \
-             CASE recipient_people WHEN '' THEN recipients ELSE recipient_people END, attachment_names, ?2 \
-             FROM messages WHERE id = ?1",
-        )?
-        .execute(params![message, text.body])?;
+        self.db
+            .prepare_cached(&format!(
+                "INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) \
+                 SELECT id, {}, ?2 FROM messages WHERE id = ?1",
+                fts_columns("")
+            ))?
+            .execute(params![message, crate::fold::indexed(&text.body)])?;
         self.db
             .prepare_cached("UPDATE bodies SET indexed = 1 WHERE message_id = ?1 AND indexed = 0")?
             .execute([message])?;

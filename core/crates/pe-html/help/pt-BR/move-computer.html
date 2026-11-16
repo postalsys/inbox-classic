@@ -1,0 +1,20 @@
+<!--review--><h1>Mudar para outro computador</h1>
+<p class="summary">Leve suas contas, configurações, contatos, chaves e regras para outro computador em um só arquivo.</p>
+<h2>Exportar</h2>
+<ol>
+    <li>Escolha <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
+    <li>Escolha o que levar: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> e <b data-text="setup-part-trusted-senders"></b>.</li>
+    <li>Para levar também as senhas e as chaves privadas, ative <b data-text="ui-setup-use-passphrase"></b> e digite duas vezes uma frase secreta com pelo menos 8 caracteres.</li>
+    <li>Clique em <b data-text="ui-setup-export-button"></b> e escolha onde salvar o arquivo.</li>
+</ol>
+<p>O arquivo não contém mensagens: elas são baixadas novamente no outro computador. Com uma frase secreta, o arquivo inteiro é criptografado. Sem ela, o arquivo não contém senhas nem chaves privadas, e cada conta pede a senha uma vez no outro computador.</p>
+<aside class="warning">Guarde o arquivo e a frase secreta separados e exclua o arquivo depois de importá-lo. Quem tiver os dois pode ler seus e-mails.</aside>
+<h2>Importar</h2>
+<ol>
+    <li>No outro computador, escolha <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Antes de você adicionar a primeira conta, <b data-text="ui-add-account-title"></b> também tem um link para isso.</li>
+    <li>Escolha o arquivo e digite a frase secreta, se houver uma.</li>
+    <li>A janela mostra o que o arquivo contém. Escolha as partes e as contas a importar e clique em <b data-text="ui-setup-import-button"></b>.</li>
+</ol>
+<p>Uma conta que já exista neste computador fica como está. Os contatos são adicionados ao seu catálogo de endereços, as configurações e as preferências das janelas são substituídas, e uma regra cuja pasta ainda não existe aguarda até a conta sincronizar. Uma chave diferente para um dos seus contatos aguarda a sua decisão, como acontece com uma chave importada.</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>
+<!--/review-->

@@ -124,6 +124,89 @@ fn chooses_the_language() {
 }
 
 #[test]
+fn chooses_by_region_and_script() {
+    // Brazil's Portuguese for Brazil, Portugal's for every other Portuguese
+    for tag in ["pt-BR", "pt_BR", "pt_BR.UTF-8", "PT-br", "pt-Latn-BR", "pt_BR@euro"] {
+        assert_eq!(supported(tag), Some("pt-BR"), "{tag}");
+    }
+    for tag in ["pt", "pt-PT", "pt_PT.UTF-8", "pt-AO", "pt-MZ", "PT"] {
+        assert_eq!(supported(tag), Some("pt"), "{tag}");
+    }
+    // Serbian in Latin script, whichever script the system writes
+    for tag in [
+        "sr",
+        "sr-RS",
+        "sr-Cyrl",
+        "sr-Cyrl-RS",
+        "sr-Latn",
+        "sr-Latn-RS",
+        "sr_RS.UTF-8",
+        "sr_RS@latin",
+        "SR-LATN-ME",
+    ] {
+        assert_eq!(supported(tag), Some("sr-Latn"), "{tag}");
+    }
+    // Norwegian is Bokmål; Nynorsk is a language of its own there is no catalog of
+    for tag in ["no", "nb", "nb-NO", "nb_NO.UTF-8", "no_NO", "NB"] {
+        assert_eq!(supported(tag), Some("nb"), "{tag}");
+    }
+    assert_eq!(supported("nn-NO"), None);
+    assert_eq!(supported("tr-TR"), Some("tr"));
+    assert_eq!(supported("ca-ES-valencia"), Some("ca"));
+    assert_eq!(supported("ca_AD.UTF-8"), Some("ca"));
+    // the codes of the list are themselves
+    for (code, _) in LANGUAGES {
+        assert_eq!(supported(code), Some(*code));
+    }
+    assert_eq!(resolve(&["ja-JP", "pt-BR", "pt-PT"]), "pt-BR");
+    assert_eq!(resolve(&["pt-PT", "pt-BR"]), "pt");
+    assert_eq!(resolve(&["sr-Cyrl-RS", "en"]), "sr-Latn");
+    assert_eq!(resolve(&["nn", "no", "en"]), "nb");
+}
+
+#[test]
+fn tags_as_gettext_writes_them() {
+    assert_eq!(gettext_locale("pt-BR"), "pt_BR");
+    assert_eq!(gettext_locale("sr-Latn"), "sr@latin");
+    assert_eq!(gettext_locale("sr-Latn-RS"), "sr_RS@latin");
+    assert_eq!(gettext_locale("sr-Cyrl"), "sr@cyrillic");
+    assert_eq!(gettext_locale("nb"), "nb");
+    assert_eq!(gettext_locale("de"), "de");
+}
+
+/// The CLDR plural category of `n` in the catalog of `code`, as its bundle picks it
+fn category(code: &str, n: i64) -> String {
+    let tag: unic_langid::LanguageIdentifier = locale(code).parse().unwrap();
+    let mut bundle = Bundle::new_concurrent(vec![tag]);
+    let resource = FluentResource::try_new(
+        "c = { $n ->\n [zero] zero\n [one] one\n [two] two\n [few] few\n [many] many\n *[other] other\n}\n".into(),
+    )
+    .unwrap();
+    bundle.add_resource(resource).unwrap();
+    format(&bundle, "c", &[("n", Arg::Num(n))]).unwrap()
+}
+
+#[test]
+fn plurals_follow_cldr() {
+    let categories = |code: &str, numbers: &[i64]| numbers.iter().map(|n| category(code, *n)).collect::<Vec<_>>();
+    // Brazil's `one` takes 0 and 1 (CLDR's pt), Portugal's only 1 (pt-PT)
+    assert_eq!(categories("pt-BR", &[0, 1, 2]), ["one", "one", "other"]);
+    assert_eq!(categories("pt", &[0, 1, 2]), ["other", "one", "other"]);
+    for code in ["tr", "nb", "ca"] {
+        assert_eq!(
+            categories(code, &[0, 1, 2, 5]),
+            ["other", "one", "other", "other"],
+            "{code}"
+        );
+    }
+    // Serbian by the last digits, as Croatian
+    assert_eq!(
+        categories("sr-Latn", &[1, 2, 5, 11, 21, 22, 25]),
+        ["one", "few", "other", "other", "one", "few", "other"]
+    );
+}
+
+#[test]
 fn mnemonics() {
     assert_eq!(without_mnemonic("&Reply to Sender"), "Reply to Sender");
     assert_eq!(without_mnemonic("Q&&A"), "Q&A");
@@ -201,39 +284,49 @@ fn a_message_by_its_id_in_a_language() {
 }
 
 #[test]
-fn the_scripts_read_the_list_of_languages() {
-    // scripts/languages.sh (and ui-e2e.ps1) read LANGUAGES from this file, one `    ("code", "Name"),` a line
-    let source = include_str!("lib.rs");
-    let start = source.find("pub const LANGUAGES").expect("the list");
-    let end = start + source[start..].find("\n];").expect("its end");
-    let read: Vec<(String, String)> = source[start..end]
-        .lines()
-        .filter_map(|line| {
-            // a Windows checkout ends its lines in CR LF
-            let rest = line
-                .trim_end_matches('\r')
-                .strip_prefix("    (\"")?
-                .strip_suffix("\"),")?;
-            let (code, name) = rest.split_once("\", \"")?;
-            Some((code.to_string(), name.to_string()))
-        })
-        .collect();
-    let listed: Vec<(String, String)> = LANGUAGES
-        .iter()
-        .map(|(code, name)| (code.to_string(), name.to_string()))
-        .collect();
-    assert_eq!(read, listed, "one language a line, as scripts/languages.sh reads them");
+fn the_list_of_languages() {
     assert_eq!(LANGUAGES[0].0, "en", "English first");
     for (code, _) in LANGUAGES {
+        // the language's two letters, then a script or a region, nothing else
+        let tag = Tag::parse(code);
         assert!(
-            code.len() == 2 && code.bytes().all(|b| b.is_ascii_lowercase()),
-            "{code}: a two-letter code, as the pictures and scripts take it"
+            tag.language.len() == 2 && tag.language.bytes().all(|b| b.is_ascii_lowercase()),
+            "{code}: the language's two letters"
+        );
+        let rebuilt: Vec<&str> = [Some(tag.language), tag.script, tag.region]
+            .into_iter()
+            .flatten()
+            .collect();
+        assert_eq!(
+            rebuilt.join("-"),
+            *code,
+            "{code}: a script or a region after the language"
         );
         assert!(
             CATALOGS.iter().any(|(c, _)| c == code),
             "{code}: a catalog in core/locales/{code}"
         );
     }
+}
+
+#[test]
+fn tags_in_their_parts() {
+    let tag = Tag::parse("sr-Latn-RS");
+    assert_eq!((tag.language, tag.script, tag.region), ("sr", Some("Latn"), Some("RS")));
+    let tag = Tag::parse("es_419");
+    assert_eq!((tag.language, tag.script, tag.region), ("es", None, Some("419")));
+    let tag = Tag::parse("ca-ES-valencia");
+    assert_eq!((tag.language, tag.script, tag.region), ("ca", None, Some("ES")));
+    assert_eq!(date_locale("de", Some("EE")), "de_EE");
+    assert_eq!(date_locale("de", None), "de");
+    assert_eq!(date_locale("pt-BR", Some("US")), "pt_BR");
+    assert_eq!(date_locale("sr-Latn", Some("RS")), "sr_Latn_RS");
+    assert_eq!(date_locale(PSEUDO, Some("EE")), "en_EE");
+    assert_eq!(
+        picture_resource("brands/google-sign-in.pt-BR.png"),
+        "GOOGLE_SIGN_IN_PT_BR"
+    );
+    assert_eq!(picture_resource("brands/microsoft-sign-in.png"), "MICROSOFT_SIGN_IN");
 }
 
 #[test]

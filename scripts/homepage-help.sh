@@ -15,11 +15,14 @@ for platform in windows mac linux; do
 done
 rm -rf "$HOMEPAGE/help"
 mkdir -p "$HOMEPAGE/help"
-# the languages there is help in, as the export wrote them (pe_i18n::LANGUAGES), for the page that picks one
-languages=""
-for code in $(scripts/languages.sh --codes); do
-    if [ -d "$out/windows/$code" ]; then languages="${languages:+$languages, }'$code'"; fi
-done
+# the tags a visitor's language is looked up by, of the languages there is help in, as the export wrote them
+# (core/include/languages.tsv, made from pe_i18n::LANGUAGES: each catalog's lookup tags)
+keys=""
+while IFS=$'\t' read -r code _ _ _ lookup; do
+    case "$code" in '#'*) continue ;; esac
+    [ -d "$out/windows/$code" ] || continue
+    for key in ${lookup//,/ }; do keys="${keys:+$keys, }'$key': '$code'"; done
+done <core/include/languages.tsv
 # the export writes <platform>/<language>/; the site has <language>/<platform>/
 for platform in windows mac linux; do
     for language_dir in "$out/$platform"/*/; do
@@ -41,12 +44,21 @@ cat >"$HOMEPAGE/help/index.html" <<EOF
 <link rel="canonical" href="https://inboxclassic.com/help/en/windows/index.html">
 <script>
 (function () {
-    var languages = [${languages}];
+    // the catalog of each tag a system may give (pe_i18n::supported, as core/include/languages.tsv has it): the
+    // tag's language with a region or script of it first, then the language alone
+    var keys = {${keys}};
+    function pick(tag) {
+        var parts = String(tag).toLowerCase().split(/[.@]/)[0].split(/[-_]/);
+        for (var k = 1; k < parts.length; k++) {
+            if (keys.hasOwnProperty(parts[0] + '-' + parts[k])) return keys[parts[0] + '-' + parts[k]];
+        }
+        return keys.hasOwnProperty(parts[0]) ? keys[parts[0]] : null;
+    }
     var language = 'en';
     var wanted = navigator.languages || [navigator.language || 'en'];
     for (var i = 0; i < wanted.length; i++) {
-        var code = String(wanted[i]).slice(0, 2).toLowerCase();
-        if (languages.indexOf(code) >= 0) { language = code; break; }
+        var found = pick(wanted[i]);
+        if (found) { language = found; break; }
     }
     var platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
     var name = /mac/i.test(platform) ? 'mac' : /linux/i.test(platform) && !/android/i.test(navigator.userAgent) ? 'linux' : 'windows';

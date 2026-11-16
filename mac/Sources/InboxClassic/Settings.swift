@@ -12,11 +12,12 @@ enum Languages {
     /// languages (its own AppleLanguages, the system's otherwise) there is a catalog of, English when none
     static func apply(_ override: String?) {
         let wanted = override ?? resolve(Locale.preferredLanguages)
-        // the code of the catalog the core took (de-AT is de, a language without one English), the pseudo-language's
-        // dates English
-        let used = taken(wanted.withCString { pe_set_language($0) }) ?? "en"
-        let code = used == "qps" ? "en" : used
-        locale = Locale(identifier: Locale.current.region.map { "\(code)_\($0.identifier)" } ?? code)
+        // the catalog the core takes (de-AT is de, a language without one English), and the core's locale of its dates:
+        // its own region (pt_BR) or the system's (de_EE), English for the pseudo-language
+        _ = taken(wanted.withCString { pe_set_language($0) })
+        let region = Locale.current.region?.identifier
+        let identifier = region.map { r in r.withCString { taken(pe_date_locale($0)) } } ?? taken(pe_date_locale(nil))
+        locale = Locale(identifier: identifier ?? "en")
         instantLocale = locale
     }
 

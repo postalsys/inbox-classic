@@ -1,0 +1,19 @@
+<!--review--><h1>Flytt til en annen datamaskin</h1>
+<p class="summary">Ta med kontoene, innstillingene, kontaktene, nøklene og reglene dine til en annen datamaskin i én fil.</p>
+<h2>Eksporter dem</h2>
+<ol>
+    <li>Velg <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
+    <li>Velg hva du vil ta med: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> og <b data-text="setup-part-trusted-senders"></b>.</li>
+    <li>For å ta med passordene og de private nøklene også slår du på <b data-text="ui-setup-use-passphrase"></b> og skriver en passfrase på minst 8 tegn to ganger.</li>
+    <li>Klikk på <b data-text="ui-setup-export-button"></b>, og velg hvor filen skal lagres.</li>
+</ol>
+<p>Filen inneholder ingen meldinger: De lastes ned igjen på den andre datamaskinen. Med en passfrase krypteres hele filen. Uten passfrase inneholder den ingen passord eller private nøkler, og hver konto ber om passordet sitt én gang på den andre datamaskinen.</p>
+<aside class="warning">Oppbevar filen og passfrasen hver for seg, og slett filen når du har importert den. Alle som har begge, kan lese e-posten din.</aside>
+<h2>Importer dem</h2>
+<ol>
+    <li>På den andre datamaskinen velger du <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Før du legger til den første kontoen, har <b data-text="ui-add-account-title"></b> også en kobling til dette.</li>
+    <li>Velg filen, og skriv passfrasen hvis den har en.</li>
+    <li>Vinduet viser hva filen inneholder. Velg delene og kontoene du vil importere, og klikk på <b data-text="ui-setup-import-button"></b>.</li>
+</ol>
+<p>En konto som allerede finnes på denne datamaskinen, blir som den er. Kontakter legges til i adresseboken, innstillinger og vinduspreferanser erstattes, og en regel med en mappe som ikke finnes ennå, venter til kontoen er synkronisert. En annen nøkkel for en av kontaktene dine venter på at du bestemmer deg, slik en importert nøkkel gjør.</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->

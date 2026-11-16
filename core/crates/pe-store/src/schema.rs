@@ -561,9 +561,36 @@ CREATE TABLE pgp_lookups (
 ALTER TABLE rules ADD COLUMN move_account INTEGER REFERENCES accounts(id) ON DELETE SET NULL;
 ALTER TABLE rules ADD COLUMN move_path TEXT;
 "#,
+    // case folded for all of Unicode, Turkish's two i's as one letter (fold.rs): the From and Subject orders by sort
+    // keys the store writes (an older version leaves them NULL, read through COALESCE), and the search index, which
+    // takes ı as i (unicode61 does not), its messages with one indexed again: from the cached source where there is
+    // one, read again by the workers otherwise
+    r#"
+ALTER TABLE messages ADD COLUMN sort_from TEXT;
+ALTER TABLE messages ADD COLUMN sort_subject TEXT;
+UPDATE messages SET sort_from = fold(CASE from_name WHEN '' THEN from_address ELSE from_name END), sort_subject = fold(subject);
+DROP INDEX messages_by_from;
+CREATE INDEX messages_by_from ON messages (folder_id, COALESCE(sort_from, CASE from_name WHEN '' THEN from_address ELSE from_name END) COLLATE NOCASE, uid);
+DROP INDEX messages_by_subject;
+CREATE INDEX messages_by_subject ON messages (folder_id, COALESCE(sort_subject, subject) COLLATE NOCASE, uid);
+DROP TRIGGER messages_fts_add;
+CREATE TRIGGER messages_fts_add AFTER INSERT ON messages BEGIN
+    INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) VALUES (new.id, replace(new.subject, 'ı', 'i'), replace(CASE new.sender_people WHEN '' THEN new.from_name || ' ' || new.from_address ELSE new.sender_people END, 'ı', 'i'), replace(CASE new.recipient_people WHEN '' THEN new.recipients ELSE new.recipient_people END, 'ı', 'i'), replace(new.attachment_names, 'ı', 'i'), '');
+END;
+CREATE TEMP TABLE dotless AS SELECT id FROM messages WHERE instr(subject || from_name || sender_people || recipients
+    || recipient_people || attachment_names || COALESCE(snippet, ''), 'ı') > 0;
+DELETE FROM messages_fts WHERE rowid IN (SELECT id FROM dotless);
+INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body)
+    SELECT id, replace(subject, 'ı', 'i'), replace(CASE sender_people WHEN '' THEN from_name || ' ' || from_address ELSE sender_people END, 'ı', 'i'), replace(CASE recipient_people WHEN '' THEN recipients ELSE recipient_people END, 'ı', 'i'), replace(attachment_names, 'ı', 'i'), '' FROM messages WHERE id IN (SELECT id FROM dotless);
+UPDATE bodies SET indexed = 0 WHERE message_id IN (SELECT id FROM dotless);
+UPDATE messages SET text_indexed = 0 WHERE id IN (SELECT id FROM dotless) AND id NOT IN (SELECT message_id FROM bodies);
+DROP TABLE dotless;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
+    // a migration writes the sort keys with it
+    crate::fold::register(db)?;
     let version: usize = db.pragma_query_value(None, "user_version", |row| row.get(0))?;
     for (index, migration) in MIGRATIONS.iter().enumerate().skip(version) {
         let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
@@ -585,6 +612,79 @@ mod tests {
         migrate(&mut db).unwrap();
         let version: usize = db.pragma_query_value(None, "user_version", |row| row.get(0)).unwrap();
         assert_eq!(version, MIGRATIONS.len());
+    }
+
+    #[test]
+    fn messages_with_a_dotless_i_are_indexed_again() {
+        let mut db = Connection::open_in_memory().unwrap();
+        // the schema before ı was indexed as i
+        let before = MIGRATIONS
+            .iter()
+            .position(|m| m.contains("DROP TRIGGER messages_fts_add"))
+            .unwrap();
+        crate::fold::register(&db).unwrap();
+        for migration in &MIGRATIONS[..before] {
+            db.execute_batch(migration).unwrap();
+        }
+        db.pragma_update(None, "user_version", before).unwrap();
+        db.execute_batch(
+            "INSERT INTO accounts (id, name, email, username, imap_host, imap_port, imap_security, smtp_host, \
+             smtp_port, smtp_security) VALUES (1, 'A', 'a@x', 'a', 'h', 993, 'tls', 'h', 465, 'tls');
+             INSERT INTO folders (id, account_id, path, name, flags, subscribed, selectable, position) \
+             VALUES (1, 1, 'INBOX', 'INBOX', '', 1, 1, 0);
+             INSERT INTO messages (id, folder_id, uid, flags, seen, subject, from_name, from_address, recipients, \
+             has_attachments, text_indexed) VALUES (1, 1, 1, '', 0, 'Işık', '', '', '', 0, 1), \
+             (2, 1, 2, '', 0, 'Ankara', '', '', '', 0, 1), (3, 1, 3, '', 0, 'Yıldız', '', '', '', 0, 1);
+             INSERT INTO bodies (message_id, source, indexed) VALUES (1, x'00', 1), (2, x'00', 1);",
+        )
+        .unwrap();
+        let found = |db: &Connection, word: &str| -> Vec<i64> {
+            let mut statement = db
+                .prepare("SELECT rowid FROM messages_fts WHERE messages_fts MATCH ?1 ORDER BY rowid")
+                .unwrap();
+            statement
+                .query_map([word], |row| row.get(0))
+                .unwrap()
+                .map(Result::unwrap)
+                .collect()
+        };
+        assert_eq!(found(&db, "isik"), [] as [i64; 0]);
+        migrate(&mut db).unwrap();
+        assert_eq!(found(&db, "isik"), [1]);
+        assert_eq!(found(&db, "yildiz"), [3]);
+        assert_eq!(found(&db, "ankara"), [2]);
+        // the one with a cached source indexed from it, the other's text read again; the rest as it was
+        let state = |id: i64| -> (i64, Option<i64>) {
+            db.query_row(
+                "SELECT m.text_indexed, b.indexed FROM messages m LEFT JOIN bodies b ON b.message_id = m.id \
+                 WHERE m.id = ?1",
+                [id],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .unwrap()
+        };
+        assert_eq!(state(1), (1, Some(0)));
+        assert_eq!(state(2), (1, Some(1)));
+        assert_eq!(state(3), (0, None));
+        // the sort keys of the messages stored before
+        let key: String = db
+            .query_row("SELECT sort_subject FROM messages WHERE id = 1", [], |row| row.get(0))
+            .unwrap();
+        assert_eq!(key, "işik");
+    }
+
+    #[test]
+    fn the_index_text_is_the_same_everywhere() {
+        // the trigger, the migration and set_indexed write the same columns of the search index
+        let migration = MIGRATIONS
+            .iter()
+            .find(|m| m.contains("DROP TRIGGER messages_fts_add"))
+            .unwrap();
+        assert!(migration.contains(&format!("VALUES (new.id, {}, '')", crate::search::fts_columns("new."))));
+        assert!(migration.contains(&format!(
+            "SELECT id, {}, '' FROM messages",
+            crate::search::fts_columns("")
+        )));
     }
 
     #[test]

@@ -1,0 +1,14 @@
+<!--review--><h1>Hesap güvenlik ayarları</h1>
+<p class="summary">Bir hesabın sunucularının güvenlik ayarları ve her birinin anlamı.</p>
+<p>Her hesapta gelen posta sunucusu için <b data-text="ui-field-imap-security"></b>, giden posta sunucusu için <b data-text="ui-field-smtp-security"></b> ayarı vardır. Inbox Classic, sağlayıcınızın ayarlarını bulduğunda bunları doldurur. Değiştirmek için hesabın özelliklerini <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> içinden açın.</p>
+<table>
+    <tr><th>Ayar</th><th>Anlamı</th></tr>
+    <tr><td>SSL/TLS</td><td>Bağlantı baştan itibaren şifrelidir. Gelen posta için genellikle 993, giden posta için 465 numaralı bağlantı noktası.</td></tr>
+    <tr><td>STARTTLS</td><td>Bağlantı açıldıktan hemen sonra şifrelenir. Gelen posta için genellikle 143, giden posta için 587 numaralı bağlantı noktası. Sunucu şifreleme sunmazsa Inbox Classic durur.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Parolanız ve postanız ağdaki herkesin okuyabileceği şekilde iletilir.</td></tr>
+</table>
+<aside class="warning"><b data-text="ui-security-none"></b> ayarını yalnızca kendi bilgisayarınızdaki veya yerel ağınızdaki bir sunucu için kullanın. Inbox Classic bunu kullanmadan önce sizi uyarır.</aside>
+<p>Inbox Classic, her sunucunun iddia ettiği sunucu olduğunu sisteminizin güvendiği sertifikalarla denetler. Her sertifikayı kabul eden bir seçenek yoktur.</p>
+<p>Parolanız posta deposunda değil, <!--os:windows-->Windows Kimlik Bilgileri Yöneticisi'nde<!--/os--><!--os:mac-->oturum açma anahtar zincirinizde<!--/os--><!--os:linux-->anahtarlığınızda<!--/os--> saklanır. Tarayıcı üzerinden oturum açan bir hesap hiç parola saklamaz.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

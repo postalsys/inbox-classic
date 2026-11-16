@@ -1,0 +1,18 @@
+<!--review--><h1>Sorter ny e-post med regler</h1>
+<p class="summary">Flytt, merk som lest, flagg eller arkiver innkommende meldinger som oppfyller kriteriene dine, automatisk.</p>
+<p>En regel kombinerer søkekriterier med handlinger som brukes på meldinger som passer, når de kommer til innboksen. En regel med <code>from:news@example.com</code> kan for eksempel flytte nyhetsbrev fra den adressen til en egen mappe og merke dem som lest.</p>
+<p>Slik lager du en regel:</p>
+<ol>
+    <li>Velg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>, og klikk deretter på <b data-text="ui-rule-new"></b>.</li>
+    <li>Skriv et navn, og fyll ut <b data-text="ui-rule-query"></b> med de samme ordene som i søkefeltet, for eksempel <code>from:</code>, <code>subject:</code> eller <code>list:</code>. Linjen under viser hvor mange av meldingene som allerede er i innboksen, som passer til kriteriene.</li>
+    <li>Velg én eller flere handlinger for meldinger som passer: flytt dem til en mappe, merk dem som lest, flagg dem, arkiver dem, flytt dem til Søppelpost, slett dem eller slå av varsler.</li>
+    <li>Klikk på <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Du kan også lage en regel fra en melding eller et søk. Velg <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> for å fylle inn avsenderen eller e-postlisten til den merkede meldingen. Klikk på <b data-text="ui-create-rule"></b> over søkeresultatene for å bruke de gjeldende søkekriteriene.</p>
+<h2>Slik virker regler</h2>
+<p>Regler behandler nye meldinger i innboksen mens Inbox Classic kjører, også når programmet er minimert til systemstatusfeltet. Eksisterende meldinger påvirkes bare hvis du merker av for <b data-text="ui-rule-apply-now"></b>. Regler som passer, kjøres i rekkefølgen i listen. Når en regel flytter en melding ut av innboksen, brukes ingen flere regler på den meldingen. Fjern avmerkingen for en regel i listen for å slå den av uten å slette den.</p>
+<h2>Endre regler</h2>
+<p>For å redigere en regel merker du den i listen og klikker på <b data-text="ui-rule-edit"></b>, eller dobbeltklikker på den. Bruk <b data-text="ui-account-move-up"></b> og <b data-text="ui-account-move-down"></b> for å endre rekkefølgen, eller <b data-text="ui-rule-delete-button"></b> for å slette regelen. I regelredigeringen klikker du på <b data-text="ui-rule-show"></b> for å se meldingene som passer nå, i hovedvinduet.</p>
+<p>Regler gjelder nye meldinger i innboksen, så mappe- og datofiltre støttes ikke. Hvis du bruker <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> eller <code>newer_than:</code>, forklarer en melding hvorfor disse filtrene ikke kan brukes. Regler kan ikke sende meldinger eller slette dem permanent: <b data-text="ui-rule-delete"></b> flytter dem til <b data-text="folder-deleted"></b>.</p>
+<aside class="note">Regler kjøres på denne datamaskinen. For å sortere e-post mens den er slått av bruker du filtrene til e-postleverandøren din.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav><!--/review-->

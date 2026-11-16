@@ -1,0 +1,13 @@
+<!--review--><h1>Sikkerhetsinnstillinger for kontoer</h1>
+<p class="summary">Sikkerhetsinnstillingene for serverne til en konto, og hva hver av dem betyr.</p>
+<p>Hver konto har <b data-text="ui-field-imap-security"></b> for serveren for innkommende e-post og <b data-text="ui-field-smtp-security"></b> for serveren for utgående e-post. Inbox Classic fyller dem ut når programmet finner innstillingene til leverandøren din. Du endrer dem i egenskapene til kontoen under <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<table>
+    <tr><th>Innstilling</th><th>Betydning</th></tr>
+    <tr><td>SSL/TLS</td><td>Tilkoblingen er kryptert fra starten av. Vanligvis port 993 for innkommende e-post og 465 for utgående e-post.</td></tr>
+    <tr><td>STARTTLS</td><td>Tilkoblingen krypteres rett etter at den er åpnet. Vanligvis port 143 for innkommende e-post og 587 for utgående e-post. Inbox Classic stopper hvis serveren ikke tilbyr kryptering.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Passordet og e-posten din sendes slik at alle på nettverket kan lese dem.</td></tr>
+</table>
+<aside class="warning">Bruk <b data-text="ui-security-none"></b> bare for en server på din egen datamaskin eller ditt eget lokale nettverk. Inbox Classic advarer deg før innstillingen tas i bruk.</aside>
+<p>Inbox Classic kontrollerer at hver server er den den utgir seg for å være, mot sertifikatene systemet ditt stoler på. Det finnes ingen bryter for å godta et hvilket som helst sertifikat.</p>
+<p>Passordet ditt oppbevares i <!--os:windows-->Legitimasjonsbehandling i Windows<!--/os--><!--os:mac-->påloggingsnøkkelringen din<!--/os--><!--os:linux-->nøkkelringen din<!--/os-->, aldri i e-postlageret. En konto som logger på via nettleseren, har ikke noe passord lagret i det hele tatt.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav><!--/review-->

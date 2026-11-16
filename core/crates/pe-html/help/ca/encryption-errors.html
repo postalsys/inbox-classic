@@ -1,0 +1,16 @@
+<!--review--><h1>Errors de xifratge</h1>
+<p class="summary">Què heu de fer quan un servidor no ofereix xifratge, o el demana on està desactivat.</p>
+<h2>«the server does not offer STARTTLS»</h2>
+<p>El compte està configurat amb STARTTLS, però el servidor no ha ofert xifratge. Inbox Classic s’ha aturat, de manera que no s’ha enviat la vostra contrasenya.</p>
+<ol>
+    <li>Obriu les propietats del compte a <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Configureu la seguretat com a SSL/TLS, amb el port 993 per al correu entrant o el 465 per al correu sortint.</li>
+    <li>Feu clic a <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Si no funciona res més, el servidor no es pot fer servir amb seguretat.</p>
+<h2>«the server takes the password only over an encrypted connection»</h2>
+<p>El servidor de sortida està configurat com a <b data-text="ui-security-none"></b>. La vostra contrasenya és correcta. Canvieu <b data-text="ui-field-smtp-security"></b> a STARTTLS amb el port 587, o a SSL/TLS amb el port 465.</p>
+<h2>L’avís sobre una connexió sense xifratge</h2>
+<p>Quan trieu <b data-text="ui-security-none"></b>, Inbox Classic avisa que qualsevol que intercepti el vostre trànsit de xarxa pot llegir la contrasenya i els missatges. Continueu només amb un servidor del vostre propi ordinador o de la vostra xarxa local.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

@@ -1,0 +1,17 @@
+<!--review--><h1>Krypteringsnøkler</h1>
+<p class="summary">Lag en nøkkel for å signere meldingene dine og motta kryptert e-post, og ta vare på kontaktenes nøkler.</p>
+<p>Inbox Classic signerer og krypterer e-post med OpenPGP-nøkler. Din egen nøkkel har to halvdeler: en offentlig nøkkel som du gir til andre, og en privat nøkkel som blir på datamaskinen din. Kontaktenes nøkler lar deg kontrollere signaturene deres og kryptere e-post til dem.</p>
+<p>Slik lager du nøkkelen din:</p>
+<ol>
+    <li>Velg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, og klikk deretter på <b data-text="ui-keys-new"></b>.</li>
+    <li>Velg kontoen, og klikk på <b data-text="ui-keys-new-make"></b>. Nøkkelen brukes for kontoens adresse og dens andre adresser.</li>
+    <li>Klikk på <b data-text="ui-keys-backup-now"></b>, og velg en passfrase. Oppbevar filen og passfrasen på to forskjellige trygge steder.</li>
+</ol>
+<aside class="warning">Uten en sikkerhetskopi kan ikke nøkkelen gjenopprettes hvis denne datamaskinen går tapt eller tilbakestilles, og e-post som er kryptert til den, kan ikke lenger leses.</aside>
+<h2>Nøklene er beskyttet uten passfraser</h2>
+<p>De private nøklene dine er beskyttet av en nøkkel som oppbevares i <!--os:windows-->Legitimasjonsbehandling<!--/os--><!--os:mac-->nøkkelringen<!--/os--><!--os:linux-->systemets nøkkelring<!--/os-->, så du trenger aldri å skrive en passfrase for å bruke dem. Du velger bare en passfrase for en sikkerhetskopi. Hvis nøkkelen din vises som låst, er denne beskyttelsen tilbakestilt: Klikk på <b data-text="ui-keys-import"></b>, og velg sikkerhetskopien av den.</p>
+<h2>Legge til nøkler</h2>
+<p>Klikk på <b data-text="ui-keys-import"></b> for å legge til en nøkkel fra en fil, for eksempel en som en kontakt har sendt deg, eller en sikkerhetskopi av din egen. En privat nøkkel som er beskyttet av en passfrase, spør etter den én gang. Inbox Classic spør deretter om en importert nøkkel som er din, skal brukes for adressene dine.</p>
+<p>En kontakts nøkkel brukes for kontaktens adresse fra da av. Hvis det senere dukker opp en annen nøkkel for den samme adressen, brukes den nåværende til du velger den nye i kontaktens egenskaper.</p>
+<p>For å dele den offentlige nøkkelen din merker du den og klikker på <b data-text="ui-keys-export"></b>. Du kan også velge kontoens nøkkel i egenskapene for kontoen, i fanen <b data-text="ui-account-security"></b>.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav><!--/review-->

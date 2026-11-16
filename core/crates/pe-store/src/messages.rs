@@ -219,12 +219,12 @@ impl Sort {
     /// The ORDER BY, each matching an index of the schema
     pub(crate) fn order_by(self) -> String {
         let column = match self.field {
-            SortField::Date => LIST_DATE,
-            SortField::Received => "internal_date",
-            SortField::From => "(CASE from_name WHEN '' THEN from_address ELSE from_name END) COLLATE NOCASE",
-            SortField::To => "recipients COLLATE NOCASE",
-            SortField::Subject => "subject COLLATE NOCASE",
-            SortField::Size => "size",
+            SortField::Date => LIST_DATE.to_string(),
+            SortField::Received => "internal_date".to_string(),
+            SortField::From => format!("{FROM_KEY} COLLATE NOCASE"),
+            SortField::To => TO_KEY.to_string(),
+            SortField::Subject => format!("{SUBJECT_KEY} COLLATE NOCASE"),
+            SortField::Size => "size".to_string(),
         };
         let direction = if self.ascending { "ASC" } else { "DESC" };
         // the id last: the same UID in two folders has one order across folders too (an index ends with the rowid, so
@@ -256,6 +256,15 @@ fn is_seen(canonical: &str) -> bool {
 
 /// [`Message::display_date`] in SQL: the Date header, never later than the arrival; what the Date order and its
 /// indexes (schema.rs) sort by
+/// What the From order sorts by: the sender's name, their address when the message has none, case folded
+/// ([`crate::fold`]) by the store as it writes the message; a row an older version wrote has no key and sorts by the
+/// name as it is (the schema's index has the same expression)
+pub(crate) const FROM_KEY: &str = "COALESCE(sort_from, CASE from_name WHEN '' THEN from_address ELSE from_name END)";
+/// What the Subject order sorts by, as [`FROM_KEY`]
+pub(crate) const SUBJECT_KEY: &str = "COALESCE(sort_subject, subject)";
+/// What the To order sorts by: folded as it is read (no index; Sent Items and Drafts are small)
+pub(crate) const TO_KEY: &str = "fold(recipients)";
+
 pub(crate) const LIST_DATE: &str = "COALESCE(MIN(date, internal_date), date, internal_date)";
 
 /// [`LIST_DATE`] of the messages of a table named `alias` in a query
@@ -339,9 +348,9 @@ impl Store {
         let mut statement = self.db.prepare_cached(
             "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
              from_address, recipients, message_id, in_reply_to, has_attachments, sender_people, recipient_people, \
-             attachment_names, attachment_count, refs, bounce, auth_headers, list_id) \
+             attachment_names, attachment_count, refs, bounce, auth_headers, list_id, sort_from, sort_subject) \
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, \
-             ?23) \
+             ?23, ?24, ?25) \
              ON CONFLICT (folder_id, uid) DO UPDATE SET modseq = excluded.modseq, flags = excluded.flags, \
              seen = excluded.seen",
         )?;
@@ -374,7 +383,13 @@ impl Store {
                 m.references.join(" "),
                 m.bounce,
                 m.auth_headers,
-                m.list_id
+                m.list_id,
+                crate::fold::fold(if m.from_name.is_empty() {
+                    &m.from_address
+                } else {
+                    &m.from_name
+                }),
+                crate::fold::fold(&m.subject)
             ])?;
             // a message new to the store goes into its conversation at once (one already here keeps its own)
             if new {
