@@ -101,6 +101,14 @@ Forms of address: German uses "Sie", French "vous", Spanish "usted", Estonian th
 - A list of addresses must work for one or several entries. Introduce it with a colon instead of forcing a
   singular case onto the placeholder. Contact names can be placed in parentheses to avoid requiring inflection.
 
+### Spanish encryption and settings transfer
+
+- Use "contraseña" for the password protecting a key backup or settings export, as in the account dialogs.
+- Use "huella digital" for a key fingerprint. Verifying a key means confirming its owner by comparing the
+  fingerprint; checking a message signature alone does not confirm the owner.
+- "Datos de acceso" includes saved sign-in tokens as well as passwords. After an unprotected export, the user
+  must sign in again, which may use a browser rather than a password prompt.
+
 Context notes:
 
 - Search covers subjects, senders, recipients, attachment names and message text. Name those fields rather than
