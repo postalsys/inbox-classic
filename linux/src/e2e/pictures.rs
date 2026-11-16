@@ -134,6 +134,7 @@ pub async fn options(d: &Driver) {
         d.check(false, "Preferences opens");
         return;
     };
+    preferences_page(&dialog, SettingsPage::Reading);
     let root: gtk::Widget = dialog.clone().upcast();
     trusted_senders(d, &dialog, &root).await;
     set_always(&root, true);
@@ -151,6 +152,7 @@ pub async fn options(d: &Driver) {
 
     command(Command::Options);
     if let Some(dialog) = wait_dialog(10, "preferences-dialog").await {
+        preferences_page(&dialog, SettingsPage::Reading);
         set_always(dialog.upcast_ref(), false);
         dialog.close();
         wait_gone(10, "preferences-dialog").await;
@@ -170,6 +172,7 @@ async fn download_ahead(d: &Driver) {
         d.check(false, "Preferences opens");
         return;
     };
+    preferences_page(&dialog, SettingsPage::Downloading);
     let root: &gtk::Widget = dialog.upcast_ref();
     let row = |name: &str| named_in(root, name).and_downcast::<adw::ComboRow>();
     let (Some(ahead), Some(limit)) = (row("preferences-download-ahead"), row("preferences-download-limit")) else {

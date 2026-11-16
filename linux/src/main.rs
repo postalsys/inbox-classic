@@ -47,7 +47,8 @@ mod webview;
 #[rustfmt::skip]
 #[path = "generated/commands.rs"]
 mod commands;
-// the settings window of core/settings.toml
+// the settings window of core/settings.toml; a whole table, of which Preferences reads what it needs (not the
+// lists of every group and setting, nor the way back from a setting to its group and page)
 #[rustfmt::skip]
 #[allow(dead_code)]
 #[path = "generated/settings_pages.rs"]

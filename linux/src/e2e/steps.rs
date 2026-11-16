@@ -1647,6 +1647,7 @@ async fn group_by_conversation(d: &Driver, on: bool) {
         d.check(false, "Preferences opens");
         return;
     };
+    preferences_page(&dialog, SettingsPage::Reading);
     let root = dialog.clone().upcast::<gtk::Widget>();
     match named_in(&root, "preferences-group-threads").and_downcast::<adw::SwitchRow>() {
         Some(row) => {
@@ -1663,6 +1664,8 @@ async fn group_by_conversation(d: &Driver, on: bool) {
     }
     // the notifications can name a message's sign-in code: off at first, the core told when it is turned on
     if !on {
+        preferences_page(&dialog, SettingsPage::General);
+        codes_follow_notify(d, &root);
         match named_in(&root, "preferences-codes").and_downcast::<adw::SwitchRow>() {
             Some(row) => {
                 d.check(
@@ -1682,6 +1685,24 @@ async fn group_by_conversation(d: &Driver, on: bool) {
     pause(300).await;
     dialog.close();
     wait_gone(10, "preferences-dialog").await;
+}
+
+/// The sign-in codes switch is insensitive while Notify me when new mail arrives is off, and keeps its value
+fn codes_follow_notify(d: &Driver, root: &gtk::Widget) {
+    let switch = |name: &str| named_in(root, name).and_downcast::<adw::SwitchRow>();
+    let (Some(notify), Some(codes)) = (switch("preferences-notify"), switch("preferences-codes")) else {
+        d.check(false, "the General page has Notify and the sign-in codes under it");
+        return;
+    };
+    let (was, kept) = (notify.is_active(), codes.is_active());
+    notify.set_active(false);
+    d.check(
+        !codes.is_sensitive() && codes.is_active() == kept,
+        "with Notify me when new mail arrives off, the sign-in codes switch is insensitive and keeps its value",
+    );
+    notify.set_active(true);
+    d.check(codes.is_sensitive(), "turned on again, it is sensitive");
+    notify.set_active(was);
 }
 
 /// Conversations: three messages of one conversation are one row of the Inbox, with their count, bold while one is
@@ -3680,6 +3701,35 @@ fn not_pseudo(root: &gtk::Widget, data: &[&str]) -> (Vec<String>, Vec<String>) {
     (english, cut)
 }
 
+/// Preferences has its three pages in the order of core/settings.toml, each group but the Downloading page's one titled
+fn preferences_pages(d: &Driver, dialog: &adw::Dialog) {
+    // the pages named, not the dialog's own page of search results
+    let pages: Vec<adw::PreferencesPage> = descendants::<adw::PreferencesPage>(dialog.upcast_ref())
+        .into_iter()
+        .filter(|page| page.name().is_some_and(|name| !name.is_empty()))
+        .collect();
+    let names: Vec<String> = pages
+        .iter()
+        .map(|page| page.name().map(|name| name.to_string()).unwrap_or_default())
+        .collect();
+    let wanted: Vec<&str> = SettingsPage::ALL.iter().map(|page| page.name()).collect();
+    d.check(
+        names == wanted,
+        &format!("Preferences has the pages General, Reading and Downloading in this order ({names:?})"),
+    );
+    let untitled: Vec<String> = pages
+        .iter()
+        .filter(|page| page.name().as_deref() != Some(SettingsPage::Downloading.name()))
+        .flat_map(|page| descendants::<adw::PreferencesGroup>(page.upcast_ref()))
+        .filter(|group| group.title().is_empty())
+        .map(|group| group.description().map(|d| d.to_string()).unwrap_or_default())
+        .collect();
+    d.check(
+        untitled.is_empty(),
+        &format!("each group of General and Reading has its title ({untitled:?})"),
+    );
+}
+
 /// The main window again, in `language`, with the Inbox and its first message shown
 async fn in_language(language: &str) {
     pe_core::i18n::set_language(language);
@@ -3698,6 +3748,8 @@ pub async fn languages(d: &Driver) {
         return;
     };
     let root = dialog.clone().upcast::<gtk::Widget>();
+    preferences_pages(d, &dialog);
+    preferences_page(&dialog, SettingsPage::General);
     let row = named_in(&root, "preferences-language").and_downcast::<adw::ComboRow>();
     let names: Vec<String> = row
         .as_ref()
@@ -3720,24 +3772,23 @@ pub async fn languages(d: &Driver) {
         ),
     );
     d.check(
-        named_in(&root, "preferences-notify").is_some(),
-        "Preferences has Notify of New Mail",
+        named_in(&root, "preferences-notify").is_some() && named_in(&root, "preferences-default-app").is_some(),
+        "General has Notify me when new mail arrives and Make Default Mail App",
     );
     let Some(row) = row else { return };
-    // the list open for the picture
-    adw::prelude::ActionRowExt::activate(&row);
-    pause(500).await;
     d.shot(&dialog, "options-1-language").await;
-    for popover in descendants::<gtk::Popover>(&root) {
-        popover.popdown();
-    }
+    preferences_page(&dialog, SettingsPage::Reading);
+    pause(300).await;
+    d.shot(&dialog, "options-2-reading").await;
+    preferences_page(&dialog, SettingsPage::General);
+    pause(300).await;
     let deutsch = names.iter().position(|n| n == "Deutsch").unwrap_or(2);
     row.set_selected(u32::try_from(deutsch).unwrap_or(2));
     match wait_alert(5).await {
         Some(alert) => {
             let text = alert_text(&alert);
             d.check(
-                text.contains("restarts to change the language"),
+                text.contains("Deutsch") && text.contains("Restart now?"),
                 &format!("a language chosen says the app starts again to change it ({text})"),
             );
             let buttons: Vec<String> = descendants::<gtk::Button>(alert.upcast_ref())
@@ -3913,8 +3964,16 @@ pub async fn language_tour(d: &Driver) {
 
         command(Command::Options);
         if let Some(preferences) = wait_dialog(10, "preferences-dialog").await {
-            check_cut("Preferences", preferences.upcast_ref());
-            d.shot(&preferences, &format!("tour-{language}-5-preferences")).await;
+            for (page, shot) in [
+                (SettingsPage::General, "5-preferences"),
+                (SettingsPage::Reading, "5b-preferences-reading"),
+                (SettingsPage::Downloading, "5c-preferences-downloading"),
+            ] {
+                preferences_page(&preferences, page);
+                pause(300).await;
+                check_cut(&format!("Preferences, {}", page.name()), preferences.upcast_ref());
+                d.shot(&preferences, &format!("tour-{language}-{shot}")).await;
+            }
             preferences.close();
             wait_gone(10, "preferences-dialog").await;
         }

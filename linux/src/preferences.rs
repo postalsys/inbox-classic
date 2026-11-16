@@ -1,8 +1,7 @@
-//! Preferences (the main menu, Ctrl+,): the language of the windows, Group messages by conversation, messages on a
-//! dark background, the pictures of messages (every message's, the trusted senders), Notify of New Mail, the app for .eml files and what is downloaded
-//! before it is opened, in a libadwaita
-//! preferences dialog as GNOME apps have it. A language chosen is saved in settings.ini and used
-//! from the next start; the app offers to start again in it at once.
+//! Preferences (the main menu, Ctrl+,): a libadwaita preferences dialog as GNOME apps have it, with the pages, groups
+//! and settings of core/settings.toml in their order (General, Reading, Downloading in the view switcher, each group
+//! titled), one row for each setting built in `row_of`. Every change counts at once. A language chosen is saved in
+//! settings.ini and used from the next start; the app offers to start again in it at once.
 
 use std::ffi::OsStr;
 
@@ -11,8 +10,9 @@ use gtk::{gio, glib};
 
 use crate::app::{shell, spawn};
 use crate::settings;
+use crate::settings_pages::{Setting, SettingKind, SettingsGroup, SettingsPage};
 use crate::ui::{self, TITLE};
-use crate::words::{Text, plain};
+use crate::words::{Text, field_title, plain, title};
 
 /// The languages offered, in the order of the list: System default (None), then each by its own name
 fn choices() -> Vec<Option<&'static str>> {
@@ -29,9 +29,175 @@ fn language_of(choice: Option<&str>) -> &'static str {
 }
 
 pub async fn open(parent: &impl IsA<gtk::Widget>) {
-    let app = shell();
+    let dialog = adw::PreferencesDialog::builder()
+        .title(t!(GtkPreferences))
+        .content_width(600)
+        .build();
+    dialog.set_widget_name("preferences-dialog");
+    for page in SettingsPage::ALL {
+        dialog.add(&page_of(*page));
+    }
+    dialog.present(Some(parent.as_ref()));
+}
+
+/// A page of the view switcher, its groups in the order of core/settings.toml
+fn page_of(page: SettingsPage) -> adw::PreferencesPage {
+    let shown = adw::PreferencesPage::builder()
+        .name(page.name())
+        .title(plain(page.text()))
+        .icon_name(page.icon())
+        .build();
+    for group in page.groups() {
+        shown.add(&group_of(*group));
+    }
+    shown
+}
+
+/// A group of a page: its title, what it is for (the notes of its choices, whose subtitle is the value chosen) and
+/// its rows, a row that depends on a switch insensitive while the switch is off
+fn group_of(group: SettingsGroup) -> adw::PreferencesGroup {
+    let shown = adw::PreferencesGroup::new();
+    if let Some(title) = group.title() {
+        shown.set_title(&field_title(title));
+    }
+    let notes: Vec<String> = group
+        .note()
+        .into_iter()
+        .chain(
+            group
+                .settings()
+                .iter()
+                .filter(|setting| setting.kind() == SettingKind::Choice)
+                .filter_map(|setting| setting.note()),
+        )
+        .map(plain)
+        .collect();
+    if !notes.is_empty() {
+        shown.set_description(Some(&notes.join("\n")));
+    }
+    let mut rows: Vec<(Setting, gtk::Widget)> = Vec::new();
+    for &setting in group.settings() {
+        let row = row_of(setting);
+        if let Some((_, switch)) = rows.iter().find(|(built, _)| Some(*built) == setting.depends_on()) {
+            switch.bind_property("active", &row, "sensitive").sync_create().build();
+        }
+        shown.add(&row);
+        rows.push((setting, row));
+    }
+    shown
+}
+
+/// The row of `setting`: one arm for each setting of core/settings.toml, no default, so a new one fails the build
+/// until it is shown
+fn row_of(setting: Setting) -> gtk::Widget {
+    match setting {
+        Setting::Language => language_row(setting).upcast(),
+        Setting::NotifyNewMail => {
+            let row = switch_row(setting, "preferences-notify", shell().notify.get(), |on| {
+                let shell = shell();
+                if shell.notify.get() != on {
+                    shell.set_notify(on);
+                }
+            });
+            row.set_subtitle(&t!(GtkNotifySubtitle));
+            row.upcast()
+        }
+        Setting::CodesInNotifications => {
+            switch_row(setting, "preferences-codes", pe_core::otp::in_notifications(), |on| {
+                shell().settings.set_bool(settings::CODES_IN_NOTIFICATIONS, on);
+                pe_core::otp::set_in_notifications(on);
+            })
+            .upcast()
+        }
+        Setting::SendDelay => send_delay_row(setting).upcast(),
+        Setting::DefaultMailApp => button_row(setting, "preferences-default-app", |dialog| {
+            spawn(crate::app::make_default_mail_app(dialog.upcast()));
+        })
+        .upcast(),
+        Setting::EmlDefault => button_row(setting, "preferences-eml-default", |dialog| {
+            spawn(async move { make_eml_default(&dialog).await });
+        })
+        .upcast(),
+        Setting::Layout => layout_row(setting).upcast(),
+        Setting::GroupByConversation => {
+            switch_row(setting, "preferences-group-threads", crate::mailbox::grouped(), |on| {
+                let shell = shell();
+                if crate::mailbox::grouped() != on {
+                    shell.settings.set_bool(settings::GROUP_BY_CONVERSATION, on);
+                    shell.main().regroup();
+                }
+            })
+            .upcast()
+        }
+        Setting::ListPictures => {
+            let on = shell().settings.bool(settings::LIST_PICTURES, true);
+            switch_row(setting, "preferences-list-pictures", on, |on| {
+                shell().main().set_list_pictures(on);
+            })
+            .upcast()
+        }
+        Setting::DarkMessages => switch_row(
+            setting,
+            "preferences-dark-messages",
+            shell().core.dark_messages(),
+            |on| {
+                if shell().core.dark_messages() != on {
+                    set_dark_messages(on);
+                }
+            },
+        )
+        .upcast(),
+        Setting::PicturesAlways => {
+            let on = shell().core.always_load_pictures().unwrap_or(false);
+            switch_row(setting, "preferences-pictures-always", on, |on| {
+                let _ = shell().core.set_always_load_pictures(on);
+            })
+            .upcast()
+        }
+        Setting::TrustedSenders => trusted_senders_row().upcast(),
+        Setting::DownloadAhead => download_ahead_row(setting).upcast(),
+        Setting::DownloadLimit => download_limit_row(setting).upcast(),
+    }
+}
+
+/// A switch titled by `setting`, its note under it; `changed` is called with each new state
+fn switch_row(setting: Setting, name: &str, active: bool, changed: impl Fn(bool) + 'static) -> adw::SwitchRow {
+    let row = adw::SwitchRow::builder()
+        .title(plain(setting.text()))
+        .active(active)
+        .build();
+    if let Some(note) = setting.note() {
+        row.set_subtitle(&plain(note));
+    }
+    row.set_widget_name(name);
+    row.connect_active_notify(move |row| changed(row.is_active()));
+    row
+}
+
+/// A button row titled by `setting` (without the dots of the menu command it repeats), `pressed` called with the
+/// dialog it is in
+fn button_row(setting: Setting, name: &str, pressed: impl Fn(adw::PreferencesDialog) + 'static) -> adw::ButtonRow {
+    let row = adw::ButtonRow::builder().title(title(setting.text())).build();
+    row.set_widget_name(name);
+    row.connect_activated(move |row| {
+        if let Some(dialog) = dialog_of(row) {
+            pressed(dialog);
+        }
+    });
+    row
+}
+
+/// The preferences dialog `row` is in
+fn dialog_of(row: &impl IsA<gtk::Widget>) -> Option<adw::PreferencesDialog> {
+    row.ancestor(adw::PreferencesDialog::static_type())
+        .and_downcast::<adw::PreferencesDialog>()
+}
+
+/// Language: System default or a language by its own name, kept for the next start; the app offers to start again
+/// in it at once
+fn language_row(setting: Setting) -> adw::ComboRow {
     let offered = choices();
-    let saved = app.settings.text(settings::LANGUAGE);
+    let saved = shell().settings.text(settings::LANGUAGE);
     let saved = saved.as_deref().and_then(pe_core::i18n::supported);
     let names: Vec<String> = offered
         .iter()
@@ -43,52 +209,32 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
             Some(code) => crate::words::language_name(code).to_string(),
         })
         .collect();
-    let model = gtk::StringList::new(&names.iter().map(String::as_str).collect::<Vec<_>>());
-    let language = adw::ComboRow::builder()
-        .title(crate::words::field_title(Text::UiLanguageLabel))
-        .subtitle(t!(GtkLanguageSubtitle))
-        .model(&model)
-        .factory(&whole_names())
-        .build();
-    language.set_widget_name("preferences-language");
     let at = offered.iter().position(|c| *c == saved).unwrap_or(0);
-    language.set_selected(at as u32);
-    let words = adw::PreferencesGroup::new();
-    words.add(&language);
-
-    let notify = adw::SwitchRow::builder()
-        .title(plain(Text::UiNotifyNewMail))
-        .subtitle(t!(GtkNotifySubtitle))
-        .active(app.notify.get())
-        .build();
-    notify.set_widget_name("preferences-notify");
-    notify.connect_active_notify(|row| {
-        let shell = shell();
-        if shell.notify.get() != row.is_active() {
-            shell.set_notify(row.is_active());
+    let row = choice_row(setting, &names, "preferences-language", at, |_| {});
+    row.connect_selected_notify(|row| {
+        let Some(choice) = choices().get(row.selected() as usize).copied() else {
+            return;
+        };
+        shell().settings.set_text(settings::LANGUAGE, choice);
+        // the same words as now: nothing to start again for
+        if language_of(choice) == pe_core::i18n::language() {
+            return;
+        }
+        if let Some(dialog) = dialog_of(row) {
+            spawn(async move { ask_restart(&dialog).await });
         }
     });
-    let codes = adw::SwitchRow::builder()
-        .title(plain(Text::UiCodesInNotifications))
-        .active(pe_core::otp::in_notifications())
-        .build();
-    codes.set_widget_name("preferences-codes");
-    codes.connect_active_notify(|row| {
-        shell()
-            .settings
-            .set_bool(settings::CODES_IN_NOTIFICATIONS, row.is_active());
-        pe_core::otp::set_in_notifications(row.is_active());
-    });
-    let mail = adw::PreferencesGroup::builder().title(t!(UiSettingsNewMail)).build();
-    mail.add(&notify);
-    mail.add(&codes);
+    row
+}
 
+/// Delay before sending: Off or a number of seconds
+fn send_delay_row(setting: Setting) -> adw::ComboRow {
     let delays: Vec<String> = pe_core::SEND_DELAYS
         .iter()
         .map(|s| pe_core::send_delay_text(*s))
         .collect();
-    let delay = choice_row(
-        Text::UiSendDelay,
+    choice_row(
+        setting,
         &delays,
         "preferences-send-delay",
         pe_core::send_delay_index(shell().core.send_delay().unwrap_or(0)),
@@ -97,114 +243,24 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
                 let _ = shell().core.set_send_delay(*seconds);
             }
         },
-    );
-    let sending = adw::PreferencesGroup::builder()
-        .description(plain(Text::UiSendDelayNote))
-        .build();
-    sending.add(&delay);
-
-    let grouped = adw::SwitchRow::builder()
-        .title(plain(Text::UiGroupByConversation))
-        .active(crate::mailbox::grouped())
-        .build();
-    grouped.set_widget_name("preferences-group-threads");
-    grouped.connect_active_notify(|row| {
-        let shell = shell();
-        if crate::mailbox::grouped() != row.is_active() {
-            shell
-                .settings
-                .set_bool(settings::GROUP_BY_CONVERSATION, row.is_active());
-            shell.main().regroup();
-        }
-    });
-    let pictures = adw::SwitchRow::builder()
-        .title(plain(Text::UiListPictures))
-        .subtitle(plain(Text::UiListPicturesNote))
-        .active(shell().settings.bool(settings::LIST_PICTURES, true))
-        .build();
-    pictures.set_widget_name("preferences-list-pictures");
-    pictures.connect_active_notify(|row| shell().main().set_list_pictures(row.is_active()));
-    let list = adw::PreferencesGroup::new();
-    list.add(&layout_row());
-    list.add(&grouped);
-    list.add(&pictures);
-
-    let page = adw::PreferencesPage::new();
-    page.add(&words);
-    page.add(&list);
-    page.add(&pictures_group());
-    page.add(&mail);
-    page.add(&sending);
-    page.add(&files_group());
-    page.add(&download_group());
-    let dialog = adw::PreferencesDialog::builder()
-        .title(t!(GtkPreferences))
-        .content_width(600)
-        // every row in view, none cut off at the bottom
-        .content_height(700)
-        .build();
-    dialog.set_widget_name("preferences-dialog");
-    dialog.add(&page);
-
-    let asking = dialog.clone();
-    language.connect_selected_notify(move |row| {
-        let Some(choice) = choices().get(row.selected() as usize).copied() else {
-            return;
-        };
-        let shell = shell();
-        shell.settings.set_text(settings::LANGUAGE, choice);
-        // the same words as now: nothing to start again for
-        if language_of(choice) == pe_core::i18n::language() {
-            return;
-        }
-        let dialog = asking.clone();
-        spawn(async move { ask_restart(&dialog).await });
-    });
-    dialog.present(Some(parent.as_ref()));
+    )
 }
 
-/// Reading: messages on a dark background when the system is dark, Download pictures in all messages (with what it
-/// tells senders), and the trusted senders on a page of their own
-fn pictures_group() -> adw::PreferencesGroup {
-    let core = &shell().core;
-    let dark = adw::SwitchRow::builder()
-        .title(plain(Text::UiDarkMessages))
-        .active(core.dark_messages())
-        .build();
-    dark.set_widget_name("preferences-dark-messages");
-    dark.connect_active_notify(|row| {
-        if shell().core.dark_messages() != row.is_active() {
-            set_dark_messages(row.is_active());
-        }
-    });
-    let always = adw::SwitchRow::builder()
-        .title(plain(Text::UiPicturesAlwaysOption))
-        .subtitle(plain(Text::UiPicturesAlwaysWarning))
-        .active(core.always_load_pictures().unwrap_or(false))
-        .build();
-    always.set_widget_name("preferences-pictures-always");
-    always.connect_active_notify(|row| {
-        let _ = shell().core.set_always_load_pictures(row.is_active());
-    });
-    let trusted = adw::ActionRow::builder()
+/// Trusted senders: the senders whose pictures are always downloaded, on a page of their own. Titled as that page
+/// is, in sentence case as GNOME's rows are, not by the button of the other platforms ("Trusted Senders...")
+fn trusted_senders_row() -> adw::ActionRow {
+    let row = adw::ActionRow::builder()
         .title(plain(Text::UiTrustedSendersTitle))
         .activatable(true)
         .build();
-    trusted.add_suffix(&gtk::Image::from_icon_name("go-next-symbolic"));
-    trusted.set_widget_name("preferences-trusted-senders");
-    trusted.connect_activated(|row| {
-        if let Some(dialog) = row
-            .ancestor(adw::PreferencesDialog::static_type())
-            .and_downcast::<adw::PreferencesDialog>()
-        {
+    row.add_suffix(&gtk::Image::from_icon_name("go-next-symbolic"));
+    row.set_widget_name("preferences-trusted-senders");
+    row.connect_activated(|row| {
+        if let Some(dialog) = dialog_of(row) {
             dialog.push_subpage(&trusted_senders_page());
         }
     });
-    let group = adw::PreferencesGroup::new();
-    group.add(&dark);
-    group.add(&always);
-    group.add(&trusted);
-    group
+    row
 }
 
 /// Messages on a dark background when the system is dark, or not: kept, and what is shown made again in that look
@@ -227,7 +283,7 @@ pub fn dark_messages_changed() {
 }
 
 /// Layout: Automatic, Classic or Columns, as View > Layout chooses
-fn layout_row() -> adw::ComboRow {
+fn layout_row(setting: Setting) -> adw::ComboRow {
     use crate::commands::Command;
     use pe_core::layout::LayoutMode;
     let modes = [LayoutMode::Automatic, LayoutMode::Classic, LayoutMode::Columns];
@@ -239,7 +295,7 @@ fn layout_row() -> adw::ComboRow {
         .iter()
         .position(|mode| *mode == shell().main().layout_mode())
         .unwrap_or(0);
-    choice_row(Text::UiLayoutLabel, &names, "preferences-layout", at, move |chosen| {
+    choice_row(setting, &names, "preferences-layout", at, move |chosen| {
         if let Some(&mode) = modes.get(chosen)
             && mode != shell().main().layout_mode()
         {
@@ -248,18 +304,19 @@ fn layout_row() -> adw::ComboRow {
     })
 }
 
-/// A row choosing one of `choices`, the one chosen under its title, where a long one has room in every language;
-/// `chosen` is called with the place of a new choice
+/// A row choosing one of `choices`, titled by `setting`, the one chosen under its title, where a long one has room in
+/// every language, as in the list it opens; `chosen` is called with the place of a new choice
 fn choice_row(
-    title: Text,
+    setting: Setting,
     choices: &[String],
     name: &str,
     selected: usize,
     chosen: impl Fn(usize) + 'static,
 ) -> adw::ComboRow {
     let row = adw::ComboRow::builder()
-        .title(crate::words::field_title(title))
+        .title(field_title(setting.text()))
         .use_subtitle(true)
+        .factory(&whole_names())
         .model(&gtk::StringList::new(
             &choices.iter().map(String::as_str).collect::<Vec<_>>(),
         ))
@@ -270,9 +327,8 @@ fn choice_row(
     row
 }
 
-/// Downloading: what is downloaded before it is opened, how much each account keeps, and what that means
-fn download_group() -> adw::PreferencesGroup {
-    let core = &shell().core;
+/// Download messages in advance: recent ones, all or none
+fn download_ahead_row(setting: Setting) -> adw::ComboRow {
     // in the order of the words below
     let aheads = [pe_core::Ahead::Recent, pe_core::Ahead::All, pe_core::Ahead::Never];
     let names = [
@@ -280,9 +336,9 @@ fn download_group() -> adw::PreferencesGroup {
         plain(Text::UiDownloadAheadAll),
         plain(Text::UiDownloadAheadNever),
     ];
-    let now = core.download_ahead().unwrap_or_default();
-    let ahead = choice_row(
-        Text::UiDownloadAhead,
+    let now = shell().core.download_ahead().unwrap_or_default();
+    choice_row(
+        setting,
         &names,
         "preferences-download-ahead",
         aheads.iter().position(|a| *a == now).unwrap_or(0),
@@ -291,14 +347,18 @@ fn download_group() -> adw::PreferencesGroup {
                 let _ = shell().core.set_download_ahead(*chosen);
             }
         },
-    );
+    )
+}
+
+/// Storage limit per account
+fn download_limit_row(setting: Setting) -> adw::ComboRow {
     let limits: Vec<String> = pe_core::DOWNLOAD_LIMITS_MB
         .iter()
         .map(|megabytes| pe_core::download_limit_text(*megabytes))
         .collect();
-    let kept = core.download_limit_mb().unwrap_or(pe_core::DEFAULT_LIMIT_MB);
-    let limit = choice_row(
-        Text::UiDownloadLimit,
+    let kept = shell().core.download_limit_mb().unwrap_or(pe_core::DEFAULT_LIMIT_MB);
+    choice_row(
+        setting,
         &limits,
         "preferences-download-limit",
         pe_core::download_limit_index(kept),
@@ -307,14 +367,7 @@ fn download_group() -> adw::PreferencesGroup {
                 let _ = shell().core.set_download_limit_mb(*megabytes);
             }
         },
-    );
-    let group = adw::PreferencesGroup::builder()
-        .title(plain(Text::UiDownloadHeading))
-        .description(plain(Text::UiDownloadNote))
-        .build();
-    group.add(&ahead);
-    group.add(&limit);
-    group
+    )
 }
 
 /// The trusted senders, each with a button that removes it; what the list is for above it
@@ -375,24 +428,6 @@ fn fill_trusted_senders(group: &adw::PreferencesGroup) {
         row.add_suffix(&remove);
         group.add(&row);
     }
-}
-
-/// Files: make the app the one that opens .eml files (xdg-mime), said in a toast or, when it could not, an alert
-fn files_group() -> adw::PreferencesGroup {
-    let eml = adw::ButtonRow::builder().title(plain(Text::UiEmlDefault)).build();
-    eml.set_widget_name("preferences-eml-default");
-    eml.connect_activated(|row| {
-        let Some(dialog) = row
-            .ancestor(adw::PreferencesDialog::static_type())
-            .and_downcast::<adw::PreferencesDialog>()
-        else {
-            return;
-        };
-        spawn(async move { make_eml_default(&dialog).await });
-    });
-    let group = adw::PreferencesGroup::new();
-    group.add(&eml);
-    group
 }
 
 /// `xdg-mime default` names the app's desktop file for message/rfc822

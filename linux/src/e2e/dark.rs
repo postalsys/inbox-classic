@@ -230,10 +230,20 @@ async fn switch_off(d: &Driver, inbox: i64) {
         d.check(false, "Preferences opens");
         return;
     };
+    // each page dark, for a look at them; Reading, with the switch, last
+    for (page, shot) in [
+        (SettingsPage::General, "dark-6c-settings-general"),
+        (SettingsPage::Downloading, "dark-6d-settings-downloading"),
+        (SettingsPage::Reading, "dark-6b-settings"),
+    ] {
+        preferences_page(&dialog, page);
+        pause(300).await;
+        d.shot(&dialog, shot).await;
+    }
     let row = named_in(dialog.upcast_ref(), "preferences-dark-messages").and_downcast::<adw::SwitchRow>();
     d.check(
         row.as_ref().is_some_and(|r| r.is_active()),
-        "Preferences has the switch for dark messages, on",
+        "Preferences has the switch for dark messages on its Reading page, on",
     );
     if let Some(row) = row {
         row.set_active(false);
