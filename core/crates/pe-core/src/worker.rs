@@ -171,6 +171,8 @@ enum Undone {
 struct Failure {
     kind: FailureKind,
     message: String,
+    /// Told to the user already ([`Event::ActionUndone`]): nothing more to say
+    told: bool,
 }
 
 impl From<pe_imap::Error> for Failure {
@@ -191,6 +193,7 @@ impl Failure {
         Failure {
             kind: FailureKind::Other,
             message: String::new(),
+            told: true,
         }
     }
 
@@ -218,7 +221,11 @@ impl Failure {
             }
             None => detail,
         };
-        Failure { kind, message }
+        Failure {
+            kind,
+            message,
+            told: false,
+        }
     }
 }
 
@@ -246,6 +253,7 @@ impl From<pe_sync::Error> for Failure {
         match error {
             pe_sync::Error::Imap(error) => error.into(),
             other => Failure {
+                told: false,
                 kind: FailureKind::Other,
                 message: other.to_string(),
             },
@@ -268,6 +276,7 @@ impl From<pe_smtp::Error> for Failure {
 impl From<crate::ComposeError> for Failure {
     fn from(error: crate::ComposeError) -> Self {
         Failure {
+            told: false,
             kind: FailureKind::Other,
             message: error.to_string(),
         }
@@ -335,6 +344,7 @@ async fn build(
     })
     .await
     .map_err(|_| Failure {
+        told: false,
         kind: FailureKind::Other,
         message: tr(Text::ErrorNotBuilt),
     })?
@@ -352,6 +362,7 @@ pub(crate) fn unix_now() -> i64 {
 fn kept(failure: Failure, waiting: usize) -> Failure {
     let note = tr_args(Text::ErrorOutboxWaits, &[("count", waiting.into())]);
     Failure {
+        told: false,
         kind: failure.kind,
         message: format!("{} ({note})", failure.message),
     }
@@ -582,6 +593,7 @@ impl Worker {
         }
         let (path, made) = pe_sync::archive_folder(client, store, account).await?;
         let path = path.map_err(|refusal| Failure {
+            told: false,
             kind: FailureKind::Other,
             message: crate::folder_refusal(&refusal),
         })?;
@@ -590,6 +602,7 @@ impl Worker {
         }
         let Some(to) = store.find_folder(self.account, &path)? else {
             return Err(Failure {
+                told: false,
                 kind: FailureKind::Other,
                 message: tr(Text::NotArchivedHere),
             });
@@ -1018,7 +1031,7 @@ impl Worker {
 
     fn fail(&mut self, failure: Failure) {
         self.reset_after(&failure);
-        if failure.message.is_empty() && failure.kind == FailureKind::Other {
+        if failure.told {
             return;
         }
         // a refused password is told once, not again for each command until the user gives another
@@ -1068,25 +1081,7 @@ impl Worker {
                 Ok(())
             }
             Command::SetFlag { folder, uids, flag, on } => {
-                let set = match self.client(store).await {
-                    Ok(client) => set_flag(client, store, folder, &uids, flag, on)
-                        .await
-                        .map_err(Failure::from),
-                    Err(failure) => Err(failure),
-                };
-                match set {
-                    // refused by the server: the store as it was, said in a bar over the list; offline, the store keeps
-                    // the change, which the next sync puts right
-                    Err(failure) if failure.kind == FailureKind::Other => {
-                        store.set_flag_many(folder, &uids, flag, !on)?;
-                        self.emit(Event::FolderChanged {
-                            account: self.account,
-                            folder,
-                        });
-                        Err(self.undone(store, folder, uids.len(), Undone::Flag { flag, on }, failure))
-                    }
-                    other => other,
-                }
+                self.set_flag_or_take_back(store, folder, &uids, flag, on).await
             }
             Command::SetFlags {
                 folder,
@@ -1143,6 +1138,7 @@ impl Worker {
                 let namespace = client.namespace().cloned();
                 let path = pe_sync::new_folder_path(store, self.account, parent, &name, namespace.as_ref())?.map_err(
                     |refusal| Failure {
+                        told: false,
                         kind: FailureKind::Other,
                         message: crate::folder_refusal(&refusal),
                     },
@@ -1193,6 +1189,36 @@ impl Worker {
                 self.remove_draft_of(store, account, &message_id).await;
                 Ok(())
             }
+        }
+    }
+
+    /// Sets or clears `flag` of the messages `uids` of `folder` on the server, as the store has them already. Refused by
+    /// the server, the store is as it was again and a bar over the list says so; offline, the store keeps the change,
+    /// which the next sync puts right.
+    async fn set_flag_or_take_back(
+        &mut self,
+        store: &mut Store,
+        folder: FolderId,
+        uids: &[u64],
+        flag: &'static str,
+        on: bool,
+    ) -> Result<(), Failure> {
+        let set = match self.client(store).await {
+            Ok(client) => set_flag(client, store, folder, uids, flag, on)
+                .await
+                .map_err(Failure::from),
+            Err(failure) => Err(failure),
+        };
+        match set {
+            Err(failure) if failure.kind == FailureKind::Other => {
+                store.set_flag_many(folder, uids, flag, !on)?;
+                self.emit(Event::FolderChanged {
+                    account: self.account,
+                    folder,
+                });
+                Err(self.undone(store, folder, uids.len(), Undone::Flag { flag, on }, failure))
+            }
+            other => other,
         }
     }
 
@@ -1322,6 +1348,7 @@ impl Worker {
         };
         if let Err(failure) = outcome {
             self.fail(Failure {
+                told: false,
                 kind: failure.kind,
                 message: tr_args(Text::ErrorDraftNotRemoved, &[("reason", (&failure.message).into())]),
             });
@@ -1368,6 +1395,7 @@ impl Worker {
         keys: Option<Arc<crate::protect_out::OutgoingKeys>>,
     ) -> Result<upload::Upload, Failure> {
         let drafts = crate::compose::drafts_folder(store, self.account)?.ok_or_else(|| Failure {
+            told: false,
             kind: FailureKind::Other,
             message: tr(Text::ErrorNoDrafts),
         })?;
@@ -1498,6 +1526,7 @@ impl Worker {
     /// How to log in: the password, or for an OAuth account an access token made from its refresh token
     async fn credentials(&mut self, store: &mut Store, account: &pe_store::Account) -> Result<Credentials, Failure> {
         let no_secret = |text: Text| Failure {
+            told: false,
             kind: FailureKind::Authentication,
             message: tr(text),
         };
@@ -1527,6 +1556,7 @@ impl Worker {
             .oauth
             .resolve(provider, store, &self.ctx.secrets)
             .ok_or_else(|| Failure {
+                told: false,
                 kind: FailureKind::Other,
                 message: tr_args(
                     Text::ErrorProviderMissing,
@@ -1539,6 +1569,7 @@ impl Worker {
             || !settings.smtp_host.eq_ignore_ascii_case(&provider.smtp.host)
         {
             return Err(Failure {
+                told: false,
                 kind: FailureKind::Other,
                 message: tr(Text::ErrorProviderServers),
             });
@@ -1551,6 +1582,7 @@ impl Worker {
         let tokens = pe_oauth::refresh(&provider, &refresh_token)
             .await
             .map_err(|error| Failure {
+                told: false,
                 kind: if error.needs_sign_in() {
                     FailureKind::Authentication
                 } else {

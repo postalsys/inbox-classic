@@ -449,11 +449,8 @@ pub unsafe extern "C" fn pe_core_close(core: *mut PeCore) {
 /// # Safety
 /// `core` must be NULL or a live handle from `pe_core_open`.
 pub(crate) unsafe fn with<T>(core: *const PeCore, fallback: T, f: impl FnOnce(&Core) -> T) -> T {
-    // SAFETY: the caller guarantees a live handle
-    let Some(core) = (unsafe { core.as_ref() }) else {
-        return fallback;
-    };
-    guard(|| f(&core.core)).unwrap_or(fallback)
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, fallback, |core| f(core)) }
 }
 
 /// [`with`] for the calls that start work in the background, which hold the core while it runs

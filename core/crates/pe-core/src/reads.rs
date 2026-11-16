@@ -13,104 +13,115 @@ use crate::opening::Opened;
 use crate::requests::Requests;
 use crate::{Core, Draft, DraftKind, Event, Result};
 
-/// What a read in the background gave
-pub(crate) enum Read {
-    /// A draft to open in a compose window; None when the message is not in the store
-    Draft(Option<Box<Draft>>),
-    /// An attachment's name, type and content; None when the message or the attachment is not here
-    Attachment(Option<(String, String, Vec<u8>)>),
-    /// An attachment written where it can be opened, or why not
-    Opened(std::result::Result<Option<Opened>, String>),
+/// The reads under way and done, by what they read
+#[derive(Default)]
+pub(crate) struct Reads {
+    /// Drafts to open in a compose window; None when the message is not in the store
+    drafts: Requests<Option<Draft>>,
+    /// Attachments' names, types and contents; None when the message or the attachment is not here
+    attachments: Requests<Option<(String, String, Vec<u8>)>>,
+    /// Attachments written where they can be opened, or why not
+    opened: Requests<std::result::Result<Option<Opened>, String>>,
     /// Selected messages in numbers
-    Summary(Option<crate::Summary>),
+    summaries: Requests<Option<crate::Summary>>,
 }
 
-/// The reads under way and done
-pub(crate) type Reads = Requests<Option<Read>>;
-
 impl Core {
-    /// Runs `read` on the reads' connection off the window thread: [`Event::ReadDone`] follows with the request this
-    /// returns
-    fn start_read(self: &Arc<Self>, read: impl FnOnce(&Core) -> Read + Send + 'static) -> Result<u64> {
+    /// Runs `read` on the reads' connection off the window thread, its result kept in what `kind` picks (None when
+    /// the core closes first): [`Event::ReadDone`] follows with the request this returns
+    fn start_read<T: Send + 'static>(
+        self: &Arc<Self>,
+        kind: fn(&Reads) -> &Requests<Option<T>>,
+        read: impl FnOnce(&Core) -> Option<T> + Send + 'static,
+    ) -> Result<u64> {
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
         let work = self.in_background(Connection::Reads, read);
+        let work = async move { work.await.flatten() };
+        kind(&self.reads).start(self.runtime()?, request, work, self.events.clone(), |request| {
+            Event::ReadDone { request }
+        });
+        Ok(request)
+    }
+
+    /// [`Core::draft`] off the window thread: [`Event::ReadDone`] follows, then [`Core::draft_result`]
+    pub fn draft_start(self: &Arc<Self>, folder: FolderId, uid: u64, kind: DraftKind) -> Result<u64> {
+        self.start_read(
+            |reads| &reads.drafts,
+            move |core| core.draft(folder, uid, kind).ok().flatten(),
+        )
+    }
+
+    /// [`Core::reopen_draft`] off the window thread: [`Event::ReadDone`] follows, then [`Core::draft_result`]
+    pub fn reopen_draft_start(self: &Arc<Self>, folder: FolderId, uid: u64) -> Result<u64> {
+        self.start_read(
+            |reads| &reads.drafts,
+            move |core| core.reopen_draft(folder, uid).ok().flatten(),
+        )
+    }
+
+    /// [`Core::attachment_with_type`] off the window thread: [`Event::ReadDone`] follows, then
+    /// [`Core::attachment_result`]
+    pub fn attachment_start(self: &Arc<Self>, folder: FolderId, uid: u64, index: usize) -> Result<u64> {
+        self.start_read(
+            |reads| &reads.attachments,
+            move |core| core.attachment_with_type(folder, uid, index).ok().flatten(),
+        )
+    }
+
+    /// [`Core::open_attachment`] off the window thread: [`Event::ReadDone`] follows, then
+    /// [`Core::open_attachment_result`]
+    pub fn open_attachment_start(self: &Arc<Self>, folder: FolderId, uid: u64, index: usize) -> Result<u64> {
+        let request = self.next_request.fetch_add(1, Ordering::Relaxed);
+        let work = self.in_background(Connection::Reads, move |core| {
+            core.open_attachment(folder, uid, index)
+                .map_err(|error| error.to_string())
+        });
+        let work = async move { work.await.unwrap_or_else(|| Err(crate::Error::Closed.to_string())) };
         self.reads
+            .opened
             .start(self.runtime()?, request, work, self.events.clone(), |request| {
                 Event::ReadDone { request }
             });
         Ok(request)
     }
 
-    /// [`Core::draft`] off the window thread: [`Event::ReadDone`] follows, then [`Core::draft_result`]
-    pub fn draft_start(self: &Arc<Self>, folder: FolderId, uid: u64, kind: DraftKind) -> Result<u64> {
-        self.start_read(move |core| Read::Draft(core.draft(folder, uid, kind).ok().flatten().map(Box::new)))
-    }
-
-    /// [`Core::reopen_draft`] off the window thread: [`Event::ReadDone`] follows, then [`Core::draft_result`]
-    pub fn reopen_draft_start(self: &Arc<Self>, folder: FolderId, uid: u64) -> Result<u64> {
-        self.start_read(move |core| Read::Draft(core.reopen_draft(folder, uid).ok().flatten().map(Box::new)))
-    }
-
-    /// [`Core::attachment_with_type`] off the window thread: [`Event::ReadDone`] follows, then
-    /// [`Core::attachment_result`]
-    pub fn attachment_start(self: &Arc<Self>, folder: FolderId, uid: u64, index: usize) -> Result<u64> {
-        self.start_read(move |core| Read::Attachment(core.attachment_with_type(folder, uid, index).ok().flatten()))
-    }
-
-    /// [`Core::open_attachment`] off the window thread: [`Event::ReadDone`] follows, then
-    /// [`Core::open_attachment_result`]
-    pub fn open_attachment_start(self: &Arc<Self>, folder: FolderId, uid: u64, index: usize) -> Result<u64> {
-        self.start_read(move |core| {
-            Read::Opened(
-                core.open_attachment(folder, uid, index)
-                    .map_err(|error| error.to_string()),
-            )
-        })
-    }
-
     /// [`Core::summary_of`] off the window thread, for a selection of a whole list (Select All), which counts every
     /// message of the list: [`Event::ReadDone`] follows, then [`Core::summary_result`]
     pub fn summary_start(self: &Arc<Self>, selected: crate::Selected) -> Result<u64> {
-        self.start_read(move |core| Read::Summary(core.summary_of(&selected).ok()))
+        self.start_read(|reads| &reads.summaries, move |core| core.summary_of(&selected).ok())
     }
 
     /// The numbers a [`Core::summary_start`] counted, once
     pub fn summary_result(&self, request: u64) -> Option<crate::Summary> {
-        match self.reads.take(request).flatten()? {
-            Read::Summary(summary) => summary,
-            _ => None,
-        }
+        self.reads.summaries.take(request).flatten()
     }
 
     /// The draft a [`Core::draft_start`] or [`Core::reopen_draft_start`] made, once: None while it is made, for
     /// another request, or when the message was not in the store
     pub fn draft_result(&self, request: u64) -> Option<Draft> {
-        match self.reads.take(request).flatten()? {
-            Read::Draft(draft) => draft.map(|draft| *draft),
-            _ => None,
-        }
+        self.reads.drafts.take(request).flatten()
     }
 
     /// The attachment an [`Core::attachment_start`] read, once: its name to save it under, its type, its content
     pub fn attachment_result(&self, request: u64) -> Option<(String, String, Vec<u8>)> {
-        match self.reads.take(request).flatten()? {
-            Read::Attachment(found) => found,
-            _ => None,
-        }
+        self.reads.attachments.take(request).flatten()
     }
 
     /// The file an [`Core::open_attachment_start`] wrote, once, as [`Core::open_attachment`] gives it; Ok(None) also
     /// while it runs or for another request
     pub fn open_attachment_result(&self, request: u64) -> Result<Option<Opened>> {
-        match self.reads.take(request).flatten() {
-            Some(Read::Opened(opened)) => opened.map_err(crate::Error::Unavailable),
-            _ => Ok(None),
+        match self.reads.opened.take(request) {
+            Some(opened) => opened.map_err(crate::Error::Unavailable),
+            None => Ok(None),
         }
     }
 
     /// Drops a read nobody waits for any more (its window closed)
     pub fn read_cancel(&self, request: u64) {
-        self.reads.cancel(request);
+        self.reads.drafts.cancel(request);
+        self.reads.attachments.cancel(request);
+        self.reads.opened.cancel(request);
+        self.reads.summaries.cancel(request);
     }
 }
 
