@@ -511,7 +511,7 @@ impl<'a> Book<'a> {
     }
 
     /// The user's own addresses: every account's and its other addresses
-    fn own_addresses(&self) -> Result<&HashSet<String>> {
+    pub(crate) fn own_addresses(&self) -> Result<&HashSet<String>> {
         if let Some(own) = self.own.get() {
             return Ok(own);
         }
@@ -555,7 +555,7 @@ impl<'a> Book<'a> {
 
     /// Keeps a private key wrapped under the master key (made now if there is none) with its addresses; the user's own
     /// addresses it holds, which only a key made here takes by itself (`claim`)
-    fn keep_secret(&self, key: &SecretKey, source: KeySource, claim: bool) -> Result<Vec<String>> {
+    pub(crate) fn keep_secret(&self, key: &SecretKey, source: KeySource, claim: bool) -> Result<Vec<String>> {
         let master = master(self.secrets, true)?.ok_or(Error::NotFound)?;
         let fingerprint = key.fingerprint();
         let wrapped = wrap(&master, &self.profile, &fingerprint, &key.to_bytes())?;

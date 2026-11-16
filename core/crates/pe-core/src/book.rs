@@ -125,7 +125,7 @@ pub fn is_mailbox(address: &str) -> bool {
 
 /// A card as the book keeps it: only the addresses that are one mailbox each, and without a name of its own or a first
 /// or last name, known by its default address
-fn checked(card: &Card) -> Card {
+pub(crate) fn checked(card: &Card) -> Card {
     let addresses: Vec<String> = card.addresses.iter().filter(|a| is_mailbox(a)).cloned().collect();
     let name = if card.name.trim().is_empty() && display_name(&card.first, &card.last).is_empty() {
         addresses.first().cloned().unwrap_or_default()

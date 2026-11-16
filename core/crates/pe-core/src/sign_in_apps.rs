@@ -182,7 +182,7 @@ impl OAuthProviders {
 }
 
 /// A host name or address as a server setting: not empty, no spaces or other characters a host has not
-fn valid_host(host: &str) -> bool {
+pub(crate) fn valid_host(host: &str) -> bool {
     !host.is_empty()
         && host
             .bytes()

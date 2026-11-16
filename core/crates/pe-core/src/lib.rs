@@ -34,6 +34,7 @@ mod search;
 mod secrets;
 mod selection;
 pub mod senders;
+pub mod setup;
 mod sign_in_apps;
 mod snippet;
 mod targets;

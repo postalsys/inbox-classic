@@ -2275,6 +2275,7 @@ dependencies = [
  "pe-testkit",
  "resvg",
  "ring",
+ "serde",
  "serde_json",
  "tokio",
  "unicode-normalization",
