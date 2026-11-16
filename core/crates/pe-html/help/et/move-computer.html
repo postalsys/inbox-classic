@@ -1,19 +1,19 @@
-<!--review--><h1>Kolimine teise arvutisse</h1>
-<p class="summary">Vii oma kontod, seaded, kontaktid, võtmed ja reeglid ühe failiga teise arvutisse.</p>
+<h1>Andmete üleviimine teise arvutisse</h1>
+<p class="summary">Viige kontod, seaded, kontaktid, võtmed ja reeglid ühe failiga teise arvutisse.</p>
 <h2>Eksportimine</h2>
 <ol>
-    <li>Vali <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
-    <li>Vali, mida kaasa võtta: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> ja <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Et võtta kaasa ka paroolid ja privaatvõtmed, lülita sisse <b data-text="ui-setup-use-passphrase"></b> ja sisesta kaks korda vähemalt 8-märgiline paroolifraas.</li>
-    <li>Klõpsa <b data-text="ui-setup-export-button"></b> ja vali, kuhu fail salvestada.</li>
+    <li>Valige <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
+    <li>Valige andmed, mida soovite üle kanda: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> ja <b data-text="setup-part-trusted-senders"></b>.</li>
+    <li>Paroolide ja privaatvõtmete kaasamiseks valige <b data-text="ui-setup-use-passphrase"></b>. Sisestage vähemalt 8 märgi pikkune parool ja korrake seda.</li>
+    <li>Klõpsake nuppu <b data-text="ui-setup-export-button"></b> ja valige faili salvestamise koht.</li>
 </ol>
-<p>Fail ei sisalda kirju: need laaditakse teises arvutis uuesti. Paroolifraasiga on kogu fail krüptitud. Ilma selleta ei sisalda see paroole ega privaatvõtmeid ja iga konto küsib teises arvutis korra oma parooli.</p>
-<aside class="warning">Hoia faili ja paroolifraasi eraldi ning kustuta fail pärast importimist. Kellel on mõlemad, saab sinu kirju lugeda.</aside>
+<p>Kirju faili ei lisata: need laaditakse teises arvutis uuesti alla. Parooliga kaitstud fail krüpteeritakse. Ilma paroolita ei lisata faili paroole, salvestatud sisselogimisandmeid ega privaatvõtmeid ning teises arvutis tuleb kontodele uuesti sisse logida.</p>
+<aside class="warning">Hoidke faili ja selle parooli eraldi ning kustutage fail pärast importimist. Faili ja parooli valdav inimene võib saada juurdepääsu teie kirjadele.</aside>
 <h2>Importimine</h2>
 <ol>
-    <li>Vali teises arvutis <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Enne esimese konto lisamist on ka aknas <b data-text="ui-add-account-title"></b> selle jaoks link.</li>
-    <li>Vali fail ja sisesta selle paroolifraas, kui see on olemas.</li>
-    <li>Aken näitab, mida fail sisaldab. Vali osad ja kontod, mida importida, ja klõpsa <b data-text="ui-setup-import-button"></b>.</li>
+    <li>Valige teises arvutis <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Enne esimese konto lisamist on importimise link saadaval ka aknas <b data-text="ui-add-account-title"></b>.</li>
+    <li>Valige fail. Kui fail on parooliga kaitstud, sisestage parool.</li>
+    <li>Avanevas aknas näete faili sisu. Valige imporditavad andmerühmad ja kontod ning klõpsake nuppu <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Konto, mis on selles arvutis juba olemas, jääb nagu on. Kontaktid lisatakse aadressiraamatusse, seaded ja akna eelistused asendatakse ning reegel, mille kausta veel pole, ootab, kuni konto on sünkroonitud. Teistsugune võti mõne kontakti jaoks ootab sinu otsust, nagu imporditud võti.</p>
-<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<p>Selles arvutis juba seadistatud kontosid ei muudeta. Kontaktid lisatakse aadressiraamatusse ning seaded ja akende eelistused asendatakse. Kui reegli sihtkausta veel pole, seotakse see reegliga pärast konto sünkroonimist. Kontakti jaoks leitud uut võtit ei võeta senise asemel kasutusele ilma teie kinnituseta.</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

@@ -14,8 +14,9 @@ behavior and surrounding controls to establish meaning. Preserve the original sc
 - Initial inventory: 241 marked messages and 14 marked help passages per language (de, es, et, fr), 964 messages
   and 56 help passages altogether. Each language has ten affected help pages. Other languages named in the guide
   are not present in this checkout. `scripts/check-language.mjs` is also absent here.
-- Start with Estonian catalogs, then its related help; repeat for German, Spanish and French. Review existing
-  wording outside the marked entries where needed for context or terminology consistency.
+- Current next step: German `app.ftl` (94 marked UI entries), then its core/platform catalogs and help.
+  Estonian is complete for the starting snapshot. Spanish and French follow. Review existing wording outside
+  marked entries when needed for context or terminology consistency.
 
 ## Checkpoint rules
 
@@ -54,7 +55,20 @@ now accurately describes cleanup at startup of temporary copies older than a day
 all 68 tests and catalog invariant checks passed. All 241 unmarked catalog entries exactly match the two
 completed batches; there are no untracked omissions.
 
-Next: the ten affected Estonian help topics. The other three languages are untouched.
+Checkpoint commit: `2e34851e`.
+
+### et-help-2026-11-16
+
+Reviewed all 14 marked passages across the ten pending Estonian help pages. Rewrote the new key management,
+verification, encrypted-mail and migration topics; corrected attachments and folder/account navigation text.
+Formal address, terms and control names now match the catalogs. Removed the review marks. All help tags, links,
+control references and platform branches are preserved. All 68 tests and `git diff --check` passed. The tracker
+accounts for all 241 unmarked catalog entries and 69 unmarked help lines. The review HTML was regenerated;
+723 messages and 42 help passages remain in the other languages.
+
+Next: German catalogs (241 marked messages), then its ten help pages. Spanish and French are also untouched.
+Estonian catalog and help review is complete for the starting snapshot. Revisit it only for newly arriving changes
+or the final cross-language consistency checks below.
 
 Source wording to revisit in the final consistency pass: `ui-setup-passphrase-note` says every account asks for a
 password after importing an unprotected file. OAuth accounts instead require signing in again; the reviewed
@@ -64,3 +78,14 @@ Also revisit English `attachment-decrypted-note` and attachment help: temporary 
 `clear_private_dirs()` at startup if over 24 hours old, not necessarily after exactly a day. The Estonian notice
 already reflects this. `pgp-details-opened` identifies the key that successfully decrypted the message; it can
 say "Decrypted with your key" more directly than "Encrypted to your key".
+
+Other consistency findings to carry through German, Spanish, French and the English source:
+
+- The encrypted-mail help must not claim an unchecked signature proves the sender's identity. Nor can a
+  multi-recipient encrypted message be read only with this user's key: each recipient's private key can open it.
+- The multi-account tree is All Inboxes, All Sent, All Drafts, Flagged, then accounts' remaining folders.
+  Main-window/organize-mail text must not imply Flagged comes immediately after All Inboxes.
+- Collapsed unread totals exclude Junk and Deleted Items (`tree.rs::counted`).
+- Internet-origin attachment marking is implemented on Windows and macOS; avoid a blanket Linux claim.
+- Check the contact's listed addresses before confirming its fingerprint, not after closing the verification
+  dialog. The Estonian steps now include both checks before confirmation.

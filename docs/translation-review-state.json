@@ -6,18 +6,7 @@
   "languages": {
     "et": {
       "pending_catalogs": {},
-      "pending_help": [
-        "all-inboxes.html",
-        "attachments.html",
-        "encrypted-and-signed-mail.html",
-        "encryption-keys.html",
-        "folders.html",
-        "main-window.html",
-        "manage-accounts.html",
-        "move-computer.html",
-        "organize-mail.html",
-        "verify-a-key.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "et-app-2026-11-16",
@@ -311,6 +300,53 @@
             "71 core values improved; clarified signature versus key-owner verification, settings-transfer results, address lists and safe filenames.",
             "Attachment cleanup runs on startup for temporary folders older than 24 hours; the notice now states this.",
             "Context: protect.rs, view.rs, keys.rs, setup/import.rs, setup/file.rs, opening.rs and lib.rs private-folder cleanup."
+          ]
+        },
+        {
+          "id": "et-help-2026-11-16",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "all-inboxes.html",
+            "attachments.html",
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "folders.html",
+            "main-window.html",
+            "manage-accounts.html",
+            "move-computer.html",
+            "organize-mail.html",
+            "verify-a-key.html"
+          ],
+          "files": {
+            "core/crates/pe-html/help/et/all-inboxes.html": "4b92c34af7641f743b1c8f049e12d4cbd4a5e0a2d9fe1b01d457b52072bae19d",
+            "core/crates/pe-html/help/et/attachments.html": "89b29182fb9039bdfa83f2f22d3450c631fd6544c05c937210159ed964a4418e",
+            "core/crates/pe-html/help/et/encrypted-and-signed-mail.html": "b7fe3c443f91411bd91f2af4f7b411dd77f190bb8b58b19f0d1473b703f509b1",
+            "core/crates/pe-html/help/et/encryption-keys.html": "7571a010f681a7157addb1dd28806ae1048e4070b850a262beccb5bc22d29b1a",
+            "core/crates/pe-html/help/et/folders.html": "26fde702c75787b08002b9d8dc11c605b8931dcfb034ffd602405ee6264b14e1",
+            "core/crates/pe-html/help/et/main-window.html": "f5e8423fb778fe21bf898a22ea6df30301386304f0bed7dcdad3cd70905227ea",
+            "core/crates/pe-html/help/et/manage-accounts.html": "44a61f982694441c1477cb36122049bb1111542e45f09c93285cd90dd54d6d82",
+            "core/crates/pe-html/help/et/move-computer.html": "63e81b77fbc4d31a30decbeb411d699f89ad63d07f3a478771a56210ab2b510a",
+            "core/crates/pe-html/help/et/organize-mail.html": "8d79a1363c2d25244ab136d2e4d3f2bd65506384223901add68e9289e6a739ef",
+            "core/crates/pe-html/help/et/verify-a-key.html": "732be123aea26b4a8fe0b584b3a3ef2789af4b627a888a78a627de73d583a4cf"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/all-inboxes.html": "4c79d7df5307fffeb3316cf05acae6e4f8005d7a220d242268a8d233b138eb70",
+            "core/crates/pe-html/help/en/attachments.html": "329cc3b62eaf4f06e0d110b69abe93b565b2239202850dae589fdca215b6c301",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "cc7f61133fda39f4130436a0ebf3031e6ffce3e7aa8dbb7c45a2a306840eeb04",
+            "core/crates/pe-html/help/en/encryption-keys.html": "67693bc89f3d12b183ff3a86f11495213a2f58ea0c9e16dea30649d931621d6a",
+            "core/crates/pe-html/help/en/folders.html": "4d74130d29ed25e2eb9042e1470853c7f12566664217927e09c4dcd45f844b3c",
+            "core/crates/pe-html/help/en/main-window.html": "93fecb9e210fc6535ad3eb857a182286f61eacd7b08c84b9ce7ad447fdc6aad0",
+            "core/crates/pe-html/help/en/manage-accounts.html": "65950a65e86fac8b79d7d22108ac246c0954a88796e4f4a32f5f91037b7b41b2",
+            "core/crates/pe-html/help/en/move-computer.html": "46c0a64f8f03831e3419d8ae212532edce46e436292a77b354df77f5fd10f8f0",
+            "core/crates/pe-html/help/en/organize-mail.html": "ada25d8118b4453fe32380c1662bbc61199f2dd1908e8ccafc494f90209588d4",
+            "core/crates/pe-html/help/en/verify-a-key.html": "2962fdcfe4f3a4e3dbbaf1122459b0a6c291454f8ec99f8b4c3bd50a30c4e4dc"
+          },
+          "validation": "Passed all 68 pe-i18n/pe-html tests, git diff --check and help-markup preservation. All 241 unmarked catalog entries and 69 unmarked help lines exactly match completed Estonian batches. Review HTML regenerated; 723 messages and 42 help passages remain.",
+          "notes": [
+            "Reviewed all 14 marked passages in ten help topics and removed the marks.",
+            "Rewrote the four new topics for keys, verification, encrypted mail and moving computers.",
+            "Preserved help tags, links, control references and platform branches.",
+            "Corrected temporary-file lifetime, signature identity claims, folder ordering and OAuth reauthentication wording."
           ]
         }
       ]
@@ -1119,5 +1155,6 @@
       ],
       "completed_batches": []
     }
-  }
+  },
+  "next_batch": "German app.ftl: all 94 marked UI messages; then German core/platform catalogs and help."
 }
