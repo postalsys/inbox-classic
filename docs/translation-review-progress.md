@@ -16,9 +16,9 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Brazilian Portuguese (`pt-BR`): the remaining 448 core entries, then 248 platform/help-title
-  entries and all 52 help topics. All 626 app entries and nine coupled controls are reviewed. Portuguese (Portugal),
-  Italian and Dutch are fully reviewed: each has 1,331 catalog entries and 52 help topics.
+- Resume with Serbian Latin (`sr-Latn`): app catalog complete; continue core,
+  platform catalogs and help. Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan and
+  Norwegian Bokmål are complete: each has 1,331 catalog entries and 52 help topics.
   Eighteen languages still have pending content, with exact IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
@@ -272,8 +272,16 @@ are preserved with Norwegian Kopi/Blindkopi access keys explained. All 75 tests,
 reconciliation, inline spacing and git diff --check pass. The review HTML is regenerated.
 Catalog/everyday-help checkpoint: `d0370fc9`. Serbian Latin is next; the source branch has no new translation changes.
 
-Current totals: 8,050 catalog entries and 316 help pages reviewed; 1,234 catalog values improved. Remaining:
-23,958 catalog entries and 936 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Serbian Latin UI catalog
+
+Reviewed all 626 shared UI entries and one coupled core error, improving 81 values. Reworked literal Serbian
+phrasing, provider and key terminology, junk/ham actions, recipient/contact plural agreement, rule processing,
+credential transfer and ownership verification. Matched the sender-address error to its field label.
+All 14 catalog tests, structure, 32 actual shortcut scopes, inventory/hash reconciliation and git diff --check pass.
+Norwegian Bokmål completion checkpoint: `9d63e925`. Core, platform catalogs and help remain pending.
+
+Current totals: 8,677 catalog entries and 316 help pages reviewed; 1,315 catalog values improved. Remaining:
+23,331 catalog entries and 936 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

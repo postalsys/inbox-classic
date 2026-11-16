@@ -558,6 +558,18 @@ Plurals: `[one]` 1, 21, 31... (not 11); `[few]` 2 to 4, 22 to 24... (not 12 to 1
 - Review first: "datoteka" (Microsoft) versus the everyday "fajl"; "Radne verzije" versus "Nacrti"; "dobavljač" for
   the mail provider; "Prijemno sanduče" (Outlook.com) versus Outlook's longer "Prijemno poštansko sanduče".
 
+Review notes (round 2):
+- Keep Serbian Ekavian and formal plural prose. Prefer "pružalac usluge e-pošte" over the supplier-like
+  "dobavljač"; inflect the head noun and keep provider/name placeholders intact.
+- "Označi kao neželjenu poštu" / "Označi kao poželjnu poštu" are the paired actions; toolbar labels use
+  "Neželjena pošta" / "Poželjna pošta". Rules obrađuju messages. Address-book Write To is "Napiši poruku".
+- The sender-address field is "Dodatne adrese za slanje:"; the core error quotes this exact label.
+- Prefer "otisak ključa" for a cryptographic fingerprint, and "digitalni potpis" where the text signature
+  could be confused with cryptographic verification. Verify all addresses before accepting a key.
+- "Podaci za prijavu" covers passwords and OAuth credentials; importing an unprotected setup requires
+  another password or browser sign-in. Cc/Bcc and Alt+C/Alt+B remain unchanged.
+- All 32 actual menu/context/dialog scopes have distinct access keys, including native Serbian letters.
+
 ### Suomi (fi)
 
 Terms: Saapuneet; Lähtevät; Lähetetyt; Poistetut; Luonnokset; Roskaposti; viesti; kansio; tili; liite; lippu (liputa,

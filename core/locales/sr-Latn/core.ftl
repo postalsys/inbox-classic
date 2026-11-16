@@ -541,8 +541,7 @@ error-folder-special = Prijemno sanduče i posebne fascikle ne mogu da se preime
 error-no-recipients = poruka nema primalaca
 # review: new
 error-bad-address = „{ $address }“ nije adresa e-pošte
-# review: new
-error-not-own-address = { $address } nije jedna od adresa pošiljaoca ovog naloga. Dodajte je u polje „Druge adrese sa kojih šaljete“ u svojstvima naloga.
+error-not-own-address = { $address } nije jedna od adresa za slanje sa ovog naloga. Dodajte je u polje „Dodatne adrese za slanje“ u svojstvima naloga.
 # review: new
 rule-query-refused = Pravila ne mogu da filtriraju po fascikli ni datumu ({ $words }).
 # review: new
