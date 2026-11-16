@@ -85,7 +85,7 @@ fn chooses_the_language() {
     assert_eq!(supported("qps"), Some(PSEUDO));
     assert_eq!(resolve(&["ja-JP", "es-419", "en"]), "es");
     assert_eq!(resolve::<&str>(&[]), "en");
-    assert_eq!(resolve(&["qps", "pt"]), "en");
+    assert_eq!(resolve(&["qps", "ja"]), "en");
 }
 
 #[test]

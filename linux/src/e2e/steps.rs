@@ -3494,11 +3494,13 @@ pub async fn languages(d: &Driver) {
                 .collect()
         })
         .unwrap_or_default();
+    let languages: Vec<&str> = pe_core::i18n::LANGUAGES.iter().map(|(_, name)| *name).collect();
     d.check(
         names.first().is_some_and(|n| n == "System default (English)")
-            && names[1..] == ["English", "Deutsch", "Eesti", "Español", "Français"],
+            && names[1..] == languages[..]
+            && names.get(2).is_some_and(|n| n == "Deutsch"),
         &format!(
-            "Language lists System default, with the language it is now, and the five by their own names ({names:?})"
+            "Language lists System default, with the language it is now, and every language by its own name ({names:?})"
         ),
     );
     d.check(
@@ -3641,10 +3643,14 @@ pub async fn waiting(d: &Driver) {
     );
 }
 
-/// The main window, a new message, Add Mail Account, the accounts and Preferences in each language of the catalogs
-/// (`tour-<language>-<n>-<view>`), for a look at each, and nothing cut off in them
+/// The main window, a new message, Add Mail Account, the accounts and Preferences in each language of
+/// pe_i18n::LANGUAGES but English (`tour-<language>-<n>-<view>`), for a look at each, and nothing cut off in them
 pub async fn language_tour(d: &Driver) {
-    for language in ["de", "es", "et", "fr"] {
+    let languages = pe_core::i18n::LANGUAGES
+        .iter()
+        .map(|(code, _)| *code)
+        .filter(|code| *code != "en");
+    for language in languages {
         d.step(&format!("the windows in {language}"));
         in_language(language).await;
         let cut_off = |root: &gtk::Widget| -> Vec<String> {

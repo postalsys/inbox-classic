@@ -17,10 +17,13 @@ extension UITest {
         let titles = popup.itemTitles
         let system = Text.uiOptionsSystemDefault.text(["language": Languages.name(Languages.system)])
         check(titles.first == system, "Language starts with System default and the language it is now (\(titles.first ?? ""))")
-        check(Array(titles.dropFirst()) == ["English", "Deutsch", "Eesti", "Español", "Français"],
+        // every language of pe_i18n::LANGUAGES, English first
+        let names = Languages.all.map(\.name)
+        check(Array(titles.dropFirst()) == names && names.first == "English" && names.contains("Deutsch"),
               "then the languages by their own names (\(titles.dropFirst().joined(separator: ", ")))")
         check(shown.notify.title == "Notify me when new mail arrives", "Notify of New Mail is there too")
-        onMain { self.choose(popup, 2) }
+        let deutsch = titles.firstIndex(of: "Deutsch") ?? 2
+        onMain { self.choose(popup, deutsch) }
         let question = await waitWindow("alert", 10)
         check(alertText(question).contains("Restart Inbox Classic now to change the language?"),
               "choosing Deutsch asks to start again (\(alertText(question)))")
