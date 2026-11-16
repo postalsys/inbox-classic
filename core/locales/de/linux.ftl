@@ -83,7 +83,6 @@ gtk-default-app-failed = Inbox Classic konnte nicht als Standard-E-Mail-Programm
 
 gtk-reader-date = Datum:
 gtk-reader-files = Anlagen der Nachricht
-# review: new
 gtk-files = { $count ->
     [one] { $count } Datei
    *[other] { $count } Dateien
@@ -172,21 +171,12 @@ gtk-restart-to-change = Inbox Classic startet neu, um die Sprache zu ändern.
 
 ## The desktop entry and the page of the software stores
 
-# review: new
 gtk-desktop-generic-name = E-Mail-Programm
-# review: new
 gtk-desktop-comment = E-Mails lesen und schreiben: ein schnelles, einfaches E-Mail-Programm
-# review: new
 gtk-desktop-keywords = Post;Posteingang;Nachricht;
-# review: new
 gtk-metainfo-summary = Ein schnelles, einfaches E-Mail-Programm
-# review: new
-gtk-metainfo-description = Inbox Classic liest und schreibt E-Mails mit den Ordnern links, den Nachrichten oben und der Nachricht darunter, wie es E-Mail-Programme früher taten. Es funktioniert mit jedem IMAP- und SMTP-Konto und meldet sich über den Browser bei Outlook.com und Microsoft 365 an.
-# review: new
-gtk-metainfo-feature-sanitized = Jede Nachricht wird bereinigt angezeigt, ohne Skripte, und Bilder aus dem Internet nur, wenn Sie es erlauben
-# review: new
-gtk-metainfo-feature-search = Eine Suche, die Wörter im Betreff, in den Personen, in den Dateinamen und im Text findet, mit den Operatoren von Gmail
-# review: new
-gtk-metainfo-feature-replies = Antworten falten die früheren Nachrichten ein, die sie zitieren
-# review: new
-gtk-metainfo-feature-offline = E-Mails bleiben offline lesbar; Kennwörter liegen in Ihrem Schlüsselbund
+gtk-metainfo-description = Inbox Classic bietet die klassische E-Mail-Ansicht: Ordner links, die Nachrichtenliste oben und den Lesebereich darunter. Es unterstützt IMAP- und SMTP-Konten. Bei Outlook.com und Microsoft 365 können Sie sich über den Browser anmelden.
+gtk-metainfo-feature-sanitized = Nachrichten werden ohne Skripte angezeigt; Bilder aus dem Internet werden nur mit Ihrer Erlaubnis geladen
+gtk-metainfo-feature-search = Suche in Betreff, Absendern, Empfängern, Anlagennamen und Nachrichtentext mit den Suchoperatoren von Gmail
+gtk-metainfo-feature-replies = Zitierte Nachrichten in Antworten werden eingeklappt
+gtk-metainfo-feature-offline = Heruntergeladene E-Mails lassen sich auch offline lesen; Kennwörter werden in Ihrem Schlüsselbund gespeichert

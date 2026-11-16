@@ -1,14 +1,13 @@
-<!--review--><h1>Definições de segurança da conta</h1>
+<h1>Definições de segurança da conta</h1>
 <p class="summary">As definições de segurança dos servidores de uma conta, e o que cada uma significa.</p>
-<p>Cada conta tem <b data-text="ui-field-imap-security"></b> para o servidor de receção e <b data-text="ui-field-smtp-security"></b> para o de envio. O Inbox Classic preenche-as quando encontra as definições do seu fornecedor. Para as alterar, abra as propriedades da conta em <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<p>Nas propriedades de cada conta, encontra <b data-text="ui-field-imap-security"></b> para o servidor de receção e <b data-text="ui-field-smtp-security"></b> para o de envio. O Inbox Classic preenche estas opções quando encontra as definições do seu fornecedor. Para as alterar, abra as propriedades da conta em <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
 <table>
     <tr><th>Definição</th><th>Significado</th></tr>
     <tr><td>SSL/TLS</td><td>A ligação é encriptada desde o início. Normalmente a porta 993 para o correio recebido e 465 para o correio enviado.</td></tr>
-    <tr><td>STARTTLS</td><td>A ligação é encriptada logo depois de ser aberta. Normalmente a porta 143 para o correio recebido e 587 para o correio enviado. O Inbox Classic para se o servidor não oferecer encriptação.</td></tr>
-    <tr><td><b data-text="ui-security-none"></b></td><td>A sua palavra-passe e o seu correio circulam de forma legível para qualquer pessoa na rede.</td></tr>
+    <tr><td>STARTTLS</td><td>A ligação é encriptada logo depois de ser aberta. Normalmente a porta 143 para o correio recebido e 587 para o correio enviado. O Inbox Classic interrompe a ligação se o servidor não oferecer encriptação.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>A sua palavra-passe e o seu correio são transmitidos sem encriptação e podem ser lidos por quem intercete o tráfego.</td></tr>
 </table>
-<aside class="warning">Use <b data-text="ui-security-none"></b> apenas para um servidor no seu próprio computador ou na sua rede local. O Inbox Classic avisa-o antes de a usar.</aside>
-<p>O Inbox Classic verifica se cada servidor é quem diz ser, com base nos certificados em que o seu sistema confia. Não existe nenhuma opção para aceitar qualquer certificado.</p>
-<p>A sua palavra-passe fica guardada <!--os:windows-->no Gestor de Credenciais do Windows<!--/os--><!--os:mac-->no seu porta-chaves de início de sessão<!--/os--><!--os:linux-->no seu porta-chaves<!--/os-->, nunca no armazenamento de correio. Uma conta que inicia sessão através do browser não guarda nenhuma palavra-passe.</p>
+<aside class="warning">Use <b data-text="ui-security-none"></b> apenas para um servidor no seu próprio computador ou na sua rede local. O Inbox Classic mostra um aviso antes de usar esta opção.</aside>
+<p>Nas ligações encriptadas, o Inbox Classic verifica a identidade do servidor com base nos certificados em que o sistema confia. Não existe nenhuma opção para aceitar qualquer certificado.</p>
+<p>A sua palavra-passe fica guardada <!--os:windows-->no Gestor de Credenciais do Windows<!--/os--><!--os:mac-->no seu porta-chaves de início de sessão<!--/os--><!--os:linux-->no seu porta-chaves<!--/os-->, nunca na base de dados do correio. Uma conta que inicia sessão através do browser não guarda nenhuma palavra-passe.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

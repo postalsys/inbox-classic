@@ -104,6 +104,24 @@ The terms of Outlook Express and Outlook in each language, kept the same everywh
 
 Forms of address: German uses "Sie", French "vous", Spanish "usted", Estonian the polite plural ("teie").
 
+### Estonian encryption and settings transfer
+
+- Use the polite plural in explanations and questions; short commands stay imperative ("Impordi", "Kontrolli").
+- Use "krüpteerima", "avalik võti", "privaatvõti" and "võtme sõrmejälg" consistently. Key verification means
+  comparing the fingerprint with the owner, not merely checking a cryptographic signature.
+- Use "parool" for the password protecting a key backup or settings file, as in the existing key dialogs.
+  "Sisselogimisandmed" includes saved sign-in tokens; it does not mean only a login password.
+- A list of addresses must work for one or several entries. Introduce it with a colon instead of forcing a
+  singular case onto the placeholder. Contact names can be placed in parentheses to avoid requiring inflection.
+
+### Spanish encryption and settings transfer
+
+- Use "contraseña" for the password protecting a key backup or settings export, as in the account dialogs.
+- Use "huella digital" for a key fingerprint. Verifying a key means confirming its owner by comparing the
+  fingerprint; checking a message signature alone does not confirm the owner.
+- "Datos de acceso" includes saved sign-in tokens as well as passwords. After an unprotected export, the user
+  must sign in again, which may use a browser rather than a password prompt.
+
 Context notes:
 
 - Search covers subjects, senders, recipients, attachment names and message text. Name those fields rather than
@@ -234,6 +252,11 @@ account (masculine, invariable); allegato; contrassegno (contrassegnare); Rispon
 "da leggere".
 
 - Informal "tu" ("Fai clic", "Scegli", "Inserisci").
+- Message rules "elaborano" messages; reserve "ordinare" for the display order of a message list.
+- Translate blocklist as "lista di blocco". In count summaries, use singular agreement when one item is possible.
+- Use "firma digitale" where needed to distinguish cryptographic signatures from account signatures.
+- Keep "passphrase", "chiave privata", "chiave pubblica" and "impronta digitale" consistent; key verification
+  confirms ownership and requires checking every listed address before confirming.
 - Participles agreeing with `$messages` choose by `$count` ("spostato" / "spostati"); "messaggio" is masculine,
   "posta" feminine ("Segna come indesiderata").
 - `their-folders` = "cartelle diverse", so "spostati in { $folder }" works without an article;
@@ -301,6 +324,11 @@ Terms: Postvak IN; Postvak UIT; Verzonden items; Verwijderde items; Concepten; O
 - Finished actions use the participle without a verb ("{ $messages } verplaatst naar ..."); ongoing ones choose
   "wordt/worden" by `$count`.
 - Destinations read "naar { $folder }", which also works with `their-folders`.
+- Message rules "verwerken" messages; reserve "sorteren" for the display order of a message list.
+- Use "digitale handtekening" where needed to distinguish a cryptographic signature from the account signature
+  added below a message. Key verification confirms ownership by comparing fingerprints.
+- The account field for additional sender addresses is "Andere afzenderadressen". Refer to this exact label in
+  errors and instructions.
 - Keys Ctrl / Shift / Del as Dutch keyboards print them. Google's button "Inloggen met Google", Microsoft's
   "Aanmelden met Microsoft".
 
@@ -415,7 +443,13 @@ Plurals: the catalog's plurals follow pt-PT (pe-i18n gives the bundle that local
 - `$messages` is feminine plural: status texts agree ("movidas") by `$count`; `done-flagged-color` and
   `done-unflagged` are phrased without agreement. Destinations read "para { $folder }".
 - Quotes « »; day names lowercase.
-- Review first: Marcar como lixo / não lixo, "Seguir conversa", "Esquema" for Layout.
+- Use "Marcar como lixo eletrónico" / "Marcar como correio legítimo" in message commands; the short toolbar
+  labels "Lixo" / "Não é lixo" remain suitable. Keep "Seguir conversa" and "Esquema" for Layout.
+- Rules "processam" messages; reserve "ordenar" for their display order.
+- Use "assinatura digital" for cryptographic signatures, "frase de acesso", "chave privada", "chave pública"
+  and "impressão digital". Confirm every address before completing key verification.
+- "Credenciais de início de sessão" includes saved browser tokens. An unprotected export requires signing in
+  again, not necessarily entering a password. Use "ID do cliente" and "segredo do cliente" for OAuth fields.
 
 ### Română (ro)
 

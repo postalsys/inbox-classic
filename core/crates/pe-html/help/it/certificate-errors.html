@@ -1,18 +1,17 @@
-<!--review--><h1>Errori di certificato</h1>
-<p class="summary">Che cosa fare quando Inbox Classic non riesce a confermare di parlare con il vero server di posta.</p>
+<h1>Errori di certificato</h1>
+<p class="summary">Cosa fare quando Inbox Classic non riesce a verificare l’identità del server di posta.</p>
 <p>Potresti vedere uno di questi messaggi:</p>
 <ul>
     <li>Nella barra di stato: “TLS error: …”</li>
     <li>Nel riquadro di lettura: “Impossibile rendere sicura la connessione al server di posta (…).”</li>
 </ul>
-<p>Inbox Classic non ha potuto confermare che il server sia quello che dice di essere, quindi non ha inviato la tua password.</p>
+<p>Inbox Classic non è riuscito a verificare l’identità del server, quindi non ha inviato la tua password.</p>
 <p>Per risolvere:</p>
 <ol>
     <li>Apri le proprietà dell’account in <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Controlla i nomi dei server. Devono essere i nomi per cui è stato emesso il certificato del server. Spesso è il nome del provider, come <code>imap.provider.com</code>, non il tuo dominio.</li>
+    <li>Controlla i nomi dei server. Devono corrispondere ai nomi indicati nel certificato. Spesso si tratta di un dominio del provider, per esempio <code>imap.provider.com</code>, non il tuo dominio.</li>
     <li>Controlla che la data e l’ora del computer siano corrette.</li>
 </ol>
 <p>Su una rete che ispeziona il traffico crittografato, come alcune reti di uffici o scuole, rivolgiti all’amministratore.</p>
 <aside class="note">Non c’è alcuna opzione per accettare qualsiasi certificato. Accettarne uno falso permetterebbe a qualcuno sulla rete di leggere la tua password e la tua posta.</aside>
 <nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

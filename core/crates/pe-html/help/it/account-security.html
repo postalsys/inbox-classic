@@ -1,14 +1,13 @@
-<!--review--><h1>Impostazioni di sicurezza dell’account</h1>
+<h1>Impostazioni di sicurezza dell’account</h1>
 <p class="summary">Le impostazioni di sicurezza dei server di un account e il significato di ciascuna.</p>
 <p>Ogni account ha <b data-text="ui-field-imap-security"></b> per il server della posta in arrivo e <b data-text="ui-field-smtp-security"></b> per quello della posta in uscita. Inbox Classic le compila quando trova le impostazioni del tuo provider. Per cambiarle, apri le proprietà dell’account in <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
 <table>
     <tr><th>Impostazione</th><th>Significato</th></tr>
-    <tr><td>SSL/TLS</td><td>La connessione è crittografata fin dall’inizio. Di solito la porta 993 per la posta in arrivo e la 465 per quella in uscita.</td></tr>
-    <tr><td>STARTTLS</td><td>La connessione viene crittografata subito dopo l’apertura. Di solito la porta 143 per la posta in arrivo e la 587 per quella in uscita. Inbox Classic si ferma se il server non offre la crittografia.</td></tr>
-    <tr><td><b data-text="ui-security-none"></b></td><td>La password e la posta viaggiano in chiaro, leggibili da chiunque sulla rete.</td></tr>
+    <tr><td>SSL/TLS</td><td>La connessione è crittografata fin dall’inizio. Di solito si usa la porta 993 per la posta in arrivo e la 465 per quella in uscita.</td></tr>
+    <tr><td>STARTTLS</td><td>La connessione viene crittografata subito dopo l’apertura. Di solito si usa la porta 143 per la posta in arrivo e la 587 per quella in uscita. Inbox Classic interrompe la connessione se il server non offre la crittografia.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>La password e la posta viaggiano in chiaro, e possono essere lette da chi intercetta il traffico di rete.</td></tr>
 </table>
-<aside class="warning">Usa <b data-text="ui-security-none"></b> solo per un server sul tuo computer o sulla tua rete locale. Inbox Classic ti avvisa prima di usarla.</aside>
+<aside class="warning">Usa <b data-text="ui-security-none"></b> solo per un server sul tuo computer o sulla tua rete locale. Inbox Classic ti avvisa prima di usare una connessione non crittografata.</aside>
 <p>Inbox Classic verifica che ogni server sia davvero quello che dice di essere, in base ai certificati considerati attendibili dal sistema. Non c’è alcuna opzione per accettare qualsiasi certificato.</p>
-<p>La password è conservata <!--os:windows-->in Gestione credenziali di Windows<!--/os--><!--os:mac-->nel portachiavi login<!--/os--><!--os:linux-->nel tuo portachiavi<!--/os-->, mai nell’archivio della posta. Un account che accede tramite il browser non conserva alcuna password.</p>
+<p>La password è conservata <!--os:windows-->in Gestione credenziali di Windows<!--/os--><!--os:mac-->nel portachiavi di login<!--/os--><!--os:linux-->nel tuo portachiavi<!--/os-->, mai nell’archivio della posta. Per un account che accede tramite il browser, Inbox Classic conserva le credenziali di accesso ricevute dal provider, non la tua password.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

@@ -58,9 +58,7 @@ header-to = An
 header-cc = Cc
 header-sent = Gesendet
 header-subject = Betreff
-# review: new
 header-security = Sicherheit
-# review: new
 header-part = Teil { $number }
 quote-original = ----- Ursprüngliche Nachricht -----
 fold-show-earlier = Frühere Nachrichten anzeigen
@@ -456,8 +454,7 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Diese Nachricht kann nicht gelesen werden.
-# review: new
-agent-encrypted-original = Diese Nachricht ist verschlüsselt: Ein Agent kann nicht darauf antworten und sie nicht weiterleiten, da er nicht verschlüsseln kann.
+agent-encrypted-original = Agenten können diese verschlüsselte Nachricht weder beantworten noch weiterleiten, da sie keine Nachrichten verschlüsseln können.
 agent-log-composed = „{ $subject }“ zum Fertigstellen im Nachrichtenfenster geöffnet
 agent-log-refused = Sie haben „{ $subject }“ nicht gesendet
 agent-log-sent = „{ $subject }“ an { $to } gesendet
@@ -515,371 +512,230 @@ event-attendees =
 otp-notification = { $code } ist Ihr Code für { $domain }
 
 ## OpenPGP keys (keys.rs)
-# review: new
 pgp-key-valid = Gültig
-# review: new
 pgp-key-expires = Gültig bis { $date }
-# review: new
 pgp-key-expired = Abgelaufen am { $date }
-# review: new
 pgp-key-revoked = Widerrufen
-# review: new
 pgp-key-revoked-why = Widerrufen: { $reason }
-# review: new
 pgp-key-not-valid = Nicht gültig
-# review: new
-pgp-key-locked = Nicht verwendbar, denn { $store } enthält den schützenden Schlüssel nicht mehr. Importieren Sie seine Sicherung erneut.
-# review: new
+pgp-key-locked = Der Schlüssel zum Entsperren fehlt im Kennwortspeicher ({ $store }). Importieren Sie die Sicherung Ihres privaten Schlüssels erneut.
 pgp-source-own = In Inbox Classic erstellt
-# review: new
 pgp-source-file = Aus einer Datei importiert
-# review: new
 pgp-source-paste = Eingefügt
-# review: new
 pgp-source-attachment = Aus einer Nachricht
-# review: new
 pgp-source-vcard = Aus einer Visitenkarte
-# review: new
 pgp-source-wkd = Vom E-Mail-Anbieter des Absenders
-# review: new
 pgp-source-keyserver = Von keys.openpgp.org
-# review: new
 pgp-source-autocrypt = Aus dem Autocrypt-Header einer Nachricht
-# review: new
-pgp-error-no-store = Für private Schlüssel wird { $store } benötigt, steht aber nicht zur Verfügung: { $error }
-# review: new
-pgp-error-wrong-passphrase = Die Passphrase ist nicht richtig.
-# review: new
-# review: new
+pgp-error-no-store = Der Kennwortspeicher für private Schlüssel ist nicht verfügbar ({ $store }): { $error }
+pgp-error-wrong-passphrase = Die Passphrase ist nicht korrekt.
 pgp-error-not-a-key = Dies ist kein OpenPGP-Schlüssel.
-# review: new
 pgp-error-too-large = Der Schlüssel ist zu groß.
-# review: new
-pgp-error-unusable = Der Schlüssel verwendet alte oder schwache Kryptografie und kann nicht verwendet werden.
-# review: new
+pgp-error-unusable = Der Schlüssel verwendet veraltete oder unsichere Kryptografie und kann daher nicht verwendet werden.
 pgp-imported-private = { $count ->
     [one] Ihr privater Schlüssel wurde importiert.
    *[other] { $count } private Schlüssel wurden importiert.
 }
-# review: new
 pgp-imported-public = { $count ->
     [one] Ein Schlüssel wurde importiert.
    *[other] { $count } Schlüssel wurden importiert.
 }
-# review: new
-pgp-imported-pending = Für { $addresses } wird bereits ein anderer Schlüssel verwendet: Der neue wartet im Kontakt, bis Sie ihn auswählen.
-# review: new
+pgp-imported-pending = Für folgende Adressen ist bereits ein anderer Schlüssel hinterlegt: { $addresses }. Den neuen Schlüssel können Sie in den Kontakteigenschaften auswählen.
 pgp-error-needs-passphrase = Der private Schlüssel ist durch eine Passphrase geschützt. Geben Sie sie ein, um den Schlüssel zu importieren.
-# review: new
-pgp-error-mismatch = Der private Schlüssel gehört nicht zu seinem öffentlichen Schlüssel. Er wurde möglicherweise verändert.
-# review: new
-pgp-file-name-public = { $who } öffentlicher Schlüssel.asc
-# review: new
-pgp-file-name-private = { $who } Sicherung des privaten Schlüssels.asc
-# review: new
+pgp-error-mismatch = Der private und der öffentliche Schlüssel passen nicht zusammen. Der Schlüssel wurde möglicherweise verändert.
+pgp-file-name-public = Öffentlicher Schlüssel ({ $who }).asc
+pgp-file-name-private = Sicherung des privaten Schlüssels ({ $who }).asc
 pgp-pending = Für { $address } wurde am { $date } ein anderer Schlüssel gefunden.
 
 ## Reading signed and encrypted mail (protect.rs)
-# review: new
-pgp-part-verified = Signiert von { $signer }, Schlüssel überprüft
-# review: new
-pgp-part-signed = Signiert von { $signer } (Schlüssel nicht überprüft)
-# review: new
+pgp-part-verified = Signiert von { $signer }, Schlüsselinhaber bestätigt
+pgp-part-signed = Signiert von { $signer }, Schlüsselinhaber nicht bestätigt
 pgp-part-other = Signiert von { $signer }, nicht vom Absender
-# review: new
 pgp-part-unknown-key = Signiert, aber der Schlüssel ist nicht bekannt
-# review: new
 pgp-part-not-signed = Nicht signiert
-# review: new
 pgp-part-not-checked = Signatur nicht geprüft
-# review: new
 pgp-part-encrypted = Verschlüsselt. { $signature }
-# review: new
-pgp-part-no-key = Verschlüsselt für einen Schlüssel, den Sie nicht haben
-# review: new
-pgp-part-changed = Der verschlüsselte Teil wurde unterwegs verändert und wird nicht angezeigt
-# review: new
-pgp-part-unprotected = Ohne Schutz gegen Veränderung verschlüsselt, nicht angezeigt
-# review: new
+pgp-part-no-key = Kein passender privater Schlüssel zum Entschlüsseln verfügbar
+pgp-part-changed = Der verschlüsselte Inhalt wurde bei der Übertragung verändert und wird nicht angezeigt
+pgp-part-unprotected = Der verschlüsselte Inhalt ist nicht gegen Veränderungen geschützt und wird nicht angezeigt
 pgp-part-broken = Der verschlüsselte Teil kann nicht gelesen werden
-# review: new
-pgp-why-mismatch = Die Signatur passt nicht zu diesem Text
-# review: new
-pgp-why-weak-hash = Die Signatur verwendet { $hash }, das nicht mehr sicher ist
-# review: new
-pgp-why-key-expired = Signiert, nachdem der Schlüssel am { $date } abgelaufen war
-# review: new
+pgp-why-mismatch = Die Signatur stimmt nicht mit dem Inhalt überein
+pgp-why-weak-hash = Die Signatur verwendet den Hashalgorithmus { $hash }, der nicht mehr als sicher gilt
+pgp-why-key-expired = Zum Zeitpunkt der Signatur war der Schlüssel bereits abgelaufen (Ablaufdatum: { $date })
 pgp-why-key-revoked = Mit einem widerrufenen Schlüssel signiert
-# review: new
-pgp-why-not-signing-key = Mit einem Schlüssel signiert, der nicht signieren darf
-# review: new
+pgp-why-not-signing-key = Der verwendete Schlüssel ist nicht zum Signieren vorgesehen
 pgp-why-from-future = Die Signatur ist in die Zukunft datiert
-# review: new
 pgp-why-signature-expired = Die Signatur ist abgelaufen
-# review: new
 pgp-why-key-not-valid = Mit einem ungültigen Schlüssel signiert
-# review: new
-pgp-why-not-for-you = Für andere Empfänger signiert und an Sie weitergegeben
-# review: new
+pgp-why-not-for-you = Für andere Empfänger signiert und anschließend an Sie weitergeleitet
 pgp-part-pictures-loaded = { $label }. Bilder wurden aus dem Internet geladen
-# review: new
-pgp-error-no-own-key = Sie haben keinen Schlüssel für { $address }, um zu signieren oder zu verschlüsseln. Erstellen Sie einen unter Extras > Verschlüsselungsschlüssel, oder schalten Sie Signieren und Verschlüsseln aus.
-# review: new
+pgp-error-no-own-key = Für { $address } ist kein Schlüssel zum Signieren oder Verschlüsseln eingerichtet. Erstellen Sie unter Extras > Verschlüsselungsschlüssel einen Schlüssel oder deaktivieren Sie Signieren und Verschlüsseln.
 pgp-error-missing-keys = { $count ->
-    [one] { $addresses } hat keinen Schlüssel zum Verschlüsseln.
-   *[other] Diese Empfänger haben keinen Schlüssel zum Verschlüsseln: { $addresses }.
+    [one] Zum Verschlüsseln fehlt der Schlüssel für { $addresses }.
+   *[other] Zum Verschlüsseln fehlen die Schlüssel für folgende Empfänger: { $addresses }.
 }
-# review: new
-pgp-error-encrypted-quote = Diese Nachricht zitiert oder leitet eine verschlüsselte Nachricht weiter und kann daher nur verschlüsselt gesendet werden. Schalten Sie Verschlüsseln ein, oder entfernen Sie den zitierten Text.
-# review: new
+pgp-error-encrypted-quote = Diese Nachricht enthält Inhalte aus einer verschlüsselten Nachricht. Aktivieren Sie die Verschlüsselung oder entfernen Sie die zitierten Inhalte, bevor Sie sie senden.
 pgp-error-protect = Die Nachricht konnte nicht signiert oder verschlüsselt werden: { $reason }
-# review: new
-pgp-found-keys = Der Schlüssel von { $addresses } wurde gefunden.
-# review: new
-pgp-found-none = Für { $addresses } wurde kein Schlüssel gefunden. Bitten Sie darum, Ihnen den öffentlichen Schlüssel zu senden.
-# review: new
+pgp-found-keys = Schlüssel gefunden für: { $addresses }.
+pgp-found-none = Für folgende Adressen wurde kein Schlüssel gefunden: { $addresses }. Bitten Sie die Empfänger, Ihnen ihre öffentlichen Schlüssel zu senden.
 pgp-found-no-key = Es wurde kein Schlüssel gefunden.
-# review: new
-pgp-find-unavailable = Schlüssel können gerade nicht gesucht werden: { $error }
-# review: new
-pgp-publish-pending = keys.openpgp.org hat einen Bestätigungslink an { $addresses } gesendet. Ihr Schlüssel wird dort veröffentlicht, sobald Sie darauf klicken.
-# review: new
+pgp-find-unavailable = Die Schlüsselsuche ist derzeit nicht verfügbar: { $error }
+pgp-publish-pending = keys.openpgp.org hat einen Bestätigungslink an folgende Adressen gesendet: { $addresses }. Bestätigen Sie jede Adresse, damit Ihr Schlüssel darüber gefunden werden kann.
 pgp-publish-done = Ihr Schlüssel ist auf keys.openpgp.org für { $addresses } veröffentlicht.
-# review: new
 pgp-publish-failed = Der Schlüssel konnte nicht veröffentlicht werden: { $error }
-# review: new
 pgp-keyserver-off = Die Suche nach Schlüsseln auf keys.openpgp.org ist in den Optionen ausgeschaltet.
-# review: new
 pgp-details-part = Teil { $number }: { $label }
-# review: new
-pgp-details-signed = Signiert { $when } mit dem Schlüssel { $key }
-# review: new
-pgp-details-unknown-key = Signiert mit dem Schlüssel { $key }, den Sie nicht haben
-# review: new
-pgp-details-opened = Verschlüsselt für Ihren Schlüssel { $key }
-# review: new
-pgp-details-for = Verschlüsselt für { $keys }
-# review: new
+pgp-details-signed = Am { $when } mit Schlüssel { $key } signiert
+pgp-details-unknown-key = Mit Schlüssel { $key } signiert; dieser Schlüssel ist hier nicht vorhanden
+pgp-details-opened = Mit Ihrem Schlüssel { $key } entschlüsselt
+pgp-details-for = Verschlüsselt mit folgenden Schlüsseln: { $keys }
 pgp-details-plain = Weder signiert noch verschlüsselt
-# review: new
-pgp-bar-parts = Diese Nachricht hat { $count } Teile: { $list }. Jeder Teil sagt, wie er geschützt ist.
-# review: new
+pgp-bar-parts = Diese Nachricht besteht aus { $count } Teilen: { $list }. Der Schutzstatus steht jeweils über dem betreffenden Teil.
 pgp-bar-count-verified = { $count } überprüft
-# review: new
 pgp-bar-count-good = { $count } signiert oder verschlüsselt
-# review: new
 pgp-bar-count-warning = { $count ->
-    [one] 1 braucht Aufmerksamkeit
-   *[other] { $count } brauchen Aufmerksamkeit
+    [one] 1 mit Warnhinweis
+   *[other] { $count } mit Warnhinweis
 }
-# review: new
 pgp-bar-count-neutral = { $count } ohne bestätigte Signatur
 # the setup file: settings, accounts, contacts and keys carried to another computer
-# review: new
 setup-part-settings = Einstellungen
-# review: new
 setup-part-preferences = Fenstereinstellungen
-# review: new
 setup-part-accounts = Konten
-# review: new
 setup-part-sign-in-apps = Anmelde-Apps
-# review: new
 setup-part-contacts = Kontakte und Gruppen
-# review: new
 setup-part-keys = Verschlüsselungsschlüssel
-# review: new
 setup-part-rules = Nachrichtenregeln
-# review: new
 setup-part-trusted-senders = Vertrauenswürdige Absender
-# review: new
 setup-holds-settings = { $count ->
     [one] 1 Einstellung
    *[other] { $count } Einstellungen
 }
-# review: new
 setup-holds-preferences = { $count ->
     [one] 1 Fenstereinstellung
    *[other] { $count } Fenstereinstellungen
 }
-# review: new
 setup-holds-accounts = { $count ->
     [one] 1 Konto
    *[other] { $count } Konten
 }
-# review: new
 setup-holds-sign-in-apps = { $count ->
     [one] 1 Anmelde-App
    *[other] { $count } Anmelde-Apps
 }
-# review: new
-setup-holds-built-in = Welche integrierten Anmelde-Apps eingeschaltet sind
-# review: new
+setup-holds-built-in = Aktivierung der integrierten Anmelde-Apps
 setup-holds-contacts = { $count ->
     [one] 1 Kontakt
    *[other] { $count } Kontakte
 }
-# review: new
 setup-holds-groups = { $count ->
     [one] 1 Gruppe
    *[other] { $count } Gruppen
 }
-# review: new
 setup-holds-own-keys = { $count ->
     [one] 1 eigener Schlüssel
    *[other] { $count } eigene Schlüssel
 }
-# review: new
 setup-holds-contact-keys = { $count ->
     [one] 1 Schlüssel eines Kontakts
    *[other] { $count } Schlüssel von Kontakten
 }
-# review: new
 setup-holds-rules = { $count ->
     [one] 1 Regel
    *[other] { $count } Regeln
 }
-# review: new
 setup-holds-trusted-senders = { $count ->
     [one] 1 vertrauenswürdiger Absender
    *[other] { $count } vertrauenswürdige Absender
 }
-# review: new
-setup-sign-in-password = Passwort
-# review: new
-setup-account-secret-password = Das Passwort ist in der Datei enthalten.
-# review: new
-setup-account-secret-token = Die Anmeldung ist in der Datei enthalten.
-# review: new
-setup-account-asks-password = Nach dem Import wird nach dem Passwort gefragt.
-# review: new
-setup-account-signs-in-again = Sie melden sich nach dem Import erneut an.
-# review: new
+setup-sign-in-password = Kennwort
+setup-account-secret-password = Das Kennwort ist in der Datei gespeichert.
+setup-account-secret-token = Die gespeicherten Anmeldedaten sind in der Datei enthalten.
+setup-account-asks-password = Nach dem Import müssen Sie das Kennwort eingeben.
+setup-account-signs-in-again = Nach dem Import müssen Sie sich erneut bei diesem Konto anmelden.
 setup-account-here = Das Konto ist hier bereits eingerichtet und wird übersprungen.
-# review: new
-setup-account-no-app = Das Konto meldet sich mit { $app } an, das hier nicht eingerichtet ist. Importieren Sie auch die Anmelde-Apps.
-# review: new
+setup-account-no-app = Dieses Konto benötigt die Anmelde-App { $app }, die hier noch nicht eingerichtet ist. Importieren Sie auch die Anmelde-Apps.
 setup-invalid-address = „{ $address }“ ist keine E-Mail-Adresse.
-# review: new
-setup-invalid-server = Der { $server }-Server hat keinen verwendbaren Namen oder Port.
-# review: new
+setup-invalid-server = Der Servername oder Port für { $server } ist ungültig.
 setup-invalid-user = Das Konto hat keinen Benutzernamen.
-# review: new
-setup-invalid-sign-in = Das Konto meldet sich auf eine Weise an, die Inbox Classic nicht kennt.
-# review: new
+setup-invalid-sign-in = Inbox Classic unterstützt die Anmeldemethode dieses Kontos nicht.
 setup-error-empty = Die Datei ist leer.
-# review: new
-setup-error-too-large = Die Datei ist zu groß für eine Inbox-Classic-Einrichtung.
-# review: new
-setup-error-not-setup = Diese Datei ist keine Inbox-Classic-Einrichtung.
-# review: new
-setup-error-damaged = Die Einrichtungsdatei ist beschädigt und kann nicht gelesen werden.
-# review: new
-setup-error-newer = Diese Einrichtung wurde von einer neueren Version von Inbox Classic ({ $version }) gespeichert. Aktualisieren Sie Inbox Classic und importieren Sie sie dann erneut.
-# review: new
-setup-error-needs-passphrase = Diese Einrichtung ist mit einer Passphrase geschützt. Geben Sie die Passphrase ein, mit der sie gespeichert wurde.
-# review: new
-setup-error-wrong-passphrase = Das ist nicht die Passphrase, mit der diese Einrichtung gespeichert wurde.
-# review: new
-setup-error-changed = Die Einrichtungsdatei wurde nach dem Speichern verändert oder beschädigt und kann daher nicht importiert werden.
-# review: new
-setup-error-read = Die Einrichtungsdatei konnte nicht gelesen werden: { $error }
-# review: new
-setup-error-write = Die Einrichtung konnte nicht gespeichert werden: { $error }
-# review: new
-setup-error-no-parts = Wählen Sie mindestens einen Teil aus.
-# review: new
+setup-error-too-large = Die Datei ist zu groß, um Einstellungen und Konten daraus zu importieren.
+setup-error-not-setup = Diese Datei ist kein Export von Einstellungen und Konten aus Inbox Classic.
+setup-error-damaged = Die Exportdatei ist beschädigt und kann nicht gelesen werden.
+setup-error-newer = Die Exportdatei wurde mit einer neueren Version von Inbox Classic ({ $version }) erstellt. Aktualisieren Sie Inbox Classic und versuchen Sie den Import erneut.
+setup-error-needs-passphrase = Diese Exportdatei ist mit einer Passphrase geschützt. Geben Sie die beim Export verwendete Passphrase ein.
+setup-error-wrong-passphrase = Mit dieser Passphrase lässt sich die Exportdatei nicht öffnen.
+setup-error-changed = Die Exportdatei wurde nach dem Speichern verändert oder beschädigt und kann daher nicht importiert werden.
+setup-error-read = Die Exportdatei konnte nicht gelesen werden: { $error }
+setup-error-write = Die Exportdatei konnte nicht gespeichert werden: { $error }
+setup-error-no-parts = Wählen Sie mindestens einen Datenbereich aus.
 setup-left-out = { $count ->
-    [one] 1 Eintrag von „{ $part }“ ist nicht verwendbar und wird ausgelassen.
-   *[other] { $count } Einträge von „{ $part }“ sind nicht verwendbar und werden ausgelassen.
+    [one] Aus dem Bereich „{ $part }“ wird 1 nicht verwendbarer Eintrag ausgelassen.
+   *[other] Aus dem Bereich „{ $part }“ werden { $count } nicht verwendbare Einträge ausgelassen.
 }
-# review: new
 setup-imported-settings = Die Einstellungen wurden ersetzt.
-# review: new
 setup-imported-preferences = Die Fenstereinstellungen wurden ersetzt.
-# review: new
 setup-added-accounts = { $count ->
     [one] 1 Konto hinzugefügt.
    *[other] { $count } Konten hinzugefügt.
 }
-# review: new
-setup-skipped-here = { $address } ist hier bereits eingerichtet und wurde übersprungen.
-# review: new
-setup-skipped-no-app = { $address } wurde übersprungen: Das Konto meldet sich mit { $app } an, das hier nicht eingerichtet ist.
-# review: new
+setup-skipped-here = Das Konto { $address } ist auf diesem Computer bereits eingerichtet und wurde nicht erneut importiert.
+setup-skipped-no-app = { $address } wurde nicht importiert, weil die benötigte Anmelde-App { $app } hier nicht eingerichtet ist.
 setup-skipped-invalid = { $address } wurde übersprungen: { $reason }
-# review: new
-setup-asks-password = { $address } fragt beim Verbinden nach dem Passwort.
-# review: new
-setup-signs-in-again = { $address } bittet Sie beim Verbinden, sich erneut anzumelden.
-# review: new
+setup-asks-password = Beim Verbinden mit { $address } müssen Sie das Kennwort eingeben.
+setup-signs-in-again = Für { $address } müssen Sie sich beim ersten Verbindungsaufbau erneut anmelden.
 setup-added-sign-in-apps = { $count ->
     [one] 1 Anmelde-App hinzugefügt.
    *[other] { $count } Anmelde-Apps hinzugefügt.
 }
-# review: new
 setup-skipped-sign-in-apps = { $count ->
     [one] 1 Anmelde-App ist hier bereits eingerichtet.
    *[other] { $count } Anmelde-Apps sind hier bereits eingerichtet.
 }
-# review: new
 setup-added-contacts = { $count ->
     [one] 1 Kontakt zum Adressbuch hinzugefügt.
    *[other] { $count } Kontakte zum Adressbuch hinzugefügt.
 }
-# review: new
 setup-skipped-contacts = { $count ->
     [one] 1 Kontakt ist bereits im Adressbuch.
    *[other] { $count } Kontakte sind bereits im Adressbuch.
 }
-# review: new
 setup-added-groups = { $count ->
     [one] 1 Gruppe hinzugefügt oder ergänzt.
    *[other] { $count } Gruppen hinzugefügt oder ergänzt.
 }
-# review: new
 setup-added-own-keys = { $count ->
     [one] 1 eigenen Schlüssel hinzugefügt.
    *[other] { $count } eigene Schlüssel hinzugefügt.
 }
-# review: new
 setup-added-contact-keys = { $count ->
     [one] 1 Schlüssel eines Kontakts hinzugefügt.
    *[other] { $count } Schlüssel von Kontakten hinzugefügt.
 }
-# review: new
 setup-added-rules = { $count ->
     [one] 1 Nachrichtenregel hinzugefügt.
    *[other] { $count } Nachrichtenregeln hinzugefügt.
 }
-# review: new
 setup-skipped-rules = { $count ->
     [one] 1 Nachrichtenregel ist bereits vorhanden.
    *[other] { $count } Nachrichtenregeln sind bereits vorhanden.
 }
-# review: new
 setup-skipped-rules-account = { $count ->
-    [one] 1 Nachrichtenregel gilt für ein Konto, das hier nicht vorhanden ist, und wurde übersprungen.
-   *[other] { $count } Nachrichtenregeln gelten für Konten, die hier nicht vorhanden sind, und wurden übersprungen.
+    [one] 1 Nachrichtenregel wurde nicht importiert, weil das zugehörige Konto hier fehlt.
+   *[other] { $count } Nachrichtenregeln wurden nicht importiert, weil die zugehörigen Konten hier fehlen.
 }
-# review: new
 setup-rules-waiting = { $count ->
-    [one] 1 Nachrichtenregel verschiebt Nachrichten in einen Ordner, der erscheint, sobald sein Konto synchronisiert ist.
-   *[other] { $count } Nachrichtenregeln verschieben Nachrichten in Ordner, die erscheinen, sobald ihre Konten synchronisiert sind.
+    [one] Für 1 Nachrichtenregel steht der Zielordner erst nach der Kontosynchronisierung zur Verfügung.
+   *[other] Die Zielordner von { $count } Nachrichtenregeln stehen erst nach der Synchronisierung der Konten zur Verfügung.
 }
-# review: new
 setup-added-trusted-senders = { $count ->
     [one] 1 vertrauenswürdigen Absender hinzugefügt.
    *[other] { $count } vertrauenswürdige Absender hinzugefügt.
 }
-# review: new
 setup-nothing = Es wurde nichts importiert.
-# review: new
 setup-account-servers = { $imap } und { $smtp } ({ $signin })
-# review: new
-setup-file-name = Inbox Classic-Einstellungen und -Konten
-# review: new
+setup-file-name = Inbox Classic - Einstellungen und Konten
 setup-skipped-unreachable = { $name } wurde übersprungen: Der Anmeldedienst war nicht erreichbar. Fügen Sie die Anmelde-App unter „Anmelde-Apps“ erneut hinzu.
-# review: new
-attachment-runs-programs = „{ $name }“ kann Programme ausführen, daher öffnet Inbox Classic die Datei nicht. Speichern Sie sie und öffnen Sie sie selbst, wenn Sie der Herkunft vertrauen.
-# review: new
-attachment-decrypted-note = Dieser Anhang stammt aus einer verschlüsselten Nachricht. Zum Öffnen speichert Inbox Classic ihn entschlüsselt auf diesem Computer, in einem Ordner von Ihnen, den Inbox Classic nach einem Tag leert.
+attachment-runs-programs = Die Datei „{ $name }“ kann Programme ausführen. Deshalb öffnet Inbox Classic sie nicht. Wenn Sie der Quelle vertrauen, können Sie die Datei speichern und selbst öffnen.
+attachment-decrypted-note = Diese Anlage stammt aus einer verschlüsselten Nachricht. Zum Öffnen legt Inbox Classic eine unverschlüsselte Kopie in Ihrem temporären Ordner ab. Kopien, die älter als einen Tag sind, werden beim Start der App gelöscht.

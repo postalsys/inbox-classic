@@ -1,6 +1,6 @@
-<!--review--><h1>Chiavi di crittografia</h1>
+<h1>Chiavi di crittografia</h1>
 <p class="summary">Crea una chiave per firmare i tuoi messaggi e ricevere posta crittografata, e conserva le chiavi dei tuoi contatti.</p>
-<p>Inbox Classic firma e crittografa la posta con chiavi OpenPGP. La tua chiave ha due metà: una chiave pubblica, che dai agli altri, e una chiave privata, che resta sul tuo computer. Le chiavi dei tuoi contatti ti permettono di controllare le loro firme e di inviare loro posta crittografata.</p>
+<p>Inbox Classic firma e crittografa la posta con chiavi OpenPGP. La tua chiave comprende una parte pubblica, da condividere con gli altri, e una parte privata, da conservare sul tuo computer. Le chiavi dei tuoi contatti ti permettono di controllare le loro firme digitali e di inviare loro posta crittografata.</p>
 <p>Per creare la tua chiave:</p>
 <ol>
     <li>Scegli <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, poi fai clic su <b data-text="ui-keys-new"></b>.</li>
@@ -8,10 +8,10 @@
     <li>Fai clic su <b data-text="ui-keys-backup-now"></b> e scegli una passphrase. Conserva il file e la passphrase in due posti sicuri diversi.</li>
 </ol>
 <aside class="warning">Senza un backup, la chiave non si può recuperare se questo computer va perso o viene ripristinato, e la posta crittografata con essa non si può più leggere.</aside>
-<h2>Le chiavi restano protette senza passphrase</h2>
-<p>Le tue chiavi private sono protette da una chiave conservata <!--os:windows-->in Gestione credenziali<!--/os--><!--os:mac-->nel portachiavi<!--/os--><!--os:linux-->nel portachiavi del sistema<!--/os-->, quindi non devi mai digitare una passphrase per usarle. Scegli una passphrase solo per un backup. Se la chiave risulta bloccata, quella protezione è stata reimpostata: fai clic su <b data-text="ui-keys-import"></b> e scegli il suo backup.</p>
+<h2>Protezione delle chiavi senza digitare passphrase</h2>
+<p>Le tue chiavi private sono protette da una chiave conservata <!--os:windows-->in Gestione credenziali<!--/os--><!--os:mac-->nel portachiavi<!--/os--><!--os:linux-->nel portachiavi del sistema<!--/os-->, quindi non devi digitare una passphrase ogni volta che le usi. La passphrase serve per proteggere i backup. Se una chiave risulta bloccata, la chiave che la proteggeva non è più disponibile: fai clic su <b data-text="ui-keys-import"></b> e scegli il backup della tua chiave privata.</p>
 <h2>Aggiungere chiavi</h2>
-<p>Fai clic su <b data-text="ui-keys-import"></b> per aggiungere una chiave da un file, per esempio una che ti ha mandato un contatto o un tuo backup. Una chiave privata protetta da una passphrase la chiede una volta. Inbox Classic chiede poi se usare per i tuoi indirizzi una tua chiave importata.</p>
+<p>Fai clic su <b data-text="ui-keys-import"></b> per aggiungere una chiave da un file, per esempio una che ti ha mandato un contatto o un tuo backup. Se la chiave privata è protetta da una passphrase, devi inserirla una sola volta. Quando importi una tua chiave, Inbox Classic chiede se usarla per i tuoi indirizzi.</p>
 <p>Da quel momento la chiave di un contatto viene usata per il suo indirizzo. Se in seguito compare una chiave diversa per lo stesso indirizzo, resta in uso quella attuale finché non scegli la nuova nelle proprietà del contatto.</p>
 <p>Per condividere la tua chiave pubblica, selezionala e fai clic su <b data-text="ui-keys-export"></b>. Puoi anche scegliere la chiave del tuo account nelle sue proprietà, nella scheda <b data-text="ui-account-security"></b>.</p>
-<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav><!--/review-->
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>

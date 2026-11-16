@@ -1,15 +1,14 @@
-<!--review--><h1>Verificar a chave de um contacto</h1>
-<p class="summary">Compare a impressão digital de uma chave com o respetivo dono para ter a certeza de que a chave é mesmo dele.</p>
-<p>Uma chave pode vir de qualquer lado: uma mensagem, um servidor de chaves, um ficheiro. Qualquer pessoa pode criar uma chave com o nome e o endereço do seu contacto. A verificação confirma que a chave que tem é a que o seu contacto tem.</p>
+<h1>Verificar a chave de um contacto</h1>
+<p class="summary">Compare a impressão digital da chave com a que o contacto lhe indicar, para confirmar que a chave lhe pertence.</p>
+<p>Uma chave pode ter várias origens: uma mensagem, um servidor de chaves, um ficheiro. Qualquer pessoa pode criar uma chave com o nome e o endereço do seu contacto. A verificação confirma que a chave que tem é a que o seu contacto tem.</p>
 <p>Para verificar uma chave:</p>
 <ol>
     <li>Escolha <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, selecione a chave do contacto e clique em <b data-text="ui-keys-verify"></b>. Também pode clicar nesse botão nas propriedades do contacto, no Livro de Endereços.</li>
-    <li>Peça ao seu contacto que lhe leia a impressão digital da chave na sua própria aplicação, pessoalmente ou numa chamada.</li>
-    <li>Se todos os grupos de quatro forem iguais, clique em <b data-text="ui-verify-match"></b>. A chave aparece como verificada.</li>
-    <li>A janela indica os endereços que ficam marcados. Uma chave pode indicar qualquer endereço, por isso, se um deles não for do seu contacto, clique antes em <b data-text="ui-verify-differ"></b>.</li>
+    <li>Peça ao seu contacto que lhe leia a impressão digital da chave na sua própria aplicação, pessoalmente ou por chamada. Confirme também que todos os endereços apresentados pertencem ao contacto.</li>
+    <li>Se todos os grupos de quatro carateres coincidirem e todos os endereços pertencerem ao contacto, clique em <b data-text="ui-verify-match"></b>. A chave aparece como verificada.</li>
+    <li>Se algum dos endereços apresentados não pertencer ao contacto, mesmo que as impressões digitais coincidam, clique em <b data-text="ui-verify-differ"></b>.</li>
 </ol>
 <aside class="warning">Não compare a impressão digital com uma enviada por e-mail. Quem conseguisse alterar a chave numa mensagem também conseguiria alterar a impressão digital.</aside>
 <p>Se as impressões digitais forem diferentes, clique em <b data-text="ui-verify-differ"></b>. A chave que tem não é a do seu contacto: remova-a e peça ao seu contacto que lhe envie novamente a chave.</p>
-<p>As assinaturas feitas com uma chave verificada aparecem a verde. Uma chave que não verificou continua a funcionar para encriptar, e as respetivas assinaturas aparecem a azul.</p>
+<p>As assinaturas digitais válidas do remetente aparecem a verde quando verificou a quem pertence a chave, ou a azul se ainda não o fez. Uma chave não verificada continua a poder ser usada para encriptar.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

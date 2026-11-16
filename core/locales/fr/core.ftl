@@ -82,9 +82,7 @@ header-to = À
 header-cc = Cc
 header-sent = Envoyé
 header-subject = Objet
-# review: new
 header-security = Sécurité
-# review: new
 header-part = Partie { $number }
 quote-original = ----- Message d'origine -----
 fold-show-earlier = Afficher les messages précédents
@@ -483,8 +481,7 @@ agent-accounts = { $count ->
 }
 agent-access = { $can } ; { $accounts }
 agent-unreadable = Ce message ne peut pas être lu.
-# review: new
-agent-encrypted-original = Ce message est chiffré : un agent ne peut ni y répondre ni le transférer, car il ne peut pas chiffrer.
+agent-encrypted-original = Les agents ne peuvent ni répondre à ce message chiffré ni le transférer, car ils ne peuvent pas chiffrer de messages.
 agent-log-composed = « { $subject } » ouvert dans un nouveau message à compléter
 agent-log-refused = Vous n'avez pas envoyé « { $subject } »
 agent-log-sent = « { $subject } » envoyé à { $to }
@@ -542,377 +539,236 @@ event-attendees =
 otp-notification = { $code } est votre code pour { $domain }
 
 ## OpenPGP keys (keys.rs)
-# review: new
 pgp-key-valid = Valide
-# review: new
 pgp-key-expires = Valide jusqu'au { $date }
-# review: new
 pgp-key-expired = Expirée le { $date }
-# review: new
 pgp-key-revoked = Révoquée
-# review: new
 pgp-key-revoked-why = Révoquée : { $reason }
-# review: new
 pgp-key-not-valid = Non valide
-# review: new
-pgp-key-locked = Inutilisable : la clé qui la protège n'est plus dans { $store }. Importez à nouveau sa sauvegarde.
-# review: new
+pgp-key-locked = La clé de déverrouillage est absente du gestionnaire de mots de passe ({ $store }). Réimportez la sauvegarde de votre clé privée.
 pgp-source-own = Créée dans Inbox Classic
-# review: new
 pgp-source-file = Importée depuis un fichier
-# review: new
 pgp-source-paste = Collée
-# review: new
 pgp-source-attachment = Depuis un message
-# review: new
 pgp-source-vcard = Depuis une carte de contact
-# review: new
 pgp-source-wkd = Depuis le fournisseur de messagerie de l'expéditeur
-# review: new
 pgp-source-keyserver = Depuis keys.openpgp.org
-# review: new
 pgp-source-autocrypt = Depuis l'en-tête Autocrypt d'un message
-# review: new
-pgp-error-no-store = Les clés privées sont protégées par { $store }, qui ne peut pas être utilisé : { $error }
-# review: new
+pgp-error-no-store = Le gestionnaire de mots de passe nécessaire à la protection des clés privées est indisponible ({ $store }) : { $error }
 pgp-error-wrong-passphrase = La phrase secrète n'est pas correcte.
-# review: new
-# review: new
 pgp-error-not-a-key = Ceci n'est pas une clé OpenPGP.
-# review: new
 pgp-error-too-large = La clé est trop grande.
-# review: new
-pgp-error-unusable = La clé utilise une cryptographie ancienne ou faible et ne peut pas être utilisée.
-# review: new
+pgp-error-unusable = Cette clé utilise des méthodes cryptographiques obsolètes ou peu sûres et ne peut pas être utilisée.
 pgp-imported-private = { $count ->
-    [one] Votre clé privée a été importée.
-   *[other] { $count } clés privées ont été importées.
+    [one] { $count } clé privée importée.
+   *[other] { $count } clés privées importées.
 }
-# review: new
 pgp-imported-public = { $count ->
-    [one] Une clé a été importée.
-   *[other] { $count } clés ont été importées.
+    [one] { $count } clé importée.
+   *[other] { $count } clés importées.
 }
-# review: new
-pgp-imported-pending = Une autre clé est déjà utilisée pour { $addresses } : la nouvelle attend dans le contact jusqu'à ce que vous la choisissiez.
-# review: new
+pgp-imported-pending = Une autre clé est déjà associée aux adresses suivantes : { $addresses }. Vous pouvez sélectionner la nouvelle clé dans les propriétés du contact.
 pgp-error-needs-passphrase = La clé privée est protégée par une phrase secrète. Saisissez-la pour importer la clé.
-# review: new
-pgp-error-mismatch = La clé privée ne correspond pas à sa clé publique. Elle a peut-être été modifiée.
-# review: new
-pgp-file-name-public = Clé publique de { $who }.asc
-# review: new
-pgp-file-name-private = Sauvegarde de la clé privée de { $who }.asc
-# review: new
+pgp-error-mismatch = La clé privée et la clé publique ne correspondent pas à la même paire. La clé a peut-être été modifiée.
+pgp-file-name-public = Clé publique ({ $who }).asc
+pgp-file-name-private = Sauvegarde de la clé privée ({ $who }).asc
 pgp-pending = Une autre clé pour { $address } a été trouvée le { $date }.
 
 ## Reading signed and encrypted mail (protect.rs)
-# review: new
 pgp-part-verified = Signé par { $signer }, clé vérifiée
-# review: new
 pgp-part-signed = Signé par { $signer } (clé non vérifiée)
-# review: new
 pgp-part-other = Signé par { $signer }, qui n'est pas l'expéditeur
-# review: new
 pgp-part-unknown-key = Signé, mais la clé n'est pas connue
-# review: new
 pgp-part-not-signed = Non signé
-# review: new
 pgp-part-not-checked = Signature non vérifiée
-# review: new
 pgp-part-encrypted = Chiffré. { $signature }
-# review: new
-pgp-part-no-key = Chiffré pour une clé que vous n'avez pas
-# review: new
-pgp-part-changed = La partie chiffrée a été modifiée en route et n'est pas affichée
-# review: new
-pgp-part-unprotected = Chiffré sans protection contre les modifications, non affiché
-# review: new
+pgp-part-no-key = La clé privée nécessaire au déchiffrement n’est pas disponible
+pgp-part-changed = Le contenu chiffré a été modifié pendant la transmission et ne sera pas affiché
+pgp-part-unprotected = Le contenu chiffré n’est pas protégé contre les modifications et ne sera pas affiché
 pgp-part-broken = La partie chiffrée ne peut pas être lue
-# review: new
-pgp-why-mismatch = La signature ne correspond pas à ce texte
-# review: new
-pgp-why-weak-hash = La signature utilise { $hash }, qui n'est plus sûr
-# review: new
-pgp-why-key-expired = Signé après l'expiration de la clé le { $date }
-# review: new
+pgp-why-mismatch = La signature ne correspond pas au contenu
+pgp-why-weak-hash = La signature utilise l’algorithme de hachage { $hash }, qui n’est plus considéré comme sûr
+pgp-why-key-expired = La clé avait déjà expiré au moment de la signature (expiration : { $date })
 pgp-why-key-revoked = Signé avec une clé révoquée
-# review: new
-pgp-why-not-signing-key = Signé avec une clé qui ne peut pas signer
-# review: new
+pgp-why-not-signing-key = La clé utilisée n’est pas prévue pour signer des messages
 pgp-why-from-future = La signature est datée dans le futur
-# review: new
 pgp-why-signature-expired = La signature a expiré
-# review: new
 pgp-why-key-not-valid = Signé avec une clé non valide
-# review: new
-pgp-why-not-for-you = Signé pour d'autres destinataires et transmis à vous
-# review: new
+pgp-why-not-for-you = Signé pour d’autres destinataires, puis transféré à votre adresse
 pgp-part-pictures-loaded = { $label }. Des images ont été chargées depuis Internet
-# review: new
-pgp-error-no-own-key = Vous n'avez pas de clé pour { $address } pour signer ou chiffrer. Créez-en une dans Outils > Clés de chiffrement, ou désactivez Signer et Chiffrer.
-# review: new
+pgp-error-no-own-key = Aucune clé n’est configurée pour signer ou chiffrer avec l’adresse { $address }. Créez-en une dans Outils > Clés de chiffrement ou désactivez les options Signer et Chiffrer.
 pgp-error-missing-keys = { $count ->
-    [one] { $addresses } n'a pas de clé pour chiffrer.
-   *[other] Ces destinataires n'ont pas de clé pour chiffrer : { $addresses }.
+    [one] La clé nécessaire pour envoyer un message chiffré à { $addresses } est introuvable.
+   *[other] Les clés nécessaires pour envoyer des messages chiffrés à ces destinataires sont introuvables : { $addresses }.
 }
-# review: new
-pgp-error-encrypted-quote = Ce message cite ou transfère un message chiffré : il ne peut être envoyé que chiffré. Activez Chiffrer, ou supprimez le texte cité.
-# review: new
+pgp-error-encrypted-quote = Ce message contient des passages d’un message chiffré. Activez l’option Chiffrer ou retirez les passages cités avant de l’envoyer.
 pgp-error-protect = Le message n’a pas pu être signé ou chiffré : { $reason }
-# review: new
-pgp-found-keys = La clé de { $addresses } a été trouvée.
-# review: new
-pgp-found-none = Aucune clé n'a été trouvée pour { $addresses }. Demandez-lui de vous envoyer sa clé publique.
-# review: new
+pgp-found-keys = Clés trouvées pour : { $addresses }.
+pgp-found-none = Aucune clé n’a été trouvée pour les adresses suivantes : { $addresses }. Demandez aux destinataires de vous envoyer leurs clés publiques.
 pgp-found-no-key = Aucune clé n'a été trouvée.
-# review: new
-pgp-find-unavailable = Les clés ne peuvent pas être recherchées pour l'instant : { $error }
-# review: new
-pgp-publish-pending = keys.openpgp.org a envoyé un lien de confirmation à { $addresses }. Votre clé y est publiée dès que vous cliquez dessus.
-# review: new
+pgp-find-unavailable = La recherche de clés est momentanément indisponible : { $error }
+pgp-publish-pending = keys.openpgp.org a envoyé un lien de confirmation aux adresses suivantes : { $addresses }. Confirmez chaque adresse pour que votre clé puisse être trouvée à partir de celle-ci.
 pgp-publish-done = Votre clé est publiée sur keys.openpgp.org pour { $addresses }.
-# review: new
 pgp-publish-failed = La clé n'a pas pu être publiée : { $error }
-# review: new
 pgp-keyserver-off = La recherche de clés sur keys.openpgp.org est désactivée dans les Options.
-# review: new
 pgp-details-part = Partie { $number } : { $label }
-# review: new
-pgp-details-signed = Signé { $when } avec la clé { $key }
-# review: new
-pgp-details-unknown-key = Signé avec la clé { $key }, que vous n’avez pas
-# review: new
-pgp-details-opened = Chiffré pour votre clé { $key }
-# review: new
-pgp-details-for = Chiffré pour { $keys }
-# review: new
+pgp-details-signed = Signé le { $when } avec la clé { $key }
+pgp-details-unknown-key = Signé avec la clé { $key }, absente de cet ordinateur
+pgp-details-opened = Déchiffré avec votre clé { $key }
+pgp-details-for = Chiffré avec les clés suivantes : { $keys }
 pgp-details-plain = Ni signé ni chiffré
-# review: new
-pgp-bar-parts = Ce message a { $count } parties : { $list }. Chaque partie indique comment elle est protégée.
-# review: new
+pgp-bar-parts = Ce message comporte { $count } parties : { $list }. L’état de protection est indiqué au-dessus de chaque partie.
 pgp-bar-count-verified = { $count ->
-    [one] 1 vérifiée
+    [one] { $count } vérifiée
    *[other] { $count } vérifiées
 }
-# review: new
 pgp-bar-count-good = { $count ->
-    [one] 1 signée ou chiffrée
+    [one] { $count } signée ou chiffrée
    *[other] { $count } signées ou chiffrées
 }
-# review: new
 pgp-bar-count-warning = { $count ->
-    [one] 1 demande votre attention
-   *[other] { $count } demandent votre attention
+    [one] { $count } avec avertissement
+   *[other] { $count } avec avertissement
 }
-# review: new
 pgp-bar-count-neutral = { $count } sans signature confirmée
 # the setup file: settings, accounts, contacts and keys carried to another computer
-# review: new
 setup-part-settings = Paramètres
-# review: new
 setup-part-preferences = Préférences des fenêtres
-# review: new
 setup-part-accounts = Comptes
-# review: new
 setup-part-sign-in-apps = Applications de connexion
-# review: new
 setup-part-contacts = Contacts et groupes
-# review: new
 setup-part-keys = Clés de chiffrement
-# review: new
 setup-part-rules = Règles de message
-# review: new
 setup-part-trusted-senders = Expéditeurs de confiance
-# review: new
 setup-holds-settings = { $count ->
     [one] { $count } paramètre
    *[other] { $count } paramètres
 }
-# review: new
 setup-holds-preferences = { $count ->
     [one] { $count } préférence
    *[other] { $count } préférences
 }
-# review: new
 setup-holds-accounts = { $count ->
     [one] { $count } compte
    *[other] { $count } comptes
 }
-# review: new
 setup-holds-sign-in-apps = { $count ->
     [one] { $count } application de connexion
    *[other] { $count } applications de connexion
 }
-# review: new
-setup-holds-built-in = Les applications de connexion intégrées activées
-# review: new
+setup-holds-built-in = État d’activation des applications de connexion intégrées
 setup-holds-contacts = { $count ->
     [one] { $count } contact
    *[other] { $count } contacts
 }
-# review: new
 setup-holds-groups = { $count ->
     [one] { $count } groupe
    *[other] { $count } groupes
 }
-# review: new
 setup-holds-own-keys = { $count ->
     [one] { $count } clé personnelle
    *[other] { $count } clés personnelles
 }
-# review: new
 setup-holds-contact-keys = { $count ->
     [one] { $count } clé de contact
    *[other] { $count } clés de contacts
 }
-# review: new
 setup-holds-rules = { $count ->
     [one] { $count } règle
    *[other] { $count } règles
 }
-# review: new
 setup-holds-trusted-senders = { $count ->
     [one] { $count } expéditeur de confiance
    *[other] { $count } expéditeurs de confiance
 }
-# review: new
 setup-sign-in-password = Mot de passe
-# review: new
-setup-account-secret-password = Son mot de passe est dans le fichier.
-# review: new
-setup-account-secret-token = Sa connexion est dans le fichier.
-# review: new
-setup-account-asks-password = Il demandera son mot de passe après l'importation.
-# review: new
-setup-account-signs-in-again = Vous vous y reconnecterez après l'importation.
-# review: new
-setup-account-here = Il est déjà configuré ici, il sera donc ignoré.
-# review: new
-setup-account-no-app = Il se connecte avec { $app }, qui n'est pas configurée ici. Importez aussi les applications de connexion.
-# review: new
+setup-account-secret-password = Le fichier contient le mot de passe enregistré.
+setup-account-secret-token = Le fichier contient les données de connexion enregistrées.
+setup-account-asks-password = Vous devrez saisir le mot de passe après l’importation.
+setup-account-signs-in-again = Vous devrez vous reconnecter à ce compte après l’importation.
+setup-account-here = Ce compte est déjà configuré sur cet ordinateur et ne sera pas réimporté.
+setup-account-no-app = Ce compte utilise l’application de connexion { $app }, qui n’est pas encore configurée ici. Importez également les applications de connexion.
 setup-invalid-address = « { $address } » n'est pas une adresse e-mail.
-# review: new
-setup-invalid-server = Le serveur { $server } n'a pas de nom ou de port utilisable.
-# review: new
-setup-invalid-user = Il n'a pas de nom d'utilisateur.
-# review: new
-setup-invalid-sign-in = Il se connecte d'une manière qu'Inbox Classic ne connaît pas.
-# review: new
+setup-invalid-server = Le nom ou le port du serveur { $server } n’est pas valide.
+setup-invalid-user = Aucun nom d’utilisateur n’est défini pour ce compte.
+setup-invalid-sign-in = Inbox Classic ne prend pas en charge la méthode de connexion de ce compte.
 setup-error-empty = Le fichier est vide.
-# review: new
-setup-error-too-large = Le fichier est trop volumineux pour être une configuration d'Inbox Classic.
-# review: new
-setup-error-not-setup = Ce fichier n'est pas une configuration d'Inbox Classic.
-# review: new
+setup-error-too-large = Le fichier est trop volumineux pour en importer les paramètres et les comptes.
+setup-error-not-setup = Ce fichier n’est pas une exportation de paramètres et de comptes Inbox Classic.
 setup-error-damaged = Le fichier de configuration est endommagé et ne peut pas être lu.
-# review: new
-setup-error-newer = Cette configuration a été enregistrée par une version plus récente d'Inbox Classic ({ $version }). Mettez Inbox Classic à jour, puis importez-la de nouveau.
-# review: new
-setup-error-needs-passphrase = Cette configuration est protégée par une phrase secrète. Tapez la phrase secrète avec laquelle elle a été enregistrée.
-# review: new
-setup-error-wrong-passphrase = Ce n'est pas la phrase secrète avec laquelle cette configuration a été enregistrée.
-# review: new
+setup-error-newer = Le fichier a été exporté avec une version plus récente d’Inbox Classic ({ $version }). Mettez Inbox Classic à jour, puis réessayez.
+setup-error-needs-passphrase = Ce fichier est protégé par une phrase secrète. Saisissez celle que vous avez choisie lors de l’exportation.
+setup-error-wrong-passphrase = Cette phrase secrète ne permet pas d’ouvrir le fichier.
 setup-error-changed = Le fichier de configuration a été modifié ou endommagé après son enregistrement, il ne peut donc pas être importé.
-# review: new
 setup-error-read = Le fichier de configuration n'a pas pu être lu : { $error }
-# review: new
-setup-error-write = La configuration n'a pas pu être enregistrée : { $error }
-# review: new
-setup-error-no-parts = Choisissez au moins une partie.
-# review: new
+setup-error-write = Le fichier de configuration n’a pas pu être enregistré : { $error }
+setup-error-no-parts = Choisissez au moins une catégorie de données.
 setup-left-out = { $count ->
-    [one] { $count } élément de « { $part } » n'est pas utilisable et est laissé de côté.
-   *[other] { $count } éléments de « { $part } » ne sont pas utilisables et sont laissés de côté.
+    [one] { $count } élément de « { $part } » sera ignoré car il n’est pas utilisable.
+   *[other] { $count } éléments de « { $part } » seront ignorés car ils ne sont pas utilisables.
 }
-# review: new
 setup-imported-settings = Les paramètres ont été remplacés.
-# review: new
 setup-imported-preferences = Les préférences des fenêtres ont été remplacées.
-# review: new
 setup-added-accounts = { $count ->
     [one] { $count } compte ajouté.
    *[other] { $count } comptes ajoutés.
 }
-# review: new
-setup-skipped-here = { $address } est déjà configuré ici, il a donc été ignoré.
-# review: new
-setup-skipped-no-app = { $address } a été ignoré : il se connecte avec { $app }, qui n'est pas configurée ici.
-# review: new
-setup-skipped-invalid = { $address } a été ignoré : { $reason }
-# review: new
-setup-asks-password = { $address } demandera son mot de passe à la connexion.
-# review: new
-setup-signs-in-again = { $address } vous demandera de vous reconnecter à la connexion.
-# review: new
+setup-skipped-here = Le compte { $address } est déjà configuré sur cet ordinateur et n’a pas été réimporté.
+setup-skipped-no-app = Le compte { $address } n’a pas été importé car l’application de connexion { $app } n’est pas configurée ici.
+setup-skipped-invalid = Le compte { $address } n’a pas été importé : { $reason }
+setup-asks-password = Vous devrez saisir le mot de passe lors de la connexion au compte { $address }.
+setup-signs-in-again = Vous devrez vous authentifier à nouveau pour accéder au compte { $address }.
 setup-added-sign-in-apps = { $count ->
     [one] { $count } application de connexion ajoutée.
    *[other] { $count } applications de connexion ajoutées.
 }
-# review: new
 setup-skipped-sign-in-apps = { $count ->
     [one] { $count } application de connexion est déjà configurée ici.
    *[other] { $count } applications de connexion sont déjà configurées ici.
 }
-# review: new
 setup-added-contacts = { $count ->
     [one] { $count } contact ajouté au carnet d'adresses.
    *[other] { $count } contacts ajoutés au carnet d'adresses.
 }
-# review: new
 setup-skipped-contacts = { $count ->
     [one] { $count } contact est déjà dans le carnet d'adresses.
    *[other] { $count } contacts sont déjà dans le carnet d'adresses.
 }
-# review: new
 setup-added-groups = { $count ->
-    [one] { $count } groupe ajouté ou complété.
-   *[other] { $count } groupes ajoutés ou complétés.
+    [one] { $count } groupe ajouté ou mis à jour.
+   *[other] { $count } groupes ajoutés ou mis à jour.
 }
-# review: new
 setup-added-own-keys = { $count ->
     [one] { $count } clé personnelle ajoutée.
    *[other] { $count } clés personnelles ajoutées.
 }
-# review: new
 setup-added-contact-keys = { $count ->
     [one] { $count } clé de contact ajoutée.
    *[other] { $count } clés de contacts ajoutées.
 }
-# review: new
 setup-added-rules = { $count ->
     [one] { $count } règle de message ajoutée.
    *[other] { $count } règles de message ajoutées.
 }
-# review: new
 setup-skipped-rules = { $count ->
     [one] { $count } règle de message existe déjà ici.
    *[other] { $count } règles de message existent déjà ici.
 }
-# review: new
 setup-skipped-rules-account = { $count ->
-    [one] { $count } règle de message concerne un compte absent d'ici, elle a donc été ignorée.
-   *[other] { $count } règles de message concernent des comptes absents d'ici, elles ont donc été ignorées.
+    [one] { $count } règle de message ignorée car le compte associé n’est pas configuré ici.
+   *[other] { $count } règles de message ignorées car les comptes associés ne sont pas configurés ici.
 }
-# review: new
 setup-rules-waiting = { $count ->
-    [one] { $count } règle de message déplace des messages vers un dossier qui apparaîtra une fois son compte synchronisé.
-   *[other] { $count } règles de message déplacent des messages vers des dossiers qui apparaîtront une fois leurs comptes synchronisés.
+    [one] Le dossier de destination de { $count } règle de message sera disponible après la synchronisation du compte.
+   *[other] Les dossiers de destination de { $count } règles de message seront disponibles après la synchronisation des comptes.
 }
-# review: new
 setup-added-trusted-senders = { $count ->
     [one] { $count } expéditeur de confiance ajouté.
    *[other] { $count } expéditeurs de confiance ajoutés.
 }
-# review: new
 setup-nothing = Rien n'a été importé.
-# review: new
 setup-account-servers = { $imap } et { $smtp } ({ $signin })
-# review: new
 setup-file-name = Paramètres et comptes Inbox Classic
-# review: new
-setup-skipped-unreachable = { $name } a été ignoré : son service de connexion n'a pas pu être joint. Ajoutez-le de nouveau dans Applications de connexion.
-# review: new
-attachment-runs-programs = « { $name } » peut lancer des programmes, Inbox Classic ne l’ouvre donc pas. Enregistrez-le, puis ouvrez-le vous-même si vous faites confiance à sa provenance.
-# review: new
-attachment-decrypted-note = Cette pièce jointe vient d’un message chiffré. Pour l’ouvrir, Inbox Classic l’enregistre déchiffrée sur cet ordinateur, dans un dossier à vous qu’Inbox Classic vide au bout d’un jour.
+setup-skipped-unreachable = L’application { $name } n’a pas été importée car son service de connexion est injoignable. Ajoutez-la à nouveau dans « Applications de connexion ».
+attachment-runs-programs = Le fichier « { $name } » peut exécuter des programmes. Inbox Classic ne l’ouvre donc pas. Si vous faites confiance à sa provenance, vous pouvez l’enregistrer et l’ouvrir vous-même.
+attachment-decrypted-note = Cette pièce jointe provient d’un message chiffré. Pour l’ouvrir, Inbox Classic enregistre une copie non chiffrée dans un dossier temporaire de votre compte utilisateur. Au démarrage de l’application, les copies datant de plus d’un jour sont supprimées.

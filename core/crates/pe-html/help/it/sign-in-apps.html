@@ -1,17 +1,16 @@
-<!--review--><h1>App di accesso</h1>
+<h1>App di accesso</h1>
 <p class="summary">Registra una tua app di accesso presso Google, Microsoft o qualsiasi provider OpenID Connect, per accedere tramite il browser.</p>
-<p>L’accesso tramite il browser usa un client OAuth registrato presso il provider. Inbox Classic ha il proprio per Google e Microsoft. Google consente solo agli utenti di prova di usare il client di Inbox Classic finché non avrà verificato l’app, per questo <b data-text="win-sign-in-google"></b> all’inizio è disattivato. Puoi registrare un client tuo: nel tuo progetto Google Cloud, nel tuo tenant Microsoft Entra o presso qualsiasi provider OpenID Connect.</p>
+<p>L’accesso tramite il browser usa un client OAuth registrato presso il provider. Inbox Classic include i propri client per Google e Microsoft. Google consente solo agli utenti di prova di usare il client di Inbox Classic finché non avrà verificato l’app, per questo <b data-text="win-sign-in-google"></b> è inizialmente disattivato. Puoi registrare un client tuo: nel tuo progetto Google Cloud, nel tuo tenant Microsoft Entra o presso qualsiasi provider OpenID Connect.</p>
 <p>Per aggiungere un’app di accesso:</p>
 <ol>
     <li>Scegli <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
     <li>Fai clic su <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->, poi su <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
-    <li>Accanto a <b data-text="ui-fill-in-for"></b>, fai clic su Google o Microsoft per compilare emittente, autorizzazioni (scope) e server. Per un altro provider, digitali tu.</li>
-    <li>Registra il client presso il provider come spiega il riquadro in basso. Registra l’<b data-text="ui-redirect-uri"></b> indicato lì.</li>
+    <li>Accanto a <b data-text="ui-fill-in-for"></b>, fai clic su Google o Microsoft per compilare emittente, autorizzazioni (scope) e server. Per un altro provider, inserisci manualmente questi dati.</li>
+    <li>Registra il client presso il provider come spiega il riquadro in basso. Indica nella registrazione l’<b data-text="ui-redirect-uri"></b> indicato lì.</li>
     <li>Digita l’<b data-text="ui-client-id"></b>, e il <b data-text="ui-client-secret"></b> se il provider te ne ha dato uno. Il segreto viene conservato <!--os:windows-->in Gestione credenziali di Windows<!--/os--><!--os:mac-->nel portachiavi di login<!--/os--><!--os:linux-->nel tuo portachiavi<!--/os--> e non viene più mostrato.</li>
-    <li>Fai clic su <b data-text="ui-check"></b> per verificare che l’emittente sia corretto, poi su <b data-text="ui-ok"></b>.</li>
+    <li>Fai clic su <b data-text="ui-check"></b> per verificare le impostazioni dell’emittente, poi su <b data-text="ui-ok"></b>.</li>
     <li>Aggiungi l’account con <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> nella prima pagina di <b data-text="ui-add-account-title"></b>.</li>
 </ol>
-<p>In <b data-text="ui-sign-in-apps"></b>, <!--os:windows,mac-->la casella di controllo di ogni app<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> indica se viene proposta per i nuovi account, comprese quelle integrate. Gli account che usano già un’app continuano a funzionare. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> modifica un’app, e <b data-text="ui-remove"></b> la rimuove quando nessun account la usa più.</p>
+<p>In <b data-text="ui-sign-in-apps"></b>, <!--os:windows,mac-->la casella di controllo di ogni app<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> indica se viene proposta per i nuovi account, comprese quelle integrate. Gli account che usano già un’app continuano a funzionare. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> permette di modificare un’app, mentre <b data-text="ui-remove"></b> la rimuove quando nessun account la usa più.</p>
 <p>Se il server di posta rifiuta il token dell’app, controlla che le sue autorizzazioni (scope) diano accesso alla posta.</p>
 <nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

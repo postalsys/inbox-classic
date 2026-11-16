@@ -1,19 +1,19 @@
-<!--review--><h1>Auf einen anderen Computer umziehen</h1>
-<p class="summary">Nehmen Sie Ihre Konten, Einstellungen, Kontakte, Schlüssel und Regeln in einer Datei auf einen anderen Computer mit.</p>
+<h1>Auf einen anderen Computer umziehen</h1>
+<p class="summary">Übertragen Sie Konten, Einstellungen, Kontakte, Schlüssel und Regeln gemeinsam in einer Datei auf einen anderen Computer.</p>
 <h2>Exportieren</h2>
 <ol>
     <li>Wählen Sie <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
-    <li>Wählen Sie, was Sie mitnehmen: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> und <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Um auch Ihre Kennwörter und privaten Schlüssel mitzunehmen, schalten Sie <b data-text="ui-setup-use-passphrase"></b> ein und geben zweimal eine Passphrase mit mindestens 8 Zeichen ein.</li>
-    <li>Klicken Sie auf <b data-text="ui-setup-export-button"></b> und wählen Sie, wo die Datei gespeichert wird.</li>
+    <li>Wählen Sie die gewünschten Datenbereiche: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> und <b data-text="setup-part-trusted-senders"></b>.</li>
+    <li>Für gespeicherte Kennwörter, Anmeldedaten und private Schlüssel aktivieren Sie <b data-text="ui-setup-use-passphrase"></b>. Geben Sie zweimal dieselbe Passphrase mit mindestens 8 Zeichen ein.</li>
+    <li>Klicken Sie auf <b data-text="ui-setup-export-button"></b> und wählen Sie den Speicherort.</li>
 </ol>
-<p>Die Datei enthält keine Nachrichten: Sie werden auf dem anderen Computer erneut geladen. Mit einer Passphrase ist die ganze Datei verschlüsselt. Ohne sie enthält sie keine Kennwörter oder privaten Schlüssel, und jedes Konto fragt auf dem anderen Computer einmal nach seinem Kennwort.</p>
-<aside class="warning">Bewahren Sie die Datei und ihre Passphrase getrennt auf, und löschen Sie die Datei nach dem Import. Wer beides hat, kann Ihre Mail lesen.</aside>
+<p>Nachrichten werden nicht exportiert. Inbox Classic lädt sie auf dem anderen Computer erneut vom Server. Mit einer Passphrase wird die gesamte Datei verschlüsselt. Ohne Passphrase fehlen gespeicherte Kennwörter, Anmeldedaten und private Schlüssel. Dann müssen Sie sich auf dem anderen Computer erneut bei Ihren Konten anmelden.</p>
+<aside class="warning">Bewahren Sie Datei und Passphrase getrennt auf und löschen Sie die Datei nach dem Import. Wer beides besitzt, kann auf Ihre E-Mails zugreifen.</aside>
 <h2>Importieren</h2>
 <ol>
-    <li>Wählen Sie auf dem anderen Computer <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Bevor Sie Ihr erstes Konto hinzufügen, hat auch <b data-text="ui-add-account-title"></b> einen Link dafür.</li>
-    <li>Wählen Sie die Datei und geben Sie ihre Passphrase ein, falls sie eine hat.</li>
-    <li>Das Fenster zeigt, was die Datei enthält. Wählen Sie die Teile und Konten aus und klicken Sie auf <b data-text="ui-setup-import-button"></b>.</li>
+    <li>Wählen Sie auf dem anderen Computer <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Solange noch kein Konto eingerichtet ist, finden Sie auch unter <b data-text="ui-add-account-title"></b> einen Link zum Import.</li>
+    <li>Wählen Sie die Datei und geben Sie bei einer geschützten Datei die Passphrase ein.</li>
+    <li>Prüfen Sie die Vorschau. Wählen Sie die gewünschten Datenbereiche und Konten und klicken Sie auf <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Ein Konto, das schon auf diesem Computer ist, bleibt, wie es ist. Kontakte kommen in Ihr Adressbuch, Einstellungen und Fenstereinstellungen werden ersetzt, und eine Regel, deren Ordner noch fehlt, wartet, bis das Konto abgeglichen ist. Ein anderer Schlüssel für einen Ihrer Kontakte wartet auf Ihre Entscheidung, wie ein importierter Schlüssel.</p>
-<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<p>Bereits eingerichtete Konten bleiben unverändert. Kontakte werden zum Adressbuch hinzugefügt; Einstellungen und Fenstereinstellungen werden ersetzt. Fehlende Zielordner für Nachrichtenregeln werden nach der Kontosynchronisierung zugeordnet. Ein neuer Schlüssel für einen Kontakt ersetzt einen vorhandenen erst, wenn Sie ihn in den Kontakteigenschaften auswählen.</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>

@@ -84,7 +84,6 @@ gtk-default-app-failed = Impossible de définir Inbox Classic comme application 
 
 gtk-reader-date = Date :
 gtk-reader-files = Pièces jointes du message
-# review: new
 gtk-files = { $count ->
     [one] { $count } fichier
    *[other] { $count } fichiers
@@ -173,21 +172,12 @@ gtk-restart-to-change = Inbox Classic redémarre pour changer de langue.
 
 ## The desktop entry and the page of the software stores
 
-# review: new
 gtk-desktop-generic-name = Client de messagerie
-# review: new
 gtk-desktop-comment = Lire et écrire des e-mails : un programme de messagerie rapide et simple
-# review: new
 gtk-desktop-keywords = courriel;courrier;message;
-# review: new
 gtk-metainfo-summary = Un programme de messagerie rapide et simple
-# review: new
-gtk-metainfo-description = Inbox Classic lit et écrit les e-mails avec les dossiers à gauche, les messages en haut et le message en dessous, comme le faisaient les programmes de messagerie. Il fonctionne avec tout compte IMAP et SMTP, et se connecte à Outlook.com et Microsoft 365 par le navigateur.
-# review: new
-gtk-metainfo-feature-sanitized = Chaque message est affiché nettoyé, sans scripts, et les images d'Internet seulement quand vous le permettez
-# review: new
-gtk-metainfo-feature-search = Une recherche qui trouve des mots dans l'objet, les personnes, les noms de fichiers et le texte, avec les opérateurs de Gmail
-# review: new
-gtk-metainfo-feature-replies = Les réponses replient les messages précédents qu'elles citent
-# review: new
-gtk-metainfo-feature-offline = Le courrier reste lisible hors ligne ; les mots de passe sont gardés dans votre trousseau
+gtk-metainfo-description = Inbox Classic retrouve la disposition classique des logiciels de messagerie : dossiers à gauche, liste des messages en haut et volet de lecture en dessous. Il prend en charge les comptes IMAP et SMTP et permet de se connecter à Outlook.com et Microsoft 365 dans le navigateur.
+gtk-metainfo-feature-sanitized = Les messages sont affichés sans scripts ; les images provenant d’Internet ne sont chargées qu’avec votre accord
+gtk-metainfo-feature-search = Recherchez dans l’objet, les expéditeurs, les destinataires, les noms des pièces jointes et le texte avec les opérateurs de recherche de Gmail
+gtk-metainfo-feature-replies = Les messages cités dans les réponses sont repliés
+gtk-metainfo-feature-offline = Le courrier téléchargé reste accessible hors connexion ; les mots de passe sont enregistrés dans le trousseau du système

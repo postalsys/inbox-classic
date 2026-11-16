@@ -115,26 +115,19 @@ win-folders-show = Näita kaustu
 
 ## The installer
 
-# review: new
 win-installer-start = Käivita Inbox Classic
-# review: new
 win-installer-welcome-new =
-    See installib meiliprogrammi Inbox Classic { $version }.
+    Installitakse meiliprogramm Inbox Classic { $version }.
 
-    Administraatori õigusi pole vaja, see installitakse ainult teie kontole.
-# review: new
+    Programm installitakse ainult teie kasutajakontole. Administraatori õigusi pole vaja.
 win-installer-welcome-same =
-    Inbox Classic { $version } on juba installitud. See installib selle uuesti.
+    Inbox Classic { $version } on juba installitud ja installitakse uuesti.
 
-    Teie kontod ja kirjad jäävad alles.
-# review: new
+    Teie kontod ja kirjad säilivad.
 win-installer-welcome-update =
-    See uuendab programmi Inbox Classic versioonist { $installed } versioonile { $version }.
+    Inbox Classic uuendatakse versioonist { $installed } versioonile { $version }.
 
-    Kui see töötab, suletakse see enne. Teie kontod ja kirjad jäävad alles.
-# review: new
+    Kui programm on avatud, suletakse see enne uuendamist. Teie kontod ja kirjad säilivad.
 win-installer-older-ask = Installitud on Inbox Classic { $installed }, mis on uuem kui { $version }. Kas installida vanem versioon siiski?
-# review: new
 win-installer-still-running = Inbox Classic töötab endiselt. Sulgege see ja proovige uuesti.
-# review: new
-win-installer-remove-mail-ask = Kas eemaldada ka kontod ja kirjad, mida Inbox Classic selles arvutis hoiab? Serverites olevad kirjad jäävad alles.
+win-installer-remove-mail-ask = Kas eemaldada sellest arvutist ka Inbox Classicu kontod ja salvestatud kirjad? Serverites olevad kirjad jäävad alles.

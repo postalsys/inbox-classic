@@ -1,7 +1,7 @@
-<!--review--><h1>Erros de encriptação</h1>
-<p class="summary">O que fazer quando um servidor não oferece encriptação, ou a exige onde está desativada.</p>
+<h1>Erros de encriptação</h1>
+<p class="summary">O que fazer quando um servidor não disponibiliza encriptação ou exige uma ligação encriptada que ainda não está configurada.</p>
 <h2>«the server does not offer STARTTLS»</h2>
-<p>A conta está definida para STARTTLS, mas o servidor não ofereceu encriptação. O Inbox Classic parou, por isso a sua palavra-passe não foi enviada.</p>
+<p>A conta está definida para STARTTLS, mas o servidor não ofereceu encriptação. O Inbox Classic interrompeu a ligação, por isso a sua palavra-passe não foi enviada.</p>
 <ol>
     <li>Abra as propriedades da conta em <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
     <li>Defina a segurança como SSL/TLS, com a porta 993 para o correio recebido ou 465 para o correio enviado.</li>
@@ -9,8 +9,7 @@
 </ol>
 <p>Se nada mais funcionar, o servidor não pode ser usado em segurança.</p>
 <h2>«the server takes the password only over an encrypted connection»</h2>
-<p>O servidor de envio está definido como <b data-text="ui-security-none"></b>. A sua palavra-passe está correta. Mude <b data-text="ui-field-smtp-security"></b> para STARTTLS com a porta 587, ou SSL/TLS com a porta 465.</p>
+<p>A ligação ao servidor de envio está configurada como <b data-text="ui-security-none"></b>. Esta resposta não indica se a palavra-passe está correta; o servidor exige primeiro uma ligação encriptada. Mude <b data-text="ui-field-smtp-security"></b> para STARTTLS com a porta 587, ou SSL/TLS com a porta 465.</p>
 <h2>O aviso sobre uma ligação sem encriptação</h2>
 <p>Quando escolhe <b data-text="ui-security-none"></b>, o Inbox Classic avisa que qualquer pessoa que intercete o seu tráfego de rede pode ler a sua palavra-passe e as suas mensagens. Continue apenas para um servidor no seu próprio computador ou na sua rede local.</p>
 <nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

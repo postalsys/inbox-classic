@@ -1,16 +1,14 @@
-<!--review-->
 <h1>Den Schlüssel eines Kontakts überprüfen</h1>
-<p class="summary">Vergleichen Sie den Fingerabdruck eines Schlüssels mit seinem Besitzer, um sicher zu sein, dass der Schlüssel wirklich seiner ist.</p>
-<p>Ein Schlüssel kann von überall kommen: aus einer Nachricht, von einem Schlüsselserver, aus einer Datei. Jeder kann einen Schlüssel mit Namen und Adresse Ihres Kontakts erstellen. Die Überprüfung bestätigt, dass Ihr Schlüssel der ist, den Ihr Kontakt hat.</p>
+<p class="summary">Vergleichen Sie den Fingerabdruck mit Ihrem Kontakt, um zu bestätigen, dass der gespeicherte Schlüssel tatsächlich zu ihm gehört.</p>
+<p>Schlüssel können aus Nachrichten, von Schlüsselservern oder aus Dateien stammen. Jeder kann einen Schlüssel mit dem Namen und der Adresse einer anderen Person erstellen. Durch den Vergleich prüfen Sie, ob der hier gespeicherte Schlüssel mit dem Ihres Kontakts übereinstimmt.</p>
 <p>So überprüfen Sie einen Schlüssel:</p>
 <ol>
-    <li>Wählen Sie <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, wählen Sie den Schlüssel des Kontakts aus und klicken Sie auf <b data-text="ui-keys-verify"></b>. Sie finden die Schaltfläche auch in den Eigenschaften des Kontakts im Adressbuch.</li>
-    <li>Bitten Sie Ihren Kontakt, Ihnen den Fingerabdruck seines Schlüssels aus der eigenen App vorzulesen, persönlich oder am Telefon.</li>
-    <li>Stimmt jede Vierergruppe überein, klicken Sie auf <b data-text="ui-verify-match"></b>. Der Schlüssel wird als überprüft angezeigt.</li>
-    <li>Das Fenster nennt die Adressen, die damit markiert werden. Ein Schlüssel kann jede Adresse nennen: Gehört eine davon nicht Ihrem Kontakt, klicken Sie stattdessen auf <b data-text="ui-verify-differ"></b>.</li>
+    <li>Öffnen Sie <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, wählen Sie den Schlüssel aus und klicken Sie auf <b data-text="ui-keys-verify"></b>. Diese Schaltfläche finden Sie auch in den Kontakteigenschaften im Adressbuch.</li>
+    <li>Bitten Sie Ihren Kontakt, den Fingerabdruck aus der eigenen App vorzulesen, persönlich oder am Telefon. Prüfen Sie auch, ob alle angezeigten Adressen zu Ihrem Kontakt gehören.</li>
+    <li>Stimmen sämtliche Vierergruppen überein und gehören alle Adressen zu Ihrem Kontakt, klicken Sie auf <b data-text="ui-verify-match"></b>. Der Schlüssel wird für diese Adressen als überprüft markiert.</li>
+    <li>Gehört eine der aufgeführten Adressen nicht zu Ihrem Kontakt, klicken Sie auf <b data-text="ui-verify-differ"></b>. Bestätigen Sie den Schlüssel auch dann nicht, wenn der Fingerabdruck übereinstimmt.</li>
 </ol>
-<aside class="warning">Vergleichen Sie den Fingerabdruck nicht mit einem per E-Mail gesendeten. Wer den Schlüssel in einer Nachricht ändern könnte, könnte auch den Fingerabdruck ändern.</aside>
-<p>Unterscheiden sich die Fingerabdrücke, klicken Sie auf <b data-text="ui-verify-differ"></b>. Ihr Schlüssel ist nicht der Ihres Kontakts: Entfernen Sie ihn und bitten Sie Ihren Kontakt, den Schlüssel erneut zu senden.</p>
-<p>Mit einem überprüften Schlüssel erstellte Signaturen werden grün angezeigt. Ein nicht überprüfter Schlüssel funktioniert weiterhin für die Verschlüsselung, seine Signaturen werden blau angezeigt.</p>
+<aside class="warning">Vergleichen Sie den Fingerabdruck nicht mit einer per E-Mail zugesandten Kopie. Wer den Schlüssel in einer Nachricht austauschen kann, könnte auch den Fingerabdruck ersetzen.</aside>
+<p>Weichen die Fingerabdrücke voneinander ab, klicken Sie auf <b data-text="ui-verify-differ"></b>. Entfernen Sie den falschen Schlüssel und bitten Sie Ihren Kontakt, den eigenen Schlüssel erneut zu senden.</p>
+<p>Gültige Signaturen des Absenders erscheinen grün, wenn Sie dessen Schlüssel überprüft haben. Ohne diese Überprüfung erscheinen sie blau. Der Schlüssel lässt sich trotzdem zum Verschlüsseln verwenden.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

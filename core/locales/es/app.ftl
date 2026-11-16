@@ -83,7 +83,6 @@ cmd-view-source = &Formato original del mensaje
 cmd-ai-agents = Agentes de &IA...
 cmd-options = &Opciones...
 cmd-message-rules = &Reglas de mensajes...
-# review: new
 cmd-encryption-keys = Claves de &cifrado...
 cmd-create-rule-from-message = Crear regla a partir del mensa&je...
 cmd-select-all = Seleccionar &todo
@@ -93,9 +92,7 @@ cmd-address-book = &Libreta de direcciones...
 cmd-add-sender-to-book = Añadir remitente a la li&breta de direcciones
 cmd-import-address-book = Importar &libreta de direcciones...
 cmd-export-address-book = &Exportar libreta de direcciones...
-# review: new
 cmd-export-setup = Exportar configuración y c&uentas...
-# review: new
 cmd-import-setup = Importar con&figuración y cuentas...
 
 ## The tray icon's menu
@@ -222,9 +219,7 @@ ui-signature = Firma
 ui-signature-hint = Se agrega a los mensajes nuevos, respuestas y reenvíos de esta cuenta.
 ui-signature-not-saved = No se pudo guardar la firma.
 ui-all-inboxes = Todas las bandejas de entrada
-# review: new
-ui-all-sent = Todos los enviados
-# review: new
+ui-all-sent = Todos los mensajes enviados
 ui-all-drafts = Todos los borradores
 ui-flagged-folder = Marcados
 ui-all-folders = Todas las carpetas
@@ -392,18 +387,12 @@ ui-menu-open = &Abrir
 ui-menu-flag = Marc&a
 ui-menu-view-source = Ver &código fuente
 ui-save-attachments = Guardar archivos adjuntos
-# review: new
 ui-attachment-open = Abrir
-# review: new
 ui-attachment-save-as = Guardar como...
-# review: new
 ui-attachment-save-all = Guardar todos...
-# review: new
 ui-attachments-strip = Archivos adjuntos
-# review: new
-ui-attachment-note-title = Abrir este archivo
-# review: new
-ui-attachment-program-tip = Abrir no está disponible para este tipo de archivo: puede ejecutar programas. Guárdelo para abrirlo usted mismo.
+ui-attachment-note-title = Abrir archivo adjunto
+ui-attachment-program-tip = Inbox Classic no abre este tipo de archivo porque puede ejecutar programas. Si lo necesita, guárdelo y ábralo por su cuenta.
 ui-clear-flag = &Quitar marca
 ui-button-move = &Mover
 ui-button-copy = &Copiar
@@ -559,9 +548,7 @@ ui-pictures-always-domain = Descargar siempre las imágenes de los remitentes de
 ui-pictures-unconfirmed = No se pudo verificar el dominio del remitente ({ $domain }). Por eso, las imágenes de este mensaje no se descargan automáticamente.
 ui-pictures-always-option = Descargar las imágenes de todos los mensajes
 ui-pictures-always-warning = Los remitentes podrán saber cuándo lee sus mensajes.
-# review: new
 ui-protection-details = &Detalles...
-# review: new
 ui-protection-details-title = Detalles de seguridad
 ui-download-heading = Descarga
 ui-download-ahead = Descargar mensajes con antelación:
@@ -608,168 +595,87 @@ ui-picture-not-picture = Este archivo no es una imagen PNG ni JPEG.
 ui-picture-too-large = Esta imagen es demasiado grande. Elija una de un máximo de 10 MB, con un ancho y un alto de hasta 8000 píxeles.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
-# review: new
 ui-keys-title = Claves de cifrado
-# review: new
-ui-keys-intro = Sus claves firman sus mensajes y abren el correo cifrado para usted. Las claves de sus contactos comprueban sus firmas y cifran el correo para ellos.
-# review: new
-ui-keys-empty = Aún no hay claves. Haga clic en Nueva clave para crear la suya, o en Importar para añadir una que ya tenga.
-# review: new
+ui-keys-intro = Con sus claves puede firmar mensajes y leer el correo cifrado que recibe. Las claves de sus contactos permiten comprobar sus firmas y cifrar los mensajes que les envía.
+ui-keys-empty = Aún no hay claves. Haga clic en «Nueva clave» para crear una o en «Importar» para añadir una que ya tenga.
 ui-keys-col-name = Nombre
-# review: new
 ui-keys-col-address = Dirección
-# review: new
 ui-keys-col-kind = Tipo
-# review: new
 ui-keys-col-status = Estado
-# review: new
 ui-keys-kind-own = Su clave
-# review: new
 ui-keys-kind-contact = Contacto
-# review: new
 ui-keys-status-verified = { $status }, verificada
-# review: new
 ui-keys-new = &Nueva clave...
-# review: new
 ui-keys-import = &Importar...
-# review: new
 ui-keys-export = &Exportar...
-# review: new
 ui-keys-backup = Copia de &seguridad...
-# review: new
 ui-keys-verify = &Verificar...
-# review: new
 ui-keys-new-title = Nueva clave
-# review: new
 ui-keys-new-for = Crear una clave para:
-# review: new
 ui-keys-new-make = &Crear clave
-# review: new
-ui-keys-no-account = Añada primero una cuenta de correo: la clave se crea para las direcciones de una cuenta.
-# review: new
-ui-keys-memory-only = Las contraseñas se guardan solo en memoria, así que una clave privada creada o importada ahora no se podrá usar después de cerrar Inbox Classic.
-# review: new
-ui-keys-backup-offer = Su nueva clave está lista. ¿Guardar ahora una copia de seguridad? Si este equipo se pierde o se restablece, la clave solo se puede recuperar de una copia.
-# review: new
+ui-keys-no-account = Añada primero una cuenta de correo. La clave se creará para las direcciones de esa cuenta.
+ui-keys-memory-only = La configuración actual guarda las contraseñas solo en memoria. Por eso, las claves privadas que cree o importe dejarán de estar disponibles al cerrar Inbox Classic.
+ui-keys-backup-offer = Su nueva clave está lista. ¿Desea guardar una copia de seguridad? Si pierde el equipo o lo restablece, necesitará esa copia para recuperar la clave.
 ui-keys-backup-now = &Guardar una copia...
-# review: new
 ui-keys-later = &Más tarde
-# review: new
 ui-keys-backup-title = Copia de seguridad de la clave
-# review: new
-ui-keys-backup-intro = La copia está protegida por una frase de contraseña. Guarde el archivo y la frase en lugares seguros distintos: necesita ambos para recuperar la clave.
-# review: new
-ui-keys-passphrase = &Frase de contraseña:
-# review: new
+ui-keys-backup-intro = La copia de seguridad está protegida con una contraseña. Guarde el archivo y la contraseña por separado, en lugares seguros. Necesitará ambos para recuperar la clave.
+ui-keys-passphrase = &Contraseña:
 ui-keys-passphrase-again = &Repítala:
-# review: new
-ui-keys-passphrase-differ = Las frases de contraseña no coinciden.
-# review: new
-ui-keys-passphrase-short = Use una frase de contraseña de al menos 8 caracteres.
-# review: new
+ui-keys-passphrase-differ = Las contraseñas no coinciden.
+ui-keys-passphrase-short = Use una contraseña de al menos 8 caracteres.
 ui-keys-backup-saved = Se guardó la copia de seguridad.
-# review: new
 ui-keys-import-title = Importar clave
-# review: new
-ui-keys-import-passphrase = Esta clave privada está protegida por una frase de contraseña. Escríbala para importar la clave:
-# review: new
+ui-keys-import-passphrase = Esta clave privada está protegida con una contraseña. Introdúzcala para importar la clave:
 ui-keys-file-filter = Claves OpenPGP
-# review: new
-ui-keys-use-for = ¿Usar esta clave para { $addresses }? Sus mensajes desde allí se firmarán con ella, y el correo cifrado para ella se podrá leer aquí.
-# review: new
+ui-keys-use-for = ¿Desea usar esta clave para las siguientes direcciones: { $addresses }? Se usará para firmar los mensajes que envíe desde ellas y le permitirá leer aquí los mensajes cifrados con esta clave.
 ui-keys-use = &Usarla
-# review: new
 ui-keys-not-now = &Ahora no
-# review: new
-ui-keys-remove-own = ¿Quitar su clave { $fingerprint }? El correo cifrado para ella ya no se podrá leer aquí, salvo que vuelva a importar su copia de seguridad.
-# review: new
-ui-keys-remove-contact = ¿Quitar la clave de { $name }? No se podrán comprobar sus firmas ni cifrar correo para esa persona hasta que vuelva a añadir su clave.
-# review: new
+ui-keys-remove-own = ¿Desea quitar su clave { $fingerprint }? Para volver a leer aquí los mensajes cifrados con esta clave, tendrá que importar su copia de seguridad.
+ui-keys-remove-contact = ¿Desea quitar la clave de { $name }? Hasta que vuelva a añadirla, no podrá comprobar las firmas de este contacto ni enviarle mensajes cifrados.
 ui-key-properties-title = Propiedades de la clave
-# review: new
 ui-key-names = Nombres:
-# review: new
-ui-key-fingerprint = Huella:
-# review: new
+ui-key-fingerprint = Huella digital:
 ui-key-status = Estado:
-# review: new
 ui-key-created = Creada:
-# review: new
 ui-key-expires = Caduca:
-# review: new
 ui-key-never = Nunca
-# review: new
 ui-key-algorithm = Algoritmo:
-# review: new
 ui-key-source = Origen:
-# review: new
 ui-key-addresses = Direcciones:
-# review: new
 ui-key-address-verified = { $address } (verificada)
-# review: new
 ui-key-address-not-verified = { $address } (sin verificar)
-# review: new
 ui-verify-title = Verificar clave
-# review: new
-ui-verify-intro = Pida a { $name } que le lea la huella de su clave desde su propia aplicación, en persona o por teléfono. No la compare con una enviada por correo: quien pudiera cambiar la clave también podría cambiar eso.
-# review: new
-ui-verify-fingerprint = La huella de la clave que tiene:
-# review: new
+ui-verify-intro = Compare la huella digital con { $name }, en persona o por teléfono. Pídale que la lea desde su propia aplicación. No use una huella enviada por correo: quien pudiera sustituir la clave también podría sustituir esa huella.
+ui-verify-fingerprint = Huella digital de la clave guardada:
 ui-verify-marks = { $count ->
-    [one] Si coinciden, la clave se marca como suya para { $addresses }. Si esa dirección no es suya, haga clic en «No coinciden».
-   *[other] Si coinciden, la clave se marca como suya para { $addresses }. Si alguna de estas direcciones no es suya, haga clic en «No coinciden».
+    [one] Si las huellas coinciden, la clave se marcará como verificada para esta dirección: { $addresses }. Si la dirección no pertenece a su contacto, haga clic en «No coinciden».
+   *[other] Si las huellas coinciden, la clave se marcará como verificada para estas direcciones: { $addresses }. Si alguna no pertenece a su contacto, haga clic en «No coinciden».
 }
-# review: new
 ui-verify-match = &Coinciden
-# review: new
 ui-verify-differ = &No coinciden
-# review: new
-ui-verify-differs = La clave que tiene no es la de { $name }. Quítela y pídale su clave de nuevo.
-# review: new
+ui-verify-differs = La clave guardada no coincide con la de { $name }. Quítela y pida a su contacto que vuelva a enviarle su clave.
 ui-verify-unmark = Marcar como &no verificada
-# review: new
 ui-account-security = Seguridad
-# review: new
-ui-account-security-intro = Con una clave, sus mensajes se pueden firmar y otras personas le pueden enviar correo cifrado.
-# review: new
+ui-account-security-intro = Con una clave puede firmar sus mensajes y recibir correo cifrado.
 ui-account-key = &Clave de esta cuenta:
-# review: new
 ui-account-key-none = Ninguna
-# review: new
 ui-account-key-new = &Nueva clave...
-# review: new
 ui-account-autocrypt = &Enviar mi clave pública con mis mensajes (Autocrypt)
-# review: new
 ui-contact-key = Clave de cifrado:
-# review: new
 ui-contact-key-none = Sin clave
-# review: new
 ui-contact-key-use-new = &Usar la nueva clave
-# review: new
 ui-contact-key-keep = &Mantener la actual
-# review: new
 ui-setup-export-title = Exportar configuración y cuentas
-# review: new
 ui-setup-import-title = Importar configuración y cuentas
-# review: new
-ui-setup-export-intro = Elija qué llevar a otro equipo. El archivo no contiene mensajes: se descargan de nuevo allí.
-# review: new
-ui-setup-use-passphrase = &Proteger el archivo con una frase de contraseña
-# review: new
-ui-setup-passphrase-note = Con una frase de contraseña, el archivo se cifra y contiene también sus contraseñas, inicios de sesión y claves privadas. Sin ella, cada cuenta pide su contraseña en el otro equipo.
-# review: new
+ui-setup-export-intro = Elija los datos que desea transferir a otro equipo. Los mensajes se descargarán de nuevo en ese equipo; no se incluyen en el archivo.
+ui-setup-use-passphrase = &Proteger el archivo con una contraseña
+ui-setup-passphrase-note = Si usa una contraseña, el archivo se cifra e incluye también las contraseñas guardadas, los datos de acceso y las claves privadas. Si no la usa, tendrá que volver a iniciar sesión en sus cuentas desde el otro equipo.
 ui-setup-export-button = &Exportar...
-# review: new
 ui-setup-file-filter = Configuración y cuentas de Inbox Classic
-# review: new
-ui-setup-ask-passphrase = Este archivo está protegido por una frase de contraseña. Escríbala para ver lo que contiene:
-# review: new
-ui-setup-import-intro = Elija qué importar. Las cuentas que ya están en este equipo se dejan como están.
-# review: new
-ui-setup-from = Guardado por Inbox Classic { $version } el { $date }.
-# review: new
+ui-setup-ask-passphrase = Este archivo está protegido con una contraseña. Introdúzcala para ver su contenido:
+ui-setup-import-intro = Elija los datos que desea importar. Las cuentas que ya estén configuradas en este equipo no se modificarán.
+ui-setup-from = Guardado con Inbox Classic { $version } el { $date }.
 ui-setup-import-button = &Importar
-# review: new
 ui-setup-done = Listo
-# review: new
 ui-setup-first-run = Importar configuración y cuentas de otro equipo...

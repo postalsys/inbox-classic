@@ -1,17 +1,16 @@
-<!--review--><h1>Opções da linha de comandos</h1>
+<h1>Opções da linha de comandos</h1>
 <p class="summary">Opções para iniciar o Inbox Classic a partir de um terminal, para testes e para agentes de IA.</p>
 <p>Inicie o programa <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> com estas opções:</p>
 <table>
     <tr><th>Opção</th><th>Função</th></tr>
-    <tr><td><code>--store &lt;file&gt;</code></td><td>Usa outro armazenamento de correio, como um para testes</td></tr>
+    <tr><td><code>--store &lt;file&gt;</code></td><td>Usa outra base de dados de correio, por exemplo para testes</td></tr>
     <tr><td><code>--memory-passwords</code></td><td>Guarda as palavras-passe apenas durante esta execução, nunca no armazenamento de palavras-passe do sistema</td></tr>
     <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Aceita apenas o certificado de servidor deste ficheiro (PEM ou DER), para um servidor de teste com um certificado autoassinado</td></tr>
-    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Escreve a página de um início de sessão no browser neste ficheiro em vez de abrir o browser</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Guarda neste ficheiro o URL da página de início de sessão, em vez de abrir o browser</td></tr>
     <tr><td><code>--language &lt;code&gt;</code></td><td>Mostra as janelas neste idioma durante esta execução, como <code>de</code></td></tr>
-    <tr><td><code>--background</code></td><td>Inicia sem a janela</td></tr>
-    <tr><td><code>--mcp</code></td><td>Liga um agente de IA ao Inbox Classic. É o programa do agente que o inicia, não o utilizador</td></tr>
+    <tr><td><code>--background</code></td><td>Inicia em segundo plano, sem mostrar a janela principal</td></tr>
+    <tr><td><code>--mcp</code></td><td>Liga um agente de IA ao Inbox Classic. Esta opção é usada pelo programa do agente para estabelecer a ligação</td></tr>
     <tr><td><code>--version</code></td><td>Mostra a versão e termina</td></tr>
 </table>
 <p>Uma ligação <code>mailto:</code> indicada como argumento abre uma nova mensagem, tal como uma ligação de e-mail.</p>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->
