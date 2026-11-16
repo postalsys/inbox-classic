@@ -72,8 +72,13 @@ enum Languages {
     static func choose(_ code: String?) {
         guard code != chosen else { return }
         chosen = code
+        offerRestart()
+    }
+
+    /// the app started again when the user wants it now, for the language chosen to count
+    static func offerRestart() {
         // asked only when the windows would change: System default that is German, then Deutsch, needs no new start
-        guard (code ?? system) != current else { return }
+        guard (chosen ?? system) != current else { return }
         if ask(Text.macRestartQuestion.text, yes: Text.uiRestartNow.text, no: Text.uiRestartLater.text,
                style: .information) {
             AppDelegate.shared?.restart()
@@ -345,10 +350,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         core.darkMessages = darkMessages.state == .on
         Preview.dark = core.darkMessages
         // the messages shown now made again as the setting has it
-        AppDelegate.shared?.main?.mailbox.reader.reload()
-        for window in MessageWindow.open {
-            window.reader.reload()
-        }
+        AppDelegate.shared?.main?.reloadMessagesShown()
     }
 
     @objc func downloadAheadChosen() {

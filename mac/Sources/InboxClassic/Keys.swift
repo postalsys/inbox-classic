@@ -96,10 +96,8 @@ enum KeyActions {
 
     /// Back Up: a passphrase typed twice, then where to save the key protected by it
     static func backup(core: Core, fingerprint: String) {
-        let check = { (typed: [String]) -> String? in core.pgpPassphraseProblem(typed[0], typed[1]) }
         guard let passphrase = PassphraseWindow(title: Text.uiKeysBackupTitle.text, intro: Text.uiKeysBackupIntro.text,
-                                                labels: [Text.uiKeysPassphrase.text, Text.uiKeysPassphraseAgain.text],
-                                                problem: nil, id: "key.backup", check: check).run() else { return }
+                                                id: "key.backup", twice: true).run() else { return }
         guard let url = saveFilePanel(name: core.pgpFileName(fingerprint, private: true), title: Text.uiKeysBackupTitle.text,
                                       types: armoredTypes) else { return }
         switch core.pgpBackup(fingerprint, passphrase: passphrase) {
@@ -124,8 +122,8 @@ enum KeyActions {
         var (outcome, message) = core.pgpImport(data, passphrase: nil)
         while outcome == PE_IMPORT_OUTCOME_NEEDS_PASSPHRASE || outcome == PE_IMPORT_OUTCOME_WRONG_PASSPHRASE {
             let problem = outcome == PE_IMPORT_OUTCOME_WRONG_PASSPHRASE ? message : nil
-            guard let passphrase = PassphraseWindow(title: title, intro: Text.uiKeysImportPassphrase.text, labels: [""],
-                                                    problem: problem, id: "key.import", check: nil).run() else { return false }
+            guard let passphrase = PassphraseWindow(title: title, intro: Text.uiKeysImportPassphrase.text, problem: problem,
+                                                    id: "key.import").run() else { return false }
             (outcome, message) = core.pgpImport(data, passphrase: passphrase)
         }
         guard outcome == PE_IMPORT_OUTCOME_IMPORTED else {
@@ -168,77 +166,185 @@ enum KeyActions {
 
 // ---- a passphrase typed ----
 
-/// A small window asking for a passphrase, once or twice, in hidden fields; `check` refuses what was typed with the
-/// reason, and the fields are emptied once it is closed
+/// A small spinner beside a window's buttons while the core works for it, taking its room when still
+@MainActor
+func busySpinner() -> NSProgressIndicator {
+    let spinner = NSProgressIndicator()
+    spinner.style = .spinning
+    spinner.controlSize = .small
+    spinner.isDisplayedWhenStopped = false
+    return spinner
+}
+
+/// A passphrase typed twice (a key backup's, a setup file's): two hidden fields with their labels, and under them
+/// what the core says of what is typed (too short, not the same) while it is typed
+@MainActor
+final class PassphrasePair: NSObject, NSTextFieldDelegate {
+    let fields = [NSSecureTextField(string: ""), NSSecureTextField(string: "")]
+    let view: NSStackView
+    private let feedback = NSTextField(wrappingLabelWithString: "")
+    /// 8 characters or more, the same twice
+    private(set) var acceptable = false
+    /// what is typed changed
+    var changed: (() -> Void)?
+
+    init(id: String, width: CGFloat) {
+        let labels = [Text.uiKeysPassphrase.text, Text.uiKeysPassphraseAgain.text]
+        let grid = NSGridView(views: zip(labels, fields).map { [formLabel($0.0), $0.1] })
+        grid.column(at: 0).xPlacement = .trailing
+        grid.column(at: 1).xPlacement = .fill
+        grid.rowAlignment = .firstBaseline
+        grid.rowSpacing = 8
+        grid.columnSpacing = 8
+        let font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+        feedback.isSelectable = false
+        feedback.textColor = .systemRed
+        feedback.font = font
+        feedback.setAccessibilityIdentifier("\(id).problem")
+        // room for the longest it says, so the window does not grow while one types
+        let longest = NSTextField(wrappingLabelWithString: taken(pe_passphrase_feedback_longest()) ?? "")
+        longest.font = font
+        longest.preferredMaxLayoutWidth = width
+        view = NSStackView(views: [grid, feedback])
+        view.orientation = .vertical
+        view.alignment = .leading
+        view.spacing = 8
+        grid.widthAnchor.constraint(equalToConstant: width).isActive = true
+        feedback.widthAnchor.constraint(equalToConstant: width).isActive = true
+        feedback.heightAnchor.constraint(greaterThanOrEqualToConstant: ceil(longest.fittingSize.height)).isActive = true
+        super.init()
+        for (index, field) in fields.enumerated() {
+            field.delegate = self
+            field.setAccessibilityIdentifier("\(id).field.\(index)")
+            field.setAccessibilityLabel(labels[index])
+        }
+        update()
+    }
+
+    var passphrase: String { fields[0].stringValue }
+
+    var isEnabled: Bool {
+        get { fields[0].isEnabled }
+        set { fields.forEach { $0.isEnabled = newValue } }
+    }
+
+    private func update() {
+        var ok = false
+        let said = fields[0].stringValue.withCString { first in
+            fields[1].stringValue.withCString { again in taken(pe_passphrase_feedback(first, again, &ok)) }
+        }
+        feedback.stringValue = said ?? ""
+        acceptable = ok
+    }
+
+    func controlTextDidChange(_ notification: Notification) {
+        update()
+        changed?()
+    }
+
+    /// what was typed taken out of the fields
+    func wipe() {
+        fields.forEach { $0.stringValue = "" }
+        update()
+    }
+}
+
+/// A small window asking for a passphrase. Twice (`twice`): with the core's words of what is typed, OK once it can be
+/// used. Once: `problem` (why the last was refused) over the field, and when `open` is given, OK tries the passphrase
+/// with it off the window thread, the window waiting, and stays open saying why when it does not open. The fields are
+/// emptied once it is closed.
 @MainActor
 final class PassphraseWindow: NSObject {
     private let window: NSWindow
-    private var fields: [NSSecureTextField] = []
-    private let check: (([String]) -> String?)?
+    private var field: NSSecureTextField?
+    private var pair: PassphrasePair?
+    private let problem = NSTextField(wrappingLabelWithString: "")
+    private let open: ((String, @escaping @MainActor (String?) -> Void) -> Void)?
+    private var ok: NSButton!
+    private var cancel: NSButton!
+    private let spinner = busySpinner()
     private var typed: String?
 
-    init(title: String, intro: String, labels: [String], problem: String?, id: String, help: String = "encryption-keys",
-         check: (([String]) -> String?)?) {
-        self.check = check
+    init(title: String, intro: String, problem refused: String? = nil, id: String, help: String = "encryption-keys",
+         twice: Bool = false, open: ((String, @escaping @MainActor (String?) -> Void) -> Void)? = nil) {
+        self.open = open
         window = keyWindow(title, id: id)
         super.init()
+        let width: CGFloat = 380
         var parts: [NSView] = [wrappingLabel(intro)]
         // why the last one was refused (a wrong passphrase), over the field
-        if let problem {
-            let said = wrappingLabel(problem)
-            said.textColor = .systemRed
-            said.setAccessibilityIdentifier("\(id).problem")
-            parts.append(said)
-        }
-        for index in labels.indices {
-            let field = NSSecureTextField(string: "")
-            field.setAccessibilityIdentifier("\(id).field.\(index)")
-            field.setAccessibilityLabel(labels[index].isEmpty ? intro : labels[index])
-            fields.append(field)
-        }
-        if labels.count == 1 && labels[0].isEmpty {
-            parts.append(fields[0])
+        problem.isSelectable = false
+        problem.textColor = .systemRed
+        problem.stringValue = refused ?? ""
+        problem.setAccessibilityIdentifier("\(id).problem")
+        if twice {
+            let pair = PassphrasePair(id: id, width: width)
+            pair.changed = { [weak self] in self?.ok.isEnabled = pair.acceptable }
+            self.pair = pair
+            parts.append(pair.view)
         } else {
-            let labelled = NSGridView(views: zip(labels, fields).map { [formLabel($0.0), $0.1] })
-            labelled.column(at: 0).xPlacement = .trailing
-            labelled.rowAlignment = .firstBaseline
-            labelled.rowSpacing = 8
-            labelled.columnSpacing = 8
-            labelled.column(at: 1).xPlacement = .fill
-            parts.append(labelled)
+            if refused != nil || open != nil {
+                parts.append(problem)
+            }
+            let field = NSSecureTextField(string: "")
+            field.setAccessibilityIdentifier("\(id).field.0")
+            field.setAccessibilityLabel(intro)
+            self.field = field
+            parts.append(field)
         }
-        let cancel = keyButton(Text.uiCancel.text, self, #selector(cancelled), "\(id).cancel")
+        cancel = keyButton(Text.uiCancel.text, self, #selector(cancelled), "\(id).cancel")
         cancel.keyEquivalent = "\u{1b}"
-        let ok = keyButton(Text.uiOk.text, self, #selector(okClicked), "\(id).ok")
+        ok = keyButton(Text.uiOk.text, self, #selector(okClicked), "\(id).ok")
         ok.keyEquivalent = "\r"
+        ok.isEnabled = pair?.acceptable ?? true
         let buttons = buttonRow([cancel, ok], help: help)
+        buttons.insertArrangedSubview(spinner, at: buttons.arrangedSubviews.count - 2)
         parts.append(buttons)
-        let stack = windowStack(parts, in: window, width: 380)
+        let stack = windowStack(parts, in: window, width: width)
         stack.setCustomSpacing(20, after: parts[parts.count - 2])
-        window.initialFirstResponder = fields.first
+        window.initialFirstResponder = pair?.fields[0] ?? field
     }
 
     @objc private func okClicked() {
-        let values = fields.map(\.stringValue)
-        if let problem = check?(values) {
-            inform(problem, title: window.title, style: .warning)
-            // typed again from the first field
-            fields.forEach { $0.stringValue = "" }
-            window.makeFirstResponder(fields.first)
+        let passphrase = pair?.passphrase ?? field?.stringValue ?? ""
+        guard pair?.acceptable ?? true else { return }
+        guard let open else {
+            typed = passphrase
+            NSApp.stopModal()
             return
         }
-        typed = values.first
-        NSApp.stopModal()
+        setBusy(true)
+        open(passphrase) { [self] refused in
+            setBusy(false)
+            guard let refused else {
+                typed = passphrase
+                NSApp.stopModal()
+                return
+            }
+            // typed again
+            problem.stringValue = refused
+            field?.stringValue = ""
+            window.makeFirstResponder(field)
+        }
+    }
+
+    /// while the passphrase is tried: nothing to type or press, the spinner turning
+    private func setBusy(_ busy: Bool) {
+        field?.isEnabled = !busy
+        ok.isEnabled = !busy
+        cancel.isEnabled = !busy
+        busy ? spinner.startAnimation(nil) : spinner.stopAnimation(nil)
     }
 
     @objc private func cancelled() {
         NSApp.stopModal()
     }
 
-    /// what was typed in the first field, nil when cancelled
+    /// what was typed (in the first field), nil when cancelled
     func run() -> String? {
         runKeyWindow(window)
-        fields.forEach { $0.stringValue = "" }
+        field?.stringValue = ""
+        pair?.wipe()
         return typed
     }
 }

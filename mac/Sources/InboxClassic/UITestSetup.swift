@@ -54,12 +54,12 @@ extension UITest {
         }
         command(.exportSetup)
         guard let export = await waitWindow("setup.export", 10) else { throw Failed(description: "no export window") }
-        let flags = setupParts.map(\.flag)
+        let flags = SetupCalls.parts.map(\.part)
         let boxes: [NSButton] = flags.compactMap { find("setup.part.\($0)", in: export) }
-        check(boxes.count == 8 && boxes.allSatisfy { $0.state == .on },
+        check(boxes.count == 8 && flags.count == 8 && boxes.allSatisfy { $0.state == .on },
               "File > Export Settings and Accounts lists the parts, all chosen (\(boxes.map(\.title)))")
         let use: NSButton? = find("setup.passphrase.use", in: export)
-        let field = { (index: Int) -> NSSecureTextField? in self.find("setup.passphrase.\(index)", in: export) }
+        let field = { (index: Int) -> NSSecureTextField? in self.find("setup.passphrase.field.\(index)", in: export) }
         let ok: NSButton? = find("setup.export.ok", in: export)
         check(use?.state == .off && field(0)?.isEnabled == false && ok?.isEnabled == true,
               "the passphrase is off, its fields greyed, Export can be used")
@@ -71,6 +71,8 @@ extension UITest {
         press(use)
         _ = await waitUntil(5) { field(0)?.isEnabled == true }
         type("short", into: field(0))
+        let early = words("setup.passphrase.problem", in: export)
+        check(early.contains("at least 8") && ok?.isEnabled == false, "a short one is said to be short at once (\(early))")
         type("short", into: field(1))
         let short = words("setup.passphrase.problem", in: export)
         check(short.contains("at least 8") && ok?.isEnabled == false, "a short passphrase is refused (\(short))")
@@ -85,7 +87,7 @@ extension UITest {
         type("correct horse battery", into: field(1))
         check(words("setup.passphrase.problem", in: export).isEmpty && ok?.isEnabled == true,
               "the same twice is taken, Export can be used")
-        checkTabs(export, ["setup.passphrase.0", "setup.passphrase.1"], "Tab goes from the passphrase to the second")
+        checkTabs(export, ["setup.passphrase.field.0", "setup.passphrase.field.1"], "Tab goes from the passphrase to the second")
         press(ok)
         guard let written = await waitWindow("setup.done", 20) else { throw Failed(description: "no export summary") }
         let summary = views(NSTextField.self, in: written.contentView).map(\.stringValue)
@@ -94,7 +96,9 @@ extension UITest {
         press(find("setup.done.ok", in: written))
         _ = await waitUntil(5) { !written.isVisible }
         TestHooks.save = nil
-        check(savedName == "Inbox Classic.inboxclassic", "the save panel starts with Inbox Classic.inboxclassic (\(savedName ?? ""))")
+        let defaultName = taken(pe_setup_default_name()) ?? ""
+        check(savedName == defaultName && defaultName.hasSuffix(".inboxclassic"),
+              "the save panel starts with the core's name for it (\(savedName ?? ""))")
         let head = String(decoding: (try? Data(contentsOf: file))?.prefix(40) ?? Data(), as: UTF8.self)
         check(head.hasPrefix("-----BEGIN PGP MESSAGE-----"), "the file is written encrypted, an OpenPGP message")
 
@@ -109,17 +113,20 @@ extension UITest {
         check(true, "File > Import Settings and Accounts asks for the file's passphrase")
         type("wrong horse battery", into: find("setup.passphrase.field.0", in: ask))
         press(find("setup.passphrase.ok", in: ask))
-        guard let again = await waitFor(10, { window("setup.passphrase").flatMap { $0 === ask ? nil : $0 } }) else {
-            throw Failed(description: "no passphrase asked again")
-        }
-        let wrong = words("setup.passphrase.problem", in: again)
-        check(wrong.contains("not the passphrase"), "a wrong one is refused and it asks again (\(wrong))")
-        type("correct horse battery", into: find("setup.passphrase.field.0", in: again))
-        press(find("setup.passphrase.ok", in: again))
+        // tried off the window thread, the window waiting, then saying why it stays
+        _ = await waitUntil(20) { !self.words("setup.passphrase.problem", in: ask).isEmpty }
+        let wrong = words("setup.passphrase.problem", in: ask)
+        let askField: NSSecureTextField? = find("setup.passphrase.field.0", in: ask)
+        check(wrong.contains("not the passphrase") && ask.isVisible && askField?.isEnabled == true
+              && askField?.stringValue.isEmpty == true,
+              "a wrong one is refused in the window, which asks again (\(wrong))")
+        type("correct horse battery", into: askField)
+        press(find("setup.passphrase.ok", in: ask))
         TestHooks.open = nil
 
         // what it holds
         guard let choose = await waitWindow("setup.import", 10) else { throw Failed(description: "no import window") }
+        _ = await waitUntil(5) { choose.isKeyWindow }
         let from = words("setup.import.from", in: choose)
         check(from.hasPrefix("Saved by Inbox Classic \(Core.version) on "), "it says when and by which version it was saved (\(from))")
         let parts: [NSButton] = flags.compactMap { find("setup.part.\($0)", in: choose) }
@@ -136,6 +143,9 @@ extension UITest {
         check(contacts.contains("contact") && keys.contains("key"), "with what each holds (\(contacts); \(keys))")
         let accountBoxes: [NSButton] = (0..<accountsBefore.count).compactMap { find("setup.account.\($0)", in: choose) }
         let notes = (0..<accountsBefore.count).map { words("setup.account.\($0).note", in: choose) }
+        let servers = (0..<accountsBefore.count).map { words("setup.account.\($0).servers", in: choose) }
+        check(accountBoxes.allSatisfy { $0.title.contains("<testuser") } && servers.allSatisfy { $0.contains("127.0.0.1") },
+              "each account shows its title and address and the core's line of its servers (\(servers))")
         check(accountBoxes.count == accountsBefore.count && accountBoxes.count > 1 && accountBoxes.allSatisfy { $0.state == .off && !$0.isEnabled }
               && notes.allSatisfy { $0.contains("already") },
               "the accounts are listed, unchecked and off as already here (\(accountBoxes.map(\.title)), \(notes))")

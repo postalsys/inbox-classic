@@ -2,84 +2,79 @@
 // sealed with a passphrase when one is typed; File > Import Settings and Accounts reads one (its passphrase asked
 // first), shows what it holds, and imports the parts and accounts chosen. The core reads, checks and writes the file
 // and says everything in words; these windows hand it the choices and the app's own preferences, which they take back
-// and apply after an import.
+// and apply after an import. What else an import changes the windows hear of through the core's events. Reading a
+// sealed file, writing one and importing (which reaches the sign-in apps' issuers) run off the window thread.
 import AppKit
 import CInboxClassic
 import UniformTypeIdentifiers
 
-/// A line of words the core gave: what a part holds, what was added or skipped, or a note
+/// A line of words the core gave: a part with its name and what it holds, what was added or skipped, or a note
 struct SetupLine {
     let kind: PeSetupLineKind
     /// the `PE_SETUP_*` flag of a part line, 0 for the others
     let part: UInt32
+    let name: String
     let text: String
 }
 
 /// An account of a setup file as the import window lists it
 struct SetupAccount {
     let index: Int
-    let email: String
-    let imap: String
-    let smtp: String
-    let signIn: String
-    /// set up here already: skipped
-    let here: Bool
-    /// why it can not be imported, nil when it can
-    let problem: String?
+    /// "Work <ann@example.com>"
+    let label: String
+    /// its servers and how it signs in, one line
+    let servers: String
+    /// an import can add it; otherwise `note` says why not
+    let importable: Bool
+    /// it can not be imported for a reason other than being here already
+    let problem: Bool
     let note: String
-
-    /// it can be chosen
-    var importable: Bool { !here && problem == nil }
 }
 
-/// The parts of a file in the order the windows list them (the core's, which the import window follows), with their
-/// names
-@MainActor
-let setupParts: [(flag: UInt32, name: Text)] = [
-    (UInt32(PE_SETUP_ACCOUNTS), .uiSetupPartAccounts), (UInt32(PE_SETUP_SIGN_IN_APPS), .uiSetupPartSignInApps),
-    (UInt32(PE_SETUP_SETTINGS), .uiSetupPartSettings), (UInt32(PE_SETUP_PREFERENCES), .uiSetupPartPreferences),
-    (UInt32(PE_SETUP_CONTACTS), .uiSetupPartContacts), (UInt32(PE_SETUP_KEYS), .uiSetupPartKeys),
-    (UInt32(PE_SETUP_RULES), .uiSetupPartRules), (UInt32(PE_SETUP_TRUSTED_SENDERS), .uiSetupPartTrusted),
-]
+/// The lines of a `PeSetupLines`
+private func setupLines(_ lines: OpaquePointer) -> [SetupLine] {
+    (0..<pe_setup_lines_count(lines)).compactMap { pe_setup_lines_get(lines, $0)?.pointee }.map {
+        SetupLine(kind: $0.kind, part: $0.part, name: text($0.name), text: text($0.text))
+    }
+}
 
-/// A setup file read: what it holds; the handle is freed with this
-final class SetupFile {
+/// A setup file read: what it holds, read once; the handle is freed with this
+final class SetupFile: @unchecked Sendable {
     let handle: OpaquePointer
+    let info: PeSetupInfo?
+    let accounts: [SetupAccount]
+    /// the parts that hold something, with what
+    let parts: [SetupLine]
+    /// what it holds that can not be used and is left out
+    let notes: [String]
 
     init(_ handle: OpaquePointer) {
         self.handle = handle
+        info = pe_setup_file_info(handle)?.pointee
+        accounts = (0..<pe_setup_file_account_count(handle)).compactMap { pe_setup_file_account(handle, $0)?.pointee }.map {
+            SetupAccount(index: $0.index, label: text($0.label), servers: text($0.servers), importable: $0.importable,
+                         problem: $0.problem != nil, note: text($0.note))
+        }
+        parts = (0..<pe_setup_file_part_count(handle)).compactMap { pe_setup_file_part(handle, $0)?.pointee }.map {
+            SetupLine(kind: $0.kind, part: $0.part, name: text($0.name), text: text($0.text))
+        }
+        if let list = pe_setup_file_notes(handle) {
+            notes = (0..<pe_text_list_count(list)).map { text(pe_text_list_get(list, $0)) }
+            pe_text_list_free(list)
+        } else {
+            notes = []
+        }
     }
 
     deinit {
         pe_setup_file_free(handle)
     }
 
-    var info: PeSetupInfo? { pe_setup_file_info(handle)?.pointee }
-
-    var accounts: [SetupAccount] {
-        (0..<pe_setup_file_account_count(handle)).compactMap { pe_setup_file_account(handle, $0)?.pointee }.map {
-            SetupAccount(index: $0.index, email: text($0.email), imap: text($0.imap), smtp: text($0.smtp),
-                         signIn: text($0.sign_in), here: $0.here, problem: $0.problem.map { String(cString: $0) },
-                         note: text($0.note))
-        }
-    }
-
-    var parts: [SetupLine] {
-        (0..<pe_setup_file_part_count(handle)).compactMap { pe_setup_file_part(handle, $0)?.pointee }.map {
-            SetupLine(kind: $0.kind, part: $0.part, text: text($0.text))
-        }
-    }
-
-    /// the app preferences it carries, by their shared names, values checked
-    var prefs: [(name: String, value: String)] {
+    /// the app preferences it carries, by their shared names, ready to apply; those that count after a restart last
+    var prefs: [(name: String, value: String, restart: Bool)] {
         (0..<pe_setup_file_pref_count(handle)).compactMap { pe_setup_file_pref(handle, $0)?.pointee }.map {
-            (text($0.name), text($0.value))
+            (text($0.name), text($0.value), $0.restart)
         }
-    }
-
-    /// what it holds that can not be used and is left out
-    var notes: [String] {
-        (0..<pe_setup_file_note_count(handle)).map { text(pe_setup_file_note(handle, $0)) }
     }
 }
 
@@ -90,18 +85,19 @@ enum SetupRead {
     case invalid(String)
 }
 
-/// The lines of a `PeSetupLines`, freed
-private func setupLines(_ lines: OpaquePointer) -> [SetupLine] {
-    (0..<pe_setup_lines_count(lines)).compactMap { pe_setup_lines_get(lines, $0)?.pointee }.map {
-        SetupLine(kind: $0.kind, part: $0.part, text: text($0.text))
+/// The core's calls of the setup file, on its handle, which may be used from any thread
+enum SetupCalls {
+    /// every part with its flag and name, in the order the windows list them
+    static var parts: [SetupLine] {
+        guard let lines = pe_setup_parts() else { return [] }
+        defer { pe_setup_lines_free(lines) }
+        return setupLines(lines)
     }
-}
 
-extension Core {
-    /// writes the `parts` to `url`, sealed with `passphrase` when there is one, with the app's preferences: what each
-    /// part holds, or why not
-    func exportSetup(parts: UInt32, passphrase: String?, prefs: [(name: String, value: String)],
-                     to url: URL) -> Result<[SetupLine], Refusal> {
+    /// writes the `parts` to `path`, sealed with `passphrase` when there is one, with the app's preferences: what
+    /// each part holds, or why not
+    static func export(_ core: OpaquePointer, parts: UInt32, passphrase: String?, prefs: [(name: String, value: String)],
+                       to path: String) -> Result<[SetupLine], Refusal> {
         guard let export = pe_setup_export_new(parts) else { return .failure(Refusal("")) }
         defer { pe_setup_export_free(export) }
         if let passphrase {
@@ -113,20 +109,21 @@ extension Core {
             _ = pe_setup_export_set_pref(export, pref.name, pref.value)
         }
         var error: UnsafeMutablePointer<CChar>?
-        guard let lines = pe_setup_export_write(handle, export, url.path, &error) else {
+        guard let lines = pe_setup_export_write(core, export, path, &error) else {
             return .failure(Refusal(taken(error) ?? ""))
         }
         defer { pe_setup_lines_free(lines) }
         return .success(setupLines(lines))
     }
 
-    /// the file at `url`, opened with `passphrase` when it is sealed
-    func readSetup(_ url: URL, passphrase: String?) -> SetupRead {
+    /// the file at `path`, opened with `passphrase` when it is sealed (a passphrase is worked through Argon2: off
+    /// the window thread; without one a sealed file is told from its first bytes)
+    static func read(_ core: OpaquePointer, _ path: String, passphrase: String?) -> SetupRead {
         var kind = PE_SETUP_ERROR_NONE
         var error: UnsafeMutablePointer<CChar>?
         let strings = CStrings()
         defer { strings.wipe() }
-        let file = pe_setup_read(handle, url.path, passphrase.map { strings.add($0) }, &kind, &error)
+        let file = pe_setup_read(core, path, passphrase.map { strings.add($0) }, &kind, &error)
         let reason = taken(error) ?? ""
         if let file { return .file(SetupFile(file)) }
         switch kind {
@@ -136,11 +133,13 @@ extension Core {
         }
     }
 
-    /// imports `parts` of `file` and the accounts at `accounts`: what was done and the accounts added, or why not
-    func importSetup(_ file: SetupFile, parts: UInt32, accounts: [Int]) -> Result<([SetupLine], [Int64]), Refusal> {
+    /// imports `parts` of `file` and the accounts at `accounts` (Accounts follows from them): what was done and the
+    /// accounts added, or why not. Blocks while sign-in apps' issuers are read: off the window thread.
+    static func importing(_ core: OpaquePointer, _ file: SetupFile, parts: UInt32,
+                          accounts: [Int]) -> Result<([SetupLine], [Int64]), Refusal> {
         var error: UnsafeMutablePointer<CChar>?
         let lines = accounts.withUnsafeBufferPointer {
-            pe_setup_import(handle, file.handle, parts, $0.baseAddress, $0.count, &error)
+            pe_setup_import(core, file.handle, parts, $0.baseAddress, $0.count, &error)
         }
         guard let lines else { return .failure(Refusal(taken(error) ?? "")) }
         defer { pe_setup_lines_free(lines) }
@@ -154,13 +153,14 @@ extension Core {
 
 @MainActor
 private enum SetupPrefs {
+    typealias Access = (get: (AppDelegate) -> String, set: (AppDelegate, String) -> Void)
+
     /// each portable preference of this app: how to read it and how to set it
-    private static func bool(_ path: ReferenceWritableKeyPath<AppDelegate, Bool>)
-        -> (get: (AppDelegate) -> String, set: (AppDelegate, String) -> Void) {
+    private static func bool(_ path: ReferenceWritableKeyPath<AppDelegate, Bool>) -> Access {
         ({ $0[keyPath: path] ? "1" : "0" }, { app, value in app[keyPath: path] = value == "1" })
     }
 
-    private static var all: [String: (get: (AppDelegate) -> String, set: (AppDelegate, String) -> Void)] {
+    private static var all: [String: Access] {
         [
             "notify_new_mail": bool(\.notify),
             "codes_in_notifications": bool(\.codesInNotifications),
@@ -170,10 +170,9 @@ private enum SetupPrefs {
             "folder_list": bool(\.folderList),
             "list_pictures": bool(\.listPictures),
             "layout": ({ String($0.layoutMode.rawValue) }, { app, value in
-                if let mode = UInt32(value), mode <= 2 { app.layoutMode = PeLayoutMode(rawValue: mode) }
+                app.layoutMode = PeLayoutMode(rawValue: UInt32(value) ?? 0)
             }),
-            // the language counts once the app starts again: set last, which asks
-            "language": ({ _ in Languages.chosen ?? "" }, { _, _ in }),
+            "language": ({ _ in Languages.chosen ?? "" }, { _, value in Languages.chosen = value.isEmpty ? nil : value }),
         ]
     }
 
@@ -187,14 +186,18 @@ private enum SetupPrefs {
         }
     }
 
-    /// sets and applies the preferences of a file, as Settings and the View menu do; the language last
-    static func apply(_ prefs: [(name: String, value: String)]) {
+    /// sets and applies the preferences of a file, as Settings and the View menu do (the core checked them), then
+    /// offers to start again when one that counts only then changed
+    static func apply(_ prefs: [(name: String, value: String, restart: Bool)]) {
         guard let app = AppDelegate.shared else { return }
-        for pref in prefs where pref.name != "language" {
-            all[pref.name]?.set(app, pref.value)
+        var restart = false
+        for pref in prefs {
+            guard let access = all[pref.name], access.get(app) != pref.value else { continue }
+            access.set(app, pref.value)
+            restart = restart || pref.restart
         }
-        if let language = prefs.first(where: { $0.name == "language" }) {
-            Languages.choose(language.value.isEmpty ? nil : language.value)
+        if restart {
+            Languages.offerRestart()
         }
     }
 }
@@ -205,7 +208,7 @@ private enum SetupPrefs {
 enum SetupFiles {
     /// the type of the files, `.inboxclassic`
     static var fileType: UTType {
-        UTType(filenameExtension: "inboxclassic", conformingTo: .data) ?? .data
+        UTType(filenameExtension: String(cString: pe_setup_extension()), conformingTo: .data) ?? .data
     }
 
     /// File > Export Settings and Accounts
@@ -215,53 +218,41 @@ enum SetupFiles {
     }
 
     /// File > Import Settings and Accounts: a file chosen, its passphrase asked while it needs one, what to import
-    /// chosen; the accounts added
+    /// chosen; the accounts added. The windows that show what it changed hear of it through the core's events.
     @discardableResult
     static func importFile(core: Core) -> [Int64] {
         let title = Text.uiSetupImportTitle.text
         guard let url = openFilesPanel(title: title, types: [fileType], multiple: false).first else { return [] }
-        var read = core.readSetup(url, passphrase: nil)
-        var passphrase: String?
-        while true {
-            let problem: String?
-            switch read {
-            case .file: problem = nil
-            case .needsPassphrase: problem = nil
-            case .wrongPassphrase(let reason): problem = reason
-            case .invalid(let reason):
-                inform(reason.isEmpty ? Text.uiUnknownReason.text : reason, title: title, style: .warning)
-                return []
+        let handle = Handed(value: core.handle)
+        // without a passphrase a sealed file is told from its first bytes, and one that is not has no Argon2 to work
+        var read = SetupCalls.read(core.handle, url.path, passphrase: nil)
+        if case .needsPassphrase = read {
+            _ = PassphraseWindow(title: title, intro: Text.uiSetupAskPassphrase.text, id: "setup.passphrase", help: "setup",
+                                 open: { passphrase, answer in
+                inBackground({ SetupCalls.read(handle.value, url.path, passphrase: passphrase) }) { result in
+                    read = result
+                    if case .wrongPassphrase(let reason) = result {
+                        answer(reason)
+                    } else {
+                        answer(nil)
+                    }
+                }
+            }).run()
+        }
+        switch read {
+        case .file(let file):
+            guard let done = SetupImportWindow(core: core, file: file).run() else { return [] }
+            SetupDoneWindow(title: title, heading: nil, lines: done.lines).run()
+            if done.preferences {
+                SetupPrefs.apply(file.prefs)
             }
-            if case .file = read { break }
-            passphrase = PassphraseWindow(title: title, intro: Text.uiSetupAskPassphrase.text, labels: [""], problem: problem,
-                                          id: "setup.passphrase", help: "setup", check: nil).run()
-            guard let passphrase else { return [] }
-            read = core.readSetup(url, passphrase: passphrase)
-        }
-        passphrase = nil
-        guard case .file(let file) = read, let done = SetupImportWindow(core: core, file: file).run() else { return [] }
-        SetupDoneWindow(title: title, heading: nil, lines: done.lines).run()
-        applyImported(core: core, file: file, parts: done.parts)
-        return done.accounts
-    }
-
-    /// what the windows show of the parts imported, made again
-    private static func applyImported(core: Core, file: SetupFile, parts: UInt32) {
-        let main = AppDelegate.shared?.main
-        if parts & UInt32(PE_SETUP_SETTINGS) != 0 {
-            Preview.dark = core.darkMessages
-            TextSize.apply(pe_text_zoom(core.handle))
-            main?.mailbox.reader.reload()
-            for window in MessageWindow.open {
-                window.reader.reload()
-            }
-        }
-        if parts & UInt32(PE_SETUP_CONTACTS) != 0 {
-            AddressBookWindow.refresh()
-        }
-        main?.mailbox.reload()
-        if parts & UInt32(PE_SETUP_PREFERENCES) != 0 {
-            SetupPrefs.apply(file.prefs)
+            return done.accounts
+        case .invalid(let reason):
+            inform(reason.isEmpty ? Text.uiUnknownReason.text : reason, title: title, style: .warning)
+            return []
+        case .needsPassphrase, .wrongPassphrase:
+            // cancelled
+            return []
         }
     }
 }
@@ -305,30 +296,32 @@ private func indented(_ views: [NSView], spacing: CGFloat = 4) -> NSStackView {
 // ---- Export ----
 
 @MainActor
-private final class SetupExportWindow: NSObject, NSTextFieldDelegate {
+private final class SetupExportWindow: NSObject {
     private let core: Core
     private let window: NSWindow
     private var parts: [(flag: UInt32, box: NSButton)] = []
     private let usePassphrase: NSButton
-    private let fields = [NSSecureTextField(string: ""), NSSecureTextField(string: "")]
-    private let problem = NSTextField(labelWithString: "")
+    private let passphrase: PassphrasePair
+    private var cancelButton: NSButton!
     private var exportButton: NSButton!
+    private let spinner = busySpinner()
     private var written: (file: String, lines: [SetupLine])?
 
     init(core: Core) {
         self.core = core
         window = keyWindow(Text.uiSetupExportTitle.text, id: "setup.export")
         usePassphrase = NSButton(checkboxWithTitle: Text.uiSetupUsePassphrase.text, target: nil, action: nil)
-        super.init()
         let width: CGFloat = 440
+        passphrase = PassphrasePair(id: "setup.passphrase", width: width - checkIndent)
+        super.init()
         let partList = NSStackView()
         partList.orientation = .vertical
         partList.alignment = .leading
         partList.spacing = 6
-        for part in setupParts {
-            let box = checkBox(part.name.text, self, #selector(changed), id: "setup.part.\(part.flag)")
+        for part in SetupCalls.parts {
+            let box = checkBox(part.name, self, #selector(changed), id: "setup.part.\(part.part)")
             box.state = .on
-            parts.append((part.flag, box))
+            parts.append((part.part, box))
             partList.addArrangedSubview(box)
         }
         let line = NSBox()
@@ -338,43 +331,24 @@ private final class SetupExportWindow: NSObject, NSTextFieldDelegate {
         usePassphrase.setAccessibilityIdentifier("setup.passphrase.use")
         let note = secondaryLabel(Text.uiSetupPassphraseNote.text, small: true)
         note.setAccessibilityIdentifier("setup.passphrase.note")
-        let labels = [Text.uiKeysPassphrase.text, Text.uiKeysPassphraseAgain.text]
-        for (index, field) in fields.enumerated() {
-            field.delegate = self
-            field.isEnabled = false
-            field.setAccessibilityIdentifier("setup.passphrase.\(index)")
-            field.setAccessibilityLabel(labels[index])
-        }
-        let grid = NSGridView(views: zip(labels, fields).map { [formLabel($0.0), $0.1] })
-        grid.column(at: 0).xPlacement = .trailing
-        grid.column(at: 1).xPlacement = .fill
-        grid.rowAlignment = .firstBaseline
-        grid.rowSpacing = 8
-        grid.columnSpacing = 8
-        problem.textColor = .systemRed
-        problem.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        problem.lineBreakMode = .byWordWrapping
-        problem.maximumNumberOfLines = 0
-        problem.setAccessibilityIdentifier("setup.passphrase.problem")
-        let passphrase = indented([note, grid, problem], spacing: 8)
-        grid.widthAnchor.constraint(equalToConstant: width - checkIndent).isActive = true
         note.widthAnchor.constraint(equalToConstant: width - checkIndent).isActive = true
-        problem.widthAnchor.constraint(equalToConstant: width - checkIndent).isActive = true
-        // its line is there before anything is refused, so the window does not grow as one types
-        problem.heightAnchor.constraint(greaterThanOrEqualToConstant: ceil(problem.font!.boundingRectForFont.height)).isActive = true
+        passphrase.isEnabled = false
+        passphrase.changed = { [weak self] in self?.update() }
+        let typed = indented([note, passphrase.view], spacing: 8)
 
-        let cancel = keyButton(Text.uiCancel.text, self, #selector(cancelled), "setup.cancel")
-        cancel.keyEquivalent = "\u{1b}"
+        cancelButton = keyButton(Text.uiCancel.text, self, #selector(cancelled), "setup.cancel")
+        cancelButton.keyEquivalent = "\u{1b}"
         exportButton = keyButton(Text.uiSetupExportButton.text.replacingOccurrences(of: "...", with: "\u{2026}"), self,
                                  #selector(exportClicked), "setup.export.ok")
         exportButton.keyEquivalent = "\r"
-        let buttons = buttonRow([cancel, exportButton], help: "setup")
-        let views: [NSView] = [wrappingLabel(Text.uiSetupExportIntro.text), partList, line, usePassphrase, passphrase, buttons]
+        let buttons = buttonRow([cancelButton, exportButton], help: "setup")
+        buttons.insertArrangedSubview(spinner, at: buttons.arrangedSubviews.count - 2)
+        let views: [NSView] = [wrappingLabel(Text.uiSetupExportIntro.text), partList, line, usePassphrase, typed, buttons]
         let stack = windowStack(views, in: window, width: width)
         stack.setCustomSpacing(16, after: views[0])
         stack.setCustomSpacing(16, after: partList)
         stack.setCustomSpacing(6, after: usePassphrase)
-        stack.setCustomSpacing(16, after: passphrase)
+        stack.setCustomSpacing(16, after: typed)
         window.setContentSize(NSSize(width: width + 40, height: stack.fittingSize.height))
         window.initialFirstResponder = parts.first?.box
         update()
@@ -384,33 +358,9 @@ private final class SetupExportWindow: NSObject, NSTextFieldDelegate {
         parts.filter { $0.box.state == .on }.reduce(0) { $0 | $1.flag }
     }
 
-    /// the problem of what is typed, nil when it is right
-    private var passphraseProblem: String? {
-        guard usePassphrase.state == .on else { return nil }
-        return core.pgpPassphraseProblem(fields[0].stringValue, fields[1].stringValue)
-    }
-
-    /// the problem said under the fields once the second is being typed: too short at once, typed differently once
-    /// the second is as long as the first; Export only when the parts and the passphrase are right
+    /// Export once a part is chosen and the passphrase, when there is one, can be used
     private func update() {
-        let on = usePassphrase.state == .on
-        fields.forEach { $0.isEnabled = on }
-        let first = fields[0].stringValue
-        let again = fields[1].stringValue
-        var said = ""
-        if on && !again.isEmpty {
-            if let short = core.pgpPassphraseProblem(first, first) {
-                said = short
-            } else if first != again && again.count >= first.count {
-                said = passphraseProblem ?? ""
-            }
-        }
-        problem.stringValue = said
-        exportButton.isEnabled = chosenParts != 0 && passphraseProblem == nil
-    }
-
-    func controlTextDidChange(_ notification: Notification) {
-        update()
+        exportButton.isEnabled = chosenParts != 0 && (usePassphrase.state == .off || passphrase.acceptable)
     }
 
     @objc private func changed() {
@@ -418,12 +368,26 @@ private final class SetupExportWindow: NSObject, NSTextFieldDelegate {
     }
 
     @objc private func passphraseToggled() {
-        if usePassphrase.state == .off {
-            fields.forEach { $0.stringValue = "" }
+        let on = usePassphrase.state == .on
+        if !on {
+            passphrase.wipe()
         }
+        passphrase.isEnabled = on
         update()
-        if usePassphrase.state == .on {
-            window.makeFirstResponder(fields[0])
+        if on {
+            window.makeFirstResponder(passphrase.fields[0])
+        }
+    }
+
+    /// while the file is written: nothing to change or press, the spinner turning
+    private func setBusy(_ busy: Bool) {
+        for control in parts.map(\.box) + [usePassphrase, cancelButton!, exportButton!] {
+            control.isEnabled = !busy
+        }
+        passphrase.isEnabled = !busy && usePassphrase.state == .on
+        busy ? spinner.startAnimation(nil) : spinner.stopAnimation(nil)
+        if !busy {
+            update()
         }
     }
 
@@ -431,16 +395,22 @@ private final class SetupExportWindow: NSObject, NSTextFieldDelegate {
         update()
         guard exportButton.isEnabled else { return }
         let title = Text.uiSetupExportTitle.text
-        guard let url = saveFilePanel(name: "Inbox Classic.inboxclassic", title: title, types: [SetupFiles.fileType]) else {
-            return
-        }
-        let passphrase = usePassphrase.state == .on ? fields[0].stringValue : nil
-        switch core.exportSetup(parts: chosenParts, passphrase: passphrase, prefs: SetupPrefs.current, to: url) {
-        case .success(let lines):
-            written = (url.lastPathComponent, lines)
-            NSApp.stopModal()
-        case .failure(let refusal):
-            inform(refusal.reason.isEmpty ? Text.macFileNotSaved.text : refusal.reason, title: title, style: .warning)
+        guard let url = saveFilePanel(name: taken(pe_setup_default_name()) ?? "", title: title,
+                                      types: [SetupFiles.fileType]) else { return }
+        let sealed = usePassphrase.state == .on ? passphrase.passphrase : nil
+        let (handle, parts, prefs) = (Handed(value: core.handle), chosenParts, SetupPrefs.current)
+        setBusy(true)
+        // a sealed file's passphrase is worked through Argon2: off the window thread
+        inBackground({ SetupCalls.export(handle.value, parts: parts, passphrase: sealed, prefs: prefs, to: url.path) }) {
+            [self] result in
+            setBusy(false)
+            switch result {
+            case .success(let lines):
+                written = (url.lastPathComponent, lines)
+                NSApp.stopModal()
+            case .failure(let refusal):
+                inform(refusal.reason.isEmpty ? Text.macFileNotSaved.text : refusal.reason, title: title, style: .warning)
+            }
         }
     }
 
@@ -451,7 +421,7 @@ private final class SetupExportWindow: NSObject, NSTextFieldDelegate {
     /// the file's name and what it holds, nil when cancelled
     func run() -> (file: String, lines: [SetupLine])? {
         runKeyWindow(window)
-        fields.forEach { $0.stringValue = "" }
+        passphrase.wipe()
         return written
     }
 }
@@ -464,9 +434,12 @@ private final class SetupImportWindow: NSObject {
     private let file: SetupFile
     private let window: NSWindow
     private var parts: [(flag: UInt32, box: NSButton)] = []
+    private var accountsBox: NSButton?
     private var accounts: [(account: SetupAccount, box: NSButton)] = []
+    private var cancelButton: NSButton!
     private var importButton: NSButton!
-    private var done: (lines: [SetupLine], parts: UInt32, accounts: [Int64])?
+    private let spinner = busySpinner()
+    private var done: (lines: [SetupLine], preferences: Bool, accounts: [Int64])?
 
     init(core: Core, file: SetupFile) {
         self.core = core
@@ -486,15 +459,8 @@ private final class SetupImportWindow: NSObject {
         partList.alignment = .leading
         partList.spacing = 8
         for line in file.parts {
-            guard let name = setupParts.first(where: { $0.flag == line.part })?.name else { continue }
-            let accountsPart = line.part == UInt32(PE_SETUP_ACCOUNTS)
-            let box = checkBox(name.text, self, accountsPart ? #selector(accountsPartChanged) : #selector(changed),
-                               id: "setup.part.\(line.part)")
-            // Accounts with no account to import is no choice: off, its accounts listed with why
-            let some = file.accounts.contains { $0.importable }
-            box.state = !accountsPart || some ? .on : .off
-            box.isEnabled = !accountsPart || some
-            parts.append((line.part, box))
+            let box = checkBox(line.name, self, #selector(changed), id: "setup.part.\(line.part)")
+            box.state = .on
             // what it holds under its name, as an account's servers are under its address: words of any length wrap
             // in the width of the window, not beside a name as long as German makes it
             let holds = secondaryLabel(line.text, small: true)
@@ -505,7 +471,17 @@ private final class SetupImportWindow: NSObject {
             row.alignment = .leading
             row.spacing = 1
             partList.addArrangedSubview(row)
-            if line.part == UInt32(PE_SETUP_ACCOUNTS) && !file.accounts.isEmpty {
+            guard line.part == UInt32(PE_SETUP_ACCOUNTS) else {
+                parts.append((line.part, box))
+                continue
+            }
+            // Accounts ticks and unticks every account that can be imported; with none, it is no choice
+            accountsBox = box
+            box.action = #selector(accountsBoxChanged)
+            let some = file.accounts.contains { $0.importable }
+            box.state = some ? .on : .off
+            box.isEnabled = some
+            if !file.accounts.isEmpty {
                 let list = accountList(width: width - checkIndent)
                 partList.addArrangedSubview(list)
                 partList.setCustomSpacing(10, after: list)
@@ -515,38 +491,37 @@ private final class SetupImportWindow: NSObject {
         for (index, note) in file.notes.enumerated() {
             views.append(warningNote(note, id: "setup.import.note.\(index)"))
         }
-        let cancel = keyButton(Text.uiCancel.text, self, #selector(cancelled), "setup.cancel")
-        cancel.keyEquivalent = "\u{1b}"
+        cancelButton = keyButton(Text.uiCancel.text, self, #selector(cancelled), "setup.cancel")
+        cancelButton.keyEquivalent = "\u{1b}"
         importButton = keyButton(Text.uiSetupImportButton.text, self, #selector(importClicked), "setup.import.ok")
         importButton.keyEquivalent = "\r"
-        let buttons = buttonRow([cancel, importButton], help: "setup")
+        let buttons = buttonRow([cancelButton, importButton], help: "setup")
+        buttons.insertArrangedSubview(spinner, at: buttons.arrangedSubviews.count - 2)
         views.append(buttons)
         let stack = windowStack(views, in: window, width: width)
-        if views.count > 1 {
-            stack.setCustomSpacing(16, after: partList)
-            stack.setCustomSpacing(16, after: views[views.count - 2])
-        }
+        stack.setCustomSpacing(16, after: partList)
+        stack.setCustomSpacing(16, after: views[views.count - 2])
         window.setContentSize(NSSize(width: width + 40, height: stack.fittingSize.height))
         window.initialFirstResponder = parts.first?.box
         update()
     }
 
-    /// a check box for each account under Accounts: its address, its servers and how it signs in, and what the
-    /// import does with it; one set up here already, or one that can not be imported, unchecked and off. Scrolls
-    /// when there are many.
+    /// a check box for each account under Accounts: its title and address, its servers and how it signs in, and what
+    /// the import does with it; ticked and on only when it can be imported. Scrolls when there are many.
     private func accountList(width: CGFloat) -> NSView {
         let list = NSStackView()
         list.orientation = .vertical
         list.alignment = .leading
         list.spacing = 10
         for account in file.accounts {
-            let box = checkBox(account.email, self, #selector(accountChanged), id: "setup.account.\(account.index)")
+            let box = checkBox(account.label, self, #selector(accountChanged), id: "setup.account.\(account.index)")
             box.state = account.importable ? .on : .off
-            let servers = secondaryLabel([account.imap, account.smtp, account.signIn].filter { !$0.isEmpty }
-                .joined(separator: " \u{00b7} "), small: true)
-            let said = secondaryLabel(account.problem ?? account.note, small: true)
+            box.isEnabled = account.importable
+            let servers = secondaryLabel(account.servers, small: true)
+            servers.setAccessibilityIdentifier("setup.account.\(account.index).servers")
+            let said = secondaryLabel(account.note, small: true)
             said.setAccessibilityIdentifier("setup.account.\(account.index).note")
-            if account.problem != nil {
+            if account.problem {
                 said.textColor = .systemRed
             }
             for label in [servers, said] {
@@ -583,33 +558,25 @@ private final class SetupImportWindow: NSObject {
         return scroll
     }
 
-    private func chosen(_ flag: UInt32) -> Bool {
-        parts.contains { $0.flag == flag && $0.box.state == .on }
-    }
-
+    /// the parts other than Accounts, which follows from the accounts ticked
     private var chosenParts: UInt32 {
         parts.filter { $0.box.state == .on }.reduce(0) { $0 | $1.flag }
     }
 
     private var chosenAccounts: [Int] {
-        chosen(UInt32(PE_SETUP_ACCOUNTS)) ? accounts.filter { $0.box.state == .on }.map(\.account.index) : []
+        accounts.filter { $0.box.state == .on }.map(\.account.index)
     }
 
     /// Import while something would be imported
     private func update() {
-        for entry in accounts {
-            entry.box.isEnabled = entry.account.importable
-        }
-        let others = chosenParts & ~UInt32(PE_SETUP_ACCOUNTS)
-        importButton.isEnabled = others != 0 || !chosenAccounts.isEmpty
+        importButton.isEnabled = chosenParts != 0 || !chosenAccounts.isEmpty
     }
 
     @objc private func changed() {
         update()
     }
 
-    /// Accounts ticked ticks every account that can be imported, unticked unticks them
-    @objc private func accountsPartChanged(_ sender: NSButton) {
+    @objc private func accountsBoxChanged(_ sender: NSButton) {
         for entry in accounts where entry.account.importable {
             entry.box.state = sender.state
         }
@@ -618,23 +585,39 @@ private final class SetupImportWindow: NSObject {
 
     /// Accounts is ticked while one of its accounts is
     @objc private func accountChanged() {
-        let any = accounts.contains { $0.box.state == .on }
-        parts.first { $0.flag == UInt32(PE_SETUP_ACCOUNTS) }?.box.state = any ? .on : .off
+        accountsBox?.state = chosenAccounts.isEmpty ? .off : .on
         update()
     }
 
-    @objc private func importClicked() {
-        // Accounts without any account chosen imports nothing of it
-        var parts = chosenParts
-        if chosenAccounts.isEmpty {
-            parts &= ~UInt32(PE_SETUP_ACCOUNTS)
+    /// while the import runs: nothing to change or press, the spinner turning
+    private func setBusy(_ busy: Bool) {
+        for control in parts.map(\.box) + [cancelButton!, importButton!] {
+            control.isEnabled = !busy
         }
-        switch core.importSetup(file, parts: parts, accounts: chosenAccounts) {
-        case .success(let (lines, added)):
-            done = (lines, parts, added)
-            NSApp.stopModal()
-        case .failure(let refusal):
-            inform(refusal.reason.isEmpty ? Text.uiUnknownReason.text : refusal.reason, title: window.title, style: .warning)
+        accountsBox?.isEnabled = !busy && accounts.contains { $0.account.importable }
+        for entry in accounts {
+            entry.box.isEnabled = !busy && entry.account.importable
+        }
+        busy ? spinner.startAnimation(nil) : spinner.stopAnimation(nil)
+        if !busy {
+            update()
+        }
+    }
+
+    @objc private func importClicked() {
+        let (handle, file, parts, accounts) = (Handed(value: core.handle), file, chosenParts, chosenAccounts)
+        setBusy(true)
+        // the sign-in apps' issuers are read: off the window thread
+        inBackground({ SetupCalls.importing(handle.value, file, parts: parts, accounts: accounts) }) { [self] result in
+            setBusy(false)
+            switch result {
+            case .success(let (lines, added)):
+                done = (lines, parts & UInt32(PE_SETUP_PREFERENCES) != 0, added)
+                NSApp.stopModal()
+            case .failure(let refusal):
+                inform(refusal.reason.isEmpty ? Text.uiUnknownReason.text : refusal.reason, title: window.title,
+                       style: .warning)
+            }
         }
     }
 
@@ -642,8 +625,8 @@ private final class SetupImportWindow: NSObject {
         NSApp.stopModal()
     }
 
-    /// what was done, the parts imported and the accounts added; nil when cancelled
-    func run() -> (lines: [SetupLine], parts: UInt32, accounts: [Int64])? {
+    /// what was done, whether the preferences were imported, and the accounts added; nil when cancelled
+    func run() -> (lines: [SetupLine], preferences: Bool, accounts: [Int64])? {
         runKeyWindow(window)
         return done
     }
@@ -704,10 +687,7 @@ private final class SetupDoneWindow: NSObject {
         sign.image = NSImage(systemSymbolName: symbol, accessibilityDescription: nil)
         sign.contentTintColor = color
         sign.setContentHuggingPriority(.required, for: .horizontal)
-        var words = line.text
-        if line.kind == PE_SETUP_LINE_KIND_PART, let name = setupParts.first(where: { $0.flag == line.part })?.name {
-            words = name.text + ": " + line.text
-        }
+        let words = line.kind == PE_SETUP_LINE_KIND_PART && !line.name.isEmpty ? line.name + ": " + line.text : line.text
         let label = wrappingLabel(words)
         label.widthAnchor.constraint(equalToConstant: width - 26).isActive = true
         let row = NSStackView(views: [sign, label])
