@@ -1,14 +1,13 @@
-<!--review--><h1>Připojení, která Inbox Classic navazuje</h1>
-<p class="summary">Kam se Inbox Classic připojuje a proč, pro technicky zvídavé.</p>
+<h1>Připojení, která Inbox Classic navazuje</h1>
+<p class="summary">Technický přehled míst, kam se Inbox Classic připojuje, a důvodů těchto připojení.</p>
 <ul>
-    <li><b>Vaše poštovní servery</b> přes IMAP pro čtení pošty a SMTP pro její odesílání. Připojení jsou šifrována pomocí TLS a certifikát každého serveru se ověřuje proti certifikátům, kterým váš systém důvěřuje. Inbox Classic odmítne server bez šifrování, pokud nezvolíte <b data-text="ui-security-none"></b> a nepotvrdíte to.</li>
-    <li><b>Při přidání účtu</b> kvůli vyhledání jeho serverů. Inbox Classic čte záznamy DNS vaší domény přes DNS over HTTPS (Cloudflare, pak Google), nikdy přes obyčejné DNS. Zkouší také soubor autoconfig vašeho poskytovatele a seznam poskytovatelů Thunderbirdu (ISPDB). U Exchange se ptá služby Microsoft Autodiscover, která vaše heslo dostane jen tehdy, když si o ně řekne přes HTTPS. Server bez šifrování se nikdy nevybere.</li>
-    <li><b>Přihlášení v prohlížeči</b> pomocí OAuth 2.0 a PKCE ke Googlu, Microsoftu nebo k poskytovateli vaší přihlašovací aplikace. Prohlížeč se vrací do Inbox Classic jen na tomto počítači.</li>
-    <li><b>Loga značek</b> (BIMI) z adresy HTTPS značky, když zpráva logo sama nenese, jednou při každém spuštění Inbox Classic. Stane se to jen tehdy, když váš poštovní server zprávu ověřil kontrolou DMARC a logo schválil.</li>
-    <li><b>Obrázky z internetu</b>, jen když o ně požádáte.</li>
-    <li><b>Odhlášení odběru</b>, jen když na něj kliknete. Požadavek jedním kliknutím (RFC 8058) se odešle, jen pokud konference zprávu podepsala pomocí DKIM.</li>
+    <li><b>Vaše poštovní servery</b> přes IMAP pro čtení pošty a SMTP pro její odesílání. Připojení jsou šifrována pomocí TLS a certifikát každého serveru se ověřuje pomocí certifikátů, kterým důvěřuje operační systém. Inbox Classic odmítne server bez šifrování, pokud nezvolíte <b data-text="ui-security-none"></b> a nepotvrdíte to.</li>
+    <li><b>Při přidání účtu</b> kvůli vyhledání jeho serverů. Inbox Classic čte záznamy DNS vaší domény přes DNS over HTTPS (Cloudflare, pak Google), nikoli pomocí nešifrovaných dotazů DNS. Zkouší také soubor autoconfig vašeho poskytovatele a seznam poskytovatelů Thunderbirdu (ISPDB). U Exchange se dotazuje služby Microsoft Autodiscover. Heslo jí odešle jen tehdy, pokud si je služba vyžádá přes HTTPS. Server bez šifrování se nikdy nevybere.</li>
+    <li><b>Přihlášení v prohlížeči</b> pomocí OAuth 2.0 a PKCE ke Googlu, Microsoftu nebo k poskytovateli vaší přihlašovací aplikace. Výsledek přihlášení se předává zpět aplikaci Inbox Classic přes místní adresu v tomto počítači.</li>
+    <li><b>Loga značek</b> (BIMI) z adresy HTTPS značky, pokud zpráva logo neobsahuje, nejvýše jednou pro každou značku při běhu aplikace. Stane se to jen tehdy, když váš poštovní server zprávu ověřil kontrolou DMARC a logo schválil.</li>
+    <li><b>Obrázky z internetu</b>, pokud je stáhnete ručně nebo povolíte jejich automatické stahování.</li>
+    <li><b>Odhlášení odběru</b>, jen když na něj kliknete. Přímý požadavek na odhlášení (RFC 8058) se odešle jen při ověřeném podpisu DKIM odesílajícího seznamu.</li>
     <!--os:mac--><li><b>Aktualizace</b> z inboxclassic.com, aby se zjistilo, zda vyšla nová verze.</li><!--/os-->
 </ul>
 <p>Přihlašovací kódy se nabízejí, jen když hlavička Authentication-Results od vašeho poskytovatele uvádí, že doména zprávu podepsala (DKIM). K tomu není potřeba žádné další připojení.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

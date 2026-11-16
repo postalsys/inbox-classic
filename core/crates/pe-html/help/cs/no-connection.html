@@ -1,19 +1,18 @@
-<!--review--><h1>Inbox Classic se nemůže připojit</h1>
+<h1>Inbox Classic se nemůže připojit</h1>
 <p class="summary">Co dělat, když poštovní server není dostupný nebo neodpovídá.</p>
 <p>Ve stavovém řádku nebo v podokně čtení můžete vidět jednu z těchto zpráv:</p>
 <ul>
     <li>„connection error: …“</li>
     <li>„the server did not answer in time“</li>
     <li>„spojení se serverem selhalo (…)“</li>
-    <li>„Poštovní server není dostupný (…).“</li>
+    <li>„K poštovnímu serveru se nepodařilo připojit (…).“</li>
 </ul>
 <p>Náprava:</p>
 <ol>
     <li>Zkontrolujte připojení k internetu.</li>
     <li>Otevřete vlastnosti účtu v nabídce <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> a zkontrolujte názvy serverů a porty.</li>
-    <li>Pokud selhává odesílání, použijte pro odchozí poštu port 465 nebo 587. Některé sítě poštovní porty blokují, zejména port 25.</li>
+    <li>Pokud selhává odesílání, ověřte u poskytovatele správný port a zabezpečení. Běžné možnosti jsou port 465 s SSL/TLS nebo 587 se STARTTLS. Některé sítě blokují poštovní porty, zejména port 25.</li>
 </ol>
 <p>Inbox Classic to zkusí znovu při příští kontrole pošty. Chcete-li to zkusit hned, klikněte na <b data-text="ui-tb-sync"></b>.</p>
-<p>Zpráva, kterou odešlete bez připojení, počká ve složce Pošta k odeslání a odejde, jakmile bude server dostupný. Nic z toho, co jste napsali, se neztratí.</p>
+<p>Zpráva zadaná k odeslání bez připojení zůstane ve složce Pošta k odeslání. Aplikace se ji pokusí odeslat po obnovení spojení. Její text se neztratí.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>
-<!--/review-->

@@ -1,21 +1,20 @@
-<!--review--><h1>Zprávy, které nebyly doručeny</h1>
+<h1>Zprávy, které nebyly doručeny</h1>
 <p class="summary">Když se odeslaná zpráva vrátí nebo se zpozdí, Inbox Classic vysvětlí proč a co můžete udělat.</p>
-<p>Oznámení o doručení má v seznamu zpráv značku nedoručení. Když je otevřete, karta nad ním řekne, zda vaše zpráva nebyla doručena, nebo se jen zpozdila.</p>
+<p>Oznámení o potížích s doručením má v seznamu zpráv zvláštní značku. Po otevření panel nad zprávou ukáže, zda doručení selhalo nebo se pouze zpozdilo.</p>
 <img src="picture:bounce-1-failed" alt="Oznámení o doručení s kartou, která říká, že zpráva nebyla doručena, a uvádí příjemce, důvod a co dělat">
-<p>Karta uvádí každého příjemce s důvodem srozumitelnými slovy a s tím, co můžete udělat. <b data-text="bounce-details"></b> ukazuje vlastní slova přijímajícího serveru.</p>
+<p>Panel u každého příjemce srozumitelně vysvětlí důvod a nabídne další postup. <b data-text="bounce-details"></b> zobrazí původní odpověď serveru příjemce.</p>
 <ul>
     <li><b data-text="bounce-show-message"></b> vybere zprávu, kterou jste odeslali.</li>
     <li>Při zpoždění ji vybere <b data-text="bounce-show-delayed"></b>. Váš poštovní server se stále pokouší ji doručit, takže ji nemusíte posílat znovu.</li>
 </ul>
 <p>Několik častých důvodů:</p>
 <table>
-    <tr><th>Karta říká</th><th>Co dělat</th></tr>
+    <tr><th>Hlášení</th><th>Co dělat</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Zkontrolujte, jak je adresa napsaná, nebo se dotyčného zeptejte na adresu, kterou používá teď.</td></tr>
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Pošlete ji znovu za pár dní, nebo se s dotyčným spojte jinak.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Pošlete ji znovu bez toho, co vypadá jako spam, například bez mnoha odkazů nebo velké přílohy.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Zkuste zprávu odeslat bez velkého množství odkazů nebo velké přílohy, které mohou působit jako spam.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Přepošlete oznámení svému poskytovateli pošty. Problém není ve zprávě.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Nic. Obvykle se doručí do hodiny.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Zatím nemusíte nic dělat. Zpráva se obvykle doručí do hodiny.</td></tr>
 </table>
-<p>Všechna oznámení o doručení najdete hledáním <code>is:bounce</code>. Důvod se zjišťuje ve vašem počítači a nikam se nic neposílá.</p>
+<p>Oznámení o potížích s doručením najdete hledáním <code>is:bounce</code>. Vysvětlení důvodu vzniká v tomto počítači bez odesílání zprávy do externí služby.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

@@ -1,17 +1,16 @@
-<!--review--><h1>Volby příkazového řádku</h1>
+<h1>Volby příkazového řádku</h1>
 <p class="summary">Volby pro spuštění Inbox Classic z terminálu, pro testování a pro agenty AI.</p>
 <p>Spusťte program <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> s těmito volbami:</p>
 <table>
     <tr><th>Volba</th><th>Účinek</th></tr>
     <tr><td><code>--store &lt;soubor&gt;</code></td><td>Použije jiné úložiště pošty, například testovací</td></tr>
-    <tr><td><code>--memory-passwords</code></td><td>Uchová hesla jen pro toto spuštění, nikdy v úložišti hesel systému</td></tr>
-    <tr><td><code>--pin-certificate &lt;soubor&gt;</code></td><td>Přijme jen certifikát serveru z tohoto souboru (PEM nebo DER), pro testovací server s certifikátem podepsaným sám sebou</td></tr>
-    <tr><td><code>--sign-in-page-file &lt;soubor&gt;</code></td><td>Zapíše stránku přihlášení přes prohlížeč do tohoto souboru místo otevření prohlížeče</td></tr>
-    <tr><td><code>--language &lt;kód&gt;</code></td><td>Zobrazí okna pro toto spuštění v daném jazyce, například <code>cs</code></td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Uchová hesla pouze v paměti do ukončení aplikace, bez uložení do systémového úložiště hesel</td></tr>
+    <tr><td><code>--pin-certificate &lt;soubor&gt;</code></td><td>Přijme jen certifikát serveru z tohoto souboru (PEM nebo DER), pro testovací server s certifikátem podepsaným sebou samým</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;soubor&gt;</code></td><td>Místo otevření prohlížeče zapíše do tohoto souboru URL přihlašovací stránky</td></tr>
+    <tr><td><code>--language &lt;kód&gt;</code></td><td>Použije daný jazyk při tomto spuštění, například <code>cs</code></td></tr>
     <tr><td><code>--background</code></td><td>Spustí se bez okna</td></tr>
-    <tr><td><code>--mcp</code></td><td>Připojí k Inbox Classic agenta AI. Spouští to program agenta, ne vy</td></tr>
+    <tr><td><code>--mcp</code></td><td>Připojí agenta AI k aplikaci Inbox Classic. Tuto volbu používá program agenta při automatickém spuštění</td></tr>
     <tr><td><code>--version</code></td><td>Vypíše verzi a skončí</td></tr>
 </table>
 <p>Odkaz <code>mailto:</code> předaný jako argument otevře novou zprávu, stejně jako e-mailový odkaz.</p>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

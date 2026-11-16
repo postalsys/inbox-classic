@@ -1,19 +1,18 @@
-<!--review--><h1>Obrázky a sledování</h1>
+<h1>Obrázky a sledování</h1>
 <p class="summary">Proč jsou obrázky z internetu blokované a jak je zobrazit u zprávy nebo odesílatele, kterému důvěřujete.</p>
-<p>Zpráva může zobrazovat obrázky, které má odesílatel uložené na internetu. Stažením takového obrázku se odesílatel dozví, že jste zprávu otevřeli, kdy a odkud. Proto je Inbox Classic nestahuje.</p>
-<p>Obrázky odeslané přímo ve zprávě se zobrazují, protože odesílateli nic neprozradí.</p>
-<p>Když má zpráva obrázky z internetu, pruh přes ni oznamuje, že některé obrázky byly zablokovány. Zobrazení u zprávy, které důvěřujete:</p>
+<p>Zpráva může zobrazovat obrázky, které má odesílatel uložené na internetu. Stažení může odesílateli prozradit, že jste zprávu otevřeli, kdy se to stalo a z jaké IP adresy. Proto Inbox Classic tyto obrázky ve výchozím nastavení nestahuje.</p>
+<p>Obrázky přiložené přímo ke zprávě se zobrazují bez dalšího připojení k serveru odesílatele.</p>
+<p>Pokud zpráva obsahuje obrázky z internetu, panel nad zprávou oznámí jejich zablokování. Pokud zprávě důvěřujete, zobrazíte je takto:</p>
 <ul>
-    <li><!--os:windows,mac-->Klikněte na pruh.<!--/os--><!--os:linux-->Klikněte v pruhu na <b data-text="gtk-download-pictures"></b>.<!--/os--></li>
+    <li><!--os:windows,mac-->Klikněte na panel.<!--/os--><!--os:linux-->Klikněte na panelu na <b data-text="gtk-download-pictures"></b>.<!--/os--></li>
     <li>Nebo zvolte <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Zobrazí se tak obrázky jen této zprávy. Další zpráva je opět blokovaná.</p>
+<p>Zobrazí se tak obrázky jen této zprávy. U další zprávy zůstávají vzdálené obrázky blokované.</p>
 <h2>Odesílatelé, kterým důvěřujete</h2>
-<p>Chcete-li obrázky od odesílatele dostávat pokaždé, <!--os:windows-->klikněte na šipku na pravém konci pruhu<!--/os--><!--os:mac-->klikněte v pruhu na šipku vedle <b data-text="cmd-pictures"></b><!--/os--><!--os:linux-->klikněte v pruhu na šipku vedle <b data-text="gtk-download-pictures"></b><!--/os-->. Zvolte, zda vždy stahovat obrázky od tohoto odesílatele, nebo od všech z jeho domény.</p>
-<p>Jejich obrázky se pak načtou samy, ale jen když váš poskytovatel pošty potvrdí, že zpráva opravdu pochází z této domény. Zpráva, která se za ně jen vydává, se stále zeptá a pruh uvede, že odesílatele nelze potvrdit. Ve složce <b data-text="folder-junk"></b> se obrázky samy nikdy nenačtou.</p>
+<p>Chcete-li obrázky od daného odesílatele stahovat automaticky, <!--os:windows-->klikněte na šipku na pravém konci panelu<!--/os--><!--os:mac-->klikněte na panelu na šipku vedle <b data-text="cmd-pictures"></b><!--/os--><!--os:linux-->klikněte na panelu na šipku vedle <b data-text="gtk-download-pictures"></b><!--/os-->. Zvolte, zda vždy stahovat obrázky od tohoto odesílatele, nebo od všech z jeho domény.</p>
+<p>Obrázky se pak stahují automaticky, pokud poskytovatel pošty ověří doménu odesílatele. Pokud ji neověří, obrázky zůstanou blokované a panel uvede důvod. Ověření domény nepotvrzuje totožnost osoby ani důvěryhodnost obsahu. Ve složce <b data-text="folder-junk"></b> se obrázky samy nikdy nenačtou.</p>
 <p>Odesílatele ze seznamu odeberete pomocí <b data-text="ui-trusted-senders-button"></b> v <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
 <h2>Obrázky ve všech zprávách</h2>
-<p><b data-text="ui-pictures-always-option"></b> v <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os--> stahuje obrázky všech zpráv kromě složky <b data-text="folder-junk"></b>. Ve výchozím stavu je vypnuto, protože odesílatelé pak poznají, kdy jejich zprávy čtete.</p>
-<p>Logo značky vedle záhlaví není sledovací obrázek. Schválil ho váš poštovní server a pochází od značky, ne z obrázků odesílatele.</p>
+<p>Volba <b data-text="ui-pictures-always-option"></b> v <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os--> zapne automatické stahování obrázků ve všech zprávách kromě složky <b data-text="folder-junk"></b>. Ve výchozím nastavení je vypnutá, protože odesílatelé mohou pomocí obrázků zjistit, kdy jejich zprávy čtete.</p>
+<p>Logo značky vedle záhlaví se načítá odděleně od obrázků v obsahu zprávy a musí je schválit poštovní server. Stahuje se jednou pro každou značku při běhu aplikace. Server s logem přesto může zaznamenat IP adresu a čas tohoto stažení.</p>
 <nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

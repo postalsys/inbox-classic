@@ -16,13 +16,11 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Czech (cs) help: all 1,334 catalog entries and 21 everyday help topics are reviewed.
-  Final 31 topics remain; security/encryption topics have been read alongside English but not yet edited.
-  All 84 late list-loading labels have been reviewed. Bulgarian, Dutch, Italian, Portuguese (Portugal),
+- Resume with Danish (da): review the app catalog, then remaining catalogs and all 52 help topics.
+  All 84 late list-loading labels have been reviewed. Bulgarian, Czech, Dutch, Italian, Portuguese (Portugal),
   Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are complete: each has
-  1,334 catalog entries and 52 help topics. Fifteen languages still have pending content,
-  with exact IDs/topics in the state file.
-  No language is considered complete merely because automated checks pass.
+  1,334 catalog entries and 52 help topics. Fourteen languages still have pending content,
+  with exact IDs/topics in the state file. No language is considered complete merely because checks pass.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
   not yet on `master` or `origin/master`. They are included in the isolated review checkout;
@@ -446,8 +444,20 @@ branches and literal keyboard tags. Structural checks, inline spacing, exact inv
 git diff --check pass. Review HTML regenerated. Test suite not run per user instruction.
 Catalog completion checkpoint: `c13d96a7`.
 
-Current totals: 13,458 catalog entries and 493 help pages reviewed; 2,080 catalog values improved. Remaining:
-18,634 catalog entries and 759 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Czech help completed
+
+Reviewed the remaining 31 topics, including security, privacy, rules, agents, troubleshooting and reference.
+Corrected key ownership/verification, queued sending, sign-in credentials, URL output and localized Cc/Bcc keys.
+The search parser treats to:, cc: and bcc: as aliases across all recipient fields; the help explains this.
+All 52 Czech topics are reviewed. Structural checks, preserved markup/keyboard text, inline joins and exact
+inventory/file/source hashes pass. Review HTML regenerated; no test suite was run per user instruction.
+First-help checkpoint: `bdf0dc0b`.
+
+Fresh upstream check: origin/master advanced to `65988ba4` with release-review tooling changes only; no catalog
+or help content changed. Local/remote wave1 remain `8df686a4`. Integrate updated tooling after this checkpoint.
+
+Current totals: 13,458 catalog entries and 524 help pages reviewed; 2,080 catalog values improved. Remaining:
+18,634 catalog entries and 728 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
