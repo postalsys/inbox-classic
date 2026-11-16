@@ -109,9 +109,8 @@
       aan via de browser.
     </p>
     <p xml:lang="nb">
-      Inbox Classic leser og skriver e-post med mappene til venstre, meldingene øverst og meldingen nedenfor, slik
-      e-postprogrammer pleide å gjøre. Det fungerer med alle IMAP- og SMTP-kontoer, og logger på Outlook.com og
-      Microsoft 365 gjennom nettleseren.
+      Inbox Classic er et e-postprogram med mappene til venstre, meldingslisten øverst og lesevinduet nedenfor. Det
+      fungerer med alle IMAP- og SMTP-kontoer og lar deg logge på Outlook.com og Microsoft 365 gjennom nettleseren.
     </p>
     <p xml:lang="pl">
       Inbox Classic czyta i pisze pocztę e-mail z folderami po lewej, wiadomościami u góry i treścią wiadomości poniżej,
@@ -239,10 +238,10 @@
       <li xml:lang="nl">Zoeken in onderwerp, afzender, ontvangers, bijlagenamen en berichttekst, met de zoekoperatoren van Gmail</li>
       <li xml:lang="nl">Geciteerde eerdere berichten in antwoorden worden ingeklapt</li>
       <li xml:lang="nl">Gedownloade e-mail blijft offline leesbaar; wachtwoorden worden bewaard in de sleutelbos van je systeem</li>
-      <li xml:lang="nb">Hver melding vises renset, uten skript, og bilder fra internett bare når du tillater det</li>
-      <li xml:lang="nb">Et søk som finner ord i emnet, personene, filnavnene og teksten, med søkeoperatorene til Gmail</li>
-      <li xml:lang="nb">Svar folder bort de tidligere meldingene de siterer</li>
-      <li xml:lang="nb">E-posten kan leses uten nett; passord oppbevares i nøkkelringen din</li>
+      <li xml:lang="nb">Meldinger vises uten skript og annet usikkert innhold. Bilder fra internett lastes bare ned med din tillatelse</li>
+      <li xml:lang="nb">Søk i emne, avsendere, mottakere, vedleggsnavn og meldingstekst med søkeoperatorer som i Gmail</li>
+      <li xml:lang="nb">Siterte meldinger foldes sammen i svar og kan utvides når du vil lese dem</li>
+      <li xml:lang="nb">Les nedlastet e-post uten nett. Passord lagres i systemets nøkkelring</li>
       <li xml:lang="pl">Każda wiadomość jest wyświetlana oczyszczona, bez skryptów, a obrazy z internetu tylko wtedy, gdy na to pozwolisz</li>
       <li xml:lang="pl">Wyszukiwanie słów w temacie, nadawcach i odbiorcach, nazwach plików i treści, z operatorami Gmaila</li>
       <li xml:lang="pl">Odpowiedzi zwijają cytowane wcześniejsze wiadomości</li>

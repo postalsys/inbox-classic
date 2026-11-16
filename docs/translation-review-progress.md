@@ -253,8 +253,18 @@ processing, key ownership checks, credential transfer and domain-authentication 
 collisions in 32 actual menu and dialog scopes. All 14 catalog tests, structure, inventory/hash reconciliation
 and git diff --check pass. Catalan completion checkpoint: `21f37354`. The remaining catalogs and help are pending.
 
-Current totals: 7,348 catalog entries and 264 help pages reviewed; 1,121 catalog values improved. Remaining:
-24,660 catalog entries and 988 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Norwegian Bokmål catalogs and first 21 help topics completed
+
+Reviewed the remaining 449 core and 253 platform/help-title entries, improving 113 values. All 1,331 catalog
+entries are reviewed, with 167 improved values. Corrected counts, queued agent logs, delivery errors, key
+lookup/publication/decryption, credential transfer, attachment cleanup and native platform guidance.
+Reviewed 21 everyday help topics, including current folder navigation, search indexing, domain authentication,
+attachment handling and transfer instructions. All 75 tests, structure, inventory/hash reconciliation, inline
+spacing, 32 shortcut scopes and git diff --check pass. Generated installer/Linux text rebuilt and inspected;
+the review HTML is regenerated. UI checkpoint: `257675e2`. The final 31 help topics remain pending.
+
+Current totals: 8,050 catalog entries and 285 help pages reviewed; 1,234 catalog values improved. Remaining:
+23,958 catalog entries and 967 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
