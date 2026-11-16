@@ -589,13 +589,13 @@ impl Mailbox {
         match again {
             // the same row: selected quietly, what it lists stays
             Some((key, Some(at))) if rows[at].key == key => {
-                self.folders.select(crate::folders::row_id(&rows[at]));
+                self.folders.select(crate::folders::row_id(&rows[at]), false);
                 self.reloading.set(false);
             }
             // another in its place, listed as a choice of the user's would
             Some((_, Some(at))) => {
                 self.reloading.set(false);
-                self.folders.select(crate::folders::row_id(&rows[at]));
+                self.folders.select(crate::folders::row_id(&rows[at]), false);
             }
             Some((_, None)) => {
                 self.reloading.set(false);
@@ -824,8 +824,9 @@ impl Mailbox {
         });
     }
 
-    /// The list chosen loaded now when it waits for the tree's paint, for what needs its rows at once
-    fn load_waiting_list(&self) {
+    /// The list chosen loaded now when it waits for the tree's paint, for what needs its rows at once (a command on
+    /// the list or its selection)
+    pub fn load_waiting_list(&self) {
         if self.list_load.waiting() {
             self.reload_list(false);
         }
@@ -950,15 +951,17 @@ impl Mailbox {
         let same = same && !self.list_load.waiting();
         self.list_load.loading();
         let core = &shell().core;
-        let view = self.list_view();
+        // the row the message shown had, before the list is read again
+        let hint = self.list.selected().map(|(at, _)| at);
+        self.list.set_view(self.list_view());
+        let view = self.list.view();
         let several = view.several_folders();
         // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
-        // conversations what they find; an account's own item lists nothing
-        let (total, unread) = view.counts(core).unwrap_or((0, 0));
+        // conversations what they find; an account's own item lists nothing. Grouped by conversation, a row for each
+        // conversation.
+        let (total, unread, rows) = view.counts_and_rows(core).unwrap_or((0, 0, 0));
         self.total.set(total);
         self.unread.set(unread);
-        // grouped by conversation, a row for each conversation
-        let rows = view.row_count(core).unwrap_or(0);
         let on = view.grouped() && view.active();
         self.enable(Command::ExpandAllThreads, on);
         self.enable(Command::CollapseAllThreads, on);
@@ -975,17 +978,21 @@ impl Mailbox {
         };
         self.list.show_folder_column(several, &title, &values);
         // the selection follows the messages to where they are now, without a flicker of the reading pane
+        let mut read = None;
         let positions: Vec<u64> = if !keep_selection {
             Vec::new()
         } else if self.several() {
             view.positions(core, &self.refs.borrow()).unwrap_or_default()
         } else if self.reader.uid() != 0 {
-            self.place_of_shown(&view)
+            let (shown, page) = self.row_of_shown(&view, hint);
+            read = page;
+            shown.into_iter().collect()
         } else {
             Vec::new()
         };
+        drop(view);
         self.reloading.set(true);
-        self.list.reset(view, rows, &positions, same);
+        self.list.reset(rows, read, &positions, same);
         self.reloading.set(false);
         self.show_empty_list();
         self.show_counts();
@@ -995,19 +1002,24 @@ impl Mailbox {
         self.list_load.loaded();
     }
 
-    /// The row of the message shown in the list `view` read again: where it was when the page there (which the list
-    /// reads next anyway) still has it there or near, else where the core finds it
-    fn place_of_shown(&self, view: &pe_core::ListView) -> Vec<u64> {
-        let (folder, uid) = (self.reader.folder(), self.reader.uid());
+    /// The row of the message shown in the list `view` just counted, the core looking first near `hint` (the row it
+    /// had) in the page there, which is read for it and given back for the list to show
+    fn row_of_shown(
+        &self,
+        view: &pe_core::ListView,
+        hint: Option<u32>,
+    ) -> (Option<u64>, Option<(u64, Vec<pe_store::Message>)>) {
         let core = &shell().core;
-        if let Some((at, _)) = self.list.selected() {
+        let page = hint.map(|at| {
             let (offset, limit) = crate::messages::page_of(at);
-            let page = view.rows(core, offset, limit).unwrap_or_default();
-            if let Some(i) = page.iter().position(|m| m.folder_id == folder && m.info.uid == uid) {
-                return vec![offset + i as u64];
-            }
-        }
-        view.index_of(core, folder, uid).ok().flatten().into_iter().collect()
+            (offset, view.rows(core, offset, limit).unwrap_or_default())
+        });
+        let hint = hint.map_or(u64::MAX, u64::from);
+        let shown = view
+            .index_of_near(core, self.reader.folder(), self.reader.uid(), hint)
+            .ok()
+            .flatten();
+        (shown, page)
     }
 
     /// The list again with the selection kept: several messages stay the ones they were (only their numbers may have
@@ -1274,7 +1286,7 @@ impl Mailbox {
         if self.searching() && self.folder.get() == folder && self.listed.get() == TreeList::Folder {
             self.clear_find();
         }
-        if !self.folders.select(folder) || self.folder.get() != folder {
+        if !self.folders.select(folder, false) || self.folder.get() != folder {
             return;
         }
         self.select_in_list(folder, uid);
@@ -1380,7 +1392,7 @@ impl Mailbox {
         };
         let row = if start.all_inboxes { ALL_INBOXES } else { start.folder };
         // the window shows with the tree first, then the list and its message
-        if self.folders.choose(row) {
+        if self.folders.select(row, true) {
             let uid = start.uid.unwrap_or(0);
             self.load_list_after_paint(Some(MessageRef {
                 folder: start.folder,
@@ -1590,16 +1602,20 @@ impl Mailbox {
         self.reload_later.borrow().is_some() || self.list_load.waiting()
     }
 
-    /// The list read again 300 ms after the first of a run of changes, which the same reading takes in
+    /// The list read again a moment (300 ms) after the first of a run of changes, which the same reading takes in
     fn reload_soon(self: &Rc<Self>) {
         if self.reload_later.borrow().is_some() {
             return;
         }
         let this = Rc::downgrade(self);
-        let timer = glib::timeout_add_local_once(std::time::Duration::from_millis(300), move || {
+        let gather = std::time::Duration::from_millis(pe_core::LIST_GATHER_MS.into());
+        let timer = glib::timeout_add_local_once(gather, move || {
             if let Some(this) = this.upgrade() {
                 this.reload_later.borrow_mut().take();
-                this.refresh_list();
+                // not when the user's own command read the list after the change already
+                if this.list_load.waiting() || this.list.stale(&this.view.borrow()) {
+                    this.refresh_list();
+                }
                 this.show_folder_name();
             }
         });
@@ -1965,7 +1981,7 @@ impl Mailbox {
                 Ok(pe_core::NextUnread::Ask { folder: to, question }) => {
                     // the question as the heading, what happens under it, as GNOME's dialogs have it
                     let (heading, body) = question.split_once("\n\n").unwrap_or((TITLE, &question));
-                    if !ui::confirm(&self.window, heading, body, false).await || !self.folders.select(to) {
+                    if !ui::confirm(&self.window, heading, body, false).await || !self.folders.select(to, false) {
                         return;
                     }
                     (folder, uid) = (to, 0);
@@ -1988,7 +2004,7 @@ impl Mailbox {
             new_folder: false,
         };
         if let Some(folder) = crate::move_dialog::choose(&self.window, request).await
-            && self.folders.select(folder)
+            && self.folders.select(folder, false)
         {
             self.list.focus();
         }

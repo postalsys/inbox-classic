@@ -132,12 +132,18 @@ glib::wrapper! {
 }
 
 impl MessageModel {
-    /// Lists the rows of `view`, `total` of them
-    fn reset(&self, view: pe_core::ListView, total: u64) {
+    /// Lists `total` rows of its view, `read` the page of them read already (its offset and rows)
+    fn reset(&self, total: u64, read: Option<(u64, Vec<Message>)>) {
         let imp = self.imp();
         let before = imp.total.get();
-        *imp.view.borrow_mut() = view;
-        imp.pages.borrow_mut().clear();
+        let mut pages = imp.pages.borrow_mut();
+        pages.clear();
+        if let Some((offset, rows)) = read
+            && let Ok(offset) = u32::try_from(offset)
+        {
+            pages.push((offset, rows.into_iter().map(MessageRow::new).collect()));
+        }
+        drop(pages);
         let now = u32::try_from(total).unwrap_or(u32::MAX);
         imp.total.set(now);
         self.items_changed(0, before, now);
@@ -489,11 +495,33 @@ impl MessageList {
         )
     }
 
-    /// The list again: the rows of `view`, `total` of them, the rows `select` selected; scrolled as it was when it
-    /// is the same list read again (`same`, GTK keeps the place), else from the top
-    pub fn reset(self: &Rc<Self>, view: pe_core::ListView, total: u64, select: &[u64], same: bool) {
+    /// The view the rows are read through: `view`, or the one it has when that lists the same (it keeps what it read,
+    /// and the counts while nothing changed)
+    pub fn set_view(&self, view: pe_core::ListView) {
+        let mut kept = self.model.imp().view.borrow_mut();
+        if *kept != view {
+            *kept = view;
+        }
+    }
+
+    /// The view the rows are read through ([`MessageList::set_view`])
+    pub fn view(&self) -> std::cell::Ref<'_, pe_core::ListView> {
+        self.model.imp().view.borrow()
+    }
+
+    /// Whether the list shown might show something else read again: it is not `view`'s, or something was written
+    /// since it was counted
+    pub fn stale(&self, view: &pe_core::ListView) -> bool {
+        let shown = self.view();
+        *shown != *view || shown.stale(&shell().core).unwrap_or(true)
+    }
+
+    /// The list again: the rows of its view, `total` of them (`read` the page of them read already, its offset and
+    /// rows), the rows `select` selected; scrolled as it was when it is the same list read again (`same`, GTK keeps
+    /// the place), else from the top
+    pub fn reset(self: &Rc<Self>, total: u64, read: Option<(u64, Vec<Message>)>, select: &[u64], same: bool) {
         self.clock.set(crate::rows::Clock::now());
-        self.model.reset(view, total);
+        self.model.reset(total, read);
         self.select_positions(select);
         // another list starts at its top (GTK keeps the place it had), unless a selection is shown
         if !same && select.is_empty() && self.model.n_items() > 0 {

@@ -692,6 +692,10 @@ fn show_about() {
 pub fn run_command(command: Command) {
     let shell = shell();
     let main = shell.main();
+    // a list chosen and waiting for the tree's paint is read first by what acts on it, not by the others
+    if command.acts_on_list() {
+        main.load_waiting_list();
+    }
     match command {
         Command::NewAccount => spawn(add_account()),
         Command::Exit => spawn(quit()),

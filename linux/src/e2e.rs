@@ -917,7 +917,7 @@ fn select_folder(name: &str) -> bool {
         .unwrap_or_default()
         .into_iter()
         .find(|f| pe_core::folder_name(&f.info) == name);
-    folder.is_some_and(|f| shell().main().folders.select(f.id))
+    folder.is_some_and(|f| shell().main().folders.select(f.id, false))
 }
 
 async fn select_row(index: u32) {
@@ -2245,7 +2245,7 @@ async fn flagged_folder(d: &Driver) {
         wait_until(10, || core.flagged_count().unwrap_or(0) == before + 1).await,
         "flagging a message counts it under Flagged",
     );
-    main.folders.select(crate::folders::FLAGGED);
+    main.folders.select(crate::folders::FLAGGED, false);
     d.check(
         wait_until(10, || u64::from(rows()) == before + 1).await,
         &format!("Flagged lists the flagged messages of every folder ({})", rows()),

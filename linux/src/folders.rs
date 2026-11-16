@@ -160,7 +160,7 @@ type Selected = Box<dyn Fn(&TreeRow, bool)>;
 /// What the tree tells the window: a row chosen, messages dropped onto a folder, and the accounts reordered
 pub struct Handlers {
     /// A row selected: by the user (true; a click or a key, whose list loads after the tree has drawn the row), or
-    /// from the app ([`FolderTree::select`], listed at once)
+    /// from the app ([`FolderTree::select`] not `by_user`, listed at once)
     pub selected: Selected,
     /// Whether the messages dragged may go to folder `to`
     pub can_drop: CanDrop,
@@ -212,7 +212,7 @@ pub struct FolderTree {
     /// The item last selected: closing an account takes the selection off a folder it hides, which stays the one
     /// listed, and is selected again when the account opens
     last: Cell<i64>,
-    /// While the app selects a row ([`FolderTree::select`]): not the user's choice
+    /// While the app selects a row ([`FolderTree::select`] not `by_user`): not the user's choice
     selecting: Cell<bool>,
     handlers: Rc<RefCell<Option<Handlers>>>,
     /// A row at the top has rows under it: every row keeps the room of an arrow, so the icons line up; else the top
@@ -394,18 +394,10 @@ impl FolderTree {
             .and_then(|item| item.row())
     }
 
-    /// Selects row `id`, the rows around it opened to it, listed at once; false when there is none (the selection
-    /// unchanged)
-    pub fn select(&self, id: i64) -> bool {
-        let before = self.selecting.replace(true);
-        let selected = self.select_row(id);
-        self.selecting.set(before);
-        selected
-    }
-
-    /// Selects row `id` as a click on it does: its list loads after the tree has drawn it
-    pub fn choose(&self, id: i64) -> bool {
-        let before = self.selecting.replace(false);
+    /// Selects row `id`, the rows around it opened to it: listed at once, or as a click on it does (`by_user`), its
+    /// list loaded after the tree has drawn it; false when there is none (the selection unchanged)
+    pub fn select(&self, id: i64, by_user: bool) -> bool {
+        let before = self.selecting.replace(!by_user);
         let selected = self.select_row(id);
         self.selecting.set(before);
         selected

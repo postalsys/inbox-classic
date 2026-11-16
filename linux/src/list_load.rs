@@ -1,7 +1,7 @@
 //! A list chosen in the folder tree loads after the tree has drawn the row chosen: the click is answered within the
 //! frame, the store is read after it. Until the new list is drawn the one before stays, dimmed and taking no clicks or
-//! keys; "Loading..." shows over it only when the load has not been done in 400 ms. A newer choice replaces the load
-//! waiting, so only the newest runs.
+//! keys; "Loading..." shows over it only when the load has not been done in 400 ms from the first choice. A newer
+//! choice replaces the load waiting, so only the newest runs, and does not start the 400 ms again.
 
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -10,8 +10,8 @@ use std::time::Duration;
 use gtk::prelude::*;
 use gtk::{gdk, glib};
 
-/// How long the old list waits dimmed before it says it is loading
-const LOADING_NOTE_AFTER: Duration = Duration::from_millis(400);
+/// How long the old list waits dimmed before it says it is loading, from the first choice of the wait
+const LOADING_NOTE_AFTER: Duration = Duration::from_millis(pe_core::LIST_LOADING_MS as u64);
 /// The load runs at the latest this long after the choice, should no frame be drawn (a window not on screen)
 const PAINT_FALLBACK: Duration = Duration::from_millis(250);
 
@@ -92,8 +92,10 @@ impl ListLoad {
     pub fn after_paint(self: &Rc<Self>, drawn: &impl IsA<gtk::Widget>, load: impl FnOnce() + 'static) {
         let mut waiting = self.waiting.borrow_mut();
         waiting.cancel();
-        waiting.load = Some(Box::new(load));
-        self.dim(true);
+        // a choice while one waits: the list stays dimmed, "Loading..." on the first one's time
+        if waiting.load.replace(Box::new(load)).is_none() {
+            self.dim(true);
+        }
         let weak = Rc::downgrade(self);
         let drawn = drawn.as_ref();
         match drawn.frame_clock().filter(|_| drawn.is_drawable()) {
@@ -186,7 +188,7 @@ impl ListLoad {
             timer.remove();
         }
         self.list.set_sensitive(!on);
-        crate::ui::set_class(&self.list, "list-waiting", on);
+        self.list.set_opacity(if on { 1.0 - pe_core::LIST_DIM } else { 1.0 });
         if !on {
             self.note.set_visible(false);
             return;
