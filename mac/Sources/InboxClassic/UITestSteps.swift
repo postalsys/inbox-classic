@@ -1745,11 +1745,19 @@ extension UITest {
               "the server refuses the move: a bar over the list says so in the core's words (\(mailbox.undoneText))")
         check(status?.stringValue.isEmpty == true, "and the status bar no longer says they were moved")
         check(await waitUntil(20) { list.numberOfRows == 3 }, "and the three are back in the list")
+        // and selected again, in sight, as what Undo brings back is
+        let back = { () -> Bool in
+            let rows = self.list.selectedRowIndexes
+            let visible = self.list.rows(in: self.list.visibleRect)
+            return rows.count == 3 && rows.allSatisfy { visible.contains($0) }
+                && Set(rows.compactMap { mailbox.row($0)?.subject }) == ["Bulk 1", "Bulk 2", "Bulk 3"]
+        }
+        check(await waitUntil(20) { back() }, "the three that came back are selected, in sight")
         await pause(0.5)
-        await shot(main.window, "big-1-refused")
+        await shot(main.window, "many-1-refused")
         main.window.appearance = NSAppearance(named: .darkAqua)
         await pause(0.5)
-        await shot(main.window, "big-2-refused-dark")
+        await shot(main.window, "many-2-refused-dark")
         main.window.appearance = nil
         let bar: InfoBar? = find("list.undone", in: main.window)
         bar?.press()

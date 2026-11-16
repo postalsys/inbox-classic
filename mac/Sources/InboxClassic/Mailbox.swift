@@ -957,7 +957,10 @@ public final class Mailbox: NSObject {
         showFolderColumn()
         showPersonColumn(load.listsRecipients)
         indentSubjectHeader()
+        // Select All still the whole list while no mail came since; otherwise the messages it had (listed by the core),
+        // the newer rows not selected
         let all = keepSelection && allSelected && rows > 0
+            && pe_list_view_select_all_again(core.handle, listView.handle, selection)
         // the selection follows the messages to where they are now, without a flicker of the reading pane
         let several = keepSelection && !all && selectedCount > 1 ? core.positions(of: selection, in: listView) : nil
         // the row of the message shown, as the load found it; one shown since the load was asked for found here
@@ -982,8 +985,8 @@ public final class Mailbox: NSObject {
         updateEmptyText()
         updateSearchBar()
         if all {
-            // the whole list again, counted again
-            selectWholeList()
+            // the same Select All, counted again: not a new one that would take mail stored since
+            selectWholeList(again: true)
         } else {
             allSelected = false
             // several selected again: the same messages, only their numbers may have changed
@@ -1032,8 +1035,9 @@ public final class Mailbox: NSObject {
     }
 
 
-    /// the messages Undo brought back selected, once they are in the list; when they came back after the list was
-    /// counted, its rows are others than the core's, so the list is read again first
+    /// the messages Undo brought back, or the store took back of a refused action, selected once they are in the
+    /// list; when they came back after the list was counted, its rows are others than the core's, so the list is read
+    /// again first
     private func selectRestored() {
         var behind = false
         guard let found = pe_list_view_restored(core.handle, listView.handle, &behind) else { return }
@@ -1125,9 +1129,10 @@ public final class Mailbox: NSObject {
         selectWholeList()
     }
 
-    /// the selection the whole list, its summary asked for; the reading pane says how many once it is here
-    private func selectWholeList() {
-        guard pe_list_view_select_all(core.handle, listView.handle, selection) else { return }
+    /// the selection the whole list, its summary asked for; the reading pane says how many once it is here. `again`:
+    /// the selection is Select All already (pe_list_view_select_all_again counted it), its summary asked for again
+    private func selectWholeList(again: Bool = false) {
+        guard again || pe_list_view_select_all(core.handle, listView.handle, selection) else { return }
         // a summary asked for before is of another list: what waited for it is dropped with it
         if summaryRequest != 0 {
             pe_read_cancel(core.handle, summaryRequest)
@@ -2501,6 +2506,9 @@ public final class Mailbox: NSObject {
             // the status bar's "Moved..." is taken back with it
             status("")
             showUndone(event.message)
+            // the messages back in the list now, and selected there as what Undo brings back is
+            restorePending = true
+            listChanged(keepSelection: true)
         case PE_EVENT_KIND_SYNC_FINISHED:
             // how much text the search still has to read
             updateSearchBar()
