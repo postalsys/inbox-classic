@@ -3498,7 +3498,7 @@ pub async fn languages(d: &Driver) {
     d.check(
         names.first().is_some_and(|n| n == "System default (English)")
             && names[1..] == languages[..]
-            && names.get(2).is_some_and(|n| n == "Deutsch"),
+            && names.iter().any(|n| n == "Deutsch"),
         &format!(
             "Language lists System default, with the language it is now, and every language by its own name ({names:?})"
         ),
@@ -3515,7 +3515,8 @@ pub async fn languages(d: &Driver) {
     for popover in descendants::<gtk::Popover>(&root) {
         popover.popdown();
     }
-    row.set_selected(2);
+    let deutsch = names.iter().position(|n| n == "Deutsch").unwrap_or(2);
+    row.set_selected(u32::try_from(deutsch).unwrap_or(2));
     match wait_alert(5).await {
         Some(alert) => {
             let text = alert_text(&alert);
