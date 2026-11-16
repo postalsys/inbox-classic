@@ -23,6 +23,7 @@ mod windows;
 pub use agents::*;
 pub use book::*;
 pub use core::*;
+pub use keys::{pe_passphrase_feedback, pe_passphrase_feedback_longest};
 pub use list_view::*;
 pub use rules::*;
 pub use selection::*;

@@ -161,6 +161,15 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_KEYS_FOUND = 25,
   // An own key was published (`pe_pgp_publish`): `pe_pgp_publish_result` with the request in `uid`
   PE_EVENT_KIND_KEY_PUBLISHED = 26,
+  // Accounts were added other than through the account form (an import): read the accounts again
+  PE_EVENT_KIND_ACCOUNTS_CHANGED = 27,
+  // Settings, trusted senders, sign-in apps or message rules changed other than through their windows (an
+  // import): read them again
+  PE_EVENT_KIND_SETTINGS_CHANGED = 28,
+  // The address book changed other than through its window (an import)
+  PE_EVENT_KIND_ADDRESS_BOOK_CHANGED = 29,
+  // The OpenPGP keys changed other than through their window (an import)
+  PE_EVENT_KIND_KEYS_CHANGED = 30,
 } PeEventKind;
 
 typedef enum PeSecurity {
@@ -1381,6 +1390,9 @@ typedef struct PeSetupLine {
   enum PeSetupLineKind kind;
   // The part (`PE_SETUP_*`) of a `Part` line, 0 for the others
   uint32_t part;
+  // The part's name ("Contacts and groups") of a `Part` line, empty for the others
+  const char *name;
+  // What the part holds ("2 accounts"; empty in `pe_setup_parts`), or what was done
   const char *text;
 } PeSetupLine;
 
@@ -1390,21 +1402,11 @@ typedef struct PeSetupInfo {
   bool encrypted;
   // The version of Inbox Classic that saved it
   const char *app_version;
-  // When, seconds since 1970, and as the user's locale writes a day
+  // When, seconds since 1970, and as the user's locale writes a day (empty when the file names no such day)
   int64_t created;
   const char *created_text;
-  // The parts it holds, `PE_SETUP_*` flags
+  // The parts it holds, `PE_SETUP_*` flags; `pe_setup_file_part` lists those it holds something in, with words
   uint32_t parts;
-  size_t settings;
-  size_t preferences;
-  size_t accounts;
-  size_t sign_in_apps;
-  size_t contacts;
-  size_t groups;
-  size_t own_keys;
-  size_t contact_keys;
-  size_t rules;
-  size_t trusted_senders;
 } PeSetupInfo;
 
 // An account of a setup file as the import window lists it
@@ -1414,18 +1416,17 @@ typedef struct PeSetupAccount {
   const char *email;
   // What the folder list will call it
   const char *title;
-  // `imap.example.com:993`
-  const char *imap;
-  const char *smtp;
+  // The title with the address, as the list shows it: "Work <ann@example.com>"
+  const char *label;
+  // Its servers and how it signs in, one line: "imap.example.com and smtp.example.com (Password)"
+  const char *servers;
   // How it signs in, in words: "Password", or the sign-in app's name
   const char *sign_in;
-  // Its password or sign-in is in the file
-  bool has_secret;
   // One like it (the same address and IMAP server) is set up here: an import skips it
   bool here;
-  // A server is reached without encryption
-  bool plain;
-  // Why it can not be imported, NULL when it can
+  // An import can add it: offer its check box ticked; otherwise unticked and greyed, `note` saying why
+  bool importable;
+  // Why it can not be imported, NULL when it can (or when it is only here already)
   const char *problem;
   // What an import does with it, in words
   const char *note;
@@ -1434,7 +1435,10 @@ typedef struct PeSetupAccount {
 // An app preference a setup file carries, its value checked
 typedef struct PeSetupPref {
   const char *name;
+  // Checked: one of the values `pe_setup_pref_names` says, ready to apply
   const char *value;
+  // It counts once the app starts again (the language, listed last): the window may offer to restart
+  bool restart;
 } PeSetupPref;
 
 // A language there is a catalog of
@@ -3318,6 +3322,20 @@ bool pe_pgp_set_key_verified(const struct PeCore *core,
 char *pe_pgp_passphrase_problem(const char *first,
                                 const char *again);
 
+// What to say under a passphrase typed twice while it is typed (a key backup's, a setup file's), NULL for nothing;
+// `acceptable` (NULL or a valid pointer) says whether it can be used: 8 characters or more, the same twice. "Too
+// short" shows once the first field has something shorter; "not the same" only once the second is as long as the
+// first. Free with `pe_string_free`.
+//
+// # Safety
+// `first` and `again` must be NULL or NUL-terminated strings, `acceptable` NULL or a valid pointer.
+char *pe_passphrase_feedback(const char *first,
+                             const char *again,
+                             bool *acceptable);
+
+// The longest of what `pe_passphrase_feedback` says, for a window to keep room for it; free with `pe_string_free`
+char *pe_passphrase_feedback_longest(void);
+
 // The keys of `address`; free with `pe_pgp_peer_free`.
 //
 // # Safety
@@ -4099,6 +4117,17 @@ const struct PeSetupPrefName *pe_setup_pref_names_get(const struct PeSetupPrefNa
 // `list` must be NULL or a list that was not freed yet.
 void pe_setup_pref_names_free(struct PeSetupPrefNames *list);
 
+// Every part of a setup file with its flag and its name, in the order the windows list them (`text` empty): what
+// the export window offers. Free with `pe_setup_lines_free`.
+struct PeSetupLines *pe_setup_parts(void);
+
+// The setup file's extension without its dot (`inboxclassic`), a static string that is not freed
+const char *pe_setup_extension(void);
+
+// The name an export offers to save as, in the language in use ("Inbox Classic settings and accounts.inboxclassic");
+// free with `pe_string_free`
+char *pe_setup_default_name(void);
+
 // # Safety
 // `lines` must be NULL or live.
 size_t pe_setup_lines_count(const struct PeSetupLines *lines);
@@ -4139,7 +4168,7 @@ bool pe_setup_export_set_pref(struct PeSetupExport *export_,
                               const char *name,
                               const char *value);
 
-// Writes the setup file at `path` (UTF-8): each part written with what it holds, as `Part` lines; NULL with the
+// Writes the setup file at `path` (UTF-8; `.inboxclassic` added when it has no extension): each part written with what it holds, as `Part` lines; NULL with the
 // reason in `error` (free it with `pe_string_free`) when it could not be written
 //
 // # Safety
@@ -4204,26 +4233,23 @@ size_t pe_setup_file_pref_count(const struct PeSetupFile *file);
 // `file` must be NULL or live.
 const struct PeSetupPref *pe_setup_file_pref(const struct PeSetupFile *file, size_t index);
 
-// # Safety
-// `file` must be NULL or live.
-size_t pe_setup_file_note_count(const struct PeSetupFile *file);
-
-// Note `index`: what the file holds that can not be used and is left out, in words; NULL past the end. Lives as
-// long as the handle.
+// What the file holds that can not be used and is left out, a line each in words; free with `pe_text_list_free`
 //
 // # Safety
 // `file` must be NULL or live.
-const char *pe_setup_file_note(const struct PeSetupFile *file,
-                               size_t index);
+struct PeTextList *pe_setup_file_notes(const struct PeSetupFile *file);
 
 // # Safety
 // `file` must be NULL or a handle that was not freed yet.
 void pe_setup_file_free(struct PeSetupFile *file);
 
 // Imports the `parts` (`PE_SETUP_*`) of `file` and its accounts at the places `accounts` names (`count` of them,
-// `PeSetupAccount.index`): lines of what was added and skipped, and the accounts added (`pe_setup_lines_accounts`),
+// `PeSetupAccount.index`; `PE_SETUP_ACCOUNTS` follows from them: taken when any are named, never when none are):
+// lines of what was added and skipped, and the accounts added (`pe_setup_lines_accounts`),
 // which start syncing. The app sets the preferences itself (`pe_setup_file_pref`). NULL with the reason in `error`
-// (free it with `pe_string_free`) when nothing could be imported.
+// (free it with `pe_string_free`) when nothing could be imported. BLOCKS while the issuers of the sign-in apps it
+// adds are read (20 seconds at most each): call it from a thread of its own, never the window thread. The core posts
+// `ACCOUNTS_CHANGED`, `SETTINGS_CHANGED`, `ADDRESS_BOOK_CHANGED` and `KEYS_CHANGED` for what it changed.
 //
 // # Safety
 // `core` and `file` must be live, `accounts` NULL or `count` values, `error` NULL or a valid pointer.

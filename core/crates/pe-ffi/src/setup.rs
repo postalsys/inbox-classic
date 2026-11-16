@@ -3,14 +3,15 @@
 //! chosen, which answers with lines of words. No JSON crosses: the core reads and writes the file, the apps hand their
 //! preferences in by name and take them back by name. The rules are the core's (pe-core `setup`).
 
-use std::ffi::{CString, c_char};
+use std::ffi::c_char;
 use std::ptr::{null, null_mut};
 
 use pe_core::setup::{self, ImportChoice, ImportLineKind, ImportSummary, Parts, PrefKind, SetupError, SetupFile};
 use zeroize::Zeroizing;
 
 use crate::core::{PeCore, Rows, Strings, arg, handed, refused, take_back, with};
-use crate::{c_string, guard};
+use crate::guard;
+use crate::selection::PeTextList;
 
 /// The parts of a setup file, as flags
 pub const PE_SETUP_SETTINGS: u32 = 1;
@@ -116,6 +117,9 @@ pub struct PeSetupLine {
     pub kind: PeSetupLineKind,
     /// The part (`PE_SETUP_*`) of a `Part` line, 0 for the others
     pub part: u32,
+    /// The part's name ("Contacts and groups") of a `Part` line, empty for the others
+    pub name: *const c_char,
+    /// What the part holds ("2 accounts"; empty in `pe_setup_parts`), or what was done
     pub text: *const c_char,
 }
 
@@ -130,8 +134,36 @@ fn part_lines(parts: &[(Parts, String)]) -> Rows<PeSetupLine> {
     Rows::new(parts, |(part, text), strings| PeSetupLine {
         kind: PeSetupLineKind::Part,
         part: part.0,
+        name: strings.add(&part.name()),
         text: strings.add(text),
     })
+}
+
+/// Every part of a setup file with its flag and its name, in the order the windows list them (`text` empty): what
+/// the export window offers. Free with `pe_setup_lines_free`.
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_setup_parts() -> *mut PeSetupLines {
+    guard(|| {
+        let parts: Vec<(Parts, String)> = Parts::EACH.iter().map(|part| (*part, String::new())).collect();
+        handed(PeSetupLines {
+            rows: part_lines(&parts),
+            accounts: Vec::new(),
+        })
+    })
+    .unwrap_or(null_mut())
+}
+
+/// The setup file's extension without its dot (`inboxclassic`), a static string that is not freed
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_setup_extension() -> *const c_char {
+    c"inboxclassic".as_ptr()
+}
+
+/// The name an export offers to save as, in the language in use ("Inbox Classic settings and accounts.inboxclassic");
+/// free with `pe_string_free`
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_setup_default_name() -> *mut c_char {
+    guard(|| crate::into_c_string(setup::default_name())).unwrap_or(null_mut())
 }
 
 fn summary_lines(summary: &ImportSummary) -> PeSetupLines {
@@ -143,6 +175,7 @@ fn summary_lines(summary: &ImportSummary) -> PeSetupLines {
                 ImportLineKind::Note => PeSetupLineKind::Note,
             },
             part: 0,
+            name: strings.add(""),
             text: strings.add(&line.text),
         }),
         accounts: summary.accounts.clone(),
@@ -256,7 +289,7 @@ pub unsafe extern "C" fn pe_setup_export_set_pref(
     .unwrap_or(false)
 }
 
-/// Writes the setup file at `path` (UTF-8): each part written with what it holds, as `Part` lines; NULL with the
+/// Writes the setup file at `path` (UTF-8; `.inboxclassic` added when it has no extension): each part written with what it holds, as `Part` lines; NULL with the
 /// reason in `error` (free it with `pe_string_free`) when it could not be written
 ///
 /// # Safety
@@ -324,21 +357,11 @@ pub struct PeSetupInfo {
     pub encrypted: bool,
     /// The version of Inbox Classic that saved it
     pub app_version: *const c_char,
-    /// When, seconds since 1970, and as the user's locale writes a day
+    /// When, seconds since 1970, and as the user's locale writes a day (empty when the file names no such day)
     pub created: i64,
     pub created_text: *const c_char,
-    /// The parts it holds, `PE_SETUP_*` flags
+    /// The parts it holds, `PE_SETUP_*` flags; `pe_setup_file_part` lists those it holds something in, with words
     pub parts: u32,
-    pub settings: usize,
-    pub preferences: usize,
-    pub accounts: usize,
-    pub sign_in_apps: usize,
-    pub contacts: usize,
-    pub groups: usize,
-    pub own_keys: usize,
-    pub contact_keys: usize,
-    pub rules: usize,
-    pub trusted_senders: usize,
 }
 
 /// An account of a setup file as the import window lists it
@@ -349,18 +372,17 @@ pub struct PeSetupAccount {
     pub email: *const c_char,
     /// What the folder list will call it
     pub title: *const c_char,
-    /// `imap.example.com:993`
-    pub imap: *const c_char,
-    pub smtp: *const c_char,
+    /// The title with the address, as the list shows it: "Work <ann@example.com>"
+    pub label: *const c_char,
+    /// Its servers and how it signs in, one line: "imap.example.com and smtp.example.com (Password)"
+    pub servers: *const c_char,
     /// How it signs in, in words: "Password", or the sign-in app's name
     pub sign_in: *const c_char,
-    /// Its password or sign-in is in the file
-    pub has_secret: bool,
     /// One like it (the same address and IMAP server) is set up here: an import skips it
     pub here: bool,
-    /// A server is reached without encryption
-    pub plain: bool,
-    /// Why it can not be imported, NULL when it can
+    /// An import can add it: offer its check box ticked; otherwise unticked and greyed, `note` saying why
+    pub importable: bool,
+    /// Why it can not be imported, NULL when it can (or when it is only here already)
     pub problem: *const c_char,
     /// What an import does with it, in words
     pub note: *const c_char,
@@ -370,7 +392,10 @@ pub struct PeSetupAccount {
 #[repr(C)]
 pub struct PeSetupPref {
     pub name: *const c_char,
+    /// Checked: one of the values `pe_setup_pref_names` says, ready to apply
     pub value: *const c_char,
+    /// It counts once the app starts again (the language, listed last): the window may offer to restart
+    pub restart: bool,
 }
 
 /// A setup file read: what it holds, for the import window, and what `pe_setup_import` writes; free with
@@ -381,40 +406,27 @@ pub struct PeSetupFile {
     accounts: Rows<PeSetupAccount>,
     parts: Rows<PeSetupLine>,
     prefs: Rows<PeSetupPref>,
-    notes: Vec<CString>,
     _strings: Strings,
 }
 
 fn file_handle(file: SetupFile) -> PeSetupFile {
     let mut strings = Strings::default();
-    let counts = file.counts;
     let info = PeSetupInfo {
         encrypted: file.encrypted,
         app_version: strings.add(&file.app_version),
         created: file.created,
         created_text: strings.add(&file.created_text),
         parts: file.parts.0,
-        settings: counts.settings,
-        preferences: counts.preferences,
-        accounts: counts.accounts,
-        sign_in_apps: counts.sign_in_apps,
-        contacts: counts.contacts,
-        groups: counts.groups,
-        own_keys: counts.own_keys,
-        contact_keys: counts.contact_keys,
-        rules: counts.rules,
-        trusted_senders: counts.trusted_senders,
     };
     let accounts = Rows::new(&file.accounts, |a, strings| PeSetupAccount {
         index: a.index,
         email: strings.add(&a.email),
         title: strings.add(&a.title),
-        imap: strings.add(&a.imap),
-        smtp: strings.add(&a.smtp),
+        label: strings.add(&a.label),
+        servers: strings.add(&a.servers),
         sign_in: strings.add(&a.sign_in),
-        has_secret: a.has_secret,
         here: a.here,
-        plain: a.plain,
+        importable: a.importable,
         problem: a.problem.as_deref().map_or(null(), |problem| strings.add(problem)),
         note: strings.add(&a.note),
     });
@@ -422,15 +434,14 @@ fn file_handle(file: SetupFile) -> PeSetupFile {
     let prefs = Rows::new(&file.prefs, |(name, value), strings| PeSetupPref {
         name: strings.add(name),
         value: strings.add(value),
+        restart: setup::pref_restarts(name),
     });
-    let notes = file.notes.iter().map(|note| c_string(note.clone())).collect();
     PeSetupFile {
         file,
         info,
         accounts,
         parts,
         prefs,
-        notes,
         _strings: strings,
     }
 }
@@ -553,25 +564,15 @@ pub unsafe extern "C" fn pe_setup_file_pref(file: *const PeSetupFile, index: usi
     Rows::get(unsafe { file.as_ref() }.map(|file| &file.prefs), index)
 }
 
-/// # Safety
-/// `file` must be NULL or live.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_setup_file_note_count(file: *const PeSetupFile) -> usize {
-    // SAFETY: as the caller guarantees
-    unsafe { file.as_ref() }.map_or(0, |file| file.notes.len())
-}
-
-/// Note `index`: what the file holds that can not be used and is left out, in words; NULL past the end. Lives as
-/// long as the handle.
+/// What the file holds that can not be used and is left out, a line each in words; free with `pe_text_list_free`
 ///
 /// # Safety
 /// `file` must be NULL or live.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_setup_file_note(file: *const PeSetupFile, index: usize) -> *const c_char {
+pub unsafe extern "C" fn pe_setup_file_notes(file: *const PeSetupFile) -> *mut PeTextList {
     // SAFETY: as the caller guarantees
-    unsafe { file.as_ref() }
-        .and_then(|file| file.notes.get(index))
-        .map_or(null(), |note| note.as_ptr())
+    let notes = unsafe { file.as_ref() }.map_or_else(Vec::new, |file| file.file.notes.clone());
+    guard(|| crate::selection::text_list(notes)).unwrap_or(null_mut())
 }
 
 /// # Safety
@@ -583,9 +584,12 @@ pub unsafe extern "C" fn pe_setup_file_free(file: *mut PeSetupFile) {
 }
 
 /// Imports the `parts` (`PE_SETUP_*`) of `file` and its accounts at the places `accounts` names (`count` of them,
-/// `PeSetupAccount.index`): lines of what was added and skipped, and the accounts added (`pe_setup_lines_accounts`),
+/// `PeSetupAccount.index`; `PE_SETUP_ACCOUNTS` follows from them: taken when any are named, never when none are):
+/// lines of what was added and skipped, and the accounts added (`pe_setup_lines_accounts`),
 /// which start syncing. The app sets the preferences itself (`pe_setup_file_pref`). NULL with the reason in `error`
-/// (free it with `pe_string_free`) when nothing could be imported.
+/// (free it with `pe_string_free`) when nothing could be imported. BLOCKS while the issuers of the sign-in apps it
+/// adds are read (20 seconds at most each): call it from a thread of its own, never the window thread. The core posts
+/// `ACCOUNTS_CHANGED`, `SETTINGS_CHANGED`, `ADDRESS_BOOK_CHANGED` and `KEYS_CHANGED` for what it changed.
 ///
 /// # Safety
 /// `core` and `file` must be live, `accounts` NULL or `count` values, `error` NULL or a valid pointer.
@@ -645,5 +649,7 @@ mod tests {
         for (flag, part) in flags {
             assert_eq!(flag, part.0);
         }
+        let extension = unsafe { std::ffi::CStr::from_ptr(pe_setup_extension()) };
+        assert_eq!(extension.to_str().unwrap(), setup::EXTENSION);
     }
 }

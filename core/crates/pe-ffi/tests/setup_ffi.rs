@@ -140,36 +140,44 @@ fn a_setup_goes_from_one_store_to_another() {
     let info = unsafe { &*pe_setup_file_info(file) };
     assert!(info.encrypted);
     assert_eq!(info.parts, PE_SETUP_ALL);
-    assert_eq!((info.accounts, info.trusted_senders, info.preferences), (1, 1, 1));
     assert_eq!(text(info.app_version), taken_version());
     assert_eq!(unsafe { pe_setup_file_account_count(file) }, 1);
     let account = unsafe { &*pe_setup_file_account(file, 0) };
     assert_eq!(
         (
             text(account.email),
-            text(account.imap),
-            account.has_secret,
+            text(account.label),
+            text(account.servers),
+            account.importable,
             account.here
         ),
-        ("ann@example.com".to_string(), "127.0.0.1:9".to_string(), true, false)
+        (
+            "ann@example.com".to_string(),
+            "example.com <ann@example.com>".to_string(),
+            "127.0.0.1 and 127.0.0.1 (Password)".to_string(),
+            true,
+            false
+        )
     );
     assert!(account.problem.is_null());
     assert!(!text(account.note).is_empty());
     assert!(unsafe { pe_setup_file_account(file, 1) }.is_null());
-    assert_eq!(unsafe { pe_setup_file_part_count(file) }, 8);
+    // the parts that hold something: no contacts, keys or rules here
+    assert_eq!(unsafe { pe_setup_file_part_count(file) }, 5);
     let part = unsafe { &*pe_setup_file_part(file, 0) };
     assert_eq!(
-        (part.part, text(part.text)),
-        (PE_SETUP_ACCOUNTS, "1 account".to_string())
+        (part.part, text(part.name), text(part.text)),
+        (PE_SETUP_ACCOUNTS, "Accounts".to_string(), "1 account".to_string())
     );
     assert_eq!(unsafe { pe_setup_file_pref_count(file) }, 1);
     let pref = unsafe { &*pe_setup_file_pref(file, 0) };
     assert_eq!(
-        (text(pref.name), text(pref.value)),
-        ("layout".to_string(), "2".to_string())
+        (text(pref.name), text(pref.value), pref.restart),
+        ("layout".to_string(), "2".to_string(), false)
     );
-    assert_eq!(unsafe { pe_setup_file_note_count(file) }, 0);
-    assert!(unsafe { pe_setup_file_note(file, 0) }.is_null());
+    let notes = unsafe { pe_setup_file_notes(file) };
+    assert_eq!(unsafe { pe_text_list_count(notes) }, 0);
+    unsafe { pe_text_list_free(notes) };
 
     // nothing chosen: refused with the reason
     let mut error: *mut c_char = null_mut();
@@ -217,4 +225,39 @@ fn a_setup_goes_from_one_store_to_another() {
 
 fn taken_version() -> String {
     text(pe_version())
+}
+
+#[test]
+fn parts_names_and_passphrases_come_from_the_core() {
+    let parts = pe_setup_parts();
+    let listed = lines(parts);
+    unsafe { pe_setup_lines_free(parts) };
+    assert_eq!(listed.len(), 8);
+    assert_eq!(listed[0].1, PE_SETUP_ACCOUNTS);
+    let names: Vec<(u32, String)> = (0..8)
+        .map(|i| {
+            let parts = pe_setup_parts();
+            let line = unsafe { &*pe_setup_lines_get(parts, i) };
+            let found = (line.part, text(line.name));
+            unsafe { pe_setup_lines_free(parts) };
+            found
+        })
+        .collect();
+    assert!(names.contains(&(PE_SETUP_CONTACTS, "Contacts and groups".to_string())));
+    assert_eq!(text(pe_setup_extension()), "inboxclassic");
+    assert!(taken(pe_setup_default_name()).ends_with(".inboxclassic"));
+
+    let feedback = |first: &str, again: &str| {
+        let (first, again) = (c(first), c(again));
+        let mut acceptable = false;
+        let said = unsafe { pe_passphrase_feedback(first.as_ptr(), again.as_ptr(), &mut acceptable) };
+        let said = if said.is_null() { None } else { Some(taken(said)) };
+        (said, acceptable)
+    };
+    assert_eq!(feedback("", ""), (None, false));
+    assert!(feedback("abc", "").0.is_some());
+    assert_eq!(feedback("abcdefgh", "abc"), (None, false));
+    assert!(feedback("abcdefgh", "abcdefgx").0.is_some());
+    assert_eq!(feedback("abcdefgh", "abcdefgh"), (None, true));
+    assert!(!taken(pe_passphrase_feedback_longest()).is_empty());
 }

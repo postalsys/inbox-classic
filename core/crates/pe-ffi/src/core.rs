@@ -145,6 +145,15 @@ pub enum PeEventKind {
     KeysFound = 25,
     /// An own key was published (`pe_pgp_publish`): `pe_pgp_publish_result` with the request in `uid`
     KeyPublished = 26,
+    /// Accounts were added other than through the account form (an import): read the accounts again
+    AccountsChanged = 27,
+    /// Settings, trusted senders, sign-in apps or message rules changed other than through their windows (an
+    /// import): read them again
+    SettingsChanged = 28,
+    /// The address book changed other than through its window (an import)
+    AddressBookChanged = 29,
+    /// The OpenPGP keys changed other than through their window (an import)
+    KeysChanged = 30,
 }
 
 #[repr(C)]
@@ -245,6 +254,10 @@ impl Callback {
             Event::AgentLogChanged => (PeEventKind::AgentLogChanged, 0, 0, 0),
             Event::Transferring { .. } => (PeEventKind::Transferring, 0, 0, 0),
             Event::FolderCreated { account, folder } => (PeEventKind::FolderCreated, *account, *folder, 0),
+            Event::AccountsChanged => (PeEventKind::AccountsChanged, 0, 0, 0),
+            Event::SettingsChanged => (PeEventKind::SettingsChanged, 0, 0, 0),
+            Event::AddressBookChanged => (PeEventKind::AddressBookChanged, 0, 0, 0),
+            Event::KeysChanged => (PeEventKind::KeysChanged, 0, 0, 0),
         };
         let count = match &event {
             Event::NewMail { count, .. } => *count as u64,
