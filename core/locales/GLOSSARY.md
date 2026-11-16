@@ -12,7 +12,10 @@ release.**
 
 **Adding a language.** Its catalogs (`core/locales/<code>/`, every file English has), its help
 (`core/crates/pe-html/help/<code>/`, every topic), both marked for review, and its line in `pe_i18n::LANGUAGES`
-(`core/crates/pe-i18n/src/lib.rs`: the two-letter code and the language's name in itself). `node
+(`core/crates/pe-i18n/src/lib.rs`: its tag and the language's name in itself). The tag is the language's two letters,
+with a region or script where the language is written differently there (`pt-BR`, `sr-Latn`): a system's language is
+matched by its language, then its region or script, then the language's own catalog (`pt` for any Portuguese but
+Brazil's), then its first (`sr-Latn` for any Serbian). `node
 scripts/check-language.mjs <code>` checks the catalogs and the help against English first. Everything else follows the
 list: building the core writes the installer's languages, the sign-in buttons' Windows resources and the Linux desktop
 entry and metainfo again (commit them), and `scripts/build-sign-in-buttons.sh` makes the language's sign-in button
@@ -142,6 +145,43 @@ Notes for translators:
 
 Each new language's key terms and the rules its draft follows, for its reviewer.
 
+### Català (ca)
+
+Terms: Safata d’entrada; Safata de sortida; Elements enviats; Elements suprimits; Esborranys; Correu brossa; Arxiu;
+Totes les safates d’entrada; missatge; carpeta; compte (m.); fitxer adjunt (short: adjunt); bandera (Marca amb bandera,
+Treu la bandera); Respon al remitent; Respon a tots; Reenvia; Envia/Rep; Marca com a brossa / Marca com a no brossa;
+Mou a la carpeta... / Copia a la carpeta...; Desfés; Selecciona-ho tot; Recents; Llibreta d’adreces; contacte; grup;
+conversa; Fitxer > Comptes; Eines; Opcions (Windows), Configuració (Mac), Preferències (Linux); De / Per a / Cc / Cco /
+Assumpte; contrasenya; servidor; baixar (download), pujar (upload); iniciar la sessió (sign in); aplicació d’inici de
+sessió; agent d’IA; identificador de client; secret de client; emissor; permisos (scopes).
+
+Encryption: clau (pública, privada), empremta digital, signat / signatura, xifrat / xifrar / desxifrar, frase de pas
+(passphrase, as GnuPG and Thunderbird in Catalan), OpenPGP, certificat.
+
+Colours (agree with the feminine "bandera"): vermella, taronja, groga, verda, blava, porpra, grisa.
+
+Plurals: `[one]` (exactly 1) and `*[other]` (0, 2 and more). A literal 1 in `[one]` is fine.
+
+- Menus and buttons in the imperative second person singular, as Softcatalà and Microsoft do ("Obre", "Desa",
+  "Imprimeix", "Surt"); sentence case.
+- Prose addresses the user with "vós" as Softcatalà and Mozilla do ("Feu clic", "Escriviu", "el vostre compte").
+- No elided article or "de" before a placeable (l’, d’): a head noun goes between ("del compte { $account }", "de la
+  carpeta { $folder }", "el missatge { $subject }"), or a label and colon ("Destinació: { $folder }").
+- `$messages` status lines put the count after a colon or choose the participle by `$count` ("Mogut" / "Moguts");
+  `their-folders` = "les seves carpetes", `transfer-another-account` = "un altre compte", both fitting "a { $folder }".
+- Quotes « » (and “ ” inside them), apostrophe ’ (U+2019) everywhere; day names lowercase.
+- Keys in catalog prose Ctrl / Maj / Alt / Supr / Retorn; the help’s `<kbd>` keys stay English.
+- "Re: " and "Fw: " stay; the reply header is "----- Missatge original -----".
+- "Inbox Classic" takes no article ("d’Inbox Classic", "a Inbox Classic").
+- The Mac's own system menus (mac.ftl) use macOS's Catalan infinitives ("Sortir d’Inbox Classic", "Retallar",
+  "Enganxar"); the shared commands stay imperative.
+- Raw network errors that the app shows in English ("connection error: …", "TLS error: …", "the server does not offer
+  STARTTLS") are quoted in English in the help.
+- Other words: testimoni (OAuth token), inquilí (Entra tenant), anell de claus (Linux keyring), Configuració del
+  Sistema (macOS System Settings), subfinestra de lectura (reading pane), kB / MB / GB.
+- Review first: "bandera" versus "marca" for flag (chosen so "Marca com a llegit" stays apart), "vós" versus "tu",
+  "Correu brossa" for the Junk pair, "frase de pas".
+
 ### Čeština (cs)
 
 Terms: Doručená pošta; Pošta k odeslání; Odeslaná pošta; Odstraněná pošta; Koncepty; Nevyžádaná pošta; zpráva;
@@ -264,6 +304,44 @@ Terms: Postvak IN; Postvak UIT; Verzonden items; Verwijderde items; Concepten; O
 - Keys Ctrl / Shift / Del as Dutch keyboards print them. Google's button "Inloggen met Google", Microsoft's
   "Aanmelden met Microsoft".
 
+### Norsk bokmål (nb)
+
+Terms: Innboks; Utboks; Sendte elementer; Slettede elementer; Utkast; Søppelpost; Arkiv; Alle innbokser; melding (f./m.,
+"meldingen", pl. "meldinger"; "e-post" as the mass noun); mappe; konto (pl. kontoer); vedlegg; flagg (Merk med flagg,
+Fjern flagg); Svar avsender; Svar alle; Videresend; Send/motta; Merk som søppelpost / Merk som ikke søppelpost; Flytt
+til mappe; Kopier til mappe; Angre; Merk alt; Nylig brukt; Adressebok; kontakt; gruppe; Verktøy; Fil > Kontoer;
+Cc / Bcc: Kopi / Blindkopi (Outlook); samtale (conversation); ulest / uleste.
+
+Colours: Rød, Oransje, Gul, Grønn, Blå, Lilla, Grå (in sentences "rødt flagg", agreeing with the neuter "flagg").
+
+Encryption: kryptering, kryptert, signert, signatur (of a message; the text signature is also "signatur", context keeps
+them apart), nøkkel (pl. nøkler), offentlig nøkkel, privat nøkkel, fingeravtrykk, passfrase, OpenPGP.
+
+Sign-in: logg på / pålogging, passord, påloggingsapp, KI-agent, klient-ID, klienthemmelighet, utsteder, tillatelser
+(scopes), appassord ("app-passord"), Legitimasjonsbehandling (Windows Credential Manager), Nøkkelring (the Mac's
+Keychain: "nøkkelringen").
+
+Menus: Fil, Rediger, Vis, Gå, Melding, Verktøy, Vindu, Hjelp. Options (Windows) "Alternativer"; Settings (Mac) "Innstillinger";
+Preferences (Linux) "Brukervalg" as GNOME's Norwegian. Mac system menus as Apple's (Avslutt, Skjul andre, Klipp ut,
+Lim inn, Gjør om, Minimer).
+
+- "du" everywhere, lowercase; imperatives in steps and on buttons ("Klikk", "Velg", "Lagre"); sentence case for menus
+  and buttons.
+- Quotes «...», apostrophe ’. No genitive -s on placeholders or provider names: "på nettstedet til { $provider }",
+  "nøkkelen til { $name }".
+- Plurals: `[one]` and `*[other]` (CLDR nb; 0 is `*[other]`).
+- Past-tense status lines agree by `$count` ("Merket 1 melding som lest" / "... som lest" is invariable in Bokmål,
+  "flyttet" invariable); destinations read "til { $folder }", which works with `their-folders` ("de opprinnelige
+  mappene") and `transfer-another-account` ("en annen konto").
+- Keys Ctrl / Skift / Del / Enter in catalog prose (Microsoft's Norwegian); help `<kbd>` stays English.
+- Reply header "Opprinnelig melding"; "Re: " and "Fw: " stay English.
+- Access keys: unique within every menu, folder items too (N&y mappe, Gi nytt na&vn til mappe, Slett ma&ppe, T&øm
+  mappe, as File already uses N, S, g and t).
+- The help quotes core error texts in Norwegian where the core translates them and in English where the app shows raw
+  server or network errors (TLS error, connection error).
+- Review first: "Svar avsender" versus "Svar", "Merk alt" (Windows) versus Apple's "Marker alt", "Søppelpost" pair,
+  "passfrase", "Legitimasjonsbehandling".
+
 ### Polski (pl)
 
 Terms: Skrzynka odbiorcza; Skrzynka nadawcza; Elementy wysłane; Elementy usunięte; Wersje robocze; Wiadomości-śmieci;
@@ -282,6 +360,44 @@ written as the `[many]` form.
 - Counts needing a case go in parentheses or after a colon ("Te wiadomości (5) zostaną trwale usunięte").
 - Quotes „…”; no Title Case. Keys stay English, `<kbd>Click</kbd>` is "Kliknięcie"; the help names Alt+D and Alt+U for
   the &DW / &UDW fields.
+
+### Português (pt-BR, Brasil)
+
+Made from the European Portuguese catalogs and rewritten in Brazilian usage, with Microsoft's (Outlook, Windows) and
+Apple's Brazilian terms.
+
+Terms: Caixa de Entrada; Caixa de Saída; Itens Enviados; Itens Excluídos; Rascunhos; Lixo Eletrônico; Arquivo Morto
+(the Archive folder, as Outlook; "Arquivo" is the File menu); Todas as Caixas de Entrada; mensagem (f.), e-mail (m.);
+lista de e-mails; pasta; conta; anexo; arquivo (file); sinalizador (Sinalizar, Limpar sinalizador); Responder,
+Responder a todos, Encaminhar; Desfazer, Excluir, Salvar (Salvar como); baixar ("Baixando..."); Acompanhar conversa;
+fazer login / login, the providers' own button labels ("Fazer login com o Google", "Entrar com a Microsoft");
+aplicativo de login; senha, senha de app; aplicativo, aplicativo de e-mail padrão; conectar, conexão; link; navegador;
+tela; mouse; contato; Catálogo de Endereços (as Outlook Express in Brazil); Nome, Sobrenome, Apelido, Nome de exibição;
+provedor; Permissões (scopes) in forms, escopo in prose; locatário (tenant); barra de status; guia (tab); Exibir
+código-fonte; Sobre o Inbox Classic; pressione, digite.
+
+Menus: Arquivo, Editar, Exibir, Ferramentas, Mensagem, Ajuda. Opções (Windows), Ajustes (Mac), Preferências (Linux);
+configurações for settings in general.
+
+Encryption: criptografia, criptografar, criptografada, descriptografar; chave (privada, pública); impressão digital;
+assinada, assinatura; frase secreta (passphrase, as GnuPG and Thunderbird in Brazil); confiável; Gerenciador de
+Credenciais, chaveiro (the Mac), chaveiro do sistema (Linux), Acesso às Chaves.
+
+Plurals: CLDR's `pt` (pe-i18n gives the catalog that locale), where 0 and 1 are `[one]`. Every `[one]` uses
+`{ $count }`, never a literal 1, and counts where zero is plausible have an explicit `[0]` branch ("nenhuma mensagem").
+
+- Never the forms of Portugal: ficheiro, ecrã, guardar, eliminar, transferir (download), palavra-passe, contacto,
+  receção, utilizador, partilhar, browser, ligação, "a + infinitivo" for the progressive.
+- "Você" with Brazilian verb forms and pronoun placement ("não o abre", "para abri-lo"), the possessive usually without
+  article ("seu computador"); imperatives as Microsoft Brazil writes them ("Clique", "Digite", "Escolha").
+- The progressive is the gerund ("Baixando...", "Salvando em Rascunhos...", "Conectando...").
+- Brazilian spelling: recepção, detectar, aspecto, eletrônico, anônimo, registro, equipe, fato, seção.
+- Sentence case for menus and buttons; folder names and the Catálogo de Endereços keep their capitals.
+- `$messages` is feminine plural ("3 mensagens"): participles agree by `$count`.
+- Quotes “ ”; decimal separator a comma.
+- Review first: "Arquivo Morto", "Acompanhar conversa", the Junk wording (Lixo / Não é lixo), "frase secreta",
+  "chaveiro", "fazer login" against "entrar", and the Google and Microsoft settings paths in the help (Verificação em
+  duas etapas, Senhas de app).
 
 ### Português (pt, Portugal)
 
@@ -347,6 +463,42 @@ never a literal 1.
 - Quotes »...«; keys Ctrl, Shift, Alt, Del, Enter.
 - Review first: the `done-*` / `transfer-*` lines and the plural forms of `setup-*` and `pgp-imported-*`.
 
+### Srpski, latinica (sr-Latn)
+
+Terms (Outlook and Windows in Serbian Latin): Prijemno sanduče; Izlazno sanduče; Poslate stavke; Izbrisane stavke;
+Radne verzije (one draft: radna verzija); Neželjena e-pošta; Arhiva; Sva prijemna sandučad; poruka; fascikla; nalog
+(pl. nalozi); prilog; datoteka; zastavica (Označi zastavicom, Ukloni zastavicu); Odgovori pošiljaocu; Odgovori svima;
+Prosledi; Pošalji/primi; Opozovi; Izaberi sve; Adresar; kontakt; grupa; Alatke (Tools); Datoteka > Nalozi.
+
+More terms: server; računar; dobavljač (e-mail provider); pošiljalac / pošiljaoca; primalac / primaoca; tema (subject);
+lozinka; prijava, prijaviti se; sertifikat; bezbednost; podešavanja (Settings on the Mac, Preferences on Linux, the
+app's settings); Opcije (Options on Windows); meni; dugme; taster; prečica; ekran; pregledač (browser); veza (link);
+obaveštenje; lista; kolona; red; podrazumevano (default); sačuvaj; izaberi.
+
+Encryption: šifrovanje, šifrovano, šifrovati, dešifrovati; potpis, potpisano, potpisati; ključ (javni, privatni);
+otisak prsta (fingerprint); pristupna fraza (passphrase, apart from lozinka); server ključeva; OpenPGP; Upravljač
+akreditivima (Windows Credential Manager); privezak ključeva (keychain).
+
+OAuth and agents: aplikacija za prijavljivanje (sign-in app); ID klijenta; tajna klijenta; izdavalac (issuer); opsezi
+(scopes); AI agent.
+
+Plurals: `[one]` 1, 21, 31... (not 11); `[few]` 2 to 4, 22 to 24... (not 12 to 14); `*[other]` 0, 5 to 20, 25 to 30...
+`[one]` uses `{ $count }`; an exact `[1]` branch comes first where English means the single one with no number.
+
+- Ekavian (vreme, mesto, pre, posle, uvek, gde) and Serbian vocabulary, never Croatian (račun, mapa, poslužitelj,
+  privitak, spremiti, odabrati, izbornik, gumb, tipka, zaslon, preglednik, poveznica, postavke, tko, točno, tisuća,
+  sustav).
+- Second person plural, lowercase ("vi", "vaš"), imperatives in -ite ("Kliknite", "Izaberite"); menu items and buttons
+  in the imperative singular as Microsoft writes them ("Sačuvaj kao...", "Odgovori svima").
+- Questions with "Da li ...?"; the future fused as Serbian writes it ("otvoriće", "biće").
+- `$messages` goes after a colon ("Premešteno: { $messages }") so no participle agrees with it; destinations that can
+  be `their-folders` or `transfer-another-account` read "(odredište: { $folder })".
+- Quotes „…“; days of the week and months lowercase; keys Ctrl / Shift / Del / Enter.
+- Folder names follow Outlook on every platform (Apple Mail and Thunderbird have no Serbian Latin localization worth
+  matching).
+- Review first: "datoteka" (Microsoft) versus the everyday "fajl"; "Radne verzije" versus "Nacrti"; "dobavljač" for
+  the mail provider; "Prijemno sanduče" (Outlook.com) versus Outlook's longer "Prijemno poštansko sanduče".
+
 ### Suomi (fi)
 
 Terms: Saapuneet; Lähtevät; Lähetetyt; Poistetut; Luonnokset; Roskaposti; viesti; kansio; tili; liite; lippu (liputa,
@@ -373,6 +525,51 @@ Svara alla; Vidarebefordra; Cc / Bcc: Kopia / Hemlig kopia (Outlook).
 - `$messages` sentences need no ending; participles ("flyttat", "flyttade") choose by `$count`.
 - Quotes ” ” (both the closing form), apostrophe ’; keys Ctrl / Skift / Del / Retur.
 - The reply header is "Ursprungligt meddelande"; "Create Mail" is "Skapa e-post" as in Outlook Express.
+
+### Türkçe (tr)
+
+Terms (Outlook / Outlook Express Turkish): Gelen Kutusu; Giden Kutusu; Gönderilmiş Öğeler; Silinmiş Öğeler; Taslaklar;
+Gereksiz E-posta; Arşiv; Tüm Gelen Kutuları; ileti; klasör; hesap; ek (ekli dosya in running text where clearer);
+bayrak (Bayrak Koy, Bayrağı Kaldır); Gönder/Al; Gönderene Yanıtla; Tümünü Yanıtla; İlet; Gereksiz Olarak İşaretle;
+Gereksiz Değil Olarak İşaretle; Klasöre Taşı; Klasöre Kopyala; Geri Al; Tümünü Seç; Son Kullanılanlar; Adres Defteri;
+kişi; grup; konuşma (conversation); Dosya, Düzen, Görünüm, Araçlar, İleti, Yardım; Dosya > Hesaplar.
+Colours: Kırmızı, Turuncu, Sarı, Yeşil, Mavi, Mor, Gri.
+OAuth: oturum açma uygulaması; istemci kimliği; istemci gizli dizisi (as Azure, keeping "anahtar" for encryption);
+yayımcı (issuer); izinler (scopes). AI agent: yapay zeka aracısı (short: aracı).
+Encryption: OpenPGP; anahtar; ortak anahtar / gizli anahtar; parmak izi; imzalı; şifreli; anahtar parolası
+(passphrase), apart from "parola" (password); uygulama parolası (app password).
+Settings: Windows "Seçenekler" (Options), the Mac "Ayarlar" (Settings), Linux "Tercihler" (Preferences).
+Cc / Bcc: Bilgi / Gizli (as Outlook Turkish).
+
+Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 ileti"), so both forms usually read alike.
+
+- Polite "siz" through the imperative in -in/-ın ("Tıklayın", "Seçin", "Girin"); "siz" itself is mostly left out.
+- Menu items and buttons as Microsoft Turkish writes them: Title Case, short imperative or noun ("Yanıtla",
+  "Farklı Kaydet...", "Klasöre Taşı...").
+- Placeables never take a suffix (case, possessive, plural). A head noun carries the ending ("{ $folder } klasörüne"
+  only where `$folder` is always a real folder name), or a label and colon is used ("Taşındı: { $messages }. Hedef:
+  { $folder }"). `their-folders` = "kendi klasörleri", `transfer-another-account` = "başka bir hesap", both
+  nominative to fit "Hedef:".
+- Provider sentences use "{ $provider } web sitesinde" (izafet without suffix on the name), so `ui-the-provider`
+  ("sağlayıcı") fits.
+- Brand names that are not placeables take a suffix after an apostrophe ("Inbox Classic'i", "Gmail'de").
+- Quotes “…” (as the app's English uses).
+- Access keys avoid i, ı, İ and I (the dotted/dotless pair maps differently in Turkish case folding) and prefer ASCII
+  letters; ğ, ş, ç, ö, ü are avoided too.
+- Keys Ctrl / Shift / Del / Enter, as Turkish keyboards print them.
+- Review first: "ileti" versus "e-posta" for message, "Gereksiz E-posta" pair, "istemci gizli dizisi", "aracı" for
+  agent.
+- More terms: etki alanı (domain, as Microsoft; never "alan adı"); bağlantı noktası (port); okuma bölmesi; durum çubuğu;
+  belirteç (token); betik (script); eşitleme (sync); istenmeyen posta (spam); Özgün İleti (reply header
+  "----- Özgün İleti -----"); Windows Kimlik Bilgileri Yöneticisi, the Mac's anahtar zinciri, Linux's sistem anahtarlığı;
+  Çöp Sepeti (the Mac's Trash); Linux Preferences = Tercihler, Quit = Çık.
+- Suffix apostrophes are ASCII ' in catalogs and help alike ("Gelen Kutusu'nda", "Inbox Classic'ten").
+- In the help a `data-text` name is followed by "komutunu seçin" (menu items), "düğmesine tıklayın" (buttons) or
+  "seçeneğini" (checkboxes), so the catalog value never takes a suffix.
+- Raw network errors quoted in the help ("connection error: …", "the server did not answer in time") stay English, as
+  the core does not translate them.
+- The checker reads a message only up to a `}` in column 0, so selectors that English puts first stay first
+  (`done-flagged-color` ends with the colour; the Linux search result counts come before a colon).
 
 ### Ελληνικά (el)
 
