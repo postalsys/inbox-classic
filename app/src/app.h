@@ -702,6 +702,8 @@ public:
     void FindInMessage(HWND owner, bool again);
     // the folder shown is Deleted Items or Junk E-mail with messages in it
     bool CanEmptyFolder() const;
+    // Edit > Mark All Read applies to the list shown: a folder's or All Inboxes'
+    bool CanMarkAllRead() const;
     void LoadPictures();
     // WM_SETCURSOR and WM_CTLCOLORSTATIC of the main window for the information bar of blocked pictures (a hand, the
     // information colors); false for other windows
@@ -862,8 +864,6 @@ private:
     // written when a row is opened or closed
     void LoadFlippedRows(const std::vector<int64_t>& accounts);
     void SaveFlippedRows() const;
-    // the list shown gathers one folder of each account (All Inboxes, All Sent, All Drafts), with an Account column
-    bool GatheredList() const;
     void OnRowExpanded(const NMTREEVIEWW& change);
     // the counts and bold of the rows from the core's rows again; the tree built again when its rows changed
     void UpdateCounts();

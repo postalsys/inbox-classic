@@ -901,7 +901,7 @@ bool Mailbox::SeveralFolders() const {
 // all in an Inbox, the Account column
 void Mailbox::ShowFolderColumn() {
     bool wanted = SeveralFolders();
-    std::wstring title = core::T(Searching() || shownList_ == PE_TREE_LIST_FLAGGED ? PE_TEXT_UI_COL_FOLDER : PE_TEXT_UI_COL_ACCOUNT);
+    std::wstring title = core::T(pe_list_view_gathers_accounts(view_.get()) ? PE_TEXT_UI_COL_ACCOUNT : PE_TEXT_UI_COL_FOLDER);
     if (wanted && folderColumn_) {
         SetColumnTitle(list_, COL_FOLDER, title);
     }
@@ -930,15 +930,11 @@ void Mailbox::ShowPersonColumn() {
     SetColumnTitle(list_, COL_RECEIVED, core::T(wanted ? PE_TEXT_UI_COL_SENT : PE_TEXT_UI_COL_RECEIVED));
 }
 
-bool Mailbox::GatheredList() const {
-    return !Searching() && (shownList_ == PE_TREE_LIST_ALL_INBOXES || shownList_ == PE_TREE_LIST_ALL_SENT || shownList_ == PE_TREE_LIST_ALL_DRAFTS);
-}
-
 // the folder of a row in a list of several folders: its name, with its account's when there are several accounts; in
 // All Inboxes, All Sent and All Drafts the account alone, as the tree names it
 std::wstring Mailbox::RowFolder(int64_t folder) const {
     auto account = folderAccounts_.find(folder);
-    if (GatheredList()) {
+    if (pe_list_view_gathers_accounts(view_.get())) {
         return account != folderAccounts_.end() ? AccountName(account->second) : L"";
     }
     auto name = folderNames_.find(folder);
@@ -1464,14 +1460,19 @@ void Mailbox::LoadPictures() {
     reader_.LoadPictures();
 }
 
+bool Mailbox::CanMarkAllRead() const {
+    return pe_list_view_marks_all_read(view_.get());
+}
+
 void Mailbox::MarkAllRead() {
-    if (Searching()) {
+    if (!CanMarkAllRead()) {
         return;
     }
-    if (shownList_ == PE_TREE_LIST_ALL_INBOXES) {
+    // a folder's list marks the folder, All Inboxes every Inbox
+    if (int64_t folder = pe_list_view_own_folder(view_.get())) {
+        pe_folder_mark_all_read(core_, folder);
+    } else {
         pe_mark_all_inboxes_read(core_);
-    } else if (folder_) {
-        pe_folder_mark_all_read(core_, folder_);
     }
 }
 
@@ -1482,7 +1483,7 @@ void Mailbox::ShowMessage(int64_t folder, uint64_t uid) {
     }
     // All Inboxes, All Sent or All Drafts stays when it has the message (of one of its folders), its list up to date
     // with it
-    if (GatheredList()) {
+    if (pe_list_view_gathers_accounts(view_.get())) {
         KillTimer(parent_, TIMER_RELOAD);
         ReloadList(true);
         if (SelectInList(folder, uid)) {
@@ -2223,7 +2224,7 @@ void Mailbox::FindInMessage(HWND owner, bool again) {
 }
 
 bool Mailbox::CanEmptyFolder() const {
-    return shownList_ == PE_TREE_LIST_FOLDER && !Searching() && emptiableFolders_.contains(folder_) && total_ > 0;
+    return emptiableFolders_.contains(pe_list_view_own_folder(view_.get())) && total_ > 0;
 }
 
 void Mailbox::SetThreadExpanded(int64_t thread, bool open) {
@@ -2733,14 +2734,15 @@ void Mailbox::PrintShown() {
 }
 
 void Mailbox::Import(HWND owner) {
-    if (!folder_) {
+    int64_t folder = pe_list_view_own_folder(view_.get());
+    if (!folder) {
         MessageBoxW(owner, core::T(PE_TEXT_UI_IMPORT_CHOOSE_FOLDER).c_str(), core::Title(PE_TEXT_CMD_IMPORT).c_str(), MB_OK | MB_ICONINFORMATION);
         return;
     }
     std::vector<std::wstring> files = OpenFilesDialog(owner, core::Title(PE_TEXT_CMD_IMPORT).c_str(),
         FileFilter({{core::T(PE_TEXT_UI_FILTER_MESSAGES), L"*.eml"}, {core::T(PE_TEXT_UI_FILTER_ALL), L"*.*"}}).c_str());
     if (!files.empty()) {
-        ImportFiles(folder_, files, owner);
+        ImportFiles(folder, files, owner);
     }
 }
 
@@ -3010,17 +3012,16 @@ DWORD Mailbox::TreeSite::Dropped(IDataObject* data, DropFrom from, POINT screen,
 }
 
 DWORD Mailbox::ListSite::Over(DropFrom from, POINT, DWORD, DWORD allowed) {
-    // files go into the folder shown; not into All Inboxes or a search, which are no one folder
-    Mailbox& box = *mailbox;
-    bool oneFolder = box.folder_ && box.shownList_ == PE_TREE_LIST_FOLDER && box.find_.empty();
-    return from == DropFrom::Files && oneFolder && !box.unselectable_.count(box.folder_) ? (allowed & DROPEFFECT_COPY) : DROPEFFECT_NONE;
+    // files go into the folder shown; not into a list of several folders (All Inboxes, a search)
+    int64_t folder = pe_list_view_own_folder(mailbox->view_.get());
+    return from == DropFrom::Files && folder && !mailbox->unselectable_.count(folder) ? (allowed & DROPEFFECT_COPY) : DROPEFFECT_NONE;
 }
 
 DWORD Mailbox::ListSite::Dropped(IDataObject* data, DropFrom from, POINT screen, DWORD keys, DWORD allowed) {
     if (!Over(from, screen, keys, allowed)) {
         return DROPEFFECT_NONE;
     }
-    PostMessageW(mailbox->parent_, WM_IMPORT_DROPPED, static_cast<WPARAM>(mailbox->folder_),
+    PostMessageW(mailbox->parent_, WM_IMPORT_DROPPED, static_cast<WPARAM>(pe_list_view_own_folder(mailbox->view_.get())),
                  reinterpret_cast<LPARAM>(new std::vector<std::wstring>(DroppedFiles(data))));
     return DROPEFFECT_COPY;
 }

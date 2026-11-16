@@ -231,6 +231,8 @@ void UpdateMenu(HMENU menu) {
             CheckMenuItem(menu, id, MF_BYCOMMAND | (g_folderList ? MF_CHECKED : MF_UNCHECKED));
         } else if (id == IDM_EMPTY_FOLDER) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanEmptyFolder() ? MF_ENABLED : MF_GRAYED));
+        } else if (id == IDM_MARK_ALL_READ) {
+            EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanMarkAllRead() ? MF_ENABLED : MF_GRAYED));
         } else if (id == IDM_NEW_FOLDER) {
             EnableMenuItem(menu, id, MF_BYCOMMAND | (g_mailbox.CanNewFolder() ? MF_ENABLED : MF_GRAYED));
         }
