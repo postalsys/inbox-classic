@@ -31,7 +31,8 @@ function messages(text) {
             const marked = k >= 0 && /^# review: (new|changed)/.test(lines[k]);
             current = { id: start[1], text: line, marked, line: i + 1 };
             found.push(current);
-        } else if (current && (line.startsWith(' ') || line.startsWith('\t') || line.trim() === '')) {
+        } else if (current && (line.startsWith(' ') || line.startsWith('\t') || line.startsWith('}') || line.trim() === '')) {
+            // a selector's closing brace may start a line, with more of the message after it ("}, { $unread } unread")
             if (line.trim() !== '') current.text += '\n' + line;
         } else {
             current = null;

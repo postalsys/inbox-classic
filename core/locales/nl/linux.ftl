@@ -242,18 +242,9 @@ gtk-nothing-yet = Nog niets.
 # review: new
 gtk-preferences = Voorkeuren
 # review: new
-gtk-language = Taal
-# review: new
 gtk-language-subtitle = Taal van de app en de Help
 # review: new
-gtk-new-mail-group = Nieuwe e-mail
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-# review: new
-gtk-notify-new-mail = Melding bij nieuwe e-mail
-# review: new
 gtk-notify-subtitle = Een melding wanneer er nieuwe berichten binnenkomen terwijl het venster op de achtergrond staat
-# review: new
-gtk-restart-to-change = Inbox Classic start opnieuw om de taal te wijzigen.
 
 ## The desktop entry and the page of the software stores
 

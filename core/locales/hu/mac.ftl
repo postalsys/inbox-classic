@@ -40,13 +40,7 @@ mac-no-updates = Az Inbox Classic ezen verziója nem támogatja az automatikus f
 # review: new
 mac-settings-title = Beállítások
 # review: new
-mac-language-label = Nyelv:
-# review: new
-mac-restart-hint = A nyelv módosításához indítsa újra az Inbox Classicot.
-# review: new
-mac-notify-new-mail = Értesítés új levél érkezésekor
-# review: new
-mac-restart-question = Újraindítja most az Inbox Classicot a nyelv módosításához?
+mac-check-updates-automatically = Frissítések automatikus keresése
 
 ## Dialogs
 

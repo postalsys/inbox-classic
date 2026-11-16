@@ -241,17 +241,9 @@ gtk-nothing-yet = Пока ничего.
 # review: new
 gtk-preferences = Параметры
 # review: new
-gtk-language = Язык
-# review: new
 gtk-language-subtitle = Язык программы и справки
 # review: new
-gtk-new-mail-group = Новая почта
-# review: new
-gtk-notify-new-mail = Уведомлять о новой почте
-# review: new
 gtk-notify-subtitle = Уведомление о новых сообщениях, когда окно находится в фоне
-# review: new
-gtk-restart-to-change = Чтобы сменить язык, Inbox Classic перезапустится.
 
 ## The desktop entry and the page of the software stores
 

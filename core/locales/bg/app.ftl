@@ -740,6 +740,30 @@ ui-col-used-by = Използва се от
 # review: new
 ui-options-system-default = По подразбиране за системата ({ $language })
 # review: new
+ui-settings-general = Общи
+# review: new
+ui-settings-reading = Четене
+# review: changed
+ui-settings-new-mail = Нова поща
+# review: new
+ui-settings-sending = Изпращане
+# review: new
+ui-settings-default-apps = Приложения по подразбиране
+# review: new
+ui-settings-message-list = Списък със съобщения
+# review: new
+ui-settings-messages = Съобщения
+# review: new
+ui-apply = &Приложи
+# review: new
+ui-language-label = &Език:
+# review: new
+ui-restart-note = Рестартирайте Inbox Classic, за да смените езика.
+# review: new
+ui-restart-ask = Inbox Classic ще се покаже на { $language } след рестартиране. Да се рестартира ли сега?
+# review: new
+ui-notify-new-mail = &Уведомяване при пристигане на нова поща
+# review: new
 ui-new-folder-title = Нова папка
 # review: new
 ui-rename-folder-title = Преименуване на папка
@@ -1044,7 +1068,7 @@ ui-book-not-exported = Адресната книга не можа да бъде
 # review: new
 ui-code-copied = Кодът е копиран
 # review: new
-ui-codes-in-notifications = Показване на кодовете за влизане в известията за нова поща
+ui-codes-in-notifications = Показване &на кодовете за влизане в известията за нова поща
 # review: new
 ui-tool-unread-only = Непрочетени
 # review: new
@@ -1056,7 +1080,7 @@ ui-pictures-always-domain = Винаги да се изтеглят изобра
 # review: new
 ui-pictures-unconfirmed = Домейнът на подателя ({ $domain }) не можа да бъде потвърден, затова изображенията в това съобщение не се изтеглят автоматично.
 # review: new
-ui-pictures-always-option = Изтегляне на изображенията във всички съобщения
+ui-pictures-always-option = &Изтегляне на изображенията във всички съобщения
 # review: new
 ui-pictures-always-warning = Тогава подателите могат да виждат кога четете съобщенията им.
 # review: new
@@ -1066,7 +1090,7 @@ ui-protection-details-title = Подробности за защитата
 # review: new
 ui-download-heading = Изтегляне
 # review: new
-ui-download-ahead = Предварително изтегляне на съобщенията:
+ui-download-ahead = Предварително &изтегляне на съобщенията:
 # review: new
 ui-download-ahead-recent = Последните съобщения до 1 МБ всяко
 # review: new
@@ -1074,9 +1098,9 @@ ui-download-ahead-all = Всички съобщения
 # review: new
 ui-download-ahead-never = Само при отваряне
 # review: new
-ui-download-limit = Ограничение на мястото за акаунт:
+ui-download-limit = &Ограничение на мястото за акаунт:
 # review: new
-ui-send-delay = Забавяне преди изпращане:
+ui-send-delay = Забавяне преди &изпращане:
 # review: new
 ui-send-delay-note = Докато съобщението чака да бъде изпратено, можете да откажете изпращането с „Отмяна“.
 # review: new
@@ -1097,7 +1121,7 @@ ui-download-note = Предварително изтеглените съобщ�
 # review: new
 ui-attachment-downloading = Това съобщение не е изтеглено докрай. Опитайте отново, когато изтеглянето завърши.
 # review: new
-ui-trusted-senders-button = Доверени податели...
+ui-trusted-senders-button = &Доверени податели...
 # review: new
 ui-trusted-senders-title = Доверени податели
 # review: new
@@ -1107,7 +1131,7 @@ ui-trusted-everyone-at = Всички в { $domain }
 # review: new
 ui-trusted-senders-empty = Все още не са добавени доверени податели.
 # review: new
-ui-eml-default = Отваряне на файловете .eml с Inbox Classic
+ui-eml-default = &Отваряне на файловете .eml с Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic вече отваря файловете .eml.
 # review: new
@@ -1117,7 +1141,7 @@ ui-folders = Папки
 # review: new
 ui-sorted-by = Сортиране по: { $field }
 # review: new
-ui-layout-label = Оформление:
+ui-layout-label = &Оформление:
 # review: new
 ui-columns-note = Прозорецът е достатъчно широк за оформление с колони. Можете да промените оформлението от Изглед > Оформление.
 # review: new
@@ -1132,9 +1156,9 @@ ui-row-messages = { $count ->
    *[other] { $count } съобщения
 }
 # review: new
-ui-list-pictures = Показване на снимките на подателите в списъка със съобщения
+ui-list-pictures = Показване &на снимките на подателите в списъка със съобщения
 # review: new
-ui-list-pictures-note = Показва логата на марките или снимките от адресната книга за потвърдени податели и инициали, когато няма снимка. Логата се изтеглят веднъж за всяка марка, а не за всяко съобщение.
+ui-list-pictures-note = При оформление с колони показва логата на марките или снимките от адресната книга за потвърдени податели и инициали, когато няма снимка. Логата се изтеглят веднъж за всяка марка, а не за всяко съобщение.
 # review: new
 ui-card-picture = Снимка:
 # review: new

@@ -740,6 +740,30 @@ ui-col-used-by = Używana przez
 # review: new
 ui-options-system-default = Domyślny systemu ({ $language })
 # review: new
+ui-settings-general = Ogólne
+# review: new
+ui-settings-reading = Czytanie
+# review: changed
+ui-settings-new-mail = Nowa poczta
+# review: new
+ui-settings-sending = Wysyłanie
+# review: new
+ui-settings-default-apps = Aplikacje domyślne
+# review: new
+ui-settings-message-list = Lista wiadomości
+# review: new
+ui-settings-messages = Wiadomości
+# review: new
+ui-apply = &Zastosuj
+# review: new
+ui-language-label = &Język:
+# review: new
+ui-restart-note = Uruchom ponownie Inbox Classic, aby zmienić język.
+# review: new
+ui-restart-ask = Inbox Classic wyświetli język { $language } po ponownym uruchomieniu. Uruchomić ponownie teraz?
+# review: new
+ui-notify-new-mail = &Powiadamiaj mnie o nowej poczcie
+# review: new
 ui-new-folder-title = Nowy folder
 # review: new
 ui-rename-folder-title = Zmień nazwę folderu
@@ -1058,7 +1082,7 @@ ui-book-not-exported = Nie udało się zapisać książki adresowej: { $reason }
 # review: new
 ui-code-copied = Skopiowano kod
 # review: new
-ui-codes-in-notifications = Pokazuj kody logowania w powiadomieniach o nowej poczcie
+ui-codes-in-notifications = Pokazuj &kody logowania w powiadomieniach o nowej poczcie
 # review: new
 ui-tool-unread-only = Nieprzeczytane
 # review: new
@@ -1070,7 +1094,7 @@ ui-pictures-always-domain = Zawsze pobieraj obrazy od wszystkich z domeny { $dom
 # review: new
 ui-pictures-unconfirmed = Nie udało się zweryfikować domeny nadawcy ({ $domain }), więc obrazy w tej wiadomości nie są pobierane automatycznie.
 # review: new
-ui-pictures-always-option = Pobieraj obrazy we wszystkich wiadomościach
+ui-pictures-always-option = Pobieraj &obrazy we wszystkich wiadomościach
 # review: new
 ui-pictures-always-warning = Nadawcy będą wtedy widzieć, kiedy czytasz ich wiadomości.
 # review: new
@@ -1080,7 +1104,7 @@ ui-protection-details-title = Szczegóły zabezpieczeń
 # review: new
 ui-download-heading = Pobieranie
 # review: new
-ui-download-ahead = Pobieraj wiadomości z wyprzedzeniem:
+ui-download-ahead = &Pobieraj wiadomości z wyprzedzeniem:
 # review: new
 ui-download-ahead-recent = Ostatnie wiadomości do 1 MB każda
 # review: new
@@ -1088,9 +1112,9 @@ ui-download-ahead-all = Wszystkie wiadomości
 # review: new
 ui-download-ahead-never = Tylko po otwarciu
 # review: new
-ui-download-limit = Limit miejsca na konto:
+ui-download-limit = &Limit miejsca na konto:
 # review: new
-ui-send-delay = Opóźnienie przed wysłaniem:
+ui-send-delay = &Opóźnienie przed wysłaniem:
 # review: new
 ui-send-delay-note = Gdy wiadomość czeka na wysłanie, możesz anulować wysyłkę poleceniem Cofnij.
 # review: new
@@ -1113,7 +1137,7 @@ ui-download-note = Wiadomości pobrane z wyprzedzeniem otwierają się od razu. 
 # review: new
 ui-attachment-downloading = Ta wiadomość nie została jeszcze w pełni pobrana. Spróbuj ponownie po zakończeniu pobierania.
 # review: new
-ui-trusted-senders-button = Zaufani nadawcy...
+ui-trusted-senders-button = Zaufani &nadawcy...
 # review: new
 ui-trusted-senders-title = Zaufani nadawcy
 # review: new
@@ -1123,7 +1147,7 @@ ui-trusted-everyone-at = Wszyscy z domeny { $domain }
 # review: new
 ui-trusted-senders-empty = Nie dodano jeszcze zaufanych nadawców.
 # review: new
-ui-eml-default = Otwieraj pliki .eml w Inbox Classic
+ui-eml-default = Otwieraj pliki .&eml w Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic otwiera teraz pliki .eml.
 # review: new
@@ -1133,7 +1157,7 @@ ui-folders = Foldery
 # review: new
 ui-sorted-by = Sortowanie: { $field }
 # review: new
-ui-layout-label = Układ:
+ui-layout-label = &Układ:
 # review: new
 ui-columns-note = Okno jest wystarczająco szerokie na układ kolumnowy. Układ możesz zmienić w menu Widok > Układ.
 # review: new
@@ -1150,9 +1174,9 @@ ui-row-messages = { $count ->
    *[other] { $count } wiadomości
 }
 # review: new
-ui-list-pictures = Pokazuj obrazy nadawców na liście wiadomości
+ui-list-pictures = &Pokazuj obrazy nadawców na liście wiadomości
 # review: new
-ui-list-pictures-note = Pokazuje logo marek lub zdjęcia z Książki adresowej dla zweryfikowanych nadawców, a inicjały, gdy obrazu nie ma. Logo jest pobierane raz dla każdej marki, a nie dla każdej wiadomości.
+ui-list-pictures-note = W układzie kolumnowym pokazuje logo marek lub zdjęcia z Książki adresowej dla zweryfikowanych nadawców, a inicjały, gdy obrazu nie ma. Logo jest pobierane raz dla każdej marki, a nie dla każdej wiadomości.
 # review: new
 ui-card-picture = Zdjęcie:
 # review: new

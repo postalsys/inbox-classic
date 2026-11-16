@@ -740,6 +740,30 @@ ui-col-used-by = Brukes av
 # review: new
 ui-options-system-default = Systemstandard ({ $language })
 # review: new
+ui-settings-general = Generelt
+# review: new
+ui-settings-reading = Lesing
+# review: changed
+ui-settings-new-mail = Ny e-post
+# review: new
+ui-settings-sending = Sending
+# review: new
+ui-settings-default-apps = Standardapper
+# review: new
+ui-settings-message-list = Meldingsliste
+# review: new
+ui-settings-messages = Meldinger
+# review: new
+ui-apply = &Bruk
+# review: new
+ui-language-label = &Språk:
+# review: new
+ui-restart-note = Start Inbox Classic på nytt for å bytte språk.
+# review: new
+ui-restart-ask = Inbox Classic vises på { $language } når programmet startes på nytt. Vil du starte på nytt nå?
+# review: new
+ui-notify-new-mail = &Varsle meg når det kommer ny e-post
+# review: new
 ui-new-folder-title = Ny mappe
 # review: new
 ui-rename-folder-title = Gi mappen nytt navn
@@ -1044,7 +1068,7 @@ ui-book-not-exported = Adresseboken kunne ikke lagres: { $reason }
 # review: new
 ui-code-copied = Koden er kopiert
 # review: new
-ui-codes-in-notifications = Vis påloggingskoder i varsler om ny e-post
+ui-codes-in-notifications = Vis &påloggingskoder i varsler om ny e-post
 # review: new
 ui-tool-unread-only = Uleste
 # review: new
@@ -1056,7 +1080,7 @@ ui-pictures-always-domain = Last alltid ned bilder fra alle på { $domain }
 # review: new
 ui-pictures-unconfirmed = Domenet til avsenderen ({ $domain }) kunne ikke bekreftes, så bildene i denne meldingen lastes ikke ned automatisk.
 # review: new
-ui-pictures-always-option = Last ned bilder i alle meldinger
+ui-pictures-always-option = &Last ned bilder i alle meldinger
 # review: new
 ui-pictures-always-warning = Avsendere kan da se når du leser meldingene deres.
 # review: new
@@ -1066,7 +1090,7 @@ ui-protection-details-title = Sikkerhetsdetaljer
 # review: new
 ui-download-heading = Nedlasting
 # review: new
-ui-download-ahead = Last ned meldinger på forhånd:
+ui-download-ahead = &Last ned meldinger på forhånd:
 # review: new
 ui-download-ahead-recent = Nylige meldinger på opptil 1 MB hver
 # review: new
@@ -1074,9 +1098,9 @@ ui-download-ahead-all = Alle meldinger
 # review: new
 ui-download-ahead-never = Bare når de åpnes
 # review: new
-ui-download-limit = Lagringsgrense per konto:
+ui-download-limit = Lagringsgrense &per konto:
 # review: new
-ui-send-delay = Forsinkelse før sending:
+ui-send-delay = &Forsinkelse før sending:
 # review: new
 ui-send-delay-note = Mens en melding venter på å bli sendt, kan du avbryte sendingen med Angre.
 # review: new
@@ -1097,7 +1121,7 @@ ui-download-note = Meldinger som er lastet ned på forhånd, åpnes med en gang.
 # review: new
 ui-attachment-downloading = Denne meldingen er ikke ferdig nedlastet. Prøv igjen når nedlastingen er fullført.
 # review: new
-ui-trusted-senders-button = Klarerte avsendere...
+ui-trusted-senders-button = &Klarerte avsendere...
 # review: new
 ui-trusted-senders-title = Klarerte avsendere
 # review: new
@@ -1107,7 +1131,7 @@ ui-trusted-everyone-at = Alle på { $domain }
 # review: new
 ui-trusted-senders-empty = Ingen klarerte avsendere er lagt til ennå.
 # review: new
-ui-eml-default = Åpne .eml-filer med Inbox Classic
+ui-eml-default = &Åpne .eml-filer med Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic åpner nå .eml-filer.
 # review: new
@@ -1117,7 +1141,7 @@ ui-folders = Mapper
 # review: new
 ui-sorted-by = Sortert etter { $field }
 # review: new
-ui-layout-label = Oppsett:
+ui-layout-label = &Oppsett:
 # review: new
 ui-columns-note = Vinduet er bredt nok for kolonneoppsettet. Du kan endre oppsettet under Vis > Oppsett.
 # review: new
@@ -1132,9 +1156,9 @@ ui-row-messages = { $count ->
    *[other] { $count } meldinger
 }
 # review: new
-ui-list-pictures = Vis bilder av avsendere i meldingslisten
+ui-list-pictures = &Vis bilder av avsendere i meldingslisten
 # review: new
-ui-list-pictures-note = Viser merkelogoer eller bilder fra adresseboken for bekreftede avsendere, og initialer når det ikke finnes noe bilde. Logoer lastes ned én gang per merke, ikke for hver melding.
+ui-list-pictures-note = I kolonneoppsettet vises merkelogoer eller bilder fra adresseboken for bekreftede avsendere, og initialer når det ikke finnes noe bilde. Logoer lastes ned én gang per merke, ikke for hver melding.
 # review: new
 ui-card-picture = Bilde:
 # review: new

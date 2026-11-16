@@ -243,18 +243,9 @@ gtk-nothing-yet = Még semmi.
 # review: new
 gtk-preferences = Beállítások
 # review: new
-gtk-language = Nyelv
-# review: new
 gtk-language-subtitle = Az alkalmazás és a súgó nyelve
 # review: new
-gtk-new-mail-group = Új levelek
-# a Beállítások sora, amely bekapcsolja az új levél értesítését, GNOME-stílusú mondatkezdő nagybetűvel
-# review: new
-gtk-notify-new-mail = Értesítés új levélről
-# review: new
 gtk-notify-subtitle = Értesítés, ha új üzenetek érkeznek, miközben az ablak a háttérben van
-# review: new
-gtk-restart-to-change = Az Inbox Classic újraindul a nyelv módosításához.
 
 ## The desktop entry and the page of the software stores
 

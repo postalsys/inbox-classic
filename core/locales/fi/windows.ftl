@@ -169,14 +169,6 @@ win-edit = &Muokkaa...
 ## Options
 
 # review: new
-win-options-language-label = &Inbox Classicin kieli:
-# review: new
-win-options-restart-note = Kieli vaihtuu, kun Inbox Classic käynnistetään uudelleen.
-# review: new
-win-options-notify = &Ilmoita, kun uutta postia saapuu
-# review: new
-win-restart-ask = Inbox Classic näytetään kielellä { $language }, kun se käynnistyy uudelleen. Käynnistetäänkö uudelleen nyt?
-# review: new
 win-folders-hide = Piilota kansioluettelo
 # review: new
 win-folders-pin = Pidä kansioluettelo viestien vieressä

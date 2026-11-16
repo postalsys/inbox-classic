@@ -741,6 +741,30 @@ ui-col-used-by = Використовують
 # review: new
 ui-options-system-default = Як у системі ({ $language })
 # review: new
+ui-settings-general = Загальні
+# review: new
+ui-settings-reading = Читання
+# review: changed
+ui-settings-new-mail = Нова пошта
+# review: new
+ui-settings-sending = Надсилання
+# review: new
+ui-settings-default-apps = Типові програми
+# review: new
+ui-settings-message-list = Список повідомлень
+# review: new
+ui-settings-messages = Повідомлення
+# review: new
+ui-apply = &Застосувати
+# review: new
+ui-language-label = &Мова:
+# review: new
+ui-restart-note = Щоб змінити мову, перезапустіть Inbox Classic.
+# review: new
+ui-restart-ask = Inbox Classic буде показано мовою «{ $language }» після перезапуску. Перезапустити зараз?
+# review: new
+ui-notify-new-mail = &Сповіщати мене про нову пошту
+# review: new
 ui-new-folder-title = Нова папка
 # review: new
 ui-rename-folder-title = Перейменувати папку
@@ -1054,7 +1078,7 @@ ui-book-not-exported = Не вдалося зберегти адресну кн�
 # review: new
 ui-code-copied = Код скопійовано
 # review: new
-ui-codes-in-notifications = Показувати коди входу в сповіщеннях про нову пошту
+ui-codes-in-notifications = &Показувати коди входу в сповіщеннях про нову пошту
 # review: new
 ui-tool-unread-only = Непрочитані
 # review: new
@@ -1066,7 +1090,7 @@ ui-pictures-always-domain = Завжди завантажувати зображ
 # review: new
 ui-pictures-unconfirmed = Домен відправника ({ $domain }) не вдалося перевірити, тому зображення в цьому повідомленні не завантажуються автоматично.
 # review: new
-ui-pictures-always-option = Завантажувати зображення в усіх повідомленнях
+ui-pictures-always-option = Завантажувати зображення &в усіх повідомленнях
 # review: new
 ui-pictures-always-warning = Тоді відправники зможуть бачити, коли ви читаєте їхні повідомлення.
 # review: new
@@ -1076,7 +1100,7 @@ ui-protection-details-title = Подробиці безпеки
 # review: new
 ui-download-heading = Завантаження
 # review: new
-ui-download-ahead = Завантажувати повідомлення заздалегідь:
+ui-download-ahead = Завантажувати &повідомлення заздалегідь:
 # review: new
 ui-download-ahead-recent = Нещодавні повідомлення до 1 МБ кожне
 # review: new
@@ -1084,9 +1108,9 @@ ui-download-ahead-all = Усі повідомлення
 # review: new
 ui-download-ahead-never = Лише під час відкриття
 # review: new
-ui-download-limit = Обмеження сховища для облікового запису:
+ui-download-limit = &Обмеження сховища для облікового запису:
 # review: new
-ui-send-delay = Затримка перед надсиланням:
+ui-send-delay = Затримка перед &надсиланням:
 # review: new
 ui-send-delay-note = Поки повідомлення чекає на надсилання, його можна скасувати командою «Скасувати».
 # review: new
@@ -1109,7 +1133,7 @@ ui-download-note = Заздалегідь завантажені повідом�
 # review: new
 ui-attachment-downloading = Це повідомлення ще не завантажилося повністю. Спробуйте знову, коли завантаження завершиться.
 # review: new
-ui-trusted-senders-button = Довірені відправники...
+ui-trusted-senders-button = &Довірені відправники...
 # review: new
 ui-trusted-senders-title = Довірені відправники
 # review: new
@@ -1119,7 +1143,7 @@ ui-trusted-everyone-at = Усі з домену { $domain }
 # review: new
 ui-trusted-senders-empty = Довірених відправників ще не додано.
 # review: new
-ui-eml-default = Відкривати файли .eml в Inbox Classic
+ui-eml-default = &Відкривати файли .eml в Inbox Classic
 # review: new
 ui-eml-default-done = Тепер Inbox Classic відкриває файли .eml.
 # review: new
@@ -1129,7 +1153,7 @@ ui-folders = Папки
 # review: new
 ui-sorted-by = Сортування: { $field }
 # review: new
-ui-layout-label = Макет:
+ui-layout-label = &Макет:
 # review: new
 ui-columns-note = Вікно досить широке для макета зі стовпцями. Макет можна змінити в меню Вигляд > Макет.
 # review: new
@@ -1146,9 +1170,9 @@ ui-row-messages = { $count ->
    *[other] { $count } повідомлення
 }
 # review: new
-ui-list-pictures = Показувати зображення відправників у списку повідомлень
+ui-list-pictures = &Показувати зображення відправників у списку повідомлень
 # review: new
-ui-list-pictures-note = Показує логотипи брендів або зображення з адресної книги для перевірених відправників, а ініціали, коли зображення немає. Логотипи завантажуються один раз для кожного бренду, а не для кожного повідомлення.
+ui-list-pictures-note = У макеті зі стовпцями показує логотипи брендів або зображення з адресної книги для перевірених відправників, а ініціали, коли зображення немає. Логотипи завантажуються один раз для кожного бренду, а не для кожного повідомлення.
 # review: new
 ui-card-picture = Зображення:
 # review: new

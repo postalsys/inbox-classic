@@ -163,13 +163,8 @@ gtk-nothing-yet = Nothing yet.
 ## Preferences
 
 gtk-preferences = Preferences
-gtk-language = Language
 gtk-language-subtitle = Language of the app and help
-gtk-new-mail-group = New mail
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-gtk-notify-new-mail = Notify of new mail
 gtk-notify-subtitle = A notification when new messages arrive while the window is in the background
-gtk-restart-to-change = Inbox Classic restarts to change the language.
 
 ## The desktop entry and the page of the software stores
 

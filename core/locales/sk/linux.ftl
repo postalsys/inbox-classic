@@ -245,18 +245,9 @@ gtk-nothing-yet = Zatiaľ nič.
 # review: new
 gtk-preferences = Predvoľby
 # review: new
-gtk-language = Jazyk
-# review: new
 gtk-language-subtitle = Jazyk aplikácie a pomocníka
 # review: new
-gtk-new-mail-group = Nová pošta
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-# review: new
-gtk-notify-new-mail = Upozorňovať na novú poštu
-# review: new
 gtk-notify-subtitle = Upozornenie, keď prídu nové správy, kým je okno na pozadí
-# review: new
-gtk-restart-to-change = Inbox Classic sa na zmenu jazyka reštartuje.
 
 ## The desktop entry and the page of the software stores
 

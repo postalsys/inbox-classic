@@ -242,18 +242,9 @@ gtk-nothing-yet = Henüz bir şey yok.
 # review: new
 gtk-preferences = Tercihler
 # review: new
-gtk-language = Dil
-# review: new
 gtk-language-subtitle = Uygulamanın ve yardımın dili
 # review: new
-gtk-new-mail-group = Yeni posta
-# Tercihler'de yeni posta bildirimini açan satır, GNOME'un yazdığı gibi yalnızca ilk sözcük büyük harfle
-# review: new
-gtk-notify-new-mail = Yeni postayı bildir
-# review: new
 gtk-notify-subtitle = Pencere arka plandayken yeni iletiler geldiğinde bir bildirim
-# review: new
-gtk-restart-to-change = Inbox Classic dili değiştirmek için yeniden başlar.
 
 ## Masaüstü girdisi ve yazılım mağazalarının sayfası
 

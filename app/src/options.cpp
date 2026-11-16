@@ -257,7 +257,7 @@ LRESULT CALLBACK OptionsProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
 // asks whether to restart now for the language `name`: true for Restart Now, false for Later
 bool AskRestart(HWND owner, const std::wstring& name) {
     RegisterDialogClass(kRestartClass, OptionsProc);
-    std::wstring text = core::T(PE_TEXT_WIN_RESTART_ASK, {{"language", name}});
+    std::wstring text = core::T(PE_TEXT_UI_RESTART_ASK, {{"language", name}});
     std::wstring now = core::T(PE_TEXT_UI_RESTART_NOW), later = core::T(PE_TEXT_UI_RESTART_LATER);
     int pad = Scale(12), width = Scale(360);
     int textHeight = std::max(Scale(32), static_cast<int>(MeasureText(text, width - 2 * pad).cy));
@@ -296,8 +296,8 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
         return found != languages.end() ? found->name : code;
     };
 
-    std::wstring label = core::T(PE_TEXT_WIN_OPTIONS_LANGUAGE_LABEL), note = core::T(PE_TEXT_WIN_OPTIONS_RESTART_NOTE);
-    std::wstring notifyText = core::T(PE_TEXT_WIN_OPTIONS_NOTIFY);
+    std::wstring label = core::T(PE_TEXT_UI_LANGUAGE_LABEL), note = core::T(PE_TEXT_UI_RESTART_NOTE);
+    std::wstring notifyText = core::T(PE_TEXT_UI_NOTIFY_NEW_MAIL);
     std::wstring threadsText = core::T(PE_TEXT_UI_GROUP_BY_CONVERSATION);
     // View > Layout's three, in the order of PeLayoutMode
     std::wstring layoutText = core::T(PE_TEXT_UI_LAYOUT_LABEL);

@@ -380,6 +380,27 @@ ui-sign-in-apps-intro = Sisselogimisrakendused võimaldavad kontodele brauseris 
 ui-col-issuer = Väljaandja
 ui-col-used-by = Kasutab
 ui-options-system-default = Süsteemi keel ({ $language })
+# review: new
+ui-settings-general = Üldine
+# review: new
+ui-settings-reading = Lugemine
+# review: changed
+ui-settings-new-mail = Uus post
+# review: new
+ui-settings-sending = Saatmine
+# review: new
+ui-settings-default-apps = Vaikerakendused
+# review: new
+ui-settings-message-list = Kirjade loend
+# review: new
+ui-settings-messages = Kirjad
+# review: new
+ui-apply = R&akenda
+# review: changed
+ui-language-label = &Keel:
+ui-restart-note = Keele vahetamiseks tuleb Inbox Classic taaskäivitada.
+ui-restart-ask = Valitud keel ({ $language }) rakendub pärast Inbox Classicu taaskäivitamist. Kas taaskäivitada kohe?
+ui-notify-new-mail = &Teavita mind uute kirjade saabumisest
 ui-new-folder-title = Uus kaust
 ui-rename-folder-title = Muuda kausta nime
 ui-delete-folder-question = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja alamkaustadega? Need kustutatakse ka serverist.
@@ -551,25 +572,30 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Aadressiraamatut ei saanud salvestada: { $reason }
 ui-code-copied = Kood kopeeriti
-ui-codes-in-notifications = Näita uute kirjade teavitustes sisselogimiskoode
+# review: changed
+ui-codes-in-notifications = &Näita uute kirjade teavitustes sisselogimiskoode
 ui-tool-unread-only = Lugemata
 ui-no-unread = Siin pole lugemata kirju.
 ui-pictures-always-sender = Laadi saatjalt { $sender } pildid alati alla
 ui-pictures-always-domain = Laadi domeenist { $domain } saabunud kirjade pildid alati alla
 ui-pictures-unconfirmed = Ei õnnestunud kinnitada, et kiri pärineb domeenist { $domain }. Seetõttu ei laadita selle pilte automaatselt alla.
-ui-pictures-always-option = Laadi pildid alla kõigis kirjades
+# review: changed
+ui-pictures-always-option = &Laadi pildid alla kõigis kirjades
 ui-pictures-always-warning = Saatjad näevad siis, millal te nende kirju loete.
 # review: new
 ui-protection-details = Ü&ksikasjad...
 # review: new
 ui-protection-details-title = Turvalisuse üksikasjad
 ui-download-heading = Allalaadimine
-ui-download-ahead = Laadi kirjad eelnevalt alla:
+# review: changed
+ui-download-ahead = &Laadi kirjad eelnevalt alla:
 ui-download-ahead-recent = Hiljutised kirjad suurusega kuni 1 MB
 ui-download-ahead-all = Kõik kirjad
 ui-download-ahead-never = Ainult avamisel
-ui-download-limit = Mahupiir konto kohta:
-ui-send-delay = Viivitus enne saatmist:
+# review: changed
+ui-download-limit = &Mahupiir konto kohta:
+# review: changed
+ui-send-delay = Viivitus &enne saatmist:
 ui-send-delay-note = Kuni kiri ootab saatmist, saate saatmise tühistada nupuga „Võta tagasi“.
 ui-dark-messages = Kuva kirju tumedal taustal, kui süsteem kasutab tumedat režiimi
 ui-sending-in = { $subject } saadetakse { $count ->
@@ -581,17 +607,20 @@ ui-send-too-late = { $subject } on juba saadetud.
 ui-outbox-status-undo = Saadetakse kell { $time }
 ui-download-note = Eelnevalt alla laaditud kirjad avanevad kohe. Mahupiiri ületamisel eemaldatakse arvutist vanimate kirjade koopiad. Kirjade avamisel laaditakse need uuesti alla.
 ui-attachment-downloading = Kirja allalaadimine on veel pooleli. Proovige uuesti, kui allalaadimine on lõppenud.
-ui-trusted-senders-button = Usaldusväärsed saatjad...
+# review: changed
+ui-trusted-senders-button = &Usaldusväärsed saatjad...
 ui-trusted-senders-title = Usaldusväärsed saatjad
 ui-trusted-senders-note = Nende saatjate kirjade pildid laaditakse automaatselt alla, kui teie meiliteenuse pakkuja on saatja domeeni kinnitanud.
 ui-trusted-everyone-at = Kõik domeeni { $domain } saatjad
 ui-trusted-senders-empty = Usaldusväärseid saatjaid pole veel lisatud.
-ui-eml-default = Ava .eml-failid Inbox Classicuga
+# review: changed
+ui-eml-default = Ava .eml-&failid Inbox Classicuga
 ui-eml-default-done = Inbox Classic avab nüüd .eml-failid.
 ui-eml-default-failed = Inbox Classicut ei õnnestunud määrata .eml-failide avamise vaikerakenduseks: { $reason }
 ui-folders = Kaustad
 ui-sorted-by = Järjestus: { $field }
-ui-layout-label = Paigutus:
+# review: changed
+ui-layout-label = &Paigutus:
 ui-columns-note = Aken on veergudega paigutuse jaoks piisavalt lai. Paigutust saate muuta menüüs Vaade > Paigutus.
 ui-row-unread = Lugemata
 ui-row-flagged = Lipuga
@@ -600,8 +629,10 @@ ui-row-messages = { $count ->
     [one] { $count } kiri
    *[other] { $count } kirja
 }
-ui-list-pictures = Näita kirjade loendis saatjate pilte
-ui-list-pictures-note = Kui saatja on kinnitatud, kuvatakse brändilogo või aadressiraamatu pilt. Pildi puudumisel kuvatakse saatja initsiaalid. Logod laaditakse alla kord brändi, mitte iga kirja kohta.
+# review: changed
+ui-list-pictures = &Näita kirjade loendis saatjate pilte
+# review: changed
+ui-list-pictures-note = Veergudega paigutuses kuvatakse kinnitatud saatja korral brändilogo või aadressiraamatu pilt. Pildi puudumisel kuvatakse saatja initsiaalid. Logod laaditakse alla kord brändi, mitte iga kirja kohta.
 ui-card-picture = Pilt:
 ui-card-picture-choose = &Vali...
 ui-picture-not-picture = See fail ei ole PNG- ega JPEG-pilt.

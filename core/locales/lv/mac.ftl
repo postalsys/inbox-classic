@@ -41,13 +41,7 @@ mac-no-updates = Šī Inbox Classic versija neatbalsta automātiskos atjaunināj
 # review: new
 mac-settings-title = Iestatījumi
 # review: new
-mac-language-label = Valoda:
-# review: new
-mac-restart-hint = Restartējiet Inbox Classic, lai mainītu valodu.
-# review: new
-mac-notify-new-mail = Paziņot, kad pienāk jauns pasts
-# review: new
-mac-restart-question = Restartēt Inbox Classic tūlīt, lai mainītu valodu?
+mac-check-updates-automatically = Automātiski meklēt atjauninājumus
 
 ## Dialogs
 

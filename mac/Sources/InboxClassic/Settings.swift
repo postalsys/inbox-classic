@@ -81,7 +81,7 @@ enum Languages {
     static func offerRestart(for code: String?) {
         // asked only when the windows would change: System default that is German, then Deutsch, needs no new start
         guard (code ?? system) != current else { return }
-        if ask(Text.macRestartQuestion.text, yes: Text.uiRestartNow.text, no: Text.uiRestartLater.text,
+        if ask(Text.uiRestartAsk.text(["language": name(code ?? system)]), yes: Text.uiRestartNow.text, no: Text.uiRestartLater.text,
                style: .information) {
             AppDelegate.shared?.restart()
         }
@@ -137,7 +137,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 440, height: 160), styleMask: [.titled, .closable],
                           backing: .buffered, defer: false)
         window.autorecalculatesKeyViewLoop = true
-        notify = NSButton(checkboxWithTitle: Text.macNotifyNewMail.text, target: nil, action: nil)
+        notify = NSButton(checkboxWithTitle: Text.uiNotifyNewMail.text, target: nil, action: nil)
         grouping = NSButton(checkboxWithTitle: Text.uiGroupByConversation.text, target: nil, action: nil)
         signInCodes = NSButton(checkboxWithTitle: Text.uiCodesInNotifications.text, target: nil, action: nil)
         pictures = NSButton(checkboxWithTitle: Text.uiPicturesAlwaysOption.text, target: nil, action: nil)
@@ -162,7 +162,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         language.action = #selector(languageChosen)
         language.setAccessibilityIdentifier("settings.language")
 
-        let hint = NSTextField(wrappingLabelWithString: Text.macRestartHint.text)
+        let hint = NSTextField(wrappingLabelWithString: Text.uiRestartNote.text)
         hint.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
         hint.textColor = .secondaryLabelColor
 
@@ -250,7 +250,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
             row.spacing = 8
         }
 
-        let label = NSTextField(labelWithString: Text.macLanguageLabel.text)
+        let label = NSTextField(labelWithString: Text.uiLanguageLabel.text)
         label.alignment = .right
         // View > Layout's choices, each item tagged with its mode
         for (command, mode) in AppDelegate.layoutModes.sorted(by: { $0.value.rawValue < $1.value.rawValue }) {

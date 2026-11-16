@@ -739,6 +739,30 @@ ui-col-used-by = Usata da
 # review: new
 ui-options-system-default = Predefinita di sistema ({ $language })
 # review: new
+ui-settings-general = Generali
+# review: new
+ui-settings-reading = Lettura
+# review: changed
+ui-settings-new-mail = Nuova posta
+# review: new
+ui-settings-sending = Invio
+# review: new
+ui-settings-default-apps = App predefinite
+# review: new
+ui-settings-message-list = Elenco messaggi
+# review: new
+ui-settings-messages = Messaggi
+# review: new
+ui-apply = A&pplica
+# review: new
+ui-language-label = &Lingua:
+# review: new
+ui-restart-note = Riavvia Inbox Classic per cambiare la lingua.
+# review: new
+ui-restart-ask = Inbox Classic sarà in { $language } dopo il riavvio. Riavviare ora?
+# review: new
+ui-notify-new-mail = &Avvisami quando arriva nuova posta
+# review: new
 ui-new-folder-title = Nuova cartella
 # review: new
 ui-rename-folder-title = Rinomina cartella
@@ -1043,7 +1067,7 @@ ui-book-not-exported = Impossibile salvare la rubrica: { $reason }
 # review: new
 ui-code-copied = Codice copiato
 # review: new
-ui-codes-in-notifications = Mostra i codici di accesso nelle notifiche di nuova posta
+ui-codes-in-notifications = &Mostra i codici di accesso nelle notifiche di nuova posta
 # review: new
 ui-tool-unread-only = Da leggere
 # review: new
@@ -1055,7 +1079,7 @@ ui-pictures-always-domain = Scarica sempre le immagini da chiunque in { $domain 
 # review: new
 ui-pictures-unconfirmed = Non è stato possibile verificare il dominio del mittente ({ $domain }), perciò le immagini di questo messaggio non vengono scaricate automaticamente.
 # review: new
-ui-pictures-always-option = Scarica le immagini in tutti i messaggi
+ui-pictures-always-option = &Scarica le immagini in tutti i messaggi
 # review: new
 ui-pictures-always-warning = I mittenti potranno così vedere quando leggi i loro messaggi.
 # review: new
@@ -1065,7 +1089,7 @@ ui-protection-details-title = Dettagli di sicurezza
 # review: new
 ui-download-heading = Download
 # review: new
-ui-download-ahead = Scarica i messaggi in anticipo:
+ui-download-ahead = &Scarica i messaggi in anticipo:
 # review: new
 ui-download-ahead-recent = Messaggi recenti fino a 1 MB ciascuno
 # review: new
@@ -1073,9 +1097,9 @@ ui-download-ahead-all = Tutti i messaggi
 # review: new
 ui-download-ahead-never = Solo quando vengono aperti
 # review: new
-ui-download-limit = Limite di spazio per account:
+ui-download-limit = &Limite di spazio per account:
 # review: new
-ui-send-delay = Attesa prima dell’invio:
+ui-send-delay = Attesa prima dell’&invio:
 # review: new
 ui-send-delay-note = Mentre un messaggio è in attesa di essere inviato, puoi annullarne l’invio con Annulla.
 # review: new
@@ -1096,7 +1120,7 @@ ui-download-note = I messaggi scaricati in anticipo si aprono subito. Quando si 
 # review: new
 ui-attachment-downloading = Il download di questo messaggio non è terminato. Riprova quando il download è completo.
 # review: new
-ui-trusted-senders-button = Mittenti attendibili...
+ui-trusted-senders-button = Mittenti &attendibili...
 # review: new
 ui-trusted-senders-title = Mittenti attendibili
 # review: new
@@ -1106,7 +1130,7 @@ ui-trusted-everyone-at = Chiunque in { $domain }
 # review: new
 ui-trusted-senders-empty = Non hai ancora aggiunto mittenti attendibili.
 # review: new
-ui-eml-default = Apri i file .eml con Inbox Classic
+ui-eml-default = Apri i &file .eml con Inbox Classic
 # review: new
 ui-eml-default-done = Ora Inbox Classic apre i file .eml.
 # review: new
@@ -1116,7 +1140,7 @@ ui-folders = Cartelle
 # review: new
 ui-sorted-by = Ordinati per { $field }
 # review: new
-ui-layout-label = Layout:
+ui-layout-label = &Layout:
 # review: new
 ui-columns-note = La finestra è abbastanza larga per il layout a colonne. Puoi cambiare il layout in Visualizza > Layout.
 # review: new
@@ -1131,9 +1155,9 @@ ui-row-messages = { $count ->
    *[other] { $count } messaggi
 }
 # review: new
-ui-list-pictures = Mostra le immagini dei mittenti nell’elenco dei messaggi
+ui-list-pictures = &Mostra le immagini dei mittenti nell’elenco dei messaggi
 # review: new
-ui-list-pictures-note = Mostra i loghi dei marchi o le immagini della Rubrica per i mittenti verificati, e le iniziali quando non c’è un’immagine. I loghi vengono scaricati una volta per marchio, non per ogni messaggio.
+ui-list-pictures-note = Nel layout a colonne, mostra i loghi dei marchi o le immagini della Rubrica per i mittenti verificati, e le iniziali quando non c’è un’immagine. I loghi vengono scaricati una volta per marchio, non per ogni messaggio.
 # review: new
 ui-card-picture = Immagine:
 # review: new

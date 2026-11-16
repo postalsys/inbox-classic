@@ -38,13 +38,7 @@ mac-no-updates = Ši Inbox Classic versija nepalaiko automatinių naujinimų. Na
 # review: new
 mac-settings-title = Nustatymai
 # review: new
-mac-language-label = Kalba:
-# review: new
-mac-restart-hint = Paleiskite Inbox Classic iš naujo, kad pasikeistų kalba.
-# review: new
-mac-notify-new-mail = Pranešti, kai gaunami nauji laiškai
-# review: new
-mac-restart-question = Paleisti Inbox Classic iš naujo dabar, kad pasikeistų kalba?
+mac-check-updates-automatically = Automatiškai ieškoti naujinių
 
 ## Dialogs
 

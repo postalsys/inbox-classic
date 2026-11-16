@@ -739,6 +739,30 @@ ui-col-used-by = Utilitzada per
 # review: new
 ui-options-system-default = Predeterminat del sistema ({ $language })
 # review: new
+ui-settings-general = General
+# review: new
+ui-settings-reading = Lectura
+# review: changed
+ui-settings-new-mail = Correu nou
+# review: new
+ui-settings-sending = Enviament
+# review: new
+ui-settings-default-apps = Aplicacions per defecte
+# review: new
+ui-settings-message-list = Llista de missatges
+# review: new
+ui-settings-messages = Missatges
+# review: new
+ui-apply = &Aplica
+# review: new
+ui-language-label = &Llengua:
+# review: new
+ui-restart-note = Reinicieu Inbox Classic per canviar la llengua.
+# review: new
+ui-restart-ask = Inbox Classic es mostrarà en { $language } quan es reiniciï. Voleu reiniciar-lo ara?
+# review: new
+ui-notify-new-mail = &Notifica’m quan arribi correu nou
+# review: new
 ui-new-folder-title = Carpeta nova
 # review: new
 ui-rename-folder-title = Canvia el nom de la carpeta
@@ -1043,7 +1067,7 @@ ui-book-not-exported = No s’ha pogut desar la llibreta d’adreces: { $reason 
 # review: new
 ui-code-copied = S’ha copiat el codi
 # review: new
-ui-codes-in-notifications = Mostra els codis d’inici de sessió a les notificacions de correu nou
+ui-codes-in-notifications = &Mostra els codis d’inici de sessió a les notificacions de correu nou
 # review: new
 ui-tool-unread-only = No llegits
 # review: new
@@ -1055,7 +1079,7 @@ ui-pictures-always-domain = Baixa sempre les imatges de tothom del domini { $dom
 # review: new
 ui-pictures-unconfirmed = No s’ha pogut verificar el domini del remitent ({ $domain }), per això les imatges d’aquest missatge no es baixen automàticament.
 # review: new
-ui-pictures-always-option = Baixa les imatges de tots els missatges
+ui-pictures-always-option = &Baixa les imatges de tots els missatges
 # review: new
 ui-pictures-always-warning = Aleshores els remitents poden veure quan llegiu els seus missatges.
 # review: new
@@ -1065,7 +1089,7 @@ ui-protection-details-title = Detalls de seguretat
 # review: new
 ui-download-heading = Baixada
 # review: new
-ui-download-ahead = Baixa els missatges per avançat:
+ui-download-ahead = &Baixa els missatges per avançat:
 # review: new
 ui-download-ahead-recent = Missatges recents de fins a 1 MB cadascun
 # review: new
@@ -1073,9 +1097,9 @@ ui-download-ahead-all = Tots els missatges
 # review: new
 ui-download-ahead-never = Només quan s’obren
 # review: new
-ui-download-limit = Límit d’emmagatzematge per compte:
+ui-download-limit = &Límit d’emmagatzematge per compte:
 # review: new
-ui-send-delay = Temps d’espera abans d’enviar:
+ui-send-delay = &Temps d’espera abans d’enviar:
 # review: new
 ui-send-delay-note = Mentre un missatge espera per ser enviat, podeu cancel·lar l’enviament amb Desfés.
 # review: new
@@ -1096,7 +1120,7 @@ ui-download-note = Els missatges baixats per avançat s’obren immediatament. Q
 # review: new
 ui-attachment-downloading = Aquest missatge no s’ha acabat de baixar. Torneu-ho a provar quan s’hagi completat la baixada.
 # review: new
-ui-trusted-senders-button = Remitents de confiança...
+ui-trusted-senders-button = Remitents de &confiança...
 # review: new
 ui-trusted-senders-title = Remitents de confiança
 # review: new
@@ -1106,7 +1130,7 @@ ui-trusted-everyone-at = Tothom del domini { $domain }
 # review: new
 ui-trusted-senders-empty = Encara no s’ha afegit cap remitent de confiança.
 # review: new
-ui-eml-default = Obre els fitxers .eml amb Inbox Classic
+ui-eml-default = &Obre els fitxers .eml amb Inbox Classic
 # review: new
 ui-eml-default-done = Ara Inbox Classic obre els fitxers .eml.
 # review: new
@@ -1116,7 +1140,7 @@ ui-folders = Carpetes
 # review: new
 ui-sorted-by = Ordenat per: { $field }
 # review: new
-ui-layout-label = Disposició:
+ui-layout-label = &Disposició:
 # review: new
 ui-columns-note = La finestra és prou ampla per a la disposició en columnes. Podeu canviar la disposició a Visualitza > Disposició.
 # review: new
@@ -1131,9 +1155,9 @@ ui-row-messages = { $count ->
    *[other] { $count } missatges
 }
 # review: new
-ui-list-pictures = Mostra les imatges dels remitents a la llista de missatges
+ui-list-pictures = &Mostra les imatges dels remitents a la llista de missatges
 # review: new
-ui-list-pictures-note = Mostra logotips de marques o imatges de la Llibreta d’adreces dels remitents verificats, i les inicials quan no hi ha cap imatge. Els logotips es baixen una vegada per marca, no per a cada missatge.
+ui-list-pictures-note = En la disposició en columnes, mostra logotips de marques o imatges de la Llibreta d’adreces dels remitents verificats, i les inicials quan no hi ha cap imatge. Els logotips es baixen una vegada per marca, no per a cada missatge.
 # review: new
 ui-card-picture = Imatge:
 # review: new

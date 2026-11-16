@@ -40,13 +40,7 @@ mac-no-updates = Deze versie van Inbox Classic ondersteunt geen automatische upd
 # review: new
 mac-settings-title = Instellingen
 # review: new
-mac-language-label = Taal:
-# review: new
-mac-restart-hint = Start Inbox Classic opnieuw om de taal te wijzigen.
-# review: new
-mac-notify-new-mail = Melding geven wanneer er nieuwe e-mail binnenkomt
-# review: new
-mac-restart-question = Inbox Classic nu opnieuw starten om de taal te wijzigen?
+mac-check-updates-automatically = Automatisch controleren op updates
 
 ## Dialogs
 

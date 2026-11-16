@@ -248,18 +248,9 @@ gtk-nothing-yet = Nimic încă.
 # review: new
 gtk-preferences = Preferințe
 # review: new
-gtk-language = Limbă
-# review: new
 gtk-language-subtitle = Limba aplicației și a ajutorului
 # review: new
-gtk-new-mail-group = E-mail nou
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-# review: new
-gtk-notify-new-mail = Notificare la e-mail nou
-# review: new
 gtk-notify-subtitle = O notificare când sosesc mesaje noi cât timp fereastra este în fundal
-# review: new
-gtk-restart-to-change = Inbox Classic repornește pentru a schimba limba.
 
 ## The desktop entry and the page of the software stores
 

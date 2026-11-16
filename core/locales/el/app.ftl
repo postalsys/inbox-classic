@@ -739,6 +739,30 @@ ui-col-used-by = Χρήση από
 # review: new
 ui-options-system-default = Προεπιλογή συστήματος ({ $language })
 # review: new
+ui-settings-general = Γενικά
+# review: new
+ui-settings-reading = Ανάγνωση
+# review: changed
+ui-settings-new-mail = Νέα αλληλογραφία
+# review: new
+ui-settings-sending = Αποστολή
+# review: new
+ui-settings-default-apps = Προεπιλεγμένες εφαρμογές
+# review: new
+ui-settings-message-list = Λίστα μηνυμάτων
+# review: new
+ui-settings-messages = Μηνύματα
+# review: new
+ui-apply = Ε&φαρμογή
+# review: new
+ui-language-label = &Γλώσσα:
+# review: new
+ui-restart-note = Επανεκκινήστε το Inbox Classic για να αλλάξει η γλώσσα.
+# review: new
+ui-restart-ask = Το Inbox Classic θα εμφανίζεται στα { $language } μετά την επανεκκίνηση. Να γίνει επανεκκίνηση τώρα;
+# review: new
+ui-notify-new-mail = &Ειδοποίηση όταν φτάνει νέα αλληλογραφία
+# review: new
 ui-new-folder-title = Νέος φάκελος
 # review: new
 ui-rename-folder-title = Μετονομασία φακέλου
@@ -1043,7 +1067,7 @@ ui-book-not-exported = Δεν ήταν δυνατή η αποθήκευση το
 # review: new
 ui-code-copied = Ο κωδικός αντιγράφηκε
 # review: new
-ui-codes-in-notifications = Εμφάνιση κωδικών σύνδεσης στις ειδοποιήσεις νέας αλληλογραφίας
+ui-codes-in-notifications = Εμφάνιση &κωδικών σύνδεσης στις ειδοποιήσεις νέας αλληλογραφίας
 # review: new
 ui-tool-unread-only = Αδιάβαστα
 # review: new
@@ -1055,7 +1079,7 @@ ui-pictures-always-domain = Πάντα λήψη εικόνων από όλους
 # review: new
 ui-pictures-unconfirmed = Δεν ήταν δυνατή η επαλήθευση του τομέα του αποστολέα ({ $domain }), οπότε οι εικόνες αυτού του μηνύματος δεν λαμβάνονται αυτόματα.
 # review: new
-ui-pictures-always-option = Λήψη εικόνων σε όλα τα μηνύματα
+ui-pictures-always-option = &Λήψη εικόνων σε όλα τα μηνύματα
 # review: new
 ui-pictures-always-warning = Οι αποστολείς μπορούν τότε να δουν πότε διαβάζετε τα μηνύματά τους.
 # review: new
@@ -1065,7 +1089,7 @@ ui-protection-details-title = Λεπτομέρειες ασφαλείας
 # review: new
 ui-download-heading = Λήψη
 # review: new
-ui-download-ahead = Λήψη μηνυμάτων εκ των προτέρων:
+ui-download-ahead = &Λήψη μηνυμάτων εκ των προτέρων:
 # review: new
 ui-download-ahead-recent = Πρόσφατα μηνύματα έως 1 MB το καθένα
 # review: new
@@ -1073,9 +1097,9 @@ ui-download-ahead-all = Όλα τα μηνύματα
 # review: new
 ui-download-ahead-never = Μόνο όταν ανοίγουν
 # review: new
-ui-download-limit = Όριο αποθήκευσης ανά λογαριασμό:
+ui-download-limit = &Όριο αποθήκευσης ανά λογαριασμό:
 # review: new
-ui-send-delay = Καθυστέρηση πριν από την αποστολή:
+ui-send-delay = Καθυστέρηση πριν &από την αποστολή:
 # review: new
 ui-send-delay-note = Όσο ένα μήνυμα περιμένει να σταλεί, μπορείτε να ακυρώσετε την αποστολή με την Αναίρεση.
 # review: new
@@ -1096,7 +1120,7 @@ ui-download-note = Τα μηνύματα που έχουν ληφθεί εκ τ�
 # review: new
 ui-attachment-downloading = Η λήψη αυτού του μηνύματος δεν έχει ολοκληρωθεί. Δοκιμάστε ξανά όταν ολοκληρωθεί η λήψη.
 # review: new
-ui-trusted-senders-button = Αξιόπιστοι αποστολείς...
+ui-trusted-senders-button = &Αξιόπιστοι αποστολείς...
 # review: new
 ui-trusted-senders-title = Αξιόπιστοι αποστολείς
 # review: new
@@ -1106,7 +1130,7 @@ ui-trusted-everyone-at = Όλοι στο { $domain }
 # review: new
 ui-trusted-senders-empty = Δεν έχουν προστεθεί ακόμη αξιόπιστοι αποστολείς.
 # review: new
-ui-eml-default = Άνοιγμα αρχείων .eml με το Inbox Classic
+ui-eml-default = &Άνοιγμα αρχείων .eml με το Inbox Classic
 # review: new
 ui-eml-default-done = Το Inbox Classic ανοίγει πλέον τα αρχεία .eml.
 # review: new
@@ -1116,7 +1140,7 @@ ui-folders = Φάκελοι
 # review: new
 ui-sorted-by = Ταξινόμηση κατά: { $field }
 # review: new
-ui-layout-label = Διάταξη:
+ui-layout-label = &Διάταξη:
 # review: new
 ui-columns-note = Το παράθυρο είναι αρκετά πλατύ για τη διάταξη σε στήλες. Μπορείτε να αλλάξετε τη διάταξη στην Προβολή > Διάταξη.
 # review: new
@@ -1131,9 +1155,9 @@ ui-row-messages = { $count ->
    *[other] { $count } μηνύματα
 }
 # review: new
-ui-list-pictures = Εμφάνιση εικόνων αποστολέων στη λίστα μηνυμάτων
+ui-list-pictures = &Εμφάνιση εικόνων αποστολέων στη λίστα μηνυμάτων
 # review: new
-ui-list-pictures-note = Εμφανίζει λογότυπα εμπορικών σημάτων ή εικόνες του Βιβλίου διευθύνσεων για επαληθευμένους αποστολείς και αρχικά όταν δεν υπάρχει εικόνα. Η λήψη των λογοτύπων γίνεται μία φορά για κάθε εμπορικό σήμα, όχι για κάθε μήνυμα.
+ui-list-pictures-note = Στη διάταξη σε στήλες, εμφανίζει λογότυπα εμπορικών σημάτων ή εικόνες του Βιβλίου διευθύνσεων για επαληθευμένους αποστολείς και αρχικά όταν δεν υπάρχει εικόνα. Η λήψη των λογοτύπων γίνεται μία φορά για κάθε εμπορικό σήμα, όχι για κάθε μήνυμα.
 # review: new
 ui-card-picture = Εικόνα:
 # review: new

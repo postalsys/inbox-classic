@@ -178,14 +178,6 @@ win-edit = &Uredi...
 ## Options
 
 # review: new
-win-options-language-label = &Jezik programa Inbox Classic:
-# review: new
-win-options-restart-note = Za spremembo jezika znova zaženite Inbox Classic.
-# review: new
-win-options-notify = &Obvesti me, ko prispe nova pošta
-# review: new
-win-restart-ask = Inbox Classic bo po ponovnem zagonu v jeziku: { $language }. Želite znova zagnati zdaj?
-# review: new
 win-folders-hide = Skrij seznam map
 # review: new
 win-folders-pin = Seznam map naj bo ob sporočilih

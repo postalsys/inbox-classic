@@ -737,6 +737,30 @@ ui-col-used-by = Koristi
 # review: new
 ui-options-system-default = Zadano u sustavu ({ $language })
 # review: new
+ui-settings-general = Općenito
+# review: new
+ui-settings-reading = Čitanje
+# review: changed
+ui-settings-new-mail = Nova pošta
+# review: new
+ui-settings-sending = Slanje
+# review: new
+ui-settings-default-apps = Zadane aplikacije
+# review: new
+ui-settings-message-list = Popis poruka
+# review: new
+ui-settings-messages = Poruke
+# review: new
+ui-apply = &Primijeni
+# review: new
+ui-language-label = &Jezik:
+# review: new
+ui-restart-note = Ponovno pokrenite Inbox Classic da biste promijenili jezik.
+# review: new
+ui-restart-ask = Inbox Classic prikazat će jezik { $language } nakon ponovnog pokretanja. Ponovno pokrenuti sada?
+# review: new
+ui-notify-new-mail = &Obavijesti me kad stigne nova pošta
+# review: new
 ui-new-folder-title = Nova mapa
 # review: new
 ui-rename-folder-title = Preimenovanje mape
@@ -1047,7 +1071,7 @@ ui-book-not-exported = Adresar nije moguće spremiti: { $reason }
 # review: new
 ui-code-copied = Kôd je kopiran
 # review: new
-ui-codes-in-notifications = Prikaži kodove za prijavu u obavijestima o novoj pošti
+ui-codes-in-notifications = Prikaži &kodove za prijavu u obavijestima o novoj pošti
 # review: new
 ui-tool-unread-only = Nepročitano
 # review: new
@@ -1059,7 +1083,7 @@ ui-pictures-always-domain = Uvijek preuzmi slike od svih s domene { $domain }
 # review: new
 ui-pictures-unconfirmed = Domenu pošiljatelja ({ $domain }) nije moguće potvrditi, pa se slike u ovoj poruci ne preuzimaju automatski.
 # review: new
-ui-pictures-always-option = Preuzimaj slike u svim porukama
+ui-pictures-always-option = Preuzimaj slike &u svim porukama
 # review: new
 ui-pictures-always-warning = Pošiljatelji tada mogu vidjeti kada čitate njihove poruke.
 # review: new
@@ -1069,7 +1093,7 @@ ui-protection-details-title = Sigurnosne pojedinosti
 # review: new
 ui-download-heading = Preuzimanje
 # review: new
-ui-download-ahead = Unaprijed preuzimaj poruke:
+ui-download-ahead = &Unaprijed preuzimaj poruke:
 # review: new
 ui-download-ahead-recent = Nedavne poruke do 1 MB svaka
 # review: new
@@ -1077,9 +1101,9 @@ ui-download-ahead-all = Sve poruke
 # review: new
 ui-download-ahead-never = Samo pri otvaranju
 # review: new
-ui-download-limit = Ograničenje pohrane po računu:
+ui-download-limit = &Ograničenje pohrane po računu:
 # review: new
-ui-send-delay = Odgoda prije slanja:
+ui-send-delay = Odgoda prije &slanja:
 # review: new
 ui-send-delay-note = Dok poruka čeka na slanje, slanje možete otkazati naredbom Poništi.
 # review: new
@@ -1101,7 +1125,7 @@ ui-download-note = Unaprijed preuzete poruke otvaraju se odmah. Kad se prekorač
 # review: new
 ui-attachment-downloading = Preuzimanje ove poruke nije završeno. Pokušajte ponovno kad preuzimanje završi.
 # review: new
-ui-trusted-senders-button = Pouzdani pošiljatelji...
+ui-trusted-senders-button = P&ouzdani pošiljatelji...
 # review: new
 ui-trusted-senders-title = Pouzdani pošiljatelji
 # review: new
@@ -1111,7 +1135,7 @@ ui-trusted-everyone-at = Svi s domene { $domain }
 # review: new
 ui-trusted-senders-empty = Još nije dodan nijedan pouzdani pošiljatelj.
 # review: new
-ui-eml-default = Otvaraj datoteke .eml u programu Inbox Classic
+ui-eml-default = Otvaraj &datoteke .eml u programu Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic sada otvara datoteke .eml.
 # review: new
@@ -1121,7 +1145,7 @@ ui-folders = Mape
 # review: new
 ui-sorted-by = Sortirano po: { $field }
 # review: new
-ui-layout-label = Raspored:
+ui-layout-label = &Raspored:
 # review: new
 ui-columns-note = Prozor je dovoljno širok za raspored u stupcima. Raspored možete promijeniti u izborniku Prikaz > Raspored.
 # review: new
@@ -1137,9 +1161,9 @@ ui-row-messages = { $count ->
    *[other] { $count } poruka
 }
 # review: new
-ui-list-pictures = Prikazuj slike pošiljatelja na popisu poruka
+ui-list-pictures = Prikazuj &slike pošiljatelja na popisu poruka
 # review: new
-ui-list-pictures-note = Za potvrđene pošiljatelje prikazuje logotipe robnih marki ili slike iz Adresara, a inicijale kad slika nije dostupna. Logotipi se preuzimaju jednom za svaku robnu marku, a ne za svaku poruku.
+ui-list-pictures-note = U rasporedu u stupcima za potvrđene pošiljatelje prikazuje logotipe robnih marki ili slike iz Adresara, a inicijale kad slika nije dostupna. Logotipi se preuzimaju jednom za svaku robnu marku, a ne za svaku poruku.
 # review: new
 ui-card-picture = Slika:
 # review: new

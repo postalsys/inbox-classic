@@ -740,6 +740,30 @@ ui-col-used-by = Käyttäjät
 # review: new
 ui-options-system-default = Järjestelmän oletus ({ $language })
 # review: new
+ui-settings-general = Yleiset
+# review: new
+ui-settings-reading = Lukeminen
+# review: changed
+ui-settings-new-mail = Uusi posti
+# review: new
+ui-settings-sending = Lähettäminen
+# review: new
+ui-settings-default-apps = Oletussovellukset
+# review: new
+ui-settings-message-list = Viestiluettelo
+# review: new
+ui-settings-messages = Viestit
+# review: new
+ui-apply = &Käytä
+# review: new
+ui-language-label = Ki&eli:
+# review: new
+ui-restart-note = Kieli vaihtuu, kun Inbox Classic käynnistetään uudelleen.
+# review: new
+ui-restart-ask = Inbox Classic näytetään kielellä { $language }, kun se käynnistyy uudelleen. Käynnistetäänkö uudelleen nyt?
+# review: new
+ui-notify-new-mail = &Ilmoita, kun uutta postia saapuu
+# review: new
 ui-new-folder-title = Uusi kansio
 # review: new
 ui-rename-folder-title = Nimeä kansio uudelleen
@@ -1044,7 +1068,7 @@ ui-book-not-exported = Osoitekirjaa ei voitu tallentaa: { $reason }
 # review: new
 ui-code-copied = Koodi kopioitu
 # review: new
-ui-codes-in-notifications = Näytä kirjautumiskoodit uuden postin ilmoituksissa
+ui-codes-in-notifications = &Näytä kirjautumiskoodit uuden postin ilmoituksissa
 # review: new
 ui-tool-unread-only = Lukemattomat
 # review: new
@@ -1056,7 +1080,7 @@ ui-pictures-always-domain = Lataa aina kuvat kaikilta verkkotunnuksesta { $domai
 # review: new
 ui-pictures-unconfirmed = Lähettäjän verkkotunnusta ({ $domain }) ei voitu vahvistaa, joten tämän viestin kuvia ei ladata automaattisesti.
 # review: new
-ui-pictures-always-option = Lataa kuvat kaikissa viesteissä
+ui-pictures-always-option = &Lataa kuvat kaikissa viesteissä
 # review: new
 ui-pictures-always-warning = Lähettäjät näkevät silloin, milloin luet heidän viestinsä.
 # review: new
@@ -1066,7 +1090,7 @@ ui-protection-details-title = Suojauksen tiedot
 # review: new
 ui-download-heading = Lataaminen
 # review: new
-ui-download-ahead = Lataa viestit etukäteen:
+ui-download-ahead = &Lataa viestit etukäteen:
 # review: new
 ui-download-ahead-recent = Uusimmat viestit, enintään 1 Mt kukin
 # review: new
@@ -1074,9 +1098,9 @@ ui-download-ahead-all = Kaikki viestit
 # review: new
 ui-download-ahead-never = Vain avattaessa
 # review: new
-ui-download-limit = Tallennustilan raja tiliä kohden:
+ui-download-limit = &Tallennustilan raja tiliä kohden:
 # review: new
-ui-send-delay = Viive ennen lähettämistä:
+ui-send-delay = &Viive ennen lähettämistä:
 # review: new
 ui-send-delay-note = Kun viesti odottaa lähtöä, voit perua lähetyksen Kumoa-toiminnolla.
 # review: new
@@ -1097,7 +1121,7 @@ ui-download-note = Etukäteen ladatut viestit avautuvat heti. Kun tallennustilan
 # review: new
 ui-attachment-downloading = Tämän viestin lataus on kesken. Yritä uudelleen, kun lataus on valmis.
 # review: new
-ui-trusted-senders-button = Luotetut lähettäjät...
+ui-trusted-senders-button = L&uotetut lähettäjät...
 # review: new
 ui-trusted-senders-title = Luotetut lähettäjät
 # review: new
@@ -1107,7 +1131,7 @@ ui-trusted-everyone-at = Kaikki verkkotunnuksessa { $domain }
 # review: new
 ui-trusted-senders-empty = Luotettuja lähettäjiä ei ole vielä lisätty.
 # review: new
-ui-eml-default = Avaa .eml-tiedostot Inbox Classicilla
+ui-eml-default = &Avaa .eml-tiedostot Inbox Classicilla
 # review: new
 ui-eml-default-done = Inbox Classic avaa nyt .eml-tiedostot.
 # review: new
@@ -1117,7 +1141,7 @@ ui-folders = Kansiot
 # review: new
 ui-sorted-by = Lajitteluperuste: { $field }
 # review: new
-ui-layout-label = Asettelu:
+ui-layout-label = &Asettelu:
 # review: new
 ui-columns-note = Ikkuna on tarpeeksi leveä sarakeasettelulle. Voit vaihtaa asettelua kohdassa Näytä > Asettelu.
 # review: new
@@ -1132,9 +1156,9 @@ ui-row-messages = { $count ->
    *[other] { $count } viestiä
 }
 # review: new
-ui-list-pictures = Näytä lähettäjien kuvat viestiluettelossa
+ui-list-pictures = &Näytä lähettäjien kuvat viestiluettelossa
 # review: new
-ui-list-pictures-note = Näyttää vahvistetuille lähettäjille brändien logot tai osoitekirjan kuvat ja nimikirjaimet, kun kuvaa ei ole. Logot ladataan kerran brändiä kohden eikä jokaista viestiä varten.
+ui-list-pictures-note = Näyttää sarakeasettelussa vahvistetuille lähettäjille brändien logot tai osoitekirjan kuvat ja nimikirjaimet, kun kuvaa ei ole. Logot ladataan kerran brändiä kohden eikä jokaista viestiä varten.
 # review: new
 ui-card-picture = Kuva:
 # review: new

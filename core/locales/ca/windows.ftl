@@ -168,14 +168,6 @@ win-edit = &Edita...
 ## Opcions
 
 # review: new
-win-options-language-label = &Mostra Inbox Classic en:
-# review: new
-win-options-restart-note = Reinicieu Inbox Classic per canviar la llengua.
-# review: new
-win-options-notify = &Notifica’m quan arribi correu nou
-# review: new
-win-restart-ask = Inbox Classic es mostrarà en { $language } quan es reiniciï. Voleu reiniciar-lo ara?
-# review: new
 win-folders-hide = Amaga la llista de carpetes
 # review: new
 win-folders-pin = Mantén la llista de carpetes al costat dels missatges

@@ -739,6 +739,30 @@ ui-col-used-by = Používa
 # review: new
 ui-options-system-default = Predvolený systémom ({ $language })
 # review: new
+ui-settings-general = Všeobecné
+# review: new
+ui-settings-reading = Čítanie
+# review: changed
+ui-settings-new-mail = Nová pošta
+# review: new
+ui-settings-sending = Odosielanie
+# review: new
+ui-settings-default-apps = Predvolené aplikácie
+# review: new
+ui-settings-message-list = Zoznam správ
+# review: new
+ui-settings-messages = Správy
+# review: new
+ui-apply = &Použiť
+# review: new
+ui-language-label = &Jazyk:
+# review: new
+ui-restart-note = Jazyk sa zmení po reštartovaní Inbox Classic.
+# review: new
+ui-restart-ask = Inbox Classic sa po reštartovaní zobrazí v jazyku { $language }. Reštartovať teraz?
+# review: new
+ui-notify-new-mail = &Upozorniť ma, keď príde nová pošta
+# review: new
 ui-new-folder-title = Nový priečinok
 # review: new
 ui-rename-folder-title = Premenovať priečinok
@@ -1050,7 +1074,7 @@ ui-book-not-exported = Adresár sa nepodarilo uložiť: { $reason }
 # review: new
 ui-code-copied = Kód bol skopírovaný
 # review: new
-ui-codes-in-notifications = Zobrazovať prihlasovacie kódy v upozorneniach na novú poštu
+ui-codes-in-notifications = &Zobrazovať prihlasovacie kódy v upozorneniach na novú poštu
 # review: new
 ui-tool-unread-only = Neprečítané
 # review: new
@@ -1062,7 +1086,7 @@ ui-pictures-always-domain = Vždy sťahovať obrázky od všetkých z domény { 
 # review: new
 ui-pictures-unconfirmed = Doménu odosielateľa ({ $domain }) sa nepodarilo overiť, preto sa obrázky v tejto správe nesťahujú automaticky.
 # review: new
-ui-pictures-always-option = Sťahovať obrázky vo všetkých správach
+ui-pictures-always-option = &Sťahovať obrázky vo všetkých správach
 # review: new
 ui-pictures-always-warning = Odosielatelia potom uvidia, kedy čítate ich správy.
 # review: new
@@ -1072,7 +1096,7 @@ ui-protection-details-title = Podrobnosti zabezpečenia
 # review: new
 ui-download-heading = Sťahovanie
 # review: new
-ui-download-ahead = Sťahovať správy vopred:
+ui-download-ahead = &Sťahovať správy vopred:
 # review: new
 ui-download-ahead-recent = Nedávne správy do 1 MB každá
 # review: new
@@ -1080,9 +1104,9 @@ ui-download-ahead-all = Všetky správy
 # review: new
 ui-download-ahead-never = Iba pri otvorení
 # review: new
-ui-download-limit = Limit úložiska na konto:
+ui-download-limit = &Limit úložiska na konto:
 # review: new
-ui-send-delay = Oneskorenie pred odoslaním:
+ui-send-delay = &Oneskorenie pred odoslaním:
 # review: new
 ui-send-delay-note = Kým správa čaká na odoslanie, môžete odoslanie zrušiť príkazom Späť.
 # review: new
@@ -1104,7 +1128,7 @@ ui-download-note = Správy stiahnuté vopred sa otvárajú okamžite. Keď sa li
 # review: new
 ui-attachment-downloading = Táto správa sa ešte nestiahla celá. Skúste to znova po dokončení sťahovania.
 # review: new
-ui-trusted-senders-button = Dôveryhodní odosielatelia...
+ui-trusted-senders-button = &Dôveryhodní odosielatelia...
 # review: new
 ui-trusted-senders-title = Dôveryhodní odosielatelia
 # review: new
@@ -1114,7 +1138,7 @@ ui-trusted-everyone-at = Všetci z domény { $domain }
 # review: new
 ui-trusted-senders-empty = Zatiaľ neboli pridaní žiadni dôveryhodní odosielatelia.
 # review: new
-ui-eml-default = Otvárať súbory .eml v Inbox Classic
+ui-eml-default = Otvárať &súbory .eml v Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic teraz otvára súbory .eml.
 # review: new
@@ -1124,7 +1148,7 @@ ui-folders = Priečinky
 # review: new
 ui-sorted-by = Zoradené podľa: { $field }
 # review: new
-ui-layout-label = Rozloženie:
+ui-layout-label = &Rozloženie:
 # review: new
 ui-columns-note = Okno je dosť široké na rozloženie so stĺpcami. Rozloženie môžete zmeniť v ponuke Zobraziť > Rozloženie.
 # review: new
@@ -1140,9 +1164,9 @@ ui-row-messages = { $count ->
    *[other] { $count } správ
 }
 # review: new
-ui-list-pictures = Zobrazovať obrázky odosielateľov v zozname správ
+ui-list-pictures = &Zobrazovať obrázky odosielateľov v zozname správ
 # review: new
-ui-list-pictures-note = Pri overených odosielateľoch zobrazuje logá značiek alebo obrázky z adresára, a ak obrázok nie je k dispozícii, iniciály. Logá sa sťahujú raz pre každú značku, nie pre každú správu.
+ui-list-pictures-note = V rozložení so stĺpcami pri overených odosielateľoch zobrazuje logá značiek alebo obrázky z adresára, a ak obrázok nie je k dispozícii, iniciály. Logá sa sťahujú raz pre každú značku, nie pre každú správu.
 # review: new
 ui-card-picture = Obrázok:
 # review: new

@@ -38,13 +38,7 @@ mac-no-updates = Tato verze Inbox Classic nepodporuje automatické aktualizace. 
 # review: new
 mac-settings-title = Nastavení
 # review: new
-mac-language-label = Jazyk:
-# review: new
-mac-restart-hint = Jazyk se změní po restartu Inbox Classic.
-# review: new
-mac-notify-new-mail = Upozornit mě, když přijde nová pošta
-# review: new
-mac-restart-question = Restartovat Inbox Classic hned a změnit jazyk?
+mac-check-updates-automatically = Automaticky vyhledávat aktualizace
 
 ## Dialogs
 

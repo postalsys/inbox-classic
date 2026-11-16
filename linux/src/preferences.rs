@@ -45,7 +45,7 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
         .collect();
     let model = gtk::StringList::new(&names.iter().map(String::as_str).collect::<Vec<_>>());
     let language = adw::ComboRow::builder()
-        .title(t!(GtkLanguage))
+        .title(crate::words::field_title(Text::UiLanguageLabel))
         .subtitle(t!(GtkLanguageSubtitle))
         .model(&model)
         .factory(&whole_names())
@@ -57,7 +57,7 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
     words.add(&language);
 
     let notify = adw::SwitchRow::builder()
-        .title(t!(GtkNotifyNewMail))
+        .title(plain(Text::UiNotifyNewMail))
         .subtitle(t!(GtkNotifySubtitle))
         .active(app.notify.get())
         .build();
@@ -79,7 +79,7 @@ pub async fn open(parent: &impl IsA<gtk::Widget>) {
             .set_bool(settings::CODES_IN_NOTIFICATIONS, row.is_active());
         pe_core::otp::set_in_notifications(row.is_active());
     });
-    let mail = adw::PreferencesGroup::builder().title(t!(GtkNewMailGroup)).build();
+    let mail = adw::PreferencesGroup::builder().title(t!(UiSettingsNewMail)).build();
     mail.add(&notify);
     mail.add(&codes);
 
@@ -440,6 +440,7 @@ fn whole_names() -> gtk::SignalListItemFactory {
 
 /// The language changes at the next start: now, or later; `parent` closes first when it is a dialog
 pub async fn ask_restart(parent: &impl IsA<gtk::Widget>) {
+    let chosen = language_of(shell().settings.text(settings::LANGUAGE).as_deref());
     let (later, now) = (
         crate::words::plain(crate::words::Text::UiRestartLater),
         crate::words::plain(crate::words::Text::UiRestartNow),
@@ -448,7 +449,7 @@ pub async fn ask_restart(parent: &impl IsA<gtk::Widget>) {
     let answer = ui::ask(
         parent,
         TITLE,
-        &t!(GtkRestartToChange),
+        &t!(UiRestartAsk, language = crate::words::language_name(chosen)),
         &answers,
         "restart",
         "later",
