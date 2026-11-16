@@ -1,6 +1,6 @@
-<!--review--><h1>Aplicacions d’inici de sessió</h1>
+<h1>Aplicacions d’inici de sessió</h1>
 <p class="summary">Registreu la vostra pròpia aplicació d’inici de sessió a Google, a Microsoft o a qualsevol proveïdor OpenID Connect, per iniciar la sessió a través del navegador.</p>
-<p>Iniciar la sessió a través del navegador fa servir un client OAuth registrat al proveïdor. Inbox Classic en té un de propi per a Google i per a Microsoft. Google només deixa fer servir el client d’Inbox Classic als usuaris de prova fins que no hagi verificat l’aplicació, per això <b data-text="win-sign-in-google"></b> està desactivat al principi. Podeu registrar un client propi: al vostre projecte de Google Cloud, al vostre inquilí de Microsoft Entra o a qualsevol proveïdor OpenID Connect.</p>
+<p>L’inici de sessió a través del navegador utilitza un client OAuth registrat al proveïdor. Inbox Classic en té un de propi per a Google i per a Microsoft. Google només deixa fer servir el client d’Inbox Classic als usuaris de prova mentre la verificació de l’aplicació estigui pendent, per això <b data-text="win-sign-in-google"></b> està desactivat de manera predeterminada. Podeu registrar un client propi: al vostre projecte de Google Cloud, al vostre inquilí de Microsoft Entra o a qualsevol proveïdor OpenID Connect.</p>
 <p>Per afegir una aplicació d’inici de sessió:</p>
 <ol>
     <li>Trieu <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
@@ -11,7 +11,6 @@
     <li>Feu clic a <b data-text="ui-check"></b> per comprovar que l’emissor és correcte, i després a <b data-text="ui-ok"></b>.</li>
     <li>Afegiu el compte amb <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> a la primera pàgina de la finestra <b data-text="ui-add-account-title"></b>.</li>
 </ol>
-<p>A <b data-text="ui-sign-in-apps"></b>, <!--os:windows,mac-->la casella de cada aplicació<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> indica si s’ofereix per als comptes nous, incloses les integrades. Els comptes que ja fan servir una aplicació continuen funcionant. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> canvia una aplicació, i <b data-text="ui-remove"></b> en suprimeix una quan ja no la fa servir cap compte.</p>
-<p>Si el servidor de correu rebutja el testimoni de l’aplicació, comproveu que els seus permisos donen accés al correu.</p>
+<p>A <b data-text="ui-sign-in-apps"></b>, <!--os:windows,mac-->la casella de cada aplicació<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> indica si l’aplicació apareix entre les opcions d’inici de sessió en afegir comptes. Això també s’aplica a les aplicacions integrades. Els comptes que ja fan servir una aplicació continuen funcionant. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> permet editar una aplicació, i <b data-text="ui-remove"></b> en suprimeix una quan ja no la fa servir cap compte.</p>
+<p>Si el servidor de correu rebutja el testimoni de l’aplicació, comproveu que els permisos sol·licitats incloguin l’accés al correu.</p>
 <nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

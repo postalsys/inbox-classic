@@ -1,17 +1,16 @@
-<!--review--><h1>Correu xifrat i signat</h1>
-<p class="summary">La barra de sobre un missatge diu si el remitent l’ha signat i si s’ha xifrat per a vós.</p>
-<p>Un missatge signat demostra qui l’ha escrit i que ningú no l’ha canviat pel camí. Un missatge xifrat només es pot llegir amb la vostra clau.</p>
-<p>La barra de sobre el missatge parla del missatge sencer:</p>
+<h1>Correu xifrat i signat</h1>
+<p class="summary">La barra de sobre el missatge mostra l’estat de la signatura digital i del xifratge.</p>
+<p>Una signatura digital vàlida permet comprovar que el missatge no s’ha modificat des que es va signar. Per confirmar la identitat del remitent, també cal verificar a qui pertany la clau. Un missatge xifrat només es pot llegir amb una clau privada que correspongui a un dels destinataris.</p>
+<p>La barra de sobre el missatge resumeix la protecció del missatge sencer:</p>
 <table>
     <tr><th>Color</th><th>Què vol dir</th></tr>
-    <tr><td>Verd</td><td>Signat pel remitent, amb una clau que heu verificat.</td></tr>
-    <tr><td>Blau</td><td>Signat pel remitent amb una clau que no heu verificat, o xifrat per a vós.</td></tr>
-    <tr><td>Ambre</td><td>Alguna cosa no va bé: la signatura no coincideix, l’ha signat algú que no és el remitent o no s’ha pogut llegir una part.</td></tr>
-    <tr><td>Gris</td><td>No signat, o signat amb una clau que no teniu.</td></tr>
+    <tr><td>Verd</td><td>Signatura vàlida feta amb una clau del remitent de la qual heu verificat la identitat.</td></tr>
+    <tr><td>Blau</td><td>Signatura vàlida amb una clau atribuïda al remitent de la qual encara no heu verificat la identitat, o missatge xifrat per a vós.</td></tr>
+    <tr><td>Taronja</td><td>Hi ha un problema: la signatura no és vàlida, s’ha fet amb la clau d’una altra persona o no s’ha pogut llegir una part del missatge.</td></tr>
+    <tr><td>Gris</td><td>Sense signatura, amb una signatura encara no comprovada o amb una clau que no teniu.</td></tr>
 </table>
 <p>Un missatge amb parts protegides de maneres diferents mostra cada part en un marc propi, amb la seva etiqueta. Llavors la barra compta les parts de cada tipus. Feu clic a una etiqueta, o a <b data-text="ui-protection-details"></b> a la barra, per veure qui ha signat cada part, amb quina clau i quan.</p>
-<aside class="warning">Només la barra i les etiquetes de sobre els marcs les escriu Inbox Classic. Un remitent pot dibuixar qualsevol cosa dins del seu missatge, fins i tot una cosa que sembli una etiqueta. Mireu la barra.</aside>
-<p>Les imatges d’Internet d’una part xifrada només es carreguen quan feu clic a la barra d’imatges, cada vegada. Llavors la seva etiqueta diu que s’han carregat imatges.</p>
-<p>Quan responeu o reenvieu, només es cita el que s’ha mostrat.</p>
+<aside class="warning">Inbox Classic només genera la barra i les etiquetes de sobre els marcs. Un remitent pot inserir qualsevol contingut dins del missatge, fins i tot elements que semblin etiquetes de seguretat. Mireu la barra.</aside>
+<p>Les imatges d’internet d’una part xifrada demanen autorització cada vegada que obriu el missatge. Feu clic a la barra d’imatges per carregar-les. L’etiqueta de la part indicarà que s’han carregat imatges.</p>
+<p>En respondre o reenviar, només s’inclou a la citació el contingut que s’ha mostrat.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->

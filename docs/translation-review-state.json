@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Catalan: remaining 31 help topics, starting with security/encryption, rules, agents, privacy, troubleshooting and references. First 21 topics reviewed and validated. Active workspace build/i18n-wave1.",
+  "next_batch": "Norwegian Bokmål (nb): app catalog read, edits and actual menu/dialog mnemonic review next. All nb entries and help remain pending. Active workspace build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -27793,39 +27793,7 @@
     },
     "ca": {
       "pending_catalogs": {},
-      "pending_help": [
-        "account-security.html",
-        "agents-connect.html",
-        "agents-permissions.html",
-        "agents-sending.html",
-        "brand-logos.html",
-        "certificate-errors.html",
-        "command-line.html",
-        "connections.html",
-        "data-storage.html",
-        "default-mail-program.html",
-        "delivery-problems.html",
-        "download-ahead.html",
-        "encrypted-and-signed-mail.html",
-        "encryption-errors.html",
-        "encryption-keys.html",
-        "invitations.html",
-        "keyboard-shortcuts.html",
-        "links-scripts.html",
-        "message-not-shown.html",
-        "message-rules.html",
-        "no-connection.html",
-        "options-language.html",
-        "password-not-accepted.html",
-        "pictures-tracking.html",
-        "removing.html",
-        "search-words.html",
-        "sign-in-apps.html",
-        "sign-in-codes.html",
-        "unsubscribe.html",
-        "updates.html",
-        "verify-a-key.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "ca-app-round2",
@@ -29325,6 +29293,138 @@
           },
           "validation": "All 75 localization/help tests pass. Structural checks report only intentionally removed marks; inventory and source/file hashes reconcile (6,719 entries and 3,115 help lines). Inline spacing and git diff --check pass.",
           "notes": "Reviewed twelve help topics for writing/replies, signatures, attachments/files, drafts/outbox, contacts, notifications, combined folders, account management/transfer and provider sign-in. Corrected temporary-attachment cleanup, domain-authentication limits, credentials, current folder navigation and rule-folder matching; improved idiomatic Catalan."
+        },
+        {
+          "id": "ca-help-3-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "account-security.html",
+            "sign-in-apps.html",
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "verify-a-key.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/ca/account-security.html": "544033df1646631668c03e284158209d8dd4440fc576332e83b1b2cd5801551a",
+            "core/crates/pe-html/help/ca/sign-in-apps.html": "a2b377bb2f6b686941fcb2c881833f62a7891bf63411dae5b3c036adff3d7753",
+            "core/crates/pe-html/help/ca/encrypted-and-signed-mail.html": "bb89593cd0bad4217a45d8080075a2666971f255cfa93db425587d2c47841cf2",
+            "core/crates/pe-html/help/ca/encryption-keys.html": "cbaddba9760a2ca68ff2360b2afcabca79b999cf6cf4ff81b6db6d48fcdf458d",
+            "core/crates/pe-html/help/ca/verify-a-key.html": "3f4beab291ff38135567fc3535677ccb9281824ed8742a3d508b9ccb7b82c80b"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/account-security.html": "adf8cbee09afd1c8bcaaf46181d1cbf6667a67e1b3ce6f35c13af4d1c016ed44",
+            "core/crates/pe-html/help/en/sign-in-apps.html": "c092b49a13a0eab86b8571ec49c3fe49696b16b2e71bc1cc1020bcbc0222c1b1",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "b11ff6a5da8cc4f36f352fe5d7a6a43f0aa04e7ac1f67ea0608ef43559ba100e",
+            "core/crates/pe-html/help/en/encryption-keys.html": "67693bc89f3d12b183ff3a86f11495213a2f58ea0c9e16dea30649d931621d6a",
+            "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153"
+          },
+          "validation": "All 75 localization/help tests pass. Structural checks report only intentionally removed marks; inventory and source/file hashes reconcile (6,719 entries and 3,499 help lines). Inline spacing and git diff --check pass.",
+          "notes": "Reviewed account transport security, OAuth apps, signed/encrypted mail, key protection/recovery and verification. Corrected signature validity versus ownership and the requirement to check all addresses before confirming a key. Preserved markup, control references and platform branches."
+        },
+        {
+          "id": "ca-help-4-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "encryption-errors.html",
+            "message-rules.html",
+            "options-language.html",
+            "download-ahead.html",
+            "data-storage.html",
+            "pictures-tracking.html",
+            "brand-logos.html",
+            "links-scripts.html",
+            "connections.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/ca/encryption-errors.html": "578d573430208cb5671e012fcffb8fd6cfb0b9c2bd4c7af3dbed915b0567751d",
+            "core/crates/pe-html/help/ca/message-rules.html": "0e3805f15112414eb72da33092a41778c28a37d9856c2db61ffc2f4670891f51",
+            "core/crates/pe-html/help/ca/options-language.html": "cec34b9cae19a48bd9fe8536312edbb92de55a7cf90ac9b0c736d155bfc22865",
+            "core/crates/pe-html/help/ca/download-ahead.html": "5f387c37cd42fb6da55354f871f2f28171da23bb981898bf3bd47ee0e576e9e0",
+            "core/crates/pe-html/help/ca/data-storage.html": "ecc2c277c6630daa9c794429542bed79c2e714a85a2f293e512c369bd91f3787",
+            "core/crates/pe-html/help/ca/pictures-tracking.html": "9b4bbe94b315eb44954602453cab272363150dedc2d71ddef327b7ca19f07a66",
+            "core/crates/pe-html/help/ca/brand-logos.html": "7fd93fdfcd1c008def173dd2b3b908d37332bd03453b00c00573f09f60aed2bb",
+            "core/crates/pe-html/help/ca/links-scripts.html": "5a713d5901bc174704f6c48aab195678d7c880aef9ac4c00acdd727d6a140a21",
+            "core/crates/pe-html/help/ca/connections.html": "aca21ff28cf6a201bc60de24892f81018f5c33643c8d436c777f3e549146a72e"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/encryption-errors.html": "a5a998593987b3275e7f6cf44f81d459ff641215dda884f275cbf9d8d0d710f1",
+            "core/crates/pe-html/help/en/message-rules.html": "50f114b3f1de58156b49d24f24c6b1c13f6ddd25d386b0f5ed10e30f0ed4f41d",
+            "core/crates/pe-html/help/en/options-language.html": "f01b936ddf998f5db9b63cc6ec8c07d64c85c93fad9da8e2937e3c07307aa1b2",
+            "core/crates/pe-html/help/en/download-ahead.html": "bd7fce66d3a898cacebd699b56fb445e89fd7cd29bcd8c5cc8a1eb2599a4c332",
+            "core/crates/pe-html/help/en/data-storage.html": "cd7a5abea6effa876efa6948daee25b444604e4dbe1616333cdae59421c842ed",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "8520ae6851d4e2d57afbf07c59fdfeb928711dc8fd10a0f29f8a37caa8cc7588",
+            "core/crates/pe-html/help/en/brand-logos.html": "b8881af971d7c91603eb9fdb6173656bda5cbc7cebeab2a02552ee03d0e96143",
+            "core/crates/pe-html/help/en/links-scripts.html": "94ed69e6dc2262c5f189568583c6f98bdd9c829584be36b89a6956e7cdc0bc53",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869"
+          },
+          "validation": "All 75 localization/help tests pass. Structural checks report only intentionally removed marks; inventory and source/file hashes reconcile (6,719 entries and 3,499 help lines). Inline spacing and git diff --check pass.",
+          "notes": "Reviewed nine settings/privacy/network help topics. Corrected TLS response interpretation, rule processing, storage limits, credential storage, external-attachment behavior, domain authentication and logo/image privacy. Preserved rule editor live match counts and all markup."
+        },
+        {
+          "id": "ca-help-5-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "agents-connect.html",
+            "agents-permissions.html",
+            "agents-sending.html",
+            "certificate-errors.html",
+            "command-line.html",
+            "default-mail-program.html",
+            "delivery-problems.html",
+            "invitations.html",
+            "keyboard-shortcuts.html",
+            "message-not-shown.html",
+            "no-connection.html",
+            "password-not-accepted.html",
+            "removing.html",
+            "search-words.html",
+            "sign-in-codes.html",
+            "unsubscribe.html",
+            "updates.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/ca/agents-connect.html": "bb9f2204cc34fdd5980c332202bfea874946c8d242ae716251b17dbaf7b16136",
+            "core/crates/pe-html/help/ca/agents-permissions.html": "e4be4f40d2726d264d49fef992efcfacbbaba2a300cd2a208b32f3e92e548234",
+            "core/crates/pe-html/help/ca/agents-sending.html": "e86012acb5f4b369ce86b57786d817c7ed71e7b93b1f1a3f06f3e3cd29c83a40",
+            "core/crates/pe-html/help/ca/certificate-errors.html": "e691742e5b9e6d4f3679b870cab1d02fa8aa3d7282bd2757ca8c0eac1e5b8e73",
+            "core/crates/pe-html/help/ca/command-line.html": "79ecf33da11e1fd958fe5a628a28e35a74dc174b12de89d6e120456baccdd3de",
+            "core/crates/pe-html/help/ca/default-mail-program.html": "5f44a6fef493903e339801f5e60ad6e95a42d68ed75a786053a2c84532fb8df6",
+            "core/crates/pe-html/help/ca/delivery-problems.html": "bc0477cb62198f9022fe6a25cfb88c7ad9cb937329eff53931f801fb5ff31cd3",
+            "core/crates/pe-html/help/ca/invitations.html": "8a31194a2a3bb3c6209944c3eedfb3b39c6ab7b55b028c3532502d69d25e1bf7",
+            "core/crates/pe-html/help/ca/keyboard-shortcuts.html": "63681ca551eaec598ac080d2d413fbc1778567c65ca2859a56e7d7c70f297459",
+            "core/crates/pe-html/help/ca/message-not-shown.html": "9a2ca1b18862f3c360eb50d7c4d1650fed7ad2a12e9f195881d099e81beed962",
+            "core/crates/pe-html/help/ca/no-connection.html": "6be029f2749b32557ca6fc2961c479df052b70a8a0305fd97bb23d9ec7b8d85b",
+            "core/crates/pe-html/help/ca/password-not-accepted.html": "d8b9b5c043221008a6e3fd5a4ca417164ccc3c0361278d992cdf4ffcb6489fd1",
+            "core/crates/pe-html/help/ca/removing.html": "ad16ee20ed60b6981c3fb339cc7fe1a95fd3ba4071ce384425f5ec0f3dc25d25",
+            "core/crates/pe-html/help/ca/search-words.html": "e9b02e075afd5b8759693aa22f3210b7d7a9fa0f4c8de4bd427d1d770c673425",
+            "core/crates/pe-html/help/ca/sign-in-codes.html": "92268706c25fa763b4f2ea4bdf73b8ed63216ba7dd9cec5d825455ca5b68f2e2",
+            "core/crates/pe-html/help/ca/unsubscribe.html": "5f5e093c9db3a007198821040ba254e224a61ffe496e6310723baa86f7497d26",
+            "core/crates/pe-html/help/ca/updates.html": "4ae87fffabd8ccfe9f79d57cec38bb72a480573530c29f74734d5e83569d8de8"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70",
+            "core/crates/pe-html/help/en/agents-permissions.html": "3f65b6b651950e2b6750417611854b8c899c5893f3e12b1b6c5f1c4a4077bb6d",
+            "core/crates/pe-html/help/en/agents-sending.html": "dffb12a981ffed82aa8cf6566ee4118d64b200c54dcc3b9d77fcd95ee0ffd75e",
+            "core/crates/pe-html/help/en/certificate-errors.html": "8f4eccaaf38ef9767695c2a3a62aebe94238f4f3cbaf8c76f7e98105978a2c84",
+            "core/crates/pe-html/help/en/command-line.html": "39216fa072adf81b4ce1480e5df5729a4ef7524d25d69aef5e1f374044c18e70",
+            "core/crates/pe-html/help/en/default-mail-program.html": "6934a7cc1e6c28786d77d488146d201f81e253b79965a6d3c63093708bdc33ad",
+            "core/crates/pe-html/help/en/delivery-problems.html": "b01b4f074dce1c3bce5c63f2c5a5bd05a7613153eb558c179ed1f4fcbfae1c0e",
+            "core/crates/pe-html/help/en/invitations.html": "d4a72136a9c92b8f37bf139b5f577630da9a6b40a921b88bec47bcd06060010d",
+            "core/crates/pe-html/help/en/keyboard-shortcuts.html": "8cef6a16af1925987835d490d608aac7614be8c13650d0b3875ff21753d39b5b",
+            "core/crates/pe-html/help/en/message-not-shown.html": "85e732ccaedb1c1eb60f30ddcef9992d7f1ee4820bb4ceaa6a59e5200a4bef0d",
+            "core/crates/pe-html/help/en/no-connection.html": "b928c6371c171c099fc80ad0fef4e13d3e022593bbdc44c1f27904b5139d3ef0",
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab",
+            "core/crates/pe-html/help/en/removing.html": "46bcd4ef3c9ae9e051c63de8eb9810f179b723d4297cc001dce3951b76a9515e",
+            "core/crates/pe-html/help/en/search-words.html": "5393319f111f177dde773bb10018564696772b16067b60fa8e2bad14f643ebbb",
+            "core/crates/pe-html/help/en/sign-in-codes.html": "c787a5e3fe4836c3e7c48fc644c4210d0107e29767c0fbacff1f7f083b6cc408",
+            "core/crates/pe-html/help/en/unsubscribe.html": "a80419bc5ca6a65992c8168d29636f505dc1281ccbeff81ff25412ba2dd3611c",
+            "core/crates/pe-html/help/en/updates.html": "faa50b2269cf71de11f9a361fd48a5476a9380883e99829aae2c67bb12028e59"
+          },
+          "validation": "All 75 localization/help tests pass. Structural checks report only intentionally removed marks; inventory and source/file hashes reconcile (6,719 entries and 3,499 help lines). Inline spacing and git diff --check pass.",
+          "notes": "Reviewed remaining 17 agent, message-action, troubleshooting and reference topics. Corrected queued sending, credential failures, secure connections, default application instructions, URL-file output, search operators and Catalan recipient shortcuts. Preserved all markup and literal keyboard tags."
         }
       ],
       "source_ref": "feat/languages-wave1",

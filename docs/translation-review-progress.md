@@ -19,7 +19,7 @@ Commit completed batches regularly and preserve an exact resume point.
 - Resume with Brazilian Portuguese (`pt-BR`): the remaining 448 core entries, then 248 platform/help-title
   entries and all 52 help topics. All 626 app entries and nine coupled controls are reviewed. Portuguese (Portugal),
   Italian and Dutch are fully reviewed: each has 1,331 catalog entries and 52 help topics.
-  Twenty-one languages still have pending content, with exact IDs/topics in the state file.
+  Nineteen languages still have pending content, with exact IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
@@ -238,8 +238,16 @@ transferred credentials and rule-folder matching. Fixed platform-specific contra
 All 75 tests, structure, inventory/hash reconciliation, inline spacing and git diff --check pass.
 Catalog completion checkpoint: `e6e56cff`. The final 31 help topics are pending.
 
-Current totals: 6,719 catalog entries and 233 help pages reviewed; 1,067 catalog values improved. Remaining:
-25,289 catalog entries and 1,019 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Catalan help completed
+
+Reviewed the final 31 help topics, completing all 52. Corrected key verification and recovery, domain
+authentication, image privacy, queued agent sends, connection failures and command-line/reference guidance.
+Preserved markup, platform branches and literal keyboard tags. All 75 tests pass, along with structure,
+inventory/hash reconciliation, inline spacing and git diff --check. The review HTML is regenerated.
+Everyday-help checkpoint: `37a547aa`. Norwegian Bokmål is next.
+
+Current totals: 6,719 catalog entries and 264 help pages reviewed; 1,067 catalog values improved. Remaining:
+25,289 catalog entries and 988 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
