@@ -12,11 +12,14 @@
 #include <cstdint>
 #include <functional>
 #include <string>
+#include <thread>
+#include <vector>
 
 #include "core.h"
 #include "preview.h"
 
 struct UiEvent;
+struct StripOpened;
 
 class Reader {
 public:
@@ -122,9 +125,16 @@ private:
     // height, 0 when it is hidden
     void FillStrip(const PeMessageInfo* info);
     int PlaceStrip(int left, int top, int width);
+    // the attachment of item `item` of the strip, NULL for none; its place in the message in `index`
+    const PeAttachment* StripAttachment(int item, size_t* index = nullptr) const;
+    // why a file of the message is not here: it is still being downloaded, or could not be read
+    void SayNotHere();
     // the file of an item of the strip opened with the system's program, from the private folder the core wrote it
-    // into: a note shown first when the core has one; a file that can run code refused with the core's words
+    // into on a thread of its own (OpenDone takes the result): a note shown first when the core has one; a file that
+    // can run code refused from its row, in the core's words. One at a time; StopOpening waits for it
     void OpenAttachment(int item);
+    void OpenDone(StripOpened* opened);
+    void StopOpening();
     // the menu of an item of the strip (Open, Save As..., Save All...) at `screen`, (-1, -1) for the keyboard's
     void StripMenu(POINT screen);
     static LRESULT CALLBACK StripProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR data);
@@ -141,6 +151,13 @@ private:
     // the strip of the files under the header (a list view of small icons), an item a file
     HWND strip_ = nullptr;
     HWND stripFrame_ = nullptr;
+    // the files the strip shows (name, size and kind), so it is filled again only when they change
+    std::vector<std::wstring> stripFiles_;
+    // the open under way and its item, -1 for none
+    std::thread opener_;
+    int openingItem_ = -1;
+    // ShowInfo lays the pane out once, at its end
+    bool holdLayout_ = false;
     HWND pictures_ = nullptr;
     HWND picturesMenu_ = nullptr;
     HWND retry_ = nullptr;

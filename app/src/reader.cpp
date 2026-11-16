@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -139,55 +140,53 @@ int DetailsMargin() {
     return Scale(4);
 }
 
-// the icon of the strip for the word of a file's kind the core gave (PeAttachment.kind)
-int KindIcon(const char* kind) {
-    static const std::pair<const char*, int> icons[] = {
-        {"image", KIND_IMAGE},          {"pdf", KIND_DOCUMENT_PDF},        {"document", KIND_DOCUMENT_TEXT},
-        {"spreadsheet", KIND_DOCUMENT_TABLE}, {"presentation", KIND_SLIDE_TEXT}, {"archive", KIND_FOLDER_ZIP},
-        {"audio", KIND_MUSIC_NOTE_2},   {"video", KIND_VIDEO},             {"calendar", KIND_CALENDAR_LTR},
-        {"contact", KIND_CONTACT_CARD}, {"key", KIND_KEY},                 {"text", KIND_DOCUMENT_ONE_PAGE},
-        {"mail", KIND_MAIL},            {"program", KIND_WINDOW_SHIELD},
-    };
-    for (const auto& [word, icon] : icons) {
-        if (kind && strcmp(kind, word) == 0) {
-            return icon;
-        }
+// the icon of the strip for a file's kind, as the core gave it
+int KindIcon(PeFileKind kind) {
+    switch (kind) {
+    case PE_FILE_KIND_IMAGE: return KIND_IMAGE;
+    case PE_FILE_KIND_PDF: return KIND_DOCUMENT_PDF;
+    case PE_FILE_KIND_DOCUMENT: return KIND_DOCUMENT_TEXT;
+    case PE_FILE_KIND_SPREADSHEET: return KIND_DOCUMENT_TABLE;
+    case PE_FILE_KIND_PRESENTATION: return KIND_SLIDE_TEXT;
+    case PE_FILE_KIND_ARCHIVE: return KIND_FOLDER_ZIP;
+    case PE_FILE_KIND_AUDIO: return KIND_MUSIC_NOTE_2;
+    case PE_FILE_KIND_VIDEO: return KIND_VIDEO;
+    case PE_FILE_KIND_CALENDAR: return KIND_CALENDAR_LTR;
+    case PE_FILE_KIND_CONTACT: return KIND_CONTACT_CARD;
+    case PE_FILE_KIND_KEY: return KIND_KEY;
+    case PE_FILE_KIND_TEXT: return KIND_DOCUMENT_ONE_PAGE;
+    case PE_FILE_KIND_MAIL: return KIND_MAIL;
+    case PE_FILE_KIND_PROGRAM: return KIND_WINDOW_SHIELD;
+    case PE_FILE_KIND_OTHER: return KIND_DOCUMENT;
     }
     return KIND_DOCUMENT;
 }
 
-// `name` no wider than `width` in the font of `dc`: its middle left out where it is wider, so the start and the
-// extension both show (the whole name is the item's tooltip)
-std::wstring MiddleEllipsis(HDC dc, const std::wstring& name, int width) {
-    auto wide = [dc](const std::wstring& text) {
-        SIZE size = {};
-        GetTextExtentPoint32W(dc, text.c_str(), static_cast<int>(text.size()), &size);
-        return static_cast<int>(size.cx);
-    };
-    if (wide(name) <= width) {
-        return name;
-    }
-    // the end keeps a third of what is kept, the extension with it
-    for (size_t keep = name.size() - 1; keep > 2; keep--) {
-        size_t tail = keep / 3;
-        std::wstring shorter = name.substr(0, keep - tail) + L"\u2026" + name.substr(name.size() - tail);
-        if (wide(shorter) <= width) {
-            return shorter;
-        }
-    }
-    return name.substr(0, 1) + L"\u2026";
+// the label of a file of the strip: its name, shortened by Windows when it is wider than `width` in the font of `dc`
+// (its start and its extension kept, the end of the rest left out: DrawText's own ellipsis, which leaves out the
+// middle only of a path; the whole name is the item's tooltip), and its size, as Outlook Express wrote its Attach line
+// ("report.pdf (240 KB)")
+std::wstring StripLabel(HDC dc, const PeAttachment& attachment, int width) {
+    std::wstring name = Text(attachment.filename);
+    size_t dot = name.rfind(L'.');
+    std::wstring extension = dot != std::wstring::npos && dot > 0 && name.size() - dot <= 10 ? name.substr(dot) : L"";
+    SIZE extent = {};
+    GetTextExtentPoint32W(dc, extension.c_str(), static_cast<int>(extension.size()), &extent);
+    // the rest, with room for the ellipsis Windows writes into it
+    std::wstring stem = name.substr(0, name.size() - extension.size());
+    std::vector<wchar_t> buffer(stem.begin(), stem.end());
+    buffer.resize(buffer.size() + 5, L'\0');
+    RECT box = {0, 0, std::max(1, width - static_cast<int>(extent.cx)), 1};
+    DrawTextExW(dc, buffer.data(), -1, &box, DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_MODIFYSTRING, nullptr);
+    std::wstring start(buffer.data());
+    // after the ellipsis, the extension without its dot: "walking wee...docx", not four dots
+    std::wstring end = start != stem && !extension.empty() ? extension.substr(1) : extension;
+    return start + end + L" (" + Text(attachment.size_text) + L")";
 }
 
-// the label of a file of the strip: its name, middle left out when long, and its size, as Outlook Express wrote its
-// Attach line ("report.pdf (240 KB)")
-std::wstring StripLabel(HWND strip, const PeAttachment& attachment) {
-    HDC dc = GetDC(strip);
-    HGDIOBJ old = SelectObject(dc, reinterpret_cast<HFONT>(SendMessageW(strip, WM_GETFONT, 0, 0)));
-    std::wstring name = MiddleEllipsis(dc, Text(attachment.filename), Scale(220));
-    SelectObject(dc, old);
-    ReleaseDC(strip, dc);
-    return name + L" (" + Text(attachment.size_text) + L")";
-}
+constexpr UINT WM_STRIP_OPENED = WM_APP + 80;
+// on the strip: an open that takes a while shows on its item
+constexpr UINT_PTR TIMER_STRIP_BUSY = 1;
 
 // the opened files of a test run (--opened-files-log), written there in place of opening them
 std::wstring g_openedFilesLog;
@@ -206,6 +205,15 @@ void OpenWithSystem(HWND owner, const std::wstring& path) {
 }
 
 }  // namespace
+
+// what the thread of an open hands back to the strip (WM_STRIP_OPENED): the file to open and the note to show first,
+// or why there is none (`refused`; neither for a message not here)
+struct StripOpened {
+    int item = -1;
+    std::wstring path;
+    std::wstring note;
+    std::wstring refused;
+};
 
 void SetOpenedFilesLog(const std::wstring& path) {
     g_openedFilesLog = path;
@@ -288,6 +296,7 @@ void Reader::Create(HWND parent, PeCore* core) {
 
 void Reader::Destroy() {
     KillTimer(parent_, TIMER_MEASURE);
+    StopOpening();
     if (viewRequest_) {
         pe_message_view_cancel(core_, viewRequest_);
         viewRequest_ = 0;
@@ -440,6 +449,10 @@ void Reader::Layout(const RECT& area) {
 // the header, with the paper clip at its right when the message has files; the security bar, the strip of the
 // files and the information bars under it; the message below
 void Reader::Layout() {
+    // ShowInfo lays the pane out once, at its end
+    if (holdLayout_) {
+        return;
+    }
     const RECT& reader = area_;
     int headerHeight = kHeaderLines * Scale(15) + Scale(8);
     int width = reader.right - reader.left;
@@ -606,6 +619,8 @@ void Reader::ShowInfo() {
         ShowBars(false, false);
         return;
     }
+    // what changes below (the logo, the security bar, the strip, the bars) laid out once, at the end
+    holdLayout_ = true;
     ShowHeader(info);
     ShowSecurity(info);
     // a mailing list that says how to leave it
@@ -614,7 +629,6 @@ void Reader::ShowInfo() {
     unsubscribeTarget_ = Text(info->unsubscribe_target);
     ShowWindow(unsubscribe_, unsubscribeKind_ != PE_UNSUBSCRIBE_NONE ? SW_SHOW : SW_HIDE);
     ShowLogo(info->has_logo && !file, file ? 0 : info->picture);
-    Layout();
     InvalidateRect(unsubscribe_, nullptr, TRUE);
     // a signed or encrypted message is a page of parts, each in a frame sized to its document: once it loaded, and
     // again while it is shown (pictures loading, "..." unfolded, another width or text size)
@@ -633,6 +647,8 @@ void Reader::ShowInfo() {
     FillStrip(info);
     // offered only for a message with pictures on the internet, until they are shown (asked for, or by themselves)
     ShowBars(info->attachment_count > 0, info->remote_images && !info->pictures_loaded && !remoteImages_);
+    holdLayout_ = false;
+    Layout();
     if (onShown) {
         onShown();
     }
@@ -689,10 +705,7 @@ void Reader::SaveAttachment(size_t index) {
     uint8_t* data = AttachmentData(index, length, name);
     core::String safeName(name);
     if (!data) {
-        // a large message shows its text before the rest of it is here
-        bool downloading = file_.empty() && pe_message_downloading(core_, folder_, uid_);
-        std::wstring why = core::T(downloading ? PE_TEXT_UI_ATTACHMENT_DOWNLOADING : PE_TEXT_UI_ATTACHMENT_NOT_READ);
-        MessageBoxW(parent_, why.c_str(), L"Inbox Classic", MB_OK | (downloading ? MB_ICONINFORMATION : MB_ICONERROR));
+        SayNotHere();
         return;
     }
     std::wstring path = SaveFileDialog(parent_, Text(safeName.get()));
@@ -741,16 +754,51 @@ void Reader::SaveAllAttachments() {
 
 // ---- the attachment strip ----
 
+const PeAttachment* Reader::StripAttachment(int item, size_t* index) const {
+    LVITEMW row = {};
+    row.mask = LVIF_PARAM;
+    row.iItem = item;
+    if (item < 0 || !ListView_GetItem(strip_, &row)) {
+        return nullptr;
+    }
+    if (index) {
+        *index = static_cast<size_t>(row.lParam);
+    }
+    return pe_message_view_attachment(view_.get(), static_cast<size_t>(row.lParam));
+}
+
+void Reader::SayNotHere() {
+    // a large message shows its text before the rest of it is here
+    bool downloading = file_.empty() && pe_message_downloading(core_, folder_, uid_);
+    std::wstring why = core::T(downloading ? PE_TEXT_UI_ATTACHMENT_DOWNLOADING : PE_TEXT_UI_ATTACHMENT_NOT_READ);
+    MessageBoxW(parent_, why.c_str(), L"Inbox Classic", MB_OK | (downloading ? MB_ICONINFORMATION : MB_ICONERROR));
+}
+
 void Reader::FillStrip(const PeMessageInfo* info) {
+    // the same files as shown (the message shown again, with its pictures, say): the strip as it is, its choice kept
+    std::vector<std::wstring> files;
+    for (size_t i = 0; info && i < info->attachment_count; i++) {
+        if (const PeAttachment* attachment = pe_message_view_attachment(view_.get(), i)) {
+            files.push_back(Text(attachment->filename) + L"\n" + Text(attachment->size_text) + L"\n" +
+                            std::to_wstring(static_cast<int>(attachment->kind)));
+        }
+    }
+    if (files == stripFiles_) {
+        return;
+    }
+    stripFiles_ = std::move(files);
     SendMessageW(strip_, WM_SETREDRAW, FALSE, 0);
     ListView_DeleteAllItems(strip_);
+    // one DC for every label, in the strip's font
+    HDC dc = CreateCompatibleDC(nullptr);
+    HGDIOBJ font = SelectObject(dc, reinterpret_cast<HFONT>(SendMessageW(strip_, WM_GETFONT, 0, 0)));
     int widest = 0;
     for (size_t i = 0; info && i < info->attachment_count; i++) {
         const PeAttachment* attachment = pe_message_view_attachment(view_.get(), i);
         if (!attachment) {
             continue;
         }
-        std::wstring label = StripLabel(strip_, *attachment);
+        std::wstring label = StripLabel(dc, *attachment, Scale(220));
         LVITEMW item = {};
         item.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;
         item.iItem = ListView_GetItemCount(strip_);
@@ -760,6 +808,8 @@ void Reader::FillStrip(const PeMessageInfo* info) {
         ListView_InsertItem(strip_, &item);
         widest = std::max(widest, ListView_GetStringWidth(strip_, label.c_str()));
     }
+    SelectObject(dc, font);
+    DeleteDC(dc);
     // the columns as wide as the widest label with its icon, and a gap
     int icon = 0;
     ImageList_GetIconSize(IconList(IconSet::Files), &icon, &icon);
@@ -796,35 +846,69 @@ int Reader::PlaceStrip(int left, int top, int width) {
 }
 
 void Reader::OpenAttachment(int item) {
-    LVITEMW row = {};
-    row.mask = LVIF_PARAM;
-    row.iItem = item;
-    if (item < 0 || !ListView_GetItem(strip_, &row) || !Info()) {
+    size_t index = 0;
+    const PeAttachment* attachment = StripAttachment(item, &index);
+    if (!attachment) {
         return;
     }
-    auto index = static_cast<size_t>(row.lParam);
-    char* note = nullptr;
-    char* error = nullptr;
-    char* written = file_.empty() ? pe_attachment_open(core_, folder_, uid_, index, &note, &error)
-                                  : pe_file_attachment_open(core_, core::Narrow(file_).c_str(), index, &note, &error);
-    core::String path(written), noted(note), refused(error);
-    if (!path) {
-        if (refused) {
-            // a file that can run code: the core says why it is only saved
-            MessageBoxW(parent_, Text(refused.get()).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
-            return;
+    // a file that can run code: refused from its row, in the core's words
+    if (!attachment->can_open) {
+        MessageBoxW(parent_, Text(attachment->refusal).c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+        return;
+    }
+    // one at a time: a double-click while one is opened waits for it
+    if (openingItem_ >= 0) {
+        return;
+    }
+    if (opener_.joinable()) {
+        opener_.join();
+    }
+    openingItem_ = item;
+    SetTimer(strip_, TIMER_STRIP_BUSY, 400, nullptr);
+    // reading (and decrypting) the message and writing the file off the window thread; the result comes back to the
+    // strip, or is dropped with it when the window closed first
+    opener_ = std::thread([strip = strip_, core = core_, folder = folder_, uid = uid_, file = core::Narrow(file_), index, item] {
+        char* note = nullptr;
+        char* error = nullptr;
+        char* written = file.empty() ? pe_attachment_open(core, folder, uid, index, &note, &error)
+                                     : pe_file_attachment_open(core, file.c_str(), index, &note, &error);
+        core::String path(written), noted(note), refused(error);
+        auto* opened = new StripOpened{item, Text(path.get()), Text(noted.get()), Text(refused.get())};
+        if (!PostMessageW(strip, WM_STRIP_OPENED, 0, reinterpret_cast<LPARAM>(opened))) {
+            delete opened;
         }
-        // a large message shows its text before the rest of it is here
-        bool downloading = file_.empty() && pe_message_downloading(core_, folder_, uid_);
-        std::wstring why = core::T(downloading ? PE_TEXT_UI_ATTACHMENT_DOWNLOADING : PE_TEXT_UI_ATTACHMENT_NOT_READ);
-        MessageBoxW(parent_, why.c_str(), L"Inbox Classic", MB_OK | (downloading ? MB_ICONINFORMATION : MB_ICONERROR));
+    });
+}
+
+void Reader::OpenDone(StripOpened* opened) {
+    std::unique_ptr<StripOpened> done(opened);
+    KillTimer(strip_, TIMER_STRIP_BUSY);
+    ListView_SetItemState(strip_, openingItem_, 0, LVIS_CUT);
+    openingItem_ = -1;
+    if (done->path.empty()) {
+        if (!done->refused.empty()) {
+            MessageBoxW(parent_, done->refused.c_str(), L"Inbox Classic", MB_OK | MB_ICONWARNING);
+        } else {
+            SayNotHere();
+        }
         return;
     }
     // an encrypted message's file, the first time: it is stored decrypted while it is open
-    if (noted) {
-        MessageBoxW(parent_, Text(noted.get()).c_str(), core::T(PE_TEXT_UI_ATTACHMENT_NOTE_TITLE).c_str(), MB_OK | MB_ICONINFORMATION);
+    if (!done->note.empty()) {
+        MessageBoxW(parent_, done->note.c_str(), core::T(PE_TEXT_UI_ATTACHMENT_NOTE_TITLE).c_str(), MB_OK | MB_ICONINFORMATION);
     }
-    OpenWithSystem(parent_, Text(path.get()));
+    OpenWithSystem(parent_, done->path);
+}
+
+void Reader::StopOpening() {
+    if (opener_.joinable()) {
+        opener_.join();
+    }
+    // the result it posted, which the strip would never take
+    MSG posted;
+    while (PeekMessageW(&posted, strip_, WM_STRIP_OPENED, WM_STRIP_OPENED, PM_REMOVE)) {
+        delete reinterpret_cast<StripOpened*>(posted.lParam);
+    }
 }
 
 void Reader::StripMenu(POINT screen) {
@@ -844,11 +928,8 @@ void Reader::StripMenu(POINT screen) {
         ScreenToClient(strip_, &hit.pt);
         item = ListView_HitTest(strip_, &hit);
     }
-    LVITEMW row = {};
-    row.mask = LVIF_PARAM;
-    row.iItem = item;
-    const PeAttachment* attachment =
-        item >= 0 && ListView_GetItem(strip_, &row) ? pe_message_view_attachment(view_.get(), static_cast<size_t>(row.lParam)) : nullptr;
+    size_t index = 0;
+    const PeAttachment* attachment = StripAttachment(item, &index);
     if (!attachment) {
         return;
     }
@@ -869,7 +950,7 @@ void Reader::StripMenu(POINT screen) {
         OpenAttachment(item);
         break;
     case kSaveAs:
-        SaveAttachment(static_cast<size_t>(row.lParam));
+        SaveAttachment(index);
         break;
     case kSaveAll:
         SaveAllAttachments();
@@ -878,7 +959,8 @@ void Reader::StripMenu(POINT screen) {
 }
 
 // the strip's own keys: Enter opens the file chosen (not the window's default button), the menu key and Shift+F10
-// its menu, as a right-click does (the list view sends WM_CONTEXTMENU to itself after NM_RCLICK)
+// its menu, as a right-click does (the list view sends WM_CONTEXTMENU to itself after NM_RCLICK); the result of an
+// open, and the busy look of one that takes a while
 LRESULT CALLBACK Reader::StripProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR data) {
     auto* reader = reinterpret_cast<Reader*>(data);
     switch (message) {
@@ -913,6 +995,24 @@ LRESULT CALLBACK Reader::StripProc(HWND hwnd, UINT message, WPARAM wParam, LPARA
     case WM_CONTEXTMENU:
         reader->StripMenu({GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)});
         return 0;
+    case WM_STRIP_OPENED:
+        reader->OpenDone(reinterpret_cast<StripOpened*>(lParam));
+        return 0;
+    case WM_TIMER:
+        if (wParam == TIMER_STRIP_BUSY) {
+            // still opening: its icon dimmed and the busy pointer over the strip until it is done
+            KillTimer(hwnd, TIMER_STRIP_BUSY);
+            ListView_SetItemState(hwnd, reader->openingItem_, LVIS_CUT, LVIS_CUT);
+            SetCursor(LoadCursorW(nullptr, IDC_APPSTARTING));
+            return 0;
+        }
+        break;
+    case WM_SETCURSOR:
+        if (reader->openingItem_ >= 0 && (ListView_GetItemState(hwnd, reader->openingItem_, LVIS_CUT) & LVIS_CUT)) {
+            SetCursor(LoadCursorW(nullptr, IDC_APPSTARTING));
+            return TRUE;
+        }
+        break;
     case WM_NCDESTROY:
         RemoveWindowSubclass(hwnd, StripProc, 0);
         break;
@@ -1082,12 +1182,11 @@ void Reader::ShowDrawn(uint8_t* pixels, size_t length) {
 
 // the calendar part as a file of its own (the core writes it, and only it), for the calendar program
 void Reader::OpenInCalendar() {
-    wchar_t temp[MAX_PATH] = L"";
-    GetTempPathW(MAX_PATH, temp);
-    std::wstring dir = std::wstring(temp) + L"InboxClassic\\Invitations";
-    std::string target = core::Narrow(dir);
-    core::String path(file_.empty() ? pe_invitation_file(core_, folder_, uid_, target.c_str())
-                                    : pe_file_invitation_file(core_, core::Narrow(file_).c_str(), target.c_str()));
+    // a private folder of the user's, which the core cleans once a day old
+    core::String dir(pe_private_folder(core_, "invitations"));
+    core::String path(!dir                ? nullptr
+                      : file_.empty()     ? pe_invitation_file(core_, folder_, uid_, dir.get())
+                                          : pe_file_invitation_file(core_, core::Narrow(file_).c_str(), dir.get()));
     if (!path) {
         MessageBoxW(parent_, core::T(PE_TEXT_UI_INVITATION_NOT_READ).c_str(), L"Inbox Classic", MB_OK | MB_ICONERROR);
         return;
@@ -1148,18 +1247,11 @@ bool Reader::OnNotify(NMHDR* header, LRESULT& result) {
         return true;
     }
     if (header->code == LVN_GETINFOTIPW) {
-        // the whole name and size, and for a file that can run code why it does not open
+        // the core's: the whole name and size, and for a file that can run code why it does not open
         auto* tip = reinterpret_cast<NMLVGETINFOTIPW*>(header);
-        LVITEMW row = {};
-        row.mask = LVIF_PARAM;
-        row.iItem = tip->iItem;
-        const PeAttachment* attachment =
-            ListView_GetItem(strip_, &row) ? pe_message_view_attachment(view_.get(), static_cast<size_t>(row.lParam)) : nullptr;
+        const PeAttachment* attachment = StripAttachment(tip->iItem);
         if (attachment && tip->pszText && tip->cchTextMax > 0) {
-            std::wstring text = Text(attachment->filename) + L" (" + Text(attachment->size_text) + L")";
-            if (!attachment->can_open) {
-                text += L"\r\n" + core::T(PE_TEXT_UI_ATTACHMENT_PROGRAM_TIP);
-            }
+            std::wstring text = WithCrlf(Text(attachment->tooltip));
             wcsncpy_s(tip->pszText, static_cast<size_t>(tip->cchTextMax), text.c_str(), _TRUNCATE);
         }
         return true;

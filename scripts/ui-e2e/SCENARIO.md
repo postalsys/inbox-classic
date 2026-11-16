@@ -84,9 +84,12 @@ A message with a PDF and a program (`setup.exe`) attached, and an encrypted mess
 
 - the strip under the header shows each file with its icon, name and size
 - double-clicking the PDF opens it: the file handed to the system is in the private folder, byte for byte what was sent
+- opened again, the same file is handed over (no second copy)
 - Tab reaches the strip, the arrow keys move between the files and Enter opens the one chosen
 - a right-click offers Open, Save As... and Save All...
 - the program's Open is greyed, and trying to open it says it can run programs and is only saved
+- pages are files that can not be opened either: `statement.xht` by its extension, and `statement` (no extension) by
+  what it holds, an HTML page; Open is greyed and the refusal names the file
 - the encrypted message's file opens, and the first time a note says it is stored decrypted; the second time no note
 - in a message's own window the strip is there and opens the same way
 

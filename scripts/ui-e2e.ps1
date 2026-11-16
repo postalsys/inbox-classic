@@ -2437,6 +2437,8 @@ public static class Dragger {
     # a PDF, a program, and files of other kinds, one with a long name
     $exe64 = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("MZ not really a program, from scripts/ui-e2e.ps1`n"))
     $note64 = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("Bring boots.`n"))
+    # and pages, which a browser would run the scripts of: one by its extension, one by what it holds
+    $page64 = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("<!DOCTYPE html><html><script>alert(1)</script></html>`n"))
     $filesSubject = 'Files for the walking weekend'
     $part = { param($name, $type, $data) "--f`r`nContent-Type: $type; name=`"$name`"`r`nContent-Disposition: attachment; filename=`"$name`"`r`nContent-Transfer-Encoding: base64`r`n`r`n$data`r`n" }
     $filesMessage = "From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $filesSubject`r`n" +
@@ -2446,17 +2448,18 @@ public static class Dragger {
         (& $part 'route.pdf' 'application/pdf' $pdf64) + (& $part 'setup.exe' 'application/octet-stream' $exe64) +
         (& $part 'Itinerary for the autumn walking weekend in the Lake District, final version.docx' 'application/octet-stream' $note64) +
         (& $part 'budget.xlsx' 'application/octet-stream' $note64) + (& $part 'lake.jpg' 'image/jpeg' $note64) +
-        (& $part 'packing list.txt' 'text/plain' $note64) + "--f--`r`n"
+        (& $part 'packing list.txt' 'text/plain' $note64) + (& $part 'statement.xht' 'application/octet-stream' $note64) +
+        (& $part 'statement' 'application/octet-stream' $page64) + "--f--`r`n"
     AddMessage $filesMessage @('\Seen')
     Command $main $IDM_SYNC
     SelectFolder 0
     $row = WaitFor { $r = @(SubjectRows $filesSubject); if ($r.Count -gt 0) { "$($r[0])" } } 30
     if ($null -ne $row) { SelectRow ([int]$row) }
-    $shown = WaitFor { if ([Native.Win]::IsWindowVisible($strip) -and (ListCount $strip) -eq 6) { $true } } 20
+    $shown = WaitFor { if ([Native.Win]::IsWindowVisible($strip) -and (ListCount $strip) -eq 8) { $true } } 20
     $texts = & $stripTexts $strip
     Check ([bool]$shown) "the strip under the header shows each file ($($texts -join ' | '))"
     Check (($texts[0] -match '^route\.pdf \(.*\d.*\)$') -and ($texts[1] -like 'setup.exe (*)')) "each with its name and size ($($texts[0]))"
-    Check ($texts[2].Contains([string][char]0x2026) -and ($texts[2] -like 'Itinerary*docx (*)')) "a long name is shortened in the middle, its start and extension kept ($($texts[2]))"
+    Check ($texts[2].Contains('...') -and ($texts[2] -like 'Itinerary*docx (*)')) "a long name is shortened, its start and extension kept ($($texts[2]))"
     Check ([bool]([Native.Win]::GetWindowLong($strip, -16) -band 0x00010000)) 'the strip is a Tab stop'
     Start-Sleep -Milliseconds 800
     Shot $main 'attach-1-strip'
@@ -2472,6 +2475,11 @@ public static class Dragger {
         # (read once nothing else has it open: an antivirus may look at a new file first)
         $content = WaitFor { try { [IO.File]::ReadAllText($opened) } catch { $null } } 10
         Check ($content -eq [Text.Encoding]::ASCII.GetString([Convert]::FromBase64String($pdf64))) "byte for byte what was sent ($($content.Length) bytes)"
+        # opened again: the same file, no second copy
+        $before = (OpenedFiles).Count
+        DoubleClickFirst $strip
+        $again = NewlyOpened $before
+        Check ($again -eq $opened) "opened again, the same file ($again)"
     }
 
     # the keys: the arrows move between the files, Enter opens the one chosen
@@ -2512,6 +2520,29 @@ public static class Dragger {
     }
     Start-Sleep -Milliseconds 500
     Check ((OpenedFiles).Count -eq $before) 'and nothing is opened'
+    # pages: Open greyed for one known by its extension and for one known by what it holds, and refused naming it
+    foreach ($page in @(@{ Key = 0x23; Name = 'statement' }, @{ Key = $VK_UP; Name = 'statement.xht' })) {
+        Key $strip $page.Key
+        [void][Native.Win]::PostMessage($strip, 0x007B, $strip, [IntPtr](-1))
+        $menu = WaitWindow '#32768' $null 10
+        if ($menu) {
+            $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+            Check (([Native.Win]::GetMenuState($hmenu, 0, 0x400) -band 0x3) -ne 0) "a page's Open is greyed ($($page.Name))"
+            Key $menu $VK_ESCAPE
+            [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 3)
+        } else {
+            Check $false "the menu of $($page.Name) opens"
+        }
+        Key $strip $VK_RETURN
+        $box = WaitWindow '#32770' 'Inbox Classic' 10
+        $said = if ($box) { Statics $box } else { '' }
+        Check ($said -match [regex]::Escape("$($page.Name)") -and $said -match 'program') "opening $($page.Name) is refused, naming it ($said)"
+        if ($box) {
+            Click $box 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($box) } 5)
+        }
+    }
+    Check ((OpenedFiles).Count -eq $before) 'and no page is opened'
 
     # in a message window of its own, the strip is there and opens the same way (Enter in the list, which has the
     # keyboard again)
@@ -2521,7 +2552,7 @@ public static class Dragger {
     $filesWindow = WaitShown 'InboxClassicMessage' 10
     if ($filesWindow) {
         $windowStrip = StripOf $filesWindow
-        Check ([bool](WaitFor { [Native.Win]::IsWindowVisible($windowStrip) -and (ListCount $windowStrip) -eq 6 } 10)) 'the message window has the strip'
+        Check ([bool](WaitFor { [Native.Win]::IsWindowVisible($windowStrip) -and (ListCount $windowStrip) -eq 8 } 10)) 'the message window has the strip'
         $before = (OpenedFiles).Count
         DoubleClickFirst $windowStrip
         $opened = NewlyOpened $before
