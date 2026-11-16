@@ -113,3 +113,29 @@ win-restart-ask = Nach einem Neustart wird Inbox Classic auf { $language } angez
 win-folders-hide = Ordnerliste ausblenden
 win-folders-pin = Ordnerliste neben den Nachrichten anheften
 win-folders-show = Ordner anzeigen
+
+## The installer
+
+# review: new
+win-installer-start = Inbox Classic starten
+# review: new
+win-installer-welcome-new =
+    Hiermit wird Inbox Classic { $version } installiert, ein E-Mail-Programm.
+
+    Administratorrechte sind nicht nötig, es wird nur für Ihr Konto installiert.
+# review: new
+win-installer-welcome-same =
+    Inbox Classic { $version } ist bereits installiert. Hiermit wird es erneut installiert.
+
+    Ihre Konten und E-Mails bleiben erhalten.
+# review: new
+win-installer-welcome-update =
+    Hiermit wird Inbox Classic { $installed } auf { $version } aktualisiert.
+
+    Läuft es, wird es zuerst geschlossen. Ihre Konten und E-Mails bleiben erhalten.
+# review: new
+win-installer-older-ask = Inbox Classic { $installed } ist installiert und neuer als { $version }. Die ältere Version trotzdem installieren?
+# review: new
+win-installer-still-running = Inbox Classic läuft noch. Schließen Sie es und versuchen Sie es erneut.
+# review: new
+win-installer-remove-mail-ask = Auch die Konten und E-Mails entfernen, die Inbox Classic auf diesem Computer speichert? Die E-Mails auf den Servern bleiben.

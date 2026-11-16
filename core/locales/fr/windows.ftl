@@ -113,3 +113,29 @@ win-restart-ask = Inbox Classic s'affichera dans la langue choisie ({ $language 
 win-folders-hide = Masquer la liste des dossiers
 win-folders-pin = Épingler la liste des dossiers à côté des messages
 win-folders-show = Afficher les dossiers
+
+## The installer
+
+# review: new
+win-installer-start = Démarrer Inbox Classic
+# review: new
+win-installer-welcome-new =
+    Ceci va installer Inbox Classic { $version }, un programme de messagerie.
+
+    Aucun droit d'administrateur n'est nécessaire, il est installé pour votre compte uniquement.
+# review: new
+win-installer-welcome-same =
+    Inbox Classic { $version } est déjà installé. Ceci va le réinstaller.
+
+    Vos comptes et votre courrier sont conservés.
+# review: new
+win-installer-welcome-update =
+    Ceci va mettre à jour Inbox Classic { $installed } vers { $version }.
+
+    S'il est ouvert, il est d'abord fermé. Vos comptes et votre courrier sont conservés.
+# review: new
+win-installer-older-ask = Inbox Classic { $installed } est installé et plus récent que { $version }. Installer quand même l'ancienne version ?
+# review: new
+win-installer-still-running = Inbox Classic est toujours ouvert. Fermez-le et réessayez.
+# review: new
+win-installer-remove-mail-ask = Supprimer aussi les comptes et le courrier qu'Inbox Classic garde sur cet ordinateur ? Le courrier sur les serveurs reste.

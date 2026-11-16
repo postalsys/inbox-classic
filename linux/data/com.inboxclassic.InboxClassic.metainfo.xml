@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- What the App Center and other software stores show of Inbox Classic -->
+<!-- Generated from pe_i18n::LANGUAGES and core/locales by core/crates/pe-ffi/build.rs, do not edit -->
 <component type="desktop-application">
   <id>com.inboxclassic.InboxClassic</id>
   <name>Inbox Classic</name>
@@ -15,9 +16,9 @@
   </developer>
   <description>
     <p>
-      Inbox Classic reads and writes e-mail with the folders on the left, the messages at the top and the message
-      below, as mail programs used to. It works with any IMAP and SMTP account, and signs in to Outlook.com and
-      Microsoft 365 through the browser.
+      Inbox Classic reads and writes e-mail with the folders on the left, the messages at the top and the message below,
+      as mail programs used to. It works with any IMAP and SMTP account, and signs in to Outlook.com and Microsoft 365
+      through the browser.
     </p>
     <p xml:lang="de">
       Inbox Classic liest und schreibt E-Mails mit den Ordnern links, den Nachrichten oben und der Nachricht darunter,
@@ -30,14 +31,14 @@
       ja Microsoft 365-sse.
     </p>
     <p xml:lang="es">
-      Inbox Classic lee y escribe correo con las carpetas a la izquierda, los mensajes arriba y el mensaje debajo,
-      como lo hacían los programas de correo. Funciona con cualquier cuenta IMAP y SMTP, e inicia sesión en
-      Outlook.com y Microsoft 365 mediante el navegador.
+      Inbox Classic lee y escribe correo con las carpetas a la izquierda, los mensajes arriba y el mensaje debajo, como
+      lo hacían los programas de correo. Funciona con cualquier cuenta IMAP y SMTP, e inicia sesión en Outlook.com y
+      Microsoft 365 mediante el navegador.
     </p>
     <p xml:lang="fr">
-      Inbox Classic lit et écrit les e-mails avec les dossiers à gauche, les messages en haut et le message en
-      dessous, comme le faisaient les programmes de messagerie. Il fonctionne avec tout compte IMAP et SMTP, et se
-      connecte à Outlook.com et Microsoft 365 par le navigateur.
+      Inbox Classic lit et écrit les e-mails avec les dossiers à gauche, les messages en haut et le message en dessous,
+      comme le faisaient les programmes de messagerie. Il fonctionne avec tout compte IMAP et SMTP, et se connecte à
+      Outlook.com et Microsoft 365 par le navigateur.
     </p>
     <ul>
       <li>Every message is shown sanitized, without scripts, and pictures from the internet only when you allow them</li>

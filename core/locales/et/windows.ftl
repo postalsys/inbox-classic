@@ -112,3 +112,29 @@ win-restart-ask = Valitud keel ({ $language }) rakendub pärast Inbox Classicu t
 win-folders-hide = Peida kaustade loend
 win-folders-pin = Kinnita kaustade loend kirjade kõrvale
 win-folders-show = Näita kaustu
+
+## The installer
+
+# review: new
+win-installer-start = Käivita Inbox Classic
+# review: new
+win-installer-welcome-new =
+    See installib meiliprogrammi Inbox Classic { $version }.
+
+    Administraatori õigusi pole vaja, see installitakse ainult teie kontole.
+# review: new
+win-installer-welcome-same =
+    Inbox Classic { $version } on juba installitud. See installib selle uuesti.
+
+    Teie kontod ja kirjad jäävad alles.
+# review: new
+win-installer-welcome-update =
+    See uuendab programmi Inbox Classic versioonist { $installed } versioonile { $version }.
+
+    Kui see töötab, suletakse see enne. Teie kontod ja kirjad jäävad alles.
+# review: new
+win-installer-older-ask = Installitud on Inbox Classic { $installed }, mis on uuem kui { $version }. Kas installida vanem versioon siiski?
+# review: new
+win-installer-still-running = Inbox Classic töötab endiselt. Sulgege see ja proovige uuesti.
+# review: new
+win-installer-remove-mail-ask = Kas eemaldada ka kontod ja kirjad, mida Inbox Classic selles arvutis hoiab? Serverites olevad kirjad jäävad alles.

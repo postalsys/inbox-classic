@@ -169,3 +169,18 @@ gtk-new-mail-group = New mail
 gtk-notify-new-mail = Notify of new mail
 gtk-notify-subtitle = A notification when new messages arrive while the window is in the background
 gtk-restart-to-change = Inbox Classic restarts to change the language.
+
+## The desktop entry and the page of the software stores
+
+# linux/data/com.inboxclassic.InboxClassic.desktop and .metainfo.xml, made by the build. The keywords are the words a
+# search of the applications finds Inbox Classic by, each ended by a semicolon, in your language only: the English
+# ones are added before them
+gtk-desktop-generic-name = Mail Client
+gtk-desktop-comment = Read and write e-mail: a fast, simple mail program
+gtk-desktop-keywords = mail;email;e-mail;imap;smtp;inbox;
+gtk-metainfo-summary = A fast, simple mail program
+gtk-metainfo-description = Inbox Classic reads and writes e-mail with the folders on the left, the messages at the top and the message below, as mail programs used to. It works with any IMAP and SMTP account, and signs in to Outlook.com and Microsoft 365 through the browser.
+gtk-metainfo-feature-sanitized = Every message is shown sanitized, without scripts, and pictures from the internet only when you allow them
+gtk-metainfo-feature-search = A search that finds words in the subject, the people, the file names and the text, with Gmail's operators
+gtk-metainfo-feature-replies = Replies fold away the earlier messages they quote
+gtk-metainfo-feature-offline = Mail stays readable offline; passwords are kept in your keyring

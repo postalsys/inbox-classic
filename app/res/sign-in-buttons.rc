@@ -1,0 +1,13 @@
+// Generated from pe_i18n::LANGUAGES and core/locales by core/crates/pe-ffi/build.rs, do not edit
+// the sign-in buttons of Add Mail Account, Google's and Microsoft's own, and with the words of each language
+// (scripts/build-sign-in-buttons.sh), named after their files (PictureResource in accounts.cpp)
+GOOGLE_SIGN_IN RCDATA "brands/google-sign-in.png"
+GOOGLE_SIGN_IN_DE RCDATA "brands/google-sign-in.de.png"
+GOOGLE_SIGN_IN_ET RCDATA "brands/google-sign-in.et.png"
+GOOGLE_SIGN_IN_ES RCDATA "brands/google-sign-in.es.png"
+GOOGLE_SIGN_IN_FR RCDATA "brands/google-sign-in.fr.png"
+MICROSOFT_SIGN_IN RCDATA "brands/microsoft-sign-in.png"
+MICROSOFT_SIGN_IN_DE RCDATA "brands/microsoft-sign-in.de.png"
+MICROSOFT_SIGN_IN_ET RCDATA "brands/microsoft-sign-in.et.png"
+MICROSOFT_SIGN_IN_ES RCDATA "brands/microsoft-sign-in.es.png"
+MICROSOFT_SIGN_IN_FR RCDATA "brands/microsoft-sign-in.fr.png"

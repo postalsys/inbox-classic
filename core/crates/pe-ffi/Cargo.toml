@@ -45,3 +45,5 @@ cbindgen = "0.29"
 # core/commands.toml
 serde = { version = "1", features = ["derive"] }
 toml = "0.9"
+# the languages and their catalogs, for the files made per language (build_languages.rs)
+pe-i18n.workspace = true
