@@ -1,0 +1,14 @@
+<!--review--><h1>De verbindingen die Inbox Classic maakt</h1>
+<p class="summary">Waarmee Inbox Classic verbinding maakt, en waarom, voor wie technisch nieuwsgierig is.</p>
+<ul>
+    <li><b>Je mailservers</b>, via IMAP om mail te lezen en via SMTP om mail te verzenden. Verbindingen zijn versleuteld met TLS, en het certificaat van elke server wordt gecontroleerd met de certificaten die je systeem vertrouwt. Inbox Classic weigert een server zonder versleuteling, tenzij je <b data-text="ui-security-none"></b> kiest en dat bevestigt.</li>
+    <li><b>Als je een account toevoegt</b>, om de servers op te zoeken. Inbox Classic leest de DNS-records van je domein via DNS over HTTPS (Cloudflare, daarna Google), nooit via gewone DNS. Het probeert ook het autoconfig-bestand van je provider en de providerlijst van Thunderbird (ISPDB). Voor Exchange vraagt het Microsoft Autodiscover, dat je wachtwoord alleen krijgt als het daar via HTTPS om vraagt. Een server zonder versleuteling wordt nooit gekozen.</li>
+    <li><b>Aanmelden via de browser</b>, met OAuth 2.0 en PKCE, bij Google, Microsoft of de provider van je aanmeldapp. De browser keert alleen terug naar Inbox Classic op deze computer.</li>
+    <li><b>Merklogo’s</b> (BIMI), van het HTTPS-adres van het merk als het bericht het logo niet meebrengt, één keer per keer dat Inbox Classic draait. Dat gebeurt alleen als je mailserver het bericht door de DMARC-controle heeft laten komen en het logo heeft goedgekeurd.</li>
+    <li><b>Afbeeldingen van internet</b>, alleen als je erom vraagt.</li>
+    <li><b>Afmelden</b>, alleen als je erop klikt. Een verzoek met één klik (RFC 8058) wordt alleen verzonden als de lijst het bericht met DKIM heeft ondertekend.</li>
+    <!--os:mac--><li><b>Updates</b>, van inboxclassic.com, om te zien of er een nieuwe versie is.</li><!--/os-->
+</ul>
+<p>Aanmeldcodes worden alleen aangeboden als de Authentication-Results-header van je provider zegt dat het domein het bericht heeft ondertekend (DKIM). Daar is geen eigen verbinding voor nodig.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
+<!--/review-->

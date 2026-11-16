@@ -5769,10 +5769,16 @@ public static class Dragger {
             [void][Native.Win]::SendMessage($combo, $CB_GETLBTEXT, [IntPtr]$i, $item)
             $item.ToString()
         })
-        Check ($items.Count -eq 6 -and $items[0] -like 'System default (*)') "Language starts with System default and the language it is now ($($items[0]))"
-        # the names in themselves; the script stays ASCII for Windows PowerShell, which reads it as ANSI
-        $names = "English,Deutsch,Eesti,Espa$([char]0xF1)ol,Fran$([char]0xE7)ais"
-        Check ((($items | Select-Object -Skip 1) -join ',') -eq $names) "and lists the five languages by their own names ($($items -join ', '))"
+        # the names in themselves, from pe_i18n::LANGUAGES (one language a line of its source, read as UTF-8: the
+        # script stays ASCII for Windows PowerShell, which reads it as ANSI)
+        $inList = $false
+        $names = @(foreach ($line in Get-Content -Encoding UTF8 (Join-Path $PSScriptRoot '..\core\crates\pe-i18n\src\lib.rs')) {
+            if ($line -like 'pub const LANGUAGES*') { $inList = $true; continue }
+            if ($line -eq '];') { $inList = $false }
+            if ($inList -and $line -match '^    \("[a-z]+", "(.+)"\),$') { $Matches[1] }
+        })
+        Check ($items.Count -eq $names.Count + 1 -and $items[0] -like 'System default (*)') "Language starts with System default and the language it is now ($($items[0]))"
+        Check ((($items | Select-Object -Skip 1) -join ',') -eq ($names -join ',')) "and lists every language by its own name ($($items -join ', '))"
         Check ([Native.Win]::GetDlgItem($options, $IDC_OPTIONS_NOTIFY) -ne [IntPtr]::Zero) 'Notify of New Mail is there too'
         $deutsch = [array]::IndexOf($items, 'Deutsch')
         [void][Native.Win]::SendMessage($combo, $CB_SETCURSEL, [IntPtr]$deutsch, [IntPtr]::Zero)

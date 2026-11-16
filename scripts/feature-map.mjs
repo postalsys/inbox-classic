@@ -1570,10 +1570,10 @@ const sections = [
             {
                 shot: 'options-1-language',
                 name: 'Options and the language',
-                what: "Tools > Options (Settings on the Mac, Preferences on Linux) chooses the language of the windows: System default, or English, Deutsch, Eesti, Español or Français, each named in itself. The app starts again in it. Notify of New Mail is there too. On Windows the installer asks for the language on a first install; on the Mac the system's own per-app language setting chooses it too.",
+                what: "Tools > Options (Settings on the Mac, Preferences on Linux) chooses the language of the windows: System default, or any language there are catalogs of (English, Deutsch, Eesti, Español, Français...), each named in itself. The app starts again in it. Notify of New Mail is there too. On Windows the installer asks for the language on a first install; on the Mac the system's own per-app language setting chooses it too.",
                 how: 'Tools > Options, Language.',
                 checked: [
-                    'Language lists System default and the five languages by their own names',
+                    'Language lists System default and every language by its own name',
                     'A language chosen says the app starts again to change it, with Restart Now and Later'
                 ]
             },

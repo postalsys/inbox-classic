@@ -1,0 +1,14 @@
+<!--review--><h1>Savienojumi, ko veido Inbox Classic</h1>
+<p class="summary">Kur Inbox Classic veido savienojumus un kāpēc, tehniski zinātkārajiem.</p>
+<ul>
+    <li><b>Jūsu pasta serveri</b>, ar IMAP pasta lasīšanai un SMTP sūtīšanai. Savienojumi ir šifrēti ar TLS, un katra servera sertifikāts tiek pārbaudīts pret tiem, kuriem uzticas jūsu sistēma. Inbox Classic atsaka serverim bez šifrēšanas, ja vien jūs neizvēlaties <b data-text="ui-security-none"></b> un to neapstiprināt.</li>
+    <li><b>Konta pievienošana</b>, lai atrastu tā serverus. Inbox Classic nolasa jūsu domēna DNS ierakstus, izmantojot DNS over HTTPS (Cloudflare, pēc tam Google), nekad parasto DNS. Tā izmēģina arī jūsu pakalpojumu sniedzēja autoconfig failu un Thunderbird pakalpojumu sniedzēju sarakstu (ISPDB). Exchange gadījumā tā vaicā Microsoft Autodiscover, kas jūsu paroli saņem tikai tad, ja to pieprasa, izmantojot HTTPS. Serveris bez šifrēšanas nekad netiek izvēlēts.</li>
+    <li><b>Pierakstīšanās pārlūkā</b>, ar OAuth 2.0 un PKCE, pie Google, Microsoft vai jūsu pierakstīšanās lietotnes pakalpojumu sniedzēja. Pārlūks atgriežas pie Inbox Classic tikai šajā datorā.</li>
+    <li><b>Zīmolu logotipi</b> (BIMI), no zīmola HTTPS adreses, ja ziņojumā logotipa nav, vienu reizi katrā Inbox Classic darbības reizē. Tas notiek tikai tad, ja jūsu pasta serveris ziņojumam ir izpildījis DMARC pārbaudi un akceptējis logotipu.</li>
+    <li><b>Attēli no interneta</b>, tikai tad, ja jūs tos pieprasāt.</li>
+    <li><b>Atteikšanās no abonēšanas</b>, tikai tad, ja jūs uz tās noklikšķināt. Viena klikšķa pieprasījums (RFC 8058) tiek nosūtīts tikai tad, ja saraksts ziņojumu ir parakstījis ar DKIM.</li>
+    <!--os:mac--><li><b>Atjauninājumi</b>, no inboxclassic.com, lai redzētu, vai ir iznākusi jauna versija.</li><!--/os-->
+</ul>
+<p>Pierakstīšanās kodi tiek piedāvāti tikai tad, ja jūsu pakalpojumu sniedzēja galvene Authentication-Results norāda, ka domēns ir parakstījis ziņojumu (DKIM). Tam nav vajadzīgs atsevišķs savienojums.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
+<!--/review-->

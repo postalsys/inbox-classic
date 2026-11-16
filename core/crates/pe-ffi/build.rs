@@ -6,9 +6,14 @@
 //   linux/src/generated/commands.rs         and for Linux
 //   core/include/texts.h                    the ids of the words of core/locales/en/*.ftl for C (PeText)
 //   mac/Sources/InboxClassic/Generated/Texts.swift      the same for the Mac
+//   and what is made per language from pe_i18n::LANGUAGES (build_languages.rs): the installer's languages, the
+//   sign-in buttons' Windows resources, the Linux desktop entry and metainfo
 // A command's label is the catalog's `cmd-<id>` (core/locales/en/app.ftl), which every command must have.
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
+
+#[path = "build_languages.rs"]
+mod languages;
 
 #[derive(serde::Deserialize)]
 struct Table {
@@ -83,11 +88,13 @@ fn main() {
         &swift(&table),
     );
     write(&root.join("linux/src/generated/commands.rs"), &rust(&table));
+    languages::write_all(&root, write);
 
     println!("cargo:rerun-if-changed=src");
     println!("cargo:rerun-if-changed=cbindgen.toml");
     println!("cargo:rerun-if-changed=../../commands.toml");
-    println!("cargo:rerun-if-changed=../../locales/en");
+    println!("cargo:rerun-if-changed=../../locales");
+    println!("cargo:rerun-if-changed=build_languages.rs");
 }
 
 /// The ids of the English catalog, in the order pe-i18n numbers them: its files sorted by name, each message as it

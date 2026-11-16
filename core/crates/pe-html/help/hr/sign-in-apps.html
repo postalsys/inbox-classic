@@ -1,0 +1,17 @@
+<!--review--><h1>Aplikacije za prijavu</h1>
+<p class="summary">Registrirajte vlastitu aplikaciju za prijavu kod Googlea, Microsofta ili bilo kojeg davatelja OpenID Connect da biste se prijavljivali putem preglednika.</p>
+<p>Prijava putem preglednika koristi OAuth klijent registriran kod davatelja usluge. Inbox Classic ima vlastite klijente za Google i Microsoft. Google dopušta korištenje klijenta programa Inbox Classic samo testnim korisnicima dok ne potvrdi aplikaciju, pa je <b data-text="win-sign-in-google"></b> isprva isključeno. Možete registrirati vlastiti klijent: u svojem projektu Google Cloud, u svojem zakupcu Microsoft Entra ili kod bilo kojeg davatelja OpenID Connect.</p>
+<p>Da biste dodali aplikaciju za prijavu:</p>
+<ol>
+    <li>Odaberite <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Kliknite <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->, a zatim <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>Pokraj <b data-text="ui-fill-in-for"></b> kliknite Google ili Microsoft da biste ispunili izdavatelja, dozvole i poslužitelje. Za drugog davatelja upišite ih sami.</li>
+    <li>Registrirajte klijent kod davatelja usluge kako objašnjava okvir pri dnu. Registrirajte ondje prikazan <b data-text="ui-redirect-uri"></b>.</li>
+    <li>Upišite <b data-text="ui-client-id"></b> i <b data-text="ui-client-secret"></b> ako vam ju je davatelj dao. Tajna se čuva <!--os:windows-->u Upravitelju vjerodajnicama sustava Windows<!--/os--><!--os:mac-->u vašem privjesku ključeva za prijavu<!--/os--><!--os:linux-->u vašem privjesku ključeva<!--/os--> i više se nikad ne prikazuje.</li>
+    <li>Kliknite <b data-text="ui-check"></b> da biste provjerili je li izdavatelj ispravan, a zatim <b data-text="ui-ok"></b>.</li>
+    <li>Dodajte račun pomoću <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> na prvoj stranici prozora <b data-text="ui-add-account-title"></b>.</li>
+</ol>
+<p>U prozoru <b data-text="ui-sign-in-apps"></b> <!--os:windows,mac-->potvrdni okvir svake aplikacije<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> pokazuje nudi li se ona za nove račune, uključujući ugrađene. Računi koji već koriste aplikaciju i dalje rade. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> mijenja aplikaciju, a <b data-text="ui-remove"></b> je uklanja kad je nijedan račun više ne koristi.</p>
+<p>Ako poslužitelj e-pošte odbije token aplikacije, provjerite daju li njezine dozvole pristup pošti.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
+<!--/review-->

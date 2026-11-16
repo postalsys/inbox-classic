@@ -1,0 +1,17 @@
+<!--review--><h1>Błędy certyfikatów</h1>
+<p class="summary">Co zrobić, gdy Inbox Classic nie może potwierdzić, że łączy się z prawdziwym serwerem poczty.</p>
+<p>Może pojawić się jeden z tych komunikatów:</p>
+<ul>
+    <li>Na pasku stanu: „TLS error: …”</li>
+    <li>W okienku odczytu: „Nie udało się zabezpieczyć połączenia z serwerem poczty (…).”</li>
+</ul>
+<p>Inbox Classic nie mógł potwierdzić, że serwer jest tym, za kogo się podaje, więc nie wysłał Twojego hasła.</p>
+<p>Aby to naprawić:</p>
+<ol>
+    <li>Otwórz właściwości konta w <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Sprawdź nazwy serwerów. Muszą to być nazwy, dla których wystawiono certyfikat serwera. Często jest to nazwa dostawcy, na przykład <code>imap.provider.com</code>, a nie Twoja własna domena.</li>
+    <li>Sprawdź, czy data i godzina na komputerze są prawidłowe.</li>
+</ol>
+<p>W sieci, która sprawdza szyfrowany ruch, na przykład w niektórych sieciach biurowych lub szkolnych, zapytaj jej administratora.</p>
+<aside class="note">Nie ma przełącznika, który akceptuje dowolny certyfikat. Zaakceptowanie fałszywego pozwoliłoby komuś w sieci odczytać Twoje hasło i pocztę.</aside>
+<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav><!--/review-->

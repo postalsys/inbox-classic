@@ -1,0 +1,14 @@
+<!--review--><h1>Anslutningarna Inbox Classic gör</h1>
+<p class="summary">Vart Inbox Classic ansluter, och varför, för den tekniskt nyfikne.</p>
+<ul>
+    <li><b>Dina e-postservrar</b>, via IMAP för att läsa e-post och SMTP för att skicka den. Anslutningarna krypteras med TLS, och varje servers certifikat kontrolleras mot dem som ditt system litar på. Inbox Classic vägrar en server utan kryptering, om du inte väljer <b data-text="ui-security-none"></b> och bekräftar.</li>
+    <li><b>När du lägger till ett konto</b>, för att hitta dess servrar. Inbox Classic läser domänens DNS-poster via DNS över HTTPS (Cloudflare, sedan Google), aldrig vanlig DNS. Det provar också leverantörens autoconfig-fil och Thunderbirds lista över leverantörer (ISPDB). För Exchange frågar det Microsoft Autodiscover, som bara får ditt lösenord när det ber om det via HTTPS. En server utan kryptering väljs aldrig.</li>
+    <li><b>Inloggning i webbläsaren</b>, med OAuth 2.0 och PKCE, hos Google, Microsoft eller leverantören av din inloggningsapp. Webbläsaren återvänder bara till Inbox Classic på den här datorn.</li>
+    <li><b>Varumärkeslogotyper</b> (BIMI), från varumärkets HTTPS-adress när meddelandet inte har med logotypen, en gång varje gång Inbox Classic körs. Det sker bara när din e-postserver har godkänt meddelandets DMARC-kontroll och logotypen.</li>
+    <li><b>Bilder från internet</b>, bara när du ber om dem.</li>
+    <li><b>Avsluta prenumeration</b>, bara när du klickar på det. En begäran med ett klick (RFC 8058) skickas bara när listan har signerat meddelandet med DKIM.</li>
+    <!--os:mac--><li><b>Uppdateringar</b>, från inboxclassic.com, för att se om en ny version finns.</li><!--/os-->
+</ul>
+<p>Inloggningskoder erbjuds bara när leverantörens huvud Authentication-Results säger att domänen har signerat meddelandet (DKIM). Det kräver ingen egen anslutning.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
+<!--/review-->

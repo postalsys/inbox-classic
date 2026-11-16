@@ -15,6 +15,11 @@ for platform in windows mac linux; do
 done
 rm -rf "$HOMEPAGE/help"
 mkdir -p "$HOMEPAGE/help"
+# the languages there is help in, as the export wrote them (pe_i18n::LANGUAGES), for the page that picks one
+languages=""
+for code in $(scripts/languages.sh --codes); do
+    if [ -d "$out/windows/$code" ]; then languages="${languages:+$languages, }'$code'"; fi
+done
 # the export writes <platform>/<language>/; the site has <language>/<platform>/
 for platform in windows mac linux; do
     for language_dir in "$out/$platform"/*/; do
@@ -26,7 +31,7 @@ done
 rm -rf "$out"
 
 # the visitor's language (of the ones there is help in) and platform, as the homepage picks the download
-cat >"$HOMEPAGE/help/index.html" <<'EOF'
+cat >"$HOMEPAGE/help/index.html" <<EOF
 <!doctype html>
 <html lang="en">
 <head>
@@ -36,7 +41,7 @@ cat >"$HOMEPAGE/help/index.html" <<'EOF'
 <link rel="canonical" href="https://inboxclassic.com/help/en/windows/index.html">
 <script>
 (function () {
-    var languages = ['en', 'de', 'es', 'et', 'fr'];
+    var languages = [${languages}];
     var language = 'en';
     var wanted = navigator.languages || [navigator.language || 'en'];
     for (var i = 0; i < wanted.length; i++) {

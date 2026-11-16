@@ -10,7 +10,7 @@ cd "$(dirname "$0")/.."
 BASE=${1:?the base ref, e.g. origin/master}
 LABELS=${2:-}
 changed=$(git diff --name-only "$BASE"...HEAD)
-shared=$(printf '%s\n' "$changed" | grep -E '^(core/include/|core/commands\.toml$|scripts/feature-map\.mjs$)' || true)
+shared=$(grep -E '^(core/include/|core/commands\.toml$|scripts/feature-map\.mjs$)' <<< "$changed" || true)
 if [ -z "$shared" ]; then
     echo "Nothing all three apps share changed"
     exit 0
@@ -19,7 +19,9 @@ echo "Changed for every app:"
 printf '  %s\n' $shared
 missing=()
 for shell in app mac linux; do
-    printf '%s\n' "$changed" | grep -q "^${shell}/" || missing+=("$shell/")
+    # a here-string, not a pipe: grep -q stops at the first match, and a long list written into a closed pipe fails
+    # the pipeline under pipefail
+    grep -q "^${shell}/" <<< "$changed" || missing+=("$shell/")
 done
 if [ ${#missing[@]} -eq 0 ]; then
     echo "app/, mac/ and linux/ changed with it"

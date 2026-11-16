@@ -45,11 +45,11 @@ if [ -n "${TEST:-}" ]; then
 fi
 sed "s/VERSION/${VERSION}/g" mac/Resources/Info.plist > "$APP/Contents/Info.plist"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
-# the languages there are catalogs of (core/locales), so the system offers them for the app (System Settings >
-# General > Language & Region > Applications) and AppKit's own words (Services, Enter Full Screen) follow the app's
+# the languages of pe_i18n::LANGUAGES, so the system offers them for the app (System Settings > General > Language &
+# Region > Applications) and AppKit's own words (Services, Enter Full Screen) follow the app's
+LANGUAGES=$(scripts/languages.sh --codes)
 /usr/libexec/PlistBuddy -c "Add :CFBundleLocalizations array" "$APP/Contents/Info.plist"
-for dir in core/locales/*/; do
-    code=$(basename "$dir")
+for code in $LANGUAGES; do
     /usr/libexec/PlistBuddy -c "Add :CFBundleLocalizations: string $code" "$APP/Contents/Info.plist"
     mkdir -p "$APP/Contents/Resources/$code.lproj"
 done
@@ -60,7 +60,10 @@ for svg in app/res/icons/*.svg; do
     rsvg-convert -f pdf "$svg" -o "$APP/Contents/Resources/icons/$name.pdf"
 done
 # the sign-in buttons, in English and each language with its own words (scripts/build-sign-in-buttons.sh)
-cp app/res/brands/{google,microsoft}-sign-in.png app/res/brands/{google,microsoft}-sign-in.??.png "$APP/Contents/Resources/brands/"
+cp app/res/brands/{google,microsoft}-sign-in.png "$APP/Contents/Resources/brands/"
+for code in $LANGUAGES; do
+    [ "$code" = en ] || cp app/res/brands/{google,microsoft}-sign-in."$code".png "$APP/Contents/Resources/brands/"
+done
 cp LICENSE "$APP/Contents/Resources/LICENSE.txt"
 
 # the help, a Help Book for Help Viewer: the core's topics as pages (pe-html's help-export), a folder a language with
@@ -107,9 +110,10 @@ for dir in "$help_pages"/*/; do
     # the book's title in the language, as its contents page has it
     title=$(sed -n 's:.*<title>\(.*\)</title>.*:\1:p' "$lproj/index.html" | head -1 | sed 's/&amp;/\&/g; s/"/\\"/g')
     printf '"HPDBookTitle" = "%s";\n' "$title" > "$lproj/InfoPlist.strings"
-    # the search index, with the anchors openHelpAnchor opens, and the built-in stop words where there are some
+    # the search index, with the anchors openHelpAnchor opens, and hiutil's built-in stop words for the languages it
+    # has them of (hiutil -h lists them)
     stopwords=""
-    case "$code" in en | de | es | fr) stopwords="-s $code" ;; esac
+    case "$code" in en | es | de | fr | sv | hu | it) stopwords="-s $code" ;; esac
     # shellcheck disable=SC2086
     hiutil -I corespotlight -Ca $stopwords -l "$code" -f "$lproj/InboxClassic.cshelpindex" "$lproj"
 done

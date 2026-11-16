@@ -1,0 +1,16 @@
+<!--review--><h1>Salausvirheet</h1>
+<p class="summary">Mitä tehdä, kun palvelin ei tarjoa salausta tai vaatii sitä, vaikka se on poissa käytöstä.</p>
+<h2>”the server does not offer STARTTLS”</h2>
+<p>Tilin asetuksena on STARTTLS, mutta palvelin ei tarjonnut salausta. Inbox Classic keskeytti, joten salasanaasi ei lähetetty.</p>
+<ol>
+    <li>Avaa tilin ominaisuudet kohdassa <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Aseta suojaukseksi SSL/TLS ja portiksi 993 saapuvalle postille tai 465 lähtevälle postille.</li>
+    <li>Napsauta <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Jos mikään muu ei toimi, palvelinta ei voi käyttää turvallisesti.</p>
+<h2>”the server takes the password only over an encrypted connection”</h2>
+<p>Lähtevän postin palvelimen asetuksena on <b data-text="ui-security-none"></b>. Salasanasi on kunnossa. Vaihda <b data-text="ui-field-smtp-security"></b> asetukseksi STARTTLS portilla 587 tai SSL/TLS portilla 465.</p>
+<h2>Varoitus salaamattomasta yhteydestä</h2>
+<p>Kun valitset <b data-text="ui-security-none"></b>, Inbox Classic varoittaa, että kuka tahansa, joka sieppaa verkkoliikenteesi, voi lukea salasanasi ja viestisi. Jatka vain, jos palvelin on omassa tietokoneessasi tai lähiverkossasi.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

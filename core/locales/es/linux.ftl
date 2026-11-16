@@ -170,3 +170,24 @@ gtk-new-mail-group = Correo nuevo
 gtk-notify-new-mail = Avisar de correo nuevo
 gtk-notify-subtitle = Recibir un aviso cuando lleguen mensajes nuevos y la ventana esté en segundo plano
 gtk-restart-to-change = Inbox Classic se reinicia para cambiar el idioma.
+
+## The desktop entry and the page of the software stores
+
+# review: new
+gtk-desktop-generic-name = Cliente de correo
+# review: new
+gtk-desktop-comment = Leer y escribir correo: un programa de correo rápido y sencillo
+# review: new
+gtk-desktop-keywords = correo;bandeja;mensaje;
+# review: new
+gtk-metainfo-summary = Un programa de correo rápido y sencillo
+# review: new
+gtk-metainfo-description = Inbox Classic lee y escribe correo con las carpetas a la izquierda, los mensajes arriba y el mensaje debajo, como lo hacían los programas de correo. Funciona con cualquier cuenta IMAP y SMTP, e inicia sesión en Outlook.com y Microsoft 365 mediante el navegador.
+# review: new
+gtk-metainfo-feature-sanitized = Cada mensaje se muestra depurado, sin scripts, y las imágenes de Internet solo cuando usted lo permite
+# review: new
+gtk-metainfo-feature-search = Una búsqueda que encuentra palabras en el asunto, las personas, los nombres de archivo y el texto, con los operadores de Gmail
+# review: new
+gtk-metainfo-feature-replies = Las respuestas pliegan los mensajes anteriores que citan
+# review: new
+gtk-metainfo-feature-offline = El correo sigue legible sin conexión; las contraseñas se guardan en su llavero

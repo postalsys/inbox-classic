@@ -1,0 +1,19 @@
+<!--review--><h1>Razvrstavanje nove pošte pravilima</h1>
+<p class="summary">Automatski premjestite, označite kao pročitane, označite zastavicom ili arhivirajte dolazne poruke koje odgovaraju vašim kriterijima.</p>
+<p>Pravilo spaja kriterije pretraživanja s radnjama koje se primjenjuju na poruke koje im odgovaraju čim stignu u mapu Ulazna pošta. Na primjer, pravilo s <code>from:news@example.com</code> može biltene s te adrese premjestiti u zasebnu mapu i označiti ih kao pročitane.</p>
+<p>Da biste stvorili pravilo:</p>
+<ol>
+    <li>Odaberite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>, a zatim kliknite <b data-text="ui-rule-new"></b>.</li>
+    <li>Unesite naziv i ispunite <b data-text="ui-rule-query"></b> istim izrazima kao u okviru za pretraživanje, na primjer <code>from:</code>, <code>subject:</code> ili <code>list:</code>. Redak ispod pokazuje koliko postojećih poruka u mapi Ulazna pošta odgovara tim kriterijima.</li>
+    <li>Odaberite jednu ili više radnji za poruke koje odgovaraju: premještanje u mapu, označavanje kao pročitano, označavanje zastavicom, arhiviranje, premještanje u Neželjenu e-poštu, brisanje ili isključivanje obavijesti.</li>
+    <li>Kliknite <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Pravilo možete stvoriti i iz poruke ili pretraživanja. Odaberite <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> da biste ispunili pošiljatelja ili popis za slanje odabrane poruke. Kliknite <b data-text="ui-create-rule"></b> iznad rezultata pretraživanja da biste upotrijebili trenutačne kriterije pretraživanja.</p>
+<h2>Kako pravila rade</h2>
+<p>Pravila obrađuju nove poruke u mapi Ulazna pošta dok Inbox Classic radi, i kad je smanjen u područje obavijesti. Na postojeće poruke utječu samo ako označite <b data-text="ui-rule-apply-now"></b>. Pravila koja odgovaraju izvršavaju se redoslijedom prikazanim na popisu. Kad pravilo premjesti poruku iz mape Ulazna pošta, na tu se poruku više ne primjenjuju druga pravila. Poništite potvrdni okvir pravila na popisu da biste ga isključili bez brisanja.</p>
+<h2>Mijenjanje pravila</h2>
+<p>Da biste uredili pravilo, odaberite ga na popisu i kliknite <b data-text="ui-rule-edit"></b> ili ga dvaput kliknite. Pomoću <b data-text="ui-account-move-up"></b> i <b data-text="ui-account-move-down"></b> mijenjate redoslijed, a pomoću <b data-text="ui-rule-delete-button"></b> brišete pravilo. U uređivaču pravila kliknite <b data-text="ui-rule-show"></b> da biste u glavnom prozoru vidjeli poruke koje trenutačno odgovaraju.</p>
+<p>Pravila se primjenjuju na nove poruke u mapi Ulazna pošta, pa filtri po mapi i datumu nisu podržani. Ako koristite <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> ili <code>newer_than:</code>, poruka objašnjava zašto se ti filtri ne mogu koristiti. Pravila ne mogu slati poruke ni trajno ih brisati: <b data-text="ui-rule-delete"></b> premješta ih u <b data-text="folder-deleted"></b>.</p>
+<aside class="note">Pravila se izvršavaju na ovom računalu. Da bi se pošta razvrstavala i dok je računalo isključeno, koristite filtre svojeg davatelja usluge e-pošte.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
+<!--/review-->

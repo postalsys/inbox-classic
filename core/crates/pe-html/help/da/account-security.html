@@ -1,0 +1,14 @@
+<!--review--><h1>Sikkerhedsindstillinger for konti</h1>
+<p class="summary">Sikkerhedsindstillingerne for en kontos servere, og hvad hver af dem betyder.</p>
+<p>Hver konto har <b data-text="ui-field-imap-security"></b> for den indgående server og <b data-text="ui-field-smtp-security"></b> for den udgående. Inbox Classic udfylder dem, når det finder din udbyders indstillinger. Hvis du vil ændre dem, skal du åbne kontoens egenskaber under <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<table>
+    <tr><th>Indstilling</th><th>Betydning</th></tr>
+    <tr><td>SSL/TLS</td><td>Forbindelsen er krypteret fra starten. Som regel port 993 til indgående mail og 465 til udgående mail.</td></tr>
+    <tr><td>STARTTLS</td><td>Forbindelsen krypteres lige efter, at den er åbnet. Som regel port 143 til indgående mail og 587 til udgående mail. Inbox Classic stopper, hvis serveren ikke tilbyder kryptering.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Din adgangskode og din mail kan læses af alle på netværket.</td></tr>
+</table>
+<aside class="warning">Brug kun <b data-text="ui-security-none"></b> til en server på din egen computer eller dit lokale netværk. Inbox Classic advarer dig, før den bruges.</aside>
+<p>Inbox Classic kontrollerer, at hver server er den, den giver sig ud for at være, ud fra de certifikater, dit system stoler på. Der er ingen indstilling, der godtager et hvilket som helst certifikat.</p>
+<p>Din adgangskode gemmes i <!--os:windows-->Windows Legitimationsstyring<!--/os--><!--os:mac-->din login-nøglering<!--/os--><!--os:linux-->din nøglering<!--/os-->, aldrig i mailarkivet. En konto, der logger på via browseren, gemmer slet ingen adgangskode.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

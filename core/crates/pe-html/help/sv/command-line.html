@@ -1,0 +1,17 @@
+<!--review--><h1>Kommandoradsalternativ</h1>
+<p class="summary">Alternativ för att starta Inbox Classic från en terminal, för tester och för AI-agenter.</p>
+<p>Starta programmet <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> med de här alternativen:</p>
+<table>
+    <tr><th>Alternativ</th><th>Gör</th></tr>
+    <tr><td><code>--store &lt;fil&gt;</code></td><td>Använder ett annat e-postlager, till exempel ett för tester</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Sparar lösenord bara under den här körningen, aldrig i systemets lösenordslager</td></tr>
+    <tr><td><code>--pin-certificate &lt;fil&gt;</code></td><td>Godtar bara servercertifikatet i den här filen (PEM eller DER), för en testserver med ett självsignerat certifikat</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;fil&gt;</code></td><td>Skriver sidan för en inloggning via webbläsaren till den här filen i stället för att öppna webbläsaren</td></tr>
+    <tr><td><code>--language &lt;kod&gt;</code></td><td>Visar fönstren på det här språket under den här körningen, till exempel <code>de</code></td></tr>
+    <tr><td><code>--background</code></td><td>Startar utan fönster</td></tr>
+    <tr><td><code>--mcp</code></td><td>Ansluter en AI-agent till Inbox Classic. Agentens program startar det, inte du</td></tr>
+    <tr><td><code>--version</code></td><td>Skriver ut versionen och avslutar</td></tr>
+</table>
+<p>En <code>mailto:</code>-länk som anges som argument öppnar ett nytt meddelande, precis som en e-postlänk gör.</p>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

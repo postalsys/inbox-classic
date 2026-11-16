@@ -113,3 +113,24 @@ win-restart-ask = Inbox Classic shows { $language } once it restarts. Restart no
 win-folders-hide = Hide the folder list
 win-folders-pin = Keep the folder list beside the messages
 win-folders-show = Show the folders
+
+## The installer
+
+# the installer's own words (installer/inbox-classic.nsi), made into installer/languages.nsh by the build;
+# { $version } and { $installed } are version numbers, 0.18.0
+win-installer-start = Start Inbox Classic
+win-installer-welcome-new =
+    This will install Inbox Classic { $version }, an e-mail program.
+
+    No administrator rights are needed, it is installed for your account only.
+win-installer-welcome-same =
+    Inbox Classic { $version } is installed already. This will install it again.
+
+    Your accounts and mail are kept.
+win-installer-welcome-update =
+    This will update Inbox Classic { $installed } to { $version }.
+
+    If it is running it is closed first. Your accounts and mail are kept.
+win-installer-older-ask = Inbox Classic { $installed } is installed, which is newer than { $version }. Install the older version anyway?
+win-installer-still-running = Inbox Classic is still running. Close it and try again.
+win-installer-remove-mail-ask = Also remove the accounts and the mail Inbox Classic keeps on this computer? The mail on the servers stays.

@@ -1,0 +1,15 @@
+<!--review-->
+<h1>Paskyros saugos nustatymai</h1>
+<p class="summary">Paskyros serverių saugos nustatymai ir ką kiekvienas iš jų reiškia.</p>
+<p>Kiekviena paskyra turi nustatymą <b data-text="ui-field-imap-security"></b> gaunamųjų laiškų serveriui ir <b data-text="ui-field-smtp-security"></b> siunčiamųjų laiškų serveriui. Inbox Classic juos užpildo, kai randa jūsų paslaugų teikėjo nustatymus. Norėdami juos pakeisti, atidarykite paskyros ypatybes per <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<table>
+    <tr><th>Nustatymas</th><th>Reikšmė</th></tr>
+    <tr><td>SSL/TLS</td><td>Ryšys šifruojamas nuo pat pradžių. Paprastai gaunamiesiems laiškams naudojamas prievadas 993, o siunčiamiesiems 465.</td></tr>
+    <tr><td>STARTTLS</td><td>Ryšys užšifruojamas iškart jį atidarius. Paprastai gaunamiesiems laiškams naudojamas prievadas 143, o siunčiamiesiems 587. Jei serveris nesiūlo šifravimo, Inbox Classic sustoja.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Jūsų slaptažodis ir laiškai keliauja tinklu taip, kad juos gali perskaityti bet kas.</td></tr>
+</table>
+<aside class="warning">Nustatymą <b data-text="ui-security-none"></b> naudokite tik serveriui, esančiam jūsų kompiuteryje arba vietiniame tinkle. Prieš jį naudodama, Inbox Classic jus įspėja.</aside>
+<p>Inbox Classic tikrina, ar kiekvienas serveris yra tas, kuo prisistato, pagal sertifikatus, kuriais pasitiki jūsų sistema. Jokio jungiklio, leidžiančio priimti bet kokį sertifikatą, nėra.</p>
+<p>Jūsų slaptažodis laikomas <!--os:windows-->Windows kredencialų tvarkytuvėje<!--/os--><!--os:mac-->jūsų prisijungimo raktinėje<!--/os--><!--os:linux-->jūsų raktinėje<!--/os-->, niekada ne pašto saugykloje. Paskyra, kuri prisijungia per naršyklę, slaptažodžio visai nelaiko.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

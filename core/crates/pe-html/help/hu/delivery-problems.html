@@ -1,0 +1,20 @@
+<!--review--><h1>Kézbesítetlen üzenetek</h1>
+<p class="summary">Ha egy elküldött üzenet visszapattan vagy késik, az Inbox Classic elmagyarázza, miért, és mit tehet.</p>
+<p>A kézbesítési értesítés mellett az üzenetlistában a kézbesítetlenséget jelző jel látható. Amikor megnyitja, egy kártya mutatja fölötte, hogy az üzenete nem lett kézbesítve, vagy csak késik.</p>
+<img src="picture:bounce-1-failed" alt="Kézbesítési értesítés egy kártyával, amely közli, hogy az üzenet nem lett kézbesítve, valamint a címzettet, az okot és a teendőt">
+<p>A kártya minden címzettnél közérthetően megadja az okot és a teendőt. A fogadó kiszolgáló saját szavait ez a rész mutatja: <b data-text="bounce-details"></b>.</p>
+<ul>
+    <li><b data-text="bounce-show-message"></b>: kijelöli az elküldött üzenetet.</li>
+    <li>Késés esetén: <b data-text="bounce-show-delayed"></b>, ez kijelöli az üzenetet. A levelezőkiszolgálója még próbálkozik, így nem kell újra elküldenie.</li>
+</ul>
+<p>Néhány gyakori ok:</p>
+<table>
+    <tr><th>A kártya szövege</th><th>Teendő</th></tr>
+    <tr><td><b data-text="bounce-user-unknown"></b></td><td>Ellenőrizze a cím helyesírását, vagy kérdezze meg a címzettet, melyik címet használja most.</td></tr>
+    <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Küldje el újra néhány nap múlva, vagy érje el a címzettet más módon.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Küldje el újra a levélszemétnek tűnő részek nélkül, például sok hivatkozás vagy nagy melléklet nélkül.</td></tr>
+    <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Továbbítsa az értesítést a levelezési szolgáltatójának. Nem az üzenettel van a gond.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Semmi. Általában egy órán belül kézbesítésre kerül.</td></tr>
+</table>
+<p>Az összes kézbesítési értesítés megkereséséhez keressen erre: <code>is:bounce</code>. Az okot a számítógépe állapítja meg, és semmi sem kerül el sehova.</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav><!--/review-->

@@ -1,0 +1,17 @@
+<!--review--><h1>Inloggningsappar</h1>
+<p class="summary">Registrera en egen inloggningsapp hos Google, Microsoft eller en annan OpenID Connect-leverantör för att logga in via webbläsaren.</p>
+<p>Inloggning via webbläsaren använder en OAuth-klient som är registrerad hos leverantören. Inbox Classic har egna klienter för Google och Microsoft. Google låter bara testanvändare använda Inbox Classics klient tills appen har verifierats, så <b data-text="win-sign-in-google"></b> är avstängt från början. Du kan registrera en egen klient: i ditt Google Cloud-projekt, i din Microsoft Entra-klientorganisation eller hos valfri OpenID Connect-leverantör.</p>
+<p>Så här lägger du till en inloggningsapp:</p>
+<ol>
+    <li>Välj <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Klicka på <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->, sedan på <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>Bredvid <b data-text="ui-fill-in-for"></b> klickar du på Google eller Microsoft för att fylla i utfärdare, behörigheter och servrar. För en annan leverantör skriver du in dem.</li>
+    <li>Registrera klienten hos leverantören så som rutan längst ner förklarar. Registrera <b data-text="ui-redirect-uri"></b> som visas där.</li>
+    <li>Skriv <b data-text="ui-client-id"></b>, och <b data-text="ui-client-secret"></b> om leverantören gav dig en. Hemligheten sparas i <!--os:windows-->Windows Autentiseringshanteraren<!--/os--><!--os:mac-->din inloggningsnyckelring<!--/os--><!--os:linux-->din nyckelring<!--/os--> och visas aldrig igen.</li>
+    <li>Klicka på <b data-text="ui-check"></b> för att se att utfärdaren stämmer, sedan på <b data-text="ui-ok"></b>.</li>
+    <li>Lägg till kontot med <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> på första sidan av <b data-text="ui-add-account-title"></b>.</li>
+</ol>
+<p>I <b data-text="ui-sign-in-apps"></b> visar <!--os:windows,mac-->kryssrutan för varje app<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> om den erbjuds för nya konton, de inbyggda inräknade. Konton som redan använder en app fortsätter att fungera. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> ändrar en app, och <b data-text="ui-remove"></b> tar bort en när inget konto använder den.</p>
+<p>Om e-postservern inte godtar appens token ska du kontrollera att dess behörigheter ger åtkomst till e-post.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
+<!--/review-->

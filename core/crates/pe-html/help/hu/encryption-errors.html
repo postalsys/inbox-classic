@@ -1,0 +1,15 @@
+<!--review--><h1>Titkosítási hibák</h1>
+<p class="summary">Teendők, ha egy kiszolgáló nem kínál titkosítást, vagy ott kéri, ahol ki van kapcsolva.</p>
+<h2>„a kiszolgáló nem kínálja a STARTTLS-t”</h2>
+<p>A fiók STARTTLS-re van állítva, de a kiszolgáló nem kínált titkosítást. Az Inbox Classic leállt, így a jelszava nem ment el.</p>
+<ol>
+    <li>Nyissa meg a fiók tulajdonságait (<b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>).</li>
+    <li>Állítsa a biztonságot SSL/TLS-re, a bejövő leveleknél a 993-as, a kimenő leveleknél a 465-ös porttal.</li>
+    <li>Kattintson az <b data-text="ui-ok"></b> gombra.</li>
+</ol>
+<p>Ha semmi más nem segít, a kiszolgáló nem használható biztonságosan.</p>
+<h2>„a kiszolgáló csak titkosított kapcsolaton fogadja el a jelszót”</h2>
+<p>A kimenő kiszolgáló beállítása: <b data-text="ui-security-none"></b>. A jelszava rendben van. Módosítsa ezt: <b data-text="ui-field-smtp-security"></b>, STARTTLS-re az 587-es porttal, vagy SSL/TLS-re a 465-ös porttal.</p>
+<h2>Figyelmeztetés titkosítás nélküli kapcsolatról</h2>
+<p>Ha ezt választja: <b data-text="ui-security-none"></b>, az Inbox Classic figyelmeztet, hogy bárki, aki lehallgatja a hálózati forgalmát, elolvashatja a jelszavát és az üzeneteit. Csak a saját számítógépén vagy helyi hálózatán futó kiszolgálónál folytassa.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav><!--/review-->
