@@ -3,11 +3,21 @@
 The words of the windows live in the Fluent files of this folder, one folder a language: `core.ftl` for what the core
 says (the same on every platform), `app.ftl` for the windows (menus, commands, dialogs, and the words the windows of
 more than one platform share, `ui-` ids), and `windows.ftl`, `mac.ftl` and `linux.ftl` for words only one platform
-has. English (`en`) is the source;
-a word a language does not have yet is shown in English. The user help is `core/crates/pe-html/help/<lang>/<topic>.html`.
+has. English (`en`) is the source; a word a language does not have yet is shown in English. The user help is
+`core/crates/pe-html/help/<lang>/<topic>.html`.
 
-**Status: the German, Estonian, French and Spanish files and help pages have had a native review. A change to the
-English words needs the same review in every language before a release.**
+**Status: the German, Estonian, French and Spanish files and help pages have had a native review; the other languages
+are drafts marked for review (below). A change to the English words needs the same review in every language before a
+release.**
+
+**Adding a language.** Its catalogs (`core/locales/<code>/`, every file English has), its help
+(`core/crates/pe-html/help/<code>/`, every topic), both marked for review, and its line in `pe_i18n::LANGUAGES`
+(`core/crates/pe-i18n/src/lib.rs`: the two-letter code and the language's name in itself). `node
+scripts/check-language.mjs <code>` checks the catalogs and the help against English first. Everything else follows the
+list: building the core writes the installer's languages, the sign-in buttons' Windows resources and the Linux desktop
+entry and metainfo again (commit them), and `scripts/build-sign-in-buttons.sh` makes the language's sign-in button
+pictures (commit them too); the Mac's localizations, the Help Books, the homepage's help and the UI tests read the list
+themselves.
 
 **Drafts waiting for review.** `REVIEWED` holds the commit of the last native review. A message translated after it
 (new, or its English changed) has `# review: new` or `# review: changed` on the line above it, and a new or changed
