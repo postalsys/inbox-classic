@@ -59,6 +59,19 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 pub struct Store {
     db: rusqlite::Connection,
+    /// Which store of this process it is, for [`Generation`]
+    id: u64,
+}
+
+/// What a store holds at one moment, as [`Store::generation`] tells it: equal values of one store mean nothing was
+/// written in between, by this connection or another, so what was read then is still so
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Generation {
+    store: u64,
+    /// SQLite's `data_version`, which changes with every commit of another connection
+    data: i64,
+    /// The rows this connection inserted, changed or deleted since it opened
+    changes: u64,
 }
 
 impl Store {
@@ -78,9 +91,24 @@ impl Store {
         db.pragma_update(None, "foreign_keys", true)?;
         db.pragma_update(None, "synchronous", "NORMAL")?;
         db.busy_timeout(std::time::Duration::from_secs(5))?;
-        let mut store = Store { db };
+        static OPENED: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+        let id = OPENED.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        let mut store = Store { db, id };
         schema::migrate(&mut store.db)?;
         Ok(store)
+    }
+
+    /// What the store holds now, as a value that changes with every write to it ([`Generation`])
+    pub fn generation(&self) -> Result<Generation> {
+        let data = self
+            .db
+            .prepare_cached("PRAGMA data_version")?
+            .query_row([], |row| row.get(0))?;
+        Ok(Generation {
+            store: self.id,
+            data,
+            changes: self.db.total_changes(),
+        })
     }
 
     /// A random ID of this store, made with it: what keeps the passwords of its accounts apart from those of
@@ -170,6 +198,26 @@ mod tests {
         let store = Store::open(&path).unwrap();
         assert_eq!(store.accounts().unwrap().len(), 1);
         drop(store);
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn the_generation_changes_with_every_write() {
+        let dir = std::env::temp_dir().join(format!("pe-store-generation-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("store.db");
+        let store = Store::open(&path).unwrap();
+        let other = Store::open(&path).unwrap();
+        let before = store.generation().unwrap();
+        store.accounts().unwrap();
+        assert_eq!(store.generation().unwrap(), before, "a read changes nothing");
+        assert_ne!(other.generation().unwrap(), before, "another store's is its own");
+        let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
+        let written = store.generation().unwrap();
+        assert_ne!(written, before, "its own write");
+        other.remove_account(account).unwrap();
+        assert_ne!(store.generation().unwrap(), written, "another connection's commit");
+        drop((store, other));
         std::fs::remove_dir_all(&dir).unwrap();
     }
 

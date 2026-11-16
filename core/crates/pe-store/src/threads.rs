@@ -772,16 +772,24 @@ impl Store {
         sort: Sort,
         ranges: &[(u64, u64)],
     ) -> Result<Vec<MessageRef>> {
-        // the rows in list order; a collapsed conversation's row stands for its messages, as they arrived, in its place
         let mut rows = Vec::new();
         for &(start, end) in ranges {
-            for message in self.search(search, sort, start, end - start)? {
-                rows.push(match message.thread.filter(ThreadPlace::collapsed) {
-                    Some(place) => RowRefs::Conversation(place.thread),
-                    None => RowRefs::Message(message.at()),
-                });
-            }
+            rows.extend(self.search(search, sort, start, end - start)?);
         }
+        self.refs_of_rows(search, &rows)
+    }
+
+    /// The messages of `rows` of the list `search` makes (rows [`Store::search`] read), in their order: a collapsed
+    /// conversation's row stands for all of its messages in the list, as they arrived, in its place. What a click
+    /// selects from the rows shown, without reading the list again.
+    pub fn refs_of_rows(&self, search: &Search, rows: &[Message]) -> Result<Vec<MessageRef>> {
+        let rows: Vec<RowRefs> = rows
+            .iter()
+            .map(|message| match message.thread.filter(ThreadPlace::collapsed) {
+                Some(place) if search.threads.is_some() => RowRefs::Conversation(place.thread),
+                _ => RowRefs::Message(message.at()),
+            })
+            .collect();
         let collapsed: Vec<i64> = rows
             .iter()
             .filter_map(|row| match row {

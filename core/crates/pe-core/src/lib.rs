@@ -861,6 +861,11 @@ impl Core {
         Ok(self.store().search(search, sort, offset, limit)?)
     }
 
+    /// What the store holds now: equal values mean nothing was written in between, so what was read then is still so
+    pub fn generation(&self) -> Result<pe_store::Generation> {
+        Ok(self.store().generation()?)
+    }
+
     /// How many messages [`Core::search`] finds, and how many of them are unread, grouped by conversation or not
     pub fn count_search(&self, search: &Search) -> Result<(u64, u64)> {
         Ok(self.store().count_search(search)?)

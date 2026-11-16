@@ -185,6 +185,12 @@ impl Core {
         Ok(self.store().refs_in_ranges(search, sort, ranges)?)
     }
 
+    /// The messages of `rows` of the list `search` makes, read by [`Core::search`]: a collapsed conversation's row
+    /// stands for its messages. What selecting rows already shown takes, without reading the list again.
+    pub fn refs_of_rows(&self, search: &Search, rows: &[pe_store::Message]) -> Result<Vec<MessageRef>> {
+        Ok(self.store().refs_of_rows(search, rows)?)
+    }
+
     /// Where the messages `refs` are now in that list, ascending, to select them again after it changed
     pub fn positions(&self, search: &Search, sort: Sort, refs: &[MessageRef]) -> Result<Vec<u64>> {
         let sort = self.list_sort(search, sort)?;
