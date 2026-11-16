@@ -15,23 +15,13 @@ pub(crate) fn fold(text: &str) -> String {
     out
 }
 
-/// `column` with ı and İ as i, in SQLite's own functions only: the schema's indexes have it, which an older version of
-/// the app must still be able to write
-pub(crate) fn dotless_as_i(column: &str) -> String {
-    format!("replace(replace({column}, 'İ', 'i'), 'ı', 'i')")
-}
-
-/// `column` as the message list orders it: [`dotless_as_i`], then NOCASE for the ASCII letters
-pub(crate) fn order_key(column: &str) -> String {
-    format!("{} COLLATE NOCASE", dotless_as_i(column))
-}
-
 /// `text` as the search index has it: ı as i, which unicode61 does not fold (the schema's trigger does the same)
 pub(crate) fn indexed(text: &str) -> String {
     text.replace('ı', "i")
 }
 
-/// `fold(text)` in SQL, for the address completion (never in the schema, which an older version reads without it)
+/// `fold(text)` in SQL, for the address completion, the To order and the migration that writes the sort keys (never in
+/// a trigger or index, which an older version must be able to write without it)
 pub(crate) fn register(db: &rusqlite::Connection) -> rusqlite::Result<()> {
     use rusqlite::functions::FunctionFlags;
     db.create_scalar_function(
