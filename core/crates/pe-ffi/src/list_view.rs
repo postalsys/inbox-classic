@@ -104,6 +104,23 @@ pub unsafe extern "C" fn pe_list_view_set_scope(view: *mut PeListView, folder: i
     unsafe { change(view, false, |view| view.set_scope(scope)) }
 }
 
+/// The list of a row of the folder list (`PeTreeRow` `list` and `folder`): its folder's, All Inboxes', All Sent's,
+/// All Drafts' or Flagged's, or none (a heading, which lists nothing without words). Every conversation is closed when
+/// it is another one. False when it was the one shown already (or for NULL).
+///
+/// # Safety
+/// `view` must be NULL or a live view.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_set_list(
+    view: *mut PeListView,
+    list: crate::core::PeTreeList,
+    folder: i64,
+) -> bool {
+    let scope = pe_core::tree::TreeList::from(list).scope(folder);
+    // SAFETY: as the caller guarantees
+    unsafe { change(view, false, |view| view.set_scope(scope)) }
+}
+
 /// The list of the Flagged row: the flagged messages of every account, but those in Deleted Items or Junk E-mail.
 /// False when it was the one shown already (or for NULL).
 ///

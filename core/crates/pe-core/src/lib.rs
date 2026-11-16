@@ -861,17 +861,19 @@ impl Core {
         Ok(self.store().search_index(search, sort, folder, uid)?)
     }
 
-    /// Whether the list of `search` names whom its messages went to rather than who sent them, as Sent Items and
-    /// Drafts do; a search's results and All Inboxes name the sender. Its person column is then To, and a From sort
-    /// is by the recipients.
+    /// Whether the list of `search` names whom its messages went to rather than who sent them, as Sent Items, Drafts,
+    /// All Sent and All Drafts do; a search's results and All Inboxes name the sender. Its person column is then To,
+    /// and a From sort is by the recipients.
     pub fn lists_recipients(&self, search: &Search) -> Result<bool> {
         use pe_imap::SpecialUse;
-        let Scope::Folder(folder) = search.scope else {
-            return Ok(false);
-        };
         if !search.text.trim().is_empty() {
             return Ok(false);
         }
+        let folder = match search.scope {
+            Scope::AllSent | Scope::AllDrafts => return Ok(true),
+            Scope::Folder(folder) => folder,
+            _ => return Ok(false),
+        };
         let special = self.store().folder(folder)?.info.special_use;
         Ok(matches!(
             special.as_deref().and_then(SpecialUse::from_flag),

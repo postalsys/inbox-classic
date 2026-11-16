@@ -1145,6 +1145,52 @@ pub enum PeTreeRowKind {
     Account = 3,
     /// A folder (with one account, its Inbox too)
     Folder = 4,
+    /// Every account's Sent Items, each under it named after the account
+    AllSent = 5,
+    /// Every account's Drafts, each under it named after the account
+    AllDrafts = 6,
+}
+
+/// The messages a row lists when chosen (`pe_list_view_set_list`)
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeTreeList {
+    /// None (a heading)
+    None = 0,
+    /// The row's folder's
+    Folder = 1,
+    AllInboxes = 2,
+    Flagged = 3,
+    AllSent = 4,
+    AllDrafts = 5,
+}
+
+impl From<PeTreeList> for pe_core::tree::TreeList {
+    fn from(list: PeTreeList) -> Self {
+        use pe_core::tree::TreeList;
+        match list {
+            PeTreeList::None => TreeList::None,
+            PeTreeList::Folder => TreeList::Folder,
+            PeTreeList::AllInboxes => TreeList::AllInboxes,
+            PeTreeList::Flagged => TreeList::Flagged,
+            PeTreeList::AllSent => TreeList::AllSent,
+            PeTreeList::AllDrafts => TreeList::AllDrafts,
+        }
+    }
+}
+
+impl From<pe_core::tree::TreeList> for PeTreeList {
+    fn from(list: pe_core::tree::TreeList) -> Self {
+        use pe_core::tree::TreeList;
+        match list {
+            TreeList::None => PeTreeList::None,
+            TreeList::Folder => PeTreeList::Folder,
+            TreeList::AllInboxes => PeTreeList::AllInboxes,
+            TreeList::Flagged => PeTreeList::Flagged,
+            TreeList::AllSent => PeTreeList::AllSent,
+            TreeList::AllDrafts => PeTreeList::AllDrafts,
+        }
+    }
 }
 
 /// The menu a row's right-click opens
@@ -1196,6 +1242,12 @@ pub struct PeTreeRow {
     /// It can be dragged among its own kind to order the accounts, and its menu has Move Up and Move Down
     pub reorders_accounts: bool,
     pub menu: PeTreeMenu,
+    /// What it lists when chosen: `pe_list_view_set_list` with it and `folder`
+    pub list: PeTreeList,
+    /// With rows under it: it starts open (All Inboxes, a heading) or closed (All Sent, All Drafts), and whether the
+    /// user's opening and closing of it is to be kept (by its `key`)
+    pub starts_open: bool,
+    pub remembers_open: bool,
     /// Where New Folder makes a folder with this row chosen: the account (0: New Folder does not apply) and the folder
     /// to make it in (0: the account's top)
     pub new_folder_account: i64,
@@ -1230,6 +1282,8 @@ pub unsafe extern "C" fn pe_folder_tree(core: *const PeCore) -> *mut PeTree {
                         pe_core::tree::TreeRowKind::Flagged => PeTreeRowKind::Flagged,
                         pe_core::tree::TreeRowKind::Account => PeTreeRowKind::Account,
                         pe_core::tree::TreeRowKind::Folder => PeTreeRowKind::Folder,
+                        pe_core::tree::TreeRowKind::AllSent => PeTreeRowKind::AllSent,
+                        pe_core::tree::TreeRowKind::AllDrafts => PeTreeRowKind::AllDrafts,
                     },
                     key: strings.add(&row.key),
                     account: row.account,
@@ -1253,6 +1307,9 @@ pub unsafe extern "C" fn pe_folder_tree(core: *const PeCore) -> *mut PeTree {
                         pe_core::tree::TreeMenu::Folder => PeTreeMenu::Folder,
                         pe_core::tree::TreeMenu::Account => PeTreeMenu::Account,
                     },
+                    list: row.list.into(),
+                    starts_open: row.starts_open,
+                    remembers_open: row.remembers_open,
                     new_folder_account: row.new_folder_account,
                     new_folder_parent: row.new_folder_parent,
                     icon: strings.add(row.icon),

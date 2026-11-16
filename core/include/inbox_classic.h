@@ -186,6 +186,10 @@ typedef enum PeTreeRowKind {
   PE_TREE_ROW_KIND_ACCOUNT = 3,
   // A folder (with one account, its Inbox too)
   PE_TREE_ROW_KIND_FOLDER = 4,
+  // Every account's Sent Items, each under it named after the account
+  PE_TREE_ROW_KIND_ALL_SENT = 5,
+  // Every account's Drafts, each under it named after the account
+  PE_TREE_ROW_KIND_ALL_DRAFTS = 6,
 } PeTreeRowKind;
 
 // The menu a row's right-click opens
@@ -199,6 +203,18 @@ typedef enum PeTreeMenu {
   // An account's
   PE_TREE_MENU_ACCOUNT = 3,
 } PeTreeMenu;
+
+// The messages a row lists when chosen (`pe_list_view_set_list`)
+typedef enum PeTreeList {
+  // None (a heading)
+  PE_TREE_LIST_NONE = 0,
+  // The row's folder's
+  PE_TREE_LIST_FOLDER = 1,
+  PE_TREE_LIST_ALL_INBOXES = 2,
+  PE_TREE_LIST_FLAGGED = 3,
+  PE_TREE_LIST_ALL_SENT = 4,
+  PE_TREE_LIST_ALL_DRAFTS = 5,
+} PeTreeList;
 
 // A conversation's mark (Message > Watch Conversation, Ignore Conversation)
 typedef enum PeThreadMark {
@@ -788,6 +804,12 @@ typedef struct PeTreeRow {
   // It can be dragged among its own kind to order the accounts, and its menu has Move Up and Move Down
   bool reorders_accounts;
   enum PeTreeMenu menu;
+  // What it lists when chosen: `pe_list_view_set_list` with it and `folder`
+  enum PeTreeList list;
+  // With rows under it: it starts open (All Inboxes, a heading) or closed (All Sent, All Drafts), and whether the
+  // user's opening and closing of it is to be kept (by its `key`)
+  bool starts_open;
+  bool remembers_open;
   // Where New Folder makes a folder with this row chosen: the account (0: New Folder does not apply) and the folder
   // to make it in (0: the account's top)
   int64_t new_folder_account;
@@ -3282,6 +3304,16 @@ void pe_list_view_free(struct PeListView *view);
 bool pe_list_view_set_scope(struct PeListView *view,
                             int64_t folder,
                             bool all_inboxes);
+
+// The list of a row of the folder list (`PeTreeRow` `list` and `folder`): its folder's, All Inboxes', All Sent's,
+// All Drafts' or Flagged's, or none (a heading, which lists nothing without words). Every conversation is closed when
+// it is another one. False when it was the one shown already (or for NULL).
+//
+// # Safety
+// `view` must be NULL or a live view.
+bool pe_list_view_set_list(struct PeListView *view,
+                           enum PeTreeList list,
+                           int64_t folder);
 
 // The list of the Flagged row: the flagged messages of every account, but those in Deleted Items or Junk E-mail.
 // False when it was the one shown already (or for NULL).

@@ -218,6 +218,10 @@ ui-signature = Signature
 ui-signature-hint = Ajoutée aux nouveaux messages, aux réponses et aux transferts de ce compte.
 ui-signature-not-saved = La signature n'a pas pu être enregistrée.
 ui-all-inboxes = Toutes les boîtes
+# review: new
+ui-all-sent = Tous les envoyés
+# review: new
+ui-all-drafts = Tous les brouillons
 ui-flagged-folder = Avec indicateur
 ui-all-folders = Tous les dossiers
 ui-the-account = le compte

@@ -218,6 +218,10 @@ ui-signature = Allkiri
 ui-signature-hint = Lisatakse sellelt kontolt saadetavatele uutele kirjadele, vastustele ja edastatud kirjadele.
 ui-signature-not-saved = Allkirja ei saanud salvestada.
 ui-all-inboxes = Kõik sisendkaustad
+# review: new
+ui-all-sent = Kõik saadetud
+# review: new
+ui-all-drafts = Kõik mustandid
 ui-flagged-folder = Lipuga
 ui-all-folders = Kõik kaustad
 ui-the-account = konto

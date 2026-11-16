@@ -26,6 +26,10 @@ pub enum Scope {
     Folder(FolderId),
     /// The Inbox of every account
     AllInboxes,
+    /// The Sent Items of every account (the folders the server marks \Sent)
+    AllSent,
+    /// The Drafts of every account (the folders the server marks \Drafts)
+    AllDrafts,
     /// Every folder of every account
     #[default]
     Everywhere,
@@ -36,6 +40,12 @@ pub enum Scope {
 
 /// The Inbox of every account, as SQL
 pub(crate) const INBOXES: &str = "SELECT id FROM folders WHERE path = 'INBOX' COLLATE NOCASE";
+
+/// The Sent Items of every account, as SQL
+pub(crate) const SENT: &str = "SELECT id FROM folders WHERE special_use = '\\Sent'";
+
+/// The Drafts of every account, as SQL
+pub(crate) const DRAFTS: &str = "SELECT id FROM folders WHERE special_use = '\\Drafts'";
 
 /// A message is flagged, as SQL; the same words as the index `messages_flagged`, so SQLite can use it
 const IS_FLAGGED: &str = "instr(' ' || flags || ' ', ' \\Flagged ') > 0";
@@ -162,6 +172,10 @@ impl Search {
             // the + keeps SQLite off the folder indexes, which would sort every message of the Inboxes for a page
             Scope::AllInboxes if in_order => parts.push(format!("+folder_id IN ({INBOXES})")),
             Scope::AllInboxes => parts.push(format!("folder_id IN ({INBOXES})")),
+            Scope::AllSent if in_order => parts.push(format!("+folder_id IN ({SENT})")),
+            Scope::AllSent => parts.push(format!("folder_id IN ({SENT})")),
+            Scope::AllDrafts if in_order => parts.push(format!("+folder_id IN ({DRAFTS})")),
+            Scope::AllDrafts => parts.push(format!("folder_id IN ({DRAFTS})")),
             Scope::Everywhere => {}
             Scope::Flagged => parts.push(format!("{IS_FLAGGED} AND folder_id IN ({FLAGGED_FROM})")),
         }
