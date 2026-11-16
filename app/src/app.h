@@ -100,7 +100,8 @@ void SelectRow(HWND list, int row);
 
 // the icon strips of app/res/toolbar (icons.h): their image list at the size closest to the DPI, loaded once
 // the security bar's are drawn over the fill of its tone, in the color of its words
-enum class IconSet { Toolbar, Format, Folders, List, SecureVerified, SecureGood, SecureWarning, SecureNeutral };
+// the attachment strip's are a file of each kind the core names
+enum class IconSet { Toolbar, Format, Folders, List, Files, SecureVerified, SecureGood, SecureWarning, SecureNeutral };
 HIMAGELIST IconList(IconSet set);
 // text for a menu item: a & in it stays a & rather than making the next character a shortcut
 std::wstring MenuText(std::wstring text);
@@ -186,6 +187,8 @@ bool ClickMnemonic(HWND root, wchar_t letter);
 bool SetLinkCursor(HWND hwnd, WPARAM wParam);
 // what a screen reader says about a control besides its name (the reason a button is turned off)
 void SetAccessibleDescription(HWND control, const std::wstring& text);
+// the name a screen reader gives a control that has no label of its own
+void SetAccessibleName(HWND control, const std::wstring& text);
 // a dialog window centered on the window of `owner`, owned by it, with this client size; RunModal shows it, runs it
 // until `done` and destroys it, the owner disabled meanwhile
 HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* title, int clientWidth, int clientHeight);
@@ -282,6 +285,8 @@ struct SignInChoice {
 uint64_t SignInWithBrowser(HWND owner, PeCore* core, SignInChoice with, const std::wstring& email);
 // test runs (--sign-in-page-file): the sign-in page is written to this file for the test to open, not to the browser
 void SetSignInPageFile(const std::wstring& path);
+// test runs (--opened-files-log): an attachment opened is written to this file, a line of its path, not opened
+void SetOpenedFilesLog(const std::wstring& path);
 // File > Accounts: the accounts listed, to add, change (Properties) or remove; true when one changed
 bool AccountsDialog(HWND owner, PeCore* core);
 // the Properties of one account, as File > Accounts > Properties opens them (the account row's menu); true when saved
@@ -1246,6 +1251,10 @@ enum ControlId : WORD {
     // with no control, when a part's label is clicked)
     IDC_SECURITY_BAR,
     IDC_SECURITY_DETAILS,
+    // under the header of a message with files: the attachment strip, a file of the message an item
+    IDC_ATTACHMENT_STRIP,
+    // the frame around it, the strip its child
+    IDC_ATTACHMENT_FRAME,
 };
 
 // the items of the Flag submenu: IDM_FLAG_COLOR + 1 (red) to + 7 (gray), and Clear Flag

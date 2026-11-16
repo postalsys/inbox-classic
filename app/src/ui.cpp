@@ -512,6 +512,15 @@ void SetAccessibleDescription(HWND control, const std::wstring& text) {
     }
 }
 
+void SetAccessibleName(HWND control, const std::wstring& text) {
+    // PROPID_ACC_NAME of oleacc.h, which only declares it
+    constexpr GUID kName = {0x608d3df8, 0x8128, 0x4aa7, {0xa4, 0x28, 0xf5, 0x5e, 0x49, 0x26, 0x72, 0x91}};
+    Microsoft::WRL::ComPtr<IAccPropServices> services;
+    if (SUCCEEDED(CoCreateInstance(__uuidof(CAccPropServices), nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&services)))) {
+        services->SetHwndPropStr(control, static_cast<DWORD>(OBJID_CLIENT), CHILDID_SELF, kName, text.c_str());
+    }
+}
+
 bool FormDialog(HWND owner, const std::wstring& title, const std::wstring& intro, std::vector<FormField>& fields,
                 bool (*validate)(const std::vector<FormField>&, std::wstring&), const wchar_t* okLabel, size_t focus, FormPart* part) {
     RegisterDialogClass(kFormClass, FormProc);
@@ -900,6 +909,7 @@ HIMAGELIST IconList(IconSet set) {
     case IconSet::Format: strips = kFormatStrips; break;
     case IconSet::Folders: strips = kFolderStrips; break;
     case IconSet::List: strips = kListStrips; break;
+    case IconSet::Files: strips = kFileStrips; break;
     case IconSet::SecureVerified: strips = kSecureVerifiedStrips; break;
     case IconSet::SecureGood: strips = kSecureGoodStrips; break;
     case IconSet::SecureWarning: strips = kSecureWarningStrips; break;

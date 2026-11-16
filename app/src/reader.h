@@ -1,5 +1,5 @@
 // The reading pane: a message's header (the brand's logo at its left, the Unsubscribe link and the paper clip of its
-// files at its right), the bars under it (a signed or encrypted message's security bar, a download that failed,
+// files at its right), the strip of its files under it, the bars under that (a signed or encrypted message's security bar, a download that failed,
 // blocked pictures) and the message itself in the locked-down WebView2 (preview.h). The main window has one under its
 // list, each message window one of its own. Every string shown was decoded by the core; the body is the sanitized
 // document the core made.
@@ -116,6 +116,18 @@ private:
     void OpenInCalendar();
     void ChooseAttachment();
     void SaveAllAttachments();
+    // file `index` of the message saved where the user says, with the Save As dialog
+    void SaveAttachment(size_t index);
+    // the attachment strip: an item a file of `info` (none hides it); placed at `left`, `top`, `width` wide, its
+    // height, 0 when it is hidden
+    void FillStrip(const PeMessageInfo* info);
+    int PlaceStrip(int left, int top, int width);
+    // the file of an item of the strip opened with the system's program, from the private folder the core wrote it
+    // into: a note shown first when the core has one; a file that can run code refused with the core's words
+    void OpenAttachment(int item);
+    // the menu of an item of the strip (Open, Save As..., Save All...) at `screen`, (-1, -1) for the keyboard's
+    void StripMenu(POINT screen);
+    static LRESULT CALLBACK StripProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR data);
     // the core's calls for the files of the message shown, from its folder or from the message file
     uint8_t* AttachmentData(size_t index, size_t& length, char*& name) const;
     bool SaveAttachments(const std::string& dir, size_t& saved, size_t& total) const;
@@ -126,6 +138,9 @@ private:
     HWND header_ = nullptr;
     // the paper clip button (a toolbar of one), the information bar of blocked pictures, the one of a failed download
     HWND attachments_ = nullptr;
+    // the strip of the files under the header (a list view of small icons), an item a file
+    HWND strip_ = nullptr;
+    HWND stripFrame_ = nullptr;
     HWND pictures_ = nullptr;
     HWND picturesMenu_ = nullptr;
     HWND retry_ = nullptr;

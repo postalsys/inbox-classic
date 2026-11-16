@@ -12,6 +12,7 @@ constexpr IconStrip kToolbarStrips[] = {{10, 24, 0xF0F0F0}, {11, 30, 0xF0F0F0}, 
 constexpr IconStrip kFormatStrips[] = {{20, 16, 0xF0F0F0}, {21, 20, 0xF0F0F0}, {22, 24, 0xF0F0F0}, {23, 32, 0xF0F0F0}};
 constexpr IconStrip kFolderStrips[] = {{30, 16, 0xFFFFFF}, {31, 20, 0xFFFFFF}, {32, 24, 0xFFFFFF}, {33, 32, 0xFFFFFF}};
 constexpr IconStrip kListStrips[] = {{40, 16, 0xFFFFFF}, {41, 20, 0xFFFFFF}, {42, 24, 0xFFFFFF}, {43, 32, 0xFFFFFF}};
+constexpr IconStrip kFileStrips[] = {{90, 16, 0xFFFFFF}, {91, 20, 0xFFFFFF}, {92, 24, 0xFFFFFF}, {93, 32, 0xFFFFFF}};
 constexpr IconStrip kSecureVerifiedStrips[] = {{50, 16, 0xE8F5E9}, {51, 20, 0xE8F5E9}, {52, 24, 0xE8F5E9}, {53, 32, 0xE8F5E9}};
 constexpr IconStrip kSecureGoodStrips[] = {{60, 16, 0xE6EEFA}, {61, 20, 0xE6EEFA}, {62, 24, 0xE6EEFA}, {63, 32, 0xE6EEFA}};
 constexpr IconStrip kSecureWarningStrips[] = {{70, 16, 0xFFF4E0}, {71, 20, 0xFFF4E0}, {72, 24, 0xFFF4E0}, {73, 32, 0xFFF4E0}};
@@ -84,6 +85,24 @@ enum ListIcon : int {
     LIST_MAIL_ERROR = 5,
     LIST_GLASSES = 6,
     LIST_SPEAKER_MUTE = 7,
+};
+
+enum FileIcon : int {
+    KIND_IMAGE = 0,
+    KIND_DOCUMENT_PDF = 1,
+    KIND_DOCUMENT_TEXT = 2,
+    KIND_DOCUMENT_TABLE = 3,
+    KIND_SLIDE_TEXT = 4,
+    KIND_FOLDER_ZIP = 5,
+    KIND_MUSIC_NOTE_2 = 6,
+    KIND_VIDEO = 7,
+    KIND_CALENDAR_LTR = 8,
+    KIND_CONTACT_CARD = 9,
+    KIND_KEY = 10,
+    KIND_DOCUMENT_ONE_PAGE = 11,
+    KIND_MAIL = 12,
+    KIND_WINDOW_SHIELD = 13,
+    KIND_DOCUMENT = 14,
 };
 
 enum SecureIcon : int {
