@@ -78,14 +78,14 @@ fn integrity_failed(error: &(dyn std::error::Error + 'static)) -> bool {
     false
 }
 
-fn classify(error: PgpError) -> DecryptError {
+pub(crate) fn classify(error: PgpError) -> DecryptError {
     if integrity_failed(&error) {
         return DecryptError::Integrity;
     }
     DecryptError::Malformed(short(error.to_string()))
 }
 
-fn read_error(error: std::io::Error) -> DecryptError {
+pub(crate) fn read_error(error: std::io::Error) -> DecryptError {
     if integrity_failed(&error) {
         return DecryptError::Integrity;
     }

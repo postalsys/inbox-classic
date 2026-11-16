@@ -22,19 +22,6 @@ pub enum Outcome {
     Shown,
 }
 
-/// A row with a check box in front of it, the box toggled by the row
-fn check_row(title: &str, name: &str, active: bool) -> (adw::ActionRow, gtk::CheckButton) {
-    let check = gtk::CheckButton::builder()
-        .active(active)
-        .valign(gtk::Align::Center)
-        .build();
-    check.set_widget_name(name);
-    let row = adw::ActionRow::builder().title(title).use_underline(false).build();
-    row.add_prefix(&check);
-    row.set_activatable_widget(Some(&check));
-    (row, check)
-}
-
 struct Editor {
     name: adw::EntryRow,
     account: adw::ComboRow,
@@ -189,7 +176,12 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, rule: Rule) -> Outcome {
     let move_to = gtk::DropDown::from_strings(&[]);
     move_to.set_valign(gtk::Align::Center);
     move_to.set_widget_name("rule-move-to");
-    let (move_row, move_it) = check_row(&field_title(Text::UiRuleMove), "rule-move", rule.move_to.is_some());
+    let (move_row, move_it) = ui::check_row(
+        &field_title(Text::UiRuleMove),
+        None,
+        "rule-move",
+        rule.move_to.is_some(),
+    );
     move_row.add_suffix(&move_to);
     // the folder is chosen for Move it to alone, as on Windows and the Mac
     move_it
@@ -198,7 +190,7 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, rule: Rule) -> Outcome {
         .build();
     actions.add(&move_row);
     let add = |text: Text, name: &str, active: bool| {
-        let (row, check) = check_row(&plain(text), name, active);
+        let (row, check) = ui::check_row(&plain(text), None, name, active);
         actions.add(&row);
         check
     };
@@ -209,7 +201,7 @@ pub async fn editor(parent: &impl IsA<gtk::Widget>, rule: Rule) -> Outcome {
     let remove = add(Text::UiRuleDelete, "rule-delete", rule.remove);
     let quiet = add(Text::UiRuleQuiet, "rule-quiet", rule.quiet);
     let also = adw::PreferencesGroup::new();
-    let (apply_row, apply_now) = check_row(&plain(Text::UiRuleApplyNow), "rule-apply-now", false);
+    let (apply_row, apply_now) = ui::check_row(&plain(Text::UiRuleApplyNow), None, "rule-apply-now", false);
     also.add(&apply_row);
     let content = gtk::Box::new(gtk::Orientation::Vertical, 18);
     content.set_margin_start(18);

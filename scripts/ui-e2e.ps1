@@ -714,6 +714,23 @@ try {
         if ($shots -and $warning) { Shot $warning 'account-4-warning' }
         Click $warning 6
     }
+    # before the first account, Add Mail Account offers the settings and accounts of another computer (setup.cpp, app.h
+    # SetupControlId): the link opens the import, which asks for a file first; cancelled, the page is there again
+    $IDC_SETUP_FIRST_RUN = 956
+    $start = StartPage $true 20
+    $importLink = if ($start) { [Native.Win]::GetDlgItem($start, $IDC_SETUP_FIRST_RUN) } else { [IntPtr]::Zero }
+    Check ($importLink -ne [IntPtr]::Zero -and (WindowText $importLink) -eq 'Import settings and accounts from another computer...') "before the first account, Add Mail Account offers to import settings and accounts from another computer ($(if ($importLink -ne [IntPtr]::Zero) { WindowText $importLink }))"
+    if ($importLink -ne [IntPtr]::Zero) {
+        Shot $start 'setup-5-first-run'
+        Click $start $IDC_SETUP_FIRST_RUN
+        $open = WaitWindow '#32770' 'Import Settings and Accounts' 40
+        Check ($null -ne $open) 'the link opens the import, which asks for a file'
+        if ($open) {
+            Click $open 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($open) } 10)
+        }
+        Check ($null -ne (StartPage $true 20)) 'cancelled, Add Mail Account is there again'
+    }
     AddAccount 'Alex Morgan' 'testuser' 'testpass' $true
 
     # ---- reading ----
@@ -1861,24 +1878,22 @@ public static class Dragger {
             Click $offer 1
         }
 
-        # Back Up: the passphrase twice, two different ones and a short one refused
+        # Back Up: the passphrase twice; what the core says of it as it is typed, OK only once it takes it
         $backup = PassphraseWindow
         Check ($null -ne $backup -and (WindowText $backup) -eq 'Back Up Key') "Save a Backup asks for a passphrase ($(if ($backup) { WindowText $backup }))"
         if ($backup) {
+            $feedback = { if ([Native.Win]::IsWindowVisible([Native.Win]::GetDlgItem($backup, $IDC_KEY_PROBLEM))) { GetText $backup $IDC_KEY_PROBLEM } else { '' } }
+            Check (-not (Enabled $backup 1) -and (& $feedback) -eq '') 'OK waits for a passphrase, nothing said before one is typed'
             SetText $backup $IDC_KEY_PASSPHRASE 'correct horse battery staple'
             SetText $backup $IDC_KEY_PASSPHRASE_AGAIN 'correct horse battery stable'
+            Check ([bool](WaitFor { (& $feedback) -match 'not the same' -and -not (Enabled $backup 1) } 5)) "two different passphrases are refused as they are typed ($(& $feedback))"
             Shot $backup 'keys-4-backup'
-            Click $backup 1
-            $said = Told 'Back Up Key' 'not the same'
-            Check ($said -match 'not the same') "two different passphrases are refused ($said)"
             SetText $backup $IDC_KEY_PASSPHRASE 'short'
             SetText $backup $IDC_KEY_PASSPHRASE_AGAIN 'short'
-            Click $backup 1
-            $said = Told 'Back Up Key' 'at least 8'
-            Check ($said -match 'at least 8') "a short one is refused ($said)"
-            Check ([Native.Win]::IsWindow($backup)) 'the window stays open for another'
+            Check ([bool](WaitFor { (& $feedback) -match 'at least 8' -and -not (Enabled $backup 1) } 5)) "a short one is refused ($(& $feedback))"
             SetText $backup $IDC_KEY_PASSPHRASE 'correct horse battery staple'
             SetText $backup $IDC_KEY_PASSPHRASE_AGAIN 'correct horse battery staple'
+            Check ([bool](WaitFor { (& $feedback) -eq '' -and (Enabled $backup 1) } 5)) 'the same one twice is taken, OK on'
             Click $backup 1
             $backupFile = Join-Path $keysOut 'own-key-backup.asc'
             Remove-Item -Force -ErrorAction SilentlyContinue $backupFile
@@ -5427,6 +5442,129 @@ public static class Dragger {
         }
     }
 
+    # ---- settings and accounts to another computer ----
+
+    Step 'settings and accounts to another computer'
+    # core/commands.toml, app/src/app.h (SetupControlId, KeysControlId)
+    $IDM_EXPORT_SETUP = 173; $IDM_IMPORT_SETUP = 174
+    $IDC_SETUP_PART = 940; $IDC_SETUP_USE_PASSPHRASE = 950; $IDC_SETUP_PASSPHRASE_NOTE = 951; $IDC_SETUP_PASSPHRASE = 952
+    $IDC_SETUP_PASSPHRASE_AGAIN = 953; $IDC_SETUP_PROBLEM = 954; $IDC_SETUP_FROM = 955; $IDC_SETUP_ACCOUNT = 1000
+    $IDC_KEY_PASSPHRASE = 882; $IDC_KEY_PROBLEM = 884
+    $BM_GETCHECK = 0x00F0; $BM_SETCHECK = 0x00F1
+    function IsChecked([IntPtr]$window, [int]$id) {
+        [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($window, $id), $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1
+    }
+    # a check box set as a click sets it, its window told
+    function SetCheck([IntPtr]$window, [int]$id, [bool]$on) {
+        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($window, $id), $BM_SETCHECK, [IntPtr]([int]$on), [IntPtr]::Zero)
+        Click $window $id
+    }
+    $setupFile = Join-Path (Resolve-Path $Out) 'setup.inboxclassic'
+    Remove-Item -Force -ErrorAction SilentlyContinue $setupFile
+    $treeCount = [int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
+    Command $main $IDM_EXPORT_SETUP
+    $export = WaitShown 'InboxClassicSetupExport' 10
+    Check ($null -ne $export) 'File > Export Settings and Accounts opens'
+    if ($export) {
+        $parts = @(0..7 | ForEach-Object { GetText $export ($IDC_SETUP_PART + $_) })
+        $chosen = @(0..7 | Where-Object { IsChecked $export ($IDC_SETUP_PART + $_) }).Count
+        Check (($parts -join ', ') -eq 'Accounts, Sign-in apps, Settings, Window preferences, Contacts and groups, Encryption keys, Message rules, Trusted senders' -and $chosen -eq 8) "it lists the parts, all chosen ($($parts -join ', '); $chosen chosen)"
+        Check (-not (IsChecked $export $IDC_SETUP_USE_PASSPHRASE) -and -not (Enabled $export $IDC_SETUP_PASSPHRASE) -and (GetText $export $IDC_SETUP_PASSPHRASE_NOTE) -match '^With a passphrase, the file is encrypted and also holds your passwords') 'the passphrase is off, with the words of what it adds'
+        Check (Enabled $export 1) 'Export can go without a passphrase'
+        Shot $export 'setup-1-export'
+        SetCheck $export $IDC_SETUP_USE_PASSPHRASE $true
+        Check ([bool](WaitFor { (Enabled $export $IDC_SETUP_PASSPHRASE) -and -not (Enabled $export 1) } 5)) 'with the passphrase on, its fields are on and Export waits for one'
+        SetText $export $IDC_SETUP_PASSPHRASE 'short'
+        Check ([bool](WaitFor { (GetText $export $IDC_SETUP_PROBLEM) -eq 'Use a passphrase of at least 8 characters.' -and (Visible $export $IDC_SETUP_PROBLEM) } 5) -and -not (Enabled $export 1)) "a passphrase shorter than 8 characters is refused with words ($(GetText $export $IDC_SETUP_PROBLEM))"
+        SetText $export $IDC_SETUP_PASSPHRASE 'correct horse battery'
+        SetText $export $IDC_SETUP_PASSPHRASE_AGAIN 'correct horse batterz'
+        Check ([bool](WaitFor { (GetText $export $IDC_SETUP_PROBLEM) -eq 'The passphrases are not the same.' } 5) -and -not (Enabled $export 1)) "typed differently the second time, it is refused with words ($(GetText $export $IDC_SETUP_PROBLEM))"
+        Shot $export 'setup-2-passphrase'
+        SetText $export $IDC_SETUP_PASSPHRASE_AGAIN 'correct horse battery'
+        Check ([bool](WaitFor { -not (Visible $export $IDC_SETUP_PROBLEM) -and (Enabled $export 1) } 5)) 'typed the same twice, it is taken and Export is on'
+        Click $export 1
+        Check (AnswerFileDialog 'Export Settings and Accounts' $setupFile $null 'Inbox Classic*') 'Export asks where to save, as "Inbox Classic"'
+        $exported = WaitShown 'InboxClassicSetupDone' 30
+        Check ($exported -and (Statics $exported) -match '2 accounts' -and (Statics $exported) -match 'contact') "then says what the file holds ($(if ($exported) { Statics $exported }))"
+        if ($exported) {
+            Shot $exported 'setup-1b-exported'
+            Click $exported 1
+            [void](WaitFor { -not [Native.Win]::IsWindow($exported) } 10)
+        }
+    }
+    $head = if (Test-Path $setupFile) { (Get-Content -TotalCount 1 $setupFile) } else { '' }
+    Check ($head -eq '-----BEGIN PGP MESSAGE-----') "with a passphrase the file is written encrypted, an OpenPGP message ($head)"
+
+    # a contact deleted, to come back with the import of Contacts alone
+    Command $main $IDM_ADDRESS_BOOK
+    $book = WaitShown 'InboxClassicAddressBook' 10
+    $contactsBefore = @()
+    if ($book) {
+        $bookList = [Native.Win]::GetDlgItem($book, $IDC_BOOK_LIST)
+        [void](WaitFor { (ListCount $bookList) -gt 0 } 5)
+        $contactsBefore = @(Names $bookList)
+        Key $bookList $VK_HOME
+        Start-Sleep -Milliseconds 300
+        Key $bookList $VK_DELETE
+        $ask = WaitWindow '#32770' 'Inbox Classic' 10
+        if ($ask) { Click $ask 6 }
+        Check ($contactsBefore.Count -gt 0 -and [bool](WaitFor { (ListCount $bookList) -eq $contactsBefore.Count - 1 } 10)) "a contact is deleted before the import ($($contactsBefore -join ', '))"
+        [void][Native.Win]::PostMessage($book, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($book) } 10)
+    }
+
+    Command $main $IDM_IMPORT_SETUP
+    Check (AnswerFileDialog 'Import Settings and Accounts' $setupFile $null) 'File > Import Settings and Accounts asks for a file'
+    $ask = WaitShown 'InboxClassicPassphrase' 30
+    Check ($ask -and (Statics $ask) -match 'This file is protected by a passphrase') "it asks for the passphrase ($(if ($ask) { Statics $ask }))"
+    if ($ask) {
+        SetText $ask $IDC_KEY_PASSPHRASE 'not the passphrase'
+        Click $ask 1
+        $again = WaitFor { $w = [Native.Win]::FindWindow('InboxClassicPassphrase', [NullString]::Value); if ($w -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($w) -and [Native.Win]::GetDlgItem($w, $IDC_KEY_PROBLEM) -ne [IntPtr]::Zero) { $w } } 30
+        Check ($again -and (GetText $again $IDC_KEY_PROBLEM) -eq 'That is not the passphrase this setup was saved with.') "a wrong one is refused with words, and asked again ($(if ($again) { GetText $again $IDC_KEY_PROBLEM }))"
+        if ($again) {
+            SetText $again $IDC_KEY_PASSPHRASE 'correct horse battery'
+            Click $again 1
+        }
+    }
+    $import = WaitShown 'InboxClassicSetupImport' 30
+    Check ($null -ne $import) 'the right one shows what the file holds'
+    if ($import) {
+        Check ((GetText $import $IDC_SETUP_FROM) -match '^Saved by Inbox Classic \d+\.\d+\.\d+ on .+\.$') "with when and by which version it was saved ($(GetText $import $IDC_SETUP_FROM))"
+        $accountBoxes = @(0..9 | Where-Object { [Native.Win]::GetDlgItem($import, $IDC_SETUP_ACCOUNT + $_) -ne [IntPtr]::Zero })
+        $here = @($accountBoxes | Where-Object { -not (IsChecked $import ($IDC_SETUP_ACCOUNT + $_)) -and -not (Enabled $import ($IDC_SETUP_ACCOUNT + $_)) })
+        $words = Statics $import
+        Check ((GetText $import $IDC_SETUP_ACCOUNT) -match '<testuser@inboxclassic\.test>$' -and $words -match '127\.0\.0\.1 and 127\.0\.0\.1 \(Password\)') "each account with the core's label and its servers ($(GetText $import $IDC_SETUP_ACCOUNT))"
+        Check ($accountBoxes.Count -eq 2 -and $here.Count -eq 2 -and ([regex]::Matches($words, 'It is set up here already, so it is skipped\.')).Count -eq 2) "the accounts, both marked as already here and not chosen ($($accountBoxes.Count) accounts, $($here.Count) here)"
+        Check (-not (IsChecked $import $IDC_SETUP_PART) -and -not (Enabled $import $IDC_SETUP_PART)) 'with no account to import, Accounts is not chosen and can not be'
+        # the parts with something in them: the test has no rules and no trusted senders, which are not offered
+        $present = @(1..7 | Where-Object { [Native.Win]::GetDlgItem($import, $IDC_SETUP_PART + $_) -ne [IntPtr]::Zero })
+        Check ($present.Count -gt 0 -and @($present | Where-Object { IsChecked $import ($IDC_SETUP_PART + $_) }).Count -eq $present.Count -and [Native.Win]::GetDlgItem($import, $IDC_SETUP_PART + 6) -eq [IntPtr]::Zero) "the other parts with something in them are there, chosen, an empty one left out ($($present.Count))"
+        Check ($words -match '\d+ contacts?, \d+ groups?' -and $words -match 'keys? of your own' -and $words -match '2 accounts') "with what each holds: the contacts, the keys and the other parts ($words)"
+        Shot $import 'setup-3-import-choose'
+        # Contacts alone
+        foreach ($i in $present) { if ($i -ne 4) { SetCheck $import ($IDC_SETUP_PART + $i) $false } }
+        Check ([bool](WaitFor { -not (Enabled $import $IDC_SETUP_ACCOUNT) } 5) -and (Enabled $import 1)) 'Contacts alone chosen'
+        Click $import 1
+        $imported = WaitShown 'InboxClassicSetupDone' 30
+        $said = if ($imported) { Statics $imported } else { '' }
+        Check ($said -match 'Added 1 contact to the address book\.' -and ($contactsBefore.Count -lt 2 -or $said -match 'in the address book already') -and $said -notmatch 'account') "the summary says what was added and skipped ($said)"
+        if ($imported) {
+            Shot $imported 'setup-4-imported'
+            Click $imported 1
+            [void](WaitFor { -not [Native.Win]::IsWindow($imported) } 10)
+        }
+    }
+    Check ([int][Native.Win]::SendMessage($tree, $TVM_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq $treeCount) 'the accounts are left as they are'
+    Command $main $IDM_ADDRESS_BOOK
+    $book = WaitShown 'InboxClassicAddressBook' 10
+    if ($book) {
+        $bookList = [Native.Win]::GetDlgItem($book, $IDC_BOOK_LIST)
+        Check ([bool](WaitFor { ((Names $bookList) -join ', ') -eq ($contactsBefore -join ', ') } 10)) "the contact deleted before is back ($((Names $bookList) -join ', '))"
+        [void][Native.Win]::PostMessage($book, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($book) } 10)
+    }
+
     # ---- Options and the language ----
 
     Step 'Options and the language'
@@ -5839,6 +5977,35 @@ public static bool HasIcon(IntPtr window) {
             Click $form 2
         }
         Start-Sleep -Milliseconds 500
+        # the setup windows in German, the longest words of the catalogs: nothing cut off
+        Command $main $IDM_EXPORT_SETUP
+        $export = WaitShown 'InboxClassicSetupExport' 10
+        Check ($export -and (WindowText $export) -eq $de['ui-setup-export-title']) "Export Settings and Accounts opens in German ($(if ($export) { WindowText $export }))"
+        if ($export) {
+            SetCheck $export $IDC_SETUP_USE_PASSPHRASE $true
+            SetText $export $IDC_SETUP_PASSPHRASE 'kurz'
+            [void](WaitFor { Visible $export $IDC_SETUP_PROBLEM } 5)
+            Shot $export 'setup-de-export'
+            Click $export 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($export) } 5)
+        }
+        Command $main $IDM_IMPORT_SETUP
+        if (AnswerFileDialog $de['ui-setup-import-title'] $setupFile $null) {
+            $ask = WaitShown 'InboxClassicPassphrase' 30
+            if ($ask) {
+                SetText $ask $IDC_KEY_PASSPHRASE 'correct horse battery'
+                Click $ask 1
+            }
+            $import = WaitShown 'InboxClassicSetupImport' 30
+            Check ($null -ne $import) 'and Import Settings and Accounts'
+            if ($import) {
+                Shot $import 'setup-de-import'
+                Click $import 2
+                [void](WaitFor { -not [Native.Win]::IsWindow($import) } 5)
+            }
+        } else {
+            Check $false 'Import Settings and Accounts asks for a file in German'
+        }
         Quit $main 'German'
     }
     Remove-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue

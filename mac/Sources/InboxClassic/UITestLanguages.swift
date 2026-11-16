@@ -83,6 +83,14 @@ extension UITest {
         } else {
             check(false, "File > New Account opens the form")
         }
+        command(.exportSetup)
+        if let export = await waitWindow("setup.export", 10) {
+            checkCatalogWords(in: export, "the Export Settings and Accounts window")
+            press(find("setup.cancel", in: export))
+            _ = await waitUntil { !export.isVisible }
+        } else {
+            check(false, "File > Export Settings and Accounts opens")
+        }
         command(.encryptionKeys)
         if let keys = await waitWindow("keys", 10) {
             checkCatalogWords(in: keys, "the Encryption Keys window")

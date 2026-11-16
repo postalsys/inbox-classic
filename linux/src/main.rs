@@ -36,6 +36,7 @@ mod rows;
 mod rules;
 mod security;
 mod settings;
+mod setup;
 mod sign_in_apps;
 mod tray;
 mod ui;

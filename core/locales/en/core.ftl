@@ -612,3 +612,142 @@ pgp-bar-count-warning = { $count ->
    *[other] { $count } need attention
 }
 pgp-bar-count-neutral = { $count } without a confirmed signature
+# the setup file: settings, accounts, contacts and keys carried to another computer
+setup-part-settings = Settings
+setup-part-preferences = Window preferences
+setup-part-accounts = Accounts
+setup-part-sign-in-apps = Sign-in apps
+setup-part-contacts = Contacts and groups
+setup-part-keys = Encryption keys
+setup-part-rules = Message rules
+setup-part-trusted-senders = Trusted senders
+setup-holds-settings = { $count ->
+    [one] 1 setting
+   *[other] { $count } settings
+}
+setup-holds-preferences = { $count ->
+    [one] 1 preference
+   *[other] { $count } preferences
+}
+setup-holds-accounts = { $count ->
+    [one] 1 account
+   *[other] { $count } accounts
+}
+setup-holds-sign-in-apps = { $count ->
+    [one] 1 sign-in app
+   *[other] { $count } sign-in apps
+}
+setup-holds-built-in = Which built-in sign-in apps are turned on
+setup-holds-contacts = { $count ->
+    [one] 1 contact
+   *[other] { $count } contacts
+}
+setup-holds-groups = { $count ->
+    [one] 1 group
+   *[other] { $count } groups
+}
+setup-holds-own-keys = { $count ->
+    [one] 1 key of your own
+   *[other] { $count } keys of your own
+}
+setup-holds-contact-keys = { $count ->
+    [one] 1 key of a contact
+   *[other] { $count } keys of contacts
+}
+setup-holds-rules = { $count ->
+    [one] 1 rule
+   *[other] { $count } rules
+}
+setup-holds-trusted-senders = { $count ->
+    [one] 1 trusted sender
+   *[other] { $count } trusted senders
+}
+setup-sign-in-password = Password
+setup-account-secret-password = Its password is in the file.
+setup-account-secret-token = Its sign-in is in the file.
+setup-account-asks-password = It asks for its password after the import.
+setup-account-signs-in-again = You sign in to it again after the import.
+setup-account-here = It is set up here already, so it is skipped.
+setup-account-no-app = It signs in with { $app }, which is not set up here. Import the sign-in apps too.
+setup-invalid-address = "{ $address }" is not an email address.
+setup-invalid-server = The { $server } server has no usable name or port.
+setup-invalid-user = It has no user name.
+setup-invalid-sign-in = It signs in in a way Inbox Classic does not know.
+setup-error-empty = The file is empty.
+setup-error-too-large = The file is too large to be an Inbox Classic setup.
+setup-error-not-setup = This file is not an Inbox Classic setup.
+setup-error-damaged = The setup file is damaged and can not be read.
+setup-error-newer = This setup was saved by a newer Inbox Classic ({ $version }). Update Inbox Classic, then import it again.
+setup-error-needs-passphrase = This setup is protected by a passphrase. Type the passphrase it was saved with.
+setup-error-wrong-passphrase = That is not the passphrase this setup was saved with.
+setup-error-changed = The setup file was changed or damaged after it was saved, so it can not be imported.
+setup-error-read = The setup file could not be read: { $error }
+setup-error-write = The setup could not be saved: { $error }
+setup-error-no-parts = Choose at least one part.
+setup-left-out = { $count ->
+    [one] 1 entry of { $part } can not be used and is left out.
+   *[other] { $count } entries of { $part } can not be used and are left out.
+}
+setup-imported-settings = The settings were replaced.
+setup-imported-preferences = The window preferences were replaced.
+setup-added-accounts = { $count ->
+    [one] Added 1 account.
+   *[other] Added { $count } accounts.
+}
+setup-skipped-here = { $address } is set up here already, so it was skipped.
+setup-skipped-no-app = { $address } was skipped: it signs in with { $app }, which is not set up here.
+setup-skipped-invalid = { $address } was skipped: { $reason }
+setup-asks-password = { $address } asks for its password when it connects.
+setup-signs-in-again = { $address } asks you to sign in again when it connects.
+setup-added-sign-in-apps = { $count ->
+    [one] Added 1 sign-in app.
+   *[other] Added { $count } sign-in apps.
+}
+setup-skipped-sign-in-apps = { $count ->
+    [one] 1 sign-in app is set up here already.
+   *[other] { $count } sign-in apps are set up here already.
+}
+setup-added-contacts = { $count ->
+    [one] Added 1 contact to the address book.
+   *[other] Added { $count } contacts to the address book.
+}
+setup-skipped-contacts = { $count ->
+    [one] 1 contact is in the address book already.
+   *[other] { $count } contacts are in the address book already.
+}
+setup-added-groups = { $count ->
+    [one] Added or completed 1 group.
+   *[other] Added or completed { $count } groups.
+}
+setup-added-own-keys = { $count ->
+    [one] Added 1 key of your own.
+   *[other] Added { $count } keys of your own.
+}
+setup-added-contact-keys = { $count ->
+    [one] Added 1 key of a contact.
+   *[other] Added { $count } keys of contacts.
+}
+setup-added-rules = { $count ->
+    [one] Added 1 message rule.
+   *[other] Added { $count } message rules.
+}
+setup-skipped-rules = { $count ->
+    [one] 1 message rule is here already.
+   *[other] { $count } message rules are here already.
+}
+setup-skipped-rules-account = { $count ->
+    [one] 1 message rule is for an account that is not here, so it was skipped.
+   *[other] { $count } message rules are for accounts that are not here, so they were skipped.
+}
+setup-rules-waiting = { $count ->
+    [one] 1 message rule moves messages to a folder that appears once its account syncs.
+   *[other] { $count } message rules move messages to folders that appear once their accounts sync.
+}
+setup-added-trusted-senders = { $count ->
+    [one] Added 1 trusted sender.
+   *[other] Added { $count } trusted senders.
+}
+setup-nothing = Nothing was imported.
+setup-account-servers = { $imap } and { $smtp } ({ $signin })
+setup-file-name = Inbox Classic settings and accounts
+setup-skipped-unreachable = { $name } was skipped: its sign-in service could not be reached. Add it again in Sign-in Apps.

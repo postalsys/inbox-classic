@@ -362,6 +362,35 @@ pub unsafe extern "C" fn pe_pgp_passphrase_problem(first: *const c_char, again: 
     guard(|| pe_core::keys::passphrase_problem(first, again).map_or(null_mut(), into_c_string)).unwrap_or(null_mut())
 }
 
+/// What to say under a passphrase typed twice while it is typed (a key backup's, a setup file's), NULL for nothing;
+/// `acceptable` (NULL or a valid pointer) says whether it can be used: 8 characters or more, the same twice. "Too
+/// short" shows once the first field has something shorter; "not the same" only once the second is as long as the
+/// first. Free with `pe_string_free`.
+///
+/// # Safety
+/// `first` and `again` must be NULL or NUL-terminated strings, `acceptable` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_passphrase_feedback(
+    first: *const c_char,
+    again: *const c_char,
+    acceptable: *mut bool,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let (first, again) = unsafe { (arg(first).unwrap_or_default(), arg(again).unwrap_or_default()) };
+    let (said, usable) = guard(|| pe_core::keys::passphrase_feedback(first, again)).unwrap_or((None, false));
+    if !acceptable.is_null() {
+        // SAFETY: as the caller guarantees
+        unsafe { *acceptable = usable };
+    }
+    said.map_or(null_mut(), into_c_string)
+}
+
+/// The longest of what `pe_passphrase_feedback` says, for a window to keep room for it; free with `pe_string_free`
+#[unsafe(no_mangle)]
+pub extern "C" fn pe_passphrase_feedback_longest() -> *mut c_char {
+    guard(|| into_c_string(pe_core::keys::passphrase_feedback_longest())).unwrap_or(null_mut())
+}
+
 /// A correspondent's keys: the one in use and a newer one waiting for the user's decision
 #[repr(C)]
 pub struct PePeerKeys {

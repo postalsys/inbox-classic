@@ -181,19 +181,28 @@ impl OAuthProviders {
     }
 }
 
-/// A host name or address as a server setting: not empty, no spaces or other characters a host has not
-fn valid_host(host: &str) -> bool {
+/// A host name or address as a server setting: not empty, at most 253 characters, no spaces or other characters a
+/// host has not
+pub(crate) fn valid_host(host: &str) -> bool {
     !host.is_empty()
+        && host.len() <= 253
         && host
             .bytes()
             .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'-' | b'.' | b':' | b'[' | b']'))
 }
 
-/// The form, checked, as the app to save: its endpoints from the discovery `found`
-fn checked_app(form: &SignInAppForm, found: Discovered, has_secret: bool, enabled: bool) -> Result<SignInApp> {
+/// Whether `app` is the client `client_id` of `issuer`: how a sign-in app is known again (in a setup file, here)
+pub(crate) fn same_client(app: &SignInApp, issuer: &str, client_id: &str) -> bool {
+    app.issuer == issuer && app.client_id == client_id
+}
+
+/// The form as the sign-in apps window and a setup file's import check it, tidied: the name and client id trimmed,
+/// the issuer as [`pe_oauth::issuer`] writes it, the scopes one space apart, the hosts trimmed and in lower case.
+/// Refused with the reason for a missing name, client id or scope, a server that is no host and port, or a server
+/// reached without encryption (the access token goes there).
+pub(crate) fn checked_form(form: &SignInAppForm) -> Result<SignInAppForm> {
     use pe_i18n::{Text, tr, tr_args};
     let invalid = |text: Text| Err(Error::Invalid(tr(text)));
-    let text = |value: &str| value.trim().to_string();
     if form.name.trim().is_empty() {
         return invalid(Text::SignInAppNoName);
     }
@@ -201,7 +210,7 @@ fn checked_app(form: &SignInAppForm, found: Discovered, has_secret: bool, enable
         return invalid(Text::SignInAppNoClient);
     }
     let scopes = form.scopes.split_whitespace().collect::<Vec<_>>().join(" ");
-    if scopes.is_empty() {
+    if scopes.is_empty() || scopes.chars().any(char::is_control) {
         return invalid(Text::SignInAppNoScopes);
     }
     for (what, host, port, security) in [
@@ -222,19 +231,38 @@ fn checked_app(form: &SignInAppForm, found: Discovered, has_secret: bool, enable
             )));
         }
     }
-    Ok(SignInApp {
-        name: text(&form.name),
+    Ok(SignInAppForm {
+        name: form.name.trim().to_string(),
         issuer: pe_oauth::issuer(&form.issuer).map_err(Error::Invalid)?,
-        client_id: text(&form.client_id),
-        has_secret,
+        client_id: form.client_id.trim().to_string(),
         scopes,
+        imap_host: form.imap_host.trim().to_ascii_lowercase(),
+        smtp_host: form.smtp_host.trim().to_ascii_lowercase(),
+        ..form.clone()
+    })
+}
+
+/// The form, checked ([`checked_form`]), as the app to save: its endpoints from the discovery `found`
+pub(crate) fn checked_app(
+    form: &SignInAppForm,
+    found: Discovered,
+    has_secret: bool,
+    enabled: bool,
+) -> Result<SignInApp> {
+    let form = checked_form(form)?;
+    Ok(SignInApp {
+        name: form.name,
+        issuer: form.issuer,
+        client_id: form.client_id,
+        has_secret,
+        scopes: form.scopes,
         authorize_url: found.authorize_url,
         token_url: found.token_url,
         response_issuer: found.response_issuer,
-        imap_host: text(&form.imap_host),
+        imap_host: form.imap_host,
         imap_port: form.imap_port,
         imap_security: form.imap_security,
-        smtp_host: text(&form.smtp_host),
+        smtp_host: form.smtp_host,
         smtp_port: form.smtp_port,
         smtp_security: form.smtp_security,
         enabled,
@@ -468,10 +496,12 @@ mod tests {
             ("Acme", "https://login.example.com", "openid mail")
         );
         type Change = fn(&mut SignInAppForm);
-        let refused: [(Change, &str); 6] = [
+        let refused: [(Change, &str); 8] = [
             (|f| f.name = " ".into(), "name"),
             (|f| f.client_id = String::new(), "client ID"),
             (|f| f.scopes = "  ".into(), "scopes"),
+            (|f| f.scopes = "openid \u{7}".into(), "scopes"),
+            (|f| f.imap_host = format!("{}.example", "a".repeat(250)), "IMAP server"),
             (|f| f.imap_host = "imap example".into(), "IMAP server"),
             (|f| f.smtp_port = 0, "SMTP server"),
             (|f| f.smtp_security = Security::Plain, "STARTTLS"),
@@ -482,6 +512,13 @@ mod tests {
             let error = checked_app(&form, found(), false, true).unwrap_err().to_string();
             assert!(error.contains(reason), "{error}");
         }
+        // the hosts as a host is written
+        let mut shouting = form();
+        shouting.imap_host = " IMAP.Example.COM ".into();
+        assert_eq!(
+            checked_app(&shouting, found(), false, true).unwrap().imap_host,
+            "imap.example.com"
+        );
     }
 
     #[test]

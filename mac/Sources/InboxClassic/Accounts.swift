@@ -207,10 +207,12 @@ private struct StartOffer {
     var more = false
     var fields = false
     var next = Text.macNext.text
+    /// the link that imports settings and accounts from another computer (the first start)
+    var importSetup = false
 }
 
 private enum Start {
-    case cancel, next, signIn(SignInChoice)
+    case cancel, next, signIn(SignInChoice), importSetup
 }
 
 @MainActor
@@ -272,6 +274,15 @@ private final class StartPage: NSObject {
             rows.append(grid)
             // the fields end at the right margin; longer labels make them narrower
             grid.widthAnchor.constraint(equalToConstant: width).isActive = true
+        }
+        if offer.importSetup {
+            let line = NSBox()
+            line.boxType = .separator
+            rows.append(line)
+            let link = linkButton(Text.uiSetupFirstRun.text.replacingOccurrences(of: "...", with: "\u{2026}"),
+                                  action: #selector(importClicked))
+            link.setAccessibilityIdentifier("account.import")
+            rows.append(link)
         }
         let cancel = NSButton(title: Text.uiCancel.text, target: self, action: #selector(cancelled))
         cancel.keyEquivalent = "\u{1b}"
@@ -397,6 +408,11 @@ private final class StartPage: NSObject {
         NSApp.stopModal()
     }
 
+    @objc private func importClicked() {
+        result = .importSetup
+        NSApp.stopModal()
+    }
+
     @objc private func cancelled() {
         result = .cancel
         NSApp.stopModal()
@@ -481,10 +497,16 @@ func newAccountDialog(core: Core) -> Int64 {
     first.fields = true
     first.intro = apps.on(PE_O_AUTH_PROVIDER_GOOGLE) || apps.on(PE_O_AUTH_PROVIDER_MICROSOFT)
         ? Text.uiStartIntro.text : Text.uiStartIntroApps.text
-    switch StartPage(core: core, apps: apps, offer: first, name: name, email: email).run(name: &name, email: &email) {
-    case .cancel: return 0
-    case .signIn(let with): return addSignedIn(core: core, with: with, name: name, email: email)
-    case .next: break
+    // before the first account: settings and accounts from another computer; once accounts came that way, done
+    first.importSetup = core.accounts().isEmpty
+    starting: while true {
+        switch StartPage(core: core, apps: apps, offer: first, name: name, email: email).run(name: &name, email: &email) {
+        case .cancel: return 0
+        case .signIn(let with): return addSignedIn(core: core, with: with, name: name, email: email)
+        case .next: break starting
+        case .importSetup:
+            if let added = SetupFiles.importFile(core: core).first { return added }
+        }
     }
 
     // the servers of the address, looked up
@@ -510,7 +532,7 @@ func newAccountDialog(core: Core) -> Int64 {
             offer.intro = Text.uiProviderIntroApps.text(["email": email, "provider": company])
         }
         switch StartPage(core: core, apps: apps, offer: offer, name: name, email: email).run(name: &name, email: &email) {
-        case .cancel: return 0
+        case .cancel, .importSetup: return 0
         case .signIn(let with): return addSignedIn(core: core, with: with, name: name, email: email)
         case .next: break
         }

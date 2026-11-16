@@ -21,6 +21,8 @@ pe-oauth = { path = "../pe-oauth" }
 pe-store = { path = "../pe-store" }
 pe-mcp = { path = "../pe-mcp" }
 tokio = { version = "1.54.1", features = ["rt", "net", "io-util", "time", "sync", "macros"] }
+# a setup file's passphrase, wiped once the export is freed
+zeroize = "1.8"
 
 # the named pipe agents reach the app on, open to this user alone, and the program that started the relay
 [target.'cfg(windows)'.dependencies]

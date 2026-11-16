@@ -505,15 +505,21 @@ bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& 
     }
     int picked = state.picked;
     std::wstring code = picked > 0 && static_cast<size_t>(picked) <= languages.size() ? languages[picked - 1].code : L"";
-    if (code == chosen) {
+    return ChooseLanguage(owner, code);
+}
+
+bool ChooseLanguage(HWND owner, const std::wstring& code) {
+    if (code == GetTextPreference(kLanguagePreference)) {
         return false;
     }
     SetTextPreference(kLanguagePreference, code);
     // the language the windows will have, and whether that is the one they have now
-    std::wstring next = code.empty() ? system : code;
+    std::wstring next = code.empty() ? SystemLanguage() : code;
     core::String current(pe_language());
     if (current && next == Text(current.get())) {
         return false;
     }
-    return AskRestart(owner, nameOf(next));
+    std::vector<Language> languages = Languages();
+    auto found = std::find_if(languages.begin(), languages.end(), [&](const Language& l) { return l.code == next; });
+    return AskRestart(owner, found != languages.end() ? found->name : next);
 }

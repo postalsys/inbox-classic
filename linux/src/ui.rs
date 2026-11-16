@@ -511,6 +511,202 @@ pub fn answers(dialog: &adw::Dialog, ok: &gtk::Button) -> async_channel::Receive
     answers
 }
 
+/// A row with a check box in front of its title, the box toggled by the row and named `name`; the subtitle under the
+/// title when there is one. Neither is read as markup
+pub fn check_row(title: &str, subtitle: Option<&str>, name: &str, active: bool) -> (adw::ActionRow, gtk::CheckButton) {
+    let check = gtk::CheckButton::builder()
+        .active(active)
+        .valign(gtk::Align::Center)
+        .build();
+    check.set_widget_name(name);
+    check.update_property(&[gtk::accessible::Property::Label(title)]);
+    let row = adw::ActionRow::builder()
+        .title(title)
+        .use_markup(false)
+        .use_underline(false)
+        .build();
+    if let Some(subtitle) = subtitle.filter(|s| !s.is_empty()) {
+        row.set_subtitle(subtitle);
+    }
+    row.add_prefix(&check);
+    row.set_activatable_widget(Some(&check));
+    (row, check)
+}
+
+// ---- passphrases ----
+
+/// The text of a passphrase field, the field emptied
+pub fn take_secret(row: &adw::PasswordEntryRow) -> String {
+    let text = row.text().to_string();
+    row.set_text("");
+    text
+}
+
+/// A passphrase's bytes overwritten before they are let go
+pub fn wipe(secret: String) {
+    let mut bytes = secret.into_bytes();
+    bytes.fill(0);
+    std::hint::black_box(&bytes);
+}
+
+/// A passphrase typed twice (a key backup's, a setup file's), with what the core says of it under the fields while
+/// it is typed, in room kept for the longest it says so the window does not jump
+pub struct PassphrasePair {
+    pub group: adw::PreferencesGroup,
+    pub first: adw::PasswordEntryRow,
+    pub again: adw::PasswordEntryRow,
+    said: gtk::Label,
+    /// The words and the room for them
+    pub feedback: gtk::Grid,
+}
+
+impl PassphrasePair {
+    /// The fields named `<name>` and `<name>-again`, the words `<name>-problem`
+    pub fn new(name: &str) -> PassphrasePair {
+        use crate::words::{Text, field_title};
+        let first = adw::PasswordEntryRow::builder()
+            .title(field_title(Text::UiKeysPassphrase))
+            .activates_default(true)
+            .build();
+        first.set_widget_name(name);
+        let again = adw::PasswordEntryRow::builder()
+            .title(field_title(Text::UiKeysPassphraseAgain))
+            .activates_default(true)
+            .build();
+        again.set_widget_name(&format!("{name}-again"));
+        let group = adw::PreferencesGroup::new();
+        group.add(&first);
+        group.add(&again);
+        let said = wrapped_label("");
+        said.add_css_class("error");
+        said.set_widget_name(&format!("{name}-problem"));
+        let room = wrapped_label(&pe_core::keys::passphrase_feedback_longest());
+        room.set_opacity(0.0);
+        room.update_state(&[gtk::accessible::State::Hidden(true)]);
+        let feedback = gtk::Grid::new();
+        feedback.attach(&room, 0, 0, 1, 1);
+        feedback.attach(&said, 0, 0, 1, 1);
+        PassphrasePair {
+            group,
+            first,
+            again,
+            said,
+            feedback,
+        }
+    }
+
+    /// What the core says of the passphrase as typed now, shown; whether it can be used
+    pub fn check(&self) -> bool {
+        let (said, acceptable) = pe_core::keys::passphrase_feedback(&self.first.text(), &self.again.text());
+        self.said.set_text(said.as_deref().unwrap_or(""));
+        acceptable
+    }
+
+    /// `changed` called on every key typed in either field
+    pub fn connect_changed(&self, changed: impl Fn() + 'static) {
+        let changed = Rc::new(changed);
+        for field in [&self.first, &self.again] {
+            let changed = changed.clone();
+            field.connect_changed(move |_| changed());
+        }
+    }
+
+    /// The passphrase typed, both fields emptied
+    pub fn take(&self) -> String {
+        self.again.set_text("");
+        take_secret(&self.first)
+    }
+
+    pub fn clear(&self) {
+        self.first.set_text("");
+        self.again.set_text("");
+    }
+}
+
+/// What an attempt with a passphrase came to: asked again with the words why, or done
+pub enum Attempt<T> {
+    Again(String),
+    Done(T),
+}
+
+/// Asks for a passphrase until `open` takes it or Cancel: `intro` above the field, the words of a refused one under
+/// it. `open` gets each passphrase typed (and wipes it) on a thread of its own; the window takes no clicks and its OK
+/// is off meanwhile. The dialog is `<name>-dialog`, the field `<name>-passphrase`, the words `<name>-error`
+pub async fn ask_passphrase<T: Send + 'static>(
+    parent: &impl IsA<gtk::Widget>,
+    title: &str,
+    intro: &str,
+    name: &str,
+    open: impl Fn(&pe_core::Core, String) -> Attempt<T> + Send + Sync + 'static,
+) -> Option<T> {
+    use crate::words::{Text, field_title};
+    let error = wrapped_label("");
+    error.add_css_class("error");
+    error.set_widget_name(&format!("{name}-error"));
+    error.set_visible(false);
+    let passphrase = adw::PasswordEntryRow::builder()
+        .title(field_title(Text::UiKeysPassphrase))
+        .activates_default(true)
+        .build();
+    passphrase.set_widget_name(&format!("{name}-passphrase"));
+    let group = adw::PreferencesGroup::new();
+    group.add(&passphrase);
+    let content = gtk::Box::new(gtk::Orientation::Vertical, 12);
+    content.set_margin_start(18);
+    content.set_margin_end(18);
+    content.set_margin_top(12);
+    content.set_margin_bottom(18);
+    content.append(&wrapped_label(intro));
+    content.append(&error);
+    content.append(&group);
+    let (dialog, ok) = dialog_with_buttons(title, &content, &t!(UiOk), 480);
+    dialog.set_widget_name(&format!("{name}-dialog"));
+    let clicks = answers(&dialog, &ok);
+    dialog.present(Some(parent.as_ref()));
+    passphrase.grab_focus();
+    let open = std::sync::Arc::new(open);
+    let mut outcome = None;
+    while let Ok(true) = clicks.recv().await {
+        let typed = take_secret(&passphrase);
+        if typed.is_empty() {
+            passphrase.grab_focus();
+            continue;
+        }
+        let open = open.clone();
+        match off_thread(&dialog, &ok, move |core| open(core, typed)).await {
+            Some(Attempt::Again(why)) => {
+                error.set_text(&why);
+                error.set_visible(true);
+                passphrase.grab_focus();
+            }
+            Some(Attempt::Done(done)) => {
+                outcome = Some(done);
+                break;
+            }
+            None => break,
+        }
+    }
+    dialog.close();
+    outcome
+}
+
+/// Runs `work` with the core on a thread of its own (a passphrase's key derivation, the network), the window taking no
+/// clicks and its OK button off meanwhile (the focus stays where it is); None when the work panicked
+pub async fn off_thread<T: Send + 'static>(
+    dialog: &adw::Dialog,
+    ok: &gtk::Button,
+    work: impl FnOnce(&pe_core::Core) -> T + Send + 'static,
+) -> Option<T> {
+    let core = crate::app::shell().core.clone();
+    let was = ok.is_sensitive();
+    dialog.set_can_target(false);
+    ok.set_sensitive(false);
+    let done = gio::spawn_blocking(move || work(&core)).await.ok();
+    dialog.set_can_target(true);
+    ok.set_sensitive(was);
+    done
+}
+
 pub fn wrapped_label(text: &str) -> gtk::Label {
     let label = gtk::Label::new(Some(text));
     label.set_wrap(true);

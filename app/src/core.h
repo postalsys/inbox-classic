@@ -59,6 +59,11 @@ using KeyList = std::unique_ptr<PeKeyList, Deleter<pe_pgp_key_list_free>>;
 using PeerKeys = std::unique_ptr<PePeerKeys, Deleter<pe_pgp_peer_free>>;
 using IdentityList = std::unique_ptr<PeIdentityList, Deleter<pe_pgp_identity_list_free>>;
 using FromChoices = std::unique_ptr<PeFromChoices, Deleter<pe_from_choices_free>>;
+// a setup file: an export being set up, a file read, the lines of what was done, the app preferences it carries
+using SetupExport = std::unique_ptr<PeSetupExport, Deleter<pe_setup_export_free>>;
+using SetupFile = std::unique_ptr<PeSetupFile, Deleter<pe_setup_file_free>>;
+using SetupLines = std::unique_ptr<PeSetupLines, Deleter<pe_setup_lines_free>>;
+using SetupPrefNames = std::unique_ptr<PeSetupPrefNames, Deleter<pe_setup_pref_names_free>>;
 
 std::wstring Widen(std::string_view utf8);
 std::string Narrow(std::wstring_view utf16);

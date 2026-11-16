@@ -40,16 +40,6 @@ extension UITest {
         type(second, into: find("key.backup.field.1", in: backup))
     }
 
-    /// the alert OK pressed refuses with, its text; the window stays
-    func okRefused(_ window: NSWindow, ok: String) async -> String {
-        press(find(ok, in: window))
-        guard let alert = await waitWindow("alert", 10) else { return "" }
-        let text = alertText(alert)
-        answer(alert, "OK")
-        _ = await waitUntil(5) { !alert.isVisible }
-        return text
-    }
-
     func encryptionKeys() async throws {
         step("encryption keys")
         let core = main.core
@@ -94,15 +84,16 @@ extension UITest {
 
         // Back Up Key: two passphrases that differ, a short one, then a good one
         guard let backup = await waitWindow("key.backup", 10) else { throw Failed(description: "no Back Up Key window") }
-        typeBackup(backup, "correct horse battery", "correct horse batter")
-        let differ = await okRefused(backup, ok: "key.backup.ok")
-        check(differ.contains("not the same") && backup.isVisible, "two different passphrases are refused (\(differ))")
-        check((find("key.backup.field.0", in: backup) as NSTextField?)?.stringValue.isEmpty == true,
-              "and are typed again from the first field")
+        // refused in the window as they are typed, the core's words under the fields, OK greyed
+        let said = { self.words("key.backup.problem", in: backup) }
+        let backupOk: NSButton? = find("key.backup.ok", in: backup)
+        typeBackup(backup, "correct horse battery", "correct horse batteries")
+        check(said().contains("not the same") && backupOk?.isEnabled == false,
+              "two different passphrases are refused (\(said()))")
         typeBackup(backup, "short", "short")
-        let short = await okRefused(backup, ok: "key.backup.ok")
-        check(short.contains("at least 8") && backup.isVisible, "a short one is refused (\(short))")
+        check(said().contains("at least 8") && backupOk?.isEnabled == false, "a short one is refused (\(said()))")
         typeBackup(backup, "correct horse battery", "correct horse battery")
+        check(said().isEmpty && backupOk?.isEnabled == true, "the same good one twice can be used")
         await shot(backup, "keys-4-backup")
         press(find("key.backup.ok", in: backup))
         if let saved = await waitWindow("alert", 20) {

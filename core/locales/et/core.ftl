@@ -658,3 +658,208 @@ pgp-bar-count-good = { $count } allkirjastatud või krüptitud
 pgp-bar-count-warning = { $count } vajab tähelepanu
 # review: new
 pgp-bar-count-neutral = { $count } kinnitatud allkirjata
+# the setup file: settings, accounts, contacts and keys carried to another computer
+# review: new
+setup-part-settings = Seaded
+# review: new
+setup-part-preferences = Akende eelistused
+# review: new
+setup-part-accounts = Kontod
+# review: new
+setup-part-sign-in-apps = Sisselogimisrakendused
+# review: new
+setup-part-contacts = Kontaktid ja grupid
+# review: new
+setup-part-keys = Krüpteerimisvõtmed
+# review: new
+setup-part-rules = Kirjade reeglid
+# review: new
+setup-part-trusted-senders = Usaldusväärsed saatjad
+# review: new
+setup-holds-settings = { $count ->
+    [one] 1 seade
+   *[other] { $count } seadet
+}
+# review: new
+setup-holds-preferences = { $count ->
+    [one] 1 eelistus
+   *[other] { $count } eelistust
+}
+# review: new
+setup-holds-accounts = { $count ->
+    [one] 1 konto
+   *[other] { $count } kontot
+}
+# review: new
+setup-holds-sign-in-apps = { $count ->
+    [one] 1 sisselogimisrakendus
+   *[other] { $count } sisselogimisrakendust
+}
+# review: new
+setup-holds-built-in = Millised sisseehitatud sisselogimisrakendused on sisse lülitatud
+# review: new
+setup-holds-contacts = { $count ->
+    [one] 1 kontakt
+   *[other] { $count } kontakti
+}
+# review: new
+setup-holds-groups = { $count ->
+    [one] 1 grupp
+   *[other] { $count } gruppi
+}
+# review: new
+setup-holds-own-keys = { $count ->
+    [one] 1 teie oma võti
+   *[other] { $count } teie oma võtit
+}
+# review: new
+setup-holds-contact-keys = { $count ->
+    [one] 1 kontakti võti
+   *[other] { $count } kontaktide võtit
+}
+# review: new
+setup-holds-rules = { $count ->
+    [one] 1 reegel
+   *[other] { $count } reeglit
+}
+# review: new
+setup-holds-trusted-senders = { $count ->
+    [one] 1 usaldusväärne saatja
+   *[other] { $count } usaldusväärset saatjat
+}
+# review: new
+setup-sign-in-password = Parool
+# review: new
+setup-account-secret-password = Selle parool on failis.
+# review: new
+setup-account-secret-token = Selle sisselogimine on failis.
+# review: new
+setup-account-asks-password = Pärast importimist küsib see parooli.
+# review: new
+setup-account-signs-in-again = Pärast importimist logite sellesse uuesti sisse.
+# review: new
+setup-account-here = See on siin juba seadistatud, seega jäetakse see vahele.
+# review: new
+setup-account-no-app = See logib sisse rakendusega { $app }, mis pole siin seadistatud. Importige ka sisselogimisrakendused.
+# review: new
+setup-invalid-address = „{ $address }“ ei ole e-posti aadress.
+# review: new
+setup-invalid-server = { $server }-serveril pole kasutatavat nime ega porti.
+# review: new
+setup-invalid-user = Sellel pole kasutajanime.
+# review: new
+setup-invalid-sign-in = See logib sisse viisil, mida Inbox Classic ei tunne.
+# review: new
+setup-error-empty = Fail on tühi.
+# review: new
+setup-error-too-large = Fail on Inbox Classicu seadistuse jaoks liiga suur.
+# review: new
+setup-error-not-setup = See fail ei ole Inbox Classicu seadistus.
+# review: new
+setup-error-damaged = Seadistusfail on kahjustatud ja seda ei saa lugeda.
+# review: new
+setup-error-newer = Selle seadistuse salvestas Inbox Classicu uuem versioon ({ $version }). Uuendage Inbox Classicut ja importige see siis uuesti.
+# review: new
+setup-error-needs-passphrase = See seadistus on kaitstud paroolifraasiga. Sisestage paroolifraas, millega see salvestati.
+# review: new
+setup-error-wrong-passphrase = See ei ole paroolifraas, millega see seadistus salvestati.
+# review: new
+setup-error-changed = Seadistusfaili on pärast salvestamist muudetud või see on kahjustatud, seega ei saa seda importida.
+# review: new
+setup-error-read = Seadistusfaili ei õnnestunud lugeda: { $error }
+# review: new
+setup-error-write = Seadistust ei õnnestunud salvestada: { $error }
+# review: new
+setup-error-no-parts = Valige vähemalt üks osa.
+# review: new
+setup-left-out = { $count ->
+    [one] Osas „{ $part }“ on 1 kirje, mida ei saa kasutada, ja see jäetakse välja.
+   *[other] Osas „{ $part }“ on { $count } kirjet, mida ei saa kasutada, ja need jäetakse välja.
+}
+# review: new
+setup-imported-settings = Seaded asendati.
+# review: new
+setup-imported-preferences = Akende eelistused asendati.
+# review: new
+setup-added-accounts = { $count ->
+    [one] Lisati 1 konto.
+   *[other] Lisati { $count } kontot.
+}
+# review: new
+setup-skipped-here = { $address } on siin juba seadistatud, seega jäeti see vahele.
+# review: new
+setup-skipped-no-app = { $address } jäeti vahele: see logib sisse rakendusega { $app }, mis pole siin seadistatud.
+# review: new
+setup-skipped-invalid = { $address } jäeti vahele: { $reason }
+# review: new
+setup-asks-password = { $address } küsib ühendumisel parooli.
+# review: new
+setup-signs-in-again = { $address } palub teil ühendumisel uuesti sisse logida.
+# review: new
+setup-added-sign-in-apps = { $count ->
+    [one] Lisati 1 sisselogimisrakendus.
+   *[other] Lisati { $count } sisselogimisrakendust.
+}
+# review: new
+setup-skipped-sign-in-apps = { $count ->
+    [one] 1 sisselogimisrakendus on siin juba seadistatud.
+   *[other] { $count } sisselogimisrakendust on siin juba seadistatud.
+}
+# review: new
+setup-added-contacts = { $count ->
+    [one] Aadressiraamatusse lisati 1 kontakt.
+   *[other] Aadressiraamatusse lisati { $count } kontakti.
+}
+# review: new
+setup-skipped-contacts = { $count ->
+    [one] 1 kontakt on juba aadressiraamatus.
+   *[other] { $count } kontakti on juba aadressiraamatus.
+}
+# review: new
+setup-added-groups = { $count ->
+    [one] Lisati või täiendati 1 gruppi.
+   *[other] Lisati või täiendati { $count } gruppi.
+}
+# review: new
+setup-added-own-keys = { $count ->
+    [one] Lisati 1 teie oma võti.
+   *[other] Lisati { $count } teie oma võtit.
+}
+# review: new
+setup-added-contact-keys = { $count ->
+    [one] Lisati 1 kontakti võti.
+   *[other] Lisati { $count } kontaktide võtit.
+}
+# review: new
+setup-added-rules = { $count ->
+    [one] Lisati 1 kirjade reegel.
+   *[other] Lisati { $count } kirjade reeglit.
+}
+# review: new
+setup-skipped-rules = { $count ->
+    [one] 1 kirjade reegel on siin juba olemas.
+   *[other] { $count } kirjade reeglit on siin juba olemas.
+}
+# review: new
+setup-skipped-rules-account = { $count ->
+    [one] 1 kirjade reegel on konto jaoks, mida siin pole, seega jäeti see vahele.
+   *[other] { $count } kirjade reeglit on kontode jaoks, mida siin pole, seega jäeti need vahele.
+}
+# review: new
+setup-rules-waiting = { $count ->
+    [one] 1 kirjade reegel teisaldab kirju kausta, mis ilmub, kui selle konto on sünkroonitud.
+   *[other] { $count } kirjade reeglit teisaldavad kirju kaustadesse, mis ilmuvad, kui nende kontod on sünkroonitud.
+}
+# review: new
+setup-added-trusted-senders = { $count ->
+    [one] Lisati 1 usaldusväärne saatja.
+   *[other] Lisati { $count } usaldusväärset saatjat.
+}
+# review: new
+setup-nothing = Midagi ei imporditud.
+# review: new
+setup-account-servers = { $imap } ja { $smtp } ({ $signin })
+# review: new
+setup-file-name = Inbox Classicu seaded ja kontod
+# review: new
+setup-skipped-unreachable = { $name } jäeti vahele: selle sisselogimisteenusega ei saadud ühendust. Lisage see uuesti sisselogimisrakenduste all.

@@ -27,7 +27,7 @@ topics = [
 
 [[section]]
 id = "accounts"
-topics = ["all-inboxes", "manage-accounts"]
+topics = ["all-inboxes", "manage-accounts", "move-computer"]
 
 [[section]]
 id = "message-features"
@@ -70,6 +70,7 @@ options = "options-language"
 sign-in-apps = "sign-in-apps"
 agents = "agents-connect"
 address-book = "address-book"
+setup = "move-computer"
 compose = "write-message"
 message-rules = "message-rules"
 encryption-keys = "encryption-keys"

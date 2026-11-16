@@ -68,6 +68,24 @@ enum Languages {
         }
     }
 
+    /// `code` (nil for the system's) chosen for the windows, and the app started again when the user wants it now
+    static func choose(_ code: String?) {
+        guard code != chosen else { return }
+        chosen = code
+        offerRestart(for: code)
+    }
+
+    /// the app started again when the user wants it now, for `code` (nil for the system's), the language just chosen,
+    /// to count: the language chosen is passed in, as a test run keeps nothing in the user's settings
+    static func offerRestart(for code: String?) {
+        // asked only when the windows would change: System default that is German, then Deutsch, needs no new start
+        guard (code ?? system) != current else { return }
+        if ask(Text.macRestartQuestion.text, yes: Text.uiRestartNow.text, no: Text.uiRestartLater.text,
+               style: .information) {
+            AppDelegate.shared?.restart()
+        }
+    }
+
     /// A language's name in itself
     static func name(_ code: String) -> String {
         all.first { $0.code == code }?.name ?? code
@@ -333,10 +351,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         core.darkMessages = darkMessages.state == .on
         Preview.dark = core.darkMessages
         // the messages shown now made again as the setting has it
-        AppDelegate.shared?.main?.mailbox.reader.reload()
-        for window in MessageWindow.open {
-            window.reader.reload()
-        }
+        AppDelegate.shared?.main?.reloadMessagesShown()
     }
 
     @objc func downloadAheadChosen() {
@@ -377,15 +392,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
     @objc func languageChosen() {
         let index = language.indexOfSelectedItem
         guard codes.indices.contains(index) else { return }
-        let code = codes[index]
-        guard code != Languages.chosen else { return }
-        Languages.chosen = code
-        // asked only when the windows would change: System default that is German, then Deutsch, needs no new start
-        guard (code ?? Languages.system) != Languages.current else { return }
-        if ask(Text.macRestartQuestion.text, yes: Text.uiRestartNow.text, no: Text.uiRestartLater.text,
-               style: .information) {
-            AppDelegate.shared?.restart()
-        }
+        Languages.choose(codes[index])
     }
 }
 

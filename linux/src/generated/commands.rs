@@ -75,6 +75,8 @@ pub enum Command {
     AddSenderToBook,
     ImportAddressBook,
     ExportAddressBook,
+    ExportSetup,
+    ImportSetup,
 }
 
 impl Command {
@@ -151,6 +153,8 @@ impl Command {
         Command::AddSenderToBook,
         Command::ImportAddressBook,
         Command::ExportAddressBook,
+        Command::ExportSetup,
+        Command::ImportSetup,
     ];
 
     /// The name of its action (`win.<name>`)
@@ -228,6 +232,8 @@ impl Command {
             Command::AddSenderToBook => "add-sender-to-book",
             Command::ImportAddressBook => "import-address-book",
             Command::ExportAddressBook => "export-address-book",
+            Command::ExportSetup => "export-setup",
+            Command::ImportSetup => "import-setup",
         }
     }
 
@@ -306,6 +312,8 @@ impl Command {
             Command::AddSenderToBook => "tools",
             Command::ImportAddressBook => "file",
             Command::ExportAddressBook => "file",
+            Command::ExportSetup => "file",
+            Command::ImportSetup => "file",
         }
     }
 
@@ -384,6 +392,8 @@ impl Command {
             Command::AddSenderToBook => pe_core::i18n::Text::CmdAddSenderToBook,
             Command::ImportAddressBook => pe_core::i18n::Text::CmdImportAddressBook,
             Command::ExportAddressBook => pe_core::i18n::Text::CmdExportAddressBook,
+            Command::ExportSetup => pe_core::i18n::Text::CmdExportSetup,
+            Command::ImportSetup => pe_core::i18n::Text::CmdImportSetup,
         }
     }
 
@@ -480,6 +490,8 @@ impl Command {
             Command::AddSenderToBook => None,
             Command::ImportAddressBook => None,
             Command::ExportAddressBook => None,
+            Command::ExportSetup => None,
+            Command::ImportSetup => None,
         }
     }
 
@@ -558,6 +570,8 @@ impl Command {
             Command::AddSenderToBook => false,
             Command::ImportAddressBook => false,
             Command::ExportAddressBook => false,
+            Command::ExportSetup => false,
+            Command::ImportSetup => false,
         }
     }
 
@@ -636,6 +650,8 @@ impl Command {
             Command::AddSenderToBook => false,
             Command::ImportAddressBook => false,
             Command::ExportAddressBook => false,
+            Command::ExportSetup => false,
+            Command::ImportSetup => false,
         }
     }
 
@@ -714,6 +730,8 @@ impl Command {
             Command::AddSenderToBook => true,
             Command::ImportAddressBook => false,
             Command::ExportAddressBook => false,
+            Command::ExportSetup => false,
+            Command::ImportSetup => false,
         }
     }
 
@@ -792,6 +810,8 @@ impl Command {
             Command::AddSenderToBook => None,
             Command::ImportAddressBook => None,
             Command::ExportAddressBook => None,
+            Command::ExportSetup => None,
+            Command::ImportSetup => None,
         }
     }
 }

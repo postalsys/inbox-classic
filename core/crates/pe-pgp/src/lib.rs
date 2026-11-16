@@ -12,6 +12,7 @@ mod decrypt;
 pub mod inline;
 pub mod policy;
 mod produce;
+pub mod sealed;
 mod verify;
 
 pub use cert::{Cert, CertProblem, SecretKey, UserId, address_of, needs_passphrase, read_certs, read_secret_keys};

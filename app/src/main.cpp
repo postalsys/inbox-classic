@@ -580,6 +580,23 @@ void OnEvent(const UiEvent& event) {
     case PE_EVENT_KIND_AGENT_LOG_CHANGED:
         AgentsChanged();
         break;
+    case PE_EVENT_KIND_ACCOUNTS_CHANGED:
+        // accounts added by an import: the folder list with them (the core syncs them)
+        g_mailbox.Reload();
+        break;
+    case PE_EVENT_KIND_SETTINGS_CHANGED:
+        // settings an import replaced: the text size of the messages (the rest is read where it is used)
+        webview::SetTextZoom(pe_text_zoom(g_core.get()));
+        break;
+    case PE_EVENT_KIND_ADDRESS_BOOK_CHANGED:
+        // contacts an import added: an open Address Book, and the list's pictures of their addresses
+        AddressBookChanged();
+        ContactPictureChanged();
+        break;
+    case PE_EVENT_KIND_KEYS_CHANGED:
+        // keys an import added: read where they are used (the Encryption Keys window, which is not open meanwhile,
+        // and the security bar of the next message opened)
+        break;
     case PE_EVENT_KIND_RULES_APPLIED:
         g_rulesSaid = core::T(PE_TEXT_UI_RULES_APPLIED, {{"count", std::to_wstring(event.count)}});
         SetStatus(g_rulesSaid);
@@ -627,6 +644,8 @@ HMENU BuildMenu() {
     AppendMenuW(file, MF_STRING, IDM_IMPORT, MenuItem(PE_TEXT_CMD_IMPORT).c_str());
     AppendMenuW(file, MF_STRING, IDM_IMPORT_ADDRESS_BOOK, MenuItem(PE_TEXT_CMD_IMPORT_ADDRESS_BOOK).c_str());
     AppendMenuW(file, MF_STRING, IDM_EXPORT_ADDRESS_BOOK, MenuItem(PE_TEXT_CMD_EXPORT_ADDRESS_BOOK).c_str());
+    AppendMenuW(file, MF_STRING, IDM_IMPORT_SETUP, MenuItem(PE_TEXT_CMD_IMPORT_SETUP).c_str());
+    AppendMenuW(file, MF_STRING, IDM_EXPORT_SETUP, MenuItem(PE_TEXT_CMD_EXPORT_SETUP).c_str());
     AppendMenuW(file, MF_STRING, IDM_PRINT, MenuItem(PE_TEXT_CMD_PRINT, L"Ctrl+P").c_str());
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(file, MF_STRING, IDM_PROPERTIES, DialogMenuItem(PE_TEXT_CMD_PROPERTIES, L"Alt+Enter").c_str());
@@ -1452,6 +1471,56 @@ void SearchFor(const std::wstring& words) {
     ShowCounts();
 }
 
+namespace {
+
+// the app preferences an import brought, by their shared names and as the core checked them, set as the menus and
+// Options set them; one that counts after a restart (the language) asks to restart as Options does
+void ApplySetupPrefs(HWND owner, const std::vector<SetupPref>& prefs) {
+    bool restart = false;
+    for (const SetupPref& pref : prefs) {
+        const std::string& name = pref.name;
+        bool on = pref.value == "1";
+        if (pref.restart) {
+            restart = ChooseLanguage(owner, core::Widen(pref.value)) || restart;
+        } else if (name == "notify_new_mail") {
+            SetNotify(on);
+        } else if (name == "codes_in_notifications") {
+            SetPreference(kCodesPreference, on ? 1 : 0);
+            pe_set_codes_in_notifications(on);
+        } else if (name == "group_by_conversation") {
+            g_mailbox.SetGrouped(on);
+        } else if (name == "hide_ignored") {
+            g_mailbox.SetHideIgnored(on);
+        } else if (name == "hide_read") {
+            g_mailbox.SetUnreadOnly(on);
+            UpdateUnreadOnlyButton();
+        } else if (name == "folder_list") {
+            SetFolderList(on);
+        } else if (name == "list_pictures") {
+            g_mailbox.SetListPictures(on);
+        } else if (name == "layout") {
+            SetLayoutMode(static_cast<PeLayoutMode>(std::atoi(pref.value.c_str())));
+        }
+    }
+    if (restart) {
+        // as File > Exit, the messages being written asked first; started again once the window is gone
+        g_restart = true;
+        g_exiting = true;
+        PostMessageW(g_main, WM_CLOSE, 0, 0);
+    }
+}
+
+}  // namespace
+
+int64_t ImportSetup(HWND owner) {
+    SetupImported imported = ImportSetupDialog(owner, g_core.get());
+    if (!imported.imported) {
+        return 0;
+    }
+    ApplySetupPrefs(owner, imported.prefs);
+    return imported.accounts.empty() ? 0 : imported.accounts.front();
+}
+
 void WriteTo(const std::wstring& to) {
     int64_t account = g_mailbox.CurrentAccount();
     if (!account) {
@@ -1659,6 +1728,12 @@ void OnCommand(WORD id, WORD code) {
             !said.empty()) {
             SetStatus(said);
         }
+        return;
+    case IDM_EXPORT_SETUP:
+        ExportSetupDialog(g_main, g_core.get());
+        return;
+    case IDM_IMPORT_SETUP:
+        ImportSetup(g_main);
         return;
     case IDCANCEL:
         // Esc: the search goes first

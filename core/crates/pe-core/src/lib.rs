@@ -34,6 +34,7 @@ mod search;
 mod secrets;
 mod selection;
 pub mod senders;
+pub mod setup;
 mod sign_in_apps;
 mod snippet;
 mod targets;
@@ -255,6 +256,16 @@ pub enum Event {
         account: AccountId,
         folder: FolderId,
     },
+    /// Accounts were added other than through the account form (an import of a setup file): the folder list and
+    /// every list of accounts read them again
+    AccountsChanged,
+    /// Settings changed other than through their window (an import of a setup file): the settings, trusted senders,
+    /// sign-in apps and message rules read again
+    SettingsChanged,
+    /// The address book changed other than through its window (an import of a setup file)
+    AddressBookChanged,
+    /// The OpenPGP keys changed other than through their window (an import of a setup file)
+    KeysChanged,
 }
 
 /// What a failure asks of the user
@@ -577,13 +588,28 @@ impl Core {
 
     /// Adds an account, its password kept as the [`Options`] say
     pub fn add_account(&self, settings: &AccountSettings, password: &str) -> Result<AccountId> {
+        self.add_account_with(settings, "", Some(password))
+    }
+
+    /// Adds an account named `account_name` in the folder list (when empty, by its provider or domain: "Gmail"),
+    /// with its password or refresh token when there is one; without, it asks for it once it connects
+    pub(crate) fn add_account_with(
+        &self,
+        settings: &AccountSettings,
+        account_name: &str,
+        password: Option<&str>,
+    ) -> Result<AccountId> {
         let id = self.store().add_account(settings)?;
-        // named by its provider or domain to begin with ("Gmail"), the folder list's name for it
-        self.store()
-            .set_account_name(id, &default_account_name(&settings.email))?;
+        let name = match account_name.trim() {
+            "" => default_account_name(&settings.email),
+            name => name.to_string(),
+        };
+        self.store().set_account_name(id, &name)?;
         // an account removed before may have had this id: its password goes, whatever happens to this one
         self.secrets.remove(id);
-        self.keep_password(id, password);
+        if let Some(password) = password {
+            self.keep_password(id, password);
+        }
         Ok(id)
     }
 

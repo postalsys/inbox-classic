@@ -110,9 +110,10 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
     public private(set) var main: MainWindow!
     /// Tools > Notify of New Mail
     var notify: Bool {
-        get { UserDefaults.standard.object(forKey: "NewMailNotifications") as? Bool ?? true }
-        set { UserDefaults.standard.set(newValue, forKey: "NewMailNotifications") }
+        get { notifying.value }
+        set { notifying.value = newValue }
     }
+    private var notifying = Preference("NewMailNotifications", default: true)
     /// Settings > Group messages by conversation, on unless turned off
     var groupByConversation: Bool {
         get { grouping.value }
@@ -435,6 +436,7 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
                                        item(for: .newFolder), item(for: .renameFolder), item(for: .deleteFolder), item(for: .emptyFolder), separator(),
                                        item(for: .saveAs), item(for: .import), item(for: .print), separator(),
                                        item(for: .importAddressBook), item(for: .exportAddressBook), separator(),
+                                       item(for: .importSetup), item(for: .exportSetup), separator(),
                                        item(for: .properties), separator(),
                                        NSMenuItem(title: Text.macCloseWindow.text, action: #selector(NSWindow.performClose(_:)),
                                                   keyEquivalent: "w")]
@@ -610,6 +612,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         case .messageRules: RulesWindow.open(core: core)
         case .encryptionKeys: KeysWindow.open(core: core)
         case .createRuleFromMessage: main.mailbox.createRuleFromMessage()
+        case .exportSetup: SetupFiles.export(core: core)
+        case .importSetup: SetupFiles.importFile(core: core)
         }
     }
 

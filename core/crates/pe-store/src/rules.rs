@@ -108,6 +108,39 @@ impl Store {
         Ok(self.db.last_insert_rowid())
     }
 
+    /// The folder a rule moves to before it is here: `path` of `account`, kept until [`Store::resolve_rule_targets`]
+    /// finds it (a rule imported from a setup file, its account not synced yet)
+    pub fn set_rule_pending_target(&self, id: RuleId, account: AccountId, path: &str) -> Result<()> {
+        self.db.execute(
+            "UPDATE rules SET move_account = ?1, move_path = ?2 WHERE id = ?3",
+            params![account, path, id],
+        )?;
+        Ok(())
+    }
+
+    /// The folder a rule waits for: (account, path), None when it waits for none
+    pub fn rule_pending_target(&self, id: RuleId) -> Result<Option<(AccountId, String)>> {
+        Ok(self
+            .db
+            .query_row("SELECT move_account, move_path FROM rules WHERE id = ?1", [id], |row| {
+                Ok((row.get::<_, Option<AccountId>>(0)?, row.get::<_, Option<String>>(1)?))
+            })
+            .optional()?
+            .and_then(|(account, path)| Some((account?, path?))))
+    }
+
+    /// The rules waiting for a folder that is here now move to it; how many
+    pub fn resolve_rule_targets(&self) -> Result<u64> {
+        let changed = self.db.execute(
+            "UPDATE rules SET move_to = (SELECT f.id FROM folders f WHERE f.account_id = rules.move_account \
+             AND f.path = rules.move_path), move_account = NULL, move_path = NULL \
+             WHERE move_path IS NOT NULL AND EXISTS (SELECT 1 FROM folders f WHERE f.account_id = rules.move_account \
+             AND f.path = rules.move_path)",
+            [],
+        )?;
+        Ok(changed as u64)
+    }
+
     pub fn delete_rule(&self, id: RuleId) -> Result<()> {
         self.db.execute("DELETE FROM rules WHERE id = ?1", [id])?;
         Ok(())
@@ -183,5 +216,48 @@ mod tests {
             .unwrap();
         store.remove_account(account).unwrap();
         assert_eq!(names(&store), ["one"]);
+    }
+
+    #[test]
+    fn a_rule_waits_for_its_folder_by_path() {
+        use crate::FolderInfo;
+        let store = Store::open_in_memory().unwrap();
+        let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
+        let id = store
+            .save_rule(&Rule {
+                enabled: true,
+                name: "news".into(),
+                query: "list:news".into(),
+                ..Default::default()
+            })
+            .unwrap();
+        store.set_rule_pending_target(id, account, "Lists/News").unwrap();
+        assert_eq!(
+            store.rule_pending_target(id).unwrap(),
+            Some((account, "Lists/News".to_string()))
+        );
+        let folder = |path: &str| FolderInfo {
+            path: path.into(),
+            name: path.into(),
+            delimiter: Some("/".into()),
+            subscribed: true,
+            selectable: true,
+            ..Default::default()
+        };
+        // another folder: still waiting
+        store.set_folders(account, &[folder("INBOX")]).unwrap();
+        assert_eq!(store.rule(id).unwrap().unwrap().move_to, None);
+        assert!(store.rule_pending_target(id).unwrap().is_some());
+        // its folder synced: it moves there
+        store
+            .set_folders(account, &[folder("INBOX"), folder("Lists/News")])
+            .unwrap();
+        let news = store.find_folder(account, "Lists/News").unwrap().unwrap().id;
+        assert_eq!(store.rule(id).unwrap().unwrap().move_to, Some(news));
+        assert_eq!(store.rule_pending_target(id).unwrap(), None);
+        // the account gone: nothing waits
+        store.set_rule_pending_target(id, account, "Other").unwrap();
+        store.remove_account(account).unwrap();
+        assert_eq!(store.rule_pending_target(id).unwrap(), None);
     }
 }

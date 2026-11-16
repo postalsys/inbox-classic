@@ -932,6 +932,18 @@ Screenshots: `signin-1-apps`, `signin-2-google-preset`, `signin-3-check` (not ye
 - a sign-in app turned off is left out of More sign-in options
 - a Gmail address is offered Sign in with Google
 
+## 45a. Settings and accounts to another computer
+
+Screenshots: `setup-1-export`, `setup-2-passphrase`, `setup-3-import-choose`, `setup-4-imported`, `setup-5-first-run` (taken in step 1, before the first account is added)
+
+- before the first account, Add Mail Account offers to import settings and accounts from another computer (opened and cancelled)
+- File > Export Settings and Accounts lists the parts, all chosen, with the passphrase off and the words of what a passphrase adds
+- a passphrase shorter than 8 characters, or typed differently the second time, is refused with words
+- with a passphrase the file is written encrypted (an OpenPGP message), and the window says what it holds
+- File > Import Settings and Accounts on that file asks for the passphrase; a wrong one is refused with words
+- the right one shows what the file holds: the accounts (both marked as already here), the contacts, the rules and the other parts, with when and by which version it was saved
+- a contact deleted before importing Contacts alone comes back; the accounts are left as they are, and the summary says what was added and skipped
+
 ## 46. Options and the language
 
 Screenshots: `options-1-language`, `lang-1-german`, `lang-1b-german-form`, `lang-1c-french-form`, `lang-2-pseudo-main`, `lang-3-pseudo-form`

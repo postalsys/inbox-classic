@@ -4265,3 +4265,112 @@ fn all_sent_and_all_drafts_list_every_account() {
     let sent_rows = rows.iter().filter(|r| r.icon == "sent" && r.folder != 0).count();
     assert_eq!(sent_rows, 2, "each Sent Items has one row, under All Sent");
 }
+
+/// A core of its own in `dir` that trusts the certificates of `servers`, sending at once
+fn core_trusting(dir: &TempDir, servers: &[&ImapKit]) -> (Core, Receiver<Event>) {
+    let (sender, events) = channel();
+    let options = pe_core::Options {
+        trust: pe_net::Trust::Pinned(servers.iter().map(|server| server.cert.clone()).collect()),
+        passwords: pe_core::PasswordStore::Memory,
+        ..Default::default()
+    };
+    let core = Core::open_with(dir.path().join("store.db"), options, move |event| {
+        let _ = sender.send(event);
+    })
+    .unwrap();
+    core.set_download_ahead(pe_store::Ahead::Never).unwrap();
+    core.set_send_delay(0).unwrap();
+    (core, events)
+}
+
+/// Waits for every account of `accounts` to finish a sync without a failure
+fn wait_synced(events: &Receiver<Event>, accounts: &[i64]) {
+    let mut left: Vec<i64> = accounts.to_vec();
+    while !left.is_empty() {
+        let event = events
+            .recv_timeout(Duration::from_secs(15))
+            .expect("a sync within 15 seconds");
+        if let Event::SyncFinished { account, failure } = event {
+            assert_eq!(failure, None, "account {account}");
+            left.retain(|a| *a != account);
+        }
+    }
+}
+
+#[test]
+fn a_setup_moves_two_accounts_to_an_empty_store() {
+    let Some(first) = ImapKit::start(json!({})) else { return };
+    let Some(second) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let (dir_a, dir_b) = (TempDir::new("setup-a"), TempDir::new("setup-b"));
+    let (a, events_a) = core_trusting(&dir_a, &[&first, &second]);
+    let ann = AccountSettings {
+        email: "ann@example.com".into(),
+        ..settings(&first)
+    };
+    let bob = AccountSettings {
+        email: "bob@example.com".into(),
+        ..settings(&second)
+    };
+    let ids = [
+        a.add_account(&ann, PASSWORD).unwrap(),
+        a.add_account(&bob, PASSWORD).unwrap(),
+    ];
+    for id in ids {
+        a.sync(id).unwrap();
+    }
+    wait_synced(&events_a, &ids);
+    let path = dir_a.path().join("Setup.inboxclassic");
+    let passphrase = "correct horse battery";
+    a.export_setup(&path, pe_core::setup::Parts::ALL, Some(passphrase), &[])
+        .unwrap();
+    drop(a);
+
+    let (b, events_b) = core_trusting(&dir_b, &[&first, &second]);
+    let file = b.read_setup(&path, Some(passphrase)).unwrap();
+    assert!(file.accounts.iter().all(|account| account.importable
+        && account.note == pe_core::i18n::tr(pe_core::i18n::Text::SetupAccountSecretPassword)));
+    let choice = pe_core::setup::ImportChoice {
+        parts: pe_core::setup::Parts::ALL,
+        accounts: vec![0, 1],
+    };
+    let summary = b.import_setup(&file, &choice).unwrap();
+    assert_eq!(summary.accounts.len(), 2, "{summary:?}");
+    // both sync with the passwords the file carried
+    wait_synced(&events_b, &summary.accounts);
+    for (&account, server) in summary.accounts.iter().zip([&first, &second]) {
+        let inbox = b
+            .folders(account)
+            .unwrap()
+            .into_iter()
+            .find(|f| f.info.path == "INBOX")
+            .expect("an Inbox");
+        assert_eq!(inbox.account_id, account);
+        let before = server.messages("INBOX").len();
+        let outgoing = pe_core::Outgoing {
+            to: "Someone <someone@example.com>".into(),
+            subject: format!("From the imported account {account}"),
+            text: "It works.\n".into(),
+            ..Default::default()
+        };
+        b.send(account, outgoing).unwrap();
+        loop {
+            let event = events_b
+                .recv_timeout(Duration::from_secs(15))
+                .expect("sent within 15 seconds");
+            assert!(
+                !matches!(event, Event::Failed { account: a, .. } if a == account),
+                "{event:?}"
+            );
+            if matches!(event, Event::MessageSent { account: a, .. } if a == account) {
+                break;
+            }
+        }
+        assert_eq!(
+            server.messages("INBOX").len(),
+            before + 1,
+            "delivered by its own server"
+        );
+    }
+}

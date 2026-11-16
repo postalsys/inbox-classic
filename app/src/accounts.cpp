@@ -252,7 +252,7 @@ namespace {
 
 // ---- the first page: the providers' sign-in buttons, or the name and address of any other account ----
 
-enum class Start { Cancel, Next, SignIn };
+enum class Start { Cancel, Next, SignIn, Import };
 
 // the ids of the first page: the name and address as the server form has them, the sign-in buttons, the "Why?" under
 // each, and More sign-in options
@@ -436,6 +436,8 @@ bool Choose(HWND hwnd, StartState& state, int id) {
         if (!ChooseMore(hwnd, state)) {
             return false;
         }
+    } else if (id == IDC_SETUP_FIRST_RUN) {
+        state.choice = Start::Import;
     } else if (id == IDOK) {
         // the page of another account wants an address to look up
         if (state.emailInput && GetWindowString(state.emailInput).find(L'@') == std::wstring::npos) {
@@ -495,6 +497,8 @@ struct StartOffer {
     std::vector<PeOAuthProvider> providers;
     bool more = false;
     bool fields = false;
+    // before the first account: the link to import the settings and accounts of another computer
+    bool importLink = false;
     std::wstring nextLabel = core::T(PE_TEXT_WIN_NEXT);
 };
 
@@ -562,7 +566,13 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
     int buttonsHeight = shown.empty() ? 0 : buttonHeight + (anyOff ? reasonHeight : 0) + Scale(8);
     int moreHeight = offer.more ? linkHeight + Scale(6) : 0;
     int otherHeight = offer.fields ? Scale(12) + otherTextHeight + 2 * (rowHeight + Scale(6)) : 0;
-    int height = pad + introHeight + Scale(8) + buttonsHeight + moreHeight + Scale(6) + otherHeight + Scale(25) + pad;
+    int buttonWidth = ButtonWidth({offer.nextLabel}, 110), cancelWidth = ButtonWidth({cancel});
+    // the import link at the left of the buttons, or over them when it does not fit beside them
+    std::wstring importText = core::T(PE_TEXT_UI_SETUP_FIRST_RUN);
+    int importWidth = offer.importLink ? static_cast<int>(MeasureText(importText).cx) + Scale(12) : 0;
+    bool importAbove = offer.importLink && pad + importWidth + Scale(12) > width - pad - buttonWidth - cancelWidth - Scale(6);
+    int importHeight = importAbove ? linkHeight + Scale(10) : 0;
+    int height = pad + introHeight + Scale(8) + buttonsHeight + moreHeight + Scale(6) + otherHeight + importHeight + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kStartClass, core::Plain(PE_TEXT_UI_ADD_ACCOUNT_TITLE).c_str(), width, height);
     StartState state{core, &apps};
 
@@ -617,11 +627,17 @@ Start StartPage(HWND owner, PeCore* core, const SignInApps& apps, const StartOff
         state.name = &name;
         state.email = &email;
     }
-    int buttonWidth = ButtonWidth({offer.nextLabel}, 110), cancelWidth = ButtonWidth({cancel}), buttonTop = height - pad - Scale(25);
+    int buttonTop = height - pad - Scale(25);
     // the default where it goes on with what was typed; beside a provider's button, the other way only
     CreateChild(dialog, L"BUTTON", offer.nextLabel.c_str(), WS_TABSTOP | (offer.fields ? BS_DEFPUSHBUTTON : BS_PUSHBUTTON), IDOK,
                 {width - pad - buttonWidth - cancelWidth - Scale(6), buttonTop, width - pad - cancelWidth - Scale(6), buttonTop + Scale(25)});
     CreateChild(dialog, L"BUTTON", cancel.c_str(), WS_TABSTOP, IDCANCEL, {width - pad - cancelWidth, buttonTop, width - pad, buttonTop + Scale(25)});
+    if (offer.importLink) {
+        int linkTop = importAbove ? buttonTop - importHeight : buttonTop + (Scale(25) - linkHeight) / 2;
+        HWND link = CreateLinkButton(dialog, importText.c_str(), IDC_SETUP_FIRST_RUN, {pad, linkTop, pad + importWidth, linkTop + linkHeight});
+        // after the fields and before Next in the Tab order, as it is placed
+        SetWindowPos(link, state.emailInput ? state.emailInput : HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
 
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     // typing comes first on the page with the fields; the provider's button on the page that offers it
@@ -706,7 +722,19 @@ int64_t NewAccountDialog(HWND owner, PeCore* core) {
     first.intro = apps.On(PE_O_AUTH_PROVIDER_GOOGLE) || apps.On(PE_O_AUTH_PROVIDER_MICROSOFT)
                       ? core::T(PE_TEXT_UI_START_INTRO)
                       : core::T(PE_TEXT_UI_START_INTRO_APPS);
-    Start start = StartPage(owner, core, apps, first, name, email, chosen);
+    Start start = Start::Cancel;
+    for (;;) {
+        core::AccountList accounts(pe_accounts(core));
+        first.importLink = pe_account_list_count(accounts.get()) == 0;
+        start = StartPage(owner, core, apps, first, name, email, chosen);
+        if (start != Start::Import) {
+            break;
+        }
+        // the import from another computer: done when it added accounts, else the page again
+        if (int64_t added = ImportSetup(owner)) {
+            return added;
+        }
+    }
     if (start == Start::Cancel) {
         return 0;
     }

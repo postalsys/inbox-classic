@@ -93,6 +93,10 @@ cmd-address-book = &Carnet d'adresses...
 cmd-add-sender-to-book = Ajouter l'e&xpéditeur au carnet d'adresses
 cmd-import-address-book = Importer le carnet d'&adresses...
 cmd-export-address-book = &Exporter le carnet d'adresses...
+# review: new
+cmd-export-setup = Exporter les param&ètres et comptes...
+# review: new
+cmd-import-setup = Importer les &paramètres et comptes...
 
 ## The tray icon's menu
 
@@ -731,3 +735,29 @@ ui-contact-key-none = Aucune clé
 ui-contact-key-use-new = &Utiliser la nouvelle clé
 # review: new
 ui-contact-key-keep = &Garder l'actuelle
+# review: new
+ui-setup-export-title = Exporter les paramètres et comptes
+# review: new
+ui-setup-import-title = Importer les paramètres et comptes
+# review: new
+ui-setup-export-intro = Choisissez ce que vous emportez sur un autre ordinateur. Le fichier ne contient aucun message : ils seront téléchargés à nouveau là-bas.
+# review: new
+ui-setup-use-passphrase = &Protéger le fichier par une phrase secrète
+# review: new
+ui-setup-passphrase-note = Avec une phrase secrète, le fichier est chiffré et contient aussi vos mots de passe, connexions et clés privées. Sans elle, chaque compte demande son mot de passe sur l’autre ordinateur.
+# review: new
+ui-setup-export-button = &Exporter...
+# review: new
+ui-setup-file-filter = Paramètres et comptes Inbox Classic
+# review: new
+ui-setup-ask-passphrase = Ce fichier est protégé par une phrase secrète. Saisissez-la pour voir ce qu’il contient :
+# review: new
+ui-setup-import-intro = Choisissez ce qu’il faut importer. Les comptes déjà présents sur cet ordinateur restent tels quels.
+# review: new
+ui-setup-from = Enregistré par Inbox Classic { $version } le { $date }.
+# review: new
+ui-setup-import-button = &Importer
+# review: new
+ui-setup-done = Terminé
+# review: new
+ui-setup-first-run = Importer les paramètres et comptes d’un autre ordinateur...

@@ -691,3 +691,208 @@ pgp-bar-count-warning = { $count ->
 }
 # review: new
 pgp-bar-count-neutral = { $count } sin firma confirmada
+# the setup file: settings, accounts, contacts and keys carried to another computer
+# review: new
+setup-part-settings = Configuración
+# review: new
+setup-part-preferences = Preferencias de las ventanas
+# review: new
+setup-part-accounts = Cuentas
+# review: new
+setup-part-sign-in-apps = Aplicaciones de inicio de sesión
+# review: new
+setup-part-contacts = Contactos y grupos
+# review: new
+setup-part-keys = Claves de cifrado
+# review: new
+setup-part-rules = Reglas de mensajes
+# review: new
+setup-part-trusted-senders = Remitentes de confianza
+# review: new
+setup-holds-settings = { $count ->
+    [one] 1 ajuste
+   *[other] { $count } ajustes
+}
+# review: new
+setup-holds-preferences = { $count ->
+    [one] 1 preferencia
+   *[other] { $count } preferencias
+}
+# review: new
+setup-holds-accounts = { $count ->
+    [one] 1 cuenta
+   *[other] { $count } cuentas
+}
+# review: new
+setup-holds-sign-in-apps = { $count ->
+    [one] 1 aplicación de inicio de sesión
+   *[other] { $count } aplicaciones de inicio de sesión
+}
+# review: new
+setup-holds-built-in = Qué aplicaciones de inicio de sesión integradas están activadas
+# review: new
+setup-holds-contacts = { $count ->
+    [one] 1 contacto
+   *[other] { $count } contactos
+}
+# review: new
+setup-holds-groups = { $count ->
+    [one] 1 grupo
+   *[other] { $count } grupos
+}
+# review: new
+setup-holds-own-keys = { $count ->
+    [one] 1 clave propia
+   *[other] { $count } claves propias
+}
+# review: new
+setup-holds-contact-keys = { $count ->
+    [one] 1 clave de un contacto
+   *[other] { $count } claves de contactos
+}
+# review: new
+setup-holds-rules = { $count ->
+    [one] 1 regla
+   *[other] { $count } reglas
+}
+# review: new
+setup-holds-trusted-senders = { $count ->
+    [one] 1 remitente de confianza
+   *[other] { $count } remitentes de confianza
+}
+# review: new
+setup-sign-in-password = Contraseña
+# review: new
+setup-account-secret-password = Su contraseña está en el archivo.
+# review: new
+setup-account-secret-token = Su inicio de sesión está en el archivo.
+# review: new
+setup-account-asks-password = Pedirá su contraseña después de la importación.
+# review: new
+setup-account-signs-in-again = Volverá a iniciar sesión en ella después de la importación.
+# review: new
+setup-account-here = Ya está configurada aquí, así que se omite.
+# review: new
+setup-account-no-app = Inicia sesión con { $app }, que no está configurada aquí. Importe también las aplicaciones de inicio de sesión.
+# review: new
+setup-invalid-address = «{ $address }» no es una dirección de correo electrónico.
+# review: new
+setup-invalid-server = El servidor { $server } no tiene un nombre o un puerto que se pueda usar.
+# review: new
+setup-invalid-user = No tiene nombre de usuario.
+# review: new
+setup-invalid-sign-in = Inicia sesión de una forma que Inbox Classic no conoce.
+# review: new
+setup-error-empty = El archivo está vacío.
+# review: new
+setup-error-too-large = El archivo es demasiado grande para ser una configuración de Inbox Classic.
+# review: new
+setup-error-not-setup = Este archivo no es una configuración de Inbox Classic.
+# review: new
+setup-error-damaged = El archivo de configuración está dañado y no se puede leer.
+# review: new
+setup-error-newer = Esta configuración la guardó una versión más reciente de Inbox Classic ({ $version }). Actualice Inbox Classic y vuelva a importarla.
+# review: new
+setup-error-needs-passphrase = Esta configuración está protegida por una frase de contraseña. Escriba la frase de contraseña con la que se guardó.
+# review: new
+setup-error-wrong-passphrase = Esa no es la frase de contraseña con la que se guardó esta configuración.
+# review: new
+setup-error-changed = El archivo de configuración se modificó o dañó después de guardarlo, así que no se puede importar.
+# review: new
+setup-error-read = No se pudo leer el archivo de configuración: { $error }
+# review: new
+setup-error-write = No se pudo guardar la configuración: { $error }
+# review: new
+setup-error-no-parts = Elija al menos una parte.
+# review: new
+setup-left-out = { $count ->
+    [one] 1 elemento de «{ $part }» no se puede usar y se omite.
+   *[other] { $count } elementos de «{ $part }» no se pueden usar y se omiten.
+}
+# review: new
+setup-imported-settings = Se reemplazó la configuración.
+# review: new
+setup-imported-preferences = Se reemplazaron las preferencias de las ventanas.
+# review: new
+setup-added-accounts = { $count ->
+    [one] Se agregó 1 cuenta.
+   *[other] Se agregaron { $count } cuentas.
+}
+# review: new
+setup-skipped-here = { $address } ya está configurada aquí, así que se omitió.
+# review: new
+setup-skipped-no-app = Se omitió { $address }: inicia sesión con { $app }, que no está configurada aquí.
+# review: new
+setup-skipped-invalid = Se omitió { $address }: { $reason }
+# review: new
+setup-asks-password = { $address } pedirá su contraseña al conectarse.
+# review: new
+setup-signs-in-again = { $address } le pedirá que vuelva a iniciar sesión al conectarse.
+# review: new
+setup-added-sign-in-apps = { $count ->
+    [one] Se agregó 1 aplicación de inicio de sesión.
+   *[other] Se agregaron { $count } aplicaciones de inicio de sesión.
+}
+# review: new
+setup-skipped-sign-in-apps = { $count ->
+    [one] 1 aplicación de inicio de sesión ya está configurada aquí.
+   *[other] { $count } aplicaciones de inicio de sesión ya están configuradas aquí.
+}
+# review: new
+setup-added-contacts = { $count ->
+    [one] Se agregó 1 contacto a la libreta de direcciones.
+   *[other] Se agregaron { $count } contactos a la libreta de direcciones.
+}
+# review: new
+setup-skipped-contacts = { $count ->
+    [one] 1 contacto ya está en la libreta de direcciones.
+   *[other] { $count } contactos ya están en la libreta de direcciones.
+}
+# review: new
+setup-added-groups = { $count ->
+    [one] Se agregó o completó 1 grupo.
+   *[other] Se agregaron o completaron { $count } grupos.
+}
+# review: new
+setup-added-own-keys = { $count ->
+    [one] Se agregó 1 clave propia.
+   *[other] Se agregaron { $count } claves propias.
+}
+# review: new
+setup-added-contact-keys = { $count ->
+    [one] Se agregó 1 clave de un contacto.
+   *[other] Se agregaron { $count } claves de contactos.
+}
+# review: new
+setup-added-rules = { $count ->
+    [one] Se agregó 1 regla de mensajes.
+   *[other] Se agregaron { $count } reglas de mensajes.
+}
+# review: new
+setup-skipped-rules = { $count ->
+    [one] 1 regla de mensajes ya está aquí.
+   *[other] { $count } reglas de mensajes ya están aquí.
+}
+# review: new
+setup-skipped-rules-account = { $count ->
+    [one] 1 regla de mensajes es de una cuenta que no está aquí, así que se omitió.
+   *[other] { $count } reglas de mensajes son de cuentas que no están aquí, así que se omitieron.
+}
+# review: new
+setup-rules-waiting = { $count ->
+    [one] 1 regla de mensajes mueve mensajes a una carpeta que aparecerá cuando su cuenta se sincronice.
+   *[other] { $count } reglas de mensajes mueven mensajes a carpetas que aparecerán cuando sus cuentas se sincronicen.
+}
+# review: new
+setup-added-trusted-senders = { $count ->
+    [one] Se agregó 1 remitente de confianza.
+   *[other] Se agregaron { $count } remitentes de confianza.
+}
+# review: new
+setup-nothing = No se importó nada.
+# review: new
+setup-account-servers = { $imap } y { $smtp } ({ $signin })
+# review: new
+setup-file-name = Configuración y cuentas de Inbox Classic
+# review: new
+setup-skipped-unreachable = Se omitió { $name }: no se pudo contactar con su servicio de inicio de sesión. Vuelva a agregarla en Aplicaciones de inicio de sesión.

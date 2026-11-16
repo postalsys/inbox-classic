@@ -296,6 +296,19 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             setStatus(event.message)
         case PE_EVENT_KIND_FOLDER_CREATED:
             MoveWindow.shown?.folderCreated(event.folder)
+        // changed other than through their windows (an import): what shows them read again; the windows of keys,
+        // rules, trusted senders and sign-in apps are modal and read theirs when they open
+        case PE_EVENT_KIND_ACCOUNTS_CHANGED:
+            mailbox.reload()
+        case PE_EVENT_KIND_SETTINGS_CHANGED:
+            Preview.dark = core.darkMessages
+            TextSize.apply(pe_text_zoom(core.handle))
+            reloadMessagesShown()
+        case PE_EVENT_KIND_ADDRESS_BOOK_CHANGED:
+            AddressBookWindow.refresh()
+        case PE_EVENT_KIND_KEYS_CHANGED:
+            // what a message shown says of its signature and encryption
+            reloadMessagesShown()
         case PE_EVENT_KIND_FAILED:
             failing.insert(event.account)
             setStatus(Text.macAccountSaid.text(["account": mailbox.accountName(event.account), "message": event.message]))
@@ -314,6 +327,14 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             showUnread()
         }
         showCounts()
+    }
+
+    /// the messages shown, in the reading pane and their own windows, made again as the settings and keys have them
+    func reloadMessagesShown() {
+        mailbox.reader.reload()
+        for window in MessageWindow.open {
+            window.reader.reload()
+        }
     }
 
     private func showUnread() {

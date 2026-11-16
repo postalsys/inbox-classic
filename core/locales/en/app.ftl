@@ -94,6 +94,8 @@ cmd-address-book = Address &Book...
 cmd-add-sender-to-book = Add Sender to Address Boo&k
 cmd-import-address-book = Import Address &Book...
 cmd-export-address-book = &Export Address Book...
+cmd-export-setup = Export Settin&gs and Accounts...
+cmd-import-setup = Import Se&ttings and Accounts...
 
 ## The tray icon's menu
 
@@ -662,3 +664,16 @@ ui-contact-key = Encryption key:
 ui-contact-key-none = No key
 ui-contact-key-use-new = Use the &New Key
 ui-contact-key-keep = &Keep the Current One
+ui-setup-export-title = Export Settings and Accounts
+ui-setup-import-title = Import Settings and Accounts
+ui-setup-export-intro = Choose what to take to another computer. The file holds no messages: they download again there.
+ui-setup-use-passphrase = &Protect the file with a passphrase
+ui-setup-passphrase-note = With a passphrase, the file is encrypted and also holds your passwords, sign-ins and private keys. Without one, each account asks for its password on the other computer.
+ui-setup-export-button = &Export...
+ui-setup-file-filter = Inbox Classic settings and accounts
+ui-setup-ask-passphrase = This file is protected by a passphrase. Type it to see what the file holds:
+ui-setup-import-intro = Choose what to import. Accounts already on this computer are left as they are.
+ui-setup-from = Saved by Inbox Classic { $version } on { $date }.
+ui-setup-import-button = &Import
+ui-setup-done = Done
+ui-setup-first-run = Import settings and accounts from another computer...

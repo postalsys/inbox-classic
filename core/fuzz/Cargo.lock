@@ -2177,6 +2177,7 @@ dependencies = [
  "pe-html",
  "pe-i18n",
  "pe-imap",
+ "pe-keys",
  "pe-mime",
  "pe-net",
  "pe-oauth",
@@ -2187,6 +2188,8 @@ dependencies = [
  "pe-sync",
  "resvg",
  "ring",
+ "serde",
+ "serde_json",
  "tokio",
  "unicode-normalization",
  "windows-native-keyring-store",
@@ -2243,6 +2246,16 @@ name = "pe-jsre"
 version = "0.18.0"
 dependencies = [
  "regex",
+]
+
+[[package]]
+name = "pe-keys"
+version = "0.18.0"
+dependencies = [
+ "pe-net",
+ "pe-pgp",
+ "ring",
+ "serde_json",
 ]
 
 [[package]]

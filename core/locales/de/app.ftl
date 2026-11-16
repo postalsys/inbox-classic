@@ -93,6 +93,10 @@ cmd-address-book = &Adressbuch...
 cmd-add-sender-to-book = Absender zum Adressbuch &hinzufügen
 cmd-import-address-book = &Adressbuch importieren...
 cmd-export-address-book = Adressbuch e&xportieren...
+# review: new
+cmd-export-setup = Einstellungen und &Konten exportieren...
+# review: new
+cmd-import-setup = Einstellungen und Konten im&portieren...
 
 ## The tray icon's menu
 
@@ -731,3 +735,29 @@ ui-contact-key-none = Kein Schlüssel
 ui-contact-key-use-new = Den neuen Schlüssel &verwenden
 # review: new
 ui-contact-key-keep = &Den bisherigen behalten
+# review: new
+ui-setup-export-title = Einstellungen und Konten exportieren
+# review: new
+ui-setup-import-title = Einstellungen und Konten importieren
+# review: new
+ui-setup-export-intro = Wählen Sie, was Sie auf einen anderen Computer mitnehmen. Die Datei enthält keine Nachrichten: Sie werden dort erneut geladen.
+# review: new
+ui-setup-use-passphrase = Datei mit einer &Passphrase schützen
+# review: new
+ui-setup-passphrase-note = Mit einer Passphrase ist die Datei verschlüsselt und enthält auch Ihre Kennwörter, Anmeldungen und privaten Schlüssel. Ohne sie fragt jedes Konto auf dem anderen Computer nach seinem Kennwort.
+# review: new
+ui-setup-export-button = &Exportieren...
+# review: new
+ui-setup-file-filter = Inbox Classic-Einstellungen und -Konten
+# review: new
+ui-setup-ask-passphrase = Diese Datei ist durch eine Passphrase geschützt. Geben Sie sie ein, um zu sehen, was die Datei enthält:
+# review: new
+ui-setup-import-intro = Wählen Sie, was importiert wird. Konten, die schon auf diesem Computer sind, bleiben, wie sie sind.
+# review: new
+ui-setup-from = Gespeichert von Inbox Classic { $version } am { $date }.
+# review: new
+ui-setup-import-button = &Importieren
+# review: new
+ui-setup-done = Fertig
+# review: new
+ui-setup-first-run = Einstellungen und Konten von einem anderen Computer importieren...

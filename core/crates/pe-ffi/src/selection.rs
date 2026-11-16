@@ -537,7 +537,7 @@ pub struct PeTextList {
     texts: Vec<std::ffi::CString>,
 }
 
-fn text_list(texts: impl IntoIterator<Item = String>) -> *mut PeTextList {
+pub(crate) fn text_list(texts: impl IntoIterator<Item = String>) -> *mut PeTextList {
     handed(PeTextList {
         texts: texts.into_iter().map(crate::c_string).collect(),
     })

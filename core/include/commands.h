@@ -77,6 +77,8 @@ enum PeCommandId : unsigned short {
     IDM_ADD_SENDER_TO_BOOK = 148,
     IDM_IMPORT_ADDRESS_BOOK = 149,
     IDM_EXPORT_ADDRESS_BOOK = 150,
+    IDM_EXPORT_SETUP = 173,
+    IDM_IMPORT_SETUP = 174,
 };
 
 // whether a command acts on one message only, off while several are selected
@@ -192,6 +194,8 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_ADD_SENDER_TO_BOOK: return PE_TEXT_CMD_ADD_SENDER_TO_BOOK;
     case IDM_IMPORT_ADDRESS_BOOK: return PE_TEXT_CMD_IMPORT_ADDRESS_BOOK;
     case IDM_EXPORT_ADDRESS_BOOK: return PE_TEXT_CMD_EXPORT_ADDRESS_BOOK;
+    case IDM_EXPORT_SETUP: return PE_TEXT_CMD_EXPORT_SETUP;
+    case IDM_IMPORT_SETUP: return PE_TEXT_CMD_IMPORT_SETUP;
     }
     return PE_TEXT_CMD_NEW_ACCOUNT;
 }

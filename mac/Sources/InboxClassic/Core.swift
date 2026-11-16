@@ -518,13 +518,6 @@ extension Core {
         _ = fingerprint.withCString { pe_pgp_set_key_verified(handle, $0, verified) }
     }
 
-    /// why a backup's passphrase typed twice is refused, nil when it is good
-    func pgpPassphraseProblem(_ first: String, _ again: String) -> String? {
-        let strings = CStrings()
-        defer { strings.wipe() }
-        return taken(pe_pgp_passphrase_problem(strings.add(first), strings.add(again)))
-    }
-
     /// the key in use for a correspondent's address, and a newer one waiting for the user's decision
     func pgpPeer(_ address: String) -> (inUse: String?, pending: String?, pendingText: String) {
         guard let peer = address.withCString({ pe_pgp_peer(handle, $0) }) else { return (nil, nil, "") }

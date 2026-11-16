@@ -121,17 +121,23 @@ enum Start {
     Cancel,
     Next,
     SignIn(SignInWith),
+    /// The link of the first run: Import Settings and Accounts
+    ImportSetup,
+    /// Accounts imported from a setup file: the first of them
+    Imported(i64),
 }
 
 /// What a page of Add Mail Account offers: the intro, a sign-in button for each of `providers` (faded and turned off
 /// when its client is off; left out when all are off), More sign-in options when `more`, then when `fields` the name
-/// and address of any other account, and `next` to go on with that
+/// and address of any other account, and `next` to go on with that; with `import`, the link to import a setup from
+/// another computer (before the first account)
 struct Offer {
     intro: String,
     providers: Vec<ProviderKind>,
     more: bool,
     fields: bool,
     next: String,
+    import: bool,
 }
 
 /// The sign-in apps as the core has them now
@@ -241,6 +247,18 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
         email_row.set_activates_default(true);
         content.append(&group);
     }
+    if offer.import {
+        let import = gtk::Button::with_label(&t!(UiSetupFirstRun));
+        import.add_css_class("flat");
+        import.set_halign(gtk::Align::Start);
+        import.set_widget_name("setup-first-run");
+        let chosen = send.clone();
+        import.connect_clicked(move |_| {
+            let _ = chosen.try_send(Start::ImportSetup);
+        });
+        content.append(&gtk::Separator::new(gtk::Orientation::Horizontal));
+        content.append(&import);
+    }
     let (dialog, next) = ui::dialog_with_buttons(&t!(UiAddAccountTitle), &content, &offer.next, 500);
     dialog.set_widget_name("account-start");
     if !offer.fields {
@@ -263,6 +281,12 @@ async fn start_page(parent: &gtk::Widget, apps: &Apps, offer: Offer, name: &mut 
             Start::Next if offer.fields && !email_row.text().contains('@') => {
                 ui::alert(&dialog, TITLE, &t!(UiTypeEmail)).await;
                 email_row.grab_focus();
+            }
+            // the import over this window; it closes once accounts came in
+            Start::ImportSetup => {
+                if let Some(first) = crate::setup::import(&dialog).await.first() {
+                    break Start::Imported(*first);
+                }
             }
             other => break other,
         }
@@ -507,9 +531,11 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
         more: true,
         fields: true,
         next: t!(GtkNext),
+        import: shell().core.accounts().map(|a| a.is_empty()).unwrap_or(false),
     };
     match start_page(&parent, &apps, first, &mut name, &mut email).await {
-        Start::Cancel => return 0,
+        Start::Cancel | Start::ImportSetup => return 0,
+        Start::Imported(account) => return account,
         Start::SignIn(with) => return add_signed_in(&parent, with, &name, &email).await,
         Start::Next => {}
     }
@@ -532,9 +558,11 @@ pub async fn new_account(parent: &impl IsA<gtk::Widget>) -> i64 {
             more,
             fields: false,
             next: t!(UiUseAppPassword),
+            import: false,
         };
         match start_page(&parent, &apps, offer, &mut name, &mut email).await {
-            Start::Cancel => return 0,
+            Start::Cancel | Start::ImportSetup => return 0,
+            Start::Imported(account) => return account,
             Start::SignIn(with) => return add_signed_in(&parent, with, &name, &email).await,
             Start::Next => {}
         }

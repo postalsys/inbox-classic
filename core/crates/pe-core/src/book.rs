@@ -125,18 +125,12 @@ pub fn is_mailbox(address: &str) -> bool {
 
 /// A card as the book keeps it: only the addresses that are one mailbox each, and without a name of its own or a first
 /// or last name, known by its default address
-fn checked(card: &Card) -> Card {
-    let addresses: Vec<String> = card.addresses.iter().filter(|a| is_mailbox(a)).cloned().collect();
-    let name = if card.name.trim().is_empty() && display_name(&card.first, &card.last).is_empty() {
-        addresses.first().cloned().unwrap_or_default()
-    } else {
-        card.name.clone()
-    };
-    Card {
-        name,
-        addresses,
-        ..card.clone()
+pub(crate) fn checked(mut card: Card) -> Card {
+    card.addresses.retain(|a| is_mailbox(a));
+    if card.name.trim().is_empty() && display_name(&card.first, &card.last).is_empty() {
+        card.name = card.addresses.first().cloned().unwrap_or_default();
     }
+    card
 }
 
 /// What reading files of cards did
@@ -227,7 +221,7 @@ impl Core {
     /// Saves a card (a new one when its id is 0); its id. An address that is not one mailbox alone is left out; a card
     /// with no name, first or last name is known by its default address, and one without an address too is refused.
     pub fn save_card(&self, card: &Card) -> Result<CardId> {
-        let card = checked(card);
+        let card = checked(card.clone());
         if card.name.trim().is_empty() && display_name(&card.first, &card.last).is_empty() {
             return Err(Error::Invalid(tr(Text::CardNameNeeded)));
         }
@@ -378,7 +372,7 @@ impl Core {
         } else {
             crate::vcard::read_csv(&text)
         }
-        .iter()
+        .into_iter()
         .map(checked)
         .collect();
         let counts = self.store().import_cards(&cards)?;
@@ -604,12 +598,12 @@ mod tests {
     fn a_nameless_card_is_known_by_its_address() {
         assert_eq!(display_name(" Mary ", " Smith "), "Mary Smith");
         assert_eq!(display_name("", "Smith"), "Smith");
-        let card = checked(&Card {
+        let card = checked(Card {
             addresses: vec!["a@x>, b@y".into(), "ann@example.com".into()],
             ..Default::default()
         });
         assert_eq!((card.name.as_str(), card.addresses.len()), ("ann@example.com", 1));
-        let named = checked(&Card {
+        let named = checked(Card {
             first: "Ann".into(),
             addresses: vec!["ann@example.com".into()],
             ..Default::default()

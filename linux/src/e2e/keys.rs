@@ -157,18 +157,16 @@ pub(super) async fn encryption_keys(d: &Driver) {
     let refused = async |first: &str, again: &str, words: &str, what: &str| {
         set_text(&b, "key-passphrase", first);
         set_text(&b, "key-passphrase-again", again);
-        click(&b, "dialog-ok");
-        let said = wait_alert(10).await;
-        let text = said.as_ref().map(alert_text).unwrap_or_default();
-        d.check(text.contains(words), &format!("{what} ({text})"));
-        if let Some(said) = said {
-            answer(&said, "OK");
-        }
-        pause(300).await;
+        pause(100).await;
+        // said under the fields as they are typed, OK off until it can be used
+        let text = label_of(&b, "key-passphrase-problem");
+        let off = named_in(&b, "dialog-ok").is_some_and(|ok| !ok.is_sensitive());
+        d.check(text.contains(words) && off, &format!("{what}, OK off ({text})"));
     };
     refused(
         PASSPHRASE,
-        "another passphrase",
+        // as long as the first at least: a shorter one is still being typed
+        "another backup passphrase",
         "not the same",
         "two different passphrases are refused",
     )
@@ -177,6 +175,14 @@ pub(super) async fn encryption_keys(d: &Driver) {
     d.check(
         dialog_named("key-backup-dialog").is_some(),
         "the backup window stays open after each",
+    );
+    d.check(
+        {
+            set_text(&b, "key-passphrase", PASSPHRASE);
+            set_text(&b, "key-passphrase-again", PASSPHRASE);
+            label_of(&b, "key-passphrase-problem").is_empty() && sensitive(&b, "dialog-ok")
+        },
+        "the same passphrase twice, long enough, turns OK on with nothing said",
     );
     set_text(&b, "key-passphrase", PASSPHRASE);
     set_text(&b, "key-passphrase-again", PASSPHRASE);
@@ -288,6 +294,8 @@ pub(super) async fn encryption_keys(d: &Driver) {
             );
             if let Some(summary) = summary {
                 answer(&summary, "OK");
+                // the next message box, not this one while it closes
+                wait_until(5, || !summary.is_mapped()).await;
             }
             let use_for = wait_alert(10).await;
             let text = use_for.as_ref().map(alert_text).unwrap_or_default();

@@ -144,6 +144,32 @@ pub fn passphrase_problem(first: &str, again: &str) -> Option<String> {
     }
 }
 
+/// What a passphrase typed twice (a key backup's, a setup file's) gets said under it while it is typed, and whether
+/// it can be used: "too short" once the first field has something shorter than [`SHORTEST_PASSPHRASE`] characters,
+/// "not the same" only once the second is at least as long as the first and differs; usable when it is long enough
+/// and the same twice
+pub fn passphrase_feedback(first: &str, again: &str) -> (Option<String>, bool) {
+    let length = first.chars().count();
+    if length > 0 && length < SHORTEST_PASSPHRASE {
+        return (Some(tr(Text::UiKeysPassphraseShort)), false);
+    }
+    if first != again {
+        let said = (again.chars().count() >= length).then(|| tr(Text::UiKeysPassphraseDiffer));
+        return (said, false);
+    }
+    (None, length >= SHORTEST_PASSPHRASE)
+}
+
+/// The longest of what [`passphrase_feedback`] says, for a window to keep room for it
+pub fn passphrase_feedback_longest() -> String {
+    let (short, differ) = (tr(Text::UiKeysPassphraseShort), tr(Text::UiKeysPassphraseDiffer));
+    if short.chars().count() >= differ.chars().count() {
+        short
+    } else {
+        differ
+    }
+}
+
 /// The name part of a user id ("Alice Example" of `"Alice Example" <alice@example.org>`), empty for an address alone
 fn user_name(user_id: &str) -> &str {
     let (name, bracketed) = match user_id.split_once('<') {
@@ -511,7 +537,7 @@ impl<'a> Book<'a> {
     }
 
     /// The user's own addresses: every account's and its other addresses
-    fn own_addresses(&self) -> Result<&HashSet<String>> {
+    pub(crate) fn own_addresses(&self) -> Result<&HashSet<String>> {
         if let Some(own) = self.own.get() {
             return Ok(own);
         }
@@ -555,11 +581,11 @@ impl<'a> Book<'a> {
 
     /// Keeps a private key wrapped under the master key (made now if there is none) with its addresses; the user's own
     /// addresses it holds, which only a key made here takes by itself (`claim`)
-    fn keep_secret(&self, key: &SecretKey, source: KeySource, claim: bool) -> Result<Vec<String>> {
+    pub(crate) fn keep_secret(&self, key: &SecretKey, source: KeySource, claim: bool) -> Result<Vec<String>> {
         let master = master(self.secrets, true)?.ok_or(Error::NotFound)?;
         let fingerprint = key.fingerprint();
         let wrapped = wrap(&master, &self.profile, &fingerprint, &key.to_bytes())?;
-        let own = self.own_addresses()?.clone();
+        let own = self.own_addresses()?;
         Ok(self.store.pgp_transaction(|| {
             let addresses = self.save(key.cert(), Some(wrapped), source)?;
             let held: Vec<String> = addresses.into_iter().filter(|address| own.contains(address)).collect();
@@ -594,23 +620,31 @@ impl<'a> Book<'a> {
     /// Learns a correspondent's certificate: merged with the copy kept, stored, and for each of its addresses the
     /// changed key rule, at once
     pub fn learn(&self, cert: &Cert, source: KeySource) -> Result<Vec<(String, Learned)>> {
-        let own = self.own_addresses()?.clone();
+        let own = self.own_addresses()?;
+        Ok(self.store.pgp_transaction(|| self.learned(cert, source, own))?)
+    }
+
+    /// [`Book::learn`] inside a transaction the caller holds, the user's own addresses `own`
+    pub(crate) fn learned(
+        &self,
+        cert: &Cert,
+        source: KeySource,
+        own: &HashSet<String>,
+    ) -> pe_store::Result<Vec<(String, Learned)>> {
         let fingerprint = cert.fingerprint();
         let now = unix_now();
-        Ok(self.store.pgp_transaction(|| {
-            let addresses = self.save(cert, None, source)?;
-            addresses
-                .into_iter()
-                .map(|address| {
-                    let learned = if own.contains(&address) {
-                        Learned::Own
-                    } else {
-                        self.peer_learns(&address, &fingerprint, now)?
-                    };
-                    Ok((address, learned))
-                })
-                .collect()
-        })?)
+        let addresses = self.save(cert, None, source)?;
+        addresses
+            .into_iter()
+            .map(|address| {
+                let learned = if own.contains(&address) {
+                    Learned::Own
+                } else {
+                    self.peer_learns(&address, &fingerprint, now)?
+                };
+                Ok((address, learned))
+            })
+            .collect()
     }
 
     /// The changed key rule for one address: a key is used when the address has none; another waits
@@ -1122,6 +1156,34 @@ mod tests {
             wrapped,
             "a nonce of its own"
         );
+    }
+
+    #[test]
+    fn passphrase_feedback_waits_for_the_typing() {
+        let short = Some(tr(Text::UiKeysPassphraseShort));
+        let differ = Some(tr(Text::UiKeysPassphraseDiffer));
+        assert_eq!(passphrase_feedback("", ""), (None, false));
+        assert_eq!(passphrase_feedback("abc", ""), (short.clone(), false));
+        assert_eq!(passphrase_feedback("abcdefg", "abcdefg"), (short, false));
+        assert_eq!(
+            passphrase_feedback("abcdefgh", ""),
+            (None, false),
+            "the second not typed yet"
+        );
+        assert_eq!(
+            passphrase_feedback("abcdefgh", "abcd"),
+            (None, false),
+            "still being typed"
+        );
+        assert_eq!(passphrase_feedback("abcdefgh", "abcdefgx"), (differ.clone(), false));
+        assert_eq!(passphrase_feedback("abcdefgh", "abcdefghi"), (differ, false));
+        assert_eq!(passphrase_feedback("abcdefgh", "abcdefgh"), (None, true));
+        assert_eq!(
+            passphrase_feedback("ääääääää", "ääääääää"),
+            (None, true),
+            "characters, not bytes"
+        );
+        assert!(passphrase_feedback_longest().chars().count() >= tr(Text::UiKeysPassphraseShort).chars().count());
     }
 
     #[test]

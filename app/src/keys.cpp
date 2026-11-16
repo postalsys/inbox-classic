@@ -6,6 +6,69 @@
 
 #include <algorithm>
 
+std::string ReadSecret(HWND edit) {
+    int length = GetWindowTextLengthW(edit);
+    std::vector<wchar_t> typed(static_cast<size_t>(length) + 1, L'\0');
+    GetWindowTextW(edit, typed.data(), length + 1);
+    std::string secret = core::Narrow({typed.data(), static_cast<size_t>(length)});
+    SecureZeroMemory(typed.data(), typed.size() * sizeof(wchar_t));
+    return secret;
+}
+
+void Wipe(std::string& secret) {
+    SecureZeroMemory(secret.data(), secret.size());
+    secret.clear();
+}
+
+int WarningNote(HWND dialog, int id, const std::wstring& text, int left, int top, int right) {
+    int icon = GetSystemMetrics(SM_CXSMICON);
+    // a system icon is shared: not destroyed
+    auto warning = static_cast<HICON>(LoadImageW(nullptr, IDI_WARNING, IMAGE_ICON, icon, icon, LR_SHARED));
+    HWND sign = CreateChild(dialog, L"STATIC", nullptr, SS_ICON | SS_REALSIZECONTROL, 0, {left, top, left + icon, top + icon});
+    SendMessageW(sign, STM_SETICON, reinterpret_cast<WPARAM>(warning), 0);
+    int textLeft = left + icon + Scale(6);
+    int height = std::max(icon, static_cast<int>(MeasureText(text, right - textLeft).cy));
+    CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, id, {textLeft, top, right, top + height});
+    return height;
+}
+
+void BottomButtons(HWND dialog, int width, int top, const std::wstring& ok, const std::wstring& cancel, bool cancelDefault) {
+    int pad = Scale(10), buttonWidth = ButtonWidth({ok, cancel});
+    CreateChild(dialog, L"BUTTON", ok.c_str(), WS_TABSTOP | (cancelDefault ? 0 : BS_DEFPUSHBUTTON), IDOK,
+                {width - pad - 2 * buttonWidth - Scale(6), top, width - pad - buttonWidth - Scale(6), top + Scale(25)});
+    CreateChild(dialog, L"BUTTON", cancel.c_str(), WS_TABSTOP | (cancelDefault ? BS_DEFPUSHBUTTON : 0), IDCANCEL,
+                {width - pad - buttonWidth, top, width - pad, top + Scale(25)});
+}
+
+void WipeFields(HWND dialog, std::initializer_list<int> ids) {
+    for (int id : ids) {
+        if (HWND edit = GetDlgItem(dialog, id)) {
+            int length = GetWindowTextLengthW(edit);
+            SetWindowTextW(edit, std::wstring(static_cast<size_t>(length), L' ').c_str());
+            SetWindowTextW(edit, L"");
+        }
+    }
+}
+
+bool ShowPassphraseFeedback(HWND dialog, int first, int again, int line) {
+    std::string typed = ReadSecret(GetDlgItem(dialog, first));
+    std::string retyped = ReadSecret(GetDlgItem(dialog, again));
+    bool acceptable = false;
+    core::String said(pe_passphrase_feedback(typed.c_str(), retyped.c_str(), &acceptable));
+    Wipe(typed);
+    Wipe(retyped);
+    std::wstring words = said ? Text(said.get()) : L"";
+    HWND note = GetDlgItem(dialog, line);
+    if (GetWindowString(note) != words) {
+        SetWindowTextW(note, words.c_str());
+    }
+    // the words and the warning sign before them
+    ShowWindow(note, words.empty() ? SW_HIDE : SW_SHOW);
+    ShowWindow(GetWindow(note, GW_HWNDPREV), words.empty() ? SW_HIDE : SW_SHOW);
+    SetAccessibleDescription(GetDlgItem(dialog, again), words);
+    return acceptable;
+}
+
 namespace {
 
 // a key file is a few kilobytes, a whole keyring a few hundred: anything larger is no key file
@@ -73,35 +136,6 @@ bool WriteKeyFile(const std::wstring& path, const char* text, std::wstring& why)
     return done;
 }
 
-// a passphrase gone from memory
-void Wipe(std::string& secret) {
-    SecureZeroMemory(secret.data(), secret.size());
-    secret.clear();
-}
-
-// a note with the system's warning sign before it, `text` wrapped between `left` and `right`: its height. A warning
-// to keep in mind, not an error
-int WarningNote(HWND dialog, int id, const std::wstring& text, int left, int top, int right) {
-    int icon = GetSystemMetrics(SM_CXSMICON);
-    // a system icon is shared: not destroyed
-    auto warning = static_cast<HICON>(LoadImageW(nullptr, IDI_WARNING, IMAGE_ICON, icon, icon, LR_SHARED));
-    HWND sign = CreateChild(dialog, L"STATIC", nullptr, SS_ICON | SS_REALSIZECONTROL, 0, {left, top, left + icon, top + icon});
-    SendMessageW(sign, STM_SETICON, reinterpret_cast<WPARAM>(warning), 0);
-    int textLeft = left + icon + Scale(6);
-    int height = std::max(icon, static_cast<int>(MeasureText(text, right - textLeft).cy));
-    CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, id, {textLeft, top, right, top + height});
-    return height;
-}
-
-// OK and Cancel (or the words given) at the bottom right of a window `width` wide, their top at `top`; the first is
-// the default unless `cancelDefault`
-void BottomButtons(HWND dialog, int width, int top, const std::wstring& ok, const std::wstring& cancel, bool cancelDefault = false) {
-    int pad = Scale(10), buttonWidth = ButtonWidth({ok, cancel});
-    CreateChild(dialog, L"BUTTON", ok.c_str(), WS_TABSTOP | (cancelDefault ? 0 : BS_DEFPUSHBUTTON), IDOK,
-                {width - pad - 2 * buttonWidth - Scale(6), top, width - pad - buttonWidth - Scale(6), top + Scale(25)});
-    CreateChild(dialog, L"BUTTON", cancel.c_str(), WS_TABSTOP | (cancelDefault ? BS_DEFPUSHBUTTON : 0), IDCANCEL,
-                {width - pad - buttonWidth, top, width - pad, top + Scale(25)});
-}
 
 // a dialog that is done with OK or Cancel: `Done` has `done` and `accepted`
 template <typename Done>
@@ -170,48 +204,16 @@ struct PassphraseState {
     bool accepted = false;
 };
 
-// what is typed in the hidden field `edit` as UTF-8, its copies here wiped
-std::string ReadSecret(HWND edit) {
-    int length = GetWindowTextLengthW(edit);
-    std::vector<wchar_t> typed(static_cast<size_t>(length) + 1, L'\0');
-    GetWindowTextW(edit, typed.data(), length + 1);
-    std::string secret = core::Narrow({typed.data(), static_cast<size_t>(length)});
-    SecureZeroMemory(typed.data(), typed.size() * sizeof(wchar_t));
-    return secret;
-}
 
-// the fields' own copies written over before the window goes, as far as the edit control lets them be
-void WipeFields(HWND dialog) {
-    for (int id : {IDC_KEY_PASSPHRASE, IDC_KEY_PASSPHRASE_AGAIN}) {
-        if (HWND edit = Item(dialog, id)) {
-            int length = GetWindowTextLengthW(edit);
-            SetWindowTextW(edit, std::wstring(static_cast<size_t>(length), L' ').c_str());
-            SetWindowTextW(edit, L"");
-        }
-    }
-}
-
-// OK: the passphrase taken, or for a backup refused with the reason when the two differ or it is too short (the
-// first field then has the focus again)
+// OK: the passphrase taken; a backup's only once the core takes it (OK is off until then, as Enter may still come)
 void TakePassphrase(HWND dialog, PassphraseState& state) {
-    HWND first = Item(dialog, IDC_KEY_PASSPHRASE);
-    std::string passphrase = ReadSecret(first);
-    if (state.twice) {
-        std::string again = ReadSecret(Item(dialog, IDC_KEY_PASSPHRASE_AGAIN));
-        core::String problem(pe_pgp_passphrase_problem(passphrase.c_str(), again.c_str()));
-        Wipe(again);
-        if (problem) {
-            Wipe(passphrase);
-            MessageBoxW(dialog, Text(problem.get()).c_str(), state.title.c_str(), MB_OK | MB_ICONWARNING);
-            SetFocus(first);
-            SendMessageW(first, EM_SETSEL, 0, -1);
-            return;
-        }
+    if (!IsWindowEnabled(Item(dialog, IDOK))) {
+        return;
     }
-    state.passphrase = std::move(passphrase);
+    state.passphrase = ReadSecret(Item(dialog, IDC_KEY_PASSPHRASE));
     state.accepted = true;
     state.done = true;
-    WipeFields(dialog);
+    WipeFields(dialog, {IDC_KEY_PASSPHRASE, IDC_KEY_PASSPHRASE_AGAIN});
 }
 
 LRESULT CALLBACK PassphraseProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -220,14 +222,19 @@ LRESULT CALLBACK PassphraseProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
         TakePassphrase(hwnd, *state);
         return 0;
     }
+    // a backup's passphrase as it is typed: what the core says of it, OK once it takes it
+    if (state && state->twice && message == WM_COMMAND && HIWORD(wParam) == EN_CHANGE) {
+        EnableWindow(Item(hwnd, IDOK), ShowPassphraseFeedback(hwnd, IDC_KEY_PASSPHRASE, IDC_KEY_PASSPHRASE_AGAIN, IDC_KEY_PROBLEM));
+        return 0;
+    }
     if (state && ((message == WM_COMMAND && LOWORD(wParam) == IDCANCEL) || message == WM_CLOSE)) {
-        WipeFields(hwnd);
+        WipeFields(hwnd, {IDC_KEY_PASSPHRASE, IDC_KEY_PASSPHRASE_AGAIN});
     }
     return SimpleProc<PassphraseState>(hwnd, message, wParam, lParam);
 }
 
-// asks for a passphrase: `intro` over it, `problem` (why the last one was not taken) between them when not empty, and
-// with `twice` a second field to type it again; true with it in `passphrase` (the caller wipes it)
+}  // namespace
+
 bool PassphraseDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& problem, bool twice,
                       std::string& passphrase) {
     RegisterDialogClass(kPassphraseClass, PassphraseProc);
@@ -238,7 +245,12 @@ bool PassphraseDialog(HWND owner, const std::wstring& title, const std::wstring&
     int iconWidth = GetSystemMetrics(SM_CXSMICON) + Scale(6);
     int problemHeight = problem.empty() ? 0 : std::max(GetSystemMetrics(SM_CYSMICON), static_cast<int>(MeasureText(problem, width - 2 * pad - iconWidth).cy)) + Scale(10);
     int fields = twice ? 2 : 1;
-    int height = pad + introHeight + Scale(10) + problemHeight + fields * (row + gap) + Scale(10) + Scale(25) + pad;
+    // a backup's: room under the fields for the longest of what the core says while it is typed
+    core::String longest(twice ? pe_passphrase_feedback_longest() : nullptr);
+    std::wstring feedback = longest ? Text(longest.get()) : L"";
+    int feedbackHeight =
+        twice ? std::max(GetSystemMetrics(SM_CYSMICON), static_cast<int>(MeasureText(feedback, width - 2 * pad - labelWidth - iconWidth).cy)) : 0;
+    int height = pad + introHeight + Scale(10) + problemHeight + fields * (row + gap) + feedbackHeight + Scale(10) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kPassphraseClass, title.c_str(), width, height);
     PassphraseState state{title, twice};
     int top = pad;
@@ -255,12 +267,20 @@ bool PassphraseDialog(HWND owner, const std::wstring& title, const std::wstring&
                     WS_EX_CLIENTEDGE);
         top += row + gap;
     }
+    if (twice) {
+        WarningNote(dialog, IDC_KEY_PROBLEM, feedback, pad + labelWidth, top, width - pad);
+    }
     BottomButtons(dialog, width, height - pad - Scale(25), core::T(PE_TEXT_UI_OK), core::T(PE_TEXT_UI_CANCEL));
+    if (twice) {
+        EnableWindow(Item(dialog, IDOK), ShowPassphraseFeedback(dialog, IDC_KEY_PASSPHRASE, IDC_KEY_PASSPHRASE_AGAIN, IDC_KEY_PROBLEM));
+    }
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     RunModal(dialog, Item(dialog, IDC_KEY_PASSPHRASE), state.done);
     passphrase = std::move(state.passphrase);
     return state.accepted;
 }
+
+namespace {
 
 // ---- New Key ----
 

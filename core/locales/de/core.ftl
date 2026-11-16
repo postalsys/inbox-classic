@@ -674,3 +674,208 @@ pgp-bar-count-warning = { $count ->
 }
 # review: new
 pgp-bar-count-neutral = { $count } ohne bestätigte Signatur
+# the setup file: settings, accounts, contacts and keys carried to another computer
+# review: new
+setup-part-settings = Einstellungen
+# review: new
+setup-part-preferences = Fenstereinstellungen
+# review: new
+setup-part-accounts = Konten
+# review: new
+setup-part-sign-in-apps = Anmelde-Apps
+# review: new
+setup-part-contacts = Kontakte und Gruppen
+# review: new
+setup-part-keys = Verschlüsselungsschlüssel
+# review: new
+setup-part-rules = Nachrichtenregeln
+# review: new
+setup-part-trusted-senders = Vertrauenswürdige Absender
+# review: new
+setup-holds-settings = { $count ->
+    [one] 1 Einstellung
+   *[other] { $count } Einstellungen
+}
+# review: new
+setup-holds-preferences = { $count ->
+    [one] 1 Fenstereinstellung
+   *[other] { $count } Fenstereinstellungen
+}
+# review: new
+setup-holds-accounts = { $count ->
+    [one] 1 Konto
+   *[other] { $count } Konten
+}
+# review: new
+setup-holds-sign-in-apps = { $count ->
+    [one] 1 Anmelde-App
+   *[other] { $count } Anmelde-Apps
+}
+# review: new
+setup-holds-built-in = Welche integrierten Anmelde-Apps eingeschaltet sind
+# review: new
+setup-holds-contacts = { $count ->
+    [one] 1 Kontakt
+   *[other] { $count } Kontakte
+}
+# review: new
+setup-holds-groups = { $count ->
+    [one] 1 Gruppe
+   *[other] { $count } Gruppen
+}
+# review: new
+setup-holds-own-keys = { $count ->
+    [one] 1 eigener Schlüssel
+   *[other] { $count } eigene Schlüssel
+}
+# review: new
+setup-holds-contact-keys = { $count ->
+    [one] 1 Schlüssel eines Kontakts
+   *[other] { $count } Schlüssel von Kontakten
+}
+# review: new
+setup-holds-rules = { $count ->
+    [one] 1 Regel
+   *[other] { $count } Regeln
+}
+# review: new
+setup-holds-trusted-senders = { $count ->
+    [one] 1 vertrauenswürdiger Absender
+   *[other] { $count } vertrauenswürdige Absender
+}
+# review: new
+setup-sign-in-password = Passwort
+# review: new
+setup-account-secret-password = Das Passwort ist in der Datei enthalten.
+# review: new
+setup-account-secret-token = Die Anmeldung ist in der Datei enthalten.
+# review: new
+setup-account-asks-password = Nach dem Import wird nach dem Passwort gefragt.
+# review: new
+setup-account-signs-in-again = Sie melden sich nach dem Import erneut an.
+# review: new
+setup-account-here = Das Konto ist hier bereits eingerichtet und wird übersprungen.
+# review: new
+setup-account-no-app = Das Konto meldet sich mit { $app } an, das hier nicht eingerichtet ist. Importieren Sie auch die Anmelde-Apps.
+# review: new
+setup-invalid-address = „{ $address }“ ist keine E-Mail-Adresse.
+# review: new
+setup-invalid-server = Der { $server }-Server hat keinen verwendbaren Namen oder Port.
+# review: new
+setup-invalid-user = Das Konto hat keinen Benutzernamen.
+# review: new
+setup-invalid-sign-in = Das Konto meldet sich auf eine Weise an, die Inbox Classic nicht kennt.
+# review: new
+setup-error-empty = Die Datei ist leer.
+# review: new
+setup-error-too-large = Die Datei ist zu groß für eine Inbox-Classic-Einrichtung.
+# review: new
+setup-error-not-setup = Diese Datei ist keine Inbox-Classic-Einrichtung.
+# review: new
+setup-error-damaged = Die Einrichtungsdatei ist beschädigt und kann nicht gelesen werden.
+# review: new
+setup-error-newer = Diese Einrichtung wurde von einer neueren Version von Inbox Classic ({ $version }) gespeichert. Aktualisieren Sie Inbox Classic und importieren Sie sie dann erneut.
+# review: new
+setup-error-needs-passphrase = Diese Einrichtung ist mit einer Passphrase geschützt. Geben Sie die Passphrase ein, mit der sie gespeichert wurde.
+# review: new
+setup-error-wrong-passphrase = Das ist nicht die Passphrase, mit der diese Einrichtung gespeichert wurde.
+# review: new
+setup-error-changed = Die Einrichtungsdatei wurde nach dem Speichern verändert oder beschädigt und kann daher nicht importiert werden.
+# review: new
+setup-error-read = Die Einrichtungsdatei konnte nicht gelesen werden: { $error }
+# review: new
+setup-error-write = Die Einrichtung konnte nicht gespeichert werden: { $error }
+# review: new
+setup-error-no-parts = Wählen Sie mindestens einen Teil aus.
+# review: new
+setup-left-out = { $count ->
+    [one] 1 Eintrag von „{ $part }“ ist nicht verwendbar und wird ausgelassen.
+   *[other] { $count } Einträge von „{ $part }“ sind nicht verwendbar und werden ausgelassen.
+}
+# review: new
+setup-imported-settings = Die Einstellungen wurden ersetzt.
+# review: new
+setup-imported-preferences = Die Fenstereinstellungen wurden ersetzt.
+# review: new
+setup-added-accounts = { $count ->
+    [one] 1 Konto hinzugefügt.
+   *[other] { $count } Konten hinzugefügt.
+}
+# review: new
+setup-skipped-here = { $address } ist hier bereits eingerichtet und wurde übersprungen.
+# review: new
+setup-skipped-no-app = { $address } wurde übersprungen: Das Konto meldet sich mit { $app } an, das hier nicht eingerichtet ist.
+# review: new
+setup-skipped-invalid = { $address } wurde übersprungen: { $reason }
+# review: new
+setup-asks-password = { $address } fragt beim Verbinden nach dem Passwort.
+# review: new
+setup-signs-in-again = { $address } bittet Sie beim Verbinden, sich erneut anzumelden.
+# review: new
+setup-added-sign-in-apps = { $count ->
+    [one] 1 Anmelde-App hinzugefügt.
+   *[other] { $count } Anmelde-Apps hinzugefügt.
+}
+# review: new
+setup-skipped-sign-in-apps = { $count ->
+    [one] 1 Anmelde-App ist hier bereits eingerichtet.
+   *[other] { $count } Anmelde-Apps sind hier bereits eingerichtet.
+}
+# review: new
+setup-added-contacts = { $count ->
+    [one] 1 Kontakt zum Adressbuch hinzugefügt.
+   *[other] { $count } Kontakte zum Adressbuch hinzugefügt.
+}
+# review: new
+setup-skipped-contacts = { $count ->
+    [one] 1 Kontakt ist bereits im Adressbuch.
+   *[other] { $count } Kontakte sind bereits im Adressbuch.
+}
+# review: new
+setup-added-groups = { $count ->
+    [one] 1 Gruppe hinzugefügt oder ergänzt.
+   *[other] { $count } Gruppen hinzugefügt oder ergänzt.
+}
+# review: new
+setup-added-own-keys = { $count ->
+    [one] 1 eigenen Schlüssel hinzugefügt.
+   *[other] { $count } eigene Schlüssel hinzugefügt.
+}
+# review: new
+setup-added-contact-keys = { $count ->
+    [one] 1 Schlüssel eines Kontakts hinzugefügt.
+   *[other] { $count } Schlüssel von Kontakten hinzugefügt.
+}
+# review: new
+setup-added-rules = { $count ->
+    [one] 1 Nachrichtenregel hinzugefügt.
+   *[other] { $count } Nachrichtenregeln hinzugefügt.
+}
+# review: new
+setup-skipped-rules = { $count ->
+    [one] 1 Nachrichtenregel ist bereits vorhanden.
+   *[other] { $count } Nachrichtenregeln sind bereits vorhanden.
+}
+# review: new
+setup-skipped-rules-account = { $count ->
+    [one] 1 Nachrichtenregel gilt für ein Konto, das hier nicht vorhanden ist, und wurde übersprungen.
+   *[other] { $count } Nachrichtenregeln gelten für Konten, die hier nicht vorhanden sind, und wurden übersprungen.
+}
+# review: new
+setup-rules-waiting = { $count ->
+    [one] 1 Nachrichtenregel verschiebt Nachrichten in einen Ordner, der erscheint, sobald sein Konto synchronisiert ist.
+   *[other] { $count } Nachrichtenregeln verschieben Nachrichten in Ordner, die erscheinen, sobald ihre Konten synchronisiert sind.
+}
+# review: new
+setup-added-trusted-senders = { $count ->
+    [one] 1 vertrauenswürdigen Absender hinzugefügt.
+   *[other] { $count } vertrauenswürdige Absender hinzugefügt.
+}
+# review: new
+setup-nothing = Es wurde nichts importiert.
+# review: new
+setup-account-servers = { $imap } und { $smtp } ({ $signin })
+# review: new
+setup-file-name = Inbox Classic-Einstellungen und -Konten
+# review: new
+setup-skipped-unreachable = { $name } wurde übersprungen: Der Anmeldedienst war nicht erreichbar. Fügen Sie die Anmelde-App unter „Anmelde-Apps“ erneut hinzu.

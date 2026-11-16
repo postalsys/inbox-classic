@@ -92,3 +92,10 @@ path = "fuzz_targets/pgp_unwrap.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "setup_file"
+path = "fuzz_targets/setup_file.rs"
+test = false
+doc = false
+bench = false
