@@ -473,8 +473,15 @@ impl Core {
     }
 
     /// The messages the last Undo brought back that are in their folders again (they get there once the server has
-    /// moved them and the folder is synced), for the window to select them. Forgotten once all are there.
+    /// moved them and the folder is synced). Forgotten once all are there.
     pub fn restored(&self) -> Result<Vec<MessageRef>> {
+        self.take_restored(|found| Ok(Some(found.to_vec())))
+            .map(Option::unwrap_or_default)
+    }
+
+    /// `f` with the messages the last Undo brought back that are in their folders again; they are forgotten once all
+    /// are there and `f` took them (gave Some), and kept for the next time when it did not
+    pub(crate) fn take_restored<T>(&self, f: impl FnOnce(&[MessageRef]) -> Result<Option<T>>) -> Result<Option<T>> {
         let mut restored = self.restored.lock().unwrap_or_else(|e| e.into_inner());
         let mut found = Vec::new();
         let mut all = true;
@@ -483,10 +490,11 @@ impl Core {
             all &= uids.len() >= ids.len();
             found.extend(uids.into_iter().map(|uid| MessageRef { folder: *folder, uid }));
         }
-        if all {
+        let taken = f(&found)?;
+        if all && taken.is_some() {
             restored.clear();
         }
-        Ok(found)
+        Ok(taken)
     }
 }
 

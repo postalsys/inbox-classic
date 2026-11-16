@@ -907,12 +907,17 @@ public final class Mailbox: NSObject {
         }
     }
 
-    /// the messages Undo brought back selected, once they are in the list
+    /// the messages Undo brought back selected, once they are in the list; when they came back after the list was
+    /// counted, its rows are others than the core's, so the list is read again first
     private func selectRestored() {
-        let restored: OpaquePointer = pe_selection_new()
-        defer { pe_selection_free(restored) }
-        guard pe_undo_restored(core.handle, restored), pe_selection_count(restored) > 0 else { return }
-        let rows = core.positions(of: restored, in: listView)
+        var behind = false
+        guard let found = pe_list_view_restored(core.handle, listView.handle, &behind) else { return }
+        defer { pe_positions_free(found) }
+        if behind {
+            gatherReload()
+            return
+        }
+        let rows = IndexSet((0..<pe_positions_count(found)).map { Int(pe_positions_get(found, $0)) })
         guard let first = rows.first else { return }
         restorePending = false
         list.selectRowIndexes(rows, byExtendingSelection: false)
@@ -2178,6 +2183,17 @@ public final class Mailbox: NSObject {
 
     // ---- the core's events ----
 
+    /// the list read again in a moment, once for however many changes come meanwhile; not when the user's own command
+    /// read it since
+    private func gatherReload() {
+        guard reloadTimer?.isValid != true else { return }
+        reloadTimer = after(Mailbox.gatherWait) { [weak self] in
+            guard let self, core.stale(listView) else { return }
+            reloadList(keepSelection: true)
+            changed()
+        }
+    }
+
     func onEvent(_ event: CoreEvent) {
         switch event.kind {
         case PE_EVENT_KIND_PICTURE_READY:
@@ -2188,12 +2204,8 @@ public final class Mailbox: NSObject {
             scheduleCounts()
             // a list of several folders has messages of any of them. The changes of a sync are gathered for a moment
             // and the list read once, not after each; not at all when the user's own command read it since
-            if (event.folder == folder && !searching) || severalFolders, reloadTimer?.isValid != true {
-                reloadTimer = after(Mailbox.gatherWait) { [weak self] in
-                    guard let self, core.stale(listView) else { return }
-                    reloadList(keepSelection: true)
-                    changed()
-                }
+            if (event.folder == folder && !searching) || severalFolders {
+                gatherReload()
             }
         case PE_EVENT_KIND_SYNC_FINISHED:
             // how much text the search still has to read

@@ -61,6 +61,9 @@ pub struct Store {
     db: rusqlite::Connection,
     /// Which store of this process it is, for [`Generation`]
     id: u64,
+    /// The rows this connection wrote to its temporary tables (the messages a selection names), which change nothing
+    /// a list shows, so [`Generation`] leaves them out
+    scratch: std::sync::atomic::AtomicU64,
 }
 
 /// What a store holds at one moment, as [`Store::generation`] tells it: equal values of one store mean nothing was
@@ -70,7 +73,7 @@ pub struct Generation {
     store: u64,
     /// SQLite's `data_version`, which changes with every commit of another connection
     data: i64,
-    /// The rows this connection inserted, changed or deleted since it opened
+    /// The rows this connection inserted, changed or deleted since it opened, those of its temporary tables not counted
     changes: u64,
 }
 
@@ -93,7 +96,11 @@ impl Store {
         db.busy_timeout(std::time::Duration::from_secs(5))?;
         static OPENED: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
         let id = OPENED.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-        let mut store = Store { db, id };
+        let mut store = Store {
+            db,
+            id,
+            scratch: Default::default(),
+        };
         schema::migrate(&mut store.db)?;
         Ok(store)
     }
@@ -107,7 +114,7 @@ impl Store {
         Ok(Generation {
             store: self.id,
             data,
-            changes: self.db.total_changes(),
+            changes: self.db.total_changes() - self.scratch.load(std::sync::atomic::Ordering::Relaxed),
         })
     }
 
@@ -215,6 +222,14 @@ mod tests {
         let account = store.add_account(&AccountSettings::example("a@example.com")).unwrap();
         let written = store.generation().unwrap();
         assert_ne!(written, before, "its own write");
+        // the messages a selection names, in a temporary table of its own
+        let picked = [MessageRef { folder: 1, uid: 1 }];
+        store.positions(&Search::folder(1), Sort::default(), &picked).unwrap();
+        assert_eq!(
+            store.generation().unwrap(),
+            written,
+            "a selection looked for writes nothing"
+        );
         other.remove_account(account).unwrap();
         assert_ne!(store.generation().unwrap(), written, "another connection's commit");
         drop((store, other));

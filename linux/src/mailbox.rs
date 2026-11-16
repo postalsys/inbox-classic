@@ -5,7 +5,7 @@
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 use adw::prelude::*;
 use gtk::{gdk, gio, glib};
@@ -121,6 +121,8 @@ pub struct Mailbox {
     reloading: Cell<bool>,
     mark_read: RefCell<Option<glib::SourceId>>,
     reload_later: RefCell<Option<glib::SourceId>>,
+    /// Itself, for the work a method of `&self` leaves for later (the list read again after a moment)
+    me: Weak<Mailbox>,
     /// The folder list's counts read again a moment after the first of a run of folder changes
     counts_later: RefCell<Option<glib::SourceId>>,
     /// What the list shows, kept by the core: the folder, the words of the Find box, the order, the grouping and the
@@ -253,7 +255,8 @@ impl Mailbox {
         });
         narrow_layout(&window, &parts, &folder_place, &status_bar, &list);
         folder_place.update();
-        let mailbox = Rc::new(Mailbox {
+        let mailbox = Rc::new_cyclic(|me| Mailbox {
+            me: me.clone(),
             window,
             title,
             folders,
@@ -1039,9 +1042,19 @@ impl Mailbox {
         if !self.undone.get() {
             return false;
         }
-        let core = &shell().core;
-        let refs = core.restored().unwrap_or_default();
-        let positions = self.view.borrow().positions(core, &refs).unwrap_or_default();
+        // the rows of the list as it was counted, the view it was read through
+        let restored = self.list.view().restored(&shell().core);
+        let positions = match restored {
+            Ok(Some(positions)) => positions,
+            // back after the list was counted: its rows are others than the core's, so it is read again first
+            Ok(None) => {
+                if let Some(me) = self.me.upgrade() {
+                    me.reload_soon();
+                }
+                return false;
+            }
+            Err(_) => return false,
+        };
         let Some(&first) = positions.first() else {
             return false;
         };

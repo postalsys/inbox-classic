@@ -3801,6 +3801,18 @@ struct PePositions *pe_list_view_positions(const struct PeCore *core,
                                            const struct PeListView *view,
                                            const struct PeSelection *selection);
 
+// The rows of the messages the last `pe_undo` brought back, for the app to select once its list has them: none while
+// none is back yet. With `behind` set true and no rows, something was written since the list was last counted (with
+// `pe_list_view_counts_and_rows`): the rows found now could be others of the list shown, so the app reads the list
+// again (as after `PE_EVENT_KIND_FOLDER_CHANGED`) and asks then; the messages are kept for it. Free with
+// `pe_positions_free`. NULL on failure.
+//
+// # Safety
+// `core` must be a live handle, `view` NULL or a live view, `behind` NULL or a valid pointer.
+struct PePositions *pe_list_view_restored(const struct PeCore *core,
+                                          const struct PeListView *view,
+                                          bool *behind);
+
 // Whether `action` (to `to`) on the messages of `summary` takes them out of the list (Ignore Conversation does while
 // it hides ignored conversations): then the app selects the row after them, as it does after Delete
 //
@@ -3947,17 +3959,18 @@ bool pe_selection_get(const struct PeSelection *selection,
                       uint64_t *uid);
 
 // # Safety
-// `positions` must be NULL or from `pe_list_view_positions`, not freed yet.
+// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, not freed yet.
 size_t pe_positions_count(const struct PePositions *positions);
 
 // Position `index`; 0 past the end
 //
 // # Safety
-// `positions` must be NULL or from `pe_list_view_positions`, not freed yet.
-uint64_t pe_positions_get(const struct PePositions *positions, size_t index);
+// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, not freed yet.
+uint64_t pe_positions_get(const struct PePositions *positions,
+                          size_t index);
 
 // # Safety
-// `positions` must be NULL or from `pe_list_view_positions`, freed once.
+// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, freed once.
 void pe_positions_free(struct PePositions *positions);
 
 // Fills `summary`; false on failure
@@ -4049,14 +4062,6 @@ char *pe_undo_label(const struct PeCore *core);
 // `core` must be a live handle, `error` NULL or a valid pointer.
 char *pe_undo(const struct PeCore *core,
               char **error);
-
-// Fills `selection` with the messages the last `pe_undo` brought back that are in their folders again, to select
-// them after the list reloads; empty while none is there yet. Forgotten once all are there. False on failure.
-//
-// # Safety
-// `core` must be a live handle, `selection` a live selection.
-bool pe_undo_restored(const struct PeCore *core,
-                      struct PeSelection *selection);
 
 // The counts of a list in the status bar: "12 messages, 3 unread" for a folder, "12 found, 3 unread" for a search
 // (`searching`), with ", 2 selected" when more than one is. Free with `pe_string_free`.

@@ -579,6 +579,38 @@ impl ListView {
         self.listed(Vec::new(), |search| core.positions(search, self.sort, refs))
     }
 
+    /// The rows of the messages the last Undo brought back ([`Core::undo`]), for the window to select them once its list
+    /// has them: empty while none is back yet. None when something was written since the list was last counted: the
+    /// rows found now could be other rows of the list shown (the messages back in the store, the list counted before
+    /// them), so the list is read again first and the messages kept for then.
+    pub fn restored(&self, core: &Core) -> Result<Option<Vec<u64>>> {
+        self.remembered(core, Some(Vec::new()), |search, moment| {
+            let counted = self
+                .memo
+                .0
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .as_ref()
+                .is_some_and(|k| {
+                    k.sort == moment.sort
+                        && k.search == *search
+                        && k.counts.is_some()
+                        && k.at.generation == moment.at.generation
+                });
+            if !counted {
+                return Ok(None);
+            }
+            core.take_restored(|refs| {
+                if refs.is_empty() {
+                    return Ok(Some(Vec::new()));
+                }
+                let rows = core.positions(search, self.sort, refs)?;
+                // a write meanwhile: the rows may already be another list's
+                Ok((core.generation()? == moment.at.generation).then_some(rows))
+            })
+        })
+    }
+
     /// Whether the list names whom its messages went to (see [`Core::lists_recipients`])
     pub fn lists_recipients(&self, core: &Core) -> Result<bool> {
         self.listed(false, |search| core.lists_recipients(search))
@@ -930,6 +962,42 @@ mod tests {
         let other = pe_store::Store::open(dir.path().join("store.db")).unwrap();
         other.add_messages(inbox, &[mail(8, 800, "<h@x>", &[])]).unwrap();
         assert!(view.stale(&core).unwrap(), "another connection's write");
+    }
+
+    /// What Undo brought back is given as rows only of the list as it was counted: messages back in the store after
+    /// the count wait for the list to be read again, and are kept until then
+    #[test]
+    fn restored_rows_only_of_the_list_counted() {
+        let dir = pe_testkit::TempDir::new("core-list-view-restored");
+        let core = opened(&dir);
+        let inbox = inbox(&core);
+        let mut view = ListView::new();
+        view.set_scope(Some(Scope::Folder(inbox)));
+        assert_eq!(view.restored(&core).unwrap(), None, "not counted yet");
+        view.counts_and_rows(&core).unwrap();
+        assert_eq!(view.restored(&core).unwrap(), Some(vec![]), "no Undo");
+
+        // Undo of two moved away, the list counted before they are back
+        *core.restored.lock().unwrap() = vec![(inbox, vec!["<g@x>".into(), "<h@x>".into()])];
+        assert_eq!(view.restored(&core).unwrap(), Some(vec![]), "none back yet");
+        // back in the store, as the worker's sync writes them: the list counted before is behind
+        let other = pe_store::Store::open(dir.path().join("store.db")).unwrap();
+        other
+            .add_messages(inbox, &[mail(7, 900, "<g@x>", &[]), mail(8, 800, "<h@x>", &[])])
+            .unwrap();
+        assert_eq!(view.restored(&core).unwrap(), None, "the list shown does not have them");
+        assert_eq!(view.restored(&core).unwrap(), None, "kept until it is read again");
+        assert_eq!(view.counts_and_rows(&core).unwrap().0, 8);
+        assert_eq!(
+            view.restored(&core).unwrap(),
+            Some(vec![0, 1]),
+            "the newest two, at the top"
+        );
+        assert_eq!(
+            view.restored(&core).unwrap(),
+            Some(vec![]),
+            "forgotten once all were given"
+        );
     }
 
     /// The row of the message shown after the list is read again: from the pages read, nearest the hint, or from the

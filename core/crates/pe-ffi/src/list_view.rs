@@ -617,6 +617,32 @@ pub unsafe extern "C" fn pe_list_view_positions(
     }
 }
 
+/// The rows of the messages the last `pe_undo` brought back, for the app to select once its list has them: none while
+/// none is back yet. With `behind` set true and no rows, something was written since the list was last counted (with
+/// `pe_list_view_counts_and_rows`): the rows found now could be others of the list shown, so the app reads the list
+/// again (as after `PE_EVENT_KIND_FOLDER_CHANGED`) and asks then; the messages are kept for it. Free with
+/// `pe_positions_free`. NULL on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `view` NULL or a live view, `behind` NULL or a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_view_restored(
+    core: *const PeCore,
+    view: *const PeListView,
+    behind: *mut bool,
+) -> *mut PePositions {
+    // SAFETY: as the caller guarantees
+    let found = unsafe { listed(core, view, None, |core, view| view.restored(core).ok()) };
+    // SAFETY: as the caller guarantees
+    if let Some(behind) = unsafe { behind.as_mut() } {
+        *behind = matches!(found, Some(None));
+    }
+    match found {
+        Some(rows) => handed(PePositions(rows.unwrap_or_default())),
+        None => null_mut(),
+    }
+}
+
 /// Whether `action` (to `to`) on the messages of `summary` takes them out of the list (Ignore Conversation does while
 /// it hides ignored conversations): then the app selects the row after them, as it does after Delete
 ///

@@ -1477,11 +1477,13 @@ void Mailbox::TakeSelection(bool rebuild) {
 }
 
 bool Mailbox::SelectRestored() {
-    core::Selection restored(pe_selection_new());
-    if (!pe_undo_restored(core_, restored.get()) || pe_selection_count(restored.get()) == 0) {
+    bool behind = false;
+    core::Positions at(pe_list_view_restored(core_, view_.get(), &behind));
+    // back after the list was counted: its rows are others than the core's, so it is read again first
+    if (behind) {
+        ScheduleReload();
         return false;
     }
-    core::Positions at(pe_list_view_positions(core_, view_.get(), restored.get()));
     if (pe_positions_count(at.get()) == 0) {
         return false;
     }
