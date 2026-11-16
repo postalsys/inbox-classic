@@ -31,6 +31,8 @@ gtk-search-indexing = { $count ->
    *[other] tekst { $count } poruka još se indeksira
 }
 # review: new
+gtk-list-loading = Učitavanje...
+# review: new
 gtk-menu-rename = Preimenuj...
 # review: new
 gtk-import-one-question = Uvesti poruku { $file } u mapu { $folder }?

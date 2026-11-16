@@ -82,6 +82,7 @@ mac-files-not-saved =
 mac-no-calendar-app = No calendar app is available on this Mac to open invitations (.ics files).
 mac-file-not-saved = The file could not be saved.
 mac-unsubscribing = Unsubscribing from { $target }…
+mac-loading-list = Loading…
 
 ## The compose window
 

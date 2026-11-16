@@ -252,9 +252,12 @@ void UpdateMenu(HMENU menu) {
 }
 
 void ShowCounts() {
-    std::wstring counts = g_mailbox.Counts();
-    SendMessageW(g_status, SB_SETTEXTW, 2, reinterpret_cast<LPARAM>(counts.c_str()));
-    LayoutStatus();
+    // a folder clicked whose list is not read yet: the counts stay until it is, rather than blink
+    if (!g_mailbox.ListPending()) {
+        std::wstring counts = g_mailbox.Counts();
+        SendMessageW(g_status, SB_SETTEXTW, 2, reinterpret_cast<LPARAM>(counts.c_str()));
+        LayoutStatus();
+    }
     // the folder bar says how many a search found
     ShowFolderName();
 }
@@ -1571,6 +1574,11 @@ constexpr ULONG_PTR kTestTextZoom = 0x5A4F4F4D;
 constexpr ULONG_PTR kTestFrames = 0x46524D53;
 // with --test-hooks only: the requests to the internet of the message shown, plus 10
 constexpr ULONG_PTR kTestRemoteRequests = 0x4E455452;
+// with --test-hooks only: whether the last folder clicked was highlighted before its list was read
+// (Mailbox::TestListOrder)
+constexpr ULONG_PTR kTestListOrder = 0x4C4F5244;
+// with --test-hooks only: the list of a folder clicked held unread ("1"), to see it waiting, or let go ("0")
+constexpr ULONG_PTR kTestHoldList = 0x484F4C44;
 // the link it handed over, opened once WM_COPYDATA returned
 constexpr UINT WM_OPEN_MAILTO = WM_APP + 61;
 std::wstring g_pendingMailto;
@@ -1669,6 +1677,11 @@ void Reply(PeDraftKind kind) {
 }
 
 void OnCommand(WORD id, WORD code) {
+    // a command of the menus, toolbar or keys that acts on the list of the folder chosen or its selection: that list read
+    // now if it waits for the paint. The Flag submenu's colours act through Mailbox::Act, which reads it
+    if (CommandActsOnList(id)) {
+        g_mailbox.FlushListLoad();
+    }
     // a colour of the Flag submenu, or Clear Flag
     if (id > IDM_FLAG_COLOR && id <= IDM_FLAG_CLEAR) {
         g_mailbox.FlagColor(id == IDM_FLAG_CLEAR ? 0 : id - IDM_FLAG_COLOR);
@@ -2036,6 +2049,18 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     case WM_COPYDATA: {
         auto* data = reinterpret_cast<const COPYDATASTRUCT*>(lParam);
+        if (g_arguments.testHooks && data->dwData == kTestListOrder) {
+            return g_mailbox.TestListOrder();
+        }
+        if (g_arguments.testHooks && data->dwData == kTestHoldList && data->cbData >= sizeof(wchar_t)) {
+            g_mailbox.TestHoldList(*static_cast<const wchar_t*>(data->lpData) == L'1');
+            return 1;
+        }
+        // the hooks that look at the list or act on its messages look at the folder chosen
+        if (g_arguments.testHooks && (data->dwData == kTestRowPicture || data->dwData == kTestListTop ||
+                                      data->dwData == kTestDragOut || data->dwData == kTestDropFiles)) {
+            g_mailbox.FlushListLoad();
+        }
         if (g_arguments.testHooks && data->dwData == kTestFromStore) {
             return pe_last_open_from_store(g_core.get()) ? 11 : 10;
         }
@@ -2171,6 +2196,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     case WM_INITMENUPOPUP:
+        // a list waiting to be read stays waiting: its menus are for nothing selected
         UpdateMenu(reinterpret_cast<HMENU>(wParam));
         break;
     case WM_CONTEXTMENU:

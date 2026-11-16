@@ -28,6 +28,8 @@ win-no-bodies = Неможливо показати вміст повідомл�
 win-webview-failed = Не вдалося створити WebView2.
 # review: new
 win-webview-missing = Середовище виконання WebView2 недоступне.
+# review: new
+win-list-loading = Завантаження...
 
 ## Buttons and words used in many windows
 

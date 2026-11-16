@@ -36,6 +36,8 @@ gtk-search-indexing = { $count ->
    *[other] trwa indeksowanie tekstu { $count } wiadomości
 }
 # review: new
+gtk-list-loading = Wczytywanie...
+# review: new
 gtk-menu-rename = Zmień nazwę...
 # review: new
 gtk-import-one-question = Zaimportować wiadomość { $file } do folderu { $folder }?

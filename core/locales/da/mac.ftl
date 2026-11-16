@@ -124,6 +124,8 @@ mac-no-calendar-app = Der er intet kalenderprogram på denne Mac, som kan åbne 
 mac-file-not-saved = Filen kunne ikke gemmes.
 # review: new
 mac-unsubscribing = Afmelder fra { $target }…
+# review: new
+mac-loading-list = Indlæser…
 
 ## The compose window
 

@@ -28,6 +28,8 @@ gtk-search-indexing = { $count ->
    *[other] indexerar fortfarande texten i { $count } meddelanden
 }
 # review: new
+gtk-list-loading = Läser in...
+# review: new
 gtk-menu-rename = Byt namn...
 # review: new
 gtk-import-one-question = Vill du importera meddelandet { $file } till { $folder }?

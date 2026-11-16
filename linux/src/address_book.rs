@@ -163,6 +163,8 @@ impl Book {
         find.set_placeholder_text(Some(&t!(UiBookFindHint)));
         find.set_widget_name("book-find");
         find.set_width_chars(26);
+        // the people found again a moment after the last key, not on every key
+        find.set_search_delay(pe_core::FIND_PAUSE_MS);
         let empty = gtk::Label::new(None);
         empty.set_wrap(true);
         empty.set_justify(gtk::Justification::Center);

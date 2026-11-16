@@ -23,6 +23,7 @@ mod folders;
 mod help;
 mod hyprland;
 mod keys;
+mod list_load;
 mod mailbox;
 mod message_window;
 mod messages;

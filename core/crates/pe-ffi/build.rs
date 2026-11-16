@@ -35,8 +35,18 @@ struct Command {
     one: bool,
     #[serde(default)]
     some: bool,
+    /// Acts on the message list or its selection: a list waiting to be read is read before it runs
+    #[serde(default)]
+    list: bool,
     /// The submenu of its menu it is in (View > Layout), labelled by the catalog's `menu-<submenu>`
     submenu: Option<String>,
+}
+
+impl Command {
+    /// Acts on the message list or its selection: marked so, or acting on messages
+    fn acts_on_list(&self) -> bool {
+        self.list || self.one || self.some
+    }
 }
 
 const MENUS: [&str; 7] = ["file", "edit", "view", "tools", "message", "help", "tray"];
@@ -246,6 +256,14 @@ fn c_header(table: &Table) -> String {
     out.push_str("\n// whether a command acts on one or several messages: off with none selected\n");
     out.push_str("inline bool CommandNeedsSome(unsigned id) {\n    switch (id) {\n");
     for command in table.command.iter().filter(|c| c.some) {
+        writeln!(out, "    case IDM_{}:", command.id.to_uppercase()).unwrap();
+    }
+    out.push_str("        return true;\n    default:\n        return false;\n    }\n}\n");
+    out.push_str(
+        "\n// whether a command acts on the message list or its selection: a list waiting to be read is read before it runs\n",
+    );
+    out.push_str("inline bool CommandActsOnList(unsigned id) {\n    switch (id) {\n");
+    for command in table.command.iter().filter(|c| c.acts_on_list()) {
         writeln!(out, "    case IDM_{}:", command.id.to_uppercase()).unwrap();
     }
     out.push_str("        return true;\n    default:\n        return false;\n    }\n}\n");
@@ -460,6 +478,19 @@ fn swift(table: &Table) -> String {
         .unwrap();
     }
     out.push_str(
+        "        }\n    }\n\n    /// Acts on the message list or its selection: a list waiting to be read is read before it runs\n    \
+         var actsOnList: Bool {\n        switch self {\n",
+    );
+    for command in &table.command {
+        writeln!(
+            out,
+            "        case .{}: return {}",
+            camel(&command.id, false),
+            command.acts_on_list()
+        )
+        .unwrap();
+    }
+    out.push_str(
         "        }\n    }\n\n    /// The submenu of its menu it is in (\"layout\"), labelled by the catalog's menu-<submenu>; nil for none\n    \
          var submenu: String? {\n        switch self {\n",
     );
@@ -573,6 +604,19 @@ fn rust(table: &Table) -> String {
             "            Command::{} => {},",
             camel(&command.id, true),
             command.one
+        )
+        .unwrap();
+    }
+    out.push_str(
+        "        }\n    }\n\n    /// Acts on the message list or its selection: a list waiting to be read is read before it runs\n    \
+         pub fn acts_on_list(self) -> bool {\n        match self {\n",
+    );
+    for command in &table.command {
+        writeln!(
+            out,
+            "            Command::{} => {},",
+            camel(&command.id, true),
+            command.acts_on_list()
         )
         .unwrap();
     }

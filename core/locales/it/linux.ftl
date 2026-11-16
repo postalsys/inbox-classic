@@ -28,6 +28,8 @@ gtk-search-indexing = { $count ->
    *[other] indicizzazione del testo di { $count } messaggi in corso
 }
 # review: new
+gtk-list-loading = Caricamento...
+# review: new
 gtk-menu-rename = Rinomina...
 # review: new
 gtk-import-one-question = Importare il messaggio { $file } in { $folder }?

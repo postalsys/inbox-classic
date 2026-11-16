@@ -33,6 +33,8 @@ gtk-search-indexing = { $count ->
    *[other] vēl tiek indeksēts { $count } ziņojumu teksts
 }
 # review: new
+gtk-list-loading = Ielādē...
+# review: new
 gtk-menu-rename = Pārdēvēt...
 # review: new
 gtk-import-one-question = Importēt ziņojumu { $file } mapē { $folder }?

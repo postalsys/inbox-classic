@@ -241,6 +241,9 @@ LRESULT DialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, void (
     return DefWindowProcW(hwnd, message, wParam, lParam);
 }
 
+// the find box of the book and of the pickers searches PE_FIND_PAUSE_MS after the last key, not for each
+constexpr UINT_PTR kFindTimer = 1;
+
 // ---- Select Recipients, Select Group Members ----
 
 enum class PickMode { Recipients, Members };
@@ -261,6 +264,7 @@ struct PickState {
 
 // the groups the core finds for the words (Select Recipients only), then the people
 void FillPick(PickState& state) {
+    KillTimer(GetParent(state.find), kFindTimer);
     std::wstring filter = Trimmed(GetWindowString(state.find));
     state.shown = state.mode == PickMode::Recipients ? Groups(state.core, filter) : std::vector<Entry>();
     for (Entry& card : Cards(state.core, filter)) {
@@ -319,7 +323,7 @@ void OnPickCommand(HWND dialog, PickState& state, WORD id, WORD code) {
     } else if (id >= IDC_PICK_TO && id < IDC_PICK_TO + state.targets) {
         AddPicked(dialog, state, id - IDC_PICK_TO);
     } else if (id == IDC_PICK_FIND && code == EN_CHANGE) {
-        FillPick(state);
+        SetTimer(dialog, kFindTimer, PE_FIND_PAUSE_MS, nullptr);
     }
 }
 
@@ -331,6 +335,10 @@ LRESULT CALLBACK PickProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (header->hwndFrom == state->list && header->code == NM_DBLCLK) {
             AddPicked(hwnd, *state, 0);
         }
+        return 0;
+    }
+    if (state && message == WM_TIMER && wParam == kFindTimer) {
+        FillPick(*state);
         return 0;
     }
     return DialogProc<PickState>(hwnd, message, wParam, lParam, OnPickCommand, RemovePicked);
@@ -1440,6 +1448,7 @@ void UpdateButtons(Book* book) {
 
 // the people of the group shown, or of the book, that the find box finds; `select` (a card) selected when it is there
 void FillPeople(Book* book, int64_t select = 0) {
+    KillTimer(book->hwnd, kFindTimer);
     std::wstring filter = Trimmed(GetWindowString(book->find));
     book->rows = book->group ? GroupPeople(book->core, book->group, filter) : Cards(book->core, filter);
     FillList(book->list, book->rows);
@@ -1758,6 +1767,11 @@ LRESULT CALLBACK BookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_SIZE:
         LayoutBook(book);
         return 0;
+    case WM_TIMER:
+        if (wParam == kFindTimer) {
+            FillPeople(book);
+        }
+        return 0;
     case WM_GETMINMAXINFO: {
         auto* info = reinterpret_cast<MINMAXINFO*>(lParam);
         info->ptMinTrackSize = {Scale(480), Scale(300)};
@@ -1767,7 +1781,7 @@ LRESULT CALLBACK BookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (LOWORD(wParam) == IDC_BOOK_FIND) {
             // what is typed is found among the people shown: the book's, or the group's
             if (HIWORD(wParam) == EN_CHANGE) {
-                FillPeople(book);
+                SetTimer(hwnd, kFindTimer, PE_FIND_PAUSE_MS, nullptr);
             }
             return 0;
         }

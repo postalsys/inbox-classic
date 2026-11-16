@@ -267,18 +267,21 @@ final class Core {
         return pe_start_message(handle, &allInboxes, &folder, &uid) ? (allInboxes, folder, uid) : nil
     }
 
-    /// the counts of the status bar: the messages of the list (grouped or not, all of them) and how many are unread
-    func counts(_ view: ListView) -> (total: UInt64, unread: UInt64) {
+    /// the counts of the status bar (the messages of the list, grouped or not, all of them, and how many are unread)
+    /// and how many rows the list has (one a message, or grouped by conversation one a
+    /// conversation and the messages under the open ones), at once, as a list read again wants them
+    func countsAndRows(_ view: ListView) -> (total: UInt64, unread: UInt64, rows: UInt64) {
         var total: UInt64 = 0
         var unread: UInt64 = 0
-        _ = pe_list_view_counts(handle, view.handle, &total, &unread)
-        return (total, unread)
+        var rows: UInt64 = 0
+        _ = pe_list_view_counts_and_rows(handle, view.handle, &total, &unread, &rows)
+        return (total, unread, rows)
     }
 
-    /// how many rows the list has: one a message, or grouped by conversation one a conversation and the messages
-    /// under the open ones
-    func rowCount(_ view: ListView) -> UInt64 {
-        pe_list_view_row_count(handle, view.handle)
+    /// whether something was written to the store since the list was last counted: read again, it might show
+    /// something else
+    func stale(_ view: ListView) -> Bool {
+        pe_list_view_stale(handle, view.handle)
     }
 
     /// the conversation that hides the message `uid` of `folder` in the list opened, to show or select the message;
@@ -307,6 +310,12 @@ final class Core {
     /// where a message is in the list (its conversation's row while that is collapsed), -1 when it is not there
     func messageIndex(_ view: ListView, folder: Int64, uid: UInt64) -> Int64 {
         pe_list_view_index(handle, view.handle, folder, uid)
+    }
+
+    /// `messageIndex`, looked for first in the pages read since the list was counted, nearest `hint` (the row it had
+    /// before the list was read again; read the page with that row first). A negative hint looks through the list
+    func messageIndex(_ view: ListView, folder: Int64, uid: UInt64, near hint: Int) -> Int64 {
+        pe_list_view_index_near(handle, view.handle, folder, uid, Int64(hint))
     }
 
     /// the messages before and after the message `uid` of `folder` in the list, in one pass: what Previous and Next

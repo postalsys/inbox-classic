@@ -123,6 +123,8 @@ mac-no-calendar-app = Det finns inget kalenderprogram på den här Mac-datorn so
 mac-file-not-saved = Det gick inte att spara filen.
 # review: new
 mac-unsubscribing = Avslutar prenumerationen hos { $target }…
+# review: new
+mac-loading-list = Läser in…
 
 ## The compose window
 

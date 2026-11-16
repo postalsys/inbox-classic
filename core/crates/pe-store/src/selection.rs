@@ -161,21 +161,31 @@ impl Store {
 
     /// `f` run with `refs` in the table `temp.picked_refs` (folder_id, uid), emptied again after
     fn with_picked_refs<T>(&self, refs: &[MessageRef], f: impl FnOnce() -> Result<T>) -> Result<T> {
-        self.db.execute_batch(
-            "CREATE TEMP TABLE IF NOT EXISTS picked_refs (folder_id INTEGER, uid INTEGER, PRIMARY KEY (folder_id, uid)) \
-             WITHOUT ROWID; DELETE FROM temp.picked_refs;",
-        )?;
-        {
+        self.scratch(|| {
+            self.db.execute_batch(
+                "CREATE TEMP TABLE IF NOT EXISTS picked_refs (folder_id INTEGER, uid INTEGER, \
+                 PRIMARY KEY (folder_id, uid)) WITHOUT ROWID; DELETE FROM temp.picked_refs;",
+            )?;
             let mut insert = self
                 .db
                 .prepare_cached("INSERT OR IGNORE INTO temp.picked_refs (folder_id, uid) VALUES (?1, ?2)")?;
             for r in refs {
                 insert.execute(rusqlite::params![r.folder, r.uid])?;
             }
-        }
+            Ok(())
+        })?;
         let found = f();
-        self.db.execute("DELETE FROM temp.picked_refs", [])?;
+        self.scratch(|| self.db.execute("DELETE FROM temp.picked_refs", []))?;
         found
+    }
+
+    /// `f`, which writes only to temporary tables: its rows not counted as a change by [`Store::generation`]
+    fn scratch<T>(&self, f: impl FnOnce() -> Result<T>) -> Result<T> {
+        let before = self.db.total_changes();
+        let done = f();
+        let written = self.db.total_changes() - before;
+        self.scratch.fetch_add(written, std::sync::atomic::Ordering::Relaxed);
+        done
     }
 
     /// The messages of `temp.picked_refs` in the list `search` makes, each with its conversation

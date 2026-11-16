@@ -29,6 +29,8 @@ gtk-search-indexing = { $count ->
    *[other] dar indeksuojami { $count } laiškų tekstai
 }
 # review: new
+gtk-list-loading = Įkeliama...
+# review: new
 gtk-menu-rename = Pervardyti...
 # review: new
 gtk-import-one-question = Importuoti laišką { $file } į aplanką „{ $folder }“?

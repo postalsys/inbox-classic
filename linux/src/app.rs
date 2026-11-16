@@ -254,6 +254,12 @@ impl Shell {
         self.main.borrow().clone().expect("the main window")
     }
 
+    /// The main window, None before it is made
+    #[cfg(feature = "e2e")]
+    pub fn try_main(&self) -> Option<Rc<Mailbox>> {
+        self.main.borrow().clone()
+    }
+
     /// The main window made again in the language in use now, in place of the one there was (the UI test, which
     /// changes the language without starting again)
     #[cfg(feature = "e2e")]
@@ -686,6 +692,10 @@ fn show_about() {
 pub fn run_command(command: Command) {
     let shell = shell();
     let main = shell.main();
+    // a list chosen and waiting for the tree's paint is read first by what acts on it, not by the others
+    if command.acts_on_list() {
+        main.load_waiting_list();
+    }
     match command {
         Command::NewAccount => spawn(add_account()),
         Command::Exit => spawn(quit()),

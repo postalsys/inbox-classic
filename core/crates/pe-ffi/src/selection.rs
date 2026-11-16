@@ -115,7 +115,7 @@ pub(crate) unsafe fn ranges_of(starts: *const u64, ends: *const u64, count: usiz
 pub struct PePositions(pub(crate) Vec<u64>);
 
 /// # Safety
-/// `positions` must be NULL or from `pe_list_view_positions`, not freed yet.
+/// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, not freed yet.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_count(positions: *const PePositions) -> usize {
     // SAFETY: as the caller guarantees
@@ -125,7 +125,7 @@ pub unsafe extern "C" fn pe_positions_count(positions: *const PePositions) -> us
 /// Position `index`; 0 past the end
 ///
 /// # Safety
-/// `positions` must be NULL or from `pe_list_view_positions`, not freed yet.
+/// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, not freed yet.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_get(positions: *const PePositions, index: usize) -> u64 {
     // SAFETY: as the caller guarantees
@@ -135,7 +135,7 @@ pub unsafe extern "C" fn pe_positions_get(positions: *const PePositions, index: 
 }
 
 /// # Safety
-/// `positions` must be NULL or from `pe_list_view_positions`, freed once.
+/// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, freed once.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_free(positions: *mut PePositions) {
     // SAFETY: as the caller guarantees
@@ -500,27 +500,6 @@ pub unsafe extern "C" fn pe_undo(core: *const PeCore, error: *mut *mut c_char) -
     let outcome = unsafe { with(core, Err(None), |core| core.undo().map_err(Some)) };
     // SAFETY: as the caller guarantees
     unsafe { refused(error, outcome, "nothing to undo") }.map_or(null_mut(), into_c_string)
-}
-
-/// Fills `selection` with the messages the last `pe_undo` brought back that are in their folders again, to select
-/// them after the list reloads; empty while none is there yet. Forgotten once all are there. False on failure.
-///
-/// # Safety
-/// `core` must be a live handle, `selection` a live selection.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_undo_restored(core: *const PeCore, selection: *mut PeSelection) -> bool {
-    // SAFETY: as the caller guarantees
-    let Some(selection) = (unsafe { selection.as_mut() }) else {
-        return false;
-    };
-    // SAFETY: as the caller guarantees
-    match unsafe { with(core, None, |core| core.restored().ok()) } {
-        Some(found) => {
-            selection.0 = found;
-            true
-        }
-        None => false,
-    }
 }
 
 /// The counts of a list in the status bar: "12 messages, 3 unread" for a folder, "12 found, 3 unread" for a search

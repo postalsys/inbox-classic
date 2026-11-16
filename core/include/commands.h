@@ -119,6 +119,52 @@ inline bool CommandNeedsSome(unsigned id) {
     }
 }
 
+// whether a command acts on the message list or its selection: a list waiting to be read is read before it runs
+inline bool CommandActsOnList(unsigned id) {
+    switch (id) {
+    case IDM_UNDO:
+    case IDM_SELECT_ALL:
+    case IDM_MARK_READ:
+    case IDM_MARK_UNREAD:
+    case IDM_SORT_DATE:
+    case IDM_SORT_FROM:
+    case IDM_SORT_SUBJECT:
+    case IDM_SORT_SIZE:
+    case IDM_SORT_ASCENDING:
+    case IDM_SORT_DESCENDING:
+    case IDM_PICTURES:
+    case IDM_REPLY:
+    case IDM_REPLY_ALL:
+    case IDM_FORWARD:
+    case IDM_DELETE:
+    case IDM_MOVE:
+    case IDM_COPY:
+    case IDM_FLAG:
+    case IDM_NEXT_MESSAGE:
+    case IDM_PREVIOUS_MESSAGE:
+    case IDM_NEXT_UNREAD:
+    case IDM_SAVE_AS:
+    case IDM_PRINT:
+    case IDM_PROPERTIES:
+    case IDM_MARK_ALL_READ:
+    case IDM_JUNK:
+    case IDM_NOT_JUNK:
+    case IDM_ARCHIVE:
+    case IDM_WATCH_CONVERSATION:
+    case IDM_IGNORE_CONVERSATION:
+    case IDM_VIEW_SOURCE:
+    case IDM_EXPAND_ALL_THREADS:
+    case IDM_COLLAPSE_ALL_THREADS:
+    case IDM_HIDE_IGNORED:
+    case IDM_HIDE_READ:
+    case IDM_CREATE_RULE_FROM_MESSAGE:
+    case IDM_ADD_SENDER_TO_BOOK:
+        return true;
+    default:
+        return false;
+    }
+}
+
 // the label of a command in the catalog (& marks the menu letter): pe_text(CommandText(IDM_...))
 inline PeText CommandText(PeCommandId id) {
     switch (id) {
