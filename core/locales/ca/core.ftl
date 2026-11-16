@@ -533,8 +533,7 @@ error-folder-special = la Safata d’entrada i les carpetes especials no es pode
 error-no-recipients = el missatge no té destinataris
 # review: new
 error-bad-address = «{ $address }» no és una adreça electrònica
-# review: new
-error-not-own-address = { $address } no és cap de les adreces de remitent d’aquest compte. Afegiu-la a «Altres adreces des de les quals envieu» a les propietats del compte.
+error-not-own-address = { $address } no és cap de les adreces d’enviament d’aquest compte. Afegiu-la al camp «Altres adreces d’enviament» de les propietats del compte.
 # review: new
 rule-query-refused = Les regles no poden filtrar per carpeta ni per data ({ $words }).
 # review: new

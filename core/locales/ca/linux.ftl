@@ -139,8 +139,7 @@ gtk-format-hyperlink = Hiperenllaç (Ctrl+K)
 gtk-font = Tipus de lletra
 # review: new
 gtk-show-cc = _Cc
-# review: new
-gtk-show-bcc = C_co
+gtk-show-bcc = Cc_o
 # review: new
 gtk-save-tip = Desa (Ctrl+S)
 # review: new
@@ -166,10 +165,8 @@ gtk-turned-off-why-long =
     { $reason }
 # review: new
 gtk-next = Següent >
-# review: new
-gtk-provider-sign-in = Inicieu la sessió al compte { $address } al lloc web de { $provider }. La vostra contrasenya no es comparteix amb Inbox Classic. També podeu fer servir una contrasenya d’aplicació creada a la configuració de seguretat del vostre compte.
-# review: new
-gtk-provider-sign-in-apps = Inicieu la sessió al compte { $address } al lloc web de { $provider } amb una de les vostres aplicacions d’inici de sessió (Més opcions d’inici de sessió). També podeu fer servir una contrasenya d’aplicació creada a la configuració de seguretat del vostre compte.
+gtk-provider-sign-in = { $provider }: inicieu la sessió al compte { $address } al lloc web del proveïdor. La vostra contrasenya no es comparteix amb Inbox Classic. També podeu fer servir una contrasenya d’aplicació creada a la configuració de seguretat del compte.
+gtk-provider-sign-in-apps = { $provider }: inicieu la sessió al compte { $address } al lloc web del proveïdor amb una de les vostres aplicacions d’inici de sessió (Més opcions d’inici de sessió). També podeu fer servir una contrasenya d’aplicació creada a la configuració de seguretat del compte.
 # review: new
 gtk-accounts-add = Afegeix...
 # review: new

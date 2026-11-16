@@ -167,7 +167,7 @@ Each new language's key terms and the rules its draft follows, for its reviewer.
 
 Terms: Safata d’entrada; Safata de sortida; Elements enviats; Elements suprimits; Esborranys; Correu brossa; Arxiu;
 Totes les safates d’entrada; missatge; carpeta; compte (m.); fitxer adjunt (short: adjunt); bandera (Marca amb bandera,
-Treu la bandera); Respon al remitent; Respon a tots; Reenvia; Envia/Rep; Marca com a brossa / Marca com a no brossa;
+Treu la bandera); Respon al remitent; Respon a tothom; Reenvia; Envia/Rep; Marca com a correu brossa / Marca com a correu legítim;
 Mou a la carpeta... / Copia a la carpeta...; Desfés; Selecciona-ho tot; Recents; Llibreta d’adreces; contacte; grup;
 conversa; Fitxer > Comptes; Eines; Opcions (Windows), Configuració (Mac), Preferències (Linux); De / Per a / Cc / Cco /
 Assumpte; contrasenya; servidor; baixar (download), pujar (upload); iniciar la sessió (sign in); aplicació d’inici de
@@ -197,8 +197,15 @@ Plurals: `[one]` (exactly 1) and `*[other]` (0, 2 and more). A literal 1 in `[on
   STARTTLS") are quoted in English in the help.
 - Other words: testimoni (OAuth token), inquilí (Entra tenant), anell de claus (Linux keyring), Configuració del
   Sistema (macOS System Settings), subfinestra de lectura (reading pane), kB / MB / GB.
-- Review first: "bandera" versus "marca" for flag (chosen so "Marca com a llegit" stays apart), "vós" versus "tu",
-  "Correu brossa" for the Junk pair, "frase de pas".
+- Retain "bandera" for the coloured flag, "vós" in prose and "frase de pas" for protected backups/exports.
+  Use "Marca com a correu brossa" / "Marca com a correu legítim" for the commands, "Brossa" / "No és brossa" in
+  the compact toolbar. The macOS system commands retain their native infinitives.
+- Rules "processen" messages; "ordenen" is reserved for sorting a list. Additional sender addresses use the
+  label "Altres adreces d’enviament", also named in the corresponding core error.
+- Use "credencials d’inici de sessió" when passwords and OAuth tokens are both included. Unprotected exports
+  require signing in again, possibly through the browser. Distinguish "signatura digital" from account signatures.
+- Provider prompts use the provider name followed by a colon so named providers and the fallback work without
+  changing the article or preposition. Cc/Cco controls use Alt+C / Alt+O on Windows and Linux.
 
 ### Čeština (cs)
 

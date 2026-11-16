@@ -211,8 +211,17 @@ The root review HTML is regenerated. Everyday-help checkpoint: `a879c8ee`.
 
 The feature branch advanced to `cf13ec99`, but its catalog/help translations are unchanged. Catalan is next.
 
-Current totals: 5,388 catalog entries and 212 help pages reviewed; 849 catalog values improved. Remaining:
-26,620 catalog entries and 1,040 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Catalan UI catalog
+
+Reviewed all 626 app entries and eight coupled core/platform controls, improving 70 values. Corrected rule
+processing, queued sends, provider fallback grammar, credential transfer, key ownership and field-label consistency.
+Resolved main/context-menu and dialog shortcuts across 32 scopes, including Cc/Cco. Retained vós prose and imperative
+shared commands, with terminology recorded in the glossary. All 14 catalog tests, structural checks, inventory/hash
+reconciliation and git diff --check pass. Brazilian Portuguese completion checkpoint: `1b5b0c22`.
+Catalan's remaining 697 catalog entries and all 52 help topics are pending.
+
+Current totals: 6,022 catalog entries and 212 help pages reviewed; 919 catalog values improved. Remaining:
+25,986 catalog entries and 1,040 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

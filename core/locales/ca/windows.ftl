@@ -29,12 +29,10 @@ win-webview-missing = L’entorn d’execució WebView2 no està disponible.
 
 ## Botons i paraules de moltes finestres
 
-# review: new
-win-delete-button = &Suprimeix
+win-delete-button = Suprimei&x
 # review: new
 win-find-label = &Cerca:
-# review: new
-win-save-as-button = Desa &com a...
+win-save-as-button = De&sa com a...
 # review: new
 win-too-many-files = Massa fitxers alhora: trieu-ne menys.
 
@@ -57,8 +55,7 @@ win-format-underline = Subratllat ({ $ctrl }+U)
 win-format-link = Hiperenllaç ({ $ctrl }+K)
 # review: new
 win-show-cc = &Cc
-# review: new
-win-show-bcc = C&co
+win-show-bcc = Cc&o
 # review: new
 win-signature-title = Signatura: { $account }
 
@@ -147,8 +144,7 @@ win-dont-send = &No l’enviïs
 win-forget-program-ask = Voleu eliminar aquest programa, els seus permisos i l’historial d’activitat dels seus agents? Se us tornarà a demanar permís la propera vegada que es connecti.
 # review: new
 win-clear-log-ask = Voleu esborrar l’historial d’activitat dels agents? Això no desfarà els canvis que han fet els agents.
-# review: new
-win-agent-programs = &Programes els agents dels quals han demanat accés al vostre correu:
+win-agent-programs = Pro&grames que han demanat accés al vostre correu mitjançant agents:
 # review: new
 win-change = &Canvia...
 # review: new
