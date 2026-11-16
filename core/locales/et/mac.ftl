@@ -80,6 +80,8 @@ mac-no-calendar-app = Selles Macis pole kalendrirakendust, millega kutseid (.ics
 # review: new
 mac-file-not-saved = Faili ei saanud salvestada.
 mac-unsubscribing = Loobutakse tellimusest { $target }…
+# review: new
+mac-loading-list = Laadimine…
 
 ## The compose window
 

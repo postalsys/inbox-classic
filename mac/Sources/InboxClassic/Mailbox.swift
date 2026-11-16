@@ -178,9 +178,25 @@ public final class Mailbox: NSObject {
     /// how many of them were written, for the status bar
     private var dragWritten = 0
     private let promiseWriter = PromiseWriter()
+    /// the list read again a moment after its folders changed, however many changes came meanwhile
     private var reloadTimer: Timer?
     /// the folder list's counts read again a moment after folders changed
     private var countsTimer: Timer?
+
+    // ---- paint first ----
+    /// a row is being chosen with the mouse or the keyboard: its list loads after the tree is drawn with it selected
+    var deferChoice = false
+    /// the row chosen whose list loads on the next turn of the run loop, and what is done once it has
+    private var pendingNode: TreeNode?
+    private var pendingThen: (() -> Void)?
+    private var pendingTimer: Timer?
+    /// over the list while another one loads: the list before dimmed, taking no clicks, "Loading..." after a moment
+    private let listCover = ListCover()
+    private var loadingTimer: Timer?
+    /// under test: a row chosen drawn selected, then its list loaded, in the order they came
+    var paintOrder: [String] = []
+    /// under test: the list of a row chosen waits until loadPending, for a picture of the wait
+    var holdPending = false
 
     init(core: Core) {
         self.core = core
@@ -244,6 +260,14 @@ public final class Mailbox: NSObject {
             listScroll.bottomAnchor.constraint(equalTo: listArea.bottomAnchor),
         ])
         setUpEmptyText(in: listScroll)
+        listArea.addSubview(listCover)
+        listCover.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            listCover.topAnchor.constraint(equalTo: listArea.topAnchor),
+            listCover.leadingAnchor.constraint(equalTo: listArea.leadingAnchor),
+            listCover.trailingAnchor.constraint(equalTo: listArea.trailingAnchor),
+            listCover.bottomAnchor.constraint(equalTo: listArea.bottomAnchor),
+        ])
         listHeightMin = listArea.heightAnchor.constraint(greaterThanOrEqualToConstant: Mailbox.smallestList)
         listHeightMin.isActive = true
         listWidthMin = listArea.widthAnchor.constraint(greaterThanOrEqualToConstant: Mailbox.smallestListWidth)
@@ -523,6 +547,8 @@ public final class Mailbox: NSObject {
     /// the tree built from `rows`, then the row `chosen` chosen: the one chosen before chooses nothing again, another
     /// (All Inboxes gone, its account's Inbox) is listed; nil with a row chosen before: that folder is gone
     private func rebuild(_ rows: [TreeRow], chosen: Int?) {
+        // the row the user chose is the one chosen before, whose node is about to go
+        loadPending()
         let before = selectedNode?.row.key
         let all = core.accounts()
         accountInfo = Dictionary(all.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
@@ -592,6 +618,15 @@ public final class Mailbox: NSObject {
     /// the row of `node` in the tree selected, the closed rows above it opened first so the row chosen is never
     /// hidden; that opening is not the user's, so it is not kept
     private func selectTreeNode(_ node: TreeNode) {
+        // a row the user chose whose list waits: this one when it is that row (selecting it again changes nothing),
+        // else this row instead
+        if let pending = pendingNode, !deferChoice {
+            if pending === node {
+                loadPending()
+            } else {
+                cancelPending()
+            }
+        }
         var above: [TreeNode] = []
         var parent = node.parent
         while let row = parent {
@@ -644,6 +679,8 @@ public final class Mailbox: NSObject {
     }
 
     var selectedName: String {
+        // the row chosen, at once, while its list loads
+        if let pendingNode { return pendingNode.row.title }
         if searching {
             // where the search looks; what it found is on the search bar
             return findPlace.isEmpty ? Text.uiAllFolders.text : findPlace
@@ -827,6 +864,7 @@ public final class Mailbox: NSObject {
         dateClock = DateClock()
         showsPictures = AppDelegate.shared?.listPictures ?? true
         pictureScale = list.window?.backingScaleFactor ?? 2
+        let shownAt = list.numberOfSelectedRows == 1 ? list.selectedRow : -1
         pages = []
         total = 0
         unread = 0
@@ -842,8 +880,7 @@ public final class Mailbox: NSObject {
         // the selection follows the messages to where they are now, without a flicker of the reading pane
         let several = keepSelection && selectedCount > 1
             ? core.positions(of: selection, in: listView) : nil
-        let index = keepSelection && several == nil && uid != 0
-            ? core.messageIndex(listView, folder: messageFolder, uid: uid) : -1
+        let index = keepSelection && several == nil && uid != 0 ? placeOfShown(near: shownAt) : -1
         reloading = true
         list.reloadData()
         if let several, !several.isEmpty {
@@ -862,6 +899,16 @@ public final class Mailbox: NSObject {
         if restorePending {
             selectRestored()
         }
+    }
+
+    /// the row of the message shown in the list read again: on the page of the row it was on, which the list draws
+    /// anyway, when that page still has it; otherwise as the core finds it
+    private func placeOfShown(near old: Int) -> Int64 {
+        if old >= 0, row(old) != nil, let page = pages.last,
+           let at = page.rows.firstIndex(where: { $0.folder == messageFolder && $0.uid == uid }) {
+            return Int64(page.offset) + Int64(at)
+        }
+        return core.messageIndex(listView, folder: messageFolder, uid: uid)
     }
 
     /// the messages Undo brought back selected, once they are in the list
@@ -1319,13 +1366,73 @@ public final class Mailbox: NSObject {
     func selectStart() {
         guard !started else { return }
         started = true
-        guard shownList == PE_TREE_LIST_NONE, let start = core.startMessage() else { return }
-        if !start.allInboxes {
-            showMessage(folder: start.folder, uid: start.uid)
-        } else if let node = topNode(PE_TREE_LIST_ALL_INBOXES) {
-            selectTreeNode(node)
+        guard shownList == PE_TREE_LIST_NONE, let start = core.startMessage(),
+              let node = start.allInboxes ? topNode(PE_TREE_LIST_ALL_INBOXES) : folderRows[start.folder] else { return }
+        // the window drawn with the tree first, the list after, as a click does
+        deferChoice = true
+        selectTreeNode(node)
+        deferChoice = false
+        if pendingNode === node {
+            pendingThen = { [weak self] in self?.selectInList(folder: start.folder, uid: start.uid) }
+        } else {
+            // the row was selected already: nothing waits
+            choose(node)
             selectInList(folder: start.folder, uid: start.uid)
         }
+    }
+
+    // ---- paint first ----
+
+    /// the row `node` chosen by the user: selected in the tree, named in the title and the list before dimmed at once,
+    /// drawn, then its list loaded on a later turn of the run loop. The window is drawn and committed to the screen
+    /// first, as the load holds the main thread; a timer of the run loop runs after that (and in modal sessions, unlike
+    /// the main queue), and another row chosen before it fired replaces it
+    private func chooseAfterPaint(_ node: TreeNode) {
+        pendingTimer?.invalidate()
+        pendingNode = node
+        pendingThen = nil
+        coverList(true)
+        changed()
+        if TestHooks.testing {
+            paintOrder.append("selected \(node.row.key)")
+        }
+        view.window?.displayIfNeeded()
+        CATransaction.flush()
+        guard !(TestHooks.testing && holdPending) else { return }
+        pendingTimer = after(0) { [weak self] in self?.loadPending() }
+    }
+
+    /// the list of the row the user chose loaded now, when it waits (a command or a rebuilt tree does not wait for it)
+    func loadPending() {
+        guard let node = pendingNode else { return }
+        let then = pendingThen
+        cancelPending()
+        if TestHooks.testing {
+            paintOrder.append("loaded \(node.row.key)")
+        }
+        choose(node)
+        then?()
+    }
+
+    /// the row the user chose no longer waits for its list: another was chosen
+    private func cancelPending() {
+        pendingTimer?.invalidate()
+        pendingTimer = nil
+        pendingNode = nil
+        pendingThen = nil
+        coverList(false)
+    }
+
+    /// whether the list is the one before, dimmed while another loads
+    var listCovered: Bool { !listCover.isHidden }
+
+    private func coverList(_ on: Bool) {
+        loadingTimer?.invalidate()
+        loadingTimer = nil
+        listCover.loading = false
+        listCover.isHidden = !on
+        guard on else { return }
+        loadingTimer = after(0.4) { [weak self] in self?.listCover.loading = true }
     }
 
     // ---- the message's own actions ----
@@ -2056,16 +2163,12 @@ public final class Mailbox: NSObject {
             reload()
         case PE_EVENT_KIND_FOLDER_CHANGED:
             scheduleCounts()
-            if event.folder == folder && !searching {
-                reloadList(keepSelection: true)
-            } else if severalFolders {
-                // a list of several folders has messages of any of them; once a sync of many is done, not after each
-                reloadTimer?.invalidate()
-                reloadTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: false) { [weak self] _ in
-                    MainActor.assumeIsolated {
-                        self?.reloadList(keepSelection: true)
-                        self?.changed()
-                    }
+            // a list of several folders has messages of any of them. The changes of a sync are gathered for a moment
+            // and the list read once, not after each
+            if (event.folder == folder && !searching) || severalFolders, reloadTimer?.isValid != true {
+                reloadTimer = after(0.3) { [weak self] in
+                    self?.reloadList(keepSelection: true)
+                    self?.changed()
                 }
             }
         case PE_EVENT_KIND_SYNC_FINISHED:
@@ -2203,7 +2306,12 @@ extension Mailbox: NSOutlineViewDataSource, NSOutlineViewDelegate {
             reloading = false
             return
         }
-        choose(node)
+        if deferChoice {
+            chooseAfterPaint(node)
+        } else {
+            cancelPending()
+            choose(node)
+        }
     }
 
     /// the list of the row `node` shown
@@ -3007,6 +3115,19 @@ public final class FolderOutline: NSOutlineView {
         return mailbox?.folderMenu()
     }
 
+    // a row chosen with the mouse or the keyboard is drawn selected before its list loads
+    public override func mouseDown(with event: NSEvent) {
+        mailbox?.deferChoice = true
+        defer { mailbox?.deferChoice = false }
+        super.mouseDown(with: event)
+    }
+
+    public override func keyDown(with event: NSEvent) {
+        mailbox?.deferChoice = true
+        defer { mailbox?.deferChoice = false }
+        super.keyDown(with: event)
+    }
+
     // Edit > Select All and Undo from the tree are the message list's: a folder is selected alone and has no undo
     public override func selectAll(_ sender: Any?) {
         mailbox?.selectAllMessages()
@@ -3066,6 +3187,8 @@ public final class MessageTable: NSTableView {
     }
 
     public override func keyDown(with event: NSEvent) {
+        // the list before, dimmed while another loads, takes no keys
+        if mailbox?.listCovered == true { return }
         switch event.keyCode {
         case 36, 76:
             mailbox?.openSelected()
@@ -3119,4 +3242,43 @@ extension Mailbox: NSSplitViewDelegate {
             app.folderList = shown
         }
     }
+}
+
+/// Over the message list while the list of another row loads: the list before shows through dimmed, as a disabled
+/// control looks, and clicks and scrolling stop here. A load that takes a while says so in the middle
+final class ListCover: NSView {
+    private let label = NSTextField(labelWithString: Text.macLoadingList.text)
+
+    /// "Loading..." shown (after a moment of loading)
+    var loading = false {
+        didSet { label.isHidden = !loading }
+    }
+
+    init() {
+        super.init(frame: .zero)
+        isHidden = true
+        setAccessibilityIdentifier("list.cover")
+        label.textColor = .secondaryLabelColor
+        label.isHidden = true
+        label.setAccessibilityIdentifier("list.loading")
+        label.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(label)
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: centerYAnchor),
+        ])
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    /// the list's own background, half covering it, in light and dark
+    override func draw(_ dirtyRect: NSRect) {
+        NSColor.controlBackgroundColor.withAlphaComponent(0.55).setFill()
+        dirtyRect.fill(using: .sourceOver)
+    }
+
+    override func mouseDown(with event: NSEvent) {}
+    override func rightMouseDown(with event: NSEvent) {}
+    override func otherMouseDown(with event: NSEvent) {}
+    override func scrollWheel(with event: NSEvent) {}
 }

@@ -81,6 +81,8 @@ mac-no-calendar-app = Aucune app de calendrier n'est disponible sur ce Mac pour 
 # review: new
 mac-file-not-saved = Le fichier n'a pas pu être enregistré.
 mac-unsubscribing = Désabonnement de { $target }…
+# review: new
+mac-loading-list = Chargement…
 
 ## The compose window
 

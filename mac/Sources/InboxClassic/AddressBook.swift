@@ -334,6 +334,7 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     private(set) var groups: [BookGroup] = []
     private(set) var rows: [BookEntry] = []
     private var filling = false
+    private var findTimer: Timer?
 
     static func show(core: Core) {
         let book = shown ?? AddressBookWindow(core: core)
@@ -503,14 +504,20 @@ final class AddressBookWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         window.toolbar?.validateVisibleItems()
     }
 
+    /// typed into the find box: the book searched once the typing pauses
     @objc private func findChanged() {
-        fillPeople()
+        findTimer?.invalidate()
+        findTimer = after(AddressBookWindow.findPause) { [weak self] in self?.fillPeople() }
     }
 
     func find(_ words: String) {
+        findTimer?.invalidate()
         searchField.stringValue = words
         fillPeople()
     }
+
+    /// how long the find box waits after the last key before it searches
+    static let findPause: TimeInterval = 0.15
 
     // ---- the tables ----
 
@@ -1486,6 +1493,7 @@ final class PeoplePicker: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     let searchField = NSSearchField()
     let source = BookTable()
     private(set) var found: [BookEntry] = []
+    private var findTimer: Timer?
     /// the lists on the right, each with what was put in it
     private(set) var lists: [BookTable] = []
     private(set) var chosen: [[BookEntry]] = []
@@ -1592,10 +1600,12 @@ final class PeoplePicker: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
     }
 
     @objc private func findChanged() {
-        fill()
+        findTimer?.invalidate()
+        findTimer = after(AddressBookWindow.findPause) { [weak self] in self?.fill() }
     }
 
     func find(_ words: String) {
+        findTimer?.invalidate()
         searchField.stringValue = words
         fill()
     }

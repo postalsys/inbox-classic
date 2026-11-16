@@ -542,6 +542,8 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         if let book = AddressBookWindow.key, book.perform(command) {
             return
         }
+        // a folder chosen a moment ago: the command is about its list
+        main.mailbox.loadPending()
         switch command {
         case .newAccount: main.addAccount()
         case .exit: NSApp.terminate(nil)
