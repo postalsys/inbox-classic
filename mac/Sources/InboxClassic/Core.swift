@@ -286,7 +286,12 @@ final class Core {
     }
 
     func messages(_ view: ListView, offset: UInt64, limit: UInt64) -> [Message] {
-        guard let list = pe_list_view_messages(handle, view.handle, offset, limit) else { return [] }
+        messages(of: pe_list_view_messages(handle, view.handle, offset, limit))
+    }
+
+    /// the rows of a message list the core handed over, which is freed
+    private func messages(of list: OpaquePointer?) -> [Message] {
+        guard let list else { return [] }
         defer { pe_message_list_free(list) }
         return (0..<pe_message_list_count(list)).compactMap { pe_message_list_get(list, $0).map { Message($0.pointee) } }
     }
@@ -294,12 +299,6 @@ final class Core {
     /// where a message is in the list (its conversation's row while that is collapsed), -1 when it is not there
     func messageIndex(_ view: ListView, folder: Int64, uid: UInt64) -> Int64 {
         pe_list_view_index(handle, view.handle, folder, uid)
-    }
-
-    /// `messageIndex`, looked for first in the pages read since the list was counted, nearest `hint` (the row it had
-    /// before the list was read again; read the page with that row first). A negative hint looks through the list
-    func messageIndex(_ view: ListView, folder: Int64, uid: UInt64, near hint: Int) -> Int64 {
-        pe_list_view_index_near(handle, view.handle, folder, uid, Int64(hint))
     }
 
     /// the messages before and after the message `uid` of `folder` in the list, in one pass: what Previous and Next
@@ -342,13 +341,6 @@ final class Core {
         _ = pe_list_view_select_ranges(handle, view.handle, selection, starts, ends, starts.count)
     }
 
-    /// where the messages of `selection` are in the list now, the rows to select again
-    func positions(of selection: OpaquePointer, in view: ListView) -> IndexSet {
-        guard let found = pe_list_view_positions(handle, view.handle, selection) else { return [] }
-        defer { pe_positions_free(found) }
-        return IndexSet((0..<pe_positions_count(found)).map { Int(pe_positions_get(found, $0)) })
-    }
-
     /// `action` on the messages of `selection`: what the status bar says, or why not
     func act(_ selection: OpaquePointer, _ action: PeAction, to: Int64 = 0) -> Result<String, Refusal> {
         var reason: UnsafeMutablePointer<CChar>?
@@ -372,30 +364,38 @@ final class Core {
     // ---- off the window thread ----
 
     /// the list `view` shows read on a store connection of the core's own: `ListReady` follows with the request this
-    /// returns, `generation` its count. With `folder` not 0, the load finds the row of the message `uid` of `folder`,
-    /// nearest `hint` (the row it had, -1 when not known). 0 on failure
-    func load(_ view: ListView, generation: UInt64, folder: Int64 = 0, uid: UInt64 = 0, hint: Int = -1) -> UInt64 {
-        pe_list_view_load(handle, view.handle, generation, folder, uid, Int64(hint))
+    /// returns. The load selects again what `selection` has (nil for nothing): one message found nearest `hint` (the
+    /// row it had, -1 when not known), several, or Select All while it is still the whole list; in its place the row
+    /// `after` a removal (-1 for none), or what Undo brought back (`restored`). 0 on failure
+    func load(_ view: ListView, selection: OpaquePointer?, hint: Int = -1, after: Int = -1, restored: Bool) -> UInt64 {
+        pe_list_view_load(handle, view.handle, selection, Int64(hint), Int64(after), restored)
     }
 
     /// a page of the list from `offset` on read the same way: `ListPageReady` follows. 0 on failure
-    func loadPage(_ view: ListView, generation: UInt64, offset: UInt64) -> UInt64 {
-        pe_list_view_load_page(handle, view.handle, generation, offset)
+    func loadPage(_ view: ListView, offset: UInt64) -> UInt64 {
+        pe_list_view_load_page(handle, view.handle, offset)
     }
 
-    /// what the load `request` read, after its event, taken once; nil for one that failed or was dropped
-    func loadResult(_ request: UInt64) -> ListLoad? {
+    /// what the load `request` read, after its event, taken once; nil when unknown. The selection it selects is put
+    /// into `selection`, when given
+    func loadResult(_ request: UInt64, selection: OpaquePointer? = nil) -> ListLoad? {
         guard let load = pe_list_load_result(handle, request) else { return nil }
         defer { pe_list_load_free(load) }
         guard let info = pe_list_load_info(load)?.pointee else { return nil }
-        var messages: [Message] = []
-        if let list = pe_list_load_messages(load) {
-            defer { pe_message_list_free(list) }
-            messages = (0..<pe_message_list_count(list)).compactMap { pe_message_list_get(list, $0).map { Message($0.pointee) } }
+        if info.failed {
+            return .failed(taken(pe_list_load_error(load)) ?? "")
         }
-        return ListLoad(generation: info.generation, offset: info.offset, counted: info.counted, total: info.total,
-                        unread: info.unread, rows: info.rows, listsRecipients: info.lists_recipients, index: info.index,
-                        messages: messages)
+        if let selection {
+            _ = pe_list_load_selection(load, selection)
+        }
+        var selected = IndexSet()
+        if let rows = pe_list_load_selected(load) {
+            defer { pe_positions_free(rows) }
+            selected = IndexSet((0..<pe_positions_count(rows)).map { Int(pe_positions_get(rows, $0)) })
+        }
+        return .read(ListRows(offset: info.offset, total: info.total, unread: info.unread, rows: info.rows,
+                              listsRecipients: info.lists_recipients, reselection: info.reselection,
+                              selected: selected, focus: Int(info.focus), messages: messages(of: pe_list_load_messages(load))))
     }
 
     /// `action` on the messages of `selection` off the window thread: `Acted` follows with the request this returns
@@ -608,17 +608,23 @@ extension Text {
     }
 }
 
-/// What a list load read (`Core.loadResult`): the counts of the status bar and the row count (for a load of the whole
-/// list), the rows from `offset` on, and the row of the message it was asked about (-1 when not there)
-struct ListLoad {
-    let generation: UInt64
+/// What a list load read (`Core.loadResult`), or why it could not, for the status bar
+enum ListLoad {
+    case read(ListRows)
+    case failed(String)
+}
+
+/// The rows a list load read: the counts of the status bar and the row count (for a load of the whole list), the rows
+/// from `offset` on, and the rows it selects (`reselection` says how, `focus` the row to scroll to, -1 for none)
+struct ListRows {
     let offset: UInt64
-    let counted: Bool
     let total: UInt64
     let unread: UInt64
     let rows: UInt64
     let listsRecipients: Bool
-    let index: Int64
+    let reselection: PeReselection
+    let selected: IndexSet
+    let focus: Int
     let messages: [Message]
 }
 

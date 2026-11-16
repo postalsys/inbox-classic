@@ -215,7 +215,7 @@ final class Reader: NSObject {
         header.attributedStringValue = headerText(from: row.from, date: row.date, to: row.recipients, cc: "", subject: row.subject)
         retry.isHidden = true
         downloadingTimer?.invalidate()
-        downloadingTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: false) { [weak self] _ in
+        downloadingTimer = Timer.scheduledTimer(withTimeInterval: Mailbox.loadingWait, repeats: false) { [weak self] _ in
             MainActor.assumeIsolated { self?.showDownloading() }
         }
     }
@@ -741,7 +741,7 @@ final class Reader: NSObject {
 
     /// attachment `index` opened with the program the system has for it: refused from its row, in the core's words,
     /// for a file that can run programs; else the core writes it into a private folder of the user's on a background
-    /// thread (reading and decrypting a large message takes a while; its tile shows it is busy after 400 ms), with an
+    /// thread (reading and decrypting a large message takes a while; its tile shows it is busy after a moment), with an
     /// encrypted message's note to show first (once). The file is marked as from the internet, as a download is.
     func openAttachment(_ index: Int) {
         guard showsMessage, let attachment = messageView?.attachment(index) else { return }
@@ -751,7 +751,7 @@ final class Reader: NSObject {
         }
         guard opening == nil else { return }
         opening = index
-        let busy = after(0.4) { [weak self] in self?.strip.busy(index) }
+        let busy = after(Mailbox.loadingWait) { [weak self] in self?.strip.busy(index) }
         let handle = core.handle
         let (file, folder, uid) = (file, folder, uid)
         guard let file else {
