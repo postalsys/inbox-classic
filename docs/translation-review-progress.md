@@ -12,9 +12,9 @@ Commit completed batches regularly and preserve an exact resume point.
   52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
 - `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
   and git history before resuming, so later source or translation changes are not missed.
-- Resume with the remaining 33 Italian help topics. All 1,331 Italian catalog entries and the first 19 help topics
-  are reviewed. The exact pending topic list is in the state file.
-  Dutch is fully reviewed: 1,331 catalog entries and 52 help topics. Eighteen new languages remain.
+- Resume with Portuguese (Portugal), `pt/app.ftl`, then its other catalogs and all 52 help topics.
+  Italian and Dutch are fully reviewed: each has 1,331 catalog entries and 52 help topics.
+  Seventeen new languages remain, with exact pending IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
 
@@ -107,8 +107,20 @@ folder navigation and attachment cleanup descriptions, and replaced literal word
 All 72 localization/help tests passed after catalog changes, followed by the 61 help tests after the first 15
 help topics. The next four topics pass structural checks; their Rust tests will run with the next help batch. Structural checks and inventory/hash reconciliation pass; only intentionally cleared marks remain.
 
-Current totals: 2,726 catalog entries and 75 help pages reviewed; 420 catalog values improved. Remaining:
-22,627 catalog entries and 917 help pages. `REVIEWED` remains unchanged until the full round is complete.
+### Italian help completed
+
+Reviewed the remaining 33 Italian help topics, completing all 52. Corrected key verification order, signature
+ownership claims, private-key recovery, transferred sign-in credentials and rule destination matching. Improved
+agent permissions/queued sending, storage and image-download descriptions, troubleshooting and reference text.
+Kept all markup, platform branches, control references and literal keyboard tags; documented Italian Cc/Ccn
+access keys beside the English combinations in the shortcut table.
+
+All 72 localization/help tests pass after the final edits. Structural checks report only the 1,331 catalog and
+52 help marks intentionally removed. Inventory and source/file hashes reconcile, git diff --check passes, and
+`build/i18n-review.html` is regenerated. Italian core/platform/everyday-help checkpoint: `3c90b946`.
+
+Current totals: 2,726 catalog entries and 108 help pages reviewed; 420 catalog values improved. Remaining:
+22,627 catalog entries and 884 help pages. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

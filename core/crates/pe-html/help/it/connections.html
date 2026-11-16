@@ -1,14 +1,13 @@
-<!--review--><h1>Le connessioni di Inbox Classic</h1>
-<p class="summary">Dove si collega Inbox Classic, e perché, per chi è curioso degli aspetti tecnici.</p>
+<h1>Le connessioni di Inbox Classic</h1>
+<p class="summary">A quali servizi si connette Inbox Classic e perché: i dettagli tecnici.</p>
 <ul>
     <li><b>I tuoi server di posta</b>, tramite IMAP per leggere la posta e SMTP per inviarla. Le connessioni sono crittografate con TLS, e il certificato di ogni server viene verificato con quelli considerati attendibili dal sistema. Inbox Classic rifiuta un server senza crittografia, a meno che tu non scelga <b data-text="ui-security-none"></b> e confermi.</li>
     <li><b>Quando aggiungi un account</b>, per cercarne i server. Inbox Classic legge i record DNS del tuo dominio tramite DNS over HTTPS (Cloudflare, poi Google), mai con il DNS in chiaro. Prova anche il file autoconfig del provider e l’elenco dei provider di Thunderbird (ISPDB). Per Exchange interroga Microsoft Autodiscover, che riceve la password solo quando la chiede tramite HTTPS. Un server senza crittografia non viene mai scelto.</li>
-    <li><b>Accesso tramite browser</b>, con OAuth 2.0 e PKCE, verso Google, Microsoft o il provider della tua app di accesso. Il browser ritorna a Inbox Classic solo su questo computer.</li>
-    <li><b>Loghi dei marchi</b> (BIMI), dall’indirizzo HTTPS del marchio quando il messaggio non contiene il logo, una volta per ogni esecuzione di Inbox Classic. Succede solo quando il tuo server di posta ha superato il controllo DMARC del messaggio e approvato il logo.</li>
-    <li><b>Immagini da internet</b>, solo quando le richiedi.</li>
-    <li><b>Annullamento dell’iscrizione</b>, solo quando fai clic. Una richiesta con un clic (RFC 8058) viene inviata solo se la lista ha firmato il messaggio con DKIM.</li>
+    <li><b>Accesso tramite browser</b>, con OAuth 2.0 e PKCE, verso Google, Microsoft o il provider della tua app di accesso. Il browser completa l’accesso tramite un indirizzo di ritorno locale a questo computer.</li>
+    <li><b>Loghi dei marchi</b> (BIMI), dall’indirizzo HTTPS del marchio quando il messaggio non contiene il logo, una volta per marchio in ogni sessione di Inbox Classic. Il logo viene caricato solo se il server di posta conferma che il messaggio ha superato il controllo DMARC e approva il logo.</li>
+    <li><b>Immagini da internet</b>, quando ne autorizzi il caricamento, per il singolo messaggio o tramite le impostazioni delle immagini.</li>
+    <li><b>Annullamento dell’iscrizione</b>, solo quando fai clic. Una richiesta diretta di annullamento (RFC 8058) viene inviata solo se la lista ha firmato il messaggio con DKIM.</li>
     <!--os:mac--><li><b>Aggiornamenti</b>, da inboxclassic.com, per sapere se è uscita una nuova versione.</li><!--/os-->
 </ul>
-<p>I codici di accesso vengono proposti solo quando l’intestazione Authentication-Results del provider dice che il dominio ha firmato il messaggio (DKIM). Questo non richiede alcuna connessione propria.</p>
+<p>I codici di accesso vengono proposti solo quando l’intestazione Authentication-Results del provider dice che il dominio ha firmato il messaggio (DKIM). Questa verifica non richiede connessioni aggiuntive.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->
