@@ -1,0 +1,16 @@
+<!--review--><h1>Greške šifrovanja</h1>
+<p class="summary">Šta da radite kad server ne nudi šifrovanje ili ga traži tamo gde je isključeno.</p>
+<h2>„the server does not offer STARTTLS“</h2>
+<p>Nalog je podešen na STARTTLS, ali server nije ponudio šifrovanje. Inbox Classic je stao, pa vaša lozinka nije poslata.</p>
+<ol>
+    <li>Otvorite svojstva naloga u meniju <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Podesite bezbednost na SSL/TLS, sa portom 993 za dolaznu poštu ili 465 za odlaznu poštu.</li>
+    <li>Kliknite na <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Ako ništa drugo ne uspe, server ne može bezbedno da se koristi.</p>
+<h2>„the server takes the password only over an encrypted connection“</h2>
+<p>Server za odlaznu poštu je podešen na <b data-text="ui-security-none"></b>. Vaša lozinka je ispravna. Promenite <b data-text="ui-field-smtp-security"></b> na STARTTLS sa portom 587 ili na SSL/TLS sa portom 465.</p>
+<h2>Upozorenje o vezi bez šifrovanja</h2>
+<p>Kad izaberete <b data-text="ui-security-none"></b>, Inbox Classic upozorava da svako ko presretne vaš mrežni saobraćaj može da pročita vašu lozinku i poruke. Nastavite samo za server na sopstvenom računaru ili u lokalnoj mreži.</p>
+<nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->
