@@ -3,7 +3,7 @@
 Objective: make the translations read as natural UI and help text in each language, using the actual application
 behavior and surrounding controls to establish meaning. Preserve the original scope across sessions.
 
-## Resume here
+## Completed review
 
 - Starting checkout: `27616ee9` on `master`; initial review baseline: `94577d0`.
 - Read `/Users/andris/Downloads/inbox-classic-translation-guide.md`, `core/locales/GLOSSARY.md`, and
@@ -15,7 +15,8 @@ behavior and surrounding controls to establish meaning. Preserve the original sc
   and 56 help passages altogether. Each language has ten affected help pages. Other languages named in the guide
   are not present in this checkout. `scripts/check-language.mjs` is also absent here.
 - All four translation sets and the final English/source consistency pass are complete.
-- Next step: commit the final reviewed content, advance the baseline, and require a clean review check.
+- Review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`. `--check` passes with zero pending drafts or unmarked changes.
+- No pending work remains from this review. For new changes, compare against the recorded file/source hashes.
 
 ## Checkpoint rules
 
@@ -173,5 +174,7 @@ platform branches and keyboard names are preserved. Completed file and English-s
 All unmarked changes match the completed inventory (965 catalog entries and 279 help lines). No review marks
 remain. `git diff --check` passes. UI behavior and shortcut scopes were checked in source; no GUI was launched.
 
-Only the review-baseline checkpoint remains. The generated review HTML is not committed. Unrelated untracked
-feedback, language-planning and responsiveness documents remain untouched.
+Final reviewed-content commit: `7c0b1672581c9bd7a33c226f35da16cedca4b528`. `core/locales/REVIEWED` points to this commit.
+The review checker passes: 0 pending messages, 0 pending help passages, and 0 unmarked changes.
+`build/i18n-review.html` was regenerated and is not committed. Unrelated untracked feedback, language-planning
+and responsiveness documents remain untouched.

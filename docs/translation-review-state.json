@@ -1593,7 +1593,7 @@
       ]
     }
   },
-  "next_batch": "Advance REVIEWED to the final reviewed-content commit, require a clean review check, and record completion.",
+  "next_batch": "None. For future changes, compare against the recorded reviewed file/source hashes and the REVIEWED baseline.",
   "final_source_consistency": {
     "files": {
       "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
@@ -1615,5 +1615,8 @@
   },
   "reviewed_catalog_entries": 965,
   "improved_translation_values": 372,
-  "reviewed_help_pages": 40
+  "reviewed_help_pages": 40,
+  "status": "complete",
+  "current_review_baseline": "7c0b1672581c9bd7a33c226f35da16cedca4b528",
+  "final_review_check": "Passed: 0 pending messages, 0 pending help passages, 0 unmarked changes. Regenerated build/i18n-review.html."
 }
