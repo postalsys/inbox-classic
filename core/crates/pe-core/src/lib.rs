@@ -58,7 +58,10 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
-pub use list_view::{FIND_PAUSE_MS, LIST_DIM, LIST_GATHER_MS, LIST_LOADING_MS, LIST_PAGE, ListLoad, ListView};
+pub use list_view::{
+    FIND_PAUSE_MS, LIST_DIM, LIST_GATHER_MS, LIST_LOADING_MS, LIST_PAGE, ListLoad, ListView, Reselect, Reselected,
+    Reselection,
+};
 use pe_i18n::{Text, tr, tr_args};
 use pe_net::Trust;
 use pe_store::{Account, AccountId, AccountSettings, Folder, FolderId, Message, Sort, Store};
@@ -271,16 +274,13 @@ pub enum Event {
     AddressBookChanged,
     /// The OpenPGP keys changed other than through their window (an import of a setup file)
     KeysChanged,
-    /// A list loaded in the background ([`Core::list_load`]) is read: [`Core::list_load_result`]. `generation` is the
-    /// window's number for the load.
+    /// A list loaded in the background ([`Core::list_load`]) is read: [`Core::list_load_result`]
     ListReady {
         request: u64,
-        generation: u64,
     },
     /// A page of a list read in the background ([`Core::list_load_page`]): [`Core::list_load_result`]
     ListPageReady {
         request: u64,
-        generation: u64,
     },
     /// The server did not do what the user asked of `count` messages of `folder` (a move, a delete, Mark All Read),
     /// so the store took the change back: the rows are as they were, and `text` says what and why, for a bar over the

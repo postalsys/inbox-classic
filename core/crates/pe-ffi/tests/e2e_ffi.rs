@@ -357,36 +357,63 @@ fn reads_mail_through_the_c_api() {
     assert!(unsafe { pe_draft_result(core, request) }.is_null(), "once");
 
     let list = view_of(inbox, None);
-    let request = unsafe { pe_list_view_load(core, list, 41, inbox, uid, -1) };
-    let ready = wait(&events, |e| e.kind == PeEventKind::ListReady && e.uid == request);
-    assert_eq!(ready.count, 41);
+    let shown = pe_selection_new();
+    unsafe { pe_selection_add(shown, inbox, uid) };
+    let request = unsafe { pe_list_view_load(core, list, shown, -1, -1, false) };
+    wait(&events, |e| e.kind == PeEventKind::ListReady && e.uid == request);
     let load = unsafe { pe_list_load_result(core, request) };
     let info = unsafe { &*pe_list_load_info(load) };
     let index = unsafe { pe_list_view_index(core, list, inbox, uid) };
     assert_eq!(
         (
-            info.generation,
+            info.failed,
             info.counted,
             info.total,
             info.unread,
             info.rows,
-            info.index
+            info.reselection,
+            info.focus
         ),
-        (41, true, 2, 1, 2, index)
+        (false, true, 2, 1, 2, PeReselection::Kept, index)
     );
+    assert!(unsafe { pe_list_load_error(load) }.is_null());
+    let selected = unsafe { pe_list_load_selected(load) };
+    assert_eq!(unsafe { pe_positions_count(selected) }, 1);
+    assert_eq!(unsafe { pe_positions_get(selected, 0) }, index as u64);
+    unsafe { pe_positions_free(selected) };
+    unsafe { pe_selection_clear(shown) };
+    assert!(unsafe { pe_list_load_selection(load, shown) });
+    assert_eq!(unsafe { pe_selection_count(shown) }, 1);
     let rows = unsafe { pe_list_load_messages(load) };
     assert_eq!(unsafe { pe_message_list_count(rows) }, 2);
     assert_eq!(unsafe { &*pe_message_list_get(rows, index as usize) }.uid, uid);
     unsafe {
         pe_message_list_free(rows);
         pe_list_load_free(load);
+        pe_selection_free(shown);
     }
-    let request = unsafe { pe_list_view_load_page(core, list, 42, 1) };
+    let request = unsafe { pe_list_view_load_page(core, list, 1) };
     wait(&events, |e| e.kind == PeEventKind::ListPageReady && e.uid == request);
     let load = unsafe { pe_list_load_result(core, request) };
     let info = unsafe { &*pe_list_load_info(load) };
-    assert_eq!((info.offset, info.counted, info.index), (1, false, -1));
+    assert_eq!(
+        (info.offset, info.counted, info.reselection, info.focus),
+        (1, false, PeReselection::None, -1)
+    );
     unsafe { pe_list_load_free(load) };
+    // a list that can not be read says why
+    let nowhere = view_of(inbox + 1000, None);
+    let request = unsafe { pe_list_view_load(core, nowhere, std::ptr::null(), -1, -1, false) };
+    wait(&events, |e| e.kind == PeEventKind::ListReady && e.uid == request);
+    let load = unsafe { pe_list_load_result(core, request) };
+    assert!(unsafe { &*pe_list_load_info(load) }.failed);
+    let why = unsafe { pe_list_load_error(load) };
+    assert!(!text(why).is_empty());
+    unsafe {
+        pe_string_free(why);
+        pe_list_load_free(load);
+        pe_list_view_free(nowhere);
+    }
 
     let all = pe_selection_new();
     assert!(unsafe { pe_list_view_select_all(core, list, all) });
@@ -400,6 +427,12 @@ fn reads_mail_through_the_c_api() {
     let mut counted = PeSelectionSummary::default();
     assert!(unsafe { pe_selection_summary_result(core, request, &mut counted) });
     assert_eq!((counted.count, counted.unread), (2, 1));
+    let request = unsafe { pe_list_view_load(core, list, all, -1, -1, false) };
+    wait(&events, |e| e.kind == PeEventKind::ListReady && e.uid == request);
+    let load = unsafe { pe_list_load_result(core, request) };
+    assert_eq!(unsafe { &*pe_list_load_info(load) }.reselection, PeReselection::All);
+    assert!(unsafe { pe_list_load_selection(load, all) } && unsafe { pe_selection_is_all(all) });
+    unsafe { pe_list_load_free(load) };
     let request = unsafe { pe_mark_read_start(core, PeMarkRead::Folder, inbox) };
     let acted = wait(&events, |e| e.kind == PeEventKind::Acted && e.uid == request);
     assert_eq!(
@@ -979,11 +1012,17 @@ fn null_and_bad_arguments() {
         assert!(!pe_sync(core, 42));
         assert!(pe_message_view(core, 1, 1, false).is_null());
         assert_eq!(pe_message_view_start(std::ptr::null(), 1, 1, false), 0);
-        assert_eq!(pe_list_view_load(std::ptr::null(), std::ptr::null(), 1, 0, 0, -1), 0);
-        assert_eq!(pe_list_view_load_page(std::ptr::null(), std::ptr::null(), 1, 0), 0);
+        assert_eq!(
+            pe_list_view_load(std::ptr::null(), std::ptr::null(), std::ptr::null(), -1, -1, true),
+            0
+        );
+        assert_eq!(pe_list_view_load_page(std::ptr::null(), std::ptr::null(), 0), 0);
         assert!(pe_list_load_result(std::ptr::null(), 1).is_null());
         assert!(pe_list_load_info(std::ptr::null()).is_null());
         assert!(pe_list_load_messages(std::ptr::null()).is_null());
+        assert!(pe_list_load_selected(std::ptr::null()).is_null());
+        assert!(pe_list_load_error(std::ptr::null()).is_null());
+        assert!(!pe_list_load_selection(std::ptr::null(), null_mut()));
         pe_list_load_free(null_mut());
         assert_eq!(pe_message_draft_start(std::ptr::null(), 1, 1, PeDraftKind::Reply), 0);
         assert_eq!(pe_draft_open_start(std::ptr::null(), 1, 1), 0);

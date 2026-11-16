@@ -154,10 +154,9 @@ pub enum PeEventKind {
     AddressBookChanged = 29,
     /// The OpenPGP keys changed other than through their window (an import)
     KeysChanged = 30,
-    /// The list load `uid` of `pe_list_view_load` is read: `pe_list_load_result`; `count` is the generation the window
-    /// gave it
+    /// The list load `uid` of `pe_list_view_load` is read: `pe_list_load_result`
     ListReady = 31,
-    /// The page `uid` of `pe_list_view_load_page` is read: `pe_list_load_result`; `count` is its generation
+    /// The page `uid` of `pe_list_view_load_page` is read: `pe_list_load_result`
     ListPageReady = 32,
     /// The read `uid` started off the window thread is done: `pe_draft_result` (`pe_message_draft_start`,
     /// `pe_draft_open_start`), `pe_attachment_data_result` (`pe_attachment_data_start`),
@@ -222,8 +221,8 @@ pub struct PeEvent {
     pub message: *const c_char,
     /// UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`. NULL otherwise
     pub detail: *const c_char,
-    /// How many messages, for `NewMail`; the window's generation of the load, for `ListReady` and `ListPageReady`;
-    /// 0 otherwise
+    /// How many messages, for `NewMail`, `RulesApplied` and `ActionUndone`; the seconds left, for `SendWaiting`; 0
+    /// otherwise
     pub count: u64,
 }
 
@@ -277,8 +276,8 @@ impl Callback {
             Event::SettingsChanged => (PeEventKind::SettingsChanged, 0, 0, 0),
             Event::AddressBookChanged => (PeEventKind::AddressBookChanged, 0, 0, 0),
             Event::KeysChanged => (PeEventKind::KeysChanged, 0, 0, 0),
-            Event::ListReady { request, .. } => (PeEventKind::ListReady, 0, 0, *request),
-            Event::ListPageReady { request, .. } => (PeEventKind::ListPageReady, 0, 0, *request),
+            Event::ListReady { request } => (PeEventKind::ListReady, 0, 0, *request),
+            Event::ListPageReady { request } => (PeEventKind::ListPageReady, 0, 0, *request),
             Event::ReadDone { request } => (PeEventKind::ReadDone, 0, 0, *request),
             Event::ActionUndone { account, folder, .. } => (PeEventKind::ActionUndone, *account, *folder, 0),
             Event::Acted { request, .. } => (PeEventKind::Acted, 0, 0, *request),
@@ -287,7 +286,6 @@ impl Callback {
             Event::NewMail { count, .. } => *count as u64,
             Event::SendWaiting { seconds, .. } => *seconds,
             Event::RulesApplied { count, .. } => *count as u64,
-            Event::ListReady { generation, .. } | Event::ListPageReady { generation, .. } => *generation,
             Event::ActionUndone { count, .. } => *count,
             _ => 0,
         };

@@ -175,7 +175,8 @@ pub(crate) unsafe fn ranges_of(starts: *const u64, ends: *const u64, count: usiz
 pub struct PePositions(pub(crate) Vec<u64>);
 
 /// # Safety
-/// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, not freed yet.
+/// `positions` must be NULL or from `pe_list_view_positions`, `pe_list_view_restored` or `pe_list_load_selected`, not
+/// freed yet.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_count(positions: *const PePositions) -> usize {
     // SAFETY: as the caller guarantees
@@ -185,7 +186,8 @@ pub unsafe extern "C" fn pe_positions_count(positions: *const PePositions) -> us
 /// Position `index`; 0 past the end
 ///
 /// # Safety
-/// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, not freed yet.
+/// `positions` must be NULL or from `pe_list_view_positions`, `pe_list_view_restored` or `pe_list_load_selected`, not
+/// freed yet.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_get(positions: *const PePositions, index: usize) -> u64 {
     // SAFETY: as the caller guarantees
@@ -195,7 +197,8 @@ pub unsafe extern "C" fn pe_positions_get(positions: *const PePositions, index: 
 }
 
 /// # Safety
-/// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, freed once.
+/// `positions` must be NULL or from `pe_list_view_positions`, `pe_list_view_restored` or `pe_list_load_selected`,
+/// freed once.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_free(positions: *mut PePositions) {
     // SAFETY: as the caller guarantees

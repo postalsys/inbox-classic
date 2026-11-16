@@ -41,7 +41,6 @@ type AfterList = Box<dyn FnOnce(&Mailbox)>;
 /// A load of the list asked of the core and not drawn yet ([`Mailbox::read_list`])
 struct Pending {
     request: u64,
-    generation: u64,
     /// The selection follows the messages to where they are in the new list
     keep_selection: bool,
     /// The same list read again: its scrolling kept
@@ -149,9 +148,6 @@ pub struct Mailbox {
     pub list_load: Rc<ListLoad>,
     /// The load of the list asked of the core, drawn when its `ListReady` comes
     loading: RefCell<Option<Pending>>,
-    /// The window's number for each load of the list, and the one of the list drawn
-    generation: Cell<u64>,
-    shown_generation: Cell<u64>,
     /// The pages of the list drawn asked of the core
     page_requests: RefCell<HashSet<u64>>,
     /// Select All: every message of the list, counted and not listed; None when the selection is the rows'
@@ -346,8 +342,6 @@ impl Mailbox {
             view: RefCell::new(start_view(sort)),
             list_load,
             loading: RefCell::default(),
-            generation: Cell::new(0),
-            shown_generation: Cell::new(0),
             page_requests: RefCell::default(),
             all: RefCell::default(),
             summary_request: Cell::new(0),
@@ -1029,9 +1023,16 @@ impl Mailbox {
         self.list.set_view(self.list_view());
         let place = (keep_selection && !self.several() && self.reader.uid() != 0)
             .then(|| (self.reader.folder(), self.reader.uid()));
-        let generation = self.generation.get() + 1;
-        self.generation.set(generation);
-        let asked = core.list_load(&self.list.view(), generation, place.map(|(f, u)| (f, u, hint)));
+        let reselect = pe_core::Reselect {
+            selected: Selected::Listed(
+                place
+                    .map(|(folder, uid)| vec![MessageRef { folder, uid }])
+                    .unwrap_or_default(),
+            ),
+            hint,
+            ..pe_core::Reselect::default()
+        };
+        let asked = core.list_load(&self.list.view(), reselect);
         // a load before it is not drawn (the core drops it when it is of the same view), nor the pages of the list
         // shown
         let before = self.loading.borrow_mut().take();
@@ -1049,7 +1050,6 @@ impl Mailbox {
         };
         *self.loading.borrow_mut() = Some(Pending {
             request,
-            generation,
             keep_selection,
             same,
             place,
@@ -1067,12 +1067,8 @@ impl Mailbox {
     }
 
     /// The list loaded off the window thread is here: drawn when it is the newest asked for
-    fn list_ready(&self, request: u64, generation: u64) {
-        let ours = self
-            .loading
-            .borrow()
-            .as_ref()
-            .is_some_and(|p| p.request == request && p.generation == generation);
+    fn list_ready(&self, request: u64) {
+        let ours = self.loading.borrow().as_ref().is_some_and(|p| p.request == request);
         if !ours {
             return;
         }
@@ -1080,7 +1076,11 @@ impl Mailbox {
             return;
         };
         // a load that failed draws an empty list, as a read on the window thread did
-        let load = shell().core.list_load_result(request).unwrap_or_default();
+        let load = shell()
+            .core
+            .list_load_result(request)
+            .and_then(Result::ok)
+            .unwrap_or_default();
         self.draw_list(pending, load);
     }
 
@@ -1088,7 +1088,6 @@ impl Mailbox {
     /// the columns its folders need, the selection where its messages are now
     fn draw_list(&self, pending: Pending, load: pe_core::ListLoad) {
         let core = &shell().core;
-        self.shown_generation.set(pending.generation);
         self.total.set(load.total);
         self.unread.set(load.unread);
         let view = self.list.view();
@@ -1117,7 +1116,7 @@ impl Mailbox {
         } else if self.reader.uid() == 0 {
             Vec::new()
         } else if pending.place == Some((self.reader.folder(), self.reader.uid())) {
-            load.index.into_iter().collect()
+            load.reselected.rows.first().copied().into_iter().collect()
         } else {
             // another message chosen while the list was read: found where it is now
             let hint = self.list.selected().map_or(u64::MAX, |(at, _)| u64::from(at));
@@ -1156,23 +1155,21 @@ impl Mailbox {
         if self.loading.borrow().is_some() {
             return;
         }
-        let asked = shell()
-            .core
-            .list_load_page(&self.list.view(), self.shown_generation.get(), offset);
+        let asked = shell().core.list_load_page(&self.list.view(), offset);
         if let Ok(request) = asked {
             self.page_requests.borrow_mut().insert(request);
         }
     }
 
     /// A page of the list read off the window thread: drawn in place of its blank lines when it is of the list shown
-    fn page_ready(&self, request: u64, generation: u64) {
+    fn page_ready(&self, request: u64) {
         if !self.page_requests.borrow_mut().remove(&request) {
             return;
         }
-        let Some(page) = shell().core.list_load_result(request) else {
+        let Some(Ok(page)) = shell().core.list_load_result(request) else {
             return;
         };
-        if generation != self.shown_generation.get() || self.loading.borrow().is_some() {
+        if self.loading.borrow().is_some() {
             return;
         }
         self.reloading.set(true);
@@ -1845,8 +1842,8 @@ impl Mailbox {
             }
             Event::SyncFinished { .. } => self.show_folder_name(),
             Event::PictureReady { request } => crate::row_pictures::ready(*request),
-            Event::ListReady { request, generation } => self.list_ready(*request, *generation),
-            Event::ListPageReady { request, generation } => self.page_ready(*request, *generation),
+            Event::ListReady { request } => self.list_ready(*request),
+            Event::ListPageReady { request } => self.page_ready(*request),
             Event::ReadDone { request } => self.summary_ready(*request),
             Event::Acted { request, said } => self.acted(*request, said),
             Event::ActionUndone { text, .. } => {

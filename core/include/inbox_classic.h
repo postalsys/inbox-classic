@@ -40,8 +40,9 @@
 // milliseconds; when the timer runs out, `pe_list_view_stale` says whether the list needs reading at all
 #define PE_LIST_GATHER_MS 300
 
-// How long a folder chosen waits for its list before the list says "Loading...", in milliseconds, counted from the
-// first click of the wait (later clicks while it waits do not start it again)
+// How long anything the user waits for shows nothing busy, in milliseconds: a folder chosen waits this long for its
+// list before the list says "Loading..." (counted from the first click of the wait; later clicks do not start it
+// again), and a message, a reply, an attachment or an action on many messages as long before it says it is busy
 #define PE_LIST_LOADING_MS 400
 
 // How long the Address Book's find boxes wait after the last key before they search, in milliseconds
@@ -188,10 +189,9 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_ADDRESS_BOOK_CHANGED = 29,
   // The OpenPGP keys changed other than through their window (an import)
   PE_EVENT_KIND_KEYS_CHANGED = 30,
-  // The list load `uid` of `pe_list_view_load` is read: `pe_list_load_result`; `count` is the generation the window
-  // gave it
+  // The list load `uid` of `pe_list_view_load` is read: `pe_list_load_result`
   PE_EVENT_KIND_LIST_READY = 31,
-  // The page `uid` of `pe_list_view_load_page` is read: `pe_list_load_result`; `count` is its generation
+  // The page `uid` of `pe_list_view_load_page` is read: `pe_list_load_result`
   PE_EVENT_KIND_LIST_PAGE_READY = 32,
   // The read `uid` started off the window thread is done: `pe_draft_result` (`pe_message_draft_start`,
   // `pe_draft_open_start`), `pe_attachment_data_result` (`pe_attachment_data_start`),
@@ -500,6 +500,21 @@ typedef enum PeAction {
   // ignored when all are (`PeSelectionSummary.ignored`)
   PE_ACTION_IGNORE = 13,
 } PeAction;
+
+// How a list load selected rows for what the window had selected (`pe_list_view_load`)
+typedef enum PeReselection {
+  // Nothing selected: nothing was, or none of it is in the list (the reading pane shows nothing)
+  PE_RESELECTION_NONE = 0,
+  // The messages selected before, where they are now (some may be gone): only their numbers change, and one
+  // message shown stays shown without being read again
+  PE_RESELECTION_KEPT = 1,
+  // Select All is still the whole list: every row selected, the selection counted again
+  PE_RESELECTION_ALL = 2,
+  // What Undo brought back, or the store took back of a refused action: a new selection, its first row focused
+  PE_RESELECTION_RESTORED = 3,
+  // The row after a removal (`after`): a new selection
+  PE_RESELECTION_AFTER = 4,
+} PeReselection;
 
 // What Mark All Read marks (`pe_mark_read_start`)
 typedef enum PeMarkRead {
@@ -831,8 +846,8 @@ typedef struct PeEvent {
   const char *message;
   // UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`. NULL otherwise
   const char *detail;
-  // How many messages, for `NewMail`; the window's generation of the load, for `ListReady` and `ListPageReady`;
-  // 0 otherwise
+  // How many messages, for `NewMail`, `RulesApplied` and `ActionUndone`; the seconds left, for `SendWaiting`; 0
+  // otherwise
   uint64_t count;
 } PeEvent;
 
@@ -1413,10 +1428,11 @@ typedef struct PeSelectionSummary {
   bool ignored;
 } PeSelectionSummary;
 
-// What a list load read, besides its rows
+// What a list load read, besides its rows and the rows it selects
 typedef struct PeListLoadInfo {
-  // The window's number for the load, as it gave it
-  uint64_t generation;
+  // The list could not be read: `pe_list_load_error` says why, for the status bar, and the app keeps the list it
+  // shows; the rest is 0
+  bool failed;
   // Where its rows start in the list
   uint64_t offset;
   // A load of the list (`pe_list_view_load`), with the counts; false for a page, whose counts are 0
@@ -1427,8 +1443,10 @@ typedef struct PeListLoadInfo {
   uint64_t rows;
   // As `pe_list_view_lists_recipients`
   bool lists_recipients;
-  // The row of the message the load was asked about, -1 when it is not in the list or none was asked about
-  int64_t index;
+  // How it selected rows (`pe_list_load_selected`, `pe_list_load_selection`); `None` for a page
+  enum PeReselection reselection;
+  // The row to focus and scroll to, -1 to leave the scrolling as it is
+  int64_t focus;
 } PeListLoadInfo;
 
 // A message rule: a search query and what to do with the new mail of an Inbox that matches it
@@ -3978,41 +3996,70 @@ bool pe_list_view_leaves_list(const struct PeListView *view,
                               int64_t to);
 
 // Loads the list `view` shows on a store connection of the core's own, off the window thread: its counts, its row
-// count, the first `PE_LIST_PAGE` rows and, when `folder` is not 0, the row of the message `uid` of `folder` (looked
-// for first in those rows, nearest `hint`, the row it had; -1 when not known). `ListReady` follows with the request
-// this returns in `uid` and `generation` (the window's number for the load, any it likes) in `count`. A newer load
-// of the same view cancels this one and the pages asked for before it: their events never come. What it read is
-// kept for the view, as its calls on the window thread keep what they read (a click selects from its rows,
-// `pe_list_view_stale` is false until the store changes). 0 on failure.
+// count, the first `PE_LIST_PAGE` rows and the rows to select in it for what the window has selected now, which it
+// finds where they are now:
+//
+// - `selection`: the messages selected (NULL or empty for none): one (the message shown, or one the app chose to
+//   show), several, or Select All (`pe_list_view_select_all`), kept while it is still the whole list;
+// - `hint`: with one message, the row it had, looked near first (-1 when not known);
+// - `after`: the row to select in place of the selection, where the rows an action took out of the list were (the
+//   last row when the list is shorter now); -1 for none;
+// - `restored`: select what the last `pe_undo` brought back, or the store took back after `ActionUndone`, in place of
+//   the selection when the list has it (a write after the list was read reads it again first).
+//
+// `ListReady` follows with the request this returns in `uid`, then `pe_list_load_result`. A newer load of the same
+// view cancels this one and the pages asked for before it: their events never come. What it read is kept for the
+// view, as its calls on the window thread keep what they read (a click selects from its rows, `pe_list_view_stale`
+// is false until the store changes). 0 on failure.
 //
 // # Safety
-// `core` must be a live handle, `view` NULL or a live view.
+// `core` must be a live handle, `view` NULL or a live view, `selection` NULL or a live selection.
 uint64_t pe_list_view_load(const struct PeCore *core,
                            const struct PeListView *view,
-                           uint64_t generation,
-                           int64_t folder,
-                           uint64_t uid,
-                           int64_t hint);
+                           const struct PeSelection *selection,
+                           int64_t hint,
+                           int64_t after,
+                           bool restored);
 
 // Loads `PE_LIST_PAGE` rows of the list `view` shows from `offset` on, off the window thread as `pe_list_view_load`
-// does: `ListPageReady` follows with the request this returns in `uid` and `generation` in `count`. Ask for the page
-// after the one shown too, so it is there when scrolled to. Dropped (no event) when a load of the whole list comes
-// after it. 0 on failure.
+// does: `ListPageReady` follows with the request this returns in `uid`. Ask for the page after the one shown too, so
+// it is there when scrolled to. Dropped (no event) when a load of the whole list comes after it. 0 on failure.
 //
 // # Safety
 // `core` must be a live handle, `view` NULL or a live view.
 uint64_t pe_list_view_load_page(const struct PeCore *core,
                                 const struct PeListView *view,
-                                uint64_t generation,
                                 uint64_t offset);
 
-// What the load `request` read, after its `ListReady` or `ListPageReady`, taken once; NULL for a request that failed,
-// was dropped or is unknown. Free with `pe_list_load_free`.
+// What the load `request` read, after its `ListReady` or `ListPageReady`, taken once; one that could not be read has
+// `failed` set and `pe_list_load_error`. NULL for a request that is unknown or not done. Free with
+// `pe_list_load_free`.
 //
 // # Safety
 // `core` must be a live handle.
 struct PeListLoad *pe_list_load_result(const struct PeCore *core,
                                        uint64_t request);
+
+// Why the load could not be read, for the status bar (free with `pe_string_free`); NULL when it was read
+//
+// # Safety
+// `load` must be NULL or live.
+char *pe_list_load_error(const struct PeListLoad *load);
+
+// The rows the load selects, ascending (none for `PE_RESELECTION_ALL`, which selects every row); free with
+// `pe_positions_free`. NULL for NULL.
+//
+// # Safety
+// `load` must be NULL or live.
+struct PePositions *pe_list_load_selected(const struct PeListLoad *load);
+
+// Puts the selection the load selects into `selection`, in place of what it had: Select All counted again
+// (`PE_RESELECTION_ALL`), or the messages its rows are of. False for NULL.
+//
+// # Safety
+// `load` must be NULL or live, `selection` NULL or a live selection.
+bool pe_list_load_selection(const struct PeListLoad *load,
+                            struct PeSelection *selection);
 
 // Drops a load nobody waits for any more (its window closed): its event does not come
 //
@@ -4192,18 +4239,21 @@ bool pe_selection_get(const struct PeSelection *selection,
                       uint64_t *uid);
 
 // # Safety
-// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, not freed yet.
+// `positions` must be NULL or from `pe_list_view_positions`, `pe_list_view_restored` or `pe_list_load_selected`, not
+// freed yet.
 size_t pe_positions_count(const struct PePositions *positions);
 
 // Position `index`; 0 past the end
 //
 // # Safety
-// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, not freed yet.
+// `positions` must be NULL or from `pe_list_view_positions`, `pe_list_view_restored` or `pe_list_load_selected`, not
+// freed yet.
 uint64_t pe_positions_get(const struct PePositions *positions,
                           size_t index);
 
 // # Safety
-// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, freed once.
+// `positions` must be NULL or from `pe_list_view_positions`, `pe_list_view_restored` or `pe_list_load_selected`,
+// freed once.
 void pe_positions_free(struct PePositions *positions);
 
 // Fills `summary`; false on failure. A whole list's selection is counted where its messages are, never listed (its

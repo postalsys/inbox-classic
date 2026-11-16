@@ -13,8 +13,8 @@ use crate::core::{
     PeCore, PeMessageList, PeNextUnread, PeShow, PeSortField, arg, handed, message_list, put_neighbours,
     put_next_unread, sort_of, take_back, with, with_shared,
 };
-use crate::guard;
 use crate::selection::{PeAction, PePositions, PeSelection, PeSelectionSummary, action_of, ranges_of};
+use crate::{guard, into_c_string};
 
 /// What a message list shows; free with `pe_list_view_free`
 pub struct PeListView(ListView);
@@ -22,8 +22,9 @@ pub struct PeListView(ListView);
 /// How long the changes to the list shown are gathered before it is read again (a sync writes many in a row), in
 /// milliseconds; when the timer runs out, `pe_list_view_stale` says whether the list needs reading at all
 pub const PE_LIST_GATHER_MS: u32 = 300;
-/// How long a folder chosen waits for its list before the list says "Loading...", in milliseconds, counted from the
-/// first click of the wait (later clicks while it waits do not start it again)
+/// How long anything the user waits for shows nothing busy, in milliseconds: a folder chosen waits this long for its
+/// list before the list says "Loading..." (counted from the first click of the wait; later clicks do not start it
+/// again), and a message, a reply, an attachment or an action on many messages as long before it says it is busy
 pub const PE_LIST_LOADING_MS: u32 = 400;
 /// How long the Address Book's find boxes wait after the last key before they search, in milliseconds
 pub const PE_FIND_PAUSE_MS: u32 = 150;
@@ -727,12 +728,43 @@ pub const PE_LIST_PAGE: u64 = 100;
 
 const _: () = assert!(PE_LIST_PAGE == pe_core::LIST_PAGE);
 
-/// What a list load read, besides its rows
+/// How a list load selected rows for what the window had selected (`pe_list_view_load`)
+#[repr(C)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum PeReselection {
+    /// Nothing selected: nothing was, or none of it is in the list (the reading pane shows nothing)
+    #[default]
+    None = 0,
+    /// The messages selected before, where they are now (some may be gone): only their numbers change, and one
+    /// message shown stays shown without being read again
+    Kept = 1,
+    /// Select All is still the whole list: every row selected, the selection counted again
+    All = 2,
+    /// What Undo brought back, or the store took back of a refused action: a new selection, its first row focused
+    Restored = 3,
+    /// The row after a removal (`after`): a new selection
+    After = 4,
+}
+
+impl From<pe_core::Reselection> for PeReselection {
+    fn from(value: pe_core::Reselection) -> Self {
+        match value {
+            pe_core::Reselection::None => PeReselection::None,
+            pe_core::Reselection::Kept => PeReselection::Kept,
+            pe_core::Reselection::All => PeReselection::All,
+            pe_core::Reselection::Restored => PeReselection::Restored,
+            pe_core::Reselection::After => PeReselection::After,
+        }
+    }
+}
+
+/// What a list load read, besides its rows and the rows it selects
 #[repr(C)]
 #[derive(Debug, Clone, Copy, Default)]
 pub struct PeListLoadInfo {
-    /// The window's number for the load, as it gave it
-    pub generation: u64,
+    /// The list could not be read: `pe_list_load_error` says why, for the status bar, and the app keeps the list it
+    /// shows; the rest is 0
+    pub failed: bool,
     /// Where its rows start in the list
     pub offset: u64,
     /// A load of the list (`pe_list_view_load`), with the counts; false for a page, whose counts are 0
@@ -743,97 +775,166 @@ pub struct PeListLoadInfo {
     pub rows: u64,
     /// As `pe_list_view_lists_recipients`
     pub lists_recipients: bool,
-    /// The row of the message the load was asked about, -1 when it is not in the list or none was asked about
-    pub index: i64,
+    /// How it selected rows (`pe_list_load_selected`, `pe_list_load_selection`); `None` for a page
+    pub reselection: PeReselection,
+    /// The row to focus and scroll to, -1 to leave the scrolling as it is
+    pub focus: i64,
 }
 
 /// A list load's result; free with `pe_list_load_free`
 pub struct PeListLoad {
     info: PeListLoadInfo,
     messages: Vec<pe_store::Message>,
+    /// The rows to select, ascending
+    selected: Vec<u64>,
+    selection: pe_core::Selected,
+    error: Option<String>,
 }
 
 /// Loads the list `view` shows on a store connection of the core's own, off the window thread: its counts, its row
-/// count, the first `PE_LIST_PAGE` rows and, when `folder` is not 0, the row of the message `uid` of `folder` (looked
-/// for first in those rows, nearest `hint`, the row it had; -1 when not known). `ListReady` follows with the request
-/// this returns in `uid` and `generation` (the window's number for the load, any it likes) in `count`. A newer load
-/// of the same view cancels this one and the pages asked for before it: their events never come. What it read is
-/// kept for the view, as its calls on the window thread keep what they read (a click selects from its rows,
-/// `pe_list_view_stale` is false until the store changes). 0 on failure.
+/// count, the first `PE_LIST_PAGE` rows and the rows to select in it for what the window has selected now, which it
+/// finds where they are now:
+///
+/// - `selection`: the messages selected (NULL or empty for none): one (the message shown, or one the app chose to
+///   show), several, or Select All (`pe_list_view_select_all`), kept while it is still the whole list;
+/// - `hint`: with one message, the row it had, looked near first (-1 when not known);
+/// - `after`: the row to select in place of the selection, where the rows an action took out of the list were (the
+///   last row when the list is shorter now); -1 for none;
+/// - `restored`: select what the last `pe_undo` brought back, or the store took back after `ActionUndone`, in place of
+///   the selection when the list has it (a write after the list was read reads it again first).
+///
+/// `ListReady` follows with the request this returns in `uid`, then `pe_list_load_result`. A newer load of the same
+/// view cancels this one and the pages asked for before it: their events never come. What it read is kept for the
+/// view, as its calls on the window thread keep what they read (a click selects from its rows, `pe_list_view_stale`
+/// is false until the store changes). 0 on failure.
 ///
 /// # Safety
-/// `core` must be a live handle, `view` NULL or a live view.
+/// `core` must be a live handle, `view` NULL or a live view, `selection` NULL or a live selection.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_list_view_load(
     core: *const PeCore,
     view: *const PeListView,
-    generation: u64,
-    folder: i64,
-    uid: u64,
+    selection: *const PeSelection,
     hint: i64,
+    after: i64,
+    restored: bool,
 ) -> u64 {
     // SAFETY: as the caller guarantees
     let Some(view) = (unsafe { view.as_ref() }) else {
         return 0;
     };
-    let place = (folder != 0).then(|| (folder, uid, u64::try_from(hint).ok()));
+    let reselect = pe_core::Reselect {
+        // SAFETY: as the caller guarantees
+        selected: unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default(),
+        hint: u64::try_from(hint).ok(),
+        after: u64::try_from(after).ok(),
+        restored,
+    };
     // SAFETY: as the caller guarantees
-    unsafe { with_shared(core, 0, |core| core.list_load(&view.0, generation, place).unwrap_or(0)) }
+    unsafe { with_shared(core, 0, |core| core.list_load(&view.0, reselect).unwrap_or(0)) }
 }
 
 /// Loads `PE_LIST_PAGE` rows of the list `view` shows from `offset` on, off the window thread as `pe_list_view_load`
-/// does: `ListPageReady` follows with the request this returns in `uid` and `generation` in `count`. Ask for the page
-/// after the one shown too, so it is there when scrolled to. Dropped (no event) when a load of the whole list comes
-/// after it. 0 on failure.
+/// does: `ListPageReady` follows with the request this returns in `uid`. Ask for the page after the one shown too, so
+/// it is there when scrolled to. Dropped (no event) when a load of the whole list comes after it. 0 on failure.
 ///
 /// # Safety
 /// `core` must be a live handle, `view` NULL or a live view.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_list_view_load_page(
-    core: *const PeCore,
-    view: *const PeListView,
-    generation: u64,
-    offset: u64,
-) -> u64 {
+pub unsafe extern "C" fn pe_list_view_load_page(core: *const PeCore, view: *const PeListView, offset: u64) -> u64 {
     // SAFETY: as the caller guarantees
     let Some(view) = (unsafe { view.as_ref() }) else {
         return 0;
     };
     // SAFETY: as the caller guarantees
-    unsafe {
-        with_shared(core, 0, |core| {
-            core.list_load_page(&view.0, generation, offset).unwrap_or(0)
-        })
-    }
+    unsafe { with_shared(core, 0, |core| core.list_load_page(&view.0, offset).unwrap_or(0)) }
 }
 
-/// What the load `request` read, after its `ListReady` or `ListPageReady`, taken once; NULL for a request that failed,
-/// was dropped or is unknown. Free with `pe_list_load_free`.
+/// What the load `request` read, after its `ListReady` or `ListPageReady`, taken once; one that could not be read has
+/// `failed` set and `pe_list_load_error`. NULL for a request that is unknown or not done. Free with
+/// `pe_list_load_free`.
 ///
 /// # Safety
 /// `core` must be a live handle.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_list_load_result(core: *const PeCore, request: u64) -> *mut PeListLoad {
     // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, null_mut(), |core| {
-            core.list_load_result(request).map_or(null_mut(), |load| {
-                handed(PeListLoad {
-                    info: PeListLoadInfo {
-                        generation: load.generation,
-                        offset: load.offset,
-                        counted: load.counted,
-                        total: load.total,
-                        unread: load.unread,
-                        rows: load.rows,
-                        lists_recipients: load.lists_recipients,
-                        index: load.index.and_then(|i| i64::try_from(i).ok()).unwrap_or(-1),
-                    },
-                    messages: load.messages,
-                })
-            })
-        })
-    }
+    let Some(load) = (unsafe { with(core, None, |core| core.list_load_result(request)) }) else {
+        return null_mut();
+    };
+    let load = match load {
+        Ok(load) => PeListLoad {
+            info: PeListLoadInfo {
+                failed: false,
+                offset: load.offset,
+                counted: load.counted,
+                total: load.total,
+                unread: load.unread,
+                rows: load.rows,
+                lists_recipients: load.lists_recipients,
+                reselection: load.reselected.how.into(),
+                focus: load.reselected.focus.and_then(|i| i64::try_from(i).ok()).unwrap_or(-1),
+            },
+            messages: load.messages,
+            selected: load.reselected.rows,
+            selection: load.reselected.selection,
+            error: None,
+        },
+        Err(error) => PeListLoad {
+            info: PeListLoadInfo {
+                failed: true,
+                focus: -1,
+                ..PeListLoadInfo::default()
+            },
+            messages: Vec::new(),
+            selected: Vec::new(),
+            selection: pe_core::Selected::default(),
+            error: Some(error),
+        },
+    };
+    handed(load)
+}
+
+/// Why the load could not be read, for the status bar (free with `pe_string_free`); NULL when it was read
+///
+/// # Safety
+/// `load` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_load_error(load: *const PeListLoad) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let Some(error) = (unsafe { load.as_ref() }).and_then(|load| load.error.clone()) else {
+        return null_mut();
+    };
+    guard(|| into_c_string(error)).unwrap_or(null_mut())
+}
+
+/// The rows the load selects, ascending (none for `PE_RESELECTION_ALL`, which selects every row); free with
+/// `pe_positions_free`. NULL for NULL.
+///
+/// # Safety
+/// `load` must be NULL or live.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_load_selected(load: *const PeListLoad) -> *mut PePositions {
+    // SAFETY: as the caller guarantees
+    let Some(load) = (unsafe { load.as_ref() }) else {
+        return null_mut();
+    };
+    guard(|| handed(PePositions(load.selected.clone()))).unwrap_or(null_mut())
+}
+
+/// Puts the selection the load selects into `selection`, in place of what it had: Select All counted again
+/// (`PE_RESELECTION_ALL`), or the messages its rows are of. False for NULL.
+///
+/// # Safety
+/// `load` must be NULL or live, `selection` NULL or a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_list_load_selection(load: *const PeListLoad, selection: *mut PeSelection) -> bool {
+    // SAFETY: as the caller guarantees
+    let (Some(load), Some(selection)) = (unsafe { load.as_ref() }, unsafe { selection.as_mut() }) else {
+        return false;
+    };
+    selection.0 = load.selection.clone();
+    true
 }
 
 /// Drops a load nobody waits for any more (its window closed): its event does not come
