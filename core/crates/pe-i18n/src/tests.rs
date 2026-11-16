@@ -64,6 +64,22 @@ fn every_catalog_matches_english() {
 }
 
 #[test]
+fn every_catalog_has_every_english_message() {
+    // a message a language lacks is shown in English: a feature's words added in English must reach every catalog
+    // (as drafts marked for review), or the windows mix languages
+    let english: BTreeSet<String> = catalog("en").into_iter().map(|(id, _)| id).collect();
+    for (code, _) in LANGUAGES {
+        let has: BTreeSet<String> = catalog(code).into_iter().map(|(id, _)| id).collect();
+        let missing: Vec<&String> = english.difference(&has).collect();
+        assert!(
+            missing.is_empty(),
+            "{code} lacks {} English messages: {missing:?}",
+            missing.len()
+        );
+    }
+}
+
+#[test]
 fn no_dashes_in_any_catalog() {
     // the house style: commas and sentences, never an en or em dash
     for (code, files) in CATALOGS {
@@ -85,7 +101,7 @@ fn chooses_the_language() {
     assert_eq!(supported("qps"), Some(PSEUDO));
     assert_eq!(resolve(&["ja-JP", "es-419", "en"]), "es");
     assert_eq!(resolve::<&str>(&[]), "en");
-    assert_eq!(resolve(&["qps", "pt"]), "en");
+    assert_eq!(resolve(&["qps", "ja"]), "en");
 }
 
 #[test]
@@ -163,4 +179,62 @@ fn a_message_by_its_id_in_a_language() {
     );
     assert_eq!(message_in("xx", "cmd-mark-read").as_deref(), Some("Mark as &Read"));
     assert_eq!(message_in("en", "no-such-message"), None);
+}
+
+#[test]
+fn the_scripts_read_the_list_of_languages() {
+    // scripts/languages.sh (and ui-e2e.ps1) read LANGUAGES from this file, one `    ("code", "Name"),` a line
+    let source = include_str!("lib.rs");
+    let start = source.find("pub const LANGUAGES").expect("the list");
+    let end = start + source[start..].find("\n];").expect("its end");
+    let read: Vec<(String, String)> = source[start..end]
+        .lines()
+        .filter_map(|line| {
+            // a Windows checkout ends its lines in CR LF
+            let rest = line
+                .trim_end_matches('\r')
+                .strip_prefix("    (\"")?
+                .strip_suffix("\"),")?;
+            let (code, name) = rest.split_once("\", \"")?;
+            Some((code.to_string(), name.to_string()))
+        })
+        .collect();
+    let listed: Vec<(String, String)> = LANGUAGES
+        .iter()
+        .map(|(code, name)| (code.to_string(), name.to_string()))
+        .collect();
+    assert_eq!(read, listed, "one language a line, as scripts/languages.sh reads them");
+    assert_eq!(LANGUAGES[0].0, "en", "English first");
+    for (code, _) in LANGUAGES {
+        assert!(
+            code.len() == 2 && code.bytes().all(|b| b.is_ascii_lowercase()),
+            "{code}: a two-letter code, as the pictures and scripts take it"
+        );
+        assert!(
+            CATALOGS.iter().any(|(c, _)| c == code),
+            "{code}: a catalog in core/locales/{code}"
+        );
+    }
+}
+
+#[test]
+fn translated_only_from_the_language_itself() {
+    assert_eq!(translated("de", "menu-file", &[]).as_deref(), Some("&Datei"));
+    assert_eq!(translated("en", "menu-file", &[]).as_deref(), Some("&File"));
+    assert_eq!(translated("de", "no-such-message", &[]), None);
+    assert_eq!(translated("ja", "menu-file", &[]), None);
+    assert_eq!(translated(PSEUDO, "menu-file", &[]), None);
+    assert_eq!(
+        translated("en", "messages", &[("count", 2u64.into())]).as_deref(),
+        Some("2 messages")
+    );
+}
+
+#[test]
+fn portuguese_plurals_follow_portugal() {
+    // pt-PT: only 1 is `one`, so no catalog needs a `[0]` branch to say "0 mensagens"
+    let selected = |count: u64| translated("pt", "selection-title", &[("count", count.into())]);
+    assert_eq!(selected(0).as_deref(), Some("0 mensagens selecionadas"));
+    assert_eq!(selected(1).as_deref(), Some("1 mensagem selecionada"));
+    assert_eq!(selected(2).as_deref(), Some("2 mensagens selecionadas"));
 }

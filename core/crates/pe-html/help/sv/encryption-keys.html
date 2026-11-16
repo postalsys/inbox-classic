@@ -1,0 +1,18 @@
+<!--review--><h1>Krypteringsnycklar</h1>
+<p class="summary">Skapa en nyckel för att signera dina meddelanden och ta emot krypterad e-post, och spara dina kontakters nycklar.</p>
+<p>Inbox Classic signerar och krypterar e-post med OpenPGP-nycklar. Din egen nyckel har två halvor: en offentlig nyckel som du ger till andra, och en privat nyckel som stannar på din dator. Med dina kontakters nycklar kan du kontrollera deras signaturer och kryptera e-post till dem.</p>
+<p>Så här skapar du din nyckel:</p>
+<ol>
+    <li>Välj <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> och klicka sedan på <b data-text="ui-keys-new"></b>.</li>
+    <li>Välj kontot och klicka på <b data-text="ui-keys-new-make"></b>. Nyckeln används för kontots adress och dess andra adresser.</li>
+    <li>Klicka på <b data-text="ui-keys-backup-now"></b> och välj en lösenfras. Förvara filen och lösenfrasen på olika säkra ställen.</li>
+</ol>
+<aside class="warning">Utan en säkerhetskopia går din nyckel inte att återställa om datorn försvinner eller återställs, och e-post som krypterats till den går inte längre att läsa.</aside>
+<h2>Nycklarna är skyddade utan lösenfraser</h2>
+<p>Dina privata nycklar skyddas av en nyckel som förvaras i <!--os:windows-->Autentiseringshanteraren<!--/os--><!--os:mac-->nyckelringen<!--/os--><!--os:linux-->systemets nyckelring<!--/os-->, så du behöver aldrig skriva en lösenfras för att använda dem. Du väljer bara en lösenfras för en säkerhetskopia. Om din nyckel visas som låst har det skyddet återställts: klicka på <b data-text="ui-keys-import"></b> och välj nyckelns säkerhetskopia.</p>
+<h2>Lägga till nycklar</h2>
+<p>Klicka på <b data-text="ui-keys-import"></b> för att lägga till en nyckel från en fil, till exempel en som en kontakt har skickat eller en egen säkerhetskopia. En privat nyckel som skyddas av en lösenfras frågar efter den en gång. Inbox Classic frågar sedan om en importerad egen nyckel ska användas för dina adresser.</p>
+<p>En kontakts nyckel används för kontaktens adress från och med då. Om en annan nyckel för samma adress dyker upp senare fortsätter den nuvarande att användas tills du väljer den nya i kontaktens egenskaper.</p>
+<p>Om du vill dela din offentliga nyckel markerar du den och klickar på <b data-text="ui-keys-export"></b>. Du kan också välja kontots nyckel i dess egenskaper, på fliken <b data-text="ui-account-security"></b>.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
+<!--/review-->

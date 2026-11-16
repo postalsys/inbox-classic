@@ -1,0 +1,16 @@
+<!--review--><h1>Aplikacje logowania</h1>
+<p class="summary">Zarejestruj własną aplikację logowania w Google, Microsoft lub u dowolnego dostawcy OpenID Connect, aby logować się przez przeglądarkę.</p>
+<p>Logowanie przez przeglądarkę używa klienta OAuth zarejestrowanego u dostawcy. Inbox Classic ma własnych klientów dla Google i Microsoft. Dopóki Google nie zweryfikuje aplikacji, pozwala korzystać z klienta Inbox Classic tylko użytkownikom testowym, więc <b data-text="win-sign-in-google"></b> jest na początku wyłączone. Możesz zarejestrować własnego klienta: w swoim projekcie Google Cloud, w swojej dzierżawie Microsoft Entra albo u dowolnego dostawcy OpenID Connect.</p>
+<p>Aby dodać aplikację logowania:</p>
+<ol>
+    <li>Wybierz <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Kliknij <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->, a potem <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
+    <li>Obok <b data-text="ui-fill-in-for"></b> kliknij Google lub Microsoft, aby wypełnić wystawcę, zakresy i serwery. W przypadku innego dostawcy wpisz je.</li>
+    <li>Zarejestruj klienta u dostawcy tak, jak wyjaśnia ramka na dole. Zarejestruj pokazany tam <b data-text="ui-redirect-uri"></b>.</li>
+    <li>Wpisz <b data-text="ui-client-id"></b> oraz <b data-text="ui-client-secret"></b>, jeśli dostawca go podał. Klucz tajny jest przechowywany w <!--os:windows-->Menedżerze poświadczeń systemu Windows<!--/os--><!--os:mac-->pęku kluczy logowania<!--/os--><!--os:linux-->pęku kluczy<!--/os--> i nigdy więcej nie jest pokazywany.</li>
+    <li>Kliknij <b data-text="ui-check"></b>, aby sprawdzić, czy wystawca jest poprawny, a potem <b data-text="ui-ok"></b>.</li>
+    <li>Dodaj konto przyciskiem <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> na pierwszej stronie okna <b data-text="ui-add-account-title"></b>.</li>
+</ol>
+<p>W oknie <b data-text="ui-sign-in-apps"></b> <!--os:windows,mac-->pole wyboru każdej aplikacji<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os--> określa, czy jest ona proponowana dla nowych kont, także w przypadku wbudowanych. Konta, które już korzystają z aplikacji, działają dalej. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> zmienia aplikację, a <b data-text="ui-remove"></b> usuwa ją, gdy nie korzysta z niej już żadne konto.</p>
+<p>Jeśli serwer poczty odrzuca token aplikacji, sprawdź, czy jej zakresy dają dostęp do poczty.</p>
+<nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav><!--/review-->

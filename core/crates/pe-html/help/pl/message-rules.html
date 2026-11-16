@@ -1,0 +1,18 @@
+<!--review--><h1>Porządkowanie nowej poczty regułami</h1>
+<p class="summary">Automatycznie przenoś, oznaczaj jako przeczytane, oznaczaj flagą lub archiwizuj przychodzące wiadomości spełniające Twoje kryteria.</p>
+<p>Reguła łączy kryteria wyszukiwania z działaniami, które są stosowane do pasujących wiadomości, gdy trafiają do Skrzynki odbiorczej. Na przykład reguła z <code>from:news@example.com</code> może przenosić biuletyny z tego adresu do osobnego folderu i oznaczać je jako przeczytane.</p>
+<p>Aby utworzyć regułę:</p>
+<ol>
+    <li>Wybierz <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>, a potem kliknij <b data-text="ui-rule-new"></b>.</li>
+    <li>Wpisz nazwę i wypełnij pole <b data-text="ui-rule-query"></b> tymi samymi wyrażeniami co w polu wyszukiwania, na przykład <code>from:</code>, <code>subject:</code> lub <code>list:</code>. Wiersz poniżej pokazuje, ile wiadomości w Skrzynce odbiorczej pasuje do tych kryteriów.</li>
+    <li>Wybierz co najmniej jedno działanie dla pasujących wiadomości: przeniesienie do folderu, oznaczenie jako przeczytane, oznaczenie flagą, archiwizację, przeniesienie do folderu Wiadomości-śmieci, usunięcie lub wyłączenie powiadomień.</li>
+    <li>Kliknij <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Regułę możesz też utworzyć z wiadomości lub wyszukiwania. Wybierz <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b>, aby wypełnić nadawcę lub listę mailingową zaznaczonej wiadomości. Kliknij <b data-text="ui-create-rule"></b> nad wynikami wyszukiwania, aby użyć bieżących kryteriów wyszukiwania.</p>
+<h2>Jak działają reguły</h2>
+<p>Reguły przetwarzają nowe wiadomości w Skrzynce odbiorczej, gdy Inbox Classic działa, także gdy jest zminimalizowany do obszaru powiadomień. Istniejące wiadomości są objęte tylko wtedy, gdy zaznaczysz <b data-text="ui-rule-apply-now"></b>. Pasujące reguły działają w kolejności z listy. Gdy reguła przeniesie wiadomość ze Skrzynki odbiorczej, kolejne reguły już jej nie dotyczą. Wyczyść pole wyboru reguły na liście, aby ją wyłączyć bez usuwania.</p>
+<h2>Zmienianie reguł</h2>
+<p>Aby edytować regułę, zaznacz ją na liście i kliknij <b data-text="ui-rule-edit"></b> albo kliknij ją dwukrotnie. Użyj przycisków <b data-text="ui-account-move-up"></b> i <b data-text="ui-account-move-down"></b>, aby zmienić kolejność, albo <b data-text="ui-rule-delete-button"></b>, aby usunąć regułę. W edytorze reguły kliknij <b data-text="ui-rule-show"></b>, aby zobaczyć w oknie głównym wiadomości, które obecnie pasują.</p>
+<p>Reguły dotyczą nowych wiadomości w Skrzynce odbiorczej, więc filtry folderu i daty nie są obsługiwane. Jeśli użyjesz <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> lub <code>newer_than:</code>, komunikat wyjaśni, dlaczego nie można użyć tych filtrów. Reguły nie mogą wysyłać wiadomości ani usuwać ich trwale: <b data-text="ui-rule-delete"></b> przenosi je do folderu <b data-text="folder-deleted"></b>.</p>
+<aside class="note">Reguły działają na tym komputerze. Aby porządkować pocztę, gdy jest wyłączony, użyj filtrów dostawcy poczty.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav><!--/review-->

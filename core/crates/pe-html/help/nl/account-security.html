@@ -1,0 +1,14 @@
+<!--review--><h1>Beveiligingsinstellingen van een account</h1>
+<p class="summary">De beveiligingsinstellingen van de servers van een account, en wat elke instelling betekent.</p>
+<p>Elk account heeft <b data-text="ui-field-imap-security"></b> voor de server voor inkomende mail en <b data-text="ui-field-smtp-security"></b> voor die voor uitgaande mail. Inbox Classic vult ze in wanneer het de instellingen van je provider vindt. Wil je ze wijzigen, open dan de eigenschappen van het account in <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<table>
+    <tr><th>Instelling</th><th>Betekenis</th></tr>
+    <tr><td>SSL/TLS</td><td>De verbinding is vanaf het begin versleuteld. Meestal poort 993 voor inkomende mail en 465 voor uitgaande mail.</td></tr>
+    <tr><td>STARTTLS</td><td>De verbinding wordt versleuteld direct nadat ze is geopend. Meestal poort 143 voor inkomende mail en 587 voor uitgaande mail. Inbox Classic stopt als de server geen versleuteling aanbiedt.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Je wachtwoord en je mail gaan leesbaar voor iedereen over het netwerk.</td></tr>
+</table>
+<aside class="warning">Gebruik <b data-text="ui-security-none"></b> alleen voor een server op je eigen computer of in je eigen lokale netwerk. Inbox Classic waarschuwt je voordat het deze instelling gebruikt.</aside>
+<p>Inbox Classic controleert of elke server is wie hij zegt te zijn, met de certificaten die je systeem vertrouwt. Er is geen schakelaar om elk certificaat te accepteren.</p>
+<p>Je wachtwoord wordt bewaard in <!--os:windows-->Windows Referentiebeheer<!--/os--><!--os:mac-->je inlogsleutelhanger<!--/os--><!--os:linux-->je sleutelbos<!--/os-->, nooit in de lokale mailopslag. Een account dat zich via de browser aanmeldt, bewaart helemaal geen wachtwoord.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

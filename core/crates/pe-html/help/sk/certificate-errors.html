@@ -1,0 +1,19 @@
+<!--review-->
+<h1>Chyby certifikátu</h1>
+<p class="summary">Čo robiť, keď Inbox Classic nemôže potvrdiť, že komunikuje so skutočným poštovým serverom.</p>
+<p>Môžete vidieť jedno z týchto hlásení:</p>
+<ul>
+    <li>V stavovom riadku: „TLS error: …“</li>
+    <li>Na table na čítanie: „Pripojenie k poštovému serveru sa nepodarilo zabezpečiť (…).“</li>
+</ul>
+<p>Inbox Classic nemohol potvrdiť, že server je ten, za ktorý sa vydáva, preto mu neposlal vaše heslo.</p>
+<p>Oprava:</p>
+<ol>
+    <li>Otvorte vlastnosti konta v ponuke <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Skontrolujte názvy serverov. Musia to byť názvy, pre ktoré je vystavený certifikát servera. Často je to názov vášho poskytovateľa, napríklad <code>imap.provider.com</code>, nie vaša vlastná doména.</li>
+    <li>Skontrolujte, či má váš počítač správny dátum a čas.</li>
+</ol>
+<p>V sieti, ktorá kontroluje šifrovanú komunikáciu, napríklad v niektorých firemných alebo školských sieťach, sa obráťte na jej správcu.</p>
+<aside class="note">Neexistuje prepínač, ktorý by prijal akýkoľvek certifikát. Prijatie falošného certifikátu by niekomu v sieti umožnilo čítať vaše heslo a poštu.</aside>
+<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

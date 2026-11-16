@@ -1,0 +1,14 @@
+<!--review--><h1>Sigurnosne postavke računa</h1>
+<p class="summary">Sigurnosne postavke poslužitelja računa i značenje svake od njih.</p>
+<p>Svaki račun ima <b data-text="ui-field-imap-security"></b> za poslužitelj dolazne pošte i <b data-text="ui-field-smtp-security"></b> za poslužitelj odlazne pošte. Inbox Classic ih ispunjava kad pronađe postavke vašeg davatelja usluge. Da biste ih promijenili, otvorite svojstva računa u <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<table>
+    <tr><th>Postavka</th><th>Značenje</th></tr>
+    <tr><td>SSL/TLS</td><td>Veza je šifrirana od početka. Obično priključak 993 za dolaznu poštu i 465 za odlaznu poštu.</td></tr>
+    <tr><td>STARTTLS</td><td>Veza se šifrira odmah nakon otvaranja. Obično priključak 143 za dolaznu poštu i 587 za odlaznu poštu. Inbox Classic prekida vezu ako poslužitelj ne nudi šifriranje.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Vaša lozinka i pošta putuju tako da ih svatko na mreži može pročitati.</td></tr>
+</table>
+<aside class="warning"><b data-text="ui-security-none"></b> koristite samo za poslužitelj na vlastitom računalu ili u lokalnoj mreži. Inbox Classic vas upozorava prije nego što to upotrijebi.</aside>
+<p>Inbox Classic provjerava je li svaki poslužitelj onaj za koji se izdaje, prema certifikatima kojima vaš sustav vjeruje. Ne postoji prekidač za prihvaćanje bilo kojeg certifikata.</p>
+<p>Vaša se lozinka čuva u <!--os:windows-->Upravitelju vjerodajnicama sustava Windows<!--/os--><!--os:mac-->vašem privjesku ključeva za prijavu<!--/os--><!--os:linux-->vašem privjesku ključeva<!--/os-->, nikad u pohrani pošte. Račun koji se prijavljuje putem preglednika uopće ne čuva lozinku.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

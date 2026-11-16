@@ -117,7 +117,7 @@ mod tests {
     #[test]
     fn review_marks_are_left_out() {
         for platform in [Platform::Windows, Platform::Mac, Platform::Linux] {
-            for language in ["en", "de", "et", "es", "fr"] {
+            for (language, _) in pe_i18n::LANGUAGES {
                 let page = crate::help_topic("find-messages", platform, language).unwrap();
                 assert!(
                     !page.contains("<!--review") && !page.contains("<!--/review"),

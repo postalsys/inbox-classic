@@ -168,3 +168,24 @@ gtk-new-mail-group = Uus post
 gtk-notify-new-mail = Teavita uuest postist
 gtk-notify-subtitle = Teavita uute kirjade saabumisest, kui aken on taustal
 gtk-restart-to-change = Inbox Classic taaskäivitub, et keelt muuta.
+
+## The desktop entry and the page of the software stores
+
+# review: new
+gtk-desktop-generic-name = E-posti klient
+# review: new
+gtk-desktop-comment = Lugege ja kirjutage e-kirju: kiire ja lihtne meiliprogramm
+# review: new
+gtk-desktop-keywords = post;e-post;kiri;
+# review: new
+gtk-metainfo-summary = Kiire ja lihtne meiliprogramm
+# review: new
+gtk-metainfo-description = Inbox Classic loeb ja kirjutab e-kirju nii, et kaustad on vasakul, kirjad üleval ja kiri nende all, nagu meiliprogrammides varem. See töötab mis tahes IMAP- ja SMTP-kontoga ning logib brauseri kaudu sisse Outlook.com-i ja Microsoft 365-sse.
+# review: new
+gtk-metainfo-feature-sanitized = Iga kiri kuvatakse puhastatuna, ilma skriptideta, ja Interneti pildid ainult siis, kui te seda lubate
+# review: new
+gtk-metainfo-feature-search = Otsing, mis leiab sõnu teemast, inimestest, failinimedest ja tekstist, Gmaili operaatoritega
+# review: new
+gtk-metainfo-feature-replies = Vastused peidavad varasemad kirjad, mida nad tsiteerivad
+# review: new
+gtk-metainfo-feature-offline = Post jääb võrguühenduseta loetavaks; paroolid hoitakse teie võtmerõngas

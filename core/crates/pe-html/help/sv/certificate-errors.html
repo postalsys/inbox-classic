@@ -1,0 +1,18 @@
+<!--review--><h1>Certifikatfel</h1>
+<p class="summary">Vad du kan göra när Inbox Classic inte kan bekräfta att det är den riktiga e-postservern som svarar.</p>
+<p>Du kan se något av följande:</p>
+<ul>
+    <li>I statusfältet: ”TLS-fel: …”</li>
+    <li>I läsfönstret: ”Anslutningen till e-postservern kunde inte göras säker (…).”</li>
+</ul>
+<p>Inbox Classic kunde inte bekräfta att servern är den som den utger sig för att vara, så ditt lösenord skickades inte.</p>
+<p>Så här åtgärdar du det:</p>
+<ol>
+    <li>Öppna kontots egenskaper i <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Kontrollera servernamnen. De måste vara de namn som serverns certifikat är utfärdat för. Det är ofta leverantörens namn, till exempel <code>imap.provider.com</code>, inte din egen domän.</li>
+    <li>Kontrollera att datorns datum och tid stämmer.</li>
+</ol>
+<p>På ett nätverk som granskar krypterad trafik, till exempel vissa kontors- eller skolnätverk, frågar du nätverkets administratör.</p>
+<aside class="note">Det finns ingen inställning för att godta vilket certifikat som helst. Om ett falskt certifikat godtogs skulle någon på nätverket kunna läsa ditt lösenord och din e-post.</aside>
+<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

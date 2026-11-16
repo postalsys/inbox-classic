@@ -1,0 +1,15 @@
+<!--review-->
+<h1>Konta drošības iestatījumi</h1>
+<p class="summary">Konta serveru drošības iestatījumi un ko katrs no tiem nozīmē.</p>
+<p>Katram kontam ir <b data-text="ui-field-imap-security"></b> ienākošā pasta serverim un <b data-text="ui-field-smtp-security"></b> izejošā pasta serverim. Inbox Classic tos aizpilda, kad atrod jūsu pakalpojumu sniedzēja iestatījumus. Lai tos mainītu, atveriet konta rekvizītus sadaļā <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<table>
+    <tr><th>Iestatījums</th><th>Nozīme</th></tr>
+    <tr><td>SSL/TLS</td><td>Savienojums ir šifrēts no paša sākuma. Parasti ienākošajam pastam ports 993 un izejošajam pastam ports 465.</td></tr>
+    <tr><td>STARTTLS</td><td>Savienojums tiek šifrēts uzreiz pēc tā atvēršanas. Parasti ienākošajam pastam ports 143 un izejošajam pastam ports 587. Inbox Classic pārtrauc darbu, ja serveris nepiedāvā šifrēšanu.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Jūsu parole un pasts tiek pārsūtīti tā, ka tos var izlasīt ikviens tīklā.</td></tr>
+</table>
+<aside class="warning">Izmantojiet <b data-text="ui-security-none"></b> tikai serverim savā datorā vai lokālajā tīklā. Inbox Classic jūs brīdina, pirms to izmanto.</aside>
+<p>Inbox Classic pārbauda, vai katrs serveris ir tas, par ko uzdodas, salīdzinot ar sertifikātiem, kuriem uzticas jūsu sistēma. Nav slēdža, ar kuru pieņemt jebkuru sertifikātu.</p>
+<p>Jūsu parole tiek glabāta <!--os:windows-->Windows akreditācijas datu pārvaldniekā<!--/os--><!--os:mac-->jūsu pieteikšanās atslēgu piekariņā<!--/os--><!--os:linux-->jūsu atslēgu saišķī<!--/os-->, nekad pasta krātuvē. Konts, kas pierakstās caur pārlūkprogrammu, paroli vispār neglabā.</p>
+<nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
+<!--/review-->

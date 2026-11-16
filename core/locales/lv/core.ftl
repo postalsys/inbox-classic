@@ -1,0 +1,1255 @@
+# Latviešu. Melnraksts, gaida dzimtās valodas runātāja pārskatīšanu (sk. core/locales/GLOSSARY.md).
+# What the core says, the same on every platform. Placeables in { $braces } are filled in by the code; keep them, in
+# the place the language puts them. Plurals choose by the number: [zero], [one] and *[other] in Latvian ([one] also
+# covers 21, 31 and so on).
+
+## Counts and sizes
+
+# review: new
+messages = { $count ->
+    [zero] { $count } ziņojumu
+    [one] { $count } ziņojums
+   *[other] { $count } ziņojumi
+}
+# the separator of decimals in sizes: 2,4 MB
+# review: new
+decimal-separator = ,
+# review: new
+size-bytes = { $count ->
+    [zero] { $count } baitu
+    [one] { $count } baits
+   *[other] { $count } baiti
+}
+# review: new
+size-kb = { $size } KB
+# review: new
+size-mb = { $size } MB
+# review: new
+size-gb = { $size } GB
+# review: new
+send-delay-off = Izslēgts
+# review: new
+send-delay-seconds = { $count ->
+    [zero] { $count } sekunžu
+    [one] { $count } sekunde
+   *[other] { $count } sekundes
+}
+# the status bar: "12 ziņojumi, nelasīti: 3"
+# review: new
+list-counts = { $messages }, nelasīti: { $unread }
+# review: new
+list-counts-selected = { $messages }, nelasīti: { $unread }, atlasīti: { $selected }
+# the status bar while searching: "Atrasti: 12, nelasīti: 3"
+# review: new
+list-counts-found = Atrasti: { $found }, nelasīti: { $unread }
+# review: new
+list-counts-found-selected = Atrasti: { $found }, nelasīti: { $unread }, atlasīti: { $selected }
+# review: new
+list-counts-none = Neviens ziņojums nav atrasts
+
+## Special folders, as Outlook names them
+
+# review: new
+folder-inbox = Iesūtne
+# review: new
+folder-sent = Nosūtītie vienumi
+# review: new
+folder-deleted = Izdzēstie vienumi
+# review: new
+folder-drafts = Melnraksti
+# review: new
+folder-junk = Nevēlamais e-pasts
+# review: new
+folder-archive = Arhīvs
+
+## The reading pane
+
+# review: new
+reader-no-message = Nav atlasīts neviens ziņojums.
+# review: new
+reader-downloading = Notiek ziņojuma lejupielāde…
+# review: new
+reader-downloading-detail = Ziņojums tiks parādīts šeit, kad lejupielāde būs pabeigta.
+# review: new
+reader-downloading-size = Ziņojuma lielums ir { $size }. Tas tiks parādīts šeit, kad būs lejupielādēts.
+# review: new
+reader-failed = Ziņojumu nevarēja lejupielādēt
+# review: new
+reader-failed-network = Nevarēja sazināties ar pasta serveri ({ $reason }).
+# review: new
+reader-failed-sign-in = Pasta serveris nepieņēma pierakstīšanos ({ $reason }). Pārbaudiet paroli vai pierakstieties vēlreiz sadaļā Fails > Konti.
+# review: new
+reader-failed-security = Savienojumu ar pasta serveri nevarēja padarīt drošu ({ $reason }).
+# review: new
+reader-failed-other = Pasta serveris atbildēja: { $reason }.
+# review: new
+reader-retry-note = Tiks mēģināts vēlreiz, kad konts atkal izveidos savienojumu.
+# review: new
+reader-unreadable = Šo ziņojumu nevar parādīt: { $error }
+# review: new
+message-source-title = Ziņojuma pirmkods: { $subject }
+# review: new
+message-source-untitled = Ziņojuma pirmkods
+
+## Printing a message, and the header of a message quoted in a reply or forward
+
+# review: new
+header-from = No
+# review: new
+header-date = Datums
+# review: new
+header-to = Kam
+# review: new
+header-cc = Kopija
+# review: new
+header-sent = Nosūtīts
+# review: new
+header-subject = Tēma
+# review: new
+header-security = Drošība
+# review: new
+header-part = { $number }. daļa
+# review: new
+quote-original = ----- Sākotnējais ziņojums -----
+# review: new
+fold-show-earlier = Rādīt iepriekšējos ziņojumus
+
+## Bounces: the card at the top of a notice that a message was not delivered
+
+# review: new
+bounce-failed = Jūsu ziņojums netika piegādāts
+# review: new
+bounce-delayed = Jūsu ziņojums vēl nav piegādāts
+# review: new
+bounce-delayed-note = Jūsu pasta serveris joprojām mēģina to piegādāt. Nav jāsūta vēlreiz.
+# the link to the message the notice is about, in Sent Items or another folder
+# review: new
+bounce-show-message = Rādīt ziņojumu, kas netika piegādāts
+# the link of a delay's card to the message that is still on its way
+# review: new
+bounce-show-delayed = Rādīt aizkavēto ziņojumu
+# review: new
+bounce-what-to-do = Ko varat darīt:
+# what to do about a recipient the message is still on its way to: in the card of a delay, and in the card of a failure
+# review: new
+bounce-delayed-do = Pagaidām neko. Ja to joprojām nevarēs piegādāt, saņemsiet vēl vienu paziņojumu.
+# review: new
+bounce-delayed-row-do = Pagaidām neko. Jūsu pasta serveris joprojām mēģina to piegādāt, un, ja tas neizdosies, saņemsiet vēl vienu paziņojumu.
+# folds the receiving server's own words
+# review: new
+bounce-details = Detaļas
+# a recipient the notice does not name
+# review: new
+bounce-someone = Kāds adresāts
+# in Details: the server that refused the message, the status code it gave, and the server that wrote the notice
+# review: new
+bounce-server = Serveris: { $server }
+# review: new
+bounce-status = Statuss: { $status }
+# review: new
+bounce-reported-by = Ziņoja: { $server }
+# review: new
+bounce-retry-minutes = Saņēmēja serveris lūdza pirms nākamā mēģinājuma pagaidīt { $count ->
+    [1] minūti
+    [one] { $count } minūti
+   *[other] { $count } minūtes
+}.
+# review: new
+bounce-retry-hours = Saņēmēja serveris lūdza pirms nākamā mēģinājuma pagaidīt { $count ->
+    [1] stundu
+    [one] { $count } stundu
+   *[other] { $count } stundas
+}.
+# the names of the blocklists, "Spamhaus ZEN, Barracuda"
+# review: new
+bounce-blocklist = Bloķēšanas saraksts: { $lists }
+# review: new
+bounce-user-unknown = Šāda adrese nepastāv
+# review: new
+bounce-user-unknown-why = Saņēmēja serverī nav pastkastes ar šo adresi. Iespējams, tā ir uzrakstīta kļūdaini vai cilvēks to vairs neizmanto.
+# review: new
+bounce-user-unknown-do = Pārbaudiet, vai adrese uzrakstīta pareizi, vai pajautājiet cilvēkam, kuru adresi viņš izmanto tagad.
+# review: new
+bounce-invalid-address = Adrese nav derīga
+# review: new
+bounce-invalid-address-why = Adrese nav uzrakstīta tādā formā, uz kuru var nosūtīt pastu.
+# review: new
+bounce-invalid-address-do = Meklējiet drukas kļūdas, piemēram, atstarpi, trūkstošu burtu vai tukšumu aiz @.
+# review: new
+bounce-mailbox-disabled = Pastkaste ir slēgta
+# review: new
+bounce-mailbox-disabled-why = Adrese pastāv, bet tās pastkaste ir izslēgta vai vairs netiek izmantota.
+# review: new
+bounce-mailbox-disabled-do = Sazinieties ar cilvēku citādi un pajautājiet adresi, kuru viņš izmanto tagad.
+# review: new
+bounce-mailbox-full = Pastkaste ir pilna
+# review: new
+bounce-mailbox-full-why = Adresāta pastkastē nav vietas jaunam pastam.
+# review: new
+bounce-mailbox-full-do = Nosūtiet to vēlreiz pēc dažām dienām vai paziņojiet cilvēkam citādi. Vispirms tiek atteikti lieli pielikumi.
+# review: new
+bounce-spam-blocked = Atteikts kā mēstule
+# review: new
+bounce-spam-blocked-why = Saņēmēja serveris uzskatīja ziņojumu par mēstuli.
+# review: new
+bounce-spam-blocked-do = Nosūtiet to vēlreiz bez tā, kas izskatās pēc mēstules, piemēram, bez daudzām saitēm, saīsinātām saitēm vai liela pielikuma. Ja tas atkārtojas, vērsieties pie sava pasta pakalpojumu sniedzēja.
+# review: new
+bounce-virus-detected = Atteikts vīrusa dēļ
+# review: new
+bounce-virus-detected-why = Saņēmēja serveris ziņojumā vai tā pielikumos atrada vīrusu vai citu kaitīgu saturu.
+# review: new
+bounce-virus-detected-do = Pārbaudiet pielikumus ar pretvīrusu programmu. Daži serveri atsaka jebkuru programmu vai arhīvu, tāpēc kopīgojiet šādus failus kā saiti.
+# review: new
+bounce-ip-blocklisted = Jūsu pasta serveris ir bloķēšanas sarakstā
+# review: new
+bounce-ip-blocklisted-why = Saņēmēja serveris atsaka pastu no servera, kas nosūtīja jūsējo, jo šī servera adrese ir bloķēšanas sarakstā.
+# review: new
+bounce-ip-blocklisted-do = Problēma nav ziņojumā. Pārsūtiet šo paziņojumu savam pasta pakalpojumu sniedzējam un lūdziet, lai serveri izņem no saraksta.
+# review: new
+bounce-domain-blocklisted = Domēns ir bloķēšanas sarakstā
+# review: new
+bounce-domain-blocklisted-why = Saņēmēja serveris atsaka ziņojumu, jo jūsu adreses domēns vai kāds domēns ziņojuma saitēs ir bloķēšanas sarakstā.
+# review: new
+bounce-domain-blocklisted-do = Ja ziņojumā ir saites, mēģiniet bez tām. Pretējā gadījumā pārsūtiet šo paziņojumu tam, kurš pārvalda jūsu domēna pastu.
+# review: new
+bounce-policy-blocked = Atteikts saskaņā ar saņēmēja servera noteikumiem
+# review: new
+bounce-policy-blocked-why = Saņēmēja servera noteikumi nelaiž cauri šo ziņojumu, piemēram, tā lieluma, pielikumu vai sūtītāja dēļ.
+# review: new
+bounce-policy-blocked-do = Servera paša vārdi sadaļā Detaļas bieži norāda iemeslu. Pajautājiet adresātam, vai viņš var pieņemt šādu pastu.
+# review: new
+bounce-geo-blocked = Atteikts izcelsmes vietas dēļ
+# review: new
+bounce-geo-blocked-why = Saņēmēja serveris nepieņem pastu no valsts vai tīkla, kurā atrodas jūsu pasta serveris.
+# review: new
+bounce-geo-blocked-do = Sazinieties ar cilvēku citādi vai jautājiet par to savam pasta pakalpojumu sniedzējam.
+# review: new
+bounce-relay-denied = Serveris to nepārsūtīja tālāk
+# review: new
+bounce-relay-denied-why = Kāds serveris atteicās piegādāt ziņojumu tālāk, bieži tāpēc, ka tas tika nosūtīts bez pierakstīšanās vai caur serveri, kas šo adresātu neapkalpo.
+# review: new
+bounce-relay-denied-do = Pārbaudiet konta izejošā pasta serveri sadaļā Fails > Konti un to, vai tas pierakstās.
+# review: new
+bounce-auth-failure = Jūsu sūtītāja adresi nevarēja pārbaudīt
+# review: new
+bounce-auth-failure-why = Saņēmēja serveris nevarēja apstiprināt, ka ziņojums tiešām nāk no jūsu domēna (SPF, DKIM vai DMARC).
+# review: new
+bounce-auth-failure-do = Pārsūtiet šo paziņojumu tam, kurš pārvalda jūsu domēna pastu: tā iestatījumi jālabo. Pa to laiku var palīdzēt sūtīšana caur jūsu pakalpojumu sniedzēja serveri.
+# review: new
+bounce-rate-limited = Pārāk daudz pasta vienlaikus
+# review: new
+bounce-rate-limited-why = Saņēmēja serveris pagaidām pieņem mazāk ziņojumu no jūsu pasta servera.
+# review: new
+bounce-rate-limited-do = Pagaidiet kādu laiku un nosūtiet to vēlreiz. Rakstot daudziem cilvēkiem, sūtiet mazākam skaitam vienlaikus.
+# review: new
+bounce-greylisting = Uz brīdi aizturēts
+# review: new
+bounce-greylisting-why = Saņēmēja serveris lūdz nezināmiem sūtītājiem mēģināt vēlreiz nedaudz vēlāk; tā ir izplatīta pārbaude pret mēstulēm.
+# review: new
+bounce-greylisting-do = Neko. Pasta serveri mēģina vēlreiz paši, un ziņojums parasti tiek piegādāts stundas laikā.
+# review: new
+bounce-server-error = Saņēmēja serverim radās problēma
+# review: new
+bounce-server-error-why = Ar saņēmēja serveri nevarēja sazināties, vai tas nevarēja pieņemt ziņojumu savas problēmas dēļ.
+# review: new
+bounce-server-error-do = Nosūtiet to vēlreiz vēlāk. Ja tas joprojām neizdodas, pārbaudiet, vai adreses daļā aiz @ nav drukas kļūdu.
+# review: new
+bounce-unknown = Nav piegādāts
+# review: new
+bounce-unknown-why = Paziņojumā nav skaidri pateikts, kāpēc.
+# review: new
+bounce-unknown-do = Servera paša vārdi sadaļā Detaļas var pastāstīt vairāk. Ja tie nepalīdz, pārsūtiet šo paziņojumu savam pasta pakalpojumu sniedzējam.
+
+## Several messages selected
+
+# review: new
+selection-title = { $count ->
+    [zero] Atlasīti { $count } ziņojumi
+    [one] Atlasīts { $count } ziņojums
+   *[other] Atlasīti { $count } ziņojumi
+}
+# review: new
+selection-unread = Nelasīti: { $count }
+# review: new
+selection-flagged = Ar karodziņu: { $count }
+# review: new
+delete-for-good-one = Šis ziņojums tiks neatgriezeniski izdzēsts. Vai dzēst to?
+# review: new
+delete-for-good-all = Šie ziņojumi ({ $count }) tiks neatgriezeniski izdzēsti. Vai dzēst tos?
+# review: new
+delete-for-good-some = { $count } no { $total } ziņojumiem tiks neatgriezeniski izdzēsti. Vai dzēst ziņojumus?
+# review: new
+done-read = { $count ->
+    [one] { $messages } atzīmēts kā lasīts
+   *[other] { $messages } atzīmēti kā lasīti
+}
+# review: new
+done-unread = { $count ->
+    [one] { $messages } atzīmēts kā nelasīts
+   *[other] { $messages } atzīmēti kā nelasīti
+}
+# review: new
+done-flagged = { $count ->
+    [one] { $messages } atzīmēts ar karodziņu
+   *[other] { $messages } atzīmēti ar karodziņu
+}
+# review: new
+done-unflagged = Karodziņš noņemts: { $messages }
+# review: new
+done-deleted-for-good = { $count ->
+    [one] { $messages } neatgriezeniski izdzēsts
+   *[other] { $messages } neatgriezeniski izdzēsti
+}
+# review: new
+done-archived = { $count ->
+    [one] { $messages } arhivēts
+   *[other] { $messages } arhivēti
+}
+# review: new
+done-moved = { $count ->
+    [one] { $messages } pārvietots uz { $folder }
+   *[other] { $messages } pārvietoti uz { $folder }
+}
+# review: new
+done-copied = { $count ->
+    [one] { $messages } nokopēts uz { $folder }
+   *[other] { $messages } nokopēti uz { $folder }
+}
+# review: new
+done-moving = { $count ->
+   *[other] Pārvieto { $messages } uz { $folder }...
+}
+# review: new
+done-copying = { $count ->
+   *[other] Kopē { $messages } uz { $folder }...
+}
+# review: new
+done-moved-back = { $count ->
+    [one] { $messages } pārvietots atpakaļ uz { $folder }
+   *[other] { $messages } pārvietoti atpakaļ uz { $folder }
+}
+# the status bar after Watch Conversation and Ignore Conversation, and after either again on a marked one
+# review: new
+done-watched = { $count ->
+    [1] Saruna tiek vērota
+    [one] { $count } saruna tiek vērota
+   *[other] Tiek vērotas { $count } sarunas
+}
+# review: new
+done-unwatched = { $count ->
+    [1] Saruna vairs netiek vērota
+    [one] { $count } saruna vairs netiek vērota
+   *[other] { $count } sarunas vairs netiek vērotas
+}
+# review: new
+done-ignored = { $count ->
+    [1] Saruna tiek ignorēta
+    [one] { $count } saruna tiek ignorēta
+   *[other] Tiek ignorētas { $count } sarunas
+}
+# review: new
+done-unignored = { $count ->
+    [1] Saruna vairs netiek ignorēta
+    [one] { $count } saruna vairs netiek ignorēta
+   *[other] { $count } sarunas vairs netiek ignorētas
+}
+# after "uz" (to): the dative plural, "uz to mapēm"
+# review: new
+their-folders = to mapēm
+# review: new
+undo-move = Atsaukt pārvietošanu
+# review: new
+undo-delete = Atsaukt dzēšanu
+# review: new
+undo-archive = Atsaukt arhivēšanu
+# review: new
+undo-junk = Atsaukt atzīmēšanu kā nevēlamu
+# review: new
+undo-not-junk = Atsaukt atzīmēšanu kā vēlamu
+# review: new
+undo-send = Atsaukt sūtīšanu
+# review: new
+nothing-to-undo = Nav ko atsaukt.
+# review: new
+messages-gone = Ziņojumu tur vairs nav.
+# A non-selectable IMAP folder cannot contain messages; this does not mean it is empty.
+# review: new
+folder-holds-no-messages = Šajā mapē nevar glabāt ziņojumus.
+# review: new
+not-archived-here = Šajā mapē esošos ziņojumus nevar arhivēt.
+# review: new
+not-emptied-here = Iztukšot var tikai mapes Izdzēstie vienumi un Nevēlamais e-pasts.
+# review: new
+next-unread-question = Mapē { $folder } vairs nav nelasītu ziņojumu.
+
+    Vai pāriet uz { $next }, nākamo mapi ar nelasītiem ziņojumiem?
+# review: new
+no-unread-left = Nelasītu ziņojumu vairs nav.
+# review: new
+empty-question = { $count ->
+    [1] Vai iztukšot mapi { $folder }?
+
+        Tajā esošais ziņojums tiks neatgriezeniski izdzēsts. To nevarēs atjaunot.
+    [one] Vai iztukšot mapi { $folder }?
+
+        Tajā esošais { $messages } tiks neatgriezeniski izdzēsts. To nevarēs atjaunot.
+   *[other] Vai iztukšot mapi { $folder }?
+
+        Tajā esošie { $messages } tiks neatgriezeniski izdzēsti. Tos nevarēs atjaunot.
+}
+# review: new
+no-junk-folder = Šim kontam nav mapes Nevēlamais e-pasts, uz kuru pārvietot ziņojumus.
+# review: new
+no-inbox-folder = Šim kontam nav mapes Iesūtne, uz kuru pārvietot ziņojumus.
+# the status bar after a flag in a colour: "2 ziņojumi: uzlikts zils karodziņš"
+# review: new
+done-flagged-color = { $messages }: uzlikts { $color ->
+    [red] sarkans
+    [orange] oranžs
+    [yellow] dzeltens
+    [green] zaļš
+    [blue] zils
+    [purple] violets
+   *[gray] pelēks
+} karodziņš
+# the Flag menu: the colours of Apple Mail's flags
+# review: new
+flag-color = { $color ->
+    [red] Sarkans
+    [orange] Oranžs
+    [yellow] Dzeltens
+    [green] Zaļš
+    [blue] Zils
+    [purple] Violets
+   *[gray] Pelēks
+}
+
+## The Move and Copy window
+
+# review: new
+move-window-title-move = { $count ->
+    [1] Pārvietot ziņojumu
+    [one] Pārvietot { $count } ziņojumu
+   *[other] Pārvietot { $count } ziņojumus
+}
+# review: new
+move-window-title-copy = { $count ->
+    [1] Kopēt ziņojumu
+    [one] Kopēt { $count } ziņojumu
+   *[other] Kopēt { $count } ziņojumus
+}
+# review: new
+move-window-prompt-move = { $count ->
+    [1] Pārvietot atlasīto ziņojumu uz:
+    [one] Pārvietot { $count } atlasīto ziņojumu uz:
+   *[other] Pārvietot { $count } atlasītos ziņojumus uz:
+}
+# review: new
+move-window-prompt-copy = { $count ->
+    [1] Kopēt atlasīto ziņojumu uz:
+    [one] Kopēt { $count } atlasīto ziņojumu uz:
+   *[other] Kopēt { $count } atlasītos ziņojumus uz:
+}
+# the folders used last, over the folder tree
+# review: new
+targets-recent = Nesen izmantotās
+# the folder the messages are in, which can not be chosen
+# review: new
+target-current = { $folder } (pašreizējā)
+# a folder used last, with its account when there are several: "Arhīvs (Darbs)"
+# review: new
+target-recent = { $folder } ({ $account })
+
+## Moving and copying to another account
+
+# review: new
+transfer-moving = Pārvieto { $done } no { $messages } uz { $folder }...
+# review: new
+transfer-copying = Kopē { $done } no { $messages } uz { $folder }...
+# after "uz" (to): the accusative, "uz citu kontu"
+# review: new
+transfer-another-account = citu kontu
+# review: new
+transfer-folder-gone = mapes, uz kuru tas tika sūtīts, vairs nav
+# review: new
+transfer-not-on-server = ziņojuma serverī vairs nav
+# review: new
+transfer-not-moved = { $count ->
+    [one] { $messages } nevarēja pārvietot uz citu kontu: { $reason }
+   *[other] { $messages } nevarēja pārvietot uz citu kontu: { $reason }
+}
+# review: new
+transfer-not-copied = { $count ->
+    [one] { $messages } nevarēja nokopēt uz citu kontu: { $reason }
+   *[other] { $messages } nevarēja nokopēt uz citu kontu: { $reason }
+}
+# review: new
+transfer-none-moved = Nevienu ziņojumu nevarēja pārvietot
+# review: new
+transfer-none-copied = Nevienu ziņojumu nevarēja nokopēt
+
+## Messages as files
+
+# review: new
+export-not-in-time = ziņojumu nevarēja lejupielādēt laikā
+# review: new
+export-not-saved = { $failed } no { $messages } nevarēja saglabāt ({ $problems })
+# review: new
+export-not-attached = ziņojumus nevarēja pievienot: { $error }
+# the status bar after Save As with several: "3 ziņojumi saglabāti mapē Darbvirsma"
+# review: new
+saved-to = { $count ->
+    [one] { $messages } saglabāts mapē { $folder }
+   *[other] { $messages } saglabāti mapē { $folder }
+}
+# review: new
+download-progress = Lejupielādē { $done } no { $total }
+# review: new
+download-done = Lejupielādēts: { $size }
+# review: new
+downloading-messages = { $count ->
+   *[other] Lejupielādē { $messages }...
+}
+# the status bar after files are dropped on a folder: "3 ziņojumi ievietoti mapē Arhīvs"
+# review: new
+import-put = { $count ->
+    [one] { $messages } ievietots mapē { $folder }
+   *[other] { $messages } ievietoti mapē { $folder }
+}
+# review: new
+import-not-put = Šie netika ievietoti mapē:
+
+    { $problems }
+
+## Problems the windows show
+
+# review: new
+error-store = lokālā krātuve: { $error }
+# review: new
+error-not-found = nav atrasts
+# review: new
+error-closed = notiek izslēgšana
+# review: new
+error-other-account = pārlūkprogramma pierakstījās kontā { $email }, nevis šajā kontā
+# a password or sign-in the mail server refused, with the server's words
+# review: new
+failure-authentication = serveris nepieņēma pierakstīšanos ({ $reason })
+# the mail server could not be reached or the connection broke, with the reason
+# review: new
+failure-network = savienojums ar serveri neizdevās ({ $reason })
+# review: new
+error-in-use = to nevar noņemt, kamēr ar to pierakstās konti: { $accounts }
+# review: new
+error-turned-off = šī pierakstīšanās lietotne jauniem kontiem ir izslēgta
+# review: new
+error-folder-name = mapes nosaukumam jābūt no 1 līdz 200 rakstzīmēm garam, un tajā nedrīkst būt vadības rakstzīmes
+# review: new
+error-folder-separator = šajā serverī mapes nosaukumā nedrīkst būt „{ $separator }”
+# review: new
+error-folder-special = Iesūtni un īpašās mapes nevar pārdēvēt vai izdzēst
+# review: new
+error-no-recipients = ziņojumam nav adresātu
+# review: new
+error-bad-address = „{ $address }” nav e-pasta adrese
+# review: new
+error-not-own-address = { $address } nav neviena no šī konta sūtītāja adresēm. Pievienojiet to laukā „Citas adreses, no kurām sūtāt” konta rekvizītos.
+# review: new
+rule-query-refused = Kārtulas nevar filtrēt pēc mapes vai datuma ({ $words }).
+# review: new
+rule-no-query = Ievadiet ienākošo ziņojumu meklēšanas kritērijus.
+# review: new
+rule-no-action = Izvēlieties kārtulai vismaz vienu darbību.
+# review: new
+error-attachment = { $path } nevarēja nolasīt: { $error }
+# review: new
+error-no-drafts = kontam nav mapes Melnraksti, kurā saglabāt ziņojumu
+# review: new
+error-draft-attachment = melnraksta pielikumu nevarēja saglabāt: { $error }
+# review: new
+error-password-not-saved = paroli nevarēja saglabāt nākamajai palaišanai: { $error }
+# review: new
+error-sign-in-not-saved = jaunos pierakstīšanās datus nevarēja saglabāt nākamajai palaišanai: { $error }
+# review: new
+error-import-unreadable = { $path } nevar nolasīt: { $error }
+# review: new
+error-import-too-large = { $path } ir lielāks par 50 MB
+# review: new
+error-import-not-mail = { $path } nav e-pasta ziņojums
+# review: new
+error-list-answered = adresātu saraksta serveris atgrieza statusu { $status }
+# review: new
+error-not-built = ziņojumu nevarēja izveidot
+# review: new
+error-outbox-waits = { $count ->
+    [1] ziņojums gaida mapē Izsūtne un tiks nosūtīts ar nākamo sūtīšanu/saņemšanu
+    [one] { $count } ziņojums gaida mapē Izsūtne un tiks nosūtīts ar nākamo sūtīšanu/saņemšanu
+   *[other] { $count } ziņojumi gaida mapē Izsūtne un tiks nosūtīti ar nākamo sūtīšanu/saņemšanu
+}
+# review: new
+error-draft-not-removed = iepriekšējo ziņojuma melnrakstu nevarēja noņemt no mapes Melnraksti: { $reason }
+# review: new
+error-sent-but = ziņojums tika nosūtīts, bet { $problem }
+# review: new
+error-sent-still-in-outbox = tas joprojām ir mapē Izsūtne: { $error }
+# review: new
+error-sent-no-copy = kopiju nevarēja saglabāt mapē Nosūtītie vienumi: { $reason }
+# review: new
+error-no-password = šim kontam nav paroles
+# review: new
+error-no-sign-in = šim kontam nav pierakstīšanās datu
+# review: new
+error-provider-missing = šī versija nevar pierakstīties pakalpojumā { $provider }: vai tā pierakstīšanās lietotne ir noņemta?
+# review: new
+error-provider-servers = šī konta serveri neatbilst tā pierakstīšanās lietotnes serveriem
+# review: new
+error-app-scopes = { $reason }. Pasta serveris nepieņēma pierakstīšanās lietotnes marķieri: pārbaudiet, vai lietotnes atļaujas (scopes) dod piekļuvi pastam
+# review: new
+error-in-folder = { $folder }: { $reason }
+
+## Sign-in apps
+
+# review: new
+sign-in-off-google = Google vēl nav pārbaudījis Inbox Classic, tāpēc ļauj ar to pierakstīties tikai testa lietotājiem. Izmantojiet savu Google pierakstīšanās lietotni vai lietotnes paroli, vai arī ieslēdziet to sadaļā Pierakstīšanās lietotnes (Fails > Konti), ja esat testa lietotājs.
+# review: new
+sign-in-off-other = Tā tika izslēgta sadaļā Pierakstīšanās lietotnes (Fails > Konti), kur to var atkal ieslēgt.
+# review: new
+sign-in-app-no-name = pierakstīšanās lietotnei vajag nosaukumu
+# review: new
+sign-in-app-no-client = trūkst klienta ID
+# review: new
+sign-in-app-no-scopes = pierakstīšanās lietotnei vajag atļaujas (scopes), kas dod piekļuvi pastam
+# review: new
+sign-in-app-bad-host = { $server } servera adrese trūkst vai nav derīgs resursdatora nosaukums
+# review: new
+sign-in-app-plain = { $server } serverim jāizmanto SSL/TLS vai STARTTLS
+# review: new
+sign-in-app-not-checked = izdevējs vēl nav pārbaudīts
+# review: new
+sign-in-app-issuer-changed = izdevējs ir mainījies: ierakstiet klienta noslēpumu vēlreiz vai noņemiet to
+# review: new
+sign-in-register-google = Google Cloud Console izveidojiet OAuth klientu ar tipu Desktop app un piekrišanas ekrānā norādiet atļauju (scope) https://mail.google.com/. Kamēr lietotne ir testēšanas režīmā, pierakstīties var tikai tās testa lietotāji.
+# review: new
+sign-in-register-microsoft = Microsoft Entra reģistrējiet lietotni ar platformu Mobile and desktop applications, novirzīšanas URI http://localhost, atļautām publiskā klienta plūsmām un deleģētajām atļaujām IMAP.AccessAsUser.All, SMTP.Send un offline_access. Tikai savai organizācijai kā izdevēju izmantojiet https://login.microsoftonline.com/<tenant ID>/v2.0.
+# review: new
+sign-in-register-other = Reģistrējiet vietējo (publisko) klientu ar tālāk norādīto novirzīšanas URI; pakalpojumu sniedzējam tajā jāatļauj jebkurš ports (RFC 8252). Pievienojiet atļauju (scope), ar kuru pakalpojumu sniedzējs dod piekļuvi pastam.
+
+## Calendar invitations
+
+# review: new
+repeats = Atkārtojas
+# review: new
+repeats-every = { $unit ->
+    [day] { $interval ->
+        [1] Katru dienu
+        [one] Ik pēc { $interval } dienas
+       *[other] Ik pēc { $interval } dienām
+    }
+    [week] { $interval ->
+        [1] Katru nedēļu
+        [one] Ik pēc { $interval } nedēļas
+       *[other] Ik pēc { $interval } nedēļām
+    }
+    [month] { $interval ->
+        [1] Katru mēnesi
+        [one] Ik pēc { $interval } mēneša
+       *[other] Ik pēc { $interval } mēnešiem
+    }
+   *[year] { $interval ->
+        [1] Katru gadu
+        [one] Ik pēc { $interval } gada
+       *[other] Ik pēc { $interval } gadiem
+    }
+}
+# "Katru nedēļu: pirmdiena, trešdiena"
+# review: new
+repeats-on = { $repeats }: { $days }
+# "Katru nedēļu, 10 reizes"
+# review: new
+repeats-times = { $count ->
+    [1] { $repeats }, vienu reizi
+    [one] { $repeats }, { $count } reizi
+   *[other] { $repeats }, { $count } reizes
+}
+# review: new
+day-monday = pirmdiena
+# review: new
+day-tuesday = otrdiena
+# review: new
+day-wednesday = trešdiena
+# review: new
+day-thursday = ceturtdiena
+# review: new
+day-friday = piektdiena
+# review: new
+day-saturday = sestdiena
+# review: new
+day-sunday = svētdiena
+
+## AI agents
+
+# review: new
+agent-level-read = Lasīt pastu: mapes, ziņojumu sarakstu, meklēšanu un ziņojumus
+# review: new
+agent-level-organize = Kārtot pastu: lasīšanas stāvoklis, karodziņi, nevēlamais pasts, pārvietošana, dzēšana uz Izdzēstie vienumi
+# review: new
+agent-level-drafts = Rakstīt melnrakstus, kurus nosūtāt jūs
+# review: new
+agent-level-send = Sūtīt pastu, katru ziņojumu tikai pēc jūsu piekrišanas
+# review: new
+agent-connect-title = { $program } vēlas izmantot jūsu pastu
+# review: new
+agent-connect-detail = MI aģents lūdza atļauju strādāt ar Inbox Classic. Izvēlieties, ko tas drīkst darīt un kurus kontus tas drīkst redzēt; to var mainīt vēlāk sadaļā Rīki > MI aģenti.
+
+    Aģenti lasa pastu, ko rakstījuši citi cilvēki, un ziņojums var mēģināt tos piemānīt. Inbox Classic vienmēr jums pajautā, pirms aģents kaut ko nosūta.
+# review: new
+agent-reply-to = Atbilde uz „{ $subject }”
+# review: new
+agent-reply-all-on = Atbilde visiem uz „{ $subject }”
+# review: new
+agent-forward-of = Pārsūtīts „{ $subject }”
+# review: new
+agent-never-written-one = Jūs nekad neesat rakstījis uz { $address }.
+# review: new
+agent-never-written-many = Uz { $count } no šīm adresēm jūs nekad neesat rakstījis.
+# review: new
+agent-send-title = { $program } vēlas nosūtīt šo ziņojumu
+# review: new
+agent-send-detail = Pārbaudiet adresātus un ziņojuma saturu. Kad apstiprināsiet, ziņojums { $seconds } sekundes gaidīs mapē Izsūtne, kur to vēl varat izdzēst.
+# review: new
+agent-change-title = Ko { $program } drīkst darīt
+# review: new
+agent-change-allowed = Mainiet, ko šīs programmas MI aģenti drīkst darīt ar jūsu pastu.
+# review: new
+agent-change-refused = Jūs liedzāt šai programmai piekļuvi. Atļaujiet to, lai tās aģenti atkal varētu piekļūt jūsu pastam.
+# review: new
+agent-log-taken-back = { $entry } (atsaukts)
+# review: new
+agent-files = Faili: { $files }
+# review: new
+agent-undo-refused = To nevar atsaukt.
+# review: new
+agent-undo-refused-why = To nevar atsaukt: { $reason }.
+# review: new
+agent-undo-impossible = to nevar atsaukt
+# review: new
+agent-undo-not-in-folder = ziņojuma šajā mapē vairs nav
+# review: new
+agent-undo-not-arrived = ziņojuma (vēl) nav mapē, uz kuru tas tika pārvietots
+# review: new
+agent-undo-sent = ziņojums jau tika nosūtīts
+# review: new
+agent-original-not-downloaded = sākotnējais ziņojums vēl nav lejupielādēts. Vispirms atveriet to
+# review: new
+agent-turned-away = Atraidīts
+# review: new
+agent-can-nothing = Neko
+# review: new
+agent-can-read = lasīt
+# review: new
+agent-can-organize = kārtot
+# review: new
+agent-can-drafts = rakstīt melnrakstus
+# review: new
+agent-can-send = sūtīt ar jūsu piekrišanu
+# "Lasīt, kārtot un rakstīt melnrakstus"
+# review: new
+agent-can-list = { $first } un { $last }
+# review: new
+agent-accounts = { $count ->
+    [0] neviens konts
+    [zero] { $count } kontu
+    [one] { $count } konts
+   *[other] { $count } konti
+}
+# "Lasīt un kārtot; 1 konts"
+# review: new
+agent-access = { $can }; { $accounts }
+# review: new
+agent-unreadable = Šo ziņojumu nevar nolasīt.
+# review: new
+agent-encrypted-original = Šis ziņojums ir šifrēts: aģents nevar uz to atbildēt vai to pārsūtīt, jo nevar šifrēt.
+# review: new
+agent-log-composed = Atvēra „{ $subject }” jaunā ziņojumā, lai jūs to pabeigtu
+# review: new
+agent-log-refused = Jūs nenosūtījāt „{ $subject }”
+# review: new
+agent-log-sent = Nosūtīja „{ $subject }” adresātam { $to }
+# review: new
+agent-log-draft = Saglabāja melnrakstu „{ $subject }”
+# review: new
+agent-log-read = Atzīmēja kā lasītu „{ $subject }”
+# review: new
+agent-log-unread = Atzīmēja kā nelasītu „{ $subject }”
+# review: new
+agent-log-flagged = Atzīmēja ar karodziņu „{ $subject }”
+# review: new
+agent-log-unflagged = Noņēma karodziņu „{ $subject }”
+# review: new
+agent-log-deleted = Izdzēsa „{ $subject }”
+# review: new
+agent-log-moved = Pārvietoja „{ $subject }” uz { $folder }
+# review: new
+agent-log-junk = Atzīmēja „{ $subject }” kā nevēlamu
+# review: new
+agent-log-not-junk = Atzīmēja „{ $subject }” kā vēlamu
+# review: new
+agent-log-archived = Arhivēja „{ $subject }”
+# review: new
+agent-log-folder = Izveidoja mapi „{ $name }”
+# review: new
+agent-log-unsubscribed = Atteicās no „{ $subject }” adresātu saraksta
+
+## Keys as the keyboards of the language name them, in the help (Windows and Linux)
+
+# review: new
+key-ctrl = Ctrl
+# review: new
+key-alt = Alt
+# review: new
+key-shift = Shift
+# review: new
+key-del = Del
+# review: new
+key-enter = Enter
+
+## Signing in and passwords
+
+# review: new
+sign-in-no-refresh = pakalpojumu sniedzējs nedeva atsvaidzināšanas marķieri
+# review: new
+sign-in-no-account = pakalpojumu sniedzējs nepateica, kurš konts pierakstījās
+# review: new
+sign-in-not-finished = pierakstīšanās nav pabeigta
+# review: new
+secrets-unavailable = { $store } nav pieejams
+# review: new
+secrets-unavailable-why = { $store } nav pieejams: { $error }
+# review: new
+secrets-windows = Akreditācijas datu pārvaldnieks
+# review: new
+secrets-mac = Atslēgu piekariņš
+# review: new
+secrets-linux = sistēmas atslēgu saišķis (Secret Service)
+# review: new
+error-no-such-file = šāda faila nav
+# review: new
+cards-file-too-big = Šis fails ir pārāk liels, lai būtu adrešu grāmata.
+# review: new
+ui-sender-added = { $name } tika pievienots adrešu grāmatai.
+# review: new
+ui-sender-known = { $name } jau ir adrešu grāmatā.
+# review: new
+ui-sender-none = Šī ziņojuma sūtītājam nav e-pasta adreses, ko pievienot.
+# review: new
+card-name-needed = Kontaktpersonai nav ne vārda, ne e-pasta adreses.
+# a file of Import Address Book that could not be read: "contacts.vcf: šāda faila nav"
+# review: new
+cards-file-failed = { $file }: { $reason }
+
+## One-time codes: the card at the top of a message with a sign-in or verification code
+
+# the domain the code is for, which signed the message
+# review: new
+otp-heading = Kods no { $domain }
+# review: new
+otp-copy = Kopēt
+# review: new
+otp-note = Ievadiet to tikai domēna { $domain } lapā.
+# review: new
+otp-old = Šis kods tika nosūtīts vairāk nekā stundu pirms tā atvēršanas, un tā derīgums, visticamāk, ir beidzies.
+
+# how many are invited, in the card of an event
+# review: new
+event-attendees =
+    { $count ->
+        [zero] { $count } dalībnieku
+        [one] { $count } dalībnieks
+       *[other] { $count } dalībnieki
+    }
+
+# the first line of a new message's notification when it has a code, for a domain that signed it
+# review: new
+otp-notification = { $code } ir jūsu kods domēnam { $domain }
+
+## OpenPGP keys (keys.rs)
+# review: new
+pgp-key-valid = Derīga
+# review: new
+pgp-key-expires = Derīga līdz { $date }
+# review: new
+pgp-key-expired = Derīguma termiņš beidzās { $date }
+# review: new
+pgp-key-revoked = Atsaukta
+# review: new
+pgp-key-revoked-why = Atsaukta: { $reason }
+# review: new
+pgp-key-not-valid = Nav derīga
+# review: new
+pgp-key-locked = Nevar izmantot: atslēga, kas to aizsargā, vairs nav šeit: { $store }. Importējiet tās dublējumu vēlreiz.
+# review: new
+pgp-source-own = Izveidota programmā Inbox Classic
+# review: new
+pgp-source-file = Importēta no faila
+# review: new
+pgp-source-paste = Ielīmēta
+# review: new
+pgp-source-attachment = No ziņojuma
+# review: new
+pgp-source-vcard = No kontaktpersonas kartītes
+# review: new
+pgp-source-wkd = No sūtītāja pasta pakalpojumu sniedzēja
+# review: new
+pgp-source-keyserver = No keys.openpgp.org
+# review: new
+pgp-source-autocrypt = No ziņojuma Autocrypt galvenes
+# review: new
+pgp-error-no-store = Privātās atslēgas aizsargā { $store }, ko nevar izmantot: { $error }
+# review: new
+pgp-error-wrong-passphrase = Paroles frāze nav pareiza.
+# review: new
+pgp-error-not-a-key = Šī nav OpenPGP atslēga.
+# review: new
+pgp-error-too-large = Atslēga ir pārāk liela.
+# review: new
+pgp-error-unusable = Atslēga izmanto vecu vai vāju kriptogrāfiju, un to nevar izmantot.
+# review: new
+pgp-imported-private = { $count ->
+    [1] Jūsu privātā atslēga tika importēta.
+    [one] Tika importēta { $count } privātā atslēga.
+   *[other] Tika importētas { $count } privātās atslēgas.
+}
+# review: new
+pgp-imported-public = { $count ->
+    [one] Tika importēta { $count } atslēga.
+   *[other] Tika importētas { $count } atslēgas.
+}
+# review: new
+pgp-imported-pending = Adresei { $addresses } jau tiek izmantota cita atslēga: jaunā gaida kontaktpersonā, līdz to izvēlēsieties.
+# review: new
+pgp-error-needs-passphrase = Privāto atslēgu aizsargā paroles frāze. Ierakstiet to, lai importētu atslēgu.
+# review: new
+pgp-error-mismatch = Privātā atslēga nepieder savai publiskajai atslēgai. Iespējams, tā ir mainīta.
+# review: new
+pgp-file-name-public = { $who } publiskā atslēga.asc
+# review: new
+pgp-file-name-private = { $who } privātās atslēgas dublējums.asc
+# review: new
+pgp-pending = Adresei { $address } { $date } tika atrasta cita atslēga.
+
+## Reading signed and encrypted mail (protect.rs)
+# review: new
+pgp-part-verified = Parakstījis { $signer }, atslēga pārbaudīta
+# review: new
+pgp-part-signed = Parakstījis { $signer } (atslēga nav pārbaudīta)
+# review: new
+pgp-part-other = Parakstījis { $signer }, kas nav sūtītājs
+# review: new
+pgp-part-unknown-key = Parakstīts, bet atslēga nav zināma
+# review: new
+pgp-part-not-signed = Nav parakstīts
+# review: new
+pgp-part-not-checked = Paraksts nav pārbaudīts
+# review: new
+pgp-part-encrypted = Šifrēts. { $signature }
+# review: new
+pgp-part-no-key = Šifrēts ar atslēgu, kuras jums nav
+# review: new
+pgp-part-changed = Šifrētā daļa ceļā tika mainīta un netiek rādīta
+# review: new
+pgp-part-unprotected = Šifrēts bez aizsardzības pret izmaiņām, netiek rādīts
+# review: new
+pgp-part-broken = Šifrēto daļu nevar nolasīt
+# review: new
+pgp-why-mismatch = Paraksts neatbilst šim tekstam
+# review: new
+pgp-why-weak-hash = Paraksts izmanto { $hash }, kas vairs nav drošs
+# review: new
+pgp-why-key-expired = Parakstīts pēc tam, kad atslēgas derīgums beidzās { $date }
+# review: new
+pgp-why-key-revoked = Parakstīts ar atsauktu atslēgu
+# review: new
+pgp-why-not-signing-key = Parakstīts ar atslēgu, kas nedrīkst parakstīt
+# review: new
+pgp-why-from-future = Paraksts ir datēts nākotnē
+# review: new
+pgp-why-signature-expired = Paraksta derīgums ir beidzies
+# review: new
+pgp-why-key-not-valid = Parakstīts ar atslēgu, kas nav derīga
+# review: new
+pgp-why-not-for-you = Parakstīts citiem adresātiem un pārsūtīts jums
+# review: new
+pgp-part-pictures-loaded = { $label }. Attēli tika ielādēti no interneta
+# review: new
+pgp-error-no-own-key = Jums nav atslēgas adresei { $address }, ar ko parakstīt vai šifrēt. Izveidojiet to sadaļā Rīki > Šifrēšanas atslēgas vai izslēdziet parakstīšanu un šifrēšanu.
+# review: new
+pgp-error-missing-keys = { $count ->
+    [1] Adresātam { $addresses } nav atslēgas, ar ko šifrēt.
+   *[other] Šiem adresātiem nav atslēgas, ar ko šifrēt: { $addresses }.
+}
+# review: new
+pgp-error-encrypted-quote = Šis ziņojums citē vai pārsūta šifrētu ziņojumu, tāpēc to var nosūtīt tikai šifrētu. Ieslēdziet šifrēšanu vai noņemiet citēto tekstu.
+# review: new
+pgp-error-protect = Ziņojumu nevarēja parakstīt vai šifrēt: { $reason }
+# review: new
+pgp-found-keys = Atrasta atslēga: { $addresses }.
+# review: new
+pgp-found-none = Atslēga netika atrasta: { $addresses }. Palūdziet, lai jums nosūta savu publisko atslēgu.
+# review: new
+pgp-found-no-key = Neviena atslēga netika atrasta.
+# review: new
+pgp-find-unavailable = Atslēgas pašlaik nevarēja meklēt: { $error }
+# review: new
+pgp-publish-pending = keys.openpgp.org nosūtīja apstiprinājuma saiti uz { $addresses }. Jūsu atslēga tur tiks publicēta, kad noklikšķināsiet uz tās.
+# review: new
+pgp-publish-done = Jūsu atslēga ir publicēta vietnē keys.openpgp.org adresei { $addresses }.
+# review: new
+pgp-publish-failed = Atslēgu nevarēja publicēt: { $error }
+# review: new
+pgp-keyserver-off = Atslēgu meklēšana vietnē keys.openpgp.org ir izslēgta opcijās.
+# review: new
+pgp-details-part = { $number }. daļa: { $label }
+# review: new
+pgp-details-signed = Parakstīts { $when } ar atslēgu { $key }
+# review: new
+pgp-details-unknown-key = Parakstīts ar atslēgu { $key }, kuras jums nav
+# review: new
+pgp-details-opened = Šifrēts ar jūsu atslēgu { $key }
+# review: new
+pgp-details-for = Šifrēts ar { $keys }
+# review: new
+pgp-details-plain = Nav parakstīts un nav šifrēts
+# review: new
+pgp-bar-parts = Šim ziņojumam ir vairākas daļas ({ $count }): { $list }. Katrā daļā norādīts, kā tā ir aizsargāta.
+# review: new
+pgp-bar-count-verified = Pārbaudītas: { $count }
+# review: new
+pgp-bar-count-good = { $count ->
+    [one] { $count } parakstīta vai šifrēta
+   *[other] { $count } parakstītas vai šifrētas
+}
+# review: new
+pgp-bar-count-warning = { $count ->
+    [one] { $count } prasa uzmanību
+   *[other] { $count } prasa uzmanību
+}
+# review: new
+pgp-bar-count-neutral = Bez apstiprināta paraksta: { $count }
+# the setup file: settings, accounts, contacts and keys carried to another computer
+# review: new
+setup-part-settings = Iestatījumi
+# review: new
+setup-part-preferences = Logu preferences
+# review: new
+setup-part-accounts = Konti
+# review: new
+setup-part-sign-in-apps = Pierakstīšanās lietotnes
+# review: new
+setup-part-contacts = Kontaktpersonas un grupas
+# review: new
+setup-part-keys = Šifrēšanas atslēgas
+# review: new
+setup-part-rules = Ziņojumu kārtulas
+# review: new
+setup-part-trusted-senders = Uzticamie sūtītāji
+# review: new
+setup-holds-settings = { $count ->
+    [zero] { $count } iestatījumu
+    [one] { $count } iestatījums
+   *[other] { $count } iestatījumi
+}
+# review: new
+setup-holds-preferences = { $count ->
+    [zero] { $count } preferenču
+    [one] { $count } preference
+   *[other] { $count } preferences
+}
+# review: new
+setup-holds-accounts = { $count ->
+    [zero] { $count } kontu
+    [one] { $count } konts
+   *[other] { $count } konti
+}
+# review: new
+setup-holds-sign-in-apps = { $count ->
+    [zero] { $count } pierakstīšanās lietotņu
+    [one] { $count } pierakstīšanās lietotne
+   *[other] { $count } pierakstīšanās lietotnes
+}
+# review: new
+setup-holds-built-in = Kuras iebūvētās pierakstīšanās lietotnes ir ieslēgtas
+# review: new
+setup-holds-contacts = { $count ->
+    [zero] { $count } kontaktpersonu
+    [one] { $count } kontaktpersona
+   *[other] { $count } kontaktpersonas
+}
+# review: new
+setup-holds-groups = { $count ->
+    [zero] { $count } grupu
+    [one] { $count } grupa
+   *[other] { $count } grupas
+}
+# review: new
+setup-holds-own-keys = { $count ->
+    [zero] { $count } jūsu atslēgu
+    [one] { $count } jūsu atslēga
+   *[other] { $count } jūsu atslēgas
+}
+# review: new
+setup-holds-contact-keys = { $count ->
+    [zero] { $count } kontaktpersonu atslēgu
+    [one] { $count } kontaktpersonas atslēga
+   *[other] { $count } kontaktpersonu atslēgas
+}
+# review: new
+setup-holds-rules = { $count ->
+    [zero] { $count } kārtulu
+    [one] { $count } kārtula
+   *[other] { $count } kārtulas
+}
+# review: new
+setup-holds-trusted-senders = { $count ->
+    [zero] { $count } uzticamu sūtītāju
+    [one] { $count } uzticams sūtītājs
+   *[other] { $count } uzticami sūtītāji
+}
+# review: new
+setup-sign-in-password = Parole
+# review: new
+setup-account-secret-password = Tā parole ir failā.
+# review: new
+setup-account-secret-token = Tā pierakstīšanās dati ir failā.
+# review: new
+setup-account-asks-password = Pēc importēšanas tas prasīs paroli.
+# review: new
+setup-account-signs-in-again = Pēc importēšanas tajā jāpierakstās vēlreiz.
+# review: new
+setup-account-here = Tas šeit jau ir iestatīts, tāpēc tiek izlaists.
+# review: new
+setup-account-no-app = Tas pierakstās ar { $app }, kas šeit nav iestatīta. Importējiet arī pierakstīšanās lietotnes.
+# review: new
+setup-invalid-address = „{ $address }” nav e-pasta adrese.
+# review: new
+setup-invalid-server = { $server } serverim nav izmantojama nosaukuma vai porta.
+# review: new
+setup-invalid-user = Tam nav lietotājvārda.
+# review: new
+setup-invalid-sign-in = Tas pierakstās veidā, ko Inbox Classic nepazīst.
+# review: new
+setup-error-empty = Fails ir tukšs.
+# review: new
+setup-error-too-large = Fails ir pārāk liels, lai būtu Inbox Classic iestatījumu fails.
+# review: new
+setup-error-not-setup = Šis fails nav Inbox Classic iestatījumu fails.
+# review: new
+setup-error-damaged = Iestatījumu fails ir bojāts, un to nevar nolasīt.
+# review: new
+setup-error-newer = Šos iestatījumus saglabāja jaunāka Inbox Classic versija ({ $version }). Atjauniniet Inbox Classic un pēc tam importējiet tos vēlreiz.
+# review: new
+setup-error-needs-passphrase = Šos iestatījumus aizsargā paroles frāze. Ierakstiet paroles frāzi, ar kuru tie tika saglabāti.
+# review: new
+setup-error-wrong-passphrase = Tā nav paroles frāze, ar kuru šie iestatījumi tika saglabāti.
+# review: new
+setup-error-changed = Iestatījumu fails pēc saglabāšanas tika mainīts vai bojāts, tāpēc to nevar importēt.
+# review: new
+setup-error-read = Iestatījumu failu nevarēja nolasīt: { $error }
+# review: new
+setup-error-write = Iestatījumus nevarēja saglabāt: { $error }
+# review: new
+setup-error-no-parts = Izvēlieties vismaz vienu daļu.
+# review: new
+setup-left-out = { $count ->
+    [one] { $count } daļas „{ $part }” ierakstu nevar izmantot, un tas tiek izlaists.
+   *[other] { $count } daļas „{ $part }” ierakstus nevar izmantot, un tie tiek izlaisti.
+}
+# review: new
+setup-imported-settings = Iestatījumi tika aizstāti.
+# review: new
+setup-imported-preferences = Logu preferences tika aizstātas.
+# review: new
+setup-added-accounts = { $count ->
+    [one] Pievienots { $count } konts.
+   *[other] Pievienoti { $count } konti.
+}
+# review: new
+setup-skipped-here = { $address } šeit jau ir iestatīts, tāpēc tika izlaists.
+# review: new
+setup-skipped-no-app = { $address } tika izlaists: tas pierakstās ar { $app }, kas šeit nav iestatīta.
+# review: new
+setup-skipped-invalid = { $address } tika izlaists: { $reason }
+# review: new
+setup-asks-password = { $address } prasīs paroli, kad izveidos savienojumu.
+# review: new
+setup-signs-in-again = { $address } lūgs jūs pierakstīties vēlreiz, kad izveidos savienojumu.
+# review: new
+setup-added-sign-in-apps = { $count ->
+    [one] Pievienota { $count } pierakstīšanās lietotne.
+   *[other] Pievienotas { $count } pierakstīšanās lietotnes.
+}
+# review: new
+setup-skipped-sign-in-apps = { $count ->
+    [one] { $count } pierakstīšanās lietotne šeit jau ir iestatīta.
+   *[other] { $count } pierakstīšanās lietotnes šeit jau ir iestatītas.
+}
+# review: new
+setup-added-contacts = { $count ->
+    [one] Adrešu grāmatai pievienota { $count } kontaktpersona.
+   *[other] Adrešu grāmatai pievienotas { $count } kontaktpersonas.
+}
+# review: new
+setup-skipped-contacts = { $count ->
+    [one] { $count } kontaktpersona jau ir adrešu grāmatā.
+   *[other] { $count } kontaktpersonas jau ir adrešu grāmatā.
+}
+# review: new
+setup-added-groups = { $count ->
+    [one] Pievienota vai papildināta { $count } grupa.
+   *[other] Pievienotas vai papildinātas { $count } grupas.
+}
+# review: new
+setup-added-own-keys = { $count ->
+    [one] Pievienota { $count } jūsu atslēga.
+   *[other] Pievienotas { $count } jūsu atslēgas.
+}
+# review: new
+setup-added-contact-keys = { $count ->
+    [one] Pievienota { $count } kontaktpersonas atslēga.
+   *[other] Pievienotas { $count } kontaktpersonu atslēgas.
+}
+# review: new
+setup-added-rules = { $count ->
+    [one] Pievienota { $count } ziņojumu kārtula.
+   *[other] Pievienotas { $count } ziņojumu kārtulas.
+}
+# review: new
+setup-skipped-rules = { $count ->
+    [one] { $count } ziņojumu kārtula šeit jau ir.
+   *[other] { $count } ziņojumu kārtulas šeit jau ir.
+}
+# review: new
+setup-skipped-rules-account = { $count ->
+    [one] { $count } ziņojumu kārtula ir paredzēta kontam, kura šeit nav, tāpēc tā tika izlaista.
+   *[other] { $count } ziņojumu kārtulas ir paredzētas kontiem, kuru šeit nav, tāpēc tās tika izlaistas.
+}
+# review: new
+setup-rules-waiting = { $count ->
+    [one] { $count } ziņojumu kārtula pārvieto ziņojumus uz mapi, kas parādīsies, kad tās konts tiks sinhronizēts.
+   *[other] { $count } ziņojumu kārtulas pārvieto ziņojumus uz mapēm, kas parādīsies, kad to konti tiks sinhronizēti.
+}
+# review: new
+setup-added-trusted-senders = { $count ->
+    [one] Pievienots { $count } uzticams sūtītājs.
+   *[other] Pievienoti { $count } uzticami sūtītāji.
+}
+# review: new
+setup-nothing = Nekas netika importēts.
+# review: new
+setup-account-servers = { $imap } un { $smtp } ({ $signin })
+# review: new
+setup-file-name = Inbox Classic iestatījumi un konti
+# review: new
+setup-skipped-unreachable = { $name } tika izlaista: ar tās pierakstīšanās pakalpojumu nevarēja sazināties. Pievienojiet to vēlreiz sadaļā Pierakstīšanās lietotnes.
+# review: new
+attachment-runs-programs = Fails „{ $name }” var palaist programmas, tāpēc Inbox Classic to neatver. Saglabājiet to un pēc tam atveriet paši, ja uzticaties tā izcelsmei.
+# review: new
+attachment-decrypted-note = Šis pielikums ir no šifrēta ziņojuma. Lai to atvērtu, Inbox Classic glabā to atšifrētu šajā datorā, jūsu mapē, ko Inbox Classic iztukšo pēc vienas dienas.

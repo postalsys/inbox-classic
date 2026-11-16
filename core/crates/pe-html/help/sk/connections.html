@@ -1,0 +1,15 @@
+<!--review-->
+<h1>Pripojenia, ktoré Inbox Classic nadväzuje</h1>
+<p class="summary">Kam sa Inbox Classic pripája a prečo, pre technicky zvedavých.</p>
+<ul>
+    <li><b>Vaše poštové servery</b>, cez IMAP na čítanie pošty a SMTP na jej odosielanie. Pripojenia sú šifrované protokolom TLS a certifikát každého servera sa overuje podľa certifikátov, ktorým váš systém dôveruje. Inbox Classic odmietne server bez šifrovania, pokiaľ nevyberiete <b data-text="ui-security-none"></b> a nepotvrdíte to.</li>
+    <li><b>Pri pridávaní konta</b>, na vyhľadanie jeho serverov. Inbox Classic číta záznamy DNS vašej domény cez DNS over HTTPS (Cloudflare, potom Google), nikdy nie cez obyčajné DNS. Skúša aj súbor autoconfig vášho poskytovateľa a zoznam poskytovateľov Thunderbirdu (ISPDB). Pri Exchange sa pýta služby Microsoft Autodiscover, ktorá dostane vaše heslo, iba keď oň požiada cez HTTPS. Server bez šifrovania sa nikdy nevyberie.</li>
+    <li><b>Prihlásenie cez prehliadač</b>, s OAuth 2.0 a PKCE, ku Googlu, Microsoftu alebo k poskytovateľovi vašej prihlasovacej aplikácie. Prehliadač sa vracia do Inbox Classic iba v tomto počítači.</li>
+    <li><b>Logá značiek</b> (BIMI), z adresy HTTPS značky, keď správa logo neobsahuje, raz pri každom spustení Inbox Classic. Deje sa to, iba keď správa prešla na vašom poštovom serveri kontrolou DMARC a server logo schválil.</li>
+    <li><b>Obrázky z internetu</b>, iba keď o ne požiadate.</li>
+    <li><b>Odhlásenie odberu</b>, iba keď naň kliknete. Žiadosť jedným kliknutím (RFC 8058) sa posiela, iba keď zoznam adresátov správu podpísal pomocou DKIM.</li>
+    <!--os:mac--><li><b>Aktualizácie</b>, z inboxclassic.com, aby sa zistilo, či vyšla nová verzia.</li><!--/os-->
+</ul>
+<p>Prihlasovacie kódy sa ponúkajú, iba keď hlavička Authentication-Results vášho poskytovateľa uvádza, že doména správu podpísala (DKIM). Nepotrebuje to žiadne vlastné pripojenie.</p>
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
+<!--/review-->

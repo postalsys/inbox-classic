@@ -1,0 +1,19 @@
+<!--review--><h1>Átköltözés másik számítógépre</h1>
+<p class="summary">Vigye át egyetlen fájlban a fiókjait, beállításait, névjegyeit, kulcsait és szabályait egy másik számítógépre.</p>
+<h2>Exportálás</h2>
+<ol>
+    <li>Válassza ezt: <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
+    <li>Válassza ki, mit visz át: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> és <b data-text="setup-part-trusted-senders"></b>.</li>
+    <li>Ha a jelszavait és a titkos kulcsait is át szeretné vinni, kapcsolja be ezt: <b data-text="ui-setup-use-passphrase"></b>, és írjon be kétszer egy legalább 8 karakteres jelmondatot.</li>
+    <li>Kattintson erre: <b data-text="ui-setup-export-button"></b>, és válassza ki, hová menti a fájlt.</li>
+</ol>
+<p>A fájl nem tartalmaz üzeneteket: azok a másik számítógépen újra letöltődnek. Jelmondattal az egész fájl titkosított. Jelmondat nélkül nem tartalmaz jelszavakat és titkos kulcsokat, és a másik számítógépen minden fiók egyszer elkéri a jelszavát.</p>
+<aside class="warning">A fájlt és a jelmondatát tartsa külön, és importálás után törölje a fájlt. Akinél mindkettő megvan, elolvashatja a leveleit.</aside>
+<h2>Importálás</h2>
+<ol>
+    <li>A másik számítógépen válassza ezt: <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Az első fiók hozzáadása előtt ebben az ablakban is talál rá hivatkozást: <b data-text="ui-add-account-title"></b>.</li>
+    <li>Válassza ki a fájlt, és ha van jelmondata, írja be.</li>
+    <li>Az ablak megmutatja, mit tartalmaz a fájl. Válassza ki az importálandó részeket és fiókokat, majd kattintson erre: <b data-text="ui-setup-import-button"></b>.</li>
+</ol>
+<p>Az ezen a számítógépen már meglévő fiók változatlan marad. A névjegyek a címjegyzékbe kerülnek, a beállítások és az ablakbeállítások lecserélődnek, és az a szabály, amelynek mappája még nincs meg, megvárja a fiók szinkronizálását. Ha valamelyik névjegyéhez eltérő kulcs érkezik, az ugyanúgy az Ön döntésére vár, mint egy importált kulcs.</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->

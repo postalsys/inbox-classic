@@ -1,0 +1,10 @@
+<!--review--><h1>Var din e-post och dina lösenord sparas</h1>
+<p class="summary">Vad Inbox Classic sparar på din dator, och var.</p>
+<ul>
+    <li><b>Hämtad e-post och kontoinställningar</b> finns i <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. Din e-post finns kvar på servern också. Kopian här är till för att läsa snabbt och offline, och för sökning.</li>
+    <li><b>Lösenord</b>, inloggningar via webbläsaren och inloggningsappars hemligheter finns i <!--os:windows-->Windows Autentiseringshanteraren, under <i>InboxClassic</i>, krypterade för ditt Windows-konto.<!--/os--><!--os:mac-->din inloggningsnyckelring, under <i>InboxClassic</i>, krypterade för ditt Mac-konto. Nyckelhanterare visar dem.<!--/os--><!--os:linux-->din nyckelring (GNOME-nyckelring), under <i>InboxClassic</i>, krypterade för din inloggning. Utan en nyckelring sparas de bara tills Inbox Classic avslutas.<!--/os--> De finns aldrig i e-postlagret.</li>
+</ul>
+<p>Sökningen, förklaringen av studsade meddelanden, grupperingen i konversationer och letandet efter inloggningskoder körs alla på din dator. Inget av din e-post skickas någonstans för dem.</p>
+<p>AI-agenter ser din e-post bara när du släpper in dem, och bara de konton du väljer. Se <a href="topic:agents-permissions"></a>.</p>
+<nav class="related"><a href="topic:connections"></a> <a href="topic:removing"></a> <a href="topic:account-security"></a></nav>
+<!--/review-->

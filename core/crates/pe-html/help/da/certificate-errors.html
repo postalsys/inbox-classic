@@ -1,0 +1,18 @@
+<!--review--><h1>Certifikatfejl</h1>
+<p class="summary">Det kan du gøre, når Inbox Classic ikke kan bekræfte, at det taler med den rigtige mailserver.</p>
+<p>Du ser måske en af disse:</p>
+<ul>
+    <li>På statuslinjen: »TLS error: …«</li>
+    <li>I læseruden: »Forbindelsen til mailserveren kunne ikke gøres sikker (…).«</li>
+</ul>
+<p>Inbox Classic kunne ikke bekræfte, at serveren er den, den udgiver sig for at være, så programmet sendte ikke din adgangskode.</p>
+<p>Sådan løser du det:</p>
+<ol>
+    <li>Åbn kontoens egenskaber under <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
+    <li>Kontrollér servernavnene. De skal være de navne, serverens certifikat er udstedt til. Det er ofte din udbyders navn, fx <code>imap.provider.com</code>, ikke dit eget domæne.</li>
+    <li>Kontrollér, at din computers dato og klokkeslæt er korrekte.</li>
+</ol>
+<p>På et netværk, der undersøger krypteret trafik, fx nogle arbejds- eller skolenetværk, skal du spørge administratoren.</p>
+<aside class="note">Der er ingen indstilling, der godtager ethvert certifikat. Hvis et falsk certifikat blev godtaget, kunne nogen på netværket læse din adgangskode og din mail.</aside>
+<nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
+<!--/review-->

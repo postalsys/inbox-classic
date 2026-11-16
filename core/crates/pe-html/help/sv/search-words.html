@@ -1,0 +1,30 @@
+<!--review--><h1>Sökord</h1>
+<p class="summary">Orden och tecknen som sökrutan förstår, så att du hittar precis de meddelanden du vill ha.</p>
+<p>Sökrutan förstår samma ord som Gmail. Kombinera så många du vill: ett meddelande måste matcha alla. Peka på sökrutan för att se en kort lista.</p>
+<table>
+    <tr><th>Skriv</th><th>Hittar</th></tr>
+    <tr><td><code>budget</code></td><td>Meddelanden med ett ord som börjar på <i>budget</i>, var som helst i dem</td></tr>
+    <tr><td><code>"exakt fras"</code></td><td>De här orden, i den här ordningen</td></tr>
+    <tr><td><code>-ord</code></td><td>Meddelanden utan ordet. Ett minustecken fungerar före alla sökord, till exempel <code>-is:unread</code></td></tr>
+    <tr><td><code>det här OR det där</code></td><td>Meddelanden med något av orden. Skriv <code>OR</code> med versaler</td></tr>
+    <tr><td><code>from:anna</code></td><td>E-post från Anna</td></tr>
+    <tr><td><code>to:anna</code>, <code>cc:</code>, <code>bcc:</code></td><td>E-post till Anna, på vilken mottagarrad som helst</td></tr>
+    <tr><td><code>subject:lunch</code></td><td>Ordet i ämnet</td></tr>
+    <tr><td><code>filename:pdf</code></td><td>Ordet i namnet på en bifogad fil</td></tr>
+    <tr><td><code>list:news.example.com</code></td><td>E-post från en e-postlista, efter dess List-Id</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Meddelanden med filer</td></tr>
+    <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Olästa eller lästa meddelanden</td></tr>
+    <tr><td><code>is:starred</code> eller <code>is:flagged</code></td><td>Flaggade meddelanden</td></tr>
+    <tr><td><code>is:answered</code></td><td>Meddelanden som du har svarat på</td></tr>
+    <tr><td><code>is:bounce</code></td><td>Meddelanden om e-post som inte levererades eller är försenad</td></tr>
+    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Bara den mappen, i alla konton</td></tr>
+    <tr><td><code>in:projekt</code></td><td>Bara mappen med det namnet</td></tr>
+    <tr><td><code>in:anywhere</code></td><td>Alla mappar</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>E-post före eller efter en dag. <code>2025-01-31</code> fungerar också</td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>E-post som är äldre eller nyare än ett antal dagar (<code>d</code>), månader (<code>m</code>) eller år (<code>y</code>)</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>E-post som är större eller mindre än en storlek, i byte eller med <code>K</code>, <code>M</code> eller <code>G</code></td></tr>
+</table>
+<p>Accenter och versaler spelar ingen roll. Ett sökord som Inbox Classic inte känner till söks som ett vanligt ord.</p>
+<p>Listan visar inga storlekar. Om du vill se hur stort ett meddelande är väljer du <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
+<!--/review-->

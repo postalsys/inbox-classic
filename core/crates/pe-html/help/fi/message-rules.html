@@ -1,0 +1,20 @@
+<!--review-->
+<h1>Uuden postin lajittelu säännöillä</h1>
+<p class="summary">Siirrä, merkitse luetuksi, liputa tai arkistoi automaattisesti saapuvat viestit, jotka täyttävät ehtosi.</p>
+<p>Sääntö yhdistää hakuehdot ja toiminnot, joita käytetään ehtoja vastaaviin viesteihin, kun ne saapuvat Saapuneet-kansioon. Esimerkiksi sääntö, jonka ehtona on <code>from:news@example.com</code>, voi siirtää kyseisestä osoitteesta tulevat uutiskirjeet omaan kansioonsa ja merkitä ne luetuiksi.</p>
+<p>Säännön luominen:</p>
+<ol>
+    <li>Valitse <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b> ja napsauta sitten <b data-text="ui-rule-new"></b>.</li>
+    <li>Anna nimi ja täytä <b data-text="ui-rule-query"></b> samoilla sanoilla kuin hakukentässä, esimerkiksi <code>from:</code>, <code>subject:</code> tai <code>list:</code>. Alla oleva rivi näyttää, kuinka moni Saapuneet-kansion nykyinen viesti täyttää ehdot.</li>
+    <li>Valitse ehtoja vastaaville viesteille yksi tai useampi toiminto: siirrä ne kansioon, merkitse ne luetuiksi, liputa ne, arkistoi ne, siirrä ne Roskaposti-kansioon, poista ne tai jätä ilmoitukset pois.</li>
+    <li>Napsauta <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Voit myös luoda säännön viestistä tai hausta. Valitse <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b>, niin valitun viestin lähettäjä tai postituslista täytetään. Napsauta hakutulosten yläpuolella <b data-text="ui-create-rule"></b>, niin nykyiset hakuehtosi otetaan käyttöön.</p>
+<h2>Miten säännöt toimivat</h2>
+<p>Säännöt käsittelevät uusia Saapuneet-kansion viestejä, kun Inbox Classic on käynnissä, myös silloin kun se on pienennetty ilmoitusalueelle. Olemassa oleviin viesteihin ne vaikuttavat vain, jos valitset kohdan <b data-text="ui-rule-apply-now"></b>. Ehtoja vastaavat säännöt suoritetaan luettelon järjestyksessä. Kun sääntö siirtää viestin pois Saapuneet-kansiosta, muita sääntöjä ei enää sovelleta siihen. Poista säännön valintaruudun valinta luettelossa, jos haluat poistaa säännön käytöstä poistamatta sitä.</p>
+<h2>Sääntöjen muuttaminen</h2>
+<p>Muokkaa sääntöä valitsemalla se luettelosta ja napsauttamalla <b data-text="ui-rule-edit"></b> tai kaksoisnapsauttamalla sitä. Muuta järjestystä painikkeilla <b data-text="ui-account-move-up"></b> ja <b data-text="ui-account-move-down"></b>, tai poista sääntö painikkeella <b data-text="ui-rule-delete-button"></b>. Säännön muokkausikkunassa <b data-text="ui-rule-show"></b> näyttää pääikkunassa viestit, jotka nyt täyttävät ehdot.</p>
+<p>Säännöt koskevat uusia Saapuneet-kansion viestejä, joten kansio- ja päivämääräsuodattimia ei tueta. Jos käytät sanoja <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> tai <code>newer_than:</code>, ilmoitus kertoo, miksi näitä suodattimia ei voi käyttää. Säännöt eivät voi lähettää viestejä eivätkä poistaa niitä pysyvästi: <b data-text="ui-rule-delete"></b> siirtää ne kansioon <b data-text="folder-deleted"></b>.</p>
+<aside class="note">Säännöt toimivat tässä tietokoneessa. Jos haluat lajitella postia, kun tietokone on sammutettuna, käytä postipalveluntarjoajasi suodattimia.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
+<!--/review-->

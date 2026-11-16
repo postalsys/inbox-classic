@@ -1,0 +1,9 @@
+<!--review--><h1>Hol tárolódnak a levelei és jelszavai</h1>
+<p class="summary">Mit tárol az Inbox Classic a számítógépén, és hol.</p>
+<ul>
+    <li><b>A letöltött levelek és a fiókbeállítások</b> helye: <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. A levelei a kiszolgálón is megmaradnak. Az itteni másolat a gyors és kapcsolat nélküli olvasást, valamint a keresést szolgálja.</li>
+    <li><b>A jelszavakat</b>, a böngészős bejelentkezéseket és a bejelentkezési alkalmazások titkos kulcsait <!--os:windows-->a Windows Hitelesítőadat-kezelője őrzi, <i>InboxClassic</i> néven, a Windows-fiókjához titkosítva.<!--/os--><!--os:mac-->a bejelentkezési kulcskarika őrzi, <i>InboxClassic</i> néven, a Mac-fiókjához titkosítva. A Kulcskarika-hozzáférés megmutatja őket.<!--/os--><!--os:linux-->a kulcstartó (GNOME Kulcstartó) őrzi, <i>InboxClassic</i> néven, a bejelentkezéséhez titkosítva. Kulcstartó nélkül csak az Inbox Classic bezárásáig maradnak meg.<!--/os--> Sosem kerülnek a levéltárba.</li>
+</ul>
+<p>A keresés, a visszapattanó üzenetek magyarázata, a beszélgetésekbe csoportosítás és a bejelentkezési kódok felismerése mind a számítógépén fut. Ezekhez semmi sem kerül el a leveleiből sehova.</p>
+<p>Az MI-ügynökök csak akkor látják a leveleit, ha beengedi őket, és csak az Ön által választott fiókokat. Lásd: <a href="topic:agents-permissions"></a>.</p>
+<nav class="related"><a href="topic:connections"></a> <a href="topic:removing"></a> <a href="topic:account-security"></a></nav><!--/review-->

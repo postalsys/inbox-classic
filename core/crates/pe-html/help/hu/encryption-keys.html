@@ -1,0 +1,17 @@
+<!--review--><h1>Titkosítási kulcsok</h1>
+<p class="summary">Hozzon létre kulcsot az üzenetei aláírásához és titkosított levelek fogadásához, és tárolja a névjegyei kulcsait.</p>
+<p>Az Inbox Classic OpenPGP-kulcsokkal ír alá és titkosít. A saját kulcsa két részből áll: a nyilvános kulcsot odaadja másoknak, a titkos kulcs pedig a számítógépén marad. A névjegyei kulcsaival ellenőrizheti az aláírásukat, és titkosított leveleket küldhet nekik.</p>
+<p>Saját kulcs létrehozása:</p>
+<ol>
+    <li>Válassza ezt: <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, majd kattintson erre: <b data-text="ui-keys-new"></b>.</li>
+    <li>Válassza ki a fiókot, és kattintson erre: <b data-text="ui-keys-new-make"></b>. A kulcs a fiók címéhez és további címeihez lesz használva.</li>
+    <li>Kattintson erre: <b data-text="ui-keys-backup-now"></b>, és adjon meg egy jelmondatot. A fájlt és a jelmondatot két külön biztonságos helyen tartsa.</li>
+</ol>
+<aside class="warning">Biztonsági másolat nélkül a kulcs nem állítható vissza, ha ez a számítógép elvész vagy alaphelyzetbe kerül, és a kulcshoz titkosított levelek többé nem olvashatók.</aside>
+<h2>A kulcsok jelmondat nélkül is védettek</h2>
+<p>A titkos kulcsait egy olyan kulcs védi, amelyet <!--os:windows-->a Hitelesítőadat-kezelő<!--/os--><!--os:mac-->a kulcskarika<!--/os--><!--os:linux-->a rendszer kulcstartója<!--/os--> őriz, így használatukhoz soha nem kell jelmondatot beírnia. Jelmondatot csak a biztonsági másolathoz választ. Ha egy kulcsa zároltként jelenik meg, ez a védelem alaphelyzetbe került: kattintson erre: <b data-text="ui-keys-import"></b>, és válassza ki a kulcs biztonsági másolatát.</p>
+<h2>Kulcsok hozzáadása</h2>
+<p>Fájlból, például egy névjegy által küldött kulcsot vagy a saját biztonsági másolatát, így adhat hozzá: <b data-text="ui-keys-import"></b>. Egy jelmondattal védett titkos kulcsnál a program egyszer elkéri a jelmondatot. Ezután az Inbox Classic megkérdezi, hogy egy importált saját kulcsot használjon-e a címeihez.</p>
+<p>Egy névjegy kulcsát ettől kezdve az ő címéhez használja a program. Ha később ugyanahhoz a címhez másik kulcs kerül elő, a jelenlegi marad használatban, amíg a névjegy tulajdonságaiban ki nem választja az újat.</p>
+<p>A nyilvános kulcsa megosztásához jelölje ki, és kattintson erre: <b data-text="ui-keys-export"></b>. A fiókja kulcsát a fiók tulajdonságaiban is kiválaszthatja, ezen a lapon: <b data-text="ui-account-security"></b>.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav><!--/review-->

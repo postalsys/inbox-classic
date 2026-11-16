@@ -1,0 +1,19 @@
+<!--review--><h1>Passare a un altro computer</h1>
+<p class="summary">Porta su un altro computer account, impostazioni, contatti, chiavi e regole in un unico file.</p>
+<h2>Esportarli</h2>
+<ol>
+    <li>Scegli <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
+    <li>Scegli cosa portare: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> e <b data-text="setup-part-trusted-senders"></b>.</li>
+    <li>Per portare anche le password e le chiavi private, attiva <b data-text="ui-setup-use-passphrase"></b> e digita due volte una passphrase di almeno 8 caratteri.</li>
+    <li>Fai clic su <b data-text="ui-setup-export-button"></b> e scegli dove salvare il file.</li>
+</ol>
+<p>Il file non contiene messaggi: vengono scaricati di nuovo sull’altro computer. Con una passphrase, l’intero file è crittografato. Senza, non contiene password né chiavi private, e sull’altro computer ogni account chiede la sua password una volta.</p>
+<aside class="warning">Tieni separati il file e la sua passphrase, ed elimina il file dopo averlo importato. Chiunque abbia entrambi può leggere la tua posta.</aside>
+<h2>Importarli</h2>
+<ol>
+    <li>Sull’altro computer, scegli <b data-text="menu-file"></b> &gt; <b data-text="cmd-import-setup"></b>. Prima di aggiungere il primo account, anche <b data-text="ui-add-account-title"></b> ha un link per farlo.</li>
+    <li>Scegli il file e, se ne ha una, digita la sua passphrase.</li>
+    <li>La finestra mostra cosa contiene il file. Scegli le parti e gli account da importare e fai clic su <b data-text="ui-setup-import-button"></b>.</li>
+</ol>
+<p>Un account già presente su questo computer resta com’è. I contatti vengono aggiunti alla Rubrica, le impostazioni e le preferenze delle finestre vengono sostituite, e una regola la cui cartella non c’è ancora aspetta che l’account sia sincronizzato. Una chiave diversa per uno dei tuoi contatti aspetta una tua decisione, come una chiave importata.</p>
+<nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->

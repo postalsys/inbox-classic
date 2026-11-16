@@ -1,0 +1,18 @@
+<!--review--><h1>Smistare la nuova posta con le regole</h1>
+<p class="summary">Sposta, segna come letti, contrassegna o archivia automaticamente i messaggi in arrivo che soddisfano i tuoi criteri.</p>
+<p>Una regola unisce dei criteri di ricerca ad azioni da applicare ai messaggi corrispondenti quando arrivano in Posta in arrivo. Per esempio, una regola con <code>from:news@example.com</code> può spostare le newsletter di quell’indirizzo in una cartella a parte e segnarle come lette.</p>
+<p>Per creare una regola:</p>
+<ol>
+    <li>Scegli <b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b>, poi fai clic su <b data-text="ui-rule-new"></b>.</li>
+    <li>Inserisci un nome e compila <b data-text="ui-rule-query"></b> con gli stessi termini della casella di ricerca, come <code>from:</code>, <code>subject:</code> o <code>list:</code>. La riga sotto mostra quanti messaggi già presenti in Posta in arrivo soddisfano questi criteri.</li>
+    <li>Scegli una o più azioni per i messaggi corrispondenti: spostarli in una cartella, segnarli come letti, contrassegnarli, archiviarli, spostarli in Posta indesiderata, eliminarli o disattivarne le notifiche.</li>
+    <li>Fai clic su <b data-text="ui-ok"></b>.</li>
+</ol>
+<p>Puoi anche creare una regola da un messaggio o da una ricerca. Scegli <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> per inserire il mittente o la mailing list del messaggio selezionato. Fai clic su <b data-text="ui-create-rule"></b> sopra i risultati della ricerca per usare i criteri di ricerca attuali.</p>
+<h2>Come funzionano le regole</h2>
+<p>Le regole elaborano i nuovi messaggi di Posta in arrivo mentre Inbox Classic è in esecuzione, anche quando è ridotto a icona nell’area di notifica. I messaggi già presenti vengono elaborati solo se selezioni <b data-text="ui-rule-apply-now"></b>. Le regole corrispondenti vengono applicate nell’ordine dell’elenco. Quando una regola sposta un messaggio fuori da Posta in arrivo, nessun’altra regola si applica a quel messaggio. Deseleziona la casella di una regola nell’elenco per disattivarla senza eliminarla.</p>
+<h2>Modificare le regole</h2>
+<p>Per modificare una regola, selezionala nell’elenco e fai clic su <b data-text="ui-rule-edit"></b>, oppure fai doppio clic su di essa. Usa <b data-text="ui-account-move-up"></b> e <b data-text="ui-account-move-down"></b> per cambiarne l’ordine, oppure <b data-text="ui-rule-delete-button"></b> per eliminarla. Nell’editor della regola, fai clic su <b data-text="ui-rule-show"></b> per vedere nella finestra principale i messaggi che corrispondono ora.</p>
+<p>Le regole si applicano ai nuovi messaggi di Posta in arrivo, quindi i filtri per cartella e per data non sono supportati. Se usi <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> o <code>newer_than:</code>, un messaggio spiega perché questi filtri non si possono usare. Le regole non possono inviare messaggi né eliminarli definitivamente: <b data-text="ui-rule-delete"></b> li sposta in <b data-text="folder-deleted"></b>.</p>
+<aside class="note">Le regole vengono eseguite su questo computer. Per smistare la posta mentre è spento, usa i filtri del tuo provider di posta.</aside>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav><!--/review-->
