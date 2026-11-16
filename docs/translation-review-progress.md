@@ -12,8 +12,8 @@ Commit completed batches regularly and preserve an exact resume point.
   52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
 - `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
   and git history before resuming, so later source or translation changes are not missed.
-- Resume with Italian `core.ftl` (449 entries),
-  its remaining platform/help catalogs (255 entries) and all 52 help topics. Italian app.ftl is reviewed.
+- Resume with the remaining 33 Italian help topics. All 1,331 Italian catalog entries and the first 19 help topics
+  are reviewed. The exact pending topic list is in the state file.
   Dutch is fully reviewed: 1,331 catalog entries and 52 help topics. Eighteen new languages remain.
   No language is considered complete merely because automated checks pass.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
@@ -93,8 +93,22 @@ changed to resolve them across shared menus; visible wording is unchanged. All 1
 Dutch now has 193 improved catalog
 values. Dutch help checkpoint: `7e7dd500`; Italian UI checkpoint: `9ee040ad`.
 
-Current totals: 2,022 catalog entries and 56 help pages reviewed; 293 catalog values improved. Remaining:
-23,331 catalog entries and 936 help pages. `REVIEWED` remains unchanged until the full round is complete.
+### Italian core, platform catalogs and first 19 help topics
+
+Reviewed all 449 core entries and 255 remaining platform/help-title entries, improving 127 values.
+Added singular agreement where the code can supply one result, selected item, deleted item or verified part.
+Corrected queued agent messages, key protection/publication, imported credentials and count summaries.
+Checked platform-specific wording and Cc/Ccn shortcuts. Regenerated and inspected installer and Linux store text.
+Italian now has 190 improved catalog values. Dutch shortcut follow-up checkpoint: `becd2162`.
+
+Reviewed the first 19 help topics: account setup, main window, layouts, reading/searching/conversations, mail
+organization/deletion, folders, composing/replies/signatures, attachments, message files, drafts/outbox, address book, new mail and unified inboxes. Corrected obsolete
+folder navigation and attachment cleanup descriptions, and replaced literal wording with natural instructions.
+All 72 localization/help tests passed after catalog changes, followed by the 61 help tests after the first 15
+help topics. The next four topics pass structural checks; their Rust tests will run with the next help batch. Structural checks and inventory/hash reconciliation pass; only intentionally cleared marks remain.
+
+Current totals: 2,726 catalog entries and 75 help pages reviewed; 420 catalog values improved. Remaining:
+22,627 catalog entries and 917 help pages. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

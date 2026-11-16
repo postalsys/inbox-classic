@@ -213,6 +213,7 @@ account (masculine, invariable); allegato; contrassegno (contrassegnare); Rispon
 
 - Informal "tu" ("Fai clic", "Scegli", "Inserisci").
 - Message rules "elaborano" messages; reserve "ordinare" for the display order of a message list.
+- Translate blocklist as "lista di blocco". In count summaries, use singular agreement when one item is possible.
 - Use "firma digitale" where needed to distinguish cryptographic signatures from account signatures.
 - Keep "passphrase", "chiave privata", "chiave pubblica" and "impronta digitale" consistent; key verification
   confirms ownership and requires checking every listed address before confirming.

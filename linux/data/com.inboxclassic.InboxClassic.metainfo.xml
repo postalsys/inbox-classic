@@ -74,9 +74,9 @@
       putem preglednika.
     </p>
     <p xml:lang="it">
-      Inbox Classic legge e scrive e-mail con le cartelle a sinistra, i messaggi in alto e il messaggio sotto, come
-      facevano i programmi di posta di una volta. Funziona con qualsiasi account IMAP e SMTP e accede a Outlook.com e
-      Microsoft 365 tramite il browser.
+      Con Inbox Classic leggi e scrivi e-mail in un’interfaccia familiare: cartelle a sinistra, elenco dei messaggi in
+      alto e contenuto del messaggio selezionato sotto. Funziona con qualsiasi account IMAP e SMTP e permette di
+      accedere a Outlook.com e Microsoft 365 tramite il browser.
     </p>
     <p xml:lang="lv">
       Inbox Classic lasa un raksta e-pastu ar mapēm kreisajā pusē, ziņojumiem augšā un ziņojumu apakšā, kā to darīja
@@ -186,10 +186,10 @@
       <li xml:lang="hr">Pretraživanje koje pronalazi riječi u predmetu, osobama, nazivima datoteka i tekstu, s Gmailovim operatorima</li>
       <li xml:lang="hr">Odgovori sažimaju ranije poruke koje citiraju</li>
       <li xml:lang="hr">Pošta ostaje čitljiva i bez veze s internetom; lozinke se čuvaju u vašem privjesku ključeva</li>
-      <li xml:lang="it">Ogni messaggio viene mostrato ripulito, senza script, e le immagini da internet solo quando lo consenti</li>
-      <li xml:lang="it">Una ricerca che trova le parole nell’oggetto, nei mittenti e destinatari, nei nomi dei file e nel testo, con gli operatori di Gmail</li>
-      <li xml:lang="it">Le risposte nascondono i messaggi precedenti che citano</li>
-      <li xml:lang="it">La posta resta leggibile offline; le password sono conservate nel tuo portachiavi</li>
+      <li xml:lang="it">I messaggi vengono visualizzati senza script e altri contenuti potenzialmente pericolosi; le immagini da internet vengono caricate solo con il tuo consenso</li>
+      <li xml:lang="it">Ricerca nell’oggetto, nei mittenti, nei destinatari, nei nomi degli allegati e nel testo dei messaggi, con il supporto degli operatori di Gmail</li>
+      <li xml:lang="it">Il testo dei messaggi precedenti citato nelle risposte viene compresso e può essere espanso quando serve</li>
+      <li xml:lang="it">La posta già scaricata si può leggere anche offline; le password vengono conservate nel portachiavi</li>
       <li xml:lang="lv">Katrs ziņojums tiek parādīts attīrīts, bez skriptiem, un attēli no interneta tikai tad, kad jūs to atļaujat</li>
       <li xml:lang="lv">Meklēšana, kas atrod vārdus tēmā, sūtītājos un adresātos, failu nosaukumos un tekstā, ar Gmail operatoriem</li>
       <li xml:lang="lv">Atbildēs tiek sakļauti agrākie ziņojumi, ko tās citē</li>
