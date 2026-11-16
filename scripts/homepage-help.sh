@@ -42,11 +42,28 @@ cat >"$HOMEPAGE/help/index.html" <<EOF
 <script>
 (function () {
     var languages = [${languages}];
+    // as the app picks one (pe_i18n::supported): the language (no is nb), then the one of the tag's region or
+    // script (pt-BR), then the language's own (pt), then its first (every Serbian gets sr-Latn)
+    function pick(tag) {
+        var parts = String(tag).split(/[.@]/)[0].split(/[-_]/);
+        var primary = parts[0].toLowerCase() === 'no' ? 'nb' : parts[0].toLowerCase();
+        var same = [], plain = null;
+        for (var i = 0; i < languages.length; i++) {
+            var own = languages[i].split('-');
+            if (own[0] !== primary) continue;
+            for (var k = 1; own[1] && k < parts.length; k++) {
+                if (parts[k].toLowerCase() === own[1].toLowerCase()) return languages[i];
+            }
+            if (!own[1]) plain = languages[i];
+            same.push(languages[i]);
+        }
+        return plain || same[0] || null;
+    }
     var language = 'en';
     var wanted = navigator.languages || [navigator.language || 'en'];
     for (var i = 0; i < wanted.length; i++) {
-        var code = String(wanted[i]).slice(0, 2).toLowerCase();
-        if (languages.indexOf(code) >= 0) { language = code; break; }
+        var found = pick(wanted[i]);
+        if (found) { language = found; break; }
     }
     var platform = (navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || '';
     var name = /mac/i.test(platform) ? 'mac' : /linux/i.test(platform) && !/android/i.test(navigator.userAgent) ? 'linux' : 'windows';

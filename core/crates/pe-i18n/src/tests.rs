@@ -105,6 +105,46 @@ fn chooses_the_language() {
 }
 
 #[test]
+fn tags_as_gettext_writes_them() {
+    assert_eq!(gettext_locale("pt-BR"), "pt_BR");
+    assert_eq!(gettext_locale("sr-Latn"), "sr@latin");
+    assert_eq!(gettext_locale("nb"), "nb");
+    assert_eq!(gettext_locale("de"), "de");
+}
+
+/// The CLDR plural category of `n` in the catalog of `code`, as its bundle picks it
+fn category(code: &str, n: i64) -> String {
+    let tag: unic_langid::LanguageIdentifier = locale(code).parse().unwrap();
+    let mut bundle = Bundle::new_concurrent(vec![tag]);
+    let resource = FluentResource::try_new(
+        "c = { $n ->\n [zero] zero\n [one] one\n [two] two\n [few] few\n [many] many\n *[other] other\n}\n".into(),
+    )
+    .unwrap();
+    bundle.add_resource(resource).unwrap();
+    format(&bundle, "c", &[("n", Arg::Num(n))]).unwrap()
+}
+
+#[test]
+fn plurals_follow_cldr() {
+    let categories = |code: &str, numbers: &[i64]| numbers.iter().map(|n| category(code, *n)).collect::<Vec<_>>();
+    // Brazil's `one` takes 0 and 1 (CLDR's pt), Portugal's only 1 (pt-PT)
+    assert_eq!(categories("pt-BR", &[0, 1, 2]), ["one", "one", "other"]);
+    assert_eq!(categories("pt", &[0, 1, 2]), ["other", "one", "other"]);
+    for code in ["tr", "nb", "ca"] {
+        assert_eq!(
+            categories(code, &[0, 1, 2, 5]),
+            ["other", "one", "other", "other"],
+            "{code}"
+        );
+    }
+    // Serbian by the last digits, as Croatian
+    assert_eq!(
+        categories("sr-Latn", &[1, 2, 5, 11, 21, 22, 25]),
+        ["one", "few", "other", "other", "one", "few", "other"]
+    );
+}
+
+#[test]
 fn mnemonics() {
     assert_eq!(without_mnemonic("&Reply to Sender"), "Reply to Sender");
     assert_eq!(without_mnemonic("Q&&A"), "Q&A");
@@ -206,9 +246,20 @@ fn the_scripts_read_the_list_of_languages() {
     assert_eq!(read, listed, "one language a line, as scripts/languages.sh reads them");
     assert_eq!(LANGUAGES[0].0, "en", "English first");
     for (code, _) in LANGUAGES {
+        // the language's two letters, and a region (`pt-BR`) or a script (`sr-Latn`), as the pictures and scripts
+        // take them
+        let (language, more) = code.split_once('-').unwrap_or((code, ""));
         assert!(
-            code.len() == 2 && code.bytes().all(|b| b.is_ascii_lowercase()),
-            "{code}: a two-letter code, as the pictures and scripts take it"
+            language.len() == 2 && language.bytes().all(|b| b.is_ascii_lowercase()),
+            "{code}: the language's two letters"
+        );
+        assert!(
+            more.is_empty()
+                || (more.len() == 2 && more.bytes().all(|b| b.is_ascii_uppercase()))
+                || (more.len() == 4
+                    && more.as_bytes()[0].is_ascii_uppercase()
+                    && more.bytes().skip(1).all(|b| b.is_ascii_lowercase())),
+            "{code}: a region or a script after the language"
         );
         assert!(
             CATALOGS.iter().any(|(c, _)| c == code),

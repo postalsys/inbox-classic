@@ -11,7 +11,8 @@ use fluent_bundle::{FluentArgs, FluentResource, FluentValue};
 
 include!(concat!(env!("OUT_DIR"), "/texts.rs"));
 
-/// The languages there is a catalog of, by code, with their names in themselves, as the language choice lists them.
+/// The languages there is a catalog of, by tag, with their names in themselves, as the language choice lists them: the
+/// language's two letters, with a region (`pt-BR`) or a script (`sr-Latn`) for one written differently there.
 /// Everything made per language follows this list: the installer's languages and words, the sign-in buttons, the
 /// Linux desktop entry and metainfo, the Mac's localizations and Help Book, the homepage's help, the UI tests. Keep
 /// one language a line as it is, `scripts/languages.sh` reads them so (a test checks it).
@@ -52,11 +53,12 @@ struct Language {
     bundle: Arc<Bundle>,
 }
 
-/// The locale a catalog's plurals follow: `pt` is the Portuguese of Portugal, where only 1 is `one` (CLDR's `pt` is
-/// Brazil's, where 0 is `one` too)
+/// The locale a catalog's plurals follow: `pt` is the Portuguese of Portugal, where only 1 is `one`, `pt-BR` Brazil's,
+/// CLDR's `pt`, where 0 is `one` too; the others are their own tags
 fn locale(code: &str) -> &str {
     match code {
         "pt" => "pt-PT",
+        "pt-BR" => "pt",
         other => other,
     }
 }
@@ -86,18 +88,46 @@ fn current() -> &'static RwLock<Option<Language>> {
     &CURRENT
 }
 
-/// The code of the catalog for a language tag (`de-AT`, `de_DE.UTF-8`, `et`), the pseudo-language included; None for
-/// a language there is none of
+/// The code of the catalog for a language tag (`de-AT`, `de_DE.UTF-8`, `pt-BR`, `sr-Latn-RS`, `sr_RS@latin`, `et`),
+/// the pseudo-language included; None for a language there is none of. The language first (`no` is Norwegian
+/// Bokmål's `nb`), then of its catalogs the one of the tag's region or script, then the language's own (`pt`, for
+/// Portugal, Angola and the rest), then its first: every Serbian gets `sr-Latn`, whichever script the system writes.
 pub fn supported(tag: &str) -> Option<&'static str> {
-    let primary = tag
-        .split(['-', '_', '.', '@'])
-        .next()
-        .unwrap_or_default()
-        .to_ascii_lowercase();
+    // the encoding (`.UTF-8`) and the modifier (`@latin`) say nothing of the language
+    let tag = tag.split(['.', '@']).next().unwrap_or_default();
+    let mut parts = tag.split(['-', '_']);
+    let primary = parts.next().unwrap_or_default().to_ascii_lowercase();
     if primary == PSEUDO {
         return Some(PSEUDO);
     }
-    LANGUAGES.iter().map(|(code, _)| *code).find(|code| *code == primary)
+    let primary = match primary.as_str() {
+        "no" => "nb",
+        other => other,
+    };
+    let same = || {
+        LANGUAGES
+            .iter()
+            .map(|(code, _)| *code)
+            .filter(move |code| code.split('-').next() == Some(primary))
+    };
+    let subtags: Vec<&str> = parts.collect();
+    same()
+        .find(|code| {
+            code.split_once('-')
+                .is_some_and(|(_, own)| subtags.iter().any(|s| s.eq_ignore_ascii_case(own)))
+        })
+        .or_else(|| same().find(|code| !code.contains('-')))
+        .or_else(|| same().next())
+}
+
+/// A tag of [`LANGUAGES`] as gettext and the freedesktop files write a locale (Linux's desktop entry, its metainfo, the
+/// help folders of Yelp): `pt_BR`, `sr@latin`
+pub fn gettext_locale(code: &str) -> String {
+    match code.split_once('-') {
+        Some((language, "Latn")) => format!("{language}@latin"),
+        Some((language, region)) => format!("{language}_{region}"),
+        None => code.to_string(),
+    }
 }
 
 /// The language for the system's preferred languages, the first one there is a catalog of, English when none
