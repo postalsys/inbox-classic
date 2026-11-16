@@ -321,14 +321,15 @@ fn groups(condition: &str, sort: Sort) -> String {
     )
 }
 
-/// The column of an order other than by date, as [`Sort::order_by`] has it, without its collation
-fn key_column(field: SortField) -> &'static str {
+/// The column of an order other than by date, as [`Sort::order_by`] has it, without its collation (which
+/// [`group_order`] adds)
+fn key_column(field: SortField) -> String {
     match field {
-        SortField::From => "(CASE from_name WHEN '' THEN from_address ELSE from_name END)",
-        SortField::To => "recipients",
-        SortField::Subject => "subject",
-        SortField::Size => "size",
-        SortField::Date | SortField::Received => "date",
+        SortField::From => crate::fold::dotless_as_i(crate::messages::FROM_KEY),
+        SortField::To => crate::fold::dotless_as_i("recipients"),
+        SortField::Subject => crate::fold::dotless_as_i("subject"),
+        SortField::Size => "size".to_string(),
+        SortField::Date | SortField::Received => "date".to_string(),
     }
 }
 

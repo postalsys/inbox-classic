@@ -104,7 +104,7 @@ pub struct Search {
 /// column, matched at the start of a word so that results come while typing (a phrase: its last word whole). None when
 /// it has no word in it (only punctuation).
 fn fts_word(word: &Word) -> Option<String> {
-    let text = word.text.replace('"', "");
+    let text = crate::fold::indexed(&word.text.replace('"', ""));
     if !text.chars().any(char::is_alphanumeric) {
         return None;
     }
@@ -510,13 +510,15 @@ impl Store {
         self.db
             .prepare_cached("DELETE FROM messages_fts WHERE rowid = ?1")?
             .execute([message])?;
+        // ı as i, as the schema's trigger indexes the rest
         self.db.prepare_cached(
             "INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) \
-             SELECT id, subject, CASE sender_people WHEN '' THEN from_name || ' ' || from_address ELSE sender_people END, \
-             CASE recipient_people WHEN '' THEN recipients ELSE recipient_people END, attachment_names, ?2 \
-             FROM messages WHERE id = ?1",
+             SELECT id, replace(subject, 'ı', 'i'), \
+             replace(CASE sender_people WHEN '' THEN from_name || ' ' || from_address ELSE sender_people END, 'ı', 'i'), \
+             replace(CASE recipient_people WHEN '' THEN recipients ELSE recipient_people END, 'ı', 'i'), \
+             replace(attachment_names, 'ı', 'i'), ?2 FROM messages WHERE id = ?1",
         )?
-        .execute(params![message, text.body])?;
+        .execute(params![message, crate::fold::indexed(&text.body)])?;
         self.db
             .prepare_cached("UPDATE bodies SET indexed = 1 WHERE message_id = ?1 AND indexed = 0")?
             .execute([message])?;

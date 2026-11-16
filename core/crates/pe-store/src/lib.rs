@@ -12,6 +12,7 @@ mod bounces;
 mod cards;
 mod contacts;
 mod download;
+mod fold;
 mod folders;
 mod marks;
 mod messages;
@@ -28,6 +29,8 @@ mod sign_in_apps;
 pub(crate) mod threads;
 mod transfers;
 mod trusted;
+#[cfg(test)]
+mod turkish;
 
 use std::path::Path;
 
@@ -78,6 +81,7 @@ impl Store {
         db.pragma_update(None, "foreign_keys", true)?;
         db.pragma_update(None, "synchronous", "NORMAL")?;
         db.busy_timeout(std::time::Duration::from_secs(5))?;
+        fold::register(&db)?;
         let mut store = Store { db };
         schema::migrate(&mut store.db)?;
         Ok(store)
