@@ -12,8 +12,8 @@ Commit completed batches regularly and preserve an exact resume point.
   52 help topics; de/es/et/fr each have 16 new installer/Linux entries and one changed help passage.
 - `translation-review-state.json` records exact pending IDs/pages and completed-batch hashes. Compare hashes
   and git history before resuming, so later source or translation changes are not missed.
-- Resume with Dutch help: 44 topics remain, starting with message-rules, delete-and-undo and folders.
-  All 1,331 Dutch catalog entries and the first eight help topics are reviewed. The other 18 new languages follow.
+- Resume with Italian `app.ftl` (626 entries), followed by its other catalogs and all 52 help topics.
+  Dutch is fully reviewed: 1,331 catalog entries and 52 help topics. Eighteen new languages remain.
   No language is considered complete merely because automated checks pass.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
 
@@ -68,8 +68,23 @@ search indexing and quoted-message folding from actual app behavior. All 61 help
 
 Checkpoint `3eeae77a` saved the first 691 entries and round-1 archive.
 
-Current totals: 1,395 catalog entries and 12 help pages reviewed; 222 catalog values improved. Remaining:
-23,958 catalog entries and 980 help pages. `REVIEWED` remains unchanged until the full round is complete.
+### Dutch help completed
+
+Reviewed the remaining 44 topics in six batches. Improved natural instructions throughout and corrected
+context in account transfer, key verification, attachment handling, folder creation, agent sending and settings.
+All 52 Dutch help topics are now reviewed. Preserved markup, shortcuts, control references and platform branches.
+All 72 localization/help tests passed after the final edits. Structural checks pass with only the 1,331
+catalog and 52 help marks intentionally removed. Inventory and source hashes reconcile; git diff --check passes.
+
+Checkpoint `d7e3090e` saved Dutch core/platform catalogs and the first eight help topics. Dutch catalog edits
+total 185 improved values; the existing-language additions account for the other 37.
+
+Current totals: 1,395 catalog entries and 56 help pages reviewed; 222 catalog values improved. Remaining:
+23,958 catalog entries and 936 help pages. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
+
+Additional context for later languages: a TLS-required server response does not prove the password valid;
+a malformed message is unreadable by this app, not necessarily every mail app. Attachment opening uses an
+external handler after saving a temporary copy. The sign-in-page-file switch writes a URL, not page HTML.

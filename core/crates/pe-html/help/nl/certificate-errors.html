@@ -1,18 +1,17 @@
-<!--review--><h1>Certificaatfouten</h1>
-<p class="summary">Wat je doet als Inbox Classic niet kan bevestigen dat het met de echte mailserver praat.</p>
+<h1>Certificaatfouten</h1>
+<p class="summary">Los problemen op wanneer Inbox Classic de identiteit van de mailserver niet kan bevestigen.</p>
 <p>Je ziet misschien een van deze meldingen:</p>
 <ul>
     <li>In de statusbalk: “TLS-fout: …”</li>
     <li>In het leesvenster: “De verbinding met de mailserver kon niet worden beveiligd (…).”</li>
 </ul>
-<p>Inbox Classic kon niet bevestigen dat de server is wie hij zegt te zijn, en heeft je wachtwoord daarom niet verzonden.</p>
+<p>Inbox Classic kon de identiteit van de server niet bevestigen. Daarom is je wachtwoord niet verzonden.</p>
 <p>Zo los je het op:</p>
 <ol>
     <li>Open de eigenschappen van het account in <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
     <li>Controleer de servernamen. Het moeten de namen zijn waarvoor het certificaat van de server is gemaakt. Dat is vaak de naam van je provider, zoals <code>imap.provider.com</code>, niet je eigen domein.</li>
     <li>Controleer of de datum en tijd van je computer kloppen.</li>
 </ol>
-<p>Op een netwerk dat versleuteld verkeer inspecteert, zoals sommige kantoor- of schoolnetwerken, vraag je het de beheerder.</p>
-<aside class="note">Er is geen schakelaar om elk certificaat te accepteren. Als je een vals certificaat accepteert, kan iemand op het netwerk je wachtwoord en je mail lezen.</aside>
+<p>Op een netwerk dat versleuteld verkeer inspecteert, zoals sommige kantoor- of schoolnetwerken, vraag je de beheerder om hulp.</p>
+<aside class="note">Je kunt de certificaatcontrole niet uitschakelen. Als je een vals certificaat accepteert, kan iemand op het netwerk je wachtwoord en je mail lezen.</aside>
 <nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->
