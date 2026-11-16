@@ -135,6 +135,17 @@ fn fts_term(any_of: &[Word]) -> Option<String> {
     }
 }
 
+/// The subject, senders, recipients and file names of a message as the search index has them, of the row `row`
+/// (`new.` in the schema's trigger, empty in a SELECT): ı as i, which unicode61 does not fold
+pub(crate) fn fts_columns(row: &str) -> String {
+    format!(
+        "replace({row}subject, 'ı', 'i'), \
+         replace(CASE {row}sender_people WHEN '' THEN {row}from_name || ' ' || {row}from_address ELSE {row}sender_people END, 'ı', 'i'), \
+         replace(CASE {row}recipient_people WHEN '' THEN {row}recipients ELSE {row}recipient_people END, 'ı', 'i'), \
+         replace({row}attachment_names, 'ı', 'i')"
+    )
+}
+
 /// The current time, for `older_than:`
 fn now() -> i64 {
     std::time::SystemTime::now()
@@ -525,15 +536,13 @@ impl Store {
         self.db
             .prepare_cached("DELETE FROM messages_fts WHERE rowid = ?1")?
             .execute([message])?;
-        // ı as i, as the schema's trigger indexes the rest
-        self.db.prepare_cached(
-            "INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) \
-             SELECT id, replace(subject, 'ı', 'i'), \
-             replace(CASE sender_people WHEN '' THEN from_name || ' ' || from_address ELSE sender_people END, 'ı', 'i'), \
-             replace(CASE recipient_people WHEN '' THEN recipients ELSE recipient_people END, 'ı', 'i'), \
-             replace(attachment_names, 'ı', 'i'), ?2 FROM messages WHERE id = ?1",
-        )?
-        .execute(params![message, crate::fold::indexed(&text.body)])?;
+        self.db
+            .prepare_cached(&format!(
+                "INSERT INTO messages_fts (rowid, subject, senders, recipients, attachments, body) \
+                 SELECT id, {}, ?2 FROM messages WHERE id = ?1",
+                fts_columns("")
+            ))?
+            .execute(params![message, crate::fold::indexed(&text.body)])?;
         self.db
             .prepare_cached("UPDATE bodies SET indexed = 1 WHERE message_id = ?1 AND indexed = 0")?
             .execute([message])?;

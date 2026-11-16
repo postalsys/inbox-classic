@@ -343,9 +343,9 @@ fn groups(condition: &str, sort: Sort) -> String {
 /// [`group_order`] adds)
 fn key_column(field: SortField) -> String {
     match field {
-        SortField::From => crate::fold::dotless_as_i(crate::messages::FROM_KEY),
-        SortField::To => crate::fold::dotless_as_i("recipients"),
-        SortField::Subject => crate::fold::dotless_as_i("subject"),
+        SortField::From => crate::messages::FROM_KEY.to_string(),
+        SortField::To => crate::messages::TO_KEY.to_string(),
+        SortField::Subject => crate::messages::SUBJECT_KEY.to_string(),
         SortField::Size => "size".to_string(),
         SortField::Date | SortField::Received => "date".to_string(),
     }

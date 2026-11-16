@@ -1,6 +1,7 @@
 //! Turkish's two i's in what the store matches and orders: dotted İ/i and dotless I/ı are one letter to a search, the
 //! message list's order and the address completion, whichever the user types, as a Turkish user expects of a program
-//! that does not know it is in Turkish (the store lowercases with no locale).
+//! that does not know it is in Turkish (the store lowercases with no locale); and every capital beside its small
+//! letter in the list's order, in any alphabet.
 
 use crate::{AccountSettings, Card, FolderInfo, IndexText, MessageInfo, Scope, Search, Sort, SortField, Store};
 
@@ -176,6 +177,55 @@ fn the_list_orders_dotted_and_dotless_i_together() {
             .collect()
     };
     assert_eq!(threads(SortField::Subject), subjects);
+    assert_eq!(threads(SortField::From), senders);
+}
+
+#[test]
+fn the_list_orders_every_capital_with_its_small_letter() {
+    let (store, inbox, _) = store();
+    // pairs that differ only in the case of their first letter, beyond ASCII: Turkish Ç, Ş, Ö, French É, Cyrillic М
+    let pairs = [
+        ("Çiçek siparişi", "çay saati"),
+        ("Şubat raporu", "şirket gezisi"),
+        ("Ödeme planı", "öğle yemeği"),
+        ("École d'été", "élection du bureau"),
+        ("Москва", "мир"),
+    ];
+    let mut messages = vec![
+        message(1, "Ankara", ("Ayşe", "a@example.com.tr")),
+        message(2, "Zeytin", ("Zeki", "z@example.com.tr")),
+    ];
+    for (index, (upper, lower)) in pairs.iter().enumerate() {
+        let uid = 10 + index as u64 * 2;
+        messages.push(message(uid, upper, (upper, "u@example.com.tr")));
+        messages.push(message(uid + 1, lower, (lower, "l@example.com.tr")));
+    }
+    store.add_messages(inbox, &messages).unwrap();
+    for field in [SortField::Subject, SortField::From] {
+        for threads in [None, Some(Vec::new())] {
+            let search = Search {
+                scope: Scope::Folder(inbox),
+                threads: threads.clone(),
+                ..Default::default()
+            };
+            let order: Vec<u64> = store
+                .search(&search, Sort { field, ascending: true }, 0, 100)
+                .unwrap()
+                .iter()
+                .map(|m| m.info.uid)
+                .collect();
+            let place = |uid: u64| order.iter().position(|u| *u == uid).unwrap();
+            for index in 0..pairs.len() as u64 {
+                let uid = 10 + index * 2;
+                assert_eq!(
+                    place(uid).abs_diff(place(uid + 1)),
+                    1,
+                    "{field:?} {:?}: a capital beside its small letter: {order:?}",
+                    threads.is_some()
+                );
+            }
+        }
+    }
 }
 
 #[test]
