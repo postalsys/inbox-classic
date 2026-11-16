@@ -318,6 +318,29 @@ bool VerifyKeyDialog(HWND owner, PeCore* core, const std::string& fingerprint);
 // (Autocrypt); what OK took is applied by ApplyAccountSecurity once the account is saved
 std::unique_ptr<FormPart> AccountSecurityPart(PeCore* core, int64_t account);
 void ApplyAccountSecurity(FormPart& part);
+// asks for a passphrase: `intro` over it, `problem` (why the last one was not taken) between them when not empty, and
+// with `twice` a second field to type it again; true with it in `passphrase` (the caller wipes it)
+bool PassphraseDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& problem, bool twice,
+                      std::string& passphrase);
+// what is typed in the hidden field `edit` as UTF-8, its copies here wiped; and a secret gone from memory
+std::string ReadSecret(HWND edit);
+void Wipe(std::string& secret);
+
+// ---- setup.cpp ----
+
+// File > Export Settings and Accounts: the parts chosen, a passphrase when wanted, the file written where the user
+// chooses, and what it holds said
+void ExportSetupDialog(HWND owner, PeCore* core);
+// what an import did, for the main window to show: the accounts added (they sync), and the app preferences of the
+// file by their shared names when Window preferences were imported
+struct SetupImported {
+    bool imported = false;
+    std::vector<int64_t> accounts;
+    std::vector<std::pair<std::string, std::string>> prefs;
+};
+// File > Import Settings and Accounts: a setup file chosen, its passphrase asked for when it has one, what it holds
+// chosen and imported, and what was added and skipped said
+SetupImported ImportSetupDialog(HWND owner, PeCore* core);
 
 // ---- agents.cpp ----
 
@@ -435,6 +458,9 @@ void StartLanguage(const std::wstring& forced);
 // Tools > Options: the language, the new mail notifications (`notify`), the list grouped by conversation
 // (`threads`) and the layout (`layout`, a PeLayoutMode), these changed when OK is clicked. True when the user chose to restart now for a new language
 bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& codes, int& layout, bool& listPictures);
+// the language of the windows set to `code` (empty: Windows' own), as Options sets it; true when the user chose to
+// restart now for it (asked only when it is not the language of the windows now)
+bool ChooseLanguage(HWND owner, const std::wstring& code);
 
 // ---- addressbook.cpp ----
 
@@ -524,6 +550,9 @@ void OpenMailto(const std::wstring& link, int64_t account = 0);
 void WriteTo(const std::wstring& to);
 // the words put into the Find box of the main window, which searches for them at once (the rule editor's Show)
 void SearchFor(const std::wstring& words);
+// File > Import Settings and Accounts (and Add Mail Account's link before the first account): the import, then the
+// folder list, the address book and the app preferences it brought shown; the first account added, 0 for none
+int64_t ImportSetup(HWND owner);
 
 // ---- mailbox.cpp ----
 
@@ -1414,6 +1443,25 @@ enum KeysControlId : WORD {
     IDC_ACCOUNT_KEY,
     IDC_ACCOUNT_KEY_NEW,
     IDC_ACCOUNT_AUTOCRYPT,
+};
+
+// the controls of Export and Import Settings and Accounts (setup.cpp), which the UI test finds by them
+enum SetupControlId : WORD {
+    // a part's check box: IDC_SETUP_PART + its place in the core's order (accounts, sign-in apps, settings, window
+    // preferences, contacts, keys, rules, trusted senders)
+    IDC_SETUP_PART = 940,
+    // Export: the passphrase check box, its note, the fields and why what is typed is not taken
+    IDC_SETUP_USE_PASSPHRASE = 950,
+    IDC_SETUP_PASSPHRASE_NOTE,
+    IDC_SETUP_PASSPHRASE,
+    IDC_SETUP_PASSPHRASE_AGAIN,
+    IDC_SETUP_PROBLEM,
+    // Import: when and by which version the file was saved
+    IDC_SETUP_FROM,
+    // Add Mail Account: the link to the import
+    IDC_SETUP_FIRST_RUN,
+    // Import: an account's check box, IDC_SETUP_ACCOUNT + its place in the file's list
+    IDC_SETUP_ACCOUNT = 1000,
 };
 
 constexpr UINT_PTR TIMER_MARK_READ = 1;

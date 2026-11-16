@@ -627,6 +627,8 @@ HMENU BuildMenu() {
     AppendMenuW(file, MF_STRING, IDM_IMPORT, MenuItem(PE_TEXT_CMD_IMPORT).c_str());
     AppendMenuW(file, MF_STRING, IDM_IMPORT_ADDRESS_BOOK, MenuItem(PE_TEXT_CMD_IMPORT_ADDRESS_BOOK).c_str());
     AppendMenuW(file, MF_STRING, IDM_EXPORT_ADDRESS_BOOK, MenuItem(PE_TEXT_CMD_EXPORT_ADDRESS_BOOK).c_str());
+    AppendMenuW(file, MF_STRING, IDM_IMPORT_SETUP, MenuItem(PE_TEXT_CMD_IMPORT_SETUP).c_str());
+    AppendMenuW(file, MF_STRING, IDM_EXPORT_SETUP, MenuItem(PE_TEXT_CMD_EXPORT_SETUP).c_str());
     AppendMenuW(file, MF_STRING, IDM_PRINT, MenuItem(PE_TEXT_CMD_PRINT, L"Ctrl+P").c_str());
     AppendMenuW(file, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(file, MF_STRING, IDM_PROPERTIES, DialogMenuItem(PE_TEXT_CMD_PROPERTIES, L"Alt+Enter").c_str());
@@ -1452,6 +1454,59 @@ void SearchFor(const std::wstring& words) {
     ShowCounts();
 }
 
+namespace {
+
+// the app preferences an import brought, by their shared names, set as the menus and Options set them; the language
+// asks to restart for it as Options does
+void ApplySetupPrefs(HWND owner, const std::vector<std::pair<std::string, std::string>>& prefs) {
+    bool restart = false;
+    for (const auto& [name, value] : prefs) {
+        bool on = value == "1";
+        if (name == "notify_new_mail") {
+            SetNotify(on);
+        } else if (name == "codes_in_notifications") {
+            SetPreference(kCodesPreference, on ? 1 : 0);
+            pe_set_codes_in_notifications(on);
+        } else if (name == "group_by_conversation") {
+            g_mailbox.SetGrouped(on);
+        } else if (name == "hide_ignored") {
+            g_mailbox.SetHideIgnored(on);
+        } else if (name == "hide_read") {
+            g_mailbox.SetUnreadOnly(on);
+            UpdateUnreadOnlyButton();
+        } else if (name == "folder_list") {
+            SetFolderList(on);
+        } else if (name == "list_pictures") {
+            g_mailbox.SetListPictures(on);
+        } else if (name == "layout" && value.size() == 1 && value[0] >= '0' && value[0] <= '0' + PE_LAYOUT_MODE_COLUMNS) {
+            SetLayoutMode(static_cast<PeLayoutMode>(value[0] - '0'));
+        } else if (name == "language") {
+            restart = ChooseLanguage(owner, core::Widen(value));
+        }
+    }
+    if (restart) {
+        // as File > Exit, the messages being written asked first; started again once the window is gone
+        g_restart = true;
+        g_exiting = true;
+        PostMessageW(g_main, WM_CLOSE, 0, 0);
+    }
+}
+
+}  // namespace
+
+int64_t ImportSetup(HWND owner) {
+    SetupImported imported = ImportSetupDialog(owner, g_core.get());
+    if (!imported.imported) {
+        return 0;
+    }
+    // the accounts added (the core syncs them), the contacts, rules and keys that came in
+    g_mailbox.Reload();
+    AddressBookChanged();
+    ShowCounts();
+    ApplySetupPrefs(owner, imported.prefs);
+    return imported.accounts.empty() ? 0 : imported.accounts.front();
+}
+
 void WriteTo(const std::wstring& to) {
     int64_t account = g_mailbox.CurrentAccount();
     if (!account) {
@@ -1659,6 +1714,12 @@ void OnCommand(WORD id, WORD code) {
             !said.empty()) {
             SetStatus(said);
         }
+        return;
+    case IDM_EXPORT_SETUP:
+        ExportSetupDialog(g_main, g_core.get());
+        return;
+    case IDM_IMPORT_SETUP:
+        ImportSetup(g_main);
         return;
     case IDCANCEL:
         // Esc: the search goes first

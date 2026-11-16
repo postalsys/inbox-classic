@@ -6,6 +6,20 @@
 
 #include <algorithm>
 
+std::string ReadSecret(HWND edit) {
+    int length = GetWindowTextLengthW(edit);
+    std::vector<wchar_t> typed(static_cast<size_t>(length) + 1, L'\0');
+    GetWindowTextW(edit, typed.data(), length + 1);
+    std::string secret = core::Narrow({typed.data(), static_cast<size_t>(length)});
+    SecureZeroMemory(typed.data(), typed.size() * sizeof(wchar_t));
+    return secret;
+}
+
+void Wipe(std::string& secret) {
+    SecureZeroMemory(secret.data(), secret.size());
+    secret.clear();
+}
+
 namespace {
 
 // a key file is a few kilobytes, a whole keyring a few hundred: anything larger is no key file
@@ -73,11 +87,6 @@ bool WriteKeyFile(const std::wstring& path, const char* text, std::wstring& why)
     return done;
 }
 
-// a passphrase gone from memory
-void Wipe(std::string& secret) {
-    SecureZeroMemory(secret.data(), secret.size());
-    secret.clear();
-}
 
 // a note with the system's warning sign before it, `text` wrapped between `left` and `right`: its height. A warning
 // to keep in mind, not an error
@@ -170,15 +179,6 @@ struct PassphraseState {
     bool accepted = false;
 };
 
-// what is typed in the hidden field `edit` as UTF-8, its copies here wiped
-std::string ReadSecret(HWND edit) {
-    int length = GetWindowTextLengthW(edit);
-    std::vector<wchar_t> typed(static_cast<size_t>(length) + 1, L'\0');
-    GetWindowTextW(edit, typed.data(), length + 1);
-    std::string secret = core::Narrow({typed.data(), static_cast<size_t>(length)});
-    SecureZeroMemory(typed.data(), typed.size() * sizeof(wchar_t));
-    return secret;
-}
 
 // the fields' own copies written over before the window goes, as far as the edit control lets them be
 void WipeFields(HWND dialog) {
@@ -226,8 +226,8 @@ LRESULT CALLBACK PassphraseProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
     return SimpleProc<PassphraseState>(hwnd, message, wParam, lParam);
 }
 
-// asks for a passphrase: `intro` over it, `problem` (why the last one was not taken) between them when not empty, and
-// with `twice` a second field to type it again; true with it in `passphrase` (the caller wipes it)
+}  // namespace
+
 bool PassphraseDialog(HWND owner, const std::wstring& title, const std::wstring& intro, const std::wstring& problem, bool twice,
                       std::string& passphrase) {
     RegisterDialogClass(kPassphraseClass, PassphraseProc);
@@ -261,6 +261,8 @@ bool PassphraseDialog(HWND owner, const std::wstring& title, const std::wstring&
     passphrase = std::move(state.passphrase);
     return state.accepted;
 }
+
+namespace {
 
 // ---- New Key ----
 
