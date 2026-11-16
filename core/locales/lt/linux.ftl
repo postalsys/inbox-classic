@@ -28,7 +28,6 @@ gtk-search-indexing = { $count ->
     [one] dar indeksuojamas { $count } laiško tekstas
    *[other] dar indeksuojami { $count } laiškų tekstai
 }
-# review: new
 gtk-list-loading = Įkeliama...
 # review: new
 gtk-menu-rename = Pervardyti...

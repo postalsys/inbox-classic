@@ -26,7 +26,6 @@ win-no-bodies = Az üzenetek törzse nem jeleníthető meg.
 win-webview-failed = A WebView2 létrehozása nem sikerült.
 # review: new
 win-webview-missing = A WebView2 futtatókörnyezet nem érhető el.
-# review: new
 win-list-loading = Betöltés...
 
 ## Buttons and words used in many windows

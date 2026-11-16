@@ -27,7 +27,6 @@ win-no-bodies = Nie można wyświetlić treści wiadomości.
 win-webview-failed = Nie udało się utworzyć WebView2.
 # review: new
 win-webview-missing = Środowisko uruchomieniowe WebView2 jest niedostępne.
-# review: new
 win-list-loading = Wczytywanie...
 
 ## Buttons and words used in many windows

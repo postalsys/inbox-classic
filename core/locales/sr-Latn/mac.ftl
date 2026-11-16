@@ -89,7 +89,6 @@ mac-files-not-saved =
 mac-no-calendar-app = Na ovom Macu nema aplikacije za kalendar koja može da otvori pozivnice (datoteke .ics).
 mac-file-not-saved = Datoteku nije moguće sačuvati.
 mac-unsubscribing = Otkazivanje pretplate: { $target }…
-# review: new
 mac-loading-list = Učitavanje…
 
 ## The compose window

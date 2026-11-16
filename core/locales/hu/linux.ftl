@@ -28,7 +28,6 @@ gtk-search-indexing = { $count ->
     [one] 1 üzenet szövegének indexelése még folyamatban
    *[other] { $count } üzenet szövegének indexelése még folyamatban
 }
-# review: new
 gtk-list-loading = Betöltés...
 # review: new
 gtk-menu-rename = Átnevezés...

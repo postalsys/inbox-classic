@@ -124,7 +124,6 @@ mac-no-calendar-app = Tässä Macissa ei ole kalenteriappia kutsujen (.ics-tiedo
 mac-file-not-saved = Tiedostoa ei voitu tallentaa.
 # review: new
 mac-unsubscribing = Peruutetaan tilausta: { $target }…
-# review: new
 mac-loading-list = Ladataan…
 
 ## The compose window

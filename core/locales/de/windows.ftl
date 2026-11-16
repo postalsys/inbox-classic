@@ -16,7 +16,6 @@ win-print-title-of = Drucken: { $subject }
 win-no-bodies = Nachrichtentexte können nicht angezeigt werden.
 win-webview-failed = WebView2 konnte nicht erstellt werden.
 win-webview-missing = Die WebView2-Laufzeit ist nicht verfügbar.
-# review: new
 win-list-loading = Wird geladen...
 
 ## Schaltflächen und Wörter vieler Fenster

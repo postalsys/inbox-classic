@@ -30,7 +30,6 @@ gtk-search-indexing = { $count ->
     [few] tekst { $count } poruke još se indeksira
    *[other] tekst { $count } poruka još se indeksira
 }
-# review: new
 gtk-list-loading = Učitavanje...
 # review: new
 gtk-menu-rename = Preimenuj...

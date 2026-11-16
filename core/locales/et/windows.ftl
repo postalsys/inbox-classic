@@ -16,7 +16,6 @@ win-print-title-of = Prindi: { $subject }
 win-no-bodies = Kirjade sisu ei saa kuvada.
 win-webview-failed = WebView2 loomine ebaõnnestus.
 win-webview-missing = WebView2 käituskeskkond pole saadaval.
-# review: new
 win-list-loading = Laadimine...
 
 ## Mitme akna nupud ja sõnad

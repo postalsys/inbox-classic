@@ -19,7 +19,6 @@ win-print-title-of = Odštampaj: { $subject }
 win-no-bodies = Sadržaj poruka ne može da se prikaže.
 win-webview-failed = Prikaz poruka nije moguće pokrenuti (WebView2).
 win-webview-missing = Komponenta WebView2 za prikaz poruka nije dostupna.
-# review: new
 win-list-loading = Učitavanje...
 
 ## Buttons and words used in many windows

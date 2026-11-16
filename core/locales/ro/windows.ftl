@@ -27,7 +27,6 @@ win-no-bodies = Conținutul mesajelor nu poate fi afișat.
 win-webview-failed = Crearea WebView2 nu a reușit.
 # review: new
 win-webview-missing = Mediul de rulare WebView2 nu este disponibil.
-# review: new
 win-list-loading = Se încarcă...
 
 ## Buttons and words used in many windows

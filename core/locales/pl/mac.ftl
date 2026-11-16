@@ -133,7 +133,6 @@ mac-no-calendar-app = Na tym Macu nie ma aplikacji kalendarza, która otworzy za
 mac-file-not-saved = Nie udało się zapisać pliku.
 # review: new
 mac-unsubscribing = Wypisywanie z { $target }…
-# review: new
 mac-loading-list = Wczytywanie…
 
 ## The compose window

@@ -28,7 +28,6 @@ gtk-search-indexing = { $count ->
     [one] γίνεται ακόμη ευρετηρίαση του κειμένου { $count } μηνύματος
    *[other] γίνεται ακόμη ευρετηρίαση του κειμένου { $count } μηνυμάτων
 }
-# review: new
 gtk-list-loading = Φόρτωση...
 # review: new
 gtk-menu-rename = Μετονομασία...

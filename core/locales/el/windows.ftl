@@ -27,7 +27,6 @@ win-no-bodies = Δεν είναι δυνατή η εμφάνιση του κει
 win-webview-failed = Η δημιουργία του WebView2 απέτυχε.
 # review: new
 win-webview-missing = Το WebView2 Runtime δεν είναι διαθέσιμο.
-# review: new
 win-list-loading = Φόρτωση...
 
 ## Buttons and words used in many windows

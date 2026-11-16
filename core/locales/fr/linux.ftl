@@ -22,7 +22,6 @@ gtk-search-indexing = { $count ->
     [one] indexation du texte de { $count } message en cours
    *[other] indexation du texte de { $count } messages en cours
 }
-# review: new
 gtk-list-loading = Chargement...
 gtk-menu-rename = Renommer...
 gtk-import-one-question = Importer le message { $file } dans le dossier { $folder } ?

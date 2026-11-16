@@ -23,7 +23,6 @@ gtk-search-indexing = { $count ->
     [one] текстът на 1 съобщение все още се индексира
    *[other] текстът на { $count } съобщения все още се индексира
 }
-# review: new
 gtk-list-loading = Зареждане...
 gtk-menu-rename = Преименуване...
 gtk-import-one-question = Да се импортира ли съобщението { $file } в { $folder }?

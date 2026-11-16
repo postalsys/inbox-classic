@@ -28,7 +28,6 @@ gtk-search-indexing = { $count ->
     [one] indekserer stadig teksten i 1 meddelelse
    *[other] indekserer stadig teksten i { $count } meddelelser
 }
-# review: new
 gtk-list-loading = Indlæser...
 # review: new
 gtk-menu-rename = Omdøb...

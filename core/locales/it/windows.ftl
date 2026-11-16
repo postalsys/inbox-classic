@@ -16,7 +16,6 @@ win-print-title-of = Stampa: { $subject }
 win-no-bodies = Non è possibile mostrare il testo dei messaggi.
 win-webview-failed = Non è stato possibile inizializzare WebView2.
 win-webview-missing = Il runtime WebView2 non è disponibile.
-# review: new
 win-list-loading = Caricamento...
 
 ## Buttons and words used in many windows

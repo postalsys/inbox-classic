@@ -79,7 +79,6 @@ mac-files-not-saved =
 mac-no-calendar-app = Selles Macis pole kalendrirakendust, millega kutseid (.ics-faile) avada.
 mac-file-not-saved = Faili ei saanud salvestada.
 mac-unsubscribing = Loobutakse tellimusest { $target }…
-# review: new
 mac-loading-list = Laadimine…
 
 ## The compose window

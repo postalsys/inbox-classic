@@ -30,7 +30,6 @@ gtk-search-indexing = { $count ->
     [one] еще индексируется текст { $count } сообщения
    *[other] еще индексируется текст { $count } сообщений
 }
-# review: new
 gtk-list-loading = Загрузка...
 # review: new
 gtk-menu-rename = Переименовать...

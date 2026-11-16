@@ -35,7 +35,6 @@ gtk-search-indexing = { $count ->
     [many] trwa indeksowanie tekstu { $count } wiadomości
    *[other] trwa indeksowanie tekstu { $count } wiadomości
 }
-# review: new
 gtk-list-loading = Wczytywanie...
 # review: new
 gtk-menu-rename = Zmień nazwę...

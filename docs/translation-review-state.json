@@ -9,20 +9,10 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review the 84 new list-loading labels (3 per language), then Bulgarian help. Do not run the test suite per user instruction.",
+  "next_batch": "Bulgarian (bg): all 1334 catalog entries including new loading labels reviewed. All 52 help topics remain. No test suite per user instruction. Active workspace build/i18n-wave1.",
   "languages": {
     "bg": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [
         "account-security.html",
         "add-account.html",
@@ -1466,6 +1456,34 @@
           },
           "validation": "All 75 localization/help tests, structural checks, 32 actual shortcut scopes, inventory/source/file hash reconciliation and git diff --check pass. Generated installer/Linux metadata rebuilt and inspected; review HTML regenerated.",
           "notes": "Reviewed remaining core/platform/help-title entries: delivery and count wording, queued agent logs, key verification and recovery, transferred credentials, attachment cleanup, native controls and installer/store text."
+        },
+        {
+          "id": "bg-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/bg/windows.ftl": "eb6372c526da88d169fc0635bc02dff5c7c990f533120d97967c3289c10ba9ef",
+            "core/locales/bg/mac.ftl": "b21c3556bd9e25078352d781cb2e83a6888bb25b921541d52a558adca782e828",
+            "core/locales/bg/linux.ftl": "e7ec3a5199c05e06a2596829958626325c3b698b93af94621459fdd27340abd9"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ]
     },
@@ -2668,8 +2686,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -2738,8 +2755,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -2814,8 +2830,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -2872,7 +2887,36 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "cs-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/cs/windows.ftl": "7e431fc5c84caed17d7209777cb8b4bda1485ed7f8bdad951c1d93f8e340f9a2",
+            "core/locales/cs/mac.ftl": "b01eb2838e7f54b72e4be56f3a2fc4bd1f7308583bea6e53d14eacf511fe0f5c",
+            "core/locales/cs/linux.ftl": "6fd10f9055daf6557c22476a00920ed0577bf6f46551e51f784076ce49523ad6"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "da": {
       "pending_catalogs": {
@@ -4073,8 +4117,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -4143,8 +4186,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -4219,8 +4261,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -4277,20 +4318,39 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "da-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/da/windows.ftl": "59d5ce59a1b44b92c0abd4645b4305f34edc7478f650e60ef238fa7592b02793",
+            "core/locales/da/mac.ftl": "cd70eec8cfee6f1c5a4749e3bd3f4bc80bbd28d929e1bf5316b9706300b41da3",
+            "core/locales/da/linux.ftl": "effea5b352d290343fd5707d8afaf38713e69629d20c8d725d4ebae88f4bac30"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "de": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -4336,6 +4396,34 @@
             "Reviewed all 16 installer/Linux additions and the language-setting help passage.",
             "Clarified the Windows user account, preserved local mail during update/reinstall, named actual search fields, described quoted-message folding and limited offline reading to downloaded mail."
           ]
+        },
+        {
+          "id": "de-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/de/windows.ftl": "68c37b9a605e6cf8c70d6771b1453d891f936aa0b712201076a705f170483d3c",
+            "core/locales/de/mac.ftl": "a963ae03fc82e08f57e99ce4b5af728052e9a12353c27ca3818c9480dc29fbbd",
+            "core/locales/de/linux.ftl": "0bdc26dc6a4cbb407dac5834dd3b681ccc5a71475c23deee244ea041bc6148a6"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ]
     },
@@ -5538,8 +5626,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -5608,8 +5695,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -5684,8 +5770,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -5742,20 +5827,39 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "el-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/el/windows.ftl": "7b84d9ff0736ecf5286b12127ab1fb51f1e0286ccb0ae78ce3c7eec44fbda875",
+            "core/locales/el/mac.ftl": "3871391e01b0ec67e18be66daba27097a0f543379390f92bfc78b0d943ed1c3f",
+            "core/locales/el/linux.ftl": "a5d6d38e222c7e4372b0e199dff7e3aac447cd158b156bca36e92a783fc5abbf"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "es": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -5801,21 +5905,39 @@
             "Reviewed all 16 installer/Linux additions and the language-setting help passage.",
             "Clarified the Windows user account, preserved local mail during update/reinstall, named actual search fields, described quoted-message folding and limited offline reading to downloaded mail."
           ]
+        },
+        {
+          "id": "es-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/es/windows.ftl": "0d6f1e8dd3941d29a49dd339e8707a6041db24df23ef22119765c6053dcb90f6",
+            "core/locales/es/mac.ftl": "222780f49dcaca6204f845df0506a46e85e39da9071bef1582db039ea37d2f83",
+            "core/locales/es/linux.ftl": "3dadaf4fd5c2772bf50a455d13f72cca88d82c826ff5e5d20db9815070ee745b"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ]
     },
     "et": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -5861,6 +5983,34 @@
             "Reviewed all 16 installer/Linux additions and the language-setting help passage.",
             "Clarified the Windows user account, preserved local mail during update/reinstall, named actual search fields, described quoted-message folding and limited offline reading to downloaded mail."
           ]
+        },
+        {
+          "id": "et-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/et/windows.ftl": "c8066eb05fb189e3246a90989a2697d5579a1d351ea6635a0c25a23303c73578",
+            "core/locales/et/mac.ftl": "9389877bb94b7f366fee06823474370e0ec83c86be702215b510a57173080527",
+            "core/locales/et/linux.ftl": "0aa6d147d3da25e7315b8dc4bb385157903ca7ebf2902aa8ff4cf040cee8cfd2"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ]
     },
@@ -7063,8 +7213,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -7133,8 +7282,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -7209,8 +7357,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -7267,20 +7414,39 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "fi-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/fi/windows.ftl": "9e3da2b21adc182454e94dd6d62f0596c2877cd8d43a1c4d76936792e3811eff",
+            "core/locales/fi/mac.ftl": "4ef668e3830e82658fc6c07e27dc91c9573a8a2c67a5d5b8891506caf8207cb0",
+            "core/locales/fi/linux.ftl": "8b2d1baab84c3c7d05e5f7a9917c5943cbd3aaf12e85ebcb1455e87f76fbf8bf"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "fr": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -7326,6 +7492,34 @@
             "Reviewed all 16 installer/Linux additions and the language-setting help passage.",
             "Clarified the Windows user account, preserved local mail during update/reinstall, named actual search fields, described quoted-message folding and limited offline reading to downloaded mail."
           ]
+        },
+        {
+          "id": "fr-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/fr/windows.ftl": "672ed5e40eaf0f8565ac6ed77964c4245b494990c39f444093235c7bcee58388",
+            "core/locales/fr/mac.ftl": "348108e5d58e0396eafbed8f1b8399eb8b3158659acb84bf58de9c733e22070a",
+            "core/locales/fr/linux.ftl": "3a151b141da5b041c81b0f7c2ade74a737946b8310e98f96ee01ae23eedabf00"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ]
     },
@@ -8528,8 +8722,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -8598,8 +8791,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -8674,8 +8866,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -8732,7 +8923,36 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "hr-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/hr/windows.ftl": "1a7ebf9386a657710429e1c9e5e696e47a097ed9debdcc319110fd43a763b866",
+            "core/locales/hr/mac.ftl": "72083c9e89f52f0908c13d52d1565baf6a5b30d6b91bf49c6cde05519755f2f9",
+            "core/locales/hr/linux.ftl": "7c36d92e12864beab1ab940f71c2338ad8f87b977d6ee8b4ffb700b05919f9d7"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "hu": {
       "pending_catalogs": {
@@ -9933,8 +10153,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -10003,8 +10222,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -10079,8 +10297,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -10137,20 +10354,39 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "hu-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/hu/windows.ftl": "fe815d3f343a748f2f94f6e699cedbeac5630ad92f1adef87a43ede6d47716b5",
+            "core/locales/hu/mac.ftl": "4fefc4bb99dde578ff0a29126828d548a3a9bb705f8ae8632d504f601093fe32",
+            "core/locales/hu/linux.ftl": "8a41ee7e634f0c1a95f57bc50497ea9d416875ef42d386c8a68411aace2ba457"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "it": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -11854,6 +12090,34 @@
           },
           "validation": "All 72 pe-i18n/pe-html tests pass. Structural checks pass with only intentionally removed marks. Main/context-menu and expanded dialog mnemonics are unique. Completed inventory and source/file hashes reconcile. Generated installer/Linux metadata inspected; git diff --check passes.",
           "notes": "Expanded Windows AI Agents dialog check found access-key collisions among global enable, program controls and activity controls. Adjusted mnemonic placement only. Existing-language de/es/et/fr checks passed unchanged."
+        },
+        {
+          "id": "it-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/it/windows.ftl": "24f9a36a9a8a12f8d072dae931fdada7e79f65a7a3335c24f1eb09f91707ff2c",
+            "core/locales/it/mac.ftl": "7d0b2a30893a6116e943b3923665ec9445e9026ebdd88ed3e27f76f0587f9abc",
+            "core/locales/it/linux.ftl": "376e6fc8d7fdc05912dad388749630d397f6270fca005bdc245172650077be28"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ]
     },
@@ -13056,8 +13320,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -13126,8 +13389,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -13202,8 +13464,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -13260,7 +13521,36 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "lt-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/lt/windows.ftl": "579452d13fd8df953bc001013ab7b93899be5aa51ac782ea146da22d6beeee07",
+            "core/locales/lt/mac.ftl": "6b16e30f6b8723e831eb52ba4a645d569af25e6a134e4dedc2cb1ec1815dfad4",
+            "core/locales/lt/linux.ftl": "8b619d48e75da010a7a905935db2a95cb043cfa2c236d02329eb102cd9bdb6d9"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "lv": {
       "pending_catalogs": {
@@ -14461,8 +14751,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -14531,8 +14820,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -14607,8 +14895,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -14665,20 +14952,39 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "lv-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/lv/windows.ftl": "af51a512dd81f74dc59169830e6ca6138c143dbb222aec7bb4f912bad6432c02",
+            "core/locales/lv/mac.ftl": "2e45019ec75e09d96725bcb2f652450549ff0faf296976ae88a11830bcea82de",
+            "core/locales/lv/linux.ftl": "7e0aef8e7c795efc8ed1a4b893fed06a13479ecf25ae22abba500d473a08e832"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "nl": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -16411,6 +16717,34 @@
           },
           "validation": "All 72 pe-i18n/pe-html tests pass. Structural checks pass with only intentionally removed marks. Main/context-menu and expanded dialog mnemonics are unique. Completed inventory and source/file hashes reconcile. Generated installer/Linux metadata inspected; git diff --check passes.",
           "notes": "Expanded Windows AI Agents dialog check found access-key collisions among global enable, program controls and activity controls. Adjusted mnemonic placement only. Existing-language de/es/et/fr checks passed unchanged."
+        },
+        {
+          "id": "nl-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/nl/windows.ftl": "0a7f22782c03845a082b7d897d002dc448f678a9764e923b4010238b2aef71b4",
+            "core/locales/nl/mac.ftl": "af7fabcfebbd04125bd319efe9df425da67aeea44b562d79c26376183a3ef546",
+            "core/locales/nl/linux.ftl": "4601e2d46fba78476ea1498edf03e44a4303087d02174a5e869607614ad2c7a4"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ]
     },
@@ -17613,8 +17947,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -17683,8 +18016,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -17759,8 +18091,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -17817,20 +18148,39 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "pl-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/pl/windows.ftl": "cddb398e87f0cce2064c60393bd11b5b2378c125f9fa8fefb3e4a89d1a583d70",
+            "core/locales/pl/mac.ftl": "7c1089af543359ee938f01a9afb5cf8bac877db148cc7e2bb9147723dd0ac3f0",
+            "core/locales/pl/linux.ftl": "f85234d859bd19c27affa226b8e5ab6c24ec6f6e356de4de43fdc004741ccada"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "pt": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -19529,6 +19879,34 @@
           },
           "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
           "notes": "Reviewed all search operators and keyboard tables. Checked recipient search maps to the combined recipient field, message list has no size column, and actual Portuguese Cc/Bcc mnemonics remain Alt+C/Alt+B. Preserved literal keyboard markup."
+        },
+        {
+          "id": "pt-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/pt/windows.ftl": "8bf22e29ade66ea618c841d90c26dd8bf73e56737cdf48201222afc90a0d4ce9",
+            "core/locales/pt/mac.ftl": "7bf74339d6583c081daf1ae875c12ca6aed4f0a46992367a204d318a424b2045",
+            "core/locales/pt/linux.ftl": "b7c5407014131bc4fed8503a2101d2c8512e8d1fdacbd5576829100e8942ddaa"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ]
     },
@@ -20731,8 +21109,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -20801,8 +21178,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -20877,8 +21253,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -20935,7 +21310,36 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "ro-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/ro/windows.ftl": "3b80f0ff35a45799917d63bd491e7cd541543434f7e7e94f7d085ea39473f15f",
+            "core/locales/ro/mac.ftl": "dd362540ea6e147afc70ccdb53f6751bd14376fd38f0cdd18aa5e0c1c43952cc",
+            "core/locales/ro/linux.ftl": "f4ae5395897b7e49af8d9f94b1d92c427566ee790a2a8f570841e74f6cf92b86"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "ru": {
       "pending_catalogs": {
@@ -22136,8 +22540,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -22206,8 +22609,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -22282,8 +22684,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -22340,7 +22741,36 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "ru-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/ru/windows.ftl": "374d916545f0cf042ac0e01b853ddf22d04151aa9781e89473b418baa8529095",
+            "core/locales/ru/mac.ftl": "f1578a91ecc36d1d44cdd79007f266bbaa29a59fee699c25b87956d61d75544e",
+            "core/locales/ru/linux.ftl": "031e15ac28cdbcbc4fd9155fff64c95612ffbcd5f403dd2de4a620de7bafe77a"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "sk": {
       "pending_catalogs": {
@@ -23541,8 +23971,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -23611,8 +24040,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -23687,8 +24115,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -23745,7 +24172,36 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "sk-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sk/windows.ftl": "bb411f7477477609e8ffd169a3660667746cdc3e1a158a0cabc9ff03087c53c3",
+            "core/locales/sk/mac.ftl": "1d6bcc61ba08eb789571deecb6064644c3145d282db2dfb40a414a3e5c9d4639",
+            "core/locales/sk/linux.ftl": "a962f283e3d8f1e00b3e947339cc9bfb860caf91cc4eb7caec8ae0e3b41a7774"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "sl": {
       "pending_catalogs": {
@@ -24946,8 +25402,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -25016,8 +25471,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -25092,8 +25546,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -25150,7 +25603,36 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "sl-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sl/windows.ftl": "e167e075fe24f8689e5a189efa0c6968ea6b27b734c5987d122545ffd6f02c12",
+            "core/locales/sl/mac.ftl": "4ac500265d08356778102d60a111e444dc7144fa228c8976229ef2030f9b68c5",
+            "core/locales/sl/linux.ftl": "4046a79faf0f094825a5ad7affa867c15b17417b9741db0ef5ec6078b91c7033"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "sv": {
       "pending_catalogs": {
@@ -26351,8 +26833,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -26421,8 +26902,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -26497,8 +26977,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -26555,7 +27034,36 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "sv-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sv/windows.ftl": "6ab3973c8c6f0ad6ca8599308f3d7e5b6ffa5607ddf813bd8b66512776d2a3ae",
+            "core/locales/sv/mac.ftl": "389545cfc1df69bcafa0e0720ecaf031b7b1d12398c3bf6602d19c2c79855d91",
+            "core/locales/sv/linux.ftl": "725b6bf0a4fba864f772685909a9e97f2ce67f10c8b3937488bcbb5c4144c00c"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "uk": {
       "pending_catalogs": {
@@ -27756,8 +28264,7 @@
           "gtk-metainfo-feature-sanitized",
           "gtk-metainfo-feature-search",
           "gtk-metainfo-feature-replies",
-          "gtk-metainfo-feature-offline",
-          "gtk-list-loading"
+          "gtk-metainfo-feature-offline"
         ],
         "mac.ftl": [
           "mac-quit",
@@ -27826,8 +28333,7 @@
           "mac-use-for-new-accounts",
           "mac-built-in",
           "mac-new-folder-button",
-          "mac-edit-link",
-          "mac-loading-list"
+          "mac-edit-link"
         ],
         "windows.ftl": [
           "win-still-running-detail",
@@ -27902,8 +28408,7 @@
           "win-installer-welcome-update",
           "win-installer-older-ask",
           "win-installer-still-running",
-          "win-installer-remove-mail-ask",
-          "win-list-loading"
+          "win-installer-remove-mail-ask"
         ]
       },
       "pending_help": [
@@ -27960,20 +28465,39 @@
         "verify-a-key.html",
         "write-message.html"
       ],
-      "completed_batches": []
+      "completed_batches": [
+        {
+          "id": "uk-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/uk/windows.ftl": "d7df0af1dfd227b9393aab330eaf52fc6ca394dce7aa6c45233ced2958275db5",
+            "core/locales/uk/mac.ftl": "4363d99a7a64cc470b95bf435a76d05205304a5b77e5b7d8973b4d6a8072f11d",
+            "core/locales/uk/linux.ftl": "a9a6eca36a0de5d0d535ef33549962b6564d4fdae3d7b865c987ab6c20882ebc"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        }
+      ]
     },
     "ca": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -29606,6 +30130,34 @@
           },
           "validation": "All 75 localization/help tests pass. Structural checks report only intentionally removed marks; inventory and source/file hashes reconcile (6,719 entries and 3,499 help lines). Inline spacing and git diff --check pass.",
           "notes": "Reviewed remaining 17 agent, message-action, troubleshooting and reference topics. Corrected queued sending, credential failures, secure connections, default application instructions, URL-file output, search operators and Catalan recipient shortcuts. Preserved all markup and literal keyboard tags."
+        },
+        {
+          "id": "ca-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 3,
+          "files": {
+            "core/locales/ca/windows.ftl": "88360c3458a0ba65995092670510a6dc3bbe890aac955da5dd86841669d3f599",
+            "core/locales/ca/mac.ftl": "a68c2e867473f3148383caf3dc704848eb904217d2bbe14f41b3cbc31553f522",
+            "core/locales/ca/linux.ftl": "76d305d66525a4ee39f9be077b76e4698b9f67a163e189ded37b89a5127347b3"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -29613,17 +30165,7 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "nb": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -31218,6 +31760,34 @@
           },
           "validation": "All 75 localization/help tests pass. Structure, inventory/source/file hashes (8,050 entries, 4,198 help lines), inline spacing and git diff --check pass. Review HTML regenerated.",
           "notes": "Reviewed final 17 agent/message, troubleshooting and reference topics. Corrected queued sends, permission scope, domain checks, credential failures, exact localized errors, URL-file output and Norwegian recipient shortcuts. Preserved markup and literal keyboard tags."
+        },
+        {
+          "id": "nb-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/nb/windows.ftl": "3ef0fa55ac81641c85b3192316dca25b5c079b827ba2abe9b18c33c2e20dfcbc",
+            "core/locales/nb/mac.ftl": "4efae7fe00274952dcc046a4899992e7b1c08fac51cd813a044f53674821430b",
+            "core/locales/nb/linux.ftl": "0da4d611ca0303cfa2783ff544847df0ab4395c80009f36cab2723e6548e106c"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -31225,17 +31795,7 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "pt-BR": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -32845,6 +33405,34 @@
           },
           "validation": "All 75 localization/help tests pass. Structural checks report only intentionally removed marks; inventory/source/file hashes reconcile (5,388 entries and 2,800 help lines). Inline control spacing and git diff --check pass. Review HTML regenerated.",
           "notes": "Reviewed remaining 31 help topics. Corrected signature validity versus key ownership, verification order, private-key recovery, domain-authentication limits, image download privacy, queued agent sending, connection guidance and command-line behavior. Checked actual rule editor count (distinct from criteria column), error text and localized Cco access keys. Preserved all markup and literal key tags."
+        },
+        {
+          "id": "pt-BR-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/pt-BR/windows.ftl": "e5c9d1547e62e0e7ff700438b591722940e7fd494233d01237f8a51a898ec95f",
+            "core/locales/pt-BR/mac.ftl": "9768bfbdfa59344fe451be842d48d90cef57316b0d9c2ca555a75205239af72b",
+            "core/locales/pt-BR/linux.ftl": "75791538d927bfdd175747f3111a91e20e26a29a4367dcfc4b227c921c892b92"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -32852,17 +33440,7 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "sr-Latn": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -34444,6 +35022,34 @@
           },
           "validation": "All 75 pe-i18n/pe-html tests pass. Structural checks, inventory and source/file hashes, inline spacing and git diff --check pass. Review HTML regenerated.",
           "notes": "Reviewed remaining security/privacy, agent, troubleshooting and reference help. Corrected signature validity versus key ownership, private-key recovery, domain checks, image privacy, queued agent sends, conditional app passwords, exact error quotes and sign-in URL export; preserved structure and shortcuts."
+        },
+        {
+          "id": "sr-Latn-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sr-Latn/windows.ftl": "0341452321b7d2d09126495521a146e4eb96156a0165762c8c68719656f9c573",
+            "core/locales/sr-Latn/mac.ftl": "6fe7dbfe6f190b58c65bbfef00d780f8dc6b6b799d262a167902e4e93e958e7f",
+            "core/locales/sr-Latn/linux.ftl": "34b32eebb58d7ab0817483bebf1746bcd27b1e29eace7f792a8edce53f478550"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -34451,17 +35057,7 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "tr": {
-      "pending_catalogs": {
-        "windows.ftl": [
-          "win-list-loading"
-        ],
-        "mac.ftl": [
-          "mac-loading-list"
-        ],
-        "linux.ftl": [
-          "gtk-list-loading"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -36034,6 +36630,34 @@
           },
           "validation": "All 75 localization/help tests pass; structural checks, inventory/source/file hash reconciliation, inline spacing and git diff --check pass. Review HTML regenerated.",
           "notes": "Reviewed remaining security/privacy, agent, troubleshooting and reference help. Corrected ownership checks versus valid signatures, key recovery, domain/logo authentication, image privacy, queued agent sends, conditional app passwords, exact error quotes, sign-in URL export and Turkish Bilgi/Gizli shortcuts. Preserved markup and keyboard tags."
+        },
+        {
+          "id": "tr-loading-round2",
+          "reviewed_ids": {
+            "windows.ftl": [
+              "win-list-loading"
+            ],
+            "mac.ftl": [
+              "mac-loading-list"
+            ],
+            "linux.ftl": [
+              "gtk-list-loading"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/tr/windows.ftl": "3289d07509b79a04cb023f9af21d6a5961b69e181cf0b7b564dfe69dd6edcfef",
+            "core/locales/tr/mac.ftl": "68344bbe4d042f08b8ee70f2faea257a6dbad970bf07c326730de1241c8a613d",
+            "core/locales/tr/linux.ftl": "363ede0e2fde27a9b2241bf9c3ed9ce36001a37bc49c2a65116b5c0584144694"
+          },
+          "english_sources": {
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140",
+            "core/locales/en/mac.ftl": "24bec3e99b75cbfeca208b25b3d2dd2c3a37577d37a65b263684f63e092ee65f",
+            "core/locales/en/linux.ftl": "04c684847fa6e6303494d26935c263ad34af4bc14bb4c2be92ce7367d67433b4"
+          },
+          "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
+          "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -36151,5 +36775,17 @@
       "notes": "Reread current guide when hash mismatch detected on resume."
     }
   ],
-  "validation_policy": "User instruction: do not run the test suite; other sessions are running it. Continue structural checks, markup/placeholder/mnemonic checks, inventory/hash reconciliation and git diff --check. Report skipped suite execution honestly; do not claim other sessions validated this checkout without evidence."
+  "validation_policy": "User instruction: do not run the test suite; other sessions are running it. Continue structural checks, markup/placeholder/mnemonic checks, inventory/hash reconciliation and git diff --check. Report skipped suite execution honestly; do not claim other sessions validated this checkout without evidence.",
+  "checker_notes": {
+    "check-language.mjs": "messages() stops at unindented } continuation lines, unlike the runtime/catalog test variable reader; full-message variable sets verified independently for the listed false positives. Do not edit valid translations merely to satisfy the incomplete parser.",
+    "verified_false_positives": [
+      "es/core.ftl:list-counts-found",
+      "es/core.ftl:list-counts-found-selected",
+      "es/core.ftl:done-flagged-color",
+      "fr/core.ftl:list-counts-selected",
+      "fr/core.ftl:list-counts-found",
+      "fr/core.ftl:list-counts-found-selected",
+      "fr/core.ftl:done-flagged-color"
+    ]
+  }
 }

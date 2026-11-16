@@ -31,7 +31,6 @@ gtk-search-indexing = { $count ->
     [few] se indexează încă textul a { $count } mesaje
    *[other] se indexează încă textul a { $count } de mesaje
 }
-# review: new
 gtk-list-loading = Se încarcă...
 # review: new
 gtk-menu-rename = Redenumire...

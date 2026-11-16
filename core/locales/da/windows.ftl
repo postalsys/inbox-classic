@@ -27,7 +27,6 @@ win-no-bodies = Meddelelsers indhold kan ikke vises.
 win-webview-failed = WebView2 kunne ikke oprettes.
 # review: new
 win-webview-missing = WebView2-runtime er ikke tilgængelig.
-# review: new
 win-list-loading = Indlæser...
 
 ## Buttons and words used in many windows

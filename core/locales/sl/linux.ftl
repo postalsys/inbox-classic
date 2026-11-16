@@ -31,7 +31,6 @@ gtk-search-indexing = { $count ->
     [one] besedilo { $count } sporočila se še indeksira
    *[other] besedilo { $count } sporočil se še indeksira
 }
-# review: new
 gtk-list-loading = Nalaganje...
 # review: new
 gtk-menu-rename = Preimenuj...

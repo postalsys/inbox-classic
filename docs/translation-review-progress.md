@@ -16,17 +16,18 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with 84 newly arrived list-loading labels across all 28 translated languages, then Bulgarian help.
-  All 52 Bulgarian help topics remain. Dutch, Italian,
+- Resume with Bulgarian help: all 52 topics remain. All 84 late list-loading labels have been reviewed.
+  Bulgarian has 1,334 reviewed catalog entries. Dutch, Italian,
   Portuguese (Portugal), Brazilian Portuguese, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are
-  complete: each has 1,331 catalog entries and 52 help topics. Sixteen languages still have pending content,
+  complete: each has 1,334 catalog entries and 52 help topics. Sixteen languages still have pending content,
   with exact IDs/topics in the state file.
   No language is considered complete merely because automated checks pass.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
   not yet on `master` or `origin/master`. They are included in the isolated review checkout;
   the feature implementation remains on the isolated branch and has not been merged into master.
-  This adds 6,655 catalog entries and 260 help topics: total scope is now 32,008 entries and 1,252 topics.
+  This adds 6,655 catalog entries and 260 help topics: scope after that addition was 32,008 entries and 1,252 topics. The later loading labels add 84 entries,
+  bringing the current scope to 32,092 entries and 1,252 topics.
   The state records exact inventories and the source commit. Recheck the branch and master for later edits.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
 
@@ -379,8 +380,21 @@ verified unchanged. Resolved the store initialization merge by retaining Unicode
 upstream list-view state. No test suite was run, as requested. The current guide was reread after its hash
 changed. Review the new list-loading labels next; the baseline remains unchanged.
 
-Current totals: 12,043 catalog entries and 420 help pages reviewed; 1,881 catalog values improved. Remaining:
-20,049 catalog entries and 832 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Late list-loading labels reviewed
+
+Reviewed all 84 platform labels in their actual transient message-list overlays. Existing wording is suitable;
+three Catalan values now use the same apostrophe as the rest of the catalog. Structural checks across all 28
+languages pass after accounting for reviewed marks and seven parser false positives in older multiline
+messages. Their complete variable sets were independently checked against English; exact IDs are in the state.
+Inventory/source/file hashes reconcile and git diff --check passes. The test suite was intentionally not run,
+as requested. Integration checkpoint: `f8648cd2`. Bulgarian help is next.
+
+Maintainer note: `scripts/check-language.mjs` stops a message at an unindented closing brace and misses variables
+on that line. The runtime/catalog test's reader handles these continuation lines. This checker issue is recorded,
+not repaired as part of translation editing. None of the seven findings indicates a missing placeholder.
+
+Current totals: 12,127 catalog entries and 420 help pages reviewed; 1,884 catalog values improved. Remaining:
+19,965 catalog entries and 832 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

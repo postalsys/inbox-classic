@@ -124,7 +124,6 @@ mac-no-calendar-app = V tomto Macu nie je žiadna aplikácia kalendára, ktorá 
 mac-file-not-saved = Súbor sa nepodarilo uložiť.
 # review: new
 mac-unsubscribing = Odhlasovanie z { $target }…
-# review: new
 mac-loading-list = Načítava sa…
 
 ## The compose window

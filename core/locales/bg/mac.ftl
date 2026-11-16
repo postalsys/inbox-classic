@@ -83,7 +83,6 @@ mac-files-not-saved =
 mac-no-calendar-app = На този Mac няма програма за календар, с която да се отварят покани (файлове .ics).
 mac-file-not-saved = Файлът не можа да бъде запазен.
 mac-unsubscribing = Отписване от { $target }…
-# review: new
 mac-loading-list = Зареждане…
 
 ## The compose window

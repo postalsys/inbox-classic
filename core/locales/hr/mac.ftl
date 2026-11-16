@@ -126,7 +126,6 @@ mac-no-calendar-app = Na ovom Macu nema aplikacije kalendara koja bi otvorila po
 mac-file-not-saved = Datoteku nije moguće spremiti.
 # review: new
 mac-unsubscribing = Otkazivanje pretplate: { $target }…
-# review: new
 mac-loading-list = Učitavanje…
 
 ## The compose window
