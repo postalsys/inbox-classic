@@ -392,6 +392,18 @@ ui-menu-open = &Abrir
 ui-menu-flag = Marc&a
 ui-menu-view-source = Ver &código fuente
 ui-save-attachments = Guardar archivos adjuntos
+# review: new
+ui-attachment-open = Abrir
+# review: new
+ui-attachment-save-as = Guardar como...
+# review: new
+ui-attachment-save-all = Guardar todos...
+# review: new
+ui-attachments-strip = Archivos adjuntos
+# review: new
+ui-attachment-note-title = Abrir este archivo
+# review: new
+ui-attachment-program-tip = Abrir no está disponible para este tipo de archivo: puede ejecutar programas. Guárdelo para abrirlo usted mismo.
 ui-clear-flag = &Quitar marca
 ui-button-move = &Mover
 ui-button-copy = &Copiar

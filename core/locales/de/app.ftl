@@ -392,6 +392,18 @@ ui-menu-open = Ö&ffnen
 ui-menu-flag = Kenn&zeichnung
 ui-menu-view-source = &Quelltext anzeigen
 ui-save-attachments = Anlagen speichern
+# review: new
+ui-attachment-open = Öffnen
+# review: new
+ui-attachment-save-as = Speichern unter...
+# review: new
+ui-attachment-save-all = Alle speichern...
+# review: new
+ui-attachments-strip = Anlagen
+# review: new
+ui-attachment-note-title = Diese Datei öffnen
+# review: new
+ui-attachment-program-tip = Öffnen ist für diese Art von Datei aus: Sie kann Programme ausführen. Speichern Sie sie, um sie selbst zu öffnen.
 ui-clear-flag = Kennzeichnung &löschen
 ui-button-move = &Verschieben
 ui-button-copy = &Kopieren

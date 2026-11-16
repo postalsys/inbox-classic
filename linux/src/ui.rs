@@ -35,6 +35,11 @@ const STYLE: &str = "
 .reader-header { padding: 8px 10px; background-color: @headerbar_bg_color; border-bottom: 1px solid alpha(@borders, 0.6); }
 .reader-header .field { opacity: 0.7; }
 .reader-header .subject { font-weight: bold; font-size: 1.1em; }
+.reader-header.with-files { border-bottom: none; padding-bottom: 4px; }
+.attachment-strip { background-color: @headerbar_bg_color; border-bottom: 1px solid alpha(@borders, 0.6); }
+.attachment-strip flowbox { padding: 0 6px 6px; }
+flowboxchild.attachment-file { padding: 4px 10px 4px 4px; border-radius: 6px; }
+flowboxchild.attachment-file:hover { background-color: alpha(currentColor, 0.07); }
 .status-bar { padding: 3px 10px; font-size: 0.9em; border-top: 1px solid alpha(@borders, 0.6); }
 .empty-list .title { font-weight: bold; opacity: 0.6; }
 .empty-list .more { opacity: 0.6; }

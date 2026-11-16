@@ -3255,12 +3255,9 @@ fn rows_get_their_senders_pictures() {
             .find(|m| m.info.subject == subject)
             .unwrap()
     };
-    // the background worker reads the verdicts after the sync
-    let deadline = std::time::Instant::now() + Duration::from_secs(20);
-    while row("With a logo").logo.is_none() {
-        assert!(std::time::Instant::now() < deadline, "no logo on the row");
-        std::thread::sleep(Duration::from_millis(100));
-    }
+    // the background worker reads the verdicts after the sync, and tells the list of the folder, which loaded its rows
+    // before (they show the logo once it loads them again)
+    s.wait(|e| *e == Event::FolderChanged { account, folder: inbox } && row("With a logo").logo.is_some());
     let (kind, key) = pe_core::senders::picture(&row("With a logo"));
     assert_eq!(kind, pe_core::senders::PictureKind::Logo);
     assert_ne!(key, 0);

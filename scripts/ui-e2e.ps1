@@ -641,8 +641,11 @@ try {
     # page to a file, where the test opens it as the browser would
     $signInPage = Join-Path $Out 'sign-in-page.txt'
     Remove-Item -Force -ErrorAction SilentlyContinue $signInPage
+    # an attachment opened is written to a file in place of being opened, so nothing is started
+    $openedLog = Join-Path $Out 'opened-files.txt'
+    Remove-Item -Force -ErrorAction SilentlyContinue $openedLog
     $arguments = @('--store', "`"$store`"", '--memory-passwords', '--pin-certificate', "`"$($ports.cert)`"",
-        '--sign-in-page-file', "`"$signInPage`"", '--test-hooks')
+        '--sign-in-page-file', "`"$signInPage`"", '--opened-files-log', "`"$openedLog`"", '--test-hooks')
     Remove-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name ClosedFolderRows -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue
@@ -2407,6 +2410,191 @@ public static class Dragger {
     Shot $main 'secure-12-resized'
     [void][Native.Win]::SetWindowPos($main, [IntPtr]::Zero, 0, 0, ($place.Right - $place.Left), ($place.Bottom - $place.Top), 0x16)
     RemoveSecure 'secure-long.eml' 'A long encrypted message'
+
+    # ---- opening attachments ----
+
+    Step 'opening an attachment'
+    # the attachment strip under the header, in its frame (app.h), its items read as the list's rows are
+    $IDC_ATTACHMENT_STRIP = 242; $IDC_ATTACHMENT_FRAME = 243; $WM_LBUTTONDOWN = 0x0201; $WM_LBUTTONUP = 0x0202; $WM_LBUTTONDBLCLK = 0x0203
+    function StripOf([IntPtr]$window) { [Native.Win]::GetDlgItem([Native.Win]::GetDlgItem($window, $IDC_ATTACHMENT_FRAME), $IDC_ATTACHMENT_STRIP) }
+    $strip = StripOf $main
+    # the files the app opened (--opened-files-log), a path a line
+    # read sharing the file with the app, which may be writing a line
+    function OpenedFiles {
+        if (-not (Test-Path $openedLog)) { return @() }
+        $stream = [IO.File]::Open($openedLog, 'Open', 'Read', 'ReadWrite')
+        try { $text = (New-Object IO.StreamReader($stream)).ReadToEnd() } finally { $stream.Dispose() }
+        @($text -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    }
+    # where the core writes the files it opens: a folder of its own in the user's temporary folder
+    $privateRoot = (Join-Path ([IO.Path]::GetFullPath([IO.Path]::GetTempPath())) 'InboxClassic').ToLowerInvariant()
+    # the files opened after the first `before`, once there is a new one (the newest), or $null
+    function NewlyOpened([int]$before) { WaitFor { $o = @(OpenedFiles); if ($o.Count -gt $before) { $o[-1] } } 10 }
+    function InPrivateFolder([string]$path) { ([IO.Path]::GetFullPath($path)).ToLowerInvariant().StartsWith("$privateRoot\open-") }
+    # a double-click on the first item of a strip, as the mouse does it
+    function DoubleClickFirst([IntPtr]$s) {
+        $point = [IntPtr]((10 -shl 16) -bor 12)
+        [void][Native.Win]::PostMessage($s, $WM_LBUTTONDOWN, [IntPtr]1, $point)
+        [void][Native.Win]::PostMessage($s, $WM_LBUTTONUP, [IntPtr]::Zero, $point)
+        [void][Native.Win]::PostMessage($s, $WM_LBUTTONDBLCLK, [IntPtr]1, $point)
+        [void][Native.Win]::PostMessage($s, $WM_LBUTTONUP, [IntPtr]::Zero, $point)
+    }
+    $stripTexts = { param($s) @(0..([Math]::Max(0, (ListCount $s) - 1)) | ForEach-Object { [Native.Win]::RemoteListText($s, $_, 0) }) }
+    # a PDF, a program, and files of other kinds, one with a long name
+    $exe64 = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("MZ not really a program, from scripts/ui-e2e.ps1`n"))
+    $note64 = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("Bring boots.`n"))
+    # and pages, which a browser would run the scripts of: one by its extension, one by what it holds
+    $page64 = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("<!DOCTYPE html><html><script>alert(1)</script></html>`n"))
+    $filesSubject = 'Files for the walking weekend'
+    $part = { param($name, $type, $data) "--f`r`nContent-Type: $type; name=`"$name`"`r`nContent-Disposition: attachment; filename=`"$name`"`r`nContent-Transfer-Encoding: base64`r`n`r`n$data`r`n" }
+    $filesMessage = "From: Ann Example <ann@example.com>`r`nTo: testuser@inboxclassic.test`r`nSubject: $filesSubject`r`n" +
+        "Message-ID: <files@example.com>`r`nDate: Thu, 9 Oct 2025 09:00:00 +0000`r`nMIME-Version: 1.0`r`n" +
+        "Content-Type: multipart/mixed; boundary=`"f`"`r`n`r`n--f`r`nContent-Type: text/plain; charset=utf-8`r`n`r`n" +
+        "The route and everything else for the weekend are attached.`r`n" +
+        (& $part 'route.pdf' 'application/pdf' $pdf64) + (& $part 'setup.exe' 'application/octet-stream' $exe64) +
+        (& $part 'Itinerary for the autumn walking weekend in the Lake District, final version.docx' 'application/octet-stream' $note64) +
+        (& $part 'budget.xlsx' 'application/octet-stream' $note64) + (& $part 'lake.jpg' 'image/jpeg' $note64) +
+        (& $part 'packing list.txt' 'text/plain' $note64) + (& $part 'statement.xht' 'application/octet-stream' $note64) +
+        (& $part 'statement' 'application/octet-stream' $page64) + "--f--`r`n"
+    AddMessage $filesMessage @('\Seen')
+    Command $main $IDM_SYNC
+    SelectFolder 0
+    $row = WaitFor { $r = @(SubjectRows $filesSubject); if ($r.Count -gt 0) { "$($r[0])" } } 30
+    if ($null -ne $row) { SelectRow ([int]$row) }
+    $shown = WaitFor { if ([Native.Win]::IsWindowVisible($strip) -and (ListCount $strip) -eq 8) { $true } } 20
+    $texts = & $stripTexts $strip
+    Check ([bool]$shown) "the strip under the header shows each file ($($texts -join ' | '))"
+    Check (($texts[0] -match '^route\.pdf \(.*\d.*\)$') -and ($texts[1] -like 'setup.exe (*)')) "each with its name and size ($($texts[0]))"
+    Check ($texts[2].Contains('...') -and ($texts[2] -like 'Itinerary*docx (*)')) "a long name is shortened, its start and extension kept ($($texts[2]))"
+    Check ([bool]([Native.Win]::GetWindowLong($strip, -16) -band 0x00010000)) 'the strip is a Tab stop'
+    Start-Sleep -Milliseconds 800
+    Shot $main 'attach-1-strip'
+
+    # a double-click opens the PDF: the file handed over is the one sent, in the private folder
+    $before = (OpenedFiles).Count
+    DoubleClickFirst $strip
+    $opened = NewlyOpened $before
+    Check ($null -ne $opened) 'double-clicking the PDF opens it'
+    if ($opened) {
+        Check (InPrivateFolder $opened) "from a private folder ($opened)"
+        Check ((Split-Path -Leaf $opened) -eq 'route.pdf') "under its own name ($(Split-Path -Leaf $opened))"
+        # (read once nothing else has it open: an antivirus may look at a new file first)
+        $content = WaitFor { try { [IO.File]::ReadAllText($opened) } catch { $null } } 10
+        Check ($content -eq [Text.Encoding]::ASCII.GetString([Convert]::FromBase64String($pdf64))) "byte for byte what was sent ($($content.Length) bytes)"
+        # opened again: the same file, no second copy
+        $before = (OpenedFiles).Count
+        DoubleClickFirst $strip
+        $again = NewlyOpened $before
+        Check ($again -eq $opened) "opened again, the same file ($again)"
+    }
+
+    # the keys: the arrows move between the files, Enter opens the one chosen
+    Key $strip $VK_DOWN
+    Key $strip $VK_DOWN
+    $before = (OpenedFiles).Count
+    Key $strip $VK_RETURN
+    $opened = NewlyOpened $before
+    Check ($opened -and (Split-Path -Leaf $opened) -like 'Itinerary*.docx') "the arrow keys choose a file and Enter opens it ($opened)"
+
+    # the program's menu: Open greyed, Save As... and Save All...
+    Key $strip $VK_UP
+    [void][Native.Win]::PostMessage($strip, 0x007B, $strip, [IntPtr](-1))
+    $menu = WaitWindow '#32768' $null 10
+    Check ($null -ne $menu) 'the menu key opens the menu of the file chosen'
+    if ($menu) {
+        $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+        $labels = @([Native.Win]::MenuLabels($hmenu))
+        Check (($labels -join '|') -eq 'Open|Save As...||Save All...') "it offers Open, Save As... and Save All... ($($labels -join '|'))"
+        Check (([Native.Win]::GetMenuState($hmenu, 0, 0x400) -band 0x3) -ne 0) "a program's Open is greyed"
+        Shot $main 'attach-2-menu' $menu
+        Key $menu $VK_ESCAPE
+        if (-not (WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 3)) {
+            [void][Native.Win]::SetForegroundWindow($main)
+            [System.Windows.Forms.SendKeys]::SendWait('{ESC}')
+        }
+    }
+    # trying to open it anyway says why, and nothing is opened
+    $before = (OpenedFiles).Count
+    Key $strip $VK_RETURN
+    $box = WaitWindow '#32770' 'Inbox Classic' 10
+    $said = if ($box) { Statics $box } else { '' }
+    Check ($said -match 'program') "opening a program is refused, with why ($said)"
+    if ($box) {
+        Shot $main 'attach-3-refused' $box
+        Click $box 2
+        [void](WaitFor { -not [Native.Win]::IsWindow($box) } 5)
+    }
+    Start-Sleep -Milliseconds 500
+    Check ((OpenedFiles).Count -eq $before) 'and nothing is opened'
+    # pages: Open greyed for one known by its extension and for one known by what it holds, and refused naming it
+    foreach ($page in @(@{ Key = 0x23; Name = 'statement' }, @{ Key = $VK_UP; Name = 'statement.xht' })) {
+        Key $strip $page.Key
+        [void][Native.Win]::PostMessage($strip, 0x007B, $strip, [IntPtr](-1))
+        $menu = WaitWindow '#32768' $null 10
+        if ($menu) {
+            $hmenu = [Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero)
+            Check (([Native.Win]::GetMenuState($hmenu, 0, 0x400) -band 0x3) -ne 0) "a page's Open is greyed ($($page.Name))"
+            Key $menu $VK_ESCAPE
+            [void](WaitFor { [Native.Win]::FindWindow('#32768', [NullString]::Value) -eq [IntPtr]::Zero } 3)
+        } else {
+            Check $false "the menu of $($page.Name) opens"
+        }
+        Key $strip $VK_RETURN
+        $box = WaitWindow '#32770' 'Inbox Classic' 10
+        $said = if ($box) { Statics $box } else { '' }
+        Check ($said -match [regex]::Escape("$($page.Name)") -and $said -match 'program') "opening $($page.Name) is refused, naming it ($said)"
+        if ($box) {
+            Click $box 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($box) } 5)
+        }
+    }
+    Check ((OpenedFiles).Count -eq $before) 'and no page is opened'
+
+    # in a message window of its own, the strip is there and opens the same way (Enter in the list, which has the
+    # keyboard again)
+    SelectRow ([int]$row)
+    [void][Native.Win]::SetForegroundWindow($main)
+    Key $list $VK_RETURN
+    $filesWindow = WaitShown 'InboxClassicMessage' 10
+    if ($filesWindow) {
+        $windowStrip = StripOf $filesWindow
+        Check ([bool](WaitFor { [Native.Win]::IsWindowVisible($windowStrip) -and (ListCount $windowStrip) -eq 8 } 10)) 'the message window has the strip'
+        $before = (OpenedFiles).Count
+        DoubleClickFirst $windowStrip
+        $opened = NewlyOpened $before
+        Check ($opened -and (Split-Path -Leaf $opened) -eq 'route.pdf' -and (InPrivateFolder $opened)) "and opens a file from it ($opened)"
+        Shot $filesWindow 'attach-5-window'
+        Key $filesWindow $VK_ESCAPE
+        [void](WaitFor { -not [Native.Win]::IsWindow($filesWindow) } 10)
+    } else {
+        Check $false 'the message window opens'
+    }
+    $added = Find 'INBOX' 'files@example\.com'
+    if ($added) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($added.uid)") }
+    Command $main $IDM_SYNC
+    [void](WaitFor { @(SubjectRows $filesSubject).Count -eq 0 } 20)
+
+    # an encrypted message's file: a note the first time it opens, none after
+    $words = ShowSecure 'secure-attachment.eml' 'An encrypted file'
+    Check ([bool](WaitFor { [Native.Win]::IsWindowVisible($strip) -and (ListCount $strip) -eq 1 } 10)) "the encrypted message's file is in the strip ($words; $(& $stripTexts $strip))"
+    $before = (OpenedFiles).Count
+    DoubleClickFirst $strip
+    $note = WaitWindow '#32770' 'Opening this file' 10
+    Check ($null -ne $note) 'the first time, a note says the file is stored decrypted'
+    if ($note) {
+        Shot $main 'attach-4-encrypted-note' $note
+        Click $note 2
+        [void](WaitFor { -not [Native.Win]::IsWindow($note) } 5)
+    }
+    $opened = NewlyOpened $before
+    $content = if ($opened) { WaitFor { try { [IO.File]::ReadAllText($opened) } catch { $null } } 10 }
+    Check ($opened -and (InPrivateFolder $opened) -and "$content".Trim() -eq 'the secret plan, in a file') "then the decrypted file opens ($opened)"
+    $before = (OpenedFiles).Count
+    DoubleClickFirst $strip
+    $again = WaitWindow '#32770' 'Opening this file' 3
+    if ($again) { Click $again 2 }
+    Check ($null -eq $again -and $null -ne (NewlyOpened $before)) 'the second time it opens without the note'
+    RemoveSecure 'secure-attachment.eml' 'An encrypted file'
 
     # ---- getting new mail ----
 

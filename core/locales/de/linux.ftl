@@ -83,6 +83,11 @@ gtk-default-app-failed = Inbox Classic konnte nicht als Standard-E-Mail-Programm
 
 gtk-reader-date = Datum:
 gtk-reader-files = Anlagen der Nachricht
+# review: new
+gtk-files = { $count ->
+    [one] { $count } Datei
+   *[other] { $count } Dateien
+}
 gtk-pictures-blocked = Einige Bilder wurden blockiert, damit der Absender Ihren Computer nicht erkennen kann.
 gtk-download-pictures = Bilder herunterladen
 gtk-save-attachments-menu = Anlagen speichern...

@@ -1215,6 +1215,9 @@ void ReadArguments() {
         } else if (arg == L"--sign-in-page-file" && i + 1 < count) {
             keep(argv[++i]);
             SetSignInPageFile(argv[i]);
+        } else if (arg == L"--opened-files-log" && i + 1 < count) {
+            keep(argv[++i]);
+            SetOpenedFilesLog(argv[i]);
         } else if (arg == L"--memory-passwords") {
             g_arguments.memoryPasswords = true;
         } else if (arg == L"--version") {

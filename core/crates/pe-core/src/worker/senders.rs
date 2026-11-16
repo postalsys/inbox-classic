@@ -11,8 +11,9 @@ use crate::{Event, FailureKind, authres, senders};
 const BATCH: usize = 100;
 
 impl Worker {
-    /// Reads the verdicts that wait in the store; how many messages that was (0: none waits). The lists are told when
-    /// a logo turned up, so their rows show it
+    /// Reads the verdicts that wait in the store; how many messages that was (0: none waits). The lists of the
+    /// folders where a logo turned up are told (their rows show it): a list that loaded a message before its verdict was
+    /// read would otherwise keep its initials until it loads again
     pub(super) fn judge_senders(&mut self, store: &mut Store) -> Result<usize, Failure> {
         let pending = store.messages_to_judge(self.account, BATCH)?;
         if pending.is_empty() {
@@ -23,14 +24,25 @@ impl Worker {
             .iter()
             .map(|p| (p.message, senders::judge(&p.headers, &p.from_address, &trusted)))
             .collect();
-        let logos = store.transaction(|store| {
+        store.transaction(|store| {
             for (message, judged) in &judged {
                 store.set_sender_auth(*message, judged.bits, judged.logo_url.as_deref())?;
             }
-            Ok(judged.iter().any(|(_, judged)| judged.logo_url.is_some()))
+            Ok(())
         })?;
-        if logos {
-            self.emit(Event::FoldersChanged { account: self.account });
+        let mut folders: Vec<_> = pending
+            .iter()
+            .zip(&judged)
+            .filter(|(_, (_, judged))| judged.logo_url.is_some())
+            .map(|(pending, _)| pending.folder)
+            .collect();
+        folders.sort_unstable();
+        folders.dedup();
+        for folder in folders {
+            self.emit(Event::FolderChanged {
+                account: self.account,
+                folder,
+            });
         }
         Ok(pending.len())
     }

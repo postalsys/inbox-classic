@@ -11,6 +11,7 @@ mod accounts;
 mod address_book;
 mod agents;
 mod app;
+mod attachments;
 mod book_dialogs;
 mod complete;
 mod compose;

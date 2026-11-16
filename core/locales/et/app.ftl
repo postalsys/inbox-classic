@@ -392,6 +392,18 @@ ui-menu-open = &Ava
 ui-menu-flag = L&ipp
 ui-menu-view-source = Vaata &lähtekoodi
 ui-save-attachments = Salvesta manused
+# review: new
+ui-attachment-open = Ava
+# review: new
+ui-attachment-save-as = Salvesta kui...
+# review: new
+ui-attachment-save-all = Salvesta kõik...
+# review: new
+ui-attachments-strip = Manused
+# review: new
+ui-attachment-note-title = Selle faili avamine
+# review: new
+ui-attachment-program-tip = Seda tüüpi faili ei saa avada: see võib käivitada programme. Salvesta see, et ise avada.
 ui-clear-flag = &Eemalda lipp
 ui-button-move = &Teisalda
 ui-button-copy = K&opeeri

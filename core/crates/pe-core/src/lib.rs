@@ -24,6 +24,7 @@ pub mod layout;
 mod list_view;
 mod lookup;
 pub mod mailto;
+pub mod opening;
 pub mod otp;
 pub mod pictures;
 pub mod protect;
@@ -447,6 +448,8 @@ pub struct Core {
     closed: Arc<AtomicBool>,
     /// The questions of AI agents waiting for the user (agents.rs)
     agent_asks: Mutex<agents::Asks>,
+    /// The attachments of the messages shown lately and the files written to open them (opening.rs)
+    attachment_files: Arc<opening::Files>,
     /// Lookups of servers; None when the address has no domain
     autoconfig: Requests<Option<pe_autoconfig::Settings>>,
     /// Lookups of OpenPGP keys and their result, learned when taken (lookup.rs)
@@ -549,6 +552,7 @@ impl Core {
             }),
             closed,
             agent_asks: Mutex::default(),
+            attachment_files: Arc::default(),
             autoconfig: Requests::default(),
             pgp_lookups: Requests::default(),
             pgp_publishes: Requests::default(),
@@ -1440,6 +1444,9 @@ impl Core {
                 let _ = self.post(event);
             },
         );
+        if let Some(view) = &view {
+            self.remember_attachments(folder, uid, view);
+        }
         Ok(view.map(|view| self.learned(view)))
     }
 
@@ -1463,6 +1470,7 @@ impl Core {
         let view_store = self.view_store.clone();
         let events = self.events.clone();
         let timings = self.timings.clone();
+        let files = self.attachment_files.clone();
         let work = async move {
             let found = found?;
             let dropped = move || newest.load(Ordering::Relaxed) != request;
@@ -1470,6 +1478,9 @@ impl Core {
                 let opened = || OpenStore::open(&view_store, &path);
                 let view = finish_view(&found, allow_remote_images, &dropped, opened, &*events);
                 timings.view_built(found.folder, found.uid, std::time::Instant::now());
+                if let Some(view) = &view {
+                    opening::remember_message(&files, found.folder, found.uid, view);
+                }
                 view
             });
             built.await.ok().flatten()
@@ -1587,7 +1598,7 @@ impl Core {
     }
 
     /// A message's source as it is shown: for a signed or encrypted message, its parts as the reading pane shows
-    /// them (decrypted, without what was not shown, `protect::shown`); any other message's as it is
+    /// them (decrypted, without what was not shown, `protect::shown_decrypted`); any other message's as it is
     fn shown_source(&self, folder: FolderId, uid: u64) -> Result<Option<Vec<u8>>> {
         let store = self.store();
         let Some(source) = store.source(folder, uid)? else {
@@ -1621,11 +1632,16 @@ impl Core {
 
     /// `source` as it is shown ([`Core::shown_source`])
     fn shown(&self, store: &Store, source: Vec<u8>) -> Vec<u8> {
+        self.shown_decrypted(store, source).0
+    }
+
+    /// [`Core::shown`], and whether something in it was decrypted
+    fn shown_decrypted(&self, store: &Store, source: Vec<u8>) -> (Vec<u8>, bool) {
         let Some(ring) = self.ring_for(store, &source) else {
-            return source;
+            return (source, false);
         };
         let from = from_addresses(&source);
-        protect::shown(&source, &ring, &from, worker::unix_now()).unwrap_or(source)
+        protect::shown_decrypted(&source, &ring, &from, worker::unix_now()).unwrap_or((source, false))
     }
 
     /// The `index`th listed attachment of a message with its name to save it under and its type, from one parse; None
@@ -1908,6 +1924,7 @@ impl Core {
             ..Default::default()
         };
         let view = view::build_unless(&source, allow_remote_images, &trust, &|| false, &|_| None).unwrap_or_default();
+        self.remember_file_attachments(path, &view);
         Ok(self.learned(view))
     }
 
@@ -2792,6 +2809,22 @@ fn save_all(source: &[u8], dir: &Path) -> (usize, usize) {
 /// A message file (.eml) read whole, up to 50 MB, refused when it is no mail: for Import and for opening a file in a
 /// message window; with the date of its Date header
 fn read_message_file(path: &std::path::Path) -> Result<(Vec<u8>, Option<i64>)> {
+    let raw = read_limited(path)?;
+    let shown = path.display().to_string();
+    let not_one = |text: Text, error: &str| {
+        Error::Unavailable(tr_args(text, &[("path", (&shown).into()), ("error", error.into())]))
+    };
+    let parsed = pe_mime::parser::parse(&raw).map_err(|_| not_one(Text::ErrorImportNotMail, ""))?;
+    // a message has headers a mail program wrote; a text file parsed as one has none of these
+    let looks_like_one = parsed.from.is_some() || parsed.message_id.is_some() || parsed.timestamp.is_some();
+    if !looks_like_one {
+        return Err(not_one(Text::ErrorImportNotMail, ""));
+    }
+    Ok((raw, parsed.timestamp))
+}
+
+/// A message file read whole, up to 50 MB, without looking at what it is: for a file a window already showed as mail
+fn read_limited(path: &std::path::Path) -> Result<Vec<u8>> {
     const LIMIT: u64 = 50 * 1024 * 1024;
     let shown = path.display().to_string();
     let not_one = |text: Text, error: &str| {
@@ -2805,13 +2838,7 @@ fn read_message_file(path: &std::path::Path) -> Result<(Vec<u8>, Option<i64>)> {
     if raw.len() as u64 > LIMIT {
         return Err(not_one(Text::ErrorImportTooLarge, ""));
     }
-    let parsed = pe_mime::parser::parse(&raw).map_err(|_| not_one(Text::ErrorImportNotMail, ""))?;
-    // a message has headers a mail program wrote; a text file parsed as one has none of these
-    let looks_like_one = parsed.from.is_some() || parsed.message_id.is_some() || parsed.timestamp.is_some();
-    if !looks_like_one {
-        return Err(not_one(Text::ErrorImportNotMail, ""));
-    }
-    Ok((raw, parsed.timestamp))
+    Ok(raw)
 }
 
 /// The view of a message's source, its date the server's when it has no Date header; None when `dropped` said to
@@ -2851,7 +2878,7 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
         .filter(|first| first.sizes.len() == view.attachments.len())
     {
         for (attachment, size) in view.attachments.iter_mut().zip(&first.sizes) {
-            attachment.size = *size;
+            attachment.set_size(*size);
         }
     }
     // without a Date header, the date the list shows: when the server got it

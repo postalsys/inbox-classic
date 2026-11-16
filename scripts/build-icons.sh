@@ -28,6 +28,9 @@ LIST=(attach flag search dismiss calendar_ltr mail_error glasses speaker_mute)
 # the security bar over a signed or encrypted message: the lock, then the pictures of its states (verified, signed,
 # a warning), each strip drawn in the words' color over the fill of one state (the INK and fill pairs below)
 SECURE=(lock_closed shield_checkmark ribbon warning)
+# the attachment strip of the reading pane: a file of each kind the core names (PeAttachment.kind), in its order
+FILES=(image document_pdf document_text document_table slide_text folder_zip music_note_2 video calendar_ltr contact_card key
+    document_one_page mail window_shield document)
 # the small ones of the format bar
 FORMAT=(text_bold text_italic text_underline text_color text_number_list_ltr text_bullet_list_ltr text_indent_decrease_ltr
     text_indent_increase_ltr text_align_left text_align_center text_align_right link line_horizontal_1 image)
@@ -95,6 +98,7 @@ kind toolbar 10 "$FACE" kToolbarStrips ToolbarIcon ICON 24 30 36 48 -- "${TOOLBA
 kind format 20 "$FACE" kFormatStrips FormatIcon FORMAT "${SMALL_SIZES[@]}" -- "${FORMAT[@]}"
 kind folders 30 "$WINDOW" kFolderStrips FolderIcon FOLDER "${SMALL_SIZES[@]}" -- "${FOLDERS[@]}"
 kind list 40 "$WINDOW" kListStrips ListIcon LIST "${SMALL_SIZES[@]}" -- "${LIST[@]}"
+kind files 90 "$WINDOW" kFileStrips FileIcon KIND "${SMALL_SIZES[@]}" -- "${FILES[@]}"
 # the security bar's tones, as the labels of the message's parts have them (core/crates/pe-html/src/secure.rs)
 INK='#1B5E20' kind secure-verified 50 '#E8F5E9' kSecureVerifiedStrips SecureIcon SECURE "${SMALL_SIZES[@]}" -- "${SECURE[@]}"
 INK='#174A87' SKIP_ENUM=1 kind secure-good 60 '#E6EEFA' kSecureGoodStrips SecureIcon SECURE "${SMALL_SIZES[@]}" -- "${SECURE[@]}"

@@ -636,10 +636,6 @@ private final class SetupImportWindow: NSObject {
 }
 
 /// The document view of a scroll, laid out from its top
-private final class FlippedView: NSView {
-    override var isFlipped: Bool { true }
-}
-
 // ---- what was done ----
 
 /// The lines of what an export wrote or an import did, each with its sign, and Done

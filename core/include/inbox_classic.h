@@ -308,6 +308,26 @@ typedef enum PeProtectionTone {
   PE_PROTECTION_TONE_NEUTRAL = 4,
 } PeProtectionTone;
 
+// What kind of file an attachment is: its icon in the strip
+typedef enum PeFileKind {
+  PE_FILE_KIND_OTHER = 0,
+  PE_FILE_KIND_IMAGE = 1,
+  PE_FILE_KIND_PDF = 2,
+  PE_FILE_KIND_DOCUMENT = 3,
+  PE_FILE_KIND_SPREADSHEET = 4,
+  PE_FILE_KIND_PRESENTATION = 5,
+  PE_FILE_KIND_ARCHIVE = 6,
+  PE_FILE_KIND_AUDIO = 7,
+  PE_FILE_KIND_VIDEO = 8,
+  PE_FILE_KIND_CALENDAR = 9,
+  PE_FILE_KIND_CONTACT = 10,
+  PE_FILE_KIND_KEY = 11,
+  PE_FILE_KIND_TEXT = 12,
+  PE_FILE_KIND_MAIL = 13,
+  // It can run code: never opened from a message
+  PE_FILE_KIND_PROGRAM = 14,
+} PeFileKind;
+
 typedef enum PeDraftKind {
   PE_DRAFT_KIND_REPLY = 0,
   PE_DRAFT_KIND_REPLY_ALL = 1,
@@ -1054,6 +1074,17 @@ typedef struct PeAttachment {
   const char *safe_filename;
   const char *mime_type;
   uint64_t size;
+  // Its size in words ("240 KB")
+  const char *size_text;
+  // What kind of file it is, for its icon
+  enum PeFileKind kind;
+  // Whether it may be opened from the message (`pe_attachment_open`): never a file that can run code, which can
+  // be saved
+  bool can_open;
+  // The strip's tooltip, shown as it is: the full name and size, and why it does not open when it does not
+  const char *tooltip;
+  // What to say when it is opened while `can_open` is false, naming it (empty when it opens)
+  const char *refusal;
 } PeAttachment;
 
 // A choice of the From list: an account, or one of its other addresses
@@ -2517,6 +2548,38 @@ bool pe_save_attachments(const struct PeCore *core,
                          const char *dir,
                          size_t *saved,
                          size_t *total);
+
+// Writes attachment `index` of a message into a private folder for the app to open with the system's program; its
+// path (free with `pe_string_free`). NULL when it is not here, or refused (a file that can run code is never opened
+// from a message: `error` then says why). `note`, when set, is to be shown before opening (once: an encrypted
+// message's file is stored decrypted while it is open). `note` and `error` may be NULL; free what they get.
+//
+// # Safety
+// `core` must be a live handle; `note` and `error` NULL or valid pointers.
+char *pe_attachment_open(const struct PeCore *core,
+                         int64_t folder,
+                         uint64_t uid,
+                         size_t index,
+                         char **note,
+                         char **error);
+
+// [`pe_attachment_open`] of a message file a window shows (`pe_file_view`), its path UTF-8
+//
+// # Safety
+// `core` must be a live handle, `path` NULL or a NUL-terminated string; `note` and `error` NULL or valid pointers.
+char *pe_file_attachment_open(const struct PeCore *core,
+                              const char *path,
+                              size_t index,
+                              char **note,
+                              char **error);
+
+// A new private folder of the user's for files the system opens (a calendar invitation), cleaned at start once a
+// day old; NULL on failure. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle, `name` a NUL-terminated string.
+char *pe_private_folder(const struct PeCore *core,
+                        const char *name);
 
 // The content of attachment `index` of a message, NULL on failure. `len` gets its length and
 // `filename` the name to save it under (free it with `pe_string_free`). Free the bytes with

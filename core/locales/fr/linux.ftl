@@ -84,6 +84,11 @@ gtk-default-app-failed = Impossible de définir Inbox Classic comme application 
 
 gtk-reader-date = Date :
 gtk-reader-files = Pièces jointes du message
+# review: new
+gtk-files = { $count ->
+    [one] { $count } fichier
+   *[other] { $count } fichiers
+}
 gtk-pictures-blocked = Certaines images ont été bloquées pour empêcher l'expéditeur d'identifier votre ordinateur.
 gtk-download-pictures = Télécharger les images
 gtk-save-attachments-menu = Enregistrer les pièces jointes...

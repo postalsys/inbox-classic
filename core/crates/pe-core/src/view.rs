@@ -13,16 +13,40 @@ pub struct AttachmentView {
     pub safe_filename: String,
     pub mime_type: String,
     pub size: u64,
+    /// Its size in words ("240 KB")
+    pub size_text: String,
+    /// What kind of file it is: its icon in the strip, and whether it may be opened (not a file that runs code)
+    pub kind: crate::opening::FileKind,
+    /// The strip's tooltip: the full name and size, and why it does not open when it does not, a line each
+    pub tooltip: String,
+    /// What to say when a file that does not open is opened anyway, naming it; None for one that opens
+    pub refusal: Option<String>,
 }
 
 impl AttachmentView {
     fn of(attachment: &Attachment) -> AttachmentView {
+        let safe_filename = attachment.safe_filename();
+        let filename = attachment.display_filename();
+        let size = attachment.content.len() as u64;
+        let size_text = crate::format_size(size);
+        let kind = crate::opening::file_kind_of(&safe_filename, &attachment.mime_type, &attachment.content);
         AttachmentView {
-            safe_filename: attachment.safe_filename(),
-            filename: attachment.display_filename(),
+            tooltip: crate::opening::tooltip(&filename, &size_text, kind),
+            refusal: crate::opening::refusal(&filename, kind),
+            kind,
+            safe_filename,
+            filename,
             mime_type: attachment.mime_type.clone(),
-            size: attachment.content.len() as u64,
+            size,
+            size_text,
         }
+    }
+
+    /// Its size as told apart from its content (a large message's text first, whose attachments are not here yet)
+    pub(crate) fn set_size(&mut self, size: u64) {
+        self.size = size;
+        self.size_text = crate::format_size(size);
+        self.tooltip = crate::opening::tooltip(&self.filename, &self.size_text, self.kind);
     }
 }
 
@@ -143,9 +167,15 @@ const REPORT_PARTS: [&str; 4] = [
 
 /// The attachments the attachment bar lists: not the images of an HTML body, nor a delivery report's parts for servers
 fn listed(attachments: &[Attachment]) -> impl Iterator<Item = &Attachment> {
-    attachments
-        .iter()
-        .filter(|a| !a.related && !REPORT_PARTS.iter().any(|p| a.mime_type.eq_ignore_ascii_case(p)))
+    attachments.iter().filter(|a| is_listed(a))
+}
+
+/// An attachment of the list: not a picture of the HTML body, not a part of a delivery report
+fn is_listed(attachment: &Attachment) -> bool {
+    !attachment.related
+        && !REPORT_PARTS
+            .iter()
+            .any(|p| attachment.mime_type.eq_ignore_ascii_case(p))
 }
 
 #[cfg(test)]
@@ -565,6 +595,35 @@ pub(crate) fn attachment(source: &[u8], index: usize) -> Option<(String, Vec<u8>
     attachments(source).into_iter().nth(index)
 }
 
+/// One attachment taken out of its message to be opened: the name to save it under, the one to show, its type and
+/// its content
+pub(crate) struct Taken {
+    pub name: String,
+    pub display_name: String,
+    pub mime_type: String,
+    pub content: Vec<u8>,
+}
+
+/// The `index`th listed attachment, taken from the parse (its content not copied)
+pub(crate) fn take_attachment(source: &[u8], index: usize) -> Option<Taken> {
+    let message = parser::parse(source).ok()?;
+    let position = message
+        .attachments
+        .iter()
+        .enumerate()
+        .filter(|(_, a)| is_listed(a))
+        .nth(index)?
+        .0;
+    let mut attachments = message.attachments;
+    let attachment = attachments.swap_remove(position);
+    Some(Taken {
+        name: attachment.safe_filename(),
+        display_name: attachment.display_filename(),
+        mime_type: attachment.mime_type,
+        content: attachment.content,
+    })
+}
+
 /// The `index`th listed attachment with the name to save it under and its type
 pub(crate) fn attachment_with_type(source: &[u8], index: usize) -> Option<(String, String, Vec<u8>)> {
     let message = parser::parse(source).ok()?;
@@ -699,10 +758,26 @@ mod tests {
                 filename: "../../report.pdf".into(),
                 safe_filename: "report.pdf".into(),
                 mime_type: "application/pdf".into(),
-                size: 4
+                size: 4,
+                size_text: crate::format_size(4),
+                kind: crate::opening::FileKind::Pdf,
+                tooltip: format!("../../report.pdf ({})", crate::format_size(4)),
+                refusal: None,
             }]
         );
         assert_eq!(attachment(MESSAGE, 0), Some(("report.pdf".into(), b"%PDF".to_vec())));
+        // taken out to be opened: the listed one (not the body's picture), its names and type
+        let taken = take_attachment(MESSAGE, 0).unwrap();
+        assert_eq!(
+            (
+                taken.name.as_str(),
+                taken.display_name.as_str(),
+                taken.mime_type.as_str()
+            ),
+            ("report.pdf", "../../report.pdf", "application/pdf")
+        );
+        assert_eq!(taken.content, b"%PDF");
+        assert!(take_attachment(MESSAGE, 1).is_none());
         assert_eq!(attachment(MESSAGE, 1), None);
     }
 

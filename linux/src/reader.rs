@@ -1,5 +1,5 @@
 //! The reading pane: the header of the message (the brand's logo beside it, Unsubscribe and the paper clip with the
-//! files at its right), the security bar of a signed or encrypted message, the bar that says pictures from the
+//! files at its right), the strip of its files under it (`attachments.rs`), the security bar of a signed or encrypted message, the bar that says pictures from the
 //! internet are blocked, and the message itself (with the
 //! cards of the core above it: a calendar event, a bounce, a one-time code), the sanitized document of the core in a locked down web view. The main window has one
 //! under its list, and each message window one of its own: the reader keeps the message it shows, asks the core for
@@ -14,6 +14,7 @@ use std::rc::Rc;
 use webkit::prelude::*;
 
 use crate::app::{shell, spawn};
+use crate::attachments::Strip;
 use crate::security::SecurityBar;
 use crate::ui::{self, TITLE};
 use crate::webview::{DocumentView, no_message};
@@ -45,6 +46,8 @@ pub struct Reader {
     /// The paper clip with the files of the message
     pub attachments: gtk::MenuButton,
     attachments_label: gtk::Label,
+    /// The strip of the files under the header: double-click or Enter opens one
+    pub strip: Rc<Strip>,
     /// The security bar of a signed or encrypted message, under the header
     pub security: SecurityBar,
     /// The bar that says pictures from the internet are blocked; its button shows them, its menu beside it trusts
@@ -74,6 +77,8 @@ pub struct Reader {
     size: Cell<u64>,
     /// A message file shown (a message window opened for a .eml), in place of a message of a folder
     file: RefCell<Option<std::path::PathBuf>>,
+    /// A file of the strip is being opened: one at a time
+    opening: Cell<bool>,
     /// Its view once the core built it, with its pictures from the internet when `remote_images`
     view: RefCell<Option<MessageView>>,
     remote_images: Cell<bool>,
@@ -196,6 +201,7 @@ impl Reader {
         header.append(&text);
         header.append(&attachments);
 
+        let strip = Strip::new();
         let security = SecurityBar::new();
         let (pictures, download_pictures, pictures_always) = pictures_bar();
 
@@ -221,6 +227,7 @@ impl Reader {
         let (find_bar, find_entry) = find_bar();
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 0);
         widget.append(&header);
+        widget.append(&strip.widget);
         widget.append(&security.widget);
         widget.append(&retry);
         widget.append(&pictures);
@@ -239,6 +246,7 @@ impl Reader {
             unsubscribe,
             attachments,
             attachments_label,
+            strip,
             security,
             pictures,
             download_pictures,
@@ -253,6 +261,7 @@ impl Reader {
             downloading: Rc::default(),
             summary: RefCell::default(),
             account: Cell::new(0),
+            opening: Cell::new(false),
             folder: Cell::new(0),
             uid: Cell::new(0),
             size: Cell::default(),
@@ -356,8 +365,26 @@ impl Reader {
                 spawn(async move { this.save_all_attachments().await });
             }
         });
+        let open = gio::SimpleAction::new("open-attachment", Some(glib::VariantTy::UINT32));
+        let this = Rc::downgrade(self);
+        open.connect_activate(move |_, index| {
+            if let (Some(this), Some(index)) = (this.upgrade(), index.and_then(|i| i.get::<u32>())) {
+                spawn(async move { this.open_attachment(index as usize).await });
+            }
+        });
+        // the greyed Open of a file that can run programs
+        let refused = gio::SimpleAction::new("open-refused", Some(glib::VariantTy::UINT32));
+        refused.set_enabled(false);
         group.add_action(&save);
         group.add_action(&all);
+        group.add_action(&open);
+        group.add_action(&refused);
+        let this = Rc::downgrade(self);
+        self.strip.connect_open(move |index| {
+            if let Some(this) = this.upgrade() {
+                spawn(async move { this.open_attachment(index).await });
+            }
+        });
         for (name, domain) in [("always-sender", false), ("always-domain", true)] {
             let always = gio::SimpleAction::new(name, None);
             let this = Rc::downgrade(self);
@@ -715,7 +742,7 @@ impl Reader {
         self.find_bar.set_search_mode(false);
         self.summary.borrow_mut().take();
         if !loading {
-            self.attachments.set_visible(false);
+            self.hide_attachments();
             self.security.hide();
             self.pictures.set_visible(false);
         }
@@ -792,7 +819,7 @@ impl Reader {
     /// The message could not be downloaded: why, in the pane, and Try Again over it
     pub fn not_downloaded(&self, kind: pe_core::FailureKind, reason: &str) {
         self.stop_downloading_note();
-        self.attachments.set_visible(false);
+        self.hide_attachments();
         self.security.hide();
         self.pictures.set_visible(false);
         self.retry.set_visible(true);
@@ -813,7 +840,7 @@ impl Reader {
         self.subject.set_text("");
         self.note.set_text(&t!(UiNotShown));
         self.note.set_visible(true);
-        self.attachments.set_visible(false);
+        self.hide_attachments();
         self.security.hide();
         self.pictures.set_visible(false);
     }
@@ -878,22 +905,27 @@ impl Reader {
         }
     }
 
-    /// The paper clip: how many files, a menu item to save each (the name the sender gave, its size), then all of
-    /// them into a folder; files are saved, never opened from here
+    /// The paper clip and the strip gone, for a message without files or none shown
+    fn hide_attachments(&self) {
+        self.attachments.set_visible(false);
+        self.strip.hide();
+        self.header.remove_css_class("with-files");
+    }
+
+    /// The strip of the files under the header, and the paper clip: how many files, a menu item to save each (the
+    /// name the sender gave, its size), then all of them into a folder
     fn show_attachments(&self, view: &MessageView) {
         let count = view.attachments.len();
+        self.strip.show(&view.attachments);
+        ui::set_class(&self.header, "with-files", count > 0);
         self.attachments.set_visible(count > 0);
         if count == 0 {
             return;
         }
-        self.attachments_label.set_text(&if count == 1 {
-            "1 file".into()
-        } else {
-            format!("{count} files")
-        });
+        self.attachments_label.set_text(&t!(GtkFiles, count = count));
         let files = gio::Menu::new();
         for (index, file) in view.attachments.iter().enumerate() {
-            let label = format!("{} ({})", file.filename, pe_core::format_size(file.size));
+            let label = format!("{} ({})", file.filename, file.size_text);
             let item = gio::MenuItem::new(Some(&label), None);
             item.set_action_and_target_value(Some("reader.save-attachment"), Some(&(index as u32).to_variant()));
             files.append_item(&item);
@@ -1038,18 +1070,22 @@ impl Reader {
         }
     }
 
+    /// Why an attachment of the message shown could not be read: a large message shows its text before the rest of
+    /// it is here
+    fn not_read(&self) -> String {
+        let downloading =
+            self.file.borrow().is_none() && shell().core.message_downloading(self.folder.get(), self.uid.get());
+        if downloading {
+            t!(UiAttachmentDownloading)
+        } else {
+            t!(UiAttachmentNotRead)
+        }
+    }
+
     async fn save_attachment(&self, index: usize) {
         let Some(window) = self.window() else { return };
         let Some((name, data)) = self.attachment(index) else {
-            // a large message shows its text before the rest of it is here
-            let downloading =
-                self.file.borrow().is_none() && shell().core.message_downloading(self.folder.get(), self.uid.get());
-            let why = if downloading {
-                t!(UiAttachmentDownloading)
-            } else {
-                t!(UiAttachmentNotRead)
-            };
-            ui::alert(&window, TITLE, &why).await;
+            ui::alert(&window, TITLE, &self.not_read()).await;
             return;
         };
         let Some(path) = ui::save_file(&window, &t!(UiSaveAttachmentAs), &name, None).await else {
@@ -1057,6 +1093,50 @@ impl Reader {
         };
         if std::fs::write(&path, data).is_err() {
             ui::alert(&window, TITLE, &t!(UiAttachmentNotSaved)).await;
+        }
+    }
+
+    /// Attachment `index` opened with the system's program for it: a file that can run programs refused from its row,
+    /// in the core's words; any other written by the core into a private folder of the user's on a thread of its own
+    /// (a large or encrypted message takes a while: its item dims after 400 ms), the note it gives shown first
+    async fn open_attachment(&self, index: usize) {
+        let Some(window) = self.window() else { return };
+        let Some(file) = self.strip.file(index) else { return };
+        if let Some(refusal) = &file.refusal {
+            return ui::alert(&window, TITLE, refusal).await;
+        }
+        if self.opening.replace(true) {
+            return;
+        }
+        let done = Rc::new(Cell::new(false));
+        let strip = self.strip.clone();
+        let waited = done.clone();
+        glib::timeout_add_local_once(std::time::Duration::from_millis(400), move || {
+            if !waited.get() {
+                strip.busy(Some(index));
+            }
+        });
+        let core = shell().core.clone();
+        let path = self.file.borrow().clone();
+        let (folder, uid) = (self.folder.get(), self.uid.get());
+        let opened = gio::spawn_blocking(move || match path {
+            Some(path) => core.file_open_attachment(&path, index),
+            None => core.open_attachment(folder, uid, index),
+        })
+        .await;
+        done.set(true);
+        self.strip.busy(None);
+        self.opening.set(false);
+        let opened = match opened {
+            Ok(Ok(Some(opened))) => opened,
+            Ok(Err(refused)) => return ui::alert(&window, TITLE, &refused.to_string()).await,
+            _ => return ui::alert(&window, TITLE, &self.not_read()).await,
+        };
+        if let Some(note) = &opened.note {
+            ui::alert(&window, &t!(UiAttachmentNoteTitle), note).await;
+        }
+        if let Err(why) = crate::attachments::launch(&opened.path, &window).await {
+            ui::alert(&window, TITLE, &why).await;
         }
     }
 
@@ -1081,8 +1161,11 @@ impl Reader {
     /// folder's message), for the calendar program
     async fn open_in_calendar(&self) {
         let Some(window) = self.window() else { return };
-        let dir = glib::tmp_dir().join("InboxClassic").join("Invitations");
         let core = &shell().core;
+        let Ok(dir) = core.private_folder("invitation") else {
+            ui::alert(&window, TITLE, &t!(UiInvitationNotRead)).await;
+            return;
+        };
         let written = match self.file.borrow().as_deref() {
             Some(file) => core.file_invitation_file(file, &dir),
             None => core.invitation_file(self.folder.get(), self.uid.get(), &dir),

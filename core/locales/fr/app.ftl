@@ -392,6 +392,18 @@ ui-menu-open = &Ouvrir
 ui-menu-flag = Indi&cateur
 ui-menu-view-source = Afficher la &source
 ui-save-attachments = Enregistrer les pièces jointes
+# review: new
+ui-attachment-open = Ouvrir
+# review: new
+ui-attachment-save-as = Enregistrer sous...
+# review: new
+ui-attachment-save-all = Tout enregistrer...
+# review: new
+ui-attachments-strip = Pièces jointes
+# review: new
+ui-attachment-note-title = Ouverture de ce fichier
+# review: new
+ui-attachment-program-tip = Ouvrir n’est pas possible pour ce type de fichier : il peut lancer des programmes. Enregistrez-le pour l’ouvrir vous-même.
 ui-clear-flag = &Effacer l'indicateur
 ui-button-move = &Déplacer
 ui-button-copy = &Copier

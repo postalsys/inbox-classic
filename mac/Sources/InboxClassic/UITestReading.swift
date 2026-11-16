@@ -545,6 +545,14 @@ extension UITest {
         let menu = opened.reader.attachmentMenu()
         check(menu.items.first?.title.hasPrefix("notes.txt") == true,
               "and lists the file's attachment (\(menu.items.first?.title ?? "none"))")
+        let fileStrip = opened.reader.strip
+        check(!fileStrip.isHidden && fileStrip.files.map(\.name) == ["notes.txt"], "its strip shows the file")
+        var handed: URL?
+        TestHooks.openFile = { handed = $0 }
+        doubleClick(fileStrip, 0)
+        _ = await waitUntil(10) { handed != nil }
+        TestHooks.openFile = nil
+        check(handed.flatMap { try? String(contentsOf: $0, encoding: .utf8) } == notes, "and opens it, as it was sent")
         await pause(1)
         await shot(shown, "files-4-open-eml")
         if let all = menu.items.last, let action = all.action {

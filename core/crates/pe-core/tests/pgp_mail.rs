@@ -600,3 +600,171 @@ fn a_part_can_not_hide_another_on_the_printout() {
     assert!(!parts.contains("style") && !parts.contains("display"), "{parts}");
     assert!(parts.contains("<b>Part 2: Signed by Alice Example"), "{parts}");
 }
+
+/// A message with `raw` as UID `uid` of the account's Inbox (made on the first call); the folder's id
+fn stored(w: &World, uid: u64, raw: &str) -> pe_store::FolderId {
+    let store = Store::open(w.dir.path().join("store.db")).unwrap();
+    let account = store.accounts().unwrap()[0].id;
+    if store.folders(account).unwrap().is_empty() {
+        let inbox = pe_store::FolderInfo {
+            path: "INBOX".into(),
+            name: "INBOX".into(),
+            selectable: true,
+            ..Default::default()
+        };
+        store.set_folders(account, &[inbox]).unwrap();
+    }
+    let folder = store.folders(account).unwrap()[0].id;
+    let info = pe_store::MessageInfo {
+        uid,
+        subject: "Files".into(),
+        from_address: "alice@example.org".into(),
+        ..Default::default()
+    };
+    store.add_messages(folder, &[info]).unwrap();
+    store.set_source(folder, uid, raw.as_bytes()).unwrap();
+    folder
+}
+
+fn file(name: &str, content_type: &str, body: &str) -> String {
+    format!(
+        "Content-Type: {content_type}; name=\"{name}\"\r\nContent-Disposition: attachment; filename=\"{name}\"\r\n\r\n{body}"
+    )
+}
+
+/// An attachment opened from a message: written into a private folder of the user's, never over another file, and
+/// opened again from the same file while it is there; a file that can run code refused with why, naming it, before
+/// the message is read again; an encrypted message's file opened with a note, the first time only
+#[test]
+fn attachments_open_from_a_private_folder() {
+    use pe_core::opening::FileKind;
+    let w = world("open-attachments");
+    let raw = message(
+        "alice@example.org",
+        &mixed(&[
+            text("Two files"),
+            file("Contract.pdf", "application/pdf", "%PDF-1.4 the contract"),
+            file("setup.exe", "application/octet-stream", "MZ program"),
+        ]),
+    );
+    let folder = stored(&w, 1, &raw);
+    let view = w.core.message_view(folder, 1, false).unwrap().unwrap();
+    let kinds: Vec<(FileKind, bool)> = view.attachments.iter().map(|a| (a.kind, a.kind.can_open())).collect();
+    assert_eq!(kinds, [(FileKind::Pdf, true), (FileKind::Program, false)]);
+    // the words of the strip: the tooltip, a line each, and the refusal naming the file
+    let pdf = &view.attachments[0];
+    assert_eq!(pdf.tooltip, format!("Contract.pdf ({})", pdf.size_text));
+    assert!(pdf.refusal.is_none());
+    let program = &view.attachments[1];
+    assert!(program.tooltip.starts_with("setup.exe (") && program.tooltip.contains("\nOpen is off"));
+    assert!(
+        program
+            .refusal
+            .as_deref()
+            .is_some_and(|r| r.contains("setup.exe") && r.contains("run programs"))
+    );
+
+    let opened = w.core.open_attachment(folder, 1, 0).unwrap().unwrap();
+    assert_eq!(std::fs::read_to_string(&opened.path).unwrap(), "%PDF-1.4 the contract");
+    assert!(opened.path.ends_with("Contract.pdf") && opened.note.is_none());
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mode = std::fs::metadata(opened.path.parent().unwrap())
+            .unwrap()
+            .permissions()
+            .mode();
+        assert_eq!(mode & 0o077, 0, "the folder is the user's alone");
+    }
+    // opened again (five double-clicks): the same file, one copy
+    for _ in 0..4 {
+        let again = w.core.open_attachment(folder, 1, 0).unwrap().unwrap();
+        assert_eq!(again.path, opened.path);
+    }
+    // once it is gone (the user deleted it), a new one
+    std::fs::remove_file(&opened.path).unwrap();
+    let anew = w.core.open_attachment(folder, 1, 0).unwrap().unwrap();
+    assert_ne!(anew.path, opened.path);
+    assert_eq!(std::fs::read_to_string(&anew.path).unwrap(), "%PDF-1.4 the contract");
+
+    // the program: refused from what the view knew, before the message is read (it is not even there any more)
+    Store::open(w.dir.path().join("store.db"))
+        .unwrap()
+        .remove_messages(folder, &[1])
+        .unwrap();
+    match w.core.open_attachment(folder, 1, 1) {
+        Err(pe_core::Error::Unavailable(why)) => {
+            assert!(why.contains("setup.exe") && why.contains("run programs"), "{why}")
+        }
+        other => panic!("{other:?}"),
+    }
+    // without a view to go by, refused once it is read
+    stored(&w, 3, &raw);
+    match w.core.open_attachment(folder, 3, 1) {
+        Err(pe_core::Error::Unavailable(why)) => assert!(why.contains("setup.exe"), "{why}"),
+        other => panic!("{other:?}"),
+    }
+    assert!(w.core.open_attachment(folder, 3, 9).unwrap().is_none());
+
+    // an encrypted message's attachment: decrypted to open it, said once
+    let inner = mixed(&[text("The plan"), file("plan.txt", "text/plain", "the secret plan")]);
+    let encrypted = message(
+        "alice@example.org",
+        &encrypted_part(&inner, &[&w.me], Some(&w.alice), "e"),
+    );
+    stored(&w, 2, &encrypted);
+    let first = w.core.open_attachment(folder, 2, 0).unwrap().unwrap();
+    assert_eq!(std::fs::read_to_string(&first.path).unwrap(), "the secret plan");
+    assert!(
+        first.note.as_deref().is_some_and(|note| note.contains("decrypted")),
+        "{first:?}"
+    );
+    let second = w.core.open_attachment(folder, 2, 0).unwrap().unwrap();
+    assert!(second.note.is_none(), "said once");
+    // a signed message that is not encrypted: no note (another store, which was never told one)
+    let w = world("open-signed-attachment");
+    let signed = message(
+        "alice@example.org",
+        &signed_part(
+            &mixed(&[text("Signed"), file("a.txt", "text/plain", "signed words")]),
+            &w.alice,
+            "s",
+        ),
+    );
+    let folder = stored(&w, 1, &signed);
+    let opened = w.core.open_attachment(folder, 1, 0).unwrap().unwrap();
+    assert_eq!(std::fs::read_to_string(&opened.path).unwrap(), "signed words");
+    assert!(opened.note.is_none(), "nothing was decrypted");
+}
+
+/// A message file's attachment: opened from the file a window shows, again the same file, and a page refused
+#[test]
+fn a_message_files_attachments_open() {
+    let w = world("open-file-attachments");
+    let raw = message(
+        "alice@example.org",
+        &mixed(&[
+            text("Files"),
+            file("notes.txt", "text/plain", "some notes"),
+            file(
+                "statement",
+                "application/octet-stream",
+                "<!DOCTYPE html><script>x()</script>",
+            ),
+        ]),
+    );
+    let path = w.dir.path().join("saved.eml");
+    std::fs::write(&path, &raw).unwrap();
+    let view = w.core.file_view(&path, false).unwrap();
+    assert!(!view.attachments[1].kind.can_open(), "a page by its content");
+    let opened = w.core.file_open_attachment(&path, 0).unwrap().unwrap();
+    assert_eq!(std::fs::read_to_string(&opened.path).unwrap(), "some notes");
+    assert_eq!(
+        w.core.file_open_attachment(&path, 0).unwrap().unwrap().path,
+        opened.path
+    );
+    assert!(matches!(
+        w.core.file_open_attachment(&path, 1),
+        Err(pe_core::Error::Unavailable(why)) if why.contains("statement")
+    ));
+}

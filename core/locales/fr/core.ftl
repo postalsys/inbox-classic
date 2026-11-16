@@ -912,3 +912,7 @@ setup-account-servers = { $imap } et { $smtp } ({ $signin })
 setup-file-name = Paramètres et comptes Inbox Classic
 # review: new
 setup-skipped-unreachable = { $name } a été ignoré : son service de connexion n'a pas pu être joint. Ajoutez-le de nouveau dans Applications de connexion.
+# review: new
+attachment-runs-programs = « { $name } » peut lancer des programmes, Inbox Classic ne l’ouvre donc pas. Enregistrez-le, puis ouvrez-le vous-même si vous faites confiance à sa provenance.
+# review: new
+attachment-decrypted-note = Cette pièce jointe vient d’un message chiffré. Pour l’ouvrir, Inbox Classic l’enregistre déchiffrée sur cet ordinateur, dans un dossier à vous qu’Inbox Classic vide au bout d’un jour.
