@@ -4950,6 +4950,11 @@ public static class Dragger {
     [void](WaitFor { [Native.Win]::SendMessage($tree, $TVM_GETNEXTITEM, [IntPtr]9, [IntPtr]::Zero) -eq $top } 5)
     Shot $main 'folder-click-waiting'
     Check ([Native.Win]::SendText($main, $kTestListOrder, '') -eq 9) 'while it waits, the list of the folder chosen is not read'
+    # opening a menu does not read it: the Message menu (the fifth) is for nothing selected meanwhile
+    $messageMenu = [Native.Win]::GetSubMenu([Native.Win]::GetMenu($main), 4)
+    [void][Native.Win]::SendMessage($main, 0x0117, $messageMenu, [IntPtr]4)
+    $replyOff = ([Native.Win]::GetMenuState($messageMenu, $IDM_REPLY, 0) -band 0x3) -ne 0
+    Check ($replyOff -and [Native.Win]::SendText($main, $kTestListOrder, '') -eq 9) 'opening a menu leaves it waiting, with Reply greyed as nothing is selected in it'
     [void][Native.Win]::SendText($main, $kTestHoldList, '0')
     $order = WaitFor { $o = [Native.Win]::SendText($main, $kTestListOrder, ''); if ($o -ge 11) { $o } } 10
     Check ($order -eq 12) "a folder chosen in the tree is highlighted before its list is read ($order)"

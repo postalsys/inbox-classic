@@ -1677,8 +1677,9 @@ void Reply(PeDraftKind kind) {
 }
 
 void OnCommand(WORD id, WORD code) {
-    // a command of the menus, toolbar or keys acts on the list of the folder chosen: read now if it waits for the paint
-    if (id < IDC_TREE) {
+    // a command of the menus, toolbar or keys that acts on the list of the folder chosen or its selection: that list read
+    // now if it waits for the paint. The Flag submenu's colours act through Mailbox::Act, which reads it
+    if (CommandActsOnList(id)) {
         g_mailbox.FlushListLoad();
     }
     // a colour of the Flag submenu, or Clear Flag
@@ -2195,7 +2196,7 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0;
     }
     case WM_INITMENUPOPUP:
-        g_mailbox.FlushListLoad();
+        // a list waiting to be read stays waiting: its menus are for nothing selected
         UpdateMenu(reinterpret_cast<HMENU>(wParam));
         break;
     case WM_CONTEXTMENU:

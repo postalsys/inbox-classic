@@ -698,7 +698,7 @@ public:
     const std::wstring& Said() const { return said_; }
     // the selected messages read or unread
     void MarkSelected(bool seen);
-    // how many messages are selected, and what they are in numbers (count 0 with none)
+    // how many messages are selected, and what they are in numbers (count 0 with none); none while a list waits
     size_t SelectedCount() const;
     const PeSelectionSummary& Summary() const { return summary_; }
     // Edit > Select All: every message of the list
@@ -943,6 +943,8 @@ private:
     void ShowPersonColumn();
     std::wstring RowFolder(int64_t folder) const;
     const PeMessage* Row(int index);
+    // the row `index` if its page is read already, nullptr otherwise; reads nothing
+    const PeMessage* CachedRow(int index) const;
     const PeMessage* SelectedRow();
     // the reading pane emptied; with "There is no message selected." in it unless a message is `loading`
     void ClearReader(bool loading = false);
@@ -980,15 +982,13 @@ private:
     void LoadPendingList();
     // the list ends waiting: its timers stopped, the UI test told whether the highlight was painted first
     void EndPending();
-    // over the list while it waits: the window colour at half strength, and "Loading..." once it waited a while
+    // over the list while it waits: the window colour at PE_LIST_DIM, and "Loading..." once it waited PE_LIST_LOADING_MS
     void DrawPending(HDC dc) const;
     // the tree's NM_CUSTOMDRAW while a list waits: whether the row chosen was painted highlighted
     void TreeCustomDraw(NMTVCUSTOMDRAW* draw, LRESULT& result);
-    // a folder changed: the list read again once for the changes of 300 ms (TIMER_RELOAD)
+    // a folder changed: the list read again once for the changes of PE_LIST_GATHER_MS (TIMER_RELOAD), unless it is up
+    // to date by then
     void ScheduleReload();
-    // the row the message shown is at after a reload, from the selected row `was` when it is still there, or moved by
-    // `shift` rows (mail came above it); -1 when it is at neither
-    int64_t KeptRow(int was, int64_t shift);
     // whether the list has messages of several folders: a search, or All Inboxes (with a Folder column)
     bool SeveralFolders() const;
     // the row of the message `uid` of `folder` selected in the list; false when it is not there

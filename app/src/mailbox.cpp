@@ -795,10 +795,11 @@ void Mailbox::ScheduleCounts() {
 }
 
 void Mailbox::ScheduleReload() {
-    // left running while more changes come: the list follows within 300 ms, once for all of them, and not later
+    // left running while more changes come: the list follows within PE_LIST_GATHER_MS, once for all of them, and not
+    // later
     if (!reloadPending_) {
         reloadPending_ = true;
-        SetTimer(parent_, TIMER_RELOAD, 300, nullptr);
+        SetTimer(parent_, TIMER_RELOAD, PE_LIST_GATHER_MS, nullptr);
     }
 }
 
@@ -976,16 +977,14 @@ void Mailbox::ReloadList(bool keepSelection) {
         }
     }
     uint64_t shown = reader_.Uid();
-    // the row of the message shown, while its page is still the one read before
+    bool follow = keepSelection && shown && !pending;
+    // the row of the message shown before the reload, while its page is still the one read before
     int was = -1;
-    if (keepSelection && shown && !pending) {
+    if (follow) {
         int selected = ListView_GetNextItem(list_, -1, LVNI_SELECTED);
-        uint64_t offset = selected >= 0 ? static_cast<uint64_t>(selected) / kPageSize * kPageSize : 0;
-        bool read = std::any_of(pages_.begin(), pages_.end(), [offset](const Page& p) { return p.offset == offset; });
-        const PeMessage* row = read ? Row(selected) : nullptr;
+        const PeMessage* row = CachedRow(selected);
         was = row && row->uid == shown && row->folder == reader_.Folder() ? selected : -1;
     }
-    uint64_t rowsBefore = rowCount_;
     pages_.clear();
     total_ = 0;
     unread_ = 0;
@@ -996,15 +995,15 @@ void Mailbox::ReloadList(bool keepSelection) {
     // conversations what they find. An account's own item lists nothing. The status bar counts messages; grouped by
     // conversation the list has fewer rows
     if (pe_list_view_active(view_.get())) {
-        pe_list_view_counts(core_, view_.get(), &total_, &unread_);
-        rowCount_ = pe_list_view_row_count(core_, view_.get());
+        pe_list_view_counts_and_rows(core_, view_.get(), &total_, &unread_, &rowCount_);
     }
     // the selection follows the message to where it is now, without a flicker of the reading pane; several selected
-    // messages are found again where they are now
-    // where it was, or as far down as rows came above it, without looking for it in the whole list
-    int64_t index = was >= 0 ? KeptRow(was, static_cast<int64_t>(rowCount_) - static_cast<int64_t>(rowsBefore)) : -1;
-    if (index < 0 && keepSelection && shown && !pending) {
-        index = pe_list_view_index(core_, view_.get(), reader_.Folder(), shown);
+    // messages are found again where they are now. The core looks near the row it had first, in the page with that
+    // row (read now, as it is drawn anyway), then in the whole list
+    int64_t index = -1;
+    if (follow) {
+        Row(std::min(was, static_cast<int>(std::min<uint64_t>(rowCount_, INT_MAX)) - 1));
+        index = pe_list_view_index_near(core_, view_.get(), reader_.Folder(), shown, was);
     }
     core::Positions several(keepSelection && (pending || !shown) && pe_selection_count(selection_.get()) > 0
                                 ? pe_list_view_positions(core_, view_.get(), selection_.get())
@@ -1033,22 +1032,6 @@ void Mailbox::ReloadList(bool keepSelection) {
     OnSelectionChanged(!kept);
 }
 
-int64_t Mailbox::KeptRow(int was, int64_t shift) {
-    for (int64_t at : {static_cast<int64_t>(was), static_cast<int64_t>(was) + shift}) {
-        if (at < 0 || at > INT_MAX) {
-            continue;
-        }
-        const PeMessage* row = Row(static_cast<int>(at));
-        if (row && row->uid == reader_.Uid() && row->folder == reader_.Folder()) {
-            return at;
-        }
-        if (shift == 0) {
-            break;
-        }
-    }
-    return -1;
-}
-
 bool Mailbox::SelectPositions(const PePositions* positions, bool focusFirst) {
     size_t count = pe_positions_count(positions);
     for (size_t i = 0; i < count; i++) {
@@ -1064,17 +1047,29 @@ bool Mailbox::SelectPositions(const PePositions* positions, bool focusFirst) {
     return count > 0;
 }
 
-const PeMessage* Mailbox::Row(int index) {
+const PeMessage* Mailbox::CachedRow(int index) const {
     if (index < 0 || static_cast<uint64_t>(index) >= rowCount_) {
         return nullptr;
     }
     uint64_t offset = static_cast<uint64_t>(index) / kPageSize * kPageSize;
     auto page = std::find_if(pages_.begin(), pages_.end(), [offset](const Page& p) { return p.offset == offset; });
     if (page == pages_.end()) {
-        // while a clicked folder's list waits, the view lists that folder: the list before shows what it read only
-        if (listPending_) {
-            return nullptr;
-        }
+        return nullptr;
+    }
+    return pe_message_list_get(page->rows.get(), static_cast<size_t>(static_cast<uint64_t>(index) - offset));
+}
+
+const PeMessage* Mailbox::Row(int index) {
+    // while a clicked folder's list waits, the view lists that folder: the list before shows what it read only
+    if (listPending_) {
+        return CachedRow(index);
+    }
+    if (index < 0 || static_cast<uint64_t>(index) >= rowCount_) {
+        return nullptr;
+    }
+    uint64_t offset = static_cast<uint64_t>(index) / kPageSize * kPageSize;
+    auto page = std::find_if(pages_.begin(), pages_.end(), [offset](const Page& p) { return p.offset == offset; });
+    if (page == pages_.end()) {
         if (pages_.size() >= kPagesKept) {
             pages_.erase(pages_.begin());
         }
@@ -1428,7 +1423,8 @@ void Mailbox::FlushSelection() {
 }
 
 size_t Mailbox::SelectedCount() const {
-    return static_cast<size_t>(ListView_GetSelectedCount(list_));
+    // the dimmed rows of the list before are not the folder's: a list that has not loaded has nothing selected
+    return listPending_ ? 0 : static_cast<size_t>(ListView_GetSelectedCount(list_));
 }
 
 std::vector<int> Mailbox::SelectedRows() const {
@@ -1522,11 +1518,15 @@ void Mailbox::DeferList() {
     if (!listPending_) {
         listPending_ = true;
         // from the first click: a second one before the list was read does not start the wait again
-        SetTimer(parent_, TIMER_LIST_LOADING, 400, nullptr);
+        SetTimer(parent_, TIMER_LIST_LOADING, PE_LIST_LOADING_MS, nullptr);
         // its rows drawn again, dimmed; an empty list keeps saying why it was empty rather than blink
         if (ListView_GetItemCount(list_) > 0) {
             InvalidateRect(list_, nullptr, FALSE);
         }
+        // nothing selected meanwhile: the menus and buttons for messages are off until the list is read
+        pe_selection_clear(selection_.get());
+        summary_ = {};
+        SendMessageW(parent_, WM_COMMAND, MAKEWPARAM(IDC_LIST, kSelectionTaken), 0);
     }
     highlightPainted_ = false;
     testListOrder_ = -1;
@@ -1534,12 +1534,14 @@ void Mailbox::DeferList() {
     if (!deferNext_) {
         startMessage_ = {};
     }
-    // WM_TIMER comes once the windows are painted; set again, the newest click is the one read
-    SetTimer(parent_, TIMER_LOAD_LIST, USER_TIMER_MINIMUM, nullptr);
+    // WM_TIMER comes once the windows are painted; set again, the newest click is the one read. Stopped by EndPending
+    // only; the UI test's hold sets it when it lets go
+    if (!holdList_) {
+        SetTimer(parent_, TIMER_LOAD_LIST, USER_TIMER_MINIMUM, nullptr);
+    }
 }
 
 void Mailbox::LoadPendingList() {
-    KillTimer(parent_, TIMER_LOAD_LIST);
     if (!listPending_) {
         return;
     }
@@ -1602,7 +1604,7 @@ void Mailbox::DrawPending(HDC dc) const {
     HBITMAP pixel = CreateCompatibleBitmap(dc, 1, 1);
     HGDIOBJ old = SelectObject(memory, pixel);
     SetPixel(memory, 0, 0, GetSysColor(COLOR_WINDOW));
-    BLENDFUNCTION blend = {AC_SRC_OVER, 0, 140, 0};
+    BLENDFUNCTION blend = {AC_SRC_OVER, 0, static_cast<BYTE>(PE_LIST_DIM * 255 + 0.5), 0};
     AlphaBlend(dc, area.left, area.top, area.right - area.left, area.bottom - area.top, memory, 0, 0, 1, 1, blend);
     SelectObject(memory, old);
     DeleteObject(pixel);
@@ -1921,7 +1923,10 @@ HMENU Mailbox::FlagMenu() {
 }
 
 void Mailbox::UpdateFlagMenu(HMENU menu) {
-    FlushSelection();
+    // a list waiting to be read stays waiting for a menu: nothing is selected in it
+    if (!listPending_) {
+        FlushSelection();
+    }
     bool some = SelectedCount() > 0;
     for (int color = 1; color <= 7; color++) {
         EnableMenuItem(menu, IDM_FLAG_COLOR + color, MF_BYCOMMAND | (some ? MF_ENABLED : MF_GRAYED));
@@ -2434,8 +2439,11 @@ void Mailbox::MarkConversations(PeAction action) {
 }
 
 void Mailbox::UpdateConversationMarks(HMENU menu) {
-    // the selection as the core knows it now: an action since it was taken may have changed the marks
-    FlushSelection();
+    // the selection as the core knows it now: an action since it was taken may have changed the marks. A list waiting to
+    // be read stays waiting for a menu: nothing is selected in it
+    if (!listPending_) {
+        FlushSelection();
+    }
     RefreshSummary();
     CheckMenuItem(menu, IDM_WATCH_CONVERSATION, MF_BYCOMMAND | (summary_.watched ? MF_CHECKED : MF_UNCHECKED));
     CheckMenuItem(menu, IDM_IGNORE_CONVERSATION, MF_BYCOMMAND | (summary_.ignored ? MF_CHECKED : MF_UNCHECKED));
@@ -3287,7 +3295,6 @@ void Mailbox::OnTimer(UINT_PTR id) {
         return;
     }
     if (id == TIMER_LOAD_LIST) {
-        KillTimer(parent_, TIMER_LOAD_LIST);
         if (!holdList_) {
             LoadPendingList();
         }
@@ -3302,8 +3309,9 @@ void Mailbox::OnTimer(UINT_PTR id) {
     if (id == TIMER_RELOAD) {
         KillTimer(parent_, TIMER_RELOAD);
         reloadPending_ = false;
-        // the UI test holds a list waiting: read with it once let go
-        if (holdList_ && listPending_) {
+        // the UI test holds a list waiting: read with it once let go. A list the user's own command read again since
+        // the changes is up to date already
+        if ((holdList_ && listPending_) || !pe_list_view_stale(core_, view_.get())) {
             return;
         }
         ReloadList(true);
@@ -3336,6 +3344,7 @@ void Mailbox::OnTimer(UINT_PTR id) {
     if (row && row->uid == reader_.Uid() && row->folder == reader_.Folder() && !row->seen) {
         // read after a moment on screen: no word of it in the status bar
         pe_message_set_seen(core_, row->folder, row->uid, true);
+        ReloadList(true);
     }
 }
 

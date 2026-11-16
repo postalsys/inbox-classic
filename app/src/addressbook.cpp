@@ -241,9 +241,8 @@ LRESULT DialogProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, void (
     return DefWindowProcW(hwnd, message, wParam, lParam);
 }
 
-// the find box of the book and of the pickers searches a moment after the last key, not for each
+// the find box of the book and of the pickers searches PE_FIND_PAUSE_MS after the last key, not for each
 constexpr UINT_PTR kFindTimer = 1;
-constexpr UINT kFindWait = 150;
 
 // ---- Select Recipients, Select Group Members ----
 
@@ -324,7 +323,7 @@ void OnPickCommand(HWND dialog, PickState& state, WORD id, WORD code) {
     } else if (id >= IDC_PICK_TO && id < IDC_PICK_TO + state.targets) {
         AddPicked(dialog, state, id - IDC_PICK_TO);
     } else if (id == IDC_PICK_FIND && code == EN_CHANGE) {
-        SetTimer(dialog, kFindTimer, kFindWait, nullptr);
+        SetTimer(dialog, kFindTimer, PE_FIND_PAUSE_MS, nullptr);
     }
 }
 
@@ -1782,7 +1781,7 @@ LRESULT CALLBACK BookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (LOWORD(wParam) == IDC_BOOK_FIND) {
             // what is typed is found among the people shown: the book's, or the group's
             if (HIWORD(wParam) == EN_CHANGE) {
-                SetTimer(hwnd, kFindTimer, kFindWait, nullptr);
+                SetTimer(hwnd, kFindTimer, PE_FIND_PAUSE_MS, nullptr);
             }
             return 0;
         }
