@@ -508,3 +508,16 @@ menu = "file"
 id = "export_address_book"
 windows = 150
 menu = "file"
+
+# settings, accounts, sign-in apps, contacts, keys, rules and trusted senders written to one file (with a passphrase,
+# encrypted and with the passwords and private keys), for another computer
+[[command]]
+id = "export_setup"
+windows = 173
+menu = "file"
+
+# a file of export_setup read in: what it holds shown first, the parts and accounts chosen
+[[command]]
+id = "import_setup"
+windows = 174
+menu = "file"

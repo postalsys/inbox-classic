@@ -93,6 +93,10 @@ cmd-address-book = &Aadressiraamat...
 cmd-add-sender-to-book = Lisa saatja aa&dressiraamatusse
 cmd-import-address-book = Impordi aadressi&raamat...
 cmd-export-address-book = &Ekspordi aadressiraamat...
+# review: new
+cmd-export-setup = Ekspordi seade&d ja kontod...
+# review: new
+cmd-import-setup = Impordi &seaded ja kontod...
 
 ## The tray icon's menu
 
@@ -731,3 +735,45 @@ ui-contact-key-none = Võtit pole
 ui-contact-key-use-new = Kasuta &uut võtit
 # review: new
 ui-contact-key-keep = &Jäta senine
+# review: new
+ui-setup-export-title = Ekspordi seaded ja kontod
+# review: new
+ui-setup-import-title = Impordi seaded ja kontod
+# review: new
+ui-setup-export-intro = Vali, mida teise arvutisse kaasa võtta. Fail ei sisalda kirju: need laaditakse seal uuesti.
+# review: new
+ui-setup-part-settings = Seaded
+# review: new
+ui-setup-part-preferences = Akna eelistused
+# review: new
+ui-setup-part-accounts = Kontod
+# review: new
+ui-setup-part-sign-in-apps = Sisselogimise rakendused
+# review: new
+ui-setup-part-contacts = Kontaktid ja grupid
+# review: new
+ui-setup-part-keys = Krüptimisvõtmed
+# review: new
+ui-setup-part-rules = Kirjareeglid
+# review: new
+ui-setup-part-trusted = Usaldusväärsed saatjad
+# review: new
+ui-setup-use-passphrase = &Kaitse faili paroolifraasiga
+# review: new
+ui-setup-passphrase-note = Paroolifraasiga on fail krüptitud ja sisaldab ka sinu paroole, sisselogimisi ja privaatvõtmeid. Ilma selleta küsib iga konto teises arvutis oma parooli.
+# review: new
+ui-setup-export-button = &Ekspordi...
+# review: new
+ui-setup-file-filter = Inbox Classicu seaded ja kontod
+# review: new
+ui-setup-ask-passphrase = See fail on kaitstud paroolifraasiga. Sisesta see, et näha, mida fail sisaldab:
+# review: new
+ui-setup-import-intro = Vali, mida importida. Selles arvutis juba olevad kontod jäävad nagu on.
+# review: new
+ui-setup-from = Salvestatud Inbox Classicu versiooniga { $version } { $date }.
+# review: new
+ui-setup-import-button = &Impordi
+# review: new
+ui-setup-done = Valmis
+# review: new
+ui-setup-first-run = Impordi seaded ja kontod teisest arvutist...

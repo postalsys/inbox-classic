@@ -75,6 +75,8 @@ enum Command: Int, CaseIterable {
     case addSenderToBook = 148
     case importAddressBook = 149
     case exportAddressBook = 150
+    case exportSetup = 173
+    case importSetup = 174
 
     /// The menu it is in: file, edit, view, tools, message, help, or tray (the Dock menu)
     var menu: String {
@@ -151,6 +153,8 @@ enum Command: Int, CaseIterable {
         case .addSenderToBook: return "tools"
         case .importAddressBook: return "file"
         case .exportAddressBook: return "file"
+        case .exportSetup: return "file"
+        case .importSetup: return "file"
         }
     }
 
@@ -234,6 +238,8 @@ enum Command: Int, CaseIterable {
         case .addSenderToBook: return .cmdAddSenderToBook
         case .importAddressBook: return .cmdImportAddressBook
         case .exportAddressBook: return .cmdExportAddressBook
+        case .exportSetup: return .cmdExportSetup
+        case .importSetup: return .cmdImportSetup
         }
     }
 
@@ -312,6 +318,8 @@ enum Command: Int, CaseIterable {
         case .addSenderToBook: return nil
         case .importAddressBook: return nil
         case .exportAddressBook: return nil
+        case .exportSetup: return nil
+        case .importSetup: return nil
         }
     }
 
@@ -390,6 +398,8 @@ enum Command: Int, CaseIterable {
         case .addSenderToBook: return false
         case .importAddressBook: return false
         case .exportAddressBook: return false
+        case .exportSetup: return false
+        case .importSetup: return false
         }
     }
 
@@ -468,6 +478,8 @@ enum Command: Int, CaseIterable {
         case .addSenderToBook: return false
         case .importAddressBook: return false
         case .exportAddressBook: return false
+        case .exportSetup: return false
+        case .importSetup: return false
         }
     }
 
@@ -546,6 +558,8 @@ enum Command: Int, CaseIterable {
         case .addSenderToBook: return true
         case .importAddressBook: return false
         case .exportAddressBook: return false
+        case .exportSetup: return false
+        case .importSetup: return false
         }
     }
 
@@ -624,6 +638,8 @@ enum Command: Int, CaseIterable {
         case .addSenderToBook: return nil
         case .importAddressBook: return nil
         case .exportAddressBook: return nil
+        case .exportSetup: return nil
+        case .importSetup: return nil
         }
     }
 }

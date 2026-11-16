@@ -93,6 +93,10 @@ cmd-address-book = &Libreta de direcciones...
 cmd-add-sender-to-book = Añadir remitente a la li&breta de direcciones
 cmd-import-address-book = Importar &libreta de direcciones...
 cmd-export-address-book = &Exportar libreta de direcciones...
+# review: new
+cmd-export-setup = Exportar configuración y c&uentas...
+# review: new
+cmd-import-setup = Importar con&figuración y cuentas...
 
 ## The tray icon's menu
 
@@ -731,3 +735,45 @@ ui-contact-key-none = Sin clave
 ui-contact-key-use-new = &Usar la nueva clave
 # review: new
 ui-contact-key-keep = &Mantener la actual
+# review: new
+ui-setup-export-title = Exportar configuración y cuentas
+# review: new
+ui-setup-import-title = Importar configuración y cuentas
+# review: new
+ui-setup-export-intro = Elija qué llevar a otro equipo. El archivo no contiene mensajes: se descargan de nuevo allí.
+# review: new
+ui-setup-part-settings = Configuración
+# review: new
+ui-setup-part-preferences = Preferencias de ventana
+# review: new
+ui-setup-part-accounts = Cuentas
+# review: new
+ui-setup-part-sign-in-apps = Aplicaciones de inicio de sesión
+# review: new
+ui-setup-part-contacts = Contactos y grupos
+# review: new
+ui-setup-part-keys = Claves de cifrado
+# review: new
+ui-setup-part-rules = Reglas de mensajes
+# review: new
+ui-setup-part-trusted = Remitentes de confianza
+# review: new
+ui-setup-use-passphrase = &Proteger el archivo con una frase de contraseña
+# review: new
+ui-setup-passphrase-note = Con una frase de contraseña, el archivo se cifra y contiene también sus contraseñas, inicios de sesión y claves privadas. Sin ella, cada cuenta pide su contraseña en el otro equipo.
+# review: new
+ui-setup-export-button = &Exportar...
+# review: new
+ui-setup-file-filter = Configuración y cuentas de Inbox Classic
+# review: new
+ui-setup-ask-passphrase = Este archivo está protegido por una frase de contraseña. Escríbala para ver lo que contiene:
+# review: new
+ui-setup-import-intro = Elija qué importar. Las cuentas que ya están en este equipo se dejan como están.
+# review: new
+ui-setup-from = Guardado por Inbox Classic { $version } el { $date }.
+# review: new
+ui-setup-import-button = &Importar
+# review: new
+ui-setup-done = Listo
+# review: new
+ui-setup-first-run = Importar configuración y cuentas de otro equipo...
