@@ -388,7 +388,6 @@ ui-settings-sending = Envio
 ui-settings-default-apps = Aplicações predefinidas
 ui-settings-message-list = Lista de mensagens
 ui-settings-messages = Mensagens
-# review: new
 ui-settings-encryption = Encriptação
 ui-settings-language = Idioma
 ui-settings-label = { $label }:
@@ -599,14 +598,10 @@ ui-trusted-senders-title = Remetentes fidedignos
 ui-trusted-senders-note = As imagens das mensagens destes remetentes são transferidas automaticamente quando o seu fornecedor de correio verifica o domínio do remetente.
 ui-trusted-everyone-at = Remetentes com o domínio { $domain }
 ui-trusted-senders-empty = Ainda não foram adicionados remetentes fidedignos.
-# review: new
 ui-search-encrypted = &Pesquisar em mensagens encriptadas
-# review: new
-ui-search-encrypted-note = As mensagens encriptadas são desencriptadas neste computador depois de transferidas ou abertas, para que as suas palavras possam ser encontradas e a lista mostre o assunto delas. O índice não está encriptado e os agentes de IA nunca pesquisam nele. Desative esta opção para as remover do índice.
-# review: new
+ui-search-encrypted-note = Se a chave privada necessária estiver disponível, o Inbox Classic pode desencriptar neste computador as mensagens transferidas ou abertas. Pode então pesquisar no texto e ver na lista uma pré-visualização e o assunto protegido, se existir. O conteúdo desencriptado fica guardado sem encriptação no índice de pesquisa local. Os agentes de IA não podem pesquisar nesse conteúdo. Ao desativar esta opção, esse conteúdo é removido do índice.
 ui-pgp-keyserver = Procurar &chaves em keys.openpgp.org
-# review: new
-ui-pgp-keyserver-note = Quando encripta uma mensagem ou procura uma chave, o endereço procurado é enviado para keys.openpgp.org. O próprio domínio do endereço é consultado primeiro.
+ui-pgp-keyserver-note = Ao procurar uma chave por endereço de e-mail, é consultado primeiro o domínio desse endereço. Se necessário, o endereço é enviado para keys.openpgp.org. Se procurar pela impressão digital ou pelo ID da chave, é enviado esse identificador em vez do endereço.
 ui-eml-default = Abrir &ficheiros .eml com o Inbox Classic
 ui-eml-default-done = O Inbox Classic abre agora os ficheiros .eml.
 ui-eml-default-failed = Não foi possível definir o Inbox Classic como aplicação predefinida para ficheiros .eml: { $reason }
@@ -617,9 +612,7 @@ ui-columns-note = A janela é suficientemente larga para o esquema em colunas. P
 ui-row-unread = Não lida
 ui-row-flagged = Sinalizada
 ui-row-attachments = Tem anexos
-# review: new
 ui-row-encrypted = Encriptada
-# review: new
 ui-row-signed = Assinada
 ui-row-messages = { $count ->
     [0] 0 mensagens
