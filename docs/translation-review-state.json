@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Greek compose additions, then the remaining compose languages (fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk). Continue the 46 original Hungarian help topics and broader lt/lv/pl/ro/ru/sk/sl/sv/uk catalogs/help. The agent unsubscribe, draft and Undo/Outbox followups are complete in all 28 languages; older connection topics in hu/lt/lv/pl/ro remain in the broader help queue. Preserve reviewed agent screenshot descriptions and shutdown instructions. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 22031/813; pending 12373/543; improvements 4176. REVIEWED unchanged.",
+  "next_batch": "Correct the two reopened Linux compose-menu passages in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da, reviewing each language in context. Then resume Finnish compose additions and hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, the 46 original Hungarian help topics and broader catalogs/help. Apply the Linux menu correction to every remaining compose topic. Agent unsubscribe/draft/Undo followups are complete in all 28 languages; preserve their reviewed passages. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 22071/800; pending 12333/556; improvements 4193. REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -29,7 +29,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -2291,14 +2292,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 17,
           "files": {
             "core/locales/bg/app.ftl": "3bf8509cda6926f876dbe40948fc8e3db2b7ce03967f282317f089da6013fed3",
             "core/locales/bg/core.ftl": "db6f289841c06b236b24e835c5aa5a6065249a807d65d763e18d2598b3e3f0f8",
-            "core/crates/pe-html/help/bg/sign-and-encrypt.html": "1a5c17719d19966ee47949d99183977f6e7eac266ba980b683d37a8c370524e0",
+            "core/crates/pe-html/help/bg/sign-and-encrypt.html": "788aa2787772dda26db808130836743f1594ab47b44408be526d69c05927b8ad",
             "core/crates/pe-html/help/bg/write-message.html": "33b2ff34703143aa71f3e90d2aba9206a56f0476c71dbfdce015148d672f19a5"
           },
           "english_sources": {
@@ -2327,7 +2327,10 @@
               "build/ui-e2e-linux"
             ],
             "limitation": "No relevant Bulgarian compose/encryption screenshots found. Source layouts/wrapping and substituted platform help joins inspected; no GUI run."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "bg-preview-mcp-source-integration-round2",
@@ -2672,7 +2675,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -4951,14 +4955,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 18,
           "files": {
             "core/locales/cs/app.ftl": "1fbd30a60d3201aab391e4d8e6e4b2fa3ad9e1bdb4836c514900810df71cd87b",
             "core/locales/cs/core.ftl": "fba34278c62edae25b5764dce79bbbbcc9c735e1ca35e422139daf940e92c56f",
-            "core/crates/pe-html/help/cs/sign-and-encrypt.html": "e2468d0132e7a4c85a21bf847a0453ea72dc438b4c629bb3f8f41ec887ab9b0e",
+            "core/crates/pe-html/help/cs/sign-and-encrypt.html": "c53bc695a0b21bc6b4e0f329bb61a157c9211b0d87214f97e64ebb1e690e5db0",
             "core/crates/pe-html/help/cs/write-message.html": "76d9b1c2e1b35cf0e3a0cd93eef73966ba4c8955a08fbf3a06c543d791827d07"
           },
           "english_sources": {
@@ -5022,7 +5025,10 @@
               "build/ui-e2e-linux"
             ],
             "limitation": "No relevant Czech compose/encryption screenshots found. Source controls/layouts/wrapping and substituted platform help joins inspected; no GUI run."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "cs-preview-mcp-source-integration-round2",
@@ -5367,7 +5373,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -7608,14 +7615,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 16,
           "files": {
             "core/locales/da/app.ftl": "b4f02819e901d0a74f76affd61bc2b66d6ec34e8ab2aaef631d5720c7bcd5cf7",
             "core/locales/da/core.ftl": "b0526f9731d08da1e6ae36eb80b96d32f7f0e6680ca9f57b500461cdc5ff825a",
-            "core/crates/pe-html/help/da/sign-and-encrypt.html": "56bf89e67a2f5e58a20c954c0204e8a660e623eec9981abf7fec90c8d5575b93",
+            "core/crates/pe-html/help/da/sign-and-encrypt.html": "742e1347340e9cd7344c2a0b14162e6b1985cf5738a65e8765971bed83fc5da3",
             "core/crates/pe-html/help/da/write-message.html": "cfb781df25f6e134bf9d2be5fbdd3a241d035a3358aea6bd39f8ea3f267e3507"
           },
           "english_sources": {
@@ -7637,7 +7643,10 @@
               "build/ui-e2e-linux"
             ],
             "limitation": "No relevant Danish compose/encryption screenshots found. Source controls/layouts/wrapping and substituted platform help joins inspected; no GUI run."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "da-preview-mcp-source-integration-round2",
@@ -7982,7 +7991,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -8663,15 +8673,14 @@
             ]
           },
           "reviewed_help": [
-            "write-message.html",
-            "sign-and-encrypt.html"
+            "write-message.html"
           ],
           "changed_values": 16,
           "files": {
             "core/locales/de/app.ftl": "b79610503f4fc2866324d78c05423948bfdba1d9e67d8326bf43e4321df1a734",
             "core/locales/de/core.ftl": "d67f982f3a2dcd94dd533bc2f2c567dca759b714d1b3aeade3b38c2025792d36",
             "core/crates/pe-html/help/de/write-message.html": "f826c4bf1ed34d45e0ed6f6ff8c5a5ccf684f1bb6ab732b14f6162384f7d2b0d",
-            "core/crates/pe-html/help/de/sign-and-encrypt.html": "a235d4abd1312c180ee18b72de1007b63c10d35b29d53141aef8a423d46720b4"
+            "core/crates/pe-html/help/de/sign-and-encrypt.html": "c404372c7efd4f8c4f0c6063ea0d731a60c0bc4ddc58611910b6933a8019b50e"
           },
           "english_sources": {
             "core/locales/en/app.ftl": "a0b8f5de6157b820dcb5543c0ca40728c6ce41a6664b69bf31d9fd27f5878299",
@@ -8682,7 +8691,10 @@
           "validation": "German check-language has exactly 1445 expected removed-mark diagnostics and no structural findings. All 53 actual mnemonic groups pass. Exact reconstruction verifies 16 value edits and 40 mark removals; IDs, full variables, plural branches, braces, access keys and comments are preserved. Help markup/attributes/code/literal keyboard contents/platform branches preserved; all prose outside the write-message insertion is byte-for-byte unchanged. Substituted control joins inspected on Windows/Mac/Linux, and dynamic command shortcuts checked against commands.toml. All 28 full active inventories and pending marks match; current file/source hashes reconcile: 20716 unmarked messages, 10391 changed help lines, 14 verified baseline pairs. Since-start1413 entries and213 passages match. HTML regenerated; git diff --check passes. No tests or builds.",
           "notes": "Reviewed all 40 compose additions and both help targets against shared decisions and each platform caller. Kept all 17 concise app labels. Improved 16 core values: intended sending protection, signature versus ownership, usable-key conditions, counts/address lists, whole-sentence state reasons, clear downgrade warnings, and conditional unencrypted sending. Help distinguishes individual recipient color/status from the overall security bar, recognizes own/unusable keys, explains safe reply/forward handling and sender-only encrypted drafts, and names the selected From address when attaching a public key. Only the inserted write-message paragraph changed; all earlier prose retained. All 53 mnemonic scopes pass. Existing German Linux compose screenshot inspected, but it predates the new controls; new control layout/word wrapping checked in source. No GUI run, no test suite, no build.",
           "changed_help_lines": 14,
-          "glossary_sha256": "c90b22c45e4965585ed72d0ccda02e576a1531f56ad0a7fb932189bf97196a85"
+          "glossary_sha256": "c90b22c45e4965585ed72d0ccda02e576a1531f56ad0a7fb932189bf97196a85",
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "de-active-key-source-integration-round2",
@@ -9141,51 +9153,11 @@
     "el": {
       "pending_catalogs": {
         "app.ftl": [
-          "menu-insert",
-          "cmd-compose-sign",
-          "cmd-compose-encrypt",
-          "cmd-attach-my-key",
-          "ui-tb-sign",
-          "ui-tb-encrypt",
-          "ui-field-keys",
           "ui-preview-show",
           "ui-preview-show-note",
-          "ui-preview-pdfs",
-          "ui-recipient-keys-title",
-          "ui-recipient-col-recipient",
-          "ui-recipient-col-key",
-          "ui-recipient-find-key",
-          "ui-recipient-remove",
-          "ui-send-unencrypted",
-          "ui-compose-make-key",
-          "ui-compose-show-keys",
-          "ui-compose-encrypt-off",
-          "ui-compose-keep-encrypted"
+          "ui-preview-pdfs"
         ],
         "core.ftl": [
-          "pgp-compose-encrypted",
-          "pgp-compose-encrypt-ready",
-          "pgp-compose-missing",
-          "pgp-compose-looking",
-          "pgp-compose-signed",
-          "pgp-compose-reply-clear",
-          "pgp-compose-encrypted-files",
-          "pgp-compose-sign-tip",
-          "pgp-compose-sign-tip-encrypted",
-          "pgp-compose-encrypt-tip",
-          "pgp-compose-make-key",
-          "pgp-compose-key-unusable",
-          "pgp-compose-encrypt-off-quote",
-          "pgp-compose-encrypt-off-reply",
-          "pgp-recipient-verified",
-          "pgp-recipient-found",
-          "pgp-recipient-own",
-          "pgp-recipient-looking",
-          "pgp-recipient-missing",
-          "pgp-recipient-not-found",
-          "pgp-recipient-unusable",
-          "pgp-recipients-intro",
-          "pgp-recipients-intro-missing",
           "preview-pdf-option",
           "preview-pdf-off",
           "preview-pdf-off-crashed",
@@ -9195,8 +9167,6 @@
         ]
       },
       "pending_help": [
-        "sign-and-encrypt.html",
-        "write-message.html",
         "attachments.html",
         "options-language.html"
       ],
@@ -11724,6 +11694,149 @@
             "since.log": "/private/tmp/inbox-agent-toggle-since.log",
             "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
+        },
+        {
+          "id": "el-compose-sign-encrypt-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "menu-insert",
+              "cmd-compose-sign",
+              "cmd-compose-encrypt",
+              "cmd-attach-my-key",
+              "ui-tb-sign",
+              "ui-tb-encrypt",
+              "ui-field-keys",
+              "ui-recipient-keys-title",
+              "ui-recipient-col-recipient",
+              "ui-recipient-col-key",
+              "ui-recipient-find-key",
+              "ui-recipient-remove",
+              "ui-send-unencrypted",
+              "ui-compose-make-key",
+              "ui-compose-show-keys",
+              "ui-compose-encrypt-off",
+              "ui-compose-keep-encrypted"
+            ],
+            "core.ftl": [
+              "pgp-compose-encrypted",
+              "pgp-compose-encrypt-ready",
+              "pgp-compose-missing",
+              "pgp-compose-looking",
+              "pgp-compose-signed",
+              "pgp-compose-reply-clear",
+              "pgp-compose-encrypted-files",
+              "pgp-compose-sign-tip",
+              "pgp-compose-sign-tip-encrypted",
+              "pgp-compose-encrypt-tip",
+              "pgp-compose-make-key",
+              "pgp-compose-key-unusable",
+              "pgp-compose-encrypt-off-quote",
+              "pgp-compose-encrypt-off-reply",
+              "pgp-recipient-verified",
+              "pgp-recipient-found",
+              "pgp-recipient-own",
+              "pgp-recipient-looking",
+              "pgp-recipient-missing",
+              "pgp-recipient-not-found",
+              "pgp-recipient-unusable",
+              "pgp-recipients-intro",
+              "pgp-recipients-intro-missing"
+            ]
+          },
+          "reviewed_help": [
+            "sign-and-encrypt.html",
+            "write-message.html"
+          ],
+          "changed_values": 17,
+          "files": {
+            "core/locales/el/app.ftl": "d45d742a51e1d443369b8834be007e80085ed16ed3110824244c97c2597c5c37",
+            "core/locales/el/core.ftl": "21c639c8d0bbf74c6bcd36778276580b064b043cd726bb4100927060a7b313e2",
+            "core/crates/pe-html/help/el/sign-and-encrypt.html": "fd6582f09584685b51bb2de028764fedf5fe201bd26a62a7a1aa386405e0f31b",
+            "core/crates/pe-html/help/el/write-message.html": "d8ee893c969ed92061c43dbd6a2a7f1fb96e8364cafeb07afcb740a9b1631428"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "db66872a15d644a25d303ba829e3a23e1fc6292630fdbbab2a82d0c6b9e36a7d",
+            "core/locales/en/core.ftl": "9dee06b6ab2156be41a88cd9fab1a36ebe20020891278b5ae1a03f258b16cce1",
+            "core/crates/pe-html/help/en/sign-and-encrypt.html": "7ab75ec9da59bc24d60b1f36e7073dbecd478c18e061b9e947a06e1f01446675",
+            "core/crates/pe-html/help/en/write-message.html": "d161c1a2aeffb7539b2e8086d1a7ee6ea4bc39d5f702d93e362d8d10bfe8ff42"
+          },
+          "validation": "Greek structural checker has 1,456 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies 40 catalog reviews, 17 improved core values, 23 retained values and two complete help targets with 15 changed wording lines. All earlier writing-help prose is retained. Tags, attributes, platform branch boundaries, controls, literal keys, variables and plural branches are unchanged. All 53 mnemonic scopes pass; explicit compose letters remain unaccented Greek letters. The recorded generated Windows Flag-menu accent issue is unchanged. Platform sentence joins include actual labels, topic titles and command shortcuts (Ctrl+Shift+D/E; Mac Option+Command+Y/X). No relevant Greek screenshots found; source layouts/wrapping and 11 captured runtime files inspected. No GUI run or visual fit claim. Exactly 30 navigation passages in 15 other languages receive review marks only; every other byte and review remains preserved. Global reconciliation accounts for 22,109 unmarked entries, 11,254 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All 28 inventories and since-start 1,056 entries/269 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies. Master 79332925 adds only the inspected PDF settings-placeholder fix; it changes no translation or compose context. HTML refreshed; git diff --check passes. No local test suites or builds; REVIEWED unchanged.",
+          "notes": "Reviewed all 40 compose additions and both help targets: 17 improved core values; all 17 app labels and six core values retained. Greek polite plural, nominal actions, unaccented mnemonic letters and guillemets retained. Describe signing/encryption at sending, usable encryption keys, identity verification separately, protected quote/media/attachment safeguards, own-key draft encryption and preserved sent-copy protection. Full reasons and dates follow neutral labels; names/addresses remain uninflected. Correct Linux compose navigation to its primary menu while preserving the existing help markup and platform branches. Earlier writing-help prose retained. No tests or GUI runs.",
+          "changed_help_lines": 15,
+          "glossary_sha256": "09b34bb440047a094d7e17da57f7b757e43df288d45799c9f7ed12c7ef856089",
+          "retained_write_message_prose_verified": true,
+          "runtime_evidence": {
+            "review_parent": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+            "files": {
+              "core/commands.toml": {
+                "sha256": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+                "snapshot": "/private/tmp/inbox-el-compose-runtime/core/commands.toml"
+              },
+              "core/crates/pe-core/src/compose_keys.rs": {
+                "sha256": "c0bddbece71f214ae35769d95fbe10e6b9522422b3845741b928148e90bd4c6e",
+                "snapshot": "/private/tmp/inbox-el-compose-runtime/core/crates/pe-core/src/compose_keys.rs"
+              },
+              "core/crates/pe-core/src/protect_out.rs": {
+                "sha256": "f25706aab875e7bba611f8c7a3b5711b92e779e6f8744519d0bfa0536f3cf452",
+                "snapshot": "/private/tmp/inbox-el-compose-runtime/core/crates/pe-core/src/protect_out.rs"
+              },
+              "core/crates/pe-core/src/lookup.rs": {
+                "sha256": "5755d32a72e1dfb48c2a66e49068fddf3313d2d903fb19e460a5218600e53a12",
+                "snapshot": "/private/tmp/inbox-el-compose-runtime/core/crates/pe-core/src/lookup.rs"
+              },
+              "core/crates/pe-html/src/help.rs": {
+                "sha256": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+                "snapshot": "/private/tmp/inbox-el-compose-runtime/core/crates/pe-html/src/help.rs"
+              },
+              "app/src/compose.cpp": {
+                "sha256": "a0ce3b477e3efadf4a64eb5659c4693ebf241bac37591ea1ffb36755f2ea0620",
+                "snapshot": "/private/tmp/inbox-el-compose-runtime/app/src/compose.cpp"
+              },
+              "app/src/recipientkeys.cpp": {
+                "sha256": "9f7d8d5f7419aefc712f2c3d8bc39b128695db4950a952f0bfa00f3928f9739d",
+                "snapshot": "/private/tmp/inbox-el-compose-runtime/app/src/recipientkeys.cpp"
+              },
+              "linux/src/compose_keys.rs": {
+                "sha256": "265c55610665a3c67b570f9cba06a3073f4e5e97bdccf246b36450ed5ecaa136",
+                "snapshot": "/private/tmp/inbox-el-compose-runtime/linux/src/compose_keys.rs"
+              },
+              "mac/Sources/InboxClassic/ComposeSecurity.swift": {
+                "sha256": "159ae2355e185812acc76494fa88e7e892d2ecffd533a5a75b4325bf5bfb7a40",
+                "snapshot": "/private/tmp/inbox-el-compose-runtime/mac/Sources/InboxClassic/ComposeSecurity.swift"
+              },
+              "mac/Sources/InboxClassic/App.swift": {
+                "sha256": "8a031f267649b85471477bc06818289d4d149a677aee28def3ce792a5a288bfb",
+                "snapshot": "/private/tmp/inbox-el-compose-runtime/mac/Sources/InboxClassic/App.swift"
+              },
+              "mac/Sources/InboxClassic/Compose.swift": {
+                "sha256": "09aad2c8d6fddff28e9a55897a68ab0181d7bd30e3efb3911b9a9c9cd103c180",
+                "snapshot": "/private/tmp/inbox-el-compose-runtime/mac/Sources/InboxClassic/Compose.swift"
+              }
+            }
+          },
+          "screenshot_context": {
+            "searched": [
+              "/Users/andris/Projects/PostalExpress/build/ui-e2e",
+              "/Users/andris/Projects/PostalExpress/build/ui-e2e-mac",
+              "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux"
+            ],
+            "matches": [],
+            "limitation": "No new GUI run; source layouts and help sentence joins will be inspected."
+          },
+          "mnemonic_scopes": 53,
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-el-compose-edits.json",
+            "exact.json": "/private/tmp/inbox-el-compose-exact.json",
+            "checks.json": "/private/tmp/inbox-el-compose-checks.json",
+            "runtime.json": "/private/tmp/inbox-el-compose-runtime.json",
+            "linux-reopen.json": "/private/tmp/inbox-el-compose-linux-reopen.json",
+            "source-audit.json": "/private/tmp/inbox-el-compose-source-audit.json",
+            "upstream.json": "/private/tmp/inbox-el-compose-upstream.json",
+            "joins.log": "/private/tmp/inbox-el-compose-joins.log",
+            "since.log": "/private/tmp/inbox-el-compose-since.log",
+            "html.log": "/private/tmp/inbox-el-compose-html.log",
+            "reconciliation.log": "/private/tmp/inbox-el-compose-reconciliation.log"
+          }
         }
       ]
     },
@@ -11745,7 +11858,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -12457,14 +12571,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 15,
           "files": {
             "core/locales/es/app.ftl": "afaa58efc139b0f01ad61f1e7c5d01359d4420060b599d091bb84165347b2098",
             "core/locales/es/core.ftl": "b06cc43d3e0844b16e460e7a7afbc101348318b24da64f745f09920842b96811",
-            "core/crates/pe-html/help/es/sign-and-encrypt.html": "536638819c333e548bf96ab899e878e9061c6476489298ef08e8b24c9de96ced",
+            "core/crates/pe-html/help/es/sign-and-encrypt.html": "abed999a1a52266c7659fac91444231076cd66f65ca2d8e731372579aa2caf0b",
             "core/crates/pe-html/help/es/write-message.html": "7e98acf4e6b9f1e223041a4e5730796a455035e41f0effe4387ea1460cb344b1"
           },
           "english_sources": {
@@ -12482,7 +12595,10 @@
           "screenshot_context": {
             "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/tour-es-2-compose.png",
             "limitation": "Existing screenshot predates signing/encryption controls; inspected only for surrounding Spanish compose context. New control layout/wrapping inspected in source."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "es-preview-mcp-source-integration-round2",
@@ -12923,7 +13039,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -13642,14 +13759,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 17,
           "files": {
             "core/locales/et/app.ftl": "5232e0d8de6efcadc124ea566a319bdef1514a23d59ac429cae7e634bbe5f94f",
             "core/locales/et/core.ftl": "2527c608ee5e46196423fcf07b36b6bd3457b1813a536637b18a6894eaa837be",
-            "core/crates/pe-html/help/et/sign-and-encrypt.html": "c0543e4e292298ce1365ebe55f1e0dee328cd07ed46f5287dd2d426eb7c2d162",
+            "core/crates/pe-html/help/et/sign-and-encrypt.html": "e5be348f4eef2848ab13781346e84751e3ed84ced5d5b3b845baaad9ff4317e5",
             "core/crates/pe-html/help/et/write-message.html": "c70e5389f4d126e13cb82d8c094deb6d613d092b27b7bd216c23960b2a9ef037"
           },
           "english_sources": {
@@ -13684,7 +13800,10 @@
           "screenshot_context": {
             "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/tour-et-2-compose.png",
             "limitation": "Predates new controls; surrounding compose context only. New controls inspected in source."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "et-preview-mcp-source-integration-round2",
@@ -16710,7 +16829,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -17436,14 +17556,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 17,
           "files": {
             "core/locales/fr/app.ftl": "41f030b3b1802621853c9e0c99ada4f703eca6f08e653eba71c2d53f1f74d27d",
             "core/locales/fr/core.ftl": "9edddd34b47abef010ddb8858350c10e63f67310f90dca903fd7baff65ded2d3",
-            "core/crates/pe-html/help/fr/sign-and-encrypt.html": "cac9c23fc79a2a9b86dc2e2fe49432f88b726ad7d851b6b6c5f124d10232ed56",
+            "core/crates/pe-html/help/fr/sign-and-encrypt.html": "c0967411d90ba6801b1040285fff427a2b33c76ba4742daa068f17913c6663af",
             "core/crates/pe-html/help/fr/write-message.html": "4e5b11a3f7f5ac6efc444c7fe2d0f7f921845657817f481bd9b0dd9b08210e2b"
           },
           "english_sources": {
@@ -17488,7 +17607,10 @@
           "screenshot_context": {
             "path": "/Users/andris/Projects/PostalExpress/build/ui-e2e-linux/tour-fr-2-compose.png",
             "limitation": "Predates new controls; surrounding context only. New controls inspected in source."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "fr-preview-mcp-source-integration-round2",
@@ -22467,7 +22589,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -24917,14 +25040,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 16,
           "files": {
             "core/locales/it/app.ftl": "4e15e83702d1545b6c8dda5a60bddc5eaf1a12d27ad8db886c3ca015462cdeaa",
             "core/locales/it/core.ftl": "1059286d7b8596aedd69a892228718605e2671e12f022dacbf0869a192b29910",
-            "core/crates/pe-html/help/it/sign-and-encrypt.html": "c2311f81bfef71eecce3ea90a33d9c52ec7f2fc8070fc8b5d35c58bd2ddff4fc",
+            "core/crates/pe-html/help/it/sign-and-encrypt.html": "f1c691160d0495a487c7c9a4757783a9d2ef75faf27588888d57bb08c31fbfe7",
             "core/crates/pe-html/help/it/write-message.html": "fc7a6c5550c3febd29c4533ee09b436acca26aab6acecaff6b73284ac25cca26"
           },
           "english_sources": {
@@ -24953,7 +25075,10 @@
               "build/ui-e2e-linux"
             ],
             "limitation": "No Italian compose/encryption screenshot found; source controls/layouts and substituted help joins inspected."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "it-preview-mcp-source-integration-round2",
@@ -29370,7 +29495,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -31852,14 +31978,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 15,
           "files": {
             "core/locales/nl/app.ftl": "2bc3da4039110ed5281f38cfbb1abacd122afe560016b7b8d9e388d0f5448651",
             "core/locales/nl/core.ftl": "e07c8c0f858f773f46680fbd7df18c1a5f25db4bfd568e7a7be0e9df1b68028e",
-            "core/crates/pe-html/help/nl/sign-and-encrypt.html": "3a08c17db2cfc86efaa0a4d981dedc6f1ec4167fc18c9904597eeebdc16e7d7e",
+            "core/crates/pe-html/help/nl/sign-and-encrypt.html": "96614f93531f956751ea785fbdf944e5572f5c5f72afe5ee03a2a24c8f42cd95",
             "core/crates/pe-html/help/nl/write-message.html": "d51ebafa21ec40ef1ce1231d45aca4b1975a021c39a57362a67f4e0ed7ebb0e5"
           },
           "english_sources": {
@@ -31881,7 +32006,10 @@
               "build/ui-e2e-linux"
             ],
             "limitation": "No matching Dutch compose/encryption screenshots found; actual controls and wrapping inspected in source, help label joins substituted per platform."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "nl-preview-mcp-source-integration-round2",
@@ -34297,7 +34425,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -36748,14 +36877,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 16,
           "files": {
             "core/locales/pt/app.ftl": "29692f1f49e8edb15aa31930470317ea17834e2750059a6425c27c8a0ce9b3b7",
             "core/locales/pt/core.ftl": "0eca9cd6c42e4f5cb8ca2a091457a11db747965a1a99f27f9d451bd3d12f7b9e",
-            "core/crates/pe-html/help/pt/sign-and-encrypt.html": "776223494cb9927ea9966c6d85aa36620c6ccc96a2003ef69db4eb866580f724",
+            "core/crates/pe-html/help/pt/sign-and-encrypt.html": "3b4e8888443f9d9d8404c531562b0b6b6a73be1be7ddf906650a7a798f0dd988",
             "core/crates/pe-html/help/pt/write-message.html": "d51c7908b8294fb3b72f50e46d2cef66bf13f99ea3909f58989854506df0f14a"
           },
           "english_sources": {
@@ -36777,7 +36905,10 @@
               "build/ui-e2e-linux"
             ],
             "limitation": "No Portuguese compose/encryption screenshots found; controls, wrapping/layouts and per-platform help joins inspected in source."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "pt-preview-mcp-source-integration-round2",
@@ -49605,7 +49736,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -51966,14 +52098,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 19,
           "files": {
             "core/locales/ca/app.ftl": "319a7261f03973587f37c557a5b82cf0eabf67eda33d2c7fc9d9d950e3d09149",
             "core/locales/ca/core.ftl": "76ee2ef167e7388ce49521b216e12321637d8879eaa0061b6622e70257d34f8c",
-            "core/crates/pe-html/help/ca/sign-and-encrypt.html": "d0baceacf4d5cff138bf90d6cd4810b1b87f401cec5fe74ae9b04c500c24970e",
+            "core/crates/pe-html/help/ca/sign-and-encrypt.html": "1398eb33fbbe5e8db7723d95e1bbc341a3b59f4691a67972cb8f355af65cb53d",
             "core/crates/pe-html/help/ca/write-message.html": "2fef238967dc3809ddff3cbae57ec562bf47192ac995d36be34185b23b38a0b0"
           },
           "english_sources": {
@@ -52007,7 +52138,10 @@
               "build/ui-e2e-linux"
             ],
             "limitation": "No relevant Catalan captures available. Actual source layouts/wrapping and substituted per-platform help joins inspected; no GUI run."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "ca-preview-mcp-source-integration-round2",
@@ -52355,7 +52489,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -54677,14 +54812,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 16,
           "files": {
             "core/locales/nb/app.ftl": "c08e1cdb8992ce3f8c6c6604aef79b26e2de50089a5401e18ca3a04b6947fee1",
             "core/locales/nb/core.ftl": "b732a2a6e3b26616bb9194250716812827587403ccfd2bb00919ae37c29f1d3e",
-            "core/crates/pe-html/help/nb/sign-and-encrypt.html": "e0ffb24a26768efad10a1552744b574c36e812eb9bcbef995a0116e0e758cbc7",
+            "core/crates/pe-html/help/nb/sign-and-encrypt.html": "77845f92fb17fd12568feec882f45acad52888452c509a184bffcc629cacfcc2",
             "core/crates/pe-html/help/nb/write-message.html": "8c41d82620b029e089d6d0c4c1efbff927062d144b518b306b868f1d32445e33"
           },
           "english_sources": {
@@ -54706,7 +54840,10 @@
               "build/ui-e2e-linux"
             ],
             "limitation": "No relevant Norwegian compose/encryption screenshots found. Source layouts/wrapping and substituted platform help joins inspected; no GUI run."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "nb-preview-mcp-source-integration-round2",
@@ -55054,7 +55191,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -57380,14 +57518,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 15,
           "files": {
             "core/locales/pt-BR/app.ftl": "27c96d9110eb953ce1a2385e8989d48f032eb667a467d3e8a9a6d6ea1657beff",
             "core/locales/pt-BR/core.ftl": "b9f56eaedf53dcfd97a737b41f61f0e213761b18ab2f0624d890f12c2de4e103",
-            "core/crates/pe-html/help/pt-BR/sign-and-encrypt.html": "6fe8ce68e5dbeb2eefb208ccab9cc46a0259790b787f69c28402f1490d71ca98",
+            "core/crates/pe-html/help/pt-BR/sign-and-encrypt.html": "846418b142525bf22fda193e25b52b4b70524e17d0b05314988159aaa1e2ec2c",
             "core/crates/pe-html/help/pt-BR/write-message.html": "a9db369732d333f2da1d0a609b2da6c0a5aa602630323d9ba19b4425bea38f9e"
           },
           "english_sources": {
@@ -57409,7 +57546,10 @@
               "build/ui-e2e-linux"
             ],
             "limitation": "The Portuguese screenshot search found no compose/encryption captures for either variant. Source controls/layouts and substituted platform help joins inspected."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "pt-BR-preview-mcp-source-integration-round2",
@@ -57757,7 +57897,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -60055,14 +60196,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 16,
           "files": {
             "core/locales/sr-Latn/app.ftl": "bc2f5edcbbc4fa407e893386698fc3d78673a4b810d248fef796f621566dfa13",
             "core/locales/sr-Latn/core.ftl": "1ec914469d0245e6e7fbfa903634a084f37718865871f30f50b5f675003d88fc",
-            "core/crates/pe-html/help/sr-Latn/sign-and-encrypt.html": "38b9f450533a731ef326dfbbf4c9bd4571160ad3019404426469502fd8510cca",
+            "core/crates/pe-html/help/sr-Latn/sign-and-encrypt.html": "5c2e380699ec1ebec4fdbb4b494ef4e0fefa4645c6228f2e60655d3c5e0b69a0",
             "core/crates/pe-html/help/sr-Latn/write-message.html": "47c6f3f3fa199af60dffdf15e443fc65a6bc7894c8c62b347ceb6ca1f6e54320"
           },
           "english_sources": {
@@ -60112,7 +60252,10 @@
               "build/ui-e2e-linux"
             ],
             "limitation": "No relevant Serbian Latin compose/encryption screenshots found. Source layouts/wrapping and substituted platform help joins inspected; no GUI run."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "sr-Latn-preview-mcp-source-integration-round2",
@@ -60460,7 +60603,8 @@
       },
       "pending_help": [
         "attachments.html",
-        "options-language.html"
+        "options-language.html",
+        "sign-and-encrypt.html"
       ],
       "completed_batches": [
         {
@@ -62731,14 +62875,13 @@
             ]
           },
           "reviewed_help": [
-            "sign-and-encrypt.html",
             "write-message.html"
           ],
           "changed_values": 17,
           "files": {
             "core/locales/tr/app.ftl": "3df5c3cc9f5a0779ba2bf8e7d41234e484d7b4aeebb801b7c37a5f3d0de1b4df",
             "core/locales/tr/core.ftl": "7d86daa35359d788634bc9b2c9de476190a1fb7092bca2aece8ae3ffeaab4db0",
-            "core/crates/pe-html/help/tr/sign-and-encrypt.html": "9e1262a69eae9318b453891b0358e22f3a36143b6e4c6a4886d688667919fa2c",
+            "core/crates/pe-html/help/tr/sign-and-encrypt.html": "b9fadf5ce2a75ce75cc319af4898e132cae855cf748dbfd05e06d0c34dfbb499",
             "core/crates/pe-html/help/tr/write-message.html": "53fe9977fd371340e4f898833791f3d73d455e33d553ef22e289cbc47d303efe"
           },
           "english_sources": {
@@ -62767,7 +62910,10 @@
               "build/ui-e2e-linux"
             ],
             "limitation": "No relevant Turkish compose/encryption screenshots available. Source layouts/wrapping and substituted platform help joins inspected; no GUI run."
-          }
+          },
+          "reopened_reviewed_help": [
+            "sign-and-encrypt.html"
+          ]
         },
         {
           "id": "tr-preview-mcp-source-integration-round2",
@@ -67032,7 +67178,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Ukrainian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 29 improved values, 33 retained good values and three complete help topics with 38 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. С/Н unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and nineteen runtime/UI/rendering/reader files match the captured evidence. Global reconciliation accounts for 22,069 unmarked entries, 11,264 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,096 entries/241 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+    "latest_source_audit": "Greek structural checker has 1,456 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies 40 catalog reviews, 17 improved core values, 23 retained values and two complete help targets with 15 changed wording lines. All earlier writing-help prose is retained. Tags, attributes, platform branch boundaries, controls, literal keys, variables and plural branches are unchanged. All 53 mnemonic scopes pass; explicit compose letters remain unaccented Greek letters. The recorded generated Windows Flag-menu accent issue is unchanged. Platform sentence joins include actual labels, topic titles and command shortcuts (Ctrl+Shift+D/E; Mac Option+Command+Y/X). No relevant Greek screenshots found; source layouts/wrapping and 11 captured runtime files inspected. No GUI run or visual fit claim. Exactly 30 navigation passages in 15 other languages receive review marks only; every other byte and review remains preserved. Global reconciliation accounts for 22,109 unmarked entries, 11,254 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All 28 inventories and since-start 1,056 entries/269 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies. Master 79332925 adds only the inspected PDF settings-placeholder fix; it changes no translation or compose context. HTML refreshed; git diff --check passes. No local test suites or builds; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -119510,6 +119656,562 @@
         },
         "runtime_context_artifact": "/private/tmp/inbox-uk-agents-runtime.json",
         "runtime_context_sha256": "7ef3caa77380054ce53cd8e213d94ca058ddff14b02fdf26ffdbeb971c6440e0"
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "7933292597b19f89c633b4d7af3bed84a2026dc1",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074",
+          "chore/pgp-hardening": "51d67bb4e5fb6732f5baea4b8004bc46507f1442"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/master": {
+            "merge_base": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 1,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              "core/crates/pe-core/src/previews.rs"
+            ],
+            "non_help_prefix_counts": {
+              "core/crates": 1
+            }
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "chore/pgp-hardening": {
+            "merge_base": "51d67bb4e5fb6732f5baea4b8004bc46507f1442",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          }
+        },
+        "integrated_help_source": "255205aad7e70f680909092c3167cc724618b70e",
+        "root_locale_help_settings_status": [],
+        "unmerged_non_help_path_count": 1,
+        "unmerged_non_help_paths_except_fuzz_corpora": [
+          "core/crates/pe-core/src/previews.rs"
+        ],
+        "guide_sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
+        "changed_source_tips_since_last_checkpoint": {
+          "origin/master": {
+            "before": "3c6674b9282fba43308f4ec725b468895f789a44",
+            "after": "7933292597b19f89c633b4d7af3bed84a2026dc1"
+          }
+        },
+        "integrated_active_key_source_check": {
+          "status": "source-only catalogs integrated and reviewed",
+          "ref": "chore/pgp-hardening",
+          "observed_source_tip": "51d67bb4e5fb6732f5baea4b8004bc46507f1442",
+          "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+          "new_catalog_entries": 28,
+          "catalog_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "new_help_topics": 0,
+          "changed_help_topics": 0,
+          "files": {},
+          "note": "New signature reason from the hardening branch: a valid signature used a key other than the active key for the From address. Exact source entry was imported in205bd846 and reviewed; current source entry still matches. Other hardening code/fuzz changes stay separate; inspect caller before review."
+        },
+        "preview_mcp_source_checks": [
+          {
+            "ref": "feat/preview-render",
+            "observed_tip": "2567d2d700c546725c6ba5468aa9b4d0dc81c06a",
+            "source_commit": "687113a325f3aaaab17784f307ccc86df4b8c061",
+            "source_files": 29,
+            "source_file_sha256": {
+              "core/locales/bg/core.ftl": "43dc4d75a55a0fa792b6d34976226d49c7158b0fdbdb92e98a55088e5623da62",
+              "core/locales/ca/core.ftl": "b0a9e91845f8068d67a614aba9a77122121a90875465a9272137552808b20928",
+              "core/locales/cs/core.ftl": "5caee113cfc0008f67c4792af63149f457723029243fb6937de5589d7a35ff83",
+              "core/locales/da/core.ftl": "8e3ff6a89174ff230a1bb21fbc631a3dddc47dbaf99805b3d491f0a774f05941",
+              "core/locales/de/core.ftl": "1c0a12d70276c443616dc9f50d80d8b2ac36fc3e17189aeb59e8fb30dd783d0b",
+              "core/locales/el/core.ftl": "9c827da4f4d3d3777ba3fdd02809eeb6a161b13439db0b774da7f5f425906066",
+              "core/locales/en/core.ftl": "56940f2b113f38b587f6acac1ed80865a92e73f6161596822bcd02e15db800a3",
+              "core/locales/es/core.ftl": "60cc61acd3ee5f71a14013f0c12fa822c0df47a706314af3345dcc5d179f6f8b",
+              "core/locales/et/core.ftl": "338071b2f1c3257bde40d78a986fc8819b8feaa0390c30669a73d75731781699",
+              "core/locales/fi/core.ftl": "6f87440104dfd5484579c555c48c3b067d31844320cadd3dc301c74677d82449",
+              "core/locales/fr/core.ftl": "6967627c63303663b7a8f1a2c1fd8736bc41b15549a797d4a2986cae32536d36",
+              "core/locales/hr/core.ftl": "5a6d8f6ff33b8356191fccf3ebe1deac854d4a5240e8cfd591dd48db3ce86b51",
+              "core/locales/hu/core.ftl": "07db76518ce65b0354314742463f69754182e7a751452f0fa65684b0be817839",
+              "core/locales/it/core.ftl": "8401c6191ada919e50047f682f90c1eb953d3028cacd86b8a2e9fe944b5d3bbc",
+              "core/locales/lt/core.ftl": "b3752f1f3581a3de8c51fee696b0fcf5f145279f3a2487ba3ca9da500dd99e37",
+              "core/locales/lv/core.ftl": "b0a70b4544a547cf70cf028cf656af0746665944a778eb1fc41b80f285482686",
+              "core/locales/nb/core.ftl": "bf57f315f85410c0bd9a8ba84da622445f895eb5f45b5d0c02642b05001752d6",
+              "core/locales/nl/core.ftl": "4df68abacca2264036d4f2689ace1cf0b59ae6073451e609d4703ac7ccb3abf5",
+              "core/locales/pl/core.ftl": "1d2b9fc5d35e1ebed2ef54661977bcd194376299911fae664c2dfc82e79805a0",
+              "core/locales/pt/core.ftl": "70cb82f3cc6a4ed36d7fe3ce107c18c7d7afdd269f70dd7fd811ff8368f32d14",
+              "core/locales/pt-BR/core.ftl": "6e330af2c1b84eb76f83d8e7dd8eb919de3ab0100b99f11fd76bdc4a9413c398",
+              "core/locales/ro/core.ftl": "c48544e49c08fbca6fa19baed73d47d20367184fec2269823dd6d90f1eddfaed",
+              "core/locales/ru/core.ftl": "d7271d713b6e46074e0d09e19627caf5eee769a5247bcabda4889f17051c20c0",
+              "core/locales/sk/core.ftl": "da05b7458ced6138dcd2c700b2fad34d58c573f44176b095b4ff4f34fe3b3ee0",
+              "core/locales/sl/core.ftl": "6e2966a4830ab1ac2fd3ec3e8909c8829e17ca1f0c6d456cade9028a3c9b47a0",
+              "core/locales/sr-Latn/core.ftl": "b8bb1429fe91dcdc72f7ef640e3d6e9be5a777f952402097edb796599431b8bb",
+              "core/locales/sv/core.ftl": "a38bd735888fa39db358306d5a5c87d4bebcf66ab7d0bf767f894728dcdd724b",
+              "core/locales/tr/core.ftl": "169d7cb61bb6aad601ed16dcc75ef8081ae1d2857f16b03f1650224e0893aaec",
+              "core/locales/uk/core.ftl": "0fdfaf0abf4ecea494dfceaf8a929d12b4dc20334c99dec02800c0d13300033d"
+            },
+            "changed_relevant_paths": [
+              "core/crates/pe-html/help/bg/agents-permissions.html",
+              "core/crates/pe-html/help/bg/agents-sending.html",
+              "core/crates/pe-html/help/ca/agents-permissions.html",
+              "core/crates/pe-html/help/ca/agents-sending.html",
+              "core/crates/pe-html/help/cs/agents-permissions.html",
+              "core/crates/pe-html/help/cs/agents-sending.html",
+              "core/crates/pe-html/help/da/agents-permissions.html",
+              "core/crates/pe-html/help/da/agents-sending.html",
+              "core/crates/pe-html/help/de/agents-permissions.html",
+              "core/crates/pe-html/help/de/agents-sending.html",
+              "core/crates/pe-html/help/el/agents-permissions.html",
+              "core/crates/pe-html/help/el/agents-sending.html",
+              "core/crates/pe-html/help/en/agents-permissions.html",
+              "core/crates/pe-html/help/en/agents-sending.html",
+              "core/crates/pe-html/help/es/agents-permissions.html",
+              "core/crates/pe-html/help/es/agents-sending.html",
+              "core/crates/pe-html/help/et/agents-permissions.html",
+              "core/crates/pe-html/help/et/agents-sending.html",
+              "core/crates/pe-html/help/fi/agents-permissions.html",
+              "core/crates/pe-html/help/fi/agents-sending.html",
+              "core/crates/pe-html/help/fr/agents-permissions.html",
+              "core/crates/pe-html/help/fr/agents-sending.html",
+              "core/crates/pe-html/help/hr/agents-permissions.html",
+              "core/crates/pe-html/help/hr/agents-sending.html",
+              "core/crates/pe-html/help/hu/agents-permissions.html",
+              "core/crates/pe-html/help/hu/agents-sending.html",
+              "core/crates/pe-html/help/it/agents-permissions.html",
+              "core/crates/pe-html/help/it/agents-sending.html",
+              "core/crates/pe-html/help/lt/agents-permissions.html",
+              "core/crates/pe-html/help/lt/agents-sending.html",
+              "core/crates/pe-html/help/lv/agents-permissions.html",
+              "core/crates/pe-html/help/lv/agents-sending.html",
+              "core/crates/pe-html/help/nb/agents-permissions.html",
+              "core/crates/pe-html/help/nb/agents-sending.html",
+              "core/crates/pe-html/help/nl/agents-permissions.html",
+              "core/crates/pe-html/help/nl/agents-sending.html",
+              "core/crates/pe-html/help/pl/agents-permissions.html",
+              "core/crates/pe-html/help/pl/agents-sending.html",
+              "core/crates/pe-html/help/pt-BR/agents-permissions.html",
+              "core/crates/pe-html/help/pt-BR/agents-sending.html",
+              "core/crates/pe-html/help/pt/agents-permissions.html",
+              "core/crates/pe-html/help/pt/agents-sending.html",
+              "core/crates/pe-html/help/ro/agents-permissions.html",
+              "core/crates/pe-html/help/ro/agents-sending.html",
+              "core/crates/pe-html/help/ru/agents-permissions.html",
+              "core/crates/pe-html/help/ru/agents-sending.html",
+              "core/crates/pe-html/help/sk/agents-permissions.html",
+              "core/crates/pe-html/help/sk/agents-sending.html",
+              "core/crates/pe-html/help/sl/agents-permissions.html",
+              "core/crates/pe-html/help/sl/agents-sending.html",
+              "core/crates/pe-html/help/sr-Latn/agents-permissions.html",
+              "core/crates/pe-html/help/sr-Latn/agents-sending.html",
+              "core/crates/pe-html/help/sv/agents-permissions.html",
+              "core/crates/pe-html/help/sv/agents-sending.html",
+              "core/crates/pe-html/help/tr/agents-permissions.html",
+              "core/crates/pe-html/help/tr/agents-sending.html",
+              "core/crates/pe-html/help/uk/agents-permissions.html",
+              "core/crates/pe-html/help/uk/agents-sending.html",
+              "core/locales/bg/app.ftl",
+              "core/locales/bg/core.ftl",
+              "core/locales/bg/windows.ftl",
+              "core/locales/ca/app.ftl",
+              "core/locales/ca/core.ftl",
+              "core/locales/ca/windows.ftl",
+              "core/locales/cs/app.ftl",
+              "core/locales/cs/core.ftl",
+              "core/locales/cs/windows.ftl",
+              "core/locales/da/app.ftl",
+              "core/locales/da/core.ftl",
+              "core/locales/da/windows.ftl",
+              "core/locales/de/app.ftl",
+              "core/locales/de/core.ftl",
+              "core/locales/de/windows.ftl",
+              "core/locales/el/app.ftl",
+              "core/locales/el/core.ftl",
+              "core/locales/el/windows.ftl",
+              "core/locales/en/app.ftl",
+              "core/locales/en/core.ftl",
+              "core/locales/en/windows.ftl",
+              "core/locales/es/app.ftl",
+              "core/locales/es/core.ftl",
+              "core/locales/es/windows.ftl",
+              "core/locales/et/app.ftl",
+              "core/locales/et/core.ftl",
+              "core/locales/et/windows.ftl",
+              "core/locales/fi/app.ftl",
+              "core/locales/fi/core.ftl",
+              "core/locales/fi/windows.ftl",
+              "core/locales/fr/app.ftl",
+              "core/locales/fr/core.ftl",
+              "core/locales/fr/windows.ftl",
+              "core/locales/hr/app.ftl",
+              "core/locales/hr/core.ftl",
+              "core/locales/hr/windows.ftl",
+              "core/locales/hu/app.ftl",
+              "core/locales/hu/core.ftl",
+              "core/locales/hu/windows.ftl",
+              "core/locales/it/app.ftl",
+              "core/locales/it/core.ftl",
+              "core/locales/it/windows.ftl",
+              "core/locales/lt/app.ftl",
+              "core/locales/lt/core.ftl",
+              "core/locales/lt/windows.ftl",
+              "core/locales/lv/app.ftl",
+              "core/locales/lv/core.ftl",
+              "core/locales/lv/windows.ftl",
+              "core/locales/nb/app.ftl",
+              "core/locales/nb/core.ftl",
+              "core/locales/nb/windows.ftl",
+              "core/locales/nl/app.ftl",
+              "core/locales/nl/core.ftl",
+              "core/locales/nl/windows.ftl",
+              "core/locales/pl/app.ftl",
+              "core/locales/pl/core.ftl",
+              "core/locales/pl/windows.ftl",
+              "core/locales/pt-BR/app.ftl",
+              "core/locales/pt-BR/core.ftl",
+              "core/locales/pt-BR/windows.ftl",
+              "core/locales/pt/app.ftl",
+              "core/locales/pt/core.ftl",
+              "core/locales/pt/windows.ftl",
+              "core/locales/ro/app.ftl",
+              "core/locales/ro/core.ftl",
+              "core/locales/ro/windows.ftl",
+              "core/locales/ru/app.ftl",
+              "core/locales/ru/core.ftl",
+              "core/locales/ru/windows.ftl",
+              "core/locales/sk/app.ftl",
+              "core/locales/sk/core.ftl",
+              "core/locales/sk/windows.ftl",
+              "core/locales/sl/app.ftl",
+              "core/locales/sl/core.ftl",
+              "core/locales/sl/windows.ftl",
+              "core/locales/sr-Latn/app.ftl",
+              "core/locales/sr-Latn/core.ftl",
+              "core/locales/sr-Latn/windows.ftl",
+              "core/locales/sv/app.ftl",
+              "core/locales/sv/core.ftl",
+              "core/locales/sv/windows.ftl",
+              "core/locales/tr/app.ftl",
+              "core/locales/tr/core.ftl",
+              "core/locales/tr/windows.ftl",
+              "core/locales/uk/app.ftl",
+              "core/locales/uk/core.ftl",
+              "core/locales/uk/windows.ftl"
+            ],
+            "new_catalog_entries": 84,
+            "changed_catalog_entries": 0,
+            "changed_help_topics": 0,
+            "validated_relevant_tree": true,
+            "inherited_upstream_verified": "65087591dc4d32bb15d66087e7026af495e2d370",
+            "note": "The immutable previously audited source tip is unchanged and is now an ancestor of GitHub master. All previously recorded source file hashes verified; no new source delta.",
+            "integrated_into_audited_upstream": "7933292597b19f89c633b4d7af3bed84a2026dc1"
+          },
+          {
+            "ref": "feat/mcp-phase1",
+            "observed_tip": "9a24e99bac4d3a67006bd7f41a53a8467733532d",
+            "source_commit": "9a24e99bac4d3a67006bd7f41a53a8467733532d",
+            "source_files": 145,
+            "source_file_sha256": {
+              "core/locales/bg/core.ftl": "ef8eacd29bf115787ac04ee96de761d63225882ad971fe42ca7eac56b8be559e",
+              "core/locales/bg/windows.ftl": "28df4285eb445dba8a26b24049f8c75fb0dfe593a32c9b7c778066cd2125f776",
+              "core/locales/bg/app.ftl": "eab8164e71a94b710e2f3ca9443015fadc8a510122ec4f5ccd31f0d91aaf4119",
+              "core/locales/ca/core.ftl": "2469fa060e783ccc8fa5df50bce2216684039afd255166a9296dfd43302fdb2a",
+              "core/locales/ca/windows.ftl": "c01b1c34712fd48cd5dcd3bc3a3263110797c4b7ad954c2e3bfcdf464293962d",
+              "core/locales/ca/app.ftl": "46979883c26839921de1023bb7d36b2ef087f2e3272117681c7f73d39ba14590",
+              "core/locales/cs/core.ftl": "64da78c2a61ce1ae0834c2f91a1ca94c97562fbdd0c5b0470281477b04a03f3f",
+              "core/locales/cs/windows.ftl": "002b3ed4ff1ffd7fb8b78921b957a3cf93c2cfe070ee996a07381909452bf4b1",
+              "core/locales/cs/app.ftl": "ad00aeeabcaeeb1a154ec8cea0e3b70b0154b8305aa5cac8cdd5520dfce58aeb",
+              "core/locales/da/core.ftl": "faa7427e0cfcfeae5462a91d8741c3782c6170ae612caa5af01d48c91546470b",
+              "core/locales/da/windows.ftl": "61f89d05b510c9fdc8cb844bef55b3d5f68d55a5e9dad20285e28720189fb2b6",
+              "core/locales/da/app.ftl": "12d41770b039b03c14b551dd68bf34f48b869cef1050c26a46c8778690e8da00",
+              "core/locales/de/core.ftl": "18fd80273fb1a3d58be5ff04fb799298874266d42ea2dd6d86fbdaf7b909a079",
+              "core/locales/de/windows.ftl": "732bd090c9bdadb18112a78788ddda08f5067d2bf9dced6e1c873a0e8a2b5dd3",
+              "core/locales/de/app.ftl": "0bab1c0d16bfa01070bbeb1ba83481ecc587850f94babbeb968838ecc72267b5",
+              "core/locales/el/core.ftl": "5a60a7194ae118a4b06acd40e60da630a96b6e4d8405076b764d874e00d0079c",
+              "core/locales/el/windows.ftl": "37d023381f8bd36d022096918d100dc9442567cbe9911b0ebfa2201f0035c375",
+              "core/locales/el/app.ftl": "45c54097606708474363fb5798be8eb905f8c993a08fbcff2531abcc614c4b25",
+              "core/locales/en/core.ftl": "a2f1754ab4306997b7e93a7207b2cbf47a582a937f8ea7f1e608bda8902498af",
+              "core/locales/en/windows.ftl": "8baa46684f4ae0a37d2b48948068eee4dd36865f53d3eced1c3080c592a55051",
+              "core/locales/en/app.ftl": "1c0e8270fd8b3df65a5f3895f1306e4bc1ee0505a1cc63f4a9b6c7997746fa01",
+              "core/locales/es/core.ftl": "abe9933b053b4c905dddd32fde509c2a0eb5929a00a732ec9144b25e410b5f2f",
+              "core/locales/es/windows.ftl": "a0f493bda7d999e6e7717cadb367777151d1ab04674f218130b0b3679f9b6754",
+              "core/locales/es/app.ftl": "4849f82a60adac4bf33e2f9544da8335dcf7c53a088f588f8661fe8e60cd1bd4",
+              "core/locales/et/core.ftl": "2634f1200fb5ac29a9e10a0dbb4e2fde3fb5dcfa0cf6f404ce224842fa70bbc1",
+              "core/locales/et/windows.ftl": "c386e8b0d7f88f0e911d3cde58865f9fd147153e4fb55d1a9d4e626dc700a82d",
+              "core/locales/et/app.ftl": "9bb922d37f995ccad38a07fb9e63ff399092d01f1d898a023fbde02a7f09b80e",
+              "core/locales/fi/core.ftl": "d3f59ac42cbfbf7992d2d214cc9a1d0069277835336c9643c85e5a83cd990273",
+              "core/locales/fi/windows.ftl": "fba8803f1541f73f45c21bc789d0542957de68f354b92f23b99c87f1cfd27655",
+              "core/locales/fi/app.ftl": "76b66a08616beaeba3d13a95d4a0648307309a449000c34bf36f7641ac17aa54",
+              "core/locales/fr/core.ftl": "4f3bbb44f3751ebf80b9a85b589e172a1c752f4d7306c976bf920018b5a1fc6c",
+              "core/locales/fr/windows.ftl": "22a507c92cedc8868d959a65d541ecb75dc405f43eb2d1f9fa87d41043323372",
+              "core/locales/fr/app.ftl": "ca938cdde47b031eef2a78612e1b73f45624b270a3ebc5b88a35cdf4ef47dd42",
+              "core/locales/hr/core.ftl": "8bbe1a0106025aef7d9697bd3806b8db9f0e6d8f8851439bcc5f63ebfb84a3aa",
+              "core/locales/hr/windows.ftl": "a4cee3870cc2c78e8f6a8c51113ef46f03015780cad020211dab8feb4f9523ec",
+              "core/locales/hr/app.ftl": "6c7f16ac4b31153c56be82ed9aab0a6930f5563d8f7f45827c74262136838d37",
+              "core/locales/hu/core.ftl": "d8d5c909766906605acbb480863c6f272b6408d8b5a57eb2163bdc00e84672f3",
+              "core/locales/hu/windows.ftl": "425e173a0d098421cfb11f48a87f10429ba805f6c3fec104627d78855e8383db",
+              "core/locales/hu/app.ftl": "02e6dd9af4a7398eb1bd6498079463fbe3f83da51497b146256ebf6ef95caee8",
+              "core/locales/it/core.ftl": "4bed9867bbd670b4fa53dd104022a8ed0ad7de383664249f94bae602a5582453",
+              "core/locales/it/windows.ftl": "3fdf9d72e6b957cf5636d3bb85c148c36e3d0ee53943b733f0de20dcbbc5de6b",
+              "core/locales/it/app.ftl": "328df78779a336e59eb7ad248d97a94475144749bb0645b9b265003518de1a78",
+              "core/locales/lt/core.ftl": "2e83761cc3a1f1f242b299dacdc3124b1e6b87fc5b792cf11483902f999b9a8e",
+              "core/locales/lt/windows.ftl": "5ec9757bc25cd6d0bf3407e0827b7c6dd9f09fcc53a89dbaf148cc92fa8feec4",
+              "core/locales/lt/app.ftl": "f03a21fc34bc5bfd419ad00ed92ed2dacf3866e8d29612b818393662bd8d25ec",
+              "core/locales/lv/core.ftl": "3edf91f34de4e1a42ae2b8d46e3881ae292be831f99694b625eb564720038c29",
+              "core/locales/lv/windows.ftl": "592cd053295dd2c6ba7c36752db1a0b6da5eff9eb6dc84f56a36e39b2d42bc25",
+              "core/locales/lv/app.ftl": "474b9b10b07dcd9c980f4af66994c2c7db565ef3de37c6188f632a7ec84d037b",
+              "core/locales/nb/core.ftl": "14376984b8cd84ae12a975404b536f36baaf1c6235969378d9a7e8fbc6ec30b1",
+              "core/locales/nb/windows.ftl": "1aae135900b40149a831a8425738b1f1970785c4f7f178642b637a23fecaac36",
+              "core/locales/nb/app.ftl": "cacf1bead749c8b736ca0ac122464c713c7474871d773b125a1a623a32e62146",
+              "core/locales/nl/core.ftl": "ce9e9abc569483e0c2d0d0d10d5e5dfc5182122cfff4d7416830d8d1e711c674",
+              "core/locales/nl/windows.ftl": "837fcf2a063cfb81b50a91fe8837cde6f38f64f080a6478c1941eed2ca12195a",
+              "core/locales/nl/app.ftl": "d23dcf5058101e3c8e532c0e5feea196204c53f356acf13c01f102d8e473f3cf",
+              "core/locales/pl/core.ftl": "a1f850f0d345ca34022d3c2b42ec775b203fd2ae488c9cb39c143ef7b6a70da1",
+              "core/locales/pl/windows.ftl": "fb931d76423ac351e6ac78921873c80d689e7a41f0633d537bdc4b898d621848",
+              "core/locales/pl/app.ftl": "b50f180642afe06b064fc662862e010b91f26f11dea536affaea02961d4fab79",
+              "core/locales/pt/core.ftl": "d66225a1a0598ca4b3b1547956aef525d1218a439e6109d5ea60c26d3517c6f7",
+              "core/locales/pt/windows.ftl": "b73774eb5d961e84cde66e7d4888296a83924b13a60502b9dbaf0102f90fa71e",
+              "core/locales/pt/app.ftl": "f1cfe3e6529c5b6c9de719ca2e78fbe370d621427cd520ab1d66e77382c0cccd",
+              "core/locales/pt-BR/core.ftl": "1028e96b850515e4a2afb6aa2107414653ee892f52137d829111d68675b19fbe",
+              "core/locales/pt-BR/windows.ftl": "96316cf354adb9119eb871a5b7a35f8bdd1b43226861e11acbc4547f0ffbd361",
+              "core/locales/pt-BR/app.ftl": "58eadeda88a03825c949e9805fe61d8024aa2e946d25cf67b93859bdf2a4c22e",
+              "core/locales/ro/core.ftl": "088f98ccebd0d1a462930991391f2a9ddbd50d455b2faa247fba4320fae1688b",
+              "core/locales/ro/windows.ftl": "4c0a4538ae7af0df2a4251c7f6a066df1e41940670fcfd0f35398fad82e105bc",
+              "core/locales/ro/app.ftl": "37ded1473ba08b2499506f4d6c02b584f93e97d5412c5b111789734b32ad04fe",
+              "core/locales/ru/core.ftl": "3f5e768132bb1521bb400ab99adb82c93f7a8826a5a954108f288d8e8daf5ea6",
+              "core/locales/ru/windows.ftl": "174c80410d6c6f87e2c291c1c592ee88f5c3d2e623f09facb8b0f58ba29a0057",
+              "core/locales/ru/app.ftl": "5f517d330c403983c40678fd40d840f14ef8ac9396cf613d49744073060e93fb",
+              "core/locales/sk/core.ftl": "afd6163dcb4bb1fd9122dffaf646f7dc8fab62d4bcbf9b4fd89015a68d308604",
+              "core/locales/sk/windows.ftl": "d14942da5d908619b86c4cdfd1a35fcffa2585abe77f2ede4f08fbdb1dc5aa94",
+              "core/locales/sk/app.ftl": "c0515f4a4e956615b0bfd292e111f40b6077c24a8c5537b22518e5a365618f1c",
+              "core/locales/sl/core.ftl": "6b637ee53c7afe28c143395466dd85aa76ca8a8a861f47a6016318a0e99cf27e",
+              "core/locales/sl/windows.ftl": "ed0101ab95e6e60fb9c1dc65134614da4a58a7a6de891d707ee99649650d5d55",
+              "core/locales/sl/app.ftl": "f5ad73b73f10afac90247bde81485e74c264dfe1a3fa317bac3f7bb752402d25",
+              "core/locales/sr-Latn/core.ftl": "7df352284df7f3ab0a7986992e3afcb47284d7feef8afe0bb693d007da1b393c",
+              "core/locales/sr-Latn/windows.ftl": "c2d0ce24d380c637b94312abe27a7082989878ca43dc87bc091b9c9b9d35eee7",
+              "core/locales/sr-Latn/app.ftl": "18c294ec090afb8a4e2de60cb582b2c17b09b2ceca942f4dffd74083edef19f4",
+              "core/locales/sv/core.ftl": "870808b7995d72cdabf5fa815ed156d9b1ba0e8cbae1268d0a31ec8c3cb70f1e",
+              "core/locales/sv/windows.ftl": "7176163dac1f0736a27ae8a7e4a42191ff92a0bcab42a733f34241b7affc5704",
+              "core/locales/sv/app.ftl": "0c1865314a57d36b88532206ef180c32dc620fcdcbe021b254e9debdcde45f8a",
+              "core/locales/tr/core.ftl": "25e438a6bb901b8a616ed3424beff7dbde4db8b7fcc1e3453fdd9c5170b5733a",
+              "core/locales/tr/windows.ftl": "0ffce480bf2e3d954ee3c6b6b4acb848cf8c00864e0d15c9730f0cf0b52d78ca",
+              "core/locales/tr/app.ftl": "ae836f1a416db9b6e3800b76ffe05c33c55a2606df6a99664df54bf696f12cc8",
+              "core/locales/uk/core.ftl": "a231145d144e485e8dc8cf9b56fec8fc892ad46dd9050173967fab1276cdea96",
+              "core/locales/uk/windows.ftl": "c2a04948ac716fe22ecbfe257c6d2cf22f27010c340a8edba677334ded4895b5",
+              "core/locales/uk/app.ftl": "98d492a8e5c7540f1e75f9fc49b7524fb241371156365aa30249c9f912b39976",
+              "core/crates/pe-html/help/bg/agents-permissions.html": "9039282e4519e57d345d2db7d652590e984935d01e22e0b1003570c2784f82a4",
+              "core/crates/pe-html/help/bg/agents-sending.html": "47bcf87572b41cf6c96a9eaff9d1a53531ffdc9a3b37af3f5d035437ea835848",
+              "core/crates/pe-html/help/ca/agents-permissions.html": "c95be3c16468f96e271a9dd60e519e0ed050e0f0a37d23f0b6b868f9fc3f0cda",
+              "core/crates/pe-html/help/ca/agents-sending.html": "09aa142a712451442cfa0241907fe71a2b68cbb328a2f207dc7d3b242c2ca4bf",
+              "core/crates/pe-html/help/cs/agents-permissions.html": "f6b755d162d635d7e8bfa15f9a251f040246376379e342f1adab951413a1588b",
+              "core/crates/pe-html/help/cs/agents-sending.html": "131b08d32e0eccdfe7c2e71b4d9e98c152a4da19e5142b21b6c96d5083afc35c",
+              "core/crates/pe-html/help/da/agents-permissions.html": "2fe8feb3d60b175d7e2581ca877247deabe2baceda3c360c178899109734cb50",
+              "core/crates/pe-html/help/da/agents-sending.html": "29d70227c012ac8acbbd12628b1b3445b1a5a8d5ed68b4ee357a82a3bf64cdab",
+              "core/crates/pe-html/help/de/agents-permissions.html": "4042c3b565720e2162b2cd3b3b7c113465e09064794a65978bfcd7c1ef65cae0",
+              "core/crates/pe-html/help/de/agents-sending.html": "16cf2466fffc5720928eb8b485e70aa1d8567f38b509b7ded5003f6e91d1d2e1",
+              "core/crates/pe-html/help/el/agents-permissions.html": "92ac29fcc54870e92fb1ea97bafdfa9ce7749de8c9656e09a968a1241f54ada3",
+              "core/crates/pe-html/help/el/agents-sending.html": "ba381615e4923eaee26a66e0333e2c0312794a16e1b4c05319e48b72ff2b3a7b",
+              "core/crates/pe-html/help/en/agents-permissions.html": "325e3ae6517438aa5f69e21a46c84a06e7985950dd3366c9a6e218be96bde1e2",
+              "core/crates/pe-html/help/en/agents-sending.html": "42d3d41e34cd7ac92d286ad745c8e02a674728d1f1de0055a94c6e4d35b93f4b",
+              "core/crates/pe-html/help/es/agents-permissions.html": "0d97882f47d3b83a86d17b1a8f237586394fc30740421a6a48cd92bd598c0801",
+              "core/crates/pe-html/help/es/agents-sending.html": "c593a72fdcbad6d43efb0638cbc11e1157aac21f881eb4d582aa1824e66641e7",
+              "core/crates/pe-html/help/et/agents-permissions.html": "9c60b29e87b0031cf51cbfc139953be92455a1ccef3b7bbab99f4911c9486e79",
+              "core/crates/pe-html/help/et/agents-sending.html": "c41061928898a66d4d0c78fdf00a435c28adc600fd03faeca6cf1c0a6218202e",
+              "core/crates/pe-html/help/fi/agents-permissions.html": "51ae744901f330ee021ca414e30dfe82c4e5b48c8effe27ac7271125d3f55ca5",
+              "core/crates/pe-html/help/fi/agents-sending.html": "5154c73e5c9b39cb04a046598e9b777656330edab064c7cef918c7012a497098",
+              "core/crates/pe-html/help/fr/agents-permissions.html": "826d98488819ca0b8f9d2e2c3e81b05d3e7be67c629e4b9b5f260905bcfb5bd6",
+              "core/crates/pe-html/help/fr/agents-sending.html": "63ae313a5c1727e208e40ba209f1a687dcfd4c5dc74b87a0bd6fa8afc2a8ad16",
+              "core/crates/pe-html/help/hr/agents-permissions.html": "4595adcd6734541ca8251cdacdc7852fee859eb97fff954b1e595dd649a2f1dc",
+              "core/crates/pe-html/help/hr/agents-sending.html": "517c9111041c913b048849774df9c24b895e72865799b8166d24cc2b9946e7e2",
+              "core/crates/pe-html/help/hu/agents-permissions.html": "a8519bd821dbebbebdd60eb4ef6201d067ec41877bd8688695b354f345398152",
+              "core/crates/pe-html/help/hu/agents-sending.html": "44c7dc03f0e652ca17a6079ada1f00332a6c36cc19379a29d3ed54ab05cc0041",
+              "core/crates/pe-html/help/it/agents-permissions.html": "ff7f57a6a6796895ae34262b3c1bdbf853e85ed56d78af323c2c876b59ef25da",
+              "core/crates/pe-html/help/it/agents-sending.html": "ba967a636203f2c38d0100a5ffe7b02db3e81e5993f071da160c8e181da7add9",
+              "core/crates/pe-html/help/lt/agents-permissions.html": "0cf7d8d58297c5c1bfc215263de3ab4d5bf48e5ce956b03c37e925ca61ca914f",
+              "core/crates/pe-html/help/lt/agents-sending.html": "5b88bbc43a42b7d899208539bddb61af7f8d867a36eb46826b12e754b4336b62",
+              "core/crates/pe-html/help/lv/agents-permissions.html": "6f8760ca97d3b1f31a9541f2a37085f7475d80fe9b09b866e787dd432a648d4f",
+              "core/crates/pe-html/help/lv/agents-sending.html": "09dc8c65dfa8c96a05f75ee60db44baf0d570551b24aaa051111c05c4bf6ad86",
+              "core/crates/pe-html/help/nb/agents-permissions.html": "cf0f5acc6c1bb3b1fa9a5a6c074286a412f70a9fe6a2f00fe325e39bc59c4e82",
+              "core/crates/pe-html/help/nb/agents-sending.html": "bb1a8c45e04a31112a803f62f40754bf198d81c2fedd57802959628197d4e465",
+              "core/crates/pe-html/help/nl/agents-permissions.html": "027ea17715cf1646cf2a153c9319938ecf0281996451da998729aebf7ef7788f",
+              "core/crates/pe-html/help/nl/agents-sending.html": "940fb1788a2300f286593335dcf8ea415a91fb0d473be759096609c9fa14ea0b",
+              "core/crates/pe-html/help/pl/agents-permissions.html": "76108cba4645df64358343295a2075f55339129f9a78bd71b0635919e85b5a26",
+              "core/crates/pe-html/help/pl/agents-sending.html": "f797afa6445920d8bac0f63964b508358e107847308e1a9ff635e23e743bfb1d",
+              "core/crates/pe-html/help/pt/agents-permissions.html": "7940094b869a4ac5ba8e69b293a9dd171a6c95e0b2f596dc1a427b5f946f2ca9",
+              "core/crates/pe-html/help/pt/agents-sending.html": "cdb8a182d99126f1ab1facfb3e5ef0db6dc6d72c53857677ad089cae57144883",
+              "core/crates/pe-html/help/pt-BR/agents-permissions.html": "7046acda6ce14b5e41162d7f85c1c234f14bddbf92c7a37c6b1bc4be2c94a650",
+              "core/crates/pe-html/help/pt-BR/agents-sending.html": "74d523946ea25d217b0afb7bdcb8083c385cf8426af329d5b1b5085cee1fd79f",
+              "core/crates/pe-html/help/ro/agents-permissions.html": "78da2700bed3b3c2e94f26f297993f1fb010668bfe7f902f234ef05fdbe93b44",
+              "core/crates/pe-html/help/ro/agents-sending.html": "63ba33396aecdd816d4114ba08d9707a122a8c73347f23b5178a9646478094c4",
+              "core/crates/pe-html/help/ru/agents-permissions.html": "984309c800b68ed7327eee4d0c43de62e7b36a68cb10611a861849e804c2ed96",
+              "core/crates/pe-html/help/ru/agents-sending.html": "d5262212809f025a3f13a2a39de9e751d3dfe6e5762efa9fecaf33c3575f5c86",
+              "core/crates/pe-html/help/sk/agents-permissions.html": "cc595b8a0bef5eb3567b555eb598492bc41cbc4f67d5d226ced74df9f4441474",
+              "core/crates/pe-html/help/sk/agents-sending.html": "0e575d1f435bae8b343d8fb292612de09a58a8c3133a3be4cb482eb8954310cd",
+              "core/crates/pe-html/help/sl/agents-permissions.html": "839a3a0696a6242046580b82c9507b2d8d1bf737013364566827a6099799a6d6",
+              "core/crates/pe-html/help/sl/agents-sending.html": "dd4f378f2cdd4450761ff9c9f2e2abf65b700900283dc31a28d19ed4c1a98e54",
+              "core/crates/pe-html/help/sr-Latn/agents-permissions.html": "79b7ab1785487af3bd88dd4fe967bf7f7e5594fc7a8bf14ab5c99fc38d4e4897",
+              "core/crates/pe-html/help/sr-Latn/agents-sending.html": "2f8f85b5cd6e8a7ee745d5695f37afe6826929d4a74c2d654e18558073aaacef",
+              "core/crates/pe-html/help/sv/agents-permissions.html": "4793fa7c28706163f957ac23dfe337f4ffba23df8abdc55090396ecc7a06ea57",
+              "core/crates/pe-html/help/sv/agents-sending.html": "92bf655901d1307d73bc857a821a9476b30a78d48460b5765962edb8f3d1f347",
+              "core/crates/pe-html/help/tr/agents-permissions.html": "5b15c46d809c3b1e7f1117648d87259411cd3cefb16557418b73984b5018a348",
+              "core/crates/pe-html/help/tr/agents-sending.html": "227db0a72623466afd5b9d111900760687a5494864e8c0f81d77e79e9ad1a170",
+              "core/crates/pe-html/help/uk/agents-permissions.html": "e30564aef3b23ac3992667fc35971f02330ae41885632167e456e5b4a62842b5",
+              "core/crates/pe-html/help/uk/agents-sending.html": "85e17c9a4b5ce87645520719f7f12eebfbde05d8a51bd81d6f4a8f09ac7b8beb"
+            },
+            "changed_relevant_paths": [],
+            "new_catalog_entries": 196,
+            "changed_catalog_entries": 28,
+            "changed_help_topics": 56,
+            "validated_relevant_tree": true,
+            "inherited_upstream_verified": null,
+            "note": "The immutable previously audited source tip is unchanged and is now an ancestor of GitHub master. All previously recorded source file hashes verified; no new source delta.",
+            "integrated_into_audited_upstream": "7933292597b19f89c633b4d7af3bed84a2026dc1"
+          }
+        ],
+        "source_worktree_relevant_status": {
+          "/Users/andris/Projects/PostalExpress": [],
+          "/Users/andris/Projects/PostalExpress-wave1": [],
+          "/Users/andris/Projects/PostalExpress-lang": [
+            "?? core/crates/pe-html/help/ca/",
+            "?? core/crates/pe-html/help/nb/",
+            "?? core/crates/pe-html/help/pt-BR/",
+            "?? core/crates/pe-html/help/sr-Latn/",
+            "?? core/crates/pe-html/help/tr/",
+            "?? core/locales/ca/",
+            "?? core/locales/nb/",
+            "?? core/locales/pt-BR/",
+            "?? core/locales/sr-Latn/",
+            "?? core/locales/tr/"
+          ],
+          "/Users/andris/Projects/PostalExpress-settings": [],
+          "/Users/andris/Projects/PostalExpress-pgp11": [],
+          "/Users/andris/Projects/PostalExpress-pgp7": []
+        },
+        "untracked_initial_wave1_copy_audit": {
+          "worktree": "/Users/andris/Projects/PostalExpress-lang",
+          "codes": [
+            "ca",
+            "nb",
+            "pt-BR",
+            "sr-Latn",
+            "tr"
+          ],
+          "status": "All290 files are exact copies of the already integrated initial wave1 draft snapshot; no later edits or new work. Left untouched.",
+          "source_snapshot": "cfdf55ab135d7def5ca1ce42e8603d866a33ce26",
+          "files": 290,
+          "exact_matches_initial_snapshot": 290,
+          "exact_matches_current_wave1_tip": 275,
+          "manifest_artifact": "/private/tmp/inbox-untracked-wave1-copies.json",
+          "manifest_sha256": "5e2e255d82be9f6ae6ae6b4d1433a356fbef80c6b56a9b8aa7e6b561a548a059"
+        },
+        "all_source_inventory_check": {
+          "worktrees": 46,
+          "refs": 188,
+          "artifact": "/private/tmp/inbox-el-compose-all-sources.json",
+          "sha256": "48c97e85522c76ef7a67b2d912e5bb351e3498fc900a9eb731ac3dbdadacf0c2",
+          "unexpected_changes": 0,
+          "equivalent_relevant_trees": [
+            {
+              "refs": [
+                "refs/remotes/origin/release-please--branches--master--components--inbox-classic"
+              ],
+              "commit": "ac818d2b6f8053292772efcfcea228320fc9f963",
+              "audited_upstream": "7933292597b19f89c633b4d7af3bed84a2026dc1",
+              "latest_audited_upstream": "7933292597b19f89c633b4d7af3bed84a2026dc1",
+              "historical_upstream_ancestor_verified": false,
+              "all_relevant_paths_identical": [
+                "core/locales",
+                "core/crates/pe-html/help",
+                "core/commands.toml",
+                "core/settings.toml",
+                "core/crates/pe-i18n/src/lib.rs"
+              ],
+              "inherited_relevant_delta_paths": 1122,
+              "new_review_work": 0
+            }
+          ],
+          "recorded_worktree_changes": [],
+          "recorded_pending_refs": [],
+          "recorded_integrated_refs": [
+            {
+              "refs": [
+                "refs/heads/feat/preview-pane"
+              ],
+              "commit": "cb9716a78c1f6b32fcd1884903b368fce1640367",
+              "recorded_source_commit": "2e6a5d00d511af0a35dc61c98fc0faff48ca6b23",
+              "files_verified": 29,
+              "status": "exact recorded source-only import; linguistic review pending",
+              "integrated": true,
+              "new_catalog_entries": 0,
+              "changed_help_topics": 0
+            }
+          ],
+          "verified_integrated_refs": [],
+          "pending_source_integrations": []
+        },
+        "since_start_pending_catalog_entries": 1056,
+        "since_start_pending_help_passages": 269,
+        "remaining_since_omissions": [],
+        "pending_catalog_entries": 12333,
+        "pending_help_topics": 556,
+        "additional_unrecorded_work": 0,
+        "kind": "Greek compose review and exact Linux menu-navigation reopens",
+        "review_commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+        "validation": "Greek structural checker has 1,456 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies 40 catalog reviews, 17 improved core values, 23 retained values and two complete help targets with 15 changed wording lines. All earlier writing-help prose is retained. Tags, attributes, platform branch boundaries, controls, literal keys, variables and plural branches are unchanged. All 53 mnemonic scopes pass; explicit compose letters remain unaccented Greek letters. The recorded generated Windows Flag-menu accent issue is unchanged. Platform sentence joins include actual labels, topic titles and command shortcuts (Ctrl+Shift+D/E; Mac Option+Command+Y/X). No relevant Greek screenshots found; source layouts/wrapping and 11 captured runtime files inspected. No GUI run or visual fit claim. Exactly 30 navigation passages in 15 other languages receive review marks only; every other byte and review remains preserved. Global reconciliation accounts for 22,109 unmarked entries, 11,254 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All 28 inventories and since-start 1,056 entries/269 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies. Master 79332925 adds only the inspected PDF settings-placeholder fix; it changes no translation or compose context. HTML refreshed; git diff --check passes. No local test suites or builds; REVIEWED unchanged.",
+        "runtime_context_artifact": "/private/tmp/inbox-el-compose-runtime.json",
+        "upstream_master_delta": {
+          "base": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "tip": "7933292597b19f89c633b4d7af3bed84a2026dc1",
+          "paths": [
+            "core/crates/pe-core/src/previews.rs"
+          ],
+          "patch_sha256": "0f062dda923d1e7ecc632ad8b4446f61ce8ded99d6edea85e7df1abac8b497b3",
+          "observation": "Existing upstream commit fills the settings placeholder using the current platform Reading settings path and adds an assertion to its existing crash test. No catalogs, help, compose implementation or reviewed runtime files changed. No tests run. Merge into clean review branch after committing the translation batch."
+        }
       }
     ],
     "settings_source_integration": {
@@ -124914,7 +125616,7 @@
           "attachment-decrypted-note"
         ]
       },
-      "status": "committed as 3552434d; linguistic review underway",
+      "status": "Compose catalog/addition reviews complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el. Linux menu-navigation instructions reopen separately in 15 previously reviewed topics; 12 languages retain full compose topics pending.",
       "catalog_ids": {
         "app.ftl": [
           "menu-insert",
@@ -127274,7 +127976,7 @@
     "source_worktree_audit_policy": "At later source checkpoints also inspect uncommitted locale/help/commands/settings/registry changes in root and the wave1, more-languages, settings, hardening and compose worktrees. Do not treat the old untracked five-language copies as new work without comparing their content. All290 matched cfdf55ab exactly at the Dutch checkpoint; any future mismatch must be diffed and recorded.",
     "source_worktree_audit_helper": "/private/tmp/inbox-compose-worktree-audit.py <batch-prefix>; run after the matching source-audit helper. Verifies relevant status in all six source worktrees and exact current contents/inventory of the290 known old copies against the verified source manifest; merges evidence into the batch source-audit JSON.",
     "compose_record_helper": "/private/tmp/inbox-compose-record.py <spec.json>; use only after the language, mnemonic, exact reconstruction, global reconciliation, source/worktree/queue and HTML checks pass. It records completed work; it does not replace linguistic review or validation.",
-    "source_audit_helper": "/private/tmp/inbox-uk-agents-source-audit.py with prefix adapted; then /private/tmp/inbox-agent-picture-source-extension.py, /private/tmp/inbox-compose-worktree-audit.py, /private/tmp/inbox-agent-picture-all-source-audit.py and the batch queue audit. Await each terminal success; preserve immutable source snapshots and baselines.",
+    "source_audit_helper": "/private/tmp/inbox-el-compose-source-audit.py, then /private/tmp/inbox-agent-picture-source-extension.py, /private/tmp/inbox-compose-worktree-audit.py, /private/tmp/inbox-agent-picture-all-source-audit.py and the batch queue audit; await each terminal success.",
     "new_source_inventory_artifact": {
       "path": "/private/tmp/inbox-new-preview-mcp-source-inventory.json",
       "sha256": "d899aee873dbe1d41681ed098ac10a2ecccf63023e1e4a2d1262771a00c2279f"
@@ -127292,7 +127994,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Greek compose additions, then the remaining compose languages (fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk). Continue the 46 original Hungarian help topics and broader lt/lv/pl/ro/ru/sk/sl/sv/uk catalogs/help. The agent unsubscribe, draft and Undo/Outbox followups are complete in all 28 languages; older connection topics in hu/lt/lv/pl/ro remain in the broader help queue. Preserve reviewed agent screenshot descriptions and shutdown instructions. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 22031/813; pending 12373/543; improvements 4176. REVIEWED unchanged."
+      "next": "Correct the two reopened Linux compose-menu passages in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da, reviewing each language in context. Then resume Finnish compose additions and hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, the 46 original Hungarian help topics and broader catalogs/help. Apply the Linux menu correction to every remaining compose topic. Agent unsubscribe/draft/Undo followups are complete in all 28 languages; preserve their reviewed passages. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 22071/800; pending 12333/556; improvements 4193. REVIEWED unchanged."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk; all 28 agent-addition languages reviewed; PDF previews pending",
@@ -130212,7 +130914,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Greek compose additions, then the remaining compose languages (fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk). Continue the 46 original Hungarian help topics and broader lt/lv/pl/ro/ru/sk/sl/sv/uk catalogs/help. The agent unsubscribe, draft and Undo/Outbox followups are complete in all 28 languages; older connection topics in hu/lt/lv/pl/ro remain in the broader help queue. Preserve reviewed agent screenshot descriptions and shutdown instructions. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 22031/813; pending 12373/543; improvements 4176. REVIEWED unchanged.",
+    "pending_phase2_resume": "Correct the two reopened Linux compose-menu passages in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da, reviewing each language in context. Then resume Finnish compose additions and hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, the 46 original Hungarian help topics and broader catalogs/help. Apply the Linux menu correction to every remaining compose topic. Agent unsubscribe/draft/Undo followups are complete in all 28 languages; preserve their reviewed passages. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 22071/800; pending 12333/556; improvements 4193. REVIEWED unchanged.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -131983,7 +132685,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk",
-      "next": "Review Greek compose additions, then the remaining compose languages (fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk). Continue the 46 original Hungarian help topics and broader lt/lv/pl/ro/ru/sk/sl/sv/uk catalogs/help. The agent unsubscribe, draft and Undo/Outbox followups are complete in all 28 languages; older connection topics in hu/lt/lv/pl/ro remain in the broader help queue. Preserve reviewed agent screenshot descriptions and shutdown instructions. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites.",
+      "next": "Correct the two reopened Linux compose-menu passages in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da, reviewing each language in context. Then resume Finnish compose additions and hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, the 46 original Hungarian help topics and broader catalogs/help. Apply the Linux menu correction to every remaining compose topic. Agent unsubscribe/draft/Undo followups are complete in all 28 languages; preserve their reviewed passages. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -133647,9 +134349,27 @@
         "full_help_topics_reviewed": 3,
         "help_wording_lines_improved": 38,
         "next": "Ukrainian agent core/additions/shared controls and all three help topics. Preserve reviewed screenshot descriptions and shutdown instructions."
+      },
+      {
+        "status": "Published and merged into GitHub master; review branch synchronized before Greek compose.",
+        "pr": 148,
+        "url": "https://github.com/postalsys/inbox-classic/pull/148",
+        "state": "MERGED",
+        "merged_at": "2026-11-17T22:54:12Z",
+        "merge_commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+        "review_commit": "0ded35c33be2fa11f90743ab13d50104787b3943",
+        "review_branch_synchronized": true,
+        "working_tree_clean": true,
+        "local_test_suites": "not run, user instruction",
+        "automatic_ci": "not claimed passed",
+        "catalog_entries_reviewed": 62,
+        "catalog_values_improved": 29,
+        "full_help_topics_reviewed": 3,
+        "help_wording_lines_improved": 38,
+        "next": "Greek compose additions, then fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk compose, 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending in all 28 languages."
       }
     ],
-    "source_audit_helper_sha256": "fadaa14860f34ec2920669126afff951ea9f242f4e55133a285890fc3747bc33",
+    "source_audit_helper_sha256": "187b1c07319c962244f6e3cb8c94de80aa00b92e79a80b1c788b8d3517681664",
     "agent_picture_source_integration": {
       "status": "Imported and all 28 new alt passages reviewed; older prose unchanged.",
       "review_parent": "37eb82fab56e4daea45ce7e92bf68fc5d4e41d44",
@@ -134198,9 +134918,10 @@
     },
     "pending_context_observations": [],
     "help_join_helper": {
-      "path": "/private/tmp/inbox-agent-help-joins-v2.py",
-      "sha256": "2362af040d34b0b6dc30c789f67d23f2932abf8874361902789eb92602c535d0",
-      "note": "Matches help.rs words() removal of mnemonic markers, ellipses and trailing colons; accepts all three agent topics."
+      "path": "/private/tmp/inbox-compose-help-joins-v3.py",
+      "sha256": "5c1c06c65a50ad194c2f09dfbdcd5d8787f81993f6208a118dab5709fe026752",
+      "scope": "Plaintext sentence joins with actual platform labels, topic titles and command shortcuts, not a GUI rendering.",
+      "note": "Extends the prior words() label handling with command-key formatting and related-topic titles; accepts arbitrary help topics. This is a plaintext join inspection, not a GUI rendering."
     },
     "publication_ci_observation": {
       "run": 44177344672,
@@ -134214,11 +134935,11 @@
         "/private/tmp/inbox-ru-pr139-arch-ci.log"
       ],
       "latest_observation": {
-        "master_commit": "3c6674b9282fba43308f4ec725b468895f789a44",
-        "master_run": 44193061965,
+        "master_commit": "7933292597b19f89c633b4d7af3bed84a2026dc1",
+        "master_run": 44195719453,
         "master_ci_status": "pending",
         "master_ci_conclusion": "",
-        "note": "Existing automatic CI run inspected only. No suite started locally or manually in GitHub; no full CI pass claimed."
+        "note": "Existing automatic CI inspected only. No local or manually triggered suites; no full CI pass claimed."
       }
     },
     "completed_context_observations": [
@@ -138216,6 +138937,11 @@
         ]
       },
       "helper": "/private/tmp/inbox-compose-mnemonics.py extends the existing actual-menu helper; duplicate GTK row instances use the same label and are not separate translation keys."
+    },
+    "compose_linux_menu": {
+      "source_issue": "The English sign-and-encrypt topic and 15 already-reviewed translations direct Linux users to Tools/Insert menus. linux/src/compose_keys.rs::Protection::new builds a single primary menu containing ComposeSign, ComposeEncrypt and AttachMyKey. Windows has Tools/Insert; macOS has Tools/File. Correct both navigation passages while retaining the controls, markup, keyboard references and platform branch boundaries.",
+      "followup": "compose-linux-menu-context",
+      "scope": "30 passages in 15 previously reviewed topics reopened, zero new scope; twelve existing full pending drafts also need this correction. Greek corrected."
     }
   },
   "context_followups": [
@@ -143001,7 +143727,6 @@
         "sign-and-encrypt.html"
       ],
       "pending_languages": [
-        "el",
         "fi",
         "hr",
         "hu",
@@ -143030,7 +143755,8 @@
         "tr",
         "bg",
         "cs",
-        "da"
+        "da",
+        "el"
       ],
       "retained_help_reviews": {
         "core/crates/pe-html/help/bg/write-message.html": {
@@ -143184,7 +143910,8 @@
         "tr": "All 53 mnemonic scopes pass; the changed label maps to GTK Şifrelemeden Gö_nder through the actual gtk_mnemonic caller. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 17 value edits and 40 mark removals; all other catalog bytes preserved. Help tags, attributes, controls, platform branches and literal keys match; all earlier writing-help prose retained. Platform joins inspected; dynamic shortcuts checked against commands.toml. No relevant Turkish screenshots found, so source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,185 unmarked messages, 10,619 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.",
         "bg": "All 53 mnemonic scopes pass; GTK label Намиране на _ключ checked against the actual conversion. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 17 value edits and 40 mark removals; all other catalog bytes preserved. Help tags, attributes, controls, platform branches and literal keys match; all earlier writing-help prose retained. Platform joins inspected and dynamic shortcuts checked in commands.toml. No relevant Bulgarian screenshots found, so source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,225 unmarked messages, 10,639 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.",
         "cs": "All53 mnemonic scopes pass; GTK Najít _klíč checked. Structural checker:1,446 expected removed-mark diagnostics, no structural findings. Exact catalog reconstruction verifies18 value edits/40 mark removals; all other bytes preserved. The full writing-help file is reconstructed from exactly the insertion and the recorded reopened paragraph. Tags/attributes/control references/platform branches/literal keys match in both help topics. Plural categories inspected for0,1,2,3,4,5,11,21,22,101, with representative count/name substitutions and positive-count/separate empty-recipient callers checked. Platform label joins and dynamic shortcuts inspected. No relevant Czech screenshots available; source layouts/wrapping inspected. No GUI run, test suites or builds. All28 inventories/current hashes reconcile:21,265 unmarked messages,10,659 changed help lines and14 verified baseline pairs. HTML regenerated; git diff --check passes.",
-        "da": "All53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies16 value edits/40 mark removals and preserves all other catalog bytes. Help tags/attributes/control references/platform branches/literal keys match; all earlier writing-help prose retained. Platform label joins inspected and dynamic shortcuts checked against commands.toml. No relevant Danish screenshots available; source layouts/wrapping inspected. No GUI run, test suites or builds. All28 current-checkout inventories/hashes reconcile:21,305 unmarked messages,10,679 changed help lines and14 verified baseline pairs. HTML regenerated; git diff --check passes. Newly discovered unmerged source work is recorded separately and remains pending import/review."
+        "da": "All53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies16 value edits/40 mark removals and preserves all other catalog bytes. Help tags/attributes/control references/platform branches/literal keys match; all earlier writing-help prose retained. Platform label joins inspected and dynamic shortcuts checked against commands.toml. No relevant Danish screenshots available; source layouts/wrapping inspected. No GUI run, test suites or builds. All28 current-checkout inventories/hashes reconcile:21,305 unmarked messages,10,679 changed help lines and14 verified baseline pairs. HTML regenerated; git diff --check passes. Newly discovered unmerged source work is recorded separately and remains pending import/review.",
+        "el": "Greek structural checker has 1,456 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies 40 catalog reviews, 17 improved core values, 23 retained values and two complete help targets with 15 changed wording lines. All earlier writing-help prose is retained. Tags, attributes, platform branch boundaries, controls, literal keys, variables and plural branches are unchanged. All 53 mnemonic scopes pass; explicit compose letters remain unaccented Greek letters. The recorded generated Windows Flag-menu accent issue is unchanged. Platform sentence joins include actual labels, topic titles and command shortcuts (Ctrl+Shift+D/E; Mac Option+Command+Y/X). No relevant Greek screenshots found; source layouts/wrapping and 11 captured runtime files inspected. No GUI run or visual fit claim. Exactly 30 navigation passages in 15 other languages receive review marks only; every other byte and review remains preserved. Global reconciliation accounts for 22,109 unmarked entries, 11,254 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All 28 inventories and since-start 1,056 entries/269 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies. Master 79332925 adds only the inspected PDF settings-placeholder fix; it changes no translation or compose context. HTML refreshed; git diff --check passes. No local test suites or builds; REVIEWED unchanged."
       }
     },
     {
@@ -148373,6 +149100,279 @@
       },
       "notes": "This is a targeted passage followup. Existing completed-topic counts and pending-topic inventories are unchanged; Estonian and French baseline topics gain only a new reviewed-paragraph record, not a claim that the full topic was re-reviewed.",
       "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged."
+    },
+    {
+      "id": "compose-linux-menu-context",
+      "status": "pending",
+      "source_checkpoint": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+      "issue": "The English sign-and-encrypt topic and 15 already-reviewed translations direct Linux users to Tools/Insert menus. linux/src/compose_keys.rs::Protection::new builds a single primary menu containing ComposeSign, ComposeEncrypt and AttachMyKey. Windows has Tools/Insert; macOS has Tools/File. Correct both navigation passages while retaining the controls, markup, keyboard references and platform branch boundaries.",
+      "evidence": [
+        "linux/src/compose_keys.rs: Protection::new menu construction",
+        "app/src/compose.cpp: BuildComposeMenu",
+        "mac/Sources/InboxClassic/App.swift: build menus, File and Tools"
+      ],
+      "runtime_evidence": {
+        "review_parent": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+        "files": {
+          "core/commands.toml": {
+            "sha256": "42c23fcbea367376411d34af4462c31a572c86964587c1eddeae12d9aa669ec5",
+            "snapshot": "/private/tmp/inbox-el-compose-runtime/core/commands.toml"
+          },
+          "core/crates/pe-core/src/compose_keys.rs": {
+            "sha256": "c0bddbece71f214ae35769d95fbe10e6b9522422b3845741b928148e90bd4c6e",
+            "snapshot": "/private/tmp/inbox-el-compose-runtime/core/crates/pe-core/src/compose_keys.rs"
+          },
+          "core/crates/pe-core/src/protect_out.rs": {
+            "sha256": "f25706aab875e7bba611f8c7a3b5711b92e779e6f8744519d0bfa0536f3cf452",
+            "snapshot": "/private/tmp/inbox-el-compose-runtime/core/crates/pe-core/src/protect_out.rs"
+          },
+          "core/crates/pe-core/src/lookup.rs": {
+            "sha256": "5755d32a72e1dfb48c2a66e49068fddf3313d2d903fb19e460a5218600e53a12",
+            "snapshot": "/private/tmp/inbox-el-compose-runtime/core/crates/pe-core/src/lookup.rs"
+          },
+          "core/crates/pe-html/src/help.rs": {
+            "sha256": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+            "snapshot": "/private/tmp/inbox-el-compose-runtime/core/crates/pe-html/src/help.rs"
+          },
+          "app/src/compose.cpp": {
+            "sha256": "a0ce3b477e3efadf4a64eb5659c4693ebf241bac37591ea1ffb36755f2ea0620",
+            "snapshot": "/private/tmp/inbox-el-compose-runtime/app/src/compose.cpp"
+          },
+          "app/src/recipientkeys.cpp": {
+            "sha256": "9f7d8d5f7419aefc712f2c3d8bc39b128695db4950a952f0bfa00f3928f9739d",
+            "snapshot": "/private/tmp/inbox-el-compose-runtime/app/src/recipientkeys.cpp"
+          },
+          "linux/src/compose_keys.rs": {
+            "sha256": "265c55610665a3c67b570f9cba06a3073f4e5e97bdccf246b36450ed5ecaa136",
+            "snapshot": "/private/tmp/inbox-el-compose-runtime/linux/src/compose_keys.rs"
+          },
+          "mac/Sources/InboxClassic/ComposeSecurity.swift": {
+            "sha256": "159ae2355e185812acc76494fa88e7e892d2ecffd533a5a75b4325bf5bfb7a40",
+            "snapshot": "/private/tmp/inbox-el-compose-runtime/mac/Sources/InboxClassic/ComposeSecurity.swift"
+          },
+          "mac/Sources/InboxClassic/App.swift": {
+            "sha256": "8a031f267649b85471477bc06818289d4d149a677aee28def3ce792a5a288bfb",
+            "snapshot": "/private/tmp/inbox-el-compose-runtime/mac/Sources/InboxClassic/App.swift"
+          },
+          "mac/Sources/InboxClassic/Compose.swift": {
+            "sha256": "09aad2c8d6fddff28e9a55897a68ab0181d7bd30e3efb3911b9a9c9cd103c180",
+            "snapshot": "/private/tmp/inbox-el-compose-runtime/mac/Sources/InboxClassic/Compose.swift"
+          }
+        }
+      },
+      "catalog_ids": {},
+      "help_topics": [
+        "sign-and-encrypt.html"
+      ],
+      "completed_languages": [
+        "el"
+      ],
+      "pending_languages": [
+        "bg",
+        "cs",
+        "da",
+        "de",
+        "es",
+        "et",
+        "fi",
+        "fr",
+        "hr",
+        "hu",
+        "it",
+        "lt",
+        "lv",
+        "nl",
+        "pl",
+        "pt",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "uk",
+        "ca",
+        "nb",
+        "pt-BR",
+        "sr-Latn",
+        "tr"
+      ],
+      "reopened_help_languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da"
+      ],
+      "reopened_help_passages_per_language": 2,
+      "checkpoint_files": {
+        "core/crates/pe-html/help/de/sign-and-encrypt.html": {
+          "previous_sha256": "a235d4abd1312c180ee18b72de1007b63c10d35b29d53141aef8a423d46720b4",
+          "sha256": "c404372c7efd4f8c4f0c6063ea0d731a60c0bc4ddc58611910b6933a8019b50e",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/es/sign-and-encrypt.html": {
+          "previous_sha256": "536638819c333e548bf96ab899e878e9061c6476489298ef08e8b24c9de96ced",
+          "sha256": "abed999a1a52266c7659fac91444231076cd66f65ca2d8e731372579aa2caf0b",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/et/sign-and-encrypt.html": {
+          "previous_sha256": "c0543e4e292298ce1365ebe55f1e0dee328cd07ed46f5287dd2d426eb7c2d162",
+          "sha256": "e5be348f4eef2848ab13781346e84751e3ed84ced5d5b3b845baaad9ff4317e5",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/fr/sign-and-encrypt.html": {
+          "previous_sha256": "cac9c23fc79a2a9b86dc2e2fe49432f88b726ad7d851b6b6c5f124d10232ed56",
+          "sha256": "c0967411d90ba6801b1040285fff427a2b33c76ba4742daa068f17913c6663af",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/nl/sign-and-encrypt.html": {
+          "previous_sha256": "3a08c17db2cfc86efaa0a4d981dedc6f1ec4167fc18c9904597eeebdc16e7d7e",
+          "sha256": "96614f93531f956751ea785fbdf944e5572f5c5f72afe5ee03a2a24c8f42cd95",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/it/sign-and-encrypt.html": {
+          "previous_sha256": "c2311f81bfef71eecce3ea90a33d9c52ec7f2fc8070fc8b5d35c58bd2ddff4fc",
+          "sha256": "f1c691160d0495a487c7c9a4757783a9d2ef75faf27588888d57bb08c31fbfe7",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/pt/sign-and-encrypt.html": {
+          "previous_sha256": "776223494cb9927ea9966c6d85aa36620c6ccc96a2003ef69db4eb866580f724",
+          "sha256": "3b4e8888443f9d9d8404c531562b0b6b6a73be1be7ddf906650a7a798f0dd988",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/pt-BR/sign-and-encrypt.html": {
+          "previous_sha256": "6fe8ce68e5dbeb2eefb208ccab9cc46a0259790b787f69c28402f1490d71ca98",
+          "sha256": "846418b142525bf22fda193e25b52b4b70524e17d0b05314988159aaa1e2ec2c",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/ca/sign-and-encrypt.html": {
+          "previous_sha256": "d0baceacf4d5cff138bf90d6cd4810b1b87f401cec5fe74ae9b04c500c24970e",
+          "sha256": "1398eb33fbbe5e8db7723d95e1bbc341a3b59f4691a67972cb8f355af65cb53d",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/nb/sign-and-encrypt.html": {
+          "previous_sha256": "e0ffb24a26768efad10a1552744b574c36e812eb9bcbef995a0116e0e758cbc7",
+          "sha256": "77845f92fb17fd12568feec882f45acad52888452c509a184bffcc629cacfcc2",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/sr-Latn/sign-and-encrypt.html": {
+          "previous_sha256": "38b9f450533a731ef326dfbbf4c9bd4571160ad3019404426469502fd8510cca",
+          "sha256": "5c2e380699ec1ebec4fdbb4b494ef4e0fefa4645c6228f2e60655d3c5e0b69a0",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/tr/sign-and-encrypt.html": {
+          "previous_sha256": "9e1262a69eae9318b453891b0358e22f3a36143b6e4c6a4886d688667919fa2c",
+          "sha256": "b9fadf5ce2a75ce75cc319af4898e132cae855cf748dbfd05e06d0c34dfbb499",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/bg/sign-and-encrypt.html": {
+          "previous_sha256": "1a5c17719d19966ee47949d99183977f6e7eac266ba980b683d37a8c370524e0",
+          "sha256": "788aa2787772dda26db808130836743f1594ab47b44408be526d69c05927b8ad",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/cs/sign-and-encrypt.html": {
+          "previous_sha256": "e2468d0132e7a4c85a21bf847a0453ea72dc438b4c629bb3f8f41ec887ab9b0e",
+          "sha256": "c53bc695a0b21bc6b4e0f329bb61a157c9211b0d87214f97e64ebb1e690e5db0",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        },
+        "core/crates/pe-html/help/da/sign-and-encrypt.html": {
+          "previous_sha256": "56bf89e67a2f5e58a20c954c0204e8a660e623eec9981abf7fec90c8d5575b93",
+          "sha256": "742e1347340e9cd7344c2a0b14162e6b1985cf5738a65e8765971bed83fc5da3",
+          "change": "Review marks only around the two Linux compose-navigation passages."
+        }
+      },
+      "retained_help_reviews": {
+        "core/crates/pe-html/help/de/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "a235d4abd1312c180ee18b72de1007b63c10d35b29d53141aef8a423d46720b4",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/es/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "536638819c333e548bf96ab899e878e9061c6476489298ef08e8b24c9de96ced",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/et/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "c0543e4e292298ce1365ebe55f1e0dee328cd07ed46f5287dd2d426eb7c2d162",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/fr/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "cac9c23fc79a2a9b86dc2e2fe49432f88b726ad7d851b6b6c5f124d10232ed56",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/nl/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "3a08c17db2cfc86efaa0a4d981dedc6f1ec4167fc18c9904597eeebdc16e7d7e",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/it/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "c2311f81bfef71eecce3ea90a33d9c52ec7f2fc8070fc8b5d35c58bd2ddff4fc",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/pt/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "776223494cb9927ea9966c6d85aa36620c6ccc96a2003ef69db4eb866580f724",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/pt-BR/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "6fe8ce68e5dbeb2eefb208ccab9cc46a0259790b787f69c28402f1490d71ca98",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/ca/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "d0baceacf4d5cff138bf90d6cd4810b1b87f401cec5fe74ae9b04c500c24970e",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/nb/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "e0ffb24a26768efad10a1552744b574c36e812eb9bcbef995a0116e0e758cbc7",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/sr-Latn/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "38b9f450533a731ef326dfbbf4c9bd4571160ad3019404426469502fd8510cca",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/tr/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "9e1262a69eae9318b453891b0358e22f3a36143b6e4c6a4886d688667919fa2c",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/bg/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "1a5c17719d19966ee47949d99183977f6e7eac266ba980b683d37a8c370524e0",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/cs/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "e2468d0132e7a4c85a21bf847a0453ea72dc438b4c629bb3f8f41ec887ab9b0e",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        },
+        "core/crates/pe-html/help/da/sign-and-encrypt.html": {
+          "commit": "bfff91d8989ee2d81caa77afcd44144b689a2228",
+          "sha256": "56bf89e67a2f5e58a20c954c0204e8a660e623eec9981abf7fec90c8d5575b93",
+          "scope": "All previously reviewed content except the two menu-navigation passages. Removing only the new review marks must reproduce this checkpoint exactly."
+        }
+      },
+      "language_validation": {
+        "el": "Greek structural checker has 1,456 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies 40 catalog reviews, 17 improved core values, 23 retained values and two complete help targets with 15 changed wording lines. All earlier writing-help prose is retained. Tags, attributes, platform branch boundaries, controls, literal keys, variables and plural branches are unchanged. All 53 mnemonic scopes pass; explicit compose letters remain unaccented Greek letters. The recorded generated Windows Flag-menu accent issue is unchanged. Platform sentence joins include actual labels, topic titles and command shortcuts (Ctrl+Shift+D/E; Mac Option+Command+Y/X). No relevant Greek screenshots found; source layouts/wrapping and 11 captured runtime files inspected. No GUI run or visual fit claim. Exactly 30 navigation passages in 15 other languages receive review marks only; every other byte and review remains preserved. Global reconciliation accounts for 22,109 unmarked entries, 11,254 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All 28 inventories and since-start 1,056 entries/269 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies. Master 79332925 adds only the inspected PDF settings-placeholder fix; it changes no translation or compose context. HTML refreshed; git diff --check passes. No local test suites or builds; REVIEWED unchanged."
+      },
+      "note": "Fifteen complete topics reopen only the signing/menu step and public-key menu paragraph. The twelve other languages already have the full topic pending. All catalog reviews and other help prose remain valid. Greek is corrected in el-compose-sign-encrypt-round2. No English or app code edited.",
+      "reopen_validation": "Exact reconstruction verifies only two new review-mark pairs per topic in 15 languages. Unchanged outside prose equals bfff91d8 byte-for-byte; inventories and latest hashes updated without adding scope."
     }
   ]
 }
