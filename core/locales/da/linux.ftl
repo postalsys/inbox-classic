@@ -242,10 +242,8 @@ gtk-nothing-yet = Intet endnu.
 
 # review: new
 gtk-preferences = Indstillinger
-# review: new
-gtk-language-subtitle = Sproget i programmet og hjælpen
-# review: new
-gtk-notify-subtitle = En notifikation, når der kommer nye meddelelser, mens vinduet er i baggrunden
+# review: changed
+gtk-notify-subtitle = Kun mens Inbox Classic er i baggrunden
 
 # linux/data/com.inboxclassic.InboxClassic.desktop and .metainfo.xml, made by the build. The keywords are the words a
 # search of the applications finds Inbox Classic by, each ended by a semicolon, in your language only: the English

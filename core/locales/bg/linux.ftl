@@ -242,10 +242,8 @@ gtk-nothing-yet = Все още нищо.
 
 # review: new
 gtk-preferences = Настройки
-# review: new
-gtk-language-subtitle = Език на приложението и помощта
-# review: new
-gtk-notify-subtitle = Известие, когато пристигнат нови съобщения, докато прозорецът е във фонов режим
+# review: changed
+gtk-notify-subtitle = Само докато Inbox Classic е във фонов режим
 
 ## The desktop entry and the page of the software stores
 

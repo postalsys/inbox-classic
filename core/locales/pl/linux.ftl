@@ -253,10 +253,8 @@ gtk-nothing-yet = Na razie nic.
 
 # review: new
 gtk-preferences = Preferencje
-# review: new
-gtk-language-subtitle = Język aplikacji i pomocy
-# review: new
-gtk-notify-subtitle = Powiadomienie, gdy nadejdą nowe wiadomości, a okno jest w tle
+# review: changed
+gtk-notify-subtitle = Tylko gdy Inbox Classic działa w tle
 
 ## The desktop entry and the page of the software stores
 

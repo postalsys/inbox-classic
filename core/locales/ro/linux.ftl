@@ -247,10 +247,8 @@ gtk-nothing-yet = Nimic încă.
 
 # review: new
 gtk-preferences = Preferințe
-# review: new
-gtk-language-subtitle = Limba aplicației și a ajutorului
-# review: new
-gtk-notify-subtitle = O notificare când sosesc mesaje noi cât timp fereastra este în fundal
+# review: changed
+gtk-notify-subtitle = Doar cât timp Inbox Classic este în fundal
 
 ## The desktop entry and the page of the software stores
 

@@ -242,10 +242,8 @@ gtk-nothing-yet = Még semmi.
 
 # review: new
 gtk-preferences = Beállítások
-# review: new
-gtk-language-subtitle = Az alkalmazás és a súgó nyelve
-# review: new
-gtk-notify-subtitle = Értesítés, ha új üzenetek érkeznek, miközben az ablak a háttérben van
+# review: changed
+gtk-notify-subtitle = Csak amíg az Inbox Classic a háttérben van
 
 ## The desktop entry and the page of the software stores
 

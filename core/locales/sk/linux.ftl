@@ -244,10 +244,8 @@ gtk-nothing-yet = Zatiaľ nič.
 
 # review: new
 gtk-preferences = Predvoľby
-# review: new
-gtk-language-subtitle = Jazyk aplikácie a pomocníka
-# review: new
-gtk-notify-subtitle = Upozornenie, keď prídu nové správy, kým je okno na pozadí
+# review: changed
+gtk-notify-subtitle = Len keď je Inbox Classic na pozadí
 
 ## The desktop entry and the page of the software stores
 

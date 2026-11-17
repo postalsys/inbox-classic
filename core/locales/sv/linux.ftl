@@ -241,10 +241,8 @@ gtk-nothing-yet = Inget ännu.
 
 # review: new
 gtk-preferences = Inställningar
-# review: new
-gtk-language-subtitle = Språk för appen och hjälpen
-# review: new
-gtk-notify-subtitle = En avisering när nya meddelanden kommer medan fönstret är i bakgrunden
+# review: changed
+gtk-notify-subtitle = Bara medan Inbox Classic är i bakgrunden
 
 
 ## The desktop entry and the page of the software stores

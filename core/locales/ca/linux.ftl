@@ -242,10 +242,8 @@ gtk-nothing-yet = Encara res.
 
 # review: new
 gtk-preferences = Preferències
-# review: new
-gtk-language-subtitle = Llengua de l’aplicació i de l’ajuda
-# review: new
-gtk-notify-subtitle = Una notificació quan arriben missatges nous mentre la finestra és en segon pla
+# review: changed
+gtk-notify-subtitle = Només mentre Inbox Classic és en segon pla
 
 ## L’entrada d’escriptori i la pàgina de les botigues de programari
 

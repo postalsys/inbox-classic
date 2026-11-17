@@ -241,10 +241,8 @@ gtk-nothing-yet = Henüz bir şey yok.
 
 # review: new
 gtk-preferences = Tercihler
-# review: new
-gtk-language-subtitle = Uygulamanın ve yardımın dili
-# review: new
-gtk-notify-subtitle = Pencere arka plandayken yeni iletiler geldiğinde bir bildirim
+# review: changed
+gtk-notify-subtitle = Yalnızca Inbox Classic arka plandayken
 
 ## Masaüstü girdisi ve yazılım mağazalarının sayfası
 

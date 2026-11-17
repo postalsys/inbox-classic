@@ -244,10 +244,8 @@ gtk-nothing-yet = Kol kas nieko.
 
 # review: new
 gtk-preferences = Nuostatos
-# review: new
-gtk-language-subtitle = Programos ir žinyno kalba
-# review: new
-gtk-notify-subtitle = Pranešimas, kai gaunami nauji laiškai, o langas yra fone
+# review: changed
+gtk-notify-subtitle = Tik kai Inbox Classic veikia fone
 
 ## The desktop entry and the page of the software stores
 

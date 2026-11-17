@@ -165,8 +165,8 @@ gtk-nothing-yet = Rien pour l'instant.
 ## Preferences
 
 gtk-preferences = Préférences
-gtk-language-subtitle = Langue de l'interface et de l'aide
-gtk-notify-subtitle = Recevoir une notification à l'arrivée de nouveaux messages lorsque la fenêtre est en arrière-plan
+# review: changed
+gtk-notify-subtitle = Uniquement lorsque Inbox Classic est en arrière-plan
 
 ## The desktop entry and the page of the software stores
 

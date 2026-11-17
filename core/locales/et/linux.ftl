@@ -164,8 +164,8 @@ gtk-nothing-yet = Veel mitte midagi.
 ## Preferences
 
 gtk-preferences = Eelistused
-gtk-language-subtitle = Rakenduse ja spikri keel
-gtk-notify-subtitle = Teavita uute kirjade saabumisest, kui aken on taustal
+# review: changed
+gtk-notify-subtitle = Ainult siis, kui Inbox Classic on taustal
 
 ## The desktop entry and the page of the software stores
 

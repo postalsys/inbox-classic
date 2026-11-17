@@ -240,10 +240,8 @@ gtk-nothing-yet = Пока ничего.
 
 # review: new
 gtk-preferences = Параметры
-# review: new
-gtk-language-subtitle = Язык программы и справки
-# review: new
-gtk-notify-subtitle = Уведомление о новых сообщениях, когда окно находится в фоне
+# review: changed
+gtk-notify-subtitle = Только когда Inbox Classic работает в фоне
 
 ## The desktop entry and the page of the software stores
 

@@ -242,10 +242,8 @@ gtk-nothing-yet = Τίποτα ακόμη.
 
 # review: new
 gtk-preferences = Προτιμήσεις
-# review: new
-gtk-language-subtitle = Γλώσσα της εφαρμογής και της βοήθειας
-# review: new
-gtk-notify-subtitle = Ειδοποίηση όταν φτάνουν νέα μηνύματα ενώ το παράθυρο είναι στο παρασκήνιο
+# review: changed
+gtk-notify-subtitle = Μόνο όταν το Inbox Classic είναι στο παρασκήνιο
 
 ## The desktop entry and the page of the software stores
 

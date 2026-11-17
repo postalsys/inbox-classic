@@ -248,10 +248,8 @@ gtk-nothing-yet = Pagaidām nekā.
 
 # review: new
 gtk-preferences = Iestatījumi
-# review: new
-gtk-language-subtitle = Lietotnes un palīdzības valoda
-# review: new
-gtk-notify-subtitle = Paziņojums, kad pienāk jauni ziņojumi, kamēr logs ir fonā
+# review: changed
+gtk-notify-subtitle = Tikai tad, kad Inbox Classic ir fonā
 
 ## The desktop entry and the page of the software stores
 

@@ -241,10 +241,8 @@ gtk-nothing-yet = Ainda nada.
 
 # review: new
 gtk-preferences = Preferências
-# review: new
-gtk-language-subtitle = Idioma da aplicação e da ajuda
-# review: new
-gtk-notify-subtitle = Uma notificação quando chegam mensagens novas com a janela em segundo plano
+# review: changed
+gtk-notify-subtitle = Apenas enquanto o Inbox Classic está em segundo plano
 
 ## The desktop entry and the page of the software stores
 

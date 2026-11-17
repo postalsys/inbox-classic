@@ -242,10 +242,8 @@ gtk-nothing-yet = Ei vielä mitään.
 
 # review: new
 gtk-preferences = Asetukset
-# review: new
-gtk-language-subtitle = Sovelluksen ja ohjeen kieli
-# review: new
-gtk-notify-subtitle = Ilmoitus, kun uusia viestejä saapuu ikkunan ollessa taustalla
+# review: changed
+gtk-notify-subtitle = Vain kun Inbox Classic on taustalla
 
 ## The desktop entry and the page of the software stores
 
