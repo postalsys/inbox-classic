@@ -151,10 +151,25 @@ type Opened = (i64, FolderId, u64, Option<(IndexText, Option<String>)>);
 /// it does not open: on the blocking pool, as decrypting and parsing would hold an async thread the syncs and the opens
 /// need
 fn decrypt_all(sources: Vec<Sealed>, ring: &KeyRing) -> Vec<Opened> {
+    open_each(sources, |source| crate::search::decrypted_text(source, ring))
+}
+
+/// `open` of each source. Anyone can encrypt a message to the user, so what decrypts and parses it runs inside a
+/// panic boundary, as the reading pane's path does at the C API: a message that makes rPGP or the parser panic counts
+/// as one that does not open (and is marked tried), rather than failing its batch on every pass and stopping the
+/// background work behind it
+fn open_each(
+    sources: Vec<Sealed>,
+    open: impl Fn(&[u8]) -> Option<(IndexText, Option<String>)>,
+) -> Vec<Opened> {
     sources
         .into_iter()
         .map(|(message, folder, uid, source)| {
-            let text = source.and_then(|source| crate::search::decrypted_text(&source, ring));
+            let text = source.and_then(|source| {
+                std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| open(&source)))
+                    .ok()
+                    .flatten()
+            });
             (message, folder, uid, text)
         })
         .collect()
@@ -219,5 +234,26 @@ impl Worker {
             });
         }
         Ok(batch.len())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_message_that_panics_counts_as_not_opened_and_the_rest_open() {
+        let sources: Vec<Sealed> = (1..=3).map(|n| (n, 1, n as u64, Some(vec![n as u8]))).collect();
+        let opened = open_each(sources, |source| {
+            if source == [2] {
+                panic!("a hostile message");
+            }
+            Some((IndexText::default(), Some(format!("{}", source[0]))))
+        });
+        let subjects: Vec<Option<String>> = opened
+            .iter()
+            .map(|(.., text)| text.as_ref().and_then(|(_, subject)| subject.clone()))
+            .collect();
+        assert_eq!(subjects, [Some("1".into()), None, Some("3".into())]);
     }
 }
