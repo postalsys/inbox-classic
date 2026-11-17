@@ -119,10 +119,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Avanti >
-# review: changed
-gtk-provider-sign-in = { $provider }: accedi a { $address } sul sito del provider. La tua password non viene condivisa con Inbox Classic. Puoi anche usare una password per le app creata nelle impostazioni di sicurezza del tuo account.
-# review: changed
-gtk-provider-sign-in-apps = { $provider }: accedi a { $address } sul sito del provider con una delle tue app di accesso (Altre opzioni di accesso). Puoi anche usare una password per le app creata nelle impostazioni di sicurezza del tuo account.
+gtk-provider-sign-in = { $provider }: accedi a { $address } sul sito del provider. La tua password non viene condivisa con Inbox Classic. Se il tuo account consente l’uso di password per le app, puoi crearne una nelle impostazioni di sicurezza. Per Outlook.com e Microsoft 365 devi accedere dal browser.
+gtk-provider-sign-in-apps = { $provider }: accedi a { $address } sul sito del provider con una delle tue app di accesso (Altre opzioni di accesso). Se il tuo account consente l’uso di password per le app, puoi crearne una nelle impostazioni di sicurezza. Per Outlook.com e Microsoft 365 devi accedere dal browser.
 gtk-accounts-add = Aggiungi...
 gtk-accounts-properties = Proprietà...
 gtk-accounts-signature = Firma...

@@ -320,10 +320,8 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com e Microsoft 365: faça log
 ui-start-intro-apps = Faça login pelo navegador com um dos seus aplicativos de login (Mais opções de login), ou adicione qualquer conta de e-mail com seu nome e endereço abaixo.
 ui-use-app-password = Usar senha de app
 ui-the-provider = Seu provedor de e-mail
-# review: changed
-ui-provider-intro = { $provider }: faça login em { $email } no site do provedor. Sua senha não é compartilhada com o Inbox Classic. Você também pode usar uma senha de app criada nas configurações de segurança da conta.
-# review: changed
-ui-provider-intro-apps = { $provider }: faça login em { $email } no site do provedor usando um dos seus aplicativos de login (Mais opções de login). Você também pode usar uma senha de app criada nas configurações de segurança da conta.
+ui-provider-intro = { $provider }: faça login em { $email } no site do provedor. Sua senha não é compartilhada com o Inbox Classic. Se sua conta permitir o uso de senhas de app para e-mail, você pode criar uma nas configurações de segurança. Para Outlook.com e Microsoft 365, é necessário fazer login pelo navegador.
+ui-provider-intro-apps = { $provider }: faça login em { $email } no site do provedor usando um dos seus aplicativos de login (Mais opções de login). Se sua conta permitir o uso de senhas de app para e-mail, você pode criar uma nas configurações de segurança. Para Outlook.com e Microsoft 365, é necessário fazer login pelo navegador.
 ui-finish = Concluir
 ui-logon = Login
 ui-enter-password = Digite a senha de { $account }.

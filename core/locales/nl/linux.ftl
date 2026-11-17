@@ -119,10 +119,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Volgende >
-# review: changed
-gtk-provider-sign-in = Meld je aan bij { $address } op de website van { $provider }. Je wachtwoord wordt niet gedeeld met Inbox Classic. Je kunt ook een app-wachtwoord gebruiken dat je in de beveiligingsinstellingen van je account hebt gemaakt.
-# review: changed
-gtk-provider-sign-in-apps = Meld je aan bij { $address } op de website van { $provider } met een van je aanmeldapps (Meer aanmeldopties). Je kunt ook een app-wachtwoord gebruiken dat je in de beveiligingsinstellingen van je account hebt gemaakt.
+gtk-provider-sign-in = Meld je aan bij { $address } op de website van { $provider }. Je wachtwoord wordt niet gedeeld met Inbox Classic. Als je account app-wachtwoorden voor e-mail ondersteunt, kun je er een maken in de beveiligingsinstellingen. Voor Outlook.com en Microsoft 365 moet je je aanmelden via de browser.
+gtk-provider-sign-in-apps = Meld je aan bij { $address } op de website van { $provider } met een van je aanmeldapps (Meer aanmeldopties). Als je account app-wachtwoorden voor e-mail ondersteunt, kun je er een maken in de beveiligingsinstellingen. Voor Outlook.com en Microsoft 365 moet je je aanmelden via de browser.
 gtk-accounts-add = Toevoegen...
 gtk-accounts-properties = Eigenschappen...
 gtk-accounts-signature = Handtekening...
