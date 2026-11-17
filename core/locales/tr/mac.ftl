@@ -24,9 +24,7 @@ mac-no-updates = Inbox Classic'in bu sürümü otomatik güncellemeleri destekle
 ## Ayarlar
 
 mac-settings-title = Ayarlar
-# review: new
 mac-check-updates-automatically = Güncellemeleri otomatik olarak denetle
-# review: new
 mac-settings-updates = Güncellemeler
 
 ## Sorular

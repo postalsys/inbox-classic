@@ -163,7 +163,6 @@ gtk-nothing-yet = Henüz etkinlik yok.
 ## Tercihler
 
 gtk-preferences = Tercihler
-# review: changed
 gtk-notify-subtitle = Yalnızca Inbox Classic arka plandayken
 
 ## Masaüstü girdisi ve yazılım mağazalarının sayfası
