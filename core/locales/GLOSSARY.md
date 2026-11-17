@@ -447,7 +447,7 @@ Review notes (round 2):
 - Calendar intervals greater than one use "Razmak između ponavljanja:" with a counted nominative phrase, including
   21/31 and the year form "godina". Weekday names appear in parentheses, without requiring an inflected placeholder.
 - Agent logs distinguish a message added to "red za slanje" from a message actually sent. Permissions describe access
-  through Inbox Classic. The compact organize permission explains deletion as moving to Izbrisane stavke.
+  through Inbox Classic. The full organize permission explains deletion as moving to Izbrisane stavke.
 - "Vlasništvo ključa potvrđeno" identifies verified key ownership separately from a valid "digitalni potpis".
   "Dešifrirano vašim ključem" describes decryption. A locked private key requires importing its own backup again;
   the missing system protection key is not that backup. Publication requires confirming every listed address.
@@ -493,6 +493,13 @@ Review notes (round 2):
 - The sign-in-page file contains a URL. Account removal clears saved sign-in credentials, including browser tokens.
   Address suggestions use "Unos odabrane adrese", not "Preuzimanje osobe"; removing an automatic suggestion leaves
   saved Address Book contacts and groups intact. Combined views are "prošireni" / "sažeti", not open/closed folders.
+
+- Agent unsubscribe additions use "lista e-pošte" and "zahtjev za otkazivanje pretplate" consistently.
+  The title keeps the count in all one/few/other branches, including 21. Failure/refusal logs label the
+  actual subject as "Poruka:" and sender addresses as "Pošiljatelji:". Buttons retain O/N on Windows.
+- Use "odbaciti skicu" for discarding an agent-owned draft, with permanent removal explained in help.
+  Saving, including autosave, ends the agent's access; opening alone does not. The account footer is
+  "tekst potpisa", separate from a digital signature. Permission descriptions name all allowed actions.
 
 ### Italiano (it)
 

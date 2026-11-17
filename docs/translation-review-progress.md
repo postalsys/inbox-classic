@@ -5,15 +5,15 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review Croatian combined agent additions, then hu and the broader drafts. The preview-warning settings-path followup is imported; all nine preview IDs and both help insertions remain pending. Recheck platform controls, shortcuts, layout and the latest runtime context before reviewing them.**
-  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi. Phase2 reopens only their affected help passages.
+- **Next: Review Hungarian combined agent additions, including both complete help drafts, then the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts. The preview-warning settings-path followup is imported; all nine preview IDs and both help insertions remain pending. Recheck platform controls, shortcuts, layout and the latest runtime context before reviewing them.**
+  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
-  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi. Continue the remaining agent queue.
-  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi.
+  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr. Continue the remaining agent queue.
+  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr.
 - Current scope: 34,404 catalog entries and 1,356 help topics.
-  Completed: 21,452 entries and 786 full topics; pending: 12,952 entries and 570 topics.
-  Historical catalog improvements: 3,887. Importing drafts earns no review credit.
+  Completed: 21,463 entries and 788 full topics; pending: 12,941 entries and 568 topics.
+  Historical catalog improvements: 3,893. Importing drafts earns no review credit.
   The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
 - All 28 unsubscribe logs now report user approval, which is recorded before the HTTP requests start.
   Nineteen older translations were reopened; four baseline-only entries entered scope and nine pending drafts
@@ -2568,3 +2568,13 @@ Imported the exact `preview-pdf-off-crashed` update from `2e6a5d00` in English a
 All 28 language checkers pass structurally with exactly 27,539 expected draft-mark diagnostics. Exact reconstruction verifies 29 source-only replacements, unchanged review marks and all earlier values/comments, unchanged scope and pending inventories, and no linguistic review credit. Both variables match English; generated IDs and REVIEWED are unchanged, so no build was required. Global reconciliation accounts for 21,490 unmarked entries, 10,848 help lines and 14 baseline pairs; latest hashes match. All 28 full inventories and since-start 1226 entries/261 passages reconcile. Source audit covers 44 worktrees/185 refs and the exact new source tree; 290 old draft copies remain unchanged. No additional unrecorded work. HTML regenerated; git diff --check passes. No tests or build run.
 
 Review Croatian combined agent additions, then hu and the broader drafts. The preview-warning settings-path followup is imported; all nine preview IDs and both help insertions remain pending. Recheck platform controls, shortcuts, layout and the latest runtime context before reviewing them.
+
+## Croatian combined agent additions
+
+Reviewed 11 entries and both agent help topics. Six catalog values and 13 help wording lines improved; five good values retained. Mailing-list terms are now consistent and unsubscribe logs distinguish refusal from failure. Help explains complete permissions, batch consent, the rolling per-program quota, optional signature text, read-only rule previews and saving/autosave as the boundary for agent-owned drafts. The permanent-removal exception for own drafts preserves the earlier protection against deleting other messages permanently when no deleted-mail folder exists. All older unmarked prose and the corrected approval log remain unchanged.
+
+Croatian structural checker has 1,415 expected mark-only diagnostics and no structural findings. Exact reconstruction verifies 11 reviewed entries, 6 changed values, 10 help edits and 13 changed help wording lines. All older unmarked prose retained. Tags, attributes, controls, platform branches, literal keys and generated IDs retained; variable sets, selectors and access-key counts intact. Windows unsubscribe O/N keys are distinct; shared Mac/Linux labels are plain. All three platform help joins inspected. Seven notice UI hashes match; no backend runtime change since the recorded snapshot. Global reconciliation: 21,501 unmarked entries, 10,862 help lines and 14 baseline pairs; latest hashes match. All 28 full inventories and since-start 1,215 entries/251 passages reconcile. Source audit covers 44 worktrees/185 refs, exact integrated source trees and 290 unchanged old copies, with no additional translation work. HTML regenerated; git diff --check passes. No tests or build run for this wording batch.
+
+Approval-time logs remain complete in 34a2cc25. The preview-warning settings-path source update is imported in 742a9ddf and remains pending in every language. Preserve the earlier preview UI/backend snapshots and the newer settings_path_followup evidence when resuming preview work.
+
+Review Hungarian combined agent additions, including both complete help drafts, then the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts. The preview-warning settings-path followup is imported; all nine preview IDs and both help insertions remain pending. Recheck platform controls, shortcuts, layout and the latest runtime context before reviewing them.

@@ -442,7 +442,6 @@ ui-browser-sign-in-server = { $server } (prijava putem preglednika)
 ui-dont-allow = Nemoj dopustiti
 ui-allow = &Dopusti
 ui-dont-send = Nemoj poslati
-# review: new
 ui-dont-unsubscribe = Nemoj otkazati pretplatu
 ui-edit-first = Najprije &uredi
 ui-new-address = Nova adresa
