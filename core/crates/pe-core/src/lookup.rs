@@ -52,7 +52,26 @@ pub struct PublishOutcome {
 impl Core {
     /// Where keys are looked up: keys.openpgp.org and every domain's own directory, or the servers of the tests
     fn key_servers(&self) -> pe_keys::Servers {
-        self.pgp_servers.clone().unwrap_or_default()
+        let servers = self.pgp_servers.lock().unwrap_or_else(|e| e.into_inner());
+        servers.clone().unwrap_or_default()
+    }
+
+    /// The UI tests' key server (`--key-server`): keys.openpgp.org and every domain's directory played by one server
+    /// on this computer. Refused for anything but a loopback address, so no one can send the lookups elsewhere.
+    pub fn use_test_key_server(&self, base: &str) -> bool {
+        let loopback = ["http://127.0.0.1:", "http://[::1]:", "http://localhost:"];
+        let base = base.trim_end_matches('/');
+        let Some(port) = loopback.iter().find_map(|prefix| base.strip_prefix(prefix)) else {
+            return false;
+        };
+        if port.is_empty() || !port.bytes().all(|b| b.is_ascii_digit()) {
+            return false;
+        }
+        *self.pgp_servers.lock().unwrap_or_else(|e| e.into_inner()) = Some(pe_keys::Servers {
+            keyserver: base.to_string(),
+            wkd_base: Some(base.to_string()),
+        });
+        true
     }
 
     /// Looks up the keys of `addresses` that have none (and were not looked up in vain in the last day), in the

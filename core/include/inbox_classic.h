@@ -2334,6 +2334,15 @@ char *pe_compose_own_key_file(const struct PeCore *core,
                               const struct PeOutgoing *message,
                               char **error);
 
+// The UI tests' `--key-server <url>`: keys are looked up on this server on this computer (the e2e harness plays
+// keys.openpgp.org and every domain's directory), never on the internet. False for anything but a loopback
+// `http://127.0.0.1:<port>`; call it right after `pe_core_open`.
+//
+// # Safety
+// `core` must be a live handle, `base` a NUL-terminated string.
+bool pe_core_use_test_key_server(const struct PeCore *core,
+                                 const char *base);
+
 // Opens the store at `path` (UTF-8, created when missing) and starts the engine. `callback` gets
 // the events, on worker threads, with `context`. NULL on failure. Close with `pe_core_close`.
 //

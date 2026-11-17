@@ -452,6 +452,22 @@ pub unsafe extern "C" fn pe_compose_own_key_file(
         .map_or(null_mut(), |path| into_c_string(path.to_string_lossy().into_owned()))
 }
 
+/// The UI tests' `--key-server <url>`: keys are looked up on this server on this computer (the e2e harness plays
+/// keys.openpgp.org and every domain's directory), never on the internet. False for anything but a loopback
+/// `http://127.0.0.1:<port>`; call it right after `pe_core_open`.
+///
+/// # Safety
+/// `core` must be a live handle, `base` a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_core_use_test_key_server(core: *const PeCore, base: *const c_char) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(base) = (unsafe { arg(base) }) else {
+        return false;
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.use_test_key_server(base)) }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

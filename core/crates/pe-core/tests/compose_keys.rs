@@ -467,3 +467,21 @@ fn attach_my_public_key() {
     };
     assert!(core.compose_security(account, &reply).unwrap().can_send_unencrypted);
 }
+
+#[test]
+fn a_test_key_server_only_on_this_computer() {
+    let (_server, base) = silent_server();
+    let dir = pe_testkit::TempDir::new("compose-keys-test-server");
+    let (core, _) = open_core(&dir, &base);
+    assert!(core.use_test_key_server("http://127.0.0.1:4711"));
+    assert!(core.use_test_key_server("http://localhost:4711/"));
+    for refused in [
+        "https://keys.openpgp.org",
+        "http://127.0.0.1.example.com:80",
+        "http://127.0.0.1:80/elsewhere",
+        "http://127.0.0.1:",
+        "http://10.0.0.1:80",
+    ] {
+        assert!(!core.use_test_key_server(refused), "{refused}");
+    }
+}

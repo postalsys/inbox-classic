@@ -106,20 +106,39 @@ async function start(options) {
 const { server, imap } = await start(main);
 const other = second ? await start(second) : null;
 
-// POST /pgp/check with a JSON body: { raw (base64), key, passphrase, signer, recipients }; the answer as JSON
+// POST /pgp/check with a JSON body: { raw (base64), key, passphrase, signer, recipients }; the answer as JSON.
+// The same server plays keys.openpgp.org and every domain's Web Key Directory for the app (`--key-server`), so no
+// lookup of a UI test leaves the computer: GET /vks/v1/by-email/<address> gives a key put there with
+// POST /pgp/keys { address, key (armored) }, everything else 404.
+const served = new Map();
 const pgp = createServer((req, res) => {
     const answer = (status, body) => {
         res.writeHead(status, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(body));
     };
-    if (req.method !== 'POST' || req.url !== '/pgp/check') {
-        return answer(404, { error: 'POST /pgp/check' });
+    const path = req.url.split('?')[0];
+    if (req.method === 'GET') {
+        const address = path.startsWith('/vks/v1/by-email/') ? decodeURIComponent(path.slice(17)).toLowerCase() : null;
+        if (address && served.has(address)) {
+            res.writeHead(200, { 'Content-Type': 'application/pgp-keys' });
+            return res.end(served.get(address));
+        }
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        return res.end('not found');
+    }
+    if (req.method !== 'POST' || (path !== '/pgp/check' && path !== '/pgp/keys')) {
+        return answer(404, { error: 'POST /pgp/check or /pgp/keys' });
     }
     const chunks = [];
     req.on('data', chunk => chunks.push(chunk));
     req.on('end', async () => {
         try {
-            answer(200, await check(JSON.parse(Buffer.concat(chunks).toString('utf8'))));
+            const body = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+            if (path === '/pgp/keys') {
+                served.set(String(body.address).toLowerCase(), String(body.key));
+                return answer(200, { ok: true });
+            }
+            answer(200, await check(body));
         } catch (error) {
             answer(400, { error: String(error) });
         }

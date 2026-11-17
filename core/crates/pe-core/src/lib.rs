@@ -494,7 +494,7 @@ pub struct Core {
     pgp_publishes: Requests<lookup::PublishOutcome>,
     /// The addresses whose keys are being looked up, each with its lookup: the compose window's "Looking for a key"
     pgp_looking: Mutex<HashMap<String, u64>>,
-    pgp_servers: Option<pe_keys::Servers>,
+    pgp_servers: Mutex<Option<pe_keys::Servers>>,
     /// BIMI logos being drawn, as pixels once done
     logos: Requests<Option<Vec<u8>>>,
     /// The pictures of the list's rows being drawn, as pixels once done
@@ -602,7 +602,7 @@ impl Core {
             pgp_lookups: Requests::default(),
             pgp_publishes: Requests::default(),
             pgp_looking: Mutex::default(),
-            pgp_servers: options.pgp_servers.clone(),
+            pgp_servers: Mutex::new(options.pgp_servers.clone()),
             logos: Requests::default(),
             pictures: Requests::default(),
             logo_downloads: Arc::default(),
