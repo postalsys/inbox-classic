@@ -7,7 +7,7 @@ use std::borrow::Cow;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::{Arc, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD;
@@ -21,6 +21,7 @@ mod help;
 mod markdown;
 mod otp;
 mod platform;
+mod previews;
 mod secure;
 mod visible;
 pub use bounce::{
@@ -39,6 +40,10 @@ pub use help::{
 pub use markdown::markdown_html;
 pub use otp::{COPY_CODE_LINK, OtpCard, is_copy_code_link, otp_card};
 pub use platform::{DOCUMENT_SCHEME, Platform, status_page, webkit_content_rules};
+pub use previews::{
+    PREVIEW_LINK, PREVIEW_PATH, PreviewFile, PreviewPage, PreviewSection, is_preview_link, parse_preview_address,
+    parse_preview_link, preview_address, preview_origin, preview_token, without_previews,
+};
 pub use secure::{
     MEASURE_SCRIPT, PART_DOCUMENT, PART_LINK, PartTone, SecurePart, part_document, part_link, secure_page,
 };
@@ -105,13 +110,22 @@ pub(crate) fn mail_builder() -> ammonia::Builder<'static> {
 /// attributes. CSS can not run code, and what it could load from the network is refused by the CSP and by the WebView2
 /// request filter.
 pub(crate) fn builder(images: &[InlineImage]) -> ammonia::Builder<'static> {
-    builder_noting(images, None)
+    builder_noting(images, None, None)
 }
 
+/// The Content-IDs (lowercase, without brackets) a message's HTML showed by `cid:`
+type Embedded = Arc<Mutex<HashSet<String>>>;
+
 /// [`builder`], setting `remote` when an attribute loads a picture from the network: an `img` src, a `background`,
-/// or a CSS `url()` / `image-set()` in a style attribute (decoded, as the sanitizer hands it over)
-fn builder_noting(images: &[InlineImage], remote: Option<Arc<AtomicBool>>) -> ammonia::Builder<'static> {
-    let embedder = Embedder::new(images);
+/// or a CSS `url()` / `image-set()` in a style attribute (decoded, as the sanitizer hands it over), and noting in
+/// `embedded` the pictures it shows by `cid:`
+fn builder_noting(
+    images: &[InlineImage],
+    remote: Option<Arc<AtomicBool>>,
+    embedded: Option<Embedded>,
+) -> ammonia::Builder<'static> {
+    let mut embedder = Embedder::new(images);
+    embedder.noted = embedded;
     let mut builder = mail_builder();
     builder.attribute_filter(move |element, attribute, value| {
         let img_src = element == "img" && attribute == "src";
@@ -154,6 +168,8 @@ struct Embedder {
     /// Each image encoded once, when it is first referenced
     uris: Vec<OnceLock<String>>,
     embedded: AtomicUsize,
+    /// Where the IDs of the pictures referenced are noted
+    noted: Option<Embedded>,
 }
 
 impl Embedder {
@@ -171,12 +187,17 @@ impl Embedder {
             uris: owned.iter().map(|_| OnceLock::new()).collect(),
             images: owned,
             embedded: AtomicUsize::new(0),
+            noted: None,
         }
     }
 
     /// The `data:` URI for a `cid:` URL, None for an unknown image or when the budget is spent
     fn embed(&self, url: &str) -> Option<String> {
-        let index = *self.by_id.get(&content_id(&url.trim_start()[4..]).to_lowercase())?;
+        let id = content_id(&url.trim_start()[4..]).to_lowercase();
+        let index = *self.by_id.get(&id)?;
+        if let Some(noted) = &self.noted {
+            noted.lock().unwrap_or_else(|p| p.into_inner()).insert(id);
+        }
         let uri = self.uris[index].get_or_init(|| {
             let (mime_type, data) = &self.images[index];
             format!("data:{mime_type};base64,{}", STANDARD.encode(data))
@@ -232,6 +253,8 @@ pub struct Rendered {
     pub document: String,
     /// The message has pictures on the internet, which the preview shows only after Download pictures
     pub remote_images: bool,
+    /// The attachments whose previews the document shows after the text ([`Cards::previews`]), in order
+    pub previewed: Vec<usize>,
 }
 
 /// [`render_message`] with the header fields of the message (`From`, `Subject`, ...), which only a printout shows (on
@@ -260,12 +283,14 @@ pub fn render_view_with(
     )
 }
 
-/// The cards of the app above a message: a one-time code's first, then an event's, then a bounce's
+/// The cards of the app above a message: a one-time code's first, then an event's, then a bounce's; and the previews
+/// of its attachments after it
 #[derive(Default)]
 pub struct Cards<'a> {
     pub otp: Option<&'a OtpCard>,
     pub event: Option<&'a EventCard>,
     pub bounce: Option<&'a BounceCard>,
+    pub previews: Option<&'a PreviewSection>,
 }
 
 /// [`render_view`] with the cards of the app above the message
@@ -277,7 +302,10 @@ pub fn render_view_cards(
     cards: &Cards,
 ) -> Rendered {
     let remote = Arc::new(AtomicBool::new(false));
-    let body = builder_noting(images, Some(remote.clone())).clean(html).to_string();
+    let embedded = Embedded::default();
+    let body = builder_noting(images, Some(remote.clone()), Some(embedded.clone()))
+        .clean(html)
+        .to_string();
     let card = [
         cards.otp.map(otp_card),
         cards.event.map(event_card),
@@ -286,11 +314,24 @@ pub fn render_view_cards(
     .into_iter()
     .flatten()
     .collect::<String>();
+    let embedded = embedded.lock().unwrap_or_else(|p| p.into_inner());
+    let previews = cards.previews.map(|previews| Previews {
+        section: previews,
+        embedded: &embedded,
+    });
+    let (document, previewed) = wrap(&body, options, header, &card, previews);
     Rendered {
         // the attributes were seen while sanitizing; style elements are left, as their text is not an attribute
         remote_images: remote.load(Ordering::Relaxed) || style_elements_load_remote(&body),
-        document: wrap(&body, options, header, &card),
+        document,
+        previewed,
     }
+}
+
+/// The previews to put after a message's text, and the pictures its HTML showed already
+struct Previews<'a> {
+    section: &'a PreviewSection,
+    embedded: &'a HashSet<String>,
 }
 
 /// An address on the network: http(s) or protocol-relative (which the https preview page would load over https).
@@ -337,6 +378,8 @@ const PRINT_SCRIPT: &str = "addEventListener('afterprint',()=>chrome.webview.pos
 /// of ours, allowed by a nonce in the CSP (nothing else can run, the message has no scripts of its own), that says
 /// when the print preview is closed. None for a document that is not one of ours.
 pub fn print_page(document: &str) -> Option<String> {
+    // the previews are not printed: the print window serves none of their pictures
+    let document = &previews::without_section(document);
     let at = document.find(CSP_START)? + CSP_START.len();
     let end = document.rfind(DOCUMENT_END)?;
     let nonce = editor::nonce();
@@ -348,12 +391,19 @@ pub fn print_page(document: &str) -> Option<String> {
     ))
 }
 
-/// The preview document around a sanitized body, with `card` (markup of ours, [`bounce_card`]) above it
-fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str) -> String {
-    let image_sources = if options.allow_remote_images {
-        "data: http: https:"
+/// The preview document around a sanitized body, with `card` (markup of ours, [`bounce_card`]) above it and the
+/// previews of its attachments after it; with the attachments it shows previews of
+fn wrap(
+    body: &str,
+    options: &RenderOptions,
+    header: &[(&str, &str)],
+    card: &str,
+    previews: Option<Previews>,
+) -> (String, Vec<usize>) {
+    let mut image_sources = if options.allow_remote_images {
+        "data: http: https:".to_string()
     } else {
-        "data:"
+        "data:".to_string()
     };
     // the header of a printout, under a class and in a cascade layer the message can not guess: an important rule
     // of the first layer beats any important rule of the message's own style elements, whatever their selector, and
@@ -374,6 +424,15 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str
         dark::Look::Light => ("light", ""),
         dark::Look::Dark { .. } => ("light dark", dark::DOCUMENT_DARK),
     };
+    // the previews after the text, their pictures from the preview path of the page's own origin and nowhere else
+    let (section, previewed) = previews.map_or_else(Default::default, |previews| {
+        let embedded = |id: &str| previews.embedded.contains(id);
+        previews::section(previews.section, &embedded, matches!(look, dark::Look::Dark { .. }))
+    });
+    if !previewed.is_empty() {
+        image_sources.push(' ');
+        image_sources.push_str(&previews::preview_source());
+    }
     let shown = "display:block!important;visibility:visible!important;opacity:1!important;position:static!important;\
                  color:#000!important;font:10pt Arial,sans-serif!important";
     let printed: String = header
@@ -392,7 +451,7 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str
     } else {
         format!("<div class=\"{class}\">{printed}</div>")
     };
-    format!(
+    let document = format!(
         "<!doctype html><html><head><meta charset=\"utf-8\">\
          <meta http-equiv=\"Content-Security-Policy\" {CSP_START}img-src {image_sources}; style-src 'unsafe-inline'; font-src data:\">\
          <meta name=\"color-scheme\" content=\"{scheme}\">\
@@ -412,8 +471,9 @@ fn wrap(body: &str, options: &RenderOptions, header: &[(&str, &str)], card: &str
          @layer {class}{{.{class}{{display:none}}\
          @media print{{.{class}{{{shown};border-bottom:1px solid #999!important;padding-bottom:6px!important;margin-bottom:10px!important}}}}}}\
          </style>\
-         </head><body>{printed}{card}{body}{DOCUMENT_END}"
-    )
+         </head><body>{printed}{card}{body}{section}{DOCUMENT_END}"
+    );
+    (document, previewed)
 }
 
 #[cfg(test)]
@@ -651,6 +711,138 @@ mod tests {
     fn style_can_not_hide_a_script() {
         let out = sanitize("<style></style><script>alert(1)</script></style>");
         assert!(!out.contains("script"));
+    }
+
+    fn previews(token: &str) -> PreviewSection {
+        PreviewSection {
+            token: token.into(),
+            files: vec![
+                PreviewFile {
+                    attachment: 0,
+                    content_id: Some("<logo@x>".into()),
+                    pages: vec![PreviewPage {
+                        page: 0,
+                        width: 64,
+                        height: 32,
+                        alt: "logo.png".into(),
+                    }],
+                    name: "logo.png".into(),
+                    ..Default::default()
+                },
+                PreviewFile {
+                    attachment: 1,
+                    paper: true,
+                    pages: vec![PreviewPage {
+                        page: 0,
+                        width: 620,
+                        height: 877,
+                        alt: "invoice.pdf, page 1 of 1".into(),
+                    }],
+                    name: "invoice.pdf".into(),
+                    details: "1 page, 3 KB".into(),
+                    ..Default::default()
+                },
+            ],
+            notice: None,
+        }
+    }
+
+    /// The previews come after the message's text, and the CSP lets pictures load from the preview path of the
+    /// page's own origin only, and only when there are previews
+    #[test]
+    fn previews_follow_the_text_and_the_csp_allows_only_their_path() {
+        let token = preview_token();
+        let section = previews(&token);
+        let cards = Cards {
+            previews: Some(&section),
+            ..Default::default()
+        };
+        // the message writes a section of its own, styles to hide ours, and an address of a preview it guessed
+        let html = "<section class=\"pe-att-x\">fake</section><style>img{display:none!important}\
+                    section{display:none!important}</style><img src=\"/pv/00000000000000000000000000000000-1-0\">";
+        let rendered = render_view_cards(html, &RenderOptions::default(), &[], &[], &cards);
+        let document = &rendered.document;
+        assert_eq!(rendered.previewed, [0, 1]);
+        let csp = document[document.find(CSP_START).unwrap()..].split('>').next().unwrap();
+        assert!(
+            csp.contains(&format!("img-src data: {}/pv/;", preview_origin())),
+            "{csp}"
+        );
+        assert!(!csp.contains("'self'"), "{csp}");
+        // the message's own section is gone (its words stay); ours is the last thing in the body
+        assert!(!document.contains("pe-att-x"), "{document}");
+        let ours = document.find(previews::SECTION_START).unwrap();
+        assert!(ours > document.find("fake").unwrap());
+        assert!(
+            document[ours..].ends_with(&format!("</section>{DOCUMENT_END}")),
+            "{document}"
+        );
+        assert!(document.contains(&format!("src=\"/pv/{token}-1-0\"")), "{document}");
+        // the message's guess stays an address no server answers: it does not carry the view's token
+        assert_eq!(document.matches(&token).count(), 4, "{document}");
+
+        // no previews, no preview path in the CSP
+        let plain = render_view_cards("<p>hi</p>", &RenderOptions::default(), &[], &[], &Cards::default());
+        assert!(plain.previewed.is_empty());
+        assert!(!plain.document.contains("/pv/"), "{}", plain.document);
+        assert!(plain.document.contains("img-src data:;"));
+        // with pictures from the internet allowed, both
+        let remote = render_view_cards(
+            "<p>hi</p>",
+            &RenderOptions {
+                allow_remote_images: true,
+            },
+            &[],
+            &[],
+            &cards,
+        );
+        assert!(
+            remote
+                .document
+                .contains(&format!("img-src data: http: https: {}/pv/;", preview_origin())),
+            "{}",
+            remote.document
+        );
+    }
+
+    /// A picture the message's HTML shows by `cid:` is not shown again after it
+    #[test]
+    fn a_picture_shown_in_the_text_is_not_previewed_again() {
+        let token = preview_token();
+        let section = previews(&token);
+        let cards = Cards {
+            previews: Some(&section),
+            ..Default::default()
+        };
+        let png = InlineImage {
+            content_id: "<LOGO@x>",
+            mime_type: "image/png",
+            data: b"\x89PNG",
+        };
+        let rendered = render_view_cards(
+            "<p>hi</p><img src=\"cid:logo@x\">",
+            &RenderOptions::default(),
+            &[png],
+            &[],
+            &cards,
+        );
+        assert_eq!(rendered.previewed, [1]);
+        assert!(!rendered.document.contains(&format!("/pv/{token}-0-0")));
+    }
+
+    /// The print page has no previews: the print window serves none of their pictures
+    #[test]
+    fn a_print_page_has_no_previews() {
+        let token = preview_token();
+        let section = previews(&token);
+        let cards = Cards {
+            previews: Some(&section),
+            ..Default::default()
+        };
+        let document = render_view_cards("<p>hi</p>", &RenderOptions::default(), &[], &[], &cards).document;
+        let page = print_page(&document).unwrap();
+        assert!(!page.contains(&format!("/pv/{token}")), "{page}");
+        assert!(page.contains("<p>hi</p>"));
     }
 
     #[test]
