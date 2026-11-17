@@ -443,7 +443,6 @@ ui-browser-sign-in-server = { $server } (böngészős bejelentkezés)
 ui-dont-allow = Tiltás
 ui-allow = &Engedélyezés
 ui-dont-send = Ne küldje el
-# review: new
 ui-dont-unsubscribe = Nincs leiratkozás
 ui-edit-first = &Szerkesztés küldés előtt
 ui-new-address = Új cím

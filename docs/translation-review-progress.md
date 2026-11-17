@@ -5,15 +5,15 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review Hungarian combined agent additions, including both complete help drafts, then the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts. The preview-warning settings-path followup is imported; all nine preview IDs and both help insertions remain pending. Recheck platform controls, shortcuts, layout and the latest runtime context before reviewing them.**
-  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr. Phase2 reopens only their affected help passages.
+- **Next: Review Lithuanian combined agent additions and both full help drafts, then lv/pl/ro/ru/sk/sl/sv/uk. After the agent queue, resume Greek and the remaining compose additions plus the remaining 46 original Hungarian help topics. Preview wording remains pending; use the latest settings-path followup and recheck platform controls, shortcuts and layout.**
+  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
-  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr. Continue the remaining agent queue.
-  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr.
+  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu. Continue the remaining agent queue.
+  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu.
 - Current scope: 34,404 catalog entries and 1,356 help topics.
-  Completed: 21,463 entries and 788 full topics; pending: 12,941 entries and 568 topics.
-  Historical catalog improvements: 3,893. Importing drafts earns no review credit.
+  Completed: 21,474 entries and 790 full topics; pending: 12,930 entries and 566 topics.
+  Historical catalog improvements: 3,898. Importing drafts earns no review credit.
   The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
 - All 28 unsubscribe logs now report user approval, which is recorded before the HTTP requests start.
   Nineteen older translations were reopened; four baseline-only entries entered scope and nine pending drafts
@@ -22,7 +22,7 @@ Commit completed batches regularly and preserve an exact resume point.
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
   Also check the agent warning: mail content must not be followed as instructions; this does not mean email
-  contains no instructions. French and Norwegian Bokmål needed that correction; the other completed languages already convey the distinction.
+  contains no instructions. French, Norwegian Bokmål and Hungarian needed that correction; the other completed languages already convey the distinction.
 - PDF core context is inspected. New reading-setting definitions and generated Mac/Linux settings now exist in
   `PostalExpress-preview2`. The six new IDs per language and both help insertions are imported from `03568aef`;
   its exact 117-path source snapshot includes the settings schema as context, without importing implementation.
@@ -39,7 +39,7 @@ Commit completed batches regularly and preserve an exact resume point.
   their original imported snapshot exactly and remain untouched.
 - Compose additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da.
   Remaining: el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk. Resume Greek after the agent additions,
-  then finish 48 original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
+  then finish 46 remaining original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
 - All 28 active-key warnings are reviewed in `25eff7b8`; compose source `162c0dd2` was integrated in `3552434d`.
   Individual recipient locks and the separate overall verified shield remain distinct in future help edits.
 - Starting checkout: `e99f7e59`; review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
@@ -2578,3 +2578,13 @@ Croatian structural checker has 1,415 expected mark-only diagnostics and no stru
 Approval-time logs remain complete in 34a2cc25. The preview-warning settings-path source update is imported in 742a9ddf and remains pending in every language. Preserve the earlier preview UI/backend snapshots and the newer settings_path_followup evidence when resuming preview work.
 
 Review Hungarian combined agent additions, including both complete help drafts, then the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts. The preview-warning settings-path followup is imported; all nine preview IDs and both help insertions remain pending. Recheck platform controls, shortcuts, layout and the latest runtime context before reviewing them.
+
+## Hungarian combined agent additions
+
+Reviewed 11 entries and both complete Hungarian agent help drafts. Five catalog values and 29 help wording lines improved; six good catalog values retained. The full help now distinguishes approval, queuing and sending, states the minimum 30-second delay, and explains that sent mail cannot be recalled. It covers complete permissions, rule previews without actions, removal of saved program access rather than uninstallation, batch unsubscribe consent and its rolling quota, optional account signature text, and own-draft permanent removal with saving/autosave as the access boundary. The malicious-instructions warning is corrected. Earlier catalog wording, the approval log, markup and literal controls are preserved.
+
+Hungarian structural checker has 1,369 expected mark-only diagnostics and no structural findings. Exact reconstruction verifies 11 reviewed entries, 5 changed values, 2 help edits and 29 changed help wording lines. Both complete help drafts were read and reviewed, rather than only newly inserted passages. Their tags, attributes and literal controls are preserved; 29 wording lines improved. All untargeted catalog values and earlier review records are retained. Tags, attributes, controls, platform branches, literal keys and generated IDs retained; variable sets, selectors and access-key counts intact. Windows unsubscribe L/N keys are distinct; shared Mac/Linux labels are plain. All three platform help joins inspected. Seven notice UI hashes match; no backend runtime change since the recorded snapshot. Global reconciliation: 21,512 unmarked entries, 10,897 help lines and 14 baseline pairs; latest hashes match. All 28 full inventories and since-start 1,204 entries/249 passages reconcile. Source audit covers 44 worktrees/185 refs, exact integrated source trees and 290 unchanged old copies, with no additional translation work. HTML regenerated; git diff --check passes. No tests or build run for this wording batch.
+
+Approval-time logs remain complete in 34a2cc25. The preview-warning settings-path update imported in 742a9ddf remains pending in every language. Preserve the prior preview UI/backend snapshots and newer settings_path_followup evidence. No source additions were found beyond the already imported followup.
+
+Review Lithuanian combined agent additions and both full help drafts, then lv/pl/ro/ru/sk/sl/sv/uk. After the agent queue, resume Greek and the remaining compose additions plus the remaining 46 original Hungarian help topics. Preview wording remains pending; use the latest settings-path followup and recheck platform controls, shortcuts and layout.

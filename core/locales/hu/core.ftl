@@ -401,8 +401,7 @@ day-sunday = vasárnap
 ## AI agents
 
 agent-level-read = Levelek olvasása: mappák, az üzenetlista, a keresés és az üzenetek
-# review: changed
-agent-level-organize = Levelek kezelése: olvasottság, jelölők, levélszemét, áthelyezés, törlés a Törölt elemek közé
+agent-level-organize = Levelek kezelése: olvasottnak vagy olvasatlannak jelölés, jelölők és levélszemét-jelölések módosítása, áthelyezés, archiválás, mappák létrehozása, törlés a Törölt elemek mappába való áthelyezéssel, valamint leiratkozás levelezőlistákról külön jóváhagyással
 agent-level-drafts = Piszkozatok írása, amelyeket később elküldhet
 agent-level-send = Levélküldés, minden üzenet külön jóváhagyásával
 agent-connect-title = { $program } hozzá szeretne férni a leveleihez
@@ -451,11 +450,8 @@ agent-log-composed = Új üzenetként megnyitva további szerkesztéshez: „{ $
 agent-log-refused = Küldés elutasítva: „{ $subject }”
 agent-log-sent = Küldési sorba helyezve: „{ $subject }”. Címzett: { $to }
 agent-log-draft = Piszkozat mentve: „{ $subject }”
-# review: new
 agent-log-draft-replaced = Piszkozat lecserélve: „{ $subject }”
-# review: new
 agent-log-draft-discarded = Piszkozat elvetve: „{ $subject }”
-# review: new
 agent-draft-note = Ezt a piszkozatot egy MI-ügynök írta: { $program }. Küldés előtt ellenőrizze a címzetteket és a szöveget.
 agent-log-read = Olvasottként megjelölve: „{ $subject }”
 agent-log-unread = Olvasatlanként megjelölve: „{ $subject }”
@@ -468,19 +464,15 @@ agent-log-not-junk = Nem levélszemétként megjelölve: „{ $subject }”
 agent-log-archived = Archiválva: „{ $subject }”
 agent-log-folder = Mappa létrehozva: „{ $name }”
 agent-log-unsubscribed = Jóváhagyta a leiratkozási kérelmet. Üzenet: „{ $subject }”
-# review: new
-agent-log-unsubscribe-failed = Sikertelen leiratkozás a levelezőlistáról („{ $subject }”): { $reason }
-# review: new
-agent-log-unsubscribe-refused = Nem iratkozott le innen: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Sikertelen leiratkozás. Üzenet: „{ $subject }”. Ok: { $reason }
+agent-log-unsubscribe-refused = Nem hagyta jóvá a leiratkozási kérelmet. Feladók: { $senders }
 agent-unsubscribe-title = { $count ->
-    [one] { $program } le szeretné iratkoztatni Önt egy levelezőlistáról
-   *[other] { $program } le szeretné iratkoztatni Önt { $count } levelezőlistáról
+    [one] { $program } leiratkozást kér egy levelezőlistáról
+   *[other] { $program } leiratkozást kér { $count } levelezőlistáról
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Az Inbox Classic megkéri az alábbi listát, hogy ne küldjön Önnek több levelet, a lista által kínált egykattintásos módon. Mást nem küld el, és a meglévő üzenetei a helyükön maradnak.
-   *[other] Az Inbox Classic az alábbi listák mindegyikét megkéri, hogy ne küldjön Önnek több levelet, a lista által kínált egykattintásos módon. Mást nem küld el, és a meglévő üzenetei a helyükön maradnak.
+    [1] Az Inbox Classic leiratkozási kérelmet küld az alábbi levelezőlistának az általa kínált egykattintásos módon. Mást nem küld, és a meglévő üzeneteket nem módosítja és nem helyezi át.
+   *[other] Az Inbox Classic leiratkozási kérelmet küld az alábbi levelezőlisták mindegyikének, az egyes listák által kínált egykattintásos módon. Mást nem küld, és a meglévő üzeneteket nem módosítja és nem helyezi át.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

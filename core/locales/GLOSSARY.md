@@ -605,6 +605,16 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
   An unreachable sign-in app message can name either that app or an account; tell the user to re-add the needed
   sign-in app. Temporary unencrypted attachment copies older than a day are removed at app startup.
 
+- Agent additions keep formal, impersonal instructions without explicit "Ön". Use "leiratkozási kérelem",
+  "levelezőlista" and "piszkozat elvetése". Logs introduce subjects with "Üzenet:" and addresses with "Feladók:".
+  The retained Windows unsubscribe pair uses L/N. Titles and controls leave all placeables uninflected.
+- Full agent help distinguishes approval from queuing/sending, limits approval to 30 list requests per program
+  over the preceding 24 hours, and treats account "aláírásszöveg" as optional. Only own untouched drafts can
+  be permanently discarded; saving in the editor, including autosave, ends that access. Opening alone does not.
+- Email content is data, not instructions for the agent to follow. Do not claim that mail contains no instructions.
+  Articles beside inserted labels follow their actual first sound: az Engedélyezés/Új cím/Eltávolítás/Eszközök,
+  a Tiltás/Leiratkozás/Nincs leiratkozás/Módosítás/Visszavonás/Küldés/Szerkesztés.
+
 ### Nederlands (nl)
 
 Terms: Postvak IN; Postvak UIT; Verzonden items; Verwijderde items; Concepten; Ongewenste e-mail; bericht; map; account
