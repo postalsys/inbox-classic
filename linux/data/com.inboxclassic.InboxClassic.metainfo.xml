@@ -99,9 +99,9 @@
       Microsoft 365 per naršyklę.
     </p>
     <p xml:lang="hu">
-      Az Inbox Classic úgy olvassa és írja az e-maileket, ahogy a levelezőprogramok régen: bal oldalon a mappák, felül
-      az üzenetek, alattuk az üzenet. Bármilyen IMAP- és SMTP-fiókkal működik, és a böngészőn keresztül jelentkezik be
-      az Outlook.com és a Microsoft 365 szolgáltatásba.
+      Az Inbox Classic a hagyományos levelezőprogramok elrendezését követi: bal oldalon a mappák, felül az üzenetlista,
+      alatta a kijelölt üzenet jelenik meg. IMAP- és SMTP-fiókokkal használható. Az Outlook.com és a Microsoft 365
+      esetén a böngészőben jelentkezhet be.
     </p>
     <p xml:lang="nl">
       Inbox Classic is een e-mailprogramma met een vertrouwde indeling: mappen links, de berichtenlijst bovenaan en het
@@ -230,10 +230,10 @@
       <li xml:lang="lt">Paieška, kuri randa žodžius temoje, siuntėjuose ir gavėjuose, failų pavadinimuose ir tekste, su Gmail operatoriais</li>
       <li xml:lang="lt">Atsakymuose suskleidžiami ankstesni cituojami laiškai</li>
       <li xml:lang="lt">Laiškus galima skaityti ir neprisijungus prie interneto; slaptažodžiai laikomi jūsų raktinėje</li>
-      <li xml:lang="hu">Minden üzenet megtisztítva, szkriptek nélkül jelenik meg, és az internetről származó képek csak az Ön engedélyével</li>
-      <li xml:lang="hu">Keresés, amely megtalálja a szavakat a tárgyban, a feladókban és címzettekben, a fájlnevekben és a szövegben, a Gmail keresőoperátoraival</li>
-      <li xml:lang="hu">A válaszok elrejtik az általuk idézett korábbi üzeneteket</li>
-      <li xml:lang="hu">A levelek internet nélkül is olvashatók; a jelszavak a kulcstartójában vannak</li>
+      <li xml:lang="hu">Az üzenetekből az alkalmazás eltávolítja a szkripteket, az internetes képeket pedig csak engedéllyel tölti le</li>
+      <li xml:lang="hu">Keresés a tárgyban, a feladók és címzettek adataiban, a mellékletnevekben és az üzenetszövegben, a Gmailből ismert keresőoperátorokkal</li>
+      <li xml:lang="hu">A válaszokban az alkalmazás elrejti az idézett korábbi üzeneteket</li>
+      <li xml:lang="hu">A letöltött levelek internetkapcsolat nélkül is olvashatók; a jelszavakat a rendszer kulcstartója tárolja</li>
       <li xml:lang="nl">Berichten worden weergegeven zonder scripts; afbeeldingen van internet worden alleen geladen als je dat toestaat</li>
       <li xml:lang="nl">Zoeken in onderwerp, afzender, ontvangers, bijlagenamen en berichttekst, met de zoekoperatoren van Gmail</li>
       <li xml:lang="nl">Geciteerde eerdere berichten in antwoorden worden ingeklapt</li>

@@ -5,6 +5,19 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
+- **Next: import newly arrived compose signing/encryption translations from `origin/master` at `a6ed91d6`.**
+  The source audit records exact hashes for all 117 affected paths: 1,120 new catalog entries (40 per language),
+  28 new sign-and-encrypt topics and 28 write-message insertions. Eighteen completed topics must reopen for
+  their insertion. No new language was added. Existing values are unchanged; 56 apparent changes were only
+  trailing blank lines at insertion boundaries. Preserve reviewed prose and the prior key-help import.
+  These additions are inventoried separately in `review_workspace.pending_source_import`; they are not yet
+  integrated or included in the active checkout totals below. Adjust scope and pending records during import.
+  The 18 earlier languages were caught up before this arrival and now need the compose additions reviewed.
+- Hungarian's remaining 245 catalog entries and first four help topics are complete. The active checkout has
+  20,642 catalog entries and 804 help topics completed, with 3,516 historical catalog improvements.
+  Remaining here: 12,078 entries and 516 topics, plus the upstream additions above. Hungarian has 48 help
+  topics left; after integration, continue read-messages/find-messages/conversations/organize-mail, then
+  lt/lv/pl/ro/ru/sk/sl/sv/uk. No test suites run; `REVIEWED` is unchanged.
 - Starting checkout: `e99f7e59`; review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
 - Read `/Users/andris/Downloads/inbox-classic-translation-guide.md`, `core/locales/GLOSSARY.md` (including the
   language's own notes), and `core/crates/pe-html/help/FORMAT.md`.
@@ -38,17 +51,18 @@ Commit completed batches regularly and preserve an exact resume point.
   Help source `255205aa` from `chore/pgp-hardening` (observed at `80d02fcc`) is now integrated:
   one inserted passage in connections/data-storage/encryption-keys in every language and English. Every byte
   of prior reviewed prose is preserved. All 54 insertions in the 18 earlier languages are now reviewed.
-  Ten broad drafts retain their full-topic marks, including the remaining 30 insertions. NEXT: Hungarian
-  help.ftl and platform catalogs (245 entries).
+  Ten broad drafts retain their full-topic marks, including the remaining 30 insertions. Hungarian
+  help.ftl and platform catalogs (245 entries) are now reviewed; the new compose import above comes next.
   Exact source/retained-review provenance
   is in `key_help_source_integration` and `key-storage-autocrypt-context`. Preserve the source worktree's
   unrelated uncommitted UI/fuzz work. Only the help source commit was imported.
-  Remaining Hungarian: help.ftl 24, linux.ftl 87, mac.ftl 65, windows.ftl 69 and all 52 help topics.
+  Hungarian catalogs are complete for this checkout, along with add-account/gmail-outlook/main-window/layouts;
+  48 help topics remain before the new compose import.
   Continue lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. All prior context followups remain relevant to those drafts.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,720 catalog entries and 1,320 help topics; 12,323 entries and 520 topics remain in the integrated queue.
+  32,720 catalog entries and 1,320 help topics; 12,078 entries and 516 topics remain in the integrated queue.
   Four round-1 agent-undo status strings now enter scope; all 18 earlier languages have that correction.
   The key help additions bring four round-1 topics into scope and reopen 50 counted topics; 30 full drafts
   already had the affected topics pending. Previously reviewed passages have not been discarded.
@@ -1868,3 +1882,41 @@ Current totals: 20,397 catalog entries and 800 help topics completed; 3,471 hist
 Remaining: 12,323 catalog entries and 520 help topics across ten languages. Scope: 32,720 entries and 1,320 topics.
 Next: Hungarian help.ftl (24), linux.ftl (87), mac.ftl (65), windows.ftl (69), then all 52 help topics.
 All 18 earlier languages are caught up. `REVIEWED` remains unchanged; the final late-arrival audit is still required.
+
+
+### Hungarian platform catalogs and getting-started help reviewed
+
+Reviewed the remaining 245 Hungarian catalog entries: 24 help titles, 87 Linux, 65 Mac and 69 Windows entries.
+Improved 45 values, keeping good existing labels and native Mac menu conventions. Corrected search scope and
+independent failure counts, clarified agent removal and unused access, and aligned Linux provider guidance with
+the shared account dialog. Installer wording distinguishes a Windows user from a mail account; the store text
+names the message list, downloaded offline mail and hidden quoted text. Sign-in button images are unchanged.
+
+Reviewed add-account, gmail-outlook, main-window and layouts. Control labels now join natural Hungarian sentences,
+with a/az chosen from the actual labels and case endings on surrounding nouns. Adding an account is distinct from
+creating one. Provider help limits app passwords to eligible Google accounts with two-step verification and directs
+Microsoft mail to browser sign-in. This completes the Hungarian provider-app-password followup; its separate
+password-troubleshooting followup remains pending. The main-window topic describes combined Sent/Drafts views
+and collapsed-folder counts, excluding Junk/Deleted. Layout text describes three-line list entries and locally available preview text.
+
+Structural checks have exactly 1,356 expected removed-mark diagnostics and no other findings. All 46 mnemonic scopes
+passed; exact reconstruction verifies the 45 catalog edits and 245 mark removals. Help tags, attributes, literal keys,
+control references and platform branches are preserved. Control/settings-path joins were inspected on all platforms;
+dynamic shortcut references were checked in commands.toml. The separate-target offline pe-ffi build passed in 10.14s.
+Only four Hungarian installer values and five Hungarian store elements changed; generated text matches its catalogs.
+No test suite was run. All 28 active inventories and current hashes reconcile: 20,676 unmarked messages, 10,371 changed
+help lines and 14 verified baseline pairs. The 333 since-start entries and 159 passages match the active queue.
+HTML regenerated; git diff --check passes. Previous checkpoint: `f90cee0e`.
+
+Fresh source discovery found compose signing/encryption merged into origin/master at `a6ed91d6`. Across all 28 languages,
+it adds 1,120 catalog entries, 28 new sign-and-encrypt topics and 28 write-message insertions. No new languages appeared.
+Eighteen previously completed topics will reopen only for their new insertion. The guide and root translation files
+are unchanged. The hardening branch also advanced to `9b6dea1b`; its identical compose sources are deduplicated, and
+its earlier 87-file key-help import remains verified. Non-help source changes and other worktrees are untouched.
+Exact pending source IDs/files/hashes are recorded separately; integrate after this clean Hungarian checkpoint and
+then update scope before reviewing them. The new work is not included in the current-checkout totals below.
+
+Current checkout: 20,642 catalog entries and 804 help topics completed; 3,516 historical catalog improvements.
+Remaining here: 12,078 catalog entries and 516 help topics. Scope: 32,720 entries and 1,320 topics. Hungarian has
+48 help topics left. The next batch is the compose source integration and followup review, then Hungarian help.
+`REVIEWED` remains unchanged; the full queue and final late-arrival audit are still required.
