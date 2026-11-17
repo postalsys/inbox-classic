@@ -13,6 +13,7 @@ use pe_core::{Draft, Outgoing};
 
 use crate::app::{shell, spawn};
 use crate::commands::Command;
+use crate::compose_keys::Protection;
 use crate::editor::{Editor, Handlers, Quote, picture_uri};
 use crate::ui::{self, Field, Form, TITLE};
 use crate::words::{Text, tr};
@@ -364,6 +365,8 @@ enum Pending {
     SaveAndClose,
     /// Saved without being asked (pe-core `autosave_wait` says when)
     Autosave,
+    /// Only looked at: what the line under the fields says of the quote (compose_keys.rs)
+    Look,
 }
 
 /// How closing a message window went
@@ -383,7 +386,7 @@ struct File {
 
 pub struct Compose {
     pub window: adw::ApplicationWindow,
-    account: Cell<i64>,
+    pub(crate) account: Cell<i64>,
     /// What it can go from, in the order of the From list: an account, and one of its other addresses (None for its
     /// own)
     choices: Vec<(i64, Option<String>)>,
@@ -404,6 +407,10 @@ pub struct Compose {
     files: RefCell<Vec<File>>,
     pub attached: gtk::FlowBox,
     attach_row: [gtk::Widget; 2],
+    /// Sign and Encrypt: the switches, the line under the fields and the recipients' locks (compose_keys.rs)
+    pub protection: Protection,
+    /// The Keys row, shown while Encrypt is on
+    pub(crate) keys_row: [gtk::Widget; 2],
     pub editor: Rc<Editor>,
     pub format: Rc<FormatBar>,
     /// The status bar: whether the draft is saved, or the address of the link at the cursor or under the mouse
@@ -534,15 +541,17 @@ impl Compose {
         attached.set_hexpand(true);
         attached.set_max_children_per_line(4);
         attached.set_widget_name("compose-files");
+        let protection = Protection::new();
         let grid = gtk::Grid::new();
         grid.add_css_class("compose-fields");
         grid.set_column_spacing(8);
         grid.set_row_spacing(4);
-        let rows: [(String, gtk::Widget); 6] = [
+        let rows: [(String, gtk::Widget); 7] = [
             (t!(UiFieldFrom), from.clone().upcast()),
             (t!(UiFieldTo), to_row.upcast()),
             (t!(UiFieldCc), cc.clone().upcast()),
             (t!(UiFieldBcc), bcc.clone().upcast()),
+            (t!(UiFieldKeys), protection.keys.clone().upcast()),
             (t!(UiFieldSubject), subject.clone().upcast()),
             (t!(UiFieldAttach), attached.clone().upcast()),
         ];
@@ -591,6 +600,7 @@ impl Compose {
         frame.append(&editor.document.view);
         let content = gtk::Box::new(gtk::Orientation::Vertical, 0);
         content.append(&grid);
+        content.append(&protection.line.widget);
         content.append(&format.widget);
         content.append(&frame);
         content.append(&status_bar);
@@ -605,6 +615,10 @@ impl Compose {
         header.pack_start(&send);
         header.pack_start(&save);
         header.pack_start(&attach);
+        // GNOME's primary menu at the end, Sign and Encrypt before it
+        header.pack_end(&protection.menu_button);
+        header.pack_end(&protection.encrypt_button);
+        header.pack_end(&protection.sign_button);
         let title = draft
             .map(|d| d.subject.clone())
             .filter(|s| !s.is_empty())
@@ -622,9 +636,12 @@ impl Compose {
             .build();
         window.set_widget_name("compose-window");
         let mut placed = placed.into_iter();
-        let mut next = || placed.next().expect("six rows");
-        let (_from_row, _to_row, cc_row, bcc_row, _subject_row, attach_row) =
-            (next(), next(), next(), next(), next(), next());
+        let mut next = || placed.next().expect("seven rows");
+        let (_from_row, _to_row, cc_row, bcc_row, keys_row, _subject_row, attach_row) =
+            (next(), next(), next(), next(), next(), next(), next());
+        // "Keys:" beside the first line of chips when they wrap
+        keys_row[0].set_valign(gtk::Align::Start);
+        keys_row[0].set_margin_top(3);
         let compose = Rc::new(Compose {
             window,
             account: Cell::new(account),
@@ -644,6 +661,8 @@ impl Compose {
             files: RefCell::default(),
             attached,
             attach_row,
+            protection,
+            keys_row,
             editor,
             format,
             status,
@@ -670,10 +689,14 @@ impl Compose {
         if let Some(draft) = draft {
             compose.fill(account, draft);
         }
+        *compose.protection.written.borrow_mut() = (body, Quote::Folded);
         compose.show_rows();
         compose.connect(&send, &save, &attach);
+        crate::compose_keys::connect(&compose);
         compose.connect_pick(&pick_buttons);
         compose.filling.set(false);
+        // a reply to encrypted mail opens encrypted: its recipients' keys looked up
+        crate::compose_keys::opened(&compose);
         compose
     }
 
@@ -686,6 +709,10 @@ impl Compose {
         *self.references.borrow_mut() = draft.references.clone();
         *self.quote_text.borrow_mut() = draft.quote_text.clone();
         self.quote_plain.set(draft.quote_text.is_some());
+        // a reply to encrypted mail, a draft saved encrypted: Encrypt and Sign on
+        self.protection.sign.set(draft.sign);
+        self.protection.encrypt.set(draft.encrypt);
+        self.protection.quote_encrypted.set(draft.quote_encrypted);
         // a saved draft opened again: its files, and its Message-ID so the next save replaces it
         *self.message_id.borrow_mut() = draft.message_id.clone();
         self.kept.set(draft.message_id.is_some());
@@ -745,6 +772,14 @@ impl Compose {
         self.show_rows();
     }
 
+    /// The address fields as Remove from Message left them
+    pub(crate) fn set_recipients(&self, to: &str, cc: &str, bcc: &str) {
+        self.to.set_text(to);
+        self.cc.set_text(cc);
+        self.bcc.set_text(bcc);
+        self.show_rows();
+    }
+
     fn open_row(&self, cc: bool) {
         if cc {
             self.show_cc.set(true);
@@ -786,6 +821,11 @@ impl Compose {
             let changed = on(|this| this.changed());
             field.connect_changed(move |_| changed());
         }
+        // the recipients' locks follow the address fields
+        for field in [&self.to, &self.cc, &self.bcc] {
+            let recipients = on(crate::compose_keys::schedule);
+            field.connect_changed(move |_| recipients());
+        }
         let subject = on(|this| {
             let text = this.subject.text();
             this.window.set_title(Some(&if text.is_empty() {
@@ -795,7 +835,10 @@ impl Compose {
             }));
         });
         self.subject.connect_changed(move |_| subject());
-        let from = on(|this| this.choose_from());
+        let from = on(|this| {
+            this.choose_from();
+            crate::compose_keys::refresh(this);
+        });
         self.from.connect_selected_notify(move |_| from());
         self.editor_handlers();
         self.files_keys();
@@ -813,8 +856,20 @@ impl Compose {
             })),
         ));
         self.window.add_controller(shortcuts);
+        // F1 in Recipients' Keys: its help
         let help = gio::SimpleAction::new(Command::Help.name(), None);
-        help.connect_activate(|_, _| crate::help::show("compose"));
+        let window = self.window.downgrade();
+        help.connect_activate(move |_, _| {
+            let dialog = window
+                .upgrade()
+                .and_then(|w| w.visible_dialog())
+                .map(|d| d.widget_name().to_string());
+            crate::help::show(if dialog.as_deref() == Some(crate::compose_keys::DIALOG_NAME) {
+                crate::compose_keys::HELP_CONTEXT
+            } else {
+                "compose"
+            });
+        });
         self.window.add_action(&help);
         let weak = Rc::downgrade(self);
         self.window.connect_close_request(move |_| {
@@ -960,7 +1015,7 @@ impl Compose {
     }
 
     /// The message changed since it was saved or opened: a "saved" status no longer holds
-    fn changed(&self) {
+    pub(crate) fn changed(&self) {
         if self.filling.get() {
             return;
         }
@@ -1009,7 +1064,7 @@ impl Compose {
         self.set_status(&t!(UiComposeRestored));
     }
 
-    fn set_status(&self, text: &str) {
+    pub(crate) fn set_status(&self, text: &str) {
         *self.status_text.borrow_mut() = text.to_string();
         self.status.set_text(text);
     }
@@ -1079,22 +1134,24 @@ impl Compose {
         true
     }
 
-    fn add_files(&self, paths: &[PathBuf]) {
+    pub(crate) fn add_files(self: &Rc<Self>, paths: &[PathBuf]) {
         for path in paths {
             if self.add_file(path) {
                 self.changed();
             }
         }
+        // files of an encrypted message may only go encrypted
+        crate::compose_keys::refresh(self);
     }
 
-    async fn attach(&self) {
+    async fn attach(self: &Rc<Self>) {
         let window = self.window.clone().upcast::<gtk::Window>();
         let files = ui::open_files(&window, &t!(UiInsertAttachment), None).await;
         self.add_files(&files);
     }
 
     /// The selected file of the Attach row taken off the message
-    pub fn remove_selected_file(&self) {
+    pub fn remove_selected_file(self: &Rc<Self>) {
         let Some(child) = self.attached.selected_children().into_iter().next() else {
             return;
         };
@@ -1106,6 +1163,7 @@ impl Compose {
         self.attached.remove(&child);
         self.changed();
         self.show_rows();
+        crate::compose_keys::refresh(self);
         let left = self.files.borrow().len() as i32;
         if left > 0
             && let Some(next) = self.attached.child_at_index(index.min(left - 1))
@@ -1116,7 +1174,7 @@ impl Compose {
 
     /// Files dropped on the text: each picture goes in where the cursor is, as Insert Picture puts one; other files
     /// (and pictures too large to go inline) are attached
-    fn drop_on_text(&self, paths: Vec<PathBuf>) {
+    fn drop_on_text(self: &Rc<Self>, paths: Vec<PathBuf>) {
         let attach: Vec<PathBuf> = paths
             .into_iter()
             .filter(|path| !insert_picture_file(&self.editor, path))
@@ -1133,21 +1191,48 @@ impl Compose {
 
     /// The editor's HTML is asked for first, the action follows when it comes
     fn request(&self, action: Pending) {
-        if self.pending.get() == Pending::None {
+        let pending = self.pending.get();
+        if pending == Pending::None {
+            self.pending.set(action);
+            if action != Pending::Look {
+                self.requested_at.set(self.changes.get());
+            }
+            self.editor.html();
+        } else if matches!(pending, Pending::Autosave | Pending::Look)
+            && !matches!(action, Pending::Autosave | Pending::Look)
+        {
+            // the user's own Send or Save comes after the automatic save or the look the HTML was asked for
             self.pending.set(action);
             self.requested_at.set(self.changes.get());
-            self.editor.html();
-        } else if self.pending.get() == Pending::Autosave && action != Pending::Autosave {
-            // the user's own Send or Save comes after the automatic save the HTML was asked for
+        } else if pending == Pending::Look && action == Pending::Autosave {
             self.pending.set(action);
+            self.requested_at.set(self.changes.get());
         }
+    }
+
+    /// Send, as the button does (Recipients' Keys' Send)
+    pub(crate) fn send_now(&self) {
+        self.request(Pending::Send);
+    }
+
+    /// The editor's HTML asked for, only for the line under the fields
+    pub(crate) fn look_at_html(&self) {
+        self.request(Pending::Look);
+    }
+
+    /// The message as it is now, with the editor's HTML as it came last: what the switches and the line judge
+    pub(crate) fn outgoing_now(&self) -> Outgoing {
+        let (html, quote) = self.protection.written.borrow().clone();
+        self.outgoing(html, &quote)
     }
 
     fn got_html(self: &Rc<Self>, html: String, quote: Quote) {
         let pending = self.pending.replace(Pending::None);
-        let outgoing = self.outgoing(html, &quote);
+        let outgoing = self.outgoing(html.clone(), &quote);
+        *self.protection.written.borrow_mut() = (html, quote);
         let this = self.clone();
         match pending {
+            Pending::Look => crate::compose_keys::refresh(self),
             Pending::Send => spawn(async move { this.send(outgoing).await }),
             Pending::Save | Pending::SaveAndClose => {
                 spawn(async move { this.save(outgoing, pending == Pending::SaveAndClose).await })
@@ -1191,13 +1276,18 @@ impl Compose {
             // saved in another account's Drafts before From changed: the core moves it once this account has it
             draft_account: (draft_account != 0 && draft_account != account).then_some(draft_account),
             from: self.from_address.borrow().clone(),
-            // Sign and Encrypt come with the compose window's switches (the plan's PR 7)
-            ..Default::default()
+            sign: self.protection.sign.get(),
+            encrypt: self.protection.encrypt.get(),
+            quote_encrypted: self.protection.quote_encrypted.get(),
         }
     }
 
-    /// Sends now, or with the next Send/Recv; a typo in an address or a file that is gone keeps the window open
-    async fn send(&self, outgoing: Outgoing) {
+    /// Sends now, or with the next Send/Recv; a typo in an address or a file that is gone keeps the window open, and
+    /// so does what signing or encrypting still needs (a recipient's key, a key of one's own)
+    async fn send(self: &Rc<Self>, outgoing: Outgoing) {
+        if !crate::compose_keys::may_send(self, &outgoing).await {
+            return;
+        }
         // it says a file is attached and none is: Go Back is the default
         if let Some(word) = pe_core::attachment_words::forgotten(&outgoing) {
             let (back, anyway) = (t!(UiGoBack), t!(UiSendAnyway));
@@ -1323,6 +1413,7 @@ impl Compose {
     /// The window gone; its copy for a crash too unless `recovery` (the UI test's crash)
     fn destroy_keeping(&self, recovery: bool) {
         self.cancel_autosave();
+        self.protection.stop();
         // nothing left to open again after a crash
         if let Some(message_id) = self.message_id.borrow().as_deref()
             && !recovery
@@ -1345,6 +1436,16 @@ impl Compose {
 #[cfg(feature = "e2e")]
 pub fn from_address(compose: &Compose) -> Option<String> {
     compose.from_address.borrow().clone()
+}
+
+/// A command of the compose window's (Sign, Encrypt, Attach My Public Key) run as its menu runs it, in the compose
+/// window in front
+pub fn run_in_front(command: Command) {
+    let composes = shell().composes.borrow().clone();
+    let front = composes.iter().rev().find(|c| c.window.is_active()).or(composes.last());
+    if let Some(compose) = front {
+        let _ = WidgetExt::activate_action(&compose.window, &format!("compose.{}", command.name()), None);
+    }
 }
 
 /// Opens again the messages that were being written when the app last ended without closing them

@@ -175,7 +175,12 @@ fn open_core(
         // keys are looked up on keys.openpgp.org and the domains' own directories
         pgp_servers: None,
     };
-    pe_core::Core::open_with(store, options, events).ok()
+    let core = pe_core::Core::open_with(store, options, events).ok()?;
+    // the UI tests' key server on this computer (the core takes a loopback address only)
+    if let Some(server) = &arguments.key_server {
+        core.use_test_key_server(server);
+    }
+    Some(core)
 }
 
 /// The store could not be opened: said in a window of its own, then the app ends
@@ -375,7 +380,11 @@ impl Shell {
                 crate::address_book::refresh();
                 main.senders_changed();
             }
-            Event::KeysChanged => main.reader.reload(),
+            Event::KeysChanged => {
+                main.reader.reload();
+                crate::compose_keys::refresh_all();
+            }
+            Event::KeysFound { request } => crate::compose_keys::keys_found(*request),
             Event::RulesApplied { count, .. } => {
                 let said = t!(UiRulesApplied, count = *count);
                 main.set_status(&said);
@@ -786,6 +795,8 @@ pub fn run_command(command: Command) {
         Command::ExportAddressBook => {
             spawn(async move { crate::address_book::export(main.window().upcast_ref()).await })
         }
+        // the compose window's own: the one in front
+        Command::ComposeSign | Command::ComposeEncrypt | Command::AttachMyKey => crate::compose::run_in_front(command),
         Command::ExportSetup => crate::setup::run_export(),
         Command::ImportSetup => crate::setup::run_import(),
     }

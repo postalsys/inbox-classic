@@ -3636,7 +3636,7 @@ pub async fn between_accounts(d: &Driver) {
 
 /// The words a window shows: its labels (buttons' included) and the message list's column titles, but not the mail's
 /// own (the rows of the list and the tree, and the reading pane's header, which hold names and subjects)
-fn shown_words(root: &gtk::Widget) -> Vec<(String, bool)> {
+pub(super) fn shown_words(root: &gtk::Widget) -> Vec<(String, bool)> {
     let data: Vec<gtk::Widget> = [
         "folder-tree",
         "message-list",
@@ -3731,7 +3731,7 @@ fn preferences_pages(d: &Driver, dialog: &adw::Dialog) {
 }
 
 /// The main window again, in `language`, with the Inbox and its first message shown
-async fn in_language(language: &str) {
+pub(super) async fn in_language(language: &str) {
     pe_core::i18n::set_language(language);
     shell().remake_main();
     pause(1000).await;

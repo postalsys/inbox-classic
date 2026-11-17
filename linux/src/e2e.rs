@@ -56,6 +56,9 @@ mod secure;
 /// Step 19i: encrypted and signed mail in the list and the search, and Search in encrypted messages
 mod encrypted_list;
 
+/// Step 19j: signing and encrypting what is written
+mod compose_keys;
+
 /// Step 8a: opening attachments (after 19i, for the account's key)
 mod attach;
 /// Step 45a: settings and accounts to another computer
@@ -78,6 +81,8 @@ struct Ports {
     second_imap: u16,
     second_smtp: u16,
     second_rest: u16,
+    /// The harness's OpenPGP checks and key server
+    pgp: u16,
 }
 
 struct Driver {
@@ -132,6 +137,8 @@ pub fn run(out: PathBuf) -> glib::ExitCode {
         // English whatever the system or Preferences say: the checks read the English words. PE_E2E_LANGUAGE runs it
         // in another language for its screenshots, where the checks of English words fail
         language: Some(std::env::var("PE_E2E_LANGUAGE").unwrap_or_else(|_| "en".into())),
+        // keys are looked up on the harness, never on the internet
+        key_server: Some(format!("http://127.0.0.1:{}", driver.ports.pgp)),
         ..Default::default()
     };
     let store = out.join("store.db").to_string_lossy().into_owned();
@@ -146,6 +153,8 @@ pub fn run(out: PathBuf) -> glib::ExitCode {
         cert,
         "--sign-in-page-file".into(),
         page,
+        "--key-server".into(),
+        format!("http://127.0.0.1:{}", driver.ports.pgp),
     ];
     DRIVER.with(|d| *d.borrow_mut() = Some(driver.clone()));
     // the driver starts once the app has
@@ -235,6 +244,7 @@ fn start_harness() -> Result<((Child, ChildStdin), Ports), String> {
             second_imap: second("imap"),
             second_smtp: second("smtp"),
             second_rest: second("rest"),
+            pgp: port("pgp"),
         },
     ))
 }
@@ -1015,6 +1025,7 @@ async fn scenario(d: Rc<Driver>) {
     rules::message_rules(&d).await;
     keys::encryption_keys(&d).await;
     secure::signed_and_encrypted(&d).await;
+    compose_keys::signing_and_encrypting(&d).await;
     attach::opening_attachments(&d).await;
     text_size(&d).await;
     send_receive(&d).await;

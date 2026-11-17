@@ -8,14 +8,14 @@ use pe_core::MessageView;
 use pe_core::protect::Tone;
 
 /// The CSS class of each tone (its colours are in the app's style, `ui.rs`)
-const TONE_CLASSES: [&str; 4] = [
+pub const TONE_CLASSES: [&str; 4] = [
     "security-verified",
     "security-good",
     "security-warning",
     "security-neutral",
 ];
 
-fn tone_class(tone: Tone) -> &'static str {
+pub fn tone_class(tone: Tone) -> &'static str {
     match tone {
         Tone::Verified => TONE_CLASSES[0],
         Tone::Good => TONE_CLASSES[1],
@@ -81,14 +81,7 @@ impl SecurityBar {
         widget.append(&text);
         widget.append(&details);
         // the dark colours while the windows are dark (the core's labels in the page follow the same style)
-        let styles = adw::StyleManager::default();
-        crate::ui::set_class(&widget, "dark", styles.is_dark());
-        let bar = widget.downgrade();
-        styles.connect_dark_notify(move |styles| {
-            if let Some(bar) = bar.upgrade() {
-                crate::ui::set_class(&bar, "dark", styles.is_dark());
-            }
-        });
+        follow_dark(&widget);
         SecurityBar {
             widget,
             lock,
@@ -148,6 +141,18 @@ impl SecurityBar {
             .collect();
         Some((self.text.text().to_string(), tone, pictures))
     }
+}
+
+/// The `dark` class on `widget` while the windows are dark, which gives the tones' classes in it their dark colours
+pub fn follow_dark(widget: &impl IsA<gtk::Widget>) {
+    let styles = adw::StyleManager::default();
+    crate::ui::set_class(widget, "dark", styles.is_dark());
+    let shown = widget.as_ref().downgrade();
+    styles.connect_dark_notify(move |styles| {
+        if let Some(widget) = shown.upgrade() {
+            crate::ui::set_class(&widget, "dark", styles.is_dark());
+        }
+    });
 }
 
 /// The Security Details window over `parent`: the title, what the core says of the message and each part (read only,
