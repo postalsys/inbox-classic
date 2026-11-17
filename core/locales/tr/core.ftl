@@ -460,9 +460,7 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = Bu ileti okunamıyor.
 agent-encrypted-original = Bu ileti şifreli: aracı şifreleme yapamadığı için ona yanıt veremez veya onu iletemez.
-# review: new
-agent-encrypted = Bu ileti şifreli. Yalnızca kullanıcı Inbox Classic'te okuyabilir.
-# review: new
+agent-encrypted = Bu ileti şifreli. Yapay zeka aracıları içeriğini okuyamaz. Kullanıcının iletiyi Inbox Classic'te açması gerekir.
 list-encrypted = Şifreli ileti
 agent-log-composed = Tamamlamanız için yeni bir ileti açıldı: “{ $subject }”
 agent-log-refused = Gönderimi reddedildi: “{ $subject }”
@@ -597,8 +595,7 @@ pgp-find-unavailable = Anahtar araması yapılamadı: { $error }
 pgp-publish-pending = keys.openpgp.org şu adreslere onay bağlantıları gönderdi: { $addresses }. Anahtarınızın her adres için bulunabilmesi, o adrese gelen bağlantıyı onaylamanıza bağlıdır.
 pgp-publish-done = Anahtarınız keys.openpgp.org'da şu adresler için yayımlandı: { $addresses }.
 pgp-publish-failed = Anahtar yayımlanamadı: { $error }
-# review: changed
-pgp-keyserver-off = keys.openpgp.org üzerinde anahtar arama { $settings } altında kapalı.
+pgp-keyserver-off = keys.openpgp.org'da anahtar arama, { $settings } bölümünde kapalı.
 pgp-details-part = Bölüm { $number }: { $label }
 pgp-details-signed = İmzalandı: { $when }, anahtar: { $key }
 pgp-details-unknown-key = Sizde olmayan bir anahtarla imzalandı: { $key }
