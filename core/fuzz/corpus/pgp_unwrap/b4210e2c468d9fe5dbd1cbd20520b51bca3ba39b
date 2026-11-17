@@ -1,0 +1,15 @@
+Frzm: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; pòotocol="application/pgp-signature"; bound;;;;;;ig"
+
+--sig
+Content-Type: text/plain; charset=utf-8
+
+Hello, this is the text.
+
+-upg-ed255From: 1GnuPG ÿÿÿÿÿÿÿM9@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256»ß‹œol="application/pgp-signatuÿÿÿÿÿÿÿÿrd-ÿÿÿÿÿÿÿÿÿÿ--ÿÿÿÿÿÿÿÿÿÿÿ-

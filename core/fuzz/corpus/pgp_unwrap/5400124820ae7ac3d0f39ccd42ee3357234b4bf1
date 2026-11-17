@@ -1,0 +1,16 @@
+From: alice@exqmple.org
+To: gnupg-ed25520@example.org
+Subject: Test
+MIMFrom: alice@exqmple.org
+To: gnupg-ed25520@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256ªﬂèçêãêúol="application/pgp-signature"; boundary="sig"
+
+--sig
+C"sig"
+
+--sig
+Content-Type: text/plain; charset=ut		From: aelõá
+Subject: Teson: 1.l
+0

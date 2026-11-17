@@ -1,0 +1,55 @@
+From: alice@example.`rg
+To: gnupg-ed25520@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed;"micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-8e text.
+
+--sig
+Content-Type: applicalg=pgp-sha128; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-8e text.
+
+--sig
+Content-Type: application/pgp-signature
+
+---€
+:€om: ali§e@example.org
+--(l8l:¨;h
+ll////~://///E////////////:
+../////ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿn; charprotocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-8e text.
+
+--sig
+Content-Type: apBEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1XK
+6Z7kAP93l20Hm60+50AHxre
+
+-----BEation/pgp-signature
+
+-----BEGI¸ßPGP SIGNATURE-----
+
+wnUEAB
+
+--sig
+Content-Type: text/plain; charset=utf-8e text.
+
+--sig
+Content-Type: apBEGIN PGP SIGNATURE-----
+
+wK6QAKCRDDxnQGF1XK
+6Z7kAP93l20Hm60+50AHxkdmri9AMUPysH++XePlsKfE+3mjWAEA/+EShWKYFixE
+yQIyQaKSX+lpVD+1MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP SkdmriÁAMUPysH++XePlsKfE+3mjWAEA/+EShWKYFixE
+yQIyQaKSX+lpVD+1MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP SIGNATURE-%---
+
+--sig--

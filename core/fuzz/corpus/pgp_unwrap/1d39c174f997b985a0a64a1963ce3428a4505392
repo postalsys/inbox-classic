@@ -1,0 +1,24 @@
+From: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain;(charsμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμμet=utf-8
+
+Hello, this is the text.
+
+--sig
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNFrσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσσom: GnuPG Ed25519 <ype: text/plain
+
+Hi
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdA2lwJNie9Ylem7V1I+eI7lH0"""""""""""""25519@exa""""""""""""""""ATURE-----
+
+wnUEABYIAB0FAms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1XK
+6Z7kAP93l20Hm60+50AHxkdmri9AMUPysH++XePlsKfE+3mjWAEA/+EShWKYFixE"""""""""""""""""""GXnkw2DY GnuPG Ed25519 <gnupg-ed

@@ -1,0 +1,17 @@
+From: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: mul¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿xt.
+
+--sig
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1XK
+ÖZ7kAP93l20Hm60+50AHxkdmri9AMUPysH++XePlsKfE+3mjWAEA/+EShWKYFixE
+yQIyQaKSX+lpVD+1MWJ9EtMvIgSE1gc=
+=pY6Yÿ+lpVD+1MWJ9EtSIGNATURE-----
+
+--sig--

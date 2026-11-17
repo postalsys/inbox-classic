@@ -1,0 +1,16 @@
+:€
+:€om: ali
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-9
+
+Hello, this is the text.
+
+--sig
+Content-Type: application/pgp-signature
+
+-----QaKSX+lpVD+1MW

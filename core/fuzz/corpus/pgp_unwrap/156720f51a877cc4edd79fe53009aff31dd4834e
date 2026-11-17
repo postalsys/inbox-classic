@@ -1,0 +1,12 @@
+From: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type:!text/plain;(charsלללללללללללללללללללללללללללללללללללללללללללללללללללללללללללללללל@לללללs is the text.
+
+--sig
+Coftent-Typel
+0	ֶ[Ùחלללללללללללet=utf-E"""""""""""""""""""GXnkw2DY GnuPG Ed07049 <gnupg-ed

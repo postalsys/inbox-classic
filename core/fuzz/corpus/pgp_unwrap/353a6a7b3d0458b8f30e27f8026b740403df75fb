@@ -1,0 +1,26 @@
+From:˜alice@example.org
+To: gnupg-ed25519@example.org
+Subject: TestFrom: alice@example.org
+To: gnupg-ed25519@l="application/pgp-ñsignaFrom: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="enc"
+
+ture"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-8
+
+He
+MIME-Version: 1.--enc
+Content-T0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signaype: application/pgp-encrypted
+
+Versiontrue";llo, this is the text.
+
+--s boundary: 1
+--enc
+Content-G"sig"Type: application
+/oc
+t-iet-

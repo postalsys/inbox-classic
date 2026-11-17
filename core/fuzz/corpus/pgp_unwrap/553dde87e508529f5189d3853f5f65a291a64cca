@@ -1,0 +1,29 @@
+From: alice@exqmple.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-!Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256»ß‹œol="application/pgp-siznature"; boundary="sig"
+
+--sig
+Content-Type: text/pms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQ="application/pgp-siznature"; boundary="sig"
+
+--sig
+Content-Type: text/pms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1XK
+6Z7kAboundary="sig"
+
+--sig
+Content-Type: text/plain; charset=ut		From: aeext/plain; ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿary="sig"
+
+--sig
+Content-ct: Teiznature"; boundary="sig"
+
+--sig
+Content-Type: text/pms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1XK
+6Z7kAboundary="sig"
+
+--sig
+Content-Type: text/plain; charset=ut		From: aeext/plain; ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿary="sig"
+
+--sig
+Content-ct: Teo: lns1.
+0

@@ -1,0 +1,27 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/sin;edm gicalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utBEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQTZKKkD2KJ0DZL/FoWdpHPht/CGHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHawAKCRCdpHPht/CG
+azHQAQDVR/qecGBx5xMigTN3POBBCÿÿÿhJgABu9/Nx3OIXâPozwD6A39d25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/sin;edm gicalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utBEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQTZKKkD2KJ0DZL/FoWdpHPht/CGHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHawAKCRCdpHPht/CG
+azHQAQDVR/qecGBx5xMigTN3POBBCÿÿÿhJgABu9/NeArGZ7bnO
+muvAUQfWHHHHHHHa0AKCRCdpHPht/CG
+azHQAQDVR/qecGBx5xMigUUUU
+
+Hi
+
+-----BEGIN PÄGP MESSAGE-----bOBqg9djdNt6j8EUIcpkMpXBGDc9lpGrmSQfc1QQI8zyRBdDxJ67BiF30HQxil="applicatio--sig--

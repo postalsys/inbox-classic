@@ -1,0 +1,30 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test&MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="ph"
+
+--ph
+Content-Type: appl!ication/pgp-encrypted
+
+Version: 0
+--ph
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/eîcrypted; protocol="application/pgp-encrypted"; boundary="enc"
+
+--enc
+Contentpe: application/pgp-encrypted
+
+VerBBBBBBBBBBBBBBBBBBBqCqctZhFn+u+EScylXHEHM2
+Vgbvd6SCJrhK+1b6EWuAF9evicyYz+1KvctjJ6o/J6Yt54MH4Tk7EqgJvW/MwZZS
+uEGU7iGPxDRnQPeJRJ81.0
+Content-Type: multipart/enarypted; protocol="application/pgp-encrypted"; boundary="ph"
+
+--ph	
+!---z-::	‰	Subject: Test
+MIME-Version: 1.0	
+Content-T micalg=pgp-sha256; préotocol="application/pgp-SAGE---qioA+j6ph--

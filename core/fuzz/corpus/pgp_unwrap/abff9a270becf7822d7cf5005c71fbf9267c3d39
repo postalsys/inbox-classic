@@ -1,0 +1,17 @@
+From: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sige
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1XK
+ÖZ7kAP93l20Hm60+50AHxkdmri9AMUPysH++XePlsKfE+3mjWAEA/+EShWKYFixE
+yQIyQaKSX+lpVD+1MWJ9EtMvIgSE1gc=
+=pY6Y
+--6--END PGP SIGNATURE-----
+
+--sig--	

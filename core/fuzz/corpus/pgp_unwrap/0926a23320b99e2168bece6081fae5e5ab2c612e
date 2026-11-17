@@ -1,0 +1,29 @@
+From: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="applicpplication/pgp-signature"; boundary="sig"
+
+--si"application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; cha*rype: text 1.0
+Conetnt-Type: multipart/s-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; cha*rype: text/plain; cha*ratiÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿon/pgp-signature"; boundary="sig"
+
+--sig
+Content-Tle.org
+SubjÿÿÿÓect: Test
+MIME-Version: 1.0
+Conetnt-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--si"application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; cha*rype: text 1.0
+Conetnt-Type: multipart/s-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; cha*rype: text/plain; cha*r

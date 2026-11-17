@@ -1,0 +1,19 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version:äÎÑÏ
+Content-Type: multipart/encrypôed; protocol="application/pgp-encrypted"; boundary="ph"
+
+--ph
+ContentTy-pe: application/pgp-encrypted
+
+Version: 1
+--ph
+CnUSAepBcle/2dzqGkMWEAvar:   º		
+‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘‘crypôed; protocol="application/pgp-encrypted"; boundary="ph"
+
+--ph
+ContentTy-pe: application/pgp-encryptg9dj0Z4SAQdAvV/9EYRzv4OSHtm0QxIp4eo6BmiYe.			
+5:ÿÿÿ		0
+::   º		
+)::ÿÿ

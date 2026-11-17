@@ -1,0 +1,10 @@
+From: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: TestFrom: alice@example.org
+To: gnupg-ed86659@example.org
+Subject: Test
+MIME-Version:"sÿÿ%alg=pgp-sha256; protocol="application/pgp-signature";llain; charset=utfA8ÿÿÿÿ
+
+Hello, this"sig"
+
+-i

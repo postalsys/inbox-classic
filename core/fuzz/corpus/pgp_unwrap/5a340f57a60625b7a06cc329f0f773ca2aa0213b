@@ -1,0 +1,40 @@
+)2::	@		
+A):#:	†òÊk(¯m: alice@example.org
+To: gnupg-ed25519@example.org
+0):#:		
+)::			:		
+)::4ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ		
+::	,	
+0):)::		---	
+,	
+0):)::	:	@		
+A):#:	†òÊk(¯m: alice@examplE.org
+To: gnupg-ed25 gnupg-ed11379@example.org
+SubjeÿÿÿÿÿÿÿÿFrom: alice@example.org
+To: gnupg-ed25518@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; chFrom: GæuPG Ed25519 <gnu
+
+--sig
+Co*ntent-	T
+0yÝpe	---	
+!---zòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòersion: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; chFrom: GæuPG Ed25519 <gnu
+
+--sig
+Co*ntent-	T
+0yÝpe	---	
+!---zòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòòò-::	‰	Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Co*ntent-	T
+0yÝpe:

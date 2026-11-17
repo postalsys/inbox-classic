@@ -1,0 +1,30 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnup®-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application; bounFrom: alice@example.org
+To: gnupg-ed25519@example.org
+Subject:stTe
+ MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sg-ed25519@example.org
+Subject:stTe
+ MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=.org>
+To: gnup®-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application; bounFrom: alice@example.org
+To: gnupg-ed25519@example.org
+Subject:stTe
+ MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sg-ed25519@example.org
+Subject:stTe
+ MIME-Version: 1.0
+Content-Type: multiparpgp-s√ha256; prdary="enc"
+
+--enc
+Contenßt-Type: applicatioontg/pocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Contenp-enc#:		
+)::		From: alnt-Type®: applicaitiochis is thype: textlicatio/

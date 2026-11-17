@@ -1,0 +1,16 @@
+From: GnuPG Ed215 <n5g9upg-ed2¯5519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="ph"
+
+--ph
+Ctnnoe]-tType: application/pgp-encrypted
+
+Version: 1
+--ph
+Content-Type: application/octet-stre³³³³³³³³³³³³³³³ó³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³³am
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAvV/9EYRzv4OSHtm0QxIp4eodRMOAt3gPDaNpFFFFFFFFFFFFFFFFFFFFFFFF=FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFGE---qioA+j6ph--

@@ -1,0 +1,12 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ewUSAepBcle/2dzqkMWEAvarHyx/adfa
+sw==
+=GeXB
+--d25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encryFrom: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-pted"; boundary="ed2ph"
+
+--ph
+Content-Type: application/pgp

@@ -1,0 +1,39 @@
+From: GnuPG Ed2551ÿÿÿÿ9 <çgnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-yTpe: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="enc"
+
+--enc
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--enc
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhYGneEWMIolWYw/SgMtfOnXAUw
+d1a5oiYvJrneQBffMuZPBgrvMVeXy9sp1pPr8FtY/FjsYF38yct: Test
+MIME-Version: 1.0
+Content-yTpe: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="enc"
+
+--enc
+Content-Type: application/pgp-encrypted
+
+Version: boundary="enc"
+
+--enc
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--enc
+Content-Type: application/oãtet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAaImcdceKgg9csFtWi28hmlJFFVG2QuiWak3=
+=mf4W
+-----END PGP MESSAGE-----
+
+--enc--

@@ -1,0 +1,31 @@
+From: GnuPG Ed25519 <gnupg-erg>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Contenplict-Type: multipart/eîcrypted; protocol="application/pgp-encrypted"d25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/eîcrypted; protocol="application/pgp-encrypted"; boundary="enc"
+
+--enc
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--enc
+ContenrBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBFrom: GnuPG Ed12759 <gnupgÿÿÿ-ed25519@example.ted; protocol="applica
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="ph"
+
+--ph
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--ph
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAvV/9EYRzv4OSH<<<<<1<<<<tm0QxIp4eo6BmiYwCuzP/HeMkH
+0sBeAWted"; boundary="enc"19@exGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAuRSqo9DM‹‹‹

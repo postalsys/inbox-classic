@@ -1,0 +1,12 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: muÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿltipart/encrypted; protocol="From: GhuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: mulapplication/pgp-encrypted"; boundary="ph"
+
+--ph
+Content-Type: application/pgp-encrti;art/encrypted; protocol="applyptic

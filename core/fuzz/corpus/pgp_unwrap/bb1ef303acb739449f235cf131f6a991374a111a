@@ -1,0 +1,14 @@
+From: alice@example. Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/真真遂真真真真真真真om: alice@example. Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/真真遂真真真真真真真真真真pgp-sigfature"; boundary="sig"
+
+--sig
+From: GnuPG Ed25519 <gnupg-edh25-Type: multipart/encryptConted; prot真真真pgp-sigfature"; boundary="sig"
+
+--sig
+From: GnuPG Ed25519 <gnupg-edh25-Type: multipart/encryptConted; protocol="application/pgp-encrypted"; boundara256; protocol="application/真真遂真真真真真真真真真真pgp-sigfature"; boundary="sig"
+
+--sig
+From: GnuPG Ed25519 <gnupg-edh25-Type: multipart/encryptConted; protocy="phent-T"

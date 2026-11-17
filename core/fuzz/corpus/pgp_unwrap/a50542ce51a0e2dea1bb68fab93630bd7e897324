@@ -1,0 +1,32 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="enc"
+
+--enc
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--enc
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAuRSqo9DMuhilukmvNOW6fhMUgfoM7xuqgjySJxWrkIw
++ZTB/VlhoLLaNO+ofkHFJWS9oBlni0gDTA4v4UhScc5NMojtSFbQsA3hpROHZxxb
+0sFIAXRlZu3P/rJYSXT/f2554eiLliPQvbZxWovaF3ZNLGItkXm1gJm1MnepByC+
+yVZySYXOiWkRq5PYsWtn5F0zOyWUSbgd/feEUxUPbbd6SLVBVP/klGSGL8QMKrMo
+lKVMs5H7MQhrRIJGqtvkeWsdi/8ddBv80/mr5hE6WJXvaMdsVuya/CIRS8kZvoXl
+sXKbvtOO62MCrUKOG/vfeC+t1HlQXYfcWnmhOBAp6BQSzTcZ5ujPCz9ilyuo7wSL
+pEBBJ8IDBb07yNWptRkuL5ZhuhLP2SgbmW3NjpQEbzhjNEsmoMOUbnCkBUPoJLAk
+U4n5ZGgNZuU8p7jj5FvRb/XnrDHVsOp4RTOpsiPZKdxMCCNwzfnC4ndKbhLtJjvg
+NuraeYaE1GTYFh2DhVtw7wgKyn3IIXG9Q91KhE1IXJX+ip8WVkSfuvb4dtUMjTX+
+EE4IDvG6zvqOPEvp8IhYSqgyaZ3HIUQT33n5OZQZoPTKzACzpUGqgpI8Jz2FAfK3
++WyzxOaFgA9rt30Pv397YNuOsrKChS9ZX9H9xN7in/jOitmoIlluUh1bKb9tUMTg
+ZHdYuNQF3FxehEC0fUPia2YNxZZWU1D812Kb7uoFg/SHEhnfeJd5yCYV9PGXpAD6
+2zwHANNXVyI5+5y2YZAOThuLdnGJc+Rp4LAizX/YUprwlYLC/lzNi8VEnw==
+=Ay8F
+-----END PGP MESSAGE-----
+
+--enc--
