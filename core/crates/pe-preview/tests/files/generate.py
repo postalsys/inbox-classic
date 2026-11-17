@@ -144,6 +144,56 @@ def zeros(size, fill=b"\0"):
 data = zeros(256 << 20, b" ")
 write("flate-bomb.pdf", pdf(page(b"<< /Length %d /Filter /FlateDecode >>\nstream\n" % len(data) + data + b"\nendstream")))
 
+# a content stream flate2 refuses but hayro's lenient decoder reads: a first code that refers to before the start
+# (skipped), an empty stored block, then raw deflate of 256 MB of spaces
+def bad_reference_prefix():
+    bits = []
+
+    def put(value, count, msb_first):
+        for i in range(count):
+            bits.append((value >> (count - 1 - i if msb_first else i)) & 1)
+
+    put(0, 1, False)
+    put(1, 2, False)
+    put(1, 7, True)
+    put(0, 5, True)
+    put(0, 7, True)
+    put(0, 1, False)
+    put(0, 2, False)
+    out = bytearray()
+    for i in range(0, len(bits), 8):
+        out.append(sum(bit << j for j, bit in enumerate(bits[i : i + 8])))
+    return bytes(out) + b"\0\0\xff\xff"
+
+
+raw = zlib.compressobj(9, zlib.DEFLATED, -15)
+spaces = b" " * (1 << 24)
+data = bad_reference_prefix() + b"".join(raw.compress(spaces) for _ in range(16)) + raw.flush()
+write("lenient-flate-bomb.pdf", pdf(page(b"<< /Length %d /Filter /FlateDecode >>\nstream\n" % len(data) + data + b"\nendstream")))
+
+# an inline picture of 20,000 by 20,000 gray whose Flate data inflates to 400 MB
+inline = zeros(20000 * 20000)
+assert b"EI" not in inline
+content = b"q 100 0 0 100 0 0 cm BI /W 20000 /H 20000 /CS /G /BPC 8 /F /Fl ID " + inline + b" EI Q"
+write("inline-image-bomb.pdf", pdf(page(stream(content))))
+
+
+# pictures whose codec says a size far larger than their dictionary does
+def picture_page(name, image_dict, data):
+    objs = page(stream(b"q 595 0 0 842 0 0 cm /Im1 Do Q"), resources=b"<< /XObject << /Im1 5 0 R >> >>")
+    objs.append(b"<< /Type /XObject /Subtype /Image " + image_dict + b" /Length %d >>\nstream\n" % len(data) + data + b"\nendstream")
+    write(name, pdf(objs))
+
+
+# CCITT: Columns 60,000 by the Height of 20,000 (the decoder sizes its rows by Columns)
+picture_page("ccitt-columns.pdf", b"/Width 10 /Height 20000 /BitsPerComponent 1 /ColorSpace /DeviceGray /Filter /CCITTFaxDecode /DecodeParms << /K -1 /Columns 60000 >>", b"\0" * 64)
+# JPEG 2000: the codestream's SIZ says 60,000 by 60,000
+siz = b"\xff\x4f\xff\x51\x00\x29\x00\x00" + b"".join(struct.pack(">I", v) for v in (60000, 60000, 0, 0, 60000, 60000, 0, 0)) + struct.pack(">H", 3) + b"\x07\x01\x01" * 3
+picture_page("jpx-siz.pdf", b"/Width 10 /Height 10 /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /JPXDecode", siz + b"\xff\xd9")
+# JBIG2: the page information says 65,000 by 65,000
+info = b"\0\0\0\0\x30\x00\x01\0\0\0\x13" + struct.pack(">II", 65000, 65000) + b"\0" * 11
+picture_page("jbig2-page.pdf", b"/Width 10 /Height 10 /ColorSpace /DeviceGray /BitsPerComponent 1 /Filter /JBIG2Decode", info)
+
 # a picture XObject that says 60,000 by 60,000 pixels of RGB, its data a short Flate stream
 img = zeros(1 << 16)
 objs = page(stream(b"q 595 0 0 842 0 0 cm /Im1 Do Q"), resources=b"<< /XObject << /Im1 5 0 R >> >>")

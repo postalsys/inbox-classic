@@ -2,18 +2,24 @@
 //! page's paths in memory, with no limit of its own: a 1 MB file can inflate to a gigabyte (the spike's
 //! `hostile_flate_bomb_1g.pdf` took 1 GB), and running out of memory ends the app. So every stream a page reaches (its
 //! content, the forms, pictures, fonts and patterns of its resources, its annotations' appearances) is measured
-//! first: the compressing filters are run counting their output, never keeping it, and a picture counts as its width
-//! by its height in RGBA. A page over [`MAX_STREAM`], [`MAX_CONTENT`] or, with the pages before it, [`MAX_DECODED`]
-//! is not drawn.
+//! first, and every inline picture (BI ... ID ... EI) in the content streams among them: the compressing filters run
+//! counting their output, never keeping it, as hayro would read them ([`inflate`]), and a picture counts as its pixels
+//! in RGBA by the larger of its dictionary's size and its codec's ([`codecs`]). A page over [`MAX_STREAM`],
+//! [`MAX_CONTENT`] or, with the pages before it, [`MAX_DECODED`] is not drawn.
 
-use std::borrow::Cow;
+mod codecs;
+mod filters;
+mod inflate;
+
 use std::collections::HashSet;
-use std::io::Read;
 
-use hayro::hayro_syntax::Filter;
+use hayro::hayro_syntax::content::TypedIter;
+use hayro::hayro_syntax::content::ops::TypedInstruction;
 use hayro::hayro_syntax::object::{Array, Dict, MaybeRef, Name, ObjRef, Object, ObjectIdentifier, Stream};
 use hayro::hayro_syntax::page::Page;
 use hayro::hayro_syntax::xref::XRef;
+
+pub(crate) use filters::decoded_size;
 
 use crate::Refusal;
 
@@ -37,12 +43,20 @@ pub(crate) struct Meter {
     decoded: u64,
 }
 
+/// An object to measure, and whether a stream reached through it is a content stream (whose operators may hold
+/// inline pictures): the page's own, a form's, a tiling pattern's, a Type 3 glyph's, an annotation's appearance
+struct Reached<'a> {
+    object: Object<'a>,
+    content: bool,
+}
+
 impl Meter {
     /// Measures `page`: Err when drawing it would take too much
     pub(crate) fn page(&mut self, page: &Page<'_>) -> Result<(), Refusal> {
         let xref = page.xref();
-        let mut content = 0u64;
+        let mut stack: Vec<Reached<'_>> = Vec::new();
         // the page's own content streams first, counted as content
+        let mut content = 0u64;
         if let Some(contents) = page.raw().get::<Object<'_>>(b"Contents") {
             let streams: Vec<Stream<'_>> = match contents {
                 Object::Stream(stream) => vec![stream],
@@ -52,24 +66,29 @@ impl Meter {
             for stream in &streams {
                 content = content.saturating_add(self.stream(stream)?);
             }
+            if content > MAX_CONTENT {
+                return Err(Refusal::TooLarge);
+            }
+            for stream in &streams {
+                self.inline_pictures(stream)?;
+            }
         }
-        if content > MAX_CONTENT {
-            return Err(Refusal::TooLarge);
-        }
-        let mut stack: Vec<Object<'_>> = Vec::new();
+        self.entries(page.raw(), &mut stack, xref, true, false);
         let mut objects = 0usize;
-        self.entries(page.raw(), &mut stack, xref, true);
-        while let Some(object) = stack.pop() {
+        while let Some(Reached { object, content }) = stack.pop() {
             objects += 1;
             if objects > MAX_OBJECTS {
                 return Err(Refusal::TooLarge);
             }
             match object {
-                Object::Dict(dict) => self.entries(&dict, &mut stack, xref, false),
-                Object::Array(array) => self.items(&array, &mut stack, xref),
+                Object::Dict(dict) => self.entries(&dict, &mut stack, xref, false, content),
+                Object::Array(array) => self.items(&array, &mut stack, xref, content),
                 Object::Stream(stream) => {
                     self.stream(&stream)?;
-                    self.entries(stream.dict(), &mut stack, xref, false);
+                    if content || is_content(stream.dict()) {
+                        self.inline_pictures(&stream)?;
+                    }
+                    self.entries(stream.dict(), &mut stack, xref, false, false);
                 }
                 _ => {}
             }
@@ -81,267 +100,215 @@ impl Meter {
     /// [`MAX_DECODED`]; the size it inflates to otherwise
     fn stream(&mut self, stream: &Stream<'_>) -> Result<u64, Refusal> {
         let id = stream.obj_id();
-        let size = decoded_size(stream, MAX_STREAM);
+        let size = decoded_size(stream, MAX_STREAM, false);
+        let new = self.seen.insert((id.obj_number, id.gen_number)) || id.obj_number == 0;
+        self.count(size, new)?;
+        Ok(size)
+    }
+
+    fn count(&mut self, size: u64, new: bool) -> Result<(), Refusal> {
         if size > MAX_STREAM {
             return Err(Refusal::TooLarge);
         }
-        if self.seen.insert((id.obj_number, id.gen_number)) || id.obj_number == 0 {
+        if new {
             self.decoded = self.decoded.saturating_add(size);
         }
         if self.decoded > MAX_DECODED {
             return Err(Refusal::TooLarge);
         }
-        Ok(size)
+        Ok(())
+    }
+
+    /// Measures the inline pictures of a content stream (already measured itself, so decoding it is bounded): hayro
+    /// decodes each with all its filters
+    fn inline_pictures(&mut self, stream: &Stream<'_>) -> Result<(), Refusal> {
+        let Ok(data) = stream.decoded() else {
+            return Ok(());
+        };
+        let mut operators = TypedIter::new(&data);
+        while let Some(operator) = operators.next() {
+            if let TypedInstruction::InlineImage(picture) = operator {
+                self.count(decoded_size(picture.0, MAX_STREAM, true), true)?;
+            }
+        }
+        Ok(())
     }
 
     /// The values of `dict` to follow: not the page tree (Parent, Kids), not another page (an annotation's P), and of
-    /// a page tree node only its Resources, which a page inherits
-    fn entries<'a>(&mut self, dict: &Dict<'a>, stack: &mut Vec<Object<'a>>, xref: &'a XRef, page: bool) {
+    /// a page tree node only its Resources, which a page inherits. What a Type 3 font's glyphs (CharProcs) and an
+    /// annotation's appearances (AP) hold are content streams, as is what a `content` dictionary holds
+    fn entries<'a>(
+        &mut self,
+        dict: &Dict<'a>,
+        stack: &mut Vec<Reached<'a>>,
+        xref: &'a XRef,
+        page: bool,
+        content: bool,
+    ) {
         let pages_node = dict.get::<Name<'_>>(b"Type").is_some_and(|t| t.as_ref() == b"Pages");
         for (key, value) in dict.entries() {
             let key: &[u8] = key.as_ref();
             let follow = match key {
-                // the page's own content streams were counted already
+                // the page's own content streams were measured already
                 b"Contents" => !page,
                 b"Kids" | b"P" | b"Dest" | b"A" | b"Next" | b"Prev" | b"First" | b"Last" | b"Thumb" => false,
                 b"Parent" | b"Resources" => true,
                 _ => !pages_node,
             };
             if follow {
-                self.push(value, stack, xref);
+                let content = content || matches!(key, b"CharProcs" | b"AP");
+                self.push(value, stack, xref, content);
             }
         }
     }
 
-    fn items<'a>(&mut self, array: &Array<'a>, stack: &mut Vec<Object<'a>>, xref: &'a XRef) {
+    fn items<'a>(&mut self, array: &Array<'a>, stack: &mut Vec<Reached<'a>>, xref: &'a XRef, content: bool) {
         for value in array.raw_iter() {
-            self.push(value, stack, xref);
+            self.push(value, stack, xref, content);
         }
     }
 
-    fn push<'a>(&mut self, value: MaybeRef<Object<'a>>, stack: &mut Vec<Object<'a>>, xref: &'a XRef) {
-        match value {
-            MaybeRef::Ref(reference) => {
-                let ObjRef { obj_number, gen_number } = reference;
+    fn push<'a>(&mut self, value: MaybeRef<Object<'a>>, stack: &mut Vec<Reached<'a>>, xref: &'a XRef, content: bool) {
+        let object = match value {
+            MaybeRef::Ref(ObjRef { obj_number, gen_number }) => {
                 // a stream is counted once by Self::stream; other objects are followed once
-                if !self.seen.contains(&(obj_number, gen_number))
-                    && let Some(object) = xref.get::<Object<'_>>(ObjectIdentifier::new(obj_number, gen_number))
-                {
-                    if !matches!(object, Object::Stream(_)) {
-                        self.seen.insert((obj_number, gen_number));
-                    }
-                    stack.push(object);
+                if self.seen.contains(&(obj_number, gen_number)) {
+                    return;
                 }
-            }
-            MaybeRef::NotRef(object) => {
-                if matches!(object, Object::Dict(_) | Object::Array(_) | Object::Stream(_)) {
-                    stack.push(object);
-                }
-            }
-        }
-    }
-}
-
-/// What `stream` inflates to, at most `cap` + 1: its filters run in turn, the last one only counted; a picture's
-/// codec (JPEG, JPEG 2000, JBIG2, CCITT) counts as its width by its height in RGBA
-pub(crate) fn decoded_size(stream: &Stream<'_>, cap: u64) -> u64 {
-    let filters = stream.filters();
-    let dict = stream.dict();
-    let picture = picture_bytes(dict);
-    let mut data: Cow<'_, [u8]> = stream.raw_data();
-    for (index, filter) in filters.iter().enumerate() {
-        let last = index + 1 == filters.len();
-        let next = match filter {
-            Filter::AsciiHexDecode => ascii_hex(&data),
-            Filter::Ascii85Decode => ascii85(&data),
-            Filter::FlateDecode | Filter::LzwDecode | Filter::RunLengthDecode => {
-                let (size, kept) = expand(*filter, &data, dict, cap, !last);
-                if last || size > cap {
-                    return size.max(picture);
-                }
-                kept
-            }
-            Filter::DctDecode | Filter::JpxDecode | Filter::Jbig2Decode | Filter::CcittFaxDecode => {
-                return picture.max(data.len() as u64);
-            }
-            Filter::Crypt => continue,
-        };
-        data = Cow::Owned(next);
-    }
-    (data.len() as u64).max(picture)
-}
-
-/// A picture's width by its height in RGBA, from its dictionary (0 for anything else)
-fn picture_bytes(dict: &Dict<'_>) -> u64 {
-    let is_image = dict.get::<Name<'_>>(b"Subtype").is_some_and(|s| s.as_ref() == b"Image");
-    if !is_image {
-        return 0;
-    }
-    let side = |key: &[u8], short: &[u8]| {
-        dict.get::<f32>(key)
-            .or_else(|| dict.get::<f32>(short))
-            .filter(|n| n.is_finite() && *n > 0.0)
-            .map_or(0, |n| n as u64)
-    };
-    side(b"Width", b"W")
-        .saturating_mul(side(b"Height", b"H"))
-        .saturating_mul(4)
-}
-
-/// Runs an expanding filter over `data`, counting its output up to `cap` + 1; its output too when `keep` (a filter
-/// that another follows)
-fn expand(filter: Filter, data: &[u8], dict: &Dict<'_>, cap: u64, keep: bool) -> (u64, Vec<u8>) {
-    let mut count = 0u64;
-    let mut kept = Vec::new();
-    let mut take = |chunk: &[u8]| -> bool {
-        count += chunk.len() as u64;
-        if keep && count <= cap {
-            kept.extend_from_slice(chunk);
-        }
-        count <= cap
-    };
-    match filter {
-        Filter::FlateDecode => {
-            // as hayro reads it: a zlib stream, else raw deflate
-            if !inflate(flate2::read::ZlibDecoder::new(data), &mut take) {
-                inflate(flate2::read::DeflateDecoder::new(data), &mut take);
-            }
-        }
-        Filter::LzwDecode => {
-            let early = dict
-                .get::<Dict<'_>>(b"DecodeParms")
-                .and_then(|p| p.get::<f32>(b"EarlyChange"))
-                .is_none_or(|e| e != 0.0);
-            let mut decoder = if early {
-                weezl::decode::Decoder::with_tiff_size_switch(weezl::BitOrder::Msb, 8)
-            } else {
-                weezl::decode::Decoder::new(weezl::BitOrder::Msb, 8)
-            };
-            let mut input = data;
-            let mut buffer = vec![0u8; 64 * 1024];
-            loop {
-                let result = decoder.decode_bytes(input, &mut buffer);
-                input = &input[result.consumed_in..];
-                if !take(&buffer[..result.consumed_out]) {
-                    break;
-                }
-                match result.status {
-                    Ok(weezl::LzwStatus::Ok) if result.consumed_in > 0 || result.consumed_out > 0 => {}
-                    _ => break,
-                }
-            }
-        }
-        Filter::RunLengthDecode => {
-            let mut at = 0usize;
-            let mut run = [0u8; 128];
-            while let Some(&length) = data.get(at) {
-                at += 1;
-                let more = match length {
-                    0..=127 => {
-                        let end = (at + usize::from(length) + 1).min(data.len());
-                        let more = take(&data[at..end]);
-                        at = end;
-                        more
-                    }
-                    128 => break,
-                    _ => {
-                        let Some(&byte) = data.get(at) else {
-                            break;
-                        };
-                        at += 1;
-                        let n = 257 - usize::from(length);
-                        run[..n].fill(byte);
-                        take(&run[..n])
-                    }
+                let Some(object) = xref.get::<Object<'_>>(ObjectIdentifier::new(obj_number, gen_number)) else {
+                    return;
                 };
-                if !more {
-                    break;
+                if !matches!(object, Object::Stream(_)) {
+                    self.seen.insert((obj_number, gen_number));
                 }
+                object
             }
-        }
-        _ => {
-            take(data);
-        }
-    }
-    (count, kept)
-}
-
-/// Reads what `reader` inflates to in pieces, handing each to `take` until it says stop; whether the stream was read
-/// to its end without an error (a stopped one counts as read)
-fn inflate(mut reader: impl Read, take: &mut impl FnMut(&[u8]) -> bool) -> bool {
-    let mut buffer = vec![0u8; 64 * 1024];
-    loop {
-        match reader.read(&mut buffer) {
-            Ok(0) => return true,
-            Ok(n) => {
-                if !take(&buffer[..n]) {
-                    return true;
-                }
-            }
-            Err(_) => return false,
-        }
-    }
-}
-
-fn ascii_hex(data: &[u8]) -> Vec<u8> {
-    let mut out = Vec::with_capacity(data.len() / 2);
-    let mut high: Option<u8> = None;
-    for &byte in data {
-        if byte == b'>' {
-            break;
-        }
-        let Some(digit) = (byte as char).to_digit(16) else {
-            continue;
+            MaybeRef::NotRef(object @ (Object::Dict(_) | Object::Array(_) | Object::Stream(_))) => object,
+            MaybeRef::NotRef(_) => return,
         };
-        match high.take() {
-            Some(h) => out.push(h << 4 | digit as u8),
-            None => high = Some(digit as u8),
-        }
+        stack.push(Reached { object, content });
     }
-    if let Some(h) = high {
-        out.push(h << 4);
-    }
-    out
 }
 
-fn ascii85(data: &[u8]) -> Vec<u8> {
-    let mut out = Vec::with_capacity(data.len() / 5 * 4 + 4);
-    let mut group = [0u8; 5];
-    let mut filled = 0usize;
-    let data = data.strip_prefix(b"<~").unwrap_or(data);
-    for &byte in data {
-        match byte {
-            b'~' => break,
-            b'z' if filled == 0 => out.extend_from_slice(&[0; 4]),
-            b'!'..=b'u' => {
-                group[filled] = byte - b'!';
-                filled += 1;
-                if filled == 5 {
-                    let value = group.iter().fold(0u64, |v, &d| v * 85 + u64::from(d));
-                    out.extend_from_slice(&(value as u32).to_be_bytes());
-                    filled = 0;
-                }
-            }
-            _ => {}
-        }
-    }
-    if filled > 1 {
-        group[filled..].fill(84);
-        let value = group.iter().fold(0u64, |v, &d| v * 85 + u64::from(d));
-        out.extend_from_slice(&(value as u32).to_be_bytes()[..filled - 1]);
-    }
-    out
+/// Whether a stream is a form or a tiling pattern, whose content hayro interprets
+fn is_content(dict: &Dict<'_>) -> bool {
+    dict.get::<Name<'_>>(b"Subtype").is_some_and(|s| s.as_ref() == b"Form")
+        || dict.get::<f32>(b"PatternType") == Some(1.0)
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
+    /// A raw deflate start that flate2 refuses and hayro's lenient decoder skips: a fixed block whose one code refers
+    /// to before the start, then an empty stored block that ends on a byte boundary
+    pub(crate) fn bad_reference_prefix() -> Vec<u8> {
+        let mut bits: Vec<bool> = Vec::new();
+        let mut put = |value: u32, count: u32, msb_first: bool| {
+            for i in 0..count {
+                let bit = if msb_first { count - 1 - i } else { i };
+                bits.push(value >> bit & 1 == 1);
+            }
+        };
+        // not final, fixed codes; length code 257 (7 bits 0000001), distance code 0 (5 bits), end of block (0000000)
+        put(0, 1, false);
+        put(1, 2, false);
+        put(1, 7, true);
+        put(0, 5, true);
+        put(0, 7, true);
+        // not final, stored
+        put(0, 1, false);
+        put(0, 2, false);
+        let mut bytes: Vec<u8> = bits
+            .chunks(8)
+            .map(|chunk| {
+                chunk
+                    .iter()
+                    .enumerate()
+                    .fold(0u8, |b, (i, &bit)| b | (u8::from(bit) << i))
+            })
+            .collect();
+        // the stored block's length and its complement
+        bytes.extend([0, 0, 0xff, 0xff]);
+        bytes
+    }
+}
+
+#[cfg(test)]
+mod parity {
+    use std::io::Write;
+    use std::sync::Arc;
+
+    use hayro::hayro_syntax::Pdf;
+    use hayro::hayro_syntax::object::Stream;
+
     use super::*;
 
+    /// A one page PDF whose content stream is `data` with `filter`
+    fn pdf(data: &[u8], filter: &str) -> Vec<u8> {
+        let objects = [
+            b"<< /Type /Catalog /Pages 2 0 R >>".to_vec(),
+            b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>".to_vec(),
+            b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 100 100] /Contents 4 0 R >>".to_vec(),
+            [
+                format!("<< /Length {} /Filter /{filter} >>\nstream\n", data.len()).as_bytes(),
+                data,
+                b"\nendstream",
+            ]
+            .concat(),
+        ];
+        let mut out = b"%PDF-1.7\n".to_vec();
+        let mut offsets = Vec::new();
+        for (i, object) in objects.iter().enumerate() {
+            offsets.push(out.len());
+            writeln!(out, "{} 0 obj", i + 1).unwrap();
+            out.extend(object);
+            out.extend(b"\nendobj\n");
+        }
+        let xref = out.len();
+        write!(out, "xref\n0 5\n0000000000 65535 f \n").unwrap();
+        for offset in offsets {
+            writeln!(out, "{offset:010} 00000 n ").unwrap();
+        }
+        write!(out, "trailer\n<< /Size 5 /Root 1 0 R >>\nstartxref\n{xref}\n%%EOF\n").unwrap();
+        out
+    }
+
+    fn raw_deflate(data: &[u8]) -> Vec<u8> {
+        let mut e = flate2::write::DeflateEncoder::new(Vec::new(), flate2::Compression::best());
+        e.write_all(data).unwrap();
+        e.finish().unwrap()
+    }
+
+    /// What hayro inflates the content stream to, and what the meter counts for it
+    fn both(data: &[u8], filter: &str) -> (usize, u64) {
+        let pdf = Pdf::new(Arc::new(pdf(data, filter))).unwrap();
+        let page = &pdf.pages()[0];
+        let hayro = page.page_stream().map_or(0, <[u8]>::len);
+        let stream = page.raw().get::<Stream<'_>>(b"Contents").unwrap();
+        (hayro, decoded_size(&stream, u64::MAX - 1, false))
+    }
+
     #[test]
-    fn ascii_filters() {
-        assert_eq!(ascii_hex(b"48 65 6c6C6f>"), b"Hello");
-        assert_eq!(ascii_hex(b"7>"), [0x70]);
-        assert_eq!(ascii85(b"<~87cURD]i,\"Ebo80~>"), b"Hello World!");
-        assert_eq!(ascii85(b"z~>"), [0, 0, 0, 0]);
+    fn the_meter_counts_what_hayro_inflates() {
+        let text: Vec<u8> = (0..300_000u32)
+            .map(|i| b"q 1 0 0 1 0 0 cm Q\n"[(i % 19) as usize])
+            .collect();
+        // ordinary zlib and raw deflate: what flate2 reads
+        let mut zlib = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::best());
+        zlib.write_all(&text).unwrap();
+        let zlib = zlib.finish().unwrap();
+        assert_eq!(both(&zlib, "FlateDecode"), (text.len(), text.len() as u64));
+        assert_eq!(
+            both(&raw_deflate(&text), "FlateDecode"),
+            (text.len(), text.len() as u64)
+        );
+        // a reference to before the start: only hayro's lenient decoder reads it
+        let lenient = [tests::bad_reference_prefix(), raw_deflate(&text)].concat();
+        assert_eq!(both(&lenient, "FlateDecode"), (text.len(), text.len() as u64));
+        // a bad checksum: flate2 fails at the end, the lenient decoder reads it all
+        let mut bad_sum = zlib.clone();
+        let end = bad_sum.len() - 1;
+        bad_sum[end] ^= 0xff;
+        let (hayro, counted) = both(&bad_sum, "FlateDecode");
+        assert_eq!(counted, hayro as u64);
     }
 }
