@@ -864,7 +864,7 @@ const sections = [
             {
                 shot: 'main-12-lock-in-list',
                 name: 'Encrypted and signed mail in the list',
-                what: 'The list marks an encrypted message with a lock and a signed one with a seal, known from its structure before it is opened (Windows in the icon column, the Mac and Linux on the row). Until an encrypted message is opened, its line of first words and its new mail notification say "Encrypted message", never its outer subject\'s placeholder or its ciphertext; its ciphertext is not counted as an attachment.',
+                what: 'The list marks an encrypted message with a lock and a signed one with a seal, known from its structure before it is opened (Windows in the icon column, the Mac and Linux on the row). Until an encrypted message is decrypted (in the background once it is downloaded, or when it is opened), its line of first words and its new mail notification say "Encrypted message", never its ciphertext; once decrypted, the list shows its first words and its protected Subject in place of the outer placeholder ("..."). Its ciphertext is not counted as an attachment.',
                 how: 'Always there, in every layout.',
                 checked: ['The lock on the encrypted message, the seal on the signed one, neither on a plain one', 'The encrypted message says "Encrypted message" until it is opened']
             },
@@ -1615,10 +1615,10 @@ const sections = [
             },
             {
                 shot: 'options-4-encryption',
-                name: 'Settings: Search in encrypted messages',
-                what: "The Reading page's Encryption group: Search in encrypted messages (on at first) keeps the text of encrypted messages the user opened in the search index on this computer, which its note says is not encrypted and AI agents never search. Turned off, that text leaves the index, with the names of the files inside.",
+                name: 'Settings: Encryption',
+                what: "The Reading page's Encryption group. Search in encrypted messages (on at first) keeps the text of encrypted messages, decrypted in the background or when opened, in the search index on this computer, which its note says is not encrypted and AI agents never search; turned off, that text leaves the index with the names of the files inside, and the list shows the Subjects the messages came with. Look up keys on keys.openpgp.org (on at first) lets a missing key be asked for there after the address's own domain; its note says only the address is sent, and only when encrypting or looking for a key.",
                 how: 'Tools > Options > Reading (Inbox Classic > Settings > Reading on the Mac, Main Menu > Preferences > Reading on Linux).',
-                checked: ['On at first, with its note', 'Turned off, the words of encrypted messages are no longer found']
+                checked: ['Both on at first, with their notes', 'Turned off, the words of encrypted messages are no longer found', 'Look up keys on keys.openpgp.org stays off once turned off']
             },
             {
                 shot: 'lang-1-german',

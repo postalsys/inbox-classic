@@ -356,13 +356,14 @@ Encrypted mail in the list and the search (screenshots `main-12-lock-in-list`, `
 
 - the list marks the encrypted message with the lock and the signed one with the seal, the plain one with neither
   (Windows: in the icon column beside the paper clip; the Mac and Linux: on the row, as the attachment mark is), in
-  light and dark; before the encrypted message is opened, the column layout's line of first words says "Encrypted
-  message" (`main-12-lock-in-list`)
+  light and dark; with Search in encrypted messages off (46), the encrypted row's line of first words in the column
+  layout says "Encrypted message" and its Subject is the outer "..." (`main-12-lock-in-list`)
 - `is:encrypted` lists the encrypted message alone, `is:signed` the signed one alone, `-is:encrypted` all but the
   encrypted one
-- before it is opened, a word of its text ("mill") finds nothing; opened once, "mill" finds it (`search-9-encrypted`)
-- with Search in encrypted messages turned off (46), "mill" finds nothing again while "alice" still finds it; turned
-  on again and the message opened again, "mill" finds it
+- with the switch off, a word of its text ("mill") finds nothing while "alice" finds it; turned on, the background
+  pass decrypts it once it is downloaded, without opening it: "mill" finds it (`search-9-encrypted`), and its row
+  shows its first words; `secure-protected-subject.eml` (an encrypted message with a protected Subject, in
+  `scripts/ui-e2e/pgp/`) is listed by its protected Subject, not "..."
 
 ## 20. Send/Recv
 
@@ -998,7 +999,7 @@ Screenshots: `setup-1-export`, `setup-2-passphrase`, `setup-3-import-choose`, `s
 
 ## 46. Options and the language
 
-Screenshots: `options-1-language` (the General page), `options-2-reading` (the Reading page), `options-4-encryption` (the Reading page's Encryption group), `lang-1-german`, `lang-1b-german-form`, `lang-1c-french-form`, `lang-2-pseudo-main`, `lang-3-pseudo-form`; for long words, not features: `lang-4-pseudo-options`, `lang-4b-pseudo-options-reading`, `lang-4c-pseudo-options-downloading` (Windows, the Mac), `tour-<language>-5-preferences`, `tour-<language>-5b-preferences-reading`, `tour-<language>-5c-preferences-downloading` (Linux)
+Screenshots: `options-1-language` (the General page), `options-2-reading` (the Reading page), `options-4-encryption` (the Reading page's Encryption group, both switches), `lang-1-german`, `lang-1b-german-form`, `lang-1c-french-form`, `lang-2-pseudo-main`, `lang-3-pseudo-form`; for long words, not features: `lang-4-pseudo-options`, `lang-4b-pseudo-options-reading`, `lang-4c-pseudo-options-downloading` (Windows, the Mac), `tour-<language>-5-preferences`, `tour-<language>-5b-preferences-reading`, `tour-<language>-5c-preferences-downloading` (Linux)
 
 - Tools > Options (Settings on the Mac, Preferences on Linux) has three pages in this order, General, Reading and
   Downloading, the settings of `core/settings.toml` on each in its order (Windows: tabs with group boxes and OK,
@@ -1007,11 +1008,13 @@ Screenshots: `options-1-language` (the General page), `options-2-reading` (the R
   sending, Make Default Mail App and Open .eml Files with Inbox Classic (and on the Mac Check for updates
   automatically); Reading has Layout, Group messages by conversation, Show senders’ pictures in the message list,
   Show messages on a dark background (the Mac, Linux), Download pictures in all messages and Trusted Senders,
-  then under Encryption Search in encrypted messages (on at first) with its note; Downloading has Download messages
-  in advance and Storage limit per account
+  then under Encryption Search in encrypted messages and Look up keys on keys.openpgp.org (both on at first), each
+  with its note; Downloading has Download messages in advance and Storage limit per account
 - Search in encrypted messages: its note says the index on this computer is not encrypted and that AI agents never
   search it; turned off (Windows: and Apply), the words of encrypted messages opened before are no longer found
   (21, 19i); on again, it stays on after the window is opened again (`options-4-encryption`)
+- Look up keys on keys.openpgp.org: its note says only the address looked up is sent, only when encrypting or looking
+  for a key; turned off, kept off when the window opens again, and on again
 - Windows: Ctrl+Tab goes to the next page; every control of a page has an access key of its own; Apply is disabled
   until something changes, applies without closing (the main window follows at once: Group messages by conversation
   turned off there regroups the list), and is disabled again; Cancel after a change leaves the setting as it was
