@@ -1,22 +1,21 @@
-<!--review--><h1>Luonnokset ja Lähtevät</h1>
+<h1>Luonnokset ja Lähtevät</h1>
 <p class="summary">Tallenna viesti myöhemmin viimeisteltäväksi ja katso, mitkä viestit odottavat lähettämistä.</p>
 <h2>Luonnoksen tallentaminen</h2>
-<p>Napsauta <b data-text="ui-tb-save"></b> tai paina <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->. Viesti tallennetaan palvelimelle tilin kansioon <b data-text="folder-drafts"></b>. Uusi tallennus korvaa aiemman kopion. Viesti-ikkunan tilarivi kertoo tallennusajan.</p>
+<p>Napsauta <b data-text="ui-tb-save"></b> tai paina <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->. Viesti tallennetaan palvelimelle tilin kansioon <b data-text="folder-drafts"></b>. Uusi tallennus korvaa aiemman kopion. Kirjoitusikkunan tilarivi kertoo tallennusajan.</p>
 <p>Inbox Classic tallentaa viestisi myös automaattisesti muutama sekunti sen jälkeen, kun lopetat kirjoittamisen, tai puolen minuutin välein, kun jatkat kirjoittamista. Jos Inbox Classic tai tietokoneesi sammuu odottamatta, keskeneräiset viestisi avautuvat uudelleen, kun Inbox Classic seuraavan kerran käynnistyy.</p>
-<p>Kun suljet viestin, jossa on muutoksia, sinulta kysytään, tallennetaanko ne:</p>
+<p>Kun suljet kirjoitusikkunan, jossa on tallentamattomia muutoksia, sovellus kysyy, tallennetaanko ne:</p>
 <ul>
     <li><!--os:windows,linux--><b data-text="ui-yes"></b><!--/os--><!--os:mac--><b data-text="ui-tb-save"></b><!--/os--> tallentaa viestin kansioon <b data-text="folder-drafts"></b>.</li>
     <li><!--os:windows,linux--><b data-text="ui-no"></b><!--/os--><!--os:mac--><b data-text="mac-dont-save"></b><!--/os--> hylkää muutokset. Jos luonnos oli tallennettu vain automaattisesti, se poistetaan myös kansiosta <b data-text="folder-drafts"></b>.</li>
     <li><b data-text="ui-cancel"></b> palauttaa sinut viestin kirjoittamiseen.</li>
 </ul>
 <p>Jatka kirjoittamista kaksoisnapsauttamalla luonnosta kansiossa <b data-text="folder-drafts"></b>. Vastaanottajat, teksti ja liitteet ovat tallessa. Kun viesti on lähetetty, luonnos poistetaan.</p>
-<p>Kirjoitat viestiä omassa ikkunassaan, joten voit samalla lukea muita viestejä. Kun lopetat Inbox Classicin, sovellus sulkee ensin viesti-ikkunat ja kysyy, tallennetaanko niissä tehdyt muutokset.</p>
+<p>Jokaisella kirjoitettavalla viestillä on oma ikkunansa, joten voit samalla lukea muita viestejä. Kun lopetat Inbox Classicin, sovellus sulkee ensin kirjoitusikkunat ja kysyy tarvittaessa, tallennetaanko muutokset.</p>
 <h2>Lähtevät</h2>
-<p><b data-text="ui-tb-send"></b> siirtää viestin Lähtevät-kansioon. Oletuksena se lähetetään muutaman sekunnin kuluttua. Sinä aikana voit perua lähetyksen (katso alla). Pääikkunan tilarivi kertoo, kun viesti on lähetetty.</p>
+<p>Painike <b data-text="ui-tb-send"></b> siirtää viestin Lähtevät-kansioon odottamaan lähettämistä. Oletuksena odotusaika on 10 sekuntia. Sinä aikana voit perua lähetyksen (katso alla). Pääikkunan tilarivi kertoo, kun viesti on lähetetty.</p>
 <p>Jos viestin lähettäminen epäonnistuu esimerkiksi yhteyden puuttumisen vuoksi, viesti säilyy Lähtevät-kansiossa. Lähettämistä yritetään uudelleen seuraavan postin tarkistuksen yhteydessä.</p>
-<p>Näet odottavat viestit valitsemalla <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. Ikkunassa näkyvät odottavat viestit ja mahdolliset lähetysvirheet. <b data-text="ui-outbox-send-all"></b> yrittää lähettämistä heti uudelleen. Voit myös poistaa viestin tästä ikkunasta.</p>
+<p>Näet odottavat viestit valitsemalla <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. Ikkunassa näkyvät odottavat viestit ja mahdolliset lähetysvirheet. Painike <b data-text="ui-outbox-send-all"></b> yrittää lähettää odottavat viestit heti. Voit myös poistaa odottavan viestin tästä ikkunasta.</p>
 <h2>Viestin lähetyksen peruminen</h2>
-<p>Oletuksena viesti odottaa lähettämistä muutaman sekunnin sen jälkeen, kun napsautat <b data-text="ui-tb-send"></b>. Tilarivi näyttää jäljellä olevan ajan. Sinä aikana voit perua lähetyksen napsauttamalla ajan vieressä <b data-text="ui-undo-button"></b> tai valitsemalla <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>. Viesti avautuu uudelleen, ja voit muokata tai hylätä sen. Peruminen on mahdollista vain tämän odotusajan kuluessa, ennen kuin viesti lähetetään.</p>
-<p>Jos haluat muuttaa viivettä tai lähettää viestit heti, valitse <b data-settings="general"></b> ja muuta asetusta <b data-text="ui-send-delay"></b>. Jos lopetat Inbox Classicin viestin odottaessa, sovellus yrittää lähettää sen heti.</p>
+<p>Oletuksena viesti odottaa lähettämistä 10 sekuntia sen jälkeen, kun napsautat painiketta <b data-text="ui-tb-send"></b>. Tilarivi näyttää jäljellä olevan ajan. Sinä aikana voit perua lähetyksen napsauttamalla ajan vieressä <b data-text="ui-undo-button"></b> tai valitsemalla <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b>. Viesti avautuu uudelleen, ja voit muokata tai hylätä sen. Peruminen on mahdollista vain tämän odotusajan kuluessa, ennen kuin viesti lähetetään.</p>
+<p>Jos haluat muuttaa viivettä tai lähettää viestit heti, avaa asetussivu <b data-settings="general"></b> ja muuta asetusta <b data-text="ui-send-delay"></b>. Jos lopetat Inbox Classicin viestin odottaessa, sovellus yrittää lähettää sen heti.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->
