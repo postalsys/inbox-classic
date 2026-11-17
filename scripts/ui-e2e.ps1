@@ -3451,6 +3451,7 @@ public static class Dragger {
     $at = @([int](($box.Left + $box.Right) / 2), [int](($box.Top + $box.Bottom) / 2))
     foreach ($button in @(0, 0x0008, 0x0010)) { [Native.Win]::Mouse($at[0], $at[1], $button) }
     $menu = WaitWindow '#32768' $null 10
+    if (-not $menu) { Shot ([Native.Win]::GetDesktopWindow()) 'debug-inbox-menu-missing'; Write-Host "   (the Inbox row at $($at -join "," ))" }
     [void][Native.Win]::SetWindowPos($main, [IntPtr](-2), 0, 0, 0, 0, 0x13)
     $labels = if ($menu) { @([Native.Win]::MenuLabels([Native.Win]::SendMessage($menu, 0x01E1, [IntPtr]::Zero, [IntPtr]::Zero))) } else { @() }
     Check (($labels -contains 'New Folder...') -and -not ($labels -contains 'Properties...') -and -not ($labels -contains 'Send and Receive')) "right-clicking the Inbox gives the folder's menu, no account commands ($($labels -join ', '))"
@@ -3586,6 +3587,12 @@ public static class Dragger {
         $hosts = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_HOSTS)
         $log = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_LOG)
         Check ([Native.Win]::RemoteListText($hosts, 0, 0) -eq 'My AI agent' -and [Native.Win]::RemoteListText($hosts, 0, 1) -match '^Read, organize, write drafts and send with your yes') "it lists the program and what it may do ($([Native.Win]::RemoteListText($hosts, 0, 1)))"
+        # what it may do is not cut off: its column as wide as its words, and no scroll bar sideways
+        $access = [Native.Win]::RemoteListText($hosts, 0, 1)
+        $hostFont = [System.Drawing.Font]::FromHfont([Native.Win]::SendMessage($hosts, 0x0031, [IntPtr]::Zero, [IntPtr]::Zero))
+        $needed = [System.Windows.Forms.TextRenderer]::MeasureText($access, $hostFont).Width
+        $accessShown = [int][Native.Win]::SendMessage($hosts, 0x101D, [IntPtr]1, [IntPtr]::Zero)
+        Check ($accessShown -ge $needed + 6 -and -not ([Native.Win]::GetWindowLong($hosts, -16) -band 0x00100000)) "what it may do is shown whole ($accessShown for $needed)"
         $logged = { param($row) [Native.Win]::RemoteListText($log, $row, 2) }
         # after the send the agent saved a draft (opened below)
         [void](WaitFor { (& $logged 0) -match '^Saved the draft' } 20)
@@ -3634,6 +3641,18 @@ public static class Dragger {
             Check ((GetText $compose $IDC_SUBJECT) -eq 'Agenda for Friday' -and (GetText $compose $IDC_TO) -like '*pat@example.net*') 'with the subject and recipient the agent wrote'
             Start-Sleep -Milliseconds 800
             Shot $compose 'agents-8-draft'
+            # in a narrow window the line wraps, taller, the editor still under it
+            $noteHeight = $noteBox.Bottom - $noteBox.Top
+            $wide = New-Object Native.Win+RECT
+            [void][Native.Win]::GetWindowRect($compose, [ref]$wide)
+            [void][Native.Win]::SetWindowPos($compose, [IntPtr]::Zero, 0, 0, 440, $wide.Bottom - $wide.Top, 0x16)
+            Start-Sleep -Milliseconds 800
+            [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($compose, $IDC_COMPOSE_AGENT_NOTE), [ref]$noteBox)
+            $editorBox = New-Object Native.Win+RECT
+            [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($compose, $IDC_BODY), [ref]$editorBox)
+            Check (($noteBox.Bottom - $noteBox.Top) -gt $noteHeight -and $editorBox.Top -gt $noteBox.Bottom) "in a narrow window the line wraps over the text ($noteHeight to $($noteBox.Bottom - $noteBox.Top), the text from $($editorBox.Top))"
+            Shot $compose 'agents-8b-draft-narrow'
+            [void][Native.Win]::SetWindowPos($compose, [IntPtr]::Zero, 0, 0, $wide.Right - $wide.Left, $wide.Bottom - $wide.Top, 0x16)
             # closed without saving: the draft stays the agent's
             [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
             $ask = WaitWindow '#32770' 'Inbox Classic' 10
@@ -7036,6 +7055,21 @@ public static bool HasIcon(IntPtr window) {
             }
         }
         [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, @(ChildRows ([IntPtr]::Zero))[0])
+        # AI Agents: what the program may do, in the language's longer words, shown whole (shot `$prefix-agents`)
+        Command $main $IDM_AI_AGENTS
+        $agents = WaitShown 'InboxClassicAgents' 10
+        if ($agents) {
+            $hosts = [Native.Win]::GetDlgItem($agents, 631)
+            $access = [Native.Win]::RemoteListText($hosts, 0, 1)
+            $hostFont = [System.Drawing.Font]::FromHfont([Native.Win]::SendMessage($hosts, 0x0031, [IntPtr]::Zero, [IntPtr]::Zero))
+            $needed = [System.Windows.Forms.TextRenderer]::MeasureText($access, $hostFont).Width
+            $accessShown = [int][Native.Win]::SendMessage($hosts, 0x101D, [IntPtr]1, [IntPtr]::Zero)
+            Check ($accessShown -ge $needed + 6 -and -not ([Native.Win]::GetWindowLong($hosts, -16) -band 0x00100000)) "AI Agents shows what the program may do whole (${prefix}: $access, $accessShown for $needed)"
+            if ($pseudo) { CheckPseudo $agents 'AI Agents' $true }
+            Shot $agents "$prefix-agents"
+            [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+            [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
+        }
     }
 
     Step 'in German'
