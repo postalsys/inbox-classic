@@ -20,6 +20,7 @@ pe-mime = { path = "../crates/pe-mime" }
 pe-otp = { path = "../crates/pe-otp" }
 pe-pgp = { path = "../crates/pe-pgp" }
 pe-core = { path = "../crates/pe-core" }
+pe-preview = { path = "../crates/pe-preview" }
 
 [[bin]]
 name = "imap_response"
@@ -96,6 +97,20 @@ bench = false
 [[bin]]
 name = "setup_file"
 path = "fuzz_targets/setup_file.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "preview_picture"
+path = "fuzz_targets/preview_picture.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "preview_pdf"
+path = "fuzz_targets/preview_pdf.rs"
 test = false
 doc = false
 bench = false

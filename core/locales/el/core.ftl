@@ -1319,3 +1319,12 @@ undone-flags = { $count ->
     [one] Ο διακομιστής δεν άλλαξε τις σημαίες για { $messages }, οπότε παραμένει όπως ήταν: { $reason }
    *[other] Ο διακομιστής δεν άλλαξε τις σημαίες για { $messages }, οπότε παραμένουν όπως ήταν: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Εμφάνιση αρχείων PDF στα μηνύματα
+# review: new
+preview-pdf-off = Τα αρχεία PDF δεν εμφανίζονται στα μηνύματα.
+# review: new
+preview-pdf-off-crashed = Ένα αρχείο PDF έκλεισε το Inbox Classic ενώ εμφανιζόταν, οπότε τα αρχεία PDF δεν εμφανίζονται πλέον στα μηνύματα. Οι εικόνες εμφανίζονται ακόμα. Για να εμφανίζονται ξανά τα αρχεία PDF, ενεργοποιήστε την επιλογή { $option } στις επιλογές ανάγνωσης.

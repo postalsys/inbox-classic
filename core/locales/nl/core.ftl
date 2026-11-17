@@ -1312,3 +1312,12 @@ undone-flags = { $count ->
     [one] De server heeft de markeringen van { $messages } niet gewijzigd, dus het is zoals het was: { $reason }
    *[other] De server heeft de markeringen van { $messages } niet gewijzigd, dus ze zijn zoals ze waren: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = PDF-bestanden in berichten tonen
+# review: new
+preview-pdf-off = PDF-bestanden worden niet in berichten getoond.
+# review: new
+preview-pdf-off-crashed = Een PDF-bestand heeft Inbox Classic gesloten terwijl het werd getoond, daarom worden PDF-bestanden niet meer in berichten getoond. Afbeeldingen wel. Schakel { $option } in bij de leesopties om PDF-bestanden weer te tonen.

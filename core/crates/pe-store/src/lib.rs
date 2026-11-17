@@ -165,6 +165,25 @@ impl Store {
         self.set_bool_setting("attachments.decrypted_noted", true)
     }
 
+    /// "Show PDF files in messages": on until the user turns it off, or the core does after a PDF file ended the app
+    pub fn pdf_previews(&self) -> Result<bool> {
+        self.bool_setting("previews.pdf", true)
+    }
+
+    pub fn set_pdf_previews(&self, on: bool) -> Result<()> {
+        self.set_bool_setting("previews.pdf", on)
+    }
+
+    /// Whether the core turned PDF previews off because a PDF file ended the app (the reading pane says so until they
+    /// are turned on again)
+    pub fn pdf_previews_crashed(&self) -> Result<bool> {
+        self.bool_setting("previews.pdf_crashed", false)
+    }
+
+    pub fn set_pdf_previews_crashed(&self, crashed: bool) -> Result<()> {
+        self.set_bool_setting("previews.pdf_crashed", crashed)
+    }
+
     /// A setting that is on or off, `fallback` when it was never set
     pub(crate) fn bool_setting(&self, key: &str, fallback: bool) -> Result<bool> {
         Ok(self.text_setting(key)?.map_or(fallback, |value| value == "1"))

@@ -1398,3 +1398,12 @@ undone-flags = { $count ->
     [few] Server nezmenil príznaky správ, takže { $messages } zostávajú bez zmeny: { $reason }
    *[other] Server nezmenil príznaky správ, takže { $messages } zostáva bez zmeny: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Zobrazovať súbory PDF v správach
+# review: new
+preview-pdf-off = Súbory PDF sa v správach nezobrazujú.
+# review: new
+preview-pdf-off-crashed = Súbor PDF ukončil Inbox Classic počas zobrazenia, preto sa súbory PDF v správach už nezobrazujú. Obrázky áno. Ak chcete súbory PDF znova zobrazovať, zapnite { $option } v možnostiach čítania.

@@ -825,3 +825,12 @@ undone-flags = { $count ->
     [one] The server did not change the flags of { $messages }, so it is as it was: { $reason }
    *[other] The server did not change the flags of { $messages }, so they are as they were: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# the reading option that turns PDF previews on and off (the apps show it)
+preview-pdf-option = Show PDF files in messages
+# the tile of a PDF file while PDF previews are off
+preview-pdf-off = PDF files are not shown in messages.
+# the note where previews are, after a PDF file ended the app: { $option } is the option's name
+preview-pdf-off-crashed = A PDF file closed Inbox Classic while it was being shown, so PDF files are no longer shown in messages. Pictures still are. To show PDF files again, turn on { $option } in the reading options.

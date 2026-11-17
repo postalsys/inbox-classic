@@ -19,6 +19,7 @@ pe-mime.workspace = true
 pe-net.workspace = true
 pe-oauth = { path = "../pe-oauth" }
 pe-otp = { path = "../pe-otp" }
+pe-preview = { path = "../pe-preview" }
 pe-pgp = { path = "../pe-pgp" }
 pe-keys = { path = "../pe-keys" }
 pe-smtp = { path = "../pe-smtp" }

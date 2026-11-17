@@ -1380,3 +1380,12 @@ undone-flags = { $count ->
     [one] Serverul nu a schimbat semnalizările pentru { $messages }, așa că este ca înainte: { $reason }
    *[other] Serverul nu a schimbat semnalizările pentru { $messages }, așa că sunt ca înainte: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Afișează fișierele PDF în mesaje
+# review: new
+preview-pdf-off = Fișierele PDF nu sunt afișate în mesaje.
+# review: new
+preview-pdf-off-crashed = Un fișier PDF a închis Inbox Classic în timp ce era afișat, așa că fișierele PDF nu mai sunt afișate în mesaje. Imaginile sunt afișate în continuare. Pentru a afișa din nou fișierele PDF, activați { $option } în opțiunile de citire.

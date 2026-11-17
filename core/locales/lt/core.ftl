@@ -1365,3 +1365,12 @@ undone-flags = { $count ->
     [one] Serveris nepakeitė laiško vėliavėlių, todėl jis nepasikeitė ({ $messages }): { $reason }
    *[other] Serveris nepakeitė laiškų vėliavėlių, todėl jie nepasikeitė ({ $messages }): { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Rodyti PDF failus laiškuose
+# review: new
+preview-pdf-off = PDF failai laiškuose nerodomi.
+# review: new
+preview-pdf-off-crashed = PDF failas uždarė Inbox Classic, kol buvo rodomas, todėl PDF failai laiškuose nebėra rodomi. Paveikslėliai vis dar rodomi. Norėdami vėl rodyti PDF failus, skaitymo parinktyse įjunkite { $option }.

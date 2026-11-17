@@ -30,6 +30,7 @@ pub mod mailto;
 pub mod opening;
 pub mod otp;
 pub mod pictures;
+pub mod previews;
 pub mod protect;
 mod protect_out;
 mod reads;
@@ -238,6 +239,15 @@ pub enum Event {
     ViewReady {
         request: u64,
     },
+    /// Something more came of the previews `request` of a message's attachment `attachment` (its description, a
+    /// page, a refusal, or the end): [`Core::preview_file`]
+    PreviewReady {
+        request: u64,
+        attachment: usize,
+    },
+    /// The app ended while a file's preview was drawn (it may have been a hostile file), so PDF previews are now off:
+    /// [`Core::previews_notice`] says why and how to turn them on again
+    PdfPreviewsOff,
     /// A message went into the Outbox, left it, or got a reason why it did not go
     OutboxChanged {
         account: AccountId,
@@ -529,6 +539,8 @@ pub struct Core {
     list_loads: list_load::ListLoads,
     /// Drafts and attachments read off the window thread (reads.rs)
     reads: reads::Reads,
+    /// Previews of attachments: the render thread and what it drew (previews.rs)
+    previews: previews::Previews,
 }
 
 impl Core {
@@ -571,9 +583,11 @@ impl Core {
         runtime.spawn(worker::watch_sleep(wake.clone()));
         // what a move the app was in the middle of when it last ended left behind
         store.clear_moving_sources()?;
+        // a file whose preview ended the app: PDF previews off, said once the core is open (on a worker thread)
+        let pdfs_turned_off = previews::check_crash_markers(&path, &store);
         let closed = Arc::new(AtomicBool::new(false));
         let open = closed.clone();
-        Ok(Core {
+        let core = Core {
             wake,
             synced: Arc::new(worker::Synced::new(Default::default())),
             path,
@@ -622,7 +636,13 @@ impl Core {
             connections: Default::default(),
             list_loads: Default::default(),
             reads: Default::default(),
-        })
+            previews: Default::default(),
+        };
+        if pdfs_turned_off {
+            let events = core.events.clone();
+            core.runtime()?.spawn(async move { events(Event::PdfPreviewsOff) });
+        }
+        Ok(core)
     }
 
     /// The store connection of the code running on this thread: the windows' own, or the one of the background work

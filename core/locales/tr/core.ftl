@@ -1308,3 +1308,12 @@ undone-flags = { $count ->
     [one] Sunucu bayrakları değiştirmedi ({ $messages }); ileti önceki haline döndü: { $reason }
    *[other] Sunucu bayrakları değiştirmedi ({ $messages }); iletiler önceki haline döndü: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = İletilerde PDF dosyalarını göster
+# review: new
+preview-pdf-off = PDF dosyaları iletilerde gösterilmiyor.
+# review: new
+preview-pdf-off-crashed = Bir PDF dosyası gösterilirken Inbox Classic'i kapattı, bu yüzden PDF dosyaları artık iletilerde gösterilmiyor. Resimler hâlâ gösteriliyor. PDF dosyalarını yeniden göstermek için okuma seçeneklerinde { $option } seçeneğini açın.

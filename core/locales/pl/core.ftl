@@ -1413,3 +1413,12 @@ undone-flags = { $count ->
     [many] Serwer nie zmienił flag wiadomości, więc { $messages } pozostaje bez zmian: { $reason }
    *[other] Serwer nie zmienił flag wiadomości, więc { $messages } pozostaje bez zmian: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Pokazuj pliki PDF w wiadomościach
+# review: new
+preview-pdf-off = Pliki PDF nie są pokazywane w wiadomościach.
+# review: new
+preview-pdf-off-crashed = Plik PDF zamknął Inbox Classic podczas wyświetlania, dlatego pliki PDF nie są już pokazywane w wiadomościach. Obrazy nadal są. Aby znów pokazywać pliki PDF, włącz { $option } w opcjach czytania.

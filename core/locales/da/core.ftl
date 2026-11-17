@@ -1311,3 +1311,12 @@ undone-flags = { $count ->
     [one] Serveren ændrede ikke flagene på { $messages }, så den er som før: { $reason }
    *[other] Serveren ændrede ikke flagene på { $messages }, så de er som før: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Vis PDF-filer i meddelelser
+# review: new
+preview-pdf-off = PDF-filer vises ikke i meddelelser.
+# review: new
+preview-pdf-off-crashed = En PDF-fil lukkede Inbox Classic, mens den blev vist, så PDF-filer vises ikke længere i meddelelser. Billeder vises stadig. Slå { $option } til i læseindstillingerne for at vise PDF-filer igen.
