@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue Finnish help: 44 of 52 topics remain. Next everyday/account batch: delete-and-undo.html, folders.html, write-message.html, reply-forward.html, signatures.html, attachments.html, save-print-import.html, drafts-outbox.html, address-book.html, new-mail.html, all-inboxes.html, manage-accounts.html, move-computer.html. In write-message, attachment reminders recognize EN/DE/ET/ES/FR keywords only; use a recognized example such as attached and do not promise Finnish keyword matching. Finnish catalogs complete, 174 value improvements; all 44 mnemonic scopes pass across the 17 reviewed catalog languages. Recheck late additions after Finnish and after the full queue. Do not run the test suite. Active checkout build/i18n-wave1.",
+  "next_batch": "Continue Finnish help: 31 of 52 topics remain, all catalogs complete (174 value improvements). Next security/privacy batch: pictures-tracking.html, links-scripts.html, brand-logos.html, connections.html, account-security.html, sign-in-codes.html, sign-in-apps.html, data-storage.html, download-ahead.html, encrypted-and-signed-mail.html, encryption-keys.html, verify-a-key.html, encryption-errors.html. Then 18 rules/agents/troubleshooting/reference topics. After Finnish, audit the 32 already-reviewed conversations/new-mail topics listed in watched-conversation-notifications: notification settings and foreground suppression still apply; watched-thread notifications cover Inbox and user folders. Fresh upstream/late-arrival check after Finnish and final full queue. All 44 mnemonic scopes pass across 17 reviewed catalog languages. No tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -7107,49 +7107,36 @@
       "pending_catalogs": {},
       "pending_help": [
         "account-security.html",
-        "address-book.html",
         "agents-connect.html",
         "agents-permissions.html",
         "agents-sending.html",
-        "all-inboxes.html",
-        "attachments.html",
         "brand-logos.html",
         "certificate-errors.html",
         "command-line.html",
         "connections.html",
         "data-storage.html",
         "default-mail-program.html",
-        "delete-and-undo.html",
         "delivery-problems.html",
         "download-ahead.html",
-        "drafts-outbox.html",
         "encrypted-and-signed-mail.html",
         "encryption-errors.html",
         "encryption-keys.html",
-        "folders.html",
         "invitations.html",
         "keyboard-shortcuts.html",
         "links-scripts.html",
-        "manage-accounts.html",
         "message-not-shown.html",
         "message-rules.html",
-        "move-computer.html",
-        "new-mail.html",
         "no-connection.html",
         "options-language.html",
         "password-not-accepted.html",
         "pictures-tracking.html",
         "removing.html",
-        "reply-forward.html",
-        "save-print-import.html",
         "search-words.html",
         "sign-in-apps.html",
         "sign-in-codes.html",
-        "signatures.html",
         "unsubscribe.html",
         "updates.html",
-        "verify-a-key.html",
-        "write-message.html"
+        "verify-a-key.html"
       ],
       "completed_batches": [
         {
@@ -8642,6 +8629,63 @@
           },
           "validation": "Static check-language has only the 1334 catalog and 8 help marks deliberately removed; no structural findings. All eight topics preserve exact markup/attributes, literal keyboard tags, platform branches and control references; inline joins and dash checks pass. Global 17503 unmarked catalog messages and 8536 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No test suite run.",
           "notes": "Read English/Finnish text and reviewed all eight topics: account setup, Google/Microsoft sign-in, main window, layouts, reading, search, conversations and message organization. Improved natural instructions and source-accurate combined Sent/Drafts navigation, collapsed unread counts excluding Junk/Deleted, search indexing versus reading, display-date capping and folded quoted messages. App passwords are conditional on account support. Data-text controls, tags/attributes, links/images, platform branches and literal keyboard tags preserved. No tests run per user instruction."
+        },
+        {
+          "id": "fi-help-everyday-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "delete-and-undo.html",
+            "folders.html",
+            "write-message.html",
+            "reply-forward.html",
+            "signatures.html",
+            "attachments.html",
+            "save-print-import.html",
+            "drafts-outbox.html",
+            "address-book.html",
+            "new-mail.html",
+            "all-inboxes.html",
+            "manage-accounts.html",
+            "move-computer.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fi/delete-and-undo.html": "db58ab890a1a2a615098cf1a2c9ced1e260267b3d8f482960da311f5177d4cdd",
+            "core/crates/pe-html/help/fi/folders.html": "cad7807ce024f6d9cbb7507ae8bf0d8ec96be2c70dcff2bf591da777be1dec2e",
+            "core/crates/pe-html/help/fi/write-message.html": "951b41374bd13fd924ad874c15e05cc35677eda8a450948b5ba435781302f030",
+            "core/crates/pe-html/help/fi/reply-forward.html": "5793817a8e8d914d9f75c23cbbc32d1e0cc14458bdd462626d9fed11ee1945d1",
+            "core/crates/pe-html/help/fi/signatures.html": "63f28c5fb281e5e6e560bf816cca58f2077475e3b6345af0d56c5a1b972e58f6",
+            "core/crates/pe-html/help/fi/attachments.html": "6cd89c63f29a7a213db08034622d45bb0d2c10b686a3fafcf1fa10b229fbdc94",
+            "core/crates/pe-html/help/fi/save-print-import.html": "d74337b1c9abc84a435647faaa2663e156f19aa41039ef72e483d7f10485ccc0",
+            "core/crates/pe-html/help/fi/drafts-outbox.html": "8b76b62c4585b77be932eb5f16a904f596effb03f923a710753e1b0f204f0e88",
+            "core/crates/pe-html/help/fi/address-book.html": "2bbb11e4037025b75f0218091916329b9ac282da6f63b05458e657d2e5978f41",
+            "core/crates/pe-html/help/fi/new-mail.html": "8bab5c10a59e05d319e92a9a8124b3d815f306cafcabf8c92de5d5f2ec299bb7",
+            "core/crates/pe-html/help/fi/all-inboxes.html": "0ba0495fe02aa9296b6a80e122a0073321b59b86b03a1f41da42d44ca44e2d29",
+            "core/crates/pe-html/help/fi/manage-accounts.html": "76eb0901a83c269bb4b121058ebbfd483ab35e648e4822508a39cb912bd9f31e",
+            "core/crates/pe-html/help/fi/move-computer.html": "ff9b4b5ba305c8f3d53c18c1ba4a66052c7f17d2d7b9f16bef5e7065cc41eecb",
+            "core/crates/pe-html/help/fi/conversations.html": "13089ede61ea71d710f7d6fc64f391c2606a7fc43d658e29010499c6da2a0382"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/delete-and-undo.html": "22fc288065674584c0de20163acedd9b43c711998d2423c2c7943616f6ae702c",
+            "core/crates/pe-html/help/en/folders.html": "2f0aeafa43c1642a3f9df4c6dcae159e96892feb819988b206fb6831808ecfef",
+            "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9",
+            "core/crates/pe-html/help/en/reply-forward.html": "67f77f7ce6fb74698b0924028b6fd6085f2983ca19587969d5aa15c81d7c78f8",
+            "core/crates/pe-html/help/en/signatures.html": "5b16b6f8daa40f8a34940e50f29c1409d89e0e074e450b7f063cea4d4c1b1f66",
+            "core/crates/pe-html/help/en/attachments.html": "e88d54aad038c2f9860965b6edc4403609c943f79d8e29ea07e88be139ecc468",
+            "core/crates/pe-html/help/en/save-print-import.html": "91e96db89168f7d0b359513f4bb7870171d89fc69fa700e77fde8efb53f3d1f9",
+            "core/crates/pe-html/help/en/drafts-outbox.html": "119b7e27c2d69405d51018ff33f4c5ebc34944086bfe97409a8e10a0b388d634",
+            "core/crates/pe-html/help/en/address-book.html": "5b5c8d345f153c33f75ee6bcea399a1d36abbc0043efc210445c007acd1c2e53",
+            "core/crates/pe-html/help/en/new-mail.html": "bec8435dfef38605c1feae047c870bbaf4b316874a4ad7829ca2e6692c3c87f4",
+            "core/crates/pe-html/help/en/all-inboxes.html": "4c79d7df5307fffeb3316cf05acae6e4f8005d7a220d242268a8d233b138eb70",
+            "core/crates/pe-html/help/en/manage-accounts.html": "7267a73e572221d410c18461ae1be3eccacfa522e9154a6917ec0aa37c39e8e7",
+            "core/crates/pe-html/help/en/move-computer.html": "636274cd347b79ccb1edaa0116514699f1f2dd4c294d78e918f42571e6e7574e",
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938"
+          },
+          "validation": "Static check-language has only the 1334 catalog and 21 help marks deliberately removed; no structural findings. All 14 edited help topics preserve exact markup/attributes, literal keyboard tags, platform branches and control references; inline joins and dash checks pass. Global 17503 unmarked catalog messages and 8730 help lines reconcile to completed batches; translation/English-source hashes match. All language marks match exact pending inventory. Review HTML regenerated; git diff --check passes. No test suite run.",
+          "notes": "Read English/Finnish and reviewed 13 everyday/account topics. Improved natural instructions, compose suggestions and replies, signatures, file import/export, contacts, combined folders and account management. Corrected attachment-reminder support (EN/DE/ET/ES/FR, recognized example attached), temporary attachment cleanup at startup, plaintext copies, sender-domain authentication, queued-send retry and cancellation, protected transfers including OAuth credentials and private keys, and destination-folder resolution. Re-read conversations and clarified watched-thread notifications against all three platform handlers. All markup/attributes and literal keyboard tags preserved. No tests run per user instruction.",
+          "followup_reviewed_help": [
+            "conversations.html"
+          ]
         }
       ]
     },
@@ -40721,6 +40765,87 @@
         "bg"
       ],
       "validation": "44 actual scopes pass across all 17 audited languages. All 74 catalog edits preserve visible text; French help preserves markup and literal keys. Full catalog structures, exact inventories and translation/English hashes reconcile. No test suite run."
+    },
+    {
+      "id": "watched-conversation-notifications",
+      "status": "pending",
+      "issue": "English conversations/new-mail says watched conversations are always announced, but notification enablement and foreground-window suppression apply on all three platforms. Core announces watched messages in Inbox and user folders, not every special folder. Correct Finnish in the current batch and audit the already-reviewed translations listed here; preserve the app-context condition and do not promise notifications override settings. Do not edit English or app code.",
+      "evidence": [
+        "core/crates/pe-core/src/watch.rs: arrived",
+        "app/src/main.cpp: NotifyNewMail",
+        "mac/Sources/InboxClassic/MainWindow.swift: notifyNewMail",
+        "linux/src/app.rs: notify_new_mail"
+      ],
+      "pending_help": {
+        "de": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "es": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "et": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "fr": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "nl": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "it": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "pt": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "pt-BR": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "ca": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "nb": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "sr-Latn": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "tr": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "bg": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "cs": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "da": [
+          "conversations.html",
+          "new-mail.html"
+        ],
+        "el": [
+          "conversations.html",
+          "new-mail.html"
+        ]
+      },
+      "completed_languages": [
+        "fi"
+      ],
+      "note": "Audit the 32 previously reviewed topics after Finnish, before continuing Croatian. Correct this context during initial review of the remaining 11 languages. Followup topics do not increase initial-scope completion totals."
     }
   ]
 }

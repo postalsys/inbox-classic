@@ -16,8 +16,10 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Finnish (fi), the remaining 44 help topics after its first eight. Its 1,334 catalog entries
-  are reviewed, with 174 value improvements. Continue everyday/account help, starting delete-and-undo and folders.
+- Resume with Finnish (fi), the remaining 31 help topics after its first 21. Its 1,334 catalog entries
+  are reviewed, with 174 value improvements. Continue security/privacy help, starting pictures-tracking and links-scripts.
+  After Finnish, audit the 32 previously reviewed conversations/new-mail topics in the notification-context followup.
+  These followups are separate from initial-scope totals and must be resolved before completing the round.
   The extended mnemonic followup is complete: 44 actual menu/dialog scopes pass across all 17 languages
   with reviewed catalogs. Use the expanded scopes for remaining languages; exact definitions are in state.
   Upstream master `76f67e82` is integrated and its already-inventoried wave1 content reconciled.
@@ -697,8 +699,29 @@ Static structural checks, inline joins, exact inventories and source/file hashes
 git diff --check passes. No test suite was run. Forty-four Finnish help topics remain.
 Expanded mnemonic followup checkpoint: `b3b4ac1c`.
 
-Current totals: 17,451 catalog entries and 636 help pages reviewed; 2,729 catalog values improved. Remaining:
-14,641 catalog entries and 616 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Finnish everyday and account help
+
+Reviewed 13 more topics: deleting/undo, folders, writing/replies, signatures, attachments, message files,
+drafts/outbox, address book, new mail, combined folders, accounts and transfer. Improved literal wording and
+corrected attachment-reminder language support, temporary plaintext attachment storage, queued-send retries
+and cancellation, sender-domain authentication and protected transfers including saved sign-in credentials.
+Combined-folder navigation and signatures now describe the actual controls and behavior clearly.
+
+Re-read the completed conversations topic and clarified watched-conversation notifications. All three platform
+handlers honor notification settings and suppress notices while the main window is in front. The core announces
+watched messages in Inbox and user folders, not every special folder. English still says "always"; no English
+or implementation files changed. State queues a precise audit of conversations/new-mail in the 16 other
+languages with reviewed help. Apply this context during the initial review of remaining languages too.
+
+Static checks have no structural findings beyond intentionally removed marks. All 14 edited help files preserve
+markup, attributes, controls, platform branches and literal keys. Exact pending inventories and completed/source
+hashes reconcile (17,503 catalog messages and 8,730 changed help lines). Report regenerated; git diff --check
+passes. No test suite was run. Finnish now has 21 of 52 help topics reviewed; 31 remain.
+Previous Finnish help checkpoint: `24d0f269`.
+
+Current totals: 17,451 catalog entries and 649 help pages reviewed; 2,729 catalog values improved. Remaining:
+14,641 catalog entries and 603 help pages (including the five additional languages), plus the 32-topic
+notification-context followup. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
