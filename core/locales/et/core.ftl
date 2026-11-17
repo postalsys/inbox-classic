@@ -575,60 +575,38 @@ pgp-publish-done = Teie võti on saidil keys.openpgp.org avaldatud järgmiste aa
 pgp-publish-failed = Võtit ei saanud avaldada: { $error }
 pgp-keyserver-off = Seadetes { $settings } on võtmete otsimine serverist keys.openpgp.org välja lülitatud.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Krüpteeritud ja allkirjastatud: seda saavad lugeda ainult sina ja { $addresses }.
-   *[other] Krüpteeritud ja allkirjastatud: seda saavad lugeda ainult sina ja kirja { $count } saajat.
+    [one] Kiri krüpteeritakse ja allkirjastatakse saatmisel. Sisu saavad lugeda ainult teie ja { $addresses }.
+   *[other] Kiri krüpteeritakse ja allkirjastatakse saatmisel. Sisu saavad lugeda ainult teie ja kirja { $count } saajat.
 }
-# review: new
-pgp-compose-encrypt-ready = Kiri krüpteeritakse ja allkirjastatakse. Lisa saajad, kelle võtmed sul on.
-# review: new
+pgp-compose-encrypt-ready = Kiri krüpteeritakse ja allkirjastatakse saatmisel. Lisage saajad, kelle jaoks on olemas kasutatav võti.
 pgp-compose-missing = { $count ->
-    [one] Aadressil { $addresses } pole võtit, seega ei saa kirja veel krüpteerida.
-   *[other] { $count } saajal pole võtit, seega ei saa kirja veel krüpteerida: { $addresses }.
+    [one] Selle saaja jaoks puudub kasutatav võti: { $addresses }. Kirja ei saa veel krüpteerida.
+   *[other] { $count } saaja jaoks puudub kasutatav võti: { $addresses }. Kirja ei saa veel krüpteerida.
 }
-# review: new
 pgp-compose-looking = Otsitakse võtmeid: { $addresses }...
-# review: new
-pgp-compose-signed = Allkirjastatud: saajad saavad kontrollida, et kiri on sinult ja seda pole muudetud.
-# review: new
-pgp-compose-reply-clear = Krüpteerimata, kuigi kiri, millele see vastab või mida see edastab, oli krüpteeritud.
-# review: new
-pgp-compose-encrypted-files = Kirjale on lisatud krüpteeritud kirja faile, seega saab selle saata ainult krüpteerituna. Lülita krüpteerimine sisse või eemalda need failid.
-# review: new
-pgp-compose-sign-tip = Allkirjasta kiri oma võtmega, et saajad saaksid kontrollida, et see on sinult ja seda pole muudetud
-# review: new
-pgp-compose-sign-tip-encrypted = Krüpteeritud kiri on alati allkirjastatud
-# review: new
-pgp-compose-encrypt-tip = Krüpteeri kiri, et seda saaksid lugeda ainult sina ja selle saajad
-# review: new
-pgp-compose-make-key = Sul pole veel aadressi { $address } jaoks võtit. Kas luua see nüüd? Selle abil saab su kirju allkirjastada ja krüpteerida.
-# review: new
-pgp-compose-key-unusable = Sinu aadressi { $address } võtit ei saa kasutada ({ $state }). Ava Krüpteerimisvõtmed, et importida selle varukoopia või luua uus võti.
-# review: new
-pgp-compose-encrypt-off-quote = See kiri tsiteerib või edastab krüpteeritud kirja. Ilma krüpteerimiseta ei saa seda saata enne, kui eemaldad tsiteeritud osa. Kas lülitada krüpteerimine ikkagi välja?
-# review: new
-pgp-compose-encrypt-off-reply = See kiri vastab krüpteeritud kirjale või edastab selle. Ilma krüpteerimiseta saab su kirja lugeda igaüks, kes seda teel käsitleb. Kas lülitada krüpteerimine välja?
-# review: new
+pgp-compose-signed = Kiri allkirjastatakse saatmisel. Saajad saavad kontrollida allkirja ja kirja sisu muutumatust.
+pgp-compose-reply-clear = Krüpteerimata, kuigi algne kiri oli krüpteeritud.
+pgp-compose-encrypted-files = Kiri sisaldab krüpteeritud kirjast pärit manuseid, seega saab seda saata ainult krüpteerituna. Lülitage krüpteerimine sisse või eemaldage need manused.
+pgp-compose-sign-tip = Allkirjasta kiri saatmisel oma võtmega, et saajad saaksid kontrollida allkirja ja kirja sisu muutumatust
+pgp-compose-sign-tip-encrypted = Krüpteeritud kirjad allkirjastatakse saatmisel alati
+pgp-compose-encrypt-tip = Krüpteeri kirja sisu saatmisel, et seda saaksid lugeda ainult teie ja kirja saajad
+pgp-compose-make-key = Aadressile { $address } pole veel oma võtit seadistatud. Kas soovite selle nüüd luua? Võtmega saate kirju allkirjastada ja krüpteerida.
+pgp-compose-key-unusable = Aadressile { $address } määratud võtit ei saa kasutada. Põhjus: { $state }
+    Avage aken „Krüpteerimisvõtmed“, et importida selle võtme varukoopia või luua uus võti.
+pgp-compose-encrypt-off-quote = Kiri sisaldab veel krüpteeritud kirjast pärit teksti, pilte või manuseid. Krüpteerimata saatmiseks tuleb need eemaldada. Kas soovite krüpteerimise siiski välja lülitada?
+pgp-compose-encrypt-off-reply = Algne kiri oli krüpteeritud. Kui saadate vastuse või edastate kirja krüpteerimata, saavad kirja vahendavad meiliserverid selle sisu lugeda. Kas soovite krüpteerimise välja lülitada?
 pgp-recipient-verified = Võti kontrollitud
-# review: new
 pgp-recipient-found = Võti kontrollimata
-# review: new
-pgp-recipient-own = Sinu enda võti
-# review: new
+pgp-recipient-own = Teie enda võti
 pgp-recipient-looking = Otsitakse võtit...
-# review: new
 pgp-recipient-missing = Võtit pole
-# review: new
-pgp-recipient-not-found = Võtit pole: { $date } ei leitud ühtegi
-# review: new
+pgp-recipient-not-found = Võtit ei leitud. Viimane otsing: { $date }
 pgp-recipient-unusable = Võtit ei saa kasutada: { $state }
-# review: new
-pgp-recipients-intro = Kiri krüpteeritakse iga saaja võtmele ja ka sinu omale.
-# review: new
+pgp-recipients-intro = Kirja krüpteerimiseks kasutatakse kõigi saajate võtmeid ja teie enda võtit.
 pgp-recipients-intro-missing = { $count ->
-    [one] Ühel saajal pole võtit, millele krüpteerida. Otsi tema võti, eemalda ta sellest kirjast või saada kiri krüpteerimata.
-   *[other] { $count } saajal pole võtit, millele krüpteerida. Otsi nende võtmed, eemalda nad sellest kirjast või saada kiri krüpteerimata.
+    [one] Ühe saaja jaoks puudub kasutatav võti. Otsige tema võtit või eemaldage saaja kirjast. Krüpteerimata saab kirja saata ainult siis, kui selles pole enam krüpteeritud kirjadest pärit teksti, pilte ega manuseid.
+   *[other] { $count } saaja jaoks puudub kasutatav võti. Otsige nende võtmeid või eemaldage need saajad kirjast. Krüpteerimata saab kirja saata ainult siis, kui selles pole enam krüpteeritud kirjadest pärit teksti, pilte ega manuseid.
 }
 pgp-details-part = Osa { $number }: { $label }
 pgp-details-signed = Allkirjastatud { $when } võtmega { $key }

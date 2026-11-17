@@ -1,26 +1,24 @@
-<!--review-->
 <h1>Kirja allkirjastamine ja krüpteerimine</h1>
-<p class="summary">Allkirjasta kiri, et saajad teaksid, et see on sinult, ja krüpteeri see, et ainult nemad saaksid seda lugeda.</p>
-<p>Allkirjastatud kiri näitab, et sina selle kirjutasid ja et keegi seda teel ei muutnud. Krüpteeritud kirja saavad lugeda ainult selle saajad ja sina ning see on alati ka allkirjastatud. Mõlemaks on sul vaja oma võtit.</p>
-<p>Kirja allkirjastamiseks või krüpteerimiseks:</p>
+<p class="summary">Allkirjastage kiri digitaalselt ja krüpteerige selle sisu, et seda saaksid lugeda ainult teie ja kirja saajad.</p>
+<p>Digiallkirjaga saab kontrollida, et kirja sisu pole pärast allkirjastamist muudetud. Võtme omaniku kinnitamiseks tuleb võtit eraldi kontrollida. Krüpteeritud kirja sisu saavad lugeda ainult teie ja kirja saajad. Krüpteeritud kirjad allkirjastatakse saatmisel alati. Allkirjastamiseks ja krüpteerimiseks on vaja oma võtit.</p>
+<p>Kirja allkirjastamiseks või krüpteerimiseks tehke järgmist.</p>
 <ol>
-    <li>Klõpsa kirjaaknas nuppu <b data-text="ui-tb-sign"></b> või <b data-text="ui-tb-encrypt"></b> või vali <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> või <b data-text="cmd-compose-encrypt"></b>. Võid ka vajutada <kbd data-command="compose_sign"></kbd> või <kbd data-command="compose_encrypt"></kbd>. Kui sul pole veel võtit, pakub Inbox Classic selle loomist.</li>
-    <li>Klõpsa nuppu <b data-text="ui-tb-send"></b>.</li>
+    <li>Klõpsake kirjaaknas nuppu <b data-text="ui-tb-sign"></b> või <b data-text="ui-tb-encrypt"></b> või valige menüüst <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> või <b data-text="cmd-compose-encrypt"></b>. Võite ka vajutada <kbd data-command="compose_sign"></kbd> või <kbd data-command="compose_encrypt"></kbd>. Kui valitud saatja aadressile pole võtit määratud, pakub Inbox Classic võtme loomist.</li>
+    <li>Klõpsake nuppu <b data-text="ui-tb-send"></b>.</li>
 </ol>
-<p>Kui <b data-text="ui-tb-encrypt"></b> on sees, näitab teema all olev rida iga saajat koos lukuga ja Inbox Classic otsib võtmeid, mida tal veel pole:</p>
+<p>Kui <b data-text="ui-tb-encrypt"></b> on sisse lülitatud, kuvatakse teema all iga saaja juures tema võtme olekut näitav sümbol. Inbox Classic otsib puuduvaid võtmeid:</p>
 <table>
-    <tr><th>Lukk</th><th>Tähendus</th></tr>
-    <tr><td>Roheline</td><td>Oled saaja võtme kontrollinud.</td></tr>
-    <tr><td>Sinine</td><td>Sul on saaja võti, kuid sa pole seda kontrollinud.</td></tr>
+    <tr><th>Värv</th><th>Tähendus</th></tr>
+    <tr><td>Roheline</td><td>Olete kontrollinud, kellele võti kuulub.</td></tr>
+    <tr><td>Sinine</td><td>Võtme omanik on kinnitamata või on tegu teie enda võtmega.</td></tr>
     <tr><td>Hall</td><td>Inbox Classic otsib saaja võtit.</td></tr>
-    <tr><td>Merevaik</td><td>Saaja jaoks ei leitud võtit.</td></tr>
+    <tr><td>Oranž</td><td>Saaja jaoks puudub kasutatav võti.</td></tr>
 </table>
-<h2>Kui saajal pole võtit</h2>
-<p>Krüpteeritud kiri saadetakse ainult siis, kui igal saajal on võti. Kui kellelgi pole, avab <b data-text="ui-tb-send"></b> akna <b data-text="ui-recipient-keys-title"></b>. Seal saad klõpsata <b data-text="ui-recipient-find-key"></b>, et uuesti otsida, <b data-text="ui-recipient-remove"></b>, et see inimene välja jätta, või <b data-text="ui-send-unencrypted"></b>. Võid ka paluda temalt avalikku võtit ja selle importida.</p>
+<h2>Kui saaja jaoks puudub kasutatav võti</h2>
+<p>Krüpteeritud kirja saatmiseks peab kõigi saajate jaoks olema kasutatav võti. Kui mõni puudub, avaneb nupu <b data-text="ui-tb-send"></b> vajutamisel aken <b data-text="ui-recipient-keys-title"></b>. Nupuga <b data-text="ui-recipient-find-key"></b> saate otsingut korrata ja nupuga <b data-text="ui-recipient-remove"></b> saaja kirjast eemaldada. Nuppu <b data-text="ui-send-unencrypted"></b> saate kasutada siis, kui kirjas pole enam krüpteeritud kirjadest pärit sisu. Võite ka paluda saajal saata oma avalik võti ja selle importida.</p>
 <h2>Vastused krüpteeritud kirjadele</h2>
-<p>Vastus krüpteeritud kirjale või selle edastus algab nii, et <b data-text="ui-tb-encrypt"></b> on sees, ja Inbox Classic küsib enne, kui selle välja lülitad. Seni kuni kiri tsiteerib veel krüpteeritud teksti või sisaldab selle manuseid, saab seda saata ainult krüpteerituna.</p>
-<p>Krüpteeritud kirja mustandid salvestatakse krüpteerituna, nagu ka selle koopia kaustas <b data-text="folder-sent"></b>.</p>
-<h2>Jaga oma avalikku võtit</h2>
-<p>Et keegi saaks sulle krüpteeritud kirju saata, vali <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Sinu avalik võti lisatakse kirjale failina.</p>
+<p>Krüpteeritud kirjale vastamisel või selle edastamisel on <b data-text="ui-tb-encrypt"></b> automaatselt sisse lülitatud. Väljalülitamisel küsib Inbox Classic kinnitust. Kuni kirjas on krüpteeritud kirjast pärit tsiteeritud teksti, pilte või manuseid, saab seda saata ainult krüpteerituna.</p>
+<p>Krüpteeritud kirja mustandid salvestatakse krüpteerituna teie enda võtmega. Ka kausta <b data-text="folder-sent"></b> salvestatud koopia jääb krüpteerituks.</p>
+<h2>Avaliku võtme jagamine</h2>
+<p>Avaliku võtme jagamiseks valige menüüst <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Valitud saatja aadressi avalik võti lisatakse kirjale failina. Selle abil saavad saajad teile krüpteeritud kirju saata.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->

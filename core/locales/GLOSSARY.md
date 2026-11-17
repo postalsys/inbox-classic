@@ -125,6 +125,12 @@ the localized combinations beside them.
   "Sisselogimisandmed" includes saved sign-in tokens; it does not mean only a login password.
 - A list of addresses must work for one or several entries. Introduce it with a colon instead of forcing a
   singular case onto the placeholder. Contact names can be placed in parentheses to avoid requiring inflection.
+- Compose status describes protection applied "saatmisel". Use "digiallkiri" or "digitaalne allkirjastamine"
+  when distinguishing signing from signature text. Signature checks do not by themselves confirm key ownership.
+- Use "kasutatav võti" for a key that can be used, including expiry/revocation constraints. A message is
+  encrypted "võtmega", not "võtmele". Recipient removal changes message address fields, not the address book.
+- A key-state reason can be a full recovery instruction. Put it after "Põhjus:" and separate the next instruction;
+  do not embed it in parentheses. Keep polite plural wording in explanations and confirmation questions.
 
 Estonian settings review (round 2):
 - New-mail settings heading: "Uued kirjad". A notification is a "teatis"; "teavita" remains the action.
