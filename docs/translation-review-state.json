@@ -129497,7 +129497,7 @@
     "publication_ci_observation": {
       "run": 44177344672,
       "commit": "37eb82fab56e4daea45ce7e92bf68fc5d4e41d44",
-      "finding": "Existing core/Mac/Linux tests still look for decrypted; current English warning says unencrypted copy. Windows/Linux export tests expect old password wording, superseded by saved passwords, sign-in credentials and private keys. The warning texts were updated at review baseline 7c0b1672. A separate compatibility commit will update only the stale test expectations before this batch is published. No local suite will run.",
+      "finding": "Existing core/Mac/Linux tests still looked for decrypted; current English warning says unencrypted copy. Windows/Linux export tests expected old password wording, superseded by saved passwords, sign-in credentials and private keys. Both texts changed at review baseline 7c0b1672. A separate compatibility commit now updates these five test files only: core/Mac/Linux attachment checks compare with the localized catalog text, the Linux export check uses its rendered catalog text, and the Windows export regex matches current English. Existing file-content, warning timing, once-only and export-control checks are preserved. Targeted Rust formatting, Swift parsing, Windows regex-to-source comparison and git diff --check pass. PowerShell is unavailable locally, so its parser was not run. No local test suite or new app build was run; fresh automatic CI results remain pending.",
       "logs": [
         "/private/tmp/inbox-ru-pr139-rust-ci.log",
         "/private/tmp/inbox-ru-pr139-mac-ci.log",

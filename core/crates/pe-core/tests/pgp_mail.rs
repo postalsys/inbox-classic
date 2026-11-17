@@ -780,10 +780,8 @@ fn attachments_open_from_a_private_folder() {
     stored(&w, 2, &encrypted);
     let first = w.core.open_attachment(folder, 2, 0).unwrap().unwrap();
     assert_eq!(std::fs::read_to_string(&first.path).unwrap(), "the secret plan");
-    assert!(
-        first.note.as_deref().is_some_and(|note| note.contains("decrypted")),
-        "{first:?}"
-    );
+    let expected_note = pe_core::i18n::tr(pe_core::i18n::Text::AttachmentDecryptedNote);
+    assert_eq!(first.note.as_deref(), Some(expected_note.as_str()), "{first:?}");
     let second = w.core.open_attachment(folder, 2, 0).unwrap().unwrap();
     assert!(second.note.is_none(), "said once");
     // a signed message that is not encrypted: no note (another store, which was never told one)

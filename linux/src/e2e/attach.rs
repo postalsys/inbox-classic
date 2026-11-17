@@ -371,9 +371,10 @@ async fn encrypted(d: &Driver, inbox: i64) {
     match wait_alert(10).await {
         Some(note) => {
             let text = alert_text(&note);
+            let expected_note = pe_core::i18n::tr(pe_core::i18n::Text::AttachmentDecryptedNote);
             d.check(
-                note.heading().is_some_and(|h| h == "Opening this file") && text.contains("decrypted"),
-                &format!("the first time a note says the file is stored decrypted ({text})"),
+                note.heading().is_some_and(|h| h == "Opening this file") && text.contains(&expected_note),
+                &format!("the first time the localized attachment warning is shown ({text})"),
             );
             d.shot(main.window(), "attach-4-encrypted-note").await;
             d.check(

@@ -67,9 +67,10 @@ pub(super) async fn settings_and_accounts(d: &Driver) {
         .iter()
         .all(|part| check_on(&e, &format!("setup-part-{}", part.0)) == Some(true));
     let off = check_on(&e, "setup-use-passphrase") == Some(false) && named_in(&e, "setup-passphrase").is_none();
+    let expected_note = crate::words::plain(crate::words::Text::UiSetupPassphraseNote);
     let note = descendants::<gtk::Label>(&e)
         .iter()
-        .any(|l| l.is_mapped() && l.text().contains("passwords, sign-ins and private keys"));
+        .any(|l| l.is_mapped() && l.text().as_str() == expected_note.as_str());
     d.check(
         all && off && note,
         "File > Export Settings and Accounts lists the parts, all chosen, with the passphrase off and the words of \
