@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review the remaining 66 late rollback messages in hr, hu, lt, lv, pl, ro, ru, sk, sl, sv and uk (six undone-* IDs each), checking their preformatted messages phrases too. The other 17 languages have completed these additions. Then Croatian initial review and the remaining ten languages. All recorded context followups are complete. Do not run tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Begin Croatian (hr) app.ftl in actual UI context. Fresh upstream audit after all 168 rollback reviews found no new strings, help or languages; origin/master remains 46b938a7. Croatian has 1330 catalog entries and 52 help topics pending. Its messages count phrase, six undone-* messages and three list-loading labels are already reviewed. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. All context followups complete; retain glossary notification, logo-cache, attachment-reminder and rollback context. Do not run tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -10013,7 +10013,6 @@
           "ui-setup-first-run"
         ],
         "core.ftl": [
-          "messages",
           "decimal-separator",
           "size-bytes",
           "size-kb",
@@ -10461,13 +10460,7 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
+          "attachment-decrypted-note"
         ],
         "help.ftl": [
           "help-title",
@@ -10830,6 +10823,30 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "hr-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "messages",
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 6,
+          "files": {
+            "core/locales/hr/core.ftl": "fcc85649a9e64a0b88716081dd90e67bf7f78c24ce7ed52e3afe1b624ead43d6"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run. Exact [1] separates a standalone single-message noun/pronoun from CLDR [one] values such as 21 or 101. Retained locale categories where predicates directly agree with the counted phrase, including Slovenian dual and Latvian zero forms in messages. Count phrases in parentheses remain nominative."
         }
       ]
     },
@@ -11464,7 +11481,6 @@
           "ui-setup-first-run"
         ],
         "core.ftl": [
-          "messages",
           "decimal-separator",
           "size-bytes",
           "size-kb",
@@ -11912,13 +11928,7 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
+          "attachment-decrypted-note"
         ],
         "help.ftl": [
           "help-title",
@@ -12281,6 +12291,30 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "hu-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "messages",
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 4,
+          "files": {
+            "core/locales/hu/core.ftl": "c913b210c67339044f191171ff527c2569393ada88d4d548090d0ed42aeda055"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run. Clarified the original folder without attaching endings or articles to a placeholder."
         }
       ]
     },
@@ -14789,7 +14823,6 @@
           "ui-setup-first-run"
         ],
         "core.ftl": [
-          "messages",
           "decimal-separator",
           "size-bytes",
           "size-kb",
@@ -15237,13 +15270,7 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
+          "attachment-decrypted-note"
         ],
         "help.ftl": [
           "help-title",
@@ -15606,6 +15633,30 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "lt-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "messages",
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 6,
+          "files": {
+            "core/locales/lt/core.ftl": "572a94faea51fd9eea144834a78484984c86324b77804cb1e848fa51ed91d5f7"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run. Exact [1] separates a standalone single-message noun/pronoun from CLDR [one] values such as 21 or 101. Retained locale categories where predicates directly agree with the counted phrase, including Slovenian dual and Latvian zero forms in messages. Count phrases in parentheses remain nominative. Actual folder names are quoted and follow an inflected folder head noun; the worker supplies real source/destination folders here."
         }
       ]
     },
@@ -16240,7 +16291,6 @@
           "ui-setup-first-run"
         ],
         "core.ftl": [
-          "messages",
           "decimal-separator",
           "size-bytes",
           "size-kb",
@@ -16688,13 +16738,7 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
+          "attachment-decrypted-note"
         ],
         "help.ftl": [
           "help-title",
@@ -17057,6 +17101,30 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "lv-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "messages",
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 6,
+          "files": {
+            "core/locales/lv/core.ftl": "3693bad37f0cdbbadccce3395ef4dcc95a537153142b6bf368336a02e6ab5d10"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run. Exact [1] separates a standalone single-message noun/pronoun from CLDR [one] values such as 21 or 101. Retained locale categories where predicates directly agree with the counted phrase, including Slovenian dual and Latvian zero forms in messages. Count phrases in parentheses remain nominative. Actual folder names are quoted and follow an inflected folder head noun; the worker supplies real source/destination folders here."
         }
       ]
     },
@@ -19592,7 +19660,6 @@
           "ui-setup-first-run"
         ],
         "core.ftl": [
-          "messages",
           "decimal-separator",
           "size-bytes",
           "size-kb",
@@ -20040,13 +20107,7 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
+          "attachment-decrypted-note"
         ],
         "help.ftl": [
           "help-title",
@@ -20409,6 +20470,30 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "pl-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "messages",
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/pl/core.ftl": "477797106937ca5ba51af33bb0cd5492fd8e0a15ad3b423dd34b7dbfb8bc39f2"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run."
         }
       ]
     },
@@ -22910,7 +22995,6 @@
           "ui-setup-first-run"
         ],
         "core.ftl": [
-          "messages",
           "decimal-separator",
           "size-bytes",
           "size-kb",
@@ -23358,13 +23442,7 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
+          "attachment-decrypted-note"
         ],
         "help.ftl": [
           "help-title",
@@ -23727,6 +23805,30 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "ro-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "messages",
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 3,
+          "files": {
+            "core/locales/ro/core.ftl": "5b04f8de270ed117d8e28434592a474e25ca0c5d87fe453799d91d2ca98c940e"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run."
         }
       ]
     },
@@ -24361,7 +24463,6 @@
           "ui-setup-first-run"
         ],
         "core.ftl": [
-          "messages",
           "decimal-separator",
           "size-bytes",
           "size-kb",
@@ -24809,13 +24910,7 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
+          "attachment-decrypted-note"
         ],
         "help.ftl": [
           "help-title",
@@ -25178,6 +25273,30 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "ru-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "messages",
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 6,
+          "files": {
+            "core/locales/ru/core.ftl": "c7de5d373edc94d6eac88b46f721b7251d1cab7337b70877dd7ede06d483a6b4"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run. Exact [1] separates a standalone single-message noun/pronoun from CLDR [one] values such as 21 or 101. Retained locale categories where predicates directly agree with the counted phrase, including Slovenian dual and Latvian zero forms in messages. Count phrases in parentheses remain nominative. Actual folder names are quoted and follow an inflected folder head noun; the worker supplies real source/destination folders here."
         }
       ]
     },
@@ -25812,7 +25931,6 @@
           "ui-setup-first-run"
         ],
         "core.ftl": [
-          "messages",
           "decimal-separator",
           "size-bytes",
           "size-kb",
@@ -26260,13 +26378,7 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
+          "attachment-decrypted-note"
         ],
         "help.ftl": [
           "help-title",
@@ -26629,6 +26741,30 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "sk-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "messages",
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/sk/core.ftl": "476fc94eb24c921739a2959af52610233b525515bd129241d9883ae7c82b6fec"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run."
         }
       ]
     },
@@ -27263,7 +27399,6 @@
           "ui-setup-first-run"
         ],
         "core.ftl": [
-          "messages",
           "decimal-separator",
           "size-bytes",
           "size-kb",
@@ -27711,13 +27846,7 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
+          "attachment-decrypted-note"
         ],
         "help.ftl": [
           "help-title",
@@ -28080,6 +28209,30 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "sl-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "messages",
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 6,
+          "files": {
+            "core/locales/sl/core.ftl": "1c2bb9dd3f05cbb0802ac5ab6b864bf477cc83267b0581685862f2e3ee9f2cf6"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run. Exact [1] separates a standalone single-message noun/pronoun from CLDR [one] values such as 21 or 101. Retained locale categories where predicates directly agree with the counted phrase, including Slovenian dual and Latvian zero forms in messages. Count phrases in parentheses remain nominative."
         }
       ]
     },
@@ -28714,7 +28867,6 @@
           "ui-setup-first-run"
         ],
         "core.ftl": [
-          "messages",
           "decimal-separator",
           "size-bytes",
           "size-kb",
@@ -29162,13 +29314,7 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
+          "attachment-decrypted-note"
         ],
         "help.ftl": [
           "help-title",
@@ -29531,6 +29677,30 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "sv-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "messages",
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/sv/core.ftl": "a5523b0cef8aa3089c76f8d1bf6e07e02fe21179e90e0b2382a910dec44dfb97"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run."
         }
       ]
     },
@@ -30165,7 +30335,6 @@
           "ui-setup-first-run"
         ],
         "core.ftl": [
-          "messages",
           "decimal-separator",
           "size-bytes",
           "size-kb",
@@ -30613,13 +30782,7 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note",
-          "undone-move",
-          "undone-delete",
-          "undone-archive",
-          "undone-read",
-          "undone-unread",
-          "undone-flags"
+          "attachment-decrypted-note"
         ],
         "help.ftl": [
           "help-title",
@@ -30982,6 +31145,30 @@
           },
           "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
           "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
+        },
+        {
+          "id": "uk-rollback-review-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "messages",
+              "undone-move",
+              "undone-delete",
+              "undone-archive",
+              "undone-read",
+              "undone-unread",
+              "undone-flags"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 6,
+          "files": {
+            "core/locales/uk/core.ftl": "a06ecdcd2fe7cdedf02d8989076974c0583e017446f84340beb11a9f3202a6b7"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run. Exact [1] separates a standalone single-message noun/pronoun from CLDR [one] values such as 21 or 101. Retained locale categories where predicates directly agree with the counted phrase, including Slovenian dual and Latvian zero forms in messages. Count phrases in parentheses remain nominative."
         }
       ]
     },
@@ -40006,7 +40193,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Fetched origin after Finnish completion 4369af4a. Local master 5573ee4b, origin/master 46b938a7, local/remote wave1 8df686a4. Found six new undone-* IDs per language (168 translated messages), no modified existing values or new languages/help. Integrated upstream source ancestry into review branch; retained all prior English/translation corrections and appended marked drafts. All 58 imported noncatalog paths match upstream exactly. Exact pending inventory now 14809 catalog entries and 572 help topics, plus 32 notification-context followups. Static catalog/help checks, exact marks and completed hashes pass; --since starting_commit identifies the 168 newly pending messages. Offline pe-ffi build passed in isolated target; no tests run. Final audit still required after the queue.",
+    "latest_source_audit": "Fetched origin after completing all 168 rollback messages. Local master 5573ee4b6a787c7813e76251023312d4fb3a4cdd, origin/master 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4, local/remote wave1 8df686a41750158ebaf60784ab8db166e34b1fba. No new translation/help/command changes from any recorded source ref and no new languages. Since-start audit reports 0 newly pending messages and 0 help passages. Current 28-language inventories, exact pending marks and completed translation/English hashes reconcile: 14630 catalog entries and 572 help topics remain in 11 initial-review languages. All recorded context followups are complete. No tests run. Final audit still required after the full queue.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -40040,6 +40227,20 @@
         "pending_catalog_entries": 14809,
         "pending_help_topics": 572,
         "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run."
+      },
+      {
+        "kind": "post-rollback-review audit",
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba"
+        },
+        "newly_pending_catalog_entries": 0,
+        "newly_pending_help_passages": 0,
+        "pending_catalog_entries": 14630,
+        "pending_help_topics": 572,
+        "validation": "All 28 inventories/variables, exact marks and completed file/source hashes match. --since starting_commit reports zero newly pending entries/passages. No tests run."
       }
     ]
   },

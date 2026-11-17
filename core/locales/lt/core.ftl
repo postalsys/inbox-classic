@@ -2,7 +2,6 @@
 
 ## Counts and sizes
 
-# review: new
 messages = { $count ->
     [one] { $count } laiškas
     [few] { $count } laiškai
@@ -1255,33 +1254,27 @@ attachment-runs-programs = Failas „{ $name }“ gali paleisti programas, todė
 # review: new
 attachment-decrypted-note = Šis priedas yra iš užšifruoto laiško. Kad galėtų jį atidaryti, Inbox Classic laiko jį iššifruotą šiame kompiuteryje, jūsų aplanke, kurį Inbox Classic ištuština po paros.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
-    [one] Serveris neperkėlė laiško, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }, paskirtis: { $folder }): { $reason }
-   *[other] Serveris neperkėlė laiškų, todėl jie vėl yra aplanke „{ $from }“ ({ $messages }, paskirtis: { $folder }): { $reason }
+    [1] Serveris neperkėlė laiško į aplanką „{ $folder }“, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
+   *[other] Serveris neperkėlė laiškų į aplanką „{ $folder }“, todėl jie vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
 }
-# review: new
 undone-delete = { $count ->
-    [one] Serveris nepanaikino laiško, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
+    [1] Serveris nepanaikino laiško, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
    *[other] Serveris nepanaikino laiškų, todėl jie vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
 }
-# review: new
 undone-archive = { $count ->
-    [one] Serveris nearchyvavo laiško, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
+    [1] Serveris nearchyvavo laiško, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
    *[other] Serveris nearchyvavo laiškų, todėl jie vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
 }
-# review: new
 undone-read = { $count ->
-    [one] Serveris nepažymėjo laiško kaip skaityto, todėl jis vėl neskaitytas ({ $messages }): { $reason }
+    [1] Serveris nepažymėjo laiško kaip skaityto, todėl jis vėl neskaitytas ({ $messages }): { $reason }
    *[other] Serveris nepažymėjo laiškų kaip skaitytų, todėl jie vėl neskaityti ({ $messages }): { $reason }
 }
-# review: new
 undone-unread = { $count ->
-    [one] Serveris nepažymėjo laiško kaip neskaityto, todėl jis vėl skaitytas ({ $messages }): { $reason }
+    [1] Serveris nepažymėjo laiško kaip neskaityto, todėl jis vėl skaitytas ({ $messages }): { $reason }
    *[other] Serveris nepažymėjo laiškų kaip neskaitytų, todėl jie vėl skaityti ({ $messages }): { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Serveris nepakeitė laiško vėliavėlių, todėl jis nepasikeitė ({ $messages }): { $reason }
-   *[other] Serveris nepakeitė laiškų vėliavėlių, todėl jie nepasikeitė ({ $messages }): { $reason }
+    [1] Serveris nepakeitė laiško vėliavėlių, todėl pakeitimas atšauktas ({ $messages }): { $reason }
+   *[other] Serveris nepakeitė laiškų vėliavėlių, todėl pakeitimas atšauktas ({ $messages }): { $reason }
 }

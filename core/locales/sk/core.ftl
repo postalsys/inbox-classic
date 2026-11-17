@@ -2,7 +2,6 @@
 
 ## Counts and sizes
 
-# review: new
 messages = { $count ->
     [one] 1 správa
     [few] { $count } správy
@@ -1284,39 +1283,33 @@ attachment-runs-programs = Súbor „{ $name }“ môže spúšťať programy, p
 # review: new
 attachment-decrypted-note = Táto príloha pochádza zo šifrovanej správy. Aby ju mohol otvoriť, Inbox Classic ju uloží dešifrovanú v tomto počítači, do vášho priečinka, ktorý Inbox Classic po jednom dni vyprázdni.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
     [one] Server nepresunul správu do priečinka { $folder }, takže { $messages } je opäť v priečinku { $from }: { $reason }
     [few] Server nepresunul správy do priečinka { $folder }, takže { $messages } sú opäť v priečinku { $from }: { $reason }
    *[other] Server nepresunul správy do priečinka { $folder }, takže { $messages } je opäť v priečinku { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] Server neodstránil správu, takže { $messages } je opäť v priečinku { $from }: { $reason }
     [few] Server neodstránil správy, takže { $messages } sú opäť v priečinku { $from }: { $reason }
    *[other] Server neodstránil správy, takže { $messages } je opäť v priečinku { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] Server nearchivoval správu, takže { $messages } je opäť v priečinku { $from }: { $reason }
     [few] Server nearchivoval správy, takže { $messages } sú opäť v priečinku { $from }: { $reason }
    *[other] Server nearchivoval správy, takže { $messages } je opäť v priečinku { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
     [one] Server neoznačil správu ako prečítanú, takže { $messages } je opäť neprečítaná: { $reason }
     [few] Server neoznačil správy ako prečítané, takže { $messages } sú opäť neprečítané: { $reason }
    *[other] Server neoznačil správy ako prečítané, takže { $messages } je opäť neprečítaných: { $reason }
 }
-# review: new
 undone-unread = { $count ->
     [one] Server neoznačil správu ako neprečítanú, takže { $messages } je opäť prečítaná: { $reason }
     [few] Server neoznačil správy ako neprečítané, takže { $messages } sú opäť prečítané: { $reason }
    *[other] Server neoznačil správy ako neprečítané, takže { $messages } je opäť prečítaných: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Server nezmenil príznaky správy, takže { $messages } zostáva bez zmeny: { $reason }
-    [few] Server nezmenil príznaky správ, takže { $messages } zostávajú bez zmeny: { $reason }
-   *[other] Server nezmenil príznaky správ, takže { $messages } zostáva bez zmeny: { $reason }
+    [one] Server nezmenil príznaky správy, preto bola zmena vrátená späť ({ $messages }): { $reason }
+    [few] Server nezmenil príznaky správ, preto bola zmena vrátená späť ({ $messages }): { $reason }
+   *[other] Server nezmenil príznaky správ, preto bola zmena vrátená späť ({ $messages }): { $reason }
 }

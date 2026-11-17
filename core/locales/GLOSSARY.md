@@ -131,6 +131,11 @@ Context notes:
   Clear Flag must use another. Account/folder context menus, Settings and folder-picker buttons have their
   own combined scopes beyond the main menus. The extended review helper covers 44 such scopes.
 
+- The `undone-*` failure bar embeds the already-localized `messages` count phrase. Source and destination
+  placeholders here are actual folder names. Moves, deletion and archiving restore local rows after failure;
+  a refused flag/read-state change reverses that requested change. Separate a standalone single-message noun
+  or pronoun from numeric agreement: CLDR `[one]` can include 21 or 101, so use exact `[1]` where required.
+
 - Watched-conversation alerts obey notification settings and are suppressed while the main window is in
   front. Watching also enables alerts for messages in user folders, not every special folder. Do not promise
   that watched messages are always announced. Ignored conversations do not produce new-mail alerts.
@@ -313,8 +318,9 @@ where the singular reads better ("Pārvietot ziņojumu").
 
 - Polite plural "jūs" ("Noklikšķiniet", "Ievadiet"); menus and buttons in the infinitive, sentence case.
 - A verb or participle next to `$messages` agrees through `$count` (`[one]` Pārvietots, `*[other]` Pārvietoti).
-- After "uz" folder names stay nominative ("uz Arhīvs"), a compromise; `their-folders` = "to mapēm",
-  `transfer-another-account` = "citu kontu".
+- For actual folder names, inflect a head noun and quote the name ("uz mapi „{ $folder }”",
+  "mapē „{ $from }”"). Where a destination can instead be `their-folders` ("to mapēm") or
+  `transfer-another-account` ("citu kontu"), phrase the sentence to accommodate that fallback too.
 - Quotes „…”; days of the week lowercase; keys unchanged.
 - Access keys on ASCII letters only (no ā, č, ē and so on).
 

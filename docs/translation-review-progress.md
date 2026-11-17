@@ -17,16 +17,17 @@ Commit completed batches regularly and preserve an exact resume point.
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
 - Finnish is complete: 1,340 catalog entries and all 52 help topics reviewed, with 174 catalog value
-  improvements. The new rollback messages are now reviewed in all 17 previously reviewed languages
-  (102 of 168 entries). The remaining 66 are in hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. Continue those, then
-  Croatian (hr) and the remaining ten initial-review languages. The notification-context followup is complete across all 17 previously reviewed languages:
+  improvements. All 168 late rollback messages are reviewed across 28 languages, along with the 11
+  shared count phrases they depend on in the remaining initial-review languages. The fresh upstream audit
+  found no further additions. Begin Croatian (hr) app.ftl; 1,330 catalog entries and 52 help topics remain.
+  Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. The notification-context followup is complete across all 17 previously reviewed languages:
   all 32 queued topics corrected, with Finnish handled earlier. Apply the glossary context note to the
   remaining initial reviews. Followup topics are separate from initial-scope totals.
   The extended mnemonic followup is complete: 44 actual menu/dialog scopes pass across all 17 languages
   with reviewed catalogs. Use the expanded scopes for remaining languages; exact definitions are in state.
   Upstream master `46b938a7` is integrated at `b4dbd1e3`, including the new rollback drafts.
   Greek’s original scope is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. The logo-cache and
-  attachment-reminder context followups are complete. Eleven languages still need their initial reviews; those same 11 have the remaining rollback drafts pending. All 84 late list-loading labels are reviewed.
+  attachment-reminder context followups are complete. Eleven languages still need their initial reviews. All 84 late list-loading labels and 168 rollback messages are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
   Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
   The persistent-logo-cache followup is now complete: 42 help topics checked (37 changed, five retained)
@@ -808,8 +809,23 @@ exact pending inventories and completed/source hashes reconcile (17,605 messages
 Report regenerated; git diff --check passes. No test suite was run. Sixty-six late messages remain in the 11
 languages whose initial reviews are still pending. Notification followup checkpoint: `d70398ad`.
 
-Current totals: 17,553 catalog entries and 680 help pages reviewed; 2,767 catalog values improved. Remaining:
-14,707 catalog entries and 572 help pages (including 66 late rollback entries). All recorded context
+### All late rollback messages completed
+
+Reviewed the final 66 rollback messages in hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk and their 11 shared counted-message
+phrases, improving 46 values. Corrected standalone singular references at 21/101, preserved direct agreement
+with counted phrases and Slovenian dual forms, clarified restored read states and reversed flag changes, and
+used actual-folder head nouns without inflecting names. Updated glossary context and Latvian folder guidance.
+
+All 168 late messages are now reviewed across 28 languages. Static checks have no unexpected findings;
+complete catalog IDs/variables, exact pending marks and completed/source hashes reconcile (17,682 messages
+and 9,122 changed help lines). Report regenerated; git diff --check passes. No test suite was run.
+Fresh fetch: origin/master remains `46b938a7`, local master `5573ee4b`, local/remote wave1 `8df686a4`.
+No new localization/help/command changes or languages; --since-start reports zero newly pending entries or
+passages. Begin Croatian app.ftl. Each of the remaining 11 languages has 1,330 catalog entries and 52 help
+topics left. Previous late-review checkpoint: `4a5719cb`.
+
+Current totals: 17,630 catalog entries and 680 help pages reviewed; 2,813 catalog values improved. Remaining:
+14,630 catalog entries and 572 help pages. All recorded context
 followups are complete. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final

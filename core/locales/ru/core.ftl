@@ -2,7 +2,6 @@
 
 ## Counts and sizes
 
-# review: new
 messages = { $count ->
     [one] { $count } сообщение
     [few] { $count } сообщения
@@ -1276,33 +1275,32 @@ attachment-runs-programs = «{ $name }» может запускать прог�
 # review: new
 attachment-decrypted-note = Это вложение из зашифрованного сообщения. Чтобы его открыть, Inbox Classic хранит расшифрованную копию на этом компьютере, в вашей папке, которую Inbox Classic очищает через сутки.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
-    [one] Сервер не переместил { $messages } в папку { $folder }, поэтому оно снова в папке { $from }: { $reason }
-   *[other] Сервер не переместил { $messages } в папку { $folder }, поэтому они снова в папке { $from }: { $reason }
+    [1] Сервер не переместил { $messages } в папку «{ $folder }», поэтому оно снова в папке «{ $from }»: { $reason }
+    [one] Сервер не переместил { $messages } в папку «{ $folder }», поэтому сообщения снова в папке «{ $from }»: { $reason }
+   *[other] Сервер не переместил { $messages } в папку «{ $folder }», поэтому они снова в папке «{ $from }»: { $reason }
 }
-# review: new
 undone-delete = { $count ->
-    [one] Сервер не удалил { $messages }, поэтому оно снова в папке { $from }: { $reason }
-   *[other] Сервер не удалил { $messages }, поэтому они снова в папке { $from }: { $reason }
+    [1] Сервер не удалил { $messages }, поэтому оно снова в папке «{ $from }»: { $reason }
+    [one] Сервер не удалил { $messages }, поэтому сообщения снова в папке «{ $from }»: { $reason }
+   *[other] Сервер не удалил { $messages }, поэтому они снова в папке «{ $from }»: { $reason }
 }
-# review: new
 undone-archive = { $count ->
-    [one] Сервер не заархивировал { $messages }, поэтому оно снова в папке { $from }: { $reason }
-   *[other] Сервер не заархивировал { $messages }, поэтому они снова в папке { $from }: { $reason }
+    [1] Сервер не заархивировал { $messages }, поэтому оно снова в папке «{ $from }»: { $reason }
+    [one] Сервер не заархивировал { $messages }, поэтому сообщения снова в папке «{ $from }»: { $reason }
+   *[other] Сервер не заархивировал { $messages }, поэтому они снова в папке «{ $from }»: { $reason }
 }
-# review: new
 undone-read = { $count ->
-    [one] Сервер не отметил { $messages } как прочитанное, поэтому оно снова непрочитанное: { $reason }
-   *[other] Сервер не отметил { $messages } как прочитанные, поэтому они снова непрочитанные: { $reason }
+    [1] Сервер не отметил { $messages } как прочитанное, поэтому оно снова отмечено как непрочитанное: { $reason }
+    [one] Сервер не отметил { $messages } как прочитанное, поэтому сообщения снова отмечены как непрочитанные: { $reason }
+   *[other] Сервер не отметил { $messages } как прочитанные, поэтому они снова отмечены как непрочитанные: { $reason }
 }
-# review: new
 undone-unread = { $count ->
-    [one] Сервер не отметил { $messages } как непрочитанное, поэтому оно снова прочитанное: { $reason }
-   *[other] Сервер не отметил { $messages } как непрочитанные, поэтому они снова прочитанные: { $reason }
+    [1] Сервер не отметил { $messages } как непрочитанное, поэтому оно снова отмечено как прочитанное: { $reason }
+    [one] Сервер не отметил { $messages } как непрочитанное, поэтому сообщения снова отмечены как прочитанные: { $reason }
+   *[other] Сервер не отметил { $messages } как непрочитанные, поэтому они снова отмечены как прочитанные: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Сервер не изменил флажки, поэтому { $messages } осталось без изменений: { $reason }
-   *[other] Сервер не изменил флажки, поэтому { $messages } остались без изменений: { $reason }
+    [one] Сервер не изменил флажки, поэтому изменение отменено ({ $messages }): { $reason }
+   *[other] Сервер не изменил флажки, поэтому изменение отменено ({ $messages }): { $reason }
 }
