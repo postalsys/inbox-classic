@@ -318,8 +318,8 @@ extension UITest {
         doubleClick(strip, 0)
         if let note = await waitWindow("alert", 10) {
             let words = alertText(note)
-            check(words.contains(Text.uiAttachmentNoteTitle.text) && words.contains("decrypted"),
-                  "the first time a note says it is stored decrypted (\(words))")
+            check(words.contains(Text.uiAttachmentNoteTitle.text) && words.contains(Text.attachmentDecryptedNote.text),
+                  "the first time the localized attachment warning is shown (\(words))")
             check(opened.isEmpty, "shown before the file is opened")
             await shot(note, "attach-4-encrypted-note")
             answer(note, "OK")

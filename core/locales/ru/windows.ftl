@@ -148,9 +148,7 @@ win-book-find-label = Введите имя или адрес электронн
 win-send = &Отправить
 # review: new
 win-dont-send = &Не отправлять
-# review: new
 win-unsubscribe = &Отписаться
-# review: new
 win-dont-unsubscribe = &Не отписываться
 # review: new
 win-forget-program-ask = Удалить эту программу, ее разрешения и журнал действий ее агентов? При следующем подключении она снова запросит разрешение.

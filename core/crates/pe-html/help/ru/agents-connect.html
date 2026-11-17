@@ -1,13 +1,12 @@
-<!--review--><h1>Подключение ИИ-агента</h1>
-<p class="summary">Разрешите ИИ-агенту, например Claude, читать и упорядочивать вашу почту через Inbox Classic.</p>
-<p>Вы можете разрешить ИИ-агенту работать с вашей почтой. Это может быть Claude, Cursor или другая программа, поддерживающая протокол Model Context Protocol (MCP). В самой Inbox Classic нет ИИ, и ничего не отправляется в службы ИИ, пока вы не впустите агента.</p>
+<h1>Подключение ИИ-агента</h1>
+<p class="summary">Разрешите ИИ-агенту, например Claude, читать вашу почту и управлять ею через Inbox Classic.</p>
+<p>С вашей почтой может работать Claude, Cursor или другая программа с поддержкой Model Context Protocol (MCP). В самой Inbox Classic нет встроенного ИИ. Данные не передаются в службы ИИ, пока вы не разрешите агенту доступ.</p>
 <p>Чтобы подключить агента:</p>
 <ol>
-    <li>Выберите <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> и нажмите <!--os:windows--><b data-text="win-how-to-connect"></b><!--/os--><!--os:mac,linux--><b data-text="ui-how-to-connect"></b><!--/os-->. Inbox Classic покажет строки, которые нужно добавить в настройки агента.</li>
-    <li>Добавьте их в список серверов MCP вашего агента. В Claude Desktop это <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
-    <li>Запустите агента. При первом подключении Inbox Classic спросит вас, что ему разрешено.</li>
+    <li>Откройте <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> и нажмите <!--os:windows--><b data-text="win-how-to-connect"></b><!--/os--><!--os:mac,linux--><b data-text="ui-how-to-connect"></b><!--/os-->. Inbox Classic покажет фрагмент конфигурации для настроек агента.</li>
+    <li>Добавьте его в настройки серверов MCP вашего агента. В Claude Desktop откройте <i>Settings &gt; Developer &gt; Edit Config</i>.</li>
+    <li>Запустите агента. При первом подключении Inbox Classic попросит выбрать разрешенные действия и доступные учетные записи.</li>
 </ol>
-<p>Если Inbox Classic не запущена, агент запускает ее в фоновом режиме. Подключиться к ней могут только программы, запущенные от вашего имени на этом компьютере.</p>
-<p>Чтобы отключить сразу всех агентов, снимите флажок <b data-text="ui-let-agents-connect"></b> в окне <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
+<p>Если Inbox Classic не запущена, агент запустит ее в фоновом режиме. Подключаться могут только программы, работающие под вашей учетной записью пользователя на этом компьютере.</p>
+<p>Чтобы запретить всем агентам доступ к почте, отключите параметр <b data-text="ui-let-agents-connect"></b> в окне <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-sending"></a> <a href="topic:command-line"></a></nav>
-<!--/review-->

@@ -6311,7 +6311,7 @@ public static class Dragger {
         $parts = @(0..7 | ForEach-Object { GetText $export ($IDC_SETUP_PART + $_) })
         $chosen = @(0..7 | Where-Object { IsChecked $export ($IDC_SETUP_PART + $_) }).Count
         Check (($parts -join ', ') -eq 'Accounts, Sign-in apps, Settings, Window preferences, Contacts and groups, Encryption keys, Message rules, Trusted senders' -and $chosen -eq 8) "it lists the parts, all chosen ($($parts -join ', '); $chosen chosen)"
-        Check (-not (IsChecked $export $IDC_SETUP_USE_PASSPHRASE) -and -not (Enabled $export $IDC_SETUP_PASSPHRASE) -and (GetText $export $IDC_SETUP_PASSPHRASE_NOTE) -match '^With a passphrase, the file is encrypted and also holds your passwords') 'the passphrase is off, with the words of what it adds'
+        Check (-not (IsChecked $export $IDC_SETUP_USE_PASSPHRASE) -and -not (Enabled $export $IDC_SETUP_PASSPHRASE) -and (GetText $export $IDC_SETUP_PASSPHRASE_NOTE) -match '^With a passphrase, the file is encrypted and includes saved passwords, sign-in credentials and private keys\.') 'the passphrase is off, with the words of what it adds'
         Check (Enabled $export 1) 'Export can go without a passphrase'
         Shot $export 'setup-1-export'
         SetCheck $export $IDC_SETUP_USE_PASSPHRASE $true
