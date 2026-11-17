@@ -728,7 +728,8 @@ fn the_migration_counts_what_was_stored_before() {
          CREATE INDEX messages_all_by_date ON messages (COALESCE(MIN(date, internal_date), date, internal_date), uid, id); \
          CREATE INDEX messages_all_by_received ON messages (internal_date, uid, id); \
          DROP INDEX messages_to_decrypt; ALTER TABLE messages DROP COLUMN protection; \
-         ALTER TABLE messages DROP COLUMN decrypted; ALTER TABLE messages DROP COLUMN outer_subject;",
+         ALTER TABLE messages DROP COLUMN decrypted; ALTER TABLE messages DROP COLUMN outer_subject; \
+         DROP TABLE drafts_taken;",
     )
     .unwrap();
     // from the migration that counts, and those after it

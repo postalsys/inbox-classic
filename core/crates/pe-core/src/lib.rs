@@ -1804,6 +1804,10 @@ impl Core {
             .and_then(compose::draft_id)
             .unwrap_or_else(|| pe_smtp::message::new_message_id(&email));
         outgoing.message_id = Some(message_id.clone());
+        // the user's save makes an agent's draft theirs at once, before the copy in Drafts is replaced
+        if outgoing.agent.is_none() {
+            self.store().take_draft(&message_id)?;
+        }
         // kept here first, so that it is there to open again after a crash, with or without a connection
         self.keep_recovery(account, &outgoing, &message_id)?;
         // with Encrypt on, the copy in Drafts on the server is encrypted to the sender's own key
@@ -1847,11 +1851,17 @@ impl Core {
     /// automatic saving made, of a message closed without saving ([`Event::Failed`] when that does not work). Its
     /// copy kept for a crash goes too.
     pub fn discard_draft(&self, account: AccountId, message_id: &str) -> Result<()> {
+        self.remove_draft(account, message_id, false)
+    }
+
+    /// [`Core::discard_draft`] for the user, or for an AI agent (`agent`), whose removal the worker skips when the
+    /// user saved the draft meanwhile
+    pub(crate) fn remove_draft(&self, account: AccountId, message_id: &str, agent: bool) -> Result<()> {
         self.store().drop_recovery(message_id)?;
         let Some(message_id) = compose::draft_id(message_id) else {
             return Ok(());
         };
-        self.send_command(account, Command::RemoveDraft { message_id })
+        self.send_command(account, Command::RemoveDraft { message_id, agent })
     }
 
     /// A saved draft (a message of the Drafts folder whose source is in the store) to go on writing; its attachments

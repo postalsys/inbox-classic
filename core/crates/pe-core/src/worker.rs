@@ -150,6 +150,8 @@ pub(crate) enum Command {
     /// Out of the Drafts folder: the copy the automatic saving made of a message closed without saving
     RemoveDraft {
         message_id: String,
+        /// An AI agent's discard: skipped once the user saved the draft ([`pe_store::Store::draft_taken`])
+        agent: bool,
     },
 }
 
@@ -1189,7 +1191,10 @@ impl Worker {
                 Box::pin(self.apply_rules(store, folder, &uids, &rules)).await?;
                 Ok(())
             }
-            Command::RemoveDraft { message_id } => {
+            Command::RemoveDraft { message_id, agent } => {
+                if agent && store.draft_taken(&message_id)? {
+                    return Ok(());
+                }
                 let account = self.account;
                 self.remove_draft_of(store, account, &message_id).await;
                 Ok(())
@@ -1375,6 +1380,10 @@ impl Worker {
         keys: Option<Arc<crate::protect_out::OutgoingKeys>>,
     ) -> Outcome {
         let message_id = outgoing.message_id.clone().unwrap_or_default();
+        // an agent's draft the user saved after the agent's own check passed: the user's save is the one kept
+        if outgoing.agent.is_some() && store.draft_taken(&message_id)? {
+            return Ok(());
+        }
         match self.draft_upload(store, outgoing, keys).await {
             Ok(upload) => {
                 self.upload_apart(upload);

@@ -2824,6 +2824,97 @@ fn drafts_saved_automatically_are_kept_for_a_crash_and_discarded() {
     assert!(s.core.recovered().unwrap().is_empty());
 }
 
+/// An AI agent's draft is the user's as soon as they save it: before the copy in Drafts is replaced by theirs and
+/// synced, the agent can neither replace nor discard it, and the user's version is what stays
+#[test]
+fn an_agent_draft_is_the_users_once_they_save_it() {
+    let Some(s) = setup() else { return };
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let drafts = s
+        .core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "Drafts")
+        .unwrap()
+        .id;
+    pe_store::Store::open(s._dir.path().join("store.db"))
+        .unwrap()
+        .save_agent_host(
+            "/test/agent",
+            "Test Agent",
+            true,
+            pe_store::AgentLevels(15),
+            &[account],
+            1,
+        )
+        .unwrap();
+    let host = s.core.agent_hosts().unwrap()[0].clone();
+    let written = |text: &str| pe_core::agents::Written {
+        account,
+        outgoing: pe_core::Outgoing {
+            subject: "Plan".into(),
+            ..Default::default()
+        },
+        text: text.into(),
+        ..Default::default()
+    };
+
+    // the agent's draft, in Drafts and downloaded here: everything its checks look at
+    let draft_id = s.core.agent_save_draft(&host, &written("Agent text"), None).unwrap();
+    let uid_of = || {
+        s.core
+            .search(&Search::folder(drafts), Sort::default(), 0, 100)
+            .unwrap()
+            .into_iter()
+            .find(|m| m.info.message_id.as_deref() == Some(draft_id.as_str()))
+            .map(|m| m.info.uid)
+    };
+    eventually(|| uid_of().is_some(), "the agent's draft in the store");
+    let uid = uid_of().unwrap();
+    s.core.open_message(drafts, uid).unwrap();
+    s.wait(|e| *e == Event::MessageReady { folder: drafts, uid });
+    assert!(s.core.agent_own_draft(&host, &draft_id).is_ok());
+
+    // the user saves it and closes the window, and the agent tries at once, before Drafts is synced
+    s.core
+        .save_draft(
+            account,
+            pe_core::Outgoing {
+                subject: "Plan".into(),
+                html: Some("<p>The user's words</p>".into()),
+                message_id: Some(draft_id.clone()),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+    s.core.compose_closed(&draft_id).unwrap();
+    let theirs = |outcome: pe_core::Result<()>| match outcome {
+        Err(pe_core::Error::Unavailable(why)) => assert!(why.contains("theirs"), "{why}"),
+        other => panic!("{other:?}"),
+    };
+    theirs(s.core.agent_replace_draft(&host, &draft_id, &written("Overwrite")));
+    theirs(s.core.agent_discard_draft(&host, &draft_id));
+
+    // the user's version is in Drafts, alone, and stays once the copies are synced
+    let users = || {
+        let saved = s.server.messages("Drafts");
+        saved.len() == 1 && pe_testkit::raw_text(&saved[0]).contains("The user's words")
+    };
+    eventually(users, "the user's draft in Drafts");
+    eventually(
+        || uid_of().is_some_and(|now| now != uid),
+        "the user's draft in the store",
+    );
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    assert!(users(), "{:?}", s.server.messages("Drafts"));
+    assert!(!pe_testkit::raw_text(&s.server.messages("Drafts")[0]).contains("X-Inbox-Classic-Agent"));
+    theirs(s.core.agent_discard_draft(&host, &draft_id));
+}
+
 #[test]
 fn a_draft_follows_from_to_another_account() {
     let Some(s) = setup() else { return };

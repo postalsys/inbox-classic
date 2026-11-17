@@ -734,6 +734,10 @@ ALTER TABLE messages ADD COLUMN decrypted INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE messages ADD COLUMN outer_subject TEXT;
 CREATE INDEX messages_to_decrypt ON messages (folder_id) WHERE protection = 2 AND decrypted = 0;
 "#,
+    // the drafts of AI agents the user saved: theirs from then on, before the copy in Drafts says so (agents.rs)
+    r#"
+CREATE TABLE drafts_taken (message_id TEXT PRIMARY KEY) WITHOUT ROWID;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

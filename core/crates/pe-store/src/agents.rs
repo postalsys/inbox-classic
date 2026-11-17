@@ -305,6 +305,27 @@ impl Store {
         Ok(last.and_then(|(what, account)| account.filter(|_| what != "discard_draft")))
     }
 
+    /// The user saved the draft with `message_id`: when an agent saved it, it is the user's from then on, even while
+    /// the copy in Drafts is still the agent's (their own is on its way to the server). Drafts no agent saved are
+    /// not kept.
+    pub fn take_draft(&self, message_id: &str) -> Result<()> {
+        self.db.execute(
+            "INSERT OR IGNORE INTO drafts_taken (message_id) SELECT ?1 WHERE EXISTS (SELECT 1 FROM agent_log \
+             WHERE message_id = ?1 AND what IN ('save_draft', 'replace_draft'))",
+            [message_id],
+        )?;
+        Ok(())
+    }
+
+    /// Whether the user saved the agent's draft with `message_id` ([`Store::take_draft`]): no agent changes it then
+    pub fn draft_taken(&self, message_id: &str) -> Result<bool> {
+        self.db.query_row(
+            "SELECT EXISTS (SELECT 1 FROM drafts_taken WHERE message_id = ?1)",
+            [message_id],
+            |row| row.get(0),
+        )
+    }
+
     /// How many entries of `what` a host logged since `since`: the rate limits count them
     pub fn agent_log_count(&self, host: AgentHostId, what: &str, since: i64) -> Result<u64> {
         self.db.query_row(
@@ -406,6 +427,29 @@ mod tests {
         // a host forgotten takes its log along
         store.remove_agent_host(host).unwrap();
         assert!(store.agent_log(10).unwrap().is_empty());
+    }
+
+    #[test]
+    fn a_draft_the_user_saved_is_theirs() {
+        let store = Store::open_in_memory().unwrap();
+        let host = store
+            .save_agent_host("/usr/bin/agent", "Agent", true, AgentLevels::DEFAULT, &[], 1)
+            .unwrap();
+        let saved = NewLogEntry {
+            host,
+            what: "save_draft".into(),
+            account: Some(1),
+            message_id: Some("<agent@x>".into()),
+            ..Default::default()
+        };
+        store.log_agent(&[saved], 10).unwrap();
+        // the user's own drafts are not kept: no agent wrote them
+        store.take_draft("<mine@x>").unwrap();
+        assert!(!store.draft_taken("<mine@x>").unwrap());
+        assert!(!store.draft_taken("<agent@x>").unwrap());
+        store.take_draft("<agent@x>").unwrap();
+        store.take_draft("<agent@x>").unwrap();
+        assert!(store.draft_taken("<agent@x>").unwrap());
     }
 
     #[test]

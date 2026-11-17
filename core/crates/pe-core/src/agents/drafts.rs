@@ -14,6 +14,14 @@ pub fn draft_note(draft: &Draft) -> Option<String> {
     Some(tr_args(Text::AgentDraftNote, &[("program", program.into())]))
 }
 
+/// The words for an agent whose draft the user took over
+fn theirs() -> Error {
+    Error::Unavailable(
+        "The user has changed this draft since the agent saved it, so it is theirs now. Save a new draft instead."
+            .into(),
+    )
+}
+
 /// Where a draft of an agent is: its account, and its copy in Drafts
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OwnDraft {
@@ -80,7 +88,7 @@ impl Core {
             .message(own.folder, own.uid)?
             .map(|m| m.agent_subject().to_string())
             .unwrap_or_default();
-        self.discard_draft(own.account, draft_id)?;
+        self.remove_draft(own.account, draft_id, true)?;
         self.log_agent(&[NewLogEntry {
             host: host.id,
             what: "discard_draft".into(),
@@ -92,8 +100,8 @@ impl Core {
     }
 
     /// The draft `draft_id` of the program `host`: one it saved (its log says so) and has not discarded, in the
-    /// Drafts of its account. Refused otherwise, in words for the agent. Its source may still be to download
-    /// ([`Core::open_message`]) before it is replaced or discarded.
+    /// Drafts of its account, and the user has not saved. Refused otherwise, in words for the agent. Its source may
+    /// still be to download ([`Core::open_message`]) before it is replaced or discarded.
     pub fn agent_own_draft(&self, host: &AgentHost, draft_id: &str) -> Result<OwnDraft> {
         let store = self.store();
         let account = store
@@ -105,6 +113,10 @@ impl Core {
                      those it discarded."
                 ))
             })?;
+        // the user's save makes it theirs at once, while the copy in Drafts may still be the agent's
+        if store.draft_taken(draft_id)? {
+            return Err(theirs());
+        }
         let folder = crate::compose::drafts_folder(&store, account)?.ok_or(Error::NotFound)?;
         let uid = store.uid_of_message_id(folder.id, draft_id)?.ok_or_else(|| {
             Error::Unavailable(
@@ -124,13 +136,6 @@ impl Core {
     /// user saved their own version (without the header naming the agent). Its source must be here.
     fn agent_draft_unchanged(&self, host: &AgentHost, draft_id: &str, own: &OwnDraft) -> Result<()> {
         let store = self.store();
-        let theirs = || {
-            Error::Unavailable(
-                "The user has changed this draft since the agent saved it, so it is theirs now. Save a new draft \
-                 instead."
-                    .into(),
-            )
-        };
         if store.recoveries()?.iter().any(|r| r.message_id == draft_id) {
             return Err(theirs());
         }
