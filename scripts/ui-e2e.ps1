@@ -7038,6 +7038,10 @@ public static bool HasIcon(IntPtr window) {
         $rows = @(SubjectRows 'Agenda for Friday')
         $places = @($rows | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_FOLDER) })
         Check ($null -ne $row -and $onServer -eq 1 -and @($places | Sort-Object -Unique).Count -eq $rows.Count) "the agent's draft is in Drafts, once for each account ($prefix; $(Bare $drafts): $($onServer) on the server, rows $($rows -join ', ') in $($places -join ', '))"
+        # the copy of the account the agent step used: only it was downloaded then, and the app has no passwords now
+        for ($i = 0; $i -lt $rows.Count; $i++) {
+            if ($places[$i] -eq 'inboxclassic.test') { $row = "$($rows[$i])" }
+        }
         if ($null -ne $row) {
             SelectRow ([int]$row)
             Key $list $VK_RETURN
