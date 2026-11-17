@@ -19,19 +19,19 @@ Commit completed batches regularly and preserve an exact resume point.
 - Upstream settings pages at `bd4a2bd1` are now integrated after Croatian app checkpoint `580d74a0`.
   German, Spanish, Estonian, French, Dutch, Italian, European/Brazilian Portuguese, Catalan, Norwegian
   Bokmål, Serbian Latin, Turkish, Bulgarian, Czech, Danish, Greek and Finnish settings are complete, including
-  encrypted-image and rendered-label followups. Fresh upstream audit at 381572d9 found no additional work.
-  Croatian's app settings additions and all 448 pending core entries are now reviewed. Continue the remaining
-  Croatian catalogs: help.ftl (24), linux.ftl (87), mac.ftl (65), windows.ftl (68), then all 52 help topics.
-  Keep Croatian settings followups pending until their remaining catalogs and affected help are reviewed. Exact source IDs/topics are in state.
+  encrypted-image and rendered-label followups. Fresh upstream audit at 675fb1f2 found no additional work.
+  All Croatian catalogs are now reviewed, including the 244 remaining platform/help-title entries and the
+  three Linux/Mac settings additions. Continue all 52 Croatian help topics. Keep its three settings-context
+  followups pending until the affected help has been reviewed. Exact source IDs/topics are in state.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,440 catalog entries and 1,292 help topics; 13,574 entries and 572 topics are currently pending.
+  32,440 catalog entries and 1,292 help topics; 13,330 entries and 572 topics are currently pending.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were initially reviewed with 74 improvements; its 24 app settings additions now have two
-  further improvements. The three Linux/Mac settings entries await their catalog reviews.
-  Croatian core.ftl is reviewed, with 128 improvements. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
+  further improvements. Croatian core.ftl has 128 improvements, and the remaining platform/help-title catalogs
+  have 54 more. Its 52 help topics remain. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
 - All 168 rollback messages and 84 loading labels remain reviewed. Earlier logo-cache, attachment-reminder
   and watched-notification followups remain preserved. Use their verified context in new reviews.
 - The three settings pages replace the former single Options mnemonic scope: use 46 actual scopes.
@@ -1248,8 +1248,29 @@ representative count/name substitutions against their callers. Exact inventories
 unchanged since the fresh Croatian audit. Report regenerated; git diff --check passes. No tests run. Croatian app
 checkpoint: `17fbe28a`. Continue the 244 platform/help-title entries and 52 help topics. Croatian is not yet complete.
 
-Current totals: 18,866 catalog entries and 720 help topics completed in the active scope; 3,066 historical
-catalog value improvements. Remaining: 13,574 catalog entries and 572 help topics. Earlier context followups
+### Croatian platform catalogs completed
+
+Reviewed all 244 remaining help-title and Windows/Mac/Linux catalog entries, improving 54 values. Corrected
+Linux Preferences to Postavke and clarified help sections. Kept native Mac menu conventions and all shortcuts.
+Indexing messages identify remaining work, and failed-file summaries handle failed and total counts independently.
+Clarified agent-entry removal, server-side folder deletion, Windows user-account installation and preservation of
+server mail. Improved browser sign-in, credential warnings and image-blocking language. Store text now describes
+hidden quoted text and downloaded offline mail accurately. All Croatian catalogs are reviewed; all 52 help topics
+and its three settings-context followups remain pending.
+
+Static checks report only 1,343 deliberately removed marks. All 46 mnemonic scopes and catalog invariants pass;
+all 28 inventories and latest file/source hashes reconcile (19,144 messages and 9,385 changed help lines, with 14
+verified baseline pairs). The isolated offline pe-ffi build passed in 5.81 seconds; generated installer/Linux
+changes affect only Croatian. The requested HTML report is regenerated. No tests run. git diff --check passes.
+Source limitation recorded: the Linux search scope receives English special-folder names from Query::place_name;
+the catalog cannot localize this dynamic value. It needs an app-side followup. No app code or English changed.
+
+Fresh fetch at `675fb1f2` confirms unchanged six source refs, no new languages or unintegrated relevant changes.
+The since-start report contains 270 known settings entries in ten languages and 121 help passages in eleven,
+all matched to the current pending inventory. Continue Croatian help; repeat the late-arrival audit after the queue.
+
+Current totals: 19,110 catalog entries and 720 help topics completed in the active scope; 3,120 historical
+catalog value improvements. Remaining: 13,330 catalog entries and 572 help topics. Earlier context followups
 are preserved; settings review remains pending in 11 languages. `REVIEWED` remains unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final

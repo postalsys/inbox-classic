@@ -337,6 +337,12 @@ Review notes (round 2):
   `setup-skipped-unreachable` can name either an account or a sign-in app; use a neutral "Preskočeno:" and refer to
   re-adding the corresponding sign-in app. Unencrypted temporary attachment copies older than a day are removed
   when the app starts, not automatically exactly one day after opening.
+- Linux Preferences is "Postavke"; keep the native Mac menu labels "Zatvori Inbox Classic" and "Zumiraj".
+  Indexing labels count remaining messages; failed-file summaries keep failed and total counts independent.
+- Removing an agent program removes its entry and saved access/history, not the installed program. The installer's
+  account is a "korisnički račun u sustavu Windows". Uninstalling local mail leaves server mail intact.
+- Store descriptions say that quoted text is hidden, not summarized, and that downloaded mail is available offline.
+  Browser sign-in provider names and the generic fallback remain uninflected in parentheses.
 
 ### Italiano (it)
 

@@ -79,9 +79,9 @@
       connecter à Outlook.com et Microsoft 365 dans le navigateur.
     </p>
     <p xml:lang="hr">
-      Inbox Classic čita i piše e-poštu s mapama s lijeve strane, porukama na vrhu i porukom ispod, kao što su to nekad
-      radili programi za poštu. Radi sa svakim računom IMAP i SMTP, a na Outlook.com i Microsoft 365 prijavljuje se
-      putem preglednika.
+      Inbox Classic omogućuje čitanje i pisanje e-pošte u poznatom sučelju. U klasičnom rasporedu mape su lijevo, popis
+      poruka gore, a odabrana poruka ispod. Podržava račune s protokolima IMAP i SMTP te prijavu na Outlook.com i
+      Microsoft 365 putem preglednika.
     </p>
     <p xml:lang="it">
       Con Inbox Classic leggi e scrivi e-mail in un’interfaccia familiare: cartelle a sinistra, elenco dei messaggi in
@@ -214,10 +214,10 @@
       <li xml:lang="fr">Recherchez dans l’objet, les expéditeurs, les destinataires, les noms des pièces jointes et le texte avec les opérateurs de recherche de Gmail</li>
       <li xml:lang="fr">Les messages cités dans les réponses sont repliés</li>
       <li xml:lang="fr">Le courrier téléchargé reste accessible hors connexion ; les mots de passe sont enregistrés dans le trousseau du système</li>
-      <li xml:lang="hr">Svaka se poruka prikazuje pročišćena, bez skripti, a slike s interneta samo kad ih dopustite</li>
-      <li xml:lang="hr">Pretraživanje koje pronalazi riječi u predmetu, osobama, nazivima datoteka i tekstu, s Gmailovim operatorima</li>
-      <li xml:lang="hr">Odgovori sažimaju ranije poruke koje citiraju</li>
-      <li xml:lang="hr">Pošta ostaje čitljiva i bez veze s internetom; lozinke se čuvaju u vašem privjesku ključeva</li>
+      <li xml:lang="hr">Skripte u porukama se ne izvršavaju, a vanjske slike preuzimaju se samo uz vaše dopuštenje</li>
+      <li xml:lang="hr">Pretraživanje predmeta, pošiljatelja, primatelja, naziva privitaka i teksta poruka, uz operatore pretraživanja iz Gmaila</li>
+      <li xml:lang="hr">Citirani tekst ranijih poruka u odgovorima skriven je iza gumba za prikaz</li>
+      <li xml:lang="hr">Preuzete poruke možete čitati i bez interneta, a lozinke su spremljene u sustavskom privjesku ključeva</li>
       <li xml:lang="it">I messaggi vengono visualizzati senza script e altri contenuti potenzialmente pericolosi; le immagini da internet vengono caricate solo con il tuo consenso</li>
       <li xml:lang="it">Ricerca nell’oggetto, nei mittenti, nei destinatari, nei nomi degli allegati e nel testo dei messaggi, con il supporto degli operatori di Gmail</li>
       <li xml:lang="it">Il testo dei messaggi precedenti citato nelle risposte viene compresso e può essere espanso quando serve</li>
