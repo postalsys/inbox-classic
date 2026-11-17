@@ -269,6 +269,8 @@ impl MessageList {
         // a bounce's mark in the paper clip's place: what matters about a delivery notice is that it is one
         view.append_column(&icon_column(attachment_icon, |_| None));
         view.append_column(&flag_column());
+        // the security bar's own marks, so the list and the bar say the same thing
+        view.append_column(&icon_column(security_icon, security_tip));
         // no Watch column: the menus check Watch and Ignore Conversation, and an ignored conversation is grey
         let recipients = Rc::new(Cell::new(false));
         let shows = recipients.clone();
@@ -830,6 +832,25 @@ pub(crate) fn attachment_icon(m: &Message) -> Option<&'static str> {
         Some(UNDELIVERED_ICON)
     } else {
         m.info.has_attachments.then_some("ic-attach-symbolic")
+    }
+}
+
+/// The lock of an encrypted message or the ribbon of a signed one, from its structure before it is opened (encrypted
+/// wins: such a message is often signed inside too); none for the others
+pub(crate) fn security_icon(m: &Message) -> Option<&'static str> {
+    match m.info.protection {
+        pe_store::PROTECTION_ENCRYPTED => Some("ic-lock-closed-symbolic"),
+        pe_store::PROTECTION_SIGNED => Some("ic-ribbon-symbolic"),
+        _ => None,
+    }
+}
+
+/// What the security mark says on hover and to a screen reader: Encrypted or Signed
+pub(crate) fn security_tip(m: &Message) -> Option<String> {
+    match m.info.protection {
+        pe_store::PROTECTION_ENCRYPTED => Some(t!(UiRowEncrypted)),
+        pe_store::PROTECTION_SIGNED => Some(t!(UiRowSigned)),
+        _ => None,
     }
 }
 

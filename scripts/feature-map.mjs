@@ -1708,10 +1708,6 @@ const notYet = {
         'write-16-link-menu'
     ],
     linux: [
-        // OpenPGP PR 10: the apps' part (the lock and the seal in the list, the setting, their UI test steps) follows
-        'main-12-lock-in-list',
-        'search-9-encrypted',
-        'options-4-encryption',
         // the system's own file panels and the Dock or the top bar run in processes of their own: their pictures can
         // not be taken from inside the app (the test answers the panels in their place and checks what they did)
         'read-4-save',
