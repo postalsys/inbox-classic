@@ -176,13 +176,25 @@ pub(crate) fn sending_address(core: &Core, account: AccountId, outgoing: &Outgoi
     })
 }
 
-/// Whether what the message quotes still has text: a quote unfolded and emptied, or taken away, has none
+/// Whether what the message quotes still holds something: text, or a picture or other media (a scan, a screenshot,
+/// carried as a data: or cid: picture), which has no text but is the content all the same. A quote unfolded and
+/// emptied, or taken away, has none.
 fn quote_present(outgoing: &Outgoing) -> bool {
     let Some(quote) = outgoing.quote.as_deref() else {
         return false;
     };
     let (_, _, body) = pe_html::quote_parts(quote);
-    !pe_mime::parser::html_to_text(body).trim().is_empty()
+    !pe_mime::parser::html_to_text(body).trim().is_empty() || holds_media(body)
+}
+
+/// Whether HTML holds content that has no text: pictures and other media, or a resource it points at
+fn holds_media(html: &str) -> bool {
+    const MEDIA: [&str; 12] = [
+        "<img", "<picture", "<svg", "<image", "<video", "<audio", "<source", "<object", "<embed", "<canvas", "data:",
+        "cid:",
+    ];
+    let lower = html.to_ascii_lowercase();
+    MEDIA.iter().any(|m| lower.contains(m)) || lower.contains("url(")
 }
 
 /// Whether what was written still holds a quoted message: a saved draft or a message taken back opens with its quote
@@ -607,6 +619,19 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(encrypted_content(&message), Some(ComposeError::EncryptedQuote));
+        // a quote of pictures alone (a scan, a screenshot) has no text but is the content: it counts
+        for body in [
+            "<p><img src=\"data:image/png;base64,iVBORw0KGgo=\"></p>",
+            "<p><img src=\"cid:scan@example.org\"></p>",
+            "<div style=\"background: url(data:image/png;base64,AAAA)\"></div>",
+        ] {
+            message.quote = Some(pe_html::quote_html(&[("From", "Ann".into())], body, &[], true));
+            assert_eq!(
+                encrypted_content(&message),
+                Some(ComposeError::EncryptedQuote),
+                "{body}"
+            );
+        }
         // unfolded and emptied: the header block alone is no quote
         message.quote = Some(pe_html::quote_html(&[("From", "Ann".into())], "<p> </p>", &[], true));
         assert_eq!(encrypted_content(&message), None);
