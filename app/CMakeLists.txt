@@ -55,6 +55,7 @@ add_executable(InboxClassic WIN32
     src/mailbox.cpp
     src/messagewindow.cpp
     src/reader.cpp
+    src/recipientkeys.cpp
     src/securitybar.cpp
     src/folderpicker.cpp
     src/folderpane.cpp

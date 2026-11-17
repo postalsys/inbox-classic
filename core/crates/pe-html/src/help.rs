@@ -478,7 +478,7 @@ fn command_label(id: &str, platform: Platform) -> String {
 /// Every command with a key on the platform, by menu, as a table
 fn shortcuts_table(platform: Platform, language: &str) -> String {
     let mut html = String::new();
-    for menu in ["app", "file", "edit", "view", "message", "tools", "help"] {
+    for menu in ["app", "file", "edit", "view", "message", "tools", "help", "compose"] {
         let rows: Vec<String> = COMMANDS
             .iter()
             .filter(|(id, m, ..)| menu_of(id, m, platform) == menu)
@@ -494,6 +494,8 @@ fn shortcuts_table(platform: Platform, language: &str) -> String {
         // the Mac's app menu has the app's name
         let title = match menu {
             "app" => "Inbox Classic".to_string(),
+            // the compose window's own commands, under the window's name
+            "compose" => words(language, "ui-new-message-title"),
             _ => words(language, &format!("menu-{menu}")),
         };
         html.push_str(&format!(
@@ -877,5 +879,20 @@ mod tests {
             "{table}"
         );
         assert!(!table.contains("<td></td>"));
+        // the compose window's commands under its own title, after the main window's menus
+        let compose = table
+            .split("<h2>New Message</h2>")
+            .nth(1)
+            .expect("the compose window's table");
+        assert!(
+            compose.contains("<td>Digitally Sign</td><td><kbd>\u{2325}\u{2318}Y</kbd></td>"),
+            "{compose}"
+        );
+        assert!(compose.contains("<td>Encrypt</td>"), "{compose}");
+        let windows = shortcuts_table(Platform::Windows, "en");
+        assert!(
+            windows.contains("<td>Encrypt</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td>"),
+            "{windows}"
+        );
     }
 }

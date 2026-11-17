@@ -968,6 +968,62 @@ pgp-publish-done = Anahtarınız keys.openpgp.org'da şu adresler için yayımla
 pgp-publish-failed = Anahtar yayımlanamadı: { $error }
 # review: changed
 pgp-keyserver-off = keys.openpgp.org üzerinde anahtar arama { $settings } altında kapalı.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [one] Şifreli ve imzalı: yalnızca siz ve şu alıcı okuyabilir: { $addresses }.
+   *[other] Şifreli ve imzalı: yalnızca siz ve { $count } alıcısı okuyabilir.
+}
+# review: new
+pgp-compose-encrypt-ready = Şifrelenip imzalanacak. Anahtarları sizde olan alıcıları ekleyin.
+# review: new
+pgp-compose-missing = { $count ->
+    [one] Bu alıcının anahtarı yok, bu yüzden ileti henüz şifrelenemez: { $addresses }.
+   *[other] { $count } alıcının anahtarı yok, bu yüzden ileti henüz şifrelenemez: { $addresses }.
+}
+# review: new
+pgp-compose-looking = Anahtarlar aranıyor: { $addresses }...
+# review: new
+pgp-compose-signed = İmzalı: alıcılar iletinin sizden geldiğini ve değiştirilmediğini denetleyebilir.
+# review: new
+pgp-compose-reply-clear = Şifreli değil, ancak yanıtladığı veya ilettiği ileti şifreliydi.
+# review: new
+pgp-compose-encrypted-files = Şifreli bir iletinin dosyaları ekli, bu yüzden bu ileti yalnızca şifreli gönderilebilir. Şifrele'yi açın veya bu dosyaları kaldırın.
+# review: new
+pgp-compose-sign-tip = İletiyi anahtarınızla imzalayın, böylece alıcılar iletinin sizden geldiğini ve değiştirilmediğini denetleyebilir
+# review: new
+pgp-compose-sign-tip-encrypted = Şifreli bir ileti her zaman imzalıdır
+# review: new
+pgp-compose-encrypt-tip = İletiyi şifreleyin, böylece onu yalnızca siz ve alıcıları okuyabilir
+# review: new
+pgp-compose-make-key = Şu adres için henüz anahtarınız yok: { $address }. Şimdi bir anahtar oluşturulsun mu? Onunla iletileriniz imzalanabilir ve şifrelenebilir.
+# review: new
+pgp-compose-key-unusable = Şu adres için anahtarınız kullanılamıyor: { $address } ({ $state }). Yedeğini içe aktarmak veya yeni bir anahtar oluşturmak için Şifreleme Anahtarları'nı açın.
+# review: new
+pgp-compose-encrypt-off-quote = Bu ileti şifreli bir iletiyi alıntılıyor veya iletiyor. Şifreleme olmadan, alıntılanan metni kaldırana kadar gönderilemez. Şifreleme yine de kapatılsın mı?
+# review: new
+pgp-compose-encrypt-off-reply = Bu ileti şifreli bir iletiyi yanıtlıyor veya iletiyor. Şifreleme olmadan, iletinizi yolda işleyen herkes onu okuyabilir. Şifreleme kapatılsın mı?
+# review: new
+pgp-recipient-verified = Anahtar doğrulandı
+# review: new
+pgp-recipient-found = Anahtar doğrulanmadı
+# review: new
+pgp-recipient-own = Kendi anahtarınız
+# review: new
+pgp-recipient-looking = Anahtar aranıyor...
+# review: new
+pgp-recipient-missing = Anahtar yok
+# review: new
+pgp-recipient-not-found = Anahtar yok: { $date } tarihinde bulunamadı
+# review: new
+pgp-recipient-unusable = Anahtar kullanılamıyor: { $state }
+# review: new
+pgp-recipients-intro = İleti her alıcının anahtarına ve sizinkine şifrelenir.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [one] Bir alıcının şifreleme için anahtarı yok. Anahtarını bulun, onu bu iletiden kaldırın veya iletiyi şifrelemeden gönderin.
+   *[other] { $count } alıcının şifreleme için anahtarı yok. Anahtarlarını bulun, onları bu iletiden kaldırın veya iletiyi şifrelemeden gönderin.
+}
 # review: new
 pgp-details-part = Bölüm { $number }: { $label }
 # review: new

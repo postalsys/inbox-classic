@@ -971,6 +971,62 @@ pgp-publish-done = Din nøgle er offentliggjort på keys.openpgp.org for { $addr
 pgp-publish-failed = Nøglen kunne ikke offentliggøres: { $error }
 # review: changed
 pgp-keyserver-off = Søgning efter nøgler på keys.openpgp.org er slået fra under { $settings }.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [one] Krypteret og signeret: kun du og { $addresses } kan læse den.
+   *[other] Krypteret og signeret: kun du og dens { $count } modtagere kan læse den.
+}
+# review: new
+pgp-compose-encrypt-ready = Den bliver krypteret og signeret. Tilføj modtagere, hvis nøgler du har.
+# review: new
+pgp-compose-missing = { $count ->
+    [one] { $addresses } har ingen nøgle, så meddelelsen kan ikke krypteres endnu.
+   *[other] { $count } modtagere har ingen nøgle, så meddelelsen kan ikke krypteres endnu: { $addresses }.
+}
+# review: new
+pgp-compose-looking = Søger efter nøglerne til { $addresses }...
+# review: new
+pgp-compose-signed = Signeret: modtagerne kan kontrollere, at den kommer fra dig og ikke er blevet ændret.
+# review: new
+pgp-compose-reply-clear = Ikke krypteret, selvom den meddelelse, den besvarer eller videresender, var det.
+# review: new
+pgp-compose-encrypted-files = Der er vedhæftet filer fra en krypteret meddelelse, så denne meddelelse kan kun sendes krypteret. Slå Krypter til, eller fjern de filer.
+# review: new
+pgp-compose-sign-tip = Signer meddelelsen med din nøgle, så modtagerne kan kontrollere, at den kommer fra dig og ikke er blevet ændret
+# review: new
+pgp-compose-sign-tip-encrypted = En krypteret meddelelse er altid signeret
+# review: new
+pgp-compose-encrypt-tip = Krypter meddelelsen, så kun du og dens modtagere kan læse den
+# review: new
+pgp-compose-make-key = Du har endnu ingen nøgle til { $address }. Vil du oprette en nu? Med den kan dine meddelelser signeres og krypteres.
+# review: new
+pgp-compose-key-unusable = Din nøgle til { $address } kan ikke bruges ({ $state }). Åbn Krypteringsnøgler for at importere sikkerhedskopien af den eller oprette en ny nøgle.
+# review: new
+pgp-compose-encrypt-off-quote = Denne meddelelse citerer eller videresender en krypteret meddelelse. Uden kryptering kan den ikke sendes, før du fjerner det, den citerer. Vil du slå kryptering fra alligevel?
+# review: new
+pgp-compose-encrypt-off-reply = Denne meddelelse besvarer eller videresender en krypteret meddelelse. Uden kryptering kan alle, der håndterer din meddelelse undervejs, læse den. Vil du slå kryptering fra?
+# review: new
+pgp-recipient-verified = Nøglen er bekræftet
+# review: new
+pgp-recipient-found = Nøglen er ikke bekræftet
+# review: new
+pgp-recipient-own = Din egen nøgle
+# review: new
+pgp-recipient-looking = Søger efter en nøgle...
+# review: new
+pgp-recipient-missing = Ingen nøgle
+# review: new
+pgp-recipient-not-found = Ingen nøgle: der blev ikke fundet nogen den { $date }
+# review: new
+pgp-recipient-unusable = Nøglen kan ikke bruges: { $state }
+# review: new
+pgp-recipients-intro = Meddelelsen krypteres til hver modtagers nøgle og til din.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [one] Én modtager har ingen nøgle at kryptere til. Find modtagerens nøgle, fjern modtageren fra denne meddelelse, eller send den uden kryptering.
+   *[other] { $count } modtagere har ingen nøgle at kryptere til. Find deres nøgler, fjern dem fra denne meddelelse, eller send den uden kryptering.
+}
 # review: new
 pgp-details-part = Del { $number }: { $label }
 # review: new

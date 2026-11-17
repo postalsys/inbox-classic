@@ -384,7 +384,8 @@ impl Mailbox {
     // ---- wiring ----
 
     fn install_actions(self: &Rc<Self>, application: &adw::Application) {
-        for &command in Command::ALL {
+        // the compose window's commands are its own (compose_keys.rs)
+        for &command in Command::ALL.iter().filter(|c| c.window() != "compose") {
             let action = if command.is_toggle() {
                 gio::SimpleAction::new_stateful(command.name(), None, &toggled(command).to_variant())
             } else {
@@ -3657,7 +3658,10 @@ fn command_menu(id: &str) -> gio::Menu {
     // Quit and Preferences have the places GNOME gives them, at the end
     let elsewhere = [Command::Exit, Command::Options];
     let mut grouped: Vec<&'static str> = Vec::new();
-    for command in Command::ALL.iter().filter(|c| c.menu() == id && !elsewhere.contains(c)) {
+    for command in Command::ALL
+        .iter()
+        .filter(|c| c.menu() == id && c.window() != "compose" && !elsewhere.contains(c))
+    {
         // the commands of a submenu (View > Layout) in it, where its first one would be
         if let Some(group) = command.submenu() {
             if !grouped.contains(&group) {

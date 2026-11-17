@@ -77,8 +77,11 @@ enum Command: Int, CaseIterable {
     case exportAddressBook = 150
     case exportSetup = 173
     case importSetup = 174
+    case composeSign = 175
+    case composeEncrypt = 176
+    case attachMyKey = 177
 
-    /// The menu it is in: file, edit, view, tools, message, help, or tray (the Dock menu)
+    /// The menu it is in: file, edit, view, tools, message, help, or tray (the Dock menu); insert for the compose window
     var menu: String {
         switch self {
         case .newAccount: return "file"
@@ -155,6 +158,92 @@ enum Command: Int, CaseIterable {
         case .exportAddressBook: return "file"
         case .exportSetup: return "file"
         case .importSetup: return "file"
+        case .composeSign: return "tools"
+        case .composeEncrypt: return "tools"
+        case .attachMyKey: return "insert"
+        }
+    }
+
+    /// The window it is a command of: main, or compose (enabled while a compose window is in front)
+    var window: String {
+        switch self {
+        case .newAccount: return "main"
+        case .exit: return "main"
+        case .sync: return "main"
+        case .undo: return "main"
+        case .selectAll: return "main"
+        case .markRead: return "main"
+        case .markUnread: return "main"
+        case .layoutAutomatic: return "main"
+        case .layoutClassic: return "main"
+        case .layoutColumns: return "main"
+        case .folderList: return "main"
+        case .sortDate: return "main"
+        case .sortFrom: return "main"
+        case .sortSubject: return "main"
+        case .sortSize: return "main"
+        case .sortAscending: return "main"
+        case .sortDescending: return "main"
+        case .textSizeLargest: return "main"
+        case .textSizeLarger: return "main"
+        case .textSizeMedium: return "main"
+        case .textSizeSmaller: return "main"
+        case .textSizeSmallest: return "main"
+        case .pictures: return "main"
+        case .about: return "main"
+        case .newMail: return "main"
+        case .reply: return "main"
+        case .replyAll: return "main"
+        case .forward: return "main"
+        case .help: return "main"
+        case .delete: return "main"
+        case .move: return "main"
+        case .copy: return "main"
+        case .flag: return "main"
+        case .newFolder: return "main"
+        case .renameFolder: return "main"
+        case .deleteFolder: return "main"
+        case .nextMessage: return "main"
+        case .previousMessage: return "main"
+        case .nextUnread: return "main"
+        case .goToFolder: return "main"
+        case .findInMessage: return "main"
+        case .emptyFolder: return "main"
+        case .accounts: return "main"
+        case .find: return "main"
+        case .saveAs: return "main"
+        case .print: return "main"
+        case .import: return "main"
+        case .outbox: return "main"
+        case .properties: return "main"
+        case .markAllRead: return "main"
+        case .junk: return "main"
+        case .notJunk: return "main"
+        case .archive: return "main"
+        case .watchConversation: return "main"
+        case .ignoreConversation: return "main"
+        case .notify: return "main"
+        case .open: return "main"
+        case .defaultApp: return "main"
+        case .viewSource: return "main"
+        case .expandAllThreads: return "main"
+        case .collapseAllThreads: return "main"
+        case .hideIgnored: return "main"
+        case .hideRead: return "main"
+        case .aiAgents: return "main"
+        case .options: return "main"
+        case .addressBook: return "main"
+        case .messageRules: return "main"
+        case .encryptionKeys: return "main"
+        case .createRuleFromMessage: return "main"
+        case .addSenderToBook: return "main"
+        case .importAddressBook: return "main"
+        case .exportAddressBook: return "main"
+        case .exportSetup: return "main"
+        case .importSetup: return "main"
+        case .composeSign: return "compose"
+        case .composeEncrypt: return "compose"
+        case .attachMyKey: return "compose"
         }
     }
 
@@ -240,6 +329,9 @@ enum Command: Int, CaseIterable {
         case .exportAddressBook: return .cmdExportAddressBook
         case .exportSetup: return .cmdExportSetup
         case .importSetup: return .cmdImportSetup
+        case .composeSign: return .cmdComposeSign
+        case .composeEncrypt: return .cmdComposeEncrypt
+        case .attachMyKey: return .cmdAttachMyKey
         }
     }
 
@@ -320,6 +412,9 @@ enum Command: Int, CaseIterable {
         case .exportAddressBook: return nil
         case .exportSetup: return nil
         case .importSetup: return nil
+        case .composeSign: return ("y", [.command, .option])
+        case .composeEncrypt: return ("x", [.command, .option])
+        case .attachMyKey: return nil
         }
     }
 
@@ -400,6 +495,9 @@ enum Command: Int, CaseIterable {
         case .exportAddressBook: return false
         case .exportSetup: return false
         case .importSetup: return false
+        case .composeSign: return true
+        case .composeEncrypt: return true
+        case .attachMyKey: return false
         }
     }
 
@@ -480,6 +578,9 @@ enum Command: Int, CaseIterable {
         case .exportAddressBook: return false
         case .exportSetup: return false
         case .importSetup: return false
+        case .composeSign: return false
+        case .composeEncrypt: return false
+        case .attachMyKey: return false
         }
     }
 
@@ -560,6 +661,9 @@ enum Command: Int, CaseIterable {
         case .exportAddressBook: return false
         case .exportSetup: return false
         case .importSetup: return false
+        case .composeSign: return false
+        case .composeEncrypt: return false
+        case .attachMyKey: return false
         }
     }
 
@@ -640,6 +744,9 @@ enum Command: Int, CaseIterable {
         case .exportAddressBook: return false
         case .exportSetup: return false
         case .importSetup: return false
+        case .composeSign: return false
+        case .composeEncrypt: return false
+        case .attachMyKey: return false
         }
     }
 
@@ -720,6 +827,9 @@ enum Command: Int, CaseIterable {
         case .exportAddressBook: return nil
         case .exportSetup: return nil
         case .importSetup: return nil
+        case .composeSign: return nil
+        case .composeEncrypt: return nil
+        case .attachMyKey: return nil
         }
     }
 }

@@ -205,6 +205,8 @@ void RunModal(HWND dialog, HWND focus, const bool& done);
 // RunModal sends it to the dialog with each key pressed in it (wParam the key, as WM_KEYDOWN has it) before the dialog
 // keys: a dialog that answers TRUE took the key (Options' Ctrl+Tab)
 constexpr UINT WM_MODAL_KEY = WM_APP + 90;
+// the button `id` of a dialog RunModal runs made its default, the one Enter clicks, in place of the one before
+void SetDefaultButton(HWND dialog, int id);
 // the path to save an attachment to, starting from the safe name the core made; empty when cancelled
 // (title and filter those of an attachment when null)
 std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t* title = nullptr, const wchar_t* filter = nullptr,
@@ -353,6 +355,12 @@ int WarningNote(HWND dialog, int id, const std::wstring& text, int left, int top
 // OK and Cancel (or the words given) at the bottom right of a window `width` wide, their top at `top`; the first is
 // the default unless `cancelDefault`
 void BottomButtons(HWND dialog, int width, int top, const std::wstring& ok, const std::wstring& cancel, bool cancelDefault = false);
+// a question as a message box asks it, with the answers `yes` and `no` on its buttons (& marks their letters): `yes`
+// the default, or `no` with `safeDefault` (Esc is always `no`); true for `yes`
+bool Ask(HWND owner, const std::wstring& title, const std::wstring& text, const std::wstring& yes, const std::wstring& no,
+         bool safeDefault = false);
+// New Key for `account` (chosen in it), and a backup offered once it is made: its fingerprint, empty when cancelled
+std::string NewKeyFor(HWND owner, PeCore* core, int64_t account);
 
 // ---- setup.cpp ----
 
@@ -541,8 +549,44 @@ void DestroyComposeWindows();
 // the save of the draft `messageId` finished, `problem` empty when it worked: the window that saved it says so;
 // false when that window is no longer open
 bool ComposeDraftSaved(const std::string& messageId, const std::wstring& problem);
-// Ctrl+S in a compose window (its fields; the editor has its own): saves the message in Drafts; true when handled
+// the keys of a compose window that its fields do not take (the editor has its own): Ctrl+S saves the message in
+// Drafts, Ctrl+Shift+D and Ctrl+Shift+E are Digitally Sign and Encrypt; true when handled
 bool ComposeKey(const MSG& msg);
+// a lookup of keys ended (the KeysFound event, `request` its uid): the compose window that asked takes what it found
+// (and says so in its status bar), and every compose window shows its recipients' keys again
+void ComposeKeysFound(uint64_t request);
+
+// ---- recipientkeys.cpp ----
+
+// what Recipients' Keys asks of the compose window it is over
+struct RecipientKeysCalls {
+    // the window's signing and encrypting now (pe_compose_security of its message), owned by the window: read it
+    // anew each time, as the window replaces it whenever the message changes
+    std::function<const PeComposeSecurity*()> security;
+    // Find Key for one recipient, Remove from Message
+    std::function<void(const std::string& address)> findKey;
+    std::function<void(const std::string& address)> remove;
+    // a key's use decided (Use the New Key, Keep the Current One): the window shows it
+    std::function<void()> changed;
+    // each of these ends in RefreshRecipientKeys, which reads the recipients again
+};
+enum class RecipientKeysAnswer { Cancel, Send, SendUnencrypted };
+// Recipients' Keys over a compose window: each recipient with their key, Find Key, Remove from Message, the waiting
+// key's decision, and Send Without Encryption or Send. `open` holds the window while it is open, for
+// RefreshRecipientKeys
+RecipientKeysAnswer RecipientKeysDialog(HWND owner, PeCore* core, const RecipientKeysCalls& calls, HWND& open);
+// the message or a key changed: the open Recipients' Keys reads its recipients again
+void RefreshRecipientKeys(HWND dialog);
+// the picture of a recipient's key in the security strips: a warning for none, else the lock, in its tone's strip
+IconSet RecipientKeySet(const PeComposeRecipient& recipient);
+int RecipientKeyPicture(const PeComposeRecipient& recipient);
+// the colors of the security bar's tone (securitybar.cpp): its fill, frame and words
+struct ToneColors {
+    COLORREF frame;
+    COLORREF fill;
+    COLORREF words;
+};
+ToneColors TonePalette(PeProtectionTone tone);
 
 // ---- messagewindow.cpp ----
 
@@ -1614,6 +1658,27 @@ enum RulesControlId : WORD {
     IDC_RULE_DELETE,
     IDC_RULE_QUIET,
     IDC_RULE_APPLY_NOW,
+};
+
+// the controls of signing and encrypting in the compose window (compose.cpp) and of Recipients' Keys
+// (recipientkeys.cpp), which the UI test finds by them
+enum ComposeKeysControlId : WORD {
+    // the line under the fields, its Details button (its child), the Keys row's label (a button) and its recipients
+    IDC_COMPOSE_SECURITY = 350,
+    IDC_COMPOSE_SECURITY_DETAILS,
+    IDC_COMPOSE_KEYS_LABEL,
+    IDC_COMPOSE_KEYS,
+    // Recipients' Keys: what it says at its top, the list, the selected recipient's buttons, the key that waits for a
+    // decision and its two answers, why Send Without Encryption is off, and the buttons at the bottom (Send is IDOK)
+    IDC_RKEYS_INTRO = 360,
+    IDC_RKEYS_LIST,
+    IDC_RKEYS_FIND,
+    IDC_RKEYS_REMOVE,
+    IDC_RKEYS_PENDING,
+    IDC_RKEYS_USE_NEW,
+    IDC_RKEYS_KEEP,
+    IDC_RKEYS_UNENCRYPTED_NOTE,
+    IDC_RKEYS_SEND_UNENCRYPTED,
 };
 
 // the controls of the key windows (keys.cpp), which the UI test finds by them

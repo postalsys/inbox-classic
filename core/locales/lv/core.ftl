@@ -1010,6 +1010,62 @@ pgp-publish-done = Jūsu atslēga ir publicēta vietnē keys.openpgp.org adresei
 pgp-publish-failed = Atslēgu nevarēja publicēt: { $error }
 # review: changed
 pgp-keyserver-off = Atslēgu meklēšana vietnē keys.openpgp.org ir izslēgta sadaļā { $settings }.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [1] Šifrēts un parakstīts: to var izlasīt tikai jūs un { $addresses }.
+   *[other] Šifrēts un parakstīts: to var izlasīt tikai jūs un tā adresāti ({ $count }).
+}
+# review: new
+pgp-compose-encrypt-ready = Tas tiks šifrēts un parakstīts. Pievienojiet adresātus, kuru atslēgas jums ir.
+# review: new
+pgp-compose-missing = { $count ->
+    [1] Adresātam { $addresses } nav atslēgas, tāpēc ziņojumu vēl nevar šifrēt.
+   *[other] Atslēgas nav šādiem adresātiem ({ $count }), tāpēc ziņojumu vēl nevar šifrēt: { $addresses }.
+}
+# review: new
+pgp-compose-looking = Meklē atslēgas: { $addresses }...
+# review: new
+pgp-compose-signed = Parakstīts: adresāti var pārbaudīt, ka tas ir no jums un nav mainīts.
+# review: new
+pgp-compose-reply-clear = Nav šifrēts, lai gan ziņojums, uz kuru tas atbild vai kuru tas pārsūta, bija šifrēts.
+# review: new
+pgp-compose-encrypted-files = Ir pievienoti šifrēta ziņojuma faili, tāpēc šo ziņojumu var nosūtīt tikai šifrētu. Ieslēdziet šifrēšanu vai noņemiet šos failus.
+# review: new
+pgp-compose-sign-tip = Parakstīt ziņojumu ar savu atslēgu, lai adresāti varētu pārbaudīt, ka tas ir no jums un nav mainīts
+# review: new
+pgp-compose-sign-tip-encrypted = Šifrēts ziņojums vienmēr ir parakstīts
+# review: new
+pgp-compose-encrypt-tip = Šifrēt ziņojumu, lai to varētu izlasīt tikai jūs un tā adresāti
+# review: new
+pgp-compose-make-key = Jums vēl nav atslēgas adresei { $address }. Vai izveidot to tagad? Ar to jūsu ziņojumus var parakstīt un šifrēt.
+# review: new
+pgp-compose-key-unusable = Jūsu atslēgu adresei { $address } nevar izmantot ({ $state }). Atveriet šifrēšanas atslēgas, lai importētu tās dublējumu vai izveidotu jaunu atslēgu.
+# review: new
+pgp-compose-encrypt-off-quote = Šis ziņojums citē vai pārsūta šifrētu ziņojumu. Bez šifrēšanas to nevar nosūtīt, kamēr nenoņemsiet citēto. Vai tomēr izslēgt šifrēšanu?
+# review: new
+pgp-compose-encrypt-off-reply = Šis ziņojums atbild uz šifrētu ziņojumu vai pārsūta to. Bez šifrēšanas jūsu ziņojumu var izlasīt ikviens, kas to apstrādā pa ceļam. Vai izslēgt šifrēšanu?
+# review: new
+pgp-recipient-verified = Atslēga pārbaudīta
+# review: new
+pgp-recipient-found = Atslēga nav pārbaudīta
+# review: new
+pgp-recipient-own = Jūsu atslēga
+# review: new
+pgp-recipient-looking = Meklē atslēgu...
+# review: new
+pgp-recipient-missing = Nav atslēgas
+# review: new
+pgp-recipient-not-found = Nav atslēgas: meklējot { $date }, neviena netika atrasta
+# review: new
+pgp-recipient-unusable = Atslēgu nevar izmantot: { $state }
+# review: new
+pgp-recipients-intro = Ziņojums tiek šifrēts ar katra adresāta atslēgu un ar jūsējo.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [1] Vienam adresātam nav atslēgas, ar ko šifrēt. Atrodiet viņa atslēgu, noņemiet viņu no šī ziņojuma vai nosūtiet to bez šifrēšanas.
+   *[other] Dažiem adresātiem ({ $count }) nav atslēgas, ar ko šifrēt. Atrodiet viņu atslēgas, noņemiet viņus no šī ziņojuma vai nosūtiet to bez šifrēšanas.
+}
 # review: new
 pgp-details-part = { $number }. daļa: { $label }
 # review: new

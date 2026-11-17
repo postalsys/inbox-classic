@@ -1,0 +1,24 @@
+<h1>Sign and encrypt a message</h1>
+<p class="summary">Sign a message so its recipients know it is from you, and encrypt it so only they can read it.</p>
+<p>A signed message shows that you wrote it and that nobody changed it on the way. An encrypted message can be read only by its recipients and by you, and it is always signed too. For both, you need a key of your own.</p>
+<p>To sign or encrypt a message:</p>
+<ol>
+    <li>In the message window, click <b data-text="ui-tb-sign"></b> or <b data-text="ui-tb-encrypt"></b>, or choose <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> or <b data-text="cmd-compose-encrypt"></b>. You can also press <kbd data-command="compose_sign"></kbd> or <kbd data-command="compose_encrypt"></kbd>. If you have no key yet, Inbox Classic offers to make one.</li>
+    <li>Click <b data-text="ui-tb-send"></b>.</li>
+</ol>
+<p>While <b data-text="ui-tb-encrypt"></b> is on, the line under the subject shows each recipient with a lock, and Inbox Classic looks for the keys it does not have yet:</p>
+<table>
+    <tr><th>Lock</th><th>What it means</th></tr>
+    <tr><td>Green</td><td>You verified the recipient’s key.</td></tr>
+    <tr><td>Blue</td><td>You have the recipient’s key, but you have not verified it.</td></tr>
+    <tr><td>Gray</td><td>Inbox Classic is looking for the recipient’s key.</td></tr>
+    <tr><td>Amber</td><td>No key was found for the recipient.</td></tr>
+</table>
+<h2>If a recipient has no key</h2>
+<p>An encrypted message is sent only when every recipient has a key. If one does not, <b data-text="ui-tb-send"></b> opens <b data-text="ui-recipient-keys-title"></b>. There you can click <b data-text="ui-recipient-find-key"></b> to look again, <b data-text="ui-recipient-remove"></b> to leave that person out, or <b data-text="ui-send-unencrypted"></b>. You can also ask them for their public key and import it.</p>
+<h2>Replies to encrypted mail</h2>
+<p>A reply to an encrypted message, or a forward of one, starts with <b data-text="ui-tb-encrypt"></b> on, and Inbox Classic asks before you turn it off. While the message still quotes the encrypted text or carries its attachments, it can be sent only encrypted.</p>
+<p>Drafts of an encrypted message are saved encrypted, and so is its copy in <b data-text="folder-sent"></b>.</p>
+<h2>Share your public key</h2>
+<p>To let someone send you encrypted mail, choose <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Your public key is attached to the message as a file.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>

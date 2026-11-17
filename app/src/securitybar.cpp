@@ -8,7 +8,7 @@
 namespace {
 
 // the colors of a tone, as the labels of the message's parts have them (pe-html secure.rs)
-struct ToneColors {
+struct ToneLook {
     COLORREF frame;
     COLORREF fill;
     COLORREF words;
@@ -17,13 +17,13 @@ struct ToneColors {
     int picture;
 };
 
-const ToneColors& ColorsOf(PeProtectionTone tone) {
-    static const ToneColors verified = {RGB(0x2e, 0x7d, 0x32), RGB(0xe8, 0xf5, 0xe9), RGB(0x1b, 0x5e, 0x20), IconSet::SecureVerified,
+const ToneLook& ColorsOf(PeProtectionTone tone) {
+    static const ToneLook verified = {RGB(0x2e, 0x7d, 0x32), RGB(0xe8, 0xf5, 0xe9), RGB(0x1b, 0x5e, 0x20), IconSet::SecureVerified,
                                         SECURE_SHIELD_CHECKMARK};
-    static const ToneColors good = {RGB(0x1f, 0x5f, 0xae), RGB(0xe6, 0xee, 0xfa), RGB(0x17, 0x4a, 0x87), IconSet::SecureGood, SECURE_RIBBON};
-    static const ToneColors warning = {RGB(0xb2, 0x6a, 0x00), RGB(0xff, 0xf4, 0xe0), RGB(0x7a, 0x48, 0x00), IconSet::SecureWarning,
+    static const ToneLook good = {RGB(0x1f, 0x5f, 0xae), RGB(0xe6, 0xee, 0xfa), RGB(0x17, 0x4a, 0x87), IconSet::SecureGood, SECURE_RIBBON};
+    static const ToneLook warning = {RGB(0xb2, 0x6a, 0x00), RGB(0xff, 0xf4, 0xe0), RGB(0x7a, 0x48, 0x00), IconSet::SecureWarning,
                                        SECURE_WARNING};
-    static const ToneColors neutral = {RGB(0x9e, 0x9e, 0x9e), RGB(0xf2, 0xf2, 0xf2), RGB(0x44, 0x44, 0x44), IconSet::SecureNeutral, -1};
+    static const ToneLook neutral = {RGB(0x9e, 0x9e, 0x9e), RGB(0xf2, 0xf2, 0xf2), RGB(0x44, 0x44, 0x44), IconSet::SecureNeutral, -1};
     switch (tone) {
     case PE_PROTECTION_TONE_VERIFIED:
         return verified;
@@ -76,6 +76,20 @@ int WordsHeight(HDC dc, HFONT font, const std::wstring& words, int width) {
 
 }  // namespace
 
+ToneColors TonePalette(PeProtectionTone tone) {
+    const ToneLook& look = ColorsOf(tone);
+    return {look.frame, look.fill, look.words};
+}
+
+IconSet RecipientKeySet(const PeComposeRecipient& recipient) {
+    return ColorsOf(recipient.tone).icons;
+}
+
+int RecipientKeyPicture(const PeComposeRecipient& recipient) {
+    // the lock while it is looked up, grey
+    return recipient.has_key || recipient.key == PE_RECIPIENT_KEY_LOOKING ? SECURE_LOCK_CLOSED : SECURE_WARNING;
+}
+
 int SecurityBarHeight(PeProtectionTone tone, bool encrypted, const std::wstring& words, HFONT font, int width, int reserved) {
     HDC dc = GetDC(nullptr);
     int wordsWidth = width - WordsLeft(tone, encrypted) - reserved - Scale(8);
@@ -87,7 +101,7 @@ int SecurityBarHeight(PeProtectionTone tone, bool encrypted, const std::wstring&
 }
 
 void DrawSecurityBar(HDC dc, const RECT& area, PeProtectionTone tone, bool encrypted, const std::wstring& words, HFONT font, int reserved) {
-    const ToneColors& colors = ColorsOf(tone);
+    const ToneLook& colors = ColorsOf(tone);
     HBRUSH fill = CreateSolidBrush(colors.fill);
     FillRect(dc, &area, fill);
     DeleteObject(fill);

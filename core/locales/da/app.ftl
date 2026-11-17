@@ -24,6 +24,8 @@ menu-sort-by = &Sorter efter
 menu-text-size = &Tekststørrelse
 # review: new
 menu-folder = &Mappe
+# review: new
+menu-insert = &Indsæt
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -185,6 +187,12 @@ cmd-export-address-book = Eksporter a&dressekartotek...
 cmd-export-setup = Eksporte&r indstillinger og konti...
 # review: new
 cmd-import-setup = I&mporter indstillinger og konti...
+# review: new
+cmd-compose-sign = &Signer digitalt
+# review: new
+cmd-compose-encrypt = &Krypter
+# review: new
+cmd-attach-my-key = Vedhæft min &offentlige nøgle
 
 ## The tray icon's menu
 
@@ -406,6 +414,12 @@ ui-tb-send = Send
 ui-tb-save = Gem
 # review: new
 ui-tb-attach = Vedhæft
+# review: new
+ui-tb-sign = Signer
+# review: new
+ui-tb-encrypt = Krypter
+# review: new
+ui-field-keys = Nøgler:
 # review: new
 ui-field-from = Fra:
 # review: new
@@ -1325,6 +1339,26 @@ ui-contact-key-none = Ingen nøgle
 ui-contact-key-use-new = Brug den &nye nøgle
 # review: new
 ui-contact-key-keep = &Behold den nuværende
+# review: new
+ui-recipient-keys-title = Modtagernes nøgler
+# review: new
+ui-recipient-col-recipient = Modtager
+# review: new
+ui-recipient-col-key = Nøgle
+# review: new
+ui-recipient-find-key = &Find nøgle
+# review: new
+ui-recipient-remove = Fjern fra &meddelelsen
+# review: new
+ui-send-unencrypted = Send &uden kryptering
+# review: new
+ui-compose-make-key = &Opret en nøgle...
+# review: new
+ui-compose-show-keys = &Krypteringsnøgler...
+# review: new
+ui-compose-encrypt-off = &Slå kryptering fra
+# review: new
+ui-compose-keep-encrypted = &Behold krypteringen
 # review: new
 ui-setup-export-title = Eksporter indstillinger og konti
 # review: new

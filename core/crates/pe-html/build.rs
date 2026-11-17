@@ -104,13 +104,17 @@ fn write_commands(out: &mut String, path: &Path) {
     for command in commands["command"].as_array().unwrap() {
         let get = |name: &str| command.get(name).and_then(|v| v.as_str());
         let key = get("key").unwrap_or("");
+        // the compose window's commands are listed apart, under its own title
+        let menu = match get("window") {
+            Some("compose") => "compose",
+            _ => get("menu").unwrap_or(""),
+        };
         let mac = get("mac").unwrap_or(key);
         let linux = get("linux").unwrap_or(key);
         writeln!(
             out,
-            "    ({:?}, {:?}, {key:?}, {mac:?}, {linux:?}),",
+            "    ({:?}, {menu:?}, {key:?}, {mac:?}, {linux:?}),",
             get("id").unwrap(),
-            get("menu").unwrap_or("")
         )
         .unwrap();
     }

@@ -200,8 +200,8 @@ impl Core {
                 .map_err(|problem| Error::Unavailable(format!("{}: {problem}", file.name)))?;
             files.push((file.name, source));
         }
-        let attachments =
-            crate::write_out(&format!("forward-{}-{}", first.folder, first.uid), files).map_err(|error| {
+        let attachments = crate::write_out(&format!("{}{}-{}", crate::FORWARD_OUT, first.folder, first.uid), files)
+            .map_err(|error| {
                 Error::Unavailable(tr_args(
                     Text::ExportNotAttached,
                     &[("error", (&error.to_string()).into())],

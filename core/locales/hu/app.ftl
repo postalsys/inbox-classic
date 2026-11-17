@@ -24,6 +24,8 @@ menu-sort-by = &Rendezés
 menu-text-size = &Betűméret
 # review: new
 menu-folder = &Mappa
+# review: new
+menu-insert = &Beszúrás
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -185,6 +187,12 @@ cmd-export-address-book = Címjegyzék &exportálása...
 cmd-export-setup = Beállítások és fiókok e&xportálása...
 # review: new
 cmd-import-setup = &Beállítások és fiókok importálása...
+# review: new
+cmd-compose-sign = Digitális &aláírás
+# review: new
+cmd-compose-encrypt = &Titkosítás
+# review: new
+cmd-attach-my-key = Saját nyilvános &kulcs csatolása
 
 ## The tray icon's menu
 
@@ -405,6 +413,12 @@ ui-tb-send = Küldés
 ui-tb-save = Mentés
 # review: new
 ui-tb-attach = Csatolás
+# review: new
+ui-tb-sign = Aláírás
+# review: new
+ui-tb-encrypt = Titkosítás
+# review: new
+ui-field-keys = Kulcsok:
 # review: new
 ui-field-from = Feladó:
 # review: new
@@ -1324,6 +1338,26 @@ ui-contact-key-none = Nincs kulcs
 ui-contact-key-use-new = Az ú&j kulcs használata
 # review: new
 ui-contact-key-keep = A jelenlegi &megtartása
+# review: new
+ui-recipient-keys-title = Címzettek kulcsai
+# review: new
+ui-recipient-col-recipient = Címzett
+# review: new
+ui-recipient-col-key = Kulcs
+# review: new
+ui-recipient-find-key = Kulcs &keresése
+# review: new
+ui-recipient-remove = &Eltávolítás az üzenetből
+# review: new
+ui-send-unencrypted = Küldés &titkosítás nélkül
+# review: new
+ui-compose-make-key = Kulcs &létrehozása...
+# review: new
+ui-compose-show-keys = &Titkosítási kulcsok...
+# review: new
+ui-compose-encrypt-off = Titkosítás &kikapcsolása
+# review: new
+ui-compose-keep-encrypted = Titkosítás meg&tartása
 # review: new
 ui-setup-export-title = Beállítások és fiókok exportálása
 # review: new

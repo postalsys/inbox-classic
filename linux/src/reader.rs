@@ -202,7 +202,7 @@ impl Reader {
         header.append(&attachments);
 
         let strip = Strip::new();
-        let security = SecurityBar::new();
+        let security = SecurityBar::new("reader");
         let (pictures, download_pictures, pictures_always) = pictures_bar();
 
         let note_retry = gtk::Label::new(Some(&pe_core::retry_note()));

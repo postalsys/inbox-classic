@@ -24,6 +24,8 @@ menu-sort-by = Or&dina per
 menu-text-size = Di&mensione testo
 # review: new
 menu-folder = &Cartella
+# review: new
+menu-insert = &Inserisci
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -185,6 +187,12 @@ cmd-export-address-book = Esporta r&ubrica...
 cmd-export-setup = Esporta impostazioni e accoun&t...
 # review: new
 cmd-import-setup = Importa imposta&zioni e account...
+# review: new
+cmd-compose-sign = &Firma digitalmente
+# review: new
+cmd-compose-encrypt = &Crittografa
+# review: new
+cmd-attach-my-key = Allega la mia chiave &pubblica
 
 ## The tray icon's menu
 
@@ -406,6 +414,12 @@ ui-tb-send = Invia
 ui-tb-save = Salva
 # review: new
 ui-tb-attach = Allega
+# review: new
+ui-tb-sign = Firma
+# review: new
+ui-tb-encrypt = Crittografa
+# review: new
+ui-field-keys = Chiavi:
 # review: new
 ui-field-from = Da:
 # review: new
@@ -1325,6 +1339,26 @@ ui-contact-key-none = Nessuna chiave
 ui-contact-key-use-new = Usa la &nuova chiave
 # review: new
 ui-contact-key-keep = &Mantieni quella attuale
+# review: new
+ui-recipient-keys-title = Chiavi dei destinatari
+# review: new
+ui-recipient-col-recipient = Destinatario
+# review: new
+ui-recipient-col-key = Chiave
+# review: new
+ui-recipient-find-key = &Trova chiave
+# review: new
+ui-recipient-remove = &Rimuovi dal messaggio
+# review: new
+ui-send-unencrypted = Invia &senza crittografia
+# review: new
+ui-compose-make-key = C&rea una chiave...
+# review: new
+ui-compose-show-keys = &Chiavi di crittografia...
+# review: new
+ui-compose-encrypt-off = &Disattiva la crittografia
+# review: new
+ui-compose-keep-encrypted = &Mantieni la crittografia
 # review: new
 ui-setup-export-title = Esporta impostazioni e account
 # review: new

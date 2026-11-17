@@ -20,12 +20,35 @@ func inform(_ text: String, title: String = appName, style: AlertStyle = .inform
     run(alert)
 }
 
-/// A question; true for the first button. `destructive` makes the second one the default, as for deleting
+/// A question; true for `yes`. `destructive` marks `yes` as destructive and makes `no` the default, as for deleting;
+/// `safeDefault` makes `no` the alert's first button, its default (Return), and Esc too, whatever its words
 @MainActor
 func ask(_ text: String, title: String = appName, yes: String = Text.uiYes.text, no: String = Text.uiNo.text,
          style: AlertStyle = .warning,
-         destructive: Bool = false) -> Bool {
+         destructive: Bool = false, safeDefault: Bool = false) -> Bool {
     let alert = makeAlert(text, title: title, style: style)
+    if safeDefault {
+        let safe = alert.addButton(withTitle: no)
+        let other = alert.addButton(withTitle: yes)
+        other.hasDestructiveAction = destructive
+        // set here rather than left to AppKit, which did not always give the first button Return; after the alert is
+        // laid out, as its layout sets the buttons' keys again on some macOS versions, and as the window's default too
+        alert.layout()
+        safe.keyEquivalent = "\r"
+        other.keyEquivalent = ""
+        alert.window.defaultButtonCell = safe.cell as? NSButtonCell
+        // AppKit gives Esc only to a button named Cancel, and on some macOS versions takes Return from both buttons
+        // while the alert runs when one is destructive: Return, Enter and Esc all answer with the safe button here
+        let escape = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            let keys: Set<UInt16> = [53, 36, 76]  // Esc, Return, keypad Enter
+            guard keys.contains(event.keyCode), event.window === alert.window,
+                  event.modifierFlags.intersection(.deviceIndependentFlagsMask).isEmpty else { return event }
+            safe.performClick(nil)
+            return nil
+        }
+        defer { escape.map(NSEvent.removeMonitor) }
+        return run(alert) == .alertSecondButtonReturn
+    }
     let first = alert.addButton(withTitle: yes)
     let second = alert.addButton(withTitle: no)
     if destructive {

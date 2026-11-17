@@ -120,6 +120,8 @@ void Editor::Configure() {
                 handlers_.state(message.substr(6));
             } else if (message == L"dirty") {
                 handlers_.dirty();
+            } else if (message == L"edited") {
+                handlers_.edited();
             } else if (message == L"drop") {
                 handlers_.dropped(DroppedFiles(args));
             } else if (message.rfind(L"caret:", 0) == 0 || message.rfind(L"hover:", 0) == 0) {
@@ -149,6 +151,8 @@ void Editor::Configure() {
             } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && key == 'S') {
                 args->put_Handled(TRUE);
                 handlers_.save();
+            } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && (GetKeyState(VK_SHIFT) & 0x8000) && handlers_.shortcut(key)) {
+                args->put_Handled(TRUE);
             } else if (kind == COREWEBVIEW2_KEY_EVENT_KIND_KEY_DOWN && control && key == 'K') {
                 args->put_Handled(TRUE);
                 handlers_.editLink();

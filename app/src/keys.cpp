@@ -168,8 +168,10 @@ struct AskState {
     bool accepted = false;
 };
 
-// a question as a message box asks it, with the answers `yes` (the default) and `no` on its buttons; true for `yes`
-bool Ask(HWND owner, const std::wstring& title, const std::wstring& text, const std::wstring& yes, const std::wstring& no) {
+}  // namespace
+
+bool Ask(HWND owner, const std::wstring& title, const std::wstring& text, const std::wstring& yes, const std::wstring& no,
+         bool safeDefault) {
     RegisterDialogClass(kAskClass, SimpleProc<AskState>);
     int pad = Scale(12), icon = GetSystemMetrics(SM_CXICON);
     int textWidth = Scale(330);
@@ -184,12 +186,14 @@ bool Ask(HWND owner, const std::wstring& title, const std::wstring& text, const 
     // words shorter than the sign beside its middle
     int textTop = pad + std::max(0, (icon - textHeight) / 2);
     CreateChild(dialog, L"STATIC", text.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad + icon + pad, textTop, width - pad, textTop + textHeight});
-    BottomButtons(dialog, width, height - Scale(10) - Scale(25), yes, no);
+    BottomButtons(dialog, width, height - Scale(10) - Scale(25), yes, no, safeDefault);
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
     MessageBeep(MB_ICONQUESTION);
-    RunModal(dialog, Item(dialog, IDOK), state.done);
+    RunModal(dialog, Item(dialog, safeDefault ? IDCANCEL : IDOK), state.done);
     return state.accepted;
 }
+
+namespace {
 
 // ---- Back Up Key and Import Key: a passphrase ----
 
@@ -1038,4 +1042,12 @@ std::unique_ptr<FormPart> AccountSecurityPart(PeCore* core, int64_t account) {
 
 void ApplyAccountSecurity(FormPart& part) {
     static_cast<AccountSecurity&>(part).Apply();
+}
+
+std::string NewKeyFor(HWND owner, PeCore* core, int64_t account) {
+    std::string made = NewKeyDialog(owner, core, account);
+    if (!made.empty()) {
+        OfferBackup(owner, core, made);
+    }
+    return made;
 }

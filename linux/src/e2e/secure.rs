@@ -32,7 +32,7 @@ const FILES: [&str; 10] = [
     "secure-long.eml",
 ];
 
-fn fixture(name: &str) -> PathBuf {
+pub(super) fn fixture(name: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../scripts/ui-e2e/pgp")
         .join(name)

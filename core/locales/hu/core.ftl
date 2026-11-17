@@ -951,6 +951,62 @@ pgp-publish-done = A kulcsa közzétéve a keys.openpgp.org oldalon ezekhez a c�
 pgp-publish-failed = A kulcsot nem sikerült közzétenni: { $error }
 # review: changed
 pgp-keyserver-off = A kulcsok keresése a keys.openpgp.org oldalon ki van kapcsolva itt: { $settings }.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [one] Titkosítva és aláírva: csak Ön és ez a címzett olvashatja: { $addresses }.
+   *[other] Titkosítva és aláírva: csak Ön és az üzenet { $count } címzettje olvashatja.
+}
+# review: new
+pgp-compose-encrypt-ready = Titkosítva és aláírva lesz elküldve. Adjon hozzá olyan címzetteket, akiknek megvan a kulcsa.
+# review: new
+pgp-compose-missing = { $count ->
+    [one] Ennek a címzettnek nincs kulcsa, ezért az üzenet még nem titkosítható: { $addresses }.
+   *[other] { $count } címzettnek nincs kulcsa, ezért az üzenet még nem titkosítható: { $addresses }.
+}
+# review: new
+pgp-compose-looking = Kulcsok keresése: { $addresses }...
+# review: new
+pgp-compose-signed = Aláírva: a címzettek ellenőrizhetik, hogy az üzenet Öntől származik, és senki nem módosította.
+# review: new
+pgp-compose-reply-clear = Nincs titkosítva, pedig a megválaszolt vagy továbbított üzenet titkosított volt.
+# review: new
+pgp-compose-encrypted-files = Egy titkosított üzenet fájljai vannak csatolva, ezért ez az üzenet csak titkosítva küldhető el. Kapcsolja be a Titkosítást, vagy távolítsa el ezeket a fájlokat.
+# review: new
+pgp-compose-sign-tip = Az üzenet aláírása a saját kulcsával, hogy a címzettek ellenőrizhessék, hogy Öntől származik, és senki nem módosította
+# review: new
+pgp-compose-sign-tip-encrypted = A titkosított üzenet mindig alá is van írva
+# review: new
+pgp-compose-encrypt-tip = Az üzenet titkosítása, hogy csak Ön és a címzettjei olvashassák
+# review: new
+pgp-compose-make-key = Ehhez a címhez még nincs kulcsa: { $address }. Létrehoz most egyet? Ezzel aláírhatja és titkosíthatja az üzeneteit.
+# review: new
+pgp-compose-key-unusable = Az ehhez a címhez tartozó kulcsa nem használható: { $address } ({ $state }). Nyissa meg a Titkosítási kulcsok ablakot, és importálja a kulcs biztonsági másolatát, vagy hozzon létre új kulcsot.
+# review: new
+pgp-compose-encrypt-off-quote = Ez az üzenet egy titkosított üzenetet idéz vagy továbbít. Titkosítás nélkül csak akkor küldhető el, ha eltávolítja belőle az idézett szöveget. Mégis kikapcsolja a titkosítást?
+# review: new
+pgp-compose-encrypt-off-reply = Ez az üzenet egy titkosított üzenetre válaszol, vagy azt továbbítja. Titkosítás nélkül bárki elolvashatja, aki útközben kezeli az üzenetét. Kikapcsolja a titkosítást?
+# review: new
+pgp-recipient-verified = A kulcs ellenőrizve
+# review: new
+pgp-recipient-found = A kulcs nincs ellenőrizve
+# review: new
+pgp-recipient-own = Saját kulcs
+# review: new
+pgp-recipient-looking = Kulcs keresése...
+# review: new
+pgp-recipient-missing = Nincs kulcs
+# review: new
+pgp-recipient-not-found = Nincs kulcs: nem található, keresés ideje: { $date }
+# review: new
+pgp-recipient-unusable = A kulcs nem használható: { $state }
+# review: new
+pgp-recipients-intro = Az üzenet minden címzett kulcsára és az Ön kulcsára is titkosítva lesz.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [one] Egy címzettnek nincs kulcsa a titkosításhoz. Keresse meg a kulcsát, távolítsa el őt ebből az üzenetből, vagy küldje el az üzenetet titkosítás nélkül.
+   *[other] { $count } címzettnek nincs kulcsa a titkosításhoz. Keresse meg a kulcsaikat, távolítsa el őket ebből az üzenetből, vagy küldje el az üzenetet titkosítás nélkül.
+}
 # review: new
 pgp-details-part = { $number }. rész: { $label }
 # review: new

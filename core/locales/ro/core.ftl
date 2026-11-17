@@ -1010,6 +1010,65 @@ pgp-publish-done = Cheia dvs. este publicată pe keys.openpgp.org pentru { $addr
 pgp-publish-failed = Cheia nu a putut fi publicată: { $error }
 # review: changed
 pgp-keyserver-off = Căutarea cheilor pe keys.openpgp.org este dezactivată în { $settings }.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [one] Criptat și semnat: doar dvs. și { $addresses } îl puteți citi.
+    [few] Criptat și semnat: doar dvs. și cei { $count } destinatari ai săi îl puteți citi.
+   *[other] Criptat și semnat: doar dvs. și cei { $count } de destinatari ai săi îl puteți citi.
+}
+# review: new
+pgp-compose-encrypt-ready = Va fi criptat și semnat. Adăugați destinatari ale căror chei le aveți.
+# review: new
+pgp-compose-missing = { $count ->
+    [one] { $addresses } nu are o cheie, deci mesajul nu poate fi criptat încă.
+    [few] { $count } destinatari nu au o cheie, deci mesajul nu poate fi criptat încă: { $addresses }.
+   *[other] { $count } de destinatari nu au o cheie, deci mesajul nu poate fi criptat încă: { $addresses }.
+}
+# review: new
+pgp-compose-looking = Se caută cheile pentru { $addresses }...
+# review: new
+pgp-compose-signed = Semnat: destinatarii pot verifica faptul că provine de la dvs. și nu a fost modificat.
+# review: new
+pgp-compose-reply-clear = Necriptat, deși mesajul la care răspunde sau pe care îl redirecționează era criptat.
+# review: new
+pgp-compose-encrypted-files = Sunt atașate fișiere ale unui mesaj criptat, deci acest mesaj poate fi trimis doar criptat. Activați Criptare sau eliminați acele fișiere.
+# review: new
+pgp-compose-sign-tip = Semnați mesajul cu cheia dvs., ca destinatarii să poată verifica faptul că provine de la dvs. și nu a fost modificat
+# review: new
+pgp-compose-sign-tip-encrypted = Un mesaj criptat este întotdeauna și semnat
+# review: new
+pgp-compose-encrypt-tip = Criptați mesajul, ca doar dvs. și destinatarii lui să îl poată citi
+# review: new
+pgp-compose-make-key = Nu aveți încă o cheie pentru { $address }. Creați una acum? Cu ea, mesajele dvs. pot fi semnate și criptate.
+# review: new
+pgp-compose-key-unusable = Cheia dvs. pentru { $address } nu poate fi folosită ({ $state }). Deschideți Chei de criptare pentru a importa copia ei de rezervă sau pentru a crea o cheie nouă.
+# review: new
+pgp-compose-encrypt-off-quote = Acest mesaj citează sau redirecționează un mesaj criptat. Fără criptare, nu poate fi trimis până nu eliminați textul citat. Dezactivați totuși criptarea?
+# review: new
+pgp-compose-encrypt-off-reply = Acest mesaj răspunde la un mesaj criptat sau îl redirecționează. Fără criptare, oricine vă gestionează mesajul pe drum îl poate citi. Dezactivați criptarea?
+# review: new
+pgp-recipient-verified = Cheie verificată
+# review: new
+pgp-recipient-found = Cheie neverificată
+# review: new
+pgp-recipient-own = Cheia dvs.
+# review: new
+pgp-recipient-looking = Se caută o cheie...
+# review: new
+pgp-recipient-missing = Nicio cheie
+# review: new
+pgp-recipient-not-found = Nicio cheie: nu s-a găsit niciuna la { $date }
+# review: new
+pgp-recipient-unusable = Cheia nu poate fi folosită: { $state }
+# review: new
+pgp-recipients-intro = Mesajul este criptat pentru cheia fiecărui destinatar și pentru a dvs.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [one] Un destinatar nu are o cheie pentru criptare. Găsiți-i cheia, eliminați-l din acest mesaj sau trimiteți mesajul fără criptare.
+    [few] { $count } destinatari nu au o cheie pentru criptare. Găsiți-le cheile, eliminați-i din acest mesaj sau trimiteți mesajul fără criptare.
+   *[other] { $count } de destinatari nu au o cheie pentru criptare. Găsiți-le cheile, eliminați-i din acest mesaj sau trimiteți mesajul fără criptare.
+}
 # review: new
 pgp-details-part = Partea { $number }: { $label }
 # review: new

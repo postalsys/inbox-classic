@@ -981,6 +981,62 @@ pgp-publish-done = Ключът ви е публикуван в keys.openpgp.org
 pgp-publish-failed = Ключът не можа да бъде публикуван: { $error }
 # review: changed
 pgp-keyserver-off = Търсенето на ключове в keys.openpgp.org е изключено в { $settings }.
+# the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
+# review: new
+pgp-compose-encrypted = { $count ->
+    [one] Шифровано и подписано: само вие и { $addresses } можете да го прочетете.
+   *[other] Шифровано и подписано: само вие и неговите { $count } получатели можете да го прочетете.
+}
+# review: new
+pgp-compose-encrypt-ready = Ще бъде шифровано и подписано. Добавете получатели, чиито ключове имате.
+# review: new
+pgp-compose-missing = { $count ->
+    [one] { $addresses } няма ключ, затова съобщението все още не може да бъде шифровано.
+   *[other] { $count } получатели нямат ключ, затова съобщението все още не може да бъде шифровано: { $addresses }.
+}
+# review: new
+pgp-compose-looking = Търсене на ключовете на { $addresses }...
+# review: new
+pgp-compose-signed = Подписано: получателите могат да проверят, че е от вас и не е променяно.
+# review: new
+pgp-compose-reply-clear = Не е шифровано, въпреки че съобщението, на което отговаря или което препраща, беше шифровано.
+# review: new
+pgp-compose-encrypted-files = Прикачени са файлове от шифровано съобщение, затова това съобщение може да бъде изпратено само шифровано. Включете „Шифроване“ или премахнете тези файлове.
+# review: new
+pgp-compose-sign-tip = Подписване на съобщението с вашия ключ, за да могат получателите да проверят, че е от вас и не е променяно
+# review: new
+pgp-compose-sign-tip-encrypted = Шифрованото съобщение винаги е и подписано
+# review: new
+pgp-compose-encrypt-tip = Шифроване на съобщението, така че само вие и получателите му да могат да го прочетат
+# review: new
+pgp-compose-make-key = Все още нямате ключ за { $address }. Да бъде ли създаден сега? С него съобщенията ви могат да бъдат подписвани и шифровани.
+# review: new
+pgp-compose-key-unusable = Ключът ви за { $address } не може да бъде използван ({ $state }). Отворете „Ключове за шифроване“, за да импортирате резервното му копие или да създадете нов ключ.
+# review: new
+pgp-compose-encrypt-off-quote = Това съобщение цитира или препраща шифровано съобщение. Без шифроване то не може да бъде изпратено, докато не премахнете цитирания текст. Да бъде ли изключено шифроването въпреки това?
+# review: new
+pgp-compose-encrypt-off-reply = Това съобщение отговаря на шифровано съобщение или го препраща. Без шифроване всеки, през когото минава съобщението ви по пътя, може да го прочете. Да бъде ли изключено шифроването?
+# review: new
+pgp-recipient-verified = Ключът е потвърден
+# review: new
+pgp-recipient-found = Ключът не е потвърден
+# review: new
+pgp-recipient-own = Вашият собствен ключ
+# review: new
+pgp-recipient-looking = Търсене на ключ...
+# review: new
+pgp-recipient-missing = Няма ключ
+# review: new
+pgp-recipient-not-found = Няма ключ: не е намерен на { $date }
+# review: new
+pgp-recipient-unusable = Ключът не може да бъде използван: { $state }
+# review: new
+pgp-recipients-intro = Съобщението се шифрова за ключа на всеки получател и за вашия.
+# review: new
+pgp-recipients-intro-missing = { $count ->
+    [one] Един получател няма ключ, за който да се шифрова. Намерете ключа му, премахнете го от това съобщение или изпратете съобщението без шифроване.
+   *[other] { $count } получатели нямат ключ, за който да се шифрова. Намерете ключовете им, премахнете ги от това съобщение или изпратете съобщението без шифроване.
+}
 # review: new
 pgp-details-part = Част { $number }: { $label }
 # review: new

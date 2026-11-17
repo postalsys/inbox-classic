@@ -703,7 +703,8 @@ try {
     $openedLog = Join-Path $Out 'opened-files.txt'
     Remove-Item -Force -ErrorAction SilentlyContinue $openedLog
     $arguments = @('--store', "`"$store`"", '--memory-passwords', '--pin-certificate', "`"$($ports.cert)`"",
-        '--sign-in-page-file', "`"$signInPage`"", '--opened-files-log', "`"$openedLog`"", '--test-hooks')
+        '--sign-in-page-file', "`"$signInPage`"", '--opened-files-log', "`"$openedLog`"", '--test-hooks',
+        '--key-server', "http://127.0.0.1:$($ports.pgp)")
     Remove-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name ClosedFolderRows -ErrorAction SilentlyContinue
     Remove-ItemProperty -Path $preferencesKey -Name CodesInNotifications -ErrorAction SilentlyContinue
@@ -2649,6 +2650,273 @@ public static class Dragger {
     }
     Command $main $IDM_SYNC
     [void](WaitFor { @(SubjectRows $plainSubject).Count -eq 0 -and @(SubjectRows 'Signed by Alice').Count -eq 0 -and @(SubjectRows 'The mill on Friday').Count -eq 0 } 20)
+
+    # ---- signing and encrypting what is written (SCENARIO 19j) ----
+
+    Step 'signing and encrypting what is written'
+    # the commands (core/commands.toml) and the controls of app.h's ComposeKeysControlId
+    $IDM_COMPOSE_SIGN = 175; $IDM_COMPOSE_ENCRYPT = 176; $IDM_ATTACH_MY_KEY = 177
+    $IDC_COMPOSE_SECURITY = 350; $IDC_COMPOSE_KEYS = 353
+    $IDC_RKEYS_INTRO = 360; $IDC_RKEYS_LIST = 361; $IDC_RKEYS_FIND = 362; $IDC_RKEYS_REMOVE = 363; $IDC_RKEYS_SEND_UNENCRYPTED = 368
+    # what the harness checks a sent message with: me.asc, whose private part it has, made the account's key (the one
+    # New Key made in the keys' step was until now), and Alice's key, to see that it was encrypted to her
+    # (read as plain strings: Get-Content's carry properties that ConvertTo-Json would send along)
+    $ownKey = [IO.File]::ReadAllText((Join-Path $pgpFiles 'me.asc'))
+    $ownPassphrase = [IO.File]::ReadAllText((Join-Path $pgpFiles 'me.passphrase')).Trim()
+    # me.asc's key id: of the two "Alex Morgan" keys, the one imported from a file (its Properties say so), the last four
+    # groups of its fingerprint, as Account Properties names the keys
+    $fixtureId = $null
+    $keys = OpenKeys
+    if ($keys) {
+        $keyList = [Native.Win]::GetDlgItem($keys, $IDC_KEYS_LIST)
+        for ($i = 0; $i -lt (ListCount $keyList) -and -not $fixtureId; $i++) {
+            if ([Native.Win]::RemoteListText($keyList, $i, 0) -ne 'Alex Morgan') { continue }
+            Key $keyList $VK_HOME
+            for ($j = 0; $j -lt $i; $j++) { Key $keyList $VK_DOWN }
+            Start-Sleep -Milliseconds 300
+            Click $keys $IDC_KEYS_PROPERTIES
+            $properties = WaitShown 'InboxClassicKeyProperties'
+            if ($properties) {
+                if ((GetText $properties $IDC_KEY_SOURCE) -match 'file') {
+                    $fixtureId = ((GetText $properties $IDC_KEY_FINGERPRINT) -split ' ' | Select-Object -Last 4) -join ' '
+                }
+                Click $properties 2
+                [void](WaitFor { -not [Native.Win]::IsWindow($properties) } 5)
+            }
+        }
+        CloseKeys $keys
+    }
+    $used = $false
+    Command $main $IDM_ACCOUNTS
+    $accountsList = WaitWindow 'InboxClassicAccounts' 'Accounts'
+    if ($accountsList -and $fixtureId) {
+        Click $accountsList 402
+        $form = WaitFor { $f = PropertiesForm; if ($f -ne [IntPtr]::Zero -and [Native.Win]::GetDlgItem($f, $IDC_ACCOUNT_KEY) -ne [IntPtr]::Zero) { $f } }
+        if ($form) {
+            $keyChoice = [Native.Win]::GetDlgItem($form, $IDC_ACCOUNT_KEY)
+            for ($i = 0; $i -lt [int][Native.Win]::SendMessage($keyChoice, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); $i++) {
+                $label = New-Object System.Text.StringBuilder 256
+                [void][Native.Win]::SendMessage($keyChoice, $CB_GETLBTEXT, [IntPtr]$i, $label)
+                if ($label.ToString().EndsWith("($fixtureId)")) {
+                    [void][Native.Win]::SendMessage($keyChoice, $CB_SETCURSEL, [IntPtr]$i, [IntPtr]::Zero)
+                    $used = $true
+                }
+            }
+            Click $form 1
+            [void](WaitFor { -not [Native.Win]::IsWindow($form) } 10)
+        }
+    }
+    if ($accountsList) {
+        [void][Native.Win]::PostMessage($accountsList, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        [void](WaitFor { -not [Native.Win]::IsWindow($accountsList) } 10)
+    }
+    Check $used "the key of me.asc is made the account's in Account Properties ($fixtureId)"
+    $aliceKey = [IO.File]::ReadAllText((Join-Path $pgpFiles 'alice.asc'))
+    function PgpCheck($message) {
+        $body = @{ raw = $message.raw; key = $ownKey; passphrase = $ownPassphrase; recipients = @($aliceKey) } | ConvertTo-Json
+        # a message it can not read is a failed check, not the end of the run
+        try { Invoke-RestMethod -Method Post -ContentType 'application/json' "http://127.0.0.1:$($ports.pgp)/pgp/check" -Body $body }
+        catch { [pscustomobject]@{ kind = 'unreadable'; error = "$_ $($_.ErrorDetails.Message)" } }
+    }
+    # the newest message of the Inbox after `before` (its highest uid then): an encrypted one's subject is "..."
+    function NewestUid { $u = @(Messages 'INBOX' | ForEach-Object { [int]$_.uid }); if ($u.Count) { ($u | Measure-Object -Maximum).Maximum } else { 0 } }
+    function SentSince([int]$before) { WaitFor { Messages 'INBOX' | Where-Object { [int]$_.uid -gt $before } | Select-Object -First 1 } 30 }
+    function TakeAway($message) { if ($message) { [void](Invoke-RestMethod -Method Delete "$rest/INBOX/messages/$($message.uid)") } }
+    # the compose window's toolbar (the one with Sign), a button pressed or enabled, and an item of its menus
+    function ComposeBar([IntPtr]$c) {
+        foreach ($b in [Native.Win]::FindDescendants($c, 'ToolbarWindow32')) {
+            if ([int][Native.Win]::SendMessage($b, 0x0419, [IntPtr]$IDM_COMPOSE_SIGN, [IntPtr]::Zero) -ge 0) { return $b }
+        }
+        [IntPtr]::Zero
+    }
+    function BarPressed([IntPtr]$c, [int]$id) { [int][Native.Win]::SendMessage((ComposeBar $c), 0x040A, [IntPtr]$id, [IntPtr]::Zero) -ne 0 }
+    function MenuChecked([IntPtr]$c, [int]$id) { $s = [Native.Win]::GetMenuState([Native.Win]::GetMenu($c), $id, 0); $s -ne [uint32]::MaxValue -and ($s -band 0x8) -ne 0 }
+    function MenuGreyed([IntPtr]$c, [int]$id) { $s = [Native.Win]::GetMenuState([Native.Win]::GetMenu($c), $id, 0); $s -ne [uint32]::MaxValue -and ($s -band 0x3) -ne 0 }
+    # the line under the fields and the Keys row, as their words say them ('' while hidden)
+    function SecurityLine([IntPtr]$c) { if (Visible $c $IDC_COMPOSE_SECURITY) { GetText $c $IDC_COMPOSE_SECURITY } else { '' } }
+    function KeysRow([IntPtr]$c) { if (Visible $c $IDC_COMPOSE_KEYS) { GetText $c $IDC_COMPOSE_KEYS } else { '' } }
+    # the line's fill inside its frame, as the screen shows it
+    function LineFill([IntPtr]$c) {
+        [void][Native.Win]::SetWindowPos($c, [IntPtr](-1), 0, 0, 0, 0, 0x13)
+        [void][Native.Win]::SetForegroundWindow($c)
+        Start-Sleep -Milliseconds 400
+        $box = New-Object Native.Win+RECT
+        [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($c, $IDC_COMPOSE_SECURITY), [ref]$box)
+        $picture = New-Object System.Drawing.Bitmap 1, 1
+        CopyScreen $picture ($box.Left + 3) ($box.Top + 3)
+        [void][Native.Win]::SetWindowPos($c, [IntPtr](-2), 0, 0, 0, 0, 0x13)
+        $p = $picture.GetPixel(0, 0)
+        '{0:x2}{1:x2}{2:x2}' -f $p.R, $p.G, $p.B
+    }
+    # a new message to `to` with `subject` and `text` written
+    function NewMessageTo([string]$to, [string]$subject, [string]$text) {
+        Command $main $IDM_NEW_MAIL
+        $c = WaitCompose
+        if (-not $c) { return $null }
+        SetText $c $IDC_TO $to
+        SetText $c $IDC_SUBJECT $subject
+        [void](TypeInEditor $c $text)
+        $c
+    }
+
+    # a new message: both off, no line; Sign (Ctrl+Shift+D in the text) pressed and checked, the blue line
+    $compose = NewMessageTo 'Alice Example <alice@example.org>' 'Signed in the UI test' 'A signed hello.'
+    if ($compose) {
+        Check (-not (BarPressed $compose $IDM_COMPOSE_SIGN) -and -not (BarPressed $compose $IDM_COMPOSE_ENCRYPT) -and
+            -not (MenuChecked $compose $IDM_COMPOSE_SIGN) -and -not (MenuChecked $compose $IDM_COMPOSE_ENCRYPT)) 'a new message starts with Sign and Encrypt off'
+        Check ((SecurityLine $compose) -eq '' -and (KeysRow $compose) -eq '') 'with no line under the fields and no Keys row'
+        [void][Native.Win]::SetForegroundWindow($compose)
+        [void](ClickEditor $compose)
+        [System.Windows.Forms.SendKeys]::SendWait('^+d')
+        Check ([bool](WaitFor { (BarPressed $compose $IDM_COMPOSE_SIGN) -and (MenuChecked $compose $IDM_COMPOSE_SIGN) } 10)) 'Ctrl+Shift+D in the text presses Sign and checks Tools > Digitally Sign'
+        $line = WaitFor { $t = SecurityLine $compose; if ($t) { $t } } 10
+        Check ($line -eq 'Signed: recipients can check that it comes from you and was not changed.') "the line says it is signed ($line)"
+        Check ((LineFill $compose) -eq $fills.good) "in blue ($(LineFill $compose))"
+        Shot $compose 'write-30-sign'
+        $before = NewestUid
+        Command $compose $IDC_SEND
+        $sent = SentSince $before
+        $said = if ($sent) { PgpCheck $sent }
+        Check ($said -and $said.kind -eq 'signed' -and $said.valid -and $said.text -match 'A signed hello') "OpenPGP.js finds it signed, the signature good ($(if ($said) { "$($said.kind) $($said.valid) $($said.error)" }))"
+        TakeAway $sent
+    }
+
+    # Encrypt: Sign on and greyed, Alice's green lock, the green line; sent encrypted to her
+    $compose = NewMessageTo 'Alice Example <alice@example.org>' 'Encrypted in the UI test' 'The meeting moves to Thursday.'
+    if ($compose) {
+        Command $compose $IDM_COMPOSE_ENCRYPT
+        Check ([bool](WaitFor { (BarPressed $compose $IDM_COMPOSE_ENCRYPT) -and (MenuChecked $compose $IDM_COMPOSE_ENCRYPT) } 10)) 'Encrypt is pressed and checked'
+        Check ((BarPressed $compose $IDM_COMPOSE_SIGN) -and (MenuChecked $compose $IDM_COMPOSE_SIGN) -and (MenuGreyed $compose $IDM_COMPOSE_SIGN)) 'Sign shows on: pressed in the toolbar, checked and greyed in Tools'
+        Command $compose $IDM_COMPOSE_SIGN
+        Start-Sleep -Milliseconds 500
+        Check ((BarPressed $compose $IDM_COMPOSE_SIGN)) 'a click on Sign leaves it on while Encrypt is'
+        $row = WaitFor { $t = KeysRow $compose; if ($t -match 'Alice Example, Key verified') { $t } } 10
+        Check ($null -ne $row) "the Keys row shows Alice with her key verified ($(KeysRow $compose))"
+        $line = WaitFor { $t = SecurityLine $compose; if ($t -match '^Encrypted') { $t } } 10
+        Check ($line -eq 'Encrypted and signed: only you and Alice Example can read it.') "the line says who can read it ($line)"
+        Check ((LineFill $compose) -eq $fills.verified) "in green ($(LineFill $compose))"
+        Shot $compose 'write-31-encrypt'
+        $before = NewestUid
+        Command $compose $IDC_SEND
+        $sent = SentSince $before
+        $said = if ($sent) { PgpCheck $sent }
+        Check ($said -and $said.kind -eq 'encrypted' -and $said.signed -and $said.valid -and @($said.to) -contains $true -and $said.text -match 'Thursday') "OpenPGP.js decrypts it, signed, to Alice's key ($(if ($said) { "$($said.kind) $($said.signed) $($said.valid) $($said.to) $($said.error)" }))"
+        Check ($sent -and (RawText $sent) -notmatch 'Thursday') 'the server holds none of its words'
+        TakeAway $sent
+    }
+
+    # Alice and Dave, whose key is nowhere: his lock amber, Send opens Recipients' Keys; Remove from Message, then Send
+    $compose = NewMessageTo 'Alice Example <alice@example.org>, Dave <dave@example.com>' 'Two recipients in the UI test' 'For both of you.'
+    if ($compose) {
+        Command $compose $IDM_COMPOSE_ENCRYPT
+        $row = WaitFor { $t = KeysRow $compose; if ($t -match 'Dave, No key: none was found on') { $t } } 20
+        Check ($null -ne $row) "Dave's lock says no key was found ($(KeysRow $compose))"
+        $line = SecurityLine $compose
+        Check ($line -match '^(Dave|dave@example\.com) has no key') "the line names him ($line)"
+        Check ((LineFill $compose) -eq $fills.warning) "in amber ($(LineFill $compose))"
+        $status = [Native.Win]::FindWindowEx($compose, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
+        Write-Host "   the status bar after the lookup: $(StatusPart $status 0)"
+        Command $compose $IDC_SEND
+        $keysWindow = WaitShown 'InboxClassicRecipientKeys' 10
+        Check ($null -ne $keysWindow) "Send opens Recipients' Keys instead of sending"
+        if ($keysWindow) {
+            $keyList = [Native.Win]::GetDlgItem($keysWindow, $IDC_RKEYS_LIST)
+            $intro = GetText $keysWindow $IDC_RKEYS_INTRO
+            Check ($intro -match '^One recipient has no key') "it says why ($intro)"
+            $rows = @(0..([Math]::Max(0, (ListCount $keyList) - 1)) | ForEach-Object { "$([Native.Win]::RemoteListText($keyList, $_, 0)) | $([Native.Win]::RemoteListText($keyList, $_, 1))" })
+            Check ((ListCount $keyList) -eq 2 -and $rows[0] -eq 'Alice Example <alice@example.org> | Key verified' -and $rows[1] -match '^Dave <dave@example.com> \| No key: none was found on') "Alice and Dave with their keys ($($rows -join '; '))"
+            Check (-not (Enabled $keysWindow $IDC_RKEYS_FIND) -and (Enabled $keysWindow $IDC_RKEYS_REMOVE)) "Dave is selected: Find Key greyed (asked a moment ago), Remove from Message"
+            Check (-not (Enabled $keysWindow 1) -and (Enabled $keysWindow $IDC_RKEYS_SEND_UNENCRYPTED)) 'Send waits for his key, Send Without Encryption can be used'
+            Check (([Native.Win]::GetWindowLong([Native.Win]::GetDlgItem($keysWindow, 2), -16) -band 0xF) -eq 1) 'Cancel is the default'
+            Shot $compose 'write-32-missing-key' $keysWindow
+            Click $keysWindow $IDC_RKEYS_REMOVE
+            Check ([bool](WaitFor { (ListCount $keyList) -eq 1 -and (Enabled $keysWindow 1) } 10)) 'Remove from Message leaves Alice, and Send can be used'
+            Check ((GetText $compose $IDC_TO) -notmatch 'dave') "Dave is out of To ($(GetText $compose $IDC_TO))"
+            Check (([Native.Win]::GetWindowLong([Native.Win]::GetDlgItem($keysWindow, 1), -16) -band 0xF) -eq 1) 'Send is the default now'
+            $before = NewestUid
+            Click $keysWindow 1
+            $sent = SentSince $before
+            $said = if ($sent) { PgpCheck $sent }
+            Check ($said -and $said.kind -eq 'encrypted' -and @($said.to) -contains $true -and (RawText $sent) -notmatch 'dave@example\.com') "Send sends it encrypted to Alice alone ($(if ($said) { "$($said.kind) $($said.to)" }))"
+            TakeAway $sent
+        }
+    }
+
+    # a reply to encrypted mail starts encrypted; Encrypt off asks first, Keep It Encrypted the default
+    AddMessage ([IO.File]::ReadAllText((Join-Path $pgpFiles 'secure-encrypted.eml'))) @('\Seen')
+    Command $main $IDM_SYNC
+    $words = SelectSecure 'Encrypted'
+    Command $main $IDM_REPLY
+    $reply = WaitCompose
+    Check ($null -ne $reply) "Reply opens a compose window ($words)"
+    if ($reply) {
+        Check ([bool](WaitFor { (BarPressed $reply $IDM_COMPOSE_ENCRYPT) -and (BarPressed $reply $IDM_COMPOSE_SIGN) } 10)) 'the reply to encrypted mail starts with Encrypt and Sign on'
+        Check ([bool](WaitFor { (KeysRow $reply) -match 'Alice Example, Key verified' } 10)) "Alice's lock green ($(KeysRow $reply))"
+        Command $reply $IDM_COMPOSE_ENCRYPT
+        $ask = WaitShown 'InboxClassicAsk' 10
+        Check ($null -ne $ask) 'Encrypt off asks first'
+        if ($ask) {
+            Check ((Statics $ask) -match 'quotes or forwards an encrypted message') "naming the encrypted quote ($(Statics $ask))"
+            Check ((GetText $ask 1) -eq '&Turn Encryption Off' -and (GetText $ask 2) -eq '&Keep It Encrypted') "with Turn Encryption Off and Keep It Encrypted ($(GetText $ask 1) / $(GetText $ask 2))"
+            Check (([Native.Win]::GetWindowLong([Native.Win]::GetDlgItem($ask, 2), -16) -band 0xF) -eq 1) 'Keep It Encrypted is the default'
+            Shot $reply 'write-33-reply-encrypted' $ask
+            Click $ask 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($ask) } 5)
+        }
+        Check ((BarPressed $reply $IDM_COMPOSE_ENCRYPT)) 'Keep It Encrypted leaves it on'
+
+        # Turn Encryption Off: the amber line, Send refused while the quote is there; without it, it goes signed
+        Command $reply $IDM_COMPOSE_ENCRYPT
+        $ask = WaitShown 'InboxClassicAsk' 10
+        if ($ask) {
+            Click $ask 1
+            [void](WaitFor { -not [Native.Win]::IsWindow($ask) } 5)
+        }
+        Check ([bool](WaitFor { -not (BarPressed $reply $IDM_COMPOSE_ENCRYPT) } 10)) 'Turn Encryption Off turns it off'
+        $line = WaitFor { $t = SecurityLine $reply; if ($t -match 'only be sent encrypted') { $t } } 10
+        Check ($null -ne $line) "the line says it can only be sent encrypted ($(SecurityLine $reply))"
+        Check ((LineFill $reply) -eq $fills.warning) "in amber ($(LineFill $reply))"
+        Shot $reply 'write-34-quote-in-clear'
+        Command $reply $IDC_SEND
+        $refused = WaitWindow '#32770' 'Inbox Classic' 10
+        Check ($refused -and (Statics $refused) -match 'only be sent encrypted') "Send is refused with the same words ($(if ($refused) { Statics $refused }))"
+        if ($refused) { Click $refused 2; [void](WaitFor { -not [Native.Win]::IsWindow($refused) } 5) }
+        Check ([Native.Win]::IsWindow($reply)) 'the message stays open'
+        # the quote unfolded and taken away with the rest (Select All unfolds it), then a line of one's own
+        [void][Native.Win]::SetForegroundWindow($reply)
+        [void](ClickEditor $reply)
+        [System.Windows.Forms.SendKeys]::SendWait('^a')
+        Start-Sleep -Milliseconds 500
+        [System.Windows.Forms.SendKeys]::SendWait('{DEL}')
+        [void](TypeInEditor $reply 'Nothing secret in this answer.')
+        $line = WaitFor { $t = SecurityLine $reply; if ($t -match '^Not encrypted') { $t } } 10
+        Check ($line -eq 'Not encrypted, although the message it answers or forwards was.') "without the quote, the line says it is not encrypted ($(SecurityLine $reply))"
+        $before = NewestUid
+        Command $reply $IDC_SEND
+        $sent = SentSince $before
+        $said = if ($sent) { PgpCheck $sent }
+        Check ($said -and $said.kind -eq 'signed' -and $said.valid -and $said.text -notmatch 'old mill') "it goes signed, Sign having stayed on, without the quote ($(if ($said) { "$($said.kind) $($said.valid)" }))"
+        TakeAway $sent
+    }
+    RemoveSecure 'secure-encrypted.eml' 'Encrypted'
+
+    # Insert > Attach My Public Key: the key in the Attach row, sent as application/pgp-keys
+    $compose = NewMessageTo 'Alice Example <alice@example.org>' 'My key in the UI test' 'Here is my key.'
+    if ($compose) {
+        Check (-not (MenuGreyed $compose $IDM_ATTACH_MY_KEY)) 'Insert > Attach My Public Key can be used'
+        Command $compose $IDM_ATTACH_MY_KEY
+        $files = [Native.Win]::GetDlgItem($compose, $IDC_FILES)
+        $file = WaitFor { if ((ListBoxCount $files) -eq 1) { ListBoxText $files 0 } } 10
+        Check ($file -match '^Alex Morgan public key\.asc \(') "the Attach row lists the key ($file)"
+        Shot $compose 'write-35-attach-key'
+        $before = NewestUid
+        Command $compose $IDC_SEND
+        $sent = SentSince $before
+        $said = if ($sent) { PgpCheck $sent }
+        $keyFile = if ($said) { @($said.attachments) | Where-Object { $_.type -eq 'application/pgp-keys' } | Select-Object -First 1 }
+        Check ($keyFile -and $keyFile.name -eq 'Alex Morgan public key.asc') "it is sent as application/pgp-keys ($(if ($said) { ($said.attachments | ForEach-Object { "$($_.type) $($_.name)" }) -join ', ' }))"
+        TakeAway $sent
+    }
 
     # ---- opening attachments ----
 
@@ -6557,6 +6825,69 @@ public static bool HasIcon(IntPtr window) {
         if (-not $wordsOnly) { Check ($cut.Count -eq 0) "${what}: nothing cut off ($($cut -join ' | '))" }
     }
 
+    # a message to ten recipients with Encrypt on, and Recipients' Keys from Send, in the language in use: the toolbar's,
+    # the line's and the window's longer words, the Keys row with more recipients than fit (shots `$prefix-compose-keys`
+    # and `$prefix-recipient-keys`, for the review; with `$pseudo` nothing left in English or cut off)
+    function ComposeKeysShots([IntPtr]$window, [string]$prefix, [bool]$pseudo) {
+        Command $window $IDM_NEW_MAIL
+        $c = WaitCompose
+        if (-not $c) { Check $false "a compose window opens ($prefix)"; return }
+        SetText $c $IDC_TO ('Alice Example <alice@example.org>, Dave <dave@example.com>, Bob Example <bob@example.net>, ' +
+            'erin@example.com, frank@example.com, grace@example.com, heidi@example.com, ivan@example.com, judy@example.com, ' +
+            'mallory@example.org')
+        SetText $c $IDC_SUBJECT 'Ten recipients'
+        Command $c 176
+        # the account it goes from has no key of its own here: Encrypt offers to make one (Cancel the default), and
+        # once it is made, turns on
+        $question = WaitShown 'InboxClassicAsk' 5
+        if ($question) {
+            if ($pseudo) { CheckPseudo $question 'the question of a missing key' }
+            Check (([Native.Win]::GetWindowLong([Native.Win]::GetDlgItem($question, 2), -16) -band 0xF) -eq 1) "the question's safe answer is the default ($prefix)"
+            Shot $c "$prefix-make-key" $question
+            Click $question 1
+            # Make a Key opens New Key; a key that can not be used here (this run's passwords are in memory only, and
+            # the app started again) opens Encryption Keys, where New Key makes one, and Encrypt is clicked again
+            $keysWindow = WaitShown 'InboxClassicKeys' 5
+            if ($keysWindow) { Click $keysWindow 871 }
+            $made = WaitShown 'InboxClassicNewKey' 10
+            if ($made) {
+                $for = [Native.Win]::GetDlgItem($made, 880)
+                for ($i = 0; $i -lt [int][Native.Win]::SendMessage($for, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero); $i++) {
+                    $label = New-Object System.Text.StringBuilder 256
+                    [void][Native.Win]::SendMessage($for, $CB_GETLBTEXT, [IntPtr]$i, $label)
+                    if ($label.ToString() -match 'alice@example\.com') { [void][Native.Win]::SendMessage($for, $CB_SETCURSEL, [IntPtr]$i, [IntPtr]::Zero) }
+                }
+                Click $made 1
+                [void](WaitFor { -not [Native.Win]::IsWindow($made) } 30)
+                $later = WaitShown 'InboxClassicAsk' 10
+                if ($later) { Click $later 2; [void](WaitFor { -not [Native.Win]::IsWindow($later) } 5) }
+            }
+            if ($keysWindow) {
+                Click $keysWindow 878
+                [void](WaitFor { -not [Native.Win]::IsWindow($keysWindow) } 10)
+                Command $c 176
+            }
+            Check ([bool](WaitFor { Visible $c 353 } 10)) "Encrypt is on once the key is made ($prefix)"
+        }
+        [void](WaitFor { -not ((GetText $c 353) -match '\.\.\.') -and (Visible $c 353) } 20)
+        Start-Sleep -Seconds 1
+        if ($pseudo) { CheckPseudo $c 'the compose window with Encrypt on' }
+        Shot $c "$prefix-compose-keys"
+        Command $c $IDC_SEND
+        $k = WaitShown 'InboxClassicRecipientKeys' 10
+        Check ($null -ne $k) "Send opens Recipients' Keys ($prefix)"
+        if ($k) {
+            if ($pseudo) { CheckPseudo $k "Recipients' Keys" }
+            Shot $c "$prefix-recipient-keys" $k
+            Click $k 2
+            [void](WaitFor { -not [Native.Win]::IsWindow($k) } 5)
+        }
+        [void][Native.Win]::PostMessage($c, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+        $ask = WaitWindow '#32770' 'Inbox Classic' 5
+        if ($ask) { Click $ask 7 }
+        [void](WaitFor { -not [Native.Win]::IsWindow($c) } 10)
+    }
+
     Step 'in German'
     # the language chosen in Options above, read at start
     $de = Catalog 'de'
@@ -6615,6 +6946,7 @@ public static bool HasIcon(IntPtr window) {
         } else {
             Check $false 'Import Settings and Accounts asks for a file in German'
         }
+        ComposeKeysShots $main 'lang-de' $false
         Quit $main 'German'
     }
     Remove-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue
@@ -6670,6 +7002,8 @@ public static bool HasIcon(IntPtr window) {
             [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
             [void](WaitFor { if (-not [Native.Win]::IsWindow($compose)) { $true } } 10)
         }
+
+        ComposeKeysShots $main 'lang-pseudo' $true
 
         Command $main $IDM_OPTIONS
         $options = WaitShown 'InboxClassicOptions'

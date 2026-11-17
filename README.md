@@ -15,7 +15,7 @@ An email client for Windows, the Mac and Linux in the style of Outlook Express: 
 - Search every folder as you type, by subject, people, file names and text, from a local full-text index, with Gmail's search syntax (`from:`, `is:unread`, `has:attachment`, `in:sent`, `before:` ...)
 - Message rules that move, flag, mark read, archive or junk new mail as it arrives, made from a message or a search
 - HTML mail sanitized and shown without scripts, remote pictures blocked until allowed, quoted history and forwarded mail folded away, messages on a dark background when the system is dark
-- Signed and encrypted mail (OpenPGP): read and checked with a security bar that says who signed and whether it was encrypted, your own keys and your contacts', keys learned from Autocrypt headers and looked up in the domain's Web Key Directory or on keys.openpgp.org
+- Signed and encrypted mail (OpenPGP): read and checked with a security bar that says who signed and whether it was encrypted, written with Sign and Encrypt in the compose window (each recipient's key shown, a reply to encrypted mail encrypted too), marked in the message list and found by search once decrypted; your own keys and your contacts', keys learned from Autocrypt headers and looked up in the domain's Web Key Directory or on keys.openpgp.org
 - An HTML editor that sends plain text when nothing is formatted, drafts saved on the server, an Outbox for what can not go yet, a delay before sending with Undo; a signature for each account, and addresses completed from the people you write to and hear from
 - New mail as it arrives (IMAP IDLE), with a notification and an unread count on the taskbar, the Dock or the dock of GNOME, and a tray icon on Windows and Linux; the default mail app for `mailto:` links and `.eml` files
 - Drag messages onto folders, Mark All Read, Junk and Not Junk (`$Junk`/`$NotJunk`), one-click Unsubscribe (RFC 8058), calendar invitations shown readably, bounces explained, sign-in codes offered when the sender's domain signed the message, brand logos (BIMI)
@@ -23,7 +23,7 @@ An email client for Windows, the Mac and Linux in the style of Outlook Express: 
 - Settings and accounts exported to one file, sealed with a passphrase, to move to another computer
 - AI agents such as Claude can read and organize your mail through the Model Context Protocol, only with what you allow them; there is no AI in the app itself, and an agent never sees the text of encrypted mail
 - In 29 languages, with the user help built in (F1) in each
-- No telemetry and no account with us: the app talks to your mail servers, and beyond them only when you or a message ask for it: a mailing list's unsubscribe address once you agree, a brand's logo address when your mail server approved the logo, the recipient's domain and keys.openpgp.org when you look up a key
+- No telemetry and no account with us: the app talks to your mail servers, and beyond them only when you or a message ask for it: a mailing list's unsubscribe address once you agree, a brand's logo address when your mail server approved the logo, the recipient's domain and keys.openpgp.org when you look up a key (Settings turns keys.openpgp.org off)
 
 ## Installing
 

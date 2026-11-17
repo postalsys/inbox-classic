@@ -44,6 +44,13 @@ struct Command {
     list: bool,
     /// The submenu of its menu it is in (View > Layout), labelled by the catalog's `menu-<submenu>`
     submenu: Option<String>,
+    /// The window it is a command of: main (left out) or compose
+    #[serde(default = "main_window")]
+    window: String,
+}
+
+fn main_window() -> String {
+    "main".into()
 }
 
 impl Command {
@@ -54,6 +61,9 @@ impl Command {
 }
 
 const MENUS: [&str; 7] = ["file", "edit", "view", "tools", "message", "help", "tray"];
+/// The compose window's menus: its own Insert, and the ones it shares with the main window
+const COMPOSE_MENUS: [&str; 2] = ["tools", "insert"];
+const WINDOWS: [&str; 2] = ["main", "compose"];
 
 fn main() {
     let crate_dir = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
@@ -193,8 +203,18 @@ fn check(table: &Table) {
             command.id
         );
         assert!(
-            MENUS.contains(&command.menu.as_str()),
-            "{}: no menu {}",
+            WINDOWS.contains(&command.window.as_str()),
+            "{}: no window {}",
+            command.id,
+            command.window
+        );
+        let menus: &[&str] = match command.window.as_str() {
+            "compose" => &COMPOSE_MENUS,
+            _ => &MENUS,
+        };
+        assert!(
+            menus.contains(&command.menu.as_str()),
+            "{}: no menu {} in its window",
             command.id,
             command.menu
         );
@@ -273,6 +293,12 @@ fn c_header(table: &Table) -> String {
         writeln!(out, "    case IDM_{}:", command.id.to_uppercase()).unwrap();
     }
     out.push_str("        return true;\n    default:\n        return false;\n    }\n}\n");
+    out.push_str("\n// whether a command is the compose window's (its toolbar and menus), not the main window's\n");
+    out.push_str("inline bool CommandInCompose(unsigned id) {\n    switch (id) {\n");
+    for command in table.command.iter().filter(|c| c.window == "compose") {
+        writeln!(out, "    case IDM_{}:", command.id.to_uppercase()).unwrap();
+    }
+    out.push_str("        return true;\n    default:\n        return false;\n    }\n}\n");
     out.push_str(
         "\n// the label of a command in the catalog (& marks the menu letter): pe_text(CommandText(IDM_...))\n\
          inline PeText CommandText(PeCommandId id) {\n    switch (id) {\n",
@@ -287,7 +313,34 @@ fn c_header(table: &Table) -> String {
         .unwrap();
     }
     out.push_str("    }\n    return PE_TEXT_CMD_NEW_ACCOUNT;\n}\n");
+    out.push_str(
+        "\n// the shortcut of a command on Windows, as its menu item shows it (\"Ctrl+Shift+D\", Shortcut() puts the key\n\
+         // names in the language in use), empty for none\n\
+         inline const wchar_t* CommandKeys(PeCommandId id) {\n    switch (id) {\n",
+    );
+    for command in table.command.iter().filter(|c| !c.key.is_empty()) {
+        writeln!(
+            out,
+            "    case IDM_{}: return L\"{}\";",
+            command.id.to_uppercase(),
+            windows_keys(&command.key)
+        )
+        .unwrap();
+    }
+    out.push_str("    default:\n        return L\"\";\n    }\n}\n");
     out
+}
+
+/// A key of the table as Windows writes it: Mod is Ctrl, Delete is Del
+fn windows_keys(key: &str) -> String {
+    key.split('+')
+        .map(|part| match part {
+            "Mod" => "Ctrl",
+            "Delete" => "Del",
+            other => other,
+        })
+        .collect::<Vec<_>>()
+        .join("+")
 }
 
 /// A shortcut: modifiers and one key
@@ -417,13 +470,23 @@ fn swift(table: &Table) -> String {
         };
         writeln!(out, "    case {name} = {}", command.windows).unwrap();
     }
-    out.push_str("\n    /// The menu it is in: file, edit, view, tools, message, help, or tray (the Dock menu)\n    var menu: String {\n        switch self {\n");
+    out.push_str("\n    /// The menu it is in: file, edit, view, tools, message, help, or tray (the Dock menu); insert for the compose window\n    var menu: String {\n        switch self {\n");
     for command in &table.command {
         writeln!(
             out,
             "        case .{}: return \"{}\"",
             camel(&command.id, false),
             command.menu
+        )
+        .unwrap();
+    }
+    out.push_str("        }\n    }\n\n    /// The window it is a command of: main, or compose (enabled while a compose window is in front)\n    var window: String {\n        switch self {\n");
+    for command in &table.command {
+        writeln!(
+            out,
+            "        case .{}: return \"{}\"",
+            camel(&command.id, false),
+            command.window
         )
         .unwrap();
     }
@@ -532,13 +595,23 @@ fn rust(table: &Table) -> String {
         )
         .unwrap();
     }
-    out.push_str("        }\n    }\n\n    /// file, edit, view, tools, message, help, or tray (the tray icon's menu only)\n    pub fn menu(self) -> &'static str {\n        match self {\n");
+    out.push_str("        }\n    }\n\n    /// file, edit, view, tools, message, help, or tray (the tray icon's menu only); insert for the compose window\n    pub fn menu(self) -> &'static str {\n        match self {\n");
     for command in &table.command {
         writeln!(
             out,
             "            Command::{} => \"{}\",",
             camel(&command.id, true),
             command.menu
+        )
+        .unwrap();
+    }
+    out.push_str("        }\n    }\n\n    /// The window it is a command of: main, or compose (`compose.<name>` in its own action group)\n    pub fn window(self) -> &'static str {\n        match self {\n");
+    for command in &table.command {
+        writeln!(
+            out,
+            "            Command::{} => \"{}\",",
+            camel(&command.id, true),
+            command.window
         )
         .unwrap();
     }

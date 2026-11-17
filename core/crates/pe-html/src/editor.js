@@ -9,6 +9,7 @@
 //   "full:<the body>"   the quote unfolded and then deleted: the body is all there is
 //   "state:<flags>"     one 0 or 1 per command of STATE, for the format bar
 //   "dirty"             the first change (since pe.clean(), after a save), so closing can ask before throwing it away
+//   "edited"            the text changed, once typing pauses (300 ms), so the host can look at it again
 //   "caret:<href>"      the address of the link the cursor is in (empty when none), when that changes
 //   "hover:<href>"      the address of the link under the mouse (empty when none), when that changes
 //   "open:<href>"       a link Ctrl+clicked, to open in the browser (the host opens http, https and mailto only)
@@ -130,12 +131,15 @@
     });
 
     let dirty = false;
+    let edited = 0;
     body.addEventListener('input', () => {
         hover();
         if (!dirty) {
             dirty = true;
             post('dirty');
         }
+        clearTimeout(edited);
+        edited = setTimeout(() => post('edited'), 300);
     });
 
     // the quoted message: folded behind "..." in a reply, in the text from the start in a forward. Unfolded it is

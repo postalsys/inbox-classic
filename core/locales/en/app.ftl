@@ -14,6 +14,7 @@ menu-layout = &Layout
 menu-sort-by = Sort &By
 menu-text-size = &Text Size
 menu-folder = F&older
+menu-insert = &Insert
 
 ## The commands of the menus, the toolbar and the tray (core/commands.toml)
 
@@ -96,6 +97,9 @@ cmd-import-address-book = Import Address &Book...
 cmd-export-address-book = &Export Address Book...
 cmd-export-setup = Export Settin&gs and Accounts...
 cmd-import-setup = Import Se&ttings and Accounts...
+cmd-compose-sign = Digitally &Sign
+cmd-compose-encrypt = &Encrypt
+cmd-attach-my-key = Attach My &Public Key
 
 ## The tray icon's menu
 
@@ -214,6 +218,9 @@ ui-format-line = Insert Horizontal Line
 ui-tb-send = Send
 ui-tb-save = Save
 ui-tb-attach = Attach
+ui-tb-sign = Sign
+ui-tb-encrypt = Encrypt
+ui-field-keys = Keys:
 ui-field-from = From:
 ui-field-to = To:
 ui-field-cc = Cc:
@@ -694,6 +701,16 @@ ui-contact-key = Encryption key:
 ui-contact-key-none = No key
 ui-contact-key-use-new = Use the &New Key
 ui-contact-key-keep = &Keep the Current One
+ui-recipient-keys-title = Recipients’ Keys
+ui-recipient-col-recipient = Recipient
+ui-recipient-col-key = Key
+ui-recipient-find-key = &Find Key
+ui-recipient-remove = &Remove from Message
+ui-send-unencrypted = Send &Without Encryption
+ui-compose-make-key = &Make a Key...
+ui-compose-show-keys = &Encryption Keys...
+ui-compose-encrypt-off = &Turn Encryption Off
+ui-compose-keep-encrypted = &Keep It Encrypted
 ui-setup-export-title = Export Settings and Accounts
 ui-setup-import-title = Import Settings and Accounts
 ui-setup-export-intro = Choose what to take to another computer. The file holds no messages: they download again there.
