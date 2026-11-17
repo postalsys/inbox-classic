@@ -13,6 +13,20 @@ async fn show_found(query: &str) -> bool {
     one
 }
 
+/// Waits until the message `subject`, put on the server, is in the Inbox of the store: its sync is done, so a search
+/// finds it (the search reads the store once, when it is typed)
+async fn in_the_inbox(subject: &str) -> bool {
+    let Some(inbox) = folder_id("Inbox") else {
+        return false;
+    };
+    wait_until(30, || {
+        listed_in_folder(inbox, 0, 500)
+            .iter()
+            .any(|m| m.info.subject == subject)
+    })
+    .await
+}
+
 /// The rows the list shows, from `offset` on, as the list has them (grouped by conversation, a row is not a message's
 /// place in the folder)
 pub(super) fn list_rows(offset: u64, limit: u64) -> Vec<pe_store::Message> {
@@ -87,8 +101,7 @@ pub async fn unsubscribing(d: &Driver) {
     let _ = d.add_message(&raw, &[]);
     run_command(Command::Sync);
     select_folder("Inbox");
-    wait_for(20, || d.find("INBOX", "Subject: Weekly list news")).await;
-    pause(1500).await;
+    in_the_inbox("Weekly list news").await;
     show_found("subject:\"Weekly list news\"").await;
     let reader = &shell().main().reader;
     let shown = wait_until(15, || reader.unsubscribe.is_visible()).await;
@@ -141,8 +154,7 @@ pub async fn invitation_and_logo(d: &Driver) {
     );
     let _ = d.add_message(&invite, &[]);
     run_command(Command::Sync);
-    wait_for(20, || d.find("INBOX", "Subject: Invitation: Quarterly planning")).await;
-    pause(1500).await;
+    in_the_inbox("Invitation: Quarterly planning").await;
     show_found("subject:\"Quarterly planning\"").await;
     let reader = &shell().main().reader;
     let card = wait_for(15, || {
@@ -173,8 +185,7 @@ pub async fn invitation_and_logo(d: &Driver) {
     );
     let _ = d.add_message(&branded, &[]);
     run_command(Command::Sync);
-    wait_for(20, || d.find("INBOX", "Subject: News from the brand")).await;
-    pause(1500).await;
+    in_the_inbox("News from the brand").await;
     show_found("subject:\"News from the brand\"").await;
     let shown = wait_until(15, || reader.logo_shown()).await;
     d.check(shown, "a sender whose logo the server passed has it beside the header");
@@ -480,8 +491,10 @@ pub async fn agent(d: &Driver) {
             label_of(&root, "agent-warning").contains("never written to pat@example.net"),
             "with a warning about the new address",
         );
+        // the question may have been on screen a while before this step looks (the agent asks while the unread
+        // counts above are still checked): the app says how long Send was off once it was shown
         d.check(
-            !send.is_response_enabled("send"),
+            crate::agents::send_waited(send),
             "Send waits a moment before it can be pressed",
         );
         pause(2000).await;
@@ -2500,8 +2513,7 @@ pub async fn not_downloaded(d: &Driver) {
     let _ = d.add_message(&raw, &[]);
     run_command(Command::Sync);
     select_folder("Inbox");
-    wait_for(20, || d.find("INBOX", "Subject: Waiting on the server")).await;
-    pause(1500).await;
+    in_the_inbox("Waiting on the server").await;
     // a server that takes the connection and says nothing: the download waits
     let silent = SilentServer::start();
     set_port(d, "form-6", &silent.port.to_string()).await;
@@ -4084,6 +4096,14 @@ pub async fn one_time_codes(d: &Driver) {
     d.check(
         said == "Copied the code",
         &format!("and the status bar says so ({said})"),
+    );
+    // a sync in the background (the timer's) ends with Done, which must not take the place of the user's answer
+    shell().sync_all();
+    pause(3000).await;
+    let said = main.status_texts().0;
+    d.check(
+        said == "Copied the code",
+        &format!("a sync in the background leaves those words ({said})"),
     );
 
     open_by_subject(inbox, by_header).await;
