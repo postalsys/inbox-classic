@@ -480,6 +480,12 @@ agent-log-composed = Отворено за довършване: „{ $subject }
 agent-log-refused = Отказано изпращане: „{ $subject }“
 agent-log-sent = Добавено в опашката за изпращане до { $to }: „{ $subject }“
 agent-log-draft = Черновата „{ $subject }“ е запазена
+# review: new
+agent-log-draft-replaced = Черновата „{ $subject }“ е заменена
+# review: new
+agent-log-draft-discarded = Черновата „{ $subject }“ е премахната
+# review: new
+agent-draft-note = { $program }, ИИ агент, написа тази чернова. Проверете получателите и текста, преди да я изпратите.
 agent-log-read = Маркирано като прочетено: „{ $subject }“
 agent-log-unread = Маркирано като непрочетено: „{ $subject }“
 agent-log-flagged = Маркирано с флаг: „{ $subject }“

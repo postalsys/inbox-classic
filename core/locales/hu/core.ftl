@@ -451,6 +451,12 @@ agent-log-composed = Új üzenetként megnyitva további szerkesztéshez: „{ $
 agent-log-refused = Küldés elutasítva: „{ $subject }”
 agent-log-sent = Küldési sorba helyezve: „{ $subject }”. Címzett: { $to }
 agent-log-draft = Piszkozat mentve: „{ $subject }”
+# review: new
+agent-log-draft-replaced = Piszkozat lecserélve: „{ $subject }”
+# review: new
+agent-log-draft-discarded = Piszkozat elvetve: „{ $subject }”
+# review: new
+agent-draft-note = Ezt a piszkozatot egy MI-ügynök írta: { $program }. Küldés előtt ellenőrizze a címzetteket és a szöveget.
 agent-log-read = Olvasottként megjelölve: „{ $subject }”
 agent-log-unread = Olvasatlanként megjelölve: „{ $subject }”
 agent-log-flagged = Jelölővel ellátva: „{ $subject }”

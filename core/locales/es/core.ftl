@@ -472,6 +472,12 @@ agent-log-composed = Se abrió «{ $subject }» en la ventana de redacción para
 agent-log-refused = No envió «{ $subject }»
 agent-log-sent = Se envió «{ $subject }» a { $to }
 agent-log-draft = Se guardó el borrador «{ $subject }»
+# review: new
+agent-log-draft-replaced = Se reemplazó el borrador «{ $subject }»
+# review: new
+agent-log-draft-discarded = Se descartó el borrador «{ $subject }»
+# review: new
+agent-draft-note = { $program }, un agente de IA, escribió este borrador. Compruebe los destinatarios y el texto antes de enviarlo.
 agent-log-read = «{ $subject }» marcado como leído
 agent-log-unread = «{ $subject }» marcado como no leído
 agent-log-flagged = Se añadió una marca a «{ $subject }»

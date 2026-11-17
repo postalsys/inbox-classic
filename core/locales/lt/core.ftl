@@ -768,6 +768,12 @@ agent-log-sent = Išsiųstas „{ $subject }“ (kam: { $to })
 # review: new
 agent-log-draft = Įrašytas juodraštis „{ $subject }“
 # review: new
+agent-log-draft-replaced = Pakeistas juodraštis „{ $subject }“
+# review: new
+agent-log-draft-discarded = Atmestas juodraštis „{ $subject }“
+# review: new
+agent-draft-note = Šį juodraštį parašė DI agentas { $program }. Prieš siųsdami patikrinkite gavėjus ir tekstą.
+# review: new
 agent-log-read = Pažymėtas kaip skaitytas: „{ $subject }“
 # review: new
 agent-log-unread = Pažymėtas kaip neskaitytas: „{ $subject }“

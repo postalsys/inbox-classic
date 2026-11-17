@@ -485,6 +485,12 @@ agent-log-composed = Ha obert «{ $subject }» en una finestra de composició pe
 agent-log-refused = Heu rebutjat l’enviament de «{ $subject }»
 agent-log-sent = Ha posat «{ $subject }» a la cua per enviar-lo a { $to }
 agent-log-draft = Ha desat l’esborrany «{ $subject }»
+# review: new
+agent-log-draft-replaced = Ha substituït l’esborrany «{ $subject }»
+# review: new
+agent-log-draft-discarded = Ha descartat l’esborrany «{ $subject }»
+# review: new
+agent-draft-note = { $program }, un agent d’IA, ha escrit aquest esborrany. Comproveu els destinataris i el text abans d’enviar-lo.
 agent-log-read = Ha marcat com a llegit «{ $subject }»
 agent-log-unread = Ha marcat com a no llegit «{ $subject }»
 agent-log-flagged = Ha marcat «{ $subject }» amb bandera

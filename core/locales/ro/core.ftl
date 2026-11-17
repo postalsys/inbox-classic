@@ -779,6 +779,12 @@ agent-log-sent = A trimis „{ $subject }” către { $to }
 # review: new
 agent-log-draft = A salvat schița „{ $subject }”
 # review: new
+agent-log-draft-replaced = A înlocuit schița „{ $subject }”
+# review: new
+agent-log-draft-discarded = A renunțat la schița „{ $subject }”
+# review: new
+agent-draft-note = { $program }, un agent IA, a scris această schiță. Verificați destinatarii și textul înainte de a o trimite.
+# review: new
 agent-log-read = A marcat ca citit „{ $subject }”
 # review: new
 agent-log-unread = A marcat ca necitit „{ $subject }”

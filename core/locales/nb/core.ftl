@@ -468,6 +468,12 @@ agent-log-composed = Åpnet «{ $subject }» i skrivevinduet slik at du kan gjø
 agent-log-refused = Du avslo å sende «{ $subject }»
 agent-log-sent = La «{ $subject }» i kø for sending til { $to }
 agent-log-draft = Lagret utkastet «{ $subject }»
+# review: new
+agent-log-draft-replaced = Erstattet utkastet «{ $subject }»
+# review: new
+agent-log-draft-discarded = Forkastet utkastet «{ $subject }»
+# review: new
+agent-draft-note = { $program }, en KI-agent, skrev dette utkastet. Kontroller mottakerne og teksten før du sender det.
 agent-log-read = Merket «{ $subject }» som lest
 agent-log-unread = Merket «{ $subject }» som ulest
 agent-log-flagged = Satte flagg på «{ $subject }»

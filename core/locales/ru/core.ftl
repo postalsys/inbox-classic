@@ -767,6 +767,12 @@ agent-log-sent = «{ $subject }» отправлено: { $to }
 # review: new
 agent-log-draft = Сохранен черновик «{ $subject }»
 # review: new
+agent-log-draft-replaced = Заменен черновик «{ $subject }»
+# review: new
+agent-log-draft-discarded = Удален черновик «{ $subject }»
+# review: new
+agent-draft-note = { $program }, ИИ-агент, написал этот черновик. Проверьте получателей и текст перед отправкой.
+# review: new
 agent-log-read = Отмечено как прочитанное: «{ $subject }»
 # review: new
 agent-log-unread = Отмечено как непрочитанное: «{ $subject }»

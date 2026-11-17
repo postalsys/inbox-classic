@@ -502,6 +502,12 @@ agent-log-composed = Άνοιξε το «{ $subject }» σε νέο μήνυμα
 agent-log-refused = Δεν στείλατε το «{ $subject }»
 agent-log-sent = Το μήνυμα «{ $subject }» τέθηκε σε αναμονή για αποστολή προς { $to }
 agent-log-draft = Αποθηκεύτηκε το πρόχειρο «{ $subject }»
+# review: new
+agent-log-draft-replaced = Αντικαταστάθηκε το πρόχειρο «{ $subject }»
+# review: new
+agent-log-draft-discarded = Απορρίφθηκε το πρόχειρο «{ $subject }»
+# review: new
+agent-draft-note = { $program }, ένας πράκτορας ΤΝ, έγραψε αυτό το πρόχειρο. Ελέγξτε τους παραλήπτες και το κείμενο πριν το στείλετε.
 agent-log-read = Επισημάνθηκε ως αναγνωσμένο το «{ $subject }»
 agent-log-unread = Επισημάνθηκε ως αδιάβαστο το «{ $subject }»
 agent-log-flagged = Προστέθηκε σημαία στο «{ $subject }»

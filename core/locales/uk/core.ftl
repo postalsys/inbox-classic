@@ -791,6 +791,12 @@ agent-log-sent = Надіслано «{ $subject }» до { $to }
 # review: new
 agent-log-draft = Збережено чернетку «{ $subject }»
 # review: new
+agent-log-draft-replaced = Замінено чернетку «{ $subject }»
+# review: new
+agent-log-draft-discarded = Відкинуто чернетку «{ $subject }»
+# review: new
+agent-draft-note = { $program }, ШІ-агент, написав цю чернетку. Перевірте одержувачів і текст, перш ніж надіслати її.
+# review: new
 agent-log-read = Позначено як прочитане «{ $subject }»
 # review: new
 agent-log-unread = Позначено як непрочитане «{ $subject }»

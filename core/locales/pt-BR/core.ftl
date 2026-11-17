@@ -496,6 +496,12 @@ agent-log-composed = Abriu “{ $subject }” na janela de escrita para você co
 agent-log-refused = Você não enviou “{ $subject }”
 agent-log-sent = Colocou “{ $subject }” na fila de envio para { $to }
 agent-log-draft = Salvou o rascunho “{ $subject }”
+# review: new
+agent-log-draft-replaced = Substituiu o rascunho “{ $subject }”
+# review: new
+agent-log-draft-discarded = Descartou o rascunho “{ $subject }”
+# review: new
+agent-draft-note = { $program }, um agente de IA, escreveu este rascunho. Confira os destinatários e o texto antes de enviá-lo.
 agent-log-read = Marcou como lida “{ $subject }”
 agent-log-unread = Marcou como não lida “{ $subject }”
 agent-log-flagged = Sinalizou “{ $subject }”

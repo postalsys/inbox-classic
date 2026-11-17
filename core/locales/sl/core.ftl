@@ -772,6 +772,12 @@ agent-log-sent = Poslal »{ $subject }« za { $to }
 # review: new
 agent-log-draft = Shranil osnutek »{ $subject }«
 # review: new
+agent-log-draft-replaced = Zamenjal osnutek »{ $subject }«
+# review: new
+agent-log-draft-discarded = Zavrgel osnutek »{ $subject }«
+# review: new
+agent-draft-note = { $program }, agent UI, je napisal ta osnutek. Pred pošiljanjem preverite prejemnike in besedilo.
+# review: new
 agent-log-read = Označil kot prebrano »{ $subject }«
 # review: new
 agent-log-unread = Označil kot neprebrano »{ $subject }«

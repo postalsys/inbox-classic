@@ -470,6 +470,12 @@ agent-log-composed = Avasi viestin ”{ $subject }” uutena viestinä, jonka vi
 agent-log-refused = Et lähettänyt viestiä ”{ $subject }”
 agent-log-sent = Lisäsi viestin ”{ $subject }” lähetysjonoon. Vastaanottajat: { $to }
 agent-log-draft = Tallensi luonnoksen ”{ $subject }”
+# review: new
+agent-log-draft-replaced = Korvasi luonnoksen ”{ $subject }”
+# review: new
+agent-log-draft-discarded = Hylkäsi luonnoksen ”{ $subject }”
+# review: new
+agent-draft-note = { $program }, tekoälyagentti, kirjoitti tämän luonnoksen. Tarkista vastaanottajat ja teksti ennen kuin lähetät sen.
 agent-log-read = Merkitsi luetuksi: ”{ $subject }”
 agent-log-unread = Merkitsi lukemattomaksi: ”{ $subject }”
 agent-log-flagged = Liputti: ”{ $subject }”

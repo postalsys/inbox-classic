@@ -780,6 +780,12 @@ agent-log-sent = Nosūtīja „{ $subject }” adresātam { $to }
 # review: new
 agent-log-draft = Saglabāja melnrakstu „{ $subject }”
 # review: new
+agent-log-draft-replaced = Aizstāja melnrakstu „{ $subject }”
+# review: new
+agent-log-draft-discarded = Atmeta melnrakstu „{ $subject }”
+# review: new
+agent-draft-note = Šo melnrakstu uzrakstīja MI aģents { $program }. Pirms nosūtāt, pārbaudiet adresātus un tekstu.
+# review: new
 agent-log-read = Atzīmēja kā lasītu „{ $subject }”
 # review: new
 agent-log-unread = Atzīmēja kā nelasītu „{ $subject }”

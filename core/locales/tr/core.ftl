@@ -467,6 +467,12 @@ agent-log-composed = Tamamlamanız için yeni bir ileti açıldı: “{ $subject
 agent-log-refused = Gönderimi reddedildi: “{ $subject }”
 agent-log-sent = Gönderilmek üzere sıraya alındı: “{ $subject }”. Alıcı: { $to }
 agent-log-draft = Taslak kaydedildi: “{ $subject }”
+# review: new
+agent-log-draft-replaced = Taslak değiştirildi: “{ $subject }”
+# review: new
+agent-log-draft-discarded = Taslak atıldı: “{ $subject }”
+# review: new
+agent-draft-note = Bu taslağı bir yapay zeka aracısı olan { $program } yazdı. Göndermeden önce alıcıları ve metni kontrol edin.
 agent-log-read = Okundu olarak işaretlendi: “{ $subject }”
 agent-log-unread = Okunmadı olarak işaretlendi: “{ $subject }”
 agent-log-flagged = Bayrak kondu: “{ $subject }”

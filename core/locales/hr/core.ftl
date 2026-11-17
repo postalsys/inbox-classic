@@ -478,6 +478,12 @@ agent-log-composed = Otvorena je nova poruka „{ $subject }“ koju možete dov
 agent-log-refused = Odbili ste slanje poruke „{ $subject }“
 agent-log-sent = Poruka „{ $subject }“ dodana je u red za slanje primateljima: { $to }
 agent-log-draft = Spremljena skica „{ $subject }“
+# review: new
+agent-log-draft-replaced = Zamijenjena skica „{ $subject }“
+# review: new
+agent-log-draft-discarded = Odbačena skica „{ $subject }“
+# review: new
+agent-draft-note = { $program }, AI agent, napisao je ovu skicu. Provjerite primatelje i tekst prije nego što je pošaljete.
 agent-log-read = Poruka „{ $subject }“ označena je kao pročitana
 agent-log-unread = Poruka „{ $subject }“ označena je kao nepročitana
 agent-log-flagged = Poruka „{ $subject }“ označena je zastavicom

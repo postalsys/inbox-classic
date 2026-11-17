@@ -793,6 +793,12 @@ agent-log-sent = „{ $subject }“ odoslané na adresu { $to }
 # review: new
 agent-log-draft = Uložený koncept „{ $subject }“
 # review: new
+agent-log-draft-replaced = Nahradený koncept „{ $subject }“
+# review: new
+agent-log-draft-discarded = Zahodený koncept „{ $subject }“
+# review: new
+agent-draft-note = { $program }, AI agent, napísal tento koncept. Pred odoslaním skontrolujte adresátov a text.
+# review: new
 agent-log-read = Označené ako prečítané: „{ $subject }“
 # review: new
 agent-log-unread = Označené ako neprečítané: „{ $subject }“

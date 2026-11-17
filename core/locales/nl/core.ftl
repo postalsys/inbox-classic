@@ -470,6 +470,12 @@ agent-log-composed = “{ $subject }” geopend als nieuw bericht dat je zelf ku
 agent-log-refused = Je hebt “{ $subject }” niet verzonden
 agent-log-sent = “{ $subject }” klaargezet voor verzending aan { $to }
 agent-log-draft = Het concept “{ $subject }” opgeslagen
+# review: new
+agent-log-draft-replaced = Het concept “{ $subject }” vervangen
+# review: new
+agent-log-draft-discarded = Het concept “{ $subject }” verwijderd
+# review: new
+agent-draft-note = { $program }, een AI-agent, heeft dit concept geschreven. Controleer de ontvangers en de tekst voordat je het verzendt.
 agent-log-read = “{ $subject }” gemarkeerd als gelezen
 agent-log-unread = “{ $subject }” gemarkeerd als ongelezen
 agent-log-flagged = “{ $subject }” gemarkeerd

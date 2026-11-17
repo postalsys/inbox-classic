@@ -461,6 +461,12 @@ agent-log-composed = „{ $subject }“ zum Fertigstellen im Nachrichtenfenster 
 agent-log-refused = Sie haben „{ $subject }“ nicht gesendet
 agent-log-sent = „{ $subject }“ an { $to } gesendet
 agent-log-draft = Entwurf „{ $subject }“ gespeichert
+# review: new
+agent-log-draft-replaced = Entwurf „{ $subject }“ ersetzt
+# review: new
+agent-log-draft-discarded = Entwurf „{ $subject }“ verworfen
+# review: new
+agent-draft-note = { $program }, ein KI-Agent, hat diesen Entwurf geschrieben. Prüfen Sie die Empfänger und den Text, bevor Sie ihn senden.
 agent-log-read = „{ $subject }“ als gelesen markiert
 agent-log-unread = „{ $subject }“ als ungelesen markiert
 agent-log-flagged = „{ $subject }“ gekennzeichnet

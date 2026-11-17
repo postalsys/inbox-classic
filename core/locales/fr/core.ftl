@@ -488,6 +488,12 @@ agent-log-composed = « { $subject } » ouvert dans un nouveau message à compl�
 agent-log-refused = Vous n'avez pas envoyé « { $subject } »
 agent-log-sent = « { $subject } » envoyé à { $to }
 agent-log-draft = Brouillon « { $subject } » enregistré
+# review: new
+agent-log-draft-replaced = Brouillon « { $subject } » remplacé
+# review: new
+agent-log-draft-discarded = Brouillon « { $subject } » supprimé
+# review: new
+agent-draft-note = { $program }, un agent d'IA, a écrit ce brouillon. Vérifiez les destinataires et le texte avant de l'envoyer.
 agent-log-read = « { $subject } » marqué comme lu
 agent-log-unread = « { $subject } » marqué comme non lu
 agent-log-flagged = Indicateur ajouté à « { $subject } »

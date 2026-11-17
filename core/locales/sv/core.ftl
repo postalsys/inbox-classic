@@ -743,6 +743,12 @@ agent-log-sent = Skickade ”{ $subject }” till { $to }
 # review: new
 agent-log-draft = Sparade utkastet ”{ $subject }”
 # review: new
+agent-log-draft-replaced = Ersatte utkastet ”{ $subject }”
+# review: new
+agent-log-draft-discarded = Kastade utkastet ”{ $subject }”
+# review: new
+agent-draft-note = { $program }, en AI-agent, skrev det här utkastet. Kontrollera mottagarna och texten innan du skickar det.
+# review: new
 agent-log-read = Markerade ”{ $subject }” som läst
 # review: new
 agent-log-unread = Markerade ”{ $subject }” som oläst

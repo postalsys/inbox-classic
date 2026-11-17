@@ -485,6 +485,12 @@ agent-log-composed = Åbnede »{ $subject }« i en ny meddelelse, som du kan gø
 agent-log-refused = Du sendte ikke »{ $subject }«
 agent-log-sent = Satte »{ $subject }« i kø til afsendelse til { $to }
 agent-log-draft = Gemte kladden »{ $subject }«
+# review: new
+agent-log-draft-replaced = Erstattede kladden »{ $subject }«
+# review: new
+agent-log-draft-discarded = Kasserede kladden »{ $subject }«
+# review: new
+agent-draft-note = { $program }, en AI-agent, har skrevet denne kladde. Kontrollér modtagerne og teksten, før du sender den.
 agent-log-read = Markerede »{ $subject }« som læst
 agent-log-unread = Markerede »{ $subject }« som ulæst
 agent-log-flagged = Satte flag på »{ $subject }«

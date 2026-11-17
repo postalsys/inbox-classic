@@ -772,6 +772,12 @@ agent-log-sent = Wysłano „{ $subject }” do { $to }
 # review: new
 agent-log-draft = Zapisano wersję roboczą „{ $subject }”
 # review: new
+agent-log-draft-replaced = Zastąpiono wersję roboczą „{ $subject }”
+# review: new
+agent-log-draft-discarded = Odrzucono wersję roboczą „{ $subject }”
+# review: new
+agent-draft-note = Tę wersję roboczą napisał agent AI { $program }. Sprawdź odbiorców i tekst, zanim ją wyślesz.
+# review: new
 agent-log-read = Oznaczono jako przeczytaną „{ $subject }”
 # review: new
 agent-log-unread = Oznaczono jako nieprzeczytaną „{ $subject }”

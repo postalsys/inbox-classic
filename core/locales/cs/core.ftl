@@ -489,6 +489,12 @@ agent-log-composed = Otevřena nová zpráva „{ $subject }“, abyste ji mohli
 agent-log-refused = Odeslání zprávy „{ $subject }“ nebylo schváleno
 agent-log-sent = Zpráva „{ $subject }“ zařazena k odeslání. Příjemci: { $to }
 agent-log-draft = Uložen koncept „{ $subject }“
+# review: new
+agent-log-draft-replaced = Nahrazen koncept „{ $subject }“
+# review: new
+agent-log-draft-discarded = Zahozen koncept „{ $subject }“
+# review: new
+agent-draft-note = { $program }, agent AI, napsal tento koncept. Před odesláním zkontrolujte příjemce a text.
 agent-log-read = Označeno jako přečtené: „{ $subject }“
 agent-log-unread = Označeno jako nepřečtené: „{ $subject }“
 agent-log-flagged = Označeno příznakem: „{ $subject }“

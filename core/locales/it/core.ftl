@@ -489,6 +489,12 @@ agent-log-composed = Aperto “{ $subject }” in un nuovo messaggio da completa
 agent-log-refused = Non hai inviato “{ $subject }”
 agent-log-sent = “{ $subject }” messo in coda per l’invio a { $to }
 agent-log-draft = Salvata la bozza “{ $subject }”
+# review: new
+agent-log-draft-replaced = Sostituita la bozza “{ $subject }”
+# review: new
+agent-log-draft-discarded = Scartata la bozza “{ $subject }”
+# review: new
+agent-draft-note = { $program }, un agente IA, ha scritto questa bozza. Controlla i destinatari e il testo prima di inviarla.
 agent-log-read = Segnato come letto “{ $subject }”
 agent-log-unread = Segnato come da leggere “{ $subject }”
 agent-log-flagged = Contrassegnato “{ $subject }”
