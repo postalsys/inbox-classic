@@ -271,6 +271,7 @@ Plurals: `[one]` 1, `[few]` 2 to 4, `*[other]` 0 and 5 or more; `[many]` (fracti
   without credentials need sign-in again, not necessarily a password prompt.
 - Compose fields: "Kopie" and "Skrytá kopie" (Windows Alt+K / Alt+S). Address-book compose action:
   "Napsat zprávu". Native letters with diacritics are valid menu access keys; check all shared menus/dialogs.
+- Desktop notifications are "oznámení"; use "upozornit" as the verb in the new-mail command and checkbox.
 
 ### Dansk (da)
 

@@ -377,33 +377,19 @@ ui-sign-in-apps-intro = Přihlašovací aplikace umožňují přihlášení k ú
 ui-col-issuer = Vydavatel
 ui-col-used-by = Používá
 ui-options-system-default = Výchozí podle systému ({ $language })
-# review: new
 ui-settings-general = Obecné
-# review: new
 ui-settings-reading = Čtení
-# review: new
 ui-settings-new-mail = Nová pošta
-# review: new
 ui-settings-sending = Odesílání
-# review: new
 ui-settings-default-apps = Výchozí aplikace
-# review: new
 ui-settings-message-list = Seznam zpráv
-# review: new
 ui-settings-messages = Zprávy
-# review: new
 ui-settings-language = Jazyk
-# review: new
 ui-settings-label = { $label }:
-# review: new
 ui-apply = &Použít
-# review: new
 ui-language-label = &Jazyk:
-# review: new
 ui-restart-note = Jazyk se změní po restartu Inbox Classic.
-# review: new
-ui-restart-ask = Inbox Classic se po restartu zobrazí v jazyce { $language }. Restartovat hned?
-# review: new
+ui-restart-ask = Vybraný jazyk ({ $language }) se použije po restartu aplikace Inbox Classic. Restartovat hned?
 ui-notify-new-mail = &Upozornit mě, když přijde nová pošta
 ui-new-folder-title = Nová složka
 ui-rename-folder-title = Přejmenovat složku
@@ -575,27 +561,22 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Adresář nelze uložit: { $reason }
 ui-code-copied = Kód zkopírován
-# review: changed
-ui-codes-in-notifications = &Zobrazovat přihlašovací kódy v upozorněních na novou poštu
+ui-codes-in-notifications = &Zobrazovat přihlašovací kódy v oznámeních o nové poště
 ui-tool-unread-only = Nepřečtené
 ui-no-unread = Nejsou tu žádné nepřečtené zprávy.
 ui-pictures-always-sender = Vždy stahovat obrázky od { $sender }
 ui-pictures-always-domain = Vždy stahovat obrázky od všech z domény { $domain }
 ui-pictures-unconfirmed = Doménu odesílatele ({ $domain }) nelze ověřit, proto se obrázky v této zprávě nestahují automaticky.
-# review: changed
 ui-pictures-always-option = Stah&ovat obrázky ve všech zprávách
 ui-pictures-always-warning = Odesílatelé pak mohou zjistit, kdy čtete jejich zprávy.
 ui-protection-details = &Podrobnosti...
 ui-protection-details-title = Podrobnosti zabezpečení
 ui-download-heading = Stahování
-# review: changed
 ui-download-ahead = &Stahovat zprávy předem:
 ui-download-ahead-recent = Nedávné zprávy o velikosti do 1 MB
 ui-download-ahead-all = Všechny zprávy
 ui-download-ahead-never = Jen při otevření
-# review: changed
-ui-download-limit = &Limit úložiště pro účet:
-# review: changed
+ui-download-limit = &Limit místa pro každý účet:
 ui-send-delay = Pr&odleva před odesláním:
 ui-send-delay-note = Dokud zpráva čeká na odeslání, můžete odeslání zrušit příkazem Zpět.
 ui-dark-messages = Zobrazovat zprávy na tmavém pozadí, když je systém v tmavém režimu
@@ -609,19 +590,16 @@ ui-send-too-late = Zpráva „{ $subject }“ už byla odeslána.
 ui-outbox-status-undo = Odešle se v { $time }
 ui-download-note = Zprávy stažené předem se otevřou okamžitě. Po překročení limitu úložiště se nejstarší místní kopie odeberou a stáhnou se znovu, až je otevřete.
 ui-attachment-downloading = Stahování této zprávy ještě neskončilo. Zkuste to znovu po dokončení stahování.
-# review: changed
 ui-trusted-senders-button = &Důvěryhodní odesílatelé...
 ui-trusted-senders-title = Důvěryhodní odesílatelé
 ui-trusted-senders-note = Obrázky ve zprávách od těchto odesílatelů se stahují automaticky, když váš poskytovatel pošty ověří doménu odesílatele.
 ui-trusted-everyone-at = Všichni z domény { $domain }
 ui-trusted-senders-empty = Zatím nebyli přidáni žádní důvěryhodní odesílatelé.
-# review: changed
 ui-eml-default = Otevírat &soubory .eml v aplikaci Inbox Classic
 ui-eml-default-done = Inbox Classic teď otevírá soubory .eml.
 ui-eml-default-failed = Inbox Classic nelze nastavit jako výchozí aplikaci pro soubory .eml: { $reason }
 ui-folders = Složky
 ui-sorted-by = Seřazeno podle: { $field }
-# review: changed
 ui-layout-label = &Rozložení:
 ui-columns-note = Okno je dost široké pro rozložení do sloupců. Rozložení můžete změnit v nabídce Zobrazit > Rozložení.
 ui-row-unread = Nepřečtená
@@ -632,10 +610,8 @@ ui-row-messages = { $count ->
     [few] { $count } zprávy
    *[other] { $count } zpráv
 }
-# review: changed
 ui-list-pictures = &Zobrazovat obrázky odesílatelů v seznamu zpráv
-# review: changed
-ui-list-pictures-note = Zobrazuje loga značek nebo obrázky z Adresáře, pokud je doména odesílatele ověřená. Není-li obrázek dostupný, zobrazí iniciály. Stažená loga se ukládají a používají znovu pro více zpráv.
+ui-list-pictures-note = V rozložení do sloupců zobrazuje loga značek nebo obrázky z Adresáře, pokud je doména odesílatele ověřená. Není-li obrázek dostupný, zobrazí iniciály. Stažená loga se ukládají a používají znovu pro více zpráv.
 ui-card-picture = Obrázek:
 ui-card-picture-choose = Vyb&rat...
 ui-picture-not-picture = Tento soubor není obrázek PNG ani JPEG.
