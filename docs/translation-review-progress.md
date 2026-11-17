@@ -24,20 +24,20 @@ Commit completed batches regularly and preserve an exact resume point.
   broader language drafts still require those corrections. Fresh fetch at 27d00888 found all six source tips
   unchanged; origin/master remains 5c645187 with unrelated README/Linux test/CI changes left unmerged.
   No new translation/help or app-behavior changes. Fresh fetch at 0190587f confirms unchanged refs and guide.
-  Croatian's catalogs and 23 help topics are reviewed; 29 topics remain. Its three settings-context followups
-  are complete: all 27 catalog targets and 11 help targets are accounted for. NEXT review account-security/
-  connections/links-scripts/data-storage/move-computer/manage-accounts/sign-in-apps/unsubscribe, then its
-  other pending topics. Exact source IDs/topics are in state; do not restart full reviews.
+  Croatian's catalogs and 31 help topics are reviewed; 21 topics remain. Its three settings-context followups
+  are complete: all 27 catalog targets and 11 help targets are accounted for. NEXT review encrypted-and-signed-mail/
+  encryption-keys/verify-a-key/address-book/invitations/agents-connect/agents-permissions/agents-sending, then
+  its other pending topics. Exact source IDs/topics are in state; do not restart full reviews.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,456 catalog entries and 1,300 help topics; 13,330 entries and 549 topics are currently pending.
+  32,456 catalog entries and 1,300 help topics; 13,330 entries and 541 topics are currently pending.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were initially reviewed with 74 improvements; its 24 app settings additions now have two
   further improvements. Croatian core.ftl has 128 improvements, and the remaining platform/help-title catalogs
-  have 54 more. Four provider introductions have subsequent corrections; 23 help topics are reviewed, with
-  29 remaining. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
+  have 54 more. Four provider introductions have subsequent corrections; 31 help topics are reviewed, with
+  21 remaining. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
 - All 168 rollback messages and 84 loading labels remain reviewed. Earlier logo-cache, attachment-reminder
   and watched-notification followups remain preserved. Use their verified context in new reviews.
 - The three settings pages replace the former single Options mnemonic scope: use 46 actual scopes.
@@ -1426,9 +1426,33 @@ Fresh fetch confirms unchanged six source tips and guide. No new languages or re
 unrelated README/Linux test/CI updates remain unmerged. All 270 since-start entries and 110 passages match pending
 inventory, with no reopened-pair omissions.
 
-Current totals: 19,126 catalog entries and 751 help topics completed in the active scope; 3,188 historical
-catalog value improvements. Remaining: 13,330 catalog entries and 549 help topics. Seventeen languages have no
-pending content. Croatian has 29 help topics left; hu/lt/lv/pl/ro/ru/sk/sl/sv/uk retain their broader queues,
+### Croatian account, privacy and transfer help completed
+
+Reviewed account-security, connections, links-scripts, data-storage, move-computer, manage-accounts,
+sign-in-apps and unsubscribe. Improved formal Croatian instructions and rendered control joins. Passwords and
+browser credentials are both covered in storage, removal and transfer guidance. An unprotected transfer requires
+password or browser sign-in again; a new contact key waits for selection in the contact's properties.
+
+Corrected automatic-image and persistent-logo conditions, external attachment opening, mail-link handling and
+domain-versus-person trust. Account help distinguishes properties access with one account and marking all messages
+in its folders read. OpenID Connect must also be supported by the mail servers; client secrets are hidden in the
+editor after saving. Direct unsubscribe requires the confirmed signature to cover its headers and reports request
+acceptance without promising that future mail will stop. All literal paths, examples and keyboard names remain intact.
+
+Static checks report only 1,374 deliberately removed marks, no structural findings; all 46 shortcut scopes pass.
+Exact tags, attributes, platform branches and literal code/keys are preserved. Substituted control/topic joins
+inspected on all platforms; the preview helper does not render dynamic keyboard labels. All 28 inventories and
+completed/source hashes reconcile: 19,160 unmarked messages, 9,823 changed help lines and 14 verified baseline
+pairs. Report regenerated; git diff --check passes. No tests run. Previous checkpoint: `203dd91c`.
+
+All six source refs and the guide remain unchanged since this turn's fresh fetch. The root checkout has no
+uncommitted locale/help/settings changes. No new relevant work; the same unrelated upstream changes remain
+unmerged. All 270 since-start entries and 110 passages match pending inventory. Full inventories also account
+for the eight just-reviewed original draft topics, which were absent from the since-start report.
+
+Current totals: 19,126 catalog entries and 759 help topics completed in the active scope; 3,188 historical
+catalog value improvements. Remaining: 13,330 catalog entries and 541 help topics. Seventeen languages have no
+pending content. Croatian has 21 help topics left; hu/lt/lv/pl/ro/ru/sk/sl/sv/uk retain their broader queues,
 including provider, deletion and settings context. `REVIEWED` is unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final

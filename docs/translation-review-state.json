@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue Croatian help: all catalogs and 23 of 52 topics reviewed; 29 remain. Its three settings-context followups are now complete, with all 27 catalog targets and 11 help targets accounted for. Next review account-security/connections/links-scripts/data-storage/move-computer/manage-accounts/sign-in-apps/unsubscribe against actual behavior and control joins. Then the other 21 Croatian topics and hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. Scope 32456 catalogs/1300 topics; pending 13330/549. No tests. Active checkout build/i18n-wave1; REVIEWED unchanged. Fresh source audit found no new relevant work.",
+  "next_batch": "Continue Croatian help: all catalogs and 31 of 52 topics reviewed; 21 remain. Three Croatian settings-context followups are complete. Next review encrypted-and-signed-mail/encryption-keys/verify-a-key/address-book/invitations/agents-connect/agents-permissions/agents-sending against callers and control joins. Then the remaining 13 Croatian topics and hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. Scope 32456 catalogs/1300 topics; pending 13330/541. No tests. Active checkout build/i18n-wave1; REVIEWED unchanged. Latest source audit found no new relevant work, including root uncommitted locale/help/settings paths.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -11257,7 +11257,6 @@
     "hr": {
       "pending_catalogs": {},
       "pending_help": [
-        "account-security.html",
         "address-book.html",
         "agents-connect.html",
         "agents-permissions.html",
@@ -11265,25 +11264,18 @@
         "all-inboxes.html",
         "certificate-errors.html",
         "command-line.html",
-        "connections.html",
-        "data-storage.html",
         "delivery-problems.html",
         "encrypted-and-signed-mail.html",
         "encryption-errors.html",
         "encryption-keys.html",
         "invitations.html",
         "keyboard-shortcuts.html",
-        "links-scripts.html",
-        "manage-accounts.html",
         "message-not-shown.html",
-        "move-computer.html",
         "no-connection.html",
         "password-not-accepted.html",
         "removing.html",
         "save-print-import.html",
         "search-words.html",
-        "sign-in-apps.html",
-        "unsubscribe.html",
         "updates.html",
         "verify-a-key.html"
       ],
@@ -12951,6 +12943,43 @@
           },
           "validation": "Static check-language reports only 1366 deliberately removed marks, no structural findings; all 46 actual mnemonic scopes pass. Exact tags/attributes/platform branches/literal keys preserved. Inspected substituted controls, settings paths and topic-title joins on all platforms; the helper does not render dynamic data-command keyboard labels. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9725 changed help lines and 14 verified baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed seven Croatian settings help topics against actual controls, all three platform settings/notification callers, download/cache rules, sender images and OTP authentication. Corrected Windows Cancel/default-app behavior, restart timing, notification conditions and watched folder scope, encrypted-image permission, persistent logo reuse and domain-versus-person trust. Improved Croatian control joins, download punctuation, large type for codes and unambiguous send-delay wording. Preserved exact tags/attributes/platform branches and literal keys. All eleven settings help targets are now reviewed; close the three Croatian settings-context followups after validation. No catalog changes or tests."
+        },
+        {
+          "id": "hr-help-accounts-privacy-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "account-security.html",
+            "connections.html",
+            "links-scripts.html",
+            "data-storage.html",
+            "move-computer.html",
+            "manage-accounts.html",
+            "sign-in-apps.html",
+            "unsubscribe.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/hr/account-security.html": "b8dae6bf8c618415a807d84cf59d71b231139b3378d1cb6157dfc0797b73c610",
+            "core/crates/pe-html/help/hr/connections.html": "db25baa51dd522e878025d4c2445ecafcca70f48799822f059bdc210c405a1a3",
+            "core/crates/pe-html/help/hr/links-scripts.html": "10d7f34d1404510ab1acbf841c4bd693c1d436bd09b3ec394eeedef72331d7f5",
+            "core/crates/pe-html/help/hr/data-storage.html": "5eecb464c7e7f395489646363f557950cea2e6f78d9c8301e7ea6df8758e4a63",
+            "core/crates/pe-html/help/hr/move-computer.html": "b8a0ba49918a0504ca51995162b0d2dc439335a6f306857d8fc9d9a36fe8a2b9",
+            "core/crates/pe-html/help/hr/manage-accounts.html": "30fa4d205115ec6297f0bef4d74efb021fa3bd85309d3396e909cbf54329f584",
+            "core/crates/pe-html/help/hr/sign-in-apps.html": "58b5d5a62f3a218168b48e18db45692914d0e2c9e7d1a263e741ece60bd93df5",
+            "core/crates/pe-html/help/hr/unsubscribe.html": "588b3a02a6d1d9fd081158e421ce5e68a0a1804c454e0d2811b823178ae15bc8"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/account-security.html": "adf8cbee09afd1c8bcaaf46181d1cbf6667a67e1b3ce6f35c13af4d1c016ed44",
+            "core/crates/pe-html/help/en/connections.html": "8ff596ed8bf4269becffe95b10001d1d46a77a896d0b39d017f1c045890dc869",
+            "core/crates/pe-html/help/en/links-scripts.html": "94ed69e6dc2262c5f189568583c6f98bdd9c829584be36b89a6956e7cdc0bc53",
+            "core/crates/pe-html/help/en/data-storage.html": "cd7a5abea6effa876efa6948daee25b444604e4dbe1616333cdae59421c842ed",
+            "core/crates/pe-html/help/en/move-computer.html": "636274cd347b79ccb1edaa0116514699f1f2dd4c294d78e918f42571e6e7574e",
+            "core/crates/pe-html/help/en/manage-accounts.html": "7267a73e572221d410c18461ae1be3eccacfa522e9154a6917ec0aa37c39e8e7",
+            "core/crates/pe-html/help/en/sign-in-apps.html": "c092b49a13a0eab86b8571ec49c3fe49696b16b2e71bc1cc1020bcbc0222c1b1",
+            "core/crates/pe-html/help/en/unsubscribe.html": "a80419bc5ca6a65992c8168d29636f505dc1281ccbeff81ff25412ba2dd3611c"
+          },
+          "validation": "Static check-language reports only 1374 deliberately removed marks, no structural findings; all 46 mnemonic scopes pass. Exact help tags/attributes/platform branches and literal code/keyboard contents preserved. Substituted controls and topic-title joins inspected on all platforms; the preview helper does not render dynamic keyboard labels. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9823 changed help lines and 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed eight Croatian account/privacy/transfer topics against TLS/Autodiscover, OAuth and system-secret storage, setup import/export, account deletion, external link/attachment opening and unsubscribe selection. Natural formal instructions and noun-led control joins; credentials include passwords/browser sign-in. Corrected logo cache and automatic-image conditions, domain rather than personal identity, external attachment opening, unprotected transfer reauthentication, explicit replacement-key choice, one-account properties route, all-folder message marking and account secret removal. OIDC must also support mail access. Unsubscribe confirms a direct request rather than guaranteeing future mail stops; DKIM must cover the unsubscribe headers. Exact markup/platform branches/literal code and keys preserved. No catalog edits or tests."
         }
       ]
     },
@@ -46665,7 +46694,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Fresh fetch at 0190587f: six refs and guide hash unchanged; origin/master 5c645187 has only previously inspected unrelated README/Linux test/CI updates left unmerged. No new languages or relevant source changes. Since-start has 270 known entries and 110 passages; all 28 full inventories and completed/source hashes match. Pending 13330 catalogs/549 help topics. Final late-arrival audit remains required; REVIEWED unchanged.",
+    "latest_source_audit": "Checkpoint at 203dd91c: six refs and guide unchanged since the fresh fetch at 0190587f; root locale/help/settings paths have no uncommitted changes. origin/master remains 5c645187 with only unrelated README/Linux test/CI updates left unmerged. No new languages or relevant source work. All 270 since-start entries and 110 passages match pending inventory; all 28 full inventories and completed/source hashes match. Pending 13330 catalogs/541 help topics. Final late-arrival audit remains required; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -47330,6 +47359,63 @@
         "review_commit": "0190587f802b04c5441c7860025ed039b5f7395d",
         "new_languages": 0,
         "validation": "Fresh fetch found all six source tips unchanged, guide hash unchanged. Only the previously inspected unrelated origin/master README/Linux test/CI changes remain unmerged. All 28 full inventories/variables/marks match; all 270 since-start entries and 110 passages match pending inventory. Completed/source hashes reconcile. No tests run."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "5c6451872aff1cbc78a7afbece67037e2e100ffc",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/master": {
+            "merge_base": "bd4a2bd12b58b438004cdd106d0b007fcbac2aed",
+            "paths": [
+              ".github/workflows/ci.yml",
+              "README.md",
+              "linux/Dockerfile",
+              "linux/src/e2e.rs",
+              "scripts/linux-ui-e2e-run.sh"
+            ],
+            "new_languages": []
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "paths": [],
+            "new_languages": []
+          }
+        },
+        "since_start_pending_catalog_entries": 270,
+        "since_start_pending_help_passages": 110,
+        "pending_catalog_entries": 13330,
+        "pending_help_topics": 541,
+        "additional_unrecorded_work": 0,
+        "kind": "Croatian account/privacy help completed",
+        "review_commit": "203dd91c59eeed59d4e92294ea65378c4edb3e21",
+        "new_languages": 0,
+        "validation": "All six refs and the guide hash remain unchanged since the fresh fetch in this turn. The root checkout has no uncommitted locale/help/settings changes. No new language or relevant source work; previously inspected unrelated README/Linux test/CI updates remain unmerged. All 270 since-start entries and 110 passages match the queue. All 28 full inventories/variables/marks and completed/source hashes reconcile. No tests run."
       }
     ],
     "settings_source_integration": {

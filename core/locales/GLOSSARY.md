@@ -366,6 +366,11 @@ Review notes (round 2):
   Windows Cancel keeps prior Apply results and external default-app choices; Mac/Linux apply immediately except
   language. Encrypted parts still require permission for external images, even for trusted senders. One-time
   codes use "uvećanim znakovima" for large type, not "velikim slovima" (uppercase).
+- Account/privacy help keeps "podaci za prijavu" broad enough for browser credentials, including removal and
+  setup transfer. Sign-in apps need mail-server support as well as OpenID Connect. Use "lista e-pošte" and
+  "otkazivanje pretplate"; acceptance of a direct unsubscribe request is not a guarantee of no future mail.
+  Links to web pages open in the browser, mail links use the default mail app, and allowed attachments open
+  externally after a temporary copy is saved. A replacement contact key waits for selection in its properties.
 
 ### Italiano (it)
 
