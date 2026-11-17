@@ -339,6 +339,13 @@ Plurals: `[one]` 1, `[few]` 2 to 4, `*[other]` 0 and 5 or more; `[many]` (fracti
 - Compose fields: "Kopie" and "Skrytá kopie" (Windows Alt+K / Alt+S). Address-book compose action:
   "Napsat zprávu". Native letters with diacritics are valid menu access keys; check all shared menus/dialogs.
 - Desktop notifications are "oznámení"; use "upozornit" as the verb in the new-mail command and checkbox.
+- Compose wording describes protection „při odeslání“ and uses „použitelný klíč“ for usable keys. Keep infinitive
+  controls/tooltips and formal plural prose. Signature integrity and verified key ownership remain distinct.
+- Recipient counts use one/few/other; nominative „2 příjemci“, „5 příjemců“, but „pro 2 příjemce“ in missing-key
+  guidance. Names/addresses stay uninflected after a colon or a head noun such as „adresu“.
+- Complete key-state reasons follow „Důvod:“, dates „Poslední hledání:“. „Najít klíč“ uses Alt+K to avoid
+  „Použít nový klíč“ (Alt+N) in the recipient-key dialog. Unencrypted sending requires removal of inherited
+  text/images/attachments. Use „Oranžová“ consistently with the reading-security help.
 
 ### Dansk (da)
 

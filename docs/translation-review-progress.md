@@ -5,14 +5,14 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Czech compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg.
+- **Next: Danish compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs.
   Each completed language has 40 new entries and both help targets reviewed. Exact IDs and context are
   recorded in `compose-sign-encrypt-context`; source feature `162c0dd2` was integrated in `3552434d`.
-- Remaining compose languages: cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
+- Remaining compose languages: da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
   Then finish 48 original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
 - Current scope: 33,868 catalog entries and 1,352 help topics.
-  Completed: 21,191 entries and 816 full topics; pending: 12,677 entries and 536 topics.
-  Historical catalog improvements: 3,742.
+  Completed: 21,231 entries and 818 full topics; pending: 12,637 entries and 534 topics.
+  Historical catalog improvements: 3,760.
 - All 28 active-key signature warnings are reviewed in `25eff7b8`. Source-only import `205bd846` includes
   catalogs/generated identifiers; implementation provenance is recorded separately.
 - Structural checks, all 53 mnemonic scopes in completed compose languages, full inventories and current
@@ -2242,3 +2242,15 @@ All 53 mnemonic scopes pass; GTK label Намиране на _ключ checked a
 
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 933 entries/189 passages reconcile. No tests.
 Completed 21,191 entries/816 topics; pending 12,677/536; scope 33,868/1,352; historical catalog improvements 3,742. Next: Czech. REVIEWED remains unchanged.
+
+
+### Czech compose signing and encryption reviewed
+
+Reviewed all 40 compose additions, improving 17 core values and one app shortcut. Find Key now uses Alt+K, avoiding Use New Key Alt+N. Kept infinitive controls/tooltips and formal plural explanations. Added few branches to the encrypted/missing statuses: natural 2 příjemci versus5 příjemců, and pro2 příjemce in missing-key guidance. Rephrased lookup around uninflected names/addresses. Protection is applied při odeslání; signatures do not prove ownership. Použitelný klíč covers unusable keys; complete reasons follow Důvod and dates follow Poslední hledání. Unencrypted sending requires removing protected text, images and attachments.
+
+Reviewed both help targets and explicitly reopened one older writing-help paragraph: Linux now reads ze správce souborů, with each existing platform branch carrying its appropriate preposition. Windows/Mac wording and every other earlier byte retained. Fifteen help wording lines improved. New help explains platform status icons, own/unusable keys, selected From key, recipient removal and encrypted drafts/sent copies. Oranžová matches existing reading-security help. Glossary updated.
+
+All53 mnemonic scopes pass; GTK Najít _klíč checked. Structural checker:1,446 expected removed-mark diagnostics, no structural findings. Exact catalog reconstruction verifies18 value edits/40 mark removals; all other bytes preserved. The full writing-help file is reconstructed from exactly the insertion and the recorded reopened paragraph. Tags/attributes/control references/platform branches/literal keys match in both help topics. Plural categories inspected for0,1,2,3,4,5,11,21,22,101, with representative count/name substitutions and positive-count/separate empty-recipient callers checked. Platform label joins and dynamic shortcuts inspected. No relevant Czech screenshots available; source layouts/wrapping inspected. No GUI run, test suites or builds. All28 inventories/current hashes reconcile:21,265 unmarked messages,10,659 changed help lines and14 verified baseline pairs. HTML regenerated; git diff --check passes.
+
+Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 893 entries/187 passages reconcile. No tests.
+Completed 21,231 entries/818 topics; pending 12,637/534; scope 33,868/1,352; historical catalog improvements 3,760. Next: Danish. REVIEWED remains unchanged.
