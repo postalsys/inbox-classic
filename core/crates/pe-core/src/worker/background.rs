@@ -158,10 +158,7 @@ fn decrypt_all(sources: Vec<Sealed>, ring: &KeyRing) -> Vec<Opened> {
 /// panic boundary, as the reading pane's path does at the C API: a message that makes rPGP or the parser panic counts
 /// as one that does not open (and is marked tried), rather than failing its batch on every pass and stopping the
 /// background work behind it
-fn open_each(
-    sources: Vec<Sealed>,
-    open: impl Fn(&[u8]) -> Option<(IndexText, Option<String>)>,
-) -> Vec<Opened> {
+fn open_each(sources: Vec<Sealed>, open: impl Fn(&[u8]) -> Option<(IndexText, Option<String>)>) -> Vec<Opened> {
     sources
         .into_iter()
         .map(|(message, folder, uid, source)| {

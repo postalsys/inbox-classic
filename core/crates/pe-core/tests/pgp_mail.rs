@@ -458,8 +458,7 @@ fn a_protected_subject_stays_out_of_a_reply() {
     // the sender hid the Subject inside the encryption: a reply or forward, whose Subject goes in the clear, takes
     // the placeholder it travelled under, never the protected one
     let w = world("pgp-subject-reply");
-    let inner =
-        "Content-Type: text/plain; charset=utf-8; protected-headers=\"v1\"\r\nSubject: Secret plan\r\n\r\nBody";
+    let inner = "Content-Type: text/plain; charset=utf-8; protected-headers=\"v1\"\r\nSubject: Secret plan\r\n\r\nBody";
     let raw = message(
         "alice@example.org",
         &encrypted_part(inner, &[&w.me], Some(&w.alice), "e"),

@@ -211,9 +211,7 @@ impl Store {
         let mut statement = self
             .db
             .prepare("SELECT address, fingerprint FROM pgp_peers WHERE fingerprint IS NOT NULL")?;
-        statement
-            .query_map([], |row| Ok((row.get(0)?, row.get(1)?)))?
-            .collect()
+        statement.query_map([], |row| Ok((row.get(0)?, row.get(1)?)))?.collect()
     }
 
     pub fn set_pgp_peer(&self, peer: &PgpPeer) -> Result<()> {
