@@ -1,27 +1,23 @@
-<!--review-->
 <h1>Keď agent odosiela poštu</h1>
-<p class="summary">Každú správu, ktorú chce AI agent odoslať, uvidíte najprv vy a pred odoslaním počká v priečinku Pošta na odoslanie.</p>
-<p>Agent môže odosielať poštu, iba ak ste mu to povolili, a každú správu až po vašom súhlase.</p>
-<img src="picture:agents-4-send" alt="Okno s otázkou, či odoslať správu, ktorú napísal agent, s každým príjemcom a označenou novou adresou">
-<p>Keď chce agent odoslať správu, Inbox Classic ju zobrazí s adresou každého príjemcu. Adresy, na ktoré ste ešte nikdy nepísali, sú označené ako <b data-text="ui-new-address"></b>.</p>
+<p class="summary">Každá správa agenta vyžaduje váš súhlas a po potvrdení čaká v priečinku Pošta na odoslanie.</p>
+<p>Agent môže odosielať poštu, iba ak ste mu udelili toto oprávnenie. Každé odoslanie musíte potvrdiť osobitne.</p>
+<img src="picture:agents-4-send" alt="Potvrdenie odoslania správy napísanej agentom. Okno zobrazuje príjemcu, text správy a upozornenie na novú adresu.">
+<p>Inbox Classic zobrazí správu a adresy všetkých príjemcov. Adresy, na ktoré ste ešte nepísali, sú označené ako <b data-text="ui-new-address"></b>.</p>
 <ol>
-    <li>Prečítajte si príjemcov a text.</li>
+    <li>Skontrolujte príjemcov a text správy.</li>
     <li>Vyberte jednu z možností:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> správu odošle. Tlačidlo sa sprístupní až po chvíli, aby ste ho nestlačili omylom.</li>
-            <li><b data-text="ui-edit-first"></b> ju otvorí v novej správe, aby ste ju mohli zmeniť.</li>
-            <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, predvolená možnosť, ju neodošle.</li>
+            <li>Tlačidlo <!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> zaradí správu do frontu na odoslanie. Sprístupní sa až po chvíli, aby ste ho nestlačili omylom.</li>
+            <li>Tlačidlo <b data-text="ui-edit-first"></b> otvorí správu v editore, kde ju môžete zmeniť.</li>
+            <li>Tlačidlo <!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, ktoré je predvolené, odoslanie odmietne.</li>
         </ul>
     </li>
 </ol>
-<p>Agent sa pýta vždy len na jednu správu. Ak vám odpoveď chvíľu trvá, agent sa dozvie, že správa čaká na vás, a neskôr sa môže opýtať, ako ste sa rozhodli. Správy a koncepty, ktoré napíše, končia vaším podpisom, tak ako tie vaše.</p>
-<p>Správa, ktorú odošlete, čaká 30 sekúnd v priečinku Pošta na odoslanie. Kým neodíde, môžete ju tam odstrániť alebo kliknúť na <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> v ponuke <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<h2>Koncepty, ktoré napíše agent</h2>
-<p>Keď otvoríte koncept, ktorý napísal agent, riadok nad správou uvádza názov agenta. Pred odoslaním skontrolujte adresátov a text.</p>
-<!--/review-->
+<p>Pre každý program môže na vašu odpoveď čakať iba jedna žiadosť o odoslanie. Ak neodpoviete hneď, agent môže neskôr zistiť, ako ste sa rozhodli. Správy a koncepty predvolene obsahujú textový podpis konta, agent ho však môže vynechať.</p>
+<p>Po potvrdení zostane správa v priečinku Pošta na odoslanie najmenej 30 sekúnd. Kým sa neodošle, môžete ju z priečinka odstrániť alebo kliknúť na <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> v okne <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> a odoslanie zrušiť.</p>
+<h2>Koncepty agenta</h2>
+<p>Keď otvoríte koncept agenta, nad textom správy sa zobrazí jeho názov. Pred odoslaním skontrolujte príjemcov a text.</p>
 <img src="picture:agents-8-draft" alt="Koncept napísaný AI agentom, otvorený v samostatnom okne. Názov agenta sa zobrazuje nad textom správy.">
-<!--review-->
-<p>Agent môže svoj koncept meniť alebo odstrániť, kým ho sami neuložíte. Odvtedy je koncept váš.</p>
-<aside class="warning">Agent, ktorý má aj iné nástroje, napríklad prehliadanie webu alebo čítanie vašich súborov, by cez ne mohol odovzdať ďalej to, čo prečíta. Inbox Classic ich nevidí. Odosielanie agentovi povoľte, iba ak ho naozaj potrebujete.</aside>
+<p>Agent môže meniť a natrvalo odstraňovať iba vlastné koncepty. Keď koncept uložíte v editore, agent ho už nemôže meniť ani odstrániť. Platí to aj pri automatickom uložení vašich zmien a pri odoslaní konceptu. Samotné otvorenie konceptu tieto oprávnenia agenta nezruší.</p>
+<aside class="warning">Ak má agent aj iné nástroje, napríklad prístup k webovým stránkam alebo vašim súborom, môže cez ne odovzdať prečítané údaje ďalej. Inbox Classic tieto nástroje nekontroluje. Odosielanie pošty povoľte iba vtedy, keď ho potrebujete.</aside>
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>
-<!--/review-->

@@ -147,10 +147,8 @@ win-book-find-label = Zadajte meno alebo e-mailovú adresu:
 win-send = &Odoslať
 # review: new
 win-dont-send = &Neodoslať
-# review: new
 win-unsubscribe = &Odhlásiť odber
-# review: new
-win-dont-unsubscribe = &Neodhlásiť
+win-dont-unsubscribe = &Neodhlásiť odber
 # review: new
 win-forget-program-ask = Odstrániť tento program, jeho oprávnenia a históriu aktivity jeho agentov? Pri ďalšom pripojení sa vás znova opýta na povolenie.
 # review: new

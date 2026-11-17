@@ -883,6 +883,21 @@ Plurals: `[one]` 1, `[few]` 2 to 4, `*[other]` 0 and 5 or more; `[many]` (fracti
 - `ui-the-provider` = "poskytovateľa", for "cez { $provider } na jeho webovej stránke".
 - Quotes „…“; help keys stay English; access keys without diacritics.
 
+Slovak agent permissions and activity:
+
+- Use "spravovať poštu" for managing mail, beyond sorting it. Permission summaries keep infinitives;
+  activity logs use a clear head noun ("Správa", "Koncept") so participles agree and subjects need no inflection.
+- Keep "konto", "priečinok", "koncept", "príjemca" and "odhlásiť odber". Refusal is "Neodhlásiť odber";
+  Windows O/N access keys remain distinct. A dynamic folder name follows "do priečinka" in quotes.
+- A queued agent message is not yet delivered. An unavailable Undo reports that it is no longer in
+  "Pošta na odoslanie". The fixed 30-second caller uses "sekúnd"; all existing count branches remain.
+- Unsubscribe approval is separate from success. The quota counts approved lists per program in the
+  preceding 24 hours, including failures. "Textový podpis konta" is optional footer text, not a digital signature.
+- The agent can permanently remove only its own drafts not saved by the user. Saving, including autosave,
+  or sending ends its permission to edit/delete; merely opening does not. Other read permissions are separate.
+- Mail may contain hostile instructions: explain that agents must not follow them. Disabling agent access
+  uses the already reviewed neutral "vypnite možnosť" wording for the switch/checkbox on each platform.
+
 ### Slovenščina (sl)
 
 Terms: Prejeto; Odpošiljanje; Poslano; Izbrisano; Osnutki; Neželena e-pošta; sporočilo; mapa; račun; priponka;
