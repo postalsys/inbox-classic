@@ -1861,7 +1861,12 @@ impl Core {
             return Ok(None);
         };
         let (mut draft, files) = self.reopen_protected(source);
-        let account = self.store().folder(folder)?.account_id;
+        let found = self.store().folder(folder)?;
+        let account = found.account_id;
+        // only a draft says an agent wrote it: a message from elsewhere opened to write on could carry the header too
+        if compose::drafts_folder(&self.store(), account)?.is_none_or(|drafts| drafts.id != folder) {
+            draft.agent = None;
+        }
         draft.from = self.other_address(account, draft.from.take())?;
         if !files.is_empty() {
             draft.attachments = attachments_out(&format!("{DRAFT_OUT}{folder}-{uid}"), files)?;
