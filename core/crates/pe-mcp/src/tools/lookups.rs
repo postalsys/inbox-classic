@@ -1,6 +1,7 @@
 //! Looking things up: the overview of the accounts, the message rules (read and tried, never changed: decision 1 of
 //! the MCP plan), and people by the start of their name or address.
 
+use pe_core::agents::everywhere;
 use pe_store::{Scope, Search, Sort};
 use serde_json::{Value, json};
 
@@ -102,8 +103,7 @@ pub(super) fn test_rule(call: &Call, args: &Args) -> Outcome {
         text: query.clone(),
         // as every search of an agent's: never by what only decrypting gives
         no_decrypted: true,
-        accounts: Some(call.host.accounts.clone()),
-        ..Default::default()
+        ..everywhere(&call.host)
     };
     let (matches, _) = call.core.count_search(&search).map_err(engine)?;
     let samples = call
@@ -125,7 +125,7 @@ pub(super) fn find_contacts(call: &Call, args: &Args) -> Outcome {
         return Err("`query` is empty: give the start of a name or an address.".into());
     }
     let limit = args.size("limit", 10)?.clamp(1, MAX_PEOPLE);
-    let people = call.core.agent_people(&call.host, &query, limit).map_err(engine)?;
+    let (people, every) = call.core.agent_people(&call.host, &query, limit).map_err(engine)?;
     let listed: Vec<Value> = people
         .iter()
         .map(|p| {
@@ -139,12 +139,6 @@ pub(super) fn find_contacts(call: &Call, args: &Args) -> Outcome {
         })
         .collect();
     let mut result = json!({ "people": listed });
-    let every = call
-        .core
-        .accounts()
-        .map_err(engine)?
-        .iter()
-        .all(|a| call.host.accounts.contains(&a.id));
     if !every {
         result["note"] = json!(
             "Only the address book: this agent may not use every account, and the people of mail are not kept by account."

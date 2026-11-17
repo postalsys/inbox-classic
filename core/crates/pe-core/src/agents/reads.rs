@@ -101,11 +101,11 @@ impl Core {
     }
 
     /// The people whose name or address starts with `typed`, for an agent: the address book's, and those of mail when
-    /// it may use every account (the people of mail are not kept by account)
-    pub fn agent_people(&self, host: &AgentHost, typed: &str, limit: usize) -> Result<Vec<Person>> {
+    /// it may use every account (the people of mail are not kept by account); and whether it may, so those are in
+    pub fn agent_people(&self, host: &AgentHost, typed: &str, limit: usize) -> Result<(Vec<Person>, bool)> {
         let store = self.store();
         let every = store.accounts()?.iter().all(|a| host.accounts.contains(&a.id));
-        Ok(store.people_matching(typed, limit, every)?)
+        Ok((store.people_matching(typed, limit, every)?, every))
     }
 }
 

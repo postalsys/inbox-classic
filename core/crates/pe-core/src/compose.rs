@@ -96,27 +96,21 @@ const AGENT_NAME_MAX: usize = 100;
 /// `raw`, a draft built for Drafts, with the header naming the agent that wrote it ([`AGENT_HEADER`])
 pub(crate) fn with_agent_header(raw: Vec<u8>, agent: &str) -> Vec<u8> {
     let name: String = agent.chars().filter(|c| !c.is_control()).take(AGENT_NAME_MAX).collect();
-    let name = if name.trim().is_empty() {
-        "AI agent".to_string()
-    } else {
-        name
+    let name = match name.trim() {
+        "" => "AI agent",
+        name => name,
     };
-    let mut out = format!(
-        "{AGENT_HEADER}: {}\r\n",
-        pe_smtp::encoding::encode_header_text(name.trim())
-    )
-    .into_bytes();
+    let mut out = format!("{AGENT_HEADER}: {}\r\n", pe_smtp::encoding::encode_header_text(name)).into_bytes();
     out.extend_from_slice(&raw);
     out
 }
 
 /// The agent a saved draft's header names ([`AGENT_HEADER`]), None for a draft without one
 fn agent_of(message: &parser::Message) -> Option<String> {
-    let key = AGENT_HEADER.to_ascii_lowercase();
     message
         .headers
         .iter()
-        .find(|h| h.key.eq_ignore_ascii_case(&key))
+        .find(|h| h.key.eq_ignore_ascii_case(AGENT_HEADER))
         .map(|h| {
             pe_mime::words::decode_words(h.value.trim())
                 .chars()

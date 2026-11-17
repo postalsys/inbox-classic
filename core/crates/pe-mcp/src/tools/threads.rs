@@ -4,6 +4,7 @@
 use std::collections::HashMap;
 use std::time::Instant;
 
+use pe_core::agents::everywhere;
 use pe_store::{FolderId, Scope, Search, Show, Sort};
 use serde_json::{Value, json};
 
@@ -51,23 +52,23 @@ pub(super) fn list_messages(call: &Call, args: &Args) -> Outcome {
         },
         threads: grouped.then(Vec::new),
         // only what this agent may see, counted in the store
-        accounts: Some(call.host.accounts.clone()),
-        ..Default::default()
+        ..everywhere(&call.host)
     };
     let rows = call
         .core
         .search(&search, Sort::default(), offset, limit)
         .map_err(engine)?;
     let (messages, unread) = call.core.count_search(&search).map_err(engine)?;
-    let total = if grouped {
-        call.core.count_rows(&search).map_err(engine)?
+    let (total, key, listed) = if grouped {
+        let total = call.core.count_rows(&search).map_err(engine)?;
+        (
+            total,
+            "conversations",
+            conversation_rows(call, &search, &rows, &places)?,
+        )
     } else {
-        messages
-    };
-    let listed: Vec<Value> = if grouped {
-        conversation_rows(call, &search, &rows, &places)?
-    } else {
-        rows.iter().map(|m| row(m, places.get(&m.folder_id))).collect()
+        let listed = rows.iter().map(|m| row(m, places.get(&m.folder_id))).collect();
+        (messages, "messages", listed)
     };
     let mut result = json!({
         "total": total,
@@ -79,7 +80,7 @@ pub(super) fn list_messages(call: &Call, args: &Args) -> Outcome {
         result["folder"] = json!(folder);
         result["name"] = json!(places.get(&folder).map(|p| p.name.as_str()));
     }
-    result[if grouped { "conversations" } else { "messages" }] = json!(listed);
+    result[key] = json!(listed);
     if grouped {
         result["messages"] = json!(messages);
     }
@@ -123,8 +124,8 @@ fn conversation_rows(
         .collect())
 }
 
-/// Waits for the sources of `messages`, all asked for at once; those not here by the deadline are left without
-fn download_all(call: &Call, messages: &[pe_store::Message]) -> Result<Vec<(FolderId, u64)>, String> {
+/// Asks for the sources of `messages` not downloaded yet, all at once: those it asked for
+fn ask_downloads(call: &Call, messages: &[pe_store::Message]) -> Result<Vec<(FolderId, u64)>, String> {
     let missing: Vec<(FolderId, u64)> = messages
         .iter()
         .filter(|m| !m.cached)
@@ -147,7 +148,7 @@ pub(super) async fn get_conversation(call: &Call<'_>, args: &Args<'_>) -> Outcom
     let left_out = messages.len().saturating_sub(CONVERSATION_MESSAGES);
     messages.drain(..left_out);
     // the ones not downloaded yet, asked for at once and waited for together
-    let mut missing = download_all(call, &messages)?;
+    let mut missing = ask_downloads(call, &messages)?;
     let deadline = Instant::now() + DOWNLOAD_WAIT;
     let mut told = Instant::now();
     while !missing.is_empty() && Instant::now() < deadline {
@@ -163,8 +164,7 @@ pub(super) async fn get_conversation(call: &Call<'_>, args: &Args<'_>) -> Outcom
     // the newest first while the text lasts, so the oldest are the ones left without
     let mut budget = CONVERSATION_TEXT;
     let mut read: Vec<Value> = Vec::with_capacity(messages.len());
-    for summary in messages.iter().rev() {
-        let mut summary = summary.clone();
+    for mut summary in messages.into_iter().rev() {
         summary.info.subject = summary.agent_subject().to_string();
         let place = places.get(&summary.folder_id);
         let Some(message) = call
@@ -212,8 +212,7 @@ pub(super) fn list_changes(call: &Call, args: &Args) -> Outcome {
     let search = Search {
         scope,
         up_to: Some(newest),
-        accounts: Some(call.host.accounts.clone()),
-        ..Default::default()
+        ..everywhere(&call.host)
     };
     let mut rows = call.core.stored_since(&search, since, limit + 1).map_err(engine)?;
     let has_more = rows.len() as u64 > limit;

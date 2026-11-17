@@ -6,6 +6,7 @@
 use std::collections::HashMap;
 use std::future::Future;
 use std::pin::Pin;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
@@ -202,7 +203,7 @@ fn request_key(id: &Value) -> String {
 pub(crate) struct Progress {
     token: Option<Value>,
     out: mpsc::UnboundedSender<Out>,
-    sent: Arc<std::sync::atomic::AtomicU64>,
+    sent: Arc<AtomicU64>,
 }
 
 impl Progress {
@@ -211,7 +212,7 @@ impl Progress {
         let Some(token) = &self.token else {
             return;
         };
-        let progress = self.sent.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
+        let progress = self.sent.fetch_add(1, Ordering::Relaxed) + 1;
         let _ = self.out.send(Out::Notify(json!({
             "jsonrpc": "2.0",
             "method": "notifications/progress",
@@ -262,11 +263,8 @@ pub async fn serve<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(core: Arc
                 match protocol::parse(&line) {
                     Incoming::Request { id, method, params } => start(&session, &mut running, &out, id, method, params),
                     Incoming::Notification { method, params } => {
-                        if method == CANCELLED
-                            && let Some(request) = params.get("requestId")
-                            && let Some(task) = running.remove(&request_key(request))
-                        {
-                            task.abort();
+                        if method == CANCELLED {
+                            cancel(&mut running, &params);
                         }
                         None
                     }
@@ -300,6 +298,15 @@ pub async fn serve<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(core: Arc
 
 /// The notification that the client no longer waits for a request
 const CANCELLED: &str = "notifications/cancelled";
+
+/// Stops the request a `notifications/cancelled` names, if it is still being served
+fn cancel(running: &mut HashMap<String, tokio::task::AbortHandle>, params: &Value) {
+    if let Some(request) = params.get("requestId")
+        && let Some(task) = running.remove(&request_key(request))
+    {
+        task.abort();
+    }
+}
 
 /// Starts serving request `id` on a task of its own; the answer to write at once when it is refused
 fn start(
@@ -374,16 +381,18 @@ impl Session {
             .map_or(AgentLevels(0), |now| now.levels())
     }
 
+    /// What the program may do now, kept as what it was told: the tools it is given go by it
+    fn tell(&self) -> AgentLevels {
+        let levels = self.levels();
+        self.state().told = levels;
+        levels
+    }
+
     /// The notification to send when what the program may do changed since it was told its tools
     fn tools_changed(&self) -> Option<Value> {
         self.state().allowed?;
-        let levels = self.levels();
-        let mut state = self.state();
-        if levels == state.told {
-            return None;
-        }
-        state.told = levels;
-        Some(json!({ "jsonrpc": "2.0", "method": TOOLS_CHANGED }))
+        let before = self.state().told;
+        (self.tell() != before).then(|| json!({ "jsonrpc": "2.0", "method": TOOLS_CHANGED }))
     }
 
     async fn request(&self, id: &Value, method: &str, params: &Value, progress: &Progress) -> Value {
@@ -392,11 +401,7 @@ impl Session {
             "ping" => protocol::result(id, json!({})),
             "initialize" => self.initialize(id, params).await,
             _ if allowed.is_none() => protocol::error(id, INVALID_REQUEST, "initialize first"),
-            "tools/list" => {
-                let levels = self.levels();
-                self.state().told = levels;
-                protocol::result(id, json!({ "tools": crate::tools::definitions(levels) }))
-            }
+            "tools/list" => protocol::result(id, json!({ "tools": crate::tools::definitions(self.tell()) })),
             "tools/call" => {
                 let Some(name) = params.get("name").and_then(Value::as_str) else {
                     return protocol::error(id, INVALID_PARAMS, "a tool call names its tool");
@@ -451,8 +456,7 @@ impl Session {
             Err(_) => return refused("Inbox Classic could not check this program."),
         };
         self.state().allowed = Some(host);
-        let levels = self.levels();
-        self.state().told = levels;
+        self.tell();
         protocol::result(
             id,
             json!({

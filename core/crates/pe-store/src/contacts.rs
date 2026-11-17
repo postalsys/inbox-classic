@@ -118,11 +118,23 @@ impl Store {
     /// says how many messages the user wrote to them and got from them.
     pub fn people_matching(&self, typed: &str, limit: usize, learned: bool) -> Result<Vec<Person>> {
         let (book, _) = self.book_matching(typed, limit)?;
+        let mail = if learned {
+            self.contacts_matching(typed, limit)?
+        } else {
+            Vec::new()
+        };
+        let found = book
+            .into_iter()
+            .map(|(name, address)| (name, address, true))
+            .chain(mail.into_iter().map(|contact| (contact.name, contact.address, false)));
         let mut counts = self
             .db
             .prepare_cached("SELECT sent, received FROM contacts WHERE address = ?1 AND hidden = 0")?;
         let mut people: Vec<Person> = Vec::new();
-        for (name, address) in book {
+        for (name, address, in_book) in found {
+            if people.len() == limit {
+                break;
+            }
             if people.iter().any(|p| p.address.eq_ignore_ascii_case(&address)) {
                 continue;
             }
@@ -137,27 +149,11 @@ impl Store {
             people.push(Person {
                 name,
                 address,
-                in_book: true,
+                in_book,
                 sent,
                 received,
             });
         }
-        if learned {
-            for contact in self.contacts_matching(typed, limit)? {
-                if people.iter().any(|p| p.address.eq_ignore_ascii_case(&contact.address)) {
-                    continue;
-                }
-                let (sent, received) = counts.query_row([&contact.address], |row| Ok((row.get(0)?, row.get(1)?)))?;
-                people.push(Person {
-                    name: contact.name,
-                    address: contact.address,
-                    in_book: false,
-                    sent,
-                    received,
-                });
-            }
-        }
-        people.truncate(limit);
         Ok(people)
     }
 
