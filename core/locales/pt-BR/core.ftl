@@ -630,60 +630,38 @@ pgp-publish-done = Sua chave está publicada em keys.openpgp.org para { $address
 pgp-publish-failed = Não foi possível publicar a chave: { $error }
 pgp-keyserver-off = A busca de chaves em keys.openpgp.org está desativada em { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Criptografada e assinada: só você e { $addresses } podem lê-la.
-   *[other] Criptografada e assinada: só você e os { $count } destinatários podem lê-la.
+    [one] A mensagem será criptografada e assinada no envio. Só você e { $addresses } poderão ler o conteúdo.
+   *[other] A mensagem será criptografada e assinada no envio. Só você e os { $count } destinatários poderão ler o conteúdo.
 }
-# review: new
-pgp-compose-encrypt-ready = Ela será criptografada e assinada. Adicione destinatários cujas chaves você tem.
-# review: new
+pgp-compose-encrypt-ready = A mensagem será criptografada e assinada no envio. Adicione destinatários para os quais você tenha uma chave utilizável.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } não tem nenhuma chave, por isso a mensagem ainda não pode ser criptografada.
-   *[other] { $count } destinatários não têm nenhuma chave, por isso a mensagem ainda não pode ser criptografada: { $addresses }.
+    [one] Não há uma chave utilizável para este destinatário: { $addresses }. Ainda não é possível criptografar a mensagem.
+   *[other] Não há chaves utilizáveis para { $count } destinatários: { $addresses }. Ainda não é possível criptografar a mensagem.
 }
-# review: new
 pgp-compose-looking = Procurando as chaves de { $addresses }...
-# review: new
-pgp-compose-signed = Assinada: os destinatários podem verificar que ela vem de você e não foi alterada.
-# review: new
+pgp-compose-signed = A mensagem será assinada digitalmente no envio. Os destinatários poderão verificar a assinatura e a integridade do conteúdo.
 pgp-compose-reply-clear = Não criptografada, embora a mensagem respondida ou encaminhada estivesse criptografada.
-# review: new
-pgp-compose-encrypted-files = Há arquivos de uma mensagem criptografada anexados, por isso esta mensagem só pode ser enviada criptografada. Ative Criptografar, ou remova esses arquivos.
-# review: new
-pgp-compose-sign-tip = Assinar a mensagem com sua chave, para que os destinatários possam verificar que ela vem de você e não foi alterada
-# review: new
-pgp-compose-sign-tip-encrypted = Uma mensagem criptografada é sempre assinada
-# review: new
-pgp-compose-encrypt-tip = Criptografar a mensagem, para que só você e os destinatários possam lê-la
-# review: new
-pgp-compose-make-key = Você ainda não tem nenhuma chave para { $address }. Criar uma agora? Com ela, suas mensagens podem ser assinadas e criptografadas.
-# review: new
-pgp-compose-key-unusable = Sua chave para { $address } não pode ser usada ({ $state }). Abra Chaves de criptografia para importar o backup dela ou criar uma nova chave.
-# review: new
-pgp-compose-encrypt-off-quote = Esta mensagem cita ou encaminha uma mensagem criptografada. Sem criptografia, ela só poderá ser enviada depois que você remover o que ela cita. Desativar a criptografia mesmo assim?
-# review: new
-pgp-compose-encrypt-off-reply = Esta mensagem responde a uma mensagem criptografada ou a encaminha. Sem criptografia, qualquer pessoa que manipule sua mensagem no caminho pode lê-la. Desativar a criptografia?
-# review: new
+pgp-compose-encrypted-files = Esta mensagem contém anexos de uma mensagem criptografada e só pode ser enviada com criptografia. Ative “Criptografar” ou remova esses anexos.
+pgp-compose-sign-tip = Assinar digitalmente a mensagem no envio para que os destinatários possam verificar a assinatura e a integridade do conteúdo
+pgp-compose-sign-tip-encrypted = Mensagens criptografadas são sempre assinadas no envio
+pgp-compose-encrypt-tip = Criptografar o conteúdo da mensagem no envio para que só você e os destinatários possam lê-lo
+pgp-compose-make-key = Ainda não há uma chave própria configurada para { $address }. Deseja criar uma agora? Com ela, você poderá assinar e criptografar mensagens.
+pgp-compose-key-unusable = Sua chave para { $address } não pode ser usada. Motivo: { $state }
+    Abra “Chaves de criptografia” para importar um backup dessa chave ou criar uma nova.
+pgp-compose-encrypt-off-quote = Esta mensagem ainda contém texto, imagens ou anexos de uma mensagem criptografada. Remova esse conteúdo antes de enviá-la sem criptografia. Deseja desativar a criptografia mesmo assim?
+pgp-compose-encrypt-off-reply = A mensagem original estava criptografada. Se você enviar a resposta ou a mensagem encaminhada sem criptografia, os servidores de e-mail poderão ler o conteúdo. Deseja desativar a criptografia?
 pgp-recipient-verified = Chave verificada
-# review: new
 pgp-recipient-found = Chave não verificada
-# review: new
 pgp-recipient-own = Sua própria chave
-# review: new
 pgp-recipient-looking = Procurando uma chave...
-# review: new
 pgp-recipient-missing = Sem chave
-# review: new
-pgp-recipient-not-found = Sem chave: nenhuma foi encontrada em { $date }
-# review: new
+pgp-recipient-not-found = Nenhuma chave encontrada. Última busca: { $date }
 pgp-recipient-unusable = A chave não pode ser usada: { $state }
-# review: new
-pgp-recipients-intro = A mensagem é criptografada para a chave de cada destinatário e para a sua.
-# review: new
+pgp-recipients-intro = O Inbox Classic usará as chaves dos destinatários e a sua para criptografar a mensagem.
 pgp-recipients-intro-missing = { $count ->
-    [one] { $count } destinatário não tem nenhuma chave para a qual criptografar. Procure a chave dele, remova-o desta mensagem ou envie-a sem criptografia.
-   *[other] { $count } destinatários não têm nenhuma chave para a qual criptografar. Procure as chaves deles, remova-os desta mensagem ou envie-a sem criptografia.
+    [one] Não há uma chave utilizável para { $count } destinatário. Procure a chave ou remova o destinatário da mensagem. Você só pode enviar sem criptografia se a mensagem não contiver mais texto, imagens ou anexos de mensagens criptografadas.
+   *[other] Não há chaves utilizáveis para { $count } destinatários. Procure as chaves ou remova esses destinatários da mensagem. Você só pode enviar sem criptografia se a mensagem não contiver mais texto, imagens ou anexos de mensagens criptografadas.
 }
 pgp-details-part = Parte { $number }: { $label }
 pgp-details-signed = Data da assinatura: { $when }. Chave: { $key }

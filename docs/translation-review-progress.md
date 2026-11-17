@@ -5,14 +5,14 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Brazilian Portuguese compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt.
+- **Next: Catalan compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR.
   Each completed language has 40 new entries and both help targets reviewed. Exact IDs and context are
   recorded in `compose-sign-encrypt-context`; source feature `162c0dd2` was integrated in `3552434d`.
-- Remaining compose languages: pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
+- Remaining compose languages: ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
   Then finish 48 original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
 - Current scope: 33,868 catalog entries and 1,352 help topics.
-  Completed: 20,951 entries and 804 full topics; pending: 12,917 entries and 548 topics.
-  Historical catalog improvements: 3,642.
+  Completed: 20,991 entries and 806 full topics; pending: 12,877 entries and 546 topics.
+  Historical catalog improvements: 3,657.
 - All 28 active-key signature warnings are reviewed in `25eff7b8`. Source-only import `205bd846` includes
   catalogs/generated identifiers; dependent hardening code remains on its source branch.
 - Structural checks, all 53 mnemonic scopes in completed compose languages, full inventories and current
@@ -2170,3 +2170,15 @@ All 53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diag
 
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,173 entries/201 passages reconcile. No tests.
 Completed 20,951 entries/804 topics; pending 12,917/548; scope 33,868/1,352; historical catalog improvements 3,642. Next: Brazilian Portuguese. REVIEWED remains unchanged.
+
+
+### Brazilian Portuguese compose signing and encryption reviewed
+
+Reviewed all 40 additions, retaining the 17 app labels and eight good core values while improving 15 core values. Kept Brazilian você, criptografia, arquivo and backup. Status describes protection no envio, usable keys and signature integrity without assuming verified ownership. Full key-state reasons follow Motivo; dates follow Última busca. Missing-key counts are positive, while zero recipients use a separate status. All selectors and numeric placeholders are preserved. Unencrypted sending requires removal of inherited protected text, images and attachments.
+
+Reviewed the new topic and only the writing-help insertion, improving 14 help lines and preserving all earlier prose. Help covers per-platform color/status symbols, own/unusable keys, the selected From key, recipient removal and encrypted drafts/sent copies. Glossary updated.
+
+All 53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies15 value edits/40 mark removals and preserves other catalog bytes. Help tags/attributes/control references/platform branches/literal keys match. All platform label joins inspected; no Portuguese compose/encryption screenshots available, so source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All28 inventories/current hashes reconcile:21,025 unmarked messages,10,539 changed help lines and14 verified baseline pairs. HTML regenerated; git diff --check passes.
+
+Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 1,133 entries/199 passages reconcile. No tests.
+Completed 20,991 entries/806 topics; pending 12,877/546; scope 33,868/1,352; historical catalog improvements 3,657. Next: Catalan. REVIEWED remains unchanged.

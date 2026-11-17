@@ -670,6 +670,10 @@ Plurals: CLDR's `pt` (pe-i18n gives the catalog that locale), where 0 and 1 are 
 - Use “assinatura digital” where text signatures could be confused with cryptographic signatures. Verify all
   addresses before confirming key ownership. A settings export without a passphrase requires signing in again,
   which may use the browser; “credenciais de login” includes tokens as well as passwords.
+- Compose status describes protection “no envio”, not completed delivery. Use “chave utilizável” when sending
+  requires a usable key; expired/revoked keys also trigger missing-key guidance. Encrypt with keys, not “para a chave”.
+- Put complete key-state reasons after “Motivo:” and separate the next instruction. Keep Brazilian você,
+  criptografar, arquivo and backup; “Remover da mensagem” removes recipients, not address-book contacts.
 - The additional sender-address field is “Outros endereços de envio”; use that exact label in errors and help.
   Use “ID do cliente” / “segredo do cliente” consistently for OAuth fields.
 
