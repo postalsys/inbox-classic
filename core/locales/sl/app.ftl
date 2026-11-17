@@ -471,8 +471,7 @@ ui-no-match-in = Iskanje v mapi { $folder } zajema zadeve, pošiljatelje, prejem
 ui-no-items = V tem pogledu ni elementov.
 # review: new
 ui-choose-folder = Izberite mapo, da vidite njena sporočila.
-# review: new
-ui-unsubscribe = Odjava
+ui-unsubscribe = Odjavi
 # review: new
 ui-open-in-calendar = Odpri v koledarju
 # review: new
@@ -855,7 +854,6 @@ ui-dont-allow = Ne dovoli
 ui-allow = &Dovoli
 # review: new
 ui-dont-send = Ne pošlji
-# review: new
 ui-dont-unsubscribe = Ne odjavi
 # review: new
 ui-edit-first = Najprej &uredi

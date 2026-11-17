@@ -911,6 +911,24 @@ never a literal 1.
 - `$messages` status texts use an impersonal participle and a colon ("Premaknjeno v Arhiv: 3 sporočila"); `$folder`
   after "v" works with "njihove mape" and "drug račun".
 - Agent log entries use the masculine past participle (Odprl, Poslal), agreeing with "agent"; AI agent is "agent UI".
+
+Slovenian agent permissions and activity:
+
+- Permission summaries use nouns ("branje", "urejanje", "pisanje osnutkov"). Keep masculine past agent logs,
+  and insert "sporočilo" before a subject so its text never needs inflection. Folder names follow "v mapo" in quotes.
+- "Razveljaviti" reverses an action; "preklicati pošiljanje" cancels queued sending. A send log records the queue,
+  and unavailable Undo reports absence from "Odpošiljanje", without claiming delivery. The fixed 30-second value
+  uses "sekund". All existing one/two/few/other account and unsubscribe branches and numeric placeholders remain.
+- The unsubscribe count stays in parentheses after the list phrase, avoiding s/z choices before arbitrary
+  numbers. The exact-one branch remains separate. Use imperative "Odjavi" on the shared action and Windows
+  confirmation; "Ne odjavi" refuses. Windows O/N keys remain distinct. The shared action is also a reader link/title.
+- Unsubscribe approval differs from success; the quota is per program over the preceding 24 hours, including
+  failed approved requests. "Besedilni podpis računa" is optional footer text, not a cryptographic signature.
+- Agents can permanently delete only their own drafts not saved by the user. Save/autosave or sending ends
+  permission to edit/delete; opening alone does not. Independent read permission is separate. Removing access
+  does not uninstall the program. Preserve the reviewed neutral shutdown instruction for switches/checkboxes.
+- Email may contain hostile instructions; tell readers that agents must not follow them, rather than saying
+  that email contains no instructions. Use polite plural address and the language's ordinary control labels.
 - Quotes »...«; keys Ctrl, Shift, Alt, Del, Enter.
 - Review first: the `done-*` / `transfer-*` lines and the plural forms of `setup-*` and `pgp-imported-*`.
 

@@ -1,25 +1,23 @@
-<!--review--><h1>Ko agent pošilja pošto</h1>
-<p class="summary">Vsako sporočilo, ki ga želi agent UI poslati, vam je najprej prikazano in pred odhodom počaka v mapi Odpošiljanje.</p>
-<p>Agent lahko pošilja pošto samo, če ste mu to dovolili, in vsako sporočilo šele po vaši potrditvi.</p>
-<img src="picture:agents-4-send" alt="Okno, ki sprašuje, ali naj se pošlje sporočilo, ki ga je napisal agent, z vsemi prejemniki in označenim novim naslovom">
-<p>Ko agent želi poslati sporočilo, ga Inbox Classic prikaže z naslovi vseh prejemnikov. Naslovi, ki jim še niste nikoli pisali, so označeni z <b data-text="ui-new-address"></b>.</p>
+<h1>Ko agent pošilja pošto</h1>
+<p class="summary">Vsako sporočilo agenta zahteva vašo potrditev, nato pa počaka v mapi Odpošiljanje.</p>
+<p>Agent lahko pošilja pošto le, če ste mu dodelili to dovoljenje. Vsako pošiljanje morate potrditi posebej.</p>
+<img src="picture:agents-4-send" alt="Potrditev pošiljanja sporočila, ki ga je napisal agent. Prikazani so prejemnik, besedilo sporočila in opozorilo na nov naslov.">
+<p>Inbox Classic prikaže sporočilo in naslove vseh prejemnikov. Naslovi, na katere še niste pisali, imajo oznako <b data-text="ui-new-address"></b>.</p>
 <ol>
-    <li>Preberite prejemnike in besedilo.</li>
+    <li>Preverite prejemnike in besedilo sporočila.</li>
     <li>Izberite eno od možnosti:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> ga pošlje. Gumb postane dejaven šele po trenutku, zato ga ne morete pritisniti po nesreči.</li>
-            <li><b data-text="ui-edit-first"></b> ga odpre v novem sporočilu, da ga spremenite.</li>
-            <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, privzeta izbira, ga ne pošlje.</li>
+            <li>Gumb <!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> sporočilo uvrsti v čakalno vrsto za pošiljanje. Omogoči se po kratkem zamiku, da ga ne pritisnete po nesreči.</li>
+            <li>Gumb <b data-text="ui-edit-first"></b> odpre sporočilo v urejevalniku, kjer ga lahko spremenite.</li>
+            <li>Gumb <!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, ki je privzeto izbran, pošiljanje zavrne.</li>
         </ul>
     </li>
 </ol>
-<p>Agent vpraša za eno sporočilo naenkrat. Če z odgovorom odlašate, agent izve, da sporočilo čaka na vas, in lahko pozneje vpraša, kako ste se odločili. Sporočila in osnutki, ki jih napiše, se končajo z vašim podpisom, tako kot vaši.</p>
-<p>Sporočilo, ki ga pošljete, 30 sekund čaka v mapi Odpošiljanje. Dokler ne odide, ga lahko tam izbrišete ali kliknete <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> v meniju <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<h2>Osnutki, ki jih napiše agent</h2>
-<p>Ko odprete osnutek, ki ga je napisal agent, je ime agenta navedeno v vrstici nad sporočilom. Pred pošiljanjem preverite prejemnike in besedilo.</p>
-<!--/review-->
+<p>Za vsak program lahko na vaš odgovor čaka le ena zahteva za pošiljanje. Če ne odgovorite takoj, lahko agent pozneje preveri vašo odločitev. Sporočila in osnutki privzeto vsebujejo besedilni podpis računa, vendar ga agent lahko izpusti.</p>
+<p>Po potrditvi sporočilo čaka v mapi Odpošiljanje najmanj 30 sekund. Dokler ni poslano, ga lahko iz te mape izbrišete ali kliknete <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> v oknu <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> in tako prekličete pošiljanje.</p>
+<h2>Agentovi osnutki</h2>
+<p>Ko odprete agentov osnutek, je nad besedilom sporočila prikazano ime agenta. Pred pošiljanjem preverite prejemnike in besedilo.</p>
 <img src="picture:agents-8-draft" alt="Osnutek, ki ga je napisal agent UI, odprt v ločenem oknu. Ime agenta je prikazano nad besedilom sporočila.">
-<!--review-->
-<p>Agent lahko svoj osnutek spremeni ali odstrani, dokler ga sami ne shranite. Od takrat je osnutek vaš.</p>
-<aside class="warning">Agent, ki ima tudi druga orodja, na primer brskanje po spletu ali branje vaših datotek, bi lahko prek njih posredoval, kar prebere. Inbox Classic jih ne vidi. Agentu dovolite pošiljanje samo, če ga res potrebujete.</aside>
-<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav><!--/review-->
+<p>Agent lahko spreminja in trajno briše le lastne osnutke. Ko osnutek shranite v urejevalniku, ga agent ne more več spreminjati ali brisati. To velja tudi ob samodejnem shranjevanju vaših sprememb in ob pošiljanju osnutka. Če osnutek samo odprete, agent ta dovoljenja ohrani.</p>
+<aside class="warning">Če ima agent druga orodja, na primer dostop do spletnih strani ali vaših datotek, lahko prebrane podatke posreduje prek njih. Inbox Classic teh orodij ne nadzira. Pošiljanje pošte dovolite le, kadar ga potrebujete.</aside>
+<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>

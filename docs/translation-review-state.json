@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Slovenian agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and all three agent help topics; then sv/uk. Preserve reviewed screenshot descriptions and connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21845/804; pending 12559/552; improvements 4082. REVIEWED unchanged.",
+  "next_batch": "Review Swedish agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and all three agent help topics; then Ukrainian. Preserve reviewed screenshot descriptions and connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21907/807; pending 12497/549; improvements 4123. REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -43522,7 +43522,6 @@
           "ui-no-match-in",
           "ui-no-items",
           "ui-choose-folder",
-          "ui-unsubscribe",
           "ui-open-in-calendar",
           "ui-pictures-blocked",
           "ui-not-shown",
@@ -43714,7 +43713,6 @@
           "ui-dont-allow",
           "ui-allow",
           "ui-dont-send",
-          "ui-dont-unsubscribe",
           "ui-edit-first",
           "ui-new-address",
           "ui-turn-away",
@@ -44200,65 +44198,7 @@
           "day-friday",
           "day-saturday",
           "day-sunday",
-          "agent-level-read",
-          "agent-level-organize",
-          "agent-level-drafts",
-          "agent-level-send",
-          "agent-connect-title",
-          "agent-connect-detail",
-          "agent-reply-to",
-          "agent-reply-all-on",
-          "agent-forward-of",
-          "agent-never-written-one",
-          "agent-never-written-many",
-          "agent-send-title",
-          "agent-send-detail",
-          "agent-change-title",
-          "agent-change-allowed",
-          "agent-change-refused",
-          "agent-log-taken-back",
-          "agent-files",
-          "agent-undo-refused",
-          "agent-undo-refused-why",
-          "agent-undo-impossible",
-          "agent-undo-not-in-folder",
-          "agent-undo-not-arrived",
-          "agent-undo-sent",
-          "agent-original-not-downloaded",
-          "agent-turned-away",
-          "agent-can-nothing",
-          "agent-can-read",
-          "agent-can-organize",
-          "agent-can-drafts",
-          "agent-can-send",
-          "agent-can-list",
-          "agent-accounts",
-          "agent-access",
-          "agent-unreadable",
-          "agent-encrypted-original",
-          "agent-encrypted",
           "list-encrypted",
-          "agent-log-composed",
-          "agent-log-refused",
-          "agent-log-sent",
-          "agent-log-draft",
-          "agent-log-draft-replaced",
-          "agent-log-draft-discarded",
-          "agent-draft-note",
-          "agent-log-read",
-          "agent-log-unread",
-          "agent-log-flagged",
-          "agent-log-unflagged",
-          "agent-log-deleted",
-          "agent-log-moved",
-          "agent-log-junk",
-          "agent-log-not-junk",
-          "agent-log-archived",
-          "agent-log-folder",
-          "agent-log-unsubscribe-failed",
-          "agent-log-unsubscribe-refused",
-          "agent-unsubscribe-title",
-          "agent-unsubscribe-detail",
           "key-ctrl",
           "key-alt",
           "key-shift",
@@ -44689,8 +44629,6 @@
           "win-book-find-label",
           "win-send",
           "win-dont-send",
-          "win-unsubscribe",
-          "win-dont-unsubscribe",
           "win-forget-program-ask",
           "win-clear-log-ask",
           "win-agent-programs",
@@ -44715,9 +44653,6 @@
         "account-security.html",
         "add-account.html",
         "address-book.html",
-        "agents-connect.html",
-        "agents-permissions.html",
-        "agents-sending.html",
         "all-inboxes.html",
         "attachments.html",
         "brand-logos.html",
@@ -45147,6 +45082,313 @@
             "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
             "since.log": "/private/tmp/inbox-agent-toggle-since.log",
             "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
+        },
+        {
+          "id": "sl-agent-additions-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-unsubscribe",
+              "ui-dont-unsubscribe"
+            ],
+            "core.ftl": [
+              "agent-level-read",
+              "agent-level-organize",
+              "agent-level-drafts",
+              "agent-level-send",
+              "agent-connect-title",
+              "agent-connect-detail",
+              "agent-reply-to",
+              "agent-reply-all-on",
+              "agent-forward-of",
+              "agent-never-written-one",
+              "agent-never-written-many",
+              "agent-send-title",
+              "agent-send-detail",
+              "agent-change-title",
+              "agent-change-allowed",
+              "agent-change-refused",
+              "agent-log-taken-back",
+              "agent-files",
+              "agent-undo-refused",
+              "agent-undo-refused-why",
+              "agent-undo-impossible",
+              "agent-undo-not-in-folder",
+              "agent-undo-not-arrived",
+              "agent-undo-sent",
+              "agent-original-not-downloaded",
+              "agent-turned-away",
+              "agent-can-nothing",
+              "agent-can-read",
+              "agent-can-organize",
+              "agent-can-drafts",
+              "agent-can-send",
+              "agent-can-list",
+              "agent-accounts",
+              "agent-access",
+              "agent-unreadable",
+              "agent-encrypted-original",
+              "agent-encrypted",
+              "agent-log-composed",
+              "agent-log-refused",
+              "agent-log-sent",
+              "agent-log-draft",
+              "agent-log-draft-replaced",
+              "agent-log-draft-discarded",
+              "agent-draft-note",
+              "agent-log-read",
+              "agent-log-unread",
+              "agent-log-flagged",
+              "agent-log-unflagged",
+              "agent-log-deleted",
+              "agent-log-moved",
+              "agent-log-junk",
+              "agent-log-not-junk",
+              "agent-log-archived",
+              "agent-log-folder",
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-title",
+              "agent-unsubscribe-detail"
+            ],
+            "windows.ftl": [
+              "win-unsubscribe",
+              "win-dont-unsubscribe"
+            ]
+          },
+          "reviewed_help": [
+            "agents-permissions.html",
+            "agents-sending.html",
+            "agents-connect.html"
+          ],
+          "changed_values": 41,
+          "files": {
+            "core/locales/sl/app.ftl": "8bab46a65c6044174e77b0375e85b89a7d38f4dc967353198ffc4f933ae869bb",
+            "core/locales/sl/core.ftl": "c6433521339100bebb520d33c3f638352e780ba69a31f45ddf995133d034e50d",
+            "core/locales/sl/windows.ftl": "df301a8bf18884695ec29cc73a44a18f951a5a47ca94d9b204860a7efa76740d",
+            "core/crates/pe-html/help/sl/agents-permissions.html": "b59412a8f38982340e822fc3dba343f8a4fcc3e6a4cb707d8bc9cfef2c25807e",
+            "core/crates/pe-html/help/sl/agents-sending.html": "17a3cf88fbfdb9006ba46d658198f97f93133ee71b5b0f342e1fbe24a7958f42",
+            "core/crates/pe-html/help/sl/agents-connect.html": "789cb85ad462802c22a216440884d72c8c7a638b5263411ab8f5a9ce2bbf5db9"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "db66872a15d644a25d303ba829e3a23e1fc6292630fdbbab2a82d0c6b9e36a7d",
+            "core/locales/en/core.ftl": "9dee06b6ab2156be41a88cd9fab1a36ebe20020891278b5ae1a03f258b16cce1",
+            "core/locales/en/windows.ftl": "8baa46684f4ae0a37d2b48948068eee4dd36865f53d3eced1c3080c592a55051",
+            "core/crates/pe-html/help/en/agents-permissions.html": "df8405481ab627c7c722977e0f03a6e4864e6e23265181ce0ca015171053be3e",
+            "core/crates/pe-html/help/en/agents-sending.html": "3b76ed19bcbfdf7c43c253c3986a5db89a73ae17b15f834d3b5bf92129404480",
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "Slovenian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 41 improved values, 21 retained good values and three complete help topics with 37 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. O/N unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and nineteen runtime/UI/rendering/reader files match the captured evidence. Global reconciliation accounts for 21,945 unmarked entries, 11,178 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,120 entries/251 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed all 58 pending agent core entries, four associated app/Windows labels and three complete help topics. Improved 41 values and retained 21 good values. Corrected queue/Outbox status, unsubscribe approval/failure, permanent own-draft removal, user save/autosave/send takeover, rolling per-program quota, optional footer, rule previews, access removal and malicious-mail instructions. Slovenian polite plural, noun permission labels, masculine past agent logs and head nouns before subjects; O/N keys and all plural branches retained. One send-dialog alt text improved against all three existing screenshots; previously reviewed draft alt and shutdown instruction preserved. No tests.",
+          "help_wording_lines_changed": 37,
+          "notice_ui_context": {
+            "status": "All3platform callers now exist in an exact uncommitted source snapshot; code and existing captures inspected. Notice linguistic review can proceed.",
+            "observation_artifact": "/private/tmp/inbox-agent-draft-ui-observation.json",
+            "sha256": "5eebd816ebaa435a5889cc02d185bb27f63b05d1ca606e32fb921a4d5ae5c40c",
+            "source_commit": "ffb7de6072c62b90d70beeb039dc4f602cec8f84",
+            "worktree": "/Users/andris/Projects/PostalExpress-mcp2",
+            "files": {
+              "app/src/app.h": "fc26b6d779f86573f54dedf4d066e4dc501687ada4f45a964504d5f8290b7b76",
+              "app/src/compose.cpp": "3a13a7daeae04b4e55e3f4302b735c0a05a6c32ee78eb1fee1481bb1c50612e2",
+              "linux/src/compose.rs": "cbf30207811e2b753be8e5f58f65c6a3616909a48b740b27413b2982de6f2260",
+              "linux/src/ui.rs": "021ce6d7444e09790f5aa37a7c1de8ee2cab3550d643859f0de072710c46acc5",
+              "mac/Sources/InboxClassic/Compose.swift": "49f202ecacc46d61e7406525f7d37589d5e87bde575e1445a0b454d6cf442f1d",
+              "mac/Sources/InboxClassic/Core.swift": "25a8a2484ac80fd7e1cc2d929b5a526da2edb3e3b56c6c10d86ae71efb195c1a",
+              "mac/Sources/InboxClassic/SecurityBar.swift": "9c1b60e76a67a53a6a84935d45e896566575e1b9b8eb068a98a40193939491b9"
+            },
+            "screenshots": [
+              {
+                "platform": "windows",
+                "path": "/Users/andris/Projects/PostalExpress-mcp2/build/ui-e2e/agents-8-draft.png",
+                "sha256": "d61c11f4287f272812764fc66872ed9f78f53516c4cd8462d68898403b6b54ca"
+              },
+              {
+                "platform": "mac",
+                "path": "/Users/andris/Projects/PostalExpress-mcp2/build/ui-e2e-mac/agents-8-draft.png",
+                "sha256": "d6db9de51c89e26564c57840d280bd4f809a463acce12933fa8666ef3989b4b8"
+              },
+              {
+                "platform": "linux",
+                "path": "/Users/andris/Projects/PostalExpress-mcp2/build/ui-e2e-linux/agents-8-draft.png",
+                "sha256": "9b349c65d21f6afa7735310ddcfe4156ce280036617a91a31c3ce95a02cd99d6"
+              },
+              {
+                "platform": "linux German narrow encrypted",
+                "path": "/Users/andris/Projects/PostalExpress-mcp2/build/ui-e2e-linux/review-agent-de-narrow-encrypt-light.png",
+                "sha256": "ab3daed3ed005f0f3854c35be613e89247795536e75587f2f837583d33d3f76e"
+              }
+            ],
+            "reviewed_behavior": [
+              "Windows OpenCompose copies PeDraftInfo.agent_note into a static owner-drawn control under recipients/attachments, above security/format bars and the message editor. DT_WORDBREAK/DT_NOPREFIX wraps and measures actual text; no mnemonic. Note persists for window lifetime.",
+              "macOS Draft.agentNote reads the core FFI string; ComposeWindow places NoteBar under the fields and above security/format bars. Wrapping NSTextField has unlimited lines, accessible text and widths updated on layout; no action. Note persists for window lifetime.",
+              "GTK agent_note calls pe_core::agents::draft_note, wraps the label with WordChar under fields and above protection/format/body. The note is informational, not a security verification badge or a send permission. No mnemonic.",
+              "Core source e5d3f046 already scopes attribution to saved drafts in the Drafts folder. The note names the program from its stored agent header. The UI retains it while the compose window stays open, even after saving; do not say the line disappears on takeover.",
+              "All seven UI/runtime files frozen by hash; unrelated e2e source work remains untouched. No application build, GUI run or test-suite run claimed."
+            ],
+            "screenshots_reviewed": "Existing captures inspected: informational attribution bar below recipient/subject fields and above editor on all3platforms. German GTK narrow/encryption capture wraps the complete notice onto2lines, distinct from the encryption warning below. These are supplied artifacts from the source worktree, not a GUI/test run of the translation checkout.",
+            "latest_screenshot_recheck": [
+              {
+                "platform": "windows",
+                "original_path": "/Users/andris/Projects/PostalExpress-mcp2/build/ui-e2e/agents-8-draft.png",
+                "observed_sha256": "d61c11f4287f272812764fc66872ed9f78f53516c4cd8462d68898403b6b54ca",
+                "status": "unchanged previously viewed capture, copied for durable evidence",
+                "snapshot": "/private/tmp/inbox-agent-draft-ui-snapshot-20261117/screenshots/windows.png"
+              },
+              {
+                "platform": "mac",
+                "original_path": "/Users/andris/Projects/PostalExpress-mcp2/build/ui-e2e-mac/agents-8-draft.png",
+                "observed_sha256": "d6db9de51c89e26564c57840d280bd4f809a463acce12933fa8666ef3989b4b8",
+                "status": "unchanged previously viewed capture, copied for durable evidence",
+                "snapshot": "/private/tmp/inbox-agent-draft-ui-snapshot-20261117/screenshots/mac.png"
+              },
+              {
+                "platform": "linux",
+                "original_path": "/Users/andris/Projects/PostalExpress-mcp2/build/ui-e2e-linux/agents-8-draft.png",
+                "observed_sha256": "9b349c65d21f6afa7735310ddcfe4156ce280036617a91a31c3ce95a02cd99d6",
+                "status": "generated capture no longer present; retain the prior explicitly recorded visual observation, not a new screenshot claim. All7 runtime source files remain byte-identical."
+              },
+              {
+                "platform": "linux German narrow encrypted",
+                "original_path": "/Users/andris/Projects/PostalExpress-mcp2/build/ui-e2e-linux/review-agent-de-narrow-encrypt-light.png",
+                "observed_sha256": "ab3daed3ed005f0f3854c35be613e89247795536e75587f2f837583d33d3f76e",
+                "status": "generated capture no longer present; retain the prior explicitly recorded visual observation, not a new screenshot claim. All7 runtime source files remain byte-identical."
+              }
+            ]
+          },
+          "context_evidence": {
+            "artifact": "/private/tmp/inbox-sl-agents-runtime.json",
+            "sha256": "1ff7b8068ad7bd10015a4d6a8d7af8e168a37ccf11ed79aa2fd3352bbee8ac2a",
+            "worktree": "/Users/andris/Projects/PostalExpress-mcp2",
+            "source_commit": "692923ae14b82e2b8209539576b4f7727c22458a",
+            "files": {
+              "core/crates/pe-core/src/agents.rs": {
+                "sha256": "86f1ca3f39d91ad8c85641ff1059b133eb08d54ea9355620cad6ce8dcdaae5ca",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-core/src/agents.rs"
+              },
+              "core/crates/pe-core/src/agents/drafts.rs": {
+                "sha256": "6118b06597946c1c825975fcaeb20c7eecf739407307605b45fe541027c12557",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-core/src/agents/drafts.rs"
+              },
+              "core/crates/pe-mcp/src/tools.rs": {
+                "sha256": "8bc910077355c026ebf0d303bd2dfba34249e41d81820d6cbe4b17ef7eade2bd",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-mcp/src/tools.rs"
+              },
+              "core/crates/pe-mcp/src/tools/drafts.rs": {
+                "sha256": "c1506ad332485ba49af8fe749935df05f7e85b4f7b15655c9ad29643ce1c21b9",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-mcp/src/tools/drafts.rs"
+              },
+              "app/src/agents.cpp": {
+                "sha256": "a03d3d2b3373311c4c15eaf53dd6fcdc0036260bd5d140f4fd023d995dc2efb0",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/app/src/agents.cpp"
+              },
+              "linux/src/agents.rs": {
+                "sha256": "408d55db859e39e7f36e3122f3f5b8cd208bd42cc46fa0b6d3c272efb15f9440",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/linux/src/agents.rs"
+              },
+              "mac/Sources/InboxClassic/Agents.swift": {
+                "sha256": "65cc89415af81e3dbc5730f01ab0d9857187d228caf7c65bd57b58af7e9a5f02",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/mac/Sources/InboxClassic/Agents.swift"
+              },
+              "core/crates/pe-core/src/lib.rs": {
+                "sha256": "9ad51bae9526051203ba5d45910648ad661c0538b6832ccb2fd9086f32ee8cdb",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-core/src/lib.rs"
+              },
+              "core/crates/pe-core/src/worker.rs": {
+                "sha256": "f5c1c28f0117606cf9b544a1d75736e84c88ad9bc53f26c7d7dda6985db8c28b",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-core/src/worker.rs"
+              },
+              "core/crates/pe-core/src/undo_send.rs": {
+                "sha256": "6fcb4c1e9f6e019cc0db2ea3e0758a77fc539e812124c2578229bfdf6784d772",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-core/src/undo_send.rs"
+              },
+              "core/crates/pe-mcp/src/relay.rs": {
+                "sha256": "f435b9ed60d18cb809e38b35b80acc89fef005b9b07fa7f77a92ca71f4f36a2f",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-mcp/src/relay.rs"
+              },
+              "core/crates/pe-mcp/src/endpoint.rs": {
+                "sha256": "6de4bef7a27e952bfea8974e1fb7d48b356a0844536d309b14025b17b8538c86",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-mcp/src/endpoint.rs"
+              },
+              "core/crates/pe-mcp/src/server.rs": {
+                "sha256": "c5a509c2f4fade38b52d2f2f09ee9bc474e46828dcc239b2d7f99c595c566896",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-mcp/src/server.rs"
+              },
+              "core/crates/pe-ffi/src/agents.rs": {
+                "sha256": "82eb4d495247272fe4a920c54c875696425668f8c66d9711b5dc8152e966c004",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-ffi/src/agents.rs"
+              },
+              "core/crates/pe-ffi/src/windows.rs": {
+                "sha256": "457a37b9519dbe8c86cd94f7844e1fb5b1b3413b89293fd490e51682e2c4de47",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-ffi/src/windows.rs"
+              },
+              "core/crates/pe-html/src/help.rs": {
+                "sha256": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/core/crates/pe-html/src/help.rs"
+              },
+              "app/src/reader.cpp": {
+                "sha256": "a63b516f6190e136f5a0d229869d70d7cd48d31802b1fed9f824f703ba991e60",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/app/src/reader.cpp"
+              },
+              "linux/src/reader.rs": {
+                "sha256": "06a3bc9efce0b9eaf80c39782a6d4d6011ee5f8a94301aded4c960a4f7d680f1",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/linux/src/reader.rs"
+              },
+              "mac/Sources/InboxClassic/Reader.swift": {
+                "sha256": "fd3bcde94ee4feaea0b91f5783306c11b4cd86062af3a8bcd273863b6d70f3fd",
+                "snapshot": "/private/tmp/inbox-sl-agents-runtime/mac/Sources/InboxClassic/Reader.swift"
+              }
+            },
+            "verified_context": [
+              "The send confirmation receives only SEND_DELAY=30. Its log is written after queueing, before delivery. Undo::Unsend checks only for the Outbox row, not delivery; manual removal can also make Undo unavailable.",
+              "Permission summaries use nouns and capitalize the first list item. Account counts are independent; Slovenian one includes 1/101, two includes 2/102, few includes 3/4/103/104. Existing numeric placeholders and exact-one unsubscribe branch are retained. The new-recipient warning handles counts greater than one and introduces the numeric count after a colon.",
+              "READ covers message listing, searches, rule inspection/query previews without actions and contact-prefix lookup. Encrypted bodies and attachments remain unavailable to agents.",
+              "Unsubscribe confirmation covers a batch, defaults to refusal and counts approved lists per program over the preceding 86400 seconds, including failed HTTP requests. Existing messages remain unchanged and no email is sent.",
+              "Only the program-owned, unmodified draft in Drafts can be changed or permanently discarded. User save/autosave or sending immediately takes it over and guards queued agent writes. Opening alone does not; independent read permissions are not revoked.",
+              "Signature text is included by default but optional. One send confirmation per program can be waiting. Send controls briefly delay activation and refusal is the default.",
+              "Connection configuration is mcpServers JSON. The relay starts the app with --background and the local channel is restricted to the current OS user. The global switch is checked on each call. GTK SwitchRow and Mac/Windows checkboxes share the setting.",
+              "The Windows unsubscribe buttons use separate O/N mnemonics and measured widths; shared Mac/Linux labels contain no ampersand. The affirmative action now uses imperative Odjavi, paired with Ne odjavi. Its additional reader link and dialog-title callers on all three platforms were inspected. The reviewed shutdown instruction is preserved."
+            ],
+            "source_issues": [
+              "English send/Undo wording overstates delivery; the blanket no-permanent-deletion help claim excludes the actual own-draft discard operation.",
+              "The quota is rolling per program; footer text is optional; email content must not be followed as instructions."
+            ],
+            "screenshots": {
+              "core/crates/pe-html/help/pictures/windows/agents-4-send.png": {
+                "sha256": "50ac47855b0e3b37726fffcaf349a02b109a504cd7624fddf56076602aee29d4",
+                "observation": "Existing English capture inspected during the preceding Slovak batch and hash reverified here: send confirmation shows one recipient, message body and a new-address warning. The Slovenian alt describes these visible elements. No new GUI run or Slovenian rendering claimed."
+              },
+              "core/crates/pe-html/help/pictures/mac/agents-4-send.png": {
+                "sha256": "1c665ca136606199ddca08029cb7f2966a8806b8e45d2888a6deea1a51662bae",
+                "observation": "Existing English capture inspected during the preceding Slovak batch and hash reverified here: send confirmation shows one recipient, message body and a new-address warning. The Slovenian alt describes these visible elements. No new GUI run or Slovenian rendering claimed."
+              },
+              "core/crates/pe-html/help/pictures/linux/agents-4-send.png": {
+                "sha256": "46ffc5f9442e869368e0445979ce1e3087756ee2fef2b4d312b465be3022842b",
+                "observation": "Existing English capture inspected during the preceding Slovak batch and hash reverified here: send confirmation shows one recipient, message body and a new-address warning. The Slovenian alt describes these visible elements. No new GUI run or Slovenian rendering claimed."
+              }
+            },
+            "tests_run": false
+          },
+          "glossary_update": {
+            "path": "core/locales/GLOSSARY.md",
+            "sha256": "4955a77bdb7cee11806321cd845ee498418aa398ee520df525d840dc0acb54f9",
+            "section": "Slovenščina (sl): agent permissions and activity"
+          },
+          "translated_alt_review": {
+            "topic": "agents-sending.html",
+            "src": "picture:agents-4-send",
+            "before": "Okno, ki sprašuje, ali naj se pošlje sporočilo, ki ga je napisal agent, z vsemi prejemniki in označenim novim naslovom",
+            "after": "Potrditev pošiljanja sporočila, ki ga je napisal agent. Prikazani so prejemnik, besedilo sporočila in opozorilo na nov naslov."
+          },
+          "validation_artifacts": {
+            "spec.json": "/private/tmp/inbox-sl-agents-spec.json",
+            "edits.json": "/private/tmp/inbox-sl-agents-edits.json",
+            "exact.json": "/private/tmp/inbox-sl-agents-exact.json",
+            "checks.json": "/private/tmp/inbox-sl-agents-checks.json",
+            "runtime.json": "/private/tmp/inbox-sl-agents-runtime.json",
+            "source-audit.json": "/private/tmp/inbox-sl-agents-source-audit.json",
+            "joins.log": "/private/tmp/inbox-sl-agents-joins.log",
+            "since.log": "/private/tmp/inbox-sl-agents-since.log",
+            "html.log": "/private/tmp/inbox-sl-agents-html.log"
           }
         }
       ]
@@ -66306,7 +66548,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Slovak structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 37 improved values, 25 retained good values and three complete help topics with 36 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. O/N unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and sixteen runtime/UI/rendering files match the captured evidence. Global reconciliation accounts for 21,883 unmarked entries, 11,135 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,132 entries/256 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+    "latest_source_audit": "Slovenian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 41 improved values, 21 retained good values and three complete help topics with 37 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. O/N unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and nineteen runtime/UI/rendering/reader files match the captured evidence. Global reconciliation accounts for 21,945 unmarked entries, 11,178 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,120 entries/251 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -117095,6 +117337,569 @@
         },
         "runtime_context_artifact": "/private/tmp/inbox-sk-agents-runtime.json",
         "runtime_context_sha256": "0701be41d93cb603dc9c4b4c34a675b19234d4b43959977882cd81e24cce7a95"
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "de5ab70db0d6cd701875f21c0e52b0c466edf5c0",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074",
+          "chore/pgp-hardening": "51d67bb4e5fb6732f5baea4b8004bc46507f1442"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/master": {
+            "merge_base": "de5ab70db0d6cd701875f21c0e52b0c466edf5c0",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "chore/pgp-hardening": {
+            "merge_base": "51d67bb4e5fb6732f5baea4b8004bc46507f1442",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          }
+        },
+        "integrated_help_source": "255205aad7e70f680909092c3167cc724618b70e",
+        "root_locale_help_settings_status": [],
+        "unmerged_non_help_path_count": 0,
+        "unmerged_non_help_paths_except_fuzz_corpora": [],
+        "guide_sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
+        "changed_source_tips_since_last_checkpoint": {
+          "origin/master": {
+            "before": "387568ad8a0ccaa5d1c4f6cc586b66c21186a534",
+            "after": "de5ab70db0d6cd701875f21c0e52b0c466edf5c0"
+          }
+        },
+        "integrated_active_key_source_check": {
+          "status": "source-only catalogs integrated and reviewed",
+          "ref": "chore/pgp-hardening",
+          "observed_source_tip": "51d67bb4e5fb6732f5baea4b8004bc46507f1442",
+          "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+          "new_catalog_entries": 28,
+          "catalog_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "new_help_topics": 0,
+          "changed_help_topics": 0,
+          "files": {},
+          "note": "New signature reason from the hardening branch: a valid signature used a key other than the active key for the From address. Exact source entry was imported in205bd846 and reviewed; current source entry still matches. Other hardening code/fuzz changes stay separate; inspect caller before review."
+        },
+        "preview_mcp_source_checks": [
+          {
+            "ref": "feat/preview-render",
+            "observed_tip": "2567d2d700c546725c6ba5468aa9b4d0dc81c06a",
+            "source_commit": "687113a325f3aaaab17784f307ccc86df4b8c061",
+            "source_files": 29,
+            "source_file_sha256": {
+              "core/locales/bg/core.ftl": "43dc4d75a55a0fa792b6d34976226d49c7158b0fdbdb92e98a55088e5623da62",
+              "core/locales/ca/core.ftl": "b0a9e91845f8068d67a614aba9a77122121a90875465a9272137552808b20928",
+              "core/locales/cs/core.ftl": "5caee113cfc0008f67c4792af63149f457723029243fb6937de5589d7a35ff83",
+              "core/locales/da/core.ftl": "8e3ff6a89174ff230a1bb21fbc631a3dddc47dbaf99805b3d491f0a774f05941",
+              "core/locales/de/core.ftl": "1c0a12d70276c443616dc9f50d80d8b2ac36fc3e17189aeb59e8fb30dd783d0b",
+              "core/locales/el/core.ftl": "9c827da4f4d3d3777ba3fdd02809eeb6a161b13439db0b774da7f5f425906066",
+              "core/locales/en/core.ftl": "56940f2b113f38b587f6acac1ed80865a92e73f6161596822bcd02e15db800a3",
+              "core/locales/es/core.ftl": "60cc61acd3ee5f71a14013f0c12fa822c0df47a706314af3345dcc5d179f6f8b",
+              "core/locales/et/core.ftl": "338071b2f1c3257bde40d78a986fc8819b8feaa0390c30669a73d75731781699",
+              "core/locales/fi/core.ftl": "6f87440104dfd5484579c555c48c3b067d31844320cadd3dc301c74677d82449",
+              "core/locales/fr/core.ftl": "6967627c63303663b7a8f1a2c1fd8736bc41b15549a797d4a2986cae32536d36",
+              "core/locales/hr/core.ftl": "5a6d8f6ff33b8356191fccf3ebe1deac854d4a5240e8cfd591dd48db3ce86b51",
+              "core/locales/hu/core.ftl": "07db76518ce65b0354314742463f69754182e7a751452f0fa65684b0be817839",
+              "core/locales/it/core.ftl": "8401c6191ada919e50047f682f90c1eb953d3028cacd86b8a2e9fe944b5d3bbc",
+              "core/locales/lt/core.ftl": "b3752f1f3581a3de8c51fee696b0fcf5f145279f3a2487ba3ca9da500dd99e37",
+              "core/locales/lv/core.ftl": "b0a70b4544a547cf70cf028cf656af0746665944a778eb1fc41b80f285482686",
+              "core/locales/nb/core.ftl": "bf57f315f85410c0bd9a8ba84da622445f895eb5f45b5d0c02642b05001752d6",
+              "core/locales/nl/core.ftl": "4df68abacca2264036d4f2689ace1cf0b59ae6073451e609d4703ac7ccb3abf5",
+              "core/locales/pl/core.ftl": "1d2b9fc5d35e1ebed2ef54661977bcd194376299911fae664c2dfc82e79805a0",
+              "core/locales/pt/core.ftl": "70cb82f3cc6a4ed36d7fe3ce107c18c7d7afdd269f70dd7fd811ff8368f32d14",
+              "core/locales/pt-BR/core.ftl": "6e330af2c1b84eb76f83d8e7dd8eb919de3ab0100b99f11fd76bdc4a9413c398",
+              "core/locales/ro/core.ftl": "c48544e49c08fbca6fa19baed73d47d20367184fec2269823dd6d90f1eddfaed",
+              "core/locales/ru/core.ftl": "d7271d713b6e46074e0d09e19627caf5eee769a5247bcabda4889f17051c20c0",
+              "core/locales/sk/core.ftl": "da05b7458ced6138dcd2c700b2fad34d58c573f44176b095b4ff4f34fe3b3ee0",
+              "core/locales/sl/core.ftl": "6e2966a4830ab1ac2fd3ec3e8909c8829e17ca1f0c6d456cade9028a3c9b47a0",
+              "core/locales/sr-Latn/core.ftl": "b8bb1429fe91dcdc72f7ef640e3d6e9be5a777f952402097edb796599431b8bb",
+              "core/locales/sv/core.ftl": "a38bd735888fa39db358306d5a5c87d4bebcf66ab7d0bf767f894728dcdd724b",
+              "core/locales/tr/core.ftl": "169d7cb61bb6aad601ed16dcc75ef8081ae1d2857f16b03f1650224e0893aaec",
+              "core/locales/uk/core.ftl": "0fdfaf0abf4ecea494dfceaf8a929d12b4dc20334c99dec02800c0d13300033d"
+            },
+            "changed_relevant_paths": [
+              "core/crates/pe-html/help/bg/agents-permissions.html",
+              "core/crates/pe-html/help/bg/agents-sending.html",
+              "core/crates/pe-html/help/ca/agents-permissions.html",
+              "core/crates/pe-html/help/ca/agents-sending.html",
+              "core/crates/pe-html/help/cs/agents-permissions.html",
+              "core/crates/pe-html/help/cs/agents-sending.html",
+              "core/crates/pe-html/help/da/agents-permissions.html",
+              "core/crates/pe-html/help/da/agents-sending.html",
+              "core/crates/pe-html/help/de/agents-permissions.html",
+              "core/crates/pe-html/help/de/agents-sending.html",
+              "core/crates/pe-html/help/el/agents-permissions.html",
+              "core/crates/pe-html/help/el/agents-sending.html",
+              "core/crates/pe-html/help/en/agents-permissions.html",
+              "core/crates/pe-html/help/en/agents-sending.html",
+              "core/crates/pe-html/help/es/agents-permissions.html",
+              "core/crates/pe-html/help/es/agents-sending.html",
+              "core/crates/pe-html/help/et/agents-permissions.html",
+              "core/crates/pe-html/help/et/agents-sending.html",
+              "core/crates/pe-html/help/fi/agents-permissions.html",
+              "core/crates/pe-html/help/fi/agents-sending.html",
+              "core/crates/pe-html/help/fr/agents-permissions.html",
+              "core/crates/pe-html/help/fr/agents-sending.html",
+              "core/crates/pe-html/help/hr/agents-permissions.html",
+              "core/crates/pe-html/help/hr/agents-sending.html",
+              "core/crates/pe-html/help/hu/agents-permissions.html",
+              "core/crates/pe-html/help/hu/agents-sending.html",
+              "core/crates/pe-html/help/it/agents-permissions.html",
+              "core/crates/pe-html/help/it/agents-sending.html",
+              "core/crates/pe-html/help/lt/agents-permissions.html",
+              "core/crates/pe-html/help/lt/agents-sending.html",
+              "core/crates/pe-html/help/lv/agents-permissions.html",
+              "core/crates/pe-html/help/lv/agents-sending.html",
+              "core/crates/pe-html/help/nb/agents-permissions.html",
+              "core/crates/pe-html/help/nb/agents-sending.html",
+              "core/crates/pe-html/help/nl/agents-permissions.html",
+              "core/crates/pe-html/help/nl/agents-sending.html",
+              "core/crates/pe-html/help/pl/agents-permissions.html",
+              "core/crates/pe-html/help/pl/agents-sending.html",
+              "core/crates/pe-html/help/pt-BR/agents-permissions.html",
+              "core/crates/pe-html/help/pt-BR/agents-sending.html",
+              "core/crates/pe-html/help/pt/agents-permissions.html",
+              "core/crates/pe-html/help/pt/agents-sending.html",
+              "core/crates/pe-html/help/ro/agents-permissions.html",
+              "core/crates/pe-html/help/ro/agents-sending.html",
+              "core/crates/pe-html/help/ru/agents-permissions.html",
+              "core/crates/pe-html/help/ru/agents-sending.html",
+              "core/crates/pe-html/help/sk/agents-permissions.html",
+              "core/crates/pe-html/help/sk/agents-sending.html",
+              "core/crates/pe-html/help/sl/agents-permissions.html",
+              "core/crates/pe-html/help/sl/agents-sending.html",
+              "core/crates/pe-html/help/sr-Latn/agents-permissions.html",
+              "core/crates/pe-html/help/sr-Latn/agents-sending.html",
+              "core/crates/pe-html/help/sv/agents-permissions.html",
+              "core/crates/pe-html/help/sv/agents-sending.html",
+              "core/crates/pe-html/help/tr/agents-permissions.html",
+              "core/crates/pe-html/help/tr/agents-sending.html",
+              "core/crates/pe-html/help/uk/agents-permissions.html",
+              "core/crates/pe-html/help/uk/agents-sending.html",
+              "core/locales/bg/app.ftl",
+              "core/locales/bg/core.ftl",
+              "core/locales/bg/windows.ftl",
+              "core/locales/ca/app.ftl",
+              "core/locales/ca/core.ftl",
+              "core/locales/ca/windows.ftl",
+              "core/locales/cs/app.ftl",
+              "core/locales/cs/core.ftl",
+              "core/locales/cs/windows.ftl",
+              "core/locales/da/app.ftl",
+              "core/locales/da/core.ftl",
+              "core/locales/da/windows.ftl",
+              "core/locales/de/app.ftl",
+              "core/locales/de/core.ftl",
+              "core/locales/de/windows.ftl",
+              "core/locales/el/app.ftl",
+              "core/locales/el/core.ftl",
+              "core/locales/el/windows.ftl",
+              "core/locales/en/app.ftl",
+              "core/locales/en/core.ftl",
+              "core/locales/en/windows.ftl",
+              "core/locales/es/app.ftl",
+              "core/locales/es/core.ftl",
+              "core/locales/es/windows.ftl",
+              "core/locales/et/app.ftl",
+              "core/locales/et/core.ftl",
+              "core/locales/et/windows.ftl",
+              "core/locales/fi/app.ftl",
+              "core/locales/fi/core.ftl",
+              "core/locales/fi/windows.ftl",
+              "core/locales/fr/app.ftl",
+              "core/locales/fr/core.ftl",
+              "core/locales/fr/windows.ftl",
+              "core/locales/hr/app.ftl",
+              "core/locales/hr/core.ftl",
+              "core/locales/hr/windows.ftl",
+              "core/locales/hu/app.ftl",
+              "core/locales/hu/core.ftl",
+              "core/locales/hu/windows.ftl",
+              "core/locales/it/app.ftl",
+              "core/locales/it/core.ftl",
+              "core/locales/it/windows.ftl",
+              "core/locales/lt/app.ftl",
+              "core/locales/lt/core.ftl",
+              "core/locales/lt/windows.ftl",
+              "core/locales/lv/app.ftl",
+              "core/locales/lv/core.ftl",
+              "core/locales/lv/windows.ftl",
+              "core/locales/nb/app.ftl",
+              "core/locales/nb/core.ftl",
+              "core/locales/nb/windows.ftl",
+              "core/locales/nl/app.ftl",
+              "core/locales/nl/core.ftl",
+              "core/locales/nl/windows.ftl",
+              "core/locales/pl/app.ftl",
+              "core/locales/pl/core.ftl",
+              "core/locales/pl/windows.ftl",
+              "core/locales/pt-BR/app.ftl",
+              "core/locales/pt-BR/core.ftl",
+              "core/locales/pt-BR/windows.ftl",
+              "core/locales/pt/app.ftl",
+              "core/locales/pt/core.ftl",
+              "core/locales/pt/windows.ftl",
+              "core/locales/ro/app.ftl",
+              "core/locales/ro/core.ftl",
+              "core/locales/ro/windows.ftl",
+              "core/locales/ru/app.ftl",
+              "core/locales/ru/core.ftl",
+              "core/locales/ru/windows.ftl",
+              "core/locales/sk/app.ftl",
+              "core/locales/sk/core.ftl",
+              "core/locales/sk/windows.ftl",
+              "core/locales/sl/app.ftl",
+              "core/locales/sl/core.ftl",
+              "core/locales/sl/windows.ftl",
+              "core/locales/sr-Latn/app.ftl",
+              "core/locales/sr-Latn/core.ftl",
+              "core/locales/sr-Latn/windows.ftl",
+              "core/locales/sv/app.ftl",
+              "core/locales/sv/core.ftl",
+              "core/locales/sv/windows.ftl",
+              "core/locales/tr/app.ftl",
+              "core/locales/tr/core.ftl",
+              "core/locales/tr/windows.ftl",
+              "core/locales/uk/app.ftl",
+              "core/locales/uk/core.ftl",
+              "core/locales/uk/windows.ftl"
+            ],
+            "new_catalog_entries": 84,
+            "changed_catalog_entries": 0,
+            "changed_help_topics": 0,
+            "validated_relevant_tree": true,
+            "inherited_upstream_verified": "65087591dc4d32bb15d66087e7026af495e2d370",
+            "note": "The immutable previously audited source tip is unchanged and is now an ancestor of GitHub master. All previously recorded source file hashes verified; no new source delta.",
+            "integrated_into_audited_upstream": "de5ab70db0d6cd701875f21c0e52b0c466edf5c0"
+          },
+          {
+            "ref": "feat/mcp-phase1",
+            "observed_tip": "9a24e99bac4d3a67006bd7f41a53a8467733532d",
+            "source_commit": "9a24e99bac4d3a67006bd7f41a53a8467733532d",
+            "source_files": 145,
+            "source_file_sha256": {
+              "core/locales/bg/core.ftl": "ef8eacd29bf115787ac04ee96de761d63225882ad971fe42ca7eac56b8be559e",
+              "core/locales/bg/windows.ftl": "28df4285eb445dba8a26b24049f8c75fb0dfe593a32c9b7c778066cd2125f776",
+              "core/locales/bg/app.ftl": "eab8164e71a94b710e2f3ca9443015fadc8a510122ec4f5ccd31f0d91aaf4119",
+              "core/locales/ca/core.ftl": "2469fa060e783ccc8fa5df50bce2216684039afd255166a9296dfd43302fdb2a",
+              "core/locales/ca/windows.ftl": "c01b1c34712fd48cd5dcd3bc3a3263110797c4b7ad954c2e3bfcdf464293962d",
+              "core/locales/ca/app.ftl": "46979883c26839921de1023bb7d36b2ef087f2e3272117681c7f73d39ba14590",
+              "core/locales/cs/core.ftl": "64da78c2a61ce1ae0834c2f91a1ca94c97562fbdd0c5b0470281477b04a03f3f",
+              "core/locales/cs/windows.ftl": "002b3ed4ff1ffd7fb8b78921b957a3cf93c2cfe070ee996a07381909452bf4b1",
+              "core/locales/cs/app.ftl": "ad00aeeabcaeeb1a154ec8cea0e3b70b0154b8305aa5cac8cdd5520dfce58aeb",
+              "core/locales/da/core.ftl": "faa7427e0cfcfeae5462a91d8741c3782c6170ae612caa5af01d48c91546470b",
+              "core/locales/da/windows.ftl": "61f89d05b510c9fdc8cb844bef55b3d5f68d55a5e9dad20285e28720189fb2b6",
+              "core/locales/da/app.ftl": "12d41770b039b03c14b551dd68bf34f48b869cef1050c26a46c8778690e8da00",
+              "core/locales/de/core.ftl": "18fd80273fb1a3d58be5ff04fb799298874266d42ea2dd6d86fbdaf7b909a079",
+              "core/locales/de/windows.ftl": "732bd090c9bdadb18112a78788ddda08f5067d2bf9dced6e1c873a0e8a2b5dd3",
+              "core/locales/de/app.ftl": "0bab1c0d16bfa01070bbeb1ba83481ecc587850f94babbeb968838ecc72267b5",
+              "core/locales/el/core.ftl": "5a60a7194ae118a4b06acd40e60da630a96b6e4d8405076b764d874e00d0079c",
+              "core/locales/el/windows.ftl": "37d023381f8bd36d022096918d100dc9442567cbe9911b0ebfa2201f0035c375",
+              "core/locales/el/app.ftl": "45c54097606708474363fb5798be8eb905f8c993a08fbcff2531abcc614c4b25",
+              "core/locales/en/core.ftl": "a2f1754ab4306997b7e93a7207b2cbf47a582a937f8ea7f1e608bda8902498af",
+              "core/locales/en/windows.ftl": "8baa46684f4ae0a37d2b48948068eee4dd36865f53d3eced1c3080c592a55051",
+              "core/locales/en/app.ftl": "1c0e8270fd8b3df65a5f3895f1306e4bc1ee0505a1cc63f4a9b6c7997746fa01",
+              "core/locales/es/core.ftl": "abe9933b053b4c905dddd32fde509c2a0eb5929a00a732ec9144b25e410b5f2f",
+              "core/locales/es/windows.ftl": "a0f493bda7d999e6e7717cadb367777151d1ab04674f218130b0b3679f9b6754",
+              "core/locales/es/app.ftl": "4849f82a60adac4bf33e2f9544da8335dcf7c53a088f588f8661fe8e60cd1bd4",
+              "core/locales/et/core.ftl": "2634f1200fb5ac29a9e10a0dbb4e2fde3fb5dcfa0cf6f404ce224842fa70bbc1",
+              "core/locales/et/windows.ftl": "c386e8b0d7f88f0e911d3cde58865f9fd147153e4fb55d1a9d4e626dc700a82d",
+              "core/locales/et/app.ftl": "9bb922d37f995ccad38a07fb9e63ff399092d01f1d898a023fbde02a7f09b80e",
+              "core/locales/fi/core.ftl": "d3f59ac42cbfbf7992d2d214cc9a1d0069277835336c9643c85e5a83cd990273",
+              "core/locales/fi/windows.ftl": "fba8803f1541f73f45c21bc789d0542957de68f354b92f23b99c87f1cfd27655",
+              "core/locales/fi/app.ftl": "76b66a08616beaeba3d13a95d4a0648307309a449000c34bf36f7641ac17aa54",
+              "core/locales/fr/core.ftl": "4f3bbb44f3751ebf80b9a85b589e172a1c752f4d7306c976bf920018b5a1fc6c",
+              "core/locales/fr/windows.ftl": "22a507c92cedc8868d959a65d541ecb75dc405f43eb2d1f9fa87d41043323372",
+              "core/locales/fr/app.ftl": "ca938cdde47b031eef2a78612e1b73f45624b270a3ebc5b88a35cdf4ef47dd42",
+              "core/locales/hr/core.ftl": "8bbe1a0106025aef7d9697bd3806b8db9f0e6d8f8851439bcc5f63ebfb84a3aa",
+              "core/locales/hr/windows.ftl": "a4cee3870cc2c78e8f6a8c51113ef46f03015780cad020211dab8feb4f9523ec",
+              "core/locales/hr/app.ftl": "6c7f16ac4b31153c56be82ed9aab0a6930f5563d8f7f45827c74262136838d37",
+              "core/locales/hu/core.ftl": "d8d5c909766906605acbb480863c6f272b6408d8b5a57eb2163bdc00e84672f3",
+              "core/locales/hu/windows.ftl": "425e173a0d098421cfb11f48a87f10429ba805f6c3fec104627d78855e8383db",
+              "core/locales/hu/app.ftl": "02e6dd9af4a7398eb1bd6498079463fbe3f83da51497b146256ebf6ef95caee8",
+              "core/locales/it/core.ftl": "4bed9867bbd670b4fa53dd104022a8ed0ad7de383664249f94bae602a5582453",
+              "core/locales/it/windows.ftl": "3fdf9d72e6b957cf5636d3bb85c148c36e3d0ee53943b733f0de20dcbbc5de6b",
+              "core/locales/it/app.ftl": "328df78779a336e59eb7ad248d97a94475144749bb0645b9b265003518de1a78",
+              "core/locales/lt/core.ftl": "2e83761cc3a1f1f242b299dacdc3124b1e6b87fc5b792cf11483902f999b9a8e",
+              "core/locales/lt/windows.ftl": "5ec9757bc25cd6d0bf3407e0827b7c6dd9f09fcc53a89dbaf148cc92fa8feec4",
+              "core/locales/lt/app.ftl": "f03a21fc34bc5bfd419ad00ed92ed2dacf3866e8d29612b818393662bd8d25ec",
+              "core/locales/lv/core.ftl": "3edf91f34de4e1a42ae2b8d46e3881ae292be831f99694b625eb564720038c29",
+              "core/locales/lv/windows.ftl": "592cd053295dd2c6ba7c36752db1a0b6da5eff9eb6dc84f56a36e39b2d42bc25",
+              "core/locales/lv/app.ftl": "474b9b10b07dcd9c980f4af66994c2c7db565ef3de37c6188f632a7ec84d037b",
+              "core/locales/nb/core.ftl": "14376984b8cd84ae12a975404b536f36baaf1c6235969378d9a7e8fbc6ec30b1",
+              "core/locales/nb/windows.ftl": "1aae135900b40149a831a8425738b1f1970785c4f7f178642b637a23fecaac36",
+              "core/locales/nb/app.ftl": "cacf1bead749c8b736ca0ac122464c713c7474871d773b125a1a623a32e62146",
+              "core/locales/nl/core.ftl": "ce9e9abc569483e0c2d0d0d10d5e5dfc5182122cfff4d7416830d8d1e711c674",
+              "core/locales/nl/windows.ftl": "837fcf2a063cfb81b50a91fe8837cde6f38f64f080a6478c1941eed2ca12195a",
+              "core/locales/nl/app.ftl": "d23dcf5058101e3c8e532c0e5feea196204c53f356acf13c01f102d8e473f3cf",
+              "core/locales/pl/core.ftl": "a1f850f0d345ca34022d3c2b42ec775b203fd2ae488c9cb39c143ef7b6a70da1",
+              "core/locales/pl/windows.ftl": "fb931d76423ac351e6ac78921873c80d689e7a41f0633d537bdc4b898d621848",
+              "core/locales/pl/app.ftl": "b50f180642afe06b064fc662862e010b91f26f11dea536affaea02961d4fab79",
+              "core/locales/pt/core.ftl": "d66225a1a0598ca4b3b1547956aef525d1218a439e6109d5ea60c26d3517c6f7",
+              "core/locales/pt/windows.ftl": "b73774eb5d961e84cde66e7d4888296a83924b13a60502b9dbaf0102f90fa71e",
+              "core/locales/pt/app.ftl": "f1cfe3e6529c5b6c9de719ca2e78fbe370d621427cd520ab1d66e77382c0cccd",
+              "core/locales/pt-BR/core.ftl": "1028e96b850515e4a2afb6aa2107414653ee892f52137d829111d68675b19fbe",
+              "core/locales/pt-BR/windows.ftl": "96316cf354adb9119eb871a5b7a35f8bdd1b43226861e11acbc4547f0ffbd361",
+              "core/locales/pt-BR/app.ftl": "58eadeda88a03825c949e9805fe61d8024aa2e946d25cf67b93859bdf2a4c22e",
+              "core/locales/ro/core.ftl": "088f98ccebd0d1a462930991391f2a9ddbd50d455b2faa247fba4320fae1688b",
+              "core/locales/ro/windows.ftl": "4c0a4538ae7af0df2a4251c7f6a066df1e41940670fcfd0f35398fad82e105bc",
+              "core/locales/ro/app.ftl": "37ded1473ba08b2499506f4d6c02b584f93e97d5412c5b111789734b32ad04fe",
+              "core/locales/ru/core.ftl": "3f5e768132bb1521bb400ab99adb82c93f7a8826a5a954108f288d8e8daf5ea6",
+              "core/locales/ru/windows.ftl": "174c80410d6c6f87e2c291c1c592ee88f5c3d2e623f09facb8b0f58ba29a0057",
+              "core/locales/ru/app.ftl": "5f517d330c403983c40678fd40d840f14ef8ac9396cf613d49744073060e93fb",
+              "core/locales/sk/core.ftl": "afd6163dcb4bb1fd9122dffaf646f7dc8fab62d4bcbf9b4fd89015a68d308604",
+              "core/locales/sk/windows.ftl": "d14942da5d908619b86c4cdfd1a35fcffa2585abe77f2ede4f08fbdb1dc5aa94",
+              "core/locales/sk/app.ftl": "c0515f4a4e956615b0bfd292e111f40b6077c24a8c5537b22518e5a365618f1c",
+              "core/locales/sl/core.ftl": "6b637ee53c7afe28c143395466dd85aa76ca8a8a861f47a6016318a0e99cf27e",
+              "core/locales/sl/windows.ftl": "ed0101ab95e6e60fb9c1dc65134614da4a58a7a6de891d707ee99649650d5d55",
+              "core/locales/sl/app.ftl": "f5ad73b73f10afac90247bde81485e74c264dfe1a3fa317bac3f7bb752402d25",
+              "core/locales/sr-Latn/core.ftl": "7df352284df7f3ab0a7986992e3afcb47284d7feef8afe0bb693d007da1b393c",
+              "core/locales/sr-Latn/windows.ftl": "c2d0ce24d380c637b94312abe27a7082989878ca43dc87bc091b9c9b9d35eee7",
+              "core/locales/sr-Latn/app.ftl": "18c294ec090afb8a4e2de60cb582b2c17b09b2ceca942f4dffd74083edef19f4",
+              "core/locales/sv/core.ftl": "870808b7995d72cdabf5fa815ed156d9b1ba0e8cbae1268d0a31ec8c3cb70f1e",
+              "core/locales/sv/windows.ftl": "7176163dac1f0736a27ae8a7e4a42191ff92a0bcab42a733f34241b7affc5704",
+              "core/locales/sv/app.ftl": "0c1865314a57d36b88532206ef180c32dc620fcdcbe021b254e9debdcde45f8a",
+              "core/locales/tr/core.ftl": "25e438a6bb901b8a616ed3424beff7dbde4db8b7fcc1e3453fdd9c5170b5733a",
+              "core/locales/tr/windows.ftl": "0ffce480bf2e3d954ee3c6b6b4acb848cf8c00864e0d15c9730f0cf0b52d78ca",
+              "core/locales/tr/app.ftl": "ae836f1a416db9b6e3800b76ffe05c33c55a2606df6a99664df54bf696f12cc8",
+              "core/locales/uk/core.ftl": "a231145d144e485e8dc8cf9b56fec8fc892ad46dd9050173967fab1276cdea96",
+              "core/locales/uk/windows.ftl": "c2a04948ac716fe22ecbfe257c6d2cf22f27010c340a8edba677334ded4895b5",
+              "core/locales/uk/app.ftl": "98d492a8e5c7540f1e75f9fc49b7524fb241371156365aa30249c9f912b39976",
+              "core/crates/pe-html/help/bg/agents-permissions.html": "9039282e4519e57d345d2db7d652590e984935d01e22e0b1003570c2784f82a4",
+              "core/crates/pe-html/help/bg/agents-sending.html": "47bcf87572b41cf6c96a9eaff9d1a53531ffdc9a3b37af3f5d035437ea835848",
+              "core/crates/pe-html/help/ca/agents-permissions.html": "c95be3c16468f96e271a9dd60e519e0ed050e0f0a37d23f0b6b868f9fc3f0cda",
+              "core/crates/pe-html/help/ca/agents-sending.html": "09aa142a712451442cfa0241907fe71a2b68cbb328a2f207dc7d3b242c2ca4bf",
+              "core/crates/pe-html/help/cs/agents-permissions.html": "f6b755d162d635d7e8bfa15f9a251f040246376379e342f1adab951413a1588b",
+              "core/crates/pe-html/help/cs/agents-sending.html": "131b08d32e0eccdfe7c2e71b4d9e98c152a4da19e5142b21b6c96d5083afc35c",
+              "core/crates/pe-html/help/da/agents-permissions.html": "2fe8feb3d60b175d7e2581ca877247deabe2baceda3c360c178899109734cb50",
+              "core/crates/pe-html/help/da/agents-sending.html": "29d70227c012ac8acbbd12628b1b3445b1a5a8d5ed68b4ee357a82a3bf64cdab",
+              "core/crates/pe-html/help/de/agents-permissions.html": "4042c3b565720e2162b2cd3b3b7c113465e09064794a65978bfcd7c1ef65cae0",
+              "core/crates/pe-html/help/de/agents-sending.html": "16cf2466fffc5720928eb8b485e70aa1d8567f38b509b7ded5003f6e91d1d2e1",
+              "core/crates/pe-html/help/el/agents-permissions.html": "92ac29fcc54870e92fb1ea97bafdfa9ce7749de8c9656e09a968a1241f54ada3",
+              "core/crates/pe-html/help/el/agents-sending.html": "ba381615e4923eaee26a66e0333e2c0312794a16e1b4c05319e48b72ff2b3a7b",
+              "core/crates/pe-html/help/en/agents-permissions.html": "325e3ae6517438aa5f69e21a46c84a06e7985950dd3366c9a6e218be96bde1e2",
+              "core/crates/pe-html/help/en/agents-sending.html": "42d3d41e34cd7ac92d286ad745c8e02a674728d1f1de0055a94c6e4d35b93f4b",
+              "core/crates/pe-html/help/es/agents-permissions.html": "0d97882f47d3b83a86d17b1a8f237586394fc30740421a6a48cd92bd598c0801",
+              "core/crates/pe-html/help/es/agents-sending.html": "c593a72fdcbad6d43efb0638cbc11e1157aac21f881eb4d582aa1824e66641e7",
+              "core/crates/pe-html/help/et/agents-permissions.html": "9c60b29e87b0031cf51cbfc139953be92455a1ccef3b7bbab99f4911c9486e79",
+              "core/crates/pe-html/help/et/agents-sending.html": "c41061928898a66d4d0c78fdf00a435c28adc600fd03faeca6cf1c0a6218202e",
+              "core/crates/pe-html/help/fi/agents-permissions.html": "51ae744901f330ee021ca414e30dfe82c4e5b48c8effe27ac7271125d3f55ca5",
+              "core/crates/pe-html/help/fi/agents-sending.html": "5154c73e5c9b39cb04a046598e9b777656330edab064c7cef918c7012a497098",
+              "core/crates/pe-html/help/fr/agents-permissions.html": "826d98488819ca0b8f9d2e2c3e81b05d3e7be67c629e4b9b5f260905bcfb5bd6",
+              "core/crates/pe-html/help/fr/agents-sending.html": "63ae313a5c1727e208e40ba209f1a687dcfd4c5dc74b87a0bd6fa8afc2a8ad16",
+              "core/crates/pe-html/help/hr/agents-permissions.html": "4595adcd6734541ca8251cdacdc7852fee859eb97fff954b1e595dd649a2f1dc",
+              "core/crates/pe-html/help/hr/agents-sending.html": "517c9111041c913b048849774df9c24b895e72865799b8166d24cc2b9946e7e2",
+              "core/crates/pe-html/help/hu/agents-permissions.html": "a8519bd821dbebbebdd60eb4ef6201d067ec41877bd8688695b354f345398152",
+              "core/crates/pe-html/help/hu/agents-sending.html": "44c7dc03f0e652ca17a6079ada1f00332a6c36cc19379a29d3ed54ab05cc0041",
+              "core/crates/pe-html/help/it/agents-permissions.html": "ff7f57a6a6796895ae34262b3c1bdbf853e85ed56d78af323c2c876b59ef25da",
+              "core/crates/pe-html/help/it/agents-sending.html": "ba967a636203f2c38d0100a5ffe7b02db3e81e5993f071da160c8e181da7add9",
+              "core/crates/pe-html/help/lt/agents-permissions.html": "0cf7d8d58297c5c1bfc215263de3ab4d5bf48e5ce956b03c37e925ca61ca914f",
+              "core/crates/pe-html/help/lt/agents-sending.html": "5b88bbc43a42b7d899208539bddb61af7f8d867a36eb46826b12e754b4336b62",
+              "core/crates/pe-html/help/lv/agents-permissions.html": "6f8760ca97d3b1f31a9541f2a37085f7475d80fe9b09b866e787dd432a648d4f",
+              "core/crates/pe-html/help/lv/agents-sending.html": "09dc8c65dfa8c96a05f75ee60db44baf0d570551b24aaa051111c05c4bf6ad86",
+              "core/crates/pe-html/help/nb/agents-permissions.html": "cf0f5acc6c1bb3b1fa9a5a6c074286a412f70a9fe6a2f00fe325e39bc59c4e82",
+              "core/crates/pe-html/help/nb/agents-sending.html": "bb1a8c45e04a31112a803f62f40754bf198d81c2fedd57802959628197d4e465",
+              "core/crates/pe-html/help/nl/agents-permissions.html": "027ea17715cf1646cf2a153c9319938ecf0281996451da998729aebf7ef7788f",
+              "core/crates/pe-html/help/nl/agents-sending.html": "940fb1788a2300f286593335dcf8ea415a91fb0d473be759096609c9fa14ea0b",
+              "core/crates/pe-html/help/pl/agents-permissions.html": "76108cba4645df64358343295a2075f55339129f9a78bd71b0635919e85b5a26",
+              "core/crates/pe-html/help/pl/agents-sending.html": "f797afa6445920d8bac0f63964b508358e107847308e1a9ff635e23e743bfb1d",
+              "core/crates/pe-html/help/pt/agents-permissions.html": "7940094b869a4ac5ba8e69b293a9dd171a6c95e0b2f596dc1a427b5f946f2ca9",
+              "core/crates/pe-html/help/pt/agents-sending.html": "cdb8a182d99126f1ab1facfb3e5ef0db6dc6d72c53857677ad089cae57144883",
+              "core/crates/pe-html/help/pt-BR/agents-permissions.html": "7046acda6ce14b5e41162d7f85c1c234f14bddbf92c7a37c6b1bc4be2c94a650",
+              "core/crates/pe-html/help/pt-BR/agents-sending.html": "74d523946ea25d217b0afb7bdcb8083c385cf8426af329d5b1b5085cee1fd79f",
+              "core/crates/pe-html/help/ro/agents-permissions.html": "78da2700bed3b3c2e94f26f297993f1fb010668bfe7f902f234ef05fdbe93b44",
+              "core/crates/pe-html/help/ro/agents-sending.html": "63ba33396aecdd816d4114ba08d9707a122a8c73347f23b5178a9646478094c4",
+              "core/crates/pe-html/help/ru/agents-permissions.html": "984309c800b68ed7327eee4d0c43de62e7b36a68cb10611a861849e804c2ed96",
+              "core/crates/pe-html/help/ru/agents-sending.html": "d5262212809f025a3f13a2a39de9e751d3dfe6e5762efa9fecaf33c3575f5c86",
+              "core/crates/pe-html/help/sk/agents-permissions.html": "cc595b8a0bef5eb3567b555eb598492bc41cbc4f67d5d226ced74df9f4441474",
+              "core/crates/pe-html/help/sk/agents-sending.html": "0e575d1f435bae8b343d8fb292612de09a58a8c3133a3be4cb482eb8954310cd",
+              "core/crates/pe-html/help/sl/agents-permissions.html": "839a3a0696a6242046580b82c9507b2d8d1bf737013364566827a6099799a6d6",
+              "core/crates/pe-html/help/sl/agents-sending.html": "dd4f378f2cdd4450761ff9c9f2e2abf65b700900283dc31a28d19ed4c1a98e54",
+              "core/crates/pe-html/help/sr-Latn/agents-permissions.html": "79b7ab1785487af3bd88dd4fe967bf7f7e5594fc7a8bf14ab5c99fc38d4e4897",
+              "core/crates/pe-html/help/sr-Latn/agents-sending.html": "2f8f85b5cd6e8a7ee745d5695f37afe6826929d4a74c2d654e18558073aaacef",
+              "core/crates/pe-html/help/sv/agents-permissions.html": "4793fa7c28706163f957ac23dfe337f4ffba23df8abdc55090396ecc7a06ea57",
+              "core/crates/pe-html/help/sv/agents-sending.html": "92bf655901d1307d73bc857a821a9476b30a78d48460b5765962edb8f3d1f347",
+              "core/crates/pe-html/help/tr/agents-permissions.html": "5b15c46d809c3b1e7f1117648d87259411cd3cefb16557418b73984b5018a348",
+              "core/crates/pe-html/help/tr/agents-sending.html": "227db0a72623466afd5b9d111900760687a5494864e8c0f81d77e79e9ad1a170",
+              "core/crates/pe-html/help/uk/agents-permissions.html": "e30564aef3b23ac3992667fc35971f02330ae41885632167e456e5b4a62842b5",
+              "core/crates/pe-html/help/uk/agents-sending.html": "85e17c9a4b5ce87645520719f7f12eebfbde05d8a51bd81d6f4a8f09ac7b8beb"
+            },
+            "changed_relevant_paths": [],
+            "new_catalog_entries": 196,
+            "changed_catalog_entries": 28,
+            "changed_help_topics": 56,
+            "validated_relevant_tree": true,
+            "inherited_upstream_verified": null,
+            "note": "The immutable previously audited source tip is unchanged and is now an ancestor of GitHub master. All previously recorded source file hashes verified; no new source delta.",
+            "integrated_into_audited_upstream": "de5ab70db0d6cd701875f21c0e52b0c466edf5c0"
+          }
+        ],
+        "source_worktree_relevant_status": {
+          "/Users/andris/Projects/PostalExpress": [],
+          "/Users/andris/Projects/PostalExpress-wave1": [],
+          "/Users/andris/Projects/PostalExpress-lang": [
+            "?? core/crates/pe-html/help/ca/",
+            "?? core/crates/pe-html/help/nb/",
+            "?? core/crates/pe-html/help/pt-BR/",
+            "?? core/crates/pe-html/help/sr-Latn/",
+            "?? core/crates/pe-html/help/tr/",
+            "?? core/locales/ca/",
+            "?? core/locales/nb/",
+            "?? core/locales/pt-BR/",
+            "?? core/locales/sr-Latn/",
+            "?? core/locales/tr/"
+          ],
+          "/Users/andris/Projects/PostalExpress-settings": [],
+          "/Users/andris/Projects/PostalExpress-pgp11": [],
+          "/Users/andris/Projects/PostalExpress-pgp7": []
+        },
+        "untracked_initial_wave1_copy_audit": {
+          "worktree": "/Users/andris/Projects/PostalExpress-lang",
+          "codes": [
+            "ca",
+            "nb",
+            "pt-BR",
+            "sr-Latn",
+            "tr"
+          ],
+          "status": "All290 files are exact copies of the already integrated initial wave1 draft snapshot; no later edits or new work. Left untouched.",
+          "source_snapshot": "cfdf55ab135d7def5ca1ce42e8603d866a33ce26",
+          "files": 290,
+          "exact_matches_initial_snapshot": 290,
+          "exact_matches_current_wave1_tip": 275,
+          "manifest_artifact": "/private/tmp/inbox-untracked-wave1-copies.json",
+          "manifest_sha256": "5e2e255d82be9f6ae6ae6b4d1433a356fbef80c6b56a9b8aa7e6b561a548a059"
+        },
+        "all_source_inventory_check": {
+          "worktrees": 46,
+          "refs": 188,
+          "artifact": "/private/tmp/inbox-sl-agents-all-sources.json",
+          "sha256": "e9953b52bbd1237482808fbb498dfe6db269fe8b0d7ff93cdf322592f84d96cc",
+          "unexpected_changes": 0,
+          "equivalent_relevant_trees": [
+            {
+              "refs": [
+                "refs/remotes/origin/release-please--branches--master--components--inbox-classic"
+              ],
+              "commit": "31701e82c04de2bf82ef5593a36262e1e2063366",
+              "audited_upstream": "387568ad8a0ccaa5d1c4f6cc586b66c21186a534",
+              "latest_audited_upstream": "de5ab70db0d6cd701875f21c0e52b0c466edf5c0",
+              "historical_upstream_ancestor_verified": true,
+              "all_relevant_paths_identical": [
+                "core/locales",
+                "core/crates/pe-html/help",
+                "core/commands.toml",
+                "core/settings.toml",
+                "core/crates/pe-i18n/src/lib.rs"
+              ],
+              "inherited_relevant_delta_paths": 1122,
+              "new_review_work": 0
+            }
+          ],
+          "recorded_worktree_changes": [],
+          "recorded_pending_refs": [],
+          "recorded_integrated_refs": [
+            {
+              "refs": [
+                "refs/heads/feat/preview-pane"
+              ],
+              "commit": "cb9716a78c1f6b32fcd1884903b368fce1640367",
+              "recorded_source_commit": "2e6a5d00d511af0a35dc61c98fc0faff48ca6b23",
+              "files_verified": 29,
+              "status": "exact recorded source-only import; linguistic review pending",
+              "integrated": true,
+              "new_catalog_entries": 0,
+              "changed_help_topics": 0
+            },
+            {
+              "refs": [
+                "refs/heads/feat/mcp-phase2a"
+              ],
+              "commit": "692923ae14b82e2b8209539576b4f7727c22458a",
+              "recorded_source_commit": "692923ae14b82e2b8209539576b4f7727c22458a",
+              "files_verified": 33,
+              "status": "exact recorded source-only import; linguistic review pending",
+              "integrated": true,
+              "new_catalog_entries": 0,
+              "changed_help_topics": 28
+            }
+          ],
+          "verified_integrated_refs": [],
+          "pending_source_integrations": []
+        },
+        "since_start_pending_catalog_entries": 1120,
+        "since_start_pending_help_passages": 251,
+        "remaining_since_omissions": [],
+        "pending_catalog_entries": 12497,
+        "pending_help_topics": 549,
+        "additional_unrecorded_work": 0,
+        "kind": "Slovenian complete agent core, additions and all three help topics",
+        "review_commit": "de5ab70db0d6cd701875f21c0e52b0c466edf5c0",
+        "validation": "Slovenian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 41 improved values, 21 retained good values and three complete help topics with 37 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. O/N unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and nineteen runtime/UI/rendering/reader files match the captured evidence. Global reconciliation accounts for 21,945 unmarked entries, 11,178 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,120 entries/251 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+        "notice_ui_source_files_verified": {
+          "app/src/app.h": "fc26b6d779f86573f54dedf4d066e4dc501687ada4f45a964504d5f8290b7b76",
+          "app/src/compose.cpp": "3a13a7daeae04b4e55e3f4302b735c0a05a6c32ee78eb1fee1481bb1c50612e2",
+          "linux/src/compose.rs": "cbf30207811e2b753be8e5f58f65c6a3616909a48b740b27413b2982de6f2260",
+          "linux/src/ui.rs": "021ce6d7444e09790f5aa37a7c1de8ee2cab3550d643859f0de072710c46acc5",
+          "mac/Sources/InboxClassic/Compose.swift": "49f202ecacc46d61e7406525f7d37589d5e87bde575e1445a0b454d6cf442f1d",
+          "mac/Sources/InboxClassic/Core.swift": "25a8a2484ac80fd7e1cc2d929b5a526da2edb3e3b56c6c10d86ae71efb195c1a",
+          "mac/Sources/InboxClassic/SecurityBar.swift": "9c1b60e76a67a53a6a84935d45e896566575e1b9b8eb068a98a40193939491b9"
+        },
+        "runtime_context_artifact": "/private/tmp/inbox-sl-agents-runtime.json",
+        "runtime_context_sha256": "1ff7b8068ad7bd10015a4d6a8d7af8e168a37ccf11ed79aa2fd3352bbee8ac2a"
       }
     ],
     "settings_source_integration": {
@@ -124859,7 +125664,7 @@
     "source_worktree_audit_policy": "At later source checkpoints also inspect uncommitted locale/help/commands/settings/registry changes in root and the wave1, more-languages, settings, hardening and compose worktrees. Do not treat the old untracked five-language copies as new work without comparing their content. All290 matched cfdf55ab exactly at the Dutch checkpoint; any future mismatch must be diffed and recorded.",
     "source_worktree_audit_helper": "/private/tmp/inbox-compose-worktree-audit.py <batch-prefix>; run after the matching source-audit helper. Verifies relevant status in all six source worktrees and exact current contents/inventory of the290 known old copies against the verified source manifest; merges evidence into the batch source-audit JSON.",
     "compose_record_helper": "/private/tmp/inbox-compose-record.py <spec.json>; use only after the language, mnemonic, exact reconstruction, global reconciliation, source/worktree/queue and HTML checks pass. It records completed work; it does not replace linguistic review or validation.",
-    "source_audit_helper": "/private/tmp/inbox-sk-agents-source-audit.py with prefix adapted; then /private/tmp/inbox-agent-picture-source-extension.py, /private/tmp/inbox-compose-worktree-audit.py, /private/tmp/inbox-agent-picture-all-source-audit.py and the batch queue audit. Await each terminal success; preserve immutable source snapshots and baselines.",
+    "source_audit_helper": "/private/tmp/inbox-sl-agents-source-audit.py with prefix adapted; then /private/tmp/inbox-agent-picture-source-extension.py, /private/tmp/inbox-compose-worktree-audit.py, /private/tmp/inbox-agent-picture-all-source-audit.py and the batch queue audit. Await each terminal success; preserve immutable source snapshots and baselines.",
     "new_source_inventory_artifact": {
       "path": "/private/tmp/inbox-new-preview-mcp-source-inventory.json",
       "sha256": "d899aee873dbe1d41681ed098ac10a2ecccf63023e1e4a2d1262771a00c2279f"
@@ -124877,10 +125682,10 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Review Slovenian agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and all three agent help topics; then sv/uk. Preserve reviewed screenshot descriptions and connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21845/804; pending 12559/552; improvements 4082. REVIEWED unchanged."
+      "next": "Review Swedish agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and all three agent help topics; then Ukrainian. Preserve reviewed screenshot descriptions and connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21907/807; pending 12497/549; improvements 4123. REVIEWED unchanged."
     },
     "preview_mcp_source_integration": {
-      "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk; remaining three agent languages and PDF previews pending",
+      "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl; remaining two agent languages and PDF previews pending",
       "review_parent": "16234beac34c13bbadb5129b1da02b90aafff53f",
       "source_commits": [
         "687113a325f3aaaab17784f307ccc86df4b8c061",
@@ -127797,14 +128602,14 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Review Slovenian agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and all three agent help topics; then sv/uk. Preserve reviewed screenshot descriptions and connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21845/804; pending 12559/552; improvements 4082. REVIEWED unchanged.",
+    "pending_phase2_resume": "Review Swedish agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and all three agent help topics; then Ukrainian. Preserve reviewed screenshot descriptions and connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21907/807; pending 12497/549; improvements 4123. REVIEWED unchanged.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
       "validation": "Handles previously audited source tips now ancestral to master only after exact recorded tip and file-hash verification. New source changes still require inspection."
     },
     "phase2_source_integration": {
-      "status": "source-only import validated; phase2 additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk; remaining three agent languages pending",
+      "status": "source-only import validated; phase2 additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl; remaining two agent languages pending",
       "review_parent": "b16d8beef42d257728a969b82238390c610ae463",
       "source_commit": "e5d3f046963b14b7b8dab54cafb4d7457ddf4438",
       "comparison_commit": "9e994df3fcd7e6115735e56cc40d56bda212bd31",
@@ -129567,8 +130372,8 @@
       ]
     },
     "agent_notice_resume": {
-      "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk",
-      "next": "Review Slovenian agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and all three agent help topics; then sv/uk. Preserve reviewed screenshot descriptions and connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.",
+      "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk/sl",
+      "next": "Review Swedish agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and all three agent help topics; then Ukrainian. Preserve reviewed screenshot descriptions and connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -131178,9 +131983,27 @@
         "changed_help_lines": 24,
         "new_full_topic_credit": 0,
         "next": "Slovak agent core/additions/shared controls and two full help topics. Preserve reviewed image alt and agents-connect shutdown instruction."
+      },
+      {
+        "status": "Published and merged into GitHub master; review branch synchronized before Slovenian.",
+        "pr": 145,
+        "url": "https://github.com/postalsys/inbox-classic/pull/145",
+        "state": "MERGED",
+        "merged_at": "2026-11-17T22:18:06Z",
+        "merge_commit": "de5ab70db0d6cd701875f21c0e52b0c466edf5c0",
+        "review_commit": "f2abf6f1374eb11d25ffd9f23bcca06ab223229f",
+        "review_branch_synchronized": true,
+        "working_tree_clean": true,
+        "local_test_suites": "not run, user instruction",
+        "automatic_ci": "not claimed passed",
+        "catalog_entries_reviewed": 62,
+        "catalog_values_improved": 37,
+        "full_help_topics_reviewed": 3,
+        "help_wording_lines_improved": 36,
+        "next": "Slovenian agent core/additions/shared controls and all three help topics. Preserve reviewed image alt and shutdown instruction."
       }
     ],
-    "source_audit_helper_sha256": "74bec7fd6fb2ef667f83795020e7fa035b0d3e63edf7f4e8e1b446f17a8e846f",
+    "source_audit_helper_sha256": "fdc0bbc4a6b9a5625a24612c809db5bca3659e4107bd741bc92e2394d005492f",
     "agent_picture_source_integration": {
       "status": "Imported and all 28 new alt passages reviewed; older prose unchanged.",
       "review_parent": "37eb82fab56e4daea45ce7e92bf68fc5d4e41d44",
@@ -131745,12 +132568,11 @@
         "/private/tmp/inbox-ru-pr139-arch-ci.log"
       ],
       "latest_observation": {
-        "master_commit": "387568ad8a0ccaa5d1c4f6cc586b66c21186a534",
-        "master_run": 44186384808,
-        "master_ci_status": "queued",
-        "prior_russian_run": 44185058393,
-        "prior_russian_ci_conclusion": "cancelled",
-        "note": "Existing automatic runs inspected only. No suite was started locally or manually in GitHub, and no new full CI pass is claimed."
+        "master_commit": "de5ab70db0d6cd701875f21c0e52b0c466edf5c0",
+        "master_run": 44188688476,
+        "master_ci_status": "pending",
+        "master_ci_conclusion": "",
+        "note": "Existing automatic run inspected only. No suite started locally or manually in GitHub; no full CI pass claimed."
       }
     },
     "completed_context_observations": [
@@ -140276,10 +141098,10 @@
         "pl",
         "ro",
         "ru",
-        "sk"
+        "sk",
+        "sl"
       ],
       "pending_languages": [
-        "sl",
         "sv",
         "uk"
       ],
@@ -140291,7 +141113,7 @@
         "core/crates/pe-core/src/lib.rs::Core::outbox_delete: removes queued message without sending",
         "core/crates/pe-core/src/agents.rs::Core::send_for_agent logs AgentLogSent when queuing with SEND_DELAY"
       ],
-      "validation": "The Outbox correction is complete in 25 languages. Slovenian, Swedish and Ukrainian remain pending. Slovak structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 37 improved values, 25 retained good values and three complete help topics with 36 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. O/N unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and sixteen runtime/UI/rendering files match the captured evidence. Global reconciliation accounts for 21,883 unmarked entries, 11,135 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,132 entries/256 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+      "validation": "The Outbox correction is complete in 26 languages. Swedish and Ukrainian remain pending. Slovenian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 41 improved values, 21 retained good values and three complete help topics with 37 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. O/N unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and nineteen runtime/UI/rendering/reader files match the captured evidence. Global reconciliation accounts for 21,945 unmarked entries, 11,178 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,120 entries/251 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
       "language_reviews": {
         "lt": {
           "batch": "lt-agent-core-round2",
@@ -140382,6 +141204,22 @@
           "combined_catalog_entries_reviewed": 62,
           "combined_changed_values": 37,
           "combined_help_wording_lines_changed": 36
+        },
+        "sl": {
+          "batch": "sl-agent-additions-round2",
+          "catalog_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          },
+          "help_topics": [],
+          "validation": "Slovenian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 41 improved values, 21 retained good values and three complete help topics with 37 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. O/N unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and nineteen runtime/UI/rendering/reader files match the captured evidence. Global reconciliation accounts for 21,945 unmarked entries, 11,178 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,120 entries/251 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "note": "Context counts overlap the one 62-entry/three-topic batch and must not be added to overall totals.",
+          "entries": 1,
+          "changed_values": 1,
+          "combined_catalog_entries_reviewed": 62,
+          "combined_changed_values": 41,
+          "combined_help_wording_lines_changed": 37
         }
       },
       "validation_history": [
@@ -140408,6 +141246,10 @@
         {
           "checkpoint": "387568ad8a0ccaa5d1c4f6cc586b66c21186a534",
           "validation": "The Outbox correction is complete in 24 languages. Slovak, Slovenian, Swedish and Ukrainian remain pending. Russian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 30 improved values, 32 retained good values and three complete help topics with 38 changed wording lines. All untargeted values, the reviewed approval log and screenshot alt description remain unchanged. Tags, attributes, controls, platform branches, literal keys, variables, plural branches, mnemonic counts and generated IDs are preserved. О/Н unsubscribe keys are distinct; shared Mac/Linux labels remain plain. Help joins with actual labels were inspected across all three platforms. Seven notice UI files and sixteen runtime/UI/rendering files match the captured evidence, including immediate user takeover on save or send and guards against queued agent changes. Global reconciliation accounts for 21,821 unmarked entries, 11,081 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,144 entries/243 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged."
+        },
+        {
+          "checkpoint": "de5ab70db0d6cd701875f21c0e52b0c466edf5c0",
+          "validation": "The Outbox correction is complete in 25 languages. Slovenian, Swedish and Ukrainian remain pending. Slovak structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 37 improved values, 25 retained good values and three complete help topics with 36 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. O/N unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and sixteen runtime/UI/rendering files match the captured evidence. Global reconciliation accounts for 21,883 unmarked entries, 11,135 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,132 entries/256 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged."
         }
       ]
     },
@@ -140907,7 +141749,6 @@
       "status": "pending",
       "review_parent": "16234beac34c13bbadb5129b1da02b90aafff53f",
       "pending_languages": [
-        "sl",
         "sv",
         "uk"
       ],
@@ -140936,7 +141777,8 @@
         "pl",
         "ro",
         "ru",
-        "sk"
+        "sk",
+        "sl"
       ],
       "integration_validation": "All28 static language checks passed except27343 expected removed/partial-mark diagnostics. Exact reconstruction verifies145 catalog/help paths;290 new entries including English and every unrelated value/comment/passage preserved. Help tag/control additions match English, literal keys and prior translated alt text retained. Generated C/Swift enums match all1403 English IDs in order. Offline pe-ffi build passed in8.95s in separate cargo-translation-review target; no test suite. Global reconciliation:21290 unmarked messages,10651 help lines,14 verified baseline pairs; latest file/source hashes match. Since-start1161 entries/277 passages and full28-language pending inventories match. HTML regenerated; git diff --check passes. Fresh fetch, seven primary refs, both new source snapshots,42worktrees/183refs and290 known old copies rechecked with no unrecorded work.",
       "language_reviews": {
@@ -141609,6 +142451,36 @@
           "combined_catalog_entries_reviewed": 62,
           "combined_changed_values": 37,
           "combined_help_wording_lines_changed": 36
+        },
+        "sl": {
+          "batch": "sl-agent-additions-round2",
+          "catalog_ids": {
+            "app.ftl": [
+              "ui-dont-unsubscribe"
+            ],
+            "core.ftl": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-title",
+              "agent-unsubscribe-detail",
+              "agent-level-organize"
+            ],
+            "windows.ftl": [
+              "win-unsubscribe",
+              "win-dont-unsubscribe"
+            ]
+          },
+          "help_topics": [
+            "agents-permissions.html",
+            "agents-sending.html"
+          ],
+          "validation": "Slovenian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 41 improved values, 21 retained good values and three complete help topics with 37 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. O/N unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and nineteen runtime/UI/rendering/reader files match the captured evidence. Global reconciliation accounts for 21,945 unmarked entries, 11,178 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,120 entries/251 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "note": "Context counts overlap the one 62-entry/three-topic batch and must not be added to overall totals.",
+          "entries": 8,
+          "changed_values": 5,
+          "combined_catalog_entries_reviewed": 62,
+          "combined_changed_values": 41,
+          "combined_help_wording_lines_changed": 37
         }
       },
       "mail_instruction_warning_followup": {
@@ -141639,7 +142511,8 @@
           "pl",
           "ro",
           "ru",
-          "sk"
+          "sk",
+          "sl"
         ],
         "corrected_languages": [
           "fr",
@@ -141650,7 +142523,8 @@
           "pl",
           "ro",
           "ru",
-          "sk"
+          "sk",
+          "sl"
         ],
         "next": "Inspect this warning when reviewing each remaining language’s agent help. If its older unmarked wording misstates the instruction, explicitly reopen only that clause and record before/after, as in French. The affected help topics are already pending; no extra scope counted.",
         "corrections": {
@@ -141707,6 +142581,13 @@
             "path": "core/crates/pe-html/help/sk/agents-permissions.html",
             "before": "Poštu píšu iní ľudia a správa sa môže pokúsiť prehovoriť agenta, aby vašu poštu preposlal alebo odstránil. Inbox Classic pred agentmi skryje text, ktorý správa skrýva pred vami, a oznámi im, že pošta nie sú pokyny. Agenta sa aj tak dá oklamať. Povoľte iba to, čo potrebujete.",
             "after": "Cudzie správy môžu obsahovať pokyny určené na oklamanie agenta, napríklad žiadosť o preposlanie alebo odstránenie vašej pošty. Inbox Classic pred agentmi skrýva text, ktorý vám správa nezobrazuje, a upozorňuje ich, aby obsah pošty nepovažovali za pokyny na vykonanie. Agenta však možno aj tak oklamať. Povoľte iba potrebné činnosti.",
+            "scope": "Already-pending full topic; no additional scope."
+          },
+          "sl": {
+            "batch": "sl-agent-additions-round2",
+            "path": "core/crates/pe-html/help/sl/agents-permissions.html",
+            "before": "Pošto pišejo drugi ljudje in sporočilo lahko poskuša agenta pregovoriti, da posreduje ali izbriše vašo pošto. Inbox Classic pred agenti skrije besedilo, ki ga sporočilo skriva pred vami, in jim pove, da pošta ni navodilo. Agenta je še vedno mogoče preslepiti. Dovolite samo tisto, kar potrebujete.",
+            "after": "Tuja sporočila lahko vsebujejo navodila, namenjena zavajanju agenta, na primer zahtevo za posredovanje ali brisanje vaše pošte. Inbox Classic pred agenti skrije besedilo, ki vam ga sporočilo ne prikaže, in jih opozori, naj vsebine pošte ne obravnavajo kot navodil za dejanja. Agenta je kljub temu mogoče preslepiti. Dovolite le potrebna dejanja.",
             "scope": "Already-pending full topic; no additional scope."
           }
         }
@@ -142523,7 +143404,6 @@
       "source_checkpoint": "e5d3f046963b14b7b8dab54cafb4d7457ddf4438",
       "review_parent": "b16d8beef42d257728a969b82238390c610ae463",
       "pending_languages": [
-        "sl",
         "sv",
         "uk"
       ],
@@ -142552,7 +143432,8 @@
         "pl",
         "ro",
         "ru",
-        "sk"
+        "sk",
+        "sl"
       ],
       "retained_help_reviews": {
         "core/crates/pe-html/help/bg/agents-permissions.html": {
@@ -144202,6 +145083,27 @@
           "combined_catalog_entries_reviewed": 62,
           "combined_changed_values": 37,
           "combined_help_wording_lines_changed": 36
+        },
+        "sl": {
+          "batch": "sl-agent-additions-round2",
+          "catalog_ids": {
+            "core.ftl": [
+              "agent-draft-note",
+              "agent-log-draft-discarded",
+              "agent-log-draft-replaced"
+            ]
+          },
+          "help_topics": [
+            "agents-permissions.html",
+            "agents-sending.html"
+          ],
+          "validation": "Slovenian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 41 improved values, 21 retained good values and three complete help topics with 37 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. O/N unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and nineteen runtime/UI/rendering/reader files match the captured evidence. Global reconciliation accounts for 21,945 unmarked entries, 11,178 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,120 entries/251 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "note": "Context counts overlap the one 62-entry/three-topic batch and must not be added to overall totals.",
+          "entries": 3,
+          "changed_values": 2,
+          "combined_catalog_entries_reviewed": 62,
+          "combined_changed_values": 41,
+          "combined_help_wording_lines_changed": 37
         }
       }
     },
@@ -145267,7 +146169,6 @@
       ],
       "pending_languages": [],
       "whole_topic_still_pending_languages": [
-        "sl",
         "sv",
         "uk"
       ],
@@ -145367,7 +146268,6 @@
         "lv",
         "pl",
         "ro",
-        "sl",
         "sv",
         "uk"
       ],
