@@ -5,7 +5,9 @@
 
 use std::collections::{BTreeMap, HashMap};
 
+use pe_testkit::Rng;
 use rusqlite::params;
+use rusqlite::types::Value;
 
 use crate::counts::RECOUNT;
 use crate::{
@@ -13,36 +15,34 @@ use crate::{
     Show, Sort, SortField, Store, ThreadMark,
 };
 
-/// A small deterministic generator
-struct Rng(u64);
-
-impl Rng {
-    fn next(&mut self) -> u64 {
-        self.0 ^= self.0 << 13;
-        self.0 ^= self.0 >> 7;
-        self.0 ^= self.0 << 17;
-        self.0
-    }
-
-    fn below(&mut self, n: u64) -> u64 {
-        self.next() % n.max(1)
-    }
-
-    fn chance(&mut self, percent: u64) -> bool {
-        self.below(100) < percent
-    }
-
-    fn pick<'a, T>(&mut self, list: &'a [T]) -> &'a T {
-        &list[self.below(list.len() as u64) as usize]
-    }
-}
-
 /// `f` with every list read from its messages, as before anything was kept
 fn recounted<T>(f: impl FnOnce() -> T) -> T {
     RECOUNT.with(|r| r.set(true));
     let found = f();
     RECOUNT.with(|r| r.set(false));
     found
+}
+
+/// The rows `sql` reads, every column
+fn rows(db: &rusqlite::Connection, sql: &str) -> Vec<Vec<Value>> {
+    let mut statement = db.prepare(sql).unwrap();
+    let columns = statement.column_count();
+    statement
+        .query_map([], |row| (0..columns).map(|i| row.get(i)).collect())
+        .unwrap()
+        .map(Result::unwrap)
+        .collect()
+}
+
+/// What the store keeps: the folders' counts and the conversations
+fn kept(db: &rusqlite::Connection) -> (Vec<Vec<Value>>, Vec<Vec<Value>>) {
+    (
+        rows(
+            db,
+            "SELECT id, total, unread, flagged, threads FROM folders ORDER BY id",
+        ),
+        rows(db, "SELECT * FROM conversations ORDER BY folder_id, thread_id"),
+    )
 }
 
 /// The store under test, with what the test knows of it
@@ -91,7 +91,7 @@ impl World {
         }
         World {
             store,
-            rng: Rng(seed | 1),
+            rng: Rng::new(seed),
             accounts,
             ids: Vec::new(),
             next_uid: HashMap::new(),
@@ -183,191 +183,191 @@ impl World {
         }
     }
 
-    /// One random write
+    /// One random write, of every kind: what the sync, the user's commands and the background workers write
     fn write(&mut self) {
         let folders = self.folders();
         let folder = *self.rng.pick(&folders);
         let stored = self.stored(folder);
         let one = (!stored.is_empty()).then(|| *self.rng.pick(&stored));
-        match self.rng.below(100) {
-            // new mail, a few at a time, sometimes with one stored before again (its flags updated)
-            0..=34 => {
-                let mut batch = Vec::new();
-                for _ in 0..1 + self.rng.below(4) {
-                    let uid = self.next_uid.entry(folder).or_insert(1);
-                    let current = *uid;
-                    *uid += 1 + self.rng.below(2);
-                    batch.push(self.message(current));
-                }
-                if let Some((_, uid)) = one
-                    && self.rng.chance(30)
-                {
-                    let mut again = self.message(uid);
-                    again.subject = "never written".into();
-                    batch.push(again);
-                }
-                self.store.add_messages(folder, &batch).unwrap();
+        match (self.rng.below(100), one) {
+            (0..=34, _) => self.new_mail(folder, one),
+            (35..=49, Some((folder, uid))) => {
+                let flags = self.flags();
+                self.store.set_flags(folder, uid, &flags, None).unwrap();
             }
-            35..=49 => {
-                if let Some((folder, uid)) = one {
-                    let flags = self.flags();
-                    self.store.set_flags(folder, uid, &flags, None).unwrap();
-                }
+            (50..=56, Some((folder, uid))) => {
+                let flag = *self.rng.pick(&["\\Seen", "\\Flagged", "\\Answered"]);
+                let on = self.rng.chance(50);
+                self.store.set_flag(folder, uid, flag, on).unwrap();
             }
-            50..=56 => {
-                if let Some((folder, uid)) = one {
-                    let flag = *self.rng.pick(&["\\Seen", "\\Flagged", "\\Answered"]);
-                    let on = self.rng.chance(50);
-                    self.store.set_flag(folder, uid, flag, on).unwrap();
-                }
-            }
-            57..=60 => {
-                let uids: Vec<u64> = stored.iter().filter(|_| self.rng.chance(40)).map(|s| s.1).collect();
+            (57..=60, _) => {
+                let uids = self.some_of(&stored, 40);
                 self.store
                     .change_flags_many(folder, &uids, &["\\Flagged"], &["\\Seen"])
                     .unwrap();
             }
-            61..=63 => {
+            (61..=63, _) => {
                 self.store.mark_all_seen(folder).unwrap();
             }
-            64..=75 => {
-                let uids: Vec<u64> = stored.iter().filter(|_| self.rng.chance(25)).map(|s| s.1).collect();
+            (64..=75, _) => {
+                let uids = self.some_of(&stored, 25);
                 self.store.remove_messages(folder, &uids).unwrap();
             }
-            // References fetched later join conversations
-            76..=80 => {
-                if let Some((folder, uid)) = one
-                    && !self.ids.is_empty()
-                {
-                    let id = self.store.message(folder, uid).unwrap().unwrap().id;
-                    let parent = self.rng.pick(&self.ids).clone();
-                    self.store.set_references(id, &[parent]).unwrap();
-                }
-            }
-            // as mail stored before conversations were kept, threaded again later
-            81..=82 => {
-                if let Some((folder, uid)) = one {
-                    self.store
-                        .db
-                        .execute(
-                            "UPDATE messages SET thread_id = -id WHERE folder_id = ?1 AND uid = ?2",
-                            params![folder, uid],
-                        )
-                        .unwrap();
-                    let account = self.store.folder(folder).unwrap().account_id;
-                    self.store.thread_unthreaded(account, 3).unwrap();
-                }
-            }
-            // what it is placed by changed in place
-            83..=85 => {
-                if let Some((folder, uid)) = one {
-                    let (received, date) = (
-                        1000 + self.rng.below(60) as i64 * 10,
-                        990 + self.rng.below(70) as i64 * 10,
-                    );
-                    self.store
-                        .db
-                        .execute(
-                            "UPDATE messages SET internal_date = ?3, date = ?4, size = ?5 WHERE folder_id = ?1 AND uid = ?2",
-                            params![folder, uid, received, date, self.rng.below(5) as i64 * 100],
-                        )
-                        .unwrap();
-                }
-            }
-            86..=88 => {
-                if let Some((folder, uid)) = one
-                    && let Some(thread) = self.store.message(folder, uid).unwrap().unwrap().info.thread_id
-                {
-                    let account = self.store.folder(folder).unwrap().account_id;
-                    let mark = *self
-                        .rng
-                        .pick(&[ThreadMark::None, ThreadMark::Watch, ThreadMark::Ignore]);
-                    self.store.set_thread_mark(account, thread, mark).unwrap();
-                }
-            }
-            89..=90 => {
+            (76..=80, Some(at)) => self.join_conversations(at),
+            (81..=82, Some(at)) => self.thread_again(at),
+            (83..=85, Some(at)) => self.redate(at),
+            (86..=88, Some(at)) => self.mark_conversation(at),
+            (89..=90, _) => {
                 if self.rng.chance(50) {
                     self.store.reset_folder(folder, Some(self.rng.below(9))).unwrap();
                 }
             }
-            // a folder gone from the server, and back
-            91..=92 => {
-                let index = self.rng.below(self.accounts.len() as u64) as usize;
-                let mut list = folder_list(index);
-                list.remove(1 + self.rng.below(list.len() as u64 - 1) as usize);
-                self.store.set_folders(self.accounts[index], &list).unwrap();
-                self.store
-                    .set_folders(self.accounts[index], &folder_list(index))
-                    .unwrap();
-            }
-            93 => {
-                // an account removed and added again
-                if self.rng.chance(30) {
-                    let index = self.rng.below(self.accounts.len() as u64) as usize;
-                    self.store.remove_account(self.accounts[index]).unwrap();
-                    let email = format!("again{}@example.net", self.rng.next());
-                    let account = self.store.add_account(&AccountSettings::example(&email)).unwrap();
-                    self.store.set_folders(account, &folder_list(index)).unwrap();
-                    self.accounts[index] = account;
-                }
-            }
-            // the same transaction rolled back: nothing of it stays
-            _ => {
-                let mut batch = Vec::new();
-                let uid = *self.next_uid.entry(folder).or_insert(1);
-                batch.push(self.message(uid + 1000));
-                let _: Result<()> = self.store.atomic(|| {
-                    self.store.add_messages(folder, &batch)?;
-                    if let Some((folder, uid)) = one {
-                        self.store.remove_messages(folder, &[uid])?;
-                    }
-                    Err(rusqlite::Error::QueryReturnedNoRows)
-                });
-            }
+            (91..=92, _) => self.folder_gone_and_back(),
+            (93, _) => self.account_removed_and_added(),
+            (94.., _) => self.rolled_back(folder, one),
+            _ => {}
         }
+    }
+
+    /// The UIDs of about `percent` in a hundred of `stored`
+    fn some_of(&mut self, stored: &[(FolderId, u64)], percent: u64) -> Vec<u64> {
+        stored
+            .iter()
+            .filter(|_| self.rng.chance(percent))
+            .map(|s| s.1)
+            .collect()
+    }
+
+    /// New mail, a few at a time, sometimes with one stored before again (only its flags change)
+    fn new_mail(&mut self, folder: FolderId, one: Option<(FolderId, u64)>) {
+        let mut batch = Vec::new();
+        for _ in 0..1 + self.rng.below(4) {
+            let uid = self.next_uid.entry(folder).or_insert(1);
+            let current = *uid;
+            *uid += 1 + self.rng.below(2);
+            batch.push(self.message(current));
+        }
+        if let Some((_, uid)) = one
+            && self.rng.chance(30)
+        {
+            let mut again = self.message(uid);
+            again.subject = "never written".into();
+            batch.push(again);
+        }
+        self.store.add_messages(folder, &batch).unwrap();
+    }
+
+    /// References fetched later join conversations
+    fn join_conversations(&mut self, (folder, uid): (FolderId, u64)) {
+        if self.ids.is_empty() {
+            return;
+        }
+        let id = self.store.message(folder, uid).unwrap().unwrap().id;
+        let parent = self.rng.pick(&self.ids).clone();
+        self.store.set_references(id, &[parent]).unwrap();
+    }
+
+    /// As mail stored before conversations were kept, threaded again later
+    fn thread_again(&mut self, (folder, uid): (FolderId, u64)) {
+        self.store
+            .db
+            .execute(
+                "UPDATE messages SET thread_id = -id WHERE folder_id = ?1 AND uid = ?2",
+                params![folder, uid],
+            )
+            .unwrap();
+        let account = self.store.folder(folder).unwrap().account_id;
+        self.store.thread_unthreaded(account, 3).unwrap();
+    }
+
+    /// What it is placed by changed in place
+    fn redate(&mut self, (folder, uid): (FolderId, u64)) {
+        let received = 1000 + self.rng.below(60) as i64 * 10;
+        let date = 990 + self.rng.below(70) as i64 * 10;
+        let size = self.rng.below(5) as i64 * 100;
+        self.store
+            .db
+            .execute(
+                "UPDATE messages SET internal_date = ?3, date = ?4, size = ?5 WHERE folder_id = ?1 AND uid = ?2",
+                params![folder, uid, received, date, size],
+            )
+            .unwrap();
+    }
+
+    /// Watch or Ignore Conversation, or neither
+    fn mark_conversation(&mut self, (folder, uid): (FolderId, u64)) {
+        let Some(thread) = self.store.message(folder, uid).unwrap().unwrap().info.thread_id else {
+            return;
+        };
+        let account = self.store.folder(folder).unwrap().account_id;
+        let mark = *self
+            .rng
+            .pick(&[ThreadMark::None, ThreadMark::Watch, ThreadMark::Ignore]);
+        self.store.set_thread_mark(account, thread, mark).unwrap();
+    }
+
+    /// A folder gone from the server, with its messages, and back
+    fn folder_gone_and_back(&mut self) {
+        let index = self.rng.below(self.accounts.len() as u64) as usize;
+        let mut list = folder_list(index);
+        list.remove(1 + self.rng.below(list.len() as u64 - 1) as usize);
+        self.store.set_folders(self.accounts[index], &list).unwrap();
+        self.store
+            .set_folders(self.accounts[index], &folder_list(index))
+            .unwrap();
+    }
+
+    /// An account removed with all its mail, and added again
+    fn account_removed_and_added(&mut self) {
+        if !self.rng.chance(30) {
+            return;
+        }
+        let index = self.rng.below(self.accounts.len() as u64) as usize;
+        self.store.remove_account(self.accounts[index]).unwrap();
+        let email = format!("again{}@example.net", self.rng.number());
+        let account = self.store.add_account(&AccountSettings::example(&email)).unwrap();
+        self.store.set_folders(account, &folder_list(index)).unwrap();
+        self.accounts[index] = account;
+    }
+
+    /// Writes rolled back: nothing of them stays
+    fn rolled_back(&mut self, folder: FolderId, one: Option<(FolderId, u64)>) {
+        let uid = *self.next_uid.entry(folder).or_insert(1);
+        let batch = [self.message(uid + 1000)];
+        let _: Result<()> = self.store.atomic(|| {
+            self.store.add_messages(folder, &batch)?;
+            if let Some((folder, uid)) = one {
+                self.store.remove_messages(folder, &[uid])?;
+            }
+            Err(rusqlite::Error::QueryReturnedNoRows)
+        });
     }
 
     /// The folders' counts and the conversations kept equal those counted from the messages
     fn check_kept(&self) {
         let db = &self.store.db;
-        let rows = |sql: &str| -> Vec<Vec<rusqlite::types::Value>> {
-            let mut statement = db.prepare(sql).unwrap();
-            let columns = statement.column_count();
-            statement
-                .query_map([], |row| (0..columns).map(|i| row.get(i)).collect())
-                .unwrap()
-                .map(Result::unwrap)
-                .collect()
-        };
         assert_eq!(
-            rows("SELECT id, total, unread, flagged, threads FROM folders ORDER BY id"),
             rows(
-                "SELECT f.id, (SELECT COUNT(*) FROM messages m WHERE m.folder_id = f.id), \
-                 (SELECT COUNT(*) FROM messages m WHERE m.folder_id = f.id AND m.seen = 0), \
-                 (SELECT COUNT(*) FROM messages m WHERE m.folder_id = f.id \
-                  AND instr(' ' || m.flags || ' ', ' \\Flagged ') > 0), \
-                 (SELECT COUNT(DISTINCT thread_id) FROM messages m WHERE m.folder_id = f.id) \
-                 FROM folders f ORDER BY f.id"
+                db,
+                "SELECT id, total, unread, flagged, threads FROM folders ORDER BY id"
+            ),
+            rows(
+                db,
+                concat!(
+                    "SELECT f.id, (SELECT COUNT(*) FROM messages m WHERE m.folder_id = f.id), \
+                     (SELECT COUNT(*) FROM messages m WHERE m.folder_id = f.id AND m.seen = 0), \
+                     (SELECT COUNT(*) FROM messages m WHERE m.folder_id = f.id AND ",
+                    is_flagged!("m."),
+                    "), (SELECT COUNT(DISTINCT thread_id) FROM messages m WHERE m.folder_id = f.id) \
+                     FROM folders f ORDER BY f.id"
+                )
             ),
             "the folders' counts"
         );
         // as the migration counts them
         assert_eq!(
-            rows("SELECT * FROM conversations ORDER BY folder_id, thread_id"),
-            rows(
-                "SELECT folder_id, thread_id, COUNT(*), SUM(seen = 0), \
-                 SUM(instr(' ' || lower(flags) || ' ', ' \\flagged ') > 0), \
-                 MAX(COALESCE(MIN(date, internal_date), date, internal_date)), MAX(internal_date), \
-                 MAX(CASE r WHEN 1 THEN id END), \
-                 MAX(CASE r WHEN 1 THEN COALESCE(internal_date, date, -9223372036854775807) END), \
-                 MAX(CASE r WHEN 1 THEN uid END), \
-                 MAX(CASE r WHEN 1 THEN COALESCE(sort_from, CASE from_name WHEN '' THEN from_address \
-                 ELSE from_name END) END), \
-                 MAX(CASE r WHEN 1 THEN COALESCE(sort_subject, subject) END), MAX(CASE r WHEN 1 THEN size END) \
-                 FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY folder_id, thread_id \
-                 ORDER BY COALESCE(internal_date, date, -9223372036854775807), uid, id) AS r FROM messages) \
-                 GROUP BY folder_id, thread_id ORDER BY folder_id, thread_id"
-            ),
+            rows(db, "SELECT * FROM conversations ORDER BY folder_id, thread_id"),
+            rows(db, concat!(conversations_counted!(), " ORDER BY folder_id, thread_id")),
             "the conversations"
         );
         let flagged = Search {
@@ -448,14 +448,29 @@ impl World {
     /// Every call of the list reads what it read from the messages: rows, counts, places, neighbours, Next Unread and
     /// pages read from a row next to them
     fn check_list(&mut self, search: &Search, sort: Sort) {
-        let store = &self.store;
         let what = format!("{search:?} {sort:?}");
-        let all = store.search(search, sort, 0, 10_000).unwrap();
+        let all = self.store.search(search, sort, 0, 10_000).unwrap();
         assert_eq!(
             all,
-            recounted(|| store.search(search, sort, 0, 10_000).unwrap()),
+            recounted(|| self.store.search(search, sort, 0, 10_000).unwrap()),
             "{what}"
         );
+        self.check_counts(search, &all, &what);
+        let members: Vec<MessageRef> = self
+            .store
+            .search(&search.ungrouped(), sort, 0, 10_000)
+            .unwrap()
+            .iter()
+            .map(Message::at)
+            .collect();
+        self.check_places(search, sort, &all, &members, &what);
+        self.check_walks(search, sort, &all, &members, &what);
+        self.check_anchored_pages(search, sort, &all, &what);
+    }
+
+    /// The counts of the list `all`, Select All's numbers and what Expand All opens
+    fn check_counts(&self, search: &Search, all: &[Message], what: &str) {
+        let store = &self.store;
         let counted = store.count_search(search).unwrap();
         assert_eq!(counted, recounted(|| store.count_search(search).unwrap()), "{what}");
         assert_eq!(store.count_rows(search).unwrap(), all.len() as u64, "{what}");
@@ -477,8 +492,12 @@ impl World {
             before.sort_unstable();
             assert_eq!(replies, before, "{what}");
         }
+    }
 
-        // each message's row, read off the rows: a collapsed one stands for its conversation's messages
+    /// Each message's row in the list `all` (its messages `members`): one by one, and several at once
+    fn check_places(&mut self, search: &Search, sort: Sort, all: &[Message], members: &[MessageRef], what: &str) {
+        let store = &self.store;
+        // read off the rows: a collapsed one stands for its conversation's messages
         let mut row_of: BTreeMap<MessageRef, u64> = BTreeMap::new();
         for (index, row) in all.iter().enumerate() {
             match row.thread.filter(|t| t.collapsed()) {
@@ -492,80 +511,76 @@ impl World {
                 }
             }
         }
-        let members: Vec<MessageRef> = store
-            .search(&search.ungrouped(), sort, 0, 10_000)
-            .unwrap()
-            .iter()
-            .map(Message::at)
-            .collect();
-        assert_eq!(members.len() as u64, counted.0, "{what}");
-        for at in &members {
+        assert_eq!(members.len(), row_of.len(), "{what}");
+        for at in members {
             assert_eq!(
                 store.search_index(search, sort, at.folder, at.uid).unwrap(),
                 row_of.get(at).copied(),
                 "{what} {at:?}"
             );
         }
-        // not in the list
-        let outside = MessageRef { folder: -5, uid: 1 };
         assert_eq!(
-            store.search_index(search, sort, outside.folder, outside.uid).unwrap(),
+            store.search_index(search, sort, OUTSIDE.folder, OUTSIDE.uid).unwrap(),
             None
         );
-
         // placed one by one and by one ranking of the list
         let few: Vec<MessageRef> = members
             .iter()
             .copied()
             .filter(|_| self.rng.chance(10))
-            .take(8)
+            .take(crate::selection::FEW)
             .collect();
         let mut expected: Vec<u64> = few.iter().filter_map(|at| row_of.get(at).copied()).collect();
         expected.sort_unstable();
         expected.dedup();
-        assert_eq!(store.positions(search, sort, &few).unwrap(), expected, "{what}");
-        let many: Vec<MessageRef> = members.iter().copied().chain([outside]).collect();
+        assert_eq!(self.store.positions(search, sort, &few).unwrap(), expected, "{what}");
+        let many: Vec<MessageRef> = members.iter().copied().chain([OUTSIDE]).collect();
         let mut expected: Vec<u64> = row_of.values().copied().collect();
         expected.sort_unstable();
         expected.dedup();
         if many.len() > crate::selection::FEW {
-            assert_eq!(store.positions(search, sort, &many).unwrap(), expected, "{what}");
+            assert_eq!(self.store.positions(search, sort, &many).unwrap(), expected, "{what}");
         }
+    }
 
-        if search.threads.is_none() {
-            // the rows next to each, and the next unread one below it
-            for (index, at) in members.iter().enumerate() {
-                let next = (
-                    index.checked_sub(1).map(|i| members[i]),
-                    members.get(index + 1).copied(),
-                );
-                assert_eq!(
-                    store.neighbours(search, sort, at.folder, at.uid).unwrap(),
-                    Some(next),
-                    "{what} {at:?}"
-                );
-                let unread = all[index + 1..].iter().find(|m| !m.info.seen()).map(Message::at);
-                assert_eq!(
-                    store.next_unread(search, sort, at.folder, at.uid).unwrap(),
-                    unread,
-                    "{what} {at:?}"
-                );
-            }
-            assert_eq!(
-                store.neighbours(search, sort, outside.folder, outside.uid).unwrap(),
-                None
-            );
-        } else {
-            for at in members.iter().filter(|_| self.rng.chance(30)).chain([&outside]) {
+    /// The rows next to each message, and the next unread one below it
+    fn check_walks(&mut self, search: &Search, sort: Sort, all: &[Message], members: &[MessageRef], what: &str) {
+        let store = &self.store;
+        if search.threads.is_some() {
+            for at in members.iter().filter(|_| self.rng.chance(30)).chain([&OUTSIDE]) {
                 assert_eq!(
                     store.next_unread(search, sort, at.folder, at.uid).unwrap(),
                     recounted(|| store.next_unread(search, sort, at.folder, at.uid).unwrap()),
                     "{what} {at:?}"
                 );
             }
+            return;
         }
+        for (index, at) in members.iter().enumerate() {
+            let next = (
+                index.checked_sub(1).map(|i| members[i]),
+                members.get(index + 1).copied(),
+            );
+            assert_eq!(
+                store.neighbours(search, sort, at.folder, at.uid).unwrap(),
+                Some(next),
+                "{what} {at:?}"
+            );
+            let unread = all[index + 1..].iter().find(|m| !m.info.seen()).map(Message::at);
+            assert_eq!(
+                store.next_unread(search, sort, at.folder, at.uid).unwrap(),
+                unread,
+                "{what} {at:?}"
+            );
+        }
+        assert_eq!(
+            store.neighbours(search, sort, OUTSIDE.folder, OUTSIDE.uid).unwrap(),
+            None
+        );
+    }
 
-        // pages read from the row above them, the row below them and the end of the list
+    /// Pages of the list `all` read from the row above them, the row below them and the end of the list
+    fn check_anchored_pages(&mut self, search: &Search, sort: Sort, all: &[Message], what: &str) {
         let size = 1 + self.rng.below(4);
         for offset in (0..all.len() as u64 + 2).step_by(size as usize) {
             let page: Vec<Message> = all.iter().skip(offset as usize).take(size as usize).cloned().collect();
@@ -578,7 +593,7 @@ impl World {
             }
             for anchor in anchors {
                 assert_eq!(
-                    store.search_from(search, sort, offset, size, anchor).unwrap(),
+                    self.store.search_from(search, sort, offset, size, anchor).unwrap(),
                     page,
                     "{what} page {offset}+{size} from {anchor:?}"
                 );
@@ -586,6 +601,9 @@ impl World {
         }
     }
 }
+
+/// A message no list has
+const OUTSIDE: MessageRef = MessageRef { folder: -5, uid: 1 };
 
 #[test]
 fn what_is_kept_follows_every_write() {
@@ -611,22 +629,9 @@ fn the_migration_counts_what_was_stored_before() {
     for _ in 0..300 {
         world.write();
     }
-    let db = &world.store.db;
-    let snapshot = |sql: &str| -> Vec<Vec<rusqlite::types::Value>> {
-        let mut statement = db.prepare(sql).unwrap();
-        let columns = statement.column_count();
-        statement
-            .query_map([], |row| (0..columns).map(|i| row.get(i)).collect())
-            .unwrap()
-            .map(Result::unwrap)
-            .collect()
-    };
-    let kept = (
-        snapshot("SELECT id, total, unread, flagged, threads FROM folders ORDER BY id"),
-        snapshot("SELECT * FROM conversations ORDER BY folder_id, thread_id"),
-    );
+    let before = kept(&world.store.db);
     // the schema as it was before: no counts, no conversations, the orders over every folder without the folder
-    db.execute_batch(
+    world.store.db.execute_batch(
         "DROP TRIGGER messages_counted; DROP TRIGGER messages_uncounted; DROP TRIGGER messages_flags_counted; \
          DROP TRIGGER messages_recounted; DROP TRIGGER conversations_counted; DROP TRIGGER conversations_uncounted; \
          DROP TABLE conversations; \
@@ -642,23 +647,7 @@ fn the_migration_counts_what_was_stored_before() {
     db.pragma_update(None, "user_version", crate::schema::MIGRATIONS.len() - 1)
         .unwrap();
     crate::schema::migrate(db).unwrap();
-    let db = &world.store.db;
-    let snapshot = |sql: &str| -> Vec<Vec<rusqlite::types::Value>> {
-        let mut statement = db.prepare(sql).unwrap();
-        let columns = statement.column_count();
-        statement
-            .query_map([], |row| (0..columns).map(|i| row.get(i)).collect())
-            .unwrap()
-            .map(Result::unwrap)
-            .collect()
-    };
-    assert_eq!(
-        (
-            snapshot("SELECT id, total, unread, flagged, threads FROM folders ORDER BY id"),
-            snapshot("SELECT * FROM conversations ORDER BY folder_id, thread_id"),
-        ),
-        kept
-    );
+    assert_eq!(kept(&world.store.db), before);
     // and keeps them from then on
     for _ in 0..100 {
         world.write();

@@ -14,26 +14,7 @@ use std::time::{Duration, Instant};
 
 use pe_core::{Core, Event, ListView, Options, PasswordStore, Scope, Show};
 use pe_store::{AccountSettings, FolderId, FolderInfo, MessageInfo, Sort, SortField, Store};
-
-/// A small deterministic generator
-struct Rng(u64);
-
-impl Rng {
-    fn next(&mut self) -> u64 {
-        self.0 ^= self.0 << 13;
-        self.0 ^= self.0 >> 7;
-        self.0 ^= self.0 << 17;
-        self.0
-    }
-
-    fn below(&mut self, n: u64) -> u64 {
-        self.next() % n
-    }
-
-    fn pick<'a>(&mut self, list: &[&'a str]) -> &'a str {
-        list[self.below(list.len() as u64) as usize]
-    }
-}
+use pe_testkit::Rng;
 
 const WORDS: &[&str] = &[
     "report",
@@ -94,12 +75,89 @@ const SIZES: [(u64, u64, u64); 3] = [
     (100_000, 10_000, 10_000),
 ];
 
-/// Fills `store` with the synthetic accounts: mail of five years, a third of it replies (conversations), the newest
-/// few hundred of each folder mostly unread, 2% flagged
+/// The mail of a folder of account `account`: `n` messages over five years, a third of them replies (conversations),
+/// the newest few hundred mostly unread, 2% flagged
+struct Mail<'a> {
+    r: &'a mut Rng,
+    account: usize,
+    path: &'static str,
+    n: u64,
+    uid: u64,
+    /// (Message-ID, subject, References) of the recent messages, which replies answer
+    recent: Vec<(String, String, Vec<String>)>,
+}
+
+impl Iterator for Mail<'_> {
+    type Item = MessageInfo;
+
+    fn next(&mut self) -> Option<MessageInfo> {
+        const NOW: i64 = 1_794_000_000;
+        const SPAN: i64 = 5 * 365 * 86_400;
+        if self.uid == self.n {
+            return None;
+        }
+        self.uid += 1;
+        let (r, uid, n, a) = (&mut *self.r, self.uid, self.n, self.account);
+        let internal = NOW - SPAN + (SPAN as u64 * uid / n) as i64 + r.below(600) as i64;
+        let message_id = format!("<{a}.{}.{uid}.{}@mail.example>", self.path, r.below(1 << 40));
+        let (subject, references) = if !self.recent.is_empty() && r.chance(35) {
+            let (parent, subject, before) = r.pick(&self.recent);
+            let mut references = before.clone();
+            references.push(parent.clone());
+            if references.len() > 20 {
+                references.remove(0);
+            }
+            (format!("Re: {}", subject.trim_start_matches("Re: ")), references)
+        } else {
+            let words: Vec<&str> = (0..2 + r.below(5)).map(|_| *r.pick(WORDS)).collect();
+            (format!("{} #{}", words.join(" "), r.below(10_000)), Vec::new())
+        };
+        let (first, last) = (*r.pick(FIRST), *r.pick(LAST));
+        let seen = if n - uid < 300 { r.chance(40) } else { r.chance(97) };
+        let mut flags = Vec::new();
+        if seen {
+            flags.push("\\Seen".to_string());
+        }
+        if r.chance(2) {
+            flags.push("\\Flagged".to_string());
+        }
+        if r.chance(10) {
+            flags.push("\\Answered".to_string());
+        }
+        let message = MessageInfo {
+            uid,
+            modseq: Some(uid),
+            flags,
+            internal_date: Some(internal),
+            date: Some(internal - r.below(900) as i64),
+            size: Some(2_000 + r.below(200_000)),
+            subject: subject.clone(),
+            from_name: format!("{first} {last}"),
+            from_address: format!(
+                "{}.{}{}@corp{}.example",
+                first.to_lowercase(),
+                last.to_lowercase(),
+                r.below(50),
+                r.below(200)
+            ),
+            recipients: format!("User {a}"),
+            message_id: Some(message_id.clone()),
+            in_reply_to: references.last().cloned(),
+            has_attachments: r.chance(15),
+            references: references.clone(),
+            ..Default::default()
+        };
+        self.recent.push((message_id, subject, references));
+        if self.recent.len() > 400 {
+            self.recent.remove(0);
+        }
+        Some(message)
+    }
+}
+
+/// Fills `store` with the synthetic accounts ([`Mail`]), 5,000 messages a transaction as a sync writes them
 fn build(store: &mut Store) {
-    let mut r = Rng(0x9e37_79b9_7f4a_7c15);
-    let now: i64 = 1_794_000_000;
-    let span = 5 * 365 * 86_400i64;
+    let mut r = Rng::new(0x9e37_79b9_7f4a_7c15);
     for (a, &(inbox, sent, archive)) in SIZES.iter().enumerate() {
         let account = store
             .add_account(&AccountSettings {
@@ -132,71 +190,17 @@ fn build(store: &mut Store) {
         let folders = store.folders(account).unwrap();
         for (path, n) in [("INBOX", inbox), ("Sent", sent), ("Archive", archive)] {
             let id = folders.iter().find(|f| f.info.path == path).unwrap().id;
-            // (Message-ID, subject, References) of the recent messages, which replies answer
-            let mut recent: Vec<(String, String, Vec<String>)> = Vec::new();
-            let mut batch = Vec::with_capacity(5000);
-            for uid in 1..=n {
-                let internal = now - span + (span as u64 * uid / n) as i64 + r.below(600) as i64;
-                let message_id = format!("<{a}.{path}.{uid}.{}@mail.example>", r.below(1 << 40));
-                let (subject, references) = if !recent.is_empty() && r.below(100) < 35 {
-                    let (parent, subject, before) = &recent[r.below(recent.len() as u64) as usize];
-                    let mut references = before.clone();
-                    references.push(parent.clone());
-                    if references.len() > 20 {
-                        references.remove(0);
-                    }
-                    (format!("Re: {}", subject.trim_start_matches("Re: ")), references)
-                } else {
-                    let words: Vec<&str> = (0..2 + r.below(5)).map(|_| r.pick(WORDS)).collect();
-                    (format!("{} #{}", words.join(" "), r.below(10_000)), Vec::new())
-                };
-                let (first, last) = (r.pick(FIRST), r.pick(LAST));
-                let seen = if n - uid < 300 {
-                    r.below(100) < 40
-                } else {
-                    r.below(100) < 97
-                };
-                let mut flags = Vec::new();
-                if seen {
-                    flags.push("\\Seen".to_string());
-                }
-                if r.below(100) < 2 {
-                    flags.push("\\Flagged".to_string());
-                }
-                if r.below(100) < 10 {
-                    flags.push("\\Answered".to_string());
-                }
-                batch.push(MessageInfo {
-                    uid,
-                    modseq: Some(uid),
-                    flags,
-                    internal_date: Some(internal),
-                    date: Some(internal - r.below(900) as i64),
-                    size: Some(2_000 + r.below(200_000)),
-                    subject: subject.clone(),
-                    from_name: format!("{first} {last}"),
-                    from_address: format!(
-                        "{}.{}{}@corp{}.example",
-                        first.to_lowercase(),
-                        last.to_lowercase(),
-                        r.below(50),
-                        r.below(200)
-                    ),
-                    recipients: format!("User {a}"),
-                    message_id: Some(message_id.clone()),
-                    in_reply_to: references.last().cloned(),
-                    has_attachments: r.below(100) < 15,
-                    references: references.clone(),
-                    ..Default::default()
-                });
-                recent.push((message_id, subject, references));
-                if recent.len() > 400 {
-                    recent.remove(0);
-                }
-                if batch.len() == 5000 || uid == n {
-                    store.transaction(|store| store.add_messages(id, &batch)).unwrap();
-                    batch.clear();
-                }
+            let mail = Mail {
+                r: &mut r,
+                account: a,
+                path,
+                n,
+                uid: 0,
+                recent: Vec::new(),
+            };
+            let all: Vec<MessageInfo> = mail.collect();
+            for batch in all.chunks(5000) {
+                store.transaction(|store| store.add_messages(id, batch)).unwrap();
             }
         }
     }
