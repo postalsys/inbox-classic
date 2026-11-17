@@ -1190,6 +1190,11 @@ void RunModal(HWND dialog, HWND focus, const bool& done) {
             HelpKey(msg.hwnd);
             continue;
         }
+        // the dialog's own keys first (Options' Ctrl+Tab), which the dialog keys would take
+        if (msg.message == WM_KEYDOWN && (msg.hwnd == dialog || IsChild(dialog, msg.hwnd)) &&
+            SendMessageW(dialog, WM_MODAL_KEY, msg.wParam, 0)) {
+            continue;
+        }
         // Enter on an owner-drawn button clicks it: it can not be the default button, so the dialog would take IDOK
         if (msg.message == WM_KEYDOWN && msg.wParam == VK_RETURN && IsChild(dialog, msg.hwnd) &&
             (GetWindowLongPtrW(msg.hwnd, GWL_STYLE) & BS_TYPEMASK) == BS_OWNERDRAW) {

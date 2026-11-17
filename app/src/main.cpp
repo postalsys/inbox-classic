@@ -4,9 +4,7 @@
 #include <objbase.h>
 #include <shellapi.h>
 #include <shlobj.h>
-#include <shobjidl.h>
 #include <windowsx.h>
-#include <wrl/client.h>
 
 #include <algorithm>
 #include <functional>
@@ -1638,35 +1636,6 @@ bool HandOver() {
     return true;
 }
 
-// what the installer registers the app as (installer/inbox-classic.nsi: MAILTOCLASS, PRODUCT)
-const wchar_t* kMailtoClass = L"InboxClassic.mailto";
-const wchar_t* kRegisteredName = L"Inbox Classic";
-
-// Tools > Make Default Mail App: Windows lets only the user choose it, in Settings, where the installer listed the app
-void MakeDefaultMailApp() {
-    Microsoft::WRL::ComPtr<IApplicationAssociationRegistration> associations;
-    LPWSTR current = nullptr;
-    if (SUCCEEDED(CoCreateInstance(CLSID_ApplicationAssociationRegistration, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&associations))) &&
-        SUCCEEDED(associations->QueryCurrentDefault(L"mailto", AT_URLPROTOCOL, AL_EFFECTIVE, &current))) {
-        bool ours = _wcsicmp(current, kMailtoClass) == 0;
-        CoTaskMemFree(current);
-        if (ours) {
-            MessageBoxW(g_main, core::T(PE_TEXT_UI_DEFAULT_APP_IS).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
-            return;
-        }
-    }
-    DWORD size = 0;
-    if (RegGetValueW(HKEY_CURRENT_USER, L"Software\\RegisteredApplications", kRegisteredName, RRF_RT_REG_SZ, nullptr, nullptr, &size) !=
-        ERROR_SUCCESS) {
-        MessageBoxW(g_main, core::T(PE_TEXT_WIN_DEFAULT_APP_NOT_INSTALLED).c_str(),
-                    kTitle, MB_OK | MB_ICONINFORMATION);
-        return;
-    }
-    MessageBoxW(g_main, core::T(PE_TEXT_WIN_DEFAULT_APP_SETTINGS).c_str(), kTitle,
-                MB_OK | MB_ICONINFORMATION);
-    ShellExecuteW(g_main, L"open", L"ms-settings:defaultapps?registeredAppUser=Inbox%20Classic", nullptr, nullptr, SW_SHOWNORMAL);
-}
-
 void Reply(PeDraftKind kind) {
     // made off the window thread: the compose window opens once it is
     bool started = g_mailbox.DraftOfShown(kind, [](core::Draft draft, int64_t account) {
@@ -1792,7 +1761,7 @@ void OnCommand(WORD id, WORD code) {
         ShowMain();
         return;
     case IDM_DEFAULT_APP:
-        MakeDefaultMailApp();
+        MakeDefaultMailApp(g_main);
         return;
     case IDC_UNSUBSCRIBE: {
         if (code != STN_CLICKED) {
@@ -1811,20 +1780,23 @@ void OnCommand(WORD id, WORD code) {
         SetNotify(!g_notify);
         return;
     case IDM_OPTIONS: {
-        bool notify = g_notify;
-        bool threads = g_mailbox.Grouped();
-        bool codes = pe_codes_in_notifications();
-        int layout = static_cast<int>(g_layoutMode);
-        bool listPictures = g_mailbox.ListPicturesShown();
-        bool restart = OptionsDialog(g_main, g_core.get(), notify, threads, codes, layout, listPictures);
-        g_mailbox.SetListPictures(listPictures);
-        if (layout != static_cast<int>(g_layoutMode)) {
-            SetLayoutMode(static_cast<PeLayoutMode>(layout));
-        }
-        SetNotify(notify);
-        SetPreference(kCodesPreference, codes ? 1 : 0);
-        pe_set_codes_in_notifications(codes);
-        g_mailbox.SetGrouped(threads);
+        WindowOptions shown;
+        shown.notify = g_notify;
+        shown.codes = pe_codes_in_notifications();
+        shown.threads = g_mailbox.Grouped();
+        shown.layout = static_cast<int>(g_layoutMode);
+        shown.listPictures = g_mailbox.ListPicturesShown();
+        // OK and Apply: the main window follows at once, with Options still open after Apply
+        bool restart = OptionsDialog(g_main, g_core.get(), shown, [](const WindowOptions& set) {
+            g_mailbox.SetListPictures(set.listPictures);
+            if (set.layout != static_cast<int>(g_layoutMode)) {
+                SetLayoutMode(static_cast<PeLayoutMode>(set.layout));
+            }
+            SetNotify(set.notify);
+            SetPreference(kCodesPreference, set.codes ? 1 : 0);
+            pe_set_codes_in_notifications(set.codes);
+            g_mailbox.SetGrouped(set.threads);
+        });
         if (restart) {
             // as File > Exit, the messages being written asked first; started again once the window is gone
             g_restart = true;
