@@ -469,7 +469,7 @@ fn the_background_pass_decrypts_for_the_search() {
         row.snippet.as_deref().is_some_and(|s| s.contains("windmill")),
         "{row:?}"
     );
-    assert_eq!(row.outer_subject.as_deref(), Some("..."));
+    assert_eq!(row.info.outer_subject.as_deref(), Some("..."));
 
     // turned off: neither its words nor its protected Subject
     s.core.set_pgp_index_encrypted(false).unwrap();
@@ -482,4 +482,43 @@ fn the_background_pass_decrypts_for_the_search() {
     s.core.set_pgp_index_encrypted(true).unwrap();
     eventually(&|| find("windmill").len() == 1, "found again once it is on");
     assert_eq!(find("is:encrypted").remove(0).info.subject, "The zebrafish plan");
+
+    // a move the server refuses (Archive deleted by another client): the row comes back as it came, nothing decrypted
+    // in it for an agent to see or find
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let (inbox, archive) = (id("INBOX"), id("Archive"));
+    s.server.delete_folder("Archive");
+    let uid = find("is:encrypted").remove(0).info.uid;
+    s.core.move_messages(inbox, &[uid], archive).unwrap();
+    s.wait(|e| matches!(e, Event::ActionUndone { .. }));
+    let agent_finds = |text: &str| {
+        let search = pe_core::Search {
+            scope: pe_core::Scope::Everywhere,
+            show: pe_core::Show::All,
+            text: text.into(),
+            no_decrypted: true,
+            ..Default::default()
+        };
+        s.core.search(&search, pe_store::Sort::default(), 0, 10).unwrap()
+    };
+    let back = find("is:encrypted").remove(0);
+    assert_eq!(back.agent_subject(), "...");
+    for word in ["windmill", "zebrafish"] {
+        assert!(agent_finds(word).is_empty(), "{word}");
+    }
+    // decrypted again by the background pass, its outer Subject kept for agents; the switch off puts it back
+    s.core.set_pgp_index_encrypted(true).unwrap();
+    eventually(
+        &|| find("windmill").len() == 1,
+        "decrypted again after the refused move",
+    );
+    let again = find("is:encrypted").remove(0);
+    assert_eq!(
+        (again.info.subject.as_str(), again.agent_subject()),
+        ("The zebrafish plan", "...")
+    );
+    assert!(agent_finds("windmill").is_empty());
+    s.core.set_pgp_index_encrypted(false).unwrap();
+    assert_eq!(find("is:encrypted").remove(0).info.subject, "...");
 }

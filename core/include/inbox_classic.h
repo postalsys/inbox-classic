@@ -1042,6 +1042,12 @@ typedef struct PeMessage {
   const char *initials;
   // The message is signed or encrypted as a whole (OpenPGP, from its structure): the list marks it
   enum PeProtection protection;
+  // What that mark says (its tooltip, and the row's words for a screen reader): Encrypted or Signed; empty for
+  // neither
+  const char *protection_words;
+  // `snippet` says the message's state ("Encrypted message"), not words its sender wrote: shown in the list's
+  // secondary style for a state (italic)
+  bool snippet_is_state;
 } PeMessage;
 
 // Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of

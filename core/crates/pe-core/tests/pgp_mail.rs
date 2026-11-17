@@ -795,7 +795,7 @@ fn decrypted_text_in_the_search_but_never_for_agents() {
             uid: 1,
             subject: "Test".into(),
             from_address: "alice@example.org".into(),
-            protection: 2,
+            protection: pe_store::Protection::Encrypted,
             ..Default::default()
         };
         store.add_messages(folder, &[info]).unwrap();
@@ -874,7 +874,7 @@ fn the_list_shows_the_protected_subject_once_opened() {
             uid: 1,
             subject: "...".into(),
             from_address: "alice@example.org".into(),
-            protection: pe_store::PROTECTION_ENCRYPTED,
+            protection: pe_store::Protection::Encrypted,
             ..Default::default()
         };
         store.add_messages(folder, &[info]).unwrap();

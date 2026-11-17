@@ -90,8 +90,8 @@ pub use sign_in_apps::{
 pub use text::{
     DOWNLOAD_LIMITS_MB, ReaderState, SEND_DELAYS, TEXT_SIZE_MEDIUM, TEXT_ZOOMS, account_label, account_shown_name,
     account_title, account_titles, default_account_name, download_limit_index, download_limit_text, downloading_text,
-    folder_kind, folder_name, format_size, initials, list_counts, messages, quoted_subject, reader_page, retry_note,
-    saved_text, send_delay_index, send_delay_text, sentence,
+    folder_kind, folder_name, format_size, initials, list_counts, messages, protection_words, quoted_subject,
+    reader_page, retry_note, saved_text, send_delay_index, send_delay_text, sentence,
 };
 pub use view::{AttachmentView, MessageView, PartView, ProtectionView};
 use worker::{Command, Role, Worker};
@@ -1510,11 +1510,7 @@ impl Core {
         }
         if let Some((folder, uid, text, subject)) = view.decrypted.take() {
             let store = self.store();
-            // the list shows its protected Subject now: the windows read the folder again
-            if store
-                .index_decrypted(folder, uid, &text, subject.as_deref())
-                .unwrap_or(false)
-                && subject.is_some()
+            if search::store_decrypted(&store, folder, uid, &text, subject.as_deref()).unwrap_or(false)
                 && let Ok(found) = store.folder(folder)
             {
                 drop(store);
@@ -2889,14 +2885,30 @@ fn read_limited(path: &std::path::Path) -> Result<Vec<u8>> {
     Ok(raw)
 }
 
+/// An encrypted message's text for the search index, from what building its view decrypted, when the user lets the
+/// index keep it and it does not have it yet; the window stores it as it takes the view ([`Core::message_view`])
+fn decrypted_for_view<S: std::ops::Deref<Target = Store>>(
+    found: &ViewSource,
+    view: &mut MessageView,
+    store: &impl Fn() -> Option<S>,
+) {
+    let Some((shown, subject)) = view.decrypted_source.take() else {
+        return;
+    };
+    if store().is_some_and(|store| store.wants_decrypted_text(found.folder, found.uid).unwrap_or(false)) {
+        view.decrypted = Some((found.folder, found.uid, search::index_text(&shown), subject));
+    }
+}
+
 /// The rows of a list: an encrypted message not opened yet (or whose text the index does not keep) says so on its
 /// line of first words
 fn encrypted_lines(mut found: Vec<Message>) -> Vec<Message> {
     for message in &mut found {
-        if message.info.protection == pe_store::PROTECTION_ENCRYPTED
+        if message.info.protection == pe_store::Protection::Encrypted
             && message.snippet.as_deref().is_none_or(str::is_empty)
         {
             message.snippet = Some(pe_i18n::tr(pe_i18n::Text::ListEncrypted));
+            message.snippet_is_state = true;
         }
     }
     found
@@ -2931,14 +2943,7 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
         ring: found.ring.as_deref(),
     };
     let mut view = view::build_unless(&found.source, allow_remote_images, &trust, dropped, &find)?;
-    // decrypted: its text for the search index, when the user lets the index keep it and it does not have it yet
-    if let Some(ring) = &found.ring
-        && view.protection.as_ref().is_some_and(|protection| protection.encrypted)
-        && store().is_some_and(|store| store.wants_decrypted_text(found.folder, found.uid).unwrap_or(false))
-        && let Some((text, subject)) = search::decrypted_text(&found.source, ring)
-    {
-        view.decrypted = Some((found.folder, found.uid, text, subject));
-    }
+    decrypted_for_view(found, &mut view, &store);
     // a large message's text first: its attachments without content, their sizes from its structure, listed by the
     // same rules
     if let Some(first) = found

@@ -99,6 +99,9 @@ pub struct MessageView {
     /// An encrypted message's text, decrypted, for the search index (when Options lets it keep it), stored when the
     /// window takes the view
     pub(crate) decrypted: Option<(pe_store::FolderId, u64, pe_store::IndexText, Option<String>)>,
+    /// What [`crate::protect::decrypted_for_index`] made of the message while the view was built (as it is shown, and
+    /// its protected Subject), for `decrypted`; never kept past the view's building
+    pub(crate) decrypted_source: Option<(Vec<u8>, Option<String>)>,
 }
 
 /// What a signed or encrypted message is, for the bar over it (which mail can not draw) and its Details
@@ -220,8 +223,11 @@ pub(crate) fn build_unless(
             if let Some(seen) = seen.as_mut() {
                 seen.gossip = protected.gossip.clone();
             }
+            // what the search index keeps of it, from this one decryption (decrypted_for_view takes it or drops it)
+            let shown = crate::protect::decrypted_for_index(source, &protected);
             let mut view = protected_view(&message, protected, clicked, allow_remote_images, sender, trust);
             view.autocrypt = seen;
+            view.decrypted_source = shown;
             return Some(view);
         }
     }
@@ -314,6 +320,7 @@ pub(crate) fn build_unless(
         part_documents: Vec::new(),
         print_document: None,
         decrypted: None,
+        decrypted_source: None,
     })
 }
 

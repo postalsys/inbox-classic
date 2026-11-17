@@ -1668,6 +1668,12 @@ pub struct PeMessage {
     pub initials: *const c_char,
     /// The message is signed or encrypted as a whole (OpenPGP, from its structure): the list marks it
     pub protection: PeProtection,
+    /// What that mark says (its tooltip, and the row's words for a screen reader): Encrypted or Signed; empty for
+    /// neither
+    pub protection_words: *const c_char,
+    /// `snippet` says the message's state ("Encrypted message"), not words its sender wrote: shown in the list's
+    /// secondary style for a state (italic)
+    pub snippet_is_state: bool,
 }
 
 /// Whether a message is signed or encrypted as a whole
@@ -1679,12 +1685,12 @@ pub enum PeProtection {
     Encrypted = 2,
 }
 
-impl PeProtection {
-    fn of(level: u8) -> Self {
-        match level {
-            pe_store::PROTECTION_ENCRYPTED => PeProtection::Encrypted,
-            pe_store::PROTECTION_SIGNED => PeProtection::Signed,
-            _ => PeProtection::None,
+impl From<pe_store::Protection> for PeProtection {
+    fn from(protection: pe_store::Protection) -> Self {
+        match protection {
+            pe_store::Protection::None => PeProtection::None,
+            pe_store::Protection::Signed => PeProtection::Signed,
+            pe_store::Protection::Encrypted => PeProtection::Encrypted,
         }
     }
 }
@@ -1765,7 +1771,9 @@ pub(crate) fn message_list(messages: &[pe_store::Message]) -> *mut PeMessageList
             picture_kind: picture_kind.into(),
             picture,
             initials: strings.add(&pe_core::initials(&info.from_name, &info.from_address)),
-            protection: PeProtection::of(info.protection),
+            protection: info.protection.into(),
+            protection_words: strings.add(&pe_core::protection_words(info.protection).unwrap_or_default()),
+            snippet_is_state: m.snippet_is_state,
         }
     })))
 }

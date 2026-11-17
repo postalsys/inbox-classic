@@ -463,6 +463,8 @@ pub(crate) struct Worker {
     worked: bool,
     /// The Gmail labels archived messages lost, by Message-ID, for Undo to put back
     archived_labels: HashMap<String, Vec<String>>,
+    /// The user's keys the background pass decrypts with, read once a pass ([`Worker::decrypt_stored`])
+    decrypt_ring: Option<Arc<crate::protect::KeyRing>>,
     /// The main worker, for a reader the server refuses a connection of its own: the opens go there
     pub(crate) fallback: Option<UnboundedSender<Command>>,
     /// The main worker's own commands, kept without keeping it running: what its uploader sends back (upload.rs)
@@ -519,6 +521,7 @@ impl Worker {
             behind: None,
             worked: false,
             archived_labels: HashMap::new(),
+            decrypt_ring: None,
             fallback: None,
             main: None,
             uploader: None,
@@ -1683,7 +1686,7 @@ impl Worker {
                 let count = fresh.announced.len();
                 let watched = newest.mark == pe_store::ThreadMark::Watch;
                 // an encrypted message says so, not its outer subject (often "..."), and has no code to offer
-                let encrypted = newest.info.protection == pe_store::PROTECTION_ENCRYPTED;
+                let encrypted = newest.info.protection == pe_store::Protection::Encrypted;
                 let subject = if encrypted {
                     pe_i18n::tr(pe_i18n::Text::ListEncrypted)
                 } else {

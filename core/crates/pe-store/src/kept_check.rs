@@ -165,7 +165,16 @@ impl World {
         let recipients = r.pick(&["Ann", "Bob", "", "carol@x"]).to_string();
         let size = (!r.chance(10)).then(|| r.below(5) * 100);
         // OpenPGP: some signed, some encrypted, as the sync reads them from the structure
-        let protection = *r.pick(&[0, 0, 0, 0, 0, 0, crate::PROTECTION_SIGNED, crate::PROTECTION_ENCRYPTED]);
+        let protection = *r.pick(&[
+            crate::Protection::None,
+            crate::Protection::None,
+            crate::Protection::None,
+            crate::Protection::None,
+            crate::Protection::None,
+            crate::Protection::None,
+            crate::Protection::Signed,
+            crate::Protection::Encrypted,
+        ]);
         let flags = self.flags();
         self.ids.push(id.clone());
         MessageInfo {
@@ -278,6 +287,15 @@ impl World {
             ..Default::default()
         };
         self.store.index_decrypted(folder, uid, &text, Some(subject)).unwrap();
+        // a move the server refused: the row comes back as it came, nothing decrypted left in it unmarked
+        if self.rng.chance(30)
+            && let Some(message) = self.store.message(folder, uid).unwrap()
+        {
+            self.store.remove_messages(folder, &[uid]).unwrap();
+            self.store.add_messages(folder, &[message.info]).unwrap();
+            let back = self.store.message(folder, uid).unwrap().unwrap();
+            assert!(!back.info.decrypted && back.info.outer_subject.is_none() && back.info.sender_people.is_empty());
+        }
     }
 
     /// References fetched later join conversations
@@ -475,10 +493,10 @@ impl World {
 
     /// A search of a mark finds the messages that have it and no other
     fn check_marks(&self, search: &Search, sort: Sort, what: &str) {
-        let wanted: fn(u8) -> bool = match search.text.as_str() {
-            "is:encrypted" => |p| p == crate::PROTECTION_ENCRYPTED,
-            "is:signed" => |p| p == crate::PROTECTION_SIGNED,
-            "-is:encrypted" => |p| p != crate::PROTECTION_ENCRYPTED,
+        let wanted: fn(crate::Protection) -> bool = match search.text.as_str() {
+            "is:encrypted" => |p| p == crate::Protection::Encrypted,
+            "is:signed" => |p| p == crate::Protection::Signed,
+            "-is:encrypted" => |p| p != crate::Protection::Encrypted,
             _ => return,
         };
         let found = self.store.search(&search.ungrouped(), sort, 0, 10_000).unwrap();

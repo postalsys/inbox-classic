@@ -401,16 +401,14 @@ impl Call<'_> {
     }
 
     /// A message of `folder`
-    /// A message as an agent knows it: by the Subject it came with, never one decrypted for the user
+    /// A message as an agent knows it: by its [`pe_store::Message::agent_subject`]
     fn message(&self, folder: FolderId, uid: u64) -> Result<pe_store::Message, String> {
         let mut message = self
             .core
             .message(folder, uid)
             .map_err(engine)?
             .ok_or_else(|| String::from("there is no such message in that folder"))?;
-        if let Some(outer) = message.outer_subject.take() {
-            message.info.subject = outer;
-        }
+        message.info.subject = message.agent_subject().to_string();
         Ok(message)
     }
 
@@ -456,8 +454,7 @@ fn row(message: &pe_store::Message) -> Value {
         "folder": message.folder_id,
         "uid": info.uid,
         "from": pe_core::address_label(&info.from_name, &info.from_address),
-        // the Subject it came with: never one decrypted for the user
-        "subject": message.outer_subject.as_deref().unwrap_or(&info.subject),
+        "subject": message.agent_subject(),
         "date": info.date.or(info.internal_date).map(pe_mime::date::to_iso),
         "unread": !info.seen(),
         "flagged": info.flagged(),

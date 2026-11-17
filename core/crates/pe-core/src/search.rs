@@ -156,8 +156,22 @@ pub(crate) fn index_pending(store: &mut Store) -> pe_store::Result<usize> {
 /// protected Subject when its layer is good; None when nothing in it could be decrypted
 pub(crate) fn decrypted_text(source: &[u8], ring: &crate::protect::KeyRing) -> Option<(IndexText, Option<String>)> {
     let from = crate::from_addresses(source);
-    let (shown, subject) = crate::protect::decrypted_for_index(source, ring, &from, crate::worker::unix_now())?;
+    let protected = crate::protect::read(source, ring, &from, crate::worker::unix_now())?;
+    let (shown, subject) = crate::protect::decrypted_for_index(source, &protected)?;
     Some((index_text(&shown), subject))
+}
+
+/// An encrypted message's decrypted text and protected Subject into the store, in a transaction of its own that reads
+/// the switch in Settings first (nothing is written while it is off). Whether its row in the list changed: its first
+/// words always do once it is written, its Subject when it had a protected one, so the windows read its folder again.
+pub(crate) fn store_decrypted(
+    store: &Store,
+    folder: pe_store::FolderId,
+    uid: u64,
+    text: &IndexText,
+    subject: Option<&str>,
+) -> pe_store::Result<bool> {
+    store.index_decrypted(folder, uid, text, subject)
 }
 
 #[cfg(test)]

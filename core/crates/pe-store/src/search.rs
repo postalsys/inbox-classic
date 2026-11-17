@@ -333,9 +333,11 @@ impl Search {
                 }),
                 Term::Attachment(on) => parts.push(format!("has_attachments = {}", i64::from(*on))),
                 Term::Bounce(on) => parts.push(format!("bounce = {}", i64::from(*on))),
-                Term::Protection(level, on) => {
-                    parts.push(format!("protection {} {level}", if *on { "=" } else { "!=" }))
-                }
+                Term::Protection(level, on) => parts.push(format!(
+                    "protection {} {}",
+                    if *on { "=" } else { "!=" },
+                    level.stored()
+                )),
                 Term::In { place, negated } => {
                     let folders = match place {
                         Place::Anywhere => continue,
@@ -679,13 +681,19 @@ impl Store {
     /// [`Store::set_indexed`] with the text of an encrypted message, decrypted when it was opened or by the background
     /// pass: marked, so that the switch in Settings can take it out again and AI agents never search it. `subject`, its
     /// protected Subject when its layer was good, takes the place of the one it came with in the list (kept, to put
-    /// back); the conversations kept follow it as any change of a subject.
-    pub fn set_indexed_decrypted(&self, message: i64, text: &IndexText, subject: Option<&str>) -> Result<()> {
+    /// back); the conversations kept follow it as any change of a subject. Nothing is written while the switch in
+    /// Settings is off, read in the same transaction as the writes, so a switch turned off while the message was being
+    /// decrypted leaves nothing decrypted behind (call it inside a transaction). Whether it was written.
+    pub fn set_indexed_decrypted(&self, message: i64, text: &IndexText, subject: Option<&str>) -> Result<bool> {
+        if !self.pgp_index_encrypted()? {
+            return Ok(false);
+        }
         if let Some(subject) = subject {
+            // the Subject it came with is kept whatever the row says now
             self.db
                 .prepare_cached(
                     "UPDATE messages SET outer_subject = COALESCE(outer_subject, subject), subject = ?2, \
-                     sort_subject = ?3 WHERE id = ?1 AND subject != ?2",
+                     sort_subject = ?3 WHERE id = ?1",
                 )?
                 .execute(params![message, subject, crate::fold::fold(subject)])?;
         }
@@ -693,7 +701,7 @@ impl Store {
         self.db
             .prepare_cached("UPDATE messages SET decrypted = 1 WHERE id = ?1")?
             .execute([message])?;
-        Ok(())
+        Ok(true)
     }
 
     /// Takes the decrypted text of every encrypted message out of the index and the list (the switch in Settings
@@ -745,8 +753,8 @@ impl Store {
             .unwrap_or(false))
     }
 
-    /// The decrypted text of the message `uid` of `folder` into the index ([`Store::set_indexed_decrypted`]); whether
-    /// the message is here
+    /// The decrypted text of the message `uid` of `folder` into the index ([`Store::set_indexed_decrypted`], in a
+    /// transaction of its own); whether it was written (the message is here and the switch is on)
     pub fn index_decrypted(&self, folder: FolderId, uid: u64, text: &IndexText, subject: Option<&str>) -> Result<bool> {
         let id: Option<i64> = self
             .db
@@ -758,10 +766,11 @@ impl Store {
             .optional()?;
         match id {
             Some(id) => {
-                let tx = self.db.unchecked_transaction()?;
-                self.set_indexed_decrypted(id, text, subject)?;
+                // the write lock first: the switch is read, then written by, this transaction
+                let tx = rusqlite::Transaction::new_unchecked(&self.db, rusqlite::TransactionBehavior::Immediate)?;
+                let written = self.set_indexed_decrypted(id, text, subject)?;
                 tx.commit()?;
-                Ok(true)
+                Ok(written)
             }
             None => Ok(false),
         }
@@ -788,10 +797,16 @@ impl Store {
 
     /// The background pass could not open this one (no key here opens it, or the keys are not available without the
     /// user): left for when the user opens it, and not tried again until the switch in Settings is turned on again
-    pub fn mark_decrypt_tried(&self, message: i64) -> Result<()> {
-        self.db
-            .prepare_cached("UPDATE messages SET decrypted = 2 WHERE id = ?1 AND decrypted = 0")?
-            .execute([message])?;
+    pub fn mark_decrypt_tried(&self, messages: &[i64]) -> Result<()> {
+        if messages.is_empty() {
+            return Ok(());
+        }
+        let mut values = Vec::new();
+        let ids = crate::selection::id_list(&mut values, messages);
+        self.db.execute(
+            &format!("UPDATE messages SET decrypted = 2 WHERE id IN ({ids}) AND decrypted = 0"),
+            rusqlite::params_from_iter(&values),
+        )?;
         Ok(())
     }
 
@@ -910,9 +925,9 @@ mod tests {
     fn encrypted_mail_in_the_search() {
         let (store, inbox, _) = setup();
         let mut signed = message(1, "Signed", "Ann", &[]);
-        signed.protection = crate::PROTECTION_SIGNED;
+        signed.protection = crate::Protection::Signed;
         let mut encrypted = message(2, "Sealed", "Bob", &[]);
-        encrypted.protection = crate::PROTECTION_ENCRYPTED;
+        encrypted.protection = crate::Protection::Encrypted;
         store
             .add_messages(inbox, &[signed, encrypted, message(3, "Plain", "Cid", &[])])
             .unwrap();
@@ -948,7 +963,7 @@ mod tests {
         };
         let shown = row("is:encrypted");
         assert_eq!(shown.info.subject, "The zebrafish plan");
-        assert_eq!(shown.outer_subject.as_deref(), Some("Sealed"));
+        assert_eq!(shown.info.outer_subject.as_deref(), Some("Sealed"));
         assert_eq!(found(&store, &words(None, "subject:zebrafish")), [2]);
         assert!(!store.wants_decrypted_text(inbox, 2).unwrap(), "once");
         let agent = |text: &str| Search {
@@ -978,7 +993,10 @@ mod tests {
         let plain = row("is:encrypted");
         assert_eq!(plain.snippet.as_deref(), Some(""));
         assert_eq!(plain.info.attachment_count, 0);
-        assert_eq!((plain.info.subject.as_str(), plain.outer_subject), ("Sealed", None));
+        assert_eq!(
+            (plain.info.subject.as_str(), plain.info.outer_subject),
+            ("Sealed", None)
+        );
         let decrypted: i64 = store
             .db
             .query_row("SELECT decrypted FROM messages WHERE id = ?1", [id], |row| row.get(0))
@@ -995,7 +1013,7 @@ mod tests {
         );
         store.set_source(inbox, 2, b"Subject: Sealed\r\n\r\n").unwrap();
         assert_eq!(store.messages_to_decrypt(account, 10).unwrap(), [(id, inbox, 2)]);
-        store.mark_decrypt_tried(id).unwrap();
+        store.mark_decrypt_tried(&[id]).unwrap();
         assert!(store.messages_to_decrypt(account, 10).unwrap().is_empty());
         assert!(
             store.wants_decrypted_text(inbox, 2).unwrap(),
@@ -1006,6 +1024,94 @@ mod tests {
         store.forget_decrypted().unwrap();
         store.set_pgp_index_encrypted(true).unwrap();
         assert_eq!(store.messages_to_decrypt(account, 10).unwrap().len(), 1);
+    }
+
+    /// A decrypted message whose move the server refused comes back as it came: its outer Subject, nothing decrypted
+    /// in it for agents to see or find, put back by the switch, and decrypted again with its outer Subject kept
+    #[test]
+    fn a_decrypted_message_stored_again_comes_as_it_came() {
+        let (store, inbox, _) = setup();
+        let mut sealed = message(1, "...", "Bob", &[]);
+        sealed.protection = crate::Protection::Encrypted;
+        store.add_messages(inbox, &[sealed]).unwrap();
+        let text = IndexText {
+            sender_people: "Inner Person".into(),
+            attachment_names: "plans.pdf".into(),
+            attachment_count: 1,
+            body: "the zebrafish plan".into(),
+            snippet: "the zebrafish plan".into(),
+            ..Default::default()
+        };
+        assert!(
+            store
+                .index_decrypted(inbox, 1, &text, Some("The real subject"))
+                .unwrap()
+        );
+        let decrypted = store.message(inbox, 1).unwrap().unwrap();
+        assert_eq!(decrypted.agent_subject(), "...");
+        // taken out for a move, put back when the server refused it
+        store.remove_messages(inbox, &[1]).unwrap();
+        store.add_messages(inbox, &[decrypted.info]).unwrap();
+        let back = store.message(inbox, 1).unwrap().unwrap();
+        assert_eq!(back.info.subject, "...");
+        assert_eq!(back.agent_subject(), "...");
+        assert!(!back.info.decrypted && back.info.sender_people.is_empty() && back.info.attachment_names.is_empty());
+        let agent = |text: &str| Search {
+            no_decrypted: true,
+            ..words(None, text)
+        };
+        for word in ["zebrafish", "inner", "plans", "real"] {
+            assert!(found(&store, &agent(word)).is_empty(), "{word}");
+            assert!(found(&store, &words(None, word)).is_empty(), "{word}");
+        }
+        // decrypted again by the background pass: the outer Subject kept
+        assert!(
+            store
+                .index_decrypted(inbox, 1, &text, Some("The real subject"))
+                .unwrap()
+        );
+        let again = store.message(inbox, 1).unwrap().unwrap();
+        assert_eq!(
+            (again.info.subject.as_str(), again.agent_subject()),
+            ("The real subject", "...")
+        );
+        // the switch off puts it back
+        store.set_pgp_index_encrypted(false).unwrap();
+        store.forget_decrypted().unwrap();
+        let off = store.message(inbox, 1).unwrap().unwrap();
+        assert_eq!((off.info.subject.as_str(), off.info.outer_subject), ("...", None));
+        assert!(found(&store, &words(None, "zebrafish")).is_empty());
+    }
+
+    /// The switch turned off between decrypting a message and storing what it gave: nothing is stored
+    #[test]
+    fn nothing_decrypted_is_stored_once_the_switch_is_off() {
+        let (store, inbox, _) = setup();
+        let mut sealed = message(1, "...", "Bob", &[]);
+        sealed.protection = crate::Protection::Encrypted;
+        store.add_messages(inbox, &[sealed]).unwrap();
+        // decrypted while it was on (the background pass's read)...
+        assert_eq!(store.messages_to_decrypt(1, 10).unwrap().len(), 0, "no source");
+        store.set_source(inbox, 1, b"Subject: ...\r\n\r\n").unwrap();
+        let account = store.folder(inbox).unwrap().account_id;
+        assert_eq!(store.messages_to_decrypt(account, 10).unwrap().len(), 1);
+        let text = IndexText {
+            body: "the zebrafish plan".into(),
+            snippet: "the zebrafish plan".into(),
+            ..Default::default()
+        };
+        // ...then the user turns it off before the write
+        store.set_pgp_index_encrypted(false).unwrap();
+        store.forget_decrypted().unwrap();
+        assert!(
+            !store
+                .index_decrypted(inbox, 1, &text, Some("The real subject"))
+                .unwrap()
+        );
+        let row = store.message(inbox, 1).unwrap().unwrap();
+        assert_eq!((row.info.subject.as_str(), row.info.decrypted), ("...", false));
+        assert!(found(&store, &words(None, "zebrafish")).is_empty());
+        assert!(found(&store, &words(None, "real")).is_empty());
     }
 
     #[test]
@@ -1135,9 +1241,7 @@ mod tests {
             threads: None,
             hide_ignored: false,
             read_since: None,
-            no_decrypted: false,
-            uids: None,
-            up_to: None,
+            ..Default::default()
         };
         assert_eq!(found(&store, &search), [9]);
         // a message read since: still listed with the unread ones, by the time the store noted (in milliseconds)
@@ -1157,13 +1261,11 @@ mod tests {
             scope: Scope::Everywhere,
             show: Show::Unread,
             read_since: Some(since),
-            no_decrypted: false,
             ..Default::default()
         };
         assert_eq!(found(&store, &kept).len(), 2, "the one read stays");
         let later = Search {
             read_since: Some(since + 3_600_000),
-            no_decrypted: false,
             ..kept
         };
         assert_eq!(found(&store, &later).len(), 1, "read before the list began: gone");

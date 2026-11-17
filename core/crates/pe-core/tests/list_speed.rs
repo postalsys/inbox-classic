@@ -147,9 +147,9 @@ impl Iterator for Mail<'_> {
             references: references.clone(),
             // about one in a hundred encrypted and one in forty signed (OpenPGP), without changing the rest
             protection: match uid {
-                _ if uid % 97 == 0 => pe_store::PROTECTION_ENCRYPTED,
-                _ if uid % 41 == 0 => pe_store::PROTECTION_SIGNED,
-                _ => 0,
+                _ if uid % 97 == 0 => pe_store::Protection::Encrypted,
+                _ if uid % 41 == 0 => pe_store::Protection::Signed,
+                _ => pe_store::Protection::None,
             },
             ..Default::default()
         };

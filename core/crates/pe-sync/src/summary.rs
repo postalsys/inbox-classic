@@ -52,12 +52,12 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         .as_ref()
         .map(|b| b.content_type.to_ascii_lowercase())
     {
-        Some(kind) if kind == "multipart/encrypted" => pe_store::PROTECTION_ENCRYPTED,
-        Some(kind) if kind == "multipart/signed" => pe_store::PROTECTION_SIGNED,
-        _ => 0,
+        Some(kind) if kind == "multipart/encrypted" => pe_store::Protection::Encrypted,
+        Some(kind) if kind == "multipart/signed" => pe_store::Protection::Signed,
+        _ => pe_store::Protection::None,
     };
     // an encrypted message's only "attachment" is its ciphertext: what it carries is known once it is opened
-    let attachments = if protection == pe_store::PROTECTION_ENCRYPTED {
+    let attachments = if protection == pe_store::Protection::Encrypted {
         Vec::new()
     } else {
         attachments
@@ -102,6 +102,8 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         protection,
         auth_headers,
         list_id,
+        outer_subject: None,
+        decrypted: false,
     })
 }
 
@@ -318,7 +320,7 @@ mod tests {
             ..Default::default()
         };
         let read = super::summary(encrypted).unwrap();
-        assert_eq!(read.protection, pe_store::PROTECTION_ENCRYPTED);
+        assert_eq!(read.protection, pe_store::Protection::Encrypted);
         assert!(!read.has_attachments && read.attachment_names.is_empty());
     }
 
