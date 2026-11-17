@@ -3603,9 +3603,15 @@ public static class Dragger {
         $heading = Statics $leave
         Check ($heading -match 'My AI agent wants to unsubscribe you from 2 mailing lists') "one question names the program and the count ($heading)"
         $lists = [Native.Win]::GetDlgItem($leave, $IDC_AGENT_LISTS)
-        $listed = @(0..1 | ForEach-Object { "$([Native.Win]::RemoteListText($lists, $_, 0)) $([Native.Win]::RemoteListText($lists, $_, 2))" })
+        $listed = @(0..1 | ForEach-Object { "$([Native.Win]::RemoteListText($lists, $_, 0))|$([Native.Win]::RemoteListText($lists, $_, 1))|$([Native.Win]::RemoteListText($lists, $_, 3))" })
         Check ((ListCount $lists) -eq 2 -and ($listed -join ';') -match 'digest@list\.example\.com' -and ($listed -join ';') -match 'offers@list\.example\.com' -and
                @($listed | Where-Object { $_ -match "$([char]0x2192) list\.example\.com$" }).Count -eq 2) "it lists both senders and where the requests go ($($listed -join '; '))"
+        # the address first and alone in its column, the name beside it, so a name can not hide who it is; the column
+        # wide enough for the whole address
+        $addressShown = [int][Native.Win]::SendMessage($lists, 0x101D, [IntPtr]0, [IntPtr]::Zero)
+        Check ((@($listed | Where-Object { $_ -match '^digest@list\.example\.com\|Weekly Digest\|' -or $_ -match '^offers@list\.example\.com\|Shop Offers\|' }).Count -eq 2) -and $addressShown -ge 200) "each list shows its address whole, first, and the name apart ($($listed -join '; '); $addressShown)"
+        # every column fits: no scroll bar sideways for lists of ordinary addresses
+        Check (-not ([Native.Win]::GetWindowLong($lists, -16) -band 0x00100000)) 'the columns fit the list, with no scroll bar sideways'
         Check (-not [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($leave, $IDC_AGENT_UNSUBSCRIBE))) 'Unsubscribe waits a moment before it can be pressed'
         Start-Sleep -Seconds 2
         # another window in front and back again, as a question raised while the app is behind: the safe answer keeps

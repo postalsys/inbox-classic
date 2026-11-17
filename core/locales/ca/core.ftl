@@ -787,7 +787,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } vol cancel·lar la vostra subscripció a { $count } llistes de correu
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic demana a cada llista d’aquí sota que deixi d’enviar-vos correu, de la manera amb un sol clic que ofereix la llista. No s’envia res més, i els missatges que teniu es queden on són.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic demana a la llista d’aquí sota que deixi d’enviar-vos correu, de la manera amb un sol clic que ofereix. No s’envia res més, i els missatges que teniu es queden on són.
+   *[other] Inbox Classic demana a cada llista d’aquí sota que deixi d’enviar-vos correu, de la manera amb un sol clic que ofereix la llista. No s’envia res més, i els missatges que teniu es queden on són.
+}
 
 ## Les tecles com les anomenen els teclats de la llengua, a l’ajuda (Windows i Linux)
 

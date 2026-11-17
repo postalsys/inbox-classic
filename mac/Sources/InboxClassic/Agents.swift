@@ -346,8 +346,8 @@ private func holdBack(_ button: NSButton) {
     RunLoop.main.add(timer, forMode: .common)
 }
 
-/// The mailing lists an agent wants to leave, one row each: the sender in full (wrapped, never cut, so a name can not
-/// hide who it is), the subject it came with and where the request goes
+/// The mailing lists an agent wants to leave, one row each: the sender's address first and whole (wrapped, never cut,
+/// so a name can not hide who it is), then the name, the subject it came with and where the request goes
 @MainActor
 private func unsubscribeQuestion(core: Core, request: UInt64) {
     guard let info = pe_agent_unsubscribe_info(core.handle, request) else { return }
@@ -365,21 +365,27 @@ private func unsubscribeQuestion(core: Core, request: UInt64) {
     let count = pe_agent_unsubscribe_list_count(info)
     for index in 0..<count {
         guard let list = pe_agent_unsubscribe_list(info, index)?.pointee else { continue }
-        let sender = wrappingLabel(text(list.sender))
-        sender.font = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
-        sender.setAccessibilityIdentifier("agent.list.\(index)")
+        let address = wrappingLabel(text(list.address))
+        address.font = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
+        address.setAccessibilityIdentifier("agent.list.\(index)")
+        let name = text(list.name)
+        let named = name.isEmpty ? nil : note(name, color: .labelColor)
+        named?.lineBreakMode = .byTruncatingTail
+        named?.toolTip = name
+        named?.setAccessibilityIdentifier("agent.list.\(index).name")
         let subject = note(text(list.subject))
         subject.lineBreakMode = .byTruncatingTail
         subject.toolTip = subject.stringValue
         let target = note("→ \(text(list.target))", color: .tertiaryLabelColor)
         target.lineBreakMode = .byTruncatingTail
         target.setAccessibilityIdentifier("agent.list.\(index).target")
-        let row = NSStackView(views: [sender, subject, target])
+        let labels = [address, named, subject, target].compactMap { $0 }
+        let row = NSStackView(views: labels)
         row.orientation = .vertical
         row.alignment = .leading
         row.spacing = 2
         row.edgeInsets = NSEdgeInsets(top: 7, left: 10, bottom: 7, right: 10)
-        for label in [sender, subject, target] {
+        for label in labels {
             label.preferredMaxLayoutWidth = width - 36
             label.widthAnchor.constraint(equalToConstant: width - 36).isActive = true
         }

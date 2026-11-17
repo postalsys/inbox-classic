@@ -810,7 +810,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } želi da otkaže vašu pretplatu na { $count } lista za slanje
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic traži od svake liste ispod da vam više ne šalje poruke, otkazivanjem pretplate jednim klikom koje lista nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju tamo gde jesu.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic traži od liste ispod da vam više ne šalje poruke, otkazivanjem pretplate jednim klikom koje nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju tamo gde jesu.
+   *[other] Inbox Classic traži od svake liste ispod da vam više ne šalje poruke, otkazivanjem pretplate jednim klikom koje lista nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju tamo gde jesu.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

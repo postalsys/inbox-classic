@@ -809,8 +809,10 @@ typedef struct PeAgentUnsubscribe {
 
 // A mailing list of the question, by the sender of its message
 typedef struct PeAgentList {
-  // The sender, as From says it: "News <news@shop.example>"
-  const char *sender;
+  // The sender's address, "news@shop.example": shown whole and first, so a name can never hide it
+  const char *address;
+  // The name From gives with it, "News"; empty when it gives none
+  const char *name;
   // The subject of the message it was found on
   const char *subject;
   // The host the request goes to

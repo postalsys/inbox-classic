@@ -784,7 +784,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } želi otkazati vašu pretplatu na { $count } popisa za slanje
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic traži od svakog popisa u nastavku da vam prestane slati poruke, na način jednim klikom koji popis nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju gdje jesu.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic traži od popisa u nastavku da vam prestane slati poruke, na način jednim klikom koji nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju gdje jesu.
+   *[other] Inbox Classic traži od svakog popisa u nastavku da vam prestane slati poruke, na način jednim klikom koji popis nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju gdje jesu.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

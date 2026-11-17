@@ -826,7 +826,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } vás chce odhlásiť z { $count } zoznamov adresátov
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic požiada každý zoznam nižšie, aby vám prestal posielať správy, a to odhlásením jedným kliknutím, ktoré zoznam ponúka. Nič iné sa neodošle a správy, ktoré máte, zostanú tam, kde sú.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic požiada zoznam nižšie, aby vám prestal posielať správy, a to odhlásením jedným kliknutím, ktoré ponúka. Nič iné sa neodošle a správy, ktoré máte, zostanú tam, kde sú.
+   *[other] Inbox Classic požiada každý zoznam nižšie, aby vám prestal posielať správy, a to odhlásením jedným kliknutím, ktoré zoznam ponúka. Nič iné sa neodošle a správy, ktoré máte, zostanú tam, kde sú.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

@@ -812,7 +812,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } vrea să vă dezaboneze de la { $count } de liste de corespondență
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic cere fiecărei liste de mai jos să nu vă mai trimită mesaje, prin dezabonarea cu un clic pe care o oferă lista. Nu se trimite nimic altceva, iar mesajele pe care le aveți rămân unde sunt.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic cere listei de mai jos să nu vă mai trimită mesaje, prin dezabonarea cu un clic pe care o oferă. Nu se trimite nimic altceva, iar mesajele pe care le aveți rămân unde sunt.
+   *[other] Inbox Classic cere fiecărei liste de mai jos să nu vă mai trimită mesaje, prin dezabonarea cu un clic pe care o oferă lista. Nu se trimite nimic altceva, iar mesajele pe care le aveți rămân unde sunt.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

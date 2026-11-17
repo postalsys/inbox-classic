@@ -772,7 +772,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } { $count } posta listesindeki aboneliğinizi iptal etmek istiyor
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic, aşağıdaki her listeden, listenin sunduğu tek tıklamayla abonelikten çıkma yoluyla size göndermeyi bırakmasını ister. Başka hiçbir şey gönderilmez ve sahip olduğunuz iletiler oldukları yerde kalır.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic, aşağıdaki listeden, sunduğu tek tıklamayla abonelikten çıkma yoluyla size göndermeyi bırakmasını ister. Başka hiçbir şey gönderilmez ve sahip olduğunuz iletiler oldukları yerde kalır.
+   *[other] Inbox Classic, aşağıdaki her listeden, listenin sunduğu tek tıklamayla abonelikten çıkma yoluyla size göndermeyi bırakmasını ister. Başka hiçbir şey gönderilmez ve sahip olduğunuz iletiler oldukları yerde kalır.
+}
 
 ## Dilin klavyelerinde adlandırıldığı biçimiyle tuşlar, yardımda (Windows ve Linux)
 

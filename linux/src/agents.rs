@@ -242,8 +242,9 @@ fn unsubscribe_dialog(ask: &agents::UnsubscribeAsk) -> adw::AlertDialog {
     dialog
 }
 
-/// The mailing lists an agent wants to leave, a row each: the sender as From says it (wrapped, never cut, so the
-/// address always shows), the subject it came with and where the request goes; scrolled past about eight
+/// The mailing lists an agent wants to leave, a row each: the sender's address first and whole (wrapped, never cut,
+/// so a name can not hide who it is), then the name, the subject it came with and where the request goes; scrolled
+/// past about eight
 fn unsubscribe_lists(ask: &agents::UnsubscribeAsk) -> gtk::ScrolledWindow {
     let list = gtk::ListBox::new();
     list.set_selection_mode(gtk::SelectionMode::None);
@@ -254,21 +255,32 @@ fn unsubscribe_lists(ask: &agents::UnsubscribeAsk) -> gtk::ScrolledWindow {
         content.set_margin_bottom(8);
         content.set_margin_start(12);
         content.set_margin_end(12);
-        let sender = ui::wrapped_label(&entry.sender);
-        sender.set_wrap_mode(gtk::pango::WrapMode::WordChar);
-        sender.add_css_class("heading");
-        sender.set_widget_name(&format!("agent-list-{index}"));
-        content.append(&sender);
-        // the subject secondary, where the request goes smaller still
-        for (text, name, class) in [
-            (entry.subject.clone(), "agent-list-subject", "body"),
-            (format!("\u{2192} {}", entry.target), "agent-list-target", "caption"),
+        let address = ui::wrapped_label(&entry.address);
+        address.set_wrap_mode(gtk::pango::WrapMode::WordChar);
+        address.add_css_class("heading");
+        address.set_widget_name(&format!("agent-list-{index}"));
+        content.append(&address);
+        // the name under it, the subject secondary, where the request goes smaller still
+        for (text, name, dim, class) in [
+            (entry.name.clone(), "agent-list-name", false, "body"),
+            (entry.subject.clone(), "agent-list-subject", true, "body"),
+            (
+                format!("\u{2192} {}", entry.target),
+                "agent-list-target",
+                true,
+                "caption",
+            ),
         ] {
+            if text.is_empty() {
+                continue;
+            }
             let label = gtk::Label::new(Some(&text));
             label.set_xalign(0.0);
             label.set_ellipsize(gtk::pango::EllipsizeMode::End);
             label.set_tooltip_text(Some(&text));
-            label.add_css_class("dim-label");
+            if dim {
+                label.add_css_class("dim-label");
+            }
             label.add_css_class(class);
             label.set_widget_name(name);
             content.append(&label);

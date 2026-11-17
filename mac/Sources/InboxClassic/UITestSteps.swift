@@ -3145,10 +3145,10 @@ extension UITest {
         let label = { (id: String) -> String in (self.find(id, in: ask) as NSTextField?)?.stringValue ?? "" }
         let heading = label("agent.heading")
         check(heading.contains("My AI agent") && heading.contains("2"), "the question names the program and the number of lists (\(heading))")
-        let senders = [label("agent.list.0"), label("agent.list.1")]
-        check(Set(senders) == ["Weekly Digest <digest@list.example.com>", "Monthly Offers <offers@list.example.com>"]
+        let senders = [0, 1].map { "\(label("agent.list.\($0)")) | \(label("agent.list.\($0).name"))" }
+        check(Set(senders) == ["digest@list.example.com | Weekly Digest", "offers@list.example.com | Monthly Offers"]
               && label("agent.list.0.target") == "→ list.example.com" && label("agent.list.1.target") == "→ list.example.com",
-              "one question lists both senders and where the requests go (\(senders))")
+              "one question lists both senders and where the requests go, each address first and whole, the name apart (\(senders))")
         let unsubscribe: NSButton? = find("agent.unsubscribe", in: ask)
         let dont: NSButton? = find("agent.dontUnsubscribe", in: ask)
         check(unsubscribe?.isEnabled == false, "Unsubscribe waits a moment before it can be pressed")

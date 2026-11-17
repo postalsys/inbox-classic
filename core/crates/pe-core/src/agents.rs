@@ -98,13 +98,23 @@ pub struct SendAsk {
 /// A mailing list an agent wants to leave, as the question lists it
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UnsubscribeList {
-    /// The sender of the message it was found on, as From says it: `News <news@shop.example>`
-    pub sender: String,
+    /// The address of the message it was found on: `news@shop.example`. The question shows it whole, first, so a
+    /// name can never hide it
+    pub address: String,
+    /// The name From gives with it, empty when it gives none or only the address again
+    pub name: String,
     /// That message's subject (the one it came with, never a decrypted one)
     pub subject: String,
     /// The host the request goes to
     pub target: String,
     pub(crate) url: String,
+}
+
+impl UnsubscribeList {
+    /// The sender as From says it, `News <news@shop.example>`, for the agent
+    pub fn sender(&self) -> String {
+        crate::address_label(&self.name, &self.address)
+    }
 }
 
 /// The mailing lists an agent wants to leave, for the user to look at first
@@ -276,7 +286,7 @@ pub fn unsubscribe_text(ask: &UnsubscribeAsk) -> (String, String) {
             Text::AgentUnsubscribeTitle,
             &[("program", (&ask.host.name).into()), ("count", ask.lists.len().into())],
         ),
-        tr(Text::AgentUnsubscribeDetail),
+        tr_args(Text::AgentUnsubscribeDetail, &[("count", ask.lists.len().into())]),
     )
 }
 
@@ -702,7 +712,8 @@ impl Core {
             // the lists are asked by the task that waits for this answer (Core::agent_ask_unsubscribe)
             (AgentAsk::Unsubscribe(_), AgentAnswer::Unsubscribe) => {}
             (AgentAsk::Unsubscribe(ask), _) => {
-                let senders: Vec<&str> = ask.lists.iter().map(|l| l.sender.as_str()).collect();
+                // by their addresses only, as a name could pass for another sender's
+                let senders: Vec<&str> = ask.lists.iter().map(|l| l.address.as_str()).collect();
                 self.log_agent(&[NewLogEntry {
                     host: ask.host.id,
                     what: "unsubscribe_refused".into(),
@@ -940,8 +951,14 @@ impl Core {
                 continue;
             }
             let target = crate::unsubscribe::Unsubscribe::OneClick { url: url.clone() }.target();
+            let (name, address) = (message.info.from_name.trim(), &message.info.from_address);
             lists.push(UnsubscribeList {
-                sender: crate::address_label(&message.info.from_name, &message.info.from_address),
+                address: address.clone(),
+                name: if name.eq_ignore_ascii_case(address) {
+                    String::new()
+                } else {
+                    name.to_string()
+                },
                 subject: message.agent_subject().to_string(),
                 target,
                 url,
@@ -1038,7 +1055,7 @@ impl Core {
             })
             .await;
             let _ = done.send(Unsubscribed::Done(
-                lists.into_iter().map(|l| l.sender).zip(problems).collect(),
+                lists.iter().map(UnsubscribeList::sender).zip(problems).collect(),
             ));
         });
         Ok(outcome)

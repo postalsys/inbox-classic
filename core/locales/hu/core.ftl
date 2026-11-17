@@ -756,7 +756,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } le szeretné iratkoztatni Önt { $count } levelezőlistáról
 }
 # review: new
-agent-unsubscribe-detail = Az Inbox Classic az alábbi listák mindegyikét megkéri, hogy ne küldjön Önnek több levelet, a lista által kínált egykattintásos módon. Mást nem küld el, és a meglévő üzenetei a helyükön maradnak.
+agent-unsubscribe-detail = { $count ->
+    [1] Az Inbox Classic megkéri az alábbi listát, hogy ne küldjön Önnek több levelet, a lista által kínált egykattintásos módon. Mást nem küld el, és a meglévő üzenetei a helyükön maradnak.
+   *[other] Az Inbox Classic az alábbi listák mindegyikét megkéri, hogy ne küldjön Önnek több levelet, a lista által kínált egykattintásos módon. Mást nem küld el, és a meglévő üzenetei a helyükön maradnak.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

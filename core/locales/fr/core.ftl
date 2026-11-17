@@ -515,7 +515,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } souhaite vous désabonner de { $count } listes de diffusion
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic demande à chaque liste ci-dessous de ne plus vous écrire, par le désabonnement en un clic qu'elle propose. Rien d'autre n'est envoyé, et les messages que vous avez restent où ils sont.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic demande à la liste ci-dessous de ne plus vous écrire, par le désabonnement en un clic qu'elle propose. Rien d'autre n'est envoyé, et les messages que vous avez restent où ils sont.
+   *[other] Inbox Classic demande à chaque liste ci-dessous de ne plus vous écrire, par le désabonnement en un clic qu'elle propose. Rien d'autre n'est envoyé, et les messages que vous avez restent où ils sont.
+}
 
 ## Keys
 

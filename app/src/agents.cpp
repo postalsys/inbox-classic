@@ -353,7 +353,7 @@ struct UnsubscribeState {
     HFONT bold = nullptr;
 };
 
-// the senders bold, so who each list is reads first; where the request goes dim
+// the addresses bold, so who each list is reads first; where the request goes dim
 LRESULT DrawListCell(UnsubscribeState& state, NMLVCUSTOMDRAW& draw) {
     switch (draw.nmcd.dwDrawStage) {
     case CDDS_PREPAINT:
@@ -364,7 +364,7 @@ LRESULT DrawListCell(UnsubscribeState& state, NMLVCUSTOMDRAW& draw) {
         bool selected = ListView_GetItemState(state.lists, static_cast<int>(draw.nmcd.dwItemSpec), LVIS_SELECTED) != 0 &&
                         GetFocus() == state.lists;
         SelectObject(draw.nmcd.hdc, draw.iSubItem == 0 && state.bold ? state.bold : reinterpret_cast<HFONT>(SendMessageW(state.lists, WM_GETFONT, 0, 0)));
-        draw.clrText = draw.iSubItem == 2 && !selected ? GetSysColor(COLOR_GRAYTEXT) : CLR_DEFAULT;
+        draw.clrText = draw.iSubItem == 3 && !selected ? GetSysColor(COLOR_GRAYTEXT) : CLR_DEFAULT;
         return CDRF_NEWFONT;
     }
     }
@@ -422,7 +422,7 @@ void UnsubscribeDialog(HWND owner, PeCore* core, uint64_t request) {
     }
     RegisterDialogClass(kUnsubscribeClass, UnsubscribeProc);
     int pad = Scale(12);
-    int width = Scale(600);
+    int width = Scale(680);
     int inner = width - 2 * pad;
     std::wstring detail = Text(ask->detail);
     int detailHeight = TextHeight(owner, detail, inner);
@@ -438,25 +438,38 @@ void UnsubscribeDialog(HWND owner, PeCore* core, uint64_t request) {
     y += Scale(24);
     CreateChild(dialog, L"STATIC", detail.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + detailHeight});
     y += detailHeight + Scale(12);
-    // one row a list: its sender as From says it (the address with the name, so a name can not hide who it is), the
+    // one row a list: the sender's address first, whole, so a name can never hide who it is, then the name, the
     // subject it came with, and the host the request goes to
     state.lists = CreateReportList(dialog, IDC_AGENT_LISTS, {pad, y, width - pad, y + listHeight});
-    // a sender too long for its column shows whole under the mouse
+    // a name or subject too long for its column shows whole under the mouse
     ListView_SetExtendedListViewStyle(state.lists, LVS_EX_FULLROWSELECT | LVS_EX_LABELTIP);
     LOGFONTW face = {};
     GetObjectW(reinterpret_cast<HFONT>(SendMessageW(state.lists, WM_GETFONT, 0, 0)), sizeof(face), &face);
     face.lfWeight = FW_BOLD;
     state.bold = CreateFontIndirectW(&face);
-    AddColumn(state.lists, 0, core::T(PE_TEXT_UI_COL_FROM).c_str(), 250);
-    AddColumn(state.lists, 1, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 190);
-    AddColumn(state.lists, 2, L"", 120);
+    AddColumn(state.lists, 0, core::T(PE_TEXT_UI_COL_FROM).c_str(), 200);
+    AddColumn(state.lists, 1, core::T(PE_TEXT_UI_COL_NAME).c_str(), 140);
+    AddColumn(state.lists, 2, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 170);
+    AddColumn(state.lists, 3, L"", 110);
+    // the address column as wide as the longest address in bold, the list scrolling sideways past the dialog
+    HDC dc = GetDC(state.lists);
+    HGDIOBJ before = SelectObject(dc, state.bold);
+    int addressWidth = Scale(200);
     for (int i = 0; i < count; i++) {
         const PeAgentList* list = pe_agent_unsubscribe_list(info.get(), static_cast<size_t>(i));
-        int row = AddRow(state.lists, i, Text(list->sender));
-        SetCell(state.lists, row, 1, Text(list->subject));
-        SetCell(state.lists, row, 2, L"→ " + Text(list->target));
+        std::wstring address = Text(list->address);
+        SIZE size = {};
+        GetTextExtentPoint32W(dc, address.c_str(), static_cast<int>(address.size()), &size);
+        addressWidth = std::max(addressWidth, static_cast<int>(size.cx) + Scale(16));
+        int row = AddRow(state.lists, i, address);
+        SetCell(state.lists, row, 1, Text(list->name));
+        SetCell(state.lists, row, 2, Text(list->subject));
+        SetCell(state.lists, row, 3, L"→ " + Text(list->target));
     }
-    ListView_SetColumnWidth(state.lists, 2, LVSCW_AUTOSIZE_USEHEADER);
+    SelectObject(dc, before);
+    ReleaseDC(state.lists, dc);
+    ListView_SetColumnWidth(state.lists, 0, addressWidth);
+    ListView_SetColumnWidth(state.lists, 3, LVSCW_AUTOSIZE_USEHEADER);
     y += listHeight + Scale(16);
     std::wstring unsubscribe = core::T(PE_TEXT_WIN_UNSUBSCRIBE), dontUnsubscribe = core::T(PE_TEXT_WIN_DONT_UNSUBSCRIBE);
     int button = ButtonWidth({unsubscribe, dontUnsubscribe}, 110);

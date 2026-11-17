@@ -479,13 +479,16 @@ agent-log-archived = Archived “{ $subject }”
 agent-log-folder = Made the folder “{ $name }”
 agent-log-unsubscribed = Unsubscribed from the list of “{ $subject }”
 agent-log-unsubscribe-failed = Could not unsubscribe from the list of “{ $subject }”: { $reason }
-# "You did not unsubscribe from News <news@shop.example>, Deals <deals@example.com>"
+# "You did not unsubscribe from news@shop.example, deals@example.com": the lists' addresses, never their names
 agent-log-unsubscribe-refused = You did not unsubscribe from { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } wants to unsubscribe you from a mailing list
    *[other] { $program } wants to unsubscribe you from { $count } mailing lists
 }
-agent-unsubscribe-detail = Inbox Classic asks each list below to stop sending to you, the one-click way the list offers. Nothing else is sent, and the messages you have stay where they are.
+agent-unsubscribe-detail = { $count ->
+    [one] Inbox Classic asks the list below to stop sending to you, the one-click way it offers. Nothing else is sent, and the messages you have stay where they are.
+   *[other] Inbox Classic asks each list below to stop sending to you, the one-click way the list offers. Nothing else is sent, and the messages you have stay where they are.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

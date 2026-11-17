@@ -475,7 +475,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } soovib teie nimel loobuda { $count } meililisti tellimusest
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic palub igal alloleval meililistil lõpetada teile kirjade saatmise, kasutades listi pakutavat ühe klõpsuga viisi. Muud midagi ei saadeta ja teie olemasolevad kirjad jäävad oma kohale.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic palub allolevalt meililistilt lõpetada teile kirjade saatmise, kasutades listi pakutavat ühe klõpsuga viisi. Muud midagi ei saadeta ja teie olemasolevad kirjad jäävad oma kohale.
+   *[other] Inbox Classic palub igal alloleval meililistil lõpetada teile kirjade saatmise, kasutades listi pakutavat ühe klõpsuga viisi. Muud midagi ei saadeta ja teie olemasolevad kirjad jäävad oma kohale.
+}
 
 ## Keys
 

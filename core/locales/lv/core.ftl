@@ -813,7 +813,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } vēlas jūsu vārdā atteikties no { $count } adresātu sarakstiem
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic lūdz katram tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot saraksta piedāvāto atteikšanos ar vienu klikšķi. Nekas cits netiek sūtīts, un jūsu ziņojumi paliek savās vietās.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic lūdz tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot tā piedāvāto atteikšanos ar vienu klikšķi. Nekas cits netiek sūtīts, un jūsu ziņojumi paliek savās vietās.
+   *[other] Inbox Classic lūdz katram tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot saraksta piedāvāto atteikšanos ar vienu klikšķi. Nekas cits netiek sūtīts, un jūsu ziņojumi paliek savās vietās.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

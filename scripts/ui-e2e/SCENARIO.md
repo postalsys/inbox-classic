@@ -498,6 +498,7 @@ The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named
 - Undo takes the message back
 - and the Outbox is empty
 - the agent asks to unsubscribe from two mailing lists: one question lists both senders and where the requests go
+- each list shows its sender's address first and whole, the name apart, so a name can not hide it
 - Don't Unsubscribe is the default
 - the agent learns the user said no, and no list was asked
 

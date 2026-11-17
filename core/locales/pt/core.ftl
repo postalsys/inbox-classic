@@ -796,7 +796,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } quer cancelar a sua subscrição de { $count } listas de correio
 }
 # review: new
-agent-unsubscribe-detail = O Inbox Classic pede a cada lista abaixo que deixe de lhe enviar mensagens, através do cancelamento com um clique que a lista oferece. Não é enviado mais nada, e as mensagens que tem ficam onde estão.
+agent-unsubscribe-detail = { $count ->
+    [1] O Inbox Classic pede à lista abaixo que deixe de lhe enviar mensagens, através do cancelamento com um clique que ela oferece. Não é enviado mais nada, e as mensagens que tem ficam onde estão.
+   *[other] O Inbox Classic pede a cada lista abaixo que deixe de lhe enviar mensagens, através do cancelamento com um clique que a lista oferece. Não é enviado mais nada, e as mensagens que tem ficam onde estão.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

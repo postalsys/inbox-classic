@@ -1268,7 +1268,7 @@ const sections = [
             {
                 shot: 'agents-7-unsubscribe',
                 name: 'Leaving mailing lists asks you first',
-                what: "An agent that may organize mail can ask to unsubscribe you from mailing lists: one question lists every list by its sender and where the request goes. Don't Unsubscribe is the default; Unsubscribe asks each list the one-click way, and the agent learns what each answered. Never from Junk E-mail, and at most 30 lists a day.",
+                what: "An agent that may organize mail can ask to unsubscribe you from mailing lists: one question lists every list by its sender, the address first and whole so a name can not hide it, and where the request goes. Don't Unsubscribe is the default; Unsubscribe asks each list the one-click way, and the agent learns what each answered. Never from Junk E-mail, and at most 30 lists a day.",
                 how: 'Shown when an agent asks to unsubscribe; only for a program allowed to organize mail.',
                 checked: ['One question lists both senders and where the requests go', "Don't Unsubscribe is the default", 'The agent learns the user said no']
             }

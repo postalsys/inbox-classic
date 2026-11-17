@@ -775,7 +775,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } haluaa peruuttaa tilauksesi { $count } postituslistalta
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic pyytää jokaista alla olevaa listaa lopettamaan lähettämisen sinulle sillä yhden napsautuksen tavalla, jota lista tarjoaa. Mitään muuta ei lähetetä, ja jo saamasi viestit pysyvät paikoillaan.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic pyytää alla olevaa listaa lopettamaan lähettämisen sinulle sillä yhden napsautuksen tavalla, jota lista tarjoaa. Mitään muuta ei lähetetä, ja jo saamasi viestit pysyvät paikoillaan.
+   *[other] Inbox Classic pyytää jokaista alla olevaa listaa lopettamaan lähettämisen sinulle sillä yhden napsautuksen tavalla, jota lista tarjoaa. Mitään muuta ei lähetetä, ja jo saamasi viestit pysyvät paikoillaan.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

@@ -455,8 +455,10 @@ pub struct PeAgentUnsubscribe {
 /// A mailing list of the question, by the sender of its message
 #[repr(C)]
 pub struct PeAgentList {
-    /// The sender, as From says it: "News <news@shop.example>"
-    pub sender: *const c_char,
+    /// The sender's address, "news@shop.example": shown whole and first, so a name can never hide it
+    pub address: *const c_char,
+    /// The name From gives with it, "News"; empty when it gives none
+    pub name: *const c_char,
     /// The subject of the message it was found on
     pub subject: *const c_char,
     /// The host the request goes to
@@ -490,7 +492,8 @@ pub unsafe extern "C" fn pe_agent_unsubscribe_info(core: *const PeCore, request:
                 detail: strings.add(&detail),
             };
             let lists = Rows::new(&ask.lists, |l, strings| PeAgentList {
-                sender: strings.add(&l.sender),
+                address: strings.add(&l.address),
+                name: strings.add(&l.name),
                 subject: strings.add(&l.subject),
                 target: strings.add(&l.target),
             });

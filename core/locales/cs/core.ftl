@@ -795,7 +795,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } vás chce odhlásit z { $count } konferencí
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic požádá každou konferenci níže, aby vám přestala posílat zprávy, a to způsobem na jedno kliknutí, který konference nabízí. Nic jiného se neodešle a zprávy, které máte, zůstanou, kde jsou.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic požádá konferenci níže, aby vám přestala posílat zprávy, a to způsobem na jedno kliknutí, který nabízí. Nic jiného se neodešle a zprávy, které máte, zůstanou, kde jsou.
+   *[other] Inbox Classic požádá každou konferenci níže, aby vám přestala posílat zprávy, a to způsobem na jedno kliknutí, který konference nabízí. Nic jiného se neodešle a zprávy, které máte, zůstanou, kde jsou.
+}
 
 ## Keys
 

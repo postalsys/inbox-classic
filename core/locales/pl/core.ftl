@@ -806,7 +806,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } chce wypisać Cię z { $count } list mailingowych
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic prosi każdą z poniższych list o zaprzestanie wysyłania Ci wiadomości, korzystając z oferowanego przez listę wypisania jednym kliknięciem. Nic innego nie jest wysyłane, a Twoje wiadomości pozostają tam, gdzie są.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic prosi poniższą listę o zaprzestanie wysyłania Ci wiadomości, korzystając z oferowanego przez nią wypisania jednym kliknięciem. Nic innego nie jest wysyłane, a Twoje wiadomości pozostają tam, gdzie są.
+   *[other] Inbox Classic prosi każdą z poniższych list o zaprzestanie wysyłania Ci wiadomości, korzystając z oferowanego przez listę wypisania jednym kliknięciem. Nic innego nie jest wysyłane, a Twoje wiadomości pozostają tam, gdzie są.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

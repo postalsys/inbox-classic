@@ -775,7 +775,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } vil afmelde dig fra { $count } mailinglister
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic beder hver liste herunder om at holde op med at sende til dig, på den måde med ét klik, som listen tilbyder. Der sendes ikke andet, og de meddelelser, du har, bliver, hvor de er.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic beder listen herunder om at holde op med at sende til dig, på den måde med ét klik, som den tilbyder. Der sendes ikke andet, og de meddelelser, du har, bliver, hvor de er.
+   *[other] Inbox Classic beder hver liste herunder om at holde op med at sende til dig, på den måde med ét klik, som listen tilbyder. Der sendes ikke andet, og de meddelelser, du har, bliver, hvor de er.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 

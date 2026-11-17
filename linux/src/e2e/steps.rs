@@ -610,22 +610,28 @@ async fn agent_unsubscribes(d: &Driver, out: &std::path::Path) {
     let root: gtk::Widget = ask.clone().upcast();
     let heading = ask.heading().unwrap_or_default().to_string();
     let lists: Vec<String> = (0..3).map(|n| label_of(&root, &format!("agent-list-{n}"))).collect();
-    let targets: Vec<String> = descendants::<gtk::Label>(&root)
-        .into_iter()
-        .filter(|l| l.widget_name() == "agent-list-target")
-        .map(|l| l.text().to_string())
-        .collect();
+    let named = |name: &str| -> Vec<String> {
+        descendants::<gtk::Label>(&root)
+            .into_iter()
+            .filter(|l| l.widget_name() == name)
+            .map(|l| l.text().to_string())
+            .collect()
+    };
+    let (names, targets) = (named("agent-list-name"), named("agent-list-target"));
     d.check(
         heading.contains("My AI agent")
             && heading.contains('2')
-            && lists[..2].contains(&"Weekly Digest <digest@list.example.com>".to_string())
-            && lists[..2].contains(&"Shop Offers <offers@list.example.com>".to_string())
+            && lists[..2].contains(&"digest@list.example.com".to_string())
+            && lists[..2].contains(&"offers@list.example.com".to_string())
             && lists[2].is_empty()
+            && names.len() == 2
+            && names.contains(&"Weekly Digest".to_string())
+            && names.contains(&"Shop Offers".to_string())
             && targets.len() == 2
             && targets.iter().all(|t| t.ends_with(" list.example.com")),
         &format!(
-            "the agent asks to unsubscribe from two mailing lists: one question lists both senders and where the \
-             requests go ({heading}; {lists:?}; {targets:?})"
+            "the agent asks to unsubscribe from two mailing lists: one question lists both senders, each address first \
+             and whole with the name apart, and where the requests go ({heading}; {lists:?}; {names:?}; {targets:?})"
         ),
     );
     d.check(
@@ -658,7 +664,7 @@ async fn agent_unsubscribes(d: &Driver, out: &std::path::Path) {
         d.check(
             entries
                 .first()
-                .is_some_and(|e| e.starts_with("You did not unsubscribe from Weekly Digest <digest@list.example.com>"))
+                .is_some_and(|e| e.starts_with("You did not unsubscribe from digest@list.example.com"))
                 && !undo,
             &format!("and the AI Agents log says so, with nothing to undo ({entries:?})"),
         );

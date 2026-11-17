@@ -488,7 +488,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } möchte { $count } Mailinglisten für Sie abbestellen
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic bittet jede der folgenden Listen, Ihnen nichts mehr zu senden, auf dem Weg mit einem Klick, den die Liste anbietet. Sonst wird nichts gesendet, und Ihre vorhandenen Nachrichten bleiben, wo sie sind.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic bittet die folgende Liste, Ihnen nichts mehr zu senden, auf dem Weg mit einem Klick, den sie anbietet. Sonst wird nichts gesendet, und Ihre vorhandenen Nachrichten bleiben, wo sie sind.
+   *[other] Inbox Classic bittet jede der folgenden Listen, Ihnen nichts mehr zu senden, auf dem Weg mit einem Klick, den die Liste anbietet. Sonst wird nichts gesendet, und Ihre vorhandenen Nachrichten bleiben, wo sie sind.
+}
 
 ## Keys
 

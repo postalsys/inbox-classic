@@ -196,9 +196,22 @@ fn answer_questions(core: Arc<Core>, events: Receiver<Event>, others: std::sync:
                 Some(AgentAsk::Unsubscribe(ask)) => {
                     // the user sees every list by its sender, and where the request goes
                     assert!(ask.lists.iter().all(|l| l.target == "127.0.0.1"), "{ask:?}");
-                    let (title, _) = pe_core::agents::unsubscribe_text(&ask);
+                    let (title, detail) = pe_core::agents::unsubscribe_text(&ask);
                     assert!(title.starts_with("Test Agent wants to unsubscribe you"), "{title}");
-                    if ask.lists.iter().any(|l| l.sender.contains("Keep")) {
+                    // the address and the name apart, so the windows can show the address whole
+                    assert!(
+                        ask.lists
+                            .iter()
+                            .all(|l| l.address == "news@list.example.com" && !l.name.contains('@')),
+                        "{ask:?}"
+                    );
+                    let each = if ask.lists.len() == 1 {
+                        "the list below"
+                    } else {
+                        "each list below"
+                    };
+                    assert!(detail.contains(each), "{detail}");
+                    if ask.lists.iter().any(|l| l.name == "Keep") {
                         AgentAnswer::DontUnsubscribe
                     } else {
                         AgentAnswer::Unsubscribe
@@ -486,7 +499,7 @@ fn an_agent_works_on_the_mailbox() {
             .await
             .unwrap();
         assert_eq!(kept_on["unsubscribed"], false, "{kept_on}");
-        assert!(core.agent_log(1).unwrap()[0].entry.summary.starts_with("You did not unsubscribe from Keep"));
+        assert!(core.agent_log(1).unwrap()[0].entry.summary.starts_with("You did not unsubscribe from news@list.example.com"));
         // 30 lists a day
         let earlier: Vec<pe_store::NewLogEntry> = (0..28)
             .map(|_| pe_store::NewLogEntry {

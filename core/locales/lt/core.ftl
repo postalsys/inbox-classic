@@ -801,7 +801,10 @@ agent-unsubscribe-title = { $count ->
    *[other] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašų prenumeratos
 }
 # review: new
-agent-unsubscribe-detail = Inbox Classic paprašo kiekvieno toliau nurodyto sąrašo nebesiųsti jums laiškų tuo vieno spustelėjimo būdu, kurį siūlo sąrašas. Daugiau nieko nesiunčiama, o jūsų turimi laiškai lieka ten, kur yra.
+agent-unsubscribe-detail = { $count ->
+    [1] Inbox Classic paprašo toliau nurodyto sąrašo nebesiųsti jums laiškų tuo vieno spustelėjimo būdu, kurį jis siūlo. Daugiau nieko nesiunčiama, o jūsų turimi laiškai lieka ten, kur yra.
+   *[other] Inbox Classic paprašo kiekvieno toliau nurodyto sąrašo nebesiųsti jums laiškų tuo vieno spustelėjimo būdu, kurį siūlo sąrašas. Daugiau nieko nesiunčiama, o jūsų turimi laiškai lieka ten, kur yra.
+}
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
 
