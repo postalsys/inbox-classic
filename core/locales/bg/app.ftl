@@ -438,8 +438,7 @@ ui-browser-sign-in-server = { $server } (влизане чрез браузър�
 ui-dont-allow = Не разрешавам
 ui-allow = &Разрешаване
 ui-dont-send = Не изпращай
-# review: new
-ui-dont-unsubscribe = Не се отписвай
+ui-dont-unsubscribe = Без отписване
 ui-edit-first = Първо &редактиране
 ui-new-address = Нов адрес
 ui-turn-away = &Отказ на достъп

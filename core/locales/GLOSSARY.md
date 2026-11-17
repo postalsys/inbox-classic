@@ -1050,6 +1050,12 @@ keep the normal plural.
   Unencrypted sending requires removing inherited text/images/attachments. Keep „Кехлибарен“ consistent with
   the reading-security help and quote the folder title „Изпратени“ in prose.
 
+- Agent consent controls use "Отписване" / "Без отписване", with distinct Cyrillic О/Б access keys.
+  "Заявка за отписване" describes a request, not a guarantee. Refusal logs use "Податели:" before addresses.
+- Retain "чернова" / "премахване" for agent-owned drafts and explain permanent removal in help. Saving,
+  including autosave, ends agent access; opening alone does not. "Текстът на подписа" is the optional account footer.
+  Quote folder names in prose, including the rendered "Изтрити" and "Нежелана поща" controls.
+
 ### Русский (ru)
 
 Terms: Входящие; Исходящие; Отправленные; Удаленные; Черновики; Нежелательная почта; сообщение; папка; учетная запись;
