@@ -5,13 +5,14 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review Dutch phase2 draft logs/help, then continue Italian with both agent batches.**
+- **Next: Review the remaining draft notices in German, Spanish, Estonian and French against the new UI snapshot, then continue Italian with both agent batches.**
   Original unsubscribe additions complete: de, es, et, fr, nl. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. All previous reviewed prose is retained.
-  New draft notice/help remains pending: core/FFI exists, but no platform editor displays the notice yet.
-  Phase2 runtime-backed logs/help reviewed: de, es, et, fr. The draft notice and its display-help passage remain pending.
+  New notice UI now exists on all three platforms in an exact recorded uncommitted snapshot.
+  Dutch notice/help is complete; finish the four earlier languages, then the remaining agent queue.
+  Phase2 runtime-backed logs/help reviewed: de, es, et, fr, nl. Fully reviewed phase2 languages: nl.
 - Current scope: 34,232 catalog entries and 1,352 help topics.
-  Completed: 21,300 entries and 788 full topics; pending: 12,932 entries and 564 topics.
+  Completed: 21,303 entries and 790 full topics; pending: 12,929 entries and 562 topics.
   Historical catalog improvements: 3,793. Importing drafts earns no review credit.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
@@ -2384,3 +2385,15 @@ Reviewed two log strings and six help passages in formal vous prose. Both logs w
 French structural checker has1,455 expected mark-only diagnostics and no structural findings. Exact replay verifies2 catalog reviews with0 wording changes and6 help passages with6 wording lines improved. Older prose, placeholders, tags/attributes/platform branches/literal keys and generated IDs retained exactly; unresolved notice unchanged. All platform label joins inspected. Global reconciliation:21,338 unmarked entries,10,669 help lines,14 verified baseline pairs; all latest hashes match. All28 full inventories and since-start1,197 entries/346 passages match. Source audit:43worktrees/184refs, exact integrated snapshots and290 old copies, no unrecorded work. HTML regenerated; git diff --check passes. No tests or build run.
 
 Review Dutch phase2 draft logs/help, then continue Italian with both agent batches. The exact notice string and help paragraph stay marked; no full-topic credit for agents-sending.
+
+## Dutch agent draft review
+
+Reviewed all three new strings and seven help passages. Good Dutch logs and the informational note were kept. Six help lines now describe actual permissions, draft takeover, permanent removal, rule preview, decision polling and attribution placement. Both affected help topics are complete. During this batch, all three platform notice consumers arrived uncommitted; their exact source and existing captures are recorded, so the four earlier languages can now finish their pending notices.
+
+Dutch structural checker has1,456 expected mark-only diagnostics and no structural findings. Exact replay verifies3 catalog reviews with0 wording changes and7 help passages with6 wording lines improved. Both help topics complete; older prose, placeholders, tags/attributes/platform branches/literal keys and generated IDs retained exactly. All platform label joins inspected. New uncommitted notice UI snapshot:7 source files rechecked by hash, existing Windows/macOS/GTK captures inspected, including German narrow encrypted GTK. No GUI/test run claimed. Global reconciliation:21,341 unmarked entries,10,676 help lines,14 verified baseline pairs; latest hashes match. All28 inventories and since-start1,194 entries/339 passages match. Source audit:43worktrees/184refs, exact integrated text snapshots and290 old copies, no additional strings; new runtime work recorded separately. HTML regenerated; git diff --check passes. No test suites or build run.
+
+Review the remaining draft notices in German, Spanish, Estonian and French against the new UI snapshot, then continue Italian with both agent batches. Both affected help topics are complete.
+
+## Agent-draft notice UI arrived during the Dutch batch
+
+The committed source still lacks consumers, but the source worktree now has Windows/macOS/GTK consumers. Seven UI files were captured with exact hashes and diffs in `/private/tmp/inbox-agent-draft-ui-observation.json`. Existing `agents-8-draft.png` captures on all three platforms and a narrow German GTK capture with encryption were inspected. The information bar is below fields and above the editor, wraps as needed, and persists for the window lifetime. It is not a security guarantee. No code was imported and no GUI/test run was performed. Recheck this snapshot before later batches; inspect changes rather than assuming unchanged committed tips mean unchanged runtime work. Dutch completed its notice in the current batch; German/Spanish/Estonian/French retain one notice and one help paragraph each, now ready for context review.
