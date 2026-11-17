@@ -266,8 +266,18 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// the account whose Drafts has that copy, 0 before the first save
     private var draftAccount: Int64 = 0
     private enum Pending {
-        /// refresh: only what was written, for whether it still quotes encrypted mail
-        case none, send, save, saveAndClose, autosave, refresh
+        /// look: only what was written, for whether it still quotes encrypted mail
+        case none, look, autosave, send, save, saveAndClose
+
+        /// which wins when the HTML is asked for twice: the user's own action over the automatic save over a look
+        var weight: Int {
+            switch self {
+            case .none: 0
+            case .look: 1
+            case .autosave: 2
+            case .send, .save, .saveAndClose: 3
+            }
+        }
     }
     private var pending = Pending.none
     private var quoteState = EditorQuote.folded
@@ -301,7 +311,6 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     /// what was written as the editor last gave it: whether it still holds a quote counts while it answers encrypted
     /// mail
     private var lastHtml = ""
-    private var quoteTimer: Timer?
     let securityLine = SecurityBar(id: "compose.security")
     let keysRow = KeyChipsRow()
     private(set) var signButton: NSButton?
@@ -370,10 +379,10 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         (window.contentView as? DropView)?.dropped = { [weak self] in self?.addFiles($0) }
         showFiles()
         filling = false
-        refreshSecurity()
         if encrypt {
             findKeys()
         }
+        refreshSecurity()
         if !TestHooks.testing {
             window.setFrameAutosaveName("Compose")
         }
@@ -618,10 +627,8 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             onMain { self?.htmlArrived(html, quote: quote, edited: edited) }
         }
         handlers.state = { [weak self] in self?.formatBar.showState($0) }
-        handlers.dirty = { [weak self] in
-            self?.changed()
-            self?.textEdited()
-        }
+        handlers.dirty = { [weak self] in self?.changed() }
+        handlers.edited = { [weak self] in self?.textEdited() }
         handlers.send = { [weak self] in self?.request(.send) }
         handlers.save = { [weak self] in self?.request(.save) }
         handlers.dropped = { [weak self] in self?.dropOnText($0) }
@@ -808,8 +815,8 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
             pending = action
             requestedAt = changes
             editor.requestHtml()
-        } else if (pending == .autosave || pending == .refresh) && action != .refresh {
-            // the user's own Send or Save comes after the automatic save the HTML was asked for
+        } else if action.weight > pending.weight {
+            // the HTML asked for already serves the weightier action
             pending = action
         }
     }
@@ -828,7 +835,7 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
         case .save: save(html, close: false)
         case .saveAndClose: save(html, close: true)
         case .autosave: autosave(html)
-        case .refresh, .none: break
+        case .look, .none: break
         }
         // the quote unfolded, edited or deleted: whether it may still go in the clear
         if action != .send && window.isVisible {
@@ -965,7 +972,6 @@ final class ComposeWindow: NSObject, NSWindowDelegate, NSTextFieldDelegate, NSTo
     func windowWillClose(_ notification: Notification) {
         cancelAutosave()
         recipientsTimer?.invalidate()
-        quoteTimer?.invalidate()
         // nothing left to open again after a crash
         if !messageId.isEmpty {
             messageId.withCString { pe_compose_closed(core.handle, $0) }
@@ -1047,16 +1053,15 @@ extension ComposeWindow: RecipientKeysOwner {
 
     private func showSecurity() {
         showSwitches()
-        let line = security.tone != PE_PROTECTION_TONE_NONE && !security.text.isEmpty
-        securityLine.show(tone: line ? security.tone : PE_PROTECTION_TONE_NONE, encrypted: security.encrypt, text: security.text)
+        let line = security.tone != PE_PROTECTION_TONE_NONE
+        securityLine.show(tone: security.tone, encrypted: security.encrypt, text: security.text)
         securityLine.detailsButton.isHidden = !security.encrypt
         formatBarTop.isActive = !line
         formatBarUnderLine.isActive = line
         // the recipients' locks, while Encrypt is on
         keysRow.show(security.recipients)
-        let keys = security.encrypt && !security.recipients.isEmpty
-        if grid.row(at: Row.keys).isHidden == keys {
-            grid.row(at: Row.keys).isHidden = !keys
+        if grid.row(at: Row.keys).isHidden == security.showKeys {
+            grid.row(at: Row.keys).isHidden = !security.showKeys
         }
         keysSheet?.refresh()
     }
@@ -1092,15 +1097,14 @@ extension ComposeWindow: RecipientKeysOwner {
         let request = pe_compose_find_keys(core.handle, account, &message)
         if request != 0 {
             lookups.insert(request)
-            refreshSecurity()
         }
     }
 
-    /// what was written changed: while it answers encrypted mail, whether it still quotes it, once typing stops
+    /// what was written changed (once typing pauses): while the core watches it, whether it still quotes encrypted mail
     private func textEdited() {
-        guard quoteEncrypted else { return }
-        quoteTimer?.invalidate()
-        quoteTimer = after(0.6) { [weak self] in self?.request(.refresh) }
+        if security.watchText {
+            request(.look)
+        }
     }
 
     /// keys were looked up (KeysFound) or changed: a lookup this window started is taken in and told in the status
@@ -1123,28 +1127,9 @@ extension ComposeWindow: RecipientKeysOwner {
     func toggle(_ which: PeComposeSwitch, on: Bool, confirmed: Bool = false) {
         let strings = CStrings()
         var message = outgoing(lastHtml, strings)
-        guard let result = pe_compose_toggle(core.handle, account, &message, which, on, confirmed) else {
-            showSecurity()
-            return
-        }
-        let toggled = result.pointee
-        let question = toggled.question
-        let (said, yes, no) = (text(toggled.text), menuless(text(toggled.yes)), menuless(text(toggled.no)))
-        if toggled.lookup != 0 {
-            lookups.insert(toggled.lookup)
-        }
-        if toggled.sign != sign || toggled.encrypt != encrypt {
-            sign = toggled.sign
-            encrypt = toggled.encrypt
-            changed()
-        }
-        pe_compose_toggled_free(result)
-        refreshSecurity()
-        guard question != PE_COMPOSE_QUESTION_NONE else { return }
-        // the safe answer (Cancel, Keep It Encrypted) is the default; turning encryption off is marked as destructive
-        let off = question == PE_COMPOSE_QUESTION_TURN_OFF_ENCRYPT
-        guard ask(said, yes: yes, no: no, style: off ? .warning : .information, destructive: off, safeDefault: true) else { return }
-        switch question {
+        guard let question = took(pe_compose_toggle(core.handle, account, &message, which, on, confirmed)),
+              asked(question) else { return }
+        switch question.kind {
         case PE_COMPOSE_QUESTION_MAKE_KEY:
             // New Key for the account it goes from, then the switch again
             if KeyActions.makeKey(core: core, accounts: core.accounts().filter { $0.id == account }) != nil {
@@ -1156,6 +1141,45 @@ extension ComposeWindow: RecipientKeysOwner {
         default:
             toggle(which, on: on, confirmed: true)
         }
+    }
+
+    /// a question of the core about the switches
+    private struct Question {
+        let kind: PeComposeQuestion
+        let text: String
+        let yes: String
+        let no: String
+    }
+
+    /// what a click on a switch came to (`pe_compose_toggle`, `pe_compose_send_unencrypted`), taken in: the switches
+    /// it keeps and the lookup it started; its question, nil without one (or on failure)
+    private func took(_ result: UnsafeMutablePointer<PeComposeToggled>?) -> Question? {
+        guard let result else {
+            showSecurity()
+            return nil
+        }
+        defer { pe_compose_toggled_free(result) }
+        let toggled = result.pointee
+        if toggled.lookup != 0 {
+            lookups.insert(toggled.lookup)
+        }
+        if toggled.sign != sign || toggled.encrypt != encrypt {
+            sign = toggled.sign
+            encrypt = toggled.encrypt
+            changed()
+        }
+        refreshSecurity()
+        guard toggled.question != PE_COMPOSE_QUESTION_NONE else { return nil }
+        let word = { (index: UInt32) in Text(rawValue: index)?.opens ?? "" }
+        return Question(kind: toggled.question, text: text(toggled.text), yes: word(toggled.yes), no: word(toggled.no))
+    }
+
+    /// the core's question asked, true on Yes: the safe answer (Cancel, Keep It Encrypted) is the default, turning
+    /// encryption off is marked as destructive
+    private func asked(_ question: Question) -> Bool {
+        let off = question.kind == PE_COMPOSE_QUESTION_TURN_OFF_ENCRYPT
+        return ask(question.text, yes: question.yes, no: question.no, style: off ? .warning : .information, destructive: off,
+                   safeDefault: true)
     }
 
     @objc func signClicked() {
@@ -1231,12 +1255,23 @@ extension ComposeWindow: RecipientKeysOwner {
         case .send:
             request(.send)
         case .sendUnencrypted:
-            encrypt = false
-            changed()
-            refreshSecurity()
-            request(.send)
+            sendUnencrypted()
         case .cancel:
             break
+        }
+    }
+
+    /// Send Without Encryption: Encrypt off as the core has it (asking first while the message carries something
+    /// encrypted), then Send
+    private func sendUnencrypted() {
+        let strings = CStrings()
+        var message = outgoing(lastHtml, strings)
+        if let question = took(pe_compose_send_unencrypted(core.handle, account, &message)) {
+            guard asked(question) else { return }
+            toggle(PE_COMPOSE_SWITCH_ENCRYPT, on: false, confirmed: true)
+        }
+        if !encrypt {
+            request(.send)
         }
     }
 

@@ -6,10 +6,12 @@ import AppKit
 import CInboxClassic
 
 /// A recipient and their key, as the core gave them
-struct ComposeRecipientKey {
+struct ComposeRecipientKey: Equatable {
     let address: String
     let label: String
     let key: PeRecipientKey
+    /// it can be encrypted to now (verified, found or the user's own key)
+    let hasKey: Bool
     let tone: PeProtectionTone
     let text: String
     let pending: String?
@@ -17,9 +19,6 @@ struct ComposeRecipientKey {
 
     /// the words of its tooltip: the key, and the new one waiting
     var tip: String { [text, pending].compactMap { $0 }.joined(separator: "\n") }
-
-    /// a key it is encrypted to (verified, found, the user's own)
-    var hasKey: Bool { [PE_RECIPIENT_KEY_VERIFIED, PE_RECIPIENT_KEY_FOUND, PE_RECIPIENT_KEY_OWN].contains(key) }
 
     /// its picture, telling the states apart without colour: the lock of a key it is encrypted to, the hourglass while
     /// it is looked up, the warning sign without one
@@ -38,17 +37,25 @@ struct ComposeSecurityState {
     var signEnabled = true
     var encrypt = false
     var hasOwnKey = false
+    /// the line's colour; NONE: no line
     var tone = PE_PROTECTION_TONE_NONE
     var text = ""
     var signTip = ""
     var encryptTip = ""
     var block = PE_COMPOSE_BLOCK_NONE
     var blockText = ""
-    var missing = 0
     var looking = false
     var keysIntro = ""
     var canSendUnencrypted = false
     var unencryptedText = ""
+    /// Send in Recipients' Keys can send encrypted
+    var canSend = false
+    /// Send, else Cancel, is Recipients' Keys' default button
+    var sendDefault = false
+    /// the Keys row shows
+    var showKeys = false
+    /// the text is looked at again when it is edited (`edited`): it answers encrypted mail and goes in the clear
+    var watchText = false
     var recipients: [ComposeRecipientKey] = []
 
     init() {}
@@ -68,24 +75,21 @@ struct ComposeSecurityState {
         encryptTip = InboxClassicKit.text(info.encrypt_tip)
         block = info.block
         blockText = InboxClassicKit.text(info.block_text)
-        missing = info.missing
         looking = info.looking
         keysIntro = InboxClassicKit.text(info.keys_intro)
         canSendUnencrypted = info.can_send_unencrypted
         unencryptedText = InboxClassicKit.text(info.unencrypted_text)
+        canSend = info.can_send
+        sendDefault = info.send_default
+        showKeys = info.show_keys
+        watchText = info.watch_text
         recipients = (0..<pe_compose_security_count(handle)).compactMap { pe_compose_security_recipient(handle, $0)?.pointee }
             .map { row in
                 ComposeRecipientKey(address: InboxClassicKit.text(row.address), label: InboxClassicKit.text(row.label), key: row.key,
-                                    tone: row.tone, text: InboxClassicKit.text(row.text),
+                                    hasKey: row.has_key, tone: row.tone, text: InboxClassicKit.text(row.text),
                                     pending: row.pending.map { String(cString: $0) }, canFind: row.can_find)
             }
     }
-}
-
-/// A word of the core with its menu letter (&) taken out, and "..." as the Mac writes it
-func menuless(_ word: String) -> String {
-    word.replacingOccurrences(of: "&&", with: "\u{1}").replacingOccurrences(of: "&", with: "")
-        .replacingOccurrences(of: "\u{1}", with: "&").replacingOccurrences(of: "...", with: "\u{2026}")
 }
 
 /// A picture of the system at the size of small text, a template for the colour of its tone
@@ -203,9 +207,7 @@ final class KeyChipsRow: NSView {
     var shown: Int { chips.filter { !$0.isHidden }.count }
 
     func show(_ recipients: [ComposeRecipientKey]) {
-        let same = recipients.map { "\($0.address)\u{1}\($0.label)\u{1}\($0.tone.rawValue)\u{1}\($0.tip)\u{1}\($0.key.rawValue)" }
-            == self.recipients.map { "\($0.address)\u{1}\($0.label)\u{1}\($0.tone.rawValue)\u{1}\($0.tip)\u{1}\($0.key.rawValue)" }
-        guard !same else { return }
+        guard recipients != self.recipients else { return }
         self.recipients = recipients
         chips.forEach { $0.removeFromSuperview() }
         chips = recipients.map { KeyChip($0) { [weak self] in self?.clicked() } }
@@ -282,17 +284,19 @@ final class RecipientKeysSheet: NSObject, NSTableViewDataSource, NSTableViewDele
     private var answer = Answer.cancel
     private let intro = wrappingLabel("")
     let table = NSTableView()
-    let findButton = NSButton(title: menuless(Text.uiRecipientFindKey.text), target: nil, action: nil)
-    let removeButton = NSButton(title: menuless(Text.uiRecipientRemove.text), target: nil, action: nil)
-    let unencryptedButton = NSButton(title: menuless(Text.uiSendUnencrypted.text), target: nil, action: nil)
+    let findButton = NSButton(title: Text.uiRecipientFindKey.opens, target: nil, action: nil)
+    let removeButton = NSButton(title: Text.uiRecipientRemove.opens, target: nil, action: nil)
+    let unencryptedButton = NSButton(title: Text.uiSendUnencrypted.opens, target: nil, action: nil)
     let sendButton = NSButton(title: Text.uiTbSend.text, target: nil, action: nil)
+    /// Esc is the window's (`TextDialogWindow`), as Return goes to Cancel or Send as the core says
+    let cancelButton = NSButton(title: Text.uiCancel.text, target: nil, action: nil)
     private let unencryptedNote = NSTextField(wrappingLabelWithString: "")
     private(set) var rows: [ComposeRecipientKey] = []
 
     init(owner: RecipientKeysOwner) {
         self.owner = owner
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 380), styleMask: [.titled], backing: .buffered,
-                          defer: true)
+        window = TextDialogWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 380), styleMask: [.titled],
+                                  backing: .buffered, defer: true)
         window.autorecalculatesKeyViewLoop = true
         window.title = Text.uiRecipientKeysTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("recipient.keys")
@@ -328,15 +332,14 @@ final class RecipientKeysSheet: NSObject, NSTableViewDataSource, NSTableViewDele
         }
         let rowButtons = NSStackView(views: [findButton, removeButton])
         rowButtons.spacing = 8
-        sendButton.keyEquivalent = "\r"
-        let cancel = NSButton(title: Text.uiCancel.text, target: self, action: #selector(cancelClicked))
-        cancel.keyEquivalent = "\u{1b}"
-        cancel.setAccessibilityIdentifier("recipient.keys.cancel")
+        cancelButton.target = self
+        cancelButton.action = #selector(cancelClicked)
+        cancelButton.setAccessibilityIdentifier("recipient.keys.cancel")
         unencryptedNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
         unencryptedNote.textColor = .secondaryLabelColor
         unencryptedNote.setAccessibilityIdentifier("recipient.keys.note")
         // Send Without Encryption apart from the two that end the sheet, as Mac sheets keep a third choice
-        let buttons = buttonRow([unencryptedButton, cancel, sendButton], help: "recipient-keys")
+        let buttons = buttonRow([unencryptedButton, cancelButton, sendButton], help: "recipient-keys")
         buttons.setCustomSpacing(24, after: unencryptedButton)
         let stack = NSStackView(views: [heading, intro, scroll, rowButtons, unencryptedNote, buttons])
         stack.orientation = .vertical
@@ -374,7 +377,10 @@ final class RecipientKeysSheet: NSObject, NSTableViewDataSource, NSTableViewDele
             table.selectRowIndexes(IndexSet(integer: index), byExtendingSelection: false)
         }
         intro.stringValue = state.keysIntro
-        sendButton.isEnabled = state.missing == 0 && !rows.isEmpty
+        sendButton.isEnabled = state.canSend
+        // Return: Send once it can go, else Cancel
+        sendButton.keyEquivalent = state.sendDefault ? "\r" : ""
+        cancelButton.keyEquivalent = state.sendDefault ? "" : "\r"
         unencryptedButton.isEnabled = state.canSendUnencrypted
         unencryptedButton.toolTip = state.canSendUnencrypted ? nil : state.unencryptedText
         unencryptedNote.stringValue = state.unencryptedText
@@ -443,8 +449,8 @@ final class RecipientKeysSheet: NSObject, NSTableViewDataSource, NSTableViewDele
                 note.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
                 note.textColor = .secondaryLabelColor
                 note.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-                let useNew = NSButton(title: menuless(Text.uiContactKeyUseNew.text), target: self, action: #selector(useNewClicked(_:)))
-                let keep = NSButton(title: menuless(Text.uiContactKeyKeep.text), target: self, action: #selector(keepClicked(_:)))
+                let useNew = NSButton(title: Text.uiContactKeyUseNew.opens, target: self, action: #selector(useNewClicked(_:)))
+                let keep = NSButton(title: Text.uiContactKeyKeep.opens, target: self, action: #selector(keepClicked(_:)))
                 for button in [useNew, keep] {
                     button.controlSize = .small
                     button.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
