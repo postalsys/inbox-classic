@@ -497,6 +497,11 @@ function WaitWindow([string]$class, [string]$title = $null, [int]$Seconds = 20) 
 function WaitShown([string]$class, [int]$Seconds = 20) {
     WaitFor { $w = [Native.Win]::FindWindow($class, [NullString]::Value); if ($w -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($w)) { $w } } $Seconds
 }
+# a form of the app with this title once it shows. FindWindow finds it as soon as it is made, before its fields are: a
+# field set then is lost, and OK takes what the form filled in itself (Find's the words of the last find)
+function WaitForm([string]$title, [int]$Seconds = 20) {
+    WaitFor { $w = [Native.Win]::FindWindow('InboxClassicForm', $title); if ($w -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($w)) { $w } } $Seconds
+}
 # Options' page $page (0 General, 1 Reading, 2 Downloading, as core/settings.toml orders them) chosen by a click on its
 # tab, posted to the tab strip (app.h: IDC_OPTIONS_TABS, 680) at the middle of the tab (TCM_GETITEMRECT)
 function OptionsPage([IntPtr]$options, [int]$page) {
@@ -2264,7 +2269,7 @@ public static class Dragger {
     function FoundInSecure([string]$words) {
         for ($try = 0; $try -lt 3; $try++) {
             Command $main $IDM_FIND_IN_MESSAGE
-            $form = WaitWindow 'InboxClassicForm' 'Find in This Message' 10
+            $form = WaitForm 'Find in This Message' 10
             if (-not $form) { return $false }
             SetText $form 100 $words
             Click $form 1
@@ -3374,7 +3379,7 @@ public static class Dragger {
     $foundInMessage = {
         param([string]$words)
         Command $main $IDM_FIND_IN_MESSAGE
-        $form = WaitWindow 'InboxClassicForm' 'Find in This Message' 10
+        $form = WaitForm 'Find in This Message' 10
         if (-not $form) { return $false }
         SetText $form 100 $words
         Click $form 1
@@ -4184,7 +4189,7 @@ public static class Dragger {
     $newsRow = WaitFor { $r = @(SubjectRows $newsletter); if ($r.Count) { "$($r[0])" } } 10
     if ($newsRow) { SelectRow ([int]$newsRow) }
     Command $main $IDM_FIND_IN_MESSAGE
-    $findForm = WaitWindow 'InboxClassicForm' 'Find in This Message' 10
+    $findForm = WaitForm 'Find in This Message' 10
     Check ($null -ne $findForm) 'Find in This Message asks for the words'
     if ($findForm) {
         SetText $findForm 100 'larches'
@@ -4195,7 +4200,7 @@ public static class Dragger {
         Shot $main 'read-17-find'
     }
     Command $main $IDM_FIND_IN_MESSAGE
-    $findForm = WaitWindow 'InboxClassicForm' 'Find in This Message' 10
+    $findForm = WaitForm 'Find in This Message' 10
     if ($findForm) {
         SetText $findForm 100 'zeppelins'
         Click $findForm 1
@@ -5475,7 +5480,7 @@ public static class Dragger {
     }
     Command $main $IDM_NEW_ACCOUNT
     AddAccount 'Work' 'testuser2' 'not-the-password' $false $true
-    $logon = WaitWindow 'InboxClassicForm' 'Logon' 30
+    $logon = WaitForm 'Logon' 30
     Check ($null -ne $logon) 'a refused password is asked for again'
     if ($logon) {
         $status = [Native.Win]::FindWindowEx($main, [IntPtr]::Zero, 'msctls_statusbar32', [NullString]::Value)
