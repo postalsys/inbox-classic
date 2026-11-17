@@ -75,7 +75,7 @@ fn action_state(c: &Compose, command: Command) -> (bool, bool) {
     (state, action.is_some_and(|a| a.is_enabled()))
 }
 
-fn line(c: &Compose) -> (String, String, String) {
+fn line(c: &Compose) -> (String, String, Vec<String>) {
     c.protection.line.shown().unwrap_or_default()
 }
 
@@ -192,8 +192,8 @@ async fn signing(d: &Driver) {
     d.check(
         text == "Signed: recipients can check that it comes from you and was not changed."
             && tone == "good"
-            && icon == "ic-ribbon-symbolic",
-        &format!("the line says it is signed, in blue with the ribbon ({tone}, {icon}: {text})"),
+            && icon == ["ic-ribbon-symbolic"],
+        &format!("the line says it is signed, in blue with the ribbon ({tone}, {icon:?}: {text})"),
     );
     d.check(!c.keys_row[1].is_visible(), "there is no Keys row while Encrypt is off");
     d.shot(&c.window, "write-30-sign").await;
@@ -246,8 +246,8 @@ async fn encrypting(d: &Driver) {
     d.check(
         text == "Encrypted and signed: only you and Alice Example can read it."
             && tone == "verified"
-            && icon == "ic-lock-closed-symbolic",
-        &format!("the line says who can read it, in green with the lock ({tone}, {icon}: {text})"),
+            && icon == ["ic-lock-closed-symbolic", "ic-shield-checkmark-symbolic"],
+        &format!("the line says who can read it, in green with the lock and the shield ({tone}, {icon:?}: {text})"),
     );
     d.shot(&c.window, "write-31-encrypt").await;
     in_dark(d, &c.window, "write-31-encrypt-dark").await;
@@ -466,7 +466,7 @@ async fn reply_to_encrypted(d: &Driver) {
     let (text, _, icon) = line(&c);
     d.check(
         off && text.contains("can only be sent encrypted")
-            && icon == "ic-warning-symbolic"
+            && icon == ["ic-warning-symbolic"]
             && p.sign_button.is_active()
             && p.sign_button.is_sensitive()
             && !c.keys_row[1].is_visible(),
@@ -488,7 +488,7 @@ async fn reply_to_encrypted(d: &Driver) {
     pause(500).await;
     d.check(c.window.is_visible(), "and the message stays open");
     c.editor.run_script(
-        "document.getElementById('more').click();var q=document.querySelector('#body > div.quoted');if(q)q.remove();",
+        "document.getElementById('more').click();var q=document.querySelector('#body > div.quoted');if(q)q.remove();document.getElementById('body').dispatchEvent(new Event('input'));",
     );
     let clear = wait_until(10, || {
         line(&c).0 == "Not encrypted, although the message it answers or forwards was."

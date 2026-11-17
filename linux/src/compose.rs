@@ -369,6 +369,18 @@ enum Pending {
     Look,
 }
 
+impl Pending {
+    /// Which of two requests the HTML on its way serves
+    fn weight(self) -> u8 {
+        match self {
+            Pending::None => 0,
+            Pending::Look => 1,
+            Pending::Autosave => 2,
+            Pending::Send | Pending::Save | Pending::SaveAndClose => 3,
+        }
+    }
+}
+
 /// How closing a message window went
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Closing {
@@ -884,7 +896,8 @@ impl Compose {
 
     fn editor_handlers(self: &Rc<Self>) {
         let w = || Rc::downgrade(self);
-        let (html, state, dirty, send, save, link, edit_link, dropped) = (w(), w(), w(), w(), w(), w(), w(), w());
+        let (html, state, dirty, edited, send, save) = (w(), w(), w(), w(), w(), w());
+        let (link, edit_link, dropped) = (w(), w(), w());
         self.editor.set_handlers(Handlers {
             html: Some(Box::new(move |body, quote| {
                 if let Some(this) = html.upgrade() {
@@ -900,6 +913,11 @@ impl Compose {
             dirty: Some(Box::new(move || {
                 if let Some(this) = dirty.upgrade() {
                     this.changed();
+                }
+            })),
+            edited: Some(Box::new(move || {
+                if let Some(this) = edited.upgrade() {
+                    crate::compose_keys::edited(&this);
                 }
             })),
             send: Some(Box::new(move || {
@@ -1189,24 +1207,19 @@ impl Compose {
 
     // ---- sending and saving ----
 
-    /// The editor's HTML is asked for first, the action follows when it comes
+    /// The editor's HTML is asked for first, the action follows when it comes. One asked while the HTML is on its way
+    /// replaces the one waiting when it weighs more: a look, then the automatic save, then the user's own Send or Save
     fn request(&self, action: Pending) {
         let pending = self.pending.get();
+        if action.weight() <= pending.weight() {
+            return;
+        }
+        self.pending.set(action);
+        if action != Pending::Look {
+            self.requested_at.set(self.changes.get());
+        }
         if pending == Pending::None {
-            self.pending.set(action);
-            if action != Pending::Look {
-                self.requested_at.set(self.changes.get());
-            }
             self.editor.html();
-        } else if matches!(pending, Pending::Autosave | Pending::Look)
-            && !matches!(action, Pending::Autosave | Pending::Look)
-        {
-            // the user's own Send or Save comes after the automatic save or the look the HTML was asked for
-            self.pending.set(action);
-            self.requested_at.set(self.changes.get());
-        } else if pending == Pending::Look && action == Pending::Autosave {
-            self.pending.set(action);
-            self.requested_at.set(self.changes.get());
         }
     }
 
@@ -1215,7 +1228,7 @@ impl Compose {
         self.request(Pending::Send);
     }
 
-    /// The editor's HTML asked for, only for the line under the fields
+    /// The editor's HTML asked for, only for the line under the fields (while its text is watched)
     pub(crate) fn look_at_html(&self) {
         self.request(Pending::Look);
     }

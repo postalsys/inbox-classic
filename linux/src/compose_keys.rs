@@ -14,14 +14,13 @@ use pe_core::protect::Tone;
 use crate::app::{shell, spawn};
 use crate::commands::Command;
 use crate::compose::Compose;
-use crate::security::{TONE_CLASSES, follow_dark, tone_class};
+#[cfg(feature = "e2e")]
+use crate::security::TONE_CLASSES;
+use crate::security::{SecurityBar, follow_dark, set_tone};
 use crate::ui::{self, TITLE};
 
 /// How long the address fields wait after the last key before the locks follow them
 const RECIPIENTS_WAIT_MS: u64 = 400;
-/// How often a message that answers encrypted mail, with Encrypt off, looks at its quote again (the editor tells no
-/// change of it): its line says whether the quote is still there
-const QUOTE_LOOK_MS: u64 = 1000;
 /// How many recipients the Keys row shows before "+3"
 const CHIPS_SHOWN: usize = 8;
 
@@ -55,28 +54,6 @@ fn key_picture(key: RecipientKey) -> gtk::Widget {
     }
 }
 
-fn set_tone(widget: &impl IsA<gtk::Widget>, tone: Tone) {
-    for class in TONE_CLASSES {
-        widget.as_ref().remove_css_class(class);
-    }
-    widget.as_ref().add_css_class(tone_class(tone));
-}
-
-/// The widget named `name` in `root`
-fn named_below(root: &gtk::Widget, name: &str) -> Option<gtk::Widget> {
-    let mut child = root.first_child();
-    while let Some(at) = child {
-        if at.widget_name() == name {
-            return Some(at);
-        }
-        if let Some(found) = named_below(&at, name) {
-            return Some(found);
-        }
-        child = at.next_sibling();
-    }
-    None
-}
-
 /// The words of the labels in `root`
 #[cfg(feature = "e2e")]
 fn label_texts(root: Option<&gtk::Widget>) -> Vec<String> {
@@ -101,91 +78,6 @@ fn recipient_tip(recipient: &Recipient) -> String {
     }
 }
 
-// ---- the line under the fields ----
-
-/// The line under the fields: what will happen to the message, in the tone's colours with a picture that says the same
-/// (the lock when encrypted, the ribbon when only signed, the warning sign), and Details while Encrypt is on
-pub struct SecurityLine {
-    pub widget: gtk::Box,
-    icon: gtk::Image,
-    text: gtk::Label,
-    pub details: gtk::Button,
-}
-
-impl SecurityLine {
-    fn new() -> SecurityLine {
-        let icon = gtk::Image::new();
-        icon.set_pixel_size(16);
-        icon.set_valign(gtk::Align::Center);
-        icon.set_accessible_role(gtk::AccessibleRole::Presentation);
-        icon.set_widget_name("compose-security-icon");
-        let text = gtk::Label::new(None);
-        text.set_xalign(0.0);
-        text.set_hexpand(true);
-        text.set_valign(gtk::Align::Center);
-        // the whole sentence on more lines in a narrow window or a long language, never cut off
-        text.set_wrap(true);
-        text.set_wrap_mode(gtk::pango::WrapMode::WordChar);
-        text.set_widget_name("compose-security-text");
-        let details = gtk::Button::with_mnemonic(&gtk_mnemonic(&t!(UiProtectionDetails)).replace("...", "…"));
-        details.set_valign(gtk::Align::Center);
-        details.set_widget_name("compose-security-details");
-        let widget = gtk::Box::builder()
-            .orientation(gtk::Orientation::Horizontal)
-            .spacing(8)
-            .accessible_role(gtk::AccessibleRole::Group)
-            .visible(false)
-            .build();
-        widget.add_css_class("security-bar");
-        widget.set_widget_name("compose-security");
-        widget.append(&icon);
-        widget.append(&text);
-        widget.append(&details);
-        SecurityLine {
-            widget,
-            icon,
-            text,
-            details,
-        }
-    }
-
-    fn show(&self, security: &ComposeSecurity) {
-        let Some(tone) = security.tone else {
-            self.widget.set_visible(false);
-            return;
-        };
-        set_tone(&self.widget, tone);
-        let icon = if tone == Tone::Warning {
-            "ic-warning-symbolic"
-        } else if security.encrypt {
-            "ic-lock-closed-symbolic"
-        } else {
-            "ic-ribbon-symbolic"
-        };
-        self.icon.set_icon_name(Some(icon));
-        self.text.set_text(&security.text);
-        self.details.set_visible(security.encrypt);
-        self.widget
-            .update_property(&[gtk::accessible::Property::Label(&security.text)]);
-        self.widget.set_visible(true);
-    }
-
-    /// Its words, its tone and its picture (the UI test reads them); None when hidden
-    #[cfg(feature = "e2e")]
-    pub fn shown(&self) -> Option<(String, String, String)> {
-        if !self.widget.is_visible() {
-            return None;
-        }
-        let tone = TONE_CLASSES
-            .iter()
-            .find(|class| self.widget.has_css_class(class))
-            .map(|class| class.trim_start_matches("security-").to_string())
-            .unwrap_or_default();
-        let icon = self.icon.icon_name().map(|n| n.to_string()).unwrap_or_default();
-        Some((self.text.text().to_string(), tone, icon))
-    }
-}
-
 // ---- the switches, the line, the locks: what a compose window has of them ----
 
 /// What a compose window has of signing and encrypting: the switches as the user set them (Sign apart from Encrypt),
@@ -200,20 +92,18 @@ pub struct Protection {
     lookups: RefCell<Vec<u64>>,
     /// The editor's HTML as it came last, and where its quote was: what the line judges the quote by between sends
     pub written: RefCell<(String, crate::editor::Quote)>,
-    /// The address fields as they were at the last lookup
-    asked_for: RefCell<String>,
     pub sign_button: gtk::ToggleButton,
     pub encrypt_button: gtk::ToggleButton,
     pub menu_button: gtk::MenuButton,
     pub actions: gio::SimpleActionGroup,
-    pub line: SecurityLine,
+    /// The line under the fields: what will happen to the message, Details while Encrypt is on
+    pub line: SecurityBar,
     /// The Keys row: one chip per recipient
     pub keys: gtk::FlowBox,
     pub keys_dialog: RefCell<Option<Rc<RecipientKeys>>>,
     /// While the window shows what the core said, a switch's change is not the user's
     updating: Cell<bool>,
     recipients_timer: RefCell<Option<glib::SourceId>>,
-    quote_timer: RefCell<Option<glib::SourceId>>,
 }
 
 /// The name of a compose command's action in the window's `compose` group
@@ -275,9 +165,8 @@ impl Protection {
         keys.update_property(&[gtk::accessible::Property::Label(&crate::words::field_title(
             crate::words::Text::UiFieldKeys,
         ))]);
-        let line = SecurityLine::new();
-        // the dark colours of the tones while the windows are dark
-        follow_dark(&line.widget);
+        let line = SecurityBar::new("compose");
+        // the dark colours of the tones while the windows are dark (the line follows them by itself)
         follow_dark(&keys);
         Protection {
             sign: Cell::new(false),
@@ -286,7 +175,6 @@ impl Protection {
             security: RefCell::default(),
             lookups: RefCell::default(),
             written: RefCell::new((String::new(), crate::editor::Quote::Folded)),
-            asked_for: RefCell::default(),
             sign_button,
             encrypt_button,
             menu_button,
@@ -296,7 +184,6 @@ impl Protection {
             keys_dialog: RefCell::default(),
             updating: Cell::new(false),
             recipients_timer: RefCell::default(),
-            quote_timer: RefCell::default(),
         }
     }
 
@@ -304,12 +191,10 @@ impl Protection {
         self.actions.lookup_action(command.name()).and_downcast()
     }
 
-    /// The timers stopped: the window is going
+    /// The timer stopped: the window is going
     pub fn stop(&self) {
-        for timer in [&self.recipients_timer, &self.quote_timer] {
-            if let Some(timer) = timer.take() {
-                timer.remove();
-            }
+        if let Some(timer) = self.recipients_timer.take() {
+            timer.remove();
         }
     }
 
@@ -332,8 +217,13 @@ impl Protection {
             attach.set_enabled(security.has_own_key);
         }
         self.updating.set(false);
-        self.line.show(security);
-        self.fill_keys(security, open_keys);
+        self.line.show_tone(security.tone, security.encrypt, &security.text);
+        self.line.details.set_visible(security.encrypt);
+        // the chips made again only when the recipients or their keys changed
+        let same = self.security.borrow().as_ref().map(|s| &s.recipients) == Some(&security.recipients);
+        if !same {
+            self.fill_keys(security, open_keys);
+        }
         if let Some(dialog) = self.keys_dialog.borrow().as_ref() {
             dialog.fill(security);
         }
@@ -470,7 +360,7 @@ pub fn connect(compose: &Rc<Compose>) {
     let weak = Rc::downgrade(compose);
     p.line.details.connect_clicked(move |_| {
         if let Some(this) = weak.upgrade() {
-            spawn(async move { recipient_keys(&this, false).await });
+            spawn(async move { recipient_keys(&this).await });
         }
     });
     // the locks follow the address fields once typing stops, and at once when the field is left
@@ -534,18 +424,16 @@ pub fn opened(compose: &Rc<Compose>) {
     recipients_changed(compose);
 }
 
-/// The recipients as they are now: with Encrypt on the keys of new ones looked up, and the locks shown
+/// The recipients as they are now: with Encrypt on the keys of new ones looked up (the core skips those being looked
+/// up or asked in vain lately), and the locks shown
 fn recipients_changed(compose: &Rc<Compose>) {
     let p = &compose.protection;
-    let fields = format!("{}\n{}\n{}", compose.to.text(), compose.cc.text(), compose.bcc.text());
-    if p.encrypt.get() && *p.asked_for.borrow() != fields {
-        if let Ok(Some(request)) = shell()
+    if p.encrypt.get()
+        && let Ok(Some(request)) = shell()
             .core
             .compose_find_keys(compose.account.get(), &compose.outgoing_now())
-        {
-            p.lookups.borrow_mut().push(request);
-        }
-        *p.asked_for.borrow_mut() = fields;
+    {
+        p.lookups.borrow_mut().push(request);
     }
     refresh(compose);
 }
@@ -562,42 +450,34 @@ pub fn refresh(compose: &Rc<Compose>) {
     let weak = Rc::downgrade(compose);
     let open_keys: Rc<dyn Fn()> = Rc::new(move || {
         if let Some(this) = weak.upgrade() {
-            spawn(async move { recipient_keys(&this, false).await });
+            spawn(async move { recipient_keys(&this).await });
         }
     });
     p.show(&security, &open_keys);
-    // the Keys row only while Encrypt is on
     for widget in &compose.keys_row {
-        widget.set_visible(security.encrypt);
+        widget.set_visible(security.show_keys);
     }
-    look_at_quote(compose, p.quote_encrypted.get() && !security.encrypt);
+    // the text as it is now once it starts to matter: it may have changed while it was not watched
+    let watched = p.security.borrow().as_ref().is_some_and(|s| s.watch_text);
+    let look = security.watch_text && !watched;
     *p.security.borrow_mut() = Some(security);
+    if look {
+        compose.look_at_html();
+    }
 }
 
-/// While a message that answers encrypted mail goes without encryption, its quote is looked at every second: the line
-/// says once it is gone
-fn look_at_quote(compose: &Rc<Compose>, on: bool) {
-    let p = &compose.protection;
-    if !on {
-        if let Some(timer) = p.quote_timer.take() {
-            timer.remove();
-        }
-        return;
+/// The editor's text changed: while it decides what Send does (a quote of encrypted mail in a message going without
+/// encryption), the line looks at it again
+pub fn edited(compose: &Rc<Compose>) {
+    if compose
+        .protection
+        .security
+        .borrow()
+        .as_ref()
+        .is_some_and(|s| s.watch_text)
+    {
+        compose.look_at_html();
     }
-    if p.quote_timer.borrow().is_some() {
-        return;
-    }
-    let weak = Rc::downgrade(compose);
-    let timer = glib::timeout_add_local(std::time::Duration::from_millis(QUOTE_LOOK_MS), move || {
-        match weak.upgrade() {
-            Some(this) => {
-                this.look_at_html();
-                glib::ControlFlow::Continue
-            }
-            None => glib::ControlFlow::Break,
-        }
-    });
-    *p.quote_timer.borrow_mut() = Some(timer);
 }
 
 /// The switches as a click left them: the window's, a lookup it started remembered, the message changed
@@ -607,7 +487,6 @@ fn apply(compose: &Rc<Compose>, toggled: &Toggled) {
     let changed = (p.encrypt.replace(toggled.encrypt) != toggled.encrypt) || changed;
     if let Some(request) = toggled.lookup {
         p.lookups.borrow_mut().push(request);
-        *p.asked_for.borrow_mut() = format!("{}\n{}\n{}", compose.to.text(), compose.cc.text(), compose.bcc.text());
     }
     if changed {
         compose.changed();
@@ -692,7 +571,7 @@ pub async fn may_send(compose: &Rc<Compose>, outgoing: &pe_core::Outgoing) -> bo
     match security.block {
         Block::None => true,
         Block::MissingKeys => {
-            recipient_keys(compose, true).await;
+            recipient_keys(compose).await;
             false
         }
         Block::NoOwnKey => {
@@ -766,13 +645,13 @@ pub struct RecipientKeys {
     pub cancel: gtk::Button,
     pub unencrypted: gtk::Button,
     note: gtk::Label,
-    /// Opened by Send: Send is the default once every recipient has a key
-    from_send: bool,
     act: Rc<dyn Fn(RowAction)>,
+    /// The recipients its rows show
+    shown: RefCell<Vec<Recipient>>,
 }
 
 impl RecipientKeys {
-    fn new(from_send: bool, act: Rc<dyn Fn(RowAction)>, answer: async_channel::Sender<KeysAnswer>) -> RecipientKeys {
+    fn new(act: Rc<dyn Fn(RowAction)>, answer: async_channel::Sender<KeysAnswer>) -> RecipientKeys {
         let intro = ui::wrapped_label("");
         intro.set_widget_name("recipient-keys-intro");
         let list = gtk::ListBox::new();
@@ -847,45 +726,37 @@ impl RecipientKeys {
             cancel,
             unencrypted,
             note,
-            from_send,
             act,
+            shown: RefCell::default(),
         }
     }
 
-    /// The window as the core says it now; the focus kept on the row it was in
+    /// The window as the core says it now; its rows made again only when the recipients or their keys changed
     fn fill(&self, security: &ComposeSecurity) {
-        let focused = self
-            .dialog
-            .focus()
-            .filter(|f| f.is_ancestor(&self.list))
-            .map(|f| f.widget_name().to_string());
         self.intro.set_text(&security.keys_intro);
-        self.list.remove_all();
-        for (index, recipient) in security.recipients.iter().enumerate() {
-            self.list.append(&self.row(index, recipient));
-            if let Some(pending) = &recipient.pending {
-                self.list.append(&self.pending_row(index, recipient, pending));
+        if *self.shown.borrow() != security.recipients {
+            self.list.remove_all();
+            for (index, recipient) in security.recipients.iter().enumerate() {
+                self.list.append(&self.row(index, recipient));
+                if let Some(pending) = &recipient.pending {
+                    self.list.append(&self.pending_row(index, recipient, pending));
+                }
             }
+            *self.shown.borrow_mut() = security.recipients.clone();
         }
-        let ready = security.missing == 0 && !security.recipients.is_empty();
-        self.send.set_sensitive(ready);
+        self.send.set_sensitive(security.can_send);
         self.unencrypted.set_sensitive(security.can_send_unencrypted);
         // why it can not go without encryption, under its button
         self.note.set_text(&security.unencrypted_text);
         self.note.set_visible(!security.can_send_unencrypted);
         self.unencrypted
             .set_tooltip_text((!security.can_send_unencrypted).then_some(security.unencrypted_text.as_str()));
-        let default = if ready && self.from_send {
+        let default = if security.send_default {
             &self.send
         } else {
             &self.cancel
         };
         self.dialog.set_default_widget(Some(default));
-        if let Some(name) = focused
-            && let Some(widget) = named_below(self.list.upcast_ref(), &name)
-        {
-            widget.grab_focus();
-        }
     }
 
     fn row(&self, index: usize, recipient: &Recipient) -> adw::ActionRow {
@@ -908,11 +779,7 @@ impl RecipientKeys {
         // the lock in the tone's colour, as on the Keys row
         badge.add_css_class("security-tint");
         row.add_prefix(&badge);
-        let usable = matches!(
-            recipient.key,
-            RecipientKey::Verified | RecipientKey::Found | RecipientKey::Own
-        );
-        if !usable {
+        if !recipient.has_key {
             let find = gtk::Button::with_mnemonic(&gtk_mnemonic(&t!(UiRecipientFindKey)));
             find.set_valign(gtk::Align::Center);
             find.set_sensitive(recipient.can_find);
@@ -966,9 +833,9 @@ impl RecipientKeys {
     }
 }
 
-/// Recipients' Keys over the compose window (once); `from_send` when Send opened it. Send there sends, Send Without
-/// Encryption turns Encrypt off (asking first as the switch does) and sends with the user's own Sign
-pub async fn recipient_keys(compose: &Rc<Compose>, from_send: bool) {
+/// Recipients' Keys over the compose window (once). Send there sends, Send Without Encryption turns Encrypt off (asking
+/// first as the switch does while the message carries something encrypted) and sends with the user's own Sign
+pub async fn recipient_keys(compose: &Rc<Compose>) {
     let p = &compose.protection;
     if p.keys_dialog.borrow().is_some() {
         return;
@@ -980,7 +847,7 @@ pub async fn recipient_keys(compose: &Rc<Compose>, from_send: bool) {
         glib::idle_add_local_once(move || row_action(&this, action));
     });
     let (send, answers) = async_channel::unbounded();
-    let window = Rc::new(RecipientKeys::new(from_send, act, send));
+    let window = Rc::new(RecipientKeys::new(act, send));
     *p.keys_dialog.borrow_mut() = Some(window.clone());
     refresh(compose);
     window.dialog.present(Some(&compose.window));
@@ -991,12 +858,35 @@ pub async fn recipient_keys(compose: &Rc<Compose>, from_send: bool) {
         KeysAnswer::Cancel => {}
         KeysAnswer::Send => compose.send_now(),
         KeysAnswer::SendUnencrypted => {
-            toggle(compose, Switch::Encrypt, false).await;
-            if !p.encrypt.get() {
+            if send_unencrypted(compose).await {
                 compose.send_now();
             }
         }
     }
+}
+
+/// Send Without Encryption: Encrypt off through the core, its question asked first when it has one; true when the
+/// message may go now
+async fn send_unencrypted(compose: &Rc<Compose>) -> bool {
+    let core = &shell().core;
+    let account = compose.account.get();
+    let Ok(mut toggled) = core.compose_send_unencrypted(account, &compose.outgoing_now()) else {
+        return false;
+    };
+    apply(compose, &toggled);
+    refresh(compose);
+    if toggled.question != Question::None {
+        if !ask(compose, &toggled).await {
+            return false;
+        }
+        let Ok(confirmed) = core.compose_toggle(account, &compose.outgoing_now(), Switch::Encrypt, false, true) else {
+            return false;
+        };
+        apply(compose, &confirmed);
+        refresh(compose);
+        toggled = confirmed;
+    }
+    toggled.question == Question::None && !toggled.encrypt
 }
 
 fn row_action(compose: &Rc<Compose>, action: RowAction) {
