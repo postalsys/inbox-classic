@@ -584,6 +584,8 @@ pgp-why-from-future = De handtekening is gedateerd in de toekomst
 pgp-why-signature-expired = De handtekening is verlopen
 pgp-why-key-not-valid = Ondertekend met een sleutel die niet geldig is
 pgp-why-not-for-you = Ondertekend voor andere ontvangers en aan jou doorgegeven
+# review: new
+pgp-why-not-key-in-use = Ondertekend met een andere sleutel dan die voor { $address } wordt gebruikt
 pgp-part-pictures-loaded = { $label }. Er zijn afbeeldingen van internet geladen
 pgp-error-no-own-key = Je hebt geen sleutel voor { $address } om mee te ondertekenen of te versleutelen. Maak er een via Extra > Versleutelingssleutels, of zet Ondertekenen en Versleutelen uit.
 pgp-error-missing-keys = { $count ->

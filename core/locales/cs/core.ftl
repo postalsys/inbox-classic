@@ -601,6 +601,8 @@ pgp-why-from-future = Digitální podpis má datum v budoucnosti
 pgp-why-signature-expired = Platnost digitálního podpisu vypršela
 pgp-why-key-not-valid = Podepsáno klíčem, který není platný
 pgp-why-not-for-you = Podepsáno pro jiné příjemce a předáno vám
+# review: new
+pgp-why-not-key-in-use = Podepsáno jiným klíčem, než jaký se používá pro { $address }
 pgp-part-pictures-loaded = { $label }. Obrázky byly načteny z internetu
 pgp-error-no-own-key = Pro { $address } nemáte klíč, kterým byste mohli podepisovat nebo šifrovat. Vytvořte si ho v nabídce Nástroje > Šifrovací klíče, nebo vypněte Podepsat a Šifrovat.
 pgp-error-missing-keys = { $count ->

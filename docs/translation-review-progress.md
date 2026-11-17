@@ -5,17 +5,17 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: integrate the newly arrived signature reason `pgp-why-not-key-in-use`.**
-  It adds one core ID in each of 28 languages on `chore/pgp-hardening`, from focused commit `9924cfe7`
-  (observed branch tip `c69576e6`). Exact source hashes and caller evidence are in `pending_source_import`.
-  Assess that focused commit's dependencies and preserve reviewed translations; keep unrelated hardening/corpus
-  work separate. The 28 new reasons are pending integration and are not included in the totals below.
+- **Next: review `pgp-why-not-key-in-use` in all 28 languages.** Its catalogs and generated text identifiers
+  are imported from `9924cfe7`; all new reasons remain marked. The caller depends on a broader hardening
+  refactor and was inspected on its source branch. That implementation is not part of this translation import.
+  Every previous catalog byte is preserved. The separate-target offline pe-ffi build passed in 12.05s;
+  no test suite ran. Review the reason standalone and in pgp-part-encrypted, including Swedish neuter agreement.
 - German's 40 compose additions and both help targets are now reviewed, with 16 improvements. Review the
   remaining compose additions starting es/et/fr, then nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and hu.
   Feature `162c0dd2` was integrated in `3552434d`; exact targets/context are in `compose-sign-encrypt-context`.
   Every earlier help passage is preserved. No new language was found in the latest audit.
-- Current integrated scope: 33,840 catalog entries and 1,352 help topics. Completed: 20,682 entries and 792
-  full topics; pending: 13,158 entries and 560 topics. Historical catalog improvements: 3,532.
+- Current integrated scope: 33,868 catalog entries and 1,352 help topics. Completed: 20,682 entries and 792
+  full topics; pending: 13,186 entries and 560 topics. Historical catalog improvements: 3,532.
   Hungarian has 48 original help topics left in addition to compose work, then lt/lv/pl/ro/ru/sk/sl/sv/uk.
 - Structural checks and German's 53 actual mnemonic scopes pass. The initial icon note was corrected after
   inspecting individual recipients: they use green/blue locks, with lookup/warning symbols as appropriate;
@@ -1987,3 +1987,18 @@ selected for the From address. It does not mean an expired key, an invalid crypt
 impersonation. No other source values or languages changed. Exact hashes and caller evidence are recorded for
 focused integration next; these 28 additions are not yet counted in the active inventory. The guide and root
 translation files are unchanged. Other source-branch changes remain untouched. `REVIEWED` is unchanged.
+
+
+### Active-key signature reason imported for review
+
+Inserted the exact new pgp-why-not-key-in-use source entry into English and all 28 translations, preserving every
+prior catalog byte. Source commit9924cfe7 depends on a broader refactor of the signature reader, so this import
+contains catalogs and regenerated text identifiers only. Its caller, active correspondent/identity key mapping
+and warning presentation were inspected in the source branch. No hardening code or corpus files were imported.
+
+The separate-target offline pe-ffi build passed in 12.05s. The two generated text identifier files match the focused
+source exactly; installer/store outputs are unchanged. All 28 structural checkers report only the expected 26,759
+removed/partial-mark diagnostics. Full catalogs, variables and pending inventories match. The new reasons remain
+marked, with no linguistic review claimed yet. Scope33868/1352, pending13186/560, completed20682/792.
+All20,716 unmarked messages and10,391 changed help lines reconcile, with14 verified baseline pairs; current hashes match.
+HTML regenerated; git diff --check passes. No test suite was run. Next: review all28 reasons and their encrypted-message wrapper, then Spanish compose.

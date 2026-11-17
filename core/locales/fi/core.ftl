@@ -583,6 +583,8 @@ pgp-why-from-future = Allekirjoitus on päivätty tulevaisuuteen
 pgp-why-signature-expired = Allekirjoitus on vanhentunut
 pgp-why-key-not-valid = Allekirjoitettu avaimella, joka ei ole voimassa
 pgp-why-not-for-you = Allekirjoitettu muille vastaanottajille ja välitetty sinulle
+# review: new
+pgp-why-not-key-in-use = Allekirjoitettu eri avaimella kuin osoitteelle { $address } käytetty
 pgp-part-pictures-loaded = { $label }. Kuvat ladattiin internetistä
 pgp-error-no-own-key = Sinulla ei ole osoitteelle { $address } avainta, jolla allekirjoittaa tai salata. Luo avain kohdassa Työkalut > Salausavaimet tai poista Allekirjoita ja Salaa käytöstä.
 pgp-error-missing-keys = { $count ->

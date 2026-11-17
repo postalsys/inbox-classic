@@ -593,6 +593,8 @@ pgp-why-from-future = Подписът е с дата в бъдещето
 pgp-why-signature-expired = Подписът е изтекъл
 pgp-why-key-not-valid = Подписано с ключ, който не е валиден
 pgp-why-not-for-you = Подписано за други получатели и препратено до вас
+# review: new
+pgp-why-not-key-in-use = Подписано с ключ, различен от използвания за { $address }
 pgp-part-pictures-loaded = { $label }. Изображенията са заредени от интернет
 pgp-error-no-own-key = Нямате ключ за { $address }, с който да подписвате или шифровате. Създайте такъв в Инструменти > Ключове за шифроване или изключете „Подписване“ и „Шифроване“.
 pgp-error-missing-keys = { $count ->

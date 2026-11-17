@@ -977,6 +977,8 @@ pgp-why-key-not-valid = Podpisano z neveljavnim ključem
 # review: new
 pgp-why-not-for-you = Podpisano za druge prejemnike in posredovano vam
 # review: new
+pgp-why-not-key-in-use = Podpisano z drugim ključem, kot se uporablja za { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Slike so bile naložene z interneta
 # review: new
 pgp-error-no-own-key = Za { $address } nimate ključa, s katerim bi podpisovali ali šifrirali. Ustvarite ga v meniju Orodja > Šifrirni ključi ali izklopite Podpiši in Šifriraj.

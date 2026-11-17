@@ -970,6 +970,8 @@ pgp-why-key-not-valid = Pasirašyta negaliojančiu raktu
 # review: new
 pgp-why-not-for-you = Pasirašyta kitiems gavėjams ir persiųsta jums
 # review: new
+pgp-why-not-key-in-use = Pasirašyta kitu raktu nei naudojamas adresui { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Paveikslėliai įkelti iš interneto
 # review: new
 pgp-error-no-own-key = Neturite { $address } rakto, kuriuo būtų galima pasirašyti ar šifruoti. Sukurkite jį per Įrankiai > Šifravimo raktai arba išjunkite pasirašymą ir šifravimą.

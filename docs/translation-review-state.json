@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Integrate the late signature reason pgp-why-not-key-in-use from focused source9924cfe7 on chore/pgp-hardening (observed c69576e6), one core ID per language, with exact files/hashes/caller evidence under pending_source_import. Preserve reviewed text; assess focused source dependencies rather than importing the whole hardening/corpus branch. Then review that reason and remaining compose additions, starting es/et/fr. German40 compose entries and both help topics are complete with16 improvements; all53 mnemonic scopes pass. Current integrated totals: scope33840/1352, completed20682/792, pending13158/560, historical catalog improvements3532. The28 newly found reasons are additional pending work, not yet counted. Continue other earlier languages/Hungarian compose targets, then48 original Hungarian help topics and lt/lv/pl/ro/ru/sk/sl/sv/uk. No test suites; REVIEWED unchanged.",
+  "next_batch": "Review pgp-why-not-key-in-use in all28 languages, plus the existing Swedish encrypted-part wrapper whose neuter agreement needs correction. Source-only catalog import from9924cfe7 is validated, with generated text IDs built in12.05s; its dependent hardening code remains outside the review branch. Inspect reason standalone and embedded after the full stop in pgp-part-encrypted. Then es/et/fr compose targets and the remaining queue. Scope33868/1352; pending13186/560; completed20682/792. No tests; REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -33,6 +33,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -2216,6 +2217,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "bg-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/bg/core.ftl": "6ef1101accd6586c33e68c31dbbe24c1f2f63cac6e7107b5288f9de4f9b3101c"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -2241,6 +2256,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -4441,6 +4457,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "cs-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/cs/core.ftl": "f4769db19dbbef52d249eefffd898a56cd22d76243ab5de3955dcf6b5f44ecdc"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -4466,6 +4496,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -6628,11 +6659,29 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "da-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/da/core.ftl": "a7de29e6bc415969ffc88040a459f5184da305e794f1538e7d1dcdf4bc5f0ddc"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
     "de": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "pgp-why-not-key-in-use"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -7328,6 +7377,20 @@
           "notes": "Reviewed all 40 compose additions and both help targets against shared decisions and each platform caller. Kept all 17 concise app labels. Improved 16 core values: intended sending protection, signature versus ownership, usable-key conditions, counts/address lists, whole-sentence state reasons, clear downgrade warnings, and conditional unencrypted sending. Help distinguishes individual recipient color/status from the overall security bar, recognizes own/unusable keys, explains safe reply/forward handling and sender-only encrypted drafts, and names the selected From address when attaching a public key. Only the inserted write-message paragraph changed; all earlier prose retained. All 53 mnemonic scopes pass. Existing German Linux compose screenshot inspected, but it predates the new controls; new control layout/word wrapping checked in source. No GUI run, no test suite, no build.",
           "changed_help_lines": 14,
           "glossary_sha256": "c90b22c45e4965585ed72d0ccda02e576a1531f56ad0a7fb932189bf97196a85"
+        },
+        {
+          "id": "de-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/de/core.ftl": "b7f026a19686747737da7944084edb05ae7e652f7bdad3d270f28948dd3e7be7"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -7353,6 +7416,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -9509,6 +9573,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "el-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/el/core.ftl": "503394cfb7f6f07e221165f70e15b71a1a1e121f20b73c34bdae269f1862a58b"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -9534,6 +9612,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -10186,6 +10265,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "es-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/es/core.ftl": "35ba962fb2a271abf0be7e98e29581b91c6089610139a0cef08c7762231b9f39"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -10211,6 +10304,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -10870,6 +10964,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "et-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/et/core.ftl": "6f8191d50f98a27353a27e105b9d807c70c7f16dedd5a1e687caaa9bc1b31877"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -10895,6 +11003,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -13058,6 +13167,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "fi-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/fi/core.ftl": "3ac557a90afec5dcf8a4aa38676bb2fd1f08b2c6001939a55b30a2c77145acfe"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -13083,6 +13206,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -13749,6 +13873,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "fr-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/fr/core.ftl": "8a748903d16e323fd730080b4632de10cc3cc3a0e26212e460edbee82afcb8a6"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -13774,6 +13912,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -15803,6 +15942,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "hr-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/hr/core.ftl": "6c1a618123d965cf77da3f895b7c7ca448f9066e8f77420e50c630040d631d72"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -15828,6 +15981,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -17516,6 +17670,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "hu-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/hu/core.ftl": "96c730c1cd69192c69b23e49aa0e3709b067bf268356de628303a6f8944bd332"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -17541,6 +17709,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -19910,6 +20079,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "it-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/it/core.ftl": "c7cd81ad89c1829aa72f54ccab2cc1eb053d8db4f59c7130242c398bd1655066"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -20940,6 +21123,7 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
+          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -21535,6 +21719,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "lt-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/lt/core.ftl": "8f649a9d64865de1238c5d8999a9d4cd751bef52a7f8df6d7a6a888327c7c56a"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -22565,6 +22763,7 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
+          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -23160,6 +23359,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "lv-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/lv/core.ftl": "63037e72ebe9b5b8721bfb45367f6da82bd9953ac501f3e974a14edc3b1726dd"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -23185,6 +23398,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -25586,6 +25800,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "nl-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/nl/core.ftl": "f1e4979197daf8aea9d3653117499cbd3ebece30324d8c78b72e6a04df5c42e7"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -26616,6 +26844,7 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
+          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -27211,6 +27440,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "pl-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/pl/core.ftl": "260cdd8a7620bb9cfa641619a0117cf66d7e849c6047644dba339067720a89bf"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -27236,6 +27479,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -29604,6 +29848,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "pt-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/pt/core.ftl": "b22ff53d6b1c964cad977343dde06fe88077a3bec757f1c4c1a219b383889262"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -30634,6 +30892,7 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
+          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -31229,6 +31488,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "ro-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/ro/core.ftl": "ce5d5a9bdc17fd74d2db6be275204923ad4ad3948408c10c04867e38a2eaf102"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -32259,6 +32532,7 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
+          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -32854,6 +33128,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "ru-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/ru/core.ftl": "9a416c4e5fafc96c959f540c17dfcbff9740906ed5627fab9ed350734abbfa11"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -33884,6 +34172,7 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
+          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -34479,6 +34768,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "sk-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sk/core.ftl": "85f0d657bbe5456895045ae272b89851c71bb0c38e59293295515bd0e29f3117"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -35509,6 +35812,7 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
+          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -36104,6 +36408,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "sl-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sl/core.ftl": "1218ce6f30a73cb5197d16c4e06267b1b2ef0a524d9a4fdd2fe9a6cdbb2f95f3"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -37134,6 +37452,7 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
+          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -37729,6 +38048,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "sv-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sv/core.ftl": "1eb5bd3d79cccb5646a5b528b6834c749e128c3138309a00dd90c39e934a5cd9"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -38759,6 +39092,7 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
+          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -39354,6 +39688,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "uk-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/uk/core.ftl": "08d9d241d9e4a77ff0442081570c3bdbee9906ecf86940f75feeaa02e5b45b2e"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ]
     },
@@ -39379,6 +39727,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -41659,6 +42008,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "ca-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/ca/core.ftl": "5f4c502ce3ea8e9c1dfa4005e785d360dbe27348a83fd2f67aedb6b9f04aa4fb"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -41687,6 +42050,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -43928,6 +44292,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "nb-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/nb/core.ftl": "44817a47d59f88b54d186a1c21e8fed26ca6222828be19465812757ef9fad835"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -43956,6 +44334,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -46203,6 +46582,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "pt-BR-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/pt-BR/core.ftl": "8c8a4636899f760697f188bfdf728ab1876312c2d6b899252e07e930744d488e"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -46231,6 +46624,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -48450,6 +48844,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "sr-Latn-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sr-Latn/core.ftl": "673924747dbd91c8bb24bc7c9d1758be392a13f58260eb874544b0c20a53a098"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -48478,6 +48886,7 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
+          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -50670,6 +51079,20 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "tr-active-key-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/tr/core.ftl": "6125d2f7f8315c0a671c4d5fd94e2bf8e752c31d7105a0b89a8e3626e1825e39"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+          "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -54106,9 +54529,23 @@
         "sign-and-encrypt.html"
       ],
       "note": "Forty new IDs per language. Twenty-eight new help topics and four round-1 write-message topics enter scope. Fourteen already scoped completed topics reopen; ten existing whole-topic drafts remain pending. All earlier reviewed prose is preserved."
+    },
+    {
+      "kind": "signature using another active key",
+      "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+      "review_parent": "9986cac38ff21057fc54b3209d0f1702d4760fa6",
+      "new_catalog_entries": 28,
+      "net_catalog_scope_change": 28,
+      "catalog_ids_per_language": {
+        "core.ftl": [
+          "pgp-why-not-key-in-use"
+        ]
+      },
+      "help_pages": 0,
+      "note": "One new reason in every language, imported from the focused source commit. Other hardening implementation stays on its branch."
     }
   ],
-  "total_catalog_entries": 33840,
+  "total_catalog_entries": 33868,
   "total_help_pages": 1352,
   "review_workspace": {
     "path": "/Users/andris/Projects/PostalExpress/build/i18n-wave1",
@@ -65062,7 +65499,7 @@
       ]
     },
     "pending_source_import": {
-      "status": "not yet integrated",
+      "status": "source-only catalogs and text identifiers integrated; linguistic review pending",
       "ref": "chore/pgp-hardening",
       "observed_source_tip": "c69576e6435b07914360cfa83c562c66d734ec45",
       "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
@@ -67440,7 +67877,86 @@
         "previously_completed_help_topics_to_reopen": 18,
         "note": "Counts describe the current review checkout. The fully inventoried pending_source_import adds 1120 catalog entries, 28 new topics and 28 write-message insertions across all 28 languages; 18 completed topics must reopen on integration. Scope will be adjusted during import, before reviewing those additions."
       }
-    ]
+    ],
+    "active_key_source_integration": {
+      "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+      "review_parent": "9986cac38ff21057fc54b3209d0f1702d4760fa6",
+      "catalog_ids": {
+        "core.ftl": [
+          "pgp-why-not-key-in-use"
+        ]
+      },
+      "status": "catalogs and generated identifiers validated; awaiting commit",
+      "catalog_paths": [
+        "core/locales/en/core.ftl",
+        "core/locales/bg/core.ftl",
+        "core/locales/cs/core.ftl",
+        "core/locales/da/core.ftl",
+        "core/locales/de/core.ftl",
+        "core/locales/el/core.ftl",
+        "core/locales/es/core.ftl",
+        "core/locales/et/core.ftl",
+        "core/locales/fi/core.ftl",
+        "core/locales/fr/core.ftl",
+        "core/locales/hr/core.ftl",
+        "core/locales/hu/core.ftl",
+        "core/locales/it/core.ftl",
+        "core/locales/lt/core.ftl",
+        "core/locales/lv/core.ftl",
+        "core/locales/nl/core.ftl",
+        "core/locales/pl/core.ftl",
+        "core/locales/pt/core.ftl",
+        "core/locales/ro/core.ftl",
+        "core/locales/ru/core.ftl",
+        "core/locales/sk/core.ftl",
+        "core/locales/sl/core.ftl",
+        "core/locales/sv/core.ftl",
+        "core/locales/uk/core.ftl",
+        "core/locales/ca/core.ftl",
+        "core/locales/nb/core.ftl",
+        "core/locales/pt-BR/core.ftl",
+        "core/locales/sr-Latn/core.ftl",
+        "core/locales/tr/core.ftl"
+      ],
+      "source_import_kind": "catalogs plus regenerated text identifiers only",
+      "implementation_dependency": "Source protect.rs uses the hardening refactor’s resolved key/address representation; current checkout uses cert/name. Imported exact catalog entries, inspected source caller, and left that implementation on its original branch.",
+      "source_catalog_hashes": {
+        "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e",
+        "core/locales/bg/core.ftl": "6ef1101accd6586c33e68c31dbbe24c1f2f63cac6e7107b5288f9de4f9b3101c",
+        "core/locales/cs/core.ftl": "f4769db19dbbef52d249eefffd898a56cd22d76243ab5de3955dcf6b5f44ecdc",
+        "core/locales/da/core.ftl": "a7de29e6bc415969ffc88040a459f5184da305e794f1538e7d1dcdf4bc5f0ddc",
+        "core/locales/de/core.ftl": "b7f026a19686747737da7944084edb05ae7e652f7bdad3d270f28948dd3e7be7",
+        "core/locales/el/core.ftl": "503394cfb7f6f07e221165f70e15b71a1a1e121f20b73c34bdae269f1862a58b",
+        "core/locales/es/core.ftl": "35ba962fb2a271abf0be7e98e29581b91c6089610139a0cef08c7762231b9f39",
+        "core/locales/et/core.ftl": "6f8191d50f98a27353a27e105b9d807c70c7f16dedd5a1e687caaa9bc1b31877",
+        "core/locales/fi/core.ftl": "3ac557a90afec5dcf8a4aa38676bb2fd1f08b2c6001939a55b30a2c77145acfe",
+        "core/locales/fr/core.ftl": "8a748903d16e323fd730080b4632de10cc3cc3a0e26212e460edbee82afcb8a6",
+        "core/locales/hr/core.ftl": "6c1a618123d965cf77da3f895b7c7ca448f9066e8f77420e50c630040d631d72",
+        "core/locales/hu/core.ftl": "96c730c1cd69192c69b23e49aa0e3709b067bf268356de628303a6f8944bd332",
+        "core/locales/it/core.ftl": "c7cd81ad89c1829aa72f54ccab2cc1eb053d8db4f59c7130242c398bd1655066",
+        "core/locales/lt/core.ftl": "8f649a9d64865de1238c5d8999a9d4cd751bef52a7f8df6d7a6a888327c7c56a",
+        "core/locales/lv/core.ftl": "63037e72ebe9b5b8721bfb45367f6da82bd9953ac501f3e974a14edc3b1726dd",
+        "core/locales/nl/core.ftl": "f1e4979197daf8aea9d3653117499cbd3ebece30324d8c78b72e6a04df5c42e7",
+        "core/locales/pl/core.ftl": "260cdd8a7620bb9cfa641619a0117cf66d7e849c6047644dba339067720a89bf",
+        "core/locales/pt/core.ftl": "b22ff53d6b1c964cad977343dde06fe88077a3bec757f1c4c1a219b383889262",
+        "core/locales/ro/core.ftl": "ce5d5a9bdc17fd74d2db6be275204923ad4ad3948408c10c04867e38a2eaf102",
+        "core/locales/ru/core.ftl": "9a416c4e5fafc96c959f540c17dfcbff9740906ed5627fab9ed350734abbfa11",
+        "core/locales/sk/core.ftl": "85f0d657bbe5456895045ae272b89851c71bb0c38e59293295515bd0e29f3117",
+        "core/locales/sl/core.ftl": "1218ce6f30a73cb5197d16c4e06267b1b2ef0a524d9a4fdd2fe9a6cdbb2f95f3",
+        "core/locales/sv/core.ftl": "1eb5bd3d79cccb5646a5b528b6834c749e128c3138309a00dd90c39e934a5cd9",
+        "core/locales/uk/core.ftl": "08d9d241d9e4a77ff0442081570c3bdbee9906ecf86940f75feeaa02e5b45b2e",
+        "core/locales/ca/core.ftl": "5f4c502ce3ea8e9c1dfa4005e785d360dbe27348a83fd2f67aedb6b9f04aa4fb",
+        "core/locales/nb/core.ftl": "44817a47d59f88b54d186a1c21e8fed26ca6222828be19465812757ef9fad835",
+        "core/locales/pt-BR/core.ftl": "8c8a4636899f760697f188bfdf728ab1876312c2d6b899252e07e930744d488e",
+        "core/locales/sr-Latn/core.ftl": "673924747dbd91c8bb24bc7c9d1758be392a13f58260eb874544b0c20a53a098",
+        "core/locales/tr/core.ftl": "6125d2f7f8315c0a671c4d5fd94e2bf8e752c31d7105a0b89a8e3626e1825e39"
+      },
+      "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+      "generated_files": {
+        "core/include/texts.h": "78d0474a94f2f7fa26b7515d037c12cbb6d53b538f10dac8f278b8be68dfd021",
+        "mac/Sources/InboxClassic/Generated/Texts.swift": "6525a6a95d2213521889a9e9e1b8c064363a5d6c3460c21e8515723351cd64aa"
+      }
+    }
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
   "guide_updates": [
@@ -76059,6 +76575,61 @@
           "correction": "The initial integration note incorrectly assigned the overall verified-status shield to individual recipients. Exact Windows RecipientKeyPicture, Mac symbol and GTK key_icon callers show recipient locks; corrected here before reviewing the first language."
         }
       ]
+    },
+    {
+      "id": "signature-active-key-context",
+      "status": "pending",
+      "source_checkpoint": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+      "review_parent": "9986cac38ff21057fc54b3209d0f1702d4760fa6",
+      "catalog_ids": {
+        "core.ftl": [
+          "pgp-why-not-key-in-use"
+        ]
+      },
+      "help_topics": [],
+      "pending_languages": [
+        "bg",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "es",
+        "et",
+        "fi",
+        "fr",
+        "hr",
+        "hu",
+        "it",
+        "lt",
+        "lv",
+        "nl",
+        "pl",
+        "pt",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "uk",
+        "ca",
+        "nb",
+        "pt-BR",
+        "sr-Latn",
+        "tr"
+      ],
+      "completed_languages": [],
+      "issue": "An otherwise valid signature used a different key from the one currently selected for the From address. Describe this mismatch without saying the sender is proven fraudulent, the key is expired/revoked, or the cryptographic signature itself is invalid. The address is a complete normalized address; do not add inflection to it. Check the translated warning wrapper and surrounding signature terminology.",
+      "evidence": [
+        "9924cfe7:core/crates/pe-core/src/protect.rs: Reader::signature classifies an otherwise valid signature as Bad when its key differs from ring.in_use for the From address",
+        "9924cfe7:core/crates/pe-core/src/keys.rs: Book::ring fills active correspondent keys and own identity keys",
+        "9924cfe7:core/crates/pe-store/src/pgp.rs: pgp_keys_in_use returns selected address/fingerprint pairs"
+      ],
+      "verified_context": [
+        "Source Reader::one_signature checks SigStatus::Good, key address membership and ring.in_use before choosing the mismatch reason. If no active key exists, this specific reason does not apply.",
+        "Book::ring includes selected correspondent keys and own identity keys; latter override correspondent entries for own addresses. Pending or rejected replacement keys can be stored without becoming active.",
+        "Source Signature::Bad returns the reason directly as the part label. Encrypted messages embed it in pgp-part-encrypted after a full stop. Inspect both the standalone reason and that wrapper. This source-only catalog import does not include the dependent hardening implementation."
+      ],
+      "integration_validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes."
     }
   ]
 }

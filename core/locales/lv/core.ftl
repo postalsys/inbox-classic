@@ -981,6 +981,8 @@ pgp-why-key-not-valid = Parakstīts ar atslēgu, kas nav derīga
 # review: new
 pgp-why-not-for-you = Parakstīts citiem adresātiem un pārsūtīts jums
 # review: new
+pgp-why-not-key-in-use = Parakstīts ar citu atslēgu, nevis to, kas tiek lietota adresei { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Attēli tika ielādēti no interneta
 # review: new
 pgp-error-no-own-key = Jums nav atslēgas adresei { $address }, ar ko parakstīt vai šifrēt. Izveidojiet to sadaļā Rīki > Šifrēšanas atslēgas vai izslēdziet parakstīšanu un šifrēšanu.

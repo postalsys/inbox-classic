@@ -968,6 +968,8 @@ pgp-why-key-not-valid = Подписано недействительным кл
 # review: new
 pgp-why-not-for-you = Подписано для других получателей и переслано вам
 # review: new
+pgp-why-not-key-in-use = Подписано другим ключом, а не тем, что используется для { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Изображения загружены из интернета
 # review: new
 pgp-error-no-own-key = У вас нет ключа для { $address }, чтобы подписывать или шифровать. Создайте его в меню Сервис > Ключи шифрования или выключите подпись и шифрование.

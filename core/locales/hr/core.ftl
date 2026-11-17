@@ -592,6 +592,8 @@ pgp-why-from-future = Datum digitalnog potpisa je u budućnosti
 pgp-why-signature-expired = Digitalni potpis je istekao
 pgp-why-key-not-valid = Potpisano ključem koji nije valjan
 pgp-why-not-for-you = Potpisano za druge primatelje i proslijeđeno vama
+# review: new
+pgp-why-not-key-in-use = Potpisano drugim ključem od onoga koji se koristi za { $address }
 pgp-part-pictures-loaded = { $label }. Slike su učitane s interneta
 pgp-error-no-own-key = Nemate ključ za adresu { $address } kojim biste digitalno potpisivali ili šifrirali poruke. Stvorite ga u izborniku Alati > Ključevi za šifriranje ili isključite mogućnosti Potpiši i Šifriraj.
 pgp-error-missing-keys = { $count ->

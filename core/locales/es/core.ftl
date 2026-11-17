@@ -581,6 +581,8 @@ pgp-why-from-future = La firma tiene una fecha futura
 pgp-why-signature-expired = La firma ha caducado
 pgp-why-key-not-valid = Firmado con una clave no válida
 pgp-why-not-for-you = Firmado para otros destinatarios y reenviado a usted
+# review: new
+pgp-why-not-key-in-use = Firmado con una clave distinta de la que se usa para { $address }
 pgp-part-pictures-loaded = { $label }. Se cargaron imágenes de internet
 pgp-error-no-own-key = No hay ninguna clave configurada para firmar o cifrar con la dirección { $address }. Cree una en Herramientas > Claves de cifrado o desactive las opciones Firmar y Cifrar.
 pgp-error-missing-keys = { $count ->

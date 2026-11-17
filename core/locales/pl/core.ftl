@@ -978,6 +978,8 @@ pgp-why-key-not-valid = Podpisane nieważnym kluczem
 # review: new
 pgp-why-not-for-you = Podpisane dla innych odbiorców i przekazane Tobie
 # review: new
+pgp-why-not-key-in-use = Podpisano innym kluczem niż używany dla { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Obrazy zostały pobrane z internetu
 # review: new
 pgp-error-no-own-key = Nie masz klucza dla { $address }, którym można podpisywać lub szyfrować. Utwórz go w menu Narzędzia > Klucze szyfrowania albo wyłącz Podpisz i Szyfruj.
