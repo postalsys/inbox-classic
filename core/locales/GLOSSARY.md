@@ -753,6 +753,8 @@ Poista lippu); Vastaa kaikille; Välitä edelleen (toolbar: Välitä).
 - "Salaus purettu avaimella" describes decryption, not encryption. A locked key requires restoring the private
   key backup; publication requires confirmation of every address. Unencrypted temporary attachment copies
   older than a day are removed at app startup, not automatically exactly one day after opening.
+- Decryption "purkaa viestin salauksen", not "purkaa viestin". Use "hakuindeksi" for the local search index;
+  disabling encrypted search removes the decrypted content from that index, not the messages themselves.
 
 ### Svenska (sv)
 

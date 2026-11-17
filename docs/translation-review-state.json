@@ -9,31 +9,11 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue encryption/search additions in bg/cs/da/el/fi/hr. German, Spanish, Estonian, French, Dutch, Italian, both Portuguese variants, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are complete again. Each remaining focused batch has ten catalog targets and seven added passages in four help topics (exact targets/provenance in encryption-search-context); Croatian search-words still needs its full original review. Preserve current reviewed prose; only marks enclose incoming passages. Use available keys, index cleanup, unconditional encrypted-notification label, agent envelope versus protected contents and address versus fingerprint lookup context. All 46 scopes pass in 18 previously reviewed app languages; the ten broad drafts retain their recorded mnemonic issues. Scope 32712/1316; pending 13480/550; completed 19232/766. Then seven original Croatian help topics and hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. No tests; active checkout build/i18n-wave1; REVIEWED unchanged. Latest source audit found no additional relevant work.",
+  "next_batch": "Finish Croatian: ten encryption/search catalog targets; inserted passages in encrypted-and-signed-mail, encryption-keys and options-language; search-words still needs its full original review including the new search additions. Do not use the focused encryption helper unchanged: Croatian has ten pending help topics, with search-words wholly marked. Then finish its other six original topics: all-inboxes, command-line, keyboard-shortcuts, removing, save-print-import, updates. The other 17 previously completed languages are caught up. Preserve current reviewed prose; context/provenance are in encryption-search-context. Use available keys, index cleanup, unconditional encrypted-notification label, agent envelope versus protected contents and address versus fingerprint lookup context. Scope 32712/1316; pending 13430/530; completed 19282/786. Then hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, including their existing context followups and mnemonic issues. No tests; active checkout build/i18n-wave1; REVIEWED unchanged. Latest source audit found no additional relevant work.",
   "languages": {
     "bg": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-settings-encryption",
-          "ui-search-encrypted",
-          "ui-search-encrypted-note",
-          "ui-pgp-keyserver",
-          "ui-pgp-keyserver-note",
-          "ui-row-encrypted",
-          "ui-row-signed"
-        ],
-        "core.ftl": [
-          "agent-encrypted",
-          "list-encrypted",
-          "pgp-keyserver-off"
-        ]
-      },
-      "pending_help": [
-        "encrypted-and-signed-mail.html",
-        "encryption-keys.html",
-        "options-language.html",
-        "search-words.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "bg-app-round2",
@@ -1990,32 +1970,56 @@
           },
           "validation": "All 28 catalog inventories, full variable sets, access-key counts, 52 help topics per language, references and exact pending marks pass. Static check-language has only 25185 expected removed/partial-review-mark diagnostics. All 46 mnemonic scopes pass in the 18 previously reviewed app languages; all three settings-page scopes pass in all 28. The ten broad drafts have exactly their pre-merge collisions; Romanian Gri still has no free runtime flag mnemonic. These are pending initial-review work, not new integration defects. All 76 imported nontranslation source/generated paths match feature 38841d96 exactly. Prior catalog values/comments and help prose retained; all 19146 unmarked messages and 10007 changed help lines reconcile, with 14 verified baseline pairs. All completed/source hashes match. HTML regenerated; locale/help/record diff checks pass. Full staged diff passes with core.whitespace=cr-at-eol: the imported secure-protected-subject.eml has intentional CRLF endings and matches upstream byte-for-byte. No tests or builds run; installer/store metadata was not changed.",
           "notes": "Integrated nine new catalog IDs, the changed pgp-keyserver-off with its new settings placeholder, and new passages in four help topics. Every unaffected catalog value/comment and all prior help prose are retained. Previously reviewed topics mark only the inserted passages; original pending topics remain wholly marked. Affected current reviewed inventories are reopened, with history retained in reopened_ fields. No new translation is counted reviewed."
+        },
+        {
+          "id": "bg-encryption-search-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-settings-encryption",
+              "ui-search-encrypted",
+              "ui-search-encrypted-note",
+              "ui-pgp-keyserver",
+              "ui-pgp-keyserver-note",
+              "ui-row-encrypted",
+              "ui-row-signed"
+            ],
+            "core.ftl": [
+              "agent-encrypted",
+              "list-encrypted",
+              "pgp-keyserver-off"
+            ]
+          },
+          "reviewed_help": [
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "options-language.html",
+            "search-words.html"
+          ],
+          "changed_values": 3,
+          "files": {
+            "core/locales/bg/app.ftl": "c1d24ca298159f150add07b08365780b1f982489bdf3f230d8209f90e2f76666",
+            "core/locales/bg/core.ftl": "c08e8797561e2f2c4cd78d030f973721dcfa87ebedfc0c091580047b1868fcda",
+            "core/crates/pe-html/help/bg/encrypted-and-signed-mail.html": "4e0ce860a3e7ac5a7bc4691441af7920bc8ae611279a1ce8bfe7c85940485ca4",
+            "core/crates/pe-html/help/bg/encryption-keys.html": "b675cfdf2998ce4fef276f9c4e5c88b8728c460558e0e652294c2b259860d3b9",
+            "core/crates/pe-html/help/bg/options-language.html": "aa812479f2b670ae0da8fbcce774a896b0a0bd4871af861d224b2f13c8ae3394",
+            "core/crates/pe-html/help/bg/search-words.html": "2e346ad62adfb1e506551a6e2d2d402946ee15b0385b6e06a0b22cc6582382b4"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2",
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "c640a1eeadc79803b4af97eb32c487657c51ead16e2b2b96cba037ee22a575cd",
+            "core/crates/pe-html/help/en/encryption-keys.html": "214716a55c27dc7ab03e2045252b08f3d50b892bb4bd07b1fe1d1a41d3819930",
+            "core/crates/pe-html/help/en/options-language.html": "572fec92ff593a5f4af6711766752289e6f28e97e673d5e346a5c9b3b3894df0",
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 46 actual mnemonic collision scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. The preexisting Greek runtime-generated accented flag mnemonic remains an app-side limitation documented in the glossary. Global reconciliation: 19316 unmarked messages, 10126 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
+          "notes": "Bulgarian polite plural and established шифроване/дешифриране, частен ключ, отпечатък and прикачен файл. Опцията supplies feminine agreement around uninflected labels. Available keys qualify decryption; plaintext local indexing and removal on disable are clear. Notifications always retain the encrypted-message indication; agents cannot access/search protected contents. Domain/address lookup differs from fingerprint/key-ID lookup. Labels and access keys retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
         }
       ]
     },
     "cs": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-settings-encryption",
-          "ui-search-encrypted",
-          "ui-search-encrypted-note",
-          "ui-pgp-keyserver",
-          "ui-pgp-keyserver-note",
-          "ui-row-encrypted",
-          "ui-row-signed"
-        ],
-        "core.ftl": [
-          "agent-encrypted",
-          "list-encrypted",
-          "pgp-keyserver-off"
-        ]
-      },
-      "pending_help": [
-        "encrypted-and-signed-mail.html",
-        "encryption-keys.html",
-        "options-language.html",
-        "search-words.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "cs-loading-round2",
@@ -3989,32 +3993,56 @@
           },
           "validation": "All 28 catalog inventories, full variable sets, access-key counts, 52 help topics per language, references and exact pending marks pass. Static check-language has only 25185 expected removed/partial-review-mark diagnostics. All 46 mnemonic scopes pass in the 18 previously reviewed app languages; all three settings-page scopes pass in all 28. The ten broad drafts have exactly their pre-merge collisions; Romanian Gri still has no free runtime flag mnemonic. These are pending initial-review work, not new integration defects. All 76 imported nontranslation source/generated paths match feature 38841d96 exactly. Prior catalog values/comments and help prose retained; all 19146 unmarked messages and 10007 changed help lines reconcile, with 14 verified baseline pairs. All completed/source hashes match. HTML regenerated; locale/help/record diff checks pass. Full staged diff passes with core.whitespace=cr-at-eol: the imported secure-protected-subject.eml has intentional CRLF endings and matches upstream byte-for-byte. No tests or builds run; installer/store metadata was not changed.",
           "notes": "Integrated nine new catalog IDs, the changed pgp-keyserver-off with its new settings placeholder, and new passages in four help topics. Every unaffected catalog value/comment and all prior help prose are retained. Previously reviewed topics mark only the inserted passages; original pending topics remain wholly marked. Affected current reviewed inventories are reopened, with history retained in reopened_ fields. No new translation is counted reviewed."
+        },
+        {
+          "id": "cs-encryption-search-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-settings-encryption",
+              "ui-search-encrypted",
+              "ui-search-encrypted-note",
+              "ui-pgp-keyserver",
+              "ui-pgp-keyserver-note",
+              "ui-row-encrypted",
+              "ui-row-signed"
+            ],
+            "core.ftl": [
+              "agent-encrypted",
+              "list-encrypted",
+              "pgp-keyserver-off"
+            ]
+          },
+          "reviewed_help": [
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "options-language.html",
+            "search-words.html"
+          ],
+          "changed_values": 6,
+          "files": {
+            "core/locales/cs/app.ftl": "848bc86986c502292a2819828092c91ba785f6e2fa5f8530135335d8eb2ed54d",
+            "core/locales/cs/core.ftl": "7539bfe7d8066cb7cc71b4f6092c22f0613e5f991c869577fbf74ca6cd0b9833",
+            "core/crates/pe-html/help/cs/encrypted-and-signed-mail.html": "7bc36d9d41cca3bb7bccca1f1fac634842302ff088cc150920c399f2c6568325",
+            "core/crates/pe-html/help/cs/encryption-keys.html": "239a26653293ad521133e9c4742f19e6723067d7a412729d511e8f13e949f62e",
+            "core/crates/pe-html/help/cs/options-language.html": "17dd8f5ac313b9337e400493455f88d0188cc00d444dce7c392c46811aabea98",
+            "core/crates/pe-html/help/cs/search-words.html": "a98dbcdaf13fa31142b6e39f815a697fc687cc3cebe91a67205a176244e1ba78"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2",
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "c640a1eeadc79803b4af97eb32c487657c51ead16e2b2b96cba037ee22a575cd",
+            "core/crates/pe-html/help/en/encryption-keys.html": "214716a55c27dc7ab03e2045252b08f3d50b892bb4bd07b1fe1d1a41d3819930",
+            "core/crates/pe-html/help/en/options-language.html": "572fec92ff593a5f4af6711766752289e6f28e97e673d5e346a5c9b3b3894df0",
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 46 actual mnemonic collision scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. The preexisting Greek runtime-generated accented flag mnemonic remains an app-side limitation documented in the glossary. Global reconciliation: 19316 unmarked messages, 10126 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
+          "notes": "Czech formal vy prose, soukromý klíč, otisk, příloha and oznámení. Row adjectives now agree with zpráva and the neighboring Nepřečtená label, describing classification rather than completed operations. Nastavení gives the inserted path a grammatical head noun; volba supplies agreement for infinitive control labels. Available keys, plaintext local index and removal on disable are explicit. Notifications are unconditional, agents cannot access protected contents and lookup distinguishes address/domain from key identifiers. Mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
         }
       ]
     },
     "da": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-settings-encryption",
-          "ui-search-encrypted",
-          "ui-search-encrypted-note",
-          "ui-pgp-keyserver",
-          "ui-pgp-keyserver-note",
-          "ui-row-encrypted",
-          "ui-row-signed"
-        ],
-        "core.ftl": [
-          "agent-encrypted",
-          "list-encrypted",
-          "pgp-keyserver-off"
-        ]
-      },
-      "pending_help": [
-        "encrypted-and-signed-mail.html",
-        "encryption-keys.html",
-        "options-language.html",
-        "search-words.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "da-loading-round2",
@@ -5956,6 +5984,50 @@
           },
           "validation": "All 28 catalog inventories, full variable sets, access-key counts, 52 help topics per language, references and exact pending marks pass. Static check-language has only 25185 expected removed/partial-review-mark diagnostics. All 46 mnemonic scopes pass in the 18 previously reviewed app languages; all three settings-page scopes pass in all 28. The ten broad drafts have exactly their pre-merge collisions; Romanian Gri still has no free runtime flag mnemonic. These are pending initial-review work, not new integration defects. All 76 imported nontranslation source/generated paths match feature 38841d96 exactly. Prior catalog values/comments and help prose retained; all 19146 unmarked messages and 10007 changed help lines reconcile, with 14 verified baseline pairs. All completed/source hashes match. HTML regenerated; locale/help/record diff checks pass. Full staged diff passes with core.whitespace=cr-at-eol: the imported secure-protected-subject.eml has intentional CRLF endings and matches upstream byte-for-byte. No tests or builds run; installer/store metadata was not changed.",
           "notes": "Integrated nine new catalog IDs, the changed pgp-keyserver-off with its new settings placeholder, and new passages in four help topics. Every unaffected catalog value/comment and all prior help prose are retained. Previously reviewed topics mark only the inserted passages; original pending topics remain wholly marked. Affected current reviewed inventories are reopened, with history retained in reopened_ fields. No new translation is counted reviewed."
+        },
+        {
+          "id": "da-encryption-search-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-settings-encryption",
+              "ui-search-encrypted",
+              "ui-search-encrypted-note",
+              "ui-pgp-keyserver",
+              "ui-pgp-keyserver-note",
+              "ui-row-encrypted",
+              "ui-row-signed"
+            ],
+            "core.ftl": [
+              "agent-encrypted",
+              "list-encrypted",
+              "pgp-keyserver-off"
+            ]
+          },
+          "reviewed_help": [
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "options-language.html",
+            "search-words.html"
+          ],
+          "changed_values": 3,
+          "files": {
+            "core/locales/da/app.ftl": "1073db4e6c3bfc13575e38845abbadc8162bf1c4c31bfef3035c42b4f4d2a1a2",
+            "core/locales/da/core.ftl": "0f65b03a28465a110dbb8605e1e7f9126d510a8da9910f7a811bc4aad1a2291c",
+            "core/crates/pe-html/help/da/encrypted-and-signed-mail.html": "5233eb3af88e6c3b772691ecea2dc43f6d325e2347e9a39847ee845bdafab02f",
+            "core/crates/pe-html/help/da/encryption-keys.html": "df9a458ffa3b16fd868a57efca81b82a44ec37261edfe9ccafe9f661aa315996",
+            "core/crates/pe-html/help/da/options-language.html": "2830867acce09304f7d83f47d5e98294f208347e79a9ae8fecce57cb43743d10",
+            "core/crates/pe-html/help/da/search-words.html": "9f5e3737a855a577dd067bc92503a27b372297143de51c0e74d8beeced526138"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2",
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "c640a1eeadc79803b4af97eb32c487657c51ead16e2b2b96cba037ee22a575cd",
+            "core/crates/pe-html/help/en/encryption-keys.html": "214716a55c27dc7ab03e2045252b08f3d50b892bb4bd07b1fe1d1a41d3819930",
+            "core/crates/pe-html/help/en/options-language.html": "572fec92ff593a5f4af6711766752289e6f28e97e673d5e346a5c9b3b3894df0",
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 46 actual mnemonic collision scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. The preexisting Greek runtime-generated accented flag mnemonic remains an app-side limitation documented in the glossary. Global reconciliation: 19316 unmarked messages, 10126 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
+          "notes": "Danish du prose, meddelelse, privat nøgle, fingeraftryk and vedhæftet fil. Clear textual excerpts replace literal own-subject/find-words phrases. Available keys qualify decryption; plaintext local search content and removal on disable are explicit. Notifications always retain the encrypted-message text. Agent restrictions concern protected contents; address/domain lookup differs from fingerprint/key-ID lookup. Suitable control labels and mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
         }
       ]
     },
@@ -6463,28 +6535,8 @@
       ]
     },
     "el": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-settings-encryption",
-          "ui-search-encrypted",
-          "ui-search-encrypted-note",
-          "ui-pgp-keyserver",
-          "ui-pgp-keyserver-note",
-          "ui-row-encrypted",
-          "ui-row-signed"
-        ],
-        "core.ftl": [
-          "agent-encrypted",
-          "list-encrypted",
-          "pgp-keyserver-off"
-        ]
-      },
-      "pending_help": [
-        "encrypted-and-signed-mail.html",
-        "encryption-keys.html",
-        "options-language.html",
-        "search-words.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "el-loading-round2",
@@ -8426,6 +8478,50 @@
           },
           "validation": "All 28 catalog inventories, full variable sets, access-key counts, 52 help topics per language, references and exact pending marks pass. Static check-language has only 25185 expected removed/partial-review-mark diagnostics. All 46 mnemonic scopes pass in the 18 previously reviewed app languages; all three settings-page scopes pass in all 28. The ten broad drafts have exactly their pre-merge collisions; Romanian Gri still has no free runtime flag mnemonic. These are pending initial-review work, not new integration defects. All 76 imported nontranslation source/generated paths match feature 38841d96 exactly. Prior catalog values/comments and help prose retained; all 19146 unmarked messages and 10007 changed help lines reconcile, with 14 verified baseline pairs. All completed/source hashes match. HTML regenerated; locale/help/record diff checks pass. Full staged diff passes with core.whitespace=cr-at-eol: the imported secure-protected-subject.eml has intentional CRLF endings and matches upstream byte-for-byte. No tests or builds run; installer/store metadata was not changed.",
           "notes": "Integrated nine new catalog IDs, the changed pgp-keyserver-off with its new settings placeholder, and new passages in four help topics. Every unaffected catalog value/comment and all prior help prose are retained. Previously reviewed topics mark only the inserted passages; original pending topics remain wholly marked. Affected current reviewed inventories are reopened, with history retained in reopened_ fields. No new translation is counted reviewed."
+        },
+        {
+          "id": "el-encryption-search-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-settings-encryption",
+              "ui-search-encrypted",
+              "ui-search-encrypted-note",
+              "ui-pgp-keyserver",
+              "ui-pgp-keyserver-note",
+              "ui-row-encrypted",
+              "ui-row-signed"
+            ],
+            "core.ftl": [
+              "agent-encrypted",
+              "list-encrypted",
+              "pgp-keyserver-off"
+            ]
+          },
+          "reviewed_help": [
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "options-language.html",
+            "search-words.html"
+          ],
+          "changed_values": 4,
+          "files": {
+            "core/locales/el/app.ftl": "31d00bb630170bb58106a240fe0ec156663675db60a2d2b7c0d85beea758ead1",
+            "core/locales/el/core.ftl": "4f80f348309b122bb6f48d52827afdb297dc0799555192668d6e7691ec359e48",
+            "core/crates/pe-html/help/el/encrypted-and-signed-mail.html": "ef96ef681f9691acdf7d9f2b05b7e69376314134adabd3bf9384cbf893af7dfa",
+            "core/crates/pe-html/help/el/encryption-keys.html": "0e71ca9bdb26c9f466a6135aff25882fc35402e88d2c1af366bf2d3453c10cbe",
+            "core/crates/pe-html/help/el/options-language.html": "f80e2572dbd88de27885141f590bf67dff011bf62024ad4df8d4bde37fe85985",
+            "core/crates/pe-html/help/el/search-words.html": "7b459819fee712f982180b84f4b53a4bae7a4ab2f7fec03b0ae09bb8e742dcbc"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2",
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "c640a1eeadc79803b4af97eb32c487657c51ead16e2b2b96cba037ee22a575cd",
+            "core/crates/pe-html/help/en/encryption-keys.html": "214716a55c27dc7ab03e2045252b08f3d50b892bb4bd07b1fe1d1a41d3819930",
+            "core/crates/pe-html/help/en/options-language.html": "572fec92ff593a5f4af6711766752289e6f28e97e673d5e346a5c9b3b3894df0",
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 46 actual mnemonic collision scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. The preexisting Greek runtime-generated accented flag mnemonic remains an app-side limitation documented in the glossary. Global reconciliation: 19316 unmarked messages, 10126 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
+          "notes": "Greek polite plural, ιδιωτικό κλειδί, αποτύπωμα, συνημμένο and πράκτορας ΤΝ. Added ενότητα before inserted settings paths to avoid article/case mismatches across platforms; labels stay nominative. Available keys, plaintext local index and removal on disable are explicit. Notifications always retain encrypted-message wording; agents cannot access protected contents. Domain/address queries differ from fingerprint/key-ID queries. Existing labels and Greek mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
         }
       ]
     },
@@ -9441,28 +9537,8 @@
       ]
     },
     "fi": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-settings-encryption",
-          "ui-search-encrypted",
-          "ui-search-encrypted-note",
-          "ui-pgp-keyserver",
-          "ui-pgp-keyserver-note",
-          "ui-row-encrypted",
-          "ui-row-signed"
-        ],
-        "core.ftl": [
-          "agent-encrypted",
-          "list-encrypted",
-          "pgp-keyserver-off"
-        ]
-      },
-      "pending_help": [
-        "encrypted-and-signed-mail.html",
-        "encryption-keys.html",
-        "options-language.html",
-        "search-words.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "fi-loading-round2",
@@ -11411,6 +11487,50 @@
           },
           "validation": "All 28 catalog inventories, full variable sets, access-key counts, 52 help topics per language, references and exact pending marks pass. Static check-language has only 25185 expected removed/partial-review-mark diagnostics. All 46 mnemonic scopes pass in the 18 previously reviewed app languages; all three settings-page scopes pass in all 28. The ten broad drafts have exactly their pre-merge collisions; Romanian Gri still has no free runtime flag mnemonic. These are pending initial-review work, not new integration defects. All 76 imported nontranslation source/generated paths match feature 38841d96 exactly. Prior catalog values/comments and help prose retained; all 19146 unmarked messages and 10007 changed help lines reconcile, with 14 verified baseline pairs. All completed/source hashes match. HTML regenerated; locale/help/record diff checks pass. Full staged diff passes with core.whitespace=cr-at-eol: the imported secure-protected-subject.eml has intentional CRLF endings and matches upstream byte-for-byte. No tests or builds run; installer/store metadata was not changed.",
           "notes": "Integrated nine new catalog IDs, the changed pgp-keyserver-off with its new settings placeholder, and new passages in four help topics. Every unaffected catalog value/comment and all prior help prose are retained. Previously reviewed topics mark only the inserted passages; original pending topics remain wholly marked. Affected current reviewed inventories are reopened, with history retained in reopened_ fields. No new translation is counted reviewed."
+        },
+        {
+          "id": "fi-encryption-search-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-settings-encryption",
+              "ui-search-encrypted",
+              "ui-search-encrypted-note",
+              "ui-pgp-keyserver",
+              "ui-pgp-keyserver-note",
+              "ui-row-encrypted",
+              "ui-row-signed"
+            ],
+            "core.ftl": [
+              "agent-encrypted",
+              "list-encrypted",
+              "pgp-keyserver-off"
+            ]
+          },
+          "reviewed_help": [
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "options-language.html",
+            "search-words.html"
+          ],
+          "changed_values": 3,
+          "files": {
+            "core/locales/fi/app.ftl": "b358dae93ebfb550384ae5bb0bd4d84e694dc4841123657bad23d81d9524786c",
+            "core/locales/fi/core.ftl": "e7332969d6728bc6b2fe559caeb925cb50e0f3c5bafe4920fa1963693c22352c",
+            "core/crates/pe-html/help/fi/encrypted-and-signed-mail.html": "330a804fc823095fa6db214fe175dfb928372cb9599b66557f9590368a380432",
+            "core/crates/pe-html/help/fi/encryption-keys.html": "b47020127a2b320177970d331ad4a0107ba58d4facb46a9c77eb4d69e0b06b7e",
+            "core/crates/pe-html/help/fi/options-language.html": "370da5f9ff8133d85a1b62614759291adc4cec347a1645de01ca56d721908c57",
+            "core/crates/pe-html/help/fi/search-words.html": "0d512d70f2d32c146d90f8fdeba5d273664fddd2fa8dddff2bf2580e4130dd26"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2",
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3",
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "c640a1eeadc79803b4af97eb32c487657c51ead16e2b2b96cba037ee22a575cd",
+            "core/crates/pe-html/help/en/encryption-keys.html": "214716a55c27dc7ab03e2045252b08f3d50b892bb4bd07b1fe1d1a41d3819930",
+            "core/crates/pe-html/help/en/options-language.html": "572fec92ff593a5f4af6711766752289e6f28e97e673d5e346a5c9b3b3894df0",
+            "core/crates/pe-html/help/en/search-words.html": "9d2042fc8b6d464ee732965c7e3fce9e08d86bde2f3f7c3d90138269027b2080"
+          },
+          "validation": "All 46 actual mnemonic collision scopes pass. check-language reports only 1404 expected removed-review-mark diagnostics per language; no structural findings. Exact IDs, complete variables, comments, access-key counts, help tags/attributes/literal tokens and all 28 pending inventories pass. Substituted control/settings/topic joins inspected on Windows/Mac/Linux; dynamic keyboard labels are outside this helper. The preexisting Greek runtime-generated accented flag mnemonic remains an app-side limitation documented in the glossary. Global reconciliation: 19316 unmarked messages, 10126 changed help lines and 14 verified unchanged/moved baseline pairs. Current translation/source hashes match. Report regenerated; git diff --check passes. No tests or builds run.",
+          "notes": "Finnish informal singular, yksityinen avain, sormenjälki and liite. Decryption purkaa viestin salauksen, not purkaa viestin; local search index is hakuindeksi, replacing the literal hakuhakemisto. Asetus carries grammar around unchanged labels; paths remain uninflected. Available private keys qualify decryption. Plaintext local contents are removed from index on disable. Notifications always use the encrypted-message text; agents cannot access protected contents. Address/domain lookup differs from key-identifier lookup. Good labels and mnemonics retained. Reviewed all ten targets and seven inserted help passages; 6 help passages improved. Every byte outside those passages is unchanged. Exact markup/literal search syntax and catalog IDs/variables/comments/access-key counts retained. No tests."
         }
       ]
     },
@@ -49229,7 +49349,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "At 2c317eb3: ca/nb/sr-Latn/tr encryption additions reviewed. Six refs and guide match after this turn’s fresh fetch; root has no locale/help/settings edits. Only five known unrelated upstream paths remain unmerged. No new relevant work. All 430 since-start entries/181 passages, full inventories and current hashes reconcile. Pending 13480 catalogs/550 help; final late-arrival audit still required. REVIEWED unchanged.",
+    "latest_source_audit": "At d3512067: bg/cs/da/el/fi encryption additions reviewed. Six refs and guide match after this turn’s fresh fetch; root has no locale/help/settings edits. Only five known unrelated upstream paths remain unmerged. No new relevant work. All 380 since-start entries/146 passages, full inventories and current hashes reconcile. Pending 13430 catalogs/530 help; final late-arrival audit still required. REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -50865,6 +50985,64 @@
         "review_commit": "2c317eb3d4966577db315bd70b74c5285c1140bf",
         "new_languages": 0,
         "validation": "All six recorded refs and guide match after this turn’s fresh fetch; root has no uncommitted locale/help/settings changes. Only five previously inspected unrelated README/Linux test/CI paths remain outside the review branch. All 430 since-start entries and 181 passages match the pending queue. All 28 full inventories and current file/source hashes match. No tests run."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "08c9ef126d4012330b9a5631e8683089c9ad769c",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/master": {
+            "merge_base": "38841d9602aeaa6dc0abb773aa4639f0597c15ee",
+            "paths": [
+              ".github/workflows/ci.yml",
+              "README.md",
+              "linux/Dockerfile",
+              "linux/src/e2e.rs",
+              "scripts/linux-ui-e2e-run.sh"
+            ],
+            "new_languages": []
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "paths": [],
+            "new_languages": []
+          }
+        },
+        "since_start_pending_catalog_entries": 380,
+        "since_start_pending_help_passages": 146,
+        "pending_catalog_entries": 13430,
+        "pending_help_topics": 530,
+        "additional_unrecorded_work": 0,
+        "root_locale_help_settings_status": [],
+        "kind": "Bulgarian, Czech, Danish, Greek and Finnish encryption additions reviewed",
+        "review_commit": "d351206714b780383df33157fda646b60376d3d7",
+        "new_languages": 0,
+        "validation": "All six recorded refs and guide match after this turn’s fresh fetch; root has no uncommitted locale/help/settings changes. Only five previously inspected unrelated README/Linux test/CI paths remain outside the review branch. All 380 since-start entries and 146 passages match the pending queue. All 28 full inventories and current file/source hashes match. No tests run."
       }
     ],
     "settings_source_integration": {
@@ -60878,11 +61056,6 @@
         "search-words.html"
       ],
       "pending_languages": [
-        "bg",
-        "cs",
-        "da",
-        "el",
-        "fi",
         "hr",
         "hu",
         "lt",
@@ -60907,7 +61080,12 @@
         "ca",
         "nb",
         "sr-Latn",
-        "tr"
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el",
+        "fi"
       ],
       "retained_help_reviews": {
         "core/crates/pe-html/help/bg/encrypted-and-signed-mail.html": {

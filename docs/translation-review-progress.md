@@ -28,17 +28,19 @@ Commit completed batches regularly and preserve an exact resume point.
   three settings-context followups are complete. Password troubleshooting is now corrected in Croatian and
   the 17 previously completed languages; the ten broader drafts retain it.
 - Encryption/search feature `38841d96`, observed in origin/master merge `08c9ef12`, is now integrated after
-  reviewed checkpoint `3aa142c1`, committed as `c83a2e31`. German, Spanish, Estonian, French, Dutch, Italian,
-  both Portuguese variants, Catalan, Norwegian Bokmål, Serbian Latin and Turkish are complete again: each has
-  ten catalog targets and seven inserted passages in four help topics reviewed. NEXT bg/cs/da/el/fi/hr.
-  Exact IDs and retained-prose provenance are in `encryption-search-context`; the other 16 languages remain pending.
+  reviewed checkpoint `3aa142c1`, committed as `c83a2e31`. All 17 previously completed languages are caught up:
+  de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi. Each has ten catalog targets and seven inserted
+  passages in four help topics reviewed. NEXT Croatian: ten catalog targets, the inserted passages in three
+  reviewed topics, and the full original search-words topic. Its other six original topics follow. The focused
+  encryption helper needs adapting for Croatian's whole-topic mark and ten pending help topics.
+  Exact IDs and retained-prose provenance are in `encryption-search-context`; 11 languages remain pending.
   Original reviewed text is retained. Check the verified decryption/index/agent/key-lookup context in state.
   Then finish Croatian's all-inboxes/command-line/keyboard-shortcuts/removing/save-print-import/search-words/
   updates and the ten broader language queues. Do not restart full reviews.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,712 catalog entries and 1,316 help topics; 13,480 entries and 550 topics are pending after twelve languages’ encryption reviews.
+  32,712 catalog entries and 1,316 help topics; 13,430 entries and 530 topics are pending after seventeen languages’ encryption reviews.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were initially reviewed with 74 improvements; its 24 app settings additions now have two
@@ -1629,10 +1631,39 @@ Fresh fetch found all six recorded refs and the guide unchanged; root has no loc
 five known unrelated upstream paths remain unmerged. All 430 since-start entries and 181 passages match the queue;
 no new languages or unrecorded work were found. Bulgarian is next, then Czech, Danish, Greek, Finnish and Croatian.
 
-Current totals: 19,232 catalog entries and 766 help topics completed in the active scope; 3,233 historical
-catalog value improvements. Remaining: 13,480 catalog entries and 550 help topics. Twelve languages have no pending
-work; the other 16 retain the encryption additions. Croatian has seven original help topics left plus reopened
-passages; the ten broader queues are hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. `REVIEWED` is unchanged.
+### Bulgarian, Czech, Danish, Greek and Finnish encryption additions completed
+
+Reviewed 50 catalog targets and 35 inserted passages across 20 help topics, improving 19 catalog values
+(Bulgarian three, Czech six, Danish three, Greek four, Finnish three) and 30 help passages. The five search-filter
+rows were already natural. Czech row labels now agree with zpráva, matching the neighboring unread label. Czech
+and Greek settings paths use head nouns without inflecting inserted labels. Finnish now describes purkaa viestin
+salauksen rather than unpacking the message; hakuindeksi replaces the literal hakuhakemisto. These Finnish
+terminology decisions are recorded in the glossary. Existing forms of address and access keys are preserved.
+
+The additions distinguish available private keys, unencrypted local search content, removal from the index when
+disabled, conditional list previews and unconditional encrypted-mail notification text. Agents cannot access
+protected contents or attachments; domain/address lookup differs from fingerprint/key-ID lookup. Every byte
+outside the newly inserted help passages is unchanged.
+
+All five languages pass 46 shortcut collision scopes and have only 1,404 expected removed-mark diagnostics each.
+Exact IDs, variables, comments, tags, attributes, literal syntax and all 28 pending inventories match. Substituted
+control/settings/topic joins were inspected on Windows, Mac and Linux; dynamic keyboard labels remain outside
+the helper. The existing Greek runtime-generated accented flag mnemonic remains documented as an app-side issue.
+Global reconciliation covers 19,316 unmarked messages, 10,126 changed help lines and 14 verified baseline pairs.
+Current translation/source hashes match. HTML regenerated; git diff --check passes. No tests or builds run.
+Previous checkpoint: `d3512067`.
+
+Fresh fetch found all six recorded refs and the guide unchanged; root has no locale/help/settings edits. Only the
+five known unrelated upstream paths remain unmerged. All 380 since-start entries and 146 passages match the queue;
+no new languages or unrecorded work were found. Croatian is next. Its search-words remains a full original topic,
+so review the entire topic along with the inserted encryption passages in the other three affected topics. Then
+finish all-inboxes, command-line, keyboard-shortcuts, removing, save-print-import and updates.
+
+Current totals: 19,282 catalog entries and 786 help topics completed in the active scope; 3,252 historical
+catalog value improvements. Remaining: 13,430 catalog entries and 530 help topics. Seventeen languages have no
+pending work. Croatian has ten catalog targets and ten pending help topics (seven original plus three reopened).
+The ten broader queues are hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, including their encryption and other context followups.
+`REVIEWED` is unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

@@ -482,9 +482,7 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = Tuto zprávu nelze přečíst.
 agent-encrypted-original = Tato zpráva je šifrovaná: agent na ni nemůže odpovědět ani ji přeposlat, protože neumí šifrovat.
-# review: new
-agent-encrypted = Tato zpráva je šifrovaná. Přečíst ji může jen uživatel, v aplikaci Inbox Classic.
-# review: new
+agent-encrypted = Tato zpráva je šifrovaná. Agenti AI nemohou číst její obsah. Uživatel ji musí otevřít v aplikaci Inbox Classic.
 list-encrypted = Šifrovaná zpráva
 agent-log-composed = Otevřena nová zpráva „{ $subject }“, abyste ji mohli dokončit
 agent-log-refused = Odeslání zprávy „{ $subject }“ nebylo schváleno
@@ -618,8 +616,7 @@ pgp-find-unavailable = Klíče teď nelze vyhledat: { $error }
 pgp-publish-pending = Služba keys.openpgp.org poslala potvrzovací odkaz na tyto adresy: { $addresses }. Potvrďte každou adresu, aby podle ní bylo možné váš klíč vyhledat.
 pgp-publish-done = Váš klíč je zveřejněn na keys.openpgp.org pro { $addresses }.
 pgp-publish-failed = Klíč nelze zveřejnit: { $error }
-# review: changed
-pgp-keyserver-off = Vyhledávání klíčů na keys.openpgp.org je vypnuté v { $settings }.
+pgp-keyserver-off = Vyhledávání klíčů na serveru keys.openpgp.org je vypnuté v nastavení { $settings }.
 pgp-details-part = Část { $number }: { $label }
 pgp-details-signed = Digitálně podepsáno: { $when }. Klíč: { $key }
 pgp-details-unknown-key = Podepsáno klíčem { $key }, který nemáte
