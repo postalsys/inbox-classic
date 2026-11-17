@@ -16,6 +16,8 @@ if [[ "${1:-}" != "--inside" ]]; then
         apt-get update -qq >/dev/null && apt-get install -y -qq sqop gnupg curl ca-certificates gcc >/dev/null 2>&1
         [ -x "$HOME/.cargo/bin/cargo" ] || curl -sSf https://sh.rustup.rs | sh -s -- -y -q --profile minimal >/dev/null
         . "$HOME/.cargo/env"
+        # an install cut short leaves rustup in the volume without a toolchain
+        rustup default stable >/dev/null 2>&1
         CARGO_TARGET_DIR=/tmp/target scripts/pgp-interop.sh --inside'
 fi
 
