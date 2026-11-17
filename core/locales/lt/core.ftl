@@ -674,73 +674,41 @@ day-sunday = sekmadienis
 
 ## AI agents
 
-# review: new
-agent-level-read = Skaityti paštą: aplankai, laiškų sąrašas, paieška ir laiškai
+agent-level-read = Skaityti paštą: peržiūrėti aplankus, laiškus ir pokalbius, ieškoti laiškų bei kontaktų ir peržiūrėti laiškų taisykles
 agent-level-organize = Tvarkyti paštą: žymėti laiškus skaitytais ar neskaitytais, keisti vėliavėles ir nepageidaujamų laiškų žymas, perkelti ir archyvuoti laiškus, kurti aplankus, naikinti laiškus perkeliant juos į aplanką „Panaikinti laiškai“ ir jūsų sutikimu atsisakyti adresatų sąrašų prenumeratų
-# review: new
-agent-level-drafts = Rašyti juodraščius, kuriuos išsiųsite jūs
-# review: new
+agent-level-drafts = Rašyti juodraščius, kuriuos galėsite išsiųsti
 agent-level-send = Siųsti laiškus, kiekvieną tik jums sutikus
-# review: new
 agent-connect-title = { $program } nori naudotis jūsų paštu
-# review: new
-agent-connect-detail = DI agentas paprašė leisti dirbti su Inbox Classic. Pasirinkite, ką jis gali daryti ir kurias paskyras gali matyti; vėliau tai galėsite pakeisti per Įrankiai > DI agentai.
+agent-connect-detail = DI agentas prašo prieigos prie jūsų pašto per Inbox Classic. Pasirinkite, ką jis galės daryti ir kurias paskyras galės pasiekti. Šias teises vėliau galėsite pakeisti pasirinkę „Įrankiai > DI agentai“.
 
-    Agentai skaito kitų žmonių parašytus laiškus, o laiškas gali bandyti juos apgauti. Inbox Classic visada jūsų paklausia, prieš agentui ką nors išsiunčiant.
-# review: new
-agent-reply-to = Atsakymas į „{ $subject }“
-# review: new
-agent-reply-all-on = Atsakymas visiems į „{ $subject }“
-# review: new
-agent-forward-of = Persiunčiamas „{ $subject }“
-# review: new
+    Agentai skaito kitų žmonių laiškus, kuriuose gali būti bandymų juos apgauti. Prieš siųsdamas laišką per Inbox Classic, agentas turi gauti atskirą jūsų sutikimą.
+agent-reply-to = Atsakymas į laišką „{ $subject }“
+agent-reply-all-on = Atsakymas visiems į laišką „{ $subject }“
+agent-forward-of = Laiško „{ $subject }“ persiuntimas
 agent-never-written-one = Niekada nerašėte adresu { $address }.
-# review: new
-agent-never-written-many = Niekada nerašėte { $count } iš šių adresų.
-# review: new
+agent-never-written-many = Adresų, kuriais dar nesate rašę, skaičius: { $count }.
 agent-send-title = { $program } nori išsiųsti šį laišką
-# review: new
-agent-send-detail = Patikrinkite gavėjus ir laiško turinį. Jums patvirtinus, laiškas { $seconds } s palauks aplanke „Siunčiami laiškai“, kur jį dar galėsite panaikinti.
-# review: new
+agent-send-detail = Patikrinkite gavėjus ir laiško turinį. Jums patvirtinus, laiškas bent { $seconds } s lauks aplanke „Siunčiami laiškai“. Per tą laiką galėsite jį panaikinti ir atšaukti siuntimą.
 agent-change-title = Ką { $program } gali daryti
-# review: new
 agent-change-allowed = Pakeiskite, ką šios programos DI agentai gali daryti su jūsų paštu.
-# review: new
-agent-change-refused = Šiai programai uždraudėte prieigą. Leiskite ją, kad jos agentai vėl galėtų pasiekti jūsų paštą.
-# review: new
+agent-change-refused = Šiai programai prieigos nesuteikėte. Galite ją suteikti, kad programos agentai galėtų naudotis jūsų paštu.
 agent-log-taken-back = { $entry } (atšaukta)
-# review: new
 agent-files = Failai: { $files }
-# review: new
-agent-undo-refused = To atšaukti negalima.
-# review: new
-agent-undo-refused-why = To atšaukti negalima: { $reason }.
-# review: new
+agent-undo-refused = Šio veiksmo atšaukti negalima.
+agent-undo-refused-why = Šio veiksmo atšaukti negalima: { $reason }.
 agent-undo-impossible = to atšaukti negalima
-# review: new
 agent-undo-not-in-folder = laiško tame aplanke nebėra
-# review: new
-agent-undo-not-arrived = laiško (dar) nėra aplanke, į kurį jis buvo perkeltas
-# review: new
-agent-undo-sent = laiškas jau išsiųstas
-# review: new
+agent-undo-not-arrived = laiškas dar nerastas paskirties aplanke
+agent-undo-sent = laiško aplanke „Siunčiami laiškai“ nebėra
 agent-original-not-downloaded = pradinis laiškas dar neatsisiųstas. Pirmiausia jį atidarykite
-# review: new
-agent-turned-away = Atmesta
-# review: new
+agent-turned-away = Prieiga uždrausta
 agent-can-nothing = Nieko
-# review: new
 agent-can-read = skaityti
-# review: new
 agent-can-organize = tvarkyti
-# review: new
 agent-can-drafts = rašyti juodraščius
-# review: new
 agent-can-send = siųsti jums sutikus
 # "Skaityti, tvarkyti ir rašyti juodraščius"
-# review: new
 agent-can-list = { $first } ir { $last }
-# review: new
 agent-accounts = { $count ->
     [0] jokių paskyrų
     [one] { $count } paskyra
@@ -748,46 +716,28 @@ agent-accounts = { $count ->
    *[other] { $count } paskyrų
 }
 # "Skaityti ir tvarkyti; 1 paskyra"
-# review: new
 agent-access = { $can }; { $accounts }
-# review: new
 agent-unreadable = Šio laiško perskaityti negalima.
-# review: new
 agent-encrypted-original = Šis laiškas užšifruotas: agentas negali į jį atsakyti ar jo persiųsti, nes negali šifruoti.
-# review: new
-agent-encrypted = Šis laiškas užšifruotas. Jį gali perskaityti tik naudotojas, programoje Inbox Classic.
+agent-encrypted = Šis laiškas užšifruotas. Agentas negali perskaityti jo turinio. Laišką turi atidaryti naudotojas programoje Inbox Classic.
 # review: new
 list-encrypted = Užšifruotas laiškas
-# review: new
-agent-log-composed = „{ $subject }“ atidarytas naujame laiške, kad jį užbaigtumėte
-# review: new
-agent-log-refused = Neišsiuntėte „{ $subject }“
-# review: new
-agent-log-sent = Išsiųstas „{ $subject }“ (kam: { $to })
-# review: new
+agent-log-composed = Atidarytas naujas laiškas „{ $subject }“, kurį galite baigti rašyti
+agent-log-refused = Atmetėte prašymą išsiųsti laišką „{ $subject }“
+agent-log-sent = Laiškas „{ $subject }“ įtrauktas į siuntimo eilę. Gavėjai: { $to }
 agent-log-draft = Įrašytas juodraštis „{ $subject }“
 agent-log-draft-replaced = Pakeistas juodraštis „{ $subject }“
 agent-log-draft-discarded = Atmestas juodraštis „{ $subject }“
 agent-draft-note = Šį juodraštį parašė DI agentas { $program }. Prieš siųsdami patikrinkite gavėjus ir tekstą.
-# review: new
 agent-log-read = Pažymėtas kaip skaitytas: „{ $subject }“
-# review: new
 agent-log-unread = Pažymėtas kaip neskaitytas: „{ $subject }“
-# review: new
 agent-log-flagged = Pažymėtas vėliavėle: „{ $subject }“
-# review: new
 agent-log-unflagged = Nuimta vėliavėlė: „{ $subject }“
-# review: new
 agent-log-deleted = Panaikintas „{ $subject }“
-# review: new
 agent-log-moved = „{ $subject }“ perkeltas (paskirtis: { $folder })
-# review: new
 agent-log-junk = Pažymėtas kaip nepageidaujamas: „{ $subject }“
-# review: new
 agent-log-not-junk = Pažymėtas kaip pageidaujamas: „{ $subject }“
-# review: new
 agent-log-archived = Archyvuotas „{ $subject }“
-# review: new
 agent-log-folder = Sukurtas aplankas „{ $name }“
 agent-log-unsubscribed = Patvirtinote prašymą atsisakyti prenumeratos. Laiškas: „{ $subject }“
 agent-log-unsubscribe-failed = Nepavyko atsisakyti prenumeratos. Laiškas: „{ $subject }“. Priežastis: { $reason }

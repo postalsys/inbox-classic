@@ -5,15 +5,15 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review the 50 remaining Lithuanian agent entries in core.ftl before moving to Latvian combined agent additions and full help, then pl/ro/ru/sk/sl/sv/uk. In Lithuanian, agent-log-sent wrongly claims delivery and agent-undo-sent wrongly treats absence from Outbox as proof of sending; verify their runtime callers and correct them with the rest of the coherent agent block. Then resume the compose queue and remaining broader catalogs/help. Preview wording remains pending.**
+- **Next: Review Latvian agent strings, including the entire pending core agent block, unsubscribe/draft additions and both full help topics; then pl/ro/ru/sk/sl/sv/uk. Check queue/Outbox semantics and the other recorded app-context corrections in every draft. After the agent queue, resume Greek and the remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending; preserve the settings-path followup and recheck current platform controls and runtime.**
   Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
   Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt. Continue the remaining agent queue.
   Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt.
 - Current scope: 34,404 catalog entries and 1,356 help topics.
-  Completed: 21,485 entries and 792 full topics; pending: 12,919 entries and 564 topics.
-  Historical catalog improvements: 3,902. Importing drafts earns no review credit.
+  Completed: 21,535 entries and 792 full topics; pending: 12,869 entries and 564 topics.
+  Historical catalog improvements: 3,920. Importing drafts earns no review credit.
   The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
 - All 28 unsubscribe logs now report user approval, which is recorded before the HTTP requests start.
   Nineteen older translations were reopened; four baseline-only entries entered scope and nine pending drafts
@@ -2598,3 +2598,11 @@ Lithuanian structural checker has 25 expected mark-only diagnostics and no struc
 Approval-time unsubscribe logs remain complete in 34a2cc25. Preview settings-path source 742a9ddf remains pending in every language; preserve its settings_path_followup with the earlier preview UI/backend snapshots. No later source additions were found at this checkpoint.
 
 Review the 50 remaining Lithuanian agent entries in core.ftl before moving to Latvian combined agent additions and full help, then pl/ro/ru/sk/sl/sv/uk. In Lithuanian, agent-log-sent wrongly claims delivery and agent-undo-sent wrongly treats absence from Outbox as proof of sending; verify their runtime callers and correct them with the rest of the coherent agent block. Then resume the compose queue and remaining broader catalogs/help. Preview wording remains pending.
+
+## Lithuanian remaining agent core
+
+Reviewed all 50 remaining agent core entries, improving 18 values and retaining 32 good translations. Send logs now describe queuing, and an absent Outbox entry no longer implies delivery. Permission text covers the actual read capabilities; sending guidance states the minimum delay. Reply/forward headings, recipient-count wording, access refusal and Undo errors read more naturally. Encrypted-content errors address the agent without promising successful user decryption. No new help topics were completed in this batch. The Outbox context correction is now complete in 20 languages, with eight pending.
+
+Lithuanian structural checker reports 75 expected mark-only diagnostics and no structural findings. Exact reconstruction verifies 50 reviewed entries, 18 changed values and 32 retained good values; no help topics changed. Untargeted values, comments, variable sets, plural branches, mnemonic counts, generated IDs and prior reviews are preserved. Three live runtime/UI files match the recorded snapshots. Global reconciliation verifies 21,573 unmarked entries, 10,932 help lines and 14 unchanged/moved baseline pairs; all latest translation and English hashes match. All 28 full inventories and since-start 1,192 entries/247 passages reconcile. Source audit covers 44 worktrees/185 refs, exact imported source trees and 290 unchanged old draft copies, with no additional unrecorded translation work. HTML regenerated; git diff --check passes. No tests, builds or GUI runs. REVIEWED remains unchanged.
+
+Review Latvian agent strings, including the entire pending core agent block, unsubscribe/draft additions and both full help topics; then pl/ro/ru/sk/sl/sv/uk. Check queue/Outbox semantics and the other recorded app-context corrections in every draft. After the agent queue, resume Greek and the remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending; preserve the settings-path followup and recheck current platform controls and runtime.

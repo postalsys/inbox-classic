@@ -575,6 +575,12 @@ Plurals: `[one]` 1, 21, 31 (not 11); `[few]` 2 to 9, 22 to 29; `*[other]` 0, 10 
   an absent destination does not permit permanent deletion. Only the agent’s own drafts not yet saved by the user
   can be discarded permanently.
 
+- Remaining agent core: send logs use "įtrauktas į siuntimo eilę" at queuing time. The Undo error says the
+  message is no longer in "Siunčiami laiškai"; manual removal can also cause this, so it does not prove delivery.
+  Reply/forward headings put an inflected "laiškas" before the untouched quoted subject. The number of new
+  recipient addresses follows "skaičius:". Access summaries capitalize the first permission at runtime.
+  Agent encrypted-message errors describe inaccessible content, without promising the user can decrypt it.
+
 ### Magyar (hu)
 
 Terms: Beérkezett üzenetek; Postázandó üzenetek; Elküldött elemek; Törölt elemek; Piszkozatok; Levélszemét; üzenet;
