@@ -1,0 +1,34 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25ÿ519@example.org
+Subject: Test
+MIME-From: GnuPG Ed25519 <gIJGqtvkeWsdi/8ddBv80/mr5nFrom: alice@example.’˜ò
+To: gnupg-ed25519@example.[rg
+Subject: Test
+MIME-Version: 10
+.Content-Typeupg-ed25519@example.oyvkeWsdi/8ddBv80/mr5nFrom: alice@example.org
+To: gnupg-ed25519@e˜ò
+To: gnupg-ed25519@example.[rg
+Subject: Test
+MIME-Version: 10
+: application/octet-streamsiz
+--sig
+Content-¬†pe:pe: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+w=mf4W
+-----END PGP MESSAGE-----
+
+25555ig
+Content-Type: text/plain; charset=utÛ-8
+
+Hello, this is the text.
+
+--sig
+Content-Type: application/pgp-signature
+
+--e
+
+-----BEGIN PGP SIGNATURE-----
+YIAB0FAms1mwAW	QT6jAz.org
+SuMH8b

@@ -111,7 +111,15 @@ impl Fact {
 struct Flags {
     known: bool,
     sign: bool,
+    /// When the signing subkey's back signature expires: it signs only until then.
+    sign_until: Option<i64>,
     encrypt: bool,
+}
+
+impl Flags {
+    fn signs_at(&self, at: i64) -> bool {
+        self.sign && self.sign_until.is_none_or(|end| end > at)
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -195,6 +203,7 @@ fn flags_of(sig: &Signature) -> Flags {
     Flags {
         known,
         sign: flags.sign(),
+        sign_until: None,
         encrypt: flags.encrypt_comms() || flags.encrypt_storage(),
     }
 }
@@ -221,6 +230,9 @@ fn revocation_of(sig: &Signature) -> Revocation {
 fn fact(sig: &Signature) -> Option<Fact> {
     let created = timestamp(sig)?;
     policy::hash(sig.hash_alg()?, Use::Binding, created).ok()?;
+    if policy::critical_notation(sig) {
+        return None;
+    }
     let typ = sig.typ()?;
     let revocation = matches!(
         typ,
@@ -241,6 +253,41 @@ fn fact(sig: &Signature) -> Option<Fact> {
         symmetric: sig.preferred_symmetric_algs().to_vec(),
         seipd_v2: sig.features().is_some_and(|f| f.seipd_v2()),
     })
+}
+
+/// The back signature of a signing subkey's binding `sig` made at `created`: any embedded signature, in either area
+/// (one that does not verify proves nothing, so a false one put first changes nothing), that verifies, uses a hash
+/// the policy takes and has no critical notation. `Some` with when it expires, if it does.
+fn back_signature(
+    sig: &Signature,
+    subkey: &packet::PublicSubkey,
+    primary: &packet::PublicKey,
+    created: i64,
+) -> Option<Option<i64>> {
+    let config = sig.config()?;
+    config
+        .hashed_subpackets()
+        .chain(config.unhashed_subpackets())
+        .filter_map(|sub| match &sub.data {
+            SubpacketData::EmbeddedSignature(back) => Some(&**back),
+            _ => None,
+        })
+        .filter(|back| {
+            back.verify_primary_key_binding(subkey, primary).is_ok()
+                && back
+                    .hash_alg()
+                    .is_some_and(|hash| policy::hash(hash, Use::Binding, created).is_ok())
+                && !policy::critical_notation(back)
+        })
+        .map(|back| {
+            let made = timestamp(back).unwrap_or(created);
+            back.signature_expiration_time()
+                .map(|d| i64::from(d.as_secs()))
+                .filter(|secs| *secs > 0)
+                .map(|secs| made + secs)
+        })
+        // the one that lasts longest
+        .max_by_key(|until| until.unwrap_or(i64::MAX))
 }
 
 /// The signatures of a component that are the key's own: those `wanted` (the right type, issued by the key, cheap to
@@ -312,12 +359,9 @@ impl Cert {
                 if fact.revocation.is_none() && fact.flags.sign {
                     // a signing subkey must sign back that it belongs to this primary key, or anyone could bind
                     // someone else's signing key to their certificate and claim its signatures
-                    fact.flags.sign = sig.embedded_signature().is_some_and(|back| {
-                        back.verify_primary_key_binding(&sub.key, &primary).is_ok()
-                            && back
-                                .hash_alg()
-                                .is_some_and(|hash| policy::hash(hash, Use::Binding, fact.created).is_ok())
-                    });
+                    let back = back_signature(sig, &sub.key, &primary, fact.created);
+                    fact.flags.sign = back.is_some();
+                    fact.flags.sign_until = back.flatten();
                 }
             }
             if !signatures.is_empty() {
@@ -479,6 +523,7 @@ impl Cert {
             Some(_) => Flags {
                 known: false,
                 sign: true,
+                sign_until: None,
                 encrypt: self.key.primary_key.algorithm().can_encrypt(),
             },
             None => Flags::default(),
@@ -487,7 +532,7 @@ impl Cert {
 
     /// The keys that may sign at `at`, primary first.
     pub(crate) fn signing_keys(&self, at: i64) -> Vec<Component<'_>> {
-        self.usable(at, |flags| flags.sign, |alg| alg.can_sign())
+        self.usable(at, |flags| flags.signs_at(at), |alg| alg.can_sign())
     }
 
     /// The keys that may be encrypted to at `at`.
@@ -530,6 +575,32 @@ impl Cert {
             }
         }
         out
+    }
+
+    /// May the component with this fingerprint decrypt? Only one some binding of it ever marked for encryption (or
+    /// a primary key from before key flags whose algorithm encrypts), at any time, so that old mail opens with an
+    /// expired key; a signing or certifying key never decrypts, which would make it an oracle for what it signs.
+    pub(crate) fn decrypts_with(&self, fingerprint: &pgp::types::Fingerprint) -> bool {
+        let encrypts = |facts: &[Fact]| facts.iter().any(|fact| fact.revocation.is_none() && fact.flags.encrypt);
+        if self.key.primary_key.fingerprint() == *fingerprint {
+            let bindings: Vec<&Fact> = self
+                .facts
+                .direct
+                .iter()
+                .chain(self.facts.users.iter().flatten())
+                .collect();
+            if bindings.iter().any(|fact| fact.flags.known) {
+                return bindings
+                    .iter()
+                    .any(|fact| fact.revocation.is_none() && fact.flags.encrypt);
+            }
+            return self.key.primary_key.algorithm().can_encrypt();
+        }
+        self.key
+            .public_subkeys
+            .iter()
+            .zip(&self.facts.subkeys)
+            .any(|(sub, facts)| sub.key.fingerprint() == *fingerprint && encrypts(facts))
     }
 
     /// Why no key can be encrypted to at `at`, if none can.

@@ -30,6 +30,7 @@ pub mod mailto;
 pub mod opening;
 pub mod otp;
 pub mod pictures;
+pub mod previews;
 pub mod protect;
 mod protect_out;
 mod reads;
@@ -238,6 +239,15 @@ pub enum Event {
     ViewReady {
         request: u64,
     },
+    /// Something more came of the previews `request` of a message's attachment `attachment` (its description, a
+    /// page, a refusal, or the end): [`Core::preview_file`]
+    PreviewReady {
+        request: u64,
+        attachment: usize,
+    },
+    /// The app ended while a file's preview was drawn (it may have been a hostile file), so PDF previews are now off:
+    /// [`Core::previews_notice`] says why and how to turn them on again
+    PdfPreviewsOff,
     /// A message went into the Outbox, left it, or got a reason why it did not go
     OutboxChanged {
         account: AccountId,
@@ -485,6 +495,8 @@ pub struct Core {
     closed: Arc<AtomicBool>,
     /// The questions of AI agents waiting for the user (agents.rs)
     agent_asks: Mutex<agents::Asks>,
+    /// Grows each time what programs may do changes (agents.rs `agent_changes`)
+    agent_changes: tokio::sync::watch::Sender<u64>,
     /// The attachments of the messages shown lately and the files written to open them (opening.rs)
     attachment_files: Arc<opening::Files>,
     /// Lookups of servers; None when the address has no domain
@@ -527,6 +539,8 @@ pub struct Core {
     list_loads: list_load::ListLoads,
     /// Drafts and attachments read off the window thread (reads.rs)
     reads: reads::Reads,
+    /// Previews of attachments: the render thread and what it drew (previews.rs)
+    previews: previews::Previews,
 }
 
 impl Core {
@@ -569,9 +583,11 @@ impl Core {
         runtime.spawn(worker::watch_sleep(wake.clone()));
         // what a move the app was in the middle of when it last ended left behind
         store.clear_moving_sources()?;
+        // a file whose preview ended the app: PDF previews off, said once the core is open (on a worker thread)
+        let pdfs_turned_off = previews::check_crash_markers(&path, &store);
         let closed = Arc::new(AtomicBool::new(false));
         let open = closed.clone();
-        Ok(Core {
+        let core = Core {
             wake,
             synced: Arc::new(worker::Synced::new(Default::default())),
             path,
@@ -597,6 +613,7 @@ impl Core {
             }),
             closed,
             agent_asks: Mutex::default(),
+            agent_changes: tokio::sync::watch::Sender::new(0),
             attachment_files: Arc::default(),
             autoconfig: Requests::default(),
             pgp_lookups: Requests::default(),
@@ -619,7 +636,13 @@ impl Core {
             connections: Default::default(),
             list_loads: Default::default(),
             reads: Default::default(),
-        })
+            previews: Default::default(),
+        };
+        if pdfs_turned_off {
+            let events = core.events.clone();
+            core.runtime()?.spawn(async move { events(Event::PdfPreviewsOff) });
+        }
+        Ok(core)
     }
 
     /// The store connection of the code running on this thread: the windows' own, or the one of the background work
@@ -1118,37 +1141,35 @@ impl Core {
     /// the background; [`Event::Unsubscribed`] follows with the request this returns. Refused for a message that
     /// offers no one-click way ([`crate::unsubscribe::of`]), whose source is not in the store.
     pub fn unsubscribe(&self, folder: FolderId, uid: u64) -> Result<u64> {
-        // the header block is all it takes
-        let start = self
-            .store()
-            .source_start(folder, uid, view::MAX_HEADER_TEXT)?
-            .ok_or(Error::NotFound)?;
-        let message = pe_mime::parser::parse(&start).map_err(|_| Error::NotFound)?;
-        let Some(unsubscribe::Unsubscribe::OneClick { url }) =
-            unsubscribe::of(&message.headers, &self.trusted(folder)?)
-        else {
-            return Err(Error::NotFound);
-        };
+        let url = self.one_click(folder, uid)?.ok_or(Error::NotFound)?;
         let request = self.next_request.fetch_add(1, Ordering::Relaxed);
         let events = self.events.clone();
         self.runtime()?.spawn(async move {
-            let answer = pe_net::http::post_form(
-                &url,
-                &[("List-Unsubscribe", "One-Click")],
-                std::time::Duration::from_secs(30),
-            )
-            .await;
-            let problem = match answer {
-                Ok(response) if (200..300).contains(&response.status) => None,
-                Ok(response) => Some(tr_args(
-                    Text::ErrorListAnswered,
-                    &[("status", u32::from(response.status).into())],
-                )),
-                Err(error) => Some(error.to_string()),
-            };
+            let problem = unsubscribe::post(&url).await;
             events(Event::Unsubscribed { request, problem });
         });
         Ok(request)
+    }
+
+    /// The address a message's one-click unsubscribe (RFC 8058) goes to, None when it offers none
+    /// ([`crate::unsubscribe::of`]) or its source is not in the store
+    pub(crate) fn one_click(&self, folder: FolderId, uid: u64) -> Result<Option<String>> {
+        self.one_click_with(folder, uid, &self.trusted(folder)?)
+    }
+
+    /// [`Core::one_click`] with the servers whose verdicts count for the folder's account already read
+    pub(crate) fn one_click_with(&self, folder: FolderId, uid: u64, trusted: &[String]) -> Result<Option<String>> {
+        // the header block is all it takes
+        let Some(start) = self.store().source_start(folder, uid, view::MAX_HEADER_TEXT)? else {
+            return Ok(None);
+        };
+        let Ok(message) = pe_mime::parser::parse(&start) else {
+            return Ok(None);
+        };
+        Ok(match unsubscribe::of(&message.headers, trusted) {
+            Some(unsubscribe::Unsubscribe::OneClick { url }) => Some(url),
+            _ => None,
+        })
     }
 
     /// Looks up the servers of `email` in the background: [`Event::AutoconfigDone`] follows with the request
@@ -1955,13 +1976,23 @@ impl Core {
             // only encrypted
             let source = store.source(folder, uid)?;
             let encrypted = source.as_deref().is_some_and(protect::has_encrypted);
+            // the Subject of an encrypted message as it travelled: a Subject the sender protected inside the
+            // encryption (RFC 9788) is shown, but never copied into the Subject of a reply, which goes in the clear
+            let outer = encrypted
+                .then(|| source.as_deref().and_then(protect::outer_subject))
+                .flatten();
             let source = source.map(|source| self.shown(&store, source));
-            (source, own_addresses(&store, account)?, date, encrypted)
+            (source, own_addresses(&store, account)?, date, (encrypted, outer))
         };
         let Some(source) = source else {
             return Ok(None);
         };
+        let (encrypted, outer) = encrypted;
         let mut draft = compose::draft(&source, kind, &own, date);
+        if encrypted {
+            let prefix = if kind == DraftKind::Forward { "Fw: " } else { "Re: " };
+            draft.subject = compose::prefixed(prefix, outer.as_deref().unwrap_or_default());
+        }
         draft.quote_encrypted = encrypted;
         draft.encrypt = encrypted;
         draft.sign = encrypted;
@@ -2327,7 +2358,7 @@ impl Core {
 
     /// The folder junk (or not junk) goes to from `folder`: the account's Junk folder, or its Inbox. Refused, saying
     /// so, when the account has none.
-    pub(crate) fn junk_target(&self, folder: FolderId, junk: bool) -> Result<FolderId> {
+    pub fn junk_target(&self, folder: FolderId, junk: bool) -> Result<FolderId> {
         let store = self.store();
         let account = store.folder(folder)?.account_id;
         let target = if junk {
@@ -2833,22 +2864,37 @@ fn write_invitation(source: &[u8], dir: &Path) -> Result<Option<PathBuf>> {
 
 /// Every address of every From header of a message (two senders are nobody's signature)
 pub(crate) fn from_addresses(source: &[u8]) -> Vec<String> {
-    let Ok(message) = pe_mime::parser::parse(source) else {
+    // the top header block only, not the body (an encrypted one's ciphertext)
+    let head = pe_mime::outline::outline(source)
+        .root()
+        .map_or(source, |root| &source[..root.body]);
+    let Ok(message) = pe_mime::parser::parse(head) else {
         return Vec::new();
     };
-    message
-        .headers
-        .iter()
-        .filter(|header| header.key == "from")
-        .flat_map(|header| pe_mime::parser::parse_addresses(&header.value))
-        .flat_map(|address| {
-            address
-                .mailboxes()
-                .iter()
-                .map(|m| m.address.clone())
-                .collect::<Vec<_>>()
-        })
-        .collect()
+    let addresses = |name: &str| -> Vec<String> {
+        message
+            .headers
+            .iter()
+            .filter(|header| header.key == name)
+            .flat_map(|header| pe_mime::parser::parse_addresses(&header.value))
+            .flat_map(|address| {
+                address
+                    .mailboxes()
+                    .iter()
+                    .map(|m| m.address.clone())
+                    .collect::<Vec<_>>()
+            })
+            .collect()
+    };
+    let mut from = addresses("from");
+    // a Sender other than the one From: someone else sent it, so no signature speaks for the From address (the
+    // signatures read only a From of one address)
+    for sender in addresses("sender") {
+        if !from.iter().any(|address| address.eq_ignore_ascii_case(&sender)) {
+            from.push(sender);
+        }
+    }
+    from
 }
 
 /// Every attachment of `source` written into `dir` under its safe name, a file there kept and the new one numbered: how

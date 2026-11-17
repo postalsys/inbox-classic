@@ -1,0 +1,10 @@
+From: alice@eed; micalg=pgp-sha256; protocol="application/pgp-siÿÿÿÿÿÿÿÿgnature"; boundary="sig"
+
+--sig
+Contentorg
+Subject: TestFrom: alice@ersion: 2.0
+Content-Type: multipart/signed; íicalg=pgp-sha256; protocol="applicature";llo, this is the text.
+
+--s boundary="sig"
+
+-i

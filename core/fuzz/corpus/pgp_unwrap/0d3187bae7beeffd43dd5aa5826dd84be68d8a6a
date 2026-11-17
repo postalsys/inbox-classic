@@ -1,0 +1,43 @@
+From: alice@example.org
+To: 256; protocol="applica:			@
+A):ç:		
+!---z-::	‰	Subject: Test
+MPME-Version: 1.0
+Content-Type: mum: alice@example.org
+To: 256; protocol="applica:			@
+A):ç:		
+!t-Type: mum: alice@example.org
+To: 256; protocol="applica:			@
+A):ç:		
+!---z-::	‰	Subject: Test
+MPME-Version: 1.0
+Content-Type: multipart/sigÿÿÿÿÿÿÿÿned; micalg=pgp-sha256; protocol="application/pgp-signaturå"ignature"; boundary="sig"
+z
+--sig
+Content-Type: text/plain; charset=ut_-9
+
+Herg
+Subject: Test
+N PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQT6: aicatio/plai-signature
+
+-----BEGIN PGWKYFixE
+yQIyQaKSX+lpVD+1M~J9EtMvIgpplicatio/plai-signature
+
+-----BEGIN PGWKYFixE
+yQIyQaKSX+lpVD+1MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP SIGNATltipart/sigÿÿÿÿÿÿÿÿned; micalg=pgp-sha256; protocol="application/pgp-signaturå"ignature"; boundary="sig"
+z
+--sig
+Content-Type: text/plain; charset=ut_-9
+
+Herg
+Subject: Test
+N PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQT6: applicŸ‹–Ğ“—i-signature
+
+-----BEGIN PGWKYFixE
+yQIy

@@ -289,7 +289,20 @@ fn locked_text() -> String {
 /// The master key: the one in the system's store, or a new one kept there. None when there is none and `create`
 /// is false.
 fn master(secrets: &Secrets, create: bool) -> Result<Option<Zeroizing<[u8; 32]>>> {
-    if let Some(encoded) = secrets.get(Key::Pgp) {
+    let no_store = |why: &str| {
+        Error::Unavailable(tr_args(
+            Text::PgpErrorNoStore,
+            &[("store", (&store_name()).into()), ("error", why.into())],
+        ))
+    };
+    let kept = match secrets.lookup(Key::Pgp) {
+        Ok(kept) => kept,
+        // locked, refused, not answering: the keys show as locked; a new master key would be written over the one
+        // there and lock every private key for good, so none is made
+        Err(_) if !create => return Ok(None),
+        Err(why) => return Err(no_store(&why)),
+    };
+    if let Some(encoded) = kept {
         let bytes = Zeroizing::new(STANDARD.decode(encoded.trim()).unwrap_or_default());
         let mut key = Zeroizing::new([0u8; 32]);
         if bytes.len() == 32 {
@@ -305,12 +318,7 @@ fn master(secrets: &Secrets, create: bool) -> Result<Option<Zeroizing<[u8; 32]>>
         .fill(&mut key[..])
         .map_err(|_| Error::Unavailable("random".into()))?;
     let encoded = Zeroizing::new(STANDARD.encode(&key[..]));
-    secrets.set(Key::Pgp, &encoded).map_err(|why| {
-        Error::Unavailable(tr_args(
-            Text::PgpErrorNoStore,
-            &[("store", (&store_name()).into()), ("error", (&why).into())],
-        ))
-    })?;
+    secrets.set(Key::Pgp, &encoded).map_err(|why| no_store(&why))?;
     Ok(Some(key))
 }
 
@@ -439,23 +447,36 @@ impl<'a> Book<'a> {
     pub fn get(&self, fingerprint: &str) -> Result<KeyInfo> {
         let key = self.store.pgp_key(fingerprint)?.ok_or(Error::NotFound)?;
         // a contact's key has no private part to open: the system's store is not asked
-        let master = if key.secret.is_some() {
-            master(self.secrets, false)?
-        } else {
-            None
-        };
+        let master = self.master_for(&key)?;
         let held = self.store.pgp_key_addresses(Some(fingerprint))?;
         let held = held.into_iter().map(|held| (held.address, held.verified)).collect();
         self.info(&key, master.as_deref(), held).ok_or(Error::NotFound)
     }
 
-    fn info(&self, key: &StoredKey, master: Option<&[u8; 32]>, addresses: Vec<(String, bool)>) -> Option<KeyInfo> {
-        let cert = self.certs.get(key)?;
-        let now = unix_now();
-        let own = key.secret.is_some();
+    /// The master key, asked of the system's store only for a key with a private part
+    fn master_for(&self, key: &StoredKey) -> Result<Option<Zeroizing<[u8; 32]>>> {
+        if key.secret.is_some() {
+            master(self.secrets, false)
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// Whether a stored key is own, its state and the state in words, without the rest of [`KeyInfo`]
+    pub fn state(&self, fingerprint: &str) -> Result<(bool, KeyState, String)> {
+        let key = self.store.pgp_key(fingerprint)?.ok_or(Error::NotFound)?;
+        let cert = self.certs.get(&key).ok_or(Error::NotFound)?;
+        let master = self.master_for(&key)?;
+        let (state, text) = self.state_of(&key, &cert, master.as_deref(), unix_now());
+        Ok((key.secret.is_some(), state, text))
+    }
+
+    /// The state of a key and its words: locked (own, and its private part does not open), else as its certificate
+    /// stands at `now`
+    fn state_of(&self, key: &StoredKey, cert: &Cert, master: Option<&[u8; 32]>, now: i64) -> (KeyState, String) {
         let date = crate::calendar::local_date;
-        let (state, state_text) = match cert.status(now) {
-            _ if own && !self.opens(key, master) => (KeyState::Locked, locked_text()),
+        match cert.status(now) {
+            _ if key.secret.is_some() && !self.opens(key, master) => (KeyState::Locked, locked_text()),
             Ok(()) => match cert.expires(now) {
                 Some(at) => (
                     KeyState::Valid,
@@ -473,7 +494,16 @@ impl<'a> Book<'a> {
             ),
             Err(pe_pgp::CertProblem::Revoked { reason: None }) => (KeyState::Revoked, tr(Text::PgpKeyRevoked)),
             Err(_) => (KeyState::NotValid, tr(Text::PgpKeyNotValid)),
-        };
+        }
+    }
+
+    fn info(&self, key: &StoredKey, master: Option<&[u8; 32]>, addresses: Vec<(String, bool)>) -> Option<KeyInfo> {
+        let cert = self.certs.get(key)?;
+        let now = unix_now();
+        let own = key.secret.is_some();
+        let date = crate::calendar::local_date;
+        let (state, state_text) = self.state_of(key, &cert, master, now);
+        let expires = cert.expires(now);
         let grouped = pe_pgp::grouped(&key.fingerprint);
         let users = cert.user_ids(now);
         let primary = users.iter().find(|user| user.primary).or(users.first());
@@ -522,7 +552,7 @@ impl<'a> Book<'a> {
             state_text,
             status,
             created: cert.created(),
-            expires: cert.expires(now),
+            expires,
             algorithm: cert.algorithm(),
             source: KeySource::words(&key.source),
             name,
@@ -531,7 +561,7 @@ impl<'a> Book<'a> {
             remove_question,
             verify_marks,
             created_text: date(cert.created()),
-            expires_text: cert.expires(now).map_or_else(|| tr(Text::UiKeyNever), date),
+            expires_text: expires.map_or_else(|| tr(Text::UiKeyNever), date),
             grouped,
         })
     }
@@ -739,18 +769,14 @@ impl<'a> Book<'a> {
         let Some(fingerprint) = self.store.pgp_peer(address)?.and_then(|peer| peer.fingerprint) else {
             return Ok(None);
         };
-        let Some(key) = self.store.pgp_key(&fingerprint)? else {
-            return Ok(None);
-        };
-        let Some(cert) = self.certs.get(&key) else {
+        let Some(cert) = self.cert(&fingerprint)? else {
             return Ok(None);
         };
         Ok(Some(cert.minimal(address, unix_now()).unwrap_or(cert).to_bytes()))
     }
 
     pub fn export(&self, fingerprint: &str) -> Result<String> {
-        let key = self.store.pgp_key(fingerprint)?.ok_or(Error::NotFound)?;
-        Ok(self.certs.get(&key).ok_or(Error::NotFound)?.armored())
+        Ok(self.cert(fingerprint)?.ok_or(Error::NotFound)?.armored())
     }
 
     /// The private key protected by `passphrase`, armored, for a backup
@@ -800,8 +826,7 @@ impl<'a> Book<'a> {
 
     /// The name a key is saved under: "Alice Example public key.asc", or "... private key backup.asc"
     pub fn file_name(&self, fingerprint: &str, private: bool) -> Result<String> {
-        let key = self.store.pgp_key(fingerprint)?.ok_or(Error::NotFound)?;
-        let cert = self.certs.get(&key).ok_or(Error::NotFound)?;
+        let cert = self.cert(fingerprint)?.ok_or(Error::NotFound)?;
         let users = cert.user_ids(unix_now());
         let user = users.iter().find(|user| user.primary).or(users.first());
         let who = match user {
@@ -842,6 +867,12 @@ impl<'a> Book<'a> {
                 ring.keys.push(secret);
             }
         }
+        for (address, fingerprint) in self.store.pgp_keys_in_use()? {
+            ring.in_use.insert(address, fingerprint);
+        }
+        for identity in self.store.pgp_identities()? {
+            ring.in_use.insert(identity.address, identity.fingerprint);
+        }
         for held in self.store.pgp_key_addresses(None)? {
             // the names the labels say: the Address Book's
             if !ring.names.contains_key(&held.address)
@@ -870,10 +901,7 @@ impl<'a> Book<'a> {
         let Some(identity) = self.store.pgp_identity(address)? else {
             return Ok(None);
         };
-        Ok(self
-            .store
-            .pgp_key(&identity.fingerprint)?
-            .and_then(|key| self.certs.get(&key)))
+        self.cert(&identity.fingerprint)
     }
 
     /// The certificate in use for a correspondent
@@ -881,11 +909,12 @@ impl<'a> Book<'a> {
         let Some(fingerprint) = self.store.pgp_peer(address)?.and_then(|peer| peer.fingerprint) else {
             return Ok(None);
         };
-        Ok(self
-            .store
-            .pgp_key(&fingerprint)?
-            .as_ref()
-            .and_then(|key| self.certs.get(key)))
+        self.cert(&fingerprint)
+    }
+
+    /// The certificate of a stored key, read once (`CertCache`)
+    pub fn cert(&self, fingerprint: &str) -> Result<Option<Cert>> {
+        Ok(self.store.pgp_key(fingerprint)?.and_then(|key| self.certs.get(&key)))
     }
 
     pub fn peer(&self, address: &str) -> Result<PeerKeys> {
@@ -964,6 +993,11 @@ impl Core {
 
     pub fn pgp_key(&self, fingerprint: &str) -> Result<KeyInfo> {
         self.book(|book| book.get(fingerprint))
+    }
+
+    /// Whether a key is own, its state and the state in words (`Book::state`)
+    pub(crate) fn pgp_key_state(&self, fingerprint: &str) -> Result<(bool, KeyState, String)> {
+        self.book(|book| book.state(fingerprint))
     }
 
     /// Whether a private key kept now can still be opened after a restart: false with memory passwords, where the
@@ -1219,6 +1253,30 @@ mod tests {
         let first = master(&secrets, true).unwrap().unwrap();
         let again = master(&secrets, false).unwrap().unwrap();
         assert_eq!(*first, *again);
+    }
+
+    /// A system store that holds a master key it can not read now (locked, the access refused), and takes writes
+    struct Unreadable(std::sync::Mutex<Option<String>>);
+
+    impl crate::secrets::Backend for Unreadable {
+        fn load(&self, _: crate::secrets::Key) -> std::result::Result<Option<String>, String> {
+            Err("the keychain is locked".into())
+        }
+        fn save(&self, _: crate::secrets::Key, password: &str) -> std::result::Result<(), String> {
+            *self.0.lock().unwrap() = Some(password.into());
+            Ok(())
+        }
+        fn remove(&self, _: crate::secrets::Key) {}
+    }
+
+    #[test]
+    fn a_master_key_that_can_not_be_read_is_never_replaced() {
+        // a new one written over it would lock every private key it wraps for good
+        let store = std::sync::Arc::new(Unreadable(Default::default()));
+        let secrets = Secrets::with_backend(store.clone());
+        assert!(master(&secrets, false).unwrap().is_none(), "read as locked");
+        assert!(matches!(master(&secrets, true), Err(Error::Unavailable(_))));
+        assert!(store.0.lock().unwrap().is_none(), "nothing written");
     }
 
     #[test]

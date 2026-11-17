@@ -190,7 +190,9 @@ impl Core {
         let subject = self
             .store()
             .message(first.folder, first.uid)?
-            .map(|m| m.info.subject)
+            // as it travelled: a Subject protected inside an encryption, shown once decrypted, stays out of the
+            // Subject of a forward, which goes in the clear
+            .map(|m| m.agent_subject().to_string())
             .unwrap_or_default();
         let exported = self.export_messages(refs, timeout)?;
         let mut files = Vec::with_capacity(exported.len());

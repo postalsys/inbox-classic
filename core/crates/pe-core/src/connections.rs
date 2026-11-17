@@ -107,16 +107,7 @@ impl Core {
         connection: Connection,
         work: impl FnOnce(&Core) -> T + Send + 'static,
     ) -> impl Future<Output = Option<T>> + Send + 'static {
-        let core = Arc::downgrade(self);
-        async move {
-            tokio::task::spawn_blocking(move || {
-                let core = core.upgrade()?;
-                Some(on(connection, || work(&core)))
-            })
-            .await
-            .ok()
-            .flatten()
-        }
+        in_background(Arc::downgrade(self), connection, work)
     }
 
     /// Queues `job`, an action of the user's, to run after the ones queued before it, on the actions' connection.
@@ -135,6 +126,22 @@ impl Core {
         };
         queue.send(job).map_err(|_| crate::Error::Closed)
     }
+}
+
+/// [`Core::in_background`] for work that holds the core only by a weak handle until it runs (a task of the core's own
+/// runtime, which must never drop the last handle)
+pub(crate) async fn in_background<T: Send + 'static>(
+    core: Weak<Core>,
+    connection: Connection,
+    work: impl FnOnce(&Core) -> T + Send + 'static,
+) -> Option<T> {
+    tokio::task::spawn_blocking(move || {
+        let core = core.upgrade()?;
+        Some(on(connection, || work(&core)))
+    })
+    .await
+    .ok()
+    .flatten()
 }
 
 /// Runs the actions' jobs one at a time

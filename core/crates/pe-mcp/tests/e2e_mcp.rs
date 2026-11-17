@@ -22,6 +22,8 @@ struct Client {
     reader: BufReader<tokio::net::unix::OwnedReadHalf>,
     writer: tokio::net::unix::OwnedWriteHalf,
     next: u64,
+    /// The notifications that came while waiting for an answer
+    notifications: Vec<Value>,
 }
 
 impl Client {
@@ -34,27 +36,49 @@ impl Client {
             reader: BufReader::new(read),
             writer,
             next: 0,
+            notifications: Vec::new(),
         }
+    }
+
+    /// The next message from the server
+    async fn line(&mut self) -> Value {
+        let mut line = String::new();
+        tokio::time::timeout(Duration::from_secs(90), self.reader.read_line(&mut line))
+            .await
+            .expect("an answer")
+            .unwrap();
+        serde_json::from_str(&line).unwrap()
     }
 
     async fn request(&mut self, method: &str, params: Value) -> Value {
         self.next += 1;
         let request = json!({ "jsonrpc": "2.0", "id": self.next, "method": method, "params": params });
         self.writer.write_all(format!("{request}\n").as_bytes()).await.unwrap();
-        let mut line = String::new();
-        tokio::time::timeout(Duration::from_secs(90), self.reader.read_line(&mut line))
-            .await
-            .expect("an answer")
-            .unwrap();
-        let answer: Value = serde_json::from_str(&line).unwrap();
-        assert_eq!(answer["id"], self.next, "{answer}");
-        answer
+        loop {
+            let answer = self.line().await;
+            if answer.get("id").is_none() {
+                self.notifications.push(answer);
+                continue;
+            }
+            assert_eq!(answer["id"], self.next, "{answer}");
+            return answer;
+        }
+    }
+
+    /// The next notification, one that came already or the next to come
+    async fn notification(&mut self) -> Value {
+        if !self.notifications.is_empty() {
+            return self.notifications.remove(0);
+        }
+        let notification = self.line().await;
+        assert!(notification.get("id").is_none(), "{notification}");
+        notification
     }
 
     async fn initialize(&mut self) -> Value {
         self.request(
             "initialize",
-            json!({ "protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": { "name": "test-client", "version": "1" } }),
+            json!({ "protocolVersion": "2025-11-25", "capabilities": {}, "clientInfo": { "name": "test-client", "version": "1" } }),
         )
         .await
     }
@@ -67,11 +91,66 @@ impl Client {
         let result = &answer["result"];
         let text = result["content"][0]["text"].as_str().unwrap_or_default().to_string();
         if result["isError"] == true {
+            // a sentence, never debug output
+            assert!(
+                text.ends_with('.') && !text.contains("Error::") && !text.contains("{ "),
+                "{text}"
+            );
             Err(text)
         } else {
-            Ok(serde_json::from_str(&text).unwrap())
+            // the text is the structured result as compact JSON
+            assert_eq!(text, result["structuredContent"].to_string());
+            Ok(result["structuredContent"].clone())
         }
     }
+}
+
+/// A mailing list's server: answers `count` one-click requests, 200 to those whose path has "ok" and 500 to the others;
+/// the request lines it got
+fn list_server(count: usize) -> (u16, std::thread::JoinHandle<Vec<String>>) {
+    let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+    let port = listener.local_addr().unwrap().port();
+    let server = std::thread::spawn(move || {
+        use std::io::{Read, Write};
+        let mut lines = Vec::new();
+        for _ in 0..count {
+            let (mut stream, _) = listener.accept().unwrap();
+            stream.set_read_timeout(Some(Duration::from_secs(10))).unwrap();
+            let mut request = Vec::new();
+            let mut buffer = [0u8; 4096];
+            while !String::from_utf8_lossy(&request).contains("One-Click") {
+                let read = stream.read(&mut buffer).unwrap();
+                if read == 0 {
+                    break;
+                }
+                request.extend_from_slice(&buffer[..read]);
+            }
+            let request = String::from_utf8_lossy(&request).into_owned();
+            let line = request.lines().next().unwrap_or_default().to_string();
+            let answer: &[u8] = if line.contains("ok") {
+                b"HTTP/1.0 200 OK\r\nContent-Length: 2\r\n\r\nok"
+            } else {
+                b"HTTP/1.0 500 Oops\r\nContent-Length: 0\r\n\r\n"
+            };
+            stream.write_all(answer).unwrap();
+            lines.push(line);
+        }
+        lines
+    });
+    (port, server)
+}
+
+/// A message of a mailing list whose one-click unsubscribe goes to `path` on the list server at `port`, signed so the
+/// provider's verdict covers it
+fn list_message(sender: &str, port: u16, path: &str) -> String {
+    format!(
+        "Authentication-Results: mx.example.com; dkim=pass header.d=list.example.com\r\n\
+         DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:list-unsubscribe:list-unsubscribe-post; bh=x; b=y\r\n\
+         From: {sender} <news@list.example.com>\r\nSubject: News of {sender}\r\n\
+         Message-ID: <{path}@list.example.com>\r\n\
+         List-Unsubscribe: <http://127.0.0.1:{port}/u/{path}>\r\n\
+         List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n\r\nThe news.\r\n"
+    )
 }
 
 /// Waits up to `seconds` for `condition`
@@ -101,6 +180,8 @@ fn answer_questions(core: Arc<Core>, events: Receiver<Event>, others: std::sync:
                     accounts: accounts.iter().map(|(id, _)| *id).collect(),
                 },
                 Some(AgentAsk::Connect { .. }) => AgentAnswer::Deny,
+                // left for the test to answer
+                Some(AgentAsk::Send(ask)) if ask.subject.contains("Wait") => continue,
                 Some(AgentAsk::Send(ask)) if ask.subject.contains("Do not send") => AgentAnswer::DontSend,
                 Some(AgentAsk::Send(ask)) => {
                     // the user sees every recipient, the new ones marked
@@ -111,6 +192,30 @@ fn answer_questions(core: Arc<Core>, events: Receiver<Event>, others: std::sync:
                         "{ask:?}"
                     );
                     AgentAnswer::Send
+                }
+                Some(AgentAsk::Unsubscribe(ask)) => {
+                    // the user sees every list by its sender, and where the request goes
+                    assert!(ask.lists.iter().all(|l| l.target == "127.0.0.1"), "{ask:?}");
+                    let (title, detail) = pe_core::agents::unsubscribe_text(&ask);
+                    assert!(title.starts_with("Test Agent wants to unsubscribe you"), "{title}");
+                    // the address and the name apart, so the windows can show the address whole
+                    assert!(
+                        ask.lists
+                            .iter()
+                            .all(|l| l.address == "news@list.example.com" && !l.name.contains('@')),
+                        "{ask:?}"
+                    );
+                    let each = if ask.lists.len() == 1 {
+                        "the list below"
+                    } else {
+                        "each list below"
+                    };
+                    assert!(detail.contains(each), "{detail}");
+                    if ask.lists.iter().any(|l| l.name == "Keep") {
+                        AgentAnswer::DontUnsubscribe
+                    } else {
+                        AgentAnswer::Unsubscribe
+                    }
                 }
                 None => continue,
             };
@@ -133,6 +238,30 @@ fn an_agent_works_on_the_mailbox() {
         &[],
     );
     let news = server.add_message("INBOX", &rfc822("News", "Our news."), &[]);
+    let offer = server.add_message(
+        "INBOX",
+        "From: Shop <shop@example.com>\r\nSubject: Offer\r\nMessage-ID: <offer@example.com>\r\n\r\nBuy now.\r\n",
+        &[],
+    );
+    let (port, list_server) = list_server(2);
+    let weekly = server.add_message("INBOX", &list_message("Weekly", port, "ok"), &[]);
+    let monthly = server.add_message("INBOX", &list_message("Monthly", port, "fail"), &[]);
+    let kept = server.add_message("INBOX", &list_message("Keep", port, "keep"), &[]);
+    // a list that takes its time to answer: the yes counts before it does
+    let slow_port = {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        std::thread::spawn(move || {
+            use std::io::{Read, Write};
+            let (mut stream, _) = listener.accept().unwrap();
+            let mut buffer = [0u8; 4096];
+            let _ = stream.read(&mut buffer);
+            std::thread::sleep(Duration::from_secs(3));
+            let _ = stream.write_all(b"HTTP/1.0 200 OK\r\nContent-Length: 2\r\n\r\nok");
+        });
+        port
+    };
+    let slow = server.add_message("INBOX", &list_message("Slow", slow_port, "slow"), &[]);
 
     let dir = TempDir::new("mcp");
     let (sender, events) = channel();
@@ -150,6 +279,7 @@ fn an_agent_works_on_the_mailbox() {
     let mut settings = server.account_settings();
     settings.smtp_security = pe_store::Security::StartTls;
     let account = core.add_account(&settings, PASSWORD).unwrap();
+    core.set_signature(account, "<p>Ann from the test</p>").unwrap();
     let (others, rest) = channel();
     answer_questions(core.clone(), events, others);
     core.sync(account).unwrap();
@@ -177,10 +307,18 @@ fn an_agent_works_on_the_mailbox() {
         assert!(agent.request("tools/list", json!({})).await["error"].is_object());
         let init = agent.initialize().await;
         assert_eq!(init["result"]["serverInfo"]["name"], "inbox-classic", "{init}");
+        assert_eq!(init["result"]["protocolVersion"], "2025-11-25", "{init}");
+        assert_eq!(init["result"]["capabilities"]["tools"]["listChanged"], true, "{init}");
         let hosts = core.agent_hosts().unwrap();
         assert_eq!((hosts.len(), hosts[0].name.as_str(), hosts[0].allowed), (1, "Test Agent", true));
+        let host = hosts[0].clone();
         let tools = agent.request("tools/list", json!({})).await;
-        assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 16);
+        let tools = tools["result"]["tools"].as_array().unwrap().clone();
+        assert_eq!(tools.len(), 16);
+        let delete = tools.iter().find(|t| t["name"] == "delete_messages").unwrap();
+        assert_eq!(delete["annotations"]["destructiveHint"], true, "{delete}");
+        let search = tools.iter().find(|t| t["name"] == "search_messages").unwrap();
+        assert!(search["description"].as_str().unwrap().contains("older_than:2d"), "{search}");
 
         let accounts = agent.call("list_accounts", json!({})).await.unwrap();
         assert_eq!(accounts["accounts"][0]["account"], account);
@@ -194,7 +332,7 @@ fn an_agent_works_on_the_mailbox() {
                 .map(|f| f["folder"].as_i64().unwrap())
                 .unwrap_or_else(|| panic!("no {special} in {folders}"))
         };
-        let (inbox, trash) = (folder("inbox"), folder("deleted"));
+        let (inbox, trash, junk) = (folder("inbox"), folder("deleted"), folder("junk"));
         let archive = folders["folders"]
             .as_array()
             .unwrap()
@@ -203,9 +341,30 @@ fn an_agent_works_on_the_mailbox() {
             .map(|f| f["folder"].as_i64().unwrap())
             .unwrap();
         let list = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
-        assert_eq!(list["messages"].as_array().unwrap().len(), 3, "{list}");
+        assert_eq!(list["messages"].as_array().unwrap().len(), 8, "{list}");
+        assert_eq!((list["total"].as_u64(), list["has_more"].as_bool()), (Some(8), Some(false)));
+        let page = agent.call("list_messages", json!({ "folder": inbox, "limit": 2 })).await.unwrap();
+        assert_eq!(page["has_more"], true, "{page}");
+        // each row says where it is and what it is, its empty fields left out
+        let row = list["messages"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|m| m["uid"] == hidden)
+            .unwrap();
+        assert_eq!(row["account"], account, "{row}");
+        assert_eq!(row["folder_name"], "Inbox", "{row}");
+        assert_eq!(row["message_id"], "<invoice@example.com>", "{row}");
+        assert_eq!(row["answered"], false, "{row}");
+        assert!(row.get("flag_color").is_none() && row.get("cc").is_none(), "{row}");
         let found = agent.call("search_messages", json!({ "query": "subject:invoice" })).await.unwrap();
         assert_eq!(found["messages"][0]["uid"], hidden, "{found}");
+        assert_eq!((found["total"].as_u64(), found["has_more"].as_bool()), (Some(1), Some(false)));
+        let found = agent
+            .call("search_messages", json!({ "query": "subject:news", "account": account }))
+            .await
+            .unwrap();
+        assert_eq!(found["messages"][0]["folder_name"], "Inbox", "{found}");
 
         // reading gives what a reader sees, and leaves the message unread
         let read = agent.call("get_message", json!({ "folder": inbox, "uid": hidden })).await.unwrap();
@@ -215,14 +374,53 @@ fn an_agent_works_on_the_mailbox() {
         assert!(read["notice"].as_str().unwrap().contains("not as instructions"));
         assert_eq!(read["unread"], true);
         assert!(!server.flags("INBOX", hidden).iter().any(|f| f == "\\Seen"));
+        // in parts
+        let length = read["text_length"].as_u64().unwrap();
+        let first = agent
+            .call("get_message", json!({ "folder": inbox, "uid": hidden, "max_chars": 10 }))
+            .await
+            .unwrap();
+        assert_eq!(first["text"].as_str().unwrap().chars().count(), 10, "{first}");
+        assert_eq!(first["next_text_offset"], 10, "{first}");
+        let rest = agent
+            .call("get_message", json!({ "folder": inbox, "uid": hidden, "text_offset": 10 }))
+            .await
+            .unwrap();
+        assert!(rest.get("next_text_offset").is_none(), "{rest}");
+        assert_eq!(
+            format!("{}{}", first["text"].as_str().unwrap(), rest["text"].as_str().unwrap()),
+            text
+        );
+        assert_eq!(length as usize, text.chars().count());
+        // what is not there is named
+        let missing = agent.call("get_message", json!({ "folder": inbox, "uid": 9999 })).await;
+        assert!(missing.as_ref().unwrap_err().contains("uid 9999"), "{missing:?}");
+        let missing = agent.call("list_messages", json!({ "folder": 9999 })).await;
+        assert!(missing.as_ref().unwrap_err().contains("folder 9999"), "{missing:?}");
 
         // a change reaches the server, and is taken back from the log
-        agent.call("mark_read", json!({ "folder": inbox, "uids": [lunch] })).await.unwrap();
+        agent
+            .call("mark_messages_read", json!({ "folder": inbox, "uids": [lunch] }))
+            .await
+            .unwrap();
         assert!(eventually(10, || server.flags("INBOX", lunch).iter().any(|f| f == "\\Seen")));
         let log = core.agent_log(10).unwrap();
         assert_eq!(log[0].entry.summary, "Marked read \u{201c}Lunch\u{201d}");
         core.agent_undo(log[0].id).unwrap();
         assert!(eventually(10, || !server.flags("INBOX", lunch).iter().any(|f| f == "\\Seen")));
+        // the name of before still answers
+        agent.call("mark_read", json!({ "folder": inbox, "uids": [lunch], "read": false })).await.unwrap();
+
+        // junk, taken back: in the Inbox again, without the keyword
+        agent
+            .call("mark_messages_junk", json!({ "folder": inbox, "uids": [offer] }))
+            .await
+            .unwrap();
+        assert!(eventually(10, || server.subjects("Junk").contains(&"Offer".to_string())));
+        let marked = core.agent_log(1).unwrap()[0].clone();
+        assert_eq!(marked.entry.summary, "Marked \u{201c}Offer\u{201d} as junk");
+        assert!(eventually(10, || core.agent_undo(marked.id).is_ok()));
+        assert!(eventually(10, || server.subjects("INBOX").contains(&"Offer".to_string())));
 
         agent
             .call("move_messages", json!({ "folder": inbox, "uids": [news], "to_folder": archive }))
@@ -267,7 +465,99 @@ fn an_agent_works_on_the_mailbox() {
         assert!(eventually(10, || server.subjects("Trash").contains(&"Lunch".to_string())));
         // nothing is deleted for good by an agent
         let for_good = agent.call("delete_messages", json!({ "folder": trash, "uids": [1] })).await;
-        assert!(for_good.unwrap_err().contains("only the user"));
+        assert!(for_good.unwrap_err().contains("Only the user"));
+
+        // unsubscribing asks the user once for all the lists, and tells what each list did
+        for uid in [weekly, monthly, kept, slow] {
+            agent.call("get_message", json!({ "folder": inbox, "uid": uid })).await.unwrap();
+        }
+        let none = agent
+            .call("unsubscribe_from_list", json!({ "folder": inbox, "uids": [hidden] }))
+            .await;
+        assert!(none.as_ref().unwrap_err().contains(&hidden.to_string()), "{none:?}");
+        let from_junk = agent
+            .call("unsubscribe_from_list", json!({ "folder": junk, "uids": [1] }))
+            .await;
+        assert!(from_junk.as_ref().unwrap_err().contains("Junk"), "{from_junk:?}");
+        let left = agent
+            .call("unsubscribe_from_list", json!({ "folder": inbox, "uids": [weekly, monthly] }))
+            .await
+            .unwrap();
+        assert_eq!(left["unsubscribed"], true, "{left}");
+        let lists = left["lists"].as_array().unwrap();
+        let outcome = |sender: &str| {
+            lists
+                .iter()
+                .find(|l| l["sender"].as_str().unwrap().starts_with(sender))
+                .unwrap_or_else(|| panic!("{sender} in {left}"))
+                .clone()
+        };
+        assert_eq!(outcome("Weekly")["unsubscribed"], true, "{left}");
+        assert_eq!(outcome("Monthly")["unsubscribed"], false, "{left}");
+        assert!(outcome("Monthly")["problem"].as_str().unwrap().contains("500"), "{left}");
+        let mut asked: Vec<String> = list_server
+            .join()
+            .unwrap()
+            .iter()
+            .map(|line| line.split(' ').take(2).collect::<Vec<_>>().join(" "))
+            .collect();
+        asked.sort();
+        assert_eq!(asked, ["POST /u/fail", "POST /u/ok"]);
+        // logged at the yes, and what the refusing list answered written into its entry
+        let summaries: Vec<String> = core.agent_log(2).unwrap().into_iter().map(|e| e.entry.summary).collect();
+        assert!(
+            summaries.contains(&"Unsubscribed from the list of \u{201c}News of Weekly\u{201d}".to_string()),
+            "{summaries:?}"
+        );
+        assert!(
+            summaries
+                .iter()
+                .any(|s| s.starts_with("Could not unsubscribe from the list of \u{201c}News of Monthly\u{201d}")),
+            "{summaries:?}"
+        );
+        // a no asks no list (the list server took its two requests and is gone)
+        let kept_on = agent
+            .call("unsubscribe", json!({ "folder": inbox, "uid": kept }))
+            .await
+            .unwrap();
+        assert_eq!(kept_on["unsubscribed"], false, "{kept_on}");
+        assert!(core.agent_log(1).unwrap()[0].entry.summary.starts_with("You did not unsubscribe from news@list.example.com"));
+        // 30 lists a day, each counted from the user's yes, not from when its list answers
+        let earlier: Vec<pe_store::NewLogEntry> = (0..27)
+            .map(|_| pe_store::NewLogEntry {
+                host: host.id,
+                what: "unsubscribe".into(),
+                summary: "earlier".into(),
+                ..Default::default()
+            })
+            .collect();
+        core.log_agent(&earlier).unwrap();
+        let leaving = tokio::spawn({
+            let socket = socket.clone();
+            async move {
+                let mut other = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+                other.initialize().await;
+                other
+                    .call("unsubscribe_from_list", json!({ "folder": inbox, "uids": [slow] }))
+                    .await
+            }
+        });
+        // the yes is logged at once; the slow list has not answered yet
+        assert!(
+            eventually_async(10, || {
+                core.agent_log(1)
+                    .unwrap()
+                    .first()
+                    .is_some_and(|e| e.entry.summary.contains("News of Slow"))
+            })
+            .await
+        );
+        let capped = agent
+            .call("unsubscribe_from_list", json!({ "folder": inbox, "uids": [kept] }))
+            .await;
+        assert!(capped.as_ref().unwrap_err().contains("30 lists a day"), "{capped:?}");
+        assert!(!leaving.is_finished(), "the slow list answered already");
+        assert_eq!(leaving.await.unwrap().unwrap()["unsubscribed"], true);
 
         // sending waits for the user; a yes puts it in the Outbox, where it waits and can be taken back
         let sent = agent
@@ -290,12 +580,83 @@ fn an_agent_works_on_the_mailbox() {
             .unwrap();
         assert_eq!(refused["sent"], false);
 
+        // one message of a program waits for the user at a time: another connection of it is refused meanwhile
+        let waiting = tokio::spawn({
+            let socket = socket.clone();
+            async move {
+                let mut first = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+                first.initialize().await;
+                first
+                    .call("send_message", json!({ "account": account, "to": "friend@example.com", "subject": "Wait", "text": "Later" }))
+                    .await
+            }
+        });
+        assert!(eventually_async(10, || !core.agent_asks_waiting().is_empty()).await);
+        let second = agent
+            .call("send_message", json!({ "account": account, "to": "friend@example.com", "subject": "Another", "text": "Now" }))
+            .await;
+        assert!(second.as_ref().unwrap_err().contains("not answered"), "{second:?}");
+        let request = core.agent_asks_waiting()[0];
+        core.agent_answer(request, AgentAnswer::DontSend).unwrap();
+        assert_eq!(waiting.await.unwrap().unwrap()["sent"], false);
+        // nor from calls at the same moment: the check and the question are one step
+        let written = pe_core::agents::Written {
+            account,
+            outgoing: pe_core::Outgoing {
+                to: "friend@example.com".into(),
+                subject: "Wait at once".into(),
+                ..Default::default()
+            },
+            text: "Now".into(),
+            ..Default::default()
+        };
+        let start = Arc::new(std::sync::Barrier::new(8));
+        let callers: Vec<_> = (0..8)
+            .map(|_| {
+                let (core, host, written, start) = (core.clone(), host.clone(), written.clone(), start.clone());
+                std::thread::spawn(move || {
+                    start.wait();
+                    core.agent_ask_send(&host, &written).is_ok()
+                })
+            })
+            .collect();
+        let asked = callers.into_iter().map(|c| c.join().unwrap()).filter(|ok| *ok).count();
+        assert_eq!((asked, core.agent_asks_waiting().len()), (1, 1));
+        core.agent_answer(core.agent_asks_waiting()[0], AgentAnswer::DontSend).unwrap();
+
+        // a draft, a reply named by `reply_to` as before, with the signature under the text
+        agent
+            .call(
+                "save_draft",
+                json!({ "account": account, "text": "A draft", "reply_to": { "folder": inbox, "uid": hidden, "kind": "reply" } }),
+            )
+            .await
+            .unwrap();
+        assert!(eventually(10, || {
+            server
+                .messages("Drafts")
+                .iter()
+                .any(|m| pe_testkit::raw_text(m).contains("Ann from the test"))
+        }));
+        // 30 drafts an hour
+        let drafts: Vec<pe_store::NewLogEntry> = (0..30)
+            .map(|_| pe_store::NewLogEntry {
+                host: host.id,
+                what: "save_draft".into(),
+                summary: "earlier".into(),
+                ..Default::default()
+            })
+            .collect();
+        core.log_agent(&drafts).unwrap();
+        let too_many = agent.call("save_draft", json!({ "account": account, "text": "One more" })).await;
+        assert!(too_many.as_ref().unwrap_err().contains("30 drafts"), "{too_many:?}");
+
         // one that goes: after its wait in the Outbox
         agent
             .call(
                 "send_message",
                 json!({ "account": account, "to": "friend@example.com", "subject": "It goes", "text": "Yes",
-                        "reply_to": { "folder": inbox, "uid": hidden, "kind": "reply" } }),
+                        "original": { "folder": inbox, "uid": hidden, "kind": "reply" } }),
             )
             .await
             .unwrap();
@@ -307,14 +668,18 @@ fn an_agent_works_on_the_mailbox() {
         );
         assert!(eventually(10, || server.subjects("Sent").contains(&"It goes".to_string())));
 
-        // what the user did not allow is refused, at once
-        let host = core.agent_hosts().unwrap()[0].clone();
+        // what the user did not allow is refused, at once, and the program is told its tools changed
         core.update_agent_host(host.id, true, AgentLevels(AgentLevels::READ), &[account]).unwrap();
-        let refused = agent.call("mark_read", json!({ "folder": inbox, "uids": [news] })).await;
+        let changed = agent.notification().await;
+        assert_eq!(changed["method"], "notifications/tools/list_changed", "{changed}");
+        let tools = agent.request("tools/list", json!({})).await;
+        assert_eq!(tools["result"]["tools"].as_array().unwrap().len(), 6, "{tools}");
+        let refused = agent.call("mark_messages_read", json!({ "folder": inbox, "uids": [news] })).await;
         assert!(refused.unwrap_err().contains("organize mail"));
         core.update_agent_host(host.id, true, AgentLevels(AgentLevels::READ), &[]).unwrap();
         assert!(agent.call("list_folders", json!({ "account": account })).await.unwrap_err().contains("account"));
         core.set_agents_enabled(false).unwrap();
+        assert_eq!(agent.notification().await["method"], "notifications/tools/list_changed");
         assert!(agent.call("list_accounts", json!({})).await.unwrap_err().contains("turned off"));
         core.set_agents_enabled(true).unwrap();
 
@@ -328,6 +693,18 @@ fn an_agent_works_on_the_mailbox() {
     mcp.stop();
     // the server let go of the engine
     assert_eq!(Arc::strong_count(&core), 2, "the test and the answering thread");
+}
+
+/// [`eventually`] without holding up the runtime the server's answers come from
+async fn eventually_async(seconds: u64, condition: impl Fn() -> bool) -> bool {
+    let deadline = Instant::now() + Duration::from_secs(seconds);
+    while Instant::now() < deadline {
+        if condition() {
+            return true;
+        }
+        tokio::time::sleep(Duration::from_millis(100)).await;
+    }
+    condition()
 }
 
 fn pe_core_now() -> i64 {
@@ -438,7 +815,7 @@ fn an_agent_never_reads_encrypted_mail() {
         assert_eq!(message["from"], "Alice Example <alice@example.org>", "{message}");
         let text = message["text"].as_str().unwrap();
         assert!(text.contains("encrypted") && !text.contains("mill"), "{message}");
-        assert!(message["attachments"].as_array().unwrap().is_empty(), "{message}");
+        assert!(message.get("attachments").is_none(), "{message}");
         let file = agent
             .call("get_attachment", json!({ "folder": inbox, "uid": sealed, "index": 0 }))
             .await;
@@ -450,7 +827,7 @@ fn an_agent_never_reads_encrypted_mail() {
         assert!(view.protection.as_ref().is_some_and(|p| p.encrypted));
         assert!(eventually(10, || user_finds("mill") == 1), "decrypted for the user");
         let found = agent.call("search_messages", json!({ "query": "mill" })).await.unwrap();
-        assert!(found["messages"].as_array().unwrap().is_empty(), "{found}");
+        assert!(found.get("messages").is_none(), "{found}");
         let found = agent
             .call("search_messages", json!({ "query": "is:encrypted" }))
             .await
@@ -461,7 +838,7 @@ fn an_agent_never_reads_encrypted_mail() {
             .await
             .unwrap();
         assert!(
-            found["messages"].as_array().unwrap().is_empty(),
+            found.get("messages").is_none(),
             "words never reach what was decrypted: {found}"
         );
         // listed by the Subject it came with, while the user's list shows the protected one
@@ -471,6 +848,8 @@ fn an_agent_never_reads_encrypted_mail() {
         );
         let listed = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
         assert_eq!(listed["messages"][0]["subject"], "...", "{listed}");
+        // nor its first words, which only decrypting gives
+        assert!(listed["messages"][0].get("snippet").is_none(), "{listed}");
         for listed in [
             listed,
             agent

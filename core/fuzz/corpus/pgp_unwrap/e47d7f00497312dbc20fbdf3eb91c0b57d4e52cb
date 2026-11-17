@@ -1,0 +1,13 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@examplecorÿÿÿÿÿÿÿÿÿFrom: GnuPG Ed25519 Îgnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-yTpeÿ multipart/encrypted; protocol="application/pgp-encryPted"; boundary="enc"
+
+--enc
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--enc
+Content-Type: application/oÿ

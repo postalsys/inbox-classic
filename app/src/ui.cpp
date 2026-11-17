@@ -1151,6 +1151,8 @@ int DefaultButtonId(HWND dialog) {
 // What a dialog's own window procedure would answer: IsDialogMessage asks for the default button (Enter in a field),
 // and a multi-line edit asks the window to move the focus on Tab. A plain window answers neither, so Enter would take
 // IDOK whichever button is the default, and Tab would stay in the edit.
+const wchar_t* kModalFocus = L"InboxClassicModalFocus";
+
 LRESULT CALLBACK ModalProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR defaultId) {
     switch (message) {
     case DM_GETDEFID:
@@ -1168,6 +1170,23 @@ LRESULT CALLBACK ModalProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
             }
         }
         return 0;
+    }
+    case WM_ACTIVATE: {
+        // the keyboard where it was when the window comes back, as a dialog keeps it: a window that came up while the
+        // app was behind another one gets the control RunModal named, its safe answer, not the window itself
+        if (LOWORD(wParam) == WA_INACTIVE) {
+            HWND focus = GetFocus();
+            if (focus && IsChild(hwnd, focus)) {
+                SetPropW(hwnd, kModalFocus, focus);
+            }
+            break;
+        }
+        LRESULT result = DefSubclassProc(hwnd, message, wParam, lParam);
+        auto saved = static_cast<HWND>(GetPropW(hwnd, kModalFocus));
+        if (!HIWORD(wParam) && saved && IsWindow(saved) && IsChild(hwnd, saved) && IsWindowEnabled(saved)) {
+            SetFocus(saved);
+        }
+        return result;
     }
     }
     return DefSubclassProc(hwnd, message, wParam, lParam);
@@ -1201,6 +1220,7 @@ void RunModal(HWND dialog, HWND focus, const bool& done) {
     EnableWindow(root, FALSE);
     ShowWindow(dialog, SW_SHOW);
     if (focus) {
+        SetPropW(dialog, kModalFocus, focus);
         SetFocus(focus);
     }
     MSG msg = {};
@@ -1237,6 +1257,7 @@ void RunModal(HWND dialog, HWND focus, const bool& done) {
     EnableWindow(root, wasEnabled);
     SetWindowLongPtrW(dialog, GWLP_USERDATA, 0);
     RemoveWindowSubclass(dialog, ModalProc, 0);
+    RemovePropW(dialog, kModalFocus);
     ClearHelpContext(dialog);
     DestroyWindow(dialog);
     if (wasEnabled) {

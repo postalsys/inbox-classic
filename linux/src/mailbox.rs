@@ -97,6 +97,10 @@ pub struct Mailbox {
     empty_title: gtk::Label,
     empty_more: gtk::Label,
     status: gtk::Label,
+    /// Whether the status bar holds a sync's words ("Checking", "Done", a failure) rather than the answer to something
+    /// the user did ("Copied the code", "3 contacts saved to ...", "not in this message"): a sync in the background
+    /// replaces only its own words, so the user's answer stays until the user does something else
+    status_is_sync: Cell<bool>,
     outgoing: gtk::Label,
     /// The status bar's Undo of a message waiting to be sent
     undo_send: gtk::Button,
@@ -322,6 +326,7 @@ impl Mailbox {
             empty_title,
             empty_more,
             status,
+            status_is_sync: Cell::new(true),
             outgoing,
             undo_send,
             counts,
@@ -409,6 +414,7 @@ impl Mailbox {
         let sync = gio::SimpleAction::new("sync-account", Some(glib::VariantTy::INT64));
         sync.connect_activate(|_, account| {
             if let Some(account) = account.and_then(|a| a.get::<i64>()) {
+                shell().main().sync_asked();
                 let _ = shell().core.sync(account);
             }
         });
@@ -1791,7 +1797,26 @@ impl Mailbox {
 
     // ---- the status bar ----
 
+    /// The answer to something the user did
     pub fn set_status(&self, text: &str) {
+        self.show_status(text);
+        self.status_is_sync.set(text.is_empty() || text == t!(UiDone));
+    }
+
+    /// A sync's words: shown unless the user's answer is there, or always (`over`: a failure, what the rules did)
+    pub fn set_sync_status(&self, text: &str, over: bool) {
+        if over || self.status_is_sync.get() {
+            self.show_status(text);
+            self.status_is_sync.set(true);
+        }
+    }
+
+    /// A sync the user asked for: its words replace whatever the status bar said
+    pub fn sync_asked(&self) {
+        self.status_is_sync.set(true);
+    }
+
+    fn show_status(&self, text: &str) {
         self.status.set_text(text);
         // the whole text as the tip, as a long one (an error and what happens next) is cut short
         self.status.set_tooltip_text((!text.is_empty()).then_some(text));

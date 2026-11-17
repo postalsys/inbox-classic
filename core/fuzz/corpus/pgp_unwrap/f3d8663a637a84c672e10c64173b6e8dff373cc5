@@ -1,0 +1,28 @@
+From: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/si#ned; mical	g=pgp-sha256; protocol="application/pgp-sication/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/pl
+
+--siice@example.org
+To: gnupg-ed75536@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-TypeÌ text/pl
+
+--sig¬
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEyQIyQaKSX+lpVD+1MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP SIGNATURE-----
+
+--sig--

@@ -19,7 +19,7 @@ pub use cert::{Cert, CertProblem, SecretKey, UserId, address_of, needs_passphras
 pub use decrypt::{DecryptError, Decrypted, decrypt, decrypt_within, recipients};
 pub use inline::armored_kind;
 pub use produce::{Signed, encrypt, generate, sign_detached};
-pub use verify::{Problem, SigCheck, SigStatus, verify_detached};
+pub use verify::{Problem, SigCheck, SigStatus, verify_detached, verify_detached_for};
 
 /// The most a certificate, a key file or an Autocrypt header may hold. Real certificates are a few kilobytes; ones
 /// with thousands of third-party signatures (flooded on the old key servers) are refused rather than parsed.

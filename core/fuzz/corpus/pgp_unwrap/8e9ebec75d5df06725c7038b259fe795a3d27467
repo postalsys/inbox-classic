@@ -1,0 +1,39 @@
+From: Gne: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhYGneEWMIolWYw/SgMtfOnXAUw
+d7koqJc5+UL04euPG Ed25519 Egnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgpe.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha26; protocol="application/pgp-signature"; boundary="sig"
+
+--s
+igContent-Type: text/plain; charset=utf-8
+
+Hello, this is the tFrom: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgpšçÙ[Æ	 protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-8
+
+Hello, this is the text.
+
+--sig
+Content-Type: application/pgp-signaturext.
+
+--sig
+Content-Type: application/pgp-sig22sf11NH
+LXJqn8frQSw8PcAk60Lo6hPf+ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿz9qS4FtWi28hmlJFFVG2QuiWak=
+=mf4W
+-----END PGP MESSAGE-----
+
+--enc--

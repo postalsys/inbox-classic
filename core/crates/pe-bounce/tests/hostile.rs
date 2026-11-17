@@ -18,9 +18,9 @@ fn notice(text: &str) -> Vec<u8> {
     .into_bytes()
 }
 
-/// The best of three runs: a busy machine stops a single run now and then, which is no measure of the work
+/// The best of five runs: a busy machine stops a single run now and then, which is no measure of the work
 fn time(raw: &[u8]) -> Duration {
-    (0..3)
+    (0..5)
         .map(|_| {
             let start = Instant::now();
             detect(raw);
@@ -30,17 +30,34 @@ fn time(raw: &[u8]) -> Duration {
         .unwrap_or_default()
 }
 
-/// Doubling the input must not much more than double the time. The floor keeps timer noise on
-/// short runs from failing the ratio; the bounds are loose for unoptimized test builds
+/// Is `large` within `factor` times `small`? Under 50 ms counts as nothing: timer noise and a busy machine.
+fn within(small: Duration, large: Duration, factor: u32) -> bool {
+    large <= (small * factor).max(Duration::from_millis(50))
+}
+
+/// Four times the input must take about four times as long, not sixteen. Only times measured side by side are
+/// compared, never a time with a fixed bound: a loaded machine (a full test run, a shared CI runner, a debug build)
+/// slows both alike, while a bound in milliseconds is a guess about the machine. The two sizes are measured in
+/// turns, so a slow spell in the middle of the test falls on both.
 fn assert_linear(label: &str, build: impl Fn(usize) -> Vec<u8>) {
+    assert_linear_at(label, SIZE, build)
+}
+
+/// `assert_linear` from `size / 4` to `size`
+fn assert_linear_at(label: &str, size: usize, build: impl Fn(usize) -> Vec<u8>) {
     // the patterns are compiled on first use
     detect(&build(16));
-    let small = time(&build(SIZE / 2));
-    let large = time(&build(SIZE));
-    assert!(large < Duration::from_secs(2), "{label}: {large:?} at full size");
+    let (small, large) = (build(size / 4), build(size));
+    let mut times = [Duration::MAX; 2];
+    for _ in 0..3 {
+        times[0] = times[0].min(time(&small));
+        times[1] = times[1].min(time(&large));
+    }
+    let [small, large] = times;
+    // linear work gives four times; quadratic, sixteen
     assert!(
-        large <= (small * 3).max(Duration::from_millis(100)),
-        "{label}: {small:?} -> {large:?} when doubled"
+        within(small, large, 8),
+        "{label}: {small:?} -> {large:?} at four times the size"
     );
 }
 
@@ -71,11 +88,9 @@ fn an_unterminated_address_is_not_read_to_the_end() {
         "The following message to <",
         "Your message could not be delivered to the following address: <",
     ] {
-        let body = format!("{anchor}a@").repeat(SIZE.div_ceil(anchor.len() + 2));
-        let start = Instant::now();
-        let detection = detect(&notice(&body));
-        assert_eq!(detection.recipient, None);
-        assert!(start.elapsed() < Duration::from_secs(2), "{:?}", start.elapsed());
+        let body = |n: usize| notice(&format!("{anchor}a@").repeat(n.div_ceil(anchor.len() + 2)));
+        assert_eq!(detect(&body(SIZE)).recipient, None);
+        assert_linear(anchor, body);
     }
 }
 
@@ -154,16 +169,17 @@ fn host_without_a_colon_in_the_recipient_block() {
 #[test]
 fn a_huge_delivery_report_is_cut_before_its_headers_are_unfolded() {
     assert_eq!(MAX_HEADER_BLOCK_SIZE, 64 * 1024);
-    let report = format!(
-        "Final-Recipient: rfc822; x@example.com\nAction: failed\nStatus: 5.1.1\nX-Fold: a\n{}",
-        " b\n".repeat(400_000)
-    );
-    let raw = report_with_text("", &report);
-    let start = Instant::now();
-    let d = detect(&raw);
-    assert!(start.elapsed() < Duration::from_secs(5), "{:?}", start.elapsed());
+    let report = |folds: usize| {
+        let report = format!(
+            "Final-Recipient: rfc822; x@example.com\nAction: failed\nStatus: 5.1.1\nX-Fold: a\n{}",
+            " b\n".repeat(folds)
+        );
+        report_with_text("", &report)
+    };
+    let d = detect(&report(400_000));
     assert_eq!(d.recipient.as_deref(), Some("x@example.com"));
     assert_eq!(d.action.as_deref(), Some("failed"));
+    assert_linear_at("folds", 400_000, report);
 }
 
 #[test]
@@ -230,10 +246,7 @@ fn a_report_of_many_fields_and_recipients_is_read_in_linear_time() {
         report_with_text("x", &report)
     };
     let raw = build(4000, 1700);
-    let start = Instant::now();
     let d = detect(&raw);
-    let elapsed = start.elapsed();
-    assert!(elapsed < Duration::from_millis(500), "{elapsed:?}");
     assert_eq!(d.reports.len(), 1700);
     assert_eq!(d.recipient.as_deref(), Some("a"));
     assert_linear("fields and recipients", |n| build(n / 12, n / 30));

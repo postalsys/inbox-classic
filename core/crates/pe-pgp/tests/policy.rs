@@ -330,3 +330,109 @@ fn rsa_under_2048_is_refused() {
     let bytes = pgp::ser::Serialize::to_bytes(&key.to_public_key()).unwrap();
     assert!(matches!(pe_pgp::read_certs(&bytes), Err(pe_pgp::Error::Unusable(_))));
 }
+
+/// The status of a signature made by the signing subkey of a key bound as `binding` says
+fn subkey_status(binding: Binding) -> SigStatus {
+    let (alice, sub) = with_signing_subkey(Y2020, "Alice <alice@example.org>", binding);
+    status(
+        &alice,
+        Sig {
+            subkey: Some(sub),
+            ..Sig::at(Y2021)
+        },
+    )
+}
+
+fn real(expires: Option<u32>) -> Back {
+    Back::Real {
+        expires,
+        critical_notation: false,
+    }
+}
+
+#[test]
+fn a_false_back_signature_before_the_real_one_changes_nothing() {
+    // the interoperability suite's "Fake backsig, backsig": only the first embedded signature was looked at
+    let binding = Binding {
+        backs: vec![Back::Fake, real(None)],
+        ..Default::default()
+    };
+    assert_eq!(subkey_status(binding), SigStatus::Good);
+    let binding = Binding {
+        backs: vec![Back::Fake],
+        ..Default::default()
+    };
+    assert_eq!(subkey_status(binding), SigStatus::Bad(Problem::NotSigningKey));
+}
+
+#[test]
+fn an_expired_back_signature_ends_the_subkeys_signing() {
+    // made in 2020, expiring a month later: the subkey signs in that month only
+    let binding = || Binding {
+        backs: vec![real(Some(MONTH))],
+        ..Default::default()
+    };
+    let (alice, sub) = with_signing_subkey(Y2020, "Alice <alice@example.org>", binding());
+    let at = |at| Sig {
+        subkey: Some(sub),
+        ..Sig::at(at)
+    };
+    assert_eq!(status(&alice, at(Y2020 + 86_400)), SigStatus::Good);
+    assert_eq!(status(&alice, at(Y2021)), SigStatus::Bad(Problem::NotSigningKey));
+}
+
+#[test]
+fn a_critical_notation_is_not_understood() {
+    // RFC 9580 5.2.3.24: a critical notation that is not understood makes the signature invalid; none is understood
+    let alice = key(Y2020, "Alice <alice@example.org>");
+    let sig = Sig {
+        critical_notation: true,
+        ..Sig::at(Y2021)
+    };
+    assert_eq!(status(&alice, sig), SigStatus::Bad(Problem::WrongType));
+    // in a subkey's binding the subkey is not bound at all, so its signatures are by a key the certificate lacks
+    let binding = Binding {
+        backs: vec![real(None)],
+        critical_notation: true,
+    };
+    assert_eq!(subkey_status(binding), SigStatus::UnknownKey);
+    // in its back signature, the subkey is bound but may not sign
+    let binding = Binding {
+        backs: vec![Back::Real {
+            expires: None,
+            critical_notation: true,
+        }],
+        ..Default::default()
+    };
+    assert_eq!(subkey_status(binding), SigStatus::Bad(Problem::NotSigningKey));
+}
+
+#[test]
+fn a_key_not_marked_for_encryption_does_not_decrypt() {
+    // the interoperability suite's "Non-encryption recipients": a message encrypted to a subkey whose binding does
+    // not allow encryption is not opened with it (a signing key that decrypts is an oracle for what it signs)
+    use pgp::composed::{ArmorOptions, MessageBuilder};
+    let mut alice = key(Y2020, "Alice <alice@example.org>");
+    let encrypt_to_subkey = |alice: &pgp::composed::SignedSecretKey| {
+        let mut rng = rand::thread_rng();
+        let mut builder = MessageBuilder::from_bytes("", &b"Hello"[..])
+            .seipd_v1(&mut rng, pgp::crypto::sym::SymmetricKeyAlgorithm::AES128);
+        builder
+            .encrypt_to_key(&mut rng, &alice.secret_subkeys[0].key.public_key())
+            .unwrap();
+        builder.to_armored_string(&mut rng, ArmorOptions::default()).unwrap()
+    };
+    let message = encrypt_to_subkey(&alice);
+    assert_eq!(
+        pe_pgp::decrypt(message.as_bytes(), &[secret(&alice)], &[], NOW)
+            .unwrap()
+            .data,
+        b"Hello"
+    );
+    bind_subkey(&mut alice, 0, Y2020, None, flags(false, false, false));
+    let message = encrypt_to_subkey(&alice);
+    assert!(matches!(
+        pe_pgp::decrypt(message.as_bytes(), &[secret(&alice)], &[], NOW),
+        Err(pe_pgp::DecryptError::NoKey { .. })
+    ));
+}

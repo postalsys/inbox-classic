@@ -1,0 +1,12 @@
+–<<<F<<1<<<<4<8<<ÿÿÿÿÿ&ÿÿ%<<<<From: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; chars:example.org
+Subject:< TestFrom: alice@example.org
+To: gnupg-<<ed25519@example.org
+Subject: Te‹
+MIME-Version: –1.0

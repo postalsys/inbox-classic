@@ -1,0 +1,19 @@
+F="sig"
+
+--sig
+Content-Type: text/plain; chast=uertf-8
+
+He
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=2ghpsipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature&"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-
+8
+He
+MIME-Version: 1.0
+Content-Typa-56; protocol="application/pgp-signature";llo, this is the text.
+
+--s boundary="sig"
+
+-i

@@ -219,6 +219,49 @@ fn changed_text_does_not_match() {
 }
 
 #[test]
+fn a_key_that_is_not_the_one_in_use_does_not_sign_for_the_sender() {
+    // Mallory makes a key with Alice's address and gets it stored (an Autocrypt header of a forged message, a file):
+    // it waits for the user's decision beside Alice's, and what it signs is not Alice's, before and after Keep
+    let w = world("pgp-not-in-use");
+    let impostor = pe_pgp::generate("Alice", &["alice@example.org".into()], now() - 60).unwrap();
+    w.core
+        .pgp_import(impostor.cert().armored().as_bytes(), None, KeySource::Paste)
+        .unwrap();
+    let raw = message(
+        "Alice <alice@example.org>",
+        &signed_part(&text("Pay Mallory 1000 euros"), &impostor, "s"),
+    );
+    let protection = w.view(&raw).protection.unwrap();
+    assert_eq!(protection.tone, Tone::Warning, "{protection:?}");
+    assert!(protection.text.contains("another key"), "{}", protection.text);
+    w.core.pgp_decide("alice@example.org", false).unwrap();
+    assert_eq!(w.view(&raw).protection.unwrap().tone, Tone::Warning);
+    // Alice's own key still signs for her
+    let raw = message("Alice <alice@example.org>", &signed_part(&text("Hi"), &w.alice, "s"));
+    assert_eq!(w.view(&raw).protection.unwrap().tone, Tone::Good);
+}
+
+#[test]
+fn a_sender_other_than_from_is_not_signed_for() {
+    // the plan's From rule: a Sender that differs from the one From never gives blue or green
+    let w = world("pgp-sender");
+    let raw = message(
+        "Alice <alice@example.org>",
+        &signed_part(&text("Hello Bob"), &w.alice, "s"),
+    )
+    .replacen("To: ", "Sender: mallory@example.net\r\nTo: ", 1);
+    let protection = w.view(&raw).protection.unwrap();
+    assert_eq!(protection.tone, Tone::Warning, "{protection:?}");
+    // the same address as From changes nothing
+    let raw = message(
+        "Alice <alice@example.org>",
+        &signed_part(&text("Hello Bob"), &w.alice, "s"),
+    )
+    .replacen("To: ", "Sender: Alice@example.org\r\nTo: ", 1);
+    assert_eq!(w.view(&raw).protection.unwrap().tone, Tone::Good);
+}
+
+#[test]
 fn an_unknown_key() {
     let w = world("pgp-unknown");
     let raw = message("mallory@example.net", &signed_part(&text("Hi"), &w.mallory, "s"));
@@ -411,6 +454,27 @@ fn protected_subject() {
 }
 
 #[test]
+fn a_protected_subject_stays_out_of_a_reply() {
+    // the sender hid the Subject inside the encryption: a reply or forward, whose Subject goes in the clear, takes
+    // the placeholder it travelled under, never the protected one
+    let w = world("pgp-subject-reply");
+    let inner = "Content-Type: text/plain; charset=utf-8; protected-headers=\"v1\"\r\nSubject: Secret plan\r\n\r\nBody";
+    let raw = message(
+        "alice@example.org",
+        &encrypted_part(inner, &[&w.me], Some(&w.alice), "e"),
+    )
+    .replacen("Subject: Test", "Subject: ...", 1);
+    let folder = stored(&w, 1, &raw);
+    for kind in [pe_core::DraftKind::Reply, pe_core::DraftKind::Forward] {
+        let draft = w.core.draft(folder, 1, kind).unwrap().unwrap();
+        assert!(!draft.subject.contains("Secret"), "{kind:?}: {}", draft.subject);
+        assert!(draft.encrypt);
+    }
+    // the shown subject is the protected one, as the list shows it once decrypted
+    assert_eq!(w.view(&raw).subject, "Secret plan");
+}
+
+#[test]
 fn attachments_come_from_the_decrypted_part() {
     let w = world("pgp-attachment");
     let inner = mixed(&[
@@ -564,13 +628,14 @@ fn an_agent_does_not_answer_encrypted_mail() {
         last_used: None,
     };
     for kind in [pe_core::DraftKind::Reply, pe_core::DraftKind::Forward] {
-        let outcome = w.core.agent_save_draft(
-            &host,
+        let written = pe_core::agents::Written {
             account,
-            Some((folder, 1, kind)),
-            pe_core::Outgoing::default(),
-            "Here you go",
-        );
+            original: Some((folder, 1, kind)),
+            text: "Here you go".into(),
+            signature: true,
+            ..Default::default()
+        };
+        let outcome = w.core.agent_save_draft(&host, &written);
         match outcome {
             Err(pe_core::Error::Unavailable(why)) => assert!(why.contains("encrypted"), "{why}"),
             other => panic!("{kind:?}: {other:?}"),

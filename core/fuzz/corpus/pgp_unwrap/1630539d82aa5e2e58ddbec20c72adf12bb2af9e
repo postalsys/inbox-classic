@@ -1,0 +1,5 @@
+From: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signeD; micalg=pgp-sha256; protocol="application/pgp-signFrom: GnuPG Ed25519 <gnupg-ed25519@exa)))))ature")))))))));

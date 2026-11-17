@@ -13,6 +13,20 @@ async fn show_found(query: &str) -> bool {
     one
 }
 
+/// Waits until the message `subject`, put on the server, is in the Inbox of the store: its sync is done, so a search
+/// finds it (the search reads the store once, when it is typed)
+async fn in_the_inbox(subject: &str) -> bool {
+    let Some(inbox) = folder_id("Inbox") else {
+        return false;
+    };
+    wait_until(30, || {
+        listed_in_folder(inbox, 0, 500)
+            .iter()
+            .any(|m| m.info.subject == subject)
+    })
+    .await
+}
+
 /// The rows the list shows, from `offset` on, as the list has them (grouped by conversation, a row is not a message's
 /// place in the folder)
 pub(super) fn list_rows(offset: u64, limit: u64) -> Vec<pe_store::Message> {
@@ -87,8 +101,7 @@ pub async fn unsubscribing(d: &Driver) {
     let _ = d.add_message(&raw, &[]);
     run_command(Command::Sync);
     select_folder("Inbox");
-    wait_for(20, || d.find("INBOX", "Subject: Weekly list news")).await;
-    pause(1500).await;
+    in_the_inbox("Weekly list news").await;
     show_found("subject:\"Weekly list news\"").await;
     let reader = &shell().main().reader;
     let shown = wait_until(15, || reader.unsubscribe.is_visible()).await;
@@ -141,8 +154,7 @@ pub async fn invitation_and_logo(d: &Driver) {
     );
     let _ = d.add_message(&invite, &[]);
     run_command(Command::Sync);
-    wait_for(20, || d.find("INBOX", "Subject: Invitation: Quarterly planning")).await;
-    pause(1500).await;
+    in_the_inbox("Invitation: Quarterly planning").await;
     show_found("subject:\"Quarterly planning\"").await;
     let reader = &shell().main().reader;
     let card = wait_for(15, || {
@@ -173,8 +185,7 @@ pub async fn invitation_and_logo(d: &Driver) {
     );
     let _ = d.add_message(&branded, &[]);
     run_command(Command::Sync);
-    wait_for(20, || d.find("INBOX", "Subject: News from the brand")).await;
-    pause(1500).await;
+    in_the_inbox("News from the brand").await;
     show_found("subject:\"News from the brand\"").await;
     let shown = wait_until(15, || reader.logo_shown()).await;
     d.check(shown, "a sender whose logo the server passed has it beside the header");
@@ -361,8 +372,28 @@ fn agent_said(file: &std::path::Path, step: &str) -> Option<Value> {
 pub async fn agent(d: &Driver) {
     d.step("an AI agent");
     select_folder("Inbox");
-    // two new messages for the agent to read, whatever the steps before left unread
     let rows_before = rows();
+    // two mailing lists for the agent to leave, read and an hour old, so the agent's newest unread are the two below;
+    // signed by the list and passed by the trusted receiving server, as one-click unsubscribing needs
+    for (index, (from, subject)) in [
+        ("Weekly Digest <digest@list.example.com>", "Weekly digest"),
+        ("Shop Offers <offers@list.example.com>", "Monthly offers"),
+    ]
+    .iter()
+    .enumerate()
+    {
+        let raw = format!(
+            "Authentication-Results: mx.inboxclassic.test; dkim=pass header.d=list.example.com\r\n\
+             DKIM-Signature: v=1; d=list.example.com; s=s1; h=from:list-unsubscribe:list-unsubscribe-post; bh=x; \
+             b=y\r\nFrom: {from}\r\nTo: testuser@inboxclassic.test\r\nSubject: {subject}\r\nDate: {}\r\n\
+             Message-ID: <agent-list-{index}@list.example.com>\r\n\
+             List-Unsubscribe: <https://list.example.com/u/{index}>\r\n\
+             List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n\r\nThis month on the list.\r\n",
+            date_now(-60)
+        );
+        let _ = d.add_message(&raw, &["\\Seen"]);
+    }
+    // two new messages for the agent to read, whatever the steps before left unread
     for (from, subject, body) in [
         (
             "Maria Lopez <maria@example.org>",
@@ -382,7 +413,7 @@ pub async fn agent(d: &Driver) {
         let _ = d.add_message(&raw, &[]);
     }
     run_command(Command::Sync);
-    wait_until(20, || rows() >= rows_before + 2).await;
+    wait_until(20, || rows() >= rows_before + 4).await;
     let unread = || d.unread_at(d.ports.rest);
     let before = unread();
     d.shot(&main_window(), "agents-1-before").await;
@@ -480,8 +511,10 @@ pub async fn agent(d: &Driver) {
             label_of(&root, "agent-warning").contains("never written to pat@example.net"),
             "with a warning about the new address",
         );
+        // the question may have been on screen a while before this step looks (the agent asks while the unread
+        // counts above are still checked): the app says how long Send was off once it was shown
         d.check(
-            !send.is_response_enabled("send"),
+            crate::agents::send_waited(send),
             "Send waits a moment before it can be pressed",
         );
         pause(2000).await;
@@ -554,9 +587,90 @@ pub async fn agent(d: &Driver) {
         shell().core.outbox().unwrap_or_default().is_empty(),
         "and the Outbox is empty",
     );
+    agent_unsubscribes(d, &out).await;
     if let Some(agent) = agent.as_mut() {
         let _ = agent.kill();
         let _ = agent.wait();
+    }
+}
+
+/// The agent asks to leave two mailing lists in one question; Don't Unsubscribe, the default, asks no list
+async fn agent_unsubscribes(d: &Driver, out: &std::path::Path) {
+    // the agent's go (scripts/ui-e2e/agent.mjs)
+    let _ = std::fs::write(out.with_extension("jsonl.unsubscribe"), "");
+    let ask = wait_for(60, || alert().filter(|a| a.widget_name() == "agent-unsubscribe")).await;
+    let Some(ask) = ask else {
+        let said = agent_said(out, "lists").or_else(|| agent_said(out, "unsubscribe"));
+        d.check(
+            false,
+            &format!("the agent asks to unsubscribe from two mailing lists ({said:?})"),
+        );
+        return;
+    };
+    let root: gtk::Widget = ask.clone().upcast();
+    let heading = ask.heading().unwrap_or_default().to_string();
+    let lists: Vec<String> = (0..3).map(|n| label_of(&root, &format!("agent-list-{n}"))).collect();
+    let named = |name: &str| -> Vec<String> {
+        descendants::<gtk::Label>(&root)
+            .into_iter()
+            .filter(|l| l.widget_name() == name)
+            .map(|l| l.text().to_string())
+            .collect()
+    };
+    let (names, targets) = (named("agent-list-name"), named("agent-list-target"));
+    d.check(
+        heading.contains("My AI agent")
+            && heading.contains('2')
+            && lists[..2].contains(&"digest@list.example.com".to_string())
+            && lists[..2].contains(&"offers@list.example.com".to_string())
+            && lists[2].is_empty()
+            && names.len() == 2
+            && names.contains(&"Weekly Digest".to_string())
+            && names.contains(&"Shop Offers".to_string())
+            && targets.len() == 2
+            && targets.iter().all(|t| t.ends_with(" list.example.com")),
+        &format!(
+            "the agent asks to unsubscribe from two mailing lists: one question lists both senders, each address first \
+             and whole with the name apart, and where the requests go ({heading}; {lists:?}; {names:?}; {targets:?})"
+        ),
+    );
+    d.check(
+        ask.default_response().as_deref() == Some("dont")
+            && ask.close_response() == "dont"
+            && ask.response_appearance("unsubscribe") == adw::ResponseAppearance::Destructive
+            && !ask.is_response_enabled("unsubscribe"),
+        "Don't Unsubscribe is the default and Esc; Unsubscribe waits a moment and can not be taken back",
+    );
+    pause(2000).await;
+    d.shot(&ask, "agents-7-unsubscribe").await;
+    // Esc
+    ask.close();
+    let said = wait_for(20, || agent_said(out, "unsubscribe")).await;
+    let asked = std::fs::read_to_string(out).unwrap_or_default();
+    d.check(
+        said.is_some_and(|s| s["unsubscribed"] == false && s["note"].as_str().is_some_and(|n| n.contains("said no")))
+            && !asked.contains("\"lists\":[{\"sender\""),
+        "the agent learns the user said no, and no list was asked",
+    );
+    command(Command::AiAgents);
+    if let Some(agents) = wait_dialog(10, "agents-dialog").await {
+        let mut rows: Vec<adw::ActionRow> = descendants::<adw::ActionRow>(agents.upcast_ref())
+            .into_iter()
+            .filter(|row| row.widget_name() == "agents-entry")
+            .collect();
+        rows.sort_by_key(|row| row.index());
+        let entries: Vec<String> = rows.iter().map(|row| row.title().to_string()).collect();
+        let undo = named_in(agents.upcast_ref(), "agents-undo").is_some_and(|u| u.is_sensitive());
+        d.check(
+            entries
+                .first()
+                .is_some_and(|e| e.starts_with("You did not unsubscribe from digest@list.example.com"))
+                && !undo,
+            &format!("and the AI Agents log says so, with nothing to undo ({entries:?})"),
+        );
+        d.shot(&agents, "agents-8-unsubscribe-log").await;
+        agents.close();
+        wait_gone(10, "agents-dialog").await;
     }
 }
 
@@ -1934,22 +2048,35 @@ pub(super) fn document_text(document: &str) -> String {
 /// The row of the message of `folder` with `subject` selected in the list (the folder shown), and its view there
 pub(super) async fn open_by_subject(folder: i64, subject: &str) -> bool {
     let main = shell().main();
-    // the list's own rows as it shows them: grouped by conversation, a row is not a message's place in the folder
-    let found = wait_for(10, || {
-        main.list
-            .shown_messages(500)
-            .iter()
-            .position(|m| m.folder_id == folder && m.info.subject == subject)
-    })
-    .await;
-    let Some(row) = found.and_then(|at| u32::try_from(at).ok()) else {
-        return false;
-    };
-    select_row(row).await;
-    wait_until(15, || {
-        main.reader.has_view() && main.reader.subject().as_deref() == Some(subject)
-    })
-    .await
+    let deadline = Instant::now() + Duration::from_secs(30);
+    while Instant::now() < deadline {
+        // found and selected in one go, once the list has settled: a row's number is good only for the list it was
+        // read from, and mail that comes meanwhile (a sync) moves the rows under it. The list's own rows as it shows
+        // them: grouped by conversation, a row is not a message's place in the folder
+        let selected = wait_for(10, || {
+            let at = main
+                .list
+                .shown_messages(500)
+                .iter()
+                .position(|m| m.folder_id == folder && m.info.subject == subject)?;
+            main.list.select(u32::try_from(at).ok()?);
+            Some(())
+        })
+        .await;
+        if selected.is_none() {
+            return false;
+        }
+        pause(1500).await;
+        // the list read again between the two would have shown another message: selected again
+        if wait_until(15, || {
+            main.reader.has_view() && main.reader.subject().as_deref() == Some(subject)
+        })
+        .await
+        {
+            return true;
+        }
+    }
+    false
 }
 
 /// The undelivered marks the list draws in its rows on screen
@@ -2500,8 +2627,7 @@ pub async fn not_downloaded(d: &Driver) {
     let _ = d.add_message(&raw, &[]);
     run_command(Command::Sync);
     select_folder("Inbox");
-    wait_for(20, || d.find("INBOX", "Subject: Waiting on the server")).await;
-    pause(1500).await;
+    in_the_inbox("Waiting on the server").await;
     // a server that takes the connection and says nothing: the download waits
     let silent = SilentServer::start();
     set_port(d, "form-6", &silent.port.to_string()).await;
@@ -4084,6 +4210,14 @@ pub async fn one_time_codes(d: &Driver) {
     d.check(
         said == "Copied the code",
         &format!("and the status bar says so ({said})"),
+    );
+    // a sync in the background (the timer's) ends with Done, which must not take the place of the user's answer
+    shell().sync_all();
+    pause(3000).await;
+    let said = main.status_texts().0;
+    d.check(
+        said == "Copied the code",
+        &format!("a sync in the background leaves those words ({said})"),
     );
 
     open_by_subject(inbox, by_header).await;

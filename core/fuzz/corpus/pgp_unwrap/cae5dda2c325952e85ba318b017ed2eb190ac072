@@ -1,0 +1,20 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed2Ä5519@exampll
+sXKbvtOO62MCrUKOG/vfeC+t1HlQXYfcWnmhOBAp6BQSzTcZ5ujPCz9ilyuo7wSL
+pEBBJ8IDBb07yNWptRkuL5ZhuhLP2SgbmW3NjpQEbzhjNEsmoMOUbnCkBUPYsWtn5F0zOyWUSbgd/feEUxUPbbd6SLVBVP/klGSGL8QMKrMo
+lKVMs5H7MQhrRIJGq7ObhxAyRu5nq3LQXBFrom:malice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha25=; pòotocol="applicatoin/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-tL3
+/9yfHOo4ndKbhLtJjvg
+NuraeYaE1GTYFh2DhVtw7wgKyn3IMXG9Q91KhE1IXJX+ip8WVkS-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV5DbOBqg9d8
+
+Hello, thisj0Z4SAQdAAuRSqo9 is the DM

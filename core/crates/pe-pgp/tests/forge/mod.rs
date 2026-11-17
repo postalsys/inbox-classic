@@ -218,6 +218,8 @@ pub struct Sig {
     pub expires: Option<u32>,
     /// Sign with this subkey rather than the primary key.
     pub subkey: Option<usize>,
+    /// A notation in the hashed area marked critical.
+    pub critical_notation: bool,
 }
 
 impl Sig {
@@ -228,6 +230,7 @@ impl Sig {
             typ: SignatureType::Binary,
             expires: None,
             subkey: None,
+            critical_notation: false,
         }
     }
 }
@@ -251,6 +254,9 @@ fn make(signer: &impl pgp::types::SigningKey, data: &[u8], options: &Sig) -> pgp
             .hashed_subpackets
             .push(Subpacket::regular(SubpacketData::SignatureExpirationTime(Duration::from_secs(expires))).unwrap());
     }
+    if options.critical_notation {
+        config.hashed_subpackets.push(notation(true));
+    }
     config.unhashed_subpackets = vec![Subpacket::regular(SubpacketData::IssuerKeyId(signer.legacy_key_id())).unwrap()];
     config.sign(signer, &Password::empty(), Cursor::new(data)).unwrap()
 }
@@ -264,4 +270,95 @@ pub fn cert(key: &SignedSecretKey) -> pe_pgp::Cert {
 /// `key` as the app's private key.
 pub fn secret(key: &SignedSecretKey) -> pe_pgp::SecretKey {
     pe_pgp::SecretKey::from_bytes(&key.to_bytes().unwrap()).unwrap()
+}
+
+/// A notation subpacket nobody understands, critical or not.
+pub fn notation(critical: bool) -> Subpacket {
+    let data = SubpacketData::Notation(pgp::packet::Notation {
+        readable: true,
+        name: "unknown@example.org".into(),
+        value: "x".into(),
+    });
+    if critical {
+        Subpacket::critical(data).unwrap()
+    } else {
+        Subpacket::regular(data).unwrap()
+    }
+}
+
+/// How a signing subkey's binding is made, for the rows about back signatures and notations.
+#[derive(Default)]
+pub struct Binding {
+    /// The embedded signatures, in this order: a real back signature (expiring after the seconds given), or a false
+    /// one (made by another key).
+    pub backs: Vec<Back>,
+    /// A critical notation in the binding itself.
+    pub critical_notation: bool,
+}
+
+pub enum Back {
+    Real {
+        expires: Option<u32>,
+        critical_notation: bool,
+    },
+    Fake,
+}
+
+/// A key like `with_subkey`'s, its signing subkey bound as `binding` says. Returns the key and the subkey's index.
+pub fn with_signing_subkey(created: u32, user_id: &str, binding: Binding) -> (SignedSecretKey, usize) {
+    let (mut key, index) = with_subkey(created, user_id, flags(true, false, false), false);
+    let other = generate(
+        created,
+        "Other <other@example.org>",
+        vec![subkey(created, KeyType::Ed25519Legacy, true)],
+    );
+    let sub = key.secret_subkeys[index].key.clone();
+    let mut config = SignatureConfig::v4(
+        SignatureType::SubkeyBinding,
+        key.primary_key.algorithm(),
+        HashAlgorithm::Sha256,
+    );
+    config.hashed_subpackets = subpackets(created, key.primary_key.fingerprint());
+    config
+        .hashed_subpackets
+        .push(Subpacket::regular(SubpacketData::KeyFlags(flags(true, false, false))).unwrap());
+    if binding.critical_notation {
+        config.hashed_subpackets.push(notation(true));
+    }
+    for back in binding.backs {
+        let (signer, critical, expires) = match back {
+            Back::Real {
+                expires,
+                critical_notation,
+            } => (&sub, critical_notation, expires),
+            Back::Fake => (&other.secret_subkeys[0].key, false, None),
+        };
+        let mut back = SignatureConfig::v4(SignatureType::KeyBinding, signer.algorithm(), HashAlgorithm::Sha256);
+        back.hashed_subpackets = subpackets(created, signer.fingerprint());
+        if let Some(expires) = expires {
+            back.hashed_subpackets.push(
+                Subpacket::regular(SubpacketData::SignatureExpirationTime(Duration::from_secs(expires))).unwrap(),
+            );
+        }
+        if critical {
+            back.hashed_subpackets.push(notation(true));
+        }
+        let back = back
+            .sign_primary_key_binding(
+                signer,
+                signer.public_key(),
+                &Password::empty(),
+                key.primary_key.public_key(),
+            )
+            .unwrap();
+        config
+            .unhashed_subpackets
+            .push(Subpacket::regular(SubpacketData::EmbeddedSignature(Box::new(back))).unwrap());
+    }
+    let public = key.primary_key.public_key().clone();
+    let sig = config
+        .sign_subkey_binding(&key.primary_key, &public, &Password::empty(), sub.public_key())
+        .unwrap();
+    key.secret_subkeys[index].signatures = vec![sig];
+    (key, index)
 }

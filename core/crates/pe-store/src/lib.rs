@@ -52,7 +52,7 @@ pub use marks::{Conversation, ThreadMark};
 pub use messages::{FLAG_COLOR_BITS, FlagColor, Message, MessageInfo, Protection, Sort, SortField};
 pub use outbox::Queued;
 pub use pgp::{KeyAddress, PgpIdentity, PgpPeer, StoredKey, normal_address};
-pub use query::Query;
+pub use query::{Query, SEARCH_OPERATORS, SEARCH_SYNTAX};
 pub use recovery::Recovery;
 pub use rules::{Rule, RuleId};
 pub use rusqlite::Error;
@@ -163,6 +163,25 @@ impl Store {
 
     pub fn set_decrypted_open_noted(&self) -> Result<()> {
         self.set_bool_setting("attachments.decrypted_noted", true)
+    }
+
+    /// "Show PDF files in messages": on until the user turns it off, or the core does after a PDF file ended the app
+    pub fn pdf_previews(&self) -> Result<bool> {
+        self.bool_setting("previews.pdf", true)
+    }
+
+    pub fn set_pdf_previews(&self, on: bool) -> Result<()> {
+        self.set_bool_setting("previews.pdf", on)
+    }
+
+    /// Whether the core turned PDF previews off because a PDF file ended the app (the reading pane says so until they
+    /// are turned on again)
+    pub fn pdf_previews_crashed(&self) -> Result<bool> {
+        self.bool_setting("previews.pdf_crashed", false)
+    }
+
+    pub fn set_pdf_previews_crashed(&self, crashed: bool) -> Result<()> {
+        self.set_bool_setting("previews.pdf_crashed", crashed)
     }
 
     /// A setting that is on or off, `fallback` when it was never set

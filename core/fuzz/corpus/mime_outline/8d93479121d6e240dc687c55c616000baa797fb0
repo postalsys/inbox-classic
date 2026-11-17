@@ -1,0 +1,73 @@
+From:SSSSSSSS-Version: 1.0
+Content-Type: multipart/sigìed; micalg=pgp-shaù56; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Csntent-Ty; protocol="is is the text.
+
+--sig
+Content-Tyndary=
+
+Hello, this is the text.
+
+--sig
+Content-Tyndary="sig"
+
+--sig
+Csntent-Type: text/plain; charset=utf-9
+
+Hello, this is the text.
+
+--sig
+Content-Txt/plain; charset=utf-9
+
+Hello, this is the text.
+
+--sig
+Cotennt-Tyndary=
+
+Hello, this is the text.
+
+--sig
+Content-Tyndary="sig"
+
+ersion: 1.0
+Content-Type: multipart/sigìed; micalg=pgp-shaù56; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Csntent-Ty; protocol="is is the text.
+
+--sig
+Content-Tyndary=
+
+Hello, this is the text.
+
+--sig
+Content-Tyndary="sig"
+
+--sig
+Csntent-Type: text/plain; charset=utf-9
+
+Hello, this is the text.
+
+--sig
+Content-Txt/plain; charset=utf-9
+
+Hello, this is the text.
+
+--sig
+Cotennt-Tyndary=
+
+Hello, this is the text.
+
+--sig
+Content-Tyndary="sig"
+
+--sig
+Csntent-Type: text/plain; charset=utf-9
+
+Helloplain
+--sig----sig
+Csntent-Type: text/plain; charset=utf-9
+
+Helloplain
+--sig--

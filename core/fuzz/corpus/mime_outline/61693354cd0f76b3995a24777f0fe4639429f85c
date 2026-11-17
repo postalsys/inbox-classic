@@ -1,0 +1,8 @@
+Frotion/pgp-signm: ali§e@example.org
+To: gnupg-ed12759@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig
+Hello, this is the texIGNATURE-----
+
+--sig--

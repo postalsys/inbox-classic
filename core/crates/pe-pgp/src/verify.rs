@@ -28,7 +28,8 @@ pub enum Problem {
     FromFuture,
     /// The signature's own expiry has passed.
     SignatureExpired,
-    /// Not a signature over a document (a key signature, a timestamp), or unreadable.
+    /// Not a signature over a document (a key signature, a timestamp), unreadable, or with a critical notation,
+    /// which nothing here understands.
     WrongType,
     /// The certificate has no valid self-signature at the time it signed, so it says nothing about who it is.
     KeyNotValid,
@@ -154,8 +155,8 @@ pub(crate) fn judge(
         return check(None, SigStatus::UnknownKey);
     };
     let bad = |problem| check(Some(cert), SigStatus::Bad(problem));
-    let Some(created) = created.filter(|_| matches!(sig.typ(), Some(SignatureType::Binary | SignatureType::Text)))
-    else {
+    let document = matches!(sig.typ(), Some(SignatureType::Binary | SignatureType::Text));
+    let Some(created) = created.filter(|_| document && !policy::critical_notation(sig)) else {
         return bad(Problem::WrongType);
     };
     if created > now + CLOCK_SKEW {
@@ -185,6 +186,18 @@ pub(crate) fn judge(
 
 /// Checks the detached signatures in `signature` (armored or binary, one or several) over `data`.
 pub fn verify_detached(signature: &[u8], data: &[u8], certs: &[Cert], now: i64) -> Result<Vec<SigCheck>, Error> {
+    verify_detached_for(signature, data, certs, now, None)
+}
+
+/// `verify_detached` of a signature found inside an encryption that `recipient` (the fingerprint of the user's
+/// primary key that opened it) decrypted: a signature naming other recipients is not for the user.
+pub fn verify_detached_for(
+    signature: &[u8],
+    data: &[u8],
+    certs: &[Cert],
+    now: i64,
+    recipient: Option<&str>,
+) -> Result<Vec<SigCheck>, Error> {
     if signature.len() > crate::MAX_CERT_BYTES {
         return Err(Error::TooLarge);
     }
@@ -192,10 +205,16 @@ pub fn verify_detached(signature: &[u8], data: &[u8], certs: &[Cert], now: i64) 
     let mut out = Vec::new();
     for sig in parsed {
         let sig = sig.map_err(malformed)?;
-        out.push(judge(&sig.signature, certs, now, None, |component| match component {
-            Component::Primary(key) => sig.signature.verify(*key, Cursor::new(data)).is_ok(),
-            Component::Subkey(key) => sig.signature.verify(*key, Cursor::new(data)).is_ok(),
-        }));
+        out.push(judge(
+            &sig.signature,
+            certs,
+            now,
+            recipient,
+            |component| match component {
+                Component::Primary(key) => sig.signature.verify(*key, Cursor::new(data)).is_ok(),
+                Component::Subkey(key) => sig.signature.verify(*key, Cursor::new(data)).is_ok(),
+            },
+        ));
         if out.len() >= 8 {
             break;
         }

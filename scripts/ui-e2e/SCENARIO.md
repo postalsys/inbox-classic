@@ -316,13 +316,14 @@ Screenshots: `rules-1-list`, `rules-2-editor`, `rules-5-applied`, `rules-6-bad-q
 
 ## 19h. Encryption keys
 
-Screenshots: `keys-1-empty`, `keys-2-new-key`, `keys-3-backup-offer`, `keys-4-backup`, `keys-5-list`, `keys-6-import-passphrase`, `keys-7-use-for`, `keys-8-properties`, `keys-9-verify`, `keys-10-account-security`, `keys-11-contact`
+Screenshots: `keys-1-empty`, `keys-2-new-key`, `keys-3-backup-offer`, `keys-4-backup`, `keys-4b-backup-low` (Linux only), `keys-5-list`, `keys-6-import-passphrase`, `keys-7-use-for`, `keys-8-properties`, `keys-9-verify`, `keys-10-account-security`, `keys-11-contact`
 
 The key files are `scripts/ui-e2e/keys/`: `bob.pub.asc` (Bob Example, bob@example.net, a public key) and `carol.sec.asc` (Carol Example, carol@example.org, a private key protected by the passphrase `correct horse battery`). The account's address is added to Carol's key for the "Use this key" question: the test imports Carol's key after adding `carol@example.org` as another address of the account, and takes it away after.
 
 - Tools > Encryption Keys opens with no keys: the empty words, New Key, Import; Export, Back Up, Verify, Properties and Remove greyed (`keys-1-empty`)
 - New Key: the window names the account the key is for (the only one, chosen) and says that passwords are kept in memory only (the tests run with `--memory-passwords`) (`keys-2-new-key`); Make Key makes it, and the backup is offered at once (`keys-3-backup-offer`)
 - Save a Backup asks for a passphrase twice (`keys-4-backup`): two different ones are refused, a short one is refused, then a good one saves the file (the system's save panel answered by the test); the file read back is an armored private key that asks for that passphrase
+- (Linux) In a window lower than the backup window, as on a small screen or a tiled window, it scrolls and its OK stays in reach (`keys-4b-backup-low`)
 - the list shows the new key: the account's name and address, Your key, Valid (`keys-5-list`); Account Properties > Security names it as the account's key
 - Import of `bob.pub.asc`: listed as Contact, Valid; the core's summary is shown
 - Import of `carol.sec.asc` asks for its passphrase (`keys-6-import-passphrase`); a wrong one says so and asks again; the right one imports it, and the window asks "Use this key for carol@example.org?" (`keys-7-use-for`); Use It makes it that address's key
@@ -472,7 +473,7 @@ Screenshot: `folders-6-one-account`
 
 ## 28. An AI agent
 
-Screenshots: `agents-1-before`, `agents-2-connect`, `agents-3-after`, `agents-4-send`, `agents-5-outbox`, `agents-6-window`
+Screenshots: `agents-1-before`, `agents-2-connect`, `agents-3-after`, `agents-4-send`, `agents-5-outbox`, `agents-6-window`, `agents-7-unsubscribe`
 
 The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named "My AI agent": it starts the app's `--mcp` relay as an agent host would, and runs one conversation through it. Two new unread messages are added first.
 
@@ -496,6 +497,10 @@ The test's agent is `scripts/ui-e2e/agent.mjs`, run from a copy of Node.js named
 - and what its agent did, newest first
 - Undo takes the message back
 - and the Outbox is empty
+- the agent asks to unsubscribe from two mailing lists: one question lists both senders and where the requests go
+- each list shows its sender's address first and whole, the name apart, so a name can not hide it
+- Don't Unsubscribe is the default
+- the agent learns the user said no, and no list was asked
 
 ## 29. Marking all read
 
@@ -659,7 +664,8 @@ Screenshots: `otp-1-card`
   with a code in its text and no verdict
 - opening the first shows a card above it: "Code from" the sender's domain, the code, where to enter it, and that it has
   probably expired (it is older than an hour)
-- Copy on the card puts the code on the clipboard, and the status bar says so
+- Copy on the card puts the code on the clipboard, and the status bar says so; a sync in the background (the timer's)
+  leaves those words, as a sync replaces only its own ("Checking", "Done")
 - the second's card has the header's code and the domain of its origin
 - the third has no card
 - Options (Settings on the Mac, Preferences on Linux), General page, has Show sign-in codes in new mail notifications,

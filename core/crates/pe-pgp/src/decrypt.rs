@@ -6,11 +6,11 @@
 
 use std::io::{Cursor, Read};
 
-use pgp::composed::{DecryptionOptions, Edata, Esk, Message, TheRing};
+use pgp::composed::{DecryptionOptions, Edata, Esk, Message, SignedSecretKey, TheRing};
 use pgp::crypto::aead;
 use pgp::errors::Error as PgpError;
 use pgp::packet::{ProtectedDataConfig, SymEncryptedProtectedDataConfig};
-use pgp::types::Password;
+use pgp::types::{KeyDetails, Password};
 
 use crate::cert::{Cert, Component, SecretKey};
 use crate::verify::{SigCheck, judge};
@@ -78,14 +78,8 @@ fn integrity_failed(error: &(dyn std::error::Error + 'static)) -> bool {
     false
 }
 
-pub(crate) fn classify(error: PgpError) -> DecryptError {
-    if integrity_failed(&error) {
-        return DecryptError::Integrity;
-    }
-    DecryptError::Malformed(short(error.to_string()))
-}
-
-pub(crate) fn read_error(error: std::io::Error) -> DecryptError {
+/// What a failure of rPGP's (its own error, or an I/O error around one) means for the message
+pub(crate) fn classify(error: impl std::error::Error + 'static) -> DecryptError {
     if integrity_failed(&error) {
         return DecryptError::Integrity;
     }
@@ -159,18 +153,77 @@ pub fn decrypt_within(
             return Err(DecryptError::Malformed("encrypted twice".into()));
         }
     }
-    if message.is_compressed() {
-        message = message.decompress().map_err(classify)?;
-    }
-    (&mut message)
-        .take(limit as u64 + 1)
-        .read_to_end(&mut opened.data)
-        .map_err(read_error)?;
-    if opened.data.len() > limit {
-        return Err(DecryptError::TooLarge);
-    }
+    let (message, data) = read_through(message, limit)?;
+    opened.data = data;
     opened.signatures = signatures(&message, certs, now, opened.key.as_deref());
     Ok(opened)
+}
+
+/// What a message opened holds: decompressed (`MAX_COMPRESSION` layers at most) and read to its end, refused past
+/// `limit` bytes. The message is given back, as its signatures are judged once it is read.
+pub(crate) fn read_through(mut message: Message<'_>, limit: usize) -> Result<(Message<'_>, Vec<u8>), DecryptError> {
+    let mut layers = 0;
+    while compressed(&message, 0) {
+        if layers == MAX_COMPRESSION {
+            return Err(DecryptError::Malformed("compressed too many times".into()));
+        }
+        message = message.decompress().map_err(classify)?;
+        layers += 1;
+    }
+    let mut data = Vec::new();
+    (&mut message)
+        .take(limit as u64 + 1)
+        .read_to_end(&mut data)
+        .map_err(classify)?;
+    if data.len() > limit {
+        return Err(DecryptError::TooLarge);
+    }
+    Ok((message, data))
+}
+
+/// Compression layers read through. GnuPG and Sequoia write one; a message compressed again and again is no mail
+/// anyone sends, and each layer left unread would be handed on as if it were the text.
+const MAX_COMPRESSION: usize = 4;
+
+/// Is the message, or the message a signature is over, still compressed? (Signatures nest; 16 levels are looked
+/// into, deeper counts as compressed and so is refused.)
+fn compressed(message: &Message<'_>, depth: usize) -> bool {
+    match message {
+        Message::Compressed { .. } => true,
+        Message::Signed { reader, .. } => depth >= 16 || compressed(reader.get_ref(), depth + 1),
+        _ => false,
+    }
+}
+
+/// `key` with only the subkeys that may decrypt (`Cert::decrypts_with`), and whether its primary key may.
+fn decryption_key(key: &SecretKey) -> (SignedSecretKey, bool) {
+    let mut only = key.key.clone();
+    only.secret_subkeys
+        .retain(|sub| key.cert().decrypts_with(&sub.key.fingerprint()));
+    let primary = key.cert().decrypts_with(&key.key.primary_key.fingerprint());
+    (only, primary)
+}
+
+/// Does a session key of the message name this key (by key id or fingerprint), rather than no one (hidden)?
+fn names(esk: &[Esk], key: &impl KeyDetails) -> bool {
+    esk.iter().any(|esk| match esk {
+        Esk::PublicKeyEncryptedSessionKey(pkesk) => match pkesk.id() {
+            Ok(id) => !id.is_wildcard() && *id == key.legacy_key_id(),
+            Err(_) => matches!(pkesk.fingerprint(), Ok(Some(fingerprint)) if *fingerprint == key.fingerprint()),
+        },
+        Esk::SymKeyEncryptedSessionKey(_) => false,
+    })
+}
+
+/// A session key for a hidden recipient (no key id, or the wildcard).
+fn hidden(esk: &Esk) -> bool {
+    match esk {
+        Esk::PublicKeyEncryptedSessionKey(pkesk) => match pkesk.id() {
+            Ok(id) => id.is_wildcard(),
+            Err(_) => !matches!(pkesk.fingerprint(), Ok(Some(_))),
+        },
+        Esk::SymKeyEncryptedSessionKey(_) => false,
+    }
 }
 
 /// The message decrypted with the first of `keys` that opens it, and that key. Each key is tried on a fresh parse
@@ -178,9 +231,21 @@ pub fn decrypt_within(
 /// a recipient fails before any of the data is decrypted, so the tries cost little.
 fn open_with<'a>(bytes: &'a [u8], keys: &'a [SecretKey]) -> Result<(Message<'a>, &'a SecretKey), DecryptError> {
     let empty = Password::empty();
+    let esk = match parse(bytes)? {
+        Message::Encrypted { esk, .. } => esk,
+        _ => Vec::new(),
+    };
     for key in keys {
+        let (only, primary) = decryption_key(key);
+        // rPGP tries the primary key for a session key that names it; one that may not decrypt is not tried. (A
+        // hidden recipient is tried with every key, as there is no telling which it is.)
+        let named_primary = names(&esk, &only.primary_key);
+        let named_subkey = only.secret_subkeys.iter().any(|sub| names(&esk, &sub.key));
+        if !primary && named_primary && !named_subkey && !esk.iter().any(hidden) {
+            continue;
+        }
         let ring = TheRing {
-            secret_keys: vec![&key.key],
+            secret_keys: vec![&only],
             key_passwords: vec![&empty],
             decrypt_options: DecryptionOptions::new(),
             ..Default::default()
@@ -257,6 +322,45 @@ mod tests {
         .unwrap();
         assert_eq!(opened.signatures[0].status, crate::SigStatus::Good);
         assert_eq!(opened.signatures[0].intended, [bob.fingerprint()]);
+    }
+
+    /// A literal data packet of `text` compressed `depth` times (with the "uncompressed" algorithm, so the packets
+    /// can be written by hand), in new format packets.
+    fn compressed_times(text: &[u8], depth: usize) -> Vec<u8> {
+        let packet = |tag: u8, body: Vec<u8>| {
+            let len = body.len();
+            let mut out = match len {
+                0..192 => vec![0xC0 | tag, len as u8],
+                _ => vec![0xC0 | tag, ((len - 192) >> 8) as u8 + 192, (len - 192) as u8],
+            };
+            out.extend(body);
+            out
+        };
+        let mut literal = vec![b'b', 0, 0, 0, 0, 0];
+        literal.extend_from_slice(text);
+        let mut message = packet(11, literal);
+        for _ in 0..depth {
+            let mut body = vec![0];
+            body.extend(message);
+            message = packet(8, body);
+        }
+        message
+    }
+
+    #[test]
+    fn compression_is_read_through_a_few_times_only() {
+        // the interoperability suite's "Maximum recursion depth": past the first layer the compressed bytes came out
+        // as if they were the text, and nothing limited the depth
+        for depth in 0..=MAX_COMPRESSION {
+            let opened = decrypt(&compressed_times(b"Hello", depth), &[], &[], 0).unwrap();
+            assert_eq!(opened.data, b"Hello", "{depth}");
+        }
+        for depth in [MAX_COMPRESSION + 1, 32, 64] {
+            assert!(matches!(
+                decrypt(&compressed_times(b"Hello", depth), &[], &[], 0),
+                Err(DecryptError::Malformed(_))
+            ));
+        }
     }
 
     #[test]

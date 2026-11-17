@@ -1,7 +1,9 @@
 // AI agents: the questions only the user answers (a program that connects for the first time, every message an
-// agent wants to send) and Tools > AI Agents, with the programs let in and what agents did. The rules, the words and
+// agent wants to send, the mailing lists an agent wants to leave) and Tools > AI Agents, with the programs let in and what agents did. The rules, the words and
 // the decisions' effects are the core's (pe-core agents.rs); these windows show them and pass the answers on.
 #include <windowsx.h>
+
+#include <algorithm>
 
 #include "app.h"
 
@@ -9,6 +11,7 @@ namespace {
 
 const wchar_t* kAccessClass = L"InboxClassicAgentAccess";
 const wchar_t* kSendClass = L"InboxClassicAgentSend";
+const wchar_t* kUnsubscribeClass = L"InboxClassicAgentUnsubscribe";
 const wchar_t* kAgentsClass = L"InboxClassicAgents";
 
 // the dialog's heading: the message font, larger and bold
@@ -123,7 +126,16 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
     int width = Scale(500);
     int inner = width - 2 * pad;
     int detailHeight = TextHeight(owner, detail, inner);
-    int height = pad + Scale(24) + detailHeight + Scale(10) + Scale(18) + Scale(10) + Scale(20) + 4 * Scale(22) + Scale(10) + Scale(18) +
+    // a level's words wrap under their check box when they are long (Organize names everything it lets an agent do)
+    std::wstring labels[PE_AGENT_LEVEL_COUNT];
+    int rows[PE_AGENT_LEVEL_COUNT] = {};
+    int levelsHeight = 0;
+    for (size_t i = 0; i < PE_AGENT_LEVEL_COUNT; i++) {
+        labels[i] = Text(pe_agent_level_label(i));
+        rows[i] = std::max(Scale(20), TextHeight(owner, labels[i], inner - Scale(4) - Scale(20)) + Scale(4));
+        levelsHeight += rows[i] + Scale(2);
+    }
+    int height = pad + Scale(24) + detailHeight + Scale(10) + Scale(18) + Scale(10) + Scale(20) + levelsHeight + Scale(10) + Scale(18) +
                  Scale(92) + Scale(16) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kAccessClass, core::Plain(mode == AccessMode::Ask ? PE_TEXT_UI_AI_AGENT : PE_TEXT_UI_AI_AGENT_ACCESS).c_str(), width, height);
     AccessState state{core};
@@ -141,11 +153,12 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
     CreateChild(dialog, L"STATIC", core::T(PE_TEXT_UI_IT_MAY).c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + Scale(16)});
     y += Scale(20);
     for (size_t i = 0; i < PE_AGENT_LEVEL_COUNT; i++) {
-        state.levels[i] = CreateChild(dialog, L"BUTTON", Text(pe_agent_level_label(i)).c_str(),
-                                      WS_TABSTOP | BS_AUTOCHECKBOX | (i == 0 ? WS_GROUP : 0), IDC_AGENT_LEVEL + static_cast<int>(i),
-                                      {pad + Scale(4), y, width - pad, y + Scale(20)});
+        DWORD wrap = rows[i] > Scale(20) ? BS_MULTILINE | BS_TOP : 0;
+        state.levels[i] = CreateChild(dialog, L"BUTTON", labels[i].c_str(),
+                                      WS_TABSTOP | BS_AUTOCHECKBOX | wrap | (i == 0 ? WS_GROUP : 0), IDC_AGENT_LEVEL + static_cast<int>(i),
+                                      {pad + Scale(4), y, width - pad, y + rows[i]});
         Button_SetCheck(state.levels[i], (levels & pe_agent_level_bit(i)) ? BST_CHECKED : BST_UNCHECKED);
-        y += Scale(22);
+        y += rows[i] + Scale(2);
     }
     y += Scale(10);
     CreateChild(dialog, L"STATIC", core::T(PE_TEXT_UI_ACCOUNTS_IT_MAY_USE).c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + Scale(16)});
@@ -182,49 +195,70 @@ int AccessDialog(HWND owner, PeCore* core, AccessMode mode, const std::wstring& 
     return state.answer;
 }
 
-// ---- a message to send ----
+// ---- the questions of an agent: a message to send, mailing lists to leave ----
 
-struct SendState {
+// what a question shows and what its answer was: the button pressed (`safe` when it was closed)
+struct QuestionState {
     bool done = false;
-    PeAgentSendAnswer answer = PE_AGENT_SEND_ANSWER_DONT_SEND;
-    HWND send = nullptr;
+    int safe = IDCANCEL;
+    int answer = IDCANCEL;
+    // the answer that comes on after a moment (Send, Unsubscribe)
+    HWND delayed = nullptr;
     HWND warning = nullptr;
+    // the lists to leave, their addresses bold
+    HWND lists = nullptr;
+    HFONT bold = nullptr;
 };
 
-constexpr UINT_PTR kSendTimer = 1;
+constexpr UINT_PTR kDelayTimer = 1;
 
-LRESULT CALLBACK SendProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
-    auto* state = reinterpret_cast<SendState*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+// the addresses bold, so who each list is reads first; where the request goes dim
+LRESULT DrawListCell(QuestionState& state, NMLVCUSTOMDRAW& draw) {
+    switch (draw.nmcd.dwDrawStage) {
+    case CDDS_PREPAINT:
+        return CDRF_NOTIFYITEMDRAW;
+    case CDDS_ITEMPREPAINT:
+        return CDRF_NOTIFYSUBITEMDRAW;
+    case CDDS_ITEMPREPAINT | CDDS_SUBITEM: {
+        bool selected = ListView_GetItemState(state.lists, static_cast<int>(draw.nmcd.dwItemSpec), LVIS_SELECTED) != 0 &&
+                        GetFocus() == state.lists;
+        SelectObject(draw.nmcd.hdc, draw.iSubItem == 0 && state.bold ? state.bold : reinterpret_cast<HFONT>(SendMessageW(state.lists, WM_GETFONT, 0, 0)));
+        draw.clrText = draw.iSubItem == 3 && !selected ? GetSysColor(COLOR_GRAYTEXT) : CLR_DEFAULT;
+        return CDRF_NEWFONT;
+    }
+    }
+    return CDRF_DODEFAULT;
+}
+
+LRESULT CALLBACK QuestionProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    auto* state = reinterpret_cast<QuestionState*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
     if (!state) {
         return DefWindowProcW(hwnd, message, wParam, lParam);
     }
     switch (message) {
     case WM_COMMAND:
-        switch (LOWORD(wParam)) {
-        case IDC_AGENT_SEND:
-            state->answer = PE_AGENT_SEND_ANSWER_SEND;
+        if (HIWORD(wParam) == BN_CLICKED) {
+            // Esc gives the safe answer
+            state->answer = LOWORD(wParam) == IDCANCEL ? state->safe : LOWORD(wParam);
             state->done = true;
-            return 0;
-        case IDC_AGENT_COMPOSE:
-            state->answer = PE_AGENT_SEND_ANSWER_COMPOSE;
-            state->done = true;
-            return 0;
-        case IDCANCEL:
-        case IDC_AGENT_DONT_SEND:
-            state->answer = PE_AGENT_SEND_ANSWER_DONT_SEND;
-            state->done = true;
-            return 0;
         }
         return 0;
+    case WM_NOTIFY: {
+        auto* header = reinterpret_cast<NMHDR*>(lParam);
+        if (state->lists && header->hwndFrom == state->lists && header->code == NM_CUSTOMDRAW) {
+            return DrawListCell(*state, *reinterpret_cast<NMLVCUSTOMDRAW*>(lParam));
+        }
+        return 0;
+    }
     case WM_TIMER:
-        // Send comes on after a moment, so a key pressed for another window does not send
-        if (wParam == kSendTimer) {
-            KillTimer(hwnd, kSendTimer);
-            EnableWindow(state->send, TRUE);
+        // Send or Unsubscribe comes on after a moment, so a key pressed for another window does not answer
+        if (wParam == kDelayTimer) {
+            KillTimer(hwnd, kDelayTimer);
+            EnableWindow(state->delayed, TRUE);
         }
         return 0;
     case WM_CLOSE:
-        state->answer = PE_AGENT_SEND_ANSWER_DONT_SEND;
+        state->answer = state->safe;
         state->done = true;
         return 0;
     case WM_CTLCOLORSTATIC:
@@ -241,6 +275,57 @@ LRESULT CALLBACK SendProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     return DefWindowProcW(hwnd, message, wParam, lParam);
 }
 
+// the question's heading and the words under it, from the top; where the rest starts
+int QuestionTop(HWND dialog, int pad, int width, const std::wstring& title, const std::wstring& detail, int detailHeight) {
+    int y = pad;
+    Heading(dialog, title, {pad, y, width - pad, y + Scale(22)});
+    y += Scale(24);
+    CreateChild(dialog, L"STATIC", detail.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + detailHeight});
+    return y + detailHeight;
+}
+
+// the answers at the bottom right, left to right, the last the safe one and the default; the first comes on after a
+// moment. The safe one, to run the window with.
+HWND AnswerButtons(HWND dialog, QuestionState& state, int pad, int width, int y, const std::vector<std::pair<std::wstring, int>>& answers) {
+    std::vector<std::wstring> labels;
+    for (const auto& answer : answers) {
+        labels.push_back(answer.first);
+    }
+    int button = ButtonWidth(labels, 110);
+    int count = static_cast<int>(answers.size());
+    HWND safe = nullptr;
+    for (int i = 0; i < count; i++) {
+        int right = width - pad - (count - 1 - i) * (button + Scale(8));
+        bool last = i == count - 1;
+        DWORD style = WS_TABSTOP | (i == 0 ? WS_DISABLED : 0) | (last ? BS_DEFPUSHBUTTON : 0);
+        HWND made = CreateChild(dialog, L"BUTTON", answers[i].first.c_str(), style, answers[i].second, {right - button, y, right, y + Scale(25)});
+        if (i == 0) {
+            state.delayed = made;
+        }
+        if (last) {
+            safe = made;
+            state.safe = state.answer = answers[i].second;
+        }
+    }
+    SetTimer(dialog, kDelayTimer, 1500, nullptr);
+    return safe;
+}
+
+// the widest of `texts` in `font` on `control`, at least `least`
+int BoldTextWidth(HWND control, HFONT font, const std::vector<std::wstring>& texts, int least) {
+    HDC dc = GetDC(control);
+    HGDIOBJ before = SelectObject(dc, font);
+    int widest = least;
+    for (const auto& text : texts) {
+        SIZE size = {};
+        GetTextExtentPoint32W(dc, text.c_str(), static_cast<int>(text.size()), &size);
+        widest = std::max(widest, static_cast<int>(size.cx) + Scale(16));
+    }
+    SelectObject(dc, before);
+    ReleaseDC(control, dc);
+    return widest;
+}
+
 // a label and its value on one line of the message's header
 void HeaderLine(HWND dialog, int pad, int& y, int width, int labelWidth, const std::wstring& label, const std::wstring& value,
                 int id = 0) {
@@ -255,7 +340,7 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
     if (!send) {
         return;
     }
-    RegisterDialogClass(kSendClass, SendProc);
+    RegisterDialogClass(kSendClass, QuestionProc);
     int pad = Scale(12);
     int width = Scale(600);
     int inner = width - 2 * pad;
@@ -269,13 +354,9 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
     int height = pad + Scale(24) + detailHeight + Scale(8) + (warning.empty() ? 0 : Scale(22)) + Scale(20) + listHeight + Scale(8) +
                  Scale(20) * (original.empty() ? 1 : 2) + Scale(4) + Scale(200) + (files.empty() ? 0 : Scale(22)) + Scale(14) + Scale(25) + pad;
     HWND dialog = CreateModalWindow(owner, kSendClass, core::Plain(PE_TEXT_UI_SEND_MESSAGE_ASK).c_str(), width, height);
-    SendState state;
+    QuestionState state;
     SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
-    int y = pad;
-    Heading(dialog, Text(send->title), {pad, y, width - pad, y + Scale(22)});
-    y += Scale(24);
-    CreateChild(dialog, L"STATIC", detail.c_str(), SS_LEFT | SS_NOPREFIX, 0, {pad, y, width - pad, y + detailHeight});
-    y += detailHeight + Scale(8);
+    int y = QuestionTop(dialog, pad, width, Text(send->title), detail, detailHeight) + Scale(8);
     if (!warning.empty()) {
         state.warning = CreateChild(dialog, L"STATIC", warning.c_str(), SS_LEFT | SS_NOPREFIX | SS_ENDELLIPSIS, IDC_AGENT_WARNING,
                                     {pad, y, width - pad, y + Scale(16)});
@@ -313,21 +394,73 @@ void SendDialog(HWND owner, PeCore* core, uint64_t request) {
         y += Scale(16);
     }
     y += Scale(14);
-    std::wstring sendLabel = core::T(PE_TEXT_WIN_SEND), editFirst = core::T(PE_TEXT_UI_EDIT_FIRST), dontSend = core::T(PE_TEXT_WIN_DONT_SEND);
-    int button = ButtonWidth({sendLabel, editFirst, dontSend}, 110);
-    state.send = CreateChild(dialog, L"BUTTON", sendLabel.c_str(), WS_TABSTOP | WS_DISABLED, IDC_AGENT_SEND,
-                             {width - pad - 3 * button - 2 * Scale(8), y, width - pad - 2 * button - 2 * Scale(8), y + Scale(25)});
-    CreateChild(dialog, L"BUTTON", editFirst.c_str(), WS_TABSTOP, IDC_AGENT_COMPOSE,
-                {width - pad - 2 * button - Scale(8), y, width - pad - button - Scale(8), y + Scale(25)});
-    HWND dontSendButton = CreateChild(dialog, L"BUTTON", dontSend.c_str(), WS_TABSTOP | BS_DEFPUSHBUTTON, IDC_AGENT_DONT_SEND,
-                                      {width - pad - button, y, width - pad, y + Scale(25)});
-    SetTimer(dialog, kSendTimer, 1500, nullptr);
+    HWND dontSend = AnswerButtons(dialog, state, pad, width, y,
+                                  {{core::T(PE_TEXT_WIN_SEND), IDC_AGENT_SEND},
+                                   {core::T(PE_TEXT_UI_EDIT_FIRST), IDC_AGENT_COMPOSE},
+                                   {core::T(PE_TEXT_WIN_DONT_SEND), IDC_AGENT_DONT_SEND}});
     int64_t account = send->account;
-    RunModal(dialog, dontSendButton, state.done);
-    core::Draft draft(pe_agent_answer_send(core, request, state.answer));
+    RunModal(dialog, dontSend, state.done);
+    PeAgentSendAnswer answer = state.answer == IDC_AGENT_SEND      ? PE_AGENT_SEND_ANSWER_SEND
+                               : state.answer == IDC_AGENT_COMPOSE ? PE_AGENT_SEND_ANSWER_COMPOSE
+                                                                   : PE_AGENT_SEND_ANSWER_DONT_SEND;
+    core::Draft draft(pe_agent_answer_send(core, request, answer));
     if (draft) {
         OpenCompose(GetAncestor(owner, GA_ROOT), core, account, pe_draft_info(draft.get()));
     }
+}
+
+void UnsubscribeDialog(HWND owner, PeCore* core, uint64_t request) {
+    core::AgentUnsubscribe info(pe_agent_unsubscribe_info(core, request));
+    const PeAgentUnsubscribe* ask = pe_agent_unsubscribe(info.get());
+    if (!ask) {
+        return;
+    }
+    RegisterDialogClass(kUnsubscribeClass, QuestionProc);
+    int pad = Scale(12);
+    int width = Scale(680);
+    int inner = width - 2 * pad;
+    std::wstring detail = Text(ask->detail);
+    int detailHeight = TextHeight(owner, detail, inner);
+    int count = static_cast<int>(pe_agent_unsubscribe_list_count(info.get()));
+    // room for up to eight lists, then it scrolls (an agent may name up to 30 a day)
+    int listHeight = Scale(26) + std::clamp(count, 3, 8) * Scale(18);
+    int height = pad + Scale(24) + detailHeight + Scale(12) + listHeight + Scale(16) + Scale(25) + pad;
+    HWND dialog = CreateModalWindow(owner, kUnsubscribeClass, core::Plain(PE_TEXT_UI_AI_AGENT).c_str(), width, height);
+    QuestionState state;
+    SetWindowLongPtrW(dialog, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&state));
+    int y = QuestionTop(dialog, pad, width, Text(ask->title), detail, detailHeight) + Scale(12);
+    // one row a list: the sender's address first, whole, so a name can never hide who it is, then the name, the
+    // subject it came with, and the host the request goes to
+    state.lists = CreateReportList(dialog, IDC_AGENT_LISTS, {pad, y, width - pad, y + listHeight});
+    // a name or subject too long for its column shows whole under the mouse
+    ListView_SetExtendedListViewStyle(state.lists, LVS_EX_FULLROWSELECT | LVS_EX_LABELTIP);
+    LOGFONTW face = {};
+    GetObjectW(reinterpret_cast<HFONT>(SendMessageW(state.lists, WM_GETFONT, 0, 0)), sizeof(face), &face);
+    face.lfWeight = FW_BOLD;
+    state.bold = CreateFontIndirectW(&face);
+    AddColumn(state.lists, 0, core::T(PE_TEXT_UI_COL_FROM).c_str(), 200);
+    AddColumn(state.lists, 1, core::T(PE_TEXT_UI_COL_NAME).c_str(), 140);
+    AddColumn(state.lists, 2, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 170);
+    AddColumn(state.lists, 3, L"", 110);
+    std::vector<std::wstring> addresses;
+    for (int i = 0; i < count; i++) {
+        const PeAgentList* list = pe_agent_unsubscribe_list(info.get(), static_cast<size_t>(i));
+        addresses.push_back(Text(list->address));
+        int row = AddRow(state.lists, i, addresses.back());
+        SetCell(state.lists, row, 1, Text(list->name));
+        SetCell(state.lists, row, 2, Text(list->subject));
+        SetCell(state.lists, row, 3, Text(list->target_label));
+    }
+    // the address column as wide as the longest address in bold, the list scrolling sideways past the dialog
+    ListView_SetColumnWidth(state.lists, 0, BoldTextWidth(state.lists, state.bold, addresses, Scale(200)));
+    ListView_SetColumnWidth(state.lists, 3, LVSCW_AUTOSIZE_USEHEADER);
+    y += listHeight + Scale(16);
+    HWND dontUnsubscribe = AnswerButtons(dialog, state, pad, width, y,
+                                         {{core::T(PE_TEXT_WIN_UNSUBSCRIBE), IDC_AGENT_UNSUBSCRIBE},
+                                          {core::T(PE_TEXT_WIN_DONT_UNSUBSCRIBE), IDC_AGENT_DONT_UNSUBSCRIBE}});
+    RunModal(dialog, dontUnsubscribe, state.done);
+    DeleteObject(state.bold);
+    pe_agent_answer_unsubscribe(core, request, state.answer == IDC_AGENT_UNSUBSCRIBE);
 }
 
 // ---- Tools > AI Agents ----
@@ -544,6 +677,9 @@ void AgentQuestion(HWND owner, PeCore* core, uint64_t request) {
     }
     case PE_AGENT_ASK_KIND_SEND:
         SendDialog(owner, core, request);
+        break;
+    case PE_AGENT_ASK_KIND_UNSUBSCRIBE:
+        UnsubscribeDialog(owner, core, request);
         break;
     default:
         break;

@@ -414,8 +414,14 @@ pub async fn list_pictures(d: &Driver) {
         .await,
         "the brand's row shows its logo",
     );
+    // read once the list has settled: selecting the first row marks it read, and the list is read again around it,
+    // its rows bound anew (none on screen for a moment)
     d.check(
-        row_on_screen(PLAIN_SUBJECT).is_some_and(|r| crate::rows::picture_shown(&r) && !crate::rows::picture_drawn(&r)),
+        wait_until(10, || {
+            row_on_screen(PLAIN_SUBJECT)
+                .is_some_and(|r| crate::rows::picture_shown(&r) && !crate::rows::picture_drawn(&r))
+        })
+        .await,
         "a sender without one has their initials",
     );
     pause(500).await;

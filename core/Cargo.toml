@@ -1,7 +1,7 @@
 [workspace.package]
 version = "0.18.0"
 edition = "2024"
-rust-version = "1.90"
+rust-version = "1.92"
 publish = false
 license = "MIT"
 
@@ -30,4 +30,11 @@ codegen-units = 1
 opt-level = 3
 
 [profile.dev.package.blake2]
+opt-level = 3
+
+# the preview meter inflates up to 160 MB of a hostile PDF stream to count it: unoptimized, the tests take seconds
+[profile.dev.package.zlib-rs]
+opt-level = 3
+
+[profile.dev.package.flate2]
 opt-level = 3

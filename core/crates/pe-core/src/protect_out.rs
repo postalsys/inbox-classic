@@ -15,6 +15,7 @@ use crate::worker::unix_now;
 use crate::{AccountId, Core, Result};
 
 /// The keys a message is protected with, found when it was sent (the private key unwrapped for this one message)
+#[derive(Default)]
 pub(crate) struct OutgoingKeys {
     /// Signs it; None for a draft
     pub signer: Option<SecretKey>,
@@ -73,11 +74,8 @@ impl Core {
         if !(encrypt || (outgoing.sign && !draft)) {
             return Ok(autocrypt.map(|header| {
                 std::sync::Arc::new(OutgoingKeys {
-                    signer: None,
-                    recipients: Vec::new(),
-                    hidden: Vec::new(),
                     headers: vec![header],
-                    gossip: Vec::new(),
+                    ..Default::default()
                 })
             }));
         }
@@ -87,75 +85,19 @@ impl Core {
             if draft {
                 let own = book.identity_cert(&from)?.ok_or_else(no_key)?;
                 return Ok(Some(OutgoingKeys {
-                    signer: None,
                     recipients: vec![own],
-                    hidden: Vec::new(),
-                    headers: Vec::new(),
-                    gossip: Vec::new(),
+                    ..Default::default()
                 }));
             }
             let own = book.identity_key(&from)?.ok_or_else(no_key)?;
             if !outgoing.encrypt {
                 return Ok(Some(OutgoingKeys {
                     signer: Some(own),
-                    recipients: Vec::new(),
-                    hidden: Vec::new(),
                     headers,
-                    gossip: Vec::new(),
+                    ..Default::default()
                 }));
             }
-            let now = unix_now();
-            let mut missing = Vec::new();
-            let mut visible: Vec<(String, Cert)> = Vec::new();
-            let mut usable = |address: String| -> Result<Option<Cert>> {
-                // the user's other own addresses are encrypted to by their own key
-                let cert = match book.cert_for(&address)? {
-                    Some(cert) => Some(cert),
-                    None => book.identity_cert(&address)?,
-                };
-                match cert.filter(|cert| cert.can_encrypt(now).is_ok()) {
-                    Some(cert) => Ok(Some(cert)),
-                    None if address == from => Ok(None),
-                    None => {
-                        if !missing.contains(&address) {
-                            missing.push(address);
-                        }
-                        Ok(None)
-                    }
-                }
-            };
-            let mut recipients = vec![own.cert().clone()];
-            for address in addresses(&outgoing.to).into_iter().chain(addresses(&outgoing.cc)) {
-                if let Some(cert) = usable(address.clone())? {
-                    visible.push((address, cert.clone()));
-                    recipients.push(cert);
-                }
-            }
-            let mut hidden = Vec::new();
-            for address in addresses(&outgoing.bcc) {
-                if let Some(cert) = usable(address)? {
-                    hidden.push(cert);
-                }
-            }
-            if !missing.is_empty() {
-                return Err(crate::Error::Compose(ComposeError::MissingKeys(missing)));
-            }
-            // each visible recipient gets the others' keys, to answer all of them encrypted (never the Bcc's)
-            let gossip = if visible.len() > 1 {
-                visible
-                    .iter()
-                    .filter_map(|(address, cert)| crate::autocrypt::gossip_header(address, cert, now))
-                    .collect()
-            } else {
-                Vec::new()
-            };
-            Ok(Some(OutgoingKeys {
-                signer: Some(own),
-                recipients,
-                hidden,
-                headers,
-                gossip,
-            }))
+            encryption_keys(book, outgoing, &from, own, headers).map(Some)
         })
         .map(|keys| keys.map(std::sync::Arc::new))
     }
@@ -268,6 +210,69 @@ pub(crate) fn protect(
     raw.extend_from_slice(b"MIME-Version: 1.0\r\n");
     raw.extend_from_slice(&wrapped);
     Ok(pe_smtp::Built { raw, ..built })
+}
+
+/// The keys of a message sent encrypted from `from`, signed by `own`: every visible recipient's and the sender's own,
+/// the Bcc recipients' apart (hidden), and the gossip of the visible ones. Refused with who has no usable key.
+fn encryption_keys(
+    book: &crate::keys::Book<'_>,
+    outgoing: &Outgoing,
+    from: &str,
+    own: SecretKey,
+    headers: Vec<String>,
+) -> Result<OutgoingKeys> {
+    let now = unix_now();
+    let mut missing = Vec::new();
+    let mut visible: Vec<(String, Cert)> = Vec::new();
+    let mut usable = |address: String| -> Result<Option<Cert>> {
+        // the user's other own addresses are encrypted to by their own key
+        let cert = match book.cert_for(&address)? {
+            Some(cert) => Some(cert),
+            None => book.identity_cert(&address)?,
+        };
+        match cert.filter(|cert| cert.can_encrypt(now).is_ok()) {
+            Some(cert) => Ok(Some(cert)),
+            None if address == from => Ok(None),
+            None => {
+                if !missing.contains(&address) {
+                    missing.push(address);
+                }
+                Ok(None)
+            }
+        }
+    };
+    let mut recipients = vec![own.cert().clone()];
+    for address in addresses(&outgoing.to).into_iter().chain(addresses(&outgoing.cc)) {
+        if let Some(cert) = usable(address.clone())? {
+            visible.push((address, cert.clone()));
+            recipients.push(cert);
+        }
+    }
+    let mut hidden = Vec::new();
+    for address in addresses(&outgoing.bcc) {
+        if let Some(cert) = usable(address)? {
+            hidden.push(cert);
+        }
+    }
+    if !missing.is_empty() {
+        return Err(crate::Error::Compose(ComposeError::MissingKeys(missing)));
+    }
+    // each visible recipient gets the others' keys, to answer all of them encrypted (never the Bcc's)
+    let gossip = if visible.len() > 1 {
+        visible
+            .iter()
+            .filter_map(|(address, cert)| crate::autocrypt::gossip_header(address, cert, now))
+            .collect()
+    } else {
+        Vec::new()
+    };
+    Ok(OutgoingKeys {
+        signer: Some(own),
+        recipients,
+        hidden,
+        headers,
+        gossip,
+    })
 }
 
 #[cfg(test)]

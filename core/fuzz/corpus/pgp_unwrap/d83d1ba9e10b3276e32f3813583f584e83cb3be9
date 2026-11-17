@@ -1,0 +1,20 @@
+From: Gne: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhYGneEWMIolWYw/SgMtfOnXAUw
+d7koqJc5+UL04euPG Ed25519 Egnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boAQdAAaalice@exampl–Ñorg
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Chntent-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; chars:exammf4W
+-----END PGP MESSAGE-----
+
+--enc--

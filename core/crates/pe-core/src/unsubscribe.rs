@@ -31,6 +31,25 @@ impl Unsubscribe {
 
 use crate::authres::{headers as header, passes, tag, verdict};
 
+/// Asks a list to take the address off the one-click way: a POST of `List-Unsubscribe=One-Click` to `url`, without
+/// cookies, redirects not followed. None when the list said yes, else why not, in words.
+pub(crate) async fn post(url: &str) -> Option<String> {
+    let answer = pe_net::http::post_form(
+        url,
+        &[("List-Unsubscribe", "One-Click")],
+        std::time::Duration::from_secs(30),
+    )
+    .await;
+    match answer {
+        Ok(response) if (200..300).contains(&response.status) => None,
+        Ok(response) => Some(pe_i18n::tr_args(
+            pe_i18n::Text::ErrorListAnswered,
+            &[("status", u32::from(response.status).into())],
+        )),
+        Err(error) => Some(error.to_string()),
+    }
+}
+
 /// The addresses of `List-Unsubscribe`: what is in angle brackets
 fn addresses(value: &str) -> Vec<&str> {
     value

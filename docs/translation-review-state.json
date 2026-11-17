@@ -119936,7 +119936,7 @@
     "source_worktree_audit_policy": "At later source checkpoints also inspect uncommitted locale/help/commands/settings/registry changes in root and the wave1, more-languages, settings, hardening and compose worktrees. Do not treat the old untracked five-language copies as new work without comparing their content. All290 matched cfdf55ab exactly at the Dutch checkpoint; any future mismatch must be diffed and recorded.",
     "source_worktree_audit_helper": "/private/tmp/inbox-compose-worktree-audit.py <batch-prefix>; run after the matching source-audit helper. Verifies relevant status in all six source worktrees and exact current contents/inventory of the290 known old copies against the verified source manifest; merges evidence into the batch source-audit JSON.",
     "compose_record_helper": "/private/tmp/inbox-compose-record.py <spec.json>; use only after the language, mnemonic, exact reconstruction, global reconciliation, source/worktree/queue and HTML checks pass. It records completed work; it does not replace linguistic review or validation.",
-    "source_audit_helper": "/private/tmp/inbox-pl-agents-source-audit.py with prefix adapted; then preview/MCP extension, six-worktree copy, all-source and queue audits after successful exits. Preserve the original source baseline and exact imported snapshots.",
+    "source_audit_helper": "/private/tmp/inbox-review-publish-resume-source-audit.py (copy with batch prefix); accepts tips already integrated in review ancestry, otherwise verifies the exact new source delta. Follow with preview/MCP extension, worktree/all-source and queue audits.",
     "new_source_inventory_artifact": {
       "path": "/private/tmp/inbox-new-preview-mcp-source-inventory.json",
       "sha256": "d899aee873dbe1d41681ed098ac10a2ecccf63023e1e4a2d1262771a00c2279f"
@@ -126182,7 +126182,27 @@
         "since.log": "/private/tmp/inbox-preview-notice-import-since.log",
         "html.log": "/private/tmp/inbox-preview-notice-import-html.log"
       }
-    }
+    },
+    "publication_policy": {
+      "authorization": "User explicitly requested pushing the completed commits and merging into master on GitHub, then pushing and merging each validated batch as soon as it is made.",
+      "workflow": "Commit a coherent validated batch, push the review branch, merge into GitHub master, then fetch and fast-forward the clean review branch to origin/master before starting the next batch. Preserve other sessions and working copies.",
+      "local_test_suites": "Do not run; user says concurrent sessions are running them. Static checks and source inspection remain enabled.",
+      "confirmed_by_user": "2026-11-17"
+    },
+    "publication_checkpoints": [
+      {
+        "review_head": "bb6a8abc890bce3363baf1fa02fb7f4807859b88",
+        "integrated_upstream": "65087591dc4d32bb15d66087e7026af495e2d370",
+        "status": "Master integrated locally for publication; push/PR merge follows this commit. Query GitHub for final publication status.",
+        "conflicts_resolved": 181,
+        "resolution": "All upstream locale/help changes were already imported and audited. Locale/help and both text-ID files retain the exact reviewed bytes; unrelated upstream implementation is retained.",
+        "validation": "All 28 language checkers pass structurally with 27754 expected mark-only diagnostics. 1412 C/Swift IDs match English in order. Review diff against upstream has no whitespace errors. No local tests or build run.",
+        "source_proof": "/private/tmp/inbox-review-publish-source-proof.json",
+        "merge_validation": "/private/tmp/inbox-review-publish-merge-validation.json",
+        "pending_source": "Agent draft picture/alt source 38e7f5cf remains recorded for import/review next."
+      }
+    ],
+    "source_audit_helper_sha256": "b5b46504cb21506fa26e2bb8c784df732311e3d104f641c4e0d5c0a5bc31afda"
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
   "guide_updates": [

@@ -88,6 +88,7 @@ using RuleList = std::unique_ptr<PeRules, Deleter<pe_rules_free>>;
 using RuleTargetList = std::unique_ptr<PeRuleTargets, Deleter<pe_rule_targets_free>>;
 using AgentConnect = std::unique_ptr<PeAgentConnectInfo, Deleter<pe_agent_connect_free>>;
 using AgentSend = std::unique_ptr<PeAgentSendInfo, Deleter<pe_agent_send_free>>;
+using AgentUnsubscribe = std::unique_ptr<PeAgentUnsubscribeInfo, Deleter<pe_agent_unsubscribe_free>>;
 using AgentHostList = std::unique_ptr<PeAgentHostList, Deleter<pe_agent_host_list_free>>;
 using AgentLog = std::unique_ptr<PeAgentLog, Deleter<pe_agent_log_free>>;
 using Selection = std::unique_ptr<PeSelection, Deleter<pe_selection_free>>;

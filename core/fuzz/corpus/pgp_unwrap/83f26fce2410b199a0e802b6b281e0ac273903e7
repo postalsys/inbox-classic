@@ -1,0 +1,15 @@
+From: alice@example.org
+To: gnupg-ed25519@example.orgеееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееееее
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/s]gned; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Conteltipart/s]kned; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; chars:exam,le.orgJSubject: TestFrom: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: ╛ ot
+MIME-Version: 1.0Content-Type: multipaqrt/signed; micalg=pgp-sha128; protocl
+0

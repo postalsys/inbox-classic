@@ -434,7 +434,7 @@ impl Core {
             Action::FlagColor(color) => {
                 return Ok(tr_args(
                     Text::DoneFlaggedColor,
-                    &[("messages", (&n).into()), ("color", color_id(color).into())],
+                    &[("messages", (&n).into()), ("color", color.id().into())],
                 ));
             }
             Action::Delete if moved.is_empty() => (Text::DoneDeletedForGood, None),
@@ -672,22 +672,9 @@ pub fn color_name(color: FlagColor) -> &'static str {
     if let Some((_, _, name)) = names.iter().find(|(l, c, _)| *l == language && *c == color) {
         return name;
     }
-    let name: &'static str = Box::leak(tr_args(Text::FlagColor, &[("color", color_id(color).into())]).into_boxed_str());
+    let name: &'static str = Box::leak(tr_args(Text::FlagColor, &[("color", color.id().into())]).into_boxed_str());
     names.push((language, color, name));
     name
-}
-
-/// How the catalog names a flag colour, for its selectors
-fn color_id(color: FlagColor) -> &'static str {
-    match color {
-        FlagColor::Red => "red",
-        FlagColor::Orange => "orange",
-        FlagColor::Yellow => "yellow",
-        FlagColor::Green => "green",
-        FlagColor::Blue => "blue",
-        FlagColor::Purple => "purple",
-        FlagColor::Gray => "gray",
-    }
 }
 
 #[cfg(test)]

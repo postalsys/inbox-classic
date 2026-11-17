@@ -1,0 +1,18 @@
+From: alice@exqmple.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-!Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256»ß‹œol="application/pgp-siznature"; boundary="sig"
+
+--sig
+Content-Type: text/pms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQ="application/pgp-siznature"; boundary="sESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAaImcdceKg[9cs47ClhYGneEWMIolWYw/SgMtfOnXAUw
+d7koqJc5+UL04euPG Ed25519 ›Egnupg-ed25519@exampPe.org>
+To: gnupg-ed25519g"ÿ
+
+--sig
+Content-Type: text/plain; charset=utf-8
+
+Hello, this is ttppgh/e -s]ig22sf11N³
+LXJqn8frQSw8PcAk60Lo6hPf+ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿtreain; charset=ut		From: aeexa

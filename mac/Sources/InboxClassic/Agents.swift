@@ -25,6 +25,8 @@ func agentQuestion(core: Core, request: UInt64) {
         }
     case PE_AGENT_ASK_KIND_SEND:
         sendQuestion(core: core, request: request)
+    case PE_AGENT_ASK_KIND_UNSUBSCRIBE:
+        unsubscribeQuestion(core: core, request: request)
     default:
         break
     }
@@ -53,6 +55,7 @@ private final class QuestionWindow: NSObject {
         icon.heightAnchor.constraint(equalToConstant: 56).isActive = true
         let headingLabel = wrappingLabel(heading)
         headingLabel.font = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize + 2)
+        headingLabel.setAccessibilityIdentifier("agent.heading")
         let detailLabel = wrappingLabel(detail)
         detailLabel.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
         let text = NSStackView(views: [headingLabel, detailLabel, accessory])
@@ -99,6 +102,32 @@ private final class QuestionWindow: NSObject {
     /// the answer by position; the safe one when it was closed otherwise
     func run() -> Int {
         window.center()
+        // the safe answer keeps Return after layout, which on some macOS versions takes it from the buttons, and Return,
+        // Enter and Esc give it whatever AppKit does with the keys (as `ask` does for its alerts)
+        let safeButton = buttons[safe]
+        window.contentView?.layoutSubtreeIfNeeded()
+        let keepDefault = { [buttons, window] in
+            for button in buttons {
+                button.keyEquivalent = button === safeButton ? "\r" : ""
+            }
+            window.defaultButtonCell = safeButton.cell as? NSButtonCell
+        }
+        keepDefault()
+        // a question raised while the app is in the background loses its default button by the time the user comes to
+        // it on some macOS versions: it gets it back as the window becomes key
+        let becameKey = NotificationCenter.default.addObserver(forName: NSWindow.didBecomeKeyNotification, object: window,
+                                                               queue: nil) { _ in
+            MainActor.assumeIsolated { keepDefault() }
+        }
+        defer { NotificationCenter.default.removeObserver(becameKey) }
+        let keys = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [window] event in
+            let answering: Set<UInt16> = [53, 36, 76]  // Esc, Return, keypad Enter
+            guard answering.contains(event.keyCode), event.window === window,
+                  event.modifierFlags.intersection(.deviceIndependentFlagsMask).isEmpty else { return event }
+            safeButton.performClick(nil)
+            return nil
+        }
+        defer { keys.map(NSEvent.removeMonitor) }
         Modal.opened(window)
         NSApp.runModal(for: window)
         Modal.closed(window)
@@ -106,6 +135,7 @@ private final class QuestionWindow: NSObject {
         return chosen < 0 ? safe : chosen
     }
 }
+
 
 /// a line of secondary text
 private func note(_ string: String, color: NSColor = .secondaryLabelColor) -> NSTextField {
@@ -145,9 +175,9 @@ private final class AccessForm: NSObject {
             box.state = levels & bit != 0 ? .on : .off
             box.setAccessibilityIdentifier("agent.level.\(index)")
             levelBoxes.append(box)
-            stack.addArrangedSubview(box)
+            stack.addArrangedSubview(wrapping(box, label))
         }
-        stack.setCustomSpacing(12, after: levelBoxes.last!)
+        stack.setCustomSpacing(12, after: stack.arrangedSubviews.last!)
         stack.addArrangedSubview(bold(Text.uiAccountsItMayUse.text))
         for account in core.accounts() {
             let box = NSButton(checkboxWithTitle: account.label, target: nil, action: nil)
@@ -155,6 +185,21 @@ private final class AccessForm: NSObject {
             accountBoxes.append((account.id, box))
             stack.addArrangedSubview(box)
         }
+    }
+
+    /// a level's checkbox with its words wrapped beside it, as the longer ones do not fit the question's width on one
+    /// line; clicking the words checks the box, as clicking a checkbox's title does
+    private func wrapping(_ box: NSButton, _ label: String) -> NSView {
+        box.title = ""
+        box.setAccessibilityLabel(label)
+        let words = wrappingLabel(label)
+        words.preferredMaxLayoutWidth = 436
+        words.widthAnchor.constraint(lessThanOrEqualToConstant: 436).isActive = true
+        words.addGestureRecognizer(NSClickGestureRecognizer(target: box, action: #selector(NSButton.performClick(_:))))
+        let row = NSStackView(views: [box, words])
+        row.alignment = .firstBaseline
+        row.spacing = 5
+        return row
     }
 
     private func bold(_ string: String) -> NSTextField {
@@ -276,13 +321,7 @@ private func sendQuestion(core: Core, request: UInt64) {
                                             (Text.uiDontSend.text, "agent.dontSend")],
                                   safe: 2, apart: 1)
     // Send comes on after a moment, so a key pressed for another window does not send
-    let sendButton = question.buttons[1]
-    sendButton.isEnabled = false
-    // in the common modes: the window runs modally, where a timer of the default mode never fires
-    let timer = Timer(timeInterval: 1.5, repeats: false) { _ in
-        MainActor.assumeIsolated { sendButton.isEnabled = true }
-    }
-    RunLoop.main.add(timer, forMode: .common)
+    holdBack(question.buttons[1])
     let account = send.account
     let answer: PeAgentSendAnswer
     switch question.run() {
@@ -293,6 +332,97 @@ private func sendQuestion(core: Core, request: UInt64) {
     if let draft = Draft(pe_agent_answer_send(core.handle, request, answer)) {
         ComposeWindow.open(core: core, account: account, draft: draft)
     }
+}
+
+/// An answer that can not be taken back comes on only after a moment, so a click or a key meant for another window
+/// does not give it
+@MainActor
+private func holdBack(_ button: NSButton) {
+    button.isEnabled = false
+    // in the common modes: the window runs modally, where a timer of the default mode never fires
+    let timer = Timer(timeInterval: 1.5, repeats: false) { _ in
+        MainActor.assumeIsolated { button.isEnabled = true }
+    }
+    RunLoop.main.add(timer, forMode: .common)
+}
+
+/// The mailing lists an agent wants to leave, one row each: the sender's address first and whole (wrapped, never cut,
+/// so a name can not hide who it is), then the name, the subject it came with and where the request goes
+@MainActor
+private func unsubscribeQuestion(core: Core, request: UInt64) {
+    guard let info = pe_agent_unsubscribe_info(core.handle, request) else { return }
+    defer { pe_agent_unsubscribe_free(info) }
+    guard let ask = pe_agent_unsubscribe(info)?.pointee else { return }
+    let width: CGFloat = 460
+    let stack = NSStackView()
+    stack.orientation = .vertical
+    stack.alignment = .leading
+    stack.spacing = 0
+    let count = pe_agent_unsubscribe_list_count(info)
+    for index in 0..<count {
+        guard let list = pe_agent_unsubscribe_list(info, index)?.pointee else { continue }
+        stack.addArrangedSubview(listRow(list, index: index, width: width))
+        if index + 1 < count {
+            let line = NSBox()
+            line.boxType = .separator
+            stack.addArrangedSubview(line)
+            line.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -20).isActive = true
+            line.leadingAnchor.constraint(equalTo: stack.leadingAnchor, constant: 10).isActive = true
+        }
+    }
+    // as tall as the lists, up to about as tall as the send question's message, then it scrolls
+    let tall = stack.fittingSize.height + 4
+    let scroll = scrolledColumn(stack, width: width, height: min(tall, 280))
+    scroll.borderType = .bezelBorder
+    scroll.autohidesScrollers = true
+    scroll.drawsBackground = true
+    scroll.backgroundColor = .textBackgroundColor
+    scroll.setAccessibilityIdentifier("agent.lists")
+    let question = QuestionWindow(title: Text.uiAiAgent.text, heading: text(ask.title), detail: text(ask.detail),
+                                  id: "agent.unsubscribe", accessory: scroll,
+                                  answers: [(Text.uiUnsubscribe.text, "agent.unsubscribe"),
+                                            (Text.uiDontUnsubscribe.text, "agent.dontUnsubscribe")],
+                                  safe: 1)
+    holdBack(question.buttons[0])
+    // a longer list shows its scroller once, so the rows below the edge are not taken for the end
+    if tall > 280 {
+        let flash = Timer(timeInterval: 0.5, repeats: false) { _ in
+            MainActor.assumeIsolated { scroll.flashScrollers() }
+        }
+        RunLoop.main.add(flash, forMode: .common)
+    }
+    _ = pe_agent_answer_unsubscribe(core.handle, request, question.run() == 0)
+}
+
+/// One list of the unsubscribe question: the sender's address bold and whole, the name under it, the subject it came
+/// with and where the request goes
+@MainActor
+private func listRow(_ list: PeAgentList, index: Int, width: CGFloat) -> NSStackView {
+    let address = wrappingLabel(text(list.address))
+    address.font = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
+    address.setAccessibilityIdentifier("agent.list.\(index)")
+    let name = text(list.name)
+    let named = name.isEmpty ? nil : note(name, color: .labelColor)
+    named?.lineBreakMode = .byTruncatingTail
+    named?.toolTip = name
+    named?.setAccessibilityIdentifier("agent.list.\(index).name")
+    let subject = note(text(list.subject))
+    subject.lineBreakMode = .byTruncatingTail
+    subject.toolTip = subject.stringValue
+    let target = note(text(list.target_label), color: .tertiaryLabelColor)
+    target.lineBreakMode = .byTruncatingTail
+    target.setAccessibilityIdentifier("agent.list.\(index).target")
+    let labels = [address, named, subject, target].compactMap { $0 }
+    let row = NSStackView(views: labels)
+    row.orientation = .vertical
+    row.alignment = .leading
+    row.spacing = 2
+    row.edgeInsets = NSEdgeInsets(top: 7, left: 10, bottom: 7, right: 10)
+    for label in labels {
+        label.preferredMaxLayoutWidth = width - 36
+        label.widthAnchor.constraint(equalToConstant: width - 36).isActive = true
+    }
+    return row
 }
 
 // ---- Tools > AI Agents ----

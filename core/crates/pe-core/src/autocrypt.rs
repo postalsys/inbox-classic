@@ -116,16 +116,18 @@ pub(crate) fn recipients(message: &Message) -> Vec<String> {
 
 /// The `Autocrypt` header of an own address with its key (`cert`, binary), folded at its spaces
 pub(crate) fn header(address: &str, cert: &pe_pgp::Cert, now: i64) -> Option<String> {
-    let minimal = cert.minimal(address, now)?;
-    let value = pe_pgp::autocrypt::build(address, &minimal.to_bytes(), false);
-    Some(format!("Autocrypt: {}\r\n", value.replace(' ', "\r\n ")))
+    field("Autocrypt", address, cert, now)
 }
 
 /// An `Autocrypt-Gossip` header for a recipient's key
 pub(crate) fn gossip_header(address: &str, cert: &pe_pgp::Cert, now: i64) -> Option<String> {
+    field("Autocrypt-Gossip", address, cert, now)
+}
+
+fn field(name: &str, address: &str, cert: &pe_pgp::Cert, now: i64) -> Option<String> {
     let minimal = cert.minimal(address, now)?;
     let value = pe_pgp::autocrypt::build(address, &minimal.to_bytes(), false);
-    Some(format!("Autocrypt-Gossip: {}\r\n", value.replace(' ', "\r\n ")))
+    Some(format!("{name}: {}\r\n", value.replace(' ', "\r\n ")))
 }
 
 impl Core {

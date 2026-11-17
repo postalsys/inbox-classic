@@ -86,19 +86,6 @@ pub fn wkd_hash(local: &str) -> String {
     zbase32(digest.as_ref())
 }
 
-/// A value in a URL: everything but letters, digits and `-._~` percent-encoded
-fn encoded(value: &str) -> String {
-    let mut out = String::new();
-    for byte in value.bytes() {
-        if byte.is_ascii_alphanumeric() || b"-._~".contains(&byte) {
-            out.push(byte as char);
-        } else {
-            out.push_str(&format!("%{byte:02X}"));
-        }
-    }
-    out
-}
-
 /// The two addresses of the Web Key Directory for `address`: advanced, then direct
 pub fn wkd_urls(address: &str, servers: &Servers) -> Option<(String, String)> {
     let (local, domain) = address.trim().rsplit_once('@')?;
@@ -107,7 +94,7 @@ pub fn wkd_urls(address: &str, servers: &Servers) -> Option<(String, String)> {
         return None;
     }
     let hash = wkd_hash(local);
-    let local = encoded(local);
+    let local = pe_net::http::percent_encode(local);
     Some(match &servers.wkd_base {
         Some(base) => (
             format!("{base}/advanced/.well-known/openpgpkey/{domain}/hu/{hash}?l={local}"),
@@ -168,7 +155,11 @@ pub async fn wkd(address: &str, servers: &Servers, now: i64) -> Found {
 
 /// The key keys.openpgp.org has for `address` (it publishes an address only once its owner confirmed it)
 pub async fn by_email(address: &str, servers: &Servers, now: i64) -> Found {
-    let url = format!("{}/vks/v1/by-email/{}", servers.keyserver, encoded(address.trim()));
+    let url = format!(
+        "{}/vks/v1/by-email/{}",
+        servers.keyserver,
+        pe_net::http::percent_encode(address.trim())
+    );
     answer(get(&url).await, |body| trimmed(body, address, now), Source::Keyserver)
 }
 

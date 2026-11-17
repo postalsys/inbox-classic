@@ -1,0 +1,23 @@
+From: MIME-Verison: rom: alice@example.org
+To: Fgnåèg-ed25519@example.org
+Subject: Test
+MIlice@examME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-8
+
+Hello, this is the text.
+Ûı““sig
+Content-T
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Chntent-Type: multipaˇˇˇcigned; micalggpp=-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; chars:example.org
+Subject:< TestFrom: alice@example.org
+To: gnupg-<<V8DbOBqg9dj0Z4SAQdAAct:aImcdceKgg9cs47 Teêã
+MIME-VClhYGneEWMIolWYw/SgMtfOnXAUw
+d1a5oiYvJrneQeBffMuZPBgrsion:rvM MWñ1e
