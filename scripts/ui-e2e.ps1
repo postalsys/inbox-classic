@@ -4798,6 +4798,10 @@ public static class Dragger {
     $first = & $copied $codeSubjects[0]
     Check ($first -eq '482913') "Copy on the card of a signed message puts its code on the clipboard ($first)"
     Check ((StatusPart $mainStatus 0) -eq 'Copied the code') "and the status bar says so ($(StatusPart $mainStatus 0))"
+    # a sync in the background (the timer's) replaces only its own words, never the answer to what the user did
+    [void][Native.Win]::PostMessage($main, 0x0113, [IntPtr]2, [IntPtr]::Zero)
+    Start-Sleep -Seconds 3
+    Check ((StatusPart $mainStatus 0) -eq 'Copied the code') "a sync in the background leaves those words ($(StatusPart $mainStatus 0))"
     Shot $main 'otp-1-card'
     $second = & $copied $codeSubjects[1]
     Check ($second -eq '917355') "an OTP-Token header gives the code ($second)"

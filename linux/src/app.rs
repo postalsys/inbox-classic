@@ -250,6 +250,7 @@ pub async fn add_account() {
     let shell = shell();
     if crate::accounts::new_account(shell.main().window()).await > 0 {
         shell.main().reload();
+        shell.main().sync_asked();
         shell.sync_all();
     }
 }
@@ -309,13 +310,14 @@ impl Shell {
         match &event {
             Event::SyncStarted { account } => {
                 self.failing.borrow_mut().remove(account);
-                main.set_status(&t!(UiChecking, account = &main.account_name(*account)));
+                main.set_sync_status(&t!(UiChecking, account = &main.account_name(*account)), false);
             }
             Event::SyncFinished { .. } => {
                 // a failure stays in the status bar until the account syncs without one; what the rules did, over Done
                 let rules_said = self.rules_said.take();
                 if self.failing.borrow().is_empty() {
-                    main.set_status(&rules_said.unwrap_or_else(|| t!(UiDone)));
+                    let over = rules_said.is_some();
+                    main.set_sync_status(&rules_said.unwrap_or_else(|| t!(UiDone)), over);
                 }
             }
             Event::AutoconfigDone { request }
@@ -387,12 +389,12 @@ impl Shell {
             Event::KeysFound { request } => crate::compose_keys::keys_found(*request),
             Event::RulesApplied { count, .. } => {
                 let said = t!(UiRulesApplied, count = *count);
-                main.set_status(&said);
+                main.set_sync_status(&said, true);
                 *self.rules_said.borrow_mut() = (*count > 0).then_some(said);
             }
             Event::Failed { account, kind, message } => {
                 self.failing.borrow_mut().insert(*account);
-                main.set_status(&format!("{}: {message}", main.account_name(*account)));
+                main.set_sync_status(&format!("{}: {message}", main.account_name(*account)), true);
                 if *kind == FailureKind::Authentication {
                     spawn(ask_password(*account));
                 }
@@ -709,7 +711,10 @@ pub fn run_command(command: Command) {
     match command {
         Command::NewAccount => spawn(add_account()),
         Command::Exit => spawn(quit()),
-        Command::Sync => shell.sync_all(),
+        Command::Sync => {
+            main.sync_asked();
+            shell.sync_all();
+        }
         Command::MarkRead => main.mark_selected(true),
         Command::MarkUnread => main.mark_selected(false),
         Command::Pictures => main.load_pictures(),
@@ -734,6 +739,7 @@ pub fn run_command(command: Command) {
         Command::Accounts => spawn(async move {
             if crate::accounts::accounts_dialog(main.window()).await {
                 main.reload();
+                main.sync_asked();
                 shell.sync_all();
             }
         }),

@@ -83,10 +83,34 @@ void OnCoreEvent(void* context, const PeEvent* event) noexcept {
     }
 }
 
-// a status that is over (a search found, a download done) leaves "Done", never an empty pane
+// whether the status bar holds a sync's words ("Checking", "Done", a failure) rather than the answer to something the
+// user did ("Copied the code", "3 contacts saved to ...", "not in this message"): a sync in the background replaces
+// only its own words, so the user's answer stays until the user does something else
+bool g_statusIsSync = true;
+
+void ShowStatus(const std::wstring& text) {
+    SendMessageW(g_status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(text.c_str()));
+}
+
+// the answer to something the user did; one that is over (a search found, a download done) leaves "Done", never an
+// empty pane, which a sync may replace
 void SetStatus(const std::wstring& text) {
-    std::wstring shown = text.empty() ? core::T(PE_TEXT_UI_DONE) : text;
-    SendMessageW(g_status, SB_SETTEXTW, 0, reinterpret_cast<LPARAM>(shown.c_str()));
+    std::wstring done = core::T(PE_TEXT_UI_DONE);
+    ShowStatus(text.empty() ? done : text);
+    g_statusIsSync = text.empty() || text == done;
+}
+
+// a sync's words: shown unless the user's answer is there, or always (`over`: a failure, what the rules did)
+void SetSyncStatus(const std::wstring& text, bool over = false) {
+    if (over || g_statusIsSync) {
+        ShowStatus(text);
+        g_statusIsSync = true;
+    }
+}
+
+// a sync the user asked for: its words replace whatever the status bar said
+void SyncAsked() {
+    g_statusIsSync = true;
 }
 
 std::wstring StatusText(int part = 0) {
@@ -458,10 +482,12 @@ void AccountMenu(const NMTOOLBARW* button) {
     UINT chosen = TrackPopupMenu(menu, TPM_RETURNCMD | TPM_LEFTALIGN | TPM_TOPALIGN, bounds.left, bounds.bottom, 0, g_main, nullptr);
     DestroyMenu(menu);
     if (chosen == 1) {
+        SyncAsked();
         SyncAll();
     } else if (chosen >= first && chosen < first + count) {
         int64_t account = pe_account_list_get(accounts.get(), chosen - first)->id;
         if (sync) {
+            SyncAsked();
             pe_sync(g_core.get(), account);
         } else {
             NewMessage(account);
@@ -528,12 +554,12 @@ void OnEvent(const UiEvent& event) {
     switch (event.kind) {
     case PE_EVENT_KIND_SYNC_STARTED:
         g_failing.erase(event.account);
-        SetStatus(core::T(PE_TEXT_UI_CHECKING, {{"account", g_mailbox.AccountName(event.account)}}));
+        SetSyncStatus(core::T(PE_TEXT_UI_CHECKING, {{"account", g_mailbox.AccountName(event.account)}}));
         break;
     case PE_EVENT_KIND_SYNC_FINISHED:
         // a failure stays in the status bar until the account syncs without one
         if (g_failing.empty()) {
-            SetStatus(g_rulesSaid.empty() ? core::T(PE_TEXT_UI_DONE) : g_rulesSaid);
+            SetSyncStatus(g_rulesSaid.empty() ? core::T(PE_TEXT_UI_DONE) : g_rulesSaid, !g_rulesSaid.empty());
         }
         g_rulesSaid.clear();
         // how much text the search still has to read
@@ -607,7 +633,7 @@ void OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_RULES_APPLIED:
         g_rulesSaid = core::T(PE_TEXT_UI_RULES_APPLIED, {{"count", std::to_wstring(event.count)}});
-        SetStatus(g_rulesSaid);
+        SetSyncStatus(g_rulesSaid, true);
         break;
     case PE_EVENT_KIND_TRANSFERRING:
         // how far messages going to another account are, and what was done once they all went; how far a large
@@ -616,7 +642,7 @@ void OnEvent(const UiEvent& event) {
         break;
     case PE_EVENT_KIND_FAILED:
         g_failing.insert(event.account);
-        SetStatus(g_mailbox.AccountName(event.account) + L": " + event.message);
+        SetSyncStatus(g_mailbox.AccountName(event.account) + L": " + event.message, true);
         if (event.failure == PE_FAILURE_KIND_AUTHENTICATION) {
             AskPassword(event.account);
         }
@@ -1452,6 +1478,7 @@ void CreateChildren(HWND hwnd) {
 void AddAccount() {
     if (NewAccountDialog(g_main, g_core.get())) {
         g_mailbox.Reload();
+        SyncAsked();
         SyncAll();
     }
 }
@@ -1824,6 +1851,7 @@ void OnCommand(WORD id, WORD code) {
         return;
     }
     case IDM_SYNC:
+        SyncAsked();
         SyncAll();
         return;
     case IDM_SELECT_ALL:

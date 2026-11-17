@@ -1445,6 +1445,11 @@ extension UITest {
         check(await waitUntil(5) { NSPasteboard.general.string(forType: .string) == "482913" },
               "Copy puts the code on the clipboard (\(NSPasteboard.general.string(forType: .string) ?? "nothing"))")
         check(status?.stringValue == "Copied the code", "and the status bar says so (\(status?.stringValue ?? ""))")
+        // a sync in the background (the timer's) replaces only its own words, never the answer to what the user did
+        main.core.syncAll()
+        await pause(3)
+        check(status?.stringValue == "Copied the code",
+              "a sync in the background leaves those words (\(status?.stringValue ?? ""))")
 
         if let header = listIndex(subject: byHeader) {
             await selectRow(header)
