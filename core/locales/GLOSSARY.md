@@ -490,6 +490,18 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
   browser sign-in. List pictures refer to the column layout and verified domains, with cached logos reused.
 - When Undo Send is too late, say "A küldés már nem vonható vissza". The expired delay does not prove delivery:
   `outbox::take_back` refuses once `not_before <= now`, even before the worker finishes sending.
+- Core messages keep singular predicates after counts, including skipped entries and queued messages.
+  Export failures label the failed and total counts separately; `$messages` remains an uninflected counted phrase.
+  Bounce retry intervals describe the server's requested wait, not an instruction to resend delayed mail.
+- Agent permissions use "Levelek kezelése", not the list-order term "rendezés". Send logs say "Küldési sorba
+  helyezve" at queuing time. A failed agent undo says the message is no longer in Postázandó üzenetek; manual
+  deletion can also cause this result, so it does not prove sending succeeded.
+- Security details use "Visszafejtve" for decryption, and "digitális aláíró" for the signer. Verified key ownership
+  is distinct from a valid signature. A locked private key requires reimporting its own backup, not the missing
+  protection key. Publication requires confirmation of every listed address.
+- Use "beállításfájl" for an exported setup file; it can contain accounts, contacts and keys as well as settings.
+  An unreachable sign-in app message can name either that app or an account; tell the user to re-add the needed
+  sign-in app. Temporary unencrypted attachment copies older than a day are removed at app startup.
 
 ### Nederlands (nl)
 

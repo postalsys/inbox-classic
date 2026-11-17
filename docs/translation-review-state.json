@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Hungarian core.ftl450 pending entries, then help.ftl24/linux.ftl87/mac.ftl65/windows.ftl69 and all52 help topics. Hungarian app647 complete,83 improvements. All18 earlier languages are caught up, including54 late key-help passages. Then lt/lv/pl/ro/ru/sk/sl/sv/uk. Ten broad drafts retain provider, encryption/search, search-negation, Undo Send and key-storage/Autocrypt context followups within their pending entries/topics. Preserve actual manual/address/key-ID lookup, separate protection key with credentials, optional public-key sharing and unverified ownership. Scope32716/1320; pending12773/520; completed19943/800; historical catalog improvements3357. No tests/builds; REVIEWED unchanged. Helpers and source audit recorded; check upstream again at the next source checkpoint and after the full queue.",
+  "next_batch": "Hungarian help.ftl24, linux.ftl87, mac.ftl65 and windows.ftl69 pending entries (245 total), then all52 help topics. Hungarian app647 and core450 review batches complete, with83 and96 improvements respectively; prior loading/rollback entries also remain reviewed. All18 earlier languages caught up, including agent-undo-outbox-context. Then lt/lv/pl/ro/ru/sk/sl/sv/uk. Retain provider/encryption/search/Undo Send/key-storage/Autocrypt context and the distinction between queued, removed and actually sent messages. Scope32720/1320; pending12323/520; completed20397/800; historical catalog improvements3471. No tests; REVIEWED unchanged. Recheck upstream at source checkpoints and after the full queue.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -2116,6 +2116,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Polite lowercase вие; данни за влизане includes browser sign-in. Public/private key and fingerprint terminology follows the catalogs. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "bg-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/bg/core.ftl": "c270550a95305a5644631182f093168145b4a2fa0464e6102b4fc0e9cc29a767"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ]
     },
@@ -4241,6 +4260,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Formal lowercase vy; přihlašovací údaje covers browser sign-in. Otisk, soukromý/veřejný klíč and karta follow existing help and catalog wording. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "cs-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/cs/core.ftl": "df0f58680fc9c568b64d1573e3327880be813a9bf0cdbaa55f62a7efd22507ca"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ]
     },
@@ -6328,6 +6366,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Informal du; meddelelse for a message and mail for mail generally. Loginoplysninger includes browser sign-in; fingeraftryk/nøgle-id follows the lookup note. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "da-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/da/core.ftl": "5e75e1f71f22828662686d1fbab63c0072a4bbd80b6ce2eefc030f3385cfc122"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ]
     },
@@ -6920,6 +6977,24 @@
           "validation": "All twelve inserted passages retain exact tags/attributes, literal code/keyboard tokens and every byte outside the new passages. check-language for de/es/et/fr has exactly 1404 expected removed-mark diagnostics each and no structural findings. Substituted Autocrypt/Security controls inspected on Windows/Mac/Linux, with correct sentence joins; dynamic command-key labels are outside the preview helper. All 28 full inventories and pending marks match; completed/source hashes reconcile globally:19977 unmarked messages,10270 changed help lines,14 verified baseline pairs. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three newly inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials, not decrypted by the database alone. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys on message opening; receipt does not verify ownership. Preserved every tag/attribute, control reference, literal key/path, and platform branch. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "de-agent-undo-context-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/de/core.ftl": "ebb7b7eddded7a471db6bb4ac14eda03e38cf6a4c1e7579a0482693e52de7483"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds."
         }
       ]
     },
@@ -9007,6 +9082,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Polite plural; στοιχεία σύνδεσης covers browser sign-in. Control names remain nominative after επιλογή/καρτέλα; αποτύπωμα/αναγνωριστικό agrees with the lookup note. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "el-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/el/core.ftl": "a339eae8d505ea69792e38e5e124ff0e74ab277255fffff004b198a75920d709"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ]
     },
@@ -9598,6 +9692,24 @@
           "validation": "All twelve inserted passages retain exact tags/attributes, literal code/keyboard tokens and every byte outside the new passages. check-language for de/es/et/fr has exactly 1404 expected removed-mark diagnostics each and no structural findings. Substituted Autocrypt/Security controls inspected on Windows/Mac/Linux, with correct sentence joins; dynamic command-key labels are outside the preview helper. All 28 full inventories and pending marks match; completed/source hashes reconcile globally:19977 unmarked messages,10270 changed help lines,14 verified baseline pairs. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three newly inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials, not decrypted by the database alone. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys on message opening; receipt does not verify ownership. Preserved every tag/attribute, control reference, literal key/path, and platform branch. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "es-agent-undo-context-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/es/core.ftl": "f5d41b294af726ff7658b7d847f09defd9228edb493163ba1db8466e0d39fe22"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds."
         }
       ]
     },
@@ -10196,6 +10308,24 @@
           "validation": "All twelve inserted passages retain exact tags/attributes, literal code/keyboard tokens and every byte outside the new passages. check-language for de/es/et/fr has exactly 1404 expected removed-mark diagnostics each and no structural findings. Substituted Autocrypt/Security controls inspected on Windows/Mac/Linux, with correct sentence joins; dynamic command-key labels are outside the preview helper. All 28 full inventories and pending marks match; completed/source hashes reconcile globally:19977 unmarked messages,10270 changed help lines,14 verified baseline pairs. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three newly inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials, not decrypted by the database alone. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys on message opening; receipt does not verify ownership. Preserved every tag/attribute, control reference, literal key/path, and platform branch. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "et-agent-undo-context-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/et/core.ftl": "592feecc6d5a4b0d1924dedbc0f82d153566853396d6b158233aa76bce0c9cd9"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds."
         }
       ]
     },
@@ -12290,6 +12420,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Informal singular; postitietokanta, kirjautumistiedot and salauksen purkaminen follow the glossary. The long checkbox uses quoted asetus, with the case carried by välilehdellä. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "fi-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/fi/core.ftl": "d5c3cdce719c93652da5ac0b5226dd9e6d0312996db51282344e5b3c14e5d4bb"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ]
     },
@@ -12895,6 +13044,24 @@
           "validation": "All twelve inserted passages retain exact tags/attributes, literal code/keyboard tokens and every byte outside the new passages. check-language for de/es/et/fr has exactly 1404 expected removed-mark diagnostics each and no structural findings. Substituted Autocrypt/Security controls inspected on Windows/Mac/Linux, with correct sentence joins; dynamic command-key labels are outside the preview helper. All 28 full inventories and pending marks match; completed/source hashes reconcile globally:19977 unmarked messages,10270 changed help lines,14 verified baseline pairs. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three newly inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials, not decrypted by the database alone. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys on message opening; receipt does not verify ownership. Preserved every tag/attribute, control reference, literal key/path, and platform branch. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "fr-agent-undo-context-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/fr/core.ftl": "ec18003ded5d8d6904505a361e5016a1655a83bd99a752cf64dc171fa03b15ad"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds."
         }
       ]
     },
@@ -14855,463 +15022,30 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Formal plural; baza pošte and podaci za prijavu follow the glossary. The quoted checkbox name is introduced by mogućnost; otisak refers to the key, not a human fingerprint. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "hr-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/hr/core.ftl": "8e3e74ed8d596e42940c8e9cfe4ff9f490008989755f5d9755ad6f72d9d24731"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ]
     },
     "hu": {
       "pending_catalogs": {
-        "core.ftl": [
-          "decimal-separator",
-          "size-bytes",
-          "size-kb",
-          "size-mb",
-          "size-gb",
-          "send-delay-off",
-          "send-delay-seconds",
-          "list-counts",
-          "list-counts-selected",
-          "list-counts-found",
-          "list-counts-found-selected",
-          "list-counts-none",
-          "folder-inbox",
-          "folder-sent",
-          "folder-deleted",
-          "folder-drafts",
-          "folder-junk",
-          "folder-archive",
-          "reader-no-message",
-          "reader-downloading",
-          "reader-downloading-detail",
-          "reader-downloading-size",
-          "reader-failed",
-          "reader-failed-network",
-          "reader-failed-sign-in",
-          "reader-failed-security",
-          "reader-failed-other",
-          "reader-retry-note",
-          "reader-unreadable",
-          "message-source-title",
-          "message-source-untitled",
-          "header-from",
-          "header-date",
-          "header-to",
-          "header-cc",
-          "header-sent",
-          "header-subject",
-          "header-security",
-          "header-part",
-          "quote-original",
-          "fold-show-earlier",
-          "bounce-failed",
-          "bounce-delayed",
-          "bounce-delayed-note",
-          "bounce-show-message",
-          "bounce-show-delayed",
-          "bounce-what-to-do",
-          "bounce-delayed-do",
-          "bounce-delayed-row-do",
-          "bounce-details",
-          "bounce-someone",
-          "bounce-server",
-          "bounce-status",
-          "bounce-reported-by",
-          "bounce-retry-minutes",
-          "bounce-retry-hours",
-          "bounce-blocklist",
-          "bounce-user-unknown",
-          "bounce-user-unknown-why",
-          "bounce-user-unknown-do",
-          "bounce-invalid-address",
-          "bounce-invalid-address-why",
-          "bounce-invalid-address-do",
-          "bounce-mailbox-disabled",
-          "bounce-mailbox-disabled-why",
-          "bounce-mailbox-disabled-do",
-          "bounce-mailbox-full",
-          "bounce-mailbox-full-why",
-          "bounce-mailbox-full-do",
-          "bounce-spam-blocked",
-          "bounce-spam-blocked-why",
-          "bounce-spam-blocked-do",
-          "bounce-virus-detected",
-          "bounce-virus-detected-why",
-          "bounce-virus-detected-do",
-          "bounce-ip-blocklisted",
-          "bounce-ip-blocklisted-why",
-          "bounce-ip-blocklisted-do",
-          "bounce-domain-blocklisted",
-          "bounce-domain-blocklisted-why",
-          "bounce-domain-blocklisted-do",
-          "bounce-policy-blocked",
-          "bounce-policy-blocked-why",
-          "bounce-policy-blocked-do",
-          "bounce-geo-blocked",
-          "bounce-geo-blocked-why",
-          "bounce-geo-blocked-do",
-          "bounce-relay-denied",
-          "bounce-relay-denied-why",
-          "bounce-relay-denied-do",
-          "bounce-auth-failure",
-          "bounce-auth-failure-why",
-          "bounce-auth-failure-do",
-          "bounce-rate-limited",
-          "bounce-rate-limited-why",
-          "bounce-rate-limited-do",
-          "bounce-greylisting",
-          "bounce-greylisting-why",
-          "bounce-greylisting-do",
-          "bounce-server-error",
-          "bounce-server-error-why",
-          "bounce-server-error-do",
-          "bounce-unknown",
-          "bounce-unknown-why",
-          "bounce-unknown-do",
-          "selection-title",
-          "selection-unread",
-          "selection-flagged",
-          "delete-for-good-one",
-          "delete-for-good-all",
-          "delete-for-good-some",
-          "done-read",
-          "done-unread",
-          "done-flagged",
-          "done-unflagged",
-          "done-deleted-for-good",
-          "done-archived",
-          "done-moved",
-          "done-copied",
-          "done-moving",
-          "done-copying",
-          "done-moved-back",
-          "done-watched",
-          "done-unwatched",
-          "done-ignored",
-          "done-unignored",
-          "their-folders",
-          "undo-move",
-          "undo-delete",
-          "undo-archive",
-          "undo-junk",
-          "undo-not-junk",
-          "undo-send",
-          "nothing-to-undo",
-          "messages-gone",
-          "folder-holds-no-messages",
-          "not-archived-here",
-          "not-emptied-here",
-          "next-unread-question",
-          "no-unread-left",
-          "empty-question",
-          "no-junk-folder",
-          "no-inbox-folder",
-          "done-flagged-color",
-          "flag-color",
-          "move-window-title-move",
-          "move-window-title-copy",
-          "move-window-prompt-move",
-          "move-window-prompt-copy",
-          "targets-recent",
-          "target-current",
-          "target-recent",
-          "transfer-moving",
-          "transfer-copying",
-          "transfer-another-account",
-          "transfer-folder-gone",
-          "transfer-not-on-server",
-          "transfer-not-moved",
-          "transfer-not-copied",
-          "transfer-none-moved",
-          "transfer-none-copied",
-          "export-not-in-time",
-          "export-not-saved",
-          "export-not-attached",
-          "saved-to",
-          "download-progress",
-          "download-done",
-          "downloading-messages",
-          "import-put",
-          "import-not-put",
-          "error-store",
-          "error-not-found",
-          "error-closed",
-          "error-other-account",
-          "failure-authentication",
-          "failure-network",
-          "error-in-use",
-          "error-turned-off",
-          "error-folder-name",
-          "error-folder-separator",
-          "error-folder-special",
-          "error-no-recipients",
-          "error-bad-address",
-          "error-not-own-address",
-          "rule-query-refused",
-          "rule-no-query",
-          "rule-no-action",
-          "error-attachment",
-          "error-no-drafts",
-          "error-draft-attachment",
-          "error-password-not-saved",
-          "error-sign-in-not-saved",
-          "error-import-unreadable",
-          "error-import-too-large",
-          "error-import-not-mail",
-          "error-list-answered",
-          "error-not-built",
-          "error-outbox-waits",
-          "error-draft-not-removed",
-          "error-sent-but",
-          "error-sent-still-in-outbox",
-          "error-sent-no-copy",
-          "error-no-password",
-          "error-no-sign-in",
-          "error-provider-missing",
-          "error-provider-servers",
-          "error-app-scopes",
-          "error-in-folder",
-          "sign-in-off-google",
-          "sign-in-off-other",
-          "sign-in-app-no-name",
-          "sign-in-app-no-client",
-          "sign-in-app-no-scopes",
-          "sign-in-app-bad-host",
-          "sign-in-app-plain",
-          "sign-in-app-not-checked",
-          "sign-in-app-issuer-changed",
-          "sign-in-register-google",
-          "sign-in-register-microsoft",
-          "sign-in-register-other",
-          "repeats",
-          "repeats-every",
-          "repeats-on",
-          "repeats-times",
-          "day-monday",
-          "day-tuesday",
-          "day-wednesday",
-          "day-thursday",
-          "day-friday",
-          "day-saturday",
-          "day-sunday",
-          "agent-level-read",
-          "agent-level-organize",
-          "agent-level-drafts",
-          "agent-level-send",
-          "agent-connect-title",
-          "agent-connect-detail",
-          "agent-reply-to",
-          "agent-reply-all-on",
-          "agent-forward-of",
-          "agent-never-written-one",
-          "agent-never-written-many",
-          "agent-send-title",
-          "agent-send-detail",
-          "agent-change-title",
-          "agent-change-allowed",
-          "agent-change-refused",
-          "agent-log-taken-back",
-          "agent-files",
-          "agent-undo-refused",
-          "agent-undo-refused-why",
-          "agent-undo-impossible",
-          "agent-undo-not-in-folder",
-          "agent-undo-not-arrived",
-          "agent-undo-sent",
-          "agent-original-not-downloaded",
-          "agent-turned-away",
-          "agent-can-nothing",
-          "agent-can-read",
-          "agent-can-organize",
-          "agent-can-drafts",
-          "agent-can-send",
-          "agent-can-list",
-          "agent-accounts",
-          "agent-access",
-          "agent-unreadable",
-          "agent-encrypted-original",
-          "agent-encrypted",
-          "list-encrypted",
-          "agent-log-composed",
-          "agent-log-refused",
-          "agent-log-sent",
-          "agent-log-draft",
-          "agent-log-read",
-          "agent-log-unread",
-          "agent-log-flagged",
-          "agent-log-unflagged",
-          "agent-log-deleted",
-          "agent-log-moved",
-          "agent-log-junk",
-          "agent-log-not-junk",
-          "agent-log-archived",
-          "agent-log-folder",
-          "agent-log-unsubscribed",
-          "key-ctrl",
-          "key-alt",
-          "key-shift",
-          "key-del",
-          "key-enter",
-          "sign-in-no-refresh",
-          "sign-in-no-account",
-          "sign-in-not-finished",
-          "secrets-unavailable",
-          "secrets-unavailable-why",
-          "secrets-windows",
-          "secrets-mac",
-          "secrets-linux",
-          "error-no-such-file",
-          "cards-file-too-big",
-          "ui-sender-added",
-          "ui-sender-known",
-          "ui-sender-none",
-          "card-name-needed",
-          "cards-file-failed",
-          "otp-heading",
-          "otp-copy",
-          "otp-note",
-          "otp-old",
-          "event-attendees",
-          "otp-notification",
-          "pgp-key-valid",
-          "pgp-key-expires",
-          "pgp-key-expired",
-          "pgp-key-revoked",
-          "pgp-key-revoked-why",
-          "pgp-key-not-valid",
-          "pgp-key-locked",
-          "pgp-source-own",
-          "pgp-source-file",
-          "pgp-source-paste",
-          "pgp-source-attachment",
-          "pgp-source-vcard",
-          "pgp-source-wkd",
-          "pgp-source-keyserver",
-          "pgp-source-autocrypt",
-          "pgp-error-no-store",
-          "pgp-error-wrong-passphrase",
-          "pgp-error-not-a-key",
-          "pgp-error-too-large",
-          "pgp-error-unusable",
-          "pgp-imported-private",
-          "pgp-imported-public",
-          "pgp-imported-pending",
-          "pgp-error-needs-passphrase",
-          "pgp-error-mismatch",
-          "pgp-file-name-public",
-          "pgp-file-name-private",
-          "pgp-pending",
-          "pgp-part-verified",
-          "pgp-part-signed",
-          "pgp-part-other",
-          "pgp-part-unknown-key",
-          "pgp-part-not-signed",
-          "pgp-part-not-checked",
-          "pgp-part-encrypted",
-          "pgp-part-no-key",
-          "pgp-part-changed",
-          "pgp-part-unprotected",
-          "pgp-part-broken",
-          "pgp-why-mismatch",
-          "pgp-why-weak-hash",
-          "pgp-why-key-expired",
-          "pgp-why-key-revoked",
-          "pgp-why-not-signing-key",
-          "pgp-why-from-future",
-          "pgp-why-signature-expired",
-          "pgp-why-key-not-valid",
-          "pgp-why-not-for-you",
-          "pgp-part-pictures-loaded",
-          "pgp-error-no-own-key",
-          "pgp-error-missing-keys",
-          "pgp-error-encrypted-quote",
-          "pgp-error-protect",
-          "pgp-found-keys",
-          "pgp-found-none",
-          "pgp-found-no-key",
-          "pgp-find-unavailable",
-          "pgp-publish-pending",
-          "pgp-publish-done",
-          "pgp-publish-failed",
-          "pgp-keyserver-off",
-          "pgp-details-part",
-          "pgp-details-signed",
-          "pgp-details-unknown-key",
-          "pgp-details-opened",
-          "pgp-details-for",
-          "pgp-details-plain",
-          "pgp-bar-parts",
-          "pgp-bar-count-verified",
-          "pgp-bar-count-good",
-          "pgp-bar-count-warning",
-          "pgp-bar-count-neutral",
-          "setup-part-settings",
-          "setup-part-preferences",
-          "setup-part-accounts",
-          "setup-part-sign-in-apps",
-          "setup-part-contacts",
-          "setup-part-keys",
-          "setup-part-rules",
-          "setup-part-trusted-senders",
-          "setup-holds-settings",
-          "setup-holds-preferences",
-          "setup-holds-accounts",
-          "setup-holds-sign-in-apps",
-          "setup-holds-built-in",
-          "setup-holds-contacts",
-          "setup-holds-groups",
-          "setup-holds-own-keys",
-          "setup-holds-contact-keys",
-          "setup-holds-rules",
-          "setup-holds-trusted-senders",
-          "setup-sign-in-password",
-          "setup-account-secret-password",
-          "setup-account-secret-token",
-          "setup-account-asks-password",
-          "setup-account-signs-in-again",
-          "setup-account-here",
-          "setup-account-no-app",
-          "setup-invalid-address",
-          "setup-invalid-server",
-          "setup-invalid-user",
-          "setup-invalid-sign-in",
-          "setup-error-empty",
-          "setup-error-too-large",
-          "setup-error-not-setup",
-          "setup-error-damaged",
-          "setup-error-newer",
-          "setup-error-needs-passphrase",
-          "setup-error-wrong-passphrase",
-          "setup-error-changed",
-          "setup-error-read",
-          "setup-error-write",
-          "setup-error-no-parts",
-          "setup-left-out",
-          "setup-imported-settings",
-          "setup-imported-preferences",
-          "setup-added-accounts",
-          "setup-skipped-here",
-          "setup-skipped-no-app",
-          "setup-skipped-invalid",
-          "setup-asks-password",
-          "setup-signs-in-again",
-          "setup-added-sign-in-apps",
-          "setup-skipped-sign-in-apps",
-          "setup-added-contacts",
-          "setup-skipped-contacts",
-          "setup-added-groups",
-          "setup-added-own-keys",
-          "setup-added-contact-keys",
-          "setup-added-rules",
-          "setup-skipped-rules",
-          "setup-skipped-rules-account",
-          "setup-rules-waiting",
-          "setup-added-trusted-senders",
-          "setup-nothing",
-          "setup-account-servers",
-          "setup-file-name",
-          "setup-skipped-unreachable",
-          "attachment-runs-programs",
-          "attachment-decrypted-note"
-        ],
         "help.ftl": [
           "help-title",
           "help-section-get-started",
@@ -16434,6 +16168,473 @@
           },
           "validation": "All 28 check-language runs have only their expected removed-mark diagnostics and no structural findings. All 87 inserted source lines verified; every preceding byte retained, English exactly matches source commit. All 28 full catalogs/variables/help inventories and pending marks match. Global reconciliation covers 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs; current completed/source hashes match. Since-start report: 339 entries and 214 passages match the queue. HTML regenerated; no conflict markers; git diff --check passes. No test suites or builds. This source integration is not a fluency review.",
           "notes": "Source-only integration of 255205aad7e70f680909092c3167cc724618b70e. Three added passages are pending review. Previously reviewed prose is unchanged. Completed topics have only the insertion marked; the ten broader drafts retain whole-topic marks. No language is marked reviewed by this integration. No test suites or builds."
+        },
+        {
+          "id": "hu-core-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "decimal-separator",
+              "size-bytes",
+              "size-kb",
+              "size-mb",
+              "size-gb",
+              "send-delay-off",
+              "send-delay-seconds",
+              "list-counts",
+              "list-counts-selected",
+              "list-counts-found",
+              "list-counts-found-selected",
+              "list-counts-none",
+              "folder-inbox",
+              "folder-sent",
+              "folder-deleted",
+              "folder-drafts",
+              "folder-junk",
+              "folder-archive",
+              "reader-no-message",
+              "reader-downloading",
+              "reader-downloading-detail",
+              "reader-downloading-size",
+              "reader-failed",
+              "reader-failed-network",
+              "reader-failed-sign-in",
+              "reader-failed-security",
+              "reader-failed-other",
+              "reader-retry-note",
+              "reader-unreadable",
+              "message-source-title",
+              "message-source-untitled",
+              "header-from",
+              "header-date",
+              "header-to",
+              "header-cc",
+              "header-sent",
+              "header-subject",
+              "header-security",
+              "header-part",
+              "quote-original",
+              "fold-show-earlier",
+              "bounce-failed",
+              "bounce-delayed",
+              "bounce-delayed-note",
+              "bounce-show-message",
+              "bounce-show-delayed",
+              "bounce-what-to-do",
+              "bounce-delayed-do",
+              "bounce-delayed-row-do",
+              "bounce-details",
+              "bounce-someone",
+              "bounce-server",
+              "bounce-status",
+              "bounce-reported-by",
+              "bounce-retry-minutes",
+              "bounce-retry-hours",
+              "bounce-blocklist",
+              "bounce-user-unknown",
+              "bounce-user-unknown-why",
+              "bounce-user-unknown-do",
+              "bounce-invalid-address",
+              "bounce-invalid-address-why",
+              "bounce-invalid-address-do",
+              "bounce-mailbox-disabled",
+              "bounce-mailbox-disabled-why",
+              "bounce-mailbox-disabled-do",
+              "bounce-mailbox-full",
+              "bounce-mailbox-full-why",
+              "bounce-mailbox-full-do",
+              "bounce-spam-blocked",
+              "bounce-spam-blocked-why",
+              "bounce-spam-blocked-do",
+              "bounce-virus-detected",
+              "bounce-virus-detected-why",
+              "bounce-virus-detected-do",
+              "bounce-ip-blocklisted",
+              "bounce-ip-blocklisted-why",
+              "bounce-ip-blocklisted-do",
+              "bounce-domain-blocklisted",
+              "bounce-domain-blocklisted-why",
+              "bounce-domain-blocklisted-do",
+              "bounce-policy-blocked",
+              "bounce-policy-blocked-why",
+              "bounce-policy-blocked-do",
+              "bounce-geo-blocked",
+              "bounce-geo-blocked-why",
+              "bounce-geo-blocked-do",
+              "bounce-relay-denied",
+              "bounce-relay-denied-why",
+              "bounce-relay-denied-do",
+              "bounce-auth-failure",
+              "bounce-auth-failure-why",
+              "bounce-auth-failure-do",
+              "bounce-rate-limited",
+              "bounce-rate-limited-why",
+              "bounce-rate-limited-do",
+              "bounce-greylisting",
+              "bounce-greylisting-why",
+              "bounce-greylisting-do",
+              "bounce-server-error",
+              "bounce-server-error-why",
+              "bounce-server-error-do",
+              "bounce-unknown",
+              "bounce-unknown-why",
+              "bounce-unknown-do",
+              "selection-title",
+              "selection-unread",
+              "selection-flagged",
+              "delete-for-good-one",
+              "delete-for-good-all",
+              "delete-for-good-some",
+              "done-read",
+              "done-unread",
+              "done-flagged",
+              "done-unflagged",
+              "done-deleted-for-good",
+              "done-archived",
+              "done-moved",
+              "done-copied",
+              "done-moving",
+              "done-copying",
+              "done-moved-back",
+              "done-watched",
+              "done-unwatched",
+              "done-ignored",
+              "done-unignored",
+              "their-folders",
+              "undo-move",
+              "undo-delete",
+              "undo-archive",
+              "undo-junk",
+              "undo-not-junk",
+              "undo-send",
+              "nothing-to-undo",
+              "messages-gone",
+              "folder-holds-no-messages",
+              "not-archived-here",
+              "not-emptied-here",
+              "next-unread-question",
+              "no-unread-left",
+              "empty-question",
+              "no-junk-folder",
+              "no-inbox-folder",
+              "done-flagged-color",
+              "flag-color",
+              "move-window-title-move",
+              "move-window-title-copy",
+              "move-window-prompt-move",
+              "move-window-prompt-copy",
+              "targets-recent",
+              "target-current",
+              "target-recent",
+              "transfer-moving",
+              "transfer-copying",
+              "transfer-another-account",
+              "transfer-folder-gone",
+              "transfer-not-on-server",
+              "transfer-not-moved",
+              "transfer-not-copied",
+              "transfer-none-moved",
+              "transfer-none-copied",
+              "export-not-in-time",
+              "export-not-saved",
+              "export-not-attached",
+              "saved-to",
+              "download-progress",
+              "download-done",
+              "downloading-messages",
+              "import-put",
+              "import-not-put",
+              "error-store",
+              "error-not-found",
+              "error-closed",
+              "error-other-account",
+              "failure-authentication",
+              "failure-network",
+              "error-in-use",
+              "error-turned-off",
+              "error-folder-name",
+              "error-folder-separator",
+              "error-folder-special",
+              "error-no-recipients",
+              "error-bad-address",
+              "error-not-own-address",
+              "rule-query-refused",
+              "rule-no-query",
+              "rule-no-action",
+              "error-attachment",
+              "error-no-drafts",
+              "error-draft-attachment",
+              "error-password-not-saved",
+              "error-sign-in-not-saved",
+              "error-import-unreadable",
+              "error-import-too-large",
+              "error-import-not-mail",
+              "error-list-answered",
+              "error-not-built",
+              "error-outbox-waits",
+              "error-draft-not-removed",
+              "error-sent-but",
+              "error-sent-still-in-outbox",
+              "error-sent-no-copy",
+              "error-no-password",
+              "error-no-sign-in",
+              "error-provider-missing",
+              "error-provider-servers",
+              "error-app-scopes",
+              "error-in-folder",
+              "sign-in-off-google",
+              "sign-in-off-other",
+              "sign-in-app-no-name",
+              "sign-in-app-no-client",
+              "sign-in-app-no-scopes",
+              "sign-in-app-bad-host",
+              "sign-in-app-plain",
+              "sign-in-app-not-checked",
+              "sign-in-app-issuer-changed",
+              "sign-in-register-google",
+              "sign-in-register-microsoft",
+              "sign-in-register-other",
+              "repeats",
+              "repeats-every",
+              "repeats-on",
+              "repeats-times",
+              "day-monday",
+              "day-tuesday",
+              "day-wednesday",
+              "day-thursday",
+              "day-friday",
+              "day-saturday",
+              "day-sunday",
+              "agent-level-read",
+              "agent-level-organize",
+              "agent-level-drafts",
+              "agent-level-send",
+              "agent-connect-title",
+              "agent-connect-detail",
+              "agent-reply-to",
+              "agent-reply-all-on",
+              "agent-forward-of",
+              "agent-never-written-one",
+              "agent-never-written-many",
+              "agent-send-title",
+              "agent-send-detail",
+              "agent-change-title",
+              "agent-change-allowed",
+              "agent-change-refused",
+              "agent-log-taken-back",
+              "agent-files",
+              "agent-undo-refused",
+              "agent-undo-refused-why",
+              "agent-undo-impossible",
+              "agent-undo-not-in-folder",
+              "agent-undo-not-arrived",
+              "agent-undo-sent",
+              "agent-original-not-downloaded",
+              "agent-turned-away",
+              "agent-can-nothing",
+              "agent-can-read",
+              "agent-can-organize",
+              "agent-can-drafts",
+              "agent-can-send",
+              "agent-can-list",
+              "agent-accounts",
+              "agent-access",
+              "agent-unreadable",
+              "agent-encrypted-original",
+              "agent-encrypted",
+              "list-encrypted",
+              "agent-log-composed",
+              "agent-log-refused",
+              "agent-log-sent",
+              "agent-log-draft",
+              "agent-log-read",
+              "agent-log-unread",
+              "agent-log-flagged",
+              "agent-log-unflagged",
+              "agent-log-deleted",
+              "agent-log-moved",
+              "agent-log-junk",
+              "agent-log-not-junk",
+              "agent-log-archived",
+              "agent-log-folder",
+              "agent-log-unsubscribed",
+              "key-ctrl",
+              "key-alt",
+              "key-shift",
+              "key-del",
+              "key-enter",
+              "sign-in-no-refresh",
+              "sign-in-no-account",
+              "sign-in-not-finished",
+              "secrets-unavailable",
+              "secrets-unavailable-why",
+              "secrets-windows",
+              "secrets-mac",
+              "secrets-linux",
+              "error-no-such-file",
+              "cards-file-too-big",
+              "ui-sender-added",
+              "ui-sender-known",
+              "ui-sender-none",
+              "card-name-needed",
+              "cards-file-failed",
+              "otp-heading",
+              "otp-copy",
+              "otp-note",
+              "otp-old",
+              "event-attendees",
+              "otp-notification",
+              "pgp-key-valid",
+              "pgp-key-expires",
+              "pgp-key-expired",
+              "pgp-key-revoked",
+              "pgp-key-revoked-why",
+              "pgp-key-not-valid",
+              "pgp-key-locked",
+              "pgp-source-own",
+              "pgp-source-file",
+              "pgp-source-paste",
+              "pgp-source-attachment",
+              "pgp-source-vcard",
+              "pgp-source-wkd",
+              "pgp-source-keyserver",
+              "pgp-source-autocrypt",
+              "pgp-error-no-store",
+              "pgp-error-wrong-passphrase",
+              "pgp-error-not-a-key",
+              "pgp-error-too-large",
+              "pgp-error-unusable",
+              "pgp-imported-private",
+              "pgp-imported-public",
+              "pgp-imported-pending",
+              "pgp-error-needs-passphrase",
+              "pgp-error-mismatch",
+              "pgp-file-name-public",
+              "pgp-file-name-private",
+              "pgp-pending",
+              "pgp-part-verified",
+              "pgp-part-signed",
+              "pgp-part-other",
+              "pgp-part-unknown-key",
+              "pgp-part-not-signed",
+              "pgp-part-not-checked",
+              "pgp-part-encrypted",
+              "pgp-part-no-key",
+              "pgp-part-changed",
+              "pgp-part-unprotected",
+              "pgp-part-broken",
+              "pgp-why-mismatch",
+              "pgp-why-weak-hash",
+              "pgp-why-key-expired",
+              "pgp-why-key-revoked",
+              "pgp-why-not-signing-key",
+              "pgp-why-from-future",
+              "pgp-why-signature-expired",
+              "pgp-why-key-not-valid",
+              "pgp-why-not-for-you",
+              "pgp-part-pictures-loaded",
+              "pgp-error-no-own-key",
+              "pgp-error-missing-keys",
+              "pgp-error-encrypted-quote",
+              "pgp-error-protect",
+              "pgp-found-keys",
+              "pgp-found-none",
+              "pgp-found-no-key",
+              "pgp-find-unavailable",
+              "pgp-publish-pending",
+              "pgp-publish-done",
+              "pgp-publish-failed",
+              "pgp-keyserver-off",
+              "pgp-details-part",
+              "pgp-details-signed",
+              "pgp-details-unknown-key",
+              "pgp-details-opened",
+              "pgp-details-for",
+              "pgp-details-plain",
+              "pgp-bar-parts",
+              "pgp-bar-count-verified",
+              "pgp-bar-count-good",
+              "pgp-bar-count-warning",
+              "pgp-bar-count-neutral",
+              "setup-part-settings",
+              "setup-part-preferences",
+              "setup-part-accounts",
+              "setup-part-sign-in-apps",
+              "setup-part-contacts",
+              "setup-part-keys",
+              "setup-part-rules",
+              "setup-part-trusted-senders",
+              "setup-holds-settings",
+              "setup-holds-preferences",
+              "setup-holds-accounts",
+              "setup-holds-sign-in-apps",
+              "setup-holds-built-in",
+              "setup-holds-contacts",
+              "setup-holds-groups",
+              "setup-holds-own-keys",
+              "setup-holds-contact-keys",
+              "setup-holds-rules",
+              "setup-holds-trusted-senders",
+              "setup-sign-in-password",
+              "setup-account-secret-password",
+              "setup-account-secret-token",
+              "setup-account-asks-password",
+              "setup-account-signs-in-again",
+              "setup-account-here",
+              "setup-account-no-app",
+              "setup-invalid-address",
+              "setup-invalid-server",
+              "setup-invalid-user",
+              "setup-invalid-sign-in",
+              "setup-error-empty",
+              "setup-error-too-large",
+              "setup-error-not-setup",
+              "setup-error-damaged",
+              "setup-error-newer",
+              "setup-error-needs-passphrase",
+              "setup-error-wrong-passphrase",
+              "setup-error-changed",
+              "setup-error-read",
+              "setup-error-write",
+              "setup-error-no-parts",
+              "setup-left-out",
+              "setup-imported-settings",
+              "setup-imported-preferences",
+              "setup-added-accounts",
+              "setup-skipped-here",
+              "setup-skipped-no-app",
+              "setup-skipped-invalid",
+              "setup-asks-password",
+              "setup-signs-in-again",
+              "setup-added-sign-in-apps",
+              "setup-skipped-sign-in-apps",
+              "setup-added-contacts",
+              "setup-skipped-contacts",
+              "setup-added-groups",
+              "setup-added-own-keys",
+              "setup-added-contact-keys",
+              "setup-added-rules",
+              "setup-skipped-rules",
+              "setup-skipped-rules-account",
+              "setup-rules-waiting",
+              "setup-added-trusted-senders",
+              "setup-nothing",
+              "setup-account-servers",
+              "setup-file-name",
+              "setup-skipped-unreachable",
+              "attachment-runs-programs",
+              "attachment-decrypted-note"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 96,
+          "files": {
+            "core/locales/hu/core.ftl": "d4955539fe83242a7634f09b875dc2b3088d19414db6b589e675a9a9cf917967"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1107 expected removed-mark diagnostics, no structural findings. All96 changed values and450 removed marks reconstruct the exact file from HEAD; all other bytes, complete variables, plural branches, brace counts, mnemonics and comments preserved. Hungarian numbers, independent counts, credential-store fallbacks, key/fingerprint names and account/app error variants checked in substituted examples. Existing access-key groups unchanged. No GUI execution or Hungarian tour screenshots; Windows permission checkbox width and dynamic paragraph wrapping checked in source. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Reviewed all450 remaining Hungarian core entries with English and actual callers: reading/error cards, bounce classifications and retry intervals, selection/permanent deletion, movement/export counts, sign-in and OAuth setup, calendar repetition, agent permissions/logging/undo, key protection/ownership/publication, setup preview/import and attachment opening/cleanup. Improved96 values. Formal impersonal prose, singular nouns and predicates after counts, uninflected names/addresses/fingerprints and full variables preserved. Local store is levéladatbázis; credentials include browser sign-in. Bounce advice describes server retries without telling the user to resend a delayed message. Agent sent log is queuing, and an absent Outbox row does not prove delivery. Corrected decryption versus encryption, signing a message versus signing an address, key-owner verification versus signature validity, private-key backup recovery and confirmation of each published address. Setup errors identify the file, not a single setting; unreachable sign-in app guidance works for both account and app names. Attachment copies remain unencrypted until cleaned up at startup when over a day old. No control mnemonics or platform metadata changed. No Hungarian tour screenshots available; source wrapping/checkbox layout inspected. Sign/Encrypt actions described generically, without inventing literal control labels absent from the current catalog. No test suites or builds."
         }
       ]
     },
@@ -18728,6 +18929,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained informal tu, chiave privata/pubblica, impronta digitale and credenziali di accesso; control-label joins use opzione and scheda. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "it-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/it/core.ftl": "27753c487e34dd93c2184c8e8f316bf42d83b1a9565eeea04be9f3ae6f48cd4b"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ]
     },
@@ -24182,6 +24402,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained informal je, openbare sleutel/privésleutel and aanmeldgegevens; avoided literal keys travelling and an app learning a person’s key. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "nl-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/nl/core.ftl": "c7e3f89cc62e15e8c2f2e924a20920c4a1707d5b810ccd209f28fb90ba780508"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ]
     },
@@ -28039,6 +28278,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained European Portuguese ficheiro/base de dados, encriptação, polite third person without você, and credenciais de início de sessão. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "pt-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/pt/core.ftl": "b02efdbd94b2adb0ef6ed77c21fc1463bcc9020be7f661c151ad827b206ee533"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ]
     },
@@ -39628,6 +39886,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained vós prose, fitxer, xifratge/desxifrar, empremta digital, and credencials d’inici de sessió; used head nouns for interpolated control labels. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "ca-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/ca/core.ftl": "c598e8cb05003dc0b293be1acaba4650b06f5c975217a7cc8203e0f739c60623"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -41797,6 +42074,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained du, offentlig/privat nøkkel, fingeravtrykk and påloggingsopplysninger; keys are saved or sent rather than learned by an app. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "nb-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/nb/core.ftl": "07b13eabe32242c1a5a49a073fc8a24abe41f0fe1fc780a6f3d6cae14d09fb6b"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -43972,6 +44268,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained Brazilian arquivo/banco de dados, criptografia, aplicativos, você and credenciais de login, keeping the variant distinct from pt-PT. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "pt-BR-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/pt-BR/core.ftl": "b51b6de2cb22885727df6214598406f6ca97c00e937b6e496c302d47fe1fea19"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -46119,6 +46434,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained Serbian Ekavian and formal plural, nalog/datoteka/pošiljalac, otisak ključa and podaci za prijavu; no Croatian terminology introduced. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "sr-Latn-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/sr-Latn/core.ftl": "7f1ea45d39f62c00532b2abdb6f061bbf0502a9099facd572ec6daa1a4bbaf57"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -48239,6 +48573,25 @@
           "validation": "check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
           "notes": "Reviewed only the three inserted key lookup/storage/Autocrypt passages, preserving all older reviewed prose byte-for-byte. Address lookup uses domain WKD then the enabled keyserver fallback; explicit fingerprint/key-ID lookup sends the identifier. Private keys are encrypted in the mail database with a separate key held alongside sign-in credentials. Autocrypt optionally shares the public key associated with the sending address and may learn usable sender keys when messages are opened; receipt does not verify ownership. Exact markup, references, literal syntax and platform branches preserved. Retained polite Turkish, etki alanı, gizli/ortak anahtar and oturum açma bilgileri; suffixes are on sekme/seçenek rather than dynamic control names. No test suites or builds.",
           "changed_help_lines": 3
+        },
+        {
+          "id": "tr-agent-undo-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/tr/core.ftl": "927a8c6eabe00e11454ff2db58de190f1c35fa6d8f7c4e8b0806e656cc982588"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "20fa020bd71b3fda34d470e33617cb95db066798e4e0fb895d5063fff1ddbed3"
+          },
+          "validation": "check-language:1404 expected removed-mark diagnostics, no structural findings. Exactly agent-undo-sent changes; all other bytes and full variables/plural/mnemonic structure preserved. The complete agent-undo-refused-why sentence was inspected with the actual localized reason; German independent clause capitalized after the colon. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds.",
+          "notes": "Agent undo returns this reason when outbox_with_message_id finds no queued row. This can happen after manual deletion without sending, not only successful delivery. State only that the message is no longer in the Outbox, using its localized name. Checked the full agent-undo-refused-why wrapper and terminal punctuation. Every other byte unchanged. English/app code unchanged; source issue recorded in agent-undo-outbox-context. No test suites or builds.",
+          "followup_reviewed_ids": {
+            "core.ftl": [
+              "agent-undo-sent"
+            ]
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -51584,16 +51937,44 @@
         ]
       ],
       "note": "One inserted passage in each of three topics across 28 languages. Four round-1 topics enter scope, 50 already counted topics reopen, and 30 full draft topics were already pending. Original reviewed text remains byte-for-byte intact."
+    },
+    {
+      "kind": "Agent Undo absent Outbox row versus completed delivery context followup",
+      "catalog_entries": 4,
+      "help_pages": 0,
+      "new_catalog_ids": [
+        [
+          "de",
+          "core.ftl",
+          "agent-undo-sent"
+        ],
+        [
+          "es",
+          "core.ftl",
+          "agent-undo-sent"
+        ],
+        [
+          "et",
+          "core.ftl",
+          "agent-undo-sent"
+        ],
+        [
+          "fr",
+          "core.ftl",
+          "agent-undo-sent"
+        ]
+      ],
+      "note": "Four round-1 status strings enter the active scope. Fourteen completed languages receive a single-string followup without increasing scope. Hungarian receives the correction in its full core batch; the nine remaining language drafts already have the marked entry."
     }
   ],
-  "total_catalog_entries": 32716,
+  "total_catalog_entries": 32720,
   "total_help_pages": 1320,
   "review_workspace": {
     "path": "/Users/andris/Projects/PostalExpress/build/i18n-wave1",
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "After ed362530: remaining14 earlier languages each completed three inserted key-help passages; all18 earlier languages caught up. Seven refs audited after fresh fetch; no new translation/help edits or languages, guide unchanged and root has no relevant edits. Exact imported help source255205aa verified; non-help branches untouched. Since-start339 entries/160 passages and full inventories/current hashes reconcile. Scope32716/1320, pending12773/520, completed19943/800. REVIEWED unchanged.",
+    "latest_source_audit": "After6e24497c: Hungarian core450 completed with96 improvements, plus18 one-entry agent-undo followups. Four round-1 entries enter scope. Seven source refs checked after fetch; no new translations or languages, guide unchanged, root has no relevant edits. Since-start336 entries/160 passages and full inventories/current hashes reconcile. Scope32720/1320, pending12323/520, completed20397/800. REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -53785,6 +54166,196 @@
         "review_commit": "ed3625307643cb9a52a988900adf46a230e55855",
         "new_languages": 0,
         "validation": "Fresh fetch and all seven observed refs checked; no new translation/help edits or languages since the previous source checkpoint. Imported87 help files still match recorded source hashes; English import unchanged. Guide unchanged; root has no locale/help/settings edits. Full inventories and current hashes reconcile. Non-help changes on source branches, including new UI/fuzz work, remain outside the review and untouched. No tests."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "08c9ef126d4012330b9a5631e8683089c9ad769c",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074",
+          "chore/pgp-hardening": "76504947cc7d30ca8536024511a8fc614536d1a5"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/master": {
+            "merge_base": "38841d9602aeaa6dc0abb773aa4639f0597c15ee",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 5,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/ci.yml",
+              "README.md",
+              "linux/Dockerfile",
+              "linux/src/e2e.rs",
+              "scripts/linux-ui-e2e-run.sh"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 1,
+              "README.md": 1,
+              "linux/Dockerfile": 1,
+              "linux/src": 1,
+              "scripts/linux-ui-e2e-run.sh": 1
+            }
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "chore/pgp-hardening": {
+            "merge_base": "38841d9602aeaa6dc0abb773aa4639f0597c15ee",
+            "new_languages": [],
+            "integrated_help_paths": 87,
+            "unmerged_non_help_path_count": 16815,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/ci.yml",
+              ".github/workflows/pgp-interop-suite.yml",
+              "CLAUDE.md",
+              "README.md",
+              "app/CMakeLists.txt",
+              "app/src/main.cpp",
+              "core/crates/pe-bounce/tests/hostile.rs",
+              "core/crates/pe-core/tests/e2e_core.rs",
+              "core/crates/pe-pgp/src/cert.rs",
+              "core/crates/pe-pgp/src/decrypt.rs",
+              "core/crates/pe-pgp/src/policy.rs",
+              "core/crates/pe-pgp/src/verify.rs",
+              "core/crates/pe-pgp/tests/forge/mod.rs",
+              "core/crates/pe-pgp/tests/policy.rs",
+              "core/fuzz/.gitignore",
+              "docs/pgp-plan.md",
+              "docs/shells.md",
+              "linux/Dockerfile",
+              "linux/src/agents.rs",
+              "linux/src/app.rs",
+              "linux/src/e2e.rs",
+              "linux/src/e2e/keys.rs",
+              "linux/src/e2e/layout.rs",
+              "linux/src/e2e/steps.rs",
+              "linux/src/keys.rs",
+              "linux/src/mailbox.rs",
+              "mac/Sources/InboxClassic/App.swift",
+              "mac/Sources/InboxClassic/MainWindow.swift",
+              "mac/Sources/InboxClassic/UITestSteps.swift",
+              "scripts/linux-ui-e2e-run.sh",
+              "scripts/pgp-interop-suite.sh",
+              "scripts/pgp-interop-summary.py",
+              "scripts/pgp-interop.sh",
+              "scripts/ui-e2e.ps1",
+              "scripts/ui-e2e/SCENARIO.md"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 2,
+              "CLAUDE.md": 1,
+              "README.md": 1,
+              "app/CMakeLists.txt": 1,
+              "app/src": 1,
+              "core/crates": 8,
+              "core/fuzz": 16781,
+              "docs/pgp-plan.md": 1,
+              "docs/shells.md": 1,
+              "linux/Dockerfile": 1,
+              "linux/src": 8,
+              "mac/Sources": 3,
+              "scripts/linux-ui-e2e-run.sh": 1,
+              "scripts/pgp-interop-suite.sh": 1,
+              "scripts/pgp-interop-summary.py": 1,
+              "scripts/pgp-interop.sh": 1,
+              "scripts/ui-e2e.ps1": 1,
+              "scripts/ui-e2e": 1
+            },
+            "complete_path_list_sha256": "3afef3c18315e5d952ac1b32c103a6670f2ee09c4ed27eea854b23c692d49ab2",
+            "complete_path_list_artifact": "/private/tmp/inbox-hu-core-unmerged-chore-pgp-hardening.txt"
+          }
+        },
+        "integrated_help_source": "255205aad7e70f680909092c3167cc724618b70e",
+        "root_locale_help_settings_status": [],
+        "unmerged_non_help_path_count": 16815,
+        "unmerged_non_help_paths_except_fuzz_corpora": [
+          ".github/workflows/ci.yml",
+          ".github/workflows/pgp-interop-suite.yml",
+          "CLAUDE.md",
+          "README.md",
+          "app/CMakeLists.txt",
+          "app/src/main.cpp",
+          "core/crates/pe-bounce/tests/hostile.rs",
+          "core/crates/pe-core/tests/e2e_core.rs",
+          "core/crates/pe-pgp/src/cert.rs",
+          "core/crates/pe-pgp/src/decrypt.rs",
+          "core/crates/pe-pgp/src/policy.rs",
+          "core/crates/pe-pgp/src/verify.rs",
+          "core/crates/pe-pgp/tests/forge/mod.rs",
+          "core/crates/pe-pgp/tests/policy.rs",
+          "core/fuzz/.gitignore",
+          "docs/pgp-plan.md",
+          "docs/shells.md",
+          "linux/Dockerfile",
+          "linux/src/agents.rs",
+          "linux/src/app.rs",
+          "linux/src/e2e.rs",
+          "linux/src/e2e/keys.rs",
+          "linux/src/e2e/layout.rs",
+          "linux/src/e2e/steps.rs",
+          "linux/src/keys.rs",
+          "linux/src/mailbox.rs",
+          "mac/Sources/InboxClassic/App.swift",
+          "mac/Sources/InboxClassic/MainWindow.swift",
+          "mac/Sources/InboxClassic/UITestSteps.swift",
+          "scripts/linux-ui-e2e-run.sh",
+          "scripts/pgp-interop-suite.sh",
+          "scripts/pgp-interop-summary.py",
+          "scripts/pgp-interop.sh",
+          "scripts/ui-e2e.ps1",
+          "scripts/ui-e2e/SCENARIO.md"
+        ],
+        "guide_sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
+        "changed_source_tips_since_last_checkpoint": {},
+        "since_start_pending_catalog_entries": 336,
+        "since_start_pending_help_passages": 160,
+        "remaining_since_omissions": [],
+        "pending_catalog_entries": 12323,
+        "pending_help_topics": 520,
+        "additional_unrecorded_work": 0,
+        "kind": "Hungarian core review and19-language agent-undo context correction",
+        "review_commit": "6e24497c894ae81f0e5e0936c9545e314c100eb4",
+        "new_languages": 0,
+        "validation": "Fresh fetch and all seven observed refs show no additional translations or languages. Guide unchanged; root has no locale/help/settings edits. Exact imported help source still verified. Full inventories and current hashes reconcile; source-branch non-help work remains untouched. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds."
       }
     ],
     "settings_source_integration": {
@@ -64868,6 +65439,18 @@
             ]
           },
           "note": "These app entries are complete. Other catalogs and help remain pending in the full Hungarian queue; do not mark the whole context followup complete."
+        },
+        {
+          "language": "hu",
+          "batch": "hu-core-round2",
+          "catalog_ids": {
+            "core.ftl": [
+              "agent-encrypted",
+              "list-encrypted",
+              "pgp-keyserver-off"
+            ]
+          },
+          "note": "These three core entries are complete, following the earlier app review. All52 Hungarian help topics remain pending; do not mark the whole context followup complete."
         }
       ],
       "superseded_retained_help_reviews": {
@@ -65482,6 +66065,58 @@
         "Autocrypt insertion should describe optional public-key sharing and receiving a usable key, without implying ownership verification or guaranteed encryption by other apps"
       ],
       "validation": "All 54 new passages in the 18 earlier languages are reviewed. The latest14-language batch improves42 passages with exact preservation outside the insertions. check-language: exactly 1404 expected removed-mark diagnostics, no structural findings. Exact tags/attributes and literal code/keyboard contents preserved; every byte outside the three new passages is unchanged. Autocrypt/Security sentence joins inspected after label substitution on Windows/Mac/Linux; dynamic keyboard labels remain outside the helper. Full28 catalogs/variables/help inventories and pending marks match. Completed/source hashes reconcile:19977 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start339 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds. The remaining30 insertions stay marked within full help topics in the ten broad drafts."
+    },
+    {
+      "id": "agent-undo-outbox-context",
+      "reason": "English agent-undo-sent claims completed sending, but agents.rs::undo_agent_log uses it whenever outbox_with_message_id returns None. The lookup tests only for an Outbox row; Core::outbox_delete also removes it without sending. Translations must say the message is no longer in the Outbox, without confirming delivery.",
+      "source_checkpoint": "6e24497c894ae81f0e5e0936c9545e314c100eb4",
+      "catalog_ids": {
+        "core.ftl": [
+          "agent-undo-sent"
+        ]
+      },
+      "help_topics": [],
+      "completed_languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el",
+        "fi",
+        "hr",
+        "hu"
+      ],
+      "pending_languages": [
+        "lt",
+        "lv",
+        "pl",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "uk"
+      ],
+      "scope_added_catalogs": 4,
+      "scope_added_help": 0,
+      "verified_context": [
+        "core/crates/pe-core/src/agents.rs::Core::undo_agent_log, Undo::Unsend branch",
+        "core/crates/pe-store/src/agents.rs::Store::outbox_with_message_id: SELECT from outbox only",
+        "core/crates/pe-core/src/lib.rs::Core::outbox_delete: removes queued message without sending",
+        "core/crates/pe-core/src/agents.rs::Core::send_for_agent logs AgentLogSent when queuing with SEND_DELAY"
+      ],
+      "validation": "Hungarian includes the correction in its450-entry core review; all18 earlier languages have exact single-entry followups. Scope adds only four round-1 entries. Full error wrappers inspected in all19 languages; remaining nine drafts keep their existing marks. All28 full catalog IDs/variables/help inventories and pending marks match. Completed/source hashes reconcile:20431 unmarked messages,10312 changed help lines,14 verified baseline pairs. Since-start336 entries/160 passages match the queue. HTML regenerated; git diff --check passes. No test suites or builds."
     }
   ]
 }

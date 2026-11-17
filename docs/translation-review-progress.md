@@ -33,20 +33,23 @@ Commit completed batches regularly and preserve an exact resume point.
   encryption additions are finished. The shared search-negation overclaim is corrected in all 18 languages;
   the ten broader drafts retain it within their existing marked search-words topic. Exact context/provenance
   is in `encryption-search-context` and `search-negation-context`.
-  Hungarian app.ftl is now complete: 647 entries, 83 improvements and all 46 shortcut scopes passing.
+  Hungarian app.ftl is complete: 647 entries, 83 improvements and all 46 shortcut scopes passing.
+  Its remaining 450 core.ftl entries are now reviewed too, with 96 improvements.
   Help source `255205aa` from `chore/pgp-hardening` (observed at `80d02fcc`) is now integrated:
   one inserted passage in connections/data-storage/encryption-keys in every language and English. Every byte
   of prior reviewed prose is preserved. All 54 insertions in the 18 earlier languages are now reviewed.
-  Ten broad drafts retain their full-topic marks, including the remaining 30 insertions. NEXT: Hungarian core.ftl.
+  Ten broad drafts retain their full-topic marks, including the remaining 30 insertions. NEXT: Hungarian
+  help.ftl and platform catalogs (245 entries).
   Exact source/retained-review provenance
   is in `key_help_source_integration` and `key-storage-autocrypt-context`. Preserve the source worktree's
   unrelated uncommitted UI/fuzz work. Only the help source commit was imported.
-  Then Hungarian core.ftl 450, help.ftl 24, linux.ftl 87, mac.ftl 65, windows.ftl 69 and all 52 help topics.
+  Remaining Hungarian: help.ftl 24, linux.ftl 87, mac.ftl 65, windows.ftl 69 and all 52 help topics.
   Continue lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. All prior context followups remain relevant to those drafts.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,716 catalog entries and 1,320 help topics; 12,773 entries and 520 topics remain in the integrated queue.
+  32,720 catalog entries and 1,320 help topics; 12,323 entries and 520 topics remain in the integrated queue.
+  Four round-1 agent-undo status strings now enter scope; all 18 earlier languages have that correction.
   The key help additions bring four round-1 topics into scope and reopen 50 counted topics; 30 full drafts
   already had the affected topics pending. Previously reviewed passages have not been discarded.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
@@ -1823,7 +1826,45 @@ root has no relevant edits. The exact imported source for all 87 help files is s
 changes, including UI behavior and fuzz corpora, remain outside this review and untouched. The 339 since-start
 entries and 160 passages match the queue. State records the audit with compact counts for the large corpus tree.
 
-Current totals: 19,943 catalog entries and 800 help topics fully completed; 3,357 historical catalog improvements.
+At that checkpoint: 19,943 catalog entries and 800 help topics fully completed; 3,357 historical catalog improvements.
 Remaining: 12,773 catalog entries and 520 help topics in hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. Scope: 32,716 entries and
 1,320 topics. Next: Hungarian core.ftl (450 entries), then its remaining catalogs and all 52 help topics.
 `REVIEWED` remains unchanged until the full queue and final late-arrival audit are complete.
+
+
+### Hungarian core catalog completed; agent Undo status clarified
+
+Reviewed all 450 remaining Hungarian core messages and improved 96 values. Reading errors, delivery-failure cards,
+count messages, calendar text, sign-in, agent permissions and logs, keys, setup transfer and attachment handling
+were checked against their actual callers. Hungarian keeps singular predicates after numbers and leaves dynamic
+names, addresses, fingerprints and counted phrases uninflected. Good existing translations are retained.
+
+Bounce advice distinguishes a server retry from a user action. Local storage uses levéladatbázis; credentials
+include browser sign-in. Agent logs now report queuing, not completed sending. Security details correctly say
+decrypted, distinguish key ownership from signature validity, and explain that every published address requires
+confirmation. Locked private keys require their own backup. Setup errors refer to the exported file; an unreachable
+sign-in-app message works whether it names the app or an account. Temporary unencrypted attachment copies older
+than a day are removed at startup. Hungarian glossary notes record these decisions for its remaining help review.
+
+The agent Undo caller exposed another source overclaim: agent-undo-sent is used whenever the Outbox row is missing,
+which also happens after deleting a queued message without sending it. Corrected this one reason in Hungarian and
+all 18 earlier languages to say the message is no longer in the Outbox. Every other byte in those 18 files is
+unchanged. Four round-1 entries enter scope; the other 14 are followups without increased scope. The nine remaining
+drafts retain the entry under agent-undo-outbox-context. English and app code are unchanged.
+
+Hungarian check-language reports 1,107 expected removed-mark diagnostics; each of the 18 followups has 1,404.
+There are no structural findings. All 96 Hungarian value edits and 450 mark removals reconstruct the exact file
+from the prior checkpoint. IDs, full variables, plural branches, braces, mnemonics and comments are preserved.
+Error-wrapper joins were inspected in all 19 languages, with independent-clause capitalization fixed in German.
+Hungarian substituted examples include failure counts, credential-store names and account/app identifiers.
+No GUI run or Hungarian tour screenshots were available; source wrapping and compact permission controls were checked.
+
+All 28 inventories and current translation/source hashes reconcile: 20,431 unmarked messages, 10,312 changed help
+lines and 14 verified baseline pairs. The 336 since-start entries and 160 passages match the queue. Fresh fetch
+and all seven observed refs show no new translations or languages; guide unchanged and root has no relevant edits.
+HTML regenerated; git diff --check passes. No test suites or builds run. Previous checkpoint: `6e24497c`.
+
+Current totals: 20,397 catalog entries and 800 help topics completed; 3,471 historical catalog improvements.
+Remaining: 12,323 catalog entries and 520 help topics across ten languages. Scope: 32,720 entries and 1,320 topics.
+Next: Hungarian help.ftl (24), linux.ftl (87), mac.ftl (65), windows.ftl (69), then all 52 help topics.
+All 18 earlier languages are caught up. `REVIEWED` remains unchanged; the final late-arrival audit is still required.
