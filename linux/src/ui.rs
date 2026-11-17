@@ -403,7 +403,8 @@ impl Drop for Form {
 }
 
 fn form_row(index: usize, field: &Field) -> gtk::Widget {
-    let title = field.label.trim_end_matches(':');
+    let title = pe_core::i18n::field_title(&field.label);
+    let title = title.as_str();
     let row: gtk::Widget = match &field.kind {
         Kind::Choice(choices) => {
             let model = gtk::StringList::new(&choices.iter().map(String::as_str).collect::<Vec<_>>());

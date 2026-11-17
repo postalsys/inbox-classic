@@ -503,10 +503,8 @@ fn rust_settings(out: &mut String, view: &View) {
         writeln!(out, "    {},", case(setting)).unwrap();
     }
     writeln!(out, "}}\n\nimpl {ty} {{").unwrap();
-    // not read yet: the Linux app names its widgets by it next
     out.push_str(
-        "    /// Its name in code and the UI test (`codes_in_notifications`)\n    #[allow(dead_code)]\n    \
-         pub fn name(self) -> &'static str {\n",
+        "    /// Its name in code and the UI test (`codes_in_notifications`)\n    pub fn name(self) -> &'static str {\n",
     );
     rust_match(out, ty, &view.settings, case, |s| format!("\"{}\"", s.2.id));
     out.push_str("\n    pub fn kind(self) -> SettingKind {\n");

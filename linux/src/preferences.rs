@@ -12,7 +12,7 @@ use crate::app::{shell, spawn};
 use crate::settings;
 use crate::settings_pages::{Setting, SettingKind, SettingsGroup, SettingsPage};
 use crate::ui::{self, TITLE};
-use crate::words::{Text, field_title, plain, title};
+use crate::words::{Text, field_title, plain, title, tr};
 
 /// The languages offered, in the order of the list: System default (None), then each by its own name
 fn choices() -> Vec<Option<&'static str>> {
@@ -58,7 +58,7 @@ fn page_of(page: SettingsPage) -> adw::PreferencesPage {
 fn group_of(group: SettingsGroup) -> adw::PreferencesGroup {
     let shown = adw::PreferencesGroup::new();
     if let Some(title) = group.title() {
-        shown.set_title(&field_title(title));
+        shown.set_title(&tr(title));
     }
     let notes: Vec<String> = group
         .note()
@@ -92,76 +92,101 @@ fn group_of(group: SettingsGroup) -> adw::PreferencesGroup {
 fn row_of(setting: Setting) -> gtk::Widget {
     match setting {
         Setting::Language => language_row(setting).upcast(),
-        Setting::NotifyNewMail => {
-            let row = switch_row(setting, "preferences-notify", shell().notify.get(), |on| {
-                let shell = shell();
-                if shell.notify.get() != on {
-                    shell.set_notify(on);
-                }
-            });
-            row.set_subtitle(&t!(GtkNotifySubtitle));
-            row.upcast()
-        }
-        Setting::CodesInNotifications => {
-            switch_row(setting, "preferences-codes", pe_core::otp::in_notifications(), |on| {
-                shell().settings.set_bool(settings::CODES_IN_NOTIFICATIONS, on);
-                pe_core::otp::set_in_notifications(on);
-            })
-            .upcast()
-        }
+        Setting::NotifyNewMail => notify_row(setting).upcast(),
+        Setting::CodesInNotifications => codes_row(setting).upcast(),
         Setting::SendDelay => send_delay_row(setting).upcast(),
-        Setting::DefaultMailApp => button_row(setting, "preferences-default-app", |dialog| {
-            spawn(crate::app::make_default_mail_app(dialog.upcast()));
-        })
-        .upcast(),
-        Setting::EmlDefault => button_row(setting, "preferences-eml-default", |dialog| {
-            spawn(async move { make_eml_default(&dialog).await });
-        })
-        .upcast(),
+        Setting::DefaultMailApp => default_app_row(setting).upcast(),
+        Setting::EmlDefault => eml_default_row(setting).upcast(),
         Setting::Layout => layout_row(setting).upcast(),
-        Setting::GroupByConversation => {
-            switch_row(setting, "preferences-group-threads", crate::mailbox::grouped(), |on| {
-                let shell = shell();
-                if crate::mailbox::grouped() != on {
-                    shell.settings.set_bool(settings::GROUP_BY_CONVERSATION, on);
-                    shell.main().regroup();
-                }
-            })
-            .upcast()
-        }
-        Setting::ListPictures => {
-            let on = shell().settings.bool(settings::LIST_PICTURES, true);
-            switch_row(setting, "preferences-list-pictures", on, |on| {
-                shell().main().set_list_pictures(on);
-            })
-            .upcast()
-        }
-        Setting::DarkMessages => switch_row(
-            setting,
-            "preferences-dark-messages",
-            shell().core.dark_messages(),
-            |on| {
-                if shell().core.dark_messages() != on {
-                    set_dark_messages(on);
-                }
-            },
-        )
-        .upcast(),
-        Setting::PicturesAlways => {
-            let on = shell().core.always_load_pictures().unwrap_or(false);
-            switch_row(setting, "preferences-pictures-always", on, |on| {
-                let _ = shell().core.set_always_load_pictures(on);
-            })
-            .upcast()
-        }
-        Setting::TrustedSenders => trusted_senders_row().upcast(),
+        Setting::GroupByConversation => group_row(setting).upcast(),
+        Setting::ListPictures => list_pictures_row(setting).upcast(),
+        Setting::DarkMessages => dark_messages_row(setting).upcast(),
+        Setting::PicturesAlways => pictures_always_row(setting).upcast(),
+        Setting::TrustedSenders => trusted_senders_row(setting).upcast(),
         Setting::DownloadAhead => download_ahead_row(setting).upcast(),
         Setting::DownloadLimit => download_limit_row(setting).upcast(),
     }
 }
 
+/// The widget name of `setting`'s row, by which the UI test finds it (`preferences-codes_in_notifications`)
+pub fn row_name(setting: Setting) -> String {
+    format!("preferences-{}", setting.name())
+}
+
+fn name_row(row: &impl IsA<gtk::Widget>, setting: Setting) {
+    row.set_widget_name(&row_name(setting));
+}
+
+/// Notifications of new mail, what they show under the title
+fn notify_row(setting: Setting) -> adw::SwitchRow {
+    let row = switch_row(setting, shell().notify.get(), |on| {
+        let shell = shell();
+        if shell.notify.get() != on {
+            shell.set_notify(on);
+        }
+    });
+    row.set_subtitle(&t!(GtkNotifySubtitle));
+    row
+}
+
+/// One-time codes in the notifications
+fn codes_row(setting: Setting) -> adw::SwitchRow {
+    switch_row(setting, pe_core::otp::in_notifications(), |on| {
+        shell().settings.set_bool(settings::CODES_IN_NOTIFICATIONS, on);
+        pe_core::otp::set_in_notifications(on);
+    })
+}
+
+/// The app as the system's mail app
+fn default_app_row(setting: Setting) -> adw::ButtonRow {
+    button_row(setting, |dialog| {
+        spawn(crate::app::make_default_mail_app(dialog.upcast()));
+    })
+}
+
+/// The app as the opener of .eml files
+fn eml_default_row(setting: Setting) -> adw::ButtonRow {
+    button_row(setting, |dialog| {
+        spawn(async move { make_eml_default(&dialog).await });
+    })
+}
+
+/// Messages grouped by conversation, the list grouped again at once
+fn group_row(setting: Setting) -> adw::SwitchRow {
+    switch_row(setting, crate::mailbox::grouped(), |on| {
+        let shell = shell();
+        if crate::mailbox::grouped() != on {
+            shell.settings.set_bool(settings::GROUP_BY_CONVERSATION, on);
+            shell.main().regroup();
+        }
+    })
+}
+
+/// The senders' pictures in the message list
+fn list_pictures_row(setting: Setting) -> adw::SwitchRow {
+    let on = shell().settings.bool(settings::LIST_PICTURES, true);
+    switch_row(setting, on, |on| shell().main().set_list_pictures(on))
+}
+
+/// Messages on a dark background when the system is dark
+fn dark_messages_row(setting: Setting) -> adw::SwitchRow {
+    switch_row(setting, shell().core.dark_messages(), |on| {
+        if shell().core.dark_messages() != on {
+            set_dark_messages(on);
+        }
+    })
+}
+
+/// Pictures always downloaded, from every sender
+fn pictures_always_row(setting: Setting) -> adw::SwitchRow {
+    let on = shell().core.always_load_pictures().unwrap_or(false);
+    switch_row(setting, on, |on| {
+        let _ = shell().core.set_always_load_pictures(on);
+    })
+}
+
 /// A switch titled by `setting`, its note under it; `changed` is called with each new state
-fn switch_row(setting: Setting, name: &str, active: bool, changed: impl Fn(bool) + 'static) -> adw::SwitchRow {
+fn switch_row(setting: Setting, active: bool, changed: impl Fn(bool) + 'static) -> adw::SwitchRow {
     let row = adw::SwitchRow::builder()
         .title(plain(setting.text()))
         .active(active)
@@ -169,16 +194,16 @@ fn switch_row(setting: Setting, name: &str, active: bool, changed: impl Fn(bool)
     if let Some(note) = setting.note() {
         row.set_subtitle(&plain(note));
     }
-    row.set_widget_name(name);
+    name_row(&row, setting);
     row.connect_active_notify(move |row| changed(row.is_active()));
     row
 }
 
 /// A button row titled by `setting` (without the dots of the menu command it repeats), `pressed` called with the
 /// dialog it is in
-fn button_row(setting: Setting, name: &str, pressed: impl Fn(adw::PreferencesDialog) + 'static) -> adw::ButtonRow {
+fn button_row(setting: Setting, pressed: impl Fn(adw::PreferencesDialog) + 'static) -> adw::ButtonRow {
     let row = adw::ButtonRow::builder().title(title(setting.text())).build();
-    row.set_widget_name(name);
+    name_row(&row, setting);
     row.connect_activated(move |row| {
         if let Some(dialog) = dialog_of(row) {
             pressed(dialog);
@@ -210,7 +235,7 @@ fn language_row(setting: Setting) -> adw::ComboRow {
         })
         .collect();
     let at = offered.iter().position(|c| *c == saved).unwrap_or(0);
-    let row = choice_row(setting, &names, "preferences-language", at, |_| {});
+    let row = choice_row(setting, &names, at, |_| {});
     row.connect_selected_notify(|row| {
         let Some(choice) = choices().get(row.selected() as usize).copied() else {
             return;
@@ -236,7 +261,6 @@ fn send_delay_row(setting: Setting) -> adw::ComboRow {
     choice_row(
         setting,
         &delays,
-        "preferences-send-delay",
         pe_core::send_delay_index(shell().core.send_delay().unwrap_or(0)),
         |at| {
             if let Some(seconds) = pe_core::SEND_DELAYS.get(at) {
@@ -248,13 +272,13 @@ fn send_delay_row(setting: Setting) -> adw::ComboRow {
 
 /// Trusted senders: the senders whose pictures are always downloaded, on a page of their own. Titled as that page
 /// is, in sentence case as GNOME's rows are, not by the button of the other platforms ("Trusted Senders...")
-fn trusted_senders_row() -> adw::ActionRow {
+fn trusted_senders_row(setting: Setting) -> adw::ActionRow {
     let row = adw::ActionRow::builder()
         .title(plain(Text::UiTrustedSendersTitle))
         .activatable(true)
         .build();
     row.add_suffix(&gtk::Image::from_icon_name("go-next-symbolic"));
-    row.set_widget_name("preferences-trusted-senders");
+    name_row(&row, setting);
     row.connect_activated(|row| {
         if let Some(dialog) = dialog_of(row) {
             dialog.push_subpage(&trusted_senders_page());
@@ -295,7 +319,7 @@ fn layout_row(setting: Setting) -> adw::ComboRow {
         .iter()
         .position(|mode| *mode == shell().main().layout_mode())
         .unwrap_or(0);
-    choice_row(setting, &names, "preferences-layout", at, move |chosen| {
+    choice_row(setting, &names, at, move |chosen| {
         if let Some(&mode) = modes.get(chosen)
             && mode != shell().main().layout_mode()
         {
@@ -309,7 +333,6 @@ fn layout_row(setting: Setting) -> adw::ComboRow {
 fn choice_row(
     setting: Setting,
     choices: &[String],
-    name: &str,
     selected: usize,
     chosen: impl Fn(usize) + 'static,
 ) -> adw::ComboRow {
@@ -321,7 +344,7 @@ fn choice_row(
             &choices.iter().map(String::as_str).collect::<Vec<_>>(),
         ))
         .build();
-    row.set_widget_name(name);
+    name_row(&row, setting);
     row.set_selected(selected as u32);
     row.connect_selected_notify(move |row| chosen(row.selected() as usize));
     row
@@ -340,7 +363,6 @@ fn download_ahead_row(setting: Setting) -> adw::ComboRow {
     choice_row(
         setting,
         &names,
-        "preferences-download-ahead",
         aheads.iter().position(|a| *a == now).unwrap_or(0),
         move |at| {
             if let Some(chosen) = aheads.get(at) {
@@ -357,17 +379,11 @@ fn download_limit_row(setting: Setting) -> adw::ComboRow {
         .map(|megabytes| pe_core::download_limit_text(*megabytes))
         .collect();
     let kept = shell().core.download_limit_mb().unwrap_or(pe_core::DEFAULT_LIMIT_MB);
-    choice_row(
-        setting,
-        &limits,
-        "preferences-download-limit",
-        pe_core::download_limit_index(kept),
-        |at| {
-            if let Some(megabytes) = pe_core::DOWNLOAD_LIMITS_MB.get(at) {
-                let _ = shell().core.set_download_limit_mb(*megabytes);
-            }
-        },
-    )
+    choice_row(setting, &limits, pe_core::download_limit_index(kept), |at| {
+        if let Some(megabytes) = pe_core::DOWNLOAD_LIMITS_MB.get(at) {
+            let _ = shell().core.set_download_limit_mb(*megabytes);
+        }
+    })
 }
 
 /// The trusted senders, each with a button that removes it; what the list is for above it

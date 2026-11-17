@@ -1649,7 +1649,7 @@ async fn group_by_conversation(d: &Driver, on: bool) {
     };
     preferences_page(&dialog, SettingsPage::Reading);
     let root = dialog.clone().upcast::<gtk::Widget>();
-    match named_in(&root, "preferences-group-threads").and_downcast::<adw::SwitchRow>() {
+    match setting_row(&root, Setting::GroupByConversation).and_downcast::<adw::SwitchRow>() {
         Some(row) => {
             d.check(
                 row.is_active() != on,
@@ -1666,7 +1666,7 @@ async fn group_by_conversation(d: &Driver, on: bool) {
     if !on {
         preferences_page(&dialog, SettingsPage::General);
         codes_follow_notify(d, &root);
-        match named_in(&root, "preferences-codes").and_downcast::<adw::SwitchRow>() {
+        match setting_row(&root, Setting::CodesInNotifications).and_downcast::<adw::SwitchRow>() {
             Some(row) => {
                 d.check(
                     !row.is_active() && !pe_core::otp::in_notifications(),
@@ -1689,8 +1689,8 @@ async fn group_by_conversation(d: &Driver, on: bool) {
 
 /// The sign-in codes switch is insensitive while Notify me when new mail arrives is off, and keeps its value
 fn codes_follow_notify(d: &Driver, root: &gtk::Widget) {
-    let switch = |name: &str| named_in(root, name).and_downcast::<adw::SwitchRow>();
-    let (Some(notify), Some(codes)) = (switch("preferences-notify"), switch("preferences-codes")) else {
+    let switch = |setting| setting_row(root, setting).and_downcast::<adw::SwitchRow>();
+    let (Some(notify), Some(codes)) = (switch(Setting::NotifyNewMail), switch(Setting::CodesInNotifications)) else {
         d.check(false, "the General page has Notify and the sign-in codes under it");
         return;
     };
@@ -3750,7 +3750,7 @@ pub async fn languages(d: &Driver) {
     let root = dialog.clone().upcast::<gtk::Widget>();
     preferences_pages(d, &dialog);
     preferences_page(&dialog, SettingsPage::General);
-    let row = named_in(&root, "preferences-language").and_downcast::<adw::ComboRow>();
+    let row = setting_row(&root, Setting::Language).and_downcast::<adw::ComboRow>();
     let names: Vec<String> = row
         .as_ref()
         .and_then(|r| r.model())
@@ -3772,7 +3772,7 @@ pub async fn languages(d: &Driver) {
         ),
     );
     d.check(
-        named_in(&root, "preferences-notify").is_some() && named_in(&root, "preferences-default-app").is_some(),
+        setting_row(&root, Setting::NotifyNewMail).is_some() && setting_row(&root, Setting::DefaultMailApp).is_some(),
         "General has Notify me when new mail arrives and Make Default Mail App",
     );
     let Some(row) = row else { return };

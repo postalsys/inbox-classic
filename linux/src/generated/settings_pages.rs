@@ -132,7 +132,6 @@ pub enum Setting {
 
 impl Setting {
     /// Its name in code and the UI test (`codes_in_notifications`)
-    #[allow(dead_code)]
     pub fn name(self) -> &'static str {
         match self {
             Setting::Language => "language",

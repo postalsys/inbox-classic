@@ -20,7 +20,7 @@ use webkit::prelude::*;
 
 use crate::app::{run_command, shell};
 use crate::commands::Command;
-use crate::settings_pages::SettingsPage;
+use crate::settings_pages::{Setting, SettingsPage};
 use crate::ui::FILE_ANSWERS;
 
 /// The steps after organizing: lists, invitations, logos, dragging, junk, folders, links, completion, signatures
@@ -739,6 +739,11 @@ fn preferences_page(dialog: &adw::Dialog, page: SettingsPage) {
     if let Some(preferences) = dialog.downcast_ref::<adw::PreferencesDialog>() {
         preferences.set_visible_page_name(page.name());
     }
+}
+
+/// The row of `setting` in Preferences
+fn setting_row(root: &gtk::Widget, setting: Setting) -> Option<gtk::Widget> {
+    named_in(root, &crate::preferences::row_name(setting))
 }
 
 fn named_in(root: &gtk::Widget, name: &str) -> Option<gtk::Widget> {
@@ -1796,7 +1801,7 @@ async fn undo_send(d: &Driver) {
     if let Some(dialog) = wait_dialog(10, "preferences-dialog").await {
         preferences_page(&dialog, SettingsPage::General);
         let root: gtk::Widget = dialog.clone().upcast();
-        let row = named_in(&root, "preferences-send-delay").and_downcast::<adw::ComboRow>();
+        let row = setting_row(&root, Setting::SendDelay).and_downcast::<adw::ComboRow>();
         d.check(
             row.is_some(),
             "Delay before sending is on the General page of Preferences",

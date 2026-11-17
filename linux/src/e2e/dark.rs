@@ -240,7 +240,7 @@ async fn switch_off(d: &Driver, inbox: i64) {
         pause(300).await;
         d.shot(&dialog, shot).await;
     }
-    let row = named_in(dialog.upcast_ref(), "preferences-dark-messages").and_downcast::<adw::SwitchRow>();
+    let row = setting_row(dialog.upcast_ref(), Setting::DarkMessages).and_downcast::<adw::SwitchRow>();
     d.check(
         row.as_ref().is_some_and(|r| r.is_active()),
         "Preferences has the switch for dark messages on its Reading page, on",
