@@ -1,29 +1,27 @@
-<!--review-->
 <h1>Čo smie agent robiť</h1>
-<p class="summary">Vyberte, čo smie každý AI agent robiť s vašou poštou, a pozrite si a vráťte, čo urobil.</p>
-<p>Keď sa agent programu pripojí prvýkrát, Inbox Classic sa vás opýta a uvedie názov programu. Vyberte, čo smie robiť:</p>
+<p class="summary">Nastavte oprávnenia AI agentov, prezrite si históriu ich činnosti a podľa potreby vráťte zmeny späť.</p>
+<p>Pri prvom pripojení agenta Inbox Classic zobrazí názov jeho programu a vyžiada si váš súhlas. Vyberte, čo smie agent robiť:</p>
 <ul>
-    <li>čítať poštu: priečinky, zoznam správ, konverzácie, vyhľadávanie a správy, a pozrieť si vaše pravidlá správ a ľudí, ktorým píšete</li>
-    <li>usporadúvať poštu: stav prečítania, príznaky, nevyžiadaná pošta, presúvanie, archivovanie, nové priečinky a odstraňovanie do priečinka <b data-text="folder-deleted"></b>, a po vašom súhlase aj odhlasovanie zo zoznamov adresátov</li>
-    <li>písať koncepty, ktoré odošlete vy, a meniť alebo odstraňovať koncepty, ktoré napísal, kým ich nezmeníte vy</li>
+    <li>čítať poštu: prezerať priečinky, správy a konverzácie, vyhľadávať správy, zobrazovať pravidlá a vyhľadávať kontakty</li>
+    <li>spravovať poštu: meniť stav prečítania a príznaky, označovať nevyžiadanú poštu, presúvať a archivovať správy, vytvárať priečinky, odstraňovať správy do priečinka <b data-text="folder-deleted"></b> a s vaším súhlasom odhlasovať odber zoznamov adresátov</li>
+    <li>písať koncepty, ktoré odošlete vy, a meniť alebo natrvalo odstraňovať vlastné koncepty, kým ich sami neuložíte alebo neodošlete</li>
     <li>odosielať poštu, každú správu až po vašom súhlase</li>
 </ul>
-<p>Potom vyberte kontá, ktoré smie vidieť, a kliknite na <b data-text="ui-allow"></b>. Tlačidlom <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> program odmietnete a už sa vás naň nebude pýtať.</p>
-<p>Agent nikdy nič neodstráni natrvalo a nikdy nemení nastavenia vašich kont. Vaše pravidlá správ môže čítať a vyskúšať, ale nikdy žiadne nevytvorí, nezmení ani neodstráni. Čítaním sa správa neoznačí ako prečítaná. Čo agent zmení, sa v oknách hneď prejaví.</p>
+<p>Potom vyberte kontá, ku ktorým bude mať agent prístup, a kliknite na <b data-text="ui-allow"></b>. Tlačidlom <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> programu odmietnete prístup a žiadosť sa už nebude zobrazovať. Oprávnenia môžete neskôr zmeniť.</p>
+<p>Pri odstraňovaní správ ich agent presúva do priečinka pre odstránené správy. Ak konto taký priečinok nemá, odstránenie sa odmietne. Natrvalo môže odstrániť iba vlastné koncepty, ktoré ste ešte neuložili v editore. Agent nemôže meniť nastavenia kont ani vytvárať, upravovať či odstraňovať pravidlá. Pravidlá môže zobraziť a zistiť, ktoré správy im vyhovujú, bez vykonania ich akcií. Obsah a prílohy šifrovaných správ sú mu neprístupné. Čítanie neoznačí správu ako prečítanú. Zmeny sa v oknách prejavia ihneď.</p>
 <h2>Odhlásenie zo zoznamov adresátov</h2>
-<p>Agent, ktorý smie usporadúvať poštu, môže požiadať o vaše odhlásenie zo zoznamov adresátov. Inbox Classic sa vás najprv raz opýta a každý zoznam uvedie podľa jeho odosielateľa:</p>
+<p>Agent s oprávnením spravovať poštu môže požiadať o odhlásenie odberu zoznamov adresátov. Inbox Classic si vyžiada váš súhlas pre všetky zoznamy v danej žiadosti naraz a zobrazí odosielateľa každého z nich:</p>
 <ul>
-    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> požiada každý zoznam, aby vám prestal posielať správy.</li>
-    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, predvolená možnosť, ich nechá tak, ako sú.</li>
+    <li>Tlačidlo <!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> odošle každému zoznamu žiadosť o odhlásenie odberu.</li>
+    <li>Tlačidlo <!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, ktoré je predvolené, žiadosť odmietne a odbery ponechá nezmenené.</li>
 </ul>
-<p>Agent vás nemôže odhlásiť zo zoznamov správ v priečinku <b data-text="folder-junk"></b> a za deň vás môže odhlásiť najviac z 30 zoznamov.</p>
+<p>Agent nemôže žiadať o odhlásenie na základe správ z priečinka <b data-text="folder-junk"></b>. Pre každý program je povolených najviac 30 schválených žiadostí za posledných 24 hodín, po jednej na zoznam. Započítavajú sa aj schválené žiadosti, ktoré zlyhali.</p>
 <h2>Zobrazenie a zmena prístupu</h2>
-<p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> uvádza programy, ktoré ste pustili alebo odmietli, a všetko, čo agenti urobili, od najnovšieho.</p>
+<p>V okne <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> nájdete programy, ktorým ste povolili alebo odmietli prístup, a históriu činnosti ich agentov. Najnovšie záznamy sú na začiatku.</p>
 <ul>
-    <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> zmení, čo smie program robiť.</li>
-    <li><b data-text="ui-remove"></b> program zabudne, takže sa vás pri jeho ďalšom pripojení opýta znova.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> vráti stav prečítania, príznak, presunutie, označenie ako nevyžiadanej pošty, archivovanie alebo odstránenie a správu, ktorá je ešte v priečinku Pošta na odoslanie.</li>
+    <li>Tlačidlo <!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> umožňuje zmeniť oprávnenia programu.</li>
+    <li>Tlačidlo <b data-text="ui-remove"></b> odstráni záznam o programe, jeho oprávnenia a históriu činnosti. Samotný program sa neodinštaluje. Pri ďalšom pripojení si Inbox Classic znova vyžiada váš súhlas.</li>
+    <li>Tlačidlo <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> vráti zmenu stavu prečítania, príznaku, označenia nevyžiadanej pošty, presunutie, archivovanie alebo odstránenie. Zruší aj odoslanie správy, kým je ešte v priečinku Pošta na odoslanie. Už odoslanú správu nemožno vziať späť.</li>
 </ul>
-<aside class="warning">Poštu píšu iní ľudia a správa sa môže pokúsiť prehovoriť agenta, aby vašu poštu preposlal alebo odstránil. Inbox Classic pred agentmi skryje text, ktorý správa skrýva pred vami, a oznámi im, že pošta nie sú pokyny. Agenta sa aj tak dá oklamať. Povoľte iba to, čo potrebujete.</aside>
+<aside class="warning">Cudzie správy môžu obsahovať pokyny určené na oklamanie agenta, napríklad žiadosť o preposlanie alebo odstránenie vašej pošty. Inbox Classic pred agentmi skrýva text, ktorý vám správa nezobrazuje, a upozorňuje ich, aby obsah pošty nepovažovali za pokyny na vykonanie. Agenta však možno aj tak oklamať. Povoľte iba potrebné činnosti.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

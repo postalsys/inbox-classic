@@ -468,7 +468,6 @@ ui-no-match-in = Hľadanie v priečinku { $folder } prehľadáva predmety, odosi
 ui-no-items = V tomto zobrazení nie sú žiadne položky.
 # review: new
 ui-choose-folder = Vyberte priečinok, ak chcete vidieť jeho správy.
-# review: new
 ui-unsubscribe = Odhlásiť odber
 # review: new
 ui-open-in-calendar = Otvoriť v kalendári
@@ -852,8 +851,7 @@ ui-dont-allow = Nepovoliť
 ui-allow = &Povoliť
 # review: new
 ui-dont-send = Neodoslať
-# review: new
-ui-dont-unsubscribe = Neodhlásiť
+ui-dont-unsubscribe = Neodhlásiť odber
 # review: new
 ui-edit-first = Najprv &upraviť
 # review: new

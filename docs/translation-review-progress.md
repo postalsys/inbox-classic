@@ -6,16 +6,16 @@ Commit completed batches regularly and preserve an exact resume point.
 ## Resume here
 
 - Publishing policy: the user authorized pushing and merging every validated batch into GitHub `master` immediately. Fetch and fast-forward the clean review branch to `origin/master` after each merge. Keep local test suites disabled.
-- **Next: Review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve the reviewed screenshot descriptions and agent-connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.**
-  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru. Phase2 reopens only their affected help passages.
+- **Next: Review Slovenian agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and all three agent help topics; then sv/uk. Preserve reviewed screenshot descriptions and connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.**
+  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
-  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru. Continue the remaining agent queue.
-  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru.
-- Agent-draft screenshot source `38e7f5cf` is imported. All 28 new alt descriptions are reviewed against the three platform captures. Older prose was unchanged by the picture batch; four full agent-sending topics remain pending after the Russian review. This adds 28 reviewed passages and no full-topic credit.
+  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru/sk. Continue the remaining agent queue.
+  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk.
+- Agent-draft screenshot source `38e7f5cf` is imported. All 28 new alt descriptions are reviewed against the three platform captures. Older prose was unchanged by the picture batch; three full agent-sending topics remain pending after the Slovak review. This adds 28 reviewed passages and no full-topic credit.
 - Current scope: 34,404 catalog entries and 1,356 help topics.
-  Completed: 21,783 entries and 801 full topics; pending: 12,621 entries and 555 topics.
-  Historical catalog improvements: 4,045. Importing drafts earns no review credit.
+  Completed: 21,845 entries and 804 full topics; pending: 12,559 entries and 552 topics.
+  Historical catalog improvements: 4,082. Importing drafts earns no review credit.
   The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
 - All 28 unsubscribe logs now report user approval, which is recorded before the HTTP requests start.
   Nineteen older translations were reopened; four baseline-only entries entered scope and nine pending drafts
@@ -24,7 +24,7 @@ Commit completed batches regularly and preserve an exact resume point.
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
   Also check the agent warning: mail content must not be followed as instructions; this does not mean email
-  contains no instructions. French, Norwegian Bokmål, Hungarian, Lithuanian, Latvian, Polish, Romanian and Russian needed that correction; the other completed languages already convey the distinction.
+  contains no instructions. French, Norwegian Bokmål, Hungarian, Lithuanian, Latvian, Polish, Romanian, Russian and Slovak needed that correction; the other completed languages already convey the distinction.
 - PDF core context is inspected. New reading-setting definitions and generated Mac/Linux settings now exist in
   `PostalExpress-preview2`. The six new IDs per language and both help insertions are imported from `03568aef`;
   its exact 117-path source snapshot includes the settings schema as context, without importing implementation.
@@ -35,7 +35,7 @@ Commit completed batches regularly and preserve an exact resume point.
   An unfinished render marker does not prove the PDF caused the crash. Original sources: preview `687113a3`, MCP `9a24e99b`.
 - Structural checks, exact import reconstruction, all inventories/hashes and C/Swift identifiers pass. The isolated
   offline pe-ffi build passed; no test suites run. HTML refreshed. `REVIEWED` remains unchanged.
-- The latest checkpoint covers 46 worktrees/188 refs. GitHub master `965f86fd` contains the review history through the Russian agent review and the corrected CI wording assertions. The new screenshot source rebased onto that master during this batch; its 33 exact image/alt additions and unchanged older prose are verified. Use the recorded updated source helpers at the next checkpoint. The 290 old untracked language copies still match their original imported snapshot and remain untouched.
+- The latest checkpoint covers 46 worktrees/188 refs. GitHub master `387568ad` contains the review history through the Russian agent review, the CI wording assertions and the agent-control instruction followup. The new screenshot source rebased onto that master during this batch; its 33 exact image/alt additions and unchanged older prose are verified. Use the recorded updated source helpers at the next checkpoint. The 290 old untracked language copies still match their original imported snapshot and remain untouched.
 - Compose additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da.
   Remaining: el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk. Resume Greek after the agent additions,
   then finish 46 remaining original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
@@ -2673,3 +2673,15 @@ Publication checkpoint: [PR #143](https://github.com/postalsys/inbox-classic/pul
 Completed: 21,783 catalog entries and 801 full topics. Pending: 12,621 entries and 555 topics. This batch adds 28 targeted paragraph reviews, including 24 wording improvements, without changing those full-topic totals.
 
 Review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve the reviewed screenshot descriptions and agent-connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.
+
+### Slovak agent permissions, activity and complete help
+
+Reviewed 62 catalog entries and all three agent help topics. Improved 37 values and 36 help wording lines, retaining 25 good values. Corrected send-queue and Outbox status, unsubscribe refusal/failure, permanent own-draft removal, user save/autosave/send takeover, rolling per-program limits, optional footer text and malicious-mail instructions. “Spravovať poštu” consistently describes mail management. Polite plural address, O/N access keys and existing plural branches are retained. One send-confirmation screenshot description is improved against the three existing platform captures; the previously reviewed draft screenshot description and shutdown instruction are unchanged.
+
+Slovak structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 37 improved values, 25 retained good values and three complete help topics with 36 changed wording lines. The prior approval log, draft screenshot description and connection shutdown instruction are unchanged. Tags, structural attributes, controls, links, platform branches, literal keys, variables, plural branches and generated IDs are preserved. One translated send-dialog alt value is deliberately improved against the three inspected English platform captures; every other attribute value is unchanged. O/N unsubscribe keys remain distinct and shared Mac/Linux labels remain plain. Sentence joins with current labels were inspected across all three platforms. Seven notice UI files and sixteen runtime/UI/rendering files match the captured evidence. Global reconciliation accounts for 21,883 unmarked entries, 11,135 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,132 entries/256 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.
+
+Publication checkpoint: [PR #144](https://github.com/postalsys/inbox-classic/pull/144) merged the cross-language agent-control instructions as `387568ad` on November 17 at 22:04 UTC. The review checkout was synchronized before Slovak. Existing automatic CI for that master was queued when inspected; the previous Russian master run was cancelled. No full CI pass is claimed.
+
+Completed: 21,845 catalog entries and 804 full topics. Pending: 12,559 entries and 552 topics. Historical catalog improvements: 4,082.
+
+Review Slovenian agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and all three agent help topics; then sv/uk. Preserve reviewed screenshot descriptions and connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.

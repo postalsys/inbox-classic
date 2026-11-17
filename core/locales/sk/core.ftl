@@ -699,74 +699,41 @@ day-sunday = nedeľa
 
 ## AI agents
 
-# review: new
-agent-level-read = Čítať poštu: priečinky, zoznam správ, vyhľadávanie a správy
-# review: new
-agent-level-organize = Usporadúvať poštu: stav prečítania, príznaky, nevyžiadaná pošta, presúvanie, archivovanie, nové priečinky, odstraňovanie do priečinka Odstránená pošta a po vašom súhlase odhlasovanie zo zoznamov adresátov
-# review: new
+agent-level-read = Čítať poštu: zobrazovať priečinky, zoznam správ a obsah správ, vyhľadávať
+agent-level-organize = Spravovať poštu: meniť stav prečítania a príznaky, označovať nevyžiadanú poštu, presúvať a archivovať správy, vytvárať priečinky, odstraňovať správy do priečinka Odstránená pošta a s vaším súhlasom odhlasovať odber zoznamov adresátov
 agent-level-drafts = Písať koncepty, ktoré odošlete vy
-# review: new
 agent-level-send = Odosielať poštu, každú správu až po vašom súhlase
-# review: new
-agent-connect-title = { $program } chce používať vašu poštu
-# review: new
-agent-connect-detail = AI agent požiadal o prácu s Inbox Classic. Vyberte, čo smie robiť a ktoré kontá smie vidieť; neskôr to môžete zmeniť v ponuke Nástroje > AI agenti.
+agent-connect-title = { $program } chce pracovať s vašou poštou
+agent-connect-detail = AI agent chce pracovať s vašou poštou prostredníctvom aplikácie Inbox Classic. Vyberte povolené činnosti a kontá, ku ktorým bude mať prístup. Neskôr to môžete zmeniť v ponuke Nástroje > AI agenti.
 
-    Agenti čítajú poštu, ktorú napísali iní ľudia, a správa sa ich môže pokúsiť oklamať. Inbox Classic sa vás vždy opýta, než agent niečo odošle.
-# review: new
-agent-reply-to = Odpoveď na „{ $subject }“
-# review: new
-agent-reply-all-on = Odpoveď všetkým na „{ $subject }“
-# review: new
+    Správy od iných ľudí môžu obsahovať pokyny, ktorých cieľom je oklamať agenta. Inbox Classic si pred každým odoslaním správy agentom vyžiada váš súhlas.
+agent-reply-to = Odpoveď na správu „{ $subject }“
+agent-reply-all-on = Odpoveď všetkým na správu „{ $subject }“
 agent-forward-of = Preposlanie správy „{ $subject }“
-# review: new
 agent-never-written-one = Na adresu { $address } ste ešte nikdy nepísali.
-# review: new
-agent-never-written-many = Na niektoré z týchto adries ({ $count }) ste ešte nikdy nepísali.
-# review: new
+agent-never-written-many = Na { $count } z týchto adries ste ešte nikdy nepísali.
 agent-send-title = { $program } chce odoslať túto správu
-# review: new
-agent-send-detail = Skontrolujte príjemcov a obsah správy. Po potvrdení správa počká { $seconds } s v priečinku Pošta na odoslanie, kde ju ešte môžete odstrániť.
-# review: new
+agent-send-detail = Skontrolujte príjemcov a obsah správy. Po potvrdení zostane správa v priečinku Pošta na odoslanie najmenej { $seconds } sekúnd. Pred odoslaním ju ešte môžete odstrániť.
 agent-change-title = Čo smie robiť { $program }
-# review: new
-agent-change-allowed = Zmeňte, čo smú AI agenti tohto programu robiť s vašou poštou.
-# review: new
-agent-change-refused = Tomuto programu ste odopreli prístup. Povoľte ho, aby jeho agenti opäť získali prístup k vašej pošte.
-# review: new
+agent-change-allowed = Vyberte, čo smú AI agenti tohto programu robiť s vašou poštou.
+agent-change-refused = Tomuto programu ste odmietli prístup. Ak ho povolíte, jeho agenti budú môcť opäť pracovať s vašou poštou.
 agent-log-taken-back = { $entry } (vrátené)
-# review: new
 agent-files = Súbory: { $files }
-# review: new
-agent-undo-refused = Nedá sa to vrátiť.
-# review: new
-agent-undo-refused-why = Nedá sa to vrátiť: { $reason }.
-# review: new
-agent-undo-impossible = toto sa nedá vrátiť
-# review: new
+agent-undo-refused = Túto akciu nemožno vrátiť späť.
+agent-undo-refused-why = Túto akciu nemožno vrátiť späť: { $reason }.
+agent-undo-impossible = túto akciu nemožno vrátiť späť
 agent-undo-not-in-folder = správa už nie je v tom priečinku
-# review: new
-agent-undo-not-arrived = správa (zatiaľ) nie je v priečinku, kam bola presunutá
-# review: new
-agent-undo-sent = správa už bola odoslaná
-# review: new
+agent-undo-not-arrived = správa zatiaľ nie je v cieľovom priečinku
+agent-undo-sent = správa už nie je v priečinku Pošta na odoslanie
 agent-original-not-downloaded = pôvodná správa ešte nebola stiahnutá. Najprv ju otvorte
-# review: new
-agent-turned-away = Odmietnutý
-# review: new
+agent-turned-away = Prístup odmietnutý
 agent-can-nothing = Nič
-# review: new
 agent-can-read = čítať
-# review: new
-agent-can-organize = usporadúvať
-# review: new
+agent-can-organize = spravovať
 agent-can-drafts = písať koncepty
-# review: new
 agent-can-send = odosielať s vaším súhlasom
 # "čítať, usporadúvať a písať koncepty"
-# review: new
 agent-can-list = { $first } a { $last }
-# review: new
 agent-accounts = { $count ->
     [0] žiadne kontá
     [one] 1 konto
@@ -774,65 +741,40 @@ agent-accounts = { $count ->
    *[other] { $count } kont
 }
 # "čítať a usporadúvať; 1 konto"
-# review: new
 agent-access = { $can }; { $accounts }
-# review: new
 agent-unreadable = Túto správu nemožno prečítať.
-# review: new
 agent-encrypted-original = Táto správa je šifrovaná: agent na ňu nemôže odpovedať ani ju preposlať, pretože nevie šifrovať.
-# review: new
-agent-encrypted = Táto správa je šifrovaná. Prečítať ju môže iba používateľ, v aplikácii Inbox Classic.
+agent-encrypted = Táto správa je šifrovaná a agent nemá prístup k jej obsahu. Otvoriť ju môžete v aplikácii Inbox Classic.
 # review: new
 list-encrypted = Šifrovaná správa
-# review: new
-agent-log-composed = „{ $subject }“ otvorené v novej správe, aby ste ju dokončili
-# review: new
-agent-log-refused = „{ $subject }“ ste neodoslali
-# review: new
-agent-log-sent = „{ $subject }“ odoslané na adresu { $to }
-# review: new
+agent-log-composed = Otvorená nová správa na úpravu. Predmet: „{ $subject }“
+agent-log-refused = Nepovolili ste odoslanie správy „{ $subject }“
+agent-log-sent = Správa „{ $subject }“ zaradená do frontu na odoslanie. Príjemcovia: { $to }
 agent-log-draft = Uložený koncept „{ $subject }“
-# review: new
 agent-log-draft-replaced = Nahradený koncept „{ $subject }“
-# review: new
-agent-log-draft-discarded = Zahodený koncept „{ $subject }“
-# review: new
-agent-draft-note = { $program }, AI agent, napísal tento koncept. Pred odoslaním skontrolujte adresátov a text.
-# review: new
-agent-log-read = Označené ako prečítané: „{ $subject }“
-# review: new
-agent-log-unread = Označené ako neprečítané: „{ $subject }“
-# review: new
-agent-log-flagged = Označené príznakom: „{ $subject }“
-# review: new
-agent-log-unflagged = Zrušený príznak: „{ $subject }“
-# review: new
-agent-log-deleted = Odstránené: „{ $subject }“
-# review: new
-agent-log-moved = „{ $subject }“ presunuté do: { $folder }
-# review: new
-agent-log-junk = Označené ako nevyžiadané: „{ $subject }“
-# review: new
-agent-log-not-junk = Označené ako vyžiadané: „{ $subject }“
-# review: new
-agent-log-archived = Archivované: „{ $subject }“
-# review: new
+agent-log-draft-discarded = Natrvalo odstránený koncept „{ $subject }“
+agent-draft-note = Tento koncept vytvoril AI agent { $program }. Pred odoslaním skontrolujte príjemcov a text.
+agent-log-read = Správa „{ $subject }“ označená ako prečítaná
+agent-log-unread = Správa „{ $subject }“ označená ako neprečítaná
+agent-log-flagged = Správa „{ $subject }“ označená príznakom
+agent-log-unflagged = Zo správy „{ $subject }“ bol odstránený príznak
+agent-log-deleted = Správa „{ $subject }“ odstránená
+agent-log-moved = Správa „{ $subject }“ presunutá do priečinka „{ $folder }“
+agent-log-junk = Správa „{ $subject }“ označená ako nevyžiadaná
+agent-log-not-junk = Označenie správy „{ $subject }“ ako nevyžiadanej bolo zrušené
+agent-log-archived = Správa „{ $subject }“ archivovaná
 agent-log-folder = Vytvorený priečinok „{ $name }“
 agent-log-unsubscribed = Schválili ste žiadosť o odhlásenie odberu. Správa: „{ $subject }“
-# review: new
-agent-log-unsubscribe-failed = Nepodarilo sa odhlásiť zo zoznamu adresátov správy „{ $subject }“: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Odhlásenie zo zoznamov ste odmietli: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Žiadosť o odhlásenie odberu zlyhala. Správa: „{ $subject }“. Dôvod: { $reason }
+agent-log-unsubscribe-refused = Odhlásenie odberu ste nepovolili. Odosielatelia: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } vás chce odhlásiť zo zoznamu adresátov
     [few] { $program } vás chce odhlásiť z { $count } zoznamov adresátov
    *[other] { $program } vás chce odhlásiť z { $count } zoznamov adresátov
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic požiada zoznam nižšie, aby vám prestal posielať správy, a to odhlásením jedným kliknutím, ktoré ponúka. Nič iné sa neodošle a správy, ktoré máte, zostanú tam, kde sú.
-   *[other] Inbox Classic požiada každý zoznam nižšie, aby vám prestal posielať správy, a to odhlásením jedným kliknutím, ktoré zoznam ponúka. Nič iné sa neodošle a správy, ktoré máte, zostanú tam, kde sú.
+    [1] Inbox Classic odošle nižšie uvedenému zoznamu adresátov žiadosť o odhlásenie odberu. Použije na to odhlásenie jedným kliknutím, ktoré tento zoznam ponúka. Žiadny e-mail sa neodošle a prijaté správy sa nezmenia.
+   *[other] Inbox Classic odošle každému z nižšie uvedených zoznamov adresátov žiadosť o odhlásenie odberu. Použije na to odhlásenie jedným kliknutím, ktoré daný zoznam ponúka. Žiadny e-mail sa neodošle a prijaté správy sa nezmenia.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
