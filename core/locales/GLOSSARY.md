@@ -1170,6 +1170,15 @@ Terms: Εισερχόμενα; Εξερχόμενα; Απεσταλμένα; Δ�
 - Keep "απόρριψη πρόχειρου" and explain permanent removal of agent-owned drafts. Saving, including autosave,
   ends agent access; opening alone does not. "Κείμενο της υπογραφής" distinguishes the optional account footer.
 
+- Compose protection is applied "κατά την αποστολή". Digital signatures check integrity and signing-key use;
+  verified key ownership is a separate check. "Κατάλληλο κλειδί" includes usability for encryption, not mere presence.
+- Keep names/addresses in parentheses or after a colon, and full key-state reasons after "Αιτία:" on their own line.
+  A failed lookup uses "Τελευταία αναζήτηση:" before the date. Encryption covers message content, not all metadata.
+- Protected quoted text, images and attachments must be removed before sending unencrypted. Encrypted drafts use
+  the sender's own key without a signature; they stay encrypted while protected content remains. Sent copies retain encryption.
+- Compose menu paths differ: Tools on Windows/Mac, the primary menu on Linux; Attach My Public Key is in Insert
+  on Windows, File on Mac and the primary menu on Linux. Preserve control labels and the existing platform branches.
+
 ### Български (bg)
 
 Terms: Входящи; Изходящи; Изпратени; Изтрити; Чернови; Нежелана поща; съобщение; папка; акаунт; прикачен файл; флаг

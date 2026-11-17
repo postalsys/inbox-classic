@@ -6,7 +6,7 @@ Commit completed batches regularly and preserve an exact resume point.
 ## Resume here
 
 - Publishing policy: the user authorized pushing and merging every validated batch into GitHub `master` immediately. Fetch and fast-forward the clean review branch to `origin/master` after each merge. Keep local test suites disabled.
-- **Next: Review Greek compose additions, then the remaining compose languages (fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk). Continue the 46 original Hungarian help topics and broader lt/lv/pl/ro/ru/sk/sl/sv/uk catalogs/help. The agent unsubscribe, draft and Undo/Outbox followups are complete in all 28 languages; older connection topics in hu/lt/lv/pl/ro remain in the broader help queue. Preserve reviewed agent screenshot descriptions and shutdown instructions. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites.**
+- **Next: Correct the two reopened Linux compose-menu passages in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da, reviewing each language in context. Then resume Finnish compose additions and hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, the 46 original Hungarian help topics and broader catalogs/help. Apply the Linux menu correction to every remaining compose topic. Agent unsubscribe/draft/Undo followups are complete in all 28 languages; preserve their reviewed passages. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites.**
   Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
@@ -14,8 +14,8 @@ Commit completed batches regularly and preserve an exact resume point.
   Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
 - Agent-draft screenshot source `38e7f5cf` is imported. All 28 new alt descriptions are reviewed against the three platform captures. Older prose was unchanged by the picture batch; all 28 full agent-sending topics are now reviewed. This adds 28 reviewed passages and no full-topic credit.
 - Current scope: 34,404 catalog entries and 1,356 help topics.
-  Completed: 22,031 entries and 813 full topics; pending: 12,373 entries and 543 topics.
-  Historical catalog improvements: 4,176. Importing drafts earns no review credit.
+  Completed: 22,071 entries and 800 full topics; pending: 12,333 entries and 556 topics.
+  Historical catalog improvements: 4,193. Importing drafts earns no review credit.
   The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
 - All 28 unsubscribe logs now report user approval, which is recorded before the HTTP requests start.
   Nineteen older translations were reopened; four baseline-only entries entered scope and nine pending drafts
@@ -35,10 +35,11 @@ Commit completed batches regularly and preserve an exact resume point.
   An unfinished render marker does not prove the PDF caused the crash. Original sources: preview `687113a3`, MCP `9a24e99b`.
 - Structural checks, exact import reconstruction, all inventories/hashes and C/Swift identifiers pass. The isolated
   offline pe-ffi build passed; no test suites run. HTML refreshed. `REVIEWED` remains unchanged.
-- The latest checkpoint covers 46 worktrees/188 refs. GitHub master `3c6674b9` contains the review history through the Swedish agent review, the CI wording assertions and the agent-control instruction followup. The screenshot source’s 33 exact image/alt additions and unchanged older prose are verified against its recorded source snapshot. Use the recorded updated source helpers at the next checkpoint. The 290 old untracked language copies still match their original imported snapshot and remain untouched.
-- Compose additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da.
-  Remaining: el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk. Resume Greek after the agent additions,
-  then finish 46 remaining original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
+- The latest checkpoint covers 46 worktrees/188 refs. GitHub master `79332925` contains the review history through the Ukrainian agent review, the CI wording assertions, the agent-control instruction followup and the PDF notice settings-placeholder fix. The screenshot source’s 33 exact image/alt additions and unchanged older prose are verified against its recorded source snapshot. Use the recorded updated source helpers at the next checkpoint. The 290 old untracked language copies still match their original imported snapshot and remain untouched.
+- Compose additions reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el.
+  Greek is complete for this batch. Two Linux navigation passages reopen in each of the other 15 topics;
+  correct those first, then resume fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk compose, the 46 original Hungarian help
+  topics and broader catalogs/help. Reopening adds 15 pending topics and no new scope.
 - All 28 active-key warnings are reviewed in `25eff7b8`; compose source `162c0dd2` was integrated in `3552434d`.
   Individual recipient locks and the separate overall verified shield remain distinct in future help edits.
 - Starting checkout: `e99f7e59`; review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
@@ -2723,3 +2724,17 @@ Publication checkpoint: [PR #147](https://github.com/postalsys/inbox-classic/pul
 Completed: 22,031 catalog entries and 813 full topics. Pending: 12,373 entries and 543 topics. Historical catalog improvements: 4,176.
 
 Review Greek compose additions, then the remaining compose languages (fi/hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk). Continue the 46 original Hungarian help topics and broader lt/lv/pl/ro/ru/sk/sl/sv/uk catalogs/help. The agent unsubscribe, draft and Undo/Outbox followups are complete in all 28 languages; older connection topics in hu/lt/lv/pl/ro remain in the broader help queue. Preserve reviewed agent screenshot descriptions and shutdown instructions. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites.
+
+### Greek compose wording and Linux navigation followup
+
+Reviewed 40 entries: improved 17 core values and retained all 17 app labels plus six core values. Completed the sign-and-encrypt topic and writing-help insertion, improving 15 wording lines. Greek now describes protection at sending, distinguishes key ownership from signature validity, handles unusable keys, and explains protected quoted content, encrypted drafts and sent copies. Placeholders remain uninflected and state reasons/date values follow neutral labels. Localized labels and shortcuts were read in context on all three platforms.
+
+Linux uses the compose primary menu, not the Tools/Insert paths in the source help. Greek now explains the actual paths without changing markup or platform branches. Reopened precisely two passages in each of the 15 previously reviewed compose topics; the other 12 full drafts already remain pending. Every unaffected passage is preserved. Source issue and exact checkpoints are recorded in compose-linux-menu-context; no English or application code was edited for this correction.
+
+Greek structural checker has 1,456 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies 40 catalog reviews, 17 improved core values, 23 retained values and two complete help targets with 15 changed wording lines. All earlier writing-help prose is retained. Tags, attributes, platform branch boundaries, controls, literal keys, variables and plural branches are unchanged. All 53 mnemonic scopes pass; explicit compose letters remain unaccented Greek letters. The recorded generated Windows Flag-menu accent issue is unchanged. Platform sentence joins include actual labels, topic titles and command shortcuts (Ctrl+Shift+D/E; Mac Option+Command+Y/X). No relevant Greek screenshots found; source layouts/wrapping and 11 captured runtime files inspected. No GUI run or visual fit claim. Exactly 30 navigation passages in 15 other languages receive review marks only; every other byte and review remains preserved. Global reconciliation accounts for 22,109 unmarked entries, 11,254 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All 28 inventories and since-start 1,056 entries/269 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies. Master 79332925 adds only the inspected PDF settings-placeholder fix; it changes no translation or compose context. HTML refreshed; git diff --check passes. No local test suites or builds; REVIEWED unchanged.
+
+Publication checkpoint: [PR #148](https://github.com/postalsys/inbox-classic/pull/148) merged Ukrainian as `bfff91d8` on November 17 at 22:54 UTC. The checkout was synchronized before Greek. Master subsequently advanced to `79332925` with the existing PDF notice fix; its single changed source file was inspected, and it will be merged into the clean review branch before publishing Greek. Existing automatic CI remains unclaimed as passed.
+
+Completed: 22,071 catalog entries and 800 full topics. Pending: 12,333 entries and 556 topics. Historical catalog improvements: 4,193. The help count reflects 15 accurately reopened topics, not lost review work.
+
+Correct the two reopened Linux compose-menu passages in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da, reviewing each language in context. Then resume Finnish compose additions and hr/hu/lt/lv/pl/ro/ru/sk/sl/sv/uk, the 46 original Hungarian help topics and broader catalogs/help. Apply the Linux menu correction to every remaining compose topic. Agent unsubscribe/draft/Undo followups are complete in all 28 languages; preserve their reviewed passages. Preview wording remains pending in all 28 languages. Push and merge each validated batch, then synchronize with master. No local test suites.
