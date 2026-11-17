@@ -5,21 +5,25 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Danish compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs.
+- **Next: integrate the newly discovered preview/MCP source additions, then Greek compose review.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da.
   Each completed language has 40 new entries and both help targets reviewed. Exact IDs and context are
   recorded in `compose-sign-encrypt-context`; source feature `162c0dd2` was integrated in `3552434d`.
-- Remaining compose languages: da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
+- Remaining compose languages: el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
   Then finish 48 original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
 - Current scope: 33,868 catalog entries and 1,352 help topics.
-  Completed: 21,231 entries and 818 full topics; pending: 12,637 entries and 534 topics.
-  Historical catalog improvements: 3,760.
+  Completed: 21,271 entries and 820 full topics; pending: 12,597 entries and 532 topics.
+  Historical catalog improvements: 3,776.
 - All 28 active-key signature warnings are reviewed in `25eff7b8`. Source-only import `205bd846` includes
   catalogs/generated identifiers; implementation provenance is recorded separately.
 - Structural checks, all 53 mnemonic scopes in completed compose languages, full inventories and current
   hashes reconcile. HTML refreshed. No test suites or builds run for wording batches; the earlier source-import
   build passed in the separate target. `REVIEWED` stays unchanged until the full queue and final audit finish.
-- Latest source audit found no new strings/languages. Six source worktrees were also checked for uncommitted
-  relevant changes. The 290 old untracked ca/nb/pt-BR/sr-Latn/tr files in PostalExpress-lang still match the
+- The wider source audit found 280 new and 28 edited strings plus 56 changed help targets on preview-render
+  `687113a3` and MCP `9a24e99b`. Exact pending imports are recorded; the checkout totals above exclude them.
+  Importing them must reopen 19 completed catalog entries and 36 help topics before review.
+- All 42 worktrees and 183 refs were inventoried. All external worktrees have no new relevant uncommitted edits.
+  Run `/private/tmp/inbox-compose-all-source-audit.py <batch-prefix>` at future checkpoints, in addition to
+  the primary source audit and six-worktree copy verification. The 290 old untracked ca/nb/pt-BR/sr-Latn/tr files in PostalExpress-lang still match the
   imported initial snapshot `cfdf55ab` exactly. Recompare them with the recorded helper at later checkpoints.
 - Individual recipients use green/blue locks and platform-specific lookup/warning symbols. The separate
   overall status bar uses the verified shield. Keep this distinction in future help edits.
@@ -2254,3 +2258,15 @@ All53 mnemonic scopes pass; GTK Najít _klíč checked. Structural checker:1,446
 
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 893 entries/187 passages reconcile. No tests.
 Completed 21,231 entries/818 topics; pending 12,637/534; scope 33,868/1,352; historical catalog improvements 3,760. Next: Danish. REVIEWED remains unchanged.
+
+
+### Danish compose signing and encryption reviewed
+
+Reviewed all40 compose additions, retaining all17 app labels and seven good core values while improving16 core values. Kept direct du, meddelelse and digital signatur. Protection is applied når du sender den; signatures do not by themselves confirm ownership. Brugbar nøgle covers unusable keys; complete reasons follow Årsag and dates follow Seneste søgning. Replaced literal encryption-to-a-key wording. Unencrypted sending requires removing inherited protected text, images and attachments.
+
+Reviewed both help targets, improving15 wording lines including the new topic title Signer og krypter en meddelelse. All earlier writing-help prose retained. Help explains platform status symbols, own/unusable keys, selected From key, recipient removal and encrypted drafts/sent copies. Orange now matches existing reading-security help. Glossary updated.
+
+All53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies16 value edits/40 mark removals and preserves all other catalog bytes. Help tags/attributes/control references/platform branches/literal keys match; all earlier writing-help prose retained. Platform label joins inspected and dynamic shortcuts checked against commands.toml. No relevant Danish screenshots available; source layouts/wrapping inspected. No GUI run, test suites or builds. All28 current-checkout inventories/hashes reconcile:21,305 unmarked messages,10,679 changed help lines and14 verified baseline pairs. HTML regenerated; git diff --check passes. Newly discovered unmerged source work is recorded separately and remains pending import/review.
+
+The seven primary refs are unchanged after fetch and the guide is unchanged. A broader discovery scan of42 worktrees and183 refs found preview-render687113a3 and MCP9a24e99b additions:280 new catalog entries,28 edited entries and56 changed help targets across28 languages. Exact source values/hashes and affected completed content are now recorded in pending_source_integrations. These additions are not yet included in checkout totals or the HTML. Nineteen completed catalog entries and36 completed help topics must reopen on import. No new languages. The release branch has the same relevant tree as origin/master; other non-ancestral historical tips predate the review baseline. All41 external worktrees are clean in relevant paths except the known old five-language copies. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 853 entries/185 passages reconcile. No tests.
+Completed 21,271 entries/820 topics; pending 12,597/532; scope 33,868/1,352; historical catalog improvements 3,776. Next: Greek. REVIEWED remains unchanged.

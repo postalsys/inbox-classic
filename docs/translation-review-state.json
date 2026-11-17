@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review Danish compose additions:17 app IDs,23 core IDs,new sign-and-encrypt topic and write-message insertion. Continue remaining compose languages, then48 original Hungarian help topics and lt/lv/pl/ro/ru/sk/sl/sv/uk. Include recorded source-worktree audit. Completed 21,231 entries/818 topics; pending 12,637/534; scope 33,868/1,352; historical catalog improvements 3,760. No test suites; REVIEWED unchanged.",
+  "next_batch": "First integrate the two newly discovered pending_source_integrations: preview-render687113a3 (84 new entries) and MCP9a24e99b (196 new entries,28 changed agent-level-organize entries,56 help targets). Preserve existing reviews/Undo context and exact tags/marks. Inspect source callers, import exact English/drafts without unrelated implementation, reopen19 completed catalog entries and36 completed help topics, adjust scope/current hashes/provenance, regenerate required identifiers in the separate target, and review new source context. Then resume Greek compose additions and remaining compose languages,48 Hungarian help topics,lt/lv/pl/ro/ru/sk/sl/sv/uk. Run the all-source inventory helper at checkpoints. Current checkout done21,271/820, pending12,597/532, scope33,868/1,352; these totals exclude pending imports. No test suites; REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -4622,56 +4622,8 @@
       ]
     },
     "da": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "menu-insert",
-          "cmd-compose-sign",
-          "cmd-compose-encrypt",
-          "cmd-attach-my-key",
-          "ui-tb-sign",
-          "ui-tb-encrypt",
-          "ui-field-keys",
-          "ui-recipient-keys-title",
-          "ui-recipient-col-recipient",
-          "ui-recipient-col-key",
-          "ui-recipient-find-key",
-          "ui-recipient-remove",
-          "ui-send-unencrypted",
-          "ui-compose-make-key",
-          "ui-compose-show-keys",
-          "ui-compose-encrypt-off",
-          "ui-compose-keep-encrypted"
-        ],
-        "core.ftl": [
-          "pgp-compose-encrypted",
-          "pgp-compose-encrypt-ready",
-          "pgp-compose-missing",
-          "pgp-compose-looking",
-          "pgp-compose-signed",
-          "pgp-compose-reply-clear",
-          "pgp-compose-encrypted-files",
-          "pgp-compose-sign-tip",
-          "pgp-compose-sign-tip-encrypted",
-          "pgp-compose-encrypt-tip",
-          "pgp-compose-make-key",
-          "pgp-compose-key-unusable",
-          "pgp-compose-encrypt-off-quote",
-          "pgp-compose-encrypt-off-reply",
-          "pgp-recipient-verified",
-          "pgp-recipient-found",
-          "pgp-recipient-own",
-          "pgp-recipient-looking",
-          "pgp-recipient-missing",
-          "pgp-recipient-not-found",
-          "pgp-recipient-unusable",
-          "pgp-recipients-intro",
-          "pgp-recipients-intro-missing"
-        ]
-      },
-      "pending_help": [
-        "sign-and-encrypt.html",
-        "write-message.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "da-loading-round2",
@@ -6837,6 +6789,86 @@
           },
           "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
           "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
+        },
+        {
+          "id": "da-compose-sign-encrypt-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "menu-insert",
+              "cmd-compose-sign",
+              "cmd-compose-encrypt",
+              "cmd-attach-my-key",
+              "ui-tb-sign",
+              "ui-tb-encrypt",
+              "ui-field-keys",
+              "ui-recipient-keys-title",
+              "ui-recipient-col-recipient",
+              "ui-recipient-col-key",
+              "ui-recipient-find-key",
+              "ui-recipient-remove",
+              "ui-send-unencrypted",
+              "ui-compose-make-key",
+              "ui-compose-show-keys",
+              "ui-compose-encrypt-off",
+              "ui-compose-keep-encrypted"
+            ],
+            "core.ftl": [
+              "pgp-compose-encrypted",
+              "pgp-compose-encrypt-ready",
+              "pgp-compose-missing",
+              "pgp-compose-looking",
+              "pgp-compose-signed",
+              "pgp-compose-reply-clear",
+              "pgp-compose-encrypted-files",
+              "pgp-compose-sign-tip",
+              "pgp-compose-sign-tip-encrypted",
+              "pgp-compose-encrypt-tip",
+              "pgp-compose-make-key",
+              "pgp-compose-key-unusable",
+              "pgp-compose-encrypt-off-quote",
+              "pgp-compose-encrypt-off-reply",
+              "pgp-recipient-verified",
+              "pgp-recipient-found",
+              "pgp-recipient-own",
+              "pgp-recipient-looking",
+              "pgp-recipient-missing",
+              "pgp-recipient-not-found",
+              "pgp-recipient-unusable",
+              "pgp-recipients-intro",
+              "pgp-recipients-intro-missing"
+            ]
+          },
+          "reviewed_help": [
+            "sign-and-encrypt.html",
+            "write-message.html"
+          ],
+          "changed_values": 16,
+          "files": {
+            "core/locales/da/app.ftl": "b4f02819e901d0a74f76affd61bc2b66d6ec34e8ab2aaef631d5720c7bcd5cf7",
+            "core/locales/da/core.ftl": "b0526f9731d08da1e6ae36eb80b96d32f7f0e6680ca9f57b500461cdc5ff825a",
+            "core/crates/pe-html/help/da/sign-and-encrypt.html": "56bf89e67a2f5e58a20c954c0204e8a660e623eec9981abf7fec90c8d5575b93",
+            "core/crates/pe-html/help/da/write-message.html": "cfb781df25f6e134bf9d2be5fbdd3a241d035a3358aea6bd39f8ea3f267e3507"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a0b8f5de6157b820dcb5543c0ca40728c6ce41a6664b69bf31d9fd27f5878299",
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e",
+            "core/crates/pe-html/help/en/sign-and-encrypt.html": "7ab75ec9da59bc24d60b1f36e7073dbecd478c18e061b9e947a06e1f01446675",
+            "core/crates/pe-html/help/en/write-message.html": "d161c1a2aeffb7539b2e8086d1a7ee6ea4bc39d5f702d93e362d8d10bfe8ff42"
+          },
+          "validation": "All53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies16 value edits/40 mark removals and preserves all other catalog bytes. Help tags/attributes/control references/platform branches/literal keys match; all earlier writing-help prose retained. Platform label joins inspected and dynamic shortcuts checked against commands.toml. No relevant Danish screenshots available; source layouts/wrapping inspected. No GUI run, test suites or builds. All28 current-checkout inventories/hashes reconcile:21,305 unmarked messages,10,679 changed help lines and14 verified baseline pairs. HTML regenerated; git diff --check passes. Newly discovered unmerged source work is recorded separately and remains pending import/review.",
+          "notes": "Reviewed17 app labels and23 core messages in actual compose/menu/recipient/own-key/downgrade context. Retained all app labels and7 good core values; improved16 core values. All53 mnemonic scopes pass. Direct du wording and meddelelse terminology; protection når du sender den, digital signatur distinct from ownership, brugbar nøgle includes unusable keys, complete reasons after Årsag and dates after Seneste søgning. No genitive suffixes on names/addresses. Unencrypted sending conditional on removing protected text/images/attachments. Help title corrected to imperative Signer og krypter en meddelelse; cross-platform colors/status, own/unusable keys, selected From key, recipient removal and encrypted drafts/sent copies clarified. Orange matches existing reading-security help. All earlier writing-help prose preserved. No Danish screenshots; source layouts/wrapping and per-platform joins inspected. No tests.",
+          "glossary_sha256": "30160cd2150cce3e4c75ea63ba10e988c868e75f79d1dbb785698bd6a9d1c366",
+          "mnemonic_scopes": 53,
+          "retained_write_message_prose_verified": true,
+          "changed_help_lines": 15,
+          "screenshot_context": {
+            "searched": [
+              "build/ui-e2e",
+              "build/ui-e2e-mac",
+              "build/ui-e2e-linux"
+            ],
+            "limitation": "No relevant Danish compose/encryption screenshots found. Source controls/layouts/wrapping and substituted platform help joins inspected; no GUI run."
+          }
         }
       ]
     },
@@ -55576,7 +55608,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Czech compose checkpoint: Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 893 entries/187 passages reconcile. No tests. Completed 21,231 entries/818 topics; pending 12,637/534; scope 33,868/1,352; historical catalog improvements 3,760. REVIEWED unchanged.",
+    "latest_source_audit": "Danish compose checkpoint: The seven primary refs are unchanged after fetch and the guide is unchanged. A broader discovery scan of42 worktrees and183 refs found preview-render687113a3 and MCP9a24e99b additions:280 new catalog entries,28 edited entries and56 changed help targets across28 languages. Exact source values/hashes and affected completed content are now recorded in pending_source_integrations. These additions are not yet included in checkout totals or the HTML. Nineteen completed catalog entries and36 completed help topics must reopen on import. No new languages. The release branch has the same relevant tree as origin/master; other non-ancestral historical tips predate the review baseline. All41 external worktrees are clean in relevant paths except the known old five-language copies. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 853 entries/185 passages reconcile. No tests. Completed 21,271 entries/820 topics; pending 12,597/532; scope 33,868/1,352; historical catalog improvements 3,776. REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -67883,6 +67915,545 @@
         "kind": "Czech compose signing/encryption review",
         "review_commit": "60124b46e3db39b5c77e2206c58ab0f2d0981a5a",
         "validation": "Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 893 entries/187 passages reconcile. No tests."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "cb5e4778ca46794b30a4c4b81f3f72c995cb9843",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074",
+          "chore/pgp-hardening": "51d67bb4e5fb6732f5baea4b8004bc46507f1442"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/master": {
+            "merge_base": "162c0dd22d9489061cdc195a42810d695a5672ba",
+            "new_languages": [],
+            "integrated_help_paths": 87,
+            "unmerged_non_help_path_count": 16827,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/pgp-interop-suite.yml",
+              "CLAUDE.md",
+              "app/CMakeLists.txt",
+              "app/src/main.cpp",
+              "core/crates/pe-bounce/tests/hostile.rs",
+              "core/crates/pe-core/src/autocrypt.rs",
+              "core/crates/pe-core/src/compose_keys.rs",
+              "core/crates/pe-core/src/export.rs",
+              "core/crates/pe-core/src/keys.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/protect.rs",
+              "core/crates/pe-core/src/protect_out.rs",
+              "core/crates/pe-core/src/secrets.rs",
+              "core/crates/pe-core/src/worker/background.rs",
+              "core/crates/pe-core/tests/e2e_core.rs",
+              "core/crates/pe-core/tests/pgp_mail.rs",
+              "core/crates/pe-keys/src/lib.rs",
+              "core/crates/pe-net/src/http.rs",
+              "core/crates/pe-pgp/src/cert.rs",
+              "core/crates/pe-pgp/src/decrypt.rs",
+              "core/crates/pe-pgp/src/lib.rs",
+              "core/crates/pe-pgp/src/policy.rs",
+              "core/crates/pe-pgp/src/sealed.rs",
+              "core/crates/pe-pgp/src/verify.rs",
+              "core/crates/pe-pgp/tests/forge/mod.rs",
+              "core/crates/pe-pgp/tests/policy.rs",
+              "core/crates/pe-store/src/pgp.rs",
+              "core/fuzz/.gitignore",
+              "core/include/texts.h",
+              "docs/pgp-plan.md",
+              "docs/shells.md",
+              "linux/src/agents.rs",
+              "linux/src/app.rs",
+              "linux/src/e2e/keys.rs",
+              "linux/src/e2e/layout.rs",
+              "linux/src/e2e/steps.rs",
+              "linux/src/keys.rs",
+              "linux/src/mailbox.rs",
+              "mac/Sources/InboxClassic/App.swift",
+              "mac/Sources/InboxClassic/Generated/Texts.swift",
+              "mac/Sources/InboxClassic/MainWindow.swift",
+              "mac/Sources/InboxClassic/UITestSteps.swift",
+              "scripts/pgp-interop-suite.sh",
+              "scripts/pgp-interop-summary.py",
+              "scripts/pgp-interop.sh",
+              "scripts/ui-e2e.ps1",
+              "scripts/ui-e2e/SCENARIO.md"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 1,
+              "CLAUDE.md": 1,
+              "app/CMakeLists.txt": 1,
+              "app/src": 1,
+              "core/crates": 23,
+              "core/fuzz": 16781,
+              "core/include": 1,
+              "docs/pgp-plan.md": 1,
+              "docs/shells.md": 1,
+              "linux/src": 7,
+              "mac/Sources": 4,
+              "scripts/pgp-interop-suite.sh": 1,
+              "scripts/pgp-interop-summary.py": 1,
+              "scripts/pgp-interop.sh": 1,
+              "scripts/ui-e2e.ps1": 1,
+              "scripts/ui-e2e": 1
+            },
+            "complete_path_list_sha256": "49d9defb7cd5a49e388398c9f1acc01570072be32bcb9e7f0ce39e3f30086309",
+            "complete_path_list_artifact": "/private/tmp/inbox-da-compose-unmerged-origin-master.txt"
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "chore/pgp-hardening": {
+            "merge_base": "162c0dd22d9489061cdc195a42810d695a5672ba",
+            "new_languages": [],
+            "integrated_help_paths": 87,
+            "unmerged_non_help_path_count": 16827,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/pgp-interop-suite.yml",
+              "CLAUDE.md",
+              "app/CMakeLists.txt",
+              "app/src/main.cpp",
+              "core/crates/pe-bounce/tests/hostile.rs",
+              "core/crates/pe-core/src/autocrypt.rs",
+              "core/crates/pe-core/src/compose_keys.rs",
+              "core/crates/pe-core/src/export.rs",
+              "core/crates/pe-core/src/keys.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/protect.rs",
+              "core/crates/pe-core/src/protect_out.rs",
+              "core/crates/pe-core/src/secrets.rs",
+              "core/crates/pe-core/src/worker/background.rs",
+              "core/crates/pe-core/tests/e2e_core.rs",
+              "core/crates/pe-core/tests/pgp_mail.rs",
+              "core/crates/pe-keys/src/lib.rs",
+              "core/crates/pe-net/src/http.rs",
+              "core/crates/pe-pgp/src/cert.rs",
+              "core/crates/pe-pgp/src/decrypt.rs",
+              "core/crates/pe-pgp/src/lib.rs",
+              "core/crates/pe-pgp/src/policy.rs",
+              "core/crates/pe-pgp/src/sealed.rs",
+              "core/crates/pe-pgp/src/verify.rs",
+              "core/crates/pe-pgp/tests/forge/mod.rs",
+              "core/crates/pe-pgp/tests/policy.rs",
+              "core/crates/pe-store/src/pgp.rs",
+              "core/fuzz/.gitignore",
+              "core/include/texts.h",
+              "docs/pgp-plan.md",
+              "docs/shells.md",
+              "linux/src/agents.rs",
+              "linux/src/app.rs",
+              "linux/src/e2e/keys.rs",
+              "linux/src/e2e/layout.rs",
+              "linux/src/e2e/steps.rs",
+              "linux/src/keys.rs",
+              "linux/src/mailbox.rs",
+              "mac/Sources/InboxClassic/App.swift",
+              "mac/Sources/InboxClassic/Generated/Texts.swift",
+              "mac/Sources/InboxClassic/MainWindow.swift",
+              "mac/Sources/InboxClassic/UITestSteps.swift",
+              "scripts/pgp-interop-suite.sh",
+              "scripts/pgp-interop-summary.py",
+              "scripts/pgp-interop.sh",
+              "scripts/ui-e2e.ps1",
+              "scripts/ui-e2e/SCENARIO.md"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 1,
+              "CLAUDE.md": 1,
+              "app/CMakeLists.txt": 1,
+              "app/src": 1,
+              "core/crates": 23,
+              "core/fuzz": 16781,
+              "core/include": 1,
+              "docs/pgp-plan.md": 1,
+              "docs/shells.md": 1,
+              "linux/src": 7,
+              "mac/Sources": 4,
+              "scripts/pgp-interop-suite.sh": 1,
+              "scripts/pgp-interop-summary.py": 1,
+              "scripts/pgp-interop.sh": 1,
+              "scripts/ui-e2e.ps1": 1,
+              "scripts/ui-e2e": 1
+            },
+            "complete_path_list_sha256": "49d9defb7cd5a49e388398c9f1acc01570072be32bcb9e7f0ce39e3f30086309",
+            "complete_path_list_artifact": "/private/tmp/inbox-da-compose-unmerged-chore-pgp-hardening.txt"
+          }
+        },
+        "integrated_help_source": "255205aad7e70f680909092c3167cc724618b70e",
+        "root_locale_help_settings_status": [],
+        "unmerged_non_help_path_count": 16827,
+        "unmerged_non_help_paths_except_fuzz_corpora": [
+          ".github/workflows/pgp-interop-suite.yml",
+          "CLAUDE.md",
+          "app/CMakeLists.txt",
+          "app/src/main.cpp",
+          "core/crates/pe-bounce/tests/hostile.rs",
+          "core/crates/pe-core/src/autocrypt.rs",
+          "core/crates/pe-core/src/compose_keys.rs",
+          "core/crates/pe-core/src/export.rs",
+          "core/crates/pe-core/src/keys.rs",
+          "core/crates/pe-core/src/lib.rs",
+          "core/crates/pe-core/src/protect.rs",
+          "core/crates/pe-core/src/protect_out.rs",
+          "core/crates/pe-core/src/secrets.rs",
+          "core/crates/pe-core/src/worker/background.rs",
+          "core/crates/pe-core/tests/e2e_core.rs",
+          "core/crates/pe-core/tests/pgp_mail.rs",
+          "core/crates/pe-keys/src/lib.rs",
+          "core/crates/pe-net/src/http.rs",
+          "core/crates/pe-pgp/src/cert.rs",
+          "core/crates/pe-pgp/src/decrypt.rs",
+          "core/crates/pe-pgp/src/lib.rs",
+          "core/crates/pe-pgp/src/policy.rs",
+          "core/crates/pe-pgp/src/sealed.rs",
+          "core/crates/pe-pgp/src/verify.rs",
+          "core/crates/pe-pgp/tests/forge/mod.rs",
+          "core/crates/pe-pgp/tests/policy.rs",
+          "core/crates/pe-store/src/pgp.rs",
+          "core/fuzz/.gitignore",
+          "core/include/texts.h",
+          "docs/pgp-plan.md",
+          "docs/shells.md",
+          "linux/src/agents.rs",
+          "linux/src/app.rs",
+          "linux/src/e2e/keys.rs",
+          "linux/src/e2e/layout.rs",
+          "linux/src/e2e/steps.rs",
+          "linux/src/keys.rs",
+          "linux/src/mailbox.rs",
+          "mac/Sources/InboxClassic/App.swift",
+          "mac/Sources/InboxClassic/Generated/Texts.swift",
+          "mac/Sources/InboxClassic/MainWindow.swift",
+          "mac/Sources/InboxClassic/UITestSteps.swift",
+          "scripts/pgp-interop-suite.sh",
+          "scripts/pgp-interop-summary.py",
+          "scripts/pgp-interop.sh",
+          "scripts/ui-e2e.ps1",
+          "scripts/ui-e2e/SCENARIO.md"
+        ],
+        "guide_sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
+        "changed_source_tips_since_last_checkpoint": {},
+        "integrated_active_key_source_check": {
+          "status": "source-only catalogs integrated and reviewed",
+          "ref": "chore/pgp-hardening",
+          "observed_source_tip": "51d67bb4e5fb6732f5baea4b8004bc46507f1442",
+          "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+          "new_catalog_entries": 28,
+          "catalog_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "new_help_topics": 0,
+          "changed_help_topics": 0,
+          "files": {
+            "core/locales/bg/core.ftl": {
+              "source_sha256": "16e9e19f2d1d75dffbeb0074ec93310c8978796141453b1d0953ad5e3fbb5977",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4a62b72469db30848900d67c0a2c9504a3ee7fe1db297e716e77b24f9bf25f51"
+            },
+            "core/locales/ca/core.ftl": {
+              "source_sha256": "3a2788707c50ee6cf4e2eabc676d35f4088226db8de9d407e1db41922b9602b6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "57c515541e23b49ca41dd16e5e8535fe4a5e2a3f4e1c21ed7aa04d0344921b25"
+            },
+            "core/locales/cs/core.ftl": {
+              "source_sha256": "fda0c74b699a113eeb04c082d374268ca8d9639e50bf6b072b27cda3a24463f0",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "c0830122e3de177236be73d54f8f09ae7c9771640dbb8691c3a9cb762d05b545"
+            },
+            "core/locales/da/core.ftl": {
+              "source_sha256": "35a86bb9f3542fa7b2a437ddf71f05424854b796281d02961d4ad4cfa47eb9d2",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "b8fad7dd255994701d3c2cc2f8fcee2e131cfde4ee196a3004607ea08964fe69"
+            },
+            "core/locales/de/core.ftl": {
+              "source_sha256": "b91224b783883801433c0c09fa6e07e6821ae6f2a19e786995788ce7e383fae9",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "a591d2f53c326961386e0554ef10cbc6b21d5015e0ebcc1676b091d62269b521"
+            },
+            "core/locales/el/core.ftl": {
+              "source_sha256": "8ed80fcf78378a7f8d081215a1eae4445722259f5db683a7a730eb0e3a82a35a",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "8dc74a5766f33d0e20ab13aef37846db1e35798134df77b2c432e6a13d4817ca"
+            },
+            "core/locales/en/core.ftl": {
+              "source_sha256": "16f82911b700dec76b7761ca4f32efcae14e3371a52d8f0d58e1382d6aa8787e",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4c94ae03e10150e79745253914b4f59ba7460faa230333cb6cf27b858753417c"
+            },
+            "core/locales/es/core.ftl": {
+              "source_sha256": "d9771c37c09402b1f1eda65bd6da77dbf3cde653f0bd7fb194f5384c21c0925c",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5c755b4c3eacebe03b92a2ef3c69e1e7c7121677189e3f1fdc4da8b5cfa843d0"
+            },
+            "core/locales/et/core.ftl": {
+              "source_sha256": "bb4c3968c7aa2c06b64213b962428681d594c59efc3a673dd12e5d3fc0a83a0f",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "b84a2b56e579b24973d3cbcb97dafa0438cedc5a654485d11b70ab5e068b56c5"
+            },
+            "core/locales/fi/core.ftl": {
+              "source_sha256": "f9f444897faf1136880a1a23befe7c0bb908f6a9eb9394c48c08dda9cb3be6e4",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "7990a785d1a186c7663d704dd2f26d8afb05a2b9fa53b52477558d3d3023588c"
+            },
+            "core/locales/fr/core.ftl": {
+              "source_sha256": "eeab1aa52ac26e5339884a49aa00deeb38ab80ad7c238f671300bc234b074dbd",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "76a6f40ecd4c18e13f7cb623bc0d4ba305f95b3a43f33176bf1f32837ff0ed7b"
+            },
+            "core/locales/hr/core.ftl": {
+              "source_sha256": "7bf5f0d2a9eebd494029b1bb6d5e2bfff03ad3d2bed4e5b3c75851f7aa758463",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "d0c9e7c7d9ad28a5260be6269219a52b43eba84490591aa1dea1d068507c6783"
+            },
+            "core/locales/hu/core.ftl": {
+              "source_sha256": "5b7fd3ff7ae169491dcb4e7471dc2a245ec5e81178ad8af848845e5f870da4c6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "de8f9cdcbd1dc605392c4d8c20711be450416b12cba221a0c8bb7545dd552e43"
+            },
+            "core/locales/it/core.ftl": {
+              "source_sha256": "e6c91c269a2b077a15b61e05cc6013cefd31a1bc55de89082a3f769bf10d4b37",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5ca92264998878c72c7c22bf864e3e3e6b904c700410086d18b2c072a4311b86"
+            },
+            "core/locales/lt/core.ftl": {
+              "source_sha256": "8fdb56b72ac0d592e065a0f2bf68d5a5e6df85c451a77696d0129eeaf9050816",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "9d0ae049a6651b7f700dc6201427e9d81c1aec1fc98f0f54def301c6ee42d1cd"
+            },
+            "core/locales/lv/core.ftl": {
+              "source_sha256": "c88a2a159132bc8ebd8eb346f56cd44c01d475ffda3678dd4db1854ba774d129",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "7162e0590d1544cd8557d4ea301077345570fea82bc4046f35324484bbdc84ea"
+            },
+            "core/locales/nb/core.ftl": {
+              "source_sha256": "fd98dd1f618212c77559a741d920bbcb819c023ac8b9955606ed59f362050536",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "649a5588a1c7b9b28c9971c913eda5dc347169814a90937b34677c80bad40965"
+            },
+            "core/locales/nl/core.ftl": {
+              "source_sha256": "c53c686eb8355626ad21a5de618b72cb3251290c2a86065eaa9958c90d509d12",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4788eb5e5382b227db6b52fa79d2d948e80d5ed97e6af51fa02c66e8421270e1"
+            },
+            "core/locales/pl/core.ftl": {
+              "source_sha256": "498b42c041b31dbfd2eb29518e441f59cb49ae0cf948c2e6b6f57c257fa828c8",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "c46ac141935e59f3c3d39f5a5bc085afb01e2d3d8133609a0cc8d754119a249c"
+            },
+            "core/locales/pt-BR/core.ftl": {
+              "source_sha256": "37e163d195e68444030d92ea2c5514bc9768e4dbb404575f18ab0fd2c63e1001",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+            },
+            "core/locales/pt/core.ftl": {
+              "source_sha256": "355f896a75ae3e52e26664563f19b6680d0719690b1d007528fccb6087b6d1a6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+            },
+            "core/locales/ro/core.ftl": {
+              "source_sha256": "f2e7b552140a37bddfb8020b8b01f4095f7e309f7b1379aee3b4c58955084a74",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "ccb6595e0be610fe030b171dbe9df6cfb0f536873e539ce5ad865c02f7175db4"
+            },
+            "core/locales/ru/core.ftl": {
+              "source_sha256": "4bcc4ffedcb660b5fe86ac69beabc7a766daeb5cfb1381e6fe929605397e2e54",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4353044c1df65b4b4990323e714482b6311db76d8415626e558320b6026620bc"
+            },
+            "core/locales/sk/core.ftl": {
+              "source_sha256": "5fd463a4f1c91fc2a14fc3bf7cb49c5afb52d78b62e82e1f3c5ffef74ae4bb97",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "88d88798c1bb159d82f82f2dd33f48583b1d5bb60199fe3bd4e84a3a0b0af3b6"
+            },
+            "core/locales/sl/core.ftl": {
+              "source_sha256": "9787b443035e1b48b59cab003b34a97545fc2a8930b2ee230fce0b8b367264ac",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "67fc0ca660f323b20c4a178855b30792f94f71bfe71d85135793eb0e9444ef7f"
+            },
+            "core/locales/sr-Latn/core.ftl": {
+              "source_sha256": "f38acd96c4995038503690ccc62016cfaefdc803a0860b7d649bef0699538b54",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "fecb2884b4c4f0373831458647d4f208fc2736d6387c8859dab5d1ad18cf1810"
+            },
+            "core/locales/sv/core.ftl": {
+              "source_sha256": "e420ae2d02d82bb51c2158659755840d94902b56305aeb5a4f58843119a3f1ac",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "6b1875cf2a7190d360a6c0ab3d3e3c7272ca9896daa013b41950c03ee60be777"
+            },
+            "core/locales/tr/core.ftl": {
+              "source_sha256": "4ea56cafd6c1b8ddf348d4392777faf297c5f11827e45240f999bb96a25b84a1",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "ed1c9e5bcd9f5f0bcc739cbfa59c1808fa9f8fafe9c762b80787772b834dd346"
+            },
+            "core/locales/uk/core.ftl": {
+              "source_sha256": "d801bd33eb1c5a09b64de91527c873425dfc966b4afa09bafd20ac821194b346",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4d507d7ad7a78f6e3e07b38976613b1e782c80074553203195fb147a96b3989d"
+            }
+          },
+          "note": "New signature reason from the hardening branch: a valid signature used a key other than the active key for the From address. Exact source entry was imported in205bd846 and reviewed; current source entry still matches. Other hardening code/fuzz changes stay separate; inspect caller before review."
+        },
+        "source_worktree_relevant_status": {
+          "/Users/andris/Projects/PostalExpress": [],
+          "/Users/andris/Projects/PostalExpress-wave1": [],
+          "/Users/andris/Projects/PostalExpress-lang": [
+            "?? core/crates/pe-html/help/ca/",
+            "?? core/crates/pe-html/help/nb/",
+            "?? core/crates/pe-html/help/pt-BR/",
+            "?? core/crates/pe-html/help/sr-Latn/",
+            "?? core/crates/pe-html/help/tr/",
+            "?? core/locales/ca/",
+            "?? core/locales/nb/",
+            "?? core/locales/pt-BR/",
+            "?? core/locales/sr-Latn/",
+            "?? core/locales/tr/"
+          ],
+          "/Users/andris/Projects/PostalExpress-settings": [],
+          "/Users/andris/Projects/PostalExpress-pgp11": [],
+          "/Users/andris/Projects/PostalExpress-pgp7": []
+        },
+        "untracked_initial_wave1_copy_audit": {
+          "worktree": "/Users/andris/Projects/PostalExpress-lang",
+          "codes": [
+            "ca",
+            "nb",
+            "pt-BR",
+            "sr-Latn",
+            "tr"
+          ],
+          "status": "All290 files are exact copies of the already integrated initial wave1 draft snapshot; no later edits or new work. Left untouched.",
+          "source_snapshot": "cfdf55ab135d7def5ca1ce42e8603d866a33ce26",
+          "files": 290,
+          "exact_matches_initial_snapshot": 290,
+          "exact_matches_current_wave1_tip": 275,
+          "manifest_artifact": "/private/tmp/inbox-untracked-wave1-copies.json",
+          "manifest_sha256": "5e2e255d82be9f6ae6ae6b4d1433a356fbef80c6b56a9b8aa7e6b561a548a059"
+        },
+        "since_start_pending_catalog_entries": 853,
+        "since_start_pending_help_passages": 185,
+        "remaining_since_omissions": [],
+        "pending_catalog_entries": 12597,
+        "pending_help_topics": 532,
+        "additional_unrecorded_work": 0,
+        "all_source_inventory_check": {
+          "worktrees": 42,
+          "refs": 183,
+          "artifact": "/private/tmp/inbox-da-compose-all-sources-verified.json",
+          "sha256": "1ae2bffa65adf17b73b57cee42dadf210e497085db481cf4d2e07c768f699928",
+          "unexpected_changes": 0,
+          "pending_source_integrations": [
+            {
+              "ref": "feat/preview-render",
+              "commit": "687113a325f3aaaab17784f307ccc86df4b8c061"
+            },
+            {
+              "ref": "feat/mcp-phase1",
+              "commit": "9a24e99bac4d3a67006bd7f41a53a8467733532d"
+            }
+          ]
+        },
+        "kind": "Danish compose signing/encryption review",
+        "review_commit": "1c934ad6d39fe290c60a60ad1141d22aea4a4d88",
+        "validation": "The seven primary refs are unchanged after fetch and the guide is unchanged. A broader discovery scan of42 worktrees and183 refs found preview-render687113a3 and MCP9a24e99b additions:280 new catalog entries,28 edited entries and56 changed help targets across28 languages. Exact source values/hashes and affected completed content are now recorded in pending_source_integrations. These additions are not yet included in checkout totals or the HTML. Nineteen completed catalog entries and36 completed help topics must reopen on import. No new languages. The release branch has the same relevant tree as origin/master; other non-ancestral historical tips predate the review baseline. All41 external worktrees are clean in relevant paths except the known old five-language copies. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 853 entries/185 passages reconcile. No tests."
       }
     ],
     "settings_source_integration": {
@@ -72481,7 +73052,2274 @@
       },
       "merge_commit": "c83a2e3122cd29e02cab5e132708508bfc2e21a7"
     },
-    "pending_source_integrations": [],
+    "pending_source_integrations": [
+      {
+        "status": "pending import and context review",
+        "ref": "feat/preview-render",
+        "source_commit": "687113a325f3aaaab17784f307ccc86df4b8c061",
+        "comparison_commit": "cb5e4778ca46794b30a4c4b81f3f72c995cb9843",
+        "catalog_ids": {
+          "new": {
+            "core.ftl": [
+              "preview-pdf-option",
+              "preview-pdf-off",
+              "preview-pdf-off-crashed"
+            ]
+          },
+          "changed": {},
+          "help": []
+        },
+        "new_catalog_entries": 84,
+        "changed_catalog_entries": 0,
+        "new_help_topics": 0,
+        "changed_help_topics": 0,
+        "files": {
+          "core/locales/bg/core.ftl": {
+            "source_sha256": "a11736c51da6b332e002cfce23bc0ee05c27fd6370b82c35cf7e063adce2b73d",
+            "comparison_sha256": "16e9e19f2d1d75dffbeb0074ec93310c8978796141453b1d0953ad5e3fbb5977",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Показване на PDF файлове в съобщенията",
+              "preview-pdf-off": "preview-pdf-off = PDF файловете не се показват в съобщенията.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = PDF файл затвори Inbox Classic, докато се показваше, затова PDF файловете вече не се показват в съобщенията. Изображенията все още се показват. За да показвате отново PDF файлове, включете { $option } в настройките за четене.\n"
+            }
+          },
+          "core/locales/ca/core.ftl": {
+            "source_sha256": "658ec78a540ad9a1c53027c312bc81c1ec0a7bfc9b95a9570b7c2624eb25e39d",
+            "comparison_sha256": "3a2788707c50ee6cf4e2eabc676d35f4088226db8de9d407e1db41922b9602b6",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Mostra els fitxers PDF als missatges",
+              "preview-pdf-off": "preview-pdf-off = Els fitxers PDF no es mostren als missatges.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Un fitxer PDF ha tancat Inbox Classic mentre es mostrava, per això els fitxers PDF ja no es mostren als missatges. Les imatges sí. Per tornar a mostrar els fitxers PDF, activeu { $option } a les opcions de lectura.\n"
+            }
+          },
+          "core/locales/cs/core.ftl": {
+            "source_sha256": "51a5d297dd26c0b0148bdc29516a5925c1ad96db23277868c1fc7225e2707690",
+            "comparison_sha256": "fda0c74b699a113eeb04c082d374268ca8d9639e50bf6b072b27cda3a24463f0",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Zobrazovat soubory PDF ve zprávách",
+              "preview-pdf-off": "preview-pdf-off = Soubory PDF se ve zprávách nezobrazují.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Soubor PDF ukončil Inbox Classic během zobrazení, proto se soubory PDF ve zprávách už nezobrazují. Obrázky ano. Chcete-li soubory PDF znovu zobrazovat, zapněte { $option } v možnostech čtení.\n"
+            }
+          },
+          "core/locales/da/core.ftl": {
+            "source_sha256": "ec43411238215e4765d94733336d1b94889087815a17431078484efee104e069",
+            "comparison_sha256": "35a86bb9f3542fa7b2a437ddf71f05424854b796281d02961d4ad4cfa47eb9d2",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Vis PDF-filer i meddelelser",
+              "preview-pdf-off": "preview-pdf-off = PDF-filer vises ikke i meddelelser.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = En PDF-fil lukkede Inbox Classic, mens den blev vist, så PDF-filer vises ikke længere i meddelelser. Billeder vises stadig. Slå { $option } til i læseindstillingerne for at vise PDF-filer igen.\n"
+            }
+          },
+          "core/locales/de/core.ftl": {
+            "source_sha256": "c8b66cd7463776b57c06fa68e7f558853b6f00b7552c68998312dde82b09821a",
+            "comparison_sha256": "b91224b783883801433c0c09fa6e07e6821ae6f2a19e786995788ce7e383fae9",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = PDF-Dateien in Nachrichten anzeigen",
+              "preview-pdf-off": "preview-pdf-off = PDF-Dateien werden in Nachrichten nicht angezeigt.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Eine PDF-Datei hat Inbox Classic beim Anzeigen beendet, daher werden PDF-Dateien in Nachrichten nicht mehr angezeigt. Bilder werden weiterhin angezeigt. Um PDF-Dateien wieder anzuzeigen, aktivieren Sie { $option } in den Leseoptionen.\n"
+            }
+          },
+          "core/locales/el/core.ftl": {
+            "source_sha256": "4f78380b1882f82143e3479d979104a995cbb6e22b93a9b816b93194af024bd2",
+            "comparison_sha256": "8ed80fcf78378a7f8d081215a1eae4445722259f5db683a7a730eb0e3a82a35a",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Εμφάνιση αρχείων PDF στα μηνύματα",
+              "preview-pdf-off": "preview-pdf-off = Τα αρχεία PDF δεν εμφανίζονται στα μηνύματα.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Ένα αρχείο PDF έκλεισε το Inbox Classic ενώ εμφανιζόταν, οπότε τα αρχεία PDF δεν εμφανίζονται πλέον στα μηνύματα. Οι εικόνες εμφανίζονται ακόμα. Για να εμφανίζονται ξανά τα αρχεία PDF, ενεργοποιήστε την επιλογή { $option } στις επιλογές ανάγνωσης.\n"
+            }
+          },
+          "core/locales/en/core.ftl": {
+            "source_sha256": "324d7d9c2e065d7a3e15ac8b0d3814a2cbda256ea390095eef879663b7aaf691",
+            "comparison_sha256": "16f82911b700dec76b7761ca4f32efcae14e3371a52d8f0d58e1382d6aa8787e",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Show PDF files in messages",
+              "preview-pdf-off": "preview-pdf-off = PDF files are not shown in messages.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = A PDF file closed Inbox Classic while it was being shown, so PDF files are no longer shown in messages. Pictures still are. To show PDF files again, turn on { $option } in the reading options.\n"
+            }
+          },
+          "core/locales/es/core.ftl": {
+            "source_sha256": "b3ddaf2cd291af9eb4809a1ac7209f49487129fb2e1d913af293a6c60fbd6910",
+            "comparison_sha256": "d9771c37c09402b1f1eda65bd6da77dbf3cde653f0bd7fb194f5384c21c0925c",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Mostrar archivos PDF en los mensajes",
+              "preview-pdf-off": "preview-pdf-off = Los archivos PDF no se muestran en los mensajes.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Un archivo PDF cerró Inbox Classic mientras se mostraba, por lo que los archivos PDF ya no se muestran en los mensajes. Las imágenes sí. Para volver a mostrar los archivos PDF, active { $option } en las opciones de lectura.\n"
+            }
+          },
+          "core/locales/et/core.ftl": {
+            "source_sha256": "76f03dc71bd0e3f304017a229ac8a7fc1bab5ccca4f4309b6cb0230a693b38db",
+            "comparison_sha256": "bb4c3968c7aa2c06b64213b962428681d594c59efc3a673dd12e5d3fc0a83a0f",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Näita PDF-faile kirjades",
+              "preview-pdf-off": "preview-pdf-off = PDF-faile kirjades ei näidata.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = PDF-fail sulges Inbox Classicu selle näitamise ajal, seetõttu ei näidata PDF-faile kirjades enam. Pilte näidatakse endiselt. PDF-failide uuesti näitamiseks lülitage lugemisvalikutes sisse { $option }.\n"
+            }
+          },
+          "core/locales/fi/core.ftl": {
+            "source_sha256": "ffc34e658bd86e603a2946c41db0d52af0c967f71441b1508e0bcf2f845fbf8f",
+            "comparison_sha256": "f9f444897faf1136880a1a23befe7c0bb908f6a9eb9394c48c08dda9cb3be6e4",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Näytä PDF-tiedostot viesteissä",
+              "preview-pdf-off": "preview-pdf-off = PDF-tiedostoja ei näytetä viesteissä.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = PDF-tiedosto sulki Inbox Classicin näytettäessä, joten PDF-tiedostoja ei enää näytetä viesteissä. Kuvat näytetään edelleen. Voit näyttää PDF-tiedostot uudelleen ottamalla asetuksen { $option } käyttöön lukuasetuksissa.\n"
+            }
+          },
+          "core/locales/fr/core.ftl": {
+            "source_sha256": "b919a8bd67dd82f6fee2e4fb1d26a4678dd35b4e1cbbce116f4b516ffa2260bb",
+            "comparison_sha256": "eeab1aa52ac26e5339884a49aa00deeb38ab80ad7c238f671300bc234b074dbd",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Afficher les fichiers PDF dans les messages",
+              "preview-pdf-off": "preview-pdf-off = Les fichiers PDF ne sont pas affichés dans les messages.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Un fichier PDF a fermé Inbox Classic pendant son affichage, les fichiers PDF ne sont donc plus affichés dans les messages. Les images le sont toujours. Pour afficher à nouveau les fichiers PDF, activez { $option } dans les options de lecture.\n"
+            }
+          },
+          "core/locales/hr/core.ftl": {
+            "source_sha256": "c5b68e22b40064d75cb99ca4d8569c38859169edb8d50dae5821aca209c63530",
+            "comparison_sha256": "7bf5f0d2a9eebd494029b1bb6d5e2bfff03ad3d2bed4e5b3c75851f7aa758463",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Prikaži PDF datoteke u porukama",
+              "preview-pdf-off": "preview-pdf-off = PDF datoteke ne prikazuju se u porukama.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = PDF datoteka zatvorila je Inbox Classic dok se prikazivala, pa se PDF datoteke više ne prikazuju u porukama. Slike se i dalje prikazuju. Za ponovni prikaz PDF datoteka uključite { $option } u mogućnostima čitanja.\n"
+            }
+          },
+          "core/locales/hu/core.ftl": {
+            "source_sha256": "604ee08fd8abdaddc76f067660ef1dadedbaf4fef84ec713be1cf24f3139e29f",
+            "comparison_sha256": "5b7fd3ff7ae169491dcb4e7471dc2a245ec5e81178ad8af848845e5f870da4c6",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = PDF-fájlok megjelenítése az üzenetekben",
+              "preview-pdf-off": "preview-pdf-off = A PDF-fájlok nem jelennek meg az üzenetekben.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Egy PDF-fájl megjelenítés közben bezárta az Inbox Classicot, ezért a PDF-fájlok már nem jelennek meg az üzenetekben. A képek továbbra is megjelennek. A PDF-fájlok ismételt megjelenítéséhez kapcsolja be az olvasási beállításokban ezt: { $option }.\n"
+            }
+          },
+          "core/locales/it/core.ftl": {
+            "source_sha256": "48d9970b612700cf6baac3aa604839dd67e8af83e08d8a0db2d65e9a707317ae",
+            "comparison_sha256": "e6c91c269a2b077a15b61e05cc6013cefd31a1bc55de89082a3f769bf10d4b37",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Mostra i file PDF nei messaggi",
+              "preview-pdf-off": "preview-pdf-off = I file PDF non vengono mostrati nei messaggi.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Un file PDF ha chiuso Inbox Classic mentre veniva mostrato, quindi i file PDF non vengono più mostrati nei messaggi. Le immagini sì. Per mostrare di nuovo i file PDF, attiva { $option } nelle opzioni di lettura.\n"
+            }
+          },
+          "core/locales/lt/core.ftl": {
+            "source_sha256": "ee29e0c7497df9873288ea951ae33d63cc22993d011c54dcce9c93206cbda125",
+            "comparison_sha256": "8fdb56b72ac0d592e065a0f2bf68d5a5e6df85c451a77696d0129eeaf9050816",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Rodyti PDF failus laiškuose",
+              "preview-pdf-off": "preview-pdf-off = PDF failai laiškuose nerodomi.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = PDF failas uždarė Inbox Classic, kol buvo rodomas, todėl PDF failai laiškuose nebėra rodomi. Paveikslėliai vis dar rodomi. Norėdami vėl rodyti PDF failus, skaitymo parinktyse įjunkite { $option }.\n"
+            }
+          },
+          "core/locales/lv/core.ftl": {
+            "source_sha256": "9ad8348849872f9ae02fac56fe2a096fce7732bb2737e7ce9524ed344108c6ff",
+            "comparison_sha256": "c88a2a159132bc8ebd8eb346f56cd44c01d475ffda3678dd4db1854ba774d129",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Rādīt PDF failus vēstulēs",
+              "preview-pdf-off": "preview-pdf-off = PDF faili vēstulēs netiek rādīti.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = PDF fails aizvēra Inbox Classic, kamēr tas tika rādīts, tāpēc PDF faili vēstulēs vairs netiek rādīti. Attēli joprojām tiek rādīti. Lai atkal rādītu PDF failus, lasīšanas opcijās ieslēdziet { $option }.\n"
+            }
+          },
+          "core/locales/nb/core.ftl": {
+            "source_sha256": "59ffba0bee837f8907651bb74ae01a687017f7a038d7419b115d919ec2537a76",
+            "comparison_sha256": "fd98dd1f618212c77559a741d920bbcb819c023ac8b9955606ed59f362050536",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Vis PDF-filer i meldinger",
+              "preview-pdf-off": "preview-pdf-off = PDF-filer vises ikke i meldinger.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = En PDF-fil lukket Inbox Classic mens den ble vist, så PDF-filer vises ikke lenger i meldinger. Bilder vises fortsatt. Slå på { $option } i leseinnstillingene for å vise PDF-filer igjen.\n"
+            }
+          },
+          "core/locales/nl/core.ftl": {
+            "source_sha256": "a2c2ba9bb7185a2b5220e127dad17626433404eac42d57e6cfad77d08b6572ad",
+            "comparison_sha256": "c53c686eb8355626ad21a5de618b72cb3251290c2a86065eaa9958c90d509d12",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = PDF-bestanden in berichten tonen",
+              "preview-pdf-off": "preview-pdf-off = PDF-bestanden worden niet in berichten getoond.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Een PDF-bestand heeft Inbox Classic gesloten terwijl het werd getoond, daarom worden PDF-bestanden niet meer in berichten getoond. Afbeeldingen wel. Schakel { $option } in bij de leesopties om PDF-bestanden weer te tonen.\n"
+            }
+          },
+          "core/locales/pl/core.ftl": {
+            "source_sha256": "9c7eac7eee0d97c8ecd521ac51bc868e58c9872d876907b95c3eeb7236492254",
+            "comparison_sha256": "498b42c041b31dbfd2eb29518e441f59cb49ae0cf948c2e6b6f57c257fa828c8",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Pokazuj pliki PDF w wiadomościach",
+              "preview-pdf-off": "preview-pdf-off = Pliki PDF nie są pokazywane w wiadomościach.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Plik PDF zamknął Inbox Classic podczas wyświetlania, dlatego pliki PDF nie są już pokazywane w wiadomościach. Obrazy nadal są. Aby znów pokazywać pliki PDF, włącz { $option } w opcjach czytania.\n"
+            }
+          },
+          "core/locales/pt/core.ftl": {
+            "source_sha256": "688094a26ef243c611ec423b14966956a32dfa026108c4ce3435866228529c6f",
+            "comparison_sha256": "355f896a75ae3e52e26664563f19b6680d0719690b1d007528fccb6087b6d1a6",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Mostrar ficheiros PDF nas mensagens",
+              "preview-pdf-off": "preview-pdf-off = Os ficheiros PDF não são mostrados nas mensagens.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Um ficheiro PDF fechou o Inbox Classic enquanto era mostrado, pelo que os ficheiros PDF deixaram de ser mostrados nas mensagens. As imagens continuam a ser. Para voltar a mostrar ficheiros PDF, ative { $option } nas opções de leitura.\n"
+            }
+          },
+          "core/locales/pt-BR/core.ftl": {
+            "source_sha256": "b1847acc578d9572d237b8f496a5acee67baac9eb612db382e2f8e1ab8a281a2",
+            "comparison_sha256": "37e163d195e68444030d92ea2c5514bc9768e4dbb404575f18ab0fd2c63e1001",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Mostrar arquivos PDF nas mensagens",
+              "preview-pdf-off": "preview-pdf-off = Os arquivos PDF não são mostrados nas mensagens.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Um arquivo PDF fechou o Inbox Classic enquanto era mostrado, por isso os arquivos PDF não são mais mostrados nas mensagens. As imagens continuam sendo. Para voltar a mostrar arquivos PDF, ative { $option } nas opções de leitura.\n"
+            }
+          },
+          "core/locales/ro/core.ftl": {
+            "source_sha256": "a0fd156e9079da23b66bd12e766aabb62376cbd4a5b13c9652e3ad3597f23916",
+            "comparison_sha256": "f2e7b552140a37bddfb8020b8b01f4095f7e309f7b1379aee3b4c58955084a74",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Afișează fișierele PDF în mesaje",
+              "preview-pdf-off": "preview-pdf-off = Fișierele PDF nu sunt afișate în mesaje.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Un fișier PDF a închis Inbox Classic în timp ce era afișat, așa că fișierele PDF nu mai sunt afișate în mesaje. Imaginile sunt afișate în continuare. Pentru a afișa din nou fișierele PDF, activați { $option } în opțiunile de citire.\n"
+            }
+          },
+          "core/locales/ru/core.ftl": {
+            "source_sha256": "3e82bd9e4b48e12703db5bd31e4ea21758b461ccebc4c20302140c8c3f0c1632",
+            "comparison_sha256": "4bcc4ffedcb660b5fe86ac69beabc7a766daeb5cfb1381e6fe929605397e2e54",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Показывать PDF-файлы в письмах",
+              "preview-pdf-off": "preview-pdf-off = PDF-файлы в письмах не показываются.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = PDF-файл закрыл Inbox Classic во время показа, поэтому PDF-файлы в письмах больше не показываются. Изображения по-прежнему показываются. Чтобы снова показывать PDF-файлы, включите параметр { $option } в настройках чтения.\n"
+            }
+          },
+          "core/locales/sk/core.ftl": {
+            "source_sha256": "7e0ea487cbe2eb82848de48e2c3af36a2d6917011dc78fab03ddebedb909c572",
+            "comparison_sha256": "5fd463a4f1c91fc2a14fc3bf7cb49c5afb52d78b62e82e1f3c5ffef74ae4bb97",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Zobrazovať súbory PDF v správach",
+              "preview-pdf-off": "preview-pdf-off = Súbory PDF sa v správach nezobrazujú.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Súbor PDF ukončil Inbox Classic počas zobrazenia, preto sa súbory PDF v správach už nezobrazujú. Obrázky áno. Ak chcete súbory PDF znova zobrazovať, zapnite { $option } v možnostiach čítania.\n"
+            }
+          },
+          "core/locales/sl/core.ftl": {
+            "source_sha256": "01e3a9d97991ceb77884423ff8e9c18503b7bdbe5b0c69c65ca65cec20b7faf0",
+            "comparison_sha256": "9787b443035e1b48b59cab003b34a97545fc2a8930b2ee230fce0b8b367264ac",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Prikaži datoteke PDF v sporočilih",
+              "preview-pdf-off": "preview-pdf-off = Datoteke PDF se v sporočilih ne prikazujejo.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Datoteka PDF je med prikazovanjem zaprla Inbox Classic, zato se datoteke PDF v sporočilih ne prikazujejo več. Slike se še prikazujejo. Če želite znova prikazovati datoteke PDF, v možnostih branja vklopite { $option }.\n"
+            }
+          },
+          "core/locales/sr-Latn/core.ftl": {
+            "source_sha256": "e86c115a81ff53ff48b0f239aca1cf3fe20a92ff1ea8d2ad888f31d80e5898b7",
+            "comparison_sha256": "f38acd96c4995038503690ccc62016cfaefdc803a0860b7d649bef0699538b54",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Prikaži PDF datoteke u porukama",
+              "preview-pdf-off": "preview-pdf-off = PDF datoteke se ne prikazuju u porukama.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = PDF datoteka je zatvorila Inbox Classic dok se prikazivala, pa se PDF datoteke više ne prikazuju u porukama. Slike se i dalje prikazuju. Da biste ponovo prikazivali PDF datoteke, uključite { $option } u opcijama čitanja.\n"
+            }
+          },
+          "core/locales/sv/core.ftl": {
+            "source_sha256": "14e4e0a295883f1967401dbb2d85f09f18a70eb88f9742ad3ea55dce04d67eb5",
+            "comparison_sha256": "e420ae2d02d82bb51c2158659755840d94902b56305aeb5a4f58843119a3f1ac",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Visa PDF-filer i meddelanden",
+              "preview-pdf-off": "preview-pdf-off = PDF-filer visas inte i meddelanden.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = En PDF-fil stängde Inbox Classic medan den visades, så PDF-filer visas inte längre i meddelanden. Bilder visas fortfarande. Slå på { $option } i läsinställningarna för att visa PDF-filer igen.\n"
+            }
+          },
+          "core/locales/tr/core.ftl": {
+            "source_sha256": "9499c01918e340d4d015fb727a3254d9be4c9b03de5107925edb6c1e26206f8a",
+            "comparison_sha256": "4ea56cafd6c1b8ddf348d4392777faf297c5f11827e45240f999bb96a25b84a1",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = İletilerde PDF dosyalarını göster",
+              "preview-pdf-off": "preview-pdf-off = PDF dosyaları iletilerde gösterilmiyor.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = Bir PDF dosyası gösterilirken Inbox Classic'i kapattı, bu yüzden PDF dosyaları artık iletilerde gösterilmiyor. Resimler hâlâ gösteriliyor. PDF dosyalarını yeniden göstermek için okuma seçeneklerinde { $option } seçeneğini açın.\n"
+            }
+          },
+          "core/locales/uk/core.ftl": {
+            "source_sha256": "d16c06a90a7f5193e35264d31f84484adbd38aa1f6ed2ba3bb1974b9ef53a17c",
+            "comparison_sha256": "d801bd33eb1c5a09b64de91527c873425dfc966b4afa09bafd20ac821194b346",
+            "added_ids": [
+              "preview-pdf-off",
+              "preview-pdf-off-crashed",
+              "preview-pdf-option"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "preview-pdf-option": "preview-pdf-option = Показувати PDF-файли в листах",
+              "preview-pdf-off": "preview-pdf-off = PDF-файли в листах не показуються.",
+              "preview-pdf-off-crashed": "preview-pdf-off-crashed = PDF-файл закрив Inbox Classic під час показу, тому PDF-файли в листах більше не показуються. Зображення й далі показуються. Щоб знову показувати PDF-файли, увімкніть параметр { $option } у налаштуваннях читання.\n"
+            }
+          }
+        },
+        "help_files": {},
+        "affected_completed_catalog_entries": [],
+        "affected_completed_help_topics": [],
+        "context_required": [
+          "Inspect the source branch callers before review; do not infer runtime behavior from new strings.",
+          "Import exact new English/source drafts and preserve existing review corrections in unrelated IDs/passages.",
+          "Reopen changed agent-level-organize and the affected help passages; preserve earlier agent Undo semantics.",
+          "Do not merge unrelated implementation/test/corpus code just to access translations.",
+          "Regenerate required text identifiers in the separate build target if necessary; do not run test suites."
+        ]
+      },
+      {
+        "status": "pending import and context review",
+        "ref": "feat/mcp-phase1",
+        "source_commit": "9a24e99bac4d3a67006bd7f41a53a8467733532d",
+        "comparison_commit": "cb5e4778ca46794b30a4c4b81f3f72c995cb9843",
+        "catalog_ids": {
+          "new": {
+            "app.ftl": [
+              "ui-dont-unsubscribe"
+            ],
+            "core.ftl": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-title",
+              "agent-unsubscribe-detail"
+            ],
+            "windows.ftl": [
+              "win-unsubscribe",
+              "win-dont-unsubscribe"
+            ]
+          },
+          "changed": {
+            "core.ftl": [
+              "agent-level-organize"
+            ]
+          },
+          "help": [
+            "agents-permissions.html",
+            "agents-sending.html"
+          ]
+        },
+        "new_catalog_entries": 196,
+        "changed_catalog_entries": 28,
+        "new_help_topics": 0,
+        "changed_help_topics": 56,
+        "files": {
+          "core/locales/bg/core.ftl": {
+            "source_sha256": "ef8eacd29bf115787ac04ee96de761d63225882ad971fe42ca7eac56b8be559e",
+            "comparison_sha256": "16e9e19f2d1d75dffbeb0074ec93310c8978796141453b1d0953ad5e3fbb5977",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Отписването от списъка на „{ $subject }“ не успя: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Не се отписахте от { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } иска да ви отпише от пощенски списък\n   *[other] { $program } иска да ви отпише от { $count } пощенски списъка\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic моли списъка по-долу да спре да ви изпраща съобщения, по начина с едно щракване, който той предлага. Нищо друго не се изпраща, а съобщенията, които имате, остават там, където са.\n   *[other] Inbox Classic моли всеки от списъците по-долу да спре да ви изпраща съобщения, по начина с едно щракване, който списъкът предлага. Нищо друго не се изпраща, а съобщенията, които имате, остават там, където са.\n}\n",
+              "agent-level-organize": "agent-level-organize = Подреждане на поща: прочетено, флагове, нежелана поща, преместване, архивиране, нови папки, изтриване в „Изтрити“ и отписване от пощенски списъци след вашето „да“"
+            }
+          },
+          "core/locales/bg/windows.ftl": {
+            "source_sha256": "28df4285eb445dba8a26b24049f8c75fb0dfe593a32c9b7c778066cd2125f776",
+            "comparison_sha256": "509c017f5a3281ff2589898d3c0f9b782ced308ef22d7e49efce7fa17632e57d",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Отписване",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Не се отписвай"
+            }
+          },
+          "core/locales/bg/app.ftl": {
+            "source_sha256": "eab8164e71a94b710e2f3ca9443015fadc8a510122ec4f5ccd31f0d91aaf4119",
+            "comparison_sha256": "31d1506b71846a1283f64d1b5a0f69f52f7f909f10d55e39ddcef0bd33cff047",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Не се отписвай"
+            }
+          },
+          "core/locales/ca/core.ftl": {
+            "source_sha256": "2469fa060e783ccc8fa5df50bce2216684039afd255166a9296dfd43302fdb2a",
+            "comparison_sha256": "3a2788707c50ee6cf4e2eabc676d35f4088226db8de9d407e1db41922b9602b6",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = No s’ha pogut cancel·lar la subscripció a la llista de «{ $subject }»: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = No us heu donat de baixa de { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } vol cancel·lar la vostra subscripció a una llista de correu\n   *[other] { $program } vol cancel·lar la vostra subscripció a { $count } llistes de correu\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic demana a la llista d’aquí sota que deixi d’enviar-vos correu, de la manera amb un sol clic que ofereix. No s’envia res més, i els missatges que teniu es queden on són.\n   *[other] Inbox Classic demana a cada llista d’aquí sota que deixi d’enviar-vos correu, de la manera amb un sol clic que ofereix la llista. No s’envia res més, i els missatges que teniu es queden on són.\n}\n",
+              "agent-level-organize": "agent-level-organize = Organitzar el correu: estat de lectura, banderes, correu brossa, moure, arxivar, carpetes noves, suprimir a Elements suprimits i donar-vos de baixa de llistes de correu després que digueu que sí"
+            }
+          },
+          "core/locales/ca/windows.ftl": {
+            "source_sha256": "c01b1c34712fd48cd5dcd3bc3a3263110797c4b7ad954c2e3bfcdf464293962d",
+            "comparison_sha256": "1463d813323d5012c5c133e71ab0cd2dc548f56fb92e40704031f3ba750c2ca6",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Cancel·la la subscripció",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &No cancel·lis la subscripció"
+            }
+          },
+          "core/locales/ca/app.ftl": {
+            "source_sha256": "46979883c26839921de1023bb7d36b2ef087f2e3272117681c7f73d39ba14590",
+            "comparison_sha256": "1bb97d6d4a581cb7c9b6b3e16692d5b375f5d5e8b653aea337f906365011313e",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = No cancel·lis la subscripció"
+            }
+          },
+          "core/locales/cs/core.ftl": {
+            "source_sha256": "64da78c2a61ce1ae0834c2f91a1ca94c97562fbdd0c5b0470281477b04a03f3f",
+            "comparison_sha256": "fda0c74b699a113eeb04c082d374268ca8d9639e50bf6b072b27cda3a24463f0",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Odhlášení z konference zprávy „{ $subject }“ se nezdařilo: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Neodhlásili jste se z odběru: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } vás chce odhlásit z konference\n    [few] { $program } vás chce odhlásit z { $count } konferencí\n   *[other] { $program } vás chce odhlásit z { $count } konferencí\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic požádá konferenci níže, aby vám přestala posílat zprávy, a to způsobem na jedno kliknutí, který nabízí. Nic jiného se neodešle a zprávy, které máte, zůstanou, kde jsou.\n   *[other] Inbox Classic požádá každou konferenci níže, aby vám přestala posílat zprávy, a to způsobem na jedno kliknutí, který konference nabízí. Nic jiného se neodešle a zprávy, které máte, zůstanou, kde jsou.\n}\n",
+              "agent-level-organize": "agent-level-organize = Třídit poštu: stav přečtení, příznaky, nevyžádaná pošta, přesouvání, archivace, nové složky, odstraňování do složky Odstraněná pošta a odhlašování z konferencí po vašem souhlasu"
+            }
+          },
+          "core/locales/cs/windows.ftl": {
+            "source_sha256": "002b3ed4ff1ffd7fb8b78921b957a3cf93c2cfe070ee996a07381909452bf4b1",
+            "comparison_sha256": "2272bb3077729f1b53c2c3775d88ffc795a86c0918e83b78106e7ff023248c2b",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Odhlásit odběr",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Neodhlašovat"
+            }
+          },
+          "core/locales/cs/app.ftl": {
+            "source_sha256": "ad00aeeabcaeeb1a154ec8cea0e3b70b0154b8305aa5cac8cdd5520dfce58aeb",
+            "comparison_sha256": "968d358a0f7926d517eb766812bfb41e6f2a68b3dd9458b3edeb68da819a0547",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Neodhlašovat"
+            }
+          },
+          "core/locales/da/core.ftl": {
+            "source_sha256": "faa7427e0cfcfeae5462a91d8741c3782c6170ae612caa5af01d48c91546470b",
+            "comparison_sha256": "35a86bb9f3542fa7b2a437ddf71f05424854b796281d02961d4ad4cfa47eb9d2",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Kunne ikke afmelde listen for »{ $subject }«: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Du afmeldte ikke { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } vil afmelde dig fra en mailingliste\n   *[other] { $program } vil afmelde dig fra { $count } mailinglister\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic beder listen herunder om at holde op med at sende til dig, på den måde med ét klik, som den tilbyder. Der sendes ikke andet, og de meddelelser, du har, bliver, hvor de er.\n   *[other] Inbox Classic beder hver liste herunder om at holde op med at sende til dig, på den måde med ét klik, som listen tilbyder. Der sendes ikke andet, og de meddelelser, du har, bliver, hvor de er.\n}\n",
+              "agent-level-organize": "agent-level-organize = Organisere mail: læst/ulæst, flag, uønsket, flytning, arkivering, nye mapper, sletning til Slettet post og afmelding af mailinglister, når du siger ja"
+            }
+          },
+          "core/locales/da/windows.ftl": {
+            "source_sha256": "61f89d05b510c9fdc8cb844bef55b3d5f68d55a5e9dad20285e28720189fb2b6",
+            "comparison_sha256": "c874c2132feadd6a1cb03736bc17d33418bbd3398ef2e62cc6720b1908d77162",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Afmeld",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = Afmeld &ikke"
+            }
+          },
+          "core/locales/da/app.ftl": {
+            "source_sha256": "12d41770b039b03c14b551dd68bf34f48b869cef1050c26a46c8778690e8da00",
+            "comparison_sha256": "8338c1b9ac99cb4c6ad0fa70ddb2fb5d6a490d31598eec66157f1165454c66b1",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Afmeld ikke"
+            }
+          },
+          "core/locales/de/core.ftl": {
+            "source_sha256": "18fd80273fb1a3d58be5ff04fb799298874266d42ea2dd6d86fbdaf7b909a079",
+            "comparison_sha256": "b91224b783883801433c0c09fa6e07e6821ae6f2a19e786995788ce7e383fae9",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Mailingliste der Nachricht „{ $subject }“ konnte nicht abbestellt werden: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Sie haben { $senders } nicht abbestellt",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } möchte eine Mailingliste für Sie abbestellen\n   *[other] { $program } möchte { $count } Mailinglisten für Sie abbestellen\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic bittet die folgende Liste, Ihnen nichts mehr zu senden, auf dem Weg mit einem Klick, den sie anbietet. Sonst wird nichts gesendet, und Ihre vorhandenen Nachrichten bleiben, wo sie sind.\n   *[other] Inbox Classic bittet jede der folgenden Listen, Ihnen nichts mehr zu senden, auf dem Weg mit einem Klick, den die Liste anbietet. Sonst wird nichts gesendet, und Ihre vorhandenen Nachrichten bleiben, wo sie sind.\n}\n",
+              "agent-level-organize": "agent-level-organize = E-Mails verwalten: Lesestatus und Kennzeichnungen ändern, Junk verwalten, Nachrichten verschieben, archivieren und löschen, neue Ordner erstellen und nach Ihrer Zustimmung Mailinglisten abbestellen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte."
+            }
+          },
+          "core/locales/de/windows.ftl": {
+            "source_sha256": "732bd090c9bdadb18112a78788ddda08f5067d2bf9dced6e1c873a0e8a2b5dd3",
+            "comparison_sha256": "80cf414bfffaec92e597351abead1a760707229991fe5c22b62496496ef876dd",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Abbestellen",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Nicht abbestellen"
+            }
+          },
+          "core/locales/de/app.ftl": {
+            "source_sha256": "0bab1c0d16bfa01070bbeb1ba83481ecc587850f94babbeb968838ecc72267b5",
+            "comparison_sha256": "5ad658fe78113f706ddc4dfd15fccaa3aef08890377e6241d753c92a6db385f7",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Nicht abbestellen"
+            }
+          },
+          "core/locales/el/core.ftl": {
+            "source_sha256": "5a60a7194ae118a4b06acd40e60da630a96b6e4d8405076b764d874e00d0079c",
+            "comparison_sha256": "8ed80fcf78378a7f8d081215a1eae4445722259f5db683a7a730eb0e3a82a35a",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Δεν ήταν δυνατή η κατάργηση εγγραφής από τη λίστα του «{ $subject }»: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Δεν καταργήσατε την εγγραφή σας από: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] Το πρόγραμμα { $program } θέλει να καταργήσει την εγγραφή σας από μια λίστα αλληλογραφίας\n   *[other] Το πρόγραμμα { $program } θέλει να καταργήσει την εγγραφή σας από { $count } λίστες αλληλογραφίας\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Το Inbox Classic ζητά από τη λίστα παρακάτω να σταματήσει να σας στέλνει μηνύματα, με τον τρόπο ενός κλικ που προσφέρει. Δεν στέλνεται τίποτε άλλο, και τα μηνύματα που έχετε μένουν εκεί που είναι.\n   *[other] Το Inbox Classic ζητά από κάθε λίστα παρακάτω να σταματήσει να σας στέλνει μηνύματα, με τον τρόπο ενός κλικ που προσφέρει η λίστα. Δεν στέλνεται τίποτε άλλο, και τα μηνύματα που έχετε μένουν εκεί που είναι.\n}\n",
+              "agent-level-organize": "agent-level-organize = Οργάνωση αλληλογραφίας: κατάσταση ανάγνωσης, σημαίες, ανεπιθύμητα, μετακίνηση, αρχειοθέτηση, νέοι φάκελοι, διαγραφή στα Διαγραμμένα και κατάργηση εγγραφής από λίστες αλληλογραφίας αφού συμφωνήσετε"
+            }
+          },
+          "core/locales/el/windows.ftl": {
+            "source_sha256": "37d023381f8bd36d022096918d100dc9442567cbe9911b0ebfa2201f0035c375",
+            "comparison_sha256": "047657dcb1a74eeb9dbd9c8575292064352a71227139576e224c99fa57ce4f27",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Κατάργηση εγγραφής",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = Να &μη γίνει κατάργηση εγγραφής"
+            }
+          },
+          "core/locales/el/app.ftl": {
+            "source_sha256": "45c54097606708474363fb5798be8eb905f8c993a08fbcff2531abcc614c4b25",
+            "comparison_sha256": "edf44bc2afab8d3c758b4e87cd16373804821ff23cde6125c1bc9844a2dfd887",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Να μη γίνει κατάργηση εγγραφής"
+            }
+          },
+          "core/locales/en/core.ftl": {
+            "source_sha256": "a2f1754ab4306997b7e93a7207b2cbf47a582a937f8ea7f1e608bda8902498af",
+            "comparison_sha256": "16f82911b700dec76b7761ca4f32efcae14e3371a52d8f0d58e1382d6aa8787e",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Could not unsubscribe from the list of “{ $subject }”: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = You did not unsubscribe from { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } wants to unsubscribe you from a mailing list\n   *[other] { $program } wants to unsubscribe you from { $count } mailing lists\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [one] Inbox Classic asks the list below to stop sending to you, the one-click way it offers. Nothing else is sent, and the messages you have stay where they are.\n   *[other] Inbox Classic asks each list below to stop sending to you, the one-click way the list offers. Nothing else is sent, and the messages you have stay where they are.\n}\n",
+              "agent-level-organize": "agent-level-organize = Organize mail: read state, flags, junk, moving, archiving, new folders, deleting to Deleted Items, and leaving mailing lists after you say yes"
+            }
+          },
+          "core/locales/en/windows.ftl": {
+            "source_sha256": "8baa46684f4ae0a37d2b48948068eee4dd36865f53d3eced1c3080c592a55051",
+            "comparison_sha256": "1dbe03aef4ac591563df4512b8bd084f64a72f2cadb0e0858811680dcde0c16f",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Unsubscribe",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Don’t Unsubscribe"
+            }
+          },
+          "core/locales/en/app.ftl": {
+            "source_sha256": "1c0e8270fd8b3df65a5f3895f1306e4bc1ee0505a1cc63f4a9b6c7997746fa01",
+            "comparison_sha256": "c1421c68af7f5c78f49b945953cc0ba8dfb7bc4ef0dc6f7ebeee9956e0cccd43",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Don’t Unsubscribe"
+            }
+          },
+          "core/locales/es/core.ftl": {
+            "source_sha256": "abe9933b053b4c905dddd32fde509c2a0eb5929a00a732ec9144b25e410b5f2f",
+            "comparison_sha256": "d9771c37c09402b1f1eda65bd6da77dbf3cde653f0bd7fb194f5384c21c0925c",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = No se pudo cancelar la suscripción a la lista que envió «{ $subject }»: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Usted no canceló la suscripción a { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } quiere cancelar su suscripción a una lista de correo\n   *[other] { $program } quiere cancelar su suscripción a { $count } listas de correo\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic pide a la lista siguiente que deje de enviarle correo, mediante la opción de un solo clic que ofrece. No se envía nada más, y los mensajes que ya tiene se quedan donde están.\n   *[other] Inbox Classic pide a cada una de las listas siguientes que deje de enviarle correo, mediante la opción de un solo clic que ofrece la lista. No se envía nada más, y los mensajes que ya tiene se quedan donde están.\n}\n",
+              "agent-level-organize": "agent-level-organize = Organizar el correo: marcar como leído o no leído, añadir marcas, gestionar el correo no deseado, mover y archivar mensajes, crear carpetas, enviar mensajes a Elementos eliminados y cancelar suscripciones a listas de correo cuando usted lo apruebe"
+            }
+          },
+          "core/locales/es/windows.ftl": {
+            "source_sha256": "a0f493bda7d999e6e7717cadb367777151d1ab04674f218130b0b3679f9b6754",
+            "comparison_sha256": "e781e321f89171cd1329260b1261bd9081ef947e18d206a8206fecfd1436b576",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Cancelar suscripción",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &No cancelar suscripción"
+            }
+          },
+          "core/locales/es/app.ftl": {
+            "source_sha256": "4849f82a60adac4bf33e2f9544da8335dcf7c53a088f588f8661fe8e60cd1bd4",
+            "comparison_sha256": "ea92c5e119272df792c1dbfb883363b09209e6a0eff1f9463efff42d63eab7be",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = No cancelar suscripción"
+            }
+          },
+          "core/locales/et/core.ftl": {
+            "source_sha256": "2634f1200fb5ac29a9e10a0dbb4e2fde3fb5dcfa0cf6f404ce224842fa70bbc1",
+            "comparison_sha256": "bb4c3968c7aa2c06b64213b962428681d594c59efc3a673dd12e5d3fc0a83a0f",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Kirja „{ $subject }“ saatnud meililisti tellimusest ei õnnestunud loobuda: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Te ei loobunud tellimusest: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } soovib teie nimel loobuda ühe meililisti tellimusest\n   *[other] { $program } soovib teie nimel loobuda { $count } meililisti tellimusest\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic palub allolevalt meililistilt lõpetada teile kirjade saatmise, kasutades listi pakutavat ühe klõpsuga viisi. Muud midagi ei saadeta ja teie olemasolevad kirjad jäävad oma kohale.\n   *[other] Inbox Classic palub igal alloleval meililistil lõpetada teile kirjade saatmise, kasutades listi pakutavat ühe klõpsuga viisi. Muud midagi ei saadeta ja teie olemasolevad kirjad jäävad oma kohale.\n}\n",
+              "agent-level-organize": "agent-level-organize = Hallata e-posti: märkida kirju loetuks või lugemata kirjadeks, lisada lippe, hallata rämpsposti, teisaldada ja arhiveerida kirju, luua uusi kaustu, viia kirju kausta Kustutatud kirjad ning teie nõusolekul loobuda meililistide tellimusest"
+            }
+          },
+          "core/locales/et/windows.ftl": {
+            "source_sha256": "c386e8b0d7f88f0e911d3cde58865f9fd147153e4fb55d1a9d4e626dc700a82d",
+            "comparison_sha256": "c06b1126418d0953b5b0b70ec72322c88c25264c44820f1ae42045cd61043a0a",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Loobu tellimusest",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = Ä&ra loobu tellimusest"
+            }
+          },
+          "core/locales/et/app.ftl": {
+            "source_sha256": "9bb922d37f995ccad38a07fb9e63ff399092d01f1d898a023fbde02a7f09b80e",
+            "comparison_sha256": "04335b5613da584f099f7f1f0ead1d25d4ff03bd10ccab7a7c73a97158fe6877",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Ära loobu tellimusest"
+            }
+          },
+          "core/locales/fi/core.ftl": {
+            "source_sha256": "d3f59ac42cbfbf7992d2d214cc9a1d0069277835336c9643c85e5a83cd990273",
+            "comparison_sha256": "f9f444897faf1136880a1a23befe7c0bb908f6a9eb9394c48c08dda9cb3be6e4",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Tilauksen peruuttaminen listalta, jolta tuli ”{ $subject }”, epäonnistui: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Et peruuttanut tilausta: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } haluaa peruuttaa tilauksesi postituslistalta\n   *[other] { $program } haluaa peruuttaa tilauksesi { $count } postituslistalta\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic pyytää alla olevaa listaa lopettamaan lähettämisen sinulle sillä yhden napsautuksen tavalla, jota lista tarjoaa. Mitään muuta ei lähetetä, ja jo saamasi viestit pysyvät paikoillaan.\n   *[other] Inbox Classic pyytää jokaista alla olevaa listaa lopettamaan lähettämisen sinulle sillä yhden napsautuksen tavalla, jota lista tarjoaa. Mitään muuta ei lähetetä, ja jo saamasi viestit pysyvät paikoillaan.\n}\n",
+              "agent-level-organize": "agent-level-organize = Järjestellä postia: luettu-tila, liput, roskaposti, siirtäminen, arkistointi, uudet kansiot, poistaminen Poistetut-kansioon ja postituslistojen tilausten peruuttaminen, kun hyväksyt sen"
+            }
+          },
+          "core/locales/fi/windows.ftl": {
+            "source_sha256": "fba8803f1541f73f45c21bc789d0542957de68f354b92f23b99c87f1cfd27655",
+            "comparison_sha256": "4887911fe15d1dae4bdb439b566e567087a304f8f521cd8a3eb3880ce09a066a",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Peruuta tilaus",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = Ä&lä peruuta tilausta"
+            }
+          },
+          "core/locales/fi/app.ftl": {
+            "source_sha256": "76b66a08616beaeba3d13a95d4a0648307309a449000c34bf36f7641ac17aa54",
+            "comparison_sha256": "1a0c8bba7afbf0b36eeac7f89c50cb03d2849784ee94d2ba4ee1540ec5599b15",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Älä peruuta tilausta"
+            }
+          },
+          "core/locales/fr/core.ftl": {
+            "source_sha256": "4f3bbb44f3751ebf80b9a85b589e172a1c752f4d7306c976bf920018b5a1fc6c",
+            "comparison_sha256": "eeab1aa52ac26e5339884a49aa00deeb38ab80ad7c238f671300bc234b074dbd",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Impossible de se désabonner de la liste ayant envoyé « { $subject } » : { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Vous avez refusé le désabonnement de { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } souhaite vous désabonner d'une liste de diffusion\n   *[other] { $program } souhaite vous désabonner de { $count } listes de diffusion\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic demande à la liste ci-dessous de ne plus vous écrire, par le désabonnement en un clic qu'elle propose. Rien d'autre n'est envoyé, et les messages que vous avez restent où ils sont.\n   *[other] Inbox Classic demande à chaque liste ci-dessous de ne plus vous écrire, par le désabonnement en un clic qu'elle propose. Rien d'autre n'est envoyé, et les messages que vous avez restent où ils sont.\n}\n",
+              "agent-level-organize": "agent-level-organize = Gérer le courrier : marquer comme lu ou non lu, ajouter des indicateurs, gérer les indésirables, déplacer, archiver et supprimer des messages, créer des dossiers, et se désabonner de listes de diffusion après votre accord. Les messages supprimés vont dans Éléments supprimés."
+            }
+          },
+          "core/locales/fr/windows.ftl": {
+            "source_sha256": "22a507c92cedc8868d959a65d541ecb75dc405f43eb2d1f9fa87d41043323372",
+            "comparison_sha256": "2fd50fbaf5821cbcf4fbc323c121f176c59110b785c1f5a2504f339cc51376eb",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Se désabonner",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Ne pas se désabonner"
+            }
+          },
+          "core/locales/fr/app.ftl": {
+            "source_sha256": "ca938cdde47b031eef2a78612e1b73f45624b270a3ebc5b88a35cdf4ef47dd42",
+            "comparison_sha256": "7c1d7054e55a17d4b06f912235baa328c29fba0d1d3139c2bf0a3416206d8a89",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Ne pas se désabonner"
+            }
+          },
+          "core/locales/hr/core.ftl": {
+            "source_sha256": "8bbe1a0106025aef7d9697bd3806b8db9f0e6d8f8851439bcc5f63ebfb84a3aa",
+            "comparison_sha256": "7bf5f0d2a9eebd494029b1bb6d5e2bfff03ad3d2bed4e5b3c75851f7aa758463",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Otkazivanje pretplate na popis poruke „{ $subject }“ nije uspjelo: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Niste otkazali pretplatu na { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } želi otkazati vašu pretplatu na { $count } popis za slanje\n    [few] { $program } želi otkazati vašu pretplatu na { $count } popisa za slanje\n   *[other] { $program } želi otkazati vašu pretplatu na { $count } popisa za slanje\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic traži od popisa u nastavku da vam prestane slati poruke, na način jednim klikom koji nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju gdje jesu.\n   *[other] Inbox Classic traži od svakog popisa u nastavku da vam prestane slati poruke, na način jednim klikom koji popis nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju gdje jesu.\n}\n",
+              "agent-level-organize": "agent-level-organize = Organiziranje pošte: stanje pročitanosti, zastavice, neželjena pošta, premještanje, arhiviranje, nove mape, brisanje u Izbrisane stavke i otkazivanje pretplate na popise za slanje nakon vašeg odobrenja"
+            }
+          },
+          "core/locales/hr/windows.ftl": {
+            "source_sha256": "a4cee3870cc2c78e8f6a8c51113ef46f03015780cad020211dab8feb4f9523ec",
+            "comparison_sha256": "74b9110db51764230b23c81f382b374aaf5329af244b87318641aaddbfccaa47",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Otkaži pretplatu",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Nemoj otkazati pretplatu"
+            }
+          },
+          "core/locales/hr/app.ftl": {
+            "source_sha256": "6c7f16ac4b31153c56be82ed9aab0a6930f5563d8f7f45827c74262136838d37",
+            "comparison_sha256": "c0c6a68a8388fbcffba3f2958137bbf755de4ae1dc6b2715501cd5cc6d8801c2",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Nemoj otkazati pretplatu"
+            }
+          },
+          "core/locales/hu/core.ftl": {
+            "source_sha256": "d8d5c909766906605acbb480863c6f272b6408d8b5a57eb2163bdc00e84672f3",
+            "comparison_sha256": "5b7fd3ff7ae169491dcb4e7471dc2a245ec5e81178ad8af848845e5f870da4c6",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Sikertelen leiratkozás a levelezőlistáról („{ $subject }”): { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Nem iratkozott le innen: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } le szeretné iratkoztatni Önt egy levelezőlistáról\n   *[other] { $program } le szeretné iratkoztatni Önt { $count } levelezőlistáról\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Az Inbox Classic megkéri az alábbi listát, hogy ne küldjön Önnek több levelet, a lista által kínált egykattintásos módon. Mást nem küld el, és a meglévő üzenetei a helyükön maradnak.\n   *[other] Az Inbox Classic az alábbi listák mindegyikét megkéri, hogy ne küldjön Önnek több levelet, a lista által kínált egykattintásos módon. Mást nem küld el, és a meglévő üzenetei a helyükön maradnak.\n}\n",
+              "agent-level-organize": "agent-level-organize = Levelek rendezése: olvasottság, jelölők, levélszemét, áthelyezés, archiválás, új mappák, törlés a Törölt elemek mappába, valamint leiratkozás levelezőlistákról az Ön jóváhagyása után"
+            }
+          },
+          "core/locales/hu/windows.ftl": {
+            "source_sha256": "425e173a0d098421cfb11f48a87f10429ba805f6c3fec104627d78855e8383db",
+            "comparison_sha256": "33af41347d66be5e9d896d1379e1e0e2594e7f2517d331f5273ec664dba0d9d5",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Leiratkozás",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Nincs leiratkozás"
+            }
+          },
+          "core/locales/hu/app.ftl": {
+            "source_sha256": "02e6dd9af4a7398eb1bd6498079463fbe3f83da51497b146256ebf6ef95caee8",
+            "comparison_sha256": "19841031a9c06184cb29cc3325b58089ff6318e3201e8cb6dd6882b52207468c",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Nincs leiratkozás"
+            }
+          },
+          "core/locales/it/core.ftl": {
+            "source_sha256": "4bed9867bbd670b4fa53dd104022a8ed0ad7de383664249f94bae602a5582453",
+            "comparison_sha256": "e6c91c269a2b077a15b61e05cc6013cefd31a1bc55de89082a3f769bf10d4b37",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Impossibile annullare l’iscrizione alla lista di “{ $subject }”: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Non hai annullato l’iscrizione a { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } vuole annullare la tua iscrizione a una mailing list\n   *[other] { $program } vuole annullare la tua iscrizione a { $count } mailing list\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic chiede alla lista qui sotto di smettere di scriverti, con il metodo a un clic che offre. Non viene inviato nient’altro, e i messaggi che hai restano dove sono.\n   *[other] Inbox Classic chiede a ogni lista qui sotto di smettere di scriverti, con il metodo a un clic offerto dalla lista. Non viene inviato nient’altro, e i messaggi che hai restano dove sono.\n}\n",
+              "agent-level-organize": "agent-level-organize = Organizzare la posta: stato di lettura, contrassegni, posta indesiderata, spostamento, archiviazione, nuove cartelle, eliminazione in Posta eliminata e annullamento dell’iscrizione alle mailing list dopo il tuo sì"
+            }
+          },
+          "core/locales/it/windows.ftl": {
+            "source_sha256": "3fdf9d72e6b957cf5636d3bb85c148c36e3d0ee53943b733f0de20dcbbc5de6b",
+            "comparison_sha256": "8400c0a3577d6da033fc00d9b6e563142f99b08988c5575083bd7b3728014008",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Annulla iscrizione",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Non annullare l’iscrizione"
+            }
+          },
+          "core/locales/it/app.ftl": {
+            "source_sha256": "328df78779a336e59eb7ad248d97a94475144749bb0645b9b265003518de1a78",
+            "comparison_sha256": "5a69174e898f1fae99df2b040dc2054520df5f74c44ad92d8b3f898d410d7a47",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Non annullare l’iscrizione"
+            }
+          },
+          "core/locales/lt/core.ftl": {
+            "source_sha256": "2e83761cc3a1f1f242b299dacdc3124b1e6b87fc5b792cf11483902f999b9a8e",
+            "comparison_sha256": "8fdb56b72ac0d592e065a0f2bf68d5a5e6df85c451a77696d0129eeaf9050816",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Nepavyko atsisakyti „{ $subject }“ adresatų sąrašo: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Neatsisakėte prenumeratos: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašo prenumeratos\n    [few] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašų prenumeratos\n   *[other] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašų prenumeratos\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic paprašo toliau nurodyto sąrašo nebesiųsti jums laiškų tuo vieno spustelėjimo būdu, kurį jis siūlo. Daugiau nieko nesiunčiama, o jūsų turimi laiškai lieka ten, kur yra.\n   *[other] Inbox Classic paprašo kiekvieno toliau nurodyto sąrašo nebesiųsti jums laiškų tuo vieno spustelėjimo būdu, kurį siūlo sąrašas. Daugiau nieko nesiunčiama, o jūsų turimi laiškai lieka ten, kur yra.\n}\n",
+              "agent-level-organize": "agent-level-organize = Tvarkyti paštą: skaitymo būsena, vėliavėlės, nepageidaujami laiškai, perkėlimas, archyvavimas, nauji aplankai, panaikinimas į „Panaikinti laiškai“ ir adresatų sąrašų prenumeratos atsisakymas jums sutikus"
+            }
+          },
+          "core/locales/lt/windows.ftl": {
+            "source_sha256": "5ec9757bc25cd6d0bf3407e0827b7c6dd9f09fcc53a89dbaf148cc92fa8feec4",
+            "comparison_sha256": "bb5368b2a6f128fcb1eec202483590e254a034ac959b00c2438c3a8e32b62a07",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Atsisakyti prenumeratos",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Neatsisakyti prenumeratos"
+            }
+          },
+          "core/locales/lt/app.ftl": {
+            "source_sha256": "f03a21fc34bc5bfd419ad00ed92ed2dacf3866e8d29612b818393662bd8d25ec",
+            "comparison_sha256": "dcb7765360266fe5a35c34fa6aec537737db0657546ca640f3c03df795d41144",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Neatsisakyti prenumeratos"
+            }
+          },
+          "core/locales/lv/core.ftl": {
+            "source_sha256": "3edf91f34de4e1a42ae2b8d46e3881ae292be831f99694b625eb564720038c29",
+            "comparison_sha256": "c88a2a159132bc8ebd8eb346f56cd44c01d475ffda3678dd4db1854ba774d129",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Neizdevās atteikties no „{ $subject }” adresātu saraksta: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Jūs neatteicāties no abonēšanas: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [zero] { $program } vēlas jūsu vārdā atteikties no { $count } adresātu sarakstiem\n    [one] { $program } vēlas jūsu vārdā atteikties no { $count } adresātu saraksta\n   *[other] { $program } vēlas jūsu vārdā atteikties no { $count } adresātu sarakstiem\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic lūdz tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot tā piedāvāto atteikšanos ar vienu klikšķi. Nekas cits netiek sūtīts, un jūsu ziņojumi paliek savās vietās.\n   *[other] Inbox Classic lūdz katram tālāk norādītajam sarakstam pārtraukt jums sūtīt ziņojumus, izmantojot saraksta piedāvāto atteikšanos ar vienu klikšķi. Nekas cits netiek sūtīts, un jūsu ziņojumi paliek savās vietās.\n}\n",
+              "agent-level-organize": "agent-level-organize = Kārtot pastu: lasīšanas stāvoklis, karodziņi, nevēlamais pasts, pārvietošana, arhivēšana, jaunas mapes, dzēšana uz Izdzēstie vienumi un atteikšanās no adresātu sarakstiem pēc jūsu piekrišanas"
+            }
+          },
+          "core/locales/lv/windows.ftl": {
+            "source_sha256": "592cd053295dd2c6ba7c36752db1a0b6da5eff9eb6dc84f56a36e39b2d42bc25",
+            "comparison_sha256": "eab78ccc269e4604f1cda93966c5d0ccab8cdac389debcebe94b5ad5bcaf8032",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Atteikties no abonēšanas",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Neatteikties"
+            }
+          },
+          "core/locales/lv/app.ftl": {
+            "source_sha256": "474b9b10b07dcd9c980f4af66994c2c7db565ef3de37c6188f632a7ec84d037b",
+            "comparison_sha256": "319ac436b35d93caef346e10b8ca379da825043ae2f9de78102fef8e3e1e3124",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Neatteikties"
+            }
+          },
+          "core/locales/nb/core.ftl": {
+            "source_sha256": "14376984b8cd84ae12a975404b536f36baaf1c6235969378d9a7e8fbc6ec30b1",
+            "comparison_sha256": "fd98dd1f618212c77559a741d920bbcb819c023ac8b9955606ed59f362050536",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Kunne ikke melde av listen til «{ $subject }»: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Du meldte deg ikke av { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } vil melde deg av en e-postliste\n   *[other] { $program } vil melde deg av { $count } e-postlister\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic ber listen nedenfor om å slutte å sende til deg, med ettklikksavmeldingen den tilbyr. Ingenting annet sendes, og meldingene du har, blir liggende der de er.\n   *[other] Inbox Classic ber hver liste nedenfor om å slutte å sende til deg, med ettklikksavmeldingen listen tilbyr. Ingenting annet sendes, og meldingene du har, blir liggende der de er.\n}\n",
+              "agent-level-organize": "agent-level-organize = Organisere e-post: lest-status, flagg, søppelpost, flytting, arkivering, nye mapper, sletting til Slettede elementer, og avmelding fra e-postlister etter at du sier ja"
+            }
+          },
+          "core/locales/nb/windows.ftl": {
+            "source_sha256": "1aae135900b40149a831a8425738b1f1970785c4f7f178642b637a23fecaac36",
+            "comparison_sha256": "506b8ca731a8a787e3b68e1c4bc050ad42c71577d578243878e10a7744e0ced6",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Meld av",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Ikke meld av"
+            }
+          },
+          "core/locales/nb/app.ftl": {
+            "source_sha256": "cacf1bead749c8b736ca0ac122464c713c7474871d773b125a1a623a32e62146",
+            "comparison_sha256": "9b2e928a09b4d69aa66c62c1e4f17144c0c94e01dab2b8c67dbe30a0194f1719",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Ikke meld av"
+            }
+          },
+          "core/locales/nl/core.ftl": {
+            "source_sha256": "ce9e9abc569483e0c2d0d0d10d5e5dfc5182122cfff4d7416830d8d1e711c674",
+            "comparison_sha256": "c53c686eb8355626ad21a5de618b72cb3251290c2a86065eaa9958c90d509d12",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Afmelden bij de lijst van “{ $subject }” is mislukt: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Je hebt je niet afgemeld bij { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } wil je afmelden bij een mailinglijst\n   *[other] { $program } wil je afmelden bij { $count } mailinglijsten\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic vraagt de lijst hieronder om je niets meer te sturen, via de afmelding met één klik die de lijst aanbiedt. Er wordt verder niets verzonden, en de berichten die je hebt, blijven waar ze zijn.\n   *[other] Inbox Classic vraagt elke lijst hieronder om je niets meer te sturen, via de afmelding met één klik die de lijst aanbiedt. Er wordt verder niets verzonden, en de berichten die je hebt, blijven waar ze zijn.\n}\n",
+              "agent-level-organize": "agent-level-organize = E-mail ordenen: gelezen of ongelezen, markeringen, ongewenst, verplaatsen, archiveren, nieuwe mappen, verwijderen naar Verwijderde items, en afmelden bij mailinglijsten nadat je ja zegt"
+            }
+          },
+          "core/locales/nl/windows.ftl": {
+            "source_sha256": "837fcf2a063cfb81b50a91fe8837cde6f38f64f080a6478c1941eed2ca12195a",
+            "comparison_sha256": "53649113a8b5d1824d9fedae1c61a293e26777942f389cfc1db6e3dd37cc157f",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Afmelden",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Niet afmelden"
+            }
+          },
+          "core/locales/nl/app.ftl": {
+            "source_sha256": "d23dcf5058101e3c8e532c0e5feea196204c53f356acf13c01f102d8e473f3cf",
+            "comparison_sha256": "f0236b3846475bf7be5e060ce30d6eaccc60e8310e876667ff9bb6c1771a9320",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Niet afmelden"
+            }
+          },
+          "core/locales/pl/core.ftl": {
+            "source_sha256": "a1f850f0d345ca34022d3c2b42ec775b203fd2ae488c9cb39c143ef7b6a70da1",
+            "comparison_sha256": "498b42c041b31dbfd2eb29518e441f59cb49ae0cf948c2e6b6f57c257fa828c8",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Nie udało się wypisać z listy „{ $subject }”: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Nie wyrażono zgody na wypisanie z list: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } chce wypisać Cię z listy mailingowej\n    [few] { $program } chce wypisać Cię z { $count } list mailingowych\n    [many] { $program } chce wypisać Cię z { $count } list mailingowych\n   *[other] { $program } chce wypisać Cię z { $count } list mailingowych\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic prosi poniższą listę o zaprzestanie wysyłania Ci wiadomości, korzystając z oferowanego przez nią wypisania jednym kliknięciem. Nic innego nie jest wysyłane, a Twoje wiadomości pozostają tam, gdzie są.\n   *[other] Inbox Classic prosi każdą z poniższych list o zaprzestanie wysyłania Ci wiadomości, korzystając z oferowanego przez listę wypisania jednym kliknięciem. Nic innego nie jest wysyłane, a Twoje wiadomości pozostają tam, gdzie są.\n}\n",
+              "agent-level-organize": "agent-level-organize = Porządkowanie poczty: stan przeczytania, flagi, śmieci, przenoszenie, archiwizowanie, nowe foldery, usuwanie do Elementów usuniętych oraz wypisywanie z list mailingowych po Twojej zgodzie"
+            }
+          },
+          "core/locales/pl/windows.ftl": {
+            "source_sha256": "fb931d76423ac351e6ac78921873c80d689e7a41f0633d537bdc4b898d621848",
+            "comparison_sha256": "20e126045c70bb3867ee5fe1cb3802261313e416f53742336743c857d270def7",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Wypisz się",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Nie wypisuj"
+            }
+          },
+          "core/locales/pl/app.ftl": {
+            "source_sha256": "b50f180642afe06b064fc662862e010b91f26f11dea536affaea02961d4fab79",
+            "comparison_sha256": "2328c407e253b851b53e4691aae311dddb606998f3cd844c609f9b83eaf2ce21",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Nie wypisuj"
+            }
+          },
+          "core/locales/pt/core.ftl": {
+            "source_sha256": "d66225a1a0598ca4b3b1547956aef525d1218a439e6109d5ea60c26d3517c6f7",
+            "comparison_sha256": "355f896a75ae3e52e26664563f19b6680d0719690b1d007528fccb6087b6d1a6",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Não foi possível cancelar a subscrição da lista de «{ $subject }»: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Não cancelou a subscrição de { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } quer cancelar a sua subscrição de uma lista de correio\n   *[other] { $program } quer cancelar a sua subscrição de { $count } listas de correio\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] O Inbox Classic pede à lista abaixo que deixe de lhe enviar mensagens, através do cancelamento com um clique que ela oferece. Não é enviado mais nada, e as mensagens que tem ficam onde estão.\n   *[other] O Inbox Classic pede a cada lista abaixo que deixe de lhe enviar mensagens, através do cancelamento com um clique que a lista oferece. Não é enviado mais nada, e as mensagens que tem ficam onde estão.\n}\n",
+              "agent-level-organize": "agent-level-organize = Organizar o correio: estado de leitura, sinalizadores, lixo, mover, arquivar, novas pastas, eliminar para Itens Eliminados e sair de listas de correio depois de dizer que sim"
+            }
+          },
+          "core/locales/pt/windows.ftl": {
+            "source_sha256": "b73774eb5d961e84cde66e7d4888296a83924b13a60502b9dbaf0102f90fa71e",
+            "comparison_sha256": "bedb8cbd03c744c5c4f4a0698fa16cea9cabe5663729022335e2c7de9317eca6",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Cancelar subscrição",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Não cancelar subscrição"
+            }
+          },
+          "core/locales/pt/app.ftl": {
+            "source_sha256": "f1cfe3e6529c5b6c9de719ca2e78fbe370d621427cd520ab1d66e77382c0cccd",
+            "comparison_sha256": "b731112d2069da7e1b29271c4259cee860b7e989ca3be8c74307dee76afa5876",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Não cancelar subscrição"
+            }
+          },
+          "core/locales/pt-BR/core.ftl": {
+            "source_sha256": "1028e96b850515e4a2afb6aa2107414653ee892f52137d829111d68675b19fbe",
+            "comparison_sha256": "37e163d195e68444030d92ea2c5514bc9768e4dbb404575f18ab0fd2c63e1001",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Não foi possível cancelar a inscrição na lista de “{ $subject }”: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Você não cancelou sua inscrição em { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } quer cancelar sua inscrição em uma lista de e-mails\n   *[other] { $program } quer cancelar sua inscrição em { $count } listas de e-mails\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] O Inbox Classic pede à lista abaixo que pare de enviar mensagens para você, pelo cancelamento com um clique que ela oferece. Nada mais é enviado, e as mensagens que você tem ficam onde estão.\n   *[other] O Inbox Classic pede a cada lista abaixo que pare de enviar mensagens para você, pelo cancelamento com um clique que a lista oferece. Nada mais é enviado, e as mensagens que você tem ficam onde estão.\n}\n",
+              "agent-level-organize": "agent-level-organize = Organizar os e-mails: status de leitura, sinalizadores, lixo, mover, arquivar, novas pastas, excluir para Itens Excluídos e sair de listas de e-mails depois que você disser sim"
+            }
+          },
+          "core/locales/pt-BR/windows.ftl": {
+            "source_sha256": "96316cf354adb9119eb871a5b7a35f8bdd1b43226861e11acbc4547f0ffbd361",
+            "comparison_sha256": "0af2480d8ae226080377b8ca8999eca62a1a3e4f22983a780cdb4cf6924a46fd",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Cancelar inscrição",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Não cancelar inscrição"
+            }
+          },
+          "core/locales/pt-BR/app.ftl": {
+            "source_sha256": "58eadeda88a03825c949e9805fe61d8024aa2e946d25cf67b93859bdf2a4c22e",
+            "comparison_sha256": "6ae44193b4bc716b4cf4beee27672bbc6d8c83c05d9f815faec3725a034211f5",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Não cancelar inscrição"
+            }
+          },
+          "core/locales/ro/core.ftl": {
+            "source_sha256": "088f98ccebd0d1a462930991391f2a9ddbd50d455b2faa247fba4320fae1688b",
+            "comparison_sha256": "f2e7b552140a37bddfb8020b8b01f4095f7e309f7b1379aee3b4c58955084a74",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Dezabonarea de la lista lui „{ $subject }” nu a reușit: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Nu v-ați dezabonat de la { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } vrea să vă dezaboneze de la o listă de corespondență\n    [few] { $program } vrea să vă dezaboneze de la { $count } liste de corespondență\n   *[other] { $program } vrea să vă dezaboneze de la { $count } de liste de corespondență\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic cere listei de mai jos să nu vă mai trimită mesaje, prin dezabonarea cu un clic pe care o oferă. Nu se trimite nimic altceva, iar mesajele pe care le aveți rămân unde sunt.\n   *[other] Inbox Classic cere fiecărei liste de mai jos să nu vă mai trimită mesaje, prin dezabonarea cu un clic pe care o oferă lista. Nu se trimite nimic altceva, iar mesajele pe care le aveți rămân unde sunt.\n}\n",
+              "agent-level-organize": "agent-level-organize = Organizarea e-mailului: stare de citire, semnalizări, nedorite, mutare, arhivare, foldere noi, ștergere în Elemente șterse și dezabonare de la liste de corespondență după ce sunteți de acord"
+            }
+          },
+          "core/locales/ro/windows.ftl": {
+            "source_sha256": "4c0a4538ae7af0df2a4251c7f6a066df1e41940670fcfd0f35398fad82e105bc",
+            "comparison_sha256": "3f01a6db37cbd7ab9740c1fda9523adea1ae88fcacfc0afb40c27b4ca9a854c4",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Dezabonare",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Nu vă dezabonați"
+            }
+          },
+          "core/locales/ro/app.ftl": {
+            "source_sha256": "37ded1473ba08b2499506f4d6c02b584f93e97d5412c5b111789734b32ad04fe",
+            "comparison_sha256": "50b2904bd36ab0c3bcc17acba2ea1ef132e591ba3589aacc0e0bb745d56a0cb7",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Nu vă dezabonați"
+            }
+          },
+          "core/locales/ru/core.ftl": {
+            "source_sha256": "3f5e768132bb1521bb400ab99adb82c93f7a8826a5a954108f288d8e8daf5ea6",
+            "comparison_sha256": "4bcc4ffedcb660b5fe86ac69beabc7a766daeb5cfb1381e6fe929605397e2e54",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Не удалось отписаться от рассылки «{ $subject }»: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Вы не стали отписываться от рассылок: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [1] { $program } хочет отписать вас от рассылки\n    [one] { $program } хочет отписать вас от { $count } рассылки\n    [few] { $program } хочет отписать вас от { $count } рассылок\n    [many] { $program } хочет отписать вас от { $count } рассылок\n   *[other] { $program } хочет отписать вас от { $count } рассылки\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic попросит рассылку ниже больше не присылать вам писем, используя отписку в один щелчок, которую она предлагает. Больше ничего не отправляется, а ваши сообщения остаются на своих местах.\n   *[other] Inbox Classic попросит каждую рассылку ниже больше не присылать вам писем, используя отписку в один щелчок, которую предлагает рассылка. Больше ничего не отправляется, а ваши сообщения остаются на своих местах.\n}\n",
+              "agent-level-organize": "agent-level-organize = Упорядочивание почты: прочитанность, флажки, нежелательная почта, перемещение, архивирование, новые папки, удаление в папку «Удаленные» и отписка от рассылок после вашего согласия"
+            }
+          },
+          "core/locales/ru/windows.ftl": {
+            "source_sha256": "174c80410d6c6f87e2c291c1c592ee88f5c3d2e623f09facb8b0f58ba29a0057",
+            "comparison_sha256": "879b8f6d5b5590cfb2c07b6c6155895796e77fbdf459926c51fa223a3f5e3d3d",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Отписаться",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Не отписываться"
+            }
+          },
+          "core/locales/ru/app.ftl": {
+            "source_sha256": "5f517d330c403983c40678fd40d840f14ef8ac9396cf613d49744073060e93fb",
+            "comparison_sha256": "6a97039e76ed021d2e2c646eeaa9d2fe6aa453d23ec93ffbaf84ecc383908414",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Не отписываться"
+            }
+          },
+          "core/locales/sk/core.ftl": {
+            "source_sha256": "afd6163dcb4bb1fd9122dffaf646f7dc8fab62d4bcbf9b4fd89015a68d308604",
+            "comparison_sha256": "5fd463a4f1c91fc2a14fc3bf7cb49c5afb52d78b62e82e1f3c5ffef74ae4bb97",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Nepodarilo sa odhlásiť zo zoznamu adresátov správy „{ $subject }“: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Odhlásenie zo zoznamov ste odmietli: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } vás chce odhlásiť zo zoznamu adresátov\n    [few] { $program } vás chce odhlásiť z { $count } zoznamov adresátov\n   *[other] { $program } vás chce odhlásiť z { $count } zoznamov adresátov\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic požiada zoznam nižšie, aby vám prestal posielať správy, a to odhlásením jedným kliknutím, ktoré ponúka. Nič iné sa neodošle a správy, ktoré máte, zostanú tam, kde sú.\n   *[other] Inbox Classic požiada každý zoznam nižšie, aby vám prestal posielať správy, a to odhlásením jedným kliknutím, ktoré zoznam ponúka. Nič iné sa neodošle a správy, ktoré máte, zostanú tam, kde sú.\n}\n",
+              "agent-level-organize": "agent-level-organize = Usporadúvať poštu: stav prečítania, príznaky, nevyžiadaná pošta, presúvanie, archivovanie, nové priečinky, odstraňovanie do priečinka Odstránená pošta a po vašom súhlase odhlasovanie zo zoznamov adresátov"
+            }
+          },
+          "core/locales/sk/windows.ftl": {
+            "source_sha256": "d14942da5d908619b86c4cdfd1a35fcffa2585abe77f2ede4f08fbdb1dc5aa94",
+            "comparison_sha256": "9acf79965091894a3451b78d5455654554e97f4d1d24e32475fa7e593b1c3db6",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Odhlásiť odber",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Neodhlásiť"
+            }
+          },
+          "core/locales/sk/app.ftl": {
+            "source_sha256": "c0515f4a4e956615b0bfd292e111f40b6077c24a8c5537b22518e5a365618f1c",
+            "comparison_sha256": "ee7246996791f20bc1c1a8bde8276509d7487ad79434e1f0a386a0becc2459c8",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Neodhlásiť"
+            }
+          },
+          "core/locales/sl/core.ftl": {
+            "source_sha256": "6b637ee53c7afe28c143395466dd85aa76ca8a8a861f47a6016318a0e99cf27e",
+            "comparison_sha256": "9787b443035e1b48b59cab003b34a97545fc2a8930b2ee230fce0b8b367264ac",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Odjava s seznama sporočila »{ $subject }« ni uspela: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Odjavo s seznamov ste zavrnili: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [1] { $program } vas želi odjaviti s poštnega seznama\n    [one] { $program } vas želi odjaviti s poštnih seznamov ({ $count })\n    [two] { $program } vas želi odjaviti s poštnih seznamov ({ $count })\n    [few] { $program } vas želi odjaviti s poštnih seznamov ({ $count })\n   *[other] { $program } vas želi odjaviti s poštnih seznamov ({ $count })\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic spodnji seznam prosi, naj vam preneha pošiljati, in sicer z odjavo z enim klikom, ki jo ponuja. Nič drugega se ne pošlje in sporočila, ki jih imate, ostanejo, kjer so.\n   *[other] Inbox Classic vsak spodnji seznam prosi, naj vam preneha pošiljati, in sicer z odjavo z enim klikom, ki jo seznam ponuja. Nič drugega se ne pošlje in sporočila, ki jih imate, ostanejo, kjer so.\n}\n",
+              "agent-level-organize": "agent-level-organize = Urejanje pošte: stanje branja, zastavice, neželena pošta, premikanje, arhiviranje, nove mape, brisanje v mapo Izbrisano in odjava s poštnih seznamov po vaši potrditvi"
+            }
+          },
+          "core/locales/sl/windows.ftl": {
+            "source_sha256": "ed0101ab95e6e60fb9c1dc65134614da4a58a7a6de891d707ee99649650d5d55",
+            "comparison_sha256": "6a0db446b5240357a08989edc133be8dbce1c2b9f77d69d48f91eeb18c9732a5",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Odjava",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Ne odjavi"
+            }
+          },
+          "core/locales/sl/app.ftl": {
+            "source_sha256": "f5ad73b73f10afac90247bde81485e74c264dfe1a3fa317bac3f7bb752402d25",
+            "comparison_sha256": "7a49b7ecd09b93d788d3cd536b5ab055704d349c00e55f487021756ea32b9961",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Ne odjavi"
+            }
+          },
+          "core/locales/sr-Latn/core.ftl": {
+            "source_sha256": "7df352284df7f3ab0a7986992e3afcb47284d7feef8afe0bb693d007da1b393c",
+            "comparison_sha256": "f38acd96c4995038503690ccc62016cfaefdc803a0860b7d649bef0699538b54",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Otkazivanje pretplate na listu poruke „{ $subject }“ nije uspelo: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Niste otkazali pretplatu: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [1] { $program } želi da otkaže vašu pretplatu na listu za slanje\n    [one] { $program } želi da otkaže vašu pretplatu na { $count } listu za slanje\n    [few] { $program } želi da otkaže vašu pretplatu na { $count } liste za slanje\n   *[other] { $program } želi da otkaže vašu pretplatu na { $count } lista za slanje\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic traži od liste ispod da vam više ne šalje poruke, otkazivanjem pretplate jednim klikom koje nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju tamo gde jesu.\n   *[other] Inbox Classic traži od svake liste ispod da vam više ne šalje poruke, otkazivanjem pretplate jednim klikom koje lista nudi. Ništa drugo se ne šalje, a poruke koje imate ostaju tamo gde jesu.\n}\n",
+              "agent-level-organize": "agent-level-organize = Organizovanje pošte: stanje pročitanosti, zastavice, neželjena pošta, premeštanje, arhiviranje, nove fascikle, brisanje u fasciklu Izbrisane stavke i napuštanje lista za slanje kada vi to odobrite"
+            }
+          },
+          "core/locales/sr-Latn/windows.ftl": {
+            "source_sha256": "c2d0ce24d380c637b94312abe27a7082989878ca43dc87bc091b9c9b9d35eee7",
+            "comparison_sha256": "386163db5d7cfeb46b85289c1dac9bdebf21b221a9eb2e25a93d99551327936c",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Otkaži pretplatu",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Nemoj otkazati pretplatu"
+            }
+          },
+          "core/locales/sr-Latn/app.ftl": {
+            "source_sha256": "18c294ec090afb8a4e2de60cb582b2c17b09b2ceca942f4dffd74083edef19f4",
+            "comparison_sha256": "0aa5c1cd208d44449e830c99ec53ca48390a5fe7d4e9926f316046e7f4f08b4d",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Nemoj otkazati pretplatu"
+            }
+          },
+          "core/locales/sv/core.ftl": {
+            "source_sha256": "870808b7995d72cdabf5fa815ed156d9b1ba0e8cbae1268d0a31ec8c3cb70f1e",
+            "comparison_sha256": "e420ae2d02d82bb51c2158659755840d94902b56305aeb5a4f58843119a3f1ac",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Kunde inte avsluta prenumerationen på listan för ”{ $subject }”: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Du valde att inte avsluta prenumerationerna: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } vill avsluta din prenumeration på en e-postlista\n   *[other] { $program } vill avsluta dina prenumerationer på { $count } e-postlistor\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic ber listan nedan att sluta skicka till dig, genom den avanmälan med ett klick som den erbjuder. Inget annat skickas, och meddelandena du har ligger kvar där de är.\n   *[other] Inbox Classic ber varje lista nedan att sluta skicka till dig, genom den avanmälan med ett klick som listan erbjuder. Inget annat skickas, och meddelandena du har ligger kvar där de är.\n}\n",
+              "agent-level-organize": "agent-level-organize = Ordna e-post: läsläge, flaggor, skräppost, flytt, arkivering, nya mappar, borttagning till Borttaget och att lämna e-postlistor efter att du har sagt ja"
+            }
+          },
+          "core/locales/sv/windows.ftl": {
+            "source_sha256": "7176163dac1f0736a27ae8a7e4a42191ff92a0bcab42a733f34241b7affc5704",
+            "comparison_sha256": "ef428fc1c4e10824bd463f394694b5bb91b5b0b1962141af5d36894d75a17de7",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Avsluta prenumeration",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = Avsluta &inte"
+            }
+          },
+          "core/locales/sv/app.ftl": {
+            "source_sha256": "0c1865314a57d36b88532206ef180c32dc620fcdcbe021b254e9debdcde45f8a",
+            "comparison_sha256": "701b290f8a55e168e26f28c222a9ad551837d2c35d590fad140e0a3072de819f",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Avsluta inte"
+            }
+          },
+          "core/locales/tr/core.ftl": {
+            "source_sha256": "25e438a6bb901b8a616ed3424beff7dbde4db8b7fcc1e3453fdd9c5170b5733a",
+            "comparison_sha256": "4ea56cafd6c1b8ddf348d4392777faf297c5f11827e45240f999bb96a25b84a1",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = “{ $subject }” iletisinin listesinden abonelik iptal edilemedi: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Abonelikten çıkmadınız: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [one] { $program } bir posta listesindeki aboneliğinizi iptal etmek istiyor\n   *[other] { $program } { $count } posta listesindeki aboneliğinizi iptal etmek istiyor\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic, aşağıdaki listeden, sunduğu tek tıklamayla abonelikten çıkma yoluyla size göndermeyi bırakmasını ister. Başka hiçbir şey gönderilmez ve sahip olduğunuz iletiler oldukları yerde kalır.\n   *[other] Inbox Classic, aşağıdaki her listeden, listenin sunduğu tek tıklamayla abonelikten çıkma yoluyla size göndermeyi bırakmasını ister. Başka hiçbir şey gönderilmez ve sahip olduğunuz iletiler oldukları yerde kalır.\n}\n",
+              "agent-level-organize": "agent-level-organize = Postayı düzenleme: okundu durumu, bayraklar, gereksiz posta, taşıma, arşivleme, yeni klasörler, Silinmiş Öğeler'e silme ve onay verdikten sonra posta listelerinden ayrılma"
+            }
+          },
+          "core/locales/tr/windows.ftl": {
+            "source_sha256": "0ffce480bf2e3d954ee3c6b6b4acb848cf8c00864e0d15c9730f0cf0b52d78ca",
+            "comparison_sha256": "e3df6c396bcffbb55ccd7c0099bf50f8f73e7db0b4c321c9a92ea8f9b7662dee",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Abonelikten Çık",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = Abonelikten Çık&ma"
+            }
+          },
+          "core/locales/tr/app.ftl": {
+            "source_sha256": "ae836f1a416db9b6e3800b76ffe05c33c55a2606df6a99664df54bf696f12cc8",
+            "comparison_sha256": "62064e627f7eea428c2c814fa0455200d4105f8e46e1f57cbc2370091fb062f1",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Abonelikten Çıkma"
+            }
+          },
+          "core/locales/uk/core.ftl": {
+            "source_sha256": "a231145d144e485e8dc8cf9b56fec8fc892ad46dd9050173967fab1276cdea96",
+            "comparison_sha256": "d801bd33eb1c5a09b64de91527c873425dfc966b4afa09bafd20ac821194b346",
+            "added_ids": [
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-detail",
+              "agent-unsubscribe-title"
+            ],
+            "changed_ids": [
+              "agent-level-organize"
+            ],
+            "source_values": {
+              "agent-log-unsubscribe-failed": "agent-log-unsubscribe-failed = Не вдалося скасувати підписку на список розсилки «{ $subject }»: { $reason }",
+              "agent-log-unsubscribe-refused": "agent-log-unsubscribe-refused = Ви не скасували підписку: { $senders }",
+              "agent-unsubscribe-title": "agent-unsubscribe-title = { $count ->\n    [1] { $program } хоче скасувати вашу підписку на список розсилки\n    [one] { $program } хоче скасувати вашу підписку на { $count } список розсилки\n    [few] { $program } хоче скасувати вашу підписку на { $count } списки розсилки\n    [many] { $program } хоче скасувати вашу підписку на { $count } списків розсилки\n   *[other] { $program } хоче скасувати вашу підписку на { $count } списку розсилки\n}",
+              "agent-unsubscribe-detail": "agent-unsubscribe-detail = { $count ->\n    [1] Inbox Classic просить список нижче більше не надсилати вам листів, через скасування підписки одним клацанням, яке він пропонує. Більше нічого не надсилається, а ваші повідомлення залишаються там, де є.\n   *[other] Inbox Classic просить кожен список нижче більше не надсилати вам листів, через скасування підписки одним клацанням, яке пропонує список. Більше нічого не надсилається, а ваші повідомлення залишаються там, де є.\n}\n",
+              "agent-level-organize": "agent-level-organize = Упорядковувати пошту: стан прочитання, прапорці, небажана пошта, переміщення, архівування, нові папки, видалення в «Видалені» та вихід зі списків розсилки після вашого «так»"
+            }
+          },
+          "core/locales/uk/windows.ftl": {
+            "source_sha256": "c2a04948ac716fe22ecbfe257c6d2cf22f27010c340a8edba677334ded4895b5",
+            "comparison_sha256": "e73fd79a955b65e7c4e341cad7e0a7beb168e851b4732df1dc1efa8919f76f0a",
+            "added_ids": [
+              "win-dont-unsubscribe",
+              "win-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "win-unsubscribe": "win-unsubscribe = &Скасувати підписку",
+              "win-dont-unsubscribe": "win-dont-unsubscribe = &Не скасовувати підписку"
+            }
+          },
+          "core/locales/uk/app.ftl": {
+            "source_sha256": "98d492a8e5c7540f1e75f9fc49b7524fb241371156365aa30249c9f912b39976",
+            "comparison_sha256": "1c5796193bceccae4ca245c4f46bf50f0e8e14193962f0c56142c292c8393386",
+            "added_ids": [
+              "ui-dont-unsubscribe"
+            ],
+            "changed_ids": [],
+            "source_values": {
+              "ui-dont-unsubscribe": "ui-dont-unsubscribe = Не скасовувати підписку"
+            }
+          }
+        },
+        "help_files": {
+          "core/crates/pe-html/help/bg/agents-permissions.html": {
+            "source_sha256": "9039282e4519e57d345d2db7d652590e984935d01e22e0b1003570c2784f82a4",
+            "comparison_sha256": "be2351fe1dce469a3f5b81d4457ac587cfc485feb4a838693a33cfb45b3b3945"
+          },
+          "core/crates/pe-html/help/bg/agents-sending.html": {
+            "source_sha256": "47bcf87572b41cf6c96a9eaff9d1a53531ffdc9a3b37af3f5d035437ea835848",
+            "comparison_sha256": "ae79c8cf3852dcfe8cdb2e5485c60f3d12aabb6afb9971ae340443194e09af87"
+          },
+          "core/crates/pe-html/help/ca/agents-permissions.html": {
+            "source_sha256": "c95be3c16468f96e271a9dd60e519e0ed050e0f0a37d23f0b6b868f9fc3f0cda",
+            "comparison_sha256": "b738adcb391278e503d6fe060c158781fab4e7b7821ce699c1727f29b5e84f39"
+          },
+          "core/crates/pe-html/help/ca/agents-sending.html": {
+            "source_sha256": "09aa142a712451442cfa0241907fe71a2b68cbb328a2f207dc7d3b242c2ca4bf",
+            "comparison_sha256": "ae792b2f7074753e1aaaf2af206f4a7d9d100e9ad107948c36791cc518433fd2"
+          },
+          "core/crates/pe-html/help/cs/agents-permissions.html": {
+            "source_sha256": "f6b755d162d635d7e8bfa15f9a251f040246376379e342f1adab951413a1588b",
+            "comparison_sha256": "eb9e41faf61bf837f00a63ff9414a05c69dccc667d9d810d45cf0e1affcd06ec"
+          },
+          "core/crates/pe-html/help/cs/agents-sending.html": {
+            "source_sha256": "131b08d32e0eccdfe7c2e71b4d9e98c152a4da19e5142b21b6c96d5083afc35c",
+            "comparison_sha256": "1ad620a3107d4c2428672f124d27958072a0ae7fc167ebdd5673764849b552dd"
+          },
+          "core/crates/pe-html/help/da/agents-permissions.html": {
+            "source_sha256": "2fe8feb3d60b175d7e2581ca877247deabe2baceda3c360c178899109734cb50",
+            "comparison_sha256": "2cf622075ebe4ec8b83adeb7af2a2d37ad789284c3a6c7257f7b44aff90cc6d0"
+          },
+          "core/crates/pe-html/help/da/agents-sending.html": {
+            "source_sha256": "29d70227c012ac8acbbd12628b1b3445b1a5a8d5ed68b4ee357a82a3bf64cdab",
+            "comparison_sha256": "f152d66216dcd87db12d25ecf0bfdc99e6304420277d450155504c08e5657344"
+          },
+          "core/crates/pe-html/help/de/agents-permissions.html": {
+            "source_sha256": "4042c3b565720e2162b2cd3b3b7c113465e09064794a65978bfcd7c1ef65cae0",
+            "comparison_sha256": "1ea0fc9f098a713dc42924c413712139b65c997796474eac7e50f72987efd080"
+          },
+          "core/crates/pe-html/help/de/agents-sending.html": {
+            "source_sha256": "16cf2466fffc5720928eb8b485e70aa1d8567f38b509b7ded5003f6e91d1d2e1",
+            "comparison_sha256": "d7043b57021bb0bcf530ecb34b31854266959210f87e1537cc70e22136425f86"
+          },
+          "core/crates/pe-html/help/el/agents-permissions.html": {
+            "source_sha256": "92ac29fcc54870e92fb1ea97bafdfa9ce7749de8c9656e09a968a1241f54ada3",
+            "comparison_sha256": "c16ee3620aaccc1704cda04d030cfa0e2046440e6c547fc3e16cd1dda13f527d"
+          },
+          "core/crates/pe-html/help/el/agents-sending.html": {
+            "source_sha256": "ba381615e4923eaee26a66e0333e2c0312794a16e1b4c05319e48b72ff2b3a7b",
+            "comparison_sha256": "c05acb4147134ed8bd874fa020aca4a47ab4384f5a917ae903ee488eaed35f21"
+          },
+          "core/crates/pe-html/help/en/agents-permissions.html": {
+            "source_sha256": "325e3ae6517438aa5f69e21a46c84a06e7985950dd3366c9a6e218be96bde1e2",
+            "comparison_sha256": "3f65b6b651950e2b6750417611854b8c899c5893f3e12b1b6c5f1c4a4077bb6d"
+          },
+          "core/crates/pe-html/help/en/agents-sending.html": {
+            "source_sha256": "42d3d41e34cd7ac92d286ad745c8e02a674728d1f1de0055a94c6e4d35b93f4b",
+            "comparison_sha256": "dffb12a981ffed82aa8cf6566ee4118d64b200c54dcc3b9d77fcd95ee0ffd75e"
+          },
+          "core/crates/pe-html/help/es/agents-permissions.html": {
+            "source_sha256": "0d97882f47d3b83a86d17b1a8f237586394fc30740421a6a48cd92bd598c0801",
+            "comparison_sha256": "45e73b0c9a7d50b6faf38631cf1d19fc2925efc84914b166235be28c0e264da5"
+          },
+          "core/crates/pe-html/help/es/agents-sending.html": {
+            "source_sha256": "c593a72fdcbad6d43efb0638cbc11e1157aac21f881eb4d582aa1824e66641e7",
+            "comparison_sha256": "f65d9a71f6447286b249943294b046226c268187ebc482d67244af8fcf2f614b"
+          },
+          "core/crates/pe-html/help/et/agents-permissions.html": {
+            "source_sha256": "9c60b29e87b0031cf51cbfc139953be92455a1ccef3b7bbab99f4911c9486e79",
+            "comparison_sha256": "9ea8a15a792a796c44e495dc42c716cec7e81b78bcedb86ed7e324e2e82244bc"
+          },
+          "core/crates/pe-html/help/et/agents-sending.html": {
+            "source_sha256": "c41061928898a66d4d0c78fdf00a435c28adc600fd03faeca6cf1c0a6218202e",
+            "comparison_sha256": "a025f361f51bf0a625658cec5c2d4a74d708d081ebf30b2c69688117f23a9311"
+          },
+          "core/crates/pe-html/help/fi/agents-permissions.html": {
+            "source_sha256": "51ae744901f330ee021ca414e30dfe82c4e5b48c8effe27ac7271125d3f55ca5",
+            "comparison_sha256": "2db9f6815dd5aa3e687d19c3d85641a614a2822b950c38addbdaff0c4e09107a"
+          },
+          "core/crates/pe-html/help/fi/agents-sending.html": {
+            "source_sha256": "5154c73e5c9b39cb04a046598e9b777656330edab064c7cef918c7012a497098",
+            "comparison_sha256": "eb0b789d1474a2370500af0dc31b4fa2c6bd6cfd047a1822bf75f916a182e79a"
+          },
+          "core/crates/pe-html/help/fr/agents-permissions.html": {
+            "source_sha256": "826d98488819ca0b8f9d2e2c3e81b05d3e7be67c629e4b9b5f260905bcfb5bd6",
+            "comparison_sha256": "8c5fdbdaff9ac6cf635c338ecda3a1b38da58e753c8a8ad12d6a268fa5a19fdc"
+          },
+          "core/crates/pe-html/help/fr/agents-sending.html": {
+            "source_sha256": "63ae313a5c1727e208e40ba209f1a687dcfd4c5dc74b87a0bd6fa8afc2a8ad16",
+            "comparison_sha256": "8cdc7f89b3bd0d9487cadb1a85b702bff1d00d8149d483222ddfea6a09297322"
+          },
+          "core/crates/pe-html/help/hr/agents-permissions.html": {
+            "source_sha256": "4595adcd6734541ca8251cdacdc7852fee859eb97fff954b1e595dd649a2f1dc",
+            "comparison_sha256": "56bb3c63ba99af66729819e3d4e276312bbc7ee32cca0b0b347947c3880051ef"
+          },
+          "core/crates/pe-html/help/hr/agents-sending.html": {
+            "source_sha256": "517c9111041c913b048849774df9c24b895e72865799b8166d24cc2b9946e7e2",
+            "comparison_sha256": "b1c9eaacb2e2b6217ba06f95235d8058e1a87d4d5378d7b3a5618333a0da2d2e"
+          },
+          "core/crates/pe-html/help/hu/agents-permissions.html": {
+            "source_sha256": "a8519bd821dbebbebdd60eb4ef6201d067ec41877bd8688695b354f345398152",
+            "comparison_sha256": "e266b4e53e878fc8e2212d9bc7c9696dbdac0a910fc18e11d331b6d860884341"
+          },
+          "core/crates/pe-html/help/hu/agents-sending.html": {
+            "source_sha256": "44c7dc03f0e652ca17a6079ada1f00332a6c36cc19379a29d3ed54ab05cc0041",
+            "comparison_sha256": "0fd731e78e038382a071756a1d34502aae20c2bcd22aa3ef07418cae9bec70f3"
+          },
+          "core/crates/pe-html/help/it/agents-permissions.html": {
+            "source_sha256": "ff7f57a6a6796895ae34262b3c1bdbf853e85ed56d78af323c2c876b59ef25da",
+            "comparison_sha256": "29d2d0a5bf7c9379beb901c9ac0c8cd4bfaf01ae3992216885ab3bb36bd115c2"
+          },
+          "core/crates/pe-html/help/it/agents-sending.html": {
+            "source_sha256": "ba967a636203f2c38d0100a5ffe7b02db3e81e5993f071da160c8e181da7add9",
+            "comparison_sha256": "d76a18071baf591409b854dece1ef5679a17ad1e2b30134ebd0e73e88c310d7b"
+          },
+          "core/crates/pe-html/help/lt/agents-permissions.html": {
+            "source_sha256": "0cf7d8d58297c5c1bfc215263de3ab4d5bf48e5ce956b03c37e925ca61ca914f",
+            "comparison_sha256": "58978c14dcee0cbfd53e757ab5c84c2aa3b5e7de46f722f89ca3c7fd90f63b58"
+          },
+          "core/crates/pe-html/help/lt/agents-sending.html": {
+            "source_sha256": "5b88bbc43a42b7d899208539bddb61af7f8d867a36eb46826b12e754b4336b62",
+            "comparison_sha256": "2d00550557699438d1d3b6e36918c75f7ccc3ba389448844ef5362f43b64a608"
+          },
+          "core/crates/pe-html/help/lv/agents-permissions.html": {
+            "source_sha256": "6f8760ca97d3b1f31a9541f2a37085f7475d80fe9b09b866e787dd432a648d4f",
+            "comparison_sha256": "6c5567af844f865acb7fc81e413d0feac1666e4903ce5dcd7d712914fb5bec85"
+          },
+          "core/crates/pe-html/help/lv/agents-sending.html": {
+            "source_sha256": "09dc8c65dfa8c96a05f75ee60db44baf0d570551b24aaa051111c05c4bf6ad86",
+            "comparison_sha256": "821aa83895b5a8df3e454d1251f0685e332b4f7d608f7f0d4c7401e8894f40e2"
+          },
+          "core/crates/pe-html/help/nb/agents-permissions.html": {
+            "source_sha256": "cf0f5acc6c1bb3b1fa9a5a6c074286a412f70a9fe6a2f00fe325e39bc59c4e82",
+            "comparison_sha256": "577b63cda2acae75f0b55f73a1a10de0463cce7093f6a33669cb3a499609173c"
+          },
+          "core/crates/pe-html/help/nb/agents-sending.html": {
+            "source_sha256": "bb1a8c45e04a31112a803f62f40754bf198d81c2fedd57802959628197d4e465",
+            "comparison_sha256": "04981eceb6991cd3240c1053d14f009fcf2f37c92e767e111fc2299a4b9d112a"
+          },
+          "core/crates/pe-html/help/nl/agents-permissions.html": {
+            "source_sha256": "027ea17715cf1646cf2a153c9319938ecf0281996451da998729aebf7ef7788f",
+            "comparison_sha256": "3b02c2e5cd8864b1ac493c666ccd9c92af8c8d091b8c19ccb7117dac93db86f9"
+          },
+          "core/crates/pe-html/help/nl/agents-sending.html": {
+            "source_sha256": "940fb1788a2300f286593335dcf8ea415a91fb0d473be759096609c9fa14ea0b",
+            "comparison_sha256": "81a497699390150be14a8b522044d774ebf34d1adbf4343a9bb83695139f352f"
+          },
+          "core/crates/pe-html/help/pl/agents-permissions.html": {
+            "source_sha256": "76108cba4645df64358343295a2075f55339129f9a78bd71b0635919e85b5a26",
+            "comparison_sha256": "01f2784647108da50d78b911252f775d660f5729c89daa2d78e40124783ae2ae"
+          },
+          "core/crates/pe-html/help/pl/agents-sending.html": {
+            "source_sha256": "f797afa6445920d8bac0f63964b508358e107847308e1a9ff635e23e743bfb1d",
+            "comparison_sha256": "43a0852705ddf2cf88dd56b2bfcc53bf74dd2e984a536f992dc852e2a047ccce"
+          },
+          "core/crates/pe-html/help/pt/agents-permissions.html": {
+            "source_sha256": "7940094b869a4ac5ba8e69b293a9dd171a6c95e0b2f596dc1a427b5f946f2ca9",
+            "comparison_sha256": "7222d3e14015d836722f5fa40c80f5471acd7b82a4279a62110a6fe407e4e84b"
+          },
+          "core/crates/pe-html/help/pt/agents-sending.html": {
+            "source_sha256": "cdb8a182d99126f1ab1facfb3e5ef0db6dc6d72c53857677ad089cae57144883",
+            "comparison_sha256": "5b508644ed5c6d3976d05b61775236e384ac20064f5989c73fab1ec9264f19c9"
+          },
+          "core/crates/pe-html/help/pt-BR/agents-permissions.html": {
+            "source_sha256": "7046acda6ce14b5e41162d7f85c1c234f14bddbf92c7a37c6b1bc4be2c94a650",
+            "comparison_sha256": "53ae2e63b4cd23395e6c2c85267e32be736c46363be54311ade7ad04af728e11"
+          },
+          "core/crates/pe-html/help/pt-BR/agents-sending.html": {
+            "source_sha256": "74d523946ea25d217b0afb7bdcb8083c385cf8426af329d5b1b5085cee1fd79f",
+            "comparison_sha256": "609c83b95ffb3af260d660a1cb7a0464d2e0406c26283428fb0ab8a3111f8581"
+          },
+          "core/crates/pe-html/help/ro/agents-permissions.html": {
+            "source_sha256": "78da2700bed3b3c2e94f26f297993f1fb010668bfe7f902f234ef05fdbe93b44",
+            "comparison_sha256": "013eb4617d178667f2381a5a00a01a303ae8cb526ceaafec09fb238d3d70a734"
+          },
+          "core/crates/pe-html/help/ro/agents-sending.html": {
+            "source_sha256": "63ba33396aecdd816d4114ba08d9707a122a8c73347f23b5178a9646478094c4",
+            "comparison_sha256": "88ac2cc1f17e7039e6288f5da2b364704e66ebb2ac04d2dd2012a41cc138c1e2"
+          },
+          "core/crates/pe-html/help/ru/agents-permissions.html": {
+            "source_sha256": "984309c800b68ed7327eee4d0c43de62e7b36a68cb10611a861849e804c2ed96",
+            "comparison_sha256": "33a81bb6e048ca69888d7972da9d5d38e5216fe62b36fd1e39e81e08c33c74e1"
+          },
+          "core/crates/pe-html/help/ru/agents-sending.html": {
+            "source_sha256": "d5262212809f025a3f13a2a39de9e751d3dfe6e5762efa9fecaf33c3575f5c86",
+            "comparison_sha256": "5ddf19f30ef000221cd803550e45f2514f33745c1bc283e678477f6ccec6711e"
+          },
+          "core/crates/pe-html/help/sk/agents-permissions.html": {
+            "source_sha256": "cc595b8a0bef5eb3567b555eb598492bc41cbc4f67d5d226ced74df9f4441474",
+            "comparison_sha256": "c89b4b387a0f1f5d5e7136a9b033a7d5a735d53b7ec2b1746f98c3e7c12e0883"
+          },
+          "core/crates/pe-html/help/sk/agents-sending.html": {
+            "source_sha256": "0e575d1f435bae8b343d8fb292612de09a58a8c3133a3be4cb482eb8954310cd",
+            "comparison_sha256": "fda097d19fb4a7d04a510d49d699fca487a5768191e89dc5664e2cbbad352574"
+          },
+          "core/crates/pe-html/help/sl/agents-permissions.html": {
+            "source_sha256": "839a3a0696a6242046580b82c9507b2d8d1bf737013364566827a6099799a6d6",
+            "comparison_sha256": "922f68ef9a56045154b219f4afa45c9eab75753a03f192effab95cac360c4838"
+          },
+          "core/crates/pe-html/help/sl/agents-sending.html": {
+            "source_sha256": "dd4f378f2cdd4450761ff9c9f2e2abf65b700900283dc31a28d19ed4c1a98e54",
+            "comparison_sha256": "9d9c1db81bfc4fe76008640b8366783305b5f178c9d2c46fa2b182d0ca8a3817"
+          },
+          "core/crates/pe-html/help/sr-Latn/agents-permissions.html": {
+            "source_sha256": "79b7ab1785487af3bd88dd4fe967bf7f7e5594fc7a8bf14ab5c99fc38d4e4897",
+            "comparison_sha256": "c15f10cf260aba12cc7a08df2cc33666612b2d5e3cdbbc94fded982333d2fc67"
+          },
+          "core/crates/pe-html/help/sr-Latn/agents-sending.html": {
+            "source_sha256": "2f8f85b5cd6e8a7ee745d5695f37afe6826929d4a74c2d654e18558073aaacef",
+            "comparison_sha256": "25fa5ce5178ba35fd15e04f26f5bd07b083bb82e7c4c2ff4df3a89aecbf7417e"
+          },
+          "core/crates/pe-html/help/sv/agents-permissions.html": {
+            "source_sha256": "4793fa7c28706163f957ac23dfe337f4ffba23df8abdc55090396ecc7a06ea57",
+            "comparison_sha256": "a9c910ba8a4089e711f5418c91efb9f6c282f198d5385d1ade8f4628be54fd31"
+          },
+          "core/crates/pe-html/help/sv/agents-sending.html": {
+            "source_sha256": "92bf655901d1307d73bc857a821a9476b30a78d48460b5765962edb8f3d1f347",
+            "comparison_sha256": "fd81e23916e7429a4dbeba60a7ec02e37fa1ba60fdc4b5a8f4d07b8064029e11"
+          },
+          "core/crates/pe-html/help/tr/agents-permissions.html": {
+            "source_sha256": "5b15c46d809c3b1e7f1117648d87259411cd3cefb16557418b73984b5018a348",
+            "comparison_sha256": "37b3f7b79696c39b61c87d4aa3fbb4a2e2e545b3ee8d3a9097f5d36a1afeb770"
+          },
+          "core/crates/pe-html/help/tr/agents-sending.html": {
+            "source_sha256": "227db0a72623466afd5b9d111900760687a5494864e8c0f81d77e79e9ad1a170",
+            "comparison_sha256": "76f9cbf743b0a591343c0aceaa2b04b01d4f3b304e2fb7faeb286063022f5b0d"
+          },
+          "core/crates/pe-html/help/uk/agents-permissions.html": {
+            "source_sha256": "e30564aef3b23ac3992667fc35971f02330ae41885632167e456e5b4a62842b5",
+            "comparison_sha256": "7b50f83e49446664452fb286f6b416e065e5278f76a15bf29a36193442cd0063"
+          },
+          "core/crates/pe-html/help/uk/agents-sending.html": {
+            "source_sha256": "85e17c9a4b5ce87645520719f7f12eebfbde05d8a51bd81d6f4a8f09ac7b8beb",
+            "comparison_sha256": "80fd05b4bdfdeeaa588e9304b89183c8d5f57cf54a84ead98929cc77e88a9822"
+          }
+        },
+        "affected_completed_catalog_entries": [
+          [
+            "bg",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "ca",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "cs",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "da",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "de",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "el",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "es",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "et",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "fi",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "fr",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "hr",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "hu",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "it",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "nb",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "nl",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "pt",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "pt-BR",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "sr-Latn",
+            "core.ftl",
+            "agent-level-organize"
+          ],
+          [
+            "tr",
+            "core.ftl",
+            "agent-level-organize"
+          ]
+        ],
+        "affected_completed_help_topics": [
+          [
+            "bg",
+            "agents-permissions.html"
+          ],
+          [
+            "bg",
+            "agents-sending.html"
+          ],
+          [
+            "ca",
+            "agents-permissions.html"
+          ],
+          [
+            "ca",
+            "agents-sending.html"
+          ],
+          [
+            "cs",
+            "agents-permissions.html"
+          ],
+          [
+            "cs",
+            "agents-sending.html"
+          ],
+          [
+            "da",
+            "agents-permissions.html"
+          ],
+          [
+            "da",
+            "agents-sending.html"
+          ],
+          [
+            "de",
+            "agents-permissions.html"
+          ],
+          [
+            "de",
+            "agents-sending.html"
+          ],
+          [
+            "el",
+            "agents-permissions.html"
+          ],
+          [
+            "el",
+            "agents-sending.html"
+          ],
+          [
+            "es",
+            "agents-permissions.html"
+          ],
+          [
+            "es",
+            "agents-sending.html"
+          ],
+          [
+            "et",
+            "agents-permissions.html"
+          ],
+          [
+            "et",
+            "agents-sending.html"
+          ],
+          [
+            "fi",
+            "agents-permissions.html"
+          ],
+          [
+            "fi",
+            "agents-sending.html"
+          ],
+          [
+            "fr",
+            "agents-permissions.html"
+          ],
+          [
+            "fr",
+            "agents-sending.html"
+          ],
+          [
+            "hr",
+            "agents-permissions.html"
+          ],
+          [
+            "hr",
+            "agents-sending.html"
+          ],
+          [
+            "it",
+            "agents-permissions.html"
+          ],
+          [
+            "it",
+            "agents-sending.html"
+          ],
+          [
+            "nb",
+            "agents-permissions.html"
+          ],
+          [
+            "nb",
+            "agents-sending.html"
+          ],
+          [
+            "nl",
+            "agents-permissions.html"
+          ],
+          [
+            "nl",
+            "agents-sending.html"
+          ],
+          [
+            "pt",
+            "agents-permissions.html"
+          ],
+          [
+            "pt",
+            "agents-sending.html"
+          ],
+          [
+            "pt-BR",
+            "agents-permissions.html"
+          ],
+          [
+            "pt-BR",
+            "agents-sending.html"
+          ],
+          [
+            "sr-Latn",
+            "agents-permissions.html"
+          ],
+          [
+            "sr-Latn",
+            "agents-sending.html"
+          ],
+          [
+            "tr",
+            "agents-permissions.html"
+          ],
+          [
+            "tr",
+            "agents-sending.html"
+          ]
+        ],
+        "context_required": [
+          "Inspect the source branch callers before review; do not infer runtime behavior from new strings.",
+          "Import exact new English/source drafts and preserve existing review corrections in unrelated IDs/passages.",
+          "Reopen changed agent-level-organize and the affected help passages; preserve earlier agent Undo semantics.",
+          "Do not merge unrelated implementation/test/corpus code just to access translations.",
+          "Regenerate required text identifiers in the separate build target if necessary; do not run test suites."
+        ]
+      }
+    ],
     "key_help_source_integration": {
       "ref": "chore/pgp-hardening",
       "observed_tip": "80d02fcc842c2cbe9f8a6a9eddcc075180d74d3d",
@@ -75647,7 +78485,25 @@
     "source_worktree_audit_policy": "At later source checkpoints also inspect uncommitted locale/help/commands/settings/registry changes in root and the wave1, more-languages, settings, hardening and compose worktrees. Do not treat the old untracked five-language copies as new work without comparing their content. All290 matched cfdf55ab exactly at the Dutch checkpoint; any future mismatch must be diffed and recorded.",
     "source_worktree_audit_helper": "/private/tmp/inbox-compose-worktree-audit.py <batch-prefix>; run after the matching source-audit helper. Verifies relevant status in all six source worktrees and exact current contents/inventory of the290 known old copies against the verified source manifest; merges evidence into the batch source-audit JSON.",
     "compose_record_helper": "/private/tmp/inbox-compose-record.py <spec.json>; use only after the language, mnemonic, exact reconstruction, global reconciliation, source/worktree/queue and HTML checks pass. It records completed work; it does not replace linguistic review or validation.",
-    "source_audit_helper": "/private/tmp/inbox-ca-compose-source-audit.py; adapt artifact prefix for the next batch. It verifies known source-only help/core imports on both chore/pgp-hardening and origin/master, where the hardening branch merged in 3161dddc. Require exact source hashes and full original-ID equality; investigate any assertion rather than ignoring new work."
+    "source_audit_helper": "/private/tmp/inbox-ca-compose-source-audit.py; adapt artifact prefix for the next batch. It verifies known source-only help/core imports on both chore/pgp-hardening and origin/master, where the hardening branch merged in 3161dddc. Require exact source hashes and full original-ID equality; investigate any assertion rather than ignoring new work.",
+    "new_source_inventory_artifact": {
+      "path": "/private/tmp/inbox-new-preview-mcp-source-inventory.json",
+      "sha256": "d899aee873dbe1d41681ed098ac10a2ecccf63023e1e4a2d1262771a00c2279f"
+    },
+    "all_source_inventory_policy": {
+      "artifact": "/private/tmp/inbox-da-compose-all-sources.json",
+      "sha256": "c1bae88e496b96f625f73243832eea1bb74a55e024cd9a75f4674ad558af3958",
+      "worktree_count": 42,
+      "ref_count": 183,
+      "helper": "/private/tmp/inbox-compose-all-source-audit.py <batch-prefix>",
+      "instruction": "In addition to the seven primary refs and six known worktrees, scan all worktrees and refs at checkpoints. Recheck changed/new non-ancestral source tips and uncommitted relevant paths. The initial wider scan found preview/MCP work, now in pending_source_integrations. Never call these pending imports reviewed or omit them when checking completion.",
+      "helper_sha256": "a5c6b2a6bd5102812b4f74ccac961d26174204f5fadf3c60b39fa309a16db494",
+      "helper_validation": "Executed successfully over42 worktrees/183 refs. Historical refs may predate core/locales; absent locale trees are handled explicitly. No additional changes beyond the exact pending preview/MCP imports and known old copies."
+    },
+    "pending_source_integration_resume": {
+      "inventory_artifact": "/private/tmp/inbox-new-preview-mcp-source-inventory.json",
+      "note": "Use source_sha256 and comparison_commit for lossless delta import. Both new sources inherit already imported hardening key/help changes; do not duplicate those. MCP agent-level-organize changed in all28 languages,19 currently complete; agents-permissions/sending changed in all28,36 currently complete topics. Source values are drafts; no translation review credit until actual contextual editing. Keep older reviewed prose outside source-changed passages, especially earlier Undo correction."
+    }
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
   "guide_updates": [
@@ -84097,7 +86953,6 @@
         "sign-and-encrypt.html"
       ],
       "pending_languages": [
-        "da",
         "el",
         "fi",
         "hr",
@@ -84126,7 +86981,8 @@
         "sr-Latn",
         "tr",
         "bg",
-        "cs"
+        "cs",
+        "da"
       ],
       "retained_help_reviews": {
         "core/crates/pe-html/help/bg/write-message.html": {
@@ -84279,7 +87135,8 @@
         "sr-Latn": "All 53 mnemonic scopes pass. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 16 value edits and 40 mark removals; all other catalog bytes preserved. Plural selection inspected for 0,1,2,3,4,5,11,12,14,21,22,24,25,101, with representative value substitutions and actual positive-count callers/separate zero-recipient state checked. Help tags, attributes, controls, platform branches and literal keys match; all earlier writing-help prose retained. Platform label joins inspected and dynamic shortcuts checked in commands.toml. No relevant Serbian screenshots found; source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,145 unmarked messages, 10,599 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.",
         "tr": "All 53 mnemonic scopes pass; the changed label maps to GTK Şifrelemeden Gö_nder through the actual gtk_mnemonic caller. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 17 value edits and 40 mark removals; all other catalog bytes preserved. Help tags, attributes, controls, platform branches and literal keys match; all earlier writing-help prose retained. Platform joins inspected; dynamic shortcuts checked against commands.toml. No relevant Turkish screenshots found, so source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,185 unmarked messages, 10,619 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.",
         "bg": "All 53 mnemonic scopes pass; GTK label Намиране на _ключ checked against the actual conversion. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 17 value edits and 40 mark removals; all other catalog bytes preserved. Help tags, attributes, controls, platform branches and literal keys match; all earlier writing-help prose retained. Platform joins inspected and dynamic shortcuts checked in commands.toml. No relevant Bulgarian screenshots found, so source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,225 unmarked messages, 10,639 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.",
-        "cs": "All53 mnemonic scopes pass; GTK Najít _klíč checked. Structural checker:1,446 expected removed-mark diagnostics, no structural findings. Exact catalog reconstruction verifies18 value edits/40 mark removals; all other bytes preserved. The full writing-help file is reconstructed from exactly the insertion and the recorded reopened paragraph. Tags/attributes/control references/platform branches/literal keys match in both help topics. Plural categories inspected for0,1,2,3,4,5,11,21,22,101, with representative count/name substitutions and positive-count/separate empty-recipient callers checked. Platform label joins and dynamic shortcuts inspected. No relevant Czech screenshots available; source layouts/wrapping inspected. No GUI run, test suites or builds. All28 inventories/current hashes reconcile:21,265 unmarked messages,10,659 changed help lines and14 verified baseline pairs. HTML regenerated; git diff --check passes."
+        "cs": "All53 mnemonic scopes pass; GTK Najít _klíč checked. Structural checker:1,446 expected removed-mark diagnostics, no structural findings. Exact catalog reconstruction verifies18 value edits/40 mark removals; all other bytes preserved. The full writing-help file is reconstructed from exactly the insertion and the recorded reopened paragraph. Tags/attributes/control references/platform branches/literal keys match in both help topics. Plural categories inspected for0,1,2,3,4,5,11,21,22,101, with representative count/name substitutions and positive-count/separate empty-recipient callers checked. Platform label joins and dynamic shortcuts inspected. No relevant Czech screenshots available; source layouts/wrapping inspected. No GUI run, test suites or builds. All28 inventories/current hashes reconcile:21,265 unmarked messages,10,659 changed help lines and14 verified baseline pairs. HTML regenerated; git diff --check passes.",
+        "da": "All53 mnemonic scopes pass. Structural checker:1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies16 value edits/40 mark removals and preserves all other catalog bytes. Help tags/attributes/control references/platform branches/literal keys match; all earlier writing-help prose retained. Platform label joins inspected and dynamic shortcuts checked against commands.toml. No relevant Danish screenshots available; source layouts/wrapping inspected. No GUI run, test suites or builds. All28 current-checkout inventories/hashes reconcile:21,305 unmarked messages,10,679 changed help lines and14 verified baseline pairs. HTML regenerated; git diff --check passes. Newly discovered unmerged source work is recorded separately and remains pending import/review."
       }
     },
     {

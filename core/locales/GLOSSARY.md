@@ -369,6 +369,12 @@ Outlook Express).
 - Use "Tilslut" for connecting an agent and "Rediger" for changing its permissions. Cc / Bcc retain Alt+C / Alt+B.
 - A key label can be a name, address or fingerprint. Use "nøglen { $name }" where the owner is not known.
 - Logos are cached and reused across messages; avoid implying a fresh download on every app launch.
+- Compose status describes protection »når du sender den«.
+  Keep direct du wording, meddelelse and digital signatur; signatures do not by themselves confirm key ownership.
+- Use »brugbar nøgle« for keys that must be usable, »Årsag:« before complete key-state explanations and
+  »Seneste søgning:« before dates. Unencrypted sending requires removing inherited text, images and attachments.
+- Help task titles use the imperative, »Signer og krypter en meddelelse«. Status colors match the reading-security
+  help (Orange); per-recipient icons differ across platforms. Recipient removal affects message fields, not contacts.
 
 ### Hrvatski (hr)
 
