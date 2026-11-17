@@ -28,7 +28,8 @@ pub enum Problem {
     FromFuture,
     /// The signature's own expiry has passed.
     SignatureExpired,
-    /// Not a signature over a document (a key signature, a timestamp), or unreadable.
+    /// Not a signature over a document (a key signature, a timestamp), unreadable, or with a critical notation,
+    /// which nothing here understands.
     WrongType,
     /// The certificate has no valid self-signature at the time it signed, so it says nothing about who it is.
     KeyNotValid,
@@ -154,8 +155,8 @@ pub(crate) fn judge(
         return check(None, SigStatus::UnknownKey);
     };
     let bad = |problem| check(Some(cert), SigStatus::Bad(problem));
-    let Some(created) = created.filter(|_| matches!(sig.typ(), Some(SignatureType::Binary | SignatureType::Text)))
-    else {
+    let document = matches!(sig.typ(), Some(SignatureType::Binary | SignatureType::Text));
+    let Some(created) = created.filter(|_| document && !policy::critical_notation(sig)) else {
         return bad(Problem::WrongType);
     };
     if created > now + CLOCK_SKEW {

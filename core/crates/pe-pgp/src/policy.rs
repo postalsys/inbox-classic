@@ -10,10 +10,14 @@
 //! | RSA under 2048 bits is refused                       | factoring 1024 bit moduli is within reach            |
 //! | DSA and ElGamal are refused                          | deprecated by RFC 9580, 1024 bit in practice         |
 //! | Encryption is never to IDEA, 3DES, CAST5, Blowfish   | only AES is written; the old ones are read           |
+//! | An ECDH key must wrap with AES and hash with SHA-2   | its KDF parameters pick the cipher a sender wraps in |
+//! | A signature with a critical notation is refused      | RFC 9580 5.2.3.24: an unknown critical one, and none |
+//! |                                                      | is known here                                        |
 //! | Unknown algorithms are refused                       | nothing is trusted that is not understood            |
 
-use pgp::crypto::{hash::HashAlgorithm, public_key::PublicKeyAlgorithm};
-use pgp::types::PublicParams;
+use pgp::crypto::{hash::HashAlgorithm, public_key::PublicKeyAlgorithm, sym::SymmetricKeyAlgorithm};
+use pgp::packet::{Signature, SubpacketData};
+use pgp::types::{EcdhPublicParams, PublicParams};
 use rsa::traits::PublicKeyParts;
 
 /// 2013-02-01: the end of SHA-1 for signatures that need collision resistance (data signatures, certifications).
@@ -59,8 +63,8 @@ pub fn key(algorithm: PublicKeyAlgorithm, params: &PublicParams) -> Result<(), S
                 Ok(())
             }
         }
+        PublicParams::ECDH(ecdh) => ecdh_kdf(ecdh),
         PublicParams::ECDSA(_)
-        | PublicParams::ECDH(_)
         | PublicParams::EdDSALegacy(_)
         | PublicParams::Ed25519(_)
         | PublicParams::X25519(_)
@@ -68,6 +72,44 @@ pub fn key(algorithm: PublicKeyAlgorithm, params: &PublicParams) -> Result<(), S
         | PublicParams::Ed448(_) => Ok(()),
         _ => Err(format!("{algorithm:?}")),
     }
+}
+
+/// An ECDH key's KDF parameters name the cipher that wraps the session key for it and the hash of the KDF; a sender
+/// uses them as they are, so a key naming a 64 bit block cipher would have mail to it wrapped in one.
+fn ecdh_kdf(params: &EcdhPublicParams) -> Result<(), String> {
+    let (hash, cipher) = match params {
+        EcdhPublicParams::Curve25519Legacy { hash, alg_sym, .. }
+        | EcdhPublicParams::P256 { hash, alg_sym, .. }
+        | EcdhPublicParams::P384 { hash, alg_sym, .. }
+        | EcdhPublicParams::P521 { hash, alg_sym, .. }
+        | EcdhPublicParams::Brainpool256 { hash, alg_sym, .. }
+        | EcdhPublicParams::Brainpool384 { hash, alg_sym, .. }
+        | EcdhPublicParams::Brainpool512 { hash, alg_sym, .. }
+        | EcdhPublicParams::Unsupported { hash, alg_sym, .. } => (*hash, *alg_sym),
+    };
+    let aes = matches!(
+        cipher,
+        SymmetricKeyAlgorithm::AES128 | SymmetricKeyAlgorithm::AES192 | SymmetricKeyAlgorithm::AES256
+    );
+    let sha2 = matches!(
+        hash,
+        HashAlgorithm::Sha256 | HashAlgorithm::Sha384 | HashAlgorithm::Sha512
+    );
+    if aes && sha2 {
+        Ok(())
+    } else {
+        Err(format!("ECDH with {cipher:?} and {hash}"))
+    }
+}
+
+/// Does a signature carry a notation marked critical in its hashed area? No notation is understood here, and a
+/// critical one that is not understood makes the signature invalid (RFC 9580 section 5.2.3.24).
+pub fn critical_notation(sig: &Signature) -> bool {
+    sig.config().is_some_and(|config| {
+        config
+            .hashed_subpackets()
+            .any(|sub| sub.is_critical && matches!(sub.data, SubpacketData::Notation(_)))
+    })
 }
 
 /// The `micalg` parameter of `multipart/signed` for a hash (RFC 3156 section 5).
@@ -110,6 +152,43 @@ mod tests {
             assert!(hash(good, Use::Data, Y2026).is_ok());
         }
         assert!(hash(HashAlgorithm::None, Use::Data, Y2026).is_err());
+    }
+
+    #[test]
+    fn ecdh_wraps_with_aes_and_hashes_with_sha2() {
+        // the interoperability suite's "ECDH Parameters": a key naming IDEA, 3DES, CAST5 or Blowfish for its key wrap
+        // had mail to it wrapped in that cipher
+        use pgp::types::KeyDetails;
+        let key = crate::generate("Alice", &["alice@example.org".into()], Y2026).unwrap();
+        let sub = &key.cert().key.public_subkeys[0].key;
+        let PublicParams::ECDH(EcdhPublicParams::Curve25519Legacy { p, ecdh_kdf_type, .. }) =
+            sub.public_params().clone()
+        else {
+            panic!("a Curve25519 encryption subkey");
+        };
+        let with = |hash, alg_sym| {
+            PublicParams::ECDH(EcdhPublicParams::Curve25519Legacy {
+                p,
+                hash,
+                alg_sym,
+                ecdh_kdf_type,
+            })
+        };
+        assert!(key_ok(&with(HashAlgorithm::Sha256, SymmetricKeyAlgorithm::AES128)));
+        assert!(key_ok(&with(HashAlgorithm::Sha512, SymmetricKeyAlgorithm::AES256)));
+        for weak in [
+            SymmetricKeyAlgorithm::IDEA,
+            SymmetricKeyAlgorithm::TripleDES,
+            SymmetricKeyAlgorithm::CAST5,
+            SymmetricKeyAlgorithm::Blowfish,
+        ] {
+            assert!(!key_ok(&with(HashAlgorithm::Sha256, weak)), "{weak:?}");
+        }
+        assert!(!key_ok(&with(HashAlgorithm::Sha1, SymmetricKeyAlgorithm::AES128)));
+    }
+
+    fn key_ok(params: &PublicParams) -> bool {
+        key(PublicKeyAlgorithm::ECDH, params).is_ok()
     }
 
     #[test]
