@@ -1947,22 +1947,35 @@ pub(super) fn document_text(document: &str) -> String {
 /// The row of the message of `folder` with `subject` selected in the list (the folder shown), and its view there
 pub(super) async fn open_by_subject(folder: i64, subject: &str) -> bool {
     let main = shell().main();
-    // the list's own rows as it shows them: grouped by conversation, a row is not a message's place in the folder
-    let found = wait_for(10, || {
-        main.list
-            .shown_messages(500)
-            .iter()
-            .position(|m| m.folder_id == folder && m.info.subject == subject)
-    })
-    .await;
-    let Some(row) = found.and_then(|at| u32::try_from(at).ok()) else {
-        return false;
-    };
-    select_row(row).await;
-    wait_until(15, || {
-        main.reader.has_view() && main.reader.subject().as_deref() == Some(subject)
-    })
-    .await
+    let deadline = Instant::now() + Duration::from_secs(30);
+    while Instant::now() < deadline {
+        // found and selected in one go, once the list has settled: a row's number is good only for the list it was
+        // read from, and mail that comes meanwhile (a sync) moves the rows under it. The list's own rows as it shows
+        // them: grouped by conversation, a row is not a message's place in the folder
+        let selected = wait_for(10, || {
+            let at = main
+                .list
+                .shown_messages(500)
+                .iter()
+                .position(|m| m.folder_id == folder && m.info.subject == subject)?;
+            main.list.select(u32::try_from(at).ok()?);
+            Some(())
+        })
+        .await;
+        if selected.is_none() {
+            return false;
+        }
+        pause(1500).await;
+        // the list read again between the two would have shown another message: selected again
+        if wait_until(15, || {
+            main.reader.has_view() && main.reader.subject().as_deref() == Some(subject)
+        })
+        .await
+        {
+            return true;
+        }
+    }
+    false
 }
 
 /// The undelivered marks the list draws in its rows on screen
