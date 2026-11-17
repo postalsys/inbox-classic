@@ -579,7 +579,7 @@ ui-sending-in = { $subject } saadetakse { $count ->
    *[other] { $count } sekundi pärast
 }
 ui-send-undone = { $subject } jäi saatmata. Kiri on taas muutmiseks avatud.
-ui-send-too-late = { $subject } on juba saadetud.
+ui-send-too-late = Saatmist ei saa enam tagasi võtta: { $subject }.
 ui-outbox-status-undo = Saadetakse kell { $time }
 ui-download-note = Eelnevalt alla laaditud kirjad avanevad kohe. Mahupiiri ületamisel eemaldatakse arvutist vanimate kirjade koopiad. Kirjade avamisel laaditakse need uuesti alla.
 ui-attachment-downloading = Kirja allalaadimine on veel pooleli. Proovige uuesti, kui allalaadimine on lõppenud.

@@ -584,7 +584,7 @@ ui-sending-in = Sender { $subject } om { $count ->
    *[other] { $count } sekunder
 }
 ui-send-undone = { $subject } ble ikke sendt. Meldingen er åpnet igjen for redigering.
-ui-send-too-late = { $subject } er allerede sendt.
+ui-send-too-late = Sendingen kan ikke lenger angres: { $subject }.
 ui-outbox-status-undo = Sendes kl. { $time }
 ui-download-note = Meldinger som er lastet ned på forhånd, åpnes med en gang. Når lagringsgrensen overskrides, fjernes de eldste lokale kopiene, og de lastes ned igjen når du åpner dem.
 ui-attachment-downloading = Denne meldingen er ikke ferdig nedlastet. Prøv igjen når nedlastingen er fullført.

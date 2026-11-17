@@ -583,7 +583,7 @@ ui-sending-in = S’enviarà { $subject } d’aquí a { $count ->
    *[other] { $count } segons
 }
 ui-send-undone = No s’ha enviat { $subject }. El missatge s’ha tornat a obrir per editar-lo.
-ui-send-too-late = { $subject } ja s’ha enviat.
+ui-send-too-late = Ja no es pot desfer l’enviament de { $subject }.
 ui-outbox-status-undo = S’enviarà a les { $time }
 ui-download-note = Els missatges baixats per avançat s’obren immediatament. Quan se supera el límit d’emmagatzematge, s’eliminen les còpies locals més antigues. Els missatges es conserven al servidor i es tornen a baixar quan els obriu.
 ui-attachment-downloading = Aquest missatge no s’ha acabat de baixar. Torneu-ho a provar quan s’hagi completat la baixada.

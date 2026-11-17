@@ -594,7 +594,7 @@ ui-sending-in = Poruka { $subject } se šalje za { $count ->
    *[other] { $count } sekundi
 }
 ui-send-undone = Poruka { $subject } nije poslata. Ponovo je otvorena za uređivanje.
-ui-send-too-late = Poruka { $subject } je već poslata.
+ui-send-too-late = Slanje poruke { $subject } više ne može da se otkaže.
 ui-outbox-status-undo = Šalje se u { $time }
 ui-download-note = Unapred preuzete poruke otvaraju se odmah. Kada se prekorači ograničenje skladišta, najstarije lokalne kopije se uklanjaju i ponovo preuzimaju kada ih otvorite.
 ui-attachment-downloading = Preuzimanje ove poruke nije završeno. Pokušajte ponovo kada se preuzimanje završi.

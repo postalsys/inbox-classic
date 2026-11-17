@@ -583,7 +583,7 @@ ui-sending-in = Invio di { $subject } tra { $count ->
    *[other] { $count } secondi
 }
 ui-send-undone = { $subject } non è stato inviato. Il messaggio è stato riaperto per la modifica.
-ui-send-too-late = { $subject } è già stato inviato.
+ui-send-too-late = Non è più possibile annullare l’invio di { $subject }.
 ui-outbox-status-undo = Invio alle { $time }
 ui-download-note = I messaggi scaricati in anticipo si aprono subito. Quando si supera il limite di spazio, le copie locali più vecchie vengono rimosse e scaricate di nuovo quando le apri.
 ui-attachment-downloading = Il download di questo messaggio non è terminato. Riprova quando il download è completo.

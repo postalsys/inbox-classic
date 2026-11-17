@@ -579,7 +579,7 @@ ui-sending-in = { $subject } wird in { $count ->
    *[other] { $count } Sekunden
 } gesendet
 ui-send-undone = { $subject } wurde nicht gesendet. Die Nachricht ist wieder zur Bearbeitung geöffnet.
-ui-send-too-late = { $subject } wurde bereits gesendet.
+ui-send-too-late = Das Senden von { $subject } kann nicht mehr rückgängig gemacht werden.
 ui-outbox-status-undo = Wird um { $time } gesendet
 ui-download-note = Vorab heruntergeladene Nachrichten lassen sich sofort öffnen. Wird das Speicherlimit überschritten, werden die ältesten lokalen Kopien entfernt und beim Öffnen erneut heruntergeladen.
 ui-attachment-downloading = Diese Nachricht wird noch heruntergeladen. Versuchen Sie es erneut, sobald der Download abgeschlossen ist.

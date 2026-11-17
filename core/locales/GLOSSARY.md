@@ -469,6 +469,20 @@ Plurals: `[one]` and `*[other]`; a noun after a number stays singular ("3 üzene
 - No "a(z)" before a placeable. In the help the article before a `data-text` word follows the Hungarian catalog value
   ("az Új levél") and must change if that word's first sound changes.
 - Quotes „...”; Options, Settings and Preferences are all "Beállítások".
+- The local mail store is "levéladatbázis", not the archival "levéltár". Rules "feldolgozzák" messages;
+  "rendezés" is the list's sort order. Keep these terms in the remaining core and help review.
+- Use "bejelentkezési adatok" for credentials, including browser sign-in, and "jelszó" only for passwords.
+  An unprotected settings transfer requires signing in again, which may happen in the browser.
+- Keep "titkos kulcs", "nyilvános kulcs", "ujjlenyomat" and "jelmondat" consistent. Message-signature text is
+  "aláírás"; explain cryptographic signing as "digitális aláírás". A key's name may be an address or fingerprint,
+  and verifying ownership requires checking every listed address as well as the fingerprint.
+- Encrypted search uses available keys and stores decrypted content unencrypted in the local "keresési index".
+  Disabling it removes that content from the index; agent searches cannot use it. Key lookup sends either an
+  address or a key identifier. Preserve these distinctions in the remaining core/help review.
+- Provider guidance must condition app-password use on account support. Outlook.com and Microsoft 365 use
+  browser sign-in. List pictures refer to the column layout and verified domains, with cached logos reused.
+- When Undo Send is too late, say "A küldés már nem vonható vissza". The expired delay does not prove delivery:
+  `outbox::take_back` refuses once `not_before <= now`, even before the worker finishes sending.
 
 ### Nederlands (nl)
 

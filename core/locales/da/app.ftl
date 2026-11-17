@@ -583,7 +583,7 @@ ui-sending-in = Sender { $subject } om { $count ->
    *[other] { $count } sekunder
 }
 ui-send-undone = { $subject } blev ikke sendt. Meddelelsen er åbnet igen, så du kan redigere den.
-ui-send-too-late = { $subject } er allerede sendt.
+ui-send-too-late = Afsendelsen kan ikke længere fortrydes: { $subject }.
 ui-outbox-status-undo = Sendes kl. { $time }
 ui-download-note = Meddelelser, der er hentet på forhånd, kan åbnes med det samme. Når lagergrænsen overskrides, fjernes de ældste lokale kopier. Meddelelserne bliver på serveren og hentes igen, når du åbner dem.
 ui-attachment-downloading = Denne meddelelse er ikke færdighentet. Prøv igen, når den er hentet.

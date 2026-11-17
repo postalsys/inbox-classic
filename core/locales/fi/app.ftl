@@ -584,7 +584,7 @@ ui-sending-in = Lähetetään { $subject }, { $count ->
    *[other] { $count } sekuntia jäljellä
 }
 ui-send-undone = Viestiä { $subject } ei lähetetty. Viesti avattiin uudelleen muokattavaksi.
-ui-send-too-late = Viesti { $subject } on jo lähetetty.
+ui-send-too-late = Lähettämistä ei voi enää perua: { $subject }.
 ui-outbox-status-undo = Lähetetään klo { $time }
 ui-download-note = Etukäteen ladatut viestit avautuvat heti. Kun tallennustilan raja ylittyy, vanhimmat paikalliset kopiot poistetaan ja ladataan uudelleen, kun avaat ne.
 ui-attachment-downloading = Tämän viestin lataus on kesken. Yritä uudelleen, kun lataus on valmis.

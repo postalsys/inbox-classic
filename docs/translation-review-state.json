@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Start Hungarian app.ftl (647 pending IDs), then core.ftl (450), help.ftl (24), linux.ftl (87), mac.ftl (65), windows.ftl (69) and all 52 help topics. Continue lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. All 18 earlier languages including Croatian have no pending marks and current completed/source hashes match. Ten broad drafts retain provider sign-in/troubleshooting, no-Trash deletion, settings/encrypted-image, encryption/search and search-negation context followups plus recorded mnemonic issues. Read their glossary notes and actual callers; do not remove marks by structure alone. Search-negation context: date/age/size operators ignore minus, so no universal-negation promise. Use available keys, index cleanup, unconditional encrypted-notification label, agent envelope versus protected contents and address versus fingerprint lookup context. Scope 32712/1316; pending 13420/520; completed 19292/796. No test suites; active checkout build/i18n-wave1; REVIEWED unchanged. Latest fresh source audit found no new languages or unrecorded translations.",
+  "next_batch": "First integrate newly discovered chore/pgp-hardening help additions (source help commit 255205aad7e70f680909092c3167cc724618b70e, observed branch 80d02fcc842c2cbe9f8a6a9eddcc075180d74d3d), with exact provenance in review_workspace.pending_source_integrations. Recheck its tip; preserve uncommitted UI/fuzz work in PostalExpress-pgp11. Three topics per language: connections, data-storage, encryption-keys; preserve completed prose and mark inserted passages, keeping full-topic marks in ten broad drafts. Reconcile English-source hashes and reopening/scope counts; review the new passages in earlier languages. Then Hungarian core.ftl (450), help.ftl (24), linux.ftl (87), mac.ftl (65), windows.ftl (69), all 52 help topics, then lt/lv/pl/ro/ru/sk/sl/sv/uk. Hungarian app.ftl (647 IDs) complete with 83 improvements; all 46 shortcut scopes pass. Provider/encryption app portions complete, other context followups remain pending. Undo Send deadline wording complete in 19 languages; remaining nine drafts must not claim successful sending merely because Undo expired. Current integrated scope 32716/1316, pending12773/520, completed19943/796, historical improvements3357; unintegrated help additions excluded until integration. No test suites or builds; REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -2031,6 +2031,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "bg-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/bg/app.ftl": "6baa02cf8fb3dc828d6a5dc87ad06e974e575f4eaf67607ca882b0616e8e6548"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ]
     },
@@ -4071,6 +4090,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "cs-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/cs/app.ftl": "50721720336d378bd392182dde029cf0c29ea8de51aa51133b550b486c8f61d0"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ]
     },
@@ -6079,6 +6117,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "da-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/da/app.ftl": "34883a270adc978e6ce0e5acfb2b67c92e901fb64cedc57b6ff8d7e2310081d2"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ]
     },
@@ -6599,6 +6656,24 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "de-undo-send-context-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/de/app.ftl": "6e81b980e35898b4bee6eaa0ee2126d9a3f60493e1388a06c888632af9784fca"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites."
         }
       ]
     },
@@ -8607,6 +8682,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "el-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/el/app.ftl": "26208b6fa1cb57db04d7e7b7e48abd634ed9b6891e0f510aca972b7e2cef5026"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ]
     },
@@ -9126,6 +9220,24 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "es-undo-send-context-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/es/app.ftl": "c0220b6a43bc4d3e5e88b12b402e78eaa6a0d1e7d6a0026bf2ea3142d517867d"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites."
         }
       ]
     },
@@ -9652,6 +9764,24 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "et-undo-send-context-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/et/app.ftl": "aacae8a738c4e7a6fea67128a3a38fe0fce6276ec24c0d538cdfb21615654c40"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites."
         }
       ]
     },
@@ -11667,6 +11797,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "fi-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/fi/app.ftl": "aad1af06e3e2b01f96162e3472bf88c98d48f21a9b5715c6306c9949821857b3"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ]
     },
@@ -12200,6 +12349,24 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "fr-undo-send-context-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/fr/app.ftl": "3d9056d4b1c301695c087fcadc33c3f1f601912962dd583822771fcafc6ce82b"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites."
         }
       ]
     },
@@ -14081,660 +14248,30 @@
             "search-words.html": 15,
             "updates.html": 5
           }
+        },
+        {
+          "id": "hr-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/hr/app.ftl": "d39b18bdc5a82216f999693ee37106efd0c18ede15b19b6db92e8a8d39ff6c44"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ]
     },
     "hu": {
       "pending_catalogs": {
-        "app.ftl": [
-          "menu-file",
-          "menu-edit",
-          "menu-view",
-          "menu-tools",
-          "menu-message",
-          "menu-help",
-          "menu-layout",
-          "menu-sort-by",
-          "menu-text-size",
-          "menu-folder",
-          "cmd-new-account",
-          "cmd-exit",
-          "cmd-sync",
-          "cmd-mark-read",
-          "cmd-mark-unread",
-          "cmd-pictures",
-          "cmd-about",
-          "cmd-new-mail",
-          "cmd-reply",
-          "cmd-reply-all",
-          "cmd-forward",
-          "cmd-help",
-          "cmd-delete",
-          "cmd-move",
-          "cmd-flag",
-          "cmd-new-folder",
-          "cmd-rename-folder",
-          "cmd-delete-folder",
-          "cmd-empty-folder",
-          "ui-empty-button",
-          "cmd-accounts",
-          "cmd-find",
-          "cmd-save-as",
-          "cmd-print",
-          "cmd-import",
-          "cmd-outbox",
-          "cmd-properties",
-          "cmd-mark-all-read",
-          "cmd-junk",
-          "cmd-not-junk",
-          "cmd-archive",
-          "cmd-watch-conversation",
-          "cmd-ignore-conversation",
-          "cmd-next-message",
-          "cmd-previous-message",
-          "cmd-next-unread",
-          "cmd-go-to-folder",
-          "cmd-find-in-message",
-          "ui-go-to-prompt",
-          "ui-find-in-message-hint",
-          "ui-find-not-found",
-          "cmd-expand-all-threads",
-          "cmd-collapse-all-threads",
-          "ui-group-by-conversation",
-          "cmd-folder-list",
-          "cmd-layout-automatic",
-          "cmd-layout-classic",
-          "cmd-layout-columns",
-          "cmd-sort-date",
-          "cmd-sort-from",
-          "cmd-sort-subject",
-          "cmd-sort-size",
-          "cmd-sort-ascending",
-          "cmd-sort-descending",
-          "cmd-text-size-largest",
-          "cmd-text-size-larger",
-          "cmd-text-size-medium",
-          "cmd-text-size-smaller",
-          "cmd-text-size-smallest",
-          "cmd-hide-ignored",
-          "cmd-hide-read",
-          "cmd-notify",
-          "cmd-open",
-          "cmd-default-app",
-          "cmd-view-source",
-          "cmd-ai-agents",
-          "cmd-options",
-          "cmd-message-rules",
-          "cmd-encryption-keys",
-          "cmd-create-rule-from-message",
-          "cmd-select-all",
-          "cmd-undo",
-          "cmd-copy",
-          "cmd-address-book",
-          "cmd-add-sender-to-book",
-          "cmd-import-address-book",
-          "cmd-export-address-book",
-          "cmd-export-setup",
-          "cmd-import-setup",
-          "tray-check",
-          "tray-no-accounts",
-          "ui-tb-create-mail",
-          "ui-tb-reply",
-          "ui-tb-reply-all",
-          "ui-tb-forward",
-          "ui-tb-print",
-          "ui-tb-delete",
-          "ui-tb-junk",
-          "ui-tb-not-junk",
-          "ui-tb-archive",
-          "ui-tb-previous",
-          "ui-tb-next",
-          "ui-previous-tip",
-          "ui-next-tip",
-          "ui-tb-sync",
-          "ui-tb-mark-read",
-          "ui-tb-mark-unread",
-          "ui-still-running",
-          "ui-no-subject",
-          "ui-quoted",
-          "ui-newest-from",
-          "ui-new-messages",
-          "ui-outbox-waiting",
-          "ui-outbox-waits",
-          "ui-outbox-sending",
-          "ui-from-account",
-          "ui-sign-in-refused",
-          "ui-sign-in-again-ask",
-          "ui-sign-in-again-failed",
-          "ui-unknown-reason",
-          "ui-checking",
-          "ui-done",
-          "ui-sent-at",
-          "ui-draft-saved",
-          "ui-draft-not-saved",
-          "ui-about-core",
-          "ui-add-account-first",
-          "ui-add-account-first-link",
-          "ui-default-app-is",
-          "ui-select-message-first",
-          "ui-store-not-opened",
-          "ui-store-or-cert-not-opened",
-          "ui-help-title",
-          "ui-help-missing",
-          "ui-ok",
-          "ui-cancel",
-          "ui-close",
-          "ui-col-subject",
-          "ui-col-from",
-          "ui-col-to",
-          "ui-col-received",
-          "ui-watched-conversation",
-          "ui-col-sent",
-          "ui-col-size",
-          "ui-col-folder",
-          "ui-col-account",
-          "ui-col-queued",
-          "ui-col-status",
-          "ui-outbox-title",
-          "ui-outbox-status-waiting",
-          "ui-outbox-status-not-sent",
-          "ui-outbox-status-agent",
-          "ui-outbox-delete-ask",
-          "ui-open-link",
-          "ui-edit-link",
-          "ui-remove-link",
-          "ui-insert-attachment",
-          "ui-insert-picture",
-          "ui-filter-all",
-          "ui-filter-pictures",
-          "ui-filter-messages",
-          "ui-save-attachment-as",
-          "ui-not-sent",
-          "ui-attachment-forgotten",
-          "ui-send-anyway",
-          "ui-go-back",
-          "ui-not-saved",
-          "ui-saving-draft",
-          "ui-compose-saved-at",
-          "ui-compose-restored",
-          "ui-compose-not-saved",
-          "ui-save-changes-ask",
-          "ui-new-message-title",
-          "ui-link-invalid",
-          "ui-link-address",
-          "ui-hyperlink",
-          "ui-hyperlink-intro",
-          "ui-edit-hyperlink",
-          "ui-edit-hyperlink-intro",
-          "ui-not-a-picture",
-          "ui-format-color",
-          "ui-format-numbers",
-          "ui-format-bullets",
-          "ui-format-outdent",
-          "ui-format-indent",
-          "ui-format-left",
-          "ui-format-center",
-          "ui-format-right",
-          "ui-format-line",
-          "ui-tb-send",
-          "ui-tb-save",
-          "ui-tb-attach",
-          "ui-field-from",
-          "ui-field-to",
-          "ui-field-cc",
-          "ui-field-bcc",
-          "ui-field-subject",
-          "ui-field-attach",
-          "ui-signature",
-          "ui-signature-hint",
-          "ui-signature-not-saved",
-          "ui-all-inboxes",
-          "ui-all-sent",
-          "ui-all-drafts",
-          "ui-flagged-folder",
-          "ui-all-folders",
-          "ui-the-account",
-          "ui-folder-name",
-          "ui-find-hint",
-          "ui-find-tip",
-          "ui-clear-search",
-          "ui-no-match",
-          "ui-no-match-all",
-          "ui-no-match-in",
-          "ui-no-items",
-          "ui-choose-folder",
-          "ui-unsubscribe",
-          "ui-open-in-calendar",
-          "ui-pictures-blocked",
-          "ui-not-shown",
-          "ui-attachment-not-read",
-          "ui-attachment-not-saved",
-          "ui-not-downloaded",
-          "ui-leave-list",
-          "ui-leave-one-click",
-          "ui-leave-mail",
-          "ui-leave-web",
-          "ui-unsubscribing",
-          "ui-cannot-unsubscribe",
-          "ui-unsubscribed",
-          "ui-not-unsubscribed",
-          "ui-event-span",
-          "ui-event-floating",
-          "ui-invitation",
-          "ui-invitation-updated",
-          "ui-invitation-canceled",
-          "ui-invitation-answer",
-          "ui-no-title",
-          "ui-organizer",
-          "ui-invitation-not-read",
-          "ui-no-calendar",
-          "ui-messages-not-changed",
-          "ui-new-folder-in-selected",
-          "ui-new-folder-at-top",
-          "ui-folder-not-created",
-          "ui-folder-not-renamed",
-          "ui-folder-not-deleted",
-          "ui-rename-folder-intro",
-          "ui-properties-of",
-          "ui-internet-headers",
-          "ui-save-messages-in",
-          "ui-save-message-as",
-          "ui-import-choose-folder",
-          "ui-add-account-title",
-          "ui-accounts-title",
-          "ui-security-none",
-          "ui-field-required",
-          "ui-email-invalid",
-          "ui-ports-invalid",
-          "ui-looking-up",
-          "ui-found-none",
-          "ui-found-change",
-          "ui-found-guess",
-          "ui-found-mx",
-          "ui-found-srv",
-          "ui-found-autodiscover",
-          "ui-found-other",
-          "ui-app-password-needed",
-          "ui-app-password-open",
-          "ui-plain-warning",
-          "ui-continue-ask",
-          "ui-add-sign-in-app",
-          "ui-turned-off",
-          "ui-off-here",
-          "ui-why",
-          "ui-more-sign-in",
-          "ui-other-account",
-          "ui-field-account-name",
-          "ui-field-name",
-          "ui-field-email",
-          "ui-field-user",
-          "ui-field-password",
-          "ui-field-imap-host",
-          "ui-field-imap-port",
-          "ui-field-imap-security",
-          "ui-field-smtp-host",
-          "ui-field-smtp-port",
-          "ui-field-smtp-security",
-          "ui-field-other-addresses",
-          "ui-sign-in-not-started",
-          "ui-sign-in-in-browser",
-          "ui-sign-in-failed",
-          "ui-account-not-saved",
-          "ui-start-intro",
-          "ui-start-intro-apps",
-          "ui-use-app-password",
-          "ui-the-provider",
-          "ui-provider-intro",
-          "ui-provider-intro-apps",
-          "ui-finish",
-          "ui-logon",
-          "ui-enter-password",
-          "ui-signs-in-with",
-          "ui-keep-password",
-          "ui-remove-account",
-          "ui-remove-account-ask",
-          "ui-col-email",
-          "ui-col-incoming",
-          "ui-type-email",
-          "ui-ai-agent",
-          "ui-ai-agent-access",
-          "ui-ai-agents",
-          "ui-program-path",
-          "ui-it-may",
-          "ui-accounts-it-may-use",
-          "ui-send-message-ask",
-          "ui-col-name",
-          "ui-never",
-          "ui-connect-agent",
-          "ui-connect-agent-intro",
-          "ui-col-program",
-          "ui-col-may",
-          "ui-col-last-used",
-          "ui-col-when",
-          "ui-col-what",
-          "ui-sign-in-app",
-          "ui-sign-in-apps",
-          "ui-add-sign-in-app-title",
-          "ui-preset-app-name",
-          "ui-issuer-not-checked",
-          "ui-checking-issuer",
-          "ui-issuer-unusable",
-          "ui-issuer-usable",
-          "ui-sign-in-app-not-saved",
-          "ui-check",
-          "ui-fill-in-for",
-          "ui-app-name",
-          "ui-issuer",
-          "ui-client-id",
-          "ui-client-secret",
-          "ui-scopes",
-          "ui-imap-server",
-          "ui-smtp-server",
-          "ui-redirect-uri",
-          "ui-sign-in-app-intro",
-          "ui-remove-secret",
-          "ui-register-it",
-          "ui-built-in-note",
-          "ui-client-with-secret",
-          "ui-client-public",
-          "ui-no-accounts",
-          "ui-remove-sign-in-app",
-          "ui-remove-sign-in-app-ask",
-          "ui-sign-in-app-not-removed",
-          "ui-sign-in-apps-intro",
-          "ui-col-issuer",
-          "ui-col-used-by",
-          "ui-options-system-default",
-          "ui-settings-general",
-          "ui-settings-reading",
-          "ui-settings-new-mail",
-          "ui-settings-sending",
-          "ui-settings-default-apps",
-          "ui-settings-message-list",
-          "ui-settings-messages",
-          "ui-settings-encryption",
-          "ui-settings-language",
-          "ui-settings-label",
-          "ui-apply",
-          "ui-language-label",
-          "ui-restart-note",
-          "ui-restart-ask",
-          "ui-notify-new-mail",
-          "ui-new-folder-title",
-          "ui-rename-folder-title",
-          "ui-delete-folder-question",
-          "ui-properties",
-          "ui-account-sync",
-          "ui-account-properties",
-          "ui-account-move-up",
-          "ui-account-move-down",
-          "ui-menu-open",
-          "ui-menu-flag",
-          "ui-menu-view-source",
-          "ui-save-attachments",
-          "ui-attachment-open",
-          "ui-attachment-save-as",
-          "ui-attachment-save-all",
-          "ui-attachments-strip",
-          "ui-attachment-note-title",
-          "ui-attachment-program-tip",
-          "ui-clear-flag",
-          "ui-button-move",
-          "ui-button-copy",
-          "ui-find-folder",
-          "ui-new-folder-in",
-          "ui-outbox-send-all",
-          "ui-yes",
-          "ui-no",
-          "ui-try-again",
-          "ui-remove",
-          "ui-signature-of",
-          "ui-sign-in-with",
-          "ui-sign-in-in-browser-yours",
-          "ui-browser-sign-in-server",
-          "ui-dont-allow",
-          "ui-allow",
-          "ui-dont-send",
-          "ui-edit-first",
-          "ui-new-address",
-          "ui-turn-away",
-          "ui-clear-agent-log",
-          "ui-clear-agent-log-detail",
-          "ui-let-agents-connect",
-          "ui-change-button",
-          "ui-undo-button",
-          "ui-rules-title",
-          "ui-rules-intro",
-          "ui-rules-none",
-          "ui-rule-new",
-          "ui-rule-edit",
-          "ui-rule-delete-button",
-          "ui-rule-title",
-          "ui-rule-name",
-          "ui-rule-account",
-          "ui-rule-all-accounts",
-          "ui-rule-query",
-          "ui-rule-query-hint",
-          "ui-rule-count",
-          "ui-rule-show",
-          "ui-rule-actions",
-          "ui-rule-move",
-          "ui-rule-mark-read",
-          "ui-rule-flag",
-          "ui-rule-archive",
-          "ui-rule-junk",
-          "ui-rule-delete",
-          "ui-rule-quiet",
-          "ui-rule-apply-now",
-          "ui-rule-delete-ask",
-          "ui-create-rule",
-          "ui-rules-applied",
-          "ui-col-rule-matches",
-          "ui-clear-button",
-          "ui-how-to-connect",
-          "ui-agent-programs",
-          "ui-what-agents-did",
-          "ui-restart-now",
-          "ui-restart-later",
-          "ui-tb-new-contact",
-          "ui-tb-new-group",
-          "ui-tb-properties",
-          "ui-tb-write-to",
-          "ui-menu-new-contact",
-          "ui-menu-new-group",
-          "ui-menu-write-to",
-          "ui-menu-delete",
-          "ui-book-find-hint",
-          "ui-book-all-contacts",
-          "ui-col-phone",
-          "ui-book-empty",
-          "ui-book-no-match",
-          "ui-book-delete-ask",
-          "ui-group-delete-ask",
-          "ui-book-no-address",
-          "ui-new-contact-title",
-          "ui-contact-title",
-          "ui-contact-first",
-          "ui-contact-last",
-          "ui-contact-display",
-          "ui-contact-nickname",
-          "ui-contact-company",
-          "ui-contact-addresses",
-          "ui-contact-address-hint",
-          "ui-contact-add",
-          "ui-contact-set-default",
-          "ui-contact-default",
-          "ui-contact-phones",
-          "ui-phone-home",
-          "ui-phone-work",
-          "ui-phone-mobile",
-          "ui-phone-other",
-          "ui-contact-notes",
-          "ui-contact-name-needed",
-          "ui-contact-address-invalid",
-          "ui-contact-not-saved",
-          "ui-new-group-title",
-          "ui-group-title",
-          "ui-group-name",
-          "ui-group-members",
-          "ui-group-select-members",
-          "ui-group-new-member",
-          "ui-group-name-needed",
-          "ui-group-not-saved",
-          "ui-group-members-count",
-          "ui-select-recipients",
-          "ui-select-members",
-          "ui-pick-intro",
-          "ui-pick-recipients",
-          "ui-pick-members",
-          "ui-pick-to",
-          "ui-pick-cc",
-          "ui-pick-bcc",
-          "ui-pick-add",
-          "ui-pick-tip",
-          "ui-filter-address-books",
-          "ui-filter-vcard",
-          "ui-book-export-name",
-          "ui-book-imported",
-          "ui-book-not-imported",
-          "ui-book-exported",
-          "ui-book-not-exported",
-          "ui-code-copied",
-          "ui-codes-in-notifications",
-          "ui-tool-unread-only",
-          "ui-no-unread",
-          "ui-pictures-always-sender",
-          "ui-pictures-always-domain",
-          "ui-pictures-unconfirmed",
-          "ui-pictures-always-option",
-          "ui-pictures-always-warning",
-          "ui-protection-details",
-          "ui-protection-details-title",
-          "ui-download-heading",
-          "ui-download-ahead",
-          "ui-download-ahead-recent",
-          "ui-download-ahead-all",
-          "ui-download-ahead-never",
-          "ui-download-limit",
-          "ui-send-delay",
-          "ui-send-delay-note",
-          "ui-dark-messages",
-          "ui-sending-in",
-          "ui-send-undone",
-          "ui-send-too-late",
-          "ui-outbox-status-undo",
-          "ui-download-note",
-          "ui-attachment-downloading",
-          "ui-trusted-senders-button",
-          "ui-trusted-senders-title",
-          "ui-trusted-senders-note",
-          "ui-trusted-everyone-at",
-          "ui-trusted-senders-empty",
-          "ui-search-encrypted",
-          "ui-search-encrypted-note",
-          "ui-pgp-keyserver",
-          "ui-pgp-keyserver-note",
-          "ui-eml-default",
-          "ui-eml-default-done",
-          "ui-eml-default-failed",
-          "ui-folders",
-          "ui-sorted-by",
-          "ui-layout-label",
-          "ui-columns-note",
-          "ui-row-unread",
-          "ui-row-flagged",
-          "ui-row-attachments",
-          "ui-row-encrypted",
-          "ui-row-signed",
-          "ui-row-messages",
-          "ui-list-pictures",
-          "ui-list-pictures-note",
-          "ui-card-picture",
-          "ui-card-picture-choose",
-          "ui-picture-not-picture",
-          "ui-picture-too-large",
-          "ui-keys-title",
-          "ui-keys-intro",
-          "ui-keys-empty",
-          "ui-keys-col-name",
-          "ui-keys-col-address",
-          "ui-keys-col-kind",
-          "ui-keys-col-status",
-          "ui-keys-kind-own",
-          "ui-keys-kind-contact",
-          "ui-keys-status-verified",
-          "ui-keys-new",
-          "ui-keys-import",
-          "ui-keys-export",
-          "ui-keys-backup",
-          "ui-keys-verify",
-          "ui-keys-new-title",
-          "ui-keys-new-for",
-          "ui-keys-new-make",
-          "ui-keys-no-account",
-          "ui-keys-memory-only",
-          "ui-keys-backup-offer",
-          "ui-keys-backup-now",
-          "ui-keys-later",
-          "ui-keys-backup-title",
-          "ui-keys-backup-intro",
-          "ui-keys-passphrase",
-          "ui-keys-passphrase-again",
-          "ui-keys-passphrase-differ",
-          "ui-keys-passphrase-short",
-          "ui-keys-backup-saved",
-          "ui-keys-import-title",
-          "ui-keys-import-passphrase",
-          "ui-keys-file-filter",
-          "ui-keys-use-for",
-          "ui-keys-use",
-          "ui-keys-not-now",
-          "ui-keys-remove-own",
-          "ui-keys-remove-contact",
-          "ui-key-properties-title",
-          "ui-key-names",
-          "ui-key-fingerprint",
-          "ui-key-status",
-          "ui-key-created",
-          "ui-key-expires",
-          "ui-key-never",
-          "ui-key-algorithm",
-          "ui-key-source",
-          "ui-key-addresses",
-          "ui-key-address-verified",
-          "ui-key-address-not-verified",
-          "ui-verify-title",
-          "ui-verify-intro",
-          "ui-verify-fingerprint",
-          "ui-verify-marks",
-          "ui-verify-match",
-          "ui-verify-differ",
-          "ui-verify-differs",
-          "ui-verify-unmark",
-          "ui-account-security",
-          "ui-account-security-intro",
-          "ui-account-key",
-          "ui-account-key-none",
-          "ui-account-key-new",
-          "ui-account-autocrypt",
-          "ui-contact-key",
-          "ui-contact-key-none",
-          "ui-contact-key-use-new",
-          "ui-contact-key-keep",
-          "ui-setup-export-title",
-          "ui-setup-import-title",
-          "ui-setup-export-intro",
-          "ui-setup-use-passphrase",
-          "ui-setup-passphrase-note",
-          "ui-setup-export-button",
-          "ui-setup-file-filter",
-          "ui-setup-ask-passphrase",
-          "ui-setup-import-intro",
-          "ui-setup-from",
-          "ui-setup-import-button",
-          "ui-setup-done",
-          "ui-setup-first-run"
-        ],
         "core.ftl": [
           "decimal-separator",
           "size-bytes",
@@ -15627,6 +15164,670 @@
           },
           "validation": "All 28 catalog inventories, full variable sets, access-key counts, 52 help topics per language, references and exact pending marks pass. Static check-language has only 25185 expected removed/partial-review-mark diagnostics. All 46 mnemonic scopes pass in the 18 previously reviewed app languages; all three settings-page scopes pass in all 28. The ten broad drafts have exactly their pre-merge collisions; Romanian Gri still has no free runtime flag mnemonic. These are pending initial-review work, not new integration defects. All 76 imported nontranslation source/generated paths match feature 38841d96 exactly. Prior catalog values/comments and help prose retained; all 19146 unmarked messages and 10007 changed help lines reconcile, with 14 verified baseline pairs. All completed/source hashes match. HTML regenerated; locale/help/record diff checks pass. Full staged diff passes with core.whitespace=cr-at-eol: the imported secure-protected-subject.eml has intentional CRLF endings and matches upstream byte-for-byte. No tests or builds run; installer/store metadata was not changed.",
           "notes": "Integrated nine new catalog IDs, the changed pgp-keyserver-off with its new settings placeholder, and new passages in four help topics. Every unaffected catalog value/comment and all prior help prose are retained. Previously reviewed topics mark only the inserted passages; original pending topics remain wholly marked. Affected current reviewed inventories are reopened, with history retained in reopened_ fields. No new translation is counted reviewed."
+        },
+        {
+          "id": "hu-app-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "menu-file",
+              "menu-edit",
+              "menu-view",
+              "menu-tools",
+              "menu-message",
+              "menu-help",
+              "menu-layout",
+              "menu-sort-by",
+              "menu-text-size",
+              "menu-folder",
+              "cmd-new-account",
+              "cmd-exit",
+              "cmd-sync",
+              "cmd-mark-read",
+              "cmd-mark-unread",
+              "cmd-pictures",
+              "cmd-about",
+              "cmd-new-mail",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "cmd-help",
+              "cmd-delete",
+              "cmd-move",
+              "cmd-flag",
+              "cmd-new-folder",
+              "cmd-rename-folder",
+              "cmd-delete-folder",
+              "cmd-empty-folder",
+              "ui-empty-button",
+              "cmd-accounts",
+              "cmd-find",
+              "cmd-save-as",
+              "cmd-print",
+              "cmd-import",
+              "cmd-outbox",
+              "cmd-properties",
+              "cmd-mark-all-read",
+              "cmd-junk",
+              "cmd-not-junk",
+              "cmd-archive",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-next-message",
+              "cmd-previous-message",
+              "cmd-next-unread",
+              "cmd-go-to-folder",
+              "cmd-find-in-message",
+              "ui-go-to-prompt",
+              "ui-find-in-message-hint",
+              "ui-find-not-found",
+              "cmd-expand-all-threads",
+              "cmd-collapse-all-threads",
+              "ui-group-by-conversation",
+              "cmd-folder-list",
+              "cmd-layout-automatic",
+              "cmd-layout-classic",
+              "cmd-layout-columns",
+              "cmd-sort-date",
+              "cmd-sort-from",
+              "cmd-sort-subject",
+              "cmd-sort-size",
+              "cmd-sort-ascending",
+              "cmd-sort-descending",
+              "cmd-text-size-largest",
+              "cmd-text-size-larger",
+              "cmd-text-size-medium",
+              "cmd-text-size-smaller",
+              "cmd-text-size-smallest",
+              "cmd-hide-ignored",
+              "cmd-hide-read",
+              "cmd-notify",
+              "cmd-open",
+              "cmd-default-app",
+              "cmd-view-source",
+              "cmd-ai-agents",
+              "cmd-options",
+              "cmd-message-rules",
+              "cmd-encryption-keys",
+              "cmd-create-rule-from-message",
+              "cmd-select-all",
+              "cmd-undo",
+              "cmd-copy",
+              "cmd-address-book",
+              "cmd-add-sender-to-book",
+              "cmd-import-address-book",
+              "cmd-export-address-book",
+              "cmd-export-setup",
+              "cmd-import-setup",
+              "tray-check",
+              "tray-no-accounts",
+              "ui-tb-create-mail",
+              "ui-tb-reply",
+              "ui-tb-reply-all",
+              "ui-tb-forward",
+              "ui-tb-print",
+              "ui-tb-delete",
+              "ui-tb-junk",
+              "ui-tb-not-junk",
+              "ui-tb-archive",
+              "ui-tb-previous",
+              "ui-tb-next",
+              "ui-previous-tip",
+              "ui-next-tip",
+              "ui-tb-sync",
+              "ui-tb-mark-read",
+              "ui-tb-mark-unread",
+              "ui-still-running",
+              "ui-no-subject",
+              "ui-quoted",
+              "ui-newest-from",
+              "ui-new-messages",
+              "ui-outbox-waiting",
+              "ui-outbox-waits",
+              "ui-outbox-sending",
+              "ui-from-account",
+              "ui-sign-in-refused",
+              "ui-sign-in-again-ask",
+              "ui-sign-in-again-failed",
+              "ui-unknown-reason",
+              "ui-checking",
+              "ui-done",
+              "ui-sent-at",
+              "ui-draft-saved",
+              "ui-draft-not-saved",
+              "ui-about-core",
+              "ui-add-account-first",
+              "ui-add-account-first-link",
+              "ui-default-app-is",
+              "ui-select-message-first",
+              "ui-store-not-opened",
+              "ui-store-or-cert-not-opened",
+              "ui-help-title",
+              "ui-help-missing",
+              "ui-ok",
+              "ui-cancel",
+              "ui-close",
+              "ui-col-subject",
+              "ui-col-from",
+              "ui-col-to",
+              "ui-col-received",
+              "ui-watched-conversation",
+              "ui-col-sent",
+              "ui-col-size",
+              "ui-col-folder",
+              "ui-col-account",
+              "ui-col-queued",
+              "ui-col-status",
+              "ui-outbox-title",
+              "ui-outbox-status-waiting",
+              "ui-outbox-status-not-sent",
+              "ui-outbox-status-agent",
+              "ui-outbox-delete-ask",
+              "ui-open-link",
+              "ui-edit-link",
+              "ui-remove-link",
+              "ui-insert-attachment",
+              "ui-insert-picture",
+              "ui-filter-all",
+              "ui-filter-pictures",
+              "ui-filter-messages",
+              "ui-save-attachment-as",
+              "ui-not-sent",
+              "ui-attachment-forgotten",
+              "ui-send-anyway",
+              "ui-go-back",
+              "ui-not-saved",
+              "ui-saving-draft",
+              "ui-compose-saved-at",
+              "ui-compose-restored",
+              "ui-compose-not-saved",
+              "ui-save-changes-ask",
+              "ui-new-message-title",
+              "ui-link-invalid",
+              "ui-link-address",
+              "ui-hyperlink",
+              "ui-hyperlink-intro",
+              "ui-edit-hyperlink",
+              "ui-edit-hyperlink-intro",
+              "ui-not-a-picture",
+              "ui-format-color",
+              "ui-format-numbers",
+              "ui-format-bullets",
+              "ui-format-outdent",
+              "ui-format-indent",
+              "ui-format-left",
+              "ui-format-center",
+              "ui-format-right",
+              "ui-format-line",
+              "ui-tb-send",
+              "ui-tb-save",
+              "ui-tb-attach",
+              "ui-field-from",
+              "ui-field-to",
+              "ui-field-cc",
+              "ui-field-bcc",
+              "ui-field-subject",
+              "ui-field-attach",
+              "ui-signature",
+              "ui-signature-hint",
+              "ui-signature-not-saved",
+              "ui-all-inboxes",
+              "ui-all-sent",
+              "ui-all-drafts",
+              "ui-flagged-folder",
+              "ui-all-folders",
+              "ui-the-account",
+              "ui-folder-name",
+              "ui-find-hint",
+              "ui-find-tip",
+              "ui-clear-search",
+              "ui-no-match",
+              "ui-no-match-all",
+              "ui-no-match-in",
+              "ui-no-items",
+              "ui-choose-folder",
+              "ui-unsubscribe",
+              "ui-open-in-calendar",
+              "ui-pictures-blocked",
+              "ui-not-shown",
+              "ui-attachment-not-read",
+              "ui-attachment-not-saved",
+              "ui-not-downloaded",
+              "ui-leave-list",
+              "ui-leave-one-click",
+              "ui-leave-mail",
+              "ui-leave-web",
+              "ui-unsubscribing",
+              "ui-cannot-unsubscribe",
+              "ui-unsubscribed",
+              "ui-not-unsubscribed",
+              "ui-event-span",
+              "ui-event-floating",
+              "ui-invitation",
+              "ui-invitation-updated",
+              "ui-invitation-canceled",
+              "ui-invitation-answer",
+              "ui-no-title",
+              "ui-organizer",
+              "ui-invitation-not-read",
+              "ui-no-calendar",
+              "ui-messages-not-changed",
+              "ui-new-folder-in-selected",
+              "ui-new-folder-at-top",
+              "ui-folder-not-created",
+              "ui-folder-not-renamed",
+              "ui-folder-not-deleted",
+              "ui-rename-folder-intro",
+              "ui-properties-of",
+              "ui-internet-headers",
+              "ui-save-messages-in",
+              "ui-save-message-as",
+              "ui-import-choose-folder",
+              "ui-add-account-title",
+              "ui-accounts-title",
+              "ui-security-none",
+              "ui-field-required",
+              "ui-email-invalid",
+              "ui-ports-invalid",
+              "ui-looking-up",
+              "ui-found-none",
+              "ui-found-change",
+              "ui-found-guess",
+              "ui-found-mx",
+              "ui-found-srv",
+              "ui-found-autodiscover",
+              "ui-found-other",
+              "ui-app-password-needed",
+              "ui-app-password-open",
+              "ui-plain-warning",
+              "ui-continue-ask",
+              "ui-add-sign-in-app",
+              "ui-turned-off",
+              "ui-off-here",
+              "ui-why",
+              "ui-more-sign-in",
+              "ui-other-account",
+              "ui-field-account-name",
+              "ui-field-name",
+              "ui-field-email",
+              "ui-field-user",
+              "ui-field-password",
+              "ui-field-imap-host",
+              "ui-field-imap-port",
+              "ui-field-imap-security",
+              "ui-field-smtp-host",
+              "ui-field-smtp-port",
+              "ui-field-smtp-security",
+              "ui-field-other-addresses",
+              "ui-sign-in-not-started",
+              "ui-sign-in-in-browser",
+              "ui-sign-in-failed",
+              "ui-account-not-saved",
+              "ui-start-intro",
+              "ui-start-intro-apps",
+              "ui-use-app-password",
+              "ui-the-provider",
+              "ui-provider-intro",
+              "ui-provider-intro-apps",
+              "ui-finish",
+              "ui-logon",
+              "ui-enter-password",
+              "ui-signs-in-with",
+              "ui-keep-password",
+              "ui-remove-account",
+              "ui-remove-account-ask",
+              "ui-col-email",
+              "ui-col-incoming",
+              "ui-type-email",
+              "ui-ai-agent",
+              "ui-ai-agent-access",
+              "ui-ai-agents",
+              "ui-program-path",
+              "ui-it-may",
+              "ui-accounts-it-may-use",
+              "ui-send-message-ask",
+              "ui-col-name",
+              "ui-never",
+              "ui-connect-agent",
+              "ui-connect-agent-intro",
+              "ui-col-program",
+              "ui-col-may",
+              "ui-col-last-used",
+              "ui-col-when",
+              "ui-col-what",
+              "ui-sign-in-app",
+              "ui-sign-in-apps",
+              "ui-add-sign-in-app-title",
+              "ui-preset-app-name",
+              "ui-issuer-not-checked",
+              "ui-checking-issuer",
+              "ui-issuer-unusable",
+              "ui-issuer-usable",
+              "ui-sign-in-app-not-saved",
+              "ui-check",
+              "ui-fill-in-for",
+              "ui-app-name",
+              "ui-issuer",
+              "ui-client-id",
+              "ui-client-secret",
+              "ui-scopes",
+              "ui-imap-server",
+              "ui-smtp-server",
+              "ui-redirect-uri",
+              "ui-sign-in-app-intro",
+              "ui-remove-secret",
+              "ui-register-it",
+              "ui-built-in-note",
+              "ui-client-with-secret",
+              "ui-client-public",
+              "ui-no-accounts",
+              "ui-remove-sign-in-app",
+              "ui-remove-sign-in-app-ask",
+              "ui-sign-in-app-not-removed",
+              "ui-sign-in-apps-intro",
+              "ui-col-issuer",
+              "ui-col-used-by",
+              "ui-options-system-default",
+              "ui-settings-general",
+              "ui-settings-reading",
+              "ui-settings-new-mail",
+              "ui-settings-sending",
+              "ui-settings-default-apps",
+              "ui-settings-message-list",
+              "ui-settings-messages",
+              "ui-settings-encryption",
+              "ui-settings-language",
+              "ui-settings-label",
+              "ui-apply",
+              "ui-language-label",
+              "ui-restart-note",
+              "ui-restart-ask",
+              "ui-notify-new-mail",
+              "ui-new-folder-title",
+              "ui-rename-folder-title",
+              "ui-delete-folder-question",
+              "ui-properties",
+              "ui-account-sync",
+              "ui-account-properties",
+              "ui-account-move-up",
+              "ui-account-move-down",
+              "ui-menu-open",
+              "ui-menu-flag",
+              "ui-menu-view-source",
+              "ui-save-attachments",
+              "ui-attachment-open",
+              "ui-attachment-save-as",
+              "ui-attachment-save-all",
+              "ui-attachments-strip",
+              "ui-attachment-note-title",
+              "ui-attachment-program-tip",
+              "ui-clear-flag",
+              "ui-button-move",
+              "ui-button-copy",
+              "ui-find-folder",
+              "ui-new-folder-in",
+              "ui-outbox-send-all",
+              "ui-yes",
+              "ui-no",
+              "ui-try-again",
+              "ui-remove",
+              "ui-signature-of",
+              "ui-sign-in-with",
+              "ui-sign-in-in-browser-yours",
+              "ui-browser-sign-in-server",
+              "ui-dont-allow",
+              "ui-allow",
+              "ui-dont-send",
+              "ui-edit-first",
+              "ui-new-address",
+              "ui-turn-away",
+              "ui-clear-agent-log",
+              "ui-clear-agent-log-detail",
+              "ui-let-agents-connect",
+              "ui-change-button",
+              "ui-undo-button",
+              "ui-rules-title",
+              "ui-rules-intro",
+              "ui-rules-none",
+              "ui-rule-new",
+              "ui-rule-edit",
+              "ui-rule-delete-button",
+              "ui-rule-title",
+              "ui-rule-name",
+              "ui-rule-account",
+              "ui-rule-all-accounts",
+              "ui-rule-query",
+              "ui-rule-query-hint",
+              "ui-rule-count",
+              "ui-rule-show",
+              "ui-rule-actions",
+              "ui-rule-move",
+              "ui-rule-mark-read",
+              "ui-rule-flag",
+              "ui-rule-archive",
+              "ui-rule-junk",
+              "ui-rule-delete",
+              "ui-rule-quiet",
+              "ui-rule-apply-now",
+              "ui-rule-delete-ask",
+              "ui-create-rule",
+              "ui-rules-applied",
+              "ui-col-rule-matches",
+              "ui-clear-button",
+              "ui-how-to-connect",
+              "ui-agent-programs",
+              "ui-what-agents-did",
+              "ui-restart-now",
+              "ui-restart-later",
+              "ui-tb-new-contact",
+              "ui-tb-new-group",
+              "ui-tb-properties",
+              "ui-tb-write-to",
+              "ui-menu-new-contact",
+              "ui-menu-new-group",
+              "ui-menu-write-to",
+              "ui-menu-delete",
+              "ui-book-find-hint",
+              "ui-book-all-contacts",
+              "ui-col-phone",
+              "ui-book-empty",
+              "ui-book-no-match",
+              "ui-book-delete-ask",
+              "ui-group-delete-ask",
+              "ui-book-no-address",
+              "ui-new-contact-title",
+              "ui-contact-title",
+              "ui-contact-first",
+              "ui-contact-last",
+              "ui-contact-display",
+              "ui-contact-nickname",
+              "ui-contact-company",
+              "ui-contact-addresses",
+              "ui-contact-address-hint",
+              "ui-contact-add",
+              "ui-contact-set-default",
+              "ui-contact-default",
+              "ui-contact-phones",
+              "ui-phone-home",
+              "ui-phone-work",
+              "ui-phone-mobile",
+              "ui-phone-other",
+              "ui-contact-notes",
+              "ui-contact-name-needed",
+              "ui-contact-address-invalid",
+              "ui-contact-not-saved",
+              "ui-new-group-title",
+              "ui-group-title",
+              "ui-group-name",
+              "ui-group-members",
+              "ui-group-select-members",
+              "ui-group-new-member",
+              "ui-group-name-needed",
+              "ui-group-not-saved",
+              "ui-group-members-count",
+              "ui-select-recipients",
+              "ui-select-members",
+              "ui-pick-intro",
+              "ui-pick-recipients",
+              "ui-pick-members",
+              "ui-pick-to",
+              "ui-pick-cc",
+              "ui-pick-bcc",
+              "ui-pick-add",
+              "ui-pick-tip",
+              "ui-filter-address-books",
+              "ui-filter-vcard",
+              "ui-book-export-name",
+              "ui-book-imported",
+              "ui-book-not-imported",
+              "ui-book-exported",
+              "ui-book-not-exported",
+              "ui-code-copied",
+              "ui-codes-in-notifications",
+              "ui-tool-unread-only",
+              "ui-no-unread",
+              "ui-pictures-always-sender",
+              "ui-pictures-always-domain",
+              "ui-pictures-unconfirmed",
+              "ui-pictures-always-option",
+              "ui-pictures-always-warning",
+              "ui-protection-details",
+              "ui-protection-details-title",
+              "ui-download-heading",
+              "ui-download-ahead",
+              "ui-download-ahead-recent",
+              "ui-download-ahead-all",
+              "ui-download-ahead-never",
+              "ui-download-limit",
+              "ui-send-delay",
+              "ui-send-delay-note",
+              "ui-dark-messages",
+              "ui-sending-in",
+              "ui-send-undone",
+              "ui-send-too-late",
+              "ui-outbox-status-undo",
+              "ui-download-note",
+              "ui-attachment-downloading",
+              "ui-trusted-senders-button",
+              "ui-trusted-senders-title",
+              "ui-trusted-senders-note",
+              "ui-trusted-everyone-at",
+              "ui-trusted-senders-empty",
+              "ui-search-encrypted",
+              "ui-search-encrypted-note",
+              "ui-pgp-keyserver",
+              "ui-pgp-keyserver-note",
+              "ui-eml-default",
+              "ui-eml-default-done",
+              "ui-eml-default-failed",
+              "ui-folders",
+              "ui-sorted-by",
+              "ui-layout-label",
+              "ui-columns-note",
+              "ui-row-unread",
+              "ui-row-flagged",
+              "ui-row-attachments",
+              "ui-row-encrypted",
+              "ui-row-signed",
+              "ui-row-messages",
+              "ui-list-pictures",
+              "ui-list-pictures-note",
+              "ui-card-picture",
+              "ui-card-picture-choose",
+              "ui-picture-not-picture",
+              "ui-picture-too-large",
+              "ui-keys-title",
+              "ui-keys-intro",
+              "ui-keys-empty",
+              "ui-keys-col-name",
+              "ui-keys-col-address",
+              "ui-keys-col-kind",
+              "ui-keys-col-status",
+              "ui-keys-kind-own",
+              "ui-keys-kind-contact",
+              "ui-keys-status-verified",
+              "ui-keys-new",
+              "ui-keys-import",
+              "ui-keys-export",
+              "ui-keys-backup",
+              "ui-keys-verify",
+              "ui-keys-new-title",
+              "ui-keys-new-for",
+              "ui-keys-new-make",
+              "ui-keys-no-account",
+              "ui-keys-memory-only",
+              "ui-keys-backup-offer",
+              "ui-keys-backup-now",
+              "ui-keys-later",
+              "ui-keys-backup-title",
+              "ui-keys-backup-intro",
+              "ui-keys-passphrase",
+              "ui-keys-passphrase-again",
+              "ui-keys-passphrase-differ",
+              "ui-keys-passphrase-short",
+              "ui-keys-backup-saved",
+              "ui-keys-import-title",
+              "ui-keys-import-passphrase",
+              "ui-keys-file-filter",
+              "ui-keys-use-for",
+              "ui-keys-use",
+              "ui-keys-not-now",
+              "ui-keys-remove-own",
+              "ui-keys-remove-contact",
+              "ui-key-properties-title",
+              "ui-key-names",
+              "ui-key-fingerprint",
+              "ui-key-status",
+              "ui-key-created",
+              "ui-key-expires",
+              "ui-key-never",
+              "ui-key-algorithm",
+              "ui-key-source",
+              "ui-key-addresses",
+              "ui-key-address-verified",
+              "ui-key-address-not-verified",
+              "ui-verify-title",
+              "ui-verify-intro",
+              "ui-verify-fingerprint",
+              "ui-verify-marks",
+              "ui-verify-match",
+              "ui-verify-differ",
+              "ui-verify-differs",
+              "ui-verify-unmark",
+              "ui-account-security",
+              "ui-account-security-intro",
+              "ui-account-key",
+              "ui-account-key-none",
+              "ui-account-key-new",
+              "ui-account-autocrypt",
+              "ui-contact-key",
+              "ui-contact-key-none",
+              "ui-contact-key-use-new",
+              "ui-contact-key-keep",
+              "ui-setup-export-title",
+              "ui-setup-import-title",
+              "ui-setup-export-intro",
+              "ui-setup-use-passphrase",
+              "ui-setup-passphrase-note",
+              "ui-setup-export-button",
+              "ui-setup-file-filter",
+              "ui-setup-ask-passphrase",
+              "ui-setup-import-intro",
+              "ui-setup-from",
+              "ui-setup-import-button",
+              "ui-setup-done",
+              "ui-setup-first-run"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 83,
+          "files": {
+            "core/locales/hu/app.ftl": "b6323697b6077980cae540b74af9c186260b411ffa7ca804ed7626c3f9d54d2f"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "All 647 app entries reviewed, 83 values improved including 18 mnemonic placements. All 46 actual menu/dialog/settings shortcut scopes pass. Full IDs, variables, plural branches, access-key counts, comments and dash checks pass. check-language has exactly 657 expected removed-mark diagnostics and no structural findings. All 28 pending inventories and current completed/source hashes reconcile: 19977 unmarked messages, 10258 changed help lines and 14 verified unchanged/moved baseline pairs. HTML regenerated; git diff --check passes. No test suites or builds. No Hungarian tour screenshots exist in the three available UI artifact directories; this batch used source context and dynamic-wrap inspection, not a GUI run.",
+          "notes": "Reviewed all 647 app entries against actual Windows main/context menus, all 46 shared menu/dialog/settings scopes, Linux and Mac callers, account provider fallback and sign-in flow, account removal, rules planning, calendar spans, undo-send deadlines, key ownership/backup and setup export, image loading and sender-logo caching. Kept formal impersonal Hungarian, singular nouns after numbers, complete variables and all plural branches. Improved 66 wording values; 18 access-key placements resolve collisions, with one overlap in a prose edit. The local mail store is levéladatbázis, broader sign-in credentials bejelentkezési adatok, private keys titkos kulcs and passphrases jelmondat; digital signing is distinct from message-signature text. Provider intros condition app passwords on account support and require browser sign-in for Outlook.com/Microsoft 365. Encrypted search requires available keys; decrypted content is unencrypted in the local index, inaccessible to agent searches and removed from the index when disabled. Key lookup distinguishes addresses and identifiers; list pictures describe column layout, authenticated domains and cache reuse. Corrected the source overclaim that a refused Undo means sending already completed: outbox::take_back refuses after not_before even before delivery. Name/address/fingerprint placeholders remain uninflected. No Hungarian tour screenshots are available; longer notes use source-verified dynamic wrapping. Sign-in button wording, installer/store strings and app code are unchanged. No test suites or builds."
         }
       ]
     },
@@ -17836,6 +18037,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "it-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/it/app.ftl": "af13e2d4cc2d5649c2fd85bfdb81f3a90f4146405376d37b9d4ee8b39e2459b0"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ]
     },
@@ -23169,6 +23389,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "nl-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/nl/app.ftl": "810c5351463f2b36cf6b3d6c09e68a740070f817b356ec20343eea60bb74faa3"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ]
     },
@@ -26921,6 +27160,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "pt-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/pt/app.ftl": "0ee1cc6f0867cf674f9a46ed614144ba5979dc05b34854aea195faad6599c037"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ]
     },
@@ -38317,6 +38575,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "ca-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/ca/app.ftl": "fd6a48e14a5e113edd4c98c24c15f91c65a2496d2c58f15f1e80972ebf0799ec"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -40401,6 +40678,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "nb-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/nb/app.ftl": "f99e20dd26d46760c6e3e15557bfe8012467ea414874c10eb1369737fda778cd"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -42491,6 +42787,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "pt-BR-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/pt-BR/app.ftl": "399b3d308db8d643c87a7356ee41b72b8c04de3c975a15f37c0b248f3aca9f21"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -44553,6 +44868,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "sr-Latn-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/sr-Latn/app.ftl": "10a10d7063cdd31e7f12e05d58499ed8b07e9e7c79378dfb925fabb48cbf7b36"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -46588,6 +46922,25 @@
           },
           "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds.",
           "notes": "Corrected only the already reviewed search-negation table description: minus also works with some filters, not every operator. query.rs::term applies negation to words, state/list/folder conditions but ignores it for dates, ages and sizes. Every other byte, all tags/attributes and literal code/keyboard contents are unchanged. This is a reviewed correction, not a repeated full-topic review."
+        },
+        {
+          "id": "tr-undo-send-context-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/tr/app.ftl": "ec313089b18c5a6e687ad766be4756161f95aebd2dd6a600d78d30979900424f"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a3377cc1421fe19d6d53a7d8c4e08f26aea37f000dbbe5b1dfd70835f9a9f5a2"
+          },
+          "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds.",
+          "notes": "The Undo Send failure only establishes that the message can no longer be recalled through the delay mechanism; pe-store outbox::take_back requires not_before > now. It does not establish completed SMTP delivery. Rephrased this one status without that promise; subject is already localized/quoted by core::quoted_subject. Every other byte is unchanged. English/app code unchanged; source issue recorded in undo-send-deadline-context. No test suites.",
+          "followup_reviewed_ids": {
+            "app.ftl": [
+              "ui-send-too-late"
+            ]
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -49677,16 +50030,44 @@
         "search-words.html"
       ],
       "note": "Nine new IDs per language. Four round-1 pgp-keyserver-off entries and twelve round-1 help topics enter this round for the first time. Other affected content is reopened without double counting. Only inserted help passages are new work in previously reviewed topics; prior text retained byte-for-byte."
+    },
+    {
+      "kind": "Undo Send deadline versus completed delivery context followup",
+      "catalog_entries": 4,
+      "help_pages": 0,
+      "new_catalog_ids": [
+        [
+          "de",
+          "app.ftl",
+          "ui-send-too-late"
+        ],
+        [
+          "es",
+          "app.ftl",
+          "ui-send-too-late"
+        ],
+        [
+          "et",
+          "app.ftl",
+          "ui-send-too-late"
+        ],
+        [
+          "fr",
+          "app.ftl",
+          "ui-send-too-late"
+        ]
+      ],
+      "note": "Four round-1 status strings were outside the active scope. Fourteen completed languages receive a single-string followup without increasing scope. Hungarian receives the correction during its full app review; the other nine full drafts already contain the marked entry."
     }
   ],
-  "total_catalog_entries": 32712,
+  "total_catalog_entries": 32716,
   "total_help_pages": 1316,
   "review_workspace": {
     "path": "/Users/andris/Projects/PostalExpress/build/i18n-wave1",
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "At b0bdea4a: Croatian final help/encryption review and 17 search-negation corrections completed. Six refs and guide match after fresh fetch; root has no locale/help/settings edits. Only five known unrelated upstream paths remain unmerged. All 370 since-start entries/140 passages and all current inventories/hashes reconcile. No new relevant source work. Pending 13420 catalogs/520 help, all in the ten broader drafts. Final late-arrival audit still required; REVIEWED unchanged.",
+    "latest_source_audit": "At 71df1f4b: Hungarian app and 18 Undo Send followups validated. Six recorded refs and guide unchanged; all 339 since-start entries/140 passages and current inventories/hashes reconcile. NEW local source chore/pgp-hardening at 80d02fcc contains help commit 255205aa: one inserted passage in connections/data-storage/encryption-keys across 28 languages plus English. See pending_source_integrations for exact passages/hashes. Integrate that committed source into this review checkout next, preserve prior edits and mark only additions in completed languages. Root and upstream worktree must remain untouched. Current integrated pending 12773/520; scope 32716/1316. REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -51438,6 +51819,77 @@
         "review_commit": "b0bdea4a20192c07eeb6892dfcd828d2398bb12e",
         "new_languages": 0,
         "validation": "All six recorded refs and guide match after this turn’s fresh fetch; root has no uncommitted locale/help/settings changes. Only five previously inspected unrelated README/Linux test/CI paths remain outside the review branch. All 370 since-start entries and 140 passages match the pending queue. All 28 full inventories and current file/source hashes match. No test suites run."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "08c9ef126d4012330b9a5631e8683089c9ad769c",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/master": {
+            "merge_base": "38841d9602aeaa6dc0abb773aa4639f0597c15ee",
+            "paths": [
+              ".github/workflows/ci.yml",
+              "README.md",
+              "linux/Dockerfile",
+              "linux/src/e2e.rs",
+              "scripts/linux-ui-e2e-run.sh"
+            ],
+            "new_languages": []
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "paths": [],
+            "new_languages": []
+          }
+        },
+        "root_locale_help_settings_status": [],
+        "since_start_pending_catalog_entries": 339,
+        "since_start_pending_help_passages": 140,
+        "pending_catalog_entries": 12773,
+        "pending_help_topics": 520,
+        "additional_unrecorded_work": 0,
+        "kind": "Hungarian app catalog and shared Undo Send status correction",
+        "review_commit": "71df1f4bc9846dd93c92f07fbc6c05efb8fbaca6",
+        "new_languages": 0,
+        "discovered_unintegrated_source": {
+          "ref": "chore/pgp-hardening",
+          "tip": "80d02fcc842c2cbe9f8a6a9eddcc075180d74d3d",
+          "help_source_commit": "255205aad7e70f680909092c3167cc724618b70e",
+          "translation_files": 84,
+          "english_files": 3,
+          "topics": [
+            "connections.html",
+            "data-storage.html",
+            "encryption-keys.html"
+          ],
+          "details": "review_workspace.pending_source_integrations"
+        },
+        "validation": "Six recorded refs and guide unchanged after fresh fetch, root has no relevant edits. Current integrated inventories and all hashes reconcile. A wider branch scan found three help insertions in every language on chore/pgp-hardening; exact source passages and hashes are recorded for integration next. Current pending totals exclude those unintegrated additions. No test suites."
       }
     ],
     "settings_source_integration": {
@@ -56035,7 +56487,415 @@
         ]
       },
       "merge_commit": "c83a2e3122cd29e02cab5e132708508bfc2e21a7"
-    }
+    },
+    "pending_source_integrations": [
+      {
+        "ref": "chore/pgp-hardening",
+        "observed_tip": "80d02fcc842c2cbe9f8a6a9eddcc075180d74d3d",
+        "help_source_commit": "255205aad7e70f680909092c3167cc724618b70e",
+        "merge_base": "38841d9602aeaa6dc0abb773aa4639f0597c15ee",
+        "new_languages": 0,
+        "help_topics": [
+          "connections.html",
+          "data-storage.html",
+          "encryption-keys.html"
+        ],
+        "translation_files": 84,
+        "english_files": 3,
+        "source_help_changes": {
+          "core/crates/pe-html/help/bg/connections.html": {
+            "inserted_passage": "    <li><b>Ключовете за шифроване</b>, само когато шифровате за някого, чийто ключ нямате: собственият домейн на адреса му (Web Key Directory), след това keys.openpgp.org, освен ако не сте го изключили. Изпраща се само адресът.</li>",
+            "source_sha256": "1ffbbe6a436b6f37d546fe93b317f735d712e167d1a5cb98277a4cfb61d812db"
+          },
+          "core/crates/pe-html/help/bg/data-storage.html": {
+            "inserted_passage": "    <li><b>Ключовете за шифроване</b> се пазят заедно с изтеглената поща. Частните ви ключове са шифровани там с ключ, който се пази до паролите ви, така че файлът с пощата сам по себе си не може да ги отвори.</li>",
+            "source_sha256": "898c538504030623c84836d864f91cffc130d5bb9f3138606a231c04f81c7d79"
+          },
+          "core/crates/pe-html/help/bg/encryption-keys.html": {
+            "inserted_passage": "<p>Ключовете пътуват и с пощата. Съобщенията от адрес с ключ носят публичния му ключ, за да могат други приложения да шифроват за вас, а Inbox Classic по същия начин научава ключа на контакт от неговите съобщения. За да спрете изпращането на своя, изключете <b data-text=\"ui-account-autocrypt\"></b> в раздела <b data-text=\"ui-account-security\"></b> на акаунта.</p>",
+            "source_sha256": "b8f6d4638eb9e0d105bda6e093747a6a94d49a0bf274158f8851ae34a198c512"
+          },
+          "core/crates/pe-html/help/ca/connections.html": {
+            "inserted_passage": "    <li><b>Les claus de xifratge</b>, només quan xifreu per a algú de qui no teniu la clau: el domini de la seva adreça (Web Key Directory) i després keys.openpgp.org, tret que l’hàgiu desactivat. Només s’envia l’adreça.</li>",
+            "source_sha256": "1a6388afa56f7726f04111494119a08fa2be5d6071721a1b3066e5aa4e89d54f"
+          },
+          "core/crates/pe-html/help/ca/data-storage.html": {
+            "inserted_passage": "    <li><b>Les claus de xifratge</b> es desen amb el correu baixat. Les vostres claus privades hi són xifrades amb una clau desada al costat de les contrasenyes, de manera que el fitxer del correu sol no les pot obrir.</li>",
+            "source_sha256": "509ecc8a2e17d3e9efcd77d880e5fdf8abdaa603487b70c70960d7ae4492161d"
+          },
+          "core/crates/pe-html/help/ca/encryption-keys.html": {
+            "inserted_passage": "<p>Les claus també viatgen amb el correu. Els missatges d’una adreça amb clau porten la seva clau pública, perquè altres aplicacions us puguin xifrar missatges, i Inbox Classic aprèn la clau d’un contacte dels seus missatges de la mateixa manera. Per deixar d’enviar la vostra, desactiveu <b data-text=\"ui-account-autocrypt\"></b> a la pestanya <b data-text=\"ui-account-security\"></b> del compte.</p>",
+            "source_sha256": "1bf6c093e1d8b2f6e4db31eddeca7cef0a14267baac4e466b02fa3b4cbfb7dff"
+          },
+          "core/crates/pe-html/help/cs/connections.html": {
+            "inserted_passage": "    <li><b>Šifrovací klíče</b>, jen když šifrujete někomu, jehož klíč nemáte: vlastní doména jeho adresy (Web Key Directory), potom keys.openpgp.org, pokud jste to nevypnuli. Odesílá se jen adresa.</li>",
+            "source_sha256": "db32b94c239afe3d2a260d9b8e2dc720a016dc64dfd5c7de935e26bfa06fbc0e"
+          },
+          "core/crates/pe-html/help/cs/data-storage.html": {
+            "inserted_passage": "    <li><b>Šifrovací klíče</b> jsou uloženy se staženou poštou. Vaše soukromé klíče jsou tam zašifrované klíčem uloženým vedle vašich hesel, takže samotný soubor s poštou je otevřít nemůže.</li>",
+            "source_sha256": "a53c379b03345a62d4264af43da1b882e6f841514e5287ef60d0d4dc5b0fb09f"
+          },
+          "core/crates/pe-html/help/cs/encryption-keys.html": {
+            "inserted_passage": "<p>Klíče putují i s poštou. Zprávy z adresy s klíčem nesou její veřejný klíč, aby vám jiné aplikace mohly šifrovat, a Inbox Classic se stejně naučí klíč kontaktu z jeho zpráv. Chcete-li svůj klíč přestat posílat, vypněte <b data-text=\"ui-account-autocrypt\"></b> na kartě <b data-text=\"ui-account-security\"></b> účtu.</p>",
+            "source_sha256": "8faf720d57e0ea42caf893ddbd965f49f33e632b55c27d58cf5ce68b5bd235a8"
+          },
+          "core/crates/pe-html/help/da/connections.html": {
+            "inserted_passage": "    <li><b>Krypteringsnøgler</b>, kun når du krypterer til en, hvis nøgle du ikke har: adressens eget domæne (Web Key Directory) og derefter keys.openpgp.org, medmindre du har slået det fra. Kun adressen sendes.</li>",
+            "source_sha256": "d9b332d478092b440bd2c4717b4fbec3dab67350a76f7ac8fd3bd8cd0bcce5a8"
+          },
+          "core/crates/pe-html/help/da/data-storage.html": {
+            "inserted_passage": "    <li><b>Krypteringsnøgler</b> gemmes sammen med den hentede mail. Dine private nøgler er krypteret dér med en nøgle, der ligger ved siden af dine adgangskoder, så mailfilen alene ikke kan åbne dem.</li>",
+            "source_sha256": "d96dfd7f5c7148106b40a53517df3620138491cf5c91ce72395ca9d962129a19"
+          },
+          "core/crates/pe-html/help/da/encryption-keys.html": {
+            "inserted_passage": "<p>Nøgler følger også med mailen. Beskeder fra en adresse med en nøgle har dens offentlige nøgle med, så andre apps kan kryptere til dig, og Inbox Classic lærer en kontakts nøgle fra deres beskeder på samme måde. Hvis du ikke vil sende din med, skal du slå <b data-text=\"ui-account-autocrypt\"></b> fra under fanen <b data-text=\"ui-account-security\"></b> for kontoen.</p>",
+            "source_sha256": "7cbf67f8fde263f1ec449a801eb490863c5c83560a3a87b46069a44dbeebb5c1"
+          },
+          "core/crates/pe-html/help/de/connections.html": {
+            "inserted_passage": "    <!--review--><li><b>Verschlüsselungsschlüssel</b>, nur wenn Sie an jemanden verschlüsseln, dessen Schlüssel Sie nicht haben: die eigene Domain der Adresse (Web Key Directory), dann keys.openpgp.org, sofern Sie das nicht deaktiviert haben. Nur die Adresse wird gesendet.</li><!--/review-->",
+            "source_sha256": "b4327c385ef20347bfc635bb44db93b21cf324cb40c94f046ecc2c7f6d1e6291"
+          },
+          "core/crates/pe-html/help/de/data-storage.html": {
+            "inserted_passage": "    <!--review--><li><b>Verschlüsselungsschlüssel</b> liegen bei den heruntergeladenen E-Mails. Ihre privaten Schlüssel sind dort mit einem Schlüssel verschlüsselt, der neben Ihren Passwörtern liegt, sodass die E-Mail-Datei allein sie nicht öffnen kann.</li><!--/review-->",
+            "source_sha256": "4905564bdc614deb87f4ddda8d1731fb1aa3dc3bffe195a23e657c6b6708e920"
+          },
+          "core/crates/pe-html/help/de/encryption-keys.html": {
+            "inserted_passage": "<p>Schlüssel reisen auch mit der E-Mail. Nachrichten von einer Adresse mit Schlüssel enthalten deren öffentlichen Schlüssel, damit andere Programme an Sie verschlüsseln können, und Inbox Classic lernt den Schlüssel eines Kontakts auf dieselbe Weise aus dessen Nachrichten. Damit Ihr Schlüssel nicht mehr mitgesendet wird, deaktivieren Sie <b data-text=\"ui-account-autocrypt\"></b> auf der Registerkarte <b data-text=\"ui-account-security\"></b> des Kontos.</p>",
+            "source_sha256": "6a9521d4ec9aba2dcc4bc92b42b76508b1cdb225386eabe648206702f833e189"
+          },
+          "core/crates/pe-html/help/el/connections.html": {
+            "inserted_passage": "    <li><b>Κλειδιά κρυπτογράφησης</b>, μόνο όταν κρυπτογραφείτε για κάποιον του οποίου το κλειδί δεν έχετε: πρώτα ο τομέας της διεύθυνσής του (Web Key Directory), μετά το keys.openpgp.org, εκτός αν το έχετε απενεργοποιήσει. Αποστέλλεται μόνο η διεύθυνση.</li>",
+            "source_sha256": "977e463c86050f5ea7fc1890c879a2e4c824e6f530b5e2bedd0c7b1a9337779b"
+          },
+          "core/crates/pe-html/help/el/data-storage.html": {
+            "inserted_passage": "    <li><b>Τα κλειδιά κρυπτογράφησης</b> φυλάσσονται μαζί με την αλληλογραφία που έχει ληφθεί. Τα ιδιωτικά σας κλειδιά είναι εκεί κρυπτογραφημένα με ένα κλειδί που φυλάσσεται δίπλα στους κωδικούς πρόσβασής σας, οπότε το αρχείο της αλληλογραφίας μόνο του δεν μπορεί να τα ανοίξει.</li>",
+            "source_sha256": "808f8eaab34cafcc9defc008ec6dd92ccefc9c8cb72f332325a6a320e13caa6e"
+          },
+          "core/crates/pe-html/help/el/encryption-keys.html": {
+            "inserted_passage": "<p>Τα κλειδιά ταξιδεύουν και με την αλληλογραφία. Τα μηνύματα από μια διεύθυνση με κλειδί φέρουν το δημόσιο κλειδί της, ώστε άλλες εφαρμογές να μπορούν να κρυπτογραφούν για εσάς, και το Inbox Classic μαθαίνει με τον ίδιο τρόπο το κλειδί μιας επαφής από τα μηνύματά της. Για να σταματήσετε να στέλνετε το δικό σας, απενεργοποιήστε το <b data-text=\"ui-account-autocrypt\"></b> στην καρτέλα <b data-text=\"ui-account-security\"></b> του λογαριασμού.</p>",
+            "source_sha256": "3a22b1870babe75f02748b2fa7e01d5e63e917f191630b9767a0a0dd1d4cf8aa"
+          },
+          "core/crates/pe-html/help/en/connections.html": {
+            "inserted_passage": "    <li><b>Encryption keys</b>, only when you encrypt to someone whose key you do not have: their address’s own domain (Web Key Directory), then keys.openpgp.org unless you turned it off. Only the address is sent.</li>",
+            "source_sha256": "25e3e7b2c4f1dd4739624e4f78093f984a4ade05ce3c70e87240080933cfb65b"
+          },
+          "core/crates/pe-html/help/en/data-storage.html": {
+            "inserted_passage": "    <li><b>Encryption keys</b> are kept with your downloaded mail. Your private keys are encrypted there with a key kept beside your passwords, so the mail file alone cannot open them.</li>",
+            "source_sha256": "1f5f46fd5acdd1a5c1ae34886312c93ebd10c32f33f618a683f72fd3e45734a6"
+          },
+          "core/crates/pe-html/help/en/encryption-keys.html": {
+            "inserted_passage": "<p>Keys also travel with mail. Messages from an address with a key carry its public key, so other apps can encrypt to you, and Inbox Classic learns a contact’s key from their messages the same way. To stop sending yours, turn off <b data-text=\"ui-account-autocrypt\"></b> on the account’s <b data-text=\"ui-account-security\"></b> tab.</p>",
+            "source_sha256": "1b6df33084fae4b8600ee162796d2150e0d83f7532b5e1310e0cdef2972f2fed"
+          },
+          "core/crates/pe-html/help/es/connections.html": {
+            "inserted_passage": "    <!--review--><li><b>Las claves de cifrado</b>, solo cuando usted cifra para alguien cuya clave no tiene: el dominio propio de su dirección (Web Key Directory) y después keys.openpgp.org, salvo que lo haya desactivado. Solo se envía la dirección.</li><!--/review-->",
+            "source_sha256": "5e25b87e9ce11aefa435f3f6b5240b877f2b4c28657328abe424f940b152b1ec"
+          },
+          "core/crates/pe-html/help/es/data-storage.html": {
+            "inserted_passage": "    <!--review--><li><b>Las claves de cifrado</b> se guardan con el correo descargado. Sus claves privadas están cifradas allí con una clave guardada junto a sus contraseñas, así que el archivo del correo por sí solo no puede abrirlas.</li><!--/review-->",
+            "source_sha256": "fb741e56bff80493f35707cf4115374dbd3854fa106c1366d6011925985fb12a"
+          },
+          "core/crates/pe-html/help/es/encryption-keys.html": {
+            "inserted_passage": "<p>Las claves también viajan con el correo. Los mensajes de una dirección con clave llevan su clave pública, para que otras aplicaciones puedan cifrarle mensajes, e Inbox Classic aprende la clave de un contacto de sus mensajes de la misma manera. Para dejar de enviar la suya, desactive <b data-text=\"ui-account-autocrypt\"></b> en la pestaña <b data-text=\"ui-account-security\"></b> de la cuenta.</p>",
+            "source_sha256": "b4ee3c061f543ac8b5351461e616d016ba14e4633f70c062c8b32b23baf96762"
+          },
+          "core/crates/pe-html/help/et/connections.html": {
+            "inserted_passage": "    <!--review--><li><b>Krüpteerimisvõtmed</b>, ainult siis, kui krüpteerite kellelegi, kelle võtit teil pole: tema aadressi enda domeen (Web Key Directory), seejärel keys.openpgp.org, kui te pole seda välja lülitanud. Saadetakse ainult aadress.</li><!--/review-->",
+            "source_sha256": "0d6b8b2b9a45cf68eaa874097790f85c8a82ed6e262e8a99de9daa6ed615e1e9"
+          },
+          "core/crates/pe-html/help/et/data-storage.html": {
+            "inserted_passage": "    <!--review--><li><b>Krüpteerimisvõtmeid</b> hoitakse koos alla laaditud postiga. Teie privaatvõtmed on seal krüpteeritud võtmega, mida hoitakse teie paroolide kõrval, nii et postifail üksi ei saa neid avada.</li><!--/review-->",
+            "source_sha256": "5fc53b2d41f06ac99d558076d818e6e09297526ea930f5b3e73bbf1cd8c747f3"
+          },
+          "core/crates/pe-html/help/et/encryption-keys.html": {
+            "inserted_passage": "<p>Võtmed liiguvad ka koos postiga. Võtmega aadressilt saadetud kirjad kannavad selle avalikku võtit, et teised rakendused saaksid sulle krüpteerida, ja Inbox Classic õpib samamoodi kontakti võtme tema kirjadest. Kui sa ei soovi oma võtit enam saata, lülita välja <b data-text=\"ui-account-autocrypt\"></b> konto vahekaardil <b data-text=\"ui-account-security\"></b>.</p>",
+            "source_sha256": "fec2c627c2933f2f239c81bfc745768d24a7d5e9bdaee8b7e5f30326e26c8c7d"
+          },
+          "core/crates/pe-html/help/fi/connections.html": {
+            "inserted_passage": "    <li><b>Salausavaimet</b>: vain kun salaat viestin jollekulle, jonka avainta sinulla ei ole. Ensin osoitteen oma verkkotunnus (Web Key Directory), sitten keys.openpgp.org, ellet ole poistanut sitä käytöstä. Vain osoite lähetetään.</li>",
+            "source_sha256": "712cfd2f620881f3e63eba5223e4bd4cb5b6ef9373ffb3a0c7a02b264ad49a2d"
+          },
+          "core/crates/pe-html/help/fi/data-storage.html": {
+            "inserted_passage": "    <li><b>Salausavaimet</b> säilytetään ladatun postin kanssa. Yksityiset avaimesi on salattu siellä avaimella, jota säilytetään salasanojesi rinnalla, joten pelkkä postitiedosto ei voi avata niitä.</li>",
+            "source_sha256": "a86e5e0e02c3941d099b02aef2964ecb6ed2c63aab14c7b5dd128fc3830a5b36"
+          },
+          "core/crates/pe-html/help/fi/encryption-keys.html": {
+            "inserted_passage": "<p>Avaimet kulkevat myös postin mukana. Avaimellisesta osoitteesta lähetetyissä viesteissä on mukana sen julkinen avain, jotta muut sovellukset voivat salata viestejä sinulle, ja Inbox Classic oppii samalla tavalla yhteystiedon avaimen tämän viesteistä. Jos et halua enää lähettää omaasi, poista <b data-text=\"ui-account-autocrypt\"></b> käytöstä tilin välilehdellä <b data-text=\"ui-account-security\"></b>.</p>",
+            "source_sha256": "c0a13f039517443158c37069d03262e1215b0788f365650160cce470cd5c666c"
+          },
+          "core/crates/pe-html/help/fr/connections.html": {
+            "inserted_passage": "    <!--review--><li><b>Les clés de chiffrement</b>, seulement quand vous chiffrez pour quelqu’un dont vous n’avez pas la clé : le domaine de son adresse (Web Key Directory), puis keys.openpgp.org, sauf si vous l’avez désactivé. Seule l’adresse est envoyée.</li><!--/review-->",
+            "source_sha256": "cc57b10fbb41394f35b949b0cdafdc0ea97cadc0ba7da763c930db154ce55bde"
+          },
+          "core/crates/pe-html/help/fr/data-storage.html": {
+            "inserted_passage": "    <!--review--><li><b>Les clés de chiffrement</b> sont conservées avec le courrier téléchargé. Vos clés privées y sont chiffrées avec une clé conservée à côté de vos mots de passe, si bien que le fichier du courrier seul ne peut pas les ouvrir.</li><!--/review-->",
+            "source_sha256": "092169d546c36352998d6fb62920311f69047861e8b12bfc04c79a6f5f7e6128"
+          },
+          "core/crates/pe-html/help/fr/encryption-keys.html": {
+            "inserted_passage": "<p>Les clés voyagent aussi avec le courrier. Les messages d’une adresse qui a une clé portent sa clé publique, pour que d’autres applications puissent vous chiffrer des messages, et Inbox Classic apprend de la même façon la clé d’un contact par ses messages. Pour ne plus envoyer la vôtre, désactivez <b data-text=\"ui-account-autocrypt\"></b> sous l’onglet <b data-text=\"ui-account-security\"></b> du compte.</p>",
+            "source_sha256": "9ad22feff275f86615a8f1d45678796465f8f23230e766e6142ee8b133d74241"
+          },
+          "core/crates/pe-html/help/hr/connections.html": {
+            "inserted_passage": "    <li><b>Ključevi za šifriranje</b>, samo kad šifrirate nekome čiji ključ nemate: vlastita domena njegove adrese (Web Key Directory), zatim keys.openpgp.org, osim ako ste to isključili. Šalje se samo adresa.</li>",
+            "source_sha256": "6ce70e263cfe699409a41e12e5c00cc2581e75948e96117df260cc10126a9ca9"
+          },
+          "core/crates/pe-html/help/hr/data-storage.html": {
+            "inserted_passage": "    <li><b>Ključevi za šifriranje</b> čuvaju se uz preuzetu poštu. Vaši privatni ključevi ondje su šifrirani ključem koji se čuva uz vaše lozinke, pa ih sama datoteka s poštom ne može otvoriti.</li>",
+            "source_sha256": "89d9af6f9678d811697251d92f41f657a7953b178eaf5d7f17dd07aa2c2c091f"
+          },
+          "core/crates/pe-html/help/hr/encryption-keys.html": {
+            "inserted_passage": "<p>Ključevi putuju i s poštom. Poruke s adrese koja ima ključ nose njezin javni ključ kako bi vam druge aplikacije mogle šifrirati poruke, a Inbox Classic na isti način uči ključ kontakta iz njegovih poruka. Da biste prestali slati svoj, isključite <b data-text=\"ui-account-autocrypt\"></b> na kartici <b data-text=\"ui-account-security\"></b> računa.</p>",
+            "source_sha256": "9796631c28c7edcf4d6d06afea3a6be099c68412566146ae60ed0a37a39eb426"
+          },
+          "core/crates/pe-html/help/hu/connections.html": {
+            "inserted_passage": "    <li><b>Titkosítási kulcsok</b>, csak ha olyasvalakinek titkosít, akinek nincs meg a kulcsa: először a címe saját tartománya (Web Key Directory), majd a keys.openpgp.org, hacsak ki nem kapcsolta. Csak a cím kerül elküldésre.</li>",
+            "source_sha256": "fe69420bcfc22fddc9bcdbf70ee441448aa9de0a8a30098cd2d44a5f1cbc204f"
+          },
+          "core/crates/pe-html/help/hu/data-storage.html": {
+            "inserted_passage": "    <li><b>A titkosítási kulcsokat</b> a letöltött levelekkel együtt tárolja. A privát kulcsai ott titkosítva vannak egy kulccsal, amely a jelszavai mellett van tárolva, így a levelek fájlja önmagában nem nyithatja meg őket.</li>",
+            "source_sha256": "8398a41a35f3fb350706b9867385f7fc47a000f2cc7b3a8dc7c4b8bd7c02940a"
+          },
+          "core/crates/pe-html/help/hu/encryption-keys.html": {
+            "inserted_passage": "<p>A kulcsok a levelekkel is utaznak. Egy kulccsal rendelkező címről küldött üzenetek magukkal viszik a nyilvános kulcsát, így más alkalmazások titkosíthatnak Önnek, és az Inbox Classic ugyanígy megtanulja egy partner kulcsát az üzeneteiből. Ha nem szeretné tovább küldeni a sajátját, kapcsolja ki ezt a fiók <b data-text=\"ui-account-security\"></b> lapján: <b data-text=\"ui-account-autocrypt\"></b>.</p>",
+            "source_sha256": "5689d924fd2e42d89ed4bfac1ea53cdc90b66aeb2aa86f018c9e03313cd47a67"
+          },
+          "core/crates/pe-html/help/it/connections.html": {
+            "inserted_passage": "    <li><b>Chiavi di crittografia</b>, solo quando cifri per qualcuno di cui non hai la chiave: il dominio del suo indirizzo (Web Key Directory), poi keys.openpgp.org, a meno che tu non l’abbia disattivato. Viene inviato solo l’indirizzo.</li>",
+            "source_sha256": "f9efdcef92a360fe26a3fdd63f27ffcf8b80ad909aa5fbd1c2b194fffa6ca96a"
+          },
+          "core/crates/pe-html/help/it/data-storage.html": {
+            "inserted_passage": "    <li><b>Le chiavi di crittografia</b> sono conservate con la posta scaricata. Le tue chiavi private vi sono cifrate con una chiave conservata accanto alle password, quindi il file della posta da solo non può aprirle.</li>",
+            "source_sha256": "4d5332bb078f1a684b2b1233128abf378fc63ba40907c17cc74baa7f65d3e166"
+          },
+          "core/crates/pe-html/help/it/encryption-keys.html": {
+            "inserted_passage": "<p>Le chiavi viaggiano anche con la posta. I messaggi da un indirizzo con una chiave portano la sua chiave pubblica, così altre app possono cifrare per te, e Inbox Classic impara allo stesso modo la chiave di un contatto dai suoi messaggi. Per smettere di inviare la tua, disattiva <b data-text=\"ui-account-autocrypt\"></b> nella scheda <b data-text=\"ui-account-security\"></b> dell’account.</p>",
+            "source_sha256": "aa6d7a5c4c423882078ea249328164f6846aaa4d2e2ab636810889fc8eaf3732"
+          },
+          "core/crates/pe-html/help/lt/connections.html": {
+            "inserted_passage": "    <li><b>Šifravimo raktai</b>, tik kai šifruojate kam nors, kurio rakto neturite: pirmiausia jo adreso domenas (Web Key Directory), tada keys.openpgp.org, nebent tai išjungėte. Siunčiamas tik adresas.</li>",
+            "source_sha256": "b055e4282f7c4ec1d80760679c67d1f85a7c9e54db1ca8de7e9019086530b55a"
+          },
+          "core/crates/pe-html/help/lt/data-storage.html": {
+            "inserted_passage": "    <li><b>Šifravimo raktai</b> laikomi kartu su atsisiųstais laiškais. Jūsų privatieji raktai ten užšifruoti raktu, laikomu šalia jūsų slaptažodžių, todėl vien pašto failas jų atverti negali.</li>",
+            "source_sha256": "41527040139a6005291e252ae0acca1df734da8c6be2f6996b4a55e8181d4392"
+          },
+          "core/crates/pe-html/help/lt/encryption-keys.html": {
+            "inserted_passage": "<p>Raktai keliauja ir su paštu. Laiškai iš adreso, turinčio raktą, neša jo viešąjį raktą, kad kitos programos galėtų jums šifruoti, o Inbox Classic tokiu pat būdu sužino kontakto raktą iš jo laiškų. Jei nebenorite siųsti savojo, išjunkite <b data-text=\"ui-account-autocrypt\"></b> paskyros skirtuke <b data-text=\"ui-account-security\"></b>.</p>",
+            "source_sha256": "6405b3e992c8978e3958d69e024f1f055284fc5d8a4fbe048ec6ff89b82620bd"
+          },
+          "core/crates/pe-html/help/lv/connections.html": {
+            "inserted_passage": "    <li><b>Šifrēšanas atslēgas</b>, tikai tad, ja šifrējat kādam, kura atslēgas jums nav: vispirms viņa adreses domēns (Web Key Directory), tad keys.openpgp.org, ja vien neesat to izslēdzis. Tiek nosūtīta tikai adrese.</li>",
+            "source_sha256": "3cf1389c0d22f17d6f4ffb2cb4865a67456a65a6f20b54e2d8bfe7d228bb0a71"
+          },
+          "core/crates/pe-html/help/lv/data-storage.html": {
+            "inserted_passage": "    <li><b>Šifrēšanas atslēgas</b> tiek glabātas kopā ar lejupielādēto pastu. Jūsu privātās atslēgas tur ir šifrētas ar atslēgu, kas glabājas blakus jūsu parolēm, tāpēc pasta fails viens pats tās atvērt nevar.</li>",
+            "source_sha256": "c7340e2c4b38a068a6d1e938870e84f393dc396f3e9f348cddea189aba01e207"
+          },
+          "core/crates/pe-html/help/lv/encryption-keys.html": {
+            "inserted_passage": "<p>Atslēgas ceļo arī kopā ar pastu. Ziņojumi no adreses ar atslēgu nes tās publisko atslēgu, lai citas lietotnes varētu jums šifrēt, un Inbox Classic tāpat uzzina kontaktpersonas atslēgu no tās ziņojumiem. Lai pārtrauktu sūtīt savējo, izslēdziet <b data-text=\"ui-account-autocrypt\"></b> konta cilnē <b data-text=\"ui-account-security\"></b>.</p>",
+            "source_sha256": "8a0ba467705f9c3532081a4f1a347b14f5ed2b16920527ad9f415c5e65daf78b"
+          },
+          "core/crates/pe-html/help/nb/connections.html": {
+            "inserted_passage": "    <li><b>Krypteringsnøkler</b>, bare når du krypterer til noen du ikke har nøkkelen til: domenet til adressen (Web Key Directory), deretter keys.openpgp.org hvis du ikke har slått det av. Bare adressen sendes.</li>",
+            "source_sha256": "5b9fb4f42860afce6e8457c711d88351178c8b0dec2655dcc13f2a300e90e162"
+          },
+          "core/crates/pe-html/help/nb/data-storage.html": {
+            "inserted_passage": "    <li><b>Krypteringsnøkler</b> lagres sammen med den nedlastede e-posten. De private nøklene dine er kryptert der med en nøkkel som ligger ved siden av passordene dine, så e-postfilen alene kan ikke åpne dem.</li>",
+            "source_sha256": "d711a380a617e966ea54574ee0af9e43fa4466d32c6fb1be80ae209465678d69"
+          },
+          "core/crates/pe-html/help/nb/encryption-keys.html": {
+            "inserted_passage": "<p>Nøkler følger også med e-posten. Meldinger fra en adresse med nøkkel har med den offentlige nøkkelen, slik at andre apper kan kryptere til deg, og Inbox Classic lærer en kontakts nøkkel fra meldingene deres på samme måte. Hvis du ikke vil sende din lenger, slår du av <b data-text=\"ui-account-autocrypt\"></b> i fanen <b data-text=\"ui-account-security\"></b> for kontoen.</p>",
+            "source_sha256": "55b0acd504b2189c2da73f935cd3f299bbad029294df571c136ea86a3a57505c"
+          },
+          "core/crates/pe-html/help/nl/connections.html": {
+            "inserted_passage": "    <li><b>Sleutels voor versleuteling</b>, alleen als je versleutelt naar iemand van wie je de sleutel niet hebt: eerst het eigen domein van het adres (Web Key Directory), dan keys.openpgp.org, tenzij je dat hebt uitgezet. Alleen het adres wordt verstuurd.</li>",
+            "source_sha256": "4e7a285048ab9f2388fb08913051e7ce048d01c7bafd5fb3a29577be9b78ce97"
+          },
+          "core/crates/pe-html/help/nl/data-storage.html": {
+            "inserted_passage": "    <li><b>Sleutels voor versleuteling</b> worden bij de gedownloade mail bewaard. Je privésleutels zijn daar versleuteld met een sleutel die naast je wachtwoorden wordt bewaard, zodat het mailbestand alleen ze niet kan openen.</li>",
+            "source_sha256": "0df4cec4a50313a19a65c463bde14874d44f242692fb90c7e504b91f39d7c719"
+          },
+          "core/crates/pe-html/help/nl/encryption-keys.html": {
+            "inserted_passage": "<p>Sleutels reizen ook mee met de mail. Berichten van een adres met een sleutel dragen de openbare sleutel mee, zodat andere apps naar je kunnen versleutelen, en Inbox Classic leert op dezelfde manier de sleutel van een contact uit diens berichten. Wil je de jouwe niet meer meesturen, zet dan <b data-text=\"ui-account-autocrypt\"></b> uit op het tabblad <b data-text=\"ui-account-security\"></b> van het account.</p>",
+            "source_sha256": "3b5c11c6730e9a1ac8ef7e7a183e6750e5e89f6c47dbeaf5a26fb0ffb9a98442"
+          },
+          "core/crates/pe-html/help/pl/connections.html": {
+            "inserted_passage": "    <li><b>Klucze szyfrowania</b>, tylko gdy szyfrujesz do kogoś, czyjego klucza nie masz: najpierw domena jego adresu (Web Key Directory), potem keys.openpgp.org, chyba że to wyłączysz. Wysyłany jest tylko adres.</li>",
+            "source_sha256": "ea3f5217b32fafbe5b54c78f1f303160c2f1ca4f928f39d35ef3be94cfe3facd"
+          },
+          "core/crates/pe-html/help/pl/data-storage.html": {
+            "inserted_passage": "    <li><b>Klucze szyfrowania</b> są przechowywane razem z pobraną pocztą. Twoje klucze prywatne są tam zaszyfrowane kluczem przechowywanym obok haseł, więc sam plik poczty nie może ich otworzyć.</li>",
+            "source_sha256": "3d78c62505cbefbb35af53508e7cbce3f4c03071ca78e56d6dc6589219dd0b91"
+          },
+          "core/crates/pe-html/help/pl/encryption-keys.html": {
+            "inserted_passage": "<p>Klucze podróżują też z pocztą. Wiadomości z adresu, który ma klucz, niosą jego klucz publiczny, aby inne aplikacje mogły szyfrować do ciebie, a Inbox Classic w ten sam sposób poznaje klucz kontaktu z jego wiadomości. Aby przestać wysyłać swój, wyłącz <b data-text=\"ui-account-autocrypt\"></b> na karcie <b data-text=\"ui-account-security\"></b> konta.</p>",
+            "source_sha256": "fe78ec335ebbfe03706e009d49484c363afa5fc7e780e253ea30b9ea1715b96c"
+          },
+          "core/crates/pe-html/help/pt-BR/connections.html": {
+            "inserted_passage": "    <li><b>Chaves de criptografia</b>, só quando você criptografa para alguém cuja chave você não tem: o domínio do endereço da pessoa (Web Key Directory) e depois keys.openpgp.org, a menos que você tenha desativado. Só o endereço é enviado.</li>",
+            "source_sha256": "3cf54effa94c4f6f19b94adafb8b75a253b0923f8babbcf65ece74a105de36fc"
+          },
+          "core/crates/pe-html/help/pt-BR/data-storage.html": {
+            "inserted_passage": "    <li><b>As chaves de criptografia</b> ficam junto com os e-mails baixados. Suas chaves privadas estão criptografadas lá com uma chave guardada junto das suas senhas, então o arquivo de e-mails sozinho não consegue abri-las.</li>",
+            "source_sha256": "fdb4965eb1a838cdb523a8cef4a4758e46cd932ece8f66530375b2b360067886"
+          },
+          "core/crates/pe-html/help/pt-BR/encryption-keys.html": {
+            "inserted_passage": "<p>As chaves também viajam com os e-mails. As mensagens de um endereço com chave levam a chave pública dele, para que outros aplicativos possam criptografar para você, e o Inbox Classic aprende da mesma forma a chave de um contato pelas mensagens dele. Para parar de enviar a sua, desative <b data-text=\"ui-account-autocrypt\"></b> na guia <b data-text=\"ui-account-security\"></b> da conta.</p>",
+            "source_sha256": "e0ed8211eeb083122695a0510c7a1e13bd812d2c441702f55c1ee9cc9c397527"
+          },
+          "core/crates/pe-html/help/pt/connections.html": {
+            "inserted_passage": "    <li><b>Chaves de encriptação</b>, só quando encripta para alguém cuja chave não tem: o domínio do endereço dessa pessoa (Web Key Directory) e depois keys.openpgp.org, a menos que o tenha desativado. Só o endereço é enviado.</li>",
+            "source_sha256": "565a6988492637079b8f133c4cddc408f2edd939ee0459d7148fe48cb635e56d"
+          },
+          "core/crates/pe-html/help/pt/data-storage.html": {
+            "inserted_passage": "    <li><b>As chaves de encriptação</b> são guardadas com o correio transferido. As suas chaves privadas estão encriptadas aí com uma chave guardada junto das palavras-passe, pelo que o ficheiro do correio sozinho não as consegue abrir.</li>",
+            "source_sha256": "52a5cd4bf9e664c14ed16eee4c2c858612a616df35fa3f7bcd9290a1b267d34b"
+          },
+          "core/crates/pe-html/help/pt/encryption-keys.html": {
+            "inserted_passage": "<p>As chaves também viajam com o correio. As mensagens de um endereço com chave levam a sua chave pública, para que outras aplicações possam encriptar para si, e o Inbox Classic aprende da mesma forma a chave de um contacto a partir das mensagens dele. Para deixar de enviar a sua, desative <b data-text=\"ui-account-autocrypt\"></b> no separador <b data-text=\"ui-account-security\"></b> da conta.</p>",
+            "source_sha256": "e0892fae746f169bfb9822b99e84239493a14253cae814ff0167032e2e473632"
+          },
+          "core/crates/pe-html/help/ro/connections.html": {
+            "inserted_passage": "    <li><b>Cheile de criptare</b>, doar când criptați pentru cineva a cărui cheie nu o aveți: întâi domeniul adresei sale (Web Key Directory), apoi keys.openpgp.org, dacă nu l-ați dezactivat. Se trimite doar adresa.</li>",
+            "source_sha256": "8118750b3f4db7e653251d7745053506fda22c242d1dac3d5198290816f32ab0"
+          },
+          "core/crates/pe-html/help/ro/data-storage.html": {
+            "inserted_passage": "    <li><b>Cheile de criptare</b> sunt păstrate împreună cu e-mailurile descărcate. Cheile dvs. private sunt criptate acolo cu o cheie păstrată lângă parolele dvs., astfel încât fișierul cu e-mailuri singur nu le poate deschide.</li>",
+            "source_sha256": "01e69e159f38bfaead3059773cb40d0d5f015855cdda260904abba652d912672"
+          },
+          "core/crates/pe-html/help/ro/encryption-keys.html": {
+            "inserted_passage": "<p>Cheile călătoresc și odată cu e-mailurile. Mesajele de la o adresă cu cheie poartă cheia ei publică, astfel încât alte aplicații să poată cripta pentru dvs., iar Inbox Classic află la fel cheia unui contact din mesajele lui. Pentru a nu mai trimite cheia dvs., dezactivați <b data-text=\"ui-account-autocrypt\"></b> în fila <b data-text=\"ui-account-security\"></b> a contului.</p>",
+            "source_sha256": "dd9944097d6a9e1b2fbc0677feeec0cccc968f53ee70a7d36f72d4deadee02c6"
+          },
+          "core/crates/pe-html/help/ru/connections.html": {
+            "inserted_passage": "    <li><b>Ключи шифрования</b>: только когда вы шифруете для того, чьего ключа у вас нет. Сначала собственный домен его адреса (Web Key Directory), затем keys.openpgp.org, если вы это не отключили. Отправляется только адрес.</li>",
+            "source_sha256": "8979cc15c5e4d2c3108c686e39a9e85f243685f3bc6fecc4c85659f0cfbb9a1c"
+          },
+          "core/crates/pe-html/help/ru/data-storage.html": {
+            "inserted_passage": "    <li><b>Ключи шифрования</b> хранятся вместе с загруженной почтой. Ваши закрытые ключи зашифрованы там ключом, который хранится рядом с вашими паролями, поэтому один лишь файл почты не может их открыть.</li>",
+            "source_sha256": "03861f22782aedf9c433c78ccfababfcfbbf8c5172eb8aa1647bcc2e2e57c737"
+          },
+          "core/crates/pe-html/help/ru/encryption-keys.html": {
+            "inserted_passage": "<p>Ключи путешествуют и вместе с почтой. Сообщения с адреса, у которого есть ключ, несут его открытый ключ, чтобы другие приложения могли шифровать для вас, и Inbox Classic так же узнает ключ контакта из его сообщений. Чтобы больше не отправлять свой ключ, отключите <b data-text=\"ui-account-autocrypt\"></b> на вкладке <b data-text=\"ui-account-security\"></b> учетной записи.</p>",
+            "source_sha256": "a7d8c1a8ebc573d8e3209b5ab10c74dde1e7090244497e7431ccf0694fe52f47"
+          },
+          "core/crates/pe-html/help/sk/connections.html": {
+            "inserted_passage": "    <li><b>Šifrovacie kľúče</b>, iba keď šifrujete niekomu, koho kľúč nemáte: vlastná doména jeho adresy (Web Key Directory), potom keys.openpgp.org, ak ste to nevypli. Odosiela sa iba adresa.</li>",
+            "source_sha256": "1b6d801c5aaa326d1c99d0d141d21a387a03becd23376b8808e589ee24c0b05d"
+          },
+          "core/crates/pe-html/help/sk/data-storage.html": {
+            "inserted_passage": "    <li><b>Šifrovacie kľúče</b> sa uchovávajú so stiahnutou poštou. Vaše súkromné kľúče sú tam zašifrované kľúčom uloženým vedľa vašich hesiel, takže samotný súbor s poštou ich otvoriť nemôže.</li>",
+            "source_sha256": "429b2c2e2c38a19f04645df0b1aa144bdbac9595055655453e981c6177266a02"
+          },
+          "core/crates/pe-html/help/sk/encryption-keys.html": {
+            "inserted_passage": "<p>Kľúče cestujú aj s poštou. Správy z adresy s kľúčom nesú jej verejný kľúč, aby vám iné aplikácie mohli šifrovať, a Inbox Classic sa rovnako naučí kľúč kontaktu z jeho správ. Ak chcete prestať posielať svoj, vypnite <b data-text=\"ui-account-autocrypt\"></b> na karte <b data-text=\"ui-account-security\"></b> konta.</p>",
+            "source_sha256": "0a65c71d165ad3d373d1f468e043deb5b7691aaecd2d4b9fe9c5f81ec78d0d3e"
+          },
+          "core/crates/pe-html/help/sl/connections.html": {
+            "inserted_passage": "    <li><b>Šifrirni ključi</b>, samo kadar šifrirate nekomu, čigar ključa nimate: najprej lastna domena njegovega naslova (Web Key Directory), nato keys.openpgp.org, razen če ste to izklopili. Pošlje se samo naslov.</li>",
+            "source_sha256": "afa8c78f1bac87ad6850046afe0d6a862d91c0f7d2830e972f9baed5b5332544"
+          },
+          "core/crates/pe-html/help/sl/data-storage.html": {
+            "inserted_passage": "    <li><b>Šifrirni ključi</b> so shranjeni skupaj s preneseno pošto. Vaši zasebni ključi so tam šifrirani s ključem, shranjenim poleg vaših gesel, zato jih datoteka s pošto sama ne more odpreti.</li>",
+            "source_sha256": "3905b7ef2581e34f50a1b20fee8827950abd92e6789388c75eed13dfc036f885"
+          },
+          "core/crates/pe-html/help/sl/encryption-keys.html": {
+            "inserted_passage": "<p>Ključi potujejo tudi s pošto. Sporočila z naslova s ključem nosijo njegov javni ključ, da vam lahko druge aplikacije šifrirajo, Inbox Classic pa se na enak način nauči ključ stika iz njegovih sporočil. Če želite nehati pošiljati svojega, izklopite <b data-text=\"ui-account-autocrypt\"></b> na zavihku <b data-text=\"ui-account-security\"></b> računa.</p>",
+            "source_sha256": "cf7ca16e38a2726bded549404ccb016b258bfc6ee7fd357c9ba84e025c4f759e"
+          },
+          "core/crates/pe-html/help/sr-Latn/connections.html": {
+            "inserted_passage": "    <li><b>Ključevi za šifrovanje</b>, samo kada šifrujete nekome čiji ključ nemate: prvo domen njegove adrese (Web Key Directory), zatim keys.openpgp.org, osim ako ste to isključili. Šalje se samo adresa.</li>",
+            "source_sha256": "40fec7c07badad369127700e3dcef06b9ebdc71cc68ee7b9e12c50d5d8687c77"
+          },
+          "core/crates/pe-html/help/sr-Latn/data-storage.html": {
+            "inserted_passage": "    <li><b>Ključevi za šifrovanje</b> čuvaju se uz preuzetu poštu. Vaši privatni ključevi su tamo šifrovani ključem koji se čuva pored vaših lozinki, pa sama datoteka sa poštom ne može da ih otvori.</li>",
+            "source_sha256": "427ca418b6d4aad91d45e9e55152960617ca11d890ece9f1c2bfcfe5f401b426"
+          },
+          "core/crates/pe-html/help/sr-Latn/encryption-keys.html": {
+            "inserted_passage": "<p>Ključevi putuju i sa poštom. Poruke sa adrese koja ima ključ nose njen javni ključ kako bi druge aplikacije mogle da vam šifruju poruke, a Inbox Classic na isti način saznaje ključ kontakta iz njegovih poruka. Da biste prestali da šaljete svoj, isključite <b data-text=\"ui-account-autocrypt\"></b> na kartici <b data-text=\"ui-account-security\"></b> naloga.</p>",
+            "source_sha256": "afb88ca972d17b9f7aa1e9b7d7ad2111cd760898e932be4781fb40099e003d06"
+          },
+          "core/crates/pe-html/help/sv/connections.html": {
+            "inserted_passage": "    <li><b>Krypteringsnycklar</b>, bara när du krypterar till någon vars nyckel du inte har: först adressens egen domän (Web Key Directory), sedan keys.openpgp.org om du inte har stängt av det. Bara adressen skickas.</li>",
+            "source_sha256": "df5b28be24399bf53dbca8707232d847a5e87f8652549e88f8fb15405dc90de4"
+          },
+          "core/crates/pe-html/help/sv/data-storage.html": {
+            "inserted_passage": "    <li><b>Krypteringsnycklar</b> sparas tillsammans med den hämtade e-posten. Dina privata nycklar är krypterade där med en nyckel som sparas bredvid dina lösenord, så e-postfilen ensam kan inte öppna dem.</li>",
+            "source_sha256": "96210582fc012ee18d039c6dfc1fa649fcc05129ac744e9fdbda15e8a4d41f77"
+          },
+          "core/crates/pe-html/help/sv/encryption-keys.html": {
+            "inserted_passage": "<p>Nycklar följer också med e-posten. Meddelanden från en adress med en nyckel bär med sig dess offentliga nyckel, så att andra appar kan kryptera till dig, och Inbox Classic lär sig en kontakts nyckel från deras meddelanden på samma sätt. Om du inte längre vill skicka din stänger du av <b data-text=\"ui-account-autocrypt\"></b> på fliken <b data-text=\"ui-account-security\"></b> för kontot.</p>",
+            "source_sha256": "f707de80d40c40a32ad783fc2456235606c87124279eec5eaaf16091ba592bbb"
+          },
+          "core/crates/pe-html/help/tr/connections.html": {
+            "inserted_passage": "    <li><b>Şifreleme anahtarları</b>: yalnızca anahtarına sahip olmadığınız birine şifrelediğinizde. Önce adresin kendi alan adı (Web Key Directory), sonra kapatmadıysanız keys.openpgp.org. Yalnızca adres gönderilir.</li>",
+            "source_sha256": "f83f7b8a044adb757ce30fbc7f58385e16ab50ec98a31230f54b9822a5aeb675"
+          },
+          "core/crates/pe-html/help/tr/data-storage.html": {
+            "inserted_passage": "    <li><b>Şifreleme anahtarları</b> indirilen postayla birlikte saklanır. Özel anahtarlarınız orada, parolalarınızın yanında saklanan bir anahtarla şifrelenmiştir; bu yüzden posta dosyası tek başına onları açamaz.</li>",
+            "source_sha256": "effe3eeeef75237e2e5e7cfdc662da288b0d383b14fb354de2701f0191fc94d3"
+          },
+          "core/crates/pe-html/help/tr/encryption-keys.html": {
+            "inserted_passage": "<p>Anahtarlar postayla birlikte de gider. Anahtarı olan bir adresten gelen iletiler o adresin ortak anahtarını taşır; böylece başka uygulamalar size şifreleyebilir, Inbox Classic de bir kişinin anahtarını aynı şekilde onun iletilerinden öğrenir. Kendi anahtarınızı göndermeyi bırakmak için hesabın <b data-text=\"ui-account-security\"></b> sekmesinde <b data-text=\"ui-account-autocrypt\"></b> seçeneğini kapatın.</p>",
+            "source_sha256": "634719a976897609c3c7eedb2c55e1a8531412dedff2dde5732a6a456620fdd3"
+          },
+          "core/crates/pe-html/help/uk/connections.html": {
+            "inserted_passage": "    <li><b>Ключі шифрування</b>, лише коли ви шифруєте для того, чийого ключа у вас немає: спершу власний домен його адреси (Web Key Directory), потім keys.openpgp.org, якщо ви цього не вимкнули. Надсилається лише адреса.</li>",
+            "source_sha256": "09a86df0c2f6ef35b35f958fb43081dd6397d9f18d033b7b9e20235e4a2fdcb9"
+          },
+          "core/crates/pe-html/help/uk/data-storage.html": {
+            "inserted_passage": "    <li><b>Ключі шифрування</b> зберігаються разом із завантаженою поштою. Ваші закриті ключі зашифровані там ключем, що зберігається поруч із вашими паролями, тож сам файл пошти не може їх відкрити.</li>",
+            "source_sha256": "ec9952cbc050909a38eaf3015dfc0ca920c3b747dbb7de5b849eefb12f80dbdc"
+          },
+          "core/crates/pe-html/help/uk/encryption-keys.html": {
+            "inserted_passage": "<p>Ключі мандрують і разом із поштою. Повідомлення з адреси, що має ключ, несуть її відкритий ключ, щоб інші застосунки могли шифрувати для вас, а Inbox Classic так само дізнається ключ контакту з його повідомлень. Щоб більше не надсилати свій ключ, вимкніть <b data-text=\"ui-account-autocrypt\"></b> на вкладці <b data-text=\"ui-account-security\"></b> облікового запису.</p>",
+            "source_sha256": "71870307517b7c9876558f0e1715bb81bcb77deedabcdb74e68f09c5114d2128"
+          }
+        },
+        "status": "pending integration after current Hungarian app batch; not included in active pending totals",
+        "other_changed_paths": [
+          ".github/workflows/ci.yml",
+          ".github/workflows/pgp-interop-suite.yml",
+          "CLAUDE.md",
+          "README.md",
+          "app/CMakeLists.txt",
+          "core/crates/pe-bounce/tests/hostile.rs",
+          "core/crates/pe-core/tests/e2e_core.rs",
+          "core/crates/pe-pgp/src/cert.rs",
+          "core/crates/pe-pgp/src/decrypt.rs",
+          "core/crates/pe-pgp/src/policy.rs",
+          "core/crates/pe-pgp/src/verify.rs",
+          "core/crates/pe-pgp/tests/forge/mod.rs",
+          "core/crates/pe-pgp/tests/policy.rs",
+          "docs/pgp-plan.md",
+          "docs/shells.md",
+          "linux/Dockerfile",
+          "linux/src/agents.rs",
+          "linux/src/e2e.rs",
+          "linux/src/e2e/keys.rs",
+          "linux/src/e2e/layout.rs",
+          "linux/src/e2e/steps.rs",
+          "linux/src/keys.rs",
+          "scripts/linux-ui-e2e-run.sh",
+          "scripts/pgp-interop-suite.sh",
+          "scripts/pgp-interop-summary.py",
+          "scripts/pgp-interop.sh",
+          "scripts/ui-e2e/SCENARIO.md"
+        ],
+        "working_tree_changes": [
+          " M app/src/main.cpp",
+          " M linux/src/app.rs",
+          " M linux/src/e2e/steps.rs",
+          " M linux/src/mailbox.rs",
+          " M mac/Sources/InboxClassic/App.swift",
+          " M mac/Sources/InboxClassic/MainWindow.swift",
+          " M mac/Sources/InboxClassic/UITestSteps.swift",
+          " M scripts/ui-e2e.ps1",
+          "?? core/fuzz/seeds/"
+        ],
+        "note": "Active upstream worktree has unrelated uncommitted UI/fuzz changes. Preserve them; integrate a concrete committed source into the isolated review branch. Preserve reviewed paragraphs and mark only inserted passages in completed languages. Broad drafts already have these full topics pending. New connections paragraph overclaims lookup only during encryption and address-only queries; apply existing explicit key-ID/domain lookup context. Autocrypt is optional; receiving a key is not ownership verification."
+      }
+    ]
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
   "guide_updates": [
@@ -60898,7 +61758,20 @@
           "review_parent": "09aa4b5794314f51691f984b1b7f77ce89e0c708"
         }
       },
-      "reopening_validation": "All 60 reopened catalog entries and 17 three-passage help reopenings preserve the original text byte-for-byte after removing review marks. Pending order matches source file order. Reopening moves old completed IDs/topics to historical reopened fields and updates only their latest file checkpoint hashes, with both hashes retained here. Previously reviewed unmarked help passages are separately reconciled against commit 5e4fd524. Four Croatian catalog followups and its Gmail/Outlook topic are corrected. Bulgarian/Turkish catalog conditions were read and retained; their help remains pending. No tests run."
+      "reopening_validation": "All 60 reopened catalog entries and 17 three-passage help reopenings preserve the original text byte-for-byte after removing review marks. Pending order matches source file order. Reopening moves old completed IDs/topics to historical reopened fields and updates only their latest file checkpoint hashes, with both hashes retained here. Previously reviewed unmarked help passages are separately reconciled against commit 5e4fd524. Four Croatian catalog followups and its Gmail/Outlook topic are corrected. Bulgarian/Turkish catalog conditions were read and retained; their help remains pending. No tests run.",
+      "partial_reviews": [
+        {
+          "language": "hu",
+          "batch": "hu-app-round2",
+          "catalog_ids": {
+            "app.ftl": [
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
+            ]
+          },
+          "note": "These app entries are complete. Other catalogs and help remain pending in the full Hungarian queue; do not mark the whole context followup complete."
+        }
+      ]
     },
     {
       "id": "delete-without-trash-context",
@@ -61919,6 +62792,24 @@
         "Address lookup tries the address domain WKD first, then keys.openpgp.org when enabled. Explicit key-handle lookup sends a fingerprint/key ID instead of an email address. The keyserver switch does not disable domain lookup. UI/help source says only an address is sent; account for the separate identifier-lookup route during review.",
         "List encrypted/signed marks classify message protection, not signature validity or verified ownership. ListEncrypted is the preview/status placeholder when there is no decrypted snippet. Protected-subject and preview storage depends on the indexing setting.",
         "New-mail notification code always substitutes ListEncrypted for encrypted messages, independently of subsequent decryption. The list placeholder is conditional on a missing decrypted snippet. Translate these as distinct conditions."
+      ],
+      "partial_reviews": [
+        {
+          "language": "hu",
+          "batch": "hu-app-round2",
+          "catalog_ids": {
+            "app.ftl": [
+              "ui-settings-encryption",
+              "ui-search-encrypted",
+              "ui-search-encrypted-note",
+              "ui-pgp-keyserver",
+              "ui-pgp-keyserver-note",
+              "ui-row-encrypted",
+              "ui-row-signed"
+            ]
+          },
+          "note": "These app entries are complete. Other catalogs and help remain pending in the full Hungarian queue; do not mark the whole context followup complete."
+        }
       ]
     },
     {
@@ -61968,6 +62859,58 @@
         "The 17 previously reviewed languages received a one-line correction; Croatian was corrected in its full original-topic review. Ten broad drafts retain this item within their existing marked search-words topic. No previously reviewed passage remains pending."
       ],
       "validation": "All 17 previously reviewed languages have exactly one changed help line each, with all other text, tags, attributes and literal code/keyboard tokens retained. check-language has only 1404 expected removed-mark diagnostics per language; no structural findings. Croatian received the same correction during its full-topic review. Current file/source hashes and the global completed inventory reconcile. No test suites or builds."
+    },
+    {
+      "id": "undo-send-deadline-context",
+      "reason": "English ui-send-too-late says the message was already sent, but undo_send returns it whenever Store::take_back returns None. Its SQL requires undoable = 1 and not_before > now; merely reaching the deadline prevents undo, even when SMTP has not started or failed. Translations must say sending can no longer be undone, without confirming delivery.",
+      "source_checkpoint": "71df1f4bc9846dd93c92f07fbc6c05efb8fbaca6",
+      "catalog_ids": {
+        "app.ftl": [
+          "ui-send-too-late"
+        ]
+      },
+      "help_topics": [],
+      "completed_languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el",
+        "fi",
+        "hr",
+        "hu"
+      ],
+      "pending_languages": [
+        "lt",
+        "lv",
+        "pl",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "uk"
+      ],
+      "scope_added_catalogs": 4,
+      "scope_added_help": 0,
+      "verified_context": [
+        "core/crates/pe-core/src/undo_send.rs::Core::undo_send",
+        "core/crates/pe-store/src/outbox.rs::Store::take_back: DELETE requires not_before > now",
+        "core/crates/pe-store/src/outbox.rs::Store::send_undoable_now: quitting clears not_before",
+        "core::quoted_subject formats the subject before interpolation"
+      ],
+      "validation": "Each of the 18 earlier-language followups changes exactly ui-send-too-late, retaining every other byte and the complete subject placeholder. check-language reports 1404 expected removed-mark diagnostics per language and no structural findings. Hungarian has the same correction in its 647-entry app batch. Completed/source hashes reconcile globally. No test suites or builds."
     }
   ]
 }

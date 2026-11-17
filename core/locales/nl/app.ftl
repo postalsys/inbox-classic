@@ -583,7 +583,7 @@ ui-sending-in = { $subject } wordt verzonden over { $count ->
    *[other] { $count } seconden
 }
 ui-send-undone = { $subject } is niet verzonden. Het bericht is weer geopend om te bewerken.
-ui-send-too-late = { $subject } is al verzonden.
+ui-send-too-late = Het verzenden van { $subject } kan niet meer ongedaan worden gemaakt.
 ui-outbox-status-undo = Wordt verzonden om { $time }
 ui-download-note = Vooraf gedownloade berichten openen meteen. Als de opslaglimiet is overschreden, worden de oudste lokale kopieën verwijderd en opnieuw gedownload wanneer je ze opent.
 ui-attachment-downloading = Dit bericht is nog niet helemaal gedownload. Probeer het opnieuw als het downloaden klaar is.

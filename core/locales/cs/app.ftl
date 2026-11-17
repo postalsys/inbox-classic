@@ -587,7 +587,7 @@ ui-sending-in = { $subject } se odešle za { $count ->
    *[other] { $count } sekund
 }
 ui-send-undone = Zpráva „{ $subject }“ nebyla odeslána. Je znovu otevřená k úpravám.
-ui-send-too-late = Zpráva „{ $subject }“ už byla odeslána.
+ui-send-too-late = Odeslání už nelze zrušit: { $subject }.
 ui-outbox-status-undo = Odešle se v { $time }
 ui-download-note = Zprávy stažené předem se otevřou okamžitě. Po překročení limitu úložiště se nejstarší místní kopie odeberou a stáhnou se znovu, až je otevřete.
 ui-attachment-downloading = Stahování této zprávy ještě neskončilo. Zkuste to znovu po dokončení stahování.

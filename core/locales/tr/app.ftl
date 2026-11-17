@@ -583,7 +583,7 @@ ui-sending-in = Gönderim için kalan süre ({ $subject }): { $count ->
    *[other] { $count } saniye
 }
 ui-send-undone = Gönderim iptal edildi: { $subject }. İleti düzenlemek üzere yeniden açıldı.
-ui-send-too-late = { $subject } zaten gönderildi.
+ui-send-too-late = Gönderim artık geri alınamaz: { $subject }.
 ui-outbox-status-undo = Gönderim saati { $time }
 ui-download-note = Önceden indirilen iletiler hemen açılır. Depolama sınırı aşıldığında en eski yerel kopyalar kaldırılır ve açtığınızda yeniden indirilir.
 ui-attachment-downloading = Bu iletinin indirilmesi bitmedi. İndirme tamamlandığında yeniden deneyin.
