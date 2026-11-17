@@ -448,6 +448,10 @@ account (masculine, invariable); allegato; contrassegno (contrassegnare); Rispon
 - Message rules "elaborano" messages; reserve "ordinare" for the display order of a message list.
 - Translate blocklist as "lista di blocco". In count summaries, use singular agreement when one item is possible.
 - Use "firma digitale" where needed to distinguish cryptographic signatures from account signatures.
+- Compose status describes protection applied "all’invio", not a completed delivery. Use "chiave utilizzabile"
+  when sending needs a usable key, including expiry/revocation constraints. Encrypt "con" keys, not "per la chiave".
+- Put complete key-state reasons after "Motivo:" with the next instruction separate, rather than in parentheses.
+  Removing a recipient changes the message address fields, not the address book.
 - Keep "passphrase", "chiave privata", "chiave pubblica" and "impronta digitale" consistent; key verification
   confirms ownership and requires checking every listed address before confirming.
 - Participles agreeing with `$messages` choose by `$count` ("spostato" / "spostati"); "messaggio" is masculine,

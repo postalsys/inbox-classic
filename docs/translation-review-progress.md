@@ -5,18 +5,18 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Italian compose signing/encryption additions.** German, Spanish, Estonian, French and Dutch
-  have all 40 new compose entries and both help targets reviewed. Dutch adds 15 catalog improvements and
-  15 changed help lines; all earlier writing-help prose is preserved. Exact targets/context are recorded in
-  `compose-sign-encrypt-context`; feature `162c0dd2` was integrated in `3552434d`.
-- Continue the compose work for it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and hu, then the broader drafts.
+- **Next: European Portuguese compose additions, then Brazilian Portuguese.** German, Spanish, Estonian,
+  French, Dutch and Italian have all 40 new compose entries and both help targets reviewed. Italian adds
+  16 catalog improvements and 15 changed help lines, including one explicitly reopened older plain-text
+  paragraph. Other earlier prose is retained. Exact targets/context are in `compose-sign-encrypt-context`.
+- Continue the compose work for pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and hu, then the broader drafts.
   The active-key signature reason is reviewed in all 28 languages, committed in `25eff7b8`: 13 warning values
   improved and 15 retained, plus the Swedish encrypted-part wrapper corrected to neuter agreement.
   The source-only import is `205bd846`; dependent hardening code remains on its source branch.
-- Current integrated scope: 33,868 catalog entries and 1,352 help topics. Completed: 20,871 entries and 800
-  full topics; pending: 12,997 entries and 552 topics. Historical catalog improvements: 3,610.
+- Current integrated scope: 33,868 catalog entries and 1,352 help topics. Completed: 20,911 entries and 802
+  full topics; pending: 12,957 entries and 550 topics. Historical catalog improvements: 3,626.
   Hungarian has 48 original help topics left in addition to compose work, then lt/lv/pl/ro/ru/sk/sl/sv/uk.
-- Structural checks and German/Spanish/Estonian/French/Dutch's 53 actual mnemonic scopes pass. All full inventories and current
+- Structural checks and the six completed compose languages’ 53 actual mnemonic scopes pass. All full inventories and current
   hashes reconcile. The latest fresh fetch/seven-ref audit found no new strings or languages; existing source
   imports and the guide are unchanged. HTML regenerated. No test suites or builds run for this wording batch;
   the earlier source-import build passed in the separate target. `REVIEWED` remains unchanged.
@@ -2135,3 +2135,28 @@ There are no later edits/new strings in those copies. They remain untouched, wit
 Completed: 20,871 entries and 800 topics; pending: 12,997/552; scope:33,868/1,352; historical improvements:3,610.
 Italian compose is next, followed by the recorded languages and remaining Hungarian help. REVIEWED is unchanged;
 the complete queue and final late-arrival audit are still required.
+
+
+### Italian compose signing and encryption reviewed
+
+Reviewed 40 additions, retaining all 17 app labels and seven good core values while improving 16 core values.
+Status describes protection all’invio, signature integrity without proof of ownership, and chiavi utilizzabili.
+Removed literal encryption-for-a-key wording. Complete state reasons follow Motivo; date/address/count joins
+remain natural. Downgrade warnings cover inherited text/images/attachments and conditional unencrypted sending.
+
+Reviewed the new help topic and writing-help insertion, plus one explicitly reopened older plain-text paragraph
+that promised identical display in all mail apps. It now describes compatibility; all other earlier prose is
+retained. Fifteen help lines improved. Help explains colors/status, own/unusable keys, selected From key,
+recipient removal and encrypted drafts/sent copies. Glossary updated.
+
+All 53 shortcut scopes pass. Structural checker:1,446 expected removed-mark diagnostics, no structural findings.
+Exact reconstruction verifies16 value edits/40 mark removals; help tags/attributes/controls/platform branches/
+literal keys preserved. Joins inspected on all platforms; no Italian screenshot found, so controls/layouts were
+checked in source. No GUI run, test suites or builds. All28 inventories/current hashes reconcile:20,945 unmarked
+messages,10,499 changed help lines,14 baseline pairs. Since-start1,213 entries/203 passages match the queue.
+HTML regenerated; git diff --check passes.
+
+Fresh fetch/seven-ref audit found no new strings/languages. Six source worktrees have no new uncommitted relevant
+changes; all290 old copies retain exact cfdf55ab contents. The reusable source-worktree audit helper and its
+verified manifest provenance are recorded in state. Completed20,911 entries/802 topics; pending12,957/550;
+scope33,868/1,352; historical improvements3,626. Portuguese is next. REVIEWED remains unchanged.
