@@ -148,8 +148,9 @@ void AddTip(HWND owner, HWND tool, const std::wstring& text);
 // how wide the words of a control are in `font` (the dialog font when NULL), its & left out
 int TextWidth(HWND control, HFONT font);
 
-// how big `text` is in the dialog font, its & left out: one line, or wrapped at `wrapWidth` when it is not 0
-SIZE MeasureText(const std::wstring& text, int wrapWidth = 0);
+// how big `text` is in the dialog font, its & left out: one line, or wrapped at `wrapWidth` when it is not 0. `flags`
+// are DrawText's more (DT_EDITCONTROL); with DT_NOPREFIX the & are measured as they are
+SIZE MeasureText(const std::wstring& text, int wrapWidth = 0, UINT flags = 0);
 // a push button wide enough for the longest of `labels`, at least `least` pixels at 96 DPI
 int ButtonWidth(std::initializer_list<std::wstring> labels, int least = 80);
 int ButtonWidth(const std::vector<std::wstring>& labels, int least = 80);
@@ -195,6 +196,9 @@ void SetAccessibleName(HWND control, const std::wstring& text);
 // until `done` and destroys it, the owner disabled meanwhile
 HWND CreateModalWindow(HWND owner, const wchar_t* className, const wchar_t* title, int clientWidth, int clientHeight);
 void RunModal(HWND dialog, HWND focus, const bool& done);
+// RunModal sends it to the dialog with each key pressed in it (wParam the key, as WM_KEYDOWN has it) before the dialog
+// keys: a dialog that answers TRUE took the key (Options' Ctrl+Tab)
+constexpr UINT WM_MODAL_KEY = WM_APP + 90;
 // the path to save an attachment to, starting from the safe name the core made; empty when cancelled
 // (title and filter those of an attachment when null)
 std::wstring SaveFileDialog(HWND owner, const std::wstring& name, const wchar_t* title = nullptr, const wchar_t* filter = nullptr,
@@ -480,9 +484,23 @@ void SetTextPreference(const wchar_t* name, const std::wstring& value);
 // the language of the windows, before the first window reads a word: `forced` (--language), else the one chosen in
 // Options, else the first of Windows' display languages there is a catalog of
 void StartLanguage(const std::wstring& forced);
-// Tools > Options: the language, the new mail notifications (`notify`), the list grouped by conversation
-// (`threads`) and the layout (`layout`, a PeLayoutMode), these changed when OK is clicked. True when the user chose to restart now for a new language
-bool OptionsDialog(HWND owner, PeCore* core, bool& notify, bool& threads, bool& codes, int& layout, bool& listPictures);
+// what Tools > Options sets of the main window: the new mail notifications and whether they name sign-in codes, the
+// list grouped by conversation, the layout (a PeLayoutMode) and the senders' pictures in the list
+struct WindowOptions {
+    bool notify = false;
+    bool codes = false;
+    bool threads = false;
+    int layout = 0;
+    bool listPictures = true;
+    bool operator==(const WindowOptions&) const = default;
+};
+// Tools > Options, a tab for each page of core/settings.toml, the main window's settings from `window`; OK and Apply
+// hand `apply` what it is to set, Cancel undoes what was changed since the last Apply. True when the user chose to
+// restart now for a new language
+bool OptionsDialog(HWND owner, PeCore* core, const WindowOptions& window, const std::function<void(const WindowOptions&)>& apply);
+// Tools > Make Default Mail App, and its button in Options: Windows' Default Apps settings, where only the user can
+// choose it, or what says it is chosen already
+void MakeDefaultMailApp(HWND owner);
 // the language of the windows set to `code` (empty: Windows' own), as Options sets it; true when the user chose to
 // restart now for it (asked only when it is not the language of the windows now)
 bool ChooseLanguage(HWND owner, const std::wstring& code);
@@ -1469,6 +1487,10 @@ enum OptionsControlId : WORD {
     // how long a message sent waits to be taken back (Undo Send), and what that is for
     IDC_OPTIONS_SEND_DELAY,
     IDC_OPTIONS_SEND_DELAY_NOTE,
+    // the tabs of the pages, Apply, and Make Default Mail App (General > Default Apps)
+    IDC_OPTIONS_TABS,
+    IDC_OPTIONS_APPLY,
+    IDC_OPTIONS_DEFAULT_APP,
 };
 
 // the controls of the Address Book's windows (addressbook.cpp), which the UI test finds by them

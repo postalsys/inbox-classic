@@ -164,13 +164,8 @@ gtk-nothing-yet = Τίποτα ακόμη.
 ## Preferences
 
 gtk-preferences = Προτιμήσεις
-gtk-language = Γλώσσα
-gtk-language-subtitle = Γλώσσα της εφαρμογής και της βοήθειας
-gtk-new-mail-group = Νέα αλληλογραφία
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-gtk-notify-new-mail = Ειδοποίηση για νέα αλληλογραφία
-gtk-notify-subtitle = Ειδοποίηση όταν φτάνουν νέα μηνύματα ενώ το παράθυρο είναι στο παρασκήνιο
-gtk-restart-to-change = Το Inbox Classic θα επανεκκινηθεί για να αλλάξει η γλώσσα.
+# review: changed
+gtk-notify-subtitle = Μόνο όταν το Inbox Classic είναι στο παρασκήνιο
 
 ## The desktop entry and the page of the software stores
 

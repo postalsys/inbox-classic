@@ -136,6 +136,7 @@ extension UITest {
             onMain { NSApp.appearance = before }
             throw Failed(description: "Settings did not open")
         }
+        await showPane(options, .reading)
         check(options.darkMessages.state == .on, "Settings has \"\(Text.uiDarkMessages.text)\", on")
         await shot(options.window, "dark-6b-settings")
         press(options.darkMessages)

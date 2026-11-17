@@ -178,14 +178,6 @@ win-edit = &Edytuj...
 ## Options
 
 # review: new
-win-options-language-label = &Język Inbox Classic:
-# review: new
-win-options-restart-note = Uruchom ponownie Inbox Classic, aby zmienić język.
-# review: new
-win-options-notify = &Powiadamiaj mnie o nowej poczcie
-# review: new
-win-restart-ask = Inbox Classic wyświetli język { $language } po ponownym uruchomieniu. Uruchomić ponownie teraz?
-# review: new
 win-folders-hide = Ukryj listę folderów
 # review: new
 win-folders-pin = Trzymaj listę folderów obok wiadomości

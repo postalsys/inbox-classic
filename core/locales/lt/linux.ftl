@@ -243,19 +243,8 @@ gtk-nothing-yet = Kol kas nieko.
 
 # review: new
 gtk-preferences = Nuostatos
-# review: new
-gtk-language = Kalba
-# review: new
-gtk-language-subtitle = Programos ir žinyno kalba
-# review: new
-gtk-new-mail-group = Nauji laiškai
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-# review: new
-gtk-notify-new-mail = Pranešti apie naujus laiškus
-# review: new
-gtk-notify-subtitle = Pranešimas, kai gaunami nauji laiškai, o langas yra fone
-# review: new
-gtk-restart-to-change = Inbox Classic pasileis iš naujo, kad pasikeistų kalba.
+# review: changed
+gtk-notify-subtitle = Tik kai Inbox Classic veikia fone
 
 ## The desktop entry and the page of the software stores
 

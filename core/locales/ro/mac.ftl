@@ -41,13 +41,9 @@ mac-no-updates = Această versiune de Inbox Classic nu acceptă actualizări aut
 # review: new
 mac-settings-title = Configurări
 # review: new
-mac-language-label = Limbă:
+mac-check-updates-automatically = Caută automat actualizări
 # review: new
-mac-restart-hint = Reporniți Inbox Classic pentru a schimba limba.
-# review: new
-mac-notify-new-mail = Notificare la sosirea e-mailurilor noi
-# review: new
-mac-restart-question = Reporniți acum Inbox Classic pentru a schimba limba?
+mac-settings-updates = Actualizări
 
 ## Dialogs
 

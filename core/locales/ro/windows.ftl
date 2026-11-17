@@ -176,14 +176,6 @@ win-edit = &Editare...
 ## Options
 
 # review: new
-win-options-language-label = &Afișare Inbox Classic în:
-# review: new
-win-options-restart-note = Reporniți Inbox Classic pentru a schimba limba.
-# review: new
-win-options-notify = &Notificare la sosirea e-mailurilor noi
-# review: new
-win-restart-ask = Inbox Classic va apărea în { $language } după repornire. Reporniți acum?
-# review: new
 win-folders-hide = Ascundere listă de foldere
 # review: new
 win-folders-pin = Păstrare listă de foldere lângă mesaje

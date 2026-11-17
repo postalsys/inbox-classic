@@ -381,6 +381,34 @@ ui-sign-in-apps-intro = As aplicações de início de sessão permitem aceder à
 ui-col-issuer = Emissor
 ui-col-used-by = Usada por
 ui-options-system-default = Predefinição do sistema ({ $language })
+# review: new
+ui-settings-general = Geral
+# review: new
+ui-settings-reading = Leitura
+# review: new
+ui-settings-new-mail = Correio novo
+# review: new
+ui-settings-sending = Envio
+# review: new
+ui-settings-default-apps = Aplicações predefinidas
+# review: new
+ui-settings-message-list = Lista de mensagens
+# review: new
+ui-settings-messages = Mensagens
+# review: new
+ui-settings-language = Idioma
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Aplicar
+# review: new
+ui-language-label = &Idioma:
+# review: new
+ui-restart-note = Reinicie o Inbox Classic para mudar o idioma.
+# review: new
+ui-restart-ask = O Inbox Classic mostra { $language } depois de reiniciar. Reiniciar agora?
+# review: new
+ui-notify-new-mail = &Notificar-me quando chegar correio novo
 ui-new-folder-title = Nova pasta
 ui-rename-folder-title = Mudar o nome da pasta
 ui-delete-folder-question = Eliminar a pasta «{ $folder }» com as respetivas mensagens e as pastas que contém? Também será eliminada no servidor.
@@ -550,23 +578,28 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Não foi possível guardar o livro de endereços: { $reason }
 ui-code-copied = Código copiado
-ui-codes-in-notifications = Mostrar códigos de início de sessão nas notificações de correio novo
+# review: changed
+ui-codes-in-notifications = &Mostrar códigos de início de sessão nas notificações de correio novo
 ui-tool-unread-only = Não lidas
 ui-no-unread = Não há mensagens não lidas aqui.
 ui-pictures-always-sender = Transferir sempre imagens de { $sender }
 ui-pictures-always-domain = Transferir sempre imagens dos remetentes com o domínio { $domain }
 ui-pictures-unconfirmed = Não foi possível verificar o domínio do remetente ({ $domain }), por isso as imagens desta mensagem não são transferidas automaticamente.
-ui-pictures-always-option = Transferir imagens em todas as mensagens
+# review: changed
+ui-pictures-always-option = &Transferir imagens em todas as mensagens
 ui-pictures-always-warning = Os remetentes podem então saber quando lê as mensagens deles.
 ui-protection-details = &Detalhes...
 ui-protection-details-title = Detalhes de segurança
 ui-download-heading = Transferência
-ui-download-ahead = Transferir mensagens antecipadamente:
+# review: changed
+ui-download-ahead = &Transferir mensagens antecipadamente:
 ui-download-ahead-recent = Mensagens recentes até 1 MB cada
 ui-download-ahead-all = Todas as mensagens
 ui-download-ahead-never = Só quando são abertas
-ui-download-limit = Limite de armazenamento por conta:
-ui-send-delay = Tempo de espera antes do envio:
+# review: changed
+ui-download-limit = &Limite de armazenamento por conta:
+# review: changed
+ui-send-delay = Tempo &de espera antes do envio:
 ui-send-delay-note = Enquanto a mensagem aguarda o envio, pode cancelá-lo com Anular.
 ui-dark-messages = Mostrar as mensagens num fundo escuro quando o sistema está no modo escuro
 ui-sending-in = A enviar { $subject } dentro de { $count ->
@@ -578,17 +611,20 @@ ui-send-too-late = A mensagem «{ $subject }» já foi enviada.
 ui-outbox-status-undo = Será enviada às { $time }
 ui-download-note = As mensagens transferidas antecipadamente abrem de imediato. Quando o limite de armazenamento é excedido, as cópias locais mais antigas são removidas e transferidas novamente quando as abrir.
 ui-attachment-downloading = A transferência desta mensagem ainda não terminou. Tente novamente quando a transferência estiver concluída.
-ui-trusted-senders-button = Remetentes fidedignos...
+# review: changed
+ui-trusted-senders-button = &Remetentes fidedignos...
 ui-trusted-senders-title = Remetentes fidedignos
 ui-trusted-senders-note = As imagens das mensagens destes remetentes são transferidas automaticamente quando o seu fornecedor de correio verifica o domínio do remetente.
 ui-trusted-everyone-at = Remetentes com o domínio { $domain }
 ui-trusted-senders-empty = Ainda não foram adicionados remetentes fidedignos.
-ui-eml-default = Abrir ficheiros .eml com o Inbox Classic
+# review: changed
+ui-eml-default = Abrir &ficheiros .eml com o Inbox Classic
 ui-eml-default-done = O Inbox Classic abre agora os ficheiros .eml.
 ui-eml-default-failed = Não foi possível definir o Inbox Classic como aplicação predefinida para ficheiros .eml: { $reason }
 ui-folders = Pastas
 ui-sorted-by = Ordenar por { $field }
-ui-layout-label = Esquema:
+# review: changed
+ui-layout-label = &Esquema:
 ui-columns-note = A janela é suficientemente larga para o esquema em colunas. Pode alterar o esquema em Ver > Esquema.
 ui-row-unread = Não lida
 ui-row-flagged = Sinalizada
@@ -598,7 +634,9 @@ ui-row-messages = { $count ->
     [one] { $count } mensagem
    *[other] { $count } mensagens
 }
-ui-list-pictures = Mostrar as imagens dos remetentes na lista de mensagens
+# review: changed
+ui-list-pictures = &Mostrar as imagens dos remetentes na lista de mensagens
+# review: changed
 ui-list-pictures-note = Mostra logótipos de marcas ou imagens do Livro de Endereços quando o domínio do remetente é verificado. Se não houver imagem, mostra as iniciais. Os logótipos transferidos são guardados e reutilizados em várias mensagens.
 ui-card-picture = Imagem:
 ui-card-picture-choose = &Escolher...

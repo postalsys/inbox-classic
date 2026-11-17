@@ -131,6 +131,14 @@ Context notes:
   Clear Flag must use another. Account/folder context menus, Settings and folder-picker buttons have their
   own combined scopes beyond the main menus. The extended review helper covers 44 such scopes.
 
+- Settings now have General, Reading and Downloading pages from `core/settings.toml`. Group headings have
+  no access key or colon; `ui-settings-label` supplies the Mac label punctuation. Check each page's access
+  keys together with OK, Cancel and Apply, and use `data-settings` for help navigation.
+- In Windows Options, OK/Apply save pending settings and trusted-sender removals; Cancel discards changes
+  since the last apply. Opening Windows Default apps is immediate and external: Cancel does not undo a
+  default-app selection there, despite the new English Settings help claiming it does. Apply can prompt
+  for a language restart. Mac/Linux settings take effect immediately, with a restart for a new UI language.
+
 - The `undone-*` failure bar embeds the already-localized `messages` count phrase. Source and destination
   placeholders here are actual folder names. Moves, deletion and archiving restore local rows after failure;
   a refused flag/read-state change reverses that requested change. Separate a standalone single-message noun

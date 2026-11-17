@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings Window Review</title>
+<style>
+:root{
+  --bg:#f6f5f1;--panel:#fff;--ink:#1d1f24;--muted:#5d6370;--line:#e2e0d9;
+  --accent:#1f5fae;--soft:#e6eefa;--hi:#a3352b;--hibg:#f9e4e1;--md:#946200;--mdbg:#fbf0d6;--lo:#1d7a46;--lobg:#e3f3ea;
+  --win:#1f5fae;--mac:#6b4fb3;--gtk:#c2570c;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--hi:#f0897d;--hibg:#3d1f1c;--md:#e8c05a;--mdbg:#3a3018;--lo:#6fd39b;--lobg:#173325;
+  --win:#7fb0f0;--mac:#b39cf0;--gtk:#f2a065;
+}}
+:root[data-theme="dark"]{
+  --bg:#15171b;--panel:#1e2127;--ink:#e7e8ec;--muted:#a1a7b3;--line:#2f333b;
+  --accent:#7fb0f0;--soft:#1f2c40;--hi:#f0897d;--hibg:#3d1f1c;--md:#e8c05a;--mdbg:#3a3018;--lo:#6fd39b;--lobg:#173325;
+  --win:#7fb0f0;--mac:#b39cf0;--gtk:#f2a065;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:1080px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px;letter-spacing:-.01em}
+h2{font-size:21px;margin:46px 0 8px}
+h3{font-size:16.5px;margin:0 0 6px}
+p{margin:0 0 10px}
+ul{margin:6px 0 0;padding-left:20px}
+li{margin:3px 0}
+code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--soft);padding:1px 4px;border-radius:4px}
+.lede{color:var(--muted);font-size:16px;max-width:800px}
+.meta{color:var(--muted);font-size:13px;margin-bottom:22px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.shot{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--win);border-radius:10px;padding:14px 16px;min-width:0}
+.shot.mac{border-top-color:var(--mac)}.shot.gtk{border-top-color:var(--gtk)}
+.shot img{width:100%;height:auto;border:1px solid var(--line);border-radius:6px;background:var(--bg);display:block;margin:8px 0}
+.shot .cap{font-size:12.5px;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;vertical-align:2px;margin-right:6px}
+.tag.H{background:var(--hibg);color:var(--hi)}.tag.M{background:var(--mdbg);color:var(--md)}.tag.L{background:var(--lobg);color:var(--lo)}
+.find{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--hi);border-radius:8px;padding:12px 16px;margin:10px 0}
+.find.M{border-left-color:var(--md)}.find.L{border-left-color:var(--lo)}
+.find .ev{font-size:12.5px;color:var(--muted);margin-top:4px}
+.tablewrap{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+td.n{text-align:center;font-variant-numeric:tabular-nums}
+.pages{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:12px}
+.page{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.page h3{display:flex;align-items:center;gap:8px}
+.page .num{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--panel);font-size:12px;font-weight:700}
+.grp{margin-top:10px}
+.grp b{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.grp ul{font-size:14px;margin-top:2px}
+.only{font-size:11px;color:var(--mac);border:1px solid var(--line);border-radius:999px;padding:0 6px;margin-left:4px}
+.forms{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:12px}
+.form{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:14px}
+.form h3{color:var(--win)}.form.mac h3{color:var(--mac)}.form.gtk h3{color:var(--gtk)}
+/* small mock-ups of the three windows */
+.mock{margin:10px 0 8px;border:1px solid var(--line);border-radius:6px;overflow:hidden;font-size:12px;background:var(--bg)}
+.mock .bar{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line);background:var(--panel);flex-wrap:wrap}
+.mock .t{padding:2px 8px;border:1px solid var(--line);border-bottom:none;border-radius:4px 4px 0 0;color:var(--muted)}
+.mock .t.on{color:var(--ink);font-weight:600;background:var(--bg)}
+.mock .ic{flex:1;text-align:center;padding:2px 4px;border-radius:5px;color:var(--muted)}
+.mock .ic.on{background:var(--soft);color:var(--ink);font-weight:600}
+.mock .body{padding:8px 10px}
+.mock fieldset{border:1px solid var(--line);border-radius:3px;margin:0 0 6px;padding:2px 8px 6px}
+.mock legend{font-size:11px;color:var(--muted);padding:0 3px}
+.mock .row{display:flex;justify-content:space-between;gap:8px;padding:2px 0}
+.mock .row span:last-child{color:var(--muted)}
+.mock .btns{display:flex;justify-content:flex-end;gap:6px;padding:6px 10px;border-top:1px solid var(--line)}
+.mock .btn{border:1px solid var(--line);border-radius:3px;padding:1px 10px;background:var(--panel)}
+.mock .gh{font-size:11px;font-weight:700;color:var(--muted);margin:6px 0 3px}
+.mock .box{border:1px solid var(--line);border-radius:8px;background:var(--panel);margin-bottom:6px}
+.mock .box .row{padding:4px 8px;border-bottom:1px solid var(--line)}
+.mock .box .row:last-child{border-bottom:none}
+.dec{counter-reset:d;list-style:none;padding:0}
+.dec li{counter-increment:d;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px 10px 46px;margin:8px 0;position:relative}
+.dec li::before{content:counter(d);position:absolute;left:14px;top:10px;width:22px;height:22px;border-radius:50%;background:var(--md);color:var(--panel);display:grid;place-items:center;font-size:12px;font-weight:700}
+.rec{color:var(--lo);font-weight:600}
+.steps{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin-top:12px}
+.step{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.step b{display:block;font-size:14px}
+.step .n{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+</style>
+</head>
+<body>
+<main>
+<h1>The settings window, on three platforms</h1>
+<p class="lede">A UX review of Tools &gt; Options (Windows), Inbox Classic &gt; Settings (Mac) and Preferences (Linux), and the plan to give all three the same three pages in each platform's own form.</p>
+<p class="meta">Review of 2026-11-16. Plan: <code>docs/settings-plan.md</code>. Screenshots from the UI tests of 2026-11-15 (the Mac ones predate the last wording review).</p>
+
+<div class="grid">
+  <div class="card"><h3>Today</h3><p>13 settings in one long column on every platform, in three different orders, with three sets of labels for the same things. None follows its platform's settings pattern.</p></div>
+  <div class="card"><h3>Proposed</h3><p>General, Reading, Downloading: the same pages, groups and order everywhere. A tabbed property sheet on Windows, toolbar panes on the Mac, an <code>AdwPreferencesDialog</code> with pages on Linux.</p></div>
+  <div class="card"><h3>Cost</h3><p>7 new strings, 5 merged ids carried over (6 ids removed), 10 strings gain an access key. One pull request, the order kept by a new <code>core/settings.toml</code>.</p></div>
+</div>
+
+<h2>Current state</h2>
+<div class="grid">
+  <div class="shot">
+    <h3>Windows: Tools &gt; Options</h3>
+    <img src="../build/ui-e2e/options-1-language.png" alt="The Windows Options dialog, one long column">
+    <p class="cap"><code>build/ui-e2e/options-1-language.png</code>. OK/Cancel, no tabs, access keys on 3 of 13 controls.</p>
+    <img src="../build/ui-e2e/lang-4-pseudo-options.png" alt="The Windows Options dialog in the pseudo-language">
+    <p class="cap"><code>lang-4-pseudo-options.png</code>. The dialog widens with the longest translation.</p>
+    <img src="../build/ui-e2e/pictures-3-options.png" alt="The Trusted senders dialog">
+    <p class="cap"><code>pictures-3-options.png</code>. Trusted senders: Remove acts at once, Cancel of Options does not undo it.</p>
+  </div>
+  <div class="shot mac">
+    <h3>Mac: Inbox Classic &gt; Settings</h3>
+    <img src="../build/ui-e2e-mac/options-1-language.png" alt="The Mac Settings window, one grid without panes">
+    <p class="cap"><code>build/ui-e2e-mac/options-1-language.png</code>. No panes, always titled "Settings"; the last three labels sit in the control column.</p>
+    <img src="../build/ui-e2e-mac/dark-6b-settings.png" alt="The Mac Settings window in dark mode">
+    <p class="cap"><code>dark-6b-settings.png</code>. Dark mode is right; the strings are the old ones ("Wait before sending").</p>
+  </div>
+  <div class="shot gtk">
+    <h3>Linux: Preferences</h3>
+    <img src="../build/ui-e2e-linux/options-1-language.png" alt="The Linux Preferences dialog, top">
+    <p class="cap"><code>build/ui-e2e-linux/options-1-language.png</code>. One page; the first three groups have no title.</p>
+    <img src="../build/ui-e2e-linux/download-1-options.png" alt="The Linux Preferences dialog, scrolled">
+    <p class="cap"><code>download-1-options.png</code>. A floating note above Delay before sending, a lone bold button row.</p>
+    <img src="../build/ui-e2e-linux/tour-de-5-preferences.png" alt="The Linux Preferences dialog in German">
+    <p class="cap"><code>tour-de-5-preferences.png</code>. German wraps well here.</p>
+  </div>
+</div>
+
+<h3 style="margin-top:26px">Where each setting is, by position</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Setting</th><th>Windows</th><th>Mac</th><th>Linux</th><th>Stored</th><th>Default</th></tr></thead>
+<tbody>
+<tr><td>Language</td><td class="n">1</td><td class="n">1</td><td class="n">1</td><td>app</td><td>system</td></tr>
+<tr><td>Notify of new mail</td><td class="n">2</td><td class="n">3</td><td class="n">9</td><td>app</td><td>on</td></tr>
+<tr><td>Sign-in codes in notifications</td><td class="n">3</td><td class="n">4</td><td class="n">10</td><td>app</td><td>off</td></tr>
+<tr><td>Group by conversation</td><td class="n">4</td><td class="n">5</td><td class="n">3</td><td>app</td><td>on</td></tr>
+<tr><td>Layout</td><td class="n">5</td><td class="n">2</td><td class="n">2</td><td>app</td><td>Automatic</td></tr>
+<tr><td>Delay before sending</td><td class="n">6</td><td class="n">11</td><td class="n">11</td><td>core</td><td>10 s</td></tr>
+<tr><td>Senders' pictures in the list</td><td class="n">7</td><td class="n">6</td><td class="n">4</td><td>app</td><td>on</td></tr>
+<tr><td>Dark background for messages</td><td class="n">none</td><td class="n">7</td><td class="n">5</td><td>core</td><td>on</td></tr>
+<tr><td>Download pictures in all messages</td><td class="n">8</td><td class="n">8</td><td class="n">6</td><td>core</td><td>off</td></tr>
+<tr><td>Trusted Senders</td><td class="n">9</td><td class="n">9</td><td class="n">7</td><td>core</td><td>empty</td></tr>
+<tr><td>Open .eml files</td><td class="n">10</td><td class="n">10</td><td class="n">12</td><td>system</td><td></td></tr>
+<tr><td>Download messages in advance</td><td class="n">11</td><td class="n">12</td><td class="n">13</td><td>core</td><td>Recent, 1 MB</td></tr>
+<tr><td>Storage limit per account</td><td class="n">12</td><td class="n">13</td><td class="n">14</td><td>core</td><td>1 GB</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Findings</h2>
+<div class="find"><span class="tag H">High</span><b>One long, unstructured column on all three.</b> 605 px tall on Windows, 18 grid rows on the Mac, seven groups (two titled) on Linux that need scrolling.<div class="ev">options-1-language.png on all three; download-1-options.png (Linux)</div></div>
+<div class="find"><span class="tag H">High</span><b>No platform pattern followed.</b> No tabs or Apply on Windows; no toolbar panes and a fixed title on the Mac; a single page on Linux, so no view switcher.<div class="ev">options.cpp:372, Settings.swift:136-146, preferences.rs:132-147</div></div>
+<div class="find"><span class="tag H">High</span><b>Three orders, so the help cannot describe one window.</b> The settings topic lists 6 of 13 settings; 10 topics repeat a three-platform path in os blocks.<div class="ev">help/en/options-language.html; the table above</div></div>
+<div class="find"><span class="tag H">High</span><b>Windows: 9 of 13 controls have no access key.</b><div class="ev">options-1-language.png; ui-layout-label, ui-send-delay, ui-download-ahead and six more without &amp;</div></div>
+<div class="find M"><span class="tag M">Medium</span><b>Mixed commit on Windows.</b> OK/Cancel, but Trusted Senders' Remove and Open .eml act at once.<div class="ev">options.cpp:243-250</div></div>
+<div class="find M"><span class="tag M">Medium</span><b>Sign-in codes stays enabled with notifications off,</b> though it is indented under them.<div class="ev">options.cpp:399, Settings.swift:173, preferences.rs:71</div></div>
+<div class="find M"><span class="tag M">Medium</span><b>Senders' pictures do nothing in the Classic layout,</b> and the label and note do not say so.<div class="ev">ui-list-pictures-note</div></div>
+<div class="find M"><span class="tag M">Medium</span><b>Mac alignment is ragged:</b> three pop-up labels in the control column, push buttons among check boxes.<div class="ev">Settings.swift:237-247; dark-6b-settings.png</div></div>
+<div class="find M"><span class="tag M">Medium</span><b>Linux groups are uneven:</b> an untitled group with a floating description, a lone bold button row, two combo styles.<div class="ev">preferences.rs:47-52, 253-271; download-1-options.png</div></div>
+<div class="find M"><span class="tag M">Medium</span><b>Long translations widen Windows and the Mac without limit</b> (German ui-dark-messages is 95 characters; Mac check boxes do not wrap).<div class="ev">options.cpp:350-355; lang-4-pseudo-options.png</div></div>
+<div class="find M"><span class="tag M">Medium</span><b>One concept, three ids:</b> notify, the language label, the restart question and note.<div class="ev">win-options-notify, mac-notify-new-mail, gtk-notify-new-mail; win-restart-ask, mac-restart-question, gtk-restart-to-change</div></div>
+<div class="find M"><span class="tag M">Medium</span><b>Default apps are split:</b> Make Default Mail App only in Tools, .eml only in settings.<div class="ev">commands.toml default_app; ui-eml-default</div></div>
+<div class="find L"><span class="tag L">Low</span><b>Stale screenshots, a straight apostrophe in "senders'", the export's "Settings" and "Window preferences" split by storage.</b><div class="ev">Mac screenshots before b19a8950; ui-list-pictures; setup-part-preferences</div></div>
+<div class="find L"><span class="tag L">Low</span><b>Fine as it is:</b> the defaults; Layout and Notify also in the menus; View toggles staying in View; no dark option on Windows (always light); nothing here is per account.</div>
+
+<h2>Before and after</h2>
+<p>The same pages and groups in the same order on all three. The help names pages and controls, never groups, so the Mac, which separates groups by space as Apple's panes do, follows it too.</p>
+<div class="pages">
+  <div class="page">
+    <h3><span class="num">1</span>General</h3>
+    <div class="grp"><b>Language</b><ul><li>Language, with the restart note</li></ul></div>
+    <div class="grp"><b>New Mail</b><ul><li>Notify me when new mail arrives</li><li>Show sign-in codes in new mail notifications (disabled while off)</li></ul></div>
+    <div class="grp"><b>Sending</b><ul><li>Delay before sending, with its note</li></ul></div>
+    <div class="grp"><b>Default Apps</b><ul><li>Make Default Mail App...</li><li>Open .eml Files with Inbox Classic</li></ul></div>
+  </div>
+  <div class="page">
+    <h3><span class="num">2</span>Reading</h3>
+    <div class="grp"><b>Message List</b><ul><li>Layout</li><li>Group messages by conversation</li><li>Show senders' pictures in the message list (note says: column layout)</li></ul></div>
+    <div class="grp"><b>Messages</b><ul><li>Dark background in dark mode <span class="only">Mac, Linux</span></li><li>Download pictures in all messages, with its warning</li><li>Trusted Senders...</li></ul></div>
+  </div>
+  <div class="page">
+    <h3><span class="num">3</span>Downloading</h3>
+    <div class="grp"><b>(the page is the group)</b><ul><li>Download messages in advance</li><li>Storage limit per account</li><li>The note</li></ul></div>
+  </div>
+</div>
+
+<h3 style="margin-top:26px">Each in its platform's form</h3>
+<div class="forms">
+  <div class="form">
+    <h3>Windows: classic property sheet</h3>
+    <div class="mock">
+      <div class="bar"><span class="t on">General</span><span class="t">Reading</span><span class="t">Downloading</span></div>
+      <div class="body">
+        <fieldset><legend>Language</legend><div class="row"><span><u>L</u>anguage:</span><span>System default (English)</span></div></fieldset>
+        <fieldset><legend>New Mail</legend><div class="row"><span>[x] <u>N</u>otify me when new mail arrives</span></div><div class="row"><span>&nbsp;&nbsp;&nbsp;[ ] Show sign-in <u>c</u>odes...</span></div></fieldset>
+        <fieldset><legend>Sending</legend><div class="row"><span>Delay before <u>s</u>ending:</span><span>10 seconds</span></div></fieldset>
+        <fieldset><legend>Default Apps</legend><div class="row"><span>[Make <u>D</u>efault Mail App...] [Open .<u>e</u>ml Files...]</span></div></fieldset>
+      </div>
+      <div class="btns"><span class="btn">OK</span><span class="btn">Cancel</span><span class="btn"><u>A</u>pply</span></div>
+    </div>
+    <ul>
+      <li>Classic tab control and group boxes, OK, Cancel, Apply</li>
+      <li>Every control an access key, unique per page; Ctrl+Tab switches tabs</li>
+      <li>Fixed width, wrapping check boxes; about 430 x 400</li>
+      <li>Controls stay direct children, so the test's ids keep working</li>
+    </ul>
+  </div>
+  <div class="form mac">
+    <h3>Mac: settings panes</h3>
+    <div class="mock">
+      <div class="bar"><span class="ic on">General</span><span class="ic">Reading</span><span class="ic">Downloading</span></div>
+      <div class="body">
+        <div class="row"><span>Language:</span><span>System default (English)</span></div>
+        <div class="row" style="margin-top:6px"><span>[x] Notify me when new mail arrives</span></div>
+        <div class="row"><span>&nbsp;&nbsp;&nbsp;[ ] Show sign-in codes...</span></div>
+        <div class="row" style="margin-top:6px"><span>Delay before sending:</span><span>10 seconds</span></div>
+        <div class="row" style="margin-top:6px"><span>[Make Default Mail App...] [Open .eml Files...]</span></div>
+      </div>
+    </div>
+    <ul>
+      <li><code>NSToolbar</code>, <code>.preference</code> style, window titled by the pane</li>
+      <li>Opens on the last pane; resizes to each pane</li>
+      <li>All pop-up labels right aligned in the label column</li>
+      <li>Instant apply, help button per pane, wrapping check boxes</li>
+    </ul>
+  </div>
+  <div class="form gtk">
+    <h3>Linux: preferences pages</h3>
+    <div class="mock">
+      <div class="bar"><span class="ic on">General</span><span class="ic">Reading</span><span class="ic">Downloading</span></div>
+      <div class="body">
+        <div class="gh">Language</div><div class="box"><div class="row"><span>Language</span><span>System default</span></div></div>
+        <div class="gh">New Mail</div><div class="box"><div class="row"><span>Notify me when new mail arrives</span><span>on</span></div><div class="row"><span>Show sign-in codes...</span><span>off</span></div></div>
+        <div class="gh">Default Apps</div><div class="box"><div class="row"><span>Make default mail app</span><span>&gt;</span></div></div>
+      </div>
+    </div>
+    <ul>
+      <li>Three <code>AdwPreferencesPage</code>s with icons: view switcher, search kept</li>
+      <li>Every group titled; choice rows all show their value as a subtitle</li>
+      <li>Codes row insensitive while notify is off</li>
+      <li>No fixed 700 px height</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Words</h2>
+<div class="grid">
+  <div class="card"><h3>New (7)</h3><p><code>ui-settings-general</code>, <code>ui-settings-reading</code>, <code>ui-settings-sending</code>, <code>ui-settings-default-apps</code>, <code>ui-settings-message-list</code>, <code>ui-settings-messages</code>, <code>ui-apply</code>. Downloading reuses <code>ui-download-heading</code>.</p></div>
+  <div class="card"><h3>Merged, carried over (5)</h3><p><code>ui-notify-new-mail</code>, <code>ui-restart-ask</code>, <code>ui-restart-note</code> (no review); <code>ui-settings-new-mail</code> (English case); <code>ui-language-label</code> (review for the &amp;). Six platform ids go.</p></div>
+  <div class="card"><h3>Changed (review)</h3><p>Access keys on 9 strings; <code>ui-list-pictures-note</code> says "In the column layout". A core test keeps access keys unique per page in every language.</p></div>
+</div>
+
+<h2>In the core, the help, the tests</h2>
+<div class="grid">
+  <div class="card"><h3>core/settings.toml</h3><p>Pages, groups, settings in order, with kinds, label ids, platforms and dependencies; generated into the three apps like <code>commands.toml</code>; each app builds settings in one exhaustive switch.</p></div>
+  <div class="card"><h3>Help</h3><p><code>&lt;b data-settings="reading"&gt;</code> writes each platform's path to a page; <code>options-language</code> becomes the "Settings" topic with a section per page; 9 topics lose their triple path.</p></div>
+  <div class="card"><h3>UI tests</h3><p>Each step selects its page; codes disabled with notify off; Mac title and last pane; Windows Apply. Screenshots per page, refreshed, in English, German, Finnish and the pseudo-language.</p></div>
+</div>
+
+<h2>Order of work, one pull request</h2>
+<div class="steps">
+  <div class="step"><span class="n">1</span><b>Core</b>settings.toml, generation, tests; data-settings; catalogs</div>
+  <div class="step"><span class="n">2</span><b>Windows</b>tabs, group boxes, Apply, access keys</div>
+  <div class="step"><span class="n">3</span><b>Mac</b>toolbar panes, aligned grids</div>
+  <div class="step"><span class="n">4</span><b>Linux</b>pages, titled groups</div>
+  <div class="step"><span class="n">5</span><b>Help</b>English, then every language</div>
+  <div class="step"><span class="n">6</span><b>Tests</b>SCENARIO, three UI tests, feature map, screenshots</div>
+  <div class="step"><span class="n">7</span><b>UX review</b>every page, three platforms, long languages</div>
+</div>
+
+<h2>Decisions for the product owner</h2>
+<ol class="dec">
+  <li><b>Three pages or four</b> (Sending on its own). <span class="rec">Recommended: three</span>; a page of one control looks unfinished. Sending moves out when it gets a second option.</li>
+  <li><b>Page names.</b> <span class="rec">Recommended: General, Reading, Downloading</span>; "Storage" is the alternative for the third.</li>
+  <li><b>Make Default Mail App in settings too.</b> <span class="rec">Recommended: yes</span>, in General, and still in Tools.</li>
+  <li><b>Apply on Windows.</b> <span class="rec">Recommended: yes</span>, as Outlook Express's Options.</li>
+  <li><b>Generate the structure from core/settings.toml, or hand-build it.</b> <span class="rec">Recommended: generate</span>; it is what keeps the three orders together.</li>
+  <li><b>One id for notify, language and restart words on all three.</b> <span class="rec">Recommended: yes</span>; Linux's "Notify of new mail" becomes "Notify me when new mail arrives".</li>
+  <li><b>Mac: "Check for updates automatically" in General.</b> <span class="rec">Recommended: yes, later</span>; bound to Sparkle, one new id.</li>
+</ol>
+</main>
+</body>
+</html>

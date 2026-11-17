@@ -162,12 +162,8 @@ gtk-nothing-yet = Zatím nic.
 ## Preferences
 
 gtk-preferences = Předvolby
-gtk-language = Jazyk
-gtk-language-subtitle = Jazyk aplikace a nápovědy
-gtk-new-mail-group = Nová pošta
-gtk-notify-new-mail = Upozorňovat na novou poštu
-gtk-notify-subtitle = Upozornění, když přijdou nové zprávy, zatímco je okno na pozadí
-gtk-restart-to-change = Inbox Classic se pro změnu jazyka restartuje.
+# review: changed
+gtk-notify-subtitle = Jen když je Inbox Classic na pozadí
 
 ## The desktop entry and the page of the software stores
 

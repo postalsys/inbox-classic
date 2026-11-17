@@ -341,7 +341,7 @@ private final class SetupExportWindow: NSObject {
 
         cancelButton = keyButton(Text.uiCancel.text, self, #selector(cancelled), "setup.cancel")
         cancelButton.keyEquivalent = "\u{1b}"
-        exportButton = keyButton(Text.uiSetupExportButton.text.replacingOccurrences(of: "...", with: "\u{2026}"), self,
+        exportButton = keyButton(Text.uiSetupExportButton.opens, self,
                                  #selector(exportClicked), "setup.export.ok")
         exportButton.keyEquivalent = "\r"
         let buttons = buttonRow([cancelButton, exportButton], help: "setup")

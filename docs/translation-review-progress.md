@@ -16,27 +16,28 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Finnish is complete: 1,340 catalog entries and all 52 help topics reviewed, with 174 catalog value
-  improvements. All 168 late rollback messages are reviewed across 28 languages, along with the 11
-  shared count phrases they depend on in the remaining initial-review languages. The fresh upstream audit
-  found no further additions at that checkpoint. Croatian app.ftl (626 entries) and the shared Windows
-  Save As button are now reviewed, with 74 improved values. FIRST integrate new upstream `bd4a2bd1`:
-  settings-page changes affect all 28 languages (16 new, 13 removed and 11 changed IDs per language,
-  plus 11 help topics each). The exact delta is in state under `source_changes_pending_integration`.
-  Preserve prior edits and reopen affected reviewed entries. Then resume Croatian core.ftl (448 entries);
-  its current checkout has 703 catalog entries and 52 help topics remaining before source integration.
-  Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. The notification-context followup is complete across all 17 previously reviewed languages:
-  all 32 queued topics corrected, with Finnish handled earlier. Apply the glossary context note to the
-  remaining initial reviews. Followup topics are separate from initial-scope totals.
-  The extended mnemonic followup is complete: 44 actual menu/dialog scopes pass across all 17 languages
-  with reviewed catalogs. Use the expanded scopes for remaining languages; exact definitions are in state.
-  Upstream master `46b938a7` is integrated at `b4dbd1e3`, including the new rollback drafts.
-  Greek’s original scope is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. The logo-cache and
-  attachment-reminder context followups are complete. Eleven languages still need their initial reviews. All 84 late list-loading labels and 168 rollback messages are reviewed.
-  Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
-  Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
-  The persistent-logo-cache followup is now complete: 42 help topics checked (37 changed, five retained)
-  and 14 already-reviewed settings descriptions corrected. These re-reviews are counted separately.
+- Upstream settings pages at `bd4a2bd1` are now integrated after Croatian app checkpoint `580d74a0`.
+  FIRST review the late settings batch in de/es/et/fr: each has 27 catalog entries (24 app, one Linux,
+  two Mac) and 11 help topics pending. Then process nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and
+  Croatian app before returning to the remaining initial reviews. Exact source IDs/topics are in state.
+- The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
+  each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
+  Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
+  32,440 catalog entries and 1,292 help topics; 14,505 entries and 759 topics are currently pending.
+- The 13 completed new-language initial reviews and round-1 languages now have this late work pending.
+  Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
+  one Windows button were reviewed with 74 improvements; its new settings entries remain pending.
+  Croatian core.ftl has 448 pending entries. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
+- All 168 rollback messages and 84 loading labels remain reviewed. Earlier logo-cache, attachment-reminder
+  and watched-notification followups remain preserved. Use their verified context in new reviews.
+- The three settings pages replace the former single Options mnemonic scope: use 46 actual scopes.
+  They pass across the 18 languages with reviewed app catalogs; all three settings-page scopes pass
+  across all 28 languages. This is structural validation, not linguistic review of the new drafts.
+- Check the new Settings help against Windows behavior: Cancel discards uncommitted local settings and
+  trusted-sender removals, but cannot undo a default-app choice in external Windows Settings. The English
+  source incorrectly promises that it can; the context note is in state and the glossary.
+- The isolated offline pe-ffi build passed in 9.41 seconds. All 76 imported implementation/generated
+  paths match upstream. Structural checks, inventory and hashes pass; no test suite was run.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
   not yet on `master` or `origin/master`. They are included in the isolated review checkout;
@@ -44,7 +45,8 @@ Commit completed batches regularly and preserve an exact resume point.
   The translation review edits remain on the isolated review branch.
   This adds 6,655 catalog entries and 260 help topics: scope after that addition was 32,008 entries and 1,252 topics. The later loading labels add 84 entries,
   bringing that scope to 32,092 entries and 1,252 topics. The 168 later rollback messages increase
-  the current scope to 32,260 entries and 1,252 topics.
+  that scope to 32,260 entries and 1,252 topics. The settings integration has a net increase of
+  180 catalog entries and 40 help topics, bringing the current scope to 32,440 entries and 1,292 topics.
   The state records exact inventories and the source commit. Recheck the branch and master for later edits.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
 
@@ -850,9 +852,32 @@ and help-topic inventory. Integrate them next, preserve review corrections, and 
 content against the new settings layouts. The --since-start check reports zero newly pending strings in the
 current checkout, which does not include this unmerged upstream delta.
 
-Current-checkout totals: 18,257 catalog entries and 680 help pages reviewed; 2,887 catalog values improved.
-Remaining: 14,003 catalog entries and 572 help pages, before incorporating the recorded settings delta.
-Earlier context followups are complete. `REVIEWED` remains unchanged until the full round is complete.
+### Settings source integrated; affected work reopened
+
+Integrated `bd4a2bd1` into the isolated review branch, resolving 182 translation/help conflicts. All unchanged
+reviewed catalog values and the prose of ten help topics per language were retained; their settings paths now
+use the new `data-settings` control. The expanded Settings topic retains reviewed blocks where unchanged or
+extended, with new/reworked blocks left as drafts. Preserved notification conditions and logo-cache corrections.
+The sender-image subtitle retains the reviewed wording and is reopened for the new column-layout context.
+
+Across 28 languages, 448 new IDs are pending, 364 obsolete platform IDs were removed, and 308 changed IDs
+are pending. This reopened 197 completed entries. All 308 affected help topics are pending, reopening 187.
+The round's net scope grows by 180 catalog entries and 40 help topics; exact inventories explain round-1
+items entering this round, and historical removed/reopened reviews remain recorded.
+
+All 28 language IDs, full variable sets, access-key counts, help topics and pending marks reconcile. Every help
+control and settings-page reference resolves. Static check-language has only 23,796 deliberately removed-mark
+diagnostics; upstream fixed the seven former es/fr parser false positives. All three settings-page access-key
+scopes pass across 28 languages; all 46 actual scopes pass in the 18 languages with reviewed app catalogs.
+The dedicated offline pe-ffi build passed (9.41 seconds), and all 76 imported implementation/generated paths
+match upstream. Completed/source hashes reconcile (17,983 messages and 7,311 changed help lines). No tests run.
+
+Review the settings translations and 11 topics in de/es/et/fr next. Correct the Windows Cancel/default-app
+source claim using the new glossary context note. The previous Croatian checkpoint is `580d74a0`.
+
+Current totals: 17,935 catalog entries and 533 help topics completed in the active scope; 2,887 historical
+catalog value improvements. Remaining: 14,505 catalog entries and 759 help topics. Earlier context followups
+are preserved; the new settings-context review is pending. `REVIEWED` remains unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

@@ -174,14 +174,6 @@ win-edit = &Rediģēt...
 ## Options
 
 # review: new
-win-options-language-label = &Rādīt Inbox Classic šajā valodā:
-# review: new
-win-options-restart-note = Restartējiet Inbox Classic, lai mainītu valodu.
-# review: new
-win-options-notify = &Paziņot, kad pienāk jauns pasts
-# review: new
-win-restart-ask = Pēc restartēšanas Inbox Classic būs šajā valodā: { $language }. Restartēt tūlīt?
-# review: new
 win-folders-hide = Paslēpt mapju sarakstu
 # review: new
 win-folders-pin = Rādīt mapju sarakstu blakus ziņojumiem

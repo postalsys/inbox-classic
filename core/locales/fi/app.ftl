@@ -381,6 +381,34 @@ ui-sign-in-apps-intro = Kirjautumissovelluksilla voit kirjautua tileille selaime
 ui-col-issuer = Myöntäjä
 ui-col-used-by = Tilit
 ui-options-system-default = Järjestelmän oletus ({ $language })
+# review: new
+ui-settings-general = Yleiset
+# review: new
+ui-settings-reading = Lukeminen
+# review: new
+ui-settings-new-mail = Uusi posti
+# review: new
+ui-settings-sending = Lähettäminen
+# review: new
+ui-settings-default-apps = Oletussovellukset
+# review: new
+ui-settings-message-list = Viestiluettelo
+# review: new
+ui-settings-messages = Viestit
+# review: new
+ui-settings-language = Kieli
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Käytä
+# review: new
+ui-language-label = Ki&eli:
+# review: new
+ui-restart-note = Kieli vaihtuu, kun Inbox Classic käynnistetään uudelleen.
+# review: new
+ui-restart-ask = Inbox Classic näytetään kielellä { $language }, kun se käynnistyy uudelleen. Käynnistetäänkö uudelleen nyt?
+# review: new
+ui-notify-new-mail = &Ilmoita, kun uutta postia saapuu
 ui-new-folder-title = Uusi kansio
 ui-rename-folder-title = Nimeä kansio uudelleen
 ui-delete-folder-question = Poistetaanko kansio ”{ $folder }” viesteineen ja sen sisältämine kansioineen? Se poistetaan myös palvelimelta.
@@ -545,23 +573,28 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Osoitekirjaa ei voitu tallentaa: { $reason }
 ui-code-copied = Koodi kopioitu
-ui-codes-in-notifications = Näytä kirjautumiskoodit uuden postin ilmoituksissa
+# review: changed
+ui-codes-in-notifications = &Näytä kirjautumiskoodit uuden postin ilmoituksissa
 ui-tool-unread-only = Lukemattomat
 ui-no-unread = Täällä ei ole lukemattomia viestejä.
 ui-pictures-always-sender = Lataa aina kuvat lähettäjältä { $sender }
 ui-pictures-always-domain = Lataa aina kuvat kaikilta verkkotunnuksesta { $domain }
 ui-pictures-unconfirmed = Lähettäjän verkkotunnusta ({ $domain }) ei voitu vahvistaa, joten tämän viestin kuvia ei ladata automaattisesti.
-ui-pictures-always-option = Lataa kuvat kaikissa viesteissä
+# review: changed
+ui-pictures-always-option = &Lataa kuvat kaikissa viesteissä
 ui-pictures-always-warning = Lähettäjät voivat silloin nähdä, milloin luet heidän viestinsä.
 ui-protection-details = &Tiedot...
 ui-protection-details-title = Suojauksen tiedot
 ui-download-heading = Lataaminen
-ui-download-ahead = Lataa viestit etukäteen:
+# review: changed
+ui-download-ahead = &Lataa viestit etukäteen:
 ui-download-ahead-recent = Uusimmat viestit, enintään 1 Mt kukin
 ui-download-ahead-all = Kaikki viestit
 ui-download-ahead-never = Vain avattaessa
-ui-download-limit = Tallennustilan raja tiliä kohden:
-ui-send-delay = Viive ennen lähettämistä:
+# review: changed
+ui-download-limit = &Tallennustilan raja tiliä kohden:
+# review: changed
+ui-send-delay = &Viive ennen lähettämistä:
 ui-send-delay-note = Kun viesti odottaa lähtöä, voit perua lähetyksen Kumoa-toiminnolla.
 ui-dark-messages = Näytä viestit tummalla taustalla, kun järjestelmä on tummassa tilassa
 ui-sending-in = Lähetetään { $subject }, { $count ->
@@ -573,17 +606,20 @@ ui-send-too-late = Viesti { $subject } on jo lähetetty.
 ui-outbox-status-undo = Lähetetään klo { $time }
 ui-download-note = Etukäteen ladatut viestit avautuvat heti. Kun tallennustilan raja ylittyy, vanhimmat paikalliset kopiot poistetaan ja ladataan uudelleen, kun avaat ne.
 ui-attachment-downloading = Tämän viestin lataus on kesken. Yritä uudelleen, kun lataus on valmis.
-ui-trusted-senders-button = Luotetut lähettäjät...
+# review: changed
+ui-trusted-senders-button = L&uotetut lähettäjät...
 ui-trusted-senders-title = Luotetut lähettäjät
 ui-trusted-senders-note = Näiden lähettäjien viestien kuvat ladataan automaattisesti, kun postipalveluntarjoajasi vahvistaa lähettäjän verkkotunnuksen.
 ui-trusted-everyone-at = Kaikki verkkotunnuksessa { $domain }
 ui-trusted-senders-empty = Luotettuja lähettäjiä ei ole vielä lisätty.
-ui-eml-default = Avaa .eml-tiedostot Inbox Classicilla
+# review: changed
+ui-eml-default = &Avaa .eml-tiedostot Inbox Classicilla
 ui-eml-default-done = Inbox Classic avaa nyt .eml-tiedostot.
 ui-eml-default-failed = Inbox Classicia ei voitu asettaa .eml-tiedostojen oletussovellukseksi: { $reason }
 ui-folders = Kansiot
 ui-sorted-by = Lajitteluperuste: { $field }
-ui-layout-label = Asettelu:
+# review: changed
+ui-layout-label = &Asettelu:
 ui-columns-note = Ikkuna on tarpeeksi leveä sarakeasettelulle. Voit vaihtaa asettelua kohdassa Näytä > Asettelu.
 ui-row-unread = Lukematon
 ui-row-flagged = Liputettu
@@ -592,7 +628,9 @@ ui-row-messages = { $count ->
     [one] { $count } viesti
    *[other] { $count } viestiä
 }
-ui-list-pictures = Näytä lähettäjien kuvat viestiluettelossa
+# review: changed
+ui-list-pictures = &Näytä lähettäjien kuvat viestiluettelossa
+# review: changed
 ui-list-pictures-note = Näyttää yritysten logot tai osoitekirjan kuvat, kun lähettäjän verkkotunnus on vahvistettu. Jos kuvaa ei ole, näytetään nimikirjaimet. Logot tallennetaan ja niitä käytetään uudelleen eri viesteissä.
 ui-card-picture = Kuva:
 ui-card-picture-choose = &Valitse...

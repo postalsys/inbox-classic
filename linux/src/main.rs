@@ -47,6 +47,10 @@ mod webview;
 #[rustfmt::skip]
 #[path = "generated/commands.rs"]
 mod commands;
+// the settings window of core/settings.toml, as Preferences reads it
+#[rustfmt::skip]
+#[path = "generated/settings_pages.rs"]
+mod settings_pages;
 
 use std::path::PathBuf;
 

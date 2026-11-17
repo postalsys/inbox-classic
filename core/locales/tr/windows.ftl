@@ -107,10 +107,6 @@ win-edit = &Düzenle...
 
 ## Seçenekler
 
-win-options-language-label = Inbox Classic'in &dili:
-win-options-restart-note = Dili değiştirmek için Inbox Classic'i yeniden başlatın.
-win-options-notify = Yeni posta geldiğinde &bildir
-win-restart-ask = Yeniden başlattığınızda Inbox Classic şu dili kullanacak: { $language }. Şimdi yeniden başlatılsın mı?
 win-folders-hide = Klasör listesini gizle
 win-folders-pin = Klasör listesini iletilerin yanında tut
 win-folders-show = Klasörleri göster

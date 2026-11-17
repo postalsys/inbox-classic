@@ -24,10 +24,10 @@ mac-no-updates = Αυτή η έκδοση του Inbox Classic δεν υποστ
 ## Settings
 
 mac-settings-title = Ρυθμίσεις
-mac-language-label = Γλώσσα:
-mac-restart-hint = Επανεκκινήστε το Inbox Classic για να αλλάξει η γλώσσα.
-mac-notify-new-mail = Ειδοποίηση όταν φτάνει νέα αλληλογραφία
-mac-restart-question = Να γίνει τώρα επανεκκίνηση του Inbox Classic για να αλλάξει η γλώσσα;
+# review: new
+mac-check-updates-automatically = Αυτόματος έλεγχος για ενημερώσεις
+# review: new
+mac-settings-updates = Ενημερώσεις
 
 ## Dialogs
 

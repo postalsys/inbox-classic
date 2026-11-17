@@ -163,13 +163,8 @@ gtk-nothing-yet = Henüz etkinlik yok.
 ## Tercihler
 
 gtk-preferences = Tercihler
-gtk-language = Dil
-gtk-language-subtitle = Uygulamanın ve yardımın dili
-gtk-new-mail-group = Yeni posta
-# Tercihler'de yeni posta bildirimini açan satır, GNOME'un yazdığı gibi yalnızca ilk sözcük büyük harfle
-gtk-notify-new-mail = Yeni postayı bildir
-gtk-notify-subtitle = Pencere arka plandayken gelen yeni iletiler için bildirim gösterir
-gtk-restart-to-change = Dil değişikliği için Inbox Classic yeniden başlatılır.
+# review: changed
+gtk-notify-subtitle = Yalnızca Inbox Classic arka plandayken
 
 ## Masaüstü girdisi ve yazılım mağazalarının sayfası
 

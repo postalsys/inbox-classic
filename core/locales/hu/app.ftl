@@ -738,6 +738,34 @@ ui-col-used-by = Használja
 # review: new
 ui-options-system-default = A rendszer alapértelmezése ({ $language })
 # review: new
+ui-settings-general = Általános
+# review: new
+ui-settings-reading = Olvasás
+# review: new
+ui-settings-new-mail = Új levelek
+# review: new
+ui-settings-sending = Küldés
+# review: new
+ui-settings-default-apps = Alapértelmezett alkalmazások
+# review: new
+ui-settings-message-list = Üzenetlista
+# review: new
+ui-settings-messages = Üzenetek
+# review: new
+ui-settings-language = Nyelv
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = Al&kalmaz
+# review: new
+ui-language-label = &Nyelv:
+# review: new
+ui-restart-note = A nyelv módosításához indítsa újra az Inbox Classicot.
+# review: new
+ui-restart-ask = Az Inbox Classic újraindítás után ezen a nyelven jelenik meg: { $language }. Újraindítja most?
+# review: new
+ui-notify-new-mail = É&rtesítés új levél érkezésekor
+# review: new
 ui-new-folder-title = Új mappa
 # review: new
 ui-rename-folder-title = Mappa átnevezése
@@ -1041,8 +1069,8 @@ ui-book-exported = { $count ->
 ui-book-not-exported = A címjegyzéket nem sikerült menteni: { $reason }
 # review: new
 ui-code-copied = A kód vágólapra másolva
-# review: new
-ui-codes-in-notifications = Bejelentkezési kódok megjelenítése az új levelek értesítéseiben
+# review: changed
+ui-codes-in-notifications = &Bejelentkezési kódok megjelenítése az új levelek értesítéseiben
 # review: new
 ui-tool-unread-only = Olvasatlan
 # review: new
@@ -1053,8 +1081,8 @@ ui-pictures-always-sender = Mindig töltse le a képeket ettől a feladótól: {
 ui-pictures-always-domain = Mindig töltse le a képeket mindenkitől ebből a tartományból: { $domain }
 # review: new
 ui-pictures-unconfirmed = A feladó tartományát ({ $domain }) nem sikerült ellenőrizni, ezért az üzenet képei nem töltődnek le automatikusan.
-# review: new
-ui-pictures-always-option = Képek letöltése minden üzenetben
+# review: changed
+ui-pictures-always-option = Képek &letöltése minden üzenetben
 # review: new
 ui-pictures-always-warning = Így a feladók láthatják, mikor olvassa el az üzeneteiket.
 # review: new
@@ -1063,18 +1091,18 @@ ui-protection-details = &Részletek...
 ui-protection-details-title = Biztonsági részletek
 # review: new
 ui-download-heading = Letöltés
-# review: new
-ui-download-ahead = Üzenetek letöltése előre:
+# review: changed
+ui-download-ahead = &Üzenetek letöltése előre:
 # review: new
 ui-download-ahead-recent = Legutóbbi üzenetek, egyenként legfeljebb 1 MB
 # review: new
 ui-download-ahead-all = Minden üzenet
 # review: new
 ui-download-ahead-never = Csak megnyitáskor
-# review: new
-ui-download-limit = Tárhelykorlát fiókonként:
-# review: new
-ui-send-delay = Várakozás küldés előtt:
+# review: changed
+ui-download-limit = &Tárhelykorlát fiókonként:
+# review: changed
+ui-send-delay = &Várakozás küldés előtt:
 # review: new
 ui-send-delay-note = Amíg egy üzenet küldésre vár, a küldést a Visszavonással megszakíthatja.
 # review: new
@@ -1094,8 +1122,8 @@ ui-outbox-status-undo = Küldés ekkor: { $time }
 ui-download-note = Az előre letöltött üzenetek azonnal megnyílnak. Ha a tárhelykorlát betelik, a legrégebbi helyi másolatok törlődnek, és megnyitáskor újra letöltődnek.
 # review: new
 ui-attachment-downloading = Az üzenet letöltése még nem fejeződött be. Próbálja újra, amikor a letöltés kész.
-# review: new
-ui-trusted-senders-button = Megbízható feladók...
+# review: changed
+ui-trusted-senders-button = &Megbízható feladók...
 # review: new
 ui-trusted-senders-title = Megbízható feladók
 # review: new
@@ -1104,8 +1132,8 @@ ui-trusted-senders-note = Az ezektől a feladóktól érkező üzenetek képei a
 ui-trusted-everyone-at = Mindenki ebből a tartományból: { $domain }
 # review: new
 ui-trusted-senders-empty = Még nincs megbízható feladó.
-# review: new
-ui-eml-default = .eml fájlok megnyitása az Inbox Classickal
+# review: changed
+ui-eml-default = .&eml fájlok megnyitása az Inbox Classickal
 # review: new
 ui-eml-default-done = Az Inbox Classic mostantól megnyitja az .eml fájlokat.
 # review: new
@@ -1114,8 +1142,8 @@ ui-eml-default-failed = Az Inbox Classicot nem sikerült az .eml fájlok alapér
 ui-folders = Mappák
 # review: new
 ui-sorted-by = Rendezés: { $field }
-# review: new
-ui-layout-label = Elrendezés:
+# review: changed
+ui-layout-label = &Elrendezés:
 # review: new
 ui-columns-note = Az ablak elég széles az oszlopos elrendezéshez. Az elrendezést a Nézet > Elrendezés menüpontban módosíthatja.
 # review: new
@@ -1129,9 +1157,9 @@ ui-row-messages = { $count ->
     [one] { $count } üzenet
    *[other] { $count } üzenet
 }
-# review: new
-ui-list-pictures = A feladók képének megjelenítése az üzenetlistában
-# review: new
+# review: changed
+ui-list-pictures = &A feladók képének megjelenítése az üzenetlistában
+# review: changed
 ui-list-pictures-note = Az ellenőrzött feladóknál márkalogót vagy a Címjegyzékben lévő képet mutat, ha nincs kép, akkor monogramot. A logók márkánként egyszer töltődnek le, nem üzenetenként.
 # review: new
 ui-card-picture = Kép:

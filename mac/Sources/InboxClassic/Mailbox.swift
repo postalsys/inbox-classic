@@ -258,7 +258,7 @@ public final class Mailbox: NSObject {
         searchBar.clicked = { [weak self] in self?.clearFind() }
         searchBar.setAccessibilityIdentifier("search.bar")
         // a rule that sorts what the search finds as it arrives
-        let createRule = NSButton(title: Text.uiCreateRule.text.replacingOccurrences(of: "...", with: "…"), target: self, action: #selector(createRuleFromSearch))
+        let createRule = NSButton(title: Text.uiCreateRule.opens, target: self, action: #selector(createRuleFromSearch))
         createRule.bezelStyle = .push
         createRule.controlSize = .small
         createRule.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
@@ -1989,7 +1989,7 @@ public final class Mailbox: NSObject {
             nil,
         ] + moveItems(account) + [
             nil,
-            (Text.uiAccountProperties.text.replacingOccurrences(of: "...", with: "…"), #selector(accountMenuProperties(_:)), true),
+            (Text.uiAccountProperties.opens, #selector(accountMenuProperties(_:)), true),
         ]
         addItems(items, to: menu, account: account)
         return menu

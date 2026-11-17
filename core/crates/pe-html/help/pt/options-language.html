@@ -1,15 +1,31 @@
-<h1>Idioma e definições</h1>
-<p class="summary">Escolha o idioma do Inbox Classic e a apresentação do correio e as notificações de novas mensagens.</p>
-<p>Escolha <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
+<!--review--><h1>Definições</h1>
+<p class="summary">Escolha o idioma do Inbox Classic, a forma como mostra e anuncia o seu correio e o que transfere antecipadamente.</p>
+<p>Escolha <b data-settings=""></b>. As definições estão divididas em três páginas: <b data-text="ui-settings-general"></b>, <b data-text="ui-settings-reading"></b> e <b data-text="ui-download-heading"></b>.<!--os:windows--> Clique em <b data-text="ui-ok"></b> para manter as alterações, ou em <b data-text="ui-apply"></b> para as manter e deixar a janela aberta. <b data-text="ui-cancel"></b> anula todas as alterações ainda não aplicadas, incluindo os remetentes fidedignos que removeu e a aplicação escolhida para os ficheiros .eml.<!--/os--><!--os:mac,linux--> Cada alteração tem efeito imediato.<!--/os--></p>
+<h2><b data-text="ui-settings-general"></b></h2>
 <ul>
-    <li><!--os:windows--><b data-text="win-options-language-label"></b><!--/os--><!--os:mac--><b data-text="mac-language-label"></b><!--/os--><!--os:linux--><b data-text="gtk-language"></b><!--/os--> permite escolher o idioma das janelas e desta ajuda. Escolha o idioma do seu sistema, ou um dos idiomas da lista. Quando o Inbox Classic não tem o idioma do seu sistema, usa o inglês.</li>
-    <li><!--os:windows--><b data-text="win-options-notify"></b><!--/os--><!--os:mac--><b data-text="mac-notify-new-mail"></b><!--/os--><!--os:linux--><b data-text="gtk-notify-new-mail"></b><!--/os--> ativa ou desativa as notificações de correio novo.</li>
-    <li><b data-text="ui-group-by-conversation"></b> agrupa cada conversa, com as respetivas respostas, numa só linha.</li>
-    <li><b data-text="ui-codes-in-notifications"></b> mostra o código de uma mensagem de início de sessão na respetiva notificação.</li>
-    <li><b data-text="ui-layout-label"></b> permite escolher o esquema: automático, de acordo com a largura da janela, clássico ou em colunas. Consulte <a href="topic:layouts"></a>.</li>
-    <li><b data-text="ui-list-pictures"></b> mostra logótipos de marcas, imagens dos contactos e iniciais no esquema em colunas.</li>
+    <li><b data-text="ui-language-label"></b> escolhe o idioma das janelas e desta ajuda: o idioma do seu sistema, ou um dos idiomas da lista. Quando o Inbox Classic não tem o idioma do seu sistema, usa o inglês.</li>
+    <li><b data-text="ui-notify-new-mail"></b> mostra uma notificação quando chega correio novo. De início, está ativada.</li>
+    <li><b data-text="ui-codes-in-notifications"></b> mostra o código de uma mensagem de início de sessão na respetiva notificação. De início, está desativada, pois uma notificação pode ser lida com o ecrã bloqueado, e fica indisponível enquanto as notificações estiverem desativadas.</li>
+    <li><b data-text="ui-send-delay"></b> mantém na Caixa de Saída, durante alguns segundos, a mensagem que envia, para que ainda a possa cancelar com Anular. De início, são 10 segundos.</li>
+    <li><b data-text="cmd-default-app"></b> abre as ligações de e-mail no Inbox Classic, e <b data-text="ui-eml-default"></b> abre os ficheiros de mensagens. Consulte <a href="topic:default-mail-program"></a>.</li>
+    <!--os:mac--><li><b data-text="mac-check-updates-automatically"></b> procura de vez em quando uma nova versão do Inbox Classic. Consulte <a href="topic:updates"></a>.</li><!--/os-->
 </ul>
 <p>É necessário reiniciar o Inbox Classic para aplicar a mudança de idioma. Clique em <b data-text="ui-restart-now"></b>, ou em <b data-text="ui-restart-later"></b> para o mudar no próximo arranque.</p>
+<h2><b data-text="ui-settings-reading"></b></h2>
+<ul>
+    <li><b data-text="ui-layout-label"></b> permite escolher o esquema: automático, de acordo com a largura da janela, clássico ou em colunas. Consulte <a href="topic:layouts"></a>.</li>
+    <li><b data-text="ui-group-by-conversation"></b> agrupa cada conversa, com as respetivas respostas, numa só linha. De início, está ativada.</li>
+    <li><b data-text="ui-list-pictures"></b> mostra logótipos de marcas, imagens dos contactos e iniciais no esquema em colunas. De início, está ativada.</li>
+    <!--os:mac,linux--><li><b data-text="ui-dark-messages"></b> mostra as mensagens que lê e escreve num fundo escuro enquanto o sistema está no modo escuro. De início, está ativada.</li><!--/os-->
+    <li><b data-text="ui-pictures-always-option"></b> transfere as imagens de todas as mensagens. De início, está desativada, porque assim os remetentes podem saber quando lê as mensagens deles. Consulte <a href="topic:pictures-tracking"></a>.</li>
+    <li><b data-text="ui-trusted-senders-button"></b> lista os remetentes cujas imagens são sempre transferidas, e permite-lhe removê-los.</li>
+</ul>
+<h2><b data-text="ui-download-heading"></b></h2>
+<ul>
+    <li><b data-text="ui-download-ahead"></b> escolhe as mensagens transferidas antes de as abrir: de início, as mensagens recentes até 1 MB cada. Consulte <a href="topic:download-ahead"></a>.</li>
+    <li><b data-text="ui-download-limit"></b> limita o espaço ocupado pelas mensagens transferidas de cada conta. De início, é 1 GB.</li>
+</ul>
 <!--os:windows--><p>Na primeira instalação, o instalador pede que escolha um idioma e guarda-o como idioma da aplicação.</p><!--/os-->
 <!--os:mac--><p>Também pode escolher o idioma só para o Inbox Classic em <i>Definições do Sistema &gt; Geral &gt; Idioma e região &gt; Aplicações</i>.</p><!--/os-->
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:conversations"></a> <a href="topic:sign-in-codes"></a></nav>
+<!--/review-->

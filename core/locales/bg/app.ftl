@@ -381,6 +381,34 @@ ui-sign-in-apps-intro = Приложенията за влизане позво�
 ui-col-issuer = Издател
 ui-col-used-by = Използва се от
 ui-options-system-default = По подразбиране за системата ({ $language })
+# review: new
+ui-settings-general = Общи
+# review: new
+ui-settings-reading = Четене
+# review: new
+ui-settings-new-mail = Нова поща
+# review: new
+ui-settings-sending = Изпращане
+# review: new
+ui-settings-default-apps = Приложения по подразбиране
+# review: new
+ui-settings-message-list = Списък със съобщения
+# review: new
+ui-settings-messages = Съобщения
+# review: new
+ui-settings-language = Език
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Приложи
+# review: new
+ui-language-label = &Език:
+# review: new
+ui-restart-note = Рестартирайте Inbox Classic, за да смените езика.
+# review: new
+ui-restart-ask = Inbox Classic ще се покаже на { $language } след рестартиране. Да се рестартира ли сега?
+# review: new
+ui-notify-new-mail = &Уведомяване при пристигане на нова поща
 ui-new-folder-title = Нова папка
 ui-rename-folder-title = Преименуване на папка
 ui-delete-folder-question = Да се изтрие ли папката „{ $folder }“ заедно със съобщенията и папките в нея? Тя се изтрива и на сървъра.
@@ -545,23 +573,28 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Адресната книга не можа да бъде запазена: { $reason }
 ui-code-copied = Кодът е копиран
-ui-codes-in-notifications = Показване на кодовете за влизане в известията за нова поща
+# review: changed
+ui-codes-in-notifications = Показва&не на кодовете за влизане в известията за нова поща
 ui-tool-unread-only = Непрочетени
 ui-no-unread = Тук няма непрочетени съобщения.
 ui-pictures-always-sender = Винаги да се изтеглят изображенията от { $sender }
 ui-pictures-always-domain = Винаги да се изтеглят изображенията от всички в { $domain }
 ui-pictures-unconfirmed = Домейнът на подателя ({ $domain }) не можа да бъде потвърден, затова изображенията в това съобщение не се изтеглят автоматично.
-ui-pictures-always-option = Изтегляне на изображенията във всички съобщения
+# review: changed
+ui-pictures-always-option = &Изтегляне на изображенията във всички съобщения
 ui-pictures-always-warning = Тогава подателите могат да виждат кога четете съобщенията им.
 ui-protection-details = &Подробности...
 ui-protection-details-title = Подробности за защитата
 ui-download-heading = Изтегляне
-ui-download-ahead = Предварително изтегляне на съобщенията:
+# review: changed
+ui-download-ahead = Предвар&ително изтегляне на съобщенията:
 ui-download-ahead-recent = Последните съобщения до 1 МБ всяко
 ui-download-ahead-all = Всички съобщения
 ui-download-ahead-never = Само при отваряне
-ui-download-limit = Ограничение на мястото за акаунт:
-ui-send-delay = Забавяне преди изпращане:
+# review: changed
+ui-download-limit = &Ограничение на мястото за акаунт:
+# review: changed
+ui-send-delay = Забавяне пред&и изпращане:
 ui-send-delay-note = Докато съобщението чака да бъде изпратено, можете да откажете изпращането с „Отмяна“.
 ui-dark-messages = Показване на съобщенията на тъмен фон, когато системата е в тъмен режим
 ui-sending-in = { $subject }: изпращане след { $count ->
@@ -573,17 +606,20 @@ ui-send-too-late = Съобщението вече е изпратено: { $sub
 ui-outbox-status-undo = Ще бъде изпратено в { $time }
 ui-download-note = Предварително изтеглените съобщения се отварят веднага. Когато ограничението на мястото бъде надхвърлено, най-старите локални копия се премахват и се изтеглят отново, когато ги отворите.
 ui-attachment-downloading = Това съобщение не е изтеглено докрай. Опитайте отново, когато изтеглянето завърши.
-ui-trusted-senders-button = Доверени податели...
+# review: changed
+ui-trusted-senders-button = &Доверени податели...
 ui-trusted-senders-title = Доверени податели
 ui-trusted-senders-note = Изображенията в съобщенията от тези податели се изтеглят автоматично, когато доставчикът на пощата ви потвърди домейна на подателя.
 ui-trusted-everyone-at = Всички в { $domain }
 ui-trusted-senders-empty = Все още не са добавени доверени податели.
-ui-eml-default = Отваряне на файловете .eml с Inbox Classic
+# review: changed
+ui-eml-default = &Отваряне на файловете .eml с Inbox Classic
 ui-eml-default-done = Inbox Classic вече отваря файловете .eml.
 ui-eml-default-failed = Inbox Classic не можа да бъде зададена като програма по подразбиране за файловете .eml: { $reason }
 ui-folders = Папки
 ui-sorted-by = Сортиране по: { $field }
-ui-layout-label = Оформление:
+# review: changed
+ui-layout-label = &Оформление:
 ui-columns-note = Прозорецът е достатъчно широк за оформление с колони. Можете да промените оформлението от Изглед > Оформление.
 ui-row-unread = Непрочетено
 ui-row-flagged = С флаг
@@ -592,7 +628,9 @@ ui-row-messages = { $count ->
     [one] { $count } съобщение
    *[other] { $count } съобщения
 }
-ui-list-pictures = Показване на снимките на подателите в списъка със съобщения
+# review: changed
+ui-list-pictures = Показва&не на снимките на подателите в списъка със съобщения
+# review: changed
 ui-list-pictures-note = Когато домейнът на подателя е потвърден, се показва логото на марката или снимката от адресната книга. Ако няма изображение, се показват инициали. Изтеглените лога се запазват и използват повторно за различни съобщения.
 ui-card-picture = Снимка:
 ui-card-picture-choose = &Избиране...

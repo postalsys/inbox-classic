@@ -380,6 +380,34 @@ ui-sign-in-apps-intro = Les aplicacions d’inici de sessió permeten accedir al
 ui-col-issuer = Emissor
 ui-col-used-by = Utilitzada per
 ui-options-system-default = Predeterminat del sistema ({ $language })
+# review: new
+ui-settings-general = General
+# review: new
+ui-settings-reading = Lectura
+# review: new
+ui-settings-new-mail = Correu nou
+# review: new
+ui-settings-sending = Enviament
+# review: new
+ui-settings-default-apps = Aplicacions per defecte
+# review: new
+ui-settings-message-list = Llista de missatges
+# review: new
+ui-settings-messages = Missatges
+# review: new
+ui-settings-language = Llengua
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Aplica
+# review: new
+ui-language-label = &Llengua:
+# review: new
+ui-restart-note = Reinicieu Inbox Classic per canviar la llengua.
+# review: new
+ui-restart-ask = Inbox Classic es mostrarà en { $language } quan es reiniciï. Voleu reiniciar-lo ara?
+# review: new
+ui-notify-new-mail = &Notifica’m quan arribi correu nou
 ui-new-folder-title = Carpeta nova
 ui-rename-folder-title = Canvia el nom de la carpeta
 ui-delete-folder-question = Voleu suprimir la carpeta «{ $folder }» amb tots els missatges i subcarpetes que conté? També se suprimirà del servidor.
@@ -544,23 +572,28 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = No s’ha pogut desar la llibreta d’adreces: { $reason }
 ui-code-copied = S’ha copiat el codi
-ui-codes-in-notifications = Mostra els codis d’inici de sessió a les notificacions de correu nou
+# review: changed
+ui-codes-in-notifications = &Mostra els codis d’inici de sessió a les notificacions de correu nou
 ui-tool-unread-only = No llegits
 ui-no-unread = Aquí no hi ha cap missatge sense llegir.
 ui-pictures-always-sender = Baixa sempre les imatges de { $sender }
 ui-pictures-always-domain = Baixa sempre les imatges de tothom del domini { $domain }
 ui-pictures-unconfirmed = No s’ha pogut verificar el domini del remitent ({ $domain }), per això les imatges d’aquest missatge no es baixen automàticament.
-ui-pictures-always-option = Baixa les imatges de tots els missatges
+# review: changed
+ui-pictures-always-option = &Baixa les imatges de tots els missatges
 ui-pictures-always-warning = Aquesta opció pot permetre que els remitents sàpiguen quan llegiu els seus missatges.
 ui-protection-details = &Detalls...
 ui-protection-details-title = Detalls de seguretat
 ui-download-heading = Baixada
-ui-download-ahead = Baixa els missatges per avançat:
+# review: changed
+ui-download-ahead = &Baixa els missatges per avançat:
 ui-download-ahead-recent = Missatges recents de fins a 1 MB cadascun
 ui-download-ahead-all = Tots els missatges
 ui-download-ahead-never = Només quan s’obren
-ui-download-limit = Límit d’emmagatzematge per compte:
-ui-send-delay = Temps d’espera abans d’enviar:
+# review: changed
+ui-download-limit = &Límit d’emmagatzematge per compte:
+# review: changed
+ui-send-delay = &Temps d’espera abans d’enviar:
 ui-send-delay-note = Mentre un missatge espera per ser enviat, podeu cancel·lar l’enviament amb Desfés.
 ui-dark-messages = Mostra els missatges amb fons fosc quan el sistema és en mode fosc
 ui-sending-in = S’enviarà { $subject } d’aquí a { $count ->
@@ -572,17 +605,20 @@ ui-send-too-late = { $subject } ja s’ha enviat.
 ui-outbox-status-undo = S’enviarà a les { $time }
 ui-download-note = Els missatges baixats per avançat s’obren immediatament. Quan se supera el límit d’emmagatzematge, s’eliminen les còpies locals més antigues. Els missatges es conserven al servidor i es tornen a baixar quan els obriu.
 ui-attachment-downloading = Aquest missatge no s’ha acabat de baixar. Torneu-ho a provar quan s’hagi completat la baixada.
-ui-trusted-senders-button = Remitents de confiança...
+# review: changed
+ui-trusted-senders-button = Remitents de &confiança...
 ui-trusted-senders-title = Remitents de confiança
 ui-trusted-senders-note = Les imatges dels missatges d’aquests remitents es baixen automàticament quan el vostre proveïdor de correu verifica el domini del remitent.
 ui-trusted-everyone-at = Tothom del domini { $domain }
 ui-trusted-senders-empty = Encara no s’ha afegit cap remitent de confiança.
-ui-eml-default = Obre els fitxers .eml amb Inbox Classic
+# review: changed
+ui-eml-default = &Obre els fitxers .eml amb Inbox Classic
 ui-eml-default-done = Ara Inbox Classic obre els fitxers .eml.
 ui-eml-default-failed = No s’ha pogut definir Inbox Classic com a aplicació predeterminada per als fitxers .eml: { $reason }
 ui-folders = Carpetes
 ui-sorted-by = Ordenat per: { $field }
-ui-layout-label = Disposició:
+# review: changed
+ui-layout-label = &Disposició:
 ui-columns-note = La finestra és prou ampla per a la disposició en columnes. Podeu canviar la disposició a Visualitza > Disposició.
 ui-row-unread = No llegit
 ui-row-flagged = Amb bandera
@@ -591,7 +627,9 @@ ui-row-messages = { $count ->
     [one] { $count } missatge
    *[other] { $count } missatges
 }
-ui-list-pictures = Mostra les imatges dels remitents a la llista de missatges
+# review: changed
+ui-list-pictures = &Mostra les imatges dels remitents a la llista de missatges
+# review: changed
 ui-list-pictures-note = Mostra logotips de marques o imatges de la Llibreta d’adreces quan es verifica el domini del remitent. Si no hi ha cap imatge, mostra les inicials. Els logotips baixats es desen i es reutilitzen en diversos missatges.
 ui-card-picture = Imatge:
 ui-card-picture-choose = &Tria...

@@ -108,10 +108,6 @@ win-edit = &Muokkaa...
 
 ## Options
 
-win-options-language-label = Inbox Classicin &kieli:
-win-options-restart-note = Kieli vaihtuu, kun Inbox Classic käynnistetään uudelleen.
-win-options-notify = &Ilmoita, kun uutta postia saapuu
-win-restart-ask = Inbox Classicin uusi kieli on { $language }. Otetaanko se käyttöön käynnistämällä sovellus uudelleen nyt?
 win-folders-hide = Piilota kansioluettelo
 win-folders-pin = Pidä kansioluettelo viestien vieressä
 win-folders-show = Näytä kansiot

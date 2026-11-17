@@ -443,6 +443,37 @@ pub fn rfc822(subject: &str, body: &str) -> String {
     )
 }
 
+/// A small deterministic generator (xorshift) for the tests that make their data at random: the same seed, the same
+/// data on every machine
+pub struct Rng(u64);
+
+impl Rng {
+    pub fn new(seed: u64) -> Rng {
+        Rng(seed | 1)
+    }
+
+    pub fn number(&mut self) -> u64 {
+        self.0 ^= self.0 << 13;
+        self.0 ^= self.0 >> 7;
+        self.0 ^= self.0 << 17;
+        self.0
+    }
+
+    /// A number below `n` (0 when `n` is 0)
+    pub fn below(&mut self, n: u64) -> u64 {
+        self.number() % n.max(1)
+    }
+
+    /// True `percent` times in a hundred
+    pub fn chance(&mut self, percent: u64) -> bool {
+        self.below(100) < percent
+    }
+
+    pub fn pick<'a, T>(&mut self, list: &'a [T]) -> &'a T {
+        &list[self.below(list.len() as u64) as usize]
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

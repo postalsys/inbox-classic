@@ -23,10 +23,10 @@ mac-no-updates = This version of Inbox Classic does not support automatic update
 ## Settings
 
 mac-settings-title = Settings
-mac-language-label = Language:
-mac-restart-hint = Restart Inbox Classic to change the language.
-mac-notify-new-mail = Notify me when new mail arrives
-mac-restart-question = Restart Inbox Classic now to change the language?
+# the Mac only: Sparkle's automatic check for a new version, in General
+mac-check-updates-automatically = Check for updates automatically
+# the title of that group, in the label column of the pane
+mac-settings-updates = Updates
 
 ## Dialogs
 

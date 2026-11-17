@@ -21,10 +21,10 @@ mac-no-updates = Diese Version von Inbox Classic unterstützt keine automatische
 ## Settings
 
 mac-settings-title = Einstellungen
-mac-language-label = Sprache:
-mac-restart-hint = Starten Sie Inbox Classic neu, um die Sprache zu ändern.
-mac-notify-new-mail = Bei neuen Nachrichten benachrichtigen
-mac-restart-question = Inbox Classic jetzt neu starten, um die Sprache zu wechseln?
+# review: new
+mac-check-updates-automatically = Automatisch nach Updates suchen
+# review: new
+mac-settings-updates = Updates
 
 ## Dialogs
 

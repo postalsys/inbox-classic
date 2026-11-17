@@ -107,10 +107,6 @@ win-edit = &Bearbeiten...
 
 ## Optionen
 
-win-options-language-label = &Sprache von Inbox Classic:
-win-options-restart-note = Die neue Sprache wird nach einem Neustart von Inbox Classic übernommen.
-win-options-notify = Bei neuer E-Mail &benachrichtigen
-win-restart-ask = Nach einem Neustart wird Inbox Classic auf { $language } angezeigt. Jetzt neu starten?
 win-folders-hide = Ordnerliste ausblenden
 win-folders-pin = Ordnerliste neben den Nachrichten anheften
 win-folders-show = Ordner anzeigen

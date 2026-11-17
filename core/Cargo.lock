@@ -2449,6 +2449,7 @@ dependencies = [
 name = "pe-store"
 version = "0.18.0"
 dependencies = [
+ "pe-testkit",
  "rusqlite",
 ]
 

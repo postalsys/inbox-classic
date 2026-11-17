@@ -108,10 +108,6 @@ win-edit = &Rediger...
 
 ## Options
 
-win-options-language-label = V&is Inbox Classic på:
-win-options-restart-note = Start Inbox Classic på nytt for å bytte språk.
-win-options-notify = &Varsle meg når det kommer ny e-post
-win-restart-ask = Inbox Classic vises på { $language } når programmet startes på nytt. Vil du starte på nytt nå?
 win-folders-hide = Skjul mappelisten
 win-folders-pin = Hold mappelisten ved siden av meldingene
 win-folders-show = Vis mappene

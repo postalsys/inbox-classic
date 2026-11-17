@@ -24,10 +24,10 @@ mac-no-updates = Tämä Inbox Classicin versio ei tue automaattisia päivityksi�
 ## Settings
 
 mac-settings-title = Asetukset
-mac-language-label = Kieli:
-mac-restart-hint = Kieli vaihtuu, kun Inbox Classic käynnistetään uudelleen.
-mac-notify-new-mail = Ilmoita, kun uutta postia saapuu
-mac-restart-question = Käynnistetäänkö Inbox Classic nyt uudelleen kielen vaihtamiseksi?
+# review: new
+mac-check-updates-automatically = Tarkista päivitykset automaattisesti
+# review: new
+mac-settings-updates = Päivitykset
 
 ## Dialogs
 

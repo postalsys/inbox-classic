@@ -1,15 +1,31 @@
-<h1>Taal en instellingen</h1>
-<p class="summary">Kies de taal, de weergave van je e-mail en de instellingen voor meldingen.</p>
-<p>Kies <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
+<!--review--><h1>Instellingen</h1>
+<p class="summary">Kies de taal van Inbox Classic, hoe het je mail toont en meldt, en wat het vooraf downloadt.</p>
+<p>Kies <b data-settings=""></b>. De instellingen staan op drie pagina’s: <b data-text="ui-settings-general"></b>, <b data-text="ui-settings-reading"></b> en <b data-text="ui-download-heading"></b>.<!--os:windows--> Klik op <b data-text="ui-ok"></b> om je wijzigingen te bewaren, of op <b data-text="ui-apply"></b> om ze te bewaren en het venster open te laten. <b data-text="ui-cancel"></b> maakt elke wijziging sindsdien ongedaan, ook vertrouwde afzenders die je hebt verwijderd en de app die je voor .eml-bestanden hebt gekozen.<!--/os--><!--os:mac,linux--> Elke wijziging werkt meteen.<!--/os--></p>
+<h2><b data-text="ui-settings-general"></b></h2>
 <ul>
-    <li>Met <!--os:windows--><b data-text="win-options-language-label"></b><!--/os--><!--os:mac--><b data-text="mac-language-label"></b><!--/os--><!--os:linux--><b data-text="gtk-language"></b><!--/os--> kies je de taal van de app en deze help. Kies de taal van je systeem, of een van de talen in de lijst. Als Inbox Classic de taal van je systeem niet heeft, gebruikt het Engels.</li>
-    <li><!--os:windows--><b data-text="win-options-notify"></b><!--/os--><!--os:mac--><b data-text="mac-notify-new-mail"></b><!--/os--><!--os:linux--><b data-text="gtk-notify-new-mail"></b><!--/os--> zet de meldingen van nieuwe mail aan of uit.</li>
-    <li><b data-text="ui-group-by-conversation"></b> groepeert samenhangende berichten op één regel.</li>
-    <li><b data-text="ui-codes-in-notifications"></b> toont de code van een aanmeldbericht in de melding ervan.</li>
-    <li>Met <b data-text="ui-layout-label"></b> kies je de indeling: automatisch op basis van de breedte van het venster, klassiek of kolommen. Zie <a href="topic:layouts"></a>.</li>
-    <li><b data-text="ui-list-pictures"></b> toont merklogo’s, foto’s van contactpersonen en initialen in de kolomindeling.</li>
+    <li><b data-text="ui-language-label"></b> kiest de taal van de vensters en van deze help: de taal van je systeem, of een van de talen in de lijst. Als Inbox Classic de taal van je systeem niet heeft, gebruikt het Engels.</li>
+    <li><b data-text="ui-notify-new-mail"></b> toont een melding wanneer er nieuwe mail binnenkomt. Standaard staat dit aan.</li>
+    <li><b data-text="ui-codes-in-notifications"></b> toont de code van een aanmeldbericht in de melding ervan. Standaard staat dit uit, omdat een melding ook op een vergrendeld scherm te lezen is. Zolang meldingen uit staan, is het niet beschikbaar.</li>
+    <li><b data-text="ui-send-delay"></b> houdt een bericht dat je verzendt een paar seconden in Postvak UIT, zodat je het nog kunt annuleren met Ongedaan maken. Standaard is dit 10 seconden.</li>
+    <li><b data-text="cmd-default-app"></b> opent e-maillinks in Inbox Classic, en <b data-text="ui-eml-default"></b> opent berichtbestanden. Zie <a href="topic:default-mail-program"></a>.</li>
+    <!--os:mac--><li><b data-text="mac-check-updates-automatically"></b> zoekt af en toe naar een nieuwe versie van Inbox Classic. Zie <a href="topic:updates"></a>.</li><!--/os-->
 </ul>
 <p>De nieuwe taal wordt actief zodra Inbox Classic opnieuw is gestart. Klik op <b data-text="ui-restart-now"></b>, of op <b data-text="ui-restart-later"></b> om de taal te wijzigen bij de volgende start.</p>
+<h2><b data-text="ui-settings-reading"></b></h2>
+<ul>
+    <li>Met <b data-text="ui-layout-label"></b> kies je de indeling: automatisch op basis van de breedte van het venster, klassiek of kolommen. Zie <a href="topic:layouts"></a>.</li>
+    <li><b data-text="ui-group-by-conversation"></b> groepeert samenhangende berichten op één regel. Standaard staat dit aan.</li>
+    <li><b data-text="ui-list-pictures"></b> toont merklogo’s, foto’s van contactpersonen en initialen in de kolomindeling. Standaard staat dit aan.</li>
+    <!--os:mac,linux--><li><b data-text="ui-dark-messages"></b> toont de berichten die je leest en schrijft op een donkere achtergrond als het systeem in de donkere modus staat. Standaard staat dit aan.</li><!--/os-->
+    <li><b data-text="ui-pictures-always-option"></b> downloadt de afbeeldingen van elk bericht. Standaard staat dit uit, omdat afzenders dan kunnen zien wanneer je hun berichten leest. Zie <a href="topic:pictures-tracking"></a>.</li>
+    <li><b data-text="ui-trusted-senders-button"></b> toont de afzenders van wie de afbeeldingen altijd worden gedownload. Daar kun je ze verwijderen.</li>
+</ul>
+<h2><b data-text="ui-download-heading"></b></h2>
+<ul>
+    <li><b data-text="ui-download-ahead"></b> kiest welke berichten worden gedownload voordat je ze opent: standaard recente berichten tot 1 MB per stuk. Zie <a href="topic:download-ahead"></a>.</li>
+    <li><b data-text="ui-download-limit"></b> beperkt de ruimte die de gedownloade berichten van elk account innemen. Standaard is dit 1 GB.</li>
+</ul>
 <!--os:windows--><p>Het installatieprogramma vraagt bij een eerste installatie naar de taal en neemt die over als taalinstelling voor de app.</p><!--/os-->
 <!--os:mac--><p>Je kunt de taal ook voor alleen Inbox Classic kiezen in <i>Systeeminstellingen &gt; Algemeen &gt; Taal en regio &gt; Apps</i>.</p><!--/os-->
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:conversations"></a> <a href="topic:sign-in-codes"></a></nav>
+<!--/review-->

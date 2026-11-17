@@ -50,12 +50,9 @@ bool ValidPort(const std::wstring& text) {
 bool Validate(const std::vector<FormField>& fields, std::wstring& error) {
     for (Field required : {EMAIL, IMAP_HOST, SMTP_HOST}) {
         if (fields[required].value.empty()) {
-            std::wstring label = fields[required].label;
-            // the label without its colon ("E-mail address:", "Adresse e-mail :")
-            while (!label.empty() && (label.back() == L':' || iswspace(label.back()))) {
-                label.pop_back();
-            }
-            error = core::T(PE_TEXT_UI_FIELD_REQUIRED, {{"field", label}});
+            // the label without its access key and colon ("E-mail address:", "Adresse e-mail :")
+            core::String label(pe_field_title(core::Narrow(fields[required].label).c_str()));
+            error = core::T(PE_TEXT_UI_FIELD_REQUIRED, {{"field", label ? Text(label.get()) : fields[required].label}});
             return false;
         }
     }

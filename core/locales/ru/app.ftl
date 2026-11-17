@@ -738,6 +738,34 @@ ui-col-used-by = Используется
 # review: new
 ui-options-system-default = Как в системе ({ $language })
 # review: new
+ui-settings-general = Общие
+# review: new
+ui-settings-reading = Чтение
+# review: new
+ui-settings-new-mail = Новая почта
+# review: new
+ui-settings-sending = Отправка
+# review: new
+ui-settings-default-apps = Приложения по умолчанию
+# review: new
+ui-settings-message-list = Список сообщений
+# review: new
+ui-settings-messages = Сообщения
+# review: new
+ui-settings-language = Язык
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Применить
+# review: new
+ui-language-label = &Язык:
+# review: new
+ui-restart-note = Чтобы сменить язык, перезапустите Inbox Classic.
+# review: new
+ui-restart-ask = Inbox Classic перейдет на язык «{ $language }» после перезапуска. Перезапустить сейчас?
+# review: new
+ui-notify-new-mail = &Уведомлять о новой почте
+# review: new
 ui-new-folder-title = Новая папка
 # review: new
 ui-rename-folder-title = Переименование папки
@@ -1050,8 +1078,8 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Не удалось сохранить адресную книгу: { $reason }
 # review: new
 ui-code-copied = Код скопирован
-# review: new
-ui-codes-in-notifications = Показывать коды для входа в уведомлениях о новой почте
+# review: changed
+ui-codes-in-notifications = По&казывать коды для входа в уведомлениях о новой почте
 # review: new
 ui-tool-unread-only = Непрочитанные
 # review: new
@@ -1062,8 +1090,8 @@ ui-pictures-always-sender = Всегда загружать изображени
 ui-pictures-always-domain = Всегда загружать изображения от всех отправителей из { $domain }
 # review: new
 ui-pictures-unconfirmed = Не удалось проверить домен отправителя ({ $domain }), поэтому изображения в этом сообщении не загружаются автоматически.
-# review: new
-ui-pictures-always-option = Загружать изображения во всех сообщениях
+# review: changed
+ui-pictures-always-option = &Загружать изображения во всех сообщениях
 # review: new
 ui-pictures-always-warning = Тогда отправители смогут видеть, когда вы читаете их сообщения.
 # review: new
@@ -1072,18 +1100,18 @@ ui-protection-details = &Подробности...
 ui-protection-details-title = Сведения о защите
 # review: new
 ui-download-heading = Загрузка
-# review: new
-ui-download-ahead = Загружать сообщения заранее:
+# review: changed
+ui-download-ahead = &Загружать сообщения заранее:
 # review: new
 ui-download-ahead-recent = Недавние сообщения размером до 1 МБ
 # review: new
 ui-download-ahead-all = Все сообщения
 # review: new
 ui-download-ahead-never = Только при открытии
-# review: new
-ui-download-limit = Лимит хранилища на учетную запись:
-# review: new
-ui-send-delay = Задержка перед отправкой:
+# review: changed
+ui-download-limit = &Лимит хранилища на учетную запись:
+# review: changed
+ui-send-delay = &Задержка перед отправкой:
 # review: new
 ui-send-delay-note = Пока сообщение ждет отправки, ее можно отменить командой «Отменить».
 # review: new
@@ -1105,8 +1133,8 @@ ui-outbox-status-undo = Будет отправлено в { $time }
 ui-download-note = Сообщения, загруженные заранее, открываются сразу. Когда лимит хранилища превышен, самые старые локальные копии удаляются и загружаются снова при открытии.
 # review: new
 ui-attachment-downloading = Это сообщение еще не загружено полностью. Повторите попытку, когда загрузка завершится.
-# review: new
-ui-trusted-senders-button = Надежные отправители...
+# review: changed
+ui-trusted-senders-button = &Надежные отправители...
 # review: new
 ui-trusted-senders-title = Надежные отправители
 # review: new
@@ -1115,8 +1143,8 @@ ui-trusted-senders-note = Изображения в сообщениях от э
 ui-trusted-everyone-at = Все из { $domain }
 # review: new
 ui-trusted-senders-empty = Надежные отправители пока не добавлены.
-# review: new
-ui-eml-default = Открывать файлы .eml в Inbox Classic
+# review: changed
+ui-eml-default = &Открывать файлы .eml в Inbox Classic
 # review: new
 ui-eml-default-done = Теперь Inbox Classic открывает файлы .eml.
 # review: new
@@ -1125,8 +1153,8 @@ ui-eml-default-failed = Не удалось сделать Inbox Classic про�
 ui-folders = Папки
 # review: new
 ui-sorted-by = Сортировка: { $field }
-# review: new
-ui-layout-label = Макет:
+# review: changed
+ui-layout-label = &Макет:
 # review: new
 ui-columns-note = Окно достаточно широкое для макета со столбцами. Макет можно изменить в меню Вид > Макет.
 # review: new
@@ -1142,9 +1170,9 @@ ui-row-messages = { $count ->
     [many] { $count } сообщений
    *[other] { $count } сообщения
 }
-# review: new
-ui-list-pictures = Показывать изображения отправителей в списке сообщений
-# review: new
+# review: changed
+ui-list-pictures = Показывать &изображения отправителей в списке сообщений
+# review: changed
 ui-list-pictures-note = Показывает логотипы брендов или изображения из адресной книги для проверенных отправителей и инициалы, если изображения нет. Логотипы загружаются один раз для каждого бренда, а не для каждого сообщения.
 # review: new
 ui-card-picture = Изображение:

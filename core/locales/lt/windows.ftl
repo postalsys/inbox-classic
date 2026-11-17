@@ -170,14 +170,6 @@ win-edit = &Keisti...
 ## Options
 
 # review: new
-win-options-language-label = &Rodyti Inbox Classic kalba:
-# review: new
-win-options-restart-note = Paleiskite Inbox Classic iš naujo, kad pasikeistų kalba.
-# review: new
-win-options-notify = &Pranešti, kai gaunami nauji laiškai
-# review: new
-win-restart-ask = Paleidus iš naujo, Inbox Classic bus rodoma kalba: { $language }. Paleisti iš naujo dabar?
-# review: new
 win-folders-hide = Slėpti aplankų sąrašą
 # review: new
 win-folders-pin = Laikyti aplankų sąrašą šalia laiškų

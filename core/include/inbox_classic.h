@@ -4655,6 +4655,13 @@ char *pe_text_plain(uint32_t text);
 // `pe_string_free`.
 char *pe_text_title(uint32_t text);
 
+// A field's label (`&Language:`, `Nom :`) as a title or a word in a sentence: without its menu letter mark, its
+// trailing colon of any width and the spaces before it. Free with `pe_string_free`; NULL for a NULL `label`.
+//
+// # Safety
+// `label` must be NULL or a NUL-terminated string.
+char *pe_field_title(const char *label);
+
 // Word `text` with its placeables filled: `names[i]` is `values[i]`, a value that is a whole number passed as a number
 // (plurals choose by it). Free with `pe_string_free`.
 //

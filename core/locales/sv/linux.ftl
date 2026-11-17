@@ -240,19 +240,8 @@ gtk-nothing-yet = Inget ännu.
 
 # review: new
 gtk-preferences = Inställningar
-# review: new
-gtk-language = Språk
-# review: new
-gtk-language-subtitle = Språk för appen och hjälpen
-# review: new
-gtk-new-mail-group = Ny e-post
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-# review: new
-gtk-notify-new-mail = Meddela om ny e-post
-# review: new
-gtk-notify-subtitle = En avisering när nya meddelanden kommer medan fönstret är i bakgrunden
-# review: new
-gtk-restart-to-change = Inbox Classic startar om för att byta språk.
+# review: changed
+gtk-notify-subtitle = Bara medan Inbox Classic är i bakgrunden
 
 
 ## The desktop entry and the page of the software stores

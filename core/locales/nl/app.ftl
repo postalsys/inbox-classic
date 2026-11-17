@@ -380,6 +380,34 @@ ui-sign-in-apps-intro = Met aanmeldapps melden accounts zich aan via de browser.
 ui-col-issuer = Uitgever
 ui-col-used-by = Gebruikt door
 ui-options-system-default = Systeemstandaard ({ $language })
+# review: new
+ui-settings-general = Algemeen
+# review: new
+ui-settings-reading = Lezen
+# review: new
+ui-settings-new-mail = Nieuwe e-mail
+# review: new
+ui-settings-sending = Verzenden
+# review: new
+ui-settings-default-apps = Standaardapps
+# review: new
+ui-settings-message-list = Berichtenlijst
+# review: new
+ui-settings-messages = Berichten
+# review: new
+ui-settings-language = Taal
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Toepassen
+# review: new
+ui-language-label = T&aal:
+# review: new
+ui-restart-note = Start Inbox Classic opnieuw om de taal te wijzigen.
+# review: new
+ui-restart-ask = Na het opnieuw starten toont Inbox Classic de taal { $language }. Nu opnieuw starten?
+# review: new
+ui-notify-new-mail = &Melding geven wanneer er nieuwe e-mail binnenkomt
 ui-new-folder-title = Nieuwe map
 ui-rename-folder-title = Map hernoemen
 ui-delete-folder-question = De map “{ $folder }” met alle berichten en submappen verwijderen? Deze worden ook op de server verwijderd.
@@ -544,23 +572,28 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Het adresboek kon niet worden opgeslagen: { $reason }
 ui-code-copied = De code is gekopieerd
-ui-codes-in-notifications = Aanmeldcodes tonen in meldingen van nieuwe e-mail
+# review: changed
+ui-codes-in-notifications = Aanmeldcodes tonen &in meldingen van nieuwe e-mail
 ui-tool-unread-only = Ongelezen
 ui-no-unread = Er zijn hier geen ongelezen berichten.
 ui-pictures-always-sender = Altijd afbeeldingen downloaden van { $sender }
 ui-pictures-always-domain = Altijd afbeeldingen downloaden van afzenders met het domein { $domain }
 ui-pictures-unconfirmed = Het domein van de afzender ({ $domain }) kon niet worden geverifieerd. Afbeeldingen in dit bericht worden daarom niet automatisch gedownload.
-ui-pictures-always-option = Afbeeldingen in alle berichten downloaden
+# review: changed
+ui-pictures-always-option = Af&beeldingen in alle berichten downloaden
 ui-pictures-always-warning = Afzenders kunnen dan zien wanneer je hun berichten leest.
 ui-protection-details = &Details...
 ui-protection-details-title = Beveiligingsdetails
 ui-download-heading = Downloaden
-ui-download-ahead = Berichten vooraf downloaden:
+# review: changed
+ui-download-ahead = &Berichten vooraf downloaden:
 ui-download-ahead-recent = Recente berichten tot 1 MB per stuk
 ui-download-ahead-all = Alle berichten
 ui-download-ahead-never = Alleen bij openen
-ui-download-limit = Opslaglimiet per account:
-ui-send-delay = Wachttijd voor verzenden:
+# review: changed
+ui-download-limit = &Opslaglimiet per account:
+# review: changed
+ui-send-delay = Wachttijd &voor verzenden:
 ui-send-delay-note = Terwijl een bericht wacht op verzending, kun je het verzenden annuleren met Ongedaan maken.
 ui-dark-messages = Berichten op een donkere achtergrond tonen als het systeem in de donkere modus staat
 ui-sending-in = { $subject } wordt verzonden over { $count ->
@@ -572,17 +605,20 @@ ui-send-too-late = { $subject } is al verzonden.
 ui-outbox-status-undo = Wordt verzonden om { $time }
 ui-download-note = Vooraf gedownloade berichten openen meteen. Als de opslaglimiet is overschreden, worden de oudste lokale kopieën verwijderd en opnieuw gedownload wanneer je ze opent.
 ui-attachment-downloading = Dit bericht is nog niet helemaal gedownload. Probeer het opnieuw als het downloaden klaar is.
-ui-trusted-senders-button = Vertrouwde afzenders...
+# review: changed
+ui-trusted-senders-button = &Vertrouwde afzenders...
 ui-trusted-senders-title = Vertrouwde afzenders
 ui-trusted-senders-note = Afbeeldingen in berichten van deze afzenders worden automatisch gedownload wanneer je e-mailprovider het domein van de afzender verifieert.
 ui-trusted-everyone-at = Alle afzenders met het domein { $domain }
 ui-trusted-senders-empty = Er zijn nog geen vertrouwde afzenders toegevoegd.
-ui-eml-default = .eml-bestanden openen met Inbox Classic
+# review: changed
+ui-eml-default = .&eml-bestanden openen met Inbox Classic
 ui-eml-default-done = Inbox Classic opent nu .eml-bestanden.
 ui-eml-default-failed = Inbox Classic kon niet worden ingesteld als standaardapp voor .eml-bestanden: { $reason }
 ui-folders = Mappen
 ui-sorted-by = Gesorteerd op { $field }
-ui-layout-label = Indeling:
+# review: changed
+ui-layout-label = &Indeling:
 ui-columns-note = Het venster is breed genoeg voor de kolomindeling. Je kunt de indeling wijzigen via Beeld > Indeling.
 ui-row-unread = Ongelezen
 ui-row-flagged = Gemarkeerd
@@ -591,7 +627,9 @@ ui-row-messages = { $count ->
     [one] { $count } bericht
    *[other] { $count } berichten
 }
-ui-list-pictures = Afbeeldingen van afzenders tonen in de berichtenlijst
+# review: changed
+ui-list-pictures = &Afbeeldingen van afzenders tonen in de berichtenlijst
+# review: changed
 ui-list-pictures-note = Toont merklogo’s of afbeeldingen uit het Adresboek als het afzenderdomein is bevestigd, en initialen als er geen afbeelding is. Gedownloade logo’s worden opgeslagen en voor meerdere berichten gebruikt.
 ui-card-picture = Afbeelding:
 ui-card-picture-choose = K&iezen...

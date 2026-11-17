@@ -380,6 +380,34 @@ ui-sign-in-apps-intro = Med login-apps kan du logge på dine konti via browseren
 ui-col-issuer = Udsteder
 ui-col-used-by = Bruges af
 ui-options-system-default = Systemstandard ({ $language })
+# review: new
+ui-settings-general = Generelt
+# review: new
+ui-settings-reading = Læsning
+# review: new
+ui-settings-new-mail = Ny mail
+# review: new
+ui-settings-sending = Afsendelse
+# review: new
+ui-settings-default-apps = Standardapps
+# review: new
+ui-settings-message-list = Meddelelsesliste
+# review: new
+ui-settings-messages = Meddelelser
+# review: new
+ui-settings-language = Sprog
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Anvend
+# review: new
+ui-language-label = S&prog:
+# review: new
+ui-restart-note = Genstart Inbox Classic for at skifte sprog.
+# review: new
+ui-restart-ask = Inbox Classic vises på { $language }, når programmet er genstartet. Vil du genstarte nu?
+# review: new
+ui-notify-new-mail = &Giv mig besked, når der kommer ny mail
 ui-new-folder-title = Ny mappe
 ui-rename-folder-title = Omdøb mappe
 ui-delete-folder-question = Vil du slette mappen »{ $folder }« med dens meddelelser og de mapper, den indeholder? Den slettes også på serveren.
@@ -544,23 +572,28 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Adressekartoteket kunne ikke gemmes: { $reason }
 ui-code-copied = Koden er kopieret
-ui-codes-in-notifications = Vis loginkoder i notifikationer om ny mail
+# review: changed
+ui-codes-in-notifications = &Vis loginkoder i notifikationer om ny mail
 ui-tool-unread-only = Ulæste
 ui-no-unread = Der er ingen ulæste meddelelser her.
 ui-pictures-always-sender = Hent altid billeder fra { $sender }
 ui-pictures-always-domain = Hent altid billeder fra alle på domænet { $domain }
 ui-pictures-unconfirmed = Afsenderens domæne ({ $domain }) kunne ikke bekræftes, så billeder i denne meddelelse hentes ikke automatisk.
-ui-pictures-always-option = Hent billeder i alle meddelelser
+# review: changed
+ui-pictures-always-option = &Hent billeder i alle meddelelser
 ui-pictures-always-warning = Afsendere kan så se, hvornår du læser deres meddelelser.
 ui-protection-details = &Detaljer...
 ui-protection-details-title = Sikkerhedsdetaljer
 ui-download-heading = Hentning
-ui-download-ahead = Hent meddelelser på forhånd:
+# review: changed
+ui-download-ahead = &Hent meddelelser på forhånd:
 ui-download-ahead-recent = Meddelelser fra de seneste 30 dage på højst 1 MB hver
 ui-download-ahead-all = Alle meddelelser
 ui-download-ahead-never = Kun når de åbnes
-ui-download-limit = Lagergrænse pr. konto:
-ui-send-delay = Forsinkelse før afsendelse:
+# review: changed
+ui-download-limit = &Lagergrænse pr. konto:
+# review: changed
+ui-send-delay = &Forsinkelse før afsendelse:
 ui-send-delay-note = Mens en meddelelse venter på at blive sendt, kan du annullere afsendelsen med Fortryd.
 ui-dark-messages = Vis meddelelser på mørk baggrund, når systemet er i mørk tilstand
 ui-sending-in = Sender { $subject } om { $count ->
@@ -572,17 +605,20 @@ ui-send-too-late = { $subject } er allerede sendt.
 ui-outbox-status-undo = Sendes kl. { $time }
 ui-download-note = Meddelelser, der er hentet på forhånd, kan åbnes med det samme. Når lagergrænsen overskrides, fjernes de ældste lokale kopier. Meddelelserne bliver på serveren og hentes igen, når du åbner dem.
 ui-attachment-downloading = Denne meddelelse er ikke færdighentet. Prøv igen, når den er hentet.
-ui-trusted-senders-button = Betroede afsendere...
+# review: changed
+ui-trusted-senders-button = &Betroede afsendere...
 ui-trusted-senders-title = Betroede afsendere
 ui-trusted-senders-note = Billeder i meddelelser fra disse afsendere hentes automatisk, når din mailudbyder bekræfter afsenderens domæne.
 ui-trusted-everyone-at = Alle på domænet { $domain }
 ui-trusted-senders-empty = Der er ikke tilføjet nogen betroede afsendere endnu.
-ui-eml-default = Åbn .eml-filer med Inbox Classic
+# review: changed
+ui-eml-default = &Åbn .eml-filer med Inbox Classic
 ui-eml-default-done = Inbox Classic åbner nu .eml-filer.
 ui-eml-default-failed = Inbox Classic kunne ikke angives som standardprogram til .eml-filer: { $reason }
 ui-folders = Mapper
 ui-sorted-by = Sorteret efter { $field }
-ui-layout-label = Layout:
+# review: changed
+ui-layout-label = La&yout:
 ui-columns-note = Vinduet er bredt nok til kolonnelayoutet. Du kan ændre layoutet under Vis > Layout.
 ui-row-unread = Ulæst
 ui-row-flagged = Med flag
@@ -591,7 +627,9 @@ ui-row-messages = { $count ->
     [one] { $count } meddelelse
    *[other] { $count } meddelelser
 }
-ui-list-pictures = Vis afsendernes billeder på meddelelseslisten
+# review: changed
+ui-list-pictures = &Vis afsendernes billeder på meddelelseslisten
+# review: changed
 ui-list-pictures-note = Viser logoer eller billeder fra adressekartoteket, når afsenderens domæne er bekræftet. Hvis intet billede er tilgængeligt, vises initialer. Hentede logoer gemmes og genbruges på tværs af meddelelser.
 ui-card-picture = Billede:
 ui-card-picture-choose = &Vælg...

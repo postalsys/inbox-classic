@@ -686,11 +686,7 @@ impl Core {
 
     /// How many flagged messages the Flagged row lists, of every account
     pub fn flagged_count(&self) -> Result<u64> {
-        let search = Search {
-            scope: Scope::Flagged,
-            ..Default::default()
-        };
-        Ok(self.store().count_search(&search)?.0)
+        Ok(self.store().flagged_count()?)
     }
 
     /// How many messages are unread in the Inboxes of all accounts
@@ -917,32 +913,30 @@ impl Core {
         Ok(self.store().search(search, sort, offset, limit)?)
     }
 
+    /// [`Core::search`] read from a row next to the page or from the end of the list (`anchor`, see
+    /// [`pe_store::Store::search_from`]): the same rows, found without going through those above them
+    pub fn search_from(
+        &self,
+        search: &Search,
+        sort: Sort,
+        offset: u64,
+        limit: u64,
+        anchor: pe_store::Anchor,
+    ) -> Result<Vec<Message>> {
+        let sort = self.list_sort(search, sort)?;
+        Ok(self.store().search_from(search, sort, offset, limit, anchor)?)
+    }
+
     /// What the store holds now: equal values mean nothing was written in between, so what was read then is still so
     pub fn generation(&self) -> Result<pe_store::Generation> {
         Ok(self.store().generation()?)
     }
 
-    /// How many messages [`Core::search`] finds, and how many of them are unread, grouped by conversation or not
+    /// How many messages [`Core::search`] finds, and how many of them are unread, grouped by conversation or not: the
+    /// counts of the status bar. Those of whole folders (a folder, All Inboxes) from what the folders keep, those of a
+    /// search counted from what it finds.
     pub fn count_search(&self, search: &Search) -> Result<(u64, u64)> {
         Ok(self.store().count_search(search)?)
-    }
-
-    /// The counts of the status bar for the list of `search`: those of a folder shown whole from its indexes, those
-    /// of a search, All Inboxes or a folder without its ignored conversations (Hide Ignored) counted from what they
-    /// find
-    pub fn list_counts(&self, search: &Search) -> Result<(u64, u64)> {
-        match search.scope {
-            Scope::Folder(folder)
-                if search.text.is_empty()
-                    && search.show == Show::All
-                    && !search.hide_ignored
-                    && search.up_to.is_none() =>
-            {
-                let folder = self.folder(folder)?;
-                Ok((folder.total, folder.unread))
-            }
-            _ => self.count_search(search),
-        }
     }
 
     /// How many rows the list of [`Core::search`] has: grouped by conversation one a conversation and the other

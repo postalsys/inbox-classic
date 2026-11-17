@@ -167,14 +167,6 @@ win-edit = &Szerkesztés...
 ## Options
 
 # review: new
-win-options-language-label = Az Inbox Classic &nyelve:
-# review: new
-win-options-restart-note = A nyelv módosításához indítsa újra az Inbox Classicot.
-# review: new
-win-options-notify = É&rtesítés új levél érkezésekor
-# review: new
-win-restart-ask = Az Inbox Classic újraindítás után ezen a nyelven jelenik meg: { $language }. Újraindítja most?
-# review: new
 win-folders-hide = A mappalista elrejtése
 # review: new
 win-folders-pin = A mappalista rögzítése az üzenetek mellett

@@ -179,14 +179,6 @@ win-edit = &Змінити...
 ## Options
 
 # review: new
-win-options-language-label = &Мова Inbox Classic:
-# review: new
-win-options-restart-note = Щоб змінити мову, перезапустіть Inbox Classic.
-# review: new
-win-options-notify = &Сповіщати мене про нову пошту
-# review: new
-win-restart-ask = Inbox Classic буде показано мовою «{ $language }» після перезапуску. Перезапустити зараз?
-# review: new
 win-folders-hide = Сховати список папок
 # review: new
 win-folders-pin = Тримати список папок поруч із повідомленнями

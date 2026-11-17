@@ -171,13 +171,8 @@ gtk-nothing-yet = Zasad ništa.
 ## Preferences
 
 gtk-preferences = Podešavanja
-gtk-language = Jezik
-gtk-language-subtitle = Jezik aplikacije i pomoći
-gtk-new-mail-group = Nova pošta
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-gtk-notify-new-mail = Obaveštenja o novoj pošti
-gtk-notify-subtitle = Obaveštenje kada stignu nove poruke dok je prozor u pozadini
-gtk-restart-to-change = Inbox Classic se ponovo pokreće da bi promenio jezik.
+# review: changed
+gtk-notify-subtitle = Samo dok je Inbox Classic u pozadini
 
 ## The desktop entry and the page of the software stores
 

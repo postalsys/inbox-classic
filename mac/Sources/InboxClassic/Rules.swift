@@ -384,7 +384,7 @@ private final class RulesListWindow: NSObject, NSTableViewDataSource, NSTableVie
     private let core: Core
     private let table = RulesTable()
     private let empty = NSTextField(wrappingLabelWithString: Text.uiRulesNone.text)
-    private let edit = NSButton(title: Text.uiRuleEdit.text.replacingOccurrences(of: "...", with: "…"), target: nil, action: nil)
+    private let edit = NSButton(title: Text.uiRuleEdit.opens, target: nil, action: nil)
     private let delete = NSButton(title: Text.uiRuleDeleteButton.text, target: nil, action: nil)
     private let up = NSButton(title: Text.uiAccountMoveUp.text, target: nil, action: nil)
     private let down = NSButton(title: Text.uiAccountMoveDown.text, target: nil, action: nil)
@@ -442,7 +442,7 @@ private final class RulesListWindow: NSObject, NSTableViewDataSource, NSTableVie
             empty.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: 12),
             empty.widthAnchor.constraint(lessThanOrEqualTo: scroll.widthAnchor, constant: -40),
         ])
-        let new = NSButton(title: Text.uiRuleNew.text.replacingOccurrences(of: "...", with: "…"), target: self, action: #selector(newClicked))
+        let new = NSButton(title: Text.uiRuleNew.opens, target: self, action: #selector(newClicked))
         new.setAccessibilityIdentifier("rules.new")
         for (button, action, id) in [(edit, #selector(editClicked), "rules.edit"), (delete, #selector(deleteClicked), "rules.delete"),
                                      (up, #selector(upClicked), "rules.up"), (down, #selector(downClicked), "rules.down")] {

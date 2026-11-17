@@ -649,10 +649,9 @@ pub async fn quit() {
     shell.application.quit();
 }
 
-/// Tools > Make Default Mail App: the desktop file names the app for mailto: links; it is chosen as their program
-async fn make_default_mail_app() {
-    let shell = shell();
-    let window = shell.main().window().clone();
+/// Tools > Make Default Mail App, and its button in Preferences: the desktop file names the app for mailto: links; it
+/// is chosen as their program, said in an alert over `window`
+pub async fn make_default_mail_app(window: gtk::Widget) {
     let desktop = format!("{}.desktop", crate::APP_ID);
     let Some(app) = gio::AppInfo::all()
         .into_iter()
@@ -763,7 +762,7 @@ pub fn run_command(command: Command) {
         Command::SortDescending => main.sort_direction(false),
         Command::Notify => shell.set_notify(!shell.notify.get()),
         Command::Open => shell.show_main(),
-        Command::DefaultApp => spawn(make_default_mail_app()),
+        Command::DefaultApp => spawn(make_default_mail_app(shell.main().window().clone().upcast())),
         Command::ViewSource => spawn(async move { main.show_source().await }),
         Command::AiAgents => spawn(async move { crate::agents::agents_dialog(main.window()).await }),
         Command::SelectAll => main.select_all(),

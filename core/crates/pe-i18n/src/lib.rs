@@ -452,13 +452,23 @@ pub fn picture_resource(file: &str) -> String {
 /// Command `text` as the title of the window it opens: without its mnemonic mark and the dots that say it asks for
 /// more ("&Import Messages..." is titled "Import Messages")
 pub fn title(text: Text) -> String {
-    let title = without_mnemonic(&tr(text));
-    // in the pseudo-language the dots come before its padding: "[Óptíöñš... ~~~~]"
-    let (body, padding) = match title.rfind(" ~") {
-        Some(at) if title.ends_with('~') || title.ends_with("~]") => title.split_at(at),
-        _ => (title.as_str(), ""),
+    trimmed_end(&without_mnemonic(&tr(text)), &['.', '\u{2026}'])
+}
+
+/// A field's label (`&Language:`, `Nom :`, `名前：`) as a title or as a word in a sentence: without its mnemonic mark
+/// and its trailing colon, of any width, and the spaces before it
+pub fn field_title(label: &str) -> String {
+    trimmed_end(&without_mnemonic(label), &[':', '\u{ff1a}'])
+}
+
+/// `text` without the `marks` and spaces at its end; in the pseudo-language they come before its padding:
+/// "[Óptíöñš... ~~~~]"
+fn trimmed_end(text: &str, marks: &[char]) -> String {
+    let (body, padding) = match text.rfind(" ~") {
+        Some(at) if text.ends_with('~') || text.ends_with("~]") => text.split_at(at),
+        _ => (text, ""),
     };
-    format!("{}{padding}", body.trim_end_matches(['.', '\u{2026}']).trim_end())
+    format!("{}{padding}", body.trim_end().trim_end_matches(marks).trim_end())
 }
 
 /// A menu label of the catalog with GTK's mnemonic mark (`_Reply to Sender`)

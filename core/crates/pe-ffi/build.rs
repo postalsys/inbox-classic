@@ -4,6 +4,8 @@
 //   core/include/commands.h                 the command ids of core/commands.toml for the Windows app
 //   mac/Sources/InboxClassic/Generated/Commands.swift   the same commands for the Mac
 //   linux/src/generated/commands.rs         and for Linux
+//   core/include/settings.h and the Mac's and Linux's tables of the settings window, from core/settings.toml
+//                                           (build_settings.rs)
 //   core/include/texts.h                    the ids of the words of core/locales/en/*.ftl for C (PeText)
 //   mac/Sources/InboxClassic/Generated/Texts.swift      the same for the Mac
 //   and what is made per language from pe_i18n::LANGUAGES (build_languages.rs): the installer's languages, the
@@ -14,6 +16,8 @@ use std::path::{Path, PathBuf};
 
 #[path = "build_languages.rs"]
 mod languages;
+#[path = "build_settings.rs"]
+mod settings;
 
 #[derive(serde::Deserialize)]
 struct Table {
@@ -98,6 +102,7 @@ fn main() {
         &swift(&table),
     );
     write(&root.join("linux/src/generated/commands.rs"), &rust(&table));
+    settings::write_all(&root, &out, &ids, write);
     languages::write_all(&root, write);
 
     println!("cargo:rerun-if-changed=src");
@@ -105,6 +110,7 @@ fn main() {
     println!("cargo:rerun-if-changed=../../commands.toml");
     println!("cargo:rerun-if-changed=../../locales");
     println!("cargo:rerun-if-changed=build_languages.rs");
+    println!("cargo:rerun-if-changed=build_settings.rs");
 }
 
 /// The ids of the English catalog, in the order pe-i18n numbers them: its files sorted by name, each message as it

@@ -1,15 +1,31 @@
-<h1>Sprache und Einstellungen</h1>
-<p class="summary">Wählen Sie die Sprache von Inbox Classic, und wie es Ihre E-Mails anzeigt und meldet.</p>
-<p>Wählen Sie <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
+<!--review--><h1>Einstellungen</h1>
+<p class="summary">Wählen Sie die Sprache von Inbox Classic, wie es Ihre E-Mails anzeigt und meldet und was es vorab herunterlädt.</p>
+<p>Wählen Sie <b data-settings=""></b>. Die Einstellungen verteilen sich auf drei Seiten: <b data-text="ui-settings-general"></b>, <b data-text="ui-settings-reading"></b> und <b data-text="ui-download-heading"></b>.<!--os:windows--> Klicken Sie auf <b data-text="ui-ok"></b>, um Ihre Änderungen zu übernehmen, oder auf <b data-text="ui-apply"></b>, um sie zu übernehmen und das Fenster offen zu lassen. <b data-text="ui-cancel"></b> macht alle noch nicht übernommenen Änderungen rückgängig, auch entfernte vertrauenswürdige Absender und das für .eml-Dateien gewählte Programm.<!--/os--><!--os:mac,linux--> Jede Änderung wirkt sofort.<!--/os--></p>
+<h2><b data-text="ui-settings-general"></b></h2>
 <ul>
-    <li>Mit <!--os:windows--><b data-text="win-options-language-label"></b><!--/os--><!--os:mac--><b data-text="mac-language-label"></b><!--/os--><!--os:linux--><b data-text="gtk-language"></b><!--/os--> legen Sie die Sprache der Programmfenster und dieser Hilfe fest. Wählen Sie die Systemsprache oder eine andere Sprache aus der Liste. Wird Ihre Systemsprache nicht unterstützt, verwendet Inbox Classic Englisch.</li>
-    <li><!--os:windows--><b data-text="win-options-notify"></b><!--/os--><!--os:mac--><b data-text="mac-notify-new-mail"></b><!--/os--><!--os:linux--><b data-text="gtk-notify-new-mail"></b><!--/os--> schaltet die Benachrichtigungen über neue E-Mails ein oder aus.</li>
-    <li><b data-text="ui-group-by-conversation"></b> fasst Nachrichten, die einander beantworten, in einer Zeile zusammen.</li>
-    <li><b data-text="ui-codes-in-notifications"></b> zeigt den Code einer Anmeldenachricht in ihrer Benachrichtigung.</li>
-    <li><b data-text="ui-layout-label"></b> wählt das Layout: automatisch nach der Breite des Fensters, klassisch oder in Spalten. Siehe <a href="topic:layouts"></a>.</li>
-    <li><b data-text="ui-list-pictures"></b> zeigt im Spaltenlayout Markenlogos, Bilder von Kontakten und Initialen.</li>
+    <li><b data-text="ui-language-label"></b> wählt die Sprache der Fenster und dieser Hilfe: die Sprache Ihres Systems oder eine der Sprachen in der Liste. Hat Inbox Classic die Sprache Ihres Systems nicht, verwendet es Englisch.</li>
+    <li><b data-text="ui-notify-new-mail"></b> zeigt eine Benachrichtigung, wenn neue E-Mails eintreffen. Die Option ist anfangs eingeschaltet.</li>
+    <li><b data-text="ui-codes-in-notifications"></b> zeigt den Code einer Anmeldenachricht in ihrer Benachrichtigung. Die Option ist anfangs ausgeschaltet, da sich eine Benachrichtigung auch auf einem gesperrten Bildschirm lesen lässt. Solange Benachrichtigungen ausgeschaltet sind, ist sie nicht verfügbar.</li>
+    <li><b data-text="ui-send-delay"></b> hält eine gesendete Nachricht einige Sekunden im Postausgang, damit Sie sie mit Rückgängig noch abbrechen können. Anfangs sind es 10 Sekunden.</li>
+    <li><b data-text="cmd-default-app"></b> öffnet E-Mail-Links in Inbox Classic, und <b data-text="ui-eml-default"></b> öffnet Nachrichtendateien. Siehe <a href="topic:default-mail-program"></a>.</li>
+    <!--os:mac--><li><b data-text="mac-check-updates-automatically"></b> sucht von Zeit zu Zeit nach einer neuen Version von Inbox Classic. Siehe <a href="topic:updates"></a>.</li><!--/os-->
 </ul>
 <p>Um die Sprache zu wechseln, startet Inbox Classic neu. Klicken Sie auf <b data-text="ui-restart-now"></b>, oder auf <b data-text="ui-restart-later"></b>, um sie beim nächsten Start zu wechseln.</p>
+<h2><b data-text="ui-settings-reading"></b></h2>
+<ul>
+    <li><b data-text="ui-layout-label"></b> wählt das Layout: automatisch nach der Breite des Fensters, klassisch oder in Spalten. Siehe <a href="topic:layouts"></a>.</li>
+    <li><b data-text="ui-group-by-conversation"></b> fasst Nachrichten, die einander beantworten, in einer Zeile zusammen. Die Option ist anfangs eingeschaltet.</li>
+    <li><b data-text="ui-list-pictures"></b> zeigt im Spaltenlayout Markenlogos, Bilder von Kontakten und Initialen. Die Option ist anfangs eingeschaltet.</li>
+    <!--os:mac,linux--><li><b data-text="ui-dark-messages"></b> zeigt die Nachrichten, die Sie lesen und schreiben, auf dunklem Hintergrund, solange das System im Dunkelmodus ist. Die Option ist anfangs eingeschaltet.</li><!--/os-->
+    <li><b data-text="ui-pictures-always-option"></b> lädt die Bilder jeder Nachricht herunter. Die Option ist anfangs ausgeschaltet, weil Absender dann erkennen können, wann Sie ihre Nachrichten lesen. Siehe <a href="topic:pictures-tracking"></a>.</li>
+    <li><b data-text="ui-trusted-senders-button"></b> zeigt die Absender, deren Bilder immer heruntergeladen werden. Dort können Sie sie entfernen.</li>
+</ul>
+<h2><b data-text="ui-download-heading"></b></h2>
+<ul>
+    <li><b data-text="ui-download-ahead"></b> wählt, welche Nachrichten heruntergeladen werden, bevor Sie sie öffnen: anfangs aktuelle Nachrichten mit jeweils höchstens 1 MB. Siehe <a href="topic:download-ahead"></a>.</li>
+    <li><b data-text="ui-download-limit"></b> begrenzt den Speicherplatz, den die heruntergeladenen Nachrichten jedes Kontos belegen. Anfangs ist es 1 GB.</li>
+</ul>
 <!--os:windows--><p>Das Installationsprogramm fragt bei der ersten Installation nach der Sprache und übernimmt sie als hier gewählte Sprache.</p><!--/os-->
 <!--os:mac--><p>Sie können die Sprache nur für Inbox Classic auch unter <i>Systemeinstellungen &gt; Allgemein &gt; Sprache &amp; Region &gt; Programme</i> wählen.</p><!--/os-->
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:conversations"></a> <a href="topic:sign-in-codes"></a></nav>
+<!--/review-->

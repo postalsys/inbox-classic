@@ -3,7 +3,7 @@
 
 use rusqlite::Connection;
 
-const MIGRATIONS: &[&str] = &[
+pub(crate) const MIGRATIONS: &[&str] = &[
     r#"
 CREATE TABLE accounts (
     id INTEGER PRIMARY KEY,
@@ -595,6 +595,135 @@ CREATE TRIGGER message_ids_high AFTER INSERT ON messages BEGIN
     UPDATE message_ids SET high = MAX(high, new.id);
 END;
 "#,
+    // lists whose reads do not grow with the store (counts.rs): each folder's messages, unread and flagged ones and
+    // conversations counted, and each conversation of a folder in a row of its own, kept by the triggers as messages
+    // come, change and go. The global orders carry the folder, so a list of several folders (All Inboxes) skips the
+    // others' messages without reading them, and the From and Subject orders have one too. Its expressions are those
+    // of the queries (sql.rs).
+    concat!(
+        "
+ALTER TABLE folders ADD COLUMN total INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE folders ADD COLUMN unread INTEGER NOT NULL DEFAULT 0;
+-- flagged as the Flagged folder finds them
+ALTER TABLE folders ADD COLUMN flagged INTEGER NOT NULL DEFAULT 0;
+-- its rows in `conversations`
+ALTER TABLE folders ADD COLUMN threads INTEGER NOT NULL DEFAULT 0;
+UPDATE folders SET
+    total = (SELECT COUNT(*) FROM messages m WHERE m.folder_id = folders.id),
+    unread = (SELECT COUNT(*) FROM messages m WHERE m.folder_id = folders.id AND m.seen = 0),
+    flagged = (SELECT COUNT(*) FROM messages m WHERE m.folder_id = folders.id AND ",
+        is_flagged!("m."),
+        ");
+
+-- a conversation's messages in one folder: how many, unread and flagged (in any case, as a selection counts them),
+-- its newest dates (the Date and Received orders), and its first message, by arrival (a message without a date
+-- first), whose row stands for it, with what the other orders sort it by
+CREATE TABLE conversations (
+    folder_id INTEGER NOT NULL REFERENCES folders(id) ON DELETE CASCADE,
+    thread_id INTEGER NOT NULL,
+    total INTEGER NOT NULL,
+    unread INTEGER NOT NULL,
+    flagged INTEGER NOT NULL,
+    newest INTEGER,
+    newest_received INTEGER,
+    first_id INTEGER NOT NULL,
+    first_at INTEGER NOT NULL,
+    first_uid INTEGER NOT NULL,
+    first_from TEXT NOT NULL,
+    first_subject TEXT NOT NULL,
+    first_size INTEGER,
+    PRIMARY KEY (folder_id, thread_id)
+) WITHOUT ROWID;
+INSERT INTO conversations (folder_id, thread_id, total, unread, flagged, newest, newest_received, first_id, first_at,
+    first_uid, first_from, first_subject, first_size)
+",
+        conversations_counted!(),
+        ";
+UPDATE folders SET threads = (SELECT COUNT(*) FROM conversations c WHERE c.folder_id = folders.id);
+-- the grouped list's orders in a folder and over several (the folder is in the key, so those of other folders are
+-- skipped in the index)
+CREATE INDEX conversations_by_date ON conversations (folder_id, newest);
+CREATE INDEX conversations_all_by_date ON conversations (newest, thread_id);
+CREATE INDEX conversations_by_received ON conversations (folder_id, newest_received);
+CREATE INDEX conversations_all_by_received ON conversations (newest_received, thread_id);
+CREATE INDEX conversations_by_from ON conversations (folder_id, first_from COLLATE NOCASE);
+CREATE INDEX conversations_all_by_from ON conversations (first_from COLLATE NOCASE, thread_id);
+CREATE INDEX conversations_by_subject ON conversations (folder_id, first_subject COLLATE NOCASE);
+CREATE INDEX conversations_all_by_subject ON conversations (first_subject COLLATE NOCASE, thread_id);
+
+CREATE TRIGGER conversations_counted AFTER INSERT ON conversations BEGIN
+    UPDATE folders SET threads = threads + 1 WHERE id = NEW.folder_id;
+END;
+CREATE TRIGGER conversations_uncounted AFTER DELETE ON conversations BEGIN
+    UPDATE folders SET threads = threads - 1 WHERE id = OLD.folder_id;
+END;
+
+CREATE TRIGGER messages_counted AFTER INSERT ON messages BEGIN
+    ",
+        count_message!("NEW."),
+        "
+END;
+-- a message of a folder deleted with it is not counted again: the folder and its conversations are gone
+CREATE TRIGGER messages_uncounted AFTER DELETE ON messages
+WHEN EXISTS (SELECT 1 FROM folders WHERE id = OLD.folder_id) BEGIN
+    ",
+        uncount_message!("OLD."),
+        "
+END;
+-- read or flagged: the counts follow (unless the message also moved, which the next trigger counts whole)
+CREATE TRIGGER messages_flags_counted AFTER UPDATE OF seen, flags ON messages
+WHEN (OLD.seen IS NOT NEW.seen OR OLD.flags IS NOT NEW.flags) AND ",
+        placed_by_changed!("IS", "AND"),
+        "
+BEGIN
+    UPDATE folders SET unread = unread + (NEW.seen = 0) - (OLD.seen = 0),
+        flagged = flagged + (",
+        is_flagged!("NEW."),
+        ") - (",
+        is_flagged!("OLD."),
+        ")
+    WHERE id = NEW.folder_id;
+    UPDATE conversations SET unread = unread + (NEW.seen = 0) - (OLD.seen = 0),
+        flagged = flagged + (",
+        any_flagged!("NEW."),
+        ") - (",
+        any_flagged!("OLD."),
+        ")
+    WHERE folder_id = NEW.folder_id AND thread_id = NEW.thread_id;
+END;
+-- moved to another conversation (conversations joined, threads.rs), or anything it is placed by changed: taken out
+-- as it was and counted again as it is
+CREATE TRIGGER messages_recounted AFTER UPDATE OF folder_id, thread_id, uid, date, internal_date, size, sort_from,
+    sort_subject, from_name, from_address, subject ON messages
+WHEN ",
+        placed_by_changed!("IS NOT", "OR"),
+        "
+BEGIN
+    ",
+        uncount_message!("OLD."),
+        "
+    ",
+        count_message!("NEW."),
+        "
+END;
+
+-- the orders over several folders with the folder in the index, and the From and Subject orders over several
+DROP INDEX messages_all_by_date;
+CREATE INDEX messages_all_by_date ON messages (",
+        list_date!(""),
+        ", uid, id, folder_id);
+DROP INDEX messages_all_by_received;
+CREATE INDEX messages_all_by_received ON messages (internal_date, uid, id, folder_id);
+CREATE INDEX messages_all_by_from ON messages (",
+        from_key!(""),
+        " COLLATE NOCASE, uid, id, folder_id);
+CREATE INDEX messages_all_by_subject ON messages (",
+        subject_key!(""),
+        " COLLATE NOCASE, uid, id, folder_id);
+-- the messages read since a time (Hide Read Messages keeps them in the list, counts.rs)
+CREATE INDEX messages_read_at ON messages (seen_at) WHERE seen_at IS NOT NULL;
+"
+    ),
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {
@@ -791,15 +920,25 @@ mod tests {
                 );
             }
         }
-        // over the Inboxes of every account (search.rs keeps it off the folder indexes for these orders)
-        for field in [crate::SortField::Date, crate::SortField::Received] {
+        // over the Inboxes of every account (search.rs keeps it off the folder indexes for these orders), the folder
+        // read from the index
+        for field in [
+            crate::SortField::Date,
+            crate::SortField::Received,
+            crate::SortField::From,
+            crate::SortField::Subject,
+        ] {
             let order = crate::Sort {
                 field,
                 ascending: false,
             }
             .order_by();
             // All Sent and All Drafts read their few folders by the folder indexes
-            for folders in [crate::search::SENT, crate::search::DRAFTS] {
+            let dated = matches!(field, crate::SortField::Date | crate::SortField::Received);
+            for folders in [crate::search::SENT, crate::search::DRAFTS]
+                .into_iter()
+                .filter(|_| dated)
+            {
                 let sql = format!("SELECT id FROM messages WHERE folder_id IN ({folders}) ORDER BY {order} LIMIT 10");
                 let plan = plan(&db, &sql);
                 assert!(
@@ -813,9 +952,42 @@ mod tests {
             );
             let plan = plan(&db, &sql);
             assert!(
-                !plan.contains("TEMP B-TREE"),
+                !plan.contains("TEMP B-TREE") && plan.contains("messages_all_by_"),
                 "{field:?} over folders sorts without an index: {plan}"
             );
+        }
+        // a message's place: the messages above it counted on the order's index alone
+        for field in [
+            crate::SortField::Date,
+            crate::SortField::Received,
+            crate::SortField::From,
+            crate::SortField::Subject,
+            crate::SortField::Size,
+        ] {
+            let order = crate::keyset::Order::messages(crate::Sort {
+                field,
+                ascending: false,
+            });
+            let cursor = crate::keyset::Cursor {
+                key: rusqlite::types::Value::Integer(5),
+                ties: vec![rusqlite::types::Value::Integer(1), rusqlite::types::Value::Integer(1)],
+            };
+            for (piece, values) in order.beyond(&cursor, false, &[]) {
+                let plan: Vec<String> = db
+                    .prepare(&format!(
+                        "EXPLAIN QUERY PLAN SELECT COUNT(*) FROM messages WHERE folder_id = 1 AND {piece}"
+                    ))
+                    .unwrap()
+                    .query_map(rusqlite::params_from_iter(values), |row| row.get::<_, String>(3))
+                    .unwrap()
+                    .map(Result::unwrap)
+                    .collect();
+                let plan = plan.join("; ");
+                assert!(
+                    plan.contains("COVERING INDEX messages_by_"),
+                    "{field:?} {piece}: {plan}"
+                );
+            }
         }
         let plan: String = db
             .query_row(

@@ -381,6 +381,34 @@ ui-sign-in-apps-intro = Med påloggingsapper kan kontoer logge på gjennom nettl
 ui-col-issuer = Utsteder
 ui-col-used-by = Brukes av
 ui-options-system-default = Systemstandard ({ $language })
+# review: new
+ui-settings-general = Generelt
+# review: new
+ui-settings-reading = Lesing
+# review: new
+ui-settings-new-mail = Ny e-post
+# review: new
+ui-settings-sending = Sending
+# review: new
+ui-settings-default-apps = Standardapper
+# review: new
+ui-settings-message-list = Meldingsliste
+# review: new
+ui-settings-messages = Meldinger
+# review: new
+ui-settings-language = Språk
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Bruk
+# review: new
+ui-language-label = &Språk:
+# review: new
+ui-restart-note = Start Inbox Classic på nytt for å bytte språk.
+# review: new
+ui-restart-ask = Inbox Classic vises på { $language } når programmet startes på nytt. Vil du starte på nytt nå?
+# review: new
+ui-notify-new-mail = &Varsle meg når det kommer ny e-post
 ui-new-folder-title = Ny mappe
 ui-rename-folder-title = Gi mappen nytt navn
 ui-delete-folder-question = Vil du slette mappen «{ $folder }» med meldingene og mappene i den? Den slettes også på serveren.
@@ -545,23 +573,28 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Adresseboken kunne ikke lagres: { $reason }
 ui-code-copied = Koden er kopiert
-ui-codes-in-notifications = Vis påloggingskoder i varsler om ny e-post
+# review: changed
+ui-codes-in-notifications = Vis &påloggingskoder i varsler om ny e-post
 ui-tool-unread-only = Uleste
 ui-no-unread = Det er ingen uleste meldinger her.
 ui-pictures-always-sender = Last alltid ned bilder fra { $sender }
 ui-pictures-always-domain = Last alltid ned bilder fra alle på { $domain }
 ui-pictures-unconfirmed = Domenet til avsenderen ({ $domain }) kunne ikke bekreftes, så bildene i denne meldingen lastes ikke ned automatisk.
-ui-pictures-always-option = Last ned bilder i alle meldinger
+# review: changed
+ui-pictures-always-option = &Last ned bilder i alle meldinger
 ui-pictures-always-warning = Avsendere kan da se når du leser meldingene deres.
 ui-protection-details = &Detaljer...
 ui-protection-details-title = Sikkerhetsdetaljer
 ui-download-heading = Nedlasting
-ui-download-ahead = Last ned meldinger på forhånd:
+# review: changed
+ui-download-ahead = &Last ned meldinger på forhånd:
 ui-download-ahead-recent = Nylige meldinger på opptil 1 MB hver
 ui-download-ahead-all = Alle meldinger
 ui-download-ahead-never = Bare når de åpnes
-ui-download-limit = Lagringsgrense per konto:
-ui-send-delay = Forsinkelse før sending:
+# review: changed
+ui-download-limit = Lagringsgrense &per konto:
+# review: changed
+ui-send-delay = &Forsinkelse før sending:
 ui-send-delay-note = Mens en melding venter på å bli sendt, kan du avbryte sendingen med Angre.
 ui-dark-messages = Vis meldinger på mørk bakgrunn når systemet bruker mørk modus
 ui-sending-in = Sender { $subject } om { $count ->
@@ -573,17 +606,20 @@ ui-send-too-late = { $subject } er allerede sendt.
 ui-outbox-status-undo = Sendes kl. { $time }
 ui-download-note = Meldinger som er lastet ned på forhånd, åpnes med en gang. Når lagringsgrensen overskrides, fjernes de eldste lokale kopiene, og de lastes ned igjen når du åpner dem.
 ui-attachment-downloading = Denne meldingen er ikke ferdig nedlastet. Prøv igjen når nedlastingen er fullført.
-ui-trusted-senders-button = Klarerte avsendere...
+# review: changed
+ui-trusted-senders-button = &Klarerte avsendere...
 ui-trusted-senders-title = Klarerte avsendere
 ui-trusted-senders-note = Bilder i meldinger fra disse avsenderne lastes ned automatisk når e-postleverandøren din bekrefter domenet til avsenderen.
 ui-trusted-everyone-at = Alle på { $domain }
 ui-trusted-senders-empty = Ingen klarerte avsendere er lagt til ennå.
-ui-eml-default = Åpne .eml-filer med Inbox Classic
+# review: changed
+ui-eml-default = &Åpne .eml-filer med Inbox Classic
 ui-eml-default-done = Inbox Classic åpner nå .eml-filer.
 ui-eml-default-failed = Inbox Classic kunne ikke angis som standardapp for .eml-filer: { $reason }
 ui-folders = Mapper
 ui-sorted-by = Sortert etter { $field }
-ui-layout-label = Oppsett:
+# review: changed
+ui-layout-label = &Oppsett:
 ui-columns-note = Vinduet er bredt nok for kolonneoppsettet. Du kan endre oppsettet under Vis > Oppsett.
 ui-row-unread = Ulest
 ui-row-flagged = Med flagg
@@ -592,7 +628,9 @@ ui-row-messages = { $count ->
     [one] { $count } melding
    *[other] { $count } meldinger
 }
-ui-list-pictures = Vis bilder av avsendere i meldingslisten
+# review: changed
+ui-list-pictures = &Vis bilder av avsendere i meldingslisten
+# review: changed
 ui-list-pictures-note = Viser merkelogoer eller bilder fra adresseboken når avsenderdomenet er bekreftet, og initialer når det ikke finnes noe bilde. Nedlastede logoer lagres og gjenbrukes i flere meldinger.
 ui-card-picture = Bilde:
 ui-card-picture-choose = &Velg...

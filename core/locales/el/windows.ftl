@@ -108,10 +108,6 @@ win-edit = &Επεξεργασία...
 
 ## Options
 
-win-options-language-label = &Γλώσσα του Inbox Classic:
-win-options-restart-note = Επανεκκινήστε το Inbox Classic για να αλλάξει η γλώσσα.
-win-options-notify = &Ειδοποίηση όταν φτάνει νέα αλληλογραφία
-win-restart-ask = Μετά την επανεκκίνηση, το Inbox Classic θα χρησιμοποιεί τη γλώσσα «{ $language }». Θέλετε να γίνει επανεκκίνηση τώρα;
 win-folders-hide = Απόκρυψη της λίστας φακέλων
 win-folders-pin = Διατήρηση της λίστας φακέλων δίπλα στα μηνύματα
 win-folders-show = Εμφάνιση των φακέλων

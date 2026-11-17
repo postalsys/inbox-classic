@@ -134,6 +134,7 @@ pub async fn options(d: &Driver) {
         d.check(false, "Preferences opens");
         return;
     };
+    preferences_page(&dialog, SettingsPage::Reading);
     let root: gtk::Widget = dialog.clone().upcast();
     trusted_senders(d, &dialog, &root).await;
     set_always(&root, true);
@@ -151,6 +152,7 @@ pub async fn options(d: &Driver) {
 
     command(Command::Options);
     if let Some(dialog) = wait_dialog(10, "preferences-dialog").await {
+        preferences_page(&dialog, SettingsPage::Reading);
         set_always(dialog.upcast_ref(), false);
         dialog.close();
         wait_gone(10, "preferences-dialog").await;
@@ -170,9 +172,10 @@ async fn download_ahead(d: &Driver) {
         d.check(false, "Preferences opens");
         return;
     };
+    preferences_page(&dialog, SettingsPage::Downloading);
     let root: &gtk::Widget = dialog.upcast_ref();
-    let row = |name: &str| named_in(root, name).and_downcast::<adw::ComboRow>();
-    let (Some(ahead), Some(limit)) = (row("preferences-download-ahead"), row("preferences-download-limit")) else {
+    let row = |setting| setting_row(root, setting).and_downcast::<adw::ComboRow>();
+    let (Some(ahead), Some(limit)) = (row(Setting::DownloadAhead), row(Setting::DownloadLimit)) else {
         d.check(false, "Preferences has what is downloaded ahead");
         return;
     };
@@ -200,7 +203,7 @@ async fn download_ahead(d: &Driver) {
 
 /// The Trusted senders page: the domain listed, removed with its button, then the page says none is
 async fn trusted_senders(d: &Driver, dialog: &adw::Dialog, root: &gtk::Widget) {
-    let Some(row) = named_in(root, "preferences-trusted-senders").and_downcast::<adw::ActionRow>() else {
+    let Some(row) = setting_row(root, Setting::TrustedSenders).and_downcast::<adw::ActionRow>() else {
         d.check(false, "Preferences has Trusted senders");
         return;
     };
@@ -229,7 +232,7 @@ async fn trusted_senders(d: &Driver, dialog: &adw::Dialog, root: &gtk::Widget) {
 }
 
 fn set_always(root: &gtk::Widget, on: bool) {
-    if let Some(row) = named_in(root, "preferences-pictures-always").and_downcast::<adw::SwitchRow>() {
+    if let Some(row) = setting_row(root, Setting::PicturesAlways).and_downcast::<adw::SwitchRow>() {
         row.set_active(on);
     }
 }

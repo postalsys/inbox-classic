@@ -226,18 +226,20 @@ public static string RemoteText(IntPtr window, uint message, IntPtr wParam) {
 [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int DrawText(IntPtr dc, string text, int count, ref RECT rect, uint format);
 // whether the words of a control fit it in the dialog font the app gives its controls (DEFAULT_GUI_FONT): a static's
 // wrapped to its width within its height, a button's on one line with room for its frame, and for its box when `box`
-public static bool Fits(IntPtr hwnd, string text, bool button, bool box) {
+public static bool Fits(IntPtr hwnd, string text, bool button, bool box, bool wraps = false, bool edit = false) {
     RECT client;
     GetClientRect(hwnd, out client);
     IntPtr dc = GetDC(hwnd);
     IntPtr old = SelectObject(dc, GetStockObject(17));
     int width = client.Right - client.Left - (button ? (box ? 18 : 8) : 0);
     RECT need = new RECT { Left = 0, Top = 0, Right = width, Bottom = 0 };
-    // DT_CALCRECT, and DT_SINGLELINE or DT_WORDBREAK
-    DrawText(dc, text, -1, ref need, 0x400u | (button ? 0x20u : 0x10u));
+    // DT_CALCRECT, and DT_SINGLELINE or DT_WORDBREAK (a multi-line button's words wrap as a static text's do)
+    bool single = button && !wraps;
+    // DT_EDITCONTROL for a static text that wraps as an edit control does (SS_EDITCONTROL), breaking a long word
+    DrawText(dc, text, -1, ref need, 0x400u | (single ? 0x20u : 0x10u) | (edit ? 0x2000u : 0u));
     SelectObject(dc, old);
     ReleaseDC(hwnd, dc);
-    return need.Right <= width && (button || need.Bottom <= client.Bottom - client.Top);
+    return need.Right <= width && (single || need.Bottom <= client.Bottom - client.Top);
 }
 // the windows of class `cls` anywhere under `parent`
 public static System.Collections.Generic.List<IntPtr> FindDescendants(IntPtr parent, string cls) {
@@ -453,6 +455,21 @@ function WaitWindow([string]$class, [string]$title = $null, [int]$Seconds = 20) 
 # a window of the app's own once it shows: its controls are made and filled before it does, so they can be read
 function WaitShown([string]$class, [int]$Seconds = 20) {
     WaitFor { $w = [Native.Win]::FindWindow($class, [NullString]::Value); if ($w -ne [IntPtr]::Zero -and [Native.Win]::IsWindowVisible($w)) { $w } } $Seconds
+}
+# Options' page $page (0 General, 1 Reading, 2 Downloading, as core/settings.toml orders them) chosen by a click on its
+# tab, posted to the tab strip (app.h: IDC_OPTIONS_TABS, 680) at the middle of the tab (TCM_GETITEMRECT)
+function OptionsPage([IntPtr]$options, [int]$page) {
+    $tabs = [Native.Win]::GetDlgItem($options, 680)
+    $item = [Native.Win]::RemoteRect($tabs, 0x130A, [IntPtr]$page, 0)
+    $strip = New-Object Native.Win+RECT
+    [void][Native.Win]::GetWindowRect($tabs, [ref]$strip)
+    $x = [int][Math]::Floor(($item.Left + $item.Right) / 2) - $strip.Left
+    $y = [int][Math]::Floor(($item.Top + $item.Bottom) / 2) - $strip.Top
+    $point = [IntPtr](($y -shl 16) -bor $x)
+    [void][Native.Win]::PostMessage($tabs, 0x0201, [IntPtr]1, $point)
+    [void][Native.Win]::PostMessage($tabs, 0x0202, [IntPtr]::Zero, $point)
+    [void](WaitFor { [int][Native.Win]::SendMessage($tabs, 0x130B, [IntPtr]::Zero, [IntPtr]::Zero) -eq $page } 5)
+    Start-Sleep -Milliseconds 200
 }
 # the window of the WebView2 of a compose window's editor that takes input, clicked into as a user would when the
 # cursor is in another field
@@ -1518,6 +1535,7 @@ public static class Dragger {
     Command $main 137
     $o = WaitShown 'InboxClassicOptions' 10
     if ($o) {
+        OptionsPage $o 0
         $delay = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_SEND_DELAY)
         Check ($delay -ne [IntPtr]::Zero -and [int][Native.Win]::SendMessage($delay, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero) -eq 5) 'Options offers the wait before sending'
         [void][Native.Win]::SendMessage($delay, $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
@@ -1558,6 +1576,7 @@ public static class Dragger {
     Command $main 137
     $o = WaitShown 'InboxClassicOptions' 10
     if ($o) {
+        OptionsPage $o 0
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_SEND_DELAY), $CB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
         Click $o 1
         [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
@@ -3730,14 +3749,22 @@ public static class Dragger {
 
     Step 'conversations'
     $IDM_EXPAND_ALL_THREADS = 145; $IDM_COLLAPSE_ALL_THREADS = 146; $IDM_OPTIONS = 137; $IDC_OPTIONS_THREADS = 663
-    # Tools > Options with Group messages by conversation turned on or off, and OK; whether the box was there
-    function SetGrouping([bool]$on, [string]$shot = $null) {
+    # Tools > Options with Group messages by conversation turned on or off, and OK; whether the box was there. With
+    # $applied, Apply first, and $applied is checked with Options still open
+    function SetGrouping([bool]$on, [scriptblock]$applied = $null) {
         Command $main $IDM_OPTIONS
         $o = WaitShown 'InboxClassicOptions' 10
         if (-not $o) { return $false }
+        OptionsPage $o 1
         $box = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_THREADS)
         [void][Native.Win]::SendMessage($box, $BM_SETCHECK, [IntPtr]([int]$on), [IntPtr]::Zero)
-        if ($shot) { Shot $o $shot }
+        if ($applied) {
+            # as a click on the box sets it, then Apply (app.h: IDC_OPTIONS_APPLY)
+            Click $o $IDC_OPTIONS_THREADS
+            [void](WaitFor { [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($o, 681)) } 5)
+            Click $o 681
+            Check ([bool](WaitFor { (& $applied) -and [Native.Win]::IsWindowVisible($o) } 10)) "Apply regroups the list at once, Options still open ($(Rows) rows)"
+        }
         Click $o 1
         [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
         $box -ne [IntPtr]::Zero
@@ -3747,8 +3774,20 @@ public static class Dragger {
     Command $main $IDM_OPTIONS
     $o = WaitShown 'InboxClassicOptions' 10
     if ($o) {
+        OptionsPage $o 0
         $codes = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_CODES)
         Check ($codes -ne [IntPtr]::Zero -and [int][Native.Win]::SendMessage($codes, $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 0) 'Options can show sign-in codes in new mail notifications, off at first'
+        # under Notify me when new mail arrives, and only with it on: cleared (as a click clears it), the codes are disabled
+        $IDC_OPTIONS_NOTIFY = 661
+        $notifyBox = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_NOTIFY)
+        $notifyWas = [int][Native.Win]::SendMessage($notifyBox, $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero)
+        Check ($notifyWas -eq 1 -and [Native.Win]::IsWindowEnabled($codes)) 'with the notifications on, the codes can be chosen'
+        [void][Native.Win]::SendMessage($notifyBox, $BM_SETCHECK, [IntPtr]0, [IntPtr]::Zero)
+        Click $o $IDC_OPTIONS_NOTIFY
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindowEnabled($codes) } 5)) 'with them off, the codes are disabled'
+        [void][Native.Win]::SendMessage($notifyBox, $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+        Click $o $IDC_OPTIONS_NOTIFY
+        Check ([bool](WaitFor { [Native.Win]::IsWindowEnabled($codes) } 5)) 'and enabled again with them on'
         [void][Native.Win]::SendMessage($codes, $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
         Click $o 1
         [void](WaitFor { -not [Native.Win]::IsWindow($o) } 10)
@@ -3803,7 +3842,7 @@ public static class Dragger {
         Command $main $IDM_MARK_READ
         Check ([bool](WaitFor { (& $coastSeen) -eq 3 } 20)) "Mark Read on the collapsed row marks all three read on the server ($(& $coastSeen))"
     }
-    Check (SetGrouping $false) 'Group messages by conversation can be turned off'
+    Check (SetGrouping $false { (Rows) -eq $flat -and (SubjectRows "Re: $topic").Count -eq 2 }) 'Group messages by conversation can be turned off'
     Check ([bool](WaitFor { (Rows) -eq $flat -and (SubjectRows "Re: $topic").Count -eq 2 } 10)) "with it off the three messages are three rows ($(Rows))"
     Check ((Get-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue).GroupByConversation -eq 0) 'and that is kept for the next start'
     Shot $main 'threads-3-options-off'
@@ -4113,6 +4152,7 @@ public static class Dragger {
         Command $main $IDM_OPTIONS
         $o = WaitShown 'InboxClassicOptions' 10
         if (-not $o) { return $false }
+        OptionsPage $o 1
         $box = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_LIST_PICTURES)
         $was = [int][Native.Win]::SendMessage($box, $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero)
         [void][Native.Win]::SendMessage($box, $BM_SETCHECK, [IntPtr]([int]$on), [IntPtr]::Zero)
@@ -4373,11 +4413,13 @@ public static class Dragger {
     $labels = & $pictureMenu $null $null
     Check ((@($labels | Where-Object { $_ -like 'Always*' }).Count -eq 0) -and (@($labels | Where-Object { $_ -like '*shop.example*' }).Count -eq 1)) "its arrow has no Always, but says why ($($labels -join ', '))"
     Check (-not (& $showShop $shopSubjects[0])) 'the signed one shows its pictures by itself when opened again'
-    # Options lists the domain, and Remove takes it away
-    Command $main $IDM_OPTIONS
-    $o = WaitShown 'InboxClassicOptions' 10
-    Check ($null -ne $o) 'Tools > Options opens'
-    if ($o) {
+    # Options lists the domain, and Remove takes it away: back after Cancel, gone after OK
+    function RemoveTrusted([string]$then, [string]$shot = $null) {
+        Command $main $IDM_OPTIONS
+        $o = WaitShown 'InboxClassicOptions' 10
+        Check ($null -ne $o) 'Tools > Options opens'
+        if (-not $o) { return }
+        OptionsPage $o 1
         $always = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_PICTURES)
         Check ($always -ne [IntPtr]::Zero -and [int][Native.Win]::SendMessage($always, $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 0) 'Options can download pictures in all messages, off at first'
         Click $o $IDC_OPTIONS_TRUSTED
@@ -4386,7 +4428,7 @@ public static class Dragger {
         if ($trusted) {
             $senders = [Native.Win]::GetDlgItem($trusted, $IDC_TRUSTED_LIST)
             Check ((ListCount $senders) -eq 1 -and [Native.Win]::RemoteListText($senders, 0, 0) -eq 'Everyone at shop.example') "with the domain chosen ($([Native.Win]::RemoteListText($senders, 0, 0)))"
-            Shot $trusted 'pictures-3-options'
+            if ($shot) { Shot $trusted $shot }
             # a click on its row, as the mouse would, then Remove
             $point = [IntPtr]((8 -shl 16) -bor 30)
             [void][Native.Win]::PostMessage($senders, 0x0201, [IntPtr]1, $point)
@@ -4396,15 +4438,20 @@ public static class Dragger {
             Check ([bool](WaitFor { (Visible $trusted $IDC_TRUSTED_EMPTY) -and -not (Visible $trusted $IDC_TRUSTED_LIST) } 5)) "Remove takes it away, and the window says nobody is trusted ($(GetText $trusted $IDC_TRUSTED_EMPTY))"
             Click $trusted 1
             Check ([bool](WaitFor { -not [Native.Win]::IsWindow($trusted) } 5)) 'Close closes it'
+            Check ([bool](WaitFor { [Native.Win]::IsWindowEnabled([Native.Win]::GetDlgItem($o, 681)) } 5)) 'and Options can apply that'
         }
-        Click $o 1
+        Click $o $(if ($then -eq 'OK') { 1 } else { 2 })
         [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
     }
+    RemoveTrusted 'Cancel' 'pictures-3-options'
+    Check (-not (& $showShop $shopSubjects[0])) 'Cancel in Options keeps the sender trusted: the signed one still shows its pictures'
+    RemoveTrusted 'OK'
     Check (& $showShop $shopSubjects[0]) 'removed, the signed one asks again'
     # every message's pictures
     Command $main $IDM_OPTIONS
     $o = WaitShown 'InboxClassicOptions' 10
     if ($o) {
+        OptionsPage $o 1
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_PICTURES), $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
         Click $o 1
         [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
@@ -4413,6 +4460,7 @@ public static class Dragger {
     Command $main $IDM_OPTIONS
     $o = WaitShown 'InboxClassicOptions' 10
     if ($o) {
+        OptionsPage $o 1
         $always = [Native.Win]::GetDlgItem($o, $IDC_OPTIONS_PICTURES)
         Check ([int][Native.Win]::SendMessage($always, $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1) 'Options shows it on'
         [void][Native.Win]::SendMessage($always, $BM_SETCHECK, [IntPtr]0, [IntPtr]::Zero)
@@ -4427,6 +4475,7 @@ public static class Dragger {
     Command $main $IDM_OPTIONS
     $o = WaitShown 'InboxClassicOptions' 10
     if ($o) {
+        OptionsPage $o 2
         Check ((& $selected $o $IDC_OPTIONS_DOWNLOAD_AHEAD) -eq 2 -and (& $selected $o $IDC_OPTIONS_DOWNLOAD_LIMIT) -eq 2) 'Options shows what is downloaded ahead (Only when opened) and 1 GB kept for each account'
         Check ((GetText $o $IDC_OPTIONS_DOWNLOAD_NOTE) -match 'oldest') "with what that means under them ($(GetText $o $IDC_OPTIONS_DOWNLOAD_NOTE))"
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_DOWNLOAD_AHEAD), $CB_SETCURSEL, [IntPtr]0, [IntPtr]::Zero)
@@ -4437,6 +4486,7 @@ public static class Dragger {
     Command $main $IDM_OPTIONS
     $o = WaitShown 'InboxClassicOptions' 10
     if ($o) {
+        OptionsPage $o 2
         Check ((& $selected $o $IDC_OPTIONS_DOWNLOAD_AHEAD) -eq 0) 'Recent messages up to 1 MB is kept when chosen'
         [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_DOWNLOAD_AHEAD), $CB_SETCURSEL, [IntPtr]2, [IntPtr]::Zero)
         Click $o 1
@@ -5834,11 +5884,54 @@ public static class Dragger {
     # ---- Options and the language ----
 
     Step 'Options and the language'
-    $IDM_OPTIONS = 137; $IDC_OPTIONS_LANGUAGE = 660; $IDC_OPTIONS_NOTIFY = 661
+    $IDM_OPTIONS = 137; $IDC_OPTIONS_LANGUAGE = 660; $IDC_OPTIONS_NOTIFY = 661; $IDC_OPTIONS_THREADS = 663; $IDC_OPTIONS_LAYOUT = 675
+    $IDC_OPTIONS_TABS = 680; $IDC_OPTIONS_APPLY = 681; $IDC_OPTIONS_DEFAULT_APP = 682; $IDC_OPTIONS_EML = 668; $TCM_GETCURSEL = 0x130B
     Command $main $IDM_OPTIONS
     $options = WaitShown 'InboxClassicOptions'
     Check ($null -ne $options) 'Tools > Options opens'
     if ($options) {
+        $tabs = [Native.Win]::GetDlgItem($options, $IDC_OPTIONS_TABS)
+        $apply = [Native.Win]::GetDlgItem($options, $IDC_OPTIONS_APPLY)
+        Check ([int][Native.Win]::SendMessage($tabs, $TCM_GETCURSEL, [IntPtr]::Zero, [IntPtr]::Zero) -eq 0) 'it opens on General'
+        Check ($apply -ne [IntPtr]::Zero -and -not [Native.Win]::IsWindowEnabled($apply)) 'Apply is disabled while nothing changed'
+        Check ((Visible $options $IDC_OPTIONS_DEFAULT_APP) -and (Visible $options $IDC_OPTIONS_EML) -and -not (Visible $options $IDC_OPTIONS_THREADS)) 'General has Make Default Mail App and Open .eml Files, not Reading''s settings'
+        # Ctrl+Tab, pressed as the keyboard would, to Reading
+        [void][Native.Win]::SetForegroundWindow($options)
+        Start-Sleep -Milliseconds 300
+        [Native.Win]::keybd_event(0x11, 0, 0, [IntPtr]::Zero)
+        [Native.Win]::keybd_event(0x09, 0, 0, [IntPtr]::Zero)
+        [Native.Win]::keybd_event(0x09, 0, 2, [IntPtr]::Zero)
+        [Native.Win]::keybd_event(0x11, 0, 2, [IntPtr]::Zero)
+        Check ([bool](WaitFor { [int][Native.Win]::SendMessage($tabs, $TCM_GETCURSEL, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 } 5)) 'Ctrl+Tab goes to Reading'
+        Check ((Visible $options $IDC_OPTIONS_THREADS) -and (Visible $options $IDC_OPTIONS_LAYOUT) -and -not (Visible $options $IDC_OPTIONS_LANGUAGE)) 'which shows its own settings only'
+        Shot $options 'options-2-reading'
+        # Group messages by conversation cleared (as a click clears it) and Apply: set with the window still open
+        $threadsBox = [Native.Win]::GetDlgItem($options, $IDC_OPTIONS_THREADS)
+        Check ([int][Native.Win]::SendMessage($threadsBox, $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1) 'Group messages by conversation is on'
+        [void][Native.Win]::SendMessage($threadsBox, $BM_SETCHECK, [IntPtr]0, [IntPtr]::Zero)
+        Click $options $IDC_OPTIONS_THREADS
+        Check ([bool](WaitFor { [Native.Win]::IsWindowEnabled($apply) } 5)) 'a change enables Apply'
+        Click $options $IDC_OPTIONS_APPLY
+        Check ([bool](WaitFor { (Get-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue).GroupByConversation -eq 0 } 5) -and [Native.Win]::IsWindowVisible($options)) 'Apply sets it, and Options stays open'
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindowEnabled($apply) } 5)) 'and Apply is disabled again'
+        # on again, then Cancel: as Apply left it
+        [void][Native.Win]::SendMessage($threadsBox, $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+        Click $options $IDC_OPTIONS_THREADS
+        Click $options 2
+        Check ([bool](WaitFor { -not [Native.Win]::IsWindow($options) } 5)) 'Cancel closes Options'
+        Start-Sleep -Milliseconds 500
+        Check ((Get-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue).GroupByConversation -eq 0) 'and leaves the setting as Apply set it'
+        Command $main $IDM_OPTIONS
+        $options = WaitShown 'InboxClassicOptions'
+    }
+    if ($options) {
+        # grouped again for the steps after, with OK
+        OptionsPage $options 1
+        $threadsBox = [Native.Win]::GetDlgItem($options, $IDC_OPTIONS_THREADS)
+        Check ([int][Native.Win]::SendMessage($threadsBox, $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 0) 'Options opened again shows it off'
+        [void][Native.Win]::SendMessage($threadsBox, $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+        Click $options $IDC_OPTIONS_THREADS
+        OptionsPage $options 0
         $combo = [Native.Win]::GetDlgItem($options, $IDC_OPTIONS_LANGUAGE)
         $count = [int][Native.Win]::SendMessage($combo, $CB_GETCOUNT, [IntPtr]::Zero, [IntPtr]::Zero)
         # CB_GETLBTEXT is one of the messages Windows copies between processes: a buffer of this one
@@ -5859,6 +5952,7 @@ public static class Dragger {
         [void][Native.Win]::SendMessage($combo, $CB_SETCURSEL, [IntPtr]$deutsch, [IntPtr]::Zero)
         Shot $options 'options-1-language'
         Click $options 1
+        Check ([bool](WaitFor { (Get-ItemProperty -Path $preferencesKey -Name GroupByConversation -ErrorAction SilentlyContinue).GroupByConversation -eq 1 } 5)) 'OK sets every page, Reading too'
         $restart = WaitShown 'InboxClassicRestart' 10
         Check ($null -ne $restart) 'a language chosen asks to restart'
         if ($restart) {
@@ -6068,6 +6162,7 @@ public static class Dragger {
         Command $main $IDM_OPTIONS
         $o = WaitShown 'InboxClassicOptions' 10
         if ($o) {
+            OptionsPage $o 2
             [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($o, $IDC_OPTIONS_DOWNLOAD_AHEAD), $CB_SETCURSEL, [IntPtr]$choice, [IntPtr]::Zero)
             Click $o 1
             [void](WaitFor { -not [Native.Win]::IsWindow($o) } 5)
@@ -6210,7 +6305,10 @@ public static bool HasIcon(IntPtr window) {
                 if ($wordsOnly -or $drawn) { continue }
                 $isButton = $class -eq 'Button'
                 $hasBox = ($kind -band 0xF) -in @(2, 3, 5, 6)
-                if (-not [Native.Win]::Fits($control, $text, $isButton, $hasBox)) { $cut += $text }
+                # BS_MULTILINE: Options' check boxes wrap their words; SS_EDITCONTROL: its notes break a long word
+                $wraps = $isButton -and ($style -band 0x2000) -ne 0
+                $edit = -not $isButton -and ($style -band 0x2000) -ne 0
+                if (-not [Native.Win]::Fits($control, $text, $isButton, $hasBox, $wraps, $edit)) { $cut += $text }
             }
         }
         Check ($english.Count -eq 0) "${what}: no word left in English ($($english -join ' | '))"
@@ -6334,8 +6432,14 @@ public static bool HasIcon(IntPtr window) {
         Command $main $IDM_OPTIONS
         $options = WaitShown 'InboxClassicOptions'
         if ($options) {
-            CheckPseudo $options 'Options'
+            CheckPseudo $options 'Options, General'
             Shot $options 'lang-4-pseudo-options'
+            OptionsPage $options 1
+            CheckPseudo $options 'Options, Reading'
+            Shot $options 'lang-4b-pseudo-options-reading'
+            OptionsPage $options 2
+            CheckPseudo $options 'Options, Downloading'
+            Shot $options 'lang-4c-pseudo-options-downloading'
             Click $options 2
         }
 

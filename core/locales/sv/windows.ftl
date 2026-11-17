@@ -167,14 +167,6 @@ win-edit = &Redigera...
 ## Options
 
 # review: new
-win-options-language-label = &Visa Inbox Classic på:
-# review: new
-win-options-restart-note = Starta om Inbox Classic för att byta språk.
-# review: new
-win-options-notify = &Meddela mig när ny e-post kommer
-# review: new
-win-restart-ask = Inbox Classic visas på { $language } efter en omstart. Vill du starta om nu?
-# review: new
 win-folders-hide = Dölj mapplistan
 # review: new
 win-folders-pin = Behåll mapplistan bredvid meddelandena
