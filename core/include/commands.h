@@ -79,6 +79,9 @@ enum PeCommandId : unsigned short {
     IDM_EXPORT_ADDRESS_BOOK = 150,
     IDM_EXPORT_SETUP = 173,
     IDM_IMPORT_SETUP = 174,
+    IDM_COMPOSE_SIGN = 175,
+    IDM_COMPOSE_ENCRYPT = 176,
+    IDM_ATTACH_MY_KEY = 177,
 };
 
 // whether a command acts on one message only, off while several are selected
@@ -165,6 +168,18 @@ inline bool CommandActsOnList(unsigned id) {
     }
 }
 
+// whether a command is the compose window's (its toolbar and menus), not the main window's
+inline bool CommandInCompose(unsigned id) {
+    switch (id) {
+    case IDM_COMPOSE_SIGN:
+    case IDM_COMPOSE_ENCRYPT:
+    case IDM_ATTACH_MY_KEY:
+        return true;
+    default:
+        return false;
+    }
+}
+
 // the label of a command in the catalog (& marks the menu letter): pe_text(CommandText(IDM_...))
 inline PeText CommandText(PeCommandId id) {
     switch (id) {
@@ -242,6 +257,9 @@ inline PeText CommandText(PeCommandId id) {
     case IDM_EXPORT_ADDRESS_BOOK: return PE_TEXT_CMD_EXPORT_ADDRESS_BOOK;
     case IDM_EXPORT_SETUP: return PE_TEXT_CMD_EXPORT_SETUP;
     case IDM_IMPORT_SETUP: return PE_TEXT_CMD_IMPORT_SETUP;
+    case IDM_COMPOSE_SIGN: return PE_TEXT_CMD_COMPOSE_SIGN;
+    case IDM_COMPOSE_ENCRYPT: return PE_TEXT_CMD_COMPOSE_ENCRYPT;
+    case IDM_ATTACH_MY_KEY: return PE_TEXT_CMD_ATTACH_MY_KEY;
     }
     return PE_TEXT_CMD_NEW_ACCOUNT;
 }

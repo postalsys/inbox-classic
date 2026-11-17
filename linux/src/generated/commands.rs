@@ -77,6 +77,9 @@ pub enum Command {
     ExportAddressBook,
     ExportSetup,
     ImportSetup,
+    ComposeSign,
+    ComposeEncrypt,
+    AttachMyKey,
 }
 
 impl Command {
@@ -155,6 +158,9 @@ impl Command {
         Command::ExportAddressBook,
         Command::ExportSetup,
         Command::ImportSetup,
+        Command::ComposeSign,
+        Command::ComposeEncrypt,
+        Command::AttachMyKey,
     ];
 
     /// The name of its action (`win.<name>`)
@@ -234,10 +240,13 @@ impl Command {
             Command::ExportAddressBook => "export-address-book",
             Command::ExportSetup => "export-setup",
             Command::ImportSetup => "import-setup",
+            Command::ComposeSign => "compose-sign",
+            Command::ComposeEncrypt => "compose-encrypt",
+            Command::AttachMyKey => "attach-my-key",
         }
     }
 
-    /// file, edit, view, tools, message, help, or tray (the tray icon's menu only)
+    /// file, edit, view, tools, message, help, or tray (the tray icon's menu only); insert for the compose window
     pub fn menu(self) -> &'static str {
         match self {
             Command::NewAccount => "file",
@@ -314,6 +323,92 @@ impl Command {
             Command::ExportAddressBook => "file",
             Command::ExportSetup => "file",
             Command::ImportSetup => "file",
+            Command::ComposeSign => "tools",
+            Command::ComposeEncrypt => "tools",
+            Command::AttachMyKey => "insert",
+        }
+    }
+
+    /// The window it is a command of: main, or compose (`compose.<name>` in its own action group)
+    pub fn window(self) -> &'static str {
+        match self {
+            Command::NewAccount => "main",
+            Command::Exit => "main",
+            Command::Sync => "main",
+            Command::Undo => "main",
+            Command::SelectAll => "main",
+            Command::MarkRead => "main",
+            Command::MarkUnread => "main",
+            Command::LayoutAutomatic => "main",
+            Command::LayoutClassic => "main",
+            Command::LayoutColumns => "main",
+            Command::FolderList => "main",
+            Command::SortDate => "main",
+            Command::SortFrom => "main",
+            Command::SortSubject => "main",
+            Command::SortSize => "main",
+            Command::SortAscending => "main",
+            Command::SortDescending => "main",
+            Command::TextSizeLargest => "main",
+            Command::TextSizeLarger => "main",
+            Command::TextSizeMedium => "main",
+            Command::TextSizeSmaller => "main",
+            Command::TextSizeSmallest => "main",
+            Command::Pictures => "main",
+            Command::About => "main",
+            Command::NewMail => "main",
+            Command::Reply => "main",
+            Command::ReplyAll => "main",
+            Command::Forward => "main",
+            Command::Help => "main",
+            Command::Delete => "main",
+            Command::Move => "main",
+            Command::Copy => "main",
+            Command::Flag => "main",
+            Command::NewFolder => "main",
+            Command::RenameFolder => "main",
+            Command::DeleteFolder => "main",
+            Command::NextMessage => "main",
+            Command::PreviousMessage => "main",
+            Command::NextUnread => "main",
+            Command::GoToFolder => "main",
+            Command::FindInMessage => "main",
+            Command::EmptyFolder => "main",
+            Command::Accounts => "main",
+            Command::Find => "main",
+            Command::SaveAs => "main",
+            Command::Print => "main",
+            Command::Import => "main",
+            Command::Outbox => "main",
+            Command::Properties => "main",
+            Command::MarkAllRead => "main",
+            Command::Junk => "main",
+            Command::NotJunk => "main",
+            Command::Archive => "main",
+            Command::WatchConversation => "main",
+            Command::IgnoreConversation => "main",
+            Command::Notify => "main",
+            Command::Open => "main",
+            Command::DefaultApp => "main",
+            Command::ViewSource => "main",
+            Command::ExpandAllThreads => "main",
+            Command::CollapseAllThreads => "main",
+            Command::HideIgnored => "main",
+            Command::HideRead => "main",
+            Command::AiAgents => "main",
+            Command::Options => "main",
+            Command::AddressBook => "main",
+            Command::MessageRules => "main",
+            Command::EncryptionKeys => "main",
+            Command::CreateRuleFromMessage => "main",
+            Command::AddSenderToBook => "main",
+            Command::ImportAddressBook => "main",
+            Command::ExportAddressBook => "main",
+            Command::ExportSetup => "main",
+            Command::ImportSetup => "main",
+            Command::ComposeSign => "compose",
+            Command::ComposeEncrypt => "compose",
+            Command::AttachMyKey => "compose",
         }
     }
 
@@ -394,6 +489,9 @@ impl Command {
             Command::ExportAddressBook => pe_core::i18n::Text::CmdExportAddressBook,
             Command::ExportSetup => pe_core::i18n::Text::CmdExportSetup,
             Command::ImportSetup => pe_core::i18n::Text::CmdImportSetup,
+            Command::ComposeSign => pe_core::i18n::Text::CmdComposeSign,
+            Command::ComposeEncrypt => pe_core::i18n::Text::CmdComposeEncrypt,
+            Command::AttachMyKey => pe_core::i18n::Text::CmdAttachMyKey,
         }
     }
 
@@ -492,6 +590,9 @@ impl Command {
             Command::ExportAddressBook => None,
             Command::ExportSetup => None,
             Command::ImportSetup => None,
+            Command::ComposeSign => Some("<Primary><Shift>d"),
+            Command::ComposeEncrypt => Some("<Primary><Shift>e"),
+            Command::AttachMyKey => None,
         }
     }
 
@@ -572,6 +673,9 @@ impl Command {
             Command::ExportAddressBook => false,
             Command::ExportSetup => false,
             Command::ImportSetup => false,
+            Command::ComposeSign => true,
+            Command::ComposeEncrypt => true,
+            Command::AttachMyKey => false,
         }
     }
 
@@ -652,6 +756,9 @@ impl Command {
             Command::ExportAddressBook => false,
             Command::ExportSetup => false,
             Command::ImportSetup => false,
+            Command::ComposeSign => false,
+            Command::ComposeEncrypt => false,
+            Command::AttachMyKey => false,
         }
     }
 
@@ -732,6 +839,9 @@ impl Command {
             Command::ExportAddressBook => false,
             Command::ExportSetup => false,
             Command::ImportSetup => false,
+            Command::ComposeSign => false,
+            Command::ComposeEncrypt => false,
+            Command::AttachMyKey => false,
         }
     }
 
@@ -812,6 +922,9 @@ impl Command {
             Command::ExportAddressBook => false,
             Command::ExportSetup => false,
             Command::ImportSetup => false,
+            Command::ComposeSign => false,
+            Command::ComposeEncrypt => false,
+            Command::AttachMyKey => false,
         }
     }
 
@@ -892,6 +1005,9 @@ impl Command {
             Command::ExportAddressBook => None,
             Command::ExportSetup => None,
             Command::ImportSetup => None,
+            Command::ComposeSign => None,
+            Command::ComposeEncrypt => None,
+            Command::AttachMyKey => None,
         }
     }
 }
