@@ -321,8 +321,8 @@ Review notes (round 2):
 - "Podaci za prijavu" includes passwords and OAuth credentials. An unprotected transfer requires another
   password or browser sign-in. Inflect a head noun before dynamic names, or use a colon/parentheses.
 - Cached brand logos are saved and reused; verified sender domains do not prove a person's identity.
-- All 44 actual menu/dialog scopes have unique access keys, using Croatian letters where needed. Cc/Bcc use
-  Kopija / Skrivena kopija with Alt+K / Alt+S, matching Windows and GTK controls.
+- All 46 actual menu/dialog scopes have unique access keys, including the three settings pages. Croatian letters
+  are used where needed. Cc/Bcc use Kopija / Skrivena kopija with Alt+K / Alt+S, matching Windows and GTK controls.
 
 ### Italiano (it)
 

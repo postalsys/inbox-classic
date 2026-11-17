@@ -378,33 +378,19 @@ ui-sign-in-apps-intro = Aplikacije za prijavu omogućuju računima prijavu putem
 ui-col-issuer = Izdavatelj
 ui-col-used-by = Računi
 ui-options-system-default = Zadano u sustavu ({ $language })
-# review: new
 ui-settings-general = Općenito
-# review: new
 ui-settings-reading = Čitanje
-# review: new
 ui-settings-new-mail = Nova pošta
-# review: new
 ui-settings-sending = Slanje
-# review: new
 ui-settings-default-apps = Zadane aplikacije
-# review: new
 ui-settings-message-list = Popis poruka
-# review: new
 ui-settings-messages = Poruke
-# review: new
 ui-settings-language = Jezik
-# review: new
 ui-settings-label = { $label }:
-# review: new
 ui-apply = &Primijeni
-# review: new
 ui-language-label = &Jezik:
-# review: new
 ui-restart-note = Ponovno pokrenite Inbox Classic da biste promijenili jezik.
-# review: new
-ui-restart-ask = Inbox Classic prikazat će jezik { $language } nakon ponovnog pokretanja. Ponovno pokrenuti sada?
-# review: new
+ui-restart-ask = Odabrani jezik ({ $language }) primijenit će se nakon ponovnog pokretanja programa Inbox Classic. Želite li sada ponovno pokrenuti program?
 ui-notify-new-mail = &Obavijesti me kad stigne nova pošta
 ui-new-folder-title = Nova mapa
 ui-rename-folder-title = Preimenovanje mape
@@ -576,27 +562,22 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Adresar nije moguće spremiti: { $reason }
 ui-code-copied = Kôd je kopiran
-# review: changed
 ui-codes-in-notifications = Pri&kaži kodove za prijavu u obavijestima o novoj pošti
 ui-tool-unread-only = Nepročitano
 ui-no-unread = Ovdje nema nepročitanih poruka.
 ui-pictures-always-sender = Uvijek preuzmi slike ovog pošiljatelja: { $sender }
 ui-pictures-always-domain = Uvijek preuzmi slike od svih s domene { $domain }
 ui-pictures-unconfirmed = Domenu pošiljatelja ({ $domain }) nije moguće potvrditi, pa se slike u ovoj poruci ne preuzimaju automatski.
-# review: changed
 ui-pictures-always-option = Pre&uzimaj slike u svim porukama
 ui-pictures-always-warning = Pošiljatelji tada mogu vidjeti kada čitate njihove poruke.
 ui-protection-details = &Pojedinosti...
 ui-protection-details-title = Sigurnosne pojedinosti
 ui-download-heading = Preuzimanje
-# review: changed
 ui-download-ahead = &Unaprijed preuzimaj poruke:
 ui-download-ahead-recent = Nedavne poruke veličine do 1 MB
 ui-download-ahead-all = Sve poruke
 ui-download-ahead-never = Samo pri otvaranju
-# review: changed
 ui-download-limit = &Ograničenje pohrane po računu:
-# review: changed
 ui-send-delay = Odgoda prije &slanja:
 ui-send-delay-note = Dok poruka čeka na slanje, slanje možete otkazati naredbom Poništi.
 ui-dark-messages = Prikazuj poruke na tamnoj pozadini kad je sustav u tamnom načinu
@@ -610,19 +591,16 @@ ui-send-too-late = Poruka { $subject } već je poslana.
 ui-outbox-status-undo = Šalje se u { $time }
 ui-download-note = Unaprijed preuzete poruke otvaraju se odmah. Kad se prekorači ograničenje pohrane, najstarije lokalne kopije uklanjaju se i ponovno preuzimaju kad ih otvorite.
 ui-attachment-downloading = Preuzimanje ove poruke nije završeno. Pokušajte ponovno kad preuzimanje završi.
-# review: changed
 ui-trusted-senders-button = P&ouzdani pošiljatelji...
 ui-trusted-senders-title = Pouzdani pošiljatelji
 ui-trusted-senders-note = Slike u porukama ovih pošiljatelja preuzimaju se automatski kad vaš davatelj usluge e-pošte potvrdi domenu pošiljatelja.
 ui-trusted-everyone-at = Svi s domene { $domain }
 ui-trusted-senders-empty = Još nije dodan nijedan pouzdani pošiljatelj.
-# review: changed
 ui-eml-default = Otvaraj &datoteke .eml u programu Inbox Classic
 ui-eml-default-done = Inbox Classic sada otvara datoteke .eml.
 ui-eml-default-failed = Inbox Classic nije moguće postaviti kao zadanu aplikaciju za datoteke .eml: { $reason }
 ui-folders = Mape
 ui-sorted-by = Sortirano po: { $field }
-# review: changed
 ui-layout-label = &Raspored:
 ui-columns-note = Prozor je dovoljno širok za raspored u stupcima. Raspored možete promijeniti u izborniku Prikaz > Raspored.
 ui-row-unread = Nepročitano
@@ -633,10 +611,8 @@ ui-row-messages = { $count ->
     [few] { $count } poruke
    *[other] { $count } poruka
 }
-# review: changed
 ui-list-pictures = Prikazuj &slike pošiljatelja na popisu poruka
-# review: changed
-ui-list-pictures-note = Kad je domena pošiljatelja potvrđena, prikazuju se logotipi robnih marki ili slike iz Adresara. Ako slika nije dostupna, prikazuju se inicijali. Preuzeti se logotipi spremaju i ponovno koriste za druge poruke.
+ui-list-pictures-note = U rasporedu sa stupcima prikazuju se logotipi robnih marki ili slike iz Adresara ako je domena pošiljatelja potvrđena. Ako slika nije dostupna, prikazuju se inicijali. Preuzeti logotipi spremaju se i ponovno koriste za druge poruke.
 ui-card-picture = Slika:
 ui-card-picture-choose = &Odaberi...
 ui-picture-not-picture = Datoteka mora biti slika u formatu PNG ili JPEG.

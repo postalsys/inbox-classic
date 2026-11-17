@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue Croatian (hr) app additions: 24 settings entries remain in app.ftl. Then review core.ftl (448 entries), remaining platform/help-title catalogs and all 52 help topics. Review the three new Linux/Mac settings entries with their catalogs. de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi settings and all three followups complete. Keep hr settings followups pending until all affected catalogs/help are reviewed. Then hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. Use 46 mnemonic scopes and glossary context/source-error notes. Pending 14046 catalogs and 572 help topics; baseline unchanged. No tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Continue Croatian (hr) core.ftl: 448 entries, then help.ftl 24, linux.ftl 87, mac.ftl 65, windows.ftl 68 and all 52 help topics. All current app entries are reviewed (24 settings additions completed). Include new Linux/Mac settings entries and all 11 affected help topics before marking hr settings-pages-context/encrypted-image-permission/help-label-punctuation complete. Then hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. Use 46 mnemonic scopes and glossary context/source-error notes. Fresh source audit at 381572d9 found no additions beyond the known queue. Pending 14022 catalogs and 572 help topics; baseline unchanged. No tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -11552,32 +11552,6 @@
           "win-installer-older-ask",
           "win-installer-still-running",
           "win-installer-remove-mail-ask"
-        ],
-        "app.ftl": [
-          "ui-settings-general",
-          "ui-settings-reading",
-          "ui-settings-new-mail",
-          "ui-settings-sending",
-          "ui-settings-default-apps",
-          "ui-settings-message-list",
-          "ui-settings-messages",
-          "ui-settings-language",
-          "ui-settings-label",
-          "ui-apply",
-          "ui-language-label",
-          "ui-restart-note",
-          "ui-restart-ask",
-          "ui-notify-new-mail",
-          "ui-codes-in-notifications",
-          "ui-pictures-always-option",
-          "ui-download-ahead",
-          "ui-download-limit",
-          "ui-send-delay",
-          "ui-trusted-senders-button",
-          "ui-eml-default",
-          "ui-layout-label",
-          "ui-list-pictures",
-          "ui-list-pictures-note"
         ]
       },
       "pending_help": [
@@ -12394,6 +12368,47 @@
           },
           "validation": "All 28 catalog IDs/full variable sets/access-key counts, 52 help topics per language and exact pending marks reconcile. All data-text and data-settings references resolve. Static check-language reports only 23796 deliberately removed marks, no structural findings; upstream fixed the previous seven es/fr multiline-parser false positives. All three settings-page mnemonic scopes pass in all 28 languages; all 46 actual menu/dialog scopes pass in the 18 languages whose app catalogs have been reviewed. All 76 imported nontranslation source/generated paths match upstream exactly. Offline cargo build -p pe-ffi passed in the dedicated target (9.41s); generated outputs match upstream. Global 17983 unmarked messages and 7311 help lines reconcile to completed batches; translation/English hashes match. No tests run.",
           "notes": "Integrated settings pages from bd4a2bd12b58b438004cdd106d0b007fcbac2aed. Preserved unchanged reviewed catalog values and all prior prose in the ten help topics whose changes are settings paths. Kept reviewed blocks where unchanged/extended in the expanded Settings topic; new/reworked blocks remain drafts. Retained the reviewed logo-cache/identity note for contextual re-review, added new required mnemonics to existing labels, and imported the shorter Linux notification subtitle. Sixteen new IDs and all eleven changed IDs are pending; thirteen obsolete platform IDs are recorded removed. All eleven affected help topics are pending, including previously reviewed topics. Historical affected review IDs/topics are retained in removed_/reopened_ fields; current reviewed_* fields only describe the current completed inventory."
+        },
+        {
+          "id": "hr-settings-app-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-settings-general",
+              "ui-settings-reading",
+              "ui-settings-new-mail",
+              "ui-settings-sending",
+              "ui-settings-default-apps",
+              "ui-settings-message-list",
+              "ui-settings-messages",
+              "ui-settings-language",
+              "ui-settings-label",
+              "ui-apply",
+              "ui-language-label",
+              "ui-restart-note",
+              "ui-restart-ask",
+              "ui-notify-new-mail",
+              "ui-codes-in-notifications",
+              "ui-pictures-always-option",
+              "ui-download-ahead",
+              "ui-download-limit",
+              "ui-send-delay",
+              "ui-trusted-senders-button",
+              "ui-eml-default",
+              "ui-layout-label",
+              "ui-list-pictures",
+              "ui-list-pictures-note"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 2,
+          "files": {
+            "core/locales/hr/app.ftl": "e749b8c05e2f53c5040db1a967449d769fa57a9e55025ba99179d7c569e67fea"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "69662a35440d1f3370abea7d106aca3bbc50578e8a28de3bfe138e8cd2326255"
+          },
+          "validation": "Static check-language: 651 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes, IDs, variables, access-key counts, comments and dash checks pass. All 28 pending inventories match. Global 18452 unmarked messages and 9385 changed help lines reconcile; 14 omitted baseline pairs verified. Latest translation/English-source hashes match. Fresh source audit at 381572d9 found 297 known settings entries and 121 help passages in 11 languages, each matched to the checkpoint inventory; no new languages or unintegrated relevant changes. Review HTML regenerated; git diff --check passes. Test suite skipped per user instruction. No help or remaining platform/core catalogs claimed reviewed.",
+          "notes": "Reviewed all 24 Croatian app catalog settings additions against the three settings pages and existing UI vocabulary. Retained fluent singular-imperative controls and formal-plural instructions. Improved the restart prompt without inflecting the language placeholder. Added column-layout context to the sender-image note, retaining verified-domain meaning, Address Book fallback and persistent logo reuse; improved clitic placement. Other labels are unchanged. Updated the glossary mnemonic scope count to 46. No Croatian screenshots available; shared settings definitions and platform code inspected. The three settings followups remain pending because the Linux/Mac entries and all 11 affected help topics have not yet been reviewed. No tests run."
         }
       ]
     },
@@ -45621,7 +45636,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Greek resume audit at 7d4b4c3b: fresh fetch confirms unchanged origin/master bd4a2bd1, master 5573ee4b and local/remote languages-wave1 8df686a4. Local more-languages/settings-pages branches also contain no relevant unintegrated changes or new languages. Since-start lists 351 known settings entries and 143 passages in 13 languages, all matched to the pending checkpoint inventory. Completed/source hashes match. Pending at audit: 14100 catalog entries and 594 help topics. No tests. Final fresh audit remains required.",
+    "latest_source_audit": "Croatian resume audit at 381572d9: fresh fetch confirms unchanged six refs, no new languages or unintegrated relevant source changes. Since-start lists 297 known settings entries and 121 help passages in 11 languages, all matched to checkpoint pending inventory. Latest completed-file/source hashes match. Pending at audit: 14046 catalogs and 572 help topics. No tests; final fresh audit remains required.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -45927,6 +45942,50 @@
         "pending_catalog_entries": 14100,
         "pending_help_topics": 594,
         "validation": "Fresh fetch: all six source refs unchanged, no unintegrated catalog/help/settings/commands/language-registry changes or new languages. Since-start lists 351 known settings entries and 143 passages in 13 languages; every ID and passage matched to the pending inventory at the checkpoint. Completed-file and English-source hashes match. No tests run."
+      },
+      {
+        "kind": "Croatian settings resume audit",
+        "review_commit": "381572d9151cc7780583e988bcc3636755cca102",
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "bd4a2bd12b58b438004cdd106d0b007fcbac2aed",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074"
+        },
+        "source_deltas": {
+          "master": {
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/master": {
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/languages-wave1": {
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/feat/languages-wave1": {
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/more-languages": {
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/settings-pages": {
+            "paths": [],
+            "new_languages": []
+          }
+        },
+        "since_start_pending_catalog_entries": 297,
+        "since_start_pending_help_passages": 121,
+        "additional_unrecorded_work": 0,
+        "pending_catalog_entries": 14046,
+        "pending_help_topics": 572,
+        "validation": "Fresh fetch: all six refs unchanged, no unintegrated catalog/help/settings/commands/registry changes or new languages. Since-start lists 297 known settings entries and 121 help passages in 11 languages, each matched to the pending checkpoint inventory. Latest completed-file and English-source hashes match; the in-progress Croatian app is compared to its HEAD checkpoint. No tests run."
       }
     ],
     "settings_source_integration": {
