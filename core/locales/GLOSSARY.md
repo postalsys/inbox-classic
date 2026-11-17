@@ -323,6 +323,20 @@ Review notes (round 2):
 - Cached brand logos are saved and reused; verified sender domains do not prove a person's identity.
 - All 46 actual menu/dialog scopes have unique access keys, including the three settings pages. Croatian letters
   are used where needed. Cc/Bcc use Kopija / Skrivena kopija with Alt+K / Alt+S, matching Windows and GTK controls.
+- Core review: status counters use separate labels for progress and totals, so `$messages` stays nominative.
+  `$done` in cross-account transfers is the item being attempted, not a completed-success count.
+  Mixed permanent-delete prompts keep `$count` and `$total` independent; move/copy instructions use formal plural.
+- Calendar intervals greater than one use "Razmak između ponavljanja:" with a counted nominative phrase, including
+  21/31 and the year form "godina". Weekday names appear in parentheses, without requiring an inflected placeholder.
+- Agent logs distinguish a message added to "red za slanje" from a message actually sent. Permissions describe access
+  through Inbox Classic. The compact organize permission explains deletion as moving to Izbrisane stavke.
+- "Vlasništvo ključa potvrđeno" identifies verified key ownership separately from a valid "digitalni potpis".
+  "Dešifrirano vašim ključem" describes decryption. A locked private key requires importing its own backup again;
+  the missing system protection key is not that backup. Publication requires confirming every listed address.
+- Use "datoteka s postavkama" and "Postavke i računi programa Inbox Classic", not "postava", for setup transfers.
+  `setup-skipped-unreachable` can name either an account or a sign-in app; use a neutral "Preskočeno:" and refer to
+  re-adding the corresponding sign-in app. Unencrypted temporary attachment copies older than a day are removed
+  when the app starts, not automatically exactly one day after opening.
 
 ### Italiano (it)
 
