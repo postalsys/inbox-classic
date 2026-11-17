@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review the late settings batch, starting de/es/et/fr: each has 27 new/changed catalog entries (24 app, 1 linux, 2 mac) and 11 help topics pending. Source bd4a2bd1 integrated after Croatian app 580d74a0; exact delta in review_workspace.settings_source_integration. Then nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and Croatian app, followed by remaining initial reviews. Use 46 menu/dialog scopes (three settings pages replace old Options); all currently pass for 18 reviewed app languages, settings-page scopes pass all 28. Expanded options-language retains new drafts; correct the Windows Cancel/default-app source error from context_followups. Preserve notification and logo-cache corrections. Current scope 32440 catalog/1292 help, pending 14505 catalog/759 help. Croatian core.ftl has 448 pending; ten other initial languages remain. No tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Continue late settings review with es/et/fr, each 27 catalog entries and 11 help topics pending. German settings batch is complete: 27 catalogs/11 topics reviewed, one catalog value improved, Settings help corrected for actual Apply/Cancel/default-app and send-delay behavior. Then nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and Croatian app before remaining initial reviews. Use 46 mnemonic scopes; preserve notification/logo-cache corrections and apply the new code-card domain-authentication note. Source bd4a2bd1 integrated at 31b96b81. Pending 14478 catalogs and 748 help topics; baseline unchanged. No tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -5513,54 +5513,8 @@
       ]
     },
     "de": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-settings-general",
-          "ui-settings-reading",
-          "ui-settings-new-mail",
-          "ui-settings-sending",
-          "ui-settings-default-apps",
-          "ui-settings-message-list",
-          "ui-settings-messages",
-          "ui-settings-language",
-          "ui-settings-label",
-          "ui-apply",
-          "ui-language-label",
-          "ui-restart-note",
-          "ui-restart-ask",
-          "ui-notify-new-mail",
-          "ui-codes-in-notifications",
-          "ui-pictures-always-option",
-          "ui-download-ahead",
-          "ui-download-limit",
-          "ui-send-delay",
-          "ui-trusted-senders-button",
-          "ui-eml-default",
-          "ui-layout-label",
-          "ui-list-pictures",
-          "ui-list-pictures-note"
-        ],
-        "linux.ftl": [
-          "gtk-notify-subtitle"
-        ],
-        "mac.ftl": [
-          "mac-check-updates-automatically",
-          "mac-settings-updates"
-        ]
-      },
-      "pending_help": [
-        "brand-logos.html",
-        "conversations.html",
-        "default-mail-program.html",
-        "download-ahead.html",
-        "drafts-outbox.html",
-        "layouts.html",
-        "new-mail.html",
-        "options-language.html",
-        "pictures-tracking.html",
-        "read-messages.html",
-        "sign-in-codes.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "de-platform-additions-round2",
@@ -5794,6 +5748,100 @@
           },
           "validation": "All 28 catalog IDs/full variable sets/access-key counts, 52 help topics per language and exact pending marks reconcile. All data-text and data-settings references resolve. Static check-language reports only 23796 deliberately removed marks, no structural findings; upstream fixed the previous seven es/fr multiline-parser false positives. All three settings-page mnemonic scopes pass in all 28 languages; all 46 actual menu/dialog scopes pass in the 18 languages whose app catalogs have been reviewed. All 76 imported nontranslation source/generated paths match upstream exactly. Offline cargo build -p pe-ffi passed in the dedicated target (9.41s); generated outputs match upstream. Global 17983 unmarked messages and 7311 help lines reconcile to completed batches; translation/English hashes match. No tests run.",
           "notes": "Integrated settings pages from bd4a2bd12b58b438004cdd106d0b007fcbac2aed. Preserved unchanged reviewed catalog values and all prior prose in the ten help topics whose changes are settings paths. Kept reviewed blocks where unchanged/extended in the expanded Settings topic; new/reworked blocks remain drafts. Retained the reviewed logo-cache/identity note for contextual re-review, added new required mnemonics to existing labels, and imported the shorter Linux notification subtitle. Sixteen new IDs and all eleven changed IDs are pending; thirteen obsolete platform IDs are recorded removed. All eleven affected help topics are pending, including previously reviewed topics. Historical affected review IDs/topics are retained in removed_/reopened_ fields; current reviewed_* fields only describe the current completed inventory."
+        },
+        {
+          "id": "de-settings-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-settings-general",
+              "ui-settings-reading",
+              "ui-settings-new-mail",
+              "ui-settings-sending",
+              "ui-settings-default-apps",
+              "ui-settings-message-list",
+              "ui-settings-messages",
+              "ui-settings-language",
+              "ui-settings-label",
+              "ui-apply",
+              "ui-language-label",
+              "ui-restart-note",
+              "ui-restart-ask",
+              "ui-notify-new-mail",
+              "ui-codes-in-notifications",
+              "ui-pictures-always-option",
+              "ui-download-ahead",
+              "ui-download-limit",
+              "ui-send-delay",
+              "ui-trusted-senders-button",
+              "ui-eml-default",
+              "ui-layout-label",
+              "ui-list-pictures",
+              "ui-list-pictures-note"
+            ],
+            "linux.ftl": [
+              "gtk-notify-subtitle"
+            ],
+            "mac.ftl": [
+              "mac-check-updates-automatically",
+              "mac-settings-updates"
+            ]
+          },
+          "reviewed_help": [
+            "brand-logos.html",
+            "conversations.html",
+            "default-mail-program.html",
+            "download-ahead.html",
+            "drafts-outbox.html",
+            "layouts.html",
+            "new-mail.html",
+            "options-language.html",
+            "pictures-tracking.html",
+            "read-messages.html",
+            "sign-in-codes.html"
+          ],
+          "changed_values": 1,
+          "files": {
+            "core/locales/de/app.ftl": "b37baafd8c88349dc6073f6fbc298d24e46e1704466d62b022ec9a2f9744057b",
+            "core/locales/de/linux.ftl": "b59eb68ddd82eb5be3a4373a6ac01be441acaefb6892a7bddce32c3b9a9ec588",
+            "core/locales/de/mac.ftl": "6f7f08012198ed6756087c164898a392a6f4e4eb81d0ee778390cfe0b26422df",
+            "core/crates/pe-html/help/de/brand-logos.html": "6ebaed422312d3730fc2b66eb44d6febb88a85cbdabd2e65e6e783de77ada387",
+            "core/crates/pe-html/help/de/conversations.html": "c3fb3733ef14cdee7c1de9cc6f01f9a12c6b9d9aee491d5e83d63832694fb56b",
+            "core/crates/pe-html/help/de/default-mail-program.html": "85ece5c9a48da63c6e63366a957e0e7aa4a13586ff070d5b72d07a161eddaf18",
+            "core/crates/pe-html/help/de/download-ahead.html": "5dfe96b195a6fd27b3645b231233fbeb180d566c05651797944c6ac45450aa85",
+            "core/crates/pe-html/help/de/drafts-outbox.html": "ede194684c834de2ec9aa4ca41bb496e7c22fd678a6fd11e71f93cae8ac8e976",
+            "core/crates/pe-html/help/de/layouts.html": "a89c96ce5869a0bddff8ffd1487658cb628f8777569de150a78b7a93fc6dc949",
+            "core/crates/pe-html/help/de/new-mail.html": "f94a37569a64b516fdedfa4cba3b40d096d87a79ebccd968dd26819f62bc934f",
+            "core/crates/pe-html/help/de/options-language.html": "743f5e63d642cbdd16e41a5c759407bda4bca56fd58968b2a3ccac6a8b612987",
+            "core/crates/pe-html/help/de/pictures-tracking.html": "59ca6849c4e283066c18659ab5de63261aa61ef62d4f1a39ca8e55d9f5ed973e",
+            "core/crates/pe-html/help/de/read-messages.html": "4e9b340557be7b81b9d6b5e5bbea4893ca23c8e2ae8b4b4f2945203622342d5c",
+            "core/crates/pe-html/help/de/sign-in-codes.html": "c542d274a3d965411980bd300e1de16ada3993cd4ee0aed79d1263ffcf11ccf5"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "69662a35440d1f3370abea7d106aca3bbc50578e8a28de3bfe138e8cd2326255",
+            "core/locales/en/linux.ftl": "c6c2156fdc533360d184053184b20da32651af1380690bf68169273a02e632b0",
+            "core/locales/en/mac.ftl": "de43d4362f87b0dc995c154b90b35219e963f2143ee214baeadcae0a20f31a48",
+            "core/crates/pe-html/help/en/brand-logos.html": "6ea4a7a9f4b7e5336f229bc367ddf12f4ec20ac05ee4d33a004b376e5b4b590d",
+            "core/crates/pe-html/help/en/conversations.html": "20c0db95c0a1d3c2d78dfe78d538f79b01812cec20cbd5eb1b57136378d18a1a",
+            "core/crates/pe-html/help/en/default-mail-program.html": "bbf56849460a56e424aad0d96f55b684807776aaab66bbbdc07daa0b8cf9382e",
+            "core/crates/pe-html/help/en/download-ahead.html": "a186d3a7104f8c7c627a1c2de4e8e7009c7ddc63a2dd43a378e22d214c357a08",
+            "core/crates/pe-html/help/en/drafts-outbox.html": "02c23a726181a6f1670fffee29610d75b51cd801ef5aae229e5d2195b676c153",
+            "core/crates/pe-html/help/en/layouts.html": "7f277333307ece96d1d05ea0d82f0395be12d694266af1e589a7834d13d2e8d7",
+            "core/crates/pe-html/help/en/new-mail.html": "a30335621e4ff3805fdeae9e2e8449ba6164606cfee45786bc584333311965cb",
+            "core/crates/pe-html/help/en/options-language.html": "56b4cae37e1c43b7e9ab75ed961a7011953e4f22cfd943fa851062bc0d95a0aa",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "19ddf63f03ccc3a7a643100cbddecf826f96a6be4b061c6c8b196322be319a42",
+            "core/crates/pe-html/help/en/read-messages.html": "3f282016d2b207ce987b6b72887f6301c68d7048ab9f9aad41dc4e9433c25072",
+            "core/crates/pe-html/help/en/sign-in-codes.html": "b8306602ce765263073757429ea289fe5cfdb933bef75df30c291bafdaad8275"
+          },
+          "validation": "Static check-language de reports exactly 1395 deliberately removed marks and no structural findings. All 46 actual menu/dialog mnemonic scopes pass. Complete variables, plural branches, access-key counts, comments, help markup/attributes/platform branches and literal keys preserved. All 28 pending inventories match. Global 18006 unmarked messages and 7351 help lines reconcile to completed batches, with four recorded German entries independently verified as unchanged English/translation pairs moved from baseline IDs removed by the settings redesign. Translation/English hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
+          "notes": "Reviewed all new/changed settings labels and all 11 affected help topics in the three-page settings context. Existing German labels are sound; added the column-layout condition to the sender-image subtitle while preserving cache/domain wording. Rewrote expanded Settings help for natural German and actual behavior: Apply/Cancel, external Windows default-app changes, queued-before-send messages, defaults, notification dependency, automatic images and trusted-domain conditions. Improved adjacent conversation wording and path joins. Checked code-card domain verification against otp::of, avoiding a blanket forged-message guarantee. Preserved tags, controls, platform branches and literal keys. The available German GTK screenshot predates the redesign and was used only for wording/layout context; current page structure verified from settings.toml and callers. No tests run.",
+          "report_unchanged_moved_ids": {
+            "app.ftl": [
+              "ui-notify-new-mail",
+              "ui-settings-language",
+              "ui-restart-note",
+              "ui-restart-ask"
+            ]
+          }
         }
       ]
     },
@@ -47208,7 +47256,8 @@
       "fr/core.ftl:list-counts-found-selected",
       "fr/core.ftl:done-flagged-color"
     ],
-    "resolved_in_source": "bd4a2bd12b58b438004cdd106d0b007fcbac2aed"
+    "resolved_in_source": "bd4a2bd12b58b438004cdd106d0b007fcbac2aed",
+    "i18n-review.mjs": "The report recognizes unchanged English/translation pairs from removed baseline IDs as moves and omits them from unmarked-change output. Keep such entries in completed review records. For every recorded entry absent from the report, independently compare both complete English and translated values against REVIEWED, requiring either the same ID or an old ID no longer present. No broad exemption or same-words-in-another-current-context match is allowed. The reconciliation helper now performs this check; four German settings entries are the first such moves in this round."
   },
   "context_followups": [
     {
@@ -49217,7 +49266,7 @@
     {
       "id": "settings-pages-context",
       "status": "pending",
-      "issue": "Settings are now three pages. Re-review 27 new/changed catalog entries and 11 affected help topics per language, including full expanded options-language. The Windows help source incorrectly says Cancel undoes the external Windows default-app choice; translated guidance must match OptionsCommand and MakeDefaultEmlApp. Local pending settings and removed trusted senders are deferred to OK/Apply, but Windows Default apps changes are external and are not undone by Cancel. Apply may prompt for language restart; Mac/Linux apply settings immediately apart from language restart. ui-list-pictures-note retained reviewed cache/identity wording and needs column-layout context.",
+      "issue": "Settings are now three pages. Re-review 27 new/changed catalog entries and 11 affected help topics per language, including full expanded options-language. The Windows help source incorrectly says Cancel undoes the external Windows default-app choice; translated guidance must match OptionsCommand and MakeDefaultEmlApp. Local pending settings and removed trusted senders are deferred to OK/Apply, but Windows Default apps changes are external and are not undone by Cancel. Apply may prompt for language restart; Mac/Linux apply settings immediately apart from language restart. ui-list-pictures-note retained reviewed cache/identity wording and needs column-layout context. The German sign-in-code re-review also clarifies that domain authentication does not prove content trustworthy; apply the glossary note to the remaining pending sign-in-codes topics.",
       "evidence": [
         "core/settings.toml",
         "app/src/options.cpp: ApplyOptions, OptionsCommand, MakeDefaultEmlApp",
@@ -49230,7 +49279,6 @@
         "ca",
         "cs",
         "da",
-        "de",
         "el",
         "es",
         "et",
@@ -49255,7 +49303,9 @@
         "tr",
         "uk"
       ],
-      "completed_languages": [],
+      "completed_languages": [
+        "de"
+      ],
       "mnemonic_scopes": 46,
       "settings_page_scope_validation": "All three new page scopes pass in all 28 languages. All 46 scopes pass for de/es/et/fr/nl/it/ca/nb/sr-Latn/tr/cs/da/el/fi/pt/pt-BR/bg/hr. Other languages still await their full initial reviews. This static check is not linguistic review.",
       "helpers": "/private/tmp/inbox-settings-mnemonics.py, LOCALE supplied via runpy init_globals; data-driven settings scopes replace the old Options scope."

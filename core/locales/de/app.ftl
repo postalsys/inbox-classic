@@ -375,33 +375,19 @@ ui-sign-in-apps-intro = Anmelde-Apps ermöglichen die Anmeldung im Browser. Apps
 ui-col-issuer = Aussteller
 ui-col-used-by = Verwendet von
 ui-options-system-default = Systemstandard ({ $language })
-# review: new
 ui-settings-general = Allgemein
-# review: new
 ui-settings-reading = Lesen
-# review: new
 ui-settings-new-mail = Neue E-Mail
-# review: new
 ui-settings-sending = Senden
-# review: new
 ui-settings-default-apps = Standard-Apps
-# review: new
 ui-settings-message-list = Nachrichtenliste
-# review: new
 ui-settings-messages = Nachrichten
-# review: new
 ui-settings-language = Sprache
-# review: new
 ui-settings-label = { $label }:
-# review: new
 ui-apply = &Übernehmen
-# review: new
 ui-language-label = S&prache:
-# review: new
 ui-restart-note = Die neue Sprache wird nach einem Neustart von Inbox Classic übernommen.
-# review: new
 ui-restart-ask = Nach einem Neustart wird Inbox Classic auf { $language } angezeigt. Jetzt neu starten?
-# review: new
 ui-notify-new-mail = Bei neuer E-Mail &benachrichtigen
 ui-new-folder-title = Neuer Ordner
 ui-rename-folder-title = Ordner umbenennen
@@ -568,27 +554,22 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Das Adressbuch konnte nicht gespeichert werden: { $reason }
 ui-code-copied = Code kopiert
-# review: changed
 ui-codes-in-notifications = &Anmeldecodes in Benachrichtigungen über neue E-Mails anzeigen
 ui-tool-unread-only = Ungelesen
 ui-no-unread = Hier gibt es keine ungelesenen Nachrichten.
 ui-pictures-always-sender = Bilder von { $sender } immer herunterladen
 ui-pictures-always-domain = Bilder von allen Absendern der Domain { $domain } immer herunterladen
 ui-pictures-unconfirmed = Die Absenderdomain { $domain } konnte nicht bestätigt werden. Deshalb werden Bilder in dieser Nachricht nicht automatisch heruntergeladen.
-# review: changed
 ui-pictures-always-option = B&ilder in allen Nachrichten herunterladen
 ui-pictures-always-warning = Absender sehen dann, wann Sie ihre Nachrichten lesen.
 ui-protection-details = &Details...
 ui-protection-details-title = Sicherheitsdetails
 ui-download-heading = Herunterladen
-# review: changed
 ui-download-ahead = &Nachrichten vorab herunterladen:
 ui-download-ahead-recent = Neuere Nachrichten mit jeweils bis zu 1 MB
 ui-download-ahead-all = Alle Nachrichten
 ui-download-ahead-never = Erst beim Öffnen
-# review: changed
 ui-download-limit = &Maximaler Speicherplatz pro Konto:
-# review: changed
 ui-send-delay = &Verzögerung vor dem Senden:
 ui-send-delay-note = Solange eine Nachricht auf den Versand wartet, können Sie das Senden mit „Rückgängig“ abbrechen.
 ui-dark-messages = Nachrichten auf dunklem Hintergrund anzeigen, wenn der Dunkelmodus des Systems aktiv ist
@@ -601,19 +582,16 @@ ui-send-too-late = { $subject } wurde bereits gesendet.
 ui-outbox-status-undo = Wird um { $time } gesendet
 ui-download-note = Vorab heruntergeladene Nachrichten lassen sich sofort öffnen. Wird das Speicherlimit überschritten, werden die ältesten lokalen Kopien entfernt und beim Öffnen erneut heruntergeladen.
 ui-attachment-downloading = Diese Nachricht wird noch heruntergeladen. Versuchen Sie es erneut, sobald der Download abgeschlossen ist.
-# review: changed
 ui-trusted-senders-button = &Vertrauenswürdige Absender...
 ui-trusted-senders-title = Vertrauenswürdige Absender
 ui-trusted-senders-note = Bilder in Nachrichten dieser Absender werden automatisch heruntergeladen, wenn Ihr E-Mail-Anbieter die Absenderdomain bestätigt.
 ui-trusted-everyone-at = Alle Absender der Domain { $domain }
 ui-trusted-senders-empty = Es wurden noch keine vertrauenswürdigen Absender hinzugefügt.
-# review: changed
 ui-eml-default = .&eml-Dateien mit Inbox Classic öffnen
 ui-eml-default-done = Inbox Classic öffnet jetzt .eml-Dateien.
 ui-eml-default-failed = Inbox Classic konnte nicht als Standard-App für .eml-Dateien festgelegt werden: { $reason }
 ui-folders = Ordner
 ui-sorted-by = Sortiert nach { $field }
-# review: changed
 ui-layout-label = &Layout:
 ui-columns-note = Das Fenster ist breit genug für das Spaltenlayout. Sie können das Layout unter Ansicht > Layout ändern.
 ui-row-unread = Ungelesen
@@ -623,10 +601,8 @@ ui-row-messages = { $count ->
     [one] { $count } Nachricht
    *[other] { $count } Nachrichten
 }
-# review: changed
 ui-list-pictures = &Bilder der Absender in der Nachrichtenliste anzeigen
-# review: changed
-ui-list-pictures-note = Zeigt bei bestätigter Absenderdomäne Markenlogos oder Bilder aus dem Adressbuch an. Ist kein Bild verfügbar, erscheinen die Initialen. Heruntergeladene Logos werden gespeichert und für mehrere Nachrichten verwendet.
+ui-list-pictures-note = Zeigt im Spaltenlayout bei bestätigter Absenderdomäne Markenlogos oder Bilder aus dem Adressbuch an. Ist kein Bild verfügbar, erscheinen die Initialen. Heruntergeladene Logos werden gespeichert und für mehrere Nachrichten verwendet.
 ui-card-picture = Bild:
 ui-card-picture-choose = Aus&wählen...
 ui-picture-not-picture = Diese Datei ist kein PNG- oder JPEG-Bild.

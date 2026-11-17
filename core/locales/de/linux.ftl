@@ -162,7 +162,6 @@ gtk-nothing-yet = Noch nichts.
 ## Preferences
 
 gtk-preferences = Einstellungen
-# review: changed
 gtk-notify-subtitle = Nur wenn Inbox Classic im Hintergrund ist
 
 ## The desktop entry and the page of the software stores

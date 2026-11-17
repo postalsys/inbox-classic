@@ -129,7 +129,11 @@ Context notes:
 
 - Check the Flag submenu's runtime colour mnemonics too: each colour takes its first unused letter, and
   Clear Flag must use another. Account/folder context menus, Settings and folder-picker buttons have their
-  own combined scopes beyond the main menus. The extended review helper covers 44 such scopes.
+  own combined scopes beyond the main menus. With the three settings pages, the extended review helper covers 46 such scopes.
+
+- Sign-in code cards require a provider-confirmed domain signature (`otp::of`). That authenticates the
+  domain associated with the code, not the safety or trustworthiness of all message content. Avoid claiming
+  that every forged or malicious message is excluded.
 
 - Settings now have General, Reading and Downloading pages from `core/settings.toml`. Group headings have
   no access key or colon; `ui-settings-label` supplies the Mac label punctuation. Check each page's access

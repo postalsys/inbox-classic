@@ -17,13 +17,13 @@ Commit completed batches regularly and preserve an exact resume point.
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
 - Upstream settings pages at `bd4a2bd1` are now integrated after Croatian app checkpoint `580d74a0`.
-  FIRST review the late settings batch in de/es/et/fr: each has 27 catalog entries (24 app, one Linux,
-  two Mac) and 11 help topics pending. Then process nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and
+  German is complete again after its 27-entry/11-topic settings review. Continue es/et/fr: each has
+  27 catalog entries (24 app, one Linux, two Mac) and 11 help topics pending. Then process nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and
   Croatian app before returning to the remaining initial reviews. Exact source IDs/topics are in state.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,440 catalog entries and 1,292 help topics; 14,505 entries and 759 topics are currently pending.
+  32,440 catalog entries and 1,292 help topics; 14,478 entries and 748 topics are currently pending.
 - The 13 completed new-language initial reviews and round-1 languages now have this late work pending.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were reviewed with 74 improvements; its new settings entries remain pending.
@@ -875,9 +875,26 @@ match upstream. Completed/source hashes reconcile (17,983 messages and 7,311 cha
 Review the settings translations and 11 topics in de/es/et/fr next. Correct the Windows Cancel/default-app
 source claim using the new glossary context note. The previous Croatian checkpoint is `580d74a0`.
 
-Current totals: 17,935 catalog entries and 533 help topics completed in the active scope; 2,887 historical
-catalog value improvements. Remaining: 14,505 catalog entries and 759 help topics. Earlier context followups
-are preserved; the new settings-context review is pending. `REVIEWED` remains unchanged.
+### German settings review completed
+
+Reviewed all 27 new/changed catalog entries and all 11 affected help topics. Retained the sound labels and
+added the column-layout condition to the sender-image subtitle. Rewrote the expanded Settings help for natural
+German and the actual Apply/Cancel, default-app, send-delay and image-download behavior. Improved conversation
+phrasing, path joins and sign-in-code domain authentication wording. The available GTK screenshot predates the
+redesign; current page structure was checked against settings.toml and the platform callers.
+
+All 46 mnemonic scopes pass. Static check-language reports only 1,395 deliberately removed marks; markup,
+controls, platform branches, literal keys, catalog variables and comments are preserved. All 28 pending
+inventories and completed/source hashes reconcile (18,006 messages and 7,351 changed help lines). Four unchanged
+English/translation pairs moved from removed baseline IDs and are correctly omitted by the report; each was
+independently matched to the complete baseline values, and remains in the completed inventory. The helper now
+verifies such moves explicitly. Report regenerated; git diff --check passes. No tests run.
+
+Continue es/et/fr settings next. Source integration checkpoint: `31b96b81`.
+
+Current totals: 17,962 catalog entries and 544 help topics completed in the active scope; 2,888 historical
+catalog value improvements. Remaining: 14,478 catalog entries and 748 help topics. Earlier context followups
+are preserved; settings review remains pending in 27 languages. `REVIEWED` remains unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
