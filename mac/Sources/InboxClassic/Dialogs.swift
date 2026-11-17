@@ -37,9 +37,12 @@ func ask(_ text: String, title: String = appName, yes: String = Text.uiYes.text,
         safe.keyEquivalent = "\r"
         other.keyEquivalent = ""
         alert.window.defaultButtonCell = safe.cell as? NSButtonCell
-        // AppKit gives Esc only to a button named Cancel
+        // AppKit gives Esc only to a button named Cancel, and on some macOS versions takes Return from both buttons
+        // while the alert runs when one is destructive: Return, Enter and Esc all answer with the safe button here
         let escape = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            guard event.keyCode == 53, event.window === alert.window else { return event }
+            let keys: Set<UInt16> = [53, 36, 76]  // Esc, Return, keypad Enter
+            guard keys.contains(event.keyCode), event.window === alert.window,
+                  event.modifierFlags.intersection(.deviceIndependentFlagsMask).isEmpty else { return event }
             safe.performClick(nil)
             return nil
         }

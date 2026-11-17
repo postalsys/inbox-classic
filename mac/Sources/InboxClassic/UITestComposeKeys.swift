@@ -232,7 +232,8 @@ extension UITest {
             let enter = NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: ProcessInfo.processInfo.systemUptime,
                                          windowNumber: question.windowNumber, context: nil, characters: "\r", charactersIgnoringModifiers: "\r",
                                          isARepeat: false, keyCode: 36)
-            enter.map { event in onMain { NSApp.sendEvent(event) } }
+            // posted to the queue as a key pressed is, so it reaches what watches keys as well as the window
+            enter.map { event in onMain { NSApp.postEvent(event, atStart: false) } }
             if !(await waitUntil(5) { !question.isVisible }) {
                 check(false, "Return answers Keep It Encrypted (\(buttons.map { "\($0.title)=\($0.keyEquivalent.debugDescription)" }))")
                 answer(question, "Keep It Encrypted")
