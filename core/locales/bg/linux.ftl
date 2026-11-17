@@ -164,7 +164,6 @@ gtk-nothing-yet = Все още няма действия.
 ## Preferences
 
 gtk-preferences = Настройки
-# review: changed
 gtk-notify-subtitle = Само докато Inbox Classic е във фонов режим
 
 ## The desktop entry and the page of the software stores
