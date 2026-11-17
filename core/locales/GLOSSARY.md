@@ -626,6 +626,8 @@ Poista lippu); Vastaa kaikille; Välitä edelleen (toolbar: Välitä).
   "Siirrä alas" uses Alt+L and the copy dialog uses Alt+O to keep these scopes distinct.
 - Sender images rely on authenticated domains, not verified people or message contents. Downloaded logos are
   cached and reused across messages; do not claim that each logo is only ever downloaded once.
+- Use "tuotemerkin logo" consistently in help. OAuth "asiakassalaisuus" is the client secret;
+  "käyttöoikeustunnus" is an access token. Keep both distinct from the client ID ("asiakastunnus").
 - Agent send logs describe queuing ("Lisäsi ... lähetysjonoon"), while the sent status confirms actual sending.
   Permission descriptions apply to access through Inbox Classic. The compact Organize permission uses
   "Poistettuihin" for the Deleted Items folder because Windows shows it in a single-line checkbox.

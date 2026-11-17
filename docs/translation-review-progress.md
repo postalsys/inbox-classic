@@ -16,8 +16,9 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Finnish (fi), the remaining 31 help topics after its first 21. Its 1,334 catalog entries
-  are reviewed, with 174 value improvements. Continue security/privacy help, starting pictures-tracking and links-scripts.
+- Resume with Finnish (fi), the final 18 help topics after its first 34. Its 1,334 catalog entries
+  are reviewed, with 174 value improvements. Continue rules, agents, troubleshooting and reference help.
+  Explain Finnish compose Alt+K/Alt+P in keyboard-shortcuts beside the unchanged literal key tags.
   After Finnish, audit the 32 previously reviewed conversations/new-mail topics in the notification-context followup.
   These followups are separate from initial-scope totals and must be resolved before completing the round.
   The extended mnemonic followup is complete: 44 actual menu/dialog scopes pass across all 17 languages
@@ -719,8 +720,24 @@ hashes reconcile (17,503 catalog messages and 8,730 changed help lines). Report 
 passes. No test suite was run. Finnish now has 21 of 52 help topics reviewed; 31 remain.
 Previous Finnish help checkpoint: `24d0f269`.
 
-Current totals: 17,451 catalog entries and 649 help pages reviewed; 2,729 catalog values improved. Remaining:
-14,641 catalog entries and 603 help pages (including the five additional languages), plus the 32-topic
+### Finnish security and privacy help
+
+Reviewed 13 topics covering pictures/tracking, links/scripts, logos, connections, account security, sign-in
+codes/apps, storage, background downloads, encrypted/signed mail, keys, verification and encryption errors.
+Corrected persistent logo reuse and download privacy, domain authentication versus personal identity, external
+attachment opening, saved browser credentials and local download limits. Digital signatures now describe
+content integrity separately from verified key ownership. The verification steps check every address before
+confirmation closes the dialog. Locked keys require a private-key backup; a TLS-required response does not
+prove that a password is correct. Recorded consistent Finnish logo and OAuth terminology in the glossary.
+
+Static checks have no structural findings beyond intentionally removed marks. Markup, attributes, controls,
+platform branches and literal keys are preserved. Pending inventories and completed/source hashes reconcile
+(17,503 catalog messages and 8,868 changed help lines). Report regenerated; git diff --check passes.
+No test suite was run. Finnish now has 34 of 52 help topics reviewed; 18 remain.
+Everyday/account help checkpoint: `037aefcd`.
+
+Current totals: 17,451 catalog entries and 662 help pages reviewed; 2,729 catalog values improved. Remaining:
+14,641 catalog entries and 590 help pages (including the five additional languages), plus the 32-topic
 notification-context followup. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
