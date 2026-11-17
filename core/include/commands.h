@@ -263,3 +263,37 @@ inline PeText CommandText(PeCommandId id) {
     }
     return PE_TEXT_CMD_NEW_ACCOUNT;
 }
+
+// the shortcut of a command on Windows, as its menu item shows it ("Ctrl+Shift+D", Shortcut() puts the key
+// names in the language in use), empty for none
+inline const wchar_t* CommandKeys(PeCommandId id) {
+    switch (id) {
+    case IDM_SYNC: return L"F5";
+    case IDM_UNDO: return L"Ctrl+Z";
+    case IDM_SELECT_ALL: return L"Ctrl+A";
+    case IDM_MARK_READ: return L"Ctrl+Q";
+    case IDM_FOLDER_LIST: return L"F9";
+    case IDM_NEW_MAIL: return L"Ctrl+N";
+    case IDM_REPLY: return L"Ctrl+R";
+    case IDM_REPLY_ALL: return L"Ctrl+Shift+R";
+    case IDM_FORWARD: return L"Ctrl+F";
+    case IDM_HELP: return L"F1";
+    case IDM_DELETE: return L"Del";
+    case IDM_MOVE: return L"Ctrl+Shift+V";
+    case IDM_NEXT_MESSAGE: return L"Ctrl+.";
+    case IDM_PREVIOUS_MESSAGE: return L"Ctrl+,";
+    case IDM_GO_TO_FOLDER: return L"Ctrl+Y";
+    case IDM_FIND_IN_MESSAGE: return L"F3";
+    case IDM_FIND: return L"Ctrl+Shift+F";
+    case IDM_PRINT: return L"Ctrl+P";
+    case IDM_PROPERTIES: return L"Alt+Enter";
+    case IDM_MARK_ALL_READ: return L"Ctrl+Shift+A";
+    case IDM_JUNK: return L"Ctrl+J";
+    case IDM_VIEW_SOURCE: return L"Ctrl+U";
+    case IDM_ADDRESS_BOOK: return L"Ctrl+Shift+B";
+    case IDM_COMPOSE_SIGN: return L"Ctrl+Shift+D";
+    case IDM_COMPOSE_ENCRYPT: return L"Ctrl+Shift+E";
+    default:
+        return L"";
+    }
+}

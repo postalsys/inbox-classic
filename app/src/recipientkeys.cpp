@@ -21,7 +21,6 @@ constexpr int kPicturesPerSet = 4;
 struct RecipientKeysState {
     PeCore* core = nullptr;
     const RecipientKeysCalls* calls = nullptr;
-    core::ComposeSecurity security{nullptr};
     HWND list = nullptr;
     HIMAGELIST pictures = nullptr;
     // the address of each row
@@ -58,9 +57,21 @@ HWND Item(HWND dialog, int id) {
     return GetDlgItem(dialog, id);
 }
 
+// the selected row's recipient as the compose window has it now, found by its address (the rows are read again a
+// moment after it changed)
 const PeComposeRecipient* Selected(const RecipientKeysState& state) {
     int row = ListView_GetNextItem(state.list, -1, LVNI_SELECTED);
-    return row >= 0 ? pe_compose_security_recipient(state.security.get(), static_cast<size_t>(row)) : nullptr;
+    const PeComposeSecurity* security = state.calls->security();
+    if (row < 0 || static_cast<size_t>(row) >= state.addresses.size() || !security) {
+        return nullptr;
+    }
+    for (size_t i = 0; i < pe_compose_security_count(security); i++) {
+        const PeComposeRecipient* recipient = pe_compose_security_recipient(security, i);
+        if (recipient->address == state.addresses[static_cast<size_t>(row)]) {
+            return recipient;
+        }
+    }
+    return nullptr;
 }
 
 constexpr int kWidth = 640;
@@ -159,13 +170,11 @@ void ShowSelected(HWND dialog, RecipientKeysState& state) {
 
 // the recipients read again, the selection kept on the same address (or the first without a key)
 void Fill(HWND dialog, RecipientKeysState& state) {
-    std::string selected;
-    if (const PeComposeRecipient* recipient = state.security ? Selected(state) : nullptr) {
-        selected = recipient->address;
-    }
-    int selectedRow = std::max(0, ListView_GetNextItem(state.list, -1, LVNI_SELECTED));
-    state.security = state.calls->security();
-    const PeComposeSecurityInfo* info = pe_compose_security_info(state.security.get());
+    int selectedRow = ListView_GetNextItem(state.list, -1, LVNI_SELECTED);
+    std::string selected = selectedRow >= 0 && static_cast<size_t>(selectedRow) < state.addresses.size() ? state.addresses[static_cast<size_t>(selectedRow)] : "";
+    selectedRow = std::max(0, selectedRow);
+    const PeComposeSecurity* security = state.calls->security();
+    const PeComposeSecurityInfo* info = security ? pe_compose_security_info(security) : nullptr;
     if (!info) {
         return;
     }
@@ -174,10 +183,10 @@ void Fill(HWND dialog, RecipientKeysState& state) {
     state.filling = true;
     ListView_DeleteAllItems(state.list);
     state.addresses.clear();
-    size_t count = pe_compose_security_count(state.security.get());
+    size_t count = pe_compose_security_count(security);
     int select = -1, firstMissing = -1;
     for (size_t i = 0; i < count; i++) {
-        const PeComposeRecipient* recipient = pe_compose_security_recipient(state.security.get(), i);
+        const PeComposeRecipient* recipient = pe_compose_security_recipient(security, i);
         int row = static_cast<int>(i);
         std::wstring label = Text(recipient->label);
         std::wstring address = Text(recipient->address);
@@ -194,8 +203,7 @@ void Fill(HWND dialog, RecipientKeysState& state) {
         if (recipient->address == selected) {
             select = row;
         }
-        bool missing = recipient->key == PE_RECIPIENT_KEY_MISSING || recipient->key == PE_RECIPIENT_KEY_UNUSABLE;
-        if (firstMissing < 0 && missing) {
+        if (firstMissing < 0 && !recipient->has_key) {
             firstMissing = row;
         }
     }
@@ -205,9 +213,8 @@ void Fill(HWND dialog, RecipientKeysState& state) {
     SelectRow(state.list, select);
     state.filling = false;
     SendMessageW(state.list, WM_SETREDRAW, TRUE, 0);
-    // Send once everyone has a key; then it is the default, else Cancel is: never Send Without Encryption
-    bool sendable = info->missing == 0 && count > 0;
-    EnableWindow(Item(dialog, IDOK), sendable);
+    // Send once everyone has a key; the core says whether Send or Cancel is the default, never Send Without Encryption
+    EnableWindow(Item(dialog, IDOK), info->can_send);
     HWND unencrypted = Item(dialog, IDC_RKEYS_SEND_UNENCRYPTED);
     EnableWindow(unencrypted, info->can_send_unencrypted && count > 0);
     std::wstring why = info->can_send_unencrypted ? L"" : Text(info->unencrypted_text);
@@ -216,7 +223,7 @@ void Fill(HWND dialog, RecipientKeysState& state) {
     ShowWindow(note, why.empty() ? SW_HIDE : SW_SHOW);
     SetAccessibleDescription(unencrypted, why);
     HWND focus = GetFocus();
-    SetDefaultButton(dialog, sendable ? IDOK : IDCANCEL);
+    SetDefaultButton(dialog, info->send_default ? IDOK : IDCANCEL);
     // the focus off a button that was turned off, onto the list
     if (focus && !IsWindowEnabled(focus)) {
         SetFocus(state.list);
@@ -232,13 +239,11 @@ void OnCommand(HWND dialog, RecipientKeysState& state, WORD id) {
     case IDC_RKEYS_FIND:
         if (!address.empty()) {
             state.calls->findKey(address);
-            Fill(dialog, state);
         }
         return;
     case IDC_RKEYS_REMOVE:
         if (!address.empty()) {
             state.calls->remove(address);
-            Fill(dialog, state);
         }
         return;
     case IDC_RKEYS_USE_NEW:
@@ -246,7 +251,6 @@ void OnCommand(HWND dialog, RecipientKeysState& state, WORD id) {
         if (!address.empty()) {
             pe_pgp_decide(state.core, address.c_str(), id == IDC_RKEYS_USE_NEW);
             state.calls->changed();
-            Fill(dialog, state);
         }
         return;
     case IDC_RKEYS_SEND_UNENCRYPTED:

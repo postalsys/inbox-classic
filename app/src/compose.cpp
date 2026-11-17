@@ -168,6 +168,15 @@ struct Compose : Writing {
     std::vector<uint64_t> lookups;
     // the editor's HTML as it last came (what was written at the start): whether the text still quotes encrypted mail
     std::wstring lastHtml;
+    // what the line under the fields and the Keys row last were laid out for: the window is laid out again only when
+    // that changed
+    struct SecurityLook {
+        std::wstring line;
+        PeProtectionTone tone = PE_PROTECTION_TONE_NONE;
+        bool encrypt = false;
+        bool keys = false;
+        bool operator==(const SecurityLook&) const = default;
+    } securityLook;
     // the line under the fields, its Details button, the Keys row of the recipients' locks and its tooltips
     HWND securityLine = nullptr;
     HWND securityDetails = nullptr;
@@ -186,14 +195,29 @@ COLORREF g_lastColor = RGB(0x00, 0x33, 0x66);
 // the editor's HTML arrived (in Compose::html): send it, outside the WebView2 event that brought it
 constexpr UINT WM_SEND_HTML = WM_APP + 1;
 
-// a moment after the recipients were typed, their keys are shown (and looked up); after the text changed, whether it
-// still quotes encrypted mail
+// a moment after the recipients were typed, their keys are shown (and looked up)
 constexpr UINT_PTR kRecipientsTimer = 2;
-constexpr UINT_PTR kTextTimer = 3;
 constexpr UINT kSecurityWait = 400;
 
 Compose* StateOf(HWND hwnd) {
     return reinterpret_cast<Compose*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+}
+
+// the commands of the window's menus (core/commands.toml)
+constexpr PeCommandId kComposeCommands[] = {IDM_COMPOSE_SIGN, IDM_COMPOSE_ENCRYPT, IDM_ATTACH_MY_KEY};
+
+// the command whose shortcut (CommandKeys) is Ctrl, with Shift when `shift`, and the letter `key`; 0 for none
+WORD ComposeShortcut(UINT key, bool shift) {
+    if (key < 'A' || key > 'Z') {
+        return 0;
+    }
+    std::wstring keys = std::wstring(L"Ctrl+") + (shift ? L"Shift+" : L"") + static_cast<wchar_t>(key);
+    for (PeCommandId command : kComposeCommands) {
+        if (keys == CommandKeys(command)) {
+            return command;
+        }
+    }
+    return 0;
 }
 
 // what the status bar of the window says about the draft
@@ -316,8 +340,8 @@ void Layout(HWND hwnd, Compose* state) {
     HWND fields[] = {state->from, state->to, state->cc, state->bcc, state->keys, state->subject, state->attached};
     static_assert(std::size(fields) == Compose::kRows);
     // From, To and Subject always; Cc and Bcc when they have something or were opened; the recipients' locks while
-    // Encrypt is on; Attach once there are files
-    bool shown[] = {true, true, state->showCc, state->showBcc, state->encrypt, true, !state->files.empty()};
+    // the core says (Encrypt on, and recipients); Attach once there are files
+    bool shown[] = {true, true, state->showCc, state->showBcc, state->securityLook.keys, true, !state->files.empty()};
     // the Cc and Bcc buttons at the end of the To row, for the rows not shown yet
     int buttonWidth = ButtonWidth({GetWindowString(state->ccButton), GetWindowString(state->bccButton)}, 40);
     int buttons = (state->showCc ? 0 : 1) + (state->showBcc ? 0 : 1);
@@ -658,7 +682,7 @@ void PlaceKeyTips(Compose* state) {
         SendMessageW(state->keysTip, TTM_DELTOOLW, 0, reinterpret_cast<LPARAM>(&info));
     }
     state->keysTips = 0;
-    if (!state->encrypt || !state->security) {
+    if (!state->securityLook.keys) {
         return;
     }
     RECT row;
@@ -698,9 +722,9 @@ void ShowSecurity(HWND hwnd, Compose* state) {
     EnableMenuItem(menu, IDM_COMPOSE_SIGN, MF_BYCOMMAND | (info->sign_enabled ? MF_ENABLED : MF_GRAYED));
     CheckMenuItem(menu, IDM_COMPOSE_ENCRYPT, MF_BYCOMMAND | (info->encrypt ? MF_CHECKED : MF_UNCHECKED));
     EnableMenuItem(menu, IDM_ATTACH_MY_KEY, MF_BYCOMMAND | (info->has_own_key ? MF_ENABLED : MF_GRAYED));
-    std::wstring line = Text(info->text);
-    if (GetWindowString(state->securityLine) != line) {
-        SetWindowTextW(state->securityLine, line.c_str());
+    Compose::SecurityLook look{Text(info->text), info->tone, info->encrypt, info->show_keys};
+    if (GetWindowString(state->securityLine) != look.line) {
+        SetWindowTextW(state->securityLine, look.line.c_str());
     }
     // the row's words, for a screen reader: each recipient with their key
     std::wstring keys = core::T(PE_TEXT_UI_FIELD_KEYS);
@@ -710,7 +734,15 @@ void ShowSecurity(HWND hwnd, Compose* state) {
     if (GetWindowString(state->keys) != keys) {
         SetWindowTextW(state->keys, keys.c_str());
     }
-    Layout(hwnd, state);
+    // the window laid out again only when the line or the Keys row came or went or the line changed; the recipients'
+    // chips and the line drawn again in any case
+    if (look != state->securityLook) {
+        state->securityLook = std::move(look);
+        Layout(hwnd, state);
+    } else {
+        PlaceKeyTips(state);
+        InvalidateRect(state->securityLine, nullptr, FALSE);
+    }
     InvalidateRect(state->keys, nullptr, FALSE);
 }
 
@@ -743,11 +775,12 @@ void RecipientsChanged(HWND hwnd, Compose* state) {
     RefreshSecurity(hwnd, state);
 }
 
-// a click on Sign or Encrypt, `on` what it is to become: the core decides, and may ask first (no key of one's own,
-// Encrypt off for a reply to encrypted mail), the safe answer the default
-void Toggle(HWND hwnd, Compose* state, PeComposeSwitch which, bool on, bool confirmed) {
-    Fields fields(state, state->lastHtml);
-    core::ComposeToggled toggled(pe_compose_toggle(state->core, state->account, &fields.outgoing, which, on, confirmed));
+void Toggle(HWND hwnd, Compose* state, PeComposeSwitch which, bool on, bool confirmed);
+
+// what the core said of a click on Sign or Encrypt (`which`, `on` what it is to become), or of Send Without
+// Encryption: the switches taken, or its question asked first (no key of one's own, Encrypt off for a reply to
+// encrypted mail), the safe answer the default
+void TakeToggled(HWND hwnd, Compose* state, core::ComposeToggled toggled, PeComposeSwitch which, bool on, bool confirmed) {
     if (!toggled) {
         ShowSecurity(hwnd, state);
         return;
@@ -770,7 +803,8 @@ void Toggle(HWND hwnd, Compose* state, PeComposeSwitch which, bool on, bool conf
     ShowSecurity(hwnd, state);
     PeComposeQuestion question = toggled->question;
     std::wstring title = core::Plain(CommandText(which == PE_COMPOSE_SWITCH_SIGN ? IDM_COMPOSE_SIGN : IDM_COMPOSE_ENCRYPT));
-    std::wstring text = Text(toggled->text), yes = Text(toggled->yes), no = Text(toggled->no);
+    std::wstring text = Text(toggled->text);
+    std::wstring yes = core::T(static_cast<PeText>(toggled->yes)), no = core::T(static_cast<PeText>(toggled->no));
     toggled.reset();
     if (!Ask(hwnd, title, text, yes, no, true)) {
         return;
@@ -792,6 +826,13 @@ void Toggle(HWND hwnd, Compose* state, PeComposeSwitch which, bool on, bool conf
     case PE_COMPOSE_QUESTION_NONE:
         return;
     }
+}
+
+// a click on Sign or Encrypt, `on` what it is to become: the core decides, and may ask first
+void Toggle(HWND hwnd, Compose* state, PeComposeSwitch which, bool on, bool confirmed) {
+    Fields fields(state, state->lastHtml);
+    TakeToggled(hwnd, state, core::ComposeToggled(pe_compose_toggle(state->core, state->account, &fields.outgoing, which, on, confirmed)),
+                which, on, confirmed);
 }
 
 // Sign or Encrypt clicked on the toolbar, in Tools or with its keys
@@ -828,11 +869,10 @@ void RemoveRecipient(HWND hwnd, Compose* state, const std::string& address) {
 
 // Recipients' Keys over the window, until it is closed: what it was closed with
 RecipientKeysAnswer ShowRecipientKeys(HWND hwnd, Compose* state) {
+    // what it shows is the window's, read again first for recipients typed a moment ago
+    RefreshSecurity(hwnd, state);
     RecipientKeysCalls calls;
-    calls.security = [state] {
-        Fields fields(state, state->lastHtml);
-        return core::ComposeSecurity(pe_compose_security(state->core, state->account, &fields.outgoing));
-    };
+    calls.security = [state] { return state->security.get(); };
     calls.findKey = [hwnd, state](const std::string& address) {
         if (uint64_t request = pe_compose_find_key(state->core, address.c_str())) {
             state->lookups.push_back(request);
@@ -844,11 +884,16 @@ RecipientKeysAnswer ShowRecipientKeys(HWND hwnd, Compose* state) {
     return RecipientKeysDialog(hwnd, state->core, calls, state->keysDialog);
 }
 
-// Send Without Encryption: Encrypt off for this message, Sign as the user had it
-void TurnEncryptionOff(HWND hwnd, Compose* state) {
-    state->encrypt = false;
-    Changed(state);
-    RefreshSecurity(hwnd, state);
+// Send Without Encryption: the core turns Encrypt off for this message, Sign as the user had it, and asks first while
+// the message carries encrypted mail; true when it may go
+bool SendUnencrypted(HWND hwnd, Compose* state) {
+    Fields fields(state, state->lastHtml);
+    core::ComposeToggled toggled(pe_compose_send_unencrypted(state->core, state->account, &fields.outgoing));
+    if (!toggled) {
+        return false;
+    }
+    TakeToggled(hwnd, state, std::move(toggled), PE_COMPOSE_SWITCH_ENCRYPT, false, false);
+    return !state->encrypt;
 }
 
 // Details, the Keys label or a recipient's lock clicked: Recipients' Keys, from which the message can be sent
@@ -887,7 +932,9 @@ bool MaySend(HWND hwnd, Compose* state, const PeOutgoing& outgoing, const std::w
         case RecipientKeysAnswer::Cancel:
             return false;
         case RecipientKeysAnswer::SendUnencrypted:
-            TurnEncryptionOff(hwnd, state);
+            if (!SendUnencrypted(hwnd, state)) {
+                return false;
+            }
             break;
         case RecipientKeysAnswer::Send:
             break;
@@ -1006,7 +1053,9 @@ void OpenRecipientKeys(HWND hwnd, Compose* state) {
     case RecipientKeysAnswer::Cancel:
         return;
     case RecipientKeysAnswer::SendUnencrypted:
-        TurnEncryptionOff(hwnd, state);
+        if (!SendUnencrypted(hwnd, state)) {
+            return;
+        }
         break;
     case RecipientKeysAnswer::Send:
         break;
@@ -1306,8 +1355,9 @@ HMENU BuildComposeMenu() {
     AppendMenuW(insert, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(insert, MF_STRING | MF_GRAYED, IDM_ATTACH_MY_KEY, MenuItem(PE_TEXT_CMD_ATTACH_MY_KEY).c_str());
     HMENU tools = CreatePopupMenu();
-    AppendMenuW(tools, MF_STRING, IDM_COMPOSE_SIGN, MenuItem(PE_TEXT_CMD_COMPOSE_SIGN, L"Ctrl+Shift+D").c_str());
-    AppendMenuW(tools, MF_STRING, IDM_COMPOSE_ENCRYPT, MenuItem(PE_TEXT_CMD_COMPOSE_ENCRYPT, L"Ctrl+Shift+E").c_str());
+    for (PeCommandId command : {IDM_COMPOSE_SIGN, IDM_COMPOSE_ENCRYPT}) {
+        AppendMenuW(tools, MF_STRING, command, MenuItem(CommandText(command), CommandKeys(command)).c_str());
+    }
     HMENU bar = CreateMenu();
     AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(insert), MenuItem(PE_TEXT_MENU_INSERT).c_str());
     AppendMenuW(bar, MF_POPUP, reinterpret_cast<UINT_PTR>(tools), MenuItem(PE_TEXT_MENU_TOOLS).c_str());
@@ -1403,13 +1453,16 @@ void CreateEditor(HWND hwnd, Compose* state, const PeDraftInfo* draft) {
         PostMessageW(hwnd, WM_SEND_HTML, 0, 0);
     };
     handlers.state = [state](const std::wstring& flags) { ShowState(state, flags); };
-    handlers.dirty = [hwnd, state] {
-        Changed(state);
-        // whether what is written still quotes encrypted mail, once typing stops a moment
-        SetTimer(hwnd, kTextTimer, kSecurityWait, nullptr);
+    handlers.dirty = [state] { Changed(state); };
+    handlers.edited = [state] {
+        // whether what is written still quotes encrypted mail, while the core says that matters
+        const PeComposeSecurityInfo* info = SecurityInfo(state);
+        if (info && info->watch_text) {
+            Request(state, Compose::Pending::Refresh);
+        }
     };
     handlers.shortcut = [hwnd](UINT key) {
-        WORD command = key == 'D' ? IDM_COMPOSE_SIGN : key == 'E' ? IDM_COMPOSE_ENCRYPT : 0;
+        WORD command = ComposeShortcut(key, true);
         if (command) {
             PostMessageW(hwnd, WM_COMMAND, MAKEWPARAM(command, 0), 0);
         }
@@ -1539,9 +1592,6 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
                 Autosave(state, html);
                 break;
             case Pending::Refresh:
-                // the next change is told again, for the next look
-                state->editor.Clean();
-                break;
             case Pending::None:
                 break;
             }
@@ -1561,11 +1611,6 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         }
         if (state && wParam == kRecipientsTimer) {
             RecipientsChanged(hwnd, state);
-            return 0;
-        }
-        if (state && wParam == kTextTimer) {
-            KillTimer(hwnd, kTextTimer);
-            Request(state, Compose::Pending::Refresh);
             return 0;
         }
         break;
@@ -1625,7 +1670,6 @@ LRESULT CALLBACK ComposeProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
         if (state) {
             KillTimer(hwnd, kAutosaveTimer);
             KillTimer(hwnd, kRecipientsTimer);
-            KillTimer(hwnd, kTextTimer);
             DeleteObject(state->bold);
             // nothing left to open again after a crash
             if (!state->messageId.empty() && !state->abandoned) {
@@ -1771,7 +1815,7 @@ bool ComposeKey(const MSG& msg) {
         return false;
     }
     bool shift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
-    WORD command = msg.wParam == 'S' ? IDC_SAVE : !shift ? 0 : msg.wParam == 'D' ? IDM_COMPOSE_SIGN : msg.wParam == 'E' ? IDM_COMPOSE_ENCRYPT : 0;
+    WORD command = msg.wParam == 'S' ? IDC_SAVE : ComposeShortcut(static_cast<UINT>(msg.wParam), shift);
     HWND root = GetAncestor(msg.hwnd, GA_ROOT);
     if (!command || std::find(g_composeWindows.begin(), g_composeWindows.end(), root) == g_composeWindows.end()) {
         return false;

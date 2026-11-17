@@ -560,13 +560,15 @@ void ComposeKeysFound(uint64_t request);
 
 // what Recipients' Keys asks of the compose window it is over
 struct RecipientKeysCalls {
-    // the window's signing and encrypting now (pe_compose_security of its message)
-    std::function<core::ComposeSecurity()> security;
+    // the window's signing and encrypting now (pe_compose_security of its message), owned by the window: read it
+    // anew each time, as the window replaces it whenever the message changes
+    std::function<const PeComposeSecurity*()> security;
     // Find Key for one recipient, Remove from Message
     std::function<void(const std::string& address)> findKey;
     std::function<void(const std::string& address)> remove;
     // a key's use decided (Use the New Key, Keep the Current One): the window shows it
     std::function<void()> changed;
+    // each of these ends in RefreshRecipientKeys, which reads the recipients again
 };
 enum class RecipientKeysAnswer { Cancel, Send, SendUnencrypted };
 // Recipients' Keys over a compose window: each recipient with their key, Find Key, Remove from Message, the waiting

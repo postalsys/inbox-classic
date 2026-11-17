@@ -1,7 +1,7 @@
 // The editor of the compose window: a WebView2 with the page of pe_editor_document, whose own script (allowed by a
 // nonce, nothing else can run) makes the message editable. The page talks back with plain strings: "html:<body>" or
 // "full:<body>" (the quote unfolded into it) after Html(), "state:<flags>" for the format bar, "dirty" on the
-// first change (after Clean(), the first change since), "drop" with the files dragged onto it, and the addresses of
+// first change (after Clean(), the first change since), "edited" on every change once typing pauses, "drop" with the files dragged onto it, and the addresses of
 // the link at the cursor and under the mouse ("caret:", "hover:"). Ctrl+click on a link, or Open Link in its menu,
 // opens it in the browser. Network requests are refused and nothing navigates, as in the preview.
 #pragma once
@@ -30,6 +30,8 @@ public:
         // one '0' or '1' per format of the bar: bold, italic, underline, numbers, bullets, left, center, right
         std::function<void(const std::wstring&)> state = [](const std::wstring&) {};
         std::function<void()> dirty = [] {};
+        // the text changed, once typing pauses a moment (every change, unlike dirty)
+        std::function<void()> edited = [] {};
         // Ctrl+Enter
         std::function<void()> send = [] {};
         // Ctrl+S

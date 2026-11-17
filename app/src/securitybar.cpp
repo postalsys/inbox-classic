@@ -86,8 +86,8 @@ IconSet RecipientKeySet(const PeComposeRecipient& recipient) {
 }
 
 int RecipientKeyPicture(const PeComposeRecipient& recipient) {
-    bool none = recipient.key == PE_RECIPIENT_KEY_MISSING || recipient.key == PE_RECIPIENT_KEY_UNUSABLE;
-    return none ? SECURE_WARNING : SECURE_LOCK_CLOSED;
+    // the lock while it is looked up, grey
+    return recipient.has_key || recipient.key == PE_RECIPIENT_KEY_LOOKING ? SECURE_LOCK_CLOSED : SECURE_WARNING;
 }
 
 int SecurityBarHeight(PeProtectionTone tone, bool encrypted, const std::wstring& words, HFONT font, int width, int reserved) {

@@ -313,7 +313,34 @@ fn c_header(table: &Table) -> String {
         .unwrap();
     }
     out.push_str("    }\n    return PE_TEXT_CMD_NEW_ACCOUNT;\n}\n");
+    out.push_str(
+        "\n// the shortcut of a command on Windows, as its menu item shows it (\"Ctrl+Shift+D\", Shortcut() puts the key\n\
+         // names in the language in use), empty for none\n\
+         inline const wchar_t* CommandKeys(PeCommandId id) {\n    switch (id) {\n",
+    );
+    for command in table.command.iter().filter(|c| !c.key.is_empty()) {
+        writeln!(
+            out,
+            "    case IDM_{}: return L\"{}\";",
+            command.id.to_uppercase(),
+            windows_keys(&command.key)
+        )
+        .unwrap();
+    }
+    out.push_str("    default:\n        return L\"\";\n    }\n}\n");
     out
+}
+
+/// A key of the table as Windows writes it: Mod is Ctrl, Delete is Del
+fn windows_keys(key: &str) -> String {
+    key.split('+')
+        .map(|part| match part {
+            "Mod" => "Ctrl",
+            "Delete" => "Del",
+            other => other,
+        })
+        .collect::<Vec<_>>()
+        .join("+")
 }
 
 /// A shortcut: modifiers and one key

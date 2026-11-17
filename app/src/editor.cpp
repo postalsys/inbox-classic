@@ -120,6 +120,8 @@ void Editor::Configure() {
                 handlers_.state(message.substr(6));
             } else if (message == L"dirty") {
                 handlers_.dirty();
+            } else if (message == L"edited") {
+                handlers_.edited();
             } else if (message == L"drop") {
                 handlers_.dropped(DroppedFiles(args));
             } else if (message.rfind(L"caret:", 0) == 0 || message.rfind(L"hover:", 0) == 0) {
