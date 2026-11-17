@@ -1,0 +1,24 @@
+[package]
+name = "pe-preview"
+description = "Pictures and PDF pages of attachments drawn as the core's own PNG or JPEG, on a render thread of their own with limits, a watchdog and a crash marker"
+version.workspace = true
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+# pictures: the formats every platform gets a preview of, decoded in Rust, never handed to a web view as they came
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp", "ico", "tiff"] }
+# PDF pages in Rust; the standard 14 fonts (about 260 KB) and the predefined CMaps (about 460 KB) built in, so no
+# system font or file is read. hayro-interpret 0.9 turns on hayro-syntax's `unsafe` feature itself (flate2 with
+# zlib-rs, SIMD in the JPEG, JPEG 2000 and JBIG2 decoders) and hayro uses pic-scale's SIMD: see the plan's "As built"
+hayro = { version = "0.9", default-features = false, features = ["embed-fonts", "embed-cmaps"] }
+# what a PDF page's streams inflate to, counted before hayro inflates them whole (streams.rs)
+flate2 = "1"
+weezl = "0.1"
+# the key of a file: its cache entry, and the crash marker that names it
+sha2 = "0.10"
+
+[dev-dependencies]
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp", "ico", "tiff"] }

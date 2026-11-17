@@ -78,7 +78,7 @@ Everything that a remote party writes, such as IMAP responses, message headers a
 
 ## Building
 
-The Rust core builds and tests on any platform with Rust 1.90 or newer:
+The Rust core builds and tests on any platform with Rust 1.92 or newer:
 
 ```
 cd core
