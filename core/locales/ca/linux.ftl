@@ -164,7 +164,6 @@ gtk-nothing-yet = Encara no hi ha activitat.
 ## Preferències
 
 gtk-preferences = Preferències
-# review: changed
 gtk-notify-subtitle = Només mentre Inbox Classic és en segon pla
 
 ## L’entrada d’escriptori i la pàgina de les botigues de programari

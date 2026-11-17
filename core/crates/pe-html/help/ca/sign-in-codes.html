@@ -1,4 +1,4 @@
-<!--review--><h1>Codis d’inici de sessió</h1>
+<h1>Codis d’inici de sessió</h1>
 <p class="summary">Un missatge amb un codi d’inici de sessió o de verificació mostra el codi en una targeta des de la qual el podeu copiar.</p>
 <p>Quan un missatge té un codi d’un sol ús, com ara un codi d’inici de sessió, de verificació o d’aprovació, una targeta a sobre mostra:</p>
 <ul>
@@ -7,9 +7,8 @@
     <li><b data-text="otp-copy"></b>, que posa el codi al porta-retalls</li>
 </ul>
 <aside class="warning">Introduïu un codi només en una pàgina del domini que indica la targeta. Un missatge que us demana que escriviu un codi en un altre lloc pot ser un intent de prendre el control del vostre compte.</aside>
-<p>La targeta només apareix quan el vostre proveïdor de correu confirma que el domini ha signat el missatge. Els missatges sense aquesta autenticació no mostren el codi a la targeta. L’autenticació del domini no garanteix la identitat d’una persona ni la seguretat de tot el contingut. No hi ha cap targeta a <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> ni <b data-text="folder-drafts"></b>, ni quan el proveïdor no informa del resultat de l’autenticació.</p>
-<p>Si el missatge es va enviar fa més d’una hora, la targeta avisa que el codi pot haver caducat.</p>
+<p>La targeta només apareix quan el vostre proveïdor de correu confirma una signatura digital vàlida per al domini del codi. Els missatges sense aquesta autenticació no mostren el codi a la targeta. L’autenticació del domini no garanteix la identitat d’una persona ni la seguretat de tot el contingut. No hi ha cap targeta a <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> ni <b data-text="folder-drafts"></b>, ni quan el proveïdor no informa del resultat de l’autenticació.</p>
+<p>Quan obriu un missatge enviat fa més d’una hora, la targeta avisa que el codi pot haver caducat.</p>
 <h2>Codis a les notificacions</h2>
 <p>Per veure el codi a la notificació d’un missatge nou, activeu <b data-text="ui-codes-in-notifications"></b> a <b data-settings="general"></b>. Aquesta opció està desactivada de manera predeterminada, perquè una notificació es pot llegir amb la pantalla bloquejada.</p>
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

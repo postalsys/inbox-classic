@@ -24,9 +24,7 @@ mac-no-updates = Aquesta versió d’Inbox Classic no admet actualitzacions auto
 ## Configuració
 
 mac-settings-title = Configuració
-# review: new
-mac-check-updates-automatically = Comprova si hi ha actualitzacions automàticament
-# review: new
+mac-check-updates-automatically = Buscar actualitzacions automàticament
 mac-settings-updates = Actualitzacions
 
 ## Diàlegs
