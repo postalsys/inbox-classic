@@ -5,12 +5,13 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review German phase2 draft logs and help, then es/et/fr/nl; continue Italian with both agent additions.**
+- **Next: Review Spanish phase2 draft logs/help, then Estonian, French and Dutch; continue Italian with both agent batches.**
   Original unsubscribe additions complete: de, es, et, fr, nl. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. All previous reviewed prose is retained.
   New draft notice/help remains pending: core/FFI exists, but no platform editor displays the notice yet.
+  Phase2 runtime-backed logs/help reviewed: de. The draft notice and its display-help passage remain pending.
 - Current scope: 34,232 catalog entries and 1,352 help topics.
-  Completed: 21,292 entries and 784 full topics; pending: 12,940 entries and 568 topics.
+  Completed: 21,294 entries and 785 full topics; pending: 12,938 entries and 567 topics.
   Historical catalog improvements: 3,792. Importing drafts earns no review credit.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
@@ -2351,3 +2352,11 @@ Runtime confirms that an agent can replace/discard only its own unchanged draft 
 All28 language checkers pass structurally:27,383 expected removed/partial-mark diagnostics only. Exact reconstruction verifies87 imported source files and87 new IDs including English; all unrelated IDs/prose, help tags/attributes/controls/platform branches/literal keys retained. Generated C/Swift maps match all1,406 English IDs. Offline pe-ffi build passed in14.59s using the separate translation target; no test suite run. Global reconciliation accounts for21,330 unmarked catalog entries,10,645 help lines and14 verified baseline pairs. Full inventories and since-start1,205 entries/370 passages reconcile. Fresh upstream audit covers43 worktrees/184 refs, including the exact phase2 source snapshot and290 old draft copies; no further work found. HTML regenerated and git diff --check passed.
 
 The discard operation expunges the agent’s own unchanged drafts, so the restrictions paragraph must make that exception explicit. Saving includes autosave; merely opening the draft is not takeover. Source has no UI consumer for the attribution notice yet, so that string and its display-help passage remain pending in every language. Ten previously completed topics reopened, which reduces the full-topic completion count from794 to784; no reviewed prose was discarded.
+
+## German agent draft review (notice pending)
+
+Reviewed two log strings and six help passages. The logs and heading were already fluent; five prose lines now describe actual permissions and draft behavior. agents-permissions is complete again; agents-sending retains only its unsupported attribution-line paragraph. Previous unsubscribe, signature, Undo and warning wording remains intact.
+
+German structural checker has1,455 expected mark-only diagnostics and no structural findings. Exact replay verifies2 catalog reviews with0 wording changes and6 help passages with5 wording lines improved. Older prose, placeholders, tags/attributes/platform branches/literal keys and generated IDs retained exactly; unresolved notice unchanged. All platform label joins inspected. Global reconciliation:21,332 unmarked entries,10,651 help lines,14 verified baseline pairs; all latest hashes match. All28 full inventories and since-start1,203 entries/364 passages match. Source audit:43worktrees/184refs, exact integrated snapshots and290 old copies, no unrecorded work. HTML regenerated; git diff --check passes. No tests or build run.
+
+Review Spanish phase2 draft logs/help, then Estonian, French and Dutch; continue Italian with both agent batches. The exact notice string and help paragraph stay marked; no full-topic credit for agents-sending.
