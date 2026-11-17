@@ -568,6 +568,10 @@ fn reads_mail_through_the_c_api() {
         quote_plain: !info.quote_text.is_null(),
         quote_text: info.quote_text,
         from: std::ptr::null(),
+        // as the draft starts them: off for a reply to mail that was not encrypted
+        sign: info.sign,
+        encrypt: info.encrypt,
+        quote_encrypted: info.quote_encrypted,
     };
     assert!(unsafe { pe_message_send(core, account, &outgoing, null_mut()) });
     unsafe { pe_draft_free(draft) };
@@ -609,6 +613,9 @@ fn reads_mail_through_the_c_api() {
         quote_plain: false,
         quote_text: std::ptr::null(),
         from: std::ptr::null(),
+        sign: false,
+        encrypt: false,
+        quote_encrypted: false,
     };
     let mut reason: *mut c_char = null_mut();
     assert!(!unsafe { pe_message_send(core, account, &typo, &mut reason) });

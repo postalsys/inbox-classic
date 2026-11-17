@@ -16,6 +16,7 @@ mod bounce;
 pub mod calendar;
 pub mod card_pictures;
 mod compose;
+pub mod compose_keys;
 mod connections;
 mod contentline;
 mod export;
@@ -491,6 +492,8 @@ pub struct Core {
     /// Lookups of OpenPGP keys and their result, learned when taken (lookup.rs)
     pgp_lookups: Requests<lookup::Fetched>,
     pgp_publishes: Requests<lookup::PublishOutcome>,
+    /// The addresses whose keys are being looked up, each with its lookup: the compose window's "Looking for a key"
+    pgp_looking: Mutex<HashMap<String, u64>>,
     pgp_servers: Option<pe_keys::Servers>,
     /// BIMI logos being drawn, as pixels once done
     logos: Requests<Option<Vec<u8>>>,
@@ -598,6 +601,7 @@ impl Core {
             autoconfig: Requests::default(),
             pgp_lookups: Requests::default(),
             pgp_publishes: Requests::default(),
+            pgp_looking: Mutex::default(),
             pgp_servers: options.pgp_servers.clone(),
             logos: Requests::default(),
             pictures: Requests::default(),
@@ -2633,7 +2637,7 @@ fn same_owner(_a: &std::path::Path, _b: &std::path::Path) -> std::io::Result<boo
 
 /// Where the folders of [`private_dir`] are: the runtime folder on Linux (its temporary folder is shared by every user),
 /// the temporary folder elsewhere (each user's own on the Mac and Windows)
-fn private_root() -> PathBuf {
+pub(crate) fn private_root() -> PathBuf {
     if cfg!(all(unix, not(target_os = "macos"))) {
         std::env::var_os("XDG_RUNTIME_DIR")
             .map(PathBuf::from)

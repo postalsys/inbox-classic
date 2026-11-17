@@ -141,7 +141,7 @@ pub enum PeEventKind {
     SendWaiting = 23,
     /// The message rules sorted `count` messages of `account`'s new mail, or of its Inbox when one was applied there
     RulesApplied = 24,
-    /// OpenPGP keys were looked up (`pe_pgp_find`, `pe_pgp_find_handle`): `pe_pgp_find_result` with the request in `uid`
+    /// OpenPGP keys were looked up (`pe_compose_find_keys`, `pe_compose_find_key`): `pe_pgp_find_result` with the request in `uid`
     KeysFound = 25,
     /// An own key was published (`pe_pgp_publish`): `pe_pgp_publish_result` with the request in `uid`
     KeyPublished = 26,
@@ -2991,12 +2991,18 @@ pub struct PeOutgoing {
     pub quote_text: *const c_char,
     /// One of the account's other addresses to send from (a `pe_from_choices` row's), NULL for its own
     pub from: *const c_char,
+    /// Sign (the user's own switch; Encrypt signs whatever it says): with the key of the address it goes from
+    pub sign: bool,
+    /// Encrypt: to every recipient's key and the sender's; a recipient without one stops the send
+    pub encrypt: bool,
+    /// PeDraftInfo.quote_encrypted, kept for the window's life: it answers or forwards encrypted mail
+    pub quote_encrypted: bool,
 }
 
 /// # Safety
 /// `outgoing` must be NULL or valid, its strings NULL or NUL-terminated, `attachments` pointing to
 /// `attachment_count` of them.
-unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
+pub(crate) unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
     // SAFETY: as the caller guarantees
     let o = unsafe { outgoing.as_ref() }?;
     // NULL is empty, text that is not UTF-8 is refused rather than sent as nothing
@@ -3036,8 +3042,9 @@ unsafe fn outgoing(outgoing: *const PeOutgoing) -> Option<Outgoing> {
         quote_plain: o.quote_plain,
         quote_text: Some(text(o.quote_text)?).filter(|t| !t.is_empty()),
         from: Some(text(o.from)?).filter(|f| !f.is_empty()),
-        // Sign and Encrypt come with the compose window's switches (the plan's PR 7)
-        ..Default::default()
+        sign: o.sign,
+        encrypt: o.encrypt,
+        quote_encrypted: o.quote_encrypted,
     })
 }
 
@@ -3300,6 +3307,11 @@ pub struct PeDraftInfo {
     /// The account's other address it goes from (a reply's to the message sent to it, a saved draft's), to choose
     /// in From; NULL for the account's own
     pub from: *const c_char,
+    /// Sign and Encrypt start so: on for a reply to or a forward of encrypted mail, as saved for a draft
+    pub sign: bool,
+    pub encrypt: bool,
+    /// It answers or forwards encrypted mail: for PeOutgoing.quote_encrypted, for as long as the window is open
+    pub quote_encrypted: bool,
 }
 
 /// A draft; free with `pe_draft_free`
@@ -3333,6 +3345,9 @@ pub(crate) fn draft_handle(draft: &pe_core::Draft) -> *mut PeDraft {
         attachment_count: attachments.len(),
         message_id: draft.message_id.as_deref().map_or(null(), |id| strings.add(id)),
         from: draft.from.as_deref().map_or(null(), |from| strings.add(from)),
+        sign: draft.sign,
+        encrypt: draft.encrypt,
+        quote_encrypted: draft.quote_encrypted,
     };
     handed(PeDraft {
         info,

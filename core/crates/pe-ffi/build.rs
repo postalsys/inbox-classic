@@ -293,9 +293,7 @@ fn c_header(table: &Table) -> String {
         writeln!(out, "    case IDM_{}:", command.id.to_uppercase()).unwrap();
     }
     out.push_str("        return true;\n    default:\n        return false;\n    }\n}\n");
-    out.push_str(
-        "\n// whether a command is the compose window's (its toolbar and menus), not the main window's\n",
-    );
+    out.push_str("\n// whether a command is the compose window's (its toolbar and menus), not the main window's\n");
     out.push_str("inline bool CommandInCompose(unsigned id) {\n    switch (id) {\n");
     for command in table.command.iter().filter(|c| c.window == "compose") {
         writeln!(out, "    case IDM_{}:", command.id.to_uppercase()).unwrap();

@@ -121,6 +121,71 @@ typedef enum PePhoneKind {
   PE_PHONE_KIND_MOBILE = 3,
 } PePhoneKind;
 
+// The colour of the security bar: green, blue, amber, grey; none without one
+typedef enum PeProtectionTone {
+  PE_PROTECTION_TONE_NONE = 0,
+  // Signed by the sender with a key the user verified
+  PE_PROTECTION_TONE_VERIFIED = 1,
+  // Signed by the sender, or encrypted
+  PE_PROTECTION_TONE_GOOD = 2,
+  // Something is not right
+  PE_PROTECTION_TONE_WARNING = 3,
+  // Not signed, or not confirmed
+  PE_PROTECTION_TONE_NEUTRAL = 4,
+} PeProtectionTone;
+
+// What Send would refuse now
+typedef enum PeComposeBlock {
+  PE_COMPOSE_BLOCK_NONE = 0,
+  // Sign or Encrypt, and no key of one's own for the From address: ask as `pe_compose_toggle` does
+  PE_COMPOSE_BLOCK_NO_OWN_KEY = 1,
+  // Encrypt, and recipients without a key (or being looked up): open Recipients' Keys instead of sending
+  PE_COMPOSE_BLOCK_MISSING_KEYS = 2,
+  // Encrypt off, and the message still quotes or forwards encrypted mail: say `block_text`
+  PE_COMPOSE_BLOCK_ENCRYPTED_QUOTE = 3,
+} PeComposeBlock;
+
+// The field a recipient is in
+typedef enum PeRecipientField {
+  PE_RECIPIENT_FIELD_TO = 0,
+  PE_RECIPIENT_FIELD_CC = 1,
+  PE_RECIPIENT_FIELD_BCC = 2,
+} PeRecipientField;
+
+// What a recipient has to encrypt to
+typedef enum PeRecipientKey {
+  // A key the user verified: a green lock
+  PE_RECIPIENT_KEY_VERIFIED = 0,
+  // A key found or imported: a blue lock
+  PE_RECIPIENT_KEY_FOUND = 1,
+  // One of the user's own addresses: their own key
+  PE_RECIPIENT_KEY_OWN = 2,
+  // Being looked up: grey
+  PE_RECIPIENT_KEY_LOOKING = 3,
+  // No key: amber
+  PE_RECIPIENT_KEY_MISSING = 4,
+  // A key that can not encrypt now (expired, revoked): amber
+  PE_RECIPIENT_KEY_UNUSABLE = 5,
+} PeRecipientKey;
+
+// What the window asks before a switch changes
+typedef enum PeComposeQuestion {
+  PE_COMPOSE_QUESTION_NONE = 0,
+  // No key for the From address: Yes opens New Key for the account, then the switch is clicked again
+  PE_COMPOSE_QUESTION_MAKE_KEY = 1,
+  // The From address's key can not be used: Yes opens Encryption Keys
+  PE_COMPOSE_QUESTION_SHOW_KEYS = 2,
+  // Encrypt off for a message that answers or forwards encrypted mail: Yes calls `pe_compose_toggle` again with
+  // `confirmed`
+  PE_COMPOSE_QUESTION_TURN_OFF_ENCRYPT = 3,
+} PeComposeQuestion;
+
+// A switch of the compose window
+typedef enum PeComposeSwitch {
+  PE_COMPOSE_SWITCH_SIGN = 0,
+  PE_COMPOSE_SWITCH_ENCRYPT = 1,
+} PeComposeSwitch;
+
 typedef enum PeEventKind {
   PE_EVENT_KIND_SYNC_STARTED = 1,
   // Comes after everything the sync found, failures included; `failure` is what kept it from finishing, `None`
@@ -176,7 +241,7 @@ typedef enum PeEventKind {
   PE_EVENT_KIND_SEND_WAITING = 23,
   // The message rules sorted `count` messages of `account`'s new mail, or of its Inbox when one was applied there
   PE_EVENT_KIND_RULES_APPLIED = 24,
-  // OpenPGP keys were looked up (`pe_pgp_find`, `pe_pgp_find_handle`): `pe_pgp_find_result` with the request in `uid`
+  // OpenPGP keys were looked up (`pe_compose_find_keys`, `pe_compose_find_key`): `pe_pgp_find_result` with the request in `uid`
   PE_EVENT_KIND_KEYS_FOUND = 25,
   // An own key was published (`pe_pgp_publish`): `pe_pgp_publish_result` with the request in `uid`
   PE_EVENT_KIND_KEY_PUBLISHED = 26,
@@ -336,19 +401,6 @@ typedef enum PeInvitationKind {
   PE_INVITATION_KIND_CANCEL = 2,
   PE_INVITATION_KIND_REPLY = 3,
 } PeInvitationKind;
-
-// The colour of the security bar: green, blue, amber, grey; none without one
-typedef enum PeProtectionTone {
-  PE_PROTECTION_TONE_NONE = 0,
-  // Signed by the sender with a key the user verified
-  PE_PROTECTION_TONE_VERIFIED = 1,
-  // Signed by the sender, or encrypted
-  PE_PROTECTION_TONE_GOOD = 2,
-  // Something is not right
-  PE_PROTECTION_TONE_WARNING = 3,
-  // Not signed, or not confirmed
-  PE_PROTECTION_TONE_NEUTRAL = 4,
-} PeProtectionTone;
 
 // What kind of file an attachment is: its icon in the strip
 typedef enum PeFileKind {
@@ -597,6 +649,9 @@ typedef struct PeCardList PeCardList;
 // One card for its Properties: a handle whose `PeCard` comes from `pe_card_info`; free with `pe_card_free`
 typedef struct PeCardView PeCardView;
 
+// The compose window's signing and encrypting, with its recipients; free with `pe_compose_security_free`
+typedef struct PeComposeSecurity PeComposeSecurity;
+
 typedef struct PeContactList PeContactList;
 
 // The mail engine
@@ -839,6 +894,109 @@ typedef struct PeGroup {
   const struct PeMember *members;
   size_t member_count;
 } PeGroup;
+
+// A message to send; strings are UTF-8, address lists as the user typed them
+typedef struct PeOutgoing {
+  const char *to;
+  const char *cc;
+  const char *bcc;
+  const char *subject;
+  // The plain text, for a message without `html`
+  const char *text;
+  // What was written in the editor, as HTML, or NULL for a plain text message
+  const char *html;
+  // The `quote` of the draft, added after `html`, or NULL
+  const char *quote;
+  // From the draft of a reply, or NULL
+  const char *in_reply_to;
+  // From the draft of a reply, space separated, or NULL
+  const char *references;
+  // Paths of files to attach
+  const char *const *attachments;
+  size_t attachment_count;
+  // The Message-ID of the draft it was saved as (from `pe_draft_save` or PeDraftInfo), or NULL
+  const char *message_id;
+  // The account whose Drafts has that copy when From changed to another account since, 0 otherwise: the copy
+  // there goes once the message is saved or queued in the account it goes from now
+  int64_t draft_account;
+  // The quoted message was plain text (PeDraftInfo.quote_text was there): with nothing formatted written, the
+  // message then goes as plain text
+  bool quote_plain;
+  // PeDraftInfo.quote_text while `quote` is the draft's own (not edited), NULL otherwise
+  const char *quote_text;
+  // One of the account's other addresses to send from (a `pe_from_choices` row's), NULL for its own
+  const char *from;
+  // Sign (the user's own switch; Encrypt signs whatever it says): with the key of the address it goes from
+  bool sign;
+  // Encrypt: to every recipient's key and the sender's; a recipient without one stops the send
+  bool encrypt;
+  // PeDraftInfo.quote_encrypted, kept for the window's life: it answers or forwards encrypted mail
+  bool quote_encrypted;
+} PeOutgoing;
+
+// Everything the compose window shows of signing and encrypting
+typedef struct PeComposeSecurityInfo {
+  // Sign as it shows (checked): the user's own, and always while Encrypt is on
+  bool sign;
+  // Sign can be clicked: not while Encrypt is on, which always signs
+  bool sign_enabled;
+  bool encrypt;
+  // The From address has a key of its own (Attach My Public Key applies)
+  bool has_own_key;
+  // The colour of the line under the fields; NONE: no line
+  enum PeProtectionTone tone;
+  // The line under the fields, empty for none
+  const char *text;
+  // The switches' tooltips
+  const char *sign_tip;
+  const char *encrypt_tip;
+  // What Send would refuse, and why (for the alert)
+  enum PeComposeBlock block;
+  const char *block_text;
+  // How many recipients have no usable key (being looked up included)
+  size_t missing;
+  // A lookup of their keys runs: `KeysFound` follows
+  bool looking;
+  // What Recipients' Keys says at its top
+  const char *keys_intro;
+  // Recipients' Keys offers Send Without Encryption; when not, `unencrypted_text` says why
+  bool can_send_unencrypted;
+  const char *unencrypted_text;
+} PeComposeSecurityInfo;
+
+// A recipient and their key, a row of the Keys line and of Recipients' Keys
+typedef struct PeComposeRecipient {
+  // In lower case: for `pe_compose_find_key`, `pe_compose_without_recipient` and `pe_pgp_decide`
+  const char *address;
+  // The name typed with it, else the address: what the Keys line shows
+  const char *label;
+  enum PeRecipientField field;
+  enum PeRecipientKey key;
+  // The colour of its lock: green, blue, amber or grey
+  enum PeProtectionTone tone;
+  // The key in words: "Key verified", "No key: none was found on 3 May 2027"
+  const char *text;
+  // "A different key for bob@example.net was found on 3 May 2027.", NULL when none waits: Use the New Key and
+  // Keep the Current One (`pe_pgp_decide`) beside it
+  const char *pending;
+  // Find Key applies now
+  bool can_find;
+} PeComposeRecipient;
+
+// What a click on a switch came to
+typedef struct PeComposeToggled {
+  // The switches to keep for PeOutgoing now: the user's own Sign (apart from Encrypt), and Encrypt
+  bool sign;
+  bool encrypt;
+  // A question to ask first, which left the switches as they were
+  enum PeComposeQuestion question;
+  // The question and its two buttons (& marks the menu letter), empty without one
+  char *text;
+  char *yes;
+  char *no;
+  // A lookup of the recipients' keys that Encrypt started, 0 for none: `KeysFound` follows with it in `uid`
+  uint64_t lookup;
+} PeComposeToggled;
 
 // An event; valid only during the callback
 typedef struct PeEvent {
@@ -1177,39 +1335,6 @@ typedef struct PeFromChoice {
   const char *label;
 } PeFromChoice;
 
-// A message to send; strings are UTF-8, address lists as the user typed them
-typedef struct PeOutgoing {
-  const char *to;
-  const char *cc;
-  const char *bcc;
-  const char *subject;
-  // The plain text, for a message without `html`
-  const char *text;
-  // What was written in the editor, as HTML, or NULL for a plain text message
-  const char *html;
-  // The `quote` of the draft, added after `html`, or NULL
-  const char *quote;
-  // From the draft of a reply, or NULL
-  const char *in_reply_to;
-  // From the draft of a reply, space separated, or NULL
-  const char *references;
-  // Paths of files to attach
-  const char *const *attachments;
-  size_t attachment_count;
-  // The Message-ID of the draft it was saved as (from `pe_draft_save` or PeDraftInfo), or NULL
-  const char *message_id;
-  // The account whose Drafts has that copy when From changed to another account since, 0 otherwise: the copy
-  // there goes once the message is saved or queued in the account it goes from now
-  int64_t draft_account;
-  // The quoted message was plain text (PeDraftInfo.quote_text was there): with nothing formatted written, the
-  // message then goes as plain text
-  bool quote_plain;
-  // PeDraftInfo.quote_text while `quote` is the draft's own (not edited), NULL otherwise
-  const char *quote_text;
-  // One of the account's other addresses to send from (a `pe_from_choices` row's), NULL for its own
-  const char *from;
-} PeOutgoing;
-
 // A message waiting in the Outbox
 typedef struct PeQueued {
   int64_t id;
@@ -1254,6 +1379,11 @@ typedef struct PeDraftInfo {
   // The account's other address it goes from (a reply's to the message sent to it, a saved draft's), to choose
   // in From; NULL for the account's own
   const char *from;
+  // Sign and Encrypt start so: on for a reply to or a forward of encrypted mail, as saved for a draft
+  bool sign;
+  bool encrypt;
+  // It answers or forwards encrypted mail: for PeOutgoing.quote_encrypted, for as long as the window is open
+  bool quote_encrypted;
 } PeDraftInfo;
 
 // The servers found for an address
@@ -2108,6 +2238,101 @@ uint8_t *pe_card_picture(const struct PeCore *core,
 // `name` and `address` must each be NULL or a NUL-terminated string.
 char *pe_initials(const char *name,
                   const char *address);
+
+// What the compose window shows of signing and encrypting `message` from `account` now: ask again when the
+// recipients, From or a switch change, and on `KeysFound`. NULL on failure. Free with `pe_compose_security_free`.
+//
+// # Safety
+// `core` must be a live handle, `message` a valid message.
+struct PeComposeSecurity *pe_compose_security(const struct PeCore *core,
+                                              int64_t account,
+                                              const struct PeOutgoing *message);
+
+// # Safety
+// `security` must be NULL or live.
+const struct PeComposeSecurityInfo *pe_compose_security_info(const struct PeComposeSecurity *security);
+
+// How many recipients the message has, each once
+//
+// # Safety
+// `security` must be NULL or live.
+size_t pe_compose_security_count(const struct PeComposeSecurity *security);
+
+// Recipient `index` (To first, then Cc and Bcc), NULL past the end
+//
+// # Safety
+// `security` must be NULL or live.
+const struct PeComposeRecipient *pe_compose_security_recipient(const struct PeComposeSecurity *security,
+                                                               size_t index);
+
+// # Safety
+// `security` must be NULL or from `pe_compose_security`, freed once.
+void pe_compose_security_free(struct PeComposeSecurity *security);
+
+// A click on Sign or Encrypt of `message` (its switches as they were), `on` what the switch is to become; again
+// with `confirmed` once the question `PE_COMPOSE_QUESTION_TURN_OFF_ENCRYPT` was answered Yes. NULL on failure. Free
+// with `pe_compose_toggled_free`.
+//
+// # Safety
+// `core` must be a live handle, `message` a valid message.
+struct PeComposeToggled *pe_compose_toggle(const struct PeCore *core,
+                                           int64_t account,
+                                           const struct PeOutgoing *message,
+                                           enum PeComposeSwitch switch_,
+                                           bool on,
+                                           bool confirmed);
+
+// # Safety
+// `toggled` must be NULL or from `pe_compose_toggle`, freed once.
+void pe_compose_toggled_free(struct PeComposeToggled *toggled);
+
+// With Encrypt on, looks up the keys of the recipients that have none: when the recipients change (a field left,
+// or a moment after typing stops). `KeysFound` follows with the request in `uid`; 0 when there is nothing to ask.
+//
+// # Safety
+// `core` must be a live handle, `message` a valid message.
+uint64_t pe_compose_find_keys(const struct PeCore *core,
+                              int64_t account,
+                              const struct PeOutgoing *message);
+
+// Recipients' Keys' Find Key for one recipient (its row's `can_find`): `KeysFound` follows with the request in
+// `uid`; 0 when it can not be asked now
+//
+// # Safety
+// `core` must be a live handle, `address` a NUL-terminated string.
+uint64_t pe_compose_find_key(const struct PeCore *core,
+                             const char *address);
+
+// What a lookup (`pe_compose_find_keys`, `pe_compose_find_key`) found, after its `KeysFound`: the keys are taken
+// into the key book now, once, by the window that started it. What to tell the user (the status bar), NULL for
+// another window's request or one still running. Free with `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle.
+char *pe_pgp_find_result(const struct PeCore *core,
+                         uint64_t request);
+
+// Remove from Message: the recipient lists of `message` without `address`, in `to`, `cc` and `bcc` (each as it
+// was typed when the address is not in it), for the fields. Free them with `pe_string_free`.
+//
+// # Safety
+// `message` must be a valid message, `address` a NUL-terminated string, `to`, `cc` and `bcc` valid pointers.
+bool pe_compose_without_recipient(const struct PeOutgoing *message,
+                                  const char *address,
+                                  char **to,
+                                  char **cc,
+                                  char **bcc);
+
+// Insert > Attach My Public Key: the public key of the address `message` goes from, written to a file to attach
+// (as the attach button adds files); NULL with the reason in `error` (no key for that address). Free both with
+// `pe_string_free`.
+//
+// # Safety
+// `core` must be a live handle, `message` a valid message, `error` NULL or a valid pointer.
+char *pe_compose_own_key_file(const struct PeCore *core,
+                              int64_t account,
+                              const struct PeOutgoing *message,
+                              char **error);
 
 // Opens the store at `path` (UTF-8, created when missing) and starts the engine. `callback` gets
 // the events, on worker threads, with `context`. NULL on failure. Close with `pe_core_close`.

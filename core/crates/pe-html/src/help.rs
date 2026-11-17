@@ -880,10 +880,19 @@ mod tests {
         );
         assert!(!table.contains("<td></td>"));
         // the compose window's commands under its own title, after the main window's menus
-        let compose = table.split("<h2>New Message</h2>").nth(1).expect("the compose window's table");
-        assert!(compose.contains("<td>Digitally Sign</td><td><kbd>\u{2325}\u{2318}Y</kbd></td>"), "{compose}");
+        let compose = table
+            .split("<h2>New Message</h2>")
+            .nth(1)
+            .expect("the compose window's table");
+        assert!(
+            compose.contains("<td>Digitally Sign</td><td><kbd>\u{2325}\u{2318}Y</kbd></td>"),
+            "{compose}"
+        );
         assert!(compose.contains("<td>Encrypt</td>"), "{compose}");
         let windows = shortcuts_table(Platform::Windows, "en");
-        assert!(windows.contains("<td>Encrypt</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td>"), "{windows}");
+        assert!(
+            windows.contains("<td>Encrypt</td><td><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td>"),
+            "{windows}"
+        );
     }
 }
