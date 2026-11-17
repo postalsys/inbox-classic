@@ -739,32 +739,26 @@ setup-file-name = Inbox Classic - Einstellungen und Konten
 setup-skipped-unreachable = { $name } wurde übersprungen: Der Anmeldedienst war nicht erreichbar. Fügen Sie die Anmelde-App unter „Anmelde-Apps“ erneut hinzu.
 attachment-runs-programs = Die Datei „{ $name }“ kann Programme ausführen. Deshalb öffnet Inbox Classic sie nicht. Wenn Sie der Quelle vertrauen, können Sie die Datei speichern und selbst öffnen.
 attachment-decrypted-note = Diese Anlage stammt aus einer verschlüsselten Nachricht. Zum Öffnen legt Inbox Classic eine unverschlüsselte Kopie in Ihrem temporären Ordner ab. Kopien, die älter als einen Tag sind, werden beim Start der App gelöscht.
-# review: new
 undone-move = { $count ->
     [one] Der Server hat { $messages } nicht in { $folder } verschoben, daher ist sie wieder in { $from }: { $reason }
    *[other] Der Server hat { $messages } nicht in { $folder } verschoben, daher sind sie wieder in { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] Der Server hat { $messages } nicht gelöscht, daher ist sie wieder in { $from }: { $reason }
    *[other] Der Server hat { $messages } nicht gelöscht, daher sind sie wieder in { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] Der Server hat { $messages } nicht archiviert, daher ist sie wieder in { $from }: { $reason }
    *[other] Der Server hat { $messages } nicht archiviert, daher sind sie wieder in { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
     [one] Der Server hat { $messages } nicht als gelesen markiert, daher ist sie wieder ungelesen: { $reason }
    *[other] Der Server hat { $messages } nicht als gelesen markiert, daher sind sie wieder ungelesen: { $reason }
 }
-# review: new
 undone-unread = { $count ->
     [one] Der Server hat { $messages } nicht als ungelesen markiert, daher ist sie wieder gelesen: { $reason }
    *[other] Der Server hat { $messages } nicht als ungelesen markiert, daher sind sie wieder gelesen: { $reason }
 }
-# review: new
 undone-flags = { $count ->
     [one] Der Server hat die Kennzeichnungen von { $messages } nicht geändert, daher ist sie wie zuvor: { $reason }
    *[other] Der Server hat die Kennzeichnungen von { $messages } nicht geändert, daher sind sie wie zuvor: { $reason }

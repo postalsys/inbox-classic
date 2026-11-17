@@ -772,33 +772,27 @@ setup-file-name = Paramètres et comptes Inbox Classic
 setup-skipped-unreachable = L’application { $name } n’a pas été importée car son service de connexion est injoignable. Ajoutez-la à nouveau dans « Applications de connexion ».
 attachment-runs-programs = Le fichier « { $name } » peut exécuter des programmes. Inbox Classic ne l’ouvre donc pas. Si vous faites confiance à sa provenance, vous pouvez l’enregistrer et l’ouvrir vous-même.
 attachment-decrypted-note = Cette pièce jointe provient d’un message chiffré. Pour l’ouvrir, Inbox Classic enregistre une copie non chiffrée dans un dossier temporaire de votre compte utilisateur. Au démarrage de l’application, les copies datant de plus d’un jour sont supprimées.
-# review: new
 undone-move = { $count ->
     [one] Le serveur n’a pas déplacé { $messages } vers { $folder }, il est donc de retour dans { $from } : { $reason }
    *[other] Le serveur n’a pas déplacé { $messages } vers { $folder }, ils sont donc de retour dans { $from } : { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] Le serveur n’a pas supprimé { $messages }, il est donc de retour dans { $from } : { $reason }
    *[other] Le serveur n’a pas supprimé { $messages }, ils sont donc de retour dans { $from } : { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] Le serveur n’a pas archivé { $messages }, il est donc de retour dans { $from } : { $reason }
    *[other] Le serveur n’a pas archivé { $messages }, ils sont donc de retour dans { $from } : { $reason }
 }
-# review: new
 undone-read = { $count ->
     [one] Le serveur n’a pas marqué { $messages } comme lu, il est donc de nouveau non lu : { $reason }
    *[other] Le serveur n’a pas marqué { $messages } comme lus, ils sont donc de nouveau non lus : { $reason }
 }
-# review: new
 undone-unread = { $count ->
     [one] Le serveur n’a pas marqué { $messages } comme non lu, il est donc de nouveau lu : { $reason }
    *[other] Le serveur n’a pas marqué { $messages } comme non lus, ils sont donc de nouveau lus : { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Le serveur n’a pas modifié les indicateurs de { $messages }, il est donc comme avant : { $reason }
-   *[other] Le serveur n’a pas modifié les indicateurs de { $messages }, ils sont donc comme avant : { $reason }
+    [one] Le serveur n’a pas modifié les indicateurs de { $messages }, ses indicateurs ont donc retrouvé leur état précédent : { $reason }
+   *[other] Le serveur n’a pas modifié les indicateurs de { $messages }, leurs indicateurs ont donc retrouvé leur état précédent : { $reason }
 }

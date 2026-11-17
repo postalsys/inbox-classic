@@ -756,32 +756,26 @@ setup-skipped-unreachable = { $name } ohitettiin: sen kirjautumispalveluun ei sa
 attachment-runs-programs = ”{ $name }” voi suorittaa ohjelmia, joten Inbox Classic ei avaa sitä. Tallenna se ja avaa se sitten itse, jos luotat sen lähteeseen.
 attachment-decrypted-note = Tämä liite on peräisin salatusta viestistä. Liitteen avaamista varten Inbox Classic tallentaa siitä salaamattoman kopion käyttäjätilisi väliaikaiseen kansioon. Yli vuorokauden vanhat kopiot poistetaan sovelluksen käynnistyessä.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
     [one] Palvelin ei siirtänyt viestiä kansioon { $folder }, joten { $messages } on taas kansiossa { $from }: { $reason }
    *[other] Palvelin ei siirtänyt viestejä kansioon { $folder }, joten { $messages } on taas kansiossa { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] Palvelin ei poistanut viestiä, joten { $messages } on taas kansiossa { $from }: { $reason }
    *[other] Palvelin ei poistanut viestejä, joten { $messages } on taas kansiossa { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] Palvelin ei arkistoinut viestiä, joten { $messages } on taas kansiossa { $from }: { $reason }
    *[other] Palvelin ei arkistoinut viestejä, joten { $messages } on taas kansiossa { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
     [one] Palvelin ei merkinnyt viestiä luetuksi, joten { $messages } on taas lukematta: { $reason }
    *[other] Palvelin ei merkinnyt viestejä luetuiksi, joten { $messages } on taas lukematta: { $reason }
 }
-# review: new
 undone-unread = { $count ->
     [one] Palvelin ei merkinnyt viestiä lukemattomaksi, joten { $messages } on taas luettu: { $reason }
    *[other] Palvelin ei merkinnyt viestejä lukemattomiksi, joten { $messages } on taas luettu: { $reason }
 }
-# review: new
 undone-flags = { $count ->
     [one] Palvelin ei muuttanut viestin lippuja, joten { $messages } on ennallaan: { $reason }
    *[other] Palvelin ei muuttanut viestien lippuja, joten { $messages } on ennallaan: { $reason }

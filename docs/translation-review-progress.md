@@ -16,16 +16,17 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Finnish's existing scope is complete: 1,334 catalog entries and all 52 help topics reviewed, with
-  174 catalog value improvements. The fresh upstream audit found six new server-action rollback messages
-  in each of 28 languages (168 total). Review these next, then the 32 previously reviewed conversations/
-  new-mail topics in the notification-context followup. Continue Croatian (hr) afterward.
+- Finnish is complete: 1,340 catalog entries and all 52 help topics reviewed, with 174 catalog value
+  improvements. The 168 new rollback messages are reviewed in fi/de/es/et/fr (30 entries); 138 remain
+  across the other 23 languages. Continue those, then the 24 remaining notification-context help topics
+  in 12 languages. Finnish and de/es/et/fr already have the corrected notification guidance.
+  Continue Croatian (hr) and the remaining ten initial-review languages afterward.
   These followups are separate from initial-scope totals and must be resolved before completing the round.
   The extended mnemonic followup is complete: 44 actual menu/dialog scopes pass across all 17 languages
   with reviewed catalogs. Use the expanded scopes for remaining languages; exact definitions are in state.
   Upstream master `76f67e82` is integrated and its already-inventoried wave1 content reconciled.
   Greek is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. The logo-cache and
-  attachment-reminder context followups are complete. Eleven languages still need their initial reviews; all 28 have the new rollback drafts pending. All 84 late list-loading labels are reviewed.
+  attachment-reminder context followups are complete. Eleven languages still need their initial reviews; 23 have the new rollback drafts pending. All 84 late list-loading labels are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
   Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
   The persistent-logo-cache followup is now complete: 42 help topics checked (37 changed, five retained)
@@ -764,8 +765,24 @@ Static checks report only known removed-mark diagnostics and seven recorded es/f
 The dedicated offline pe-ffi build passed; generated output is unchanged from imported upstream files.
 No test suite was run. Review the 168 new messages next, then the notification-context followup.
 
-Current totals: 17,451 catalog entries and 680 help pages reviewed; 2,729 catalog values improved. Remaining:
-14,809 catalog entries and 572 help pages (including the five additional languages), plus the 32-topic
+### First late rollback reviews and notification corrections
+
+Reviewed all 30 new failure messages in Finnish, German, Spanish, Estonian and French against the merged
+app implementation. Checked counted-message phrases, singular/plural agreement and restored local state after
+a failed server action. Retained good drafts; improved two Spanish status descriptions and one French flag
+sentence. Finnish is complete again, now at 1,340 catalog entries and 52 help topics.
+
+Corrected eight conversations/new-mail help topics in de/es/et/fr: watching includes messages in user folders,
+but notification settings and foreground-window suppression still apply. Rechecked all three handlers in the
+merged source. Twenty-four followup topics remain in 12 languages; these do not increase initial-scope totals.
+
+Static checks have no unexpected structural findings; the seven known es/fr parser false positives are
+accounted for. Catalog variables/plurals and help tags/attributes/literal keys are preserved. All inventories
+and completed/source hashes reconcile (17,533 messages and 9,122 changed help lines). Report regenerated;
+git diff --check passes. No test suite was run. Upstream integration checkpoint: `b4dbd1e3`.
+
+Current totals: 17,481 catalog entries and 680 help pages reviewed; 2,732 catalog values improved. Remaining:
+14,779 catalog entries and 572 help pages (including the five additional languages), plus the 24-topic
 notification-context followup. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final

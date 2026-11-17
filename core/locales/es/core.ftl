@@ -756,32 +756,26 @@ setup-file-name = Configuración y cuentas de Inbox Classic
 setup-skipped-unreachable = Se omitió { $name } porque no se pudo contactar con el servicio de inicio de sesión. Vuelva a añadir esta aplicación en «Aplicaciones de inicio de sesión».
 attachment-runs-programs = El archivo «{ $name }» puede ejecutar programas, por lo que Inbox Classic no lo abre. Si confía en su origen, puede guardarlo y abrirlo por su cuenta.
 attachment-decrypted-note = Este archivo adjunto procede de un mensaje cifrado. Para abrirlo, Inbox Classic guarda una copia sin cifrar en una carpeta temporal de su cuenta de usuario. Al iniciar la aplicación, se eliminan las copias que tienen más de un día.
-# review: new
 undone-move = { $count ->
     [one] El servidor no movió { $messages } a { $folder }, así que vuelve a estar en { $from }: { $reason }
    *[other] El servidor no movió { $messages } a { $folder }, así que vuelven a estar en { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] El servidor no eliminó { $messages }, así que vuelve a estar en { $from }: { $reason }
    *[other] El servidor no eliminó { $messages }, así que vuelven a estar en { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] El servidor no archivó { $messages }, así que vuelve a estar en { $from }: { $reason }
    *[other] El servidor no archivó { $messages }, así que vuelven a estar en { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
-    [one] El servidor no marcó { $messages } como leído, así que vuelve a estar sin leer: { $reason }
-   *[other] El servidor no marcó { $messages } como leídos, así que vuelven a estar sin leer: { $reason }
+    [one] El servidor no marcó { $messages } como leído, así que vuelve a figurar como no leído: { $reason }
+   *[other] El servidor no marcó { $messages } como leídos, así que vuelven a figurar como no leídos: { $reason }
 }
-# review: new
 undone-unread = { $count ->
-    [one] El servidor no marcó { $messages } como no leído, así que vuelve a estar leído: { $reason }
-   *[other] El servidor no marcó { $messages } como no leídos, así que vuelven a estar leídos: { $reason }
+    [one] El servidor no marcó { $messages } como no leído, así que vuelve a figurar como leído: { $reason }
+   *[other] El servidor no marcó { $messages } como no leídos, así que vuelven a figurar como leídos: { $reason }
 }
-# review: new
 undone-flags = { $count ->
     [one] El servidor no cambió las marcas de { $messages }, así que está como antes: { $reason }
    *[other] El servidor no cambió las marcas de { $messages }, así que están como antes: { $reason }
