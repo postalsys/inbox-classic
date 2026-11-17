@@ -1,31 +1,29 @@
-<!--review-->
 <h1>Hakusanat</h1>
-<p class="summary">Sanat ja merkit, jotka hakukenttä ymmärtää, jotta löydät juuri haluamasi viestit.</p>
-<p>Hakukenttä hyväksyy samat sanat kuin Gmail. Yhdistä niitä niin monta kuin haluat: viestin on vastattava kaikkia. Näet lyhyen luettelon osoittamalla hakukenttää.</p>
+<p class="summary">Tarkenna hakua hakusanoilla ja hakuehdoilla ja löydä haluamasi viestit.</p>
+<p>Hakukentässä voi käyttää Gmailista tuttuja hakuehtoja. Yhdistä useita ehtoja, niin haku näyttää ne kaikki täyttävät viestit. Näet lyhyen ohjeen viemällä osoittimen hakukentän päälle.</p>
 <table>
     <tr><th>Kirjoita</th><th>Löytää</th></tr>
-    <tr><td><code>budjetti</code></td><td>Viestit, joissa on missä tahansa kohdassa sana, joka alkaa <i>budjetti</i></td></tr>
+    <tr><td><code>budjetti</code></td><td>Viestit, joiden haettavissa tiedoissa on merkkijonolla <i>budjetti</i> alkava sana</td></tr>
     <tr><td><code>"tarkka ilmaus"</code></td><td>Nämä sanat tässä järjestyksessä</td></tr>
     <tr><td><code>-sana</code></td><td>Viestit, joissa sanaa ei ole. Miinusmerkki toimii minkä tahansa hakusanan edessä, esimerkiksi <code>-is:unread</code></td></tr>
     <tr><td><code>tämä OR tuo</code></td><td>Viestit, joissa on jompikumpi sana. Kirjoita <code>OR</code> isoin kirjaimin</td></tr>
-    <tr><td><code>from:anna</code></td><td>Annalta tullut posti</td></tr>
-    <tr><td><code>to:anna</code>, <code>cc:</code>, <code>bcc:</code></td><td>Annalle lähetetty posti millä tahansa vastaanottajarivillä</td></tr>
-    <tr><td><code>subject:lounas</code></td><td>Sana aiheessa</td></tr>
-    <tr><td><code>filename:pdf</code></td><td>Sana liitetiedoston nimessä</td></tr>
-    <tr><td><code>list:news.example.com</code></td><td>Postituslistan posti sen List-Id:n mukaan</td></tr>
-    <tr><td><code>has:attachment</code></td><td>Viestit, joissa on tiedostoja</td></tr>
+    <tr><td><code>from:anna</code></td><td>Viestit, joiden lähettäjän tiedoissa on Anna</td></tr>
+    <tr><td><code>to:anna</code>, <code>cc:</code>, <code>bcc:</code></td><td>Viestit, joiden vastaanottajatiedoissa on Anna. Kaikki kolme hakuehtoa etsivät kaikista vastaanottajakentistä</td></tr>
+    <tr><td><code>subject:lounas</code></td><td>Viestit, joiden aiheessa on annettu sana</td></tr>
+    <tr><td><code>filename:pdf</code></td><td>Viestit, joiden liitetiedoston nimessä on annettu sana</td></tr>
+    <tr><td><code>list:news.example.com</code></td><td>Postituslistan viestit List-Id-tunnisteen perusteella</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Viestit, joissa on liitteitä</td></tr>
     <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Lukemattomat tai luetut viestit</td></tr>
     <tr><td><code>is:starred</code> tai <code>is:flagged</code></td><td>Liputetut viestit</td></tr>
     <tr><td><code>is:answered</code></td><td>Viestit, joihin vastasit</td></tr>
     <tr><td><code>is:bounce</code></td><td>Ilmoitukset viesteistä, joita ei toimitettu tai jotka ovat viivästyneet</td></tr>
-    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Vain kyseinen kansio kaikilla tileillä</td></tr>
-    <tr><td><code>in:projektit</code></td><td>Vain kansio, jolla on tämä nimi</td></tr>
+    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Viestit kyseisestä kansiosta kaikilta tileiltä</td></tr>
+    <tr><td><code>in:projektit</code></td><td>Viestit tämännimisestä kansiosta</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Kaikki kansiot</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Posti ennen tiettyä päivää tai sen jälkeen. Myös <code>2025-01-31</code> toimii</td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Posti, joka on vanhempi tai uudempi kuin päivät (<code>d</code>), kuukaudet (<code>m</code>) tai vuodet (<code>y</code>)</td></tr>
-    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Posti, joka on suurempi tai pienempi kuin koko tavuina tai merkinnällä <code>K</code>, <code>M</code> tai <code>G</code></td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Ennen annettua päivää tai annetusta päivästä alkaen päivätyt viestit. Myös muoto <code>2025-01-31</code> käy</td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Annettua ajanjaksoa vanhemmat tai uudemmat viestit. Yksiköt ovat päivät (<code>d</code>), kuukaudet (<code>m</code>) ja vuodet (<code>y</code>)</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Annettua kokoa suuremmat tai pienemmät viestit. Ilmoita koko tavuina tai käytä tunnusta <code>K</code>, <code>M</code> tai <code>G</code></td></tr>
 </table>
-<p>Tarkkeilla ja isoilla kirjaimilla ei ole merkitystä. Hakusanaa, jota Inbox Classic ei tunne, haetaan tavallisena sanana.</p>
-<p>Luettelo ei näytä kokoja. Näet viestin koon valitsemalla <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<p>Kirjainten koolla ja tarkemerkeillä ei ole merkitystä. Tunnistamattomat hakuehdot käsitellään tavallisina hakusanoina.</p>
+<p>Viestiluettelossa ei näytetä viestien kokoja. Näet viestin koon valitsemalla <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
-<!--/review-->

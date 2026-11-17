@@ -1,18 +1,17 @@
-<!--review--><h1>Varmennevirheet</h1>
+<h1>Varmennevirheet</h1>
 <p class="summary">Mitä tehdä, kun Inbox Classic ei voi varmistaa, että se on yhteydessä oikeaan postipalvelimeen.</p>
 <p>Saatat nähdä jonkin näistä:</p>
 <ul>
     <li>Tilarivillä: ”TLS error: …”</li>
     <li>Lukuruudussa: ”Yhteyttä postipalvelimeen ei voitu suojata (…).”</li>
 </ul>
-<p>Inbox Classic ei voinut varmistaa, että palvelin on se, joka se väittää olevansa, joten se ei lähettänyt salasanaasi.</p>
-<p>Ongelman korjaaminen:</p>
+<p>Suojatun yhteyden muodostaminen epäonnistui ennen salasanan lähettämistä. Syynä voi olla palvelimen varmenne tai muu TLS-yhteyden ongelma.</p>
+<p>Näin selvität ongelman:</p>
 <ol>
     <li>Avaa tilin ominaisuudet kohdassa <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Tarkista palvelinten nimet. Niiden on oltava nimiä, joille palvelimen varmenne on tehty. Se on usein palveluntarjoajasi nimi, kuten <code>imap.provider.com</code>, ei oma verkkotunnuksesi.</li>
+    <li>Tarkista palvelinten nimet. Niiden on vastattava varmenteessa olevia nimiä. Käytä palveluntarjoajan ilmoittamaa palvelinnimeä, esimerkiksi <code>imap.provider.com</code>, joka voi olla eri kuin oma verkkotunnuksesi.</li>
     <li>Tarkista, että tietokoneesi päivämäärä ja kellonaika ovat oikein.</li>
 </ol>
-<p>Jos verkko tarkastaa salattua liikennettä, kuten jotkin työpaikkojen tai koulujen verkot, kysy sen ylläpitäjältä.</p>
-<aside class="note">Mitään valintaa kaikkien varmenteiden hyväksymiseksi ei ole. Väärän varmenteen hyväksyminen antaisi jollekulle verkossa mahdollisuuden lukea salasanasi ja postisi.</aside>
+<p>Jos käytät työpaikan tai oppilaitoksen verkkoa, joka tarkastaa salattua liikennettä, kysy apua verkon ylläpitäjältä.</p>
+<aside class="note">Varmenteiden tarkistusta ei voi poistaa käytöstä. Väärennetyn varmenteen hyväksyminen voisi antaa hyökkääjälle pääsyn salasanaasi ja viesteihisi.</aside>
 <nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

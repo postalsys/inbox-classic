@@ -16,16 +16,15 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Finnish (fi), the final 18 help topics after its first 34. Its 1,334 catalog entries
-  are reviewed, with 174 value improvements. Continue rules, agents, troubleshooting and reference help.
-  Explain Finnish compose Alt+K/Alt+P in keyboard-shortcuts beside the unchanged literal key tags.
-  After Finnish, audit the 32 previously reviewed conversations/new-mail topics in the notification-context followup.
+- Finnish (fi) is complete: 1,334 catalog entries and all 52 help topics reviewed, with 174 catalog
+  value improvements. Fetch/reconcile upstream and late additions, then audit the 32 previously reviewed
+  conversations/new-mail topics in the notification-context followup. Continue Croatian (hr) afterward.
   These followups are separate from initial-scope totals and must be resolved before completing the round.
   The extended mnemonic followup is complete: 44 actual menu/dialog scopes pass across all 17 languages
   with reviewed catalogs. Use the expanded scopes for remaining languages; exact definitions are in state.
   Upstream master `76f67e82` is integrated and its already-inventoried wave1 content reconciled.
   Greek is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. The logo-cache and
-  attachment-reminder context followups are complete. Twelve languages still have pending content. All 84 late list-loading labels are reviewed.
+  attachment-reminder context followups are complete. Eleven languages still have pending content. All 84 late list-loading labels are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
   Norwegian Bokmål, Serbian Latin and Turkish have completed their initial reviews.
   The persistent-logo-cache followup is now complete: 42 help topics checked (37 changed, five retained)
@@ -736,8 +735,22 @@ platform branches and literal keys are preserved. Pending inventories and comple
 No test suite was run. Finnish now has 34 of 52 help topics reviewed; 18 remain.
 Everyday/account help checkpoint: `037aefcd`.
 
-Current totals: 17,451 catalog entries and 662 help pages reviewed; 2,729 catalog values improved. Remaining:
-14,641 catalog entries and 590 help pages (including the five additional languages), plus the 32-topic
+### Finnish help completed
+
+Reviewed the final 18 help topics covering rules, agents, troubleshooting, installation and reference material.
+Improved natural instructions and clarified rule processing, agent permission scope, queued-send approval and
+cancellation, TLS failures, conditional app-password support and command-line behavior. Search examples now
+match date boundaries and recipient-field behavior. Unsubscribe instructions distinguish direct requests,
+prepared messages and browser actions. Finnish compose shortcuts Alt+K/Alt+P are explained beside unchanged
+literal key tags. All 1,334 catalog entries and all 52 Finnish help topics are now reviewed.
+
+Static checks have no structural findings beyond deliberately removed marks. Markup, attributes, controls,
+platform branches and literal keys are preserved. All 28 language inventories and pending marks match state;
+completed/source hashes reconcile (17,503 catalog messages and 9,114 changed help lines). Report regenerated;
+git diff --check passes. No test suite was run. Security/privacy checkpoint: `d45745a0`.
+
+Current totals: 17,451 catalog entries and 680 help pages reviewed; 2,729 catalog values improved. Remaining:
+14,641 catalog entries and 572 help pages (including the five additional languages), plus the 32-topic
 notification-context followup. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final

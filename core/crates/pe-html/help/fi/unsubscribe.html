@@ -1,18 +1,17 @@
-<!--review--><h1>Postituslistalta eroaminen</h1>
-<p class="summary">Lopeta postituslistan viestit tilauksen peruutuspainikkeella.</p>
-<p>Postituslistan viestissä, joka kertoo, miten listalta erotaan, on otsikkotietojen oikeassa reunassa painike <b data-text="ui-unsubscribe"></b>.</p>
-<p>Listalta eroaminen:</p>
+<h1>Postituslistalta eroaminen</h1>
+<p class="summary">Peru postituslistan tilaus suoraan viestistä.</p>
+<p>Jos postituslistan viesti sisältää tilauksen perumisohjeet, otsikkotietojen oikeassa reunassa näkyy painike <b data-text="ui-unsubscribe"></b>.</p>
+<p>Näin perut tilauksen:</p>
 <ol>
-    <li>Napsauta <b data-text="ui-unsubscribe"></b>. Inbox Classic kertoo, mitä tapahtuu, ja kysyy ensin.</li>
-    <li>Vahvista. Listasta riippuen tapahtuu yksi kolmesta:
+    <li>Napsauta <b data-text="ui-unsubscribe"></b>. Inbox Classic kertoo perumistavan ja pyytää vahvistuksen.</li>
+    <li>Vahvista peruminen. Postituslistasta riippuen tapahtuu jokin seuraavista:
         <ul>
-            <li>Inbox Classic pyytää listaa lopettamaan. Mitään sivua ei avata eikä viestiä lähetetä.</li>
-            <li>Inbox Classic kirjoittaa viestin, jonka lista haluaa. Lähetä se napsauttamalla <b data-text="ui-tb-send"></b>.</li>
-            <li>Listan sivu avautuu selaimeesi, jossa viet eroamisen loppuun.</li>
+            <li>Inbox Classic lähettää perumispyynnön suoraan postituslistan palvelimelle. Verkkosivua ei avata eikä sähköpostiviestiä lähetetä.</li>
+            <li>Inbox Classic valmistelee postituslistan edellyttämän perumisviestin. Lähetä se napsauttamalla <b data-text="ui-tb-send"></b>.</li>
+            <li>Postituslistan verkkosivu avautuu selaimessa. Viimeistele peruminen siellä.</li>
         </ul>
     </li>
 </ol>
-<p>Tilarivi kertoo, kun lista on hyväksynyt pyynnön.</p>
-<aside class="note">Inbox Classic pyytää listaa lopettamaan itse vain, kun listan palvelin on allekirjoittanut viestin. Keksitty viesti ei voi käyttää sitä tavoittaakseen jonkun muun.</aside>
+<p>Tilarivi ilmoittaa, kun postituslistan palvelin on hyväksynyt suoran perumispyynnön.</p>
+<aside class="note">Suora perumispyyntö lähetetään vain, jos postipalveluntarjoaja on vahvistanut postituslistan DKIM-allekirjoituksen. Näin väärennetty viesti ei voi ohjata tätä pyyntöä toiseen osoitteeseen.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

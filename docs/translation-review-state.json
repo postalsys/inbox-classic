@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Finish Finnish help: 18 of 52 topics remain (34 reviewed); all 1334 catalog entries are complete with 174 value improvements. Next: message-rules.html, agents-connect.html, agents-permissions.html, agents-sending.html, certificate-errors.html, delivery-problems.html, message-not-shown.html, no-connection.html, password-not-accepted.html, command-line.html, default-mail-program.html, invitations.html, keyboard-shortcuts.html, options-language.html, removing.html, search-words.html, unsubscribe.html, updates.html. Explain Finnish compose Cc/Bcc Alt+K/Alt+P beside unchanged literal shortcuts. After Finnish, audit the 32 previously reviewed conversations/new-mail topics in watched-conversation-notifications and fetch/reconcile upstream and late additions. Then Croatian (hr) and remaining languages. All 44 mnemonic scopes pass across 17 reviewed catalog languages. Do not run tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Finnish complete: all 1334 catalog entries and all 52 help topics reviewed, 174 catalog value improvements. Fetch/reconcile upstream refs, late changes and inventories. Then audit the 32 previously reviewed conversations/new-mail topics in watched-conversation-notifications. Continue Croatian (hr) and the remaining ten languages. All 44 mnemonic scopes pass across 17 reviewed catalog languages. Do not run tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -7105,26 +7105,7 @@
     },
     "fi": {
       "pending_catalogs": {},
-      "pending_help": [
-        "agents-connect.html",
-        "agents-permissions.html",
-        "agents-sending.html",
-        "certificate-errors.html",
-        "command-line.html",
-        "default-mail-program.html",
-        "delivery-problems.html",
-        "invitations.html",
-        "keyboard-shortcuts.html",
-        "message-not-shown.html",
-        "message-rules.html",
-        "no-connection.html",
-        "options-language.html",
-        "password-not-accepted.html",
-        "removing.html",
-        "search-words.html",
-        "unsubscribe.html",
-        "updates.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "fi-loading-round2",
@@ -8725,6 +8706,73 @@
           },
           "validation": "Static check-language has only the 1334 catalog and 34 help marks deliberately removed; no structural findings. All 13 edited help topics preserve exact markup/attributes, literal keyboard tags, platform branches and control references; inline joins and dash checks pass. Global 17503 unmarked catalog messages and 8868 help lines reconcile to completed batches; translation/English-source hashes match. All language marks match the exact pending inventory. Review HTML regenerated; git diff --check passes. No test suite run.",
           "notes": "Read English/Finnish and reviewed all 13 security/privacy topics against source behavior. Improved natural instructions and consistent tuotemerkin logo, postitietokanta, asiakassalaisuus and käyttöoikeustunnus terminology. Corrected persistent logo caching/download privacy, authenticated domains versus people/content, attachment opening through the system handler, OAuth credential storage, local download limits, private-key backup recovery, signature validity versus verified ownership, verification of all addresses before Match closes the dialog, and TLS-required responses not proving a password correct. Kept actual English protocol-error text. Preserved all tags/attributes, controls, links, platform branches and literal keyboard tags. No tests run per user instruction."
+        },
+        {
+          "id": "fi-help-final-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "message-rules.html",
+            "agents-connect.html",
+            "agents-permissions.html",
+            "agents-sending.html",
+            "certificate-errors.html",
+            "delivery-problems.html",
+            "message-not-shown.html",
+            "no-connection.html",
+            "password-not-accepted.html",
+            "command-line.html",
+            "default-mail-program.html",
+            "invitations.html",
+            "keyboard-shortcuts.html",
+            "options-language.html",
+            "removing.html",
+            "search-words.html",
+            "unsubscribe.html",
+            "updates.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fi/message-rules.html": "361ced5a5a24bd67fb6eef21440fead342a1dd0c7dd3bea259a4c292a435b72d",
+            "core/crates/pe-html/help/fi/agents-connect.html": "5587ddd04c4e92ada213445c486914739a1db3454d6c8f0084b811eada6a3527",
+            "core/crates/pe-html/help/fi/agents-permissions.html": "bf24198883fa5c2bfda393bae174655e602d4116412ff3c643918205022c226c",
+            "core/crates/pe-html/help/fi/agents-sending.html": "8a940b8b3d37abdb8c5c9134d07e09bab503893bfc861686b889990dcab8441a",
+            "core/crates/pe-html/help/fi/certificate-errors.html": "bd61028e42bf233802d99a1ddc3fe5ba090660735db5aff9582457c927498d2d",
+            "core/crates/pe-html/help/fi/delivery-problems.html": "27f0d8e907ae1696110d534b143351d428496a00abf9b777fd8f40417adf64ec",
+            "core/crates/pe-html/help/fi/message-not-shown.html": "fbf35bcefc6ff42d420c66bf3207bc33e35224f9f343da9ea5b4e8c8752fa088",
+            "core/crates/pe-html/help/fi/no-connection.html": "f22ce8064994357068c62194c200d8358fcb8eab52758c007bdb19510c48d8fe",
+            "core/crates/pe-html/help/fi/password-not-accepted.html": "8da7c524d81941dd2bfede2346aeb1a7576cd5e7468bf98043d3db4b1cad9c93",
+            "core/crates/pe-html/help/fi/command-line.html": "ec0846ce3b3cdbf1ff07e681a8d37c9a8a5717913349db48ff42f40c1082a729",
+            "core/crates/pe-html/help/fi/default-mail-program.html": "78bdd7a2b4611c686a34f6ceb06f818633b2e0413322ee3a67aa19b8b70702d5",
+            "core/crates/pe-html/help/fi/invitations.html": "7220434f7326478e7e21d38b7d1a52fdef5b4f580ceca711601ff714c87a31bd",
+            "core/crates/pe-html/help/fi/keyboard-shortcuts.html": "07aca6329699fb6bc8fad6cb37da5e2262d6fc843d75cc71ee35d393e18d7258",
+            "core/crates/pe-html/help/fi/options-language.html": "4d5b3ba5802ecf16467457d37cc27b2fd184989c09a50e174f654a043652697c",
+            "core/crates/pe-html/help/fi/removing.html": "555a53b7fce77dc17066916639d2d90cbbd923b20878e10788119beb5d198e3d",
+            "core/crates/pe-html/help/fi/search-words.html": "6626bc15abd1ba2c5568bdafdbedd1e9752cd2c3a05be3d4ec3dd3aa7aa5887f",
+            "core/crates/pe-html/help/fi/unsubscribe.html": "9b5e83389c197ea699f77a7cfb7333e4b399378c93e093c631b1006b82fe9005",
+            "core/crates/pe-html/help/fi/updates.html": "ab095fe0d8037bca7580350b61b4dbdab2f57cf3bcc474b14e53866b12d2ca80"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/message-rules.html": "50f114b3f1de58156b49d24f24c6b1c13f6ddd25d386b0f5ed10e30f0ed4f41d",
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70",
+            "core/crates/pe-html/help/en/agents-permissions.html": "3f65b6b651950e2b6750417611854b8c899c5893f3e12b1b6c5f1c4a4077bb6d",
+            "core/crates/pe-html/help/en/agents-sending.html": "dffb12a981ffed82aa8cf6566ee4118d64b200c54dcc3b9d77fcd95ee0ffd75e",
+            "core/crates/pe-html/help/en/certificate-errors.html": "8f4eccaaf38ef9767695c2a3a62aebe94238f4f3cbaf8c76f7e98105978a2c84",
+            "core/crates/pe-html/help/en/delivery-problems.html": "b01b4f074dce1c3bce5c63f2c5a5bd05a7613153eb558c179ed1f4fcbfae1c0e",
+            "core/crates/pe-html/help/en/message-not-shown.html": "85e732ccaedb1c1eb60f30ddcef9992d7f1ee4820bb4ceaa6a59e5200a4bef0d",
+            "core/crates/pe-html/help/en/no-connection.html": "b928c6371c171c099fc80ad0fef4e13d3e022593bbdc44c1f27904b5139d3ef0",
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab",
+            "core/crates/pe-html/help/en/command-line.html": "39216fa072adf81b4ce1480e5df5729a4ef7524d25d69aef5e1f374044c18e70",
+            "core/crates/pe-html/help/en/default-mail-program.html": "6934a7cc1e6c28786d77d488146d201f81e253b79965a6d3c63093708bdc33ad",
+            "core/crates/pe-html/help/en/invitations.html": "d4a72136a9c92b8f37bf139b5f577630da9a6b40a921b88bec47bcd06060010d",
+            "core/crates/pe-html/help/en/keyboard-shortcuts.html": "8cef6a16af1925987835d490d608aac7614be8c13650d0b3875ff21753d39b5b",
+            "core/crates/pe-html/help/en/options-language.html": "f01b936ddf998f5db9b63cc6ec8c07d64c85c93fad9da8e2937e3c07307aa1b2",
+            "core/crates/pe-html/help/en/removing.html": "46bcd4ef3c9ae9e051c63de8eb9810f179b723d4297cc001dce3951b76a9515e",
+            "core/crates/pe-html/help/en/search-words.html": "5393319f111f177dde773bb10018564696772b16067b60fa8e2bad14f643ebbb",
+            "core/crates/pe-html/help/en/unsubscribe.html": "a80419bc5ca6a65992c8168d29636f505dc1281ccbeff81ff25412ba2dd3611c",
+            "core/crates/pe-html/help/en/updates.html": "faa50b2269cf71de11f9a361fd48a5476a9380883e99829aae2c67bb12028e59"
+          },
+          "validation": "Static check-language reports only the 1334 catalog and 52 help marks deliberately removed; no structural findings. All 18 edited help topics preserve exact markup/attributes, literal keyboard tags, platform branches and control references; inline joins and dash checks pass. Global 17503 unmarked catalog messages and 9114 help lines reconcile to completed batches; translation/English-source hashes match. All 28 language inventories and pending marks match state. Review HTML regenerated; git diff --check passes. No test suite run.",
+          "notes": "Read English/Finnish and reviewed all 18 remaining help topics against their actual app context. Improved fluent instructions for rules, agents, troubleshooting, installation and reference material. Corrected rule processing versus list sorting, permission scope through Inbox Classic, approval queuing and cancellation, TLS versus certificate failures, conditional app-password support, sign-in-page-file writing a URL, inclusive after/exclusive before dates, to/cc/bcc searching all recipient fields, and the three unsubscribe flows. Explained Finnish compose Alt+K/Alt+P beside preserved literal key tags. All markup/attributes, control references, links, platform branches and literal keyboard tags preserved. No tests run per user instruction."
         }
       ]
     },
