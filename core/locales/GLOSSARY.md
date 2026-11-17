@@ -145,7 +145,8 @@ Context notes:
   This is already stated by `pe-autoconfig/src/app_password.rs::MICROSOFT_WARNING`, although the English provider
   introductions and Gmail/Outlook help contradict it. Google app passwords require two-step verification and an
   eligible account. Do not imply that every provider or account supports them. The focused followup and official
-  provider sources are recorded under `provider-app-password-context` in the review state.
+  provider sources are recorded under `provider-app-password-context` in the review state. The same distinction
+  applies to password-not-accepted help; its focused followup is `provider-troubleshooting-context`.
 
 - Deleting a message is permanent both inside Deleted Items and when the account has no Trash folder.
   `Core::trash_for`/`deletes_for_good` and the selection summary enforce this; all three platforms ask first.
@@ -171,6 +172,9 @@ Context notes:
 - Search covers subjects, senders, recipients, attachment names and message text. Name those fields rather than
   translating the English draft's vague "people" literally.
 - An agent's message shown in the Outbox is queued for a delayed send. It has not been sent yet.
+- Approval in the agent send dialog queues a message with a 30-second minimum delay (`agents::SEND_DELAY`).
+  It is separate from the user's normal send-delay setting; quitting only accelerates the user's undoable sends,
+  not the agent queue. Agent Undo cancels a queued message and cannot recall a delivered one.
 - Undo Send cancels a message during the delay before sending and reopens it for editing. It does not recall
   delivered mail. `$subject` in send-status messages is already quoted by the caller.
 - Message rules process new Inbox messages in list order while the app runs. Matching rules accumulate their
@@ -371,6 +375,15 @@ Review notes (round 2):
   "otkazivanje pretplate"; acceptance of a direct unsubscribe request is not a guarantee of no future mail.
   Links to web pages open in the browser, mail links use the default mail app, and allowed attachments open
   externally after a temporary copy is saved. A replacement contact key waits for selection in its properties.
+- Encryption help uses "otisak ključa", never "otisak prsta"; a valid digital signature and confirmed key ownership
+  are distinct. Check all addresses before confirming ownership. Contact photos confirm a domain, not a person.
+  Calendar help uses "pozivnica za događaj" and "vremenska zona"; floating event times remain as written.
+  Agent permissions describe access through Inbox Classic, and removing an agent entry does not uninstall it.
+- Troubleshooting quotes the current localized errors and leaves raw low-level English errors recognizable.
+  A requirement for TLS does not confirm the password is valid. Use provider-supported ports/security modes;
+  describe retries as attempts, not delivery promises. Damaged mail may be unreadable by this app, not all apps.
+  Browser sign-in is required for Outlook.com; Gmail app passwords depend on account eligibility and two-step
+  verification. Two-step verification alone does not mean an app password is needed.
 
 ### Italiano (it)
 

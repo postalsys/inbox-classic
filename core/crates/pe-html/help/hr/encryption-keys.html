@@ -1,18 +1,17 @@
-<!--review--><h1>Ključevi za šifriranje</h1>
-<p class="summary">Stvorite ključ za potpisivanje svojih poruka i primanje šifrirane pošte te čuvajte ključeve svojih kontakata.</p>
-<p>Inbox Classic potpisuje i šifrira poštu ključevima OpenPGP. Vaš vlastiti ključ ima dvije polovice: javni ključ koji dajete drugima i privatni ključ koji ostaje na vašem računalu. Ključevi vaših kontakata omogućuju vam provjeru njihovih potpisa i šifriranje pošte za njih.</p>
+<h1>Ključevi za šifriranje</h1>
+<p class="summary">Stvorite ključ za digitalno potpisivanje i primanje šifrirane pošte te dodajte ključeve svojih kontakata.</p>
+<p>Inbox Classic digitalno potpisuje i šifrira poštu ključevima OpenPGP. Vaš ključ ima javni dio koji dijelite s drugima i privatni dio koji čuvate na računalu. Javnim ključevima kontakata provjeravate njihove potpise i šifrirate poruke koje im šaljete.</p>
 <p>Da biste stvorili svoj ključ:</p>
 <ol>
-    <li>Odaberite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, a zatim kliknite <b data-text="ui-keys-new"></b>.</li>
-    <li>Odaberite račun i kliknite <b data-text="ui-keys-new-make"></b>. Ključ se koristi za adresu računa i njegove druge adrese.</li>
-    <li>Kliknite <b data-text="ui-keys-backup-now"></b> i odaberite pristupnu frazu. Datoteku i pristupnu frazu čuvajte na različitim sigurnim mjestima.</li>
+    <li>Odaberite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> pa kliknite <b data-text="ui-keys-new"></b>.</li>
+    <li>Odaberite račun i kliknite <b data-text="ui-keys-new-make"></b>. Ključ se koristi za glavnu i dodatne adrese tog računa.</li>
+    <li>Kliknite <b data-text="ui-keys-backup-now"></b> i odaberite pristupnu frazu za sigurnosnu kopiju. Datoteku i pristupnu frazu čuvajte odvojeno, na sigurnim mjestima.</li>
 </ol>
-<aside class="warning">Bez sigurnosne kopije vaš se ključ ne može vratiti ako se ovo računalo izgubi ili vrati na tvorničke postavke, a pošta šifrirana za njega više se ne može čitati.</aside>
-<h2>Ključevi ostaju zaštićeni bez pristupnih fraza</h2>
-<p>Vaše privatne ključeve štiti ključ koji se čuva <!--os:windows-->u Upravitelju vjerodajnicama<!--/os--><!--os:mac-->u privjesku ključeva<!--/os--><!--os:linux-->u sustavskom privjesku ključeva<!--/os-->, pa za njihovo korištenje nikad ne upisujete pristupnu frazu. Pristupnu frazu birate samo za sigurnosnu kopiju. Ako se vaš ključ prikazuje kao zaključan, ta je zaštita poništena: kliknite <b data-text="ui-keys-import"></b> i odaberite njegovu sigurnosnu kopiju.</p>
+<aside class="warning">Ako izgubite računalo ili njegove podatke, bez sigurnosne kopije nećete moći vratiti privatni ključ. Bez odgovarajućeg privatnog ključa ne možete čitati poruke šifrirane za njega.</aside>
+<h2>Zaštita ključeva pri svakodnevnom radu</h2>
+<p>Privatni ključevi šifrirani su zaštitnim ključem koji se čuva <!--os:windows-->u Upravitelju vjerodajnicama sustava Windows<!--/os--><!--os:mac-->u privjesku ključeva<!--/os--><!--os:linux-->u sustavskom privjesku ključeva<!--/os-->. Zato pri svakodnevnom korištenju ne unosite pristupnu frazu; birate je za zaštitu sigurnosne kopije. Ako je privatni ključ zaključan, program nema odgovarajući zaštitni ključ za njegovo otključavanje. Kliknite <b data-text="ui-keys-import"></b> i uvezite sigurnosnu kopiju tog privatnog ključa.</p>
 <h2>Dodavanje ključeva</h2>
-<p>Kliknite <b data-text="ui-keys-import"></b> da biste dodali ključ iz datoteke, na primjer ključ koji vam je poslao kontakt ili sigurnosnu kopiju vlastitog ključa. Privatni ključ zaštićen pristupnom frazom traži je jednom. Inbox Classic zatim pita želite li uvezeni vlastiti ključ koristiti za svoje adrese.</p>
-<p>Ključ kontakta od tada se koristi za njegovu adresu. Ako se kasnije pojavi drugi ključ za istu adresu, trenutačni se koristi i dalje dok novi ne odaberete u svojstvima kontakta.</p>
-<p>Da biste podijelili svoj javni ključ, odaberite ga i kliknite <b data-text="ui-keys-export"></b>. Ključ računa možete odabrati i u njegovim svojstvima, na kartici <b data-text="ui-account-security"></b>.</p>
+<p>Kliknite <b data-text="ui-keys-import"></b> da biste dodali ključ iz datoteke, primjerice ključ kontakta ili sigurnosnu kopiju vlastitog ključa. Ako je privatni ključ zaštićen pristupnom frazom, unesite je pri uvozu. Inbox Classic zatim pita želite li uvezeni vlastiti ključ koristiti za svoje adrese.</p>
+<p>Prvi ključ kontakta počinje se koristiti za njegovu adresu. Ako se kasnije pojavi drugi ključ za istu adresu, postojeći ostaje u upotrebi dok novi ne odaberete u svojstvima kontakta.</p>
+<p>Da biste podijelili svoj javni ključ, odaberite ga i kliknite <b data-text="ui-keys-export"></b>. Ključ računa možete odabrati i na kartici <b data-text="ui-account-security"></b> u svojstvima računa.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

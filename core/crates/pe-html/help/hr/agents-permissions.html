@@ -1,21 +1,20 @@
-<!--review--><h1>Što agent smije raditi</h1>
-<p class="summary">Odaberite što svaki AI agent smije raditi s vašom poštom te pogledajte i poništite ono što je napravio.</p>
-<p>Kad se agent nekog programa prvi put poveže, Inbox Classic vas pita i navodi naziv programa. Odaberite što smije raditi:</p>
+<h1>Dozvole AI agenta</h1>
+<p class="summary">Odredite što agent smije raditi s vašom poštom te pregledajte i poništite njegove radnje.</p>
+<p>Pri prvom povezivanju agenta Inbox Classic prikazuje naziv programa i traži vaše odobrenje. Možete mu dopustiti:</p>
 <ul>
-    <li>čitati poštu: mape, popis poruka, pretraživanje i poruke</li>
-    <li>organizirati poštu: stanje pročitanosti, zastavice, neželjenu poštu, premještanje i brisanje u <b data-text="folder-deleted"></b></li>
-    <li>pisati skice koje ćete vi poslati</li>
-    <li>slati poštu, svaku poruku tek nakon vašeg odobrenja</li>
+    <li>čitanje pošte: pregled mapa i poruka te pretraživanje</li>
+    <li>organiziranje pošte: označavanje pročitanosti, zastavica i neželjene pošte, premještanje te brisanje premještanjem u mapu <b data-text="folder-deleted"></b></li>
+    <li>pripremu skica koje ćete sami poslati</li>
+    <li>slanje pošte uz zasebno odobrenje svake poruke</li>
 </ul>
-<p>Zatim odaberite račune koje smije vidjeti i kliknite <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> odbija program i više vas se za njega ne pita.</p>
-<p>Agent nikad ništa ne briše trajno i nikad ne mijenja postavke vašeg računa. Čitanje poruke ne označava je kao pročitanu. Ono što agent promijeni odmah se vidi u prozorima.</p>
+<p>Odaberite i račune kojima agent smije pristupiti pa kliknite <b data-text="ui-allow"></b>. Gumbom <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> odbijate pristup tom programu. Odluka se pamti, pa se pri sljedećem povezivanju pitanje ne ponavlja.</p>
+<p>Putem ovih dozvola agent ne može trajno brisati poruke ni mijenjati postavke računa. Ako bi brisanje bilo trajno, primjerice zato što račun nema mapu za izbrisane poruke, zahtjev se odbija. Kad agent pročita poruku, ona se ne označava kao pročitana. Njegove promjene odmah su vidljive u programu.</p>
 <h2>Pregled i promjena pristupa</h2>
-<p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> prikazuje programe koje ste pustili ili odbili te sve što su agenti napravili, od najnovijeg.</p>
+<p>Otvorite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> za popis programa kojima ste dopustili ili odbili pristup te pregled zabilježenih radnji. Najnovije radnje prikazuju se prve.</p>
 <ul>
-    <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> mijenja što program smije raditi.</li>
-    <li><b data-text="ui-remove"></b> zaboravlja program, pa vas se pri njegovom sljedećem povezivanju ponovno pita.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> poništava promjenu stanja pročitanosti, zastavicu, premještanje ili brisanje te poruku koja je još u mapi Izlazna pošta.</li>
+    <li>Gumbom <!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> mijenjate dozvole programa.</li>
+    <li>Gumbom <b data-text="ui-remove"></b> uklanjate zapis o programu, njegove dozvole i povijest radnji. Program ostaje instaliran, a pri sljedećem povezivanju ponovno će se tražiti vaše odobrenje.</li>
+    <li>Gumbom <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> možete poništiti promjenu pročitanosti ili zastavice, premještanje ili brisanje te otkazati poruku koja još čeka na slanje u Izlaznoj pošti. Već poslanu poruku nije moguće povući.</li>
 </ul>
-<aside class="warning">Poštu pišu drugi ljudi, a poruka može pokušati nagovoriti agenta da proslijedi ili izbriše vašu poštu. Inbox Classic skriva od agenata tekst koji poruka skriva od vas i govori im da pošta nisu upute. Agenta ipak još uvijek mogu prevariti. Dopustite samo ono što vam treba.</aside>
+<aside class="warning">Sadržaj poruke može pokušati navesti agenta da proslijedi ili izbriše vašu poštu. Inbox Classic izostavlja skriveni tekst i upozorava agenta da sadržaj pošte ne smije tretirati kao upute. To ipak ne jamči da će agent prepoznati svaki pokušaj prijevare. Dodijelite mu samo potrebne dozvole.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

@@ -24,20 +24,26 @@ Commit completed batches regularly and preserve an exact resume point.
   broader language drafts still require those corrections. Fresh fetch at 27d00888 found all six source tips
   unchanged; origin/master remains 5c645187 with unrelated README/Linux test/CI changes left unmerged.
   No new translation/help or app-behavior changes. Fresh fetch at 0190587f confirms unchanged refs and guide.
-  Croatian's catalogs and 31 help topics are reviewed; 21 topics remain. Its three settings-context followups
-  are complete: all 27 catalog targets and 11 help targets are accounted for. NEXT review encrypted-and-signed-mail/
-  encryption-keys/verify-a-key/address-book/invitations/agents-connect/agents-permissions/agents-sending, then
-  its other pending topics. Exact source IDs/topics are in state; do not restart full reviews.
+  Croatian's catalogs and 45 help topics are reviewed; seven topics remain in the integrated scope. Its prior
+  three settings-context followups are complete. Password troubleshooting is now corrected in Croatian and
+  the 17 previously completed languages; the ten broader drafts retain it.
+- NEXT integrate the newly discovered encryption/search feature at origin/master `08c9ef12` after this
+  reviewed-help checkpoint. It adds 252 catalog entries, changes 28 entries and affects 112 help topics
+  across all 28 languages. Exact IDs/topics are in `review_workspace.pending_upstream`. These items are not
+  yet included in the active totals below; no language is complete with this upstream work outstanding.
+  Preserve existing reviewed prose and reopen only affected passages. Update Reading mnemonic scopes,
+  inventories and source hashes. Then finish Croatian's all-inboxes/command-line/keyboard-shortcuts/removing/
+  save-print-import/search-words/updates and the ten broader language queues. Do not restart full reviews.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,456 catalog entries and 1,300 help topics; 13,330 entries and 541 topics are currently pending.
+  32,456 catalog entries and 1,304 help topics; 13,330 entries and 527 topics are pending before the new upstream integration.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were initially reviewed with 74 improvements; its 24 app settings additions now have two
   further improvements. Croatian core.ftl has 128 improvements, and the remaining platform/help-title catalogs
-  have 54 more. Four provider introductions have subsequent corrections; 31 help topics are reviewed, with
-  21 remaining. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
+  have 54 more. Four provider introductions have subsequent corrections; 45 help topics are reviewed, with
+  seven remaining before integration. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
 - All 168 rollback messages and 84 loading labels remain reviewed. Earlier logo-cache, attachment-reminder
   and watched-notification followups remain preserved. Use their verified context in new reviews.
 - The three settings pages replace the former single Options mnemonic scope: use 46 actual scopes.
@@ -59,7 +65,9 @@ Commit completed batches regularly and preserve an exact resume point.
   180 catalog entries and 40 help topics, bringing that scope to 32,440 entries and 1,292 topics. The provider
   context followup adds 16 previously out-of-scope catalog entries and four help topics, for 32,456 and 1,296.
   The no-Trash deletion followup adds four round-1 help topics, bringing the scope to 32,456 and 1,300.
-  Other affected items were already counted and are reopened without increasing scope.
+  The password-troubleshooting followup adds four further round-1 topics, bringing it to 32,456 and 1,304.
+  Other affected items were already counted and are reopened without increasing scope. The newly discovered
+  upstream encryption batch still needs integration and scope reconciliation.
   The state records exact inventories and the source commit. Recheck the branch and master for later edits.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
 
@@ -1450,10 +1458,56 @@ uncommitted locale/help/settings changes. No new relevant work; the same unrelat
 unmerged. All 270 since-start entries and 110 passages match pending inventory. Full inventories also account
 for the eight just-reviewed original draft topics, which were absent from the since-start report.
 
-Current totals: 19,126 catalog entries and 759 help topics completed in the active scope; 3,188 historical
-catalog value improvements. Remaining: 13,330 catalog entries and 541 help topics. Seventeen languages have no
-pending content. Croatian has 21 help topics left; hu/lt/lv/pl/ro/ru/sk/sl/sv/uk retain their broader queues,
-including provider, deletion and settings context. `REVIEWED` is unchanged.
+### Croatian encryption, contacts and agent help completed
+
+Reviewed encrypted-and-signed-mail, encryption-keys, verify-a-key, address-book, invitations, agents-connect,
+agents-permissions and agents-sending. Improved natural Croatian instructions and control-label joins. Corrected
+cryptographic fingerprint terminology, valid signatures versus confirmed key ownership, checking every address,
+private-key backups versus the system protection key, contact replacement keys, and calendar time-zone behavior.
+Agent help describes scoped access, the 30-second minimum send delay, queue cancellation versus recalling mail,
+and removal of saved access rather than uninstalling the agent program. The Claude Desktop configuration path
+and restart step were checked against the [official MCP guide](https://modelcontextprotocol.io/docs/develop/connect-local-servers).
+
+### Croatian troubleshooting and focused provider corrections completed
+
+Reviewed certificate-errors, delivery-problems, encryption-errors, message-not-shown, no-connection and
+password-not-accepted. Matched the actual Croatian errors and control labels; kept raw English low-level errors
+recognizable. Removed false assurances about password validity, delivery and whether other apps can read a damaged
+message. Connection advice now uses provider-supported security modes and ports. Bounce explanations distinguish
+delayed delivery and local analysis from successful delivery.
+
+The troubleshooting topic still offered app passwords for Outlook.com after the earlier account-setup corrections.
+Reopened its second and third steps in 17 previously reviewed languages and completed those focused corrections;
+all other text is unchanged. Four round-1 topics enter the scope; 13 previously counted topics were reopened without
+double counting. Croatian received a full review. The ten broader drafts retain the followup. Guidance agrees with
+the app's Microsoft warning, [Outlook.com's authentication requirements](https://support.microsoft.com/en-gb/outlook/pop-imap-and-smtp-settings-for-outlook-com)
+and [Google's app-password eligibility rules](https://support.google.com/accounts/answer/185833). No English or app code changed.
+
+All 18 affected language checks have only expected removed-mark diagnostics: 1,388 in Croatian, 1,395 in each other
+language. No structural findings; all 46 existing mnemonic scopes pass. Exact tags, attributes, platform branches
+and literal code/keys are preserved. Substituted control/topic joins inspected on all three platforms; dynamic
+keyboard labels are outside the preview helper. All 28 current inventories and completed/source hashes reconcile:
+19,160 unmarked messages, 10,007 changed help lines and 14 verified baseline pairs. Report regenerated;
+git diff --check passes. No tests run. Previous checkpoint: `33e3e583`.
+
+### New upstream encryption work discovered at this checkpoint
+
+Fresh fetch found origin/master at `08c9ef12`, merging encrypted-message search/list support and Reading > Encryption
+settings. Inventoried nine new catalog IDs and one changed ID in every language: 252 new and 28 changed entries.
+Four help topics change in every language: encrypted-and-signed-mail, encryption-keys, options-language and
+search-words, for 112 affected topics. There are no new languages. The other five recorded refs and guide hash are
+unchanged, and the root checkout has no uncommitted locale/help/settings edits.
+
+This upstream batch is recorded, not yet integrated. Commit this validated help checkpoint first, then integrate
+the feature and reopen affected translations while preserving prior reviews. The preceding checks cover the current
+checkout only. Its 270 since-start entries and 110 help passages match the queue; full inventories also cover the
+original drafts omitted by that comparison. The final late-arrival audit remains required.
+
+Current pre-integration totals: 19,126 catalog entries and 777 help topics completed in the active scope;
+3,188 historical catalog value improvements. Remaining: 13,330 catalog entries and 527 help topics. Seventeen
+languages have no pending content in the integrated scope, but all 28 have the upstream encryption work above.
+Croatian has seven original help topics left; hu/lt/lv/pl/ro/ru/sk/sl/sv/uk retain their broader queues, including
+provider, deletion and settings context. `REVIEWED` is unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

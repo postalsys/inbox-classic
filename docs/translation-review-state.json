@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue Croatian help: all catalogs and 31 of 52 topics reviewed; 21 remain. Three Croatian settings-context followups are complete. Next review encrypted-and-signed-mail/encryption-keys/verify-a-key/address-book/invitations/agents-connect/agents-permissions/agents-sending against callers and control joins. Then the remaining 13 Croatian topics and hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. Scope 32456 catalogs/1300 topics; pending 13330/541. No tests. Active checkout build/i18n-wave1; REVIEWED unchanged. Latest source audit found no new relevant work, including root uncommitted locale/help/settings paths.",
+  "next_batch": "FIRST integrate the upstream encryption/search feature from origin/master 08c9ef126d4012330b9a5631e8683089c9ad769c into the clean review branch, preserving completed translations and reopening only the affected IDs/passages. Exact 252 new + 28 changed catalog entries and 112 affected help topics are in review_workspace.pending_upstream; these are not yet included in active totals. Update scope/provenance, mnemonic scopes and hashes before reviewing the additions in all 28 languages. Then finish the seven remaining Croatian topics (all-inboxes, command-line, keyboard-shortcuts, removing, save-print-import, search-words, updates) and hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. Current pre-integration scope 32456 catalogs/1304 help; completed 19126/777, pending 13330/527. Croatian catalogs and 45/52 topics reviewed. Provider troubleshooting followup complete in 18 languages; ten broad drafts remain. No tests; active checkout build/i18n-wave1; REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -1548,7 +1548,6 @@
             "message-not-shown.html",
             "message-rules.html",
             "no-connection.html",
-            "password-not-accepted.html",
             "removing.html",
             "search-words.html",
             "sign-in-apps.html",
@@ -1580,7 +1579,7 @@
             "core/crates/pe-html/help/bg/message-rules.html": "4a6e5cf5c91423cd73d560b9e4f7480aa33b6dcd7253a2b5458631db0b66a62b",
             "core/crates/pe-html/help/bg/no-connection.html": "9a9b32ff0eb6789b92dbe42195793604d974c2745a469589ef22820de1b46dbe",
             "core/crates/pe-html/help/bg/options-language.html": "d9014a0bb4a9a192632a6c8c79663b0a37a71bbab5021ba3ee790f905504a6fc",
-            "core/crates/pe-html/help/bg/password-not-accepted.html": "9a9e6f1f0dbb8a3be9f01d0d3d8e293e71a4a72743cace82d45963cdbb2b8643",
+            "core/crates/pe-html/help/bg/password-not-accepted.html": "1df094f960a8b47916c4f5cd968ad08fb142db47b3df3c4833d945f5269c415e",
             "core/crates/pe-html/help/bg/pictures-tracking.html": "130b983e847787e2b0aea611978f14f4264d6afe8663d2ce5424098632a5ca27",
             "core/crates/pe-html/help/bg/removing.html": "ff324387cb05af93bebe9b217127469d57d9078bc831b780fe95669806d192e0",
             "core/crates/pe-html/help/bg/search-words.html": "c64ad19a6706d4a4427334cb72ea13807b7c8a791a025fe7b33fc8423ce26300",
@@ -1631,7 +1630,8 @@
             "download-ahead.html",
             "options-language.html",
             "pictures-tracking.html",
-            "sign-in-codes.html"
+            "sign-in-codes.html",
+            "password-not-accepted.html"
           ]
         },
         {
@@ -1926,6 +1926,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "bg-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/bg/password-not-accepted.html": "c52aa66aa3017550e8b26589f2034c154fec69274dbc034cab5c0e784ce53060"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
@@ -3462,7 +3478,6 @@
             "message-not-shown.html",
             "message-rules.html",
             "no-connection.html",
-            "password-not-accepted.html",
             "removing.html",
             "search-words.html",
             "sign-in-apps.html",
@@ -3494,7 +3509,7 @@
             "core/crates/pe-html/help/cs/message-rules.html": "3e2060dbc679626b8f7bb6a29a56341a262c154bd413d0a3a3a0a9f1605eb7c4",
             "core/crates/pe-html/help/cs/no-connection.html": "301c71c4104094f17392987cf2832afb3999f043e78248324144a15e0ad897fd",
             "core/crates/pe-html/help/cs/options-language.html": "848dcf5ef43897c6ce849b51edfa8bd877220c6b86b6e27b467a0e665f11dd60",
-            "core/crates/pe-html/help/cs/password-not-accepted.html": "58764f2a1589d854c090322394b1eb04204a2d3d6e02ed26125cf897d121ab48",
+            "core/crates/pe-html/help/cs/password-not-accepted.html": "794574cea1e8ed95e61d1f9b9035ddfb6dbe5302003b7c52b80eb10304267214",
             "core/crates/pe-html/help/cs/pictures-tracking.html": "ebc57c2bd41124b2d46a8a32c260b8252684379b5c399875c019c008482aa20e",
             "core/crates/pe-html/help/cs/removing.html": "a849d54e82f576596e78a09376aa8ca006f57222a2418e586867eff75e229af2",
             "core/crates/pe-html/help/cs/search-words.html": "c20e089f1f9ef579e562f5ba2c03cbad4c2916bf143864d46e38138039f03cfc",
@@ -3545,7 +3560,8 @@
             "download-ahead.html",
             "options-language.html",
             "pictures-tracking.html",
-            "sign-in-codes.html"
+            "sign-in-codes.html",
+            "password-not-accepted.html"
           ]
         },
         {
@@ -3861,6 +3877,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "cs-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/cs/password-not-accepted.html": "902bc6f1783e5294fa9d667e07d674ee0224ce7a98e4ecce6b49b4af0e696c06"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
@@ -5397,7 +5429,6 @@
             "message-not-shown.html",
             "message-rules.html",
             "no-connection.html",
-            "password-not-accepted.html",
             "removing.html",
             "search-words.html",
             "sign-in-apps.html",
@@ -5429,7 +5460,7 @@
             "core/crates/pe-html/help/da/message-rules.html": "68504c624016a273fa1f4e85f5d33339895963eaa46e4884f794a74f716d456d",
             "core/crates/pe-html/help/da/no-connection.html": "12c8e0cf119a6bf9f6c78da3e9d3181ff19167212e9f57301a0eb108c3194df5",
             "core/crates/pe-html/help/da/options-language.html": "818f79825bc0918af5f937613d911dff8129182f71c31093ec6133b1d84280ee",
-            "core/crates/pe-html/help/da/password-not-accepted.html": "504ec756b2d4cf68c305a3a6c14b18bf69b2b984b628dcb7ab47e811d7303d77",
+            "core/crates/pe-html/help/da/password-not-accepted.html": "e7b83ec4a7a588067ee37994303493b5566c2123c1db61c99ce6b0a9f0bb7a4e",
             "core/crates/pe-html/help/da/pictures-tracking.html": "beed3e41f683857c9930f0cee518d44bae68fcd2d7f975e306578b06533aafcc",
             "core/crates/pe-html/help/da/removing.html": "4fd70dc654d96794fea9d3f3b27800a515c547a36ca01d2fedc8f1aa2e526eba",
             "core/crates/pe-html/help/da/search-words.html": "a92e5e434e61b039520339d5f98172708c9ec8cf5cde4ad3afa3e8f5078ec3b5",
@@ -5480,7 +5511,8 @@
             "download-ahead.html",
             "options-language.html",
             "pictures-tracking.html",
-            "sign-in-codes.html"
+            "sign-in-codes.html",
+            "password-not-accepted.html"
           ]
         },
         {
@@ -5764,6 +5796,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "da-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/da/password-not-accepted.html": "b3f8676fc90f3940ed501e34124548cb6e7adf955ef553a22af25839dab3e085"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
@@ -6179,6 +6227,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "de-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/de/password-not-accepted.html": "82353f94c1a328d88bbc3c4eab3792c5e81d1c8dbc50acf6c10e3babbd69e11b"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
@@ -7775,7 +7839,6 @@
             "message-not-shown.html",
             "message-rules.html",
             "no-connection.html",
-            "password-not-accepted.html",
             "removing.html",
             "search-words.html",
             "sign-in-apps.html",
@@ -7796,7 +7859,7 @@
             "core/crates/pe-html/help/el/message-rules.html": "e81af17e96787a89051b0b2776747a852d6984b54f4f7afafe23c83ec9c7c896",
             "core/crates/pe-html/help/el/no-connection.html": "e6cf62705258fc95d8ae0ba253661cc1ad70184e7df52f71070973c463eba7b4",
             "core/crates/pe-html/help/el/options-language.html": "1f164dba3c95256f6391320b024f921bb2281999a0c0266fd47139f7c0c4cbdf",
-            "core/crates/pe-html/help/el/password-not-accepted.html": "c2cdee3c0a27105c82803d09d42bfe65f20b8d9bcef7f37bd5906b760628a205",
+            "core/crates/pe-html/help/el/password-not-accepted.html": "495b0853eed8cae63cf4fdf62d57beac1397e402346be2a08e7ebc7fd76d2f3c",
             "core/crates/pe-html/help/el/removing.html": "61071430bc01c1064796e04de9f18f5c178ede98740b20cf9ccc682407952d64",
             "core/crates/pe-html/help/el/search-words.html": "fe9400270bfd825b5e39ac12d4043ad423dc591f67a0a85e52b4f44ba96d4650",
             "core/crates/pe-html/help/el/sign-in-apps.html": "d00c3657b653cb97d7de499ff825ea77fb89f6760fa5946e64e4b518a1b9019b",
@@ -7826,7 +7889,8 @@
           "notes": "Reviewed all final 18 topics: rules, agents, connection/authentication/TLS/message/delivery troubleshooting, custom OAuth apps, language/defaults/updates/removal, CLI/search/keyboard references. Corrected queued sends and permission scope, rule processing, TLS-required not proving passwords, TLS failures not only certificate errors, app-specific malformed-message display, persisted credentials and native instructions. Search aliases cover all recipients; Greek name examples use actual Greek text. Preserved literal English keyboard tags and explained Greek Alt+Κ/Alt+Ι beside them. CLI sign-in-page-file is a URL, not HTML. All Greek help reviewed; no test suite run.",
           "reopened_reviewed_help": [
             "default-mail-program.html",
-            "options-language.html"
+            "options-language.html",
+            "password-not-accepted.html"
           ]
         },
         {
@@ -8080,6 +8144,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "el-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/el/password-not-accepted.html": "a65f02845c73d21c3c26634264246d8673d3363892a2e07197d9bb74e1f20601"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
@@ -8494,6 +8574,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "es-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/es/password-not-accepted.html": "4ab382f270ba89f755d25a3cd353957ae8392767509fd45320407d83d2e52edc"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
@@ -8915,6 +9011,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "et-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/et/password-not-accepted.html": "0428e404cdbe0ca268362a21f65b7f08ac98d0f5a4355d57d177c27e7a2e7823"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
@@ -10557,7 +10669,6 @@
             "delivery-problems.html",
             "message-not-shown.html",
             "no-connection.html",
-            "password-not-accepted.html",
             "command-line.html",
             "invitations.html",
             "keyboard-shortcuts.html",
@@ -10576,7 +10687,7 @@
             "core/crates/pe-html/help/fi/delivery-problems.html": "27f0d8e907ae1696110d534b143351d428496a00abf9b777fd8f40417adf64ec",
             "core/crates/pe-html/help/fi/message-not-shown.html": "fbf35bcefc6ff42d420c66bf3207bc33e35224f9f343da9ea5b4e8c8752fa088",
             "core/crates/pe-html/help/fi/no-connection.html": "f22ce8064994357068c62194c200d8358fcb8eab52758c007bdb19510c48d8fe",
-            "core/crates/pe-html/help/fi/password-not-accepted.html": "8da7c524d81941dd2bfede2346aeb1a7576cd5e7468bf98043d3db4b1cad9c93",
+            "core/crates/pe-html/help/fi/password-not-accepted.html": "95166607d44af7199278fd34ea07664f5a4815e8b1410fed5bc4ba4269dc5550",
             "core/crates/pe-html/help/fi/command-line.html": "ec0846ce3b3cdbf1ff07e681a8d37c9a8a5717913349db48ff42f40c1082a729",
             "core/crates/pe-html/help/fi/default-mail-program.html": "78bdd7a2b4611c686a34f6ceb06f818633b2e0413322ee3a67aa19b8b70702d5",
             "core/crates/pe-html/help/fi/invitations.html": "7220434f7326478e7e21d38b7d1a52fdef5b4f580ceca711601ff714c87a31bd",
@@ -10611,7 +10722,8 @@
           "notes": "Read English/Finnish and reviewed all 18 remaining help topics against their actual app context. Improved fluent instructions for rules, agents, troubleshooting, installation and reference material. Corrected rule processing versus list sorting, permission scope through Inbox Classic, approval queuing and cancellation, TLS versus certificate failures, conditional app-password support, sign-in-page-file writing a URL, inclusive after/exclusive before dates, to/cc/bcc searching all recipient fields, and the three unsubscribe flows. Explained Finnish compose Alt+K/Alt+P beside preserved literal key tags. All markup/attributes, control references, links, platform branches and literal keyboard tags preserved. No tests run per user instruction.",
           "reopened_reviewed_help": [
             "default-mail-program.html",
-            "options-language.html"
+            "options-language.html",
+            "password-not-accepted.html"
           ]
         },
         {
@@ -10823,6 +10935,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "fi-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fi/password-not-accepted.html": "a2a14e24a1894049d8699b450d41b13433360a3c2497f68ba330d62749b04368"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
@@ -11251,33 +11379,35 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "fr-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fr/password-not-accepted.html": "3809eff506630b71b14574805eefe47ea6f2ab1a7db04c47ce0a8d57c2e7ac67"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
     "hr": {
       "pending_catalogs": {},
       "pending_help": [
-        "address-book.html",
-        "agents-connect.html",
-        "agents-permissions.html",
-        "agents-sending.html",
         "all-inboxes.html",
-        "certificate-errors.html",
         "command-line.html",
-        "delivery-problems.html",
-        "encrypted-and-signed-mail.html",
-        "encryption-errors.html",
-        "encryption-keys.html",
-        "invitations.html",
         "keyboard-shortcuts.html",
-        "message-not-shown.html",
-        "no-connection.html",
-        "password-not-accepted.html",
         "removing.html",
         "save-print-import.html",
         "search-words.html",
-        "updates.html",
-        "verify-a-key.html"
+        "updates.html"
       ],
       "completed_batches": [
         {
@@ -12980,6 +13110,74 @@
           },
           "validation": "Static check-language reports only 1374 deliberately removed marks, no structural findings; all 46 mnemonic scopes pass. Exact help tags/attributes/platform branches and literal code/keyboard contents preserved. Substituted controls and topic-title joins inspected on all platforms; the preview helper does not render dynamic keyboard labels. All 28 inventories and completed/source hashes reconcile: 19160 unmarked messages, 9823 changed help lines and 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed eight Croatian account/privacy/transfer topics against TLS/Autodiscover, OAuth and system-secret storage, setup import/export, account deletion, external link/attachment opening and unsubscribe selection. Natural formal instructions and noun-led control joins; credentials include passwords/browser sign-in. Corrected logo cache and automatic-image conditions, domain rather than personal identity, external attachment opening, unprotected transfer reauthentication, explicit replacement-key choice, one-account properties route, all-folder message marking and account secret removal. OIDC must also support mail access. Unsubscribe confirms a direct request rather than guaranteeing future mail stops; DKIM must cover the unsubscribe headers. Exact markup/platform branches/literal code and keys preserved. No catalog edits or tests."
+        },
+        {
+          "id": "hr-help-encryption-agents-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "verify-a-key.html",
+            "address-book.html",
+            "invitations.html",
+            "agents-connect.html",
+            "agents-permissions.html",
+            "agents-sending.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/hr/encrypted-and-signed-mail.html": "d3487f71160094548e7271c439f34c33b0ff89aa278c338d8bbe868ccf1c7dae",
+            "core/crates/pe-html/help/hr/encryption-keys.html": "b00ee6478c4043bbc8f3fcbc46bb5b96006f464f231893ccccfd79286380f034",
+            "core/crates/pe-html/help/hr/verify-a-key.html": "56643fdcd1778cbcc0f6521189054086f23d604d04f8b7271184e0fdb651b61e",
+            "core/crates/pe-html/help/hr/address-book.html": "358d0378e11e79d409e50f43b71d6cf8e96be8451d4435f3dac36f4a3872e127",
+            "core/crates/pe-html/help/hr/invitations.html": "e4abaff607b1faada2634e0dedba84e788cb081c3bf6a0df1b050dfa362cb4d6",
+            "core/crates/pe-html/help/hr/agents-connect.html": "96341b6adbcaf6dafafb69239479510eff763e0c7e30947de03971b063f71aef",
+            "core/crates/pe-html/help/hr/agents-permissions.html": "04f32792f2bc766d1520aeb406a56b109d44d07dbb6e4f88c556e0f0599c92ff",
+            "core/crates/pe-html/help/hr/agents-sending.html": "9989eb42bea4583a70dcc1e0be13129459e7577eee099885cd397a1a3c260b7a"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/encrypted-and-signed-mail.html": "b11ff6a5da8cc4f36f352fe5d7a6a43f0aa04e7ac1f67ea0608ef43559ba100e",
+            "core/crates/pe-html/help/en/encryption-keys.html": "67693bc89f3d12b183ff3a86f11495213a2f58ea0c9e16dea30649d931621d6a",
+            "core/crates/pe-html/help/en/verify-a-key.html": "7b690f37e72f8c83ee9c6d573601c0d29bd86b29627c95a92f89d906f1b10153",
+            "core/crates/pe-html/help/en/address-book.html": "5b5c8d345f153c33f75ee6bcea399a1d36abbc0043efc210445c007acd1c2e53",
+            "core/crates/pe-html/help/en/invitations.html": "d4a72136a9c92b8f37bf139b5f577630da9a6b40a921b88bec47bcd06060010d",
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70",
+            "core/crates/pe-html/help/en/agents-permissions.html": "3f65b6b651950e2b6750417611854b8c899c5893f3e12b1b6c5f1c4a4077bb6d",
+            "core/crates/pe-html/help/en/agents-sending.html": "dffb12a981ffed82aa8cf6566ee4118d64b200c54dcc3b9d77fcd95ee0ffd75e"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed eight Croatian encryption/contact/calendar/agent topics against key protection and verification, signature tones, all-address verification action, contact import/completion/images, floating event times, MCP permissions and queue/undo behavior. Corrected valid signature versus confirmed key ownership, otisak ključa, matching private key, backup recovery, domain-versus-person trust, calendar app response and timezone wording. Agent access is through Inbox Classic; deletion cannot be permanent even without Trash, removal forgets permissions/history rather than uninstalling, approval queues with a 30-second minimum and undo cannot recall delivered mail. Formal natural instructions and exact control/markup/platform/literal-key preservation. Claude Desktop Settings > Developer > Edit Config and restart verified against official MCP documentation https://modelcontextprotocol.io/docs/develop/connect-local-servers . No catalog edits or tests."
+        },
+        {
+          "id": "hr-help-troubleshooting-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "certificate-errors.html",
+            "delivery-problems.html",
+            "encryption-errors.html",
+            "message-not-shown.html",
+            "no-connection.html",
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/hr/certificate-errors.html": "1535dd22ce2fec2a826673ca7297efdf4f8da8eb312d97863076fd7fd0383cf4",
+            "core/crates/pe-html/help/hr/delivery-problems.html": "3bbbb5b75f6119e1fd1433fde98f6f8b26ecf94e8932fb9a510485fe407f9245",
+            "core/crates/pe-html/help/hr/encryption-errors.html": "7a996f72ce30bac459446102408459b95b7f9504656ae64bad1401f55b2595b3",
+            "core/crates/pe-html/help/hr/message-not-shown.html": "d1237cc97b60f0be174f15dea241c9a2730a2086c07e0d766558f610828e6909",
+            "core/crates/pe-html/help/hr/no-connection.html": "12ac9e0c511cc4aeb06b2c80d7135827ff5d64c5e70b6cdb7de4015e797aa4e9",
+            "core/crates/pe-html/help/hr/password-not-accepted.html": "76296536c8d3259b832d4512609b19eb810eb724f1b83c9d48d0c5ba5719c190"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/certificate-errors.html": "8f4eccaaf38ef9767695c2a3a62aebe94238f4f3cbaf8c76f7e98105978a2c84",
+            "core/crates/pe-html/help/en/delivery-problems.html": "b01b4f074dce1c3bce5c63f2c5a5bd05a7613153eb558c179ed1f4fcbfae1c0e",
+            "core/crates/pe-html/help/en/encryption-errors.html": "a5a998593987b3275e7f6cf44f81d459ff641215dda884f275cbf9d8d0d710f1",
+            "core/crates/pe-html/help/en/message-not-shown.html": "85e732ccaedb1c1eb60f30ddcef9992d7f1ee4820bb4ceaa6a59e5200a4bef0d",
+            "core/crates/pe-html/help/en/no-connection.html": "b928c6371c171c099fc80ad0fef4e13d3e022593bbdc44c1f27904b5139d3ef0",
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed six topics against localized failure/reader/sign-in controls, pe-net::stream errors, pe-imap/pe-smtp error classification, reader retry behavior, outbox persistence and bounce card rendering/classification. Kept raw English low-level errors that are displayed untranslated. Corrected failure-network quote, TLS-required response not proving a valid password, provider-supported ports, pending retries versus delivery, local bounce analysis and damaged messages unreadable by this app rather than all apps. Outlook.com browser sign-in and eligible Gmail app passwords now match verified provider context. All tags/attributes/platform branches/literal code/keys preserved; no tests."
         }
       ]
     },
@@ -16115,8 +16313,7 @@
             "agents-permissions.html",
             "agents-sending.html",
             "delivery-problems.html",
-            "no-connection.html",
-            "password-not-accepted.html"
+            "no-connection.html"
           ],
           "changed_values": 0,
           "files": {
@@ -16125,7 +16322,7 @@
             "core/crates/pe-html/help/it/agents-sending.html": "4dd61ec1c6dd8eb30c6f8d87e9c4d378801343eb86e85e9d76711ee5da3dda01",
             "core/crates/pe-html/help/it/delivery-problems.html": "6b83d0afb1ec464bfb4be50f4b73bd442be7db6fa2f0a52008482fb5539396dd",
             "core/crates/pe-html/help/it/no-connection.html": "0f4b5d64954bcbfc60cd180185e23819581ae1c620c0d78e674b7c9ce9ebd3fe",
-            "core/crates/pe-html/help/it/password-not-accepted.html": "fc8689b9313324bf01d846d5b1402aaaa82f41f2f313e9c98f4ee6bc40a9ba39"
+            "core/crates/pe-html/help/it/password-not-accepted.html": "1d9d4ffb8121ffbbfdf99ede50832964bd8f0567194c943ff358a591e9bf6c6d"
           },
           "english_sources": {
             "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70",
@@ -16136,7 +16333,10 @@
             "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
           },
           "validation": "All 72 localization/help tests pass after the complete Italian review. Structural catalog/help checks pass with only cleared marks. Inventory and file/source hashes reconcile; git diff --check passes; review HTML regenerated. Expanded catalog menu/dialog mnemonic checks pass; installer/Linux generated text inspected.",
-          "notes": "Reviewed AI-agent setup/permissions/sending and delivery/network/sign-in troubleshooting. Used actual Claude menu names, clarified per-message consent and 30-second queuing, precise server responses and provider-dependent app-password requirements."
+          "notes": "Reviewed AI-agent setup/permissions/sending and delivery/network/sign-in troubleshooting. Used actual Claude menu names, clarified per-message consent and 30-second queuing, precise server responses and provider-dependent app-password requirements.",
+          "reopened_reviewed_help": [
+            "password-not-accepted.html"
+          ]
         },
         {
           "id": "it-help-privacy-network-round2",
@@ -16591,6 +16791,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "it-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/it/password-not-accepted.html": "4da297c1bba93942d4925659edc88f791ec667eacb6089bdcdbfa829dd43f629"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
@@ -21276,7 +21492,6 @@
           "reviewed_help": [
             "keyboard-shortcuts.html",
             "search-words.html",
-            "password-not-accepted.html",
             "certificate-errors.html",
             "encryption-errors.html",
             "no-connection.html",
@@ -21286,7 +21501,7 @@
           "files": {
             "core/crates/pe-html/help/nl/keyboard-shortcuts.html": "fc782054c3952a9458098763598662bef00916642b485df521a7133f75bcb506",
             "core/crates/pe-html/help/nl/search-words.html": "351437a8a4fb88d0d8c66eeb50c21f33b47faf0f74cc200404d7e1e6edc8ba2b",
-            "core/crates/pe-html/help/nl/password-not-accepted.html": "ef0db573f3358391d7035bdf37f6063db2db0045307f1996463c7c757fa50b2d",
+            "core/crates/pe-html/help/nl/password-not-accepted.html": "8c0fbd20a1d781dc2bf739be44258efbf63e8c8a95319191b16ac7ccc8960d3d",
             "core/crates/pe-html/help/nl/certificate-errors.html": "a5ad0fa6a1a3510ecb8bead8644c046b71d851841b973ecef2e2049c3ba85194",
             "core/crates/pe-html/help/nl/encryption-errors.html": "86d83f7c670ee6c4a3863a7b9b6992fecfad37e6b21754c8c6097bc9862fc8be",
             "core/crates/pe-html/help/nl/no-connection.html": "3d62c8d9d7feda085bf4b7d1d3048e536acac697af842082b7d491e497397afe",
@@ -21302,7 +21517,10 @@
             "core/crates/pe-html/help/en/message-not-shown.html": "85e732ccaedb1c1eb60f30ddcef9992d7f1ee4820bb4ceaa6a59e5200a4bef0d"
           },
           "validation": "Passed all 72 pe-i18n/pe-html tests after complete Dutch review; structural checks pass except intentionally cleared markers; git diff --check and review inventory/hash reconciliation pass.",
-          "notes": "Reviewed seven reference/troubleshooting topics. Preserved shortcut keys and query syntax, clarified search operators and failed connections, removed unsupported claims that a TLS-required response proves a password valid or unreadable MIME fails in every email app."
+          "notes": "Reviewed seven reference/troubleshooting topics. Preserved shortcut keys and query syntax, clarified search operators and failed connections, removed unsupported claims that a TLS-required response proves a password valid or unreadable MIME fails in every email app.",
+          "reopened_reviewed_help": [
+            "password-not-accepted.html"
+          ]
         },
         {
           "id": "nl-help-privacy-advanced-round2",
@@ -21747,6 +21965,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "nl-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/nl/password-not-accepted.html": "184152ac1eef1b64c0b9500910504ccdd5aff2f833c576a7d6041cd09dc387d0"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
@@ -24897,7 +25131,6 @@
           "reviewed_ids": {},
           "reviewed_help": [
             "no-connection.html",
-            "password-not-accepted.html",
             "certificate-errors.html",
             "message-not-shown.html",
             "delivery-problems.html",
@@ -24906,7 +25139,7 @@
           "changed_values": 0,
           "files": {
             "core/crates/pe-html/help/pt/no-connection.html": "5e8703132e64f86e8a2b7496296464a477980c6465c3b6509f69857f8ec9dd81",
-            "core/crates/pe-html/help/pt/password-not-accepted.html": "063f252df3661a89c7ff74ec81c67831449d781941a89132c9aee1825601e271",
+            "core/crates/pe-html/help/pt/password-not-accepted.html": "3a04c1e3e61c2a114a4658e5812513d9facd658e4979c9d906352f98b5dcf3aa",
             "core/crates/pe-html/help/pt/certificate-errors.html": "8b8489aca4a5748b3ff71128b42d6d84ed602f1bf9fd38433426e53bad47883d",
             "core/crates/pe-html/help/pt/message-not-shown.html": "c977e8e7a26d945909b09d79d2dd56dbda6182607bcdcd259d7ab78e38f52b43",
             "core/crates/pe-html/help/pt/delivery-problems.html": "7dadee795afd14a94190968b830b81216be25076f4819e54c1ffb890660dd943",
@@ -24921,7 +25154,10 @@
             "core/crates/pe-html/help/en/unsubscribe.html": "a80419bc5ca6a65992c8168d29636f505dc1281ccbeff81ff25412ba2dd3611c"
           },
           "validation": "All 72 pe-i18n/pe-html tests pass after all 52 Portuguese topics. Structural checks, review-mark inventory, source/file hashes and inline control spacing pass; git diff --check passes. Review HTML regenerated.",
-          "notes": "Reviewed connection/authentication/certificate errors against raw network and localized core strings. Corrected message-download timing, unreadable-message scope, conditional app-password guidance and delivery/unsubscribe task wording."
+          "notes": "Reviewed connection/authentication/certificate errors against raw network and localized core strings. Corrected message-download timing, unreadable-message scope, conditional app-password guidance and delivery/unsubscribe task wording.",
+          "reopened_reviewed_help": [
+            "password-not-accepted.html"
+          ]
         },
         {
           "id": "pt-help-setup-reference-round2",
@@ -25353,6 +25589,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "pt-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt/password-not-accepted.html": "537d96c4bd32edc3fb6606baa55761f3903fb587051e062e07705e41a7dce89e"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ]
     },
@@ -36043,7 +36295,6 @@
             "keyboard-shortcuts.html",
             "message-not-shown.html",
             "no-connection.html",
-            "password-not-accepted.html",
             "removing.html",
             "search-words.html",
             "unsubscribe.html",
@@ -36062,7 +36313,7 @@
             "core/crates/pe-html/help/ca/keyboard-shortcuts.html": "63681ca551eaec598ac080d2d413fbc1778567c65ca2859a56e7d7c70f297459",
             "core/crates/pe-html/help/ca/message-not-shown.html": "9a2ca1b18862f3c360eb50d7c4d1650fed7ad2a12e9f195881d099e81beed962",
             "core/crates/pe-html/help/ca/no-connection.html": "6be029f2749b32557ca6fc2961c479df052b70a8a0305fd97bb23d9ec7b8d85b",
-            "core/crates/pe-html/help/ca/password-not-accepted.html": "d8b9b5c043221008a6e3fd5a4ca417164ccc3c0361278d992cdf4ffcb6489fd1",
+            "core/crates/pe-html/help/ca/password-not-accepted.html": "850de93c0dd8a62a235d4b58bf547d9200b7c8fd47c812fc531abafd9dfc4b3a",
             "core/crates/pe-html/help/ca/removing.html": "ad16ee20ed60b6981c3fb339cc7fe1a95fd3ba4071ce384425f5ec0f3dc25d25",
             "core/crates/pe-html/help/ca/search-words.html": "e9b02e075afd5b8759693aa22f3210b7d7a9fa0f4c8de4bd427d1d770c673425",
             "core/crates/pe-html/help/ca/sign-in-codes.html": "92268706c25fa763b4f2ea4bdf73b8ed63216ba7dd9cec5d825455ca5b68f2e2",
@@ -36092,7 +36343,8 @@
           "notes": "Reviewed remaining 17 agent, message-action, troubleshooting and reference topics. Corrected queued sending, credential failures, secure connections, default application instructions, URL-file output, search operators and Catalan recipient shortcuts. Preserved all markup and literal keyboard tags.",
           "reopened_reviewed_help": [
             "default-mail-program.html",
-            "sign-in-codes.html"
+            "sign-in-codes.html",
+            "password-not-accepted.html"
           ]
         },
         {
@@ -36442,6 +36694,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run. Used la carpeta before the nominative folder control to avoid the ungrammatical substituted join de Elements suprimits."
+        },
+        {
+          "id": "ca-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/ca/password-not-accepted.html": "fd679c2819f6253652a079cda02857684aba51818616d859a5e1690eef0af281"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -38015,7 +38283,6 @@
             "keyboard-shortcuts.html",
             "message-not-shown.html",
             "no-connection.html",
-            "password-not-accepted.html",
             "removing.html",
             "search-words.html",
             "unsubscribe.html",
@@ -38034,7 +38301,7 @@
             "core/crates/pe-html/help/nb/keyboard-shortcuts.html": "e758731a693d24eb340ce9fb4ec40d34df28c9144847c6a7deec4e74c186589c",
             "core/crates/pe-html/help/nb/message-not-shown.html": "bb447018fd698b1e5db769bbbe9a30fba7cd22c1e361873825d7054eb31e589e",
             "core/crates/pe-html/help/nb/no-connection.html": "270527e3455dfc9e78304060b12ae3659eab8c4ffc4c056fceeefc577db0bcf9",
-            "core/crates/pe-html/help/nb/password-not-accepted.html": "db10d4d10a7ba5e02fc201d0f6fe73bc9ab27ae2411c36261f2ade7f9a3d3b8b",
+            "core/crates/pe-html/help/nb/password-not-accepted.html": "e04ceba7a4f67f80ac012d25210b99240a02fa9b30574a2b278bb42bf2f84b3c",
             "core/crates/pe-html/help/nb/removing.html": "f94611bfc7c5eedf3e2a7950da095f3aec65b6476025ffa9bbf27d5910d5d1fb",
             "core/crates/pe-html/help/nb/search-words.html": "2f4a3ec20ab3ab3523fc6b5b7dee0cda191fff909fc2d82a20ee07b538746948",
             "core/crates/pe-html/help/nb/sign-in-codes.html": "e013b560042e67ea9c56fbd542aaf9c2039aa94a984c147450a2f0b90a4d331d",
@@ -38064,7 +38331,8 @@
           "notes": "Reviewed final 17 agent/message, troubleshooting and reference topics. Corrected queued sends, permission scope, domain checks, credential failures, exact localized errors, URL-file output and Norwegian recipient shortcuts. Preserved markup and literal keyboard tags.",
           "reopened_reviewed_help": [
             "default-mail-program.html",
-            "sign-in-codes.html"
+            "sign-in-codes.html",
+            "password-not-accepted.html"
           ]
         },
         {
@@ -38419,6 +38687,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "nb-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/nb/password-not-accepted.html": "258b401f74ef87657ffcad515ed20026ca60a216df05ad4d80ff5afd8439243f"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -39975,7 +40259,6 @@
             "message-not-shown.html",
             "message-rules.html",
             "no-connection.html",
-            "password-not-accepted.html",
             "removing.html",
             "search-words.html",
             "sign-in-apps.html",
@@ -40007,7 +40290,7 @@
             "core/crates/pe-html/help/pt-BR/message-rules.html": "af00cbe094965678d0039cb00e1ab9a110f549a2558ecef53eac70fc50adec36",
             "core/crates/pe-html/help/pt-BR/no-connection.html": "6e0e082d00da33ff46b86337a20e285c196a77265e6f48b224b360a2c4840de0",
             "core/crates/pe-html/help/pt-BR/options-language.html": "b076870684bb6fb56b1ceba6f88adf3798edae1bb48b2547446dc827f53236f5",
-            "core/crates/pe-html/help/pt-BR/password-not-accepted.html": "a2e021884d609f6efd65571bb12e2364f26d3c3bedebb6eb29473d4b42dd741b",
+            "core/crates/pe-html/help/pt-BR/password-not-accepted.html": "e223d16908d69e4f971cd3d9d617436a1e34830ce874784f2bfa5faff144c818",
             "core/crates/pe-html/help/pt-BR/pictures-tracking.html": "882bd2e42947a38e5e255cc0e22fd6b766615f2cd2983b80c9a2428c8ad56da5",
             "core/crates/pe-html/help/pt-BR/removing.html": "b99d901bf219a9d63aceec0cb4dee92fe7cc610d78bfad4c6e652768a9fe46ce",
             "core/crates/pe-html/help/pt-BR/search-words.html": "6302ae487a7f3d085af8ee1167999c4484c354b5c25a17f5060a8490f70f9f20",
@@ -40058,7 +40341,8 @@
             "download-ahead.html",
             "options-language.html",
             "pictures-tracking.html",
-            "sign-in-codes.html"
+            "sign-in-codes.html",
+            "password-not-accepted.html"
           ]
         },
         {
@@ -40402,6 +40686,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "pt-BR-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/pt-BR/password-not-accepted.html": "9e50edc4a077978973aa32cff32516977bd2f0467bf806f48c9e99271f73ab0a"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -41926,7 +42226,6 @@
             "message-not-shown.html",
             "message-rules.html",
             "no-connection.html",
-            "password-not-accepted.html",
             "removing.html",
             "search-words.html",
             "sign-in-apps.html",
@@ -41958,7 +42257,7 @@
             "core/crates/pe-html/help/sr-Latn/message-rules.html": "6d4a9bef7b6c3d4c9dcf8c1c79f80618d285439bdca620018cbfb39ae16869fa",
             "core/crates/pe-html/help/sr-Latn/no-connection.html": "5efd57bb0ffdc27f3028e6bdb9886ea6d5bf47fc50b7c856ac61d5046c11b060",
             "core/crates/pe-html/help/sr-Latn/options-language.html": "dd92487ebbbf36f7375e76b5daa90395acda74646636c733b174d603e8341c26",
-            "core/crates/pe-html/help/sr-Latn/password-not-accepted.html": "5ac4509de7d1e8bb806aed5e09357db6818ea7fe03b25b655ae6c7cfd06918f3",
+            "core/crates/pe-html/help/sr-Latn/password-not-accepted.html": "6262ac9da341b987eb7e3995a318ba96c6147c17438569eed1cb78337de1bbc4",
             "core/crates/pe-html/help/sr-Latn/pictures-tracking.html": "2b6ea202c1e9e29f1872e1ce28dfb945c4045ccc4bf4ee2c359f7bf2e75086ac",
             "core/crates/pe-html/help/sr-Latn/removing.html": "dbf077f5145a84f8b533760ac5d662db51f201bbabefa83bf3fc34a89b9b0229",
             "core/crates/pe-html/help/sr-Latn/search-words.html": "293191074eafc8bfd65f72c31b50a48e192978a8a19386751ab40c694972d1fe",
@@ -42009,7 +42308,8 @@
             "download-ahead.html",
             "options-language.html",
             "pictures-tracking.html",
-            "sign-in-codes.html"
+            "sign-in-codes.html",
+            "password-not-accepted.html"
           ]
         },
         {
@@ -42357,6 +42657,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "sr-Latn-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/sr-Latn/password-not-accepted.html": "fdfc0f225b72620197fc077370d311cbce81d66837dbfb261b6e27e52ce34085"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -43872,7 +44188,6 @@
             "message-not-shown.html",
             "message-rules.html",
             "no-connection.html",
-            "password-not-accepted.html",
             "removing.html",
             "search-words.html",
             "sign-in-apps.html",
@@ -43904,7 +44219,7 @@
             "core/crates/pe-html/help/tr/message-rules.html": "6954a859250fd5df9da3f668b5470073ea9c059d4de0288de07e2d9664e64f36",
             "core/crates/pe-html/help/tr/no-connection.html": "f7985a1df274face55c5c4c341fdc249d3060e2a2f2d76832e067ef1c9d41cf4",
             "core/crates/pe-html/help/tr/options-language.html": "01d4bc4058f21df19505a6ef54a0d61fff4a7615034936ccb3a8441770634e25",
-            "core/crates/pe-html/help/tr/password-not-accepted.html": "c1485f64d59f0f32749e5ed697a6e08fa97aff2abcea9e2a1334da9530a745ce",
+            "core/crates/pe-html/help/tr/password-not-accepted.html": "6841285d36a1916752a9192148019cff011ee5abffe705b82522a1290a95c0a2",
             "core/crates/pe-html/help/tr/pictures-tracking.html": "168a0bb98cf6ddb2ba33b4d751f6da8ba2479e024c04286391e628d7e72c2c3c",
             "core/crates/pe-html/help/tr/removing.html": "252edbcc1464cb1359996388679a082f4e6424c0cb123dcda59791c5b29de4fc",
             "core/crates/pe-html/help/tr/search-words.html": "4c48ada2614441aafb2c05c5e63c2762a3e0cbd4568b97f47b451c8bcc4b54ec",
@@ -43955,7 +44270,8 @@
             "download-ahead.html",
             "options-language.html",
             "pictures-tracking.html",
-            "sign-in-codes.html"
+            "sign-in-codes.html",
+            "password-not-accepted.html"
           ]
         },
         {
@@ -44287,6 +44603,22 @@
           },
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed the first two body paragraphs in their existing language/register. Qualified the normal move to Deleted Items and explained permanent deletion when the account has no deleted-mail folder, preserving the confirmation instruction. Verified Core::delete_messages/trash_for/deletes_for_good, selection summary and all three platform confirmation callers. The rest of this previously reviewed topic is unchanged. Exact markup, controls, platform branches and literal keyboard tags preserved. No tests run."
+        },
+        {
+          "id": "tr-provider-troubleshooting-context",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "password-not-accepted.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/tr/password-not-accepted.html": "79d7a5c42950cfd11b2d3d7f24d4fccd0e0a85c441ae7e88c0cb0ff922599ee7"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/password-not-accepted.html": "d9e500d1d0120a1631eedec46cb62a6f2078dffc5c009fc844e78b327973c2ab"
+          },
+          "validation": "Static language check: only intentionally removed review marks (1388 Croatian; 1395 in each other affected language), no structural findings. All 46 existing mnemonic scopes pass. Exact tags/attributes/platform branches and literal code/keys preserved. Substituted control and topic-title joins inspected on all three platforms; preview does not render dynamic keyboard labels. All 28 current inventories and completed/source hashes reconcile: 19160 unmarked messages, 10007 changed help lines, 14 verified unchanged/moved baseline pairs. HTML report regenerated; git diff --check passes. No tests run. These results cover the current checkout, before the newly discovered upstream encryption feature is integrated.",
+          "notes": "Reviewed second/third troubleshooting steps in existing register. Outlook.com explicitly uses browser sign-in; Gmail app passwords require an eligible account and two-step verification. Removed unconditional two-step/app-password equivalence in de/es/et/fr; other existing conditional second steps are unchanged. Every byte outside these two steps remains unchanged. Verified app MICROSOFT_WARNING and current official Microsoft/Google guidance. Exact markup/topic link preserved. No catalog edits or tests."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -46685,16 +47017,40 @@
         ]
       ],
       "note": "Four round-1 help topics were outside this active round. Thirteen other completed topics are reopened without increasing scope. Croatian is already corrected; ten pending full-language drafts contain this topic."
+    },
+    {
+      "kind": "provider troubleshooting context followup",
+      "catalog_entries": 0,
+      "help_pages": 4,
+      "new_help_topics": [
+        [
+          "de",
+          "password-not-accepted.html"
+        ],
+        [
+          "es",
+          "password-not-accepted.html"
+        ],
+        [
+          "et",
+          "password-not-accepted.html"
+        ],
+        [
+          "fr",
+          "password-not-accepted.html"
+        ]
+      ],
+      "note": "Four round-1 password troubleshooting topics enter the active scope. Thirteen other completed topics are reopened without increasing scope; Croatian and ten broader drafts already include this topic."
     }
   ],
   "total_catalog_entries": 32456,
-  "total_help_pages": 1300,
+  "total_help_pages": 1304,
   "review_workspace": {
     "path": "/Users/andris/Projects/PostalExpress/build/i18n-wave1",
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Checkpoint at 203dd91c: six refs and guide unchanged since the fresh fetch at 0190587f; root locale/help/settings paths have no uncommitted changes. origin/master remains 5c645187 with only unrelated README/Linux test/CI updates left unmerged. No new languages or relevant source work. All 270 since-start entries and 110 passages match pending inventory; all 28 full inventories and completed/source hashes match. Pending 13330 catalogs/541 help topics. Final late-arrival audit remains required; REVIEWED unchanged.",
+    "latest_source_audit": "Fresh fetch at 33e3e583: origin/master advanced to 08c9ef12. New encryption feature has 252 new and 28 changed catalog entries and 112 affected help topics across all 28 languages. Exact IDs/topics/source commit are recorded under pending_upstream. Integrate after this reviewed-help commit; do not count any language complete while it is outstanding. Other five refs and guide hash unchanged; no relevant uncommitted changes in root. Current checkout inventory: 13330 catalog entries/527 help topics pending; 270 since-start entries/110 passages reconciled. Final late-arrival audit remains required; REVIEWED unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -47416,6 +47772,380 @@
         "review_commit": "203dd91c59eeed59d4e92294ea65378c4edb3e21",
         "new_languages": 0,
         "validation": "All six refs and the guide hash remain unchanged since the fresh fetch in this turn. The root checkout has no uncommitted locale/help/settings changes. No new language or relevant source work; previously inspected unrelated README/Linux test/CI updates remain unmerged. All 270 since-start entries and 110 passages match the queue. All 28 full inventories/variables/marks and completed/source hashes reconcile. No tests run."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "08c9ef126d4012330b9a5631e8683089c9ad769c",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/master": {
+            "merge_base": "bd4a2bd12b58b438004cdd106d0b007fcbac2aed",
+            "paths": [
+              ".github/workflows/ci.yml",
+              "README.md",
+              "app/res/toolbar/list-16.bmp",
+              "app/res/toolbar/list-20.bmp",
+              "app/res/toolbar/list-24.bmp",
+              "app/res/toolbar/list-32.bmp",
+              "app/src/app.h",
+              "app/src/columnrow.cpp",
+              "app/src/icons.h",
+              "app/src/mailbox.cpp",
+              "app/src/main.cpp",
+              "app/src/options.cpp",
+              "core/Cargo.lock",
+              "core/crates/pe-core/src/agents.rs",
+              "core/crates/pe-core/src/keys.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/list_view.rs",
+              "core/crates/pe-core/src/lookup.rs",
+              "core/crates/pe-core/src/protect.rs",
+              "core/crates/pe-core/src/search.rs",
+              "core/crates/pe-core/src/senders.rs",
+              "core/crates/pe-core/src/setup/export.rs",
+              "core/crates/pe-core/src/setup/file.rs",
+              "core/crates/pe-core/src/setup/import.rs",
+              "core/crates/pe-core/src/setup/round_trips.rs",
+              "core/crates/pe-core/src/text.rs",
+              "core/crates/pe-core/src/view.rs",
+              "core/crates/pe-core/src/watch.rs",
+              "core/crates/pe-core/src/worker.rs",
+              "core/crates/pe-core/src/worker/background.rs",
+              "core/crates/pe-core/tests/e2e_pgp.rs",
+              "core/crates/pe-core/tests/list_speed.rs",
+              "core/crates/pe-core/tests/lookup.rs",
+              "core/crates/pe-core/tests/pgp_mail.rs",
+              "core/crates/pe-core/tests/ui_fixtures.rs",
+              "core/crates/pe-ffi/src/core.rs",
+              "core/crates/pe-ffi/src/keys.rs",
+              "core/crates/pe-html/help/bg/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/bg/encryption-keys.html",
+              "core/crates/pe-html/help/bg/options-language.html",
+              "core/crates/pe-html/help/bg/search-words.html",
+              "core/crates/pe-html/help/ca/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/ca/encryption-keys.html",
+              "core/crates/pe-html/help/ca/options-language.html",
+              "core/crates/pe-html/help/ca/search-words.html",
+              "core/crates/pe-html/help/cs/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/cs/encryption-keys.html",
+              "core/crates/pe-html/help/cs/options-language.html",
+              "core/crates/pe-html/help/cs/search-words.html",
+              "core/crates/pe-html/help/da/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/da/encryption-keys.html",
+              "core/crates/pe-html/help/da/options-language.html",
+              "core/crates/pe-html/help/da/search-words.html",
+              "core/crates/pe-html/help/de/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/de/encryption-keys.html",
+              "core/crates/pe-html/help/de/options-language.html",
+              "core/crates/pe-html/help/de/search-words.html",
+              "core/crates/pe-html/help/el/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/el/encryption-keys.html",
+              "core/crates/pe-html/help/el/options-language.html",
+              "core/crates/pe-html/help/el/search-words.html",
+              "core/crates/pe-html/help/en/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/en/encryption-keys.html",
+              "core/crates/pe-html/help/en/options-language.html",
+              "core/crates/pe-html/help/en/search-words.html",
+              "core/crates/pe-html/help/es/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/es/encryption-keys.html",
+              "core/crates/pe-html/help/es/options-language.html",
+              "core/crates/pe-html/help/es/search-words.html",
+              "core/crates/pe-html/help/et/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/et/encryption-keys.html",
+              "core/crates/pe-html/help/et/options-language.html",
+              "core/crates/pe-html/help/et/search-words.html",
+              "core/crates/pe-html/help/fi/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/fi/encryption-keys.html",
+              "core/crates/pe-html/help/fi/options-language.html",
+              "core/crates/pe-html/help/fi/search-words.html",
+              "core/crates/pe-html/help/fr/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/fr/encryption-keys.html",
+              "core/crates/pe-html/help/fr/options-language.html",
+              "core/crates/pe-html/help/fr/search-words.html",
+              "core/crates/pe-html/help/hr/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/hr/encryption-keys.html",
+              "core/crates/pe-html/help/hr/options-language.html",
+              "core/crates/pe-html/help/hr/search-words.html",
+              "core/crates/pe-html/help/hu/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/hu/encryption-keys.html",
+              "core/crates/pe-html/help/hu/options-language.html",
+              "core/crates/pe-html/help/hu/search-words.html",
+              "core/crates/pe-html/help/it/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/it/encryption-keys.html",
+              "core/crates/pe-html/help/it/options-language.html",
+              "core/crates/pe-html/help/it/search-words.html",
+              "core/crates/pe-html/help/lt/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/lt/encryption-keys.html",
+              "core/crates/pe-html/help/lt/options-language.html",
+              "core/crates/pe-html/help/lt/search-words.html",
+              "core/crates/pe-html/help/lv/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/lv/encryption-keys.html",
+              "core/crates/pe-html/help/lv/options-language.html",
+              "core/crates/pe-html/help/lv/search-words.html",
+              "core/crates/pe-html/help/nb/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/nb/encryption-keys.html",
+              "core/crates/pe-html/help/nb/options-language.html",
+              "core/crates/pe-html/help/nb/search-words.html",
+              "core/crates/pe-html/help/nl/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/nl/encryption-keys.html",
+              "core/crates/pe-html/help/nl/options-language.html",
+              "core/crates/pe-html/help/nl/search-words.html",
+              "core/crates/pe-html/help/pl/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/pl/encryption-keys.html",
+              "core/crates/pe-html/help/pl/options-language.html",
+              "core/crates/pe-html/help/pl/search-words.html",
+              "core/crates/pe-html/help/pt-BR/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/pt-BR/encryption-keys.html",
+              "core/crates/pe-html/help/pt-BR/options-language.html",
+              "core/crates/pe-html/help/pt-BR/search-words.html",
+              "core/crates/pe-html/help/pt/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/pt/encryption-keys.html",
+              "core/crates/pe-html/help/pt/options-language.html",
+              "core/crates/pe-html/help/pt/search-words.html",
+              "core/crates/pe-html/help/ro/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/ro/encryption-keys.html",
+              "core/crates/pe-html/help/ro/options-language.html",
+              "core/crates/pe-html/help/ro/search-words.html",
+              "core/crates/pe-html/help/ru/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/ru/encryption-keys.html",
+              "core/crates/pe-html/help/ru/options-language.html",
+              "core/crates/pe-html/help/ru/search-words.html",
+              "core/crates/pe-html/help/sk/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/sk/encryption-keys.html",
+              "core/crates/pe-html/help/sk/options-language.html",
+              "core/crates/pe-html/help/sk/search-words.html",
+              "core/crates/pe-html/help/sl/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/sl/encryption-keys.html",
+              "core/crates/pe-html/help/sl/options-language.html",
+              "core/crates/pe-html/help/sl/search-words.html",
+              "core/crates/pe-html/help/sr-Latn/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/sr-Latn/encryption-keys.html",
+              "core/crates/pe-html/help/sr-Latn/options-language.html",
+              "core/crates/pe-html/help/sr-Latn/search-words.html",
+              "core/crates/pe-html/help/sv/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/sv/encryption-keys.html",
+              "core/crates/pe-html/help/sv/options-language.html",
+              "core/crates/pe-html/help/sv/search-words.html",
+              "core/crates/pe-html/help/tr/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/tr/encryption-keys.html",
+              "core/crates/pe-html/help/tr/options-language.html",
+              "core/crates/pe-html/help/tr/search-words.html",
+              "core/crates/pe-html/help/uk/encrypted-and-signed-mail.html",
+              "core/crates/pe-html/help/uk/encryption-keys.html",
+              "core/crates/pe-html/help/uk/options-language.html",
+              "core/crates/pe-html/help/uk/search-words.html",
+              "core/crates/pe-html/src/help.rs",
+              "core/crates/pe-html/src/lib.rs",
+              "core/crates/pe-mcp/Cargo.toml",
+              "core/crates/pe-mcp/src/tools.rs",
+              "core/crates/pe-mcp/tests/e2e_mcp.rs",
+              "core/crates/pe-pgp/examples/ui_fixtures.rs",
+              "core/crates/pe-store/src/kept_check.rs",
+              "core/crates/pe-store/src/lib.rs",
+              "core/crates/pe-store/src/messages.rs",
+              "core/crates/pe-store/src/pgp.rs",
+              "core/crates/pe-store/src/query.rs",
+              "core/crates/pe-store/src/schema.rs",
+              "core/crates/pe-store/src/search.rs",
+              "core/crates/pe-sync/src/summary.rs",
+              "core/include/inbox_classic.h",
+              "core/include/settings.h",
+              "core/include/texts.h",
+              "core/locales/bg/app.ftl",
+              "core/locales/bg/core.ftl",
+              "core/locales/ca/app.ftl",
+              "core/locales/ca/core.ftl",
+              "core/locales/cs/app.ftl",
+              "core/locales/cs/core.ftl",
+              "core/locales/da/app.ftl",
+              "core/locales/da/core.ftl",
+              "core/locales/de/app.ftl",
+              "core/locales/de/core.ftl",
+              "core/locales/el/app.ftl",
+              "core/locales/el/core.ftl",
+              "core/locales/en/app.ftl",
+              "core/locales/en/core.ftl",
+              "core/locales/es/app.ftl",
+              "core/locales/es/core.ftl",
+              "core/locales/et/app.ftl",
+              "core/locales/et/core.ftl",
+              "core/locales/fi/app.ftl",
+              "core/locales/fi/core.ftl",
+              "core/locales/fr/app.ftl",
+              "core/locales/fr/core.ftl",
+              "core/locales/hr/app.ftl",
+              "core/locales/hr/core.ftl",
+              "core/locales/hu/app.ftl",
+              "core/locales/hu/core.ftl",
+              "core/locales/it/app.ftl",
+              "core/locales/it/core.ftl",
+              "core/locales/lt/app.ftl",
+              "core/locales/lt/core.ftl",
+              "core/locales/lv/app.ftl",
+              "core/locales/lv/core.ftl",
+              "core/locales/nb/app.ftl",
+              "core/locales/nb/core.ftl",
+              "core/locales/nl/app.ftl",
+              "core/locales/nl/core.ftl",
+              "core/locales/pl/app.ftl",
+              "core/locales/pl/core.ftl",
+              "core/locales/pt-BR/app.ftl",
+              "core/locales/pt-BR/core.ftl",
+              "core/locales/pt/app.ftl",
+              "core/locales/pt/core.ftl",
+              "core/locales/ro/app.ftl",
+              "core/locales/ro/core.ftl",
+              "core/locales/ru/app.ftl",
+              "core/locales/ru/core.ftl",
+              "core/locales/sk/app.ftl",
+              "core/locales/sk/core.ftl",
+              "core/locales/sl/app.ftl",
+              "core/locales/sl/core.ftl",
+              "core/locales/sr-Latn/app.ftl",
+              "core/locales/sr-Latn/core.ftl",
+              "core/locales/sv/app.ftl",
+              "core/locales/sv/core.ftl",
+              "core/locales/tr/app.ftl",
+              "core/locales/tr/core.ftl",
+              "core/locales/uk/app.ftl",
+              "core/locales/uk/core.ftl",
+              "core/settings.toml",
+              "docs/shells.md",
+              "linux/Dockerfile",
+              "linux/src/e2e.rs",
+              "linux/src/e2e/encrypted_list.rs",
+              "linux/src/e2e/layout.rs",
+              "linux/src/e2e/secure.rs",
+              "linux/src/e2e/watch.rs",
+              "linux/src/generated/settings_pages.rs",
+              "linux/src/messages.rs",
+              "linux/src/preferences.rs",
+              "linux/src/rows.rs",
+              "mac/Sources/InboxClassic/Core.swift",
+              "mac/Sources/InboxClassic/Generated/SettingsPages.swift",
+              "mac/Sources/InboxClassic/Generated/Texts.swift",
+              "mac/Sources/InboxClassic/Icons.swift",
+              "mac/Sources/InboxClassic/Mailbox.swift",
+              "mac/Sources/InboxClassic/Settings.swift",
+              "mac/Sources/InboxClassic/UITestLanguages.swift",
+              "mac/Sources/InboxClassic/UITestSecure.swift",
+              "scripts/build-icons.sh",
+              "scripts/feature-map.mjs",
+              "scripts/linux-ui-e2e-run.sh",
+              "scripts/ui-e2e.ps1",
+              "scripts/ui-e2e/SCENARIO.md",
+              "scripts/ui-e2e/pgp/secure-protected-subject.eml"
+            ],
+            "new_languages": []
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "paths": [],
+            "new_languages": []
+          }
+        },
+        "since_start_pending_catalog_entries": 270,
+        "since_start_pending_help_passages": 110,
+        "pending_catalog_entries": 13330,
+        "pending_help_topics": 527,
+        "additional_unrecorded_work": 0,
+        "pending_upstream": {
+          "source_commit": "08c9ef126d4012330b9a5631e8683089c9ad769c",
+          "previous_source_commit": "5c6451872aff1cbc78a7afbece67037e2e100ffc",
+          "kind": "Encrypted mail list/search and Reading > Encryption settings",
+          "status": "discovered; integrate after the current reviewed-help checkpoint is committed",
+          "languages": [
+            "bg",
+            "ca",
+            "cs",
+            "da",
+            "de",
+            "el",
+            "es",
+            "et",
+            "fi",
+            "fr",
+            "hr",
+            "hu",
+            "it",
+            "lt",
+            "lv",
+            "nb",
+            "nl",
+            "pl",
+            "pt",
+            "pt-BR",
+            "ro",
+            "ru",
+            "sk",
+            "sl",
+            "sr-Latn",
+            "sv",
+            "tr",
+            "uk"
+          ],
+          "new_catalog_ids": {
+            "app.ftl": [
+              "ui-settings-encryption",
+              "ui-search-encrypted",
+              "ui-search-encrypted-note",
+              "ui-pgp-keyserver",
+              "ui-pgp-keyserver-note",
+              "ui-row-encrypted",
+              "ui-row-signed"
+            ],
+            "core.ftl": [
+              "agent-encrypted",
+              "list-encrypted"
+            ]
+          },
+          "changed_catalog_ids": {
+            "core.ftl": [
+              "pgp-keyserver-off"
+            ]
+          },
+          "removed_catalog_ids": {},
+          "changed_help_topics": [
+            "encrypted-and-signed-mail.html",
+            "encryption-keys.html",
+            "options-language.html",
+            "search-words.html"
+          ],
+          "new_catalog_entries": 252,
+          "changed_catalog_entries": 28,
+          "affected_help_topics": 112,
+          "note": "Do not call any language complete while this upstream batch is outstanding. Counts in active pending catalogs/help still describe the pre-integration checkout. Reopen only new/changed entries and help passages when integrating; preserve prior reviewed text and provenance. No tests allowed."
+        },
+        "root_locale_help_settings_status": [],
+        "kind": "Croatian security/agents/troubleshooting help and provider followup; new upstream encryption work discovered",
+        "review_commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+        "new_languages": 0,
+        "validation": "Fresh fetch found origin/master advanced to 08c9ef12 with encrypted-mail search/list and Reading > Encryption settings. Inventoried nine new IDs and one changed ID per language, plus four changed help topics in each of 28 languages; no new language. This upstream batch is not yet integrated. Other five recorded source refs and guide hash unchanged; root has no uncommitted locale/help/settings changes. Current checkout: 270 since-start entries and 110 passages match pending inventory; all 28 full inventories and completed/source hashes match. No tests run."
       }
     ],
     "settings_source_integration": {
@@ -49825,6 +50555,73 @@
         "scripts/ui-e2e.ps1",
         "scripts/ui-e2e/SCENARIO.md"
       ]
+    },
+    "pending_upstream": {
+      "source_commit": "08c9ef126d4012330b9a5631e8683089c9ad769c",
+      "previous_source_commit": "5c6451872aff1cbc78a7afbece67037e2e100ffc",
+      "kind": "Encrypted mail list/search and Reading > Encryption settings",
+      "status": "discovered; integrate after the current reviewed-help checkpoint is committed",
+      "languages": [
+        "bg",
+        "ca",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "es",
+        "et",
+        "fi",
+        "fr",
+        "hr",
+        "hu",
+        "it",
+        "lt",
+        "lv",
+        "nb",
+        "nl",
+        "pl",
+        "pt",
+        "pt-BR",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sr-Latn",
+        "sv",
+        "tr",
+        "uk"
+      ],
+      "new_catalog_ids": {
+        "app.ftl": [
+          "ui-settings-encryption",
+          "ui-search-encrypted",
+          "ui-search-encrypted-note",
+          "ui-pgp-keyserver",
+          "ui-pgp-keyserver-note",
+          "ui-row-encrypted",
+          "ui-row-signed"
+        ],
+        "core.ftl": [
+          "agent-encrypted",
+          "list-encrypted"
+        ]
+      },
+      "changed_catalog_ids": {
+        "core.ftl": [
+          "pgp-keyserver-off"
+        ]
+      },
+      "removed_catalog_ids": {},
+      "changed_help_topics": [
+        "encrypted-and-signed-mail.html",
+        "encryption-keys.html",
+        "options-language.html",
+        "search-words.html"
+      ],
+      "new_catalog_entries": 252,
+      "changed_catalog_entries": 28,
+      "affected_help_topics": 112,
+      "note": "Do not call any language complete while this upstream batch is outstanding. Counts in active pending catalogs/help still describe the pre-integration checkout. Reopen only new/changed entries and help passages when integrating; preserve prior reviewed text and provenance. No tests allowed."
     }
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
@@ -49864,6 +50661,11 @@
       "source_issue": "English delete-and-undo omits permanent deletion when the account has no Trash folder. No English/app code edited.",
       "behavior": "Core sends Expunge when trash_for returns None, including an account without Trash. Selection summary prompts for confirmation on Windows, Mac and Linux.",
       "followup": "delete-without-trash-context"
+    },
+    "provider_troubleshooting": {
+      "source_issue": "English password-not-accepted still offers app passwords for Outlook.com and treats two-step verification as requiring app passwords. No English/app code edited.",
+      "behavior": "The current app warning requires browser sign-in for Microsoft mail; official Outlook.com settings require OAuth2. Google app passwords require an eligible account and two-step verification.",
+      "followup": "provider-troubleshooting-context"
     }
   },
   "context_followups": [
@@ -52943,6 +53745,247 @@
           "validation": "Static check-language reports only 1395 deliberately removed marks per language, with no structural findings. All 46 actual mnemonic scopes pass. Each deletion topic is byte-for-byte unchanged outside its first two body paragraphs. Corrected the Catalan folder-name join after substitution. All 28 pending inventories and completed/source hashes reconcile: 19160 unmarked messages, 9644 changed help lines and 14 verified unchanged/moved baseline pairs. Exact help tags, attributes, platform branches and literal keys are preserved. Substituted controls, settings paths and topic-title joins inspected; dynamic data-command keyboard labels were not rendered by the preview helper. HTML report regenerated; git diff --check passes. No tests run."
         }
       ]
+    },
+    {
+      "id": "provider-troubleshooting-context",
+      "status": "pending",
+      "issue": "Password troubleshooting still offers app passwords for Outlook.com, contradicting the corrected Gmail/Outlook account-setup topic and the app MICROSOFT_WARNING. Four round-1 topics also assert that two-step verification always requires an app password. Use browser sign-in for Outlook.com and condition Gmail app passwords on eligible accounts with two-step verification. Generic advice must depend on account support, not two-step verification alone.",
+      "evidence": [
+        "core/crates/pe-autoconfig/src/app_password.rs: MICROSOFT_WARNING",
+        "https://support.microsoft.com/en-gb/outlook/pop-imap-and-smtp-settings-for-outlook-com",
+        "https://support.google.com/accounts/answer/185833"
+      ],
+      "catalog_ids": {},
+      "help_topics": [
+        "password-not-accepted.html"
+      ],
+      "completed_languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el",
+        "fi",
+        "hr"
+      ],
+      "pending_languages": [
+        "hu",
+        "lt",
+        "lv",
+        "pl",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "uk"
+      ],
+      "reopened_help_languages": [
+        "de",
+        "es",
+        "et",
+        "fr",
+        "nl",
+        "it",
+        "pt",
+        "pt-BR",
+        "ca",
+        "nb",
+        "sr-Latn",
+        "tr",
+        "bg",
+        "cs",
+        "da",
+        "el",
+        "fi"
+      ],
+      "reopened_help_passages_per_language": 2,
+      "checkpoint_files": {
+        "core/crates/pe-html/help/de/password-not-accepted.html": {
+          "previous_sha256": "ce3d9a0b094d8fb4da757a03c261da9c9ffa93e26f3151610dcc11f661a18999",
+          "sha256": "5046ee1aab06eba1af4e0deb0710c96b817291d46dd0de41ed2baa44776a7e1b",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/es/password-not-accepted.html": {
+          "previous_sha256": "4020d204a7c0e167d1e207b2e8a88f503d51cf47b4d7fc8f3b58f2c7832dc133",
+          "sha256": "2cf1baf8bbd9302c2d6cf93379f1b886fda38f4a287516c471044dce4fd077d4",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/et/password-not-accepted.html": {
+          "previous_sha256": "bb2b9c39ef78dc845a83c34b22c86b59881d34093609814b5031dbda50693700",
+          "sha256": "a4e5a85a189c64295c325192d203eff493ccce4cd0d435019adda75ec98abe23",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/fr/password-not-accepted.html": {
+          "previous_sha256": "7b122f5e61c143917224cefe35763b54b18576c2d01839f76a6e07d2ce3ecc8f",
+          "sha256": "cf29113109ed16a7d27bbbfc8384f9921512dc645ed990b2071f604801fc3b3a",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/nl/password-not-accepted.html": {
+          "previous_sha256": "ef0db573f3358391d7035bdf37f6063db2db0045307f1996463c7c757fa50b2d",
+          "sha256": "8c0fbd20a1d781dc2bf739be44258efbf63e8c8a95319191b16ac7ccc8960d3d",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/it/password-not-accepted.html": {
+          "previous_sha256": "fc8689b9313324bf01d846d5b1402aaaa82f41f2f313e9c98f4ee6bc40a9ba39",
+          "sha256": "1d9d4ffb8121ffbbfdf99ede50832964bd8f0567194c943ff358a591e9bf6c6d",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/pt/password-not-accepted.html": {
+          "previous_sha256": "063f252df3661a89c7ff74ec81c67831449d781941a89132c9aee1825601e271",
+          "sha256": "3a04c1e3e61c2a114a4658e5812513d9facd658e4979c9d906352f98b5dcf3aa",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/pt-BR/password-not-accepted.html": {
+          "previous_sha256": "a2e021884d609f6efd65571bb12e2364f26d3c3bedebb6eb29473d4b42dd741b",
+          "sha256": "e223d16908d69e4f971cd3d9d617436a1e34830ce874784f2bfa5faff144c818",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/ca/password-not-accepted.html": {
+          "previous_sha256": "d8b9b5c043221008a6e3fd5a4ca417164ccc3c0361278d992cdf4ffcb6489fd1",
+          "sha256": "850de93c0dd8a62a235d4b58bf547d9200b7c8fd47c812fc531abafd9dfc4b3a",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/nb/password-not-accepted.html": {
+          "previous_sha256": "db10d4d10a7ba5e02fc201d0f6fe73bc9ab27ae2411c36261f2ade7f9a3d3b8b",
+          "sha256": "e04ceba7a4f67f80ac012d25210b99240a02fa9b30574a2b278bb42bf2f84b3c",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/sr-Latn/password-not-accepted.html": {
+          "previous_sha256": "5ac4509de7d1e8bb806aed5e09357db6818ea7fe03b25b655ae6c7cfd06918f3",
+          "sha256": "6262ac9da341b987eb7e3995a318ba96c6147c17438569eed1cb78337de1bbc4",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/tr/password-not-accepted.html": {
+          "previous_sha256": "c1485f64d59f0f32749e5ed697a6e08fa97aff2abcea9e2a1334da9530a745ce",
+          "sha256": "6841285d36a1916752a9192148019cff011ee5abffe705b82522a1290a95c0a2",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/bg/password-not-accepted.html": {
+          "previous_sha256": "9a9e6f1f0dbb8a3be9f01d0d3d8e293e71a4a72743cace82d45963cdbb2b8643",
+          "sha256": "1df094f960a8b47916c4f5cd968ad08fb142db47b3df3c4833d945f5269c415e",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/cs/password-not-accepted.html": {
+          "previous_sha256": "58764f2a1589d854c090322394b1eb04204a2d3d6e02ed26125cf897d121ab48",
+          "sha256": "794574cea1e8ed95e61d1f9b9035ddfb6dbe5302003b7c52b80eb10304267214",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/da/password-not-accepted.html": {
+          "previous_sha256": "504ec756b2d4cf68c305a3a6c14b18bf69b2b984b628dcb7ab47e811d7303d77",
+          "sha256": "e7b83ec4a7a588067ee37994303493b5566c2123c1db61c99ce6b0a9f0bb7a4e",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/el/password-not-accepted.html": {
+          "previous_sha256": "c2cdee3c0a27105c82803d09d42bfe65f20b8d9bcef7f37bd5906b760628a205",
+          "sha256": "495b0853eed8cae63cf4fdf62d57beac1397e402346be2a08e7ebc7fd76d2f3c",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        },
+        "core/crates/pe-html/help/fi/password-not-accepted.html": {
+          "previous_sha256": "8da7c524d81941dd2bfede2346aeb1a7576cd5e7468bf98043d3db4b1cad9c93",
+          "sha256": "95166607d44af7199278fd34ea07664f5a4815e8b1410fed5bc4ba4269dc5550",
+          "change": "Review marks only around the second and third troubleshooting steps; provider authentication context needs correction."
+        }
+      },
+      "retained_help_reviews": {
+        "core/crates/pe-html/help/de/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "ce3d9a0b094d8fb4da757a03c261da9c9ffa93e26f3151610dcc11f661a18999",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/es/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "4020d204a7c0e167d1e207b2e8a88f503d51cf47b4d7fc8f3b58f2c7832dc133",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/et/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "bb2b9c39ef78dc845a83c34b22c86b59881d34093609814b5031dbda50693700",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/fr/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "7b122f5e61c143917224cefe35763b54b18576c2d01839f76a6e07d2ce3ecc8f",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/nl/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "ef0db573f3358391d7035bdf37f6063db2db0045307f1996463c7c757fa50b2d",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/it/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "fc8689b9313324bf01d846d5b1402aaaa82f41f2f313e9c98f4ee6bc40a9ba39",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/pt/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "063f252df3661a89c7ff74ec81c67831449d781941a89132c9aee1825601e271",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/pt-BR/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "a2e021884d609f6efd65571bb12e2364f26d3c3bedebb6eb29473d4b42dd741b",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/ca/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "d8b9b5c043221008a6e3fd5a4ca417164ccc3c0361278d992cdf4ffcb6489fd1",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/nb/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "db10d4d10a7ba5e02fc201d0f6fe73bc9ab27ae2411c36261f2ade7f9a3d3b8b",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/sr-Latn/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "5ac4509de7d1e8bb806aed5e09357db6818ea7fe03b25b655ae6c7cfd06918f3",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/tr/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "c1485f64d59f0f32749e5ed697a6e08fa97aff2abcea9e2a1334da9530a745ce",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/bg/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "9a9e6f1f0dbb8a3be9f01d0d3d8e293e71a4a72743cace82d45963cdbb2b8643",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/cs/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "58764f2a1589d854c090322394b1eb04204a2d3d6e02ed26125cf897d121ab48",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/da/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "504ec756b2d4cf68c305a3a6c14b18bf69b2b984b628dcb7ab47e811d7303d77",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/el/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "c2cdee3c0a27105c82803d09d42bfe65f20b8d9bcef7f37bd5906b760628a205",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        },
+        "core/crates/pe-html/help/fi/password-not-accepted.html": {
+          "commit": "33e3e5833e9ec1e5ec9310ccd24d7f2532a815ba",
+          "sha256": "8da7c524d81941dd2bfede2346aeb1a7576cd5e7468bf98043d3db4b1cad9c93",
+          "scope": "Previously reviewed topic outside the second and third ordered steps; unchanged content retained against this checkpoint."
+        }
+      },
+      "note": "Focused review of the second and third troubleshooting steps in 17 previously completed languages. Preserve every other byte of their reviewed help. Croatian and the ten broader drafts already have the whole topic pending. Prior provider-app-password-context covered provider introductions and gmail-outlook.html only; this separate followup closes the additional troubleshooting path. Focused corrections are complete in the 17 reopened languages; Croatian received its full-topic review. All original content outside the second and third ordered steps in those 17 languages remains byte-for-byte unchanged. The ten broader drafts retain this followup."
     }
   ]
 }
