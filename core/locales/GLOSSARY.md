@@ -773,6 +773,10 @@ Terms: Εισερχόμενα; Εξερχόμενα; Απεσταλμένα; Δ�
   in Windows/Linux; explain these beside the unchanged literal English keyboard tags in help.
 - Menu access letters may appear lowercase in a label; their uppercase form must be an unaccented Greek
   letter. Check shared menu/dialog scopes, including the two separate flag entries in the Message menu.
+- The unaccented-letter rule applies to explicit catalog mnemonics. The Windows Flag submenu generates its
+  own mnemonics in `app/src/mailbox.cpp::FlagMenu`: its first-unused-letter algorithm can select ί in
+  "Κίτρινο" after Κ was used for "Κόκκινο". Preserve the correct colour spelling; this needs an app-side
+  review, not a translation workaround. Collision checks alone do not validate that generated shortcut.
 
 ### Български (bg)
 

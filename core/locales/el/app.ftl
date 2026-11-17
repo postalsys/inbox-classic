@@ -380,33 +380,19 @@ ui-sign-in-apps-intro = Οι εφαρμογές σύνδεσης επιτρέπ�
 ui-col-issuer = Εκδότης
 ui-col-used-by = Χρήση από
 ui-options-system-default = Προεπιλογή συστήματος ({ $language })
-# review: new
 ui-settings-general = Γενικά
-# review: new
 ui-settings-reading = Ανάγνωση
-# review: new
 ui-settings-new-mail = Νέα αλληλογραφία
-# review: new
 ui-settings-sending = Αποστολή
-# review: new
 ui-settings-default-apps = Προεπιλεγμένες εφαρμογές
-# review: new
 ui-settings-message-list = Λίστα μηνυμάτων
-# review: new
 ui-settings-messages = Μηνύματα
-# review: new
 ui-settings-language = Γλώσσα
-# review: new
 ui-settings-label = { $label }:
-# review: new
 ui-apply = Ε&φαρμογή
-# review: new
 ui-language-label = &Γλώσσα:
-# review: new
 ui-restart-note = Επανεκκινήστε το Inbox Classic για να αλλάξει η γλώσσα.
-# review: new
-ui-restart-ask = Το Inbox Classic θα εμφανίζεται στα { $language } μετά την επανεκκίνηση. Να γίνει επανεκκίνηση τώρα;
-# review: new
+ui-restart-ask = Η επιλεγμένη γλώσσα ({ $language }) θα χρησιμοποιηθεί μετά την επανεκκίνηση του Inbox Classic. Να γίνει επανεκκίνηση τώρα;
 ui-notify-new-mail = &Ειδοποίηση όταν φτάνει νέα αλληλογραφία
 ui-new-folder-title = Νέος φάκελος
 ui-rename-folder-title = Μετονομασία φακέλου
@@ -572,27 +558,22 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Δεν ήταν δυνατή η αποθήκευση του βιβλίου διευθύνσεων: { $reason }
 ui-code-copied = Ο κωδικός αντιγράφηκε
-# review: changed
 ui-codes-in-notifications = Εμφάνιση &κωδικών σύνδεσης στις ειδοποιήσεις νέας αλληλογραφίας
 ui-tool-unread-only = Αδιάβαστα
 ui-no-unread = Δεν υπάρχουν αδιάβαστα μηνύματα εδώ.
 ui-pictures-always-sender = Πάντα λήψη εικόνων από { $sender }
 ui-pictures-always-domain = Πάντα λήψη εικόνων από όλους τους αποστολείς στον τομέα { $domain }
 ui-pictures-unconfirmed = Δεν ήταν δυνατή η επαλήθευση του τομέα του αποστολέα ({ $domain }), οπότε οι εικόνες αυτού του μηνύματος δεν λαμβάνονται αυτόματα.
-# review: changed
 ui-pictures-always-option = &Λήψη εικόνων σε όλα τα μηνύματα
 ui-pictures-always-warning = Οι αποστολείς μπορούν τότε να δουν πότε διαβάζετε τα μηνύματά τους.
 ui-protection-details = &Λεπτομέρειες...
 ui-protection-details-title = Λεπτομέρειες ασφαλείας
 ui-download-heading = Λήψη
-# review: changed
 ui-download-ahead = &Λήψη μηνυμάτων εκ των προτέρων:
 ui-download-ahead-recent = Πρόσφατα μηνύματα έως 1 MB το καθένα
 ui-download-ahead-all = Όλα τα μηνύματα
 ui-download-ahead-never = Μόνο όταν ανοίγουν
-# review: changed
-ui-download-limit = &Όριο αποθήκευσης ανά λογαριασμό:
-# review: changed
+ui-download-limit = Όριο α&ποθήκευσης ανά λογαριασμό:
 ui-send-delay = Κ&αθυστέρηση πριν από την αποστολή:
 ui-send-delay-note = Όσο ένα μήνυμα περιμένει να σταλεί, μπορείτε να ακυρώσετε την αποστολή με την Αναίρεση.
 ui-dark-messages = Εμφάνιση μηνυμάτων σε σκούρο φόντο όταν το σύστημα είναι σε σκούρα λειτουργία
@@ -605,19 +586,16 @@ ui-send-too-late = Το μήνυμα { $subject } έχει ήδη σταλεί.
 ui-outbox-status-undo = Αποστολή στις { $time }
 ui-download-note = Τα μηνύματα που έχουν ληφθεί εκ των προτέρων ανοίγουν αμέσως. Όταν ξεπεραστεί το όριο αποθήκευσης, τα παλαιότερα τοπικά αντίγραφα καταργούνται και λαμβάνονται ξανά όταν τα ανοίξετε.
 ui-attachment-downloading = Η λήψη αυτού του μηνύματος δεν έχει ολοκληρωθεί. Δοκιμάστε ξανά όταν ολοκληρωθεί η λήψη.
-# review: changed
 ui-trusted-senders-button = &Αξιόπιστοι αποστολείς...
 ui-trusted-senders-title = Αξιόπιστοι αποστολείς
 ui-trusted-senders-note = Οι εικόνες σε μηνύματα από αυτούς τους αποστολείς λαμβάνονται αυτόματα όταν ο πάροχος αλληλογραφίας σας επαληθεύει τον τομέα του αποστολέα.
 ui-trusted-everyone-at = Όλοι οι αποστολείς στον τομέα { $domain }
 ui-trusted-senders-empty = Δεν έχουν προστεθεί ακόμη αξιόπιστοι αποστολείς.
-# review: changed
-ui-eml-default = &Άνοιγμα αρχείων .eml με το Inbox Classic
+ui-eml-default = Άνοιγμα α&ρχείων .eml με το Inbox Classic
 ui-eml-default-done = Το Inbox Classic ανοίγει πλέον τα αρχεία .eml.
 ui-eml-default-failed = Δεν ήταν δυνατό να οριστεί το Inbox Classic ως προεπιλεγμένη εφαρμογή για αρχεία .eml: { $reason }
 ui-folders = Φάκελοι
 ui-sorted-by = Ταξινόμηση κατά: { $field }
-# review: changed
 ui-layout-label = &Διάταξη:
 ui-columns-note = Το παράθυρο είναι αρκετά πλατύ για τη διάταξη σε στήλες. Μπορείτε να αλλάξετε τη διάταξη στην Προβολή > Διάταξη.
 ui-row-unread = Αδιάβαστο
@@ -627,10 +605,8 @@ ui-row-messages = { $count ->
     [one] { $count } μήνυμα
    *[other] { $count } μηνύματα
 }
-# review: changed
 ui-list-pictures = &Εμφάνιση εικόνων αποστολέων στη λίστα μηνυμάτων
-# review: changed
-ui-list-pictures-note = Εμφανίζει λογότυπα ή εικόνες από το Βιβλίο διευθύνσεων όταν έχει επαληθευτεί ο τομέας του αποστολέα. Αν δεν υπάρχει εικόνα, εμφανίζονται τα αρχικά. Τα λογότυπα αποθηκεύονται και επαναχρησιμοποιούνται σε διαφορετικά μηνύματα.
+ui-list-pictures-note = Στη διάταξη σε στήλες εμφανίζονται λογότυπα ή εικόνες από το Βιβλίο διευθύνσεων όταν έχει επαληθευτεί ο τομέας του αποστολέα. Αν δεν υπάρχει εικόνα, εμφανίζονται τα αρχικά. Μετά τη λήψη τους, τα λογότυπα αποθηκεύονται και χρησιμοποιούνται ξανά σε άλλα μηνύματα.
 ui-card-picture = Εικόνα:
 ui-card-picture-choose = Επι&λογή...
 ui-picture-not-picture = Αυτό το αρχείο δεν είναι εικόνα PNG ή JPEG.

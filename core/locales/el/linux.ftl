@@ -164,7 +164,6 @@ gtk-nothing-yet = Τίποτα ακόμη.
 ## Preferences
 
 gtk-preferences = Προτιμήσεις
-# review: changed
 gtk-notify-subtitle = Μόνο όταν το Inbox Classic είναι στο παρασκήνιο
 
 ## The desktop entry and the page of the software stores

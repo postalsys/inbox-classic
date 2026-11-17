@@ -24,9 +24,7 @@ mac-no-updates = Αυτή η έκδοση του Inbox Classic δεν υποστ
 ## Settings
 
 mac-settings-title = Ρυθμίσεις
-# review: new
 mac-check-updates-automatically = Αυτόματος έλεγχος για ενημερώσεις
-# review: new
 mac-settings-updates = Ενημερώσεις
 
 ## Dialogs
