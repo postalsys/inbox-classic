@@ -16,7 +16,8 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Finnish (fi), starting all 626 pending app.ftl entries and their actual menu/dialog contexts.
+- Resume with Finnish (fi), all 449 core.ftl entries, then 255 remaining platform/help-title entries and 52 help topics.
+  Its 626 UI entries and one coupled Windows button are reviewed, with 59 values improved.
   Upstream master `76f67e82` is integrated and its already-inventoried wave1 content reconciled.
   Greek is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. Both context followups
   are complete. Twelve languages still have pending content. All 84 late list-loading labels are reviewed.
@@ -627,8 +628,23 @@ exactly 15,972 catalog entries and 624 help topics; completed file/English-sourc
 changes reconcile to 16,124 catalog messages and 8,414 help lines (including separate context followups).
 Both working-tree and staged whitespace checks pass. Greek completion checkpoint: `fd1002f6`. Continue Finnish.
 
-Current totals: 16,120 catalog entries and 628 help pages reviewed; 2,482 catalog values improved. Remaining:
-15,972 catalog entries and 624 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Finnish UI catalog
+
+Reviewed all 626 shared UI entries and one coupled Windows button, improving 59 values. Corrected unnatural
+status/failure wording, account/provider placeholders, rule processing, contact counts, key ownership and
+address verification, saved sign-in credentials and protected transfers. Sender-image text now distinguishes
+verified domains from people and explains persistent logo reuse. Recorded Finnish terminology in the glossary.
+
+Thirty-two actual menu/context/dialog scopes have unique access keys, including native ä/ö. Source inspection
+confirmed that Open appears only for a single draft and Not Junk only for Junk messages, so these two controls
+never coexist; the generic mnemonic helper had incorrectly combined them. Compose Kopio/Piilokopio retain
+Alt+K/Alt+P, with the recipient picker's separate scope checked. Existing contact-import screenshot inspected;
+no Finnish tour screenshots are available. IDs, full variable sets, plural branches and mnemonic counts are
+preserved. Structural and inventory/hash checks pass, report regenerated and git diff --check passes.
+The test suite was not run. Upstream integration checkpoint: `03d0b346`.
+
+Current totals: 16,747 catalog entries and 628 help pages reviewed; 2,541 catalog values improved. Remaining:
+15,345 catalog entries and 624 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

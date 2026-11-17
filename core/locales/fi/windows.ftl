@@ -143,8 +143,7 @@ win-never-written-to = Ei koskaan kirjoitettu
 win-book-find-label = Kirjoita nimi tai sähköpostiosoite:
 # review: new
 win-send = &Lähetä
-# review: new
-win-dont-send = Ä&lä lähetä
+win-dont-send = Älä lä&hetä
 # review: new
 win-forget-program-ask = Poistetaanko tämä ohjelma, sen käyttöoikeudet ja sen agenttien toimintahistoria? Sinulta kysytään lupaa uudelleen, kun se seuraavan kerran muodostaa yhteyden.
 # review: new

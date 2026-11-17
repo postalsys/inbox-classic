@@ -598,11 +598,23 @@ Poista lippu); Vastaa kaikille; Välitä edelleen (toolbar: Välitä).
 - Placeables never inflect: a head noun takes the case ("kansioon { $folder }", "tililtä { $account }") or a label and
   colon is used ("Siirretty: { $messages }. Kohde: { $folder }"); `their-folders` and `transfer-another-account` are
   nominative to fit "Kohde:".
-- Brand names that are not placeables inflect with a colon ("Inbox Classicin").
+- Brand names that are not placeables inflect normally, without a colon ("Inbox Classicin", "Inbox Classicista").
 - Participles choose by `$count` ("Merkitty luetuksi" / "Merkitty luetuiksi"); colours take the adessive inside the
   selector ("punaisella lipulla").
 - Quotes ” ” (both U+201D), apostrophe ’; `ui-event-span` joins with a hyphen. Options, Settings and Preferences are
   all "Asetukset".
+- Round 2: rules "käsittelevät" messages; "lajitella" means changing list order. Address-book Write To is
+  "Kirjoita viesti". The local mail store is "postitietokanta".
+- "Digitaalinen allekirjoitus" is cryptographic; "allekirjoitus" alone can mean the text appended to messages.
+  "Avaimen haltija vahvistettu" identifies verified ownership, independently of signature validity. A key's
+  displayed name may be an address or fingerprint. Check all listed addresses before selecting "Täsmäävät".
+- "Kirjautumistiedot" includes passwords and OAuth credentials. An unprotected transfer requires another
+  password or browser sign-in. "Salalause" protects an encrypted backup.
+- Cc/Bcc are "Kopio" / "Piilokopio", with Alt+K/Alt+P in the compose window. The recipient picker has its own
+  shortcut scope. Native ä/ö may be used when needed to keep menu shortcuts distinct.
+  Open Draft and Not Junk never coexist: their folder roles are mutually exclusive.
+- Sender images rely on authenticated domains, not verified people or message contents. Downloaded logos are
+  cached and reused across messages; do not claim that each logo is only ever downloaded once.
 
 ### Svenska (sv)
 
