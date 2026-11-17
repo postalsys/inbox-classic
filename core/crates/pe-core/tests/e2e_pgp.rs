@@ -413,3 +413,112 @@ fn pe_core_part(raw: &str) -> String {
     let end = raw.find("-----END PGP MESSAGE-----").unwrap() + "-----END PGP MESSAGE-----".len();
     raw[start..end].to_string()
 }
+
+/// An encrypted message downloaded ahead is decrypted by the background pass with the user's key, asking nothing:
+/// found by a word of its text and listed by its protected Subject, until the switch in Settings is turned off, and
+/// again once it is on
+#[test]
+fn the_background_pass_decrypts_for_the_search() {
+    let Some(s) = setup() else { return };
+    let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../scripts/ui-e2e/pgp");
+    let read = |name: &str| std::fs::read(fixtures.join(name)).unwrap();
+    let passphrase = String::from_utf8(read("me.passphrase")).unwrap();
+    s.core
+        .pgp_import(&read("me.asc"), Some(passphrase.trim()), KeySource::File)
+        .unwrap();
+    let me = pe_pgp::read_certs(&read("me.asc")).unwrap().remove(0);
+    let inner = "Content-Type: text/plain; charset=utf-8; protected-headers=\"v1\"\r\nSubject: The zebrafish plan\r\n\r\n\
+                 Meet me at the old windmill.\r\n";
+    let armored = pe_pgp::encrypt(inner.as_bytes().to_vec(), &[&me], &[], None, now()).unwrap();
+    let raw = format!(
+        "From: Alice Example <alice@example.org>\r\nTo: testuser@example.com\r\nSubject: ...\r\n\
+         Message-ID: <background@example.org>\r\nMIME-Version: 1.0\r\n\
+         Content-Type: multipart/encrypted; protocol=\"application/pgp-encrypted\"; boundary=\"e\"\r\n\r\n\
+         --e\r\nContent-Type: application/pgp-encrypted\r\n\r\nVersion: 1\r\n--e\r\n\
+         Content-Type: application/octet-stream\r\n\r\n{armored}\r\n--e--\r\n"
+    );
+    s.server.add_message("INBOX", &raw, &[]);
+    let account = s.core.add_account(&s.server.account_settings(), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+
+    let find = |text: &str| {
+        let search = pe_core::Search {
+            scope: pe_core::Scope::Everywhere,
+            show: pe_core::Show::All,
+            text: text.into(),
+            ..Default::default()
+        };
+        s.core.search(&search, pe_store::Sort::default(), 0, 10).unwrap()
+    };
+    let eventually = |done: &dyn Fn() -> bool, what: &str| {
+        let until = std::time::Instant::now() + Duration::from_secs(30);
+        while !done() {
+            assert!(std::time::Instant::now() < until, "{what}");
+            std::thread::sleep(Duration::from_millis(200));
+        }
+    };
+    // downloaded ahead and decrypted in the background, never opened
+    eventually(
+        &|| find("windmill").len() == 1,
+        "found by a word of its text after the background pass",
+    );
+    let row = find("is:encrypted").remove(0);
+    assert_eq!(row.info.subject, "The zebrafish plan");
+    assert!(
+        row.snippet.as_deref().is_some_and(|s| s.contains("windmill")),
+        "{row:?}"
+    );
+    assert_eq!(row.info.outer_subject.as_deref(), Some("..."));
+
+    // turned off: neither its words nor its protected Subject
+    s.core.set_pgp_index_encrypted(false).unwrap();
+    assert!(find("windmill").is_empty(), "not after the switch is off");
+    let row = find("is:encrypted").remove(0);
+    assert_eq!(row.info.subject, "...");
+    assert_eq!(row.snippet.as_deref(), Some("Encrypted message"));
+
+    // on again: the background pass decrypts it again
+    s.core.set_pgp_index_encrypted(true).unwrap();
+    eventually(&|| find("windmill").len() == 1, "found again once it is on");
+    assert_eq!(find("is:encrypted").remove(0).info.subject, "The zebrafish plan");
+
+    // a move the server refuses (Archive deleted by another client): the row comes back as it came, nothing decrypted
+    // in it for an agent to see or find
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let (inbox, archive) = (id("INBOX"), id("Archive"));
+    s.server.delete_folder("Archive");
+    let uid = find("is:encrypted").remove(0).info.uid;
+    s.core.move_messages(inbox, &[uid], archive).unwrap();
+    s.wait(|e| matches!(e, Event::ActionUndone { .. }));
+    let agent_finds = |text: &str| {
+        let search = pe_core::Search {
+            scope: pe_core::Scope::Everywhere,
+            show: pe_core::Show::All,
+            text: text.into(),
+            no_decrypted: true,
+            ..Default::default()
+        };
+        s.core.search(&search, pe_store::Sort::default(), 0, 10).unwrap()
+    };
+    let back = find("is:encrypted").remove(0);
+    assert_eq!(back.agent_subject(), "...");
+    for word in ["windmill", "zebrafish"] {
+        assert!(agent_finds(word).is_empty(), "{word}");
+    }
+    // decrypted again by the background pass, its outer Subject kept for agents; the switch off puts it back
+    s.core.set_pgp_index_encrypted(true).unwrap();
+    eventually(
+        &|| find("windmill").len() == 1,
+        "decrypted again after the refused move",
+    );
+    let again = find("is:encrypted").remove(0);
+    assert_eq!(
+        (again.info.subject.as_str(), again.agent_subject()),
+        ("The zebrafish plan", "...")
+    );
+    assert!(agent_finds("windmill").is_empty());
+    s.core.set_pgp_index_encrypted(false).unwrap();
+    assert_eq!(find("is:encrypted").remove(0).info.subject, "...");
+}

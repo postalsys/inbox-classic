@@ -2,7 +2,7 @@
 //! `"exact phrases"`, `-word` for none of it, `OR` between alternatives, and operators:
 //!
 //! - `from:` `to:` `cc:` `bcc:` `subject:` `filename:` a word in that part (to, cc and bcc all mean the recipients)
-//! - `is:unread` `is:read` `is:starred` (or `is:flagged`) `is:answered` `is:bounce` (a delivery failure or delay
+//! - `is:unread` `is:read` `is:starred` (or `is:flagged`) `is:answered` `is:signed` `is:encrypted` `is:bounce` (a delivery failure or delay
 //!   notice); `has:attachment`
 //! - `in:inbox` `in:sent` `in:drafts` `in:trash` `in:spam` `in:archive`, `in:<folder name>`, `in:anywhere`
 //!   (`label:` is the same); a search with `in:` looks in every account
@@ -61,6 +61,8 @@ pub enum Term {
     Attachment(bool),
     /// A delivery failure or delay notice
     Bounce(bool),
+    /// `is:signed`, `is:encrypted`
+    Protection(crate::Protection, bool),
     In {
         place: Place,
         negated: bool,
@@ -280,6 +282,8 @@ fn term(raw: &Token, now: i64) -> Term {
         ("is", "answered" | "replied") => Some(Term::Answered(yes)),
         ("has", "attachment" | "attachments") => Some(Term::Attachment(yes)),
         ("is", "bounce" | "bounced") => Some(Term::Bounce(yes)),
+        ("is", "signed") => Some(Term::Protection(crate::Protection::Signed, yes)),
+        ("is", "encrypted") => Some(Term::Protection(crate::Protection::Encrypted, yes)),
         ("in" | "label", _) => Some(Term::In {
             place: place(&raw.text),
             negated: raw.negated,

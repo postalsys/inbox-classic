@@ -478,6 +478,10 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = Denne meddelelse kan ikke læses.
 agent-encrypted-original = Meddelelsen er krypteret. En agent kan ikke svare på den eller videresende den gennem Inbox Classic, da agenten ikke kan kryptere mail her.
+# review: new
+agent-encrypted = Denne meddelelse er krypteret. Kun brugeren kan læse den, i Inbox Classic.
+# review: new
+list-encrypted = Krypteret meddelelse
 agent-log-composed = Åbnede »{ $subject }« i en ny meddelelse, som du kan gøre færdig
 agent-log-refused = Du sendte ikke »{ $subject }«
 agent-log-sent = Satte »{ $subject }« i kø til afsendelse til { $to }
@@ -611,7 +615,8 @@ pgp-find-unavailable = Nøgler kunne ikke slås op lige nu: { $error }
 pgp-publish-pending = keys.openpgp.org har sendt et bekræftelseslink til hver af disse adresser: { $addresses }. Bekræft hver adresse, så andre kan finde din nøgle ved hjælp af den.
 pgp-publish-done = Din nøgle er offentliggjort på keys.openpgp.org for { $addresses }.
 pgp-publish-failed = Nøglen kunne ikke offentliggøres: { $error }
-pgp-keyserver-off = Opslag af nøgler på keys.openpgp.org er slået fra i Indstillinger.
+# review: changed
+pgp-keyserver-off = Søgning efter nøgler på keys.openpgp.org er slået fra under { $settings }.
 pgp-details-part = Del { $number }: { $label }
 pgp-details-signed = Signeret { $when } med nøglen { $key }
 pgp-details-unknown-key = Signeret med nøglen { $key }, som du ikke har

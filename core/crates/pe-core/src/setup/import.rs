@@ -421,6 +421,10 @@ impl Core {
         if let Some(on) = settings.pgp_keyserver {
             self.set_pgp_keyserver(on)?;
         }
+        // turned off, what was decrypted here leaves the index
+        if let Some(on) = settings.pgp_index_encrypted {
+            self.set_pgp_index_encrypted(on)?;
+        }
         if let Some(delay) = settings.send_delay {
             self.set_send_delay(delay)?;
         }

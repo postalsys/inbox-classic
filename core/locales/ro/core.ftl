@@ -767,6 +767,10 @@ agent-unreadable = Acest mesaj nu poate fi citit.
 # review: new
 agent-encrypted-original = Acest mesaj este criptat: un agent nu poate să îi răspundă sau să îl redirecționeze, deoarece nu poate cripta.
 # review: new
+agent-encrypted = Acest mesaj este criptat. Doar utilizatorul îl poate citi, în Inbox Classic.
+# review: new
+list-encrypted = Mesaj criptat
+# review: new
 agent-log-composed = A deschis „{ $subject }” într-un mesaj nou, pe care să îl terminați dvs.
 # review: new
 agent-log-refused = Nu ați trimis „{ $subject }”
@@ -1003,8 +1007,8 @@ pgp-publish-pending = keys.openpgp.org a trimis un link de confirmare la { $addr
 pgp-publish-done = Cheia dvs. este publicată pe keys.openpgp.org pentru { $addresses }.
 # review: new
 pgp-publish-failed = Cheia nu a putut fi publicată: { $error }
-# review: new
-pgp-keyserver-off = Căutarea cheilor pe keys.openpgp.org este dezactivată în Opțiuni.
+# review: changed
+pgp-keyserver-off = Căutarea cheilor pe keys.openpgp.org este dezactivată în { $settings }.
 # review: new
 pgp-details-part = Partea { $number }: { $label }
 # review: new

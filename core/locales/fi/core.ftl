@@ -463,6 +463,10 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = Tätä viestiä ei voi lukea.
 agent-encrypted-original = Tämä viesti on salattu: agentti ei voi vastata siihen tai välittää sitä, koska se ei osaa salata.
+# review: new
+agent-encrypted = Tämä viesti on salattu. Vain käyttäjä voi lukea sen Inbox Classicissa.
+# review: new
+list-encrypted = Salattu viesti
 agent-log-composed = Avasi viestin ”{ $subject }” uutena viestinä, jonka viimeistelet
 agent-log-refused = Et lähettänyt viestiä ”{ $subject }”
 agent-log-sent = Lisäsi viestin ”{ $subject }” lähetysjonoon. Vastaanottajat: { $to }
@@ -596,7 +600,8 @@ pgp-find-unavailable = Avaimia ei voitu hakea nyt: { $error }
 pgp-publish-pending = keys.openpgp.org lähetti vahvistuslinkin jokaiseen seuraavista osoitteista: { $addresses }. Vahvista jokainen osoite, jotta avaimesi löytyy sen avulla.
 pgp-publish-done = Avaimesi on julkaistu palvelussa keys.openpgp.org. Sähköpostiosoitteet: { $addresses }.
 pgp-publish-failed = Avainta ei voitu julkaista: { $error }
-pgp-keyserver-off = Avainten haku palvelusta keys.openpgp.org on poistettu käytöstä Asetuksissa.
+# review: changed
+pgp-keyserver-off = Avainten haku palvelusta keys.openpgp.org on poistettu käytöstä kohdassa { $settings }.
 pgp-details-part = Osa { $number }: { $label }
 pgp-details-signed = Allekirjoitettu { $when } avaimella { $key }
 pgp-details-unknown-key = Allekirjoitettu avaimella { $key }, jota sinulla ei ole

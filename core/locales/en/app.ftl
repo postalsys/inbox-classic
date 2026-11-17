@@ -389,6 +389,7 @@ ui-settings-sending = Sending
 ui-settings-default-apps = Default Apps
 ui-settings-message-list = Message List
 ui-settings-messages = Messages
+ui-settings-encryption = Encryption
 ui-settings-language = Language
 # a group's title as the label before its first control, in the Mac's panes: the colon as the language writes it
 ui-settings-label = { $label }:
@@ -594,6 +595,10 @@ ui-trusted-senders-title = Trusted senders
 ui-trusted-senders-note = Pictures in messages from these senders are downloaded automatically when your mail provider verifies the sender’s domain.
 ui-trusted-everyone-at = Everyone at { $domain }
 ui-trusted-senders-empty = No trusted senders have been added yet.
+ui-search-encrypted = Search in &encrypted messages
+ui-search-encrypted-note = Encrypted messages are decrypted on this computer once downloaded or opened, so their words can be found and the list shows their own subjects. The index is not encrypted, and AI agents never search it. Turn this off to remove them from the index.
+ui-pgp-keyserver = Look &up keys on keys.openpgp.org
+ui-pgp-keyserver-note = Only when you encrypt a message or look for a key: the address looked up is sent to keys.openpgp.org to find its key. The address’s own domain is asked first.
 ui-eml-default = Open .&eml Files with Inbox Classic
 ui-eml-default-done = Inbox Classic now opens .eml files.
 ui-eml-default-failed = Inbox Classic could not be set as the default app for .eml files: { $reason }
@@ -604,6 +609,8 @@ ui-columns-note = The window is wide enough for the column layout. You can chang
 ui-row-unread = Unread
 ui-row-flagged = Flagged
 ui-row-attachments = Has attachments
+ui-row-encrypted = Encrypted
+ui-row-signed = Signed
 ui-row-messages = { $count ->
     [one] { $count } message
    *[other] { $count } messages

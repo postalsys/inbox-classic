@@ -145,6 +145,22 @@ id = "trusted_senders"
 kind = "button"
 label = "ui-trusted-senders-button"
 
+[[page.group]]
+id = "encryption"
+label = "ui-settings-encryption"
+
+[[page.group.setting]]
+id = "search_encrypted"
+kind = "switch"
+label = "ui-search-encrypted"
+note = "ui-search-encrypted-note"
+
+[[page.group.setting]]
+id = "keyserver"
+kind = "switch"
+label = "ui-pgp-keyserver"
+note = "ui-pgp-keyserver-note"
+
 [[page]]
 id = "downloading"
 label = "ui-download-heading"

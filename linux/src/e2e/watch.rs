@@ -52,7 +52,7 @@ fn checked(command: Command) -> bool {
 }
 
 /// The notifications of new mail sent so far, as (title, text)
-fn notified() -> Vec<(String, String)> {
+pub(super) fn notified() -> Vec<(String, String)> {
     crate::notify::SENT.with(|sent| sent.borrow().clone())
 }
 
@@ -83,7 +83,7 @@ fn reply(id: &str, from: &str, subject: &str, refs: &[&str], minutes: i32, text:
 
 /// New mail put into the Inbox on the server while the window is hidden (a notification is only sent then), synced
 /// until `arrived`; the window back in front
-async fn while_hidden(d: &Driver, raw: &str, arrived: impl FnMut() -> bool) -> bool {
+pub(super) async fn while_hidden(d: &Driver, raw: &str, arrived: impl FnMut() -> bool) -> bool {
     let main = shell().main();
     main.window().set_visible(false);
     let added = d.add_message_to("INBOX", raw).is_ok();

@@ -5,6 +5,8 @@
 //!   in `me.passphrase`, imported by the tests; `alice.asc` and `mallory.asc`: public keys the tests import; Dave's key
 //!   is in no file, so his signature's key is not known.
 //! - One message a case, each a whole `.eml` the tests put in the Inbox (the `secure-*` steps of SCENARIO.md).
+//!   `secure-protected-subject.eml` (encrypted to `me.asc`, unsigned, its Subject protected) was made from the
+//!   committed `me.asc` and is not written here: make it again with the same headers if the keys are made again.
 
 use std::path::Path;
 

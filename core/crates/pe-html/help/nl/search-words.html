@@ -17,6 +17,7 @@
     <tr><td><code>is:starred</code> of <code>is:flagged</code></td><td>Gemarkeerde berichten</td></tr>
     <tr><td><code>is:answered</code></td><td>Berichten die je hebt beantwoord</td></tr>
     <tr><td><code>is:bounce</code></td><td>Meldingen van berichten die niet zijn bezorgd of vertraagd zijn</td></tr>
+<!--review-->    <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Versleutelde of ondertekende berichten</td></tr><!--/review-->
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Alleen die map, in elk account</td></tr>
     <tr><td><code>in:projecten</code></td><td>Alleen de map met die naam</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Elke map</td></tr>
@@ -25,5 +26,6 @@
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>E-mail groter of kleiner dan de opgegeven omvang, in bytes of met <code>K</code>, <code>M</code> of <code>G</code></td></tr>
 </table>
 <p>Zoeken is niet gevoelig voor accenten of hoofdletters. Een onbekende zoekoperator wordt als gewone zoektekst behandeld.</p>
+<!--review--><p>Een versleuteld bericht wordt gevonden op afzender, ontvangers en onderwerp, en na ontsleuteling ook op de woorden van de tekst, zolang <b data-text="ui-search-encrypted"></b> aan staat bij <b data-settings="reading"></b>.</p><!--/review-->
 <p>De berichtenlijst toont geen berichtgroottes. Om te zien hoe groot een bericht is, kies je <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

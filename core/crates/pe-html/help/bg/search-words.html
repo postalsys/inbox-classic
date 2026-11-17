@@ -17,6 +17,7 @@
     <tr><td><code>is:starred</code> или <code>is:flagged</code></td><td>Съобщения с флаг</td></tr>
     <tr><td><code>is:answered</code></td><td>Съобщения, на които сте отговорили</td></tr>
     <tr><td><code>is:bounce</code></td><td>Известия за съобщения, които не са доставени или са забавени</td></tr>
+<!--review-->    <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Шифровани или подписани съобщения</td></tr><!--/review-->
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Само тази папка, във всеки акаунт</td></tr>
     <tr><td><code>in:projects</code></td><td>Само папката с това име</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Всички папки</td></tr>
@@ -25,5 +26,6 @@
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Съобщения, по-големи или по-малки от посочения размер, в байтове или с <code>K</code>, <code>M</code> или <code>G</code></td></tr>
 </table>
 <p>Ударенията и главните букви нямат значение. Неразпознатите оператори се търсят като обикновен текст.</p>
+<!--review--><p>Шифрованото съобщение се намира по подателя, получателите и темата, а след дешифриране и по думите от текста му, докато <b data-text="ui-search-encrypted"></b> е включено в <b data-settings="reading"></b>.</p><!--/review-->
 <p>Списъкът със съобщения няма колона за размер. За да видите колко голямо е съобщението, изберете <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

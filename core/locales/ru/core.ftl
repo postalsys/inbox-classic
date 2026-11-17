@@ -755,6 +755,10 @@ agent-unreadable = Это сообщение невозможно прочита
 # review: new
 agent-encrypted-original = Это сообщение зашифровано: агент не может ответить на него или переслать его, так как не умеет шифровать.
 # review: new
+agent-encrypted = Это сообщение зашифровано. Прочитать его может только пользователь, в Inbox Classic.
+# review: new
+list-encrypted = Зашифрованное сообщение
+# review: new
 agent-log-composed = «{ $subject }» открыто в новом сообщении, чтобы вы его закончили
 # review: new
 agent-log-refused = Вы не отправили «{ $subject }»
@@ -990,8 +994,8 @@ pgp-publish-pending = keys.openpgp.org отправил ссылку для по
 pgp-publish-done = Ваш ключ опубликован на keys.openpgp.org для { $addresses }.
 # review: new
 pgp-publish-failed = Не удалось опубликовать ключ: { $error }
-# review: new
-pgp-keyserver-off = Поиск ключей на keys.openpgp.org отключен в параметрах.
+# review: changed
+pgp-keyserver-off = Поиск ключей на keys.openpgp.org выключен в разделе { $settings }.
 # review: new
 pgp-details-part = Часть { $number }: { $label }
 # review: new

@@ -59,6 +59,11 @@ fn each_case_reads_as_the_ui_tests_expect() {
     assert!(text.starts_with("Encrypted. Signed by alice@example.org"), "{text}");
     assert!(shown(&view).contains("old mill"));
     assert!(view.protection.as_ref().unwrap().encrypted);
+    // encrypted with a protected Subject (made once, outside ui_fixtures, with the committed me.asc): the list and
+    // the reading pane name it by the Subject inside
+    let (_, _, view) = bar("secure-protected-subject.eml");
+    assert_eq!(view.subject, "The mill on Friday");
+    assert!(shown(&view).contains("grain arrives"));
     let (tone, text, view) = bar("secure-mixed.eml");
     assert_eq!(tone, Tone::Neutral);
     assert!(text.contains("3 parts"), "{text}");

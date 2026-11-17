@@ -27,23 +27,23 @@ Commit completed batches regularly and preserve an exact resume point.
   Croatian's catalogs and 45 help topics are reviewed; seven topics remain in the integrated scope. Its prior
   three settings-context followups are complete. Password troubleshooting is now corrected in Croatian and
   the 17 previously completed languages; the ten broader drafts retain it.
-- NEXT integrate the newly discovered encryption/search feature at origin/master `08c9ef12` after this
-  reviewed-help checkpoint. It adds 252 catalog entries, changes 28 entries and affects 112 help topics
-  across all 28 languages. Exact IDs/topics are in `review_workspace.pending_upstream`. These items are not
-  yet included in the active totals below; no language is complete with this upstream work outstanding.
-  Preserve existing reviewed prose and reopen only affected passages. Update Reading mnemonic scopes,
-  inventories and source hashes. Then finish Croatian's all-inboxes/command-line/keyboard-shortcuts/removing/
-  save-print-import/search-words/updates and the ten broader language queues. Do not restart full reviews.
+- Encryption/search feature `38841d96`, observed in origin/master merge `08c9ef12`, is now integrated after
+  reviewed checkpoint `3aa142c1`. NEXT review de/es/et/fr: ten catalog targets and inserted passages in four
+  help topics per language. Then nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr. Exact IDs and retained-prose
+  provenance are in `encryption-search-context`. All new translations remain marked; no language is complete.
+  Original reviewed text is retained. Check the verified decryption/index/agent/key-lookup context in state.
+  Then finish Croatian's all-inboxes/command-line/keyboard-shortcuts/removing/save-print-import/search-words/
+  updates and the ten broader language queues. Do not restart full reviews.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,456 catalog entries and 1,304 help topics; 13,330 entries and 527 topics are pending before the new upstream integration.
+  32,712 catalog entries and 1,316 help topics; 13,600 entries and 598 topics are pending after encryption integration.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were initially reviewed with 74 improvements; its 24 app settings additions now have two
   further improvements. Croatian core.ftl has 128 improvements, and the remaining platform/help-title catalogs
   have 54 more. Four provider introductions have subsequent corrections; 45 help topics are reviewed, with
-  seven remaining before integration. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
+  seven original topics remaining, plus the new encryption passages. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
 - All 168 rollback messages and 84 loading labels remain reviewed. Earlier logo-cache, attachment-reminder
   and watched-notification followups remain preserved. Use their verified context in new reviews.
 - The three settings pages replace the former single Options mnemonic scope: use 46 actual scopes.
@@ -66,8 +66,8 @@ Commit completed batches regularly and preserve an exact resume point.
   context followup adds 16 previously out-of-scope catalog entries and four help topics, for 32,456 and 1,296.
   The no-Trash deletion followup adds four round-1 help topics, bringing the scope to 32,456 and 1,300.
   The password-troubleshooting followup adds four further round-1 topics, bringing it to 32,456 and 1,304.
-  Other affected items were already counted and are reopened without increasing scope. The newly discovered
-  upstream encryption batch still needs integration and scope reconciliation.
+  Other affected items were already counted and are reopened without increasing scope. The encryption batch
+  adds 252 new IDs, four changed round-1 IDs and twelve round-1 help topics: scope is now 32,712 and 1,316.
   The state records exact inventories and the source commit. Recheck the branch and master for later edits.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
 
@@ -1503,11 +1503,37 @@ the feature and reopen affected translations while preserving prior reviews. The
 checkout only. Its 270 since-start entries and 110 help passages match the queue; full inventories also cover the
 original drafts omitted by that comparison. The final late-arrival audit remains required.
 
-Current pre-integration totals: 19,126 catalog entries and 777 help topics completed in the active scope;
-3,188 historical catalog value improvements. Remaining: 13,330 catalog entries and 527 help topics. Seventeen
-languages have no pending content in the integrated scope, but all 28 have the upstream encryption work above.
-Croatian has seven original help topics left; hu/lt/lv/pl/ro/ru/sk/sl/sv/uk retain their broader queues, including
-provider, deletion and settings context. `REVIEWED` is unchanged.
+### Encryption/search feature integrated; affected translations reopened
+
+Merged the feature tip `38841d96` directly, retaining its ancestry and leaving the five unrelated upstream
+README/Linux test/CI paths outside this branch. Resolved 99 translation/help conflicts. Every unaffected catalog
+value and comment and all previous help prose remain intact, including prior English-source corrections.
+New drafts were inserted into the current text. Seventy-one previously reviewed help topics mark only their
+new passages; the remaining affected topics were already pending full review.
+
+Added 252 new catalog IDs and reopened 18 changed entries, including four round-1 entries entering this scope.
+Four help topics per language are affected; twelve round-1 topics enter the scope. Prior review history is
+preserved under reopened fields and retained-prose hashes. No imported draft is counted reviewed. Current
+completed counts fall because affected entries/topics are pending again, not because earlier edits were lost.
+
+All 28 language inventories, full variable sets, access-key counts, help references and exact pending marks pass.
+Static language checks report only 25,185 expected removed/partial-mark diagnostics. All 46 mnemonic scopes pass
+in the 18 previously reviewed app languages, and all three settings-page scopes pass in every language. The ten
+broader drafts' shortcut collisions are byte-for-byte the same lists as before integration; Romanian Gri also
+still lacks a free runtime flag mnemonic. These remain recorded for their initial reviews.
+
+All 76 implementation/generated imports match the feature source. Global reconciliation accounts for 19,146
+unmarked messages, 10,007 changed help lines and 14 verified baseline pairs. All completed/source hashes match.
+The 550 since-start entries and 265 passages match the queue. Review HTML regenerated; locale/help/record
+diff checks pass. The full staged check passes with cr-at-eol for the imported email fixture’s intentional CRLF
+endings; its bytes match upstream exactly.
+No tests or builds run; installer/store metadata was not changed. The source refs remain as freshly fetched;
+no new languages were found. Review the German encryption additions next, followed by Spanish/Estonian/French.
+
+Current totals: 19,112 catalog entries and 718 help topics completed in the active scope; 3,188 historical
+catalog value improvements. Remaining: 13,600 catalog entries and 598 help topics. All 28 languages have the
+new encryption work pending. Croatian has seven original help topics left plus reopened passages;
+hu/lt/lv/pl/ro/ru/sk/sl/sv/uk retain their broader queues. `REVIEWED` is unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

@@ -160,6 +160,7 @@ fn fill_with(core: &Core, issuer: &str) -> Filled {
     core.set_download_limit_mb(500).unwrap();
     core.set_always_load_pictures(true).unwrap();
     core.set_pgp_keyserver(false).unwrap();
+    core.set_pgp_index_encrypted(false).unwrap();
     core.set_send_delay(20).unwrap();
     core.set_dark_messages(false).unwrap();
 
@@ -296,7 +297,7 @@ fn every_part_round_trips_without_a_passphrase() {
         ),
         (0, 1, 2, 2)
     );
-    assert_eq!(counts.settings, 7);
+    assert_eq!(counts.settings, 8);
     assert_eq!(
         file.prefs,
         [
@@ -342,6 +343,7 @@ fn every_part_round_trips_without_a_passphrase() {
     assert_eq!(b.download_limit_mb().unwrap(), 500);
     assert!(b.always_load_pictures().unwrap());
     assert!(!b.pgp_keyserver().unwrap());
+    assert!(!b.pgp_index_encrypted().unwrap());
     assert_eq!(b.send_delay().unwrap(), 20);
     assert!(!b.dark_messages());
 

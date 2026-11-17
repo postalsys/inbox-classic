@@ -63,7 +63,7 @@ const COLUMNS_SUBJECT: &str = "Ferry times for Saturday";
 const COLUMNS_BODY: &str = "The ferry leaves at nine from the north pier.";
 
 /// The rows of the Columns list on screen: (who, subject, snippet, indent)
-fn rows_on_screen() -> Vec<(String, String, String, i32)> {
+pub(super) fn rows_on_screen() -> Vec<(String, String, String, i32)> {
     let view: gtk::Widget = shell().main().list.rows_view.clone().upcast();
     descendants::<gtk::Widget>(&view)
         .iter()

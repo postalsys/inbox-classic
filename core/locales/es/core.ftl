@@ -466,6 +466,10 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = Este mensaje no se puede leer.
 agent-encrypted-original = Los agentes no pueden responder a este mensaje cifrado ni reenviarlo, ya que no pueden cifrar mensajes.
+# review: new
+agent-encrypted = Este mensaje está cifrado. Solo el usuario puede leerlo, en Inbox Classic.
+# review: new
+list-encrypted = Mensaje cifrado
 agent-log-composed = Se abrió «{ $subject }» en la ventana de redacción para que termine de escribirlo
 agent-log-refused = No envió «{ $subject }»
 agent-log-sent = Se envió «{ $subject }» a { $to }
@@ -594,7 +598,8 @@ pgp-find-unavailable = La búsqueda de claves no está disponible en este moment
 pgp-publish-pending = keys.openpgp.org ha enviado un enlace de confirmación a las siguientes direcciones: { $addresses }. Confirme cada dirección para que su clave pueda encontrarse a través de ella.
 pgp-publish-done = Su clave está publicada en keys.openpgp.org para { $addresses }.
 pgp-publish-failed = No se pudo publicar la clave: { $error }
-pgp-keyserver-off = La búsqueda de claves en keys.openpgp.org está desactivada en Opciones.
+# review: changed
+pgp-keyserver-off = La búsqueda de claves en keys.openpgp.org está desactivada en { $settings }.
 pgp-details-part = Parte { $number }: { $label }
 pgp-details-signed = Firmado el { $when } con la clave { $key }
 pgp-details-unknown-key = Firmado con la clave { $key }, que no está disponible en este equipo

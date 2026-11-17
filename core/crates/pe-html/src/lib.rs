@@ -33,7 +33,7 @@ pub use editor::{
 pub use event::{EventCard, OPEN_CALENDAR_LINK, event_card, is_open_calendar_link};
 pub use help::{
     HELP_TOPIC_SCHEME, HelpSection, HelpTarget, HelpTopic, help_contents, help_context, help_export, help_link_topic,
-    help_search, help_topic,
+    help_search, help_topic, settings_words,
 };
 pub use otp::{COPY_CODE_LINK, OtpCard, is_copy_code_link, otp_card};
 pub use platform::{DOCUMENT_SCHEME, Platform, status_page, webkit_content_rules};

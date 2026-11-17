@@ -201,6 +201,9 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
     /// Show messages on a dark background when the system is dark
     var darkMessages: NSButton { box(.darkMessages) }
     var pictures: NSButton { box(.picturesAlways) }
+    /// Search in encrypted messages and Look up keys on keys.openpgp.org, under Encryption
+    var searchEncrypted: NSButton { box(.searchEncrypted) }
+    var keyserver: NSButton { box(.keyserver) }
     var downloadAhead: NSPopUpButton { popup(.downloadAhead) }
     var downloadLimit: NSPopUpButton { popup(.downloadLimit) }
 
@@ -324,6 +327,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
             return toggle(setting, core.darkMessages, #selector(darkMessagesChanged))
         case .picturesAlways:
             return toggle(setting, core.alwaysLoadPictures, #selector(picturesChanged))
+        case .searchEncrypted:
+            return toggle(setting, core.searchEncrypted, #selector(searchEncryptedChanged))
+        case .keyserver:
+            return toggle(setting, core.keyserver, #selector(keyserverChanged))
         case .trustedSenders:
             return button(setting, #selector(trustedSendersClicked))
         case .downloadAhead:
@@ -507,6 +514,15 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
         core.alwaysLoadPictures = pictures.state == .on
         // the message shown now as the setting has it
         AppDelegate.shared?.main?.mailbox.reader.reload()
+    }
+
+    @objc func searchEncryptedChanged() {
+        // the lists reload when the core says the folders changed
+        core.searchEncrypted = searchEncrypted.state == .on
+    }
+
+    @objc func keyserverChanged() {
+        core.keyserver = keyserver.state == .on
     }
 
     @objc func darkMessagesChanged() {

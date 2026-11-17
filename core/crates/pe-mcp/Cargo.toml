@@ -17,5 +17,6 @@ tokio = { version = "1.54.1", features = ["rt", "net", "io-util", "io-std", "tim
 
 [dev-dependencies]
 pe-testkit = { path = "../pe-testkit" }
+pe-pgp = { path = "../pe-pgp" }
 pe-net.workspace = true
 tokio = { version = "1.54.1", features = ["rt", "net", "io-util", "time", "macros"] }

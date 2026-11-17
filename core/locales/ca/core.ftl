@@ -478,6 +478,10 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = Aquest missatge no es pot llegir.
 agent-encrypted-original = El missatge original està xifrat. Un agent no hi pot respondre ni reenviar-lo perquè no pot xifrar el missatge de sortida.
+# review: new
+agent-encrypted = Aquest missatge està xifrat. Només l’usuari el pot llegir, a Inbox Classic.
+# review: new
+list-encrypted = Missatge xifrat
 agent-log-composed = Ha obert «{ $subject }» en una finestra de composició perquè l’editeu
 agent-log-refused = Heu rebutjat l’enviament de «{ $subject }»
 agent-log-sent = Ha posat «{ $subject }» a la cua per enviar-lo a { $to }
@@ -611,7 +615,8 @@ pgp-find-unavailable = Ara no es poden cercar claus: { $error }
 pgp-publish-pending = keys.openpgp.org ha enviat un enllaç de confirmació a cada adreça: { $addresses }. Confirmeu cada adreça per fer-hi accessible la vostra clau.
 pgp-publish-done = La vostra clau està publicada a keys.openpgp.org. Adreces: { $addresses }.
 pgp-publish-failed = No s’ha pogut publicar la clau: { $error }
-pgp-keyserver-off = La cerca de claus a keys.openpgp.org està desactivada a Opcions.
+# review: changed
+pgp-keyserver-off = La cerca de claus a keys.openpgp.org està desactivada a { $settings }.
 pgp-details-part = Part { $number }: { $label }
 pgp-details-signed = Data de la signatura: { $when }. Clau: { $key }
 pgp-details-unknown-key = Signat amb la clau { $key }, que no teniu

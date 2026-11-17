@@ -464,6 +464,10 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = Dit bericht kan niet worden gelezen.
 agent-encrypted-original = Dit bericht is versleuteld: een agent kan het niet beantwoorden of doorsturen, omdat hij niet kan versleutelen.
+# review: new
+agent-encrypted = Dit bericht is versleuteld. Alleen de gebruiker kan het lezen, in Inbox Classic.
+# review: new
+list-encrypted = Versleuteld bericht
 agent-log-composed = “{ $subject }” geopend als nieuw bericht dat je zelf kunt afmaken
 agent-log-refused = Je hebt “{ $subject }” niet verzonden
 agent-log-sent = “{ $subject }” klaargezet voor verzending aan { $to }
@@ -597,7 +601,8 @@ pgp-find-unavailable = De sleutels konden niet worden opgezocht: { $error }
 pgp-publish-pending = keys.openpgp.org heeft een bevestigingslink gestuurd naar deze adressen: { $addresses }. Bevestig elk adres afzonderlijk zodat je sleutel via dat adres kan worden gevonden.
 pgp-publish-done = Je sleutel is gepubliceerd op keys.openpgp.org voor { $addresses }.
 pgp-publish-failed = De sleutel kon niet worden gepubliceerd: { $error }
-pgp-keyserver-off = Sleutels opzoeken op keys.openpgp.org is uitgeschakeld in Opties.
+# review: changed
+pgp-keyserver-off = Sleutels zoeken op keys.openpgp.org staat uit bij { $settings }.
 pgp-details-part = Deel { $number }: { $label }
 pgp-details-signed = Ondertekend op { $when } met de sleutel { $key }
 pgp-details-unknown-key = Ondertekend met de sleutel { $key }, die je niet hebt

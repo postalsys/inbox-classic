@@ -608,3 +608,43 @@ pub unsafe extern "C" fn pe_pgp_set_account_key(
         })
     }
 }
+
+/// Settings, Reading > Encryption: whether the search index keeps the text of encrypted messages once they are decrypted
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pgp_index_encrypted(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.pgp_index_encrypted().unwrap_or(false)) }
+}
+
+/// Turns it on or off; off, the text decrypted so far leaves the index
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pgp_set_index_encrypted(core: *const PeCore, on: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_pgp_index_encrypted(on).is_ok()) }
+}
+
+/// Settings > Reading > Encryption: whether keys are looked up on keys.openpgp.org (Encrypt and Find Key)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pgp_keyserver(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, true, |core| core.pgp_keyserver().unwrap_or(true)) }
+}
+
+/// Turns it on or off
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pgp_set_keyserver(core: *const PeCore, on: bool) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.set_pgp_keyserver(on).is_ok()) }
+}

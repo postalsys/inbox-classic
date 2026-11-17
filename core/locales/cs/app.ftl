@@ -384,6 +384,8 @@ ui-settings-sending = Odesílání
 ui-settings-default-apps = Výchozí aplikace
 ui-settings-message-list = Seznam zpráv
 ui-settings-messages = Zprávy
+# review: new
+ui-settings-encryption = Šifrování
 ui-settings-language = Jazyk
 ui-settings-label = { $label }:
 ui-apply = &Použít
@@ -595,6 +597,14 @@ ui-trusted-senders-title = Důvěryhodní odesílatelé
 ui-trusted-senders-note = Obrázky ve zprávách od těchto odesílatelů se stahují automaticky, když váš poskytovatel pošty ověří doménu odesílatele.
 ui-trusted-everyone-at = Všichni z domény { $domain }
 ui-trusted-senders-empty = Zatím nebyli přidáni žádní důvěryhodní odesílatelé.
+# review: new
+ui-search-encrypted = Hledat v &šifrovaných zprávách
+# review: new
+ui-search-encrypted-note = Šifrované zprávy se v tomto počítači dešifrují, jakmile se stáhnou nebo otevřou, aby bylo možné najít jejich slova a seznam ukázal jejich vlastní předmět. Index není šifrovaný a agenti AI v něm nikdy nehledají. Vypnutím je z indexu odeberete.
+# review: new
+ui-pgp-keyserver = &Hledat klíče na keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Když šifrujete zprávu nebo hledáte klíč, hledaná adresa se odešle na keys.openpgp.org. Nejdřív se zeptá vlastní domény adresy.
 ui-eml-default = Otevírat &soubory .eml v aplikaci Inbox Classic
 ui-eml-default-done = Inbox Classic teď otevírá soubory .eml.
 ui-eml-default-failed = Inbox Classic nelze nastavit jako výchozí aplikaci pro soubory .eml: { $reason }
@@ -605,6 +615,10 @@ ui-columns-note = Okno je dost široké pro rozložení do sloupců. Rozložení
 ui-row-unread = Nepřečtená
 ui-row-flagged = S příznakem
 ui-row-attachments = Obsahuje přílohy
+# review: new
+ui-row-encrypted = Šifrováno
+# review: new
+ui-row-signed = Podepsáno
 ui-row-messages = { $count ->
     [one] { $count } zpráva
     [few] { $count } zprávy

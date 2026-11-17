@@ -218,6 +218,7 @@ fn settings_part(store: &Store) -> Result<SettingsPart> {
         download_limit_mb: Some(store.download_limit_mb()?),
         always_load_pictures: Some(store.always_load_pictures()?),
         pgp_keyserver: Some(store.pgp_keyserver()?),
+        pgp_index_encrypted: Some(store.pgp_index_encrypted()?),
         send_delay: Some(store.send_delay()?),
     })
 }

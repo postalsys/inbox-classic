@@ -495,6 +495,10 @@ agent-accounts = { $count ->
 agent-access = { $can }· { $accounts }
 agent-unreadable = Δεν είναι δυνατή η ανάγνωση αυτού του μηνύματος.
 agent-encrypted-original = Αυτό το μήνυμα είναι κρυπτογραφημένο. Ένας πράκτορας δεν μπορεί να απαντήσει ή να το προωθήσει μέσω του Inbox Classic, επειδή δεν υποστηρίζεται κρυπτογράφηση για αποστολή από πράκτορες.
+# review: new
+agent-encrypted = Αυτό το μήνυμα είναι κρυπτογραφημένο. Μόνο ο χρήστης μπορεί να το διαβάσει, στο Inbox Classic.
+# review: new
+list-encrypted = Κρυπτογραφημένο μήνυμα
 agent-log-composed = Άνοιξε το «{ $subject }» σε νέο μήνυμα για να το ολοκληρώσετε
 agent-log-refused = Δεν στείλατε το «{ $subject }»
 agent-log-sent = Το μήνυμα «{ $subject }» τέθηκε σε αναμονή για αποστολή προς { $to }
@@ -628,7 +632,8 @@ pgp-find-unavailable = Δεν ήταν δυνατή η αναζήτηση κλε
 pgp-publish-pending = Το keys.openpgp.org έστειλε συνδέσμους επιβεβαίωσης στις διευθύνσεις: { $addresses }. Επιβεβαιώστε κάθε διεύθυνση ξεχωριστά, ώστε το κλειδί σας να μπορεί να βρεθεί μέσω αυτής.
 pgp-publish-done = Το κλειδί σας δημοσιεύτηκε στο keys.openpgp.org για { $addresses }.
 pgp-publish-failed = Δεν ήταν δυνατή η δημοσίευση του κλειδιού: { $error }
-pgp-keyserver-off = Η αναζήτηση κλειδιών στο keys.openpgp.org είναι απενεργοποιημένη στις Επιλογές.
+# review: changed
+pgp-keyserver-off = Η αναζήτηση κλειδιών στο keys.openpgp.org είναι απενεργοποιημένη στο { $settings }.
 pgp-details-part = Τμήμα { $number }: { $label }
 pgp-details-signed = Υπογράφηκε { $when } με το κλειδί { $key }
 pgp-details-unknown-key = Υπογράφηκε με το κλειδί { $key }, που δεν έχετε

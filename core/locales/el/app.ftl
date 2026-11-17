@@ -387,6 +387,8 @@ ui-settings-sending = Αποστολή
 ui-settings-default-apps = Προεπιλεγμένες εφαρμογές
 ui-settings-message-list = Λίστα μηνυμάτων
 ui-settings-messages = Μηνύματα
+# review: new
+ui-settings-encryption = Κρυπτογράφηση
 ui-settings-language = Γλώσσα
 ui-settings-label = { $label }:
 ui-apply = Ε&φαρμογή
@@ -591,6 +593,14 @@ ui-trusted-senders-title = Αξιόπιστοι αποστολείς
 ui-trusted-senders-note = Οι εικόνες σε μηνύματα από αυτούς τους αποστολείς λαμβάνονται αυτόματα όταν ο πάροχος αλληλογραφίας σας επαληθεύει τον τομέα του αποστολέα.
 ui-trusted-everyone-at = Όλοι οι αποστολείς στον τομέα { $domain }
 ui-trusted-senders-empty = Δεν έχουν προστεθεί ακόμη αξιόπιστοι αποστολείς.
+# review: new
+ui-search-encrypted = Αναζήτηση σε &κρυπτογραφημένα μηνύματα
+# review: new
+ui-search-encrypted-note = Τα κρυπτογραφημένα μηνύματα αποκρυπτογραφούνται σε αυτόν τον υπολογιστή μόλις ληφθούν ή ανοιχτούν, ώστε να βρίσκονται οι λέξεις τους και η λίστα να δείχνει το δικό τους θέμα. Το ευρετήριο δεν είναι κρυπτογραφημένο και οι πράκτορες ΤΝ δεν κάνουν ποτέ αναζήτηση σε αυτό. Απενεργοποιήστε το για να αφαιρεθούν από το ευρετήριο.
+# review: new
+ui-pgp-keyserver = Αναζήτηση κλειδιών &στο keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Όταν κρυπτογραφείτε ένα μήνυμα ή αναζητάτε ένα κλειδί, η διεύθυνση που αναζητείται στέλνεται στο keys.openpgp.org. Πρώτα ερωτάται ο ίδιος ο τομέας της διεύθυνσης.
 ui-eml-default = Άνοιγμα α&ρχείων .eml με το Inbox Classic
 ui-eml-default-done = Το Inbox Classic ανοίγει πλέον τα αρχεία .eml.
 ui-eml-default-failed = Δεν ήταν δυνατό να οριστεί το Inbox Classic ως προεπιλεγμένη εφαρμογή για αρχεία .eml: { $reason }
@@ -601,6 +611,10 @@ ui-columns-note = Το παράθυρο είναι αρκετά πλατύ γι�
 ui-row-unread = Αδιάβαστο
 ui-row-flagged = Με σημαία
 ui-row-attachments = Έχει συνημμένα
+# review: new
+ui-row-encrypted = Κρυπτογραφημένο
+# review: new
+ui-row-signed = Υπογεγραμμένο
 ui-row-messages = { $count ->
     [one] { $count } μήνυμα
    *[other] { $count } μηνύματα

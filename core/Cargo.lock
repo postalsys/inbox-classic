@@ -2368,6 +2368,7 @@ dependencies = [
  "pe-i18n",
  "pe-mime",
  "pe-net",
+ "pe-pgp",
  "pe-store",
  "pe-testkit",
  "serde_json",

@@ -85,6 +85,8 @@ enum ListIcon : int {
     LIST_MAIL_ERROR = 5,
     LIST_GLASSES = 6,
     LIST_SPEAKER_MUTE = 7,
+    LIST_LOCK_CLOSED = 8,
+    LIST_RIBBON = 9,
 };
 
 enum FileIcon : int {

@@ -473,6 +473,10 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = Това съобщение не може да бъде прочетено.
 agent-encrypted-original = Това съобщение е шифровано: агент не може да отговори на него или да го препрати, тъй като не може да шифрова.
+# review: new
+agent-encrypted = Това съобщение е шифровано. Само потребителят може да го прочете, в Inbox Classic.
+# review: new
+list-encrypted = Шифровано съобщение
 agent-log-composed = Отворено за довършване: „{ $subject }“
 agent-log-refused = Отказано изпращане: „{ $subject }“
 agent-log-sent = Добавено в опашката за изпращане до { $to }: „{ $subject }“
@@ -606,7 +610,8 @@ pgp-find-unavailable = В момента не може да се търсят к
 pgp-publish-pending = keys.openpgp.org изпрати връзки за потвърждение до: { $addresses }. Потвърдете всеки адрес, за да може ключът ви да бъде намерен чрез него.
 pgp-publish-done = Ключът ви е публикуван в keys.openpgp.org за { $addresses }.
 pgp-publish-failed = Ключът не можа да бъде публикуван: { $error }
-pgp-keyserver-off = Търсенето на ключове в keys.openpgp.org е изключено в „Опции“.
+# review: changed
+pgp-keyserver-off = Търсенето на ключове в keys.openpgp.org е изключено в { $settings }.
 pgp-details-part = Част { $number }: { $label }
 pgp-details-signed = Подписано на { $when } с ключа { $key }
 pgp-details-unknown-key = Подписано с ключа { $key }, който нямате

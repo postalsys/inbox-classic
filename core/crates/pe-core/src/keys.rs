@@ -1070,6 +1070,32 @@ impl Core {
         Ok(self.store().pgp_identities()?)
     }
 
+    /// Options > Security: whether the search index keeps the text of encrypted messages once they are opened
+    pub fn pgp_index_encrypted(&self) -> Result<bool> {
+        Ok(self.store().pgp_index_encrypted()?)
+    }
+
+    /// Turned off, the text decrypted so far leaves the index and the list shows the Subjects the messages came with
+    /// (their senders and recipients stay searched); turned on, the background workers decrypt what is downloaded
+    pub fn set_pgp_index_encrypted(&self, on: bool) -> Result<()> {
+        {
+            let store = self.store();
+            store.set_pgp_index_encrypted(on)?;
+            if !on {
+                store.forget_decrypted()?;
+            }
+        }
+        if on {
+            self.more_to_download();
+        } else {
+            // the lists read again, as when conversations change in the background
+            for account in self.store().accounts()? {
+                let _ = self.post(crate::Event::FoldersChanged { account: account.id });
+            }
+        }
+        Ok(())
+    }
+
     pub fn pgp_set_identity(&self, address: &str, fingerprint: &str, autocrypt: bool) -> Result<()> {
         let identity = PgpIdentity {
             address: address.into(),

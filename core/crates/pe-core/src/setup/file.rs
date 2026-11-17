@@ -75,6 +75,9 @@ pub(crate) struct SettingsPart {
     pub always_load_pictures: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pgp_keyserver: Option<bool>,
+    /// Settings > Reading > Encryption: the text of encrypted messages opened kept in the search index
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pgp_index_encrypted: Option<bool>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub send_delay: Option<u64>,
 }
@@ -95,6 +98,7 @@ impl SettingsPart {
                 .filter(|mb| crate::DOWNLOAD_LIMITS_MB.contains(mb)),
             always_load_pictures: self.always_load_pictures,
             pgp_keyserver: self.pgp_keyserver,
+            pgp_index_encrypted: self.pgp_index_encrypted,
             send_delay: self.send_delay.filter(|delay| crate::SEND_DELAYS.contains(delay)),
         }
     }
@@ -107,6 +111,7 @@ impl SettingsPart {
             self.download_limit_mb.is_some(),
             self.always_load_pictures.is_some(),
             self.pgp_keyserver.is_some(),
+            self.pgp_index_encrypted.is_some(),
             self.send_delay.is_some(),
         ]
         .iter()

@@ -387,6 +387,8 @@ ui-settings-sending = Enviament
 ui-settings-default-apps = Aplicacions predeterminades
 ui-settings-message-list = Llista de missatges
 ui-settings-messages = Missatges
+# review: new
+ui-settings-encryption = Xifratge
 ui-settings-language = Llengua
 ui-settings-label = { $label }:
 ui-apply = &Aplica
@@ -591,6 +593,14 @@ ui-trusted-senders-title = Remitents de confiança
 ui-trusted-senders-note = Les imatges dels missatges d’aquests remitents es baixen automàticament quan el vostre proveïdor de correu verifica el domini del remitent.
 ui-trusted-everyone-at = Tothom del domini { $domain }
 ui-trusted-senders-empty = Encara no s’ha afegit cap remitent de confiança.
+# review: new
+ui-search-encrypted = Cerca als missatges &xifrats
+# review: new
+ui-search-encrypted-note = Els missatges xifrats es desxifren en aquest ordinador un cop baixats o oberts, perquè se’n puguin trobar les paraules i la llista en mostri l’assumpte propi. L’índex no està xifrat i els agents d’IA no hi cerquen mai. Desactiveu-ho per treure’ls de l’índex.
+# review: new
+ui-pgp-keyserver = C&erca claus a keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Quan xifreu un missatge o cerqueu una clau, l’adreça cercada s’envia a keys.openpgp.org. Primer es consulta el domini de l’adreça.
 ui-eml-default = &Obre els fitxers .eml amb Inbox Classic
 ui-eml-default-done = Ara Inbox Classic obre els fitxers .eml.
 ui-eml-default-failed = No s’ha pogut definir Inbox Classic com a aplicació predeterminada per als fitxers .eml: { $reason }
@@ -601,6 +611,10 @@ ui-columns-note = La finestra és prou ampla per a la disposició en columnes. P
 ui-row-unread = No llegit
 ui-row-flagged = Amb bandera
 ui-row-attachments = Té fitxers adjunts
+# review: new
+ui-row-encrypted = Xifrat
+# review: new
+ui-row-signed = Signat
 ui-row-messages = { $count ->
     [one] { $count } missatge
    *[other] { $count } missatges

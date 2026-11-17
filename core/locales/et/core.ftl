@@ -442,6 +442,10 @@ agent-accounts = { $count ->
 agent-access = { $can }; { $accounts }
 agent-unreadable = Seda kirja ei saa lugeda.
 agent-encrypted-original = Agent ei saa krüpteeritud kirjale vastata ega seda edastada, sest agent ei toeta kirjade krüpteerimist.
+# review: new
+agent-encrypted = See kiri on krüptitud. Seda saab lugeda ainult kasutaja, Inbox Classicus.
+# review: new
+list-encrypted = Krüptitud kiri
 agent-log-composed = Kiri „{ $subject }“ avati koostamisaknas, et saaksite selle valmis kirjutada
 agent-log-refused = Te ei saatnud kirja „{ $subject }“
 agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }
@@ -570,7 +574,8 @@ pgp-find-unavailable = Võtmeid ei saa praegu otsida: { $error }
 pgp-publish-pending = keys.openpgp.org saatis kinnituslingi järgmistele aadressidele: { $addresses }. Kinnitage iga aadress, et teie võtit saaks selle aadressi järgi leida.
 pgp-publish-done = Teie võti on saidil keys.openpgp.org avaldatud järgmiste aadresside jaoks: { $addresses }.
 pgp-publish-failed = Võtit ei saanud avaldada: { $error }
-pgp-keyserver-off = Võtmete otsimine saidilt keys.openpgp.org on suvandites välja lülitatud.
+# review: changed
+pgp-keyserver-off = Võtmete otsimine serverist keys.openpgp.org on välja lülitatud: { $settings }.
 pgp-details-part = Osa { $number }: { $label }
 pgp-details-signed = Allkirjastatud { $when } võtmega { $key }
 pgp-details-unknown-key = Allkirjastatud võtmega { $key }, mida teil pole

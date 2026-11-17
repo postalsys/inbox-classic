@@ -90,8 +90,8 @@ pub use sign_in_apps::{
 pub use text::{
     DOWNLOAD_LIMITS_MB, ReaderState, SEND_DELAYS, TEXT_SIZE_MEDIUM, TEXT_ZOOMS, account_label, account_shown_name,
     account_title, account_titles, default_account_name, download_limit_index, download_limit_text, downloading_text,
-    folder_kind, folder_name, format_size, initials, list_counts, messages, quoted_subject, reader_page, retry_note,
-    saved_text, send_delay_index, send_delay_text, sentence,
+    folder_kind, folder_name, format_size, initials, list_counts, messages, protection_words, quoted_subject,
+    reader_page, retry_note, saved_text, send_delay_index, send_delay_text, sentence,
 };
 pub use view::{AttachmentView, MessageView, PartView, ProtectionView};
 use worker::{Command, Role, Worker};
@@ -477,7 +477,7 @@ pub struct Core {
     synced: Arc<worker::Synced>,
     secrets: Secrets,
     /// The OpenPGP certificates read from the store, each read once (keys.rs)
-    pgp_certs: keys::CertCache,
+    pgp_certs: Arc<keys::CertCache>,
     trust: Trust,
     events: EventSink,
     /// Set when closing: no event is delivered after
@@ -910,7 +910,7 @@ impl Core {
     /// A page of what `search` finds (Gmail's syntax, see [`pe_store::Query`]), in the order of `sort`
     pub fn search(&self, search: &Search, sort: Sort, offset: u64, limit: u64) -> Result<Vec<Message>> {
         let sort = self.list_sort(search, sort)?;
-        Ok(self.store().search(search, sort, offset, limit)?)
+        Ok(encrypted_lines(self.store().search(search, sort, offset, limit)?))
     }
 
     /// [`Core::search`] read from a row next to the page or from the end of the list (`anchor`, see
@@ -924,7 +924,9 @@ impl Core {
         anchor: pe_store::Anchor,
     ) -> Result<Vec<Message>> {
         let sort = self.list_sort(search, sort)?;
-        Ok(self.store().search_from(search, sort, offset, limit, anchor)?)
+        Ok(encrypted_lines(
+            self.store().search_from(search, sort, offset, limit, anchor)?,
+        ))
     }
 
     /// What the store holds now: equal values mean nothing was written in between, so what was read then is still so
@@ -1505,6 +1507,18 @@ impl Core {
     fn learned(&self, mut view: MessageView) -> MessageView {
         if let Some(seen) = view.autocrypt.take() {
             let _ = self.learn_autocrypt(&seen);
+        }
+        if let Some((folder, uid, text, subject)) = view.decrypted.take() {
+            let store = self.store();
+            if search::store_decrypted(&store, folder, uid, &text, subject.as_deref()).unwrap_or(false)
+                && let Ok(found) = store.folder(folder)
+            {
+                drop(store);
+                let _ = self.post(Event::FolderChanged {
+                    account: found.account_id,
+                    folder,
+                });
+            }
         }
         view
     }
@@ -2409,6 +2423,7 @@ impl Core {
             opening: self.opening.clone(),
             partials: self.partials.clone(),
             restored: self.restored.clone(),
+            pgp_certs: self.pgp_certs.clone(),
         }
     }
 
@@ -2870,6 +2885,35 @@ fn read_limited(path: &std::path::Path) -> Result<Vec<u8>> {
     Ok(raw)
 }
 
+/// An encrypted message's text for the search index, from what building its view decrypted, when the user lets the
+/// index keep it and it does not have it yet; the window stores it as it takes the view ([`Core::message_view`])
+fn decrypted_for_view<S: std::ops::Deref<Target = Store>>(
+    found: &ViewSource,
+    view: &mut MessageView,
+    store: &impl Fn() -> Option<S>,
+) {
+    let Some((shown, subject)) = view.decrypted_source.take() else {
+        return;
+    };
+    if store().is_some_and(|store| store.wants_decrypted_text(found.folder, found.uid).unwrap_or(false)) {
+        view.decrypted = Some((found.folder, found.uid, search::index_text(&shown), subject));
+    }
+}
+
+/// The rows of a list: an encrypted message not opened yet (or whose text the index does not keep) says so on its
+/// line of first words
+fn encrypted_lines(mut found: Vec<Message>) -> Vec<Message> {
+    for message in &mut found {
+        if message.info.protection == pe_store::Protection::Encrypted
+            && message.snippet.as_deref().is_none_or(str::is_empty)
+        {
+            message.snippet = Some(pe_i18n::tr(pe_i18n::Text::ListEncrypted));
+            message.snippet_is_state = true;
+        }
+    }
+    found
+}
+
 /// The view of a message's source, its date the server's when it has no Date header; None when `dropped` said to
 /// give up. `store` gives the store a bounce needs: the message it returns is looked up there, and a bounce the list
 /// did not mark yet (one found by the heuristics) is marked, with `events` told the folder changed.
@@ -2899,6 +2943,7 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
         ring: found.ring.as_deref(),
     };
     let mut view = view::build_unless(&found.source, allow_remote_images, &trust, dropped, &find)?;
+    decrypted_for_view(found, &mut view, &store);
     // a large message's text first: its attachments without content, their sizes from its structure, listed by the
     // same rules
     if let Some(first) = found

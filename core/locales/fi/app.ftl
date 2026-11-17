@@ -388,6 +388,8 @@ ui-settings-sending = Lähettäminen
 ui-settings-default-apps = Oletussovellukset
 ui-settings-message-list = Viestiluettelo
 ui-settings-messages = Viestit
+# review: new
+ui-settings-encryption = Salaus
 ui-settings-language = Kieli
 ui-settings-label = { $label }:
 ui-apply = &Käytä
@@ -592,6 +594,14 @@ ui-trusted-senders-title = Luotetut lähettäjät
 ui-trusted-senders-note = Näiden lähettäjien viestien kuvat ladataan automaattisesti, kun postipalveluntarjoajasi vahvistaa lähettäjän verkkotunnuksen.
 ui-trusted-everyone-at = Kaikki verkkotunnuksessa { $domain }
 ui-trusted-senders-empty = Luotettuja lähettäjiä ei ole vielä lisätty.
+# review: new
+ui-search-encrypted = Hae &salatuista viesteistä
+# review: new
+ui-search-encrypted-note = Salatut viestit puretaan tällä tietokoneella, kun ne on ladattu tai avattu, jotta niiden sanat löytyvät ja luettelo näyttää niiden oman aiheen. Hakemistoa ei ole salattu, eivätkä tekoälyagentit koskaan hae siitä. Poista tämä käytöstä, niin ne poistetaan hakemistosta.
+# review: new
+ui-pgp-keyserver = &Hae avaimia palvelusta keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Kun salaat viestin tai haet avainta, haettu osoite lähetetään palveluun keys.openpgp.org. Ensin kysytään osoitteen omalta verkkotunnukselta.
 ui-eml-default = &Avaa .eml-tiedostot Inbox Classicilla
 ui-eml-default-done = Inbox Classic avaa nyt .eml-tiedostot.
 ui-eml-default-failed = Inbox Classicia ei voitu asettaa .eml-tiedostojen oletussovellukseksi: { $reason }
@@ -602,6 +612,10 @@ ui-columns-note = Ikkuna on tarpeeksi leveä sarakeasettelulle. Voit vaihtaa ase
 ui-row-unread = Lukematon
 ui-row-flagged = Liputettu
 ui-row-attachments = Sisältää liitteitä
+# review: new
+ui-row-encrypted = Salattu
+# review: new
+ui-row-signed = Allekirjoitettu
 ui-row-messages = { $count ->
     [one] { $count } viesti
    *[other] { $count } viestiä

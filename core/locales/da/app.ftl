@@ -387,6 +387,8 @@ ui-settings-sending = Afsendelse
 ui-settings-default-apps = Standardapps
 ui-settings-message-list = Meddelelsesliste
 ui-settings-messages = Meddelelser
+# review: new
+ui-settings-encryption = Kryptering
 ui-settings-language = Sprog
 ui-settings-label = { $label }:
 ui-apply = &Anvend
@@ -591,6 +593,14 @@ ui-trusted-senders-title = Betroede afsendere
 ui-trusted-senders-note = Billeder i meddelelser fra disse afsendere hentes automatisk, når din mailudbyder bekræfter afsenderens domæne.
 ui-trusted-everyone-at = Alle på domænet { $domain }
 ui-trusted-senders-empty = Der er ikke tilføjet nogen betroede afsendere endnu.
+# review: new
+ui-search-encrypted = Søg i &krypterede meddelelser
+# review: new
+ui-search-encrypted-note = Krypterede meddelelser dekrypteres på denne computer, når de er hentet eller åbnet, så deres ord kan findes, og listen viser deres eget emne. Indekset er ikke krypteret, og AI-agenter søger aldrig i det. Slå dette fra for at fjerne dem fra indekset.
+# review: new
+ui-pgp-keyserver = &Søg efter nøgler på keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Når du krypterer en meddelelse eller søger efter en nøgle, sendes den adresse, der søges efter, til keys.openpgp.org. Adressens eget domæne spørges først.
 ui-eml-default = &Åbn .eml-filer med Inbox Classic
 ui-eml-default-done = Inbox Classic åbner nu .eml-filer.
 ui-eml-default-failed = Inbox Classic kunne ikke angives som standardprogram til .eml-filer: { $reason }
@@ -601,6 +611,10 @@ ui-columns-note = Vinduet er bredt nok til kolonnelayoutet. Du kan ændre layout
 ui-row-unread = Ulæst
 ui-row-flagged = Med flag
 ui-row-attachments = Har vedhæftede filer
+# review: new
+ui-row-encrypted = Krypteret
+# review: new
+ui-row-signed = Signeret
 ui-row-messages = { $count ->
     [one] { $count } meddelelse
    *[other] { $count } meddelelser

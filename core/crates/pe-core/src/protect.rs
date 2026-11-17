@@ -306,7 +306,20 @@ fn has_layer(raw: &[u8]) -> bool {
 /// so nothing that was not shown (a part not decrypted, a hidden one) ever is; with whether a section of it was
 /// decrypted (an attachment opened from it is then stored decrypted). None for a message without protection.
 pub(crate) fn shown_decrypted(raw: &[u8], ring: &KeyRing, from: &[String], now: i64) -> Option<(Vec<u8>, bool)> {
-    let protected = read(raw, ring, from, now)?;
+    shown_of(raw, &read(raw, ring, from, now)?)
+}
+
+/// What the search index keeps of a message something of which was decrypted: the message as it is shown, and its
+/// protected Subject when its layer is good (RFC 9788, or protected-headers="v1"). None when nothing was decrypted.
+pub(crate) fn decrypted_for_index(raw: &[u8], protected: &Protected) -> Option<(Vec<u8>, Option<String>)> {
+    match shown_of(raw, protected)? {
+        (shown, true) => Some((shown, protected.subject.clone())),
+        _ => None,
+    }
+}
+
+/// [`shown_decrypted`] of a message already read
+fn shown_of(raw: &[u8], protected: &Protected) -> Option<(Vec<u8>, bool)> {
     let decrypted = protected
         .sections
         .iter()

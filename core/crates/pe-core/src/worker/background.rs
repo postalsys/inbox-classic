@@ -12,7 +12,9 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use pe_store::{AccountId, Store};
+use pe_store::{AccountId, FolderId, IndexText, Store};
+
+use crate::protect::KeyRing;
 use tokio::sync::Notify;
 use tokio::sync::mpsc::UnboundedReceiver;
 
@@ -65,6 +67,8 @@ impl Worker {
     /// Batches until there is no work left, or one fails (tried again with the next work). When this worker can not
     /// connect, the main worker does them, a slice at a time between its commands.
     async fn work_through(&mut self, store: &mut Store) {
+        // the keys read again for this pass: one imported since is used
+        self.decrypt_ring = None;
         if !self.limited_lately() {
             let started = std::time::Instant::now();
             loop {
@@ -93,6 +97,7 @@ impl Worker {
     /// The main worker's share of the background work: batches for [`MAIN_SLICE`] at most, then back to the Inbox
     /// and the user's commands. Whether there is more.
     pub(super) async fn background_slice(&mut self, store: &mut Store) -> bool {
+        self.decrypt_ring = None;
         let until = std::time::Instant::now() + MAIN_SLICE;
         loop {
             match self.background_batch(store).await {
@@ -108,7 +113,8 @@ impl Worker {
 
     /// One batch of what is done in the background: the senders' verdicts fetched with the summaries read (local,
     /// quick), messages downloaded ahead (with their search text), conversations, the search text of the rest, the
-    /// snippets of mail indexed before there were any, then the verdicts of mail stored before they were fetched.
+    /// text of encrypted mail downloaded (decrypted here), the snippets of mail indexed before there were any, then
+    /// the verdicts of mail stored before they were fetched.
     /// Whether there may be more.
     async fn background_batch(&mut self, store: &mut Store) -> Result<bool, Failure> {
         if self.judge_senders(store)? > 0 {
@@ -123,9 +129,95 @@ impl Worker {
         if self.index_texts(store, &Store::messages_to_index).await? > 0 {
             return Ok(true);
         }
+        if self.decrypt_stored(store).await? > 0 {
+            return Ok(true);
+        }
         if self.index_texts(store, &Store::messages_without_snippet).await? > 0 {
             return Ok(true);
         }
         Ok(self.fetch_sender_verdicts(store).await? > 0)
+    }
+}
+
+/// How many encrypted messages one batch of the background pass decrypts
+const DECRYPT_BATCH: usize = 8;
+
+/// An encrypted message to decrypt: its id, folder and UID, and its source
+type Sealed = (i64, FolderId, u64, Option<Vec<u8>>);
+/// What decrypting it gave the index: its text and its protected Subject; None when nothing opened
+type Opened = (i64, FolderId, u64, Option<(IndexText, Option<String>)>);
+
+/// What decrypting each of `sources` with `ring` gave for the index (its text, its protected Subject), None for one
+/// it does not open: on the blocking pool, as decrypting and parsing would hold an async thread the syncs and the opens
+/// need
+fn decrypt_all(sources: Vec<Sealed>, ring: &KeyRing) -> Vec<Opened> {
+    sources
+        .into_iter()
+        .map(|(message, folder, uid, source)| {
+            let text = source.and_then(|source| crate::search::decrypted_text(&source, ring));
+            (message, folder, uid, text)
+        })
+        .collect()
+}
+
+impl Worker {
+    /// The user's keys the background pass decrypts with: read once a pass (the master key, every private key
+    /// unwrapped, the cards of the addresses), not for every batch
+    fn decrypt_ring(&mut self, store: &Store) -> Arc<KeyRing> {
+        if let Some(ring) = &self.decrypt_ring {
+            return ring.clone();
+        }
+        let ring = Arc::new(
+            crate::keys::Book::new(store, &self.ctx.secrets, &self.ctx.pgp_certs)
+                .and_then(|book| book.ring())
+                .unwrap_or_default(),
+        );
+        self.decrypt_ring = Some(ring.clone());
+        ring
+    }
+
+    /// One batch of encrypted mail whose source is here, decrypted for the search with the user's keys as they are,
+    /// never asking for anything (docs/pgp-plan.md): its text indexed, its snippet and protected Subject in the list.
+    /// One no key here opens is left for when the user opens it, and so is the whole batch while no private key is
+    /// at hand. Nothing while the switch in Settings is off. How many messages that was; the windows hear of the
+    /// folders whose list changed.
+    pub(super) async fn decrypt_stored(&mut self, store: &mut Store) -> Result<usize, Failure> {
+        let batch = store.messages_to_decrypt(self.account, DECRYPT_BATCH)?;
+        if batch.is_empty() {
+            return Ok(0);
+        }
+        let ring = self.decrypt_ring(store);
+        if ring.keys.is_empty() {
+            let ids: Vec<i64> = batch.iter().map(|(message, ..)| *message).collect();
+            store.mark_decrypt_tried(&ids)?;
+            return Ok(batch.len());
+        }
+        let mut sources = Vec::new();
+        for (message, folder, uid) in &batch {
+            sources.push((*message, *folder, *uid, store.source(*folder, *uid)?));
+        }
+        let read = tokio::task::spawn_blocking(move || decrypt_all(sources, &ring))
+            .await
+            .map_err(|error| Failure::said(crate::FailureKind::Other, error.to_string()))?;
+        let mut changed = std::collections::BTreeSet::new();
+        let mut tried = Vec::new();
+        for (message, folder, uid, text) in &read {
+            match text {
+                Some((text, subject)) => {
+                    if crate::search::store_decrypted(store, *folder, *uid, text, subject.as_deref())? {
+                        changed.insert(*folder);
+                    }
+                }
+                None => tried.push(*message),
+            }
+        }
+        store.mark_decrypt_tried(&tried)?;
+        for folder in changed {
+            self.emit(crate::Event::FolderChanged {
+                account: self.account,
+                folder,
+            });
+        }
+        Ok(batch.len())
     }
 }

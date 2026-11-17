@@ -103,6 +103,8 @@ fn row_of(setting: Setting) -> gtk::Widget {
         Setting::DarkMessages => dark_messages_row(setting).upcast(),
         Setting::PicturesAlways => pictures_always_row(setting).upcast(),
         Setting::TrustedSenders => trusted_senders_row(setting).upcast(),
+        Setting::SearchEncrypted => search_encrypted_row(setting).upcast(),
+        Setting::Keyserver => keyserver_row(setting).upcast(),
         Setting::DownloadAhead => download_ahead_row(setting).upcast(),
         Setting::DownloadLimit => download_limit_row(setting).upcast(),
     }
@@ -182,6 +184,22 @@ fn pictures_always_row(setting: Setting) -> adw::SwitchRow {
     let on = shell().core.always_load_pictures().unwrap_or(false);
     switch_row(setting, on, |on| {
         let _ = shell().core.set_always_load_pictures(on);
+    })
+}
+
+/// The text of encrypted messages in the search index on this computer: off takes it out at once
+fn search_encrypted_row(setting: Setting) -> adw::SwitchRow {
+    let on = shell().core.pgp_index_encrypted().unwrap_or(true);
+    switch_row(setting, on, |on| {
+        let _ = shell().core.set_pgp_index_encrypted(on);
+    })
+}
+
+/// Missing keys asked for on keys.openpgp.org
+fn keyserver_row(setting: Setting) -> adw::SwitchRow {
+    let on = shell().core.pgp_keyserver().unwrap_or(true);
+    switch_row(setting, on, |on| {
+        let _ = shell().core.set_pgp_keyserver(on);
     })
 }
 

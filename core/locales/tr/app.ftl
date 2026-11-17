@@ -387,6 +387,8 @@ ui-settings-sending = Gönderme
 ui-settings-default-apps = Varsayılan uygulamalar
 ui-settings-message-list = İleti listesi
 ui-settings-messages = İletiler
+# review: new
+ui-settings-encryption = Şifreleme
 ui-settings-language = Dil
 ui-settings-label = { $label }:
 ui-apply = &Uygula
@@ -591,6 +593,14 @@ ui-trusted-senders-title = Güvenilen gönderenler
 ui-trusted-senders-note = Bu gönderenlerden gelen iletilerdeki resimler, posta sağlayıcınız gönderenin etki alanını doğruladığında otomatik olarak indirilir.
 ui-trusted-everyone-at = { $domain } etki alanındaki herkes
 ui-trusted-senders-empty = Henüz güvenilen gönderen eklenmedi.
+# review: new
+ui-search-encrypted = Şifreli iletilerde &ara
+# review: new
+ui-search-encrypted-note = Şifreli iletiler indirildikten veya açıldıktan sonra bu bilgisayarda çözülür; böylece sözcükleri bulunabilir ve liste kendi konularını gösterir. Dizin şifreli değildir ve yapay zeka aracıları dizinde hiçbir zaman arama yapmaz. Dizinden kaldırmak için bunu kapatın.
+# review: new
+ui-pgp-keyserver = A&nahtarları keys.openpgp.org üzerinde ara
+# review: new
+ui-pgp-keyserver-note = Bir iletiyi şifrelediğinizde veya anahtar aradığınızda, aranan adres keys.openpgp.org adresine gönderilir. Önce adresin kendi etki alanına sorulur.
 ui-eml-default = .&eml Dosyalarını Inbox Classic ile Aç
 ui-eml-default-done = Inbox Classic artık .eml dosyalarını açıyor.
 ui-eml-default-failed = Inbox Classic, .eml dosyaları için varsayılan uygulama yapılamadı: { $reason }
@@ -601,6 +611,10 @@ ui-columns-note = Pencere sütun yerleşimi için yeterince geniş. Yerleşimi G
 ui-row-unread = Okunmamış
 ui-row-flagged = Bayraklı
 ui-row-attachments = Ekleri var
+# review: new
+ui-row-encrypted = Şifreli
+# review: new
+ui-row-signed = İmzalı
 ui-row-messages = { $count ->
     [one] { $count } ileti
    *[other] { $count } ileti

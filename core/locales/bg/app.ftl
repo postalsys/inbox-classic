@@ -388,6 +388,8 @@ ui-settings-sending = Изпращане
 ui-settings-default-apps = Приложения по подразбиране
 ui-settings-message-list = Списък със съобщения
 ui-settings-messages = Съобщения
+# review: new
+ui-settings-encryption = Шифроване
 ui-settings-language = Език
 ui-settings-label = { $label }:
 ui-apply = &Прилагане
@@ -592,6 +594,14 @@ ui-trusted-senders-title = Доверени податели
 ui-trusted-senders-note = Изображенията в съобщенията от тези податели се изтеглят автоматично, когато доставчикът на пощата ви потвърди домейна на подателя.
 ui-trusted-everyone-at = Всички в { $domain }
 ui-trusted-senders-empty = Все още не са добавени доверени податели.
+# review: new
+ui-search-encrypted = Търсене в &шифрованите съобщения
+# review: new
+ui-search-encrypted-note = Шифрованите съобщения се дешифрират на този компютър, след като бъдат изтеглени или отворени, за да могат думите им да бъдат намерени, а списъкът да показва собствената им тема. Индексът не е шифрован и агентите с ИИ никога не търсят в него. Изключете това, за да ги премахнете от индекса.
+# review: new
+ui-pgp-keyserver = &Търсене на ключове в keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Когато шифровате съобщение или търсите ключ, търсеният адрес се изпраща до keys.openpgp.org. Първо се пита собственият домейн на адреса.
 ui-eml-default = &Отваряне на файловете .eml с Inbox Classic
 ui-eml-default-done = Inbox Classic вече отваря файловете .eml.
 ui-eml-default-failed = Inbox Classic не можа да бъде зададена като програма по подразбиране за файловете .eml: { $reason }
@@ -602,6 +612,10 @@ ui-columns-note = Прозорецът е достатъчно широк за �
 ui-row-unread = Непрочетено
 ui-row-flagged = С флаг
 ui-row-attachments = Има прикачени файлове
+# review: new
+ui-row-encrypted = Шифровано
+# review: new
+ui-row-signed = Подписано
 ui-row-messages = { $count ->
     [one] { $count } съобщение
    *[other] { $count } съобщения

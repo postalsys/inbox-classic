@@ -754,6 +754,8 @@ ui-settings-message-list = Lista wiadomości
 # review: new
 ui-settings-messages = Wiadomości
 # review: new
+ui-settings-encryption = Szyfrowanie
+# review: new
 ui-settings-language = Język
 # review: new
 ui-settings-label = { $label }:
@@ -1150,6 +1152,14 @@ ui-trusted-senders-note = Obrazy w wiadomościach od tych nadawców są pobieran
 ui-trusted-everyone-at = Wszyscy z domeny { $domain }
 # review: new
 ui-trusted-senders-empty = Nie dodano jeszcze zaufanych nadawców.
+# review: new
+ui-search-encrypted = &Szukaj w zaszyfrowanych wiadomościach
+# review: new
+ui-search-encrypted-note = Zaszyfrowane wiadomości są odszyfrowywane na tym komputerze po pobraniu lub otwarciu, aby można było znaleźć ich słowa, a lista pokazywała ich własny temat. Indeks nie jest zaszyfrowany, a agenci AI nigdy go nie przeszukują. Wyłącz tę opcję, aby usunąć je z indeksu.
+# review: new
+ui-pgp-keyserver = Szukaj &kluczy na keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Gdy szyfrujesz wiadomość lub szukasz klucza, szukany adres jest wysyłany do keys.openpgp.org. Najpierw pytana jest domena tego adresu.
 # review: changed
 ui-eml-default = Otwi&eraj pliki .eml w Inbox Classic
 # review: new
@@ -1170,6 +1180,10 @@ ui-row-unread = Nieprzeczytana
 ui-row-flagged = Z flagą
 # review: new
 ui-row-attachments = Ma załączniki
+# review: new
+ui-row-encrypted = Zaszyfrowana
+# review: new
+ui-row-signed = Podpisana
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } wiadomość

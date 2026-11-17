@@ -862,6 +862,20 @@ const sections = [
                 checked: ['The lock', 'The text shown']
             },
             {
+                shot: 'main-12-lock-in-list',
+                name: 'Encrypted and signed mail in the list',
+                what: 'The list marks an encrypted message with a lock and a signed one with a seal, known from its structure before it is opened (Windows in the icon column, the Mac and Linux on the row). Until an encrypted message is decrypted (in the background once it is downloaded, or when it is opened), its line of first words and its new mail notification say "Encrypted message", never its ciphertext; once decrypted, the list shows its first words and its protected Subject in place of the outer placeholder ("..."). Its ciphertext is not counted as an attachment.',
+                how: 'Always there, in every layout.',
+                checked: ['The lock on the encrypted message, the seal on the signed one, neither on a plain one', 'The encrypted message says "Encrypted message" until it is opened']
+            },
+            {
+                shot: 'search-9-encrypted',
+                name: 'Searching encrypted mail',
+                what: 'is:encrypted and is:signed find protected mail. An encrypted message is found by its envelope at once, and by the words of its text once it was opened, while Search in encrypted messages is on (Settings > Reading). AI agents never search what was decrypted, and read an encrypted message as its envelope and one line saying it is encrypted.',
+                how: 'Type is:encrypted, is:signed or a word of an encrypted message you opened.',
+                checked: ['is:encrypted and is:signed list only those messages', 'A word of an encrypted message is found only after it was opened', 'Turned off in Settings, it is found by its sender only']
+            },
+            {
                 shot: 'secure-4-mixed-parts',
                 name: 'Parts protected differently',
                 what: 'Each part of a message is a document of its own in a frame with its own label, so nothing a sender writes can reach a label. The bar counts the parts of each kind.',
@@ -1598,6 +1612,13 @@ const sections = [
                 what: "The Reading page: the message list (Layout, Group messages by conversation, Show senders’ pictures in the message list, which the column layout shows) and the messages (Show messages on a dark background on the Mac and Linux, Download pictures in all messages, Trusted Senders).",
                 how: 'Tools > Options > Reading (Inbox Classic > Settings > Reading on the Mac, Main Menu > Preferences > Reading on Linux).',
                 checked: ['The Reading page shows its settings in the order of core/settings.toml']
+            },
+            {
+                shot: 'options-4-encryption',
+                name: 'Settings: Encryption',
+                what: "The Reading page's Encryption group. Search in encrypted messages (on at first) keeps the text of encrypted messages, decrypted in the background or when opened, in the search index on this computer, which its note says is not encrypted and AI agents never search; turned off, that text leaves the index with the names of the files inside, and the list shows the Subjects the messages came with. Look up keys on keys.openpgp.org (on at first) lets a missing key be asked for there after the address's own domain; its note says only the address is sent, and only when encrypting or looking for a key.",
+                how: 'Tools > Options > Reading (Inbox Classic > Settings > Reading on the Mac, Main Menu > Preferences > Reading on Linux).',
+                checked: ['Both on at first, with their notes', 'Turned off, the words of encrypted messages are no longer found', 'Look up keys on keys.openpgp.org stays off once turned off']
             },
             {
                 shot: 'lang-1-german',

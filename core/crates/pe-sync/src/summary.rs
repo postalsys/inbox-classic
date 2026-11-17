@@ -46,6 +46,22 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         .map(|b| b.attachments())
         .unwrap_or_default();
     let bounce = message.body_structure.as_ref().is_some_and(is_delivery_report);
+    // OpenPGP: the message's own type says it (RFC 3156); a part of it signed or encrypted is found when it is opened
+    let protection = match message
+        .body_structure
+        .as_ref()
+        .map(|b| b.content_type.to_ascii_lowercase())
+    {
+        Some(kind) if kind == "multipart/encrypted" => pe_store::Protection::Encrypted,
+        Some(kind) if kind == "multipart/signed" => pe_store::Protection::Signed,
+        _ => pe_store::Protection::None,
+    };
+    // an encrypted message's only "attachment" is its ciphertext: what it carries is known once it is opened
+    let attachments = if protection == pe_store::Protection::Encrypted {
+        Vec::new()
+    } else {
+        attachments
+    };
     let attachment_names: Vec<&str> = attachments.iter().filter_map(|part| part.filename()).collect();
     let attachment_names = attachment_names.join("\n");
     let attachment_count = attachments.len() as u32;
@@ -83,8 +99,11 @@ pub(crate) fn summary(message: FetchedMessage) -> Option<MessageInfo> {
         gmail_thread: message.thread_id,
         thread_id: None,
         bounce,
+        protection,
         auth_headers,
         list_id,
+        outer_subject: None,
+        decrypted: false,
     })
 }
 
@@ -286,6 +305,23 @@ mod tests {
         );
         assert!(summary.has_attachments);
         assert!(!summary.bounce);
+
+        // encrypted: its ciphertext is no file of it, and the list marks it encrypted
+        let encrypted = FetchedMessage {
+            uid: Some(2),
+            body_structure: Some(BodyStructure {
+                content_type: "multipart/encrypted".into(),
+                children: vec![
+                    part("application/pgp-encrypted", None, None),
+                    part("application/octet-stream", Some("inline"), Some("encrypted.asc")),
+                ],
+                ..Default::default()
+            }),
+            ..Default::default()
+        };
+        let read = super::summary(encrypted).unwrap();
+        assert_eq!(read.protection, pe_store::Protection::Encrypted);
+        assert!(!read.has_attachments && read.attachment_names.is_empty());
     }
 
     #[test]

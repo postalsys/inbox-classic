@@ -1,0 +1,28 @@
+From: Alice Example <alice@example.org>
+To: Alex Morgan <testuser@inboxclassic.test>
+Subject: ...
+Date: Sun, 01 Nov 2026 10:00:00 +0000
+Message-ID: <protected-subject@ui-test.example>
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="e"
+
+--e
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--e
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wWwGFQRgUxH75HeSViGFN7kF/AIzbfKFLRIBB0ADk96EsJKoR2sG3dmKWMPEby5c
+P3GHT/V1Db2AEoKYJjCGPrw6HSHszFz8nb2qv0WMadskbEiKeU6OElrvvOm/BFep
+NA2T9/XUby2AedUYO77SwB4CCQIGYjj5uPKLcASfzfePvNcapBBdzEKevYYnzH3Q
+8D6R3BG1GYLo0zffQYWEFU0EthDzZMVzHqjy22YGFNVmhEbJn0LjeLVNmbk1pT3g
+m4F6pX7v+K0649QnWRVbEPfhLgbcdiXDZoXDr5xtx9QA+gkVueFeKvDTwb3uVdAR
+8uVBmpj3CWXIt6qK+oIoJR7l4RWPMoUTHe0nwcLGSKVf2IU81T9SMzQ+0QzAqOYq
+OcRZJuLaCBgKu8xkdWM95QX3QMp+4Gu91V0TcnkUlROtUjcrkdj4yOFoXDcwlrg=
+=GPtx
+-----END PGP MESSAGE-----
+
+--e--

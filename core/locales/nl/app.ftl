@@ -387,6 +387,8 @@ ui-settings-sending = Verzenden
 ui-settings-default-apps = Standaardapps
 ui-settings-message-list = Berichtenlijst
 ui-settings-messages = Berichten
+# review: new
+ui-settings-encryption = Versleuteling
 ui-settings-language = Taal
 ui-settings-label = { $label }:
 ui-apply = &Toepassen
@@ -591,6 +593,14 @@ ui-trusted-senders-title = Vertrouwde afzenders
 ui-trusted-senders-note = Afbeeldingen in berichten van deze afzenders worden automatisch gedownload wanneer je e-mailprovider het domein van de afzender verifieert.
 ui-trusted-everyone-at = Alle afzenders met het domein { $domain }
 ui-trusted-senders-empty = Er zijn nog geen vertrouwde afzenders toegevoegd.
+# review: new
+ui-search-encrypted = &Zoeken in versleutelde berichten
+# review: new
+ui-search-encrypted-note = Versleutelde berichten worden op deze computer ontsleuteld zodra ze zijn gedownload of geopend, zodat hun woorden kunnen worden gevonden en de lijst hun eigen onderwerp toont. De index is niet versleuteld en AI-agents zoeken er nooit in. Zet dit uit om ze uit de index te verwijderen.
+# review: new
+ui-pgp-keyserver = &Sleutels zoeken op keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Als je een bericht versleutelt of naar een sleutel zoekt, wordt het gezochte adres naar keys.openpgp.org gestuurd. Eerst wordt het eigen domein van het adres gevraagd.
 ui-eml-default = .&eml-bestanden openen met Inbox Classic
 ui-eml-default-done = Inbox Classic opent nu .eml-bestanden.
 ui-eml-default-failed = Inbox Classic kon niet worden ingesteld als standaardapp voor .eml-bestanden: { $reason }
@@ -601,6 +611,10 @@ ui-columns-note = Het venster is breed genoeg voor de kolomindeling. Je kunt de 
 ui-row-unread = Ongelezen
 ui-row-flagged = Gemarkeerd
 ui-row-attachments = Heeft bijlagen
+# review: new
+ui-row-encrypted = Versleuteld
+# review: new
+ui-row-signed = Ondertekend
 ui-row-messages = { $count ->
     [one] { $count } bericht
    *[other] { $count } berichten
