@@ -977,6 +977,13 @@ keep the normal plural.
   „цифров подпис“ distinguishes cryptographic signatures from the signature text appended to mail.
 - „Данни за влизане“ includes passwords and browser sign-in tokens. Key verification confirms the owner
   and every listed address before „Съвпадат“; the displayed name may be a fingerprint.
+- Compose controls and tooltips keep verbal nouns; explanations use polite plural and „при изпращане“.
+  Use „използваем ключ“ when keys must be usable. Digital signatures do not themselves establish ownership.
+- Complete reasons follow „Причина:“, dates „Последно търсене:“. Recipients are people, so counts keep
+  „получатели“, not the count form used for objects. Names/addresses remain unchanged.
+- „Намиране на ключ“ uses Cyrillic Alt+К to avoid „Използване на новия ключ“ (Alt+Н) in the recipient dialog.
+  Unencrypted sending requires removing inherited text/images/attachments. Keep „Кехлибарен“ consistent with
+  the reading-security help and quote the folder title „Изпратени“ in prose.
 
 ### Русский (ru)
 

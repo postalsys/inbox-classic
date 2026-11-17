@@ -5,14 +5,14 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Bulgarian compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr.
+- **Next: Czech compose additions.** Compose additions are complete in de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg.
   Each completed language has 40 new entries and both help targets reviewed. Exact IDs and context are
   recorded in `compose-sign-encrypt-context`; source feature `162c0dd2` was integrated in `3552434d`.
-- Remaining compose languages: bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
+- Remaining compose languages: cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk.
   Then finish 48 original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
 - Current scope: 33,868 catalog entries and 1,352 help topics.
-  Completed: 21,151 entries and 814 full topics; pending: 12,717 entries and 538 topics.
-  Historical catalog improvements: 3,725.
+  Completed: 21,191 entries and 816 full topics; pending: 12,677 entries and 536 topics.
+  Historical catalog improvements: 3,742.
 - All 28 active-key signature warnings are reviewed in `25eff7b8`. Source-only import `205bd846` includes
   catalogs/generated identifiers; implementation provenance is recorded separately.
 - Structural checks, all 53 mnemonic scopes in completed compose languages, full inventories and current
@@ -2230,3 +2230,15 @@ All 53 mnemonic scopes pass; the changed label maps to GTK Şifrelemeden Gö_nde
 
 Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 973 entries/191 passages reconcile. No tests.
 Completed 21,151 entries/814 topics; pending 12,717/538; scope 33,868/1,352; historical catalog improvements 3,725. Next: Bulgarian. REVIEWED remains unchanged.
+
+
+### Bulgarian compose signing and encryption reviewed
+
+Reviewed all 40 compose additions, improving 16 core values and one app shortcut. Find Key now uses Cyrillic Alt+К, avoiding Use New Key Alt+Н. Kept verbal-noun controls/tooltips and polite plural explanations. Protection is applied при изпращане; digital signatures do not by themselves confirm ownership. Използваем ключ includes unusable keys; complete reasons follow Причина and dates follow Последно търсене. Counts use the ordinary plural получатели for people. Replaced literal encryption-for-a-key wording and explained when inherited protected text, images and attachments prevent unencrypted sending.
+
+Reviewed the new help topic and writing-help insertion, improving 14 wording lines. The unchanged heading also loses its inline review mark, excluded from the wording count. All earlier writing-help prose is preserved. Help describes platform status symbols, own/unusable keys, the selected From key, recipient removal and encrypted drafts/sent copies. Kept Кехлибарен consistent with reading-security help and quoted the folder name Изпратени. Glossary updated.
+
+All 53 mnemonic scopes pass; GTK label Намиране на _ключ checked against the actual conversion. Structural checker: 1,446 expected removed-mark diagnostics, no structural findings. Exact reconstruction verifies 17 value edits and 40 mark removals; all other catalog bytes preserved. Help tags, attributes, controls, platform branches and literal keys match; all earlier writing-help prose retained. Platform joins inspected and dynamic shortcuts checked in commands.toml. No relevant Bulgarian screenshots found, so source controls/layouts/wrapping inspected. No GUI run, test suites or builds. All 28 inventories/current hashes reconcile: 21,225 unmarked messages, 10,639 changed help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes.
+
+Seven source refs unchanged after fetch, guide unchanged; no new strings/languages. Six source worktrees have no new uncommitted relevant changes; all 290 old draft copies retain exact cfdf55ab contents. Full inventories and since-start 933 entries/189 passages reconcile. No tests.
+Completed 21,191 entries/816 topics; pending 12,677/536; scope 33,868/1,352; historical catalog improvements 3,742. Next: Czech. REVIEWED remains unchanged.
