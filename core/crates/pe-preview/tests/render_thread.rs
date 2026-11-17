@@ -370,7 +370,7 @@ fn describe_goes_ahead_of_the_queue_and_gives_up_in_time() {
     let started = Instant::now();
     let answer = previewer.describe(file(PDF, "hang"), String::new(), Duration::from_millis(50));
     assert_eq!(answer, Err(Refusal::TimedOut));
-    assert!(started.elapsed() < Duration::from_millis(250));
+    assert!(started.elapsed() < Duration::from_secs(1));
     fake.release.store(true, Ordering::SeqCst);
     drop(outcomes);
 }

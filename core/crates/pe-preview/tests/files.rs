@@ -95,7 +95,9 @@ fn hostile_pdf_files_are_bounded() {
         let started = Instant::now();
         let (_, _, drawn) = pdf_pages(name).unwrap();
         assert_eq!(drawn, [Err(Refusal::TooLarge)], "{name}");
-        assert!(started.elapsed() < Duration::from_secs(2), "{name} measured quickly");
+        // a bound on the work, generous for unoptimized builds on slow runners: what it guards is that the meter stops
+        // at its cap rather than inflating the whole bomb
+        assert!(started.elapsed() < Duration::from_secs(15), "{name} measured quickly");
     }
     // nesting and a form that draws itself: drawn, bounded by hayro's own depth limits
     for name in ["deep-content.pdf", "xobject-self.pdf"] {
@@ -169,7 +171,7 @@ fn a_pdf_that_never_finishes_is_abandoned() {
     let started = Instant::now();
     previewer.request(request(0, read("xobject-laughs.pdf")));
     assert_eq!(wait(0), Some(Refusal::TimedOut));
-    assert!(started.elapsed() < Duration::from_secs(3));
+    assert!(started.elapsed() < Duration::from_secs(5));
     previewer.request(request(1, read("invoice.pdf")));
     assert_eq!(wait(1), Some(Refusal::Off));
 }

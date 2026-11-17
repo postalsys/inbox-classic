@@ -31,3 +31,10 @@ opt-level = 3
 
 [profile.dev.package.blake2]
 opt-level = 3
+
+# the preview meter inflates up to 160 MB of a hostile PDF stream to count it: unoptimized, the tests take seconds
+[profile.dev.package.zlib-rs]
+opt-level = 3
+
+[profile.dev.package.flate2]
+opt-level = 3
