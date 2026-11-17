@@ -31,9 +31,12 @@ func ask(_ text: String, title: String = appName, yes: String = Text.uiYes.text,
         let safe = alert.addButton(withTitle: no)
         let other = alert.addButton(withTitle: yes)
         other.hasDestructiveAction = destructive
-        // set here rather than left to AppKit, which did not always give the first button Return
+        // set here rather than left to AppKit, which did not always give the first button Return; after the alert is
+        // laid out, as its layout sets the buttons' keys again on some macOS versions, and as the window's default too
+        alert.layout()
         safe.keyEquivalent = "\r"
         other.keyEquivalent = ""
+        alert.window.defaultButtonCell = safe.cell as? NSButtonCell
         // AppKit gives Esc only to a button named Cancel
         let escape = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
             guard event.keyCode == 53, event.window === alert.window else { return event }
