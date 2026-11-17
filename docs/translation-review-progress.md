@@ -16,8 +16,9 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Finnish (fi), all 449 core.ftl entries, then 255 remaining platform/help-title entries and 52 help topics.
-  Its 626 UI entries and one coupled Windows button are reviewed, with 59 values improved.
+- Resume with Finnish (fi), 255 remaining platform/help-title entries and all 52 help topics.
+  Its UI/core entries and one coupled Windows button are reviewed: 1,079 entries including the three earlier
+  loading labels, with 134 values improved.
   Upstream master `76f67e82` is integrated and its already-inventoried wave1 content reconciled.
   Greek is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. Both context followups
   are complete. Twelve languages still have pending content. All 84 late list-loading labels are reviewed.
@@ -643,8 +644,21 @@ no Finnish tour screenshots are available. IDs, full variable sets, plural branc
 preserved. Structural and inventory/hash checks pass, report regenerated and git diff --check passes.
 The test suite was not run. Upstream integration checkpoint: `03d0b346`.
 
-Current totals: 16,747 catalog entries and 628 help pages reviewed; 2,541 catalog values improved. Remaining:
-15,345 catalog entries and 624 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Finnish core catalog
+
+Reviewed all 449 core entries, improving 75 values. Corrected delivery guidance, unnatural status/count
+phrasing, sign-in credentials and settings-import results. Agent send logs now describe adding a message to
+the send queue. Key details correctly describe decryption, missing private keys and restoring a private-key
+backup; publication instructions require confirming every listed address. Temporary plaintext attachment
+copies are removed on startup once older than a day. The Organize permission stays concise for its single-line
+Windows checkbox. Existing plural structures and all placeholders are preserved.
+
+Structural checks report only deliberately removed review marks. Exact inventories and completed-file/source
+hashes reconcile, review HTML regenerated and git diff --check passes. No test suite was run.
+Finnish UI checkpoint: `1da11a3f`. Its 255 remaining platform/help-title entries and all 52 help topics are next.
+
+Current totals: 17,196 catalog entries and 628 help pages reviewed; 2,616 catalog values improved. Remaining:
+14,896 catalog entries and 624 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

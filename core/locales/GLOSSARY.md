@@ -615,6 +615,12 @@ Poista lippu); Vastaa kaikille; Välitä edelleen (toolbar: Välitä).
   Open Draft and Not Junk never coexist: their folder roles are mutually exclusive.
 - Sender images rely on authenticated domains, not verified people or message contents. Downloaded logos are
   cached and reused across messages; do not claim that each logo is only ever downloaded once.
+- Agent send logs describe queuing ("Lisäsi ... lähetysjonoon"), while the sent status confirms actual sending.
+  Permission descriptions apply to access through Inbox Classic. The compact Organize permission uses
+  "Poistettuihin" for the Deleted Items folder because Windows shows it in a single-line checkbox.
+- "Salaus purettu avaimella" describes decryption, not encryption. A locked key requires restoring the private
+  key backup; publication requires confirmation of every address. Unencrypted temporary attachment copies
+  older than a day are removed at app startup, not automatically exactly one day after opening.
 
 ### Svenska (sv)
 
