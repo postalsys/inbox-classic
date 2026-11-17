@@ -1,0 +1,34 @@
+From:GnGPu  Ed25519 <gnupg-de25519@example.org>
+To: gnupg-ed25519@example.org
+SubPG Ed25519 <gnupg-ed25519@example.org>
+Subject: inline
+Content-Type: text/plain
+
+Hi
+
+-----BEGIN PGP MESSAGE-----
+
+wV2DbOBqg9dj0Z4SAQdA2lwJNie9Ylem7V1I+ject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="ph"
+ncrypted519@example.org>
+To: gnupg-ed25519@example.org
+SubPG Ed25519 <gnupg-ed25519@example.org>
+Subject: inline
+Content-Type: text/plain
+
+Hi
+
+-----BEGIN PGP MESSAGE-----
+
+wV2DbOBqg9dj0Z4SAQdA2lwJNie9Ylem7V1I+ject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="ph"
+ncrypted
+
+VersionFHi54s4X6gAIU9hlxMeNQssQAkNwUSAepBcle/2dHi54s4X6gAIU9hlxMeNQssQAkNwUSAepBcle/2dzqkMWEAvaH/rxyadfa
+sw==
+=GeXB
+-----END PGP MESSAGE-----
+
+--ph--

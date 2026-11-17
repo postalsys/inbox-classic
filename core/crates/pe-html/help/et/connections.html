@@ -7,6 +7,7 @@
     <li><b>Kaubamärkide logod</b> (BIMI), kaubamärgi HTTPS-aadressilt, kui kiri logo kaasas ei kanna, üks kord iga Inbox Classicu käivituse kohta. See juhtub ainult siis, kui teie meiliserver kinnitas kirja DMARC-kontrolli ja kiitis logo heaks.</li>
     <li><b>Pildid Internetist</b>, ainult siis, kui te neid küsite.</li>
     <li><b>Tellimusest loobumine</b>, ainult siis, kui seda klõpsate. Ühe klõpsuga päring (RFC 8058) saadetakse ainult siis, kui postiloend allkirjastas kirja DKIM-iga.</li>
+    <!--review--><li><b>Krüpteerimisvõtmed</b>, ainult siis, kui krüpteerite kellelegi, kelle võtit teil pole: tema aadressi enda domeen (Web Key Directory), seejärel keys.openpgp.org, kui te pole seda välja lülitanud. Saadetakse ainult aadress.</li><!--/review-->
     <!--os:mac--><li><b>Uuendused</b>, saidilt inboxclassic.com, et näha, kas uus versioon on ilmunud.</li><!--/os-->
 </ul>
 <p>Sisselogimiskoode pakutakse ainult siis, kui teie teenusepakkuja päis Authentication-Results ütleb, et domeen allkirjastas kirja (DKIM). Selleks pole eraldi ühendust vaja.</p>

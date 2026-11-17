@@ -7,6 +7,7 @@
     <li><b>Markenlogos</b> (BIMI), von der HTTPS-Adresse der Marke, wenn die Nachricht das Logo nicht mitbringt, einmal pro Start von Inbox Classic. Das geschieht nur, wenn Ihr Mailserver die DMARC-Prüfung der Nachricht bestanden und das Logo freigegeben hat.</li>
     <li><b>Bilder aus dem Internet</b>, nur wenn Sie sie anfordern.</li>
     <li><b>Abbestellen</b>, nur wenn Sie darauf klicken. Eine Ein-Klick-Anfrage (RFC 8058) wird nur gesendet, wenn die Liste die Nachricht mit DKIM signiert hat.</li>
+    <!--review--><li><b>Verschlüsselungsschlüssel</b>, nur wenn Sie an jemanden verschlüsseln, dessen Schlüssel Sie nicht haben: die eigene Domain der Adresse (Web Key Directory), dann keys.openpgp.org, sofern Sie das nicht deaktiviert haben. Nur die Adresse wird gesendet.</li><!--/review-->
     <!--os:mac--><li><b>Updates</b>, von inboxclassic.com, um zu sehen, ob eine neue Version erschienen ist.</li><!--/os-->
 </ul>
 <p>Anmeldecodes werden nur angeboten, wenn die Kopfzeile Authentication-Results Ihres Anbieters besagt, dass die Domäne die Nachricht signiert hat (DKIM). Dafür ist keine eigene Verbindung nötig.</p>

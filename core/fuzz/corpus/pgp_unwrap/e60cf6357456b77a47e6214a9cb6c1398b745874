@@ -1,0 +1,15 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25ÿ519@example.org
+Subject: Test
+MIME-From: GnuPG Ed25519 <gIJGqtvkeWsdi/8ddBv80/mr5nFrom: alice@ex………………
+Content-Type: text/plain; charset=utÛ-8
+
+Hello, this is the text.
+
+--sig
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUŠABYIAB0FAms1mwAW	QT6jAz.org
+SuMH8b

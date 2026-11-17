@@ -1,0 +1,10 @@
+From: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: TestFrom: 
+Subject: Test
+MIME-Version: 1.0
+Cont="application/pgp-signature";llo, this is the text.
+
+--s boundary="sig"
+
+-i

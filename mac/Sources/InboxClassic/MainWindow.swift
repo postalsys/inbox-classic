@@ -167,8 +167,27 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
 
     // ---- the status bar ----
 
+    /// whether the status bar holds a sync's words ("Checking", "Done", a failure) rather than the answer to something
+    /// the user did ("Copied the code", "3 contacts saved to ...", "not in this message"): a sync in the background
+    /// replaces only its own words, so the user's answer stays until the user does something else
+    private var statusIsSync = true
+
+    /// the answer to something the user did
     func setStatus(_ text: String) {
         statusText.stringValue = text
+        statusIsSync = text.isEmpty || text == Text.uiDone.text
+    }
+
+    /// a sync's words: shown unless the user's answer is there, or always (`over`: a failure, what the rules did)
+    func setSyncStatus(_ text: String, over: Bool = false) {
+        guard over || statusIsSync else { return }
+        statusText.stringValue = text
+        statusIsSync = true
+    }
+
+    /// a sync the user asked for: its words replace whatever the status bar said
+    func syncAsked() {
+        statusIsSync = true
     }
 
     /// the selected folder in the title, what it holds in the status bar
@@ -244,16 +263,16 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
         switch event.kind {
         case PE_EVENT_KIND_SYNC_STARTED:
             failing.remove(event.account)
-            setStatus(Text.macChecking.text(["account": mailbox.accountName(event.account)]))
+            setSyncStatus(Text.macChecking.text(["account": mailbox.accountName(event.account)]))
         case PE_EVENT_KIND_SYNC_FINISHED:
             // a failure stays in the status bar until the account syncs without one; what the rules did, over Done
             if failing.isEmpty {
-                setStatus(rulesSaid ?? Text.uiDone.text)
+                setSyncStatus(rulesSaid ?? Text.uiDone.text, over: rulesSaid != nil)
             }
             rulesSaid = nil
         case PE_EVENT_KIND_RULES_APPLIED:
             let said = Text.uiRulesApplied.text(["count": event.count])
-            setStatus(said)
+            setSyncStatus(said, over: true)
             rulesSaid = event.count > 0 ? said : nil
         case PE_EVENT_KIND_AUTOCONFIG_DONE, PE_EVENT_KIND_SIGN_IN_DONE, PE_EVENT_KIND_SIGN_IN_APP_CHECKED:
             Waiting.requestDone(event.uid)
@@ -313,7 +332,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             reloadMessagesShown()
         case PE_EVENT_KIND_FAILED:
             failing.insert(event.account)
-            setStatus(Text.macAccountSaid.text(["account": mailbox.accountName(event.account), "message": event.message]))
+            setSyncStatus(Text.macAccountSaid.text(["account": mailbox.accountName(event.account), "message": event.message]), over: true)
             if event.failure == PE_FAILURE_KIND_AUTHENTICATION {
                 // after this event, so the prompt does not hold up the others
                 onMain { self.askPassword(event.account) }
@@ -408,6 +427,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     func addAccount() {
         if newAccountDialog(core: core) > 0 {
             mailbox.reload()
+            syncAsked()
             core.syncAll()
         }
     }
@@ -415,6 +435,7 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
     func showAccounts() {
         if accountsDialog(core: core) {
             mailbox.reload()
+            syncAsked()
             core.syncAll()
         }
     }
@@ -743,8 +764,10 @@ extension MainWindow: NSMenuDelegate {
     @objc private func accountChosen(_ sender: NSMenuItem) {
         let sync = sender.representedObject as? Bool ?? true
         if sender.tag == 0 {
+            syncAsked()
             core.syncAll()
         } else if sync {
+            syncAsked()
             core.sync(Int64(sender.tag))
         } else {
             newMessage(Int64(sender.tag))

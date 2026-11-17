@@ -966,6 +966,8 @@ pgp-why-key-not-valid = Assinada com uma chave que não é válida
 # review: new
 pgp-why-not-for-you = Assinada para outros destinatários e reencaminhada para si
 # review: new
+pgp-why-not-key-in-use = Assinada com uma chave diferente da usada para { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Foram carregadas imagens da Internet
 # review: new
 pgp-error-no-own-key = Não tem nenhuma chave para { $address } com que assinar ou encriptar. Crie uma em Ferramentas > Chaves de encriptação, ou desative Assinar e Encriptar.

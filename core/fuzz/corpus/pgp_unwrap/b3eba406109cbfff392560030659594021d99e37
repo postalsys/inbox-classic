@@ -1,0 +1,16 @@
+Fro: text/plain; charset=utf-8
+
+Hello, this is the text.
+
+--sig
+Content-Type: paplication/pgp-signature
+
+-----BEGIN PGP SIGNATURE--UUUUUUU---
+
+wnUEABYIAB0FAms1mwAWIQTZKKkD2KJ0DZL/FoWdpHPht/CGawAKCRCdpHPht/CG
+azH[AQDVR/qecGBx5xMigTN3POBBCAXDPJgABu9/Nx3OIXPozwD6A39eArGZ7bnO
+muvAUQfWyFfyqKa3cf90cIvmw6T34gA=
+=UqIz
+-----END PGP SIGNATURE-----
+
+--sig--

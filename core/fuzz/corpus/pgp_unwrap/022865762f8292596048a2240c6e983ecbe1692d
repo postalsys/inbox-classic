@@ -1,0 +1,26 @@
+)2::	@		
+A):#:		
+::
+From: alice@example.org
+To: gnupg-ed25519@example.orgÖ
+0):#:		
+)::			:		
+)::4		
+::	,0
+	):)::		---	
+,	
+0):)::		---	
+!---z-::	â	Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+,	
+0):)::		---	
+!---z-::	â	Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Cont
+--sig
+Content-	T
+0y›pe:

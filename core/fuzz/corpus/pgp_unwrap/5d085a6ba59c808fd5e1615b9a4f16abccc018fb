@@ -1,0 +1,27 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="ph"
+
+--ph
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--ph
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE---m-
+
+wV4DbOBqg9dj0Z4SAQdAvV/h1VVJQ2VCTe6LZF3dh+b9EYRzv4OSHtm0QxIp4eo6BmiYwCuzP/HeMkH
+0sBeAWzCyPlsM6rO/lMpxtwHyRjXTzIaBGqjHNW76cgXCJM9t+ffHmbLR6VRSGME
+bY5P3lXCp9hjMiVQ3dkfHDgjM6E6XxfD7E2Zl4+tkqCqctZhFn+u+EScylXHEHM2
+Vgbvd6SCJrhK+1b6EWuAF9evicyYz+1KvctjJ6o/³É¦‹54MH4Tk7EqgJvW/MwZZS
+uEGU7iGPxDRnQPeJRJ8gr9GyHPRV4qJBwypEvIQyzLQ+nJ6rbX7Vuw+/fpMKkR4n
+h1VVJQ2VCTe6LZF3dh+bJTaV+AxndIaJwoAs0T9ZheGNap5IeqACU9z8T+qKbBuP
+VW7vVPFHi54s4X6gAIU9hlxMeNQssQAkNwUSAepBcle/2dzqkMWEAvarHyx/adfa
+sw==
+=GeXB
+-----END PGP MESSAGE-----
+
+--ph--

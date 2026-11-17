@@ -1,0 +1,10 @@
+From:mal€e@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+E-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+l2From: aliceÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 10
+Content-Type: [ultipart/signed; mi;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;calg=pgp-sha256; protgned; mi;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;calg=pgp-sha256; protocol="applicati2sf11²·õ±XJqn8frQSw8PcAk60Lo6hon/pgp-signature"part/signed; micalg=pgp-sha25rom: aliceÿÿÿÿÿÿÿÿÿÿÿÿIMEÿ

@@ -1,0 +1,149 @@
+From: alice@example.org
+To: gnupg-ed25520@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed;"micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=t/signed;"micalg=pgp-sha256; protocol="application/pgp-signature"; boundarÿÿÿÿÿÿÿÿÿÿÿÿÿol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=u4f-8e text.
+
+--sig
+Content-="sig"
+¶
+--sig
+Content-Type: text/plain; charset=utf-4e text.
+
+--sig
+Content-Type: applicalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=u4f-8e text.
+
+--sig
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----ÿÿÿÿÿy="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-4e text.
+
+--sig
+Content-Type: applicalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=u4f-8e text.
+
+--sig
+Content-="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-4e text.
+
+--sig
+Content-Type: applicalg=pgp-sha256; protocol="application/pgp-signature"; boundary="micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=t/signed;"micalg=pgp-sha256; protocol="application/pgp-sigsig"
+
+--sig
+Content-Type: text/plain; charset=u4f-rotocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-4e text.
+
+--sig
+Content-Type: applicalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=u4f-8e text.
+
+--sig
+Content-="sig"
+¶
+--sig
+Content-Type: text/plain; charset=utf-4e text.
+
+--sig
+Content-Type: applicalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=u4f-8e text.
+
+--sig
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1Xt/plain; charset=utf-4e text.
+
+--sig
+Content-Type: applicalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=u4f-8e text.
+
+--sig
+Content-="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-4e text.
+
+--sig
+Content-Type: applicalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=u4f-8e text.
+
+--sig
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1XK
+6Z7kAP93l20Hm60+50AHxre
+
+--naturutf-8e text.
+
+--sig
+Content-Type: applicalgmple.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed;"micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=t/signed;"micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-4e text.
+
+--sig
+Content-Type: applicalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=u4f-8e text.
+
+--sig
+Content-="sig"
+-
+-sig
+Content-Type: text/plain; charset=utf-4e text.
+
+--sig
+Content-Type: applicalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--siha256; protocol="application/pgp-sigsig"
+
+--sig
+Content-Type: text/plain; charset=u4f-rotocol="application/pgp-signature"; boundary="plication/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1XK
+6Z7kAP93l20Hm60+50AHxre
+
+-----BEation/pgp-signature
+
+-----BEGIN PGP SIGNATUR

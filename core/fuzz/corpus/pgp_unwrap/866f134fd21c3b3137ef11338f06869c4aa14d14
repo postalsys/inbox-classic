@@ -1,0 +1,14 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SA999=999999999999999999999999999999999צצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצצ99999999999999999999999999999999999999999999999999999QdARSuAqo9DMuhilukmvNOW6fhMUgfoM7xuqgjySJxWrkIw
++ZTB/Vlho-LaNO+ofkHFJWS9oBlni0gDTA4v4UhScc5NMop-sha256; protocolre"; boundary="sig"
+
+--sig
+ContejtSFbQsA3hpROHZxxb
+0sFIAXVyI5+5y2YZAOThuLdnGJc+Rp4LAizX/YUprwlYLC/lzNi8VEnw==
+=Ay8F
+-----END PGP MESSAGE-----
+
+--enc--

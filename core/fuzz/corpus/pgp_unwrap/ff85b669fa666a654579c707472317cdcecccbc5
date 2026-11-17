@@ -1,0 +1,31 @@
+From: GnuPG Ed255From: GnuPG Ed25519 <gnupg-ed255From: GnuPG Ed25519 <gnupg-ed25519@example.or`g>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="aÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿpplication/pgp-encrypted"; boundary="enc"
+
+--enÿÿÿBontupg-ed25519@crypted"; boundary="enc"
+
+--enc
+Conteqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhYGneEWMIolWYw/SgMtorg
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="enc"
+
+--enc
+Content-TyFrom: GnuPG Ed25519 <gnupg-ed25519@example.or`g>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="applica19 <gnupg-ed25519@e, this iscigned; micalggpp=-sha256; protocol="application/pgpmsignature";tion/pgp-encrypted"; boundary="enc"
+
+--enÿÿÿBontupg-ed25519@crypted"; boundary="enc"
+
+--enc
+Conteqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhYGneEWMIolW
+
+--enc
+Conteqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhYGneEWMIolWYw/SgMtorg
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encryptetent-Type: multipart/encrypted; protocol="applb

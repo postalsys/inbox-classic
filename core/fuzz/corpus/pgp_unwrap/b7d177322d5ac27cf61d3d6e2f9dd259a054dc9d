@@ -1,0 +1,27 @@
+From: GอออออออออออออออออออออออออออeG
+
+Version: 1
+--ph
+Content-Type: application/octet-sncrypty="ph"
+ 
+--ph
+Content-Type: application/ppty="ph"
+ 
+--ph
+Content-Type: application/pgp-encrypted
+gp-encrypted
+
+Version: 0
+--ph
+Content-Type: application/octet-stre’๒๕
+-----BEGI3dh+bJTaV+Edd25519@example.org
+Subject: Test
+MiME-Version: 1.0
+Content-Type: multipart/encryptEd; protocol="application/pgp-encrypted"; boundary="ph"
+
+ฬา—๒พถU9hlxMeNQssQAkNwUSAepBcle/2dzqkMWEAvarHyLRadfa
+sw==
+=GeXB
+-----END PGP MESSAGE-----
+
+--ph--

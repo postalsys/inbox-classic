@@ -2091,10 +2091,16 @@ fn a_move_or_delete_the_server_does_not_do_comes_back() {
     // out of the list at once
     let mut changes = 0;
     let mut failures = 0;
+    // what came, with when, said should it stop: with the server gone the failures come within milliseconds (40 runs
+    // beside the whole suite took under 50 ms), and the one run seen to wait 20 seconds told nothing of why
+    let started = std::time::Instant::now();
+    let mut seen = Vec::new();
     while failures < 2 || changes < 4 {
-        // the failures come once the reconnects give up, which a loaded machine (a full test run beside other work)
-        // can take longer than 20 seconds to reach
-        match events.recv_timeout(Duration::from_secs(60)).expect("events") {
+        let event = events
+            .recv_timeout(Duration::from_secs(60))
+            .unwrap_or_else(|_| panic!("no more events after {seen:#?}"));
+        seen.push((started.elapsed(), event.clone()));
+        match event {
             Event::FolderChanged { folder, .. } if folder == inbox => changes += 1,
             Event::Failed { kind, .. } => {
                 assert_ne!(kind, FailureKind::Authentication);
@@ -2602,7 +2608,16 @@ fn message_rules_sort_new_mail() {
         &[],
     );
     s.core.sync(account).unwrap();
-    s.wait(|e| matches!(e, Event::RulesApplied { account: a, count: 2 } if *a == account));
+    // in one sync or two: IDLE can see the first delivery before the second is made
+    let applied = std::cell::Cell::new(0);
+    s.wait(|e| {
+        if let Event::RulesApplied { account: a, count } = e
+            && *a == account
+        {
+            applied.set(applied.get() + count);
+        }
+        applied.get() == 2
+    });
     // the newsletter moved to Archive, read; Ann's message flagged for a word of its text, and for its sender
     eventually(
         || s.server.subjects("Archive").contains(&"This week".to_string()),
@@ -3873,36 +3888,31 @@ fn the_reader_is_connected_before_the_first_open() {
 #[test]
 fn a_dead_reader_connection_is_replaced_within_seconds() {
     let Some(s) = setup() else { return };
-    let (_, inbox, uids) = synced_with(&s, &["One"]);
-    // the session found is kept: asked again, the background connection may be idle too for a moment, which makes
-    // the reader's not tell apart
-    let found = std::cell::Cell::new(None);
-    eventually(
-        || {
-            found.set(reader_session(&s.server));
-            found.get().is_some()
-        },
-        "the reader connects",
-    );
-    // from now on the reader's session gets no answer, as one a NAT forgot
-    let reader = found.get().expect("the reader's session");
+    let (_, inbox, uids) = synced_with(&s, &["One", "Two"]);
+    // a first open leaves the reader's connection with the Inbox selected, so the download is the first command of
+    // the next open, the one the answer limit is for
+    open(&s, inbox, uids[0]);
+    assert_eq!(s.core.open_timings().pop().unwrap().served, Served::Reader);
+    // the next download gets no answer, as on a connection a NAT forgot. Aimed at the command, not at a session:
+    // which session is the reader's can only be guessed from the outside (the one signed in with no folder open),
+    // and the background worker's looks the same between its jobs, so a guess silenced the wrong one now and then.
+    // Only the reader downloads whole messages here, and only once, so the download on the new connection is answered
     s.server.request(
         "POST",
         "/v1/script/rules",
-        // what an open sends; the sign-in may still be finishing (ID, ENABLE), which the reader waits for
         Some(json!({
-            "on": "command", "session": reader, "command": ["SELECT", "EXAMINE", "UID FETCH"], "drop": true
+            "on": "command", "command": "UID FETCH", "match": "BODY\\.PEEK\\[\\]", "drop": true, "times": 1
         })),
     );
     let started = std::time::Instant::now();
-    s.core.open_message(inbox, uids[0]).unwrap();
+    s.core.open_message(inbox, uids[1]).unwrap();
     // the answer limit and a new connection: more than the 10 seconds of Setup::wait on a slow machine
     loop {
         let event = s.events.recv_timeout(Duration::from_secs(20)).expect("the message");
         if event
             == (Event::MessageReady {
                 folder: inbox,
-                uid: uids[0],
+                uid: uids[1],
             })
         {
             break;

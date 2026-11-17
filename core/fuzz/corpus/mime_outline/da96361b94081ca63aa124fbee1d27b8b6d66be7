@@ -1,0 +1,47 @@
+From: alice@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; c
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha25ms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1harset=utf-9í
+
+Hello, this is the text.
+
+--sig
+Content-Type: rt/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; c
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha25ms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1harset=utf-9í
+
+Hello, this is the text.
+
+--sig
+Content-Type: application/pgp-signature
+
+-----BEGIN PGPRE-----
+
+wnUEABYIAB0FAms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1XK
+6Z7kAP93l20Hm60+50AHxkdmri9AMUPysH++XePlsKfE+3mjWAEA/+EShWKYFixE
+yQIyQaKSX+lpVD+1MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP SIGNATUapplication/pgp-signature
+
+-----BEGIN PGPRE-----
+
+wnUEABYIAB0FAms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1XK
+6Z7kAPlsKfE+3mjWAEA/+EShWKYFixE
+yQIyQaKSX+lpVD+1MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP SIGNATURE-----
+
+--sig--

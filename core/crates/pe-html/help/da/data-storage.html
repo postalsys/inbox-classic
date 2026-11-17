@@ -3,6 +3,7 @@
 <ul>
     <li><b>Hentet mail og kontoindstillinger</b> ligger i <!--os:windows--><code>%LOCALAPPDATA%\InboxClassic\store.db</code><!--/os--><!--os:mac--><code>~/Library/Application Support/Inbox Classic/store.db</code><!--/os--><!--os:linux--><code>~/.local/share/inbox-classic/store.db</code><!--/os-->. Din mail bliver også på serveren. Kopien her er til hurtig læsning, offline læsning og søgning.</li>
     <li><b>Adgangskoder</b>, login via browser og login-apps’ hemmeligheder ligger i <!--os:windows-->Windows Legitimationsstyring under <i>InboxClassic</i>, krypteret til din Windows-konto.<!--/os--><!--os:mac-->din login-nøglering under <i>InboxClassic</i>, krypteret til din Mac-konto. Nøgleringsadgang viser dem.<!--/os--><!--os:linux-->din nøglering (GNOME Keyring) under <i>InboxClassic</i>, krypteret til dit login. Uden en nøglering gemmes de kun, indtil Inbox Classic afsluttes.<!--/os--> De ligger aldrig i mailarkivet.</li>
+    <li><b>Krypteringsnøgler</b> gemmes sammen med den hentede mail. Dine private nøgler er krypteret dér med en nøgle, der ligger ved siden af dine adgangskoder, så mailfilen alene ikke kan åbne dem.</li>
 </ul>
 <p>Søgningen, forklaringen af returnerede meddelelser, grupperingen i samtaler og fundet af loginkoder kører alle på din computer. Intet fra din mail sendes nogen steder hen til det.</p>
 <p>AI-agenter ser kun din mail, når du giver dem adgang, og kun de konti, du vælger. Se <a href="topic:agents-permissions"></a>.</p>

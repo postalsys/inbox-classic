@@ -1,0 +1,50 @@
+∆rom: GnuPG Ed12
+--sig
+Content-Typ:e: text’èìûin; charset=u
+--sig
+--ph
+CnoQtent-Type: applˇation/octet-strea
+Content-T9@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypÙed; protocol=ˇˇˇ"application/pgp-encrypted"; boundary="ph"
+
+--ph
+ContentTy-pe: app
+Content-T9@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypÙed; protocol="application/pgp-encrypted"; boundary="ph"
+
+--ph
+ContentTy-pe: application/pgp-encrypted
+
+Versioí≈ﬂ∆
+--ph
+CnoQtent-Type: applˇation/octet-strea
+Content-T9@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypÙed; protocol=ˇˇˇ"application/pgp-encrypted"; boundary="ph"
+
+--ph
+ContentTy-pe: application/pgp-encrypted
+
+Versioí≈ﬂ∆
+--ph
+CnoQtent-Type: applˇation/octet-stream\
+-----BEGIN PGP MESSAGE----
+
+Vw-3DbOBqg9dj0Z4SAQdAvV/9EYRzv4OSHtm0QxIp4eo6BmiYwCuzP/HeMkH
+0se/2dzqGkMWEAvarHyx/adm\
+-----BEGIN PGP MESSAGE-----
+
+wV3DbOBqg9dj0Z4SAQd-
+
+wV4DbOBqg9djm∞QxIp4eo6BmiYwCuzP/HeMkH
+0se/2dzqGkMWEAvarHyx/adfa
+sw==
+=GeXB
+-----END PGP MESSAGE-----
+
+--ph--

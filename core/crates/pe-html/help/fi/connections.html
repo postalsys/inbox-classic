@@ -7,6 +7,7 @@
     <li><b>Tuotemerkkien logot</b> (BIMI): tuotemerkin HTTPS-osoitteesta, kun viesti ei sisällä logoa, kerran jokaista Inbox Classicin käyttökertaa kohden. Tämä tapahtuu vain, kun sähköpostipalvelimesi on hyväksynyt viestin DMARC-tarkistuksen ja logon.</li>
     <li><b>Kuvat internetistä</b>: vain kun pyydät niitä.</li>
     <li><b>Tilauksen peruminen</b>: vain kun napsautat sitä. Yhden napsautuksen pyyntö (RFC 8058) lähetetään vain, kun lista on allekirjoittanut viestin DKIM:llä.</li>
+    <li><b>Salausavaimet</b>: vain kun salaat viestin jollekulle, jonka avainta sinulla ei ole. Ensin osoitteen oma verkkotunnus (Web Key Directory), sitten keys.openpgp.org, ellet ole poistanut sitä käytöstä. Vain osoite lähetetään.</li>
     <!--os:mac--><li><b>Päivitykset</b>: inboxclassic.comista, jotta nähdään, onko uusi versio julkaistu.</li><!--/os-->
 </ul>
 <p>Kirjautumiskoodeja tarjotaan vain, kun palveluntarjoajasi Authentication-Results-otsikkotieto kertoo, että verkkotunnus on allekirjoittanut viestin (DKIM). Tämä ei vaadi omaa yhteyttä.</p>

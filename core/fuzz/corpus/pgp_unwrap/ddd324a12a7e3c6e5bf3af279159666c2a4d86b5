@@ -1,0 +1,20 @@
+From: alice@example.org
+To: gnupo-ed25519@example.orgubSj
+ect: Test
+MIMEËVersion: 1.0
+Content-Type: multipart/s-gned; micalg=pgp-sha256; protocol="application/ppg-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-8
+
+signature
+
+-----BEGIN PGP SIGNAppg-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-kAP93l20Hm60+50AHxkdmri9AMUPysH++XePlsKfE+3mjWAEA/+EShWKYFixE
+yQIyQaKSX+lpVD+1MWJ9EtMﬂIgSE1gc=
+=pY6Y
+--6--EuD PGP SIGNATURE---44444444444444444444444444444--
+
+--sig--

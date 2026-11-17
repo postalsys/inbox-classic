@@ -4798,6 +4798,10 @@ public static class Dragger {
     $first = & $copied $codeSubjects[0]
     Check ($first -eq '482913') "Copy on the card of a signed message puts its code on the clipboard ($first)"
     Check ((StatusPart $mainStatus 0) -eq 'Copied the code') "and the status bar says so ($(StatusPart $mainStatus 0))"
+    # a sync in the background (the timer's) replaces only its own words, never the answer to what the user did
+    [void][Native.Win]::PostMessage($main, 0x0113, [IntPtr]2, [IntPtr]::Zero)
+    Start-Sleep -Seconds 3
+    Check ((StatusPart $mainStatus 0) -eq 'Copied the code') "a sync in the background leaves those words ($(StatusPart $mainStatus 0))"
     Shot $main 'otp-1-card'
     $second = & $copied $codeSubjects[1]
     Check ($second -eq '917355') "an OTP-Token header gives the code ($second)"
@@ -7044,8 +7048,9 @@ public static bool HasIcon(IntPtr window) {
             CheckPseudo $form 'the account form'
             Shot $form 'lang-3-pseudo-form'
             Click $form 2
+            # Exit while the form is still open is not taken: wait for it to be gone, not a guess of how long that takes
+            [void](WaitFor { if (-not [Native.Win]::IsWindow($form)) { $true } } 10)
         }
-        Start-Sleep -Milliseconds 500
         Quit $main 'pseudo-language'
     }
 } catch {

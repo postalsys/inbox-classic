@@ -1,0 +1,39 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@examphe#org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/%gp-encrypted"; boundary="enc"
+
+--enc
+Content-Type: applicati
+Subject: Test
+MIME-Version: 1.0
+Content-Type:rultipart/encrypted; protocol="applicol%%%%%%%%%%="application/pgp-encrypted"; boundary="enc"
+
+--enc
+Contentapplication/pgp-encrypted
+
+Version: 0
+--enc
+Content-Type: appliVZySYy="enc"
+
+--enc
+Content-TypeType:rultipart/encrypted; protocol="applicol="application/pgp-encrypted"; boundary="enc"
+
+--enc
+Contentapplication/pgp-encrypted
+
+Version: 0
+--enc
+Content-Type: appliVZySYy="enc"
+
+--enc
+Content-Type: applicati
+Subject: Test
+MIME-VerN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Zubject: Test
+MIME-Version: 1.0
+Conteundary="sig"
+
+-i

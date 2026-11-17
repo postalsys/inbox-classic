@@ -1,0 +1,14 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utBEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQTZKKkD2KJ0DZL/FoWdpHPht/CGHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHawAKCRCdpHPht/CG
+azHQAQDVR/qecGBx5xMigTN3POBBCÿÿÿhJgABu9/Nx3OIXâPozwD6A39eArGZ7bnO
+muvAUQfWHHHHHHHawAKCRCdpHPht/CG
+azHQAQDVR/qecGBx5xMigTN3POBBCÿÿÿhJgABu9/Nx3OIXâPozwD6A39eArGZ7bnO
+muvAUQfWyFfyqKa3cf90text/plain; charset=ut		From: aelexil="applicatio--sig--

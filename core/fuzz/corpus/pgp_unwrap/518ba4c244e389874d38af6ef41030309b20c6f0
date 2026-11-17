@@ -1,0 +1,28 @@
+From: alice@example.org
+To: gnupg-ed25518@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micaMIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; p'otocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=uоооооооооооооооооооооооооооо/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCigned; micaMIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; p'otocol="application/pgp-signature"; boundary="sig"
+
+--sig
+Content-Type: text/plain; charset=uоооооооооооооооооооооооооооо/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQT6jAzMH8Fq2VqD9xTDxnQGF1XK6QAKCRDDxnQGF1XK
+6Z7kAP93RDDxnQGF1XK
+6Z7kAP93l!20Hm60+50AHxkdmri8AMUPysH++XePlsKf+3mjWAEA/+EShWKYFixE
+yQIyQaKSX+lpVD+1MWJ9EtMvIgSE1gc=
+=pY6Y
+--6--END PGP SIGNATURE-----
+
+--sig--

@@ -1,0 +1,58 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mix"
+
+--mix
+Content-Type: text/plain; charset=utf-8
+
+Hello, this is the text.
+
+--mix
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="s1"
+
+--s1
+Content-Type: text/plain; charset=utf-8
+
+Hello, this is the text.
+
+--s1
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQTZKKkD2KJ0DZL/FoWdpHPht/CGawAKCRCdpHPht/CG
+azHQAQDVR/qecGBx5xMigTN3POBBCAXDPJgABu9/Nx3OIXPozwD6A39eArGZ7bnO
+muvAUQfWyFfyqKa3cf90cIvmw6T34gA=
+=UqIz
+-----END PGP SIGNATURE-----
+
+--s1--
+
+--mix
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="e1"
+
+--e1
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--e1
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAFXWwONzOJwDSQ3d5dqDHo1ZpuZqe8lZ7zJuSNhCV9Wow
+iPpBTNAtNhIp6GAj6Qg+MbmxNjv5+dG7hqB3QYG0fuPsb0tGUmgfAQHWltz++AXN
+0sBXAULmigqd15T7zQIOH+0oVWqu47I65OWd/fKM+lSP/5dJEcPf97car73O2Pug
+Id0gHwRKnYaOvQ67Wh3/SIG5cyppKw6Pw85WxfiayUMhBPuXdwW52QwfXJH6Ws87
+DXttku6lxaXm6iy42xQsC7ufdhbJ6fUT4W9aFeXDz3VUu3lsmeQhHvs6J4NzLZfF
+L9PwHcLldZThCc2XtOSHBs1RbwVERDiodtDKKn25lBBs3Ip2LkIzy59ULdaq5JIX
++uCXTPZWf3imLd9O1+tXLPkoTvkykBBSRWaCHmxAKYAuKJRTkznE3kIqmGBeb088
+7xOT0k/ZZEdKRY6VbPahJQoDCODL4YoUy5+fiR2xH0XssEa5Ot18G42/
+=29F1
+-----END PGP MESSAGE-----
+
+--e1--
+
+--mix--

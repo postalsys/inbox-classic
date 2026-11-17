@@ -1,0 +1,40 @@
+name: OpenPGP interoperability suite
+
+# Sequoia's OpenPGP interoperability test suite against pe-pgp's sop example, once a week and by hand. Not a gate:
+# the report is kept as an artifact and read (docs/pgp-plan.md, "As built", lists what it fails and why); the
+# pgp-interop job of CI is the gate.
+on:
+    schedule:
+        - cron: '17 4 * * 1'
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+jobs:
+    suite:
+        name: The suite against pe-pgp and Sequoia
+        runs-on: ubuntu-latest
+        container: debian:trixie
+        timeout-minutes: 90
+        steps:
+            - uses: actions/checkout@v6
+            - name: Sequoia, a compiler and nettle
+              run: |
+                  apt-get update -qq
+                  apt-get install -y -qq sqop git curl ca-certificates build-essential pkg-config clang nettle-dev \
+                      libssl-dev libsqlite3-dev python3
+            # the suite pins a nightly in its rust-toolchain.toml, which rustup installs when it builds
+            - uses: dtolnay/rust-toolchain@stable
+            - uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: core
+            - run: scripts/pgp-interop-suite.sh --inside
+            - name: The summary
+              if: always()
+              run: cat build/pgp-interop-suite/summary.txt >>"$GITHUB_STEP_SUMMARY" || true
+            - uses: actions/upload-artifact@v7
+              if: always()
+              with:
+                  name: pgp-interop-suite
+                  path: build/pgp-interop-suite

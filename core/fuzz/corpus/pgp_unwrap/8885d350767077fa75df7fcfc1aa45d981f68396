@@ -1,0 +1,42 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mix"
+
+--mix
+Content-Type: text/html; charset=utf-8
+
+<p>Hello <img src="cid:x"></p>
+
+--mix
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="e2"
+
+--e2
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--e2
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdA7jGSz9GgMMUsm80xt8KvPM3QtPP3h9DAMjP3Xi299Ukw
+2PYQEGiWcIr2EiyNL/7z3jIlwgaia4s7T2HI6pevA4xlFfSaLiuQWUdJQUoLKciN
+0sBTAcrnkwdWaTqH+uwok95hf/SQkrO5nDgQ5RO/baWT9ITPbnDhdbamJov46J2d
+tOKTNwbovif6zYHsl72wqKSOagkC89XkhUKhJefvLffU+yvbmTDrBBauO2wwMy2V
+q1XHKx5qSTmXB2ATUlp6bOagEC7uPxpHFXx6cyAvUT9u+9+Rb5rcnNI619l6uXSe
+i5FkbVsl3+yiJ5VIk+afiZ8i83x57OtJvfZ2hqpfISZ1uQuQ1+eWw+ifwCDCpoaP
+V+fZXZv22AIvINbNu+I3GFQtb8GoNhhgWSICJLFXBWDNOfHvTFdAngcww22TXor5
+zdf2Wsty+okqKyccsewWdw7CjIv7yTy3I18aMPx/CztVYo5ZVuY=
+=c+vE
+-----END PGP MESSAGE-----
+
+--e2--
+
+--mix
+Content-Type: text/html; charset=utf-8
+
+<p>Hello <img src="cid:x"></p>
+
+--mix--

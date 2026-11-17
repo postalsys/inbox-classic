@@ -953,6 +953,8 @@ pgp-why-key-not-valid = Подписано с ключ, който не е ва�
 # review: new
 pgp-why-not-for-you = Подписано за други получатели и препратено до вас
 # review: new
+pgp-why-not-key-in-use = Подписано с ключ, различен от използвания за { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. Изображенията са заредени от интернет
 # review: new
 pgp-error-no-own-key = Нямате ключ за { $address }, с който да подписвате или шифровате. Създайте такъв в Инструменти > Ключове за шифроване или изключете „Подписване“ и „Шифроване“.

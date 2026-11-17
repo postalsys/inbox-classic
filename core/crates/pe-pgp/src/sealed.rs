@@ -5,7 +5,7 @@
 //! that is Argon2 or iterated and salted, and an Argon2 that asks for no more than `MAX_ARGON2_*` (a hostile file
 //! could ask for gigabytes of memory and minutes of work before the passphrase is even checked).
 
-use std::io::{Cursor, Read};
+use std::io::Cursor;
 
 use pgp::bytes::Bytes;
 use pgp::composed::{ArmorOptions, Edata, Esk, Message, MessageBuilder, TheRing};
@@ -15,7 +15,7 @@ use pgp::errors::Error as PgpError;
 use pgp::types::{Password, StringToKey};
 
 use crate::DecryptError;
-use crate::decrypt::{classify, read_error};
+use crate::decrypt::{classify, read_through};
 
 /// Argon2 as written: RFC 9106's second recommended choice, 2^16 KiB (64 MiB), three passes, four lanes
 const ARGON2_PASSES: u8 = 3;
@@ -121,7 +121,7 @@ pub fn open(bytes: &[u8], passphrase: &str, limit: usize) -> Result<Vec<u8>, Ope
         message_password: vec![&password],
         ..Default::default()
     };
-    let mut message = match message.decrypt_the_ring(ring, true) {
+    let message = match message.decrypt_the_ring(ring, true) {
         Ok((message, _)) => message,
         Err(PgpError::MissingKey) => return Err(OpenError::WrongPassphrase),
         Err(error) => return Err(classify(error).into()),
@@ -129,17 +129,7 @@ pub fn open(bytes: &[u8], passphrase: &str, limit: usize) -> Result<Vec<u8>, Ope
     if message.is_encrypted() {
         return Err(OpenError::Malformed("encrypted twice".into()));
     }
-    if message.is_compressed() {
-        message = message.decompress().map_err(|error| OpenError::from(classify(error)))?;
-    }
-    let mut data = Vec::new();
-    (&mut message)
-        .take(limit as u64 + 1)
-        .read_to_end(&mut data)
-        .map_err(|error| OpenError::from(read_error(error)))?;
-    if data.len() > limit {
-        return Err(OpenError::TooLarge);
-    }
+    let (_, data) = read_through(message, limit)?;
     Ok(data)
 }
 

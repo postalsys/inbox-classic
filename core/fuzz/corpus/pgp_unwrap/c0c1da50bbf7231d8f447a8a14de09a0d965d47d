@@ -1,0 +1,26 @@
+From: GnuPG Ed25519 <gnupg-ed2551upg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; ;protocol="application/pgp-encrypted"; boundary="enc"
+
+--enc
+Content-Type: application/pgp-encrypted
+
+Version: 1
+--enc
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhYGneEWMIolWYw/SgMtfOnXAUw
+d1a5oiYvJrneQBffMuZPBgrvMVeXy9sp1pPr8FtY/FjsYF38yDBzS8QN3sfvWxt4
+0sBTAWYgGTufvSF0MvYnut+H4n0Zs88ZLO5nu4Vx9aut7ObhxAyRu5nq3LQXBtL3
+/9yfHOotC8MWWu6z0vGimzEqs3m8C8hlri6ujVuXJvgq7KYFP+wWYB8Mwdb3fM60
+sWUk3RxEhZEpz0+By96R42OYoKz3DclavdEqATZbF/g8YgO5ib0l4HHGfT9rfnLP
+i9+M1SDRK5VUOmABoiWz8tacK4WQJRZ2Dzj5HQJif5QX0CexPIa7koqJc5+UL04e
+mXWZV3gbBIYzZWSOcUnjK8MjjNAQCf0vGimzEqs3m8C8hlri6ujVuXJl22sf11NH
+LXJqn8frQSw8PcAk60Lo6hPf+z9qS4FtWi28hmlJFFVG2QuiWak=
+=mf4W
+-----END PGP MESSAGE-----
+
+--enc--

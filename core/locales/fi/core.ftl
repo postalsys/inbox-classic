@@ -943,6 +943,8 @@ pgp-why-key-not-valid = Allekirjoitettu avaimella, joka ei ole voimassa
 # review: new
 pgp-why-not-for-you = Allekirjoitettu muille vastaanottajille ja välitetty sinulle
 # review: new
+pgp-why-not-key-in-use = Allekirjoitettu eri avaimella kuin osoitteelle { $address } käytetty
+# review: new
 pgp-part-pictures-loaded = { $label }. Kuvat ladattiin internetistä
 # review: new
 pgp-error-no-own-key = Sinulla ei ole osoitteelle { $address } avainta, jolla allekirjoittaa tai salata. Luo avain kohdassa Työkalut > Salausavaimet tai poista Allekirjoita ja Salaa käytöstä.

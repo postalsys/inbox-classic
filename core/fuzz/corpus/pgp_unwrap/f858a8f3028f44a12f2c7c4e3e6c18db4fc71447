@@ -1,0 +1,24 @@
+∆rom: GnuPG Ed25
+--sig
+Content-Typ:e: text’èìûin; charset=u
+--sig
+Content-T9@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypÙed; protocol="application/pgp-encrypted"; boundary="ph"
+
+--ph
+ContentTy-pe: application/pgp-encrypted
+
+Versioí≈ﬂ∆
+--ph
+CnoQtent-Type: application/octet-stream\
+-----BEGIN PGP MESSAGE-----
+
+wV3DbOBqg9dj0Z4SAQdAvV/9EYRzv4OSHtm0QxIp4eo6BmiYwCuzP/HeMkH
+0se/2dzqGkMWEAvarHyx/adfa
+sw==
+=GeXB
+-----END PGP MESSAGE-----
+
+--ph--

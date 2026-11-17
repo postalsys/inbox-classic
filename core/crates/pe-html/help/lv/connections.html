@@ -7,6 +7,7 @@
     <li><b>Zīmolu logotipi</b> (BIMI), no zīmola HTTPS adreses, ja ziņojumā logotipa nav, vienu reizi katrā Inbox Classic darbības reizē. Tas notiek tikai tad, ja jūsu pasta serveris ziņojumam ir izpildījis DMARC pārbaudi un akceptējis logotipu.</li>
     <li><b>Attēli no interneta</b>, tikai tad, ja jūs tos pieprasāt.</li>
     <li><b>Atteikšanās no abonēšanas</b>, tikai tad, ja jūs uz tās noklikšķināt. Viena klikšķa pieprasījums (RFC 8058) tiek nosūtīts tikai tad, ja saraksts ziņojumu ir parakstījis ar DKIM.</li>
+    <li><b>Šifrēšanas atslēgas</b>, tikai tad, ja šifrējat kādam, kura atslēgas jums nav: vispirms viņa adreses domēns (Web Key Directory), tad keys.openpgp.org, ja vien neesat to izslēdzis. Tiek nosūtīta tikai adrese.</li>
     <!--os:mac--><li><b>Atjauninājumi</b>, no inboxclassic.com, lai redzētu, vai ir iznākusi jauna versija.</li><!--/os-->
 </ul>
 <p>Pierakstīšanās kodi tiek piedāvāti tikai tad, ja jūsu pakalpojumu sniedzēja galvene Authentication-Results norāda, ka domēns ir parakstījis ziņojumu (DKIM). Tam nav vajadzīgs atsevišķs savienojums.</p>

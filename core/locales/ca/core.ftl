@@ -955,6 +955,8 @@ pgp-why-key-not-valid = Signat amb una clau que no és vàlida
 # review: new
 pgp-why-not-for-you = Signat per a altres destinataris, i reenviat a vós
 # review: new
+pgp-why-not-key-in-use = Signat amb una clau diferent de la que s'utilitza per a { $address }
+# review: new
 pgp-part-pictures-loaded = { $label }. S’han carregat imatges d’internet
 # review: new
 pgp-error-no-own-key = No teniu cap clau per a { $address } amb què signar o xifrar. Creeu-ne una a Eines > Claus de xifratge, o desactiveu Signa i Xifra.

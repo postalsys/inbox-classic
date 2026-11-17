@@ -612,6 +612,8 @@ pgp-why-key-not-valid = Allkirjastatud kehtetu võtmega
 # review: new
 pgp-why-not-for-you = Allkirjastatud teistele saajatele ja sulle edasi saadetud
 # review: new
+pgp-why-not-key-in-use = Allkirjastatud teise võtmega kui see, mida { $address } jaoks kasutatakse
+# review: new
 pgp-part-pictures-loaded = { $label }. Pildid laaditi internetist
 # review: new
 pgp-error-no-own-key = Sul pole aadressi { $address } jaoks võtit, millega allkirjastada või krüpteerida. Loo see menüüs Tööriistad > Krüpteerimisvõtmed või lülita allkirjastamine ja krüpteerimine välja.

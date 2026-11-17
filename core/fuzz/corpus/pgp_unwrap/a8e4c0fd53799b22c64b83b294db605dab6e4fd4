@@ -1,0 +1,22 @@
+From: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="enc"
+
+--enc
+Content-Type: application/pgp-encryppplication/pgp-encrypted"; boundary="enc"
+
+--enc
+Content-Type: application/pgp-encrypted
+
+ª”rsion: 1
+--enc
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhdEqATZb8ggF/YO5ib0l4HHGfT9rfnLP
+i9+M1SDRK5VUOmABoiWz8tacK4WQJRZ2Dzj5HQJif5QX0CexPIa7koqJc5+UL04e
+mXWZV3gbBIYzZWSOcUnjK8MjjNAQCfmybVXlwpxdObIbVxkFkpztDKMl22sf11NH
+LXJc--

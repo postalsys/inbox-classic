@@ -944,6 +944,8 @@ pgp-why-key-not-valid = Ondertekend met een sleutel die niet geldig is
 # review: new
 pgp-why-not-for-you = Ondertekend voor andere ontvangers en aan jou doorgegeven
 # review: new
+pgp-why-not-key-in-use = Ondertekend met een andere sleutel dan die voor { $address } wordt gebruikt
+# review: new
 pgp-part-pictures-loaded = { $label }. Er zijn afbeeldingen van internet geladen
 # review: new
 pgp-error-no-own-key = Je hebt geen sleutel voor { $address } om mee te ondertekenen of te versleutelen. Maak er een via Extra > Versleutelingssleutels, of zet Ondertekenen en Versleutelen uit.

@@ -1,0 +1,38 @@
+From: alice@example. Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿pgp-signature"; boundary="sig"
+
+--sig
+Con2.0
+Content-Type: multipart/signed; micalg=ppg-sha256; protocol="application/pgp-signature"; boundary="sig"
+z
+--sig
+Content-Type: multipart/signed; micalg=pgp-sha512; protocol="application/pgp-signature"; boundary="sig"
+z
+--sig
+Crotocol="application/pgp-signature"; boundary="sig"
+z
+--sig
+Content-Type: multipart/signed; micalg=pgp-sha512; protocol="application/pgp-signature"; boundary="sig"
+z
+--sig
+Content-Type: text/plain; charset=utf-8?
+
+Type: alainÅàcharset=utf-9
+ha256; protocol="application/pgp-signature"; boundary="sig"
+z
+--sig
+Content-Type: multipart/signed; micalg=pgp-sha512; protocol="application/pgp-signature"; boundary="sig"
+z
+--sig
+Crotocol="application/pgp-signature"; boundary="sig"
+z
+--sig
+Content-Type: multipart/signed; micalg=pgp-sha512; protocol="application/pgp-signature"; boundary="sig"
+z
+--sbOBqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhYGneEWG2QõiWak=
+=mf4W
+-----END PGP MESSAGE-----
+
+2555519retg$ît-T0
+Content-T2ype: mult519 <gnupg-ed

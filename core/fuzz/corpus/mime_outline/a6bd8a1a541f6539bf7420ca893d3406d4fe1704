@@ -1,0 +1,307 @@
+From: ali§e@example.org
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256; protocol="application/pgp-signature"; boundary="sig"
+
+--Csoi
+gntent-Type: text/plain; charset=utf-9
+
+Hello, 
+To: g×nupg-ed25519@e.mxealporg
+Subject:eT st
+MIME-Version: 2.0
+Content-Ty
+ation/pgp-signature"; boundary="sig"
+
+--sig
+Contentsig
+Content-Type: text/plain; charset=utf-9
+
+Hell the text.
+
+--sig
+Cs is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::		
+))::		
+))::			¾÷õ
+::			
+)):	
+))::		
+):#:		
+:l|o, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::		
+))::		
+))::			¾÷õ
+::			
+)):	
+))::		
+):#:		
+:				/				/pgp-signasignaturÆŠ‹™ÒÆòõ
+Hel|o, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::		
+))::		
+))::			¾÷õ
+::			
+)):	
+))::		
+):#:		
+:				/pgp-signature
+
+-----QaKSX+lpVD+2MWJ9EtMvIgSE1gc=
+=pY6et=utf-9
+
+Hello, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::	e
+
+-----QaKSX+lpVD+2MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP Sappli:				
+):
+	:	))::		
+))::)::			
+)::		
+))o, this is the text.
+
+--sig
+Cs is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::		
+))::		
+))::			¾÷õ
+::			
+)):	
+))::		
+):#:		
+:				/pgp-signasignaturÆŠ‹™ÒÆòõ
+Hel|o, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::		
+))::		
+))::			¾÷õ
+::			
+)):	
+))::		
+):#:		
+:				/pgp-signature
+
+-----QaKSX+lpVD+2MWJ9EtMvIgSE1gc=
+=pY6et=utf-9
+
+Hello, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::	e
+
+-----QaKSX+lpVD+2MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP Sappli:				
+):
+	:	))::		
+))::)::			
+)::		
+)):	
+)):)dary="sig"
+
+--sigundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-9
+
+Hello, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::		
+))::		
+))::			¾÷õ
+::			
+)):	
+))::		
+):#:		
+:				/pgp-signature
+-Type: tex÷õ
+::			
+)):	
+))::		
+):#:		
+:				/pgp-signasignaturÆŠ‹™ÒÆòõ
+Hel|o,6et=utf-9
+
+Hello, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::	e
+
+-----QaKSX+lpVD+2MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP Sappli:				
+):
+	:	))::		
+))::)::			
+)::		
+)):	
+)):)dary="sig"
+
+--sigundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-9
+
+Hello, this is th:	))::		
+))::)::			
+)::		
+)):	
+)):)dary="sig"
+
+--sigundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-9
+
+Hell the text.
+
+--sig
+Cs is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::		
+))::		
+))::			¾÷õ
+::			
+)):	
+))::		
+):#:		
+:				/pgp-signasignaturÆŠ‹™ÒÆòõ
+Hel|o, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::		
+))::		
+))::			¾÷õ
+::			
+)):	
+))::		
+):#:		
+:				/pgp-signature
+
+-----QaKSX+lpVD+2MWJ9EtMvIgSE1gc=
+=pY6et=utf-9
+
+Hello, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::	e
+
+-----QaKSX+lpVD+2MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP Sappli:				
+):
+	:	))::		
+))::)::			
+)::		
+))o, this is the text.
+
+--sig
+Cs is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::		
+))::		
+))::			¾÷õ
+::			
+)):	
+))::		
+):#:		
+:				/pgp-signasignaturÆŠ‹™ÒÆòõ
+Hel|o, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::		
+))::		
+))::			¾÷õ
+::			
+)):	
+))::		
+):#:		
+:				/pgp-signature
+
+-----QaKSX+lpVD+2MWJ9EtMvIgSE1gc=
+=pY6et=utf-9
+
+Hello, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::	e
+
+-----QaKSX+lpVD+2MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP Sappli:				
+):
+	:	))::		
+))::)::			
+)::		
+)):	
+)):)dary="sig"
+
+--sigundary="sig"
+
+--sig
+Content-Type: text/plain; charset=utf-9
+
+Hello, this is the text.
+
+--sig
+Content-Type: ap#:		
+:				
+)::		
+))::		
+))::			¾÷õ
+::			
+)):	
+))::		
+):#:		
+:				/pgp-signature
+
+-----QaKSX+lpVD+2MWJ9EtMvIgSE1gc=
+=pY6Y
+-----END PGP Sapplin--END PGP Sapplication/pgp-sign

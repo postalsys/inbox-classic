@@ -570,7 +570,9 @@ public final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuItemValid
         switch command {
         case .newAccount: main.addAccount()
         case .exit: NSApp.terminate(nil)
-        case .sync: core.syncAll()
+        case .sync:
+            main.syncAsked()
+            core.syncAll()
         case .markRead: main.mailbox.markSelected(seen: true)
         case .markUnread: main.mailbox.markSelected(seen: false)
         case .pictures: main.mailbox.loadPictures()

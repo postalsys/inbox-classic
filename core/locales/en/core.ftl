@@ -581,6 +581,7 @@ pgp-why-from-future = The signature is dated in the future
 pgp-why-signature-expired = The signature has expired
 pgp-why-key-not-valid = Signed with a key that is not valid
 pgp-why-not-for-you = Signed for other recipients, and passed on to you
+pgp-why-not-key-in-use = Signed with another key than the one in use for { $address }
 pgp-part-pictures-loaded = { $label }. Pictures were loaded from the internet
 pgp-error-no-own-key = You have no key for { $address } to sign or encrypt with. Make one in Tools > Encryption Keys, or turn Sign and Encrypt off.
 pgp-error-missing-keys = { $count ->

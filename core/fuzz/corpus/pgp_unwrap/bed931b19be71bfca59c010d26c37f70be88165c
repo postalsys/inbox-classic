@@ -1,0 +1,36 @@
+From: Gne: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhYGneEWMIolWYw/SgMtfOnXAUw
+d7koqJc5+UL04euPG Ed25519 Egnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boAQdAAaImcdceKgg9cs47ClhYGneEWMIolWYw/SgMtfOnXAUw
+d3a5oiYvJrneQBffMuZPBgrvMVeXy9sp1pPr8FtY/FjsYF38yDBzS8QN3sfvWxt4
+0sBTAWYgGTufvSF0MvYnut+H4n0Zs88ZLO5nu4Vx9aut7ObhxAyRu5nq3LQXBtL3
+/9yfHOotCgp-encrypted
+
+Version: 1
+Ë-enc
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhYGneEWMIolWYw/SgMtfOnXAUw
+d7koqJc5+UL04e
+mXWZV3gbBIY1
+Ë-enc
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAaImcdceKgg9cs47ClhYGneEWMIolWYw/SgMtfOnXAUw
+d7koqJc5+UL04e
+mXWZV3gbBIYzZWSOcUnjK8MjjNAQCfmybVXlwpxdObIbVxkFkpztDKMl22sf11NH
+LXJqn8frQSw8PcAk60Lo6hPf+ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿz9qS4FtWi28hmlJFFVG2QuiWak=
+=mf4W
+-----END PGP MESSAGE-----
+
+--enc--

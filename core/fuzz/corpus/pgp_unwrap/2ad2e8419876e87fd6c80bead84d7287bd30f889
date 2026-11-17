@@ -1,0 +1,28 @@
+From: alice@examplõ—êêg
+To: gnuˇˇˇˇˇ
+SubjFrom: GnuPG Ed25519 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted; protocol="application/pgp-encrypted"; boundary="enc"
+
+--enc
+Contenßt-Type: application/pgp-encrypted
+
+Version: 1
+--enc
+Content-Type: application/octet-stream
+
+-----BEGIN PGP MESSAGE-----
+
+wV4DbOBqg9dj0Z4SAQdAAuRSqo9DMuhil8ukmvNOW9@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: multipart/encrypted;; protocol="applica6fhxample.org
+Subject: Test
+MIME-Version: 1.0
+Content-Type: 
+--sig
+Content-Type: text/plain; charset=utf
+Content-Type: text/plain; charset=utf-8___""""""""""‹""alg=pgp-charset=utf56; protocol="appli¶atioí–èòè“åègl="applicaect: Test
+MIME-Ve0t

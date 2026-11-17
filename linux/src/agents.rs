@@ -153,14 +153,7 @@ pub async fn question(request: u64) {
                 "agent-send",
             );
             dialog.set_response_appearance("send", adw::ResponseAppearance::Suggested);
-            // Send comes on after a moment, so a key pressed for another window does not send
-            dialog.set_response_enabled("send", false);
-            let later = dialog.downgrade();
-            glib::timeout_add_local_once(std::time::Duration::from_millis(1500), move || {
-                if let Some(dialog) = later.upgrade() {
-                    dialog.set_response_enabled("send", true);
-                }
-            });
+            send_after_a_moment(&dialog);
             let answer = match dialog.choose_future(Some(&window)).await.as_str() {
                 "send" => AgentAnswer::Send,
                 "compose" => AgentAnswer::Compose,
@@ -172,6 +165,46 @@ pub async fn question(request: u64) {
         }
         None => {}
     }
+}
+
+/// How long Send stays off once the question is on screen
+const SEND_DELAY: std::time::Duration = std::time::Duration::from_millis(1500);
+
+#[cfg(feature = "e2e")]
+thread_local! {
+    /// How long Send of the last question stayed off after it was on screen (for the UI test)
+    static SEND_WAITED: std::cell::Cell<Option<std::time::Duration>> = const { std::cell::Cell::new(None) };
+}
+
+/// Send comes on a moment after the question is on screen, so a key pressed for another window does not send. Counted
+/// from when it is shown, not made: a busy window can show it later than it was made
+fn send_after_a_moment(dialog: &adw::AlertDialog) {
+    dialog.set_response_enabled("send", false);
+    #[cfg(feature = "e2e")]
+    SEND_WAITED.with(|waited| waited.set(None));
+    let started = std::cell::Cell::new(false);
+    dialog.connect_map(move |dialog| {
+        if started.replace(true) {
+            return;
+        }
+        let later = dialog.downgrade();
+        #[cfg(feature = "e2e")]
+        let shown = std::time::Instant::now();
+        glib::timeout_add_local_once(SEND_DELAY, move || {
+            if let Some(dialog) = later.upgrade() {
+                dialog.set_response_enabled("send", true);
+                #[cfg(feature = "e2e")]
+                SEND_WAITED.with(|waited| waited.set(Some(shown.elapsed())));
+            }
+        });
+    });
+}
+
+/// Whether Send of the question `dialog` was off for the whole moment after it was shown (for the UI test): still
+/// off, or on only after the moment
+#[cfg(feature = "e2e")]
+pub fn send_waited(dialog: &adw::AlertDialog) -> bool {
+    !dialog.is_response_enabled("send") || SEND_WAITED.with(|waited| waited.get()).is_some_and(|w| w >= SEND_DELAY)
 }
 
 /// The message as it would go: every recipient on a row of its own, address first, so a name can not hide where it

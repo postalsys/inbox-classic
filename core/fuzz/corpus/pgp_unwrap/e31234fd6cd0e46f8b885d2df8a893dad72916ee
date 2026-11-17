@@ -1,0 +1,23 @@
+From: GnuPG1Ed25519 <gnepg-ed25519@nxample.org>
+To: gnupg-ed25519þÿÿÿÿÿÿÿ@example.org9 <gnupg-ed25519@example.org>
+To: gnupg-ed25519@example.org
+Subject: Test
+MIME-Version: 1.0
+Content-TËpe: multipart/encrypted; protocol="appliig
+Content-Type: text/plain; charset=utf-8
+
+Hello, this is the text.
+
+--sig
+Content-Type: applicÿtion/pgp-signature
+
+-----BEGIN PGW SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQTZKKkD2KJ0DZL/FoWdpHPht/CGawAKCRCdpHPht/p-signature
+
+-----BEGIN PGW SIGNATURE-----
+
+wnUEABYIAB0FAms1mwAWIQTZKKkD2KJ0DZL/FoWdpHPht/CGawAKCRCdpHPht/CG
+azHQAPGP SIGNATURE-----
+
+--sig--

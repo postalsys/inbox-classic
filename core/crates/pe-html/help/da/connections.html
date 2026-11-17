@@ -7,6 +7,7 @@
     <li><b>Brandlogoer</b> (BIMI), fra brandets HTTPS-adresse, når meddelelsen ikke selv har logoet med, én gang hver gang Inbox Classic kører. Det sker kun, når din mailserver har godkendt meddelelsens DMARC-kontrol og logoet.</li>
     <li><b>Billeder fra internettet</b>, kun når du beder om dem.</li>
     <li><b>Afmelding</b>, kun når du klikker på den. En anmodning med ét klik (RFC 8058) sendes kun, når listen har signeret meddelelsen med DKIM.</li>
+    <li><b>Krypteringsnøgler</b>, kun når du krypterer til en, hvis nøgle du ikke har: adressens eget domæne (Web Key Directory) og derefter keys.openpgp.org, medmindre du har slået det fra. Kun adressen sendes.</li>
     <!--os:mac--><li><b>Opdateringer</b>, fra inboxclassic.com, for at se, om der er kommet en ny version.</li><!--/os-->
 </ul>
 <p>Loginkoder tilbydes kun, når din udbyders Authentication-Results-header siger, at domænet har signeret meddelelsen (DKIM). Det kræver ingen forbindelse i sig selv.</p>

@@ -206,6 +206,14 @@ impl Store {
             .optional()
     }
 
+    /// Every correspondent's key in use: (address, fingerprint)
+    pub fn pgp_keys_in_use(&self) -> Result<Vec<(String, String)>> {
+        let mut statement = self
+            .db
+            .prepare("SELECT address, fingerprint FROM pgp_peers WHERE fingerprint IS NOT NULL")?;
+        statement.query_map([], |row| Ok((row.get(0)?, row.get(1)?)))?.collect()
+    }
+
     pub fn set_pgp_peer(&self, peer: &PgpPeer) -> Result<()> {
         self.db.execute(
             "INSERT INTO pgp_peers (address, fingerprint, pending, pending_since, autocrypt_seen, autocrypt_key_seen, \

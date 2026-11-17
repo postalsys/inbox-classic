@@ -1,4 +1,13 @@
 target/
-corpus/
+# the corpora are kept in the CI cache, but for the OpenPGP targets, which are committed (minimized with
+# `cargo fuzz cmin`) so a run starts from what an hour of fuzzing found
+corpus/*
+!corpus/pgp_cert/
+!corpus/pgp_message/
+!corpus/autocrypt_header/
+!corpus/mime_outline/
+!corpus/pgp_unwrap/
 artifacts/
 coverage/
+logs/
+seeds/
