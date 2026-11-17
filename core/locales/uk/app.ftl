@@ -1138,6 +1138,12 @@ ui-send-delay-note = Поки повідомлення чекає на надс�
 # review: new
 ui-dark-messages = Показувати повідомлення на темному тлі, коли система в темному режимі
 # review: new
+ui-preview-show = Показувати вк&ладення в листах
+# review: new
+ui-preview-show-note = Показує зображення та перші сторінки PDF-файлів після тексту листа. Inbox Classic сам створює ці попередні перегляди, тож ніщо у файлі не може запуститися.
+# review: new
+ui-preview-pdfs = Показувати PDF-&файли в листах
+# review: new
 ui-sending-in = { $subject } буде надіслано через { $count ->
     [one] { $count } секунду
     [few] { $count } секунди

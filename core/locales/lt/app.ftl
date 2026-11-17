@@ -1133,6 +1133,12 @@ ui-send-delay-note = Kol laiškas laukia išsiuntimo, siuntimą galite atšaukti
 # review: new
 ui-dark-messages = Rodyti laiškus tamsiame fone, kai sistemoje įjungtas tamsusis režimas
 # review: new
+ui-preview-show = Rodyti prie&dus laiškuose
+# review: new
+ui-preview-show-note = Po laiško tekstu rodo paveikslėlius ir pirmuosius PDF failų puslapius. Šias peržiūras Inbox Classic sukuria pati, todėl niekas faile negali būti paleista.
+# review: new
+ui-preview-pdfs = Rodyti PDF &failus laiškuose
+# review: new
 ui-sending-in = { $subject } bus išsiųstas po { $count ->
     [one] { $count } sekundės
    *[other] { $count } sekundžių

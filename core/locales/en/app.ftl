@@ -589,6 +589,11 @@ ui-download-limit = &Storage limit per account:
 ui-send-delay = Delay before &sending:
 ui-send-delay-note = While a message is waiting to be sent, you can cancel sending with Undo.
 ui-dark-messages = Show messages on a dark background when the system is in dark mode
+# Reading settings: previews of the pictures and PDF files attached, after a message's text
+ui-preview-show = &Show attachments in messages
+ui-preview-show-note = Shows pictures and the first pages of PDF files after the text of a message. Inbox Classic draws these previews itself, so nothing in a file can run.
+# the second setting under it; the same words as preview-pdf-option, with an access key
+ui-preview-pdfs = Show PDF &files in messages
 ui-sending-in = Sending { $subject } in { $count ->
     [one] 1 second
    *[other] { $count } seconds

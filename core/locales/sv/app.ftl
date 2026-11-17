@@ -1127,6 +1127,12 @@ ui-send-delay-note = Medan ett meddelande väntar på att skickas kan du avbryta
 # review: new
 ui-dark-messages = Visa meddelanden på mörk bakgrund när systemet använder mörkt läge
 # review: new
+ui-preview-show = Visa bila&gor i meddelanden
+# review: new
+ui-preview-show-note = Visar bilder och de första sidorna av PDF-filer efter texten i ett meddelande. Inbox Classic gör förhandsvisningarna själv, så inget i en fil kan köras.
+# review: new
+ui-preview-pdfs = Visa &PDF-filer i meddelanden
+# review: new
 ui-sending-in = Skickar { $subject } om { $count ->
     [one] { $count } sekund
    *[other] { $count } sekunder

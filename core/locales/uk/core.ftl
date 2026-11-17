@@ -1437,3 +1437,19 @@ preview-pdf-option = Показувати PDF-файли в листах
 preview-pdf-off = PDF-файли в листах не показуються.
 # review: new
 preview-pdf-off-crashed = PDF-файл закрив Inbox Classic під час показу, тому PDF-файли в листах більше не показуються. Зображення й далі показуються. Щоб знову показувати PDF-файли, увімкніть параметр { $option } у налаштуваннях читання.
+# review: new
+preview-pdf-details = { $count ->
+    [one] { $count } сторінка, { $size }
+    [few] { $count } сторінки, { $size }
+    [many] { $count } сторінок, { $size }
+   *[other] { $count } сторінки, { $size }
+}
+# review: new
+preview-page-alt = { $name }, сторінка { $page } з { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Відкрийте файл, щоб побачити всю { $count } сторінку
+    [few] Відкрийте файл, щоб побачити всі { $count } сторінки
+    [many] Відкрийте файл, щоб побачити всі { $count } сторінок
+   *[other] Відкрийте файл, щоб побачити всі { $count } сторінки
+}

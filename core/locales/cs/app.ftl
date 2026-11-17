@@ -590,6 +590,12 @@ ui-download-limit = &Limit místa pro každý účet:
 ui-send-delay = Pr&odleva před odesláním:
 ui-send-delay-note = Dokud zpráva čeká na odeslání, můžete odeslání zrušit příkazem Zpět.
 ui-dark-messages = Zobrazovat zprávy na tmavém pozadí, když je systém v tmavém režimu
+# review: new
+ui-preview-show = Zobrazovat pří&lohy ve zprávách
+# review: new
+ui-preview-show-note = Zobrazí obrázky a první stránky souborů PDF pod textem zprávy. Inbox Classic tyto náhledy vytváří sám, takže nic v souboru se nemůže spustit.
+# review: new
+ui-preview-pdfs = Zobrazovat soubory PD&F ve zprávách
 ui-sending-in = { $subject } se odešle za { $count ->
     [one] 1 sekundu
     [few] { $count } sekundy

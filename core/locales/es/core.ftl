@@ -839,3 +839,15 @@ preview-pdf-option = Mostrar archivos PDF en los mensajes
 preview-pdf-off = Los archivos PDF no se muestran en los mensajes.
 # review: new
 preview-pdf-off-crashed = Un archivo PDF cerró Inbox Classic mientras se mostraba, por lo que los archivos PDF ya no se muestran en los mensajes. Las imágenes sí. Para volver a mostrar los archivos PDF, active { $option } en las opciones de lectura.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 página, { $size }
+   *[other] { $count } páginas, { $size }
+}
+# review: new
+preview-page-alt = { $name }, página { $page } de { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Ábralo para ver la página
+   *[other] Ábralo para ver las { $count } páginas
+}

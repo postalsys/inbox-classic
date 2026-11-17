@@ -582,6 +582,12 @@ ui-download-limit = &Kettaruumi piir konto kohta:
 ui-send-delay = Viivitus &enne saatmist:
 ui-send-delay-note = Kuni kiri ootab saatmist, saate saatmise tühistada nupuga „Võta tagasi“.
 ui-dark-messages = Kuva kirju tumedal taustal, kui süsteem kasutab tumedat režiimi
+# review: new
+ui-preview-show = Näita &manuseid kirjades
+# review: new
+ui-preview-show-note = Näitab pilte ja PDF-failide esimesi lehekülgi kirja teksti järel. Inbox Classic teeb need eelvaated ise, nii et miski failis ei saa käivituda.
+# review: new
+ui-preview-pdfs = Näita PDF-&faile kirjades
 ui-sending-in = { $subject } saadetakse { $count ->
     [one] 1 sekundi pärast
    *[other] { $count } sekundi pärast

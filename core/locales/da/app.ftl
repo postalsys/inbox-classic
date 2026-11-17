@@ -587,6 +587,12 @@ ui-download-limit = &Lagergrænse pr. konto:
 ui-send-delay = &Forsinkelse før afsendelse:
 ui-send-delay-note = Mens en meddelelse venter på at blive sendt, kan du annullere afsendelsen med Fortryd.
 ui-dark-messages = Vis meddelelser på mørk baggrund, når systemet er i mørk tilstand
+# review: new
+ui-preview-show = Vis v&edhæftede filer i meddelelser
+# review: new
+ui-preview-show-note = Viser billeder og de første sider af PDF-filer efter teksten i en meddelelse. Inbox Classic laver selv disse forhåndsvisninger, så intet i en fil kan køre.
+# review: new
+ui-preview-pdfs = Vis &PDF-filer i meddelelser
 ui-sending-in = Sender { $subject } om { $count ->
     [one] 1 sekund
    *[other] { $count } sekunder

@@ -1132,6 +1132,12 @@ ui-send-delay-note = Kamēr ziņojums gaida nosūtīšanu, sūtīšanu var atcel
 # review: new
 ui-dark-messages = Rādīt ziņojumus uz tumša fona, kad sistēmā ir tumšais režīms
 # review: new
+ui-preview-show = Rādīt &pielikumus vēstulēs
+# review: new
+ui-preview-show-note = Pēc vēstules teksta rāda attēlus un PDF failu pirmās lappuses. Šos priekšskatījumus Inbox Classic veido pati, tāpēc nekas failā nevar tikt palaists.
+# review: new
+ui-preview-pdfs = Rādīt PDF &failus vēstulēs
+# review: new
 ui-sending-in = { $subject } tiks nosūtīts pēc { $count ->
     [one] { $count } sekundes
    *[other] { $count } sekundēm

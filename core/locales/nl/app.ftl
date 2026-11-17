@@ -586,6 +586,12 @@ ui-download-limit = &Opslaglimiet per account:
 ui-send-delay = Wachttijd &voor verzenden:
 ui-send-delay-note = Terwijl een bericht wacht op verzending, kun je het verzenden annuleren met Ongedaan maken.
 ui-dark-messages = Berichten op een donkere achtergrond tonen als het systeem in de donkere modus staat
+# review: new
+ui-preview-show = Bi&jlagen in berichten tonen
+# review: new
+ui-preview-show-note = Toont afbeeldingen en de eerste pagina’s van PDF-bestanden na de tekst van een bericht. Inbox Classic maakt deze voorbeelden zelf, dus niets in een bestand kan worden uitgevoerd.
+# review: new
+ui-preview-pdfs = P&DF-bestanden in berichten tonen
 ui-sending-in = { $subject } wordt verzonden over { $count ->
     [one] { $count } seconde
    *[other] { $count } seconden

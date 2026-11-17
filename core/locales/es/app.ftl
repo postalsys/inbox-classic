@@ -582,6 +582,12 @@ ui-download-limit = &Espacio máximo por cuenta:
 ui-send-delay = &Retraso antes de enviar:
 ui-send-delay-note = Mientras un mensaje esté pendiente de envío, puede cancelar el envío con Deshacer.
 ui-dark-messages = Mostrar los mensajes sobre fondo oscuro cuando el sistema esté en modo oscuro
+# review: new
+ui-preview-show = Mostrar los archivos ad&juntos en los mensajes
+# review: new
+ui-preview-show-note = Muestra las imágenes y las primeras páginas de los archivos PDF después del texto del mensaje. Inbox Classic crea estas vistas previas por sí mismo, así que nada de un archivo puede ejecutarse.
+# review: new
+ui-preview-pdfs = Mostrar archivos &PDF en los mensajes
 ui-sending-in = Se enviará { $subject } en { $count ->
     [one] 1 segundo
    *[other] { $count } segundos

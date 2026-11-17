@@ -1136,6 +1136,12 @@ ui-send-delay-note = Cât timp un mesaj așteaptă să fie trimis, puteți anula
 # review: new
 ui-dark-messages = Afișare mesaje pe fundal întunecat când sistemul este în modul întunecat
 # review: new
+ui-preview-show = Afișează a&tașamentele în mesaje
+# review: new
+ui-preview-show-note = Afișează imaginile și primele pagini ale fișierelor PDF după textul mesajului. Inbox Classic creează singur aceste previzualizări, așa că nimic dintr-un fișier nu poate rula.
+# review: new
+ui-preview-pdfs = Afișează &fișierele PDF în mesaje
+# review: new
 ui-sending-in = { $subject } se trimite în { $count ->
     [one] 1 secundă
     [few] { $count } secunde

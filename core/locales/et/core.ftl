@@ -806,3 +806,15 @@ preview-pdf-option = Näita PDF-faile kirjades
 preview-pdf-off = PDF-faile kirjades ei näidata.
 # review: new
 preview-pdf-off-crashed = PDF-fail sulges Inbox Classicu selle näitamise ajal, seetõttu ei näidata PDF-faile kirjades enam. Pilte näidatakse endiselt. PDF-failide uuesti näitamiseks lülitage lugemisvalikutes sisse { $option }.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 lehekülg, { $size }
+   *[other] { $count } lehekülge, { $size }
+}
+# review: new
+preview-page-alt = { $name }, lehekülg { $page }/{ $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Avage fail, et lehekülge näha
+   *[other] Avage fail, et näha kõiki { $count } lehekülge
+}

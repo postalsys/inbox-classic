@@ -844,3 +844,15 @@ preview-pdf-option = İletilerde PDF dosyalarını göster
 preview-pdf-off = PDF dosyaları iletilerde gösterilmiyor.
 # review: new
 preview-pdf-off-crashed = Bir PDF dosyası gösterilirken Inbox Classic'i kapattı, bu yüzden PDF dosyaları artık iletilerde gösterilmiyor. Resimler hâlâ gösteriliyor. PDF dosyalarını yeniden göstermek için okuma seçeneklerinde { $option } seçeneğini açın.
+# review: new
+preview-pdf-details = { $count ->
+    [one] { $count } sayfa, { $size }
+   *[other] { $count } sayfa, { $size }
+}
+# review: new
+preview-page-alt = { $name }, sayfa { $page }/{ $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Sayfayı görmek için dosyayı açın
+   *[other] { $count } sayfanın tümünü görmek için dosyayı açın
+}

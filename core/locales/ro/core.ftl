@@ -1387,3 +1387,17 @@ preview-pdf-option = Afișează fișierele PDF în mesaje
 preview-pdf-off = Fișierele PDF nu sunt afișate în mesaje.
 # review: new
 preview-pdf-off-crashed = Un fișier PDF a închis Inbox Classic în timp ce era afișat, așa că fișierele PDF nu mai sunt afișate în mesaje. Imaginile sunt afișate în continuare. Pentru a afișa din nou fișierele PDF, activați { $option } în opțiunile de citire.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 pagină, { $size }
+    [few] { $count } pagini, { $size }
+   *[other] { $count } de pagini, { $size }
+}
+# review: new
+preview-page-alt = { $name }, pagina { $page } din { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Deschideți fișierul pentru a vedea pagina
+    [few] Deschideți fișierul pentru a vedea toate cele { $count } pagini
+   *[other] Deschideți fișierul pentru a vedea toate cele { $count } de pagini
+}

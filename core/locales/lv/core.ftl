@@ -1364,3 +1364,17 @@ preview-pdf-option = Rādīt PDF failus vēstulēs
 preview-pdf-off = PDF faili vēstulēs netiek rādīti.
 # review: new
 preview-pdf-off-crashed = PDF fails aizvēra Inbox Classic, kamēr tas tika rādīts, tāpēc PDF faili vēstulēs vairs netiek rādīti. Attēli joprojām tiek rādīti. Lai atkal rādītu PDF failus, lasīšanas opcijās ieslēdziet { $option }.
+# review: new
+preview-pdf-details = { $count ->
+    [zero] { $count } lappušu, { $size }
+    [one] { $count } lappuse, { $size }
+   *[other] { $count } lappuses, { $size }
+}
+# review: new
+preview-page-alt = { $name }, { $page }. lappuse no { $count }
+# review: new
+preview-more-pages = { $count ->
+    [zero] Atveriet failu, lai redzētu visas { $count } lappuses
+    [one] Atveriet failu, lai redzētu visu { $count } lappusi
+   *[other] Atveriet failu, lai redzētu visas { $count } lappuses
+}

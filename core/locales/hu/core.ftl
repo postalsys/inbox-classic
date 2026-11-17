@@ -849,3 +849,15 @@ preview-pdf-option = PDF-fájlok megjelenítése az üzenetekben
 preview-pdf-off = A PDF-fájlok nem jelennek meg az üzenetekben.
 # review: new
 preview-pdf-off-crashed = Egy PDF-fájl megjelenítés közben bezárta az Inbox Classicot, ezért a PDF-fájlok már nem jelennek meg az üzenetekben. A képek továbbra is megjelennek. A PDF-fájlok ismételt megjelenítéséhez kapcsolja be az olvasási beállításokban ezt: { $option }.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 oldal, { $size }
+   *[other] { $count } oldal, { $size }
+}
+# review: new
+preview-page-alt = { $name }, { $page }. oldal / { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Nyissa meg az oldal megtekintéséhez
+   *[other] Nyissa meg mind a(z) { $count } oldal megtekintéséhez
+}

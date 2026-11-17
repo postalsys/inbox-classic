@@ -593,6 +593,12 @@ ui-download-limit = &Tárhelykorlát fiókonként:
 ui-send-delay = &Várakozás küldés előtt:
 ui-send-delay-note = Amíg az üzenet küldésre vár, a Visszavonás paranccsal leállíthatja a küldést.
 ui-dark-messages = Üzenetek sötét háttéren, ha a rendszer sötét módban van
+# review: new
+ui-preview-show = Mellékletek me&gjelenítése az üzenetekben
+# review: new
+ui-preview-show-note = Az üzenet szövege után megjeleníti a képeket és a PDF-fájlok első oldalait. Ezeket az előnézeteket az Inbox Classic maga készíti, így a fájlokban semmi sem tud elindulni.
+# review: new
+ui-preview-pdfs = &PDF-fájlok megjelenítése az üzenetekben
 ui-sending-in = { $subject } elküldése { $count ->
     [one] 1 másodperc múlva
    *[other] { $count } másodperc múlva

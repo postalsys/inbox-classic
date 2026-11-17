@@ -586,6 +586,12 @@ ui-download-limit = &Limite di spazio per account:
 ui-send-delay = Attesa pr&ima dell’invio:
 ui-send-delay-note = Mentre un messaggio è in attesa di essere inviato, puoi annullarne l’invio con Annulla.
 ui-dark-messages = Mostra i messaggi su sfondo scuro quando il sistema è in modalità scura
+# review: new
+ui-preview-show = Mostra gli alle&gati nei messaggi
+# review: new
+ui-preview-show-note = Mostra le immagini e le prime pagine dei file PDF dopo il testo del messaggio. Inbox Classic crea da sé queste anteprime, quindi niente in un file può essere eseguito.
+# review: new
+ui-preview-pdfs = Mostra i &file PDF nei messaggi
 ui-sending-in = Invio di { $subject } tra { $count ->
     [one] { $count } secondo
    *[other] { $count } secondi

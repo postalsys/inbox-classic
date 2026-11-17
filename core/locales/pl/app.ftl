@@ -1142,6 +1142,12 @@ ui-send-delay-note = Gdy wiadomość czeka na wysłanie, możesz anulować wysy�
 # review: new
 ui-dark-messages = Pokazuj wiadomości na ciemnym tle, gdy system jest w trybie ciemnym
 # review: new
+ui-preview-show = Pokazuj z&ałączniki w wiadomościach
+# review: new
+ui-preview-show-note = Pokazuje obrazy i pierwsze strony plików PDF pod tekstem wiadomości. Inbox Classic sam tworzy te podglądy, więc nic w pliku nie może się uruchomić.
+# review: new
+ui-preview-pdfs = Pokazuj pliki PD&F w wiadomościach
+# review: new
 ui-sending-in = Wysyłanie { $subject } za { $count ->
     [one] 1 sekundę
     [few] { $count } sekundy

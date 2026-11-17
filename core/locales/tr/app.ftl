@@ -587,6 +587,12 @@ ui-download-limit = &Hesap başına depolama sınırı:
 ui-send-delay = &Göndermeden önce bekleme:
 ui-send-delay-note = Bir ileti gönderilmeyi beklerken Geri Al ile gönderimi iptal edebilirsiniz.
 ui-dark-messages = Sistem karanlık moddayken iletileri koyu arka planda göster
+# review: new
+ui-preview-show = İletilerde &ekleri göster
+# review: new
+ui-preview-show-note = İletinin metninden sonra resimleri ve PDF dosyalarının ilk sayfalarını gösterir. Bu önizlemeleri Inbox Classic kendisi oluşturur, bu yüzden bir dosyadaki hiçbir şey çalışamaz.
+# review: new
+ui-preview-pdfs = İletilerde &PDF dosyalarını göster
 ui-sending-in = Gönderim için kalan süre ({ $subject }): { $count ->
     [one] 1 saniye
    *[other] { $count } saniye

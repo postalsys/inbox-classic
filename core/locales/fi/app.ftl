@@ -595,6 +595,12 @@ ui-download-limit = &Tallennustilan raja tiliä kohden:
 ui-send-delay = &Viive ennen lähettämistä:
 ui-send-delay-note = Kun viesti odottaa lähtöä, voit perua lähetyksen Kumoa-toiminnolla.
 ui-dark-messages = Näytä viestit tummalla taustalla, kun järjestelmä on tummassa tilassa
+# review: new
+ui-preview-show = Näytä l&iitteet viesteissä
+# review: new
+ui-preview-show-note = Näyttää kuvat ja PDF-tiedostojen ensimmäiset sivut viestin tekstin jälkeen. Inbox Classic tekee nämä esikatselut itse, joten mikään tiedostossa ei voi käynnistyä.
+# review: new
+ui-preview-pdfs = Näytä &PDF-tiedostot viesteissä
 ui-sending-in = Lähetetään { $subject }, { $count ->
     [one] 1 sekunti jäljellä
    *[other] { $count } sekuntia jäljellä

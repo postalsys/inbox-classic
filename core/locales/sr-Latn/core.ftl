@@ -921,3 +921,17 @@ preview-pdf-option = Prikaži PDF datoteke u porukama
 preview-pdf-off = PDF datoteke se ne prikazuju u porukama.
 # review: new
 preview-pdf-off-crashed = PDF datoteka je zatvorila Inbox Classic dok se prikazivala, pa se PDF datoteke više ne prikazuju u porukama. Slike se i dalje prikazuju. Da biste ponovo prikazivali PDF datoteke, uključite { $option } u opcijama čitanja.
+# review: new
+preview-pdf-details = { $count ->
+    [one] { $count } stranica, { $size }
+    [few] { $count } stranice, { $size }
+   *[other] { $count } stranica, { $size }
+}
+# review: new
+preview-page-alt = { $name }, stranica { $page } od { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Otvorite datoteku da biste videli svih { $count } stranicu
+    [few] Otvorite datoteku da biste videli sve { $count } stranice
+   *[other] Otvorite datoteku da biste videli svih { $count } stranica
+}

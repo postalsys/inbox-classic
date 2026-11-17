@@ -597,6 +597,12 @@ ui-download-limit = Ograničenje pr&ostora po nalogu:
 ui-send-delay = Odlaganje pre &slanja:
 ui-send-delay-note = Dok poruka čeka na slanje, slanje možete da otkažete komandom Opozovi.
 ui-dark-messages = Prikazuj poruke na tamnoj pozadini kada je sistem u tamnom režimu
+# review: new
+ui-preview-show = Prikaži pri&loge u porukama
+# review: new
+ui-preview-show-note = Prikazuje slike i prve stranice PDF datoteka posle teksta poruke. Inbox Classic sam pravi ove preglede, pa ništa iz datoteke ne može da se pokrene.
+# review: new
+ui-preview-pdfs = Prikaži PDF &datoteke u porukama
 ui-sending-in = Poruka { $subject } se šalje za { $count ->
     [one] { $count } sekundu
     [few] { $count } sekunde

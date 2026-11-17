@@ -901,3 +901,15 @@ preview-pdf-option = Εμφάνιση αρχείων PDF στα μηνύματα
 preview-pdf-off = Τα αρχεία PDF δεν εμφανίζονται στα μηνύματα.
 # review: new
 preview-pdf-off-crashed = Ένα αρχείο PDF έκλεισε το Inbox Classic ενώ εμφανιζόταν, οπότε τα αρχεία PDF δεν εμφανίζονται πλέον στα μηνύματα. Οι εικόνες εμφανίζονται ακόμα. Για να εμφανίζονται ξανά τα αρχεία PDF, ενεργοποιήστε την επιλογή { $option } στις επιλογές ανάγνωσης.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 σελίδα, { $size }
+   *[other] { $count } σελίδες, { $size }
+}
+# review: new
+preview-page-alt = { $name }, σελίδα { $page } από { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Ανοίξτε το για να δείτε τη σελίδα
+   *[other] Ανοίξτε το για να δείτε και τις { $count } σελίδες
+}

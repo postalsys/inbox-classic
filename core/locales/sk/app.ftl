@@ -1134,6 +1134,12 @@ ui-send-delay-note = Kým správa čaká na odoslanie, môžete odoslanie zruši
 # review: new
 ui-dark-messages = Zobrazovať správy na tmavom pozadí, keď je systém v tmavom režime
 # review: new
+ui-preview-show = Zobrazovať prí&lohy v správach
+# review: new
+ui-preview-show-note = Zobrazí obrázky a prvé strany súborov PDF pod textom správy. Inbox Classic tieto náhľady vytvára sám, takže nič v súbore sa nemôže spustiť.
+# review: new
+ui-preview-pdfs = Zobrazovať súbory PD&F v správach
+# review: new
 ui-sending-in = { $subject } sa odošle o { $count ->
     [one] 1 sekundu
     [few] { $count } sekundy

@@ -582,6 +582,12 @@ ui-download-limit = &Maximaler Speicherplatz pro Konto:
 ui-send-delay = &Verzögerung vor dem Senden:
 ui-send-delay-note = Solange eine Nachricht auf den Versand wartet, können Sie das Senden mit „Rückgängig“ abbrechen.
 ui-dark-messages = Nachrichten auf dunklem Hintergrund anzeigen, wenn der Dunkelmodus des Systems aktiv ist
+# review: new
+ui-preview-show = An&hänge in Nachrichten anzeigen
+# review: new
+ui-preview-show-note = Zeigt Bilder und die ersten Seiten von PDF-Dateien unter dem Text einer Nachricht an. Inbox Classic erstellt diese Vorschauen selbst, daher kann nichts in einer Datei ausgeführt werden.
+# review: new
+ui-preview-pdfs = &PDF-Dateien in Nachrichten anzeigen
 ui-sending-in = { $subject } wird in { $count ->
     [one] 1 Sekunde
    *[other] { $count } Sekunden

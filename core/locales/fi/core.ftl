@@ -869,3 +869,15 @@ preview-pdf-option = Näytä PDF-tiedostot viesteissä
 preview-pdf-off = PDF-tiedostoja ei näytetä viesteissä.
 # review: new
 preview-pdf-off-crashed = PDF-tiedosto sulki Inbox Classicin näytettäessä, joten PDF-tiedostoja ei enää näytetä viesteissä. Kuvat näytetään edelleen. Voit näyttää PDF-tiedostot uudelleen ottamalla asetuksen { $option } käyttöön lukuasetuksissa.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 sivu, { $size }
+   *[other] { $count } sivua, { $size }
+}
+# review: new
+preview-page-alt = { $name }, sivu { $page }/{ $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Avaa tiedosto nähdäksesi sivun
+   *[other] Avaa tiedosto nähdäksesi kaikki { $count } sivua
+}

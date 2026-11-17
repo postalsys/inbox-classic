@@ -822,3 +822,15 @@ preview-pdf-option = PDF-Dateien in Nachrichten anzeigen
 preview-pdf-off = PDF-Dateien werden in Nachrichten nicht angezeigt.
 # review: new
 preview-pdf-off-crashed = Eine PDF-Datei hat Inbox Classic beim Anzeigen beendet, daher werden PDF-Dateien in Nachrichten nicht mehr angezeigt. Bilder werden weiterhin angezeigt. Um PDF-Dateien wieder anzuzeigen, aktivieren Sie { $option } in den Leseoptionen.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 Seite, { $size }
+   *[other] { $count } Seiten, { $size }
+}
+# review: new
+preview-page-alt = { $name }, Seite { $page } von { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Öffnen, um die Seite zu sehen
+   *[other] Öffnen, um alle { $count } Seiten zu sehen
+}

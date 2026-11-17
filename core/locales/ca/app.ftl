@@ -587,6 +587,12 @@ ui-download-limit = &Límit d’emmagatzematge per compte:
 ui-send-delay = &Temps d’espera abans d’enviar:
 ui-send-delay-note = Mentre un missatge espera per ser enviat, podeu cancel·lar l’enviament amb Desfés.
 ui-dark-messages = Mostra els missatges amb fons fosc quan el sistema és en mode fosc
+# review: new
+ui-preview-show = Mostra els &fitxers adjunts als missatges
+# review: new
+ui-preview-show-note = Mostra les imatges i les primeres pàgines dels fitxers PDF després del text del missatge. Inbox Classic crea aquestes previsualitzacions ell mateix, de manera que res d'un fitxer no es pot executar.
+# review: new
+ui-preview-pdfs = Mostra els fitxers &PDF als missatges
 ui-sending-in = S’enviarà { $subject } d’aquí a { $count ->
     [one] 1 segon
    *[other] { $count } segons

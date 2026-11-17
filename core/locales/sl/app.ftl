@@ -1144,6 +1144,12 @@ ui-send-delay-note = Dokler sporočilo čaka na pošiljanje, lahko pošiljanje p
 # review: new
 ui-dark-messages = Pokaži sporočila na temnem ozadju, ko je sistem v temnem načinu
 # review: new
+ui-preview-show = Prikaži pripon&ke v sporočilih
+# review: new
+ui-preview-show-note = Za besedilom sporočila prikaže slike in prve strani datotek PDF. Inbox Classic te predoglede izdela sam, zato se nič v datoteki ne more zagnati.
+# review: new
+ui-preview-pdfs = Prikaži datoteke PD&F v sporočilih
+# review: new
 ui-sending-in = Pošiljanje { $subject } čez { $count ->
     [one] { $count } sekundo
     [two] { $count } sekundi

@@ -1421,3 +1421,19 @@ preview-pdf-option = Prikaži datoteke PDF v sporočilih
 preview-pdf-off = Datoteke PDF se v sporočilih ne prikazujejo.
 # review: new
 preview-pdf-off-crashed = Datoteka PDF je med prikazovanjem zaprla Inbox Classic, zato se datoteke PDF v sporočilih ne prikazujejo več. Slike se še prikazujejo. Če želite znova prikazovati datoteke PDF, v možnostih branja vklopite { $option }.
+# review: new
+preview-pdf-details = { $count ->
+    [one] { $count } stran, { $size }
+    [two] { $count } strani, { $size }
+    [few] { $count } strani, { $size }
+   *[other] { $count } strani, { $size }
+}
+# review: new
+preview-page-alt = { $name }, stran { $page } od { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Odprite datoteko za ogled vseh { $count } strani
+    [two] Odprite datoteko za ogled obeh { $count } strani
+    [few] Odprite datoteko za ogled vseh { $count } strani
+   *[other] Odprite datoteko za ogled vseh { $count } strani
+}
