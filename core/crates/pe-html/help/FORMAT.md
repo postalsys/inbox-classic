@@ -36,7 +36,7 @@ on inboxclassic.com/help.
 - `<a href="topic:<id>"></a>`: a link to another topic; left empty, it is filled with that topic's title.
   `<a href="https://...">` opens in the browser.
 - `<img src="picture:<shot>" alt="...">`: a screenshot of the UI tests (`read-1-html`, `account-1-form`,
-  `agents-4-send`, `bounce-1-failed`, `all-inboxes-3-accounts`), the platform's own.
+  `agents-4-send`, `agents-8-draft`, `bounce-1-failed`, `all-inboxes-3-accounts`), the platform's own.
 - `<!--os:windows,linux-->...<!--/os-->`: a part for some platforms only (windows, mac, linux), not nested.
 - `<!--review-->...<!--/review-->` in a translation: a passage waiting for a native review.
 
