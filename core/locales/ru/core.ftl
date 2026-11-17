@@ -674,73 +674,40 @@ day-sunday = воскресенье
 
 ## AI agents
 
-# review: new
-agent-level-read = Чтение почты: папки, список сообщений, поиск и сообщения
-# review: new
-agent-level-organize = Упорядочивание почты: прочитанность, флажки, нежелательная почта, перемещение, архивирование, новые папки, удаление в папку «Удаленные» и отписка от рассылок после вашего согласия
-# review: new
-agent-level-drafts = Создание черновиков, которые отправляете вы
-# review: new
-agent-level-send = Отправка почты, каждого сообщения только после вашего согласия
-# review: new
+agent-level-read = Чтение почты: просмотр папок, списка сообщений и их содержимого, поиск
+agent-level-organize = Управление почтой: отметки о прочтении, флажки, пометка нежелательных сообщений, перемещение, архивирование, создание папок, удаление в папку «Удаленные» и отписка от рассылок с вашего согласия
+agent-level-drafts = Создание черновиков, которые вы сможете отправить сами
+agent-level-send = Отправка сообщений с вашим подтверждением каждой отправки
 agent-connect-title = { $program } запрашивает доступ к вашей почте
-# review: new
-agent-connect-detail = ИИ-агент запросил разрешение на работу с Inbox Classic. Выберите, что ему разрешено и какие учетные записи он может видеть; позже это можно изменить в меню Сервис > ИИ-агенты.
+agent-connect-detail = ИИ-агент хочет работать с вашей почтой через Inbox Classic. Выберите разрешенные действия и доступные ему учетные записи. Позже это можно изменить в меню Сервис > ИИ-агенты.
 
-    Агенты читают почту, написанную другими людьми, и сообщение может попытаться их обмануть. Inbox Classic всегда спрашивает вас, прежде чем агент что-либо отправит.
-# review: new
-agent-reply-to = Ответ на «{ $subject }»
-# review: new
-agent-reply-all-on = Ответ всем на «{ $subject }»
-# review: new
-agent-forward-of = Пересылка «{ $subject }»
-# review: new
+    Письма от других людей могут содержать инструкции, рассчитанные на обман агента. Inbox Classic всегда запрашивает ваше согласие, прежде чем агент отправит сообщение.
+agent-reply-to = Ответ на сообщение «{ $subject }»
+agent-reply-all-on = Ответ всем на сообщение «{ $subject }»
+agent-forward-of = Пересылка сообщения «{ $subject }»
 agent-never-written-one = Вы никогда не писали на адрес { $address }.
-# review: new
-agent-never-written-many = На некоторые из этих адресов ({ $count }) вы никогда не писали.
-# review: new
+agent-never-written-many = Вы никогда не писали на { $count } из этих адресов.
 agent-send-title = { $program } хочет отправить это сообщение
-# review: new
-agent-send-detail = Проверьте получателей и содержимое сообщения. После подтверждения сообщение будет ждать в папке «Исходящие» { $seconds } с., и его еще можно будет удалить.
-# review: new
+agent-send-detail = Проверьте получателей и содержимое сообщения. После подтверждения сообщение останется в папке «Исходящие» на { $seconds } секунд. До отправки его можно удалить.
 agent-change-title = Разрешения программы { $program }
-# review: new
-agent-change-allowed = Измените, что ИИ-агентам этой программы разрешено делать с вашей почтой.
-# review: new
-agent-change-refused = Вы запретили этой программе доступ. Разрешите его, чтобы снова дать ее агентам доступ к вашей почте.
-# review: new
+agent-change-allowed = Укажите, какие действия с вашей почтой разрешены ИИ-агентам этой программы.
+agent-change-refused = Вы запретили этой программе доступ. Разрешите доступ, чтобы ее агенты снова могли работать с вашей почтой.
 agent-log-taken-back = { $entry } (отменено)
-# review: new
 agent-files = Файлы: { $files }
-# review: new
-agent-undo-refused = Это нельзя отменить.
-# review: new
-agent-undo-refused-why = Это нельзя отменить: { $reason }.
-# review: new
+agent-undo-refused = Это действие нельзя отменить.
+agent-undo-refused-why = Это действие нельзя отменить: { $reason }.
 agent-undo-impossible = это нельзя отменить
-# review: new
 agent-undo-not-in-folder = сообщения больше нет в этой папке
-# review: new
-agent-undo-not-arrived = сообщения нет (пока) в папке, куда оно перемещено
-# review: new
-agent-undo-sent = сообщение уже отправлено
-# review: new
+agent-undo-not-arrived = сообщения пока нет в папке назначения
+agent-undo-sent = сообщения больше нет в папке «Исходящие»
 agent-original-not-downloaded = исходное сообщение еще не загружено. Сначала откройте его
-# review: new
-agent-turned-away = Отклонено
-# review: new
+agent-turned-away = Доступ запрещен
 agent-can-nothing = Ничего
-# review: new
 agent-can-read = чтение
-# review: new
-agent-can-organize = упорядочивание
-# review: new
+agent-can-organize = управление почтой
 agent-can-drafts = создание черновиков
-# review: new
 agent-can-send = отправка с вашего согласия
-# review: new
 agent-can-list = { $first } и { $last }
-# review: new
 agent-accounts = { $count ->
     [0] нет учетных записей
     [one] { $count } учетная запись
@@ -748,56 +715,32 @@ agent-accounts = { $count ->
     [many] { $count } учетных записей
    *[other] { $count } учетной записи
 }
-# review: new
 agent-access = { $can }; { $accounts }
-# review: new
 agent-unreadable = Это сообщение невозможно прочитать.
-# review: new
 agent-encrypted-original = Это сообщение зашифровано: агент не может ответить на него или переслать его, так как не умеет шифровать.
-# review: new
-agent-encrypted = Это сообщение зашифровано. Прочитать его может только пользователь, в Inbox Classic.
+agent-encrypted = Это сообщение зашифровано, и агент не может прочитать его содержимое. Вы можете открыть его в Inbox Classic.
 # review: new
 list-encrypted = Зашифрованное сообщение
-# review: new
-agent-log-composed = «{ $subject }» открыто в новом сообщении, чтобы вы его закончили
-# review: new
-agent-log-refused = Вы не отправили «{ $subject }»
-# review: new
-agent-log-sent = «{ $subject }» отправлено: { $to }
-# review: new
+agent-log-composed = Открыто новое сообщение для редактирования. Тема: «{ $subject }»
+agent-log-refused = Вы не разрешили отправить сообщение «{ $subject }»
+agent-log-sent = Сообщение «{ $subject }» добавлено в очередь отправки. Получатели: { $to }
 agent-log-draft = Сохранен черновик «{ $subject }»
-# review: new
 agent-log-draft-replaced = Заменен черновик «{ $subject }»
-# review: new
-agent-log-draft-discarded = Удален черновик «{ $subject }»
-# review: new
-agent-draft-note = { $program }, ИИ-агент, написал этот черновик. Проверьте получателей и текст перед отправкой.
-# review: new
+agent-log-draft-discarded = Черновик «{ $subject }» удален безвозвратно
+agent-draft-note = Этот черновик создал ИИ-агент { $program }. Проверьте получателей и текст перед отправкой.
 agent-log-read = Отмечено как прочитанное: «{ $subject }»
-# review: new
 agent-log-unread = Отмечено как непрочитанное: «{ $subject }»
-# review: new
 agent-log-flagged = Помечено флажком: «{ $subject }»
-# review: new
 agent-log-unflagged = Флажок снят: «{ $subject }»
-# review: new
 agent-log-deleted = Удалено: «{ $subject }»
-# review: new
-agent-log-moved = «{ $subject }» перемещено в { $folder }
-# review: new
+agent-log-moved = Сообщение «{ $subject }» перемещено в папку «{ $folder }»
 agent-log-junk = «{ $subject }» помечено как нежелательное
-# review: new
-agent-log-not-junk = «{ $subject }» помечено как обычное
-# review: new
-agent-log-archived = В архиве: «{ $subject }»
-# review: new
+agent-log-not-junk = Сообщение «{ $subject }» больше не помечено как нежелательное
+agent-log-archived = Сообщение «{ $subject }» архивировано
 agent-log-folder = Создана папка «{ $name }»
 agent-log-unsubscribed = Вы одобрили запрос на отмену подписки. Сообщение: «{ $subject }»
-# review: new
-agent-log-unsubscribe-failed = Не удалось отписаться от рассылки «{ $subject }»: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Вы не стали отписываться от рассылок: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Ошибка при отписке от рассылки. Сообщение: «{ $subject }». Причина: { $reason }
+agent-log-unsubscribe-refused = Вы не разрешили отписаться от рассылок. Отправители: { $senders }
 agent-unsubscribe-title = { $count ->
     [1] { $program } хочет отписать вас от рассылки
     [one] { $program } хочет отписать вас от { $count } рассылки
@@ -805,10 +748,9 @@ agent-unsubscribe-title = { $count ->
     [many] { $program } хочет отписать вас от { $count } рассылок
    *[other] { $program } хочет отписать вас от { $count } рассылки
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic попросит рассылку ниже больше не присылать вам писем, используя отписку в один щелчок, которую она предлагает. Больше ничего не отправляется, а ваши сообщения остаются на своих местах.
-   *[other] Inbox Classic попросит каждую рассылку ниже больше не присылать вам писем, используя отписку в один щелчок, которую предлагает рассылка. Больше ничего не отправляется, а ваши сообщения остаются на своих местах.
+    [1] Inbox Classic отправит указанной ниже рассылке запрос прекратить отправку сообщений. Для этого используется предусмотренная рассылкой отписка одним щелчком. Письма при этом не отправляются, а полученные сообщения остаются без изменений.
+   *[other] Inbox Classic отправит каждой из указанных ниже рассылок запрос прекратить отправку сообщений. Для этого используется предусмотренная рассылкой отписка одним щелчком. Письма при этом не отправляются, а полученные сообщения остаются без изменений.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)

@@ -1171,6 +1171,21 @@ Plurals: `[one]` 1, 21, 31...; `[few]` 2 to 4, 22 to 24...; `[many]` 0, 5 to 20,
   «учетную запись» (accusative).
 - Inbox Classic is feminine («программа»); weekday names lowercase; `<kbd>Click</kbd>` is `<kbd>Щелчок</kbd>`.
 
+- Agent permissions use "управление почтой" for organization beyond sorting, consistently in catalogs and all
+  three agent help topics. Use "ИИ-агент", "черновик", "запрос на отписку" and the existing Cyrillic О/Н keys.
+- Agent logs keep impersonal past forms and describe the send queue before delivery. An unavailable Undo says
+  that the message is absent from "Исходящие", without claiming delivery. A folder name follows "в папку" in
+  quotes so custom names need no inflection. The seconds caller supplies only 30, so "30 секунд" is grammatical.
+- Keep all Russian account and unsubscribe plural branches, including the numeric placeholder in `[one]` for
+  21 and higher. Account counts are independent of the permission list. Subject placeholders follow "сообщение"
+  or "Тема:" where the surrounding grammar needs a head noun.
+- The unsubscribe quota counts approved requests per program over the preceding 24 hours, including failures.
+  Mail content must be treated as data, not instructions to follow. The optional "текстовая подпись" is the
+  account footer, distinct from a digital signature.
+- Only the agent's own drafts not yet saved by the user can be permanently removed. Saving, including autosave,
+  or sending ends access; merely opening does not. Removing a program's access does not uninstall the program.
+  Use "отключите" for the connection control, since Linux has a switch and the other platforms use checkboxes.
+
 ### Українська (uk)
 
 Terms: Вхідні; Вихідні; Надіслані; Видалені; Чернетки; Небажана пошта; повідомлення; папка; обліковий запис; вкладення;

@@ -6,16 +6,16 @@ Commit completed batches regularly and preserve an exact resume point.
 ## Resume here
 
 - Publishing policy: the user authorized pushing and merging every validated batch into GitHub `master` immediately. Fetch and fast-forward the clean review branch to `origin/master` after each merge. Keep local test suites disabled.
-- **Next: Review Russian agent strings, including the entire pending core agent block, unsubscribe/draft additions, shared controls and both full help topics; then sk/sl/sv/uk. Refresh runtime evidence, preserving the reviewed screenshot alt descriptions. After the agent queue, resume Greek and the remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.**
-  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro. Phase2 reopens only their affected help passages.
+- **Next: Check the remaining agents-connect topics against the GTK switch and review only affected control instructions. Then review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve reviewed screenshot descriptions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.**
+  Original unsubscribe additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. Source imports retain earlier reviewed prose; later corrections are recorded per batch.
   Notice UI exists on all three platforms. The exact recorded source hashes still match; Mac/Linux consumers are now committed.
-  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro. Continue the remaining agent queue.
-  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro.
-- Agent-draft screenshot source `38e7f5cf` is imported. All 28 new alt descriptions are reviewed against the three platform captures. Older prose was unchanged by the picture batch; five full agent-sending topics remain pending after the Romanian review. This adds 28 reviewed passages and no full-topic credit.
+  Notices and both agent help topics are now complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru. Continue the remaining agent queue.
+  Phase2 additions fully reviewed: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da, el, fi, hr, hu, lt, lv, pl, ro, ru.
+- Agent-draft screenshot source `38e7f5cf` is imported. All 28 new alt descriptions are reviewed against the three platform captures. Older prose was unchanged by the picture batch; four full agent-sending topics remain pending after the Russian review. This adds 28 reviewed passages and no full-topic credit.
 - Current scope: 34,404 catalog entries and 1,356 help topics.
-  Completed: 21,721 entries and 798 full topics; pending: 12,683 entries and 558 topics.
-  Historical catalog improvements: 4,015. Importing drafts earns no review credit.
+  Completed: 21,783 entries and 801 full topics; pending: 12,621 entries and 555 topics.
+  Historical catalog improvements: 4,045. Importing drafts earns no review credit.
   The 168 new preview drafts are now in scope. Thirty-two completed help topics reopen only for new passages; four baseline-only topics also enter this round.
 - All 28 unsubscribe logs now report user approval, which is recorded before the HTTP requests start.
   Nineteen older translations were reopened; four baseline-only entries entered scope and nine pending drafts
@@ -24,7 +24,7 @@ Commit completed batches regularly and preserve an exact resume point.
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
   Also check the agent warning: mail content must not be followed as instructions; this does not mean email
-  contains no instructions. French, Norwegian Bokmål, Hungarian, Lithuanian, Latvian, Polish and Romanian needed that correction; the other completed languages already convey the distinction.
+  contains no instructions. French, Norwegian Bokmål, Hungarian, Lithuanian, Latvian, Polish, Romanian and Russian needed that correction; the other completed languages already convey the distinction.
 - PDF core context is inspected. New reading-setting definitions and generated Mac/Linux settings now exist in
   `PostalExpress-preview2`. The six new IDs per language and both help insertions are imported from `03568aef`;
   its exact 117-path source snapshot includes the settings schema as context, without importing implementation.
@@ -35,7 +35,7 @@ Commit completed batches regularly and preserve an exact resume point.
   An unfinished render marker does not prove the PDF caused the crash. Original sources: preview `687113a3`, MCP `9a24e99b`.
 - Structural checks, exact import reconstruction, all inventories/hashes and C/Swift identifiers pass. The isolated
   offline pe-ffi build passed; no test suites run. HTML refreshed. `REVIEWED` remains unchanged.
-- The latest checkpoint covers 46 worktrees/188 refs. GitHub master `b61eb125` contains the review history and the reviewed screenshot descriptions. The new screenshot source rebased onto that master during this batch; its 33 exact image/alt additions and unchanged older prose are verified. Use the recorded updated source helpers at the next checkpoint. The 290 old untracked language copies still match their original imported snapshot and remain untouched.
+- The latest checkpoint covers 46 worktrees/188 refs. GitHub master `c3586aa4` contains the review history, the screenshot descriptions and the Romanian agent review. The new screenshot source rebased onto that master during this batch; its 33 exact image/alt additions and unchanged older prose are verified. Use the recorded updated source helpers at the next checkpoint. The 290 old untracked language copies still match their original imported snapshot and remain untouched.
 - Compose additions complete: de, es, et, fr, nl, it, pt, pt-BR, ca, nb, sr-Latn, tr, bg, cs, da.
   Remaining: el, fi, hr, hu, lt, lv, pl, ro, ru, sk, sl, sv, uk. Resume Greek after the agent additions,
   then finish 46 remaining original Hungarian help topics and the broader lt/lv/pl/ro/ru/sk/sl/sv/uk drafts.
@@ -2643,3 +2643,13 @@ Romanian structural checker passes with 76 expected mark-only diagnostics. Exact
 Publication checkpoint: [PR #141](https://github.com/postalsys/inbox-classic/pull/141) merged the screenshot descriptions as `b61eb125` on November 17 at 21:25 UTC. This Romanian batch is ready for the same authorized publication workflow.
 
 Review Russian agent strings, including the entire pending core agent block, unsubscribe/draft additions, shared controls and both full help topics; then sk/sl/sv/uk. Refresh runtime evidence, preserving the reviewed screenshot alt descriptions. After the agent queue, resume Greek and the remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.
+
+### Russian agent permissions, status and complete help
+
+Reviewed 62 catalog entries and all three agent help topics. Improved 30 values and 38 help wording lines, retaining 32 good values. Corrected queue and Outbox status, request approval and failure, permanent own-draft removal, save/autosave/send takeover, rolling per-program limits, optional signature text and malicious-mail instructions. Russian uses lowercase вы, noun permission labels and impersonal agent logs; the existing О/Н unsubscribe keys and all plural branches are retained. The earlier screenshot alt description and approval log are unchanged.
+
+Russian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 30 improved values, 32 retained good values and three complete help topics with 38 changed wording lines. All untargeted values, the reviewed approval log and screenshot alt description remain unchanged. Tags, attributes, controls, platform branches, literal keys, variables, plural branches, mnemonic counts and generated IDs are preserved. О/Н unsubscribe keys are distinct; shared Mac/Linux labels remain plain. Help joins with actual labels were inspected across all three platforms. Seven notice UI files and sixteen runtime/UI/rendering files match the captured evidence, including immediate user takeover on save or send and guards against queued agent changes. Global reconciliation accounts for 21,821 unmarked entries, 11,081 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,144 entries/243 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.
+
+Publication checkpoint: [PR #142](https://github.com/postalsys/inbox-classic/pull/142) merged the Romanian agent review as `c3586aa4` on November 17 at 21:37 UTC. This Russian batch is ready for the same authorized publication workflow.
+
+Check the remaining agents-connect topics against the GTK switch and review only affected control instructions. Then review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve reviewed screenshot descriptions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.
