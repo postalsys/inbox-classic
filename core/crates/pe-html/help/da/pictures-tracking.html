@@ -1,7 +1,7 @@
-<!--review--><h1>Billeder og sporing</h1>
+<h1>Billeder og sporing</h1>
 <p class="summary">Hvorfor billeder fra internettet blokeres, og hvordan du viser dem for en meddelelse eller en afsender, du stoler på.</p>
 <p>En meddelelse kan vise billeder, som afsenderen har liggende på internettet. Når et sådant billede hentes, kan afsenderen se tidspunktet og din IP-adresse og dermed ofte udlede, at du har åbnet meddelelsen. Derfor blokerer Inbox Classic som udgangspunkt disse billeder.</p>
-<p>Billeder, der er sendt inde i selve meddelelsen, vises, da de ikke fortæller afsenderen noget.</p>
+<p>Billeder, der følger med selve meddelelsen, vises uden at kontakte afsenderens server.</p>
 <p>Når en meddelelse har billeder fra internettet, viser en bjælke hen over den, at nogle billeder er blokeret. Sådan ser du dem i en meddelelse, du stoler på:</p>
 <ul>
     <li><!--os:windows,mac-->Klik på bjælken.<!--/os--><!--os:linux-->Klik på <b data-text="gtk-download-pictures"></b> på bjælken.<!--/os--></li>
@@ -10,10 +10,9 @@
 <p>Tilladelsen gælder kun billederne i denne meddelelse. Billeder i andre meddelelser er fortsat blokeret.</p>
 <h2>Afsendere, du stoler på</h2>
 <p>Hvis du vil se en afsenders billeder hver gang, skal du <!--os:windows-->klikke på pilen yderst til højre på bjælken<!--/os--><!--os:mac-->klikke på pilen ved siden af <b data-text="cmd-pictures"></b> på bjælken<!--/os--><!--os:linux-->klikke på pilen ved siden af <b data-text="gtk-download-pictures"></b> på bjælken<!--/os-->. Vælg altid at hente billeder fra den afsender eller fra alle på afsenderens domæne.</p>
-<p>Billederne hentes derefter automatisk, men kun hvis din mailudbyder bekræfter afsenderens domæne. Ellers kræver billederne stadig din tilladelse, og bjælken viser, at afsenderen ikke kunne bekræftes. I <b data-text="folder-junk"></b> hentes billeder aldrig automatisk.</p>
+<p>Billederne hentes derefter automatisk, men kun hvis din mailudbyder bekræfter afsenderens domæne. Ellers kræver billederne stadig din tilladelse, og bjælken viser, at domænet ikke kunne bekræftes. Et bekræftet domæne beviser ikke, hvem der har skrevet meddelelsen, eller at indholdet er troværdigt. I <b data-text="folder-junk"></b> hentes billeder aldrig automatisk.</p>
 <p>Hvis du vil fjerne en afsender fra listen, skal du bruge <b data-text="ui-trusted-senders-button"></b> under <b data-settings="reading"></b>.</p>
 <h2>Billeder i alle meddelelser</h2>
-<p><b data-text="ui-pictures-always-option"></b> under <b data-settings="reading"></b> henter billederne i alle meddelelser, undtagen i <b data-text="folder-junk"></b>. Indstillingen er som udgangspunkt slået fra, fordi automatisk hentning kan afsløre, hvornår du læser en meddelelse.</p>
+<p><b data-text="ui-pictures-always-option"></b> under <b data-settings="reading"></b> henter automatisk billeder fra internettet i alle meddelelser uden for mappen <b data-text="folder-junk"></b>. Indstillingen er som udgangspunkt slået fra, fordi automatisk hentning kan afsløre, hvornår du åbner en meddelelse. Billeder fra internettet i krypterede dele kræver din udtrykkelige tilladelse, hver gang du åbner meddelelsen. Det gælder også for betroede afsendere.</p>
 <p>Et brandlogo ved siden af meddelelseshovedet håndteres særskilt fra billeder i meddelelsen og kræver mailserverens godkendelse. Hentede logoer gemmes og genbruges. Ved selve hentningen kan logoserveren se tidspunktet og din IP-adresse.</p>
 <nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

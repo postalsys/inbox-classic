@@ -1,15 +1,14 @@
-<!--review--><h1>Loginkoder</h1>
+<h1>Loginkoder</h1>
 <p class="summary">Login- og bekræftelseskoder kan vises særskilt over meddelelsen, så de er nemme at kopiere.</p>
 <p>Når programmet genkender en engangskode, fx til login, bekræftelse eller godkendelse, kan et kort over meddelelsen vise:</p>
 <ul>
-    <li>»Kode fra« og afsenderens bekræftede domæne</li>
+    <li>»Kode fra« og det domæne, koden gælder for</li>
     <li>koden med stor skrift</li>
-    <li><b data-text="otp-copy"></b>, som lægger koden i udklipsholderen</li>
+    <li>knappen <b data-text="otp-copy"></b>, som lægger koden i udklipsholderen</li>
 </ul>
 <aside class="warning">Indtast kun en kode på en side fra det domæne, kortet nævner. En meddelelse, der beder dig skrive en kode et andet sted, kan være et forsøg på at overtage din konto.</aside>
-<p>Kortet vises kun, når din mailudbyder bekræfter, at domænet har signeret meddelelsen. Uden denne bekræftelse vises koden ikke særskilt. Der er intet kort i <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> eller <b data-text="folder-drafts"></b>, eller når din udbyder ikke oplyser om signaturer.</p>
-<p>Hvis meddelelsen blev sendt for over en time siden, advarer kortet om, at koden sandsynligvis er udløbet.</p>
+<p>Kortet vises kun, når din mailudbyder bekræfter en gyldig digital signatur, der passer til det domæne, koden gælder for. Det beviser ikke, hvem der har skrevet meddelelsen, eller at indholdet er troværdigt. Kortet vises ikke i mapperne <b data-text="folder-junk"></b>, <b data-text="folder-sent"></b> og <b data-text="folder-drafts"></b>, eller når din udbyder ikke oplyser resultatet af kontrollen af domænets signatur.</p>
+<p>Hvis meddelelsen er over en time gammel, når du åbner den, advarer kortet om, at koden sandsynligvis er udløbet.</p>
 <h2>Koder i notifikationer</h2>
 <p>Hvis du vil se koden i notifikationen om en ny meddelelse, skal du slå <b data-text="ui-codes-in-notifications"></b> til under <b data-settings="general"></b>. Indstillingen er som udgangspunkt slået fra, fordi notifikationer kan være synlige på en låst skærm.</p>
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

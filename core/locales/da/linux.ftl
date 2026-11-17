@@ -167,7 +167,6 @@ gtk-nothing-yet = Intet endnu.
 ## Preferences
 
 gtk-preferences = Indstillinger
-# review: changed
 gtk-notify-subtitle = Kun mens Inbox Classic er i baggrunden
 
 # linux/data/com.inboxclassic.InboxClassic.desktop and .metainfo.xml, made by the build. The keywords are the words a
