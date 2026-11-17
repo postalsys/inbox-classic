@@ -1,26 +1,24 @@
-<!--review-->
 <h1>Firmar y cifrar un mensaje</h1>
-<p class="summary">Firme un mensaje para que sus destinatarios sepan que es suyo, y cífrelo para que solo ellos puedan leerlo.</p>
-<p>Un mensaje firmado demuestra que usted lo escribió y que nadie lo cambió por el camino. Un mensaje cifrado solo lo pueden leer sus destinatarios y usted, y además siempre va firmado. Para ambas cosas necesita una clave propia.</p>
+<p class="summary">Firme digitalmente sus mensajes y cifre su contenido para que solo usted y los destinatarios puedan leerlo.</p>
+<p>La firma digital permite comprobar que el contenido no ha cambiado desde que se firmó. Verificar a quién pertenece la clave es un paso aparte. El cifrado protege el contenido para que solo usted y los destinatarios puedan leerlo. Los mensajes que envía cifrados también se firman. Para firmar o cifrar necesita una clave propia.</p>
 <p>Para firmar o cifrar un mensaje:</p>
 <ol>
-    <li>En la ventana del mensaje, haga clic en <b data-text="ui-tb-sign"></b> o <b data-text="ui-tb-encrypt"></b>, o elija <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> o <b data-text="cmd-compose-encrypt"></b>. También puede presionar <kbd data-command="compose_sign"></kbd> o <kbd data-command="compose_encrypt"></kbd>. Si aún no tiene ninguna clave, Inbox Classic le ofrece crear una.</li>
+    <li>En la ventana del mensaje, haga clic en <b data-text="ui-tb-sign"></b> o <b data-text="ui-tb-encrypt"></b>, o elija <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> o <b data-text="cmd-compose-encrypt"></b>. También puede pulsar <kbd data-command="compose_sign"></kbd> o <kbd data-command="compose_encrypt"></kbd>. Si no tiene una clave para la dirección desde la que envía, Inbox Classic le ofrece crearla.</li>
     <li>Haga clic en <b data-text="ui-tb-send"></b>.</li>
 </ol>
-<p>Mientras <b data-text="ui-tb-encrypt"></b> está activado, la línea bajo el asunto muestra cada destinatario con un candado, e Inbox Classic busca las claves que aún no tiene:</p>
+<p>Con <b data-text="ui-tb-encrypt"></b> activado, cada destinatario aparece bajo el asunto con un símbolo de estado. Inbox Classic busca las claves que faltan:</p>
 <table>
-    <tr><th>Candado</th><th>Qué significa</th></tr>
-    <tr><td>Verde</td><td>Usted verificó la clave del destinatario.</td></tr>
-    <tr><td>Azul</td><td>Tiene la clave del destinatario, pero no la ha verificado.</td></tr>
+    <tr><th>Color</th><th>Qué significa</th></tr>
+    <tr><td>Verde</td><td>Ha confirmado a quién pertenece la clave.</td></tr>
+    <tr><td>Azul</td><td>La clave no está verificada, o es una clave propia.</td></tr>
     <tr><td>Gris</td><td>Inbox Classic está buscando la clave del destinatario.</td></tr>
-    <tr><td>Ámbar</td><td>No se encontró ninguna clave para el destinatario.</td></tr>
+    <tr><td>Ámbar</td><td>No hay ninguna clave utilizable para el destinatario.</td></tr>
 </table>
-<h2>Si un destinatario no tiene clave</h2>
-<p>Un mensaje cifrado solo se envía cuando todos los destinatarios tienen clave. Si a alguno le falta, <b data-text="ui-tb-send"></b> abre <b data-text="ui-recipient-keys-title"></b>. Allí puede hacer clic en <b data-text="ui-recipient-find-key"></b> para buscar de nuevo, en <b data-text="ui-recipient-remove"></b> para dejar fuera a esa persona, o en <b data-text="ui-send-unencrypted"></b>. También puede pedirle su clave pública e importarla.</p>
+<h2>Si falta una clave utilizable</h2>
+<p>Para enviar un mensaje cifrado, todos los destinatarios deben tener una clave utilizable. Si falta alguna, al pulsar <b data-text="ui-tb-send"></b> se abre la ventana <b data-text="ui-recipient-keys-title"></b>. Use <b data-text="ui-recipient-find-key"></b> para repetir la búsqueda o <b data-text="ui-recipient-remove"></b> para quitar al destinatario del mensaje. Puede elegir <b data-text="ui-send-unencrypted"></b> si no queda contenido procedente de mensajes cifrados. También puede pedir al destinatario su clave pública e importarla.</p>
 <h2>Respuestas a correo cifrado</h2>
-<p>Una respuesta a un mensaje cifrado, o un reenvío de uno, empieza con <b data-text="ui-tb-encrypt"></b> activado, e Inbox Classic le pregunta antes de que lo desactive. Mientras el mensaje siga citando el texto cifrado o lleve sus archivos adjuntos, solo se puede enviar cifrado.</p>
-<p>Los borradores de un mensaje cifrado se guardan cifrados, igual que su copia en <b data-text="folder-sent"></b>.</p>
+<p>Al responder a un mensaje cifrado o reenviarlo, <b data-text="ui-tb-encrypt"></b> se activa automáticamente. Inbox Classic pide confirmación antes de desactivarlo. Mientras queden texto citado, imágenes o archivos adjuntos del mensaje cifrado, solo podrá enviarlo cifrado.</p>
+<p>Los borradores de mensajes cifrados se guardan cifrados con su propia clave. La copia en <b data-text="folder-sent"></b> también conserva el cifrado.</p>
 <h2>Compartir su clave pública</h2>
-<p>Para que alguien pueda enviarle correo cifrado, elija <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Su clave pública se adjunta al mensaje como archivo.</p>
+<p>Para compartir su clave pública, elija <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Se adjunta como archivo la clave pública de la dirección desde la que envía. Los destinatarios podrán usarla para enviarle mensajes cifrados.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->

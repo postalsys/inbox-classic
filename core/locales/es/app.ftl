@@ -12,7 +12,6 @@ menu-layout = &Diseño
 menu-sort-by = Ordenar &por
 menu-text-size = Tamaño del te&xto
 menu-folder = Carpe&ta
-# review: new
 menu-insert = &Insertar
 
 ## The commands
@@ -96,11 +95,8 @@ cmd-import-address-book = Importar &libreta de direcciones...
 cmd-export-address-book = &Exportar libreta de direcciones...
 cmd-export-setup = Exportar configuración y c&uentas...
 cmd-import-setup = Importar con&figuración y cuentas...
-# review: new
 cmd-compose-sign = &Firmar digitalmente
-# review: new
 cmd-compose-encrypt = &Cifrar
-# review: new
 cmd-attach-my-key = Adjuntar mi clave &pública
 
 ## The tray icon's menu
@@ -217,11 +213,8 @@ ui-format-line = Insertar línea horizontal
 ui-tb-send = Enviar
 ui-tb-save = Guardar
 ui-tb-attach = Adjuntar
-# review: new
 ui-tb-sign = Firmar
-# review: new
 ui-tb-encrypt = Cifrar
-# review: new
 ui-field-keys = Claves:
 ui-field-from = De:
 ui-field-to = Para:
@@ -701,25 +694,15 @@ ui-contact-key = Clave de cifrado:
 ui-contact-key-none = Sin clave
 ui-contact-key-use-new = &Usar la nueva clave
 ui-contact-key-keep = &Mantener la actual
-# review: new
 ui-recipient-keys-title = Claves de los destinatarios
-# review: new
 ui-recipient-col-recipient = Destinatario
-# review: new
 ui-recipient-col-key = Clave
-# review: new
 ui-recipient-find-key = &Buscar clave
-# review: new
 ui-recipient-remove = &Quitar del mensaje
-# review: new
 ui-send-unencrypted = Enviar &sin cifrar
-# review: new
 ui-compose-make-key = C&rear una clave...
-# review: new
 ui-compose-show-keys = Claves de &cifrado...
-# review: new
 ui-compose-encrypt-off = &Desactivar el cifrado
-# review: new
 ui-compose-keep-encrypted = &Mantenerlo cifrado
 ui-setup-export-title = Exportar configuración y cuentas
 ui-setup-import-title = Importar configuración y cuentas

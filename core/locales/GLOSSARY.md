@@ -139,6 +139,12 @@ Estonian settings review (round 2):
   fingerprint; checking a message signature alone does not confirm the owner.
 - "Datos de acceso" includes saved sign-in tokens as well as passwords. After an unprotected export, the user
   must sign in again, which may use a browser rather than a password prompt.
+- Use "firmar digitalmente" where needed to distinguish cryptographic signing from the signature text at the
+  end of a message. Compose status describes protection applied when sending, not completed delivery.
+- Use "clave utilizable" in missing-key guidance: an expired or revoked key also prevents encryption.
+  "Quitar del mensaje" removes a recipient from its address fields, not from the address book.
+- Put a key-state reason after "Motivo:" and separate the next instruction. The reason may be a full sentence
+  with recovery instructions, so it does not fit naturally inside parentheses.
 
 Context notes:
 

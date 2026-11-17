@@ -5,22 +5,23 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Spanish compose signing/encryption additions, then Estonian and French.** The active-key signature
-  reason is now reviewed in all 28 languages: 13 warning values improved, 15 retained. The existing Swedish
-  encrypted-part wrapper was also reviewed and corrected to neuter agreement. This completes 29 entries with
-  14 improvements. The source-only import is `205bd846`; dependent hardening code remains on its source branch.
-  All previous catalog bytes outside these entries are preserved. New source audit found no further additions.
-- German's 40 compose additions and both help targets are now reviewed, with 16 improvements. Review the
-  remaining compose additions starting es/et/fr, then nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and hu.
-  Feature `162c0dd2` was integrated in `3552434d`; exact targets/context are in `compose-sign-encrypt-context`.
-  Every earlier help passage is preserved. No new language was found in the latest audit.
-- Current integrated scope: 33,868 catalog entries and 1,352 help topics. Completed: 20,711 entries and 792
-  full topics; pending: 13,157 entries and 560 topics. Historical catalog improvements: 3,546.
+- **Next: Estonian compose signing/encryption additions, then French.** German and Spanish now have all
+  40 new compose entries and both help targets reviewed. Spanish adds 15 catalog wording improvements and
+  14 changed help lines; all prior write-message prose is retained. Exact targets/context are recorded in
+  `compose-sign-encrypt-context`. Feature `162c0dd2` was integrated in `3552434d`.
+- Continue the compose work for nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and hu, then the broader drafts.
+  The active-key signature reason is reviewed in all 28 languages, committed in `25eff7b8`: 13 warning values
+  improved and 15 retained, plus the Swedish encrypted-part wrapper corrected to neuter agreement.
+  The source-only import is `205bd846`; dependent hardening code remains on its source branch.
+- Current integrated scope: 33,868 catalog entries and 1,352 help topics. Completed: 20,751 entries and 794
+  full topics; pending: 13,117 entries and 558 topics. Historical catalog improvements: 3,561.
   Hungarian has 48 original help topics left in addition to compose work, then lt/lv/pl/ro/ru/sk/sl/sv/uk.
-- Structural checks and German's 53 actual mnemonic scopes pass. The initial icon note was corrected after
-  inspecting individual recipients: they use green/blue locks, with lookup/warning symbols as appropriate;
-  the separate overall status bar uses the verified shield. Keep this distinction in future help edits.
-  No test suites or builds run. `REVIEWED` remains unchanged; the final late-arrival audit is still required.
+- Structural checks and German/Spanish's 53 actual mnemonic scopes pass. All full inventories and current
+  hashes reconcile. The latest fresh fetch/seven-ref audit found no new strings or languages; existing source
+  imports and the guide are unchanged. HTML regenerated. No test suites or builds run for this wording batch;
+  the earlier source-import build passed in the separate target. `REVIEWED` remains unchanged.
+- The initial icon note was corrected: individual recipients use green/blue locks and platform-specific
+  lookup/warning symbols; the separate overall status bar uses the verified shield. Keep this distinction.
 - Starting checkout: `e99f7e59`; review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
 - Read `/Users/andris/Downloads/inbox-classic-translation-guide.md`, `core/locales/GLOSSARY.md` (including the
   language's own notes), and `core/crates/pe-html/help/FORMAT.md`.
@@ -2023,3 +2024,32 @@ All seven source refs remain unchanged; no further strings or languages were fou
 no relevant edits, and the existing key-help source and active-key entry remain verified. Dependent hardening code
 and corpus work remain separate. Current scope33868/1352; completed20711/792; pending13157/560. Historical catalog
 improvements3546. Continue Spanish compose next, then Estonian and French. REVIEWED remains unchanged.
+
+
+### Spanish compose signing and encryption reviewed
+
+Reviewed all 17 new app labels and 23 core messages. Kept the good labels and improved 15 core values:
+intended protection when sending, signature integrity without proof of authorship, usable-key requirements,
+natural address/count/date joins and complete key-state reasons after «Motivo». Downgrade warnings cover quoted
+text, images and attachments, and sending without encryption is conditional. Formal usted and existing terms
+remain consistent; the glossary records the compose terminology and reason-placeholder decisions.
+
+Reviewed the new sign-and-encrypt topic and only the marked write-message paragraph, improving 14 help lines.
+The help distinguishes key ownership from signature checks, uses a cross-platform color/status table, includes
+own keys in blue status and unusable keys in amber, and explains the selected From key, encrypted drafts and
+recipient removal. All earlier write-message bytes remain intact. Control-label joins were inspected on all
+three platforms and dynamic shortcuts checked in commands.toml. The existing Spanish compose screenshot was
+inspected but predates the new controls; their layout/wrapping was checked in platform source. No GUI run.
+
+All 53 actual mnemonic scopes pass. Spanish's structural checker reports exactly 1,446 expected removed-mark
+diagnostics and no other findings. Exact reconstruction verifies 15 value edits and 40 mark removals; variables,
+selectors, comments, help tags/attributes/control references/platform branches/literal keys are preserved.
+All 28 full inventories and current hashes reconcile: 20,785 unmarked messages, 10,411 changed help lines and
+14 verified baseline pairs. The 1,373 since-start entries and 211 passages match the remaining queue.
+HTML regenerated; git diff --check passes. No test suites or builds run.
+
+Fresh fetch and seven-ref audit found no source changes, new strings or new languages. Existing key-help and
+active-key sources match recorded imports; guide unchanged and root has no relevant edits. Other hardening
+code and corpus changes remain separate. Completed: 20,751 entries and 794 topics; pending: 13,117 entries
+and 558 topics. Scope remains 33,868/1,352; historical catalog improvements: 3,561. Continue Estonian, then
+French compose additions. REVIEWED is unchanged; the complete queue and final late-arrival audit remain.

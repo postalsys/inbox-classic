@@ -599,60 +599,38 @@ pgp-publish-done = Su clave está publicada en keys.openpgp.org para { $addresse
 pgp-publish-failed = No se pudo publicar la clave: { $error }
 pgp-keyserver-off = La búsqueda de claves en keys.openpgp.org está desactivada en { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Cifrado y firmado: solo usted y { $addresses } pueden leerlo.
-   *[other] Cifrado y firmado: solo usted y sus { $count } destinatarios pueden leerlo.
+    [one] Se cifrará y firmará al enviarlo. Solo usted y { $addresses } podrán leer el contenido.
+   *[other] Se cifrará y firmará al enviarlo. Solo usted y sus { $count } destinatarios podrán leer el contenido.
 }
-# review: new
-pgp-compose-encrypt-ready = Se cifrará y firmará. Agregue destinatarios cuyas claves tenga.
-# review: new
+pgp-compose-encrypt-ready = Al enviarlo, el mensaje se cifrará y firmará. Agregue destinatarios para los que disponga de una clave utilizable.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } no tiene ninguna clave, así que el mensaje aún no se puede cifrar.
-   *[other] { $count } destinatarios no tienen ninguna clave, así que el mensaje aún no se puede cifrar: { $addresses }.
+    [one] No hay una clave utilizable para este destinatario: { $addresses }. Aún no se puede cifrar el mensaje.
+   *[other] No hay una clave utilizable para { $count } destinatarios: { $addresses }. Aún no se puede cifrar el mensaje.
 }
-# review: new
 pgp-compose-looking = Buscando las claves de { $addresses }...
-# review: new
-pgp-compose-signed = Firmado: los destinatarios pueden comprobar que procede de usted y que nadie lo cambió.
-# review: new
+pgp-compose-signed = Se firmará al enviarlo. Los destinatarios podrán comprobar la firma y detectar cambios en el contenido.
 pgp-compose-reply-clear = Sin cifrar, aunque el mensaje al que responde o que reenvía estaba cifrado.
-# review: new
-pgp-compose-encrypted-files = Lleva adjuntos archivos de un mensaje cifrado, así que este mensaje solo se puede enviar cifrado. Active Cifrar, o quite esos archivos.
-# review: new
-pgp-compose-sign-tip = Firmar el mensaje con su clave, para que los destinatarios puedan comprobar que procede de usted y que nadie lo cambió
-# review: new
-pgp-compose-sign-tip-encrypted = Un mensaje cifrado siempre se firma
-# review: new
-pgp-compose-encrypt-tip = Cifrar el mensaje, para que solo usted y sus destinatarios puedan leerlo
-# review: new
-pgp-compose-make-key = Aún no tiene ninguna clave para { $address }. ¿Crear una ahora? Con ella, sus mensajes se pueden firmar y cifrar.
-# review: new
-pgp-compose-key-unusable = Su clave para { $address } no se puede usar ({ $state }). Abra Claves de cifrado para importar su copia de seguridad o crear una clave nueva.
-# review: new
-pgp-compose-encrypt-off-quote = Este mensaje cita o reenvía un mensaje cifrado. Sin cifrado, no se podrá enviar hasta que quite lo que cita. ¿Desactivar el cifrado de todos modos?
-# review: new
-pgp-compose-encrypt-off-reply = Este mensaje responde a un mensaje cifrado o lo reenvía. Sin cifrado, cualquiera que maneje su mensaje por el camino podrá leerlo. ¿Desactivar el cifrado?
-# review: new
+pgp-compose-encrypted-files = Este mensaje incluye archivos adjuntos procedentes de un mensaje cifrado y solo puede enviarse cifrado. Active «Cifrar» o quite esos archivos adjuntos.
+pgp-compose-sign-tip = Firmar digitalmente el mensaje al enviarlo para que los destinatarios puedan comprobar la firma y la integridad del contenido
+pgp-compose-sign-tip-encrypted = Los mensajes enviados con cifrado también se firman
+pgp-compose-encrypt-tip = Cifrar el contenido al enviar el mensaje para que solo usted y los destinatarios puedan leerlo
+pgp-compose-make-key = Todavía no hay una clave propia configurada para { $address }. ¿Desea crearla ahora? Le permitirá firmar y cifrar mensajes.
+pgp-compose-key-unusable = Su clave para { $address } no se puede usar. Motivo: { $state }
+    Abra «Claves de cifrado» para importar una copia de seguridad de esa clave o crear una nueva.
+pgp-compose-encrypt-off-quote = Este mensaje aún contiene texto, imágenes o archivos adjuntos de un mensaje cifrado. Debe quitarlos antes de poder enviarlo sin cifrar. ¿Desea desactivar el cifrado de todos modos?
+pgp-compose-encrypt-off-reply = El mensaje original estaba cifrado. Si envía esta respuesta o reenvío sin cifrar, los servidores de correo por los que pase podrán leer su contenido. ¿Desea desactivar el cifrado?
 pgp-recipient-verified = Clave verificada
-# review: new
 pgp-recipient-found = Clave sin verificar
-# review: new
 pgp-recipient-own = Su propia clave
-# review: new
 pgp-recipient-looking = Buscando una clave...
-# review: new
 pgp-recipient-missing = Sin clave
-# review: new
-pgp-recipient-not-found = Sin clave: no se encontró ninguna el { $date }
-# review: new
+pgp-recipient-not-found = No se encontró ninguna clave. Última búsqueda: { $date }
 pgp-recipient-unusable = La clave no se puede usar: { $state }
-# review: new
-pgp-recipients-intro = El mensaje se cifra para la clave de cada destinatario, y para la suya.
-# review: new
+pgp-recipients-intro = Inbox Classic usará las claves de los destinatarios y la suya para cifrar el mensaje.
 pgp-recipients-intro-missing = { $count ->
-    [one] Un destinatario no tiene ninguna clave para cifrar. Busque su clave, quítelo de este mensaje o envíelo sin cifrar.
-   *[other] { $count } destinatarios no tienen ninguna clave para cifrar. Busque sus claves, quítelos de este mensaje o envíelo sin cifrar.
+    [one] No hay una clave utilizable para un destinatario. Busque su clave o quite al destinatario del mensaje. Solo puede enviarlo sin cifrar si no contiene texto, imágenes ni archivos adjuntos de mensajes cifrados.
+   *[other] No hay una clave utilizable para { $count } destinatarios. Busque sus claves o quite a esos destinatarios del mensaje. Solo puede enviarlo sin cifrar si no contiene texto, imágenes ni archivos adjuntos de mensajes cifrados.
 }
 pgp-details-part = Parte { $number }: { $label }
 pgp-details-signed = Firmado el { $when } con la clave { $key }
