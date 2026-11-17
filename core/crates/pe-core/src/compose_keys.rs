@@ -390,15 +390,15 @@ impl Core {
         let Some(identity) = self.store().pgp_identity(address)? else {
             return Ok(OwnKey::None);
         };
-        let info = match self.pgp_key(&identity.fingerprint) {
-            Ok(info) => info,
+        let (own, state, text) = match self.pgp_key_state(&identity.fingerprint) {
+            Ok(state) => state,
             Err(crate::Error::NotFound) => return Ok(OwnKey::None),
             Err(error) => return Err(error),
         };
-        Ok(match (info.own, info.state) {
+        Ok(match (own, state) {
             (true, KeyState::Valid) => OwnKey::Ready,
             (false, _) => OwnKey::None,
-            (true, _) => OwnKey::Unusable(info.state_text),
+            (true, _) => OwnKey::Unusable(text),
         })
     }
 
@@ -435,8 +435,8 @@ impl Core {
         let cert = self.pgp_cert(&fingerprint)?;
         if !cert.as_ref().is_some_and(|cert| cert.can_encrypt(now).is_ok()) {
             let state = self
-                .pgp_key(&fingerprint)
-                .map(|info| info.state_text)
+                .pgp_key_state(&fingerprint)
+                .map(|(_, _, text)| text)
                 .unwrap_or_else(|_| tr(Text::PgpKeyNotValid));
             let text = tr_args(Text::PgpRecipientUnusable, &[("state", (&state).into())]);
             return Ok((RecipientKey::Unusable, text, pending));

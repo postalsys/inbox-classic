@@ -263,7 +263,9 @@ pub fn read(raw: &[u8], ring: &KeyRing, from: &[String], now: i64) -> Option<Pro
     // gossip counts only inside an encryption that opened
     let gossip = match (&envelope, &payload) {
         (Some(verdict), Some(payload)) if verdict.encrypted && verdict.sealed.is_none() => {
-            let outer = pe_mime::parser::parse(raw)
+            // the top header block only, not the ciphertext under it
+            let head = outline(raw).root().map_or(raw, |root| &raw[..root.body]);
+            let outer = pe_mime::parser::parse(head)
                 .map(|m| crate::autocrypt::recipients(&m))
                 .unwrap_or_default();
             crate::autocrypt::gossip(payload, &outer)
@@ -492,16 +494,11 @@ impl Reader<'_> {
             let (content, signature) = (root.children[0], root.children[1]);
             let signed = canonical(outline.bytes(&entity, content));
             let signature_bytes = transfer_decoded(&outline, &entity, signature);
-            let checks = pe_pgp::verify_detached(&signature_bytes, &signed, &self.ring.certs, self.now);
+            let checks = pe_pgp::verify_detached_for(&signature_bytes, &signed, &self.ring.certs, self.now, recipient);
             let verdict = Verdict {
                 encrypted: false,
                 signature: match checks {
-                    Ok(mut checks) => {
-                        for check in &mut checks {
-                            not_for(check, recipient);
-                        }
-                        self.signature(&checks)
-                    }
+                    Ok(checks) => self.signature(&checks),
                     Err(_) => Signature::Bad {
                         why: tr(Text::PgpWhyMismatch),
                     },
@@ -647,33 +644,22 @@ impl Reader<'_> {
                     };
                 };
                 let addresses = cert.addresses(at.max(cert.created()));
+                let key = cert.fingerprint();
                 // the From rule: one From, and the key holds its address
                 let sender = match self.from {
                     [one] => Some(one.trim().to_lowercase()),
                     _ => None,
                 };
-                let name = signer_name(self.ring, cert, sender.as_deref(), at);
+                let signer = signer_name(self.ring, &addresses, &key, sender.as_deref());
                 match sender {
                     Some(sender) if addresses.contains(&sender) => {
-                        if self.ring.verified.contains(&(cert.fingerprint(), sender)) {
-                            Signature::Verified {
-                                signer: name,
-                                at,
-                                key: cert.fingerprint(),
-                            }
+                        if self.ring.verified.contains(&(key.clone(), sender)) {
+                            Signature::Verified { signer, at, key }
                         } else {
-                            Signature::Signed {
-                                signer: name,
-                                at,
-                                key: cert.fingerprint(),
-                            }
+                            Signature::Signed { signer, at, key }
                         }
                     }
-                    _ => Signature::OtherPerson {
-                        signer: name,
-                        at,
-                        key: cert.fingerprint(),
-                    },
+                    _ => Signature::OtherPerson { signer, at, key },
                 }
             }
         }
@@ -696,15 +682,14 @@ fn rank(signature: &Signature) -> u8 {
 /// The name a signer is shown by: the Address Book's name of the address checked (the sender's, or the key's first
 /// address for someone else), else that address; never the key's own free text, which anyone writes ("Alice (key
 /// verified)" gains nothing)
-fn signer_name(ring: &KeyRing, cert: &Cert, sender: Option<&str>, at: i64) -> String {
-    let addresses = cert.addresses(at.max(cert.created()));
+fn signer_name(ring: &KeyRing, addresses: &[String], fingerprint: &str, sender: Option<&str>) -> String {
     let address = sender
         .filter(|sender| addresses.iter().any(|address| address == sender))
         .map(str::to_string)
         .or_else(|| addresses.first().cloned());
     match address {
         Some(address) => ring.names.get(&address).cloned().unwrap_or(address),
-        None => pe_pgp::grouped(&cert.fingerprint()),
+        None => pe_pgp::grouped(fingerprint),
     }
 }
 
@@ -812,17 +797,6 @@ fn text_entity(text: &str) -> Vec<u8> {
 fn plain_text(text: &str, within: Within<'_>, out: &mut Vec<Section>) {
     if !text.trim().is_empty() {
         out.push(within.section(Some(text_entity(text))));
-    }
-}
-
-/// A signature made for other recipients than the user's key that opened the encryption around it: not for the user
-fn not_for(check: &mut SigCheck, recipient: Option<&str>) {
-    if let Some(recipient) = recipient
-        && check.is_good()
-        && !check.intended.is_empty()
-        && !check.intended.iter().any(|fingerprint| fingerprint == recipient)
-    {
-        check.status = SigStatus::Bad(Problem::NotForYou);
     }
 }
 

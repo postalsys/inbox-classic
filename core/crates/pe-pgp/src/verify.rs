@@ -186,6 +186,18 @@ pub(crate) fn judge(
 
 /// Checks the detached signatures in `signature` (armored or binary, one or several) over `data`.
 pub fn verify_detached(signature: &[u8], data: &[u8], certs: &[Cert], now: i64) -> Result<Vec<SigCheck>, Error> {
+    verify_detached_for(signature, data, certs, now, None)
+}
+
+/// `verify_detached` of a signature found inside an encryption that `recipient` (the fingerprint of the user's
+/// primary key that opened it) decrypted: a signature naming other recipients is not for the user.
+pub fn verify_detached_for(
+    signature: &[u8],
+    data: &[u8],
+    certs: &[Cert],
+    now: i64,
+    recipient: Option<&str>,
+) -> Result<Vec<SigCheck>, Error> {
     if signature.len() > crate::MAX_CERT_BYTES {
         return Err(Error::TooLarge);
     }
@@ -193,10 +205,16 @@ pub fn verify_detached(signature: &[u8], data: &[u8], certs: &[Cert], now: i64) 
     let mut out = Vec::new();
     for sig in parsed {
         let sig = sig.map_err(malformed)?;
-        out.push(judge(&sig.signature, certs, now, None, |component| match component {
-            Component::Primary(key) => sig.signature.verify(*key, Cursor::new(data)).is_ok(),
-            Component::Subkey(key) => sig.signature.verify(*key, Cursor::new(data)).is_ok(),
-        }));
+        out.push(judge(
+            &sig.signature,
+            certs,
+            now,
+            recipient,
+            |component| match component {
+                Component::Primary(key) => sig.signature.verify(*key, Cursor::new(data)).is_ok(),
+                Component::Subkey(key) => sig.signature.verify(*key, Cursor::new(data)).is_ok(),
+            },
+        ));
         if out.len() >= 8 {
             break;
         }

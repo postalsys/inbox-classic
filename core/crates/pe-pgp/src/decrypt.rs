@@ -78,14 +78,8 @@ fn integrity_failed(error: &(dyn std::error::Error + 'static)) -> bool {
     false
 }
 
-pub(crate) fn classify(error: PgpError) -> DecryptError {
-    if integrity_failed(&error) {
-        return DecryptError::Integrity;
-    }
-    DecryptError::Malformed(short(error.to_string()))
-}
-
-pub(crate) fn read_error(error: std::io::Error) -> DecryptError {
+/// What a failure of rPGP's (its own error, or an I/O error around one) means for the message
+pub(crate) fn classify(error: impl std::error::Error + 'static) -> DecryptError {
     if integrity_failed(&error) {
         return DecryptError::Integrity;
     }
@@ -159,6 +153,15 @@ pub fn decrypt_within(
             return Err(DecryptError::Malformed("encrypted twice".into()));
         }
     }
+    let (message, data) = read_through(message, limit)?;
+    opened.data = data;
+    opened.signatures = signatures(&message, certs, now, opened.key.as_deref());
+    Ok(opened)
+}
+
+/// What a message opened holds: decompressed (`MAX_COMPRESSION` layers at most) and read to its end, refused past
+/// `limit` bytes. The message is given back, as its signatures are judged once it is read.
+pub(crate) fn read_through(mut message: Message<'_>, limit: usize) -> Result<(Message<'_>, Vec<u8>), DecryptError> {
     let mut layers = 0;
     while compressed(&message, 0) {
         if layers == MAX_COMPRESSION {
@@ -167,15 +170,15 @@ pub fn decrypt_within(
         message = message.decompress().map_err(classify)?;
         layers += 1;
     }
+    let mut data = Vec::new();
     (&mut message)
         .take(limit as u64 + 1)
-        .read_to_end(&mut opened.data)
-        .map_err(read_error)?;
-    if opened.data.len() > limit {
+        .read_to_end(&mut data)
+        .map_err(classify)?;
+    if data.len() > limit {
         return Err(DecryptError::TooLarge);
     }
-    opened.signatures = signatures(&message, certs, now, opened.key.as_deref());
-    Ok(opened)
+    Ok((message, data))
 }
 
 /// Compression layers read through. GnuPG and Sequoia write one; a message compressed again and again is no mail
