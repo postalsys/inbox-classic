@@ -13,7 +13,7 @@ use rusqlite::types::Value;
 use crate::query::Query;
 use crate::search::{DRAFTS, INBOXES, SENT};
 use crate::selection::FolderSummary;
-use crate::{FolderId, Result, Scope, Search, Show, Store};
+use crate::{AccountId, FolderId, Result, Scope, Search, Show, Store};
 
 #[cfg(test)]
 thread_local! {
@@ -44,6 +44,15 @@ impl Scope {
     fn groups_kept(self) -> bool {
         matches!(self, Scope::Folder(_) | Scope::AllInboxes)
     }
+}
+
+/// What an account's folders keep ([`Store::account_counts`])
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct AccountCounts {
+    pub inbox: u64,
+    pub inbox_unread: u64,
+    pub flagged: u64,
+    pub drafts: u64,
 }
 
 /// The whole folders a list shows ([`Search::kept`]): what each keeps counts it, and its conversations' rows there
@@ -87,20 +96,16 @@ impl Kept {
 
 impl Search {
     /// The whole folders the search lists ([`Kept`]): no words, no messages picked by UID or bound by Select All;
-    /// every message shown, or with `unread` their unread ones too ([`Show::Unread`]). None when it lists only some of
-    /// their messages (the Flagged folder is one: its messages are flagged ones of many folders).
+    /// every message shown, or with `unread` their unread ones too ([`Show::Unread`]); of some accounts only, those
+    /// accounts' folders of it. None when it lists only some of their messages (the Flagged folder is one: its
+    /// messages are flagged ones of many folders).
     pub(crate) fn kept(&self, unread: bool) -> Option<Kept> {
         #[cfg(test)]
         if RECOUNT.with(std::cell::Cell::get) {
             return None;
         }
         let shown = self.show == Show::All || (unread && self.show == Show::Unread);
-        if !shown
-            || self.uids.is_some()
-            || self.up_to.is_some()
-            || self.accounts.is_some()
-            || !Query::parse(&self.text, 0).terms.is_empty()
-        {
+        if !shown || self.uids.is_some() || self.up_to.is_some() || !Query::parse(&self.text, 0).terms.is_empty() {
             return None;
         }
         let mut values = Vec::new();
@@ -114,6 +119,14 @@ impl Search {
             Scope::AllDrafts => DRAFTS.to_string(),
             Scope::Everywhere => "SELECT id FROM folders".to_string(),
             Scope::Flagged => return None,
+        };
+        // an agent's list: the folders of the accounts it may use alone
+        let folders = match &self.accounts {
+            Some(accounts) => {
+                let marks = crate::selection::id_list(&mut values, accounts);
+                format!("SELECT id FROM folders WHERE id IN ({folders}) AND account_id IN ({marks})")
+            }
+            None => folders,
         };
         Some(Kept {
             folders,
@@ -258,6 +271,29 @@ impl Store {
                 crate::search::FLAGGED_FROM
             ))?
             .query_row([], |row| row.get(0))
+    }
+
+    /// What the folders of `account` keep, for an agent's overview: its Inbox's messages and unread ones, its flagged
+    /// messages as the Flagged folder lists them, and its drafts
+    pub fn account_counts(&self, account: AccountId) -> Result<AccountCounts> {
+        self.db
+            .prepare_cached(&format!(
+                "SELECT \
+                 COALESCE(SUM(CASE WHEN id IN ({INBOXES}) THEN total END), 0), \
+                 COALESCE(SUM(CASE WHEN id IN ({INBOXES}) THEN unread END), 0), \
+                 COALESCE(SUM(CASE WHEN id IN ({}) THEN flagged END), 0), \
+                 COALESCE(SUM(CASE WHEN id IN ({DRAFTS}) THEN total END), 0) \
+                 FROM folders WHERE account_id = ?1",
+                crate::search::FLAGGED_FROM
+            ))?
+            .query_row([account], |row| {
+                Ok(AccountCounts {
+                    inbox: row.get(0)?,
+                    inbox_unread: row.get(1)?,
+                    flagged: row.get(2)?,
+                    drafts: row.get(3)?,
+                })
+            })
     }
 
     /// How many messages are unread in the Inboxes of all accounts, for the tray and the taskbar

@@ -658,6 +658,39 @@ impl Store {
         Ok(())
     }
 
+    /// Who wrote in each of the conversations `threads` in what `search` finds: (name, address) of each sender once,
+    /// in the order they first wrote there, at most `most` a conversation
+    pub fn thread_senders(
+        &self,
+        search: &Search,
+        threads: &[i64],
+        most: usize,
+    ) -> Result<HashMap<i64, Vec<(String, String)>>> {
+        let mut senders: HashMap<i64, Vec<(String, String)>> = HashMap::new();
+        if threads.is_empty() {
+            return Ok(senders);
+        }
+        let (wanted, values) = of_threads(&search.ungrouped(), threads);
+        let mut statement = self.db.prepare(&format!(
+            "SELECT thread_id, from_name, from_address FROM messages WHERE {wanted} ORDER BY +{ARRIVED}, uid, id"
+        ))?;
+        let rows = statement.query_map(params_from_iter(values), |row| {
+            Ok((
+                row.get::<_, i64>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, String>(2)?,
+            ))
+        })?;
+        for row in rows {
+            let (thread, name, address) = row?;
+            let list = senders.entry(thread).or_default();
+            if list.len() < most && !list.iter().any(|(_, a)| a.eq_ignore_ascii_case(&address)) {
+                list.push((name, address));
+            }
+        }
+        Ok(senders)
+    }
+
     /// The messages of the conversation `thread` in what `search` finds, in the order they arrived, the first first
     pub fn thread_messages(&self, search: &Search, thread: i64) -> Result<Vec<Message>> {
         Ok(self
@@ -1148,6 +1181,72 @@ mod tests {
 
     fn subjects(rows: &[Message]) -> Vec<(String, u32)> {
         rows.iter().map(|r| (r.info.subject.clone(), place(r).depth)).collect()
+    }
+
+    #[test]
+    fn senders_of_conversations_and_mail_stored_since() {
+        let (store, account, inbox, sent) = setup();
+        let from = |mut info: MessageInfo, name: &str, address: &str| {
+            info.from_name = name.into();
+            info.from_address = address.into();
+            info
+        };
+        let before = store.newest_message().unwrap();
+        store
+            .add_messages(
+                inbox,
+                &[
+                    from(mail(1, 100, "<a@x>", &[], true), "Ann", "ann@x"),
+                    from(mail(2, 300, "<c@x>", &["<a@x>"], true), "Ann again", "ANN@x"),
+                ],
+            )
+            .unwrap();
+        store
+            .add_messages(sent, &[from(mail(1, 200, "<b@x>", &["<a@x>"], true), "Me", "me@x")])
+            .unwrap();
+        let thread = store.message(inbox, 1).unwrap().unwrap().info.thread_id.unwrap();
+        let everywhere = Search {
+            scope: crate::Scope::Everywhere,
+            accounts: Some(vec![account]),
+            ..Default::default()
+        };
+        let senders = store.thread_senders(&everywhere, &[thread], 5).unwrap();
+        assert_eq!(
+            senders[&thread],
+            [("Ann".to_string(), "ann@x".to_string()), ("Me".into(), "me@x".into())],
+            "each once, in the order they wrote"
+        );
+        assert_eq!(
+            store.thread_senders(&everywhere, &[thread], 1).unwrap()[&thread].len(),
+            1
+        );
+        // of the accounts named only
+        let none = Search {
+            accounts: Some(Vec::new()),
+            ..everywhere.clone()
+        };
+        assert!(store.thread_senders(&none, &[thread], 5).unwrap().is_empty());
+
+        // stored since a moment, in the order they were stored, a page at a time
+        let since: Vec<u64> = store
+            .stored_since(&everywhere, before, 10)
+            .unwrap()
+            .iter()
+            .map(|m| m.info.uid)
+            .collect();
+        assert_eq!(since, [1, 2, 1]);
+        let first = store.stored_since(&everywhere, before, 1).unwrap();
+        let rest = store.stored_since(&everywhere, first[0].id, 10).unwrap();
+        assert_eq!(rest.len(), 2);
+        assert!(
+            store
+                .stored_since(&everywhere, store.newest_message().unwrap(), 10)
+                .unwrap()
+                .is_empty()
+        );
+        assert!(store.stored_since(&none, before, 10).unwrap().is_empty());
+        let inbox_only = Search::folder(inbox);
+        assert_eq!(store.stored_since(&inbox_only, before, 10).unwrap().len(), 2);
     }
 
     #[test]

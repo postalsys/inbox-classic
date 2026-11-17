@@ -493,6 +493,21 @@ impl Store {
             .query_row([], |row| row.get(0))
     }
 
+    /// What `search` finds of the messages stored after the message `since` ([`Store::newest_message`]), in the order
+    /// they were stored, at most `limit`: an agent's changes since its cursor. Read from those stored since, by id.
+    pub fn stored_since(&self, search: &Search, since: i64, limit: u64) -> Result<Vec<Message>> {
+        let (condition, mut values) = search.ungrouped().condition(false);
+        values.push(Value::Integer(since));
+        values.push(Value::Integer(limit as i64));
+        let at = values.len();
+        let mut statement = self.db.prepare_cached(&format!(
+            "SELECT {COLUMNS} FROM messages WHERE id IN (SELECT id FROM messages WHERE id > ?{}) AND {condition} \
+             ORDER BY id LIMIT ?{at}",
+            at - 1
+        ))?;
+        statement.query_map(params_from_iter(values), from_row)?.collect()
+    }
+
     /// Whether `search`, without its bound, finds a message stored after the message `id` ([`Store::newest_message`]):
     /// read from those stored since, so it takes what they are, not what the list is
     pub fn found_after(&self, search: &Search, id: i64) -> Result<bool> {

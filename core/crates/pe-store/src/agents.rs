@@ -290,6 +290,21 @@ impl Store {
             .optional()
     }
 
+    /// The account of the draft with `message_id` that host `host` saved (its log's `save_draft` or `replace_draft`),
+    /// None when it saved none or discarded it since (`discard_draft`): an agent changes only drafts of its own
+    pub fn agent_draft(&self, host: AgentHostId, message_id: &str) -> Result<Option<AccountId>> {
+        let last: Option<(String, Option<AccountId>)> = self
+            .db
+            .query_row(
+                "SELECT what, account_id FROM agent_log WHERE host_id = ?1 AND message_id = ?2 \
+                 AND what IN ('save_draft', 'replace_draft', 'discard_draft') ORDER BY at DESC, id DESC LIMIT 1",
+                params![host, message_id],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
+            .optional()?;
+        Ok(last.and_then(|(what, account)| account.filter(|_| what != "discard_draft")))
+    }
+
     /// How many entries of `what` a host logged since `since`: the rate limits count them
     pub fn agent_log_count(&self, host: AgentHostId, what: &str, since: i64) -> Result<u64> {
         self.db.query_row(
@@ -373,6 +388,21 @@ mod tests {
             "Marked \"Hi\" read again"
         );
         assert!(store.agent_log_entry(first).unwrap().unwrap().undone);
+        // the drafts it saved are its own until it discards them; another host's are not
+        let draft = |what: &str| NewLogEntry {
+            host,
+            what: what.into(),
+            account: Some(4),
+            message_id: Some("<d@x>".into()),
+            ..Default::default()
+        };
+        assert_eq!(store.agent_draft(host, "<d@x>").unwrap(), None);
+        store.log_agent(&[draft("save_draft")], 30).unwrap();
+        store.log_agent(&[draft("replace_draft")], 31).unwrap();
+        assert_eq!(store.agent_draft(host, "<d@x>").unwrap(), Some(4));
+        assert_eq!(store.agent_draft(host + 1, "<d@x>").unwrap(), None);
+        store.log_agent(&[draft("discard_draft")], 32).unwrap();
+        assert_eq!(store.agent_draft(host, "<d@x>").unwrap(), None);
         // a host forgotten takes its log along
         store.remove_agent_host(host).unwrap();
         assert!(store.agent_log(10).unwrap().is_empty());
