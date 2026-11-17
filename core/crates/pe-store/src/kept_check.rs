@@ -218,7 +218,8 @@ impl World {
             }
             (76..=80, Some(at)) => self.join_conversations(at),
             (81..=82, Some(at)) => self.thread_again(at),
-            (83..=85, Some(at)) => self.redate(at),
+            (83..=84, Some(at)) => self.redate(at),
+            (85, Some(at)) => self.decrypt(at),
             (86..=88, Some(at)) => self.mark_conversation(at),
             (89..=90, _) => {
                 if self.rng.chance(50) {
@@ -258,6 +259,25 @@ impl World {
             batch.push(again);
         }
         self.store.add_messages(folder, &batch).unwrap();
+    }
+
+    /// An encrypted message decrypted for the index, its protected Subject shown in the list (which moves it in the
+    /// Subject order and may make it its conversation's first); now and then the switch turned off, which puts every
+    /// Subject back
+    fn decrypt(&mut self, (folder, uid): (FolderId, u64)) {
+        if self.rng.chance(20) {
+            self.store.forget_decrypted().unwrap();
+            return;
+        }
+        let subject = *self
+            .rng
+            .pick(&["Aardvark plans", "zz inside", "Hello", "Ärger im Haus"]);
+        let text = crate::IndexText {
+            body: "the inside".into(),
+            snippet: "the inside".into(),
+            ..Default::default()
+        };
+        self.store.index_decrypted(folder, uid, &text, Some(subject)).unwrap();
     }
 
     /// References fetched later join conversations
@@ -662,7 +682,8 @@ fn the_migration_counts_what_was_stored_before() {
          DROP INDEX messages_all_by_date; DROP INDEX messages_all_by_received; \
          CREATE INDEX messages_all_by_date ON messages (COALESCE(MIN(date, internal_date), date, internal_date), uid, id); \
          CREATE INDEX messages_all_by_received ON messages (internal_date, uid, id); \
-         ALTER TABLE messages DROP COLUMN protection; ALTER TABLE messages DROP COLUMN decrypted;",
+         DROP INDEX messages_to_decrypt; ALTER TABLE messages DROP COLUMN protection; \
+         ALTER TABLE messages DROP COLUMN decrypted; ALTER TABLE messages DROP COLUMN outer_subject;",
     )
     .unwrap();
     // from the migration that counts, and those after it

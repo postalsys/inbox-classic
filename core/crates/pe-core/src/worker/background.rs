@@ -108,7 +108,8 @@ impl Worker {
 
     /// One batch of what is done in the background: the senders' verdicts fetched with the summaries read (local,
     /// quick), messages downloaded ahead (with their search text), conversations, the search text of the rest, the
-    /// snippets of mail indexed before there were any, then the verdicts of mail stored before they were fetched.
+    /// text of encrypted mail downloaded (decrypted here), the snippets of mail indexed before there were any, then
+    /// the verdicts of mail stored before they were fetched.
     /// Whether there may be more.
     async fn background_batch(&mut self, store: &mut Store) -> Result<bool, Failure> {
         if self.judge_senders(store)? > 0 {
@@ -123,9 +124,72 @@ impl Worker {
         if self.index_texts(store, &Store::messages_to_index).await? > 0 {
             return Ok(true);
         }
+        if self.decrypt_stored(store).await? > 0 {
+            return Ok(true);
+        }
         if self.index_texts(store, &Store::messages_without_snippet).await? > 0 {
             return Ok(true);
         }
         Ok(self.fetch_sender_verdicts(store).await? > 0)
+    }
+}
+
+/// How many encrypted messages one batch of the background pass decrypts
+const DECRYPT_BATCH: usize = 8;
+
+impl Worker {
+    /// One batch of encrypted mail whose source is here, decrypted for the search with the user's keys as they are,
+    /// never asking for anything (docs/pgp-plan.md): its text indexed, its snippet and protected Subject in the list.
+    /// One no key here opens is left for when the user opens it. Nothing while the switch in Settings is off. How
+    /// many messages that was; the windows hear of the folders whose list changed.
+    pub(super) async fn decrypt_stored(&mut self, store: &mut Store) -> Result<usize, Failure> {
+        let batch = store.messages_to_decrypt(self.account, DECRYPT_BATCH)?;
+        if batch.is_empty() {
+            return Ok(0);
+        }
+        let ring = crate::keys::Book::new(store, &self.ctx.secrets, &self.ctx.pgp_certs)
+            .and_then(|book| book.ring())
+            .ok();
+        let mut sources = Vec::new();
+        for (message, folder, uid) in &batch {
+            sources.push((*message, *folder, store.source(*folder, *uid)?));
+        }
+        // on the blocking pool: decrypting and parsing would hold an async thread the syncs and the opens need
+        let read = tokio::task::spawn_blocking(move || {
+            sources
+                .into_iter()
+                .map(|(message, folder, source)| {
+                    let text = match (&ring, source) {
+                        (Some(ring), Some(source)) => crate::search::decrypted_text(&source, ring),
+                        _ => None,
+                    };
+                    (message, folder, text)
+                })
+                .collect::<Vec<_>>()
+        })
+        .await
+        .map_err(|error| Failure::said(crate::FailureKind::Other, error.to_string()))?;
+        let changed = store.transaction(|store| {
+            let mut changed = std::collections::BTreeSet::new();
+            for (message, folder, text) in &read {
+                match text {
+                    Some((text, subject)) => {
+                        store.set_indexed_decrypted(*message, text, subject.as_deref())?;
+                        if subject.is_some() {
+                            changed.insert(*folder);
+                        }
+                    }
+                    None => store.mark_decrypt_tried(*message)?,
+                }
+            }
+            Ok(changed)
+        })?;
+        for folder in changed {
+            self.emit(crate::Event::FolderChanged {
+                account: self.account,
+                folder,
+            });
+        }
+        Ok(batch.len())
     }
 }

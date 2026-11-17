@@ -98,7 +98,7 @@ pub struct MessageView {
     pub print_document: Option<String>,
     /// An encrypted message's text, decrypted, for the search index (when Options lets it keep it), stored when the
     /// window takes the view
-    pub(crate) decrypted: Option<(pe_store::FolderId, u64, pe_store::IndexText)>,
+    pub(crate) decrypted: Option<(pe_store::FolderId, u64, pe_store::IndexText, Option<String>)>,
 }
 
 /// What a signed or encrypted message is, for the bar over it (which mail can not draw) and its Details

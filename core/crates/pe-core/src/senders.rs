@@ -215,6 +215,7 @@ mod tests {
             sender_auth,
             logo,
             contact,
+            outer_subject: None,
         }
     }
 

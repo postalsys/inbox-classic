@@ -152,6 +152,14 @@ pub(crate) fn index_pending(store: &mut Store) -> pe_store::Result<usize> {
     }
 }
 
+/// What the search index keeps of an encrypted message decrypted with `ring`: its text as it is shown, and its
+/// protected Subject when its layer is good; None when nothing in it could be decrypted
+pub(crate) fn decrypted_text(source: &[u8], ring: &crate::protect::KeyRing) -> Option<(IndexText, Option<String>)> {
+    let from = crate::from_addresses(source);
+    let (shown, subject) = crate::protect::decrypted_for_index(source, ring, &from, crate::worker::unix_now())?;
+    Some((index_text(&shown), subject))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

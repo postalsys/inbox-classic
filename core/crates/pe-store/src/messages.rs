@@ -181,6 +181,8 @@ pub struct Message {
     /// The picture of the Address Book's card with its sender's address, (card, its picture's revision), when there is
     /// one: the core shows it only for a confirmed sender ([`Message::sender_auth`]); never in a Junk folder
     pub contact: Option<(i64, i64)>,
+    /// The Subject it came with, while the list shows the protected one decrypted from it: what an AI agent is told
+    pub outer_subject: Option<String>,
 }
 
 impl Message {
@@ -293,7 +295,7 @@ pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_da
       ORDER BY a.card_id LIMIT 1), \
      (SELECT p.changed FROM card_addresses a JOIN card_pictures p ON p.card_id = a.card_id \
       WHERE a.address = messages.from_address COLLATE NOCASE AND messages.from_address != '' \
-      ORDER BY a.card_id LIMIT 1), protection";
+      ORDER BY a.card_id LIMIT 1), protection, outer_subject";
 
 pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
     let junk: bool = row.get(27)?;
@@ -311,6 +313,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
             (Some(card), Some(changed)) if !junk => Some((card, changed)),
             _ => None,
         },
+        outer_subject: row.get(31)?,
         info: MessageInfo {
             uid: row.get(2)?,
             modseq: row.get(3)?,

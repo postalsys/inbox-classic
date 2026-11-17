@@ -445,6 +445,8 @@ pub(crate) struct Context {
     pub(crate) partials: Partials,
     /// The messages taken back in the store when the server refused an action, for the window to select
     pub(crate) restored: crate::selection::Restored,
+    /// The certificates read so far, shared with the core: the background pass decrypts with the user's keys
+    pub(crate) pgp_certs: Arc<crate::keys::CertCache>,
 }
 
 pub(crate) struct Worker {

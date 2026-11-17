@@ -477,7 +477,7 @@ pub struct Core {
     synced: Arc<worker::Synced>,
     secrets: Secrets,
     /// The OpenPGP certificates read from the store, each read once (keys.rs)
-    pgp_certs: keys::CertCache,
+    pgp_certs: Arc<keys::CertCache>,
     trust: Trust,
     events: EventSink,
     /// Set when closing: no event is delivered after
@@ -1508,8 +1508,21 @@ impl Core {
         if let Some(seen) = view.autocrypt.take() {
             let _ = self.learn_autocrypt(&seen);
         }
-        if let Some((folder, uid, text)) = view.decrypted.take() {
-            let _ = self.store().index_decrypted(folder, uid, &text);
+        if let Some((folder, uid, text, subject)) = view.decrypted.take() {
+            let store = self.store();
+            // the list shows its protected Subject now: the windows read the folder again
+            if store
+                .index_decrypted(folder, uid, &text, subject.as_deref())
+                .unwrap_or(false)
+                && subject.is_some()
+                && let Ok(found) = store.folder(folder)
+            {
+                drop(store);
+                let _ = self.post(Event::FolderChanged {
+                    account: found.account_id,
+                    folder,
+                });
+            }
         }
         view
     }
@@ -2414,6 +2427,7 @@ impl Core {
             opening: self.opening.clone(),
             partials: self.partials.clone(),
             restored: self.restored.clone(),
+            pgp_certs: self.pgp_certs.clone(),
         }
     }
 
@@ -2921,11 +2935,9 @@ fn finish_view<S: std::ops::Deref<Target = Store>>(
     if let Some(ring) = &found.ring
         && view.protection.as_ref().is_some_and(|protection| protection.encrypted)
         && store().is_some_and(|store| store.wants_decrypted_text(found.folder, found.uid).unwrap_or(false))
+        && let Some((text, subject)) = search::decrypted_text(&found.source, ring)
     {
-        let from = from_addresses(&found.source);
-        if let Some((shown, true)) = protect::shown_decrypted(&found.source, ring, &from, worker::unix_now()) {
-            view.decrypted = Some((found.folder, found.uid, search::index_text(&shown)));
-        }
+        view.decrypted = Some((found.folder, found.uid, text, subject));
     }
     // a large message's text first: its attachments without content, their sizes from its structure, listed by the
     // same rules

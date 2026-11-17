@@ -120,6 +120,7 @@ mod tests {
             sender_auth: 0,
             logo: None,
             contact: None,
+            outer_subject: None,
         }
     }
 

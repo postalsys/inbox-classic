@@ -377,7 +377,7 @@ impl Search {
         // words looked for (or left out) would match what was decrypted: such a search passes over those messages
         let has_text = query.terms.iter().any(|term| matches!(term, Term::Text { .. }));
         if self.no_decrypted && has_text {
-            parts.push("decrypted = 0".into());
+            parts.push("decrypted != 1".into());
         }
         if self.hide_ignored {
             parts.push(format!(
@@ -676,9 +676,19 @@ impl Store {
         Ok(())
     }
 
-    /// [`Store::set_indexed`] with the text of an encrypted message, decrypted when it was opened: marked, so that the
-    /// switch in Options can take it out again and AI agents never search it
-    pub fn set_indexed_decrypted(&self, message: i64, text: &IndexText) -> Result<()> {
+    /// [`Store::set_indexed`] with the text of an encrypted message, decrypted when it was opened or by the background
+    /// pass: marked, so that the switch in Settings can take it out again and AI agents never search it. `subject`, its
+    /// protected Subject when its layer was good, takes the place of the one it came with in the list (kept, to put
+    /// back); the conversations kept follow it as any change of a subject.
+    pub fn set_indexed_decrypted(&self, message: i64, text: &IndexText, subject: Option<&str>) -> Result<()> {
+        if let Some(subject) = subject {
+            self.db
+                .prepare_cached(
+                    "UPDATE messages SET outer_subject = COALESCE(outer_subject, subject), subject = ?2, \
+                     sort_subject = ?3 WHERE id = ?1 AND subject != ?2",
+                )?
+                .execute(params![message, subject, crate::fold::fold(subject)])?;
+        }
         self.set_indexed(message, text)?;
         self.db
             .prepare_cached("UPDATE messages SET decrypted = 1 WHERE id = ?1")?
@@ -686,10 +696,17 @@ impl Store {
         Ok(())
     }
 
-    /// Takes the decrypted text of every encrypted message out of the index and the list (Options' switch turned off):
-    /// each is indexed again as it came, by its envelope alone, without the people and the names of the files inside
+    /// Takes the decrypted text of every encrypted message out of the index and the list (the switch in Settings
+    /// turned off): each gets back the Subject it came with and is indexed again as it came, by its envelope alone,
+    /// without the people and the names of the files inside. Those the background pass could not open are tried again
+    /// once it is on.
     pub fn forget_decrypted(&self) -> Result<()> {
         let tx = self.db.unchecked_transaction()?;
+        tx.execute(
+            "UPDATE messages SET subject = outer_subject, sort_subject = fold(outer_subject), outer_subject = NULL \
+             WHERE decrypted = 1 AND outer_subject IS NOT NULL",
+            [],
+        )?;
         tx.execute(
             "UPDATE messages SET snippet = '', sender_people = '', recipient_people = '', attachment_names = '', \
              attachment_count = 0 WHERE decrypted = 1",
@@ -707,12 +724,12 @@ impl Store {
             ),
             [],
         )?;
-        tx.execute("UPDATE messages SET decrypted = 0 WHERE decrypted = 1", [])?;
+        tx.execute("UPDATE messages SET decrypted = 0 WHERE decrypted != 0", [])?;
         tx.commit()
     }
 
     /// Whether the text of the message `uid` of `folder` should be indexed decrypted, now that it was: the user lets
-    /// the index keep it (Options), and it was not yet
+    /// the index keep it (Settings), and it was not yet
     pub fn wants_decrypted_text(&self, folder: FolderId, uid: u64) -> Result<bool> {
         if !self.pgp_index_encrypted()? {
             return Ok(false);
@@ -720,7 +737,7 @@ impl Store {
         Ok(self
             .db
             .query_row(
-                "SELECT decrypted = 0 FROM messages WHERE folder_id = ?1 AND uid = ?2",
+                "SELECT decrypted != 1 FROM messages WHERE folder_id = ?1 AND uid = ?2",
                 params![folder, uid as i64],
                 |row| row.get(0),
             )
@@ -728,8 +745,9 @@ impl Store {
             .unwrap_or(false))
     }
 
-    /// The decrypted text of the message `uid` of `folder` into the index ([`Store::set_indexed_decrypted`])
-    pub fn index_decrypted(&self, folder: FolderId, uid: u64, text: &IndexText) -> Result<()> {
+    /// The decrypted text of the message `uid` of `folder` into the index ([`Store::set_indexed_decrypted`]); whether
+    /// the message is here
+    pub fn index_decrypted(&self, folder: FolderId, uid: u64, text: &IndexText, subject: Option<&str>) -> Result<bool> {
         let id: Option<i64> = self
             .db
             .query_row(
@@ -739,9 +757,42 @@ impl Store {
             )
             .optional()?;
         match id {
-            Some(id) => self.set_indexed_decrypted(id, text),
-            None => Ok(()),
+            Some(id) => {
+                let tx = self.db.unchecked_transaction()?;
+                self.set_indexed_decrypted(id, text, subject)?;
+                tx.commit()?;
+                Ok(true)
+            }
+            None => Ok(false),
         }
+    }
+
+    /// Encrypted messages of an account whose source is here and that were not decrypted for the index yet, newest
+    /// first, while the user lets the index keep their text: (message id, folder, UID)
+    pub fn messages_to_decrypt(&self, account: AccountId, limit: usize) -> Result<Vec<(i64, FolderId, u64)>> {
+        if !self.pgp_index_encrypted()? {
+            return Ok(Vec::new());
+        }
+        let mut statement = self.db.prepare_cached(
+            "SELECT m.id, m.folder_id, m.uid FROM messages m INDEXED BY messages_to_decrypt \
+             JOIN folders f ON f.id = m.folder_id WHERE m.protection = 2 AND m.decrypted = 0 AND f.account_id = ?1 \
+             AND EXISTS (SELECT 1 FROM bodies b WHERE b.message_id = m.id) \
+             ORDER BY COALESCE(m.date, m.internal_date) DESC LIMIT ?2",
+        )?;
+        statement
+            .query_map(params![account, limit as i64], |row| {
+                Ok((row.get(0)?, row.get(1)?, row.get(2)?))
+            })?
+            .collect()
+    }
+
+    /// The background pass could not open this one (no key here opens it, or the keys are not available without the
+    /// user): left for when the user opens it, and not tried again until the switch in Settings is turned on again
+    pub fn mark_decrypt_tried(&self, message: i64) -> Result<()> {
+        self.db
+            .prepare_cached("UPDATE messages SET decrypted = 2 WHERE id = ?1 AND decrypted = 0")?
+            .execute([message])?;
+        Ok(())
     }
 
     /// Which of the messages `uids` of `folder` the index does not have the text of yet (and the server has not
@@ -883,7 +934,22 @@ mod tests {
             snippet: "the zebrafish plan".into(),
             ..Default::default()
         };
-        store.index_decrypted(inbox, 2, &text).unwrap();
+        assert!(
+            store
+                .index_decrypted(inbox, 2, &text, Some("The zebrafish plan"))
+                .unwrap()
+        );
+        // the protected Subject in the list, and an agent told the one it came with
+        let row = |text: &str| {
+            store
+                .search(&words(None, text), Sort::default(), 0, 1)
+                .unwrap()
+                .remove(0)
+        };
+        let shown = row("is:encrypted");
+        assert_eq!(shown.info.subject, "The zebrafish plan");
+        assert_eq!(shown.outer_subject.as_deref(), Some("Sealed"));
+        assert_eq!(found(&store, &words(None, "subject:zebrafish")), [2]);
         assert!(!store.wants_decrypted_text(inbox, 2).unwrap(), "once");
         let agent = |text: &str| Search {
             no_decrypted: true,
@@ -909,16 +975,37 @@ mod tests {
             [2],
             "its envelope is searched"
         );
-        let row = &store
-            .search(&words(None, "is:encrypted"), Sort::default(), 0, 1)
-            .unwrap()[0];
-        assert_eq!(row.snippet.as_deref(), Some(""));
-        assert_eq!(row.info.attachment_count, 0);
+        let plain = row("is:encrypted");
+        assert_eq!(plain.snippet.as_deref(), Some(""));
+        assert_eq!(plain.info.attachment_count, 0);
+        assert_eq!((plain.info.subject.as_str(), plain.outer_subject), ("Sealed", None));
         let decrypted: i64 = store
             .db
             .query_row("SELECT decrypted FROM messages WHERE id = ?1", [id], |row| row.get(0))
             .unwrap();
         assert_eq!(decrypted, 0);
+
+        // the background pass: one whose source is here, while the switch is on; one it could not open is left for
+        // the user, and tried again once the switch is turned on again
+        let account = store.folder(inbox).unwrap().account_id;
+        store.set_pgp_index_encrypted(true).unwrap();
+        assert!(
+            store.messages_to_decrypt(account, 10).unwrap().is_empty(),
+            "no source here"
+        );
+        store.set_source(inbox, 2, b"Subject: Sealed\r\n\r\n").unwrap();
+        assert_eq!(store.messages_to_decrypt(account, 10).unwrap(), [(id, inbox, 2)]);
+        store.mark_decrypt_tried(id).unwrap();
+        assert!(store.messages_to_decrypt(account, 10).unwrap().is_empty());
+        assert!(
+            store.wants_decrypted_text(inbox, 2).unwrap(),
+            "opened by the user, it still is"
+        );
+        store.set_pgp_index_encrypted(false).unwrap();
+        assert!(store.messages_to_decrypt(account, 10).unwrap().is_empty(), "off");
+        store.forget_decrypted().unwrap();
+        store.set_pgp_index_encrypted(true).unwrap();
+        assert_eq!(store.messages_to_decrypt(account, 10).unwrap().len(), 1);
     }
 
     #[test]

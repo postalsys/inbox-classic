@@ -845,3 +845,56 @@ fn decrypted_text_in_the_search_but_never_for_agents() {
     w.core.message_view(folder, 1, false).unwrap().unwrap();
     assert_eq!(found(false), 0);
 }
+
+/// Opened, an encrypted message with a protected Subject is listed by it, and by the one it came with again once
+/// the switch in Settings is off
+#[test]
+fn the_list_shows_the_protected_subject_once_opened() {
+    use pe_core::{Scope, Search, Show};
+    let w = world("pgp-list-subject");
+    let inner =
+        "Content-Type: text/plain; charset=utf-8; protected-headers=\"v1\"\r\nSubject: The real subject\r\n\r\nBody";
+    let raw = message(
+        "alice@example.org",
+        &encrypted_part(inner, &[&w.me], Some(&w.alice), "e"),
+    )
+    .replacen("Subject: Test", "Subject: ...", 1);
+    let folder = {
+        let store = Store::open(w.dir.path().join("store.db")).unwrap();
+        let account = store.accounts().unwrap()[0].id;
+        let inbox = pe_store::FolderInfo {
+            path: "INBOX".into(),
+            name: "INBOX".into(),
+            selectable: true,
+            ..Default::default()
+        };
+        store.set_folders(account, &[inbox]).unwrap();
+        let folder = store.folders(account).unwrap()[0].id;
+        let info = pe_store::MessageInfo {
+            uid: 1,
+            subject: "...".into(),
+            from_address: "alice@example.org".into(),
+            protection: pe_store::PROTECTION_ENCRYPTED,
+            ..Default::default()
+        };
+        store.add_messages(folder, &[info]).unwrap();
+        store.set_source(folder, 1, raw.as_bytes()).unwrap();
+        folder
+    };
+    let subject = || {
+        let search = Search {
+            scope: Scope::Folder(folder),
+            show: Show::All,
+            ..Default::default()
+        };
+        w.core.search(&search, pe_store::Sort::default(), 0, 1).unwrap()[0]
+            .info
+            .subject
+            .clone()
+    };
+    assert_eq!(subject(), "...");
+    w.core.message_view(folder, 1, false).unwrap().unwrap();
+    assert_eq!(subject(), "The real subject");
+    w.core.set_pgp_index_encrypted(false).unwrap();
+    assert_eq!(subject(), "...");
+}

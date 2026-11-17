@@ -347,7 +347,22 @@ fn an_agent_never_reads_encrypted_mail() {
     };
     let fixtures = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../scripts/ui-e2e/pgp");
     let read = |name: &str| std::fs::read(fixtures.join(name)).unwrap();
-    let raw = String::from_utf8(read("secure-encrypted.eml")).unwrap();
+    // encrypted to the user's key, with a protected Subject the user's list shows once it is decrypted
+    let me = pe_pgp::read_certs(&read("me.asc")).unwrap().remove(0);
+    let inner = "Content-Type: text/plain; charset=utf-8; protected-headers=\"v1\"\r\nSubject: The zebrafish plan\r\n\r\n\
+                 See you at the old mill.\r\n";
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs() as i64;
+    let armored = pe_pgp::encrypt(inner.as_bytes().to_vec(), &[&me], &[], None, now).unwrap();
+    let raw = format!(
+        "From: Alice Example <alice@example.org>\r\nTo: testuser@example.com\r\nSubject: ...\r\n\
+         Message-ID: <sealed@example.org>\r\nMIME-Version: 1.0\r\n\
+         Content-Type: multipart/encrypted; protocol=\"application/pgp-encrypted\"; boundary=\"e\"\r\n\r\n\
+         --e\r\nContent-Type: application/pgp-encrypted\r\n\r\nVersion: 1\r\n--e\r\n\
+         Content-Type: application/octet-stream\r\n\r\n{armored}\r\n--e--\r\n"
+    );
     let sealed = server.add_message("INBOX", &raw, &[]);
 
     let dir = TempDir::new("mcp-pgp");
@@ -365,8 +380,6 @@ fn an_agent_never_reads_encrypted_mail() {
     );
     let passphrase = String::from_utf8(read("me.passphrase")).unwrap();
     core.pgp_import(&read("me.asc"), Some(passphrase.trim()), pe_core::keys::KeySource::File)
-        .unwrap();
-    core.pgp_import(&read("alice.asc"), None, pe_core::keys::KeySource::File)
         .unwrap();
     let mut settings = server.account_settings();
     settings.smtp_security = pe_store::Security::StartTls;
@@ -431,11 +444,11 @@ fn an_agent_never_reads_encrypted_mail() {
             .await;
         assert!(file.is_err(), "{file:?}");
 
-        // the user opens it: their search finds its words, an agent's never does
-        assert_eq!(user_finds("mill"), 0, "not opened yet");
+        // decrypted for the user (by the background pass, or as it is opened): their search finds its words, an
+        // agent's never does
         let view = core.message_view(inbox, sealed, false).unwrap().unwrap();
         assert!(view.protection.as_ref().is_some_and(|p| p.encrypted));
-        assert_eq!(user_finds("mill"), 1, "opened");
+        assert!(eventually(10, || user_finds("mill") == 1), "decrypted for the user");
         let found = agent.call("search_messages", json!({ "query": "mill" })).await.unwrap();
         assert!(found["messages"].as_array().unwrap().is_empty(), "{found}");
         let found = agent
@@ -451,8 +464,15 @@ fn an_agent_never_reads_encrypted_mail() {
             found["messages"].as_array().unwrap().is_empty(),
             "words never reach what was decrypted: {found}"
         );
+        // listed by the Subject it came with, while the user's list shows the protected one
+        assert_eq!(
+            core.message(inbox, sealed).unwrap().unwrap().info.subject,
+            "The zebrafish plan"
+        );
+        let listed = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
+        assert_eq!(listed["messages"][0]["subject"], "...", "{listed}");
         for listed in [
-            agent.call("list_messages", json!({ "folder": inbox })).await.unwrap(),
+            listed,
             agent
                 .call("get_message", json!({ "folder": inbox, "uid": sealed }))
                 .await
