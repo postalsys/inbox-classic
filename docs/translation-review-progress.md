@@ -17,14 +17,15 @@ Commit completed batches regularly and preserve an exact resume point.
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
 - Upstream settings pages at `bd4a2bd1` are now integrated after Croatian app checkpoint `580d74a0`.
-  German, Spanish, Estonian, French and Dutch are complete again after their settings reviews. Fresh upstream
-  audit at French checkpoint 3ff603ac found no additional work. Continue Italian: 27 catalog entries
-  (24 app, one Linux, two Mac) and 11 help topics remain. Then process pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and
+  German, Spanish, Estonian, French, Dutch and Italian settings are complete. Fresh upstream audit at French
+  checkpoint 3ff603ac found no additional work. Add the verified encrypted-image exception to the settings/image
+  help in de/es/et/fr/nl, then continue Portuguese: 27 catalog entries and 11 help topics pending.
+  Then process pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and
   Croatian app before returning to the remaining initial reviews. Exact source IDs/topics are in state.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,440 catalog entries and 1,292 help topics; 14,370 entries and 704 topics are currently pending.
+  32,440 catalog entries and 1,292 help topics; 14,343 entries and 693 topics are currently pending.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were reviewed with 74 improvements; its new settings entries remain pending.
@@ -960,9 +961,24 @@ help markup and exact 28-language pending inventories pass. Completed/source has
 and 7,642 changed help lines; 14 moved baseline pairs remain verified. Report regenerated; git diff --check passes.
 No tests run. Continue Italian settings next.
 
-Current totals: 18,070 catalog entries and 588 help topics completed in the active scope; 2,901 historical
-catalog value improvements. Remaining: 14,370 catalog entries and 704 help topics. Earlier context followups
-are preserved; settings review remains pending in 23 languages. `REVIEWED` remains unchanged.
+### Italian settings review completed
+
+Reviewed all 27 settings entries and 11 affected help topics, improving three catalog values. Improved restart wording,
+the sender-image note and automatic-update label. Rewrote Settings help with natural wording for defaults and accurate
+Apply/Cancel, external default-app choices, queued sending, exact download defaults and image/domain conditions.
+Improved logo fallback, download-option joins, retry wording, sorting instructions, main-window notifications,
+background operation and code-card authentication. No Italian screenshots were available; current settings verified
+from source. Encrypted message parts still require explicit permission to load external images, even with automatic
+loading enabled (`view.rs`). Italian help now states this exception and the glossary records it for future batches.
+
+Static check-language reports only 1,395 deliberately removed marks. All 46 shortcut scopes, catalog invariants,
+help markup and exact 28-language pending inventories pass. Completed/source hashes reconcile with 18,131 messages
+and 7,787 changed help lines; 14 moved baseline pairs remain verified. Report regenerated; git diff --check passes.
+No tests run. Dutch checkpoint: `2a52474b`. Add the image exception to de/es/et/fr/nl settings/image help, then Portuguese.
+
+Current totals: 18,097 catalog entries and 599 help topics completed in the active scope; 2,904 historical
+catalog value improvements. Remaining: 14,343 catalog entries and 693 help topics. Earlier context followups
+are preserved; settings review remains pending in 22 languages. `REVIEWED` remains unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

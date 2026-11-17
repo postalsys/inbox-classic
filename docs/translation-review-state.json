@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue Italian (it) settings: 27 catalog entries and 11 help topics pending. de/es/et/fr/nl settings complete. Then pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and Croatian app before remaining initial reviews. Use 46 mnemonic scopes and context/source-error notes; preserve notification and logo-cache corrections. Fresh post-French upstream audit found no additional work beyond bd4a2bd1. Pending 14370 catalogs and 704 help topics; baseline unchanged. No tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Apply the verified encrypted-image exception to options-language and pictures-tracking in de/es/et/fr/nl as a focused completed-content followup, then Portuguese (pt) settings: 27 catalog entries and 11 help topics. de/es/et/fr/nl/it settings complete. Then pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi and Croatian app before remaining initial reviews. Use 46 mnemonic scopes and glossary context/source-error notes. Upstream audit after French found no additions beyond bd4a2bd1. Pending 14343 catalogs and 693 help topics; baseline unchanged. No tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -13563,54 +13563,8 @@
       ]
     },
     "it": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-settings-general",
-          "ui-settings-reading",
-          "ui-settings-new-mail",
-          "ui-settings-sending",
-          "ui-settings-default-apps",
-          "ui-settings-message-list",
-          "ui-settings-messages",
-          "ui-settings-language",
-          "ui-settings-label",
-          "ui-apply",
-          "ui-language-label",
-          "ui-restart-note",
-          "ui-restart-ask",
-          "ui-notify-new-mail",
-          "ui-codes-in-notifications",
-          "ui-pictures-always-option",
-          "ui-download-ahead",
-          "ui-download-limit",
-          "ui-send-delay",
-          "ui-trusted-senders-button",
-          "ui-eml-default",
-          "ui-layout-label",
-          "ui-list-pictures",
-          "ui-list-pictures-note"
-        ],
-        "linux.ftl": [
-          "gtk-notify-subtitle"
-        ],
-        "mac.ftl": [
-          "mac-check-updates-automatically",
-          "mac-settings-updates"
-        ]
-      },
-      "pending_help": [
-        "brand-logos.html",
-        "conversations.html",
-        "default-mail-program.html",
-        "download-ahead.html",
-        "drafts-outbox.html",
-        "layouts.html",
-        "new-mail.html",
-        "options-language.html",
-        "pictures-tracking.html",
-        "read-messages.html",
-        "sign-in-codes.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "it-app-round2",
@@ -15553,6 +15507,92 @@
           },
           "validation": "All 28 catalog IDs/full variable sets/access-key counts, 52 help topics per language and exact pending marks reconcile. All data-text and data-settings references resolve. Static check-language reports only 23796 deliberately removed marks, no structural findings; upstream fixed the previous seven es/fr multiline-parser false positives. All three settings-page mnemonic scopes pass in all 28 languages; all 46 actual menu/dialog scopes pass in the 18 languages whose app catalogs have been reviewed. All 76 imported nontranslation source/generated paths match upstream exactly. Offline cargo build -p pe-ffi passed in the dedicated target (9.41s); generated outputs match upstream. Global 17983 unmarked messages and 7311 help lines reconcile to completed batches; translation/English hashes match. No tests run.",
           "notes": "Integrated settings pages from bd4a2bd12b58b438004cdd106d0b007fcbac2aed. Preserved unchanged reviewed catalog values and all prior prose in the ten help topics whose changes are settings paths. Kept reviewed blocks where unchanged/extended in the expanded Settings topic; new/reworked blocks remain drafts. Retained the reviewed logo-cache/identity note for contextual re-review, added new required mnemonics to existing labels, and imported the shorter Linux notification subtitle. Sixteen new IDs and all eleven changed IDs are pending; thirteen obsolete platform IDs are recorded removed. All eleven affected help topics are pending, including previously reviewed topics. Historical affected review IDs/topics are retained in removed_/reopened_ fields; current reviewed_* fields only describe the current completed inventory."
+        },
+        {
+          "id": "it-settings-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-settings-general",
+              "ui-settings-reading",
+              "ui-settings-new-mail",
+              "ui-settings-sending",
+              "ui-settings-default-apps",
+              "ui-settings-message-list",
+              "ui-settings-messages",
+              "ui-settings-language",
+              "ui-settings-label",
+              "ui-apply",
+              "ui-language-label",
+              "ui-restart-note",
+              "ui-restart-ask",
+              "ui-notify-new-mail",
+              "ui-codes-in-notifications",
+              "ui-pictures-always-option",
+              "ui-download-ahead",
+              "ui-download-limit",
+              "ui-send-delay",
+              "ui-trusted-senders-button",
+              "ui-eml-default",
+              "ui-layout-label",
+              "ui-list-pictures",
+              "ui-list-pictures-note"
+            ],
+            "linux.ftl": [
+              "gtk-notify-subtitle"
+            ],
+            "mac.ftl": [
+              "mac-check-updates-automatically",
+              "mac-settings-updates"
+            ]
+          },
+          "reviewed_help": [
+            "brand-logos.html",
+            "conversations.html",
+            "default-mail-program.html",
+            "download-ahead.html",
+            "drafts-outbox.html",
+            "layouts.html",
+            "new-mail.html",
+            "options-language.html",
+            "pictures-tracking.html",
+            "read-messages.html",
+            "sign-in-codes.html"
+          ],
+          "changed_values": 3,
+          "files": {
+            "core/locales/it/app.ftl": "fdd3c31c03f21bc0d3db55131e60fc863fa4d4c7ea18384b6752b57b95611911",
+            "core/locales/it/linux.ftl": "4afee33f6dd60e60276edec038c536bbbc1d6afbe6472e04ecbffcdd506a4699",
+            "core/locales/it/mac.ftl": "934da8bb4be43eae5e22ace8ab6df32dd4cd672c172e4ab6d3879ba5410c9586",
+            "core/crates/pe-html/help/it/brand-logos.html": "42553cf5975c5017d46e7517f04a0f8fe6774083b552f0784ac1ee85111d6081",
+            "core/crates/pe-html/help/it/conversations.html": "f8f352251b004adc8479cc2386106709af5e3594e582b48edd279462db7b6d28",
+            "core/crates/pe-html/help/it/default-mail-program.html": "b3a7055e76b086952d7c72704981acb3945fab1c2541907b7e58088f1808981a",
+            "core/crates/pe-html/help/it/download-ahead.html": "e7acf378089603c563f318d2c69a193a1aff27bac5a57abad406518b4520de4d",
+            "core/crates/pe-html/help/it/drafts-outbox.html": "c16a469af841bd9b1f98343a2185ca06ecbebd2d3bddb1bc27e425efee3382bf",
+            "core/crates/pe-html/help/it/layouts.html": "0fd97e802c16fe615234b63f3f2329b8ee741dd694893eeca8d0f5f96b1cb973",
+            "core/crates/pe-html/help/it/new-mail.html": "3da9b77754ee828ba72a40785ac410b55315212f5e4d3123a32285b5e12527c8",
+            "core/crates/pe-html/help/it/options-language.html": "9841dc1844f659a90237997d9be6acaf318aa0a433b535f392b0e1267adfa83f",
+            "core/crates/pe-html/help/it/pictures-tracking.html": "f0c46982160947ca3eea5b92ccfb5fc6f1274dc2e65e30f576b4b2c6293fbffc",
+            "core/crates/pe-html/help/it/read-messages.html": "471f8a8aed3d1167b19e30c0617df2659a427e9dbf519319ae0ee408a7c3c9d0",
+            "core/crates/pe-html/help/it/sign-in-codes.html": "a885e52ca9075ee4135994b0364d8920310fcc26525e335a3179098e33da31a8"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "69662a35440d1f3370abea7d106aca3bbc50578e8a28de3bfe138e8cd2326255",
+            "core/locales/en/linux.ftl": "c6c2156fdc533360d184053184b20da32651af1380690bf68169273a02e632b0",
+            "core/locales/en/mac.ftl": "de43d4362f87b0dc995c154b90b35219e963f2143ee214baeadcae0a20f31a48",
+            "core/crates/pe-html/help/en/brand-logos.html": "6ea4a7a9f4b7e5336f229bc367ddf12f4ec20ac05ee4d33a004b376e5b4b590d",
+            "core/crates/pe-html/help/en/conversations.html": "20c0db95c0a1d3c2d78dfe78d538f79b01812cec20cbd5eb1b57136378d18a1a",
+            "core/crates/pe-html/help/en/default-mail-program.html": "bbf56849460a56e424aad0d96f55b684807776aaab66bbbdc07daa0b8cf9382e",
+            "core/crates/pe-html/help/en/download-ahead.html": "a186d3a7104f8c7c627a1c2de4e8e7009c7ddc63a2dd43a378e22d214c357a08",
+            "core/crates/pe-html/help/en/drafts-outbox.html": "02c23a726181a6f1670fffee29610d75b51cd801ef5aae229e5d2195b676c153",
+            "core/crates/pe-html/help/en/layouts.html": "7f277333307ece96d1d05ea0d82f0395be12d694266af1e589a7834d13d2e8d7",
+            "core/crates/pe-html/help/en/new-mail.html": "a30335621e4ff3805fdeae9e2e8449ba6164606cfee45786bc584333311965cb",
+            "core/crates/pe-html/help/en/options-language.html": "56b4cae37e1c43b7e9ab75ed961a7011953e4f22cfd943fa851062bc0d95a0aa",
+            "core/crates/pe-html/help/en/pictures-tracking.html": "19ddf63f03ccc3a7a643100cbddecf826f96a6be4b061c6c8b196322be319a42",
+            "core/crates/pe-html/help/en/read-messages.html": "3f282016d2b207ce987b6b72887f6301c68d7048ab9f9aad41dc4e9433c25072",
+            "core/crates/pe-html/help/en/sign-in-codes.html": "b8306602ce765263073757429ea289fe5cfdb933bef75df30c291bafdaad8275"
+          },
+          "validation": "Static check-language it reports exactly 1395 intentionally removed marks and no structural findings. All 46 actual mnemonic scopes pass. IDs, variables, access-key counts, comments, plural branches, exact help tags/attributes, OS branches and literal keys preserved. All 28 pending inventories match. Global 18131 unmarked messages and 7787 help lines reconcile; 14 unchanged/moved baseline pairs across de/es/et/fr independently verified. Completed translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
+          "notes": "Reviewed all 27 new/changed settings entries and all 11 affected help topics in app context. Improved restart wording, column-layout sender-image note and automatic-update label. Rewrote Settings help in informal Italian with natural default terminology, accurate Apply/Cancel, external default-app choices, queued sending, exact download defaults, image/domain conditions and the encrypted-part image permission exception verified in view.rs. Improved logo fallback, download-option joins, outbox/retry wording, sorting instructions, main-window notification condition, background operation and code-card authentication. Retained fluent prior corrections elsewhere. No Italian screenshots available; current structure verified from settings.toml and callers. Tags/controls/OS branches/literal keys, variables and comments preserved. Added the encrypted-image context note to the glossary. No tests run."
         }
       ]
     },
@@ -49504,7 +49544,6 @@
         "fi",
         "hr",
         "hu",
-        "it",
         "lt",
         "lv",
         "nb",
@@ -49525,7 +49564,8 @@
         "es",
         "et",
         "fr",
-        "nl"
+        "nl",
+        "it"
       ],
       "mnemonic_scopes": 46,
       "settings_page_scope_validation": "All three new page scopes pass in all 28 languages. All 46 scopes pass for de/es/et/fr/nl/it/ca/nb/sr-Latn/tr/cs/da/el/fi/pt/pt-BR/bg/hr. Other languages still await their full initial reviews. This static check is not linguistic review.",

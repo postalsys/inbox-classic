@@ -180,6 +180,9 @@ Context notes:
 - `ui-pictures-*` and the trusted-sender settings concern external images inside messages. `ui-list-pictures-*`
   concerns the sender's picture beside a message: a verified brand logo, then an Address Book picture for a verified
   sender domain, otherwise initials. Do not describe these as the same kind of picture.
+- External images in encrypted message parts always require explicit permission when the message is opened,
+  even with automatic image loading or a trusted sender (`view.rs`: encrypted parts use the clicked flag).
+  Mention this exception when Settings/help says images are automatically loaded in all messages.
 - Downloaded brand logos are stored and reused across app restarts, not once per run. Describe cached reuse
   across messages, not a promise of exactly one download per brand. When a download occurs, the logo server
   can see the request time and IP address. The English logo help still contains the older timing claims.
