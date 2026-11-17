@@ -93,9 +93,22 @@ pub struct Pages<'a> {
 impl Pages<'_> {
     /// Page `index` (from 0) drawn on white at [`page_size`], as a PNG (or a JPEG for a scan, [`crate::encode`])
     pub fn render(&self, index: usize) -> Result<Picture, Refusal> {
+        self.render_scaled(index, 1)
+    }
+
+    /// Page `index` drawn as [`Self::render`] does, its sides divided by `divisor`: what the fuzz target draws, as a
+    /// page of the full size takes a tenth of a second under the address sanitizer and the target would cover little
+    #[doc(hidden)]
+    pub fn render_scaled(&self, index: usize, divisor: u32) -> Result<Picture, Refusal> {
         let page = self.document.pdf.pages().get(index).ok_or(Refusal::Unreadable)?;
         let (width, height) = page.render_dimensions();
         let (width, height, scale) = page_size(width, height).ok_or(Refusal::TooLarge)?;
+        let divisor = divisor.max(1);
+        let (width, height, scale) = (
+            (width / divisor).max(1),
+            (height / divisor).max(1),
+            scale / f64::from(divisor),
+        );
         self.meter.borrow_mut().page(page)?;
         let mut context = RenderContext::new(width as u16, height as u16);
         let transform = Affine::scale(scale) * page.initial_transform(true).to_kurbo();
