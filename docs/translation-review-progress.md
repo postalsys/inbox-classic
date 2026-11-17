@@ -5,14 +5,14 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: Review Estonian phase2 draft logs/help, then French and Dutch; continue Italian with both agent batches.**
+- **Next: Review French phase2 draft logs/help, then Dutch; continue Italian with both agent batches.**
   Original unsubscribe additions complete: de, es, et, fr, nl. Phase2 reopens only their affected help passages.
   Phase2 source `e5d3f046` adds 84 entries and changes 56 help topics. All previous reviewed prose is retained.
   New draft notice/help remains pending: core/FFI exists, but no platform editor displays the notice yet.
-  Phase2 runtime-backed logs/help reviewed: de, es. The draft notice and its display-help passage remain pending.
+  Phase2 runtime-backed logs/help reviewed: de, es, et. The draft notice and its display-help passage remain pending.
 - Current scope: 34,232 catalog entries and 1,352 help topics.
-  Completed: 21,296 entries and 786 full topics; pending: 12,936 entries and 566 topics.
-  Historical catalog improvements: 3,792. Importing drafts earns no review credit.
+  Completed: 21,298 entries and 787 full topics; pending: 12,934 entries and 565 topics.
+  Historical catalog improvements: 3,793. Importing drafts earns no review credit.
 - Agent context: consent covers a batch of lists; refusal is the default. The quota is 30 approved list requests
   per program over the preceding 24 hours. The text signature is included by default but can be omitted.
   Correct the new help accordingly; preserve prior Undo/Outbox corrections.
@@ -2368,3 +2368,11 @@ Reviewed two log strings and six help passages in formal usted prose. The two lo
 Spanish structural checker has1,455 expected mark-only diagnostics and no structural findings. Exact replay verifies2 catalog reviews with0 wording changes and6 help passages with5 wording lines improved. Older prose, placeholders, tags/attributes/platform branches/literal keys and generated IDs retained exactly; unresolved notice unchanged. All platform label joins inspected. Global reconciliation:21,334 unmarked entries,10,657 help lines,14 verified baseline pairs; all latest hashes match. All28 full inventories and since-start1,201 entries/358 passages match. Source audit:43worktrees/184refs, exact integrated snapshots and290 old copies, no unrecorded work. HTML regenerated; git diff --check passes. No tests or build run.
 
 Review Estonian phase2 draft logs/help, then French and Dutch; continue Italian with both agent batches. The exact notice string and help paragraph stay marked; no full-topic credit for agents-sending.
+
+## Estonian agent draft review (notice pending)
+
+Reviewed two log strings and six help passages in polite plural prose. The replacement log and heading were retained; the discard log now says kustutati instead of the colloquial visati ära. Five help lines now cover actual permissions, permanent draft removal, takeover through saving/autosave, safe rule preview and send-answer polling. The attribution-line paragraph remains pending; older reviewed prose is preserved.
+
+Estonian structural checker has1,455 expected mark-only diagnostics and no structural findings. Exact replay verifies2 catalog reviews with1 wording change and6 help passages with5 wording lines improved. Older prose, placeholders, tags/attributes/platform branches/literal keys and generated IDs retained exactly; unresolved notice unchanged. All platform label joins inspected. Global reconciliation:21,336 unmarked entries,10,663 help lines,14 verified baseline pairs; all latest hashes match. All28 full inventories and since-start1,199 entries/352 passages match. Source audit:43worktrees/184refs, exact integrated snapshots and290 old copies, no unrecorded work. HTML regenerated; git diff --check passes. No tests or build run.
+
+Review French phase2 draft logs/help, then Dutch; continue Italian with both agent batches. The exact notice string and help paragraph stay marked; no full-topic credit for agents-sending.

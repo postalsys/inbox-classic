@@ -448,10 +448,8 @@ agent-log-composed = Kiri „{ $subject }“ avati koostamisaknas, et saaksite s
 agent-log-refused = Te ei saatnud kirja „{ $subject }“
 agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }
 agent-log-draft = Mustand „{ $subject }“ salvestati
-# review: new
 agent-log-draft-replaced = Mustand „{ $subject }“ asendati
-# review: new
-agent-log-draft-discarded = Mustand „{ $subject }“ visati ära
+agent-log-draft-discarded = Mustand „{ $subject }“ kustutati
 # review: new
 agent-draft-note = { $program }, tehisintellekti agent, kirjutas selle mustandi. Kontrollige enne saatmist adressaate ja teksti.
 agent-log-read = „{ $subject }“ märgiti loetuks
