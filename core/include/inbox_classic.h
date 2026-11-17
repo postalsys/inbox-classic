@@ -799,8 +799,6 @@ typedef struct PeAgentRecipient {
 
 // The mailing lists an agent wants to leave, as the question shows them
 typedef struct PeAgentUnsubscribe {
-  // The account the messages are in
-  int64_t account;
   // The question: "Claude wants to unsubscribe you from 3 mailing lists"
   const char *title;
   // What the dialog says under it
@@ -817,6 +815,8 @@ typedef struct PeAgentList {
   const char *subject;
   // The host the request goes to
   const char *target;
+  // The host as the question shows it: "→ list.example.com"
+  const char *target_label;
 } PeAgentList;
 
 // A program the user decided about

@@ -253,14 +253,9 @@ pub(crate) fn hello_line(host: &HostInfo) -> String {
 impl Session {
     /// What the program may do now: nothing once it is turned away or forgotten, or agents are off
     fn levels(&self) -> AgentLevels {
-        if !self.core.agents_enabled().unwrap_or(false) {
-            return AgentLevels(0);
-        }
         self.allowed
-            .and_then(|host| self.core.agent_host(host).ok().flatten())
-            .filter(|host| host.allowed)
-            .map(|host| host.levels)
-            .unwrap_or_default()
+            .and_then(|host| self.core.agent_host_now(host).ok())
+            .map_or(AgentLevels(0), |now| now.levels())
     }
 
     /// The notification to send when what the program may do changed since it was told its tools

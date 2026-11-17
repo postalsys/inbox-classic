@@ -354,42 +354,14 @@ private func unsubscribeQuestion(core: Core, request: UInt64) {
     defer { pe_agent_unsubscribe_free(info) }
     guard let ask = pe_agent_unsubscribe(info)?.pointee else { return }
     let width: CGFloat = 460
-    let rows = FlippedView()
-    rows.translatesAutoresizingMaskIntoConstraints = false
     let stack = NSStackView()
     stack.orientation = .vertical
     stack.alignment = .leading
     stack.spacing = 0
-    stack.translatesAutoresizingMaskIntoConstraints = false
-    rows.addSubview(stack)
     let count = pe_agent_unsubscribe_list_count(info)
     for index in 0..<count {
         guard let list = pe_agent_unsubscribe_list(info, index)?.pointee else { continue }
-        let address = wrappingLabel(text(list.address))
-        address.font = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
-        address.setAccessibilityIdentifier("agent.list.\(index)")
-        let name = text(list.name)
-        let named = name.isEmpty ? nil : note(name, color: .labelColor)
-        named?.lineBreakMode = .byTruncatingTail
-        named?.toolTip = name
-        named?.setAccessibilityIdentifier("agent.list.\(index).name")
-        let subject = note(text(list.subject))
-        subject.lineBreakMode = .byTruncatingTail
-        subject.toolTip = subject.stringValue
-        let target = note("→ \(text(list.target))", color: .tertiaryLabelColor)
-        target.lineBreakMode = .byTruncatingTail
-        target.setAccessibilityIdentifier("agent.list.\(index).target")
-        let labels = [address, named, subject, target].compactMap { $0 }
-        let row = NSStackView(views: labels)
-        row.orientation = .vertical
-        row.alignment = .leading
-        row.spacing = 2
-        row.edgeInsets = NSEdgeInsets(top: 7, left: 10, bottom: 7, right: 10)
-        for label in labels {
-            label.preferredMaxLayoutWidth = width - 36
-            label.widthAnchor.constraint(equalToConstant: width - 36).isActive = true
-        }
-        stack.addArrangedSubview(row)
+        stack.addArrangedSubview(listRow(list, index: index, width: width))
         if index + 1 < count {
             let line = NSBox()
             line.boxType = .separator
@@ -398,28 +370,14 @@ private func unsubscribeQuestion(core: Core, request: UInt64) {
             line.leadingAnchor.constraint(equalTo: stack.leadingAnchor, constant: 10).isActive = true
         }
     }
-    NSLayoutConstraint.activate([
-        stack.topAnchor.constraint(equalTo: rows.topAnchor),
-        stack.leadingAnchor.constraint(equalTo: rows.leadingAnchor),
-        stack.trailingAnchor.constraint(equalTo: rows.trailingAnchor),
-        stack.bottomAnchor.constraint(equalTo: rows.bottomAnchor),
-    ])
-    let scroll = NSScrollView()
-    scroll.borderType = .bezelBorder
-    scroll.hasVerticalScroller = true
-    scroll.autohidesScrollers = true
-    scroll.backgroundColor = .textBackgroundColor
-    scroll.documentView = rows
-    NSLayoutConstraint.activate([
-        rows.topAnchor.constraint(equalTo: scroll.contentView.topAnchor),
-        rows.leadingAnchor.constraint(equalTo: scroll.contentView.leadingAnchor),
-        rows.widthAnchor.constraint(equalTo: scroll.contentView.widthAnchor),
-    ])
-    scroll.setAccessibilityIdentifier("agent.lists")
-    scroll.translatesAutoresizingMaskIntoConstraints = false
-    scroll.widthAnchor.constraint(equalToConstant: width).isActive = true
     // as tall as the lists, up to about as tall as the send question's message, then it scrolls
-    scroll.heightAnchor.constraint(equalToConstant: min(rows.fittingSize.height + 4, 280)).isActive = true
+    let tall = stack.fittingSize.height + 4
+    let scroll = scrolledColumn(stack, width: width, height: min(tall, 280))
+    scroll.borderType = .bezelBorder
+    scroll.autohidesScrollers = true
+    scroll.drawsBackground = true
+    scroll.backgroundColor = .textBackgroundColor
+    scroll.setAccessibilityIdentifier("agent.lists")
     let question = QuestionWindow(title: Text.uiAiAgent.text, heading: text(ask.title), detail: text(ask.detail),
                                   id: "agent.unsubscribe", accessory: scroll,
                                   answers: [(Text.uiUnsubscribe.text, "agent.unsubscribe"),
@@ -427,13 +385,44 @@ private func unsubscribeQuestion(core: Core, request: UInt64) {
                                   safe: 1)
     holdBack(question.buttons[0])
     // a longer list shows its scroller once, so the rows below the edge are not taken for the end
-    if rows.fittingSize.height + 4 > 280 {
+    if tall > 280 {
         let flash = Timer(timeInterval: 0.5, repeats: false) { _ in
             MainActor.assumeIsolated { scroll.flashScrollers() }
         }
         RunLoop.main.add(flash, forMode: .common)
     }
     _ = pe_agent_answer_unsubscribe(core.handle, request, question.run() == 0)
+}
+
+/// One list of the unsubscribe question: the sender's address bold and whole, the name under it, the subject it came
+/// with and where the request goes
+@MainActor
+private func listRow(_ list: PeAgentList, index: Int, width: CGFloat) -> NSStackView {
+    let address = wrappingLabel(text(list.address))
+    address.font = NSFont.boldSystemFont(ofSize: NSFont.systemFontSize)
+    address.setAccessibilityIdentifier("agent.list.\(index)")
+    let name = text(list.name)
+    let named = name.isEmpty ? nil : note(name, color: .labelColor)
+    named?.lineBreakMode = .byTruncatingTail
+    named?.toolTip = name
+    named?.setAccessibilityIdentifier("agent.list.\(index).name")
+    let subject = note(text(list.subject))
+    subject.lineBreakMode = .byTruncatingTail
+    subject.toolTip = subject.stringValue
+    let target = note(text(list.target_label), color: .tertiaryLabelColor)
+    target.lineBreakMode = .byTruncatingTail
+    target.setAccessibilityIdentifier("agent.list.\(index).target")
+    let labels = [address, named, subject, target].compactMap { $0 }
+    let row = NSStackView(views: labels)
+    row.orientation = .vertical
+    row.alignment = .leading
+    row.spacing = 2
+    row.edgeInsets = NSEdgeInsets(top: 7, left: 10, bottom: 7, right: 10)
+    for label in labels {
+        label.preferredMaxLayoutWidth = width - 36
+        label.widthAnchor.constraint(equalToConstant: width - 36).isActive = true
+    }
+    return row
 }
 
 // ---- Tools > AI Agents ----

@@ -444,8 +444,6 @@ pub unsafe extern "C" fn pe_agent_answer_send(
 /// The mailing lists an agent wants to leave, as the question shows them
 #[repr(C)]
 pub struct PeAgentUnsubscribe {
-    /// The account the messages are in
-    pub account: i64,
     /// The question: "Claude wants to unsubscribe you from 3 mailing lists"
     pub title: *const c_char,
     /// What the dialog says under it
@@ -463,6 +461,8 @@ pub struct PeAgentList {
     pub subject: *const c_char,
     /// The host the request goes to
     pub target: *const c_char,
+    /// The host as the question shows it: "→ list.example.com"
+    pub target_label: *const c_char,
 }
 
 pub struct PeAgentUnsubscribeInfo {
@@ -487,7 +487,6 @@ pub unsafe extern "C" fn pe_agent_unsubscribe_info(core: *const PeCore, request:
             let (title, detail) = pe_core::agents::unsubscribe_text(&ask);
             let mut strings = Strings::default();
             let info = PeAgentUnsubscribe {
-                account: ask.account,
                 title: strings.add(&title),
                 detail: strings.add(&detail),
             };
@@ -496,6 +495,7 @@ pub unsafe extern "C" fn pe_agent_unsubscribe_info(core: *const PeCore, request:
                 name: strings.add(&l.name),
                 subject: strings.add(&l.subject),
                 target: strings.add(&l.target),
+                target_label: strings.add(&l.target_label),
             });
             handed(PeAgentUnsubscribeInfo {
                 info,

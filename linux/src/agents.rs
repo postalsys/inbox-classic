@@ -264,12 +264,7 @@ fn unsubscribe_lists(ask: &agents::UnsubscribeAsk) -> gtk::ScrolledWindow {
         for (text, name, dim, class) in [
             (entry.name.clone(), "agent-list-name", false, "body"),
             (entry.subject.clone(), "agent-list-subject", true, "body"),
-            (
-                format!("\u{2192} {}", entry.target),
-                "agent-list-target",
-                true,
-                "caption",
-            ),
+            (entry.target_label.clone(), "agent-list-target", true, "caption"),
         ] {
             if text.is_empty() {
                 continue;
