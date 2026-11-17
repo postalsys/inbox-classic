@@ -69,6 +69,12 @@ add_executable(InboxClassic WIN32
     res/app.rc
 )
 add_dependencies(InboxClassic pe_core_cargo)
+# rc.exe reports no dependencies, so the resources are compiled again only when app.rc itself changes: an icon
+# strip, a sign-in button or the icon changed alone would keep its old picture in an incremental build. Every file
+# under res/ is made a dependency of app.rc (CONFIGURE_DEPENDS finds files added later)
+file(GLOB_RECURSE APP_RESOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/res/*)
+list(REMOVE_ITEM APP_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/res/app.rc)
+set_source_files_properties(res/app.rc PROPERTIES OBJECT_DEPENDS "${APP_RESOURCES}")
 
 target_include_directories(InboxClassic PRIVATE src ${CORE_DIR}/include ${WEBVIEW2_DIR}/build/native/include)
 target_compile_definitions(InboxClassic PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX
