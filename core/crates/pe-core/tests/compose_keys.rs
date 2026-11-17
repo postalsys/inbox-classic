@@ -320,17 +320,23 @@ fn a_reply_to_encrypted_mail_asks_before_encrypt_goes_off_and_its_quote_stays_en
     let shown = core.compose_security(account, &removed).unwrap();
     assert_eq!(shown.block, Block::None);
     assert!(shown.can_send_unencrypted);
-    assert_eq!(shown.tone, Tone::Good, "still signed");
-    let unsigned = Outgoing {
-        sign: false,
-        ..removed.clone()
-    };
-    let shown = core.compose_security(account, &unsigned).unwrap();
-    assert_eq!(shown.tone, Tone::Warning);
-    assert_eq!(
-        shown.text,
-        "Not encrypted, although the message it answers or forwards was."
-    );
+    // signed or not, the line warns that the answer goes without the encryption the original had: that matters more
+    // than the signature
+    assert!(removed.sign, "Sign stays on after Encrypt is turned off");
+    for message in [
+        removed.clone(),
+        Outgoing {
+            sign: false,
+            ..removed.clone()
+        },
+    ] {
+        let shown = core.compose_security(account, &message).unwrap();
+        assert_eq!(shown.tone, Tone::Warning);
+        assert_eq!(
+            shown.text,
+            "Not encrypted, although the message it answers or forwards was."
+        );
+    }
     // a reply whose quote is gone is asked with the other words
     let encrypted_again = Outgoing {
         encrypt: true,

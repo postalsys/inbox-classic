@@ -407,9 +407,10 @@ impl Core {
                 );
                 (tone, text)
             }
-            Block::None if sign => (Tone::Good, tr(Text::PgpComposeSigned)),
-            // a message that answers encrypted mail and goes without encryption says so
+            // a message that answers encrypted mail and goes without encryption says so, signed or not: that it is no
+            // longer encrypted matters more than that it is signed
             Block::None if outgoing.quote_encrypted => (Tone::Warning, tr(Text::PgpComposeReplyClear)),
+            Block::None if sign => (Tone::Good, tr(Text::PgpComposeSigned)),
             Block::None => (Tone::Neutral, String::new()),
         };
         let tone = if text.is_empty() { None } else { Some(tone) };
