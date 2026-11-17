@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Begin Croatian (hr) app.ftl in actual UI context. Fresh upstream audit after all 168 rollback reviews found no new strings, help or languages; origin/master remains 46b938a7. Croatian has 1330 catalog entries and 52 help topics pending. Its messages count phrase, six undone-* messages and three list-loading labels are already reviewed. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. All context followups complete; retain glossary notification, logo-cache, attachment-reminder and rollback context. Do not run tests. Active checkout build/i18n-wave1.",
+  "next_batch": "FIRST integrate origin/master bd4a2bd1 (from prior source 46b938a7), preserving existing review corrections. Exact catalog/help delta is in review_workspace.source_changes_pending_integration: per language 16 new, 13 removed and 11 changed catalog IDs, plus 11 changed help topics; 28 languages affected. Reconcile IDs, marks, recorded batches and English/source hashes; reopen affected reviewed strings/help and check actual settings pages. Then continue Croatian core.ftl (448 pending), remaining platform/help-title catalogs and 52 help topics. Croatian app.ftl and Windows win-save-as-button are reviewed against pre-redesign source. Croatian currently has 703 catalog entries remaining; current checkout total pending 14003 catalog/572 help, before new-source integration. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. No tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -9384,634 +9384,6 @@
     },
     "hr": {
       "pending_catalogs": {
-        "app.ftl": [
-          "menu-file",
-          "menu-edit",
-          "menu-view",
-          "menu-tools",
-          "menu-message",
-          "menu-help",
-          "menu-layout",
-          "menu-sort-by",
-          "menu-text-size",
-          "menu-folder",
-          "cmd-new-account",
-          "cmd-exit",
-          "cmd-sync",
-          "cmd-mark-read",
-          "cmd-mark-unread",
-          "cmd-pictures",
-          "cmd-about",
-          "cmd-new-mail",
-          "cmd-reply",
-          "cmd-reply-all",
-          "cmd-forward",
-          "cmd-help",
-          "cmd-delete",
-          "cmd-move",
-          "cmd-flag",
-          "cmd-new-folder",
-          "cmd-rename-folder",
-          "cmd-delete-folder",
-          "cmd-empty-folder",
-          "ui-empty-button",
-          "cmd-accounts",
-          "cmd-find",
-          "cmd-save-as",
-          "cmd-print",
-          "cmd-import",
-          "cmd-outbox",
-          "cmd-properties",
-          "cmd-mark-all-read",
-          "cmd-junk",
-          "cmd-not-junk",
-          "cmd-archive",
-          "cmd-watch-conversation",
-          "cmd-ignore-conversation",
-          "cmd-next-message",
-          "cmd-previous-message",
-          "cmd-next-unread",
-          "cmd-go-to-folder",
-          "cmd-find-in-message",
-          "ui-go-to-prompt",
-          "ui-find-in-message-hint",
-          "ui-find-not-found",
-          "cmd-expand-all-threads",
-          "cmd-collapse-all-threads",
-          "ui-group-by-conversation",
-          "cmd-folder-list",
-          "cmd-layout-automatic",
-          "cmd-layout-classic",
-          "cmd-layout-columns",
-          "cmd-sort-date",
-          "cmd-sort-from",
-          "cmd-sort-subject",
-          "cmd-sort-size",
-          "cmd-sort-ascending",
-          "cmd-sort-descending",
-          "cmd-text-size-largest",
-          "cmd-text-size-larger",
-          "cmd-text-size-medium",
-          "cmd-text-size-smaller",
-          "cmd-text-size-smallest",
-          "cmd-hide-ignored",
-          "cmd-hide-read",
-          "cmd-notify",
-          "cmd-open",
-          "cmd-default-app",
-          "cmd-view-source",
-          "cmd-ai-agents",
-          "cmd-options",
-          "cmd-message-rules",
-          "cmd-encryption-keys",
-          "cmd-create-rule-from-message",
-          "cmd-select-all",
-          "cmd-undo",
-          "cmd-copy",
-          "cmd-address-book",
-          "cmd-add-sender-to-book",
-          "cmd-import-address-book",
-          "cmd-export-address-book",
-          "cmd-export-setup",
-          "cmd-import-setup",
-          "tray-check",
-          "tray-no-accounts",
-          "ui-tb-create-mail",
-          "ui-tb-reply",
-          "ui-tb-reply-all",
-          "ui-tb-forward",
-          "ui-tb-print",
-          "ui-tb-delete",
-          "ui-tb-junk",
-          "ui-tb-not-junk",
-          "ui-tb-archive",
-          "ui-tb-previous",
-          "ui-tb-next",
-          "ui-previous-tip",
-          "ui-next-tip",
-          "ui-tb-sync",
-          "ui-tb-mark-read",
-          "ui-tb-mark-unread",
-          "ui-still-running",
-          "ui-no-subject",
-          "ui-quoted",
-          "ui-newest-from",
-          "ui-new-messages",
-          "ui-outbox-waiting",
-          "ui-outbox-waits",
-          "ui-outbox-sending",
-          "ui-from-account",
-          "ui-sign-in-refused",
-          "ui-sign-in-again-ask",
-          "ui-sign-in-again-failed",
-          "ui-unknown-reason",
-          "ui-checking",
-          "ui-done",
-          "ui-sent-at",
-          "ui-draft-saved",
-          "ui-draft-not-saved",
-          "ui-about-core",
-          "ui-add-account-first",
-          "ui-add-account-first-link",
-          "ui-default-app-is",
-          "ui-select-message-first",
-          "ui-store-not-opened",
-          "ui-store-or-cert-not-opened",
-          "ui-help-title",
-          "ui-help-missing",
-          "ui-ok",
-          "ui-cancel",
-          "ui-close",
-          "ui-col-subject",
-          "ui-col-from",
-          "ui-col-to",
-          "ui-col-received",
-          "ui-watched-conversation",
-          "ui-col-sent",
-          "ui-col-size",
-          "ui-col-folder",
-          "ui-col-account",
-          "ui-col-queued",
-          "ui-col-status",
-          "ui-outbox-title",
-          "ui-outbox-status-waiting",
-          "ui-outbox-status-not-sent",
-          "ui-outbox-status-agent",
-          "ui-outbox-delete-ask",
-          "ui-open-link",
-          "ui-edit-link",
-          "ui-remove-link",
-          "ui-insert-attachment",
-          "ui-insert-picture",
-          "ui-filter-all",
-          "ui-filter-pictures",
-          "ui-filter-messages",
-          "ui-save-attachment-as",
-          "ui-not-sent",
-          "ui-attachment-forgotten",
-          "ui-send-anyway",
-          "ui-go-back",
-          "ui-not-saved",
-          "ui-saving-draft",
-          "ui-compose-saved-at",
-          "ui-compose-restored",
-          "ui-compose-not-saved",
-          "ui-save-changes-ask",
-          "ui-new-message-title",
-          "ui-link-invalid",
-          "ui-link-address",
-          "ui-hyperlink",
-          "ui-hyperlink-intro",
-          "ui-edit-hyperlink",
-          "ui-edit-hyperlink-intro",
-          "ui-not-a-picture",
-          "ui-format-color",
-          "ui-format-numbers",
-          "ui-format-bullets",
-          "ui-format-outdent",
-          "ui-format-indent",
-          "ui-format-left",
-          "ui-format-center",
-          "ui-format-right",
-          "ui-format-line",
-          "ui-tb-send",
-          "ui-tb-save",
-          "ui-tb-attach",
-          "ui-field-from",
-          "ui-field-to",
-          "ui-field-cc",
-          "ui-field-bcc",
-          "ui-field-subject",
-          "ui-field-attach",
-          "ui-signature",
-          "ui-signature-hint",
-          "ui-signature-not-saved",
-          "ui-all-inboxes",
-          "ui-all-sent",
-          "ui-all-drafts",
-          "ui-flagged-folder",
-          "ui-all-folders",
-          "ui-the-account",
-          "ui-folder-name",
-          "ui-find-hint",
-          "ui-find-tip",
-          "ui-clear-search",
-          "ui-no-match",
-          "ui-no-match-all",
-          "ui-no-match-in",
-          "ui-no-items",
-          "ui-choose-folder",
-          "ui-unsubscribe",
-          "ui-open-in-calendar",
-          "ui-pictures-blocked",
-          "ui-not-shown",
-          "ui-attachment-not-read",
-          "ui-attachment-not-saved",
-          "ui-not-downloaded",
-          "ui-leave-list",
-          "ui-leave-one-click",
-          "ui-leave-mail",
-          "ui-leave-web",
-          "ui-unsubscribing",
-          "ui-cannot-unsubscribe",
-          "ui-unsubscribed",
-          "ui-not-unsubscribed",
-          "ui-event-span",
-          "ui-event-floating",
-          "ui-invitation",
-          "ui-invitation-updated",
-          "ui-invitation-canceled",
-          "ui-invitation-answer",
-          "ui-no-title",
-          "ui-organizer",
-          "ui-invitation-not-read",
-          "ui-no-calendar",
-          "ui-messages-not-changed",
-          "ui-new-folder-in-selected",
-          "ui-new-folder-at-top",
-          "ui-folder-not-created",
-          "ui-folder-not-renamed",
-          "ui-folder-not-deleted",
-          "ui-rename-folder-intro",
-          "ui-properties-of",
-          "ui-internet-headers",
-          "ui-save-messages-in",
-          "ui-save-message-as",
-          "ui-import-choose-folder",
-          "ui-add-account-title",
-          "ui-accounts-title",
-          "ui-security-none",
-          "ui-field-required",
-          "ui-email-invalid",
-          "ui-ports-invalid",
-          "ui-looking-up",
-          "ui-found-none",
-          "ui-found-change",
-          "ui-found-guess",
-          "ui-found-mx",
-          "ui-found-srv",
-          "ui-found-autodiscover",
-          "ui-found-other",
-          "ui-app-password-needed",
-          "ui-app-password-open",
-          "ui-plain-warning",
-          "ui-continue-ask",
-          "ui-add-sign-in-app",
-          "ui-turned-off",
-          "ui-off-here",
-          "ui-why",
-          "ui-more-sign-in",
-          "ui-other-account",
-          "ui-field-account-name",
-          "ui-field-name",
-          "ui-field-email",
-          "ui-field-user",
-          "ui-field-password",
-          "ui-field-imap-host",
-          "ui-field-imap-port",
-          "ui-field-imap-security",
-          "ui-field-smtp-host",
-          "ui-field-smtp-port",
-          "ui-field-smtp-security",
-          "ui-field-other-addresses",
-          "ui-sign-in-not-started",
-          "ui-sign-in-in-browser",
-          "ui-sign-in-failed",
-          "ui-account-not-saved",
-          "ui-start-intro",
-          "ui-start-intro-apps",
-          "ui-use-app-password",
-          "ui-the-provider",
-          "ui-provider-intro",
-          "ui-provider-intro-apps",
-          "ui-finish",
-          "ui-logon",
-          "ui-enter-password",
-          "ui-signs-in-with",
-          "ui-keep-password",
-          "ui-remove-account",
-          "ui-remove-account-ask",
-          "ui-col-email",
-          "ui-col-incoming",
-          "ui-type-email",
-          "ui-ai-agent",
-          "ui-ai-agent-access",
-          "ui-ai-agents",
-          "ui-program-path",
-          "ui-it-may",
-          "ui-accounts-it-may-use",
-          "ui-send-message-ask",
-          "ui-col-name",
-          "ui-never",
-          "ui-connect-agent",
-          "ui-connect-agent-intro",
-          "ui-col-program",
-          "ui-col-may",
-          "ui-col-last-used",
-          "ui-col-when",
-          "ui-col-what",
-          "ui-sign-in-app",
-          "ui-sign-in-apps",
-          "ui-add-sign-in-app-title",
-          "ui-preset-app-name",
-          "ui-issuer-not-checked",
-          "ui-checking-issuer",
-          "ui-issuer-unusable",
-          "ui-issuer-usable",
-          "ui-sign-in-app-not-saved",
-          "ui-check",
-          "ui-fill-in-for",
-          "ui-app-name",
-          "ui-issuer",
-          "ui-client-id",
-          "ui-client-secret",
-          "ui-scopes",
-          "ui-imap-server",
-          "ui-smtp-server",
-          "ui-redirect-uri",
-          "ui-sign-in-app-intro",
-          "ui-remove-secret",
-          "ui-register-it",
-          "ui-built-in-note",
-          "ui-client-with-secret",
-          "ui-client-public",
-          "ui-no-accounts",
-          "ui-remove-sign-in-app",
-          "ui-remove-sign-in-app-ask",
-          "ui-sign-in-app-not-removed",
-          "ui-sign-in-apps-intro",
-          "ui-col-issuer",
-          "ui-col-used-by",
-          "ui-options-system-default",
-          "ui-new-folder-title",
-          "ui-rename-folder-title",
-          "ui-delete-folder-question",
-          "ui-properties",
-          "ui-account-sync",
-          "ui-account-properties",
-          "ui-account-move-up",
-          "ui-account-move-down",
-          "ui-menu-open",
-          "ui-menu-flag",
-          "ui-menu-view-source",
-          "ui-save-attachments",
-          "ui-attachment-open",
-          "ui-attachment-save-as",
-          "ui-attachment-save-all",
-          "ui-attachments-strip",
-          "ui-attachment-note-title",
-          "ui-attachment-program-tip",
-          "ui-clear-flag",
-          "ui-button-move",
-          "ui-button-copy",
-          "ui-find-folder",
-          "ui-new-folder-in",
-          "ui-outbox-send-all",
-          "ui-yes",
-          "ui-no",
-          "ui-try-again",
-          "ui-remove",
-          "ui-signature-of",
-          "ui-sign-in-with",
-          "ui-sign-in-in-browser-yours",
-          "ui-browser-sign-in-server",
-          "ui-dont-allow",
-          "ui-allow",
-          "ui-dont-send",
-          "ui-edit-first",
-          "ui-new-address",
-          "ui-turn-away",
-          "ui-clear-agent-log",
-          "ui-clear-agent-log-detail",
-          "ui-let-agents-connect",
-          "ui-change-button",
-          "ui-undo-button",
-          "ui-rules-title",
-          "ui-rules-intro",
-          "ui-rules-none",
-          "ui-rule-new",
-          "ui-rule-edit",
-          "ui-rule-delete-button",
-          "ui-rule-title",
-          "ui-rule-name",
-          "ui-rule-account",
-          "ui-rule-all-accounts",
-          "ui-rule-query",
-          "ui-rule-query-hint",
-          "ui-rule-count",
-          "ui-rule-show",
-          "ui-rule-actions",
-          "ui-rule-move",
-          "ui-rule-mark-read",
-          "ui-rule-flag",
-          "ui-rule-archive",
-          "ui-rule-junk",
-          "ui-rule-delete",
-          "ui-rule-quiet",
-          "ui-rule-apply-now",
-          "ui-rule-delete-ask",
-          "ui-create-rule",
-          "ui-rules-applied",
-          "ui-col-rule-matches",
-          "ui-clear-button",
-          "ui-how-to-connect",
-          "ui-agent-programs",
-          "ui-what-agents-did",
-          "ui-restart-now",
-          "ui-restart-later",
-          "ui-tb-new-contact",
-          "ui-tb-new-group",
-          "ui-tb-properties",
-          "ui-tb-write-to",
-          "ui-menu-new-contact",
-          "ui-menu-new-group",
-          "ui-menu-write-to",
-          "ui-menu-delete",
-          "ui-book-find-hint",
-          "ui-book-all-contacts",
-          "ui-col-phone",
-          "ui-book-empty",
-          "ui-book-no-match",
-          "ui-book-delete-ask",
-          "ui-group-delete-ask",
-          "ui-book-no-address",
-          "ui-new-contact-title",
-          "ui-contact-title",
-          "ui-contact-first",
-          "ui-contact-last",
-          "ui-contact-display",
-          "ui-contact-nickname",
-          "ui-contact-company",
-          "ui-contact-addresses",
-          "ui-contact-address-hint",
-          "ui-contact-add",
-          "ui-contact-set-default",
-          "ui-contact-default",
-          "ui-contact-phones",
-          "ui-phone-home",
-          "ui-phone-work",
-          "ui-phone-mobile",
-          "ui-phone-other",
-          "ui-contact-notes",
-          "ui-contact-name-needed",
-          "ui-contact-address-invalid",
-          "ui-contact-not-saved",
-          "ui-new-group-title",
-          "ui-group-title",
-          "ui-group-name",
-          "ui-group-members",
-          "ui-group-select-members",
-          "ui-group-new-member",
-          "ui-group-name-needed",
-          "ui-group-not-saved",
-          "ui-group-members-count",
-          "ui-select-recipients",
-          "ui-select-members",
-          "ui-pick-intro",
-          "ui-pick-recipients",
-          "ui-pick-members",
-          "ui-pick-to",
-          "ui-pick-cc",
-          "ui-pick-bcc",
-          "ui-pick-add",
-          "ui-pick-tip",
-          "ui-filter-address-books",
-          "ui-filter-vcard",
-          "ui-book-export-name",
-          "ui-book-imported",
-          "ui-book-not-imported",
-          "ui-book-exported",
-          "ui-book-not-exported",
-          "ui-code-copied",
-          "ui-codes-in-notifications",
-          "ui-tool-unread-only",
-          "ui-no-unread",
-          "ui-pictures-always-sender",
-          "ui-pictures-always-domain",
-          "ui-pictures-unconfirmed",
-          "ui-pictures-always-option",
-          "ui-pictures-always-warning",
-          "ui-protection-details",
-          "ui-protection-details-title",
-          "ui-download-heading",
-          "ui-download-ahead",
-          "ui-download-ahead-recent",
-          "ui-download-ahead-all",
-          "ui-download-ahead-never",
-          "ui-download-limit",
-          "ui-send-delay",
-          "ui-send-delay-note",
-          "ui-dark-messages",
-          "ui-sending-in",
-          "ui-send-undone",
-          "ui-send-too-late",
-          "ui-outbox-status-undo",
-          "ui-download-note",
-          "ui-attachment-downloading",
-          "ui-trusted-senders-button",
-          "ui-trusted-senders-title",
-          "ui-trusted-senders-note",
-          "ui-trusted-everyone-at",
-          "ui-trusted-senders-empty",
-          "ui-eml-default",
-          "ui-eml-default-done",
-          "ui-eml-default-failed",
-          "ui-folders",
-          "ui-sorted-by",
-          "ui-layout-label",
-          "ui-columns-note",
-          "ui-row-unread",
-          "ui-row-flagged",
-          "ui-row-attachments",
-          "ui-row-messages",
-          "ui-list-pictures",
-          "ui-list-pictures-note",
-          "ui-card-picture",
-          "ui-card-picture-choose",
-          "ui-picture-not-picture",
-          "ui-picture-too-large",
-          "ui-keys-title",
-          "ui-keys-intro",
-          "ui-keys-empty",
-          "ui-keys-col-name",
-          "ui-keys-col-address",
-          "ui-keys-col-kind",
-          "ui-keys-col-status",
-          "ui-keys-kind-own",
-          "ui-keys-kind-contact",
-          "ui-keys-status-verified",
-          "ui-keys-new",
-          "ui-keys-import",
-          "ui-keys-export",
-          "ui-keys-backup",
-          "ui-keys-verify",
-          "ui-keys-new-title",
-          "ui-keys-new-for",
-          "ui-keys-new-make",
-          "ui-keys-no-account",
-          "ui-keys-memory-only",
-          "ui-keys-backup-offer",
-          "ui-keys-backup-now",
-          "ui-keys-later",
-          "ui-keys-backup-title",
-          "ui-keys-backup-intro",
-          "ui-keys-passphrase",
-          "ui-keys-passphrase-again",
-          "ui-keys-passphrase-differ",
-          "ui-keys-passphrase-short",
-          "ui-keys-backup-saved",
-          "ui-keys-import-title",
-          "ui-keys-import-passphrase",
-          "ui-keys-file-filter",
-          "ui-keys-use-for",
-          "ui-keys-use",
-          "ui-keys-not-now",
-          "ui-keys-remove-own",
-          "ui-keys-remove-contact",
-          "ui-key-properties-title",
-          "ui-key-names",
-          "ui-key-fingerprint",
-          "ui-key-status",
-          "ui-key-created",
-          "ui-key-expires",
-          "ui-key-never",
-          "ui-key-algorithm",
-          "ui-key-source",
-          "ui-key-addresses",
-          "ui-key-address-verified",
-          "ui-key-address-not-verified",
-          "ui-verify-title",
-          "ui-verify-intro",
-          "ui-verify-fingerprint",
-          "ui-verify-marks",
-          "ui-verify-match",
-          "ui-verify-differ",
-          "ui-verify-differs",
-          "ui-verify-unmark",
-          "ui-account-security",
-          "ui-account-security-intro",
-          "ui-account-key",
-          "ui-account-key-none",
-          "ui-account-key-new",
-          "ui-account-autocrypt",
-          "ui-contact-key",
-          "ui-contact-key-none",
-          "ui-contact-key-use-new",
-          "ui-contact-key-keep",
-          "ui-setup-export-title",
-          "ui-setup-import-title",
-          "ui-setup-export-intro",
-          "ui-setup-use-passphrase",
-          "ui-setup-passphrase-note",
-          "ui-setup-export-button",
-          "ui-setup-file-filter",
-          "ui-setup-ask-passphrase",
-          "ui-setup-import-intro",
-          "ui-setup-from",
-          "ui-setup-import-button",
-          "ui-setup-done",
-          "ui-setup-first-run"
-        ],
         "core.ftl": [
           "decimal-separator",
           "size-bytes",
@@ -10664,7 +10036,6 @@
           "win-webview-missing",
           "win-delete-button",
           "win-find-label",
-          "win-save-as-button",
           "win-too-many-files",
           "win-editor-failed",
           "win-ctrl-click-to-open",
@@ -10847,6 +10218,654 @@
           },
           "validation": "Static check-language for these 11 languages reports only 110 intentionally removed catalog marks, no structural findings. Full catalog IDs/variables and all pending catalog/help marks reconcile across 28 languages. Reviewed exact-number/plural branches with the preformatted messages phrases, retaining valid defaults. All 168 undone-* messages are recorded complete; the 11 messages dependency entries are also reviewed. Global 17682 unmarked messages and 9122 help lines reconcile to completed records; file/English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run.",
           "notes": "Reviewed all six late rollback messages and the messages count phrase they embed against text::undone_text and worker failure/restore handlers. Move/delete/archive restore local rows; read/unread/flag changes are taken back on server refusal. Preserved correct count phrases, all variables, named-folder context, language register and sound drafts. Improved restored-state wording and replaced vague unchanged-message claims with the requested change being undone. No tests run. Exact [1] separates a standalone single-message noun/pronoun from CLDR [one] values such as 21 or 101. Retained locale categories where predicates directly agree with the counted phrase, including Slovenian dual and Latvian zero forms in messages. Count phrases in parentheses remain nominative."
+        },
+        {
+          "id": "hr-app-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "menu-file",
+              "menu-edit",
+              "menu-view",
+              "menu-tools",
+              "menu-message",
+              "menu-help",
+              "menu-layout",
+              "menu-sort-by",
+              "menu-text-size",
+              "menu-folder",
+              "cmd-new-account",
+              "cmd-exit",
+              "cmd-sync",
+              "cmd-mark-read",
+              "cmd-mark-unread",
+              "cmd-pictures",
+              "cmd-about",
+              "cmd-new-mail",
+              "cmd-reply",
+              "cmd-reply-all",
+              "cmd-forward",
+              "cmd-help",
+              "cmd-delete",
+              "cmd-move",
+              "cmd-flag",
+              "cmd-new-folder",
+              "cmd-rename-folder",
+              "cmd-delete-folder",
+              "cmd-empty-folder",
+              "ui-empty-button",
+              "cmd-accounts",
+              "cmd-find",
+              "cmd-save-as",
+              "cmd-print",
+              "cmd-import",
+              "cmd-outbox",
+              "cmd-properties",
+              "cmd-mark-all-read",
+              "cmd-junk",
+              "cmd-not-junk",
+              "cmd-archive",
+              "cmd-watch-conversation",
+              "cmd-ignore-conversation",
+              "cmd-next-message",
+              "cmd-previous-message",
+              "cmd-next-unread",
+              "cmd-go-to-folder",
+              "cmd-find-in-message",
+              "ui-go-to-prompt",
+              "ui-find-in-message-hint",
+              "ui-find-not-found",
+              "cmd-expand-all-threads",
+              "cmd-collapse-all-threads",
+              "ui-group-by-conversation",
+              "cmd-folder-list",
+              "cmd-layout-automatic",
+              "cmd-layout-classic",
+              "cmd-layout-columns",
+              "cmd-sort-date",
+              "cmd-sort-from",
+              "cmd-sort-subject",
+              "cmd-sort-size",
+              "cmd-sort-ascending",
+              "cmd-sort-descending",
+              "cmd-text-size-largest",
+              "cmd-text-size-larger",
+              "cmd-text-size-medium",
+              "cmd-text-size-smaller",
+              "cmd-text-size-smallest",
+              "cmd-hide-ignored",
+              "cmd-hide-read",
+              "cmd-notify",
+              "cmd-open",
+              "cmd-default-app",
+              "cmd-view-source",
+              "cmd-ai-agents",
+              "cmd-options",
+              "cmd-message-rules",
+              "cmd-encryption-keys",
+              "cmd-create-rule-from-message",
+              "cmd-select-all",
+              "cmd-undo",
+              "cmd-copy",
+              "cmd-address-book",
+              "cmd-add-sender-to-book",
+              "cmd-import-address-book",
+              "cmd-export-address-book",
+              "cmd-export-setup",
+              "cmd-import-setup",
+              "tray-check",
+              "tray-no-accounts",
+              "ui-tb-create-mail",
+              "ui-tb-reply",
+              "ui-tb-reply-all",
+              "ui-tb-forward",
+              "ui-tb-print",
+              "ui-tb-delete",
+              "ui-tb-junk",
+              "ui-tb-not-junk",
+              "ui-tb-archive",
+              "ui-tb-previous",
+              "ui-tb-next",
+              "ui-previous-tip",
+              "ui-next-tip",
+              "ui-tb-sync",
+              "ui-tb-mark-read",
+              "ui-tb-mark-unread",
+              "ui-still-running",
+              "ui-no-subject",
+              "ui-quoted",
+              "ui-newest-from",
+              "ui-new-messages",
+              "ui-outbox-waiting",
+              "ui-outbox-waits",
+              "ui-outbox-sending",
+              "ui-from-account",
+              "ui-sign-in-refused",
+              "ui-sign-in-again-ask",
+              "ui-sign-in-again-failed",
+              "ui-unknown-reason",
+              "ui-checking",
+              "ui-done",
+              "ui-sent-at",
+              "ui-draft-saved",
+              "ui-draft-not-saved",
+              "ui-about-core",
+              "ui-add-account-first",
+              "ui-add-account-first-link",
+              "ui-default-app-is",
+              "ui-select-message-first",
+              "ui-store-not-opened",
+              "ui-store-or-cert-not-opened",
+              "ui-help-title",
+              "ui-help-missing",
+              "ui-ok",
+              "ui-cancel",
+              "ui-close",
+              "ui-col-subject",
+              "ui-col-from",
+              "ui-col-to",
+              "ui-col-received",
+              "ui-watched-conversation",
+              "ui-col-sent",
+              "ui-col-size",
+              "ui-col-folder",
+              "ui-col-account",
+              "ui-col-queued",
+              "ui-col-status",
+              "ui-outbox-title",
+              "ui-outbox-status-waiting",
+              "ui-outbox-status-not-sent",
+              "ui-outbox-status-agent",
+              "ui-outbox-delete-ask",
+              "ui-open-link",
+              "ui-edit-link",
+              "ui-remove-link",
+              "ui-insert-attachment",
+              "ui-insert-picture",
+              "ui-filter-all",
+              "ui-filter-pictures",
+              "ui-filter-messages",
+              "ui-save-attachment-as",
+              "ui-not-sent",
+              "ui-attachment-forgotten",
+              "ui-send-anyway",
+              "ui-go-back",
+              "ui-not-saved",
+              "ui-saving-draft",
+              "ui-compose-saved-at",
+              "ui-compose-restored",
+              "ui-compose-not-saved",
+              "ui-save-changes-ask",
+              "ui-new-message-title",
+              "ui-link-invalid",
+              "ui-link-address",
+              "ui-hyperlink",
+              "ui-hyperlink-intro",
+              "ui-edit-hyperlink",
+              "ui-edit-hyperlink-intro",
+              "ui-not-a-picture",
+              "ui-format-color",
+              "ui-format-numbers",
+              "ui-format-bullets",
+              "ui-format-outdent",
+              "ui-format-indent",
+              "ui-format-left",
+              "ui-format-center",
+              "ui-format-right",
+              "ui-format-line",
+              "ui-tb-send",
+              "ui-tb-save",
+              "ui-tb-attach",
+              "ui-field-from",
+              "ui-field-to",
+              "ui-field-cc",
+              "ui-field-bcc",
+              "ui-field-subject",
+              "ui-field-attach",
+              "ui-signature",
+              "ui-signature-hint",
+              "ui-signature-not-saved",
+              "ui-all-inboxes",
+              "ui-all-sent",
+              "ui-all-drafts",
+              "ui-flagged-folder",
+              "ui-all-folders",
+              "ui-the-account",
+              "ui-folder-name",
+              "ui-find-hint",
+              "ui-find-tip",
+              "ui-clear-search",
+              "ui-no-match",
+              "ui-no-match-all",
+              "ui-no-match-in",
+              "ui-no-items",
+              "ui-choose-folder",
+              "ui-unsubscribe",
+              "ui-open-in-calendar",
+              "ui-pictures-blocked",
+              "ui-not-shown",
+              "ui-attachment-not-read",
+              "ui-attachment-not-saved",
+              "ui-not-downloaded",
+              "ui-leave-list",
+              "ui-leave-one-click",
+              "ui-leave-mail",
+              "ui-leave-web",
+              "ui-unsubscribing",
+              "ui-cannot-unsubscribe",
+              "ui-unsubscribed",
+              "ui-not-unsubscribed",
+              "ui-event-span",
+              "ui-event-floating",
+              "ui-invitation",
+              "ui-invitation-updated",
+              "ui-invitation-canceled",
+              "ui-invitation-answer",
+              "ui-no-title",
+              "ui-organizer",
+              "ui-invitation-not-read",
+              "ui-no-calendar",
+              "ui-messages-not-changed",
+              "ui-new-folder-in-selected",
+              "ui-new-folder-at-top",
+              "ui-folder-not-created",
+              "ui-folder-not-renamed",
+              "ui-folder-not-deleted",
+              "ui-rename-folder-intro",
+              "ui-properties-of",
+              "ui-internet-headers",
+              "ui-save-messages-in",
+              "ui-save-message-as",
+              "ui-import-choose-folder",
+              "ui-add-account-title",
+              "ui-accounts-title",
+              "ui-security-none",
+              "ui-field-required",
+              "ui-email-invalid",
+              "ui-ports-invalid",
+              "ui-looking-up",
+              "ui-found-none",
+              "ui-found-change",
+              "ui-found-guess",
+              "ui-found-mx",
+              "ui-found-srv",
+              "ui-found-autodiscover",
+              "ui-found-other",
+              "ui-app-password-needed",
+              "ui-app-password-open",
+              "ui-plain-warning",
+              "ui-continue-ask",
+              "ui-add-sign-in-app",
+              "ui-turned-off",
+              "ui-off-here",
+              "ui-why",
+              "ui-more-sign-in",
+              "ui-other-account",
+              "ui-field-account-name",
+              "ui-field-name",
+              "ui-field-email",
+              "ui-field-user",
+              "ui-field-password",
+              "ui-field-imap-host",
+              "ui-field-imap-port",
+              "ui-field-imap-security",
+              "ui-field-smtp-host",
+              "ui-field-smtp-port",
+              "ui-field-smtp-security",
+              "ui-field-other-addresses",
+              "ui-sign-in-not-started",
+              "ui-sign-in-in-browser",
+              "ui-sign-in-failed",
+              "ui-account-not-saved",
+              "ui-start-intro",
+              "ui-start-intro-apps",
+              "ui-use-app-password",
+              "ui-the-provider",
+              "ui-provider-intro",
+              "ui-provider-intro-apps",
+              "ui-finish",
+              "ui-logon",
+              "ui-enter-password",
+              "ui-signs-in-with",
+              "ui-keep-password",
+              "ui-remove-account",
+              "ui-remove-account-ask",
+              "ui-col-email",
+              "ui-col-incoming",
+              "ui-type-email",
+              "ui-ai-agent",
+              "ui-ai-agent-access",
+              "ui-ai-agents",
+              "ui-program-path",
+              "ui-it-may",
+              "ui-accounts-it-may-use",
+              "ui-send-message-ask",
+              "ui-col-name",
+              "ui-never",
+              "ui-connect-agent",
+              "ui-connect-agent-intro",
+              "ui-col-program",
+              "ui-col-may",
+              "ui-col-last-used",
+              "ui-col-when",
+              "ui-col-what",
+              "ui-sign-in-app",
+              "ui-sign-in-apps",
+              "ui-add-sign-in-app-title",
+              "ui-preset-app-name",
+              "ui-issuer-not-checked",
+              "ui-checking-issuer",
+              "ui-issuer-unusable",
+              "ui-issuer-usable",
+              "ui-sign-in-app-not-saved",
+              "ui-check",
+              "ui-fill-in-for",
+              "ui-app-name",
+              "ui-issuer",
+              "ui-client-id",
+              "ui-client-secret",
+              "ui-scopes",
+              "ui-imap-server",
+              "ui-smtp-server",
+              "ui-redirect-uri",
+              "ui-sign-in-app-intro",
+              "ui-remove-secret",
+              "ui-register-it",
+              "ui-built-in-note",
+              "ui-client-with-secret",
+              "ui-client-public",
+              "ui-no-accounts",
+              "ui-remove-sign-in-app",
+              "ui-remove-sign-in-app-ask",
+              "ui-sign-in-app-not-removed",
+              "ui-sign-in-apps-intro",
+              "ui-col-issuer",
+              "ui-col-used-by",
+              "ui-options-system-default",
+              "ui-new-folder-title",
+              "ui-rename-folder-title",
+              "ui-delete-folder-question",
+              "ui-properties",
+              "ui-account-sync",
+              "ui-account-properties",
+              "ui-account-move-up",
+              "ui-account-move-down",
+              "ui-menu-open",
+              "ui-menu-flag",
+              "ui-menu-view-source",
+              "ui-save-attachments",
+              "ui-attachment-open",
+              "ui-attachment-save-as",
+              "ui-attachment-save-all",
+              "ui-attachments-strip",
+              "ui-attachment-note-title",
+              "ui-attachment-program-tip",
+              "ui-clear-flag",
+              "ui-button-move",
+              "ui-button-copy",
+              "ui-find-folder",
+              "ui-new-folder-in",
+              "ui-outbox-send-all",
+              "ui-yes",
+              "ui-no",
+              "ui-try-again",
+              "ui-remove",
+              "ui-signature-of",
+              "ui-sign-in-with",
+              "ui-sign-in-in-browser-yours",
+              "ui-browser-sign-in-server",
+              "ui-dont-allow",
+              "ui-allow",
+              "ui-dont-send",
+              "ui-edit-first",
+              "ui-new-address",
+              "ui-turn-away",
+              "ui-clear-agent-log",
+              "ui-clear-agent-log-detail",
+              "ui-let-agents-connect",
+              "ui-change-button",
+              "ui-undo-button",
+              "ui-rules-title",
+              "ui-rules-intro",
+              "ui-rules-none",
+              "ui-rule-new",
+              "ui-rule-edit",
+              "ui-rule-delete-button",
+              "ui-rule-title",
+              "ui-rule-name",
+              "ui-rule-account",
+              "ui-rule-all-accounts",
+              "ui-rule-query",
+              "ui-rule-query-hint",
+              "ui-rule-count",
+              "ui-rule-show",
+              "ui-rule-actions",
+              "ui-rule-move",
+              "ui-rule-mark-read",
+              "ui-rule-flag",
+              "ui-rule-archive",
+              "ui-rule-junk",
+              "ui-rule-delete",
+              "ui-rule-quiet",
+              "ui-rule-apply-now",
+              "ui-rule-delete-ask",
+              "ui-create-rule",
+              "ui-rules-applied",
+              "ui-col-rule-matches",
+              "ui-clear-button",
+              "ui-how-to-connect",
+              "ui-agent-programs",
+              "ui-what-agents-did",
+              "ui-restart-now",
+              "ui-restart-later",
+              "ui-tb-new-contact",
+              "ui-tb-new-group",
+              "ui-tb-properties",
+              "ui-tb-write-to",
+              "ui-menu-new-contact",
+              "ui-menu-new-group",
+              "ui-menu-write-to",
+              "ui-menu-delete",
+              "ui-book-find-hint",
+              "ui-book-all-contacts",
+              "ui-col-phone",
+              "ui-book-empty",
+              "ui-book-no-match",
+              "ui-book-delete-ask",
+              "ui-group-delete-ask",
+              "ui-book-no-address",
+              "ui-new-contact-title",
+              "ui-contact-title",
+              "ui-contact-first",
+              "ui-contact-last",
+              "ui-contact-display",
+              "ui-contact-nickname",
+              "ui-contact-company",
+              "ui-contact-addresses",
+              "ui-contact-address-hint",
+              "ui-contact-add",
+              "ui-contact-set-default",
+              "ui-contact-default",
+              "ui-contact-phones",
+              "ui-phone-home",
+              "ui-phone-work",
+              "ui-phone-mobile",
+              "ui-phone-other",
+              "ui-contact-notes",
+              "ui-contact-name-needed",
+              "ui-contact-address-invalid",
+              "ui-contact-not-saved",
+              "ui-new-group-title",
+              "ui-group-title",
+              "ui-group-name",
+              "ui-group-members",
+              "ui-group-select-members",
+              "ui-group-new-member",
+              "ui-group-name-needed",
+              "ui-group-not-saved",
+              "ui-group-members-count",
+              "ui-select-recipients",
+              "ui-select-members",
+              "ui-pick-intro",
+              "ui-pick-recipients",
+              "ui-pick-members",
+              "ui-pick-to",
+              "ui-pick-cc",
+              "ui-pick-bcc",
+              "ui-pick-add",
+              "ui-pick-tip",
+              "ui-filter-address-books",
+              "ui-filter-vcard",
+              "ui-book-export-name",
+              "ui-book-imported",
+              "ui-book-not-imported",
+              "ui-book-exported",
+              "ui-book-not-exported",
+              "ui-code-copied",
+              "ui-codes-in-notifications",
+              "ui-tool-unread-only",
+              "ui-no-unread",
+              "ui-pictures-always-sender",
+              "ui-pictures-always-domain",
+              "ui-pictures-unconfirmed",
+              "ui-pictures-always-option",
+              "ui-pictures-always-warning",
+              "ui-protection-details",
+              "ui-protection-details-title",
+              "ui-download-heading",
+              "ui-download-ahead",
+              "ui-download-ahead-recent",
+              "ui-download-ahead-all",
+              "ui-download-ahead-never",
+              "ui-download-limit",
+              "ui-send-delay",
+              "ui-send-delay-note",
+              "ui-dark-messages",
+              "ui-sending-in",
+              "ui-send-undone",
+              "ui-send-too-late",
+              "ui-outbox-status-undo",
+              "ui-download-note",
+              "ui-attachment-downloading",
+              "ui-trusted-senders-button",
+              "ui-trusted-senders-title",
+              "ui-trusted-senders-note",
+              "ui-trusted-everyone-at",
+              "ui-trusted-senders-empty",
+              "ui-eml-default",
+              "ui-eml-default-done",
+              "ui-eml-default-failed",
+              "ui-folders",
+              "ui-sorted-by",
+              "ui-layout-label",
+              "ui-columns-note",
+              "ui-row-unread",
+              "ui-row-flagged",
+              "ui-row-attachments",
+              "ui-row-messages",
+              "ui-list-pictures",
+              "ui-list-pictures-note",
+              "ui-card-picture",
+              "ui-card-picture-choose",
+              "ui-picture-not-picture",
+              "ui-picture-too-large",
+              "ui-keys-title",
+              "ui-keys-intro",
+              "ui-keys-empty",
+              "ui-keys-col-name",
+              "ui-keys-col-address",
+              "ui-keys-col-kind",
+              "ui-keys-col-status",
+              "ui-keys-kind-own",
+              "ui-keys-kind-contact",
+              "ui-keys-status-verified",
+              "ui-keys-new",
+              "ui-keys-import",
+              "ui-keys-export",
+              "ui-keys-backup",
+              "ui-keys-verify",
+              "ui-keys-new-title",
+              "ui-keys-new-for",
+              "ui-keys-new-make",
+              "ui-keys-no-account",
+              "ui-keys-memory-only",
+              "ui-keys-backup-offer",
+              "ui-keys-backup-now",
+              "ui-keys-later",
+              "ui-keys-backup-title",
+              "ui-keys-backup-intro",
+              "ui-keys-passphrase",
+              "ui-keys-passphrase-again",
+              "ui-keys-passphrase-differ",
+              "ui-keys-passphrase-short",
+              "ui-keys-backup-saved",
+              "ui-keys-import-title",
+              "ui-keys-import-passphrase",
+              "ui-keys-file-filter",
+              "ui-keys-use-for",
+              "ui-keys-use",
+              "ui-keys-not-now",
+              "ui-keys-remove-own",
+              "ui-keys-remove-contact",
+              "ui-key-properties-title",
+              "ui-key-names",
+              "ui-key-fingerprint",
+              "ui-key-status",
+              "ui-key-created",
+              "ui-key-expires",
+              "ui-key-never",
+              "ui-key-algorithm",
+              "ui-key-source",
+              "ui-key-addresses",
+              "ui-key-address-verified",
+              "ui-key-address-not-verified",
+              "ui-verify-title",
+              "ui-verify-intro",
+              "ui-verify-fingerprint",
+              "ui-verify-marks",
+              "ui-verify-match",
+              "ui-verify-differ",
+              "ui-verify-differs",
+              "ui-verify-unmark",
+              "ui-account-security",
+              "ui-account-security-intro",
+              "ui-account-key",
+              "ui-account-key-none",
+              "ui-account-key-new",
+              "ui-account-autocrypt",
+              "ui-contact-key",
+              "ui-contact-key-none",
+              "ui-contact-key-use-new",
+              "ui-contact-key-keep",
+              "ui-setup-export-title",
+              "ui-setup-import-title",
+              "ui-setup-export-intro",
+              "ui-setup-use-passphrase",
+              "ui-setup-passphrase-note",
+              "ui-setup-export-button",
+              "ui-setup-file-filter",
+              "ui-setup-ask-passphrase",
+              "ui-setup-import-intro",
+              "ui-setup-from",
+              "ui-setup-import-button",
+              "ui-setup-done",
+              "ui-setup-first-run"
+            ],
+            "windows.ftl": [
+              "win-save-as-button"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 74,
+          "files": {
+            "core/locales/hr/app.ftl": "db0dd093b2f45e142d42067fb4e8cf1708387620027c2cd3632d49ff32736319",
+            "core/locales/hr/windows.ftl": "92de9a21c53ffd67ec1f31eb0dd0632263d6bd0c55af120f2d9db628ec70cd2f"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "2af2417b97f4e9badb00d93b05877fdae875566f2d1f1b9977f8bfd4039be2ba",
+            "core/locales/en/windows.ftl": "eda9cf47c848d1776d9dbbcd8209ab3d383aa3a00b75f4aa64c86a9422d5d140"
+          },
+          "validation": "Static check-language hr reports exactly 637 intentionally removed catalog marks and no structural findings. All 44 actual menu/dialog mnemonic scopes pass; GTK Cc/Bcc K/S agree with Windows. Complete catalog IDs, full variable sets, original plural branches, comments and mnemonic counts are preserved. All 28 pending catalog/help inventories match marks. Global 18309 unmarked messages and 9122 help lines reconcile to completed batches; translation and English-source hashes match. Review HTML regenerated; git diff --check passes. No tests run. New upstream settings changes discovered separately and queued for integration/re-review.",
+          "notes": "Reviewed all 626 shared app/menu/dialog entries and the coupled Windows Save As control against actual Windows/Linux/Mac callers, notification/subject formatting, outbox queue state, OAuth app account columns, folder creation, rule processing, address-book import/export, image caches, key ownership and setup transfer behavior. Inspected existing Linux rules/contact screenshots; no Croatian tour screenshots are available. Improved formal plural instructions and singular action labels, count agreement, names without inflection, digital-signature/fingerprint terminology and credential wording. All 44 actual mnemonic scopes are collision-free, including runtime flag colors and alternate message context menus; GTK and Windows Cc/Bcc retain K/S. The generic sign-in accessibility label changed; branded image labels did not. No tests run."
         }
       ]
     },
@@ -40193,7 +40212,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Fetched origin after completing all 168 rollback messages. Local master 5573ee4b6a787c7813e76251023312d4fb3a4cdd, origin/master 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4, local/remote wave1 8df686a41750158ebaf60784ab8db166e34b1fba. No new translation/help/command changes from any recorded source ref and no new languages. Since-start audit reports 0 newly pending messages and 0 help passages. Current 28-language inventories, exact pending marks and completed translation/English hashes reconcile: 14630 catalog entries and 572 help topics remain in 11 initial-review languages. All recorded context followups are complete. No tests run. Final audit still required after the full queue.",
+    "latest_source_audit": "Fetched origin at Croatian app checkpoint. Local master 5573ee4b; origin/master advanced to bd4a2bd12b58b438004cdd106d0b007fcbac2aed; local/remote wave1 remain 8df686a4. Detected settings redesign: per language 16 added, 13 removed and 11 changed catalog IDs plus 11 changed help topics. Exact source delta is recorded under source_changes_pending_integration. Current checkout inventories and hashes reconcile, with 14003 catalog entries and 572 help topics pending. Since-start comparison in this checkout finds zero newly pending entries, which does not include unmerged upstream work. Integrate and review that delta next. No tests run.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -40241,8 +40260,2361 @@
         "pending_catalog_entries": 14630,
         "pending_help_topics": 572,
         "validation": "All 28 inventories/variables, exact marks and completed file/source hashes match. --since starting_commit reports zero newly pending entries/passages. No tests run."
+      },
+      {
+        "kind": "Croatian app checkpoint: settings changes discovered",
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "bd4a2bd12b58b438004cdd106d0b007fcbac2aed",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba"
+        },
+        "source_base": "46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4",
+        "status": "pending integration",
+        "added_translation_entries": 448,
+        "removed_translation_entries": 364,
+        "changed_translation_entries": 308,
+        "changed_translation_help_topics": 308,
+        "new_languages": 0,
+        "pending_catalog_entries_current_checkout": 14003,
+        "pending_help_topics_current_checkout": 572,
+        "validation": "All 28 current inventories/variables, exact marks and completed file/source hashes match. Since-start reports zero newly pending entries/passages in this checkout; explicit upstream diff identified the separate settings delta. No tests run."
       }
-    ]
+    ],
+    "source_changes_pending_integration": {
+      "source_base": "46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4",
+      "source_commit": "bd4a2bd12b58b438004cdd106d0b007fcbac2aed",
+      "catalogs": {
+        "core/locales/bg/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/bg/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/bg/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/bg/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/ca/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/ca/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/ca/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/ca/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/cs/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/cs/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/cs/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/cs/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/da/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/da/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/da/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/da/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/de/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/de/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/de/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/de/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/el/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/el/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/el/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/el/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/en/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/en/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/en/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/en/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/es/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/es/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/es/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/es/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/et/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/et/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/et/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/et/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/fi/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/fi/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/fi/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/fi/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/fr/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/fr/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/fr/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/fr/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/hr/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/hr/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/hr/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/hr/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/hu/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/hu/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/hu/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/hu/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/it/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/it/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/it/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/it/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/lt/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/lt/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/lt/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/lt/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/lv/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/lv/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/lv/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/lv/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/nb/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/nb/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/nb/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/nb/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/nl/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/nl/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/nl/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/nl/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/pl/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/pl/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/pl/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/pl/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/pt-BR/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/pt-BR/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/pt-BR/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/pt-BR/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/pt/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/pt/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/pt/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/pt/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/ro/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/ro/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/ro/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/ro/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/ru/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/ru/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/ru/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/ru/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/sk/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/sk/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/sk/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/sk/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/sl/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/sl/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/sl/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/sl/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/sr-Latn/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/sr-Latn/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/sr-Latn/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/sr-Latn/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/sv/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/sv/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/sv/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/sv/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/tr/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/tr/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/tr/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/tr/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        },
+        "core/locales/uk/app.ftl": {
+          "added": [
+            "ui-apply",
+            "ui-language-label",
+            "ui-notify-new-mail",
+            "ui-restart-ask",
+            "ui-restart-note",
+            "ui-settings-default-apps",
+            "ui-settings-general",
+            "ui-settings-label",
+            "ui-settings-language",
+            "ui-settings-message-list",
+            "ui-settings-messages",
+            "ui-settings-new-mail",
+            "ui-settings-reading",
+            "ui-settings-sending"
+          ],
+          "removed": [],
+          "changed": [
+            "ui-codes-in-notifications",
+            "ui-download-ahead",
+            "ui-download-limit",
+            "ui-eml-default",
+            "ui-layout-label",
+            "ui-list-pictures",
+            "ui-list-pictures-note",
+            "ui-pictures-always-option",
+            "ui-send-delay",
+            "ui-trusted-senders-button"
+          ]
+        },
+        "core/locales/uk/linux.ftl": {
+          "added": [],
+          "removed": [
+            "gtk-language",
+            "gtk-language-subtitle",
+            "gtk-new-mail-group",
+            "gtk-notify-new-mail",
+            "gtk-restart-to-change"
+          ],
+          "changed": [
+            "gtk-notify-subtitle"
+          ]
+        },
+        "core/locales/uk/mac.ftl": {
+          "added": [
+            "mac-check-updates-automatically",
+            "mac-settings-updates"
+          ],
+          "removed": [
+            "mac-language-label",
+            "mac-notify-new-mail",
+            "mac-restart-hint",
+            "mac-restart-question"
+          ],
+          "changed": []
+        },
+        "core/locales/uk/windows.ftl": {
+          "added": [],
+          "removed": [
+            "win-options-language-label",
+            "win-options-notify",
+            "win-options-restart-note",
+            "win-restart-ask"
+          ],
+          "changed": []
+        }
+      },
+      "help": {
+        "bg": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "ca": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "cs": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "da": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "de": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "el": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "en": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "es": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "et": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "fi": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "fr": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "hr": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "hu": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "it": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "lt": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "lv": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "nb": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "nl": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "pl": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "pt-BR": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "pt": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "ro": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "ru": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "sk": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "sl": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "sr-Latn": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "sv": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "tr": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ],
+        "uk": [
+          "brand-logos.html",
+          "conversations.html",
+          "default-mail-program.html",
+          "download-ahead.html",
+          "drafts-outbox.html",
+          "layouts.html",
+          "new-mail.html",
+          "options-language.html",
+          "pictures-tracking.html",
+          "read-messages.html",
+          "sign-in-codes.html"
+        ]
+      },
+      "other_paths": [
+        "core/crates/pe-html/help/FORMAT.md",
+        "core/settings.toml"
+      ],
+      "status": "pending integration after Croatian app checkpoint",
+      "note": "Source advanced from 46b938a7 to bd4a2bd1 (settings pages and bounded list queries). Across 28 translations: 448 added catalog IDs, 364 removed IDs and 308 changed values; 308 help topics changed. No new languages. Integrate source and generated outputs while preserving all review edits, then reconcile/reopen affected completed entries and inspect the actual settings contexts. Current pending totals describe the current checkout and do not yet include this unmerged delta. No tests run."
+    }
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
   "guide_updates": [

@@ -34,8 +34,7 @@ win-list-loading = Učitavanje...
 win-delete-button = &Izbriši
 # review: new
 win-find-label = &Traži:
-# review: new
-win-save-as-button = Spremi &kao...
+win-save-as-button = Spremi k&ao...
 # review: new
 win-too-many-files = Previše datoteka odjednom: odaberite manje.
 

@@ -287,6 +287,19 @@ means the single one with no number, an exact `[1]` branch comes first and `[one
 - Quotes „…“; days of the week lowercase; keys Ctrl / Shift / Del.
 - Folder names follow Outlook on every platform, not Apple Mail's "Smeće" and "Poslano".
 
+Review notes (round 2):
+- Commands use the imperative singular; instructions keep the formal plural. Write To is "Napiši poruku".
+- Pair "Označi kao neželjenu poštu" / "Označi kao poželjnu poštu"; the folder remains "Neželjena e-pošta".
+- Rules "obrađuju" messages; "sortiranje" describes the displayed order. Mailing list is "lista e-pošte".
+- Use "baza pošte" for the local mail store, "otisak ključa" for a cryptographic fingerprint, and "digitalni
+  potpis" to distinguish cryptographic signing from an account's signature text. Key verification confirms
+  ownership; check every listed address before accepting it. A key label may be a name, address or fingerprint.
+- "Podaci za prijavu" includes passwords and OAuth credentials. An unprotected transfer requires another
+  password or browser sign-in. Inflect a head noun before dynamic names, or use a colon/parentheses.
+- Cached brand logos are saved and reused; verified sender domains do not prove a person's identity.
+- All 44 actual menu/dialog scopes have unique access keys, using Croatian letters where needed. Cc/Bcc use
+  Kopija / Skrivena kopija with Alt+K / Alt+S, matching Windows and GTK controls.
+
 ### Italiano (it)
 
 Terms: Posta in arrivo; Posta in uscita; Posta inviata; Posta eliminata; Bozze; Posta indesiderata; messaggio; cartella;

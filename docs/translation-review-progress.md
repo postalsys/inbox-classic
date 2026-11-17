@@ -19,7 +19,12 @@ Commit completed batches regularly and preserve an exact resume point.
 - Finnish is complete: 1,340 catalog entries and all 52 help topics reviewed, with 174 catalog value
   improvements. All 168 late rollback messages are reviewed across 28 languages, along with the 11
   shared count phrases they depend on in the remaining initial-review languages. The fresh upstream audit
-  found no further additions. Begin Croatian (hr) app.ftl; 1,330 catalog entries and 52 help topics remain.
+  found no further additions at that checkpoint. Croatian app.ftl (626 entries) and the shared Windows
+  Save As button are now reviewed, with 74 improved values. FIRST integrate new upstream `bd4a2bd1`:
+  settings-page changes affect all 28 languages (16 new, 13 removed and 11 changed IDs per language,
+  plus 11 help topics each). The exact delta is in state under `source_changes_pending_integration`.
+  Preserve prior edits and reopen affected reviewed entries. Then resume Croatian core.ftl (448 entries);
+  its current checkout has 703 catalog entries and 52 help topics remaining before source integration.
   Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward. The notification-context followup is complete across all 17 previously reviewed languages:
   all 32 queued topics corrected, with Finnish handled earlier. Apply the glossary context note to the
   remaining initial reviews. Followup topics are separate from initial-scope totals.
@@ -824,9 +829,30 @@ No new localization/help/command changes or languages; --since-start reports zer
 passages. Begin Croatian app.ftl. Each of the remaining 11 languages has 1,330 catalog entries and 52 help
 topics left. Previous late-review checkpoint: `4a5719cb`.
 
-Current totals: 17,630 catalog entries and 680 help pages reviewed; 2,813 catalog values improved. Remaining:
-14,630 catalog entries and 572 help pages. All recorded context
-followups are complete. `REVIEWED` remains unchanged until the full round is complete.
+### Croatian app catalog and new settings source discovered
+
+Reviewed all 626 shared app entries and the coupled Windows Save As button, improving 74 values. Corrected
+literal commands, queued agent state, rule processing, counted contact imports, dynamic names, account-transfer
+credentials, key fingerprints/ownership, and cached sender images. All 44 actual mnemonic scopes are free of
+collisions; Windows and GTK Cc/Bcc retain Alt+K/Alt+S. Existing Linux rules/contact screenshots supplied layout
+context; no Croatian tour screenshots are available. The generic sign-in accessibility label changed, without
+changing branded image labels. Glossary decisions are recorded for the remaining Croatian catalogs/help.
+
+Static checks show exactly 637 deliberately removed catalog marks, with no structural findings. Full IDs,
+variables, plural branches, comments and access-key counts are preserved. All 28 language inventories match
+state; completed/source hashes reconcile (18,309 messages and 9,122 changed help lines). Report regenerated;
+git diff --check passes. No test suite was run. Previous checkpoint: `b00052c8`.
+
+The fresh upstream comparison found settings-page work at `bd4a2bd1`, following `46b938a7`. Across the 28
+translations, it adds 448 catalog IDs, removes 364, changes 308 existing values and changes 308 help topics.
+No new languages were found. These changes are not yet integrated; the state contains the exact per-file ID
+and help-topic inventory. Integrate them next, preserve review corrections, and reopen affected completed
+content against the new settings layouts. The --since-start check reports zero newly pending strings in the
+current checkout, which does not include this unmerged upstream delta.
+
+Current-checkout totals: 18,257 catalog entries and 680 help pages reviewed; 2,887 catalog values improved.
+Remaining: 14,003 catalog entries and 572 help pages, before incorporating the recorded settings delta.
+Earlier context followups are complete. `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.
