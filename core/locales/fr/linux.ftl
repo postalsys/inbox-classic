@@ -119,10 +119,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Suivant >
-# review: changed
-gtk-provider-sign-in = Connectez-vous au compte { $address } sur le site de { $provider }. Votre mot de passe ne sera pas transmis à Inbox Classic. Vous pouvez aussi utiliser un mot de passe d'application créé dans les paramètres de sécurité de votre compte.
-# review: changed
-gtk-provider-sign-in-apps = Connectez-vous au compte { $address } sur le site de { $provider } avec l'une de vos applications de connexion (« Autres options de connexion »). Vous pouvez aussi utiliser un mot de passe d'application créé dans les paramètres de sécurité de votre compte.
+gtk-provider-sign-in = Connectez-vous au compte { $address } sur le site de { $provider }. Votre mot de passe ne sera pas transmis à Inbox Classic. Si votre compte autorise les mots de passe d'application, vous pouvez en créer un dans ses paramètres de sécurité. Outlook.com et Microsoft 365 exigent une connexion via le navigateur.
+gtk-provider-sign-in-apps = Connectez-vous au compte { $address } sur le site de { $provider } avec l'une de vos applications de connexion (« Autres options de connexion »). Si votre compte autorise les mots de passe d'application, vous pouvez en créer un dans ses paramètres de sécurité. Outlook.com et Microsoft 365 exigent une connexion via le navigateur.
 gtk-accounts-add = Ajouter...
 gtk-accounts-properties = Propriétés...
 gtk-accounts-signature = Signature...

@@ -118,10 +118,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Weiter >
-# review: changed
-gtk-provider-sign-in = Melden Sie sich für { $address } auf der Webseite von { $provider } an. Ihr Passwort wird nicht an Inbox Classic weitergegeben. Alternativ können Sie ein App-Passwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
-# review: changed
-gtk-provider-sign-in-apps = Melden Sie sich für { $address } auf der Webseite von { $provider } mit einer Ihrer Anmelde-Apps an („Weitere Anmeldeoptionen“). Alternativ können Sie ein App-Passwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
+gtk-provider-sign-in = Melden Sie sich für { $address } auf der Webseite von { $provider } an. Ihr Passwort wird nicht an Inbox Classic weitergegeben. Falls Ihr Konto App-Passwörter für E-Mails unterstützt, können Sie eines in den Sicherheitseinstellungen erstellen. Für Outlook.com und Microsoft 365 ist die Anmeldung im Browser erforderlich.
+gtk-provider-sign-in-apps = Melden Sie sich für { $address } auf der Webseite von { $provider } mit einer Ihrer Anmelde-Apps an („Weitere Anmeldeoptionen“). Falls Ihr Konto App-Passwörter für E-Mails unterstützt, können Sie eines in den Sicherheitseinstellungen erstellen. Für Outlook.com und Microsoft 365 ist die Anmeldung im Browser erforderlich.
 gtk-accounts-add = Hinzufügen...
 gtk-accounts-properties = Eigenschaften...
 gtk-accounts-signature = Signatur...

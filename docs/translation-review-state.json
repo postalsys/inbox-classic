@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "FIRST resolve provider-app-password-context in the 17 previously completed languages, one language at a time: de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi. The exact followup is four introduction IDs per language except bg/tr (already conditional), plus the three marked gmail-outlook passages; preserve good surrounding text/markup. Then resume Croatian 44 remaining help topics, starting message-rules/delete-and-undo/folders/write-message/reply-forward/attachments/drafts-outbox/signatures. Croatian first eight help topics and all catalogs, including provider corrections, are reviewed. Three Croatian settings-context followups remain open. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward, including the provider guidance in their normal review. No tests. Scope 32456 catalogs/1296 help; pending 13390/581. Active checkout build/i18n-wave1; REVIEWED unchanged.",
+  "next_batch": "Continue provider-app-password-context in the 13 otherwise completed languages: nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi. German/Spanish/Estonian/French are now complete again. Each has four introduction IDs plus three marked gmail-outlook passages, except bg/tr whose conditional introductions are already reviewed and only help remains. Read the surrounding heading and Google eligibility note for coherence. Preserve markup, control names and variables; no tests. Then resume Croatian 44 help topics and hu/lt/lv/pl/ro/ru/sk/sl/sv/uk full reviews, including provider context. Scope 32456 catalogs/1296 topics; pending 13374/577. Active checkout build/i18n-wave1; REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -5657,19 +5657,8 @@
       ]
     },
     "de": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-provider-intro",
-          "ui-provider-intro-apps"
-        ],
-        "linux.ftl": [
-          "gtk-provider-sign-in",
-          "gtk-provider-sign-in-apps"
-        ]
-      },
-      "pending_help": [
-        "gmail-outlook.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "de-platform-additions-round2",
@@ -6034,6 +6023,35 @@
           },
           "validation": "Static checker reports only 1395 deliberately missing marks. Exact tags/attributes, OS branches, literal keys and other wording preserved. Control-label substitutions mirror help.rs::words, including final whitespace trimming; all six joined sentences inspected and French has a nonbreaking space before its colon. Global 18185 unmarked messages and 8080 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Latest translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
           "notes": "Added an explicit separator after the download-field control label. help.rs::words strips the catalog colon, so relying on it produced an unpunctuated join with the following sentence. Adjusted following capitalization to the language. All other words and markup preserved. This is a followup to a completed topic, not additional completion scope. No tests run."
+        },
+        {
+          "id": "de-provider-app-password-context",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
+            ],
+            "linux.ftl": [
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
+            ]
+          },
+          "reviewed_help": [
+            "gmail-outlook.html"
+          ],
+          "changed_values": 4,
+          "files": {
+            "core/locales/de/app.ftl": "d6ab778aab2f20d4a2dcc0f66bb6511e976cf44408216ca8d19e94f697846ff0",
+            "core/locales/de/linux.ftl": "d93b33d061363f335f8c7f1561bc8d7d0300919fd2ee770fb58572c5582be5aa",
+            "core/crates/pe-html/help/de/gmail-outlook.html": "9dd46e0f949fd0f59bcef47ca3e116a831243c92744346860cfea36e71615bb1"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "69662a35440d1f3370abea7d106aca3bbc50578e8a28de3bfe138e8cd2326255",
+            "core/locales/en/linux.ftl": "c6c2156fdc533360d184053184b20da32651af1380690bf68169273a02e632b0",
+            "core/crates/pe-html/help/en/gmail-outlook.html": "d093be2eb683a0a3ea53bb68efab3bbef98ef09e341100495f42f7e77493de2c"
+          },
+          "validation": "Static check-language: 1395 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes and catalog IDs/variables/access-key counts pass; comments, help tags/attributes, platform branches, empty controls and literal keys preserved. Full topic and nearby Google eligibility/heading text reviewed. Relevant control joins inspected with renderer-style substitution for Windows/Mac/Linux; provider-name and generic fallback substitutions inspected. All 28 pending inventories match. Global 19116 unmarked messages and 9487 changed help lines reconcile, plus 14 unchanged/moved baseline pairs; partial-topic retained passages match their recorded Git checkpoints. Latest translation and English hashes match. Guide and six source refs unchanged since the fresh audit at 5e4fd524. Review HTML regenerated; git diff --check passes. No test suite run.",
+          "notes": "Reviewed the four provider introductions and Gmail/Outlook help in German against actual account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Preserve formal Sie and existing provider-name/fallback grammar. App passwords are conditional on support for email; Outlook.com and Microsoft 365 explicitly require browser sign-in. Help limits the app-password steps to eligible Google accounts, explains two-step verification and removes the incorrect Microsoft app-password path. Improved the adjacent disabled-Google-button sentence and qualified its app-password alternative. All other reviewed text retained; tags, attributes, controls, platform branches and keyboard keys preserved. No tests run."
         }
       ]
     },
@@ -7905,19 +7923,8 @@
       ]
     },
     "es": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-provider-intro",
-          "ui-provider-intro-apps"
-        ],
-        "linux.ftl": [
-          "gtk-provider-sign-in",
-          "gtk-provider-sign-in-apps"
-        ]
-      },
-      "pending_help": [
-        "gmail-outlook.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "es-platform-additions-round2",
@@ -8281,23 +8288,41 @@
           },
           "validation": "Static checker reports only 1395 deliberately missing marks. Exact tags/attributes, OS branches, literal keys and other wording preserved. Control-label substitutions mirror help.rs::words, including final whitespace trimming; all six joined sentences inspected and French has a nonbreaking space before its colon. Global 18185 unmarked messages and 8080 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Latest translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
           "notes": "Added an explicit separator after the download-field control label. help.rs::words strips the catalog colon, so relying on it produced an unpunctuated join with the following sentence. Adjusted following capitalization to the language. All other words and markup preserved. This is a followup to a completed topic, not additional completion scope. No tests run."
+        },
+        {
+          "id": "es-provider-app-password-context",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
+            ],
+            "linux.ftl": [
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
+            ]
+          },
+          "reviewed_help": [
+            "gmail-outlook.html"
+          ],
+          "changed_values": 4,
+          "files": {
+            "core/locales/es/app.ftl": "294a2651a0bc7989bfac0793703a5f4743ef76ea4c8b30f2d055768136d2c4b9",
+            "core/locales/es/linux.ftl": "56be040c92b568f51c24bc82521b5d4e01abfbc29b310cb2fff726c3eb4cd4c7",
+            "core/crates/pe-html/help/es/gmail-outlook.html": "66d43229948d2463f1009421a28c27b35d1a9e467f854d799df03a4216d3a3cd"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "69662a35440d1f3370abea7d106aca3bbc50578e8a28de3bfe138e8cd2326255",
+            "core/locales/en/linux.ftl": "c6c2156fdc533360d184053184b20da32651af1380690bf68169273a02e632b0",
+            "core/crates/pe-html/help/en/gmail-outlook.html": "d093be2eb683a0a3ea53bb68efab3bbef98ef09e341100495f42f7e77493de2c"
+          },
+          "validation": "Static check-language: 1395 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes and catalog IDs/variables/access-key counts pass; comments, help tags/attributes, platform branches, empty controls and literal keys preserved. Full topic and nearby Google eligibility/heading text reviewed. Relevant control joins inspected with renderer-style substitution for Windows/Mac/Linux; provider-name and generic fallback substitutions inspected. All 28 pending inventories match. Global 19116 unmarked messages and 9487 changed help lines reconcile, plus 14 unchanged/moved baseline pairs; partial-topic retained passages match their recorded Git checkpoints. Latest translation and English hashes match. Guide and six source refs unchanged since the fresh audit at 5e4fd524. Review HTML regenerated; git diff --check passes. No test suite run.",
+          "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Microsoft mail explicitly uses browser sign-in; app-password use is conditional. Help restricts app-password steps to eligible Google accounts with two-step verification and removes the incorrect Microsoft app-password path. Preserved formal usted, contraseña de aplicación and the existing provider placeholder grammar. Qualified Google eligibility and clarified the disabled sign-in button without changing its image label. Preserved all tags, attributes, control references, platform branches, literal keyboard tags, IDs and variables. No tests run."
         }
       ]
     },
     "et": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-provider-intro",
-          "ui-provider-intro-apps"
-        ],
-        "linux.ftl": [
-          "gtk-provider-sign-in",
-          "gtk-provider-sign-in-apps"
-        ]
-      },
-      "pending_help": [
-        "gmail-outlook.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "et-platform-additions-round2",
@@ -8668,6 +8693,35 @@
           },
           "validation": "Static checker reports only 1395 deliberately missing marks. Exact tags/attributes, OS branches, literal keys and other wording preserved. Control-label substitutions mirror help.rs::words, including final whitespace trimming; all six joined sentences inspected and French has a nonbreaking space before its colon. Global 18185 unmarked messages and 8080 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Latest translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
           "notes": "Added an explicit separator after the download-field control label. help.rs::words strips the catalog colon, so relying on it produced an unpunctuated join with the following sentence. Adjusted following capitalization to the language. All other words and markup preserved. This is a followup to a completed topic, not additional completion scope. No tests run."
+        },
+        {
+          "id": "et-provider-app-password-context",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
+            ],
+            "linux.ftl": [
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
+            ]
+          },
+          "reviewed_help": [
+            "gmail-outlook.html"
+          ],
+          "changed_values": 4,
+          "files": {
+            "core/locales/et/app.ftl": "9f5c94b4a5c68a5fd1f22e4f3f76d5bdee331007b6f0af47165ba2411adb59b5",
+            "core/locales/et/linux.ftl": "fbd86cb88491b4308e84ce1b01157fdd619bf2d0f9fe581b6c6eab05ec4ae33a",
+            "core/crates/pe-html/help/et/gmail-outlook.html": "adcc8210590f146426ba5d4e824f0767bfb7be8d06017a85a0a1c62ef8488f3b"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "69662a35440d1f3370abea7d106aca3bbc50578e8a28de3bfe138e8cd2326255",
+            "core/locales/en/linux.ftl": "c6c2156fdc533360d184053184b20da32651af1380690bf68169273a02e632b0",
+            "core/crates/pe-html/help/en/gmail-outlook.html": "d093be2eb683a0a3ea53bb68efab3bbef98ef09e341100495f42f7e77493de2c"
+          },
+          "validation": "Static check-language: 1395 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes and catalog IDs/variables/access-key counts pass; comments, help tags/attributes, platform branches, empty controls and literal keys preserved. Full topic and nearby Google eligibility/heading text reviewed. Relevant control joins inspected with renderer-style substitution for Windows/Mac/Linux; provider-name and generic fallback substitutions inspected. All 28 pending inventories match. Global 19116 unmarked messages and 9487 changed help lines reconcile, plus 14 unchanged/moved baseline pairs; partial-topic retained passages match their recorded Git checkpoints. Latest translation and English hashes match. Guide and six source refs unchanged since the fresh audit at 5e4fd524. Review HTML regenerated; git diff --check passes. No test suite run.",
+          "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Microsoft mail explicitly uses browser sign-in; app-password use is conditional. Help restricts app-password steps to eligible Google accounts with two-step verification and removes the incorrect Microsoft app-password path. Preserved polite plural instructions and rakenduse parool. Provider placeholders remain uninflected subjects after mida haldab; browser sign-in is explicit for Microsoft. Improved the adjacent Google eligibility wording. Preserved all tags, attributes, control references, platform branches, literal keyboard tags, IDs and variables. No tests run."
         }
       ]
     },
@@ -10546,19 +10600,8 @@
       ]
     },
     "fr": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "ui-provider-intro",
-          "ui-provider-intro-apps"
-        ],
-        "linux.ftl": [
-          "gtk-provider-sign-in",
-          "gtk-provider-sign-in-apps"
-        ]
-      },
-      "pending_help": [
-        "gmail-outlook.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "fr-platform-additions-round2",
@@ -10936,6 +10979,35 @@
           },
           "validation": "Static checker reports only 1395 deliberately missing marks. Exact tags/attributes, OS branches, literal keys and other wording preserved. Control-label substitutions mirror help.rs::words, including final whitespace trimming; all six joined sentences inspected and French has a nonbreaking space before its colon. Global 18185 unmarked messages and 8080 help lines reconcile, with 14 verified unchanged/moved baseline pairs. Latest translation/English-source hashes match. HTML regenerated and git diff --check passes. No tests run.",
           "notes": "Added an explicit separator after the download-field control label. help.rs::words strips the catalog colon, so relying on it produced an unpunctuated join with the following sentence. Adjusted following capitalization to the language. All other words and markup preserved. This is a followup to a completed topic, not additional completion scope. No tests run."
+        },
+        {
+          "id": "fr-provider-app-password-context",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
+            ],
+            "linux.ftl": [
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
+            ]
+          },
+          "reviewed_help": [
+            "gmail-outlook.html"
+          ],
+          "changed_values": 4,
+          "files": {
+            "core/locales/fr/app.ftl": "93e5472028d46d03cfce77a801bb1153e77e2e05cf73859a11fb81ed284bd412",
+            "core/locales/fr/linux.ftl": "97151d24b627bf8e433fba67dd495a865d858e003f08e5d07aed8cf03d0c1c7a",
+            "core/crates/pe-html/help/fr/gmail-outlook.html": "0e3a42fa1e5aa85de8f1401a5ee443288c84d31f4f9814cc41c6d12fb8b9ff33"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "69662a35440d1f3370abea7d106aca3bbc50578e8a28de3bfe138e8cd2326255",
+            "core/locales/en/linux.ftl": "c6c2156fdc533360d184053184b20da32651af1380690bf68169273a02e632b0",
+            "core/crates/pe-html/help/en/gmail-outlook.html": "d093be2eb683a0a3ea53bb68efab3bbef98ef09e341100495f42f7e77493de2c"
+          },
+          "validation": "Static check-language: 1395 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes and catalog IDs/variables/access-key counts pass; comments, help tags/attributes, platform branches, empty controls and literal keys preserved. Full topic and nearby Google eligibility/heading text reviewed. Relevant control joins inspected with renderer-style substitution for Windows/Mac/Linux; provider-name and generic fallback substitutions inspected. All 28 pending inventories match. Global 19116 unmarked messages and 9487 changed help lines reconcile, plus 14 unchanged/moved baseline pairs; partial-topic retained passages match their recorded Git checkpoints. Latest translation and English hashes match. Guide and six source refs unchanged since the fresh audit at 5e4fd524. Review HTML regenerated; git diff --check passes. No test suite run.",
+          "notes": "Reviewed all four provider introductions and the Gmail/Outlook topic against account setup callers, MICROSOFT_WARNING and the recorded official provider sources. Microsoft mail explicitly uses browser sign-in; app-password use is conditional. Help restricts app-password steps to eligible Google accounts with two-step verification and removes the incorrect Microsoft app-password path. Preserved formal vous and mot de passe d'application, as well as the provider-name/fallback construction. Qualified Google eligibility and the disabled-button alternative; no branded label changes. Preserved all tags, attributes, control references, platform branches, literal keyboard tags, IDs and variables. No tests run."
         }
       ]
     },
@@ -51103,18 +51175,18 @@
         "gmail-outlook.html"
       ],
       "completed_languages": [
-        "hr"
+        "hr",
+        "de",
+        "es",
+        "et",
+        "fr"
       ],
       "pending_languages": [
         "bg",
         "cs",
         "da",
-        "de",
         "el",
-        "es",
-        "et",
         "fi",
-        "fr",
         "hu",
         "it",
         "lt",
@@ -51635,7 +51707,21 @@
           "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
         }
       },
-      "validation": "All 60 reopened catalog entries and 17 three-passage help reopenings preserve the original text byte-for-byte after removing review marks. Pending order matches source file order. Reopening moves old completed IDs/topics to historical reopened fields and updates only their latest file checkpoint hashes, with both hashes retained here. Previously reviewed unmarked help passages are separately reconciled against commit 5e4fd524. Four Croatian catalog followups and its Gmail/Outlook topic are corrected. Bulgarian/Turkish catalog conditions were read and retained; their help remains pending. No tests run."
+      "validation": "All 60 reopened catalog entries and 17 three-passage help reopenings preserve the original text byte-for-byte after removing review marks. Pending order matches source file order. Reopening moves old completed IDs/topics to historical reopened fields and updates only their latest file checkpoint hashes, with both hashes retained here. Previously reviewed unmarked help passages are separately reconciled against commit 5e4fd524. Four Croatian catalog followups and its Gmail/Outlook topic are corrected. Bulgarian/Turkish catalog conditions were read and retained; their help remains pending. No tests run.",
+      "completion_checkpoints": [
+        {
+          "languages": [
+            "de",
+            "es",
+            "et",
+            "fr"
+          ],
+          "reviewed_catalog_entries": 16,
+          "reviewed_help_topics": 4,
+          "changed_values": 16,
+          "validation": "Structural checks and all 46 shortcut scopes pass in each language. Complete help markup/literal keys and all variables preserved; all inventories and file/source hashes reconcile. Report regenerated, no tests run."
+        }
+      ]
     }
   ]
 }

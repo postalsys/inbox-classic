@@ -314,10 +314,8 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com ja Microsoft 365: logige s
 ui-start-intro-apps = Logige brauseris sisse mõne oma sisselogimisrakendusega (Muud sisselogimisviisid) või lisage allpool mis tahes meilikonto oma nime ja aadressiga.
 ui-use-app-password = Kasuta rakenduse parooli
 ui-the-provider = teie meiliteenuse pakkuja
-# review: changed
-ui-provider-intro = Logige kontole { $email } sisse veebilehel, mida haldab { $provider }. Inbox Classic teie parooli ei näe. Võite kasutada ka konto turvasätetes loodud rakenduse parooli.
-# review: changed
-ui-provider-intro-apps = Logige kontole { $email } sisse veebilehel, mida haldab { $provider }, kasutades mõnda oma sisselogimisrakendust („Muud sisselogimisviisid“). Võite kasutada ka konto turvasätetes loodud rakenduse parooli.
+ui-provider-intro = Logige kontole { $email } sisse veebilehel, mida haldab { $provider }. Inbox Classic teie parooli ei näe. Kui teie konto toetab rakenduse paroole, saate parooli luua konto turvasätetes. Outlook.com ja Microsoft 365 nõuavad sisselogimist brauseri kaudu.
+ui-provider-intro-apps = Logige kontole { $email } sisse veebilehel, mida haldab { $provider }, kasutades mõnda oma sisselogimisrakendust („Muud sisselogimisviisid“). Kui teie konto toetab rakenduse paroole, saate parooli luua konto turvasätetes. Outlook.com ja Microsoft 365 nõuavad sisselogimist brauseri kaudu.
 ui-finish = Lõpeta
 ui-logon = Sisselogimine
 ui-enter-password = Sisestage konto { $account } parool.

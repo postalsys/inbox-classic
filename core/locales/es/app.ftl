@@ -314,10 +314,8 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com y Microsoft 365: inicie se
 ui-start-intro-apps = Inicie sesión en el navegador con una de sus aplicaciones de inicio de sesión (Más opciones de inicio de sesión), o agregue abajo cualquier cuenta de correo con su nombre y su dirección.
 ui-use-app-password = Usar contraseña de aplicación
 ui-the-provider = su proveedor
-# review: changed
-ui-provider-intro = Inicie sesión en la cuenta { $email } desde el sitio web de { $provider }. Su contraseña no se compartirá con Inbox Classic. También puede usar una contraseña de aplicación creada en la configuración de seguridad de su cuenta.
-# review: changed
-ui-provider-intro-apps = Inicie sesión en la cuenta { $email } desde el sitio web de { $provider } con una de sus aplicaciones de inicio de sesión («Más opciones de inicio de sesión»). También puede usar una contraseña de aplicación creada en la configuración de seguridad de su cuenta.
+ui-provider-intro = Inicie sesión en la cuenta { $email } desde el sitio web de { $provider }. Su contraseña no se compartirá con Inbox Classic. Si su cuenta admite contraseñas de aplicación para el correo, puede crear una en la configuración de seguridad. Para Outlook.com y Microsoft 365, debe iniciar sesión en el navegador.
+ui-provider-intro-apps = Inicie sesión en la cuenta { $email } desde el sitio web de { $provider } con una de sus aplicaciones de inicio de sesión («Más opciones de inicio de sesión»). Si su cuenta admite contraseñas de aplicación para el correo, puede crear una en la configuración de seguridad. Para Outlook.com y Microsoft 365, debe iniciar sesión en el navegador.
 ui-finish = Finalizar
 ui-logon = Iniciar sesión
 ui-enter-password = Escriba la contraseña de { $account }.

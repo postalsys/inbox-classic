@@ -118,10 +118,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Edasi >
-# review: changed
-gtk-provider-sign-in = Logige kontole { $address } sisse veebilehel, mida haldab { $provider }. Inbox Classic teie parooli ei näe. Võite kasutada ka konto turvasätetes loodud rakenduse parooli.
-# review: changed
-gtk-provider-sign-in-apps = Logige kontole { $address } sisse veebilehel, mida haldab { $provider }, kasutades mõnda oma sisselogimisrakendust („Muud sisselogimisviisid“). Võite kasutada ka konto turvasätetes loodud rakenduse parooli.
+gtk-provider-sign-in = Logige kontole { $address } sisse veebilehel, mida haldab { $provider }. Inbox Classic teie parooli ei näe. Kui teie konto toetab rakenduse paroole, saate parooli luua konto turvasätetes. Outlook.com ja Microsoft 365 nõuavad sisselogimist brauseri kaudu.
+gtk-provider-sign-in-apps = Logige kontole { $address } sisse veebilehel, mida haldab { $provider }, kasutades mõnda oma sisselogimisrakendust („Muud sisselogimisviisid“). Kui teie konto toetab rakenduse paroole, saate parooli luua konto turvasätetes. Outlook.com ja Microsoft 365 nõuavad sisselogimist brauseri kaudu.
 gtk-accounts-add = Lisa...
 gtk-accounts-properties = Atribuudid...
 gtk-accounts-signature = Allkiri...
