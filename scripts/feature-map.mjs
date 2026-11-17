@@ -1271,6 +1271,13 @@ const sections = [
                 what: "An agent that may organize mail can ask to unsubscribe you from mailing lists: one question lists every list by its sender, the address first and whole so a name can not hide it, and where the request goes. Don't Unsubscribe is the default; Unsubscribe asks each list the one-click way, and the agent learns what each answered. Never from Junk E-mail, and at most 30 lists a day.",
                 how: 'Shown when an agent asks to unsubscribe; only for a program allowed to organize mail.',
                 checked: ['One question lists both senders and where the requests go', "Don't Unsubscribe is the default", 'The agent learns the user said no']
+            },
+            {
+                shot: 'agents-8-draft',
+                name: 'Drafts say who wrote them',
+                what: 'A draft an agent wrote opens with a line naming the agent and asking you to check the recipients and the text. The agent can write in Markdown, which Inbox Classic turns into formatting itself (never HTML from the agent), and it can change or remove only its own drafts, until you save them yourself.',
+                how: 'Open the draft from Drafts.',
+                checked: ['It says which agent wrote it and asks to check the recipients and the text', 'Its Markdown is formatted']
             }
         ]
     },
