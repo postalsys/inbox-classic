@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review German agent-unsubscribe additions:8 catalog entries and changed/inserted passages in agents-permissions/agents-sending, then other27languages. Keep PDF recovery instructions marked pending actual platform controls; core behavior inspected at687113a3. Then Greek compose, remaining compose languages,48 Hungarian original help topics and broader drafts. Scope34148/1352, pending12896/568, completed21252/784. No tests. REVIEWED unchanged.",
+  "next_batch": "Review Spanish agent-unsubscribe additions next:8 catalog entries and four help blocks in agents-permissions/agents-sending, then Estonian/French and remaining24languages. German done. PDF recovery instructions remain marked until platform controls exist; core behavior inspected. Then Greek compose and remaining compose/Hungarian/broad-draft queue. Scope34148/1352; pending12888/566; completed21260/786; historical catalog improvements3779. Latest origin/master9e994df3 includes the exact imported MCP snapshot, no new review work. No tests; REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -7046,27 +7046,12 @@
     "de": {
       "pending_catalogs": {
         "core.ftl": [
-          "agent-level-organize",
-          "agent-log-unsubscribe-failed",
-          "agent-log-unsubscribe-refused",
-          "agent-unsubscribe-title",
-          "agent-unsubscribe-detail",
           "preview-pdf-option",
           "preview-pdf-off",
           "preview-pdf-off-crashed"
-        ],
-        "windows.ftl": [
-          "win-unsubscribe",
-          "win-dont-unsubscribe"
-        ],
-        "app.ftl": [
-          "ui-dont-unsubscribe"
         ]
       },
-      "pending_help": [
-        "agents-permissions.html",
-        "agents-sending.html"
-      ],
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "de-platform-additions-round2",
@@ -7815,6 +7800,67 @@
           },
           "validation": "All28 static language checks passed except27343 expected removed/partial-mark diagnostics. Exact reconstruction verifies145 catalog/help paths;290 new entries including English and every unrelated value/comment/passage preserved. Help tag/control additions match English, literal keys and prior translated alt text retained. Generated C/Swift enums match all1403 English IDs in order. Offline pe-ffi build passed in8.95s in separate cargo-translation-review target; no test suite. Global reconciliation:21290 unmarked messages,10651 help lines,14 verified baseline pairs; latest file/source hashes match. Since-start1161 entries/277 passages and full28-language pending inventories match. HTML regenerated; git diff --check passes. Fresh fetch, seven primary refs, both new source snapshots,42worktrees/183refs and290 known old copies rechecked with no unrecorded work.",
           "notes": "Imported 10 new source entries and reopened agent-level-organize plus both agent help topics. New source drafts remain marked. Reviewed existing translations retained as the basis for source-change adaptation; candidates are recorded. No linguistic credit or test-suite execution."
+        },
+        {
+          "id": "de-agent-unsubscribe-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-dont-unsubscribe"
+            ],
+            "core.ftl": [
+              "agent-level-organize",
+              "agent-log-unsubscribe-failed",
+              "agent-log-unsubscribe-refused",
+              "agent-unsubscribe-title",
+              "agent-unsubscribe-detail"
+            ],
+            "windows.ftl": [
+              "win-unsubscribe",
+              "win-dont-unsubscribe"
+            ]
+          },
+          "reviewed_help": [
+            "agents-permissions.html",
+            "agents-sending.html"
+          ],
+          "changed_values": 3,
+          "files": {
+            "core/locales/de/app.ftl": "f59fa83270c37224e7ae1550581a97b868054ec19a290ba0dd4905efebaeb6f2",
+            "core/locales/de/core.ftl": "e2dee6a8224a95a62638ab3ced6cfddc855094d3eec61f738bded6dc8c5e99f2",
+            "core/locales/de/windows.ftl": "2eb2a82f6e682ff68ef401cd27e9ce3aeb9e14cb4cc79935fded4b10415d8dde",
+            "core/crates/pe-html/help/de/agents-permissions.html": "f4b54417dcf7b41d114c94e91f0452c8513ebbac1f772acf6c9cf53167aa3204",
+            "core/crates/pe-html/help/de/agents-sending.html": "965c0e40c10facb013afad93589fcfeeee24d35a20ea1cf724338f75ab745e0c"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "3e92d5b3b404f077d8f49f2105ac424c7dc2c92b7f303de73bf293081f904ce5",
+            "core/locales/en/core.ftl": "ce39623dc6f82e8e3dc385ade3e6b1722908a7d19f5e80a50e27795001b82c11",
+            "core/locales/en/windows.ftl": "8baa46684f4ae0a37d2b48948068eee4dd36865f53d3eced1c3080c592a55051",
+            "core/crates/pe-html/help/en/agents-permissions.html": "325e3ae6517438aa5f69e21a46c84a06e7985950dd3366c9a6e218be96bde1e2",
+            "core/crates/pe-html/help/en/agents-sending.html": "42d3d41e34cd7ac92d286ad745c8e02a674728d1f1de0055a94c6e4d35b93f4b"
+          },
+          "validation": "German static checker has1453 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies8 reviewed IDs,3 changed values and7 changed help wording lines; every other catalog/help byte is retained. Tags/attributes, controls, platform branches and literal keys unchanged. All three platform label joins inspected. New Windows dialog uses A/N without collisions; all28 new-dialog key pairs are distinct, without linguistic review credit for the other27. No matching new German agent screenshot available; actual source wrapping inspected on Windows/macOS/Linux. Global reconciliation:21298 unmarked entries,10659 help lines and14 verified baseline pairs; latest hashes match. All28 full catalogs/variables/topics/pending inventories and since-start1153 entries/273 passages reconcile. HTML regenerated and git diff --check passed. No tests or repeated build.",
+          "notes": "Reviewed eight entries and four pending help blocks against frozen MCP9a24e99b callers on all three platforms. Retained five good catalog values; improved permission list, address-only refusal log and one-click confirmation prose. Help distinguishes consent/request from guaranteed unsubscribe, rolling per-program quota including failed approved requests, safe refusal default, one outstanding send per program and optional account text signature. Prior unmarked prose and Undo/Outbox semantics preserved. Windows A/N keys distinct; plain Mac/Linux labels retained. No tests.",
+          "help_wording_lines_changed": 7,
+          "context_evidence": {
+            "source": "9a24e99bac4d3a67006bd7f41a53a8467733532d",
+            "permission_label_wrapping": [
+              "app/src/agents.cpp:AccessDialog measures row heights and uses BS_MULTILINE",
+              "mac/Sources/InboxClassic/Agents.swift:AccessForm uses wrapping checkbox helper",
+              "linux/src/agents.rs:AccessForm uses wrapped_label width48"
+            ],
+            "confirmation_layout": [
+              "Windows detail height is measured; buttons sized from labels",
+              "macOS QuestionWindow uses wrapping labels with preferred width460",
+              "GTK AlertDialog wraps the body, wide layout enabled"
+            ],
+            "counts": "Core uses deduplicated list URL count; title one/other and detail exact1/other inspected. Address lists after colon; no inflection attached to subject/program/address placeholders.",
+            "no_gui_capture": "Existing unsubscribe images are for reader actions, not the new agent batch dialog. No matching fresh German agent dialog captures; actual platform source wrapping inspected. No GUI or test suite run."
+          },
+          "glossary_update": {
+            "path": "core/locales/GLOSSARY.md",
+            "sha256": "bb57faf87f5976fd494f8e8a070b9bb8d1c4fd120d7cb1836da03a9b6b35c1f5",
+            "section": "German agent unsubscribe additions"
+          }
         }
       ]
     },
@@ -70558,6 +70604,623 @@
         "kind": "PDF preview and agent unsubscribe source-only import",
         "review_commit": "16234beac34c13bbadb5129b1da02b90aafff53f",
         "validation": "All28 static language checks passed except27343 expected removed/partial-mark diagnostics. Exact reconstruction verifies145 catalog/help paths;290 new entries including English and every unrelated value/comment/passage preserved. Help tag/control additions match English, literal keys and prior translated alt text retained. Generated C/Swift enums match all1403 English IDs in order. Offline pe-ffi build passed in8.95s in separate cargo-translation-review target; no test suite. Global reconciliation:21290 unmarked messages,10651 help lines,14 verified baseline pairs; latest file/source hashes match. Since-start1161 entries/277 passages and full28-language pending inventories match. HTML regenerated; git diff --check passes. Fresh fetch, seven primary refs, both new source snapshots,42worktrees/183refs and290 known old copies rechecked with no unrecorded work."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "9e994df3fcd7e6115735e56cc40d56bda212bd31",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074",
+          "chore/pgp-hardening": "51d67bb4e5fb6732f5baea4b8004bc46507f1442"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/master": {
+            "merge_base": "162c0dd22d9489061cdc195a42810d695a5672ba",
+            "new_languages": [],
+            "integrated_help_paths": 232,
+            "unmerged_non_help_path_count": 16853,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/pgp-interop-suite.yml",
+              "CLAUDE.md",
+              "app/CMakeLists.txt",
+              "app/src/agents.cpp",
+              "app/src/app.h",
+              "app/src/core.h",
+              "app/src/main.cpp",
+              "app/src/ui.cpp",
+              "core/crates/pe-bounce/tests/hostile.rs",
+              "core/crates/pe-core/src/agents.rs",
+              "core/crates/pe-core/src/autocrypt.rs",
+              "core/crates/pe-core/src/compose_keys.rs",
+              "core/crates/pe-core/src/connections.rs",
+              "core/crates/pe-core/src/export.rs",
+              "core/crates/pe-core/src/keys.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/list_view.rs",
+              "core/crates/pe-core/src/protect.rs",
+              "core/crates/pe-core/src/protect_out.rs",
+              "core/crates/pe-core/src/secrets.rs",
+              "core/crates/pe-core/src/selection.rs",
+              "core/crates/pe-core/src/unsubscribe.rs",
+              "core/crates/pe-core/src/view.rs",
+              "core/crates/pe-core/src/worker/background.rs",
+              "core/crates/pe-core/tests/e2e_core.rs",
+              "core/crates/pe-core/tests/pgp_mail.rs",
+              "core/crates/pe-ffi/src/agents.rs",
+              "core/crates/pe-keys/src/lib.rs",
+              "core/crates/pe-mcp/src/server.rs",
+              "core/crates/pe-mcp/src/tools.rs",
+              "core/crates/pe-mcp/tests/e2e_mcp.rs",
+              "core/crates/pe-net/src/http.rs",
+              "core/crates/pe-pgp/src/cert.rs",
+              "core/crates/pe-pgp/src/decrypt.rs",
+              "core/crates/pe-pgp/src/lib.rs",
+              "core/crates/pe-pgp/src/policy.rs",
+              "core/crates/pe-pgp/src/sealed.rs",
+              "core/crates/pe-pgp/src/verify.rs",
+              "core/crates/pe-pgp/tests/forge/mod.rs",
+              "core/crates/pe-pgp/tests/policy.rs",
+              "core/crates/pe-store/src/agents.rs",
+              "core/crates/pe-store/src/counts.rs",
+              "core/crates/pe-store/src/lib.rs",
+              "core/crates/pe-store/src/messages.rs",
+              "core/crates/pe-store/src/pgp.rs",
+              "core/crates/pe-store/src/query.rs",
+              "core/crates/pe-store/src/search.rs",
+              "core/fuzz/.gitignore",
+              "core/include/inbox_classic.h",
+              "core/include/texts.h",
+              "docs/pgp-plan.md",
+              "docs/shells.md",
+              "linux/src/agents.rs",
+              "linux/src/app.rs",
+              "linux/src/e2e/keys.rs",
+              "linux/src/e2e/layout.rs",
+              "linux/src/e2e/steps.rs",
+              "linux/src/keys.rs",
+              "linux/src/mailbox.rs",
+              "mac/Sources/InboxClassic/Agents.swift",
+              "mac/Sources/InboxClassic/App.swift",
+              "mac/Sources/InboxClassic/Attachments.swift",
+              "mac/Sources/InboxClassic/Generated/Texts.swift",
+              "mac/Sources/InboxClassic/MainWindow.swift",
+              "mac/Sources/InboxClassic/Setup.swift",
+              "mac/Sources/InboxClassic/UITestSteps.swift",
+              "scripts/feature-map.mjs",
+              "scripts/pgp-interop-suite.sh",
+              "scripts/pgp-interop-summary.py",
+              "scripts/pgp-interop.sh",
+              "scripts/ui-e2e.ps1",
+              "scripts/ui-e2e/SCENARIO.md",
+              "scripts/ui-e2e/agent.mjs"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 1,
+              "CLAUDE.md": 1,
+              "app/CMakeLists.txt": 1,
+              "app/src": 5,
+              "core/crates": 39,
+              "core/fuzz": 16781,
+              "core/include": 2,
+              "docs/pgp-plan.md": 1,
+              "docs/shells.md": 1,
+              "linux/src": 7,
+              "mac/Sources": 7,
+              "scripts/feature-map.mjs": 1,
+              "scripts/pgp-interop-suite.sh": 1,
+              "scripts/pgp-interop-summary.py": 1,
+              "scripts/pgp-interop.sh": 1,
+              "scripts/ui-e2e.ps1": 1,
+              "scripts/ui-e2e": 2
+            },
+            "complete_path_list_sha256": "6c0a11c8d398942fbefa1cd90db0441fea66fb1b4b3b19a994e31792625d223a",
+            "complete_path_list_artifact": "/private/tmp/inbox-de-agent-unsubscribe-unmerged-origin-master.txt"
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "chore/pgp-hardening": {
+            "merge_base": "162c0dd22d9489061cdc195a42810d695a5672ba",
+            "new_languages": [],
+            "integrated_help_paths": 87,
+            "unmerged_non_help_path_count": 16827,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/pgp-interop-suite.yml",
+              "CLAUDE.md",
+              "app/CMakeLists.txt",
+              "app/src/main.cpp",
+              "core/crates/pe-bounce/tests/hostile.rs",
+              "core/crates/pe-core/src/autocrypt.rs",
+              "core/crates/pe-core/src/compose_keys.rs",
+              "core/crates/pe-core/src/export.rs",
+              "core/crates/pe-core/src/keys.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/protect.rs",
+              "core/crates/pe-core/src/protect_out.rs",
+              "core/crates/pe-core/src/secrets.rs",
+              "core/crates/pe-core/src/worker/background.rs",
+              "core/crates/pe-core/tests/e2e_core.rs",
+              "core/crates/pe-core/tests/pgp_mail.rs",
+              "core/crates/pe-keys/src/lib.rs",
+              "core/crates/pe-net/src/http.rs",
+              "core/crates/pe-pgp/src/cert.rs",
+              "core/crates/pe-pgp/src/decrypt.rs",
+              "core/crates/pe-pgp/src/lib.rs",
+              "core/crates/pe-pgp/src/policy.rs",
+              "core/crates/pe-pgp/src/sealed.rs",
+              "core/crates/pe-pgp/src/verify.rs",
+              "core/crates/pe-pgp/tests/forge/mod.rs",
+              "core/crates/pe-pgp/tests/policy.rs",
+              "core/crates/pe-store/src/pgp.rs",
+              "core/fuzz/.gitignore",
+              "core/include/texts.h",
+              "docs/pgp-plan.md",
+              "docs/shells.md",
+              "linux/src/agents.rs",
+              "linux/src/app.rs",
+              "linux/src/e2e/keys.rs",
+              "linux/src/e2e/layout.rs",
+              "linux/src/e2e/steps.rs",
+              "linux/src/keys.rs",
+              "linux/src/mailbox.rs",
+              "mac/Sources/InboxClassic/App.swift",
+              "mac/Sources/InboxClassic/Generated/Texts.swift",
+              "mac/Sources/InboxClassic/MainWindow.swift",
+              "mac/Sources/InboxClassic/UITestSteps.swift",
+              "scripts/pgp-interop-suite.sh",
+              "scripts/pgp-interop-summary.py",
+              "scripts/pgp-interop.sh",
+              "scripts/ui-e2e.ps1",
+              "scripts/ui-e2e/SCENARIO.md"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 1,
+              "CLAUDE.md": 1,
+              "app/CMakeLists.txt": 1,
+              "app/src": 1,
+              "core/crates": 23,
+              "core/fuzz": 16781,
+              "core/include": 1,
+              "docs/pgp-plan.md": 1,
+              "docs/shells.md": 1,
+              "linux/src": 7,
+              "mac/Sources": 4,
+              "scripts/pgp-interop-suite.sh": 1,
+              "scripts/pgp-interop-summary.py": 1,
+              "scripts/pgp-interop.sh": 1,
+              "scripts/ui-e2e.ps1": 1,
+              "scripts/ui-e2e": 1
+            },
+            "complete_path_list_sha256": "49d9defb7cd5a49e388398c9f1acc01570072be32bcb9e7f0ce39e3f30086309",
+            "complete_path_list_artifact": "/private/tmp/inbox-de-agent-unsubscribe-unmerged-chore-pgp-hardening.txt"
+          }
+        },
+        "integrated_help_source": "255205aad7e70f680909092c3167cc724618b70e",
+        "upstream_mcp_merge_check": {
+          "observed_origin_master": "9e994df3fcd7e6115735e56cc40d56bda212bd31",
+          "integrated_source_commit": "9a24e99bac4d3a67006bd7f41a53a8467733532d",
+          "exact_source_paths_verified": 232,
+          "new_review_work": 0,
+          "note": "The already imported MCP source merged upstream during the German review. All locale/help bytes in the union of MCP and earlier hardening imports match their recorded snapshots. No additional strings or prose."
+        },
+        "root_locale_help_settings_status": [],
+        "unmerged_non_help_path_count": 16853,
+        "unmerged_non_help_paths_except_fuzz_corpora": [
+          ".github/workflows/pgp-interop-suite.yml",
+          "CLAUDE.md",
+          "app/CMakeLists.txt",
+          "app/src/agents.cpp",
+          "app/src/app.h",
+          "app/src/core.h",
+          "app/src/main.cpp",
+          "app/src/ui.cpp",
+          "core/crates/pe-bounce/tests/hostile.rs",
+          "core/crates/pe-core/src/agents.rs",
+          "core/crates/pe-core/src/autocrypt.rs",
+          "core/crates/pe-core/src/compose_keys.rs",
+          "core/crates/pe-core/src/connections.rs",
+          "core/crates/pe-core/src/export.rs",
+          "core/crates/pe-core/src/keys.rs",
+          "core/crates/pe-core/src/lib.rs",
+          "core/crates/pe-core/src/list_view.rs",
+          "core/crates/pe-core/src/protect.rs",
+          "core/crates/pe-core/src/protect_out.rs",
+          "core/crates/pe-core/src/secrets.rs",
+          "core/crates/pe-core/src/selection.rs",
+          "core/crates/pe-core/src/unsubscribe.rs",
+          "core/crates/pe-core/src/view.rs",
+          "core/crates/pe-core/src/worker/background.rs",
+          "core/crates/pe-core/tests/e2e_core.rs",
+          "core/crates/pe-core/tests/pgp_mail.rs",
+          "core/crates/pe-ffi/src/agents.rs",
+          "core/crates/pe-keys/src/lib.rs",
+          "core/crates/pe-mcp/src/server.rs",
+          "core/crates/pe-mcp/src/tools.rs",
+          "core/crates/pe-mcp/tests/e2e_mcp.rs",
+          "core/crates/pe-net/src/http.rs",
+          "core/crates/pe-pgp/src/cert.rs",
+          "core/crates/pe-pgp/src/decrypt.rs",
+          "core/crates/pe-pgp/src/lib.rs",
+          "core/crates/pe-pgp/src/policy.rs",
+          "core/crates/pe-pgp/src/sealed.rs",
+          "core/crates/pe-pgp/src/verify.rs",
+          "core/crates/pe-pgp/tests/forge/mod.rs",
+          "core/crates/pe-pgp/tests/policy.rs",
+          "core/crates/pe-store/src/agents.rs",
+          "core/crates/pe-store/src/counts.rs",
+          "core/crates/pe-store/src/lib.rs",
+          "core/crates/pe-store/src/messages.rs",
+          "core/crates/pe-store/src/pgp.rs",
+          "core/crates/pe-store/src/query.rs",
+          "core/crates/pe-store/src/search.rs",
+          "core/fuzz/.gitignore",
+          "core/include/inbox_classic.h",
+          "core/include/texts.h",
+          "docs/pgp-plan.md",
+          "docs/shells.md",
+          "linux/src/agents.rs",
+          "linux/src/app.rs",
+          "linux/src/e2e/keys.rs",
+          "linux/src/e2e/layout.rs",
+          "linux/src/e2e/steps.rs",
+          "linux/src/keys.rs",
+          "linux/src/mailbox.rs",
+          "mac/Sources/InboxClassic/Agents.swift",
+          "mac/Sources/InboxClassic/App.swift",
+          "mac/Sources/InboxClassic/Attachments.swift",
+          "mac/Sources/InboxClassic/Generated/Texts.swift",
+          "mac/Sources/InboxClassic/MainWindow.swift",
+          "mac/Sources/InboxClassic/Setup.swift",
+          "mac/Sources/InboxClassic/UITestSteps.swift",
+          "scripts/feature-map.mjs",
+          "scripts/pgp-interop-suite.sh",
+          "scripts/pgp-interop-summary.py",
+          "scripts/pgp-interop.sh",
+          "scripts/ui-e2e.ps1",
+          "scripts/ui-e2e/SCENARIO.md",
+          "scripts/ui-e2e/agent.mjs"
+        ],
+        "guide_sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
+        "changed_source_tips_since_last_checkpoint": {
+          "origin/master": {
+            "before": "cb5e4778ca46794b30a4c4b81f3f72c995cb9843",
+            "after": "9e994df3fcd7e6115735e56cc40d56bda212bd31"
+          }
+        },
+        "integrated_active_key_source_check": {
+          "status": "source-only catalogs integrated and reviewed",
+          "ref": "chore/pgp-hardening",
+          "observed_source_tip": "51d67bb4e5fb6732f5baea4b8004bc46507f1442",
+          "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+          "new_catalog_entries": 28,
+          "catalog_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "new_help_topics": 0,
+          "changed_help_topics": 0,
+          "files": {
+            "core/locales/bg/core.ftl": {
+              "source_sha256": "16e9e19f2d1d75dffbeb0074ec93310c8978796141453b1d0953ad5e3fbb5977",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4a62b72469db30848900d67c0a2c9504a3ee7fe1db297e716e77b24f9bf25f51"
+            },
+            "core/locales/ca/core.ftl": {
+              "source_sha256": "3a2788707c50ee6cf4e2eabc676d35f4088226db8de9d407e1db41922b9602b6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "57c515541e23b49ca41dd16e5e8535fe4a5e2a3f4e1c21ed7aa04d0344921b25"
+            },
+            "core/locales/cs/core.ftl": {
+              "source_sha256": "fda0c74b699a113eeb04c082d374268ca8d9639e50bf6b072b27cda3a24463f0",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "c0830122e3de177236be73d54f8f09ae7c9771640dbb8691c3a9cb762d05b545"
+            },
+            "core/locales/da/core.ftl": {
+              "source_sha256": "35a86bb9f3542fa7b2a437ddf71f05424854b796281d02961d4ad4cfa47eb9d2",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "b8fad7dd255994701d3c2cc2f8fcee2e131cfde4ee196a3004607ea08964fe69"
+            },
+            "core/locales/de/core.ftl": {
+              "source_sha256": "b91224b783883801433c0c09fa6e07e6821ae6f2a19e786995788ce7e383fae9",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "a591d2f53c326961386e0554ef10cbc6b21d5015e0ebcc1676b091d62269b521"
+            },
+            "core/locales/el/core.ftl": {
+              "source_sha256": "8ed80fcf78378a7f8d081215a1eae4445722259f5db683a7a730eb0e3a82a35a",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "8dc74a5766f33d0e20ab13aef37846db1e35798134df77b2c432e6a13d4817ca"
+            },
+            "core/locales/en/core.ftl": {
+              "source_sha256": "16f82911b700dec76b7761ca4f32efcae14e3371a52d8f0d58e1382d6aa8787e",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4c94ae03e10150e79745253914b4f59ba7460faa230333cb6cf27b858753417c"
+            },
+            "core/locales/es/core.ftl": {
+              "source_sha256": "d9771c37c09402b1f1eda65bd6da77dbf3cde653f0bd7fb194f5384c21c0925c",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5c755b4c3eacebe03b92a2ef3c69e1e7c7121677189e3f1fdc4da8b5cfa843d0"
+            },
+            "core/locales/et/core.ftl": {
+              "source_sha256": "bb4c3968c7aa2c06b64213b962428681d594c59efc3a673dd12e5d3fc0a83a0f",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "b84a2b56e579b24973d3cbcb97dafa0438cedc5a654485d11b70ab5e068b56c5"
+            },
+            "core/locales/fi/core.ftl": {
+              "source_sha256": "f9f444897faf1136880a1a23befe7c0bb908f6a9eb9394c48c08dda9cb3be6e4",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "7990a785d1a186c7663d704dd2f26d8afb05a2b9fa53b52477558d3d3023588c"
+            },
+            "core/locales/fr/core.ftl": {
+              "source_sha256": "eeab1aa52ac26e5339884a49aa00deeb38ab80ad7c238f671300bc234b074dbd",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "76a6f40ecd4c18e13f7cb623bc0d4ba305f95b3a43f33176bf1f32837ff0ed7b"
+            },
+            "core/locales/hr/core.ftl": {
+              "source_sha256": "7bf5f0d2a9eebd494029b1bb6d5e2bfff03ad3d2bed4e5b3c75851f7aa758463",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "d0c9e7c7d9ad28a5260be6269219a52b43eba84490591aa1dea1d068507c6783"
+            },
+            "core/locales/hu/core.ftl": {
+              "source_sha256": "5b7fd3ff7ae169491dcb4e7471dc2a245ec5e81178ad8af848845e5f870da4c6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "de8f9cdcbd1dc605392c4d8c20711be450416b12cba221a0c8bb7545dd552e43"
+            },
+            "core/locales/it/core.ftl": {
+              "source_sha256": "e6c91c269a2b077a15b61e05cc6013cefd31a1bc55de89082a3f769bf10d4b37",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5ca92264998878c72c7c22bf864e3e3e6b904c700410086d18b2c072a4311b86"
+            },
+            "core/locales/lt/core.ftl": {
+              "source_sha256": "8fdb56b72ac0d592e065a0f2bf68d5a5e6df85c451a77696d0129eeaf9050816",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "9d0ae049a6651b7f700dc6201427e9d81c1aec1fc98f0f54def301c6ee42d1cd"
+            },
+            "core/locales/lv/core.ftl": {
+              "source_sha256": "c88a2a159132bc8ebd8eb346f56cd44c01d475ffda3678dd4db1854ba774d129",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "7162e0590d1544cd8557d4ea301077345570fea82bc4046f35324484bbdc84ea"
+            },
+            "core/locales/nb/core.ftl": {
+              "source_sha256": "fd98dd1f618212c77559a741d920bbcb819c023ac8b9955606ed59f362050536",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "649a5588a1c7b9b28c9971c913eda5dc347169814a90937b34677c80bad40965"
+            },
+            "core/locales/nl/core.ftl": {
+              "source_sha256": "c53c686eb8355626ad21a5de618b72cb3251290c2a86065eaa9958c90d509d12",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4788eb5e5382b227db6b52fa79d2d948e80d5ed97e6af51fa02c66e8421270e1"
+            },
+            "core/locales/pl/core.ftl": {
+              "source_sha256": "498b42c041b31dbfd2eb29518e441f59cb49ae0cf948c2e6b6f57c257fa828c8",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "c46ac141935e59f3c3d39f5a5bc085afb01e2d3d8133609a0cc8d754119a249c"
+            },
+            "core/locales/pt-BR/core.ftl": {
+              "source_sha256": "37e163d195e68444030d92ea2c5514bc9768e4dbb404575f18ab0fd2c63e1001",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+            },
+            "core/locales/pt/core.ftl": {
+              "source_sha256": "355f896a75ae3e52e26664563f19b6680d0719690b1d007528fccb6087b6d1a6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+            },
+            "core/locales/ro/core.ftl": {
+              "source_sha256": "f2e7b552140a37bddfb8020b8b01f4095f7e309f7b1379aee3b4c58955084a74",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "ccb6595e0be610fe030b171dbe9df6cfb0f536873e539ce5ad865c02f7175db4"
+            },
+            "core/locales/ru/core.ftl": {
+              "source_sha256": "4bcc4ffedcb660b5fe86ac69beabc7a766daeb5cfb1381e6fe929605397e2e54",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4353044c1df65b4b4990323e714482b6311db76d8415626e558320b6026620bc"
+            },
+            "core/locales/sk/core.ftl": {
+              "source_sha256": "5fd463a4f1c91fc2a14fc3bf7cb49c5afb52d78b62e82e1f3c5ffef74ae4bb97",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "88d88798c1bb159d82f82f2dd33f48583b1d5bb60199fe3bd4e84a3a0b0af3b6"
+            },
+            "core/locales/sl/core.ftl": {
+              "source_sha256": "9787b443035e1b48b59cab003b34a97545fc2a8930b2ee230fce0b8b367264ac",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "67fc0ca660f323b20c4a178855b30792f94f71bfe71d85135793eb0e9444ef7f"
+            },
+            "core/locales/sr-Latn/core.ftl": {
+              "source_sha256": "f38acd96c4995038503690ccc62016cfaefdc803a0860b7d649bef0699538b54",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "fecb2884b4c4f0373831458647d4f208fc2736d6387c8859dab5d1ad18cf1810"
+            },
+            "core/locales/sv/core.ftl": {
+              "source_sha256": "e420ae2d02d82bb51c2158659755840d94902b56305aeb5a4f58843119a3f1ac",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "6b1875cf2a7190d360a6c0ab3d3e3c7272ca9896daa013b41950c03ee60be777"
+            },
+            "core/locales/tr/core.ftl": {
+              "source_sha256": "4ea56cafd6c1b8ddf348d4392777faf297c5f11827e45240f999bb96a25b84a1",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "ed1c9e5bcd9f5f0bcc739cbfa59c1808fa9f8fafe9c762b80787772b834dd346"
+            },
+            "core/locales/uk/core.ftl": {
+              "source_sha256": "d801bd33eb1c5a09b64de91527c873425dfc966b4afa09bafd20ac821194b346",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4d507d7ad7a78f6e3e07b38976613b1e782c80074553203195fb147a96b3989d"
+            }
+          },
+          "note": "New signature reason from the hardening branch: a valid signature used a key other than the active key for the From address. Exact source entry was imported in205bd846 and reviewed; current source entry still matches. Other hardening code/fuzz changes stay separate; inspect caller before review."
+        },
+        "preview_mcp_source_checks": [
+          {
+            "ref": "feat/preview-render",
+            "observed_tip": "687113a325f3aaaab17784f307ccc86df4b8c061",
+            "source_commit": "687113a325f3aaaab17784f307ccc86df4b8c061",
+            "source_files": 29,
+            "changed_relevant_paths": [],
+            "new_catalog_entries": 84,
+            "changed_catalog_entries": 0,
+            "changed_help_topics": 0
+          },
+          {
+            "ref": "feat/mcp-phase1",
+            "observed_tip": "9a24e99bac4d3a67006bd7f41a53a8467733532d",
+            "source_commit": "9a24e99bac4d3a67006bd7f41a53a8467733532d",
+            "source_files": 145,
+            "changed_relevant_paths": [],
+            "new_catalog_entries": 196,
+            "changed_catalog_entries": 28,
+            "changed_help_topics": 56
+          }
+        ],
+        "source_worktree_relevant_status": {
+          "/Users/andris/Projects/PostalExpress": [],
+          "/Users/andris/Projects/PostalExpress-wave1": [],
+          "/Users/andris/Projects/PostalExpress-lang": [
+            "?? core/crates/pe-html/help/ca/",
+            "?? core/crates/pe-html/help/nb/",
+            "?? core/crates/pe-html/help/pt-BR/",
+            "?? core/crates/pe-html/help/sr-Latn/",
+            "?? core/crates/pe-html/help/tr/",
+            "?? core/locales/ca/",
+            "?? core/locales/nb/",
+            "?? core/locales/pt-BR/",
+            "?? core/locales/sr-Latn/",
+            "?? core/locales/tr/"
+          ],
+          "/Users/andris/Projects/PostalExpress-settings": [],
+          "/Users/andris/Projects/PostalExpress-pgp11": [],
+          "/Users/andris/Projects/PostalExpress-pgp7": []
+        },
+        "untracked_initial_wave1_copy_audit": {
+          "worktree": "/Users/andris/Projects/PostalExpress-lang",
+          "codes": [
+            "ca",
+            "nb",
+            "pt-BR",
+            "sr-Latn",
+            "tr"
+          ],
+          "status": "All290 files are exact copies of the already integrated initial wave1 draft snapshot; no later edits or new work. Left untouched.",
+          "source_snapshot": "cfdf55ab135d7def5ca1ce42e8603d866a33ce26",
+          "files": 290,
+          "exact_matches_initial_snapshot": 290,
+          "exact_matches_current_wave1_tip": 275,
+          "manifest_artifact": "/private/tmp/inbox-untracked-wave1-copies.json",
+          "manifest_sha256": "5e2e255d82be9f6ae6ae6b4d1433a356fbef80c6b56a9b8aa7e6b561a548a059"
+        },
+        "all_source_inventory_check": {
+          "worktrees": 43,
+          "refs": 184,
+          "artifact": "/private/tmp/inbox-de-agent-unsubscribe-all-sources.json",
+          "sha256": "fae03a800a4171b9cb764bc0778e2f4134ba8586c1b55dc278fdd6741189cebe",
+          "unexpected_changes": 0,
+          "pending_source_integrations": []
+        },
+        "since_start_pending_catalog_entries": 1153,
+        "since_start_pending_help_passages": 273,
+        "remaining_since_omissions": [],
+        "pending_catalog_entries": 12888,
+        "pending_help_topics": 566,
+        "additional_unrecorded_work": 0,
+        "kind": "German agent unsubscribe review",
+        "review_commit": "2904d2681210461f9e3d9ee71fca586cb5387b31",
+        "validation": "German static checker has1453 expected removed/partial-mark diagnostics and no structural findings. Exact reconstruction verifies8 reviewed IDs,3 changed values and7 changed help wording lines; every other catalog/help byte is retained. Tags/attributes, controls, platform branches and literal keys unchanged. All three platform label joins inspected. New Windows dialog uses A/N without collisions; all28 new-dialog key pairs are distinct, without linguistic review credit for the other27. No matching new German agent screenshot available; actual source wrapping inspected on Windows/macOS/Linux. Global reconciliation:21298 unmarked entries,10659 help lines and14 verified baseline pairs; latest hashes match. All28 full catalogs/variables/topics/pending inventories and since-start1153 entries/273 passages reconcile. HTML regenerated and git diff --check passed. No tests or repeated build. During the checkpoint, origin/master advanced to9e994df3 with the already imported MCP feature. All232 relevant upstream paths match the frozen MCP/hardening snapshots; no additional strings/prose. Both feature refs unchanged. Broader43worktrees/184refs and290 old draft copies verified; no unrecorded work."
       }
     ],
     "settings_source_integration": {
@@ -78322,7 +78985,7 @@
     "source_worktree_audit_policy": "At later source checkpoints also inspect uncommitted locale/help/commands/settings/registry changes in root and the wave1, more-languages, settings, hardening and compose worktrees. Do not treat the old untracked five-language copies as new work without comparing their content. All290 matched cfdf55ab exactly at the Dutch checkpoint; any future mismatch must be diffed and recorded.",
     "source_worktree_audit_helper": "/private/tmp/inbox-compose-worktree-audit.py <batch-prefix>; run after the matching source-audit helper. Verifies relevant status in all six source worktrees and exact current contents/inventory of the290 known old copies against the verified source manifest; merges evidence into the batch source-audit JSON.",
     "compose_record_helper": "/private/tmp/inbox-compose-record.py <spec.json>; use only after the language, mnemonic, exact reconstruction, global reconciliation, source/worktree/queue and HTML checks pass. It records completed work; it does not replace linguistic review or validation.",
-    "source_audit_helper": "/private/tmp/inbox-preview-mcp-import-source-audit.py, adapting prefix; then /private/tmp/inbox-preview-mcp-source-extension.py <prefix>, legacy six-worktree and all-source audits. The extension verifies both feature source snapshots; inspect new source/context if their tips move.",
+    "source_audit_helper": "/private/tmp/inbox-de-agent-unsubscribe-source-audit.py, adapting prefix; then /private/tmp/inbox-preview-mcp-source-extension.py <prefix>, legacy six-worktree and all-source audits. Main helper now validates the full232-file union when MCP source is ancestral to origin/master; do not bypass unexpected paths or hash mismatches.",
     "new_source_inventory_artifact": {
       "path": "/private/tmp/inbox-new-preview-mcp-source-inventory.json",
       "sha256": "d899aee873dbe1d41681ed098ac10a2ecccf63023e1e4a2d1262771a00c2279f"
@@ -78339,10 +79002,10 @@
     },
     "pending_source_integration_resume": {
       "status": "The frozen preview/MCP additions are imported and validated. No pending unimported source snapshots.",
-      "next": "Review agent-unsubscribe-context in German next, then other languages; preserve source-changed retained values until manually adapted. PDF recovery context remains unresolved until setting/control callers arrive."
+      "next": "German agent additions complete. Review Spanish next, then Estonian/French and remaining24 languages. Keep PDF recovery instruction pending until actual platform setting/control callers arrive."
     },
     "preview_mcp_source_integration": {
-      "status": "source-only import validated; linguistic review pending",
+      "status": "source-only import validated; German agent additions reviewed, other language work pending",
       "review_parent": "16234beac34c13bbadb5129b1da02b90aafff53f",
       "source_commits": [
         "687113a325f3aaaab17784f307ccc86df4b8c061",
@@ -78386,7 +79049,8 @@
           "id": "agent-level-organize",
           "reviewed_value_retained": "agent-level-organize = E-Mails verwalten: Lesestatus und Kennzeichnungen ändern, Junk verwalten, Nachrichten verschieben und löschen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.",
           "source_candidate": "agent-level-organize = E-Mails verwalten: Lesestatus und Kennzeichnungen ändern, Junk verwalten, Nachrichten verschieben, archivieren und löschen, neue Ordner erstellen und nach Ihrer Zustimmung Mailinglisten abbestellen. Gelöschte Nachrichten landen im Ordner Gelöschte Objekte.",
-          "reason": "English adds archive/new folders/consented unsubscribe; adapt the reviewed wording in its language batch."
+          "reason": "English adds archive/new folders/consented unsubscribe; adapt the reviewed wording in its language batch.",
+          "resolved_by": "de-agent-unsubscribe-round2"
         },
         {
           "path": "core/locales/el/core.ftl",
@@ -78547,14 +79211,16 @@
           "passage": "data-text=\"folder-deleted\"",
           "reviewed_value_retained": "    <li>E-Mails ordnen: Gelesen-Status, Kennzeichnungen, Junk, Verschieben und Löschen in den Ordner <b data-text=\"folder-deleted\"></b></li>\n",
           "source_candidate": "    <li>E-Mails ordnen: Gelesen-Status, Kennzeichnungen, Junk, Verschieben, Archivieren, neue Ordner und Löschen in den Ordner <b data-text=\"folder-deleted\"></b>, sowie Mailinglisten abbestellen, nachdem Sie zugestimmt haben</li>\n",
-          "reason": "Keep prior fluency/Undo corrections while reopening the sentence for archive/junk/folder/unsubscribe additions."
+          "reason": "Keep prior fluency/Undo corrections while reopening the sentence for archive/junk/folder/unsubscribe additions.",
+          "resolved_by": "de-agent-unsubscribe-round2"
         },
         {
           "path": "core/crates/pe-html/help/de/agents-permissions.html",
           "passage": "data-text=\"cmd-undo\"",
           "reviewed_value_retained": "    <li><!--os:windows--><b data-text=\"cmd-undo\"></b><!--/os--><!--os:mac,linux--><b data-text=\"ui-undo-button\"></b><!--/os--> macht einen Gelesen-Status, eine Kennzeichnung, ein Verschieben oder ein Löschen rückgängig, ebenso eine Nachricht, die noch im Postausgang liegt.</li>\n",
           "source_candidate": "    <li><!--os:windows--><b data-text=\"cmd-undo\"></b><!--/os--><!--os:mac,linux--><b data-text=\"ui-undo-button\"></b><!--/os--> macht einen Gelesen-Status, eine Kennzeichnung, ein Verschieben, eine Junk-Markierung, ein Archivieren oder ein Löschen rückgängig, ebenso eine Nachricht, die noch im Postausgang liegt.</li>\n",
-          "reason": "Keep prior fluency/Undo corrections while reopening the sentence for archive/junk/folder/unsubscribe additions."
+          "reason": "Keep prior fluency/Undo corrections while reopening the sentence for archive/junk/folder/unsubscribe additions.",
+          "resolved_by": "de-agent-unsubscribe-round2"
         },
         {
           "path": "core/crates/pe-html/help/el/agents-permissions.html",
@@ -78903,6 +79569,129 @@
       "path": "/private/tmp/inbox-review-round2-wave1.py",
       "sha256": "ae7b5d75440d65a6ad55c25f44c585c1badb1c6d77e0bdb9688691402fe47916",
       "note": "restore_pending_source_edits reverses exact import edits and verifies the old whole file for partially reopened help. Required for agent-unsubscribe-context retained_help_reviews. This is evidence bookkeeping, not review credit."
+    },
+    "agent_unsubscribe_mnemonic_audit": {
+      "source": "9a24e99b",
+      "new_scope": [
+        "win-unsubscribe",
+        "win-dont-unsubscribe"
+      ],
+      "keys_by_language": {
+        "bg": {
+          "win-unsubscribe": "о",
+          "win-dont-unsubscribe": "н"
+        },
+        "cs": {
+          "win-unsubscribe": "o",
+          "win-dont-unsubscribe": "n"
+        },
+        "da": {
+          "win-unsubscribe": "a",
+          "win-dont-unsubscribe": "i"
+        },
+        "de": {
+          "win-unsubscribe": "a",
+          "win-dont-unsubscribe": "n"
+        },
+        "el": {
+          "win-unsubscribe": "κ",
+          "win-dont-unsubscribe": "μ"
+        },
+        "es": {
+          "win-unsubscribe": "c",
+          "win-dont-unsubscribe": "n"
+        },
+        "et": {
+          "win-unsubscribe": "l",
+          "win-dont-unsubscribe": "r"
+        },
+        "fi": {
+          "win-unsubscribe": "p",
+          "win-dont-unsubscribe": "l"
+        },
+        "fr": {
+          "win-unsubscribe": "s",
+          "win-dont-unsubscribe": "n"
+        },
+        "hr": {
+          "win-unsubscribe": "o",
+          "win-dont-unsubscribe": "n"
+        },
+        "hu": {
+          "win-unsubscribe": "l",
+          "win-dont-unsubscribe": "n"
+        },
+        "it": {
+          "win-unsubscribe": "a",
+          "win-dont-unsubscribe": "n"
+        },
+        "lt": {
+          "win-unsubscribe": "a",
+          "win-dont-unsubscribe": "n"
+        },
+        "lv": {
+          "win-unsubscribe": "a",
+          "win-dont-unsubscribe": "n"
+        },
+        "nl": {
+          "win-unsubscribe": "a",
+          "win-dont-unsubscribe": "n"
+        },
+        "pl": {
+          "win-unsubscribe": "w",
+          "win-dont-unsubscribe": "n"
+        },
+        "pt": {
+          "win-unsubscribe": "c",
+          "win-dont-unsubscribe": "n"
+        },
+        "ro": {
+          "win-unsubscribe": "d",
+          "win-dont-unsubscribe": "n"
+        },
+        "ru": {
+          "win-unsubscribe": "о",
+          "win-dont-unsubscribe": "н"
+        },
+        "sk": {
+          "win-unsubscribe": "o",
+          "win-dont-unsubscribe": "n"
+        },
+        "sl": {
+          "win-unsubscribe": "o",
+          "win-dont-unsubscribe": "n"
+        },
+        "sv": {
+          "win-unsubscribe": "a",
+          "win-dont-unsubscribe": "i"
+        },
+        "uk": {
+          "win-unsubscribe": "с",
+          "win-dont-unsubscribe": "н"
+        },
+        "ca": {
+          "win-unsubscribe": "c",
+          "win-dont-unsubscribe": "n"
+        },
+        "nb": {
+          "win-unsubscribe": "m",
+          "win-dont-unsubscribe": "i"
+        },
+        "pt-BR": {
+          "win-unsubscribe": "c",
+          "win-dont-unsubscribe": "n"
+        },
+        "sr-Latn": {
+          "win-unsubscribe": "o",
+          "win-dont-unsubscribe": "n"
+        },
+        "tr": {
+          "win-unsubscribe": "a",
+          "win-dont-unsubscribe": "m"
+        }
+      },
+      "collisions": {},
+      "note": "Two buttons in actual Windows UnsubscribeDialog; Mac/Linux use plain shared labels. Add this scope to future language mnemonic audits; the older53-scope compose helper alone does not cover it."
     }
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
@@ -88324,7 +89113,6 @@
         "bg",
         "cs",
         "da",
-        "de",
         "el",
         "es",
         "et",
@@ -88350,8 +89138,23 @@
         "sr-Latn",
         "tr"
       ],
-      "completed_languages": [],
-      "integration_validation": "All28 static language checks passed except27343 expected removed/partial-mark diagnostics. Exact reconstruction verifies145 catalog/help paths;290 new entries including English and every unrelated value/comment/passage preserved. Help tag/control additions match English, literal keys and prior translated alt text retained. Generated C/Swift enums match all1403 English IDs in order. Offline pe-ffi build passed in8.95s in separate cargo-translation-review target; no test suite. Global reconciliation:21290 unmarked messages,10651 help lines,14 verified baseline pairs; latest file/source hashes match. Since-start1161 entries/277 passages and full28-language pending inventories match. HTML regenerated; git diff --check passes. Fresh fetch, seven primary refs, both new source snapshots,42worktrees/183refs and290 known old copies rechecked with no unrecorded work."
+      "completed_languages": [
+        "de"
+      ],
+      "integration_validation": "All28 static language checks passed except27343 expected removed/partial-mark diagnostics. Exact reconstruction verifies145 catalog/help paths;290 new entries including English and every unrelated value/comment/passage preserved. Help tag/control additions match English, literal keys and prior translated alt text retained. Generated C/Swift enums match all1403 English IDs in order. Offline pe-ffi build passed in8.95s in separate cargo-translation-review target; no test suite. Global reconciliation:21290 unmarked messages,10651 help lines,14 verified baseline pairs; latest file/source hashes match. Since-start1161 entries/277 passages and full28-language pending inventories match. HTML regenerated; git diff --check passes. Fresh fetch, seven primary refs, both new source snapshots,42worktrees/183refs and290 known old copies rechecked with no unrecorded work.",
+      "language_reviews": {
+        "de": {
+          "batch": "de-agent-unsubscribe-round2",
+          "entries": 8,
+          "changed_values": 3,
+          "help_topics": [
+            "agents-permissions.html",
+            "agents-sending.html"
+          ],
+          "help_wording_lines_changed": 7,
+          "context": "Consent/request, rolling per-program quota, safe default, optional account text signature and Undo semantics reviewed. Five good values retained."
+        }
+      }
     }
   ]
 }

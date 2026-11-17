@@ -116,6 +116,13 @@ the localized combinations beside them.
 - A reason placeholder can be a complete sentence, including locked-key recovery instructions. Put it after
   "Grund:" and separate the next instruction, rather than embedding it in parentheses.
 
+### German agent unsubscribe additions
+
+- Use "Mailingliste abbestellen" consistently with the existing reading-pane action. An unsubscribe confirmation
+  sends an "Abmeldeanfrage"; it does not guarantee that future mail will stop. Introduce sender-address lists
+  with a colon. "Textsignatur" distinguishes the account footer from a digital signature; agents include it
+  by default but can omit it. Keep the quota per program over the preceding 24 hours, counting approvals.
+
 ### Estonian encryption and settings transfer
 
 - Use the polite plural in explanations and questions; short commands stay imperative ("Impordi", "Kontrolli").
