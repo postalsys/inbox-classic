@@ -733,6 +733,10 @@ agent-unreadable = Dit bericht kan niet worden gelezen.
 # review: new
 agent-encrypted-original = Dit bericht is versleuteld: een agent kan het niet beantwoorden of doorsturen, omdat hij niet kan versleutelen.
 # review: new
+agent-encrypted = Dit bericht is versleuteld. Alleen de gebruiker kan het lezen, in Inbox Classic.
+# review: new
+list-encrypted = Versleuteld bericht
+# review: new
 agent-log-composed = “{ $subject }” geopend in een nieuw bericht dat jij afmaakt
 # review: new
 agent-log-refused = Je hebt “{ $subject }” niet verzonden

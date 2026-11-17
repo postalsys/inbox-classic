@@ -753,6 +753,8 @@ ui-settings-message-list = Berichtenlijst
 # review: new
 ui-settings-messages = Berichten
 # review: new
+ui-settings-encryption = Versleuteling
+# review: new
 ui-settings-language = Taal
 # review: new
 ui-settings-label = { $label }:
@@ -1133,6 +1135,10 @@ ui-trusted-senders-note = Afbeeldingen in berichten van deze afzenders worden au
 ui-trusted-everyone-at = Iedereen bij { $domain }
 # review: new
 ui-trusted-senders-empty = Er zijn nog geen vertrouwde afzenders toegevoegd.
+# review: new
+ui-search-encrypted = &Zoeken in versleutelde berichten
+# review: new
+ui-search-encrypted-note = Versleutelde berichten die je opent, worden opgenomen in de zoekindex op deze computer, zodat hun woorden kunnen worden gevonden. De index is niet versleuteld en AI-agents zoeken er nooit in. Zet dit uit om ze uit de index te verwijderen.
 # review: new
 ui-eml-default = .&eml-bestanden openen met Inbox Classic
 # review: new

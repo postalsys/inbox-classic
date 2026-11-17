@@ -754,6 +754,8 @@ ui-settings-message-list = Lista de mensagens
 # review: new
 ui-settings-messages = Mensagens
 # review: new
+ui-settings-encryption = Criptografia
+# review: new
 ui-settings-language = Idioma
 # review: new
 ui-settings-label = { $label }:
@@ -1139,6 +1141,10 @@ ui-trusted-senders-note = As imagens das mensagens destes remetentes são baixad
 ui-trusted-everyone-at = Todos em { $domain }
 # review: new
 ui-trusted-senders-empty = Nenhum remetente confiável foi adicionado ainda.
+# review: new
+ui-search-encrypted = Pesquisar em mensagens &criptografadas
+# review: new
+ui-search-encrypted-note = As mensagens criptografadas que você abre são adicionadas ao índice de pesquisa deste computador, para que suas palavras possam ser encontradas. O índice não é criptografado, e agentes de IA nunca pesquisam nele. Desative esta opção para removê-las do índice.
 # review: new
 ui-eml-default = Abrir arquivos .&eml com o Inbox Classic
 # review: new

@@ -732,6 +732,10 @@ agent-unreadable = Denne meddelelse kan ikke læses.
 # review: new
 agent-encrypted-original = Denne meddelelse er krypteret: en agent kan ikke svare på den eller videresende den, da den ikke kan kryptere.
 # review: new
+agent-encrypted = Denne meddelelse er krypteret. Kun brugeren kan læse den, i Inbox Classic.
+# review: new
+list-encrypted = Krypteret meddelelse
+# review: new
 agent-log-composed = Åbnede »{ $subject }« i en ny meddelelse, som du kan gøre færdig
 # review: new
 agent-log-refused = Du sendte ikke »{ $subject }«

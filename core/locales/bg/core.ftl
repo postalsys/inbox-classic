@@ -742,6 +742,10 @@ agent-unreadable = Това съобщение не може да бъде пр�
 # review: new
 agent-encrypted-original = Това съобщение е шифровано: агент не може да отговори на него или да го препрати, тъй като не може да шифрова.
 # review: new
+agent-encrypted = Това съобщение е шифровано. Само потребителят може да го прочете, в Inbox Classic.
+# review: new
+list-encrypted = Шифровано съобщение
+# review: new
 agent-log-composed = „{ $subject }“ е отворено в ново съобщение, за да го довършите
 # review: new
 agent-log-refused = Не изпратихте „{ $subject }“

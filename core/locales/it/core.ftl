@@ -742,6 +742,10 @@ agent-unreadable = Questo messaggio non può essere letto.
 # review: new
 agent-encrypted-original = Questo messaggio è crittografato: un agente non può rispondere o inoltrarlo, perché non può crittografare.
 # review: new
+agent-encrypted = Questo messaggio è crittografato. Solo l’utente può leggerlo, in Inbox Classic.
+# review: new
+list-encrypted = Messaggio crittografato
+# review: new
 agent-log-composed = Aperto “{ $subject }” in un nuovo messaggio da completare
 # review: new
 agent-log-refused = Non hai inviato “{ $subject }”

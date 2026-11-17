@@ -757,6 +757,8 @@ ui-settings-message-list = Lista poruka
 # review: new
 ui-settings-messages = Poruke
 # review: new
+ui-settings-encryption = Šifrovanje
+# review: new
 ui-settings-language = Jezik
 # review: new
 ui-settings-label = { $label }:
@@ -1144,6 +1146,10 @@ ui-trusted-senders-note = Slike u porukama ovih pošiljalaca preuzimaju se autom
 ui-trusted-everyone-at = Svi sa domena { $domain }
 # review: new
 ui-trusted-senders-empty = Još nije dodat nijedan pouzdani pošiljalac.
+# review: new
+ui-search-encrypted = Pretraži &šifrovane poruke
+# review: new
+ui-search-encrypted-note = Šifrovane poruke koje otvorite dodaju se u indeks pretrage na ovom računaru kako bi se njihove reči mogle pronaći. Indeks nije šifrovan i AI agenti ga nikada ne pretražuju. Isključite ovo da biste ih uklonili iz indeksa.
 # review: new
 ui-eml-default = Otvaraj &datoteke .eml u programu Inbox Classic
 # review: new

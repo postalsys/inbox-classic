@@ -729,6 +729,10 @@ agent-unreadable = Bu ileti okunamıyor.
 # review: new
 agent-encrypted-original = Bu ileti şifreli: aracı şifreleme yapamadığı için ona yanıt veremez veya onu iletemez.
 # review: new
+agent-encrypted = Bu ileti şifreli. Yalnızca kullanıcı Inbox Classic'te okuyabilir.
+# review: new
+list-encrypted = Şifreli ileti
+# review: new
 agent-log-composed = “{ $subject }” bitirmeniz için yeni bir iletide açıldı
 # review: new
 agent-log-refused = “{ $subject }” iletisini göndermediniz

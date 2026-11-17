@@ -754,6 +754,8 @@ ui-settings-message-list = Viestiluettelo
 # review: new
 ui-settings-messages = Viestit
 # review: new
+ui-settings-encryption = Salaus
+# review: new
 ui-settings-language = Kieli
 # review: new
 ui-settings-label = { $label }:
@@ -1134,6 +1136,10 @@ ui-trusted-senders-note = Näiden lähettäjien viestien kuvat ladataan automaat
 ui-trusted-everyone-at = Kaikki verkkotunnuksessa { $domain }
 # review: new
 ui-trusted-senders-empty = Luotettuja lähettäjiä ei ole vielä lisätty.
+# review: new
+ui-search-encrypted = Hae &salatuista viesteistä
+# review: new
+ui-search-encrypted-note = Avaamasi salatut viestit lisätään tämän tietokoneen hakuhakemistoon, jotta niiden sanat löytyvät. Hakemistoa ei ole salattu, eivätkä tekoälyagentit koskaan hae siitä. Poista tämä käytöstä, niin ne poistetaan hakemistosta.
 # review: new
 ui-eml-default = &Avaa .eml-tiedostot Inbox Classicilla
 # review: new

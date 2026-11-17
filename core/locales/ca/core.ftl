@@ -744,6 +744,10 @@ agent-unreadable = Aquest missatge no es pot llegir.
 # review: new
 agent-encrypted-original = Aquest missatge està xifrat: un agent no hi pot respondre ni reenviar-lo, perquè no pot xifrar.
 # review: new
+agent-encrypted = Aquest missatge està xifrat. Només l’usuari el pot llegir, a Inbox Classic.
+# review: new
+list-encrypted = Missatge xifrat
+# review: new
 agent-log-composed = Ha obert «{ $subject }» en un missatge nou perquè l’acabeu
 # review: new
 agent-log-refused = No heu enviat «{ $subject }»

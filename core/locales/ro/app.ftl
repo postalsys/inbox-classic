@@ -755,6 +755,8 @@ ui-settings-message-list = Lista de mesaje
 # review: new
 ui-settings-messages = Mesaje
 # review: new
+ui-settings-encryption = Criptare
+# review: new
 ui-settings-language = Limbă
 # review: new
 ui-settings-label = { $label }:
@@ -1143,6 +1145,10 @@ ui-trusted-senders-note = Imaginile din mesajele acestor expeditori se descarcă
 ui-trusted-everyone-at = Oricine din { $domain }
 # review: new
 ui-trusted-senders-empty = Nu a fost adăugat încă niciun expeditor de încredere.
+# review: new
+ui-search-encrypted = Căutare în mesajele &criptate
+# review: new
+ui-search-encrypted-note = Mesajele criptate pe care le deschideți sunt adăugate în indexul de căutare de pe acest computer, ca să le puteți găsi cuvintele. Indexul nu este criptat, iar agenții AI nu caută niciodată în el. Dezactivați opțiunea pentru a le elimina din index.
 # review: new
 ui-eml-default = &Deschidere fișiere .eml cu Inbox Classic
 # review: new

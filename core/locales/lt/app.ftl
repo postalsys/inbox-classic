@@ -753,6 +753,8 @@ ui-settings-message-list = Laiškų sąrašas
 # review: new
 ui-settings-messages = Laiškai
 # review: new
+ui-settings-encryption = Šifravimas
+# review: new
 ui-settings-language = Kalba
 # review: new
 ui-settings-label = { $label }:
@@ -1139,6 +1141,10 @@ ui-trusted-senders-note = Šių siuntėjų laiškų paveikslėliai atsisiunčiam
 ui-trusted-everyone-at = Visi iš { $domain }
 # review: new
 ui-trusted-senders-empty = Patikimų siuntėjų dar nepridėta.
+# review: new
+ui-search-encrypted = Ieškoti &užšifruotuose laiškuose
+# review: new
+ui-search-encrypted-note = Atidaryti užšifruoti laiškai įtraukiami į šio kompiuterio paieškos indeksą, kad būtų galima rasti jų žodžius. Indeksas nėra šifruotas, o DI agentai jame niekada neieško. Išjunkite, kad jie būtų pašalinti iš indekso.
 # review: new
 ui-eml-default = &Atidaryti .eml failus su Inbox Classic
 # review: new

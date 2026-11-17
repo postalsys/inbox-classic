@@ -753,6 +753,8 @@ ui-settings-message-list = Meddelelsesliste
 # review: new
 ui-settings-messages = Meddelelser
 # review: new
+ui-settings-encryption = Kryptering
+# review: new
 ui-settings-language = Sprog
 # review: new
 ui-settings-label = { $label }:
@@ -1133,6 +1135,10 @@ ui-trusted-senders-note = Billeder i meddelelser fra disse afsendere hentes auto
 ui-trusted-everyone-at = Alle hos { $domain }
 # review: new
 ui-trusted-senders-empty = Der er ikke tilføjet nogen betroede afsendere endnu.
+# review: new
+ui-search-encrypted = Søg i &krypterede meddelelser
+# review: new
+ui-search-encrypted-note = Krypterede meddelelser, du åbner, føjes til søgeindekset på denne computer, så deres ord kan findes. Indekset er ikke krypteret, og AI-agenter søger aldrig i det. Slå dette fra for at fjerne dem fra indekset.
 # review: new
 ui-eml-default = &Åbn .eml-filer med Inbox Classic
 # review: new

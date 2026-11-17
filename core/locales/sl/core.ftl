@@ -761,6 +761,10 @@ agent-unreadable = Tega sporočila ni mogoče prebrati.
 # review: new
 agent-encrypted-original = To sporočilo je šifrirano: agent nanj ne more odgovoriti ali ga posredovati, ker ne zna šifrirati.
 # review: new
+agent-encrypted = To sporočilo je šifrirano. Prebere ga lahko samo uporabnik, v programu Inbox Classic.
+# review: new
+list-encrypted = Šifrirano sporočilo
+# review: new
 agent-log-composed = Odprl »{ $subject }« v novem sporočilu, da ga dokončate
 # review: new
 agent-log-refused = Niste poslali »{ $subject }«

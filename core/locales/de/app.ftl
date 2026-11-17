@@ -395,6 +395,8 @@ ui-settings-message-list = Nachrichtenliste
 # review: new
 ui-settings-messages = Nachrichten
 # review: new
+ui-settings-encryption = Verschlüsselung
+# review: new
 ui-settings-language = Sprache
 # review: new
 ui-settings-label = { $label }:
@@ -617,6 +619,10 @@ ui-trusted-senders-title = Vertrauenswürdige Absender
 ui-trusted-senders-note = Bilder in Nachrichten dieser Absender werden automatisch heruntergeladen, wenn Ihr E-Mail-Anbieter die Absenderdomain bestätigt.
 ui-trusted-everyone-at = Alle Absender der Domain { $domain }
 ui-trusted-senders-empty = Es wurden noch keine vertrauenswürdigen Absender hinzugefügt.
+# review: new
+ui-search-encrypted = In verschlüsselten Nachrichten &suchen
+# review: new
+ui-search-encrypted-note = Verschlüsselte Nachrichten, die Sie öffnen, werden in den Suchindex auf diesem Computer aufgenommen, damit ihre Wörter gefunden werden. Der Index ist nicht verschlüsselt, und KI-Agenten durchsuchen ihn nie. Schalten Sie dies aus, um sie aus dem Index zu entfernen.
 # review: changed
 ui-eml-default = .&eml-Dateien mit Inbox Classic öffnen
 ui-eml-default-done = Inbox Classic öffnet jetzt .eml-Dateien.

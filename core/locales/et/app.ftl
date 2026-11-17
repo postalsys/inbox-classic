@@ -395,6 +395,8 @@ ui-settings-message-list = Kirjade loend
 # review: new
 ui-settings-messages = Kirjad
 # review: new
+ui-settings-encryption = Krüptimine
+# review: new
 ui-settings-language = Keel
 # review: new
 ui-settings-label = { $label }:
@@ -617,6 +619,10 @@ ui-trusted-senders-title = Usaldusväärsed saatjad
 ui-trusted-senders-note = Nende saatjate kirjade pildid laaditakse automaatselt alla, kui teie meiliteenuse pakkuja on saatja domeeni kinnitanud.
 ui-trusted-everyone-at = Kõik domeeni { $domain } saatjad
 ui-trusted-senders-empty = Usaldusväärseid saatjaid pole veel lisatud.
+# review: new
+ui-search-encrypted = Otsi &krüptitud kirjadest
+# review: new
+ui-search-encrypted-note = Avatud krüptitud kirjad lisatakse selle arvuti otsinguindeksisse, et nende sõnu saaks leida. Indeks ei ole krüptitud ja tehisintellekti agendid ei otsi sellest kunagi. Lülita see välja, et need indeksist eemaldada.
 # review: changed
 ui-eml-default = Ava .eml-&failid Inbox Classicuga
 ui-eml-default-done = Inbox Classic avab nüüd .eml-failid.

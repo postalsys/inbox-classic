@@ -732,6 +732,10 @@ agent-unreadable = Tätä viestiä ei voi lukea.
 # review: new
 agent-encrypted-original = Tämä viesti on salattu: agentti ei voi vastata siihen tai välittää sitä, koska se ei osaa salata.
 # review: new
+agent-encrypted = Tämä viesti on salattu. Vain käyttäjä voi lukea sen Inbox Classicissa.
+# review: new
+list-encrypted = Salattu viesti
+# review: new
 agent-log-composed = Avasi viestin ”{ $subject }” uutena viestinä, jonka viimeistelet
 # review: new
 agent-log-refused = Et lähettänyt viestiä ”{ $subject }”

@@ -752,6 +752,8 @@ ui-settings-message-list = Üzenetlista
 # review: new
 ui-settings-messages = Üzenetek
 # review: new
+ui-settings-encryption = Titkosítás
+# review: new
 ui-settings-language = Nyelv
 # review: new
 ui-settings-label = { $label }:
@@ -1132,6 +1134,10 @@ ui-trusted-senders-note = Az ezektől a feladóktól érkező üzenetek képei a
 ui-trusted-everyone-at = Mindenki ebből a tartományból: { $domain }
 # review: new
 ui-trusted-senders-empty = Még nincs megbízható feladó.
+# review: new
+ui-search-encrypted = Keresés a &titkosított üzenetekben
+# review: new
+ui-search-encrypted-note = A megnyitott titkosított üzenetek bekerülnek a számítógép keresési indexébe, így a szavaik megtalálhatók. Az index nincs titkosítva, és az MI-ügynökök soha nem keresnek benne. Kapcsolja ki, hogy eltávolítsa őket az indexből.
 # review: new
 ui-eml-default = .&eml fájlok megnyitása az Inbox Classickal
 # review: new

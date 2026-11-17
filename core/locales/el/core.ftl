@@ -740,6 +740,10 @@ agent-unreadable = Δεν είναι δυνατή η ανάγνωση αυτού
 # review: new
 agent-encrypted-original = Αυτό το μήνυμα είναι κρυπτογραφημένο: ένας πράκτορας δεν μπορεί να του απαντήσει ή να το προωθήσει, καθώς δεν μπορεί να κρυπτογραφήσει.
 # review: new
+agent-encrypted = Αυτό το μήνυμα είναι κρυπτογραφημένο. Μόνο ο χρήστης μπορεί να το διαβάσει, στο Inbox Classic.
+# review: new
+list-encrypted = Κρυπτογραφημένο μήνυμα
+# review: new
 agent-log-composed = Άνοιξε το «{ $subject }» σε νέο μήνυμα για να το ολοκληρώσετε
 # review: new
 agent-log-refused = Δεν στείλατε το «{ $subject }»

@@ -740,6 +740,10 @@ agent-unreadable = Ova se poruka ne može pročitati.
 # review: new
 agent-encrypted-original = Ova je poruka šifrirana: agent na nju ne može odgovoriti niti je proslijediti jer ne može šifrirati.
 # review: new
+agent-encrypted = Ova je poruka šifrirana. Može je pročitati samo korisnik, u aplikaciji Inbox Classic.
+# review: new
+list-encrypted = Šifrirana poruka
+# review: new
 agent-log-composed = Poruka „{ $subject }“ otvorena je kao nova poruka koju ćete dovršiti
 # review: new
 agent-log-refused = Niste poslali poruku „{ $subject }“

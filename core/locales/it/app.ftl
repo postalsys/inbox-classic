@@ -753,6 +753,8 @@ ui-settings-message-list = Elenco messaggi
 # review: new
 ui-settings-messages = Messaggi
 # review: new
+ui-settings-encryption = Crittografia
+# review: new
 ui-settings-language = Lingua
 # review: new
 ui-settings-label = { $label }:
@@ -1133,6 +1135,10 @@ ui-trusted-senders-note = Le immagini nei messaggi di questi mittenti vengono sc
 ui-trusted-everyone-at = Chiunque in { $domain }
 # review: new
 ui-trusted-senders-empty = Non hai ancora aggiunto mittenti attendibili.
+# review: new
+ui-search-encrypted = Cerca nei messaggi &crittografati
+# review: new
+ui-search-encrypted-note = I messaggi crittografati che apri vengono aggiunti all’indice di ricerca di questo computer, così le loro parole possono essere trovate. L’indice non è crittografato e gli agenti IA non vi cercano mai. Disattiva l’opzione per rimuoverli dall’indice.
 # review: new
 ui-eml-default = Apri i &file .eml con Inbox Classic
 # review: new

@@ -752,6 +752,8 @@ ui-settings-message-list = Список сообщений
 # review: new
 ui-settings-messages = Сообщения
 # review: new
+ui-settings-encryption = Шифрование
+# review: new
 ui-settings-language = Язык
 # review: new
 ui-settings-label = { $label }:
@@ -1143,6 +1145,10 @@ ui-trusted-senders-note = Изображения в сообщениях от э
 ui-trusted-everyone-at = Все из { $domain }
 # review: new
 ui-trusted-senders-empty = Надежные отправители пока не добавлены.
+# review: new
+ui-search-encrypted = Искать в за&шифрованных сообщениях
+# review: new
+ui-search-encrypted-note = Открытые вами зашифрованные сообщения добавляются в поисковый индекс на этом компьютере, чтобы их слова можно было найти. Индекс не зашифрован, и агенты ИИ никогда не выполняют в нем поиск. Выключите этот параметр, чтобы удалить их из индекса.
 # review: new
 ui-eml-default = &Открывать файлы .eml в Inbox Classic
 # review: new

@@ -751,6 +751,10 @@ agent-unreadable = Tuto zprávu nelze přečíst.
 # review: new
 agent-encrypted-original = Tato zpráva je šifrovaná: agent na ni nemůže odpovědět ani ji přeposlat, protože neumí šifrovat.
 # review: new
+agent-encrypted = Tato zpráva je šifrovaná. Přečíst ji může jen uživatel, v aplikaci Inbox Classic.
+# review: new
+list-encrypted = Šifrovaná zpráva
+# review: new
 agent-log-composed = „{ $subject }“ otevřeno v nové zprávě, kterou dokončíte vy
 # review: new
 agent-log-refused = „{ $subject }“ jste neodeslali

@@ -780,6 +780,10 @@ agent-unreadable = Це повідомлення неможливо прочит
 # review: new
 agent-encrypted-original = Це повідомлення зашифроване: агент не може відповісти на нього чи переслати його, бо не вміє шифрувати.
 # review: new
+agent-encrypted = Це повідомлення зашифроване. Прочитати його може лише користувач, в Inbox Classic.
+# review: new
+list-encrypted = Зашифроване повідомлення
+# review: new
 agent-log-composed = Відкрито «{ $subject }» у новому повідомленні, щоб ви його завершили
 # review: new
 agent-log-refused = Ви не надіслали «{ $subject }»

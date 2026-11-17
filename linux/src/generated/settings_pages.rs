@@ -44,7 +44,7 @@ impl SettingsPage {
     pub fn groups(self) -> &'static [SettingsGroup] {
         match self {
             SettingsPage::General => &[SettingsGroup::Language, SettingsGroup::NewMail, SettingsGroup::Sending, SettingsGroup::DefaultApps],
-            SettingsPage::Reading => &[SettingsGroup::MessageList, SettingsGroup::Messages],
+            SettingsPage::Reading => &[SettingsGroup::MessageList, SettingsGroup::Messages, SettingsGroup::Encryption],
             SettingsPage::Downloading => &[SettingsGroup::Downloading],
         }
     }
@@ -59,6 +59,7 @@ pub enum SettingsGroup {
     DefaultApps,
     MessageList,
     Messages,
+    Encryption,
     Downloading,
 }
 
@@ -72,6 +73,7 @@ impl SettingsGroup {
             SettingsGroup::DefaultApps => Some(Text::UiSettingsDefaultApps),
             SettingsGroup::MessageList => Some(Text::UiSettingsMessageList),
             SettingsGroup::Messages => Some(Text::UiSettingsMessages),
+            SettingsGroup::Encryption => Some(Text::UiSettingsEncryption),
             SettingsGroup::Downloading => None,
         }
     }
@@ -85,6 +87,7 @@ impl SettingsGroup {
             SettingsGroup::DefaultApps => None,
             SettingsGroup::MessageList => None,
             SettingsGroup::Messages => None,
+            SettingsGroup::Encryption => None,
             SettingsGroup::Downloading => Some(Text::UiDownloadNote),
         }
     }
@@ -98,6 +101,7 @@ impl SettingsGroup {
             SettingsGroup::DefaultApps => &[Setting::DefaultMailApp, Setting::EmlDefault],
             SettingsGroup::MessageList => &[Setting::Layout, Setting::GroupByConversation, Setting::ListPictures],
             SettingsGroup::Messages => &[Setting::DarkMessages, Setting::PicturesAlways, Setting::TrustedSenders],
+            SettingsGroup::Encryption => &[Setting::SearchEncrypted],
             SettingsGroup::Downloading => &[Setting::DownloadAhead, Setting::DownloadLimit],
         }
     }
@@ -126,6 +130,7 @@ pub enum Setting {
     DarkMessages,
     PicturesAlways,
     TrustedSenders,
+    SearchEncrypted,
     DownloadAhead,
     DownloadLimit,
 }
@@ -146,6 +151,7 @@ impl Setting {
             Setting::DarkMessages => "dark_messages",
             Setting::PicturesAlways => "pictures_always",
             Setting::TrustedSenders => "trusted_senders",
+            Setting::SearchEncrypted => "search_encrypted",
             Setting::DownloadAhead => "download_ahead",
             Setting::DownloadLimit => "download_limit",
         }
@@ -165,6 +171,7 @@ impl Setting {
             Setting::DarkMessages => SettingKind::Switch,
             Setting::PicturesAlways => SettingKind::Switch,
             Setting::TrustedSenders => SettingKind::Button,
+            Setting::SearchEncrypted => SettingKind::Switch,
             Setting::DownloadAhead => SettingKind::Choice,
             Setting::DownloadLimit => SettingKind::Choice,
         }
@@ -185,6 +192,7 @@ impl Setting {
             Setting::DarkMessages => Text::UiDarkMessages,
             Setting::PicturesAlways => Text::UiPicturesAlwaysOption,
             Setting::TrustedSenders => Text::UiTrustedSendersButton,
+            Setting::SearchEncrypted => Text::UiSearchEncrypted,
             Setting::DownloadAhead => Text::UiDownloadAhead,
             Setting::DownloadLimit => Text::UiDownloadLimit,
         }
@@ -205,6 +213,7 @@ impl Setting {
             Setting::DarkMessages => None,
             Setting::PicturesAlways => Some(Text::UiPicturesAlwaysWarning),
             Setting::TrustedSenders => None,
+            Setting::SearchEncrypted => Some(Text::UiSearchEncryptedNote),
             Setting::DownloadAhead => None,
             Setting::DownloadLimit => None,
         }
@@ -225,6 +234,7 @@ impl Setting {
             Setting::DarkMessages => None,
             Setting::PicturesAlways => None,
             Setting::TrustedSenders => None,
+            Setting::SearchEncrypted => None,
             Setting::DownloadAhead => None,
             Setting::DownloadLimit => None,
         }

@@ -753,6 +753,8 @@ ui-settings-message-list = Llista de missatges
 # review: new
 ui-settings-messages = Missatges
 # review: new
+ui-settings-encryption = Xifratge
+# review: new
 ui-settings-language = Llengua
 # review: new
 ui-settings-label = { $label }:
@@ -1133,6 +1135,10 @@ ui-trusted-senders-note = Les imatges dels missatges d’aquests remitents es ba
 ui-trusted-everyone-at = Tothom del domini { $domain }
 # review: new
 ui-trusted-senders-empty = Encara no s’ha afegit cap remitent de confiança.
+# review: new
+ui-search-encrypted = Cerca als missatges &xifrats
+# review: new
+ui-search-encrypted-note = Els missatges xifrats que obriu s’afegeixen a l’índex de cerca d’aquest ordinador, perquè se’n puguin trobar les paraules. L’índex no està xifrat i els agents d’IA no hi cerquen mai. Desactiveu-ho per treure’ls de l’índex.
 # review: new
 ui-eml-default = &Obre els fitxers .eml amb Inbox Classic
 # review: new

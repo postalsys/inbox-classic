@@ -750,6 +750,8 @@ ui-settings-message-list = Seznam zpráv
 # review: new
 ui-settings-messages = Zprávy
 # review: new
+ui-settings-encryption = Šifrování
+# review: new
 ui-settings-language = Jazyk
 # review: new
 ui-settings-label = { $label }:
@@ -1137,6 +1139,10 @@ ui-trusted-senders-note = Obrázky ve zprávách od těchto odesílatelů se sta
 ui-trusted-everyone-at = Všichni z domény { $domain }
 # review: new
 ui-trusted-senders-empty = Zatím nebyli přidáni žádní důvěryhodní odesílatelé.
+# review: new
+ui-search-encrypted = Hledat v &šifrovaných zprávách
+# review: new
+ui-search-encrypted-note = Šifrované zprávy, které otevřete, se přidávají do indexu vyhledávání v tomto počítači, aby bylo možné najít jejich slova. Index není šifrovaný a agenti AI v něm nikdy nehledají. Vypnutím je z indexu odeberete.
 # review: new
 ui-eml-default = Otevírat &soubory .eml v Inbox Classic
 # review: new

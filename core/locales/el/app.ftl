@@ -753,6 +753,8 @@ ui-settings-message-list = Λίστα μηνυμάτων
 # review: new
 ui-settings-messages = Μηνύματα
 # review: new
+ui-settings-encryption = Κρυπτογράφηση
+# review: new
 ui-settings-language = Γλώσσα
 # review: new
 ui-settings-label = { $label }:
@@ -1133,6 +1135,10 @@ ui-trusted-senders-note = Οι εικόνες σε μηνύματα από αυ�
 ui-trusted-everyone-at = Όλοι στο { $domain }
 # review: new
 ui-trusted-senders-empty = Δεν έχουν προστεθεί ακόμη αξιόπιστοι αποστολείς.
+# review: new
+ui-search-encrypted = Αναζήτηση σε &κρυπτογραφημένα μηνύματα
+# review: new
+ui-search-encrypted-note = Τα κρυπτογραφημένα μηνύματα που ανοίγετε προστίθενται στο ευρετήριο αναζήτησης σε αυτόν τον υπολογιστή, ώστε να βρίσκονται οι λέξεις τους. Το ευρετήριο δεν είναι κρυπτογραφημένο και οι πράκτορες ΤΝ δεν κάνουν ποτέ αναζήτηση σε αυτό. Απενεργοποιήστε το για να αφαιρεθούν από το ευρετήριο.
 # review: new
 ui-eml-default = &Άνοιγμα αρχείων .eml με το Inbox Classic
 # review: new

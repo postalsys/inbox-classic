@@ -754,6 +754,8 @@ ui-settings-message-list = Lista wiadomości
 # review: new
 ui-settings-messages = Wiadomości
 # review: new
+ui-settings-encryption = Szyfrowanie
+# review: new
 ui-settings-language = Język
 # review: new
 ui-settings-label = { $label }:
@@ -1150,6 +1152,10 @@ ui-trusted-senders-note = Obrazy w wiadomościach od tych nadawców są pobieran
 ui-trusted-everyone-at = Wszyscy z domeny { $domain }
 # review: new
 ui-trusted-senders-empty = Nie dodano jeszcze zaufanych nadawców.
+# review: new
+ui-search-encrypted = &Szukaj w zaszyfrowanych wiadomościach
+# review: new
+ui-search-encrypted-note = Otwierane zaszyfrowane wiadomości są dodawane do indeksu wyszukiwania na tym komputerze, aby można było znaleźć ich słowa. Indeks nie jest zaszyfrowany, a agenci AI nigdy go nie przeszukują. Wyłącz tę opcję, aby usunąć je z indeksu.
 # review: new
 ui-eml-default = Otwieraj pliki .&eml w Inbox Classic
 # review: new

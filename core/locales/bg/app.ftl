@@ -754,6 +754,8 @@ ui-settings-message-list = Списък със съобщения
 # review: new
 ui-settings-messages = Съобщения
 # review: new
+ui-settings-encryption = Шифроване
+# review: new
 ui-settings-language = Език
 # review: new
 ui-settings-label = { $label }:
@@ -1134,6 +1136,10 @@ ui-trusted-senders-note = Изображенията в съобщенията �
 ui-trusted-everyone-at = Всички в { $domain }
 # review: new
 ui-trusted-senders-empty = Все още не са добавени доверени податели.
+# review: new
+ui-search-encrypted = Търсене в &шифрованите съобщения
+# review: new
+ui-search-encrypted-note = Шифрованите съобщения, които отворите, се добавят към индекса за търсене на този компютър, за да могат думите им да бъдат намерени. Индексът не е шифрован и агентите с ИИ никога не търсят в него. Изключете това, за да ги премахнете от индекса.
 # review: new
 ui-eml-default = &Отваряне на файловете .eml с Inbox Classic
 # review: new

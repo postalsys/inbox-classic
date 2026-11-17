@@ -389,6 +389,7 @@ ui-settings-sending = Sending
 ui-settings-default-apps = Default Apps
 ui-settings-message-list = Message List
 ui-settings-messages = Messages
+ui-settings-encryption = Encryption
 ui-settings-language = Language
 # a group's title as the label before its first control, in the Mac's panes: the colon as the language writes it
 ui-settings-label = { $label }:
@@ -594,6 +595,8 @@ ui-trusted-senders-title = Trusted senders
 ui-trusted-senders-note = Pictures in messages from these senders are downloaded automatically when your mail provider verifies the sender’s domain.
 ui-trusted-everyone-at = Everyone at { $domain }
 ui-trusted-senders-empty = No trusted senders have been added yet.
+ui-search-encrypted = Search in &encrypted messages
+ui-search-encrypted-note = Encrypted messages you open are added to the search index on this computer, so their words can be found. The index is not encrypted, and AI agents never search it. Turn this off to remove them from the index.
 ui-eml-default = Open .&eml Files with Inbox Classic
 ui-eml-default-done = Inbox Classic now opens .eml files.
 ui-eml-default-failed = Inbox Classic could not be set as the default app for .eml files: { $reason }

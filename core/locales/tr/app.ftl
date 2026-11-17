@@ -753,6 +753,8 @@ ui-settings-message-list = İleti listesi
 # review: new
 ui-settings-messages = İletiler
 # review: new
+ui-settings-encryption = Şifreleme
+# review: new
 ui-settings-language = Dil
 # review: new
 ui-settings-label = { $label }:
@@ -1133,6 +1135,10 @@ ui-trusted-senders-note = Bu gönderenlerden gelen iletilerdeki resimler, posta 
 ui-trusted-everyone-at = { $domain } etki alanındaki herkes
 # review: new
 ui-trusted-senders-empty = Henüz güvenilen gönderen eklenmedi.
+# review: new
+ui-search-encrypted = Şifreli iletilerde &ara
+# review: new
+ui-search-encrypted-note = Açtığınız şifreli iletiler, sözcükleri bulunabilsin diye bu bilgisayardaki arama dizinine eklenir. Dizin şifreli değildir ve yapay zeka aracıları dizinde hiçbir zaman arama yapmaz. Dizinden kaldırmak için bunu kapatın.
 # review: new
 ui-eml-default = .&eml Dosyalarını Inbox Classic ile Aç
 # review: new
