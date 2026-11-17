@@ -316,7 +316,9 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com a Microsoft 365: přihlast
 ui-start-intro-apps = Přihlaste se přes prohlížeč pomocí některé ze svých přihlašovacích aplikací (Další možnosti přihlášení), nebo níže přidejte libovolný e-mailový účet se svým jménem a adresou.
 ui-use-app-password = Použít heslo aplikace
 ui-the-provider = poskytovatel
+# review: changed
 ui-provider-intro = Přihlaste se k účtu { $email } na webu poskytovatele ({ $provider }). Vaše heslo se aplikaci Inbox Classic nepředává. Můžete také použít heslo aplikace vytvořené v nastavení zabezpečení vašeho účtu.
+# review: changed
 ui-provider-intro-apps = Přihlaste se k účtu { $email } na webu poskytovatele ({ $provider }) pomocí některé ze svých přihlašovacích aplikací (Další možnosti přihlášení). Můžete také použít heslo aplikace vytvořené v nastavení zabezpečení vašeho účtu.
 ui-finish = Dokončit
 ui-logon = Přihlášení

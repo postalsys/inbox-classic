@@ -141,6 +141,12 @@ Context notes:
   domain associated with the code, not the safety or trustworthiness of all message content. Avoid claiming
   that every forged or malicious message is excluded.
 
+- Outlook.com and Microsoft 365 mail require browser/modern authentication; app passwords are not an alternative.
+  This is already stated by `pe-autoconfig/src/app_password.rs::MICROSOFT_WARNING`, although the English provider
+  introductions and Gmail/Outlook help contradict it. Google app passwords require two-step verification and an
+  eligible account. Do not imply that every provider or account supports them. The focused followup and official
+  provider sources are recorded under `provider-app-password-context` in the review state.
+
 - Settings now have General, Reading and Downloading pages from `core/settings.toml`. Group headings have
   no access key or colon; `ui-settings-label` supplies the Mac label punctuation. Check each page's access
   keys together with OK, Cancel and Apply, and use `data-settings` for help navigation.
@@ -343,6 +349,9 @@ Review notes (round 2):
   account is a "korisnički račun u sustavu Windows". Uninstalling local mail leaves server mail intact.
 - Store descriptions say that quoted text is hidden, not summarized, and that downloaded mail is available offline.
   Browser sign-in provider names and the generic fallback remain uninflected in parentheses.
+- Help uses "objedinjeni prikaz" for combined folders and explains hidden quoted text separately from a collapsed
+  conversation ("sažeti razgovor"). Search indexing does not require the user to open or mark a message read.
+  Use "mogućnost" before long setting labels and quote them when needed to keep the rendered sentence grammatical.
 
 ### Italiano (it)
 

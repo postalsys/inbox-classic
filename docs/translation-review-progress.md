@@ -19,19 +19,22 @@ Commit completed batches regularly and preserve an exact resume point.
 - Upstream settings pages at `bd4a2bd1` are now integrated after Croatian app checkpoint `580d74a0`.
   German, Spanish, Estonian, French, Dutch, Italian, European/Brazilian Portuguese, Catalan, Norwegian
   Bokmål, Serbian Latin, Turkish, Bulgarian, Czech, Danish, Greek and Finnish settings are complete, including
-  encrypted-image and rendered-label followups. Fresh upstream audit at 675fb1f2 found no additional work.
-  All Croatian catalogs are now reviewed, including the 244 remaining platform/help-title entries and the
-  three Linux/Mac settings additions. Continue all 52 Croatian help topics. Keep its three settings-context
-  followups pending until the affected help has been reviewed. Exact source IDs/topics are in state.
+  encrypted-image and rendered-label followups. Fresh upstream audit at 5e4fd524 found no additional source work.
+  FIRST resolve the focused provider-app-password followup below in those 17 previously completed languages.
+  Their other reviewed content remains preserved. Croatian's catalogs and first eight help topics are reviewed;
+  it has 44 help topics left. Its four provider introductions and Gmail/Outlook help are already corrected.
+  Then continue Croatian help, keeping its three settings-context followups open until their remaining help is done.
+  Exact source IDs/topics are in state; do not restart full language reviews.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,440 catalog entries and 1,292 help topics; 13,330 entries and 572 topics are currently pending.
+  32,456 catalog entries and 1,296 help topics; 13,390 entries and 581 topics are currently pending.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were initially reviewed with 74 improvements; its 24 app settings additions now have two
   further improvements. Croatian core.ftl has 128 improvements, and the remaining platform/help-title catalogs
-  have 54 more. Its 52 help topics remain. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
+  have 54 more. Four provider introductions have subsequent corrections; eight help topics are reviewed, with
+  44 remaining. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward.
 - All 168 rollback messages and 84 loading labels remain reviewed. Earlier logo-cache, attachment-reminder
   and watched-notification followups remain preserved. Use their verified context in new reviews.
 - The three settings pages replace the former single Options mnemonic scope: use 46 actual scopes.
@@ -50,7 +53,9 @@ Commit completed batches regularly and preserve an exact resume point.
   This adds 6,655 catalog entries and 260 help topics: scope after that addition was 32,008 entries and 1,252 topics. The later loading labels add 84 entries,
   bringing that scope to 32,092 entries and 1,252 topics. The 168 later rollback messages increase
   that scope to 32,260 entries and 1,252 topics. The settings integration has a net increase of
-  180 catalog entries and 40 help topics, bringing the current scope to 32,440 entries and 1,292 topics.
+  180 catalog entries and 40 help topics, bringing that scope to 32,440 entries and 1,292 topics. The provider
+  context followup adds 16 previously out-of-scope catalog entries and four help topics, for 32,456 and 1,296.
+  Other affected items were already counted and are reopened without increasing scope.
   The state records exact inventories and the source commit. Recheck the branch and master for later edits.
 - Round 1 is preserved in `translation-review-round1-state.json` and `translation-review-round1-progress.md`.
 
@@ -1269,9 +1274,41 @@ Fresh fetch at `675fb1f2` confirms unchanged six source refs, no new languages o
 The since-start report contains 270 known settings entries in ten languages and 121 help passages in eleven,
 all matched to the current pending inventory. Continue Croatian help; repeat the late-arrival audit after the queue.
 
-Current totals: 19,110 catalog entries and 720 help topics completed in the active scope; 3,120 historical
-catalog value improvements. Remaining: 13,330 catalog entries and 572 help topics. Earlier context followups
-are preserved; settings review remains pending in 11 languages. `REVIEWED` remains unchanged.
+### Croatian first eight help topics and provider-context followup
+
+Reviewed add-account, gmail-outlook, main-window, layouts, read-messages, find-messages, conversations and
+organize-mail. Improved formal instructions and control joins; corrected combined-folder order and collapsed
+unread totals, quoted-text folding, automatic search indexing and watched-notification conditions. Preserved all
+markup, attributes, platform branches, settings/control references and literal keyboard tags. Croatian has 44 help
+topics left; its three settings-context followups are still pending.
+
+The app's existing MICROSOFT_WARNING and official provider guidance confirm that Outlook.com and Microsoft 365
+mail require browser/modern authentication. App passwords are not an alternative; Google permits them only on
+eligible accounts with two-step verification. Corrected the Croatian help and four provider introductions.
+Sources: [Microsoft mail settings](https://support.microsoft.com/en-gb/outlook/pop-imap-and-smtp-settings-for-outlook-com),
+[Exchange Online authentication](https://learn.microsoft.com/en-us/exchange/clients-and-mobile-in-exchange-online/deprecation-of-basic-authentication-exchange-online),
+[Google app passwords](https://support.google.com/accounts/answer/185833?hl=hr).
+
+Recorded the focused provider-app-password-context followup: 60 catalog entries and three help passages in each
+of 17 previously completed languages are marked for re-review. Their wording is unchanged at this checkpoint.
+Bulgarian/Turkish introductions already condition app-password support and remain reviewed; their Microsoft help
+steps still need correction. Existing pending drafts include the same targets. Only 16 entries and four topics
+from the round-1 languages are new to the active scope. Prior reviews and unchanged passages are retained; the
+reconciliation helper verifies partial-topic content byte-for-byte against the pre-reopen Git checkpoint.
+
+Static Croatian checks report 1,351 deliberately removed marks and no structural findings. All 46 shortcut scopes
+pass. All 28 inventories and completed/source hashes reconcile (19,100 unmarked messages and 9,467 changed help
+lines, plus 14 verified baseline pairs). The review report is regenerated and git diff --check passes. No tests
+run. Fresh fetch at `5e4fd524` found no new source work; 318 known entries and 169 passages in the since-start
+report match the queue. Another 12 reopened cs/da/nl catalog entries are unchanged from their initially marked
+snapshot and therefore omitted by --since; their full English/translation pairs were verified and remain pending.
+The larger queue comes from this context finding, not new upstream commits.
+
+Current totals: 19,066 catalog entries and 715 help topics completed in the active scope; 3,124 historical
+catalog value improvements. Remaining: 13,390 catalog entries and 581 help topics. Completed totals decrease
+because affected earlier reviews were reopened. The 17 otherwise completed languages now have only this focused
+followup pending; Croatian and ten other languages retain their broader queues. Settings followups still await
+11 languages. `REVIEWED` remains unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

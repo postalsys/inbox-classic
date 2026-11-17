@@ -120,7 +120,9 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Neste >
+# review: changed
 gtk-provider-sign-in = { $provider }: Logg på kontoen { $address } på leverandørens nettsted. Passordet ditt deles ikke med Inbox Classic. Du kan også bruke et app-passord som er opprettet i sikkerhetsinnstillingene for kontoen.
+# review: changed
 gtk-provider-sign-in-apps = { $provider }: Bruk en av påloggingsappene dine (Flere påloggingsvalg) til å logge på kontoen { $address } på leverandørens nettsted. Du kan også bruke et app-passord som er opprettet i sikkerhetsinnstillingene for kontoen.
 gtk-accounts-add = Legg til...
 gtk-accounts-properties = Egenskaper...

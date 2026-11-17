@@ -119,7 +119,9 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Suivant >
+# review: changed
 gtk-provider-sign-in = Connectez-vous au compte { $address } sur le site de { $provider }. Votre mot de passe ne sera pas transmis à Inbox Classic. Vous pouvez aussi utiliser un mot de passe d'application créé dans les paramètres de sécurité de votre compte.
+# review: changed
 gtk-provider-sign-in-apps = Connectez-vous au compte { $address } sur le site de { $provider } avec l'une de vos applications de connexion (« Autres options de connexion »). Vous pouvez aussi utiliser un mot de passe d'application créé dans les paramètres de sécurité de votre compte.
 gtk-accounts-add = Ajouter...
 gtk-accounts-properties = Propriétés...

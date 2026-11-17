@@ -314,7 +314,9 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com und Microsoft 365: Melden 
 ui-start-intro-apps = Melden Sie sich im Browser mit einer Ihrer Anmelde-Apps an (Weitere Anmeldeoptionen), oder fügen Sie unten ein beliebiges E-Mail-Konto mit Ihrem Namen und Ihrer Adresse hinzu.
 ui-use-app-password = App-Passwort verwenden
 ui-the-provider = Ihrem Anbieter
+# review: changed
 ui-provider-intro = Melden Sie sich für { $email } auf der Webseite von { $provider } an. Ihr Passwort wird nicht an Inbox Classic weitergegeben. Alternativ können Sie ein App-Passwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
+# review: changed
 ui-provider-intro-apps = Melden Sie sich für { $email } auf der Webseite von { $provider } mit einer Ihrer Anmelde-Apps an („Weitere Anmeldeoptionen“). Alternativ können Sie ein App-Passwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
 ui-finish = Fertigstellen
 ui-logon = Anmelden

@@ -9,11 +9,13 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Continue Croatian (hr) all 52 help topics. All Croatian catalogs are now reviewed, including the three Linux/Mac settings additions. Review the 11 affected settings help topics and encrypted-image/rendered-label behavior before completing the three hr context followups. Then hu/lt/lv/pl/ro/ru/sk/sl/sv/uk. Fresh source audit at 675fb1f2 found no new work; recheck at the next checkpoint and after the queue. Pending 13330 catalogs and 572 help topics; REVIEWED unchanged. No test suite. Active checkout build/i18n-wave1.",
+  "next_batch": "FIRST resolve provider-app-password-context in the 17 previously completed languages, one language at a time: de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi. The exact followup is four introduction IDs per language except bg/tr (already conditional), plus the three marked gmail-outlook passages; preserve good surrounding text/markup. Then resume Croatian 44 remaining help topics, starting message-rules/delete-and-undo/folders/write-message/reply-forward/attachments/drafts-outbox/signatures. Croatian first eight help topics and all catalogs, including provider corrections, are reviewed. Three Croatian settings-context followups remain open. Continue hu/lt/lv/pl/ro/ru/sk/sl/sv/uk afterward, including the provider guidance in their normal review. No tests. Scope 32456 catalogs/1296 help; pending 13390/581. Active checkout build/i18n-wave1; REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
-      "pending_help": [],
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "bg-app-round2",
@@ -1459,7 +1461,6 @@
             "delete-and-undo.html",
             "find-messages.html",
             "folders.html",
-            "gmail-outlook.html",
             "main-window.html",
             "manage-accounts.html",
             "move-computer.html",
@@ -1480,7 +1481,7 @@
             "core/crates/pe-html/help/bg/drafts-outbox.html": "0956c5a3b95cfe7cb402967cd32044224d9f3adf2598d7a0ab10e2a988c8b7b2",
             "core/crates/pe-html/help/bg/find-messages.html": "3b3daf933ce7dffb2d10ff45b27b5291a1883562427ec964ed77b897750d4b7b",
             "core/crates/pe-html/help/bg/folders.html": "c6889423e042682c4f96019da76b9b614a83093822599428461fa4059e9b1ea1",
-            "core/crates/pe-html/help/bg/gmail-outlook.html": "e58839a2903b64e2a9825c8267cdd401775ab56d5b15086d1eef1b2ff4333622",
+            "core/crates/pe-html/help/bg/gmail-outlook.html": "11b67e90207743eaa02582553a16ecde0ad91fb48a1998a0eb0e8b81c4d0a70b",
             "core/crates/pe-html/help/bg/layouts.html": "13f85e4d9ea440f0a032102b20c606a868e94b4549493612dfcd52d4950f28f7",
             "core/crates/pe-html/help/bg/main-window.html": "0d2963cb8c45e9916acb83410c88881eaba0e459915e522a93644360a077205f",
             "core/crates/pe-html/help/bg/manage-accounts.html": "755901946ae11e43cfbeaae1866b58a7ed513e4a5d498f4c2cf9d232b56697dc",
@@ -1523,7 +1524,8 @@
             "drafts-outbox.html",
             "layouts.html",
             "new-mail.html",
-            "read-messages.html"
+            "read-messages.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -1885,8 +1887,19 @@
       ]
     },
     "cs": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "cs-loading-round2",
@@ -2217,8 +2230,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish",
               "ui-logon",
               "ui-enter-password",
@@ -2567,7 +2578,9 @@
               "ui-eml-default",
               "ui-layout-label",
               "ui-list-pictures",
-              "ui-list-pictures-note"
+              "ui-list-pictures-note",
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
             ]
           }
         },
@@ -3099,8 +3112,6 @@
               "gtk-turned-off-why",
               "gtk-turned-off-why-long",
               "gtk-next",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps",
               "gtk-accounts-add",
               "gtk-accounts-properties",
               "gtk-accounts-signature",
@@ -3313,7 +3324,9 @@
           },
           "reopened_reviewed_ids": {
             "linux.ftl": [
-              "gtk-notify-subtitle"
+              "gtk-notify-subtitle",
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
             ]
           }
         },
@@ -3328,7 +3341,6 @@
             "delete-and-undo.html",
             "find-messages.html",
             "folders.html",
-            "gmail-outlook.html",
             "main-window.html",
             "manage-accounts.html",
             "move-computer.html",
@@ -3349,7 +3361,7 @@
             "core/crates/pe-html/help/cs/drafts-outbox.html": "956f9da61a9286f997c4fcf40a88ac027d7d5a36413d810f6d39f2c1b6b2cd00",
             "core/crates/pe-html/help/cs/find-messages.html": "d85cbed1045fb44d2f3eef6b61ef753e7d8106edfba8d95e84e8a794a71f28b5",
             "core/crates/pe-html/help/cs/folders.html": "9b6301077f907fc1aef0bea8e5bfa3988e833e0f9a9ce5a7968ff81b6e770ee0",
-            "core/crates/pe-html/help/cs/gmail-outlook.html": "96486e6ed09893ce2909cc34e3c326c9290de35795cf50f575a70764b01e9b9b",
+            "core/crates/pe-html/help/cs/gmail-outlook.html": "0a8c36ca0e72656f5b072993c0f6f0bd04d25a07d558e2c841d4c82f8b8609c2",
             "core/crates/pe-html/help/cs/layouts.html": "2bb88c787d0697923107894d791577b58e252d762d62eac8770dbb83b8878837",
             "core/crates/pe-html/help/cs/main-window.html": "0374fc2d45f79d6ea7544b026cfde37a80897a3c3eef61ce99c5fc2ab8b659b1",
             "core/crates/pe-html/help/cs/manage-accounts.html": "1d33411448ce0a50612e45462c62e6d65a5e3ac5329e46b9d30e2ef893efe123",
@@ -3392,7 +3404,8 @@
             "drafts-outbox.html",
             "layouts.html",
             "new-mail.html",
-            "read-messages.html"
+            "read-messages.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -3738,8 +3751,8 @@
           ],
           "changed_values": 4,
           "files": {
-            "core/locales/cs/app.ftl": "6a83975b40c30dea089e0602fec5d95a77fc95bf553660e5a992ee9e7f9c56d6",
-            "core/locales/cs/linux.ftl": "dd87f45b23523565fef9280b43eb093079c9d62d5fa587d99bb9609b0329b0a4",
+            "core/locales/cs/app.ftl": "467711359ddb385bc869e23916e0d2d5f3373e449d4fb77a6fdf7cdf0f1898e5",
+            "core/locales/cs/linux.ftl": "10469ff461e3b2410aa3826063a83f1cc444dfb27b3dba7566bab487553cd25a",
             "core/locales/cs/mac.ftl": "c59591bdd9ac229f0c47ff30686b6ffc37df2bf434cec3167929676e7ea29921",
             "core/crates/pe-html/help/cs/brand-logos.html": "2c7bfd47d4754348a696351293f7235d1fddb50216b5be724d82a8cfd9141cef",
             "core/crates/pe-html/help/cs/conversations.html": "2d0b21787a6f449f25fd60e481838879d32a6d2bd5c91996f6b9a8662ab6e809",
@@ -3775,8 +3788,19 @@
       ]
     },
     "da": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "da-loading-round2",
@@ -4107,8 +4131,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish",
               "ui-logon",
               "ui-enter-password",
@@ -4455,7 +4477,9 @@
               "ui-eml-default",
               "ui-layout-label",
               "ui-list-pictures",
-              "ui-list-pictures-note"
+              "ui-list-pictures-note",
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
             ]
           }
         },
@@ -4987,8 +5011,6 @@
               "gtk-turned-off-why",
               "gtk-turned-off-why-long",
               "gtk-next",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps",
               "gtk-accounts-add",
               "gtk-accounts-properties",
               "gtk-accounts-signature",
@@ -5203,7 +5225,9 @@
           },
           "reopened_reviewed_ids": {
             "linux.ftl": [
-              "gtk-notify-subtitle"
+              "gtk-notify-subtitle",
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
             ]
           }
         },
@@ -5218,7 +5242,6 @@
             "delete-and-undo.html",
             "find-messages.html",
             "folders.html",
-            "gmail-outlook.html",
             "main-window.html",
             "manage-accounts.html",
             "move-computer.html",
@@ -5239,7 +5262,7 @@
             "core/crates/pe-html/help/da/drafts-outbox.html": "b222f36b218d298c3317423aa83b8b36c8e4be3eea3cb36db1d7b874776a6b46",
             "core/crates/pe-html/help/da/find-messages.html": "465c0fc3db1831a0a16c96d15791b588b37d032b72b89950bd17d782aaec1d12",
             "core/crates/pe-html/help/da/folders.html": "63194b6048376963c7e19e4b39d57db29531db510d4e467927e2f435bbd8d1bc",
-            "core/crates/pe-html/help/da/gmail-outlook.html": "736c711ed4f8a87c58a74059e780eafc28078ec3bd9d3fc246dcd5c7b25741ad",
+            "core/crates/pe-html/help/da/gmail-outlook.html": "1f402e4b6e7ef390acb0c0a75898863e4d4ea2bda4916ac4bf6960241c87a5a9",
             "core/crates/pe-html/help/da/layouts.html": "264acfb9114fea3d87712afa7363c5638dbe0a24409248d0b998a26b8e825f25",
             "core/crates/pe-html/help/da/main-window.html": "6409005f4740aee8d7efa4e3ef00cdcbe104b97122e36ce9278c7f01f4b955f2",
             "core/crates/pe-html/help/da/manage-accounts.html": "eefc8933fe5083b424980e90ce0117446ae8b1530215ead046de98e0b1d273c1",
@@ -5282,7 +5305,8 @@
             "drafts-outbox.html",
             "layouts.html",
             "new-mail.html",
-            "read-messages.html"
+            "read-messages.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -5596,8 +5620,8 @@
           ],
           "changed_values": 1,
           "files": {
-            "core/locales/da/app.ftl": "d57cfa6413ea5c8b29a45fcc3a2c1b7786ad9dc753ded74d620b6e9fcb5a468d",
-            "core/locales/da/linux.ftl": "0956c92633f886bce235d75d485dade3a82e4c481fa15b98a6460e3c89e5c593",
+            "core/locales/da/app.ftl": "b3082077f559121924a59672de04bd4e1d3e4db7410395abd65d30ca9064a3cd",
+            "core/locales/da/linux.ftl": "a3911cbab6b6ed1a0929b1ff1e40b72d7a32af8fdf0c52a9df38e9489a135a65",
             "core/locales/da/mac.ftl": "fd89be6395b786852a64937066c222b51a773213280ca2f4cd278d6a14b9d3bb",
             "core/crates/pe-html/help/da/brand-logos.html": "b993f0b0ee82ef1151d4c54e61744c6609e1dfe1a80c0c6ea763696b702d1311",
             "core/crates/pe-html/help/da/conversations.html": "5d458d1868eca004b565da239dade49963df522b1197212ba31fbaa583345bc0",
@@ -5633,8 +5657,19 @@
       ]
     },
     "de": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "de-platform-additions-round2",
@@ -5921,8 +5956,8 @@
           ],
           "changed_values": 1,
           "files": {
-            "core/locales/de/app.ftl": "b37baafd8c88349dc6073f6fbc298d24e46e1704466d62b022ec9a2f9744057b",
-            "core/locales/de/linux.ftl": "b59eb68ddd82eb5be3a4373a6ac01be441acaefb6892a7bddce32c3b9a9ec588",
+            "core/locales/de/app.ftl": "ba39f27e1fbc197dd09c06d0d62d1134e45509c50b495fffd4258abc7f7a81b8",
+            "core/locales/de/linux.ftl": "c7543e948d05fbd84fd44155cf5eba2d80252b6aeb17013c77541099f72751a1",
             "core/locales/de/mac.ftl": "6f7f08012198ed6756087c164898a392a6f4e4eb81d0ee778390cfe0b26422df",
             "core/crates/pe-html/help/de/brand-logos.html": "6ebaed422312d3730fc2b66eb44d6febb88a85cbdabd2e65e6e783de77ada387",
             "core/crates/pe-html/help/de/conversations.html": "c3fb3733ef14cdee7c1de9cc6f01f9a12c6b9d9aee491d5e83d63832694fb56b",
@@ -6003,8 +6038,19 @@
       ]
     },
     "el": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "el-loading-round2",
@@ -6335,8 +6381,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish",
               "ui-logon",
               "ui-enter-password",
@@ -6682,7 +6726,9 @@
               "ui-eml-default",
               "ui-layout-label",
               "ui-list-pictures",
-              "ui-list-pictures-note"
+              "ui-list-pictures-note",
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
             ]
           }
         },
@@ -7229,8 +7275,6 @@
               "gtk-turned-off-why",
               "gtk-turned-off-why-long",
               "gtk-next",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps",
               "gtk-accounts-add",
               "gtk-accounts-properties",
               "gtk-accounts-signature",
@@ -7444,7 +7488,9 @@
           },
           "reopened_reviewed_ids": {
             "linux.ftl": [
-              "gtk-notify-subtitle"
+              "gtk-notify-subtitle",
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
             ]
           }
         },
@@ -7453,7 +7499,6 @@
           "reviewed_ids": {},
           "reviewed_help": [
             "add-account.html",
-            "gmail-outlook.html",
             "main-window.html",
             "find-messages.html",
             "organize-mail.html",
@@ -7472,7 +7517,7 @@
           "changed_values": 0,
           "files": {
             "core/crates/pe-html/help/el/add-account.html": "90bffc966d6ec01ce0e26ef12c772f1895d5a9c24cc755ad1bd18597c0b8d408",
-            "core/crates/pe-html/help/el/gmail-outlook.html": "961b724d032dd51c19d1d1af08e2c9161a91abde00304f1cfb874f147205d1cf",
+            "core/crates/pe-html/help/el/gmail-outlook.html": "760b9e78397ab11eee4b07969245fc03cdfeaf3a1528379b8415a0fc4192db02",
             "core/crates/pe-html/help/el/main-window.html": "c875e78fc0c7d0c8acf2eac63c0ad23b67dda94b7467888240712d5e56ed5db3",
             "core/crates/pe-html/help/el/layouts.html": "94247952cba72815fe548bf034dffa2b0d53805bd520b20ccb8ad6dd685cc117",
             "core/crates/pe-html/help/el/read-messages.html": "cfa593047c30ef43863235e2bc4ecfd5995063812b91d4fc51a94c5d81213031",
@@ -7523,7 +7568,8 @@
             "read-messages.html",
             "conversations.html",
             "drafts-outbox.html",
-            "new-mail.html"
+            "new-mail.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -7822,8 +7868,8 @@
           ],
           "changed_values": 4,
           "files": {
-            "core/locales/el/app.ftl": "5496dbd4c7d65b70ba9646bd6c69aebbb6f02b49c266826a309561857f5fff23",
-            "core/locales/el/linux.ftl": "a42804aad738089810683ba7f04de56ab1808c1d03697b906ecaae9fca28b8eb",
+            "core/locales/el/app.ftl": "b9bb2a4fb0c797011cdb676cfb845bfb99ff7cb1c5ded48020614c39bbfb2b35",
+            "core/locales/el/linux.ftl": "baba418ce3c00b66238eb5801bd4a85714ec8e7d7902f0c98a5393d1e4e2732e",
             "core/locales/el/mac.ftl": "45b0ede2613e07e0dd526e8f84607c81c4b5b26631a5b20efdcc23a4fd360c84",
             "core/crates/pe-html/help/el/brand-logos.html": "3bc11fe149ec59ceafc59c15d508cda79041777765b4b0bf54b686f059edc439",
             "core/crates/pe-html/help/el/conversations.html": "f0d4ce29ba50ac37cb5eeaa3d0e650149b6c569ff3b5968094109711d1d3e405",
@@ -7859,8 +7905,19 @@
       ]
     },
     "es": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "es-platform-additions-round2",
@@ -8147,8 +8204,8 @@
           ],
           "changed_values": 3,
           "files": {
-            "core/locales/es/app.ftl": "06fe5419242652f629fc0e6a7bc1324946feece3d5a1c3e1c8b602575c18f312",
-            "core/locales/es/linux.ftl": "66a632e0dd877db7efa71c2a5c3ae80a86ed973880d56a3cddd5ada7bd0940fc",
+            "core/locales/es/app.ftl": "40c43dd978e1fc7bc1a57d5f1b003f835697b47ac204e83b112599ad4206a95b",
+            "core/locales/es/linux.ftl": "ec12c47d2f687805fa2c60481ee891666fe4d6df265f05bcfe3271abc2c145f9",
             "core/locales/es/mac.ftl": "53a7bf0b84cd5186d50ec4afbf096efb2cfbb0b88933778933839b0a58566f17",
             "core/crates/pe-html/help/es/brand-logos.html": "2864fb9224091ebb09928030488353fb6547e479e2a5f02ca8bbb6ccea451448",
             "core/crates/pe-html/help/es/conversations.html": "69ecc46ab670d86396fef6b79e08edeb2cd4f46738059d2ab4d653ac3b1383fa",
@@ -8228,8 +8285,19 @@
       ]
     },
     "et": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "et-platform-additions-round2",
@@ -8522,8 +8590,8 @@
           ],
           "changed_values": 6,
           "files": {
-            "core/locales/et/app.ftl": "ee63cf0b7a2953a1e6951841b027c72f2360de1fc59e774b78f82207028d48e4",
-            "core/locales/et/linux.ftl": "c812aabcbde69f87adc121634c5f88d4a6a4dbce1eb2522cf4fcb3ac2d675759",
+            "core/locales/et/app.ftl": "0c994e498b7e45914c7bcc9310bdd64379295e24d87ff09de79d017674403b2b",
+            "core/locales/et/linux.ftl": "13f0fcd6847ed23e055e728c278a6b8a63e118d73ea0f91bbbb620fbec6132f6",
             "core/locales/et/mac.ftl": "edc02bf944285ef7defe14a1ad099f64b039ddec0fdc627cedfd512cb8688190",
             "core/crates/pe-html/help/et/brand-logos.html": "e39b499abd56101785dea07f9ca76584d66bc8b236db5070b9e1678066b89cd4",
             "core/crates/pe-html/help/et/conversations.html": "eb84a04409ece38838fa5b7afc06dd80a8cec46e01d03efb329d834758b940b8",
@@ -8604,8 +8672,19 @@
       ]
     },
     "fi": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "fi-loading-round2",
@@ -8936,8 +9015,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish",
               "ui-logon",
               "ui-enter-password",
@@ -9283,7 +9360,9 @@
               "ui-eml-default",
               "ui-layout-label",
               "ui-list-pictures",
-              "ui-list-pictures-note"
+              "ui-list-pictures-note",
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
             ]
           }
         },
@@ -9830,8 +9909,6 @@
               "gtk-turned-off-why",
               "gtk-turned-off-why-long",
               "gtk-next",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps",
               "gtk-accounts-add",
               "gtk-accounts-properties",
               "gtk-accounts-signature",
@@ -10053,7 +10130,9 @@
           },
           "reopened_reviewed_ids": {
             "linux.ftl": [
-              "gtk-notify-subtitle"
+              "gtk-notify-subtitle",
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
             ]
           }
         },
@@ -10082,7 +10161,6 @@
           "reviewed_ids": {},
           "reviewed_help": [
             "add-account.html",
-            "gmail-outlook.html",
             "main-window.html",
             "find-messages.html",
             "organize-mail.html"
@@ -10090,7 +10168,7 @@
           "changed_values": 0,
           "files": {
             "core/crates/pe-html/help/fi/add-account.html": "a6556c2b8b76900c1f6b44d751f4ead79bdb457b0d927b2d441c4ff70f5be750",
-            "core/crates/pe-html/help/fi/gmail-outlook.html": "c0d372b4bfcfad269936632603b0fe364128c69c69e891ac625b0751a6919a24",
+            "core/crates/pe-html/help/fi/gmail-outlook.html": "f1e4a89a5dc9015aa3d324368ad859af5cc9fb49f3949f4dd0c65e8afcf2adbe",
             "core/crates/pe-html/help/fi/main-window.html": "fb90c03a395626f0925097e5c3cf16a96c7dc3a8ca74f2f11773ec5e23b7bcb1",
             "core/crates/pe-html/help/fi/layouts.html": "26a77bafc38fc129453b14fd0bb897b48cd2c8bc0270194114caa67092a54a6f",
             "core/crates/pe-html/help/fi/read-messages.html": "880e49ca414980652c11f7230a23da9f25389984eda89e48908c4876f5040a27",
@@ -10113,7 +10191,8 @@
           "reopened_reviewed_help": [
             "layouts.html",
             "read-messages.html",
-            "conversations.html"
+            "conversations.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -10430,8 +10509,8 @@
           ],
           "changed_values": 3,
           "files": {
-            "core/locales/fi/app.ftl": "8f696d716a62017f93bc660a21581e172909c911daa9c2632246a89351ff55ca",
-            "core/locales/fi/linux.ftl": "c2f047b3252af4bd293822c13248bf6fa00a3080d7b02455eab47e835edc6088",
+            "core/locales/fi/app.ftl": "65e31437ba5529d8a27b34af2b5fb460f3420bac83ffd12c8c81a8c051bdf151",
+            "core/locales/fi/linux.ftl": "9498c42914efb4f4c34096aacbfe1e6a1d8e419e3727f8ae6bd65b55d870de68",
             "core/locales/fi/mac.ftl": "adec3ffa303b3a07f546c2c76e1aeaffbcf694ee515ad2641747dc71f8c6a151",
             "core/crates/pe-html/help/fi/brand-logos.html": "49a3bdea342f57a48bbc39b44727e91ddf2c34fb6e21ff1b378b8d07ce9d5141",
             "core/crates/pe-html/help/fi/conversations.html": "0135bce8e740cb626d1fd5fe443209fc1bddffb2d43acc6e1a6d5e742d91ae2c",
@@ -10467,8 +10546,19 @@
       ]
     },
     "fr": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "fr-platform-additions-round2",
@@ -10769,8 +10859,8 @@
           ],
           "changed_values": 2,
           "files": {
-            "core/locales/fr/app.ftl": "a8f0640733939d17bb2039e4d4b308502a70920ee1b86679f3c7338d9596b897",
-            "core/locales/fr/linux.ftl": "2d23c781bcabd7cb07d26b1f1cbab76195f60d939ddf1f4e1eeeef22a009086a",
+            "core/locales/fr/app.ftl": "359db407a883a1b01dc1b79eb90521642f68dfae59005bca917e08ca527a815e",
+            "core/locales/fr/linux.ftl": "daf38b17046db240944e965340ba75637d83a7e23f59efb16f0c76436b848b66",
             "core/locales/fr/mac.ftl": "535b84074123032b321089b71de01e86d047498c3491466378697e25957cf5b7",
             "core/crates/pe-html/help/fr/brand-logos.html": "d2b6dd17721b15b189b1a70c9f1ba4397ab74c77773134fc26bfbd6aabaf9a0c",
             "core/crates/pe-html/help/fr/conversations.html": "11a5409e5dd08d009c98486e54029f4f092546bfa52ab7251783b4f8999d0bad",
@@ -10853,7 +10943,6 @@
       "pending_catalogs": {},
       "pending_help": [
         "account-security.html",
-        "add-account.html",
         "address-book.html",
         "agents-connect.html",
         "agents-permissions.html",
@@ -10864,7 +10953,6 @@
         "certificate-errors.html",
         "command-line.html",
         "connections.html",
-        "conversations.html",
         "data-storage.html",
         "default-mail-program.html",
         "delete-and-undo.html",
@@ -10874,14 +10962,10 @@
         "encrypted-and-signed-mail.html",
         "encryption-errors.html",
         "encryption-keys.html",
-        "find-messages.html",
         "folders.html",
-        "gmail-outlook.html",
         "invitations.html",
         "keyboard-shortcuts.html",
-        "layouts.html",
         "links-scripts.html",
-        "main-window.html",
         "manage-accounts.html",
         "message-not-shown.html",
         "message-rules.html",
@@ -10889,10 +10973,8 @@
         "new-mail.html",
         "no-connection.html",
         "options-language.html",
-        "organize-mail.html",
         "password-not-accepted.html",
         "pictures-tracking.html",
-        "read-messages.html",
         "removing.html",
         "reply-forward.html",
         "save-print-import.html",
@@ -11273,8 +11355,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish",
               "ui-logon",
               "ui-enter-password",
@@ -11620,7 +11700,9 @@
               "ui-eml-default",
               "ui-layout-label",
               "ui-list-pictures",
-              "ui-list-pictures-note"
+              "ui-list-pictures-note",
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
             ]
           }
         },
@@ -12249,8 +12331,6 @@
               "gtk-turned-off-why",
               "gtk-turned-off-why-long",
               "gtk-next",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps",
               "gtk-accounts-add",
               "gtk-accounts-properties",
               "gtk-accounts-signature",
@@ -12443,7 +12523,63 @@
             "core/locales/en/windows.ftl": "1dbe03aef4ac591563df4512b8bd084f64a72f2cadb0e0858811680dcde0c16f"
           },
           "validation": "Static check-language: 1343 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes, IDs, variables, access-key counts, comments and dash checks pass; existing plural branches retained. All 28 pending inventories match. Global 19144 unmarked messages and 9385 changed help lines reconcile, with 14 omitted baseline pairs verified; completed-file and English hashes match. Offline cargo build -p pe-ffi passed in the isolated target (5.81s); inspected generated changes affect only Croatian installer and Linux desktop/store text. Guide hash unchanged. Fresh fetch confirms all six source refs unchanged, no new languages or unintegrated relevant paths. Since-start reports 270 known settings entries and 121 help passages, all matched to current pending inventories. Requested review HTML regenerated; git diff --check passes. No tests run.",
-          "notes": "Reviewed all 244 pending help-title and Windows/Mac/Linux entries against English, the actual native menus/dialogs and installer, search/indexing, unsubscribe, account/sign-in and agent callers. Improved 54 values. Corrected Linux Preferences to Postavke; clarified digital signing and the Reference section contents. Preserved native Mac Quit/Zoom labels and all existing access keys. Indexing counts remaining messages; failed-file summaries avoid agreement with independent failed/total counts. Clarified server-side folder deletion, agent entry removal versus uninstall, and Windows user-account installation. Uninstall wording preserves server mail. Mac bundle failure is shared by MAILTO and .eml default-app actions. Linux sign-in wording fits provider-name fallback and the More sign-in options menu. Transport warnings cover all credentials; image wording avoids claiming total tracking prevention. Store descriptions distinguish hidden quoted text from summaries and downloaded offline mail from all mail. The three remaining settings entries are reviewed here; all 52 help topics and the three Croatian context followups remain pending. No English or app code changes. No tests run. Source limitation: pe-store Query::place_name returns hardcoded English special-folder names used by the Linux search placeholder. This requires an app-side localization followup; the translated sentence accepts that placeholder unchanged."
+          "notes": "Reviewed all 244 pending help-title and Windows/Mac/Linux entries against English, the actual native menus/dialogs and installer, search/indexing, unsubscribe, account/sign-in and agent callers. Improved 54 values. Corrected Linux Preferences to Postavke; clarified digital signing and the Reference section contents. Preserved native Mac Quit/Zoom labels and all existing access keys. Indexing counts remaining messages; failed-file summaries avoid agreement with independent failed/total counts. Clarified server-side folder deletion, agent entry removal versus uninstall, and Windows user-account installation. Uninstall wording preserves server mail. Mac bundle failure is shared by MAILTO and .eml default-app actions. Linux sign-in wording fits provider-name fallback and the More sign-in options menu. Transport warnings cover all credentials; image wording avoids claiming total tracking prevention. Store descriptions distinguish hidden quoted text from summaries and downloaded offline mail from all mail. The three remaining settings entries are reviewed here; all 52 help topics and the three Croatian context followups remain pending. No English or app code changes. No tests run. Source limitation: pe-store Query::place_name returns hardcoded English special-folder names used by the Linux search placeholder. This requires an app-side localization followup; the translated sentence accepts that placeholder unchanged.",
+          "reopened_reviewed_ids": {
+            "linux.ftl": [
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
+            ]
+          }
+        },
+        {
+          "id": "hr-help-getting-started-reading",
+          "reviewed_ids": {
+            "app.ftl": [
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
+            ],
+            "linux.ftl": [
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
+            ]
+          },
+          "reviewed_help": [
+            "add-account.html",
+            "gmail-outlook.html",
+            "main-window.html",
+            "layouts.html",
+            "read-messages.html",
+            "find-messages.html",
+            "conversations.html",
+            "organize-mail.html"
+          ],
+          "changed_values": 4,
+          "files": {
+            "core/locales/hr/app.ftl": "8718269df8415b5d5237d645d639aa6b5c7905799221ea00166edc29fc376a35",
+            "core/locales/hr/linux.ftl": "87edadf5004e3c4f10a9004a5fc459d892db175b4a4adeaf57d7604d2063f72e",
+            "core/crates/pe-html/help/hr/add-account.html": "f609411baaf44e99680c31b8b776d2c218bc4b105db2aa45220239d50920169c",
+            "core/crates/pe-html/help/hr/gmail-outlook.html": "93ed2b1e8c09524d4e19cb695a37003226738361f3fd80af83001461a143c6e5",
+            "core/crates/pe-html/help/hr/main-window.html": "048eead954bbf3af252af9708473738976ad7fb76bce8b1f5f8cad8865d21ff0",
+            "core/crates/pe-html/help/hr/layouts.html": "001b7c561133a26c901556bb23af59e718e9d3da79ff59ef20437b9d64b153aa",
+            "core/crates/pe-html/help/hr/read-messages.html": "00c24aceeb870339ec73b7ad03657c4eaef8125ed3e300df4905fd2a6176fb3c",
+            "core/crates/pe-html/help/hr/find-messages.html": "a8347ab594ab64c56c53964377060b8e996e75e654ef10c76a50a9e357b16d8a",
+            "core/crates/pe-html/help/hr/conversations.html": "c3fe445c2e6453ab6a69b77f056259d91b1aa1e0b554123d200f4fdda344f958",
+            "core/crates/pe-html/help/hr/organize-mail.html": "ba959da8c76fae5ef007f4cee9564197f5054cd1c39f37b49f3ba2190d3ebe1f"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "69662a35440d1f3370abea7d106aca3bbc50578e8a28de3bfe138e8cd2326255",
+            "core/locales/en/linux.ftl": "c6c2156fdc533360d184053184b20da32651af1380690bf68169273a02e632b0",
+            "core/crates/pe-html/help/en/add-account.html": "07fe4a8ae27c3acaf2594782a770b21b1b1b229b0ce81a5f88986feddc823b25",
+            "core/crates/pe-html/help/en/gmail-outlook.html": "d093be2eb683a0a3ea53bb68efab3bbef98ef09e341100495f42f7e77493de2c",
+            "core/crates/pe-html/help/en/main-window.html": "1bda497c507b83039b305560b2c14c93e38bc07f72709634bdbb54e8cc65d6b5",
+            "core/crates/pe-html/help/en/layouts.html": "7f277333307ece96d1d05ea0d82f0395be12d694266af1e589a7834d13d2e8d7",
+            "core/crates/pe-html/help/en/read-messages.html": "3f282016d2b207ce987b6b72887f6301c68d7048ab9f9aad41dc4e9433c25072",
+            "core/crates/pe-html/help/en/find-messages.html": "3cde4173761e98f4e4af66ff67cc8be4b045346c6a741ee17bf6588d8dce6e73",
+            "core/crates/pe-html/help/en/conversations.html": "20c0db95c0a1d3c2d78dfe78d538f79b01812cec20cbd5eb1b57136378d18a1a",
+            "core/crates/pe-html/help/en/organize-mail.html": "a63b4edf72374937db37a8b40e34a222102d3b13d0d575930e08db9a9f96ebc8"
+          },
+          "validation": "Static check-language: 1351 expected removed-mark diagnostics only, no structural findings. All 46 mnemonic scopes and catalog invariants pass. Eight help topics preserve all tags, attributes, platform branches, empty controls/settings references and literal keyboard tags. Relevant control/settings joins inspected with renderer-style substitution on all three platforms; no runtime UI test. All 28 pending inventories match. All cross-language reopening edits are review marks only and match their pre-reopen content hashes. Global 19100 unmarked messages and 9467 changed help lines reconcile, with 14 unchanged/moved baseline pairs verified; retained unmarked passages in partially reopened topics are verified byte-for-byte against their prior Git checkpoint. Translation and English hashes match. Fresh fetch: six source refs unchanged and no new languages or unintegrated relevant changes. Since-start lists 318 known entries and 169 passages, matched to exact pending inventories; 12 reopened cs/da/nl provider entries omitted because their marked starting pairs are unchanged are separately verified and remain pending. Report regenerated; git diff --check passes. No test suite run.",
+          "notes": "Reviewed eight Croatian getting-started/reading help topics and four provider-introduction followups against native controls, tree construction, search/indexing, notifications and account sign-in callers. Improved formal-plural instructions and rendered control joins; corrected combined-folder order, collapsed unread totals, quoted-text folding, search indexing versus user reading, and watched-notification foreground/settings conditions. Corrected Microsoft app-password guidance against the existing autoconfig MICROSOFT_WARNING and official Microsoft documentation: Outlook.com and Exchange Online use browser sign-in; Google app passwords require an eligible account with two-step verification. Preserved all tags, attributes, platform branches, empty control/settings links and literal keyboard tags. Four catalog followups retain IDs/variables and access-key counts. Broader provider-context followup is being inventoried separately. No tests run."
         }
       ]
     },
@@ -13961,8 +14097,19 @@
       ]
     },
     "it": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "it-app-round2",
@@ -14265,8 +14412,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish",
               "ui-logon",
               "ui-enter-password",
@@ -14612,7 +14757,9 @@
               "ui-eml-default",
               "ui-layout-label",
               "ui-list-pictures",
-              "ui-list-pictures-note"
+              "ui-list-pictures-note",
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
             ]
           }
         },
@@ -15165,8 +15312,6 @@
               "gtk-turned-off-why",
               "gtk-turned-off-why-long",
               "gtk-next",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps",
               "gtk-accounts-add",
               "gtk-accounts-properties",
               "gtk-accounts-signature",
@@ -15380,7 +15525,9 @@
           },
           "reopened_reviewed_ids": {
             "linux.ftl": [
-              "gtk-notify-subtitle"
+              "gtk-notify-subtitle",
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
             ]
           }
         },
@@ -15389,13 +15536,12 @@
           "reviewed_ids": {},
           "reviewed_help": [
             "add-account.html",
-            "gmail-outlook.html",
             "main-window.html"
           ],
           "changed_values": 0,
           "files": {
             "core/crates/pe-html/help/it/add-account.html": "d3a8f08fc4016f20f6fd4455459aa187704067c3cf850801c6543d487d002cdd",
-            "core/crates/pe-html/help/it/gmail-outlook.html": "84fff9b5ede95043cd38f188e22ae882671d25483bccccb6716ecfdf523c5dbe",
+            "core/crates/pe-html/help/it/gmail-outlook.html": "9f482e566ea6d8661abe6a9fed514abfdf46c8c8fcb411598bb23f8fd21cda84",
             "core/crates/pe-html/help/it/main-window.html": "3065a9b993419cd9fc99adbdd7099f009a2ca9eb39d1195d6a6e804257e39afe",
             "core/crates/pe-html/help/it/layouts.html": "cbb26c9b4d3b6c58485457dfa88792e93fac71a67b634ec48a1d06e68ec3bbfa"
           },
@@ -15408,7 +15554,8 @@
           "validation": "All 72 localization/help tests pass after the complete Italian review. Structural catalog/help checks pass with only cleared marks. Inventory and file/source hashes reconcile; git diff --check passes; review HTML regenerated. Expanded catalog menu/dialog mnemonic checks pass; installer/Linux generated text inspected.",
           "notes": "Reviewed setup, browser sign-in, main-window navigation and layouts. Updated combined-folder order, collapsed unread counts and natural instructions; preserved platform branches and control references.",
           "reopened_reviewed_help": [
-            "layouts.html"
+            "layouts.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -15958,8 +16105,8 @@
           ],
           "changed_values": 3,
           "files": {
-            "core/locales/it/app.ftl": "fdd3c31c03f21bc0d3db55131e60fc863fa4d4c7ea18384b6752b57b95611911",
-            "core/locales/it/linux.ftl": "4afee33f6dd60e60276edec038c536bbbc1d6afbe6472e04ecbffcdd506a4699",
+            "core/locales/it/app.ftl": "b33e0f248999d84093a02e9689c75207f13cea7842d8b286c4bc8f21f511117c",
+            "core/locales/it/linux.ftl": "761d7dc831c4793c722c0d019220be54daddcdf8d1c27445301a1145dc9ec99d",
             "core/locales/it/mac.ftl": "934da8bb4be43eae5e22ace8ab6df32dd4cd672c172e4ab6d3879ba5410c9586",
             "core/crates/pe-html/help/it/brand-logos.html": "42553cf5975c5017d46e7517f04a0f8fe6774083b552f0784ac1ee85111d6081",
             "core/crates/pe-html/help/it/conversations.html": "f8f352251b004adc8479cc2386106709af5e3594e582b48edd279462db7b6d28",
@@ -19038,8 +19185,19 @@
       ]
     },
     "nl": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "nl-app-main-compose-accounts-round2",
@@ -19342,8 +19500,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish"
             ]
           },
@@ -19360,7 +19516,13 @@
             "Reviewed the first 300 UI entries: menus, navigation, notification/Outbox status, composing, attachments, search, invitations, folders and account setup. Improved 28 values.",
             "Checked actual main-menu scopes in app/src/main.cpp; existing access keys are unique and preserved. Clarified failures, the All Sent label and supplementary sender addresses.",
             "Follow through on the shorter label Andere afzenderadressen in core validation text and help when those files are reviewed."
-          ]
+          ],
+          "reopened_reviewed_ids": {
+            "app.ftl": [
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
+            ]
+          }
         },
         {
           "id": "nl-app-settings-keys-round2",
@@ -20274,8 +20436,6 @@
               "gtk-turned-off-why",
               "gtk-turned-off-why-long",
               "gtk-next",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps",
               "gtk-accounts-add",
               "gtk-accounts-properties",
               "gtk-accounts-signature",
@@ -20490,7 +20650,9 @@
           },
           "reopened_reviewed_ids": {
             "linux.ftl": [
-              "gtk-notify-subtitle"
+              "gtk-notify-subtitle",
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
             ]
           }
         },
@@ -20499,7 +20661,6 @@
           "reviewed_ids": {},
           "reviewed_help": [
             "add-account.html",
-            "gmail-outlook.html",
             "main-window.html",
             "find-messages.html",
             "organize-mail.html"
@@ -20507,7 +20668,7 @@
           "changed_values": 0,
           "files": {
             "core/crates/pe-html/help/nl/add-account.html": "ef9858946f7d9705563cb58e0224269fb0b7c0deb6812030975f9812a8795130",
-            "core/crates/pe-html/help/nl/gmail-outlook.html": "ba9aab30fc7f456be961e43f19fc821b07df95581763bfb53eca4b7c3addee20",
+            "core/crates/pe-html/help/nl/gmail-outlook.html": "796d668fbc642327c8f9a2c72273f0190861b3d9373232689fced2f387602a9d",
             "core/crates/pe-html/help/nl/main-window.html": "2ece27a656285c8a21b781e435a95b8c840c3d870f6f525a2a4d97d7a263e03f",
             "core/crates/pe-html/help/nl/layouts.html": "954da515c590b3f8d9d014d4def271c5681207537fbea283e5b7e26a4d9016c2",
             "core/crates/pe-html/help/nl/read-messages.html": "504c0052bce4bc1ecab82bd2ee62f92736446ed24ff8880736f0bb5c57d056d0",
@@ -20530,7 +20691,8 @@
           "reopened_reviewed_help": [
             "layouts.html",
             "read-messages.html",
-            "conversations.html"
+            "conversations.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -21062,8 +21224,8 @@
           ],
           "changed_values": 2,
           "files": {
-            "core/locales/nl/app.ftl": "e9bb609f5e358d64993fc1c6a1262d73ac0cdfbaea4d751ad94eeaf21c406811",
-            "core/locales/nl/linux.ftl": "93d0c317f99b20458b9f5031a5b27ac0019c52fd61e5baade17f9e0f9da240ae",
+            "core/locales/nl/app.ftl": "cad210962724f007007d0f002f113f5583ff265051d83676d4d28eb373049a5b",
+            "core/locales/nl/linux.ftl": "f4fa37bc2f49b92f9b2cd7b25e8155f24a1d6247fd58b981850ddd9d7772e9dd",
             "core/locales/nl/mac.ftl": "c79aff635dacaa87d4724a6c09e4eee09c42eb3ad11f5c6a637a28a4d4fc100e",
             "core/crates/pe-html/help/nl/brand-logos.html": "7f1af79469a92ab785b95a8d37d22a43240754ad7b4dbb0f84c1cbcedeaa6612",
             "core/crates/pe-html/help/nl/conversations.html": "704ca91901a9d30ced3823caa0a4e9928d9065a5b5a710ac06dada9951a11ace",
@@ -22632,8 +22794,19 @@
       ]
     },
     "pt": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "pt-app-round2",
@@ -22936,8 +23109,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish",
               "ui-logon",
               "ui-enter-password",
@@ -23278,7 +23449,9 @@
               "ui-eml-default",
               "ui-layout-label",
               "ui-list-pictures",
-              "ui-list-pictures-note"
+              "ui-list-pictures-note",
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
             ]
           }
         },
@@ -23829,8 +24002,6 @@
               "gtk-turned-off-why",
               "gtk-turned-off-why-long",
               "gtk-next",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps",
               "gtk-accounts-add",
               "gtk-accounts-properties",
               "gtk-accounts-signature",
@@ -24045,7 +24216,9 @@
           },
           "reopened_reviewed_ids": {
             "linux.ftl": [
-              "gtk-notify-subtitle"
+              "gtk-notify-subtitle",
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
             ]
           }
         },
@@ -24054,14 +24227,13 @@
           "reviewed_ids": {},
           "reviewed_help": [
             "add-account.html",
-            "gmail-outlook.html",
             "main-window.html",
             "find-messages.html"
           ],
           "changed_values": 0,
           "files": {
             "core/crates/pe-html/help/pt/add-account.html": "e6cf1b8212fa2b4fe02ebc5a27a85373e14637654523cbed212da92087d54755",
-            "core/crates/pe-html/help/pt/gmail-outlook.html": "bdfe0f5552fc7d49ddf6a36947309362478d15a90e0356368b4608862464cb32",
+            "core/crates/pe-html/help/pt/gmail-outlook.html": "d10fb9f27bcc696727daf471b51457bcb4619a636a5264908175567a84ee1699",
             "core/crates/pe-html/help/pt/main-window.html": "0eed7ba3cca32a8845cb4453e3264bc865a7e6a92ee41f121731ff4c17262459",
             "core/crates/pe-html/help/pt/layouts.html": "3062d025a8b6825c23db99c3adc5aeef604b348a2e26584f331528234cde7f9c",
             "core/crates/pe-html/help/pt/read-messages.html": "6ca2c8d849491d1eb5a3756006c0285e2bef44f3e3d9c0d9e9c6c9e02dc96bcb",
@@ -24079,7 +24251,8 @@
           "notes": "Reviewed account setup, folder navigation, layouts, reading and search against UI/caller behavior. Corrected combined-folder order and collapsed unread totals; clarified indexing versus marking messages read, quoted text and platform-specific instructions.",
           "reopened_reviewed_help": [
             "layouts.html",
-            "read-messages.html"
+            "read-messages.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -24626,8 +24799,8 @@
           ],
           "changed_values": 2,
           "files": {
-            "core/locales/pt/app.ftl": "beac90a2cb17ad16c528caba122b51961793a78a934b724dc8039c3400bc369d",
-            "core/locales/pt/linux.ftl": "614a682de697a959bf09a067ad41992fdcbb1fdf32682f855c18f5ca39a74a44",
+            "core/locales/pt/app.ftl": "7e6a8c2abeb1df3c406721846838f6459bd4066cd2fcde73b0ac51707aca5b5f",
+            "core/locales/pt/linux.ftl": "3fbddd93604123d6ae89b5abd184a66d045650483ce477aaa4829074e7dceb73",
             "core/locales/pt/mac.ftl": "780b8d9b68bac96a6276a6ae73c0030dbe0446664b26527312a354ab1d2f25d7",
             "core/crates/pe-html/help/pt/brand-logos.html": "f8d6732263e86aa43e73179afb14b076fdf83fcb0cf72ed9778e1ffedd267c55",
             "core/crates/pe-html/help/pt/conversations.html": "64484f800efac34eb978821ef4fc4abffce8a747d14451f9eaf5515d4f0abd87",
@@ -33758,8 +33931,19 @@
       ]
     },
     "ca": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "ca-app-round2",
@@ -34062,8 +34246,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish",
               "ui-logon",
               "ui-enter-password",
@@ -34392,9 +34574,7 @@
               "win-agent-programs"
             ],
             "linux.ftl": [
-              "gtk-show-bcc",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps"
+              "gtk-show-bcc"
             ]
           },
           "reviewed_help": [],
@@ -34424,7 +34604,13 @@
               "ui-eml-default",
               "ui-layout-label",
               "ui-list-pictures",
-              "ui-list-pictures-note"
+              "ui-list-pictures-note",
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
+            ],
+            "linux.ftl": [
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
             ]
           }
         },
@@ -35241,8 +35427,7 @@
             "address-book.html",
             "all-inboxes.html",
             "manage-accounts.html",
-            "move-computer.html",
-            "gmail-outlook.html"
+            "move-computer.html"
           ],
           "changed_values": 0,
           "files": {
@@ -35257,7 +35442,7 @@
             "core/crates/pe-html/help/ca/all-inboxes.html": "15f4eaed530cf1aa32e6a472d0c1616ff152a3b7d803a17c1c7dd653814f4fa2",
             "core/crates/pe-html/help/ca/manage-accounts.html": "5ad5242400aa407b11c36d61cf4d17c9e280aea64f765e0278e88ca507f8a86c",
             "core/crates/pe-html/help/ca/move-computer.html": "e877c79eced83fee2a14b0a8b5645149abea731a978c31adc5b75bb298dec1ac",
-            "core/crates/pe-html/help/ca/gmail-outlook.html": "9c966dbb42daaf4abeb64699f3b2ed7a8e40e21417f5f5d1af1959b74198b247"
+            "core/crates/pe-html/help/ca/gmail-outlook.html": "d88579ba5fa7358d1ae7ad1657a9947668d03dc88f391b15fb37c3a5f4633411"
           },
           "english_sources": {
             "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9",
@@ -35277,7 +35462,8 @@
           "notes": "Reviewed twelve help topics for writing/replies, signatures, attachments/files, drafts/outbox, contacts, notifications, combined folders, account management/transfer and provider sign-in. Corrected temporary-attachment cleanup, domain-authentication limits, credentials, current folder navigation and rule-folder matching; improved idiomatic Catalan.",
           "reopened_reviewed_help": [
             "drafts-outbox.html",
-            "new-mail.html"
+            "new-mail.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -35685,8 +35871,8 @@
           ],
           "changed_values": 3,
           "files": {
-            "core/locales/ca/app.ftl": "8a0f6c065229d0e97f38782c6e224947c5f9e095d6a238d079e2b454629c017c",
-            "core/locales/ca/linux.ftl": "41dfd8988afe668123db34b88869ae39deeb85e4eb411454c67350dbebedaee6",
+            "core/locales/ca/app.ftl": "016396dd5386ab8174da3d5b4c43d08f095a4f74bb7fb9a875958486b56e8e74",
+            "core/locales/ca/linux.ftl": "c43d6b38d06c96e48a50433f201e9143bddabeebdf64b69c16223f5d518eac86",
             "core/locales/ca/mac.ftl": "062edc07dc823e9b104a3dab88737b3903aa9a1ff344f90892c1ff93fac6afe3",
             "core/crates/pe-html/help/ca/brand-logos.html": "8c8d5b9205a5a6cd8b6cbe33c95e7ff65794b0d48d6783bccde448a89c5c0d37",
             "core/crates/pe-html/help/ca/conversations.html": "7c7c1eb136e4182a2f90311ec569c6f531da023133d523c7acdc407492b718a7",
@@ -35725,8 +35911,19 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "nb": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "nb-app-round2",
@@ -36029,8 +36226,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish",
               "ui-logon",
               "ui-enter-password",
@@ -36378,7 +36573,9 @@
               "ui-eml-default",
               "ui-layout-label",
               "ui-list-pictures",
-              "ui-list-pictures-note"
+              "ui-list-pictures-note",
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
             ]
           }
         },
@@ -36925,8 +37122,6 @@
               "gtk-turned-off-why",
               "gtk-turned-off-why-long",
               "gtk-next",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps",
               "gtk-accounts-add",
               "gtk-accounts-properties",
               "gtk-accounts-signature",
@@ -37138,7 +37333,9 @@
           },
           "reopened_reviewed_ids": {
             "linux.ftl": [
-              "gtk-notify-subtitle"
+              "gtk-notify-subtitle",
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
             ]
           }
         },
@@ -37153,7 +37350,6 @@
             "delete-and-undo.html",
             "find-messages.html",
             "folders.html",
-            "gmail-outlook.html",
             "main-window.html",
             "manage-accounts.html",
             "move-computer.html",
@@ -37174,7 +37370,7 @@
             "core/crates/pe-html/help/nb/drafts-outbox.html": "ba11ac99312c3b4d895209690343ea6ae73dbec209639417135c611083814f1a",
             "core/crates/pe-html/help/nb/find-messages.html": "ea1c877437e6cf8b551ac65bc2d58e610cb03d15b1ab38c606c8e21e45553d53",
             "core/crates/pe-html/help/nb/folders.html": "a77b172db56280ea9c7b5ab04881ab7242c69d754079c825bce3baf4b4645aa5",
-            "core/crates/pe-html/help/nb/gmail-outlook.html": "938de1320ab383945e460394cdde1aafeac886078b1083ab3ab6f8e5abe91352",
+            "core/crates/pe-html/help/nb/gmail-outlook.html": "00d39856719175bc0bf98af8c7891c70cd2e199e80c7349f688f1f6ddec36aec",
             "core/crates/pe-html/help/nb/layouts.html": "522c0be2b8294fbbf27adb226ee42a6d39a843d3b6f550655d0fcfcced9888fd",
             "core/crates/pe-html/help/nb/main-window.html": "a12d4ffcd1e295a0ec7b577119b1da10fb06b05fa4682a1628421ba525d3d72e",
             "core/crates/pe-html/help/nb/manage-accounts.html": "146a4bcca56b0434e47ce13febf1ff6980d69844b1dfe5b2a09dc3f05affefdf",
@@ -37217,7 +37413,8 @@
             "drafts-outbox.html",
             "layouts.html",
             "new-mail.html",
-            "read-messages.html"
+            "read-messages.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -37617,8 +37814,8 @@
           ],
           "changed_values": 1,
           "files": {
-            "core/locales/nb/app.ftl": "0a95e2021114d54d389f01fe52a38dcd0c1f52ec04ac438801513b44eb2244b2",
-            "core/locales/nb/linux.ftl": "30878e0f73e7a168305bce7edc12f32132c6a15c1e67fabdeb1d7ef337d24224",
+            "core/locales/nb/app.ftl": "98749eee066338e2881fc7e3be5f634d7009eb5ec78ef786e4812de12f7137e2",
+            "core/locales/nb/linux.ftl": "c3bc7888ead7c4c4736c7b99d323dae6c2afe39e68f257628b53d7cbcac6dd6e",
             "core/locales/nb/mac.ftl": "b7d78a547bb12e8f716c27ab565421fc36573a8d071ee5fb98a4a63cd70151fc",
             "core/crates/pe-html/help/nb/brand-logos.html": "7b3a4ae54c865170e55c4ef90eb1ac9778e26a7909456f879348efe3bfe2d5ba",
             "core/crates/pe-html/help/nb/conversations.html": "2277e3b5caa28785d49511ab0ed08ade9f66a88fc5974704f9efd2c182bf5f55",
@@ -37657,8 +37854,19 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "pt-BR": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "pt-BR-app-round2",
@@ -37961,8 +38169,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish",
               "ui-logon",
               "ui-enter-password",
@@ -38291,9 +38497,7 @@
               "win-agent-programs"
             ],
             "linux.ftl": [
-              "gtk-show-bcc",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps"
+              "gtk-show-bcc"
             ],
             "mac.ftl": [
               "mac-bcc"
@@ -38328,7 +38532,13 @@
               "ui-eml-default",
               "ui-layout-label",
               "ui-list-pictures",
-              "ui-list-pictures-note"
+              "ui-list-pictures-note",
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
+            ],
+            "linux.ftl": [
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
             ]
           }
         },
@@ -39143,8 +39353,7 @@
             "address-book.html",
             "all-inboxes.html",
             "manage-accounts.html",
-            "move-computer.html",
-            "gmail-outlook.html"
+            "move-computer.html"
           ],
           "changed_values": 0,
           "files": {
@@ -39159,7 +39368,7 @@
             "core/crates/pe-html/help/pt-BR/all-inboxes.html": "856df58b45de17aac6ef7de24e49ce43cbbdce41e880e8f35d93c26ba1f2ca24",
             "core/crates/pe-html/help/pt-BR/manage-accounts.html": "d35d68c9a7505d9c103d6bb547af32b868eaccbfcee8b7961f8f6873fd4ab72c",
             "core/crates/pe-html/help/pt-BR/move-computer.html": "242302c41cd0dc5ecfd013220ec5bbbdec60ce9acb331e897de089269049dd55",
-            "core/crates/pe-html/help/pt-BR/gmail-outlook.html": "04f254741f749d5e399e3e828f79ed79f6f81e9b80f7861037ed8a8656dc4176"
+            "core/crates/pe-html/help/pt-BR/gmail-outlook.html": "8232c1a5940fd61726141d7bcd22679b5fb11ca5f4afdd530e23733bf31e6f0a"
           },
           "english_sources": {
             "core/crates/pe-html/help/en/write-message.html": "da2a93434d446cc303babd326e7504ba1d59d5001ade1dddc109a338fd0e61c9",
@@ -39179,7 +39388,8 @@
           "notes": "Reviewed twelve help topics for writing, attachments, files, contacts, notifications, combined folders, account management/transfer and provider sign-in. Corrected Cco, domain-authentication limits, temporary unencrypted attachment lifetime, transferred credentials and rule-folder association.",
           "reopened_reviewed_help": [
             "drafts-outbox.html",
-            "new-mail.html"
+            "new-mail.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -39553,8 +39763,8 @@
           ],
           "changed_values": 3,
           "files": {
-            "core/locales/pt-BR/app.ftl": "0fb21934854579580fa125a1e7c643bdbce15f1a24d9d2bb0951450d71b80311",
-            "core/locales/pt-BR/linux.ftl": "94c879023f68b1b6fdb54e93baca91c1b1c5a9918e0c43b00b6d5419a900264a",
+            "core/locales/pt-BR/app.ftl": "58594a26cdadd7685edef7389a7deacac6ef5c7ee3cd8d215647bb57373d9801",
+            "core/locales/pt-BR/linux.ftl": "10f3350d7dab2b68f2310636624ae52cb8dac5c5eae2305f31185411d7b44e84",
             "core/locales/pt-BR/mac.ftl": "346877f5d3c62e8616ff8d4eacb0c3fdf07d04a6eea0fe9c961f6d023175d600",
             "core/crates/pe-html/help/pt-BR/brand-logos.html": "8daf9ec7a322be9b79641e0db9752de96bca75639225bcb659af2e214020bff0",
             "core/crates/pe-html/help/pt-BR/conversations.html": "69fddc6f317f9fcb47978c6d95b7425ab7171e9a63d44a40a5ead1e5052f488e",
@@ -39593,8 +39803,19 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "sr-Latn": {
-      "pending_catalogs": {},
-      "pending_help": [],
+      "pending_catalogs": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "sr-app-round2",
@@ -39897,8 +40118,6 @@
               "ui-start-intro-apps",
               "ui-use-app-password",
               "ui-the-provider",
-              "ui-provider-intro",
-              "ui-provider-intro-apps",
               "ui-finish",
               "ui-logon",
               "ui-enter-password",
@@ -40244,7 +40463,9 @@
               "ui-eml-default",
               "ui-layout-label",
               "ui-list-pictures",
-              "ui-list-pictures-note"
+              "ui-list-pictures-note",
+              "ui-provider-intro",
+              "ui-provider-intro-apps"
             ]
           }
         },
@@ -40790,8 +41011,6 @@
               "gtk-turned-off-why",
               "gtk-turned-off-why-long",
               "gtk-next",
-              "gtk-provider-sign-in",
-              "gtk-provider-sign-in-apps",
               "gtk-accounts-add",
               "gtk-accounts-properties",
               "gtk-accounts-signature",
@@ -41006,7 +41225,9 @@
           },
           "reopened_reviewed_ids": {
             "linux.ftl": [
-              "gtk-notify-subtitle"
+              "gtk-notify-subtitle",
+              "gtk-provider-sign-in",
+              "gtk-provider-sign-in-apps"
             ]
           }
         },
@@ -41028,8 +41249,7 @@
             "address-book.html",
             "all-inboxes.html",
             "manage-accounts.html",
-            "move-computer.html",
-            "gmail-outlook.html"
+            "move-computer.html"
           ],
           "changed_values": 0,
           "files": {
@@ -41053,7 +41273,7 @@
             "core/crates/pe-html/help/sr-Latn/all-inboxes.html": "48bbdd73f4de6befeaede86c05b8f4c44a1ae1d8f1936acfda42acb43e0bf02a",
             "core/crates/pe-html/help/sr-Latn/manage-accounts.html": "5dbab7ee445c4e818a44337344b8fbf80fdb1cbfb7fd59848277392e98401dfa",
             "core/crates/pe-html/help/sr-Latn/move-computer.html": "323199d9d8a926ea9e2fbc9ed16c583939bd4069ef8bd1ef738cb5ccfee95282",
-            "core/crates/pe-html/help/sr-Latn/gmail-outlook.html": "8c42728d92253660d0736aeba26f0cf0cb0e363f722cced03a0228205fe816fb"
+            "core/crates/pe-html/help/sr-Latn/gmail-outlook.html": "36436816f25cb5728d4e2e2209764cb2217accca2a23d82c020876c2ce98c846"
           },
           "english_sources": {
             "core/crates/pe-html/help/en/add-account.html": "07fe4a8ae27c3acaf2594782a770b21b1b1b229b0ce81a5f88986feddc823b25",
@@ -41085,7 +41305,8 @@
             "read-messages.html",
             "conversations.html",
             "drafts-outbox.html",
-            "new-mail.html"
+            "new-mail.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -41463,8 +41684,8 @@
           ],
           "changed_values": 3,
           "files": {
-            "core/locales/sr-Latn/app.ftl": "6feb684518f38405d0d18163b583130405b1f3df092ace5ca6cd0524fedaa8a2",
-            "core/locales/sr-Latn/linux.ftl": "43c8b2fdbea19bfee0d90984df0a02ec99737f04a78d23332bcce92711e4ac33",
+            "core/locales/sr-Latn/app.ftl": "658ef810abd72c4bc1db82baa2292555e0bbf4f7da9aa637bf2b882deb3942df",
+            "core/locales/sr-Latn/linux.ftl": "d16dfb91f878be0049056eeeee8df4202bacef46fcd1de48033f685428c24df7",
             "core/locales/sr-Latn/mac.ftl": "90bf4c7be3580dda4ca0f246ca765665452ce428006ff4df45038fb4018298e4",
             "core/crates/pe-html/help/sr-Latn/brand-logos.html": "5dc00ffa15c59dc6c50398f0ad337436e35738423730abb5b51822d381304192",
             "core/crates/pe-html/help/sr-Latn/conversations.html": "05bd29805df69175e42f97a989afd37a82d52822d4d83ab85ff37aa5370b998c",
@@ -41504,7 +41725,9 @@
     },
     "tr": {
       "pending_catalogs": {},
-      "pending_help": [],
+      "pending_help": [
+        "gmail-outlook.html"
+      ],
       "completed_batches": [
         {
           "id": "tr-app-round2",
@@ -42929,8 +43152,7 @@
             "address-book.html",
             "all-inboxes.html",
             "manage-accounts.html",
-            "move-computer.html",
-            "gmail-outlook.html"
+            "move-computer.html"
           ],
           "changed_values": 0,
           "files": {
@@ -42954,7 +43176,7 @@
             "core/crates/pe-html/help/tr/all-inboxes.html": "9a3fb9a537d3d4f9b739e6a0ea670df4564bc94de1ea3ed5fd4feed6ed871703",
             "core/crates/pe-html/help/tr/manage-accounts.html": "40855aaf669e7e91b52a0aa38941659041ec7564431ce9a8de7e6f0521fdd62f",
             "core/crates/pe-html/help/tr/move-computer.html": "0aedde74aa5c9f1903692ee1a44d21f5210d019b9a934421ef40f37648f03a51",
-            "core/crates/pe-html/help/tr/gmail-outlook.html": "06e13acdac1c48afc394bc457b0400d6df88e8ff883e2e3637acac02c569be43"
+            "core/crates/pe-html/help/tr/gmail-outlook.html": "332811dab1d2dc46dca477164a14559e809142047c63a6ea52e4c08b6414ecda"
           },
           "english_sources": {
             "core/crates/pe-html/help/en/add-account.html": "07fe4a8ae27c3acaf2594782a770b21b1b1b229b0ce81a5f88986feddc823b25",
@@ -42986,7 +43208,8 @@
             "read-messages.html",
             "conversations.html",
             "drafts-outbox.html",
-            "new-mail.html"
+            "new-mail.html",
+            "gmail-outlook.html"
           ]
         },
         {
@@ -45662,16 +45885,122 @@
         }
       },
       "notes": "Initial-scope totals exclude earlier round-1 work unless newly affected. The remaining 52 removed IDs were only in round 1; 44 changed existing-language IDs and 40 existing-language help topics enter this round for the first time. Review histories preserved under removed_/reopened_ fields. No entries are counted reviewed merely because their source was integrated."
+    },
+    {
+      "kind": "provider app-password context followup",
+      "catalog_entries": 16,
+      "help_pages": 4,
+      "new_catalog_ids": [
+        [
+          "de",
+          "app.ftl",
+          "ui-provider-intro"
+        ],
+        [
+          "de",
+          "app.ftl",
+          "ui-provider-intro-apps"
+        ],
+        [
+          "de",
+          "linux.ftl",
+          "gtk-provider-sign-in"
+        ],
+        [
+          "de",
+          "linux.ftl",
+          "gtk-provider-sign-in-apps"
+        ],
+        [
+          "es",
+          "app.ftl",
+          "ui-provider-intro"
+        ],
+        [
+          "es",
+          "app.ftl",
+          "ui-provider-intro-apps"
+        ],
+        [
+          "es",
+          "linux.ftl",
+          "gtk-provider-sign-in"
+        ],
+        [
+          "es",
+          "linux.ftl",
+          "gtk-provider-sign-in-apps"
+        ],
+        [
+          "et",
+          "app.ftl",
+          "ui-provider-intro"
+        ],
+        [
+          "et",
+          "app.ftl",
+          "ui-provider-intro-apps"
+        ],
+        [
+          "et",
+          "linux.ftl",
+          "gtk-provider-sign-in"
+        ],
+        [
+          "et",
+          "linux.ftl",
+          "gtk-provider-sign-in-apps"
+        ],
+        [
+          "fr",
+          "app.ftl",
+          "ui-provider-intro"
+        ],
+        [
+          "fr",
+          "app.ftl",
+          "ui-provider-intro-apps"
+        ],
+        [
+          "fr",
+          "linux.ftl",
+          "gtk-provider-sign-in"
+        ],
+        [
+          "fr",
+          "linux.ftl",
+          "gtk-provider-sign-in-apps"
+        ]
+      ],
+      "new_help_topics": [
+        [
+          "de",
+          "gmail-outlook.html"
+        ],
+        [
+          "es",
+          "gmail-outlook.html"
+        ],
+        [
+          "et",
+          "gmail-outlook.html"
+        ],
+        [
+          "fr",
+          "gmail-outlook.html"
+        ]
+      ],
+      "note": "The four round-1 languages had these messages/topics outside the active round scope. Other affected entries/topics were already counted and are reopened without adding scope. Croatian four catalog corrections/eight help topics are complete; Bulgarian/Turkish catalog introductions already make support conditional and remain reviewed. Microsoft app-password steps in all other completed help topics require correction."
     }
   ],
-  "total_catalog_entries": 32440,
-  "total_help_pages": 1292,
+  "total_catalog_entries": 32456,
+  "total_help_pages": 1296,
   "review_workspace": {
     "path": "/Users/andris/Projects/PostalExpress/build/i18n-wave1",
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Fresh Croatian platform checkpoint at 675fb1f2: six refs unchanged, no new languages or unintegrated relevant source changes. Since-start lists 270 known settings entries and 121 help passages, matched to exact pending inventories. Current pending 13330 catalogs and 572 help topics; final late-arrival audit remains required. No tests run.",
+    "latest_source_audit": "Fresh fetch at 5e4fd524 confirms unchanged six refs and no new languages or unintegrated source changes. Since-start has 318 known entries and 169 passages, including provider-context reopenings, all matched to pending inventory; 12 reopened cs/da/nl catalog pairs are intentionally omitted by --since and verified against the marked starting snapshot. Pending 13390 catalogs/581 help topics; baseline unchanged. Final late-arrival audit still required.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -46065,6 +46394,50 @@
         "pending_catalog_entries": 13330,
         "pending_help_topics": 572,
         "validation": "Fresh fetch: all six refs unchanged, no new languages or unintegrated catalog/help/settings/commands/registry changes. Since-start contains 270 settings entries in ten languages and 121 help passages in eleven languages, each matched to exact current pending inventories. Completed/source hashes match. No tests run."
+      },
+      {
+        "kind": "Croatian first help batch and provider context discovery",
+        "review_commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "bd4a2bd12b58b438004cdd106d0b007fcbac2aed",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074"
+        },
+        "source_deltas": {
+          "master": {
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/master": {
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/languages-wave1": {
+            "paths": [],
+            "new_languages": []
+          },
+          "origin/feat/languages-wave1": {
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/more-languages": {
+            "paths": [],
+            "new_languages": []
+          },
+          "feat/settings-pages": {
+            "paths": [],
+            "new_languages": []
+          }
+        },
+        "since_start_pending_catalog_entries": 318,
+        "since_start_pending_help_passages": 169,
+        "additional_unrecorded_work": 0,
+        "pending_catalog_entries": 13390,
+        "pending_help_topics": 581,
+        "validation": "Fresh fetch confirms unchanged six refs and no new languages or unintegrated relevant source changes. The larger known queue is from the provider-context followup, not new upstream commits. All 318 since-start entries and 169 help passages match current exact pending inventories. Twelve cs/da/nl reopened entries are omitted by --since because their full marked starting pairs are unchanged; separately verified and still pending. No tests run."
       }
     ],
     "settings_source_integration": {
@@ -48503,7 +48876,73 @@
       "source": "app/src/mailbox.cpp::Mailbox::FlagMenu (line 2194)",
       "finding": "The first-unused-letter runtime algorithm can choose accented ί in Κίτρινο after Κ is used for Κόκκινο. Explicit catalog access keys can be corrected to unaccented letters, but the correct colour spelling must remain. This is an app-side followup, not a pending translation. Collision checks alone do not establish usability of this generated shortcut. No application code edited and no runtime test run."
     },
-    "search_special_folder_names": "Source-context finding during Croatian platform review: core/crates/pe-store/src/query.rs::Query::place_name returns English Inbox/Sent Items/Drafts/Deleted Items/Junk E-mail/Archive names. Core::search_place passes these to linux/src/mailbox.rs find_place and the gtk-search-* strings. The catalog cannot translate dynamic values. Retain grammatical head nouns in translations; localizing special-folder names needs an app-side followup. No app code or English changed."
+    "search_special_folder_names": "Source-context finding during Croatian platform review: core/crates/pe-store/src/query.rs::Query::place_name returns English Inbox/Sent Items/Drafts/Deleted Items/Junk E-mail/Archive names. Core::search_place passes these to linux/src/mailbox.rs find_place and the gtk-search-* strings. The catalog cannot translate dynamic values. Retain grammatical head nouns in translations; localizing special-folder names needs an app-side followup. No app code or English changed.",
+    "provider_app_password_source_inconsistency": "The source catalogs and gmail-outlook help still offer Microsoft app passwords, contradicting pe-autoconfig::MICROSOFT_WARNING and current official Microsoft mail-authentication requirements. Translation followup is tracked under provider-app-password-context. English and app-side guidance need maintainer correction separately; no code changes in this review.",
+    "since_start_reopened_unchanged": {
+      "ids": [
+        [
+          "cs",
+          "app.ftl",
+          "ui-provider-intro"
+        ],
+        [
+          "cs",
+          "app.ftl",
+          "ui-provider-intro-apps"
+        ],
+        [
+          "cs",
+          "linux.ftl",
+          "gtk-provider-sign-in"
+        ],
+        [
+          "cs",
+          "linux.ftl",
+          "gtk-provider-sign-in-apps"
+        ],
+        [
+          "da",
+          "app.ftl",
+          "ui-provider-intro"
+        ],
+        [
+          "da",
+          "app.ftl",
+          "ui-provider-intro-apps"
+        ],
+        [
+          "da",
+          "linux.ftl",
+          "gtk-provider-sign-in"
+        ],
+        [
+          "da",
+          "linux.ftl",
+          "gtk-provider-sign-in-apps"
+        ],
+        [
+          "nl",
+          "app.ftl",
+          "ui-provider-intro"
+        ],
+        [
+          "nl",
+          "app.ftl",
+          "ui-provider-intro-apps"
+        ],
+        [
+          "nl",
+          "linux.ftl",
+          "gtk-provider-sign-in"
+        ],
+        [
+          "nl",
+          "linux.ftl",
+          "gtk-provider-sign-in-apps"
+        ]
+      ],
+      "note": "--since omits a reopened message whose complete English/translation pair is identical to the marked starting snapshot. These 12 cs/da/nl provider introductions are verified against that snapshot and remain in the full pending inventory. Always combine since-start output with exact current marks."
+    }
   },
   "context_followups": [
     {
@@ -50636,6 +51075,567 @@
         "sv",
         "uk"
       ]
+    },
+    {
+      "id": "provider-app-password-context",
+      "status": "pending",
+      "issue": "English provider introductions and gmail-outlook help offer app passwords as an alternative for Microsoft accounts. Actual pe-autoconfig MICROSOFT_WARNING and official Microsoft guidance say Outlook.com and Microsoft 365 mail require modern/browser authentication; app passwords cannot replace it. Google app passwords require two-step verification and an eligible account. Correct translated claims and instructions without editing English or app code.",
+      "evidence": [
+        "core/crates/pe-autoconfig/src/app_password.rs: MICROSOFT_WARNING, TABLE",
+        "linux/src/accounts.rs: explain_app_password, GtkProviderSignIn, GtkProviderSignInApps",
+        "app/src/accounts.cpp: ExplainAppPassword",
+        "mac/Sources/InboxClassic/Accounts.swift: explainAppPassword",
+        "https://support.google.com/accounts/answer/185833?hl=hr",
+        "https://support.microsoft.com/en-gb/outlook/pop-imap-and-smtp-settings-for-outlook-com",
+        "https://learn.microsoft.com/en-us/exchange/clients-and-mobile-in-exchange-online/deprecation-of-basic-authentication-exchange-online"
+      ],
+      "catalog_ids": {
+        "app.ftl": [
+          "ui-provider-intro",
+          "ui-provider-intro-apps"
+        ],
+        "linux.ftl": [
+          "gtk-provider-sign-in",
+          "gtk-provider-sign-in-apps"
+        ]
+      },
+      "help_topics": [
+        "gmail-outlook.html"
+      ],
+      "completed_languages": [
+        "hr"
+      ],
+      "pending_languages": [
+        "bg",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "es",
+        "et",
+        "fi",
+        "fr",
+        "hu",
+        "it",
+        "lt",
+        "lv",
+        "nl",
+        "pl",
+        "pt",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "uk",
+        "ca",
+        "nb",
+        "pt-BR",
+        "sr-Latn",
+        "tr"
+      ],
+      "catalog_reviewed_unchanged": {
+        "bg": "All four introductions already condition app-password use on provider support in this mail setup context.",
+        "tr": "All four introductions already condition app-password use on account support."
+      },
+      "reopened_catalog_ids": {
+        "cs": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "da": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "de": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "el": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "es": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "et": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "fi": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "fr": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "it": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "nl": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "pt": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "ca": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "nb": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "pt-BR": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        },
+        "sr-Latn": {
+          "app.ftl": [
+            "ui-provider-intro",
+            "ui-provider-intro-apps"
+          ],
+          "linux.ftl": [
+            "gtk-provider-sign-in",
+            "gtk-provider-sign-in-apps"
+          ]
+        }
+      },
+      "reopened_help_languages": [
+        "bg",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "es",
+        "et",
+        "fi",
+        "fr",
+        "it",
+        "nl",
+        "pt",
+        "ca",
+        "nb",
+        "pt-BR",
+        "sr-Latn",
+        "tr"
+      ],
+      "reopened_help_passages_per_language": 3,
+      "checkpoint_files": {
+        "core/crates/pe-html/help/bg/gmail-outlook.html": {
+          "previous_sha256": "e58839a2903b64e2a9825c8267cdd401775ab56d5b15086d1eef1b2ff4333622",
+          "sha256": "11b67e90207743eaa02582553a16ecde0ad91fb48a1998a0eb0e8b81c4d0a70b",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/cs/app.ftl": {
+          "previous_sha256": "6a83975b40c30dea089e0602fec5d95a77fc95bf553660e5a992ee9e7f9c56d6",
+          "sha256": "467711359ddb385bc869e23916e0d2d5f3373e449d4fb77a6fdf7cdf0f1898e5",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/cs/linux.ftl": {
+          "previous_sha256": "dd87f45b23523565fef9280b43eb093079c9d62d5fa587d99bb9609b0329b0a4",
+          "sha256": "10469ff461e3b2410aa3826063a83f1cc444dfb27b3dba7566bab487553cd25a",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/cs/gmail-outlook.html": {
+          "previous_sha256": "96486e6ed09893ce2909cc34e3c326c9290de35795cf50f575a70764b01e9b9b",
+          "sha256": "0a8c36ca0e72656f5b072993c0f6f0bd04d25a07d558e2c841d4c82f8b8609c2",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/da/app.ftl": {
+          "previous_sha256": "d57cfa6413ea5c8b29a45fcc3a2c1b7786ad9dc753ded74d620b6e9fcb5a468d",
+          "sha256": "b3082077f559121924a59672de04bd4e1d3e4db7410395abd65d30ca9064a3cd",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/da/linux.ftl": {
+          "previous_sha256": "0956c92633f886bce235d75d485dade3a82e4c481fa15b98a6460e3c89e5c593",
+          "sha256": "a3911cbab6b6ed1a0929b1ff1e40b72d7a32af8fdf0c52a9df38e9489a135a65",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/da/gmail-outlook.html": {
+          "previous_sha256": "736c711ed4f8a87c58a74059e780eafc28078ec3bd9d3fc246dcd5c7b25741ad",
+          "sha256": "1f402e4b6e7ef390acb0c0a75898863e4d4ea2bda4916ac4bf6960241c87a5a9",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/de/app.ftl": {
+          "previous_sha256": "b37baafd8c88349dc6073f6fbc298d24e46e1704466d62b022ec9a2f9744057b",
+          "sha256": "ba39f27e1fbc197dd09c06d0d62d1134e45509c50b495fffd4258abc7f7a81b8",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/de/linux.ftl": {
+          "previous_sha256": "b59eb68ddd82eb5be3a4373a6ac01be441acaefb6892a7bddce32c3b9a9ec588",
+          "sha256": "c7543e948d05fbd84fd44155cf5eba2d80252b6aeb17013c77541099f72751a1",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/de/gmail-outlook.html": {
+          "previous_sha256": "8dfe8b473b771c05704eab9343ae86d75ce2c53a45e8c3e1a6c96cb6607ddb2c",
+          "sha256": "4eae1919c9944f51054071ea04b06e2c41893948a38ecca48e8afbce41185cc4",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/el/app.ftl": {
+          "previous_sha256": "5496dbd4c7d65b70ba9646bd6c69aebbb6f02b49c266826a309561857f5fff23",
+          "sha256": "b9bb2a4fb0c797011cdb676cfb845bfb99ff7cb1c5ded48020614c39bbfb2b35",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/el/linux.ftl": {
+          "previous_sha256": "a42804aad738089810683ba7f04de56ab1808c1d03697b906ecaae9fca28b8eb",
+          "sha256": "baba418ce3c00b66238eb5801bd4a85714ec8e7d7902f0c98a5393d1e4e2732e",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/el/gmail-outlook.html": {
+          "previous_sha256": "961b724d032dd51c19d1d1af08e2c9161a91abde00304f1cfb874f147205d1cf",
+          "sha256": "760b9e78397ab11eee4b07969245fc03cdfeaf3a1528379b8415a0fc4192db02",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/es/app.ftl": {
+          "previous_sha256": "06fe5419242652f629fc0e6a7bc1324946feece3d5a1c3e1c8b602575c18f312",
+          "sha256": "40c43dd978e1fc7bc1a57d5f1b003f835697b47ac204e83b112599ad4206a95b",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/es/linux.ftl": {
+          "previous_sha256": "66a632e0dd877db7efa71c2a5c3ae80a86ed973880d56a3cddd5ada7bd0940fc",
+          "sha256": "ec12c47d2f687805fa2c60481ee891666fe4d6df265f05bcfe3271abc2c145f9",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/es/gmail-outlook.html": {
+          "previous_sha256": "72050d5d8101fcd6b2fb09143652628969333b622aba84af436de574b02b2e34",
+          "sha256": "931628069a539928f54673d8e5d96fd7cb4da8ff7f2039ea263491bb904e475d",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/et/app.ftl": {
+          "previous_sha256": "ee63cf0b7a2953a1e6951841b027c72f2360de1fc59e774b78f82207028d48e4",
+          "sha256": "0c994e498b7e45914c7bcc9310bdd64379295e24d87ff09de79d017674403b2b",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/et/linux.ftl": {
+          "previous_sha256": "c812aabcbde69f87adc121634c5f88d4a6a4dbce1eb2522cf4fcb3ac2d675759",
+          "sha256": "13f0fcd6847ed23e055e728c278a6b8a63e118d73ea0f91bbbb620fbec6132f6",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/et/gmail-outlook.html": {
+          "previous_sha256": "b4d705f557586b6e269d671fd8fb24a8a4ce07f4a43631b6cc4e4211e3d90fe8",
+          "sha256": "d0ecf8aa80830a2adbb936e8141ba02870e53029b551fb204fa6ad0d9bad03fc",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/fi/app.ftl": {
+          "previous_sha256": "8f696d716a62017f93bc660a21581e172909c911daa9c2632246a89351ff55ca",
+          "sha256": "65e31437ba5529d8a27b34af2b5fb460f3420bac83ffd12c8c81a8c051bdf151",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/fi/linux.ftl": {
+          "previous_sha256": "c2f047b3252af4bd293822c13248bf6fa00a3080d7b02455eab47e835edc6088",
+          "sha256": "9498c42914efb4f4c34096aacbfe1e6a1d8e419e3727f8ae6bd65b55d870de68",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/fi/gmail-outlook.html": {
+          "previous_sha256": "c0d372b4bfcfad269936632603b0fe364128c69c69e891ac625b0751a6919a24",
+          "sha256": "f1e4a89a5dc9015aa3d324368ad859af5cc9fb49f3949f4dd0c65e8afcf2adbe",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/fr/app.ftl": {
+          "previous_sha256": "a8f0640733939d17bb2039e4d4b308502a70920ee1b86679f3c7338d9596b897",
+          "sha256": "359db407a883a1b01dc1b79eb90521642f68dfae59005bca917e08ca527a815e",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/fr/linux.ftl": {
+          "previous_sha256": "2d23c781bcabd7cb07d26b1f1cbab76195f60d939ddf1f4e1eeeef22a009086a",
+          "sha256": "daf38b17046db240944e965340ba75637d83a7e23f59efb16f0c76436b848b66",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/fr/gmail-outlook.html": {
+          "previous_sha256": "f3ca0b30ebcceadf7ba197e9c49d23c08841d0953f9372199769c3b4cdd1dd5f",
+          "sha256": "0c50eea3407352c4585ad2bc855d83ef1027fd804ed2dd597569a6ace880abf6",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/it/app.ftl": {
+          "previous_sha256": "fdd3c31c03f21bc0d3db55131e60fc863fa4d4c7ea18384b6752b57b95611911",
+          "sha256": "b33e0f248999d84093a02e9689c75207f13cea7842d8b286c4bc8f21f511117c",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/it/linux.ftl": {
+          "previous_sha256": "4afee33f6dd60e60276edec038c536bbbc1d6afbe6472e04ecbffcdd506a4699",
+          "sha256": "761d7dc831c4793c722c0d019220be54daddcdf8d1c27445301a1145dc9ec99d",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/it/gmail-outlook.html": {
+          "previous_sha256": "84fff9b5ede95043cd38f188e22ae882671d25483bccccb6716ecfdf523c5dbe",
+          "sha256": "9f482e566ea6d8661abe6a9fed514abfdf46c8c8fcb411598bb23f8fd21cda84",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/nl/app.ftl": {
+          "previous_sha256": "e9bb609f5e358d64993fc1c6a1262d73ac0cdfbaea4d751ad94eeaf21c406811",
+          "sha256": "cad210962724f007007d0f002f113f5583ff265051d83676d4d28eb373049a5b",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/nl/linux.ftl": {
+          "previous_sha256": "93d0c317f99b20458b9f5031a5b27ac0019c52fd61e5baade17f9e0f9da240ae",
+          "sha256": "f4fa37bc2f49b92f9b2cd7b25e8155f24a1d6247fd58b981850ddd9d7772e9dd",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/nl/gmail-outlook.html": {
+          "previous_sha256": "ba9aab30fc7f456be961e43f19fc821b07df95581763bfb53eca4b7c3addee20",
+          "sha256": "796d668fbc642327c8f9a2c72273f0190861b3d9373232689fced2f387602a9d",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/pt/app.ftl": {
+          "previous_sha256": "beac90a2cb17ad16c528caba122b51961793a78a934b724dc8039c3400bc369d",
+          "sha256": "7e6a8c2abeb1df3c406721846838f6459bd4066cd2fcde73b0ac51707aca5b5f",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/pt/linux.ftl": {
+          "previous_sha256": "614a682de697a959bf09a067ad41992fdcbb1fdf32682f855c18f5ca39a74a44",
+          "sha256": "3fbddd93604123d6ae89b5abd184a66d045650483ce477aaa4829074e7dceb73",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/pt/gmail-outlook.html": {
+          "previous_sha256": "bdfe0f5552fc7d49ddf6a36947309362478d15a90e0356368b4608862464cb32",
+          "sha256": "d10fb9f27bcc696727daf471b51457bcb4619a636a5264908175567a84ee1699",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/ca/app.ftl": {
+          "previous_sha256": "8a0f6c065229d0e97f38782c6e224947c5f9e095d6a238d079e2b454629c017c",
+          "sha256": "016396dd5386ab8174da3d5b4c43d08f095a4f74bb7fb9a875958486b56e8e74",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/ca/linux.ftl": {
+          "previous_sha256": "41dfd8988afe668123db34b88869ae39deeb85e4eb411454c67350dbebedaee6",
+          "sha256": "c43d6b38d06c96e48a50433f201e9143bddabeebdf64b69c16223f5d518eac86",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/ca/gmail-outlook.html": {
+          "previous_sha256": "9c966dbb42daaf4abeb64699f3b2ed7a8e40e21417f5f5d1af1959b74198b247",
+          "sha256": "d88579ba5fa7358d1ae7ad1657a9947668d03dc88f391b15fb37c3a5f4633411",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/nb/app.ftl": {
+          "previous_sha256": "0a95e2021114d54d389f01fe52a38dcd0c1f52ec04ac438801513b44eb2244b2",
+          "sha256": "98749eee066338e2881fc7e3be5f634d7009eb5ec78ef786e4812de12f7137e2",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/nb/linux.ftl": {
+          "previous_sha256": "30878e0f73e7a168305bce7edc12f32132c6a15c1e67fabdeb1d7ef337d24224",
+          "sha256": "c3bc7888ead7c4c4736c7b99d323dae6c2afe39e68f257628b53d7cbcac6dd6e",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/nb/gmail-outlook.html": {
+          "previous_sha256": "938de1320ab383945e460394cdde1aafeac886078b1083ab3ab6f8e5abe91352",
+          "sha256": "00d39856719175bc0bf98af8c7891c70cd2e199e80c7349f688f1f6ddec36aec",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/pt-BR/app.ftl": {
+          "previous_sha256": "0fb21934854579580fa125a1e7c643bdbce15f1a24d9d2bb0951450d71b80311",
+          "sha256": "58594a26cdadd7685edef7389a7deacac6ef5c7ee3cd8d215647bb57373d9801",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/pt-BR/linux.ftl": {
+          "previous_sha256": "94c879023f68b1b6fdb54e93baca91c1b1c5a9918e0c43b00b6d5419a900264a",
+          "sha256": "10f3350d7dab2b68f2310636624ae52cb8dac5c5eae2305f31185411d7b44e84",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/pt-BR/gmail-outlook.html": {
+          "previous_sha256": "04f254741f749d5e399e3e828f79ed79f6f81e9b80f7861037ed8a8656dc4176",
+          "sha256": "8232c1a5940fd61726141d7bcd22679b5fb11ca5f4afdd530e23733bf31e6f0a",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/sr-Latn/app.ftl": {
+          "previous_sha256": "6feb684518f38405d0d18163b583130405b1f3df092ace5ca6cd0524fedaa8a2",
+          "sha256": "658ef810abd72c4bc1db82baa2292555e0bbf4f7da9aa637bf2b882deb3942df",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/locales/sr-Latn/linux.ftl": {
+          "previous_sha256": "43c8b2fdbea19bfee0d90984df0a02ec99737f04a78d23332bcce92711e4ac33",
+          "sha256": "d16dfb91f878be0049056eeeee8df4202bacef46fcd1de48033f685428c24df7",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/sr-Latn/gmail-outlook.html": {
+          "previous_sha256": "8c42728d92253660d0736aeba26f0cf0cb0e363f722cced03a0228205fe816fb",
+          "sha256": "36436816f25cb5728d4e2e2209764cb2217accca2a23d82c020876c2ce98c846",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        },
+        "core/crates/pe-html/help/tr/gmail-outlook.html": {
+          "previous_sha256": "06e13acdac1c48afc394bc457b0400d6df88e8ff883e2e3637acac02c569be43",
+          "sha256": "332811dab1d2dc46dca477164a14559e809142047c63a6ea52e4c08b6414ecda",
+          "change": "Review marks only; content unchanged. Provider app-password context requires targeted re-review."
+        }
+      },
+      "note": "Do not repeat full language reviews. Review only these IDs and the three marked help passages, checking nearby headings/Google eligibility text for coherence. Existing pending new-language drafts already contain these targets. Conditional Bulgarian/Turkish catalogs remain unchanged; their Microsoft help steps still need correction. All prior text/markup/keyboard content is preserved by the reopening checkpoint. The reconciliation helper validates retained unmarked help against the exact pre-reopen Git checkpoint with marks removed; any other change fails until recorded in a completed batch.",
+      "retained_help_reviews": {
+        "core/crates/pe-html/help/bg/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "e58839a2903b64e2a9825c8267cdd401775ab56d5b15086d1eef1b2ff4333622",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/cs/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "96486e6ed09893ce2909cc34e3c326c9290de35795cf50f575a70764b01e9b9b",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/da/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "736c711ed4f8a87c58a74059e780eafc28078ec3bd9d3fc246dcd5c7b25741ad",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/de/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "8dfe8b473b771c05704eab9343ae86d75ce2c53a45e8c3e1a6c96cb6607ddb2c",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/el/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "961b724d032dd51c19d1d1af08e2c9161a91abde00304f1cfb874f147205d1cf",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/es/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "72050d5d8101fcd6b2fb09143652628969333b622aba84af436de574b02b2e34",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/et/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "b4d705f557586b6e269d671fd8fb24a8a4ce07f4a43631b6cc4e4211e3d90fe8",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/fi/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "c0d372b4bfcfad269936632603b0fe364128c69c69e891ac625b0751a6919a24",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/fr/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "f3ca0b30ebcceadf7ba197e9c49d23c08841d0953f9372199769c3b4cdd1dd5f",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/it/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "84fff9b5ede95043cd38f188e22ae882671d25483bccccb6716ecfdf523c5dbe",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/nl/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "ba9aab30fc7f456be961e43f19fc821b07df95581763bfb53eca4b7c3addee20",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/pt/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "bdfe0f5552fc7d49ddf6a36947309362478d15a90e0356368b4608862464cb32",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/ca/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "9c966dbb42daaf4abeb64699f3b2ed7a8e40e21417f5f5d1af1959b74198b247",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/nb/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "938de1320ab383945e460394cdde1aafeac886078b1083ab3ab6f8e5abe91352",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/pt-BR/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "04f254741f749d5e399e3e828f79ed79f6f81e9b80f7861037ed8a8656dc4176",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/sr-Latn/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "8c42728d92253660d0736aeba26f0cf0cb0e363f722cced03a0228205fe816fb",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        },
+        "core/crates/pe-html/help/tr/gmail-outlook.html": {
+          "commit": "5e4fd524554aa6347345297d009797c87ac4ee49",
+          "sha256": "06e13acdac1c48afc394bc457b0400d6df88e8ff883e2e3637acac02c569be43",
+          "scope": "Previously reviewed passages outside the three newly marked paragraphs; topic remains pending."
+        }
+      },
+      "validation": "All 60 reopened catalog entries and 17 three-passage help reopenings preserve the original text byte-for-byte after removing review marks. Pending order matches source file order. Reopening moves old completed IDs/topics to historical reopened fields and updates only their latest file checkpoint hashes, with both hashes retained here. Previously reviewed unmarked help passages are separately reconciled against commit 5e4fd524. Four Croatian catalog followups and its Gmail/Outlook topic are corrected. Bulgarian/Turkish catalog conditions were read and retained; their help remains pending. No tests run."
     }
   ]
 }

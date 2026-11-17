@@ -120,7 +120,9 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Seuraava >
+# review: changed
 gtk-provider-sign-in = { $provider }: kirjaudu tilille { $address } palveluntarjoajan sivustolla. Inbox Classic ei saa salasanaasi. Voit myös käyttää sovellussalasanaa, jonka olet luonut tilisi suojausasetuksissa.
+# review: changed
 gtk-provider-sign-in-apps = { $provider }: kirjaudu tilille { $address } palveluntarjoajan sivustolla jollakin kirjautumissovelluksellasi (Lisää kirjautumisvaihtoehtoja). Voit myös käyttää sovellussalasanaa, jonka olet luonut tilisi suojausasetuksissa.
 gtk-accounts-add = Lisää...
 gtk-accounts-properties = Ominaisuudet...

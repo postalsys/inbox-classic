@@ -319,7 +319,9 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com og Microsoft 365: log på 
 ui-start-intro-apps = Log på via browseren med en af dine login-apps under Flere loginmuligheder, eller angiv navn og e-mailadresse nedenfor for at tilføje en mailkonto.
 ui-use-app-password = Brug appadgangskode
 ui-the-provider = udbyderen
+# review: changed
 ui-provider-intro = Log på { $email } på webstedet for { $provider }. Din adgangskode deles ikke med Inbox Classic. Du kan også bruge en appadgangskode, som du opretter i kontoens sikkerhedsindstillinger.
+# review: changed
 ui-provider-intro-apps = Log på { $email } på webstedet for { $provider } med en af dine login-apps (Flere loginmuligheder). Du kan også bruge en appadgangskode, som du opretter i kontoens sikkerhedsindstillinger.
 ui-finish = Udfør
 ui-logon = Log på

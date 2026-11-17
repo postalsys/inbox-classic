@@ -320,7 +320,9 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com e Microsoft 365: inicie se
 ui-start-intro-apps = Inicie sessão através do browser com uma das suas aplicações de início de sessão (Mais opções de início de sessão), ou adicione qualquer conta de e-mail com o seu nome e endereço abaixo.
 ui-use-app-password = Usar palavra-passe de aplicação
 ui-the-provider = O fornecedor de correio
+# review: changed
 ui-provider-intro = { $provider }: inicie sessão em { $email } no site do fornecedor. A sua palavra-passe não é partilhada com o Inbox Classic. Também pode usar uma palavra-passe de aplicação criada nas definições de segurança da sua conta.
+# review: changed
 ui-provider-intro-apps = { $provider }: inicie sessão em { $email } no site do fornecedor com uma das suas aplicações de início de sessão (Mais opções de início de sessão). Também pode usar uma palavra-passe de aplicação criada nas definições de segurança da sua conta.
 ui-finish = Concluir
 ui-logon = Início de sessão

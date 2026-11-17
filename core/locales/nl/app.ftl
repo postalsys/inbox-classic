@@ -319,7 +319,9 @@ ui-start-intro = Voor Gmail, Google Workspace, Outlook.com en Microsoft 365 meld
 ui-start-intro-apps = Meld je aan via de browser met een van je aanmeldapps (Meer aanmeldopties), of voeg hieronder een e-mailaccount toe met je naam en adres.
 ui-use-app-password = App-wachtwoord gebruiken
 ui-the-provider = de provider
+# review: changed
 ui-provider-intro = Meld je aan bij { $email } op de website van { $provider }. Je wachtwoord wordt niet gedeeld met Inbox Classic. Je kunt ook een app-wachtwoord gebruiken dat je in de beveiligingsinstellingen van je account hebt gemaakt.
+# review: changed
 ui-provider-intro-apps = Meld je aan bij { $email } op de website van { $provider } met een van je aanmeldapps (Meer aanmeldopties). Je kunt ook een app-wachtwoord gebruiken dat je in de beveiligingsinstellingen van je account hebt gemaakt.
 ui-finish = Voltooien
 ui-logon = Aanmelden

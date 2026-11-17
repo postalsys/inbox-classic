@@ -116,8 +116,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Dalje >
-gtk-provider-sign-in = Prijavite se na račun { $address } putem preglednika ({ $provider }). Inbox Classic pritom ne dobiva vašu lozinku. Možete upotrijebiti i lozinku za aplikaciju koju izradite u sigurnosnim postavkama računa.
-gtk-provider-sign-in-apps = Prijavite se na račun { $address } putem preglednika ({ $provider }). Odaberite „Još mogućnosti prijave“, a zatim jednu od svojih aplikacija za prijavu. Možete upotrijebiti i lozinku za aplikaciju koju izradite u sigurnosnim postavkama računa.
+gtk-provider-sign-in = Prijavite se na račun { $address } putem preglednika ({ $provider }). Inbox Classic pritom ne dobiva vašu lozinku. Ako vaš račun podržava lozinke za aplikacije, izradite takvu lozinku u sigurnosnim postavkama računa. Za Outlook.com i Microsoft 365 koristite prijavu putem preglednika.
+gtk-provider-sign-in-apps = Prijavite se na račun { $address } putem preglednika ({ $provider }). Odaberite „Još mogućnosti prijave“, a zatim jednu od svojih aplikacija za prijavu. Ako vaš račun podržava lozinke za aplikacije, izradite takvu lozinku u sigurnosnim postavkama računa. Za Outlook.com i Microsoft 365 koristite prijavu putem preglednika.
 gtk-accounts-add = Dodaj...
 gtk-accounts-properties = Svojstva...
 gtk-accounts-signature = Potpis...

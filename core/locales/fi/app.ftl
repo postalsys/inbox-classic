@@ -320,7 +320,9 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com ja Microsoft 365: kirjaudu
 ui-start-intro-apps = Kirjaudu selaimen kautta jollakin kirjautumissovelluksellasi (Lisää kirjautumisvaihtoehtoja) tai lisää mikä tahansa sähköpostitili kirjoittamalla nimesi ja sähköpostiosoitteesi alle.
 ui-use-app-password = Käytä sovellussalasanaa
 ui-the-provider = Palveluntarjoaja
+# review: changed
 ui-provider-intro = { $provider }: kirjaudu tilille { $email } palveluntarjoajan sivustolla. Inbox Classic ei saa salasanaasi. Voit myös käyttää sovellussalasanaa, jonka olet luonut tilisi suojausasetuksissa.
+# review: changed
 ui-provider-intro-apps = { $provider }: kirjaudu tilille { $email } palveluntarjoajan sivustolla jollakin kirjautumissovelluksellasi (Lisää kirjautumisvaihtoehtoja). Voit myös käyttää sovellussalasanaa, jonka olet luonut tilisi suojausasetuksissa.
 ui-finish = Valmis
 ui-logon = Kirjautuminen

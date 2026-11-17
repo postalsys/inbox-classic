@@ -319,7 +319,9 @@ ui-start-intro = Per Gmail, Google Workspace, Outlook.com e Microsoft 365, acced
 ui-start-intro-apps = Accedi tramite il browser con una delle tue app di accesso (Altre opzioni di accesso), oppure aggiungi qui sotto un account e-mail qualsiasi con il tuo nome e indirizzo.
 ui-use-app-password = Usa password per le app
 ui-the-provider = Il provider di posta
+# review: changed
 ui-provider-intro = { $provider }: accedi a { $email } tramite il sito ufficiale. La password non viene condivisa con Inbox Classic. Puoi anche usare una password per le app, creata nelle impostazioni di sicurezza del tuo account.
+# review: changed
 ui-provider-intro-apps = { $provider }: accedi a { $email } tramite il sito ufficiale usando una delle tue app di accesso, disponibili in Altre opzioni di accesso. Puoi anche usare una password per le app, creata nelle impostazioni di sicurezza del tuo account.
 ui-finish = Fine
 ui-logon = Accesso

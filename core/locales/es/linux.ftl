@@ -119,7 +119,9 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Siguiente >
+# review: changed
 gtk-provider-sign-in = Inicie sesión en la cuenta { $address } desde el sitio web de { $provider }. Su contraseña no se compartirá con Inbox Classic. También puede usar una contraseña de aplicación creada en la configuración de seguridad de su cuenta.
+# review: changed
 gtk-provider-sign-in-apps = Inicie sesión en la cuenta { $address } desde el sitio web de { $provider } con una de sus aplicaciones de inicio de sesión («Más opciones de inicio de sesión»). También puede usar una contraseña de aplicación creada en la configuración de seguridad de su cuenta.
 gtk-accounts-add = Agregar...
 gtk-accounts-properties = Propiedades...

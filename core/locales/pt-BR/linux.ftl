@@ -120,7 +120,9 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Avançar >
+# review: changed
 gtk-provider-sign-in = { $provider }: faça login em { $address } no site do provedor. Sua senha não é compartilhada com o Inbox Classic. Você também pode usar uma senha de app criada nas configurações de segurança da conta.
+# review: changed
 gtk-provider-sign-in-apps = { $provider }: faça login em { $address } no site do provedor usando um dos seus aplicativos de login (Mais opções de login). Você também pode usar uma senha de app criada nas configurações de segurança da conta.
 gtk-accounts-add = Adicionar...
 gtk-accounts-properties = Propriedades...

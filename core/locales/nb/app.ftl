@@ -320,7 +320,9 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com og Microsoft 365: Påloggi
 ui-start-intro-apps = Bruk en av påloggingsappene dine til å logge på gjennom nettleseren (Flere påloggingsvalg), eller skriv inn navnet og e-postadressen din nedenfor for å legge til en annen konto.
 ui-use-app-password = Bruk app-passord
 ui-the-provider = E-postleverandøren din
+# review: changed
 ui-provider-intro = { $provider }: Logg på kontoen { $email } på leverandørens nettsted. Passordet ditt deles ikke med Inbox Classic. Du kan også bruke et app-passord som er opprettet i sikkerhetsinnstillingene for kontoen.
+# review: changed
 ui-provider-intro-apps = { $provider }: Bruk en av påloggingsappene dine (Flere påloggingsvalg) til å logge på kontoen { $email } på leverandørens nettsted. Du kan også bruke et app-passord som er opprettet i sikkerhetsinnstillingene for kontoen.
 ui-finish = Fullfør
 ui-logon = Pålogging

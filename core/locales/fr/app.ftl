@@ -314,7 +314,9 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com et Microsoft 365 : connect
 ui-start-intro-apps = Connectez-vous par le navigateur avec l'une de vos applications de connexion (Autres options de connexion), ou ajoutez ci-dessous n'importe quel compte de messagerie avec votre nom et votre adresse.
 ui-use-app-password = Utiliser un mot de passe d'application
 ui-the-provider = votre fournisseur
+# review: changed
 ui-provider-intro = Connectez-vous au compte { $email } sur le site de { $provider }. Votre mot de passe ne sera pas transmis à Inbox Classic. Vous pouvez aussi utiliser un mot de passe d'application créé dans les paramètres de sécurité de votre compte.
+# review: changed
 ui-provider-intro-apps = Connectez-vous au compte { $email } sur le site de { $provider } avec l'une de vos applications de connexion (« Autres options de connexion »). Vous pouvez aussi utiliser un mot de passe d'application créé dans les paramètres de sécurité de votre compte.
 ui-finish = Terminer
 ui-logon = Connexion
