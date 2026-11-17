@@ -753,3 +753,28 @@ setup-file-name = Inbox Classic settings and accounts
 setup-skipped-unreachable = { $name } was skipped: its sign-in service could not be reached. Add it again in Sign-in Apps.
 attachment-runs-programs = “{ $name }” can run programs, so Inbox Classic does not open it. Save it, then open it yourself if you trust where it comes from.
 attachment-decrypted-note = This attachment comes from an encrypted message. To open it, Inbox Classic stores it decrypted on this computer, in a folder of yours that Inbox Classic empties after a day.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+undone-move = { $count ->
+    [one] The server did not move { $messages } to { $folder }, so it is back in { $from }: { $reason }
+   *[other] The server did not move { $messages } to { $folder }, so they are back in { $from }: { $reason }
+}
+undone-delete = { $count ->
+    [one] The server did not delete { $messages }, so it is back in { $from }: { $reason }
+   *[other] The server did not delete { $messages }, so they are back in { $from }: { $reason }
+}
+undone-archive = { $count ->
+    [one] The server did not archive { $messages }, so it is back in { $from }: { $reason }
+   *[other] The server did not archive { $messages }, so they are back in { $from }: { $reason }
+}
+undone-read = { $count ->
+    [one] The server did not mark { $messages } as read, so it is unread again: { $reason }
+   *[other] The server did not mark { $messages } as read, so they are unread again: { $reason }
+}
+undone-unread = { $count ->
+    [one] The server did not mark { $messages } as unread, so it is read again: { $reason }
+   *[other] The server did not mark { $messages } as unread, so they are read again: { $reason }
+}
+undone-flags = { $count ->
+    [one] The server did not change the flags of { $messages }, so it is as it was: { $reason }
+   *[other] The server did not change the flags of { $messages }, so they are as they were: { $reason }
+}

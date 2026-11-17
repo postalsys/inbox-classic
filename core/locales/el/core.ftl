@@ -1212,3 +1212,34 @@ setup-skipped-unreachable = Η εφαρμογή σύνδεσης { $name } πα�
 attachment-runs-programs = Το αρχείο «{ $name }» μπορεί να εκτελέσει προγράμματα, γι’ αυτό το Inbox Classic δεν το ανοίγει. Αποθηκεύστε το και ανοίξτε το μόνοι σας, αν εμπιστεύεστε την προέλευσή του.
 # review: new
 attachment-decrypted-note = Αυτό το συνημμένο προέρχεται από κρυπτογραφημένο μήνυμα. Για να το ανοίξει, το Inbox Classic το αποθηκεύει αποκρυπτογραφημένο σε αυτόν τον υπολογιστή, σε έναν φάκελό σας που το Inbox Classic αδειάζει μετά από μία ημέρα.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Ο διακομιστής δεν μετακίνησε { $messages } στον φάκελο «{ $folder }», οπότε βρίσκεται ξανά στον φάκελο «{ $from }»: { $reason }
+   *[other] Ο διακομιστής δεν μετακίνησε { $messages } στον φάκελο «{ $folder }», οπότε βρίσκονται ξανά στον φάκελο «{ $from }»: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Ο διακομιστής δεν διέγραψε { $messages }, οπότε βρίσκεται ξανά στον φάκελο «{ $from }»: { $reason }
+   *[other] Ο διακομιστής δεν διέγραψε { $messages }, οπότε βρίσκονται ξανά στον φάκελο «{ $from }»: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Ο διακομιστής δεν αρχειοθέτησε { $messages }, οπότε βρίσκεται ξανά στον φάκελο «{ $from }»: { $reason }
+   *[other] Ο διακομιστής δεν αρχειοθέτησε { $messages }, οπότε βρίσκονται ξανά στον φάκελο «{ $from }»: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Ο διακομιστής δεν επισήμανε { $messages } ως αναγνωσμένο, οπότε είναι ξανά αδιάβαστο: { $reason }
+   *[other] Ο διακομιστής δεν επισήμανε { $messages } ως αναγνωσμένα, οπότε είναι ξανά αδιάβαστα: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Ο διακομιστής δεν επισήμανε { $messages } ως αδιάβαστο, οπότε είναι ξανά αναγνωσμένο: { $reason }
+   *[other] Ο διακομιστής δεν επισήμανε { $messages } ως αδιάβαστα, οπότε είναι ξανά αναγνωσμένα: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Ο διακομιστής δεν άλλαξε τις σημαίες για { $messages }, οπότε παραμένει όπως ήταν: { $reason }
+   *[other] Ο διακομιστής δεν άλλαξε τις σημαίες για { $messages }, οπότε παραμένουν όπως ήταν: { $reason }
+}

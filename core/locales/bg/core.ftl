@@ -1214,3 +1214,34 @@ setup-skipped-unreachable = { $name } беше пропуснат: услуга�
 attachment-runs-programs = Файлът „{ $name }“ може да стартира програми, затова Inbox Classic не го отваря. Запазете го и след това го отворете сами, ако имате доверие на източника му.
 # review: new
 attachment-decrypted-note = Този прикачен файл е от шифровано съобщение. За да го отвори, Inbox Classic го съхранява дешифриран на този компютър, в ваша папка, която Inbox Classic изпразва след един ден.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Сървърът не премести { $messages } в папка { $folder }, затова съобщението отново е в папка { $from }: { $reason }
+   *[other] Сървърът не премести { $messages } в папка { $folder }, затова съобщенията отново са в папка { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Сървърът не изтри { $messages }, затова съобщението отново е в папка { $from }: { $reason }
+   *[other] Сървърът не изтри { $messages }, затова съобщенията отново са в папка { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Сървърът не архивира { $messages }, затова съобщението отново е в папка { $from }: { $reason }
+   *[other] Сървърът не архивира { $messages }, затова съобщенията отново са в папка { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Сървърът не маркира { $messages } като прочетено, затова съобщението отново е непрочетено: { $reason }
+   *[other] Сървърът не маркира { $messages } като прочетени, затова съобщенията отново са непрочетени: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Сървърът не маркира { $messages } като непрочетено, затова съобщението отново е прочетено: { $reason }
+   *[other] Сървърът не маркира { $messages } като непрочетени, затова съобщенията отново са прочетени: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Сървърът не промени флаговете на { $messages }, затова съобщението е както преди: { $reason }
+   *[other] Сървърът не промени флаговете на { $messages }, затова съобщенията са както преди: { $reason }
+}

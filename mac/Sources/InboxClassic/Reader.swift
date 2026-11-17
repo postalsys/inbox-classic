@@ -215,7 +215,7 @@ final class Reader: NSObject {
         header.attributedStringValue = headerText(from: row.from, date: row.date, to: row.recipients, cc: "", subject: row.subject)
         retry.isHidden = true
         downloadingTimer?.invalidate()
-        downloadingTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: false) { [weak self] _ in
+        downloadingTimer = Timer.scheduledTimer(withTimeInterval: Mailbox.loadingWait, repeats: false) { [weak self] _ in
             MainActor.assumeIsolated { self?.showDownloading() }
         }
     }
@@ -620,13 +620,27 @@ final class Reader: NSObject {
         bouncedHandler(info.bounced_folder, info.bounced_uid)
     }
 
-    /// a reply, a reply to all or a forward of the message shown; of a message file from `account`
-    func draft(_ kind: PeDraftKind, account from: Int64 = 0) -> Draft? {
-        guard showsMessage else { return nil }
+    /// a reply, a reply to all or a forward of the message shown, made off the window thread (the message parsed and
+    /// decrypted there), then `done` with it (nil when there is no message); of a message file from `account`, at once
+    func startDraft(_ kind: PeDraftKind, account from: Int64 = 0, _ done: @escaping (Draft?) -> Void) {
+        guard showsMessage else { return done(nil) }
         if let file {
-            return file.withCString { Draft(pe_file_draft(core.handle, $0, from, kind)) }
+            return done(file.withCString { Draft(pe_file_draft(core.handle, $0, from, kind)) })
         }
-        return Draft(pe_message_draft(core.handle, folder, uid, kind))
+        let request = pe_message_draft_start(core.handle, folder, uid, kind)
+        let idle = Pending.busy(status)
+        guard Pending.read(request, by: self, { [core] in
+            idle()
+            done(Draft(pe_draft_result(core.handle, request)))
+        }) else {
+            idle()
+            return done(nil)
+        }
+    }
+
+    /// the reads the reader waits for dropped: its window closed
+    func cancelReads() {
+        Pending.cancel(by: self, core: core)
     }
 
     /// the message as it is shown, with the pictures it shows
@@ -682,20 +696,36 @@ final class Reader: NSObject {
         saveAttachment(at: sender.tag)
     }
 
+    /// Save As of a file: read from the message file shown at once, from the store off the window thread (a large
+    /// message parsed and decrypted there), then the panel to save it with
     private func saveAttachment(at index: Int) {
-        var length = 0
-        var name: UnsafeMutablePointer<CChar>?
-        // the core reads it from the store, or from the message file shown
-        let bytes = file.map { path in
-            path.withCString { pe_file_attachment_data(core.handle, $0, index, &length, &name) }
-        } ?? pe_attachment_data(core.handle, folder, uid, index, &length, &name)
-        let data = takenBytes(bytes, length)
-        let safeName = taken(name) ?? "attachment"
+        if let file {
+            var length = 0
+            var name: UnsafeMutablePointer<CChar>?
+            let bytes = file.withCString { pe_file_attachment_data(core.handle, $0, index, &length, &name) }
+            return saveAttachment(takenBytes(bytes, length), named: taken(name))
+        }
+        let request = pe_attachment_data_start(core.handle, folder, uid, index)
+        let idle = Pending.busy(status)
+        guard Pending.read(request, by: self, { [weak self] in
+            idle()
+            guard let self else { return }
+            var length = 0
+            var name: UnsafeMutablePointer<CChar>?
+            let bytes = pe_attachment_data_result(core.handle, request, &length, &name)
+            saveAttachment(takenBytes(bytes, length), named: taken(name))
+        }) else {
+            idle()
+            return notHere()
+        }
+    }
+
+    private func saveAttachment(_ data: Data?, named name: String?) {
         guard let data else {
             notHere()
             return
         }
-        if let url = saveFilePanel(name: safeName), !writeDownloaded(data, to: url) {
+        if let url = saveFilePanel(name: name ?? "attachment"), !writeDownloaded(data, to: url) {
             inform(Text.uiAttachmentNotSaved.text, style: .error)
         }
     }
@@ -711,7 +741,7 @@ final class Reader: NSObject {
 
     /// attachment `index` opened with the program the system has for it: refused from its row, in the core's words,
     /// for a file that can run programs; else the core writes it into a private folder of the user's on a background
-    /// thread (reading and decrypting a large message takes a while; its tile shows it is busy after 400 ms), with an
+    /// thread (reading and decrypting a large message takes a while; its tile shows it is busy after a moment), with an
     /// encrypted message's note to show first (once). The file is marked as from the internet, as a download is.
     func openAttachment(_ index: Int) {
         guard showsMessage, let attachment = messageView?.attachment(index) else { return }
@@ -721,15 +751,29 @@ final class Reader: NSObject {
         }
         guard opening == nil else { return }
         opening = index
-        let busy = after(0.4) { [weak self] in self?.strip.busy(index) }
+        let busy = after(Mailbox.loadingWait) { [weak self] in self?.strip.busy(index) }
         let handle = core.handle
         let (file, folder, uid) = (file, folder, uid)
+        guard let file else {
+            // a message of the store: written off the window thread by the core
+            let request = pe_attachment_open_start(handle, folder, uid, index)
+            let waits = Pending.read(request, by: self) { [weak self] in
+                busy.invalidate()
+                var note: UnsafeMutablePointer<CChar>?
+                var error: UnsafeMutablePointer<CChar>?
+                let written = taken(pe_attachment_open_result(handle, request, &note, &error))
+                self?.opened(path: written, note: taken(note), refused: taken(error))
+            }
+            if !waits {
+                busy.invalidate()
+                opened(path: nil, note: nil, refused: nil)
+            }
+            return
+        }
         inBackground({
             var note: UnsafeMutablePointer<CChar>?
             var error: UnsafeMutablePointer<CChar>?
-            let written = file.map { path in
-                path.withCString { pe_file_attachment_open(handle, $0, index, &note, &error) }
-            } ?? pe_attachment_open(handle, folder, uid, index, &note, &error)
+            let written = file.withCString { pe_file_attachment_open(handle, $0, index, &note, &error) }
             return (taken(written), taken(note), taken(error))
         }, then: { [weak self] (path, note, refused) in
             busy.invalidate()
@@ -901,8 +945,15 @@ final class InfoBar: NSView {
         set { textLabel.stringValue = newValue }
     }
 
-    init(icon: String, link: String?, button: String? = nil) {
-        if let button {
+    /// `close`: a cross at the trailing edge, named so for a screen reader, that closes the bar (`clicked`)
+    init(icon: String, link: String?, button: String? = nil, close: String? = nil) {
+        if let close {
+            let cross = NSButton(image: Icons.list("dismiss") ?? NSImage(), target: nil, action: nil)
+            cross.isBordered = false
+            cross.toolTip = close
+            cross.setAccessibilityLabel(close)
+            action = cross
+        } else if let button {
             action = NSButton(title: button, target: nil, action: nil)
             action?.bezelStyle = .push
         } else if let link {
@@ -943,7 +994,7 @@ final class InfoBar: NSView {
             action.setContentCompressionResistancePriority(.required, for: .horizontal)
             // a long text gives way in its middle, never under the link
             textLabel.lineBreakMode = .byTruncatingMiddle
-            views += button != nil ? [spacer, action] : [action, spacer]
+            views += button != nil || close != nil ? [spacer, action] : [action, spacer]
         }
         let stack = NSStackView(views: views)
         row = stack
@@ -1008,6 +1059,24 @@ final class InfoBar: NSView {
 
     @objc private func fire() {
         clicked()
+    }
+
+    /// the text on as many lines as it needs (up to four), the bar as tall as they are: a sentence that must be read
+    /// whole (the core's why)
+    func wrapText() {
+        textLabel.lineBreakMode = .byWordWrapping
+        textLabel.usesSingleLineMode = false
+        textLabel.cell?.wraps = true
+        textLabel.cell?.truncatesLastVisibleLine = true
+        textLabel.maximumNumberOfLines = 4
+        textLabel.setContentCompressionResistancePriority(.required, for: .vertical)
+        row?.alignment = .centerY
+        row?.edgeInsets = NSEdgeInsets(top: 6, left: 8, bottom: 6, right: 8)
+    }
+
+    /// the bar's link, button or cross pressed, as a click does (the UI test)
+    func press() {
+        action?.performClick(nil)
     }
 
     override func accessibilityPerformPress() -> Bool {

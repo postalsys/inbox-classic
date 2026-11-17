@@ -53,7 +53,7 @@ extension UITest {
         // a server that takes the connection and says nothing: the download waits
         guard let silent = SilentServer() else { throw Failed(description: "no silent server") }
         try await setPort(field: 6, "\(silent.port)")
-        search("subject:\"Waiting on the server\"")
+        await search("subject:\"Waiting on the server\"")
         _ = await waitUntil(20) { list.numberOfRows == 1 }
         await selectRow(0)
         let header: NSTextField? = find("reader.header", in: main.window)
@@ -72,7 +72,7 @@ extension UITest {
         try await setPort(field: 6, port("imap"))
         check(await waitUntil(30) { await readerText().contains("Here at last") }, "once the account is back the message shows by itself")
         check(retry?.isHidden == true, "and Try Again goes")
-        search("")
+        await search("")
         selectFolder(named: "Inbox")
     }
 
@@ -102,7 +102,7 @@ extension UITest {
         selectFolder(named: "Archive")
         _ = await waitFor(20) { await findMessage("Archive", "Subject: The quarterly report") }
         await pause(1)
-        search("subject:\"The quarterly report\"")
+        await search("subject:\"The quarterly report\"")
         _ = await waitUntil(20) { list.numberOfRows == 1 }
         await selectRow(0)
         check(await waitUntil(15) { await readerText().contains("The figures are attached") },
@@ -113,7 +113,7 @@ extension UITest {
         await shot(main.window, "large-1-text-first")
         check(await waitUntil(30) { said?.stringValue.hasPrefix("Downloaded") == true },
               "then that it is all here (\(said?.stringValue ?? ""))")
-        search("")
+        await search("")
         selectFolder(named: "Inbox")
     }
 
@@ -130,7 +130,7 @@ extension UITest {
         _ = await waitFor(20) { await findMessage("Archive", "Subject: Here before you") }
         // time for the background to download it: nothing on the screen says when
         await pause(10)
-        search("subject:\"Here before you\"")
+        await search("subject:\"Here before you\"")
         _ = await waitUntil(20) { list.numberOfRows == 1 }
         await selectRow(0)
         check(await waitUntil(10) { await readerText().contains("Downloaded before it was opened") }
@@ -138,7 +138,7 @@ extension UITest {
               "a new message downloaded ahead opens from the store, without a download")
         await shot(main.window, "open-1-from-store")
         onMain { self.main.core.downloadAhead = PE_DOWNLOAD_AHEAD_NEVER }
-        search("")
+        await search("")
         selectFolder(named: "Inbox")
     }
 
@@ -188,7 +188,7 @@ extension UITest {
         check(saved != nil, "the draft is in Drafts on the server")
         check((saved?["flags"] as? [String])?.contains("\\Draft") == true, "marked as a draft")
         selectFolder(named: "Drafts")
-        check(await waitUntil { list.numberOfRows >= 1 }, "Drafts lists it")
+        check(await waitUntil { !main.mailbox.listLoading && list.numberOfRows >= 1 }, "Drafts lists it")
         await selectRow(0)
         main.mailbox.openSelected()
         guard let reopened = await waitFor(20, { ComposeWindow.open.last.flatMap { $0.window.title == "Draft from the UI test" ? $0.window : nil } })
@@ -350,7 +350,7 @@ extension UITest {
     func textSize() async throws {
         step("Text Size")
         selectFolder(named: "Inbox")
-        _ = await waitUntil(10) { self.list.numberOfRows > 0 }
+        _ = await waitUntil(10) { !self.main.mailbox.listLoading && self.list.numberOfRows > 0 }
         await selectRow(0)
         let pane: WKWebView? = find("preview", in: main.window)
         check(menuItem(.textSizeMedium)?.state == .on, "View > Text Size is Medium at first")
@@ -384,12 +384,13 @@ extension UITest {
         let before = main.core.flaggedCount
         // a message of another folder flagged: it is listed too
         selectFolder(named: "Archive")
-        _ = await waitUntil(10) { self.list.numberOfRows > 0 }
+        _ = await waitUntil(10) { !self.main.mailbox.listLoading && self.list.numberOfRows > 0 }
         await selectRow(0)
         let subject = main.mailbox.selectedRow?.subject ?? ""
         AppDelegate.shared.perform(.flag)
-        // the app's own command reads the list again at once, not when the change is reported a moment later
-        check(main.mailbox.selectedRow?.flagged == true && main.mailbox.selectedRow?.subject == subject,
+        // the app's own command reads the list again once the store has it (Acted), not when the change is reported
+        // a moment later
+        check(await waitUntil(2) { main.mailbox.selectedRow?.flagged == true && main.mailbox.selectedRow?.subject == subject },
               "the row is flagged as soon as the command is done, still selected")
         check(await waitUntil(10) { self.main.core.flaggedCount == before + 1 }, "flagging a message counts it under Flagged")
         onMain { _ = self.tree.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false) }
@@ -572,10 +573,11 @@ extension UITest {
         _ = await waitUntil(10) { !rules2.isVisible }
 
         // Create Rule on the search bar: the words searched for
-        search("lunch")
-        _ = await waitUntil(10) { self.list.numberOfRows > 0 }
+        await search("lunch")
         let createRule: NSButton? = find("search.rule", in: main.window)
-        check(createRule != nil && createRule?.isHiddenOrHasHiddenAncestor == false, "the search bar offers Create Rule")
+        // the bar comes with what the search found, read off the window thread
+        check(await waitUntil(10) { self.list.numberOfRows > 0 && createRule?.isHiddenOrHasHiddenAncestor == false },
+              "the search bar offers Create Rule")
         press(createRule)
         if let (editor, query) = await waitRuleEditor() {
             check(query == "lunch", "Create Rule makes one of the words searched for (\(query))")
@@ -584,11 +586,10 @@ extension UITest {
         } else {
             check(false, "Create Rule opens the rule editor")
         }
-        search("")
-
+        await search("")
         // Create Rule from Message: its sender
         selectFolder(named: "Inbox")
-        _ = await waitUntil(10) { self.list.numberOfRows > 0 }
+        _ = await waitUntil(10) { !self.main.mailbox.listLoading && self.list.numberOfRows > 0 }
         let row = (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == "Photos from Saturday" } ?? 0
         await selectRow(row)
         command(.createRuleFromMessage)
@@ -682,7 +683,7 @@ extension UITest {
         await shot(main.window, "organize-3-after")
         // from Deleted Items it is gone for good, after asking
         selectFolder(named: "Deleted Items")
-        _ = await waitUntil { list.numberOfRows >= 1 }
+        _ = await waitUntil { !main.mailbox.listLoading && list.numberOfRows >= 1 }
         await selectRow(0)
         command(.delete)
         let sure = await waitWindow("alert", 10)
@@ -802,7 +803,7 @@ extension UITest {
             + "List-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n\r\nThis week on the list.\r\n")
         command(.sync)
         _ = await waitFor(20) { await findMessage("INBOX", "Subject: Weekly list news") }
-        search("subject:\"Weekly list news\"")
+        await search("subject:\"Weekly list news\"")
         _ = await waitUntil(20) { list.numberOfRows == 1 }
         await selectRow(0)
         let unsubscribe: NSButton? = find("reader.unsubscribe", in: main.window)
@@ -819,8 +820,7 @@ extension UITest {
               "Yes posts List-Unsubscribe=One-Click to the list")
         let status: NSTextField? = find("status.text", in: main.window)
         check(await waitUntil(10) { status?.stringValue.contains("Unsubscribe request accepted") == true }, "and the status bar says it is done")
-        search("")
-
+        await search("")
         step("a calendar invitation")
         try await addMessage("From: Ann Example <ann@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Invitation: Quarterly planning\r\n"
             + "Date: \(rfc2822(Date()))\r\nMessage-ID: <planning-invite@example.com>\r\n"
@@ -831,7 +831,7 @@ extension UITest {
             + "ATTENDEE;CN=Test:mailto:testuser@inboxclassic.test\r\nRRULE:FREQ=WEEKLY;BYDAY=TU;COUNT=4\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n--inv--\r\n")
         command(.sync)
         _ = await waitFor(20) { await findMessage("INBOX", "Subject: Invitation: Quarterly planning") }
-        search("subject:\"Quarterly planning\"")
+        await search("subject:\"Quarterly planning\"")
         _ = await waitUntil(20) { list.numberOfRows == 1 }
         await selectRow(0)
         check(await waitUntil(15) {
@@ -842,8 +842,7 @@ extension UITest {
         let link = try? await preview?.evaluateJavaScript("document.querySelector('a[href=\"inboxclassic:open-calendar\"]') !== null")
         check(link as? Bool == true, "its Open in Calendar is the card's own link")
         await shot(main.window, "read-10-invitation")
-        search("")
-
+        await search("")
         step("a brand logo (BIMI)")
         let svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.2\" baseProfile=\"tiny-ps\" viewBox=\"0 0 100 100\"><title>Brand</title>"
             + "<rect width=\"100\" height=\"100\" rx=\"22\" fill=\"#0a5bd3\"/><circle cx=\"50\" cy=\"50\" r=\"26\" fill=\"#ffffff\"/><circle cx=\"50\" cy=\"50\" r=\"13\" fill=\"#0a5bd3\"/></svg>"
@@ -852,14 +851,13 @@ extension UITest {
             + "Subject: News from the brand\r\nDate: \(rfc2822(Date()))\r\nMessage-ID: <brand-news@brand.example>\r\n\r\nOur news.\r\n")
         command(.sync)
         _ = await waitFor(20) { await findMessage("INBOX", "Subject: News from the brand") }
-        search("subject:\"News from the brand\"")
+        await search("subject:\"News from the brand\"")
         _ = await waitUntil(20) { list.numberOfRows == 1 }
         await selectRow(0)
         let logo = views(NSImageView.self, in: main.mailbox.reader.view).first { $0.frame.width == 48 }
         check(await waitUntil(15) { logo?.isHidden == false && logo?.image != nil }, "a sender whose logo the server passed has it beside the header")
         await shot(main.window, "read-11-logo")
-        search("")
-
+        await search("")
         try await oneAccountTree()
 
         try await agent()
@@ -886,7 +884,7 @@ extension UITest {
         check(junked != nil, "Junk moves the message to Junk E-mail")
         check((junked?["flags"] as? [String])?.contains("$Junk") == true, "with the $Junk keyword")
         selectFolder(named: "Junk E-mail")
-        _ = await waitUntil(20) { list.numberOfRows >= 1 }
+        _ = await waitUntil(20) { !main.mailbox.listLoading && list.numberOfRows >= 1 }
         await selectRow(0)
         check(main.mailbox.inJunk, "in Junk E-mail the toolbar has Not Junk in place of Junk")
         await shot(main.window, "organize-7-junk")
@@ -916,7 +914,7 @@ extension UITest {
                              to: "Junk")
         selectFolder(named: "Junk E-mail")
         command(.sync)
-        _ = await waitUntil(20) { list.numberOfRows >= 1 }
+        _ = await waitUntil(20) { !main.mailbox.listLoading && main.mailbox.row(0)?.subject == "Win a prize" }
         check(main.mailbox.canEmptyFolder, "Empty Folder is on in Junk E-mail")
         command(.emptyFolder)
         let emptying = await waitWindow("alert", 10)
@@ -1539,7 +1537,7 @@ extension UITest {
         check((await readerText()).contains("still trying"), "saying it is still being tried")
         await shot(main.window, "bounce-2-delayed")
 
-        search("is:bounce")
+        await search("is:bounce")
         check(await waitUntil(20) { list.numberOfRows == 2 }, "is:bounce finds the two notices and nothing else (\(list.numberOfRows))")
         let foundSubjects = Set((0..<list.numberOfRows).compactMap { main.mailbox.row($0)?.subject })
         check(foundSubjects == [failedSubject, delayedSubject], "the report and the delay notice")
@@ -1547,7 +1545,7 @@ extension UITest {
             await selectRow(shownRow)
         }
         await shot(main.window, "bounce-3-list")
-        search("")
+        await search("")
         selectFolder(named: "Inbox")
         _ = await waitUntil(20) { list.numberOfRows >= 4 }
     }
@@ -1682,6 +1680,112 @@ extension UITest {
         let header: NSTextField? = find("reader.header", in: main.window)
         check(!main.mailbox.reader.showsSummary && header?.stringValue.isEmpty == false,
               "one message selected again is shown in the reading pane")
+    }
+
+    // ---- big actions, off the window thread ----
+
+    /// a mailbox made (`create`) or deleted on the server, as another client would
+    func serverMailbox(_ path: String, create: Bool) async {
+        let escaped = path.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? path
+        var request = URLRequest(url: URL(string: create ? rest : "\(rest)/\(escaped)")!)
+        request.httpMethod = create ? "POST" : "DELETE"
+        if create {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try? JSONSerialization.data(withJSONObject: ["path": path, "subscribed": true])
+        }
+        _ = try? await URLSession.shared.data(for: request)
+    }
+
+    /// Select All, Move and Delete of a whole folder done off the window thread: the status bar says what was done at
+    /// once, and a move the server refuses comes back, a bar over the list saying so in the core's words until closed
+    func bigActions() async throws {
+        step("big actions")
+        let mailbox = main.mailbox
+        // a folder with three messages, and one another client deletes behind the app's back
+        await serverMailbox("Bulk", create: true)
+        await serverMailbox("Gone", create: true)
+        for n in 1...3 {
+            try await addMessage("From: Bulk <bulk@example.com>\r\nTo: testuser@inboxclassic.test\r\nSubject: Bulk \(n)\r\n"
+                + "Message-ID: <bulk\(n)@example.com>\r\nDate: Thu, \(n) Oct 2025 08:00:00 +0000\r\n\r\nBulk mail \(n).\r\n",
+                to: "Bulk")
+        }
+        command(.sync)
+        guard await waitUntil(30, { folderRow("Gone") != nil && selectFolder(named: "Bulk") }) else {
+            throw Failed(description: "no folder Bulk")
+        }
+        check(await waitUntil(30) { list.numberOfRows == 3 && !mailbox.listCovered }, "the folder lists its three messages")
+        await serverMailbox("Gone", create: false)
+
+        command(.selectAll)
+        check(await waitUntil(10) { mailbox.selectedCount == 3 && !mailbox.summaryWaiting && mailbox.summary.count == 3 },
+              "Select All selects the three, their summary read off the window thread (\(mailbox.summary.count))")
+        await selectRow(0)
+        // Move chosen before Select All's summary is here: it waits for it, then asks where once
+        var waitedForMove = false
+        onMain {
+            AppDelegate.shared.perform(.selectAll)
+            waitedForMove = mailbox.summaryWaiting
+            AppDelegate.shared.perform(.move)
+        }
+        let move = await waitWindow("move", 10)
+        check(waitedForMove && move != nil, "Move chosen before Select All's summary is here opens its window once it is")
+        if let move {
+            choose(folder(ofAccount: 0, named: "Gone"), in: move)
+            press(find("move.ok", in: move))
+            _ = await waitUntil(5) { !move.isVisible }
+        }
+        await pause(1)
+        check(window("move") == nil, "and only once")
+        let status: NSTextField? = find("status.text", in: main.window)
+        // the status bar says they were moved, until the server refuses
+        check(await waitUntil(10) { status?.stringValue == "Moved 3 messages to Gone" || !mailbox.undoneText.isEmpty },
+              "the status bar says they were moved at once (\(status?.stringValue ?? ""))")
+        let refused = "The server did not move 3 messages to Gone, so they are back in Bulk: "
+        check(await waitUntil(30) { mailbox.undoneText.hasPrefix(refused) },
+              "the server refuses the move: a bar over the list says so in the core's words (\(mailbox.undoneText))")
+        check(status?.stringValue.isEmpty == true, "and the status bar no longer says they were moved")
+        check(await waitUntil(20) { list.numberOfRows == 3 }, "and the three are back in the list")
+        // and selected again, in sight, as what Undo brings back is
+        let back = { () -> Bool in
+            let rows = self.list.selectedRowIndexes
+            let visible = self.list.rows(in: self.list.visibleRect)
+            return rows.count == 3 && rows.allSatisfy { visible.contains($0) }
+                && Set(rows.compactMap { mailbox.row($0)?.subject }) == ["Bulk 1", "Bulk 2", "Bulk 3"]
+        }
+        check(await waitUntil(20) { back() }, "the three that came back are selected, in sight")
+        await pause(0.5)
+        await shot(main.window, "many-1-refused")
+        main.window.appearance = NSAppearance(named: .darkAqua)
+        await pause(0.5)
+        await shot(main.window, "many-2-refused-dark")
+        main.window.appearance = nil
+        let bar: InfoBar? = find("list.undone", in: main.window)
+        bar?.press()
+        check(mailbox.undoneText.isEmpty && bar?.isHidden == true, "the bar's cross closes it")
+
+        await selectRow(0)
+        // Delete pressed before Select All's summary is here: it waits for it, then deletes once
+        AppDelegate.shared.perform(.selectAll)
+        let waitedForDelete = mailbox.summaryWaiting
+        AppDelegate.shared.perform(.delete)
+        check(waitedForDelete && list.numberOfRows == 3, "Delete pressed before Select All's summary is here waits for it")
+        check(await waitUntil(10) { status?.stringValue == "Moved 3 messages to Deleted Items" },
+              "Select All then Delete: the status bar says the three went to Deleted Items (\(status?.stringValue ?? ""))")
+        check(await waitUntil(20) { list.numberOfRows == 0 }, "and out of the list")
+        check(await waitUntil(20) {
+            let left = await messages("Bulk")
+            let trashed = await findMessage("Trash", "Subject: Bulk 3")
+            return left.isEmpty && trashed != nil
+        },
+              "and into Deleted Items on the server")
+        await pause(1)
+        let bulk = await messages("Trash").filter { raw($0).contains("Subject: Bulk ") }.count
+        check(bulk == 3, "deleted once: each of the three is in Deleted Items once (\(bulk))")
+        // the folder gone again, for the steps after
+        await serverMailbox("Bulk", create: false)
+        selectFolder(named: "Inbox")
+        command(.sync)
+        _ = await waitUntil(30) { folderRow("Bulk") == nil && folderRow("Gone") == nil }
     }
 
     // ---- messages as files ----
@@ -1950,7 +2054,10 @@ extension UITest {
             mailbox.loadPending()
         }
         check(held, "a list that takes a while to load says Loading... over the list before")
-        check(mailbox.allInboxes && !mailbox.listCovered && loading?.isHidden == true, "and goes once the list is loaded")
+        // read off the window thread: still dimmed when the load is asked for, until it is drawn
+        check(mailbox.listCovered, "the list before stays dimmed while the list chosen is read off the window thread")
+        check(await waitUntil(10) { mailbox.allInboxes && !mailbox.listCovered && loading?.isHidden == true },
+              "and goes once the list is loaded")
         // from the list of the row below
         tree.selectRowIndexes(IndexSet(integer: row + 1), byExtendingSelection: false)
         _ = await waitUntil(5) { !mailbox.listCovered && tree.selectedRow == row + 1 }
@@ -1966,8 +2073,8 @@ extension UITest {
         check(selectedIn < 0.5, "the row is selected within the key press, its list not read in it (\(Int(selectedIn * 1000)) ms)")
         check(await waitUntil(10) { mailbox.allInboxes && !mailbox.listCovered },
               "then its list loads and the list is no longer dimmed")
-        check(mailbox.paintOrder == ["selected \(node.row.key)", "loaded \(node.row.key)"],
-              "the row was drawn selected before the list was loaded (\(mailbox.paintOrder))")
+        check(mailbox.paintOrder == ["selected \(node.row.key)", "loading \(node.row.key)", "loaded \(node.row.key)"],
+              "the row was drawn selected before its list was asked for and drawn (\(mailbox.paintOrder))")
     }
 
     /// the tree's row of the first account's folder named `name`
@@ -3123,7 +3230,7 @@ extension UITest {
         bookWindow.orderOut(nil)
         main.window.makeKeyAndOrderFront(nil)
         selectFolder(named: "Inbox")
-        _ = await waitUntil { list.numberOfRows > 0 }
+        _ = await waitUntil { !main.mailbox.listLoading && list.numberOfRows > 0 }
         let senderRow = (0..<list.numberOfRows).first { main.mailbox.row($0)?.subject == "October newsletter" }
             ?? (0..<list.numberOfRows).first { !(main.mailbox.row($0)?.fromAddress ?? "").isEmpty } ?? 0
         await selectRow(senderRow)

@@ -1216,3 +1216,34 @@ setup-skipped-unreachable = S’ha omès { $name }: no s’ha pogut connectar am
 attachment-runs-programs = «{ $name }» pot executar programes, així que Inbox Classic no l’obre. Deseu-lo i obriu-lo vós mateix si confieu en la seva procedència.
 # review: new
 attachment-decrypted-note = Aquest fitxer adjunt prové d’un missatge xifrat. Per obrir-lo, Inbox Classic el desa desxifrat en aquest ordinador, en una carpeta vostra que Inbox Classic buida al cap d’un dia.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] El servidor no ha mogut { $messages } a { $folder }, així que torna a ser a { $from }: { $reason }
+   *[other] El servidor no ha mogut { $messages } a { $folder }, així que tornen a ser a { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] El servidor no ha suprimit { $messages }, així que torna a ser a { $from }: { $reason }
+   *[other] El servidor no ha suprimit { $messages }, així que tornen a ser a { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] El servidor no ha arxivat { $messages }, així que torna a ser a { $from }: { $reason }
+   *[other] El servidor no ha arxivat { $messages }, així que tornen a ser a { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] El servidor no ha marcat { $messages } com a llegit, així que torna a estar sense llegir: { $reason }
+   *[other] El servidor no ha marcat { $messages } com a llegits, així que tornen a estar sense llegir: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] El servidor no ha marcat { $messages } com a no llegit, així que torna a estar llegit: { $reason }
+   *[other] El servidor no ha marcat { $messages } com a no llegits, així que tornen a estar llegits: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] El servidor no ha canviat les banderes de { $messages }, així que està com estava: { $reason }
+   *[other] El servidor no ha canviat les banderes de { $messages }, així que estan com estaven: { $reason }
+}

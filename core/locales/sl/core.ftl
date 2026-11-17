@@ -1285,3 +1285,46 @@ setup-skipped-unreachable = { $name } je bil preskočen: njegove storitve za pri
 attachment-runs-programs = Datoteka »{ $name }« lahko zažene programe, zato je Inbox Classic ne odpre. Shranite jo in jo nato odprite sami, če zaupate njenemu izvoru.
 # review: new
 attachment-decrypted-note = Ta priponka je iz šifriranega sporočila. Da jo lahko odpre, jo Inbox Classic shrani dešifrirano v ta računalnik, v vašo mapo, ki jo Inbox Classic po enem dnevu izprazni.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Strežnik sporočila ni premaknil v mapo { $folder }, zato je { $messages } spet v mapi { $from }: { $reason }
+    [two] Strežnik sporočil ni premaknil v mapo { $folder }, zato sta { $messages } spet v mapi { $from }: { $reason }
+    [few] Strežnik sporočil ni premaknil v mapo { $folder }, zato so { $messages } spet v mapi { $from }: { $reason }
+   *[other] Strežnik sporočil ni premaknil v mapo { $folder }, zato je { $messages } spet v mapi { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Strežnik sporočila ni izbrisal, zato je { $messages } spet v mapi { $from }: { $reason }
+    [two] Strežnik sporočil ni izbrisal, zato sta { $messages } spet v mapi { $from }: { $reason }
+    [few] Strežnik sporočil ni izbrisal, zato so { $messages } spet v mapi { $from }: { $reason }
+   *[other] Strežnik sporočil ni izbrisal, zato je { $messages } spet v mapi { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Strežnik sporočila ni arhiviral, zato je { $messages } spet v mapi { $from }: { $reason }
+    [two] Strežnik sporočil ni arhiviral, zato sta { $messages } spet v mapi { $from }: { $reason }
+    [few] Strežnik sporočil ni arhiviral, zato so { $messages } spet v mapi { $from }: { $reason }
+   *[other] Strežnik sporočil ni arhiviral, zato je { $messages } spet v mapi { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Strežnik sporočila ni označil kot prebranega, zato je { $messages } spet neprebrano: { $reason }
+    [two] Strežnik sporočil ni označil kot prebranih, zato sta { $messages } spet neprebrani: { $reason }
+    [few] Strežnik sporočil ni označil kot prebranih, zato so { $messages } spet neprebrana: { $reason }
+   *[other] Strežnik sporočil ni označil kot prebranih, zato je { $messages } spet neprebranih: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Strežnik sporočila ni označil kot neprebranega, zato je { $messages } spet prebrano: { $reason }
+    [two] Strežnik sporočil ni označil kot neprebranih, zato sta { $messages } spet prebrani: { $reason }
+    [few] Strežnik sporočil ni označil kot neprebranih, zato so { $messages } spet prebrana: { $reason }
+   *[other] Strežnik sporočil ni označil kot neprebranih, zato je { $messages } spet prebranih: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Strežnik ni spremenil zastavic sporočila, zato { $messages } ostaja nespremenjeno: { $reason }
+    [two] Strežnik ni spremenil zastavic sporočil, zato { $messages } ostajata nespremenjeni: { $reason }
+    [few] Strežnik ni spremenil zastavic sporočil, zato { $messages } ostajajo nespremenjena: { $reason }
+   *[other] Strežnik ni spremenil zastavic sporočil, zato { $messages } ostaja nespremenjenih: { $reason }
+}

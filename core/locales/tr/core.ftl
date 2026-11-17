@@ -1201,3 +1201,34 @@ setup-skipped-unreachable = Atlandı: { $name }. Oturum açma hizmetine ulaşıl
 attachment-runs-programs = “{ $name }” program çalıştırabilir, bu yüzden Inbox Classic onu açmaz. Kaydedin, kaynağına güveniyorsanız kendiniz açın.
 # review: new
 attachment-decrypted-note = Bu ek şifreli bir iletiden geliyor. Inbox Classic onu açmak için şifresi çözülmüş olarak bu bilgisayarda, size ait ve bir gün sonra boşalttığı bir klasörde saklar.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Sunucu taşıma işlemini yapmadı ({ $messages }, hedef: { $folder }); ileti yeniden { $from } klasöründe: { $reason }
+   *[other] Sunucu taşıma işlemini yapmadı ({ $messages }, hedef: { $folder }); iletiler yeniden { $from } klasöründe: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Sunucu silme işlemini yapmadı ({ $messages }); ileti yeniden { $from } klasöründe: { $reason }
+   *[other] Sunucu silme işlemini yapmadı ({ $messages }); iletiler yeniden { $from } klasöründe: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Sunucu arşivleme işlemini yapmadı ({ $messages }); ileti yeniden { $from } klasöründe: { $reason }
+   *[other] Sunucu arşivleme işlemini yapmadı ({ $messages }); iletiler yeniden { $from } klasöründe: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Sunucu okundu olarak işaretlemedi ({ $messages }); ileti yeniden okunmamış durumda: { $reason }
+   *[other] Sunucu okundu olarak işaretlemedi ({ $messages }); iletiler yeniden okunmamış durumda: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Sunucu okunmadı olarak işaretlemedi ({ $messages }); ileti yeniden okunmuş durumda: { $reason }
+   *[other] Sunucu okunmadı olarak işaretlemedi ({ $messages }); iletiler yeniden okunmuş durumda: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Sunucu bayrakları değiştirmedi ({ $messages }); ileti önceki haline döndü: { $reason }
+   *[other] Sunucu bayrakları değiştirmedi ({ $messages }); iletiler önceki haline döndü: { $reason }
+}

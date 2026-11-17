@@ -171,6 +171,9 @@ public final class Mailbox: NSObject {
     private(set) var summary = PeSelectionSummary()
     /// after Undo: the messages it brings back are selected once the list has them (until the user selects otherwise)
     private var restorePending = false
+    /// after a removal: the row that took the place of the messages taken out, selected by the next load (until the
+    /// user or Undo selects otherwise)
+    private var rowAfter: Int?
 
     var selectedCount: Int { list.numberOfSelectedRows }
     /// the messages being dragged out of the list, as files for the Finder
@@ -197,6 +200,25 @@ public final class Mailbox: NSObject {
     var paintOrder: [String] = []
     /// under test: the list of a row chosen waits until loadPending, for a picture of the wait
     var holdPending = false
+
+    // ---- the list read off the window thread ----
+    /// the load of the whole list on its way (0: none); a load or page asked for before it never comes
+    private var listRequest: UInt64 = 0
+    /// the user selected rows while the list was read: what the load selects is of before, so it is read again
+    private var choseWhileLoading = false
+    /// the load keeps what is selected (a reload of the same list), and dims the list before until it is here (another
+    /// list, order or grouping)
+    private var loadKeepsSelection = false
+    private var loadCovers = false
+    /// what waits for the list to be loaded (a row to select, a command chosen meanwhile)
+    private var whenListed: [() -> Void] = []
+    /// the pages asked for since the list was read, by request, with their first row
+    private var pageRequests: [UInt64: UInt64] = [:]
+    /// Select All: the whole list is selected, counted at once and summed up off the window thread, never listed here
+    private var allSelected = false
+    private var summaryRequest: UInt64 = 0
+    /// the bar over the list that says what the server refused, taken back (`ActionUndone`)
+    private let undoneBar = InfoBar(icon: "warning", link: nil, close: Text.uiClose.text)
 
     init(core: Core) {
         self.core = core
@@ -245,8 +267,20 @@ public final class Mailbox: NSObject {
         let barHeight = searchBar.heightAnchor.constraint(equalToConstant: 0)
         searchBar.heightConstraint = barHeight
         setUpSortBar()
+        // over the search bar: what the server refused and was taken back, until it is closed
+        listArea.addSubview(undoneBar)
+        undoneBar.translatesAutoresizingMaskIntoConstraints = false
+        undoneBar.isHidden = true
+        undoneBar.wrapText()
+        undoneBar.clicked = { [weak self] in self?.showUndone(nil) }
+        undoneBar.setAccessibilityIdentifier("list.undone")
+        undoneBar.heightConstraint = undoneBar.heightAnchor.constraint(equalToConstant: 0)
         NSLayoutConstraint.activate([
-            searchBar.topAnchor.constraint(equalTo: listArea.topAnchor),
+            undoneBar.topAnchor.constraint(equalTo: listArea.topAnchor),
+            undoneBar.leadingAnchor.constraint(equalTo: listArea.leadingAnchor),
+            undoneBar.trailingAnchor.constraint(equalTo: listArea.trailingAnchor),
+            undoneBar.heightConstraint!,
+            searchBar.topAnchor.constraint(equalTo: undoneBar.bottomAnchor),
             searchBar.leadingAnchor.constraint(equalTo: listArea.leadingAnchor),
             searchBar.trailingAnchor.constraint(equalTo: listArea.trailingAnchor),
             barHeight,
@@ -479,7 +513,7 @@ public final class Mailbox: NSObject {
         listView.setSort(sort, ascending: ascending)
         showSortIndicator()
         updateSortBar()
-        reloadList(keepSelection: true)
+        reloadList(keepSelection: true, covering: true)
     }
 
     private func scrolled(_ document: NSView) -> NSScrollView {
@@ -667,13 +701,14 @@ public final class Mailbox: NSObject {
             return
         }
         restorePending = false
+        rowAfter = nil
         // the message of the folder before is not this folder's, nor is the search
         folder = id
         shownList = list
         listView.setList(list, folder: id)
         resetFind()
         clearReader()
-        reloadList(keepSelection: false)
+        reloadList(keepSelection: false, covering: true)
         changed()
         selectionChanged()
     }
@@ -837,8 +872,7 @@ public final class Mailbox: NSObject {
 
     /// From, or To in Sent Items and Drafts (the core says which, and sorts a From sort by the recipients there): its
     /// title and its values follow, and the date column is Sent there, as Outlook Express names it
-    private func showPersonColumn() {
-        let wanted = core.listsRecipients(listView)
+    private func showPersonColumn(_ wanted: Bool) {
         guard wanted != recipientsColumn else { return }
         recipientsColumn = wanted
         for (id, title) in [(ColumnID.from, wanted ? Text.uiColTo : Text.uiColFrom),
@@ -861,68 +895,171 @@ public final class Mailbox: NSObject {
         return text
     }
 
-    func reloadList(keepSelection: Bool) {
+    /// the list read again off the window thread (`ListReady`), the newest reading winning, then drawn; `then` once it
+    /// is. `keepSelection`: the same list, what is selected selected again where it is now (the core finds it);
+    /// `covering`: another list, order or grouping, the list before dimmed (and taking no clicks) until it is drawn
+    func reloadList(keepSelection: Bool, covering: Bool = false, then: (() -> Void)? = nil) {
+        // a reading gathered after a change is this one
+        reloadTimer?.invalidate()
+        let loading = listRequest != 0
+        loadKeepsSelection = keepSelection && (!loading || loadKeepsSelection)
+        loadCovers = covering || (loading && loadCovers)
+        if let then {
+            whenListed.append(then)
+        }
+        pageRequests = [:]
+        choseWhileLoading = false
+        listRequest = startLoad()
+        if listRequest == 0 {
+            listFailed()
+            return
+        }
+        updateCover()
+    }
+
+    /// the load of the list asked for with what is selected now, for the core to select it again where it is: the
+    /// message shown nearest the row it had, several, Select All; the row after a removal or what Undo brought back
+    /// in their place
+    private func startLoad() -> UInt64 {
+        let (after, restored) = (rowAfter ?? -1, restorePending)
+        guard loadKeepsSelection && selectedCount > 0 else {
+            return core.load(listView, selection: nil, after: after, restored: restored)
+        }
+        guard !allSelected && selectedCount == 1 && uid != 0 else {
+            return core.load(listView, selection: selection, after: after, restored: restored)
+        }
+        // the message shown alone, not the rest of a closed conversation whose row it is
+        let shown = newSelection([(messageFolder, uid)])
+        defer { pe_selection_free(shown) }
+        return core.load(listView, selection: shown, hint: list.selectedRow, after: after, restored: restored)
+    }
+
+    /// a list that could not be read: the one before stays, nothing waits for it any more
+    private func listFailed() {
+        listRequest = 0
+        loadCovers = false
+        whenListed = []
+        updateCover()
+    }
+
+    /// `ListReady`: the newest reading of the list drawn, with what waited for it; an older one dropped, one the user
+    /// selected rows during read again
+    private func listReady(_ request: UInt64) {
+        guard request == listRequest else {
+            _ = core.loadResult(request)
+            return
+        }
+        guard !choseWhileLoading else {
+            _ = core.loadResult(request)
+            reloadList(keepSelection: true)
+            return
+        }
+        let load = core.loadResult(request, selection: selection)
+        guard case .read(let rows)? = load else {
+            if case .failed(let why)? = load {
+                status(why)
+            }
+            listFailed()
+            return
+        }
+        listRequest = 0
+        loadCovers = false
+        let waiting = whenListed
+        whenListed = []
+        drawList(rows)
+        updateCover()
+        changed()
+        waiting.forEach { $0() }
+    }
+
+    /// the list as `load` read it: its counts, its rows from the first page, the place column, the selection
+    private func drawList(_ load: ListRows) {
         dateClock = DateClock()
         showsPictures = AppDelegate.shared?.listPictures ?? true
         pictureScale = list.window?.backingScaleFactor ?? 2
-        let shownAt = list.numberOfSelectedRows == 1 ? list.selectedRow : -1
-        pages = []
-        total = 0
-        unread = 0
-        rows = 0
-        showFolderColumn()
-        showPersonColumn()
         // the core counts them: a folder from its indexes, a search, All Inboxes and a folder without its ignored
         // conversations what they find; an account lists nothing. Grouped by conversation the list has fewer rows than
         // messages
-        (total, unread, rows) = core.countsAndRows(listView)
+        (total, unread, rows) = (load.total, load.unread, load.rows)
+        pages = [(load.offset, load.messages)]
+        showFolderColumn()
+        showPersonColumn(load.listsRecipients)
         indentSubjectHeader()
-        // the selection follows the messages to where they are now, without a flicker of the reading pane
-        let several = keepSelection && selectedCount > 1
-            ? core.positions(of: selection, in: listView) : nil
-        // the row of the message shown, as the core finds it nearest the row it had: its page read first, which the
-        // list draws anyway
-        var index: Int64 = -1
-        if keepSelection && several == nil && uid != 0 {
-            _ = row(shownAt)
-            index = core.messageIndex(listView, folder: messageFolder, uid: uid, near: shownAt)
-        }
         reloading = true
         list.reloadData()
-        if let several, !several.isEmpty {
-            list.selectRowIndexes(several, byExtendingSelection: false)
-        } else if index >= 0 {
-            list.selectRowIndexes(IndexSet(integer: Int(index)), byExtendingSelection: false)
-            list.scrollRowToVisible(Int(index))
-        } else {
-            list.deselectAll(nil)
-        }
         reloading = false
         updateEmptyText()
         updateSearchBar()
-        // several selected again: the same messages, only their numbers may have changed
-        selectionDidChange(same: several?.isEmpty == false)
-        if restorePending {
-            selectRestored()
+        reselect(after: load)
+    }
+
+    /// the rows `load` selects selected, the selection (copied from the load) what it says: Select All counted again,
+    /// the messages kept where they are now (one shown stays shown, without a flicker of the reading pane), or a new
+    /// selection (what Undo brought back, the row after a removal)
+    private func reselect(after load: ListRows) {
+        rowAfter = nil
+        if load.reselection == PE_RESELECTION_RESTORED {
+            restorePending = false
+        }
+        let all = load.reselection == PE_RESELECTION_ALL && rows > 0
+        reloading = true
+        list.selectRowIndexes(all ? IndexSet(integersIn: 0..<numberOfRows(in: list)) : load.selected,
+                              byExtendingSelection: false)
+        if load.focus >= 0 {
+            list.scrollRowToVisible(load.focus)
+        }
+        reloading = false
+        if all {
+            // the same Select All, counted again: not a new one that would take mail stored since
+            selectWholeList(again: true)
+            return
+        }
+        allSelected = false
+        // grouped, one row may stand for a closed conversation, whose messages the selection takes again
+        let kept = load.reselection == PE_RESELECTION_KEPT && (selectedCount > 1 || !grouped)
+        selectionDidChange(same: kept)
+    }
+
+    /// `ListPageReady`: a page of the list drawn in the rows that waited for it (one of a list before dropped)
+    private func pageReady(_ request: UInt64) {
+        let load = core.loadResult(request)
+        guard pageRequests.removeValue(forKey: request) != nil, case .read(let page)? = load else { return }
+        if pages.count >= 16 { pages.removeFirst() }
+        pages.append((page.offset, page.messages))
+        let end = min(Int(page.offset) + page.messages.count, numberOfRows(in: list))
+        guard Int(page.offset) < end else { return }
+        let rows = IndexSet(integersIn: Int(page.offset)..<end)
+        list.reloadData(forRowIndexes: rows, columnIndexes: IndexSet(integersIn: 0..<list.numberOfColumns))
+        // the message selected whose row was not here yet: shown now
+        if list.numberOfSelectedRows == 1 && rows.contains(list.selectedRow) && selectedRow?.uid != uid {
+            selectionDidChange()
         }
     }
 
-    /// the messages Undo brought back selected, once they are in the list; when they came back after the list was
-    /// counted, its rows are others than the core's, so the list is read again first
-    private func selectRestored() {
-        var behind = false
-        guard let found = pe_list_view_restored(core.handle, listView.handle, &behind) else { return }
-        defer { pe_positions_free(found) }
-        if behind {
-            gatherReload()
-            return
+    /// the page of the list with row `offset` asked for, and the page after it, when they are not here or asked for;
+    /// nothing while the whole list is being read (its rows are drawn when it is here)
+    private func askForPage(_ offset: UInt64) {
+        guard listRequest == 0 else { return }
+        for wanted in [offset, offset + pageSize] where wanted < rows && !pageRequests.values.contains(wanted)
+            && !pages.contains(where: { $0.offset == wanted }) {
+            let request = core.loadPage(listView, offset: wanted)
+            if request != 0 {
+                pageRequests[request] = wanted
+            }
         }
-        let rows = IndexSet((0..<pe_positions_count(found)).map { Int(pe_positions_get(found, $0)) })
-        guard let first = rows.first else { return }
-        restorePending = false
-        list.selectRowIndexes(rows, byExtendingSelection: false)
-        list.scrollRowToVisible(first)
     }
+
+    /// `block` once the list being read is drawn, at once when none is; whether it waits
+    @discardableResult
+    func afterListed(_ block: @escaping () -> Void) -> Bool {
+        guard listRequest != 0 else {
+            block()
+            return false
+        }
+        whenListed.append(block)
+        return true
+    }
+
 
     /// a sender's picture is drawn: the rows on screen that show it get it, the list is not loaded again
     private func pictureArrived(_ picture: UInt64) {
@@ -945,17 +1082,22 @@ public final class Mailbox: NSObject {
     func row(_ index: Int) -> Message? {
         guard index >= 0, UInt64(index) < rows else { return nil }
         let offset = UInt64(index) / pageSize * pageSize
-        if let at = pages.firstIndex(where: { $0.offset == offset }) {
-            // the most recently used page goes last, the least recently used is dropped first
-            let page = pages.remove(at: at)
-            pages.append(page)
-        } else {
-            if pages.count >= 8 { pages.removeFirst() }
-            pages.append((offset, core.messages(listView, offset: offset, limit: pageSize)))
+        guard let at = pages.firstIndex(where: { $0.offset == offset }) else {
+            // not here yet: a blank row until its page is read off the window thread
+            askForPage(offset)
+            return nil
         }
-        let rows = pages.last!.rows
-        let at = Int(UInt64(index) - offset)
-        return at < rows.count ? rows[at] : nil
+        // the most recently used page goes last, the least recently used is dropped first
+        let page = pages.remove(at: at)
+        pages.append(page)
+        let row = Int(UInt64(index) - offset)
+        return row < page.rows.count ? page.rows[row] : nil
+    }
+
+    /// whether the row `index` is here to show (its page read)
+    private func rowLoaded(_ index: Int) -> Bool {
+        let offset = UInt64(max(index, 0)) / pageSize * pageSize
+        return pages.contains { $0.offset == offset }
     }
 
     /// the one selected message; nil when none or several are
@@ -975,16 +1117,83 @@ public final class Mailbox: NSObject {
     }
 
     private func updateSummary() {
+        // the whole list's is summed up off the window thread
+        guard !allSelected else { return }
         summary = PeSelectionSummary()
         if selectedCount > 0 {
             _ = pe_selection_summary(core.handle, selection, &summary)
         }
     }
 
+    /// Select All: every row selected and the whole list the selection, counted at once without listing it; what the
+    /// menus need to know of it (unread, flagged, in Junk) comes off the window thread
     func selectAllMessages() {
         guard rows > 0 else { return }
         list.window?.makeFirstResponder(list)
-        list.selectAll(nil)
+        allSelected = true
+        reloading = true
+        list.selectRowIndexes(IndexSet(integersIn: 0..<numberOfRows(in: list)), byExtendingSelection: false)
+        reloading = false
+        selectWholeList()
+    }
+
+    /// the selection the whole list, its summary asked for; the reading pane says how many once it is here. `again`:
+    /// the selection is Select All already (the list load counted it again), its summary asked for again
+    private func selectWholeList(again: Bool = false) {
+        guard again || pe_list_view_select_all(core.handle, listView.handle, selection) else { return }
+        // a summary asked for before is of another list: what waited for it is dropped with it
+        if summaryRequest != 0 {
+            pe_read_cancel(core.handle, summaryRequest)
+            whenSummed = []
+        }
+        let request = pe_selection_summary_start(core.handle, selection)
+        summaryRequest = request
+        summary = PeSelectionSummary()
+        summary.count = numericCast(pe_selection_count(selection))
+        if !reader.showsSummary {
+            clearReader()
+        }
+        Pending.read(request, by: self) { [weak self] in self?.summed(request) }
+        selectionChanged()
+    }
+
+    /// the summary of Select All `request` is here: the reading pane says it, what waited for it runs; dropped when it
+    /// failed (never run on a later one) or another selection came since
+    private func summed(_ request: UInt64) {
+        guard request == summaryRequest else { return }
+        summaryRequest = 0
+        var numbers = PeSelectionSummary()
+        guard allSelected, pe_selection_summary_result(core.handle, request, &numbers) else {
+            whenSummed = []
+            return
+        }
+        summary = numbers
+        reader.showSummary(numbers)
+        selectionChanged()
+        let waiting = whenSummed
+        whenSummed = []
+        waiting.forEach { $0() }
+    }
+
+    /// the summary of the whole list not here yet: what needs it waits
+    var summaryWaiting: Bool { allSelected && summaryRequest != 0 }
+
+    /// `block` kept for when the summary of the whole list is here, while it is read; false (nothing kept) when it is
+    /// here, the caller going on at once
+    private func afterSummary(_ block: @escaping () -> Void) -> Bool {
+        guard summaryWaiting else { return false }
+        whenSummed.append(block)
+        return true
+    }
+
+    private var whenSummed: [() -> Void] = []
+
+    /// the messages of the selection, listed when it is the whole list's (the rare command that needs each one)
+    private func listedSelection() -> OpaquePointer {
+        if pe_selection_is_all(selection) {
+            _ = pe_selection_list(core.handle, selection)
+        }
+        return selection
     }
 
     fileprivate func sortBy(_ column: NSTableColumn) {
@@ -1096,7 +1305,7 @@ public final class Mailbox: NSObject {
         findText = text
         findPlace = Core.searchPlace(text)
         listView.setText(text)
-        reloadList(keepSelection: true)
+        reloadList(keepSelection: true, covering: true)
         changed()
     }
 
@@ -1110,7 +1319,7 @@ public final class Mailbox: NSObject {
     func clearFind() {
         guard !findText.isEmpty else { return }
         resetFind()
-        reloadList(keepSelection: true)
+        reloadList(keepSelection: true, covering: true)
         changed()
         list.window?.makeFirstResponder(list)
     }
@@ -1142,6 +1351,16 @@ public final class Mailbox: NSObject {
     /// `same`: the list was reloaded with the same messages selected, whose numbers alone may have changed
     fileprivate func selectionDidChange(same: Bool = false) {
         guard !reloading else { return }
+        // Select All's rows still all selected: its selection and summary stand
+        if allSelected && list.numberOfSelectedRows == numberOfRows(in: list) && rows > 0 {
+            return
+        }
+        allSelected = false
+        whenSummed = []
+        if summaryRequest != 0 {
+            pe_read_cancel(core.handle, summaryRequest)
+            summaryRequest = 0
+        }
         if same {
             updateSummary()
         } else {
@@ -1153,6 +1372,12 @@ public final class Mailbox: NSObject {
                 clearReader()
             }
             reader.showSummary(summary)
+            selectionChanged()
+            return
+        }
+        // the row's page is still being read: the message shown stays until it is here (pageReady)
+        if list.numberOfSelectedRows == 1 && !rowLoaded(list.selectedRow) {
+            askForPage(UInt64(list.selectedRow) / pageSize * pageSize)
             selectionChanged()
             return
         }
@@ -1223,18 +1448,27 @@ public final class Mailbox: NSObject {
         guard let node = folderRows[id] else { return }
         // All Inboxes (All Sent, All Drafts) stays when it has the message, its list up to date with it
         if listView.gathersAccounts {
-            reloadTimer?.invalidate()
-            reloadList(keepSelection: true)
-            if selectInList(folder: id, uid: message) { return }
+            reloadList(keepSelection: true) { [weak self] in
+                guard let self, !selectInList(folder: id, uid: message) else { return }
+                showInFolder(node, folder: id, uid: message)
+            }
+            return
         }
+        showInFolder(node, folder: id, uid: message)
+    }
+
+    /// the message (`folder`, `uid`) selected in its folder's list, once that is read
+    private func showInFolder(_ node: TreeNode, folder id: Int64, uid message: UInt64) {
         // another folder selected ends a search; the folder selected already is not selected again, its search is
         // ended here
         if searching && folder == id {
             clearFind()
         }
         selectTreeNode(node)
-        guard folder == id else { return }
-        selectInList(folder: id, uid: message)
+        afterListed { [weak self] in
+            guard let self, folder == id else { return }
+            selectInList(folder: id, uid: message)
+        }
     }
 
     // ---- reading with the keyboard ----
@@ -1300,33 +1534,33 @@ public final class Mailbox: NSObject {
     /// View > Expand All Conversations
     func expandAll() {
         guard core.expandAll(listView) else { return }
-        reloadList(keepSelection: true)
+        reloadList(keepSelection: true, covering: true)
     }
 
     /// View > Collapse All Conversations
     func collapseAll() {
         guard listView.collapseAll() else { return }
-        reloadList(keepSelection: true)
+        reloadList(keepSelection: true, covering: true)
     }
 
     /// View > Hide Ignored Conversations turned on or off
     func hideIgnoredChanged() {
         listView.setHideIgnored(AppDelegate.shared?.hideIgnored ?? false)
-        reloadList(keepSelection: true)
+        reloadList(keepSelection: true, covering: true)
         changed()
     }
 
     /// View > Hide Read Messages or the toolbar's Unread filter turned on or off
     func hideReadChanged() {
         listView.setUnreadOnly(AppDelegate.shared?.hideRead ?? false)
-        reloadList(keepSelection: true)
+        reloadList(keepSelection: true, covering: true)
         changed()
     }
 
     /// grouping turned on or off in Settings: the list again, the message shown still selected
     func groupingChanged() {
         listView.setGrouped(AppDelegate.shared?.groupByConversation ?? true)
-        reloadList(keepSelection: true)
+        reloadList(keepSelection: true, covering: true)
         changed()
     }
 
@@ -1351,8 +1585,14 @@ public final class Mailbox: NSObject {
     /// when it is not there
     @discardableResult
     private func selectInList(folder id: Int64, uid message: UInt64) -> Bool {
+        // the list being read: selected once it is drawn
+        if listRequest != 0 {
+            afterListed { [weak self] in self?.selectInList(folder: id, uid: message) }
+            return true
+        }
         if core.reveal(listView, folder: id, uid: message) {
-            reloadList(keepSelection: true)
+            reloadList(keepSelection: true) { [weak self] in self?.selectInList(folder: id, uid: message) }
+            return true
         }
         let index = core.messageIndex(listView, folder: id, uid: message)
         guard index >= 0 else { return false }
@@ -1407,28 +1647,49 @@ public final class Mailbox: NSObject {
     func loadPending() {
         guard let node = pendingNode else { return }
         let then = pendingThen
-        cancelPending()
+        // the list before stays dimmed while the chosen one is read (until its ListReady)
+        dropPending()
         if TestHooks.testing {
-            paintOrder.append("loaded \(node.row.key)")
+            paintOrder.append("loading \(node.row.key)")
         }
         choose(node)
-        then?()
+        if let then {
+            afterListed(then)
+        }
+        afterListed { [weak self] in
+            if TestHooks.testing {
+                self?.paintOrder.append("loaded \(node.row.key)")
+            }
+        }
+        updateCover()
     }
 
     /// the row the user chose no longer waits for its list: another was chosen
     private func cancelPending() {
+        dropPending()
+        updateCover()
+    }
+
+    private func dropPending() {
         pendingTimer?.invalidate()
         pendingTimer = nil
         pendingNode = nil
         pendingThen = nil
-        coverList(false)
     }
+
+    /// the list before dimmed while a row chosen waits, and while another list (order, grouping) is read
+    private func updateCover() {
+        coverList(pendingNode != nil || (listRequest != 0 && loadCovers))
+    }
+
+    /// the list is being read off the window thread
+    var listLoading: Bool { listRequest != 0 }
 
     /// whether the list is the one before, dimmed while another loads
     var listCovered: Bool { !listCover.isHidden }
 
-    /// a row chosen whose list has not loaded yet
-    var listWaiting: Bool { pendingNode != nil }
+    /// a row chosen whose list has not loaded yet, or another list being read: nothing is selected in it yet
+    var listWaiting: Bool { pendingNode != nil || (listRequest != 0 && loadCovers) }
 
     /// the list before covered while another loads; "Loading..." counted from the first row chosen of the wait, so
     /// rows chosen one after another while it waits do not start it again
@@ -1463,40 +1724,68 @@ public final class Mailbox: NSObject {
             MessageWindow.open(core: core, mailbox: self, folder: messageFolder, uid: uid)
             return
         }
-        guard let draft = Draft(pe_draft_open(core.handle, messageFolder, uid)) else {
-            // not fetched yet: MessageReady follows
-            openWhenReady = true
-            return
+        // read off the window thread, the compose window opened once it is
+        let (folder, message, account) = (messageFolder, uid, currentAccount)
+        let request = pe_draft_open_start(core.handle, folder, message)
+        let idle = Pending.busy(status)
+        let waits = Pending.read(request, by: self) { [weak self] in
+            idle()
+            guard let self else { return }
+            guard let draft = Draft(pe_draft_result(core.handle, request)) else {
+                // not fetched yet: MessageReady follows, if it is still the one shown
+                openWhenReady = (messageFolder, uid) == (folder, message)
+                return
+            }
+            ComposeWindow.open(core: core, account: account, draft: draft)
         }
-        ComposeWindow.open(core: core, account: currentAccount, draft: draft)
+        if !waits {
+            idle()
+        }
     }
 
-    func draftOfShown(_ kind: PeDraftKind) -> Draft? {
-        reader.draft(kind)
-    }
-
-    /// `action` on `messages` (the selected ones by default): what was done in the status bar, or why not, and the
-    /// list read again at once, the selection kept
+    /// `action` on `messages` (the selected ones by default), off the window thread: once the store has it, what was
+    /// done in the status bar, or why not, and the list read again, the selection kept
     @discardableResult
     private func act(_ action: PeAction, to: Int64 = 0, on messages: OpaquePointer? = nil, quiet: Bool = false) -> Bool {
-        guard apply(action, to: to, on: messages, quiet: quiet) else { return false }
-        listChanged(keepSelection: true)
+        apply(action, to: to, on: messages, quiet: quiet) { [weak self] in self?.listChanged(keepSelection: true) }
+    }
+
+    /// `action` started as `act` starts it, then `done` once the store has it (not when it was refused); false when it
+    /// could not start
+    private func apply(_ action: PeAction, to: Int64 = 0, on messages: OpaquePointer? = nil, quiet: Bool = false,
+                       then done: @escaping () -> Void) -> Bool {
+        let request = core.actStart(messages ?? selection, action, to: to)
+        guard Pending.acted(request, by: self, { [weak self] event in self?.acted(event, quiet: quiet, then: done) }) else {
+            inform(Text.uiMessagesNotChanged.text, style: .warning)
+            return false
+        }
         return true
     }
 
-    /// `action` done, as `act`, the list not read again
-    private func apply(_ action: PeAction, to: Int64 = 0, on messages: OpaquePointer? = nil, quiet: Bool = false) -> Bool {
-        switch core.act(messages ?? selection, action, to: to) {
-        case .success(let done):
-            if !quiet {
-                status(done)
-            }
-            return true
-        case .failure(let refusal):
-            inform(refusal.reason, style: .warning)
-            return false
+    /// `Acted`: what was done in the status bar (not for `quiet`, the message shown read after a moment), then
+    /// `done`; why not in a window when it was refused
+    private func acted(_ event: CoreEvent, quiet: Bool, then done: () -> Void) {
+        if event.failure == PE_FAILURE_KIND_OTHER {
+            inform(event.message.isEmpty ? Text.uiMessagesNotChanged.text : event.message, style: .warning)
+            return
         }
+        if !quiet {
+            status(event.message)
+        }
+        done()
     }
+
+    /// `ActionUndone`: the server refused what was asked and the store took it back (the rows are back through the
+    /// FolderChanged before it); the bar over the list says what and why, until it is closed
+    private func showUndone(_ message: String?) {
+        let shown = !(message ?? "").isEmpty
+        undoneBar.text = message ?? ""
+        undoneBar.isHidden = !shown
+        undoneBar.heightConstraint?.isActive = !shown
+    }
+
+    /// what the bar over the list says the server refused, empty when it is closed (the UI test)
+    var undoneText: String { undoneBar.isHidden ? "" : undoneBar.text }
 
     /// the user's own command changed the list: read again at once, not a moment later when its change is reported
     /// (that reload then finds the list read)
@@ -1514,25 +1803,29 @@ public final class Mailbox: NSObject {
     /// Mark All Read applies to the list shown (the core says): a folder's or All Inboxes'
     var marksAllRead: Bool { listView.marksAllRead }
 
-    /// the folder's messages, or every Inbox's, marked read
+    /// the folder's messages, or every Inbox's, marked read off the window thread
     func markAllRead() {
         guard listView.marksAllRead else { return }
         let own = listView.ownFolder
-        if own != 0 {
-            pe_folder_mark_all_read(core.handle, own)
-        } else {
-            pe_mark_all_inboxes_read(core.handle)
+        markAllRead(own != 0 ? PE_MARK_READ_FOLDER : PE_MARK_READ_ALL_INBOXES, own)
+    }
+
+    /// Mark All Read of `what` (`id` the folder or the account): what was done in the status bar, the list read again
+    private func markAllRead(_ what: PeMarkRead, _ id: Int64) {
+        let request = pe_mark_read_start(core.handle, what, id)
+        let waits = Pending.acted(request, by: self) { [weak self] event in
+            self?.acted(event, quiet: false) { self?.listChanged(keepSelection: true) }
         }
-        listChanged(keepSelection: true)
+        if !waits {
+            inform(Text.uiMessagesNotChanged.text, style: .warning)
+        }
     }
 
     /// `action` takes the selected messages out of the list: the row after the last of them is selected then
     @discardableResult
     private func actAndRemove(_ action: PeAction, to: Int64 = 0, on messages: OpaquePointer? = nil) -> Bool {
         let next = (list.selectedRowIndexes.last ?? -1) + 1 - selectedCount
-        guard apply(action, to: to, on: messages) else { return false }
-        selectAfterRemoval(next)
-        return true
+        return apply(action, to: to, on: messages) { [weak self] in self?.selectAfterRemoval(next) }
     }
 
     /// every selected message can be archived (from the Inbox or a folder of the user's)
@@ -1540,6 +1833,7 @@ public final class Mailbox: NSObject {
 
     /// out of the Inbox into the account's Archive (on Gmail every label taken off)
     func archiveSelected() {
+        if afterSummary({ [weak self] in self?.archiveSelected() }) { return }
         guard canArchive else { return }
         actAndRemove(PE_ACTION_ARCHIVE)
     }
@@ -1549,6 +1843,7 @@ public final class Mailbox: NSObject {
     /// takes them out of the list (Ignore while ignored conversations are hidden)
     func markConversations(_ action: PeAction) {
         guard hasSelection else { return }
+        if afterSummary({ [weak self] in self?.markConversations(action) }) { return }
         if leavesList(action) {
             actAndRemove(action)
         } else {
@@ -1595,18 +1890,16 @@ public final class Mailbox: NSObject {
         act(PE_ACTION_UNFLAG)
     }
 
-    /// after messages left the list: the one that took their place selected, or the last one
+    /// after messages left the list: the one that took their place selected by the load, or the last one
     private func selectAfterRemoval(_ index: Int) {
-        listChanged(keepSelection: false)
-        if index >= 0 && rows > 0 {
-            let next = min(index, Int(rows) - 1)
-            list.selectRowIndexes(IndexSet(integer: next), byExtendingSelection: false)
-            list.scrollRowToVisible(next)
-        }
+        rowAfter = index >= 0 ? index : nil
+        listChanged(keepSelection: true)
     }
 
     func deleteSelected() {
         guard hasSelection else { return }
+        // from Deleted Items it asks first, which the summary says
+        if afterSummary({ [weak self] in self?.deleteSelected() }) { return }
         // from Deleted Items, or an account without one, they are gone for good: asked first
         if let question = taken(pe_selection_delete_question(&summary)),
            !ask(question, yes: Text.uiTbDelete.text, no: Text.uiCancel.text, destructive: true) {
@@ -1619,11 +1912,12 @@ public final class Mailbox: NSObject {
     /// the background (the status bar says how far)
     func moveSelected(copy: Bool = false) {
         guard hasSelection else { return }
+        if afterSummary({ [weak self] in self?.moveSelected(copy: copy) }) { return }
         let verb = copy ? Text.uiButtonCopy.text : Text.uiButtonMove.text
         let title = taken(pe_selection_move_text(&summary, copy, false)) ?? verb
         let prompt = taken(pe_selection_move_text(&summary, copy, true)) ?? ""
         // the folder they are all in can not be chosen
-        let current = summary.folders == 1 ? firstSelected?.folder ?? 0 : 0
+        let current = summary.folders == 1 ? firstSelected?.folder ?? listView.ownFolder : 0
         let window = MoveWindow(core: core, title: title, prompt: prompt, verb: verb, current: current)
         guard let to = window.run() else { return }
         if copy {
@@ -1650,6 +1944,7 @@ public final class Mailbox: NSObject {
         case .success(let done):
             status(done)
             restorePending = true
+            rowAfter = nil
             listChanged(keepSelection: true)
         case .failure(let refusal):
             inform(refusal.reason, style: .warning)
@@ -1733,7 +2028,7 @@ public final class Mailbox: NSObject {
     }
 
     @objc private func accountMenuMarkRead(_ sender: NSMenuItem) {
-        pe_account_mark_all_read(core.handle, menuAccount(sender))
+        markAllRead(PE_MARK_READ_ACCOUNT, menuAccount(sender))
     }
 
     @objc private func accountMenuNewFolder(_ sender: NSMenuItem) {
@@ -2045,7 +2340,7 @@ public final class Mailbox: NSObject {
     /// Forward with several selected: one new message with them attached as .eml files, from the account of the first,
     /// once those not downloaded yet are here
     func forwardSelected(_ open: @escaping @MainActor (Draft, Int64) -> Void) {
-        guard let first = refs(of: selection).first else { return }
+        guard let first = refs(of: listedSelection()).first else { return }
         let account = folderInfo[first.0]?.account ?? currentAccount
         withDownloads(title: Text.uiTbForward.text, { core, selection, error in
             Handed(value: pe_selection_forward(core, selection, exportTimeout, &error))
@@ -2062,7 +2357,7 @@ public final class Mailbox: NSObject {
     private func withDownloads<T>(title: String,
                                   _ work: @escaping (OpaquePointer, OpaquePointer, inout UnsafeMutablePointer<CChar>?) -> T,
                                   then done: @escaping @MainActor (T) -> Void) {
-        let selection = Handed(value: newSelection(refs(of: selection)))
+        let selection = Handed(value: newSelection(refs(of: listedSelection())))
         let handle = Handed(value: core.handle)
         if let downloading = taken(pe_selection_downloading_text(core.handle, selection.value)) {
             status(downloading)
@@ -2111,7 +2406,7 @@ public final class Mailbox: NSObject {
     /// else the row's; a closed conversation's row all of its messages, as the core's selection has them
     private func dragRefs(forRow index: Int) -> [(Int64, UInt64)] {
         if list.selectedRowIndexes.contains(index) {
-            return refs(of: selection)
+            return refs(of: listedSelection())
         }
         let one: OpaquePointer = pe_selection_new()
         defer { pe_selection_free(one) }
@@ -2207,6 +2502,18 @@ public final class Mailbox: NSObject {
             if (event.folder == folder && !searching) || severalFolders {
                 gatherReload()
             }
+        case PE_EVENT_KIND_LIST_READY:
+            listReady(event.uid)
+        case PE_EVENT_KIND_LIST_PAGE_READY:
+            pageReady(event.uid)
+        case PE_EVENT_KIND_ACTION_UNDONE:
+            // the status bar's "Moved..." is taken back with it
+            status("")
+            showUndone(event.message)
+            // the messages back in the list now, and selected there as what Undo brings back is
+            restorePending = true
+            rowAfter = nil
+            listChanged(keepSelection: true)
         case PE_EVENT_KIND_SYNC_FINISHED:
             // how much text the search still has to read
             updateSearchBar()
@@ -2532,9 +2839,12 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
     }
 
     public func tableViewSelectionDidChange(_ notification: Notification) {
-        // the user chose: what Undo brings back is not selected over it (selectRestored clears it before it selects)
+        // the user chose: neither what Undo brings back nor the row after a removal is selected over it, and a list
+        // being read selects what was selected before, so it is read again
         if !reloading {
             restorePending = false
+            rowAfter = nil
+            choseWhileLoading = listRequest != 0
         }
         selectionDidChange()
     }
@@ -3206,6 +3516,11 @@ public final class MessageTable: NSTableView {
         mailbox?.undo()
     }
 
+    /// Select All: the whole list, counted without listing it
+    public override func selectAll(_ sender: Any?) {
+        mailbox?.selectAllMessages()
+    }
+
     static func validateUndo(_ item: NSValidatedUserInterfaceItem, _ mailbox: Mailbox?) -> Bool {
         let label = mailbox?.core.undoLabel
         (item as? NSMenuItem)?.title = label ?? Text.cmdUndo.text
@@ -3290,7 +3605,10 @@ final class ListCover: NSView {
 
     /// "Loading..." shown (after a moment of loading)
     var loading = false {
-        didSet { label.isHidden = !loading }
+        didSet {
+            label.isHidden = !loading
+            needsDisplay = true
+        }
     }
 
     init() {
@@ -3314,6 +3632,13 @@ final class ListCover: NSView {
     override func draw(_ dirtyRect: NSRect) {
         NSColor.controlBackgroundColor.withAlphaComponent(PE_LIST_DIM).setFill()
         dirtyRect.fill(using: .sourceOver)
+        // "Loading..." on a plate of its own, never through the rows' words under it
+        guard loading else { return }
+        let plate = NSBezierPath(roundedRect: label.frame.insetBy(dx: -14, dy: -7), xRadius: 8, yRadius: 8)
+        NSColor.controlBackgroundColor.setFill()
+        plate.fill()
+        NSColor.separatorColor.setStroke()
+        plate.stroke()
     }
 
     override func mouseDown(with event: NSEvent) {}

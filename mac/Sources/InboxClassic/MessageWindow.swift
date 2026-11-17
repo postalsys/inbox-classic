@@ -340,8 +340,10 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
             inform(Text.uiAddAccountFirst.text)
             return
         }
-        guard let draft = reader.draft(kind, account: account) else { return }
-        ComposeWindow.open(core: core, account: account, draft: draft)
+        reader.startDraft(kind, account: account) { [core] draft in
+            guard let draft else { return }
+            ComposeWindow.open(core: core, account: account, draft: draft)
+        }
     }
 
     /// Save As of a message file: a copy where the user chooses
@@ -416,6 +418,8 @@ final class MessageWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NSTool
     // ---- closing ----
 
     func windowWillClose(_ notification: Notification) {
+        // what it still reads is nobody's now
+        reader.cancelReads()
         reader.clear(loading: false)
         MessageWindow.open.removeAll { $0 === self }
         // back to the main window when no other window takes the keys

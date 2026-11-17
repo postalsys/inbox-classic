@@ -346,11 +346,12 @@ impl Store {
             .db
             .prepare_cached("SELECT 1 FROM messages WHERE folder_id = ?1 AND uid = ?2")?;
         let mut statement = self.db.prepare_cached(
+            // the id after the highest given, never one of a message deleted since (Store::newest_message)
             "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
              from_address, recipients, message_id, in_reply_to, has_attachments, sender_people, recipient_people, \
-             attachment_names, attachment_count, refs, bounce, auth_headers, list_id, sort_from, sort_subject) \
+             attachment_names, attachment_count, refs, bounce, auth_headers, list_id, sort_from, sort_subject, id) \
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, \
-             ?23, ?24, ?25) \
+             ?23, ?24, ?25, (SELECT high + 1 FROM message_ids)) \
              ON CONFLICT (folder_id, uid) DO UPDATE SET modseq = excluded.modseq, flags = excluded.flags, \
              seen = excluded.seen",
         )?;

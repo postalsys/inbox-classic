@@ -28,7 +28,7 @@ pub enum ThreadMark {
 }
 
 /// The number `thread_marks.mark` keeps of a mark that is not None
-const WATCH: i64 = 1;
+pub(crate) const WATCH: i64 = 1;
 pub(crate) const IGNORE: i64 = 2;
 
 impl ThreadMark {

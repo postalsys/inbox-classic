@@ -1269,3 +1269,34 @@ setup-skipped-unreachable = { $name } a fost omis: serviciul lui de conectare nu
 attachment-runs-programs = „{ $name }” poate rula programe, de aceea Inbox Classic nu îl deschide. Salvați-l, apoi deschideți-l dvs. dacă aveți încredere în sursa lui.
 # review: new
 attachment-decrypted-note = Această atașare provine dintr-un mesaj criptat. Pentru a o deschide, Inbox Classic o stochează decriptată pe acest computer, într-un folder al dvs. pe care Inbox Classic îl golește după o zi.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Serverul nu a mutat { $messages } în { $folder }, așa că este din nou în { $from }: { $reason }
+   *[other] Serverul nu a mutat { $messages } în { $folder }, așa că sunt din nou în { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Serverul nu a șters { $messages }, așa că este din nou în { $from }: { $reason }
+   *[other] Serverul nu a șters { $messages }, așa că sunt din nou în { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Serverul nu a arhivat { $messages }, așa că este din nou în { $from }: { $reason }
+   *[other] Serverul nu a arhivat { $messages }, așa că sunt din nou în { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Serverul nu a marcat { $messages } ca citit, așa că este din nou necitit: { $reason }
+   *[other] Serverul nu a marcat { $messages } ca citite, așa că sunt din nou necitite: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Serverul nu a marcat { $messages } ca necitit, așa că este din nou citit: { $reason }
+   *[other] Serverul nu a marcat { $messages } ca necitite, așa că sunt din nou citite: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Serverul nu a schimbat semnalizările pentru { $messages }, așa că este ca înainte: { $reason }
+   *[other] Serverul nu a schimbat semnalizările pentru { $messages }, așa că sunt ca înainte: { $reason }
+}

@@ -54,9 +54,10 @@ public:
     bool PicturesShown() const;
     // the message as it is shown, with the pictures the user allowed, in the Print window over `owner`
     void Print(HWND owner);
-    // a reply, reply to all or forward of the message shown, empty while it is not shown; of a message file, from
-    // `account`
-    core::Draft DraftOf(PeDraftKind kind, int64_t account = 0) const;
+    // a reply, reply to all or forward of the message shown, made off the window thread (a message file's at once, from
+    // `account`): `done` gets it, empty when the message is not here; false while no message is shown. A newer one
+    // replaces one not done yet
+    bool DraftOf(PeDraftKind kind, int64_t account, std::function<void(core::Draft)> done);
     // the Unsubscribe link, after asking over `owner`: what the status bar says; a mailto: link to write a message to
     // in `mailto` when the list wants one
     std::wstring Unsubscribe(HWND owner, std::wstring& mailto);
@@ -119,8 +120,12 @@ private:
     void OpenInCalendar();
     void ChooseAttachment();
     void SaveAllAttachments();
-    // file `index` of the message saved where the user says, with the Save As dialog
+    // file `index` of the message saved where the user says, with the Save As dialog once the core read it off the
+    // window thread (SaveRead)
     void SaveAttachment(size_t index);
+    void SaveRead(uint8_t* data, size_t length, char* name);
+    // the reads off the window thread not waited for any more, the window closing
+    void CancelReads();
     // the attachment strip: an item a file of `info` (none hides it); placed at `left`, `top`, `width` wide, its
     // height, 0 when it is hidden
     void FillStrip(const PeMessageInfo* info);
@@ -130,7 +135,7 @@ private:
     // why a file of the message is not here: it is still being downloaded, or could not be read
     void SayNotHere();
     // the file of an item of the strip opened with the system's program, from the private folder the core wrote it
-    // into on a thread of its own (OpenDone takes the result): a note shown first when the core has one; a file that
+    // into off the window thread (OpenDone takes the result): a note shown first when the core has one; a file that
     // can run code refused from its row, in the core's words. One at a time; StopOpening waits for it
     void OpenAttachment(int item);
     void OpenDone(StripOpened* opened);
@@ -138,8 +143,9 @@ private:
     // the menu of an item of the strip (Open, Save As..., Save All...) at `screen`, (-1, -1) for the keyboard's
     void StripMenu(POINT screen);
     static LRESULT CALLBACK StripProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, UINT_PTR, DWORD_PTR data);
+    // a ReadDone: the reply, the file to save or the file to open it was for, if it was this pane's
+    void OnReadDone(uint64_t request);
     // the core's calls for the files of the message shown, from its folder or from the message file
-    uint8_t* AttachmentData(size_t index, size_t& length, char*& name) const;
     bool SaveAttachments(const std::string& dir, size_t& saved, size_t& total) const;
 
     PeCore* core_ = nullptr;
@@ -153,9 +159,15 @@ private:
     HWND stripFrame_ = nullptr;
     // the files the strip shows (name, size and kind), so it is filled again only when they change
     std::vector<std::wstring> stripFiles_;
-    // the open under way and its item, -1 for none
+    // the open under way and its item, -1 for none: a message file's on a thread of its own, a folder's message's a
+    // read of the core (pe_attachment_open_start)
     std::thread opener_;
     int openingItem_ = -1;
+    uint64_t openRequest_ = 0;
+    // the reads of the core waited for (ReadDone): a reply or forward and what takes it, a file to save
+    PendingRead draftRead_;
+    std::function<void(core::Draft)> draftDone_;
+    PendingRead saveRead_;
     // ShowInfo lays the pane out once, at its end
     bool holdLayout_ = false;
     HWND pictures_ = nullptr;

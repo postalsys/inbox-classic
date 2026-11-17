@@ -787,6 +787,50 @@ pub fn text_dialog_sized(
 
 // ---- waiting for the core ----
 
+/// How long a read off the window thread runs before the window shows the busy cursor, as long as a list waits
+const BUSY_AFTER: std::time::Duration = std::time::Duration::from_millis(pe_core::LIST_LOADING_MS as u64);
+
+/// Waits for the `ReadDone` of `request`, a read off the window thread (a reply made, a draft, an attachment) for the
+/// window of `widget`: the busy cursor over the window when it takes longer than `LIST_LOADING_MS`; false when the window closed
+/// first, which drops the read
+pub async fn wait_read(widget: &impl IsA<gtk::Widget>, request: u64) -> bool {
+    let (send, answers) = async_channel::bounded::<bool>(2);
+    shell().watch_request(request, send.clone());
+    let window = widget
+        .as_ref()
+        .root()
+        .map(|root| root.upcast::<gtk::Widget>())
+        .unwrap_or_else(|| widget.as_ref().clone());
+    let busy = Rc::new(RefCell::new(None::<glib::SourceId>));
+    let shown = window.downgrade();
+    let timer = busy.clone();
+    *busy.borrow_mut() = Some(glib::timeout_add_local_once(BUSY_AFTER, move || {
+        timer.borrow_mut().take();
+        if let Some(window) = shown.upgrade() {
+            window.set_cursor_from_name(Some("progress"));
+        }
+    }));
+    let destroyed = Rc::new(Cell::new(false));
+    let gone = destroyed.clone();
+    let closed = window.connect_destroy(move |_| {
+        gone.set(true);
+        let _ = send.try_send(false);
+    });
+    let done = answers.recv().await.unwrap_or(false);
+    if let Some(timer) = busy.borrow_mut().take() {
+        timer.remove();
+    }
+    if !destroyed.get() {
+        window.disconnect(closed);
+        window.set_cursor(None);
+    }
+    shell().forget_request(request);
+    if !done {
+        shell().core.read_cancel(request);
+    }
+    done
+}
+
 /// Waits for the event of `request` with a small dialog titled `title` that says `text` and can cancel it (`cancel`
 /// is called then); false when it was cancelled
 pub async fn wait_for_request(

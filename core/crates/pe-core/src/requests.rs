@@ -31,7 +31,7 @@ impl<T: Send + 'static> Requests<T> {
         request: u64,
         work: impl Future<Output = T> + Send + 'static,
         events: EventSink,
-        done: fn(u64) -> Event,
+        done: impl FnOnce(u64) -> Event + Send + 'static,
     ) {
         let results = self.0.clone();
         // held while the work starts, so it can not finish before it is listed as running

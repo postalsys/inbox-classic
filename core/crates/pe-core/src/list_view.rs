@@ -10,11 +10,12 @@
 //! without reading the whole list again.
 
 use std::collections::BTreeSet;
-use std::sync::Mutex;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{Arc, Mutex};
 
 use pe_store::{FolderId, Generation, Message, MessageRef, RowRef, Scope, Search, Show, Sort};
 
-use crate::{Action, Core, NextUnread, Result, Summary};
+use crate::{Action, Core, NextUnread, Result, Selected, Summary};
 
 /// When a list begins, in milliseconds since the epoch, as the store notes when a message became read: a tenth of a
 /// second early, as SQLite's clock (`seen_at`) can lag behind this one (on Windows by a tick of about 16 ms)
@@ -33,8 +34,9 @@ const KEPT_PAGES: usize = 4;
 /// read again (a sync writes many in a row), in milliseconds
 pub const LIST_GATHER_MS: u32 = 300;
 
-/// How long a folder chosen waits for its list before the list says "Loading...", in milliseconds, from the first
-/// click of the wait (later clicks while it waits do not start it again)
+/// How long anything the user waits for shows nothing busy, in milliseconds: a folder chosen waits this long for its
+/// list before the list says "Loading..." (counted from the first click of the wait; later clicks do not start it
+/// again), and a message, a reply, an attachment or an action on many messages as long before it says it is busy
 pub const LIST_LOADING_MS: u32 = 400;
 
 /// How long the Address Book's find boxes wait after the last key before they search, in milliseconds
@@ -48,8 +50,22 @@ pub const LIST_DIM: f64 = 0.55;
 /// again while nothing was written to the store ([`Generation`]) in the same minute (words like `newer_than:` count
 /// from now). The pages also say which messages the rows show until the list is counted again, as the apps do when
 /// they read it again: a click selects what its row shows. A copy of the view starts without.
-#[derive(Default)]
-struct Memo(Mutex<Option<Kept>>);
+/// Shared by a view and the loads it started in the background ([`ListView::snapshot`]), which keep what they read
+/// in it; `id` tells the view apart from others for its loads (the newest wins)
+struct Memo {
+    id: u64,
+    kept: Arc<Mutex<Option<Kept>>>,
+}
+
+impl Default for Memo {
+    fn default() -> Memo {
+        static NEXT: AtomicU64 = AtomicU64::new(1);
+        Memo {
+            id: NEXT.fetch_add(1, Ordering::Relaxed),
+            kept: Arc::default(),
+        }
+    }
+}
 
 /// What [`Memo`] keeps, and of which list
 struct Kept {
@@ -73,7 +89,7 @@ struct Page {
 
 /// What the store held and the minute, when something was read
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct When {
+pub(crate) struct When {
     generation: Generation,
     minute: i64,
 }
@@ -111,7 +127,7 @@ impl Memo {
     /// `f` with what is kept of the list read at `moment`: nothing when it was another list, no counts when they were
     /// read before a write or in another minute
     fn with<T>(&self, moment: Moment, f: impl FnOnce(&mut Kept) -> T) -> T {
-        let mut kept = self.0.lock().unwrap_or_else(|e| e.into_inner());
+        let mut kept = self.kept.lock().unwrap_or_else(|e| e.into_inner());
         let same_list = kept
             .as_ref()
             .is_some_and(|k| k.sort == moment.sort && k.search == *moment.search);
@@ -427,6 +443,7 @@ impl ListView {
             hide_ignored: self.hide_ignored,
             read_since: (self.show == Show::Unread).then_some(self.since),
             uids: None,
+            up_to: None,
         })
     }
 
@@ -496,10 +513,7 @@ impl ListView {
         self.remembered(core, (0, 0, 0), |search, moment| {
             self.memo.with(moment, |kept| {
                 let (total, unread) = kept.counted(|k| &mut k.counts, || core.list_counts(search))?;
-                let rows = match self.grouped {
-                    true => kept.counted(|k| &mut k.rows, || core.count_rows(search))?,
-                    false => total,
-                };
+                let rows = kept.counted(|k| &mut k.rows, || rows_of(core, search, self.grouped, total))?;
                 Ok((total, unread, rows))
             })
         })
@@ -510,7 +524,7 @@ impl ListView {
     /// the reload that the change's event asks for a moment later.
     pub fn stale(&self, core: &Core) -> Result<bool> {
         self.remembered(core, false, |search, moment| {
-            let kept = self.memo.0.lock().unwrap_or_else(|e| e.into_inner());
+            let kept = self.memo.kept.lock().unwrap_or_else(|e| e.into_inner());
             Ok(!kept
                 .as_ref()
                 .is_some_and(|k| k.sort == moment.sort && k.search == *search && k.counted_at(moment.at)))
@@ -574,20 +588,82 @@ impl ListView {
         })
     }
 
+    /// Select All: every message of the list (a collapsed conversation's too), counted, not listed: counted from what
+    /// the view kept when nothing was written since it counted the list. Bound to the messages stored when it is
+    /// chosen ([`Search::up_to`]): mail stored after it is neither counted nor acted on. Listed by
+    /// [`Core::selected_refs`] when a command needs them.
+    pub fn select_all(&self, core: &Core) -> Result<Selected> {
+        let Some(search) = self.search() else {
+            return Ok(Selected::default());
+        };
+        let (up_to, count) = self.bounded_count(core)?;
+        Ok(Selected::All {
+            search: Search {
+                up_to: Some(up_to),
+                ..search
+            },
+            sort: self.sort,
+            count,
+        })
+    }
+
+    /// The list read again with every row selected (`selected` Select All of this list): whether it still is the
+    /// whole list, no message stored since in it; then `selected` is counted again with its bound (those gone since
+    /// left out). Otherwise a Select All is listed, the messages it had, for the window to select where they are now,
+    /// the newer ones not.
+    pub fn select_all_again(&self, core: &Core, selected: &mut Selected) -> Result<bool> {
+        let Selected::All { search: chosen, .. } = &*selected else {
+            return Ok(false);
+        };
+        let before = core.generation()?;
+        if self.still_all(core, chosen)? {
+            let count = self.counts(core)?.0;
+            if core.generation()? == before {
+                *selected = Selected::All {
+                    search: chosen.clone(),
+                    sort: self.sort,
+                    count,
+                };
+                return Ok(true);
+            }
+        }
+        *selected = Selected::Listed(core.selected_refs(selected)?);
+        Ok(false)
+    }
+
+    /// The newest message stored and the messages of the list, counted at the same moment: from what the view kept
+    /// when nothing is written meanwhile, otherwise counted with the bound
+    fn bounded_count(&self, core: &Core) -> Result<(i64, u64)> {
+        for _ in 0..3 {
+            let before = core.generation()?;
+            let up_to = core.store().newest_message()?;
+            let count = self.counts(core)?.0;
+            if core.generation()? == before {
+                return Ok((up_to, count));
+            }
+        }
+        let up_to = core.store().newest_message()?;
+        let search = Search {
+            up_to: Some(up_to),
+            ..self.search().unwrap_or_default()
+        };
+        Ok((up_to, core.count_search(&search)?.0))
+    }
+
     /// Where the messages `refs` are now, ascending; those no longer in the list left out
     pub fn positions(&self, core: &Core, refs: &[MessageRef]) -> Result<Vec<u64>> {
         self.listed(Vec::new(), |search| core.positions(search, self.sort, refs))
     }
 
-    /// The rows of the messages the last Undo brought back ([`Core::undo`]), for the window to select them once its list
-    /// has them: empty while none is back yet. None when something was written since the list was last counted: the
+    /// The rows of the messages the last Undo brought back ([`Core::undo`]), and of those the store took back of an
+    /// action the server refused, for the window to select them once its list has them: empty while none is back yet. None when something was written since the list was last counted: the
     /// rows found now could be other rows of the list shown (the messages back in the store, the list counted before
     /// them), so the list is read again first and the messages kept for then.
     pub fn restored(&self, core: &Core) -> Result<Option<Vec<u64>>> {
         self.remembered(core, Some(Vec::new()), |search, moment| {
             let counted = self
                 .memo
-                .0
+                .kept
                 .lock()
                 .unwrap_or_else(|e| e.into_inner())
                 .as_ref()
@@ -620,6 +696,321 @@ impl ListView {
     pub fn leaves_list(&self, summary: &Summary, action: Action) -> bool {
         summary.leaves_list(action, self.hide_ignored)
     }
+
+    /// Which view this is, for its loads in the background (a copy is another view)
+    pub(crate) fn view_id(&self) -> u64 {
+        self.memo.id
+    }
+
+    /// A copy of the view for a load in the background: what it reads is kept for this view too
+    pub(crate) fn snapshot(&self) -> ListView {
+        ListView {
+            memo: Memo {
+                id: self.memo.id,
+                kept: self.memo.kept.clone(),
+            },
+            ..self.clone()
+        }
+    }
+
+    /// What the store holds now and the minute, read on the windows' connection: what a load started now is kept as
+    /// (a write after it makes the list stale, so it is never older than what it read)
+    pub(crate) fn moment_now(core: &Core) -> Result<When> {
+        Ok(When {
+            generation: core.generation()?,
+            minute: now_ms() / 60_000,
+        })
+    }
+
+    /// Reads the list as a load does, on the connection of the thread: the counts, the row count and the page at
+    /// `offset` (with `counted`; otherwise the page alone), and with `reselect` the rows to select in it
+    /// ([`Reselected`]). None when `dropped` says a newer load took its place, between the steps. Kept for the view as
+    /// read at `at`, as the calls of the window thread keep what they read.
+    pub(crate) fn load(
+        &self,
+        core: &Core,
+        at: When,
+        offset: u64,
+        counted: bool,
+        reselect: Option<&Reselect>,
+        dropped: &dyn Fn() -> bool,
+    ) -> Result<Option<ListLoad>> {
+        let mut load = ListLoad {
+            offset,
+            counted,
+            ..ListLoad::default()
+        };
+        let Some(search) = self.search() else {
+            return Ok(Some(load));
+        };
+        for attempt in 1..=READ_AGAIN {
+            let before = core.generation()?;
+            if counted {
+                load.lists_recipients = core.lists_recipients(&search)?;
+                (load.total, load.unread) = core.list_counts(&search)?;
+                load.rows = rows_of(core, &search, self.grouped, load.total)?;
+                if dropped() {
+                    return Ok(None);
+                }
+            }
+            load.messages = core.search(&search, self.sort, offset, LIST_PAGE)?;
+            if dropped() {
+                return Ok(None);
+            }
+            let moment = Moment {
+                search: &search,
+                sort: self.sort,
+                at,
+            };
+            let page = Page {
+                offset,
+                limit: LIST_PAGE,
+                at,
+                rows: load.messages.iter().map(RowRef::of).collect(),
+            };
+            self.memo.with(moment, |kept| {
+                if counted {
+                    kept.counts = Some((load.total, load.unread));
+                    kept.rows = Some(load.rows);
+                    kept.pages.clear();
+                }
+                kept.keep(page);
+            });
+            let Some(reselect) = reselect else {
+                break;
+            };
+            let found = Found {
+                moment,
+                rows: load.rows,
+                total: load.total,
+                before,
+                last: attempt == READ_AGAIN,
+            };
+            // None: the store changed under the rows of what Undo brought back, so the list is read again
+            if let Some(reselected) = self.reselect(core, &found, reselect)? {
+                load.reselected = reselected;
+                break;
+            }
+        }
+        Ok(Some(load))
+    }
+
+    /// The rows to select in the list a load read (`found`) for what the window had selected ([`Reselect`]); None
+    /// when what Undo brought back is in the list but the store changed since it was read
+    fn reselect(&self, core: &Core, found: &Found, reselect: &Reselect) -> Result<Option<Reselected>> {
+        if let Some(after) = reselect.after {
+            return self.row_after(core, found, after).map(Some);
+        }
+        let mut selected = reselect.selected.clone();
+        if let Selected::All { search: chosen, .. } = &selected {
+            if self.still_all(core, chosen)? {
+                return Ok(Some(Reselected {
+                    how: Reselection::All,
+                    selection: Selected::All {
+                        search: chosen.clone(),
+                        sort: self.sort,
+                        count: found.total,
+                    },
+                    ..Reselected::default()
+                }));
+            }
+            // no longer the whole list: the messages Select All had, found where they are now, the newer ones not
+            selected = Selected::Listed(core.selected_refs(&selected)?);
+        }
+        if reselect.restored {
+            match self.restored_rows(core, found)? {
+                Back::Found(back) => return Ok(Some(back)),
+                Back::Behind if !found.last => return Ok(None),
+                // the last read: they are left for the next load
+                Back::Behind | Back::None => {}
+            }
+        }
+        let Selected::Listed(refs) = selected else {
+            return Ok(Some(Reselected::default()));
+        };
+        let search = found.moment.search;
+        let rows = match refs.as_slice() {
+            [] => Vec::new(),
+            // the message shown: looked for first in the page read, nearest the row it had
+            [one] => match self.memo.with(found.moment, |kept| {
+                kept.row_near(*one, reselect.hint.unwrap_or(0), found.moment.at)
+            }) {
+                Some(row) => vec![row],
+                None => core
+                    .search_index(search, self.sort, one.folder, one.uid)?
+                    .into_iter()
+                    .collect(),
+            },
+            several => core.positions(search, self.sort, several)?,
+        };
+        let Some(&first) = rows.first() else {
+            return Ok(Some(Reselected::default()));
+        };
+        Ok(Some(Reselected {
+            how: Reselection::Kept,
+            // one message: its row seen; several stay where the list is scrolled to
+            focus: (refs.len() == 1).then_some(first),
+            rows,
+            selection: Selected::Listed(refs),
+        }))
+    }
+
+    /// The row `after` selected (where rows an action took out of the list were), the last row when the list is
+    /// shorter now
+    fn row_after(&self, core: &Core, found: &Found, after: u64) -> Result<Reselected> {
+        let Some(last) = found.rows.checked_sub(1) else {
+            return Ok(Reselected::default());
+        };
+        let row = after.min(last);
+        let refs = core.refs_in_ranges(found.moment.search, self.sort, &[(row, row + 1)])?;
+        Ok(Reselected {
+            how: Reselection::After,
+            rows: vec![row],
+            focus: Some(row),
+            selection: Selected::Listed(refs),
+        })
+    }
+
+    /// The rows of what the last Undo brought back and of what the store took back of a refused action, in the list
+    /// `found`: taken when they are in it (forgotten when they are not), left when the store changed since it was
+    /// read
+    fn restored_rows(&self, core: &Core, found: &Found) -> Result<Back> {
+        let mut behind = false;
+        let taken = core.take_restored(|refs| {
+            if refs.is_empty() {
+                return Ok(None);
+            }
+            let rows = core.positions(found.moment.search, self.sort, refs)?;
+            if core.generation()? != found.before {
+                behind = true;
+                return Ok(None);
+            }
+            let Some(&first) = rows.first() else {
+                return Ok(Some(None));
+            };
+            // only what this list shows: what came back elsewhere is not selected, so no command acts on it unseen
+            let shown = core.store().refs_found(found.moment.search, refs)?;
+            Ok(Some(Some(Reselected {
+                how: Reselection::Restored,
+                rows,
+                focus: Some(first),
+                selection: Selected::Listed(shown),
+            })))
+        })?;
+        Ok(match taken.flatten() {
+            Some(back) => Back::Found(back),
+            None if behind => Back::Behind,
+            None => Back::None,
+        })
+    }
+
+    /// Whether the Select All `chosen` is still the whole of this list: no message stored since it in it
+    fn still_all(&self, core: &Core, chosen: &Search) -> Result<bool> {
+        let this_list = self.search().is_some_and(|s| {
+            Search {
+                up_to: None,
+                ..chosen.clone()
+            } == s
+        });
+        Ok(this_list && !core.store().found_after(chosen, chosen.up_to.unwrap_or(i64::MAX))?)
+    }
+}
+
+/// The rows a list has: grouped, as the store counts them; otherwise one a message, `total`
+fn rows_of(core: &Core, search: &Search, grouped: bool, total: u64) -> Result<u64> {
+    match grouped {
+        true => core.count_rows(search),
+        false => Ok(total),
+    }
+}
+
+/// How many times a load reads the list when the store changes under the rows of what Undo brought back
+const READ_AGAIN: u32 = 3;
+
+/// The list a load read, for the rows to select in it
+struct Found<'a> {
+    moment: Moment<'a>,
+    rows: u64,
+    total: u64,
+    /// What the store held when it was read, on the load's connection
+    before: Generation,
+    /// The last read of the list: what it finds is taken
+    last: bool,
+}
+
+/// What Undo brought back, in a list
+enum Back {
+    None,
+    Found(Reselected),
+    /// The store changed since the list was read
+    Behind,
+}
+
+/// The rows a list load reads at a time
+pub const LIST_PAGE: u64 = 100;
+
+/// What the window has selected when it asks for its list ([`Core::list_load`]), for the load to select it again where
+/// it is now ([`Reselected`])
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Reselect {
+    /// The messages selected: one (the message shown, or one the app chose to show), several, Select All, or none
+    pub selected: Selected,
+    /// With one message: the row it had, looked near first (a list read again with mail come above it finds it at
+    /// once)
+    pub hint: Option<u64>,
+    /// The row to select in place of the selection: where the rows an action took out of the list were (the last row
+    /// when the list is shorter now)
+    pub after: Option<u64>,
+    /// The messages the last Undo brought back, or the store took back as the server refused an action, selected in
+    /// place of the selection when the list has them (after `ActionUndone` or an Undo)
+    pub restored: bool,
+}
+
+/// How a load selected rows for what the window had selected
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum Reselection {
+    /// Nothing selected: nothing was, or none of it is in the list
+    #[default]
+    None,
+    /// The messages selected before, where they are now (some may be gone): only their numbers change
+    Kept,
+    /// Select All is still the whole list: every row selected, counted again
+    All,
+    /// What Undo brought back, or the store took back of a refused action: a new selection, its first row focused
+    Restored,
+    /// The row after a removal: a new selection
+    After,
+}
+
+/// The rows a load selected ([`ListLoad::reselected`])
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Reselected {
+    pub how: Reselection,
+    /// The rows to select, ascending; none for [`Reselection::All`], which selects every row
+    pub rows: Vec<u64>,
+    /// The row to focus and scroll to, None to leave the scrolling as it is
+    pub focus: Option<u64>,
+    /// The selection now: Select All counted again, or the messages the rows are of
+    pub selection: Selected,
+}
+
+/// What a list load read in the background ([`Core::list_load`], [`Core::list_load_page`])
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ListLoad {
+    /// Where its rows start in the list
+    pub offset: u64,
+    /// It read the counts (a load of the list); a page alone did not, and has them 0
+    pub counted: bool,
+    /// The messages of the list, the unread ones, and its rows (one a conversation when grouped)
+    pub total: u64,
+    pub unread: u64,
+    pub rows: u64,
+    /// Whether the list names whom its messages went to ([`Core::lists_recipients`])
+    pub lists_recipients: bool,
+    /// The rows from `offset` on, [`LIST_PAGE`] at most
+    pub messages: Vec<Message>,
+    /// The rows to select for what the window had selected (a load of the list; nothing for a page)
+    pub reselected: Reselected,
 }
 
 #[cfg(test)]
@@ -900,7 +1291,7 @@ mod tests {
                 .iter()
                 .map(RowRef::of)
                 .collect();
-            let kept = view.memo.0.lock().unwrap();
+            let kept = view.memo.kept.lock().unwrap();
             let pages = &kept.as_ref().unwrap().pages;
             let kept: Vec<RowRef> = pages.iter().flat_map(|p| p.rows.iter().copied()).collect();
             assert_eq!(kept, fresh, "grouped {grouped}, open {open:?}");
@@ -978,7 +1369,10 @@ mod tests {
         assert_eq!(view.restored(&core).unwrap(), Some(vec![]), "no Undo");
 
         // Undo of two moved away, the list counted before they are back
-        *core.restored.lock().unwrap() = vec![(inbox, vec!["<g@x>".into(), "<h@x>".into()])];
+        *core.restored.lock().unwrap() = vec![crate::selection::Back::Moving(
+            inbox,
+            vec!["<g@x>".into(), "<h@x>".into()],
+        )];
         assert_eq!(view.restored(&core).unwrap(), Some(vec![]), "none back yet");
         // back in the store, as the worker's sync writes them: the list counted before is behind
         let other = pe_store::Store::open(dir.path().join("store.db")).unwrap();
@@ -1037,7 +1431,7 @@ mod tests {
                     generation: core.generation().unwrap(),
                     minute: now_ms() / 60_000,
                 };
-                let kept = view.memo.0.lock().unwrap();
+                let kept = view.memo.kept.lock().unwrap();
                 kept.as_ref().unwrap().row_near(first, 1, moment_at)
             };
             assert_eq!(found(&view), Some(0), "{what}");
