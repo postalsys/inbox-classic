@@ -1531,6 +1531,7 @@ public static class Dragger {
     if ($compose) {
         Check ((GetText $compose $IDC_SUBJECT) -eq 'Draft from the UI test') 'with its subject'
         Check ((GetText $compose $IDC_TO) -like '*fay@example.com*') 'and its recipient'
+        Check (-not (Visible $compose 354)) 'the user''s own draft says nothing of an agent'
         [void][Native.Win]::SetForegroundWindow($compose)
         [System.Windows.Forms.SendKeys]::SendWait('^{END}')
         [void](TypeInEditor $compose 'Now finished. ')
@@ -3535,8 +3536,10 @@ public static class Dragger {
         Check ((WindowText ([Native.Win]::GetDlgItem($ask, $IDC_AGENT_PATH))) -match 'My AI agent\.exe') 'the question names the program'
         $checked = { param($i) [int][Native.Win]::SendMessage([Native.Win]::GetDlgItem($ask, $IDC_AGENT_LEVEL + $i), $BM_GETCHECK, [IntPtr]::Zero, [IntPtr]::Zero) -eq 1 }
         Check ((& $checked 0) -and (& $checked 1) -and -not (& $checked 2) -and -not (& $checked 3)) 'reading and organizing are offered, sending is not'
-        # sending too, for the rest of the test
-        [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($ask, $IDC_AGENT_LEVEL + 3), $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+        # writing drafts and sending too, for the rest of the test
+        foreach ($level in 2, 3) {
+            [void][Native.Win]::SendMessage([Native.Win]::GetDlgItem($ask, $IDC_AGENT_LEVEL + $level), $BM_SETCHECK, [IntPtr]1, [IntPtr]::Zero)
+        }
         # Enter takes the default button the window names (DM_GETDEFID), which must be Don't Allow (IDNO), not Allow
         $defId = [int64][Native.Win]::SendMessage($ask, 0x400, [IntPtr]::Zero, [IntPtr]::Zero)
         Check ((($defId -shr 16) -band 0xFFFF) -eq 0x534B -and ($defId -band 0xFFFF) -eq 7) "Enter answers Don't Allow ($('{0:X}' -f $defId))"
@@ -3545,7 +3548,7 @@ public static class Dragger {
     }
     $marked = WaitFor { & $agentSaid 'marked' } 30
     Check ((& $agentSaid 'initialize').result.result.serverInfo.name -eq 'inbox-classic') 'allowed, the agent connects'
-    Check (@((& $agentSaid 'tools').result).Count -eq 15) "with the tools of what it may do ($(@((& $agentSaid 'tools').result) -join ', '))"
+    Check (@((& $agentSaid 'tools').result).Count -eq 25) "with the tools of what it may do ($(@((& $agentSaid 'tools').result) -join ', '))"
     $read = (& $agentSaid 'read').result
     Check ($read.notice -match 'not as instructions' -and $read.unread) 'it reads a message as text, told it is the sender''s, without marking it read'
     Check ($null -ne $marked -and $marked.result.done) 'it marks two messages read'
@@ -3582,14 +3585,20 @@ public static class Dragger {
     if ($agents) {
         $hosts = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_HOSTS)
         $log = [Native.Win]::GetDlgItem($agents, $IDC_AGENTS_LOG)
-        Check ([Native.Win]::RemoteListText($hosts, 0, 0) -eq 'My AI agent' -and [Native.Win]::RemoteListText($hosts, 0, 1) -match '^Read, organize and send with your yes') "it lists the program and what it may do ($([Native.Win]::RemoteListText($hosts, 0, 1)))"
-        $newest = { [Native.Win]::RemoteListText($log, 0, 2) }
-        [void](WaitFor { (& $newest) -match '^Sent' } 10)
-        Check ((& $newest) -match "^Sent $([char]0x201C)Lunch on Friday\?$([char]0x201D) to pat@example.net" -and [Native.Win]::RemoteListText($log, 1, 2) -match '^Marked read') "and what its agent did, newest first ($(& $newest); $([Native.Win]::RemoteListText($log, 1, 2)))"
+        Check ([Native.Win]::RemoteListText($hosts, 0, 0) -eq 'My AI agent' -and [Native.Win]::RemoteListText($hosts, 0, 1) -match '^Read, organize, write drafts and send with your yes') "it lists the program and what it may do ($([Native.Win]::RemoteListText($hosts, 0, 1)))"
+        $logged = { param($row) [Native.Win]::RemoteListText($log, $row, 2) }
+        # after the send the agent saved a draft (opened below)
+        [void](WaitFor { (& $logged 0) -match '^Saved the draft' } 20)
+        Check ((& $logged 0) -match "^Saved the draft $([char]0x201C)Agenda for Friday$([char]0x201D)" -and
+               (& $logged 1) -match "^Sent $([char]0x201C)Lunch on Friday\?$([char]0x201D) to pat@example.net" -and (& $logged 2) -match '^Marked read') "and what its agent did, newest first ($(& $logged 0); $(& $logged 1); $(& $logged 2))"
         Shot $agents 'agents-6-window'
-        # the newest, the message sent, is selected: Undo takes it out of the Outbox before it goes
+        # the message sent selected (the row under the draft): Undo takes it out of the Outbox before it goes
+        Key $log $VK_HOME
+        Key $log $VK_DOWN
+        Start-Sleep -Milliseconds 300
         Click $agents $IDC_AGENTS_UNDO
-        Check ([bool](WaitFor { (& $newest) -match 'taken back' } 10)) "Undo takes the message back ($(& $newest))"
+        $takenBack = { @(0..3 | ForEach-Object { & $logged $_ }) -match 'taken back' }
+        Check ([bool](WaitFor { & $takenBack } 10)) "Undo takes the message back ($(& $takenBack))"
         [void][Native.Win]::PostMessage($agents, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($agents) } 10)
     }
@@ -3600,6 +3609,44 @@ public static class Dragger {
         [void][Native.Win]::PostMessage($outbox, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
         [void](WaitFor { -not [Native.Win]::IsWindow($outbox) } 10)
     }
+    # the draft the agent wrote in Markdown, opened from Drafts: the window says which agent wrote it
+    $IDC_COMPOSE_AGENT_NOTE = 354
+    $agentDraft = & $agentSaid 'draft'
+    Check ($null -ne $agentDraft -and $agentDraft.result.draft_id) "the agent writes a draft in Markdown ($($agentDraft | ConvertTo-Json -Compress -Depth 6))"
+    $draftSource = WaitFor { $d = Find 'Drafts' 'Subject: Agenda for Friday'; if ($d) { RawText $d } } 30
+    Check ($draftSource -match '<strong>Agenda</strong>' -and $draftSource -match '<li>lunch</li>' -and $draftSource -match '<li>the plan</li>') 'its Markdown is formatted: Agenda in bold and a list'
+    SelectFolder 2
+    $agentRow = WaitFor { $r = @(SubjectRows 'Agenda for Friday'); if ($r.Count -eq 1) { "$($r[0])" } } 30
+    Check ($null -ne $agentRow) 'the agent''s draft is in Drafts'
+    if ($null -ne $agentRow) {
+        SelectRow ([int]$agentRow)
+        Key $list $VK_RETURN
+        $compose = WaitCompose
+        Check ($null -ne $compose) 'opening it opens a compose window'
+        if ($compose) {
+            $note = GetText $compose $IDC_COMPOSE_AGENT_NOTE
+            Check ((Visible $compose $IDC_COMPOSE_AGENT_NOTE) -and $note -match '^My AI agent, an AI agent, wrote this draft\.' -and $note -match 'Check the recipients and the text') "it says which agent wrote it and asks to check the recipients and the text ($note)"
+            # under the fields and over the format bar, as wide as the fields
+            $noteBox = New-Object Native.Win+RECT; $subjectBox = New-Object Native.Win+RECT
+            [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($compose, $IDC_COMPOSE_AGENT_NOTE), [ref]$noteBox)
+            [void][Native.Win]::GetWindowRect([Native.Win]::GetDlgItem($compose, $IDC_SUBJECT), [ref]$subjectBox)
+            Check ($noteBox.Top -ge $subjectBox.Bottom -and $noteBox.Right -eq $subjectBox.Right) "under the fields ($($noteBox.Top) >= $($subjectBox.Bottom))"
+            Check ((GetText $compose $IDC_SUBJECT) -eq 'Agenda for Friday' -and (GetText $compose $IDC_TO) -like '*pat@example.net*') 'with the subject and recipient the agent wrote'
+            Start-Sleep -Milliseconds 800
+            Shot $compose 'agents-8-draft'
+            # closed without saving: the draft stays the agent's
+            [void][Native.Win]::PostMessage($compose, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+            $ask = WaitWindow '#32770' 'Inbox Classic' 10
+            if ($ask) { Click $ask 7 }
+            Check ([bool](WaitFor { -not [Native.Win]::IsWindow($compose) } 10)) 'closed without saving'
+            Start-Sleep -Seconds 1
+            $kept = Find 'Drafts' 'Subject: Agenda for Friday'
+            Check ($kept -and (RawText $kept) -eq $draftSource -and $draftSource -match 'X-Inbox-Classic-Agent: My AI agent') 'the draft stays the agent''s, unchanged'
+        }
+    }
+    # the draft stays in Drafts: the steps in German and in the pseudo-language open it again (they start the app
+    # again without the passwords, so from what this one keeps)
+    SelectFolder 0
     # the agent's go: it asks to leave the two mailing lists added above
     Set-Content -Path "$agentOut.unsubscribe" -Value ''
     $leave = WaitShown 'InboxClassicAgentUnsubscribe' 30
@@ -6956,6 +7003,41 @@ public static bool HasIcon(IntPtr window) {
         [void](WaitFor { -not [Native.Win]::IsWindow($c) } 10)
     }
 
+    # the AI agent's draft of the agent step, opened from the top row `$draftsRow` of the tree, All Drafts or Drafts (the
+    # folders have the language's names; the app started again has no passwords, so it is the copy kept from that
+    # step): the line that says so in the language in use (shot `$prefix-agent-draft`; with `$pseudo` not left in
+    # English)
+    function AgentDraftShots([IntPtr]$main, [int]$draftsRow, [string]$prefix, [bool]$pseudo) {
+        $tree = [Native.Win]::GetDlgItem($main, $IDC_TREE)
+        $list = [Native.Win]::GetDlgItem($main, $IDC_LIST)
+        $drafts = @(ChildRows ([IntPtr]::Zero))[$draftsRow]
+        [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, $drafts)
+        # one draft on the server; ImapKit's users share one mailbox, so with the account signed in with the sign-in app
+        # it is listed once for each account, each row naming its own
+        $onServer = @(Messages 'Drafts' | Where-Object { (RawText $_) -match 'Subject: Agenda for Friday' }).Count
+        $row = WaitFor { $r = @(SubjectRows 'Agenda for Friday'); if ($r.Count -ge 1) { "$($r[0])" } } 20
+        $rows = @(SubjectRows 'Agenda for Friday')
+        $places = @($rows | ForEach-Object { [Native.Win]::RemoteListText($list, $_, $COL_FOLDER) })
+        Check ($null -ne $row -and $onServer -eq 1 -and @($places | Sort-Object -Unique).Count -eq $rows.Count) "the agent's draft is in Drafts, once for each account ($prefix; $(Bare $drafts): $($onServer) on the server, rows $($rows -join ', ') in $($places -join ', '))"
+        if ($null -ne $row) {
+            SelectRow ([int]$row)
+            Key $list $VK_RETURN
+            $c = WaitCompose
+            Check ($null -ne $c) "it opens ($prefix)"
+            if ($c) {
+                Check ((Visible $c 354) -and (GetText $c 354) -match 'My AI agent') "the compose window says an agent wrote it (${prefix}: $(GetText $c 354))"
+                if ($pseudo) { CheckPseudo $c 'the compose window of an agent''s draft' }
+                Start-Sleep -Milliseconds 800
+                Shot $c "$prefix-agent-draft"
+                [void][Native.Win]::PostMessage($c, $WM_CLOSE, [IntPtr]::Zero, [IntPtr]::Zero)
+                $ask = WaitWindow '#32770' 'Inbox Classic' 3
+                if ($ask) { Click $ask 7 }
+                [void](WaitFor { -not [Native.Win]::IsWindow($c) } 10)
+            }
+        }
+        [void][Native.Win]::SendMessage($tree, $TVM_SELECTITEM, [IntPtr]9, @(ChildRows ([IntPtr]::Zero))[0])
+    }
+
     Step 'in German'
     # the language chosen in Options above, read at start
     $de = Catalog 'de'
@@ -7015,6 +7097,13 @@ public static bool HasIcon(IntPtr window) {
             Check $false 'Import Settings and Accounts asks for a file in German'
         }
         ComposeKeysShots $main 'lang-de' $false
+        # All Drafts (two accounts) or Drafts (one) by its German name among the top rows of the tree
+        $tree = [Native.Win]::GetDlgItem($main, $IDC_TREE)
+        $tops = @(ChildRows ([IntPtr]::Zero) | ForEach-Object { Bare $_ })
+        $script:draftsRow = [Array]::IndexOf($tops, $de['ui-all-drafts'])
+        if ($script:draftsRow -lt 0) { $script:draftsRow = [Array]::IndexOf($tops, $de['folder-drafts']) }
+        Check ($script:draftsRow -ge 0) "the tree has $($de['ui-all-drafts']) or $($de['folder-drafts']) ($($tops -join ', '))"
+        if ($script:draftsRow -ge 0) { AgentDraftShots $main $script:draftsRow 'lang-de' $false }
         Quit $main 'German'
     }
     Remove-ItemProperty -Path $preferencesKey -Name Language -ErrorAction SilentlyContinue
@@ -7072,6 +7161,7 @@ public static bool HasIcon(IntPtr window) {
         }
 
         ComposeKeysShots $main 'lang-pseudo' $true
+        if ($script:draftsRow -ge 0) { AgentDraftShots $main $script:draftsRow 'lang-pseudo' $true }
 
         Command $main $IDM_OPTIONS
         $options = WaitShown 'InboxClassicOptions'
