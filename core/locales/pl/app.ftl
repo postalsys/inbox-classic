@@ -469,7 +469,6 @@ ui-no-match-in = Wyszukiwanie w folderze { $folder } obejmuje tematy, nadawców,
 ui-no-items = W tym widoku nie ma żadnych elementów.
 # review: new
 ui-choose-folder = Wybierz folder, aby zobaczyć jego wiadomości.
-# review: new
 ui-unsubscribe = Wypisz się
 # review: new
 ui-open-in-calendar = Otwórz w kalendarzu
@@ -853,7 +852,6 @@ ui-dont-allow = Nie zezwalaj
 ui-allow = &Zezwól
 # review: new
 ui-dont-send = Nie wysyłaj
-# review: new
 ui-dont-unsubscribe = Nie wypisuj
 # review: new
 ui-edit-first = Najpierw &edytuj

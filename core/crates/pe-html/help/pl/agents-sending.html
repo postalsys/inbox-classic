@@ -1,22 +1,22 @@
-<!--review--><h1>Gdy agent wysyła pocztę</h1>
-<p class="summary">Każda wiadomość, którą agent AI chce wysłać, najpierw jest Ci pokazywana i czeka w Skrzynce nadawczej, zanim wyjdzie.</p>
-<p>Agent może wysyłać pocztę tylko wtedy, gdy mu na to pozwolisz, i każdą wiadomość dopiero po Twojej zgodzie.</p>
+<h1>Gdy agent wysyła pocztę</h1>
+<p class="summary">Każda wiadomość agenta AI wymaga Twojego zatwierdzenia i przed wysłaniem czeka w Skrzynce nadawczej.</p>
+<p>Agent może wysyłać pocztę tylko za Twoją zgodą. Wysłanie każdej wiadomości wymaga osobnego potwierdzenia.</p>
 <img src="picture:agents-4-send" alt="Okno z pytaniem, czy wysłać wiadomość napisaną przez agenta, z każdym odbiorcą i oznaczonym nowym adresem">
-<p>Gdy agent chce wysłać wiadomość, Inbox Classic pokazuje ją z adresem każdego odbiorcy. Adresy, na które nigdy nic nie wysłano, są oznaczone jako <b data-text="ui-new-address"></b>.</p>
+<p>Gdy agent chce wysłać wiadomość, Inbox Classic pokazuje jej treść i adresy wszystkich odbiorców. Adresy, na które nie wysłano jeszcze żadnej wiadomości, mają oznaczenie „<b data-text="ui-new-address"></b>”.</p>
 <ol>
-    <li>Przeczytaj listę odbiorców i tekst.</li>
+    <li>Sprawdź odbiorców i przeczytaj treść wiadomości.</li>
     <li>Wybierz jedną z opcji:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> wysyła wiadomość. Przycisk staje się aktywny po chwili, więc nie da się go nacisnąć przypadkiem.</li>
-            <li><b data-text="ui-edit-first"></b> otwiera ją w nowej wiadomości, aby można ją było zmienić.</li>
-            <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, opcja domyślna, nie wysyła jej.</li>
+            <li>Przycisk „<!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os-->” zatwierdza wysłanie i dodaje wiadomość do kolejki wysyłania. Staje się aktywny po krótkiej chwili, aby ograniczyć ryzyko przypadkowego kliknięcia.</li>
+            <li>Przycisk „<b data-text="ui-edit-first"></b>” otwiera nową wiadomość w edytorze, gdzie możesz ją sprawdzić i zmienić.</li>
+            <li>Przycisk „<!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->” jest wyborem domyślnym. Odrzuca prośbę o wysłanie wiadomości.</li>
         </ul>
     </li>
 </ol>
-<p>Agent pyta o jedną wiadomość naraz. Jeśli przez dłuższą chwilę nie odpowiadasz, agent dostaje informację, że wiadomość czeka na Ciebie, i może później zapytać o Twoją decyzję. Wiadomości i wersje robocze, które pisze, kończą się Twoim podpisem, tak jak Twoje.</p>
-<p>Wysłana wiadomość czeka 30 sekund w Skrzynce nadawczej. Dopóki nie wyjdzie, możesz ją tam usunąć albo kliknąć <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> w <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
+<p>Każdy program może mieć tylko jedną prośbę o wysłanie wiadomości oczekującą na Twoją odpowiedź. Jeśli nie odpowiesz od razu, agent dowie się, że prośba nadal czeka, i może później sprawdzić Twoją decyzję. Do wiadomości i wersji roboczych agenta domyślnie dodawany jest tekst podpisu ustawiony dla konta, ale agent może go pominąć. Nie jest to podpis cyfrowy.</p>
+<p>Po zatwierdzeniu wiadomość czeka w Skrzynce nadawczej przez co najmniej 30 sekund. Dopóki tam jest, możesz ją usunąć lub użyć przycisku „<!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os-->” w oknie <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>, aby anulować wysyłanie. Wiadomości, która została już wysłana, nie można wycofać.</p>
 <h2>Wersje robocze pisane przez agenta</h2>
-<p>Gdy otworzysz wersję roboczą napisaną przez agenta, wiersz nad wiadomością podaje nazwę agenta. Sprawdź odbiorców i tekst, zanim ją wyślesz.</p>
-<p>Agent może zmieniać lub usuwać swoją wersję roboczą, dopóki nie zapiszesz jej samodzielnie. Od tej chwili wersja robocza jest Twoja.</p>
-<aside class="warning">Agent, który ma też inne narzędzia, na przykład przeglądanie internetu lub czytanie Twoich plików, mógłby przez nie przekazać dalej to, co przeczytał. Inbox Classic ich nie widzi. Pozwalaj agentowi wysyłać pocztę tylko wtedy, gdy jest to potrzebne.</aside>
-<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav><!--/review-->
+<p>Po otwarciu wersji roboczej agenta nad jej treścią pojawia się informacja z nazwą jego programu. Przed wysłaniem sprawdź odbiorców i treść.</p>
+<p>Agent może zmieniać lub trwale usuwać tylko własne wersje robocze, których jeszcze nie zapisano w edytorze. Po zapisaniu wersji roboczej w edytorze agent traci te uprawnienia. Dotyczy to również zapisu automatycznego. Samo otwarcie wersji roboczej nie odbiera agentowi dostępu.</p>
+<aside class="warning">Jeśli agent ma dostęp do innych narzędzi, na przykład do przeglądania internetu lub odczytu plików, może za ich pomocą przekazać dalej to, co przeczyta. Inbox Classic nie kontroluje tych narzędzi. Zezwalaj agentowi na wysyłanie poczty tylko wtedy, gdy jest to potrzebne.</aside>
+<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>

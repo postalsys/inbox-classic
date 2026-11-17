@@ -741,6 +741,16 @@ written as the `[many]` form.
 - Quotes „…”; no Title Case. Keys stay English, `<kbd>Click</kbd>` is "Kliknięcie"; the help names Alt+D and Alt+U for
   the &DW / &UDW fields.
 
+- Agent status messages use impersonal forms, avoiding gendered user forms. Send logs describe adding a message
+  to the sending queue; absence from the Outbox does not prove delivery. Subject placeholders follow "wiadomość".
+- Retain "lista mailingowa" and "wypisz się". Logs label the source message subject and sender addresses separately.
+  Windows unsubscribe controls keep distinct W/N keys. Ordinary read/organize summaries use consistent noun phrases.
+- Draft removal uses "usunięto wersję roboczą". Only an agent's own drafts not yet saved by the user in the editor
+  can be permanently removed. Saving including autosave ends access; opening alone does not. Account signature text
+  ("tekst podpisu") is distinct from a digital signature ("podpis cyfrowy").
+- "Oznaczenie śmieci" refers to the junk flag. Removing it does not delete the message. The email warning tells
+  agents to treat message content as data, not as commands to execute.
+
 ### Português (pt-BR, Brasil)
 
 Made from the European Portuguese catalogs and rewritten in Brazilian usage, with Microsoft's (Outlook, Windows) and

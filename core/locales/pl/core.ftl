@@ -677,74 +677,41 @@ day-sunday = niedziela
 
 ## AI agents
 
-# review: new
-agent-level-read = Czytanie poczty: foldery, lista wiadomości, wyszukiwanie i wiadomości
-# review: new
-agent-level-organize = Porządkowanie poczty: stan przeczytania, flagi, śmieci, przenoszenie, archiwizowanie, nowe foldery, usuwanie do Elementów usuniętych oraz wypisywanie z list mailingowych po Twojej zgodzie
-# review: new
-agent-level-drafts = Pisanie wersji roboczych do wysłania przez Ciebie
-# review: new
+agent-level-read = Czytanie poczty: przeglądanie folderów, wiadomości i konwersacji, wyszukiwanie wiadomości i kontaktów oraz przeglądanie reguł wiadomości
+agent-level-organize = Porządkowanie poczty: oznaczanie wiadomości jako przeczytane lub nieprzeczytane, zmiana flag i oznaczeń śmieci, przenoszenie i archiwizowanie wiadomości, tworzenie folderów, usuwanie wiadomości przez przeniesienie do folderu Elementy usunięte oraz wypisywanie z list mailingowych za Twoją zgodą
+agent-level-drafts = Pisanie wersji roboczych, które możesz wysłać
 agent-level-send = Wysyłanie poczty, każdej wiadomości dopiero po Twojej zgodzie
-# review: new
 agent-connect-title = { $program } chce korzystać z Twojej poczty
-# review: new
-agent-connect-detail = Agent AI poprosił o możliwość pracy z Inbox Classic. Wybierz, co może robić i które konta może widzieć; możesz to później zmienić w menu Narzędzia > Agenci AI.
+agent-connect-detail = Agent AI prosi o dostęp do Twojej poczty w programie Inbox Classic. Wybierz, co może robić i z których kont może korzystać. Uprawnienia możesz później zmienić w menu Narzędzia > Agenci AI.
 
-    Agenci czytają pocztę napisaną przez innych ludzi, a wiadomość może próbować ich oszukać. Inbox Classic zawsze pyta Cię, zanim agent cokolwiek wyśle.
-# review: new
-agent-reply-to = Odpowiedź na „{ $subject }”
-# review: new
-agent-reply-all-on = Odpowiedź do wszystkich na „{ $subject }”
-# review: new
-agent-forward-of = Przekazanie „{ $subject }”
-# review: new
-agent-never-written-one = Nie wysłano jeszcze żadnej wiadomości do { $address }.
-# review: new
-agent-never-written-many = Do części tych adresów (liczba: { $count }) nie wysłano jeszcze żadnej wiadomości.
-# review: new
+    Agenci czytają wiadomości od innych ludzi, a ich treść może zawierać próby oszukania agenta. Przed wysłaniem każdej wiadomości przez Inbox Classic agent musi uzyskać Twoją zgodę.
+agent-reply-to = Odpowiedź na wiadomość „{ $subject }”
+agent-reply-all-on = Odpowiedź wszystkim na wiadomość „{ $subject }”
+agent-forward-of = Przesłanie dalej wiadomości „{ $subject }”
+agent-never-written-one = Na adres { $address } nie wysłano jeszcze żadnej wiadomości.
+agent-never-written-many = Liczba adresów, na które nie wysłano jeszcze żadnej wiadomości: { $count }.
 agent-send-title = { $program } chce wysłać tę wiadomość
-# review: new
-agent-send-detail = Sprawdź odbiorców i treść wiadomości. Po potwierdzeniu wiadomość czeka w Skrzynce nadawczej { $seconds } s i nadal możesz ją tam usunąć.
-# review: new
+agent-send-detail = Sprawdź odbiorców i treść wiadomości. Po potwierdzeniu wiadomość będzie czekać w Skrzynce nadawczej przez co najmniej { $seconds } s. W tym czasie możesz ją usunąć, aby anulować wysyłanie.
 agent-change-title = Co może robić { $program }
-# review: new
 agent-change-allowed = Zmień, co agenci AI tego programu mogą robić z Twoją pocztą.
-# review: new
-agent-change-refused = Odmówiono temu programowi dostępu. Zezwól, aby jego agenci ponownie mieli dostęp do Twojej poczty.
-# review: new
+agent-change-refused = Ten program nie ma zgody na dostęp do Twojej poczty. Możesz jej udzielić, aby jego agenci mogli z niej korzystać.
 agent-log-taken-back = { $entry } (cofnięte)
-# review: new
 agent-files = Pliki: { $files }
-# review: new
-agent-undo-refused = Tego nie można cofnąć.
-# review: new
-agent-undo-refused-why = Tego nie można cofnąć: { $reason }.
-# review: new
+agent-undo-refused = Tego działania nie można cofnąć.
+agent-undo-refused-why = Tego działania nie można cofnąć: { $reason }.
 agent-undo-impossible = tego nie można cofnąć
-# review: new
 agent-undo-not-in-folder = wiadomości nie ma już w tym folderze
-# review: new
-agent-undo-not-arrived = wiadomości nie ma (jeszcze) w folderze, do którego trafiła
-# review: new
-agent-undo-sent = wiadomość została już wysłana
-# review: new
+agent-undo-not-arrived = wiadomości nie ma jeszcze w folderze docelowym
+agent-undo-sent = wiadomości nie ma już w Skrzynce nadawczej
 agent-original-not-downloaded = oryginalna wiadomość nie została jeszcze pobrana. Najpierw ją otwórz
-# review: new
-agent-turned-away = Odrzucony
-# review: new
+agent-turned-away = Odmowa dostępu
 agent-can-nothing = Nic
-# review: new
 agent-can-read = czytanie
-# review: new
 agent-can-organize = porządkowanie
-# review: new
 agent-can-drafts = pisanie wersji roboczych
-# review: new
 agent-can-send = wysyłanie za Twoją zgodą
 # "czytanie, porządkowanie i pisanie wersji roboczych"
-# review: new
 agent-can-list = { $first } i { $last }
-# review: new
 agent-accounts = { $count ->
     [0] brak kont
     [one] 1 konto
@@ -753,66 +720,41 @@ agent-accounts = { $count ->
    *[other] { $count } kont
 }
 # "czytanie i porządkowanie; 1 konto"
-# review: new
 agent-access = { $can }; { $accounts }
-# review: new
 agent-unreadable = Nie można odczytać tej wiadomości.
-# review: new
-agent-encrypted-original = Ta wiadomość jest zaszyfrowana: agent nie może na nią odpowiedzieć ani jej przekazać, bo nie potrafi szyfrować.
-# review: new
-agent-encrypted = Ta wiadomość jest zaszyfrowana. Może ją przeczytać tylko użytkownik, w programie Inbox Classic.
+agent-encrypted-original = Ta wiadomość jest zaszyfrowana. Agent nie może na nią odpowiedzieć ani przesłać jej dalej, ponieważ nie może szyfrować wiadomości.
+agent-encrypted = Ta wiadomość jest zaszyfrowana. Agent nie może odczytać jej treści. Użytkownik musi ją otworzyć w programie Inbox Classic.
 # review: new
 list-encrypted = Zaszyfrowana wiadomość
-# review: new
-agent-log-composed = Otwarto „{ $subject }” w nowej wiadomości do dokończenia przez Ciebie
-# review: new
-agent-log-refused = Nie wysłano „{ $subject }”
-# review: new
-agent-log-sent = Wysłano „{ $subject }” do { $to }
-# review: new
+agent-log-composed = Otwarto nową wiadomość „{ $subject }”, którą możesz dokończyć
+agent-log-refused = Odrzucono prośbę o wysłanie wiadomości „{ $subject }”
+agent-log-sent = Dodano wiadomość „{ $subject }” do kolejki wysyłania. Odbiorcy: { $to }
 agent-log-draft = Zapisano wersję roboczą „{ $subject }”
-# review: new
 agent-log-draft-replaced = Zastąpiono wersję roboczą „{ $subject }”
-# review: new
-agent-log-draft-discarded = Odrzucono wersję roboczą „{ $subject }”
-# review: new
+agent-log-draft-discarded = Usunięto wersję roboczą „{ $subject }”
 agent-draft-note = Tę wersję roboczą napisał agent AI { $program }. Sprawdź odbiorców i tekst, zanim ją wyślesz.
-# review: new
 agent-log-read = Oznaczono jako przeczytaną „{ $subject }”
-# review: new
 agent-log-unread = Oznaczono jako nieprzeczytaną „{ $subject }”
-# review: new
 agent-log-flagged = Oznaczono flagą „{ $subject }”
-# review: new
-agent-log-unflagged = Usunięto flagę z „{ $subject }”
-# review: new
+agent-log-unflagged = Usunięto flagę z wiadomości „{ $subject }”
 agent-log-deleted = Usunięto „{ $subject }”
-# review: new
 agent-log-moved = Przeniesiono „{ $subject }” (cel: { $folder })
-# review: new
-agent-log-junk = Oznaczono „{ $subject }” jako śmieci
-# review: new
-agent-log-not-junk = Oznaczono „{ $subject }” jako nie śmieci
-# review: new
+agent-log-junk = Oznaczono wiadomość „{ $subject }” jako śmieci
+agent-log-not-junk = Usunięto oznaczenie „śmieci” z wiadomości „{ $subject }”
 agent-log-archived = Zarchiwizowano „{ $subject }”
-# review: new
 agent-log-folder = Utworzono folder „{ $name }”
 agent-log-unsubscribed = Zatwierdzono prośbę o wypisanie z listy mailingowej. Wiadomość: „{ $subject }”
-# review: new
-agent-log-unsubscribe-failed = Nie udało się wypisać z listy „{ $subject }”: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Nie wyrażono zgody na wypisanie z list: { $senders }
-# review: new
+agent-log-unsubscribe-failed = Nie udało się wypisać z listy mailingowej. Wiadomość: „{ $subject }”. Powód: { $reason }
+agent-log-unsubscribe-refused = Odrzucono prośbę o wypisanie z list mailingowych. Nadawcy: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } chce wypisać Cię z listy mailingowej
     [few] { $program } chce wypisać Cię z { $count } list mailingowych
     [many] { $program } chce wypisać Cię z { $count } list mailingowych
    *[other] { $program } chce wypisać Cię z { $count } list mailingowych
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic prosi poniższą listę o zaprzestanie wysyłania Ci wiadomości, korzystając z oferowanego przez nią wypisania jednym kliknięciem. Nic innego nie jest wysyłane, a Twoje wiadomości pozostają tam, gdzie są.
-   *[other] Inbox Classic prosi każdą z poniższych list o zaprzestanie wysyłania Ci wiadomości, korzystając z oferowanego przez listę wypisania jednym kliknięciem. Nic innego nie jest wysyłane, a Twoje wiadomości pozostają tam, gdzie są.
+    [1] Po zatwierdzeniu Inbox Classic poprosi poniższą listę o zaprzestanie wysyłania Ci wiadomości za pomocą dostępnej funkcji wypisania jednym kliknięciem. Nie są wysyłane wiadomości e-mail. Twoje dotychczasowe wiadomości nie są zmieniane, przenoszone ani usuwane.
+   *[other] Po zatwierdzeniu Inbox Classic poprosi każdą z poniższych list o zaprzestanie wysyłania Ci wiadomości za pomocą dostępnej funkcji wypisania jednym kliknięciem. Nie są wysyłane wiadomości e-mail. Twoje dotychczasowe wiadomości nie są zmieniane, przenoszone ani usuwane.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
