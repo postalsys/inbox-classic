@@ -621,8 +621,7 @@ pgp-why-from-future = Potpis ima datum u budućnosti
 pgp-why-signature-expired = Potpis je istekao
 pgp-why-key-not-valid = Potpisano ključem koji nije važeći
 pgp-why-not-for-you = Potpisano za druge primaoce i prosleđeno vama
-# review: new
-pgp-why-not-key-in-use = Potpisano drugim ključem od onog koji se koristi za { $address }
+pgp-why-not-key-in-use = Potpisano ključem koji se razlikuje od onog izabranog za adresu { $address }
 pgp-part-pictures-loaded = { $label }. Slike su učitane sa interneta
 pgp-error-no-own-key = Nemate ključ za { $address } kojim biste potpisivali ili šifrovali. Napravite ga u meniju Alatke > Ključevi za šifrovanje ili isključite Potpiši i Šifruj.
 pgp-error-missing-keys = { $count ->

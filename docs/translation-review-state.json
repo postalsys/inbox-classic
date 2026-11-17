@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review pgp-why-not-key-in-use in all28 languages, plus the existing Swedish encrypted-part wrapper whose neuter agreement needs correction. Source-only catalog import from9924cfe7 is validated, with generated text IDs built in12.05s; its dependent hardening code remains outside the review branch. Inspect reason standalone and embedded after the full stop in pgp-part-encrypted. Then es/et/fr compose targets and the remaining queue. Scope33868/1352; pending13186/560; completed20682/792. No tests; REVIEWED unchanged.",
+  "next_batch": "Review Spanish compose signing/encryption additions, then Estonian/French:17 app IDs,23 core IDs,sign-and-encrypt topic and write-message insertion per language. German compose and the active-key signature reason in all28 languages are complete. The source-only reason import205bd846 preserves all earlier text; its hardening implementation remains on its source branch. Swedish encrypted-part wrapper also corrected to neuter agreement. Scope33868/1352; completed20711/792; pending13157/560; historical catalog improvements3546. Then other earlier languages/Hungarian compose work,48 original Hungarian help topics and lt/lv/pl/ro/ru/sk/sl/sv/uk. No test suites; REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -33,7 +33,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -2231,6 +2230,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "bg-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/bg/core.ftl": "b57a36e6259f830c0c4473c0d2aee5dbe8b98a9819d1448efe2af942e03adf88"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
@@ -2256,7 +2273,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -4471,6 +4487,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "cs-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/cs/core.ftl": "03cc547f6ca25d012e950d4d43db01568271179d13463f3c0192fdbf19860462"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ]
     },
@@ -4496,7 +4530,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -6673,15 +6706,29 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "da-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/da/core.ftl": "bef65260b32ba8927dc2eb02d4393cf40f27653165726988dffc05476c2cf988"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
     "de": {
-      "pending_catalogs": {
-        "core.ftl": [
-          "pgp-why-not-key-in-use"
-        ]
-      },
+      "pending_catalogs": {},
       "pending_help": [],
       "completed_batches": [
         {
@@ -7391,6 +7438,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "de-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/de/core.ftl": "3fe1723c28d5216e8c4b4027a148983aaf23600755ce0fb9f0d511501ca0dcef"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ]
     },
@@ -7416,7 +7481,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -9587,6 +9651,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "el-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/el/core.ftl": "8b6eb7372e1b8d69911b0263ea6522b2cee27149728ec8a92560d5656a33127c"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ]
     },
@@ -9612,7 +9694,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -10279,6 +10360,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "es-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/es/core.ftl": "185dc00cccd1eb35eb7d236b279fbc153045fd2279260d3b4e5c154cadb11304"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
@@ -10304,7 +10403,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -10978,6 +11076,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "et-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/et/core.ftl": "eb60cbe795cf69b3c850d393a8969385e56970944627a5a72aa7c3b1a081305e"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ]
     },
@@ -11003,7 +11119,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -13181,6 +13296,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "fi-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/fi/core.ftl": "422c0c372bc3f9ed43a6ebf66205473c758c64bbfdc6e78e7d677c8efda8eefc"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ]
     },
@@ -13206,7 +13339,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -13887,6 +14019,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "fr-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/fr/core.ftl": "314c218df3b5ac3d8a05388bc2aebb5032155b8f65b603429ce0211592836814"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
@@ -13912,7 +14062,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -15956,6 +16105,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "hr-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/hr/core.ftl": "e3d4d8fec2d11aa9c73d932c7323ebdeecad219ee59c76d3328fe4ea701db0f6"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ]
     },
@@ -15981,7 +16148,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -17684,6 +17850,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "hu-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/hu/core.ftl": "613666f77dbef607613f4cfed5e70cb206a434a91761bfc83161738f72a110cc"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ]
     },
@@ -17709,7 +17893,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -20093,6 +20276,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "it-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/it/core.ftl": "8742d65dd8c459801402b09c7bb954a0babc84fbc2f4d64c6d08e7ab27df552d"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
@@ -21123,7 +21324,6 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
-          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -21733,6 +21933,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "lt-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/lt/core.ftl": "636f8407fd2c2602c118714161a82d3c9fd62d798abdbdbbe770c993968d8c7b"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
@@ -22763,7 +22981,6 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
-          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -23373,6 +23590,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "lv-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/lv/core.ftl": "723d2b009ec03af28dd7b0c283443bff2a0813828091cfde86d3fa78cbb2f2e5"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
@@ -23398,7 +23633,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -25814,6 +26048,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "nl-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/nl/core.ftl": "efb92123fae9ef765a98ff89f6fd8554c149d9cc7f1881726afc45d2eeae0028"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
@@ -26844,7 +27096,6 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
-          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -27454,6 +27705,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "pl-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/pl/core.ftl": "689c159ba3c0f07d914af229709d4c7cc5003e4231ab99ff70ec833d4be61654"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ]
     },
@@ -27479,7 +27748,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -29862,6 +30130,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "pt-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/pt/core.ftl": "8f75545ef2554a9eb6a5a51139a4d2d50180ba3d2045127538c4150fc6b6adc9"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
@@ -30892,7 +31178,6 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
-          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -31502,6 +31787,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "ro-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/ro/core.ftl": "cd8e8ced5c64ba4a6827d24f1b763a223df221fbad0f57ead4ce362658623670"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
@@ -32532,7 +32835,6 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
-          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -33142,6 +33444,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "ru-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/ru/core.ftl": "ac55271983787483a54818f99fd865b87fe159246d2955894e57616a41c44704"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ]
     },
@@ -34172,7 +34492,6 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
-          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -34782,6 +35101,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "sk-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sk/core.ftl": "44cf2d9575185eec73342522d68a1771ee227e8bd2d04fbccc2914c68e562eae"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
@@ -35812,7 +36149,6 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
-          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -36422,6 +36758,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "sl-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/sl/core.ftl": "b6677e7df332bc786f0774111f0f4adb3882f26252ca4831439971153c34cd23"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ]
     },
@@ -37438,7 +37792,6 @@
           "pgp-part-unknown-key",
           "pgp-part-not-signed",
           "pgp-part-not-checked",
-          "pgp-part-encrypted",
           "pgp-part-no-key",
           "pgp-part-changed",
           "pgp-part-unprotected",
@@ -37452,7 +37805,6 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
-          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -38062,6 +38414,25 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "sv-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use",
+              "pgp-part-encrypted"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 2,
+          "files": {
+            "core/locales/sv/core.ftl": "1d270332f6c9d58a87e4323d22d9e92e6353a8af75b06f86ebc515055d0d76b6"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. Also reviewed the existing encrypted-part wrapper and corrected both reason/wrapper to neuter agreement with meddelande; other pending Swedish strings remain marked. No scope increase for this wrapper. No test suite run."
         }
       ]
     },
@@ -39092,7 +39463,6 @@
           "pgp-why-signature-expired",
           "pgp-why-key-not-valid",
           "pgp-why-not-for-you",
-          "pgp-why-not-key-in-use",
           "pgp-part-pictures-loaded",
           "pgp-error-no-own-key",
           "pgp-error-missing-keys",
@@ -39702,6 +40072,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "uk-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/uk/core.ftl": "97f0707c1ca32fe8de9a843debe2abd90deb8fd66f07305d1aec3bc5695d667e"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ]
     },
@@ -39727,7 +40115,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -42022,6 +42409,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "ca-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/ca/core.ftl": "e2aeace5b6069a06ace3c01d9aae68c0fe34afc8b987744b10f51f53c9619928"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -42050,7 +42455,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -44306,6 +44710,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "nb-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/nb/core.ftl": "2020acfe43fd7ce94f19759afc3028732845cbb4c995ccfa325732236a93a471"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -44334,7 +44756,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -46596,6 +47017,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "pt-BR-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/pt-BR/core.ftl": "91789eaffe4a3a28fe0ea771953577c8e5cff5723eb2fc5355bee29f09ba6ad9"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -46624,7 +47063,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -48858,6 +49296,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "sr-Latn-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 1,
+          "files": {
+            "core/locales/sr-Latn/core.ftl": "10f04c426dff10bf96953dc0a7f6273d851b582eac0d7bde3a78852658db0f88"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Improved the literal draft phrasing. No test suite run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -48886,7 +49342,6 @@
           "ui-compose-keep-encrypted"
         ],
         "core.ftl": [
-          "pgp-why-not-key-in-use",
           "pgp-compose-encrypted",
           "pgp-compose-encrypt-ready",
           "pgp-compose-missing",
@@ -51093,6 +51548,24 @@
           },
           "validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
           "notes": "Exact source insertion of pgp-why-not-key-in-use from9924cfe7, still marked. Every earlier catalog byte retained. Caller inspected on the source branch; dependent hardening implementation is not imported. No linguistic review or test suite claimed."
+        },
+        {
+          "id": "tr-signature-active-key-round2",
+          "reviewed_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/tr/core.ftl": "4852afbc385034abd6871c264796b1297995601d155bb848bb13794950d9fadf"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "d91fda54a6a0ffb1883e3a8b9ba7d59967c391874d01f96eba810cbc8adbd63e"
+          },
+          "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+          "notes": "Reviewed the new signature-key mismatch reason standalone and in pgp-part-encrypted, using the upstream Signature::Bad caller and active-key map. It reports a different key from the one currently assigned/in use for the address; no claim of invalid cryptography, expired key or proven impersonation. Address remains uninflected. Preserved language register and key terminology. Retained the already natural and accurate wording. No test suite run."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -60220,6 +60693,426 @@
         "review_commit": "3552434d",
         "new_languages": 0,
         "validation": "Fresh fetch; origin/master remains a6ed91d6. Hardening branch advanced to c69576e6 and adds exactly pgp-why-not-key-in-use in every language (28 translations), from focused commit9924cfe7. No existing source value changed. New files/IDs/hashes recorded pending import, not counted in active scope. Guide unchanged; root has no relevant edits; original key-help source exact. Other code/fuzz work untouched. German check-language has exactly 1445 expected removed-mark diagnostics and no structural findings. All 53 actual mnemonic groups pass. Exact reconstruction verifies 16 value edits and 40 mark removals; IDs, full variables, plural branches, braces, access keys and comments are preserved. Help markup/attributes/code/literal keyboard contents/platform branches preserved; all prose outside the write-message insertion is byte-for-byte unchanged. Substituted control joins inspected on Windows/Mac/Linux, and dynamic command shortcuts checked against commands.toml. All 28 full active inventories and pending marks match; current file/source hashes reconcile: 20716 unmarked messages, 10391 changed help lines, 14 verified baseline pairs. Since-start1413 entries and213 passages match. HTML regenerated; git diff --check passes. No tests or builds."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "a6ed91d6d98637ee3d18102862f697adc4ddbdf5",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074",
+          "chore/pgp-hardening": "c69576e6435b07914360cfa83c562c66d734ec45"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/master": {
+            "merge_base": "162c0dd22d9489061cdc195a42810d695a5672ba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "chore/pgp-hardening": {
+            "merge_base": "162c0dd22d9489061cdc195a42810d695a5672ba",
+            "new_languages": [],
+            "integrated_help_paths": 87,
+            "unmerged_non_help_path_count": 16827,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/pgp-interop-suite.yml",
+              "CLAUDE.md",
+              "app/CMakeLists.txt",
+              "app/src/main.cpp",
+              "core/crates/pe-bounce/tests/hostile.rs",
+              "core/crates/pe-core/src/autocrypt.rs",
+              "core/crates/pe-core/src/compose_keys.rs",
+              "core/crates/pe-core/src/export.rs",
+              "core/crates/pe-core/src/keys.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/protect.rs",
+              "core/crates/pe-core/src/protect_out.rs",
+              "core/crates/pe-core/src/secrets.rs",
+              "core/crates/pe-core/src/worker/background.rs",
+              "core/crates/pe-core/tests/e2e_core.rs",
+              "core/crates/pe-core/tests/pgp_mail.rs",
+              "core/crates/pe-keys/src/lib.rs",
+              "core/crates/pe-net/src/http.rs",
+              "core/crates/pe-pgp/src/cert.rs",
+              "core/crates/pe-pgp/src/decrypt.rs",
+              "core/crates/pe-pgp/src/lib.rs",
+              "core/crates/pe-pgp/src/policy.rs",
+              "core/crates/pe-pgp/src/sealed.rs",
+              "core/crates/pe-pgp/src/verify.rs",
+              "core/crates/pe-pgp/tests/forge/mod.rs",
+              "core/crates/pe-pgp/tests/policy.rs",
+              "core/crates/pe-store/src/pgp.rs",
+              "core/fuzz/.gitignore",
+              "core/include/texts.h",
+              "docs/pgp-plan.md",
+              "docs/shells.md",
+              "linux/src/agents.rs",
+              "linux/src/app.rs",
+              "linux/src/e2e/keys.rs",
+              "linux/src/e2e/layout.rs",
+              "linux/src/e2e/steps.rs",
+              "linux/src/keys.rs",
+              "linux/src/mailbox.rs",
+              "mac/Sources/InboxClassic/App.swift",
+              "mac/Sources/InboxClassic/Generated/Texts.swift",
+              "mac/Sources/InboxClassic/MainWindow.swift",
+              "mac/Sources/InboxClassic/UITestSteps.swift",
+              "scripts/pgp-interop-suite.sh",
+              "scripts/pgp-interop-summary.py",
+              "scripts/pgp-interop.sh",
+              "scripts/ui-e2e.ps1",
+              "scripts/ui-e2e/SCENARIO.md"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 1,
+              "CLAUDE.md": 1,
+              "app/CMakeLists.txt": 1,
+              "app/src": 1,
+              "core/crates": 23,
+              "core/fuzz": 16781,
+              "core/include": 1,
+              "docs/pgp-plan.md": 1,
+              "docs/shells.md": 1,
+              "linux/src": 7,
+              "mac/Sources": 4,
+              "scripts/pgp-interop-suite.sh": 1,
+              "scripts/pgp-interop-summary.py": 1,
+              "scripts/pgp-interop.sh": 1,
+              "scripts/ui-e2e.ps1": 1,
+              "scripts/ui-e2e": 1
+            },
+            "complete_path_list_sha256": "49d9defb7cd5a49e388398c9f1acc01570072be32bcb9e7f0ce39e3f30086309",
+            "complete_path_list_artifact": "/private/tmp/inbox-active-key-unmerged-chore-pgp-hardening.txt"
+          }
+        },
+        "integrated_help_source": "255205aad7e70f680909092c3167cc724618b70e",
+        "root_locale_help_settings_status": [],
+        "unmerged_non_help_path_count": 16827,
+        "unmerged_non_help_paths_except_fuzz_corpora": [
+          ".github/workflows/pgp-interop-suite.yml",
+          "CLAUDE.md",
+          "app/CMakeLists.txt",
+          "app/src/main.cpp",
+          "core/crates/pe-bounce/tests/hostile.rs",
+          "core/crates/pe-core/src/autocrypt.rs",
+          "core/crates/pe-core/src/compose_keys.rs",
+          "core/crates/pe-core/src/export.rs",
+          "core/crates/pe-core/src/keys.rs",
+          "core/crates/pe-core/src/lib.rs",
+          "core/crates/pe-core/src/protect.rs",
+          "core/crates/pe-core/src/protect_out.rs",
+          "core/crates/pe-core/src/secrets.rs",
+          "core/crates/pe-core/src/worker/background.rs",
+          "core/crates/pe-core/tests/e2e_core.rs",
+          "core/crates/pe-core/tests/pgp_mail.rs",
+          "core/crates/pe-keys/src/lib.rs",
+          "core/crates/pe-net/src/http.rs",
+          "core/crates/pe-pgp/src/cert.rs",
+          "core/crates/pe-pgp/src/decrypt.rs",
+          "core/crates/pe-pgp/src/lib.rs",
+          "core/crates/pe-pgp/src/policy.rs",
+          "core/crates/pe-pgp/src/sealed.rs",
+          "core/crates/pe-pgp/src/verify.rs",
+          "core/crates/pe-pgp/tests/forge/mod.rs",
+          "core/crates/pe-pgp/tests/policy.rs",
+          "core/crates/pe-store/src/pgp.rs",
+          "core/fuzz/.gitignore",
+          "core/include/texts.h",
+          "docs/pgp-plan.md",
+          "docs/shells.md",
+          "linux/src/agents.rs",
+          "linux/src/app.rs",
+          "linux/src/e2e/keys.rs",
+          "linux/src/e2e/layout.rs",
+          "linux/src/e2e/steps.rs",
+          "linux/src/keys.rs",
+          "linux/src/mailbox.rs",
+          "mac/Sources/InboxClassic/App.swift",
+          "mac/Sources/InboxClassic/Generated/Texts.swift",
+          "mac/Sources/InboxClassic/MainWindow.swift",
+          "mac/Sources/InboxClassic/UITestSteps.swift",
+          "scripts/pgp-interop-suite.sh",
+          "scripts/pgp-interop-summary.py",
+          "scripts/pgp-interop.sh",
+          "scripts/ui-e2e.ps1",
+          "scripts/ui-e2e/SCENARIO.md"
+        ],
+        "guide_sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
+        "changed_source_tips_since_last_checkpoint": {},
+        "integrated_active_key_source_check": {
+          "status": "source-only catalogs integrated and reviewed",
+          "ref": "chore/pgp-hardening",
+          "observed_source_tip": "c69576e6435b07914360cfa83c562c66d734ec45",
+          "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+          "new_catalog_entries": 28,
+          "catalog_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "new_help_topics": 0,
+          "changed_help_topics": 0,
+          "files": {
+            "core/locales/bg/core.ftl": {
+              "source_sha256": "16e9e19f2d1d75dffbeb0074ec93310c8978796141453b1d0953ad5e3fbb5977",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4a62b72469db30848900d67c0a2c9504a3ee7fe1db297e716e77b24f9bf25f51"
+            },
+            "core/locales/ca/core.ftl": {
+              "source_sha256": "3a2788707c50ee6cf4e2eabc676d35f4088226db8de9d407e1db41922b9602b6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "57c515541e23b49ca41dd16e5e8535fe4a5e2a3f4e1c21ed7aa04d0344921b25"
+            },
+            "core/locales/cs/core.ftl": {
+              "source_sha256": "fda0c74b699a113eeb04c082d374268ca8d9639e50bf6b072b27cda3a24463f0",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "c0830122e3de177236be73d54f8f09ae7c9771640dbb8691c3a9cb762d05b545"
+            },
+            "core/locales/da/core.ftl": {
+              "source_sha256": "35a86bb9f3542fa7b2a437ddf71f05424854b796281d02961d4ad4cfa47eb9d2",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "b8fad7dd255994701d3c2cc2f8fcee2e131cfde4ee196a3004607ea08964fe69"
+            },
+            "core/locales/de/core.ftl": {
+              "source_sha256": "b91224b783883801433c0c09fa6e07e6821ae6f2a19e786995788ce7e383fae9",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "a591d2f53c326961386e0554ef10cbc6b21d5015e0ebcc1676b091d62269b521"
+            },
+            "core/locales/el/core.ftl": {
+              "source_sha256": "8ed80fcf78378a7f8d081215a1eae4445722259f5db683a7a730eb0e3a82a35a",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "8dc74a5766f33d0e20ab13aef37846db1e35798134df77b2c432e6a13d4817ca"
+            },
+            "core/locales/en/core.ftl": {
+              "source_sha256": "16f82911b700dec76b7761ca4f32efcae14e3371a52d8f0d58e1382d6aa8787e",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4c94ae03e10150e79745253914b4f59ba7460faa230333cb6cf27b858753417c"
+            },
+            "core/locales/es/core.ftl": {
+              "source_sha256": "d9771c37c09402b1f1eda65bd6da77dbf3cde653f0bd7fb194f5384c21c0925c",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5c755b4c3eacebe03b92a2ef3c69e1e7c7121677189e3f1fdc4da8b5cfa843d0"
+            },
+            "core/locales/et/core.ftl": {
+              "source_sha256": "bb4c3968c7aa2c06b64213b962428681d594c59efc3a673dd12e5d3fc0a83a0f",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "b84a2b56e579b24973d3cbcb97dafa0438cedc5a654485d11b70ab5e068b56c5"
+            },
+            "core/locales/fi/core.ftl": {
+              "source_sha256": "f9f444897faf1136880a1a23befe7c0bb908f6a9eb9394c48c08dda9cb3be6e4",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "7990a785d1a186c7663d704dd2f26d8afb05a2b9fa53b52477558d3d3023588c"
+            },
+            "core/locales/fr/core.ftl": {
+              "source_sha256": "eeab1aa52ac26e5339884a49aa00deeb38ab80ad7c238f671300bc234b074dbd",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "76a6f40ecd4c18e13f7cb623bc0d4ba305f95b3a43f33176bf1f32837ff0ed7b"
+            },
+            "core/locales/hr/core.ftl": {
+              "source_sha256": "7bf5f0d2a9eebd494029b1bb6d5e2bfff03ad3d2bed4e5b3c75851f7aa758463",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "d0c9e7c7d9ad28a5260be6269219a52b43eba84490591aa1dea1d068507c6783"
+            },
+            "core/locales/hu/core.ftl": {
+              "source_sha256": "5b7fd3ff7ae169491dcb4e7471dc2a245ec5e81178ad8af848845e5f870da4c6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "de8f9cdcbd1dc605392c4d8c20711be450416b12cba221a0c8bb7545dd552e43"
+            },
+            "core/locales/it/core.ftl": {
+              "source_sha256": "e6c91c269a2b077a15b61e05cc6013cefd31a1bc55de89082a3f769bf10d4b37",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5ca92264998878c72c7c22bf864e3e3e6b904c700410086d18b2c072a4311b86"
+            },
+            "core/locales/lt/core.ftl": {
+              "source_sha256": "8fdb56b72ac0d592e065a0f2bf68d5a5e6df85c451a77696d0129eeaf9050816",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "9d0ae049a6651b7f700dc6201427e9d81c1aec1fc98f0f54def301c6ee42d1cd"
+            },
+            "core/locales/lv/core.ftl": {
+              "source_sha256": "c88a2a159132bc8ebd8eb346f56cd44c01d475ffda3678dd4db1854ba774d129",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "7162e0590d1544cd8557d4ea301077345570fea82bc4046f35324484bbdc84ea"
+            },
+            "core/locales/nb/core.ftl": {
+              "source_sha256": "fd98dd1f618212c77559a741d920bbcb819c023ac8b9955606ed59f362050536",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "649a5588a1c7b9b28c9971c913eda5dc347169814a90937b34677c80bad40965"
+            },
+            "core/locales/nl/core.ftl": {
+              "source_sha256": "c53c686eb8355626ad21a5de618b72cb3251290c2a86065eaa9958c90d509d12",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4788eb5e5382b227db6b52fa79d2d948e80d5ed97e6af51fa02c66e8421270e1"
+            },
+            "core/locales/pl/core.ftl": {
+              "source_sha256": "498b42c041b31dbfd2eb29518e441f59cb49ae0cf948c2e6b6f57c257fa828c8",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "c46ac141935e59f3c3d39f5a5bc085afb01e2d3d8133609a0cc8d754119a249c"
+            },
+            "core/locales/pt-BR/core.ftl": {
+              "source_sha256": "37e163d195e68444030d92ea2c5514bc9768e4dbb404575f18ab0fd2c63e1001",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+            },
+            "core/locales/pt/core.ftl": {
+              "source_sha256": "355f896a75ae3e52e26664563f19b6680d0719690b1d007528fccb6087b6d1a6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+            },
+            "core/locales/ro/core.ftl": {
+              "source_sha256": "f2e7b552140a37bddfb8020b8b01f4095f7e309f7b1379aee3b4c58955084a74",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "ccb6595e0be610fe030b171dbe9df6cfb0f536873e539ce5ad865c02f7175db4"
+            },
+            "core/locales/ru/core.ftl": {
+              "source_sha256": "4bcc4ffedcb660b5fe86ac69beabc7a766daeb5cfb1381e6fe929605397e2e54",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4353044c1df65b4b4990323e714482b6311db76d8415626e558320b6026620bc"
+            },
+            "core/locales/sk/core.ftl": {
+              "source_sha256": "5fd463a4f1c91fc2a14fc3bf7cb49c5afb52d78b62e82e1f3c5ffef74ae4bb97",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "88d88798c1bb159d82f82f2dd33f48583b1d5bb60199fe3bd4e84a3a0b0af3b6"
+            },
+            "core/locales/sl/core.ftl": {
+              "source_sha256": "9787b443035e1b48b59cab003b34a97545fc2a8930b2ee230fce0b8b367264ac",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "67fc0ca660f323b20c4a178855b30792f94f71bfe71d85135793eb0e9444ef7f"
+            },
+            "core/locales/sr-Latn/core.ftl": {
+              "source_sha256": "f38acd96c4995038503690ccc62016cfaefdc803a0860b7d649bef0699538b54",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "fecb2884b4c4f0373831458647d4f208fc2736d6387c8859dab5d1ad18cf1810"
+            },
+            "core/locales/sv/core.ftl": {
+              "source_sha256": "e420ae2d02d82bb51c2158659755840d94902b56305aeb5a4f58843119a3f1ac",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "6b1875cf2a7190d360a6c0ab3d3e3c7272ca9896daa013b41950c03ee60be777"
+            },
+            "core/locales/tr/core.ftl": {
+              "source_sha256": "4ea56cafd6c1b8ddf348d4392777faf297c5f11827e45240f999bb96a25b84a1",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "ed1c9e5bcd9f5f0bcc739cbfa59c1808fa9f8fafe9c762b80787772b834dd346"
+            },
+            "core/locales/uk/core.ftl": {
+              "source_sha256": "d801bd33eb1c5a09b64de91527c873425dfc966b4afa09bafd20ac821194b346",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4d507d7ad7a78f6e3e07b38976613b1e782c80074553203195fb147a96b3989d"
+            }
+          },
+          "note": "The exact source entry imported in205bd846 is unchanged upstream. All28 reasons are now reviewed against its caller. Other hardening implementation/corpus changes remain outside this review checkout."
+        },
+        "since_start_pending_catalog_entries": 1413,
+        "since_start_pending_help_passages": 213,
+        "remaining_since_omissions": [],
+        "pending_catalog_entries": 13157,
+        "pending_help_topics": 560,
+        "additional_unrecorded_work": 0,
+        "kind": "All-language signature-key warning review",
+        "review_commit": "205bd846",
+        "new_languages": 0,
+        "validation": "Fresh source comparison shows all seven refs unchanged since the prior audit. No additional strings/languages; exact key-help and active-key source entries verified. Guide unchanged; root has no relevant edits. All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build."
       }
     ],
     "settings_source_integration": {
@@ -65498,232 +66391,6 @@
         "hr"
       ]
     },
-    "pending_source_import": {
-      "status": "source-only catalogs and text identifiers integrated; linguistic review pending",
-      "ref": "chore/pgp-hardening",
-      "observed_source_tip": "c69576e6435b07914360cfa83c562c66d734ec45",
-      "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
-      "new_catalog_entries": 28,
-      "catalog_ids": {
-        "core.ftl": [
-          "pgp-why-not-key-in-use"
-        ]
-      },
-      "new_help_topics": 0,
-      "changed_help_topics": 0,
-      "files": {
-        "core/locales/bg/core.ftl": {
-          "source_sha256": "16e9e19f2d1d75dffbeb0074ec93310c8978796141453b1d0953ad5e3fbb5977",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "4a62b72469db30848900d67c0a2c9504a3ee7fe1db297e716e77b24f9bf25f51"
-        },
-        "core/locales/ca/core.ftl": {
-          "source_sha256": "3a2788707c50ee6cf4e2eabc676d35f4088226db8de9d407e1db41922b9602b6",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "57c515541e23b49ca41dd16e5e8535fe4a5e2a3f4e1c21ed7aa04d0344921b25"
-        },
-        "core/locales/cs/core.ftl": {
-          "source_sha256": "fda0c74b699a113eeb04c082d374268ca8d9639e50bf6b072b27cda3a24463f0",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "c0830122e3de177236be73d54f8f09ae7c9771640dbb8691c3a9cb762d05b545"
-        },
-        "core/locales/da/core.ftl": {
-          "source_sha256": "35a86bb9f3542fa7b2a437ddf71f05424854b796281d02961d4ad4cfa47eb9d2",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "b8fad7dd255994701d3c2cc2f8fcee2e131cfde4ee196a3004607ea08964fe69"
-        },
-        "core/locales/de/core.ftl": {
-          "source_sha256": "b91224b783883801433c0c09fa6e07e6821ae6f2a19e786995788ce7e383fae9",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "a591d2f53c326961386e0554ef10cbc6b21d5015e0ebcc1676b091d62269b521"
-        },
-        "core/locales/el/core.ftl": {
-          "source_sha256": "8ed80fcf78378a7f8d081215a1eae4445722259f5db683a7a730eb0e3a82a35a",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "8dc74a5766f33d0e20ab13aef37846db1e35798134df77b2c432e6a13d4817ca"
-        },
-        "core/locales/en/core.ftl": {
-          "source_sha256": "16f82911b700dec76b7761ca4f32efcae14e3371a52d8f0d58e1382d6aa8787e",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "4c94ae03e10150e79745253914b4f59ba7460faa230333cb6cf27b858753417c"
-        },
-        "core/locales/es/core.ftl": {
-          "source_sha256": "d9771c37c09402b1f1eda65bd6da77dbf3cde653f0bd7fb194f5384c21c0925c",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "5c755b4c3eacebe03b92a2ef3c69e1e7c7121677189e3f1fdc4da8b5cfa843d0"
-        },
-        "core/locales/et/core.ftl": {
-          "source_sha256": "bb4c3968c7aa2c06b64213b962428681d594c59efc3a673dd12e5d3fc0a83a0f",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "b84a2b56e579b24973d3cbcb97dafa0438cedc5a654485d11b70ab5e068b56c5"
-        },
-        "core/locales/fi/core.ftl": {
-          "source_sha256": "f9f444897faf1136880a1a23befe7c0bb908f6a9eb9394c48c08dda9cb3be6e4",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "7990a785d1a186c7663d704dd2f26d8afb05a2b9fa53b52477558d3d3023588c"
-        },
-        "core/locales/fr/core.ftl": {
-          "source_sha256": "eeab1aa52ac26e5339884a49aa00deeb38ab80ad7c238f671300bc234b074dbd",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "76a6f40ecd4c18e13f7cb623bc0d4ba305f95b3a43f33176bf1f32837ff0ed7b"
-        },
-        "core/locales/hr/core.ftl": {
-          "source_sha256": "7bf5f0d2a9eebd494029b1bb6d5e2bfff03ad3d2bed4e5b3c75851f7aa758463",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "d0c9e7c7d9ad28a5260be6269219a52b43eba84490591aa1dea1d068507c6783"
-        },
-        "core/locales/hu/core.ftl": {
-          "source_sha256": "5b7fd3ff7ae169491dcb4e7471dc2a245ec5e81178ad8af848845e5f870da4c6",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "de8f9cdcbd1dc605392c4d8c20711be450416b12cba221a0c8bb7545dd552e43"
-        },
-        "core/locales/it/core.ftl": {
-          "source_sha256": "e6c91c269a2b077a15b61e05cc6013cefd31a1bc55de89082a3f769bf10d4b37",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "5ca92264998878c72c7c22bf864e3e3e6b904c700410086d18b2c072a4311b86"
-        },
-        "core/locales/lt/core.ftl": {
-          "source_sha256": "8fdb56b72ac0d592e065a0f2bf68d5a5e6df85c451a77696d0129eeaf9050816",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "9d0ae049a6651b7f700dc6201427e9d81c1aec1fc98f0f54def301c6ee42d1cd"
-        },
-        "core/locales/lv/core.ftl": {
-          "source_sha256": "c88a2a159132bc8ebd8eb346f56cd44c01d475ffda3678dd4db1854ba774d129",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "7162e0590d1544cd8557d4ea301077345570fea82bc4046f35324484bbdc84ea"
-        },
-        "core/locales/nb/core.ftl": {
-          "source_sha256": "fd98dd1f618212c77559a741d920bbcb819c023ac8b9955606ed59f362050536",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "649a5588a1c7b9b28c9971c913eda5dc347169814a90937b34677c80bad40965"
-        },
-        "core/locales/nl/core.ftl": {
-          "source_sha256": "c53c686eb8355626ad21a5de618b72cb3251290c2a86065eaa9958c90d509d12",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "4788eb5e5382b227db6b52fa79d2d948e80d5ed97e6af51fa02c66e8421270e1"
-        },
-        "core/locales/pl/core.ftl": {
-          "source_sha256": "498b42c041b31dbfd2eb29518e441f59cb49ae0cf948c2e6b6f57c257fa828c8",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "c46ac141935e59f3c3d39f5a5bc085afb01e2d3d8133609a0cc8d754119a249c"
-        },
-        "core/locales/pt-BR/core.ftl": {
-          "source_sha256": "37e163d195e68444030d92ea2c5514bc9768e4dbb404575f18ab0fd2c63e1001",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
-        },
-        "core/locales/pt/core.ftl": {
-          "source_sha256": "355f896a75ae3e52e26664563f19b6680d0719690b1d007528fccb6087b6d1a6",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
-        },
-        "core/locales/ro/core.ftl": {
-          "source_sha256": "f2e7b552140a37bddfb8020b8b01f4095f7e309f7b1379aee3b4c58955084a74",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "ccb6595e0be610fe030b171dbe9df6cfb0f536873e539ce5ad865c02f7175db4"
-        },
-        "core/locales/ru/core.ftl": {
-          "source_sha256": "4bcc4ffedcb660b5fe86ac69beabc7a766daeb5cfb1381e6fe929605397e2e54",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "4353044c1df65b4b4990323e714482b6311db76d8415626e558320b6026620bc"
-        },
-        "core/locales/sk/core.ftl": {
-          "source_sha256": "5fd463a4f1c91fc2a14fc3bf7cb49c5afb52d78b62e82e1f3c5ffef74ae4bb97",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "88d88798c1bb159d82f82f2dd33f48583b1d5bb60199fe3bd4e84a3a0b0af3b6"
-        },
-        "core/locales/sl/core.ftl": {
-          "source_sha256": "9787b443035e1b48b59cab003b34a97545fc2a8930b2ee230fce0b8b367264ac",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "67fc0ca660f323b20c4a178855b30792f94f71bfe71d85135793eb0e9444ef7f"
-        },
-        "core/locales/sr-Latn/core.ftl": {
-          "source_sha256": "f38acd96c4995038503690ccc62016cfaefdc803a0860b7d649bef0699538b54",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "fecb2884b4c4f0373831458647d4f208fc2736d6387c8859dab5d1ad18cf1810"
-        },
-        "core/locales/sv/core.ftl": {
-          "source_sha256": "e420ae2d02d82bb51c2158659755840d94902b56305aeb5a4f58843119a3f1ac",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "6b1875cf2a7190d360a6c0ab3d3e3c7272ca9896daa013b41950c03ee60be777"
-        },
-        "core/locales/tr/core.ftl": {
-          "source_sha256": "4ea56cafd6c1b8ddf348d4392777faf297c5f11827e45240f999bb96a25b84a1",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "ed1c9e5bcd9f5f0bcc739cbfa59c1808fa9f8fafe9c762b80787772b834dd346"
-        },
-        "core/locales/uk/core.ftl": {
-          "source_sha256": "d801bd33eb1c5a09b64de91527c873425dfc966b4afa09bafd20ac821194b346",
-          "added_ids": [
-            "pgp-why-not-key-in-use"
-          ],
-          "value_sha256": "4d507d7ad7a78f6e3e07b38976613b1e782c80074553203195fb147a96b3989d"
-        }
-      },
-      "note": "Exact new source reason is pending integration. Evaluate focused commit9924cfe7 and its dependencies; preserve reviewed catalogs and avoid importing the unrelated corpus tree. The message describes a key mismatch, not an expired/revoked key, failed cryptographic signature or proven impersonation.",
-      "audit_checkpoint_index": 31,
-      "caller_evidence": [
-        "9924cfe7:core/crates/pe-core/src/protect.rs: Reader::signature classifies an otherwise valid signature as Bad when its key differs from ring.in_use for the From address",
-        "9924cfe7:core/crates/pe-core/src/keys.rs: Book::ring fills active correspondent keys and own identity keys",
-        "9924cfe7:core/crates/pe-store/src/pgp.rs: pgp_keys_in_use returns selected address/fingerprint pairs"
-      ]
-    },
     "compose_source_integration": {
       "source_commit": "162c0dd22d9489061cdc195a42810d695a5672ba",
       "source_base": "38841d9602aeaa6dc0abb773aa4639f0597c15ee",
@@ -67876,6 +68543,232 @@
         "changed_help_topics": 28,
         "previously_completed_help_topics_to_reopen": 18,
         "note": "Counts describe the current review checkout. The fully inventoried pending_source_import adds 1120 catalog entries, 28 new topics and 28 write-message insertions across all 28 languages; 18 completed topics must reopen on integration. Scope will be adjusted during import, before reviewing those additions."
+      },
+      {
+        "status": "source-only catalogs integrated in205bd846 and all28 reasons reviewed",
+        "ref": "chore/pgp-hardening",
+        "observed_source_tip": "c69576e6435b07914360cfa83c562c66d734ec45",
+        "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+        "new_catalog_entries": 28,
+        "catalog_ids": {
+          "core.ftl": [
+            "pgp-why-not-key-in-use"
+          ]
+        },
+        "new_help_topics": 0,
+        "changed_help_topics": 0,
+        "files": {
+          "core/locales/bg/core.ftl": {
+            "source_sha256": "16e9e19f2d1d75dffbeb0074ec93310c8978796141453b1d0953ad5e3fbb5977",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "4a62b72469db30848900d67c0a2c9504a3ee7fe1db297e716e77b24f9bf25f51"
+          },
+          "core/locales/ca/core.ftl": {
+            "source_sha256": "3a2788707c50ee6cf4e2eabc676d35f4088226db8de9d407e1db41922b9602b6",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "57c515541e23b49ca41dd16e5e8535fe4a5e2a3f4e1c21ed7aa04d0344921b25"
+          },
+          "core/locales/cs/core.ftl": {
+            "source_sha256": "fda0c74b699a113eeb04c082d374268ca8d9639e50bf6b072b27cda3a24463f0",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "c0830122e3de177236be73d54f8f09ae7c9771640dbb8691c3a9cb762d05b545"
+          },
+          "core/locales/da/core.ftl": {
+            "source_sha256": "35a86bb9f3542fa7b2a437ddf71f05424854b796281d02961d4ad4cfa47eb9d2",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "b8fad7dd255994701d3c2cc2f8fcee2e131cfde4ee196a3004607ea08964fe69"
+          },
+          "core/locales/de/core.ftl": {
+            "source_sha256": "b91224b783883801433c0c09fa6e07e6821ae6f2a19e786995788ce7e383fae9",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "a591d2f53c326961386e0554ef10cbc6b21d5015e0ebcc1676b091d62269b521"
+          },
+          "core/locales/el/core.ftl": {
+            "source_sha256": "8ed80fcf78378a7f8d081215a1eae4445722259f5db683a7a730eb0e3a82a35a",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "8dc74a5766f33d0e20ab13aef37846db1e35798134df77b2c432e6a13d4817ca"
+          },
+          "core/locales/en/core.ftl": {
+            "source_sha256": "16f82911b700dec76b7761ca4f32efcae14e3371a52d8f0d58e1382d6aa8787e",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "4c94ae03e10150e79745253914b4f59ba7460faa230333cb6cf27b858753417c"
+          },
+          "core/locales/es/core.ftl": {
+            "source_sha256": "d9771c37c09402b1f1eda65bd6da77dbf3cde653f0bd7fb194f5384c21c0925c",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "5c755b4c3eacebe03b92a2ef3c69e1e7c7121677189e3f1fdc4da8b5cfa843d0"
+          },
+          "core/locales/et/core.ftl": {
+            "source_sha256": "bb4c3968c7aa2c06b64213b962428681d594c59efc3a673dd12e5d3fc0a83a0f",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "b84a2b56e579b24973d3cbcb97dafa0438cedc5a654485d11b70ab5e068b56c5"
+          },
+          "core/locales/fi/core.ftl": {
+            "source_sha256": "f9f444897faf1136880a1a23befe7c0bb908f6a9eb9394c48c08dda9cb3be6e4",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "7990a785d1a186c7663d704dd2f26d8afb05a2b9fa53b52477558d3d3023588c"
+          },
+          "core/locales/fr/core.ftl": {
+            "source_sha256": "eeab1aa52ac26e5339884a49aa00deeb38ab80ad7c238f671300bc234b074dbd",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "76a6f40ecd4c18e13f7cb623bc0d4ba305f95b3a43f33176bf1f32837ff0ed7b"
+          },
+          "core/locales/hr/core.ftl": {
+            "source_sha256": "7bf5f0d2a9eebd494029b1bb6d5e2bfff03ad3d2bed4e5b3c75851f7aa758463",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "d0c9e7c7d9ad28a5260be6269219a52b43eba84490591aa1dea1d068507c6783"
+          },
+          "core/locales/hu/core.ftl": {
+            "source_sha256": "5b7fd3ff7ae169491dcb4e7471dc2a245ec5e81178ad8af848845e5f870da4c6",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "de8f9cdcbd1dc605392c4d8c20711be450416b12cba221a0c8bb7545dd552e43"
+          },
+          "core/locales/it/core.ftl": {
+            "source_sha256": "e6c91c269a2b077a15b61e05cc6013cefd31a1bc55de89082a3f769bf10d4b37",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "5ca92264998878c72c7c22bf864e3e3e6b904c700410086d18b2c072a4311b86"
+          },
+          "core/locales/lt/core.ftl": {
+            "source_sha256": "8fdb56b72ac0d592e065a0f2bf68d5a5e6df85c451a77696d0129eeaf9050816",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "9d0ae049a6651b7f700dc6201427e9d81c1aec1fc98f0f54def301c6ee42d1cd"
+          },
+          "core/locales/lv/core.ftl": {
+            "source_sha256": "c88a2a159132bc8ebd8eb346f56cd44c01d475ffda3678dd4db1854ba774d129",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "7162e0590d1544cd8557d4ea301077345570fea82bc4046f35324484bbdc84ea"
+          },
+          "core/locales/nb/core.ftl": {
+            "source_sha256": "fd98dd1f618212c77559a741d920bbcb819c023ac8b9955606ed59f362050536",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "649a5588a1c7b9b28c9971c913eda5dc347169814a90937b34677c80bad40965"
+          },
+          "core/locales/nl/core.ftl": {
+            "source_sha256": "c53c686eb8355626ad21a5de618b72cb3251290c2a86065eaa9958c90d509d12",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "4788eb5e5382b227db6b52fa79d2d948e80d5ed97e6af51fa02c66e8421270e1"
+          },
+          "core/locales/pl/core.ftl": {
+            "source_sha256": "498b42c041b31dbfd2eb29518e441f59cb49ae0cf948c2e6b6f57c257fa828c8",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "c46ac141935e59f3c3d39f5a5bc085afb01e2d3d8133609a0cc8d754119a249c"
+          },
+          "core/locales/pt-BR/core.ftl": {
+            "source_sha256": "37e163d195e68444030d92ea2c5514bc9768e4dbb404575f18ab0fd2c63e1001",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+          },
+          "core/locales/pt/core.ftl": {
+            "source_sha256": "355f896a75ae3e52e26664563f19b6680d0719690b1d007528fccb6087b6d1a6",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+          },
+          "core/locales/ro/core.ftl": {
+            "source_sha256": "f2e7b552140a37bddfb8020b8b01f4095f7e309f7b1379aee3b4c58955084a74",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "ccb6595e0be610fe030b171dbe9df6cfb0f536873e539ce5ad865c02f7175db4"
+          },
+          "core/locales/ru/core.ftl": {
+            "source_sha256": "4bcc4ffedcb660b5fe86ac69beabc7a766daeb5cfb1381e6fe929605397e2e54",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "4353044c1df65b4b4990323e714482b6311db76d8415626e558320b6026620bc"
+          },
+          "core/locales/sk/core.ftl": {
+            "source_sha256": "5fd463a4f1c91fc2a14fc3bf7cb49c5afb52d78b62e82e1f3c5ffef74ae4bb97",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "88d88798c1bb159d82f82f2dd33f48583b1d5bb60199fe3bd4e84a3a0b0af3b6"
+          },
+          "core/locales/sl/core.ftl": {
+            "source_sha256": "9787b443035e1b48b59cab003b34a97545fc2a8930b2ee230fce0b8b367264ac",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "67fc0ca660f323b20c4a178855b30792f94f71bfe71d85135793eb0e9444ef7f"
+          },
+          "core/locales/sr-Latn/core.ftl": {
+            "source_sha256": "f38acd96c4995038503690ccc62016cfaefdc803a0860b7d649bef0699538b54",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "fecb2884b4c4f0373831458647d4f208fc2736d6387c8859dab5d1ad18cf1810"
+          },
+          "core/locales/sv/core.ftl": {
+            "source_sha256": "e420ae2d02d82bb51c2158659755840d94902b56305aeb5a4f58843119a3f1ac",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "6b1875cf2a7190d360a6c0ab3d3e3c7272ca9896daa013b41950c03ee60be777"
+          },
+          "core/locales/tr/core.ftl": {
+            "source_sha256": "4ea56cafd6c1b8ddf348d4392777faf297c5f11827e45240f999bb96a25b84a1",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "ed1c9e5bcd9f5f0bcc739cbfa59c1808fa9f8fafe9c762b80787772b834dd346"
+          },
+          "core/locales/uk/core.ftl": {
+            "source_sha256": "d801bd33eb1c5a09b64de91527c873425dfc966b4afa09bafd20ac821194b346",
+            "added_ids": [
+              "pgp-why-not-key-in-use"
+            ],
+            "value_sha256": "4d507d7ad7a78f6e3e07b38976613b1e782c80074553203195fb147a96b3989d"
+          }
+        },
+        "note": "Exact new source reason is pending integration. Evaluate focused commit9924cfe7 and its dependencies; preserve reviewed catalogs and avoid importing the unrelated corpus tree. The message describes a key mismatch, not an expired/revoked key, failed cryptographic signature or proven impersonation.",
+        "audit_checkpoint_index": 31,
+        "caller_evidence": [
+          "9924cfe7:core/crates/pe-core/src/protect.rs: Reader::signature classifies an otherwise valid signature as Bad when its key differs from ring.in_use for the From address",
+          "9924cfe7:core/crates/pe-core/src/keys.rs: Book::ring fills active correspondent keys and own identity keys",
+          "9924cfe7:core/crates/pe-store/src/pgp.rs: pgp_keys_in_use returns selected address/fingerprint pairs"
+        ]
       }
     ],
     "active_key_source_integration": {
@@ -67886,7 +68779,7 @@
           "pgp-why-not-key-in-use"
         ]
       },
-      "status": "catalogs and generated identifiers validated; awaiting commit",
+      "status": "catalog import205bd846 and all28 warning translations reviewed; dependent source implementation remains separate",
       "catalog_paths": [
         "core/locales/en/core.ftl",
         "core/locales/bg/core.ftl",
@@ -67955,7 +68848,8 @@
       "generated_files": {
         "core/include/texts.h": "78d0474a94f2f7fa26b7515d037c12cbb6d53b538f10dac8f278b8be68dfd021",
         "mac/Sources/InboxClassic/Generated/Texts.swift": "6525a6a95d2213521889a9e9e1b8c064363a5d6c3460c21e8515723351cd64aa"
-      }
+      },
+      "integration_commit": "205bd846"
     }
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
@@ -76578,7 +77472,7 @@
     },
     {
       "id": "signature-active-key-context",
-      "status": "pending",
+      "status": "complete",
       "source_checkpoint": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
       "review_parent": "9986cac38ff21057fc54b3209d0f1702d4760fa6",
       "catalog_ids": {
@@ -76587,7 +77481,8 @@
         ]
       },
       "help_topics": [],
-      "pending_languages": [
+      "pending_languages": [],
+      "completed_languages": [
         "bg",
         "cs",
         "da",
@@ -76617,7 +77512,6 @@
         "sr-Latn",
         "tr"
       ],
-      "completed_languages": [],
       "issue": "An otherwise valid signature used a different key from the one currently selected for the From address. Describe this mismatch without saying the sender is proven fraudulent, the key is expired/revoked, or the cryptographic signature itself is invalid. The address is a complete normalized address; do not add inflection to it. Check the translated warning wrapper and surrounding signature terminology.",
       "evidence": [
         "9924cfe7:core/crates/pe-core/src/protect.rs: Reader::signature classifies an otherwise valid signature as Bad when its key differs from ring.in_use for the From address",
@@ -76629,7 +77523,17 @@
         "Book::ring includes selected correspondent keys and own identity keys; latter override correspondent entries for own addresses. Pending or rejected replacement keys can be stored without becoming active.",
         "Source Signature::Bad returns the reason directly as the part label. Encrypted messages embed it in pgp-part-encrypted after a full stop. Inspect both the standalone reason and that wrapper. This source-only catalog import does not include the dependent hardening implementation."
       ],
-      "integration_validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes."
+      "integration_validation": "All28 structural language checks report only expected removed/partial-mark diagnostics (26759 total). Exact29 catalog imports retain every previous byte and add only the new source entry. Full catalog/variable and pending inventories match. Separate-target offline pe-ffi build passed in12.05s; no test suite run. Generated Windows and Mac text identifiers match source9924cfe7 exactly; no installer/store output changed. Global reconciliation accounts for20716 unmarked messages,10391 changed help lines and14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes.",
+      "additional_reviewed_ids": {
+        "sv": {
+          "core.ftl": [
+            "pgp-part-encrypted"
+          ]
+        }
+      },
+      "validation": "All 28 structural language checks have only expected removed/partial-mark diagnostics (26788 total). Exact reconstruction verifies all 29 reviewed IDs and 14 changed values; every other catalog byte is unchanged. Full variables, IDs, braces, access-key counts and pending inventories match. All 28 standalone/encrypted wrapper joins were inspected with a representative address. Global reconciliation accounts for 20745 unmarked messages, 10391 changed help lines and 14 verified baseline pairs; current file/source hashes match. HTML regenerated; git diff --check passes. No test suite run; no build repeated after the source-import build.",
+      "changed_values": 14,
+      "reviewed_catalog_entries": 29
     }
   ]
 }

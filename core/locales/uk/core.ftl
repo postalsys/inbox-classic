@@ -997,7 +997,6 @@ pgp-why-signature-expired = Термін дії підпису сплив
 pgp-why-key-not-valid = Підписано недійсним ключем
 # review: new
 pgp-why-not-for-you = Підписано для інших одержувачів і передано вам
-# review: new
 pgp-why-not-key-in-use = Підписано іншим ключем, ніж той, що використовується для { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Зображення завантажено з інтернету

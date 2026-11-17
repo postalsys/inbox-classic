@@ -980,7 +980,6 @@ pgp-why-signature-expired = Paraksta derīgums ir beidzies
 pgp-why-key-not-valid = Parakstīts ar atslēgu, kas nav derīga
 # review: new
 pgp-why-not-for-you = Parakstīts citiem adresātiem un pārsūtīts jums
-# review: new
 pgp-why-not-key-in-use = Parakstīts ar citu atslēgu, nevis to, kas tiek lietota adresei { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Attēli tika ielādēti no interneta

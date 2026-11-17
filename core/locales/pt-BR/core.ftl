@@ -612,7 +612,6 @@ pgp-why-from-future = A assinatura tem uma data no futuro
 pgp-why-signature-expired = A assinatura expirou
 pgp-why-key-not-valid = Assinada com uma chave que não é válida
 pgp-why-not-for-you = Assinada para outros destinatários e encaminhada para você
-# review: new
 pgp-why-not-key-in-use = Assinada com uma chave diferente da usada para { $address }
 pgp-part-pictures-loaded = { $label }. Imagens da internet foram carregadas
 pgp-error-no-own-key = Você não tem nenhuma chave para { $address } com a qual assinar ou criptografar. Crie uma em Ferramentas > Chaves de criptografia, ou desative Assinar e Criptografar.

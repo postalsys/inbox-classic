@@ -977,8 +977,7 @@ pgp-why-signature-expired = Podpis wygasł
 pgp-why-key-not-valid = Podpisane nieważnym kluczem
 # review: new
 pgp-why-not-for-you = Podpisane dla innych odbiorców i przekazane Tobie
-# review: new
-pgp-why-not-key-in-use = Podpisano innym kluczem niż używany dla { $address }
+pgp-why-not-key-in-use = Podpisano innym kluczem niż klucz wybrany dla adresu { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Obrazy zostały pobrane z internetu
 # review: new

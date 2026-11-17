@@ -913,8 +913,7 @@ pgp-part-unknown-key = Signerad, men nyckeln är okänd
 pgp-part-not-signed = Inte signerad
 # review: new
 pgp-part-not-checked = Signaturen har inte kontrollerats
-# review: new
-pgp-part-encrypted = Krypterad. { $signature }
+pgp-part-encrypted = Krypterat. { $signature }
 # review: new
 pgp-part-no-key = Krypterad till en nyckel som du inte har
 # review: new
@@ -941,8 +940,7 @@ pgp-why-signature-expired = Signaturen har gått ut
 pgp-why-key-not-valid = Signerad med en nyckel som inte är giltig
 # review: new
 pgp-why-not-for-you = Signerad för andra mottagare och vidarebefordrad till dig
-# review: new
-pgp-why-not-key-in-use = Signerad med en annan nyckel än den som används för { $address }
+pgp-why-not-key-in-use = Signerat med en annan nyckel än den som används för { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Bilder hämtades från internet
 # review: new

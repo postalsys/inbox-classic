@@ -557,8 +557,7 @@ pgp-why-from-future = Allkirja kuupäev on tulevikus
 pgp-why-signature-expired = Allkiri on aegunud
 pgp-why-key-not-valid = Allkirjastatud kehtetu võtmega
 pgp-why-not-for-you = Kiri allkirjastati teistele saajatele saatmiseks ja edastati seejärel teile
-# review: new
-pgp-why-not-key-in-use = Allkirjastatud teise võtmega kui see, mida { $address } jaoks kasutatakse
+pgp-why-not-key-in-use = Kirja allkirjastamiseks kasutatud võti erineb aadressile { $address } määratud võtmest
 pgp-part-pictures-loaded = { $label }. Pildid laaditi internetist
 pgp-error-no-own-key = Aadressile { $address } pole allkirjastamiseks ega krüpteerimiseks võtit seadistatud. Looge võti menüüs Tööriistad > Krüpteerimisvõtmed või lülitage allkirjastamine ja krüpteerimine välja.
 pgp-error-missing-keys = { $count ->

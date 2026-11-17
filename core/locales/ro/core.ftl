@@ -980,7 +980,6 @@ pgp-why-signature-expired = Semnătura a expirat
 pgp-why-key-not-valid = Semnat cu o cheie care nu este validă
 # review: new
 pgp-why-not-for-you = Semnat pentru alți destinatari și transmis mai departe către dvs.
-# review: new
 pgp-why-not-key-in-use = Semnat cu o altă cheie decât cea folosită pentru { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Imaginile au fost încărcate de pe internet

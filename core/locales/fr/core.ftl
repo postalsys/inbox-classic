@@ -597,7 +597,6 @@ pgp-why-from-future = La signature est datée dans le futur
 pgp-why-signature-expired = La signature a expiré
 pgp-why-key-not-valid = Signé avec une clé non valide
 pgp-why-not-for-you = Signé pour d’autres destinataires, puis transféré à votre adresse
-# review: new
 pgp-why-not-key-in-use = Signé avec une autre clé que celle utilisée pour { $address }
 pgp-part-pictures-loaded = { $label }. Des images ont été chargées depuis Internet
 pgp-error-no-own-key = Aucune clé n’est configurée pour signer ou chiffrer avec l’adresse { $address }. Créez-en une dans Outils > Clés de chiffrement ou désactivez les options Signer et Chiffrer.

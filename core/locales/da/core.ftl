@@ -598,7 +598,6 @@ pgp-why-from-future = Den digitale signatur har en dato i fremtiden
 pgp-why-signature-expired = Den digitale signatur er udløbet
 pgp-why-key-not-valid = Signeret med en nøgle, der ikke er gyldig
 pgp-why-not-for-you = Signeret til andre modtagere og sendt videre til dig
-# review: new
 pgp-why-not-key-in-use = Signeret med en anden nøgle end den, der bruges til { $address }
 pgp-part-pictures-loaded = { $label }. Billeder blev hentet fra internettet
 pgp-error-no-own-key = Du har ingen nøgle til { $address } at signere eller kryptere med. Opret en under Funktioner > Krypteringsnøgler, eller slå Signer og Krypter fra.

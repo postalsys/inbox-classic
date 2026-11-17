@@ -570,8 +570,7 @@ pgp-why-from-future = Die Signatur ist in die Zukunft datiert
 pgp-why-signature-expired = Die Signatur ist abgelaufen
 pgp-why-key-not-valid = Mit einem ungültigen Schlüssel signiert
 pgp-why-not-for-you = Für andere Empfänger signiert und anschließend an Sie weitergeleitet
-# review: new
-pgp-why-not-key-in-use = Mit einem anderen Schlüssel signiert als dem, der für { $address } verwendet wird
+pgp-why-not-key-in-use = Der Signaturschlüssel stimmt nicht mit dem aktuell für { $address } verwendeten Schlüssel überein
 pgp-part-pictures-loaded = { $label }. Bilder wurden aus dem Internet geladen
 pgp-error-no-own-key = Für { $address } ist kein Schlüssel zum Signieren oder Verschlüsseln eingerichtet. Erstellen Sie unter Extras > Verschlüsselungsschlüssel einen Schlüssel oder deaktivieren Sie Signieren und Verschlüsseln.
 pgp-error-missing-keys = { $count ->

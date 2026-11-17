@@ -5,17 +5,17 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: review `pgp-why-not-key-in-use` in all 28 languages.** Its catalogs and generated text identifiers
-  are imported from `9924cfe7`; all new reasons remain marked. The caller depends on a broader hardening
-  refactor and was inspected on its source branch. That implementation is not part of this translation import.
-  Every previous catalog byte is preserved. The separate-target offline pe-ffi build passed in 12.05s;
-  no test suite ran. Review the reason standalone and in pgp-part-encrypted, including Swedish neuter agreement.
+- **Next: Spanish compose signing/encryption additions, then Estonian and French.** The active-key signature
+  reason is now reviewed in all 28 languages: 13 warning values improved, 15 retained. The existing Swedish
+  encrypted-part wrapper was also reviewed and corrected to neuter agreement. This completes 29 entries with
+  14 improvements. The source-only import is `205bd846`; dependent hardening code remains on its source branch.
+  All previous catalog bytes outside these entries are preserved. New source audit found no further additions.
 - German's 40 compose additions and both help targets are now reviewed, with 16 improvements. Review the
   remaining compose additions starting es/et/fr, then nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and hu.
   Feature `162c0dd2` was integrated in `3552434d`; exact targets/context are in `compose-sign-encrypt-context`.
   Every earlier help passage is preserved. No new language was found in the latest audit.
-- Current integrated scope: 33,868 catalog entries and 1,352 help topics. Completed: 20,682 entries and 792
-  full topics; pending: 13,186 entries and 560 topics. Historical catalog improvements: 3,532.
+- Current integrated scope: 33,868 catalog entries and 1,352 help topics. Completed: 20,711 entries and 792
+  full topics; pending: 13,157 entries and 560 topics. Historical catalog improvements: 3,546.
   Hungarian has 48 original help topics left in addition to compose work, then lt/lv/pl/ro/ru/sk/sl/sv/uk.
 - Structural checks and German's 53 actual mnemonic scopes pass. The initial icon note was corrected after
   inspecting individual recipients: they use green/blue locks, with lookup/warning symbols as appropriate;
@@ -2002,3 +2002,24 @@ removed/partial-mark diagnostics. Full catalogs, variables and pending inventori
 marked, with no linguistic review claimed yet. Scope33868/1352, pending13186/560, completed20682/792.
 All20,716 unmarked messages and10,391 changed help lines reconcile, with14 verified baseline pairs; current hashes match.
 HTML regenerated; git diff --check passes. No test suite was run. Next: review all28 reasons and their encrypted-message wrapper, then Spanish compose.
+
+
+### Signature-key warning reviewed in all 28 languages
+
+Reviewed pgp-why-not-key-in-use standalone and inside each encrypted-part label. Improved 13 drafts, retaining
+15 already natural translations. Removed Hungarian a(z), corrected Finnish's incomplete comparison, made key/address
+relationships clearer, and kept Catalan typography. Swedish now uses neuter Signerat with meddelande; its existing
+Krypterad wrapper was also reviewed and corrected to Krypterat. Other pending Swedish messages remain marked.
+The warning describes a different active key, without claiming expired keys, failed cryptography or proven fraud.
+All placeholder addresses remain uninflected; register and terminology match the language notes.
+
+All 28 structural checkers report only expected removed/partial-mark diagnostics (26,788 total). Exact reconstruction
+verifies 29 reviewed entries and 14 value improvements with every other byte preserved. Representative address joins
+were inspected in all 28 languages. Full inventories and hashes reconcile: 20,745 unmarked messages, 10,391 changed
+help lines and 14 verified baseline pairs. HTML regenerated; git diff --check passes. No test suites run. The earlier
+12.05s source-import build was not repeated for these single-line wording edits.
+
+All seven source refs remain unchanged; no further strings or languages were found. The guide is unchanged, root has
+no relevant edits, and the existing key-help source and active-key entry remain verified. Dependent hardening code
+and corpus work remain separate. Current scope33868/1352; completed20711/792; pending13157/560. Historical catalog
+improvements3546. Continue Spanish compose next, then Estonian and French. REVIEWED remains unchanged.

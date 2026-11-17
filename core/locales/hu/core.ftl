@@ -563,8 +563,7 @@ pgp-why-from-future = Az aláírás dátuma a jövőben van
 pgp-why-signature-expired = Az aláírás lejárt
 pgp-why-key-not-valid = Érvénytelen kulccsal aláírva
 pgp-why-not-for-you = Más címzettek számára digitálisan aláírt, majd továbbított üzenet
-# review: new
-pgp-why-not-key-in-use = Más kulccsal aláírva, mint amelyet a(z) { $address } címhez használ
+pgp-why-not-key-in-use = Az aláíráshoz használt kulcs eltér az ehhez a címhez beállított kulcstól: { $address }
 pgp-part-pictures-loaded = { $label }. A képek az internetről töltődtek be
 pgp-error-no-own-key = Ehhez a feladócímhez nincs aláírásra vagy titkosításra használható saját kulcs: { $address }. Hozzon létre kulcsot az Eszközök > Titkosítási kulcsok menüpontban, vagy kapcsolja ki az üzenet digitális aláírását és titkosítását.
 pgp-error-missing-keys = { $count ->

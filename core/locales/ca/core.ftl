@@ -598,8 +598,7 @@ pgp-why-from-future = La signatura té una data futura
 pgp-why-signature-expired = La signatura ha caducat
 pgp-why-key-not-valid = Signat amb una clau que no és vàlida
 pgp-why-not-for-you = Signat per a altres destinataris, i reenviat a vós
-# review: new
-pgp-why-not-key-in-use = Signat amb una clau diferent de la que s'utilitza per a { $address }
+pgp-why-not-key-in-use = Signat amb una clau diferent de la que s’utilitza per a l’adreça { $address }
 pgp-part-pictures-loaded = { $label }. S’han carregat imatges d’internet
 pgp-error-no-own-key = No teniu cap clau per a { $address } amb què signar o xifrar. Creeu-ne una a Eines > Claus de xifratge, o desactiveu Signa i Xifra.
 pgp-error-missing-keys = { $count ->

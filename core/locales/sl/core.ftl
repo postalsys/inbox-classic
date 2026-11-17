@@ -976,8 +976,7 @@ pgp-why-signature-expired = Podpis je potekel
 pgp-why-key-not-valid = Podpisano z neveljavnim ključem
 # review: new
 pgp-why-not-for-you = Podpisano za druge prejemnike in posredovano vam
-# review: new
-pgp-why-not-key-in-use = Podpisano z drugim ključem, kot se uporablja za { $address }
+pgp-why-not-key-in-use = Ključ podpisa se razlikuje od ključa, izbranega za naslov { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Slike so bile naložene z interneta
 # review: new

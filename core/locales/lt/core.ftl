@@ -969,7 +969,6 @@ pgp-why-signature-expired = Parašas nebegalioja
 pgp-why-key-not-valid = Pasirašyta negaliojančiu raktu
 # review: new
 pgp-why-not-for-you = Pasirašyta kitiems gavėjams ir persiųsta jums
-# review: new
 pgp-why-not-key-in-use = Pasirašyta kitu raktu nei naudojamas adresui { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Paveikslėliai įkelti iš interneto

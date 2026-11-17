@@ -580,7 +580,6 @@ pgp-why-from-future = İmzanın tarihi gelecekte
 pgp-why-signature-expired = İmzanın süresi doldu
 pgp-why-key-not-valid = Geçerli olmayan bir anahtarla imzalanmış
 pgp-why-not-for-you = Başka alıcılar için imzalanmış ve size iletilmiş
-# review: new
 pgp-why-not-key-in-use = { $address } için kullanılan anahtardan farklı bir anahtarla imzalanmış
 pgp-part-pictures-loaded = { $label }. Resimler internetten yüklendi
 pgp-error-no-own-key = İmzalamak veya şifrelemek için şu adrese ait bir anahtarınız yok: { $address }. Araçlar > Şifreleme Anahtarları'nda bir anahtar oluşturun veya İmzala ve Şifrele'yi kapatın.
