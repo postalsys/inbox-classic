@@ -29,6 +29,10 @@ on inboxclassic.com/help.
 - `<b data-text="cmd-mark-read"></b>`: a control named by its catalog message (`core/locales/<lang>/*.ftl`), as the
   app names it in the language, without its access key's `&`. Use it for every menu command, button and field name.
   A menu path: `<b data-text="menu-file"></b> &gt; <b data-text="cmd-new-account"></b>`.
+- `<b data-settings="reading"></b>`: the way to a page of the settings window (`core/settings.toml`: `general`,
+  `reading`, `downloading`) as the platform writes it: Tools > Options > Reading on Windows, Inbox Classic > Settings >
+  Reading on the Mac, Main Menu > Preferences > Reading on Linux. `data-settings=""` is the window alone. Never write
+  the way to a setting by hand; name the control by its `data-text` after it.
 - `<a href="topic:<id>"></a>`: a link to another topic; left empty, it is filled with that topic's title.
   `<a href="https://...">` opens in the browser.
 - `<img src="picture:<shot>" alt="...">`: a screenshot of the UI tests (`read-1-html`, `account-1-form`,

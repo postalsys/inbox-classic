@@ -21,10 +21,10 @@ mac-no-updates = See Inbox Classicu versioon ei toeta automaatseid uuendusi. Uus
 ## Settings
 
 mac-settings-title = Seaded
-mac-language-label = Keel:
-mac-restart-hint = Keele vahetamiseks taaskäivitage Inbox Classic.
-mac-notify-new-mail = Teavita mind uue posti saabumisest
-mac-restart-question = Kas käivitada Inbox Classic keele vahetamiseks kohe uuesti?
+# review: new
+mac-check-updates-automatically = Kontrolli uuendusi automaatselt
+# review: new
+mac-settings-updates = Uuendused
 
 ## Dialogs
 

@@ -1,15 +1,31 @@
-<h1>Keel ja seaded</h1>
-<p class="summary">Valige Inbox Classicu keel ning kuidas see teie posti näitab ja sellest teada annab.</p>
-<p>Valige <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
+<!--review--><h1>Seaded</h1>
+<p class="summary">Valige Inbox Classicu keel, kuidas see teie posti näitab ja sellest teada annab ning mida see eelnevalt alla laadib.</p>
+<p>Valige <b data-settings=""></b>. Seaded on kolmel lehel: <b data-text="ui-settings-general"></b>, <b data-text="ui-settings-reading"></b> ja <b data-text="ui-download-heading"></b>.<!--os:windows--> Klõpsake nuppu <b data-text="ui-ok"></b>, et muudatused jätta, või nuppu <b data-text="ui-apply"></b>, et need jätta ja aken avatuks jätta. Nupp <b data-text="ui-cancel"></b> tühistab kõik muudatused sellest ajast peale, ka eemaldatud usaldusväärsed saatjad ja .eml-failide jaoks valitud rakenduse.<!--/os--><!--os:mac,linux--> Iga muudatus jõustub kohe.<!--/os--></p>
+<h2><b data-text="ui-settings-general"></b></h2>
 <ul>
-    <li><!--review--><!--os:windows--><b data-text="win-options-language-label"></b><!--/os--><!--os:mac--><b data-text="mac-language-label"></b><!--/os--><!--os:linux--><b data-text="gtk-language"></b><!--/os--> valib akende ja selle spikri keele. Valige oma süsteemi keel või mõni loendis olevatest keeltest. Kui Inbox Classicul pole teie süsteemi keelt, kasutab see inglise keelt.<!--/review--></li>
-    <li><!--os:windows--><b data-text="win-options-notify"></b><!--/os--><!--os:mac--><b data-text="mac-notify-new-mail"></b><!--/os--><!--os:linux--><b data-text="gtk-notify-new-mail"></b><!--/os--> lülitab uue posti teatised sisse või välja.</li>
-    <li><b data-text="ui-group-by-conversation"></b> rühmitab teineteisele vastavad kirjad ühele reale.</li>
-    <li><b data-text="ui-codes-in-notifications"></b> näitab sisselogimiskirja koodi selle teatises.</li>
-    <li><b data-text="ui-layout-label"></b> valib paigutuse: automaatselt akna laiuse järgi, klassikaline või veergudega. Vt <a href="topic:layouts"></a>.</li>
-    <li><b data-text="ui-list-pictures"></b> näitab veergudega paigutuses brändide logosid, kontaktide pilte ja initsiaale.</li>
+    <li><b data-text="ui-language-label"></b> valib akende ja selle spikri keele: teie süsteemi keele või mõne loendis oleva keele. Kui Inbox Classicul pole teie süsteemi keelt, kasutab see inglise keelt.</li>
+    <li><b data-text="ui-notify-new-mail"></b> näitab uute kirjade saabumisel teatist. Vaikimisi on see sees.</li>
+    <li><b data-text="ui-codes-in-notifications"></b> näitab sisselogimiskirja koodi selle teatises. Vaikimisi on see väljas, sest teatist saab lugeda ka lukustatud ekraanil. Kui teatised on välja lülitatud, pole see saadaval.</li>
+    <li><b data-text="ui-send-delay"></b> hoiab saadetavat kirja mõne sekundi väljundkaustas, et saaksite selle veel nupuga Võta tagasi tühistada. Vaikimisi on see 10 sekundit.</li>
+    <li><b data-text="cmd-default-app"></b> avab e-posti lingid Inbox Classicus ja <b data-text="ui-eml-default"></b> avab kirjafailid. Vt <a href="topic:default-mail-program"></a>.</li>
+    <!--os:mac--><li><b data-text="mac-check-updates-automatically"></b> otsib aeg-ajalt Inbox Classicu uut versiooni. Vt <a href="topic:updates"></a>.</li><!--/os-->
 </ul>
 <p>Keele vahetamiseks käivitub Inbox Classic uuesti. Klõpsake nuppu <b data-text="ui-restart-now"></b> või nuppu <b data-text="ui-restart-later"></b>, et keel vahetuks järgmisel käivitamisel.</p>
+<h2><b data-text="ui-settings-reading"></b></h2>
+<ul>
+    <li><b data-text="ui-layout-label"></b> valib paigutuse: automaatselt akna laiuse järgi, klassikaline või veergudega. Vt <a href="topic:layouts"></a>.</li>
+    <li><b data-text="ui-group-by-conversation"></b> rühmitab teineteisele vastavad kirjad ühele reale. Vaikimisi on see sees.</li>
+    <li><b data-text="ui-list-pictures"></b> näitab veergudega paigutuses brändide logosid, kontaktide pilte ja initsiaale. Vaikimisi on see sees.</li>
+    <!--os:mac,linux--><li><b data-text="ui-dark-messages"></b> näitab kirju, mida loete ja kirjutate, tumedal taustal, kui süsteem kasutab tumedat režiimi. Vaikimisi on see sees.</li><!--/os-->
+    <li><b data-text="ui-pictures-always-option"></b> laadib alla kõigi kirjade pildid. Vaikimisi on see väljas, sest siis saavad saatjad teada, millal te nende kirju loete. Vt <a href="topic:pictures-tracking"></a>.</li>
+    <li><b data-text="ui-trusted-senders-button"></b> näitab saatjaid, kelle pildid laaditakse alati alla, ja seal saate neid eemaldada.</li>
+</ul>
+<h2><b data-text="ui-download-heading"></b></h2>
+<ul>
+    <li><b data-text="ui-download-ahead"></b> valib, millised kirjad laaditakse alla enne, kui need avate: vaikimisi viimased kirjad, igaüks kuni 1 MB. Vt <a href="topic:download-ahead"></a>.</li>
+    <li><b data-text="ui-download-limit"></b> piirab ruumi, mida iga konto allalaaditud kirjad võtavad. Vaikimisi on see 1 GB.</li>
+</ul>
 <!--os:windows--><p>Paigaldaja küsib esimesel paigaldamisel keelt ja jätab selle siin valitud keeleks.</p><!--/os-->
 <!--os:mac--><p>Keele saab valida ka ainult Inbox Classicule: <i>System Settings &gt; General &gt; Language &amp; Region &gt; Applications</i>.</p><!--/os-->
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:conversations"></a> <a href="topic:sign-in-codes"></a></nav>
+<!--/review-->

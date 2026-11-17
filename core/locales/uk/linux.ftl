@@ -256,19 +256,8 @@ gtk-nothing-yet = Поки нічого.
 
 # review: new
 gtk-preferences = Налаштування
-# review: new
-gtk-language = Мова
-# review: new
-gtk-language-subtitle = Мова програми й довідки
-# review: new
-gtk-new-mail-group = Нова пошта
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-# review: new
-gtk-notify-new-mail = Сповіщати про нову пошту
-# review: new
-gtk-notify-subtitle = Сповіщення, коли надходять нові повідомлення, а вікно у фоні
-# review: new
-gtk-restart-to-change = Щоб змінити мову, Inbox Classic перезапуститься.
+# review: changed
+gtk-notify-subtitle = Лише коли Inbox Classic працює у фоні
 
 ## The desktop entry and the page of the software stores
 

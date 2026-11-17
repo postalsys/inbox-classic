@@ -248,19 +248,8 @@ gtk-nothing-yet = Pagaidām nekā.
 
 # review: new
 gtk-preferences = Iestatījumi
-# review: new
-gtk-language = Valoda
-# review: new
-gtk-language-subtitle = Lietotnes un palīdzības valoda
-# review: new
-gtk-new-mail-group = Jauns pasts
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-# review: new
-gtk-notify-new-mail = Paziņot par jaunu pastu
-# review: new
-gtk-notify-subtitle = Paziņojums, kad pienāk jauni ziņojumi, kamēr logs ir fonā
-# review: new
-gtk-restart-to-change = Inbox Classic tiek restartēta, lai mainītu valodu.
+# review: changed
+gtk-notify-subtitle = Tikai tad, kad Inbox Classic ir fonā
 
 ## The desktop entry and the page of the software stores
 

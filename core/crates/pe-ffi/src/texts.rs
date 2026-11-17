@@ -35,6 +35,20 @@ pub extern "C" fn pe_text_title(text: u32) -> *mut c_char {
     guard(|| Text::from_index(text).map_or(null_mut(), |t| into_c_string(pe_i18n::title(t)))).unwrap_or(null_mut())
 }
 
+/// A field's label (`&Language:`, `Nom :`) as a title or a word in a sentence: without its menu letter mark, its
+/// trailing colon of any width and the spaces before it. Free with `pe_string_free`; NULL for a NULL `label`.
+///
+/// # Safety
+/// `label` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_field_title(label: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let Some(label) = (unsafe { arg(label) }) else {
+        return null_mut();
+    };
+    guard(|| into_c_string(pe_i18n::field_title(label))).unwrap_or(null_mut())
+}
+
 /// Word `text` with its placeables filled: `names[i]` is `values[i]`, a value that is a whole number passed as a number
 /// (plurals choose by it). Free with `pe_string_free`.
 ///

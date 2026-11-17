@@ -20,6 +20,7 @@ use webkit::prelude::*;
 
 use crate::app::{run_command, shell};
 use crate::commands::Command;
+use crate::settings_pages::{Setting, SettingsPage};
 use crate::ui::FILE_ANSWERS;
 
 /// The steps after organizing: lists, invitations, logos, dragging, junk, folders, links, completion, signatures
@@ -731,6 +732,18 @@ fn toggle_on(name: &str) -> bool {
     named_in(&main_window(), name)
         .and_downcast::<gtk::ToggleButton>()
         .is_some_and(|b| b.is_active())
+}
+
+/// Preferences turned to `page`, as its button in the view switcher does; only the rows of the page shown are found
+fn preferences_page(dialog: &adw::Dialog, page: SettingsPage) {
+    if let Some(preferences) = dialog.downcast_ref::<adw::PreferencesDialog>() {
+        preferences.set_visible_page_name(page.name());
+    }
+}
+
+/// The row of `setting` in Preferences
+fn setting_row(root: &gtk::Widget, setting: Setting) -> Option<gtk::Widget> {
+    named_in(root, &crate::preferences::row_name(setting))
 }
 
 fn named_in(root: &gtk::Widget, name: &str) -> Option<gtk::Widget> {
@@ -1786,9 +1799,13 @@ async fn undo_send(d: &Driver) {
     let main = shell().main();
     command(Command::Options);
     if let Some(dialog) = wait_dialog(10, "preferences-dialog").await {
+        preferences_page(&dialog, SettingsPage::General);
         let root: gtk::Widget = dialog.clone().upcast();
-        let row = named_in(&root, "preferences-send-delay").and_downcast::<adw::ComboRow>();
-        d.check(row.is_some(), "Wait before sending is in Preferences");
+        let row = setting_row(&root, Setting::SendDelay).and_downcast::<adw::ComboRow>();
+        d.check(
+            row.is_some(),
+            "Delay before sending is on the General page of Preferences",
+        );
         if let Some(row) = row {
             d.check(row.selected() == 0, "off at first in the UI test");
             row.set_selected(2);

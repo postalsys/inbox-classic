@@ -416,8 +416,8 @@ const sections = [
             {
                 shot: 'pictures-3-options',
                 name: 'Trusted senders and pictures in every message',
-                what: 'Options lists the trusted senders with Remove, and has "Download pictures in all messages", off out of the box, with what it tells senders.',
-                how: 'Options (Settings on the Mac, Preferences on Linux), the reading part.',
+                what: 'The Reading page of Options has Trusted Senders, which lists them with Remove, and "Download pictures in all messages", off out of the box, with what it tells senders. On Windows Cancel in Options undoes a removal too.',
+                how: 'Tools > Options > Reading (Inbox Classic > Settings > Reading on the Mac, Main Menu > Preferences > Reading on Linux).',
                 checked: ['The trusted sender is listed and can be removed', "With the setting on, every message's pictures load"]
             },
             {
@@ -438,7 +438,7 @@ const sections = [
                 shot: 'download-1-options',
                 name: 'Messages downloaded before they are opened',
                 what: 'New mail is downloaded as it arrives, so it opens at once, and the messages above and below the one opened are fetched for Next and Previous. Options says what is downloaded ahead (recent messages up to 1 MB out of the box, all of them, or only when opened) and how much each account keeps; past it, the oldest are removed and downloaded again when opened. Junk E-mail, Deleted Items and Gmail’s All Mail are downloaded only when opened.',
-                how: 'Options (Settings on the Mac, Preferences on Linux), the downloading part.',
+                how: 'Tools > Options > Downloading (Inbox Classic > Settings > Downloading on the Mac, Main Menu > Preferences > Downloading on Linux).',
                 checked: ['What is downloaded ahead and 1 GB kept for each account are shown', 'A choice is kept']
             },
             {
@@ -452,7 +452,7 @@ const sections = [
                 shot: 'layout-1-columns',
                 name: 'The column layout',
                 what: 'Folders, messages and the message side by side, for a wide screen. Each message is a row of three lines: who and when, the subject with its marks, and the first words the sender wrote (without the quoted reply). Classic stays as it was.',
-                how: 'View > Layout > Columns, or the same choice in Options (Settings on the Mac, Preferences on Linux).',
+                how: 'View > Layout > Columns, or Layout on the Reading page of Options (Settings on the Mac, Preferences on Linux).',
                 checked: ['The list stands beside the reading pane', 'Rows of three lines with the first words', 'Back to Classic as before']
             },
             {
@@ -473,7 +473,7 @@ const sections = [
                 shot: 'pictures-4-list',
                 name: "Senders' pictures in the message list",
                 what: "In the column layout each row has the sender's picture: the brand's logo when the mail provider confirmed it, else the sender's initials on a quiet fill. A logo is downloaded once for each brand, never for each message, so no sender learns who opened what.",
-                how: "The column layout (View > Layout > Columns). Options turns them off: Show senders' pictures in the message list.",
+                how: "The column layout (View > Layout > Columns). The Reading page of Options turns them off: Show senders’ pictures in the message list.",
                 checked: ['A confirmed logo in its row', 'Initials for the rest', 'The setting turns them off']
             },
             {
@@ -605,7 +605,7 @@ const sections = [
                 shot: 'threads-1-collapsed',
                 name: 'Conversations',
                 what: "The list groups the messages that answer each other into conversations (by their Message-IDs, In-Reply-To and References; on Gmail by Gmail's own conversations), one row each on its first message with how many it has, bold while one is unread, placed by its newest message. An action on a collapsed conversation acts on all of its messages.",
-                how: 'On by default; Tools > Options > Group messages by conversation turns it off.',
+                how: 'On by default; Group messages by conversation on the Reading page of Tools > Options turns it off.',
                 checked: ['The Inbox lists the conversation once, with its count', 'Mark Read on the collapsed row marks all three read on the server']
             },
             {
@@ -619,7 +619,7 @@ const sections = [
                 shot: 'threads-3-options-off',
                 name: 'One row a message',
                 what: 'With Group messages by conversation turned off in Options, every message is a row of its own again.',
-                how: 'Tools > Options (Inbox Classic > Settings on the Mac, Preferences on Linux).',
+                how: 'Tools > Options > Reading (Inbox Classic > Settings > Reading on the Mac, Main Menu > Preferences > Reading on Linux).',
                 checked: ['With the option off the three messages are three rows; on again, one']
             },
             {
@@ -747,8 +747,8 @@ const sections = [
             {
                 shot: 'dark-6-switch-off',
                 name: 'Dark messages turned off',
-                what: 'Settings has "Show messages on a dark background when the system is dark", on by default. Turned off, messages are shown light in a dark window too; the message shown changes at once.',
-                how: 'On the Mac Inbox Classic > Settings, on Linux the main menu > Preferences.',
+                what: 'The Reading page of Settings has "Show messages on a dark background when the system is in dark mode", on by default. Turned off, messages are shown light in a dark window too; the message shown changes at once.',
+                how: 'On the Mac Inbox Classic > Settings > Reading, on Linux Main Menu > Preferences > Reading.',
                 checked: ['Turning it off keeps it off', 'The message shown is made again, light on white', 'With its colors as sent']
             }
         ]
@@ -1256,7 +1256,7 @@ const sections = [
             {
                 shot: 'files-4-open-eml',
                 name: 'Opening .eml files',
-                what: 'A message file opened from Finder, File Explorer or the file manager opens in a message window, the same as a message of the list, with Reply, Reply All, Forward, Print and Save As. Options can make Inbox Classic the app for .eml files (on Windows through its Default Apps).',
+                what: 'A message file opened from Finder, File Explorer or the file manager opens in a message window, the same as a message of the list, with Reply, Reply All, Forward, Print and Save As. Open .eml Files with Inbox Classic on the General page of Options makes Inbox Classic the app for .eml files (on Windows through its Default Apps).',
                 how: 'Double-click an .eml file, or Open With Inbox Classic.',
                 checked: ['The file opens in a message window with its subject', 'Reply from it opens a reply']
             },
@@ -1405,7 +1405,7 @@ const sections = [
                 shot: 'write-24-send-delay',
                 name: 'Wait before sending',
                 what: 'How long a message waits to be taken back: Off, 5, 10 (out of the box), 20 or 30 seconds.',
-                how: 'Tools > Options (Settings on the Mac, Preferences on Linux).',
+                how: 'Delay before sending on the General page of Tools > Options (Settings on the Mac, Preferences on Linux).',
                 checked: ['The five waits are offered', '10 seconds chosen']
             },
             {
@@ -1581,19 +1581,29 @@ const sections = [
             },
             {
                 shot: 'options-1-language',
-                name: 'Options and the language',
-                what: "Tools > Options (Settings on the Mac, Preferences on Linux) chooses the language of the windows: System default, or any language there are catalogs of (English, Deutsch, Eesti, Español, Français...), each named in itself. The app starts again in it. Notify of New Mail is there too. On Windows the installer asks for the language on a first install; on the Mac the system's own per-app language setting chooses it too.",
-                how: 'Tools > Options, Language.',
+                name: 'Settings: General',
+                what: "Tools > Options (Settings on the Mac, Preferences on Linux) has the same three pages on every platform, General, Reading and Downloading, in each platform's form: tabs with group boxes and OK, Cancel and Apply on Windows, a toolbar of panes titled by the pane on the Mac, a preferences dialog with a view switcher on Linux. General chooses the language of the windows (System default, or any language there are catalogs of, each named in itself; the app starts again in it), new mail notifications and the sign-in codes in them, the delay before sending, and the default apps (Make Default Mail App, Open .eml Files); on the Mac also Check for updates automatically. On Windows the installer asks for the language on a first install; on the Mac the system's own per-app language setting chooses it too.",
+                how: 'Tools > Options > General (Inbox Classic > Settings > General on the Mac, Main Menu > Preferences > General on Linux).',
                 checked: [
+                    'Three pages in the same order, with the settings of core/settings.toml',
                     'Language lists System default and every language by its own name',
-                    'A language chosen says the app starts again to change it, with Restart Now and Later'
+                    'A language chosen says the app starts again to change it, with Restart Now and Later',
+                    'The sign-in codes setting is disabled while notifications are off',
+                    'Windows: Apply applies without closing; the Mac: the window is titled by its pane and opens on the last one'
                 ]
+            },
+            {
+                shot: 'options-2-reading',
+                name: 'Settings: Reading',
+                what: "The Reading page: the message list (Layout, Group messages by conversation, Show senders’ pictures in the message list, which the column layout shows) and the messages (Show messages on a dark background on the Mac and Linux, Download pictures in all messages, Trusted Senders).",
+                how: 'Tools > Options > Reading (Inbox Classic > Settings > Reading on the Mac, Main Menu > Preferences > Reading on Linux).',
+                checked: ['The Reading page shows its settings in the order of core/settings.toml']
             },
             {
                 shot: 'lang-1-german',
                 name: 'In German',
                 what: 'Every word of the windows comes from the catalogs of the core (Fluent), the same on every platform: menus, toolbar, dialogs, status bar, the reading pane, the help. Dates and sizes follow the language too.',
-                how: 'Choose Deutsch in Options.',
+                how: 'Choose Deutsch in Options > General.',
                 checked: ['Started in German, the menus, the toolbar and the status bar are in German']
             },
             {

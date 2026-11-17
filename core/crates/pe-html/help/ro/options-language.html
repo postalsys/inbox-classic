@@ -1,15 +1,30 @@
-<!--review--><h1>Limba și setările</h1>
-<p class="summary">Alegeți limba Inbox Classic și cum vă afișează și vă anunță e-mailurile.</p>
-<p>Alegeți <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
+<!--review--><h1>Setări</h1>
+<p class="summary">Alegeți limba Inbox Classic, cum vă afișează și vă anunță e-mailurile și ce descarcă în avans.</p>
+<p>Alegeți <b data-settings=""></b>. Setările sunt pe trei pagini: <b data-text="ui-settings-general"></b>, <b data-text="ui-settings-reading"></b> și <b data-text="ui-download-heading"></b>.<!--os:windows--> Faceți clic pe <b data-text="ui-ok"></b> pentru a păstra modificările sau pe <b data-text="ui-apply"></b> pentru a le păstra și a lăsa fereastra deschisă. <b data-text="ui-cancel"></b> renunță la toate modificările făcute de atunci, inclusiv la expeditorii de încredere pe care i-ați eliminat și la aplicația aleasă pentru fișierele .eml.<!--/os--><!--os:mac,linux--> Fiecare modificare se aplică imediat.<!--/os--></p>
+<h2><b data-text="ui-settings-general"></b></h2>
 <ul>
-    <li><!--os:windows--><b data-text="win-options-language-label"></b><!--/os--><!--os:mac--><b data-text="mac-language-label"></b><!--/os--><!--os:linux--><b data-text="gtk-language"></b><!--/os--> alege limba ferestrelor și a acestui ajutor. Alegeți limba sistemului sau una dintre limbile din listă. Când Inbox Classic nu are limba sistemului, folosește engleza.</li>
-    <li><!--os:windows--><b data-text="win-options-notify"></b><!--/os--><!--os:mac--><b data-text="mac-notify-new-mail"></b><!--/os--><!--os:linux--><b data-text="gtk-notify-new-mail"></b><!--/os--> activează sau dezactivează notificările pentru e-mailurile noi.</li>
-    <li><b data-text="ui-group-by-conversation"></b> grupează pe un singur rând mesajele care își răspund unul altuia.</li>
-    <li><b data-text="ui-codes-in-notifications"></b> afișează codul unui mesaj de conectare în notificarea lui.</li>
-    <li><b data-text="ui-layout-label"></b> alege aspectul: automat după lățimea ferestrei, clasic sau pe coloane. Consultați <a href="topic:layouts"></a>.</li>
-    <li><b data-text="ui-list-pictures"></b> afișează siglele mărcilor, imaginile contactelor și inițialele în aspectul pe coloane.</li>
+    <li><b data-text="ui-language-label"></b> alege limba ferestrelor și a acestui ajutor: limba sistemului sau una dintre limbile din listă. Când Inbox Classic nu are limba sistemului, folosește engleza.</li>
+    <li><b data-text="ui-notify-new-mail"></b> afișează o notificare când sosesc e-mailuri noi. Implicit este activată.</li>
+    <li><b data-text="ui-codes-in-notifications"></b> afișează codul unui mesaj de conectare în notificarea lui. Implicit este dezactivată, deoarece o notificare poate fi citită pe un ecran blocat. Nu este disponibilă cât timp notificările sunt dezactivate.</li>
+    <li><b data-text="ui-send-delay"></b> păstrează câteva secunde în Mesaje de trimis un mesaj pe care îl trimiteți, ca să îl mai puteți anula cu Anulare. Implicit este de 10 secunde.</li>
+    <li><b data-text="cmd-default-app"></b> deschide linkurile de e-mail în Inbox Classic, iar <b data-text="ui-eml-default"></b> deschide fișierele de mesaje. Consultați <a href="topic:default-mail-program"></a>.</li>
+    <!--os:mac--><li><b data-text="mac-check-updates-automatically"></b> caută din când în când o versiune nouă de Inbox Classic. Consultați <a href="topic:updates"></a>.</li><!--/os-->
 </ul>
 <p>Pentru a schimba limba, Inbox Classic repornește. Faceți clic pe <b data-text="ui-restart-now"></b> sau pe <b data-text="ui-restart-later"></b> pentru a o schimba la următoarea pornire.</p>
+<h2><b data-text="ui-settings-reading"></b></h2>
+<ul>
+    <li><b data-text="ui-layout-label"></b> alege aspectul: automat după lățimea ferestrei, clasic sau pe coloane. Consultați <a href="topic:layouts"></a>.</li>
+    <li><b data-text="ui-group-by-conversation"></b> grupează pe un singur rând mesajele care își răspund unul altuia. Implicit este activată.</li>
+    <li><b data-text="ui-list-pictures"></b> afișează siglele mărcilor, imaginile contactelor și inițialele în aspectul pe coloane. Implicit este activată.</li>
+    <!--os:mac,linux--><li><b data-text="ui-dark-messages"></b> afișează mesajele pe care le citiți și le scrieți pe un fundal întunecat cât timp sistemul este în modul întunecat. Implicit este activată.</li><!--/os-->
+    <li><b data-text="ui-pictures-always-option"></b> descarcă imaginile din toate mesajele. Implicit este dezactivată, deoarece expeditorii pot afla atunci când le citiți mesajele. Consultați <a href="topic:pictures-tracking"></a>.</li>
+    <li><b data-text="ui-trusted-senders-button"></b> afișează expeditorii ale căror imagini sunt descărcate întotdeauna, de unde îi puteți elimina.</li>
+</ul>
+<h2><b data-text="ui-download-heading"></b></h2>
+<ul>
+    <li><b data-text="ui-download-ahead"></b> alege mesajele descărcate înainte să le deschideți: implicit, mesajele recente de până la 1 MB fiecare. Consultați <a href="topic:download-ahead"></a>.</li>
+    <li><b data-text="ui-download-limit"></b> limitează spațiul ocupat de mesajele descărcate ale fiecărui cont. Implicit este de 1 GB.</li>
+</ul>
 <!--os:windows--><p>Programul de instalare întreabă limba la prima instalare și o păstrează ca limbă aleasă aici.</p><!--/os-->
 <!--os:mac--><p>Puteți alege limba doar pentru Inbox Classic și în <i>Configurări sistem &gt; General &gt; Limbă și regiune &gt; Aplicații</i>.</p><!--/os-->
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:conversations"></a> <a href="topic:sign-in-codes"></a></nav>

@@ -468,9 +468,10 @@ extension UITest {
         guard await waitWindow("settings", 10) != nil, let options = SettingsWindow.current else {
             throw Failed(description: "Settings did not open")
         }
+        await showPane(options, .reading)
         check(options.pictures.state == .off && !main.core.alwaysLoadPictures, "Download pictures in all messages is there, off at first")
         await shot(options.window, "pictures-3-options")
-        press(find("settings.trusted", in: options.window))
+        press(find("settings.trustedSenders", in: options.window))
         guard await waitWindow("trusted", 10) != nil, let sheet = TrustedSendersSheet.current else {
             throw Failed(description: "Trusted Senders did not open")
         }
@@ -497,6 +498,7 @@ extension UITest {
               "off again, it asks again")
 
         step("what is downloaded ahead")
+        await showPane(options, .downloading)
         // the test turned it off at its start, before the first account
         check(options.downloadAhead.indexOfSelectedItem == 2 && options.downloadLimit.indexOfSelectedItem == 2
                   && options.downloadLimit.titleOfSelectedItem == "1 GB",

@@ -740,6 +740,34 @@ ui-col-used-by = Usada por
 # review: new
 ui-options-system-default = Predefinição do sistema ({ $language })
 # review: new
+ui-settings-general = Geral
+# review: new
+ui-settings-reading = Leitura
+# review: changed
+ui-settings-new-mail = Correio novo
+# review: new
+ui-settings-sending = Envio
+# review: new
+ui-settings-default-apps = Aplicações predefinidas
+# review: new
+ui-settings-message-list = Lista de mensagens
+# review: new
+ui-settings-messages = Mensagens
+# review: new
+ui-settings-language = Idioma
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Aplicar
+# review: new
+ui-language-label = &Idioma:
+# review: new
+ui-restart-note = Reinicie o Inbox Classic para mudar o idioma.
+# review: new
+ui-restart-ask = O Inbox Classic mostra { $language } depois de reiniciar. Reiniciar agora?
+# review: new
+ui-notify-new-mail = &Notificar-me quando chegar correio novo
+# review: new
 ui-new-folder-title = Nova pasta
 # review: new
 ui-rename-folder-title = Mudar o nome da pasta
@@ -1049,7 +1077,7 @@ ui-book-not-exported = Não foi possível guardar o livro de endereços: { $reas
 # review: new
 ui-code-copied = Código copiado
 # review: new
-ui-codes-in-notifications = Mostrar códigos de início de sessão nas notificações de correio novo
+ui-codes-in-notifications = &Mostrar códigos de início de sessão nas notificações de correio novo
 # review: new
 ui-tool-unread-only = Não lidas
 # review: new
@@ -1061,7 +1089,7 @@ ui-pictures-always-domain = Transferir sempre imagens de todos em { $domain }
 # review: new
 ui-pictures-unconfirmed = Não foi possível verificar o domínio do remetente ({ $domain }), por isso as imagens desta mensagem não são transferidas automaticamente.
 # review: new
-ui-pictures-always-option = Transferir imagens em todas as mensagens
+ui-pictures-always-option = &Transferir imagens em todas as mensagens
 # review: new
 ui-pictures-always-warning = Os remetentes podem então saber quando lê as mensagens deles.
 # review: new
@@ -1071,7 +1099,7 @@ ui-protection-details-title = Detalhes de segurança
 # review: new
 ui-download-heading = Transferência
 # review: new
-ui-download-ahead = Transferir mensagens antecipadamente:
+ui-download-ahead = &Transferir mensagens antecipadamente:
 # review: new
 ui-download-ahead-recent = Mensagens recentes até 1 MB cada
 # review: new
@@ -1079,9 +1107,9 @@ ui-download-ahead-all = Todas as mensagens
 # review: new
 ui-download-ahead-never = Só quando são abertas
 # review: new
-ui-download-limit = Limite de armazenamento por conta:
+ui-download-limit = &Limite de armazenamento por conta:
 # review: new
-ui-send-delay = Atraso antes do envio:
+ui-send-delay = Atraso antes &do envio:
 # review: new
 ui-send-delay-note = Enquanto uma mensagem aguarda o envio, pode cancelar o envio com Anular.
 # review: new
@@ -1102,7 +1130,7 @@ ui-download-note = As mensagens transferidas antecipadamente abrem de imediato. 
 # review: new
 ui-attachment-downloading = A transferência desta mensagem ainda não terminou. Tente novamente quando a transferência estiver concluída.
 # review: new
-ui-trusted-senders-button = Remetentes fidedignos...
+ui-trusted-senders-button = &Remetentes fidedignos...
 # review: new
 ui-trusted-senders-title = Remetentes fidedignos
 # review: new
@@ -1112,7 +1140,7 @@ ui-trusted-everyone-at = Todos em { $domain }
 # review: new
 ui-trusted-senders-empty = Ainda não foram adicionados remetentes fidedignos.
 # review: new
-ui-eml-default = Abrir ficheiros .eml com o Inbox Classic
+ui-eml-default = Abrir &ficheiros .eml com o Inbox Classic
 # review: new
 ui-eml-default-done = O Inbox Classic abre agora os ficheiros .eml.
 # review: new
@@ -1122,7 +1150,7 @@ ui-folders = Pastas
 # review: new
 ui-sorted-by = Ordenado por { $field }
 # review: new
-ui-layout-label = Esquema:
+ui-layout-label = &Esquema:
 # review: new
 ui-columns-note = A janela é suficientemente larga para o esquema em colunas. Pode alterar o esquema em Ver > Esquema.
 # review: new
@@ -1138,9 +1166,9 @@ ui-row-messages = { $count ->
    *[other] { $count } mensagens
 }
 # review: new
-ui-list-pictures = Mostrar as imagens dos remetentes na lista de mensagens
+ui-list-pictures = &Mostrar as imagens dos remetentes na lista de mensagens
 # review: new
-ui-list-pictures-note = Mostra logótipos de marcas ou imagens do Livro de Endereços para remetentes verificados, e as iniciais quando não há imagem. Os logótipos são transferidos uma vez por marca, e não para cada mensagem.
+ui-list-pictures-note = No esquema em colunas, mostra logótipos de marcas ou imagens do Livro de Endereços para remetentes verificados, e as iniciais quando não há imagem. Os logótipos são transferidos uma vez por marca, e não para cada mensagem.
 # review: new
 ui-card-picture = Imagem:
 # review: new

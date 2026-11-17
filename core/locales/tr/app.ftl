@@ -739,6 +739,34 @@ ui-col-used-by = Kullanan
 # review: new
 ui-options-system-default = Sistem varsayılanı ({ $language })
 # review: new
+ui-settings-general = Genel
+# review: new
+ui-settings-reading = Okuma
+# review: changed
+ui-settings-new-mail = Yeni posta
+# review: new
+ui-settings-sending = Gönderme
+# review: new
+ui-settings-default-apps = Varsayılan uygulamalar
+# review: new
+ui-settings-message-list = İleti listesi
+# review: new
+ui-settings-messages = İletiler
+# review: new
+ui-settings-language = Dil
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Uygula
+# review: new
+ui-language-label = &Dil:
+# review: new
+ui-restart-note = Dili değiştirmek için Inbox Classic'i yeniden başlatın.
+# review: new
+ui-restart-ask = Inbox Classic yeniden başladığında dil şu olacak: { $language }. Şimdi yeniden başlatılsın mı?
+# review: new
+ui-notify-new-mail = Yeni posta geldiğinde &bildir
+# review: new
 ui-new-folder-title = Yeni Klasör
 # review: new
 ui-rename-folder-title = Klasörü Yeniden Adlandır
@@ -1043,7 +1071,7 @@ ui-book-not-exported = Adres defteri kaydedilemedi: { $reason }
 # review: new
 ui-code-copied = Kod kopyalandı
 # review: new
-ui-codes-in-notifications = Yeni posta bildirimlerinde oturum açma kodlarını göster
+ui-codes-in-notifications = &Yeni posta bildirimlerinde oturum açma kodlarını göster
 # review: new
 ui-tool-unread-only = Okunmamış
 # review: new
@@ -1055,7 +1083,7 @@ ui-pictures-always-domain = { $domain } etki alanındaki herkesten resimleri her
 # review: new
 ui-pictures-unconfirmed = Gönderenin etki alanı ({ $domain }) doğrulanamadı, bu nedenle bu iletideki resimler otomatik olarak indirilmez.
 # review: new
-ui-pictures-always-option = Tüm iletilerdeki resimleri indir
+ui-pictures-always-option = &Tüm iletilerdeki resimleri indir
 # review: new
 ui-pictures-always-warning = Bu durumda gönderenler iletilerini ne zaman okuduğunuzu görebilir.
 # review: new
@@ -1065,7 +1093,7 @@ ui-protection-details-title = Güvenlik Ayrıntıları
 # review: new
 ui-download-heading = İndirme
 # review: new
-ui-download-ahead = İletileri önceden indir:
+ui-download-ahead = &İletileri önceden indir:
 # review: new
 ui-download-ahead-recent = Her biri en çok 1 MB olan son iletiler
 # review: new
@@ -1073,9 +1101,9 @@ ui-download-ahead-all = Tüm iletiler
 # review: new
 ui-download-ahead-never = Yalnızca açıldığında
 # review: new
-ui-download-limit = Hesap başına depolama sınırı:
+ui-download-limit = &Hesap başına depolama sınırı:
 # review: new
-ui-send-delay = Göndermeden önce bekleme:
+ui-send-delay = &Göndermeden önce bekleme:
 # review: new
 ui-send-delay-note = Bir ileti gönderilmeyi beklerken Geri Al ile gönderimi iptal edebilirsiniz.
 # review: new
@@ -1096,7 +1124,7 @@ ui-download-note = Önceden indirilen iletiler hemen açılır. Depolama sınır
 # review: new
 ui-attachment-downloading = Bu iletinin indirilmesi bitmedi. İndirme tamamlandığında yeniden deneyin.
 # review: new
-ui-trusted-senders-button = Güvenilen Gönderenler...
+ui-trusted-senders-button = G&üvenilen Gönderenler...
 # review: new
 ui-trusted-senders-title = Güvenilen gönderenler
 # review: new
@@ -1106,7 +1134,7 @@ ui-trusted-everyone-at = { $domain } etki alanındaki herkes
 # review: new
 ui-trusted-senders-empty = Henüz güvenilen gönderen eklenmedi.
 # review: new
-ui-eml-default = .eml Dosyalarını Inbox Classic ile Aç
+ui-eml-default = .&eml Dosyalarını Inbox Classic ile Aç
 # review: new
 ui-eml-default-done = Inbox Classic artık .eml dosyalarını açıyor.
 # review: new
@@ -1116,7 +1144,7 @@ ui-folders = Klasörler
 # review: new
 ui-sorted-by = Sıralama: { $field }
 # review: new
-ui-layout-label = Yerleşim:
+ui-layout-label = &Yerleşim:
 # review: new
 ui-columns-note = Pencere sütun yerleşimi için yeterince geniş. Yerleşimi Görünüm > Yerleşim altından değiştirebilirsiniz.
 # review: new
@@ -1131,9 +1159,9 @@ ui-row-messages = { $count ->
    *[other] { $count } ileti
 }
 # review: new
-ui-list-pictures = İleti listesinde gönderenlerin resimlerini göster
+ui-list-pictures = &İleti listesinde gönderenlerin resimlerini göster
 # review: new
-ui-list-pictures-note = Doğrulanmış gönderenler için marka logolarını veya Adres Defteri resimlerini, resim yoksa baş harfleri gösterir. Logolar her ileti için değil, her marka için bir kez indirilir.
+ui-list-pictures-note = Sütun yerleşiminde doğrulanmış gönderenler için marka logolarını veya Adres Defteri resimlerini, resim yoksa baş harfleri gösterir. Logolar her ileti için değil, her marka için bir kez indirilir.
 # review: new
 ui-card-picture = Resim:
 # review: new

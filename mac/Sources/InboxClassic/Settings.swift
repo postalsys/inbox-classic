@@ -4,6 +4,7 @@
 // system's per-app language setting (System Settings > General > Language & Region > Applications) is the same choice.
 import AppKit
 import CInboxClassic
+import Sparkle
 import UniformTypeIdentifiers
 
 @MainActor
@@ -81,7 +82,7 @@ enum Languages {
     static func offerRestart(for code: String?) {
         // asked only when the windows would change: System default that is German, then Deutsch, needs no new start
         guard (code ?? system) != current else { return }
-        if ask(Text.macRestartQuestion.text, yes: Text.uiRestartNow.text, no: Text.uiRestartLater.text,
+        if ask(Text.uiRestartAsk.text(["language": name(code ?? system)]), yes: Text.uiRestartNow.text, no: Text.uiRestartLater.text,
                style: .information) {
             AppDelegate.shared?.restart()
         }
@@ -93,29 +94,31 @@ enum Languages {
     }
 }
 
-/// Inbox Classic > Settings: the language of the windows, Notify of New Mail, Group messages by conversation, messages dark in a dark window, the
-/// pictures of every message and the trusted senders, .eml files, and what is downloaded before it is opened. As Mac settings windows do, a change counts at
-/// once; a language counts once the app starts again, which it offers to do.
+/// Inbox Classic > Settings: the panes of core/settings.toml (General, Reading, Downloading) behind a toolbar, as the
+/// system's own apps have them. The window is titled by its pane and opens on the one chosen last. As Mac settings
+/// windows do, a change counts at once; a language counts once the app starts again, which it offers to do.
 @MainActor
-final class SettingsWindow: NSObject, NSWindowDelegate {
+final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
     private static var shown: SettingsWindow?
+    /// the pane chosen last, by its name in settings.toml
+    private static var lastPane = Preference("SettingsPane", default: SettingsPage.general.rawValue)
+    /// the width of a pane, its margins included; long words wrap within it
+    private static let width: CGFloat = 520
+    private static let margin: CGFloat = 20
+    /// the widest a pop-up's label gets before it wraps, so the controls keep their room
+    private static let widestLabel: CGFloat = 220
+    /// how far a check box's title starts from its box: a note or a dependent check box under it starts there
+    private static let indent: CGFloat = 20
+    /// between a label and its pop-up
+    private static let spacing: CGFloat = 8
+
     let window: NSWindow
-    let language = NSPopUpButton()
-    let notify: NSButton
-    let grouping: NSButton
-    let signInCodes: NSButton
-    let pictures: NSButton
-    /// Show messages on a dark background when the system is dark
-    let darkMessages: NSButton
-    let listPictures: NSButton
-    let downloadAhead = NSPopUpButton()
-    let downloadLimit = NSPopUpButton()
-    /// Wait before sending (Undo Send)
-    let sendDelay = NSPopUpButton()
-    /// Automatic, Classic, Columns: View > Layout's choice
-    let layout = NSPopUpButton()
+    private(set) var pane = SettingsPage.general
+    private var panes: [SettingsPage: NSView] = [:]
+    /// the controls of the settings, every pane's, made when the window opens
+    private var controls: [Setting: NSControl] = [:]
     private let core: Core
-    /// the codes of the popup's items, nil for System default
+    /// the codes of the language pop-up's items, nil for System default
     private var codes: [String?] = []
 
     static func open(core: Core) {
@@ -134,200 +137,354 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
 
     private init(core: Core) {
         self.core = core
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 440, height: 160), styleMask: [.titled, .closable],
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: Self.width, height: 200), styleMask: [.titled, .closable],
                           backing: .buffered, defer: false)
-        window.autorecalculatesKeyViewLoop = true
-        notify = NSButton(checkboxWithTitle: Text.macNotifyNewMail.text, target: nil, action: nil)
-        grouping = NSButton(checkboxWithTitle: Text.uiGroupByConversation.text, target: nil, action: nil)
-        signInCodes = NSButton(checkboxWithTitle: Text.uiCodesInNotifications.text, target: nil, action: nil)
-        pictures = NSButton(checkboxWithTitle: Text.uiPicturesAlwaysOption.text, target: nil, action: nil)
-        darkMessages = NSButton(checkboxWithTitle: Text.uiDarkMessages.text, target: nil, action: nil)
-        listPictures = NSButton(checkboxWithTitle: Text.uiListPictures.text, target: nil, action: nil)
         super.init()
-        window.title = Text.macSettingsTitle.text
         window.identifier = NSUserInterfaceItemIdentifier("settings")
         window.isReleasedWhenClosed = false
         window.delegate = self
-
-        let system = Text.uiOptionsSystemDefault.text(["language": Languages.name(Languages.system)])
-        language.addItem(withTitle: system)
-        codes = [nil]
-        for (code, name) in Languages.all {
-            language.addItem(withTitle: name)
-            codes.append(code)
+        window.toolbarStyle = .preference
+        let toolbar = NSToolbar(identifier: "settings")
+        toolbar.delegate = self
+        toolbar.allowsUserCustomization = false
+        window.toolbar = toolbar
+        for page in SettingsPage.allCases {
+            panes[page] = makePane(page)
         }
-        let chosen = Languages.chosen
-        language.selectItem(at: codes.firstIndex { $0 == chosen } ?? 0)
-        language.target = self
-        language.action = #selector(languageChosen)
-        language.setAccessibilityIdentifier("settings.language")
-
-        let hint = NSTextField(wrappingLabelWithString: Text.macRestartHint.text)
-        hint.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        hint.textColor = .secondaryLabelColor
-
-        notify.state = AppDelegate.shared?.notify ?? true ? .on : .off
-        notify.target = self
-        notify.action = #selector(notifyChanged)
-        notify.setAccessibilityIdentifier("settings.notify")
-
-        signInCodes.state = AppDelegate.shared?.codesInNotifications ?? false ? .on : .off
-        signInCodes.target = self
-        signInCodes.action = #selector(signInCodesChanged)
-        signInCodes.setAccessibilityIdentifier("settings.codes")
-
-        grouping.state = AppDelegate.shared?.groupByConversation ?? true ? .on : .off
-        grouping.target = self
-        grouping.action = #selector(groupingChanged)
-        grouping.setAccessibilityIdentifier("settings.grouping")
-
-        // the senders' pictures of the column layout's list, with what is shown and downloaded under it
-        listPictures.state = AppDelegate.shared?.listPictures ?? true ? .on : .off
-        listPictures.target = self
-        listPictures.action = #selector(listPicturesChanged)
-        listPictures.setAccessibilityIdentifier("settings.listPictures")
-        let listNote = NSTextField(wrappingLabelWithString: Text.uiListPicturesNote.text)
-        listNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        listNote.textColor = .secondaryLabelColor
-        let listNoted = NSStackView(views: [listNote])
-        listNoted.edgeInsets = NSEdgeInsets(top: 0, left: 18, bottom: 0, right: 0)
-
-        // under the notifications, as a choice of theirs
-        let indented = NSStackView(views: [signInCodes])
-        indented.edgeInsets = NSEdgeInsets(top: 0, left: 18, bottom: 0, right: 0)
-
-        // reading: messages dark in a dark window, then the pictures of every message, with what that tells senders under it, and the senders trusted
-        darkMessages.state = core.darkMessages ? .on : .off
-        darkMessages.target = self
-        darkMessages.action = #selector(darkMessagesChanged)
-        darkMessages.setAccessibilityIdentifier("settings.darkMessages")
-        pictures.state = core.alwaysLoadPictures ? .on : .off
-        pictures.target = self
-        pictures.action = #selector(picturesChanged)
-        pictures.setAccessibilityIdentifier("settings.pictures")
-        let warning = NSTextField(wrappingLabelWithString: Text.uiPicturesAlwaysWarning.text)
-        warning.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        warning.textColor = .secondaryLabelColor
-        let warned = NSStackView(views: [warning])
-        warned.edgeInsets = NSEdgeInsets(top: 0, left: 18, bottom: 0, right: 0)
-        let trusted = NSButton(title: Text.uiTrustedSendersButton.text.replacingOccurrences(of: "...", with: "…"), target: self,
-                               action: #selector(trustedSendersClicked))
-        trusted.setAccessibilityIdentifier("settings.trusted")
-        let eml = NSButton(title: Text.uiEmlDefault.text, target: self, action: #selector(emlDefaultClicked))
-        eml.setAccessibilityIdentifier("settings.eml")
-
-        // downloading: what is downloaded ahead (in the order of PeDownloadAhead), how much each account keeps, and
-        // what that means under them
-        for item in [Text.uiDownloadAheadRecent, Text.uiDownloadAheadAll, Text.uiDownloadAheadNever] {
-            downloadAhead.addItem(withTitle: item.text)
-        }
-        downloadAhead.selectItem(at: Int(core.downloadAhead.rawValue))
-        downloadAhead.target = self
-        downloadAhead.action = #selector(downloadAheadChosen)
-        downloadAhead.setAccessibilityIdentifier("settings.downloadAhead")
-        downloadLimit.addItems(withTitles: Core.downloadLimits)
-        downloadLimit.selectItem(at: core.downloadLimitIndex)
-        downloadLimit.target = self
-        downloadLimit.action = #selector(downloadLimitChosen)
-        downloadLimit.setAccessibilityIdentifier("settings.downloadLimit")
-        sendDelay.addItems(withTitles: Core.sendDelays)
-        sendDelay.selectItem(at: core.sendDelayIndex)
-        sendDelay.target = self
-        sendDelay.action = #selector(sendDelayChosen)
-        sendDelay.setAccessibilityIdentifier("settings.sendDelay")
-        let sendRow = NSStackView(views: [NSTextField(labelWithString: Text.uiSendDelay.text), sendDelay])
-        let sendNote = NSTextField(wrappingLabelWithString: Text.uiSendDelayNote.text)
-        sendNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        sendNote.textColor = .secondaryLabelColor
-        let downloadNote = NSTextField(wrappingLabelWithString: Text.uiDownloadNote.text)
-        downloadNote.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
-        downloadNote.textColor = .secondaryLabelColor
-        // each label beside its pop-up, under the other settings: the language's label keeps the left column narrow
-        let aheadRow = NSStackView(views: [NSTextField(labelWithString: Text.uiDownloadAhead.text), downloadAhead])
-        let limitRow = NSStackView(views: [NSTextField(labelWithString: Text.uiDownloadLimit.text), downloadLimit])
-        for row in [sendRow, aheadRow, limitRow] {
-            row.alignment = .firstBaseline
-            row.spacing = 8
-        }
-
-        let label = NSTextField(labelWithString: Text.macLanguageLabel.text)
-        label.alignment = .right
-        // View > Layout's choices, each item tagged with its mode
-        for (command, mode) in AppDelegate.layoutModes.sorted(by: { $0.value.rawValue < $1.value.rawValue }) {
-            layout.addItem(withTitle: command.label)
-            layout.lastItem?.tag = Int(mode.rawValue)
-        }
-        layout.selectItem(withTag: Int(AppDelegate.shared?.layoutMode.rawValue ?? 0))
-        layout.target = self
-        layout.action = #selector(layoutChosen)
-        layout.setAccessibilityIdentifier("settings.layout")
-        let layoutLabel = NSTextField(labelWithString: Text.uiLayoutLabel.text)
-        layoutLabel.alignment = .right
-        let grid = NSGridView(views: [
-            [label, language],
-            [NSGridCell.emptyContentView, hint],
-            [layoutLabel, layout],
-            [NSGridCell.emptyContentView, notify],
-            [NSGridCell.emptyContentView, indented],
-            [NSGridCell.emptyContentView, grouping],
-            [NSGridCell.emptyContentView, listPictures],
-            [NSGridCell.emptyContentView, listNoted],
-            [NSGridCell.emptyContentView, darkMessages],
-            [NSGridCell.emptyContentView, pictures],
-            [NSGridCell.emptyContentView, warned],
-            [NSGridCell.emptyContentView, trusted],
-            [NSGridCell.emptyContentView, eml],
-            [NSGridCell.emptyContentView, sendRow],
-            [NSGridCell.emptyContentView, sendNote],
-            [NSGridCell.emptyContentView, aheadRow],
-            [NSGridCell.emptyContentView, limitRow],
-            [NSGridCell.emptyContentView, downloadNote],
-        ])
-        grid.rowSpacing = 8
-        grid.columnSpacing = 8
-        grid.column(at: 0).xPlacement = .trailing
-        // the rows by what is in them, so a row added between them does not move another's room
-        let rowOf = { (view: NSView) in grid.cell(for: view)?.row }
-        for (view, padding) in [(layout, 8), (notify, 8), (darkMessages, 8), (pictures, 4), (trusted, 4), (eml, 8), (sendRow, 12), (aheadRow, 12)] as [(NSView, CGFloat)] {
-            rowOf(view)?.topPadding = padding
-        }
-        // the labels on the pop-ups' text lines, as the other forms have them
-        rowOf(language)?.rowAlignment = .firstBaseline
-        rowOf(layout)?.rowAlignment = .firstBaseline
-        grid.translatesAutoresizingMaskIntoConstraints = false
-        // the help button in the bottom right corner, as the system's settings have it
-        let help = HelpButton("options")
-        help.translatesAutoresizingMaskIntoConstraints = false
-        let content = NSView()
-        content.addSubview(grid)
-        content.addSubview(help)
-        NSLayoutConstraint.activate([
-            grid.topAnchor.constraint(equalTo: content.topAnchor, constant: 20),
-            grid.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 20),
-            grid.trailingAnchor.constraint(lessThanOrEqualTo: help.leadingAnchor, constant: -12),
-            grid.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -20),
-            help.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -20),
-            help.bottomAnchor.constraint(equalTo: content.bottomAnchor, constant: -20),
-            hint.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
-            warning.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
-            downloadNote.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
-            sendNote.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
-            listNote.widthAnchor.constraint(lessThanOrEqualToConstant: 320),
-        ])
-        window.contentView = content
-        window.setContentSize(content.fittingSize)
+        updateDependents()
+        select(SettingsPage(rawValue: Self.lastPane.value) ?? .general, animate: false)
     }
 
     func windowWillClose(_ notification: Notification) {
         SettingsWindow.shown = nil
     }
 
-    @objc private func layoutChosen() {
+    // ---- the panes ----
+
+    /// `page` shown, as its toolbar item does: the window titled by it and as tall as it, its top edge kept
+    func select(_ page: SettingsPage, animate: Bool = true) {
+        guard let view = panes[page] else { return }
+        pane = page
+        Self.lastPane.value = page.rawValue
+        window.toolbar?.selectedItemIdentifier = NSToolbarItem.Identifier(page.rawValue)
+        window.title = page.label.text
+        let size = view.fittingSize
+        var frame = window.frameRect(forContentRect: NSRect(origin: .zero, size: size))
+        frame.origin = NSPoint(x: window.frame.minX, y: window.frame.maxY - frame.height)
+        // the window grows or shrinks empty, then shows the pane, as the system's settings windows do
+        if animate && window.isVisible && frame.size != window.frame.size {
+            window.contentView = NSView()
+            window.setFrame(frame, display: true, animate: true)
+        } else {
+            window.setFrame(frame, display: true)
+        }
+        window.contentView = view
+        window.recalculateKeyViewLoop()
+    }
+
+    @objc private func paneClicked(_ item: NSToolbarItem) {
+        SettingsPage(rawValue: item.itemIdentifier.rawValue).map { select($0) }
+    }
+
+    /// the controls the UI test reads and the actions read back
+    var language: NSPopUpButton { popup(.language) }
+    var notify: NSButton { box(.notifyNewMail) }
+    var signInCodes: NSButton { box(.codesInNotifications) }
+    /// Delay before sending (Undo Send)
+    var sendDelay: NSPopUpButton { popup(.sendDelay) }
+    /// Check for updates automatically: Sparkle's own setting, disabled in a build without it
+    var checkUpdates: NSButton { box(.checkForUpdates) }
+    /// Automatic, Classic, Columns: View > Layout's choice
+    var layout: NSPopUpButton { popup(.layout) }
+    var grouping: NSButton { box(.groupByConversation) }
+    var listPictures: NSButton { box(.listPictures) }
+    /// Show messages on a dark background when the system is dark
+    var darkMessages: NSButton { box(.darkMessages) }
+    var pictures: NSButton { box(.picturesAlways) }
+    var downloadAhead: NSPopUpButton { popup(.downloadAhead) }
+    var downloadLimit: NSPopUpButton { popup(.downloadLimit) }
+
+    // every setting's control is made in init, so these always find theirs
+    private func popup(_ setting: Setting) -> NSPopUpButton {
+        controls[setting] as! NSPopUpButton
+    }
+
+    private func box(_ setting: Setting) -> NSButton {
+        controls[setting] as! NSButton
+    }
+
+    /// A pane: its groups' settings in a grid, the labels right aligned before the controls, as Apple's panes have
+    /// them (a pop-up's own, and a group's title on its first control's row when that is no pop-up), the groups set
+    /// apart by space, and the help button in the bottom right corner
+    private func makePane(_ page: SettingsPage) -> NSView {
+        let settings = page.groups.flatMap(\.settings)
+        for setting in settings {
+            controls[setting] = control(for: setting)
+        }
+        let labels = labelColumn(for: page, controls: settings.compactMap { controls[$0] })
+        let labelWidth = labels.values.map(\.preferredMaxLayoutWidth).max() ?? 0
+        let room = Self.width - 2 * Self.margin
+        let column = labelWidth > 0 ? room - labelWidth - Self.spacing : room
+        let grid = NSGridView()
+        grid.rowSpacing = 10
+        grid.columnSpacing = Self.spacing
+        for (index, group) in page.groups.enumerated() {
+            let first = grid.numberOfRows
+            for setting in group.settings {
+                guard let control = controls[setting] else { continue }
+                // a check box that depends on the one before it starts where that one's title does
+                let width = column - (setting.dependsOn == nil ? 0 : Self.indent)
+                (control as? WrappingCheckbox)?.preferredMaxLayoutWidth = width
+                if setting.kind == .choice {
+                    labels[setting].map(control.setAccessibilityTitleUIElement)
+                }
+                let cell = stacked(control, note: setting.note, setting: setting, width: width)
+                let row = grid.addRow(with: [labels[setting] ?? NSGridCell.emptyContentView,
+                                             width < column ? indented(cell, by: column - width) : cell])
+                row.rowAlignment = .firstBaseline
+            }
+            if let note = group.note {
+                grid.addRow(with: [NSGridCell.emptyContentView, noteLabel(note.text, width: column)])
+                grid.row(at: grid.numberOfRows - 1).topPadding = -4
+            }
+            if index > 0 && grid.numberOfRows > first {
+                grid.row(at: first).topPadding = 12
+            }
+        }
+        // a pane without pop-ups has its controls start at the margin
+        grid.column(at: 0).isHidden = labels.isEmpty
+        grid.column(at: 0).xPlacement = .trailing
+        return framed(grid)
+    }
+
+    /// The labels of `page` by their settings, as wide as the widest of them, up to a limit that leaves the widest of
+    /// `controls` that does not wrap (a pop-up or push button) its room; check boxes and notes wrap in what is left
+    private func labelColumn(for page: SettingsPage, controls: [NSControl]) -> [Setting: NSTextField] {
+        let room = Self.width - 2 * Self.margin
+        let widestFixed = controls.filter { !($0 is WrappingCheckbox) }.map(\.intrinsicContentSize.width).max() ?? 0
+        let limit = max(min(Self.widestLabel, room - Self.spacing - ceil(widestFixed)), Self.widestLabel / 2)
+        var labels: [Setting: NSTextField] = [:]
+        for group in page.groups {
+            for setting in group.settings {
+                if let text = labelText(setting, in: group) {
+                    labels[setting] = label(text, limit)
+                }
+            }
+        }
+        return labels
+    }
+
+    /// `grid` within the pane's margins, the help button in the bottom right corner under it
+    private func framed(_ grid: NSGridView) -> NSView {
+        grid.translatesAutoresizingMaskIntoConstraints = false
+        let help = HelpButton("options")
+        help.translatesAutoresizingMaskIntoConstraints = false
+        let view = NSView()
+        view.addSubview(grid)
+        view.addSubview(help)
+        NSLayoutConstraint.activate([
+            view.widthAnchor.constraint(equalToConstant: Self.width),
+            grid.topAnchor.constraint(equalTo: view.topAnchor, constant: Self.margin),
+            grid.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: Self.margin),
+            grid.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -Self.margin),
+            help.topAnchor.constraint(equalTo: grid.bottomAnchor, constant: 16),
+            help.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -Self.margin),
+            help.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -Self.margin),
+        ])
+        return view
+    }
+
+    /// The control of `setting`, set to its value
+    private func control(for setting: Setting) -> NSControl {
+        let app = AppDelegate.shared
+        switch setting {
+        case .language:
+            return fillLanguages(choice(setting, #selector(languageChosen)))
+        case .notifyNewMail:
+            return toggle(setting, app?.notify ?? true, #selector(notifyChanged))
+        case .codesInNotifications:
+            return toggle(setting, app?.codesInNotifications ?? false, #selector(signInCodesChanged))
+        case .sendDelay:
+            return filled(choice(setting, #selector(sendDelayChosen)), Core.sendDelays, core.sendDelayIndex)
+        case .defaultMailApp:
+            return button(setting, #selector(defaultAppClicked))
+        case .emlDefault:
+            return button(setting, #selector(emlDefaultClicked))
+        case .checkForUpdates:
+            let box = toggle(setting, app?.updater?.automaticallyChecksForUpdates ?? false, #selector(checkUpdatesChanged))
+            box.isEnabled = app?.updater != nil
+            return box
+        case .layout:
+            return fillLayouts(choice(setting, #selector(layoutChosen)))
+        case .groupByConversation:
+            return toggle(setting, app?.groupByConversation ?? true, #selector(groupingChanged))
+        case .listPictures:
+            return toggle(setting, app?.listPictures ?? true, #selector(listPicturesChanged))
+        case .darkMessages:
+            return toggle(setting, core.darkMessages, #selector(darkMessagesChanged))
+        case .picturesAlways:
+            return toggle(setting, core.alwaysLoadPictures, #selector(picturesChanged))
+        case .trustedSenders:
+            return button(setting, #selector(trustedSendersClicked))
+        case .downloadAhead:
+            return fillDownloadAhead(choice(setting, #selector(downloadAheadChosen)))
+        case .downloadLimit:
+            return filled(choice(setting, #selector(downloadLimitChosen)), Core.downloadLimits, core.downloadLimitIndex)
+        }
+    }
+
+    /// the accessibility id of a setting's control, as the UI test finds it
+    private func id(_ setting: Setting) -> String {
+        "settings.\(setting)"
+    }
+
+    private func toggle(_ setting: Setting, _ on: Bool, _ action: Selector) -> WrappingCheckbox {
+        let box = WrappingCheckbox()
+        box.title = hyphensKept(setting.label.text)
+        box.state = on ? .on : .off
+        box.target = self
+        box.action = action
+        box.setAccessibilityIdentifier(id(setting))
+        return box
+    }
+
+    private func choice(_ setting: Setting, _ action: Selector) -> NSPopUpButton {
+        let popup = NSPopUpButton()
+        popup.target = self
+        popup.action = action
+        popup.setAccessibilityIdentifier(id(setting))
+        return popup
+    }
+
+    private func button(_ setting: Setting, _ action: Selector) -> NSButton {
+        let button = NSButton(title: setting.label.opens, target: self, action: action)
+        button.setAccessibilityIdentifier(id(setting))
+        return button
+    }
+
+    /// the words before `setting`: a pop-up's own label, its group's title with a colon on the group's first row
+    private func labelText(_ setting: Setting, in group: SettingsGroup) -> String? {
+        if setting.kind == .choice {
+            return setting.label.text
+        }
+        guard setting == group.settings.first, let title = group.label else { return nil }
+        return Text.uiSettingsLabel.text(["label": title.text])
+    }
+
+    /// a label of the label column, right aligned, wrapping when it is longer than the column may be
+    private func label(_ words: String, _ limit: CGFloat) -> NSTextField {
+        let text = hyphensKept(words)
+        let width = min(ceil(NSTextField(labelWithString: text).intrinsicContentSize.width), limit)
+        let label = NSTextField(wrappingLabelWithString: text)
+        label.isSelectable = false
+        label.alignment = .right
+        label.preferredMaxLayoutWidth = width
+        label.widthAnchor.constraint(equalToConstant: width).isActive = true
+        return label
+    }
+
+    /// a control with its note under it, the note where a check box's title starts
+    private func stacked(_ control: NSView, note: Text?, setting: Setting, width: CGFloat) -> NSView {
+        guard let note else { return control }
+        let inset = setting.kind == .toggle ? Self.indent : 0
+        let text = noteLabel(note.text, width: width - inset)
+        let stack = NSStackView(views: [control, inset > 0 ? indented(text, by: inset) : text])
+        stack.orientation = .vertical
+        stack.alignment = .leading
+        stack.spacing = 6
+        return stack
+    }
+
+    private func noteLabel(_ text: String, width: CGFloat) -> NSTextField {
+        let label = NSTextField(wrappingLabelWithString: hyphensKept(text))
+        label.isSelectable = false
+        label.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
+        label.textColor = .secondaryLabelColor
+        label.preferredMaxLayoutWidth = width
+        return label
+    }
+
+    private func indented(_ view: NSView, by inset: CGFloat) -> NSView {
+        let stack = NSStackView(views: [view])
+        stack.edgeInsets = NSEdgeInsets(top: 0, left: inset, bottom: 0, right: 0)
+        return stack
+    }
+
+    /// `popup` with `titles`, the one at `selected` chosen
+    private func filled(_ popup: NSPopUpButton, _ titles: [String], _ selected: Int) -> NSPopUpButton {
+        popup.addItems(withTitles: titles)
+        popup.selectItem(at: selected)
+        return popup
+    }
+
+    /// System default and the languages there is a catalog of, the one chosen selected
+    private func fillLanguages(_ popup: NSPopUpButton) -> NSPopUpButton {
+        let languages = Languages.all
+        codes = [nil] + languages.map(\.code)
+        let titles = [Text.uiOptionsSystemDefault.text(["language": Languages.name(Languages.system)])] + languages.map(\.name)
+        let chosen = Languages.chosen
+        return filled(popup, titles, codes.firstIndex { $0 == chosen } ?? 0)
+    }
+
+    /// View > Layout's choices, each item tagged with its mode
+    private func fillLayouts(_ popup: NSPopUpButton) -> NSPopUpButton {
+        for (command, mode) in AppDelegate.layoutModes.sorted(by: { $0.value.rawValue < $1.value.rawValue }) {
+            popup.addItem(withTitle: command.label)
+            popup.lastItem?.tag = Int(mode.rawValue)
+        }
+        popup.selectItem(withTag: Int(AppDelegate.shared?.layoutMode.rawValue ?? 0))
+        return popup
+    }
+
+    /// Recent, All and Never, in the order of PeDownloadAhead
+    private func fillDownloadAhead(_ popup: NSPopUpButton) -> NSPopUpButton {
+        let items = [Text.uiDownloadAheadRecent, Text.uiDownloadAheadAll, Text.uiDownloadAheadNever]
+        return filled(popup, items.map(\.text), Int(core.downloadAhead.rawValue))
+    }
+
+    /// a check box that depends on another enabled only while that one is checked, keeping its own value
+    private func updateDependents() {
+        for (setting, control) in controls {
+            if let parent = setting.dependsOn.flatMap({ controls[$0] as? NSButton }) {
+                control.isEnabled = parent.state == .on
+            }
+        }
+    }
+
+    // ---- the toolbar ----
+
+    func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
+                 willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
+        guard let page = SettingsPage(rawValue: itemIdentifier.rawValue) else { return nil }
+        let item = NSToolbarItem(itemIdentifier: itemIdentifier)
+        item.label = page.label.text
+        item.image = NSImage(systemSymbolName: page.symbol, accessibilityDescription: nil)
+        item.target = self
+        item.action = #selector(paneClicked(_:))
+        return item
+    }
+
+    func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+        SettingsPage.allCases.map { NSToolbarItem.Identifier($0.rawValue) }
+    }
+
+    func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+        toolbarDefaultItemIdentifiers(toolbar)
+    }
+
+    func toolbarSelectableItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+        toolbarDefaultItemIdentifiers(toolbar)
+    }
+
+    // ---- what the controls do ----
+
+    @objc func layoutChosen() {
         AppDelegate.shared?.layoutMode = PeLayoutMode(rawValue: UInt32(max(0, layout.selectedTag())))
     }
 
     @objc func notifyChanged() {
         AppDelegate.shared?.notify = notify.state == .on
+        updateDependents()
     }
 
     @objc func signInCodesChanged() {
@@ -340,6 +497,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
 
     @objc func listPicturesChanged() {
         AppDelegate.shared?.listPictures = listPictures.state == .on
+    }
+
+    @objc func checkUpdatesChanged() {
+        AppDelegate.shared?.updater?.automaticallyChecksForUpdates = checkUpdates.state == .on
     }
 
     @objc func picturesChanged() {
@@ -372,6 +533,11 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         TrustedSendersSheet(core: core).run(on: window)
     }
 
+    /// Make Default Mail App..., as Tools has it
+    @objc func defaultAppClicked() {
+        AppDelegate.shared?.perform(.defaultApp)
+    }
+
     /// Open .eml Files with Inbox Classic: the app made the one for message files, as the system lets it
     @objc func emlDefaultClicked() {
         let bundle = Bundle.main.bundleURL
@@ -394,6 +560,31 @@ final class SettingsWindow: NSObject, NSWindowDelegate {
         let index = language.indexOfSelectedItem
         guard codes.indices.contains(index) else { return }
         Languages.choose(codes[index])
+    }
+}
+
+/// A check box whose title wraps at `preferredMaxLayoutWidth`, so a long translation makes it taller, not wider
+final class WrappingCheckbox: NSButton {
+    var preferredMaxLayoutWidth: CGFloat = 0 {
+        didSet { invalidateIntrinsicContentSize() }
+    }
+
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        setButtonType(.switch)
+        cell?.wraps = true
+        cell?.lineBreakMode = .byWordWrapping
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("not from a nib")
+    }
+
+    override var intrinsicContentSize: NSSize {
+        let size = super.intrinsicContentSize
+        guard preferredMaxLayoutWidth > 0, size.width > preferredMaxLayoutWidth, let cell else { return size }
+        let fitted = cell.cellSize(forBounds: NSRect(x: 0, y: 0, width: preferredMaxLayoutWidth, height: 10_000))
+        return NSSize(width: preferredMaxLayoutWidth, height: ceil(fitted.height))
     }
 }
 

@@ -52,8 +52,8 @@ fn valid_port(text: &str) -> bool {
 fn validate(fields: &[Field]) -> Result<(), String> {
     for required in [EMAIL, IMAP_HOST, SMTP_HOST] {
         if fields[required].value.is_empty() {
-            let field = fields[required].label.trim_end_matches([':', ' ', '\u{a0}']);
-            return Err(t!(UiFieldRequired, field = field));
+            let field = pe_core::i18n::field_title(&fields[required].label);
+            return Err(t!(UiFieldRequired, field = &field));
         }
     }
     if !fields[EMAIL].value.contains('@') {

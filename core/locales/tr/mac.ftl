@@ -41,13 +41,9 @@ mac-no-updates = Inbox Classic'in bu sürümü otomatik güncellemeleri destekle
 # review: new
 mac-settings-title = Ayarlar
 # review: new
-mac-language-label = Dil:
+mac-check-updates-automatically = Güncellemeleri otomatik olarak denetle
 # review: new
-mac-restart-hint = Dili değiştirmek için Inbox Classic'i yeniden başlatın.
-# review: new
-mac-notify-new-mail = Yeni posta geldiğinde bildir
-# review: new
-mac-restart-question = Dili değiştirmek için Inbox Classic şimdi yeniden başlatılsın mı?
+mac-settings-updates = Güncellemeler
 
 ## Sorular
 

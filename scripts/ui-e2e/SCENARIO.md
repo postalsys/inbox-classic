@@ -256,7 +256,7 @@ Screenshots: `write-24-send-delay`, `write-22-undo-send`, `write-23-undone`
 
 The UI tests send at once (the wait is set to Off at their start); this step turns it on.
 
-- Options (Settings, Preferences) offers the wait before sending: Off, 5, 10, 20 or 30 seconds
+- Options (Settings, Preferences), General page, Delay before sending offers Off, 5, 10, 20 or 30 seconds
 - 10 seconds chosen
 - Send closes the message, and the status bar counts down to sending
 - with an Undo button, and Edit names Undo Send
@@ -607,7 +607,7 @@ Screenshots: `threads-1-collapsed`, `threads-2-expanded`, `threads-3-options-off
 - expanding it shows its replies under it, indented
 - collapsing it hides them again
 - Mark Read on the collapsed row marks all three read on the server
-- with Group messages by conversation turned off in Options, the list has the three messages each on a row of its own
+- with Group messages by conversation (Options, Reading page) turned off, the list has the three messages each on a row of its own
 - turned on again, the conversation is one row again
 
 ## 34f. A message that bounced
@@ -634,9 +634,11 @@ Screenshots: `otp-1-card`
 - Copy on the card puts the code on the clipboard, and the status bar says so
 - the second's card has the header's code and the domain of its origin
 - the third has no card
-- Options (Settings on the Mac, Preferences on Linux) has Show sign-in codes in new mail notifications, off at first;
-  turned on, the core is told (the core's own test checks that the notification then names the code of fresh, signed
-  mail and not of unsigned mail)
+- Options (Settings on the Mac, Preferences on Linux), General page, has Show sign-in codes in new mail notifications,
+  off at first, under Notify me when new mail arrives; turned on, the core is told (the core's own test checks that the
+  notification then names the code of fresh, signed mail and not of unsigned mail)
+- with Notify me when new mail arrives turned off, the codes control is disabled (insensitive on Linux) and keeps its
+  value; turned on again, it is enabled
 
 ## 34g. Watch and Ignore Conversation
 
@@ -663,18 +665,20 @@ account's provider) say DKIM and DMARC passed for shop.example, one whose say th
 - the confirmed one's pictures bar offers Always from news@shop.example and from everyone at shop.example; the other's
   menu says, greyed, that the sender could not be verified, and its bar has no second line
 - Always from everyone at shop.example: the confirmed one shows its pictures without the bar, the forged one still has it
-- Options lists the trusted sender; Remove takes it out
-- "Download pictures in all messages" on: the forged one's pictures load; off again
+- Options (Reading page), Trusted Senders, lists the trusted sender; Remove takes it out
+- on Windows, Cancel in Options brings the removed sender back (Cancel undoes everything, trusted senders included);
+  removed again and OK, it stays removed
+- "Download pictures in all messages" (Reading page) on: the forged one's pictures load; off again
 
 ## 34g2a. Messages downloaded ahead
 
-Screenshot: `download-1-options`
+Screenshot: `download-1-options` (the Downloading page)
 
 The test turns downloading ahead off at its start (Only when opened, before the first account), so the
 steps that open messages see them downloaded then; the core's own tests check what is downloaded ahead.
 
-- Options (Settings on the Mac, Preferences on Linux) has Download messages ahead, at Only when opened, and
-  Downloaded messages kept for each account, at 1 GB, with what they mean under them
+- Options (Settings on the Mac, Preferences on Linux), Downloading page, has Download messages in advance, at Only when
+  opened, and Storage limit per account, at 1 GB, with what they mean under them
 - Recent messages up to 1 MB chosen is still chosen when Options opens again; Only when opened is chosen again after
 
 ## 34g3. Unread only
@@ -717,7 +721,7 @@ Screenshot: `pictures-4-list`
 - in the column layout, a message whose provider confirmed the brand's logo (BIMI and DMARC pass) shows the logo in
   its row; a message without one shows the sender's initials on a quiet fill
 - the logo is downloaded once, when a row first shows it
-- Options' "Show senders' pictures in the message list" off: the rows have no pictures; on again
+- "Show senders’ pictures in the message list" (Options, Reading page) off: the rows have no pictures; on again
 
 ## 35. Folders
 
@@ -920,7 +924,7 @@ Three messages added to the Inbox (read, dated before the others): a plain one, 
 - the receipt stays light, as it was designed (`color-scheme: light`, a white background)
 - the delivery report of 34f shows its card dark, Details open
 - a reply to the written message is written in a dark editor, and what is written carries no colors
-- the switch turned off in Settings: the written message shown is made again, light on white in the dark window, its colors as sent
+- the switch turned off in Settings, Reading pane: the written message shown is made again, light on white in the dark window, its colors as sent
 - the switch on again and the system's appearance back, for the steps after this one
 
 ## 44. Accounts
@@ -981,9 +985,22 @@ Screenshots: `setup-1-export`, `setup-2-passphrase`, `setup-3-import-choose`, `s
 
 ## 46. Options and the language
 
-Screenshots: `options-1-language`, `lang-1-german`, `lang-1b-german-form`, `lang-1c-french-form`, `lang-2-pseudo-main`, `lang-3-pseudo-form`
+Screenshots: `options-1-language` (the General page), `options-2-reading` (the Reading page), `lang-1-german`, `lang-1b-german-form`, `lang-1c-french-form`, `lang-2-pseudo-main`, `lang-3-pseudo-form`; for long words, not features: `lang-4-pseudo-options`, `lang-4b-pseudo-options-reading`, `lang-4c-pseudo-options-downloading` (Windows, the Mac), `tour-<language>-5-preferences`, `tour-<language>-5b-preferences-reading`, `tour-<language>-5c-preferences-downloading` (Linux)
 
-- Tools > Options (Settings on the Mac, Preferences on Linux) has Language and Notify of New Mail
+- Tools > Options (Settings on the Mac, Preferences on Linux) has three pages in this order, General, Reading and
+  Downloading, the settings of `core/settings.toml` on each in its order (Windows: tabs with group boxes and OK,
+  Cancel, Apply; the Mac: a toolbar of panes; Linux: a preferences dialog with a view switcher and titled groups)
+- General has Language, Notify me when new mail arrives, Show sign-in codes in new mail notifications, Delay before
+  sending, Make Default Mail App and Open .eml Files with Inbox Classic (and on the Mac Check for updates
+  automatically); Reading has Layout, Group messages by conversation, Show senders’ pictures in the message list,
+  Show messages on a dark background (the Mac, Linux), Download pictures in all messages and Trusted Senders;
+  Downloading has Download messages in advance and Storage limit per account
+- Windows: Ctrl+Tab goes to the next page; every control of a page has an access key of its own; Apply is disabled
+  until something changes, applies without closing (the main window follows at once: Group messages by conversation
+  turned off there regroups the list), and is disabled again; Cancel after a change leaves the setting as it was
+- the Mac: the window is titled by its pane (General, Reading, Downloading); closed on Reading and opened again, it
+  opens on Reading
+- Linux: each page is reached by its name (`set_visible_page_name`), its groups titled
 - Language lists System default, with the language it is now, and every language of `pe_i18n::LANGUAGES` by its own name (English, Deutsch, Eesti, Español, Français...)
 - a language chosen says the app starts again to change it, with Restart Now and Later
 - started in German, the menus, the toolbar and the status bar are in German
@@ -991,7 +1008,9 @@ Screenshots: `options-1-language`, `lang-1-german`, `lang-1b-german-form`, `lang
 - Add Mail Account in German (and French on the Mac): the Google and Microsoft sign-in buttons say it in the language, the form as wide as they are
 - started in the pseudo-language, nothing in the main window, the compose window and the account form is left in English
 - and nothing is cut off
-- in each language of `pe_i18n::LANGUAGES` but English, the main window, a new message, Add Mail Account, the accounts and Preferences, nothing cut off in them: `tour-<language>-<n>-<view>` (Linux)
+- in each language of `pe_i18n::LANGUAGES` but English, the main window, a new message, Add Mail Account, the accounts and each page of Preferences, nothing cut off in them: `tour-<language>-<n>-<view>` (Linux)
+- started in the pseudo-language, each page of Options (Windows) and Settings (the Mac) fits its longer words: long
+  check box labels wrap, the window does not grow wider than its fixed content width
 
 ## 47. About
 

@@ -1,15 +1,30 @@
-<!--review--><h1>Jezik in nastavitve</h1>
-<p class="summary">Izberite jezik programa Inbox Classic ter način, kako prikazuje vašo pošto in vas o njej obvešča.</p>
-<p>Izberite <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
+<!--review--><h1>Nastavitve</h1>
+<p class="summary">Izberite jezik programa Inbox Classic, način, kako prikazuje vašo pošto in vas o njej obvešča, ter kaj prenese vnaprej.</p>
+<p>Izberite <b data-settings=""></b>. Nastavitve so na treh straneh: <b data-text="ui-settings-general"></b>, <b data-text="ui-settings-reading"></b> in <b data-text="ui-download-heading"></b>.<!--os:windows--> Kliknite <b data-text="ui-ok"></b>, da obdržite spremembe, ali <b data-text="ui-apply"></b>, da jih obdržite in okno ostane odprto. <b data-text="ui-cancel"></b> razveljavi vse spremembe od takrat, tudi odstranjene zaupanja vredne pošiljatelje in program, izbran za datoteke .eml.<!--/os--><!--os:mac,linux--> Vsaka sprememba začne veljati takoj.<!--/os--></p>
+<h2><b data-text="ui-settings-general"></b></h2>
 <ul>
-    <li><!--os:windows--><b data-text="win-options-language-label"></b><!--/os--><!--os:mac--><b data-text="mac-language-label"></b><!--/os--><!--os:linux--><b data-text="gtk-language"></b><!--/os--> izbere jezik oken in te pomoči. Izberite jezik svojega sistema ali enega od jezikov na seznamu. Če Inbox Classic jezika vašega sistema nima, uporabi angleščino.</li>
-    <li><!--os:windows--><b data-text="win-options-notify"></b><!--/os--><!--os:mac--><b data-text="mac-notify-new-mail"></b><!--/os--><!--os:linux--><b data-text="gtk-notify-new-mail"></b><!--/os--> vklopi ali izklopi obvestila o novi pošti.</li>
-    <li><b data-text="ui-group-by-conversation"></b> združi sporočila, ki odgovarjajo drugo na drugo, v eno vrstico.</li>
-    <li><b data-text="ui-codes-in-notifications"></b> prikaže kodo iz sporočila za prijavo v njegovem obvestilu.</li>
-    <li><b data-text="ui-layout-label"></b> izbere postavitev: samodejno glede na širino okna, klasično ali s stolpci. Glejte <a href="topic:layouts"></a>.</li>
-    <li><b data-text="ui-list-pictures"></b> v postavitvi s stolpci prikaže logotipe blagovnih znamk, slike stikov in začetnice.</li>
+    <li><b data-text="ui-language-label"></b> izbere jezik oken in te pomoči: jezik vašega sistema ali enega od jezikov na seznamu. Če Inbox Classic jezika vašega sistema nima, uporabi angleščino.</li>
+    <li><b data-text="ui-notify-new-mail"></b> prikaže obvestilo, ko prispe nova pošta. Privzeto je vklopljeno.</li>
+    <li><b data-text="ui-codes-in-notifications"></b> prikaže kodo iz sporočila za prijavo v njegovem obvestilu. Privzeto je izklopljeno, ker je obvestilo mogoče prebrati na zaklenjenem zaslonu, in ni na voljo, ko so obvestila izklopljena.</li>
+    <li><b data-text="ui-send-delay"></b> sporočilo, ki ga pošljete, za nekaj sekund zadrži v mapi Odpošiljanje, da ga lahko še prekličete z ukazom Razveljavi. Privzeto je to 10 sekund.</li>
+    <li><b data-text="cmd-default-app"></b> odpira e-poštne povezave v programu Inbox Classic, <b data-text="ui-eml-default"></b> pa odpira datoteke sporočil. Glejte <a href="topic:default-mail-program"></a>.</li>
+    <!--os:mac--><li><b data-text="mac-check-updates-automatically"></b> občasno preveri, ali je na voljo nova različica programa Inbox Classic. Glejte <a href="topic:updates"></a>.</li><!--/os-->
 </ul>
 <p>Za spremembo jezika se Inbox Classic znova zažene. Kliknite <b data-text="ui-restart-now"></b> ali <b data-text="ui-restart-later"></b>, da se jezik spremeni ob naslednjem zagonu.</p>
+<h2><b data-text="ui-settings-reading"></b></h2>
+<ul>
+    <li><b data-text="ui-layout-label"></b> izbere postavitev: samodejno glede na širino okna, klasično ali s stolpci. Glejte <a href="topic:layouts"></a>.</li>
+    <li><b data-text="ui-group-by-conversation"></b> združi sporočila, ki odgovarjajo drugo na drugo, v eno vrstico. Privzeto je vklopljeno.</li>
+    <li><b data-text="ui-list-pictures"></b> v postavitvi s stolpci prikaže logotipe blagovnih znamk, slike stikov in začetnice. Privzeto je vklopljeno.</li>
+    <!--os:mac,linux--><li><b data-text="ui-dark-messages"></b> prikaže sporočila, ki jih berete in pišete, na temnem ozadju, ko je sistem v temnem načinu. Privzeto je vklopljeno.</li><!--/os-->
+    <li><b data-text="ui-pictures-always-option"></b> prenese slike vseh sporočil. Privzeto je izklopljeno, ker lahko pošiljatelji tako ugotovijo, kdaj berete njihova sporočila. Glejte <a href="topic:pictures-tracking"></a>.</li>
+    <li><b data-text="ui-trusted-senders-button"></b> prikaže seznam pošiljateljev, katerih slike se vedno prenesejo, in jih lahko z njega odstranite.</li>
+</ul>
+<h2><b data-text="ui-download-heading"></b></h2>
+<ul>
+    <li><b data-text="ui-download-ahead"></b> izbere sporočila, ki se prenesejo, preden jih odprete: privzeto nedavna sporočila, vsako do 1 MB. Glejte <a href="topic:download-ahead"></a>.</li>
+    <li><b data-text="ui-download-limit"></b> omeji prostor, ki ga zasedajo prenesena sporočila vsakega računa. Privzeto je to 1 GB.</li>
+</ul>
 <!--os:windows--><p>Namestitveni program ob prvi namestitvi vpraša za jezik in ga ohrani kot jezik, izbran tukaj.</p><!--/os-->
 <!--os:mac--><p>Jezik samo za Inbox Classic lahko izberete tudi v <i>Sistemske nastavitve &gt; Splošno &gt; Jezik in regija &gt; Aplikacije</i>.</p><!--/os-->
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:conversations"></a> <a href="topic:sign-in-codes"></a></nav>

@@ -1,15 +1,30 @@
-<!--review--><h1>Язык и параметры</h1>
-<p class="summary">Выберите язык Inbox Classic и то, как она показывает почту и сообщает о ней.</p>
-<p>Выберите <!--os:windows--><b data-text="menu-tools"></b> &gt; <b data-text="cmd-options"></b><!--/os--><!--os:mac-->Inbox Classic &gt; <b data-text="mac-settings"></b><!--/os--><!--os:linux--><b data-text="gtk-main-menu"></b> &gt; <b data-text="gtk-preferences"></b><!--/os-->.</p>
+<!--review--><h1>Настройки</h1>
+<p class="summary">Выберите язык Inbox Classic, то, как она показывает почту и сообщает о ней, и что она загружает заранее.</p>
+<p>Выберите <b data-settings=""></b>. Настройки разделены на три страницы: <b data-text="ui-settings-general"></b>, <b data-text="ui-settings-reading"></b> и <b data-text="ui-download-heading"></b>.<!--os:windows--> Нажмите <b data-text="ui-ok"></b>, чтобы сохранить изменения, или <b data-text="ui-apply"></b>, чтобы сохранить их и оставить окно открытым. <b data-text="ui-cancel"></b> отменяет все изменения, сделанные после этого, включая удаленных надежных отправителей и программу, выбранную для файлов .eml.<!--/os--><!--os:mac,linux--> Каждое изменение вступает в силу сразу.<!--/os--></p>
+<h2><b data-text="ui-settings-general"></b></h2>
 <ul>
-    <li><!--os:windows--><b data-text="win-options-language-label"></b><!--/os--><!--os:mac--><b data-text="mac-language-label"></b><!--/os--><!--os:linux--><b data-text="gtk-language"></b><!--/os--> выбирает язык окон и этой справки. Выберите язык системы или один из языков списка. Если в Inbox Classic нет языка вашей системы, используется английский.</li>
-    <li><!--os:windows--><b data-text="win-options-notify"></b><!--/os--><!--os:mac--><b data-text="mac-notify-new-mail"></b><!--/os--><!--os:linux--><b data-text="gtk-notify-new-mail"></b><!--/os--> включает или выключает уведомления о новой почте.</li>
-    <li><b data-text="ui-group-by-conversation"></b> собирает сообщения, которые отвечают друг на друга, в одну строку.</li>
-    <li><b data-text="ui-codes-in-notifications"></b> показывает код из сообщения для входа в его уведомлении.</li>
-    <li><b data-text="ui-layout-label"></b> выбирает макет: автоматический по ширине окна, классический или со столбцами. См. раздел <a href="topic:layouts"></a>.</li>
-    <li><b data-text="ui-list-pictures"></b> показывает логотипы брендов, изображения контактов и инициалы в макете со столбцами.</li>
+    <li><b data-text="ui-language-label"></b> выбирает язык окон и этой справки: язык вашей системы или один из языков списка. Если в Inbox Classic нет языка вашей системы, используется английский.</li>
+    <li><b data-text="ui-notify-new-mail"></b> показывает уведомление, когда приходит новая почта. По умолчанию это включено.</li>
+    <li><b data-text="ui-codes-in-notifications"></b> показывает код из сообщения для входа в его уведомлении. По умолчанию это выключено, так как уведомление можно прочитать на заблокированном экране. Пока уведомления выключены, этот параметр недоступен.</li>
+    <li><b data-text="ui-send-delay"></b> оставляет отправленное сообщение в папке «Исходящие» на несколько секунд, чтобы отправку еще можно было отменить. По умолчанию это 10 секунд.</li>
+    <li><b data-text="cmd-default-app"></b> открывает ссылки электронной почты в Inbox Classic, а <b data-text="ui-eml-default"></b> открывает в ней файлы сообщений. См. раздел <a href="topic:default-mail-program"></a>.</li>
+    <!--os:mac--><li><b data-text="mac-check-updates-automatically"></b> время от времени проверяет, нет ли новой версии Inbox Classic. См. раздел <a href="topic:updates"></a>.</li><!--/os-->
 </ul>
 <p>Чтобы сменить язык, Inbox Classic перезапускается. Нажмите <b data-text="ui-restart-now"></b> или <b data-text="ui-restart-later"></b>, чтобы язык сменился при следующем запуске.</p>
+<h2><b data-text="ui-settings-reading"></b></h2>
+<ul>
+    <li><b data-text="ui-layout-label"></b> выбирает макет: автоматический по ширине окна, классический или со столбцами. См. раздел <a href="topic:layouts"></a>.</li>
+    <li><b data-text="ui-group-by-conversation"></b> собирает сообщения, которые отвечают друг на друга, в одну строку. По умолчанию это включено.</li>
+    <li><b data-text="ui-list-pictures"></b> показывает логотипы брендов, изображения контактов и инициалы в макете со столбцами. По умолчанию это включено.</li>
+    <!--os:mac,linux--><li><b data-text="ui-dark-messages"></b> показывает сообщения, которые вы читаете и пишете, на темном фоне, когда в системе включен темный режим. По умолчанию это включено.</li><!--/os-->
+    <li><b data-text="ui-pictures-always-option"></b> загружает изображения во всех сообщениях. По умолчанию это выключено, потому что тогда отправители могут узнать, когда вы читаете их сообщения. См. раздел <a href="topic:pictures-tracking"></a>.</li>
+    <li><b data-text="ui-trusted-senders-button"></b> показывает отправителей, изображения которых загружаются всегда, и там их можно удалить.</li>
+</ul>
+<h2><b data-text="ui-download-heading"></b></h2>
+<ul>
+    <li><b data-text="ui-download-ahead"></b> выбирает, какие сообщения загружаются до того, как вы их откроете: по умолчанию это недавние сообщения размером до 1 МБ каждое. См. раздел <a href="topic:download-ahead"></a>.</li>
+    <li><b data-text="ui-download-limit"></b> ограничивает место, которое занимают загруженные сообщения каждой учетной записи. По умолчанию это 1 ГБ.</li>
+</ul>
 <!--os:windows--><p>Установщик спрашивает язык при первой установке и сохраняет его как язык, выбранный здесь.</p><!--/os-->
 <!--os:mac--><p>Язык только для Inbox Classic можно также выбрать в разделе <i>Системные настройки &gt; Основные &gt; Язык и регион &gt; Приложения</i>.</p><!--/os-->
 <nav class="related"><a href="topic:new-mail"></a> <a href="topic:conversations"></a> <a href="topic:sign-in-codes"></a></nav>

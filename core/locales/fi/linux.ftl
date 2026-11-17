@@ -242,19 +242,8 @@ gtk-nothing-yet = Ei vielä mitään.
 
 # review: new
 gtk-preferences = Asetukset
-# review: new
-gtk-language = Kieli
-# review: new
-gtk-language-subtitle = Sovelluksen ja ohjeen kieli
-# review: new
-gtk-new-mail-group = Uusi posti
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-# review: new
-gtk-notify-new-mail = Ilmoita uudesta postista
-# review: new
-gtk-notify-subtitle = Ilmoitus, kun uusia viestejä saapuu ikkunan ollessa taustalla
-# review: new
-gtk-restart-to-change = Inbox Classic käynnistyy uudelleen kielen vaihtamiseksi.
+# review: changed
+gtk-notify-subtitle = Vain kun Inbox Classic on taustalla
 
 ## The desktop entry and the page of the software stores
 

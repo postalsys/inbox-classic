@@ -739,6 +739,34 @@ ui-col-used-by = Naudoja
 # review: new
 ui-options-system-default = Sistemos numatytoji ({ $language })
 # review: new
+ui-settings-general = Bendra
+# review: new
+ui-settings-reading = Skaitymas
+# review: changed
+ui-settings-new-mail = Nauji laiškai
+# review: new
+ui-settings-sending = Siuntimas
+# review: new
+ui-settings-default-apps = Numatytosios programos
+# review: new
+ui-settings-message-list = Laiškų sąrašas
+# review: new
+ui-settings-messages = Laiškai
+# review: new
+ui-settings-language = Kalba
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Taikyti
+# review: new
+ui-language-label = &Kalba:
+# review: new
+ui-restart-note = Paleiskite Inbox Classic iš naujo, kad pasikeistų kalba.
+# review: new
+ui-restart-ask = Paleidus iš naujo, Inbox Classic bus rodoma kalba: { $language }. Paleisti iš naujo dabar?
+# review: new
+ui-notify-new-mail = &Pranešti, kai gaunami nauji laiškai
+# review: new
 ui-new-folder-title = Naujas aplankas
 # review: new
 ui-rename-folder-title = Pervardyti aplanką
@@ -1049,7 +1077,7 @@ ui-book-not-exported = Adresų knygelės įrašyti nepavyko: { $reason }
 # review: new
 ui-code-copied = Kodas nukopijuotas
 # review: new
-ui-codes-in-notifications = Rodyti prisijungimo kodus pranešimuose apie naujus laiškus
+ui-codes-in-notifications = &Rodyti prisijungimo kodus pranešimuose apie naujus laiškus
 # review: new
 ui-tool-unread-only = Neskaityti
 # review: new
@@ -1061,7 +1089,7 @@ ui-pictures-always-domain = Visada atsisiųsti paveikslėlius iš visų { $domai
 # review: new
 ui-pictures-unconfirmed = Siuntėjo domeno ({ $domain }) patvirtinti nepavyko, todėl šio laiško paveikslėliai automatiškai neatsisiunčiami.
 # review: new
-ui-pictures-always-option = Atsisiųsti paveikslėlius visuose laiškuose
+ui-pictures-always-option = &Atsisiųsti paveikslėlius visuose laiškuose
 # review: new
 ui-pictures-always-warning = Tada siuntėjai galės matyti, kada skaitote jų laiškus.
 # review: new
@@ -1071,7 +1099,7 @@ ui-protection-details-title = Saugos informacija
 # review: new
 ui-download-heading = Atsisiuntimas
 # review: new
-ui-download-ahead = Atsisiųsti laiškus iš anksto:
+ui-download-ahead = &Atsisiųsti laiškus iš anksto:
 # review: new
 ui-download-ahead-recent = Naujausius laiškus, kurių kiekvienas iki 1 MB
 # review: new
@@ -1079,9 +1107,9 @@ ui-download-ahead-all = Visus laiškus
 # review: new
 ui-download-ahead-never = Tik atidarant
 # review: new
-ui-download-limit = Saugyklos riba kiekvienai paskyrai:
+ui-download-limit = &Saugyklos riba kiekvienai paskyrai:
 # review: new
-ui-send-delay = Delsa prieš siunčiant:
+ui-send-delay = &Delsa prieš siunčiant:
 # review: new
 ui-send-delay-note = Kol laiškas laukia išsiuntimo, siuntimą galite atšaukti komanda „Atšaukti“.
 # review: new
@@ -1102,7 +1130,7 @@ ui-download-note = Iš anksto atsisiųsti laiškai atsidaro iš karto. Viršijus
 # review: new
 ui-attachment-downloading = Šis laiškas dar neatsisiųstas iki galo. Bandykite dar kartą, kai atsisiuntimas baigsis.
 # review: new
-ui-trusted-senders-button = Patikimi siuntėjai...
+ui-trusted-senders-button = &Patikimi siuntėjai...
 # review: new
 ui-trusted-senders-title = Patikimi siuntėjai
 # review: new
@@ -1112,7 +1140,7 @@ ui-trusted-everyone-at = Visi iš { $domain }
 # review: new
 ui-trusted-senders-empty = Patikimų siuntėjų dar nepridėta.
 # review: new
-ui-eml-default = Atidaryti .eml failus su Inbox Classic
+ui-eml-default = &Atidaryti .eml failus su Inbox Classic
 # review: new
 ui-eml-default-done = Dabar .eml failus atidaro Inbox Classic.
 # review: new
@@ -1122,7 +1150,7 @@ ui-folders = Aplankai
 # review: new
 ui-sorted-by = Rikiuota pagal: { $field }
 # review: new
-ui-layout-label = Išdėstymas:
+ui-layout-label = &Išdėstymas:
 # review: new
 ui-columns-note = Langas pakankamai platus stulpelių išdėstymui. Išdėstymą galite pakeisti per Rodinys > Išdėstymas.
 # review: new
@@ -1138,9 +1166,9 @@ ui-row-messages = { $count ->
    *[other] { $count } laiškų
 }
 # review: new
-ui-list-pictures = Rodyti siuntėjų paveikslėlius laiškų sąraše
+ui-list-pictures = &Rodyti siuntėjų paveikslėlius laiškų sąraše
 # review: new
-ui-list-pictures-note = Patvirtintiems siuntėjams rodomi prekių ženklų logotipai arba adresų knygelės paveikslėliai, o kai paveikslėlio nėra, inicialai. Logotipai atsisiunčiami vieną kartą kiekvienam prekės ženklui, o ne kiekvienam laiškui.
+ui-list-pictures-note = Stulpelių išdėstyme patvirtintiems siuntėjams rodomi prekių ženklų logotipai arba adresų knygelės paveikslėliai, o kai paveikslėlio nėra, inicialai. Logotipai atsisiunčiami vieną kartą kiekvienam prekės ženklui, o ne kiekvienam laiškui.
 # review: new
 ui-card-picture = Paveikslėlis:
 # review: new

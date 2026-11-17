@@ -739,6 +739,34 @@ ui-col-used-by = Gebruikt door
 # review: new
 ui-options-system-default = Systeemstandaard ({ $language })
 # review: new
+ui-settings-general = Algemeen
+# review: new
+ui-settings-reading = Lezen
+# review: changed
+ui-settings-new-mail = Nieuwe e-mail
+# review: new
+ui-settings-sending = Verzenden
+# review: new
+ui-settings-default-apps = Standaardapps
+# review: new
+ui-settings-message-list = Berichtenlijst
+# review: new
+ui-settings-messages = Berichten
+# review: new
+ui-settings-language = Taal
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Toepassen
+# review: new
+ui-language-label = T&aal:
+# review: new
+ui-restart-note = Start Inbox Classic opnieuw om de taal te wijzigen.
+# review: new
+ui-restart-ask = Na het opnieuw starten toont Inbox Classic de taal { $language }. Nu opnieuw starten?
+# review: new
+ui-notify-new-mail = &Melding geven wanneer er nieuwe e-mail binnenkomt
+# review: new
 ui-new-folder-title = Nieuwe map
 # review: new
 ui-rename-folder-title = Map hernoemen
@@ -1043,7 +1071,7 @@ ui-book-not-exported = Het adresboek kan niet worden opgeslagen: { $reason }
 # review: new
 ui-code-copied = De code is gekopieerd
 # review: new
-ui-codes-in-notifications = Aanmeldcodes tonen in meldingen van nieuwe e-mail
+ui-codes-in-notifications = Aanmeldcodes tonen &in meldingen van nieuwe e-mail
 # review: new
 ui-tool-unread-only = Ongelezen
 # review: new
@@ -1055,7 +1083,7 @@ ui-pictures-always-domain = Altijd afbeeldingen downloaden van iedereen bij { $d
 # review: new
 ui-pictures-unconfirmed = Het domein van de afzender ({ $domain }) kan niet worden geverifieerd, dus afbeeldingen in dit bericht worden niet automatisch gedownload.
 # review: new
-ui-pictures-always-option = Afbeeldingen in alle berichten downloaden
+ui-pictures-always-option = Afbeeldingen in alle &berichten downloaden
 # review: new
 ui-pictures-always-warning = Afzenders kunnen dan zien wanneer je hun berichten leest.
 # review: new
@@ -1065,7 +1093,7 @@ ui-protection-details-title = Beveiligingsdetails
 # review: new
 ui-download-heading = Downloaden
 # review: new
-ui-download-ahead = Berichten vooraf downloaden:
+ui-download-ahead = &Berichten vooraf downloaden:
 # review: new
 ui-download-ahead-recent = Recente berichten tot 1 MB per stuk
 # review: new
@@ -1073,9 +1101,9 @@ ui-download-ahead-all = Alle berichten
 # review: new
 ui-download-ahead-never = Alleen bij openen
 # review: new
-ui-download-limit = Opslaglimiet per account:
+ui-download-limit = &Opslaglimiet per account:
 # review: new
-ui-send-delay = Vertraging voor verzenden:
+ui-send-delay = &Vertraging voor verzenden:
 # review: new
 ui-send-delay-note = Terwijl een bericht wacht op verzending, kun je het verzenden annuleren met Ongedaan maken.
 # review: new
@@ -1096,7 +1124,7 @@ ui-download-note = Vooraf gedownloade berichten openen meteen. Als de opslaglimi
 # review: new
 ui-attachment-downloading = Dit bericht is nog niet helemaal gedownload. Probeer het opnieuw als het downloaden klaar is.
 # review: new
-ui-trusted-senders-button = Vertrouwde afzenders...
+ui-trusted-senders-button = &Vertrouwde afzenders...
 # review: new
 ui-trusted-senders-title = Vertrouwde afzenders
 # review: new
@@ -1106,7 +1134,7 @@ ui-trusted-everyone-at = Iedereen bij { $domain }
 # review: new
 ui-trusted-senders-empty = Er zijn nog geen vertrouwde afzenders toegevoegd.
 # review: new
-ui-eml-default = .eml-bestanden openen met Inbox Classic
+ui-eml-default = .&eml-bestanden openen met Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic opent nu .eml-bestanden.
 # review: new
@@ -1116,7 +1144,7 @@ ui-folders = Mappen
 # review: new
 ui-sorted-by = Gesorteerd op { $field }
 # review: new
-ui-layout-label = Indeling:
+ui-layout-label = &Indeling:
 # review: new
 ui-columns-note = Het venster is breed genoeg voor de kolomindeling. Je kunt de indeling wijzigen via Beeld > Indeling.
 # review: new
@@ -1131,9 +1159,9 @@ ui-row-messages = { $count ->
    *[other] { $count } berichten
 }
 # review: new
-ui-list-pictures = Afbeeldingen van afzenders tonen in de berichtenlijst
+ui-list-pictures = &Afbeeldingen van afzenders tonen in de berichtenlijst
 # review: new
-ui-list-pictures-note = Toont merklogo’s of afbeeldingen uit het Adresboek voor geverifieerde afzenders, en initialen als er geen afbeelding is. Logo’s worden één keer per merk gedownload, niet voor elk bericht.
+ui-list-pictures-note = Toont in de kolomindeling merklogo’s of afbeeldingen uit het Adresboek voor geverifieerde afzenders, en initialen als er geen afbeelding is. Logo’s worden één keer per merk gedownload, niet voor elk bericht.
 # review: new
 ui-card-picture = Afbeelding:
 # review: new

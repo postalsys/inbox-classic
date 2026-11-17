@@ -30,7 +30,7 @@ private func validPort(_ text: String) -> Bool {
 private func validate(_ fields: [FormField]) -> String? {
     for required in [Field.email, .imapHost, .smtpHost] where fields[required.rawValue].value.isEmpty {
         let label = fields[required.rawValue].label
-        return Text.uiFieldRequired.text(["field": label.hasSuffix(":") ? String(label.dropLast()) : label])
+        return Text.uiFieldRequired.text(["field": fieldTitle(label)])
     }
     if !fields[Field.email.rawValue].value.contains("@") {
         return Text.uiEmailInvalid.text
@@ -279,7 +279,7 @@ private final class StartPage: NSObject {
             let line = NSBox()
             line.boxType = .separator
             rows.append(line)
-            let link = linkButton(Text.uiSetupFirstRun.text.replacingOccurrences(of: "...", with: "\u{2026}"),
+            let link = linkButton(Text.uiSetupFirstRun.opens,
                                   action: #selector(importClicked))
             link.setAccessibilityIdentifier("account.import")
             rows.append(link)

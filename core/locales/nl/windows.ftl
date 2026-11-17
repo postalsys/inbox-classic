@@ -168,14 +168,6 @@ win-edit = &Bewerken...
 ## Options
 
 # review: new
-win-options-language-label = Inbox Classic &tonen in:
-# review: new
-win-options-restart-note = Start Inbox Classic opnieuw om de taal te wijzigen.
-# review: new
-win-options-notify = &Melding geven wanneer er nieuwe e-mail binnenkomt
-# review: new
-win-restart-ask = Na het opnieuw starten toont Inbox Classic de taal { $language }. Nu opnieuw starten?
-# review: new
 win-folders-hide = De mappenlijst verbergen
 # review: new
 win-folders-pin = De mappenlijst naast de berichten houden

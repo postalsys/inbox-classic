@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # The rule that keeps the three apps in step: a change to what all of them show or do (the core's C API in
-# core/include, the commands of core/commands.toml, or the features of scripts/feature-map.mjs) changes the Windows
-# app (app/), the Mac app (mac/) and the Linux app (linux/) in the same pull request. One that leaves a platform for
-# later carries the label "shells: partial" and says in its description what is left for which platform.
+# core/include, the commands of core/commands.toml, the settings window of core/settings.toml, or the features of
+# scripts/feature-map.mjs) changes the Windows app (app/), the Mac app (mac/) and the Linux app (linux/) in the same
+# pull request. One that leaves a platform for later carries the label "shells: partial" and says in its description
+# what is left for which platform.
 #
 #   scripts/check-shells.sh <base ref> [labels]      CI passes the PR's base branch and its labels, comma separated
 set -euo pipefail
@@ -10,7 +11,7 @@ cd "$(dirname "$0")/.."
 BASE=${1:?the base ref, e.g. origin/master}
 LABELS=${2:-}
 changed=$(git diff --name-only "$BASE"...HEAD)
-shared=$(grep -E '^(core/include/|core/commands\.toml$|scripts/feature-map\.mjs$)' <<< "$changed" || true)
+shared=$(grep -E '^(core/include/|core/(commands|settings)\.toml$|scripts/feature-map\.mjs$)' <<< "$changed" || true)
 if [ -z "$shared" ]; then
     echo "Nothing all three apps share changed"
     exit 0

@@ -739,6 +739,34 @@ ui-col-used-by = Bruges af
 # review: new
 ui-options-system-default = Systemstandard ({ $language })
 # review: new
+ui-settings-general = Generelt
+# review: new
+ui-settings-reading = Læsning
+# review: changed
+ui-settings-new-mail = Ny mail
+# review: new
+ui-settings-sending = Afsendelse
+# review: new
+ui-settings-default-apps = Standardapps
+# review: new
+ui-settings-message-list = Meddelelsesliste
+# review: new
+ui-settings-messages = Meddelelser
+# review: new
+ui-settings-language = Sprog
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Anvend
+# review: new
+ui-language-label = S&prog:
+# review: new
+ui-restart-note = Genstart Inbox Classic for at skifte sprog.
+# review: new
+ui-restart-ask = Inbox Classic vises på { $language }, når programmet er genstartet. Vil du genstarte nu?
+# review: new
+ui-notify-new-mail = &Giv mig besked, når der kommer ny mail
+# review: new
 ui-new-folder-title = Ny mappe
 # review: new
 ui-rename-folder-title = Omdøb mappe
@@ -1043,7 +1071,7 @@ ui-book-not-exported = Adressekartoteket kunne ikke gemmes: { $reason }
 # review: new
 ui-code-copied = Koden er kopieret
 # review: new
-ui-codes-in-notifications = Vis loginkoder i notifikationer om ny mail
+ui-codes-in-notifications = &Vis loginkoder i notifikationer om ny mail
 # review: new
 ui-tool-unread-only = Ulæste
 # review: new
@@ -1055,7 +1083,7 @@ ui-pictures-always-domain = Hent altid billeder fra alle hos { $domain }
 # review: new
 ui-pictures-unconfirmed = Afsenderens domæne ({ $domain }) kunne ikke bekræftes, så billeder i denne meddelelse hentes ikke automatisk.
 # review: new
-ui-pictures-always-option = Hent billeder i alle meddelelser
+ui-pictures-always-option = &Hent billeder i alle meddelelser
 # review: new
 ui-pictures-always-warning = Afsendere kan så se, hvornår du læser deres meddelelser.
 # review: new
@@ -1065,7 +1093,7 @@ ui-protection-details-title = Sikkerhedsdetaljer
 # review: new
 ui-download-heading = Hentning
 # review: new
-ui-download-ahead = Hent meddelelser på forhånd:
+ui-download-ahead = &Hent meddelelser på forhånd:
 # review: new
 ui-download-ahead-recent = Nye meddelelser på op til 1 MB hver
 # review: new
@@ -1073,9 +1101,9 @@ ui-download-ahead-all = Alle meddelelser
 # review: new
 ui-download-ahead-never = Kun når de åbnes
 # review: new
-ui-download-limit = Lagergrænse pr. konto:
+ui-download-limit = &Lagergrænse pr. konto:
 # review: new
-ui-send-delay = Forsinkelse før afsendelse:
+ui-send-delay = &Forsinkelse før afsendelse:
 # review: new
 ui-send-delay-note = Mens en meddelelse venter på at blive sendt, kan du annullere afsendelsen med Fortryd.
 # review: new
@@ -1096,7 +1124,7 @@ ui-download-note = Meddelelser, der er hentet på forhånd, åbner med det samme
 # review: new
 ui-attachment-downloading = Denne meddelelse er ikke færdighentet. Prøv igen, når den er hentet.
 # review: new
-ui-trusted-senders-button = Betroede afsendere...
+ui-trusted-senders-button = &Betroede afsendere...
 # review: new
 ui-trusted-senders-title = Betroede afsendere
 # review: new
@@ -1106,7 +1134,7 @@ ui-trusted-everyone-at = Alle hos { $domain }
 # review: new
 ui-trusted-senders-empty = Der er ikke tilføjet nogen betroede afsendere endnu.
 # review: new
-ui-eml-default = Åbn .eml-filer med Inbox Classic
+ui-eml-default = &Åbn .eml-filer med Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic åbner nu .eml-filer.
 # review: new
@@ -1116,7 +1144,7 @@ ui-folders = Mapper
 # review: new
 ui-sorted-by = Sorteret efter { $field }
 # review: new
-ui-layout-label = Layout:
+ui-layout-label = La&yout:
 # review: new
 ui-columns-note = Vinduet er bredt nok til kolonnelayoutet. Du kan ændre layoutet under Vis > Layout.
 # review: new
@@ -1131,9 +1159,9 @@ ui-row-messages = { $count ->
    *[other] { $count } meddelelser
 }
 # review: new
-ui-list-pictures = Vis afsendernes billeder på meddelelseslisten
+ui-list-pictures = &Vis afsendernes billeder på meddelelseslisten
 # review: new
-ui-list-pictures-note = Viser brandlogoer eller billeder fra adressekartoteket for bekræftede afsendere, og initialer, når der ikke er noget billede. Logoer hentes én gang pr. brand, ikke for hver meddelelse.
+ui-list-pictures-note = I kolonnelayoutet vises brandlogoer eller billeder fra adressekartoteket for bekræftede afsendere, og initialer, når der ikke er noget billede. Logoer hentes én gang pr. brand, ikke for hver meddelelse.
 # review: new
 ui-card-picture = Billede:
 # review: new

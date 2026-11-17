@@ -283,7 +283,8 @@ extension UITest {
         guard await waitWindow("settings", 10) != nil, let options = SettingsWindow.current else {
             throw Failed(description: "Settings did not open")
         }
-        check(options.sendDelay.titleOfSelectedItem == "Off", "Wait before sending is in Settings (\(options.sendDelay.titleOfSelectedItem ?? ""))")
+        await showPane(options, .general)
+        check(options.sendDelay.titleOfSelectedItem == "Off", "Delay before sending is in Settings, General (\(options.sendDelay.titleOfSelectedItem ?? ""))")
         check(options.sendDelay.itemTitles == ["Off", "5 seconds", "10 seconds", "20 seconds", "30 seconds"],
               "with the waits it offers (\(options.sendDelay.itemTitles))")
         onMain { options.sendDelay.selectItem(at: 2); options.sendDelayChosen() }
@@ -1171,13 +1172,20 @@ extension UITest {
         guard await waitWindow("settings", 10) != nil, let options = SettingsWindow.current else {
             throw Failed(description: "Settings did not open")
         }
-        check(options.grouping.state == .on, "Group messages by conversation is on in Settings")
-        check(options.signInCodes.state == .off && !pe_codes_in_notifications(),
+        await showPane(options, .general)
+        check(options.signInCodes.state == .off && !pe_codes_in_notifications() && options.signInCodes.isEnabled,
               "Show sign-in codes in new mail notifications is there, off at first")
+        press(options.notify)
+        check(await waitUntil(5) { !options.signInCodes.isEnabled && !AppDelegate.shared.notify },
+              "with Notify me when new mail arrives turned off, the codes check box is disabled")
+        press(options.notify)
+        check(await waitUntil(5) { options.signInCodes.isEnabled && AppDelegate.shared.notify }, "and enabled again when it is on")
         onMain { options.signInCodes.state = .on; options.signInCodesChanged() }
         check(await waitUntil(5) { pe_codes_in_notifications() }, "turned on, the core names the codes in the notifications")
         onMain { options.signInCodes.state = .off; options.signInCodesChanged() }
         _ = await waitUntil(5) { !pe_codes_in_notifications() }
+        await showPane(options, .reading)
+        check(options.grouping.state == .on, "Group messages by conversation is on in Settings, Reading")
         onMain { options.grouping.state = .off; options.groupingChanged() }
         check(await waitUntil(5) { tripRows().count == 3 && tripRows().allSatisfy { $0.message.thread == 0 } },
               "turned off, the three messages are each a row of their own")

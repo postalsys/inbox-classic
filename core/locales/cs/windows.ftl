@@ -171,14 +171,6 @@ win-edit = &Upravit...
 ## Options
 
 # review: new
-win-options-language-label = &Jazyk Inbox Classic:
-# review: new
-win-options-restart-note = Jazyk se změní po restartu Inbox Classic.
-# review: new
-win-options-notify = &Upozornit mě, když přijde nová pošta
-# review: new
-win-restart-ask = Inbox Classic se po restartu zobrazí v jazyce { $language }. Restartovat hned?
-# review: new
 win-folders-hide = Skrýt seznam složek
 # review: new
 win-folders-pin = Ponechat seznam složek vedle zpráv

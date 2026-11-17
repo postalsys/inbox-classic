@@ -242,19 +242,8 @@ gtk-nothing-yet = Intet endnu.
 
 # review: new
 gtk-preferences = Indstillinger
-# review: new
-gtk-language = Sprog
-# review: new
-gtk-language-subtitle = Sproget i programmet og hjælpen
-# review: new
-gtk-new-mail-group = Ny mail
-# the row of Preferences that turns the new mail notification on, in sentence case as GNOME writes it
-# review: new
-gtk-notify-new-mail = Giv besked om ny mail
-# review: new
-gtk-notify-subtitle = En notifikation, når der kommer nye meddelelser, mens vinduet er i baggrunden
-# review: new
-gtk-restart-to-change = Inbox Classic genstarter for at skifte sprog.
+# review: changed
+gtk-notify-subtitle = Kun mens Inbox Classic er i baggrunden
 
 # linux/data/com.inboxclassic.InboxClassic.desktop and .metainfo.xml, made by the build. The keywords are the words a
 # search of the applications finds Inbox Classic by, each ended by a semicolon, in your language only: the English

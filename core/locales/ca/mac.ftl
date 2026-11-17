@@ -41,13 +41,9 @@ mac-no-updates = Aquesta versió d’Inbox Classic no admet actualitzacions auto
 # review: new
 mac-settings-title = Configuració
 # review: new
-mac-language-label = Llengua:
+mac-check-updates-automatically = Comprova si hi ha actualitzacions automàticament
 # review: new
-mac-restart-hint = Reinicieu Inbox Classic per canviar la llengua.
-# review: new
-mac-notify-new-mail = Notifica’m quan arribi correu nou
-# review: new
-mac-restart-question = Voleu reiniciar Inbox Classic ara per canviar la llengua?
+mac-settings-updates = Actualitzacions
 
 ## Diàlegs
 

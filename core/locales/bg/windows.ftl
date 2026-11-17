@@ -169,14 +169,6 @@ win-edit = &Редактиране...
 ## Options
 
 # review: new
-win-options-language-label = &Език на Inbox Classic:
-# review: new
-win-options-restart-note = Рестартирайте Inbox Classic, за да смените езика.
-# review: new
-win-options-notify = &Уведомяване при пристигане на нова поща
-# review: new
-win-restart-ask = Inbox Classic ще се покаже на { $language } след рестартиране. Да се рестартира ли сега?
-# review: new
 win-folders-hide = Скриване на списъка с папки
 # review: new
 win-folders-pin = Списъкът с папки да стои до съобщенията

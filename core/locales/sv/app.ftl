@@ -739,6 +739,34 @@ ui-col-used-by = Används av
 # review: new
 ui-options-system-default = Systemets standard ({ $language })
 # review: new
+ui-settings-general = Allmänt
+# review: new
+ui-settings-reading = Läsning
+# review: changed
+ui-settings-new-mail = Ny e-post
+# review: new
+ui-settings-sending = Skicka
+# review: new
+ui-settings-default-apps = Standardappar
+# review: new
+ui-settings-message-list = Meddelandelista
+# review: new
+ui-settings-messages = Meddelanden
+# review: new
+ui-settings-language = Språk
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Verkställ
+# review: new
+ui-language-label = S&pråk:
+# review: new
+ui-restart-note = Starta om Inbox Classic för att byta språk.
+# review: new
+ui-restart-ask = Inbox Classic visas på { $language } efter en omstart. Vill du starta om nu?
+# review: new
+ui-notify-new-mail = &Meddela mig när ny e-post kommer
+# review: new
 ui-new-folder-title = Ny mapp
 # review: new
 ui-rename-folder-title = Byt namn på mapp
@@ -1043,7 +1071,7 @@ ui-book-not-exported = Det gick inte att spara adressboken: { $reason }
 # review: new
 ui-code-copied = Koden kopierades
 # review: new
-ui-codes-in-notifications = Visa inloggningskoder i aviseringar om ny e-post
+ui-codes-in-notifications = Visa &inloggningskoder i aviseringar om ny e-post
 # review: new
 ui-tool-unread-only = Olästa
 # review: new
@@ -1055,7 +1083,7 @@ ui-pictures-always-domain = Hämta alltid bilder från alla på { $domain }
 # review: new
 ui-pictures-unconfirmed = Avsändarens domän ({ $domain }) kunde inte verifieras, så bilderna i meddelandet hämtas inte automatiskt.
 # review: new
-ui-pictures-always-option = Hämta bilder i alla meddelanden
+ui-pictures-always-option = &Hämta bilder i alla meddelanden
 # review: new
 ui-pictures-always-warning = Avsändarna kan då se när du läser deras meddelanden.
 # review: new
@@ -1065,7 +1093,7 @@ ui-protection-details-title = Säkerhetsdetaljer
 # review: new
 ui-download-heading = Hämtning
 # review: new
-ui-download-ahead = Hämta meddelanden i förväg:
+ui-download-ahead = &Hämta meddelanden i förväg:
 # review: new
 ui-download-ahead-recent = Senaste meddelandena upp till 1 MB vardera
 # review: new
@@ -1073,9 +1101,9 @@ ui-download-ahead-all = Alla meddelanden
 # review: new
 ui-download-ahead-never = Bara när de öppnas
 # review: new
-ui-download-limit = Lagringsgräns per konto:
+ui-download-limit = &Lagringsgräns per konto:
 # review: new
-ui-send-delay = Fördröjning före sändning:
+ui-send-delay = &Fördröjning före sändning:
 # review: new
 ui-send-delay-note = Medan ett meddelande väntar på att skickas kan du avbryta sändningen med Ångra.
 # review: new
@@ -1096,7 +1124,7 @@ ui-download-note = Meddelanden som hämtats i förväg öppnas direkt. När lagr
 # review: new
 ui-attachment-downloading = Meddelandet har inte hämtats färdigt. Försök igen när hämtningen är klar.
 # review: new
-ui-trusted-senders-button = Betrodda avsändare...
+ui-trusted-senders-button = &Betrodda avsändare...
 # review: new
 ui-trusted-senders-title = Betrodda avsändare
 # review: new
@@ -1106,7 +1134,7 @@ ui-trusted-everyone-at = Alla på { $domain }
 # review: new
 ui-trusted-senders-empty = Inga betrodda avsändare har lagts till ännu.
 # review: new
-ui-eml-default = Öppna .eml-filer med Inbox Classic
+ui-eml-default = &Öppna .eml-filer med Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic öppnar nu .eml-filer.
 # review: new
@@ -1116,7 +1144,7 @@ ui-folders = Mappar
 # review: new
 ui-sorted-by = Sorterat efter { $field }
 # review: new
-ui-layout-label = Layout:
+ui-layout-label = &Layout:
 # review: new
 ui-columns-note = Fönstret är tillräckligt brett för kolumnlayouten. Du kan byta layout under Visa > Layout.
 # review: new
@@ -1131,9 +1159,9 @@ ui-row-messages = { $count ->
    *[other] { $count } meddelanden
 }
 # review: new
-ui-list-pictures = Visa avsändarnas bilder i meddelandelistan
+ui-list-pictures = Visa &avsändarnas bilder i meddelandelistan
 # review: new
-ui-list-pictures-note = Visar varumärkeslogotyper eller bilder från adressboken för verifierade avsändare, och initialer när ingen bild finns. Logotyper hämtas en gång per varumärke, inte för varje meddelande.
+ui-list-pictures-note = Visar i kolumnlayouten varumärkeslogotyper eller bilder från adressboken för verifierade avsändare, och initialer när ingen bild finns. Logotyper hämtas en gång per varumärke, inte för varje meddelande.
 # review: new
 ui-card-picture = Bild:
 # review: new

@@ -742,6 +742,34 @@ ui-col-used-by = Izmanto
 # review: new
 ui-options-system-default = Sistēmas noklusējums ({ $language })
 # review: new
+ui-settings-general = Vispārīgi
+# review: new
+ui-settings-reading = Lasīšana
+# review: changed
+ui-settings-new-mail = Jauns pasts
+# review: new
+ui-settings-sending = Sūtīšana
+# review: new
+ui-settings-default-apps = Noklusējuma lietotnes
+# review: new
+ui-settings-message-list = Ziņojumu saraksts
+# review: new
+ui-settings-messages = Ziņojumi
+# review: new
+ui-settings-language = Valoda
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Lietot
+# review: new
+ui-language-label = &Valoda:
+# review: new
+ui-restart-note = Restartējiet Inbox Classic, lai mainītu valodu.
+# review: new
+ui-restart-ask = Pēc restartēšanas Inbox Classic būs šajā valodā: { $language }. Restartēt tūlīt?
+# review: new
+ui-notify-new-mail = &Paziņot, kad pienāk jauns pasts
+# review: new
 ui-new-folder-title = Jauna mape
 # review: new
 ui-rename-folder-title = Pārdēvēt mapi
@@ -1048,7 +1076,7 @@ ui-book-not-exported = Adrešu grāmatu nevarēja saglabāt: { $reason }
 # review: new
 ui-code-copied = Kods nokopēts
 # review: new
-ui-codes-in-notifications = Rādīt pierakstīšanās kodus paziņojumos par jaunu pastu
+ui-codes-in-notifications = &Rādīt pierakstīšanās kodus paziņojumos par jaunu pastu
 # review: new
 ui-tool-unread-only = Nelasītie
 # review: new
@@ -1060,7 +1088,7 @@ ui-pictures-always-domain = Vienmēr lejupielādēt attēlus no visiem domēnā 
 # review: new
 ui-pictures-unconfirmed = Sūtītāja domēnu ({ $domain }) nevarēja pārbaudīt, tāpēc attēli šajā ziņojumā netiek lejupielādēti automātiski.
 # review: new
-ui-pictures-always-option = Lejupielādēt attēlus visos ziņojumos
+ui-pictures-always-option = Lejupielādēt &attēlus visos ziņojumos
 # review: new
 ui-pictures-always-warning = Tad sūtītāji var redzēt, kad jūs lasāt viņu ziņojumus.
 # review: new
@@ -1070,7 +1098,7 @@ ui-protection-details-title = Drošības detaļas
 # review: new
 ui-download-heading = Lejupielāde
 # review: new
-ui-download-ahead = Lejupielādēt ziņojumus iepriekš:
+ui-download-ahead = Lejupielādēt &ziņojumus iepriekš:
 # review: new
 ui-download-ahead-recent = Nesenos ziņojumus līdz 1 MB katru
 # review: new
@@ -1078,9 +1106,9 @@ ui-download-ahead-all = Visus ziņojumus
 # review: new
 ui-download-ahead-never = Tikai atverot
 # review: new
-ui-download-limit = Krātuves ierobežojums kontam:
+ui-download-limit = &Krātuves ierobežojums kontam:
 # review: new
-ui-send-delay = Aizture pirms sūtīšanas:
+ui-send-delay = &Aizture pirms sūtīšanas:
 # review: new
 ui-send-delay-note = Kamēr ziņojums gaida nosūtīšanu, sūtīšanu var atcelt ar Atsaukt.
 # review: new
@@ -1101,7 +1129,7 @@ ui-download-note = Iepriekš lejupielādēti ziņojumi atveras uzreiz. Kad krāt
 # review: new
 ui-attachment-downloading = Šī ziņojuma lejupielāde vēl nav pabeigta. Mēģiniet vēlreiz, kad lejupielāde būs pabeigta.
 # review: new
-ui-trusted-senders-button = Uzticamie sūtītāji...
+ui-trusted-senders-button = &Uzticamie sūtītāji...
 # review: new
 ui-trusted-senders-title = Uzticamie sūtītāji
 # review: new
@@ -1111,7 +1139,7 @@ ui-trusted-everyone-at = Visi domēnā { $domain }
 # review: new
 ui-trusted-senders-empty = Vēl nav pievienots neviens uzticams sūtītājs.
 # review: new
-ui-eml-default = Atvērt .eml failus ar Inbox Classic
+ui-eml-default = Atvērt .&eml failus ar Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic tagad atver .eml failus.
 # review: new
@@ -1121,7 +1149,7 @@ ui-folders = Mapes
 # review: new
 ui-sorted-by = Kārtots pēc: { $field }
 # review: new
-ui-layout-label = Izkārtojums:
+ui-layout-label = &Izkārtojums:
 # review: new
 ui-columns-note = Logs ir pietiekami plats kolonnu izkārtojumam. Izkārtojumu var mainīt sadaļā Skats > Izkārtojums.
 # review: new
@@ -1137,9 +1165,9 @@ ui-row-messages = { $count ->
    *[other] { $count } ziņojumi
 }
 # review: new
-ui-list-pictures = Rādīt sūtītāju attēlus ziņojumu sarakstā
+ui-list-pictures = &Rādīt sūtītāju attēlus ziņojumu sarakstā
 # review: new
-ui-list-pictures-note = Pārbaudītiem sūtītājiem rāda zīmolu logotipus vai adrešu grāmatas attēlus, bet, ja attēla nav, iniciāļus. Logotipi tiek lejupielādēti vienreiz katram zīmolam, nevis katram ziņojumam.
+ui-list-pictures-note = Kolonnu izkārtojumā pārbaudītiem sūtītājiem rāda zīmolu logotipus vai adrešu grāmatas attēlus, bet, ja attēla nav, iniciāļus. Logotipi tiek lejupielādēti vienreiz katram zīmolam, nevis katram ziņojumam.
 # review: new
 ui-card-picture = Attēls:
 # review: new

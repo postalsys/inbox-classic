@@ -22,10 +22,18 @@ extension UITest {
         check(Array(titles.dropFirst()) == names && names.first == "English" && names.contains("Deutsch"),
               "then the languages by their own names (\(titles.dropFirst().joined(separator: ", ")))")
         check(shown.notify.title == "Notify me when new mail arrives", "Notify of New Mail is there too")
+        let panes = settings.toolbar?.items.map(\.label) ?? []
+        check(panes == ["General", "Reading", "Downloading"], "the toolbar has the panes General, Reading and Downloading (\(panes))")
+        // the pane chosen last is the dark messages step's Reading
+        check(shown.pane == .reading && settings.title == "Reading", "it opens on the pane chosen last, titled by it (\(settings.title))")
+        await showPane(shown, .general)
+        check(settings.title == "General", "General titles the window General (\(settings.title))")
+        check(shown.checkUpdates.title == "Check for updates automatically" && !shown.checkUpdates.isEnabled,
+              "General has Check for updates automatically, disabled in a build without updates")
         let deutsch = titles.firstIndex(of: "Deutsch") ?? 2
         onMain { self.choose(popup, deutsch) }
         let question = await waitWindow("alert", 10)
-        check(alertText(question).contains("Restart Inbox Classic now to change the language?"),
+        check(alertText(question).contains("Inbox Classic shows Deutsch once it restarts. Restart now?"),
               "choosing Deutsch asks to start again (\(alertText(question)))")
         let buttons = views(NSButton.self, in: question?.contentView).map(\.title)
         check(buttons.contains("Restart Now") && buttons.contains("Later"), "with Restart Now and Later")
@@ -33,7 +41,19 @@ extension UITest {
         _ = await waitUntil { !(question?.isVisible ?? false) }
         await pause(0.3)
         await shot(settings, "options-1-language")
+        await showPane(shown, .reading)
+        check(settings.title == "Reading", "the Reading pane titles the window Reading (\(settings.title))")
+        await shot(settings, "options-2-reading")
         settings.close()
+        _ = await waitUntil { SettingsWindow.current == nil }
+        command(.options)
+        if let again = await waitFor(10, { SettingsWindow.current }) {
+            check(again.pane == .reading && again.window.title == "Reading", "closed on Reading and opened again, it opens on Reading")
+            await showPane(again, .general)
+            again.window.close()
+        } else {
+            check(false, "Settings opens again")
+        }
 
         step("the windows in German")
         await startIn("de")
@@ -86,6 +106,21 @@ extension UITest {
         } else {
             check(false, "File > New Account opens the form")
         }
+        command(.options)
+        if let options = await waitFor(10, { SettingsWindow.current }) {
+            for (page, name) in [(SettingsPage.general, "lang-4-pseudo-options"), (.reading, "lang-4b-pseudo-options-reading"),
+                                 (.downloading, "lang-4c-pseudo-options-downloading")] {
+                await showPane(options, page)
+                await shot(options.window, name)
+                checkCatalogWords(in: options.window, "Settings, \(page.rawValue)")
+                let width = options.window.contentView?.frame.width ?? 0
+                check(width == 520, "and its long words wrap, the \(page.rawValue) pane no wider than 520 points (\(Int(width)))")
+            }
+            await showPane(options, .general)
+            options.window.close()
+        } else {
+            check(false, "Settings opens")
+        }
         command(.exportSetup)
         if let export = await waitWindow("setup.export", 10) {
             checkCatalogWords(in: export, "the Export Settings and Accounts window")
@@ -106,6 +141,13 @@ extension UITest {
         step("back in English")
         await startIn("en")
         check(main.window.toolbar?.items.contains { $0.label == "Reply" } == true, "the windows are in English again")
+    }
+
+    /// `page` of Settings shown, as its toolbar item shows it
+    func showPane(_ settings: SettingsWindow, _ page: SettingsPage) async {
+        onMain { settings.select(page) }
+        _ = await waitUntil(5) { settings.pane == page && settings.window.title == page.label.text }
+        await pause(0.5)
     }
 
     /// the language set and the windows made again in it, the Inbox and its first message shown

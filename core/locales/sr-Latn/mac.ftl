@@ -42,13 +42,9 @@ mac-no-updates = Ova verzija programa Inbox Classic ne podržava automatska ažu
 # review: new
 mac-settings-title = Podešavanja
 # review: new
-mac-language-label = Jezik:
+mac-check-updates-automatically = Automatski traži ažuriranja
 # review: new
-mac-restart-hint = Ponovo pokrenite Inbox Classic da biste promenili jezik.
-# review: new
-mac-notify-new-mail = Obavesti me kada stigne nova pošta
-# review: new
-mac-restart-question = Da li želite da sada ponovo pokrenete Inbox Classic da biste promenili jezik?
+mac-settings-updates = Ažuriranja
 
 ## Dialogs
 

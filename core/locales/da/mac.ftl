@@ -41,13 +41,9 @@ mac-no-updates = Denne version af Inbox Classic understøtter ikke automatiske o
 # review: new
 mac-settings-title = Indstillinger
 # review: new
-mac-language-label = Sprog:
+mac-check-updates-automatically = Søg automatisk efter opdateringer
 # review: new
-mac-restart-hint = Genstart Inbox Classic for at skifte sprog.
-# review: new
-mac-notify-new-mail = Giv mig besked, når der kommer ny mail
-# review: new
-mac-restart-question = Vil du genstarte Inbox Classic nu for at skifte sprog?
+mac-settings-updates = Opdateringer
 
 ## Dialogs
 

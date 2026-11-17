@@ -606,6 +606,16 @@ extension Text {
         defer { pe_string_free(title) }
         return String(cString: title)
     }
+
+    /// the word of a button that opens a window, with the Mac's ellipsis ("New Key…")
+    var opens: String {
+        text.replacingOccurrences(of: "...", with: "\u{2026}")
+    }
+}
+
+/// a field's label ("Picture:", "Image :") as a title or a word in a sentence, without its colon
+func fieldTitle(_ label: String) -> String {
+    label.withCString { taken(pe_field_title($0)) } ?? label
 }
 
 /// What a list load read (`Core.loadResult`), or why it could not, for the status bar

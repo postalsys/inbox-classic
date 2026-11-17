@@ -38,13 +38,9 @@ mac-no-updates = Эта версия Inbox Classic не поддерживает
 # review: new
 mac-settings-title = Настройки
 # review: new
-mac-language-label = Язык:
+mac-check-updates-automatically = Автоматически проверять наличие обновлений
 # review: new
-mac-restart-hint = Чтобы сменить язык, перезапустите Inbox Classic.
-# review: new
-mac-notify-new-mail = Уведомлять о новой почте
-# review: new
-mac-restart-question = Перезапустить Inbox Classic сейчас, чтобы сменить язык?
+mac-settings-updates = Обновления
 
 ## Dialogs
 

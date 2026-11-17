@@ -742,6 +742,34 @@ ui-col-used-by = Uporablja
 # review: new
 ui-options-system-default = Privzeto v sistemu ({ $language })
 # review: new
+ui-settings-general = Splošno
+# review: new
+ui-settings-reading = Branje
+# review: changed
+ui-settings-new-mail = Nova pošta
+# review: new
+ui-settings-sending = Pošiljanje
+# review: new
+ui-settings-default-apps = Privzeti programi
+# review: new
+ui-settings-message-list = Seznam sporočil
+# review: new
+ui-settings-messages = Sporočila
+# review: new
+ui-settings-language = Jezik
+# review: new
+ui-settings-label = { $label }:
+# review: new
+ui-apply = &Uporabi
+# review: new
+ui-language-label = &Jezik:
+# review: new
+ui-restart-note = Za spremembo jezika znova zaženite Inbox Classic.
+# review: new
+ui-restart-ask = Inbox Classic bo po ponovnem zagonu v jeziku: { $language }. Želite znova zagnati zdaj?
+# review: new
+ui-notify-new-mail = &Obvesti me, ko prispe nova pošta
+# review: new
 ui-new-folder-title = Nova mapa
 # review: new
 ui-rename-folder-title = Preimenuj mapo
@@ -1060,7 +1088,7 @@ ui-book-not-exported = Imenika ni bilo mogoče shraniti: { $reason }
 # review: new
 ui-code-copied = Koda je kopirana
 # review: new
-ui-codes-in-notifications = Pokaži kode za prijavo v obvestilih o novi pošti
+ui-codes-in-notifications = &Pokaži kode za prijavo v obvestilih o novi pošti
 # review: new
 ui-tool-unread-only = Neprebrano
 # review: new
@@ -1072,7 +1100,7 @@ ui-pictures-always-domain = Vedno prenesi slike od vseh na { $domain }
 # review: new
 ui-pictures-unconfirmed = Domene pošiljatelja ({ $domain }) ni bilo mogoče preveriti, zato se slike v tem sporočilu ne prenesejo samodejno.
 # review: new
-ui-pictures-always-option = Prenašaj slike v vseh sporočilih
+ui-pictures-always-option = Prenašaj slike &v vseh sporočilih
 # review: new
 ui-pictures-always-warning = Pošiljatelji bodo nato lahko videli, kdaj preberete njihova sporočila.
 # review: new
@@ -1082,7 +1110,7 @@ ui-protection-details-title = Varnostne podrobnosti
 # review: new
 ui-download-heading = Prenašanje
 # review: new
-ui-download-ahead = Vnaprej prenesi sporočila:
+ui-download-ahead = &Vnaprej prenesi sporočila:
 # review: new
 ui-download-ahead-recent = Nedavna sporočila do 1 MB vsako
 # review: new
@@ -1090,9 +1118,9 @@ ui-download-ahead-all = Vsa sporočila
 # review: new
 ui-download-ahead-never = Samo ob odpiranju
 # review: new
-ui-download-limit = Omejitev prostora na račun:
+ui-download-limit = &Omejitev prostora na račun:
 # review: new
-ui-send-delay = Zakasnitev pred pošiljanjem:
+ui-send-delay = &Zakasnitev pred pošiljanjem:
 # review: new
 ui-send-delay-note = Dokler sporočilo čaka na pošiljanje, lahko pošiljanje prekličete z ukazom Razveljavi.
 # review: new
@@ -1115,7 +1143,7 @@ ui-download-note = Vnaprej prenesena sporočila se odprejo takoj. Ko je omejitev
 # review: new
 ui-attachment-downloading = Prenos tega sporočila še ni končan. Poskusite znova, ko bo prenos končan.
 # review: new
-ui-trusted-senders-button = Zaupanja vredni pošiljatelji...
+ui-trusted-senders-button = &Zaupanja vredni pošiljatelji...
 # review: new
 ui-trusted-senders-title = Zaupanja vredni pošiljatelji
 # review: new
@@ -1125,7 +1153,7 @@ ui-trusted-everyone-at = Vsi na { $domain }
 # review: new
 ui-trusted-senders-empty = Dodan še ni noben zaupanja vreden pošiljatelj.
 # review: new
-ui-eml-default = Odpiraj datoteke .eml z Inbox Classic
+ui-eml-default = Odpiraj &datoteke .eml z Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic zdaj odpira datoteke .eml.
 # review: new
@@ -1135,7 +1163,7 @@ ui-folders = Mape
 # review: new
 ui-sorted-by = Razvrščeno po: { $field }
 # review: new
-ui-layout-label = Postavitev:
+ui-layout-label = &Postavitev:
 # review: new
 ui-columns-note = Okno je dovolj široko za postavitev s stolpci. Postavitev lahko spremenite v meniju Pogled > Postavitev.
 # review: new
@@ -1152,9 +1180,9 @@ ui-row-messages = { $count ->
    *[other] { $count } sporočil
 }
 # review: new
-ui-list-pictures = Pokaži slike pošiljateljev na seznamu sporočil
+ui-list-pictures = Pokaži &slike pošiljateljev na seznamu sporočil
 # review: new
-ui-list-pictures-note = Za preverjene pošiljatelje prikaže logotipe blagovnih znamk ali slike iz Imenika, kadar slike ni, pa začetnice. Logotipi se prenesejo enkrat za vsako znamko, ne za vsako sporočilo.
+ui-list-pictures-note = V postavitvi s stolpci za preverjene pošiljatelje prikaže logotipe blagovnih znamk ali slike iz Imenika, kadar slike ni, pa začetnice. Logotipi se prenesejo enkrat za vsako znamko, ne za vsako sporočilo.
 # review: new
 ui-card-picture = Slika:
 # review: new

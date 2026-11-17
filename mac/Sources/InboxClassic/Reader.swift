@@ -813,15 +813,14 @@ final class Reader: NSObject {
         let menu = NSMenu()
         menu.autoenablesItems = false
         guard let attachment = messageView?.attachment(index) else { return menu }
-        let ellipsis = { (text: Text) in text.text.replacingOccurrences(of: "...", with: "\u{2026}") }
         let open = menu.addItem(withTitle: Text.uiAttachmentOpen.text, action: #selector(openChosen(_:)), keyEquivalent: "")
         open.isEnabled = attachment.canOpen
         if !attachment.canOpen {
             open.toolTip = attachment.tooltip
         }
         menu.addItem(.separator())
-        menu.addItem(withTitle: ellipsis(.uiAttachmentSaveAs), action: #selector(saveAttachment(_:)), keyEquivalent: "")
-        menu.addItem(withTitle: ellipsis(.uiAttachmentSaveAll), action: #selector(saveAllAttachments), keyEquivalent: "")
+        menu.addItem(withTitle: Text.uiAttachmentSaveAs.opens, action: #selector(saveAttachment(_:)), keyEquivalent: "")
+        menu.addItem(withTitle: Text.uiAttachmentSaveAll.opens, action: #selector(saveAllAttachments), keyEquivalent: "")
         for item in menu.items where !item.isSeparatorItem {
             item.target = self
             item.tag = index
