@@ -2881,6 +2881,13 @@ void pe_set_codes_in_notifications(bool on);
 // shows a logo the test serves itself. The apps call it only with their test switch (--test-hooks, the UI test)
 void pe_allow_loopback_logos_for_tests(bool on);
 
+// The UI tests only (with the apps' test switch): PDF previews off as after a PDF file ended the app, the notice in
+// the documents built from now on, and `PdfPreviewsOff` sent, without ending the app
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_pdf_previews_crashed_for_tests(const struct PeCore *core);
+
 // What `pe_set_codes_in_notifications` set last, for the UI tests
 bool pe_codes_in_notifications(void);
 

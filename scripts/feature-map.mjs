@@ -577,6 +577,25 @@ const sections = [
                 checked: ['The note shows the first time only', 'The decrypted file opens']
             },
             {
+                shot: 'read-30-previews',
+                name: 'Pictures and PDF files in the message',
+                what: "Attached pictures and the first five pages of PDF files show after the message's text, each with its name and size, at most the width of the pane. They are copies the core draws itself in Rust (no sender's bytes reach the web view's decoders, nothing runs, nothing loads from the internet), served to the web view under a token of the view that the sender's HTML can not know. Their space is kept before they arrive, so the text never moves. Signed and encrypted mail shows none yet.",
+                how: 'Open a message with a picture or a PDF file; click a preview, or Tab to it and press Enter, to open the file. Turn off "Show attachments in messages" (Reading) to see only the strip.',
+                checked: [
+                    'The photo and the three pages of the invoice show after the text',
+                    'A preview opens its file',
+                    'A long PDF file shows five pages and a link to the rest',
+                    'The setting turns the previews off, and PDF files alone'
+                ]
+            },
+            {
+                shot: 'read-31-previews-pdf-off',
+                name: 'PDF files off after one closed the app',
+                what: 'Should a PDF file ever end the app while it is drawn, the core turns PDF previews off at the next start (a crash marker names the file) and says so where the previews are, naming the setting that turns them on again. Pictures still show.',
+                how: 'Turn on "Show PDF files in messages" (Reading) again.',
+                checked: ['The notice shows with the photo', 'Turning the setting on brings the pages back']
+            },
+            {
                 shot: 'read-4-save',
                 name: 'Saving an attachment',
                 what: 'The standard Save dialog, suggesting the safe name, starting in Downloads (after that, where you saved last).',

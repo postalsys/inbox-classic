@@ -93,6 +93,32 @@ A message with a PDF and a program (`setup.exe`) attached, and an encrypted mess
 - the encrypted message's file opens, and the first time a note says it is stored decrypted; the second time no note
 - in a message's own window the strip is there and opens the same way
 
+## 8b. Pictures and PDF files in the message
+
+Screenshots: `read-30-previews`, `read-31-previews-pdf-off`
+
+Two messages of `scripts/ui-e2e/previews/` (made by its `generate.py`) are put in the Inbox over ImapKit's API, and
+taken away after: `photo-and-pdf.eml`, a photo (`lake.jpg`) and a three-page invoice (`invoice-2026-118.pdf`), and
+`long-pdf.eml`, a twelve-page manual. Opening a file goes to the test hooks, as in 8a.
+
+- the photo and the invoice's three pages show after the text, each file's name and size above it ("3 pages" for the
+  invoice), the pages on white with an edge; the text does not move while the pictures arrive (`read-30-previews`)
+- the strip still lists both files
+- clicking the photo opens it as a double-click in the strip does: the file handed over is byte for byte what was sent
+- Tab reaches the previews, and Enter on the invoice opens the invoice
+- the manual shows its first five pages and "Open to see all 12 pages", which opens it
+- in a message's own window the previews are there too
+- Options (Settings on the Mac, Preferences on Linux), Reading page, has "Show attachments in messages", on, with its
+  note, and "Show PDF files in messages" under it, on
+- "Show attachments in messages" off: the message shows no previews, and the PDF control is disabled (insensitive on
+  Linux) and keeps its value; on again, the previews are back
+- "Show PDF files in messages" off: the photo shows, the invoice does not, and nothing says why (the user chose it);
+  on again
+- PDF previews turned off as after a PDF file closed the app (`pe_pdf_previews_crashed_for_tests`, with the test
+  switch): the message shows the photo and the notice that a PDF file closed Inbox Classic, naming "Show PDF files in
+  messages" (`read-31-previews-pdf-off`); the setting shows it off; turned on, the notice is gone and the pages are back
+- on the Mac and Linux in dark mode: the photo as it is, the pages still on white, the names in the dark colours
+
 ## 9. Marking unread and read
 
 Screenshots: `read-5-unread`

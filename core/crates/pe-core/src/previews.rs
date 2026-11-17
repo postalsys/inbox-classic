@@ -295,6 +295,20 @@ impl Core {
         }
     }
 
+    /// The UI tests only (the apps' test switch): PDF previews turned off as after a PDF file ended the app, and
+    /// [`Event::PdfPreviewsOff`] said, without ending the app
+    pub fn pdf_previews_crashed_for_tests(&self) -> Result<()> {
+        {
+            let store = self.store();
+            store.set_pdf_previews(false)?;
+            store.set_pdf_previews_crashed(true)?;
+        }
+        if let Some(previewer) = self.previews.previewer.get() {
+            previewer.set_pdfs(false);
+        }
+        self.post(Event::PdfPreviewsOff)
+    }
+
     /// "Show PDF files in messages"
     pub fn pdf_previews(&self) -> Result<bool> {
         Ok(self.store().pdf_previews()?)
@@ -1070,6 +1084,44 @@ mod view_tests {
         assert_eq!(core.preview_link(&format!("inboxclassic:attachment-{token}-16")), None);
     }
 
+    /// The messages of the UI tests' previews step (`scripts/ui-e2e/previews/`) show what the tests look for
+    #[test]
+    fn the_ui_tests_messages_read_as_the_tests_expect() {
+        let dir = pe_testkit::TempDir::new("core-previews-ui");
+        let (core, inbox, events) = opened(&dir, 1);
+        core.store()
+            .set_source(
+                inbox,
+                1,
+                include_bytes!("../../../../scripts/ui-e2e/previews/photo-and-pdf.eml"),
+            )
+            .unwrap();
+        let view = shown(&core, inbox);
+        let token = token(&view);
+        assert_eq!(view.document.matches("<img").count(), 4, "{}", view.document);
+        assert!(
+            view.document
+                .contains(&format!("src=\"/pv/{token}-0-0\" width=\"1600\" height=\"1000\""))
+        );
+        assert!(view.document.contains(&format!("/pv/{token}-1-2")));
+        assert!(view.document.contains("alt=\"invoice-2026-118.pdf, page 3 of 3\""));
+        assert!(view.document.contains("3 pages, "));
+        assert!(!view.document.contains("Open to see"));
+        let ask = core.preview_ask(&format!("/pv/{token}-0-0")).unwrap();
+        assert_eq!(answered(&core, &events, ask).unwrap().mime, PreviewMime::Jpeg);
+
+        core.store()
+            .set_source(
+                inbox,
+                1,
+                include_bytes!("../../../../scripts/ui-e2e/previews/long-pdf.eml"),
+            )
+            .unwrap();
+        let view = shown(&core, inbox);
+        assert_eq!(view.document.matches("<img").count(), PREVIEW_PAGES);
+        assert!(view.document.contains("Open to see all 12 pages"), "{}", view.document);
+    }
+
     /// A message's HTML that names a preview's address or link guesses no token: nothing answers it
     #[test]
     fn a_message_can_not_reach_the_previews() {
@@ -1139,6 +1191,23 @@ mod crash_tests {
         let request = core.previews_start(inbox, 1, vec![1]).unwrap();
         let files = super::tests::finished(&core, &events, request, &[1]);
         assert!(files[0].pages[&0].is_ok());
+    }
+
+    /// The UI tests' way to the same state, without ending the app
+    #[test]
+    fn the_ui_tests_turn_pdf_previews_off_as_a_crash_does() {
+        let dir = pe_testkit::TempDir::new("core-previews-crash-hook");
+        let (core, _inbox, events) = opened(&dir, 1);
+        core.pdf_previews_crashed_for_tests().unwrap();
+        let until = Instant::now() + Duration::from_secs(10);
+        while !matches!(
+            events.recv_timeout(until.saturating_duration_since(Instant::now())),
+            Ok(Event::PdfPreviewsOff)
+        ) {
+            assert!(Instant::now() < until, "no PdfPreviewsOff");
+        }
+        assert!(!core.pdf_previews().unwrap());
+        assert!(core.previews_notice().is_some());
     }
 
     #[test]

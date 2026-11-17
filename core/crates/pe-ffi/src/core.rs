@@ -2306,6 +2306,17 @@ pub extern "C" fn pe_allow_loopback_logos_for_tests(on: bool) {
     guard(|| pe_core::bimi::allow_loopback_logos(on));
 }
 
+/// The UI tests only (with the apps' test switch): PDF previews off as after a PDF file ended the app, the notice in
+/// the documents built from now on, and `PdfPreviewsOff` sent, without ending the app
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_pdf_previews_crashed_for_tests(core: *const PeCore) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, false, |core| core.pdf_previews_crashed_for_tests().is_ok()) }
+}
+
 /// What `pe_set_codes_in_notifications` set last, for the UI tests
 #[unsafe(no_mangle)]
 pub extern "C" fn pe_codes_in_notifications() -> bool {
