@@ -1,21 +1,19 @@
-<!--review-->
 <h1>Claves de cifrado</h1>
-<p class="summary">Cree una clave para firmar sus mensajes y recibir correo cifrado, y guarde las claves de sus contactos.</p>
-<p>Inbox Classic firma y cifra el correo con claves OpenPGP. Su propia clave tiene dos mitades: una clave pública que da a los demás y una clave privada que se queda en su equipo. Las claves de sus contactos le permiten comprobar sus firmas y cifrarles el correo.</p>
+<p class="summary">Cree su propia clave para firmar mensajes y recibir correo cifrado, y gestione las claves de sus contactos.</p>
+<p>Inbox Classic utiliza claves OpenPGP para firmar y cifrar mensajes. Su par de claves consta de una clave pública, que puede compartir, y una privada, que debe guardar de forma segura. Las claves públicas de sus contactos permiten comprobar sus firmas y enviarles mensajes cifrados.</p>
 <p>Para crear su clave:</p>
 <ol>
     <li>Elija <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> y haga clic en <b data-text="ui-keys-new"></b>.</li>
-    <li>Elija la cuenta y haga clic en <b data-text="ui-keys-new-make"></b>. La clave se usa para la dirección de la cuenta y sus otras direcciones.</li>
-    <li>Haga clic en <b data-text="ui-keys-backup-now"></b> y elija una frase de contraseña. Guarde el archivo y la frase en lugares seguros distintos.</li>
+    <li>Elija la cuenta y haga clic en <b data-text="ui-keys-new-make"></b>. La clave se utilizará para su dirección principal y sus direcciones adicionales.</li>
+    <li>Haga clic en <b data-text="ui-keys-backup-now"></b> y elija una contraseña. Guarde el archivo y la contraseña por separado, en lugares seguros.</li>
 </ol>
-<aside class="warning">Sin una copia de seguridad, su clave no se puede recuperar si este equipo se pierde o se restablece, y el correo cifrado para ella ya no se podrá leer.</aside>
-<h2>Protegidas sin frases de contraseña</h2>
-<p>Sus claves privadas están protegidas por una clave guardada en <!--os:windows-->el Administrador de credenciales<!--/os--><!--os:mac-->el llavero<!--/os--><!--os:linux-->el llavero del sistema<!--/os-->, así que nunca escribe una frase de contraseña para usarlas. Solo elige una para una copia de seguridad. Si su clave aparece bloqueada, esa protección se restableció: haga clic en <b data-text="ui-keys-import"></b> y elija su copia de seguridad.</p>
+<aside class="warning">Si pierde el equipo o lo restablece, necesitará una copia de seguridad de su clave privada. Sin ella, no podrá leer los mensajes cifrados con esa clave.</aside>
+<h2>Protección sin introducir una contraseña cada vez</h2>
+<p>Sus claves privadas están protegidas con otra clave, guardada en <!--os:windows-->el Administrador de credenciales<!--/os--><!--os:mac-->el llavero<!--/os--><!--os:linux-->el llavero del sistema<!--/os-->. Por eso no necesita introducir una contraseña para firmar o descifrar mensajes. La contraseña protege la copia de seguridad. Si falta la clave de desbloqueo, haga clic en <b data-text="ui-keys-import"></b> y elija la copia de seguridad de su clave privada.</p>
 <h2>Añadir claves</h2>
-<p>Haga clic en <b data-text="ui-keys-import"></b> para añadir una clave de un archivo, como una que le envió un contacto o una copia de seguridad de la suya. Una clave privada protegida por una frase de contraseña la pide una vez. Después, Inbox Classic pregunta si usar una clave suya importada para sus direcciones.</p>
-<p>La clave de un contacto se usa para su dirección desde entonces. Si más adelante aparece otra clave para la misma dirección, la actual sigue en uso hasta que elija la nueva en las propiedades del contacto.</p>
-<p>Para compartir su clave pública, selecciónela y haga clic en <b data-text="ui-keys-export"></b>. También puede elegir la clave de su cuenta en sus propiedades, en la pestaña <b data-text="ui-account-security"></b>.</p>
-<p>Cuando cifra para alguien cuya clave no tiene, Inbox Classic la pide al propio dominio de su dirección y después a keys.openpgp.org. Solo se envía la dirección. Para no consultar nunca keys.openpgp.org, desactive <b data-text="ui-pgp-keyserver"></b> en <b data-settings="reading"></b>.</p>
-<p>Las claves también viajan con el correo. Los mensajes de una dirección con clave llevan su clave pública, para que otras aplicaciones puedan cifrarle mensajes, e Inbox Classic aprende la clave de un contacto de sus mensajes de la misma manera. Para dejar de enviar la suya, desactive <b data-text="ui-account-autocrypt"></b> en la pestaña <b data-text="ui-account-security"></b> de la cuenta.</p>
+<p>Haga clic en <b data-text="ui-keys-import"></b> para cargar una clave desde un archivo, como la clave pública de un contacto o su propia copia de seguridad. Si la clave privada está protegida, introduzca la contraseña una vez. Después podrá asociar las claves propias a sus direcciones.</p>
+<p>La clave importada de un contacto se usará para su dirección. Si ya hay otra clave asociada, se seguirá usando la anterior hasta que elija la nueva en las propiedades del contacto.</p>
+<p>Para compartir su clave pública, selecciónela y haga clic en <b data-text="ui-keys-export"></b>. Puede elegir la clave de una cuenta en sus propiedades, en la pestaña <b data-text="ui-account-security"></b>.</p>
+<p>Si falta la clave de un destinatario al cifrar un mensaje, Inbox Classic la busca primero en el dominio de su dirección de correo. Si no la encuentra, envía esa dirección a keys.openpgp.org. Si no desea buscar claves en keys.openpgp.org, desactive la opción <b data-text="ui-pgp-keyserver"></b> en <b data-settings="reading"></b>. La búsqueda en el dominio seguirá disponible.</p>
+<p>Si Autocrypt está activado y la dirección del remitente tiene una clave asociada, Inbox Classic incluye la clave pública en los mensajes. Así, otras aplicaciones pueden cifrar mensajes para usted. Al abrir mensajes recibidos, Inbox Classic también puede incorporar las claves públicas de sus remitentes. Esto no confirma a quién pertenecen las claves. Para dejar de enviar la suya, desactive la opción <b data-text="ui-account-autocrypt"></b> en la pestaña <b data-text="ui-account-security"></b> de las propiedades de la cuenta.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

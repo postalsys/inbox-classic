@@ -1,28 +1,27 @@
-<!--review--><h1>Co smí agent dělat</h1>
-<p class="summary">Zvolte, co smí jednotliví agenti AI dělat s vaší poštou, a prohlédněte si nebo vraťte, co udělali.</p>
+<h1>Co smí agent dělat</h1>
+<p class="summary">Nastavte oprávnění agentů AI, sledujte jejich činnost a podle potřeby vracejte provedené změny zpět.</p>
 <p>Když se agent nějakého programu připojí poprvé, Inbox Classic se vás zeptá a uvede název programu. Zvolte, co smí dělat:</p>
 <ul>
-    <li>číst poštu: složky, seznam zpráv, hledání a zprávy</li>
-    <li>třídit poštu: stav přečtení, příznaky, nevyžádanou poštu, přesouvání, archivaci, nové složky a odstraňování do složky <b data-text="folder-deleted"></b>, a po vašem souhlasu odhlašování z konferencí</li>
-    <li>psát koncepty, které odešlete vy</li>
+    <li>číst poštu: prohlížet složky, zprávy a konverzace, vyhledávat zprávy a kontakty a prohlížet pravidla pro zprávy</li>
+    <li>uspořádat poštu: měnit stav přečtení a příznaky, spravovat nevyžádanou poštu, přesouvat a archivovat zprávy, vytvářet složky, odstraňovat zprávy přesunem do složky <b data-text="folder-deleted"></b> a s vaším souhlasem odhlašovat odběr zpráv</li>
+    <li>psát koncepty, které odešlete vy, a upravovat nebo zahazovat vlastní koncepty, dokud je neuložíte</li>
     <li>odesílat poštu, každou zprávu až po vašem souhlasu</li>
 </ul>
-<p>Potom zvolte účty, které smí vidět, a klikněte na <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> program odmítne a už se vás na něj nikdo nezeptá.</p>
-<p>Agent nikdy nic neodstraní natrvalo a nikdy nemění nastavení vašich účtů. Přečtením zprávy ji neoznačí jako přečtenou. Co změní, se v oknech projeví okamžitě.</p>
-<h2>Odhlášení z konferencí</h2>
-<p>Agent, který smí třídit poštu, může požádat o vaše odhlášení z konferencí. Inbox Classic se vás nejdřív jednou zeptá a každou konferenci uvede podle jejího odesílatele:</p>
+<p>Potom zvolte účty, které smí vidět, a klikněte na <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> přístup programu zamítne. Při dalším připojení už aplikace tento dotaz nezobrazí.</p>
+<p>Agent může trvale odstranit pouze koncepty, které sám vytvořil a které jste ještě neuložili. Nemůže měnit nastavení účtů. Může prohlížet pravidla pro zprávy a zjistit, na které zprávy by se použila, aniž by tyto zprávy změnil. Nemůže pravidla vytvářet, upravovat ani odstraňovat. Načtení zprávy agentem nezmění její stav přečtení. Provedené změny se v aplikaci projeví okamžitě.</p>
+<h2>Odhlášení odběru zpráv</h2>
+<p>Agent s oprávněním uspořádat poštu může navrhnout odhlášení odběru zpráv z rozesílacích seznamů. Inbox Classic zobrazí adresy odesílatelů a vyžádá si jedno potvrzení pro všechny vybrané seznamy:</p>
 <ul>
-    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> požádá každou konferenci, aby vám přestala posílat zprávy.</li>
-    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, výchozí volba, je ponechá, jak jsou.</li>
+    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> odešle vybraným seznamům žádost, aby vám přestaly posílat zprávy.</li>
+    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os--> je výchozí volba a neodešle žádost o odhlášení.</li>
 </ul>
-<p>Agent vás nemůže odhlásit podle zpráv ve složce <b data-text="folder-junk"></b> a za den vás odhlásí nejvýše z 30 konferencí.</p>
+<p>Agent nemůže k odhlášení odběru použít zprávy ze složky <b data-text="folder-junk"></b>. Pro každý program platí limit 30 žádostí o odhlášení, které jste schválili za posledních 24 hodin. Do limitu se započítávají i neúspěšné žádosti.</p>
 <h2>Zobrazení a změna přístupu</h2>
-<p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> ukazuje programy, které jste pustili dovnitř nebo odmítli, a vše, co agenti udělali, od nejnovějšího.</p>
+<p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> zobrazí programy s povoleným i zamítnutým přístupem a záznam činnosti agentů od nejnovějšího.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> změní, co program smí dělat.</li>
-    <li><b data-text="ui-remove"></b> program zapomene, takže při příštím připojení se vás zeptá znovu.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> vrátí zpět stav přečtení, příznak, přesun, označení jako nevyžádané, archivaci nebo odstranění a zprávu, která je ještě ve složce Pošta k odeslání.</li>
+    <li><b data-text="ui-remove"></b> odstraní záznam programu, jeho oprávnění i historii. Při příštím připojení se dotaz na přístup zobrazí znovu.</li>
+    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> vrátí změny stavu přečtení, příznaků a označení nevyžádané pošty i přesuny, archivaci a odstranění zpráv. Může také zrušit odeslání zprávy, která dosud čeká ve složce Pošta k odeslání.</li>
 </ul>
-<aside class="warning">Poštu píší jiní lidé a zpráva se může pokusit agenta přemluvit, aby vaši poštu přeposlal nebo odstranil. Inbox Classic před agenty skrývá text, který zpráva skrývá před vámi, a říká jim, že pošta nejsou pokyny. Agenta přesto lze oklamat. Povolte jen to, co potřebujete.</aside>
+<aside class="warning">Přijaté zprávy mohou obsahovat pokyny, které se snaží agenta přimět k přeposlání nebo odstranění vaší pošty. Inbox Classic agentům nepředává skrytý text a upozorňuje je, aby obsah zpráv nepovažovali za pokyny. Přesto lze agenta oklamat. Povolte jen potřebná oprávnění.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

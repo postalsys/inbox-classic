@@ -1,20 +1,22 @@
-<!--review--><h1>Quando um agente envia e-mails</h1>
-<p class="summary">Cada mensagem que um agente de IA quer enviar é mostrada a você primeiro e aguarda na Caixa de Saída antes de sair.</p>
-<p>Um agente só pode enviar e-mails se você tiver permitido, e cada mensagem só depois que você disser sim.</p>
+<h1>Quando um agente envia e-mails</h1>
+<p class="summary">Cada mensagem que um agente de IA quer enviar é mostrada a você primeiro e aguarda na Caixa de Saída antes do envio.</p>
+<p>Um agente só pode enviar e-mails com sua autorização, que deve ser dada para cada mensagem.</p>
 <img src="picture:agents-4-send" alt="A janela que pergunta se deve enviar uma mensagem escrita por um agente, com cada destinatário e um endereço novo marcado">
-<p>Quando o agente quer enviar, o Inbox Classic mostra a mensagem com cada destinatário pelo endereço. Os endereços para os quais você nunca escreveu aparecem marcados como <b data-text="ui-new-address"></b>.</p>
+<p>Quando um agente solicita um envio, o Inbox Classic mostra a mensagem e o endereço de cada destinatário. Os endereços para os quais você nunca escreveu aparecem marcados como <b data-text="ui-new-address"></b>.</p>
 <ol>
-    <li>Leia os destinatários e o texto.</li>
+    <li>Confira os destinatários e leia o texto.</li>
     <li>Escolha uma opção:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> envia a mensagem. O botão só fica ativo depois de um instante, para que você não o pressione por engano.</li>
-            <li><b data-text="ui-edit-first"></b> abre a mensagem em uma mensagem nova para você alterá-la.</li>
+            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> coloca a mensagem na Caixa de Saída. O botão só fica ativo após um breve intervalo, para que você não o pressione por engano.</li>
+            <li><b data-text="ui-edit-first"></b> abre uma nova janela de composição para você editar a mensagem.</li>
             <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, a opção padrão, não a envia.</li>
         </ul>
     </li>
 </ol>
-<p>Um agente pergunta sobre uma mensagem por vez. As mensagens e os rascunhos que ele escreve terminam com sua assinatura, assim como os seus.</p>
-<p>Uma mensagem que você envia aguarda 30 segundos na Caixa de Saída. Até ela sair, você pode excluí-la ali, ou clicar em <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> em <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<aside class="warning">Um agente que também tenha outras ferramentas, como navegar na Web ou ler seus arquivos, pode repassar por meio delas o que lê. O Inbox Classic não consegue vê-las. Deixe um agente enviar apenas se você precisar disso.</aside>
+<p>Cada programa só pode ter uma mensagem aguardando sua confirmação. Se você não responder de imediato, o Inbox Classic informa ao agente que a resposta está pendente. O agente pode consultar sua decisão mais tarde. Por padrão, as mensagens e os rascunhos escritos pelo agente incluem o texto da assinatura da sua conta. O agente pode optar por não incluí-lo.</p>
+<p>Uma mensagem cujo envio você aprova aguarda 30 segundos na Caixa de Saída. Antes do envio, você pode excluí-la ali, ou clicar em <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> em <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
+<h2>Rascunhos escritos por um agente</h2>
+<p>Quando você abre um rascunho escrito por um agente, o nome do agente aparece acima do texto da mensagem. Confira os destinatários e o texto antes de enviá-lo.</p>
+<p>Um agente só pode alterar ou descartar os rascunhos que ele criou. Quando você salva um desses rascunhos, o agente não pode mais alterá-lo nem descartá-lo. Isso também vale quando o Inbox Classic salva suas alterações automaticamente. Apenas abrir o rascunho não impede que o agente continue alterando-o.</p>
+<aside class="warning">Um agente que também tenha outras ferramentas, como navegar na Web ou ler seus arquivos, pode repassar por meio delas o que lê. O Inbox Classic não controla essas outras ferramentas. Autorize o envio de e-mails apenas quando for necessário.</aside>
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>
-<!--/review-->

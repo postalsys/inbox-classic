@@ -28,7 +28,6 @@ win-no-bodies = Ziņojumu saturu nevar parādīt.
 win-webview-failed = Neizdevās izveidot WebView2.
 # review: new
 win-webview-missing = WebView2 izpildlaiks nav pieejams.
-# review: new
 win-list-loading = Ielādē...
 
 ## Buttons and words used in many windows
@@ -152,9 +151,7 @@ win-book-find-label = Ierakstiet vārdu vai e-pasta adresi:
 win-send = &Sūtīt
 # review: new
 win-dont-send = &Nesūtīt
-# review: new
 win-unsubscribe = &Atteikties no abonēšanas
-# review: new
 win-dont-unsubscribe = &Neatteikties
 # review: new
 win-forget-program-ask = Noņemt šo programmu, tās atļaujas un tās aģentu darbību vēsturi? Kad tā nākamreiz pieslēgsies, atļauja tiks prasīta vēlreiz.

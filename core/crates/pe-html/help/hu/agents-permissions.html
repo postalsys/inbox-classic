@@ -1,27 +1,27 @@
-<!--review--><h1>Mit tehet egy ügynök</h1>
-<p class="summary">Válassza ki, mit tehet az egyes MI-ügynökök a leveleivel, és tekintse meg, illetve vonja vissza, amit tettek.</p>
-<p>Amikor egy program ügynöke először csatlakozik, az Inbox Classic a program nevét megadva rákérdez. Válassza ki, mit tehet:</p>
+<h1>Mit tehet egy ügynök</h1>
+<p class="summary">Állítsa be, mit tehetnek az MI-ügynökök a leveleivel, tekintse meg a műveleteiket, és vonja vissza a módosításokat.</p>
+<p>Az ügynök első csatlakozásakor az Inbox Classic megjeleníti a program nevét, és engedélyt kér. Válassza ki az engedélyezett műveleteket:</p>
 <ul>
-    <li>levelek olvasása: mappák, az üzenetlista, keresés és üzenetek</li>
-    <li>levelek rendezése: olvasottság, jelölők, levélszemét, áthelyezés, archiválás, új mappák és törlés ide: <b data-text="folder-deleted"></b>, valamint leiratkozás levelezőlistákról az Ön jóváhagyása után</li>
-    <li>piszkozatok írása, amelyeket Ön küld el</li>
-    <li>levelek küldése, minden üzenetet csak az Ön jóváhagyása után</li>
+    <li>levelek olvasása: mappák, üzenetek és beszélgetések megtekintése, üzenetek és névjegyek keresése, valamint üzenetszabályok megtekintése</li>
+    <li>levelek kezelése: olvasottnak vagy olvasatlannak jelölés, jelölők és levélszemét-jelölések módosítása, áthelyezés, archiválás, mappák létrehozása, törlés a <b data-text="folder-deleted"></b> mappába való áthelyezéssel, valamint leiratkozás levelezőlistákról külön jóváhagyással</li>
+    <li>piszkozatok írása, amelyeket később elküldhet, valamint az ügynök saját piszkozatainak módosítása vagy elvetése, amíg nem menti őket a szerkesztőben</li>
+    <li>levelek küldése, minden üzenethez külön jóváhagyást kérve</li>
 </ul>
-<p>Ezután válassza ki, mely fiókokat láthatja, és kattintson erre: <b data-text="ui-allow"></b>. Ezzel a gombbal elutasítja a programot, és többé nem kérdez rá: <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os-->.</p>
-<p>Az ügynök soha nem töröl semmit véglegesen, és soha nem módosítja a fiókbeállításait. Egy üzenet elolvasása nem jelöli meg olvasottként. Amit módosít, az azonnal látszik az ablakokban.</p>
+<p>Ezután válassza ki, mely fiókokhoz férhet hozzá az ügynök, majd kattintson az <b data-text="ui-allow"></b> gombra. A <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> gomb elutasítja a hozzáférést. Az Inbox Classic megjegyzi a döntést, és nem kér újra engedélyt.</p>
+<p>Az ügynök csak a saját, a szerkesztőben még nem mentett piszkozatait törölheti véglegesen. A többi üzenet törlése áthelyezéssel történik; ha ehhez nincs megfelelő mappa, a kérés sikertelen. Nem módosíthatja a fiókbeállításokat. Megnézheti a szabályokat és ellenőrizheti, mely üzenetekre vonatkoznának, de nem hajthatja végre őket. Szabályokat nem hozhat létre, nem módosíthat és nem törölhet. Az üzenet lekérése nem jelöli olvasottnak. A módosítások azonnal megjelennek a programban.</p>
 <h2>Leiratkozás levelezőlistákról</h2>
-<p>Az az ügynök, amely rendezheti a leveleket, kérheti, hogy leiratkoztassa Önt levelezőlistákról. Az Inbox Classic előbb egyszer rákérdez, és minden listát a feladójával mutat:</p>
+<p>A levelek kezelésére jogosult ügynök leiratkozást kezdeményezhet levelezőlistákról. Az Inbox Classic megjeleníti a feladók címét, és egyszerre kér jóváhagyást az összes felsorolt listához:</p>
 <ul>
-    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os-->: minden listát megkér, hogy ne küldjön Önnek több levelet.</li>
-    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->: ez az alapértelmezett, a listákat változatlanul hagyja.</li>
+    <li>A <!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> gomb leiratkozási kérelmet küld a felsorolt listáknak.</li>
+    <li>A <!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os--> gomb az alapértelmezett választás, és nem küld leiratkozási kérelmet.</li>
 </ul>
-<p>Az ügynök nem iratkoztathatja le Önt az ebben a mappában lévő üzenetek listáiról: <b data-text="folder-junk"></b>, és naponta legfeljebb 30 listáról iratkoztathatja le.</p>
+<p>Az ügynök nem használhatja leiratkozáshoz a <b data-text="folder-junk"></b> mappában lévő üzeneteket. A korlát programonként 30 jóváhagyott kérelem az előző 24 órára számítva. A sikertelen kérelmek is beleszámítanak.</p>
 <h2>A hozzáférés megtekintése és módosítása</h2>
-<p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>: ez az ablak felsorolja a beengedett és az elutasított programokat, valamint mindazt, amit az ügynökök tettek, a legújabbal kezdve.</p>
+<p>Az <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> menüponttal nyithatja meg az engedélyezett és letiltott programok listáját és a műveletnaplót. A legújabb műveletek kerülnek felülre.</p>
 <ul>
-    <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os-->: módosítja, mit tehet egy program.</li>
-    <li><b data-text="ui-remove"></b>: elfelejti a programot, így a következő csatlakozáskor újra rákérdez.</li>
-    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os-->: visszavonja az olvasottság vagy a jelölő módosítását, az áthelyezést, a levélszemétnek jelölést, az archiválást, a törlést, valamint a még a Postázandó üzenetek mappában lévő üzenetet.</li>
+    <li>A <!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> gombbal módosíthatja a program jogosultságait.</li>
+    <li>Az <b data-text="ui-remove"></b> gomb törli a program mentett jogosultságait és műveletnaplóját. A programot nem távolítja el a számítógépről. A következő csatlakozáskor az Inbox Classic ismét engedélyt kér.</li>
+    <li>A <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> gombbal visszavonhatja az olvasottság, a jelölők és a levélszemét-jelölés módosítását, az áthelyezést, az archiválást és az üzenetek áthelyezéssel végzett törlését. A még a Postázandó üzenetek mappában várakozó üzenet küldését is visszavonhatja. A már elküldött üzeneteket nem hívhatja vissza.</li>
 </ul>
-<aside class="warning">A leveleket mások írják, és egy üzenet megpróbálhatja rávenni az ügynököt, hogy továbbítsa vagy törölje a leveleit. Az Inbox Classic elrejti az ügynökök elől azt a szöveget, amelyet az üzenet Ön elől rejt el, és közli velük, hogy a levelek nem utasítások. Egy ügynököt ennek ellenére is be lehet csapni. Csak azt engedélyezze, amire szüksége van.</aside>
-<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav><!--/review-->
+<aside class="warning">Egy üzenet tartalma megpróbálhatja rávenni az ügynököt a levelek továbbítására vagy törlésére. Az Inbox Classic kihagyja az ügynöknek átadott szövegből a rejtett tartalmat, és arra utasítja, hogy a levelek tartalmát adatként kezelje, ne követendő utasításként. Az ügynököt ennek ellenére is be lehet csapni. Csak a szükséges jogosultságokat adja meg.</aside>
+<nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

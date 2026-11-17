@@ -1,26 +1,24 @@
-<!--review-->
 <h1>Assinar e criptografar uma mensagem</h1>
-<p class="summary">Assine uma mensagem para que os destinatários saibam que ela é sua, e criptografe-a para que só eles possam lê-la.</p>
-<p>Uma mensagem assinada mostra que você a escreveu e que ninguém a alterou no caminho. Uma mensagem criptografada só pode ser lida pelos destinatários e por você, e ela é sempre assinada também. Para as duas coisas, você precisa de uma chave própria.</p>
+<p class="summary">Assine digitalmente suas mensagens e criptografe o conteúdo para que só você e os destinatários possam lê-lo.</p>
+<p>A assinatura digital permite verificar se o conteúdo foi alterado depois que a mensagem foi assinada. Verificar a quem a chave pertence é uma etapa separada. Só você e os destinatários podem ler o conteúdo de uma mensagem criptografada. As mensagens criptografadas também são assinadas no envio. Para assinar ou criptografar, você precisa de uma chave própria.</p>
 <p>Para assinar ou criptografar uma mensagem:</p>
 <ol>
-    <li>Na janela da mensagem, clique em <b data-text="ui-tb-sign"></b> ou <b data-text="ui-tb-encrypt"></b>, ou escolha <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> ou <b data-text="cmd-compose-encrypt"></b>. Você também pode pressionar <kbd data-command="compose_sign"></kbd> ou <kbd data-command="compose_encrypt"></kbd>. Se você ainda não tiver uma chave, o Inbox Classic oferece criar uma.</li>
+    <li>Na janela da mensagem, clique em <b data-text="ui-tb-sign"></b> ou <b data-text="ui-tb-encrypt"></b>, ou escolha <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> ou <b data-text="cmd-compose-encrypt"></b>. Você também pode pressionar <kbd data-command="compose_sign"></kbd> ou <kbd data-command="compose_encrypt"></kbd>. Se nenhuma chave estiver configurada para o endereço de envio selecionado, o Inbox Classic oferece a opção de criar uma.</li>
     <li>Clique em <b data-text="ui-tb-send"></b>.</li>
 </ol>
-<p>Enquanto <b data-text="ui-tb-encrypt"></b> estiver ativado, a linha abaixo do assunto mostra cada destinatário com um cadeado, e o Inbox Classic procura as chaves que ainda não tem:</p>
+<p>Com a opção <b data-text="ui-tb-encrypt"></b> ativada, cada destinatário aparece abaixo do assunto com um símbolo que indica o status da chave. O Inbox Classic procura as chaves que faltam:</p>
 <table>
-    <tr><th>Cadeado</th><th>O que significa</th></tr>
-    <tr><td>Verde</td><td>Você verificou a chave do destinatário.</td></tr>
-    <tr><td>Azul</td><td>Você tem a chave do destinatário, mas não a verificou.</td></tr>
+    <tr><th>Cor</th><th>O que significa</th></tr>
+    <tr><td>Verde</td><td>Você confirmou a quem a chave pertence.</td></tr>
+    <tr><td>Azul</td><td>A chave não foi verificada ou é sua própria chave.</td></tr>
     <tr><td>Cinza</td><td>O Inbox Classic está procurando a chave do destinatário.</td></tr>
-    <tr><td>Âmbar</td><td>Nenhuma chave foi encontrada para o destinatário.</td></tr>
+    <tr><td>Laranja</td><td>Não há uma chave utilizável para o destinatário.</td></tr>
 </table>
-<h2>Se um destinatário não tiver chave</h2>
-<p>Uma mensagem criptografada só é enviada quando todos os destinatários têm uma chave. Se algum não tiver, <b data-text="ui-tb-send"></b> abre <b data-text="ui-recipient-keys-title"></b>. Ali você pode clicar em <b data-text="ui-recipient-find-key"></b> para procurar de novo, em <b data-text="ui-recipient-remove"></b> para deixar essa pessoa de fora, ou em <b data-text="ui-send-unencrypted"></b>. Você também pode pedir a chave pública dela e importá-la.</p>
+<h2>Se faltar uma chave utilizável</h2>
+<p>Para enviar uma mensagem criptografada, você precisa de uma chave utilizável para cada destinatário. Se faltar alguma, clique em <b data-text="ui-tb-send"></b> para abrir a janela <b data-text="ui-recipient-keys-title"></b>. Use <b data-text="ui-recipient-find-key"></b> para buscar novamente ou <b data-text="ui-recipient-remove"></b> para remover o destinatário da mensagem. <b data-text="ui-send-unencrypted"></b> só está disponível se a mensagem não contiver mais conteúdo de mensagens criptografadas. Você também pode pedir a chave pública ao destinatário e importá-la.</p>
 <h2>Respostas a e-mails criptografados</h2>
-<p>Uma resposta a uma mensagem criptografada, ou um encaminhamento de uma, começa com <b data-text="ui-tb-encrypt"></b> ativado, e o Inbox Classic pergunta antes que você o desative. Enquanto a mensagem ainda citar o texto criptografado ou levar os anexos dele, ela só pode ser enviada criptografada.</p>
-<p>Os rascunhos de uma mensagem criptografada são salvos criptografados, assim como a cópia dela em <b data-text="folder-sent"></b>.</p>
+<p>Ao responder a uma mensagem criptografada ou encaminhá-la, a opção <b data-text="ui-tb-encrypt"></b> é ativada automaticamente. O Inbox Classic pede confirmação antes de desativar a criptografia. Enquanto houver texto citado, imagens ou anexos da mensagem criptografada, você só poderá enviar a nova mensagem com criptografia.</p>
+<p>Os rascunhos dessas mensagens são salvos criptografados com sua própria chave. A cópia em <b data-text="folder-sent"></b> também permanece criptografada.</p>
 <h2>Compartilhar sua chave pública</h2>
-<p>Para que alguém possa enviar e-mails criptografados para você, escolha <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Sua chave pública é anexada à mensagem como um arquivo.</p>
+<p>Para compartilhar sua chave pública, escolha <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. A chave pública do endereço de envio selecionado é anexada como arquivo. Os destinatários poderão usá-la para enviar mensagens criptografadas para você.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->

@@ -16,14 +16,13 @@ win-print-title-of = Imprimir: { $subject }
 win-no-bodies = No se puede mostrar el contenido de los mensajes.
 win-webview-failed = No se pudo crear el WebView2.
 win-webview-missing = El entorno de ejecución de WebView2 no está disponible.
-# review: new
 win-list-loading = Cargando...
 
 ## Botones y palabras de varias ventanas
 
 win-delete-button = &Eliminar
 win-find-label = &Buscar:
-win-save-as-button = Guardar &como...
+win-save-as-button = G&uardar como...
 win-too-many-files = Demasiados archivos a la vez: elija menos.
 
 ## La Bandeja de salida
@@ -94,9 +93,7 @@ win-never-written-to = Nunca le ha escrito
 win-book-find-label = Escriba un nombre o una dirección de correo:
 win-send = &Enviar
 win-dont-send = &No enviar
-# review: new
 win-unsubscribe = &Cancelar suscripción
-# review: new
 win-dont-unsubscribe = &No cancelar suscripción
 win-forget-program-ask = ¿Quitar este programa, sus permisos y el historial de sus agentes? Se le volverá a pedir autorización la próxima vez que el programa se conecte.
 win-clear-log-ask = ¿Borrar el historial de los agentes? Esto no deshará los cambios realizados.
@@ -118,26 +115,19 @@ win-folders-show = Mostrar las carpetas
 
 ## The installer
 
-# review: new
 win-installer-start = Iniciar Inbox Classic
-# review: new
 win-installer-welcome-new =
     Se instalará Inbox Classic { $version }, un programa de correo electrónico.
 
-    No se necesitan derechos de administrador; se instala solo para su cuenta.
-# review: new
+    La instalación se realizará solo para su cuenta de usuario. No necesita permisos de administrador.
 win-installer-welcome-same =
-    Inbox Classic { $version } ya está instalado. Se instalará de nuevo.
+    Inbox Classic { $version } ya está instalado y se volverá a instalar.
 
-    Sus cuentas y su correo se conservan.
-# review: new
+    Sus cuentas y mensajes se conservarán.
 win-installer-welcome-update =
-    Se actualizará Inbox Classic { $installed } a { $version }.
+    Inbox Classic se actualizará de la versión { $installed } a la { $version }.
 
-    Si está abierto, primero se cierra. Sus cuentas y su correo se conservan.
-# review: new
+    Si el programa está abierto, se cerrará antes de continuar. Sus cuentas y mensajes se conservarán.
 win-installer-older-ask = Está instalado Inbox Classic { $installed }, que es más reciente que { $version }. ¿Instalar de todos modos la versión anterior?
-# review: new
 win-installer-still-running = Inbox Classic sigue abierto. Ciérrelo y vuelva a intentarlo.
-# review: new
-win-installer-remove-mail-ask = ¿Quitar también las cuentas y el correo que Inbox Classic guarda en este equipo? El correo de los servidores se queda.
+win-installer-remove-mail-ask = ¿Desea eliminar también las cuentas y los mensajes que Inbox Classic guarda en este equipo? Los mensajes de los servidores se conservarán.

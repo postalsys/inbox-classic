@@ -3,7 +3,6 @@
 
 ## Counts and sizes
 
-# review: new
 messages = { $count ->
     [one] 1 mesaj
     [few] { $count } mesaje
@@ -688,7 +687,7 @@ day-sunday = duminică
 
 # review: new
 agent-level-read = Citirea e-mailului: foldere, lista de mesaje, căutare și mesaje
-# review: changed
+# review: new
 agent-level-organize = Organizarea e-mailului: stare de citire, semnalizări, nedorite, mutare, arhivare, foldere noi, ștergere în Elemente șterse și dezabonare de la liste de corespondență după ce sunteți de acord
 # review: new
 agent-level-drafts = Scrierea de schițe pe care le trimiteți dvs.
@@ -780,6 +779,12 @@ agent-log-sent = A trimis „{ $subject }” către { $to }
 # review: new
 agent-log-draft = A salvat schița „{ $subject }”
 # review: new
+agent-log-draft-replaced = A înlocuit schița „{ $subject }”
+# review: new
+agent-log-draft-discarded = A renunțat la schița „{ $subject }”
+# review: new
+agent-draft-note = { $program }, un agent IA, a scris această schiță. Verificați destinatarii și textul înainte de a o trimite.
+# review: new
 agent-log-read = A marcat ca citit „{ $subject }”
 # review: new
 agent-log-unread = A marcat ca necitit „{ $subject }”
@@ -799,8 +804,7 @@ agent-log-not-junk = A marcat „{ $subject }” ca dorit
 agent-log-archived = A arhivat „{ $subject }”
 # review: new
 agent-log-folder = A creat folderul „{ $name }”
-# review: new
-agent-log-unsubscribed = S-a dezabonat de la lista lui „{ $subject }”
+agent-log-unsubscribed = Ați aprobat cererea de dezabonare. Mesaj: „{ $subject }”
 # review: new
 agent-log-unsubscribe-failed = Dezabonarea de la lista lui „{ $subject }” nu a reușit: { $reason }
 # review: new
@@ -996,7 +1000,6 @@ pgp-why-signature-expired = Semnătura a expirat
 pgp-why-key-not-valid = Semnat cu o cheie care nu este validă
 # review: new
 pgp-why-not-for-you = Semnat pentru alți destinatari și transmis mai departe către dvs.
-# review: new
 pgp-why-not-key-in-use = Semnat cu o altă cheie decât cea folosită pentru { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Imaginile au fost încărcate de pe internet
@@ -1350,35 +1353,29 @@ attachment-runs-programs = „{ $name }” poate rula programe, de aceea Inbox C
 # review: new
 attachment-decrypted-note = Această atașare provine dintr-un mesaj criptat. Pentru a o deschide, Inbox Classic o stochează decriptată pe acest computer, într-un folder al dvs. pe care Inbox Classic îl golește după o zi.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
     [one] Serverul nu a mutat { $messages } în { $folder }, așa că este din nou în { $from }: { $reason }
    *[other] Serverul nu a mutat { $messages } în { $folder }, așa că sunt din nou în { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] Serverul nu a șters { $messages }, așa că este din nou în { $from }: { $reason }
    *[other] Serverul nu a șters { $messages }, așa că sunt din nou în { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] Serverul nu a arhivat { $messages }, așa că este din nou în { $from }: { $reason }
    *[other] Serverul nu a arhivat { $messages }, așa că sunt din nou în { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
-    [one] Serverul nu a marcat { $messages } ca citit, așa că este din nou necitit: { $reason }
-   *[other] Serverul nu a marcat { $messages } ca citite, așa că sunt din nou necitite: { $reason }
+    [one] Serverul nu a marcat { $messages } ca citit, așa că apare din nou ca necitit: { $reason }
+   *[other] Serverul nu a marcat { $messages } ca citite, așa că apar din nou ca necitite: { $reason }
 }
-# review: new
 undone-unread = { $count ->
-    [one] Serverul nu a marcat { $messages } ca necitit, așa că este din nou citit: { $reason }
-   *[other] Serverul nu a marcat { $messages } ca necitite, așa că sunt din nou citite: { $reason }
+    [one] Serverul nu a marcat { $messages } ca necitit, așa că apare din nou ca citit: { $reason }
+   *[other] Serverul nu a marcat { $messages } ca necitite, așa că apar din nou ca citite: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Serverul nu a schimbat semnalizările pentru { $messages }, așa că este ca înainte: { $reason }
-   *[other] Serverul nu a schimbat semnalizările pentru { $messages }, așa că sunt ca înainte: { $reason }
+    [one] Serverul nu a schimbat semnalizările pentru { $messages }, așa că modificarea a fost anulată: { $reason }
+   *[other] Serverul nu a schimbat semnalizările pentru { $messages }, așa că modificarea a fost anulată: { $reason }
 }
 
 ## Previews of attachments: the pictures and PDF files shown in a message
@@ -1388,4 +1385,18 @@ preview-pdf-option = Afișează fișierele PDF în mesaje
 # review: new
 preview-pdf-off = Fișierele PDF nu sunt afișate în mesaje.
 # review: new
-preview-pdf-off-crashed = Un fișier PDF a închis Inbox Classic în timp ce era afișat, așa că fișierele PDF nu mai sunt afișate în mesaje. Imaginile sunt afișate în continuare. Pentru a afișa din nou fișierele PDF, activați { $option } în opțiunile de citire.
+preview-pdf-off-crashed = Un fișier PDF a închis Inbox Classic în timp ce era afișat, așa că fișierele PDF nu mai sunt afișate în mesaje. Imaginile sunt afișate în continuare. Pentru a afișa din nou fișierele PDF, activați { $option } în { $settings }.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 pagină, { $size }
+    [few] { $count } pagini, { $size }
+   *[other] { $count } de pagini, { $size }
+}
+# review: new
+preview-page-alt = { $name }, pagina { $page } din { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Deschideți fișierul pentru a vedea pagina
+    [few] Deschideți fișierul pentru a vedea toate cele { $count } pagini
+   *[other] Deschideți fișierul pentru a vedea toate cele { $count } de pagini
+}

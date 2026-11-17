@@ -1,18 +1,17 @@
-<!--review--><h1>Pogreške certifikata</h1>
-<p class="summary">Što učiniti kad Inbox Classic ne može potvrditi da razgovara sa stvarnim poslužiteljem e-pošte.</p>
-<p>Možda ćete vidjeti nešto od ovoga:</p>
+<h1>Pogreške certifikata</h1>
+<p class="summary">Što učiniti kad Inbox Classic ne može potvrditi identitet poslužitelja e-pošte.</p>
+<p>Mogu se pojaviti ove poruke:</p>
 <ul>
     <li>Na traci stanja: „TLS error: …“</li>
     <li>U oknu za čitanje: „Vezu s poslužiteljem e-pošte nije moguće zaštititi (…).“</li>
 </ul>
-<p>Inbox Classic nije mogao potvrditi da je poslužitelj onaj za koji se predstavlja, pa nije poslao vašu lozinku.</p>
-<p>Da biste to riješili:</p>
+<p>Inbox Classic nije mogao potvrditi identitet poslužitelja, pa mu nije poslao vaše podatke za prijavu.</p>
+<p>Da biste riješili problem:</p>
 <ol>
     <li>Otvorite svojstva računa u izborniku <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Provjerite nazive poslužitelja. Moraju biti nazivi za koje je izdan certifikat poslužitelja. To je često naziv vašeg davatelja usluge, na primjer <code>imap.provider.com</code>, a ne vaša vlastita domena.</li>
-    <li>Provjerite jesu li datum i vrijeme na vašem računalu točni.</li>
+    <li>Provjerite nazive poslužitelja. Moraju odgovarati nazivima za koje je izdan certifikat. Često je to naziv koji pripada davatelju usluge, na primjer <code>imap.provider.com</code>, a ne domena vaše adrese e-pošte.</li>
+    <li>Provjerite jesu li datum i vrijeme na računalu točni.</li>
 </ol>
-<p>Na mreži koja pregledava šifrirani promet, kao što su neke uredske ili školske mreže, obratite se njezinu administratoru.</p>
-<aside class="note">Ne postoji prekidač kojim bi se prihvaćao bilo koji certifikat. Prihvaćanje lažnog certifikata omogućilo bi nekome na mreži da čita vašu lozinku i poštu.</aside>
+<p>Ako vaša mreža nadzire šifrirani promet, kao neke poslovne ili školske mreže, obratite se njezinu administratoru.</p>
+<aside class="note">Inbox Classic nema mogućnost prihvaćanja svih certifikata bez provjere. Prihvaćanje lažnog certifikata omogućilo bi nekome na mreži da pročita vašu lozinku i poštu.</aside>
 <nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

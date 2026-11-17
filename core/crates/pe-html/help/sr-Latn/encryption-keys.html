@@ -1,20 +1,19 @@
-<!--review--><h1>Ključevi za šifrovanje</h1>
+<h1>Ključevi za šifrovanje</h1>
 <p class="summary">Napravite ključ kojim ćete potpisivati poruke i primati šifrovanu poštu i čuvajte ključeve svojih kontakata.</p>
-<p>Inbox Classic potpisuje i šifruje poštu OpenPGP ključevima. Vaš ključ ima dve polovine: javni ključ, koji dajete drugima, i privatni ključ, koji ostaje na vašem računaru. Pomoću ključeva svojih kontakata proveravate njihove potpise i šifrujete poštu za njih.</p>
+<p>Inbox Classic potpisuje i šifruje poštu OpenPGP ključevima. Vaš ključ se sastoji od dva dela: javni ključ, koji dajete drugima, i privatni ključ, koji ostaje na vašem računaru. Pomoću ključeva svojih kontakata proveravate njihove potpise i šifrujete poštu za njih.</p>
 <p>Da biste napravili svoj ključ:</p>
 <ol>
     <li>Izaberite <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, a zatim kliknite na <b data-text="ui-keys-new"></b>.</li>
-    <li>Izaberite nalog i kliknite na <b data-text="ui-keys-new-make"></b>. Ključ se koristi za adresu naloga i njegove ostale adrese.</li>
+    <li>Izaberite nalog i kliknite na <b data-text="ui-keys-new-make"></b>. Ključ se koristi za adresu naloga i njegove dodatne adrese za slanje.</li>
     <li>Kliknite na <b data-text="ui-keys-backup-now"></b> i izaberite pristupnu frazu. Datoteku i pristupnu frazu čuvajte na različitim bezbednim mestima.</li>
 </ol>
-<aside class="warning">Bez rezervne kopije vaš ključ ne može da se vrati ako se ovaj računar izgubi ili resetuje, a pošta šifrovana za njega više ne može da se pročita.</aside>
-<h2>Ključevi su zaštićeni i bez pristupnih fraza</h2>
-<p>Vaše privatne ključeve štiti ključ koji se čuva <!--os:windows-->u Upravljaču akreditivima<!--/os--><!--os:mac-->u privesku ključeva<!--/os--><!--os:linux-->u sistemskom privesku ključeva<!--/os-->, pa nikad ne unosite pristupnu frazu da biste ih koristili. Pristupnu frazu birate samo za rezervnu kopiju. Ako se vaš ključ prikazuje kao zaključan, ta zaštita je resetovana: kliknite na <b data-text="ui-keys-import"></b> i izaberite njegovu rezervnu kopiju.</p>
+<aside class="warning">Ako izgubite ili resetujete računar, bez rezervne kopije privatnog ključa nećete moći da vratite ključ ni da čitate poštu šifrovanu za njega.</aside>
+<h2>Zaštita ključeva bez unošenja pristupne fraze</h2>
+<p>Vaše privatne ključeve štiti ključ koji se čuva <!--os:windows-->u Upravljaču akreditivima<!--/os--><!--os:mac-->u privesku ključeva<!--/os--><!--os:linux-->u sistemskom privesku ključeva<!--/os-->, pa pri svakodnevnom korišćenju ne morate da unosite pristupnu frazu. Pristupnu frazu birate samo za rezervnu kopiju. Ako je vaš ključ prikazan kao zaključan, zaštitni ključ više nije dostupan: kliknite na <b data-text="ui-keys-import"></b> i izaberite rezervnu kopiju privatnog ključa.</p>
 <h2>Dodavanje ključeva</h2>
-<p>Kliknite na <b data-text="ui-keys-import"></b> da biste dodali ključ iz datoteke, na primer ključ koji vam je poslao kontakt ili rezervnu kopiju sopstvenog ključa. Privatni ključ zaštićen pristupnom frazom traži je jednom. Inbox Classic zatim pita da li uvezeni sopstveni ključ želite da koristite za svoje adrese.</p>
+<p>Kliknite na <b data-text="ui-keys-import"></b> da biste dodali ključ iz datoteke, na primer ključ koji vam je poslao kontakt ili rezervnu kopiju sopstvenog ključa. Ako je privatni ključ zaštićen pristupnom frazom, unesite je jednom pri uvozu. Inbox Classic zatim pita da li uvezeni privatni ključ želite da koristite za svoje adrese.</p>
 <p>Ključ kontakta se od tada koristi za njegovu adresu. Ako se kasnije pojavi drugi ključ za istu adresu, i dalje se koristi trenutni, dok novi ne izaberete u svojstvima kontakta.</p>
 <p>Da biste podelili svoj javni ključ, izaberite ga i kliknite na <b data-text="ui-keys-export"></b>. Ključ naloga možete da izaberete i u njegovim svojstvima, na kartici <b data-text="ui-account-security"></b>.</p>
-<p>Kada šifrujete nekome čiji ključ nemate, Inbox Classic ga traži od domena njegove adrese, a zatim od keys.openpgp.org. Šalje se samo adresa. Da se keys.openpgp.org nikada ne pita, isključite <b data-text="ui-pgp-keyserver"></b> u <b data-settings="reading"></b>.</p>
-<p>Ključevi putuju i sa poštom. Poruke sa adrese koja ima ključ nose njen javni ključ kako bi druge aplikacije mogle da vam šifruju poruke, a Inbox Classic na isti način saznaje ključ kontakta iz njegovih poruka. Da biste prestali da šaljete svoj, isključite <b data-text="ui-account-autocrypt"></b> na kartici <b data-text="ui-account-security"></b> naloga.</p>
+<p>Ako prilikom šifrovanja poruke nedostaje ključ primaoca, Inbox Classic ga prvo traži na domenu adrese e-pošte tog primaoca. Ako ga ne pronađe, šalje adresu serveru keys.openpgp.org. Da biste isključili tu pretragu na serveru keys.openpgp.org, isključite opciju <b data-text="ui-pgp-keyserver"></b> u podešavanjima <b data-settings="reading"></b>. Pretraga na domenu ostaje dostupna.</p>
+<p>Ako je Autocrypt uključen i vašoj adresi za slanje dodeljen ključ, Inbox Classic šalje javni ključ uz vaše poruke. Druge aplikacije mogu da ga koriste za slanje šifrovanih poruka na vašu adresu. Kada otvorite primljenu poruku, Inbox Classic može da sačuva i javni ključ pošiljaoca. Time se ne potvrđuje kome ključ pripada. Da biste prestali da šaljete svoj ključ, isključite opciju <b data-text="ui-account-autocrypt"></b> na kartici <b data-text="ui-account-security"></b> u svojstvima naloga.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

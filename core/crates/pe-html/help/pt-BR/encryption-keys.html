@@ -1,20 +1,19 @@
-<!--review--><h1>Chaves de criptografia</h1>
+<h1>Chaves de criptografia</h1>
 <p class="summary">Crie uma chave para assinar suas mensagens e receber e-mails criptografados, e guarde as chaves dos seus contatos.</p>
-<p>O Inbox Classic assina e criptografa e-mails com chaves OpenPGP. Sua chave tem duas metades: uma chave pública, que você dá aos outros, e uma chave privada, que fica no seu computador. As chaves dos seus contatos permitem verificar as assinaturas deles e criptografar os e-mails que você envia para eles.</p>
+<p>O Inbox Classic assina e criptografa e-mails com chaves OpenPGP. Você tem um par de chaves: uma pública, que pode compartilhar, e uma privada, que fica no seu computador. As chaves dos seus contatos permitem verificar as assinaturas deles e criptografar os e-mails que você envia para eles.</p>
 <p>Para criar sua chave:</p>
 <ol>
     <li>Escolha <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> e clique em <b data-text="ui-keys-new"></b>.</li>
     <li>Escolha a conta e clique em <b data-text="ui-keys-new-make"></b>. A chave é usada para o endereço da conta e para os outros endereços dela.</li>
-    <li>Clique em <b data-text="ui-keys-backup-now"></b> e escolha uma frase secreta. Guarde o arquivo e a frase secreta em lugares seguros diferentes.</li>
+    <li>Clique em <b data-text="ui-keys-backup-now"></b> e escolha uma frase secreta. Guarde o arquivo e a frase secreta em locais seguros separados.</li>
 </ol>
 <aside class="warning">Sem um backup, sua chave não pode ser recuperada se este computador for perdido ou redefinido, e os e-mails criptografados para ela não poderão mais ser lidos.</aside>
-<h2>As chaves ficam protegidas sem frases secretas</h2>
-<p>Suas chaves privadas são protegidas por uma chave armazenada <!--os:windows-->no Gerenciador de Credenciais<!--/os--><!--os:mac-->no chaveiro<!--/os--><!--os:linux-->no chaveiro do sistema<!--/os-->, por isso você nunca digita uma frase secreta para usá-las. Você só escolhe uma frase secreta para um backup. Se sua chave aparecer como bloqueada, essa proteção foi redefinida: clique em <b data-text="ui-keys-import"></b> e escolha o backup dela.</p>
+<h2>Proteção das chaves no computador</h2>
+<p>Suas chaves privadas são protegidas por uma chave mestra armazenada <!--os:windows-->no Gerenciador de Credenciais<!--/os--><!--os:mac-->no chaveiro<!--/os--><!--os:linux-->no chaveiro do sistema<!--/os-->, por isso você não precisa digitar uma frase secreta a cada uso. A frase secreta protege o arquivo de backup. Se uma chave aparecer bloqueada, a chave mestra de proteção pode estar indisponível. Para restaurar a chave privada, clique em <b data-text="ui-keys-import"></b> e escolha o backup dessa chave privada.</p>
 <h2>Adicionar chaves</h2>
-<p>Clique em <b data-text="ui-keys-import"></b> para adicionar uma chave de um arquivo, como uma que um contato enviou para você ou um backup seu. Uma chave privada protegida por uma frase secreta pede essa frase uma vez. Depois, o Inbox Classic pergunta se deve usar uma chave sua importada para os seus endereços.</p>
-<p>A chave de um contato passa a ser usada para o endereço dele a partir daí. Se mais tarde aparecer uma chave diferente para o mesmo endereço, a atual continua em uso até você escolher a nova nas propriedades do contato.</p>
+<p>Clique em <b data-text="ui-keys-import"></b> para adicionar uma chave de um arquivo, como uma que um contato enviou para você ou um backup seu. Se a chave privada estiver protegida por uma frase secreta, você precisará digitá-la durante a importação. Depois, o Inbox Classic pergunta se deve associar a chave importada aos seus endereços de e-mail.</p>
+<p>A chave importada de um contato passa a ser usada para o endereço correspondente. Se mais tarde aparecer uma chave diferente para o mesmo endereço, a atual continua em uso até você escolher a nova nas propriedades do contato.</p>
 <p>Para compartilhar sua chave pública, selecione-a e clique em <b data-text="ui-keys-export"></b>. Você também pode escolher a chave da sua conta nas propriedades dela, na guia <b data-text="ui-account-security"></b>.</p>
-<p>Quando você criptografa para alguém cuja chave não tem, o Inbox Classic a pede ao domínio do endereço e depois a keys.openpgp.org. Só o endereço é enviado. Para nunca consultar keys.openpgp.org, desative <b data-text="ui-pgp-keyserver"></b> em <b data-settings="reading"></b>.</p>
-<p>As chaves também viajam com os e-mails. As mensagens de um endereço com chave levam a chave pública dele, para que outros aplicativos possam criptografar para você, e o Inbox Classic aprende da mesma forma a chave de um contato pelas mensagens dele. Para parar de enviar a sua, desative <b data-text="ui-account-autocrypt"></b> na guia <b data-text="ui-account-security"></b> da conta.</p>
+<p>Se faltar a chave de um destinatário ao criptografar uma mensagem, o Inbox Classic procura primeiro no domínio do endereço de e-mail desse destinatário. Se não encontrar a chave, envia o endereço para keys.openpgp.org. Para desativar essa consulta a keys.openpgp.org, desative a opção <b data-text="ui-pgp-keyserver"></b> em <b data-settings="reading"></b>. A busca no domínio continua disponível.</p>
+<p>Se o Autocrypt estiver ativado e seu endereço de envio tiver uma chave associada, o Inbox Classic inclui a chave pública nas mensagens. Outros aplicativos podem usá-la para enviar mensagens criptografadas a você. Ao abrir uma mensagem recebida, o Inbox Classic também pode obter a chave pública do remetente. Isso não confirma a quem pertence a chave. Para parar de enviar a sua, desative a opção <b data-text="ui-account-autocrypt"></b> na guia <b data-text="ui-account-security"></b> das propriedades da conta.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

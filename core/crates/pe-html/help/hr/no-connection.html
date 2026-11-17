@@ -1,19 +1,18 @@
-<!--review--><h1>Inbox Classic se ne može povezati</h1>
+<h1>Inbox Classic se ne može povezati</h1>
 <p class="summary">Što učiniti kad poslužitelj e-pošte nije dostupan ili ne odgovara.</p>
-<p>Na traci stanja ili u oknu za čitanje možda ćete vidjeti nešto od ovoga:</p>
+<p>Na traci stanja ili u oknu za čitanje mogu se pojaviti ove poruke:</p>
 <ul>
     <li>„connection error: …“</li>
     <li>„the server did not answer in time“</li>
-    <li>„veza s poslužiteljem nije uspjela (…)“</li>
+    <li>„nije se moguće povezati s poslužiteljem (…)“</li>
     <li>„Poslužitelj e-pošte nije dostupan (…).“</li>
 </ul>
-<p>Da biste to riješili:</p>
+<p>Da biste riješili problem:</p>
 <ol>
     <li>Provjerite internetsku vezu.</li>
-    <li>Otvorite svojstva računa u <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> i provjerite nazive poslužitelja i priključke.</li>
-    <li>Ako slanje ne uspijeva, za odlaznu poštu koristite priključak 465 ili 587. Neke mreže blokiraju priključke za poštu, osobito priključak 25.</li>
+    <li>Otvorite svojstva računa u izborniku <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> i provjerite nazive poslužitelja i priključke.</li>
+    <li>Ako slanje ne uspijeva, provjerite postavke davatelja usluge. Za odlaznu poštu obično se koristi priključak 465 uz SSL/TLS ili 587 uz STARTTLS. Neke mreže blokiraju priključke za poštu, osobito 25.</li>
 </ol>
-<p>Inbox Classic ponovno pokušava pri sljedećoj provjeri pošte. Da biste pokušali odmah, kliknite <b data-text="ui-tb-sync"></b>.</p>
-<p>Poruka koju pošaljete dok nema veze čeka u mapi Izlazna pošta i odlazi čim poslužitelj postane dostupan. Ništa što ste napisali ne gubi se.</p>
+<p>Inbox Classic ponovno pokušava uspostaviti vezu pri sljedećoj provjeri pošte. Da biste pokušali odmah, kliknite <b data-text="ui-tb-sync"></b>.</p>
+<p>Poruka koju pokušate poslati bez internetske veze ostaje u mapi Izlazna pošta. Kad poslužitelj ponovno postane dostupan, Inbox Classic pokušat će je poslati.</p>
 <nav class="related"><a href="topic:drafts-outbox"></a> <a href="topic:certificate-errors"></a> <a href="topic:message-not-shown"></a></nav>
-<!--/review-->

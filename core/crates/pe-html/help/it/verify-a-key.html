@@ -1,15 +1,14 @@
-<!--review--><h1>Verificare la chiave di un contatto</h1>
-<p class="summary">Confronta l’impronta digitale di una chiave con il suo proprietario per essere sicuro che la chiave sia davvero sua.</p>
+<h1>Verificare la chiave di un contatto</h1>
+<p class="summary">Verifica l’impronta digitale insieme al proprietario per assicurarti che la chiave appartenga davvero a lui.</p>
 <p>Una chiave può arrivare da ovunque: un messaggio, un server di chiavi, un file. Chiunque può creare una chiave con il nome e l’indirizzo del tuo contatto. La verifica conferma che la chiave che hai è quella del tuo contatto.</p>
 <p>Per verificare una chiave:</p>
 <ol>
     <li>Scegli <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, seleziona la chiave del contatto e fai clic su <b data-text="ui-keys-verify"></b>. Puoi farlo anche dalle proprietà del contatto nella Rubrica.</li>
-    <li>Chiedi al tuo contatto di leggerti l’impronta digitale della sua chiave dalla sua app, di persona o al telefono.</li>
-    <li>Se ogni gruppo di quattro caratteri è uguale, fai clic su <b data-text="ui-verify-match"></b>. La chiave risulta verificata.</li>
-    <li>La finestra elenca gli indirizzi a cui si applica. Una chiave può indicare qualsiasi indirizzo, quindi se uno di essi non è del tuo contatto, fai clic invece su <b data-text="ui-verify-differ"></b>.</li>
+    <li>Chiedi al contatto, di persona o al telefono, di leggerti l’impronta digitale mostrata nella sua app. Verifica anche che tutti gli indirizzi elencati gli appartengano.</li>
+    <li>Se tutti i gruppi di quattro caratteri coincidono e tutti gli indirizzi appartengono al contatto, fai clic su <b data-text="ui-verify-match"></b>. La chiave risulta verificata.</li>
+    <li>Se anche un solo indirizzo non appartiene al contatto, fai clic invece su <b data-text="ui-verify-differ"></b>, anche se le impronte digitali coincidono.</li>
 </ol>
 <aside class="warning">Non confrontare l’impronta digitale con una inviata per email. Chi potesse cambiare la chiave in un messaggio potrebbe cambiare anche l’impronta digitale.</aside>
 <p>Se le impronte digitali sono diverse, fai clic su <b data-text="ui-verify-differ"></b>. La chiave che hai non è del tuo contatto: rimuovila e chiedi al contatto di inviarti di nuovo la sua chiave.</p>
-<p>Le firme fatte con una chiave verificata compaiono in verde. Una chiave che non hai verificato funziona comunque per la crittografia, e le sue firme compaiono in blu.</p>
+<p>Le firme valide del mittente compaiono in verde se hai verificato la sua chiave, oppure in blu se non l’hai verificata. Una chiave non verificata può comunque essere usata per crittografare i messaggi.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

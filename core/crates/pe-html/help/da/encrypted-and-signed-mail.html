@@ -1,18 +1,18 @@
-<!--review--><h1>Krypteret og signeret mail</h1>
-<p class="summary">Linjen over en meddelelse viser, om den er signeret af afsenderen, og om den blev krypteret til dig.</p>
-<p>En signeret meddelelse beviser, hvem der skrev den, og at ingen har ændret den undervejs. En krypteret meddelelse kan kun læses med din nøgle.</p>
-<p>Linjen over meddelelsen gælder meddelelsen som helhed:</p>
+<h1>Krypteret og digitalt signeret mail</h1>
+<p class="summary">Bjælken over meddelelsen viser oplysninger om dens digitale signatur og kryptering.</p>
+<p>En gyldig digital signatur bekræfter, at indholdet ikke er ændret siden signeringen. For at bekræfte afsenderens identitet skal du også kontrollere nøglens ejerskab. En krypteret meddelelse kan kun læses med en tilsvarende privat nøgle.</p>
+<p>Bjælken over meddelelsen opsummerer dens beskyttelse:</p>
 <table>
     <tr><th>Farve</th><th>Betydning</th></tr>
-    <tr><td>Grøn</td><td>Signeret af afsenderen med en nøgle, du har bekræftet.</td></tr>
-    <tr><td>Blå</td><td>Signeret af afsenderen med en nøgle, du ikke har bekræftet, eller krypteret til dig.</td></tr>
-    <tr><td>Gul</td><td>Noget er galt: signaturen passer ikke, en anden end afsenderen har signeret, eller en del kunne ikke læses.</td></tr>
-    <tr><td>Grå</td><td>Ikke signeret, eller signeret med en nøgle, du ikke har.</td></tr>
+    <tr><td>Grøn</td><td>Gyldig digital signatur fra afsenderen med bekræftet ejerskab af nøglen.</td></tr>
+    <tr><td>Blå</td><td>Gyldig digital signatur fra afsenderen uden bekræftet ejerskab af nøglen, eller krypteret til dig uden signatur.</td></tr>
+    <tr><td>Orange</td><td>Noget er galt: signaturen passer ikke, en anden end afsenderen har signeret, eller en del kunne ikke læses.</td></tr>
+    <tr><td>Grå</td><td>Ingen digital signatur, eller signaturen kunne ikke kontrolleres, fx fordi nøglen mangler.</td></tr>
 </table>
-<p>En meddelelse, hvis dele er beskyttet forskelligt, viser hver del i sin egen ramme med sin egen etiket. Linjen tæller så delene af hver slags. Klik på en etiket, eller på <b data-text="ui-protection-details"></b> på linjen, for at se, hvem der har signeret hver del, med hvilken nøgle og hvornår.</p>
-<aside class="warning">Kun linjen og etiketterne over rammerne er skrevet af Inbox Classic. En afsender kan tegne hvad som helst i sin egen meddelelse, også noget, der ligner en etiket. Se på linjen.</aside>
-<p>Billeder fra internettet i en krypteret del hentes kun, når du klikker på billedlinjen, hver gang. Etiketten oplyser så, at billederne blev hentet.</p>
+<p>En meddelelse, hvis dele er beskyttet forskelligt, viser hver del i sin egen ramme med sin egen etiket. Bjælken viser antallet af dele i hver kategori. Klik på en etiket, eller på <b data-text="ui-protection-details"></b> på bjælken, for at se, hvem der har signeret hver del, med hvilken nøgle og hvornår.</p>
+<aside class="warning">Kun bjælken og etiketterne over rammerne kommer fra Inbox Classic. Afsenderen bestemmer indholdet af selve meddelelsen og kan indsætte noget, der ligner en etiket. Brug programmets bjælke til at vurdere beskyttelsen.</aside>
+<p>Billeder fra internettet i en krypteret del kræver din tilladelse, hver gang du åbner meddelelsen. Klik på bjælken for billeder for at hente dem. Delens etiket viser derefter, at billederne er hentet.</p>
 <p>Når du svarer eller videresender, citeres kun det, der blev vist.</p>
-<p>På meddelelseslisten markerer en lås en krypteret meddelelse og et segl en signeret. Når Inbox Classic har dekrypteret en krypteret meddelelse, efter at have hentet eller åbnet den, viser listen dens eget emne og første ord. Indtil da viser listen og notifikationen om ny mail <b data-text="list-encrypted"></b>.</p>
-<p>Søgningen finder en dekrypteret meddelelse ud fra ordene i dens tekst, så længe <b data-text="ui-search-encrypted"></b> er slået til under <b data-settings="reading"></b>. AI-agenter ser aldrig, hvad der står i en krypteret meddelelse, eller dens filer.</p>
-<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav><!--/review-->
+<p>På meddelelseslisten viser en hængelås, at meddelelsen er krypteret, og et segl, at den er signeret. Hvis søgning i krypterede meddelelser er slået til, og den nødvendige private nøgle er tilgængelig, kan Inbox Classic dekryptere meddelelsen efter download eller ved åbning. Listen viser så et tekstuddrag og eventuelt emnet fra den krypterede del. Hvis der ikke er et dekrypteret tekstuddrag, vises <b data-text="list-encrypted"></b>. Notifikationer om nye krypterede meddelelser bruger altid denne tekst.</p>
+<p>Med indstillingen <b data-text="ui-search-encrypted"></b> under <b data-settings="reading"></b> kan du også søge i teksten i dekrypterede meddelelser. AI-agenter kan ikke læse indholdet eller de vedhæftede filer i krypterede meddelelser og kan heller ikke søge i indholdet.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>

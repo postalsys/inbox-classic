@@ -1,14 +1,13 @@
-<!--review--><h1>Configuració de seguretat del compte</h1>
-<p class="summary">La configuració de seguretat dels servidors d’un compte, i què vol dir cada opció.</p>
+<h1>Configuració de seguretat del compte</h1>
+<p class="summary">Conegueu les opcions de seguretat de les connexions amb els servidors del compte.</p>
 <p>Cada compte té <b data-text="ui-field-imap-security"></b> per al servidor d’entrada i <b data-text="ui-field-smtp-security"></b> per al de sortida. Inbox Classic els omple quan troba la configuració del vostre proveïdor. Per canviar-los, obriu les propietats del compte a <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
 <table>
     <tr><th>Opció</th><th>Significat</th></tr>
-    <tr><td>SSL/TLS</td><td>La connexió està xifrada des del començament. Normalment el port 993 per al correu d’entrada i el 465 per al de sortida.</td></tr>
-    <tr><td>STARTTLS</td><td>La connexió es xifra just després d’obrir-se. Normalment el port 143 per al correu d’entrada i el 587 per al de sortida. Inbox Classic s’atura si el servidor no ofereix xifratge.</td></tr>
-    <tr><td><b data-text="ui-security-none"></b></td><td>La contrasenya i el correu viatgen de manera que qualsevol persona de la xarxa els pot llegir.</td></tr>
+    <tr><td>SSL/TLS</td><td>La connexió està xifrada des del començament. Normalment fa servir el port 993 per rebre correu i el 465 per enviar-ne.</td></tr>
+    <tr><td>STARTTLS</td><td>La connexió es xifra just després d’obrir-se. Normalment fa servir el port 143 per rebre correu i el 587 per enviar-ne. Inbox Classic interromp la connexió si el servidor no ofereix xifratge.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>La contrasenya i el correu es transmeten sense xifrar i els pot llegir qui intercepti el trànsit de xarxa.</td></tr>
 </table>
-<aside class="warning">Feu servir <b data-text="ui-security-none"></b> només per a un servidor del vostre ordinador o de la vostra xarxa local. Inbox Classic us avisa abans de fer-lo servir.</aside>
-<p>Inbox Classic comprova que cada servidor és el que diu ser, amb els certificats en què confia el sistema. No hi ha cap opció per acceptar qualsevol certificat.</p>
-<p>La contrasenya es guarda <!--os:windows-->a l’Administrador de credencials de Windows<!--/os--><!--os:mac-->al vostre clauer d’inici de sessió<!--/os--><!--os:linux-->al vostre anell de claus<!--/os-->, mai al magatzem de correu. Un compte que inicia la sessió a través del navegador no guarda cap contrasenya.</p>
+<aside class="warning">Feu servir <b data-text="ui-security-none"></b> només per a un servidor del vostre ordinador o de la vostra xarxa local. Inbox Classic us avisa abans de fer servir aquesta opció.</aside>
+<p>Inbox Classic comprova la identitat de cada servidor, amb els certificats en què confia el sistema. No hi ha cap opció per acceptar qualsevol certificat.</p>
+<p>La contrasenya es guarda <!--os:windows-->a l’Administrador de credencials de Windows<!--/os--><!--os:mac-->al vostre clauer d’inici de sessió<!--/os--><!--os:linux-->al vostre anell de claus<!--/os-->, mai a la base de dades de correu. Un compte que inicia la sessió a través del navegador no desa la contrasenya, però desa un testimoni d’inici de sessió al mateix lloc protegit.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

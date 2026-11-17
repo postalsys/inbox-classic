@@ -589,6 +589,11 @@ ui-download-limit = &Storage limit per account:
 ui-send-delay = Delay before &sending:
 ui-send-delay-note = While a message is waiting to be sent, you can cancel sending with Undo.
 ui-dark-messages = Show messages on a dark background when the system is in dark mode
+# Reading settings: previews of the pictures and PDF files attached, after a message's text
+ui-preview-show = &Show attachments in messages
+ui-preview-show-note = Shows pictures and the first pages of PDF files after the text of a message. Inbox Classic draws these previews itself, so nothing in a file can run.
+# the second setting under it; the same words as preview-pdf-option, with an access key
+ui-preview-pdfs = Show PDF &files in messages
 ui-sending-in = Sending { $subject } in { $count ->
     [one] 1 second
    *[other] { $count } seconds
@@ -716,7 +721,7 @@ ui-setup-export-title = Export Settings and Accounts
 ui-setup-import-title = Import Settings and Accounts
 ui-setup-export-intro = Choose what to take to another computer. The file holds no messages: they download again there.
 ui-setup-use-passphrase = &Protect the file with a passphrase
-ui-setup-passphrase-note = With a passphrase, the file is encrypted and also holds your passwords, sign-ins and private keys. Without one, each account asks for its password on the other computer.
+ui-setup-passphrase-note = With a passphrase, the file is encrypted and includes saved passwords, sign-in credentials and private keys. Without one, you will need to sign in to your accounts again on the other computer.
 ui-setup-export-button = &Export...
 ui-setup-file-filter = Inbox Classic settings and accounts
 ui-setup-ask-passphrase = This file is protected by a passphrase. Type it to see what the file holds:

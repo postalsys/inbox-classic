@@ -1,16 +1,15 @@
-<!--review--><h1>Pogreške šifriranja</h1>
-<p class="summary">Što učiniti kad poslužitelj ne nudi šifriranje ili ga traži ondje gdje je isključeno.</p>
+<h1>Pogreške šifriranja</h1>
+<p class="summary">Što učiniti kad poslužitelj ne podržava odabrano šifriranje veze ili ga zahtijeva, a ono je isključeno.</p>
 <h2>„the server does not offer STARTTLS“</h2>
-<p>Račun je postavljen na STARTTLS, ali poslužitelj nije ponudio šifriranje. Inbox Classic je stao, pa vaša lozinka nije poslana.</p>
+<p>Za račun je odabran STARTTLS, ali poslužitelj nije ponudio šifriranje. Inbox Classic prekinuo je povezivanje prije slanja podataka za prijavu.</p>
 <ol>
     <li>Otvorite svojstva računa u izborniku <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Postavite sigurnost na SSL/TLS, s priključkom 993 za dolaznu poštu ili 465 za odlaznu poštu.</li>
+    <li>Provjerite postavke koje preporučuje davatelj usluge. Ako poslužitelj podržava SSL/TLS, odaberite ga uz priključak 993 za dolaznu ili 465 za odlaznu poštu.</li>
     <li>Kliknite <b data-text="ui-ok"></b>.</li>
 </ol>
-<p>Ako ništa drugo ne uspije, poslužitelj se ne može sigurno koristiti.</p>
+<p>Ako poslužitelj ne podržava šifriranu vezu, pristup mu nije siguran.</p>
 <h2>„the server takes the password only over an encrypted connection“</h2>
-<p>Poslužitelj odlazne pošte postavljen je na <b data-text="ui-security-none"></b>. Vaša je lozinka ispravna. Promijenite <b data-text="ui-field-smtp-security"></b> na STARTTLS s priključkom 587 ili na SSL/TLS s priključkom 465.</p>
-<h2>Upozorenje o vezi bez šifriranja</h2>
-<p>Kad odaberete <b data-text="ui-security-none"></b>, Inbox Classic upozorava da svatko tko presretne vaš mrežni promet može pročitati vašu lozinku i poruke. Nastavite samo za poslužitelj na vlastitom računalu ili u lokalnoj mreži.</p>
+<p>Za poslužitelj odlazne pošte odabrana je mogućnost <b data-text="ui-security-none"></b>, ali poslužitelj zahtijeva šifriranu vezu. To ne potvrđuje da je lozinka ispravna. U polju <b data-text="ui-field-smtp-security"></b> odaberite STARTTLS uz priključak 587 ili SSL/TLS uz priključak 465, prema uputama davatelja usluge.</p>
+<h2>Upozorenje o nešifriranoj vezi</h2>
+<p>Kad odaberete mogućnost <b data-text="ui-security-none"></b>, Inbox Classic upozorava da netko tko presretne mrežni promet može pročitati vašu lozinku i poruke. Nastavite samo ako je poslužitelj na vašem računalu ili u lokalnoj mreži kojoj vjerujete.</p>
 <nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

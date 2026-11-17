@@ -755,7 +755,7 @@ ui-options-system-default = Как в системе ({ $language })
 ui-settings-general = Общие
 # review: new
 ui-settings-reading = Чтение
-# review: changed
+# review: new
 ui-settings-new-mail = Новая почта
 # review: new
 ui-settings-sending = Отправка
@@ -1096,8 +1096,8 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Не удалось сохранить адресную книгу: { $reason }
 # review: new
 ui-code-copied = Код скопирован
-# review: new
-ui-codes-in-notifications = Показывать &коды для входа в уведомлениях о новой почте
+# review: changed
+ui-codes-in-notifications = По&казывать коды для входа в уведомлениях о новой почте
 # review: new
 ui-tool-unread-only = Непрочитанные
 # review: new
@@ -1108,7 +1108,7 @@ ui-pictures-always-sender = Всегда загружать изображени
 ui-pictures-always-domain = Всегда загружать изображения от всех отправителей из { $domain }
 # review: new
 ui-pictures-unconfirmed = Не удалось проверить домен отправителя ({ $domain }), поэтому изображения в этом сообщении не загружаются автоматически.
-# review: new
+# review: changed
 ui-pictures-always-option = &Загружать изображения во всех сообщениях
 # review: new
 ui-pictures-always-warning = Тогда отправители смогут видеть, когда вы читаете их сообщения.
@@ -1118,7 +1118,7 @@ ui-protection-details = &Подробности...
 ui-protection-details-title = Сведения о защите
 # review: new
 ui-download-heading = Загрузка
-# review: new
+# review: changed
 ui-download-ahead = &Загружать сообщения заранее:
 # review: new
 ui-download-ahead-recent = Недавние сообщения размером до 1 МБ
@@ -1126,14 +1126,20 @@ ui-download-ahead-recent = Недавние сообщения размером 
 ui-download-ahead-all = Все сообщения
 # review: new
 ui-download-ahead-never = Только при открытии
-# review: new
+# review: changed
 ui-download-limit = &Лимит хранилища на учетную запись:
-# review: new
+# review: changed
 ui-send-delay = &Задержка перед отправкой:
 # review: new
 ui-send-delay-note = Пока сообщение ждет отправки, ее можно отменить командой «Отменить».
 # review: new
 ui-dark-messages = Показывать сообщения на темном фоне, когда в системе включен темный режим
+# review: new
+ui-preview-show = Показывать &вложения в письмах
+# review: new
+ui-preview-show-note = Показывает изображения и первые страницы PDF-файлов после текста письма. Inbox Classic сам создаёт эти превью, поэтому ничто в файле не может запуститься.
+# review: new
+ui-preview-pdfs = Показывать PDF-&файлы в письмах
 # review: new
 ui-sending-in = { $subject } будет отправлено через { $count ->
     [one] { $count } секунду
@@ -1151,7 +1157,7 @@ ui-outbox-status-undo = Будет отправлено в { $time }
 ui-download-note = Сообщения, загруженные заранее, открываются сразу. Когда лимит хранилища превышен, самые старые локальные копии удаляются и загружаются снова при открытии.
 # review: new
 ui-attachment-downloading = Это сообщение еще не загружено полностью. Повторите попытку, когда загрузка завершится.
-# review: new
+# review: changed
 ui-trusted-senders-button = &Надежные отправители...
 # review: new
 ui-trusted-senders-title = Надежные отправители
@@ -1169,7 +1175,7 @@ ui-search-encrypted-note = Зашифрованные сообщения рас�
 ui-pgp-keyserver = Искать &ключи на keys.openpgp.org
 # review: new
 ui-pgp-keyserver-note = Когда вы шифруете сообщение или ищете ключ, искомый адрес отправляется на keys.openpgp.org. Сначала запрос идет к домену самого адреса.
-# review: new
+# review: changed
 ui-eml-default = &Открывать файлы .eml в Inbox Classic
 # review: new
 ui-eml-default-done = Теперь Inbox Classic открывает файлы .eml.
@@ -1179,7 +1185,7 @@ ui-eml-default-failed = Не удалось сделать Inbox Classic про�
 ui-folders = Папки
 # review: new
 ui-sorted-by = Сортировка: { $field }
-# review: new
+# review: changed
 ui-layout-label = &Макет:
 # review: new
 ui-columns-note = Окно достаточно широкое для макета со столбцами. Макет можно изменить в меню Вид > Макет.
@@ -1200,10 +1206,10 @@ ui-row-messages = { $count ->
     [many] { $count } сообщений
    *[other] { $count } сообщения
 }
-# review: new
+# review: changed
 ui-list-pictures = Показывать &изображения отправителей в списке сообщений
-# review: new
-ui-list-pictures-note = В макете со столбцами показывает логотипы брендов или изображения из адресной книги для проверенных отправителей и инициалы, если изображения нет. Логотипы загружаются один раз для каждого бренда, а не для каждого сообщения.
+# review: changed
+ui-list-pictures-note = Показывает логотипы брендов или изображения из адресной книги для проверенных отправителей и инициалы, если изображения нет. Логотипы загружаются один раз для каждого бренда, а не для каждого сообщения.
 # review: new
 ui-card-picture = Изображение:
 # review: new

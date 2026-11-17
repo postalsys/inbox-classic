@@ -1,20 +1,23 @@
-<!--review--><h1>Allegati</h1>
-<p class="summary">Apri o salva i file che arrivano con un messaggio e allega file ai messaggi che scrivi.</p>
+<h1>Allegati</h1>
+<p class="summary">Apri o salva gli allegati ricevuti e aggiungi file ai messaggi che scrivi.</p>
+<!--review--><h2>Vedere immagini e file PDF nel messaggio</h2>
+<p>Le immagini e le prime pagine dei file PDF sono mostrate dopo il testo del messaggio, con nome e dimensione. Fai clic su una per aprire il file. Un file PDF più lungo ha un link che lo apre.</p>
+<p>Sono copie che Inbox Classic disegna da sé: niente in un file viene eseguito e niente viene caricato da internet. Un file che non riesce a disegnare, e i file dei messaggi firmati o cifrati, sono solo nell’elenco dei file.</p>
+<p>Per vedere solo l’elenco, disattiva <b data-text="ui-preview-show"></b> in <b data-settings="reading"></b>. Se un file PDF dovesse chiudere Inbox Classic, i file PDF non vengono più mostrati e il messaggio lo dice; attiva <b data-text="ui-preview-pdfs"></b> per mostrarli di nuovo.</p><!--/review-->
 <h2>Aprire un allegato</h2>
-<p>I file di un messaggio sono elencati sotto la sua intestazione, ognuno con nome e dimensione. Fai doppio clic su un file per aprirlo con il programma che il computer usa per quel tipo di file. Con la tastiera, premi <kbd>Tab</kbd> finché non sono selezionati i file, scegline uno con i tasti freccia e premi <kbd>Enter</kbd>.</p>
-<p>Fai clic destro su un file per <b data-text="ui-attachment-open"></b>, <b data-text="ui-attachment-save-as"></b> e <b data-text="ui-attachment-save-all"></b>. Anche la graffetta a destra dell’intestazione elenca i file.</p>
-<p>Inbox Classic non apre mai un file che può eseguire programmi: programmi, script, programmi di installazione, collegamenti, immagini disco, pagine web e documenti di Office con macro. Per questi file <b data-text="ui-attachment-open"></b> è disattivato; salva il file e aprilo tu stesso solo se ti fidi della sua provenienza.</p>
-<p>Un file viene aperto da una tua cartella che Inbox Classic svuota dopo un giorno, ed è contrassegnato come proveniente da Internet. Il file di un messaggio crittografato vi resta decrittografato finché è aperto; la prima volta, Inbox Classic te lo dice.</p>
+<p>Gli allegati di un messaggio sono elencati sotto la sua intestazione, ognuno con nome e dimensione. Fai doppio clic su un file per aprirlo con il programma che il computer usa per quel tipo di file. Con la tastiera, premi <kbd>Tab</kbd> fino a raggiungere l’elenco degli allegati, scegline uno con i tasti freccia e premi <kbd>Enter</kbd>.</p>
+<p>Fai clic con il pulsante destro su un file per accedere ai comandi <b data-text="ui-attachment-open"></b>, <b data-text="ui-attachment-save-as"></b> e <b data-text="ui-attachment-save-all"></b>. Anche la graffetta a destra dell’intestazione elenca i file.</p>
+<p>Inbox Classic non apre direttamente i file che possono eseguire codice: programmi, script, programmi di installazione, collegamenti, immagini disco, pagine web e documenti di Office con macro. Per questi file <b data-text="ui-attachment-open"></b> è disattivato; salva il file e aprilo tu stesso solo se ti fidi della sua provenienza.</p>
+<p>Per aprire un allegato, Inbox Classic ne salva una copia in una cartella temporanea riservata al tuo account utente. All’avvio dell’app vengono rimosse le copie più vecchie di 24 ore. Su Windows e macOS i file vengono contrassegnati come provenienti da internet. Gli allegati dei messaggi crittografati vengono salvati in questa cartella senza crittografia. Inbox Classic ti avvisa la prima volta che ne apri uno.</p>
 <h2>Salvare un allegato</h2>
-<p>Fai clic destro su un file e scegli <b data-text="ui-attachment-save-as"></b>, oppure scegli <b data-text="ui-attachment-save-all"></b> per salvarli tutti in una cartella. Inbox Classic propone un nome sicuro, senza caratteri che potrebbero far sembrare un nome qualcos’altro. Un file con lo stesso nome già presente nella cartella viene conservato, e quello nuovo riceve un numero.</p>
-<aside class="warning">Apri gli allegati solo di persone da cui te li aspetti. Un programma, o un documento che ti chiede di “abilitare il contenuto”, può prendere il controllo del computer. Tra i programmi ci sono i file <!--os:windows--><code>.exe</code>, <code>.msi</code>, <code>.js</code>, <code>.vbs</code>, <code>.bat</code> e <code>.scr</code>.<!--/os--><!--os:mac--><code>.app</code>, <code>.pkg</code>, <code>.dmg</code> e <code>.command</code>.<!--/os--><!--os:linux--><code>.sh</code>, <code>.deb</code>, <code>.AppImage</code> e <code>.desktop</code>.<!--/os--></aside>
+<p>Fai clic destro su un file e scegli <b data-text="ui-attachment-save-as"></b>, oppure scegli <b data-text="ui-attachment-save-all"></b> per salvarli tutti in una cartella. Inbox Classic propone un nome sicuro, privo di caratteri che potrebbero camuffare il nome del file. Un file con lo stesso nome già presente nella cartella viene conservato, e al nome del nuovo file viene aggiunto un numero.</p>
+<aside class="warning">Apri solo gli allegati che ti aspetti di ricevere dal mittente. Un programma, o un documento che ti chiede di “abilitare il contenuto”, può prendere il controllo del computer. Tra i programmi ci sono i file <!--os:windows--><code>.exe</code>, <code>.msi</code>, <code>.js</code>, <code>.vbs</code>, <code>.bat</code> e <code>.scr</code>.<!--/os--><!--os:mac--><code>.app</code>, <code>.pkg</code>, <code>.dmg</code> e <code>.command</code>.<!--/os--><!--os:linux--><code>.sh</code>, <code>.deb</code>, <code>.AppImage</code> e <code>.desktop</code>.<!--/os--></aside>
 <h2>Allegare un file</h2>
 <p>Per allegare file al messaggio che scrivi:</p>
 <ol>
     <li>Fai clic su <b data-text="ui-tb-attach"></b>.</li>
     <li>Scegli i file. Vengono elencati in <b data-text="ui-field-attach"></b> con le loro dimensioni.</li>
 </ol>
-<p>Puoi anche trascinare i file da <!--os:windows-->Esplora file<!--/os--><!--os:mac-->Finder<!--/os--><!--os:linux-->il gestore di file<!--/os--> sui campi degli indirizzi. Un file che non è un’immagine si può trascinare anche sul testo.</p>
+<p>Puoi anche trascinare i file <!--os:windows-->da Esplora file<!--/os--><!--os:mac-->dal Finder<!--/os--><!--os:linux-->dal gestore di file<!--/os--> sui campi degli indirizzi. Un file che non è un’immagine si può trascinare anche sul testo.</p>
 <p>Per togliere un file, selezionalo e premi <kbd>Delete</kbd>, oppure fai clic destro su di esso e scegli <b data-text="ui-remove"></b>. I file vengono letti quando il messaggio viene inviato, quindi lasciali dove sono fino ad allora.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:save-print-import"></a> <a href="topic:links-scripts"></a></nav>
-<!--/review-->

@@ -1,12 +1,16 @@
-<!--review--><h1>Ekler</h1>
-<p class="summary">Bir iletinin getirdiği dosyaları açın veya kaydedin, yazdığınız iletilere dosya ekleyin.</p>
+<h1>Ekler</h1>
+<p class="summary">İletiyle gelen ekleri açın veya kaydedin, yazdığınız iletilere dosya ekleyin.</p>
+<!--review--><h2>İletideki resimleri ve PDF dosyalarını görme</h2>
+<p>Resimler ve PDF dosyalarının ilk sayfaları, adları ve boyutlarıyla birlikte iletinin metninden sonra gösterilir. Dosyayı açmak için birine tıklayın. Daha uzun bir PDF dosyasında onu açan bir bağlantı vardır.</p>
+<p>Bunlar Inbox Classic'in kendisinin çizdiği kopyalardır: bir dosyadaki hiçbir şey çalışmaz ve internetten hiçbir şey yüklenmez. Çizemediği bir dosya ile imzalı veya şifreli iletilerin dosyaları yalnızca dosya listesindedir.</p>
+<p>Yalnızca listeyi görmek için <b data-settings="reading"></b> bölümünde <b data-text="ui-preview-show"></b> seçeneğini kapatın. Bir PDF dosyası Inbox Classic'i kapatırsa PDF dosyaları artık gösterilmez ve ileti bunu söyler; yeniden göstermek için <b data-text="ui-preview-pdfs"></b> seçeneğini açın.</p><!--/review-->
 <h2>Bir eki açma</h2>
-<p>Bir iletinin dosyaları, üst bilgisinin altında adı ve boyutuyla listelenir. Bir dosyayı bilgisayarınızın onun için kullandığı programla açmak için dosyaya çift tıklayın. Klavyeyle, dosyalar seçilene kadar <kbd>Tab</kbd> tuşuna basın, ok tuşlarıyla birini seçin ve <kbd>Enter</kbd> tuşuna basın.</p>
+<p>Bir iletinin dosyaları, üst bilgisinin altında adı ve boyutuyla listelenir. Bir dosyayı bu dosya türünün varsayılan uygulamasında açmak için dosyaya çift tıklayın. Klavyeyle, dosyalar seçilene kadar <kbd>Tab</kbd> tuşuna basın, ok tuşlarıyla birini seçin ve <kbd>Enter</kbd> tuşuna basın.</p>
 <p><b data-text="ui-attachment-open"></b>, <b data-text="ui-attachment-save-as"></b> ve <b data-text="ui-attachment-save-all"></b> için bir dosyaya sağ tıklayın. Üst bilginin sağındaki ataç da dosyaları listeler.</p>
-<p>Inbox Classic, program çalıştırabilen bir dosyayı asla açmaz: programlar, betikler, yükleyiciler, kısayollar, disk görüntüleri, web sayfaları ve makro içeren Office belgeleri. Bunlarda <b data-text="ui-attachment-open"></b> kapalıdır; böyle bir dosyayı kaydedin ve yalnızca nereden geldiğine güveniyorsanız kendiniz açın.</p>
-<p>Bir dosya, Inbox Classic'in bir gün sonra boşalttığı size ait bir klasörden açılır ve internetten geldiği işaretlenir. Şifreli bir iletinin dosyası açık olduğu sürece orada şifresi çözülmüş olarak saklanır; ilk seferinde Inbox Classic bunu söyler.</p>
+<p>Inbox Classic, kod çalıştırabilen dosyaların doğrudan açılmasını engeller. Bunlara programlar, betikler, yükleyiciler, kısayollar, disk görüntüleri, web sayfaları ve makro içeren Office belgeleri dahildir. Bunlarda <b data-text="ui-attachment-open"></b> komutu devre dışıdır. Böyle bir dosyayı kaydedip kendiniz açabilirsiniz; bunu yalnızca kaynağına güveniyorsanız yapın.</p>
+<p>Bir eki açtığınızda önce kullanıcı hesabınıza ait bir klasöre geçici kopyası kaydedilir, ardından ilgili uygulamada açılır. 24 saatten eski kopyalar Inbox Classic'in bir sonraki açılışında temizlenir. Windows ve macOS'ta dosya, internetten indirilmiş olarak işaretlenir. Şifreli bir iletinin eki bu klasöre şifresi çözülmüş olarak kaydedilir ve görüntülediğiniz uygulamayı kapattığınızda silinmez. Inbox Classic ilk seferinde sizi bu konuda bilgilendirir.</p>
 <h2>Bir eki kaydetme</h2>
-<p>Bir dosyaya sağ tıklayıp <b data-text="ui-attachment-save-as"></b> komutunu seçin veya hepsini bir klasöre kaydetmek için <b data-text="ui-attachment-save-all"></b> komutunu seçin. Inbox Classic, bir adı başka bir şey gibi gösterebilecek karakterler içermeyen güvenli bir ad önerir. Klasörde aynı adlı bir dosya zaten varsa korunur ve yeni dosya bir numara alır.</p>
+<p>Bir dosyaya sağ tıklayıp <b data-text="ui-attachment-save-as"></b> komutunu seçin veya hepsini bir klasöre kaydetmek için <b data-text="ui-attachment-save-all"></b> komutunu seçin. Inbox Classic, dosya türünü veya adını yanıltıcı gösterebilecek karakterleri çıkararak güvenli bir dosya adı önerir. Klasörde aynı adlı bir dosya zaten varsa korunur ve yeni dosyanın adına bir numara eklenir.</p>
 <aside class="warning">Ekleri yalnızca beklediğiniz kişilerden geliyorsa açın. Bir program veya sizden “içeriği etkinleştirmenizi” isteyen bir belge bilgisayarınızı ele geçirebilir. Programlar arasında <!--os:windows--><code>.exe</code>, <code>.msi</code>, <code>.js</code>, <code>.vbs</code>, <code>.bat</code> ve <code>.scr</code> dosyaları vardır.<!--/os--><!--os:mac--><code>.app</code>, <code>.pkg</code>, <code>.dmg</code> ve <code>.command</code> dosyaları vardır.<!--/os--><!--os:linux--><code>.sh</code>, <code>.deb</code>, <code>.AppImage</code> ve <code>.desktop</code> dosyaları vardır.<!--/os--></aside>
 <h2>Dosya ekleme</h2>
 <p>Yazdığınız iletiye dosya eklemek için:</p>
@@ -17,4 +21,3 @@
 <p>Dosyaları <!--os:windows-->Dosya Gezgini'nden<!--/os--><!--os:mac-->Finder'dan<!--/os--><!--os:linux-->dosya yöneticisinden<!--/os--> adres alanlarına da sürükleyebilirsiniz. Resim olmayan bir dosya metnin üzerine de bırakılabilir.</p>
 <p>Bir dosyayı çıkarmak için onu seçip <kbd>Delete</kbd> tuşuna basın veya sağ tıklayıp <b data-text="ui-remove"></b> komutunu seçin. Dosyalar ileti gönderilirken okunur, bu yüzden o zamana kadar yerlerinde bırakın.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:save-print-import"></a> <a href="topic:links-scripts"></a></nav>
-<!--/review-->

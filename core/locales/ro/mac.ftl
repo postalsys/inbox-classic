@@ -126,7 +126,6 @@ mac-no-calendar-app = Pe acest Mac nu există nicio aplicație de calendar care 
 mac-file-not-saved = Fișierul nu a putut fi salvat.
 # review: new
 mac-unsubscribing = Se face dezabonarea de la { $target }…
-# review: new
 mac-loading-list = Se încarcă…
 
 ## The compose window

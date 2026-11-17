@@ -1,32 +1,31 @@
-<!--review--><h1>Λέξεις αναζήτησης</h1>
-<p class="summary">Οι λέξεις και τα σύμβολα που καταλαβαίνει το πλαίσιο αναζήτησης, για να βρίσκετε ακριβώς τα μηνύματα που θέλετε.</p>
-<p>Το πλαίσιο αναζήτησης δέχεται τις ίδιες λέξεις με το Gmail. Συνδυάστε όσες θέλετε: ένα μήνυμα πρέπει να ταιριάζει με όλες. Τοποθετήστε τον δείκτη πάνω στο πλαίσιο αναζήτησης για να δείτε μια σύντομη λίστα.</p>
+<h1>Όροι αναζήτησης</h1>
+<p class="summary">Οι όροι και τα σύμβολα που υποστηρίζει η αναζήτηση για να βρίσκετε τα μηνύματα που θέλετε.</p>
+<p>Το πλαίσιο αναζήτησης υποστηρίζει όρους παρόμοιους με του Gmail. Μπορείτε να συνδυάσετε πολλούς όρους. Αν δεν τους συνδέσετε με OR, το μήνυμα πρέπει να πληροί όλους τους όρους. Τοποθετήστε τον δείκτη πάνω στο πλαίσιο αναζήτησης για να δείτε μια σύντομη λίστα.</p>
 <table>
     <tr><th>Πληκτρολογήστε</th><th>Βρίσκει</th></tr>
-    <tr><td><code>προϋπολογισμός</code></td><td>Μηνύματα με μια λέξη που αρχίζει από <i>προϋπολογισμός</i>, οπουδήποτε μέσα τους</td></tr>
+    <tr><td><code>προϋπολογισμός</code></td><td>Μηνύματα με λέξη που αρχίζει από <i>προϋπολογισμός</i> στο θέμα, στους αποστολείς ή παραλήπτες, στα ονόματα συνημμένων ή στο κείμενο</td></tr>
     <tr><td><code>"ακριβής φράση"</code></td><td>Αυτές τις λέξεις, με αυτή τη σειρά</td></tr>
-    <tr><td><code>-λέξη</code></td><td>Μηνύματα χωρίς τη λέξη. Το μείον λειτουργεί πριν από οποιαδήποτε λέξη αναζήτησης, όπως <code>-is:unread</code></td></tr>
+    <tr><td><code>-λέξη</code></td><td>Μηνύματα χωρίς αυτή τη λέξη. Μπορείτε επίσης να χρησιμοποιήσετε το μείον με ορισμένα φίλτρα, όπως <code>-is:unread</code></td></tr>
     <tr><td><code>αυτό OR εκείνο</code></td><td>Μηνύματα με οποιαδήποτε από τις δύο λέξεις. Γράψτε το <code>OR</code> με κεφαλαία</td></tr>
-    <tr><td><code>from:anna</code></td><td>Αλληλογραφία από την Άννα</td></tr>
-    <tr><td><code>to:anna</code>, <code>cc:</code>, <code>bcc:</code></td><td>Αλληλογραφία προς την Άννα, σε οποιαδήποτε γραμμή παραληπτών</td></tr>
+    <tr><td><code>from:άννα</code></td><td>Αλληλογραφία από την Άννα</td></tr>
+    <tr><td><code>to:άννα</code>, <code>cc:</code>, <code>bcc:</code></td><td>Μηνύματα με παραλήπτη την Άννα. Και οι τρεις όροι αναζητούν σε όλα τα πεδία παραληπτών, Προς, Κοιν. και Ιδ. κοιν.</td></tr>
     <tr><td><code>subject:γεύμα</code></td><td>Η λέξη στο θέμα</td></tr>
     <tr><td><code>filename:pdf</code></td><td>Η λέξη στο όνομα ενός συνημμένου αρχείου</td></tr>
     <tr><td><code>list:news.example.com</code></td><td>Αλληλογραφία μιας λίστας αλληλογραφίας, με βάση το List-Id της</td></tr>
-    <tr><td><code>has:attachment</code></td><td>Μηνύματα με αρχεία</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Μηνύματα με συνημμένα</td></tr>
     <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Αδιάβαστα ή αναγνωσμένα μηνύματα</td></tr>
     <tr><td><code>is:starred</code> ή <code>is:flagged</code></td><td>Μηνύματα με σημαία</td></tr>
     <tr><td><code>is:answered</code></td><td>Μηνύματα στα οποία απαντήσατε</td></tr>
     <tr><td><code>is:bounce</code></td><td>Ειδοποιήσεις για μηνύματα που δεν παραδόθηκαν ή καθυστερούν</td></tr>
     <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Κρυπτογραφημένα ή υπογεγραμμένα μηνύματα</td></tr>
-    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Μόνο αυτός ο φάκελος, σε κάθε λογαριασμό</td></tr>
+    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Μηνύματα στον αντίστοιχο ειδικό φάκελο όλων των λογαριασμών</td></tr>
     <tr><td><code>in:έργα</code></td><td>Μόνο ο φάκελος με αυτό το όνομα</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Όλοι οι φάκελοι</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Αλληλογραφία πριν ή μετά από μια ημέρα. Λειτουργεί και το <code>2025-01-31</code></td></tr>
-    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Αλληλογραφία παλαιότερη ή νεότερη από ημέρες (<code>d</code>), μήνες (<code>m</code>) ή έτη (<code>y</code>)</td></tr>
-    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Αλληλογραφία μεγαλύτερη ή μικρότερη από ένα μέγεθος, σε byte ή με <code>K</code>, <code>M</code> ή <code>G</code></td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Μηνύματα πριν ή μετά την καθορισμένη ημερομηνία. Υποστηρίζεται και η μορφή <code>2025-01-31</code></td></tr>
+    <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Μηνύματα παλαιότερα ή νεότερα από τον καθορισμένο αριθμό ημερών (<code>d</code>), μηνών (<code>m</code>) ή ετών (<code>y</code>)</td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Μηνύματα μεγαλύτερα ή μικρότερα από το καθορισμένο μέγεθος, σε byte ή με επίθημα <code>K</code>, <code>M</code> ή <code>G</code></td></tr>
 </table>
-<p>Οι τόνοι και τα κεφαλαία δεν έχουν σημασία. Μια λέξη αναζήτησης που δεν γνωρίζει το Inbox Classic αναζητείται ως απλή λέξη.</p>
-<p>Ένα κρυπτογραφημένο μήνυμα βρίσκεται από τον αποστολέα, τους παραλήπτες και το θέμα του, και μετά την αποκρυπτογράφηση από τις λέξεις του κειμένου του, όσο η επιλογή <b data-text="ui-search-encrypted"></b> είναι ενεργή στο <b data-settings="reading"></b>.</p>
-<p>Η λίστα δεν δείχνει μεγέθη. Για να δείτε πόσο μεγάλο είναι ένα μήνυμα, επιλέξτε <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<p>Οι τόνοι αγνοούνται και δεν γίνεται διάκριση πεζών και κεφαλαίων. Οι όροι που το Inbox Classic δεν αναγνωρίζει ως ειδικά φίλτρα αναζητούνται ως απλό κείμενο.</p>
+<p>Μπορείτε να βρείτε κρυπτογραφημένα μηνύματα με βάση τον αποστολέα, τους παραλήπτες και το θέμα. Αν η επιλογή <b data-text="ui-search-encrypted"></b> είναι ενεργή στην ενότητα <b data-settings="reading"></b>, μπορείτε να αναζητάτε και στο κείμενό τους μετά την αποκρυπτογράφηση.</p>
+<p>Η λίστα μηνυμάτων δεν περιλαμβάνει στήλη μεγέθους. Για να δείτε το μέγεθος ενός μηνύματος, επιλέξτε <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
-<!--/review-->

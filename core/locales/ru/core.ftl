@@ -2,7 +2,6 @@
 
 ## Counts and sizes
 
-# review: new
 messages = { $count ->
     [one] { $count } сообщение
     [few] { $count } сообщения
@@ -677,7 +676,7 @@ day-sunday = воскресенье
 
 # review: new
 agent-level-read = Чтение почты: папки, список сообщений, поиск и сообщения
-# review: changed
+# review: new
 agent-level-organize = Упорядочивание почты: прочитанность, флажки, нежелательная почта, перемещение, архивирование, новые папки, удаление в папку «Удаленные» и отписка от рассылок после вашего согласия
 # review: new
 agent-level-drafts = Создание черновиков, которые отправляете вы
@@ -768,6 +767,12 @@ agent-log-sent = «{ $subject }» отправлено: { $to }
 # review: new
 agent-log-draft = Сохранен черновик «{ $subject }»
 # review: new
+agent-log-draft-replaced = Заменен черновик «{ $subject }»
+# review: new
+agent-log-draft-discarded = Удален черновик «{ $subject }»
+# review: new
+agent-draft-note = { $program }, ИИ-агент, написал этот черновик. Проверьте получателей и текст перед отправкой.
+# review: new
 agent-log-read = Отмечено как прочитанное: «{ $subject }»
 # review: new
 agent-log-unread = Отмечено как непрочитанное: «{ $subject }»
@@ -787,8 +792,7 @@ agent-log-not-junk = «{ $subject }» помечено как обычное
 agent-log-archived = В архиве: «{ $subject }»
 # review: new
 agent-log-folder = Создана папка «{ $name }»
-# review: new
-agent-log-unsubscribed = Отменена подписка на рассылку «{ $subject }»
+agent-log-unsubscribed = Вы одобрили запрос на отмену подписки. Сообщение: «{ $subject }»
 # review: new
 agent-log-unsubscribe-failed = Не удалось отписаться от рассылки «{ $subject }»: { $reason }
 # review: new
@@ -985,8 +989,7 @@ pgp-why-signature-expired = Срок действия подписи истек
 pgp-why-key-not-valid = Подписано недействительным ключом
 # review: new
 pgp-why-not-for-you = Подписано для других получателей и переслано вам
-# review: new
-pgp-why-not-key-in-use = Подписано другим ключом, а не тем, что используется для { $address }
+pgp-why-not-key-in-use = Ключ подписи отличается от ключа, выбранного для адреса { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Изображения загружены из интернета
 # review: new
@@ -1364,35 +1367,34 @@ attachment-runs-programs = «{ $name }» может запускать прог�
 # review: new
 attachment-decrypted-note = Это вложение из зашифрованного сообщения. Чтобы его открыть, Inbox Classic хранит расшифрованную копию на этом компьютере, в вашей папке, которую Inbox Classic очищает через сутки.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
-    [one] Сервер не переместил { $messages } в папку { $folder }, поэтому оно снова в папке { $from }: { $reason }
-   *[other] Сервер не переместил { $messages } в папку { $folder }, поэтому они снова в папке { $from }: { $reason }
+    [1] Сервер не переместил { $messages } в папку «{ $folder }», поэтому оно снова в папке «{ $from }»: { $reason }
+    [one] Сервер не переместил { $messages } в папку «{ $folder }», поэтому сообщения снова в папке «{ $from }»: { $reason }
+   *[other] Сервер не переместил { $messages } в папку «{ $folder }», поэтому они снова в папке «{ $from }»: { $reason }
 }
-# review: new
 undone-delete = { $count ->
-    [one] Сервер не удалил { $messages }, поэтому оно снова в папке { $from }: { $reason }
-   *[other] Сервер не удалил { $messages }, поэтому они снова в папке { $from }: { $reason }
+    [1] Сервер не удалил { $messages }, поэтому оно снова в папке «{ $from }»: { $reason }
+    [one] Сервер не удалил { $messages }, поэтому сообщения снова в папке «{ $from }»: { $reason }
+   *[other] Сервер не удалил { $messages }, поэтому они снова в папке «{ $from }»: { $reason }
 }
-# review: new
 undone-archive = { $count ->
-    [one] Сервер не заархивировал { $messages }, поэтому оно снова в папке { $from }: { $reason }
-   *[other] Сервер не заархивировал { $messages }, поэтому они снова в папке { $from }: { $reason }
+    [1] Сервер не заархивировал { $messages }, поэтому оно снова в папке «{ $from }»: { $reason }
+    [one] Сервер не заархивировал { $messages }, поэтому сообщения снова в папке «{ $from }»: { $reason }
+   *[other] Сервер не заархивировал { $messages }, поэтому они снова в папке «{ $from }»: { $reason }
 }
-# review: new
 undone-read = { $count ->
-    [one] Сервер не отметил { $messages } как прочитанное, поэтому оно снова непрочитанное: { $reason }
-   *[other] Сервер не отметил { $messages } как прочитанные, поэтому они снова непрочитанные: { $reason }
+    [1] Сервер не отметил { $messages } как прочитанное, поэтому оно снова отмечено как непрочитанное: { $reason }
+    [one] Сервер не отметил { $messages } как прочитанное, поэтому сообщения снова отмечены как непрочитанные: { $reason }
+   *[other] Сервер не отметил { $messages } как прочитанные, поэтому они снова отмечены как непрочитанные: { $reason }
 }
-# review: new
 undone-unread = { $count ->
-    [one] Сервер не отметил { $messages } как непрочитанное, поэтому оно снова прочитанное: { $reason }
-   *[other] Сервер не отметил { $messages } как непрочитанные, поэтому они снова прочитанные: { $reason }
+    [1] Сервер не отметил { $messages } как непрочитанное, поэтому оно снова отмечено как прочитанное: { $reason }
+    [one] Сервер не отметил { $messages } как непрочитанное, поэтому сообщения снова отмечены как прочитанные: { $reason }
+   *[other] Сервер не отметил { $messages } как непрочитанные, поэтому они снова отмечены как прочитанные: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Сервер не изменил флажки, поэтому { $messages } осталось без изменений: { $reason }
-   *[other] Сервер не изменил флажки, поэтому { $messages } остались без изменений: { $reason }
+    [one] Сервер не изменил флажки, поэтому изменение отменено ({ $messages }): { $reason }
+   *[other] Сервер не изменил флажки, поэтому изменение отменено ({ $messages }): { $reason }
 }
 
 ## Previews of attachments: the pictures and PDF files shown in a message
@@ -1402,4 +1404,20 @@ preview-pdf-option = Показывать PDF-файлы в письмах
 # review: new
 preview-pdf-off = PDF-файлы в письмах не показываются.
 # review: new
-preview-pdf-off-crashed = PDF-файл закрыл Inbox Classic во время показа, поэтому PDF-файлы в письмах больше не показываются. Изображения по-прежнему показываются. Чтобы снова показывать PDF-файлы, включите параметр { $option } в настройках чтения.
+preview-pdf-off-crashed = PDF-файл закрыл Inbox Classic во время показа, поэтому PDF-файлы в письмах больше не показываются. Изображения по-прежнему показываются. Чтобы снова показывать PDF-файлы, включите параметр { $option } в разделе { $settings }.
+# review: new
+preview-pdf-details = { $count ->
+    [one] { $count } страница, { $size }
+    [few] { $count } страницы, { $size }
+    [many] { $count } страниц, { $size }
+   *[other] { $count } страницы, { $size }
+}
+# review: new
+preview-page-alt = { $name }, страница { $page } из { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Откройте файл, чтобы увидеть всю { $count } страницу
+    [few] Откройте файл, чтобы увидеть все { $count } страницы
+    [many] Откройте файл, чтобы увидеть все { $count } страниц
+   *[other] Откройте файл, чтобы увидеть все { $count } страницы
+}

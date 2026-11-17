@@ -1,14 +1,14 @@
-<!--review--><h1>Bekreft nøkkelen til en kontakt</h1>
-<p class="summary">Sammenlign fingeravtrykket til en nøkkel med eieren, for å være sikker på at nøkkelen virkelig er deres.</p>
+<h1>Bekreft nøkkelen til en kontakt</h1>
+<p class="summary">Sammenlign nøkkelens fingeravtrykk med det eieren oppgir, og kontroller hvilke adresser nøkkelen gjelder.</p>
 <p>En nøkkel kan komme fra hvor som helst: en melding, en nøkkelserver, en fil. Hvem som helst kan lage en nøkkel med navnet og adressen til kontakten din. Bekreftelse sikrer at nøkkelen du har, er den samme som kontakten din har.</p>
 <p>Slik bekrefter du en nøkkel:</p>
 <ol>
     <li>Velg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, merk nøkkelen til kontakten og klikk på <b data-text="ui-keys-verify"></b>. Du kan også klikke på den i egenskapene til kontakten i adresseboken.</li>
-    <li>Be kontakten din lese opp fingeravtrykket til nøkkelen sin fra sin egen app, ansikt til ansikt eller i en samtale.</li>
-    <li>Hvis hver gruppe på fire er lik, klikker du på <b data-text="ui-verify-match"></b>. Nøkkelen vises som bekreftet.</li>
-    <li>Vinduet viser adressene dette gjelder. En nøkkel kan inneholde en hvilken som helst adresse, så hvis en av dem ikke er adressen til kontakten din, klikker du på <b data-text="ui-verify-differ"></b> i stedet.</li>
+    <li>Be kontakten din lese opp fingeravtrykket til nøkkelen sin fra sin egen app, ansikt til ansikt eller på telefon.</li>
+    <li>Sammenlign alle gruppene på fire tegn, og kontroller at alle adressene i vinduet tilhører kontakten. Bare hvis både fingeravtrykket og adressene stemmer, klikker du på <b data-text="ui-verify-match"></b>. Nøkkelen vises som bekreftet.</li>
+    <li>En nøkkel kan inneholde adresser som ikke tilhører eieren. Hvis fingeravtrykket eller en av adressene ikke stemmer, klikker du på <b data-text="ui-verify-differ"></b> i stedet.</li>
 </ol>
 <aside class="warning">Ikke sammenlign fingeravtrykket med et som er sendt med e-post. Den som kan endre nøkkelen i en melding, kan også endre fingeravtrykket.</aside>
-<p>Hvis fingeravtrykkene er forskjellige, klikker du på <b data-text="ui-verify-differ"></b>. Nøkkelen du har, tilhører ikke kontakten din: Fjern den, og be kontakten din sende nøkkelen sin på nytt.</p>
-<p>Signaturer laget med en bekreftet nøkkel vises i grønt. En nøkkel du ikke har bekreftet, virker fortsatt for kryptering, og signaturene fra den vises i blått.</p>
-<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav><!--/review-->
+<p>Hvis fingeravtrykkene er forskjellige, klikker du på <b data-text="ui-verify-differ"></b>. Nøkkelen du har, samsvarer ikke med kontaktens nøkkel. Fjern den, og be om riktig nøkkel.</p>
+<p>En gyldig signatur vises i grønt når nøkkelen er bekreftet for avsenderen. En gyldig signatur fra en nøkkel du ikke har bekreftet, vises i blått. Du kan kryptere med en gyldig nøkkel selv om den ikke er bekreftet, men du vet da ikke sikkert hvem nøkkelen tilhører.</p>
+<nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>

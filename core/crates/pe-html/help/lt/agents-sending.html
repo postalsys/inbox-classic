@@ -1,21 +1,22 @@
-<!--review-->
 <h1>Kai agentas siunčia laišką</h1>
-<p class="summary">Kiekvienas laiškas, kurį DI agentas nori išsiųsti, pirmiausia parodomas jums ir prieš išsiunčiant palaukia aplanke „Siunčiami laiškai“.</p>
-<p>Agentas gali siųsti laiškus tik tada, jei jam tai leidote, ir kiekvieną laišką tik jums sutikus.</p>
+<p class="summary">Kiekvieną agento laišką turite patvirtinti, o patvirtintas laiškas prieš išsiunčiant trumpai laukia aplanke „Siunčiami laiškai“.</p>
+<p>Agentui reikia leidimo siųsti laiškus per Inbox Classic ir atskiro jūsų sutikimo kiekvienam laiškui.</p>
 <img src="picture:agents-4-send" alt="Langas, klausiantis, ar siųsti agento parašytą laišką, su kiekvienu gavėju ir pažymėtu nauju adresu">
-<p>Kai agentas nori siųsti, Inbox Classic parodo laišką su kiekvieno gavėjo adresu. Adresai, kuriais niekada nerašėte, pažymėti žyme <b data-text="ui-new-address"></b>.</p>
+<p>Kai agentas prašo išsiųsti laišką, Inbox Classic parodo laišką ir visų gavėjų adresus. Adresai, kuriais dar nesate rašę, pažymėti žyme „<b data-text="ui-new-address"></b>“.</p>
 <ol>
-    <li>Perskaitykite gavėjus ir tekstą.</li>
-    <li>Pasirinkite vieną iš šių:
+    <li>Patikrinkite gavėjus ir perskaitykite laiško tekstą.</li>
+    <li>Pasirinkite veiksmą:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> išsiunčia laišką. Šis mygtukas įsijungia po akimirkos, kad jo nepaspaustumėte netyčia.</li>
-            <li><b data-text="ui-edit-first"></b> atidaro jį naujame laiške, kad galėtumėte pakeisti.</li>
-            <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, numatytasis pasirinkimas, laiško nesiunčia.</li>
+            <li>Mygtukas „<!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os-->“ įtraukia laišką į siuntimo eilę. Jis tampa aktyvus po trumpos delsos, kad sumažėtų atsitiktinio paspaudimo tikimybė.</li>
+            <li>Mygtukas „<b data-text="ui-edit-first"></b>“ atidaro laišką redagavimo lange, kad galėtumėte jį pakeisti prieš siųsdami.</li>
+            <li>Mygtukas „<!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->“ atmeta siuntimo prašymą. Tai numatytasis pasirinkimas.</li>
         </ul>
     </li>
 </ol>
-<p>Agentas klausia apie vieną laišką vienu metu. Jo rašomi laiškai ir juodraščiai baigiasi jūsų parašu, kaip ir jūsų pačių.</p>
-<p>Jūsų išsiųstas laiškas 30 sekundžių palaukia aplanke „Siunčiami laiškai“. Kol jis neišsiųstas, galite jį ten panaikinti arba spustelėti <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> lange <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<aside class="warning">Agentas, turintis ir kitų įrankių, pavyzdžiui, naršymo žiniatinklyje ar jūsų failų skaitymo, per juos gali perduoti tai, ką perskaito. Inbox Classic jų nemato. Leiskite agentui siųsti laiškus tik tada, kai to tikrai reikia.</aside>
+<p>Kiekviena programa vienu metu gali laukti tik vieno laiško patvirtinimo. Jei neatsakote iš karto, agentui pranešama, kad vis dar laukiama atsakymo. Jis gali vėliau patikrinti jūsų sprendimą. Agento parengtų laiškų ir juodraščių pabaigoje pagal numatytuosius nustatymus pridedamas paskyros parašo tekstas. Agentas gali jo nepridėti.</p>
+<p>Patvirtintas laiškas aplanke „Siunčiami laiškai“ laukia bent 30 sekundžių iki siuntimo pradžios. Per tą laiką galite jį iš ten panaikinti arba spustelėti „<!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os-->“ lange, kurį atveria meniu punktas „<b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>“. Jau išsiųsto laiško susigrąžinti negalima.</p>
+<h2>Agento rašomi juodraščiai</h2>
+<p>Atidarius agento parašytą juodraštį, virš laiško teksto rodomas agento pavadinimas. Prieš siųsdami patikrinkite gavėjus ir tekstą.</p>
+<p>Agentas gali keisti arba atmesti tik savo sukurtus juodraščius. Kai įrašote tokį juodraštį redagavimo lange, agentas jo nebegali keisti ar atmesti. Tai galioja ir tada, kai Inbox Classic automatiškai įrašo jūsų pakeitimus. Vien atidarius juodraštį, agentas šių teisių nepraranda.</p>
+<aside class="warning">Agentas gali perduoti perskaitytus duomenis ir per kitus įrankius, jei jam leidžiama, pavyzdžiui, naršyti internete ar skaityti failus. Inbox Classic šių įrankių nevaldo. Suteikite siuntimo teisę tik tada, kai jos reikia.</aside>
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>
-<!--/review-->

@@ -1,13 +1,13 @@
-<!--review--><h1>Přechod na jiný počítač</h1>
+<h1>Přechod na jiný počítač</h1>
 <p class="summary">Přeneste účty, nastavení, kontakty, klíče a pravidla na jiný počítač v jednom souboru.</p>
 <h2>Export</h2>
 <ol>
     <li>Zvolte <b data-text="menu-file"></b> &gt; <b data-text="cmd-export-setup"></b>.</li>
     <li>Zvolte, co přenést: <b data-text="setup-part-settings"></b>, <b data-text="setup-part-preferences"></b>, <b data-text="setup-part-accounts"></b>, <b data-text="setup-part-sign-in-apps"></b>, <b data-text="setup-part-contacts"></b>, <b data-text="setup-part-keys"></b>, <b data-text="setup-part-rules"></b> a <b data-text="setup-part-trusted-senders"></b>.</li>
-    <li>Chcete-li přenést i hesla a soukromé klíče, zapněte <b data-text="ui-setup-use-passphrase"></b> a dvakrát zadejte heslovou frázi o délce alespoň 8 znaků.</li>
+    <li>Chcete-li přenést i uložená hesla, další přihlašovací údaje a soukromé klíče, zapněte <b data-text="ui-setup-use-passphrase"></b> a dvakrát zadejte heslovou frázi o délce alespoň 8 znaků.</li>
     <li>Klikněte na <b data-text="ui-setup-export-button"></b> a zvolte, kam soubor uložit.</li>
 </ol>
-<p>Soubor neobsahuje žádné zprávy: na druhém počítači se stáhnou znovu. S heslovou frází je celý soubor zašifrovaný. Bez ní neobsahuje hesla ani soukromé klíče a každý účet si na druhém počítači jednou řekne o heslo.</p>
+<p>Soubor neobsahuje zprávy. Ty se na druhém počítači znovu stáhnou ze serveru. Heslová fráze chrání celý soubor šifrováním. Bez ní soubor neobsahuje hesla, další přihlašovací údaje ani soukromé klíče. K účtům se pak musíte znovu přihlásit heslem nebo přes prohlížeč.</p>
 <aside class="warning">Soubor a jeho heslovou frázi uchovávejte odděleně a po importu soubor odstraňte. Kdo má obojí, může číst vaši poštu.</aside>
 <h2>Import</h2>
 <ol>
@@ -15,6 +15,5 @@
     <li>Zvolte soubor a zadejte jeho heslovou frázi, pokud ji má.</li>
     <li>Okno ukáže, co soubor obsahuje. Zvolte části a účty k importu a klikněte na <b data-text="ui-setup-import-button"></b>.</li>
 </ol>
-<p>Účet, který už na tomto počítači je, zůstane beze změny. Kontakty se přidají do adresáře, nastavení a předvolby oken se nahradí a pravidlo, jehož složka tu ještě není, počká, až se účet synchronizuje. Jiný klíč některého z vašich kontaktů čeká na vaše rozhodnutí, stejně jako importovaný klíč.</p>
+<p>Účty už nastavené v tomto počítači zůstanou beze změny. Kontakty se přidají do Adresáře. Nastavení a předvolby oken se nahradí. Chybějící cílové složky pravidel se přiřadí po synchronizaci účtů. Nový klíč kontaktu nahradí dosavadní klíč až poté, co jej vyberete ve vlastnostech kontaktu.</p>
 <nav class="related"><a href="topic:manage-accounts"></a> <a href="topic:address-book"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->

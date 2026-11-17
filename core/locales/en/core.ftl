@@ -467,6 +467,9 @@ agent-log-composed = Opened “{ $subject }” in a new message for you to finis
 agent-log-refused = You did not send “{ $subject }”
 agent-log-sent = Sent “{ $subject }” to { $to }
 agent-log-draft = Saved the draft “{ $subject }”
+agent-log-draft-replaced = Replaced the draft “{ $subject }”
+agent-log-draft-discarded = Discarded the draft “{ $subject }”
+agent-draft-note = { $program }, an AI agent, wrote this draft. Check the recipients and the text before you send it.
 agent-log-read = Marked read “{ $subject }”
 agent-log-unread = Marked unread “{ $subject }”
 agent-log-flagged = Flagged “{ $subject }”
@@ -601,11 +604,11 @@ pgp-error-missing-keys = { $count ->
 }
 pgp-error-encrypted-quote = This message quotes or forwards an encrypted message, so it can only be sent encrypted. Turn Encrypt on, or remove the quoted text.
 pgp-error-protect = The message could not be signed or encrypted: { $reason }
-pgp-found-keys = Found the key of { $addresses }.
+pgp-found-keys = Keys found for: { $addresses }.
 pgp-found-none = No key was found for { $addresses }. Ask them to send you their public key.
 pgp-found-no-key = No key was found.
 pgp-find-unavailable = Keys could not be looked up now: { $error }
-pgp-publish-pending = keys.openpgp.org sent a confirmation link to { $addresses }. Your key is published there once you click it.
+pgp-publish-pending = keys.openpgp.org sent a confirmation link to these addresses: { $addresses }. Confirm each address so your key can be found using that address.
 pgp-publish-done = Your key is published on keys.openpgp.org for { $addresses }.
 pgp-publish-failed = The key could not be published: { $error }
 pgp-keyserver-off = Looking up keys on keys.openpgp.org is turned off in { $settings }.
@@ -645,7 +648,7 @@ pgp-recipients-intro-missing = { $count ->
 pgp-details-part = Part { $number }: { $label }
 pgp-details-signed = Signed { $when } with the key { $key }
 pgp-details-unknown-key = Signed with the key { $key }, which you do not have
-pgp-details-opened = Encrypted to your key { $key }
+pgp-details-opened = Decrypted with your key { $key }
 pgp-details-for = Encrypted to { $keys }
 pgp-details-plain = Not signed and not encrypted
 pgp-bar-parts = This message has { $count } parts: { $list }. Each part says how it is protected.
@@ -799,7 +802,7 @@ setup-account-servers = { $imap } and { $smtp } ({ $signin })
 setup-file-name = Inbox Classic settings and accounts
 setup-skipped-unreachable = { $name } was skipped: its sign-in service could not be reached. Add it again in Sign-in Apps.
 attachment-runs-programs = “{ $name }” can run programs, so Inbox Classic does not open it. Save it, then open it yourself if you trust where it comes from.
-attachment-decrypted-note = This attachment comes from an encrypted message. To open it, Inbox Classic stores it decrypted on this computer, in a folder of yours that Inbox Classic empties after a day.
+attachment-decrypted-note = This attachment comes from an encrypted message. To open it, Inbox Classic saves an unencrypted copy in a temporary folder for your user account. Copies older than a day are removed when the app starts.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
 undone-move = { $count ->
     [one] The server did not move { $messages } to { $folder }, so it is back in { $from }: { $reason }
@@ -833,4 +836,16 @@ preview-pdf-option = Show PDF files in messages
 # the tile of a PDF file while PDF previews are off
 preview-pdf-off = PDF files are not shown in messages.
 # the note where previews are, after a PDF file ended the app: { $option } is the option's name
-preview-pdf-off-crashed = A PDF file closed Inbox Classic while it was being shown, so PDF files are no longer shown in messages. Pictures still are. To show PDF files again, turn on { $option } in the reading options.
+preview-pdf-off-crashed = A PDF file closed Inbox Classic while it was being shown, so PDF files are no longer shown in messages. Pictures still are. To show PDF files again, turn on { $option } in { $settings }.
+# under the pages of a PDF file shown in a message: its page count and size ("3 pages, 84 KB")
+preview-pdf-details = { $count ->
+    [one] 1 page, { $size }
+   *[other] { $count } pages, { $size }
+}
+# what a screen reader says of a page of a PDF file shown in a message
+preview-page-alt = { $name }, page { $page } of { $count }
+# the link under the pages of a PDF file shown in a message, when it has more pages than are shown
+preview-more-pages = { $count ->
+    [one] Open to see the page
+   *[other] Open to see all { $count } pages
+}

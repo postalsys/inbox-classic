@@ -1,19 +1,18 @@
-<!--review--><h1>Immagini e tracciamento</h1>
+<h1>Immagini e tracciamento</h1>
 <p class="summary">Perché le immagini da internet sono bloccate e come mostrarle per un messaggio o un mittente di cui ti fidi.</p>
-<p>Un messaggio può mostrare immagini che il mittente tiene su internet. Scaricare una di queste immagini dice al mittente che hai aperto il messaggio, quando e da dove. Per questo Inbox Classic non le scarica.</p>
-<p>Le immagini inviate all’interno del messaggio vengono mostrate, perché non dicono nulla al mittente.</p>
+<p>Un messaggio può contenere immagini ospitate su server esterni. Scaricarle può rivelare al mittente quando hai aperto il messaggio e il tuo indirizzo IP. Per questo Inbox Classic ne blocca il download per impostazione predefinita.</p>
+<p>Le immagini incluse nel messaggio vengono mostrate senza contattare i server del mittente.</p>
 <p>Quando un messaggio contiene immagini da internet, una barra sopra di esso indica che alcune immagini sono state bloccate. Per vederle in un messaggio di cui ti fidi:</p>
 <ul>
     <li><!--os:windows,mac-->Fai clic sulla barra.<!--/os--><!--os:linux-->Fai clic su <b data-text="gtk-download-pictures"></b> nella barra.<!--/os--></li>
     <li>Oppure scegli <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>In questo modo vengono mostrate solo le immagini di quel messaggio. Il messaggio successivo parte di nuovo bloccato.</p>
+<p>In questo modo vengono mostrate solo le immagini di quel messaggio. Le immagini del messaggio successivo restano bloccate, salvo le eccezioni configurate nelle impostazioni.</p>
 <h2>Mittenti attendibili</h2>
-<p>Per ricevere sempre le immagini di un mittente, <!--os:windows-->fai clic sulla freccia all’estremità destra della barra<!--/os--><!--os:mac-->fai clic sulla freccia accanto a <b data-text="cmd-pictures"></b> nella barra<!--/os--><!--os:linux-->fai clic sulla freccia accanto a <b data-text="gtk-download-pictures"></b> nella barra<!--/os-->. Scegli di scaricare sempre le immagini di quel mittente, oppure di chiunque del suo dominio.</p>
-<p>Le sue immagini si caricano allora da sole, ma solo quando il tuo provider di posta conferma che il messaggio proviene davvero da quel dominio. Un messaggio che finge soltanto di venire da lui chiede comunque, e la barra indica che il mittente non è stato confermato. In <b data-text="folder-junk"></b> le immagini non si caricano mai da sole.</p>
+<p>Per ricevere sempre le immagini di un mittente, <!--os:windows-->fai clic sulla freccia all’estremità destra della barra<!--/os--><!--os:mac-->fai clic sulla freccia accanto a <b data-text="cmd-pictures"></b> nella barra<!--/os--><!--os:linux-->fai clic sulla freccia accanto a <b data-text="gtk-download-pictures"></b> nella barra<!--/os-->. Scegli di scaricare sempre le immagini di quel mittente, oppure di tutti i mittenti dello stesso dominio.</p>
+<p>Le immagini vengono quindi caricate automaticamente, ma solo se il provider di posta conferma il dominio del mittente. In assenza di questa conferma, occorre ancora autorizzare il download e la barra segnala che il mittente non è stato verificato. In <b data-text="folder-junk"></b> le immagini non vengono mai caricate automaticamente.</p>
 <p>Per togliere un mittente dall’elenco, usa <b data-text="ui-trusted-senders-button"></b> in <b data-settings="reading"></b>.</p>
 <h2>Immagini in tutti i messaggi</h2>
-<p><b data-text="ui-pictures-always-option"></b> in <b data-settings="reading"></b> scarica le immagini di tutti i messaggi, tranne in <b data-text="folder-junk"></b>. All’inizio è disattivato, perché così i mittenti possono sapere quando leggi i loro messaggi.</p>
-<p>Il logo di un marchio accanto all’intestazione non è un’immagine di tracciamento. È approvato dal tuo server di posta e proviene dal marchio, non dalle immagini del mittente.</p>
+<p><b data-text="ui-pictures-always-option"></b> in <b data-settings="reading"></b> scarica le immagini di tutti i messaggi, tranne in <b data-text="folder-junk"></b>. Questa opzione è disattivata per impostazione predefinita, perché il download può consentire ai mittenti di rilevare l’apertura dei messaggi. Nelle parti crittografate occorre comunque autorizzare il caricamento ogni volta.</p>
+<p>Il logo del marchio accanto all’intestazione viene gestito separatamente dalle immagini del messaggio. Deve essere approvato dal server di posta. I loghi scaricati vengono salvati e riutilizzati. Quando un logo viene scaricato, il server che lo ospita può vedere il tuo indirizzo IP e l’ora della richiesta.</p>
 <nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

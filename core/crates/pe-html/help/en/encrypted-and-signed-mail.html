@@ -1,13 +1,13 @@
 <h1>Encrypted and signed mail</h1>
 <p class="summary">The bar above a message says whether it is signed by its sender and whether it was encrypted to you.</p>
-<p>A signed message proves who wrote it and that nobody changed it on the way. An encrypted message can be read only with your key.</p>
+<p>A valid signature confirms that the content has not changed since it was signed. To confirm who signed it, also verify who owns the key. An encrypted message can only be read with a matching private key.</p>
 <p>The bar above the message gives the message as a whole:</p>
 <table>
     <tr><th>Color</th><th>What it means</th></tr>
     <tr><td>Green</td><td>Signed by the sender, with a key you verified.</td></tr>
     <tr><td>Blue</td><td>Signed by the sender with a key you have not verified, or encrypted to you.</td></tr>
     <tr><td>Amber</td><td>Something is not right: the signature does not match, someone other than the sender signed, or a part could not be read.</td></tr>
-    <tr><td>Gray</td><td>Not signed, or signed with a key you do not have.</td></tr>
+    <tr><td>Gray</td><td>Not signed, or the signature could not be checked, for example because its key is missing.</td></tr>
 </table>
 <p>A message whose parts are protected differently shows each part in a frame of its own, with its own label. The bar then counts the parts of each kind. Click a label, or <b data-text="ui-protection-details"></b> on the bar, to see who signed each part, with which key and when.</p>
 <aside class="warning">Only the bar and the labels above the frames are written by Inbox Classic. A sender can draw anything inside their own message, including something that looks like a label. Look at the bar.</aside>

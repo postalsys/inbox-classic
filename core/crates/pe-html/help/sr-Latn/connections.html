@@ -1,15 +1,14 @@
-<!--review--><h1>Veze koje Inbox Classic uspostavlja</h1>
-<p class="summary">Gde se Inbox Classic povezuje i zašto, za one koje zanimaju tehnički detalji.</p>
+<h1>Veze koje Inbox Classic uspostavlja</h1>
+<p class="summary">Sa kojim serverima se Inbox Classic povezuje i zašto.</p>
 <ul>
     <li><b>Vaši serveri e-pošte</b>, preko protokola IMAP za čitanje pošte i SMTP za slanje. Veze su šifrovane protokolom TLS, a sertifikat svakog servera se proverava prema sertifikatima kojima vaš sistem veruje. Inbox Classic odbija server bez šifrovanja, osim ako izaberete <b data-text="ui-security-none"></b> i to potvrdite.</li>
-    <li><b>Kada dodajete nalog</b>, radi traženja njegovih servera. Inbox Classic čita DNS zapise vašeg domena preko DNS-a preko HTTPS-a (Cloudflare, zatim Google), nikada preko običnog DNS-a. Pokušava i sa autoconfig datotekom vašeg dobavljača i sa Thunderbird-ovom listom dobavljača (ISPDB). Za Exchange pita Microsoft Autodiscover, koji dobija vašu lozinku samo kada je zatraži preko HTTPS-a. Server bez šifrovanja se nikada ne bira.</li>
-    <li><b>Prijava preko pregledača</b>, protokolom OAuth 2.0 sa PKCE-om, kod Google-a, Microsoft-a ili dobavljača vaše aplikacije za prijavljivanje. Pregledač se vraća samo programu Inbox Classic na ovom računaru.</li>
-    <li><b>Logotipi brendova</b> (BIMI), sa HTTPS adrese brenda kada poruka ne sadrži logotip, jednom pri svakom pokretanju programa Inbox Classic. To se dešava samo kada je poruka prošla DMARC proveru na vašem serveru e-pošte i kada je on odobrio logotip.</li>
-    <li><b>Slike sa interneta</b>, samo kada ih zatražite.</li>
-    <li><b>Otkazivanje pretplate</b>, samo kada kliknete na njega. Zahtev jednim klikom (RFC 8058) šalje se samo ako je lista potpisala poruku DKIM-om.</li>
-    <li><b>Ključevi za šifrovanje</b>, samo kada šifrujete nekome čiji ključ nemate: prvo domen njegove adrese (Web Key Directory), zatim keys.openpgp.org, osim ako ste to isključili. Šalje se samo adresa.</li>
+    <li><b>Kada dodajete nalog</b>, radi traženja njegovih servera. Inbox Classic čita DNS zapise vašeg domena putem DNS-a preko HTTPS-a (Cloudflare, zatim Google), nikada preko običnog DNS-a. Pokušava i sa autoconfig datotekom pružaoca usluge i Thunderbird bazom podešavanja (ISPDB). Za Exchange pita Microsoft Autodiscover, koji dobija vašu lozinku samo kada je zatraži preko HTTPS-a. Server bez šifrovanja se nikada ne bira.</li>
+    <li><b>Prijava preko pregledača</b>, protokolom OAuth 2.0 sa PKCE-om, kod kompanije Google ili Microsoft, ili kod pružaoca usluge za kog ste podesili aplikaciju za prijavljivanje. Odgovor nakon prijave vraća se programu Inbox Classic preko lokalne adrese na ovom računaru.</li>
+    <li><b>Logotipi brendova</b> (BIMI), sa HTTPS adrese brenda kada poruka ne sadrži logotip i nije moguće koristiti sačuvanu kopiju. Preuzeti logotipi se čuvaju i ponovo koriste, čak i nakon ponovnog pokretanja programa. To se dešava samo kada je poruka prošla DMARC proveru na vašem serveru e-pošte i kada je on odobrio logotip.</li>
+    <li><b>Slike sa interneta</b>, kada dozvolite njihovo učitavanje za poruku, pošiljaoca ili domen, ili uključite automatsko učitavanje u podešavanjima.</li>
+    <li><b>Otkazivanje pretplate</b>, tek kada potvrdite postupak. Zahtev jednim klikom (RFC 8058) šalje se samo ako je lista potpisala poruku DKIM-om.</li>
+    <li><b>Ključevi za šifrovanje</b> traže se kada za šifrovanje poruke nedostaje ključ primaoca ili kada sami pokrenete pretragu ključeva. Pri pretrazi po adresi e-pošte prvo se pretražuje imenik ključeva na domenu te adrese (Web Key Directory). Po potrebi se adresa šalje serveru keys.openpgp.org, ako je ta pretraga uključena. Pri pretrazi po otisku ili identifikatoru ključa, serveru keys.openpgp.org šalje se taj identifikator umesto adrese e-pošte.</li>
     <!--os:mac--><li><b>Ažuriranja</b>, sa sajta inboxclassic.com, radi provere da li je izašla nova verzija.</li><!--/os-->
 </ul>
-<p>Kodovi za prijavu nude se samo kada zaglavlje Authentication-Results vašeg dobavljača kaže da je domen potpisao poruku (DKIM). Za to nije potrebna posebna veza.</p>
+<p>Kodovi za prijavu nude se samo kada zaglavlje Authentication-Results pružaoca usluge potvrđuje potpis domena (DKIM). Za to nije potrebna posebna veza.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

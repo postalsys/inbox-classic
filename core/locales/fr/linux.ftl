@@ -22,7 +22,6 @@ gtk-search-indexing = { $count ->
     [one] indexation du texte de { $count } message en cours
    *[other] indexation du texte de { $count } messages en cours
 }
-# review: new
 gtk-list-loading = Chargement...
 gtk-menu-rename = Renommer...
 gtk-import-one-question = Importer le message { $file } dans le dossier { $folder } ?
@@ -86,7 +85,6 @@ gtk-default-app-failed = Impossible de définir Inbox Classic comme application 
 
 gtk-reader-date = Date :
 gtk-reader-files = Pièces jointes du message
-# review: new
 gtk-files = { $count ->
     [one] { $count } fichier
    *[other] { $count } fichiers
@@ -103,7 +101,7 @@ gtk-format-underline = Souligné (Ctrl+U)
 gtk-format-hyperlink = Lien hypertexte (Ctrl+K)
 gtk-font = Police
 gtk-show-cc = _Cc
-gtk-show-bcc = C_ci
+gtk-show-bcc = Cc_i
 gtk-save-tip = Enregistrer (Ctrl+S)
 gtk-link-status = { $link }    (Ctrl+clic pour ouvrir)
 
@@ -121,8 +119,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Suivant >
-gtk-provider-sign-in = Connectez-vous au compte { $address } sur le site de { $provider }. Votre mot de passe ne sera pas transmis à Inbox Classic. Vous pouvez aussi utiliser un mot de passe d'application créé dans les paramètres de sécurité de votre compte.
-gtk-provider-sign-in-apps = Connectez-vous au compte { $address } sur le site de { $provider } avec l'une de vos applications de connexion (« Autres options de connexion »). Vous pouvez aussi utiliser un mot de passe d'application créé dans les paramètres de sécurité de votre compte.
+gtk-provider-sign-in = Connectez-vous au compte { $address } sur le site de { $provider }. Votre mot de passe ne sera pas transmis à Inbox Classic. Si votre compte autorise les mots de passe d'application, vous pouvez en créer un dans ses paramètres de sécurité. Outlook.com et Microsoft 365 exigent une connexion via le navigateur.
+gtk-provider-sign-in-apps = Connectez-vous au compte { $address } sur le site de { $provider } avec l'une de vos applications de connexion (« Autres options de connexion »). Si votre compte autorise les mots de passe d'application, vous pouvez en créer un dans ses paramètres de sécurité. Outlook.com et Microsoft 365 exigent une connexion via le navigateur.
 gtk-accounts-add = Ajouter...
 gtk-accounts-properties = Propriétés...
 gtk-accounts-signature = Signature...
@@ -165,26 +163,16 @@ gtk-nothing-yet = Rien pour l'instant.
 ## Preferences
 
 gtk-preferences = Préférences
-# review: changed
-gtk-notify-subtitle = Uniquement lorsque Inbox Classic est en arrière-plan
+gtk-notify-subtitle = Uniquement lorsqu’Inbox Classic est en arrière-plan
 
 ## The desktop entry and the page of the software stores
 
-# review: new
 gtk-desktop-generic-name = Client de messagerie
-# review: new
 gtk-desktop-comment = Lire et écrire des e-mails : un programme de messagerie rapide et simple
-# review: new
 gtk-desktop-keywords = courriel;courrier;message;
-# review: new
 gtk-metainfo-summary = Un programme de messagerie rapide et simple
-# review: new
-gtk-metainfo-description = Inbox Classic lit et écrit les e-mails avec les dossiers à gauche, les messages en haut et le message en dessous, comme le faisaient les programmes de messagerie. Il fonctionne avec tout compte IMAP et SMTP, et se connecte à Outlook.com et Microsoft 365 par le navigateur.
-# review: new
-gtk-metainfo-feature-sanitized = Chaque message est affiché nettoyé, sans scripts, et les images d'Internet seulement quand vous le permettez
-# review: new
-gtk-metainfo-feature-search = Une recherche qui trouve des mots dans l'objet, les personnes, les noms de fichiers et le texte, avec les opérateurs de Gmail
-# review: new
-gtk-metainfo-feature-replies = Les réponses replient les messages précédents qu'elles citent
-# review: new
-gtk-metainfo-feature-offline = Le courrier reste lisible hors ligne ; les mots de passe sont gardés dans votre trousseau
+gtk-metainfo-description = Inbox Classic retrouve la disposition classique des logiciels de messagerie : dossiers à gauche, liste des messages en haut et volet de lecture en dessous. Il prend en charge les comptes IMAP et SMTP et permet de se connecter à Outlook.com et Microsoft 365 dans le navigateur.
+gtk-metainfo-feature-sanitized = Les messages sont affichés sans scripts ; les images provenant d’Internet ne sont chargées qu’avec votre accord
+gtk-metainfo-feature-search = Recherchez dans l’objet, les expéditeurs, les destinataires, les noms des pièces jointes et le texte avec les opérateurs de recherche de Gmail
+gtk-metainfo-feature-replies = Les messages cités dans les réponses sont repliés
+gtk-metainfo-feature-offline = Le courrier téléchargé reste accessible hors connexion ; les mots de passe sont enregistrés dans le trousseau du système

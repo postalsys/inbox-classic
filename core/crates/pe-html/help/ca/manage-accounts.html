@@ -1,4 +1,4 @@
-<!--review--><h1>Canviar, ordenar i suprimir comptes</h1>
+<h1>Canviar, ordenar i suprimir comptes</h1>
 <p class="summary">Canvieu el nom d’un compte, la configuració o la contrasenya, poseu els comptes en l’ordre que vulgueu o suprimiu-ne un.</p>
 <h2>Canviar un compte</h2>
 <ol>
@@ -8,23 +8,23 @@
 </ol>
 <ul>
     <li><!--os:windows,mac--><b data-text="ui-field-account-name"></b><!--/os--><!--os:linux--><b data-text="gtk-account-name-title"></b><!--/os--> és el nom del compte a la llista de carpetes, com ara <i>Gmail</i> o <i>Feina</i>.</li>
-    <li><!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os--> és el nom que veuen les persones a qui escriviu.</li>
+    <li><!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os--> és el nom que veuen els destinataris dels vostres missatges.</li>
     <li>Per conservar la contrasenya, deixeu <b data-text="ui-field-password"></b> en blanc.</li>
     <li>Un compte que inicia la sessió pel navegador indica quina aplicació d’inici de sessió fa servir.</li>
-    <li><b data-text="ui-field-other-addresses"></b> mostra altres adreces des de les quals envieu amb aquest compte, com ara un àlies, separades per comes: <code>Vendes &lt;vendes@example.com&gt;</code> o només l’adreça. Aleshores <b data-text="ui-field-from"></b> les ofereix totes sota el compte.</li>
+    <li><b data-text="ui-field-other-addresses"></b> permet indicar altres adreces d’enviament d’aquest compte, com ara àlies, separades per comes: <code>Vendes &lt;vendes@example.com&gt;</code> o només l’adreça. Aleshores <b data-text="ui-field-from"></b> ofereix aquestes adreces com a opcions de remitent.</li>
 </ul>
 <p><!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os--> a la mateixa finestra afegeix un altre compte.</p>
 <h2>Posar els comptes en ordre</h2>
-<p>Amb dos comptes o més, arrossegueu un compte a la llista de carpetes, o la seva fila sota <b data-text="ui-all-inboxes"></b>, damunt o sota un altre. Una línia mostra on anirà. També podeu fer clic amb el botó dret al compte i triar <b data-text="ui-account-move-up"></b> o <b data-text="ui-account-move-down"></b>. La llista de carpetes i les files sota <b data-text="ui-all-inboxes"></b> segueixen el nou ordre.</p>
+<p>Amb dos comptes o més, arrossegueu un compte a la llista de carpetes, o la seva fila sota <b data-text="ui-all-inboxes"></b>, damunt o sota un altre. Una línia indica la nova posició. També podeu fer clic amb el botó dret al compte i triar <b data-text="ui-account-move-up"></b> o <b data-text="ui-account-move-down"></b>. La llista de carpetes i les files sota <b data-text="ui-all-inboxes"></b> segueixen el nou ordre.</p>
 <h2>El menú del compte</h2>
-<p>Amb dos comptes o més, feu clic amb el botó dret a un compte de la llista de carpetes per veure aquestes ordres. Amb un sol compte, la llista de carpetes no hi té cap fila: les ordres són a <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> i al menú <b data-text="menu-tools"></b>.</p>
+<p>Amb dos comptes o més, feu clic amb el botó dret a un compte de la llista de carpetes per veure aquestes ordres. Amb un sol compte, no apareix cap fila amb el nom del compte a la llista de carpetes: les ordres són a <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> i al menú <b data-text="menu-tools"></b>.</p>
 <ul>
     <li><b data-text="ui-account-sync"></b> comprova només aquell compte.</li>
     <li><b data-text="cmd-mark-all-read"></b> marca com a llegides totes les carpetes del compte.</li>
     <li><b data-text="cmd-new-folder"></b>, <b data-text="ui-account-properties"></b>, <b data-text="ui-account-move-up"></b> i <b data-text="ui-account-move-down"></b>.</li>
 </ul>
 <h2>Suprimir un compte</h2>
-<aside class="note">En suprimir un compte, s’esborren d’aquest ordinador el correu que s’hi ha baixat i la contrasenya desada. El correu del servidor es conserva.</aside>
+<aside class="note">En suprimir un compte, s’esborren d’aquest ordinador les còpies locals dels missatges i les credencials d’inici de sessió desades. El correu del servidor es conserva.</aside>
 <p>Per suprimir un compte:</p>
 <ol>
     <li>Trieu <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
@@ -32,4 +32,3 @@
     <li>Confirmeu-ho. El compte desapareix de la llista de carpetes.</li>
 </ol>
 <nav class="related"><a href="topic:add-account"></a> <a href="topic:all-inboxes"></a> <a href="topic:signatures"></a></nav>
-<!--/review-->

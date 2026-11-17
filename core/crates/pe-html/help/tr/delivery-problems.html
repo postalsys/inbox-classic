@@ -1,21 +1,20 @@
-<!--review--><h1>Teslim edilemeyen iletiler</h1>
+<h1>Teslim edilemeyen iletiler</h1>
 <p class="summary">Gönderdiğiniz bir ileti geri döndüğünde veya geciktiğinde Inbox Classic nedenini ve ne yapabileceğinizi açıklar.</p>
-<p>Bir teslim bildirimi ileti listesinde teslim edilemedi işaretiyle görünür. Onu açtığınızda, üstündeki bir kart iletinizin teslim edilmediğini mi yoksa yalnızca geciktiğini mi söyler.</p>
+<p>Teslim edilemeyen veya geciken iletilere ilişkin bildirimler listede özel bir simgeyle gösterilir. Bildirimi açtığınızda üstteki kart, teslimatın başarısız mı olduğunu yoksa hâlâ geciktiğini mi belirtir.</p>
 <img src="picture:bounce-1-failed" alt="İletinin teslim edilmediğini, alıcıyı, nedeni ve ne yapılacağını söyleyen kartıyla bir teslim bildirimi">
-<p>Kart her alıcıyı, nedeni sade bir dille ve ne yapabileceğinizi listeler. <b data-text="bounce-details"></b> alıcı sunucunun kendi sözlerini gösterir.</p>
+<p>Kart, her alıcı için sorunun nedenini sade bir dille açıklar ve yapabileceklerinizi gösterir. <b data-text="bounce-details"></b> alıcı sunucunun özgün yanıtını gösterir.</p>
 <ul>
     <li><b data-text="bounce-show-message"></b> gönderdiğiniz iletiyi seçer.</li>
-    <li>Gecikmede <b data-text="bounce-show-delayed"></b> onu seçer. Posta sunucunuz hâlâ deniyor, bu yüzden yeniden göndermeniz gerekmez.</li>
+    <li>Geciken iletiyi görmek için <b data-text="bounce-show-delayed"></b> düğmesini kullanın. Posta sunucunuz teslimatı hâlâ deniyor, bu yüzden yeniden göndermeniz gerekmez.</li>
 </ul>
 <p>Sık görülen bazı nedenler:</p>
 <table>
-    <tr><th>Kartın söylediği</th><th>Ne yapmalı</th></tr>
+    <tr><th>Karttaki açıklama</th><th>Ne yapmalı</th></tr>
     <tr><td><b data-text="bounce-user-unknown"></b></td><td>Adresin yazımını kontrol edin veya kişiye şimdi kullandığı adresi sorun.</td></tr>
     <tr><td><b data-text="bounce-mailbox-full"></b></td><td>Birkaç gün sonra yeniden gönderin veya kişiye başka bir yoldan ulaşın.</td></tr>
-    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Çok sayıda bağlantı veya büyük bir ek gibi istenmeyen posta izlenimi verenler olmadan yeniden gönderin.</td></tr>
+    <tr><td><b data-text="bounce-spam-blocked"></b></td><td>Çok sayıda bağlantı veya büyük ek gibi istenmeyen posta şüphesi uyandırabilecek içerikleri çıkarıp yeniden gönderin.</td></tr>
     <tr><td><b data-text="bounce-ip-blocklisted"></b></td><td>Bildirimi posta sağlayıcınıza iletin. Sorun iletide değil.</td></tr>
-    <tr><td><b data-text="bounce-greylisting"></b></td><td>Hiçbir şey. Genellikle bir saat içinde teslim edilir.</td></tr>
+    <tr><td><b data-text="bounce-greylisting"></b></td><td>Sunucunun yeniden denemesini bekleyin. Bu tür geçici retlerde ileti genellikle bir saat içinde teslim edilir.</td></tr>
 </table>
-<p>Tüm teslim bildirimlerini bulmak için <code>is:bounce</code> arayın. Neden bilgisayarınızda belirlenir ve hiçbir şey hiçbir yere gönderilmez.</p>
+<p>Tüm teslim bildirimlerini bulmak için <code>is:bounce</code> arayın. Açıklama, ileti içeriği başka bir hizmete gönderilmeden bilgisayarınızda hazırlanır.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

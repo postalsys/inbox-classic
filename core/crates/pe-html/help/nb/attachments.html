@@ -1,12 +1,16 @@
-<!--review--><h1>Vedlegg</h1>
+<h1>Vedlegg</h1>
 <p class="summary">Åpne eller lagre filene som følger med en melding, og legg ved filer i meldingene du skriver.</p>
+<!--review--><h2>Se bilder og PDF-filer i meldingen</h2>
+<p>Bilder og de første sidene av PDF-filer vises etter teksten i en melding, med navn og størrelse. Klikk på en for å åpne filen. En lengre PDF-fil har en lenke som åpner den.</p>
+<p>Dette er kopier som Inbox Classic tegner selv: ingenting i en fil kjører, og ingenting lastes fra internett. En fil den ikke kan tegne, og filene i signerte eller krypterte meldinger, er bare i listen over filer.</p>
+<p>Slå av <b data-text="ui-preview-show"></b> under <b data-settings="reading"></b> for å se bare listen. Hvis en PDF-fil noen gang lukker Inbox Classic, vises ikke PDF-filer lenger, og meldingen sier fra; slå på <b data-text="ui-preview-pdfs"></b> for å vise dem igjen.</p><!--/review-->
 <h2>Åpne et vedlegg</h2>
-<p>Filene i en melding vises under meldingshodet, hver med navn og størrelse. Dobbeltklikk en fil for å åpne den med programmet datamaskinen din bruker for den. Med tastaturet trykker du <kbd>Tab</kbd> til filene er valgt, velger en med piltastene og trykker <kbd>Enter</kbd>.</p>
+<p>Filene i en melding vises under meldingshodet, hver med navn og størrelse. Dobbeltklikk på en fil for å åpne den i standardprogrammet for filtypen. Med tastaturet trykker du <kbd>Tab</kbd> til filene er valgt, velger en med piltastene og trykker <kbd>Enter</kbd>.</p>
 <p>Høyreklikk en fil for <b data-text="ui-attachment-open"></b>, <b data-text="ui-attachment-save-as"></b> og <b data-text="ui-attachment-save-all"></b>. Bindersen til høyre i meldingshodet viser også filene.</p>
-<p>Inbox Classic åpner aldri en fil som kan kjøre programmer: programmer, skript, installasjonsprogrammer, snarveier, diskbilder, nettsider og Office-dokumenter med makroer. For slike filer er <b data-text="ui-attachment-open"></b> slått av. Lagre filen, og åpne den selv bare hvis du stoler på hvor den kommer fra.</p>
-<p>En fil åpnes fra en egen mappe som Inbox Classic tømmer etter et døgn, og merkes som hentet fra Internett. En fil fra en kryptert melding lagres der dekryptert mens den er åpen. Første gang sier Inbox Classic fra om dette.</p>
+<p>Inbox Classic blokkerer direkte åpning av filtyper som kan kjøre kode: programmer, skript, installasjonsprogrammer, snarveier, diskbilder, nettsider og Office-dokumenter med makroer. For slike filer er <b data-text="ui-attachment-open"></b> slått av. Lagre filen, og åpne den selv bare hvis du stoler på hvor den kommer fra.</p>
+<p>Når du åpner et vedlegg, lagrer Inbox Classic en midlertidig kopi i en mappe for brukeren din og åpner den i et annet program. Kopier som er eldre enn 24 timer, fjernes neste gang Inbox Classic starter. På Windows og macOS merkes kopien som hentet fra internett. Vedlegg fra krypterte meldinger lagres dekryptert i denne mappen og blir ikke slettet bare fordi du lukker visningsprogrammet. Inbox Classic varsler om dette første gang.</p>
 <h2>Lagre et vedlegg</h2>
-<p>Høyreklikk en fil og velg <b data-text="ui-attachment-save-as"></b>, eller velg <b data-text="ui-attachment-save-all"></b> for å lagre alle i en mappe. Inbox Classic foreslår et trygt navn, uten tegn som kan få et navn til å se ut som noe annet. En fil med samme navn som allerede ligger i mappen, beholdes, og den nye får et nummer.</p>
+<p>Høyreklikk en fil og velg <b data-text="ui-attachment-save-as"></b>, eller velg <b data-text="ui-attachment-save-all"></b> for å lagre alle i en mappe. Inbox Classic foreslår et trygt navn, uten tegn som kan skjule filtypen eller gi navnet et misvisende utseende. En fil med samme navn som allerede ligger i mappen, beholdes, og den nye får et nummer.</p>
 <aside class="warning">Åpne bare vedlegg fra personer du venter dem fra. Et program, eller et dokument som ber deg «aktivere innhold», kan ta over datamaskinen din. Programmer er blant annet <!--os:windows--><code>.exe</code>-, <code>.msi</code>-, <code>.js</code>-, <code>.vbs</code>-, <code>.bat</code>- og <code>.scr</code>-filer.<!--/os--><!--os:mac--><code>.app</code>-, <code>.pkg</code>-, <code>.dmg</code>- og <code>.command</code>-filer.<!--/os--><!--os:linux--><code>.sh</code>-, <code>.deb</code>-, <code>.AppImage</code>- og <code>.desktop</code>-filer.<!--/os--></aside>
 <h2>Legg ved en fil</h2>
 <p>Slik legger du ved filer i meldingen du skriver:</p>
@@ -16,4 +20,4 @@
 </ol>
 <p>Du kan også dra filer fra <!--os:windows-->Filutforsker<!--/os--><!--os:mac-->Finder<!--/os--><!--os:linux-->filbehandleren<!--/os--> til adressefeltene. En fil som ikke er et bilde, kan også slippes på teksten.</p>
 <p>Vil du fjerne en fil, merker du den og trykker <kbd>Delete</kbd>, eller høyreklikker den og velger <b data-text="ui-remove"></b>. Filene leses når meldingen sendes, så la dem ligge der de er til da.</p>
-<nav class="related"><a href="topic:write-message"></a> <a href="topic:save-print-import"></a> <a href="topic:links-scripts"></a></nav><!--/review-->
+<nav class="related"><a href="topic:write-message"></a> <a href="topic:save-print-import"></a> <a href="topic:links-scripts"></a></nav>

@@ -1,26 +1,24 @@
-<!--review-->
 <h1>Eine Nachricht signieren und verschlüsseln</h1>
-<p class="summary">Signieren Sie eine Nachricht, damit die Empfänger wissen, dass sie von Ihnen stammt, und verschlüsseln Sie sie, damit nur die Empfänger sie lesen können.</p>
-<p>Eine signierte Nachricht belegt, dass Sie sie geschrieben haben und dass niemand sie unterwegs verändert hat. Eine verschlüsselte Nachricht können nur ihre Empfänger und Sie lesen, und sie ist immer auch signiert. Für beides brauchen Sie einen eigenen Schlüssel.</p>
+<p class="summary">Mit einer digitalen Signatur können Empfänger die Nachricht prüfen; mit Verschlüsselung schützen Sie ihren Inhalt vor fremden Blicken.</p>
+<p>Eine digitale Signatur lässt erkennen, ob der Inhalt seit dem Signieren verändert wurde. Wem der verwendete Schlüssel gehört, muss gesondert überprüft werden. Den verschlüsselten Inhalt können nur die Empfänger und Sie lesen. Verschlüsselt gesendete Nachrichten werden auch signiert. Für beides brauchen Sie einen eigenen Schlüssel.</p>
 <p>So signieren oder verschlüsseln Sie eine Nachricht:</p>
 <ol>
-    <li>Klicken Sie im Nachrichtenfenster auf <b data-text="ui-tb-sign"></b> oder <b data-text="ui-tb-encrypt"></b>, oder wählen Sie <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> oder <b data-text="cmd-compose-encrypt"></b>. Sie können auch <kbd data-command="compose_sign"></kbd> oder <kbd data-command="compose_encrypt"></kbd> drücken. Wenn Sie noch keinen Schlüssel haben, bietet Inbox Classic an, einen zu erstellen.</li>
+    <li>Klicken Sie im Nachrichtenfenster auf <b data-text="ui-tb-sign"></b> oder <b data-text="ui-tb-encrypt"></b>. Alternativ wählen Sie <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> oder <b data-text="cmd-compose-encrypt"></b> oder drücken <kbd data-command="compose_sign"></kbd> bzw. <kbd data-command="compose_encrypt"></kbd>. Fehlt ein eigener Schlüssel für die Absenderadresse, bietet Inbox Classic an, einen zu erstellen.</li>
     <li>Klicken Sie auf <b data-text="ui-tb-send"></b>.</li>
 </ol>
-<p>Solange <b data-text="ui-tb-encrypt"></b> eingeschaltet ist, zeigt die Zeile unter dem Betreff jeden Empfänger mit einem Schloss, und Inbox Classic sucht die Schlüssel, die es noch nicht hat:</p>
+<p>Wenn <b data-text="ui-tb-encrypt"></b> aktiviert ist, erscheint unter dem Betreff für jeden Empfänger ein farbiges Statussymbol. Inbox Classic sucht automatisch nach fehlenden Schlüsseln:</p>
 <table>
-    <tr><th>Schloss</th><th>Bedeutung</th></tr>
-    <tr><td>Grün</td><td>Sie haben den Schlüssel des Empfängers überprüft.</td></tr>
-    <tr><td>Blau</td><td>Sie haben den Schlüssel des Empfängers, aber Sie haben ihn nicht überprüft.</td></tr>
+    <tr><th>Farbe</th><th>Bedeutung</th></tr>
+    <tr><td>Grün</td><td>Sie haben überprüft, dass der Schlüssel dem Empfänger gehört.</td></tr>
+    <tr><td>Blau</td><td>Ein Schlüssel liegt vor, dessen Inhaber Sie noch nicht überprüft haben, oder es ist Ihr eigener Schlüssel.</td></tr>
     <tr><td>Grau</td><td>Inbox Classic sucht den Schlüssel des Empfängers.</td></tr>
-    <tr><td>Orange</td><td>Für den Empfänger wurde kein Schlüssel gefunden.</td></tr>
+    <tr><td>Orange</td><td>Für den Empfänger liegt kein verwendbarer Schlüssel vor.</td></tr>
 </table>
-<h2>Wenn ein Empfänger keinen Schlüssel hat</h2>
-<p>Eine verschlüsselte Nachricht wird nur gesendet, wenn jeder Empfänger einen Schlüssel hat. Fehlt einer, öffnet <b data-text="ui-tb-send"></b> das Fenster <b data-text="ui-recipient-keys-title"></b>. Dort können Sie auf <b data-text="ui-recipient-find-key"></b> klicken, um erneut zu suchen, auf <b data-text="ui-recipient-remove"></b>, um diese Person wegzulassen, oder auf <b data-text="ui-send-unencrypted"></b>. Sie können die Person auch um ihren öffentlichen Schlüssel bitten und ihn importieren.</p>
+<h2>Wenn ein verwendbarer Schlüssel fehlt</h2>
+<p>Zum verschlüsselten Senden muss für jeden Empfänger ein verwendbarer Schlüssel vorliegen. Ein Klick auf <b data-text="ui-tb-send"></b> öffnet dann das Fenster <b data-text="ui-recipient-keys-title"></b>. Über <b data-text="ui-recipient-find-key"></b> können Sie die Suche wiederholen; mit <b data-text="ui-recipient-remove"></b> nehmen Sie den Empfänger aus der Nachricht. <b data-text="ui-send-unencrypted"></b> ist nur verfügbar, wenn keine Inhalte aus einer verschlüsselten Nachricht mehr enthalten sind. Sie können den Empfänger auch um seinen öffentlichen Schlüssel bitten und ihn importieren.</p>
 <h2>Antworten auf verschlüsselte E-Mails</h2>
-<p>Eine Antwort auf eine verschlüsselte Nachricht oder deren Weiterleitung beginnt mit eingeschaltetem <b data-text="ui-tb-encrypt"></b>, und Inbox Classic fragt nach, bevor Sie es ausschalten. Solange die Nachricht noch den verschlüsselten Text zitiert oder dessen Anlagen enthält, kann sie nur verschlüsselt gesendet werden.</p>
-<p>Entwürfe einer verschlüsselten Nachricht werden verschlüsselt gespeichert, ebenso ihre Kopie in <b data-text="folder-sent"></b>.</p>
+<p>Bei Antworten auf verschlüsselte Nachrichten und deren Weiterleitung ist <b data-text="ui-tb-encrypt"></b> zunächst aktiviert. Inbox Classic fragt nach, bevor Sie die Verschlüsselung ausschalten. Solange übernommener Text, Bilder oder Anlagen enthalten sind, lässt sich die Nachricht nur verschlüsselt senden.</p>
+<p>Bei aktivierter Verschlüsselung werden Entwürfe nur für Ihren eigenen Schlüssel verschlüsselt gespeichert. Auch die Kopie im Ordner <b data-text="folder-sent"></b> bleibt verschlüsselt.</p>
 <h2>Ihren öffentlichen Schlüssel weitergeben</h2>
-<p>Damit Ihnen jemand verschlüsselte E-Mails senden kann, wählen Sie <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Ihr öffentlicher Schlüssel wird der Nachricht als Datei angehängt.</p>
+<p>Damit Ihnen jemand verschlüsselte E-Mails senden kann, wählen Sie <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b>. Der öffentliche Schlüssel der gewählten Absenderadresse wird als Datei angehängt.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->

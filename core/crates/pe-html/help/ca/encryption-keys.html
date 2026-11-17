@@ -1,6 +1,6 @@
-<!--review--><h1>Claus de xifratge</h1>
+<h1>Claus de xifratge</h1>
 <p class="summary">Creeu una clau per signar els missatges i rebre correu xifrat, i deseu les claus dels vostres contactes.</p>
-<p>Inbox Classic signa i xifra el correu amb claus OpenPGP. La vostra clau té dues meitats: una clau pública que doneu als altres i una clau privada que es queda a l’ordinador. Les claus dels contactes us permeten comprovar-ne les signatures i xifrar-los correu.</p>
+<p>Inbox Classic signa i xifra el correu amb claus OpenPGP. Disposeu d’un parell de claus: una de pública, que podeu compartir, i una de privada, que es queda a l’ordinador. Les claus dels contactes us permeten comprovar-ne les signatures i xifrar-los correu.</p>
 <p>Per crear la vostra clau:</p>
 <ol>
     <li>Trieu <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> i feu clic a <b data-text="ui-keys-new"></b>.</li>
@@ -8,13 +8,12 @@
     <li>Feu clic a <b data-text="ui-keys-backup-now"></b> i trieu una frase de pas. Guardeu el fitxer i la frase de pas en llocs segurs diferents.</li>
 </ol>
 <aside class="warning">Sense una còpia de seguretat, la clau no es pot recuperar si es perd o es restableix aquest ordinador, i el correu xifrat amb la clau ja no es pot llegir.</aside>
-<h2>Les claus estan protegides sense frases de pas</h2>
-<p>Les claus privades estan protegides per una clau desada <!--os:windows-->a l’Administrador de credencials<!--/os--><!--os:mac-->al clauer<!--/os--><!--os:linux-->a l’anell de claus del sistema<!--/os-->, de manera que no heu d’escriure mai una frase de pas per fer-les servir. Només trieu una frase de pas per a una còpia de seguretat. Si la clau apareix bloquejada, aquella protecció s’ha restablert: feu clic a <b data-text="ui-keys-import"></b> i trieu-ne la còpia de seguretat.</p>
+<h2>Protecció de les claus a l’ordinador</h2>
+<p>Les claus privades estan protegides per una clau mestra desada <!--os:windows-->a l’Administrador de credencials<!--/os--><!--os:mac-->al clauer<!--/os--><!--os:linux-->a l’anell de claus del sistema<!--/os-->, de manera que no heu d’introduir una frase de pas a cada ús. La frase de pas protegeix el fitxer de còpia de seguretat. Si una clau apareix bloquejada, pot ser que la clau mestra que la protegeix ja no estigui disponible. Per restaurar la clau privada, feu clic a <b data-text="ui-keys-import"></b> i trieu la còpia de seguretat d’aquesta clau privada.</p>
 <h2>Afegir claus</h2>
-<p>Feu clic a <b data-text="ui-keys-import"></b> per afegir una clau des d’un fitxer, com ara una que us ha enviat un contacte o una còpia de seguretat vostra. Una clau privada protegida per una frase de pas la demana una vegada. Després Inbox Classic pregunta si voleu fer servir una clau vostra importada per a les vostres adreces.</p>
+<p>Feu clic a <b data-text="ui-keys-import"></b> per afegir una clau des d’un fitxer, com ara una que us ha enviat un contacte o una còpia de seguretat vostra. Si la clau privada està protegida amb una frase de pas, l’haureu d’introduir durant la importació. Després, Inbox Classic us pregunta si voleu associar la clau importada a les vostres adreces d’enviament.</p>
 <p>A partir d’aleshores, la clau d’un contacte es fa servir per a la seva adreça. Si més endavant apareix una clau diferent per a la mateixa adreça, l’actual continua en ús fins que trieu la nova a les propietats del contacte.</p>
 <p>Per compartir la vostra clau pública, seleccioneu-la i feu clic a <b data-text="ui-keys-export"></b>. També podeu triar la clau del compte a les seves propietats, a la pestanya <b data-text="ui-account-security"></b>.</p>
-<p>Quan xifreu per a algú de qui no teniu la clau, Inbox Classic la demana al domini de la seva adreça i després a keys.openpgp.org. Només s’envia l’adreça. Per no consultar mai keys.openpgp.org, desactiveu <b data-text="ui-pgp-keyserver"></b> a <b data-settings="reading"></b>.</p>
-<p>Les claus també viatgen amb el correu. Els missatges d’una adreça amb clau porten la seva clau pública, perquè altres aplicacions us puguin xifrar missatges, i Inbox Classic aprèn la clau d’un contacte dels seus missatges de la mateixa manera. Per deixar d’enviar la vostra, desactiveu <b data-text="ui-account-autocrypt"></b> a la pestanya <b data-text="ui-account-security"></b> del compte.</p>
+<p>Si falta la clau d’un destinatari en xifrar un missatge, Inbox Classic la cerca primer al domini de la seva adreça de correu. Si no la troba, envia l’adreça a keys.openpgp.org. Per desactivar aquesta consulta a keys.openpgp.org, desactiveu l’opció <b data-text="ui-pgp-keyserver"></b> a <b data-settings="reading"></b>. La cerca al domini continua disponible.</p>
+<p>Si l’Autocrypt està activat i la vostra adreça de remitent té una clau associada, Inbox Classic inclou la clau pública als missatges. Altres aplicacions poden fer-la servir per enviar-vos missatges xifrats. En obrir un missatge rebut, Inbox Classic també pot obtenir la clau pública del remitent. Això no confirma a qui pertany la clau. Per deixar d’enviar la vostra, desactiveu l’opció <b data-text="ui-account-autocrypt"></b> a la pestanya <b data-text="ui-account-security"></b> de les propietats del compte.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

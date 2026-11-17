@@ -1,14 +1,14 @@
-<!--review--><h1>Tilkoblingene Inbox Classic oppretter</h1>
-<p class="summary">Hvor Inbox Classic kobler til, og hvorfor, for de teknisk nysgjerrige.</p>
+<h1>Tilkoblingene Inbox Classic oppretter</h1>
+<p class="summary">Hvilke tjenester Inbox Classic kobler til, og hva tilkoblingene brukes til.</p>
 <ul>
     <li><b>E-postserverne dine</b>, over IMAP for å lese e-post og SMTP for å sende den. Tilkoblingene krypteres med TLS, og sertifikatet til hver server kontrolleres mot dem systemet ditt stoler på. Inbox Classic avviser en server uten kryptering, med mindre du velger <b data-text="ui-security-none"></b> og bekrefter.</li>
     <li><b>Når du legger til en konto</b>, for å slå opp serverne. Inbox Classic leser DNS-postene til domenet ditt via DNS over HTTPS (Cloudflare, deretter Google), aldri vanlig DNS. Programmet prøver også autoconfig-filen til leverandøren din og listen over leverandører fra Thunderbird (ISPDB). For Exchange spør det Microsoft Autodiscover, som får passordet ditt bare når det ber om det over HTTPS. En server uten kryptering velges aldri.</li>
     <li><b>Pålogging i nettleseren</b>, med OAuth 2.0 og PKCE, til Google, Microsoft eller leverandøren av påloggingsappen din. Nettleseren går bare tilbake til Inbox Classic på denne datamaskinen.</li>
-    <li><b>Merkelogoer</b> (BIMI), fra HTTPS-adressen til merket når meldingen ikke har med logoen, én gang hver gang Inbox Classic kjører. Dette skjer bare når e-postserveren din har godkjent DMARC-kontrollen av meldingen og godkjent logoen.</li>
-    <li><b>Bilder fra Internett</b>, bare når du ber om dem.</li>
+    <li><b>Merkelogoer</b> (BIMI), fra HTTPS-adressen til merket når meldingen ikke inneholder logoen og en lagret kopi ikke kan brukes. Nedlastede logoer lagres og gjenbrukes, også etter at programmet er startet på nytt. Dette skjer bare når e-postserveren din har godkjent DMARC-kontrollen av meldingen og godkjent logoen.</li>
+    <li><b>Bilder fra Internett</b>, når du ber om dem, eller automatisk i samsvar med bildeinnstillingene dine.</li>
     <li><b>Avmelding</b>, bare når du klikker den. En ettklikksforespørsel (RFC 8058) sendes bare når listen har signert meldingen med DKIM.</li>
-    <li><b>Krypteringsnøkler</b>, bare når du krypterer til noen du ikke har nøkkelen til: domenet til adressen (Web Key Directory), deretter keys.openpgp.org hvis du ikke har slått det av. Bare adressen sendes.</li>
+    <li><b>Krypteringsnøkler</b> søkes opp når en mottakers nøkkel mangler ved kryptering, eller når du ber om et nøkkelsøk. Ved søk på e-postadresse spør Inbox Classic først domenet til adressen (Web Key Directory). Om nødvendig sendes adressen deretter til keys.openpgp.org, hvis dette søket er slått på. Ved søk på fingeravtrykk eller nøkkel-ID sendes denne identifikatoren til keys.openpgp.org i stedet for en e-postadresse.</li>
     <!--os:mac--><li><b>Oppdateringer</b>, fra inboxclassic.com, for å se om en ny versjon er kommet.</li><!--/os-->
 </ul>
 <p>Påloggingskoder tilbys bare når Authentication-Results-hodet fra leverandøren din sier at domenet har signert meldingen (DKIM). Dette krever ingen egen tilkobling.</p>
-<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav><!--/review-->
+<nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>

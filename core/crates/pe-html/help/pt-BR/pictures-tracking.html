@@ -1,19 +1,18 @@
-<!--review--><h1>Imagens e rastreamento</h1>
+<h1>Imagens e rastreamento</h1>
 <p class="summary">Por que as imagens da internet são bloqueadas e como mostrá-las para uma mensagem ou um remetente em que você confia.</p>
-<p>Uma mensagem pode mostrar imagens que o remetente mantém na internet. Baixar uma dessas imagens informa ao remetente que você abriu a mensagem, quando e de onde. Por isso, o Inbox Classic não as baixa.</p>
-<p>As imagens enviadas dentro da mensagem são mostradas, porque não dizem nada ao remetente.</p>
+<p>Uma mensagem pode mostrar imagens que o remetente mantém na internet. Baixar essas imagens pode informar ao remetente quando você abriu a mensagem e revelar seu endereço IP. Por isso, o Inbox Classic bloqueia esse download por padrão.</p>
+<p>As imagens enviadas dentro da mensagem são mostradas, pois sua exibição não exige uma nova conexão com o remetente.</p>
 <p>Quando uma mensagem tem imagens da internet, uma barra indica que algumas imagens foram bloqueadas. Para vê-las em uma mensagem em que você confia:</p>
 <ul>
     <li><!--os:windows,mac-->Clique na barra.<!--/os--><!--os:linux-->Clique em <b data-text="gtk-download-pictures"></b> na barra.<!--/os--></li>
     <li>Ou escolha <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Isto mostra apenas as imagens dessa mensagem. A próxima mensagem começa bloqueada novamente.</p>
+<p>Isso libera apenas as imagens dessa mensagem. Para as outras mensagens, valem as configurações de bloqueio.</p>
 <h2>Remetentes em que você confia</h2>
 <p>Para receber sempre as imagens de um remetente, <!--os:windows-->clique na seta na ponta direita da barra<!--/os--><!--os:mac-->clique na seta ao lado de <b data-text="cmd-pictures"></b> na barra<!--/os--><!--os:linux-->clique na seta ao lado de <b data-text="gtk-download-pictures"></b> na barra<!--/os-->. Escolha baixar sempre as imagens desse remetente, ou de todos do domínio dele.</p>
-<p>As imagens passam a ser carregadas automaticamente, mas só quando o seu provedor de e-mail confirma que a mensagem vem realmente desse domínio. Uma mensagem que apenas finge vir dele continua perguntando, e a barra indica que não foi possível confirmar o remetente. Em <b data-text="folder-junk"></b>, as imagens nunca são carregadas automaticamente.</p>
+<p>As imagens passam a ser carregadas automaticamente, mas só quando o seu provedor de e-mail confirma que a mensagem vem realmente desse domínio. Uma mensagem cujo domínio não pôde ser confirmado continua exigindo autorização para carregar imagens, e a barra indica que não foi possível confirmar o remetente. Em <b data-text="folder-junk"></b>, as imagens nunca são carregadas automaticamente.</p>
 <p>Para remover um remetente da lista, use <b data-text="ui-trusted-senders-button"></b> em <b data-settings="reading"></b>.</p>
 <h2>Imagens em todas as mensagens</h2>
-<p><b data-text="ui-pictures-always-option"></b> em <b data-settings="reading"></b> baixa as imagens de todas as mensagens, exceto em <b data-text="folder-junk"></b>. Vem desativado, porque assim os remetentes podem saber quando você lê as mensagens deles.</p>
-<p>O logotipo de uma marca ao lado do cabeçalho não é uma imagem de rastreamento. É aprovado pelo seu servidor de e-mail e vem da marca, não das imagens do remetente.</p>
+<p><b data-text="ui-pictures-always-option"></b> em <b data-settings="reading"></b> baixa as imagens de todas as mensagens, exceto em <b data-text="folder-junk"></b>. Essa opção vem desativada, pois o carregamento automático pode revelar aos remetentes quando você lê suas mensagens. As imagens externas em partes criptografadas sempre exigem autorização a cada abertura.</p>
+<p>O logotipo de uma marca ao lado do cabeçalho é tratado separadamente das imagens no conteúdo da mensagem. Ele só aparece após a aprovação do seu servidor de e-mail. Os logotipos baixados são salvos e reutilizados. Quando um logotipo é baixado, o servidor que o hospeda pode ver seu endereço IP e o horário da solicitação.</p>
 <nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

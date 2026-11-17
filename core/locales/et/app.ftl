@@ -12,7 +12,6 @@ menu-layout = Pai&gutus
 menu-sort-by = Sor&teeri
 menu-text-size = Teksti &suurus
 menu-folder = K&aust
-# review: new
 menu-insert = &Lisa
 
 ## The commands
@@ -26,7 +25,7 @@ cmd-pictures = Laadi &pildid alla
 cmd-about = &Teave Inbox Classicu kohta
 cmd-new-mail = &Uus kiri
 cmd-reply = &Vasta saatjale
-cmd-reply-all = Vasta &kõigile
+cmd-reply-all = Vasta k&õigile
 cmd-forward = &Edasta
 cmd-help = &Sisukord
 cmd-delete = Ku&stuta kiri
@@ -45,16 +44,16 @@ cmd-import = &Impordi kirjad...
 cmd-outbox = Väl&jundkaust...
 cmd-properties = Atri&buudid
 cmd-mark-all-read = Märgi kõik lo&etuks
-cmd-junk = Märgi &rämpspostiks
-cmd-not-junk = Märgi &tavapostiks
+cmd-junk = M&ärgi rämpspostiks
+cmd-not-junk = &Märgi tavapostiks
 cmd-archive = A&rhiveeri
 cmd-watch-conversation = &Jälgi vestlust
-cmd-ignore-conversation = &Ignoreeri vestlust
+cmd-ignore-conversation = Ignoreeri ve&stlust
 cmd-next-message = &Järgmine kiri
 cmd-previous-message = &Eelmine kiri
-cmd-next-unread = Järgmine &lugemata kiri
+cmd-next-unread = Jä&rgmine lugemata kiri
 cmd-go-to-folder = &Mine kausta...
-cmd-find-in-message = Otsi &sellest kirjast...
+cmd-find-in-message = Otsi sellest kir&jast...
 ui-go-to-prompt = Mine kausta:
 ui-find-in-message-hint = Otsi sellest kirjast
 ui-find-not-found = „{ $words }“ ei ole selles kirjas
@@ -77,33 +76,27 @@ cmd-text-size-medium = &Keskmine
 cmd-text-size-smaller = Vä&iksem
 cmd-text-size-smallest = &Väikseim
 cmd-hide-ignored = Peida &ignoreeritud vestlused
-cmd-hide-read = Peida &loetud kirjad
+cmd-hide-read = Peida loet&ud kirjad
 cmd-notify = Teavita &uuest postist
 cmd-open = &Ava Inbox Classic
 cmd-default-app = Määra &vaikimisi meiliprogrammiks...
-cmd-view-source = Kirja &lähtekood
+cmd-view-source = Kirja lä&htekood
 cmd-ai-agents = &Tehisintellekti agendid...
 cmd-options = &Seaded...
 cmd-message-rules = Kirjade &reeglid...
-# review: new
 cmd-encryption-keys = Krü&pteerimisvõtmed...
 cmd-create-rule-from-message = L&oo kirjast reegel...
 cmd-select-all = Vali &kõik
 cmd-undo = &Võta tagasi
-cmd-copy = Kopeeri k&austa...
+cmd-copy = Kopeeri ka&usta...
 cmd-address-book = &Aadressiraamat...
 cmd-add-sender-to-book = Lisa saatja aa&dressiraamatusse
 cmd-import-address-book = Impordi aadressi&raamat...
 cmd-export-address-book = &Ekspordi aadressiraamat...
-# review: new
 cmd-export-setup = Ekspordi seade&d ja kontod...
-# review: new
-cmd-import-setup = Impordi &seaded ja kontod...
-# review: new
+cmd-import-setup = I&mpordi seaded ja kontod...
 cmd-compose-sign = &Allkirjasta digitaalselt
-# review: new
 cmd-compose-encrypt = &Krüpteeri
-# review: new
 cmd-attach-my-key = Manusta minu &avalik võti
 
 ## The tray icon's menu
@@ -220,11 +213,8 @@ ui-format-line = Lisa horisontaaljoon
 ui-tb-send = Saada
 ui-tb-save = Salvesta
 ui-tb-attach = Manusta
-# review: new
 ui-tb-sign = Allkirjasta
-# review: new
 ui-tb-encrypt = Krüpteeri
-# review: new
 ui-field-keys = Võtmed:
 ui-field-from = Saatja:
 ui-field-to = Saaja:
@@ -236,9 +226,7 @@ ui-signature = Allkiri
 ui-signature-hint = Lisatakse sellelt kontolt saadetavatele uutele kirjadele, vastustele ja edastatud kirjadele.
 ui-signature-not-saved = Allkirja ei saanud salvestada.
 ui-all-inboxes = Kõik sisendkaustad
-# review: new
 ui-all-sent = Kõik saadetud
-# review: new
 ui-all-drafts = Kõik mustandid
 ui-flagged-folder = Lipuga
 ui-all-folders = Kõik kaustad
@@ -333,8 +321,8 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com ja Microsoft 365: logige s
 ui-start-intro-apps = Logige brauseris sisse mõne oma sisselogimisrakendusega (Muud sisselogimisviisid) või lisage allpool mis tahes meilikonto oma nime ja aadressiga.
 ui-use-app-password = Kasuta rakenduse parooli
 ui-the-provider = teie meiliteenuse pakkuja
-ui-provider-intro = Logige kontole { $email } sisse veebilehel, mida haldab { $provider }. Inbox Classic teie parooli ei näe. Võite kasutada ka konto turvasätetes loodud rakenduse parooli.
-ui-provider-intro-apps = Logige kontole { $email } sisse veebilehel, mida haldab { $provider }, kasutades mõnda oma sisselogimisrakendust („Muud sisselogimisviisid“). Võite kasutada ka konto turvasätetes loodud rakenduse parooli.
+ui-provider-intro = Logige kontole { $email } sisse veebilehel, mida haldab { $provider }. Inbox Classic teie parooli ei näe. Kui teie konto toetab rakenduse paroole, saate parooli luua konto turvasätetes. Outlook.com ja Microsoft 365 nõuavad sisselogimist brauseri kaudu.
+ui-provider-intro-apps = Logige kontole { $email } sisse veebilehel, mida haldab { $provider }, kasutades mõnda oma sisselogimisrakendust („Muud sisselogimisviisid“). Kui teie konto toetab rakenduse paroole, saate parooli luua konto turvasätetes. Outlook.com ja Microsoft 365 nõuavad sisselogimist brauseri kaudu.
 ui-finish = Lõpeta
 ui-logon = Sisselogimine
 ui-enter-password = Sisestage konto { $account } parool.
@@ -394,29 +382,17 @@ ui-sign-in-apps-intro = Sisselogimisrakendused võimaldavad kontodele brauseris 
 ui-col-issuer = Väljaandja
 ui-col-used-by = Kasutab
 ui-options-system-default = Süsteemi keel ({ $language })
-# review: new
 ui-settings-general = Üldine
-# review: new
 ui-settings-reading = Lugemine
-# review: changed
-ui-settings-new-mail = Uus post
-# review: new
+ui-settings-new-mail = Uued kirjad
 ui-settings-sending = Saatmine
-# review: new
 ui-settings-default-apps = Vaikerakendused
-# review: new
 ui-settings-message-list = Kirjade loend
-# review: new
 ui-settings-messages = Kirjad
-# review: new
-ui-settings-encryption = Krüptimine
-# review: new
+ui-settings-encryption = Krüpteerimine
 ui-settings-language = Keel
-# review: new
 ui-settings-label = { $label }:
-# review: new
 ui-apply = R&akenda
-# review: changed
 ui-language-label = &Keel:
 ui-restart-note = Keele vahetamiseks tuleb Inbox Classic taaskäivitada.
 ui-restart-ask = Valitud keel ({ $language }) rakendub pärast Inbox Classicu taaskäivitamist. Kas taaskäivitada kohe?
@@ -424,27 +400,21 @@ ui-notify-new-mail = &Teavita mind uute kirjade saabumisest
 ui-new-folder-title = Uus kaust
 ui-rename-folder-title = Muuda kausta nime
 ui-delete-folder-question = Kas kustutada kaust „{ $folder }“ koos selle kirjade ja alamkaustadega? Need kustutatakse ka serverist.
-ui-properties = &Atribuudid
+ui-properties = Atri&buudid
 ui-account-sync = Saada ja võta &vastu
 ui-account-properties = Atri&buudid...
 ui-account-move-up = Liiguta ü&les
 ui-account-move-down = Liiguta &alla
 ui-menu-open = &Ava
 ui-menu-flag = L&ipp
-ui-menu-view-source = Vaata &lähtekoodi
+ui-menu-view-source = Vaata lä&htekoodi
 ui-save-attachments = Salvesta manused
-# review: new
 ui-attachment-open = Ava
-# review: new
 ui-attachment-save-as = Salvesta kui...
-# review: new
 ui-attachment-save-all = Salvesta kõik...
-# review: new
 ui-attachments-strip = Manused
-# review: new
-ui-attachment-note-title = Selle faili avamine
-# review: new
-ui-attachment-program-tip = Seda tüüpi faili ei saa avada: see võib käivitada programme. Salvesta see, et ise avada.
+ui-attachment-note-title = Manuse avamine
+ui-attachment-program-tip = Inbox Classic seda tüüpi faile ei ava, sest need võivad käivitada programme. Vajaduse korral salvestage fail ja avage see ise.
 ui-clear-flag = &Eemalda lipp
 ui-button-move = &Teisalda
 ui-button-copy = K&opeeri
@@ -462,7 +432,6 @@ ui-browser-sign-in-server = { $server } (sisselogimine brauseris)
 ui-dont-allow = Ära luba
 ui-allow = &Luba
 ui-dont-send = Ära saada
-# review: new
 ui-dont-unsubscribe = Ära loobu tellimusest
 ui-edit-first = &Muuda enne
 ui-new-address = Uus aadress
@@ -521,7 +490,7 @@ ui-tb-write-to = Kirjuta
 ui-menu-new-contact = Uus &kontakt...
 ui-menu-new-group = Uus &grupp...
 ui-menu-write-to = Kir&juta
-ui-menu-delete = &Kustuta
+ui-menu-delete = Ku&stuta
 ui-book-find-hint = Sisestage nimi või e-posti aadress
 ui-book-all-contacts = Kõik kontaktid
 ui-col-phone = Telefon
@@ -594,267 +563,164 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Aadressiraamatut ei saanud salvestada: { $reason }
 ui-code-copied = Kood kopeeriti
-# review: changed
-ui-codes-in-notifications = &Näita uute kirjade teavitustes sisselogimiskoode
+ui-codes-in-notifications = &Näita uute kirjade teatistes sisselogimiskoode
 ui-tool-unread-only = Lugemata
 ui-no-unread = Siin pole lugemata kirju.
 ui-pictures-always-sender = Laadi saatjalt { $sender } pildid alati alla
 ui-pictures-always-domain = Laadi domeenist { $domain } saabunud kirjade pildid alati alla
 ui-pictures-unconfirmed = Ei õnnestunud kinnitada, et kiri pärineb domeenist { $domain }. Seetõttu ei laadita selle pilte automaatselt alla.
-# review: changed
-ui-pictures-always-option = &Laadi pildid alla kõigis kirjades
+ui-pictures-always-option = &Laadi alla kõigi kirjade pildid
 ui-pictures-always-warning = Saatjad näevad siis, millal te nende kirju loete.
-# review: new
 ui-protection-details = Ü&ksikasjad...
-# review: new
 ui-protection-details-title = Turvalisuse üksikasjad
 ui-download-heading = Allalaadimine
-# review: changed
 ui-download-ahead = &Laadi kirjad eelnevalt alla:
 ui-download-ahead-recent = Hiljutised kirjad suurusega kuni 1 MB
 ui-download-ahead-all = Kõik kirjad
 ui-download-ahead-never = Ainult avamisel
-# review: changed
-ui-download-limit = &Mahupiir konto kohta:
-# review: changed
+ui-download-limit = &Kettaruumi piir konto kohta:
 ui-send-delay = Viivitus &enne saatmist:
 ui-send-delay-note = Kuni kiri ootab saatmist, saate saatmise tühistada nupuga „Võta tagasi“.
 ui-dark-messages = Kuva kirju tumedal taustal, kui süsteem kasutab tumedat režiimi
+# review: new
+ui-preview-show = Näita &manuseid kirjades
+# review: new
+ui-preview-show-note = Näitab pilte ja PDF-failide esimesi lehekülgi kirja teksti järel. Inbox Classic teeb need eelvaated ise, nii et miski failis ei saa käivituda.
+# review: new
+ui-preview-pdfs = Näita PDF-&faile kirjades
 ui-sending-in = { $subject } saadetakse { $count ->
     [one] 1 sekundi pärast
    *[other] { $count } sekundi pärast
 }
 ui-send-undone = { $subject } jäi saatmata. Kiri on taas muutmiseks avatud.
-ui-send-too-late = { $subject } on juba saadetud.
+ui-send-too-late = Saatmist ei saa enam tagasi võtta: { $subject }.
 ui-outbox-status-undo = Saadetakse kell { $time }
 ui-download-note = Eelnevalt alla laaditud kirjad avanevad kohe. Mahupiiri ületamisel eemaldatakse arvutist vanimate kirjade koopiad. Kirjade avamisel laaditakse need uuesti alla.
 ui-attachment-downloading = Kirja allalaadimine on veel pooleli. Proovige uuesti, kui allalaadimine on lõppenud.
-# review: changed
 ui-trusted-senders-button = &Usaldusväärsed saatjad...
 ui-trusted-senders-title = Usaldusväärsed saatjad
 ui-trusted-senders-note = Nende saatjate kirjade pildid laaditakse automaatselt alla, kui teie meiliteenuse pakkuja on saatja domeeni kinnitanud.
 ui-trusted-everyone-at = Kõik domeeni { $domain } saatjad
 ui-trusted-senders-empty = Usaldusväärseid saatjaid pole veel lisatud.
-# review: new
-ui-search-encrypted = Otsi &krüptitud kirjadest
-# review: new
-ui-search-encrypted-note = Krüptitud kirjad dekrüptitakse selles arvutis pärast allalaadimist või avamist, et nende sõnu saaks leida ja loend näitaks nende enda teemat. Indeks ei ole krüptitud ja tehisintellekti agendid ei otsi sellest kunagi. Lülitage see välja, et need indeksist eemaldada.
-# review: new
+ui-search-encrypted = Otsi &krüpteeritud kirjadest
+ui-search-encrypted-note = Kui sobiv võti on saadaval, dekrüpteerib Inbox Classic allalaaditud või avatud kirjad selles arvutis. See võimaldab otsida nende sisust ning näidata loendis teksti eelvaadet ja kaitstud teemat. Dekrüpteeritud sisu salvestatakse kohalikku otsinguindeksisse krüpteerimata kujul. Tehisintellekti agentide otsingud seda sisu ei hõlma. Valiku väljalülitamisel eemaldatakse see sisu indeksist.
 ui-pgp-keyserver = &Otsi võtmeid serverist keys.openpgp.org
-# review: new
-ui-pgp-keyserver-note = Kui krüptite kirja või otsite võtit, saadetakse otsitav aadress serverisse keys.openpgp.org. Kõigepealt küsitakse aadressi enda domeenilt.
-# review: changed
+ui-pgp-keyserver-note = Aadressi järgi võtit otsides pöördub Inbox Classic esmalt selle domeeni poole. Vajaduse korral saadetakse otsitav aadress serverisse keys.openpgp.org. Sõrmejälje või võtme ID järgi otsides saadetakse aadressi asemel see tunnus.
 ui-eml-default = Ava .eml-&failid Inbox Classicuga
 ui-eml-default-done = Inbox Classic avab nüüd .eml-failid.
 ui-eml-default-failed = Inbox Classicut ei õnnestunud määrata .eml-failide avamise vaikerakenduseks: { $reason }
 ui-folders = Kaustad
 ui-sorted-by = Järjestus: { $field }
-# review: changed
 ui-layout-label = &Paigutus:
 ui-columns-note = Aken on veergudega paigutuse jaoks piisavalt lai. Paigutust saate muuta menüüs Vaade > Paigutus.
 ui-row-unread = Lugemata
 ui-row-flagged = Lipuga
 ui-row-attachments = Manustega
-# review: new
-ui-row-encrypted = Krüptitud
-# review: new
+ui-row-encrypted = Krüpteeritud
 ui-row-signed = Allkirjastatud
 ui-row-messages = { $count ->
     [one] { $count } kiri
    *[other] { $count } kirja
 }
-# review: changed
 ui-list-pictures = &Näita kirjade loendis saatjate pilte
-# review: changed
-ui-list-pictures-note = Veergudega paigutuses kuvatakse kinnitatud saatja korral brändilogo või aadressiraamatu pilt. Pildi puudumisel kuvatakse saatja initsiaalid. Logod laaditakse alla kord brändi, mitte iga kirja kohta.
+ui-list-pictures-note = Kui saatja domeen on kinnitatud, kuvatakse veergudega paigutuses kaubamärgi logo või Aadressiraamatu pilt. Pildi puudumisel kuvatakse saatja initsiaalid. Allalaaditud logod salvestatakse ja neid kasutatakse mitme kirja juures.
 ui-card-picture = Pilt:
-ui-card-picture-choose = &Vali...
+ui-card-picture-choose = V&ali...
 ui-picture-not-picture = See fail ei ole PNG- ega JPEG-pilt.
 ui-picture-too-large = See pilt on liiga suur. Valige kuni 10 MB suurune pilt, mille laius ja kõrgus ei ületa 8000 pikslit.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
-# review: new
 ui-keys-title = Krüpteerimisvõtmed
-# review: new
-ui-keys-intro = Sinu võtmed allkirjastavad sinu kirju ja avavad sulle krüpteeritud kirju. Kontaktide võtmed kontrollivad nende allkirju ja krüpteerivad neile saadetavad kirjad.
-# review: new
-ui-keys-empty = Võtmeid veel pole. Klõpsa „Uus võti“, et enda oma luua, või „Impordi“, et lisada olemasolev võti.
-# review: new
+ui-keys-intro = Oma võtmetega saate kirju allkirjastada ja teile saadetud krüpteeritud kirju lugeda. Kontaktide võtmetega saate kontrollida nende allkirju ja krüpteerida neile saadetavaid kirju.
+ui-keys-empty = Võtmeid veel pole. Oma võtme loomiseks klõpsake „Uus võti“. Olemasoleva võtme lisamiseks valige „Impordi“.
 ui-keys-col-name = Nimi
-# review: new
 ui-keys-col-address = Aadress
-# review: new
 ui-keys-col-kind = Liik
-# review: new
 ui-keys-col-status = Olek
-# review: new
-ui-keys-kind-own = Sinu võti
-# review: new
-ui-keys-kind-contact = Kontakt
-# review: new
+ui-keys-kind-own = Teie võti
+ui-keys-kind-contact = Kontakti võti
 ui-keys-status-verified = { $status }, kontrollitud
-# review: new
 ui-keys-new = &Uus võti...
-# review: new
 ui-keys-import = &Impordi...
-# review: new
-ui-keys-export = &Ekspordi...
-# review: new
+ui-keys-export = Eks&pordi...
 ui-keys-backup = &Varunda...
-# review: new
 ui-keys-verify = &Kontrolli...
-# review: new
 ui-keys-new-title = Uus võti
-# review: new
 ui-keys-new-for = Loo võti kontole:
-# review: new
 ui-keys-new-make = &Loo võti
-# review: new
-ui-keys-no-account = Lisa kõigepealt e-posti konto: võti luuakse konto aadressidele.
-# review: new
-ui-keys-memory-only = Paroole hoitakse ainult mälus, seega praegu loodud või imporditud privaatvõtit ei saa pärast Inbox Classicu sulgemist kasutada.
-# review: new
-ui-keys-backup-offer = Sinu uus võti on valmis. Kas salvestada sellest kohe varukoopia? Kui see arvuti kaob või lähtestatakse, saab võtme tagasi ainult varukoopiast.
-# review: new
+ui-keys-no-account = Lisage esmalt e-posti konto. Võti luuakse selle konto e-posti aadressidele.
+ui-keys-memory-only = Paroole hoitakse ainult mälus. Selles režiimis loodud või imporditud privaatvõtmeid ei saa pärast Inbox Classicu sulgemist enam kasutada.
+ui-keys-backup-offer = Uus võti on valmis. Kas soovite sellest kohe varukoopia salvestada? Kui arvuti kaob või selle andmed kustutatakse, saab võtme taastada ainult varukoopiast.
 ui-keys-backup-now = &Salvesta varukoopia...
-# review: new
 ui-keys-later = &Hiljem
-# review: new
 ui-keys-backup-title = Varunda võti
-# review: new
-ui-keys-backup-intro = Varukoopiat kaitseb parool. Hoia faili ja parooli eri turvalistes kohtades: võtme taastamiseks on vaja mõlemat.
-# review: new
+ui-keys-backup-intro = Varukoopiat kaitseb parool. Hoidke faili ja parooli turvaliselt ning teineteisest eraldi. Võtme taastamiseks on vaja mõlemat.
 ui-keys-passphrase = &Parool:
-# review: new
 ui-keys-passphrase-again = &Korda parooli:
-# review: new
-ui-keys-passphrase-differ = Paroolid ei ole samad.
-# review: new
-ui-keys-passphrase-short = Kasuta vähemalt 8 märgist parooli.
-# review: new
+ui-keys-passphrase-differ = Paroolid ei ühti.
+ui-keys-passphrase-short = Kasutage vähemalt 8 märgi pikkust parooli.
 ui-keys-backup-saved = Varukoopia salvestati.
-# review: new
 ui-keys-import-title = Impordi võti
-# review: new
-ui-keys-import-passphrase = Seda privaatvõtit kaitseb parool. Võtme importimiseks sisesta see:
-# review: new
+ui-keys-import-passphrase = See privaatvõti on parooliga kaitstud. Importimiseks sisestage võtme parool:
 ui-keys-file-filter = OpenPGP võtmed
-# review: new
-ui-keys-use-for = Kas kasutada seda võtit aadressi { $addresses } jaoks? Sealt saadetud kirjad allkirjastatakse sellega ja sellele krüpteeritud kirju saab siin lugeda.
-# review: new
+ui-keys-use-for = Kas võtta see võti kasutusele järgmiste aadresside jaoks: { $addresses }? Võtmega allkirjastatakse neilt aadressidelt saadetavad kirjad. Samuti saate sellega avada teile saadetud krüpteeritud kirju.
 ui-keys-use = &Kasuta
-# review: new
 ui-keys-not-now = &Mitte praegu
-# review: new
-ui-keys-remove-own = Kas eemaldada sinu võti { $fingerprint }? Sellele krüpteeritud kirju ei saa siin enam lugeda, kui sa selle varukoopiat uuesti ei impordi.
-# review: new
-ui-keys-remove-contact = Kas eemaldada kontakti { $name } võti? Tema allkirju ei saa kontrollida ega talle kirju krüpteerida, kuni lisad tema võtme uuesti.
-# review: new
-ui-key-properties-title = Võtme omadused
-# review: new
+ui-keys-remove-own = Kas eemaldada teie võti { $fingerprint }? Sellega krüpteeritud kirju saate siin uuesti lugeda alles pärast võtme varukoopia importimist.
+ui-keys-remove-contact = Kas eemaldada kontakti ({ $name }) võti? Kuni te pole võtit uuesti lisanud, ei saa te kontrollida selle kontakti allkirju ega talle saadetavaid kirju krüpteerida.
+ui-key-properties-title = Võtme atribuudid
 ui-key-names = Nimed:
-# review: new
 ui-key-fingerprint = Sõrmejälg:
-# review: new
 ui-key-status = Olek:
-# review: new
 ui-key-created = Loodud:
-# review: new
 ui-key-expires = Aegub:
-# review: new
 ui-key-never = Mitte kunagi
-# review: new
 ui-key-algorithm = Algoritm:
-# review: new
 ui-key-source = Päritolu:
-# review: new
 ui-key-addresses = Aadressid:
-# review: new
 ui-key-address-verified = { $address } (kontrollitud)
-# review: new
 ui-key-address-not-verified = { $address } (kontrollimata)
-# review: new
 ui-verify-title = Kontrolli võtit
-# review: new
-ui-verify-intro = Palu kontaktil { $name } lugeda sulle oma rakendusest ette oma võtme sõrmejälg, silmast silma või telefonis. Ära võrdle seda e-kirjaga saadetuga: kes saaks võtit muuta, saaks muuta ka seda.
-# review: new
-ui-verify-fingerprint = Sinu käes oleva võtme sõrmejälg:
-# review: new
+ui-verify-intro = Võrrelge sõrmejälge võtme omanikuga ({ $name }) silmast silma või telefonitsi. Paluge tal lugeda sõrmejälg ette oma rakendusest. Ärge võrrelge seda e-kirjaga saadetuga: kes saab asendada võtit, saab asendada ka kirjas olevat sõrmejälge.
+ui-verify-fingerprint = Teie salvestatud võtme sõrmejälg:
 ui-verify-marks = { $count ->
-    [one] Kui need klapivad, märgitakse võti nende omaks aadressile { $addresses }. Kui see aadress pole nende oma, klõpsa „Need erinevad“.
-   *[other] Kui need klapivad, märgitakse võti nende omaks aadressidele { $addresses }. Kui mõni neist pole nende oma, klõpsa „Need erinevad“.
+    [one] Kui sõrmejäljed ühtivad, kinnitate, et see võti ja järgmine aadress kuuluvad samale isikule: { $addresses }. Kui aadress ei kuulu võtme omanikule, valige „Need erinevad“.
+   *[other] Kui sõrmejäljed ühtivad, kinnitate, et see võti ja järgmised aadressid kuuluvad samale isikule: { $addresses }. Kui mõni aadress ei kuulu võtme omanikule, valige „Need erinevad“.
 }
-# review: new
 ui-verify-match = Need &ühtivad
-# review: new
 ui-verify-differ = Need &erinevad
-# review: new
-ui-verify-differs = Sinu käes olev võti ei ole see, mis on kontaktil { $name }. Eemalda see ja küsi temalt võti uuesti.
-# review: new
+ui-verify-differs = Teie salvestatud võti erineb võtme omaniku ({ $name }) kasutatavast võtmest. Eemaldage see ja küsige võti temalt uuesti.
 ui-verify-unmark = Märgi &kontrollimata
-# review: new
 ui-account-security = Turvalisus
-# review: new
-ui-account-security-intro = Võtmega saab sinu kirju allkirjastada ja teised saavad sulle krüpteeritud kirju saata.
-# review: new
-ui-account-key = &Selle konto võti:
-# review: new
+ui-account-security-intro = Võti võimaldab teie kirju allkirjastada ja teistel teile krüpteeritud kirju saata.
+ui-account-key = Se&lle konto võti:
 ui-account-key-none = Puudub
-# review: new
 ui-account-key-new = &Uus võti...
-# review: new
 ui-account-autocrypt = &Saada oma avalik võti kirjadega kaasa (Autocrypt)
-# review: new
 ui-contact-key = Krüpteerimisvõti:
-# review: new
 ui-contact-key-none = Võtit pole
-# review: new
 ui-contact-key-use-new = Kasuta &uut võtit
-# review: new
-ui-contact-key-keep = &Jäta senine
-# review: new
+ui-contact-key-keep = &Säilita senine võti
 ui-recipient-keys-title = Saajate võtmed
-# review: new
 ui-recipient-col-recipient = Saaja
-# review: new
 ui-recipient-col-key = Võti
-# review: new
 ui-recipient-find-key = &Otsi võtit
-# review: new
 ui-recipient-remove = &Eemalda kirjast
-# review: new
 ui-send-unencrypted = Saada &krüpteerimata
-# review: new
 ui-compose-make-key = Loo &võti...
-# review: new
 ui-compose-show-keys = &Krüpteerimisvõtmed...
-# review: new
 ui-compose-encrypt-off = Lülita krüpteerimine &välja
-# review: new
 ui-compose-keep-encrypted = &Jäta krüpteerituks
-# review: new
 ui-setup-export-title = Ekspordi seaded ja kontod
-# review: new
 ui-setup-import-title = Impordi seaded ja kontod
-# review: new
-ui-setup-export-intro = Vali, mida teise arvutisse kaasa võtta. Fail ei sisalda kirju: need laaditakse seal uuesti.
-# review: new
-ui-setup-use-passphrase = &Kaitse faili paroolifraasiga
-# review: new
-ui-setup-passphrase-note = Paroolifraasiga on fail krüptitud ja sisaldab ka sinu paroole, sisselogimisi ja privaatvõtmeid. Ilma selleta küsib iga konto teises arvutis oma parooli.
-# review: new
+ui-setup-export-intro = Valige, millised andmed soovite teise arvutisse üle kanda. Kirju faili ei lisata: need laaditakse teises arvutis uuesti alla.
+ui-setup-use-passphrase = Kaitse &faili parooliga
+ui-setup-passphrase-note = Parooliga kaitstud fail krüpteeritakse ning sinna lisatakse ka salvestatud paroolid, sisselogimisandmed ja privaatvõtmed. Paroolita faili kasutamisel peate teises arvutis kontodele uuesti sisse logima.
 ui-setup-export-button = &Ekspordi...
-# review: new
 ui-setup-file-filter = Inbox Classicu seaded ja kontod
-# review: new
-ui-setup-ask-passphrase = See fail on kaitstud paroolifraasiga. Sisesta see, et näha, mida fail sisaldab:
-# review: new
-ui-setup-import-intro = Vali, mida importida. Selles arvutis juba olevad kontod jäävad nagu on.
-# review: new
-ui-setup-from = Salvestatud Inbox Classicu versiooniga { $version } { $date }.
-# review: new
+ui-setup-ask-passphrase = See fail on parooliga kaitstud. Faili sisu vaatamiseks sisestage parool:
+ui-setup-import-intro = Valige, mida soovite importida. Selles arvutis juba seadistatud kontosid ei muudeta.
+ui-setup-from = Salvestatud { $date } rakendusega Inbox Classic { $version }.
 ui-setup-import-button = &Impordi
-# review: new
 ui-setup-done = Valmis
-# review: new
 ui-setup-first-run = Impordi seaded ja kontod teisest arvutist...

@@ -125,7 +125,6 @@ mac-no-calendar-app = Šajā Mac datorā nav kalendāra lietotnes, ar ko atvērt
 mac-file-not-saved = Failu nevarēja saglabāt.
 # review: new
 mac-unsubscribing = Atsakās no abonēšanas: { $target }…
-# review: new
 mac-loading-list = Ielādē…
 
 ## The compose window

@@ -1,15 +1,14 @@
-<!--review--><h1>Verificar la clau d’un contacte</h1>
-<p class="summary">Compareu l’empremta digital d’una clau amb el seu propietari per estar segurs que la clau és realment seva.</p>
-<p>Una clau pot venir de qualsevol lloc: un missatge, un servidor de claus, un fitxer. Qualsevol pot crear una clau amb el nom i l’adreça del vostre contacte. Verificar-la confirma que la clau que teniu és la que té el vostre contacte.</p>
+<h1>Verificar la clau d’un contacte</h1>
+<p class="summary">Contrasteu l’empremta digital de la clau amb el vostre contacte per confirmar que la clau li pertany.</p>
+<p>Una clau pot venir de qualsevol lloc: un missatge, un servidor de claus, un fitxer. Qualsevol pot crear una clau amb el nom i l’adreça del vostre contacte. Verificar-la confirma que la clau que teniu pertany al vostre contacte.</p>
 <p>Per verificar una clau:</p>
 <ol>
     <li>Trieu <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, seleccioneu la clau del contacte i feu clic a <b data-text="ui-keys-verify"></b>. També hi podeu fer clic a les propietats del contacte a la Llibreta d’adreces.</li>
-    <li>Demaneu al vostre contacte que us llegeixi l’empremta digital de la seva clau des de la seva pròpia aplicació, en persona o per telèfon.</li>
-    <li>Si tots els grups de quatre són iguals, feu clic a <b data-text="ui-verify-match"></b>. La clau es mostra com a verificada.</li>
-    <li>La finestra llista les adreces que això marca. Una clau pot indicar qualsevol adreça, de manera que si una no és del vostre contacte, feu clic a <b data-text="ui-verify-differ"></b>.</li>
+    <li>Demaneu al vostre contacte que us llegeixi l’empremta digital de la seva clau des de l’aplicació que fa servir, en persona o per telèfon.</li>
+    <li>Abans de confirmar-ho, comproveu també que totes les adreces de la finestra pertanyin al contacte. Si les adreces són correctes i tots els grups de quatre caràcters de l’empremta digital coincideixen, feu clic a <b data-text="ui-verify-match"></b>. La clau es mostra com a verificada.</li>
+    <li>La verificació s’aplica a totes les adreces de la finestra. Una clau pot contenir qualsevol adreça; si alguna no pertany al contacte, no confirmeu la verificació: feu clic a <b data-text="ui-verify-differ"></b>.</li>
 </ol>
-<aside class="warning">No compareu l’empremta digital amb una que us hagin enviat per correu electrònic. Qui pogués canviar la clau en un missatge també podria canviar l’empremta digital.</aside>
+<aside class="warning">No compareu l’empremta digital amb una que us hagin enviat per correu electrònic. Qui pot substituir la clau en un missatge també pot substituir l’empremta digital.</aside>
 <p>Si les empremtes digitals són diferents, feu clic a <b data-text="ui-verify-differ"></b>. La clau que teniu no és del vostre contacte: suprimiu-la i demaneu al contacte que us torni a enviar la seva clau.</p>
-<p>Les signatures fetes amb una clau verificada es mostren en verd. Una clau que no heu verificat continua servint per xifrar, i les seves signatures es mostren en blau.</p>
+<p>Les signatures vàlides fetes amb una clau verificada del remitent es mostren en verd. Una clau encara no verificada es pot fer servir per xifrar. Les signatures vàlides fetes amb aquesta clau es mostren en blau quan corresponen al remitent.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

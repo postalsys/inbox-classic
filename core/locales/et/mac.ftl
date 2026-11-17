@@ -21,9 +21,7 @@ mac-no-updates = See Inbox Classicu versioon ei toeta automaatseid uuendusi. Uus
 ## Settings
 
 mac-settings-title = Seaded
-# review: new
-mac-check-updates-automatically = Kontrolli uuendusi automaatselt
-# review: new
+mac-check-updates-automatically = Otsi uuendusi automaatselt
 mac-settings-updates = Uuendused
 
 ## Dialogs
@@ -77,10 +75,8 @@ mac-files-not-saved =
        *[other] { $count } failist { $failed } ei saanud salvestada.
     }
 mac-no-calendar-app = Selles Macis pole kalendrirakendust, millega kutseid (.ics-faile) avada.
-# review: new
 mac-file-not-saved = Faili ei saanud salvestada.
 mac-unsubscribing = Loobutakse tellimusest { $target }…
-# review: new
 mac-loading-list = Laadimine…
 
 ## The compose window
@@ -111,7 +107,6 @@ mac-looking-up = Otsitakse domeeni { $domain } sätteid…
 mac-add-button = Lisa…
 mac-properties-button = Atribuudid…
 mac-signature-button = Allkiri…
-# review: new
 mac-security-button = Turvalisus…
 mac-sign-in-apps-button = Sisselogimisrakendused…
 

@@ -1,17 +1,17 @@
-<!--review--><h1>Hesapları değiştirme, sıralama ve kaldırma</h1>
+<h1>Hesapları düzenleme, sıralama ve kaldırma</h1>
 <p class="summary">Bir hesabı yeniden adlandırın, ayarlarını veya parolasını değiştirin, hesaplarınızı istediğiniz sıraya koyun veya birini kaldırın.</p>
-<h2>Bir hesabı değiştirme</h2>
+<h2>Hesap ayarlarını değiştirme</h2>
 <ol>
     <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> öğesini seçin. Pencere hesaplarınızı listeler.</li>
     <li>Birini seçip <!--os:windows--><b data-text="win-properties-button"></b><!--/os--><!--os:mac--><b data-text="mac-properties-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-properties"></b><!--/os--> düğmesine tıklayın veya ona çift tıklayın.</li>
     <li>Gerekeni değiştirin ve <b data-text="ui-ok"></b> düğmesine tıklayın.</li>
 </ol>
 <ul>
-    <li><!--os:windows,mac--><b data-text="ui-field-account-name"></b><!--/os--><!--os:linux--><b data-text="gtk-account-name-title"></b><!--/os-->, klasör listesinin hesaba verdiği addır; örneğin <i>Gmail</i> veya <i>İş</i>.</li>
-    <li><!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os-->, yazdığınız kişilerin gördüğü addır.</li>
+    <li><!--os:windows,mac--><b data-text="ui-field-account-name"></b><!--/os--><!--os:linux--><b data-text="gtk-account-name-title"></b><!--/os--> alanı, hesabın klasör listesinde görünen adını belirler; örneğin <i>Gmail</i> veya <i>İş</i>.</li>
+    <li><!--os:windows,mac--><b data-text="ui-field-name"></b><!--/os--><!--os:linux--><b data-text="gtk-display-name-title"></b><!--/os--> alanı, alıcıların göreceği adınızı belirler.</li>
     <li>Parolayı korumak için <b data-text="ui-field-password"></b> alanını boş bırakın.</li>
     <li>Tarayıcı üzerinden oturum açan bir hesap, hangi oturum açma uygulamasını kullandığını gösterir.</li>
-    <li><b data-text="ui-field-other-addresses"></b>, bu hesapla gönderdiğiniz diğer adresleri (örneğin bir takma adı) virgülle ayrılmış olarak listeler: <code>Satış &lt;satis@example.com&gt;</code> veya yalnızca adres. Ardından <b data-text="ui-field-from"></b> alanı her birini hesabın altında sunar.</li>
+    <li><b data-text="ui-field-other-addresses"></b> alanına, bu hesap üzerinden gönderim yapabileceğiniz ek adresleri veya takma adresleri girin. Adresleri virgülle ayırın. Örneğin <code>Satış &lt;satis@example.com&gt;</code> biçimini kullanabilir ya da yalnızca adresi yazabilirsiniz. Ardından <b data-text="ui-field-from"></b> alanı her birini hesabın altında sunar.</li>
 </ul>
 <p>Aynı penceredeki <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os--> düğmesi başka bir hesap ekler.</p>
 <h2>Hesaplarınızı sıraya koyma</h2>
@@ -20,15 +20,15 @@
 <p>İki veya daha fazla hesapla, bu komutlar için klasör listesinde bir hesaba sağ tıklayın. Tek hesapla klasör listesinde hesap için bir satır yoktur: komutlar <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> ve <b data-text="menu-tools"></b> menüsünde bulunur.</p>
 <ul>
     <li><b data-text="ui-account-sync"></b> yalnızca o hesabı denetler.</li>
-    <li><b data-text="cmd-mark-all-read"></b> hesabın her klasörünü okundu olarak işaretler.</li>
+    <li><b data-text="cmd-mark-all-read"></b> komutu, hesabın tüm klasörlerindeki iletileri okundu olarak işaretler.</li>
     <li><b data-text="cmd-new-folder"></b>, <b data-text="ui-account-properties"></b>, <b data-text="ui-account-move-up"></b> ve <b data-text="ui-account-move-down"></b>.</li>
 </ul>
 <h2>Bir hesabı kaldırma</h2>
-<aside class="note">Bir hesabı kaldırmak, onun için indirilen postaları ve kayıtlı parolasını bu bilgisayardan siler. Sunucudaki postalar kalır.</aside>
+<aside class="note">Bir hesabı kaldırdığınızda bu bilgisayardaki ileti kopyaları ve kayıtlı oturum açma bilgileri silinir. Sunucudaki postalar korunur.</aside>
 <p>Bir hesabı kaldırmak için:</p>
 <ol>
     <li><b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b> öğesini seçin.</li>
     <li>Hesabı seçip <b data-text="ui-remove"></b> düğmesine tıklayın veya <kbd>Delete</kbd> tuşuna basın.</li>
     <li>Onaylayın. Hesap klasör listesinden kaldırılır.</li>
 </ol>
-<nav class="related"><a href="topic:add-account"></a> <a href="topic:all-inboxes"></a> <a href="topic:signatures"></a></nav><!--/review-->
+<nav class="related"><a href="topic:add-account"></a> <a href="topic:all-inboxes"></a> <a href="topic:signatures"></a></nav>

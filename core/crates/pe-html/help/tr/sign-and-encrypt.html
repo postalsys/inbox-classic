@@ -1,25 +1,24 @@
-<!--review--><h1>İletiyi imzalama ve şifreleme</h1>
-<p class="summary">Alıcılarının sizden geldiğini bilmesi için iletiyi imzalayın, yalnızca onların okuyabilmesi için şifreleyin.</p>
-<p>İmzalı bir ileti, onu sizin yazdığınızı ve yolda kimsenin değiştirmediğini gösterir. Şifreli bir ileti yalnızca alıcıları ve siz tarafından okunabilir ve her zaman imzalıdır da. İkisi için de kendi anahtarınız gerekir.</p>
+<h1>İletiyi imzalama ve şifreleme</h1>
+<p class="summary">İletilerinizi dijital olarak imzalayın ve içeriklerini yalnızca sizin ve alıcıların okuyabileceği şekilde şifreleyin.</p>
+<p>Dijital imza, içeriğin imzalandıktan sonra değiştirilip değiştirilmediğini kontrol etmenizi sağlar. Anahtarın kime ait olduğunu ayrıca doğrulamanız gerekir. Şifreli bir iletinin içeriğini yalnızca siz ve alıcılar okuyabilirsiniz. Şifreli iletiler gönderilirken imzalanır. İmzalamak veya şifrelemek için kendi anahtarınız gerekir.</p>
 <p>Bir iletiyi imzalamak veya şifrelemek için:</p>
 <ol>
-    <li>İleti penceresinde <b data-text="ui-tb-sign"></b> veya <b data-text="ui-tb-encrypt"></b> düğmesine tıklayın ya da <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> veya <b data-text="cmd-compose-encrypt"></b> komutunu seçin. <kbd data-command="compose_sign"></kbd> veya <kbd data-command="compose_encrypt"></kbd> tuşlarına da basabilirsiniz. Henüz anahtarınız yoksa Inbox Classic bir anahtar oluşturmayı önerir.</li>
+    <li>İleti penceresinde <b data-text="ui-tb-sign"></b> veya <b data-text="ui-tb-encrypt"></b> düğmesine tıklayın ya da <b data-text="menu-tools"></b> &gt; <b data-text="cmd-compose-sign"></b> veya <b data-text="cmd-compose-encrypt"></b> komutunu seçin. <kbd data-command="compose_sign"></kbd> veya <kbd data-command="compose_encrypt"></kbd> tuşlarına da basabilirsiniz. Gönderim yaptığınız adres için bir anahtar ayarlanmamışsa Inbox Classic bir anahtar oluşturmayı önerir.</li>
     <li><b data-text="ui-tb-send"></b> düğmesine tıklayın.</li>
 </ol>
-<p><b data-text="ui-tb-encrypt"></b> açıkken konu satırının altındaki satır her alıcıyı bir kilitle gösterir ve Inbox Classic henüz sahip olmadığı anahtarları arar:</p>
+<p><b data-text="ui-tb-encrypt"></b> seçeneği açıkken konu satırının altında her alıcının yanında bir durum simgesi görünür. Inbox Classic eksik anahtarları arar:</p>
 <table>
-    <tr><th>Kilit</th><th>Anlamı</th></tr>
-    <tr><td>Yeşil</td><td>Alıcının anahtarını doğruladınız.</td></tr>
-    <tr><td>Mavi</td><td>Alıcının anahtarı sizde var, ancak onu doğrulamadınız.</td></tr>
+    <tr><th>Renk</th><th>Anlamı</th></tr>
+    <tr><td>Yeşil</td><td>Anahtarın kime ait olduğunu doğruladınız.</td></tr>
+    <tr><td>Mavi</td><td>Anahtarın kime ait olduğunu henüz doğrulamadınız ya da anahtar size ait.</td></tr>
     <tr><td>Gri</td><td>Inbox Classic alıcının anahtarını arıyor.</td></tr>
-    <tr><td>Kehribar</td><td>Alıcı için anahtar bulunamadı.</td></tr>
+    <tr><td>Kehribar</td><td>Alıcı için kullanılabilir anahtar yok.</td></tr>
 </table>
-<h2>Bir alıcının anahtarı yoksa</h2>
-<p>Şifreli bir ileti yalnızca her alıcının anahtarı olduğunda gönderilir. Birinin anahtarı yoksa <b data-text="ui-tb-send"></b> düğmesi <b data-text="ui-recipient-keys-title"></b> penceresini açar. Orada yeniden aramak için <b data-text="ui-recipient-find-key"></b>, o kişiyi çıkarmak için <b data-text="ui-recipient-remove"></b> düğmesine ya da <b data-text="ui-send-unencrypted"></b> düğmesine tıklayabilirsiniz. Kişiden ortak anahtarını isteyip onu içe de aktarabilirsiniz.</p>
+<h2>Kullanılabilir anahtar yoksa</h2>
+<p>Şifreli bir ileti göndermek için her alıcıya ait kullanılabilir bir anahtar gerekir. Bir alıcı için böyle bir anahtar yoksa <b data-text="ui-tb-send"></b> düğmesine tıklayarak <b data-text="ui-recipient-keys-title"></b> penceresini açın. Yeniden aramak için <b data-text="ui-recipient-find-key"></b>, alıcıyı iletiden kaldırmak için <b data-text="ui-recipient-remove"></b> düğmesini kullanın. İletide şifreli iletilerden alınan içerik yoksa <b data-text="ui-send-unencrypted"></b> düğmesini kullanabilirsiniz. Alıcıdan ortak anahtarını isteyip içe aktarmanız da mümkündür.</p>
 <h2>Şifreli postalara yanıtlar</h2>
-<p>Şifreli bir iletiye verilen yanıt veya onun iletilmesi <b data-text="ui-tb-encrypt"></b> açık olarak başlar ve siz onu kapatmadan önce Inbox Classic sorar. İleti hâlâ şifreli metni alıntılıyor veya onun eklerini taşıyorsa yalnızca şifreli gönderilebilir.</p>
-<p>Şifreli bir iletinin taslakları şifreli kaydedilir, <b data-text="folder-sent"></b> klasöründeki kopyası da öyle.</p>
+<p>Şifreli bir iletiyi yanıtladığınızda veya ilettiğinizde <b data-text="ui-tb-encrypt"></b> seçeneği otomatik olarak açılır. Inbox Classic, şifrelemeyi kapatmadan önce onay ister. İletide şifreli iletiden alınan alıntı metin, resim veya ekler varsa ileti yalnızca şifreli gönderilebilir.</p>
+<p>Bu iletilerin taslakları kendi anahtarınız kullanılarak şifrelenir. <b data-text="folder-sent"></b> klasörüne kaydedilen kopya da şifrelidir.</p>
 <h2>Ortak anahtarınızı paylaşma</h2>
-<p>Birinin size şifreli posta gönderebilmesi için <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b> komutunu seçin. Ortak anahtarınız iletiye dosya olarak eklenir.</p>
+<p>Ortak anahtarınızı paylaşmak için <!--os:windows,linux--><b data-text="menu-insert"></b><!--/os--><!--os:mac--><b data-text="menu-file"></b><!--/os--> &gt; <b data-text="cmd-attach-my-key"></b> komutunu seçin. Gönderim yaptığınız adrese ait ortak anahtar, iletiye dosya olarak eklenir. Alıcılar bu anahtarla size şifreli ileti gönderebilir.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:encrypted-and-signed-mail"></a> <a href="topic:verify-a-key"></a></nav>
-<!--/review-->

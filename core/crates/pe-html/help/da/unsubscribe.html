@@ -1,17 +1,17 @@
-<!--review--><h1>Forlad en mailingliste</h1>
+<h1>Afmeld en mailingliste</h1>
 <p class="summary">Stop meddelelserne fra en mailingliste med knappen Afmeld.</p>
-<p>En meddelelse fra en mailingliste, der fortæller, hvordan man forlader den, har <b data-text="ui-unsubscribe"></b> til højre i sin header.</p>
-<p>Sådan forlader du listen:</p>
+<p>Hvis en meddelelse indeholder oplysninger om afmelding fra en mailingliste, vises knappen <b data-text="ui-unsubscribe"></b> til højre i meddelelseshovedet.</p>
+<p>Sådan afmelder du dig:</p>
 <ol>
-    <li>Klik på <b data-text="ui-unsubscribe"></b>. Inbox Classic fortæller, hvad der vil ske, og spørger først.</li>
+    <li>Klik på <b data-text="ui-unsubscribe"></b>. Inbox Classic fortæller, hvad der vil ske, og beder om din bekræftelse.</li>
     <li>Bekræft. Afhængigt af listen sker der én af tre ting:
         <ul>
-            <li>Inbox Classic beder listen om at stoppe. Der åbnes ingen side, og der sendes ingen meddelelse.</li>
-            <li>Inbox Classic skriver den meddelelse, listen ønsker. Klik på <b data-text="ui-tb-send"></b> for at sende den.</li>
-            <li>Listens side åbnes i din browser, hvor du gør det færdigt.</li>
+            <li>Inbox Classic sender en afmeldingsanmodning til listens server. Der åbnes ingen webside og sendes ingen mail.</li>
+            <li>Inbox Classic opretter en afmeldingsmail. Klik på <b data-text="ui-tb-send"></b> for at sende den.</li>
+            <li>Listens side åbnes i din browser, hvor du gennemfører afmeldingen.</li>
         </ul>
     </li>
 </ol>
-<p>Statuslinjen viser, når listen har modtaget anmodningen.</p>
-<aside class="note">Inbox Classic beder kun selv listen om at stoppe, når listens server har signeret meddelelsen. En forfalsket meddelelse kan ikke bruge det til at nå en anden.</aside>
-<nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav><!--/review-->
+<p>Statuslinjen viser, når listens server har accepteret afmeldingsanmodningen.</p>
+<aside class="note">Den direkte afmeldingsanmodning bruges kun, når de nødvendige oplysninger er beskyttet af listens DKIM-signatur. Ubekræftede afmeldingsoplysninger kan derfor ikke udløse denne type anmodning.</aside>
+<nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>

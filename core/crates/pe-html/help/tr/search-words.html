@@ -1,18 +1,18 @@
-<!--review--><h1>Arama sözcükleri</h1>
-<p class="summary">Tam olarak istediğiniz iletileri bulmak için arama kutusunun anladığı sözcükler ve işaretler.</p>
-<p>Arama kutusu Gmail'inkiyle aynı sözcükleri kabul eder. İstediğiniz kadarını birleştirin: bir ileti hepsiyle eşleşmelidir. Kısa bir liste görmek için fareyle arama kutusunun üzerine gelin.</p>
+<h1>Arama ifadeleri</h1>
+<p class="summary">İstediğiniz iletileri daha kolay bulmak için sözcükleri ve özel arama ifadelerini kullanın.</p>
+<p>Arama kutusu aşağıdaki Gmail tarzı ifadeleri destekler. İfadeleri birleştirebilirsiniz: OR ile bağlamadığınız sürece ileti tüm koşullara uymalıdır. Kısa bir liste görmek için fareyle arama kutusunun üzerine gelin.</p>
 <table>
     <tr><th>Yazın</th><th>Bulunanlar</th></tr>
     <tr><td><code>bütçe</code></td><td>İçinde herhangi bir yerde <i>bütçe</i> ile başlayan bir sözcük geçen iletiler</td></tr>
     <tr><td><code>"tam ifade"</code></td><td>Bu sözcükler, bu sırayla</td></tr>
-    <tr><td><code>-sözcük</code></td><td>Sözcüğü içermeyen iletiler. Eksi işareti, <code>-is:unread</code> gibi her arama sözcüğünün önünde çalışır</td></tr>
+    <tr><td><code>-sözcük</code></td><td>Sözcüğü içermeyen iletiler. Eksi işaretini <code>-is:unread</code> gibi bazı arama koşullarıyla da kullanabilirsiniz</td></tr>
     <tr><td><code>bu OR şu</code></td><td>İki sözcükten birini içeren iletiler. <code>OR</code> büyük harflerle yazılır</td></tr>
     <tr><td><code>from:ayşe</code></td><td>Ayşe'den gelen postalar</td></tr>
     <tr><td><code>to:ayşe</code>, <code>cc:</code>, <code>bcc:</code></td><td>Herhangi bir alıcı satırında Ayşe'ye giden postalar</td></tr>
     <tr><td><code>subject:öğle</code></td><td>Konuda geçen sözcük</td></tr>
     <tr><td><code>filename:pdf</code></td><td>Ekli bir dosyanın adında geçen sözcük</td></tr>
     <tr><td><code>list:news.example.com</code></td><td>Bir posta listesinin postaları, List-Id değerine göre</td></tr>
-    <tr><td><code>has:attachment</code></td><td>Dosya içeren iletiler</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Ek içeren iletiler</td></tr>
     <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Okunmamış veya okunmuş iletiler</td></tr>
     <tr><td><code>is:starred</code> veya <code>is:flagged</code></td><td>Bayraklı iletiler</td></tr>
     <tr><td><code>is:answered</code></td><td>Yanıtladığınız iletiler</td></tr>
@@ -25,8 +25,7 @@
     <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Belirli sayıda günden (<code>d</code>), aydan (<code>m</code>) veya yıldan (<code>y</code>) eski ya da yeni postalar</td></tr>
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Bir boyuttan büyük veya küçük postalar; bayt olarak ya da <code>K</code>, <code>M</code> veya <code>G</code> ile</td></tr>
 </table>
-<p>Aksanlı harfler ve büyük harfler önemli değildir. Inbox Classic'in tanımadığı bir arama sözcüğü, sözcük olarak aranır.</p>
-<p>Şifreli bir ileti göndereni, alıcıları ve konusuyla, şifresi çözüldükten sonra da metnindeki sözcüklerle bulunur; <b data-settings="reading"></b> altındaki <b data-text="ui-search-encrypted"></b> seçeneği açık olduğu sürece.</p>
-<p>Liste boyutları göstermez. Bir iletinin ne kadar büyük olduğunu görmek için <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b> komutunu seçin.</p>
+<p>Arama, büyük ve küçük harfleri veya harflerin üzerindeki işaretleri ayırt etmez. Tanınmayan arama ifadeleri normal sözcükler olarak aranır.</p>
+<p>Şifreli iletileri gönderen, alıcı ve konu bilgileriyle bulabilirsiniz. <b data-settings="reading"></b> bölümündeki <b data-text="ui-search-encrypted"></b> seçeneği açıksa şifreleri çözüldükten sonra iletilerin metninde de arama yapabilirsiniz.</p>
+<p>İleti listesinde boyut sütunu bulunmaz. Bir iletinin ne kadar büyük olduğunu görmek için <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b> komutunu seçin.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
-<!--/review-->

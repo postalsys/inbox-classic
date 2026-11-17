@@ -27,7 +27,6 @@ win-no-bodies = Nie można wyświetlić treści wiadomości.
 win-webview-failed = Nie udało się utworzyć WebView2.
 # review: new
 win-webview-missing = Środowisko uruchomieniowe WebView2 jest niedostępne.
-# review: new
 win-list-loading = Wczytywanie...
 
 ## Buttons and words used in many windows
@@ -156,9 +155,7 @@ win-book-find-label = Wpisz nazwę lub adres e-mail:
 win-send = &Wyślij
 # review: new
 win-dont-send = &Nie wysyłaj
-# review: new
 win-unsubscribe = &Wypisz się
-# review: new
 win-dont-unsubscribe = &Nie wypisuj
 # review: new
 win-forget-program-ask = Usunąć ten program, jego uprawnienia i historię działań jego agentów? Przy następnym połączeniu Inbox Classic ponownie poprosi o zgodę.

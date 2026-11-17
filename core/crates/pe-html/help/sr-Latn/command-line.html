@@ -1,17 +1,16 @@
-<!--review--><h1>Opcije komandne linije</h1>
+<h1>Opcije komandne linije</h1>
 <p class="summary">Opcije za pokretanje programa Inbox Classic iz terminala, za testiranje i za AI agente.</p>
 <p>Pokrenite program <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> sa ovim opcijama:</p>
 <table>
     <tr><th>Opcija</th><th>Šta radi</th></tr>
     <tr><td><code>--store &lt;file&gt;</code></td><td>Koristi drugo skladište pošte, na primer ono za testiranje</td></tr>
-    <tr><td><code>--memory-passwords</code></td><td>Čuva lozinke samo za ovo pokretanje, nikada u sistemskom skladištu lozinki</td></tr>
+    <tr><td><code>--memory-passwords</code></td><td>Čuva lozinke samo do zatvaranja programa, bez upisivanja u sistemsko skladište lozinki</td></tr>
     <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Prihvata samo sertifikat servera iz ove datoteke (PEM ili DER), za probni server sa samopotpisanim sertifikatom</td></tr>
-    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Upisuje stranicu za prijavu preko pregledača u ovu datoteku umesto da otvori pregledač</td></tr>
-    <tr><td><code>--language &lt;code&gt;</code></td><td>Prikazuje prozore na ovom jeziku za ovo pokretanje, na primer <code>de</code></td></tr>
+    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Upisuje URL stranice za prijavu u datoteku umesto da otvori pregledač</td></tr>
+    <tr><td><code>--language &lt;code&gt;</code></td><td>Koristi izabrani jezik tokom ovog pokretanja, na primer <code>de</code></td></tr>
     <tr><td><code>--background</code></td><td>Pokreće se bez prozora</td></tr>
-    <tr><td><code>--mcp</code></td><td>Povezuje AI agenta sa programom Inbox Classic. Ovo pokreće program agenta, a ne vi</td></tr>
+    <tr><td><code>--mcp</code></td><td>Povezuje AI agenta sa programom Inbox Classic. Ovu opciju koristi program agenta</td></tr>
     <tr><td><code>--version</code></td><td>Ispisuje verziju i završava rad</td></tr>
 </table>
-<p>Veza <code>mailto:</code> navedena kao argument otvara novu poruku, kao i veza za e-poštu.</p>
+<p>Veza <code>mailto:</code> navedena kao argument otvara novu poruku, isto kao kada kliknete na vezu za e-poštu.</p>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

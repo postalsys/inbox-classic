@@ -1,19 +1,18 @@
-<!--review--><h1>Salattu ja allekirjoitettu posti</h1>
-<p class="summary">Viestin yläpuolella oleva palkki kertoo, onko lähettäjä allekirjoittanut viestin ja onko se salattu sinulle.</p>
-<p>Allekirjoitettu viesti todistaa, kuka sen kirjoitti ja ettei kukaan muuttanut sitä matkalla. Salatun viestin voi lukea vain avaimellasi.</p>
+<h1>Salattu ja digitaalisesti allekirjoitettu posti</h1>
+<p class="summary">Viestin yläpuolella oleva palkki kertoo digitaalisesta allekirjoituksesta ja salauksesta.</p>
+<p>Kelvollinen digitaalinen allekirjoitus osoittaa, ettei sisältö ole muuttunut allekirjoittamisen jälkeen. Allekirjoittajan henkilöllisyyden varmistamiseksi on vahvistettava myös avaimen haltija. Salatun viestin lukeminen edellyttää salauksen purkamiseen sopivaa yksityistä avainta.</p>
 <p>Viestin yläpuolella oleva palkki kertoo koko viestin tilan:</p>
 <table>
     <tr><th>Väri</th><th>Merkitys</th></tr>
-    <tr><td>Vihreä</td><td>Lähettäjän allekirjoittama avaimella, jonka olet vahvistanut.</td></tr>
-    <tr><td>Sininen</td><td>Lähettäjän allekirjoittama avaimella, jota et ole vahvistanut, tai salattu sinulle.</td></tr>
-    <tr><td>Keltainen</td><td>Jokin on vialla: allekirjoitus ei täsmää, joku muu kuin lähettäjä allekirjoitti tai jotakin osaa ei voitu lukea.</td></tr>
-    <tr><td>Harmaa</td><td>Ei allekirjoitettu, tai allekirjoitettu avaimella, jota sinulla ei ole.</td></tr>
+    <tr><td>Vihreä</td><td>Lähettäjän digitaalinen allekirjoitus on kelvollinen ja olet vahvistanut avaimen haltijan.</td></tr>
+    <tr><td>Sininen</td><td>Lähettäjän digitaalinen allekirjoitus on kelvollinen, mutta avaimen haltijaa ei ole vahvistettu. Sininen voi myös tarkoittaa salattua viestiä, jossa ei ole allekirjoitusta tai jonka allekirjoitus jätetään tarkistamatta.</td></tr>
+    <tr><td>Oranssi</td><td>Suojauksessa on ongelma: allekirjoitus ei vastaa sisältöä, allekirjoittaja ei ole lähettäjä tai jotakin viestin osaa ei voitu lukea.</td></tr>
+    <tr><td>Harmaa</td><td>Viestiä ei ole allekirjoitettu digitaalisesti tai allekirjoitusta ei voitu tarkistaa esimerkiksi puuttuvan avaimen vuoksi.</td></tr>
 </table>
-<p>Jos viestin osat on suojattu eri tavoin, jokainen osa näkyy omassa kehyksessään omalla merkinnällään. Palkki laskee silloin kunkin lajin osat. Napsauta merkintää tai palkin painiketta <b data-text="ui-protection-details"></b>, niin näet, kuka allekirjoitti kunkin osan, millä avaimella ja milloin.</p>
-<aside class="warning">Vain palkin ja kehysten yläpuolella olevat merkinnät ovat Inbox Classicin kirjoittamia. Lähettäjä voi piirtää viestiinsä mitä tahansa, myös jotakin merkinnältä näyttävää. Katso palkkia.</aside>
-<p>Salatun osan internetistä tulevat kuvat latautuvat vain, kun napsautat kuvapalkkia, joka kerta. Sen merkintä kertoo silloin, että kuvat ladattiin.</p>
-<p>Kun vastaat tai välität edelleen, vain näytetty sisältö lainataan.</p>
-<p>Viestiluettelossa lukko merkitsee salatun viestin ja sinetti allekirjoitetun. Kun Inbox Classic on purkanut salatun viestin lataamisen tai avaamisen jälkeen, luettelo näyttää sen oman aiheen ja ensimmäiset sanat. Siihen asti luettelo ja uuden postin ilmoitus näyttävät <b data-text="list-encrypted"></b>.</p>
-<p>Haku löytää puretun viestin sen tekstin sanoilla, kun <b data-text="ui-search-encrypted"></b> on käytössä kohdassa <b data-settings="reading"></b>. Tekoälyagentit eivät koskaan näe, mitä salatussa viestissä lukee, eivätkä sen tiedostoja.</p>
+<p>Jos viestin osat on suojattu eri tavoin, jokainen osa näkyy omassa kehyksessään omalla merkinnällään. Palkissa näkyvät eri tavoin suojattujen osien määrät. Napsauta merkintää tai palkin painiketta <b data-text="ui-protection-details"></b>, niin näet, kuka allekirjoitti kunkin osan, millä avaimella ja milloin.</p>
+<aside class="warning">Vain yläpalkki ja kehysten yläpuolella olevat merkinnät ovat Inbox Classicin tuottamia. Lähettäjä voi lisätä viestin sisältöön myös suojausmerkintää muistuttavan kuvan tai tekstin. Tarkista suojaustiedot yläpalkista.</aside>
+<p>Salatun osan ulkoiset kuvat ladataan vain, kun sallit sen kuvapalkista. Lataaminen on sallittava joka kerta erikseen. Osan merkinnässä kerrotaan sen jälkeen, että kuvat on ladattu.</p>
+<p>Vastaukseen tai edelleenlähetettävään viestiin lainataan vain sisältö, joka näytettiin sinulle.</p>
+<p>Viestiluettelossa lukko tarkoittaa salattua viestiä ja sinetti digitaalisesti allekirjoitettua viestiä. Jos haku salatuista viesteistä on käytössä ja sopiva yksityinen avain on saatavilla, Inbox Classic voi purkaa viestin salauksen lataamisen tai avaamisen jälkeen. Luettelossa näkyy sitten esikatselu ja mahdollinen salatun osan aihe. Jos esikatselua ei ole saatavilla, tilalla on teksti <b data-text="list-encrypted"></b>. Uusien salattujen viestien ilmoituksissa käytetään aina tätä tekstiä.</p>
+<p>Asetus <b data-text="ui-search-encrypted"></b> kohdassa <b data-settings="reading"></b> mahdollistaa haun myös viestien tekstistä salauksen purkamisen jälkeen. Tekoälyagentit eivät voi lukea salattujen viestien sisältöä tai liitteitä eivätkä hakea niiden sisällöstä.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->

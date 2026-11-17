@@ -120,7 +120,6 @@ mac-no-calendar-app = Šiame Mac kompiuteryje nėra kalendoriaus programos, kuri
 mac-file-not-saved = Failo įrašyti nepavyko.
 # review: new
 mac-unsubscribing = Atsisakoma prenumeratos: { $target }…
-# review: new
 mac-loading-list = Įkeliama…
 
 ## The compose window

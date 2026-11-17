@@ -12,7 +12,6 @@ menu-layout = Dispositio&n
 menu-sort-by = T&rier par
 menu-text-size = Taille du te&xte
 menu-folder = &Dossier
-# review: new
 menu-insert = &Insertion
 
 ## The commands
@@ -32,7 +31,7 @@ cmd-help = &Sommaire
 cmd-delete = &Supprimer le message
 cmd-move = &Déplacer vers un dossier...
 cmd-flag = Ajouter un &indicateur au message
-cmd-new-folder = Nouveau &dossier...
+cmd-new-folder = &Nouveau dossier...
 cmd-rename-folder = &Renommer le dossier...
 cmd-delete-folder = Supprimer le d&ossier
 cmd-empty-folder = &Vider le dossier
@@ -45,21 +44,21 @@ cmd-import = I&mporter des messages...
 cmd-outbox = Boîte d'en&voi...
 cmd-properties = &Propriétés
 cmd-mark-all-read = Marquer tous les messages comme l&us
-cmd-junk = Marquer comme in&désirable
-cmd-not-junk = Marquer comme non indé&sirable
-cmd-archive = A&rchiver
+cmd-junk = &Marquer comme indésirable
+cmd-not-junk = Marquer comme non indésira&ble
+cmd-archive = Arc&hiver
 cmd-watch-conversation = Sur&veiller la conversation
 cmd-ignore-conversation = I&gnorer la conversation
 cmd-next-message = Message &suivant
 cmd-previous-message = Message &précédent
-cmd-next-unread = Message non &lu suivant
+cmd-next-unread = Message non lu su&ivant
 cmd-go-to-folder = &Aller au dossier...
 cmd-find-in-message = Rechercher dans &ce message...
 ui-go-to-prompt = Aller au dossier :
 ui-find-in-message-hint = Rechercher dans ce message
 ui-find-not-found = Aucune occurrence de « { $words } » dans ce message
 cmd-expand-all-threads = &Développer toutes les conversations
-cmd-collapse-all-threads = Ré&duire toutes les conversations
+cmd-collapse-all-threads = Réd&uire toutes les conversations
 ui-group-by-conversation = &Regrouper les messages par conversation
 cmd-folder-list = Liste des d&ossiers
 cmd-layout-automatic = &Automatique
@@ -81,29 +80,23 @@ cmd-hide-read = Masquer les messages &lus
 cmd-notify = &Signaler les nouveaux messages
 cmd-open = &Ouvrir Inbox Classic
 cmd-default-app = Définir comme programme de &messagerie par défaut...
-cmd-view-source = Code &source du message
+cmd-view-source = Code source du messa&ge
 cmd-ai-agents = &Agents d'IA...
 cmd-options = &Options...
 cmd-message-rules = &Règles de message...
-# review: new
 cmd-encryption-keys = Clés de c&hiffrement...
 cmd-create-rule-from-message = Créer une règl&e à partir du message...
 cmd-select-all = Sélectionner &tout
 cmd-undo = &Annuler
-cmd-copy = &Copier vers un dossier...
+cmd-copy = Co&pier vers un dossier...
 cmd-address-book = &Carnet d'adresses...
 cmd-add-sender-to-book = Ajouter l'e&xpéditeur au carnet d'adresses
 cmd-import-address-book = Importer le carnet d'&adresses...
 cmd-export-address-book = &Exporter le carnet d'adresses...
-# review: new
 cmd-export-setup = Exporter les param&ètres et comptes...
-# review: new
-cmd-import-setup = Importer les &paramètres et comptes...
-# review: new
+cmd-import-setup = Importer les paramè&tres et comptes...
 cmd-compose-sign = &Signer numériquement
-# review: new
 cmd-compose-encrypt = &Chiffrer
-# review: new
 cmd-attach-my-key = Joindre ma clé &publique
 
 ## The tray icon's menu
@@ -220,11 +213,8 @@ ui-format-line = Insérer une ligne horizontale
 ui-tb-send = Envoyer
 ui-tb-save = Enregistrer
 ui-tb-attach = Joindre
-# review: new
 ui-tb-sign = Signer
-# review: new
 ui-tb-encrypt = Chiffrer
-# review: new
 ui-field-keys = Clés :
 ui-field-from = De :
 ui-field-to = À :
@@ -236,9 +226,7 @@ ui-signature = Signature
 ui-signature-hint = Ajoutée aux nouveaux messages, aux réponses et aux transferts de ce compte.
 ui-signature-not-saved = La signature n'a pas pu être enregistrée.
 ui-all-inboxes = Toutes les boîtes
-# review: new
-ui-all-sent = Tous les envoyés
-# review: new
+ui-all-sent = Tous les messages envoyés
 ui-all-drafts = Tous les brouillons
 ui-flagged-folder = Avec indicateur
 ui-all-folders = Tous les dossiers
@@ -333,8 +321,8 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com et Microsoft 365 : connect
 ui-start-intro-apps = Connectez-vous par le navigateur avec l'une de vos applications de connexion (Autres options de connexion), ou ajoutez ci-dessous n'importe quel compte de messagerie avec votre nom et votre adresse.
 ui-use-app-password = Utiliser un mot de passe d'application
 ui-the-provider = votre fournisseur
-ui-provider-intro = Connectez-vous au compte { $email } sur le site de { $provider }. Votre mot de passe ne sera pas transmis à Inbox Classic. Vous pouvez aussi utiliser un mot de passe d'application créé dans les paramètres de sécurité de votre compte.
-ui-provider-intro-apps = Connectez-vous au compte { $email } sur le site de { $provider } avec l'une de vos applications de connexion (« Autres options de connexion »). Vous pouvez aussi utiliser un mot de passe d'application créé dans les paramètres de sécurité de votre compte.
+ui-provider-intro = Connectez-vous au compte { $email } sur le site de { $provider }. Votre mot de passe ne sera pas transmis à Inbox Classic. Si votre compte autorise les mots de passe d'application, vous pouvez en créer un dans ses paramètres de sécurité. Outlook.com et Microsoft 365 exigent une connexion via le navigateur.
+ui-provider-intro-apps = Connectez-vous au compte { $email } sur le site de { $provider } avec l'une de vos applications de connexion (« Autres options de connexion »). Si votre compte autorise les mots de passe d'application, vous pouvez en créer un dans ses paramètres de sécurité. Outlook.com et Microsoft 365 exigent une connexion via le navigateur.
 ui-finish = Terminer
 ui-logon = Connexion
 ui-enter-password = Saisissez le mot de passe de { $account }.
@@ -394,58 +382,39 @@ ui-sign-in-apps-intro = Les applications de connexion permettent aux comptes de 
 ui-col-issuer = Émetteur
 ui-col-used-by = Utilisée par
 ui-options-system-default = Langue du système ({ $language })
-# review: new
 ui-settings-general = Général
-# review: new
 ui-settings-reading = Lecture
-# review: changed
 ui-settings-new-mail = Nouveau courrier
-# review: new
 ui-settings-sending = Envoi
-# review: new
 ui-settings-default-apps = Applications par défaut
-# review: new
 ui-settings-message-list = Liste des messages
-# review: new
 ui-settings-messages = Messages
-# review: new
 ui-settings-encryption = Chiffrement
-# review: new
 ui-settings-language = Langue
-# review: new
 ui-settings-label = { $label } :
-# review: new
 ui-apply = &Appliquer
-# review: changed
 ui-language-label = &Langue :
 ui-restart-note = Redémarrez Inbox Classic pour appliquer la nouvelle langue.
 ui-restart-ask = Inbox Classic s'affichera dans la langue choisie ({ $language }) après un redémarrage. Redémarrer maintenant ?
-# review: changed
 ui-notify-new-mail = Me &prévenir de l'arrivée de nouveaux messages
 ui-new-folder-title = Nouveau dossier
 ui-rename-folder-title = Renommer le dossier
 ui-delete-folder-question = Supprimer le dossier « { $folder } », tous ses messages et ses sous-dossiers ? Ils seront également supprimés du serveur.
-ui-properties = &Propriétés
+ui-properties = Propri&étés
 ui-account-sync = &Envoyer et recevoir
 ui-account-properties = &Propriétés...
 ui-account-move-up = &Monter
 ui-account-move-down = &Descendre
 ui-menu-open = &Ouvrir
 ui-menu-flag = Indi&cateur
-ui-menu-view-source = Afficher la &source
+ui-menu-view-source = &Afficher la source
 ui-save-attachments = Enregistrer les pièces jointes
-# review: new
 ui-attachment-open = Ouvrir
-# review: new
 ui-attachment-save-as = Enregistrer sous...
-# review: new
 ui-attachment-save-all = Tout enregistrer...
-# review: new
 ui-attachments-strip = Pièces jointes
-# review: new
-ui-attachment-note-title = Ouverture de ce fichier
-# review: new
-ui-attachment-program-tip = Ouvrir n’est pas possible pour ce type de fichier : il peut lancer des programmes. Enregistrez-le pour l’ouvrir vous-même.
+ui-attachment-note-title = Ouvrir une pièce jointe
+ui-attachment-program-tip = Inbox Classic n’ouvre pas ce type de fichier, car il peut exécuter des programmes. Si nécessaire, enregistrez-le pour l’ouvrir vous-même.
 ui-clear-flag = &Effacer l'indicateur
 ui-button-move = &Déplacer
 ui-button-copy = &Copier
@@ -455,7 +424,7 @@ ui-outbox-send-all = &Tout envoyer maintenant
 ui-yes = Oui
 ui-no = Non
 ui-try-again = Réessayer
-ui-remove = &Supprimer
+ui-remove = Supp&rimer
 ui-signature-of = Signature - { $account }
 ui-sign-in-with = Se connecter avec { $provider }
 ui-sign-in-in-browser-yours = Connectez-vous à votre compte dans la fenêtre du navigateur qui s'est ouverte, puis revenez ici.
@@ -463,7 +432,6 @@ ui-browser-sign-in-server = { $server } (connexion par le navigateur)
 ui-dont-allow = Ne pas autoriser
 ui-allow = &Autoriser
 ui-dont-send = Ne pas envoyer
-# review: new
 ui-dont-unsubscribe = Ne pas se désabonner
 ui-edit-first = &Modifier d'abord
 ui-new-address = Nouvelle adresse
@@ -521,7 +489,7 @@ ui-tb-properties = Propriétés
 ui-tb-write-to = Écrire à
 ui-menu-new-contact = Nouveau &contact...
 ui-menu-new-group = Nouveau &groupe...
-ui-menu-write-to = É&crire à
+ui-menu-write-to = Écrir&e à
 ui-menu-delete = &Supprimer
 ui-book-find-hint = Tapez un nom ou une adresse e-mail
 ui-book-all-contacts = Tous les contacts
@@ -595,267 +563,164 @@ ui-book-exported = { $count ->
 }
 ui-book-not-exported = Le carnet d'adresses n'a pas pu être enregistré : { $reason }
 ui-code-copied = Code copié
-# review: changed
-ui-codes-in-notifications = Afficher les &codes de connexion dans les notifications de nouveau courrier
+ui-codes-in-notifications = Affi&cher les codes de connexion dans les notifications de nouveau courrier
 ui-tool-unread-only = Non lus
 ui-no-unread = Il n'y a aucun message non lu ici.
 ui-pictures-always-sender = Toujours télécharger les images de { $sender }
 ui-pictures-always-domain = Toujours télécharger les images des expéditeurs du domaine { $domain }
 ui-pictures-unconfirmed = Le domaine de l'expéditeur ({ $domain }) n'a pas pu être vérifié. Les images de ce message ne sont donc pas téléchargées automatiquement.
-# review: changed
 ui-pictures-always-option = &Télécharger les images de tous les messages
 ui-pictures-always-warning = Les expéditeurs peuvent alors savoir quand vous lisez leurs messages.
-# review: new
 ui-protection-details = &Détails...
-# review: new
 ui-protection-details-title = Détails de sécurité
 ui-download-heading = Téléchargement
-# review: changed
 ui-download-ahead = &Télécharger les messages à l’avance :
 ui-download-ahead-recent = Messages récents de 1 Mo maximum
 ui-download-ahead-all = Tous les messages
 ui-download-ahead-never = Seulement à l’ouverture
-# review: changed
 ui-download-limit = &Espace maximal par compte :
-# review: changed
 ui-send-delay = &Délai avant l’envoi :
 ui-send-delay-note = Tant qu’un message est en attente d’envoi, vous pouvez annuler son envoi avec le bouton Annuler.
 ui-dark-messages = Afficher les messages sur fond sombre lorsque le système est en mode sombre
+# review: new
+ui-preview-show = Afficher les &pièces jointes dans les messages
+# review: new
+ui-preview-show-note = Affiche les images et les premières pages des fichiers PDF après le texte d’un message. Inbox Classic crée lui-même ces aperçus : rien dans un fichier ne peut s’exécuter.
+# review: new
+ui-preview-pdfs = Afficher les &fichiers PDF dans les messages
 ui-sending-in = Envoi de { $subject } dans { $count ->
     [one] { $count } seconde
    *[other] { $count } secondes
 }
 ui-send-undone = { $subject } n’a pas été envoyé. Le message est à nouveau ouvert pour être modifié.
-ui-send-too-late = { $subject } a déjà été envoyé.
+ui-send-too-late = L’envoi de { $subject } ne peut plus être annulé.
 ui-outbox-status-undo = Envoi à { $time }
 ui-download-note = Les messages téléchargés à l'avance s'ouvrent immédiatement. Lorsque la limite de stockage est dépassée, les copies locales les plus anciennes sont supprimées, puis téléchargées à nouveau à l'ouverture des messages.
 ui-attachment-downloading = Le téléchargement de ce message est encore en cours. Réessayez une fois le téléchargement terminé.
-# review: changed
 ui-trusted-senders-button = &Expéditeurs de confiance...
 ui-trusted-senders-title = Expéditeurs de confiance
 ui-trusted-senders-note = Les images des messages de ces expéditeurs sont téléchargées automatiquement lorsque votre fournisseur de messagerie vérifie le domaine de l'expéditeur.
 ui-trusted-everyone-at = Tous les expéditeurs du domaine { $domain }
 ui-trusted-senders-empty = Aucun expéditeur de confiance n'a encore été ajouté.
-# review: new
 ui-search-encrypted = Rechercher dans les messages &chiffrés
-# review: new
-ui-search-encrypted-note = Les messages chiffrés sont déchiffrés sur cet ordinateur une fois téléchargés ou ouverts, pour que leurs mots puissent être trouvés et que la liste affiche leur propre objet. L'index n'est pas chiffré et les agents d'IA n'y cherchent jamais. Désactivez cette option pour les retirer de l'index.
-# review: new
+ui-search-encrypted-note = Si la clé nécessaire est disponible, Inbox Classic déchiffre sur cet ordinateur les messages téléchargés ou ouverts. Vous pouvez alors rechercher dans leur contenu, et la liste peut afficher un aperçu et l’objet protégé. Le contenu déchiffré est conservé en clair dans l’index local. Les agents d’IA n’ont pas accès à ce contenu. Désactiver cette option le retire de l’index.
 ui-pgp-keyserver = Rechercher les clés &sur keys.openpgp.org
-# review: new
-ui-pgp-keyserver-note = Quand vous chiffrez un message ou cherchez une clé, l'adresse recherchée est envoyée à keys.openpgp.org. Le domaine de l'adresse est consulté en premier.
-# review: changed
+ui-pgp-keyserver-note = Pour une recherche par adresse e-mail, Inbox Classic interroge d’abord le domaine de cette adresse, puis keys.openpgp.org si nécessaire. Une recherche par empreinte ou identifiant de clé transmet cet identifiant au serveur, sans envoyer d’adresse e-mail.
 ui-eml-default = &Ouvrir les fichiers .eml avec Inbox Classic
 ui-eml-default-done = Inbox Classic ouvre maintenant les fichiers .eml.
 ui-eml-default-failed = Impossible de définir Inbox Classic comme application par défaut pour les fichiers .eml : { $reason }
 ui-folders = Dossiers
 ui-sorted-by = Tri : { $field }
-# review: changed
 ui-layout-label = &Disposition :
 ui-columns-note = La fenêtre est assez large pour la disposition en colonnes. Vous pouvez modifier la disposition dans Affichage > Disposition.
 ui-row-unread = Non lu
 ui-row-flagged = Avec indicateur
 ui-row-attachments = Avec pièces jointes
-# review: new
 ui-row-encrypted = Chiffré
-# review: new
 ui-row-signed = Signé
 ui-row-messages = { $count ->
     [one] { $count } message
    *[other] { $count } messages
 }
-# review: changed
 ui-list-pictures = Afficher &les images des expéditeurs dans la liste des messages
-# review: changed
-ui-list-pictures-note = Dans la disposition en colonnes, affiche les logos de marque ou les photos du carnet d'adresses pour les expéditeurs vérifiés, et les initiales si aucune image n'est disponible. Les logos sont téléchargés une seule fois par marque, et non à chaque message.
+ui-list-pictures-note = Dans la disposition en colonnes, affiche les logos de marque ou les photos du Carnet d'adresses si le domaine de l'expéditeur est confirmé, et ses initiales si aucune image n'est disponible. Les logos téléchargés sont conservés et réutilisés pour plusieurs messages.
 ui-card-picture = Image :
 ui-card-picture-choose = &Choisir...
 ui-picture-not-picture = Ce fichier n'est pas une image PNG ou JPEG.
 ui-picture-too-large = Cette image est trop grande. Choisissez une image de 10 Mo maximum, dont la largeur et la hauteur ne dépassent pas 8000 pixels.
 
 ## Encryption keys (Tools > Encryption Keys, Account Properties > Security, a contact's key)
-# review: new
 ui-keys-title = Clés de chiffrement
-# review: new
-ui-keys-intro = Vos clés signent vos messages et ouvrent le courrier chiffré pour vous. Les clés de vos contacts vérifient leurs signatures et chiffrent le courrier qui leur est destiné.
-# review: new
-ui-keys-empty = Aucune clé pour l'instant. Cliquez sur Nouvelle clé pour créer la vôtre, ou sur Importer pour ajouter une clé que vous avez déjà.
-# review: new
+ui-keys-intro = Vos clés vous permettent de signer vos messages et de lire le courrier chiffré que vous recevez. Avec les clés de vos contacts, vous pouvez vérifier leurs signatures et leur envoyer des messages chiffrés.
+ui-keys-empty = Aucune clé pour l’instant. Cliquez sur « Nouvelle clé » pour en créer une ou sur « Importer » pour ajouter une clé existante.
 ui-keys-col-name = Nom
-# review: new
 ui-keys-col-address = Adresse
-# review: new
 ui-keys-col-kind = Type
-# review: new
 ui-keys-col-status = État
-# review: new
 ui-keys-kind-own = Votre clé
-# review: new
 ui-keys-kind-contact = Contact
-# review: new
 ui-keys-status-verified = { $status }, vérifiée
-# review: new
 ui-keys-new = &Nouvelle clé...
-# review: new
 ui-keys-import = &Importer...
-# review: new
 ui-keys-export = &Exporter...
-# review: new
-ui-keys-backup = &Sauvegarder...
-# review: new
+ui-keys-backup = Sa&uvegarder...
 ui-keys-verify = &Vérifier...
-# review: new
 ui-keys-new-title = Nouvelle clé
-# review: new
 ui-keys-new-for = Créer une clé pour :
-# review: new
 ui-keys-new-make = &Créer la clé
-# review: new
-ui-keys-no-account = Ajoutez d'abord un compte de messagerie : une clé est créée pour les adresses d'un compte.
-# review: new
-ui-keys-memory-only = Les mots de passe sont gardés en mémoire seulement : une clé privée créée ou importée maintenant ne pourra plus servir après la fermeture d'Inbox Classic.
-# review: new
-ui-keys-backup-offer = Votre nouvelle clé est prête. Enregistrer une sauvegarde maintenant ? Si cet ordinateur est perdu ou réinitialisé, la clé ne pourra revenir que d'une sauvegarde.
-# review: new
+ui-keys-no-account = Ajoutez d’abord un compte de messagerie. La clé sera créée pour les adresses de ce compte.
+ui-keys-memory-only = Les mots de passe sont actuellement conservés en mémoire uniquement. Les clés privées que vous créez ou importez ne seront donc plus utilisables après la fermeture d’Inbox Classic.
+ui-keys-backup-offer = Votre nouvelle clé est prête. Voulez-vous en enregistrer une sauvegarde ? Si vous perdez cet ordinateur ou le réinitialisez, cette sauvegarde sera indispensable pour récupérer la clé.
 ui-keys-backup-now = &Enregistrer une sauvegarde...
-# review: new
 ui-keys-later = &Plus tard
-# review: new
 ui-keys-backup-title = Sauvegarder la clé
-# review: new
-ui-keys-backup-intro = La sauvegarde est protégée par une phrase secrète. Gardez le fichier et la phrase dans des endroits sûrs différents : il faut les deux pour récupérer la clé.
-# review: new
+ui-keys-backup-intro = La sauvegarde est protégée par une phrase secrète. Conservez le fichier et la phrase secrète séparément, dans des endroits sûrs. Vous aurez besoin des deux pour récupérer la clé.
 ui-keys-passphrase = &Phrase secrète :
-# review: new
 ui-keys-passphrase-again = &Saisissez-la à nouveau :
-# review: new
 ui-keys-passphrase-differ = Les phrases secrètes ne sont pas identiques.
-# review: new
 ui-keys-passphrase-short = Utilisez une phrase secrète d'au moins 8 caractères.
-# review: new
 ui-keys-backup-saved = La sauvegarde a été enregistrée.
-# review: new
 ui-keys-import-title = Importer une clé
-# review: new
 ui-keys-import-passphrase = Cette clé privée est protégée par une phrase secrète. Saisissez-la pour importer la clé :
-# review: new
 ui-keys-file-filter = Clés OpenPGP
-# review: new
-ui-keys-use-for = Utiliser cette clé pour { $addresses } ? Vos messages envoyés de là seront signés avec elle, et le courrier chiffré pour elle pourra être lu ici.
-# review: new
+ui-keys-use-for = Utiliser cette clé pour les adresses suivantes : { $addresses } ? Elle servira à signer les messages envoyés depuis ces adresses et vous permettra de lire ici les messages chiffrés avec cette clé.
 ui-keys-use = &Utiliser
-# review: new
 ui-keys-not-now = &Pas maintenant
-# review: new
-ui-keys-remove-own = Supprimer votre clé { $fingerprint } ? Le courrier chiffré pour elle ne pourra plus être lu ici, sauf si vous importez à nouveau sa sauvegarde.
-# review: new
-ui-keys-remove-contact = Supprimer la clé de { $name } ? Ses signatures ne pourront pas être vérifiées ni le courrier lui être chiffré tant que vous n'aurez pas ajouté sa clé à nouveau.
-# review: new
+ui-keys-remove-own = Supprimer votre clé { $fingerprint } ? Vous devrez réimporter sa sauvegarde pour pouvoir lire à nouveau ici les messages chiffrés avec cette clé.
+ui-keys-remove-contact = Supprimer la clé de { $name } ? Vous ne pourrez plus vérifier les signatures de ce contact ni lui envoyer de messages chiffrés avant d’avoir ajouté sa clé à nouveau.
 ui-key-properties-title = Propriétés de la clé
-# review: new
 ui-key-names = Noms :
-# review: new
 ui-key-fingerprint = Empreinte :
-# review: new
 ui-key-status = État :
-# review: new
 ui-key-created = Créée le :
-# review: new
 ui-key-expires = Expire le :
-# review: new
 ui-key-never = Jamais
-# review: new
 ui-key-algorithm = Algorithme :
-# review: new
 ui-key-source = Origine :
-# review: new
 ui-key-addresses = Adresses :
-# review: new
 ui-key-address-verified = { $address } (vérifiée)
-# review: new
 ui-key-address-not-verified = { $address } (non vérifiée)
-# review: new
 ui-verify-title = Vérifier la clé
-# review: new
-ui-verify-intro = Demandez à { $name } de vous lire l'empreinte de sa clé depuis sa propre application, en personne ou au téléphone. Ne la comparez pas avec une empreinte reçue par courriel : qui pourrait changer la clé pourrait aussi changer celle-ci.
-# review: new
-ui-verify-fingerprint = L'empreinte de la clé que vous avez :
-# review: new
+ui-verify-intro = Comparez l’empreinte avec { $name }, en personne ou au téléphone. Demandez à votre contact de la lire dans sa propre application. N’utilisez pas une empreinte reçue par e-mail : une personne capable de remplacer la clé pourrait aussi remplacer cette empreinte.
+ui-verify-fingerprint = Empreinte de la clé enregistrée ici :
 ui-verify-marks = { $count ->
-    [one] S’ils correspondent, la clé est marquée comme la leur pour { $addresses }. Si cette adresse n’est pas la leur, cliquez sur « Elles diffèrent ».
-   *[other] S’ils correspondent, la clé est marquée comme la leur pour { $addresses }. Si l’une de ces adresses n’est pas la leur, cliquez sur « Elles diffèrent ».
+    [one] Si les empreintes correspondent, la clé sera marquée comme vérifiée pour cette adresse : { $addresses }. Si l’adresse n’appartient pas à votre contact, cliquez sur « Elles diffèrent ».
+   *[other] Si les empreintes correspondent, la clé sera marquée comme vérifiée pour ces adresses : { $addresses }. Si l’une d’elles n’appartient pas à votre contact, cliquez sur « Elles diffèrent ».
 }
-# review: new
 ui-verify-match = Elles &correspondent
-# review: new
 ui-verify-differ = Elles &diffèrent
-# review: new
-ui-verify-differs = La clé que vous avez n'est pas celle de { $name }. Supprimez-la et redemandez sa clé.
-# review: new
+ui-verify-differs = La clé enregistrée ici ne correspond pas à celle de { $name }. Supprimez-la et demandez à votre contact de vous renvoyer sa clé.
 ui-verify-unmark = Marquer comme &non vérifiée
-# review: new
 ui-account-security = Sécurité
-# review: new
-ui-account-security-intro = Avec une clé, vos messages peuvent être signés et d'autres personnes peuvent vous envoyer du courrier chiffré.
-# review: new
+ui-account-security-intro = Avec une clé, vous pouvez signer vos messages et recevoir du courrier chiffré.
 ui-account-key = &Clé de ce compte :
-# review: new
 ui-account-key-none = Aucune
-# review: new
 ui-account-key-new = &Nouvelle clé...
-# review: new
 ui-account-autocrypt = &Envoyer ma clé publique avec mes messages (Autocrypt)
-# review: new
 ui-contact-key = Clé de chiffrement :
-# review: new
 ui-contact-key-none = Aucune clé
-# review: new
 ui-contact-key-use-new = &Utiliser la nouvelle clé
-# review: new
 ui-contact-key-keep = &Garder l'actuelle
-# review: new
 ui-recipient-keys-title = Clés des destinataires
-# review: new
 ui-recipient-col-recipient = Destinataire
-# review: new
 ui-recipient-col-key = Clé
-# review: new
 ui-recipient-find-key = &Rechercher la clé
-# review: new
 ui-recipient-remove = Retirer du &message
-# review: new
 ui-send-unencrypted = Envoyer &sans chiffrement
-# review: new
 ui-compose-make-key = &Créer une clé...
-# review: new
 ui-compose-show-keys = Clés de c&hiffrement...
-# review: new
 ui-compose-encrypt-off = &Désactiver le chiffrement
-# review: new
 ui-compose-keep-encrypted = &Garder le chiffrement
-# review: new
 ui-setup-export-title = Exporter les paramètres et comptes
-# review: new
 ui-setup-import-title = Importer les paramètres et comptes
-# review: new
-ui-setup-export-intro = Choisissez ce que vous emportez sur un autre ordinateur. Le fichier ne contient aucun message : ils seront téléchargés à nouveau là-bas.
-# review: new
-ui-setup-use-passphrase = &Protéger le fichier par une phrase secrète
-# review: new
-ui-setup-passphrase-note = Avec une phrase secrète, le fichier est chiffré et contient aussi vos mots de passe, connexions et clés privées. Sans elle, chaque compte demande son mot de passe sur l’autre ordinateur.
-# review: new
+ui-setup-export-intro = Choisissez les données à transférer sur un autre ordinateur. Les messages ne sont pas inclus dans le fichier : ils seront téléchargés à nouveau sur cet ordinateur.
+ui-setup-use-passphrase = Proté&ger le fichier par une phrase secrète
+ui-setup-passphrase-note = Avec une phrase secrète, le fichier est chiffré et inclut aussi les mots de passe enregistrés, les données de connexion et les clés privées. Sans phrase secrète, vous devrez vous reconnecter à vos comptes sur l’autre ordinateur.
 ui-setup-export-button = &Exporter...
-# review: new
 ui-setup-file-filter = Paramètres et comptes Inbox Classic
-# review: new
 ui-setup-ask-passphrase = Ce fichier est protégé par une phrase secrète. Saisissez-la pour voir ce qu’il contient :
-# review: new
-ui-setup-import-intro = Choisissez ce qu’il faut importer. Les comptes déjà présents sur cet ordinateur restent tels quels.
-# review: new
-ui-setup-from = Enregistré par Inbox Classic { $version } le { $date }.
-# review: new
+ui-setup-import-intro = Choisissez les données à importer. Les comptes déjà configurés sur cet ordinateur ne seront pas modifiés.
+ui-setup-from = Enregistré avec Inbox Classic { $version } le { $date }.
 ui-setup-import-button = &Importer
-# review: new
 ui-setup-done = Terminé
-# review: new
 ui-setup-first-run = Importer les paramètres et comptes d’un autre ordinateur...

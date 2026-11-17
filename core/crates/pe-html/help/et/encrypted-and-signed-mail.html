@@ -1,20 +1,18 @@
-<!--review-->
-<h1>Krüptitud ja allkirjastatud kirjad</h1>
-<p class="summary">Kirja kohal olev riba näitab, kas saatja on selle allkirjastanud ja kas see on sulle krüptitud.</p>
-<p>Allkirjastatud kiri tõendab, kes selle kirjutas ja et keegi seda teel ei muutnud. Krüptitud kirja saab lugeda ainult sinu võtmega.</p>
-<p>Kirja kohal olev riba käib kogu kirja kohta:</p>
+<h1>Krüpteeritud ja allkirjastatud kirjad</h1>
+<p class="summary">Kirja kohal olev riba näitab, kas kiri on saatja poolt allkirjastatud ja kas see on krüpteeritud.</p>
+<p>Kehtiv allkiri näitab, millise võtmega kiri allkirjastati, ja kinnitab, et allkirjastatud sisu pole muudetud. Saatja isiku kinnitamiseks tuleb kontrollida võtme omanikku. Krüpteeritud kirja lugemiseks on vaja adressaadi privaatvõtit.</p>
+<p>Kirja kohal oleva riba värvid tähendavad järgmist:</p>
 <table>
     <tr><th>Värv</th><th>Tähendus</th></tr>
-    <tr><td>Roheline</td><td>Saatja allkirjastas selle võtmega, mille sa oled kontrollinud.</td></tr>
-    <tr><td>Sinine</td><td>Saatja allkirjastas selle võtmega, mida sa pole kontrollinud, või on kiri sulle krüptitud.</td></tr>
-    <tr><td>Merevaik</td><td>Midagi on valesti: allkiri ei klapi, allkirjastas keegi teine kui saatja või ühte osa ei saanud lugeda.</td></tr>
-    <tr><td>Hall</td><td>Allkirjastamata või allkirjastatud võtmega, mida sul pole.</td></tr>
+    <tr><td>Roheline</td><td>Kirjal on saatja kehtiv allkiri ja olete kinnitanud, et võti kuulub saatjale.</td></tr>
+    <tr><td>Sinine</td><td>Kirjal on saatja kehtiv allkiri, kuid te pole võtme omanikku kontrollinud, või on kiri krüpteeritud.</td></tr>
+    <tr><td>Kollakasoranž</td><td>Midagi vajab tähelepanu: allkiri ei vasta sisule, allkirjastaja ei ole saatja või mõnda kirja osa ei saanud lugeda.</td></tr>
+    <tr><td>Hall</td><td>Kiri on allkirjastamata või allkirja pole saanud kontrollida, näiteks puuduva võtme tõttu.</td></tr>
 </table>
-<p>Kiri, mille osad on kaitstud erinevalt, näitab iga osa oma raamis ja oma sildiga. Riba loendab siis iga liiki osad. Klõpsa sildil või ribal nupul <b data-text="ui-protection-details"></b>, et näha, kes iga osa millise võtmega ja millal allkirjastas.</p>
-<aside class="warning">Ainult riba ja raamide kohal olevad sildid kirjutab Inbox Classic. Saatja võib oma kirja sisse joonistada mida tahes, ka midagi, mis näeb välja nagu silt. Vaata riba.</aside>
-<p>Krüptitud osa pildid internetist laaditakse alles siis, kui klõpsad piltide ribal, iga kord uuesti. Selle silt ütleb siis, et pildid laaditi.</p>
-<p>Vastamisel ja edastamisel tsiteeritakse ainult seda, mida näidati.</p>
-<!--/review-->
-<!--review--><p>Kirjade loendis tähistab lukk krüptitud kirja ja pitser allkirjastatud kirja. Kui Inbox Classic on krüptitud kirja pärast allalaadimist või avamist dekrüptinud, näitab loend selle enda teemat ja esimesi sõnu. Seni näitavad loend ja uue kirja teade <b data-text="list-encrypted"></b>.</p><!--/review-->
-<!--review--><p>Otsing leiab dekrüptitud kirja selle teksti sõnade järgi, kui <b data-text="ui-search-encrypted"></b> on <b data-settings="reading"></b> all sisse lülitatud. Tehisintellekti agendid ei näe kunagi, mida krüptitud kirjas on, ega selle faile.</p><!--/review-->
+<p>Kui kirja osad on kaitstud erinevalt, kuvatakse iga osa eraldi raamis koos selle kaitse olekuga. Ülemine riba näitab, mitu osa on igas olekus. Klõpsake osa olekusilti või ribal nuppu <b data-text="ui-protection-details"></b>, et näha, kes, millal ja millise võtmega iga osa allkirjastas.</p>
+<aside class="warning">Usaldage ainult Inbox Classicu riba ja raamide kohal olevaid olekusilte. Saatja saab kirja sisu ise kujundada ja sinna ka eksitavaid turvalisuse tähiseid lisada.</aside>
+<p>Krüpteeritud kirja osas olevaid veebipilte laaditakse ainult siis, kui annate selleks piltide ribal loa. Luba tuleb anda igal avamisel uuesti. Pärast laadimist näitab osa olekusilt, et pildid laaditi internetist.</p>
+<p>Vastamisel ja edastamisel tsiteeritakse ainult kirja seda sisu, mida teile kuvati.</p>
+<p>Kirjade loendis tähistab tabalukk krüpteeritud kirja ja pitser allkirjastatud kirja. Kui krüpteeritud kirjade otsing on sisse lülitatud ja sobiv võti on saadaval, saab Inbox Classic allalaaditud või avatud kirja dekrüpteerida. Seejärel saab loendis näidata teksti eelvaadet ja olemasolu korral ka kaitstud teemat. Kui dekrüpteeritud eelvaadet pole, kuvatakse <b data-text="list-encrypted"></b>. Sama teksti kasutatakse ka uute krüpteeritud kirjade teatistes.</p>
+<p>Valik <b data-text="ui-search-encrypted"></b> seadetes <b data-settings="reading"></b> võimaldab otsida ka dekrüpteeritud kirjade sisust. Tehisintellekti agendid ei saa krüpteeritud kirjade sisu ega manuseid lugeda ega dekrüpteeritud sisust otsida.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>

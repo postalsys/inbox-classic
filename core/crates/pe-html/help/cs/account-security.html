@@ -1,14 +1,13 @@
-<!--review--><h1>Nastavení zabezpečení účtu</h1>
-<p class="summary">Nastavení zabezpečení serverů účtu a co jednotlivé volby znamenají.</p>
-<p>Každý účet má <b data-text="ui-field-imap-security"></b> pro server příchozí pošty a <b data-text="ui-field-smtp-security"></b> pro server odchozí pošty. Inbox Classic je vyplní, když najde nastavení vašeho poskytovatele. Chcete-li je změnit, otevřete vlastnosti účtu v nabídce <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
+<h1>Nastavení zabezpečení účtu</h1>
+<p class="summary">Zvolte způsob zabezpečení spojení s poštovními servery a zjistěte, co jednotlivé možnosti znamenají.</p>
+<p>U každého účtu nastavujete <b data-text="ui-field-imap-security"></b> pro server příchozí pošty a <b data-text="ui-field-smtp-security"></b> pro server odchozí pošty. Inbox Classic je vyplní, když najde nastavení vašeho poskytovatele. Chcete-li je změnit, otevřete vlastnosti účtu v nabídce <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</p>
 <table>
     <tr><th>Nastavení</th><th>Význam</th></tr>
     <tr><td>SSL/TLS</td><td>Spojení je šifrované od samého začátku. Obvykle port 993 pro příchozí poštu a 465 pro odchozí poštu.</td></tr>
-    <tr><td>STARTTLS</td><td>Spojení se zašifruje hned po navázání. Obvykle port 143 pro příchozí poštu a 587 pro odchozí poštu. Pokud server šifrování nenabídne, Inbox Classic se zastaví.</td></tr>
-    <tr><td><b data-text="ui-security-none"></b></td><td>Vaše heslo i pošta putují sítí tak, že je může přečíst kdokoli.</td></tr>
+    <tr><td>STARTTLS</td><td>Spojení se zašifruje hned po navázání. Obvykle port 143 pro příchozí poštu a 587 pro odchozí poštu. Pokud server šifrování nenabídne, Inbox Classic spojení ukončí.</td></tr>
+    <tr><td><b data-text="ui-security-none"></b></td><td>Heslo i pošta se přenášejí bez šifrování. Může je přečíst kdokoli, kdo zachytí síťový provoz.</td></tr>
 </table>
 <aside class="warning">Volbu <b data-text="ui-security-none"></b> používejte jen pro server na vlastním počítači nebo v místní síti. Inbox Classic vás před jejím použitím upozorní.</aside>
-<p>Inbox Classic u každého serveru ověřuje podle certifikátů, kterým váš systém důvěřuje, že je opravdu tím, za koho se vydává. Neexistuje žádný přepínač, který by přijal libovolný certifikát.</p>
-<p>Vaše heslo je uloženo <!--os:windows-->ve Správci pověření systému Windows<!--/os--><!--os:mac-->ve vaší přihlašovací klíčence<!--/os--><!--os:linux-->ve vaší klíčence<!--/os-->, nikdy v úložišti pošty. Účet, který se přihlašuje přes prohlížeč, nemá uložené žádné heslo.</p>
+<p>Inbox Classic ověřuje totožnost serveru pomocí certifikátů, kterým důvěřuje operační systém. Ověřování nelze vypnout ani nastavit přijímání libovolného certifikátu.</p>
+<p>Vaše heslo je uloženo <!--os:windows-->ve Správci pověření systému Windows<!--/os--><!--os:mac-->ve vaší přihlašovací klíčence<!--/os--><!--os:linux-->ve vaší klíčence<!--/os-->, nikdy v úložišti pošty. U účtu přihlášeného přes prohlížeč se místo hesla ukládají přihlašovací tokeny, rovněž do systémového úložiště.</p>
 <nav class="related"><a href="topic:certificate-errors"></a> <a href="topic:encryption-errors"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

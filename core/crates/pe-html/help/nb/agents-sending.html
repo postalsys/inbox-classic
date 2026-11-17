@@ -1,19 +1,22 @@
-<!--review--><h1>Når en agent sender e-post</h1>
+<h1>Når en agent sender e-post</h1>
 <p class="summary">Hver melding en KI-agent vil sende, vises først for deg og venter i Utboks før den sendes.</p>
-<p>En agent kan bare sende e-post hvis du har tillatt det, og hver melding først etter at du har sagt ja.</p>
+<p>En agent kan bare sende e-post hvis du har tillatt det, og du må godkjenne hver melding.</p>
 <img src="picture:agents-4-send" alt="Vinduet som spør om en melding som en agent har skrevet, skal sendes, med hver mottaker og en ny adresse merket">
 <p>Når agenten vil sende, viser Inbox Classic meldingen med adressen til hver mottaker. Adresser du aldri har skrevet til, er merket <b data-text="ui-new-address"></b>.</p>
 <ol>
-    <li>Les mottakerne og teksten.</li>
+    <li>Kontroller mottakerne og les teksten.</li>
     <li>Velg ett av disse:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> sender den. Knappen blir aktiv etter et øyeblikk, så du ikke trykker på den ved et uhell.</li>
-            <li><b data-text="ui-edit-first"></b> åpner den i en ny melding som du kan endre.</li>
+            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> godkjenner meldingen og legger den i kø for sending. Knappen blir aktiv etter et øyeblikk, så du ikke trykker på den ved et uhell.</li>
+            <li><b data-text="ui-edit-first"></b> åpner meldingen i skrivevinduet, slik at du kan redigere og sende den selv.</li>
             <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, standardvalget, sender den ikke.</li>
         </ul>
     </li>
 </ol>
-<p>En agent spør om én melding om gangen. Meldingene og utkastene den skriver, slutter med signaturen din, slik dine gjør.</p>
-<p>En melding du sender, venter 30 sekunder i Utboks. Før den sendes, kan du slette den der eller klikke <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> under <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<aside class="warning">En agent som også har andre verktøy, for eksempel nettsurfing eller lesing av filene dine, kan bringe videre det den leser, gjennom dem. Inbox Classic kan ikke se dem. La en agent sende bare hvis du trenger det.</aside>
-<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav><!--/review-->
+<p>Hvert program kan bare ha én melding som venter på godkjenningen din. Hvis du ikke svarer med en gang, får agenten beskjed om at du ikke har svart ennå. Agenten kan sjekke svaret ditt senere. Som standard inneholder agentens meldinger og utkast signaturteksten for kontoen. Agenten kan også utelate den.</p>
+<p>Etter at du har godkjent en agents sending, venter meldingen 30 sekunder i Utboks. Før den sendes, kan du slette den der eller klikke <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> under <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
+<h2>Utkast en agent skriver</h2>
+<p>Når du åpner et utkast som en agent har skrevet, vises agentens navn over meldingsteksten. Kontroller mottakerne og teksten før du sender det.</p>
+<p>En agent kan bare endre eller forkaste utkast den selv har skrevet. Når du lagrer et slikt utkast, kan agenten ikke lenger endre eller forkaste det. Det gjelder også når Inbox Classic lagrer endringene dine automatisk. Hvis du bare åpner utkastet, kan agenten fortsatt endre det.</p>
+<aside class="warning">En agent som også har andre verktøy, for eksempel nettsurfing eller lesing av filene dine, kan sende innholdet videre gjennom disse verktøyene. Inbox Classic kan ikke kontrollere slike overføringer. La en agent sende bare hvis du trenger det.</aside>
+<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>

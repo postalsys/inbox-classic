@@ -1,19 +1,18 @@
-<!--review--><h1>Imatges i seguiment</h1>
+<h1>Imatges i rastreig</h1>
 <p class="summary">Per què es bloquegen les imatges d’Internet i com mostrar-les per a un missatge o un remitent de confiança.</p>
-<p>Un missatge pot mostrar imatges que el remitent té a Internet. Baixar una d’aquestes imatges diu al remitent que heu obert el missatge, quan i des d’on. Per això Inbox Classic no les baixa.</p>
-<p>Les imatges enviades dins del missatge es mostren, perquè no diuen res al remitent.</p>
+<p>Un missatge pot mostrar imatges que el remitent té a Internet. Baixar aquestes imatges pot revelar al remitent quan heu obert el missatge i quina és la vostra adreça IP. Per això, Inbox Classic en bloqueja la baixada de manera predeterminada.</p>
+<p>Les imatges incloses al missatge es mostren sense establir cap connexió addicional amb el remitent.</p>
 <p>Quan un missatge té imatges d’Internet, una barra a sobre diu que s’han bloquejat algunes imatges. Per veure-les en un missatge de confiança:</p>
 <ul>
     <li><!--os:windows,mac-->Feu clic a la barra.<!--/os--><!--os:linux-->Feu clic a <b data-text="gtk-download-pictures"></b> a la barra.<!--/os--></li>
     <li>O trieu <b data-text="menu-view"></b> &gt; <b data-text="cmd-pictures"></b>.</li>
 </ul>
-<p>Això només mostra les imatges d’aquell missatge. El missatge següent torna a començar bloquejat.</p>
+<p>Això només mostra les imatges d’aquell missatge. Les imatges dels missatges següents continuen bloquejades.</p>
 <h2>Remitents de confiança</h2>
 <p>Per rebre sempre les imatges d’un remitent, <!--os:windows-->feu clic a la fletxa de l’extrem dret de la barra<!--/os--><!--os:mac-->feu clic a la fletxa del costat de <b data-text="cmd-pictures"></b> a la barra<!--/os--><!--os:linux-->feu clic a la fletxa del costat de <b data-text="gtk-download-pictures"></b> a la barra<!--/os-->. Trieu baixar sempre les imatges d’aquell remitent, o de tothom del seu domini.</p>
-<p>Llavors les seves imatges es carreguen soles, però només quan el vostre proveïdor de correu confirma que el missatge ve realment d’aquell domini. Un missatge que només fingeix ser seu encara ho pregunta, i la barra diu que no s’ha pogut confirmar el remitent. A la carpeta <b data-text="folder-junk"></b>, les imatges no es carreguen mai soles.</p>
+<p>Llavors les seves imatges es carreguen automàticament, però només quan el vostre proveïdor de correu confirma que el missatge ve realment d’aquell domini. Si no s’ha pogut autenticar el domini, el missatge continua demanant autorització per carregar imatges i la barra n’indica el motiu. A la carpeta <b data-text="folder-junk"></b>, les imatges no es carreguen mai automàticament.</p>
 <p>Per treure un remitent de la llista, feu servir <b data-text="ui-trusted-senders-button"></b> a <b data-settings="reading"></b>.</p>
 <h2>Imatges a tots els missatges</h2>
-<p><b data-text="ui-pictures-always-option"></b>, a <b data-settings="reading"></b>, baixa les imatges de tots els missatges, excepte a la carpeta <b data-text="folder-junk"></b>. D’entrada està desactivat, perquè així els remitents poden saber quan llegiu els seus missatges.</p>
-<p>El logotip d’una marca al costat de la capçalera no és una imatge de seguiment. L’aprova el vostre servidor de correu i ve de la marca, no de les imatges del remitent.</p>
+<p><b data-text="ui-pictures-always-option"></b>, a <b data-settings="reading"></b>, baixa les imatges de tots els missatges, excepte a la carpeta <b data-text="folder-junk"></b>. Aquesta opció està desactivada de manera predeterminada, perquè el carregament automàtic pot revelar als remitents quan llegiu els missatges. A les parts xifrades, cal autoritzar la càrrega d’imatges externes cada vegada que obriu el missatge.</p>
+<p>El logotip d’una marca al costat de la capçalera es tracta per separat de les imatges del contingut. Només es mostra amb l’aprovació del servidor de correu. Els logotips baixats es desen i es reutilitzen. Quan se’n baixa un, el servidor que l’allotja pot veure la vostra adreça IP i l’hora de la petició.</p>
 <nav class="related"><a href="topic:links-scripts"></a> <a href="topic:brand-logos"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

@@ -1,17 +1,16 @@
-<!--review--><h1>Opcions de la línia d’ordres</h1>
+<h1>Opcions de la línia d’ordres</h1>
 <p class="summary">Opcions per iniciar Inbox Classic des d’un terminal, per fer proves i per als agents d’IA.</p>
 <p>Inicieu el programa <!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> amb aquestes opcions:</p>
 <table>
     <tr><th>Opció</th><th>Funció</th></tr>
-    <tr><td><code>--store &lt;fitxer&gt;</code></td><td>Fa servir un altre magatzem de correu, com ara un de proves</td></tr>
+    <tr><td><code>--store &lt;fitxer&gt;</code></td><td>Fa servir un altre fitxer de base de dades de correu, per exemple per fer proves</td></tr>
     <tr><td><code>--memory-passwords</code></td><td>Conserva les contrasenyes només durant aquesta execució, mai al magatzem de contrasenyes del sistema</td></tr>
     <tr><td><code>--pin-certificate &lt;fitxer&gt;</code></td><td>Només accepta el certificat de servidor d’aquest fitxer (PEM o DER), per a un servidor de proves amb un certificat autosignat</td></tr>
-    <tr><td><code>--sign-in-page-file &lt;fitxer&gt;</code></td><td>Escriu la pàgina d’un inici de sessió pel navegador en aquest fitxer en lloc d’obrir el navegador</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;fitxer&gt;</code></td><td>Desa l’adreça de la pàgina d’inici de sessió en aquest fitxer en lloc d’obrir el navegador</td></tr>
     <tr><td><code>--language &lt;codi&gt;</code></td><td>Mostra les finestres en aquesta llengua durant aquesta execució, com ara <code>ca</code></td></tr>
-    <tr><td><code>--background</code></td><td>S’inicia sense la finestra</td></tr>
-    <tr><td><code>--mcp</code></td><td>Connecta un agent d’IA a Inbox Classic. L’inicia el programa de l’agent, no vós</td></tr>
+    <tr><td><code>--background</code></td><td>S’inicia en segon pla, sense obrir la finestra</td></tr>
+    <tr><td><code>--mcp</code></td><td>Connecta un agent d’IA a Inbox Classic. El programa de l’agent fa servir aquesta opció per iniciar la connexió</td></tr>
     <tr><td><code>--version</code></td><td>Mostra la versió i acaba</td></tr>
 </table>
 <p>Un enllaç <code>mailto:</code> donat com a argument obre un missatge nou, igual que un enllaç de correu electrònic.</p>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

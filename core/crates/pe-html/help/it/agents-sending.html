@@ -1,20 +1,22 @@
-<!--review--><h1>Quando un agente invia posta</h1>
+<h1>Quando un agente invia posta</h1>
 <p class="summary">Ogni messaggio che un agente IA vuole inviare ti viene mostrato prima, e attende in Posta in uscita prima di partire.</p>
-<p>Un agente può inviare posta solo se glielo hai permesso, e ogni messaggio solo dopo il tuo sì.</p>
+<p>Un agente può inviare posta solo se glielo hai permesso, e richiede la tua conferma per ogni messaggio.</p>
 <img src="picture:agents-4-send" alt="La finestra che chiede se inviare un messaggio scritto da un agente, con ogni destinatario e un indirizzo nuovo evidenziato">
-<p>Quando l’agente vuole inviare, Inbox Classic mostra il messaggio con ogni destinatario per indirizzo. Gli indirizzi a cui non hai mai scritto sono segnati con <b data-text="ui-new-address"></b>.</p>
+<p>Quando l’agente vuole inviare, Inbox Classic mostra il messaggio con l’indirizzo completo di ogni destinatario. Gli indirizzi a cui non hai mai scritto sono segnati con <b data-text="ui-new-address"></b>.</p>
 <ol>
     <li>Leggi i destinatari e il testo.</li>
     <li>Scegli una di queste opzioni:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> lo invia. Si attiva dopo un attimo, così non puoi premerlo per sbaglio.</li>
-            <li><b data-text="ui-edit-first"></b> lo apre in un nuovo messaggio da modificare.</li>
+            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> mette il messaggio in coda per l’invio. Il pulsante si attiva dopo un breve intervallo per ridurre il rischio di conferme accidentali.</li>
+            <li><b data-text="ui-edit-first"></b> apre il messaggio in una finestra di composizione per modificarlo.</li>
             <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->, la scelta predefinita, non lo invia.</li>
         </ul>
     </li>
 </ol>
-<p>Un agente chiede per un messaggio alla volta. I messaggi e le bozze che scrive terminano con la tua firma, come i tuoi.</p>
-<p>Un messaggio che invii attende 30 secondi in Posta in uscita. Finché non parte, puoi eliminarlo lì, oppure fare clic su <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> in <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<aside class="warning">Un agente che ha anche altri strumenti, come navigare sul web o leggere i tuoi file, potrebbe trasmettere attraverso di essi quello che legge. Inbox Classic non può vederli. Permetti a un agente di inviare solo se ti serve.</aside>
+<p>Ogni programma può avere un solo messaggio in attesa della tua conferma. Se non rispondi subito, Inbox Classic informa l’agente che la tua risposta è ancora in sospeso. L’agente può controllare più tardi che cosa hai deciso. Per impostazione predefinita, i messaggi e le bozze dell’agente includono il testo della firma del tuo account. L’agente può anche ometterlo.</p>
+<p>Un messaggio dell’agente che approvi attende 30 secondi in Posta in uscita. Finché non parte, puoi eliminarlo lì, oppure fare clic su <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> in <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
+<h2>Bozze scritte da un agente</h2>
+<p>Quando apri una bozza scritta da un agente, il nome dell’agente compare sopra il testo del messaggio. Controlla i destinatari e il testo prima di inviarla.</p>
+<p>Un agente può modificare o eliminare solo le bozze che ha creato. Quando salvi una di queste bozze, l’agente non può più modificarla né eliminarla. Questo vale anche quando Inbox Classic salva automaticamente le tue modifiche. Se apri soltanto la bozza, l’agente può ancora modificarla.</p>
+<aside class="warning">Un agente con altri strumenti, per esempio per navigare sul web o leggere file, potrebbe usarli per trasmettere i dati della tua posta. Inbox Classic non può controllare questi strumenti. Concedi all’agente solo l’accesso necessario.</aside>
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>
-<!--/review-->

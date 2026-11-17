@@ -758,7 +758,7 @@ ui-options-system-default = Як у системі ({ $language })
 ui-settings-general = Загальні
 # review: new
 ui-settings-reading = Читання
-# review: changed
+# review: new
 ui-settings-new-mail = Нова пошта
 # review: new
 ui-settings-sending = Надсилання
@@ -1099,7 +1099,7 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Не вдалося зберегти адресну книгу: { $reason }
 # review: new
 ui-code-copied = Код скопійовано
-# review: new
+# review: changed
 ui-codes-in-notifications = &Показувати коди входу в сповіщеннях про нову пошту
 # review: new
 ui-tool-unread-only = Непрочитані
@@ -1111,8 +1111,8 @@ ui-pictures-always-sender = Завжди завантажувати зображ
 ui-pictures-always-domain = Завжди завантажувати зображення від усіх із домену { $domain }
 # review: new
 ui-pictures-unconfirmed = Домен відправника ({ $domain }) не вдалося перевірити, тому зображення в цьому повідомленні не завантажуються автоматично.
-# review: new
-ui-pictures-always-option = Завантажувати зображення &в усіх повідомленнях
+# review: changed
+ui-pictures-always-option = За&вантажувати зображення в усіх повідомленнях
 # review: new
 ui-pictures-always-warning = Тоді відправники зможуть бачити, коли ви читаєте їхні повідомлення.
 # review: new
@@ -1121,7 +1121,7 @@ ui-protection-details = &Подробиці...
 ui-protection-details-title = Подробиці безпеки
 # review: new
 ui-download-heading = Завантаження
-# review: new
+# review: changed
 ui-download-ahead = Завантажувати &повідомлення заздалегідь:
 # review: new
 ui-download-ahead-recent = Нещодавні повідомлення до 1 МБ кожне
@@ -1129,14 +1129,20 @@ ui-download-ahead-recent = Нещодавні повідомлення до 1 М
 ui-download-ahead-all = Усі повідомлення
 # review: new
 ui-download-ahead-never = Лише під час відкриття
-# review: new
+# review: changed
 ui-download-limit = &Обмеження сховища для облікового запису:
-# review: new
+# review: changed
 ui-send-delay = Затримка перед &надсиланням:
 # review: new
 ui-send-delay-note = Поки повідомлення чекає на надсилання, його можна скасувати командою «Скасувати».
 # review: new
 ui-dark-messages = Показувати повідомлення на темному тлі, коли система в темному режимі
+# review: new
+ui-preview-show = Показувати вк&ладення в листах
+# review: new
+ui-preview-show-note = Показує зображення та перші сторінки PDF-файлів після тексту листа. Inbox Classic сам створює ці попередні перегляди, тож ніщо у файлі не може запуститися.
+# review: new
+ui-preview-pdfs = Показувати PDF-&файли в листах
 # review: new
 ui-sending-in = { $subject } буде надіслано через { $count ->
     [one] { $count } секунду
@@ -1154,7 +1160,7 @@ ui-outbox-status-undo = Буде надіслано о { $time }
 ui-download-note = Заздалегідь завантажені повідомлення відкриваються одразу. Коли обмеження сховища перевищено, найстаріші локальні копії вилучаються й завантажуються знову, коли ви їх відкриваєте.
 # review: new
 ui-attachment-downloading = Це повідомлення ще не завантажилося повністю. Спробуйте знову, коли завантаження завершиться.
-# review: new
+# review: changed
 ui-trusted-senders-button = &Довірені відправники...
 # review: new
 ui-trusted-senders-title = Довірені відправники
@@ -1172,7 +1178,7 @@ ui-search-encrypted-note = Зашифровані повідомлення ро�
 ui-pgp-keyserver = Шукати &ключі на keys.openpgp.org
 # review: new
 ui-pgp-keyserver-note = Коли ви шифруєте повідомлення або шукаєте ключ, шукана адреса надсилається на keys.openpgp.org. Спочатку запит іде до домену самої адреси.
-# review: new
+# review: changed
 ui-eml-default = &Відкривати файли .eml в Inbox Classic
 # review: new
 ui-eml-default-done = Тепер Inbox Classic відкриває файли .eml.
@@ -1182,7 +1188,7 @@ ui-eml-default-failed = Не вдалося зробити Inbox Classic тип�
 ui-folders = Папки
 # review: new
 ui-sorted-by = Сортування: { $field }
-# review: new
+# review: changed
 ui-layout-label = &Макет:
 # review: new
 ui-columns-note = Вікно досить широке для макета зі стовпцями. Макет можна змінити в меню Вигляд > Макет.
@@ -1203,10 +1209,10 @@ ui-row-messages = { $count ->
     [many] { $count } повідомлень
    *[other] { $count } повідомлення
 }
-# review: new
+# review: changed
 ui-list-pictures = &Показувати зображення відправників у списку повідомлень
-# review: new
-ui-list-pictures-note = У макеті зі стовпцями показує логотипи брендів або зображення з адресної книги для перевірених відправників, а ініціали, коли зображення немає. Логотипи завантажуються один раз для кожного бренду, а не для кожного повідомлення.
+# review: changed
+ui-list-pictures-note = Показує логотипи брендів або зображення з адресної книги для перевірених відправників, а ініціали, коли зображення немає. Логотипи завантажуються один раз для кожного бренду, а не для кожного повідомлення.
 # review: new
 ui-card-picture = Зображення:
 # review: new

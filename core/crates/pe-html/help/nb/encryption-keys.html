@@ -1,6 +1,6 @@
-<!--review--><h1>Krypteringsnøkler</h1>
-<p class="summary">Lag en nøkkel for å signere meldingene dine og motta kryptert e-post, og ta vare på kontaktenes nøkler.</p>
-<p>Inbox Classic signerer og krypterer e-post med OpenPGP-nøkler. Din egen nøkkel har to halvdeler: en offentlig nøkkel som du gir til andre, og en privat nøkkel som blir på datamaskinen din. Kontaktenes nøkler lar deg kontrollere signaturene deres og kryptere e-post til dem.</p>
+<h1>Krypteringsnøkler</h1>
+<p class="summary">Lag en nøkkel for å signere meldingene dine og motta kryptert e-post, og administrer kontaktenes nøkler.</p>
+<p>Inbox Classic signerer og krypterer e-post med OpenPGP-nøkler. Din egen nøkkel har to deler: en offentlig nøkkel som du gir til andre, og en privat nøkkel som du må holde hemmelig. Kontaktenes nøkler lar deg kontrollere signaturene deres og kryptere e-post til dem.</p>
 <p>Slik lager du nøkkelen din:</p>
 <ol>
     <li>Velg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, og klikk deretter på <b data-text="ui-keys-new"></b>.</li>
@@ -8,12 +8,12 @@
     <li>Klikk på <b data-text="ui-keys-backup-now"></b>, og velg en passfrase. Oppbevar filen og passfrasen på to forskjellige trygge steder.</li>
 </ol>
 <aside class="warning">Uten en sikkerhetskopi kan ikke nøkkelen gjenopprettes hvis denne datamaskinen går tapt eller tilbakestilles, og e-post som er kryptert til den, kan ikke lenger leses.</aside>
-<h2>Nøklene er beskyttet uten passfraser</h2>
-<p>De private nøklene dine er beskyttet av en nøkkel som oppbevares i <!--os:windows-->Legitimasjonsbehandling<!--/os--><!--os:mac-->nøkkelringen<!--/os--><!--os:linux-->systemets nøkkelring<!--/os-->, så du trenger aldri å skrive en passfrase for å bruke dem. Du velger bare en passfrase for en sikkerhetskopi. Hvis nøkkelen din vises som låst, er denne beskyttelsen tilbakestilt: Klikk på <b data-text="ui-keys-import"></b>, og velg sikkerhetskopien av den.</p>
-<h2>Legge til nøkler</h2>
-<p>Klikk på <b data-text="ui-keys-import"></b> for å legge til en nøkkel fra en fil, for eksempel en som en kontakt har sendt deg, eller en sikkerhetskopi av din egen. En privat nøkkel som er beskyttet av en passfrase, spør etter den én gang. Inbox Classic spør deretter om en importert nøkkel som er din, skal brukes for adressene dine.</p>
+<h2>Beskyttelse av lagrede nøkler</h2>
+<p>De private nøklene dine er beskyttet av en nøkkel som oppbevares i <!--os:windows-->Legitimasjonsbehandling<!--/os--><!--os:mac-->nøkkelringen<!--/os--><!--os:linux-->systemets nøkkelring<!--/os-->, så du slipper å skrive en passfrase hver gang du bruker dem. Du bruker en passfrase til sikkerhetskopier og eventuelt ved import. Hvis den lagrede beskyttelsesnøkkelen går tapt, kan den private nøkkelen ikke brukes: Klikk på <b data-text="ui-keys-import"></b>, og velg en sikkerhetskopi av den private nøkkelen.</p>
+<h2>Legg til nøkler</h2>
+<p>Klikk på <b data-text="ui-keys-import"></b> for å legge til en nøkkel fra en fil, for eksempel en som en kontakt har sendt deg, eller en sikkerhetskopi av din egen. Hvis den private nøkkelen er beskyttet med en passfrase, blir du bedt om den ved import. Inbox Classic spør deretter om en importert nøkkel som er din, skal brukes for adressene dine.</p>
 <p>En kontakts nøkkel brukes for kontaktens adresse fra da av. Hvis det senere dukker opp en annen nøkkel for den samme adressen, brukes den nåværende til du velger den nye i kontaktens egenskaper.</p>
 <p>For å dele den offentlige nøkkelen din merker du den og klikker på <b data-text="ui-keys-export"></b>. Du kan også velge kontoens nøkkel i egenskapene for kontoen, i fanen <b data-text="ui-account-security"></b>.</p>
-<p>Når du krypterer til noen du ikke har nøkkelen til, spør Inbox Classic adressens eget domene og deretter keys.openpgp.org. Bare adressen sendes. Slå av <b data-text="ui-pgp-keyserver"></b> under <b data-settings="reading"></b> for aldri å spørre keys.openpgp.org.</p>
-<p>Nøkler følger også med e-posten. Meldinger fra en adresse med nøkkel har med den offentlige nøkkelen, slik at andre apper kan kryptere til deg, og Inbox Classic lærer en kontakts nøkkel fra meldingene deres på samme måte. Hvis du ikke vil sende din lenger, slår du av <b data-text="ui-account-autocrypt"></b> i fanen <b data-text="ui-account-security"></b> for kontoen.</p>
-<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav><!--/review-->
+<p>Når du skal kryptere en melding og mangler nøkkelen til en mottaker, søker Inbox Classic først på domenet til mottakerens e-postadresse. Finner appen ikke nøkkelen der, sendes adressen til keys.openpgp.org. Slå av <b data-text="ui-pgp-keyserver"></b> under <b data-settings="reading"></b> for å deaktivere dette søket på keys.openpgp.org. Søk via domenet er fortsatt tilgjengelig.</p>
+<p>Når Autocrypt er slått på og avsenderadressen din har en tilknyttet nøkkel, sender Inbox Classic den offentlige nøkkelen med meldingene dine. Andre apper kan bruke den til å sende deg krypterte meldinger. Når du åpner en mottatt melding, kan Inbox Classic også lagre avsenderens offentlige nøkkel. Det bekrefter ikke hvem nøkkelen tilhører. Hvis du ikke vil sende din egen nøkkel, slår du av <b data-text="ui-account-autocrypt"></b> på fanen <b data-text="ui-account-security"></b> i kontoegenskapene.</p>
+<nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>

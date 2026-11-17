@@ -123,7 +123,6 @@ mac-no-calendar-app = На этом Mac нет программы календа
 mac-file-not-saved = Не удалось сохранить файл.
 # review: new
 mac-unsubscribing = Отписка от { $target }…
-# review: new
 mac-loading-list = Загрузка…
 
 ## The compose window

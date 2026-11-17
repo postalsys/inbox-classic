@@ -759,7 +759,7 @@ ui-options-system-default = Privzeto v sistemu ({ $language })
 ui-settings-general = Splošno
 # review: new
 ui-settings-reading = Branje
-# review: changed
+# review: new
 ui-settings-new-mail = Nova pošta
 # review: new
 ui-settings-sending = Pošiljanje
@@ -1105,7 +1105,7 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Imenika ni bilo mogoče shraniti: { $reason }
 # review: new
 ui-code-copied = Koda je kopirana
-# review: new
+# review: changed
 ui-codes-in-notifications = &Pokaži kode za prijavo v obvestilih o novi pošti
 # review: new
 ui-tool-unread-only = Neprebrano
@@ -1117,7 +1117,7 @@ ui-pictures-always-sender = Vedno prenesi slike od { $sender }
 ui-pictures-always-domain = Vedno prenesi slike od vseh na { $domain }
 # review: new
 ui-pictures-unconfirmed = Domene pošiljatelja ({ $domain }) ni bilo mogoče preveriti, zato se slike v tem sporočilu ne prenesejo samodejno.
-# review: new
+# review: changed
 ui-pictures-always-option = Prenašaj slike &v vseh sporočilih
 # review: new
 ui-pictures-always-warning = Pošiljatelji bodo nato lahko videli, kdaj preberete njihova sporočila.
@@ -1127,7 +1127,7 @@ ui-protection-details = &Podrobnosti...
 ui-protection-details-title = Varnostne podrobnosti
 # review: new
 ui-download-heading = Prenašanje
-# review: new
+# review: changed
 ui-download-ahead = &Vnaprej prenesi sporočila:
 # review: new
 ui-download-ahead-recent = Nedavna sporočila do 1 MB vsako
@@ -1135,14 +1135,20 @@ ui-download-ahead-recent = Nedavna sporočila do 1 MB vsako
 ui-download-ahead-all = Vsa sporočila
 # review: new
 ui-download-ahead-never = Samo ob odpiranju
-# review: new
+# review: changed
 ui-download-limit = &Omejitev prostora na račun:
-# review: new
+# review: changed
 ui-send-delay = &Zakasnitev pred pošiljanjem:
 # review: new
 ui-send-delay-note = Dokler sporočilo čaka na pošiljanje, lahko pošiljanje prekličete z ukazom Razveljavi.
 # review: new
 ui-dark-messages = Pokaži sporočila na temnem ozadju, ko je sistem v temnem načinu
+# review: new
+ui-preview-show = Prikaži pripon&ke v sporočilih
+# review: new
+ui-preview-show-note = Za besedilom sporočila prikaže slike in prve strani datotek PDF. Inbox Classic te predoglede izdela sam, zato se nič v datoteki ne more zagnati.
+# review: new
+ui-preview-pdfs = Prikaži datoteke PD&F v sporočilih
 # review: new
 ui-sending-in = Pošiljanje { $subject } čez { $count ->
     [one] { $count } sekundo
@@ -1160,7 +1166,7 @@ ui-outbox-status-undo = Pošiljanje ob { $time }
 ui-download-note = Vnaprej prenesena sporočila se odprejo takoj. Ko je omejitev prostora presežena, se najstarejše lokalne kopije odstranijo in znova prenesejo, ko jih odprete.
 # review: new
 ui-attachment-downloading = Prenos tega sporočila še ni končan. Poskusite znova, ko bo prenos končan.
-# review: new
+# review: changed
 ui-trusted-senders-button = &Zaupanja vredni pošiljatelji...
 # review: new
 ui-trusted-senders-title = Zaupanja vredni pošiljatelji
@@ -1178,8 +1184,8 @@ ui-search-encrypted-note = Šifrirana sporočila se v tem računalniku dešifrir
 ui-pgp-keyserver = &Išči ključe na keys.openpgp.org
 # review: new
 ui-pgp-keyserver-note = Ko šifrirate sporočilo ali iščete ključ, se iskani naslov pošlje na keys.openpgp.org. Najprej se vpraša domena naslova.
-# review: new
-ui-eml-default = Odpiraj &datoteke .eml z Inbox Classic
+# review: changed
+ui-eml-default = O&dpiraj datoteke .eml z Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic zdaj odpira datoteke .eml.
 # review: new
@@ -1188,7 +1194,7 @@ ui-eml-default-failed = Inbox Classic ni bilo mogoče nastaviti kot privzeti pro
 ui-folders = Mape
 # review: new
 ui-sorted-by = Razvrščeno po: { $field }
-# review: new
+# review: changed
 ui-layout-label = &Postavitev:
 # review: new
 ui-columns-note = Okno je dovolj široko za postavitev s stolpci. Postavitev lahko spremenite v meniju Pogled > Postavitev.
@@ -1209,10 +1215,10 @@ ui-row-messages = { $count ->
     [few] { $count } sporočila
    *[other] { $count } sporočil
 }
-# review: new
+# review: changed
 ui-list-pictures = Pokaži &slike pošiljateljev na seznamu sporočil
-# review: new
-ui-list-pictures-note = V postavitvi s stolpci za preverjene pošiljatelje prikaže logotipe blagovnih znamk ali slike iz Imenika, kadar slike ni, pa začetnice. Logotipi se prenesejo enkrat za vsako znamko, ne za vsako sporočilo.
+# review: changed
+ui-list-pictures-note = Za preverjene pošiljatelje prikaže logotipe blagovnih znamk ali slike iz Imenika, kadar slike ni, pa začetnice. Logotipi se prenesejo enkrat za vsako znamko, ne za vsako sporočilo.
 # review: new
 ui-card-picture = Slika:
 # review: new

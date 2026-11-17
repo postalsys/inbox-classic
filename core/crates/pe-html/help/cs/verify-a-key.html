@@ -1,15 +1,14 @@
-<!--review--><h1>Ověření klíče kontaktu</h1>
+<h1>Ověření klíče kontaktu</h1>
 <p class="summary">Porovnejte otisk klíče s jeho vlastníkem, abyste měli jistotu, že klíč opravdu patří jemu.</p>
 <p>Klíč může pocházet odkudkoli: ze zprávy, ze serveru klíčů, ze souboru. Klíč se jménem a adresou vašeho kontaktu může vytvořit kdokoli. Ověření potvrdí, že klíč, který máte, je tentýž, který má váš kontakt.</p>
 <p>Jak ověřit klíč:</p>
 <ol>
     <li>Zvolte <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, vyberte klíč kontaktu a klikněte na <b data-text="ui-keys-verify"></b>. Tlačítko najdete i ve vlastnostech kontaktu v Adresáři.</li>
-    <li>Požádejte kontakt, aby vám osobně nebo po telefonu přečetl otisk svého klíče ze své vlastní aplikace.</li>
-    <li>Pokud je každá čtveřice znaků stejná, klikněte na <b data-text="ui-verify-match"></b>. Klíč se zobrazí jako ověřený.</li>
-    <li>Okno uvádí adresy, kterých se označení týká. Klíč může uvádět libovolnou adresu, takže pokud některá z nich vašemu kontaktu nepatří, klikněte místo toho na <b data-text="ui-verify-differ"></b>.</li>
+    <li>Požádejte kontakt, aby vám osobně nebo po telefonu přečetl otisk ze své aplikace. Ověřte také, že mu patří všechny adresy uvedené v okně.</li>
+    <li>Pokud se shodují všechny skupiny čtyř znaků a kontaktu patří všechny uvedené adresy, klikněte na <b data-text="ui-verify-match"></b>. Klíč se zobrazí jako ověřený.</li>
+    <li>Pokud některá z uvedených adres kontaktu nepatří, klikněte i při shodě otisků na <b data-text="ui-verify-differ"></b>.</li>
 </ol>
 <aside class="warning">Neporovnávejte otisk s otiskem poslaným e-mailem. Kdo mohl změnit klíč ve zprávě, mohl změnit i otisk.</aside>
-<p>Pokud se otisky liší, klikněte na <b data-text="ui-verify-differ"></b>. Klíč, který máte, nepatří vašemu kontaktu: odeberte jej a požádejte kontakt, aby vám svůj klíč poslal znovu.</p>
-<p>Podpisy ověřeným klíčem se zobrazují zeleně. Klíč, který jste neověřili, funguje pro šifrování dál a jeho podpisy se zobrazují modře.</p>
+<p>Pokud se otisky liší, klikněte na <b data-text="ui-verify-differ"></b>. Klíč, který máte, neodpovídá klíči kontaktu. Odeberte jej a požádejte kontakt o jeho klíč znovu.</p>
+<p>Platný digitální podpis odesílatele se zobrazí zeleně, pokud jste ověřili vlastnictví klíče, jinak modře. Neověřený klíč lze nadále používat k šifrování.</p>
 <nav class="related"><a href="topic:encryption-keys"></a> <a href="topic:address-book"></a></nav>
-<!--/review-->

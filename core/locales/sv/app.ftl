@@ -756,7 +756,7 @@ ui-options-system-default = Systemets standard ({ $language })
 ui-settings-general = Allmänt
 # review: new
 ui-settings-reading = Läsning
-# review: changed
+# review: new
 ui-settings-new-mail = Ny e-post
 # review: new
 ui-settings-sending = Skicka
@@ -1088,8 +1088,8 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Det gick inte att spara adressboken: { $reason }
 # review: new
 ui-code-copied = Koden kopierades
-# review: new
-ui-codes-in-notifications = Visa &inloggningskoder i aviseringar om ny e-post
+# review: changed
+ui-codes-in-notifications = V&isa inloggningskoder i aviseringar om ny e-post
 # review: new
 ui-tool-unread-only = Olästa
 # review: new
@@ -1100,7 +1100,7 @@ ui-pictures-always-sender = Hämta alltid bilder från { $sender }
 ui-pictures-always-domain = Hämta alltid bilder från alla på { $domain }
 # review: new
 ui-pictures-unconfirmed = Avsändarens domän ({ $domain }) kunde inte verifieras, så bilderna i meddelandet hämtas inte automatiskt.
-# review: new
+# review: changed
 ui-pictures-always-option = &Hämta bilder i alla meddelanden
 # review: new
 ui-pictures-always-warning = Avsändarna kan då se när du läser deras meddelanden.
@@ -1110,7 +1110,7 @@ ui-protection-details = &Detaljer...
 ui-protection-details-title = Säkerhetsdetaljer
 # review: new
 ui-download-heading = Hämtning
-# review: new
+# review: changed
 ui-download-ahead = &Hämta meddelanden i förväg:
 # review: new
 ui-download-ahead-recent = Senaste meddelandena upp till 1 MB vardera
@@ -1118,14 +1118,20 @@ ui-download-ahead-recent = Senaste meddelandena upp till 1 MB vardera
 ui-download-ahead-all = Alla meddelanden
 # review: new
 ui-download-ahead-never = Bara när de öppnas
-# review: new
+# review: changed
 ui-download-limit = &Lagringsgräns per konto:
-# review: new
+# review: changed
 ui-send-delay = &Fördröjning före sändning:
 # review: new
 ui-send-delay-note = Medan ett meddelande väntar på att skickas kan du avbryta sändningen med Ångra.
 # review: new
 ui-dark-messages = Visa meddelanden på mörk bakgrund när systemet använder mörkt läge
+# review: new
+ui-preview-show = Visa bila&gor i meddelanden
+# review: new
+ui-preview-show-note = Visar bilder och de första sidorna av PDF-filer efter texten i ett meddelande. Inbox Classic gör förhandsvisningarna själv, så inget i en fil kan köras.
+# review: new
+ui-preview-pdfs = Visa &PDF-filer i meddelanden
 # review: new
 ui-sending-in = Skickar { $subject } om { $count ->
     [one] { $count } sekund
@@ -1141,7 +1147,7 @@ ui-outbox-status-undo = Skickas { $time }
 ui-download-note = Meddelanden som hämtats i förväg öppnas direkt. När lagringsgränsen överskrids tas de äldsta lokala kopiorna bort och hämtas igen när du öppnar dem.
 # review: new
 ui-attachment-downloading = Meddelandet har inte hämtats färdigt. Försök igen när hämtningen är klar.
-# review: new
+# review: changed
 ui-trusted-senders-button = &Betrodda avsändare...
 # review: new
 ui-trusted-senders-title = Betrodda avsändare
@@ -1159,7 +1165,7 @@ ui-search-encrypted-note = Krypterade meddelanden dekrypteras på den här dator
 ui-pgp-keyserver = &Sök efter nycklar på keys.openpgp.org
 # review: new
 ui-pgp-keyserver-note = När du krypterar ett meddelande eller söker efter en nyckel skickas adressen som söks till keys.openpgp.org. Adressens egen domän tillfrågas först.
-# review: new
+# review: changed
 ui-eml-default = &Öppna .eml-filer med Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic öppnar nu .eml-filer.
@@ -1169,7 +1175,7 @@ ui-eml-default-failed = Inbox Classic kunde inte anges som standardprogram för 
 ui-folders = Mappar
 # review: new
 ui-sorted-by = Sorterat efter { $field }
-# review: new
+# review: changed
 ui-layout-label = &Layout:
 # review: new
 ui-columns-note = Fönstret är tillräckligt brett för kolumnlayouten. Du kan byta layout under Visa > Layout.
@@ -1188,10 +1194,10 @@ ui-row-messages = { $count ->
     [one] { $count } meddelande
    *[other] { $count } meddelanden
 }
-# review: new
-ui-list-pictures = Visa &avsändarnas bilder i meddelandelistan
-# review: new
-ui-list-pictures-note = Visar i kolumnlayouten varumärkeslogotyper eller bilder från adressboken för verifierade avsändare, och initialer när ingen bild finns. Logotyper hämtas en gång per varumärke, inte för varje meddelande.
+# review: changed
+ui-list-pictures = Vis&a avsändarnas bilder i meddelandelistan
+# review: changed
+ui-list-pictures-note = Visar varumärkeslogotyper eller bilder från adressboken för verifierade avsändare, och initialer när ingen bild finns. Logotyper hämtas en gång per varumärke, inte för varje meddelande.
 # review: new
 ui-card-picture = Bild:
 # review: new

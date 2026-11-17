@@ -1,15 +1,14 @@
-<!--review--><h1>Inbox Classicin muodostamat yhteydet</h1>
-<p class="summary">Mihin Inbox Classic muodostaa yhteyden ja miksi, teknisesti uteliaille.</p>
+<h1>Inbox Classicin muodostamat yhteydet</h1>
+<p class="summary">Teknisiä tietoja Inbox Classicin verkkoyhteyksistä ja niiden käyttötarkoituksista.</p>
 <ul>
-    <li><b>Sähköpostipalvelimesi</b>: IMAP postin lukemiseen ja SMTP sen lähettämiseen. Yhteydet salataan TLS:llä, ja jokaisen palvelimen varmenne tarkistetaan järjestelmäsi luottamia varmenteita vasten. Inbox Classic hylkää palvelimen, jossa ei ole salausta, ellet valitse kohtaa <b data-text="ui-security-none"></b> ja vahvista valintaa.</li>
-    <li><b>Kun lisäät tilin</b>, sen palvelimet haetaan. Inbox Classic lukee verkkotunnuksesi DNS-tietueet DNS over HTTPS -yhteydellä (Cloudflare, sitten Google), ei koskaan tavallisella DNS:llä. Se kokeilee myös palveluntarjoajasi autoconfig-tiedostoa ja Thunderbirdin palveluntarjoajaluetteloa (ISPDB). Exchangen kohdalla se kysyy Microsoft Autodiscoverilta, joka saa salasanasi vain pyytäessään sitä HTTPS:n kautta. Salaamatonta palvelinta ei koskaan valita.</li>
-    <li><b>Kirjautuminen selaimessa</b>: OAuth 2.0 ja PKCE, Googleen, Microsoftiin tai kirjautumissovelluksesi palveluntarjoajaan. Selain palaa vain tämän tietokoneen Inbox Classiciin.</li>
-    <li><b>Tuotemerkkien logot</b> (BIMI): tuotemerkin HTTPS-osoitteesta, kun viesti ei sisällä logoa, kerran jokaista Inbox Classicin käyttökertaa kohden. Tämä tapahtuu vain, kun sähköpostipalvelimesi on hyväksynyt viestin DMARC-tarkistuksen ja logon.</li>
-    <li><b>Kuvat internetistä</b>: vain kun pyydät niitä.</li>
-    <li><b>Tilauksen peruminen</b>: vain kun napsautat sitä. Yhden napsautuksen pyyntö (RFC 8058) lähetetään vain, kun lista on allekirjoittanut viestin DKIM:llä.</li>
-    <li><b>Salausavaimet</b>: vain kun salaat viestin jollekulle, jonka avainta sinulla ei ole. Ensin osoitteen oma verkkotunnus (Web Key Directory), sitten keys.openpgp.org, ellet ole poistanut sitä käytöstä. Vain osoite lähetetään.</li>
-    <!--os:mac--><li><b>Päivitykset</b>: inboxclassic.comista, jotta nähdään, onko uusi versio julkaistu.</li><!--/os-->
+    <li><b>Sähköpostipalvelimesi</b>: postin lukemiseen käytetään IMAP-protokollaa ja lähettämiseen SMTP-protokollaa. Yhteydet salataan TLS:llä, ja palvelinten varmenteet tarkistetaan käyttöjärjestelmän luottamien varmenteiden perusteella. Salaamatonta yhteyttä ei käytetä, ellet valitse asetusta <b data-text="ui-security-none"></b> ja vahvista valintaa.</li>
+    <li><b>Kun lisäät tilin</b>, Inbox Classic selvittää sen palvelinasetukset. Inbox Classic lukee verkkotunnuksesi DNS-tietueet DNS over HTTPS -yhteydellä (Cloudflare, sitten Google), ei koskaan tavallisella DNS:llä. Se tarkistaa myös palveluntarjoajan autoconfig-tiedoston ja Thunderbirdin palveluntarjoajaluettelon (ISPDB). Exchange-tileille käytetään Microsoft Autodiscoveria. Salasana lähetetään vain sitä pyytäneelle HTTPS-palvelimelle. Automaattinen haku ei valitse salaamatonta yhteyttä.</li>
+    <li><b>Kirjautuminen selaimessa</b>: Googleen, Microsoftiin tai kirjautumissovelluksen palveluntarjoajaan muodostetaan yhteys OAuth 2.0:n ja PKCE:n avulla. Kirjautumisen jälkeen selain ohjaa takaisin tällä tietokoneella toimivaan Inbox Classiciin.</li>
+    <li><b>Tuotemerkkien logot</b> (BIMI): logo ladataan tarvittaessa tuotemerkin HTTPS-osoitteesta, jos sitä ei ole viestissä. Ladatut logot tallennetaan ja käytetään uudelleen myös seuraavilla käyttökerroilla. Logo näytetään vain, jos postipalvelimen mukaan viesti läpäisi DMARC-tarkistuksen ja logo on hyväksytty. Latauspyyntö voi paljastaa logon palvelimelle IP-osoitteesi ja latausajan.</li>
+    <li><b>Kuvat internetistä</b>: kun sallit lataamisen yksittäisessä viestissä, luotetulle lähettäjälle tai kaikkien viestien asetuksissa. Roskapostissa kuvia ei ladata automaattisesti.</li>
+    <li><b>Tilauksen peruminen</b>: vain vahvistuksesi jälkeen. Yhden napsautuksen perumispyyntö (RFC 8058) lähetetään vain, jos postituslistan DKIM-allekirjoitus on hyväksytty.</li>
+    <li><b>Salausavaimia</b> haetaan, kun salaat viestin eikä sinulla ole vastaanottajan avainta tai kun käynnistät haun itse. Sähköpostiosoitteella haettaessa Inbox Classic ottaa ensin yhteyttä osoitteen verkkotunnukseen (Web Key Directory). Jos avainta ei löydy ja haku palvelusta keys.openpgp.org on käytössä, osoite lähetetään myös sinne. Kun haet sormenjäljellä tai avaimen tunnisteella, palveluun keys.openpgp.org lähetetään tämä tunniste sähköpostiosoitteen sijaan.</li>
+    <!--os:mac--><li><b>Päivitykset</b>: inboxclassic.com-sivustolta tarkistetaan, onko uusi versio saatavilla.</li><!--/os-->
 </ul>
-<p>Kirjautumiskoodeja tarjotaan vain, kun palveluntarjoajasi Authentication-Results-otsikkotieto kertoo, että verkkotunnus on allekirjoittanut viestin (DKIM). Tämä ei vaadi omaa yhteyttä.</p>
+<p>Kirjautumiskoodi näytetään erillisessä kortissa vain, jos postipalveluntarjoajan Authentication-Results-otsikkotieto vahvistaa koodin verkkotunnuksen DKIM-allekirjoituksen. Koodin tunnistaminen ei vaadi erillistä verkkoyhteyttä.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

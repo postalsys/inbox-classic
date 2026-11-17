@@ -3,7 +3,6 @@
 
 ## Counts and sizes
 
-# review: new
 messages = { $count ->
     [one] { $count } повідомлення
     [few] { $count } повідомлення
@@ -699,7 +698,7 @@ day-sunday = неділя
 
 # review: new
 agent-level-read = Читати пошту: папки, список повідомлень, пошук і повідомлення
-# review: changed
+# review: new
 agent-level-organize = Упорядковувати пошту: стан прочитання, прапорці, небажана пошта, переміщення, архівування, нові папки, видалення в «Видалені» та вихід зі списків розсилки після вашого «так»
 # review: new
 agent-level-drafts = Писати чернетки, які надсилаєте ви
@@ -792,6 +791,12 @@ agent-log-sent = Надіслано «{ $subject }» до { $to }
 # review: new
 agent-log-draft = Збережено чернетку «{ $subject }»
 # review: new
+agent-log-draft-replaced = Замінено чернетку «{ $subject }»
+# review: new
+agent-log-draft-discarded = Відкинуто чернетку «{ $subject }»
+# review: new
+agent-draft-note = { $program }, ШІ-агент, написав цю чернетку. Перевірте одержувачів і текст, перш ніж надіслати її.
+# review: new
 agent-log-read = Позначено як прочитане «{ $subject }»
 # review: new
 agent-log-unread = Позначено як непрочитане «{ $subject }»
@@ -811,8 +816,7 @@ agent-log-not-junk = Позначено «{ $subject }» як не небажа�
 agent-log-archived = Заархівовано «{ $subject }»
 # review: new
 agent-log-folder = Створено папку «{ $name }»
-# review: new
-agent-log-unsubscribed = Скасовано підписку на список розсилки «{ $subject }»
+agent-log-unsubscribed = Ви схвалили запит на скасування підписки. Повідомлення: «{ $subject }»
 # review: new
 agent-log-unsubscribe-failed = Не вдалося скасувати підписку на список розсилки «{ $subject }»: { $reason }
 # review: new
@@ -1015,7 +1019,6 @@ pgp-why-signature-expired = Термін дії підпису сплив
 pgp-why-key-not-valid = Підписано недійсним ключем
 # review: new
 pgp-why-not-for-you = Підписано для інших одержувачів і передано вам
-# review: new
 pgp-why-not-key-in-use = Підписано іншим ключем, ніж той, що використовується для { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Зображення завантажено з інтернету
@@ -1395,35 +1398,34 @@ attachment-runs-programs = «{ $name }» може запускати прогр�
 # review: new
 attachment-decrypted-note = Це вкладення із зашифрованого повідомлення. Щоб його відкрити, Inbox Classic зберігає розшифровану копію на цьому комп’ютері, у вашій папці, яку Inbox Classic очищає через добу.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
-    [one] Сервер не перемістив { $messages } у папку «{ $folder }», тому воно знову в папці «{ $from }»: { $reason }
+    [1] Сервер не перемістив { $messages } у папку «{ $folder }», тому воно знову в папці «{ $from }»: { $reason }
+    [one] Сервер не перемістив { $messages } у папку «{ $folder }», тому повідомлення знову в папці «{ $from }»: { $reason }
    *[other] Сервер не перемістив { $messages } у папку «{ $folder }», тому вони знову в папці «{ $from }»: { $reason }
 }
-# review: new
 undone-delete = { $count ->
-    [one] Сервер не видалив { $messages }, тому воно знову в папці «{ $from }»: { $reason }
+    [1] Сервер не видалив { $messages }, тому воно знову в папці «{ $from }»: { $reason }
+    [one] Сервер не видалив { $messages }, тому повідомлення знову в папці «{ $from }»: { $reason }
    *[other] Сервер не видалив { $messages }, тому вони знову в папці «{ $from }»: { $reason }
 }
-# review: new
 undone-archive = { $count ->
-    [one] Сервер не заархівував { $messages }, тому воно знову в папці «{ $from }»: { $reason }
+    [1] Сервер не заархівував { $messages }, тому воно знову в папці «{ $from }»: { $reason }
+    [one] Сервер не заархівував { $messages }, тому повідомлення знову в папці «{ $from }»: { $reason }
    *[other] Сервер не заархівував { $messages }, тому вони знову в папці «{ $from }»: { $reason }
 }
-# review: new
 undone-read = { $count ->
-    [one] Сервер не позначив { $messages } як прочитане, тому воно знову непрочитане: { $reason }
-   *[other] Сервер не позначив { $messages } як прочитані, тому вони знову непрочитані: { $reason }
+    [1] Сервер не позначив { $messages } як прочитане, тому воно знову позначене як непрочитане: { $reason }
+    [one] Сервер не позначив { $messages } як прочитане, тому повідомлення знову позначені як непрочитані: { $reason }
+   *[other] Сервер не позначив { $messages } як прочитані, тому вони знову позначені як непрочитані: { $reason }
 }
-# review: new
 undone-unread = { $count ->
-    [one] Сервер не позначив { $messages } як непрочитане, тому воно знову прочитане: { $reason }
-   *[other] Сервер не позначив { $messages } як непрочитані, тому вони знову прочитані: { $reason }
+    [1] Сервер не позначив { $messages } як непрочитане, тому воно знову позначене як прочитане: { $reason }
+    [one] Сервер не позначив { $messages } як непрочитане, тому повідомлення знову позначені як прочитані: { $reason }
+   *[other] Сервер не позначив { $messages } як непрочитані, тому вони знову позначені як прочитані: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Сервер не змінив прапорці, тому { $messages } залишилося без змін: { $reason }
-   *[other] Сервер не змінив прапорці, тому { $messages } залишилися без змін: { $reason }
+    [one] Сервер не змінив прапорці, тому зміну скасовано ({ $messages }): { $reason }
+   *[other] Сервер не змінив прапорці, тому зміну скасовано ({ $messages }): { $reason }
 }
 
 ## Previews of attachments: the pictures and PDF files shown in a message
@@ -1433,4 +1435,20 @@ preview-pdf-option = Показувати PDF-файли в листах
 # review: new
 preview-pdf-off = PDF-файли в листах не показуються.
 # review: new
-preview-pdf-off-crashed = PDF-файл закрив Inbox Classic під час показу, тому PDF-файли в листах більше не показуються. Зображення й далі показуються. Щоб знову показувати PDF-файли, увімкніть параметр { $option } у налаштуваннях читання.
+preview-pdf-off-crashed = PDF-файл закрив Inbox Classic під час показу, тому PDF-файли в листах більше не показуються. Зображення й далі показуються. Щоб знову показувати PDF-файли, увімкніть параметр { $option } у розділі { $settings }.
+# review: new
+preview-pdf-details = { $count ->
+    [one] { $count } сторінка, { $size }
+    [few] { $count } сторінки, { $size }
+    [many] { $count } сторінок, { $size }
+   *[other] { $count } сторінки, { $size }
+}
+# review: new
+preview-page-alt = { $name }, сторінка { $page } з { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Відкрийте файл, щоб побачити всю { $count } сторінку
+    [few] Відкрийте файл, щоб побачити всі { $count } сторінки
+    [many] Відкрийте файл, щоб побачити всі { $count } сторінок
+   *[other] Відкрийте файл, щоб побачити всі { $count } сторінки
+}

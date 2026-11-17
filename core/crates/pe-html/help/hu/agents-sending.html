@@ -1,19 +1,22 @@
-<!--review--><h1>Amikor egy ügynök levelet küld</h1>
-<p class="summary">Minden üzenetet, amelyet egy MI-ügynök el szeretne küldeni, először Ön lát, és az elküldés előtt a Postázandó üzenetek mappában vár.</p>
-<p>Az ügynök csak akkor küldhet levelet, ha ezt engedélyezte, és minden üzenetet csak az Ön jóváhagyása után.</p>
+<h1>Amikor egy ügynök levelet küld</h1>
+<p class="summary">Küldés előtt hagyja jóvá az ügynök üzenetét, amely ezután rövid ideig a Postázandó üzenetek mappában vár.</p>
+<p>Az Inbox Classicban az ügynök csak küldési jogosultsággal és az egyes üzenetek külön jóváhagyásával küldhet levelet.</p>
 <img src="picture:agents-4-send" alt="Az ablak, amely megkérdezi, elküldje-e az ügynök által írt üzenetet, minden címzettel és egy megjelölt új címmel">
-<p>Amikor az ügynök küldeni szeretne, az Inbox Classic megmutatja az üzenetet, minden címzettet a címével együtt. Azok a címek, amelyekre még soha nem írt, ezzel a jelöléssel látszanak: <b data-text="ui-new-address"></b>.</p>
+<p>Amikor az ügynök küldést kér, az Inbox Classic megjeleníti az üzenetet és a címzettek teljes e-mail-címét. Azoknál a címeknél, amelyekre még nem írt, az <b data-text="ui-new-address"></b> jelölés látható.</p>
 <ol>
-    <li>Olvassa el a címzetteket és a szöveget.</li>
+    <li>Ellenőrizze a címzetteket, és olvassa el az üzenet szövegét.</li>
     <li>Válasszon:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os-->: elküldi. Csak egy pillanat múlva válik használhatóvá, így nem nyomhatja meg véletlenül.</li>
-            <li><b data-text="ui-edit-first"></b>: megnyitja egy új üzenetben, hogy módosíthassa.</li>
-            <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os-->: nem küldi el. Ez az alapértelmezett.</li>
+            <li>A <!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> gomb küldési sorba helyezi az üzenetet. Rövid késleltetéssel válik elérhetővé, hogy csökkentse a véletlen kattintások esélyét.</li>
+            <li>A <b data-text="ui-edit-first"></b> gomb megnyitja az üzenetet a szerkesztőben, ahol küldés előtt módosíthatja.</li>
+            <li>A <!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os--> gomb elutasítja a küldési kérelmet. Ez az alapértelmezett választás.</li>
         </ul>
     </li>
 </ol>
-<p>Az ügynök egyszerre egy üzenetről kérdez. Az általa írt üzenetek és piszkozatok az Ön aláírásával végződnek, ahogy a sajátjai is.</p>
-<p>Az elküldött üzenet 30 másodpercig vár a Postázandó üzenetek mappában. Amíg el nem megy, ott törölheti, vagy kattinthat erre: <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os-->, itt: <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<aside class="warning">Ha egy ügynöknek más eszközei is vannak, például böngészhet a weben vagy olvashatja a fájljait, ezeken keresztül továbbadhatja, amit olvas. Az Inbox Classic ezeket nem látja. Csak akkor engedje meg egy ügynöknek a küldést, ha szüksége van rá.</aside>
-<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav><!--/review-->
+<p>Programonként egyszerre egy üzenet várhat jóváhagyásra. Ha nem válaszol rögtön, az ügynök értesül arról, hogy a kérés még válaszra vár. A döntést később is lekérdezheti. Az ügynök által írt üzenetekhez és piszkozatokhoz alapértelmezés szerint hozzáadódik a fiók aláírásszövege. Az ügynök ezt kihagyhatja.</p>
+<p>A jóváhagyott üzenet legalább 30 másodpercig a Postázandó üzenetek mappában vár a küldés megkezdése előtt. Ezalatt törölheti onnan, vagy használhatja a <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> gombot az <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> menüponttal megnyitható ablakban. A már elküldött üzenet nem hívható vissza.</p>
+<h2>Ügynök által írt piszkozatok</h2>
+<p>Az ügynök által írt piszkozat megnyitásakor az ügynök neve az üzenet szövege fölött jelenik meg. Küldés előtt ellenőrizze a címzetteket és a szöveget.</p>
+<p>Az ügynök csak a saját piszkozatait módosíthatja vagy vetheti el. Ha elmenti a piszkozatot a szerkesztőben, az ügynök többé nem módosíthatja és nem vetheti el. Ez akkor is érvényes, ha az Inbox Classic automatikusan menti a módosításokat. A puszta megnyitás után az ügynök még módosíthatja vagy elvetheti a piszkozatot.</p>
+<aside class="warning">Az ügynök más eszközökön keresztül is továbbadhatja az olvasott adatokat, ha például böngészhet vagy hozzáférhet a fájlokhoz. Az Inbox Classic nem szabályozza ezeket az eszközöket. Csak akkor adjon küldési jogosultságot, ha szüksége van rá.</aside>
+<nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>

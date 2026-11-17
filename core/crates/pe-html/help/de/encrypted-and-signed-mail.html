@@ -1,20 +1,18 @@
-<!--review-->
 <h1>Verschlüsselte und signierte E-Mails</h1>
-<p class="summary">Die Leiste über einer Nachricht zeigt, ob sie vom Absender signiert und ob sie für Sie verschlüsselt wurde.</p>
-<p>Eine signierte Nachricht belegt, wer sie geschrieben hat und dass sie unterwegs nicht verändert wurde. Eine verschlüsselte Nachricht kann nur mit Ihrem Schlüssel gelesen werden.</p>
-<p>Die Leiste über der Nachricht gilt für die ganze Nachricht:</p>
+<p class="summary">Die Leiste über einer Nachricht zeigt, ob sie vom Absender signiert und für Sie verschlüsselt wurde.</p>
+<p>Eine gültige Signatur bestätigt, dass der Inhalt seit dem Signieren unverändert ist. Ob der verwendete Schlüssel wirklich dem Absender gehört, müssen Sie separat überprüfen. Verschlüsselte Nachrichten lassen sich nur mit einem passenden privaten Schlüssel lesen.</p>
+<p>Die Farbe der Leiste zeigt den Schutzstatus der gesamten Nachricht:</p>
 <table>
     <tr><th>Farbe</th><th>Bedeutung</th></tr>
-    <tr><td>Grün</td><td>Vom Absender signiert, mit einem Schlüssel, den Sie überprüft haben.</td></tr>
-    <tr><td>Blau</td><td>Vom Absender signiert, mit einem Schlüssel, den Sie nicht überprüft haben, oder für Sie verschlüsselt.</td></tr>
-    <tr><td>Orange</td><td>Etwas stimmt nicht: Die Signatur passt nicht, jemand anderes als der Absender hat signiert, oder ein Teil konnte nicht gelesen werden.</td></tr>
-    <tr><td>Grau</td><td>Nicht signiert, oder mit einem Schlüssel signiert, den Sie nicht haben.</td></tr>
+    <tr><td>Grün</td><td>Gültige Signatur des Absenders; Sie haben bestätigt, dass der Schlüssel ihm gehört.</td></tr>
+    <tr><td>Blau</td><td>Gültige Signatur des Absenders mit einem noch nicht überprüften Schlüssel, oder eine für Sie verschlüsselte Nachricht.</td></tr>
+    <tr><td>Orange</td><td>Die Signatur ist ungültig, stammt nicht vom angegebenen Absender oder ein Teil der Nachricht lässt sich nicht lesen.</td></tr>
+    <tr><td>Grau</td><td>Keine Signatur oder keine überprüfbare Signatur, etwa weil der benötigte Schlüssel fehlt.</td></tr>
 </table>
-<p>Eine Nachricht, deren Teile unterschiedlich geschützt sind, zeigt jeden Teil in einem eigenen Rahmen mit eigener Beschriftung. Die Leiste zählt dann die Teile jeder Art. Klicken Sie auf eine Beschriftung oder in der Leiste auf <b data-text="ui-protection-details"></b>, um zu sehen, wer jeden Teil wann mit welchem Schlüssel signiert hat.</p>
-<aside class="warning">Nur die Leiste und die Beschriftungen über den Rahmen schreibt Inbox Classic. Ein Absender kann in seiner Nachricht alles zeichnen, auch etwas, das wie eine Beschriftung aussieht. Achten Sie auf die Leiste.</aside>
-<p>Bilder aus dem Internet in einem verschlüsselten Teil werden nur geladen, wenn Sie auf die Bilderleiste klicken, jedes Mal. Die Beschriftung sagt dann, dass Bilder geladen wurden.</p>
-<p>Beim Antworten und Weiterleiten wird nur zitiert, was angezeigt wurde.</p>
-<!--/review-->
-<!--review--><p>In der Nachrichtenliste kennzeichnet ein Schloss eine verschlüsselte Nachricht und ein Siegel eine signierte. Sobald Inbox Classic eine verschlüsselte Nachricht entschlüsselt hat, nach dem Herunterladen oder Öffnen, zeigt die Liste ihren eigenen Betreff und ihre ersten Wörter. Bis dahin zeigen die Liste und die Benachrichtigung über neue E-Mails <b data-text="list-encrypted"></b>.</p><!--/review-->
-<!--review--><p>Die Suche findet eine entschlüsselte Nachricht über die Wörter ihres Textes, solange <b data-text="ui-search-encrypted"></b> unter <b data-settings="reading"></b> aktiviert ist. KI-Agenten sehen nie, was in einer verschlüsselten Nachricht steht, und auch nicht ihre Dateien.</p><!--/review-->
+<p>Sind die Teile einer Nachricht unterschiedlich geschützt, erhält jeder Teil einen eigenen Rahmen und Schutzstatus. Die Leiste zählt die Teile nach ihrem Status. Klicken Sie auf einen Schutzstatus oder in der Leiste auf <b data-text="ui-protection-details"></b>, um Signaturdatum und Schlüssel der einzelnen Teile anzuzeigen.</p>
+<aside class="warning">Nur die Leiste und die Statusangaben über den Rahmen stammen von Inbox Classic. Im Nachrichtentext kann der Absender solche Angaben nachahmen. Verlassen Sie sich deshalb auf die Leiste.</aside>
+<p>Bilder aus dem Internet werden in verschlüsselten Teilen erst geladen, wenn Sie dies in der Bilderleiste erlauben. Das gilt bei jedem Öffnen erneut. Der Schutzstatus weist anschließend darauf hin, dass Bilder geladen wurden.</p>
+<p>Beim Antworten und Weiterleiten werden nur die angezeigten Inhalte zitiert.</p>
+<p>In der Nachrichtenliste kennzeichnet ein Schloss verschlüsselte und ein Siegel signierte Nachrichten. Bei aktivierter Suche in verschlüsselten Nachrichten entschlüsselt Inbox Classic heruntergeladene oder geöffnete Nachrichten mit verfügbaren Schlüsseln. Die Liste kann dann eine Textvorschau und, sofern vorhanden, den geschützten Betreff zeigen. Ohne entschlüsselte Vorschau steht dort <b data-text="list-encrypted"></b>. Benachrichtigungen über neue verschlüsselte Nachrichten verwenden ebenfalls diese Angabe.</p>
+<p>Mit der Option <b data-text="ui-search-encrypted"></b> unter <b data-settings="reading"></b> können Sie auch den entschlüsselten Nachrichtentext durchsuchen. KI-Agenten können den Inhalt und die Anlagen verschlüsselter Nachrichten weder lesen noch durchsuchen.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>

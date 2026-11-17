@@ -1,18 +1,17 @@
-<!--review--><h1>Chyby certifikátu</h1>
+<h1>Chyby certifikátu</h1>
 <p class="summary">Co dělat, když Inbox Classic nemůže ověřit, že komunikuje se skutečným poštovním serverem.</p>
 <p>Můžete vidět jednu z těchto zpráv:</p>
 <ul>
     <li>Ve stavovém řádku: „TLS error: …“</li>
-    <li>V podokně čtení: „Spojení s poštovním serverem nelze zabezpečit (…).“</li>
+    <li>V podokně čtení: „Nepodařilo se navázat zabezpečené spojení s poštovním serverem (…).“</li>
 </ul>
-<p>Inbox Classic nemohl ověřit, že server je tím, za koho se vydává, a proto mu neposlal vaše heslo.</p>
+<p>Inbox Classic neověřil totožnost serveru, proto spojení ukončil bez odeslání hesla.</p>
 <p>Náprava:</p>
 <ol>
     <li>Otevřete vlastnosti účtu v nabídce <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
-    <li>Zkontrolujte názvy serverů. Musí to být názvy, pro které je certifikát serveru vystaven. Často je to název poskytovatele, například <code>imap.provider.com</code>, nikoli vaše vlastní doména.</li>
+    <li>Zkontrolujte názvy serverů. Musí to být názvy, pro které je certifikát serveru vystaven. Často jde o server v doméně poskytovatele, například <code>imap.provider.com</code>, nikoli vaše vlastní doména.</li>
     <li>Zkontrolujte, zda má počítač správné datum a čas.</li>
 </ol>
 <p>V síti, která kontroluje šifrovaný provoz, například v některých firemních nebo školních sítích, se obraťte na jejího správce.</p>
-<aside class="note">Neexistuje přepínač, který by přijal jakýkoli certifikát. Přijetí falešného certifikátu by někomu v síti umožnilo číst vaše heslo a poštu.</aside>
+<aside class="note">Ověřování certifikátu nelze vypnout ani nastavit přijímání libovolného certifikátu. Přijetí falešného certifikátu by někomu v síti umožnilo číst vaše heslo a poštu.</aside>
 <nav class="related"><a href="topic:encryption-errors"></a> <a href="topic:account-security"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

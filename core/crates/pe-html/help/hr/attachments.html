@@ -1,20 +1,23 @@
-<!--review--><h1>Privici</h1>
-<p class="summary">Otvorite ili spremite datoteke koje stižu s porukom i priložite datoteke porukama koje pišete.</p>
+<h1>Privici</h1>
+<p class="summary">Otvorite ili spremite privitke primljenih poruka i priložite datoteke porukama koje pišete.</p>
+<!--review--><h2>Slike i PDF datoteke u poruci</h2>
+<p>Slike i prve stranice PDF datoteka prikazuju se nakon teksta poruke, s nazivima i veličinama. Kliknite jednu da biste otvorili datoteku. Dulja PDF datoteka ima poveznicu koja je otvara.</p>
+<p>To su kopije koje Inbox Classic sam iscrtava: ništa iz datoteke se ne pokreće i ništa se ne učitava s interneta. Datoteka koju ne može iscrtati te datoteke potpisanih ili šifriranih poruka nalaze se samo na popisu datoteka.</p>
+<p>Da biste vidjeli samo popis, isključite <b data-text="ui-preview-show"></b> u <b data-settings="reading"></b>. Ako PDF datoteka ikad zatvori Inbox Classic, PDF datoteke se više ne prikazuju i poruka to kaže; uključite <b data-text="ui-preview-pdfs"></b> da biste ih ponovno prikazali.</p><!--/review-->
 <h2>Otvaranje privitka</h2>
-<p>Datoteke poruke navedene su ispod njezina zaglavlja, svaka s nazivom i veličinom. Dvaput kliknite datoteku da biste je otvorili u programu koji vaše računalo za nju koristi. Na tipkovnici pritišćite <kbd>Tab</kbd> dok ne odaberete datoteke, strelicama odaberite jednu i pritisnite <kbd>Enter</kbd>.</p>
-<p>Desnom tipkom miša kliknite datoteku za naredbe <b data-text="ui-attachment-open"></b>, <b data-text="ui-attachment-save-as"></b> i <b data-text="ui-attachment-save-all"></b>. Datoteke navodi i spajalica s desne strane zaglavlja.</p>
-<p>Inbox Classic nikad ne otvara datoteku koja može pokretati programe: programe, skripte, instalacijske programe, prečace, slike diska, web-stranice i Office dokumente s makronaredbama. Za njih je naredba <b data-text="ui-attachment-open"></b> isključena; takvu datoteku spremite i sami je otvorite samo ako vjerujete njezinu izvoru.</p>
-<p>Datoteka se otvara iz vaše mape koju Inbox Classic prazni nakon jednog dana i označena je kao datoteka s interneta. Datoteka šifrirane poruke ondje je spremljena dešifrirana dok je otvorena; prvi put Inbox Classic vas na to upozori.</p>
+<p>Privici su navedeni ispod zaglavlja poruke, svaki s nazivom i veličinom. Dvaput kliknite privitak da biste ga otvorili u zadanom programu za tu vrstu datoteke. Za otvaranje tipkovnicom pritišćite <kbd>Tab</kbd> dok ne dođete do popisa privitaka, strelicama odaberite privitak i pritisnite <kbd>Enter</kbd>.</p>
+<p>Desnim klikom na privitak otvarate izbornik s naredbama <b data-text="ui-attachment-open"></b>, <b data-text="ui-attachment-save-as"></b> i <b data-text="ui-attachment-save-all"></b>. Popis privitaka možete otvoriti i klikom na spajalicu desno od zaglavlja.</p>
+<p>Inbox Classic blokira izravno otvaranje programa, skripti, instalacijskih programa, prečaca, slika diska, web-stranica i dokumenata sustava Office s makronaredbama. Za njih je naredba <b data-text="ui-attachment-open"></b> onemogućena. Takvu datoteku spremite i sami je otvorite samo ako vjerujete njezinu izvoru.</p>
+<p>Za otvaranje privitka Inbox Classic sprema njegovu kopiju u privremenu mapu vašeg korisničkog računa. Pri pokretanju briše kopije starije od jednog dana. U sustavima Windows i macOS označava datoteke kao preuzete s interneta. Privici šifriranih poruka ondje se spremaju bez šifriranja; program vas na to upozorava pri prvom otvaranju takvog privitka.</p>
 <h2>Spremanje privitka</h2>
-<p>Desnom tipkom miša kliknite datoteku i odaberite <b data-text="ui-attachment-save-as"></b> ili odaberite <b data-text="ui-attachment-save-all"></b> da biste ih sve spremili u mapu. Inbox Classic predlaže siguran naziv, bez znakova zbog kojih bi naziv mogao izgledati kao nešto drugo. Datoteka istog naziva koja je već u mapi zadržava se, a nova dobiva broj.</p>
+<p>Desnom tipkom miša kliknite privitak i odaberite <b data-text="ui-attachment-save-as"></b> ili odaberite <b data-text="ui-attachment-save-all"></b> da biste sve privitke spremili u jednu mapu. Inbox Classic predlaže siguran naziv bez znakova koji bi mogli prikriti stvarni naziv datoteke. Ako u mapi već postoji datoteka istog naziva, ona se zadržava, a nazivu nove datoteke dodaje se broj.</p>
 <aside class="warning">Otvarajte samo privitke od osoba od kojih ih očekujete. Program ili dokument koji traži da „omogućite sadržaj“ može preuzeti nadzor nad vašim računalom. Programi su među ostalim datoteke <!--os:windows--><code>.exe</code>, <code>.msi</code>, <code>.js</code>, <code>.vbs</code>, <code>.bat</code> i <code>.scr</code>.<!--/os--><!--os:mac--><code>.app</code>, <code>.pkg</code>, <code>.dmg</code> i <code>.command</code>.<!--/os--><!--os:linux--><code>.sh</code>, <code>.deb</code>, <code>.AppImage</code> i <code>.desktop</code>.<!--/os--></aside>
 <h2>Prilaganje datoteke</h2>
 <p>Da biste priložili datoteke poruci koju pišete:</p>
 <ol>
     <li>Kliknite <b data-text="ui-tb-attach"></b>.</li>
-    <li>Odaberite datoteke. Navode se u polju <b data-text="ui-field-attach"></b> s veličinama.</li>
+    <li>Odaberite datoteke. Pojavljuju se u polju <b data-text="ui-field-attach"></b>, zajedno s veličinama.</li>
 </ol>
-<p>Datoteke možete i povući iz <!--os:windows-->Eksplorera za datoteke<!--/os--><!--os:mac-->Findera<!--/os--><!--os:linux-->upravitelja datoteka<!--/os--> na polja adresa. Datoteka koja nije slika može se ispustiti i na tekst.</p>
-<p>Da biste uklonili datoteku, odaberite je i pritisnite <kbd>Delete</kbd> ili je kliknite desnom tipkom miša i odaberite <b data-text="ui-remove"></b>. Datoteke se čitaju pri slanju poruke, pa ih dotad ostavite gdje jesu.</p>
+<p>Datoteke možete i povući iz <!--os:windows-->Eksplorera za datoteke<!--/os--><!--os:mac-->Findera<!--/os--><!--os:linux-->upravitelja datoteka<!--/os--> na polja adresa. Datoteku koja nije slika možete ispustiti i u područje za tekst.</p>
+<p>Da biste uklonili privitak, odaberite ga i pritisnite <kbd>Delete</kbd> ili ga kliknite desnom tipkom miša i odaberite <b data-text="ui-remove"></b>. Datoteke se učitavaju pri slanju poruke, pa ih dotad nemojte premještati ni brisati.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:save-print-import"></a> <a href="topic:links-scripts"></a></nav>
-<!--/review-->

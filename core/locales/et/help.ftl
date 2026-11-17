@@ -6,7 +6,6 @@ help-section-get-started = Alustamine
 help-section-everyday = Igapäevased toimingud
 help-section-accounts = Mitu kontot
 help-section-message-features = Kirjade võimalused
-# review: new
 help-section-encrypted-mail = Krüpteeritud ja allkirjastatud kirjad
 help-section-settings = Seaded
 help-section-agents = Tehisintellekti agendid

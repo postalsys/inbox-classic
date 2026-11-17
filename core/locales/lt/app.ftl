@@ -756,7 +756,7 @@ ui-options-system-default = Sistemos numatytoji ({ $language })
 ui-settings-general = Bendra
 # review: new
 ui-settings-reading = Skaitymas
-# review: changed
+# review: new
 ui-settings-new-mail = Nauji laiškai
 # review: new
 ui-settings-sending = Siuntimas
@@ -852,7 +852,6 @@ ui-dont-allow = Neleisti
 ui-allow = &Leisti
 # review: new
 ui-dont-send = Nesiųsti
-# review: new
 ui-dont-unsubscribe = Neatsisakyti prenumeratos
 # review: new
 ui-edit-first = &Pirma redaguoti
@@ -1094,7 +1093,7 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Adresų knygelės įrašyti nepavyko: { $reason }
 # review: new
 ui-code-copied = Kodas nukopijuotas
-# review: new
+# review: changed
 ui-codes-in-notifications = &Rodyti prisijungimo kodus pranešimuose apie naujus laiškus
 # review: new
 ui-tool-unread-only = Neskaityti
@@ -1106,7 +1105,7 @@ ui-pictures-always-sender = Visada atsisiųsti paveikslėlius iš { $sender }
 ui-pictures-always-domain = Visada atsisiųsti paveikslėlius iš visų { $domain } siuntėjų
 # review: new
 ui-pictures-unconfirmed = Siuntėjo domeno ({ $domain }) patvirtinti nepavyko, todėl šio laiško paveikslėliai automatiškai neatsisiunčiami.
-# review: new
+# review: changed
 ui-pictures-always-option = &Atsisiųsti paveikslėlius visuose laiškuose
 # review: new
 ui-pictures-always-warning = Tada siuntėjai galės matyti, kada skaitote jų laiškus.
@@ -1116,7 +1115,7 @@ ui-protection-details = &Išsamiau...
 ui-protection-details-title = Saugos informacija
 # review: new
 ui-download-heading = Atsisiuntimas
-# review: new
+# review: changed
 ui-download-ahead = &Atsisiųsti laiškus iš anksto:
 # review: new
 ui-download-ahead-recent = Naujausius laiškus, kurių kiekvienas iki 1 MB
@@ -1124,14 +1123,20 @@ ui-download-ahead-recent = Naujausius laiškus, kurių kiekvienas iki 1 MB
 ui-download-ahead-all = Visus laiškus
 # review: new
 ui-download-ahead-never = Tik atidarant
-# review: new
+# review: changed
 ui-download-limit = &Saugyklos riba kiekvienai paskyrai:
-# review: new
+# review: changed
 ui-send-delay = &Delsa prieš siunčiant:
 # review: new
 ui-send-delay-note = Kol laiškas laukia išsiuntimo, siuntimą galite atšaukti komanda „Atšaukti“.
 # review: new
 ui-dark-messages = Rodyti laiškus tamsiame fone, kai sistemoje įjungtas tamsusis režimas
+# review: new
+ui-preview-show = Rodyti prie&dus laiškuose
+# review: new
+ui-preview-show-note = Po laiško tekstu rodo paveikslėlius ir pirmuosius PDF failų puslapius. Šias peržiūras Inbox Classic sukuria pati, todėl niekas faile negali būti paleista.
+# review: new
+ui-preview-pdfs = Rodyti PDF &failus laiškuose
 # review: new
 ui-sending-in = { $subject } bus išsiųstas po { $count ->
     [one] { $count } sekundės
@@ -1147,7 +1152,7 @@ ui-outbox-status-undo = Bus išsiųsta { $time }
 ui-download-note = Iš anksto atsisiųsti laiškai atsidaro iš karto. Viršijus saugyklos ribą, seniausios vietinės kopijos pašalinamos ir vėl atsisiunčiamos, kai jas atidarote.
 # review: new
 ui-attachment-downloading = Šis laiškas dar neatsisiųstas iki galo. Bandykite dar kartą, kai atsisiuntimas baigsis.
-# review: new
+# review: changed
 ui-trusted-senders-button = &Patikimi siuntėjai...
 # review: new
 ui-trusted-senders-title = Patikimi siuntėjai
@@ -1165,7 +1170,7 @@ ui-search-encrypted-note = Užšifruoti laiškai šiame kompiuteryje iššifruoj
 ui-pgp-keyserver = I&eškoti raktų keys.openpgp.org
 # review: new
 ui-pgp-keyserver-note = Kai šifruojate laišką arba ieškote rakto, ieškomas adresas siunčiamas į keys.openpgp.org. Pirmiausia klausiama paties adreso domeno.
-# review: new
+# review: changed
 ui-eml-default = &Atidaryti .eml failus su Inbox Classic
 # review: new
 ui-eml-default-done = Dabar .eml failus atidaro Inbox Classic.
@@ -1175,7 +1180,7 @@ ui-eml-default-failed = Nepavyko nustatyti Inbox Classic kaip numatytosios .eml 
 ui-folders = Aplankai
 # review: new
 ui-sorted-by = Rikiuota pagal: { $field }
-# review: new
+# review: changed
 ui-layout-label = &Išdėstymas:
 # review: new
 ui-columns-note = Langas pakankamai platus stulpelių išdėstymui. Išdėstymą galite pakeisti per Rodinys > Išdėstymas.
@@ -1195,10 +1200,10 @@ ui-row-messages = { $count ->
     [few] { $count } laiškai
    *[other] { $count } laiškų
 }
-# review: new
+# review: changed
 ui-list-pictures = &Rodyti siuntėjų paveikslėlius laiškų sąraše
-# review: new
-ui-list-pictures-note = Stulpelių išdėstyme patvirtintiems siuntėjams rodomi prekių ženklų logotipai arba adresų knygelės paveikslėliai, o kai paveikslėlio nėra, inicialai. Logotipai atsisiunčiami vieną kartą kiekvienam prekės ženklui, o ne kiekvienam laiškui.
+# review: changed
+ui-list-pictures-note = Patvirtintiems siuntėjams rodomi prekių ženklų logotipai arba adresų knygelės paveikslėliai, o kai paveikslėlio nėra, inicialai. Logotipai atsisiunčiami vieną kartą kiekvienam prekės ženklui, o ne kiekvienam laiškui.
 # review: new
 ui-card-picture = Paveikslėlis:
 # review: new

@@ -1,4 +1,4 @@
-<!--review--><h1>Kladder og Udbakke</h1>
+<h1>Kladder og Udbakke</h1>
 <p class="summary">Gem en meddelelse, så du kan gøre den færdig senere, og se, hvad der venter på at blive sendt.</p>
 <h2>Gem en kladde</h2>
 <p>Klik på <b data-text="ui-tb-save"></b>, eller tryk på <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->. Meddelelsen gemmes i kontoens mappe <b data-text="folder-drafts"></b> på serveren. Gemmer du igen, erstattes den tidligere kopi. Meddelelsens statuslinje viser, hvornår den blev gemt.</p>
@@ -9,14 +9,13 @@
     <li><!--os:windows,linux--><b data-text="ui-no"></b><!--/os--><!--os:mac--><b data-text="mac-dont-save"></b><!--/os--> kasserer ændringerne. Hvis kladden kun var gemt automatisk, fjernes den også fra <b data-text="folder-drafts"></b>.</li>
     <li><b data-text="ui-cancel"></b> går tilbage til meddelelsen.</li>
 </ul>
-<p>Dobbeltklik på kladden i <b data-text="folder-drafts"></b> for at skrive videre. Den åbner med sine modtagere, sin tekst og sine filer. Når den er sendt, fjernes kladden.</p>
-<p>En meddelelse, du skriver, er et vindue for sig, så du kan læse mail, mens den er åben. Når du lukker Inbox Classic, lukkes de meddelelser, du skriver, først, og du bliver spurgt om dem med ændringer.</p>
+<p>Dobbeltklik på kladden i <b data-text="folder-drafts"></b> for at skrive videre. Den åbnes med modtagere, tekst og vedhæftede filer. Når den er sendt, fjernes kladden.</p>
+<p>Du skriver meddelelsen i et særskilt vindue og kan derfor læse anden mail imens. Når du afslutter Inbox Classic, spørger programmet, om ugemte ændringer skal gemmes, før skrivevinduerne lukkes.</p>
 <h2>Udbakke</h2>
 <p><b data-text="ui-tb-send"></b> lægger meddelelsen i Udbakke. Som standard sendes den efter nogle sekunder. I den tid kan du annullere afsendelsen (se nedenfor). Hovedvinduets statuslinje viser, hvornår den er sendt.</p>
-<p>Når en meddelelse ikke kan sendes, fx uden forbindelse, bliver den i Udbakke. Den sendes ved næste tjek for mail, så intet af det, du har skrevet, går tabt.</p>
-<p>Vælg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b> for at se, hvad der venter. Hver meddelelse vises med årsagen til, at den ikke blev sendt. <b data-text="ui-outbox-send-all"></b> prøver igen med det samme, og du kan også slette en meddelelse der.</p>
+<p>Når en meddelelse ikke kan sendes, fx uden forbindelse, bliver den i Udbakke. Programmet prøver at sende den igen ved næste kontrol for ny mail. Det, du har skrevet, bliver bevaret.</p>
+<p>Vælg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b> for at se, hvad der venter. Listen viser status for hver meddelelse og årsagen, hvis afsendelsen er mislykkedes. Klik på <b data-text="ui-outbox-send-all"></b> for at prøve igen med det samme. Du kan også slette ventende meddelelser fra listen.</p>
 <h2>Annuller afsendelsen af en meddelelse</h2>
-<p>Som standard venter meddelelsen nogle sekunder, efter du har klikket på <b data-text="ui-tb-send"></b>, før den sendes. Statuslinjen viser en nedtælling. I den tid kan du klikke på <b data-text="ui-undo-button"></b> ved siden af nedtællingen eller vælge <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b> for at annullere afsendelsen. Meddelelsen åbnes igen, så du kan redigere eller kassere den. Muligheden findes kun, mens meddelelsen venter på at blive sendt.</p>
+<p>Som standard venter meddelelsen nogle sekunder, efter du har klikket på <b data-text="ui-tb-send"></b>, før den sendes. Statuslinjen viser en nedtælling. I den tid kan du klikke på <b data-text="ui-undo-button"></b> ved siden af nedtællingen eller vælge <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b> for at annullere afsendelsen. Meddelelsen åbnes igen, så du kan redigere eller kassere den. Muligheden gælder kun, mens meddelelsen venter i Udbakke. Den kan ikke tilbagekalde en meddelelse, som allerede er sendt.</p>
 <p>Hvis du vil ændre forsinkelsen eller sende meddelelser med det samme, så vælg <b data-settings="general"></b>, og juster <b data-text="ui-send-delay"></b>. Hvis du afslutter Inbox Classic, mens en meddelelse venter, prøver programmet at sende den med det samme.</p>
 <nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

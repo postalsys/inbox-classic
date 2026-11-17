@@ -58,9 +58,7 @@ header-to = Saaja
 header-cc = Koopia
 header-sent = Saadetud
 header-subject = Teema
-# review: new
 header-security = Turvalisus
-# review: new
 header-part = Osa { $number }
 quote-original = ----- Algne kiri -----
 fold-show-earlier = Näita varasemaid kirju
@@ -403,8 +401,7 @@ day-sunday = pühapäeval
 ## AI agents
 
 agent-level-read = Lugeda e-posti: vaadata kaustu ja kirju ning kasutada otsingut
-# review: changed
-agent-level-organize = Hallata e-posti: märkida kirju loetuks või lugemata kirjadeks, lisada lippe, hallata rämpsposti, teisaldada ja arhiveerida kirju, luua uusi kaustu, viia kirju kausta Kustutatud kirjad ning teie nõusolekul loobuda meililistide tellimusest
+agent-level-organize = Hallata e-posti: muuta kirjade lugemisolekut ja lippe, hallata rämpsposti, teisaldada ja arhiveerida kirju, viia neid kausta Kustutatud kirjad, luua kaustu ning teie nõusolekul loobuda meililistide tellimustest
 agent-level-drafts = Koostada mustandeid, mille saadate ise
 agent-level-send = Saata kirju, küsides iga kirja jaoks teie nõusolekut
 agent-connect-title = { $program } soovib kasutada teie e-posti
@@ -428,7 +425,7 @@ agent-undo-refused-why = Seda ei saa tagasi võtta: { $reason }.
 agent-undo-impossible = seda ei saa tagasi võtta
 agent-undo-not-in-folder = kiri pole enam selles kaustas
 agent-undo-not-arrived = kiri pole (veel) sihtkaustas
-agent-undo-sent = kiri on juba saadetud
+agent-undo-sent = kirja pole enam väljundkaustas
 agent-original-not-downloaded = algne kiri pole veel alla laaditud. Avage see kõigepealt
 agent-turned-away = Keelatud
 agent-can-nothing = Mitte midagi
@@ -444,16 +441,16 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Seda kirja ei saa lugeda.
-# review: new
-agent-encrypted-original = See kiri on krüptitud: agent ei saa sellele vastata ega seda edastada, sest ta ei saa krüptida.
-# review: new
-agent-encrypted = See kiri on krüptitud. Seda saab lugeda ainult kasutaja, Inbox Classicus.
-# review: new
-list-encrypted = Krüptitud kiri
+agent-encrypted-original = Agent ei saa krüpteeritud kirjale vastata ega seda edastada, sest agent ei toeta kirjade krüpteerimist.
+agent-encrypted = See kiri on krüpteeritud. Tehisintellekti agentidel pole selle sisule ligipääsu. Kasutaja peab selle ise Inbox Classicus avama.
+list-encrypted = Krüpteeritud kiri
 agent-log-composed = Kiri „{ $subject }“ avati koostamisaknas, et saaksite selle valmis kirjutada
 agent-log-refused = Te ei saatnud kirja „{ $subject }“
 agent-log-sent = „{ $subject }“ saadeti adressaadile { $to }
 agent-log-draft = Mustand „{ $subject }“ salvestati
+agent-log-draft-replaced = Mustand „{ $subject }“ asendati
+agent-log-draft-discarded = Mustand „{ $subject }“ kustutati
+agent-draft-note = Selle mustandi koostas tehisintellekti agent { $program }. Kontrollige enne saatmist adressaate ja teksti.
 agent-log-read = „{ $subject }“ märgiti loetuks
 agent-log-unread = „{ $subject }“ märgiti lugemata kirjaks
 agent-log-flagged = „{ $subject }“ märgiti lipuga
@@ -464,20 +461,16 @@ agent-log-junk = „{ $subject }“ märgiti rämpspostiks
 agent-log-not-junk = „{ $subject }“ märgiti tavapostiks
 agent-log-archived = „{ $subject }“ arhiveeriti
 agent-log-folder = Loodi kaust „{ $name }“
-agent-log-unsubscribed = Loobuti kirja „{ $subject }“ saatnud meililisti tellimusest
-# review: new
+agent-log-unsubscribed = Lubasite saata tellimusest loobumise taotluse. Kiri: „{ $subject }“
 agent-log-unsubscribe-failed = Kirja „{ $subject }“ saatnud meililisti tellimusest ei õnnestunud loobuda: { $reason }
-# review: new
 agent-log-unsubscribe-refused = Te ei loobunud tellimusest: { $senders }
-# review: new
 agent-unsubscribe-title = { $count ->
     [one] { $program } soovib teie nimel loobuda ühe meililisti tellimusest
    *[other] { $program } soovib teie nimel loobuda { $count } meililisti tellimusest
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic palub allolevalt meililistilt lõpetada teile kirjade saatmise, kasutades listi pakutavat ühe klõpsuga viisi. Muud midagi ei saadeta ja teie olemasolevad kirjad jäävad oma kohale.
-   *[other] Inbox Classic palub igal alloleval meililistil lõpetada teile kirjade saatmise, kasutades listi pakutavat ühe klõpsuga viisi. Muud midagi ei saadeta ja teie olemasolevad kirjad jäävad oma kohale.
+    [1] Inbox Classic saadab allolevale meililistile tellimusest loobumise taotluse, kasutades listi pakutavat ühe klõpsuga loobumise võimalust. Muud ei saadeta ja teie olemasolevaid kirju ei muudeta.
+   *[other] Inbox Classic saadab igale allolevale meililistile tellimusest loobumise taotluse, kasutades listi pakutavat ühe klõpsuga loobumise võimalust. Muud ei saadeta ja teie olemasolevaid kirju ei muudeta.
 }
 
 ## Keys
@@ -521,455 +514,285 @@ event-attendees =
 otp-notification = { $code } on teie kood domeeni { $domain } jaoks
 
 ## OpenPGP keys (keys.rs)
-# review: new
 pgp-key-valid = Kehtiv
-# review: new
 pgp-key-expires = Kehtiv kuni { $date }
-# review: new
 pgp-key-expired = Aegus { $date }
-# review: new
 pgp-key-revoked = Tühistatud
-# review: new
 pgp-key-revoked-why = Tühistatud: { $reason }
-# review: new
 pgp-key-not-valid = Ei kehti
-# review: new
-pgp-key-locked = Ei saa kasutada: { $store } ei sisalda enam seda kaitsvat võtit. Impordi selle varukoopia uuesti.
-# review: new
+pgp-key-locked = Privaatvõtit ei saa avada, sest seda kaitsev võti puudub paroolihoidlast ({ $store }). Importige privaatvõtme varukoopia uuesti.
 pgp-source-own = Loodud Inbox Classicus
-# review: new
 pgp-source-file = Imporditud failist
-# review: new
 pgp-source-paste = Kleebitud
-# review: new
 pgp-source-attachment = Kirjast
-# review: new
 pgp-source-vcard = Kontaktikaardilt
-# review: new
 pgp-source-wkd = Saatja e-posti teenusepakkujalt
-# review: new
 pgp-source-keyserver = Saidilt keys.openpgp.org
-# review: new
 pgp-source-autocrypt = Kirja Autocrypti päisest
-# review: new
-pgp-error-no-store = Privaatvõtmeid kaitseb { $store }, mida ei saa kasutada: { $error }
-# review: new
-pgp-error-wrong-passphrase = Parool ei ole õige.
-# review: new
-# review: new
+pgp-error-no-store = Privaatvõtmeid kaitsev paroolihoidla pole saadaval ({ $store }): { $error }
+pgp-error-wrong-passphrase = Vale parool.
 pgp-error-not-a-key = See ei ole OpenPGP võti.
-# review: new
 pgp-error-too-large = Võti on liiga suur.
-# review: new
-pgp-error-unusable = Võti kasutab vana või nõrka krüptograafiat ja seda ei saa kasutada.
-# review: new
+pgp-error-unusable = Võti kasutab aegunud või ebaturvalist krüptograafiat, mistõttu ei saa seda kasutada.
 pgp-imported-private = { $count ->
-    [one] Sinu privaatvõti imporditi.
+    [one] Teie privaatvõti imporditi.
    *[other] Imporditi { $count } privaatvõtit.
 }
-# review: new
 pgp-imported-public = { $count ->
     [one] Imporditi üks võti.
    *[other] Imporditi { $count } võtit.
 }
-# review: new
-pgp-imported-pending = Aadressi { $addresses } jaoks on juba kasutusel teine võti: uus ootab kontaktis, kuni selle valid.
-# review: new
-pgp-error-needs-passphrase = Privaatvõtit kaitseb parool. Võtme importimiseks sisesta see.
-# review: new
-pgp-error-mismatch = Privaatvõti ei kuulu oma avaliku võtme juurde. See võib olla muudetud.
-# review: new
-pgp-file-name-public = { $who } avalik võti.asc
-# review: new
-pgp-file-name-private = { $who } privaatvõtme varukoopia.asc
-# review: new
-pgp-pending = Aadressi { $address } jaoks leiti { $date } teine võti.
+pgp-imported-pending = Järgmiste aadresside jaoks on juba kasutusel teine võti: { $addresses }. Uus võti on kontakti andmetes ootel, kuni selle kasutusele võtate.
+pgp-error-needs-passphrase = See privaatvõti on parooliga kaitstud. Importimiseks sisestage võtme parool.
+pgp-error-mismatch = Privaatvõti ja avalik võti ei sobi kokku. Võtit võib olla muudetud.
+pgp-file-name-public = Avalik võti ({ $who }).asc
+pgp-file-name-private = Privaatvõtme varukoopia ({ $who }).asc
+pgp-pending = Aadressile { $address } leiti { $date } uus võti, mis erineb senisest.
 
 ## Reading signed and encrypted mail (protect.rs)
-# review: new
-pgp-part-verified = Allkirjastanud { $signer }, võti kontrollitud
-# review: new
-pgp-part-signed = Allkirjastanud { $signer } (võti kontrollimata)
-# review: new
-pgp-part-other = Allkirjastanud { $signer }, kes ei ole saatja
-# review: new
+pgp-part-verified = Allkirjastaja: { $signer }, võtme omanik kinnitatud
+pgp-part-signed = Allkirjastaja: { $signer }, võtme omanik kinnitamata
+pgp-part-other = Allkirjastaja: { $signer }. Allkirjastaja ei ole kirja saatja
 pgp-part-unknown-key = Allkirjastatud, kuid võti pole teada
-# review: new
 pgp-part-not-signed = Allkirjastamata
-# review: new
 pgp-part-not-checked = Allkirja ei kontrollitud
-# review: new
 pgp-part-encrypted = Krüpteeritud. { $signature }
-# review: new
-pgp-part-no-key = Krüpteeritud võtmele, mida sul pole
-# review: new
-pgp-part-changed = Krüpteeritud osa muudeti teel ja seda ei näidata
-# review: new
-pgp-part-unprotected = Krüpteeritud ilma muutmise vastase kaitseta, ei näidata
-# review: new
+pgp-part-no-key = Kirja avamiseks vajalik krüpteerimisvõti puudub
+pgp-part-changed = Kirja krüpteeritud osa on edastamisel muudetud. Seda ei kuvata
+pgp-part-unprotected = Kirja krüpteeritud osal puudub kaitse muutmise vastu. Seda ei kuvata
 pgp-part-broken = Krüpteeritud osa ei saa lugeda
-# review: new
-pgp-why-mismatch = Allkiri ei vasta sellele tekstile
-# review: new
+pgp-why-mismatch = Allkiri ei vasta sellele sisule
 pgp-why-weak-hash = Allkiri kasutab algoritmi { $hash }, mis pole enam turvaline
-# review: new
-pgp-why-key-expired = Allkirjastatud pärast võtme aegumist { $date }
-# review: new
+pgp-why-key-expired = Allkirjastamiseks kasutatud võti oli juba aegunud (aegumiskuupäev: { $date })
 pgp-why-key-revoked = Allkirjastatud tühistatud võtmega
-# review: new
-pgp-why-not-signing-key = Allkirjastatud võtmega, mis ei tohi allkirjastada
-# review: new
-pgp-why-from-future = Allkiri on dateeritud tulevikku
-# review: new
+pgp-why-not-signing-key = Kasutatud võti ei ole mõeldud allkirjastamiseks
+pgp-why-from-future = Allkirja kuupäev on tulevikus
 pgp-why-signature-expired = Allkiri on aegunud
-# review: new
 pgp-why-key-not-valid = Allkirjastatud kehtetu võtmega
-# review: new
-pgp-why-not-for-you = Allkirjastatud teistele saajatele ja sulle edasi saadetud
-# review: new
-pgp-why-not-key-in-use = Allkirjastatud teise võtmega kui see, mida { $address } jaoks kasutatakse
-# review: new
+pgp-why-not-for-you = Kiri allkirjastati teistele saajatele saatmiseks ja edastati seejärel teile
+pgp-why-not-key-in-use = Kirja allkirjastamiseks kasutatud võti erineb aadressile { $address } määratud võtmest
 pgp-part-pictures-loaded = { $label }. Pildid laaditi internetist
-# review: new
-pgp-error-no-own-key = Sul pole aadressi { $address } jaoks võtit, millega allkirjastada või krüpteerida. Loo see menüüs Tööriistad > Krüpteerimisvõtmed või lülita allkirjastamine ja krüpteerimine välja.
-# review: new
+pgp-error-no-own-key = Aadressile { $address } pole allkirjastamiseks ega krüpteerimiseks võtit seadistatud. Looge võti menüüs Tööriistad > Krüpteerimisvõtmed või lülitage allkirjastamine ja krüpteerimine välja.
 pgp-error-missing-keys = { $count ->
-    [one] Aadressil { $addresses } pole võtit, millele krüpteerida.
-   *[other] Neil saajatel pole võtit, millele krüpteerida: { $addresses }.
+    [one] Sellele saajale kirja krüpteerimiseks puudub võti: { $addresses }.
+   *[other] Neile saajatele kirja krüpteerimiseks puuduvad võtmed: { $addresses }.
 }
-# review: new
-pgp-error-encrypted-quote = See kiri tsiteerib või edastab krüpteeritud kirja, seega saab selle saata ainult krüpteerituna. Lülita krüpteerimine sisse või eemalda tsiteeritud tekst.
-# review: new
-pgp-error-protect = Kirja ei saanud allkirjastada ega krüptida: { $reason }
-# review: new
-pgp-found-keys = Leiti aadressi { $addresses } võti.
-# review: new
-pgp-found-none = Aadressi { $addresses } jaoks võtit ei leitud. Palu neil saata sulle oma avalik võti.
-# review: new
+pgp-error-encrypted-quote = See kiri sisaldab tsitaati krüpteeritud kirjast või edastab krüpteeritud kirja. Seetõttu saab seda saata ainult krüpteerituna. Lülitage krüpteerimine sisse või eemaldage tsiteeritud sisu.
+pgp-error-protect = Kirja ei saanud allkirjastada ega krüpteerida: { $reason }
+pgp-found-keys = Võtmed leiti järgmiste aadresside jaoks: { $addresses }.
+pgp-found-none = Võtit ei leitud järgmiste aadresside jaoks: { $addresses }. Paluge nende aadresside omanikel saata teile oma avalik võti.
 pgp-found-no-key = Võtit ei leitud.
-# review: new
 pgp-find-unavailable = Võtmeid ei saa praegu otsida: { $error }
-# review: new
-pgp-publish-pending = keys.openpgp.org saatis kinnituslingi aadressile { $addresses }. Sinu võti avaldatakse seal, kui sellel klõpsad.
-# review: new
-pgp-publish-done = Sinu võti on keys.openpgp.org lehel avaldatud aadressi { $addresses } jaoks.
-# review: new
+pgp-publish-pending = keys.openpgp.org saatis kinnituslingi järgmistele aadressidele: { $addresses }. Kinnitage iga aadress, et teie võtit saaks selle aadressi järgi leida.
+pgp-publish-done = Teie võti on saidil keys.openpgp.org avaldatud järgmiste aadresside jaoks: { $addresses }.
 pgp-publish-failed = Võtit ei saanud avaldada: { $error }
-# review: changed
-pgp-keyserver-off = Võtmete otsimine serverist keys.openpgp.org on välja lülitatud: { $settings }.
+pgp-keyserver-off = Seadetes { $settings } on võtmete otsimine serverist keys.openpgp.org välja lülitatud.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Krüpteeritud ja allkirjastatud: seda saavad lugeda ainult sina ja { $addresses }.
-   *[other] Krüpteeritud ja allkirjastatud: seda saavad lugeda ainult sina ja kirja { $count } saajat.
+    [one] Kiri krüpteeritakse ja allkirjastatakse saatmisel. Sisu saavad lugeda ainult teie ja { $addresses }.
+   *[other] Kiri krüpteeritakse ja allkirjastatakse saatmisel. Sisu saavad lugeda ainult teie ja kirja { $count } saajat.
 }
-# review: new
-pgp-compose-encrypt-ready = Kiri krüpteeritakse ja allkirjastatakse. Lisa saajad, kelle võtmed sul on.
-# review: new
+pgp-compose-encrypt-ready = Kiri krüpteeritakse ja allkirjastatakse saatmisel. Lisage saajad, kelle jaoks on olemas kasutatav võti.
 pgp-compose-missing = { $count ->
-    [one] Aadressil { $addresses } pole võtit, seega ei saa kirja veel krüpteerida.
-   *[other] { $count } saajal pole võtit, seega ei saa kirja veel krüpteerida: { $addresses }.
+    [one] Selle saaja jaoks puudub kasutatav võti: { $addresses }. Kirja ei saa veel krüpteerida.
+   *[other] { $count } saaja jaoks puudub kasutatav võti: { $addresses }. Kirja ei saa veel krüpteerida.
 }
-# review: new
 pgp-compose-looking = Otsitakse võtmeid: { $addresses }...
-# review: new
-pgp-compose-signed = Allkirjastatud: saajad saavad kontrollida, et kiri on sinult ja seda pole muudetud.
-# review: new
-pgp-compose-reply-clear = Krüpteerimata, kuigi kiri, millele see vastab või mida see edastab, oli krüpteeritud.
-# review: new
-pgp-compose-encrypted-files = Kirjale on lisatud krüpteeritud kirja faile, seega saab selle saata ainult krüpteerituna. Lülita krüpteerimine sisse või eemalda need failid.
-# review: new
-pgp-compose-sign-tip = Allkirjasta kiri oma võtmega, et saajad saaksid kontrollida, et see on sinult ja seda pole muudetud
-# review: new
-pgp-compose-sign-tip-encrypted = Krüpteeritud kiri on alati allkirjastatud
-# review: new
-pgp-compose-encrypt-tip = Krüpteeri kiri, et seda saaksid lugeda ainult sina ja selle saajad
-# review: new
-pgp-compose-make-key = Sul pole veel aadressi { $address } jaoks võtit. Kas luua see nüüd? Selle abil saab su kirju allkirjastada ja krüpteerida.
-# review: new
-pgp-compose-key-unusable = Sinu aadressi { $address } võtit ei saa kasutada ({ $state }). Ava Krüpteerimisvõtmed, et importida selle varukoopia või luua uus võti.
-# review: new
-pgp-compose-encrypt-off-quote = See kiri tsiteerib või edastab krüpteeritud kirja. Ilma krüpteerimiseta ei saa seda saata enne, kui eemaldad tsiteeritud osa. Kas lülitada krüpteerimine ikkagi välja?
-# review: new
-pgp-compose-encrypt-off-reply = See kiri vastab krüpteeritud kirjale või edastab selle. Ilma krüpteerimiseta saab su kirja lugeda igaüks, kes seda teel käsitleb. Kas lülitada krüpteerimine välja?
-# review: new
+pgp-compose-signed = Kiri allkirjastatakse saatmisel. Saajad saavad kontrollida allkirja ja kirja sisu muutumatust.
+pgp-compose-reply-clear = Krüpteerimata, kuigi algne kiri oli krüpteeritud.
+pgp-compose-encrypted-files = Kiri sisaldab krüpteeritud kirjast pärit manuseid, seega saab seda saata ainult krüpteerituna. Lülitage krüpteerimine sisse või eemaldage need manused.
+pgp-compose-sign-tip = Allkirjasta kiri saatmisel oma võtmega, et saajad saaksid kontrollida allkirja ja kirja sisu muutumatust
+pgp-compose-sign-tip-encrypted = Krüpteeritud kirjad allkirjastatakse saatmisel alati
+pgp-compose-encrypt-tip = Krüpteeri kirja sisu saatmisel, et seda saaksid lugeda ainult teie ja kirja saajad
+pgp-compose-make-key = Aadressile { $address } pole veel oma võtit seadistatud. Kas soovite selle nüüd luua? Võtmega saate kirju allkirjastada ja krüpteerida.
+pgp-compose-key-unusable = Aadressile { $address } määratud võtit ei saa kasutada. Põhjus: { $state }
+    Avage aken „Krüpteerimisvõtmed“, et importida selle võtme varukoopia või luua uus võti.
+pgp-compose-encrypt-off-quote = Kiri sisaldab veel krüpteeritud kirjast pärit teksti, pilte või manuseid. Krüpteerimata saatmiseks tuleb need eemaldada. Kas soovite krüpteerimise siiski välja lülitada?
+pgp-compose-encrypt-off-reply = Algne kiri oli krüpteeritud. Kui saadate vastuse või edastate kirja krüpteerimata, saavad kirja vahendavad meiliserverid selle sisu lugeda. Kas soovite krüpteerimise välja lülitada?
 pgp-recipient-verified = Võti kontrollitud
-# review: new
 pgp-recipient-found = Võti kontrollimata
-# review: new
-pgp-recipient-own = Sinu enda võti
-# review: new
+pgp-recipient-own = Teie enda võti
 pgp-recipient-looking = Otsitakse võtit...
-# review: new
 pgp-recipient-missing = Võtit pole
-# review: new
-pgp-recipient-not-found = Võtit pole: { $date } ei leitud ühtegi
-# review: new
+pgp-recipient-not-found = Võtit ei leitud. Viimane otsing: { $date }
 pgp-recipient-unusable = Võtit ei saa kasutada: { $state }
-# review: new
-pgp-recipients-intro = Kiri krüpteeritakse iga saaja võtmele ja ka sinu omale.
-# review: new
+pgp-recipients-intro = Kirja krüpteerimiseks kasutatakse kõigi saajate võtmeid ja teie enda võtit.
 pgp-recipients-intro-missing = { $count ->
-    [one] Ühel saajal pole võtit, millele krüpteerida. Otsi tema võti, eemalda ta sellest kirjast või saada kiri krüpteerimata.
-   *[other] { $count } saajal pole võtit, millele krüpteerida. Otsi nende võtmed, eemalda nad sellest kirjast või saada kiri krüpteerimata.
+    [one] Ühe saaja jaoks puudub kasutatav võti. Otsige tema võtit või eemaldage saaja kirjast. Krüpteerimata saab kirja saata ainult siis, kui selles pole enam krüpteeritud kirjadest pärit teksti, pilte ega manuseid.
+   *[other] { $count } saaja jaoks puudub kasutatav võti. Otsige nende võtmeid või eemaldage need saajad kirjast. Krüpteerimata saab kirja saata ainult siis, kui selles pole enam krüpteeritud kirjadest pärit teksti, pilte ega manuseid.
 }
-# review: new
 pgp-details-part = Osa { $number }: { $label }
-# review: new
 pgp-details-signed = Allkirjastatud { $when } võtmega { $key }
-# review: new
-pgp-details-unknown-key = Allkirjastatud võtmega { $key }, mida sul pole
-# review: new
-pgp-details-opened = Krüptitud sinu võtmele { $key }
-# review: new
-pgp-details-for = Krüptitud võtmetele { $keys }
-# review: new
-pgp-details-plain = Pole allkirjastatud ega krüptitud
-# review: new
-pgp-bar-parts = Sellel kirjal on { $count } osa: { $list }. Iga osa ütleb, kuidas see on kaitstud.
-# review: new
+pgp-details-unknown-key = Allkirjastatud võtmega { $key }, mida teil pole
+pgp-details-opened = Dekrüpteeritud teie võtmega { $key }
+pgp-details-for = Krüpteerimiseks kasutatud võtmed: { $keys }
+pgp-details-plain = Allkirjastamata ja krüpteerimata
+pgp-bar-parts = Kirjal on { $count } osa: { $list }. Iga osa juures on näha selle kaitse olek.
 pgp-bar-count-verified = { $count } kontrollitud
-# review: new
-pgp-bar-count-good = { $count } allkirjastatud või krüptitud
-# review: new
+pgp-bar-count-good = { $count } allkirjastatud või krüpteeritud
 pgp-bar-count-warning = { $count } vajab tähelepanu
-# review: new
 pgp-bar-count-neutral = { $count } kinnitatud allkirjata
 # the setup file: settings, accounts, contacts and keys carried to another computer
-# review: new
 setup-part-settings = Seaded
-# review: new
 setup-part-preferences = Akende eelistused
-# review: new
 setup-part-accounts = Kontod
-# review: new
 setup-part-sign-in-apps = Sisselogimisrakendused
-# review: new
 setup-part-contacts = Kontaktid ja grupid
-# review: new
 setup-part-keys = Krüpteerimisvõtmed
-# review: new
 setup-part-rules = Kirjade reeglid
-# review: new
 setup-part-trusted-senders = Usaldusväärsed saatjad
-# review: new
 setup-holds-settings = { $count ->
     [one] 1 seade
    *[other] { $count } seadet
 }
-# review: new
 setup-holds-preferences = { $count ->
     [one] 1 eelistus
    *[other] { $count } eelistust
 }
-# review: new
 setup-holds-accounts = { $count ->
     [one] 1 konto
    *[other] { $count } kontot
 }
-# review: new
 setup-holds-sign-in-apps = { $count ->
     [one] 1 sisselogimisrakendus
    *[other] { $count } sisselogimisrakendust
 }
-# review: new
-setup-holds-built-in = Millised sisseehitatud sisselogimisrakendused on sisse lülitatud
-# review: new
+setup-holds-built-in = Sisseehitatud sisselogimisrakenduste lubamise seaded
 setup-holds-contacts = { $count ->
     [one] 1 kontakt
    *[other] { $count } kontakti
 }
-# review: new
 setup-holds-groups = { $count ->
     [one] 1 grupp
    *[other] { $count } gruppi
 }
-# review: new
 setup-holds-own-keys = { $count ->
-    [one] 1 teie oma võti
-   *[other] { $count } teie oma võtit
+    [one] 1 teie võti
+   *[other] { $count } teie võtit
 }
-# review: new
 setup-holds-contact-keys = { $count ->
     [one] 1 kontakti võti
    *[other] { $count } kontaktide võtit
 }
-# review: new
 setup-holds-rules = { $count ->
     [one] 1 reegel
    *[other] { $count } reeglit
 }
-# review: new
 setup-holds-trusted-senders = { $count ->
     [one] 1 usaldusväärne saatja
    *[other] { $count } usaldusväärset saatjat
 }
-# review: new
 setup-sign-in-password = Parool
-# review: new
-setup-account-secret-password = Selle parool on failis.
-# review: new
-setup-account-secret-token = Selle sisselogimine on failis.
-# review: new
-setup-account-asks-password = Pärast importimist küsib see parooli.
-# review: new
-setup-account-signs-in-again = Pärast importimist logite sellesse uuesti sisse.
-# review: new
-setup-account-here = See on siin juba seadistatud, seega jäetakse see vahele.
-# review: new
-setup-account-no-app = See logib sisse rakendusega { $app }, mis pole siin seadistatud. Importige ka sisselogimisrakendused.
-# review: new
+setup-account-secret-password = Konto parool on faili salvestatud.
+setup-account-secret-token = Konto sisselogimisandmed on faili salvestatud.
+setup-account-asks-password = Pärast importimist tuleb sisestada konto parool.
+setup-account-signs-in-again = Pärast importimist tuleb kontole uuesti sisse logida.
+setup-account-here = Konto on selles arvutis juba seadistatud ning seda uuesti ei impordita.
+setup-account-no-app = Konto kasutab sisselogimisrakendust { $app }, mida selles arvutis pole seadistatud. Importige ka sisselogimisrakendused.
 setup-invalid-address = „{ $address }“ ei ole e-posti aadress.
-# review: new
-setup-invalid-server = { $server }-serveril pole kasutatavat nime ega porti.
-# review: new
-setup-invalid-user = Sellel pole kasutajanime.
-# review: new
-setup-invalid-sign-in = See logib sisse viisil, mida Inbox Classic ei tunne.
-# review: new
+setup-invalid-server = Serveri ({ $server }) nimi või pordinumber ei ole korrektne.
+setup-invalid-user = Konto kasutajanimi puudub.
+setup-invalid-sign-in = Inbox Classic ei toeta selle konto sisselogimisviisi.
 setup-error-empty = Fail on tühi.
-# review: new
-setup-error-too-large = Fail on Inbox Classicu seadistuse jaoks liiga suur.
-# review: new
-setup-error-not-setup = See fail ei ole Inbox Classicu seadistus.
-# review: new
-setup-error-damaged = Seadistusfail on kahjustatud ja seda ei saa lugeda.
-# review: new
-setup-error-newer = Selle seadistuse salvestas Inbox Classicu uuem versioon ({ $version }). Uuendage Inbox Classicut ja importige see siis uuesti.
-# review: new
-setup-error-needs-passphrase = See seadistus on kaitstud paroolifraasiga. Sisestage paroolifraas, millega see salvestati.
-# review: new
-setup-error-wrong-passphrase = See ei ole paroolifraas, millega see seadistus salvestati.
-# review: new
-setup-error-changed = Seadistusfaili on pärast salvestamist muudetud või see on kahjustatud, seega ei saa seda importida.
-# review: new
-setup-error-read = Seadistusfaili ei õnnestunud lugeda: { $error }
-# review: new
-setup-error-write = Seadistust ei õnnestunud salvestada: { $error }
-# review: new
-setup-error-no-parts = Valige vähemalt üks osa.
-# review: new
+setup-error-too-large = Fail on seadete ja kontode importimiseks liiga suur.
+setup-error-not-setup = See pole Inbox Classicu seadete ja kontode fail.
+setup-error-damaged = Seadete ja kontode fail on kahjustatud ning seda ei saa lugeda.
+setup-error-newer = Fail on salvestatud Inbox Classicu uuema versiooniga ({ $version }). Uuendage rakendust ja proovige seejärel uuesti importida.
+setup-error-needs-passphrase = See seadete ja kontode fail on parooliga kaitstud. Sisestage faili salvestamisel määratud parool.
+setup-error-wrong-passphrase = Sisestatud parool ei sobi selle seadete ja kontode faili avamiseks.
+setup-error-changed = Seadete ja kontode faili on pärast salvestamist muudetud või see on kahjustatud. Faili ei saa importida.
+setup-error-read = Seadete ja kontode faili ei saanud lugeda: { $error }
+setup-error-write = Seadeid ja kontosid ei saanud faili salvestada: { $error }
+setup-error-no-parts = Valige vähemalt üks andmerühm.
 setup-left-out = { $count ->
-    [one] Osas „{ $part }“ on 1 kirje, mida ei saa kasutada, ja see jäetakse välja.
-   *[other] Osas „{ $part }“ on { $count } kirjet, mida ei saa kasutada, ja need jäetakse välja.
+    [one] Jaotisest „{ $part }“ jäetakse välja 1 kirje, mida ei saa kasutada.
+   *[other] Jaotisest „{ $part }“ jäetakse välja { $count } kirjet, mida ei saa kasutada.
 }
-# review: new
 setup-imported-settings = Seaded asendati.
-# review: new
 setup-imported-preferences = Akende eelistused asendati.
-# review: new
 setup-added-accounts = { $count ->
     [one] Lisati 1 konto.
    *[other] Lisati { $count } kontot.
 }
-# review: new
-setup-skipped-here = { $address } on siin juba seadistatud, seega jäeti see vahele.
-# review: new
-setup-skipped-no-app = { $address } jäeti vahele: see logib sisse rakendusega { $app }, mis pole siin seadistatud.
-# review: new
+setup-skipped-here = Konto { $address } on selles arvutis juba seadistatud ning seda uuesti ei imporditud.
+setup-skipped-no-app = Konto { $address } jäeti importimata, sest selle sisselogimisrakendust { $app } pole selles arvutis seadistatud.
 setup-skipped-invalid = { $address } jäeti vahele: { $reason }
-# review: new
-setup-asks-password = { $address } küsib ühendumisel parooli.
-# review: new
-setup-signs-in-again = { $address } palub teil ühendumisel uuesti sisse logida.
-# review: new
+setup-asks-password = Kontoga { $address } ühenduse loomisel küsitakse konto parooli.
+setup-signs-in-again = Kontoga { $address } ühenduse loomiseks tuleb uuesti sisse logida.
 setup-added-sign-in-apps = { $count ->
     [one] Lisati 1 sisselogimisrakendus.
    *[other] Lisati { $count } sisselogimisrakendust.
 }
-# review: new
 setup-skipped-sign-in-apps = { $count ->
-    [one] 1 sisselogimisrakendus on siin juba seadistatud.
-   *[other] { $count } sisselogimisrakendust on siin juba seadistatud.
+    [one] 1 sisselogimisrakendus on selles arvutis juba seadistatud.
+   *[other] { $count } sisselogimisrakendust on selles arvutis juba seadistatud.
 }
-# review: new
 setup-added-contacts = { $count ->
     [one] Aadressiraamatusse lisati 1 kontakt.
    *[other] Aadressiraamatusse lisati { $count } kontakti.
 }
-# review: new
 setup-skipped-contacts = { $count ->
     [one] 1 kontakt on juba aadressiraamatus.
    *[other] { $count } kontakti on juba aadressiraamatus.
 }
-# review: new
 setup-added-groups = { $count ->
     [one] Lisati või täiendati 1 gruppi.
    *[other] Lisati või täiendati { $count } gruppi.
 }
-# review: new
 setup-added-own-keys = { $count ->
-    [one] Lisati 1 teie oma võti.
-   *[other] Lisati { $count } teie oma võtit.
+    [one] Lisati 1 teie võti.
+   *[other] Lisati { $count } teie võtit.
 }
-# review: new
 setup-added-contact-keys = { $count ->
     [one] Lisati 1 kontakti võti.
    *[other] Lisati { $count } kontaktide võtit.
 }
-# review: new
 setup-added-rules = { $count ->
     [one] Lisati 1 kirjade reegel.
    *[other] Lisati { $count } kirjade reeglit.
 }
-# review: new
 setup-skipped-rules = { $count ->
-    [one] 1 kirjade reegel on siin juba olemas.
-   *[other] { $count } kirjade reeglit on siin juba olemas.
+    [one] 1 kirjade reegel on juba olemas.
+   *[other] { $count } kirjade reeglit on juba olemas.
 }
-# review: new
 setup-skipped-rules-account = { $count ->
-    [one] 1 kirjade reegel on konto jaoks, mida siin pole, seega jäeti see vahele.
-   *[other] { $count } kirjade reeglit on kontode jaoks, mida siin pole, seega jäeti need vahele.
+    [one] 1 reegel jäeti importimata, sest sellega seotud kontot pole selles arvutis.
+   *[other] { $count } reeglit jäeti importimata, sest nendega seotud kontosid pole selles arvutis.
 }
-# review: new
 setup-rules-waiting = { $count ->
-    [one] 1 kirjade reegel teisaldab kirju kausta, mis ilmub, kui selle konto on sünkroonitud.
-   *[other] { $count } kirjade reeglit teisaldavad kirju kaustadesse, mis ilmuvad, kui nende kontod on sünkroonitud.
+    [one] 1 reegli sihtkaust muutub kättesaadavaks pärast konto sünkroonimist.
+   *[other] { $count } reegli sihtkaustad muutuvad kättesaadavaks pärast kontode sünkroonimist.
 }
-# review: new
 setup-added-trusted-senders = { $count ->
     [one] Lisati 1 usaldusväärne saatja.
    *[other] Lisati { $count } usaldusväärset saatjat.
 }
-# review: new
 setup-nothing = Midagi ei imporditud.
-# review: new
 setup-account-servers = { $imap } ja { $smtp } ({ $signin })
-# review: new
 setup-file-name = Inbox Classicu seaded ja kontod
-# review: new
-setup-skipped-unreachable = { $name } jäeti vahele: selle sisselogimisteenusega ei saadud ühendust. Lisage see uuesti sisselogimisrakenduste all.
-# review: new
-attachment-runs-programs = „{ $name }“ võib käivitada programme, seega Inbox Classic seda ei ava. Salvesta see ja ava ise, kui usaldad selle päritolu.
-# review: new
-attachment-decrypted-note = See manus on pärit krüptitud kirjast. Avamiseks salvestab Inbox Classic selle dekrüptituna sellesse arvutisse, sinu kausta, mille Inbox Classic päeva pärast tühjendab.
-# review: new
+setup-skipped-unreachable = Sisselogimisrakendus { $name } jäeti importimata, sest selle teenusega ei saadud ühendust. Lisage rakendus uuesti sisselogimisrakenduste seadetes.
+attachment-runs-programs = Fail „{ $name }“ võib käivitada programme, mistõttu Inbox Classic seda ei ava. Kui usaldate faili päritolu, salvestage see ja avage ise.
+attachment-decrypted-note = See manus on pärit krüpteeritud kirjast. Avamiseks salvestab Inbox Classic sellest krüpteerimata koopia teie ajutisse kausta. Üle päeva vanused koopiad kustutatakse rakenduse käivitamisel.
 undone-move = { $count ->
     [one] Server ei teisaldanud kirja kausta { $folder }, seega on { $messages } taas kaustas { $from }: { $reason }
    *[other] Server ei teisaldanud kirju kausta { $folder }, seega on { $messages } taas kaustas { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] Server ei kustutanud kirja, seega on { $messages } taas kaustas { $from }: { $reason }
    *[other] Server ei kustutanud kirju, seega on { $messages } taas kaustas { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] Server ei arhiveerinud kirja, seega on { $messages } taas kaustas { $from }: { $reason }
    *[other] Server ei arhiveerinud kirju, seega on { $messages } taas kaustas { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
     [one] Server ei märkinud kirja loetuks, seega on { $messages } taas lugemata: { $reason }
    *[other] Server ei märkinud kirju loetuks, seega on { $messages } taas lugemata: { $reason }
 }
-# review: new
 undone-unread = { $count ->
     [one] Server ei märkinud kirja lugemata kirjaks, seega on { $messages } taas loetud: { $reason }
    *[other] Server ei märkinud kirju lugemata kirjadeks, seega on { $messages } taas loetud: { $reason }
 }
-# review: new
 undone-flags = { $count ->
     [one] Server ei muutnud kirja lippe, seega on { $messages } nagu enne: { $reason }
    *[other] Server ei muutnud kirjade lippe, seega on { $messages } nagu enne: { $reason }
@@ -982,4 +805,16 @@ preview-pdf-option = Näita PDF-faile kirjades
 # review: new
 preview-pdf-off = PDF-faile kirjades ei näidata.
 # review: new
-preview-pdf-off-crashed = PDF-fail sulges Inbox Classicu selle näitamise ajal, seetõttu ei näidata PDF-faile kirjades enam. Pilte näidatakse endiselt. PDF-failide uuesti näitamiseks lülitage lugemisvalikutes sisse { $option }.
+preview-pdf-off-crashed = PDF-fail sulges Inbox Classicu selle näitamise ajal, seetõttu ei näidata PDF-faile kirjades enam. Pilte näidatakse endiselt. PDF-failide uuesti näitamiseks lülitage sisse { $option }, asukoht: { $settings }.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 lehekülg, { $size }
+   *[other] { $count } lehekülge, { $size }
+}
+# review: new
+preview-page-alt = { $name }, lehekülg { $page }/{ $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Avage fail, et lehekülge näha
+   *[other] Avage fail, et näha kõiki { $count } lehekülge
+}

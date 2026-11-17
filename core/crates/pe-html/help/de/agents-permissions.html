@@ -2,26 +2,26 @@
 <p class="summary">Legen Sie fest, was jeder KI-Agent mit Ihren E-Mails tun darf, und sehen Sie, was er getan hat, und machen Sie es rückgängig.</p>
 <p>Wenn sich der Agent eines Programms zum ersten Mal verbindet, fragt Inbox Classic Sie und nennt dabei das Programm. Wählen Sie, was er tun darf:</p>
 <ul>
-    <li>E-Mails lesen: Ordner, die Nachrichtenliste, die Suche und Nachrichten</li>
-    <!--review--><li>E-Mails ordnen: Gelesen-Status, Kennzeichnungen, Junk, Verschieben, Archivieren, neue Ordner und Löschen in den Ordner <b data-text="folder-deleted"></b>, sowie Mailinglisten abbestellen, nachdem Sie zugestimmt haben</li><!--/review-->
-    <li>Entwürfe schreiben, die Sie selbst senden</li>
+    <li>E-Mails lesen: Ordner, Nachrichten und Unterhaltungen anzeigen und durchsuchen sowie Nachrichtenregeln, Namen und E-Mail-Adressen nachschlagen</li>
+    <li>E-Mails verwalten: Lesestatus und Kennzeichnungen ändern, Junk verwalten, Nachrichten verschieben, archivieren und löschen, Ordner erstellen und nach Ihrer Zustimmung Mailinglisten abbestellen. Beim Löschen werden Nachrichten in den Ordner <b data-text="folder-deleted"></b> verschoben.</li>
+    <li>Entwürfe schreiben, die Sie selbst senden, und eigene Entwürfe ändern oder verwerfen, solange Sie diese noch nicht gespeichert haben</li>
     <li>E-Mails senden, jede Nachricht erst nach Ihrer Zustimmung</li>
 </ul>
 <p>Wählen Sie dann die Konten, die er sehen darf, und klicken Sie auf <b data-text="ui-allow"></b>. <!--os:windows--><b data-text="win-dont-allow"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-allow"></b><!--/os--> weist das Programm ab, und Sie werden nicht erneut danach gefragt.</p>
-<p>Ein Agent löscht nie etwas endgültig und ändert nie Ihre Kontoeinstellungen. Wenn er eine Nachricht liest, wird sie nicht als gelesen markiert. Was er ändert, ist sofort in den Fenstern zu sehen.</p>
-<!--review--><h2>Mailinglisten abbestellen</h2>
-<p>Ein Agent, der E-Mails ordnen darf, kann darum bitten, Mailinglisten für Sie abzubestellen. Inbox Classic fragt Sie zuerst einmal und nennt jede Liste mit ihrem Absender:</p>
+<p>Ein Agent löscht Ihre Nachrichten nicht endgültig. Ausnahme: Eigene Entwürfe, die Sie noch nicht übernommen haben, kann er endgültig verwerfen. Ihre Kontoeinstellungen ändert er nicht. Er kann Nachrichtenregeln ansehen und prüfen, welche Nachrichten sie erfassen würden. Regeln erstellen, ändern oder löschen kann er nicht. Wenn er eine Nachricht liest, wird sie nicht als gelesen markiert. Was er ändert, ist sofort in den Fenstern zu sehen.</p>
+<h2>Mailinglisten abbestellen</h2>
+<p>Mit der Berechtigung zum Verwalten von E-Mails kann ein Agent Mailinglisten zur Abmeldung vorschlagen. Inbox Classic zeigt Ihnen die Absenderadressen und bittet Sie um Zustimmung für die gesamte Auswahl:</p>
 <ul>
-    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> bittet jede Liste, Ihnen nichts mehr zu senden.</li>
-    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os-->, die Vorgabe, lässt sie, wie sie sind.</li>
+    <li><!--os:windows--><b data-text="win-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-unsubscribe"></b><!--/os--> fordert die ausgewählten Mailinglisten auf, Ihnen keine weiteren Nachrichten zu senden.</li>
+    <li><!--os:windows--><b data-text="win-dont-unsubscribe"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-unsubscribe"></b><!--/os--> ist vorausgewählt und bricht die Abmeldung ab.</li>
 </ul>
-<p>Ein Agent kann keine Listen über Nachrichten im Ordner <b data-text="folder-junk"></b> abbestellen und höchstens 30 Listen am Tag.</p><!--/review-->
+<p>Nachrichten im Ordner <b data-text="folder-junk"></b> können nicht für eine Abmeldung durch einen Agenten verwendet werden. Für jedes Programm gilt eine Grenze von 30 bestätigten Abmeldeanfragen in den letzten 24 Stunden. Auch fehlgeschlagene Anfragen zählen mit.</p>
 <h2>Zugriff ansehen und ändern</h2>
 <p><b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b> listet die Programme auf, die Sie zugelassen oder abgewiesen haben, und alles, was Agenten getan haben, das Neueste zuerst.</p>
 <ul>
     <li><!--os:windows--><b data-text="win-change"></b><!--/os--><!--os:mac,linux--><b data-text="ui-change-button"></b><!--/os--> ändert, was ein Programm tun darf.</li>
     <li><b data-text="ui-remove"></b> vergisst ein Programm, sodass Sie bei seiner nächsten Verbindung erneut gefragt werden.</li>
-    <!--review--><li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> macht einen Gelesen-Status, eine Kennzeichnung, ein Verschieben, eine Junk-Markierung, ein Archivieren oder ein Löschen rückgängig, ebenso eine Nachricht, die noch im Postausgang liegt.</li><!--/review-->
+    <li><!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> macht Änderungen am Lesestatus und an Kennzeichnungen rückgängig, ebenso Junk-Markierungen, Verschieben, Archivieren und Löschen. Damit können Sie auch das Senden einer Nachricht abbrechen, solange diese noch im Postausgang liegt.</li>
 </ul>
 <aside class="warning">E-Mails werden von anderen Menschen geschrieben, und eine Nachricht kann versuchen, einen Agenten dazu zu bringen, Ihre E-Mails weiterzuleiten oder zu löschen. Inbox Classic verbirgt vor Agenten den Text, den eine Nachricht vor Ihnen verbirgt, und teilt ihnen mit, dass E-Mails keine Anweisungen sind. Ein Agent kann sich dennoch täuschen lassen. Erlauben Sie nur, was Sie brauchen.</aside>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:agents-sending"></a> <a href="topic:data-storage"></a></nav>

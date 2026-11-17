@@ -2,7 +2,6 @@
 
 ## Counts and sizes
 
-# review: new
 messages = { $count ->
     [one] 1 správa
     [few] { $count } správy
@@ -702,7 +701,7 @@ day-sunday = nedeľa
 
 # review: new
 agent-level-read = Čítať poštu: priečinky, zoznam správ, vyhľadávanie a správy
-# review: changed
+# review: new
 agent-level-organize = Usporadúvať poštu: stav prečítania, príznaky, nevyžiadaná pošta, presúvanie, archivovanie, nové priečinky, odstraňovanie do priečinka Odstránená pošta a po vašom súhlase odhlasovanie zo zoznamov adresátov
 # review: new
 agent-level-drafts = Písať koncepty, ktoré odošlete vy
@@ -794,6 +793,12 @@ agent-log-sent = „{ $subject }“ odoslané na adresu { $to }
 # review: new
 agent-log-draft = Uložený koncept „{ $subject }“
 # review: new
+agent-log-draft-replaced = Nahradený koncept „{ $subject }“
+# review: new
+agent-log-draft-discarded = Zahodený koncept „{ $subject }“
+# review: new
+agent-draft-note = { $program }, AI agent, napísal tento koncept. Pred odoslaním skontrolujte adresátov a text.
+# review: new
 agent-log-read = Označené ako prečítané: „{ $subject }“
 # review: new
 agent-log-unread = Označené ako neprečítané: „{ $subject }“
@@ -813,8 +818,7 @@ agent-log-not-junk = Označené ako vyžiadané: „{ $subject }“
 agent-log-archived = Archivované: „{ $subject }“
 # review: new
 agent-log-folder = Vytvorený priečinok „{ $name }“
-# review: new
-agent-log-unsubscribed = Odhlásené zo zoznamu adresátov správy „{ $subject }“
+agent-log-unsubscribed = Schválili ste žiadosť o odhlásenie odberu. Správa: „{ $subject }“
 # review: new
 agent-log-unsubscribe-failed = Nepodarilo sa odhlásiť zo zoznamu adresátov správy „{ $subject }“: { $reason }
 # review: new
@@ -1010,7 +1014,6 @@ pgp-why-signature-expired = Platnosť podpisu skončila
 pgp-why-key-not-valid = Podpísané kľúčom, ktorý nie je platný
 # review: new
 pgp-why-not-for-you = Podpísané pre iných príjemcov a preposlané vám
-# review: new
 pgp-why-not-key-in-use = Podpísané iným kľúčom, než aký sa používa pre { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Obrázky boli načítané z internetu
@@ -1362,41 +1365,35 @@ attachment-runs-programs = Súbor „{ $name }“ môže spúšťať programy, p
 # review: new
 attachment-decrypted-note = Táto príloha pochádza zo šifrovanej správy. Aby ju mohol otvoriť, Inbox Classic ju uloží dešifrovanú v tomto počítači, do vášho priečinka, ktorý Inbox Classic po jednom dni vyprázdni.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
     [one] Server nepresunul správu do priečinka { $folder }, takže { $messages } je opäť v priečinku { $from }: { $reason }
     [few] Server nepresunul správy do priečinka { $folder }, takže { $messages } sú opäť v priečinku { $from }: { $reason }
    *[other] Server nepresunul správy do priečinka { $folder }, takže { $messages } je opäť v priečinku { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] Server neodstránil správu, takže { $messages } je opäť v priečinku { $from }: { $reason }
     [few] Server neodstránil správy, takže { $messages } sú opäť v priečinku { $from }: { $reason }
    *[other] Server neodstránil správy, takže { $messages } je opäť v priečinku { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] Server nearchivoval správu, takže { $messages } je opäť v priečinku { $from }: { $reason }
     [few] Server nearchivoval správy, takže { $messages } sú opäť v priečinku { $from }: { $reason }
    *[other] Server nearchivoval správy, takže { $messages } je opäť v priečinku { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
     [one] Server neoznačil správu ako prečítanú, takže { $messages } je opäť neprečítaná: { $reason }
     [few] Server neoznačil správy ako prečítané, takže { $messages } sú opäť neprečítané: { $reason }
    *[other] Server neoznačil správy ako prečítané, takže { $messages } je opäť neprečítaných: { $reason }
 }
-# review: new
 undone-unread = { $count ->
     [one] Server neoznačil správu ako neprečítanú, takže { $messages } je opäť prečítaná: { $reason }
     [few] Server neoznačil správy ako neprečítané, takže { $messages } sú opäť prečítané: { $reason }
    *[other] Server neoznačil správy ako neprečítané, takže { $messages } je opäť prečítaných: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Server nezmenil príznaky správy, takže { $messages } zostáva bez zmeny: { $reason }
-    [few] Server nezmenil príznaky správ, takže { $messages } zostávajú bez zmeny: { $reason }
-   *[other] Server nezmenil príznaky správ, takže { $messages } zostáva bez zmeny: { $reason }
+    [one] Server nezmenil príznaky správy, preto bola zmena vrátená späť ({ $messages }): { $reason }
+    [few] Server nezmenil príznaky správ, preto bola zmena vrátená späť ({ $messages }): { $reason }
+   *[other] Server nezmenil príznaky správ, preto bola zmena vrátená späť ({ $messages }): { $reason }
 }
 
 ## Previews of attachments: the pictures and PDF files shown in a message
@@ -1406,4 +1403,20 @@ preview-pdf-option = Zobrazovať súbory PDF v správach
 # review: new
 preview-pdf-off = Súbory PDF sa v správach nezobrazujú.
 # review: new
-preview-pdf-off-crashed = Súbor PDF ukončil Inbox Classic počas zobrazenia, preto sa súbory PDF v správach už nezobrazujú. Obrázky áno. Ak chcete súbory PDF znova zobrazovať, zapnite { $option } v možnostiach čítania.
+preview-pdf-off-crashed = Súbor PDF ukončil Inbox Classic počas zobrazenia, preto sa súbory PDF v správach už nezobrazujú. Obrázky áno. Ak chcete súbory PDF znova zobrazovať, zapnite { $option } v { $settings }.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 strana, { $size }
+    [few] { $count } strany, { $size }
+    [many] { $count } strany, { $size }
+   *[other] { $count } strán, { $size }
+}
+# review: new
+preview-page-alt = { $name }, strana { $page } z { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Otvorte súbor a uvidíte stranu
+    [few] Otvorte súbor a uvidíte všetky { $count } strany
+    [many] Otvorte súbor a uvidíte všetkých { $count } strany
+   *[other] Otvorte súbor a uvidíte všetkých { $count } strán
+}

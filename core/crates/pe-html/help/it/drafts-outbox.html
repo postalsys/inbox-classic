@@ -1,21 +1,21 @@
-<!--review--><h1>Bozze e Posta in uscita</h1>
-<p class="summary">Salva un messaggio per finirlo più tardi e guarda cosa aspetta di essere inviato.</p>
+<h1>Bozze e Posta in uscita</h1>
+<p class="summary">Salva un messaggio da completare più tardi e controlla quelli in attesa di invio.</p>
 <h2>Salvare una bozza</h2>
 <p>Fai clic su <b data-text="ui-tb-save"></b> oppure premi <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os-->. Il messaggio viene conservato nella cartella <b data-text="folder-drafts"></b> dell’account, sul server. Salvando di nuovo, la copia precedente viene sostituita. La barra di stato del messaggio indica quando è stato salvato.</p>
-<p>Inbox Classic salva il messaggio anche da solo, pochi secondi dopo che smetti di scrivere, oppure ogni trenta secondi mentre continui a scrivere. Se Inbox Classic o il computer si chiudono all’improvviso, i messaggi non finiti si riaprono al successivo avvio di Inbox Classic.</p>
+<p>Inbox Classic salva il messaggio anche automaticamente, pochi secondi dopo che smetti di scrivere, oppure ogni trenta secondi mentre continui a scrivere. Se Inbox Classic si interrompe o il computer si spegne all’improvviso, i messaggi non completati si riaprono al successivo avvio di Inbox Classic.</p>
 <p>Quando chiudi un messaggio con modifiche, ti viene chiesto se salvarle:</p>
 <ul>
     <li><!--os:windows,linux--><b data-text="ui-yes"></b><!--/os--><!--os:mac--><b data-text="ui-tb-save"></b><!--/os--> lo salva in <b data-text="folder-drafts"></b>.</li>
     <li><!--os:windows,linux--><b data-text="ui-no"></b><!--/os--><!--os:mac--><b data-text="mac-dont-save"></b><!--/os--> scarta le modifiche. Se la bozza era stata salvata solo in automatico, viene tolta anche da <b data-text="folder-drafts"></b>.</li>
     <li><b data-text="ui-cancel"></b> torna al messaggio.</li>
 </ul>
-<p>Per continuare a scrivere, fai doppio clic sulla bozza in <b data-text="folder-drafts"></b>. Si apre con i destinatari, il testo e i file. Una volta inviata, la bozza viene eliminata.</p>
-<p>Ogni messaggio che scrivi ha una finestra tutta sua, quindi puoi leggere la posta mentre resta aperto. Quando chiudi Inbox Classic, prima si chiudono i messaggi che stai scrivendo, con una domanda per quelli che hanno modifiche.</p>
+<p>Per continuare a scrivere, fai doppio clic sulla bozza in <b data-text="folder-drafts"></b>. La bozza si apre con i destinatari, il testo e gli allegati. Una volta inviata, la bozza viene eliminata.</p>
+<p>Ogni messaggio viene composto in una finestra separata, così puoi leggere la posta mentre scrivi. Quando esci da Inbox Classic, l’app chiude prima le finestre di composizione e chiede se salvare le modifiche.</p>
 <h2>Posta in uscita</h2>
-<p><b data-text="ui-tb-send"></b> mette il messaggio in Posta in uscita. Per impostazione predefinita viene inviato dopo pochi secondi. In questo tempo puoi annullare l’invio (vedi sotto). La barra di stato della finestra principale indica quando viene inviato.</p>
-<p>Se un messaggio non può partire, per esempio senza connessione, resta in Posta in uscita. Parte al successivo controllo della posta, così niente di ciò che hai scritto va perso.</p>
-<p>Per vedere cosa è in attesa, scegli <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. L’elenco mostra ogni messaggio e il motivo per cui non è partito. <b data-text="ui-outbox-send-all"></b> riprova subito, e da lì puoi anche eliminare un messaggio.</p>
+<p><b data-text="ui-tb-send"></b> aggiunge il messaggio a Posta in uscita. Per impostazione predefinita viene inviato dopo pochi secondi. In questo tempo puoi annullare l’invio (vedi sotto). La barra di stato della finestra principale indica quando viene inviato.</p>
+<p>Se non è possibile inviare un messaggio, per esempio perché manca la connessione, questo resta in Posta in uscita. Inbox Classic riprova a inviarlo al successivo controllo della posta.</p>
+<p>Per vedere i messaggi in attesa di invio, scegli <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b>. L’elenco mostra ogni messaggio e il motivo del mancato invio. <b data-text="ui-outbox-send-all"></b> riprova subito, e da lì puoi anche eliminare un messaggio.</p>
 <h2>Annullare l’invio di un messaggio</h2>
-<p>Per impostazione predefinita, dopo che fai clic su <b data-text="ui-tb-send"></b>, il messaggio aspetta qualche secondo prima di essere inviato. La barra di stato mostra un conto alla rovescia. In questo tempo, fai clic su <b data-text="ui-undo-button"></b> accanto al conto alla rovescia, oppure scegli <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b> per annullare l’invio. Il messaggio si riapre e puoi modificarlo o scartarlo. Questa possibilità c’è solo finché il messaggio è in attesa di essere inviato.</p>
-<p>Per cambiare l’attesa o inviare i messaggi subito, scegli <b data-settings="general"></b> e regola <b data-text="ui-send-delay"></b>. Se esci da Inbox Classic mentre un messaggio è in attesa, l’app prova a inviarlo subito.</p>
-<nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav><!--/review-->
+<p>Per impostazione predefinita, dopo che fai clic su <b data-text="ui-tb-send"></b>, il messaggio resta in attesa per qualche secondo prima di essere inviato. La barra di stato mostra un conto alla rovescia. In questo tempo, fai clic su <b data-text="ui-undo-button"></b> accanto al conto alla rovescia, oppure scegli <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b> per annullare l’invio. Il messaggio si riapre e puoi modificarlo o scartarlo. Puoi annullare l’invio solo mentre il messaggio è ancora in attesa.</p>
+<p>Per cambiare il tempo di attesa o inviare subito i messaggi, scegli <b data-settings="general"></b> e regola <b data-text="ui-send-delay"></b>. Se esci da Inbox Classic mentre un messaggio è in attesa, l’app prova a inviarlo subito.</p>
+<nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav>

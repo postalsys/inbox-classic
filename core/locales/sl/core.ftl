@@ -3,7 +3,6 @@
 
 ## Counts and sizes
 
-# review: new
 messages = { $count ->
     [one] { $count } sporočilo
     [two] { $count } sporočili
@@ -680,7 +679,7 @@ day-sunday = nedelja
 
 # review: new
 agent-level-read = Branje pošte: mape, seznam sporočil, iskanje in sporočila
-# review: changed
+# review: new
 agent-level-organize = Urejanje pošte: stanje branja, zastavice, neželena pošta, premikanje, arhiviranje, nove mape, brisanje v mapo Izbrisano in odjava s poštnih seznamov po vaši potrditvi
 # review: new
 agent-level-drafts = Pisanje osnutkov, ki jih pošljete sami
@@ -773,6 +772,12 @@ agent-log-sent = Poslal »{ $subject }« za { $to }
 # review: new
 agent-log-draft = Shranil osnutek »{ $subject }«
 # review: new
+agent-log-draft-replaced = Zamenjal osnutek »{ $subject }«
+# review: new
+agent-log-draft-discarded = Zavrgel osnutek »{ $subject }«
+# review: new
+agent-draft-note = { $program }, agent UI, je napisal ta osnutek. Pred pošiljanjem preverite prejemnike in besedilo.
+# review: new
 agent-log-read = Označil kot prebrano »{ $subject }«
 # review: new
 agent-log-unread = Označil kot neprebrano »{ $subject }«
@@ -792,8 +797,7 @@ agent-log-not-junk = Označil »{ $subject }« kot želeno
 agent-log-archived = Arhiviral »{ $subject }«
 # review: new
 agent-log-folder = Ustvaril mapo »{ $name }«
-# review: new
-agent-log-unsubscribed = Odjavil od seznama sporočila »{ $subject }«
+agent-log-unsubscribed = Odobrili ste zahtevo za odjavo s poštnega seznama. Sporočilo: »{ $subject }«
 # review: new
 agent-log-unsubscribe-failed = Odjava s seznama sporočila »{ $subject }« ni uspela: { $reason }
 # review: new
@@ -994,8 +998,7 @@ pgp-why-signature-expired = Podpis je potekel
 pgp-why-key-not-valid = Podpisano z neveljavnim ključem
 # review: new
 pgp-why-not-for-you = Podpisano za druge prejemnike in posredovano vam
-# review: new
-pgp-why-not-key-in-use = Podpisano z drugim ključem, kot se uporablja za { $address }
+pgp-why-not-key-in-use = Ključ podpisa se razlikuje od ključa, izbranega za naslov { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Slike so bile naložene z interneta
 # review: new
@@ -1367,47 +1370,46 @@ attachment-runs-programs = Datoteka »{ $name }« lahko zažene programe, zato j
 # review: new
 attachment-decrypted-note = Ta priponka je iz šifriranega sporočila. Da jo lahko odpre, jo Inbox Classic shrani dešifrirano v ta računalnik, v vašo mapo, ki jo Inbox Classic po enem dnevu izprazni.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
-    [one] Strežnik sporočila ni premaknil v mapo { $folder }, zato je { $messages } spet v mapi { $from }: { $reason }
+    [1] Strežnik sporočila ni premaknil v mapo { $folder }, zato je { $messages } spet v mapi { $from }: { $reason }
+    [one] Strežnik sporočil ni premaknil v mapo { $folder }, zato je { $messages } spet v mapi { $from }: { $reason }
     [two] Strežnik sporočil ni premaknil v mapo { $folder }, zato sta { $messages } spet v mapi { $from }: { $reason }
     [few] Strežnik sporočil ni premaknil v mapo { $folder }, zato so { $messages } spet v mapi { $from }: { $reason }
    *[other] Strežnik sporočil ni premaknil v mapo { $folder }, zato je { $messages } spet v mapi { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
-    [one] Strežnik sporočila ni izbrisal, zato je { $messages } spet v mapi { $from }: { $reason }
+    [1] Strežnik sporočila ni izbrisal, zato je { $messages } spet v mapi { $from }: { $reason }
+    [one] Strežnik sporočil ni izbrisal, zato je { $messages } spet v mapi { $from }: { $reason }
     [two] Strežnik sporočil ni izbrisal, zato sta { $messages } spet v mapi { $from }: { $reason }
     [few] Strežnik sporočil ni izbrisal, zato so { $messages } spet v mapi { $from }: { $reason }
    *[other] Strežnik sporočil ni izbrisal, zato je { $messages } spet v mapi { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
-    [one] Strežnik sporočila ni arhiviral, zato je { $messages } spet v mapi { $from }: { $reason }
+    [1] Strežnik sporočila ni arhiviral, zato je { $messages } spet v mapi { $from }: { $reason }
+    [one] Strežnik sporočil ni arhiviral, zato je { $messages } spet v mapi { $from }: { $reason }
     [two] Strežnik sporočil ni arhiviral, zato sta { $messages } spet v mapi { $from }: { $reason }
     [few] Strežnik sporočil ni arhiviral, zato so { $messages } spet v mapi { $from }: { $reason }
    *[other] Strežnik sporočil ni arhiviral, zato je { $messages } spet v mapi { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
-    [one] Strežnik sporočila ni označil kot prebranega, zato je { $messages } spet neprebrano: { $reason }
+    [1] Strežnik sporočila ni označil kot prebranega, zato je { $messages } spet neprebrano: { $reason }
+    [one] Strežnik sporočil ni označil kot prebranih, zato je { $messages } spet neprebrano: { $reason }
     [two] Strežnik sporočil ni označil kot prebranih, zato sta { $messages } spet neprebrani: { $reason }
     [few] Strežnik sporočil ni označil kot prebranih, zato so { $messages } spet neprebrana: { $reason }
    *[other] Strežnik sporočil ni označil kot prebranih, zato je { $messages } spet neprebranih: { $reason }
 }
-# review: new
 undone-unread = { $count ->
-    [one] Strežnik sporočila ni označil kot neprebranega, zato je { $messages } spet prebrano: { $reason }
+    [1] Strežnik sporočila ni označil kot neprebranega, zato je { $messages } spet prebrano: { $reason }
+    [one] Strežnik sporočil ni označil kot neprebranih, zato je { $messages } spet prebrano: { $reason }
     [two] Strežnik sporočil ni označil kot neprebranih, zato sta { $messages } spet prebrani: { $reason }
     [few] Strežnik sporočil ni označil kot neprebranih, zato so { $messages } spet prebrana: { $reason }
    *[other] Strežnik sporočil ni označil kot neprebranih, zato je { $messages } spet prebranih: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Strežnik ni spremenil zastavic sporočila, zato { $messages } ostaja nespremenjeno: { $reason }
-    [two] Strežnik ni spremenil zastavic sporočil, zato { $messages } ostajata nespremenjeni: { $reason }
-    [few] Strežnik ni spremenil zastavic sporočil, zato { $messages } ostajajo nespremenjena: { $reason }
-   *[other] Strežnik ni spremenil zastavic sporočil, zato { $messages } ostaja nespremenjenih: { $reason }
+    [one] Strežnik ni spremenil zastavic ({ $messages }), zato je bila sprememba razveljavljena: { $reason }
+    [two] Strežnik ni spremenil zastavic ({ $messages }), zato je bila sprememba razveljavljena: { $reason }
+    [few] Strežnik ni spremenil zastavic ({ $messages }), zato je bila sprememba razveljavljena: { $reason }
+   *[other] Strežnik ni spremenil zastavic ({ $messages }), zato je bila sprememba razveljavljena: { $reason }
 }
 
 ## Previews of attachments: the pictures and PDF files shown in a message
@@ -1417,4 +1419,20 @@ preview-pdf-option = Prikaži datoteke PDF v sporočilih
 # review: new
 preview-pdf-off = Datoteke PDF se v sporočilih ne prikazujejo.
 # review: new
-preview-pdf-off-crashed = Datoteka PDF je med prikazovanjem zaprla Inbox Classic, zato se datoteke PDF v sporočilih ne prikazujejo več. Slike se še prikazujejo. Če želite znova prikazovati datoteke PDF, v možnostih branja vklopite { $option }.
+preview-pdf-off-crashed = Datoteka PDF je med prikazovanjem zaprla Inbox Classic, zato se datoteke PDF v sporočilih ne prikazujejo več. Slike se še prikazujejo. Če želite znova prikazovati datoteke PDF, v { $settings } vklopite { $option }.
+# review: new
+preview-pdf-details = { $count ->
+    [one] { $count } stran, { $size }
+    [two] { $count } strani, { $size }
+    [few] { $count } strani, { $size }
+   *[other] { $count } strani, { $size }
+}
+# review: new
+preview-page-alt = { $name }, stran { $page } od { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Odprite datoteko za ogled vseh { $count } strani
+    [two] Odprite datoteko za ogled obeh { $count } strani
+    [few] Odprite datoteko za ogled vseh { $count } strani
+   *[other] Odprite datoteko za ogled vseh { $count } strani
+}

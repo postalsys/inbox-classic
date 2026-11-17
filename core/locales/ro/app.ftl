@@ -758,7 +758,7 @@ ui-options-system-default = Implicită sistemului ({ $language })
 ui-settings-general = General
 # review: new
 ui-settings-reading = Citire
-# review: changed
+# review: new
 ui-settings-new-mail = E-mail nou
 # review: new
 ui-settings-sending = Trimitere
@@ -1097,7 +1097,7 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Agenda nu a putut fi salvată: { $reason }
 # review: new
 ui-code-copied = Codul a fost copiat
-# review: new
+# review: changed
 ui-codes-in-notifications = Afișare &coduri de conectare în notificările de e-mail nou
 # review: new
 ui-tool-unread-only = Necitite
@@ -1109,7 +1109,7 @@ ui-pictures-always-sender = Descărcați întotdeauna imaginile de la { $sender 
 ui-pictures-always-domain = Descărcați întotdeauna imaginile de la oricine din { $domain }
 # review: new
 ui-pictures-unconfirmed = Domeniul expeditorului ({ $domain }) nu a putut fi verificat, așa că imaginile din acest mesaj nu se descarcă automat.
-# review: new
+# review: changed
 ui-pictures-always-option = &Descărcare imagini în toate mesajele
 # review: new
 ui-pictures-always-warning = Expeditorii pot vedea atunci când le citiți mesajele.
@@ -1119,7 +1119,7 @@ ui-protection-details = &Detalii...
 ui-protection-details-title = Detalii de securitate
 # review: new
 ui-download-heading = Descărcare
-# review: new
+# review: changed
 ui-download-ahead = &Descărcare mesaje în avans:
 # review: new
 ui-download-ahead-recent = Mesajele recente, de până la 1 MB fiecare
@@ -1127,14 +1127,20 @@ ui-download-ahead-recent = Mesajele recente, de până la 1 MB fiecare
 ui-download-ahead-all = Toate mesajele
 # review: new
 ui-download-ahead-never = Doar la deschidere
-# review: new
+# review: changed
 ui-download-limit = &Limită de stocare pe cont:
-# review: new
+# review: changed
 ui-send-delay = &Întârziere înainte de trimitere:
 # review: new
 ui-send-delay-note = Cât timp un mesaj așteaptă să fie trimis, puteți anula trimiterea cu Anulare.
 # review: new
 ui-dark-messages = Afișare mesaje pe fundal întunecat când sistemul este în modul întunecat
+# review: new
+ui-preview-show = Afișează a&tașamentele în mesaje
+# review: new
+ui-preview-show-note = Afișează imaginile și primele pagini ale fișierelor PDF după textul mesajului. Inbox Classic creează singur aceste previzualizări, așa că nimic dintr-un fișier nu poate rula.
+# review: new
+ui-preview-pdfs = Afișează &fișierele PDF în mesaje
 # review: new
 ui-sending-in = { $subject } se trimite în { $count ->
     [one] 1 secundă
@@ -1151,7 +1157,7 @@ ui-outbox-status-undo = Pleacă la { $time }
 ui-download-note = Mesajele descărcate în avans se deschid imediat. Când se depășește limita de stocare, cele mai vechi copii locale sunt eliminate și descărcate din nou când le deschideți.
 # review: new
 ui-attachment-downloading = Descărcarea acestui mesaj nu s-a terminat. Încercați din nou după ce se termină descărcarea.
-# review: new
+# review: changed
 ui-trusted-senders-button = &Expeditori de încredere...
 # review: new
 ui-trusted-senders-title = Expeditori de încredere
@@ -1169,7 +1175,7 @@ ui-search-encrypted-note = Mesajele criptate sunt decriptate pe acest computer d
 ui-pgp-keyserver = Căutare chei &pe keys.openpgp.org
 # review: new
 ui-pgp-keyserver-note = Când criptați un mesaj sau căutați o cheie, adresa căutată este trimisă la keys.openpgp.org. Mai întâi este întrebat domeniul adresei.
-# review: new
+# review: changed
 ui-eml-default = &Deschidere fișiere .eml cu Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic deschide acum fișierele .eml.
@@ -1179,7 +1185,7 @@ ui-eml-default-failed = Inbox Classic nu a putut fi setat ca aplicație implicit
 ui-folders = Foldere
 # review: new
 ui-sorted-by = Sortat după { $field }
-# review: new
+# review: changed
 ui-layout-label = A&spect:
 # review: new
 ui-columns-note = Fereastra este destul de lată pentru aspectul pe coloane. Puteți schimba aspectul din Vizualizare > Aspect.
@@ -1199,10 +1205,10 @@ ui-row-messages = { $count ->
     [few] { $count } mesaje
    *[other] { $count } de mesaje
 }
-# review: new
-ui-list-pictures = Afișare &imaginile expeditorilor în lista de mesaje
-# review: new
-ui-list-pictures-note = În aspectul pe coloane, afișează sigle de mărci sau imagini din Agendă pentru expeditorii verificați și inițiale când nu există nicio imagine. Siglele se descarcă o singură dată pentru fiecare marcă, nu pentru fiecare mesaj.
+# review: changed
+ui-list-pictures = Af&ișare imaginile expeditorilor în lista de mesaje
+# review: changed
+ui-list-pictures-note = Afișează sigle de mărci sau imagini din Agendă pentru expeditorii verificați și inițiale când nu există nicio imagine. Siglele se descarcă o singură dată pentru fiecare marcă, nu pentru fiecare mesaj.
 # review: new
 ui-card-picture = Imagine:
 # review: new

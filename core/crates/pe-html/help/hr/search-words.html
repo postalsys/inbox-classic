@@ -1,32 +1,31 @@
-<!--review--><h1>Izrazi za pretraživanje</h1>
-<p class="summary">Riječi i znakovi koje okvir za pretraživanje razumije, kako biste pronašli točno one poruke koje želite.</p>
-<p>Okvir za pretraživanje prihvaća iste izraze kao Gmail. Kombinirajte ih koliko god želite: poruka mora odgovarati svima. Postavite pokazivač na okvir za pretraživanje da biste vidjeli kratak popis.</p>
+<h1>Izrazi za pretraživanje</h1>
+<p class="summary">Izrazi kojima možete suziti pretraživanje i pronaći željene poruke.</p>
+<p>Pretraživanje podržava sljedeće izraze u stilu Gmaila. Možete ih kombinirati: poruka mora zadovoljiti sve zadane uvjete. Zadržite pokazivač iznad okvira za pretraživanje za kratak pregled izraza.</p>
 <table>
     <tr><th>Upišite</th><th>Pronalazi</th></tr>
-    <tr><td><code>proračun</code></td><td>Poruke s riječju koja počinje s <i>proračun</i>, bilo gdje u njima</td></tr>
-    <tr><td><code>"točan izraz"</code></td><td>Ove riječi, ovim redoslijedom</td></tr>
-    <tr><td><code>-riječ</code></td><td>Poruke bez te riječi. Minus radi ispred bilo kojeg izraza, na primjer <code>-is:unread</code></td></tr>
+    <tr><td><code>proračun</code></td><td>Poruke s riječju koja počinje nizom <i>proračun</i></td></tr>
+    <tr><td><code>"točan izraz"</code></td><td>Navedene riječi, točno tim redoslijedom</td></tr>
+    <tr><td><code>-riječ</code></td><td>Poruke bez te riječi. Znak minus može se koristiti i s uvjetima poput <code>-is:unread</code></td></tr>
     <tr><td><code>ovo OR ono</code></td><td>Poruke s bilo kojom od tih riječi. <code>OR</code> pišite velikim slovima</td></tr>
     <tr><td><code>from:ana</code></td><td>Pošta od Ane</td></tr>
-    <tr><td><code>to:ana</code>, <code>cc:</code>, <code>bcc:</code></td><td>Pošta za Anu, u bilo kojem retku primatelja</td></tr>
+    <tr><td><code>to:ana</code>, <code>cc:</code>, <code>bcc:</code></td><td>Poruke za Anu. Sva tri izraza pretražuju sve retke primatelja</td></tr>
     <tr><td><code>subject:ručak</code></td><td>Riječ u predmetu</td></tr>
-    <tr><td><code>filename:pdf</code></td><td>Riječ u nazivu priložene datoteke</td></tr>
-    <tr><td><code>list:vijesti.primjer.hr</code></td><td>Pošta s popisa za slanje, prema njegovu List-Id</td></tr>
-    <tr><td><code>has:attachment</code></td><td>Poruke s datotekama</td></tr>
+    <tr><td><code>filename:pdf</code></td><td>Riječ u nazivu privitka</td></tr>
+    <tr><td><code>list:vijesti.primjer.hr</code></td><td>Poruke s liste e-pošte, prema njezinu zaglavlju List-Id</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Poruke s privicima</td></tr>
     <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Nepročitane ili pročitane poruke</td></tr>
     <tr><td><code>is:starred</code> ili <code>is:flagged</code></td><td>Poruke označene zastavicom</td></tr>
     <tr><td><code>is:answered</code></td><td>Poruke na koje ste odgovorili</td></tr>
     <tr><td><code>is:bounce</code></td><td>Obavijesti o porukama koje nisu isporučene ili kasne</td></tr>
     <tr><td><code>is:encrypted</code>, <code>is:signed</code></td><td>Šifrirane ili potpisane poruke</td></tr>
-    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Samo ta mapa, na svim računima</td></tr>
-    <tr><td><code>in:projekti</code></td><td>Samo mapa s tim nazivom</td></tr>
+    <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Poruke iz te mape na svim računima</td></tr>
+    <tr><td><code>in:projekti</code></td><td>Poruke iz mapa s tim nazivom</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Sve mape</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Pošta prije ili poslije određenog dana. Radi i <code>2025-01-31</code></td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Poruke prije navedenog datuma ili od navedenog datuma nadalje. Podržan je i oblik <code>2025-01-31</code></td></tr>
     <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Pošta starija ili novija od zadanog broja dana (<code>d</code>), mjeseci (<code>m</code>) ili godina (<code>y</code>)</td></tr>
     <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Pošta veća ili manja od zadane veličine, u bajtovima ili s <code>K</code>, <code>M</code> ili <code>G</code></td></tr>
 </table>
-<p>Dijakritički znakovi i velika slova nisu bitni. Izraz koji Inbox Classic ne poznaje traži se kao obična riječ.</p>
-<p>Šifrirana poruka pronalazi se po pošiljatelju, primateljima i predmetu, a nakon dešifriranja i po riječima teksta, dok je <b data-text="ui-search-encrypted"></b> uključeno u <b data-settings="reading"></b>.</p>
-<p>Popis ne prikazuje veličine. Da biste vidjeli koliko je poruka velika, odaberite <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<p>Pretraživanje ne razlikuje velika i mala slova. Slova č, ć, š i ž možete upisati bez dijakritičkih znakova, ali đ i d razlikuju se. Izraz koji Inbox Classic ne prepoznaje traži se kao obična riječ.</p>
+<p>Šifrirane poruke možete pronaći prema pošiljatelju, primateljima i predmetu. Ako je mogućnost „<b data-text="ui-search-encrypted"></b>“ uključena u postavkama <b data-settings="reading"></b>, nakon dešifriranja možete pretraživati i njihov tekst.</p>
+<p>Veličina poruke ne prikazuje se na popisu. Da biste je vidjeli, odaberite <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
 <nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>
-<!--/review-->

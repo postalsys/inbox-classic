@@ -1,15 +1,14 @@
-<!--review--><h1>Inbox Classic'in kurduğu bağlantılar</h1>
-<p class="summary">Teknik konulara meraklı olanlar için Inbox Classic'in nereye ve neden bağlandığı.</p>
+<h1>Inbox Classic'in kurduğu bağlantılar</h1>
+<p class="summary">Inbox Classic'in hangi sunuculara, ne amaçla bağlandığını öğrenin.</p>
 <ul>
-    <li><b>Posta sunucularınız</b>: postayı okumak için IMAP, göndermek için SMTP üzerinden. Bağlantılar TLS ile şifrelenir ve her sunucunun sertifikası sisteminizin güvendiği sertifikalarla denetlenir. Siz <b data-text="ui-security-none"></b> seçip onaylamadıkça Inbox Classic şifrelemesiz bir sunucuyu reddeder.</li>
-    <li><b>Hesap eklediğinizde</b>, sunucularını bulmak için. Inbox Classic etki alanınızın DNS kayıtlarını hiçbir zaman düz DNS ile değil, HTTPS üzerinden DNS ile (önce Cloudflare, sonra Google) okur. Sağlayıcınızın otomatik yapılandırma dosyasını ve Thunderbird'ün sağlayıcı listesini (ISPDB) de dener. Exchange için Microsoft Autodiscover'a sorar; o da parolanızı yalnızca HTTPS üzerinden istediğinde alır. Şifrelemesiz bir sunucu asla seçilmez.</li>
-    <li><b>Tarayıcıda oturum açma</b>: OAuth 2.0 ve PKCE ile Google'a, Microsoft'a veya oturum açma uygulamanızın sağlayıcısına. Tarayıcı yalnızca bu bilgisayardaki Inbox Classic'e döner.</li>
-    <li><b>Marka logoları</b> (BIMI): ileti logoyu taşımıyorsa, Inbox Classic her çalıştığında bir kez markanın HTTPS adresinden. Bu yalnızca posta sunucunuz iletinin DMARC denetimini geçirip logoyu onayladığında olur.</li>
-    <li><b>İnternetten resimler</b>: yalnızca siz istediğinizde.</li>
-    <li><b>Abonelikten çıkma</b>: yalnızca siz tıkladığınızda. Tek tıklamalı bir istek (RFC 8058) yalnızca liste iletiyi DKIM ile imzaladıysa gönderilir.</li>
-    <li><b>Şifreleme anahtarları</b>: yalnızca anahtarına sahip olmadığınız birine şifrelediğinizde. Önce adresin kendi alan adı (Web Key Directory), sonra kapatmadıysanız keys.openpgp.org. Yalnızca adres gönderilir.</li>
+    <li><b>Posta sunucularınız</b>: postayı okumak için IMAP, göndermek için SMTP üzerinden. Bağlantılar TLS ile şifrelenir ve her sunucunun sertifikası sisteminizin güvendiği sertifikalarla denetlenir. Siz <b data-text="ui-security-none"></b> seçip onaylamadıkça Inbox Classic şifrelenmemiş bağlantı kurmaz.</li>
+    <li><b>Hesap eklediğinizde</b>, hesabın sunucu ayarlarını bulmak için bağlantı kurulur. Inbox Classic etki alanınızın DNS kayıtlarını hiçbir zaman düz DNS ile değil, HTTPS üzerinden DNS ile (önce Cloudflare, sonra Google) okur. Sağlayıcınızın otomatik yapılandırma dosyasını ve Thunderbird'ün sağlayıcı listesini (ISPDB) de dener. Exchange ayarları Microsoft Autodiscover üzerinden sorgulanır. Parola gerekirse yalnızca HTTPS bağlantısı üzerinden gönderilir. Şifrelemesiz bir sunucu asla seçilmez.</li>
+    <li><b>Tarayıcıda oturum açma</b>: OAuth 2.0 ve PKCE ile Google'a, Microsoft'a veya oturum açma uygulamanızın sağlayıcısına. Oturum açma yanıtı, bu bilgisayardaki yerel adres üzerinden Inbox Classic'e iletilir.</li>
+    <li><b>Marka logoları</b> (BIMI): ileti logoyu içermiyorsa ve kayıtlı bir kopya kullanılamıyorsa markanın HTTPS adresinden indirilir. İndirilen logolar kaydedilir ve program yeniden başlatıldıktan sonra da kullanılır. Bu yalnızca posta sunucunuz iletinin DMARC denetimini geçirip logoyu onayladığında olur.</li>
+    <li><b>İnternetten resimler</b>: bir ileti, gönderen veya etki alanı için izin verdiğinizde ya da otomatik yüklemeyi açtığınızda indirilir.</li>
+    <li><b>Abonelikten çıkma</b>: yalnızca işlemi onayladığınızda. Tek tıklamalı bir istek (RFC 8058) yalnızca liste iletiyi DKIM ile imzaladıysa gönderilir.</li>
+    <li><b>Şifreleme anahtarları</b>, bir iletiyi şifrelemek için alıcının anahtarı eksik olduğunda veya siz anahtar araması başlattığınızda aranır. E-posta adresiyle arama yapılırken önce adresin etki alanındaki anahtar dizinine (Web Key Directory) başvurulur. Gerekirse, bu arama açıksa adres keys.openpgp.org sunucusuna gönderilir. Parmak izi veya anahtar kimliğiyle aramada e-posta adresi yerine bu bilgi keys.openpgp.org sunucusuna gönderilir.</li>
     <!--os:mac--><li><b>Güncellemeler</b>: yeni bir sürüm çıkıp çıkmadığını görmek için inboxclassic.com'dan.</li><!--/os-->
 </ul>
-<p>Oturum açma kodları yalnızca sağlayıcınızın Authentication-Results üst bilgisi etki alanının iletiyi imzaladığını (DKIM) söylediğinde sunulur. Bunun için ayrı bir bağlantı gerekmez.</p>
+<p>Oturum açma kodları yalnızca sağlayıcınızın Authentication-Results üst bilgisi gönderen etki alanının imzasının doğrulandığını (DKIM) bildirdiğinde gösterilir. Bunun için ayrı bir bağlantı gerekmez.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

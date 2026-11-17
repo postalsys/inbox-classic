@@ -1,15 +1,14 @@
-<!--review--><h1>As ligações que o Inbox Classic estabelece</h1>
-<p class="summary">Onde o Inbox Classic se liga, e porquê, para os mais curiosos em termos técnicos.</p>
+<h1>As ligações que o Inbox Classic estabelece</h1>
+<p class="summary">Informações técnicas sobre os serviços a que o Inbox Classic se liga e a finalidade dessas ligações.</p>
 <ul>
     <li><b>Os seus servidores de correio</b>, por IMAP para ler o correio e por SMTP para o enviar. As ligações são encriptadas com TLS, e o certificado de cada servidor é verificado com base nos certificados em que o seu sistema confia. O Inbox Classic recusa um servidor sem encriptação, a não ser que escolha <b data-text="ui-security-none"></b> e confirme.</li>
-    <li><b>Quando adiciona uma conta</b>, para procurar os respetivos servidores. O Inbox Classic lê os registos DNS do seu domínio através de DNS over HTTPS (Cloudflare e depois Google), nunca por DNS simples. Também experimenta o ficheiro autoconfig do seu fornecedor e a lista de fornecedores do Thunderbird (ISPDB). Para o Exchange, pergunta à Deteção Automática da Microsoft, que só recebe a sua palavra-passe quando a pede por HTTPS. Nunca é escolhido um servidor sem encriptação.</li>
-    <li><b>Início de sessão no browser</b>, com OAuth 2.0 e PKCE, na Google, na Microsoft ou no fornecedor da sua aplicação de início de sessão. O browser regressa ao Inbox Classic apenas neste computador.</li>
-    <li><b>Logótipos de marcas</b> (BIMI), a partir do endereço HTTPS da marca quando a mensagem não traz o logótipo, uma vez por cada execução do Inbox Classic. Isto só acontece quando o seu servidor de correio aprovou a verificação DMARC da mensagem e o logótipo.</li>
-    <li><b>Imagens da Internet</b>, só quando as pede.</li>
+    <li><b>Quando adiciona uma conta</b>, para procurar os respetivos servidores. O Inbox Classic lê os registos DNS do seu domínio através de DNS over HTTPS (Cloudflare e depois Google), nunca por DNS simples. Também consulta o ficheiro autoconfig do seu fornecedor e a lista de fornecedores do Thunderbird (ISPDB). Para o Exchange, consulta o serviço Autodiscover da Microsoft, que só recebe a sua palavra-passe quando a pede por HTTPS. Nunca é escolhido um servidor sem encriptação.</li>
+    <li><b>Início de sessão no browser</b>, com OAuth 2.0 e PKCE, na Google, na Microsoft ou no fornecedor da sua aplicação de início de sessão. O browser devolve a resposta ao Inbox Classic através de um endereço local neste computador.</li>
+    <li><b>Logótipos de marcas</b> (BIMI), a partir do endereço HTTPS da marca quando a mensagem não inclui o logótipo e não é possível reutilizar uma cópia guardada. Os logótipos transferidos são guardados e reutilizados, mesmo depois de reiniciar o programa. Isto só acontece quando o seu servidor de correio aprovou a verificação DMARC da mensagem e o logótipo.</li>
+    <li><b>Imagens da Internet</b>, quando autoriza o carregamento nessa mensagem ou nas definições.</li>
     <li><b>Cancelar subscrição</b>, só quando clica nesse botão. Um pedido com um clique (RFC 8058) só é enviado quando a lista assinou a mensagem com DKIM.</li>
-    <li><b>Chaves de encriptação</b>, só quando encripta para alguém cuja chave não tem: o domínio do endereço dessa pessoa (Web Key Directory) e depois keys.openpgp.org, a menos que o tenha desativado. Só o endereço é enviado.</li>
+    <li><b>As chaves de encriptação</b> são procuradas quando falta a chave de um destinatário para encriptar uma mensagem ou quando inicia uma pesquisa de chaves. Numa pesquisa por endereço de e-mail, o Inbox Classic consulta primeiro o domínio desse endereço (Web Key Directory). Se necessário, envia depois o endereço para keys.openpgp.org, caso essa pesquisa esteja ativada. Numa pesquisa por impressão digital ou ID da chave, envia esse identificador para keys.openpgp.org em vez de um endereço de e-mail.</li>
     <!--os:mac--><li><b>Atualizações</b>, a partir de inboxclassic.com, para ver se saiu uma nova versão.</li><!--/os-->
 </ul>
-<p>Os códigos de início de sessão só são oferecidos quando o cabeçalho Authentication-Results do seu fornecedor indica que o domínio assinou a mensagem (DKIM). Isto não precisa de nenhuma ligação própria.</p>
+<p>Os códigos de início de sessão só são apresentados quando o cabeçalho Authentication-Results do seu fornecedor indica que o domínio assinou a mensagem (DKIM). Esta verificação não requer uma ligação adicional.</p>
 <nav class="related"><a href="topic:data-storage"></a> <a href="topic:account-security"></a> <a href="topic:pictures-tracking"></a></nav>
-<!--/review-->

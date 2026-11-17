@@ -70,9 +70,7 @@ header-to = Para
 header-cc = CC
 header-sent = Enviado
 header-subject = Asunto
-# review: new
 header-security = Seguridad
-# review: new
 header-part = Parte { $number }
 quote-original = ----- Mensaje original -----
 fold-show-earlier = Mostrar los mensajes anteriores
@@ -427,8 +425,7 @@ day-sunday = domingo
 ## AI agents
 
 agent-level-read = Leer el correo: consultar carpetas y mensajes, y realizar búsquedas
-# review: changed
-agent-level-organize = Organizar el correo: marcar como leído o no leído, añadir marcas, gestionar el correo no deseado, mover y archivar mensajes, crear carpetas, enviar mensajes a Elementos eliminados y cancelar suscripciones a listas de correo cuando usted lo apruebe
+agent-level-organize = Organizar el correo: cambiar el estado de lectura y las marcas, gestionar el correo no deseado, mover o archivar mensajes, enviarlos a Elementos eliminados, crear carpetas y cancelar suscripciones a listas de correo con su autorización
 agent-level-drafts = Escribir borradores para que usted los envíe
 agent-level-send = Enviar correo, cada mensaje solo después de que usted lo apruebe
 agent-connect-title = { $program } solicita acceso a su correo
@@ -452,7 +449,7 @@ agent-undo-refused-why = No se puede deshacer: { $reason }.
 agent-undo-impossible = esto no se puede deshacer
 agent-undo-not-in-folder = el mensaje ya no está en esa carpeta
 agent-undo-not-arrived = el mensaje no está (todavía) en la carpeta de destino
-agent-undo-sent = el mensaje ya se envió
+agent-undo-sent = el mensaje ya no está en la Bandeja de salida
 agent-original-not-downloaded = el mensaje original aún no se ha descargado. Ábralo primero
 agent-turned-away = Rechazado
 agent-can-nothing = Nada
@@ -468,16 +465,16 @@ agent-accounts = { $count ->
 }
 agent-access = { $can }; { $accounts }
 agent-unreadable = Este mensaje no se puede leer.
-# review: new
-agent-encrypted-original = Este mensaje está cifrado: un agente no puede responderlo ni reenviarlo, porque no puede cifrar.
-# review: new
-agent-encrypted = Este mensaje está cifrado. Solo el usuario puede leerlo, en Inbox Classic.
-# review: new
+agent-encrypted-original = Los agentes no pueden responder a este mensaje cifrado ni reenviarlo, ya que no pueden cifrar mensajes.
+agent-encrypted = Este mensaje está cifrado. Los agentes de IA no pueden leer su contenido. El usuario debe abrirlo en Inbox Classic.
 list-encrypted = Mensaje cifrado
 agent-log-composed = Se abrió «{ $subject }» en la ventana de redacción para que termine de escribirlo
 agent-log-refused = No envió «{ $subject }»
 agent-log-sent = Se envió «{ $subject }» a { $to }
 agent-log-draft = Se guardó el borrador «{ $subject }»
+agent-log-draft-replaced = Se reemplazó el borrador «{ $subject }»
+agent-log-draft-discarded = Se descartó el borrador «{ $subject }»
+agent-draft-note = { $program }, un agente de IA, escribió este borrador. Compruebe los destinatarios y el texto antes de enviarlo.
 agent-log-read = «{ $subject }» marcado como leído
 agent-log-unread = «{ $subject }» marcado como no leído
 agent-log-flagged = Se añadió una marca a «{ $subject }»
@@ -488,20 +485,16 @@ agent-log-junk = «{ $subject }» marcado como correo no deseado
 agent-log-not-junk = «{ $subject }» marcado como correo deseado
 agent-log-archived = Se archivó «{ $subject }»
 agent-log-folder = Se creó la carpeta «{ $name }»
-agent-log-unsubscribed = Suscripción cancelada a la lista que envió «{ $subject }»
-# review: new
+agent-log-unsubscribed = Ha autorizado la solicitud de cancelación de la suscripción. Mensaje: «{ $subject }»
 agent-log-unsubscribe-failed = No se pudo cancelar la suscripción a la lista que envió «{ $subject }»: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Usted no canceló la suscripción a { $senders }
-# review: new
+agent-log-unsubscribe-refused = No canceló la suscripción a estas listas: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } quiere cancelar su suscripción a una lista de correo
    *[other] { $program } quiere cancelar su suscripción a { $count } listas de correo
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic pide a la lista siguiente que deje de enviarle correo, mediante la opción de un solo clic que ofrece. No se envía nada más, y los mensajes que ya tiene se quedan donde están.
-   *[other] Inbox Classic pide a cada una de las listas siguientes que deje de enviarle correo, mediante la opción de un solo clic que ofrece la lista. No se envía nada más, y los mensajes que ya tiene se quedan donde están.
+    [1] Para solicitar la baja de la lista indicada, Inbox Classic usa la opción de un clic que esta ofrece. No se envía nada más. Los mensajes que ya tiene no se modifican.
+   *[other] Para solicitar la baja de las listas indicadas, Inbox Classic usa la opción de un clic que ofrece cada lista. No se envía nada más. Los mensajes que ya tiene no se modifican.
 }
 
 ## Keys
@@ -545,464 +538,294 @@ event-attendees =
 otp-notification = { $code } es su código para { $domain }
 
 ## OpenPGP keys (keys.rs)
-# review: new
 pgp-key-valid = Válida
-# review: new
 pgp-key-expires = Válida hasta el { $date }
-# review: new
 pgp-key-expired = Caducó el { $date }
-# review: new
 pgp-key-revoked = Revocada
-# review: new
 pgp-key-revoked-why = Revocada: { $reason }
-# review: new
 pgp-key-not-valid = No válida
-# review: new
-pgp-key-locked = No se puede usar: la clave que la protege ya no está en { $store }. Vuelva a importar su copia de seguridad.
-# review: new
+pgp-key-locked = Falta la clave necesaria para desbloquearla en el almacén de contraseñas ({ $store }). Vuelva a importar la copia de seguridad de su clave privada.
 pgp-source-own = Creada en Inbox Classic
-# review: new
 pgp-source-file = Importada de un archivo
-# review: new
 pgp-source-paste = Pegada
-# review: new
 pgp-source-attachment = De un mensaje
-# review: new
 pgp-source-vcard = De una tarjeta de contacto
-# review: new
 pgp-source-wkd = Del proveedor de correo del remitente
-# review: new
 pgp-source-keyserver = De keys.openpgp.org
-# review: new
 pgp-source-autocrypt = Del encabezado Autocrypt de un mensaje
-# review: new
-pgp-error-no-store = Las claves privadas se guardan protegidas por { $store }, que no se puede usar: { $error }
-# review: new
-pgp-error-wrong-passphrase = La frase de contraseña no es correcta.
-# review: new
-# review: new
+pgp-error-no-store = El almacén de contraseñas necesario para proteger las claves privadas no está disponible ({ $store }): { $error }
+pgp-error-wrong-passphrase = La contraseña no es correcta.
 pgp-error-not-a-key = Esto no es una clave OpenPGP.
-# review: new
 pgp-error-too-large = La clave es demasiado grande.
-# review: new
-pgp-error-unusable = La clave usa criptografía antigua o débil y no se puede usar.
-# review: new
+pgp-error-unusable = Esta clave utiliza métodos criptográficos obsoletos o inseguros y no se puede usar.
 pgp-imported-private = { $count ->
     [one] Se importó su clave privada.
    *[other] Se importaron { $count } claves privadas.
 }
-# review: new
 pgp-imported-public = { $count ->
     [one] Se importó una clave.
    *[other] Se importaron { $count } claves.
 }
-# review: new
-pgp-imported-pending = Ya se usa otra clave para { $addresses }: la nueva espera en el contacto hasta que la elija.
-# review: new
-pgp-error-needs-passphrase = La clave privada está protegida por una frase de contraseña. Escríbala para importar la clave.
-# review: new
-pgp-error-mismatch = La clave privada no corresponde a su clave pública. Puede haber sido alterada.
-# review: new
+pgp-imported-pending = Ya hay otra clave asociada a estas direcciones: { $addresses }. Puede elegir la nueva clave en las propiedades del contacto.
+pgp-error-needs-passphrase = La clave privada está protegida con una contraseña. Introdúzcala para importar la clave.
+pgp-error-mismatch = La clave privada y la pública no corresponden al mismo par. Es posible que la clave se haya modificado.
 pgp-file-name-public = Clave pública de { $who }.asc
-# review: new
 pgp-file-name-private = Copia de seguridad de la clave privada de { $who }.asc
-# review: new
 pgp-pending = Se encontró otra clave para { $address } el { $date }.
 
 ## Reading signed and encrypted mail (protect.rs)
-# review: new
 pgp-part-verified = Firmado por { $signer }, clave verificada
-# review: new
 pgp-part-signed = Firmado por { $signer } (clave sin verificar)
-# review: new
 pgp-part-other = Firmado por { $signer }, que no es el remitente
-# review: new
 pgp-part-unknown-key = Firmado, pero no se conoce la clave
-# review: new
 pgp-part-not-signed = Sin firmar
-# review: new
 pgp-part-not-checked = Firma no comprobada
-# review: new
 pgp-part-encrypted = Cifrado. { $signature }
-# review: new
-pgp-part-no-key = Cifrado para una clave que no tiene
-# review: new
-pgp-part-changed = La parte cifrada se modificó por el camino y no se muestra
-# review: new
-pgp-part-unprotected = Cifrado sin protección contra cambios, no se muestra
-# review: new
+pgp-part-no-key = No dispone de la clave privada necesaria para descifrar el contenido
+pgp-part-changed = El contenido cifrado se modificó durante la transmisión y no se muestra
+pgp-part-unprotected = El contenido cifrado no está protegido contra modificaciones y no se muestra
 pgp-part-broken = La parte cifrada no se puede leer
-# review: new
-pgp-why-mismatch = La firma no corresponde a este texto
-# review: new
-pgp-why-weak-hash = La firma usa { $hash }, que ya no es seguro
-# review: new
+pgp-why-mismatch = La firma no coincide con el contenido
+pgp-why-weak-hash = La firma utiliza el algoritmo hash { $hash }, que ya no se considera seguro
 pgp-why-key-expired = Firmado después de que la clave caducara el { $date }
-# review: new
 pgp-why-key-revoked = Firmado con una clave revocada
-# review: new
-pgp-why-not-signing-key = Firmado con una clave que no puede firmar
-# review: new
+pgp-why-not-signing-key = La clave utilizada no está habilitada para firmar
 pgp-why-from-future = La firma tiene una fecha futura
-# review: new
 pgp-why-signature-expired = La firma ha caducado
-# review: new
 pgp-why-key-not-valid = Firmado con una clave no válida
-# review: new
 pgp-why-not-for-you = Firmado para otros destinatarios y reenviado a usted
-# review: new
 pgp-why-not-key-in-use = Firmado con una clave distinta de la que se usa para { $address }
-# review: new
 pgp-part-pictures-loaded = { $label }. Se cargaron imágenes de internet
-# review: new
-pgp-error-no-own-key = No tiene ninguna clave para { $address } con la que firmar o cifrar. Cree una en Herramientas > Claves de cifrado, o desactive Firmar y Cifrar.
-# review: new
+pgp-error-no-own-key = No hay ninguna clave configurada para firmar o cifrar con la dirección { $address }. Cree una en Herramientas > Claves de cifrado o desactive las opciones Firmar y Cifrar.
 pgp-error-missing-keys = { $count ->
-    [one] { $addresses } no tiene ninguna clave para cifrar.
-   *[other] Estos destinatarios no tienen ninguna clave para cifrar: { $addresses }.
+    [one] Falta la clave necesaria para enviar un mensaje cifrado a { $addresses }.
+   *[other] Faltan las claves necesarias para enviar mensajes cifrados a estos destinatarios: { $addresses }.
 }
-# review: new
-pgp-error-encrypted-quote = Este mensaje cita o reenvía un mensaje cifrado, así que solo se puede enviar cifrado. Active Cifrar, o quite el texto citado.
-# review: new
+pgp-error-encrypted-quote = Este mensaje incluye contenido de un mensaje cifrado. Active la opción Cifrar o quite el contenido citado antes de enviarlo.
 pgp-error-protect = No se pudo firmar ni cifrar el mensaje: { $reason }
-# review: new
-pgp-found-keys = Se encontró la clave de { $addresses }.
-# review: new
-pgp-found-none = No se encontró ninguna clave para { $addresses }. Pídale que le envíe su clave pública.
-# review: new
+pgp-found-keys = Claves encontradas para: { $addresses }.
+pgp-found-none = No se encontró ninguna clave para estas direcciones: { $addresses }. Pida a los destinatarios que le envíen sus claves públicas.
 pgp-found-no-key = No se encontró ninguna clave.
-# review: new
-pgp-find-unavailable = Ahora no se pueden buscar claves: { $error }
-# review: new
-pgp-publish-pending = keys.openpgp.org envió un enlace de confirmación a { $addresses }. Su clave se publica allí en cuanto haga clic en él.
-# review: new
+pgp-find-unavailable = La búsqueda de claves no está disponible en este momento: { $error }
+pgp-publish-pending = keys.openpgp.org ha enviado un enlace de confirmación a las siguientes direcciones: { $addresses }. Confirme cada dirección para que su clave pueda encontrarse a través de ella.
 pgp-publish-done = Su clave está publicada en keys.openpgp.org para { $addresses }.
-# review: new
 pgp-publish-failed = No se pudo publicar la clave: { $error }
-# review: changed
 pgp-keyserver-off = La búsqueda de claves en keys.openpgp.org está desactivada en { $settings }.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Cifrado y firmado: solo usted y { $addresses } pueden leerlo.
-   *[other] Cifrado y firmado: solo usted y sus { $count } destinatarios pueden leerlo.
+    [one] Se cifrará y firmará al enviarlo. Solo usted y { $addresses } podrán leer el contenido.
+   *[other] Se cifrará y firmará al enviarlo. Solo usted y sus { $count } destinatarios podrán leer el contenido.
 }
-# review: new
-pgp-compose-encrypt-ready = Se cifrará y firmará. Agregue destinatarios cuyas claves tenga.
-# review: new
+pgp-compose-encrypt-ready = Al enviarlo, el mensaje se cifrará y firmará. Agregue destinatarios para los que disponga de una clave utilizable.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } no tiene ninguna clave, así que el mensaje aún no se puede cifrar.
-   *[other] { $count } destinatarios no tienen ninguna clave, así que el mensaje aún no se puede cifrar: { $addresses }.
+    [one] No hay una clave utilizable para este destinatario: { $addresses }. Aún no se puede cifrar el mensaje.
+   *[other] No hay una clave utilizable para { $count } destinatarios: { $addresses }. Aún no se puede cifrar el mensaje.
 }
-# review: new
 pgp-compose-looking = Buscando las claves de { $addresses }...
-# review: new
-pgp-compose-signed = Firmado: los destinatarios pueden comprobar que procede de usted y que nadie lo cambió.
-# review: new
+pgp-compose-signed = Se firmará al enviarlo. Los destinatarios podrán comprobar la firma y detectar cambios en el contenido.
 pgp-compose-reply-clear = Sin cifrar, aunque el mensaje al que responde o que reenvía estaba cifrado.
-# review: new
-pgp-compose-encrypted-files = Lleva adjuntos archivos de un mensaje cifrado, así que este mensaje solo se puede enviar cifrado. Active Cifrar, o quite esos archivos.
-# review: new
-pgp-compose-sign-tip = Firmar el mensaje con su clave, para que los destinatarios puedan comprobar que procede de usted y que nadie lo cambió
-# review: new
-pgp-compose-sign-tip-encrypted = Un mensaje cifrado siempre se firma
-# review: new
-pgp-compose-encrypt-tip = Cifrar el mensaje, para que solo usted y sus destinatarios puedan leerlo
-# review: new
-pgp-compose-make-key = Aún no tiene ninguna clave para { $address }. ¿Crear una ahora? Con ella, sus mensajes se pueden firmar y cifrar.
-# review: new
-pgp-compose-key-unusable = Su clave para { $address } no se puede usar ({ $state }). Abra Claves de cifrado para importar su copia de seguridad o crear una clave nueva.
-# review: new
-pgp-compose-encrypt-off-quote = Este mensaje cita o reenvía un mensaje cifrado. Sin cifrado, no se podrá enviar hasta que quite lo que cita. ¿Desactivar el cifrado de todos modos?
-# review: new
-pgp-compose-encrypt-off-reply = Este mensaje responde a un mensaje cifrado o lo reenvía. Sin cifrado, cualquiera que maneje su mensaje por el camino podrá leerlo. ¿Desactivar el cifrado?
-# review: new
+pgp-compose-encrypted-files = Este mensaje incluye archivos adjuntos procedentes de un mensaje cifrado y solo puede enviarse cifrado. Active «Cifrar» o quite esos archivos adjuntos.
+pgp-compose-sign-tip = Firmar digitalmente el mensaje al enviarlo para que los destinatarios puedan comprobar la firma y la integridad del contenido
+pgp-compose-sign-tip-encrypted = Los mensajes enviados con cifrado también se firman
+pgp-compose-encrypt-tip = Cifrar el contenido al enviar el mensaje para que solo usted y los destinatarios puedan leerlo
+pgp-compose-make-key = Todavía no hay una clave propia configurada para { $address }. ¿Desea crearla ahora? Le permitirá firmar y cifrar mensajes.
+pgp-compose-key-unusable = Su clave para { $address } no se puede usar. Motivo: { $state }
+    Abra «Claves de cifrado» para importar una copia de seguridad de esa clave o crear una nueva.
+pgp-compose-encrypt-off-quote = Este mensaje aún contiene texto, imágenes o archivos adjuntos de un mensaje cifrado. Debe quitarlos antes de poder enviarlo sin cifrar. ¿Desea desactivar el cifrado de todos modos?
+pgp-compose-encrypt-off-reply = El mensaje original estaba cifrado. Si envía esta respuesta o reenvío sin cifrar, los servidores de correo por los que pase podrán leer su contenido. ¿Desea desactivar el cifrado?
 pgp-recipient-verified = Clave verificada
-# review: new
 pgp-recipient-found = Clave sin verificar
-# review: new
 pgp-recipient-own = Su propia clave
-# review: new
 pgp-recipient-looking = Buscando una clave...
-# review: new
 pgp-recipient-missing = Sin clave
-# review: new
-pgp-recipient-not-found = Sin clave: no se encontró ninguna el { $date }
-# review: new
+pgp-recipient-not-found = No se encontró ninguna clave. Última búsqueda: { $date }
 pgp-recipient-unusable = La clave no se puede usar: { $state }
-# review: new
-pgp-recipients-intro = El mensaje se cifra para la clave de cada destinatario, y para la suya.
-# review: new
+pgp-recipients-intro = Inbox Classic usará las claves de los destinatarios y la suya para cifrar el mensaje.
 pgp-recipients-intro-missing = { $count ->
-    [one] Un destinatario no tiene ninguna clave para cifrar. Busque su clave, quítelo de este mensaje o envíelo sin cifrar.
-   *[other] { $count } destinatarios no tienen ninguna clave para cifrar. Busque sus claves, quítelos de este mensaje o envíelo sin cifrar.
+    [one] No hay una clave utilizable para un destinatario. Busque su clave o quite al destinatario del mensaje. Solo puede enviarlo sin cifrar si no contiene texto, imágenes ni archivos adjuntos de mensajes cifrados.
+   *[other] No hay una clave utilizable para { $count } destinatarios. Busque sus claves o quite a esos destinatarios del mensaje. Solo puede enviarlo sin cifrar si no contiene texto, imágenes ni archivos adjuntos de mensajes cifrados.
 }
-# review: new
 pgp-details-part = Parte { $number }: { $label }
-# review: new
-pgp-details-signed = Firmado { $when } con la clave { $key }
-# review: new
-pgp-details-unknown-key = Firmado con la clave { $key }, que usted no tiene
-# review: new
-pgp-details-opened = Cifrado para su clave { $key }
-# review: new
-pgp-details-for = Cifrado para { $keys }
-# review: new
+pgp-details-signed = Firmado el { $when } con la clave { $key }
+pgp-details-unknown-key = Firmado con la clave { $key }, que no está disponible en este equipo
+pgp-details-opened = Descifrado con su clave { $key }
+pgp-details-for = Cifrado con las siguientes claves: { $keys }
 pgp-details-plain = Ni firmado ni cifrado
-# review: new
-pgp-bar-parts = Este mensaje tiene { $count } partes: { $list }. Cada parte indica cómo está protegida.
-# review: new
+pgp-bar-parts = Este mensaje consta de { $count } partes: { $list }. El estado de protección se indica sobre cada parte.
 pgp-bar-count-verified = { $count ->
     [one] 1 verificada
    *[other] { $count } verificadas
 }
-# review: new
 pgp-bar-count-good = { $count ->
     [one] 1 firmada o cifrada
    *[other] { $count } firmadas o cifradas
 }
-# review: new
 pgp-bar-count-warning = { $count ->
-    [one] 1 requiere atención
-   *[other] { $count } requieren atención
+    [one] 1 con advertencias
+   *[other] { $count } con advertencias
 }
-# review: new
 pgp-bar-count-neutral = { $count } sin firma confirmada
 # the setup file: settings, accounts, contacts and keys carried to another computer
-# review: new
 setup-part-settings = Configuración
-# review: new
 setup-part-preferences = Preferencias de las ventanas
-# review: new
 setup-part-accounts = Cuentas
-# review: new
 setup-part-sign-in-apps = Aplicaciones de inicio de sesión
-# review: new
 setup-part-contacts = Contactos y grupos
-# review: new
 setup-part-keys = Claves de cifrado
-# review: new
 setup-part-rules = Reglas de mensajes
-# review: new
 setup-part-trusted-senders = Remitentes de confianza
-# review: new
 setup-holds-settings = { $count ->
     [one] 1 ajuste
    *[other] { $count } ajustes
 }
-# review: new
 setup-holds-preferences = { $count ->
     [one] 1 preferencia
    *[other] { $count } preferencias
 }
-# review: new
 setup-holds-accounts = { $count ->
     [one] 1 cuenta
    *[other] { $count } cuentas
 }
-# review: new
 setup-holds-sign-in-apps = { $count ->
     [one] 1 aplicación de inicio de sesión
    *[other] { $count } aplicaciones de inicio de sesión
 }
-# review: new
-setup-holds-built-in = Qué aplicaciones de inicio de sesión integradas están activadas
-# review: new
+setup-holds-built-in = Estado de activación de las aplicaciones de inicio de sesión integradas
 setup-holds-contacts = { $count ->
     [one] 1 contacto
    *[other] { $count } contactos
 }
-# review: new
 setup-holds-groups = { $count ->
     [one] 1 grupo
    *[other] { $count } grupos
 }
-# review: new
 setup-holds-own-keys = { $count ->
     [one] 1 clave propia
    *[other] { $count } claves propias
 }
-# review: new
 setup-holds-contact-keys = { $count ->
     [one] 1 clave de un contacto
    *[other] { $count } claves de contactos
 }
-# review: new
 setup-holds-rules = { $count ->
     [one] 1 regla
    *[other] { $count } reglas
 }
-# review: new
 setup-holds-trusted-senders = { $count ->
     [one] 1 remitente de confianza
    *[other] { $count } remitentes de confianza
 }
-# review: new
 setup-sign-in-password = Contraseña
-# review: new
-setup-account-secret-password = Su contraseña está en el archivo.
-# review: new
-setup-account-secret-token = Su inicio de sesión está en el archivo.
-# review: new
-setup-account-asks-password = Pedirá su contraseña después de la importación.
-# review: new
-setup-account-signs-in-again = Volverá a iniciar sesión en ella después de la importación.
-# review: new
-setup-account-here = Ya está configurada aquí, así que se omite.
-# review: new
-setup-account-no-app = Inicia sesión con { $app }, que no está configurada aquí. Importe también las aplicaciones de inicio de sesión.
-# review: new
+setup-account-secret-password = El archivo incluye la contraseña guardada.
+setup-account-secret-token = El archivo incluye los datos de acceso guardados.
+setup-account-asks-password = Tras la importación, tendrá que introducir la contraseña.
+setup-account-signs-in-again = Tras la importación, tendrá que volver a iniciar sesión en esta cuenta.
+setup-account-here = Esta cuenta ya está configurada en este equipo y no se volverá a importar.
+setup-account-no-app = Esta cuenta utiliza la aplicación de inicio de sesión { $app }, que aún no está configurada en este equipo. Importe también las aplicaciones de inicio de sesión.
 setup-invalid-address = «{ $address }» no es una dirección de correo electrónico.
-# review: new
-setup-invalid-server = El servidor { $server } no tiene un nombre o un puerto que se pueda usar.
-# review: new
-setup-invalid-user = No tiene nombre de usuario.
-# review: new
-setup-invalid-sign-in = Inicia sesión de una forma que Inbox Classic no conoce.
-# review: new
+setup-invalid-server = El nombre o el puerto del servidor { $server } no es válido.
+setup-invalid-user = La cuenta no tiene un nombre de usuario.
+setup-invalid-sign-in = El método de inicio de sesión de esta cuenta no es compatible con Inbox Classic.
 setup-error-empty = El archivo está vacío.
-# review: new
-setup-error-too-large = El archivo es demasiado grande para ser una configuración de Inbox Classic.
-# review: new
-setup-error-not-setup = Este archivo no es una configuración de Inbox Classic.
-# review: new
+setup-error-too-large = El archivo es demasiado grande para importar su configuración y sus cuentas.
+setup-error-not-setup = Este archivo no contiene una exportación de configuración y cuentas de Inbox Classic.
 setup-error-damaged = El archivo de configuración está dañado y no se puede leer.
-# review: new
-setup-error-newer = Esta configuración la guardó una versión más reciente de Inbox Classic ({ $version }). Actualice Inbox Classic y vuelva a importarla.
-# review: new
-setup-error-needs-passphrase = Esta configuración está protegida por una frase de contraseña. Escriba la frase de contraseña con la que se guardó.
-# review: new
-setup-error-wrong-passphrase = Esa no es la frase de contraseña con la que se guardó esta configuración.
-# review: new
+setup-error-newer = El archivo se exportó con una versión más reciente de Inbox Classic ({ $version }). Actualice Inbox Classic y vuelva a intentar la importación.
+setup-error-needs-passphrase = El archivo está protegido con una contraseña. Introduzca la contraseña que usó al exportarlo.
+setup-error-wrong-passphrase = No se puede abrir el archivo con esta contraseña.
 setup-error-changed = El archivo de configuración se modificó o dañó después de guardarlo, así que no se puede importar.
-# review: new
 setup-error-read = No se pudo leer el archivo de configuración: { $error }
-# review: new
-setup-error-write = No se pudo guardar la configuración: { $error }
-# review: new
-setup-error-no-parts = Elija al menos una parte.
-# review: new
+setup-error-write = No se pudo guardar el archivo de configuración: { $error }
+setup-error-no-parts = Elija al menos una categoría de datos.
 setup-left-out = { $count ->
-    [one] 1 elemento de «{ $part }» no se puede usar y se omite.
-   *[other] { $count } elementos de «{ $part }» no se pueden usar y se omiten.
+    [one] Se omitirá 1 elemento de «{ $part }» porque no se puede usar.
+   *[other] Se omitirán { $count } elementos de «{ $part }» porque no se pueden usar.
 }
-# review: new
 setup-imported-settings = Se reemplazó la configuración.
-# review: new
 setup-imported-preferences = Se reemplazaron las preferencias de las ventanas.
-# review: new
 setup-added-accounts = { $count ->
-    [one] Se agregó 1 cuenta.
-   *[other] Se agregaron { $count } cuentas.
+    [one] Se añadió 1 cuenta.
+   *[other] Se añadieron { $count } cuentas.
 }
-# review: new
-setup-skipped-here = { $address } ya está configurada aquí, así que se omitió.
-# review: new
-setup-skipped-no-app = Se omitió { $address }: inicia sesión con { $app }, que no está configurada aquí.
-# review: new
+setup-skipped-here = La cuenta { $address } ya está configurada en este equipo y no se ha vuelto a importar.
+setup-skipped-no-app = No se importó { $address } porque falta la aplicación de inicio de sesión { $app }.
 setup-skipped-invalid = Se omitió { $address }: { $reason }
-# review: new
-setup-asks-password = { $address } pedirá su contraseña al conectarse.
-# review: new
-setup-signs-in-again = { $address } le pedirá que vuelva a iniciar sesión al conectarse.
-# review: new
+setup-asks-password = Al conectarse a la cuenta { $address }, tendrá que introducir la contraseña.
+setup-signs-in-again = Al conectarse a la cuenta { $address }, tendrá que volver a iniciar sesión.
 setup-added-sign-in-apps = { $count ->
-    [one] Se agregó 1 aplicación de inicio de sesión.
-   *[other] Se agregaron { $count } aplicaciones de inicio de sesión.
+    [one] Se añadió 1 aplicación de inicio de sesión.
+   *[other] Se añadieron { $count } aplicaciones de inicio de sesión.
 }
-# review: new
 setup-skipped-sign-in-apps = { $count ->
     [one] 1 aplicación de inicio de sesión ya está configurada aquí.
    *[other] { $count } aplicaciones de inicio de sesión ya están configuradas aquí.
 }
-# review: new
 setup-added-contacts = { $count ->
-    [one] Se agregó 1 contacto a la libreta de direcciones.
-   *[other] Se agregaron { $count } contactos a la libreta de direcciones.
+    [one] Se añadió 1 contacto a la libreta de direcciones.
+   *[other] Se añadieron { $count } contactos a la libreta de direcciones.
 }
-# review: new
 setup-skipped-contacts = { $count ->
     [one] 1 contacto ya está en la libreta de direcciones.
    *[other] { $count } contactos ya están en la libreta de direcciones.
 }
-# review: new
 setup-added-groups = { $count ->
-    [one] Se agregó o completó 1 grupo.
-   *[other] Se agregaron o completaron { $count } grupos.
+    [one] Se añadió o actualizó 1 grupo.
+   *[other] Se añadieron o actualizaron { $count } grupos.
 }
-# review: new
 setup-added-own-keys = { $count ->
-    [one] Se agregó 1 clave propia.
-   *[other] Se agregaron { $count } claves propias.
+    [one] Se añadió 1 clave propia.
+   *[other] Se añadieron { $count } claves propias.
 }
-# review: new
 setup-added-contact-keys = { $count ->
-    [one] Se agregó 1 clave de un contacto.
-   *[other] Se agregaron { $count } claves de contactos.
+    [one] Se añadió 1 clave de un contacto.
+   *[other] Se añadieron { $count } claves de contactos.
 }
-# review: new
 setup-added-rules = { $count ->
-    [one] Se agregó 1 regla de mensajes.
-   *[other] Se agregaron { $count } reglas de mensajes.
+    [one] Se añadió 1 regla de mensajes.
+   *[other] Se añadieron { $count } reglas de mensajes.
 }
-# review: new
 setup-skipped-rules = { $count ->
-    [one] 1 regla de mensajes ya está aquí.
-   *[other] { $count } reglas de mensajes ya están aquí.
+    [one] 1 regla de mensajes ya existe en este equipo.
+   *[other] { $count } reglas de mensajes ya existen en este equipo.
 }
-# review: new
 setup-skipped-rules-account = { $count ->
-    [one] 1 regla de mensajes es de una cuenta que no está aquí, así que se omitió.
-   *[other] { $count } reglas de mensajes son de cuentas que no están aquí, así que se omitieron.
+    [one] Se omitió 1 regla de mensajes porque su cuenta no está configurada en este equipo.
+   *[other] Se omitieron { $count } reglas de mensajes porque sus cuentas no están configuradas en este equipo.
 }
-# review: new
 setup-rules-waiting = { $count ->
-    [one] 1 regla de mensajes mueve mensajes a una carpeta que aparecerá cuando su cuenta se sincronice.
-   *[other] { $count } reglas de mensajes mueven mensajes a carpetas que aparecerán cuando sus cuentas se sincronicen.
+    [one] La carpeta de destino de 1 regla de mensajes estará disponible cuando se sincronice la cuenta.
+   *[other] Las carpetas de destino de { $count } reglas de mensajes estarán disponibles cuando se sincronicen sus cuentas.
 }
-# review: new
 setup-added-trusted-senders = { $count ->
-    [one] Se agregó 1 remitente de confianza.
-   *[other] Se agregaron { $count } remitentes de confianza.
+    [one] Se añadió 1 remitente de confianza.
+   *[other] Se añadieron { $count } remitentes de confianza.
 }
-# review: new
 setup-nothing = No se importó nada.
-# review: new
 setup-account-servers = { $imap } y { $smtp } ({ $signin })
-# review: new
 setup-file-name = Configuración y cuentas de Inbox Classic
-# review: new
-setup-skipped-unreachable = Se omitió { $name }: no se pudo contactar con su servicio de inicio de sesión. Vuelva a agregarla en Aplicaciones de inicio de sesión.
-# review: new
-attachment-runs-programs = «{ $name }» puede ejecutar programas, así que Inbox Classic no lo abre. Guárdelo y ábralo usted mismo si confía en su origen.
-# review: new
-attachment-decrypted-note = Este adjunto viene de un mensaje cifrado. Para abrirlo, Inbox Classic lo guarda descifrado en este equipo, en una carpeta suya que Inbox Classic vacía al cabo de un día.
-# review: new
+setup-skipped-unreachable = Se omitió { $name } porque no se pudo contactar con el servicio de inicio de sesión. Vuelva a añadir esta aplicación en «Aplicaciones de inicio de sesión».
+attachment-runs-programs = El archivo «{ $name }» puede ejecutar programas, por lo que Inbox Classic no lo abre. Si confía en su origen, puede guardarlo y abrirlo por su cuenta.
+attachment-decrypted-note = Este archivo adjunto procede de un mensaje cifrado. Para abrirlo, Inbox Classic guarda una copia sin cifrar en una carpeta temporal de su cuenta de usuario. Al iniciar la aplicación, se eliminan las copias que tienen más de un día.
 undone-move = { $count ->
     [one] El servidor no movió { $messages } a { $folder }, así que vuelve a estar en { $from }: { $reason }
    *[other] El servidor no movió { $messages } a { $folder }, así que vuelven a estar en { $from }: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] El servidor no eliminó { $messages }, así que vuelve a estar en { $from }: { $reason }
    *[other] El servidor no eliminó { $messages }, así que vuelven a estar en { $from }: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] El servidor no archivó { $messages }, así que vuelve a estar en { $from }: { $reason }
    *[other] El servidor no archivó { $messages }, así que vuelven a estar en { $from }: { $reason }
 }
-# review: new
 undone-read = { $count ->
-    [one] El servidor no marcó { $messages } como leído, así que vuelve a estar sin leer: { $reason }
-   *[other] El servidor no marcó { $messages } como leídos, así que vuelven a estar sin leer: { $reason }
+    [one] El servidor no marcó { $messages } como leído, así que vuelve a figurar como no leído: { $reason }
+   *[other] El servidor no marcó { $messages } como leídos, así que vuelven a figurar como no leídos: { $reason }
 }
-# review: new
 undone-unread = { $count ->
-    [one] El servidor no marcó { $messages } como no leído, así que vuelve a estar leído: { $reason }
-   *[other] El servidor no marcó { $messages } como no leídos, así que vuelven a estar leídos: { $reason }
+    [one] El servidor no marcó { $messages } como no leído, así que vuelve a figurar como leído: { $reason }
+   *[other] El servidor no marcó { $messages } como no leídos, así que vuelven a figurar como leídos: { $reason }
 }
-# review: new
 undone-flags = { $count ->
     [one] El servidor no cambió las marcas de { $messages }, así que está como antes: { $reason }
    *[other] El servidor no cambió las marcas de { $messages }, así que están como antes: { $reason }
@@ -1015,4 +838,16 @@ preview-pdf-option = Mostrar archivos PDF en los mensajes
 # review: new
 preview-pdf-off = Los archivos PDF no se muestran en los mensajes.
 # review: new
-preview-pdf-off-crashed = Un archivo PDF cerró Inbox Classic mientras se mostraba, por lo que los archivos PDF ya no se muestran en los mensajes. Las imágenes sí. Para volver a mostrar los archivos PDF, active { $option } en las opciones de lectura.
+preview-pdf-off-crashed = Un archivo PDF cerró Inbox Classic mientras se mostraba, por lo que los archivos PDF ya no se muestran en los mensajes. Las imágenes sí. Para volver a mostrar los archivos PDF, active { $option } en { $settings }.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 página, { $size }
+   *[other] { $count } páginas, { $size }
+}
+# review: new
+preview-page-alt = { $name }, página { $page } de { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Ábralo para ver la página
+   *[other] Ábralo para ver las { $count } páginas
+}

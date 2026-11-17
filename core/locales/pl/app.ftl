@@ -469,7 +469,6 @@ ui-no-match-in = Wyszukiwanie w folderze { $folder } obejmuje tematy, nadawców,
 ui-no-items = W tym widoku nie ma żadnych elementów.
 # review: new
 ui-choose-folder = Wybierz folder, aby zobaczyć jego wiadomości.
-# review: new
 ui-unsubscribe = Wypisz się
 # review: new
 ui-open-in-calendar = Otwórz w kalendarzu
@@ -757,7 +756,7 @@ ui-options-system-default = Domyślny systemu ({ $language })
 ui-settings-general = Ogólne
 # review: new
 ui-settings-reading = Czytanie
-# review: changed
+# review: new
 ui-settings-new-mail = Nowa poczta
 # review: new
 ui-settings-sending = Wysyłanie
@@ -853,7 +852,6 @@ ui-dont-allow = Nie zezwalaj
 ui-allow = &Zezwól
 # review: new
 ui-dont-send = Nie wysyłaj
-# review: new
 ui-dont-unsubscribe = Nie wypisuj
 # review: new
 ui-edit-first = Najpierw &edytuj
@@ -1103,8 +1101,8 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Nie udało się zapisać książki adresowej: { $reason }
 # review: new
 ui-code-copied = Skopiowano kod
-# review: new
-ui-codes-in-notifications = Pokazuj &kody logowania w powiadomieniach o nowej poczcie
+# review: changed
+ui-codes-in-notifications = Po&kazuj kody logowania w powiadomieniach o nowej poczcie
 # review: new
 ui-tool-unread-only = Nieprzeczytane
 # review: new
@@ -1115,8 +1113,8 @@ ui-pictures-always-sender = Zawsze pobieraj obrazy od { $sender }
 ui-pictures-always-domain = Zawsze pobieraj obrazy od wszystkich z domeny { $domain }
 # review: new
 ui-pictures-unconfirmed = Nie udało się zweryfikować domeny nadawcy ({ $domain }), więc obrazy w tej wiadomości nie są pobierane automatycznie.
-# review: new
-ui-pictures-always-option = Pobieraj &obrazy we wszystkich wiadomościach
+# review: changed
+ui-pictures-always-option = P&obieraj obrazy we wszystkich wiadomościach
 # review: new
 ui-pictures-always-warning = Nadawcy będą wtedy widzieć, kiedy czytasz ich wiadomości.
 # review: new
@@ -1125,7 +1123,7 @@ ui-protection-details = &Szczegóły...
 ui-protection-details-title = Szczegóły zabezpieczeń
 # review: new
 ui-download-heading = Pobieranie
-# review: new
+# review: changed
 ui-download-ahead = &Pobieraj wiadomości z wyprzedzeniem:
 # review: new
 ui-download-ahead-recent = Ostatnie wiadomości do 1 MB każda
@@ -1133,14 +1131,20 @@ ui-download-ahead-recent = Ostatnie wiadomości do 1 MB każda
 ui-download-ahead-all = Wszystkie wiadomości
 # review: new
 ui-download-ahead-never = Tylko po otwarciu
-# review: new
+# review: changed
 ui-download-limit = &Limit miejsca na konto:
-# review: new
+# review: changed
 ui-send-delay = &Opóźnienie przed wysłaniem:
 # review: new
 ui-send-delay-note = Gdy wiadomość czeka na wysłanie, możesz anulować wysyłkę poleceniem Cofnij.
 # review: new
 ui-dark-messages = Pokazuj wiadomości na ciemnym tle, gdy system jest w trybie ciemnym
+# review: new
+ui-preview-show = Pokazuj z&ałączniki w wiadomościach
+# review: new
+ui-preview-show-note = Pokazuje obrazy i pierwsze strony plików PDF pod tekstem wiadomości. Inbox Classic sam tworzy te podglądy, więc nic w pliku nie może się uruchomić.
+# review: new
+ui-preview-pdfs = Pokazuj pliki PD&F w wiadomościach
 # review: new
 ui-sending-in = Wysyłanie { $subject } za { $count ->
     [one] 1 sekundę
@@ -1158,8 +1162,8 @@ ui-outbox-status-undo = Wysyłka o { $time }
 ui-download-note = Wiadomości pobrane z wyprzedzeniem otwierają się od razu. Po przekroczeniu limitu miejsca najstarsze lokalne kopie są usuwane i pobierane ponownie przy otwarciu.
 # review: new
 ui-attachment-downloading = Ta wiadomość nie została jeszcze w pełni pobrana. Spróbuj ponownie po zakończeniu pobierania.
-# review: new
-ui-trusted-senders-button = Zaufani &nadawcy...
+# review: changed
+ui-trusted-senders-button = Zaufa&ni nadawcy...
 # review: new
 ui-trusted-senders-title = Zaufani nadawcy
 # review: new
@@ -1176,8 +1180,8 @@ ui-search-encrypted-note = Zaszyfrowane wiadomości są odszyfrowywane na tym ko
 ui-pgp-keyserver = Szukaj &kluczy na keys.openpgp.org
 # review: new
 ui-pgp-keyserver-note = Gdy szyfrujesz wiadomość lub szukasz klucza, szukany adres jest wysyłany do keys.openpgp.org. Najpierw pytana jest domena tego adresu.
-# review: new
-ui-eml-default = Otwieraj pliki .&eml w Inbox Classic
+# review: changed
+ui-eml-default = Otwi&eraj pliki .eml w Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic otwiera teraz pliki .eml.
 # review: new
@@ -1186,7 +1190,7 @@ ui-eml-default-failed = Nie udało się ustawić Inbox Classic jako domyślnej a
 ui-folders = Foldery
 # review: new
 ui-sorted-by = Sortowanie: { $field }
-# review: new
+# review: changed
 ui-layout-label = &Układ:
 # review: new
 ui-columns-note = Okno jest wystarczająco szerokie na układ kolumnowy. Układ możesz zmienić w menu Widok > Układ.
@@ -1207,10 +1211,10 @@ ui-row-messages = { $count ->
     [many] { $count } wiadomości
    *[other] { $count } wiadomości
 }
-# review: new
+# review: changed
 ui-list-pictures = &Pokazuj obrazy nadawców na liście wiadomości
-# review: new
-ui-list-pictures-note = W układzie kolumnowym pokazuje logo marek lub zdjęcia z Książki adresowej dla zweryfikowanych nadawców, a inicjały, gdy obrazu nie ma. Logo jest pobierane raz dla każdej marki, a nie dla każdej wiadomości.
+# review: changed
+ui-list-pictures-note = Pokazuje logo marek lub zdjęcia z Książki adresowej dla zweryfikowanych nadawców, a inicjały, gdy obrazu nie ma. Logo jest pobierane raz dla każdej marki, a nie dla każdej wiadomości.
 # review: new
 ui-card-picture = Zdjęcie:
 # review: new

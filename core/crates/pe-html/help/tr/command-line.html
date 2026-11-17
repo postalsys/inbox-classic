@@ -1,17 +1,16 @@
-<!--review--><h1>Komut satırı seçenekleri</h1>
-<p class="summary">Inbox Classic'i bir terminalden başlatma seçenekleri, test için ve yapay zeka aracıları için.</p>
+<h1>Komut satırı seçenekleri</h1>
+<p class="summary">Inbox Classic'i terminalden başlatırken, testlerde ve yapay zeka aracılarıyla kullanabileceğiniz seçenekler.</p>
 <p><!--os:windows--><code>InboxClassic.exe</code><!--/os--><!--os:mac--><code>"Inbox Classic.app/Contents/MacOS/Inbox Classic"</code><!--/os--><!--os:linux--><code>inbox-classic</code><!--/os--> programını şu seçeneklerle başlatın:</p>
 <table>
     <tr><th>Seçenek</th><th>Ne yapar</th></tr>
-    <tr><td><code>--store &lt;file&gt;</code></td><td>Test için olan gibi başka bir posta deposu kullanır</td></tr>
+    <tr><td><code>--store &lt;file&gt;</code></td><td>Örneğin test amacıyla farklı bir posta deposu kullanır</td></tr>
     <tr><td><code>--memory-passwords</code></td><td>Parolaları sistemin parola deposunda değil, yalnızca bu çalıştırma için tutar</td></tr>
     <tr><td><code>--pin-certificate &lt;file&gt;</code></td><td>Kendinden imzalı sertifikası olan bir test sunucusu için yalnızca bu dosyadaki (PEM veya DER) sunucu sertifikasını kabul eder</td></tr>
-    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Tarayıcıyı açmak yerine tarayıcıda oturum açma sayfasını bu dosyaya yazar</td></tr>
-    <tr><td><code>--language &lt;code&gt;</code></td><td>Bu çalıştırmada pencereleri <code>de</code> gibi bu dilde gösterir</td></tr>
-    <tr><td><code>--background</code></td><td>Penceresi olmadan başlar</td></tr>
-    <tr><td><code>--mcp</code></td><td>Bir yapay zeka aracısını Inbox Classic'e bağlar. Bunu siz değil, aracının programı başlatır</td></tr>
+    <tr><td><code>--sign-in-page-file &lt;file&gt;</code></td><td>Tarayıcıyı açmak yerine oturum açma sayfasının URL adresini dosyaya yazar</td></tr>
+    <tr><td><code>--language &lt;code&gt;</code></td><td>Bu çalıştırma boyunca belirtilen dili kullanır; örneğin Almanca için <code>de</code></td></tr>
+    <tr><td><code>--background</code></td><td>Pencere açmadan çalışır</td></tr>
+    <tr><td><code>--mcp</code></td><td>Bir yapay zeka aracısını Inbox Classic'e bağlar. Bu seçeneği aracının programı kullanır</td></tr>
     <tr><td><code>--version</code></td><td>Sürümü yazdırır ve çıkar</td></tr>
 </table>
-<p>Bağımsız değişken olarak verilen bir <code>mailto:</code> bağlantısı, bir e-posta bağlantısının yaptığı gibi yeni bir ileti açar.</p>
+<p>Bağımsız değişken olarak verilen bir <code>mailto:</code> bağlantısı, e-posta bağlantısına tıklamakla aynı şekilde yeni bir ileti açar.</p>
 <nav class="related"><a href="topic:agents-connect"></a> <a href="topic:default-mail-program"></a> <a href="topic:data-storage"></a></nav>
-<!--/review-->

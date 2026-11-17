@@ -1,17 +1,16 @@
-<!--review--><h1>Login-apps</h1>
+<h1>Login-apps</h1>
 <p class="summary">Registrer din egen login-app hos Google, Microsoft eller en anden OpenID Connect-udbyder for at logge på via browseren.</p>
-<p>Login via browseren bruger en OAuth-klient, der er registreret hos udbyderen. Inbox Classic har sin egen til Google og Microsoft. Google lader kun testbrugere bruge Inbox Classics klient, indtil Google har godkendt appen, så <b data-text="win-sign-in-google"></b> er slået fra i starten. Du kan registrere din egen klient: i dit Google Cloud-projekt, i din Microsoft Entra-tenant eller hos en anden OpenID Connect-udbyder.</p>
+<p>Login via browseren bruger en OAuth-klient, der er registreret hos udbyderen. Inbox Classic har indbyggede klienter til Google og Microsoft. Google lader kun testbrugere bruge Inbox Classics klient, indtil Google har godkendt appen, så <b data-text="win-sign-in-google"></b> er slået fra i starten. Du kan registrere din egen klient: i dit Google Cloud-projekt, i din Microsoft Entra-tenant eller hos en anden OpenID Connect-udbyder.</p>
 <p>Sådan tilføjer du en login-app:</p>
 <ol>
     <li>Vælg <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
     <li>Klik på <!--os:windows--><b data-text="win-sign-in-apps-button"></b><!--/os--><!--os:mac--><b data-text="mac-sign-in-apps-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-sign-in-apps"></b><!--/os-->, og derefter på <!--os:windows--><b data-text="win-add"></b><!--/os--><!--os:mac--><b data-text="mac-add-button"></b><!--/os--><!--os:linux--><b data-text="gtk-accounts-add"></b><!--/os-->.</li>
     <li>Klik på Google eller Microsoft ud for <b data-text="ui-fill-in-for"></b> for at udfylde udsteder, tilladelser (scopes) og servere. Skriv dem selv for en anden udbyder.</li>
-    <li>Registrer klienten hos udbyderen, som feltet nederst forklarer. Registrer den <b data-text="ui-redirect-uri"></b>, der vises der.</li>
-    <li>Skriv <b data-text="ui-client-id"></b>, og <b data-text="ui-client-secret"></b>, hvis udbyderen har givet dig en. Hemmeligheden gemmes i <!--os:windows-->Legitimationsstyring i Windows<!--/os--><!--os:mac-->din login-nøglering<!--/os--><!--os:linux-->din nøglering<!--/os--> og vises aldrig igen.</li>
-    <li>Klik på <b data-text="ui-check"></b> for at se, at udstederen er rigtig, og derefter på <b data-text="ui-ok"></b>.</li>
+    <li>Følg anvisningerne nederst i vinduet for at registrere klienten hos udbyderen. Registrer også den <b data-text="ui-redirect-uri"></b>, der vises der.</li>
+    <li>Udfyld <b data-text="ui-client-id"></b> og eventuelt <b data-text="ui-client-secret"></b>, hvis du har fået en klienthemmelighed fra udbyderen. Klienthemmeligheden gemmes i <!--os:windows-->Legitimationsstyring i Windows<!--/os--><!--os:mac-->din login-nøglering<!--/os--><!--os:linux-->din nøglering<!--/os--> og vises aldrig igen.</li>
+    <li>Klik på <b data-text="ui-check"></b> for at kontrollere udstederen, og derefter på <b data-text="ui-ok"></b>.</li>
     <li>Tilføj kontoen med <!--os:windows,linux--><b data-text="ui-more-sign-in"></b><!--/os--><!--os:mac--><b data-text="mac-more-sign-in-options"></b><!--/os--> på den første side af <b data-text="ui-add-account-title"></b>.</li>
 </ol>
-<p>I <b data-text="ui-sign-in-apps"></b> viser <!--os:windows,mac-->afkrydsningsfeltet ud for hver app<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os-->, om den tilbydes til nye konti, også de indbyggede. De konti, der allerede bruger en app, virker fortsat. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> ændrer en app, og <b data-text="ui-remove"></b> fjerner en, når ingen konto bruger den længere.</p>
+<p>I <b data-text="ui-sign-in-apps"></b> viser <!--os:windows,mac-->afkrydsningsfeltet ud for hver app<!--/os--><!--os:linux--><b data-text="gtk-offered-for-new"></b><!--/os-->, om appen tilbydes, når du tilføjer en konto. Det gælder også de indbyggede login-apps. De konti, der allerede bruger en app, virker fortsat. <!--os:windows--><b data-text="win-edit"></b><!--/os--><!--os:mac--><b data-text="mac-edit-button"></b><!--/os--><!--os:linux--><b data-text="gtk-edit-button"></b><!--/os--> ændrer en app, og <b data-text="ui-remove"></b> fjerner en, når ingen konto bruger den længere.</p>
 <p>Hvis mailserveren afviser appens token, så kontrollér, at dens tilladelser (scopes) giver adgang til mail.</p>
 <nav class="related"><a href="topic:gmail-outlook"></a> <a href="topic:add-account"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

@@ -1,20 +1,22 @@
-<!--review--><h1>Kun agentti lähettää postia</h1>
-<p class="summary">Jokainen viesti, jonka tekoälyagentti haluaa lähettää, näytetään ensin sinulle, ja se odottaa Lähtevät-kansiossa ennen lähtöään.</p>
-<p>Agentti voi lähettää postia vain, jos olet sallinut sen, ja jokaisen viestin vasta hyväksyntäsi jälkeen.</p>
+<h1>Kun agentti lähettää postia</h1>
+<p class="summary">Agentin viesti näytetään sinulle ennen lähettämistä, ja hyväksytty viesti odottaa hetken Lähtevät-kansiossa.</p>
+<p>Agentti voi lähettää postia Inbox Classicin kautta vain lähetysoikeudella ja vasta, kun hyväksyt kunkin viestin erikseen.</p>
 <img src="picture:agents-4-send" alt="Ikkuna, joka kysyy, lähetetäänkö agentin kirjoittama viesti, ja näyttää jokaisen vastaanottajan ja merkityn uuden osoitteen">
 <p>Kun agentti haluaa lähettää viestin, Inbox Classic näyttää sen ja jokaisen vastaanottajan osoitteen. Osoitteet, joihin et ole koskaan kirjoittanut, on merkitty tekstillä <b data-text="ui-new-address"></b>.</p>
 <ol>
-    <li>Lue vastaanottajat ja teksti.</li>
+    <li>Tarkista vastaanottajat ja viestin sisältö.</li>
     <li>Valitse jokin näistä:
         <ul>
-            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> lähettää viestin. Painike tulee käyttöön pienen hetken kuluttua, joten et voi painaa sitä vahingossa.</li>
-            <li><b data-text="ui-edit-first"></b> avaa viestin uutena viestinä, jota voit muuttaa.</li>
-            <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os--> on oletus, eikä se lähetä viestiä.</li>
+            <li><!--os:windows--><b data-text="win-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-tb-send"></b><!--/os--> lisää viestin lähetysjonoon. Painike tulee käyttöön pienen viiveen jälkeen tahattomien napsautusten välttämiseksi.</li>
+            <li><b data-text="ui-edit-first"></b> avaa viestin kirjoitusikkunaan muokattavaksi.</li>
+            <li><!--os:windows--><b data-text="win-dont-send"></b><!--/os--><!--os:mac,linux--><b data-text="ui-dont-send"></b><!--/os--> on oletusvalinta ja hylkää lähetyspyynnön.</li>
         </ul>
     </li>
 </ol>
-<p>Agentti kysyy yhdestä viestistä kerrallaan. Sen kirjoittamat viestit ja luonnokset päättyvät allekirjoitukseesi, kuten omasikin.</p>
-<p>Lähettämäsi viesti odottaa 30 sekuntia Lähtevät-kansiossa. Ennen kuin se lähtee, voit poistaa sen sieltä tai valita <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> kohdassa <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
-<aside class="warning">Agentti, jolla on myös muita työkaluja, kuten verkon selaaminen tai tiedostojesi lukeminen, voi välittää lukemansa niiden kautta eteenpäin. Inbox Classic ei näe niitä. Anna agentin lähettää postia vain, jos todella tarvitset sitä.</aside>
+<p>Kullakin ohjelmalla voi olla vain yksi viesti odottamassa hyväksyntääsi. Jos et vastaa heti, Inbox Classic ilmoittaa agentille odottavansa yhä vastaustasi. Agentti voi tarkistaa päätöksesi myöhemmin. Agentin kirjoittamiin viesteihin ja luonnoksiin lisätään oletuksena tilisi allekirjoitusteksti. Agentti voi jättää sen pois.</p>
+<p>Tässä ikkunassa hyväksymäsi viesti odottaa 30 sekuntia Lähtevät-kansiossa ennen lähettämistä. Voit perua lähettämisen poistamalla viestin sieltä tai valitsemalla <!--os:windows--><b data-text="cmd-undo"></b><!--/os--><!--os:mac,linux--><b data-text="ui-undo-button"></b><!--/os--> kohdassa <b data-text="menu-tools"></b> &gt; <b data-text="cmd-ai-agents"></b>.</p>
+<h2>Agentin kirjoittamat luonnokset</h2>
+<p>Kun avaat agentin kirjoittaman luonnoksen, agentin nimi näkyy viestin tekstin yläpuolella. Tarkista vastaanottajat ja teksti ennen lähettämistä.</p>
+<p>Agentti voi muokata tai hylätä vain itse luomiaan luonnoksia. Kun tallennat tällaisen luonnoksen, agentti ei voi enää muokata eikä hylätä sitä. Tämä koskee myös tilanteita, joissa Inbox Classic tallentaa muutoksesi automaattisesti. Pelkkä luonnoksen avaaminen ei estä agenttia muokkaamasta sitä.</p>
+<aside class="warning">Jos agentilla on muitakin työkaluja, kuten selain tai pääsy tiedostoihisi, se voi välittää lukemaansa tietoa niiden kautta. Inbox Classic ei voi valvoa näiden työkalujen käyttöä. Myönnä lähetysoikeus vain, jos tarvitset sitä.</aside>
 <nav class="related"><a href="topic:agents-permissions"></a> <a href="topic:agents-connect"></a> <a href="topic:drafts-outbox"></a></nav>
-<!--/review-->

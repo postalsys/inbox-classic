@@ -1,18 +1,17 @@
-<!--review--><h1>Napuštanje liste za slanje</h1>
-<p class="summary">Zaustavite poruke liste za slanje dugmetom za otkazivanje pretplate.</p>
-<p>Poruka liste za slanje koja navodi kako da je napustite ima dugme <b data-text="ui-unsubscribe"></b> sa desne strane zaglavlja.</p>
-<p>Da biste napustili listu:</p>
+<h1>Odjava sa liste za slanje</h1>
+<p class="summary">Zatražite odjavu sa liste za slanje pomoću dugmeta za otkazivanje pretplate.</p>
+<p>Ako poruka sa liste sadrži podatke za odjavu, prikazuje se dugme <b data-text="ui-unsubscribe"></b> sa desne strane zaglavlja.</p>
+<p>Da biste se odjavili sa liste:</p>
 <ol>
     <li>Kliknite na <b data-text="ui-unsubscribe"></b>. Inbox Classic objašnjava šta će se desiti i najpre vas pita.</li>
-    <li>Potvrdite. U zavisnosti od liste, dešava se jedno od tri:
+    <li>Potvrdite. U zavisnosti od liste, sledi jedan od tri postupka:
         <ul>
             <li>Inbox Classic traži od liste da prestane sa slanjem. Ne otvara se nijedna stranica i ne šalje se nijedna poruka.</li>
-            <li>Inbox Classic piše poruku koju lista traži. Kliknite na <b data-text="ui-tb-send"></b> da biste je poslali.</li>
+            <li>Inbox Classic priprema poruku za odjavu koju lista zahteva. Kliknite na <b data-text="ui-tb-send"></b> da biste je poslali.</li>
             <li>Stranica liste se otvara u pregledaču, gde završavate postupak.</li>
         </ul>
     </li>
 </ol>
-<p>Statusna traka javlja kada lista prihvati zahtev.</p>
-<aside class="note">Inbox Classic sam traži od liste da prestane sa slanjem samo kada je server liste potpisao poruku. Izmišljena poruka ne može to da iskoristi da bi stigla do nekog drugog.</aside>
+<p>Statusna traka javlja kada server liste prihvati zahtev. To ne znači da će slanje poruka odmah prestati.</p>
+<aside class="note">Inbox Classic šalje neposredan zahtev za odjavu samo kada provera potpisa domena poruke to dozvoljava. Time se sprečava da lažirana poruka navede program da pošalje takav zahtev drugoj strani.</aside>
 <nav class="related"><a href="topic:organize-mail"></a> <a href="topic:links-scripts"></a> <a href="topic:connections"></a></nav>
-<!--/review-->

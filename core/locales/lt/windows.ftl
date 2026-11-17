@@ -26,7 +26,6 @@ win-no-bodies = Laiškų turinio parodyti negalima.
 win-webview-failed = Nepavyko sukurti WebView2.
 # review: new
 win-webview-missing = WebView2 vykdymo aplinka nepasiekiama.
-# review: new
 win-list-loading = Įkeliama...
 
 ## Buttons and words used in many windows
@@ -148,9 +147,7 @@ win-book-find-label = Įveskite vardą arba el. pašto adresą:
 win-send = &Siųsti
 # review: new
 win-dont-send = &Nesiųsti
-# review: new
 win-unsubscribe = &Atsisakyti prenumeratos
-# review: new
 win-dont-unsubscribe = &Neatsisakyti prenumeratos
 # review: new
 win-forget-program-ask = Pašalinti šią programą, jos teises ir jos agentų veiklos istoriją? Kitą kartą jai prisijungus vėl bus paprašyta leidimo.

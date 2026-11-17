@@ -1,19 +1,18 @@
-<!--review--><h1>Šifrovaná a podepsaná pošta</h1>
-<p class="summary">Pruh nad zprávou ukazuje, zda ji odesílatel podepsal a zda byla zašifrována pro vás.</p>
-<p>Podepsaná zpráva dokládá, kdo ji napsal a že ji cestou nikdo nezměnil. Šifrovanou zprávu lze přečíst jen pomocí vašeho klíče.</p>
-<p>Pruh nad zprávou hodnotí zprávu jako celek:</p>
+<h1>Šifrovaná a digitálně podepsaná pošta</h1>
+<p class="summary">Panel nad zprávou ukazuje její digitální podpis a šifrování.</p>
+<p>Platný digitální podpis potvrzuje, že se obsah od podepsání nezměnil. Totožnost podepisujícího potvrdíte ověřením vlastníka klíče. Šifrovanou zprávu lze přečíst jen odpovídajícím soukromým klíčem.</p>
+<p>Panel nad zprávou shrnuje její zabezpečení:</p>
 <table>
     <tr><th>Barva</th><th>Význam</th></tr>
-    <tr><td>Zelená</td><td>Podepsáno odesílatelem klíčem, který jste ověřili.</td></tr>
-    <tr><td>Modrá</td><td>Podepsáno odesílatelem klíčem, který jste neověřili, nebo zašifrováno pro vás.</td></tr>
-    <tr><td>Jantarová</td><td>Něco není v pořádku: podpis nesouhlasí, podepsal někdo jiný než odesílatel, nebo část nešla přečíst.</td></tr>
-    <tr><td>Šedá</td><td>Nepodepsáno, nebo podepsáno klíčem, který nemáte.</td></tr>
+    <tr><td>Zelená</td><td>Platný digitální podpis odesílatele a ověřené vlastnictví klíče.</td></tr>
+    <tr><td>Modrá</td><td>Platný digitální podpis odesílatele s neověřeným vlastnictvím klíče nebo zpráva šifrovaná pro vás bez podpisu.</td></tr>
+    <tr><td>Oranžová</td><td>Zpráva vyžaduje pozornost: podpis neodpovídá obsahu, podepisující se liší od odesílatele nebo některou část nelze přečíst.</td></tr>
+    <tr><td>Šedá</td><td>Bez digitálního podpisu nebo podpis nelze zkontrolovat, například kvůli chybějícímu klíči.</td></tr>
 </table>
-<p>Zpráva, jejíž části jsou chráněny různě, zobrazí každou část ve vlastním rámečku s vlastním štítkem. Pruh pak počítá části každého druhu. Kliknutím na štítek nebo na <b data-text="ui-protection-details"></b> v pruhu zjistíte, kdo každou část podepsal, jakým klíčem a kdy.</p>
-<aside class="warning">Inbox Classic píše jen pruh a štítky nad rámečky. Odesílatel může do své zprávy nakreslit cokoli, i něco, co vypadá jako štítek. Řiďte se pruhem.</aside>
-<p>Obrázky z internetu v šifrované části se načtou, jen když kliknete na pruh s obrázky, a to pokaždé. Její štítek pak uvádí, že byly načteny obrázky.</p>
+<p>Pokud jsou části zprávy chráněny různě, každá má vlastní rámeček a štítek. Panel uvádí počet částí v jednotlivých kategoriích. Kliknutím na štítek nebo na <b data-text="ui-protection-details"></b> na panelu zjistíte, kdo každou část podepsal, jakým klíčem a kdy.</p>
+<aside class="warning">Inbox Classic vytváří pouze panel a štítky nad rámečky. Obsah zprávy řídí odesílatel a může do něj vložit i napodobeninu štítku. Řiďte se panelem aplikace.</aside>
+<p>Obrázky z internetu v šifrované části se stáhnou pouze po kliknutí na panel pro stažení obrázků. Souhlas je nutný při každém otevření. Štítek části pak uvádí, že se obrázky načetly.</p>
 <p>Při odpovědi nebo přeposlání se cituje jen to, co bylo zobrazeno.</p>
-<p>V seznamu zpráv označuje zámek šifrovanou zprávu a pečeť podepsanou. Jakmile Inbox Classic šifrovanou zprávu dešifruje, po stažení nebo otevření, seznam ukáže její vlastní předmět a první slova. Do té doby seznam a oznámení o nové poště zobrazují <b data-text="list-encrypted"></b>.</p>
-<p>Hledání najde dešifrovanou zprávu podle slov jejího textu, pokud je zapnuto <b data-text="ui-search-encrypted"></b> v <b data-settings="reading"></b>. Agenti AI nikdy neuvidí, co šifrovaná zpráva obsahuje, ani její soubory.</p>
+<p>V seznamu zpráv označuje zámek šifrovanou zprávu a pečeť podepsanou. Pokud je hledání v šifrovaných zprávách zapnuté a odpovídající soukromý klíč je k dispozici, může Inbox Classic zprávy dešifrovat po stažení nebo při otevření. Seznam pak zobrazí začátek textu i předmět ze šifrované části, pokud je uveden. Pokud není k dispozici dešifrovaný náhled textu, zobrazí se <b data-text="list-encrypted"></b>. Oznámení o nových šifrovaných zprávách používají tento text vždy.</p>
+<p>Volba <b data-text="ui-search-encrypted"></b> v nastavení <b data-settings="reading"></b> umožňuje hledat i v textu dešifrovaných zpráv. Agenti AI nemohou číst obsah ani přílohy šifrovaných zpráv ani v jejich obsahu hledat.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->

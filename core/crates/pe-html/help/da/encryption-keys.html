@@ -1,20 +1,19 @@
-<!--review--><h1>Krypteringsnøgler</h1>
-<p class="summary">Opret en nøgle til at signere dine meddelelser og modtage krypteret mail, og gem dine kontakters nøgler.</p>
-<p>Inbox Classic signerer og krypterer mail med OpenPGP-nøgler. Din egen nøgle har to halvdele: en offentlig nøgle, som du giver til andre, og en privat nøgle, som bliver på din computer. Dine kontakters nøgler lader dig kontrollere deres signaturer og kryptere mail til dem.</p>
+<h1>Krypteringsnøgler</h1>
+<p class="summary">Opret en nøgle til digital signering og krypteret mail, og administrer dine kontakters nøgler.</p>
+<p>Inbox Classic signerer og krypterer mail med OpenPGP-nøgler. Din egen nøgle har to halvdele: en offentlig nøgle, som du giver til andre, og en privat nøgle, som bliver på din computer. Kontakternes offentlige nøgler bruges til at kontrollere deres digitale signaturer og kryptere mail til dem.</p>
 <p>Sådan opretter du din nøgle:</p>
 <ol>
     <li>Vælg <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b>, og klik så på <b data-text="ui-keys-new"></b>.</li>
     <li>Vælg kontoen, og klik på <b data-text="ui-keys-new-make"></b>. Nøglen bruges til kontoens adresse og dens andre adresser.</li>
-    <li>Klik på <b data-text="ui-keys-backup-now"></b>, og vælg en adgangsfrase. Opbevar filen og adgangsfrasen forskellige sikre steder.</li>
+    <li>Klik på <b data-text="ui-keys-backup-now"></b>, og vælg en adgangsfrase. Opbevar filen og adgangsfrasen på hver sit sikre sted.</li>
 </ol>
 <aside class="warning">Uden en sikkerhedskopi kan din nøgle ikke gendannes, hvis computeren bliver væk eller nulstilles, og mail, der er krypteret til den, kan ikke længere læses.</aside>
-<h2>Nøgler forbliver beskyttet uden adgangsfraser</h2>
-<p>Dine private nøgler er beskyttet af en nøgle, der gemmes i <!--os:windows-->Legitimationsstyring<!--/os--><!--os:mac-->nøgleringen<!--/os--><!--os:linux-->systemets nøglering<!--/os-->, så du skal aldrig skrive en adgangsfrase for at bruge dem. Du vælger kun en adgangsfrase til en sikkerhedskopi. Hvis din nøgle vises som låst, er den beskyttelse blevet nulstillet: klik på <b data-text="ui-keys-import"></b>, og vælg sikkerhedskopien af den.</p>
-<h2>Tilføje nøgler</h2>
-<p>Klik på <b data-text="ui-keys-import"></b> for at tilføje en nøgle fra en fil, fx en, som en kontakt har sendt dig, eller en sikkerhedskopi af din egen. En privat nøgle, der er beskyttet af en adgangsfrase, beder om den én gang. Inbox Classic spørger derefter, om en importeret nøgle, der er din, skal bruges til dine adresser.</p>
+<h2>Beskyttelse ved daglig brug</h2>
+<p>Dine private nøgler er beskyttet af en nøgle, der gemmes i <!--os:windows-->Legitimationsstyring<!--/os--><!--os:mac-->nøgleringen<!--/os--><!--os:linux-->systemets nøglering<!--/os-->, så du ikke behøver indtaste en adgangsfrase ved daglig brug. Adgangsfrasen beskytter sikkerhedskopien. Hvis den private nøgle ikke kan bruges, fordi beskyttelsesnøglen mangler, skal du klikke på <b data-text="ui-keys-import"></b>, og gendanne den private nøgle fra dens sikkerhedskopi.</p>
+<h2>Tilføj nøgler</h2>
+<p>Klik på <b data-text="ui-keys-import"></b> for at tilføje en nøgle fra en fil, fx en, som en kontakt har sendt dig, eller en sikkerhedskopi af din egen. Når du importerer en privat nøgle beskyttet med en adgangsfrase, indtaster du frasen én gang. Programmet spørger derefter, om din importerede nøgle skal bruges til dine adresser.</p>
 <p>En kontakts nøgle bruges derefter til kontaktens adresse. Hvis der senere dukker en anden nøgle op til samme adresse, bruges den nuværende fortsat, indtil du vælger den nye i kontaktens egenskaber.</p>
 <p>Hvis du vil dele din offentlige nøgle, skal du markere den og klikke på <b data-text="ui-keys-export"></b>. Du kan også vælge kontoens nøgle i dens egenskaber under fanen <b data-text="ui-account-security"></b>.</p>
-<p>Når du krypterer til en, hvis nøgle du ikke har, spørger Inbox Classic adressens eget domæne og derefter keys.openpgp.org. Kun adressen sendes. Slå <b data-text="ui-pgp-keyserver"></b> fra under <b data-settings="reading"></b>, hvis keys.openpgp.org aldrig skal spørges.</p>
-<p>Nøgler følger også med mailen. Beskeder fra en adresse med en nøgle har dens offentlige nøgle med, så andre apps kan kryptere til dig, og Inbox Classic lærer en kontakts nøgle fra deres beskeder på samme måde. Hvis du ikke vil sende din med, skal du slå <b data-text="ui-account-autocrypt"></b> fra under fanen <b data-text="ui-account-security"></b> for kontoen.</p>
+<p>Hvis du vil kryptere en meddelelse og mangler nøglen til en modtager, søger Inbox Classic først på domænet for modtagerens e-mailadresse. Hvis nøglen ikke findes der, sendes adressen til keys.openpgp.org. Slå <b data-text="ui-pgp-keyserver"></b> fra under <b data-settings="reading"></b> for at deaktivere denne søgning på keys.openpgp.org. Du kan stadig søge efter nøgler via domænet.</p>
+<p>Når Autocrypt er slået til, og afsenderadressen har en tilknyttet nøgle, medtager Inbox Classic den offentlige nøgle i dine meddelelser. Andre apps kan bruge den til at kryptere mail til dig. Når du åbner en modtaget meddelelse, kan Inbox Classic også gemme afsenderens offentlige nøgle. Det bekræfter ikke, hvem nøglen tilhører. Hvis du vil holde op med at sende din offentlige nøgle, skal du slå <b data-text="ui-account-autocrypt"></b> fra under fanen <b data-text="ui-account-security"></b> for kontoen.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

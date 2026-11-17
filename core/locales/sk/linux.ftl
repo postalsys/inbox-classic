@@ -28,7 +28,6 @@ gtk-search-indexing = { $count ->
     [one] text 1 správy sa ešte indexuje
    *[other] text správ ({ $count }) sa ešte indexuje
 }
-# review: new
 gtk-list-loading = Načítava sa...
 # review: new
 gtk-menu-rename = Premenovať...

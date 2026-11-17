@@ -1,21 +1,20 @@
-<!--review--><h1>Skrive en meddelelse</h1>
+<h1>Skriv en meddelelse</h1>
 <p class="summary">Skriv og send en ny meddelelse med formatering, links og billeder.</p>
 <p>Sådan skriver du en meddelelse:</p>
 <ol>
     <li>Klik på <b data-text="ui-tb-create-mail"></b>, eller tryk på <kbd data-command="new_mail"></kbd>. En ny meddelelse åbnes i sit eget vindue.</li>
-    <li>Skriv adresserne i <b data-text="ui-field-to"></b>. Adskil flere med kommaer. Mens du skriver, viser Inbox Classic de personer, det kan være. Tryk på <!--os:windows,linux--><kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Return</kbd><!--/os--> eller <kbd>Tab</kbd> for at vælge en.</li>
-    <li>Skriv <b data-text="ui-field-subject"></b> og teksten.</li>
+    <li>Skriv adresserne i <b data-text="ui-field-to"></b>. Adskil flere adresser med kommaer. Mens du skriver, foreslår Inbox Classic modtagere. Tryk på <!--os:windows,linux--><kbd>Enter</kbd><!--/os--><!--os:mac--><kbd>Return</kbd><!--/os--> eller <kbd>Tab</kbd> for at vælge en.</li>
+    <li>Udfyld feltet <b data-text="ui-field-subject"></b>, og skriv meddelelsens tekst.</li>
     <li>Klik på <b data-text="ui-tb-send"></b><!--os:windows,linux-->, eller tryk på <kbd>Ctrl</kbd>+<kbd>Enter</kbd><!--/os--><!--os:mac-->, eller tryk på <kbd>⌘Return</kbd><!--/os-->.</li>
 </ol>
-<p>Hvis du vil tilføje Cc eller Bcc, skal du klikke på <!--os:windows--><b data-text="win-show-cc"></b><!--/os--><!--os:mac--><b data-text="header-cc"></b><!--/os--><!--os:linux--><b data-text="gtk-show-cc"></b><!--/os--> eller <!--os:windows--><b data-text="win-show-bcc"></b><!--/os--><!--os:mac--><b data-text="mac-bcc"></b><!--/os--><!--os:linux--><b data-text="gtk-show-bcc"></b><!--/os--> for enden af linjen Til. Personer i Bcc får meddelelsen, men de andre modtagere kan ikke se dem.</p>
+<p>Hvis du vil tilføje Cc eller Bcc, skal du klikke på <!--os:windows--><b data-text="win-show-cc"></b><!--/os--><!--os:mac--><b data-text="header-cc"></b><!--/os--><!--os:linux--><b data-text="gtk-show-cc"></b><!--/os--> eller <!--os:windows--><b data-text="win-show-bcc"></b><!--/os--><!--os:mac--><b data-text="mac-bcc"></b><!--/os--><!--os:linux--><b data-text="gtk-show-bcc"></b><!--/os--> for enden af linjen Til. Modtagere i Bcc får meddelelsen, men deres adresser er skjult for de øvrige modtagere.</p>
 <p><b data-text="ui-field-from"></b> viser den konto, meddelelsen sendes fra. Har du flere konti, kan du vælge en anden der. Meddelelsen sendes så med den konto og gemmes i kontoens <b data-text="folder-sent"></b>. Hvis du vil starte fra en bestemt konto, skal du bruge pilen ved siden af <b data-text="ui-tb-create-mail"></b>.</p>
-<p>Hvis emnet eller teksten siger, at en fil er vedhæftet, fx »se den vedhæftede plan«, og der ikke er nogen, spørger Inbox Classic, før meddelelsen sendes.</p>
-<p>Hvis du vil signere eller kryptere meddelelsen, skal du klikke på <b data-text="ui-tb-sign"></b> eller <b data-text="ui-tb-encrypt"></b> på værktøjslinjen. Se <a href="topic:sign-and-encrypt"></a>.</p>
+<p>Inbox Classic leder efter bestemte ord om vedhæftninger i emnet og teksten, fx det engelske »attached«. Finder appen et af ordene uden en vedhæftet fil, bliver du bedt om at bekræfte afsendelsen. Påmindelsen understøtter kun engelsk, tysk, estisk, spansk og fransk.</p>
+<p>Hvis du vil signere meddelelsen digitalt eller kryptere den, skal du klikke på <b data-text="ui-tb-sign"></b> eller <b data-text="ui-tb-encrypt"></b> på værktøjslinjen. Se <a href="topic:sign-and-encrypt"></a>.</p>
 <h2>Formatering</h2>
-<p>Linjen over teksten har skrifttype, fed, kursiv, understreget, farve, lister, indrykning, justering, links, en skillelinje og billeder. Hvis du vil indsætte et billede i teksten, skal du klikke på <b data-text="ui-insert-picture"></b> eller trække en billedfil fra <!--os:windows-->Stifinder<!--/os--><!--os:mac-->Finder<!--/os--><!--os:linux-->filhåndteringen<!--/os--> ind i teksten.</p>
-<p>En meddelelse uden formatering sendes som ren tekst, som alle mailprogrammer viser ens. En formateret meddelelse sendes som HTML med en kopi i ren tekst.</p>
+<p>På linjen over teksten kan du vælge skrifttype, fed, kursiv, understregning, farve, lister, indrykning og justering samt indsætte links, skillelinjer og billeder. Hvis du vil indsætte et billede i teksten, skal du klikke på <b data-text="ui-insert-picture"></b> eller trække en billedfil fra <!--os:windows-->Stifinder<!--/os--><!--os:mac-->Finder<!--/os--><!--os:linux-->filhåndteringen<!--/os--> ind i teksten.</p>
+<p>En meddelelse uden formatering sendes som ren tekst, som alle mailprogrammer kan læse. En formateret meddelelse sendes som HTML med en kopi i ren tekst.</p>
 <h2>Links</h2>
-<p>Hvis du vil lave et link af den markerede tekst, skal du klikke på <b data-text="ui-hyperlink"></b> og skrive adressen. Når markøren står i et link, viser statuslinjen, hvor det fører hen. <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>Click</kbd><!--/os--><!--os:mac--><kbd>⌘</kbd>+<kbd>Click</kbd><!--/os--> på et link åbner det i din browser. Højreklik på det for <b data-text="ui-open-link"></b>, <b data-text="ui-edit-link"></b> og <b data-text="ui-remove-link"></b>.</p>
+<p>Hvis du vil lave et link af den markerede tekst, skal du klikke på <b data-text="ui-hyperlink"></b> og skrive adressen. Når markøren står i et link, viser statuslinjen, hvor det fører hen. <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>Click</kbd><!--/os--><!--os:mac--><kbd>⌘</kbd>+<kbd>Click</kbd><!--/os--> på et link åbner det i din browser. Højreklik på linket for at vælge <b data-text="ui-open-link"></b>, <b data-text="ui-edit-link"></b> og <b data-text="ui-remove-link"></b>.</p>
 <p>Stavefejl understreges. Højreklik på et ord for at få forslag.</p>
 <nav class="related"><a href="topic:reply-forward"></a> <a href="topic:attachments"></a> <a href="topic:drafts-outbox"></a></nav>
-<!--/review-->

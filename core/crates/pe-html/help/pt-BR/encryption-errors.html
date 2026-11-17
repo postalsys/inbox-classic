@@ -1,16 +1,15 @@
-<!--review--><h1>Erros de criptografia</h1>
+<h1>Erros de criptografia</h1>
 <p class="summary">O que fazer quando um servidor não oferece criptografia, ou a exige onde ela está desativada.</p>
 <h2>“the server does not offer STARTTLS”</h2>
-<p>A conta está configurada para STARTTLS, mas o servidor não ofereceu criptografia. O Inbox Classic parou, por isso sua senha não foi enviada.</p>
+<p>A conta está configurada para STARTTLS, mas o servidor não ofereceu criptografia. O Inbox Classic interrompeu a conexão antes de enviar sua senha.</p>
 <ol>
     <li>Abra as propriedades da conta em <b data-text="menu-file"></b> &gt; <b data-text="cmd-accounts"></b>.</li>
     <li>Defina a segurança como SSL/TLS, com a porta 993 para os e-mails recebidos ou 465 para os enviados.</li>
     <li>Clique em <b data-text="ui-ok"></b>.</li>
 </ol>
-<p>Se nada mais funcionar, o servidor não pode ser usado com segurança.</p>
+<p>Se a conexão continuar falhando, confirme com o provedor quais portas e opções de criptografia devem ser usadas.</p>
 <h2>“the server takes the password only over an encrypted connection”</h2>
-<p>O servidor de envio está configurado como <b data-text="ui-security-none"></b>. Sua senha está correta. Altere <b data-text="ui-field-smtp-security"></b> para STARTTLS com a porta 587, ou SSL/TLS com a porta 465.</p>
+<p>O servidor de envio está configurado como <b data-text="ui-security-none"></b>. O servidor exige criptografia antes de aceitar a senha; essa resposta não confirma se ela está correta. Altere <b data-text="ui-field-smtp-security"></b> para STARTTLS com a porta 587, ou SSL/TLS com a porta 465.</p>
 <h2>O aviso sobre uma conexão sem criptografia</h2>
 <p>Quando você escolhe <b data-text="ui-security-none"></b>, o Inbox Classic avisa que qualquer pessoa que intercepte seu tráfego de rede pode ler sua senha e suas mensagens. Continue apenas para um servidor no seu próprio computador ou na sua rede local.</p>
 <nav class="related"><a href="topic:account-security"></a> <a href="topic:certificate-errors"></a> <a href="topic:no-connection"></a></nav>
-<!--/review-->

@@ -1,21 +1,21 @@
-<!--review--><h1>Taslaklar ve Giden Kutusu</h1>
+<h1>Taslaklar ve Giden Kutusu</h1>
 <p class="summary">Bir iletiyi daha sonra bitirmek üzere kaydedin ve gönderilmeyi bekleyenleri görün.</p>
 <h2>Taslak kaydetme</h2>
-<p><b data-text="ui-tb-save"></b> düğmesine tıklayın veya <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os--> tuşlarına basın. İleti, hesabın sunucudaki <b data-text="folder-drafts"></b> klasöründe saklanır. Yeniden kaydetmek önceki kopyanın yerini alır. İletinin durum çubuğu ne zaman kaydedildiğini gösterir.</p>
-<p>Inbox Classic, yazmayı bıraktıktan birkaç saniye sonra veya yazmaya devam ederken her otuz saniyede bir iletinizi kendiliğinden de kaydeder. Inbox Classic veya bilgisayarınız beklenmedik şekilde kapanırsa, bitmemiş iletileriniz Inbox Classic bir sonraki açılışında yeniden açılır.</p>
+<p><b data-text="ui-tb-save"></b> düğmesine tıklayın veya <!--os:windows,linux--><kbd>Ctrl</kbd>+<kbd>S</kbd><!--/os--><!--os:mac--><kbd>⌘S</kbd><!--/os--> tuşlarına basın. İleti, hesabın sunucudaki <b data-text="folder-drafts"></b> klasöründe saklanır. Her kaydettiğinizde önceki taslak güncellenir. İletinin durum çubuğu ne zaman kaydedildiğini gösterir.</p>
+<p>Inbox Classic, yazmayı bıraktıktan birkaç saniye sonra veya yazmaya devam ederken her otuz saniyede bir iletinizi kendiliğinden de kaydeder. Inbox Classic veya bilgisayarınız beklenmedik şekilde kapanırsa, tamamlanmamış iletileriniz programın bir sonraki açılışında geri yüklenir.</p>
 <p>Değişiklik içeren bir iletiyi kapatırken bunları kaydetmek isteyip istemediğiniz sorulur:</p>
 <ul>
     <li><!--os:windows,linux--><b data-text="ui-yes"></b><!--/os--><!--os:mac--><b data-text="ui-tb-save"></b><!--/os--> iletiyi <b data-text="folder-drafts"></b> klasörüne kaydeder.</li>
     <li><!--os:windows,linux--><b data-text="ui-no"></b><!--/os--><!--os:mac--><b data-text="mac-dont-save"></b><!--/os--> değişiklikleri atar. Taslak yalnızca kendiliğinden kaydedildiyse <b data-text="folder-drafts"></b> klasöründen de kaldırılır.</li>
-    <li><b data-text="ui-cancel"></b> iletiye geri döner.</li>
+    <li><b data-text="ui-cancel"></b> düğmesi kapatma işlemini iptal eder ve yazdığınız iletiye geri dönmenizi sağlar.</li>
 </ul>
-<p>Yazmaya devam etmek için <b data-text="folder-drafts"></b> klasöründeki taslağa çift tıklayın. Taslak alıcıları, metni ve dosyalarıyla açılır. Gönderildiğinde taslak kaldırılır.</p>
-<p>Yazdığınız ileti kendi penceresinde açılır, bu yüzden o açıkken postalarınızı okuyabilirsiniz. Inbox Classic kapanırken önce yazdığınız iletileri kapatır ve değişiklik içerenler için size sorar.</p>
+<p>Yazmaya devam etmek için <b data-text="folder-drafts"></b> klasöründeki taslağa çift tıklayın. Taslak; alıcıları, metni ve ekleriyle birlikte açılır. Gönderildiğinde taslak kaldırılır.</p>
+<p>Her ileti ayrı bir pencerede yazılır. Bu pencere açıkken diğer iletilerinizi okuyabilirsiniz. Inbox Classic'ten çıkarken ileti yazma pencereleri de kapatılır ve kaydedilmemiş değişikliklerle ne yapılacağı sorulur.</p>
 <h2>Giden Kutusu</h2>
 <p><b data-text="ui-tb-send"></b> iletiyi Giden Kutusu'na koyar. Varsayılan olarak ileti birkaç saniye sonra gönderilir. Bu sürede gönderimi iptal edebilirsiniz (aşağıya bakın). Ana pencerenin durum çubuğu iletinin ne zaman gönderildiğini gösterir.</p>
-<p>Bir ileti gönderilemediğinde, örneğin bağlantı yokken, Giden Kutusu'nda kalır. Bir sonraki posta denetiminde gönderilir, böylece yazdığınız hiçbir şey kaybolmaz.</p>
-<p>Bekleyenleri görmek için <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b> öğesini seçin. Liste her iletiyi neden gönderilemediğiyle birlikte gösterir. <b data-text="ui-outbox-send-all"></b> hemen yeniden dener; bir iletiyi buradan silebilirsiniz de.</p>
+<p>Bir ileti gönderilemediğinde, örneğin bağlantı yokken, Giden Kutusu'nda kalır. Bir sonraki posta denetiminde gönderim yeniden denenir.</p>
+<p>Bekleyenleri görmek için <b data-text="menu-tools"></b> &gt; <b data-text="cmd-outbox"></b> komutunu seçin. Liste her iletinin durumunu ve varsa gönderilememe nedenini gösterir. <b data-text="ui-outbox-send-all"></b> komutu gönderimi hemen yeniden dener. Bekleyen iletileri bu listeden silebilirsiniz.</p>
 <h2>Bir iletinin gönderimini iptal etme</h2>
-<p>Varsayılan olarak <b data-text="ui-tb-send"></b> düğmesine tıkladıktan sonra ileti gönderilmeden önce birkaç saniye bekler. Durum çubuğunda bir geri sayım görünür. Bu sırada gönderimi iptal etmek için geri sayımın yanındaki <b data-text="ui-undo-button"></b> düğmesine tıklayın veya <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b> öğesini seçin. İleti, düzenlemeniz veya atmanız için yeniden açılır. Bu seçenek yalnızca ileti gönderilmeyi beklerken kullanılabilir.</p>
+<p>Varsayılan olarak <b data-text="ui-tb-send"></b> düğmesine tıkladıktan sonra ileti gönderilmeden önce birkaç saniye bekler. Durum çubuğunda bir geri sayım görünür. Bu sırada gönderimi iptal etmek için geri sayımın yanındaki <b data-text="ui-undo-button"></b> düğmesine tıklayın veya <b data-text="menu-edit"></b> &gt; <b data-text="undo-send"></b> komutunu seçin. İleti, düzenlemeniz veya atmanız için yeniden açılır. Bu seçenek yalnızca ileti gönderilmeyi beklerken kullanılabilir.</p>
 <p>Bekleme süresini değiştirmek veya iletileri hemen göndermek için <b data-settings="general"></b> öğesini seçin ve <b data-text="ui-send-delay"></b> ayarını değiştirin. Bir ileti beklerken Inbox Classic'ten çıkarsanız, uygulama iletiyi hemen göndermeyi dener.</p>
-<nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav><!--/review-->
+<nav class="related"><a href="topic:write-message"></a> <a href="topic:new-mail"></a> <a href="topic:no-connection"></a></nav>

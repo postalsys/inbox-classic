@@ -22,7 +22,6 @@ gtk-search-indexing = { $count ->
     [one] der Text von 1 Nachricht wird noch indiziert
    *[other] der Text von { $count } Nachrichten wird noch indiziert
 }
-# review: new
 gtk-list-loading = Wird geladen...
 gtk-menu-rename = Umbenennen...
 gtk-import-one-question = Die Nachricht { $file } in den Ordner { $folder } importieren?
@@ -85,7 +84,6 @@ gtk-default-app-failed = Inbox Classic konnte nicht als Standard-E-Mail-Programm
 
 gtk-reader-date = Datum:
 gtk-reader-files = Anlagen der Nachricht
-# review: new
 gtk-files = { $count ->
     [one] { $count } Datei
    *[other] { $count } Dateien
@@ -120,8 +118,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Weiter >
-gtk-provider-sign-in = Melden Sie sich für { $address } auf der Webseite von { $provider } an. Ihr Passwort wird nicht an Inbox Classic weitergegeben. Alternativ können Sie ein App-Passwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
-gtk-provider-sign-in-apps = Melden Sie sich für { $address } auf der Webseite von { $provider } mit einer Ihrer Anmelde-Apps an („Weitere Anmeldeoptionen“). Alternativ können Sie ein App-Passwort in den Sicherheitseinstellungen Ihres Kontos erstellen.
+gtk-provider-sign-in = Melden Sie sich für { $address } auf der Webseite von { $provider } an. Ihr Passwort wird nicht an Inbox Classic weitergegeben. Falls Ihr Konto App-Passwörter für E-Mails unterstützt, können Sie eines in den Sicherheitseinstellungen erstellen. Für Outlook.com und Microsoft 365 ist die Anmeldung im Browser erforderlich.
+gtk-provider-sign-in-apps = Melden Sie sich für { $address } auf der Webseite von { $provider } mit einer Ihrer Anmelde-Apps an („Weitere Anmeldeoptionen“). Falls Ihr Konto App-Passwörter für E-Mails unterstützt, können Sie eines in den Sicherheitseinstellungen erstellen. Für Outlook.com und Microsoft 365 ist die Anmeldung im Browser erforderlich.
 gtk-accounts-add = Hinzufügen...
 gtk-accounts-properties = Eigenschaften...
 gtk-accounts-signature = Signatur...
@@ -164,26 +162,16 @@ gtk-nothing-yet = Noch nichts.
 ## Preferences
 
 gtk-preferences = Einstellungen
-# review: changed
 gtk-notify-subtitle = Nur wenn Inbox Classic im Hintergrund ist
 
 ## The desktop entry and the page of the software stores
 
-# review: new
 gtk-desktop-generic-name = E-Mail-Programm
-# review: new
 gtk-desktop-comment = E-Mails lesen und schreiben: ein schnelles, einfaches E-Mail-Programm
-# review: new
 gtk-desktop-keywords = Post;Posteingang;Nachricht;
-# review: new
 gtk-metainfo-summary = Ein schnelles, einfaches E-Mail-Programm
-# review: new
-gtk-metainfo-description = Inbox Classic liest und schreibt E-Mails mit den Ordnern links, den Nachrichten oben und der Nachricht darunter, wie es E-Mail-Programme früher taten. Es funktioniert mit jedem IMAP- und SMTP-Konto und meldet sich über den Browser bei Outlook.com und Microsoft 365 an.
-# review: new
-gtk-metainfo-feature-sanitized = Jede Nachricht wird bereinigt angezeigt, ohne Skripte, und Bilder aus dem Internet nur, wenn Sie es erlauben
-# review: new
-gtk-metainfo-feature-search = Eine Suche, die Wörter im Betreff, in den Personen, in den Dateinamen und im Text findet, mit den Operatoren von Gmail
-# review: new
-gtk-metainfo-feature-replies = Antworten falten die früheren Nachrichten ein, die sie zitieren
-# review: new
-gtk-metainfo-feature-offline = E-Mails bleiben offline lesbar; Kennwörter liegen in Ihrem Schlüsselbund
+gtk-metainfo-description = Inbox Classic bietet die klassische E-Mail-Ansicht: Ordner links, die Nachrichtenliste oben und den Lesebereich darunter. Es unterstützt IMAP- und SMTP-Konten. Bei Outlook.com und Microsoft 365 können Sie sich über den Browser anmelden.
+gtk-metainfo-feature-sanitized = Nachrichten werden ohne Skripte angezeigt; Bilder aus dem Internet werden nur mit Ihrer Erlaubnis geladen
+gtk-metainfo-feature-search = Suche in Betreff, Absendern, Empfängern, Anlagennamen und Nachrichtentext mit den Suchoperatoren von Gmail
+gtk-metainfo-feature-replies = Zitierte Nachrichten in Antworten werden eingeklappt
+gtk-metainfo-feature-offline = Heruntergeladene E-Mails lassen sich auch offline lesen; Kennwörter werden in Ihrem Schlüsselbund gespeichert

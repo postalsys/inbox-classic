@@ -1,19 +1,18 @@
-<!--review--><h1>Šifrovana i potpisana pošta</h1>
-<p class="summary">Traka iznad poruke pokazuje da li ju je pošiljalac potpisao i da li je šifrovana za vas.</p>
-<p>Potpisana poruka dokazuje ko ju je napisao i da je usput niko nije izmenio. Šifrovana poruka može da se pročita samo vašim ključem.</p>
+<h1>Šifrovana i potpisana pošta</h1>
+<p class="summary">Traka iznad poruke pokazuje da li poruka ima digitalni potpis i da li je šifrovana za vas.</p>
+<p>Ispravan digitalni potpis potvrđuje da je poruka potpisana odgovarajućim ključem i da potpisani sadržaj nije izmenjen. Da biste znali kome ključ pripada, proverite ga sa njegovim vlasnikom. Šifrovanu poruku možete da pročitate odgovarajućim privatnim ključem; čita je i svaki drugi primalac koji ima odgovarajući ključ.</p>
 <p>Traka iznad poruke opisuje poruku u celini:</p>
 <table>
     <tr><th>Boja</th><th>Značenje</th></tr>
-    <tr><td>Zelena</td><td>Potpisao ju je pošiljalac, ključem koji ste proverili.</td></tr>
-    <tr><td>Plava</td><td>Potpisao ju je pošiljalac ključem koji niste proverili, ili je šifrovana za vas.</td></tr>
+    <tr><td>Zelena</td><td>Potpis pošiljaoca je ispravan, a njegov ključ ste proverili.</td></tr>
+    <tr><td>Plava</td><td>Potpis pošiljaoca je ispravan, ali njegov ključ niste proverili, ili je poruka šifrovana bez potpisa.</td></tr>
     <tr><td>Žutonarandžasta</td><td>Nešto nije u redu: potpis se ne poklapa, potpisao ju je neko drugi a ne pošiljalac, ili neki deo nije mogao da se pročita.</td></tr>
-    <tr><td>Siva</td><td>Nije potpisana, ili je potpisana ključem koji nemate.</td></tr>
+    <tr><td>Siva</td><td>Nema potpisa, ključ potpisnika nije dostupan ili potpis nije proveren.</td></tr>
 </table>
-<p>Poruka čiji su delovi različito zaštićeni prikazuje svaki deo u posebnom okviru, sa sopstvenom oznakom. Traka tada broji delove svake vrste. Kliknite na oznaku ili na <b data-text="ui-protection-details"></b> na traci da biste videli ko je potpisao svaki deo, kojim ključem i kada.</p>
-<aside class="warning">Samo traku i oznake iznad okvira ispisuje Inbox Classic. Pošiljalac u svojoj poruci može da nacrta bilo šta, pa i nešto što liči na oznaku. Gledajte traku.</aside>
-<p>Slike sa interneta u šifrovanom delu učitavaju se samo kad kliknete na traku za slike, i to svaki put. Oznaka tada navodi da su slike učitane.</p>
+<p>Poruka čiji su delovi različito zaštićeni prikazuje svaki deo u posebnom okviru, sa sopstvenom oznakom. Traka tada broji delove svake vrste. Kliknite na oznaku ili na <b data-text="ui-protection-details"></b> na traci da biste videli podatke o potpisu i šifrovanju svakog dela, uključujući korišćene ključeve i vreme potpisivanja.</p>
+<aside class="warning">Samo traku i oznake iznad okvira prikazuje sam Inbox Classic. Pošiljalac u svojoj poruci može da nacrta bilo šta, pa i nešto što liči na oznaku. Gledajte traku.</aside>
+<p>Za učitavanje slika sa interneta u šifrovanom delu morate da date dozvolu svaki put kada otvorite poruku, klikom na traku za slike. Oznaka tada navodi da su slike učitane.</p>
 <p>Kad odgovarate ili prosleđujete, citira se samo ono što je bilo prikazano.</p>
-<p>Na listi poruka katanac označava šifrovanu poruku, a pečat potpisanu. Kada Inbox Classic dešifruje šifrovanu poruku, posle preuzimanja ili otvaranja, lista prikazuje njenu pravu temu i prve reči. Do tada lista i obaveštenje o novoj pošti prikazuju <b data-text="list-encrypted"></b>.</p>
-<p>Pretraga pronalazi dešifrovanu poruku po rečima njenog teksta, dok je <b data-text="ui-search-encrypted"></b> uključeno u <b data-settings="reading"></b>. AI agenti nikada ne vide šta piše u šifrovanoj poruci, niti njene datoteke.</p>
+<p>Na listi poruka katanac označava šifrovanu poruku, a pečat potpisanu. Ako je pretraga šifrovanih poruka uključena i odgovarajući privatni ključ je dostupan, Inbox Classic može da dešifruje poruke posle preuzimanja ili kada ih otvorite. Lista tada prikazuje početak teksta i temu iz šifrovanog dela, ako je tamo navedena. Ako nema dešifrovanog teksta za prikaz, piše <b data-text="list-encrypted"></b>. Obaveštenja o novim šifrovanim porukama uvek koriste taj tekst.</p>
+<p>Opcija <b data-text="ui-search-encrypted"></b> u podešavanjima <b data-settings="reading"></b> omogućava da pretražujete i tekst dešifrovanih poruka. AI agenti ne mogu da čitaju sadržaj ni priloge šifrovanih poruka, niti da pretražuju njihov sadržaj.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:encryption-keys"></a></nav>
-<!--/review-->

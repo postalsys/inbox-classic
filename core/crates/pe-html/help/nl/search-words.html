@@ -1,18 +1,18 @@
-<!--review--><h1>Zoekwoorden</h1>
-<p class="summary">De woorden en tekens die het zoekvak begrijpt, om precies de berichten te vinden die je zoekt.</p>
-<p>Het zoekvak gebruikt dezelfde zoekwoorden als Gmail. Combineer er zoveel als je wilt: een bericht moet aan allemaal voldoen. Wijs het zoekvak aan om een korte lijst te zien.</p>
+<h1>Zoekoperatoren</h1>
+<p class="summary">Gebruik zoekoperatoren om precies de berichten te vinden die je zoekt.</p>
+<p>Het zoekvak ondersteunt zoekoperatoren zoals in Gmail. Je kunt ze combineren; een bericht moet dan aan alle opgegeven voorwaarden voldoen. Wijs het zoekvak aan voor een beknopt overzicht.</p>
 <table>
     <tr><th>Typ</th><th>Vindt</th></tr>
     <tr><td><code>budget</code></td><td>Berichten met een woord dat begint met <i>budget</i>, waar dan ook in het bericht</td></tr>
     <tr><td><code>"exacte woordgroep"</code></td><td>Deze woorden, in deze volgorde</td></tr>
-    <tr><td><code>-woord</code></td><td>Berichten zonder het woord. Een min werkt voor elk zoekwoord, zoals <code>-is:unread</code></td></tr>
+    <tr><td><code>-woord</code></td><td>Berichten zonder dat woord. Een minteken werkt ook bij sommige zoekfilters, zoals <code>-is:unread</code></td></tr>
     <tr><td><code>dit OR dat</code></td><td>Berichten met het ene of het andere woord. Schrijf <code>OR</code> in hoofdletters</td></tr>
     <tr><td><code>from:ann</code></td><td>Mail van Ann</td></tr>
     <tr><td><code>to:ann</code>, <code>cc:</code>, <code>bcc:</code></td><td>Mail aan Ann, in elke regel met ontvangers</td></tr>
     <tr><td><code>subject:lunch</code></td><td>Het woord in het onderwerp</td></tr>
     <tr><td><code>filename:pdf</code></td><td>Het woord in de naam van een bijgevoegd bestand</td></tr>
     <tr><td><code>list:news.example.com</code></td><td>Mail van een mailinglijst, op basis van de List-Id</td></tr>
-    <tr><td><code>has:attachment</code></td><td>Berichten met bestanden</td></tr>
+    <tr><td><code>has:attachment</code></td><td>Berichten met bijlagen</td></tr>
     <tr><td><code>is:unread</code>, <code>is:read</code></td><td>Ongelezen of gelezen berichten</td></tr>
     <tr><td><code>is:starred</code> of <code>is:flagged</code></td><td>Gemarkeerde berichten</td></tr>
     <tr><td><code>is:answered</code></td><td>Berichten die je hebt beantwoord</td></tr>
@@ -21,11 +21,11 @@
     <tr><td><code>in:inbox</code>, <code>in:sent</code>, <code>in:drafts</code>, <code>in:trash</code>, <code>in:spam</code>, <code>in:archive</code></td><td>Alleen die map, in elk account</td></tr>
     <tr><td><code>in:projecten</code></td><td>Alleen de map met die naam</td></tr>
     <tr><td><code>in:anywhere</code></td><td>Elke map</td></tr>
-    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>Mail van voor of na een dag. <code>2025-01-31</code> werkt ook</td></tr>
+    <tr><td><code>before:2025/01/31</code>, <code>after:2025/01/01</code></td><td>E-mail van vóór of na een datum. <code>2025-01-31</code> werkt ook</td></tr>
     <tr><td><code>older_than:2d</code>, <code>newer_than:1m</code></td><td>Mail ouder of nieuwer dan een aantal dagen (<code>d</code>), maanden (<code>m</code>) of jaren (<code>y</code>)</td></tr>
-    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>Mail groter of kleiner dan een grootte, in bytes of met <code>K</code>, <code>M</code> of <code>G</code></td></tr>
+    <tr><td><code>larger:5M</code>, <code>smaller:100k</code></td><td>E-mail groter of kleiner dan de opgegeven omvang, in bytes of met <code>K</code>, <code>M</code> of <code>G</code></td></tr>
 </table>
-<p>Accenten en hoofdletters maken niet uit. Een zoekwoord dat Inbox Classic niet kent, wordt als gewoon woord gezocht.</p>
-<p>Een versleuteld bericht wordt gevonden op afzender, ontvangers en onderwerp, en na ontsleuteling ook op de woorden van de tekst, zolang <b data-text="ui-search-encrypted"></b> aan staat bij <b data-settings="reading"></b>.</p>
-<p>De lijst toont geen groottes. Om te zien hoe groot een bericht is, kies je <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
-<nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav><!--/review-->
+<p>Zoeken is niet gevoelig voor accenten of hoofdletters. Een onbekende zoekoperator wordt als gewone zoektekst behandeld.</p>
+<p>Je kunt versleutelde berichten vinden op afzender, ontvangers en onderwerp. Staat de optie <b data-text="ui-search-encrypted"></b> aan bij <b data-settings="reading"></b>, dan kun je na ontsleuteling ook in de berichttekst zoeken.</p>
+<p>De berichtenlijst toont geen berichtgroottes. Om te zien hoe groot een bericht is, kies je <b data-text="menu-file"></b> &gt; <b data-text="cmd-properties"></b>.</p>
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:delivery-problems"></a> <a href="topic:keyboard-shortcuts"></a></nav>

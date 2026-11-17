@@ -471,7 +471,6 @@ ui-no-match-in = Meklēšana mapē { $folder } aptver tēmas, sūtītājus, adre
 ui-no-items = Šajā skatā nav neviena vienuma.
 # review: new
 ui-choose-folder = Izvēlieties mapi, lai redzētu tās ziņojumus.
-# review: new
 ui-unsubscribe = Atteikties no abonēšanas
 # review: new
 ui-open-in-calendar = Atvērt kalendārā
@@ -759,7 +758,7 @@ ui-options-system-default = Sistēmas noklusējums ({ $language })
 ui-settings-general = Vispārīgi
 # review: new
 ui-settings-reading = Lasīšana
-# review: changed
+# review: new
 ui-settings-new-mail = Jauns pasts
 # review: new
 ui-settings-sending = Sūtīšana
@@ -855,7 +854,6 @@ ui-dont-allow = Neatļaut
 ui-allow = &Atļaut
 # review: new
 ui-dont-send = Nesūtīt
-# review: new
 ui-dont-unsubscribe = Neatteikties
 # review: new
 ui-edit-first = &Vispirms rediģēt
@@ -1093,7 +1091,7 @@ ui-book-exported = { $count ->
 ui-book-not-exported = Adrešu grāmatu nevarēja saglabāt: { $reason }
 # review: new
 ui-code-copied = Kods nokopēts
-# review: new
+# review: changed
 ui-codes-in-notifications = &Rādīt pierakstīšanās kodus paziņojumos par jaunu pastu
 # review: new
 ui-tool-unread-only = Nelasītie
@@ -1105,7 +1103,7 @@ ui-pictures-always-sender = Vienmēr lejupielādēt attēlus no { $sender }
 ui-pictures-always-domain = Vienmēr lejupielādēt attēlus no visiem domēnā { $domain }
 # review: new
 ui-pictures-unconfirmed = Sūtītāja domēnu ({ $domain }) nevarēja pārbaudīt, tāpēc attēli šajā ziņojumā netiek lejupielādēti automātiski.
-# review: new
+# review: changed
 ui-pictures-always-option = Lejupielādēt &attēlus visos ziņojumos
 # review: new
 ui-pictures-always-warning = Tad sūtītāji var redzēt, kad jūs lasāt viņu ziņojumus.
@@ -1115,7 +1113,7 @@ ui-protection-details = &Detaļas...
 ui-protection-details-title = Drošības detaļas
 # review: new
 ui-download-heading = Lejupielāde
-# review: new
+# review: changed
 ui-download-ahead = Lejupielādēt &ziņojumus iepriekš:
 # review: new
 ui-download-ahead-recent = Nesenos ziņojumus līdz 1 MB katru
@@ -1123,14 +1121,20 @@ ui-download-ahead-recent = Nesenos ziņojumus līdz 1 MB katru
 ui-download-ahead-all = Visus ziņojumus
 # review: new
 ui-download-ahead-never = Tikai atverot
-# review: new
+# review: changed
 ui-download-limit = &Krātuves ierobežojums kontam:
-# review: new
+# review: changed
 ui-send-delay = &Aizture pirms sūtīšanas:
 # review: new
 ui-send-delay-note = Kamēr ziņojums gaida nosūtīšanu, sūtīšanu var atcelt ar Atsaukt.
 # review: new
 ui-dark-messages = Rādīt ziņojumus uz tumša fona, kad sistēmā ir tumšais režīms
+# review: new
+ui-preview-show = Rādīt &pielikumus vēstulēs
+# review: new
+ui-preview-show-note = Pēc vēstules teksta rāda attēlus un PDF failu pirmās lappuses. Šos priekšskatījumus Inbox Classic veido pati, tāpēc nekas failā nevar tikt palaists.
+# review: new
+ui-preview-pdfs = Rādīt PDF &failus vēstulēs
 # review: new
 ui-sending-in = { $subject } tiks nosūtīts pēc { $count ->
     [one] { $count } sekundes
@@ -1146,7 +1150,7 @@ ui-outbox-status-undo = Tiks nosūtīts plkst. { $time }
 ui-download-note = Iepriekš lejupielādēti ziņojumi atveras uzreiz. Kad krātuves ierobežojums ir pārsniegts, vecākās lokālās kopijas tiek noņemtas un atkal lejupielādētas, kad tās atverat.
 # review: new
 ui-attachment-downloading = Šī ziņojuma lejupielāde vēl nav pabeigta. Mēģiniet vēlreiz, kad lejupielāde būs pabeigta.
-# review: new
+# review: changed
 ui-trusted-senders-button = &Uzticamie sūtītāji...
 # review: new
 ui-trusted-senders-title = Uzticamie sūtītāji
@@ -1164,7 +1168,7 @@ ui-search-encrypted-note = Šifrētie ziņojumi šajā datorā tiek atšifrēti 
 ui-pgp-keyserver = &Meklēt atslēgas vietnē keys.openpgp.org
 # review: new
 ui-pgp-keyserver-note = Kad šifrējat ziņojumu vai meklējat atslēgu, meklētā adrese tiek nosūtīta uz keys.openpgp.org. Vispirms tiek vaicāts pašas adreses domēnam.
-# review: new
+# review: changed
 ui-eml-default = Atvērt .&eml failus ar Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic tagad atver .eml failus.
@@ -1174,7 +1178,7 @@ ui-eml-default-failed = Inbox Classic nevarēja iestatīt kā noklusējuma lieto
 ui-folders = Mapes
 # review: new
 ui-sorted-by = Kārtots pēc: { $field }
-# review: new
+# review: changed
 ui-layout-label = &Izkārtojums:
 # review: new
 ui-columns-note = Logs ir pietiekami plats kolonnu izkārtojumam. Izkārtojumu var mainīt sadaļā Skats > Izkārtojums.
@@ -1194,10 +1198,10 @@ ui-row-messages = { $count ->
     [one] { $count } ziņojums
    *[other] { $count } ziņojumi
 }
-# review: new
+# review: changed
 ui-list-pictures = &Rādīt sūtītāju attēlus ziņojumu sarakstā
-# review: new
-ui-list-pictures-note = Kolonnu izkārtojumā pārbaudītiem sūtītājiem rāda zīmolu logotipus vai adrešu grāmatas attēlus, bet, ja attēla nav, iniciāļus. Logotipi tiek lejupielādēti vienreiz katram zīmolam, nevis katram ziņojumam.
+# review: changed
+ui-list-pictures-note = Pārbaudītiem sūtītājiem rāda zīmolu logotipus vai adrešu grāmatas attēlus, bet, ja attēla nav, iniciāļus. Logotipi tiek lejupielādēti vienreiz katram zīmolam, nevis katram ziņojumam.
 # review: new
 ui-card-picture = Attēls:
 # review: new

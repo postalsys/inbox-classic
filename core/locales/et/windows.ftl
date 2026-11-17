@@ -16,13 +16,12 @@ win-print-title-of = Prindi: { $subject }
 win-no-bodies = Kirjade sisu ei saa kuvada.
 win-webview-failed = WebView2 loomine ebaõnnestus.
 win-webview-missing = WebView2 käituskeskkond pole saadaval.
-# review: new
 win-list-loading = Laadimine...
 
 ## Mitme akna nupud ja sõnad
 
 win-delete-button = &Kustuta
-win-find-label = &Otsi:
+win-find-label = Ots&i:
 win-save-as-button = Salvesta &nimega...
 win-too-many-files = Liiga palju faile korraga: valige vähem.
 
@@ -82,7 +81,7 @@ win-your-account = teie konto
 win-browser-sign-in = (brauseris sisselogimine)
 win-add = &Lisa...
 win-properties-button = &Atribuudid...
-win-signature-button = A&llkiri...
+win-signature-button = Allki&ri...
 win-sign-in-apps-button = &Sisselogimisrakendused...
 
 ## Tehisintellekti agendid
@@ -93,9 +92,7 @@ win-never-written-to = Pole kunagi kirjutanud
 win-book-find-label = Sisestage nimi või e-posti aadress:
 win-send = &Saada
 win-dont-send = Ä&ra saada
-# review: new
 win-unsubscribe = &Loobu tellimusest
-# review: new
 win-dont-unsubscribe = Ä&ra loobu tellimusest
 win-forget-program-ask = Kas eemaldada see programm koos õiguste ja agentide tegevusajalooga? Järgmisel ühendumisel küsitakse juurdepääsuluba uuesti.
 win-clear-log-ask = Kas tühjendada agentide tegevusajalugu? See ei võta agentide tehtud muudatusi tagasi.
@@ -117,26 +114,19 @@ win-folders-show = Näita kaustu
 
 ## The installer
 
-# review: new
 win-installer-start = Käivita Inbox Classic
-# review: new
 win-installer-welcome-new =
-    See installib meiliprogrammi Inbox Classic { $version }.
+    Installitakse meiliprogramm Inbox Classic { $version }.
 
-    Administraatori õigusi pole vaja, see installitakse ainult teie kontole.
-# review: new
+    Programm installitakse ainult teie kasutajakontole. Administraatori õigusi pole vaja.
 win-installer-welcome-same =
-    Inbox Classic { $version } on juba installitud. See installib selle uuesti.
+    Inbox Classic { $version } on juba installitud ja installitakse uuesti.
 
-    Teie kontod ja kirjad jäävad alles.
-# review: new
+    Teie kontod ja kirjad säilivad.
 win-installer-welcome-update =
-    See uuendab programmi Inbox Classic versioonist { $installed } versioonile { $version }.
+    Inbox Classic uuendatakse versioonist { $installed } versioonile { $version }.
 
-    Kui see töötab, suletakse see enne. Teie kontod ja kirjad jäävad alles.
-# review: new
+    Kui programm on avatud, suletakse see enne uuendamist. Teie kontod ja kirjad säilivad.
 win-installer-older-ask = Installitud on Inbox Classic { $installed }, mis on uuem kui { $version }. Kas installida vanem versioon siiski?
-# review: new
 win-installer-still-running = Inbox Classic töötab endiselt. Sulgege see ja proovige uuesti.
-# review: new
-win-installer-remove-mail-ask = Kas eemaldada ka kontod ja kirjad, mida Inbox Classic selles arvutis hoiab? Serverites olevad kirjad jäävad alles.
+win-installer-remove-mail-ask = Kas eemaldada sellest arvutist ka Inbox Classicu kontod ja salvestatud kirjad? Serverites olevad kirjad jäävad alles.

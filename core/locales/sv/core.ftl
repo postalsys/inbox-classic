@@ -4,7 +4,6 @@
 
 ## Counts and sizes
 
-# review: new
 messages = { $count ->
     [one] { $count } meddelande
    *[other] { $count } meddelanden
@@ -653,7 +652,7 @@ day-sunday = söndag
 
 # review: new
 agent-level-read = Läsa e-post: mappar, meddelandelistan, sökning och meddelanden
-# review: changed
+# review: new
 agent-level-organize = Ordna e-post: läsläge, flaggor, skräppost, flytt, arkivering, nya mappar, borttagning till Borttaget och att lämna e-postlistor efter att du har sagt ja
 # review: new
 agent-level-drafts = Skriva utkast som du skickar
@@ -744,6 +743,12 @@ agent-log-sent = Skickade ”{ $subject }” till { $to }
 # review: new
 agent-log-draft = Sparade utkastet ”{ $subject }”
 # review: new
+agent-log-draft-replaced = Ersatte utkastet ”{ $subject }”
+# review: new
+agent-log-draft-discarded = Kastade utkastet ”{ $subject }”
+# review: new
+agent-draft-note = { $program }, en AI-agent, skrev det här utkastet. Kontrollera mottagarna och texten innan du skickar det.
+# review: new
 agent-log-read = Markerade ”{ $subject }” som läst
 # review: new
 agent-log-unread = Markerade ”{ $subject }” som oläst
@@ -763,8 +768,7 @@ agent-log-not-junk = Markerade ”{ $subject }” som ej skräppost
 agent-log-archived = Arkiverade ”{ $subject }”
 # review: new
 agent-log-folder = Skapade mappen ”{ $name }”
-# review: new
-agent-log-unsubscribed = Avslutade prenumerationen på listan för ”{ $subject }”
+agent-log-unsubscribed = Du godkände begäran om att avsluta prenumerationen. Meddelande: ”{ $subject }”
 # review: new
 agent-log-unsubscribe-failed = Kunde inte avsluta prenumerationen på listan för ”{ $subject }”: { $reason }
 # review: new
@@ -928,8 +932,7 @@ pgp-part-unknown-key = Signerad, men nyckeln är okänd
 pgp-part-not-signed = Inte signerad
 # review: new
 pgp-part-not-checked = Signaturen har inte kontrollerats
-# review: new
-pgp-part-encrypted = Krypterad. { $signature }
+pgp-part-encrypted = Krypterat. { $signature }
 # review: new
 pgp-part-no-key = Krypterad till en nyckel som du inte har
 # review: new
@@ -956,8 +959,7 @@ pgp-why-signature-expired = Signaturen har gått ut
 pgp-why-key-not-valid = Signerad med en nyckel som inte är giltig
 # review: new
 pgp-why-not-for-you = Signerad för andra mottagare och vidarebefordrad till dig
-# review: new
-pgp-why-not-key-in-use = Signerad med en annan nyckel än den som används för { $address }
+pgp-why-not-key-in-use = Signerat med en annan nyckel än den som används för { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Bilder hämtades från internet
 # review: new
@@ -1281,35 +1283,29 @@ attachment-runs-programs = ”{ $name }” kan köra program, så Inbox Classic 
 # review: new
 attachment-decrypted-note = Den här bilagan kommer från ett krypterat meddelande. För att kunna öppna den sparar Inbox Classic den dekrypterad på den här datorn, i en mapp som tillhör dig och som Inbox Classic tömmer efter en dag.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
     [one] Servern flyttade inte { $messages } till { $folder }, så det ligger i { $from } igen: { $reason }
    *[other] Servern flyttade inte { $messages } till { $folder }, så de ligger i { $from } igen: { $reason }
 }
-# review: new
 undone-delete = { $count ->
     [one] Servern tog inte bort { $messages }, så det ligger i { $from } igen: { $reason }
    *[other] Servern tog inte bort { $messages }, så de ligger i { $from } igen: { $reason }
 }
-# review: new
 undone-archive = { $count ->
     [one] Servern arkiverade inte { $messages }, så det ligger i { $from } igen: { $reason }
    *[other] Servern arkiverade inte { $messages }, så de ligger i { $from } igen: { $reason }
 }
-# review: new
 undone-read = { $count ->
     [one] Servern markerade inte { $messages } som läst, så det är oläst igen: { $reason }
    *[other] Servern markerade inte { $messages } som lästa, så de är olästa igen: { $reason }
 }
-# review: new
 undone-unread = { $count ->
     [one] Servern markerade inte { $messages } som oläst, så det är läst igen: { $reason }
    *[other] Servern markerade inte { $messages } som olästa, så de är lästa igen: { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Servern ändrade inte flaggorna för { $messages }, så det är som förut: { $reason }
-   *[other] Servern ändrade inte flaggorna för { $messages }, så de är som förut: { $reason }
+    [one] Servern ändrade inte flaggorna för { $messages }, så ändringen har ångrats: { $reason }
+   *[other] Servern ändrade inte flaggorna för { $messages }, så ändringen har ångrats: { $reason }
 }
 
 ## Previews of attachments: the pictures and PDF files shown in a message
@@ -1319,4 +1315,16 @@ preview-pdf-option = Visa PDF-filer i meddelanden
 # review: new
 preview-pdf-off = PDF-filer visas inte i meddelanden.
 # review: new
-preview-pdf-off-crashed = En PDF-fil stängde Inbox Classic medan den visades, så PDF-filer visas inte längre i meddelanden. Bilder visas fortfarande. Slå på { $option } i läsinställningarna för att visa PDF-filer igen.
+preview-pdf-off-crashed = En PDF-fil stängde Inbox Classic medan den visades, så PDF-filer visas inte längre i meddelanden. Bilder visas fortfarande. Slå på { $option } under { $settings } för att visa PDF-filer igen.
+# review: new
+preview-pdf-details = { $count ->
+    [one] 1 sida, { $size }
+   *[other] { $count } sidor, { $size }
+}
+# review: new
+preview-page-alt = { $name }, sida { $page } av { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Öppna filen för att se sidan
+   *[other] Öppna filen för att se alla { $count } sidor
+}

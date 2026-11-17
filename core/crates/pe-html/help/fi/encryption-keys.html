@@ -1,20 +1,19 @@
-<!--review--><h1>Salausavaimet</h1>
-<p class="summary">Luo avain, jolla allekirjoitat viestisi ja vastaanotat salattua postia, ja säilytä yhteystietojesi avaimet.</p>
-<p>Inbox Classic allekirjoittaa ja salaa postin OpenPGP-avaimilla. Omassa avaimessasi on kaksi puolta: julkinen avain, jonka annat muille, ja yksityinen avain, joka pysyy tietokoneellasi. Yhteystietojesi avaimilla tarkistat heidän allekirjoituksensa ja salaat heille lähettämäsi postin.</p>
+<h1>Salausavaimet</h1>
+<p class="summary">Luo avain viestien digitaaliseen allekirjoittamiseen ja salatun postin vastaanottamiseen sekä tallenna yhteystietojesi julkiset avaimet.</p>
+<p>Inbox Classic allekirjoittaa viestit digitaalisesti ja salaa ne OpenPGP-avaimilla. Oma avaimesi koostuu julkisesta avaimesta, jonka voit jakaa muille, ja yksityisestä avaimesta, joka säilytetään tietokoneellasi. Yhteystietojesi julkisilla avaimilla tarkistetaan heidän digitaaliset allekirjoituksensa ja salataan heille lähettämäsi viestit.</p>
 <p>Näin luot oman avaimesi:</p>
 <ol>
     <li>Valitse <b data-text="menu-tools"></b> &gt; <b data-text="cmd-encryption-keys"></b> ja napsauta <b data-text="ui-keys-new"></b>.</li>
-    <li>Valitse tili ja napsauta <b data-text="ui-keys-new-make"></b>. Avainta käytetään tilin osoitteelle ja sen muille osoitteille.</li>
-    <li>Napsauta <b data-text="ui-keys-backup-now"></b> ja valitse salalause. Säilytä tiedosto ja salalause eri turvallisissa paikoissa.</li>
+    <li>Valitse tili ja napsauta <b data-text="ui-keys-new-make"></b>. Avain otetaan käyttöön tilin sähköpostiosoitteelle ja sen muille lähettäjäosoitteille.</li>
+    <li>Napsauta <b data-text="ui-keys-backup-now"></b> ja valitse salalause. Säilytä varmuuskopio ja sen salalause turvallisissa paikoissa erillään toisistaan.</li>
 </ol>
-<aside class="warning">Ilman varmuuskopiota avaintasi ei voi palauttaa, jos tämä tietokone katoaa tai nollataan, eikä sille salattua postia voi enää lukea.</aside>
-<h2>Avaimet pysyvät suojattuina ilman salalauseita</h2>
-<p>Yksityisiä avaimiasi suojaa avain, jota säilytetään <!--os:windows-->Tunnistetietojen hallinnassa<!--/os--><!--os:mac-->avainnipussa<!--/os--><!--os:linux-->järjestelmän avainnipussa<!--/os-->, joten sinun ei koskaan tarvitse kirjoittaa salalausetta niitä käyttääksesi. Salalauseen valitset vain varmuuskopiolle. Jos avaimesi näkyy lukittuna, tämä suojaus on nollattu: napsauta <b data-text="ui-keys-import"></b> ja valitse avaimen varmuuskopio.</p>
+<aside class="warning">Jos tietokone katoaa tai sen tiedot poistetaan, yksityisen avaimen palauttaminen edellyttää varmuuskopiota. Ilman avainta et voi lukea sille salattuja viestejä.</aside>
+<h2>Avainten suojaus päivittäisessä käytössä</h2>
+<p>Yksityiset avaimesi salataan suojausavaimella, jota säilytetään <!--os:windows-->Tunnistetietojen hallinnassa<!--/os--><!--os:mac-->avainnipussa<!--/os--><!--os:linux-->järjestelmän avainnipussa<!--/os-->, joten sinun ei tarvitse kirjoittaa salalausetta aina avaimia käyttäessäsi. Valitset salalauseen varmuuskopiota varten. Jos yksityinen avain ei avaudu suojausavaimen puuttumisen vuoksi, napsauta <b data-text="ui-keys-import"></b> ja valitse yksityisen avaimen varmuuskopio.</p>
 <h2>Avainten lisääminen</h2>
-<p>Napsauta <b data-text="ui-keys-import"></b>, niin voit lisätä avaimen tiedostosta, esimerkiksi yhteystiedon lähettämän avaimen tai oman varmuuskopiosi. Salalauseella suojattu yksityinen avain kysyy salalausetta kerran. Sen jälkeen Inbox Classic kysyy, käytetäänkö tuotua omaa avaintasi osoitteillesi.</p>
-<p>Yhteystiedon avainta käytetään siitä lähtien hänen osoitteelleen. Jos samalle osoitteelle löytyy myöhemmin eri avain, nykyinen pysyy käytössä, kunnes valitset uuden yhteystiedon ominaisuuksissa.</p>
+<p>Napsauta <b data-text="ui-keys-import"></b>, niin voit tuoda avaimen tiedostosta, esimerkiksi toiselta henkilöltä saadun julkisen avaimen tai oman avaimesi varmuuskopion. Salalauseella suojatun yksityisen avaimen salalause kysytään tuonnin yhteydessä. Inbox Classic kysyy sen jälkeen, otetaanko oma avaimesi käyttöön sähköpostiosoitteillesi.</p>
+<p>Yhteystiedon julkinen avain otetaan käyttöön kyseiselle osoitteelle. Jos samalle osoitteelle löytyy myöhemmin toinen avain, nykyinen säilyy käytössä, kunnes valitset uuden yhteystiedon ominaisuuksissa.</p>
 <p>Voit jakaa julkisen avaimesi valitsemalla sen ja napsauttamalla <b data-text="ui-keys-export"></b>. Voit myös valita tilisi avaimen tilin ominaisuuksien välilehdellä <b data-text="ui-account-security"></b>.</p>
-<p>Kun salaat jollekulle, jonka avainta sinulla ei ole, Inbox Classic kysyy sitä hänen osoitteensa verkkotunnukselta ja sitten palvelusta keys.openpgp.org. Vain osoite lähetetään. Jos et halua kysyä koskaan palvelusta keys.openpgp.org, poista <b data-text="ui-pgp-keyserver"></b> käytöstä kohdassa <b data-settings="reading"></b>.</p>
-<p>Avaimet kulkevat myös postin mukana. Avaimellisesta osoitteesta lähetetyissä viesteissä on mukana sen julkinen avain, jotta muut sovellukset voivat salata viestejä sinulle, ja Inbox Classic oppii samalla tavalla yhteystiedon avaimen tämän viesteistä. Jos et halua enää lähettää omaasi, poista <b data-text="ui-account-autocrypt"></b> käytöstä tilin välilehdellä <b data-text="ui-account-security"></b>.</p>
+<p>Jos vastaanottajan avain puuttuu, kun salaat viestiä, Inbox Classic etsii sitä ensin vastaanottajan sähköpostiosoitteen verkkotunnuksesta. Jos avainta ei löydy, osoite lähetetään palveluun keys.openpgp.org. Voit estää nämä haut palvelusta keys.openpgp.org poistamalla asetuksen <b data-text="ui-pgp-keyserver"></b> käytöstä kohdassa <b data-settings="reading"></b>. Haku verkkotunnuksesta on edelleen käytettävissä.</p>
+<p>Kun Autocrypt on käytössä ja lähettäjän osoitteelle on määritetty avain, Inbox Classic sisällyttää julkisen avaimen viesteihisi. Muut sovellukset voivat käyttää sitä sinulle lähetettävien viestien salaamiseen. Kun avaat saapuneen viestin, Inbox Classic voi myös tallentaa lähettäjän julkisen avaimen. Tämä ei vahvista, kenelle avain kuuluu. Jos et halua lähettää julkista avaintasi, poista käytöstä asetus ”<b data-text="ui-account-autocrypt"></b>” tilin <b data-text="ui-account-security"></b>-välilehdellä.</p>
 <nav class="related"><a href="topic:verify-a-key"></a> <a href="topic:address-book"></a> <a href="topic:manage-accounts"></a></nav>
-<!--/review-->

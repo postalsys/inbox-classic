@@ -2,7 +2,6 @@
 
 ## Counts and sizes
 
-# review: new
 messages = { $count ->
     [one] { $count } laiškas
     [few] { $count } laiškai
@@ -675,74 +674,41 @@ day-sunday = sekmadienis
 
 ## AI agents
 
-# review: new
-agent-level-read = Skaityti paštą: aplankai, laiškų sąrašas, paieška ir laiškai
-# review: changed
-agent-level-organize = Tvarkyti paštą: skaitymo būsena, vėliavėlės, nepageidaujami laiškai, perkėlimas, archyvavimas, nauji aplankai, panaikinimas į „Panaikinti laiškai“ ir adresatų sąrašų prenumeratos atsisakymas jums sutikus
-# review: new
-agent-level-drafts = Rašyti juodraščius, kuriuos išsiųsite jūs
-# review: new
+agent-level-read = Skaityti paštą: peržiūrėti aplankus, laiškus ir pokalbius, ieškoti laiškų bei kontaktų ir peržiūrėti laiškų taisykles
+agent-level-organize = Tvarkyti paštą: žymėti laiškus skaitytais ar neskaitytais, keisti vėliavėles ir nepageidaujamų laiškų žymas, perkelti ir archyvuoti laiškus, kurti aplankus, naikinti laiškus perkeliant juos į aplanką „Panaikinti laiškai“ ir jūsų sutikimu atsisakyti adresatų sąrašų prenumeratų
+agent-level-drafts = Rašyti juodraščius, kuriuos galėsite išsiųsti
 agent-level-send = Siųsti laiškus, kiekvieną tik jums sutikus
-# review: new
 agent-connect-title = { $program } nori naudotis jūsų paštu
-# review: new
-agent-connect-detail = DI agentas paprašė leisti dirbti su Inbox Classic. Pasirinkite, ką jis gali daryti ir kurias paskyras gali matyti; vėliau tai galėsite pakeisti per Įrankiai > DI agentai.
+agent-connect-detail = DI agentas prašo prieigos prie jūsų pašto per Inbox Classic. Pasirinkite, ką jis galės daryti ir kurias paskyras galės pasiekti. Šias teises vėliau galėsite pakeisti pasirinkę „Įrankiai > DI agentai“.
 
-    Agentai skaito kitų žmonių parašytus laiškus, o laiškas gali bandyti juos apgauti. Inbox Classic visada jūsų paklausia, prieš agentui ką nors išsiunčiant.
-# review: new
-agent-reply-to = Atsakymas į „{ $subject }“
-# review: new
-agent-reply-all-on = Atsakymas visiems į „{ $subject }“
-# review: new
-agent-forward-of = Persiunčiamas „{ $subject }“
-# review: new
+    Agentai skaito kitų žmonių laiškus, kuriuose gali būti bandymų juos apgauti. Prieš siųsdamas laišką per Inbox Classic, agentas turi gauti atskirą jūsų sutikimą.
+agent-reply-to = Atsakymas į laišką „{ $subject }“
+agent-reply-all-on = Atsakymas visiems į laišką „{ $subject }“
+agent-forward-of = Laiško „{ $subject }“ persiuntimas
 agent-never-written-one = Niekada nerašėte adresu { $address }.
-# review: new
-agent-never-written-many = Niekada nerašėte { $count } iš šių adresų.
-# review: new
+agent-never-written-many = Adresų, kuriais dar nesate rašę, skaičius: { $count }.
 agent-send-title = { $program } nori išsiųsti šį laišką
-# review: new
-agent-send-detail = Patikrinkite gavėjus ir laiško turinį. Jums patvirtinus, laiškas { $seconds } s palauks aplanke „Siunčiami laiškai“, kur jį dar galėsite panaikinti.
-# review: new
+agent-send-detail = Patikrinkite gavėjus ir laiško turinį. Jums patvirtinus, laiškas bent { $seconds } s lauks aplanke „Siunčiami laiškai“. Per tą laiką galėsite jį panaikinti ir atšaukti siuntimą.
 agent-change-title = Ką { $program } gali daryti
-# review: new
 agent-change-allowed = Pakeiskite, ką šios programos DI agentai gali daryti su jūsų paštu.
-# review: new
-agent-change-refused = Šiai programai uždraudėte prieigą. Leiskite ją, kad jos agentai vėl galėtų pasiekti jūsų paštą.
-# review: new
+agent-change-refused = Šiai programai prieigos nesuteikėte. Galite ją suteikti, kad programos agentai galėtų naudotis jūsų paštu.
 agent-log-taken-back = { $entry } (atšaukta)
-# review: new
 agent-files = Failai: { $files }
-# review: new
-agent-undo-refused = To atšaukti negalima.
-# review: new
-agent-undo-refused-why = To atšaukti negalima: { $reason }.
-# review: new
+agent-undo-refused = Šio veiksmo atšaukti negalima.
+agent-undo-refused-why = Šio veiksmo atšaukti negalima: { $reason }.
 agent-undo-impossible = to atšaukti negalima
-# review: new
 agent-undo-not-in-folder = laiško tame aplanke nebėra
-# review: new
-agent-undo-not-arrived = laiško (dar) nėra aplanke, į kurį jis buvo perkeltas
-# review: new
-agent-undo-sent = laiškas jau išsiųstas
-# review: new
+agent-undo-not-arrived = laiškas dar nerastas paskirties aplanke
+agent-undo-sent = laiško aplanke „Siunčiami laiškai“ nebėra
 agent-original-not-downloaded = pradinis laiškas dar neatsisiųstas. Pirmiausia jį atidarykite
-# review: new
-agent-turned-away = Atmesta
-# review: new
+agent-turned-away = Prieiga uždrausta
 agent-can-nothing = Nieko
-# review: new
 agent-can-read = skaityti
-# review: new
 agent-can-organize = tvarkyti
-# review: new
 agent-can-drafts = rašyti juodraščius
-# review: new
 agent-can-send = siųsti jums sutikus
 # "Skaityti, tvarkyti ir rašyti juodraščius"
-# review: new
 agent-can-list = { $first } ir { $last }
-# review: new
 agent-accounts = { $count ->
     [0] jokių paskyrų
     [one] { $count } paskyra
@@ -750,60 +716,40 @@ agent-accounts = { $count ->
    *[other] { $count } paskyrų
 }
 # "Skaityti ir tvarkyti; 1 paskyra"
-# review: new
 agent-access = { $can }; { $accounts }
-# review: new
 agent-unreadable = Šio laiško perskaityti negalima.
-# review: new
 agent-encrypted-original = Šis laiškas užšifruotas: agentas negali į jį atsakyti ar jo persiųsti, nes negali šifruoti.
-# review: new
-agent-encrypted = Šis laiškas užšifruotas. Jį gali perskaityti tik naudotojas, programoje Inbox Classic.
+agent-encrypted = Šis laiškas užšifruotas. Agentas negali perskaityti jo turinio. Laišką turi atidaryti naudotojas programoje Inbox Classic.
 # review: new
 list-encrypted = Užšifruotas laiškas
-# review: new
-agent-log-composed = „{ $subject }“ atidarytas naujame laiške, kad jį užbaigtumėte
-# review: new
-agent-log-refused = Neišsiuntėte „{ $subject }“
-# review: new
-agent-log-sent = Išsiųstas „{ $subject }“ (kam: { $to })
-# review: new
+agent-log-composed = Atidarytas naujas laiškas „{ $subject }“, kurį galite baigti rašyti
+agent-log-refused = Atmetėte prašymą išsiųsti laišką „{ $subject }“
+agent-log-sent = Laiškas „{ $subject }“ įtrauktas į siuntimo eilę. Gavėjai: { $to }
 agent-log-draft = Įrašytas juodraštis „{ $subject }“
-# review: new
+agent-log-draft-replaced = Pakeistas juodraštis „{ $subject }“
+agent-log-draft-discarded = Atmestas juodraštis „{ $subject }“
+agent-draft-note = Šį juodraštį parašė DI agentas { $program }. Prieš siųsdami patikrinkite gavėjus ir tekstą.
 agent-log-read = Pažymėtas kaip skaitytas: „{ $subject }“
-# review: new
 agent-log-unread = Pažymėtas kaip neskaitytas: „{ $subject }“
-# review: new
 agent-log-flagged = Pažymėtas vėliavėle: „{ $subject }“
-# review: new
 agent-log-unflagged = Nuimta vėliavėlė: „{ $subject }“
-# review: new
 agent-log-deleted = Panaikintas „{ $subject }“
-# review: new
 agent-log-moved = „{ $subject }“ perkeltas (paskirtis: { $folder })
-# review: new
 agent-log-junk = Pažymėtas kaip nepageidaujamas: „{ $subject }“
-# review: new
 agent-log-not-junk = Pažymėtas kaip pageidaujamas: „{ $subject }“
-# review: new
 agent-log-archived = Archyvuotas „{ $subject }“
-# review: new
 agent-log-folder = Sukurtas aplankas „{ $name }“
-# review: new
-agent-log-unsubscribed = Atsisakyta „{ $subject }“ adresatų sąrašo
-# review: new
-agent-log-unsubscribe-failed = Nepavyko atsisakyti „{ $subject }“ adresatų sąrašo: { $reason }
-# review: new
-agent-log-unsubscribe-refused = Neatsisakėte prenumeratos: { $senders }
-# review: new
+agent-log-unsubscribed = Patvirtinote prašymą atsisakyti prenumeratos. Laiškas: „{ $subject }“
+agent-log-unsubscribe-failed = Nepavyko atsisakyti prenumeratos. Laiškas: „{ $subject }“. Priežastis: { $reason }
+agent-log-unsubscribe-refused = Nepatvirtinote prašymo atsisakyti prenumeratos. Siuntėjai: { $senders }
 agent-unsubscribe-title = { $count ->
     [one] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašo prenumeratos
     [few] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašų prenumeratos
    *[other] { $program } nori jūsų vardu atsisakyti { $count } adresatų sąrašų prenumeratos
 }
-# review: new
 agent-unsubscribe-detail = { $count ->
-    [1] Inbox Classic paprašo toliau nurodyto sąrašo nebesiųsti jums laiškų tuo vieno spustelėjimo būdu, kurį jis siūlo. Daugiau nieko nesiunčiama, o jūsų turimi laiškai lieka ten, kur yra.
-   *[other] Inbox Classic paprašo kiekvieno toliau nurodyto sąrašo nebesiųsti jums laiškų tuo vieno spustelėjimo būdu, kurį siūlo sąrašas. Daugiau nieko nesiunčiama, o jūsų turimi laiškai lieka ten, kur yra.
+    [1] Inbox Classic paprašo toliau nurodyto adresatų sąrašo nebesiųsti jums laiškų. Tam naudojama sąrašo siūloma galimybė atsisakyti prenumeratos vienu spustelėjimu. Daugiau nieko nesiunčiama. Esami laiškai nekeičiami ir neperkeliami.
+   *[other] Inbox Classic paprašo kiekvieno toliau nurodyto adresatų sąrašo nebesiųsti jums laiškų. Tam naudojama kiekvieno sąrašo siūloma galimybė atsisakyti prenumeratos vienu spustelėjimu. Daugiau nieko nesiunčiama. Esami laiškai nekeičiami ir neperkeliami.
 }
 
 ## Keys as the keyboards of the language name them, in the help (Windows and Linux)
@@ -985,7 +931,6 @@ pgp-why-signature-expired = Parašas nebegalioja
 pgp-why-key-not-valid = Pasirašyta negaliojančiu raktu
 # review: new
 pgp-why-not-for-you = Pasirašyta kitiems gavėjams ir persiųsta jums
-# review: new
 pgp-why-not-key-in-use = Pasirašyta kitu raktu nei naudojamas adresui { $address }
 # review: new
 pgp-part-pictures-loaded = { $label }. Paveikslėliai įkelti iš interneto
@@ -1335,35 +1280,29 @@ attachment-runs-programs = Failas „{ $name }“ gali paleisti programas, todė
 # review: new
 attachment-decrypted-note = Šis priedas yra iš užšifruoto laiško. Kad galėtų jį atidaryti, Inbox Classic laiko jį iššifruotą šiame kompiuteryje, jūsų aplanke, kurį Inbox Classic ištuština po paros.
 # a bar over the list when the server did not do what the user asked of messages, so they are as they were again
-# review: new
 undone-move = { $count ->
-    [one] Serveris neperkėlė laiško, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }, paskirtis: { $folder }): { $reason }
-   *[other] Serveris neperkėlė laiškų, todėl jie vėl yra aplanke „{ $from }“ ({ $messages }, paskirtis: { $folder }): { $reason }
+    [1] Serveris neperkėlė laiško į aplanką „{ $folder }“, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
+   *[other] Serveris neperkėlė laiškų į aplanką „{ $folder }“, todėl jie vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
 }
-# review: new
 undone-delete = { $count ->
-    [one] Serveris nepanaikino laiško, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
+    [1] Serveris nepanaikino laiško, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
    *[other] Serveris nepanaikino laiškų, todėl jie vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
 }
-# review: new
 undone-archive = { $count ->
-    [one] Serveris nearchyvavo laiško, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
+    [1] Serveris nearchyvavo laiško, todėl jis vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
    *[other] Serveris nearchyvavo laiškų, todėl jie vėl yra aplanke „{ $from }“ ({ $messages }): { $reason }
 }
-# review: new
 undone-read = { $count ->
-    [one] Serveris nepažymėjo laiško kaip skaityto, todėl jis vėl neskaitytas ({ $messages }): { $reason }
+    [1] Serveris nepažymėjo laiško kaip skaityto, todėl jis vėl neskaitytas ({ $messages }): { $reason }
    *[other] Serveris nepažymėjo laiškų kaip skaitytų, todėl jie vėl neskaityti ({ $messages }): { $reason }
 }
-# review: new
 undone-unread = { $count ->
-    [one] Serveris nepažymėjo laiško kaip neskaityto, todėl jis vėl skaitytas ({ $messages }): { $reason }
+    [1] Serveris nepažymėjo laiško kaip neskaityto, todėl jis vėl skaitytas ({ $messages }): { $reason }
    *[other] Serveris nepažymėjo laiškų kaip neskaitytų, todėl jie vėl skaityti ({ $messages }): { $reason }
 }
-# review: new
 undone-flags = { $count ->
-    [one] Serveris nepakeitė laiško vėliavėlių, todėl jis nepasikeitė ({ $messages }): { $reason }
-   *[other] Serveris nepakeitė laiškų vėliavėlių, todėl jie nepasikeitė ({ $messages }): { $reason }
+    [1] Serveris nepakeitė laiško vėliavėlių, todėl pakeitimas atšauktas ({ $messages }): { $reason }
+   *[other] Serveris nepakeitė laiškų vėliavėlių, todėl pakeitimas atšauktas ({ $messages }): { $reason }
 }
 
 ## Previews of attachments: the pictures and PDF files shown in a message
@@ -1373,4 +1312,20 @@ preview-pdf-option = Rodyti PDF failus laiškuose
 # review: new
 preview-pdf-off = PDF failai laiškuose nerodomi.
 # review: new
-preview-pdf-off-crashed = PDF failas uždarė Inbox Classic, kol buvo rodomas, todėl PDF failai laiškuose nebėra rodomi. Paveikslėliai vis dar rodomi. Norėdami vėl rodyti PDF failus, skaitymo parinktyse įjunkite { $option }.
+preview-pdf-off-crashed = PDF failas uždarė Inbox Classic, kol buvo rodomas, todėl PDF failai laiškuose nebėra rodomi. Paveikslėliai vis dar rodomi. Norėdami vėl rodyti PDF failus, skiltyje { $settings } įjunkite { $option }.
+# review: new
+preview-pdf-details = { $count ->
+    [one] { $count } puslapis, { $size }
+    [few] { $count } puslapiai, { $size }
+    [many] { $count } puslapio, { $size }
+   *[other] { $count } puslapių, { $size }
+}
+# review: new
+preview-page-alt = { $name }, { $page } puslapis iš { $count }
+# review: new
+preview-more-pages = { $count ->
+    [one] Atidarykite, kad matytumėte visą { $count } puslapį
+    [few] Atidarykite, kad matytumėte visus { $count } puslapius
+    [many] Atidarykite, kad matytumėte visus { $count } puslapio
+   *[other] Atidarykite, kad matytumėte visus { $count } puslapių
+}

@@ -1,18 +1,18 @@
-<!--review--><h1>Yeni postaları kurallarla düzenleme</h1>
+<h1>Yeni postaları kurallarla düzenleme</h1>
 <p class="summary">Ölçütlerinize uyan gelen iletileri otomatik olarak taşıyın, okundu olarak işaretleyin, bayrak koyun veya arşivleyin.</p>
-<p>Bir kural, arama ölçütlerini Gelen Kutunuza gelen eşleşen iletilere uygulanacak eylemlerle birleştirir. Örneğin <code>from:news@example.com</code> içeren bir kural, o adresten gelen bültenleri ayrı bir klasöre taşıyabilir ve okundu olarak işaretleyebilir.</p>
+<p>Bir kural, Gelen Kutusu'na gelen iletilerin hangi ölçütlere göre seçileceğini ve bunlara hangi işlemlerin uygulanacağını belirler. Örneğin <code>from:news@example.com</code> içeren bir kural, o adresten gelen bültenleri ayrı bir klasöre taşıyabilir ve okundu olarak işaretleyebilir.</p>
 <p>Bir kural oluşturmak için:</p>
 <ol>
     <li><b data-text="menu-tools"></b> &gt; <b data-text="cmd-message-rules"></b> öğesini seçin, ardından <b data-text="ui-rule-new"></b> düğmesine tıklayın.</li>
-    <li>Bir ad girin ve <b data-text="ui-rule-query"></b> alanını arama kutusundakiyle aynı sözcüklerle doldurun; örneğin <code>from:</code>, <code>subject:</code> veya <code>list:</code>. Alttaki satır, Gelen Kutusu'ndaki mevcut iletilerden kaçının bu ölçütlere uyduğunu gösterir.</li>
+    <li>Bir ad girin ve <b data-text="ui-rule-query"></b> alanını arama kutusunda kullandığınız ifadelerle doldurun; örneğin <code>from:</code>, <code>subject:</code> veya <code>list:</code>. Alttaki satır, Gelen Kutusu'ndaki mevcut iletilerden kaçının bu ölçütlere uyduğunu gösterir.</li>
     <li>Eşleşen iletiler için bir veya daha fazla eylem seçin: bir klasöre taşıma, okundu olarak işaretleme, bayrak koyma, arşivleme, Gereksiz E-posta klasörüne taşıma, silme veya bildirimleri kapatma.</li>
     <li><b data-text="ui-ok"></b> düğmesine tıklayın.</li>
 </ol>
 <p>Bir iletiden veya bir aramadan da kural oluşturabilirsiniz. Seçili iletinin gönderenini veya posta listesini doldurmak için <b data-text="menu-message"></b> &gt; <b data-text="cmd-create-rule-from-message"></b> öğesini seçin. Geçerli arama ölçütlerinizi kullanmak için arama sonuçlarının üstündeki <b data-text="ui-create-rule"></b> düğmesine tıklayın.</p>
 <h2>Kurallar nasıl çalışır</h2>
-<p>Kurallar, Inbox Classic çalışırken, bildirim alanına küçültülmüşken de, Gelen Kutusu'na gelen yeni iletileri işler. Mevcut iletiler yalnızca <b data-text="ui-rule-apply-now"></b> seçeneğini işaretlerseniz etkilenir. Eşleşen kurallar listede gösterilen sırayla çalışır. Bir kural bir iletiyi Gelen Kutusu'ndan çıkardığında, o iletiye başka kural uygulanmaz. Bir kuralı silmeden devre dışı bırakmak için listedeki onay kutusunu temizleyin.</p>
-<h2>Kuralları değiştirme</h2>
+<p>Kurallar, Inbox Classic arka planda çalışıyor olsa da Gelen Kutusu'na gelen yeni iletileri işler. Mevcut iletiler yalnızca <b data-text="ui-rule-apply-now"></b> seçeneğini işaretlerseniz etkilenir. Eşleşen kurallar listede gösterilen sırayla çalışır. Bir kural bir iletiyi Gelen Kutusu'ndan çıkardığında, o iletiye başka kural uygulanmaz. Bir kuralı silmeden devre dışı bırakmak için listedeki onay kutusunun işaretini kaldırın.</p>
+<h2>Kuralları düzenleme</h2>
 <p>Bir kuralı düzenlemek için listede seçip <b data-text="ui-rule-edit"></b> düğmesine tıklayın veya ona çift tıklayın. Sırayı değiştirmek için <b data-text="ui-account-move-up"></b> ve <b data-text="ui-account-move-down"></b>, kuralı silmek için <b data-text="ui-rule-delete-button"></b> düğmesini kullanın. Kural düzenleyicisinde, şu anda eşleşen iletileri ana pencerede görmek için <b data-text="ui-rule-show"></b> düğmesine tıklayın.</p>
 <p>Kurallar Gelen Kutusu'na gelen yeni iletilere uygulandığından klasör ve tarih filtreleri desteklenmez. <code>in:</code>, <code>before:</code>, <code>after:</code>, <code>older_than:</code> veya <code>newer_than:</code> kullanırsanız, bu filtrelerin neden kullanılamadığını açıklayan bir ileti görünür. Kurallar ileti gönderemez veya iletileri kalıcı olarak silemez: <b data-text="ui-rule-delete"></b> iletileri <b data-text="folder-deleted"></b> klasörüne taşır.</p>
 <aside class="note">Kurallar bu bilgisayarda çalışır. Bilgisayar kapalıyken postaları düzenlemek için posta sağlayıcınızın filtrelerini kullanın.</aside>
-<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav><!--/review-->
+<nav class="related"><a href="topic:find-messages"></a> <a href="topic:search-words"></a> <a href="topic:organize-mail"></a></nav>
