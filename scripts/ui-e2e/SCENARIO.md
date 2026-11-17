@@ -503,6 +503,23 @@ Screenshots: `select-1-several`, `select-2-undo`
 - Select All selects every message of the list
 - one message selected again is shown in the reading pane
 
+## 31a. Many messages at once
+
+Screenshots: `many-1-refused`
+
+In a folder of its own, Bulk, with a few messages made on the server, and a folder Gone that another client deletes (through ImapKit's REST API) before the app hears of it.
+
+- a folder click on a big list highlights its row at once, the old list dimmed until the new one is drawn
+- Reply opens the compose window with the reply, made off the window thread
+- a move to Gone comes back: a bar over the list says so in the core's words, "The server did not move N messages to Gone, so they are back in Bulk: " and the server's reason
+- the status bar no longer says they moved
+- the messages are back in the list
+- and selected again, all of them (by subject), in sight
+- the bar's close button hides it
+- Select All then Delete empties the list
+- the status bar says how many moved to Deleted Items
+- and the server has them there, each once
+
 ## 32. Messages as files
 
 Screenshots: `files-4-drag-out`, `files-5-forward`, `files-6-drop-in`

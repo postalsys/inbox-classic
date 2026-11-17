@@ -489,7 +489,7 @@ int Mailbox::TestListTop() const {
 int Mailbox::TestRowPicture(const std::wstring& subject) {
     int count = ListView_GetItemCount(list_);
     for (int index = 0; index < count; index++) {
-        const PeMessage* row = Row(index);
+        const PeMessage* row = RowNow(index);
         if (!row || Text(row->subject) != subject) {
             continue;
         }

@@ -499,10 +499,12 @@ final class UITest {
         return true
     }
 
-    func search(_ words: String) {
+    /// the words searched for, and what they find read (off the window thread) and drawn
+    func search(_ words: String) async {
         main.searchField.stringValue = words
         main.mailbox.find(words)
         main.showCounts()
+        _ = await waitUntil(20) { !main.mailbox.listLoading }
     }
 
     /// the mailboxes on the server
@@ -522,6 +524,8 @@ final class UITest {
     }
 
     func selectRow(_ row: Int) async {
+        // a list being read is selected in once it is drawn
+        _ = await waitUntil(20) { !main.mailbox.listLoading }
         list.window?.makeFirstResponder(list)
         list.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
         await pause(1.5)
@@ -584,6 +588,7 @@ final class UITest {
         try await trustedPictures()
         try await openEml()
         try await darkMessages()
+        try await bigActions()
         try await accountsAndHelp()
         try await setupFile()
         try await languages()
@@ -809,8 +814,12 @@ final class UITest {
 
         step("replying")
         await selectRow(1)
-        command(.reply)
+        // the draft is made off the window thread: the window opens once it is, not in the command
+        let composing = ComposeWindow.open.count
+        AppDelegate.shared.perform(.reply)
+        check(ComposeWindow.open.count == composing, "Reply returns before the reply is made (no window yet)")
         guard let reply = await waitCompose() else { throw Failed(description: "no compose window") }
+        check(ComposeWindow.open.count == composing + 1, "then Reply opens the compose window with it")
         compose = reply
         check(field("compose.to", compose)?.stringValue.contains("ann@example.com") == true, "the reply goes to the sender")
         check(await typeInEditor(compose, "Thanks, Ann. The lake one is my favourite too."), "the editor takes typing")
@@ -887,29 +896,24 @@ final class UITest {
 
     func searching() async throws {
         step("searching")
-        main.searchField.stringValue = "newsletter"
-        main.mailbox.find("newsletter")
-        main.showCounts()
+        await search("newsletter")
         let found = await waitFor { list.numberOfRows >= 1 ? list.numberOfRows : nil }
         check(found == 1, "the search finds the newsletter (\(found ?? 0))")
         let bar: InfoBar? = find("search.bar", in: main.window)
         check(bar?.isHidden == false && bar?.text.contains("1 result") == true, "the bar over the list says what was found")
         await selectRow(0)
         await shot(main.window, "find-1-results")
-        main.searchField.stringValue = "lunch OR minutes"
-        main.mailbox.find("lunch OR minutes")
-        main.showCounts()
+        await search("lunch OR minutes")
         check(await waitUntil { list.numberOfRows == 2 }, "OR finds either")
         await selectRow(0)
         await shot(main.window, "find-2-every-folder")
-        main.searchField.stringValue = "zebra"
-        main.mailbox.find("zebra")
-        main.showCounts()
+        await search("zebra")
         check(await waitUntil { list.numberOfRows == 0 }, "a word no message has finds nothing")
         await shot(main.window, "find-3-no-results")
         main.searchField.stringValue = ""
         main.mailbox.clearFind()
         main.showCounts()
+        _ = await waitUntil(20) { !main.mailbox.listLoading }
         check(await waitUntil { list.numberOfRows >= 5 }, "clearing the search shows the folder again")
     }
 

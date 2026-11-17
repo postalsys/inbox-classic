@@ -586,6 +586,15 @@ UPDATE bodies SET indexed = 0 WHERE message_id IN (SELECT id FROM dotless);
 UPDATE messages SET text_indexed = 0 WHERE id IN (SELECT id FROM dotless) AND id NOT IN (SELECT message_id FROM bodies);
 DROP TABLE dotless;
 "#,
+    // the highest message id given: a message stored later gets a higher one (messages.rs), never one of a message
+    // deleted since as SQLite would, so that Select All acts on what was there when it was chosen (Search::up_to)
+    r#"
+CREATE TABLE message_ids (high INTEGER NOT NULL);
+INSERT INTO message_ids SELECT COALESCE(MAX(id), 0) FROM messages;
+CREATE TRIGGER message_ids_high AFTER INSERT ON messages BEGIN
+    UPDATE message_ids SET high = MAX(high, new.id);
+END;
+"#,
 ];
 
 pub(crate) fn migrate(db: &mut Connection) -> rusqlite::Result<()> {

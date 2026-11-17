@@ -74,7 +74,7 @@ extension UITest {
 
     func openingAttachments() async throws {
         step("opening an attachment")
-        search("")
+        await search("")
         let base64 = { (data: Data) in data.base64EncodedString(options: .lineLength76Characters) }
         let part = { (type: String, name: String, data: Data) in
             "--trip\r\nContent-Type: \(type); name=\"\(name)\"\r\nContent-Disposition: attachment; filename=\"\(name)\"\r\n"

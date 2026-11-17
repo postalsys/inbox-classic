@@ -9,10 +9,19 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Finnish complete: all 1334 catalog entries and all 52 help topics reviewed, 174 catalog value improvements. Fetch/reconcile upstream refs, late changes and inventories. Then audit the 32 previously reviewed conversations/new-mail topics in watched-conversation-notifications. Continue Croatian (hr) and the remaining ten languages. All 44 mnemonic scopes pass across 17 reviewed catalog languages. Do not run tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Review 168 new server-action rollback messages (six undone-* IDs per each of 28 languages) imported from origin/master 46b938a7. Existing Finnish scope is complete: 1334 catalogs/52 help, 174 improved catalog values; its six late IDs are pending. Then complete the 32-topic watched-conversation-notifications followup, followed by Croatian and remaining ten initial-review languages. Do not run tests. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -1672,11 +1681,34 @@
           },
           "validation": "All 11 language structures pass after accounting for intentionally cleared marks. Tags, attributes, keyboard literals and inline joins preserved. Exact inventories/file/source hashes reconcile; git diff --check passes; report regenerated. No test suite run per user instruction.",
           "notes": "Re-reviewed the attachment reminder paragraph against attachment_words.rs. Retained the surrounding reviewed text. Use a recognized English example and specify that reminder detection supports selected English/German/Estonian/Spanish/French words; target-language examples were unsupported. Preserve every tag/attribute/keyboard literal. Separate followup, not a newly completed initial-scope topic."
+        },
+        {
+          "id": "bg-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/bg/core.ftl": "5ae543f0dbff4dfa28e1c9c822276b421b65ffeec54f1253ea675440926ee502"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "cs": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -3353,11 +3385,34 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "cs-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/cs/core.ftl": "ef9c0470f960e2ff687c0ae4998df617db508af76cc3e998dc2dba6790706ca6"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "da": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -5005,11 +5060,34 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "da-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/da/core.ftl": "cf2bb02b5f9a45c0434ba834c31b0d9b7268b787e2ac58603743f22eaf5daa21"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "de": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -5152,11 +5230,34 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "de-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/de/core.ftl": "46802619b35782343885efda3ecec8ff4920dcec397d611b42080c93f646a3db"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "el": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -6800,11 +6901,34 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "el-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/el/core.ftl": "b07d6bfdf319e6f329247272dcec669c6cc49bbbef593d9fc076dd3b25cea2da"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "es": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -6947,11 +7071,34 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "es-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/es/core.ftl": "908cb7b7485365126bd15f6d70a82564e9117d7142eeecdb38bff20589fb5ce1"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "et": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -7100,11 +7247,34 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "et-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/et/core.ftl": "63d6fe383142d09d902dd938853bc555f44c78f5c1bbe0130927856f1d26819e"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "fi": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -8773,11 +8943,34 @@
           },
           "validation": "Static check-language reports only the 1334 catalog and 52 help marks deliberately removed; no structural findings. All 18 edited help topics preserve exact markup/attributes, literal keyboard tags, platform branches and control references; inline joins and dash checks pass. Global 17503 unmarked catalog messages and 9114 help lines reconcile to completed batches; translation/English-source hashes match. All 28 language inventories and pending marks match state. Review HTML regenerated; git diff --check passes. No test suite run.",
           "notes": "Read English/Finnish and reviewed all 18 remaining help topics against their actual app context. Improved fluent instructions for rules, agents, troubleshooting, installation and reference material. Corrected rule processing versus list sorting, permission scope through Inbox Classic, approval queuing and cancellation, TLS versus certificate failures, conditional app-password support, sign-in-page-file writing a URL, inclusive after/exclusive before dates, to/cc/bcc searching all recipient fields, and the three unsubscribe flows. Explained Finnish compose Alt+K/Alt+P beside preserved literal key tags. All markup/attributes, control references, links, platform branches and literal keyboard tags preserved. No tests run per user instruction."
+        },
+        {
+          "id": "fi-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/fi/core.ftl": "33a35a90d0db9b74edf1bdbb67f197d0e9e6b46cc99cce61ac94a9aa6c5a7dbf"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "fr": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -8934,6 +9127,20 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "fr-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/fr/core.ftl": "50f72f924d5cf94ba8552805e8a9e2c98b223486f2bd694f43d7f014e09da124"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
@@ -10016,7 +10223,13 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note"
+          "attachment-decrypted-note",
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
         ],
         "help.ftl": [
           "help-title",
@@ -10365,6 +10578,20 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "hr-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/hr/core.ftl": "c55cea65a50c608bc3de48542b1a38f0a88bd8e3d849578bb1e08c6298157c17"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
@@ -11447,7 +11674,13 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note"
+          "attachment-decrypted-note",
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
         ],
         "help.ftl": [
           "help-title",
@@ -11796,11 +12029,34 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "hu-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/hu/core.ftl": "b7aba38374e6871fcec6090e7567a52baa38851956faf1acfc4d9350eec083fe"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "it": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -13613,6 +13869,20 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "it-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/it/core.ftl": "df4931b8bd84e8df4c5ca77d8dd2fc64c3a38789dcf5c44f7ed817b787e32db1"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
@@ -14695,7 +14965,13 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note"
+          "attachment-decrypted-note",
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
         ],
         "help.ftl": [
           "help-title",
@@ -15044,6 +15320,20 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "lt-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/lt/core.ftl": "946704fee9b9005ba9dbec2c896da6582c8c8d590b0167cbafb78793995d7f50"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
@@ -16126,7 +16416,13 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note"
+          "attachment-decrypted-note",
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
         ],
         "help.ftl": [
           "help-title",
@@ -16475,11 +16771,34 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "lv-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/lv/core.ftl": "2df4fb0eac83056cc0857a75c562f7957005f236dfe16da6a616ea56f4b38790"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "nl": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -18319,6 +18638,20 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "nl-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/nl/core.ftl": "0aca0bb27e66e9788cd2d56e814856401f69d080661c6fc7dff718d06de25028"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
@@ -19401,7 +19734,13 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note"
+          "attachment-decrypted-note",
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
         ],
         "help.ftl": [
           "help-title",
@@ -19750,11 +20089,34 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "pl-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/pl/core.ftl": "4afe287ac78f524ae02e0745f4ec1e76efe0e9524278ce5153149292339a91de"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "pt": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -21560,6 +21922,20 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "pt-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/pt/core.ftl": "3bc48009766ad4ed6f78bb1ce5be3d0630453ac8b4b23a65fdc23946fbc31881"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
@@ -22642,7 +23018,13 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note"
+          "attachment-decrypted-note",
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
         ],
         "help.ftl": [
           "help-title",
@@ -22991,6 +23373,20 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "ro-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/ro/core.ftl": "98479074f570147f86ba6b3c944fb8a7e73e3cad9854c21f63d0f53c298e744d"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
@@ -24073,7 +24469,13 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note"
+          "attachment-decrypted-note",
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
         ],
         "help.ftl": [
           "help-title",
@@ -24422,6 +24824,20 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "ru-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/ru/core.ftl": "3d96e039e67e4057cf6d7fd12ee0056c8bc4fd54d165c1b2163417e97f9f8c45"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
@@ -25504,7 +25920,13 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note"
+          "attachment-decrypted-note",
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
         ],
         "help.ftl": [
           "help-title",
@@ -25853,6 +26275,20 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "sk-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sk/core.ftl": "ed2cea96f353ed04f497b68e787f17749c71a63b926acfc14d3ea6bf8b56d052"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
@@ -26935,7 +27371,13 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note"
+          "attachment-decrypted-note",
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
         ],
         "help.ftl": [
           "help-title",
@@ -27284,6 +27726,20 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "sl-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sl/core.ftl": "6cdac66a255c638ddcc38fd69d477d64b396a491f2236b575b755abfa660a0bd"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
@@ -28366,7 +28822,13 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note"
+          "attachment-decrypted-note",
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
         ],
         "help.ftl": [
           "help-title",
@@ -28715,6 +29177,20 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "sv-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sv/core.ftl": "10c970eb645a9d53622f8e789e2e3f2e8834b1c315c6a4d02fef8bc8a1972180"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
@@ -29797,7 +30273,13 @@
           "setup-file-name",
           "setup-skipped-unreachable",
           "attachment-runs-programs",
-          "attachment-decrypted-note"
+          "attachment-decrypted-note",
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
         ],
         "help.ftl": [
           "help-title",
@@ -30146,11 +30628,34 @@
           },
           "validation": "Structural checks pass, accounting for reviewed marks and seven independently verified multiline-parser false positives across existing catalogs. Exact inventory/source/file hashes reconcile; git diff --check passes. Test suite intentionally not run per user instruction.",
           "notes": "Reviewed transient message-list loading overlay in Windows mailbox.cpp, Mac ListCover and Linux list_load.rs. Natural short loading status retained; Catalan apostrophe made consistent. No test suite per user instruction."
+        },
+        {
+          "id": "uk-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/uk/core.ftl": "1cd6f3be9c734553d98165f16ca9d31a6fd56704c41b3a803e5ef9113f0ba0b3"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ]
     },
     "ca": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -31897,6 +32402,20 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "ca-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/ca/core.ftl": "7e7e36f5634260b1263e290d4fe88058218616c88d6efeecc2e231df9a889dbb"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -31904,7 +32423,16 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "nb": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -33614,6 +34142,20 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "nb-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/nb/core.ftl": "46ab38dc47aebab076da948ad933505c624f5942396c4748810024772267f68b"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -33621,7 +34163,16 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "pt-BR": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -35339,6 +35890,20 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "pt-BR-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/pt-BR/core.ftl": "e88c0d2bececf03b685af2ccfe99c9eb9ec5836dc7fa95fcb412a4b56c8b5ed8"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -35346,7 +35911,16 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "sr-Latn": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -37040,6 +37614,20 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "sr-Latn-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/sr-Latn/core.ftl": "a51f1f553d9eb40056cb0e6ebfd2fa63cc5e5287743ea5d6427b9933cdff2d13"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -37047,7 +37635,16 @@
       "location": "Included in the active i18n/review-wave1 checkout. Original drafts are unchanged from source_commit before review."
     },
     "tr": {
-      "pending_catalogs": {},
+      "pending_catalogs": {
+        "core.ftl": [
+          "undone-move",
+          "undone-delete",
+          "undone-archive",
+          "undone-read",
+          "undone-unread",
+          "undone-flags"
+        ]
+      },
       "pending_help": [],
       "completed_batches": [
         {
@@ -38729,6 +39326,20 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "tr-rollback-source-integration-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "changed_values": 0,
+          "files": {
+            "core/locales/tr/core.ftl": "d770ad0b58220e61ce145cfb9412ebf464cdab55de796f6479d963d00ae2a1a2"
+          },
+          "english_sources": {
+            "core/locales/en/core.ftl": "ff86d8646e2925dc905d53de7158219588a2e8c49b99f020a41dc8f5392ac49d"
+          },
+          "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run.",
+          "notes": "Source integration checkpoint only, not linguistic review. Imported six marked undone-* drafts from 46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4. Compared every existing catalog value with the pre-integration checkpoint; no existing translation or English value changed. Added all six IDs to exact pending inventory."
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -38828,16 +39439,64 @@
       "catalog_entries": 84,
       "help_pages": 0,
       "notes": "Three list-loading status messages per translated language; imported with existing reviewed values and marks preserved. These are not network-download or index-progress labels."
+    },
+    {
+      "kind": "late server-action rollback messages",
+      "sources": {
+        "origin/master": "46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4",
+        "review_parent": "4369af4a9cdc2f36f8197e7310e93c878a96f49c"
+      },
+      "catalog_entries": 168,
+      "help_pages": 0,
+      "ids": [
+        "undone-move",
+        "undone-delete",
+        "undone-archive",
+        "undone-read",
+        "undone-unread",
+        "undone-flags"
+      ],
+      "languages": [
+        "bg",
+        "ca",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "es",
+        "et",
+        "fi",
+        "fr",
+        "hr",
+        "hu",
+        "it",
+        "lt",
+        "lv",
+        "nb",
+        "nl",
+        "pl",
+        "pt",
+        "pt-BR",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sr-Latn",
+        "sv",
+        "tr",
+        "uk"
+      ],
+      "notes": "Six marked undone-* drafts added to every translated core catalog. Existing English and translation values retained exactly; no reviewed entries reopened. New entries remain pending."
     }
   ],
-  "total_catalog_entries": 32092,
+  "total_catalog_entries": 32260,
   "total_help_pages": 1252,
   "review_workspace": {
     "path": "/Users/andris/Projects/PostalExpress/build/i18n-wave1",
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Fetched origin after Greek completion fd1002f6. Local master 5573ee4b, origin/master 76f67e82, local/remote wave1 8df686a4. New master merges the five already-inventoried wave1 languages with no further localization changes. Integrated upstream ancestry, retaining reviewed translation/glossary/generated contents and taking inspected current upstream code/scripts. One automatic merge duplicated fold::register; resolved to upstream initialization. Fifteen upstream source paths match origin/master exactly. Offline pe-ffi build in isolated target passed; existing generated translations unchanged; new languages.tsv matches upstream. Full 28-language catalogs/variables/help inventory matches state: 15972 pending catalog entries and 624 help topics. All completed translation and English hashes match; --since starting_commit reports 0 newly pending messages/passages. Mark-only diagnostics reconcile exactly. No tests run. Final audit still required after queue.",
+    "latest_source_audit": "Fetched origin after Finnish completion 4369af4a. Local master 5573ee4b, origin/master 46b938a7, local/remote wave1 8df686a4. Found six new undone-* IDs per language (168 translated messages), no modified existing values or new languages/help. Integrated upstream source ancestry into review branch; retained all prior English/translation corrections and appended marked drafts. All 58 imported noncatalog paths match upstream exactly. Exact pending inventory now 14809 catalog entries and 572 help topics, plus 32 notification-context followups. Static catalog/help checks, exact marks and completed hashes pass; --since starting_commit identifies the 168 newly pending messages. Offline pe-ffi build passed in isolated target; no tests run. Final audit still required after the queue.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -38860,7 +39519,19 @@
         "scripts/ui-e2e.ps1"
       ],
       "validation": "Offline cargo build -p pe-ffi passed in isolated target; generated translation outputs unchanged. All 28 catalogs/help inventories and variable sets checked; completed file/source hashes reconcile. git diff --check and cached check pass. No test suite run per user instruction."
-    }
+    },
+    "source_audit_checkpoints": [
+      {
+        "source_commit": "46b938a7c2ce2ac2ce24b0d62f0f6c1e36b062c4",
+        "review_parent": "4369af4a9cdc2f36f8197e7310e93c878a96f49c",
+        "local_master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+        "wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+        "added_catalog_entries": 168,
+        "pending_catalog_entries": 14809,
+        "pending_help_topics": 572,
+        "validation": "All 28 language catalog IDs/full variable sets, 52 help topics per language and pending marks reconcile exactly. All prior values preserved; 168 marked drafts added. 17503 completed catalog messages and 9114 help lines plus translation/English hashes reconcile. Static check-language has only 23595 intentionally removed marks and seven recorded es/fr parser false positives, no unexpected diagnostics. Offline cargo build -p pe-ffi passed in dedicated target (9.53s); generated files unchanged from staged upstream. git diff --check passes. No test suite run."
+      }
+    ]
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
   "guide_updates": [

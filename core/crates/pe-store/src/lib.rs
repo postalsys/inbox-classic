@@ -51,7 +51,7 @@ pub use recovery::Recovery;
 pub use rules::{Rule, RuleId};
 pub use rusqlite::Error;
 pub use search::{IndexText, Scope, Search, Show};
-pub use selection::{MessageRef, Picked};
+pub use selection::{FolderSummary, MessageRef, Picked};
 pub use senders::{LOGO_KEPT_MS, LOGO_RETRY_MS, StoredLogo, ToJudge};
 pub use sign_in_apps::{SignInApp, SignInAppId, StoredSignInApp};
 pub use threads::{MAX_REFERENCES, RowRef, ThreadPlace, parse_references};

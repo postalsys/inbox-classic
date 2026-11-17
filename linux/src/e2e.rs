@@ -921,6 +921,8 @@ fn select_folder(name: &str) -> bool {
 }
 
 async fn select_row(index: u32) {
+    // the list asked for drawn first: it is read off the window thread
+    wait_until(10, || true).await;
     shell().main().list.select(index);
     pause(1500).await;
 }
@@ -1011,6 +1013,7 @@ async fn scenario(d: Rc<Driver>) {
     steps::mark_all_read(&d).await;
     steps::dragging(&d).await;
     steps::several_messages(&d).await;
+    steps::many_messages(&d).await;
     steps::messages_as_files(&d).await;
     steps::flag_colors(&d).await;
     steps::junk(&d).await;

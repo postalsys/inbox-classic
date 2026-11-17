@@ -752,3 +752,34 @@ setup-file-name = Inbox Classic ayarları ve hesapları
 setup-skipped-unreachable = Atlandı: { $name }. Oturum açma hizmetine ulaşılamadı. Oturum Açma Uygulamaları'nda yeniden ekleyin.
 attachment-runs-programs = “{ $name }” kod çalıştırabilen bir dosya türünde olduğu için Inbox Classic tarafından doğrudan açılmaz. Kaynağına güveniyorsanız dosyayı kaydedip kendiniz açabilirsiniz.
 attachment-decrypted-note = Bu ek, şifreli bir iletiden geliyor. Açabilmeniz için bu bilgisayarda, kullanıcı hesabınıza ait bir klasöre şifresi çözülmüş geçici bir kopyası kaydedilir. Dosyayı açan programı kapatmanız kopyayı silmez. 24 saatten eski kopyalar Inbox Classic'in bir sonraki açılışında temizlenir.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Sunucu taşıma işlemini yapmadı ({ $messages }, hedef: { $folder }); ileti yeniden { $from } klasöründe: { $reason }
+   *[other] Sunucu taşıma işlemini yapmadı ({ $messages }, hedef: { $folder }); iletiler yeniden { $from } klasöründe: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Sunucu silme işlemini yapmadı ({ $messages }); ileti yeniden { $from } klasöründe: { $reason }
+   *[other] Sunucu silme işlemini yapmadı ({ $messages }); iletiler yeniden { $from } klasöründe: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Sunucu arşivleme işlemini yapmadı ({ $messages }); ileti yeniden { $from } klasöründe: { $reason }
+   *[other] Sunucu arşivleme işlemini yapmadı ({ $messages }); iletiler yeniden { $from } klasöründe: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Sunucu okundu olarak işaretlemedi ({ $messages }); ileti yeniden okunmamış durumda: { $reason }
+   *[other] Sunucu okundu olarak işaretlemedi ({ $messages }); iletiler yeniden okunmamış durumda: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Sunucu okunmadı olarak işaretlemedi ({ $messages }); ileti yeniden okunmuş durumda: { $reason }
+   *[other] Sunucu okunmadı olarak işaretlemedi ({ $messages }); iletiler yeniden okunmuş durumda: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Sunucu bayrakları değiştirmedi ({ $messages }); ileti önceki haline döndü: { $reason }
+   *[other] Sunucu bayrakları değiştirmedi ({ $messages }); iletiler önceki haline döndü: { $reason }
+}

@@ -299,6 +299,7 @@ void Reader::Create(HWND parent, PeCore* core) {
 void Reader::Destroy() {
     KillTimer(parent_, TIMER_MEASURE);
     StopOpening();
+    CancelReads();
     if (viewRequest_) {
         pe_message_view_cancel(core_, viewRequest_);
         viewRequest_ = 0;
@@ -417,6 +418,10 @@ void Reader::ShowRetry(bool shown) {
 }
 
 bool Reader::OnSetCursor(HWND window) const {
+    // a reply or an attachment that takes long to read
+    if (BusyCursor()) {
+        return true;
+    }
     if (window != pictures_ && window != picturesMenu_ && window != retry_ && window != unsubscribe_) {
         return false;
     }
@@ -702,9 +707,20 @@ void Reader::ChooseAttachment() {
 }
 
 void Reader::SaveAttachment(size_t index) {
-    size_t length = 0;
-    char* name = nullptr;
-    uint8_t* data = AttachmentData(index, length, name);
+    if (!file_.empty()) {
+        size_t length = 0;
+        char* name = nullptr;
+        uint8_t* data = pe_file_attachment_data(core_, core::Narrow(file_).c_str(), index, &length, &name);
+        SaveRead(data, length, name);
+        return;
+    }
+    // read (and decrypted) off the window thread: the dialog once it is here (ReadDone)
+    if (!saveRead_.Start(core_, pe_attachment_data_start(core_, folder_, uid_, index))) {
+        SayNotHere();
+    }
+}
+
+void Reader::SaveRead(uint8_t* data, size_t length, char* name) {
     core::String safeName(name);
     if (!data) {
         SayNotHere();
@@ -719,14 +735,6 @@ void Reader::SaveAttachment(size_t index) {
         }
     }
     pe_bytes_free(data, length);
-}
-
-// the files of the message shown, of its folder or of the message file
-uint8_t* Reader::AttachmentData(size_t index, size_t& length, char*& name) const {
-    if (!file_.empty()) {
-        return pe_file_attachment_data(core_, core::Narrow(file_).c_str(), index, &length, &name);
-    }
-    return pe_attachment_data(core_, folder_, uid_, index, &length, &name);
 }
 
 bool Reader::SaveAttachments(const std::string& dir, size_t& saved, size_t& total) const {
@@ -866,14 +874,21 @@ void Reader::OpenAttachment(int item) {
         opener_.join();
     }
     openingItem_ = item;
-    SetTimer(strip_, TIMER_STRIP_BUSY, 400, nullptr);
-    // reading (and decrypting) the message and writing the file off the window thread; the result comes back to the
-    // strip, or is dropped with it when the window closed first
-    opener_ = std::thread([strip = strip_, core = core_, folder = folder_, uid = uid_, file = core::Narrow(file_), index, item] {
+    SetTimer(strip_, TIMER_STRIP_BUSY, PE_LIST_LOADING_MS, nullptr);
+    // reading (and decrypting) the message and writing the file off the window thread: a folder's message by the core
+    // (ReadDone), a message file on a thread of its own whose result comes back to the strip, or is dropped with it
+    // when the window closed first
+    if (file_.empty()) {
+        openRequest_ = pe_attachment_open_start(core_, folder_, uid_, index);
+        if (!openRequest_) {
+            OpenDone(new StripOpened{item, L"", L"", L""});
+        }
+        return;
+    }
+    opener_ = std::thread([strip = strip_, core = core_, file = core::Narrow(file_), index, item] {
         char* note = nullptr;
         char* error = nullptr;
-        char* written = file.empty() ? pe_attachment_open(core, folder, uid, index, &note, &error)
-                                     : pe_file_attachment_open(core, file.c_str(), index, &note, &error);
+        char* written = pe_file_attachment_open(core, file.c_str(), index, &note, &error);
         core::String path(written), noted(note), refused(error);
         auto* opened = new StripOpened{item, Text(path.get()), Text(noted.get()), Text(refused.get())};
         if (!PostMessageW(strip, WM_STRIP_OPENED, 0, reinterpret_cast<LPARAM>(opened))) {
@@ -903,6 +918,9 @@ void Reader::OpenDone(StripOpened* opened) {
 }
 
 void Reader::StopOpening() {
+    if (openRequest_) {
+        pe_read_cancel(core_, std::exchange(openRequest_, 0));
+    }
     if (opener_.joinable()) {
         opener_.join();
     }
@@ -1103,14 +1121,27 @@ void Reader::Print(HWND owner) {
     }
 }
 
-core::Draft Reader::DraftOf(PeDraftKind kind, int64_t account) const {
+bool Reader::DraftOf(PeDraftKind kind, int64_t account, std::function<void(core::Draft)> done) {
     if (!file_.empty() && view_) {
-        return core::Draft(pe_file_draft(core_, core::Narrow(file_).c_str(), account, kind));
+        done(core::Draft(pe_file_draft(core_, core::Narrow(file_).c_str(), account, kind)));
+        return true;
     }
     if (!uid_ || !view_) {
-        return core::Draft();
+        return false;
     }
-    return core::Draft(pe_message_draft(core_, folder_, uid_, kind));
+    // the message read (and decrypted) off the window thread: `done` once it is (ReadDone)
+    if (!draftRead_.Start(core_, pe_message_draft_start(core_, folder_, uid_, kind))) {
+        done(core::Draft());
+        return true;
+    }
+    draftDone_ = std::move(done);
+    return true;
+}
+
+void Reader::CancelReads() {
+    draftRead_.Reset();
+    saveRead_.Reset();
+    draftDone_ = nullptr;
 }
 
 std::wstring Reader::Unsubscribe(HWND owner, std::wstring& mailto) {
@@ -1307,6 +1338,31 @@ bool Reader::OnTimer(UINT_PTR id) {
     return true;
 }
 
+// a read this pane started is done (another's is not its own)
+void Reader::OnReadDone(uint64_t request) {
+    if (!request) {
+        return;
+    }
+    if (draftRead_.Done(request)) {
+        auto done = std::exchange(draftDone_, nullptr);
+        core::Draft draft(pe_draft_result(core_, request));
+        if (done) {
+            done(std::move(draft));
+        }
+    } else if (saveRead_.Done(request)) {
+        size_t length = 0;
+        char* name = nullptr;
+        uint8_t* data = pe_attachment_data_result(core_, request, &length, &name);
+        SaveRead(data, length, name);
+    } else if (request == openRequest_) {
+        openRequest_ = 0;
+        char* note = nullptr;
+        char* error = nullptr;
+        core::String path(pe_attachment_open_result(core_, request, &note, &error)), noted(note), refused(error);
+        OpenDone(new StripOpened{openingItem_, Text(path.get()), Text(noted.get()), Text(refused.get())});
+    }
+}
+
 void Reader::OnEvent(const UiEvent& event) {
     switch (event.kind) {
     case PE_EVENT_KIND_MESSAGE_READY:
@@ -1329,6 +1385,9 @@ void Reader::OnEvent(const UiEvent& event) {
         if (event.failure == PE_FAILURE_KIND_NONE && IsWindowVisible(retry_) && account_ && account_ == event.account) {
             Retry();
         }
+        break;
+    case PE_EVENT_KIND_READ_DONE:
+        OnReadDone(event.uid);
         break;
     case PE_EVENT_KIND_VIEW_READY:
         // a view for a message that is no longer shown was cancelled, its event is not this one

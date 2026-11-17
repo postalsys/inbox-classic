@@ -1,10 +1,12 @@
 //! The message list: a column view over a list model that pages through the core, 100 rows at a time, as the virtual
-//! list view of the Windows app does. The columns: the paper clip, the flag, From, Subject (which takes the room the
+//! list view of the Windows app does. The pages are read off the window thread: rows not here yet are blank lines of
+//! the same height, filled when their page comes. The columns: the paper clip, the flag, From, Subject (which takes the room the
 //! others leave), Received, and Folder while a search lists several folders. Unread messages in bold, ignored
 //! conversations grey; the menus check Watch and Ignore Conversation. Every string comes from the core as it decoded
 //! it.
 
 use std::cell::{Cell, RefCell};
+use std::collections::HashSet;
 use std::rc::Rc;
 
 use gtk::prelude::*;
@@ -15,20 +17,20 @@ use pe_store::{Message, MessageRef, Sort, SortField};
 use crate::app::shell;
 use crate::ui::set_class;
 
-const PAGE: u32 = 100;
+/// The rows of a page, as the core's list loads read them
+const PAGE: u32 = pe_core::LIST_PAGE as u32;
 /// Pages kept while the list scrolls, the least recently used dropped first
 const PAGES_KEPT: usize = 8;
 
-/// The page the list reads the row at `position` with: its offset and length
-pub fn page_of(position: u32) -> (u64, u64) {
-    (u64::from(position / PAGE * PAGE), u64::from(PAGE))
-}
 /// The widths the Subject and Folder columns start with; the Subject column takes what the others leave, so in a
 /// wide window it is wider
 const SUBJECT_WIDTH: i32 = 200;
 const FOLDER_WIDTH: i32 = 130;
 /// The least the Folder column of a search leaves the Subject column
 const MIN_SUBJECT_WIDTH: i32 = 90;
+
+/// Asks the core for the page of the list at an offset
+type AskPage = Rc<dyn Fn(u64)>;
 
 mod imp {
     use super::*;
@@ -51,7 +53,15 @@ mod imp {
         /// The view the rows are read through
         pub view: RefCell<pe_core::ListView>,
         pub total: Cell<u32>,
+        /// The pages here, the least recently used first: read rows, or blank ones while their page is asked for
         pub pages: RefCell<Vec<(u32, Vec<super::MessageRow>)>>,
+        /// The offsets of the pages asked for since the list was drawn
+        pub asked: RefCell<HashSet<u32>>,
+        /// Pages a row drawn wants, asked for once the drawing is done
+        pub wanted: RefCell<Vec<u32>>,
+        pub asking: Cell<bool>,
+        /// Asks the core for the page at an offset (`ListPageReady` brings it)
+        pub ask: RefCell<Option<AskPage>>,
     }
 
     #[glib::object_subclass]
@@ -72,8 +82,11 @@ mod imp {
             self.total.get()
         }
 
+        /// The row at `position` from the pages here; a page not here is blank lines of the row's height, and is
+        /// asked of the core with the page after it (no query here: GTK asks while it draws)
         fn item(&self, position: u32) -> Option<glib::Object> {
-            if position >= self.total.get() {
+            let total = self.total.get();
+            if position >= total {
                 return None;
             }
             let offset = position / PAGE * PAGE;
@@ -90,15 +103,16 @@ mod imp {
                     if pages.len() >= PAGES_KEPT {
                         pages.remove(0);
                     }
-                    let rows = self
-                        .view
-                        .borrow()
-                        .rows(&shell().core, u64::from(offset), u64::from(PAGE))
-                        .unwrap_or_default()
-                        .into_iter()
-                        .map(super::MessageRow::new)
+                    let rows = (offset..total.min(offset + PAGE))
+                        .map(|_| super::MessageRow::blank())
                         .collect();
                     pages.push((offset, rows));
+                    drop(pages);
+                    self.want(offset);
+                    if offset + PAGE < total {
+                        self.want(offset + PAGE);
+                    }
+                    pages = self.pages.borrow_mut();
                     pages.len() - 1
                 }
             };
@@ -106,6 +120,32 @@ mod imp {
                 .1
                 .get((position - offset) as usize)
                 .map(|row| row.clone().upcast())
+        }
+    }
+
+    impl MessageModel {
+        /// The page at `offset` asked of the core once GTK is done drawing, unless asked for already
+        fn want(&self, offset: u32) {
+            if !self.asked.borrow_mut().insert(offset) {
+                return;
+            }
+            self.wanted.borrow_mut().push(offset);
+            if self.asking.replace(true) {
+                return;
+            }
+            let model = self.obj().downgrade();
+            glib::idle_add_local_once(move || {
+                let Some(model) = model.upgrade() else { return };
+                let imp = model.imp();
+                imp.asking.set(false);
+                let wanted = std::mem::take(&mut *imp.wanted.borrow_mut());
+                let ask = imp.ask.borrow().clone();
+                if let Some(ask) = ask {
+                    for offset in wanted {
+                        ask(u64::from(offset));
+                    }
+                }
+            });
         }
     }
 }
@@ -119,6 +159,11 @@ impl MessageRow {
         let row: MessageRow = glib::Object::new();
         *row.imp().message.borrow_mut() = Some(message);
         row
+    }
+
+    /// A row whose page is not here yet: a blank line
+    fn blank() -> MessageRow {
+        glib::Object::new()
     }
 
     /// What `f` reads of the message
@@ -138,15 +183,39 @@ impl MessageModel {
         let before = imp.total.get();
         let mut pages = imp.pages.borrow_mut();
         pages.clear();
+        imp.asked.borrow_mut().clear();
+        imp.wanted.borrow_mut().clear();
         if let Some((offset, rows)) = read
             && let Ok(offset) = u32::try_from(offset)
         {
             pages.push((offset, rows.into_iter().map(MessageRow::new).collect()));
+            imp.asked.borrow_mut().insert(offset);
         }
         drop(pages);
         let now = u32::try_from(total).unwrap_or(u32::MAX);
         imp.total.set(now);
         self.items_changed(0, before, now);
+    }
+
+    /// The page read at `offset` in place of its blank lines: the range of rows that changed, None when the page is
+    /// past the end of the list
+    fn fill(&self, offset: u64, rows: Vec<Message>) -> Option<(u32, u32)> {
+        let imp = self.imp();
+        let total = imp.total.get();
+        let offset = u32::try_from(offset).ok().filter(|o| *o < total && o % PAGE == 0)?;
+        let count = total.min(offset + PAGE) - offset;
+        let mut rows: Vec<MessageRow> = rows.into_iter().take(count as usize).map(MessageRow::new).collect();
+        // a page shorter than the list says (it changed since it was counted): blank to the end, until it is read again
+        rows.resize_with(count as usize, MessageRow::blank);
+        let mut pages = imp.pages.borrow_mut();
+        pages.retain(|(at, _)| *at != offset);
+        if pages.len() >= PAGES_KEPT {
+            pages.remove(0);
+        }
+        pages.push((offset, rows));
+        drop(pages);
+        self.items_changed(offset, count, count);
+        Some((offset, count))
     }
 }
 
@@ -516,6 +585,20 @@ impl MessageList {
         *shown != *view || shown.stale(&shell().core).unwrap_or(true)
     }
 
+    /// What asks the core for a page of the list, when a row of one not here is drawn
+    pub fn connect_page_wanted(&self, ask: impl Fn(u64) + 'static) {
+        *self.model.imp().ask.borrow_mut() = Some(Rc::new(ask));
+    }
+
+    /// A page of the list read at `offset`, drawn in place of its blank lines with the selection kept
+    pub fn fill_page(&self, offset: u64, rows: Vec<Message>) {
+        let selected = self.selection.selection().copy();
+        if let Some((start, count)) = self.model.fill(offset, rows) {
+            self.selection
+                .set_selection(&selected, &gtk::Bitset::new_range(start, count));
+        }
+    }
+
     /// The list again: the rows of its view, `total` of them (`read` the page of them read already, its offset and
     /// rows), the rows `select` selected; scrolled as it was when it is the same list read again (`same`, GTK keeps
     /// the place), else from the top
@@ -589,6 +672,23 @@ impl MessageList {
 
     pub fn rows(&self) -> u32 {
         self.model.n_items()
+    }
+
+    /// Whether every selected row is in sight, for the e2e driver
+    #[cfg(feature = "e2e")]
+    pub fn selection_in_sight(&self) -> bool {
+        let selected = self.selection.selection();
+        let rows = self.model.n_items();
+        if selected.is_empty() || rows == 0 {
+            return false;
+        }
+        let Some(adjustment) = self.adjustment() else {
+            return true;
+        };
+        let row = adjustment.upper() / f64::from(rows);
+        let top = adjustment.value();
+        f64::from(selected.minimum()) * row >= top - 0.5
+            && f64::from(selected.maximum() + 1) * row <= top + adjustment.page_size() + 0.5
     }
 
     /// The messages of the first `limit` rows as the list shows them now, for the e2e driver
@@ -997,6 +1097,9 @@ fn subject_column() -> gtk::ColumnViewColumn {
         let Some((subject, thread, unread, ignored)) =
             row.with(|m| (m.info.subject.clone(), m.thread, m.bold(), m.dimmed()))
         else {
+            // its page is not here yet: a blank line
+            expander.set_visible(false);
+            label.set_text("");
             return;
         };
         set_class(&label, "unread", unread);

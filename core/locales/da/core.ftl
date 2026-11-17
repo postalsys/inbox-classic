@@ -770,3 +770,34 @@ setup-file-name = Inbox Classic-indstillinger og -konti
 setup-skipped-unreachable = { $name } blev sprunget over: dens logintjeneste kunne ikke nås. Tilføj den igen under Login-apps.
 attachment-runs-programs = Filen »{ $name }« kan køre programmer, så Inbox Classic åbner den ikke. Gem den, og åbn den selv, hvis du stoler på, hvor den kommer fra.
 attachment-decrypted-note = Den vedhæftede fil kommer fra en krypteret meddelelse. For at åbne den gemmer Inbox Classic en ukrypteret kopi i en midlertidig mappe til din brugerkonto. Kopier, der er over et døgn gamle, fjernes, når programmet starter.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Serveren flyttede ikke { $messages } til { $folder }, så den er tilbage i { $from }: { $reason }
+   *[other] Serveren flyttede ikke { $messages } til { $folder }, så de er tilbage i { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Serveren slettede ikke { $messages }, så den er tilbage i { $from }: { $reason }
+   *[other] Serveren slettede ikke { $messages }, så de er tilbage i { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Serveren arkiverede ikke { $messages }, så den er tilbage i { $from }: { $reason }
+   *[other] Serveren arkiverede ikke { $messages }, så de er tilbage i { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Serveren markerede ikke { $messages } som læst, så den er ulæst igen: { $reason }
+   *[other] Serveren markerede ikke { $messages } som læste, så de er ulæste igen: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Serveren markerede ikke { $messages } som ulæst, så den er læst igen: { $reason }
+   *[other] Serveren markerede ikke { $messages } som ulæste, så de er læste igen: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Serveren ændrede ikke flagene på { $messages }, så den er som før: { $reason }
+   *[other] Serveren ændrede ikke flagene på { $messages }, så de er som før: { $reason }
+}

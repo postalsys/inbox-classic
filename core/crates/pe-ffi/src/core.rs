@@ -154,6 +154,22 @@ pub enum PeEventKind {
     AddressBookChanged = 29,
     /// The OpenPGP keys changed other than through their window (an import)
     KeysChanged = 30,
+    /// The list load `uid` of `pe_list_view_load` is read: `pe_list_load_result`
+    ListReady = 31,
+    /// The page `uid` of `pe_list_view_load_page` is read: `pe_list_load_result`
+    ListPageReady = 32,
+    /// The read `uid` started off the window thread is done: `pe_draft_result` (`pe_message_draft_start`,
+    /// `pe_draft_open_start`), `pe_attachment_data_result` (`pe_attachment_data_start`),
+    /// `pe_attachment_open_result` (`pe_attachment_open_start`) or `pe_selection_summary_result`
+    /// (`pe_selection_summary_start`)
+    ReadDone = 33,
+    /// The server did not do what the user asked of `count` messages of `folder` of `account` (a move, a delete, Mark
+    /// All Read), so the store took it back: the rows are as they were again (a `FolderChanged` came first), and
+    /// `message` says what and why, for a bar over the list
+    ActionUndone = 34,
+    /// The action `uid` of `pe_selection_act_start` or `pe_mark_read_start` is done in the store and handed to the
+    /// server: `message` is what the status bar says; with `failure` `Other` it was refused, and `message` says why
+    Acted = 35,
 }
 
 #[repr(C)]
@@ -199,12 +215,14 @@ pub struct PeEvent {
     pub folder: i64,
     pub uid: u64,
     pub failure: PeFailureKind,
-    /// UTF-8: why, for `Failed`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; the
+    /// UTF-8: why, for `Failed`; what was taken back and why, for `ActionUndone`; what was done or why not, for
+    /// `Acted`; the subject, for `MessageSent`; why not, for a `DraftSaved` that did not save; the
     /// notification's title, for `NewMail`; how far it is or what was done, for `Transferring`. NULL otherwise
     pub message: *const c_char,
     /// UTF-8: the Message-ID of the draft, for `DraftSaved`; the notification's text, for `NewMail`. NULL otherwise
     pub detail: *const c_char,
-    /// How many messages, for `NewMail`; 0 otherwise
+    /// How many messages, for `NewMail`, `RulesApplied` and `ActionUndone`; the seconds left, for `SendWaiting`; 0
+    /// otherwise
     pub count: u64,
 }
 
@@ -258,11 +276,17 @@ impl Callback {
             Event::SettingsChanged => (PeEventKind::SettingsChanged, 0, 0, 0),
             Event::AddressBookChanged => (PeEventKind::AddressBookChanged, 0, 0, 0),
             Event::KeysChanged => (PeEventKind::KeysChanged, 0, 0, 0),
+            Event::ListReady { request } => (PeEventKind::ListReady, 0, 0, *request),
+            Event::ListPageReady { request } => (PeEventKind::ListPageReady, 0, 0, *request),
+            Event::ReadDone { request } => (PeEventKind::ReadDone, 0, 0, *request),
+            Event::ActionUndone { account, folder, .. } => (PeEventKind::ActionUndone, *account, *folder, 0),
+            Event::Acted { request, .. } => (PeEventKind::Acted, 0, 0, *request),
         };
         let count = match &event {
             Event::NewMail { count, .. } => *count as u64,
             Event::SendWaiting { seconds, .. } => *seconds,
             Event::RulesApplied { count, .. } => *count as u64,
+            Event::ActionUndone { count, .. } => *count,
             _ => 0,
         };
         let (failure, message, detail) = match event {
@@ -277,7 +301,11 @@ impl Callback {
             Event::Unsubscribed { problem, .. } => (PeFailureKind::None, problem.map(c_string), None),
             Event::MessageFailed { kind, message, .. } => (kind.into(), Some(c_string(message)), None),
             Event::SyncFinished { failure, .. } => (failure.map_or(PeFailureKind::None, Into::into), None, None),
-            Event::Transferring { text } => (PeFailureKind::None, Some(c_string(text)), None),
+            Event::Transferring { text } | Event::ActionUndone { text, .. } => {
+                (PeFailureKind::None, Some(c_string(text)), None)
+            }
+            Event::Acted { said: Ok(text), .. } => (PeFailureKind::None, Some(c_string(text)), None),
+            Event::Acted { said: Err(why), .. } => (PeFailureKind::Other, Some(c_string(why)), None),
             _ => (PeFailureKind::None, None, None),
         };
         let event = PeEvent {
@@ -421,6 +449,15 @@ pub unsafe extern "C" fn pe_core_close(core: *mut PeCore) {
 /// # Safety
 /// `core` must be NULL or a live handle from `pe_core_open`.
 pub(crate) unsafe fn with<T>(core: *const PeCore, fallback: T, f: impl FnOnce(&Core) -> T) -> T {
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, fallback, |core| f(core)) }
+}
+
+/// [`with`] for the calls that start work in the background, which hold the core while it runs
+///
+/// # Safety
+/// `core` must be NULL or a live handle from `pe_core_open`.
+pub(crate) unsafe fn with_shared<T>(core: *const PeCore, fallback: T, f: impl FnOnce(&std::sync::Arc<Core>) -> T) -> T {
     // SAFETY: the caller guarantees a live handle
     let Some(core) = (unsafe { core.as_ref() }) else {
         return fallback;
@@ -850,7 +887,7 @@ pub unsafe extern "C" fn pe_file_invitation_file(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_picture_start(core: *const PeCore, key: u64, size: u32) -> u64 {
     // SAFETY: as the caller guarantees
-    unsafe { with(core, 0, |core| core.picture_start(key, size).unwrap_or(0)) }
+    unsafe { with_shared(core, 0, |core| core.picture_start(key, size).unwrap_or(0)) }
 }
 
 /// The pixels of a drawn picture: `size` x `size` BGRA with the alpha multiplied in, `len` bytes; NULL when there was
@@ -886,7 +923,7 @@ pub unsafe extern "C" fn pe_picture_result(core: *const PeCore, request: u64, le
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_logo_start(core: *const PeCore, folder: i64, uid: u64, size: u32) -> u64 {
     // SAFETY: as the caller guarantees
-    unsafe { with(core, 0, |core| core.logo_start(folder, uid, size).unwrap_or(0)) }
+    unsafe { with_shared(core, 0, |core| core.logo_start(folder, uid, size).unwrap_or(0)) }
 }
 
 /// The pixels of a drawn logo: `size` x `size` BGRA with the alpha multiplied in, `len` bytes; NULL when there was
@@ -1770,36 +1807,6 @@ pub unsafe extern "C" fn pe_message_set_seen(core: *const PeCore, folder: i64, u
     unsafe { with(core, false, |core| core.set_seen(folder, uid, seen).is_ok()) }
 }
 
-/// Marks every message of a folder read: in the store now (`FolderChanged` follows), on the server in the background
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_folder_mark_all_read(core: *const PeCore, folder: i64) -> bool {
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.mark_all_read(folder).is_ok()) }
-}
-
-/// Marks every message of every account's Inbox read, as `pe_folder_mark_all_read` marks one folder
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_mark_all_inboxes_read(core: *const PeCore) -> bool {
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.mark_all_inboxes_read().is_ok()) }
-}
-
-/// Marks every message of every folder of an account read (the account's Mark All Read)
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_account_mark_all_read(core: *const PeCore, account: i64) -> bool {
-    // SAFETY: as the caller guarantees
-    unsafe { with(core, false, |core| core.mark_account_read(account).is_ok()) }
-}
-
 // ---- folders ----
 
 /// Runs a folder change, handing its refusal (a name that can not be one, a special folder) to `error`
@@ -1938,8 +1945,8 @@ pub struct PeAttachment {
     pub size_text: *const c_char,
     /// What kind of file it is, for its icon
     pub kind: PeFileKind,
-    /// Whether it may be opened from the message (`pe_attachment_open`): never a file that can run code, which can
-    /// be saved
+    /// Whether it may be opened from the message (`pe_attachment_open_start`): never a file that can run code, which
+    /// can be saved
     pub can_open: bool,
     /// The strip's tooltip, shown as it is: the full name and size, and why it does not open when it does not
     pub tooltip: *const c_char,
@@ -2400,8 +2407,8 @@ pub unsafe extern "C" fn pe_message_view(
     }
 }
 
-/// Builds the view of a message whose source is in the store (after `MessageReady`) on a worker thread:
-/// `ViewReady` with this request in `uid` follows. 0 on failure.
+/// Builds the view of a message whose source is in the store (after `MessageReady`) off the window thread, its source
+/// read there too: `ViewReady` with this request in `uid` follows. 0 on failure.
 ///
 /// # Safety
 /// `core` must be a live handle.
@@ -2414,7 +2421,7 @@ pub unsafe extern "C" fn pe_message_view_start(
 ) -> u64 {
     // SAFETY: as the caller guarantees
     unsafe {
-        with(core, 0, |core| {
+        with_shared(core, 0, |core| {
             core.message_view_start(folder, uid, allow_remote_images).unwrap_or(0)
         })
     }
@@ -2564,31 +2571,10 @@ fn opened(
     }
 }
 
-/// Writes attachment `index` of a message into a private folder for the app to open with the system's program; its
-/// path (free with `pe_string_free`). NULL when it is not here, or refused (a file that can run code is never opened
-/// from a message: `error` then says why). `note`, when set, is to be shown before opening (once: an encrypted
-/// message's file is stored decrypted while it is open). `note` and `error` may be NULL; free what they get.
-///
-/// # Safety
-/// `core` must be a live handle; `note` and `error` NULL or valid pointers.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_attachment_open(
-    core: *const PeCore,
-    folder: i64,
-    uid: u64,
-    index: usize,
-    note: *mut *mut c_char,
-    error: *mut *mut c_char,
-) -> *mut c_char {
-    // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, null_mut(), |core| {
-            opened(core.open_attachment(folder, uid, index), note, error)
-        })
-    }
-}
-
-/// [`pe_attachment_open`] of a message file a window shows (`pe_file_view`), its path UTF-8
+/// Writes attachment `index` of a message file a window shows (`pe_file_view`, its path UTF-8) into a private folder
+/// for the app to open with the system's program; its path (free with `pe_string_free`). NULL when it is not there, or
+/// refused (a file that can run code is never opened from a message: `error` then says why). `note`, when set, is to
+/// be shown before opening. `note` and `error` may be NULL; free what they get.
 ///
 /// # Safety
 /// `core` must be a live handle, `path` NULL or a NUL-terminated string; `note` and `error` NULL or valid pointers.
@@ -2634,26 +2620,11 @@ pub unsafe extern "C" fn pe_private_folder(core: *const PeCore, name: *const c_c
     }
 }
 
-/// The content of attachment `index` of a message, NULL on failure. `len` gets its length and
-/// `filename` the name to save it under (free it with `pe_string_free`). Free the bytes with
-/// `pe_bytes_free`.
+/// An attachment's content handed to C, its length in `len` and its name in `filename`; NULL for none
 ///
 /// # Safety
-/// `core` must be a live handle; `len` and `filename` must be valid pointers.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_attachment_data(
-    core: *const PeCore,
-    folder: i64,
-    uid: u64,
-    index: usize,
-    len: *mut usize,
-    filename: *mut *mut c_char,
-) -> *mut u8 {
-    if len.is_null() || filename.is_null() {
-        return null_mut();
-    }
-    // SAFETY: as the caller guarantees
-    let found = unsafe { with(core, None, |core| core.attachment(folder, uid, index).ok().flatten()) };
+/// `len` and `filename` must be valid pointers.
+unsafe fn attachment_out(found: Option<(String, Vec<u8>)>, len: *mut usize, filename: *mut *mut c_char) -> *mut u8 {
     let Some((name, data)) = found else {
         return null_mut();
     };
@@ -2666,7 +2637,92 @@ pub unsafe extern "C" fn pe_attachment_data(
     Box::into_raw(data).cast()
 }
 
-/// [`pe_attachment_data`] of a message file a window shows (`pe_file_view`), its path UTF-8
+/// Reads attachment `index` of a message off the window thread (parsed, and decrypted when the message is
+/// encrypted, there): `ReadDone` with the request this returns in `uid` follows, then `pe_attachment_data_result`.
+/// 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_attachment_data_start(core: *const PeCore, folder: i64, uid: u64, index: usize) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, 0, |core| core.attachment_start(folder, uid, index).unwrap_or(0)) }
+}
+
+/// What `pe_attachment_data_start` read, once: the bytes (free with
+/// `pe_bytes_free`), their length in `len` and the name to save them under in `filename` (free with
+/// `pe_string_free`); NULL when the message or the attachment is not here, or for another request.
+///
+/// # Safety
+/// `core` must be a live handle; `len` and `filename` must be valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_attachment_data_result(
+    core: *const PeCore,
+    request: u64,
+    len: *mut usize,
+    filename: *mut *mut c_char,
+) -> *mut u8 {
+    if len.is_null() || filename.is_null() {
+        return null_mut();
+    }
+    // SAFETY: as the caller guarantees
+    let found = unsafe { with(core, None, |core| core.attachment_result(request)) };
+    // SAFETY: the caller gave valid pointers
+    unsafe { attachment_out(found.map(|(name, _, data)| (name, data)), len, filename) }
+}
+
+/// Writes attachment `index` of a message into a private folder for the app to open with the system's program, off
+/// the window thread: `ReadDone` with the request this returns in `uid` follows, then `pe_attachment_open_result`. 0
+/// on failure.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_attachment_open_start(core: *const PeCore, folder: i64, uid: u64, index: usize) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with_shared(core, 0, |core| {
+            core.open_attachment_start(folder, uid, index).unwrap_or(0)
+        })
+    }
+}
+
+/// What `pe_attachment_open_start` wrote, once: the path to open (free with `pe_string_free`), or NULL when the
+/// attachment is not here or refused (a file that can run code is never opened from a message: `error` then says
+/// why). `note`, when set, is to be shown before opening (once: an encrypted message's file is stored decrypted while
+/// it is open). `note` and `error` may be NULL; free what they get.
+///
+/// # Safety
+/// `core` must be a live handle; `note` and `error` NULL or valid pointers.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_attachment_open_result(
+    core: *const PeCore,
+    request: u64,
+    note: *mut *mut c_char,
+    error: *mut *mut c_char,
+) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            opened(core.open_attachment_result(request), note, error)
+        })
+    }
+}
+
+/// Drops a read started off the window thread that nobody waits for any more (`pe_message_draft_start`,
+/// `pe_draft_open_start`, `pe_attachment_data_start`, `pe_attachment_open_start`)
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_read_cancel(core: *const PeCore, request: u64) {
+    // SAFETY: as the caller guarantees
+    unsafe { with(core, (), |core| core.read_cancel(request)) }
+}
+
+/// The content of attachment `index` of a message file a window shows (`pe_file_view`, its path UTF-8), NULL on
+/// failure. `len` gets its length and `filename` the name to save it under (free it with `pe_string_free`). Free the
+/// bytes with `pe_bytes_free`.
 ///
 /// # Safety
 /// `core` must be a live handle, `path` NULL or a NUL-terminated string; `len` and `filename` must be valid pointers.
@@ -2859,14 +2915,14 @@ pub unsafe extern "C" fn pe_message_import(
     }
 }
 
-/// Frees bytes from `pe_attachment_data` and `pe_message_source`
+/// Frees bytes from `pe_attachment_data_result`, `pe_file_attachment_data` and `pe_message_source`
 ///
 /// # Safety
 /// `data` must be NULL or bytes from this library of `len` bytes, not freed yet.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_bytes_free(data: *mut u8, len: usize) {
     if !data.is_null() {
-        // SAFETY: a boxed slice of `len` bytes made by pe_attachment_data
+        // SAFETY: a boxed slice of `len` bytes made by this library
         drop(unsafe { Box::from_raw(std::ptr::slice_from_raw_parts_mut(data, len)) });
     }
 }
@@ -3255,28 +3311,46 @@ pub(crate) fn draft_handle(draft: &pe_core::Draft) -> *mut PeDraft {
     })
 }
 
-/// A reply, a reply to all or a forward of a message whose source is in the store (after
-/// `MessageReady`), NULL otherwise
+/// A reply, a reply to all or a forward of a message whose source is in the store (after `MessageReady`), made off the
+/// window thread (the message parsed, and decrypted when it is encrypted, there): `ReadDone` with the request this
+/// returns in `uid` follows, then `pe_draft_result`. 0 on failure.
 ///
 /// # Safety
 /// `core` must be a live handle.
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_message_draft(
-    core: *const PeCore,
-    folder: i64,
-    uid: u64,
-    kind: PeDraftKind,
-) -> *mut PeDraft {
+pub unsafe extern "C" fn pe_message_draft_start(core: *const PeCore, folder: i64, uid: u64, kind: PeDraftKind) -> u64 {
     let kind = match kind {
         PeDraftKind::Reply => DraftKind::Reply,
         PeDraftKind::ReplyAll => DraftKind::ReplyAll,
         PeDraftKind::Forward => DraftKind::Forward,
     };
     // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, 0, |core| core.draft_start(folder, uid, kind).unwrap_or(0)) }
+}
+
+/// A saved draft of the Drafts folder (its source in the store, after `MessageReady`) to go on writing, read off the
+/// window thread: `ReadDone` with the request this returns in `uid` follows, then `pe_draft_result`. 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_draft_open_start(core: *const PeCore, folder: i64, uid: u64) -> u64 {
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, 0, |core| core.reopen_draft_start(folder, uid).unwrap_or(0)) }
+}
+
+/// The draft `pe_message_draft_start` or `pe_draft_open_start` made, once, after its `ReadDone`; NULL when the
+/// message was not in the store, or for another request. Free with `pe_draft_free`.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_draft_result(core: *const PeCore, request: u64) -> *mut PeDraft {
+    // SAFETY: as the caller guarantees
     unsafe {
-        with(core, null_mut(), |core| match core.draft(folder, uid, kind) {
-            Ok(Some(draft)) => draft_handle(&draft),
-            _ => null_mut(),
+        with(core, null_mut(), |core| {
+            core.draft_result(request)
+                .map_or(null_mut(), |draft| draft_handle(&draft))
         })
     }
 }
@@ -3354,22 +3428,6 @@ pub unsafe extern "C" fn pe_mailto_draft(link: *const c_char) -> *mut PeDraft {
         return null_mut();
     };
     guard(move || pe_core::mailto::draft(&link).map_or(null_mut(), |draft| draft_handle(&draft))).unwrap_or(null_mut())
-}
-
-/// A saved draft of the Drafts folder (its source in the store, after `MessageReady`) to go on writing, NULL
-/// otherwise
-///
-/// # Safety
-/// `core` must be a live handle.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pe_draft_open(core: *const PeCore, folder: i64, uid: u64) -> *mut PeDraft {
-    // SAFETY: as the caller guarantees
-    unsafe {
-        with(core, null_mut(), |core| match core.reopen_draft(folder, uid) {
-            Ok(Some(draft)) => draft_handle(&draft),
-            _ => null_mut(),
-        })
-    }
 }
 
 /// The word of a message that says a file is attached when none is ("attached"), for the question before sending;

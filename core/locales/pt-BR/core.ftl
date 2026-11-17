@@ -797,3 +797,34 @@ setup-file-name = Configurações e contas do Inbox Classic
 setup-skipped-unreachable = O aplicativo { $name } não foi importado: não foi possível acessar seu serviço de login. Adicione-o novamente em Aplicativos de login.
 attachment-runs-programs = “{ $name }” pode executar programas, por isso o Inbox Classic não o abre. Salve-o e depois abra-o você mesmo, se confiar na origem dele.
 attachment-decrypted-note = Este anexo faz parte de uma mensagem criptografada. Para abri-lo, o Inbox Classic salva uma cópia sem criptografia em uma pasta temporária da sua conta de usuário. As cópias com mais de um dia são removidas quando o aplicativo é iniciado.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] O servidor não moveu { $messages } para { $folder }, por isso ela voltou para { $from }: { $reason }
+   *[other] O servidor não moveu { $messages } para { $folder }, por isso elas voltaram para { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] O servidor não excluiu { $messages }, por isso ela voltou para { $from }: { $reason }
+   *[other] O servidor não excluiu { $messages }, por isso elas voltaram para { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] O servidor não arquivou { $messages }, por isso ela voltou para { $from }: { $reason }
+   *[other] O servidor não arquivou { $messages }, por isso elas voltaram para { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] O servidor não marcou { $messages } como lida, por isso ela está não lida novamente: { $reason }
+   *[other] O servidor não marcou { $messages } como lidas, por isso elas estão não lidas novamente: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] O servidor não marcou { $messages } como não lida, por isso ela está lida novamente: { $reason }
+   *[other] O servidor não marcou { $messages } como não lidas, por isso elas estão lidas novamente: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] O servidor não alterou os sinalizadores de { $messages }, por isso ela está como estava: { $reason }
+   *[other] O servidor não alterou os sinalizadores de { $messages }, por isso elas estão como estavam: { $reason }
+}

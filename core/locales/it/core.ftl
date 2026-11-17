@@ -777,3 +777,34 @@ setup-file-name = Impostazioni e account di Inbox Classic
 setup-skipped-unreachable = L’app di accesso { $name } è stata ignorata perché il relativo servizio non era raggiungibile. Aggiungila di nuovo in App di accesso.
 attachment-runs-programs = “{ $name }” può eseguire programmi, quindi Inbox Classic non lo apre. Salvalo, poi aprilo tu stesso se ti fidi della sua provenienza.
 attachment-decrypted-note = Questo allegato proviene da un messaggio crittografato. Per aprirlo, Inbox Classic salva una copia non crittografata in una cartella temporanea del tuo account utente. Le copie più vecchie di un giorno vengono eliminate all’avvio dell’app.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Il server non ha spostato { $messages } in { $folder }, quindi è di nuovo in { $from }: { $reason }
+   *[other] Il server non ha spostato { $messages } in { $folder }, quindi sono di nuovo in { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Il server non ha eliminato { $messages }, quindi è di nuovo in { $from }: { $reason }
+   *[other] Il server non ha eliminato { $messages }, quindi sono di nuovo in { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Il server non ha archiviato { $messages }, quindi è di nuovo in { $from }: { $reason }
+   *[other] Il server non ha archiviato { $messages }, quindi sono di nuovo in { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Il server non ha segnato { $messages } come letto, quindi è di nuovo da leggere: { $reason }
+   *[other] Il server non ha segnato { $messages } come letti, quindi sono di nuovo da leggere: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Il server non ha segnato { $messages } come da leggere, quindi è di nuovo letto: { $reason }
+   *[other] Il server non ha segnato { $messages } come da leggere, quindi sono di nuovo letti: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Il server non ha cambiato i contrassegni di { $messages }, quindi è com’era: { $reason }
+   *[other] Il server non ha cambiato i contrassegni di { $messages }, quindi sono com’erano: { $reason }
+}

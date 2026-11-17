@@ -14,7 +14,7 @@ use serde_json::json;
 
 struct Setup {
     server: ImapKit,
-    core: Core,
+    core: std::sync::Arc<Core>,
     events: Receiver<Event>,
     _dir: TempDir,
 }
@@ -44,7 +44,7 @@ fn setup_with(config: serde_json::Value) -> Option<Setup> {
     core.set_send_delay(0).unwrap();
     Some(Setup {
         server,
-        core,
+        core: std::sync::Arc::new(core),
         events,
         _dir: dir,
     })
@@ -2098,6 +2098,12 @@ fn a_move_or_delete_the_server_does_not_do_comes_back() {
             Event::FolderChanged { folder, .. } if folder == inbox => changes += 1,
             Event::Failed { kind, .. } => {
                 assert_ne!(kind, FailureKind::Authentication);
+            }
+            // each told with why, in words for a bar over the list
+            Event::ActionUndone {
+                folder, count, text, ..
+            } => {
+                assert_eq!((folder, count), (inbox, 1), "{text}");
                 failures += 1;
             }
             _ => {}
@@ -2114,6 +2120,98 @@ fn a_move_or_delete_the_server_does_not_do_comes_back() {
     assert_eq!(uids_now, [first, second]);
     assert!(core.messages(archive, Sort::default(), 0, 10).unwrap().is_empty());
     assert!(core.messages(trash, Sort::default(), 0, 10).unwrap().is_empty());
+}
+
+/// Actions on many messages off the window thread: done in the store at once and on the server after; what the server
+/// refuses is taken back in the store and said in words, with no failure of the account
+#[test]
+fn an_action_the_server_refuses_is_taken_back_and_said() {
+    let Some(s) = setup() else { return };
+    let first = s.server.add_message("INBOX", &rfc822("First", "1"), &[]);
+    let second = s.server.add_message("INBOX", &rfc822("Second", "2"), &[]);
+    let trashed = s.server.add_message("Trash", &rfc822("Old", "3"), &[]);
+    let account = s.core.add_account(&settings(&s.server), PASSWORD).unwrap();
+    s.core.sync(account).unwrap();
+    s.wait(|e| *e == Event::SyncFinished { account, failure: None });
+    let folders = s.core.folders(account).unwrap();
+    let id = |path: &str| folders.iter().find(|f| f.info.path == path).unwrap().id;
+    let (inbox, archive, trash) = (id("INBOX"), id("Archive"), id("Trash"));
+    let uids = |folder| -> Vec<u64> {
+        let mut uids: Vec<u64> = s
+            .core
+            .messages(folder, Sort::default(), 0, 10)
+            .unwrap()
+            .iter()
+            .map(|m| m.info.uid)
+            .collect();
+        uids.sort();
+        uids
+    };
+    let at = |uid| MessageRef { folder: inbox, uid };
+
+    // Select All counts without listing; its summary is that of its messages listed
+    let mut view = pe_core::ListView::new();
+    view.set_scope(Some(Scope::Folder(inbox)));
+    let all = view.select_all(&s.core).unwrap();
+    assert_eq!(all.count(), 2);
+    assert_eq!(s.core.selected_refs(&all).unwrap().len(), 2);
+    assert_eq!(
+        s.core.summary_of(&all).unwrap(),
+        s.core.summary(&[at(first), at(second)]).unwrap()
+    );
+
+    // another client deletes Archive and Deleted Items: a move there and marking there are refused
+    s.server.delete_folder("Archive");
+    s.server.delete_folder("Trash");
+    let request = s.core.act_start(all, Action::Move(archive)).unwrap();
+    let mut said = None;
+    let mut undone = None;
+    while said.is_none() || undone.is_none() {
+        match s.events.recv_timeout(Duration::from_secs(30)).expect("events") {
+            Event::Acted { request: r, said: done } if r == request => said = Some(done),
+            Event::ActionUndone {
+                account: a,
+                folder,
+                count,
+                text,
+            } => {
+                assert_eq!((a, folder, count), (account, inbox, 2));
+                undone = Some(text);
+            }
+            Event::Failed { message, .. } => panic!("told as a bar, not as a failure: {message}"),
+            _ => {}
+        }
+    }
+    assert_eq!(said.unwrap().unwrap(), "Moved 2 messages to Archive");
+    let undone = undone.unwrap();
+    assert!(
+        undone.starts_with("The server did not move 2 messages to Archive, so they are back in Inbox: "),
+        "{undone}"
+    );
+    assert_eq!(uids(inbox), [first, second], "back as they were");
+    assert!(uids(archive).is_empty());
+    // and for the window to select again, as what Undo brings back: once
+    let mut restored = s.core.restored().unwrap();
+    restored.sort_by_key(|r| r.uid);
+    assert_eq!(restored, [at(first), at(second)]);
+    assert!(s.core.restored().unwrap().is_empty());
+
+    // Mark All Read: read in the store at once, unread again when the server refuses
+    let request = s.core.mark_read_start(pe_core::MarkRead::Folder(trash)).unwrap();
+    let mut said = None;
+    let mut undone = None;
+    while said.is_none() || undone.is_none() {
+        match s.events.recv_timeout(Duration::from_secs(30)).expect("events") {
+            Event::Acted { request: r, said: done } if r == request => said = Some(done),
+            Event::ActionUndone { folder, text, .. } if folder == trash => undone = Some(text),
+            Event::Failed { message, .. } => panic!("told as a bar, not as a failure: {message}"),
+            _ => {}
+        }
+    }
+    assert_eq!(said.unwrap().unwrap(), "Marked 1 message as read");
+    assert!(undone.unwrap().contains("so it is unread again"));
+    let message = s.core.message(trash, trashed).unwrap().unwrap();
+    assert!(!message.info.flags.iter().any(|f| f == "\\Seen"), "unread again");
 }
 
 #[test]

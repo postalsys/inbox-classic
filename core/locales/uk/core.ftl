@@ -1306,3 +1306,34 @@ setup-skipped-unreachable = { $name } пропущено: його служба 
 attachment-runs-programs = «{ $name }» може запускати програми, тому Inbox Classic не відкриває цей файл. Збережіть його й відкрийте самостійно, якщо довіряєте його джерелу.
 # review: new
 attachment-decrypted-note = Це вкладення із зашифрованого повідомлення. Щоб його відкрити, Inbox Classic зберігає розшифровану копію на цьому комп’ютері, у вашій папці, яку Inbox Classic очищає через добу.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Сервер не перемістив { $messages } у папку «{ $folder }», тому воно знову в папці «{ $from }»: { $reason }
+   *[other] Сервер не перемістив { $messages } у папку «{ $folder }», тому вони знову в папці «{ $from }»: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Сервер не видалив { $messages }, тому воно знову в папці «{ $from }»: { $reason }
+   *[other] Сервер не видалив { $messages }, тому вони знову в папці «{ $from }»: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Сервер не заархівував { $messages }, тому воно знову в папці «{ $from }»: { $reason }
+   *[other] Сервер не заархівував { $messages }, тому вони знову в папці «{ $from }»: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Сервер не позначив { $messages } як прочитане, тому воно знову непрочитане: { $reason }
+   *[other] Сервер не позначив { $messages } як прочитані, тому вони знову непрочитані: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Сервер не позначив { $messages } як непрочитане, тому воно знову прочитане: { $reason }
+   *[other] Сервер не позначив { $messages } як непрочитані, тому вони знову прочитані: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Сервер не змінив прапорці, тому { $messages } залишилося без змін: { $reason }
+   *[other] Сервер не змінив прапорці, тому { $messages } залишилися без змін: { $reason }
+}

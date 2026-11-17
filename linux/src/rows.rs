@@ -215,9 +215,11 @@ pub fn factory(context: RowContext) -> gtk::SignalListItemFactory {
             return;
         };
         let parts = row.imp().parts.borrow();
-        if let Some(parts) = parts.as_ref() {
-            message.with(|m| bind(row.upcast_ref(), parts, m, &context));
-        }
+        let bound = parts
+            .as_ref()
+            .and_then(|parts| message.with(|m| bind(row.upcast_ref(), parts, m, &context)));
+        // a row whose page is not here yet: a blank line of the same height until it comes
+        row.set_opacity(if bound.is_some() { 1.0 } else { 0.0 });
     });
     factory
 }

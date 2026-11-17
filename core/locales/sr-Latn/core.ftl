@@ -821,3 +821,40 @@ setup-file-name = Podešavanja i nalozi programa Inbox Classic
 setup-skipped-unreachable = Aplikacija { $name } je preskočena jer njena usluga za prijavljivanje nije dostupna. Ponovo je dodajte u prozoru Aplikacije za prijavljivanje.
 attachment-runs-programs = Datoteka „{ $name }“ može da izvršava kôd, pa je Inbox Classic ne otvara direktno. Sačuvajte je i otvorite sami samo ako verujete njenom izvoru.
 attachment-decrypted-note = Ovaj prilog potiče iz šifrovane poruke. Da bi ga otvorio u drugom programu, Inbox Classic čuva privremenu dešifrovanu kopiju u fascikli vašeg korisničkog naloga. Kopije starije od 24 sata uklanjaju se pri sledećem pokretanju programa.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Server nije izvršio premeštanje ({ $messages }, odredište: { $folder }), pa je poruka ponovo u fascikli { $from }: { $reason }
+    [few] Server nije izvršio premeštanje ({ $messages }, odredište: { $folder }), pa su poruke ponovo u fascikli { $from }: { $reason }
+   *[other] Server nije izvršio premeštanje ({ $messages }, odredište: { $folder }), pa su poruke ponovo u fascikli { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Server nije izvršio brisanje ({ $messages }), pa je poruka ponovo u fascikli { $from }: { $reason }
+    [few] Server nije izvršio brisanje ({ $messages }), pa su poruke ponovo u fascikli { $from }: { $reason }
+   *[other] Server nije izvršio brisanje ({ $messages }), pa su poruke ponovo u fascikli { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Server nije izvršio arhiviranje ({ $messages }), pa je poruka ponovo u fascikli { $from }: { $reason }
+    [few] Server nije izvršio arhiviranje ({ $messages }), pa su poruke ponovo u fascikli { $from }: { $reason }
+   *[other] Server nije izvršio arhiviranje ({ $messages }), pa su poruke ponovo u fascikli { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Server nije izvršio označavanje kao pročitano ({ $messages }), pa je poruka ponovo nepročitana: { $reason }
+    [few] Server nije izvršio označavanje kao pročitano ({ $messages }), pa su poruke ponovo nepročitane: { $reason }
+   *[other] Server nije izvršio označavanje kao pročitano ({ $messages }), pa su poruke ponovo nepročitane: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Server nije izvršio označavanje kao nepročitano ({ $messages }), pa je poruka ponovo pročitana: { $reason }
+    [few] Server nije izvršio označavanje kao nepročitano ({ $messages }), pa su poruke ponovo pročitane: { $reason }
+   *[other] Server nije izvršio označavanje kao nepročitano ({ $messages }), pa su poruke ponovo pročitane: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Server nije promenio zastavice ({ $messages }), pa je poruka ponovo kao pre: { $reason }
+    [few] Server nije promenio zastavice ({ $messages }), pa su poruke ponovo kao pre: { $reason }
+   *[other] Server nije promenio zastavice ({ $messages }), pa su poruke ponovo kao pre: { $reason }
+}

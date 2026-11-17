@@ -1292,3 +1292,46 @@ setup-skipped-unreachable = Pominięto { $name }: nie można połączyć się z 
 attachment-runs-programs = Plik „{ $name }” może uruchamiać programy, więc Inbox Classic go nie otwiera. Zapisz go, a potem otwórz samodzielnie, jeśli ufasz jego źródłu.
 # review: new
 attachment-decrypted-note = Ten załącznik pochodzi z zaszyfrowanej wiadomości. Aby go otworzyć, Inbox Classic przechowuje go odszyfrowany na tym komputerze, w Twoim folderze, który Inbox Classic opróżnia po jednym dniu.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Serwer nie przeniósł wiadomości do folderu { $folder }, więc { $messages } jest znowu w folderze { $from }: { $reason }
+    [few] Serwer nie przeniósł wiadomości do folderu { $folder }, więc { $messages } są znowu w folderze { $from }: { $reason }
+    [many] Serwer nie przeniósł wiadomości do folderu { $folder }, więc { $messages } jest znowu w folderze { $from }: { $reason }
+   *[other] Serwer nie przeniósł wiadomości do folderu { $folder }, więc { $messages } jest znowu w folderze { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Serwer nie usunął wiadomości, więc { $messages } jest znowu w folderze { $from }: { $reason }
+    [few] Serwer nie usunął wiadomości, więc { $messages } są znowu w folderze { $from }: { $reason }
+    [many] Serwer nie usunął wiadomości, więc { $messages } jest znowu w folderze { $from }: { $reason }
+   *[other] Serwer nie usunął wiadomości, więc { $messages } jest znowu w folderze { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Serwer nie zarchiwizował wiadomości, więc { $messages } jest znowu w folderze { $from }: { $reason }
+    [few] Serwer nie zarchiwizował wiadomości, więc { $messages } są znowu w folderze { $from }: { $reason }
+    [many] Serwer nie zarchiwizował wiadomości, więc { $messages } jest znowu w folderze { $from }: { $reason }
+   *[other] Serwer nie zarchiwizował wiadomości, więc { $messages } jest znowu w folderze { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Serwer nie oznaczył wiadomości jako przeczytanej, więc { $messages } jest znowu nieprzeczytana: { $reason }
+    [few] Serwer nie oznaczył wiadomości jako przeczytanych, więc { $messages } są znowu nieprzeczytane: { $reason }
+    [many] Serwer nie oznaczył wiadomości jako przeczytanych, więc { $messages } jest znowu nieprzeczytanych: { $reason }
+   *[other] Serwer nie oznaczył wiadomości jako przeczytanych, więc { $messages } jest znowu nieprzeczytanych: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Serwer nie oznaczył wiadomości jako nieprzeczytanej, więc { $messages } jest znowu przeczytana: { $reason }
+    [few] Serwer nie oznaczył wiadomości jako nieprzeczytanych, więc { $messages } są znowu przeczytane: { $reason }
+    [many] Serwer nie oznaczył wiadomości jako nieprzeczytanych, więc { $messages } jest znowu przeczytanych: { $reason }
+   *[other] Serwer nie oznaczył wiadomości jako nieprzeczytanych, więc { $messages } jest znowu przeczytanych: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Serwer nie zmienił flag wiadomości, więc { $messages } pozostaje bez zmian: { $reason }
+    [few] Serwer nie zmienił flag wiadomości, więc { $messages } pozostają bez zmian: { $reason }
+    [many] Serwer nie zmienił flag wiadomości, więc { $messages } pozostaje bez zmian: { $reason }
+   *[other] Serwer nie zmienił flag wiadomości, więc { $messages } pozostaje bez zmian: { $reason }
+}

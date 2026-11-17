@@ -257,6 +257,8 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             rulesSaid = event.count > 0 ? said : nil
         case PE_EVENT_KIND_AUTOCONFIG_DONE, PE_EVENT_KIND_SIGN_IN_DONE, PE_EVENT_KIND_SIGN_IN_APP_CHECKED:
             Waiting.requestDone(event.uid)
+        case PE_EVENT_KIND_READ_DONE, PE_EVENT_KIND_ACTED:
+            Pending.finish(event)
         case PE_EVENT_KIND_NEW_MAIL:
             notifyNewMail(event)
         case PE_EVENT_KIND_UNSUBSCRIBED:
@@ -461,11 +463,15 @@ public final class MainWindow: NSObject, NSWindowDelegate, NSToolbarDelegate, NS
             }
             return
         }
-        guard let draft = mailbox.draftOfShown(kind) else {
-            inform(Text.uiSelectMessageFirst.text)
-            return
+        let account = mailbox.currentAccount
+        // read and quoted off the window thread: the window opens once the draft is made
+        mailbox.reader.startDraft(kind) { [core] draft in
+            guard let draft else {
+                inform(Text.uiSelectMessageFirst.text)
+                return
+            }
+            ComposeWindow.open(core: core, account: account, draft: draft)
         }
-        ComposeWindow.open(core: core, account: mailbox.currentAccount, draft: draft)
     }
 
     func showMessage(folder: Int64, uid: UInt64) {

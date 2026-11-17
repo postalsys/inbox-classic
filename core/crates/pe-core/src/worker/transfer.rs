@@ -32,6 +32,7 @@ fn appendable(flags: &str) -> Vec<&str> {
 /// A failure that trying again does not help
 fn gone(message: &str) -> Failure {
     Failure {
+        told: false,
         kind: FailureKind::Other,
         message: message.into(),
     }
@@ -184,6 +185,7 @@ impl Worker {
                 Text::TransferNotMoved
             };
             self.fail(Failure {
+                told: false,
                 kind: FailureKind::Other,
                 message: tr_args(
                     text,

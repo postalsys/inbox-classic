@@ -723,3 +723,33 @@ setup-file-name = Inbox Classicu seaded ja kontod
 setup-skipped-unreachable = Sisselogimisrakendus { $name } jäeti importimata, sest selle teenusega ei saadud ühendust. Lisage rakendus uuesti sisselogimisrakenduste seadetes.
 attachment-runs-programs = Fail „{ $name }“ võib käivitada programme, mistõttu Inbox Classic seda ei ava. Kui usaldate faili päritolu, salvestage see ja avage ise.
 attachment-decrypted-note = See manus on pärit krüpteeritud kirjast. Avamiseks salvestab Inbox Classic sellest krüpteerimata koopia teie ajutisse kausta. Üle päeva vanused koopiad kustutatakse rakenduse käivitamisel.
+# review: new
+undone-move = { $count ->
+    [one] Server ei teisaldanud kirja kausta { $folder }, seega on { $messages } taas kaustas { $from }: { $reason }
+   *[other] Server ei teisaldanud kirju kausta { $folder }, seega on { $messages } taas kaustas { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Server ei kustutanud kirja, seega on { $messages } taas kaustas { $from }: { $reason }
+   *[other] Server ei kustutanud kirju, seega on { $messages } taas kaustas { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Server ei arhiveerinud kirja, seega on { $messages } taas kaustas { $from }: { $reason }
+   *[other] Server ei arhiveerinud kirju, seega on { $messages } taas kaustas { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Server ei märkinud kirja loetuks, seega on { $messages } taas lugemata: { $reason }
+   *[other] Server ei märkinud kirju loetuks, seega on { $messages } taas lugemata: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Server ei märkinud kirja lugemata kirjaks, seega on { $messages } taas loetud: { $reason }
+   *[other] Server ei märkinud kirju lugemata kirjadeks, seega on { $messages } taas loetud: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Server ei muutnud kirja lippe, seega on { $messages } nagu enne: { $reason }
+   *[other] Server ei muutnud kirjade lippe, seega on { $messages } nagu enne: { $reason }
+}

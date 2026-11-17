@@ -985,6 +985,58 @@ std::wstring ReasonText(char* reason, PeText fallback) {
     return why ? Text(why.get()) : core::T(fallback);
 }
 
+namespace {
+
+// the reads under way, the timer that shows the busy pointer once they take long, and whether it shows
+int g_busy = 0;
+UINT_PTR g_busyTimer = 0;
+bool g_busyShown = false;
+
+void CALLBACK BusyTimer(HWND, UINT, UINT_PTR id, DWORD) {
+    KillTimer(nullptr, id);
+    g_busyTimer = 0;
+    if (g_busy > 0) {
+        g_busyShown = true;
+        SetCursor(LoadCursorW(nullptr, IDC_APPSTARTING));
+    }
+}
+
+// the pointer set again by the window under it (WM_SETCURSOR follows a move)
+void RefreshCursor() {
+    POINT at;
+    if (GetCursorPos(&at)) {
+        SetCursorPos(at.x, at.y);
+    }
+}
+
+}  // namespace
+
+void BusyStart() {
+    if (g_busy++ == 0) {
+        g_busyTimer = SetTimer(nullptr, 0, PE_LIST_LOADING_MS, BusyTimer);
+    }
+}
+
+void BusyEnd() {
+    if (g_busy == 0 || --g_busy > 0) {
+        return;
+    }
+    if (g_busyTimer) {
+        KillTimer(nullptr, std::exchange(g_busyTimer, 0));
+    }
+    if (std::exchange(g_busyShown, false)) {
+        RefreshCursor();
+    }
+}
+
+bool BusyCursor() {
+    if (!g_busyShown) {
+        return false;
+    }
+    SetCursor(LoadCursorW(nullptr, IDC_APPSTARTING));
+    return true;
+}
+
 bool SetJunkButton(HWND toolbar, bool inJunk) {
     int from = inJunk ? IDM_JUNK : IDM_NOT_JUNK, to = inJunk ? IDM_NOT_JUNK : IDM_JUNK;
     if (SendMessageW(toolbar, TB_COMMANDTOINDEX, from, 0) < 0) {

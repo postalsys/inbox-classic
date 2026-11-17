@@ -267,17 +267,6 @@ final class Core {
         return pe_start_message(handle, &allInboxes, &folder, &uid) ? (allInboxes, folder, uid) : nil
     }
 
-    /// the counts of the status bar (the messages of the list, grouped or not, all of them, and how many are unread)
-    /// and how many rows the list has (one a message, or grouped by conversation one a
-    /// conversation and the messages under the open ones), at once, as a list read again wants them
-    func countsAndRows(_ view: ListView) -> (total: UInt64, unread: UInt64, rows: UInt64) {
-        var total: UInt64 = 0
-        var unread: UInt64 = 0
-        var rows: UInt64 = 0
-        _ = pe_list_view_counts_and_rows(handle, view.handle, &total, &unread, &rows)
-        return (total, unread, rows)
-    }
-
     /// whether something was written to the store since the list was last counted: read again, it might show
     /// something else
     func stale(_ view: ListView) -> Bool {
@@ -296,13 +285,13 @@ final class Core {
         pe_list_view_expand_all(handle, view.handle)
     }
 
-    /// whether the list names whom its messages went to (Sent Items, Drafts): the person column is then To
-    func listsRecipients(_ view: ListView) -> Bool {
-        pe_list_view_lists_recipients(handle, view.handle)
+    func messages(_ view: ListView, offset: UInt64, limit: UInt64) -> [Message] {
+        messages(of: pe_list_view_messages(handle, view.handle, offset, limit))
     }
 
-    func messages(_ view: ListView, offset: UInt64, limit: UInt64) -> [Message] {
-        guard let list = pe_list_view_messages(handle, view.handle, offset, limit) else { return [] }
+    /// the rows of a message list the core handed over, which is freed
+    private func messages(of list: OpaquePointer?) -> [Message] {
+        guard let list else { return [] }
         defer { pe_message_list_free(list) }
         return (0..<pe_message_list_count(list)).compactMap { pe_message_list_get(list, $0).map { Message($0.pointee) } }
     }
@@ -310,12 +299,6 @@ final class Core {
     /// where a message is in the list (its conversation's row while that is collapsed), -1 when it is not there
     func messageIndex(_ view: ListView, folder: Int64, uid: UInt64) -> Int64 {
         pe_list_view_index(handle, view.handle, folder, uid)
-    }
-
-    /// `messageIndex`, looked for first in the pages read since the list was counted, nearest `hint` (the row it had
-    /// before the list was read again; read the page with that row first). A negative hint looks through the list
-    func messageIndex(_ view: ListView, folder: Int64, uid: UInt64, near hint: Int) -> Int64 {
-        pe_list_view_index_near(handle, view.handle, folder, uid, Int64(hint))
     }
 
     /// the messages before and after the message `uid` of `folder` in the list, in one pass: what Previous and Next
@@ -358,13 +341,6 @@ final class Core {
         _ = pe_list_view_select_ranges(handle, view.handle, selection, starts, ends, starts.count)
     }
 
-    /// where the messages of `selection` are in the list now, the rows to select again
-    func positions(of selection: OpaquePointer, in view: ListView) -> IndexSet {
-        guard let found = pe_list_view_positions(handle, view.handle, selection) else { return [] }
-        defer { pe_positions_free(found) }
-        return IndexSet((0..<pe_positions_count(found)).map { Int(pe_positions_get(found, $0)) })
-    }
-
     /// `action` on the messages of `selection`: what the status bar says, or why not
     func act(_ selection: OpaquePointer, _ action: PeAction, to: Int64 = 0) -> Result<String, Refusal> {
         var reason: UnsafeMutablePointer<CChar>?
@@ -383,6 +359,49 @@ final class Core {
             return .success(done)
         }
         return .failure(Refusal(taken(reason) ?? Text.nothingToUndo.text))
+    }
+
+    // ---- off the window thread ----
+
+    /// the list `view` shows read on a store connection of the core's own: `ListReady` follows with the request this
+    /// returns. The load selects again what `selection` has (nil for nothing): one message found nearest `hint` (the
+    /// row it had, -1 when not known), several, or Select All while it is still the whole list; in its place the row
+    /// `after` a removal (-1 for none), or what Undo brought back (`restored`). 0 on failure
+    func load(_ view: ListView, selection: OpaquePointer?, hint: Int = -1, after: Int = -1, restored: Bool) -> UInt64 {
+        pe_list_view_load(handle, view.handle, selection, Int64(hint), Int64(after), restored)
+    }
+
+    /// a page of the list from `offset` on read the same way: `ListPageReady` follows. 0 on failure
+    func loadPage(_ view: ListView, offset: UInt64) -> UInt64 {
+        pe_list_view_load_page(handle, view.handle, offset)
+    }
+
+    /// what the load `request` read, after its event, taken once; nil when unknown. The selection it selects is put
+    /// into `selection`, when given
+    func loadResult(_ request: UInt64, selection: OpaquePointer? = nil) -> ListLoad? {
+        guard let load = pe_list_load_result(handle, request) else { return nil }
+        defer { pe_list_load_free(load) }
+        guard let info = pe_list_load_info(load)?.pointee else { return nil }
+        if info.failed {
+            return .failed(taken(pe_list_load_error(load)) ?? "")
+        }
+        if let selection {
+            _ = pe_list_load_selection(load, selection)
+        }
+        var selected = IndexSet()
+        if let rows = pe_list_load_selected(load) {
+            defer { pe_positions_free(rows) }
+            selected = IndexSet((0..<pe_positions_count(rows)).map { Int(pe_positions_get(rows, $0)) })
+        }
+        return .read(ListRows(offset: info.offset, total: info.total, unread: info.unread, rows: info.rows,
+                              listsRecipients: info.lists_recipients, reselection: info.reselection,
+                              selected: selected, focus: Int(info.focus), messages: messages(of: pe_list_load_messages(load))))
+    }
+
+    /// `action` on the messages of `selection` off the window thread: `Acted` follows with the request this returns
+    /// (what the status bar says, or why not), `ActionUndone` when the server refuses it. 0 on failure
+    func actStart(_ selection: OpaquePointer, _ action: PeAction, to: Int64 = 0) -> UInt64 {
+        pe_selection_act_start(handle, selection, action, to)
     }
 
     var unindexedCount: UInt64 { pe_search_unindexed_count(handle) }
@@ -586,6 +605,88 @@ extension Text {
         guard let title = pe_text_title(rawValue) else { return "" }
         defer { pe_string_free(title) }
         return String(cString: title)
+    }
+}
+
+/// What a list load read (`Core.loadResult`), or why it could not, for the status bar
+enum ListLoad {
+    case read(ListRows)
+    case failed(String)
+}
+
+/// The rows a list load read: the counts of the status bar and the row count (for a load of the whole list), the rows
+/// from `offset` on, and the rows it selects (`reselection` says how, `focus` the row to scroll to, -1 for none)
+struct ListRows {
+    let offset: UInt64
+    let total: UInt64
+    let unread: UInt64
+    let rows: UInt64
+    let listsRecipients: Bool
+    let reselection: PeReselection
+    let selected: IndexSet
+    let focus: Int
+    let messages: [Message]
+}
+
+/// The reads and actions windows started off the window thread, each finished by its event (`ReadDone`, `Acted`, with
+/// the request in `uid`); what a window still waits for is dropped when it closes. The status bar says "Loading..."
+/// for a read the user waits for that takes longer than a moment.
+@MainActor
+enum Pending {
+    private struct Key: Hashable {
+        let kind: UInt32
+        let request: UInt64
+    }
+
+    private static var requests: [Key: (owner: ObjectIdentifier, done: (CoreEvent) -> Void)] = [:]
+
+    /// `done` once the read `request` (`ReadDone`) is done; false for a request of 0 (the start failed)
+    @discardableResult
+    static func read(_ request: UInt64, by owner: AnyObject, _ done: @escaping () -> Void) -> Bool {
+        wait(PE_EVENT_KIND_READ_DONE, request, by: owner) { _ in done() }
+    }
+
+    /// `done` with the event once the action `request` (`Acted`) is done; false for a request of 0
+    @discardableResult
+    static func acted(_ request: UInt64, by owner: AnyObject, _ done: @escaping (CoreEvent) -> Void) -> Bool {
+        wait(PE_EVENT_KIND_ACTED, request, by: owner, done)
+    }
+
+    private static func wait(_ kind: PeEventKind, _ request: UInt64, by owner: AnyObject,
+                             _ done: @escaping (CoreEvent) -> Void) -> Bool {
+        guard request != 0 else { return false }
+        requests[Key(kind: kind.rawValue, request: request)] = (ObjectIdentifier(owner), done)
+        return true
+    }
+
+    /// a `ReadDone` or `Acted`: what waited for it done
+    static func finish(_ event: CoreEvent) {
+        requests.removeValue(forKey: Key(kind: event.kind.rawValue, request: event.uid))?.done(event)
+    }
+
+    /// what `owner` waits for dropped (its window closed): the reads cancelled in the core; the actions run on, as
+    /// the user asked for them, unheard
+    static func cancel(by owner: AnyObject, core: Core) {
+        let id = ObjectIdentifier(owner)
+        for (key, waiting) in requests where waiting.owner == id {
+            requests.removeValue(forKey: key)
+            if key.kind == PE_EVENT_KIND_READ_DONE.rawValue {
+                pe_read_cancel(core.handle, key.request)
+            }
+        }
+    }
+
+    /// "Loading..." in the status bar (`status`) once a read takes longer than a moment, taken away when it is done
+    static func busy(_ status: @escaping (String) -> Void) -> () -> Void {
+        var said = false
+        let timer = after(Mailbox.loadingWait) {
+            said = true
+            status(Text.macLoadingList.text)
+        }
+        return {
+            timer.invalidate()
+            if said { status("") }
+        }
     }
 }
 

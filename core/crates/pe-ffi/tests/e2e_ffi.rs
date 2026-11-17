@@ -23,6 +23,7 @@ struct Copied {
     uid: u64,
     failure: PeFailureKind,
     message: Option<String>,
+    count: u64,
 }
 
 unsafe extern "C" fn on_event(context: *mut c_void, event: *const PeEvent) {
@@ -37,6 +38,7 @@ unsafe extern "C" fn on_event(context: *mut c_void, event: *const PeEvent) {
         uid: event.uid,
         failure: event.failure,
         message,
+        count: event.count,
     });
 }
 
@@ -327,15 +329,119 @@ fn reads_mail_through_the_c_api() {
 
     let mut len = 0usize;
     let mut filename: *mut c_char = null_mut();
-    let data = unsafe { pe_attachment_data(core, inbox, uid, 0, &mut len, &mut filename) };
-    assert!(!data.is_null());
+    // off the window thread: the attachment, a reply, the list and its next page, Select All and an action
+    let request = unsafe { pe_attachment_data_start(core, inbox, uid, 0) };
+    wait(&events, |e| e.kind == PeEventKind::ReadDone && e.uid == request);
+    let data = unsafe { pe_attachment_data_result(core, request, &mut len, &mut filename) };
     assert_eq!(unsafe { std::slice::from_raw_parts(data, len) }, b"%PDF");
     assert_eq!(text(filename), "evil.pdf");
     unsafe {
         pe_bytes_free(data, len);
         pe_string_free(filename);
     }
-    assert!(unsafe { pe_attachment_data(core, inbox, uid, 1, &mut len, &mut filename) }.is_null());
+    let request = unsafe { pe_attachment_data_start(core, inbox, uid, 1) };
+    wait(&events, |e| e.kind == PeEventKind::ReadDone && e.uid == request);
+    assert!(unsafe { pe_attachment_data_result(core, request, &mut len, &mut filename) }.is_null());
+    let request = unsafe { pe_message_draft_start(core, inbox, uid, PeDraftKind::Reply) };
+    wait(&events, |e| e.kind == PeEventKind::ReadDone && e.uid == request);
+    let draft = unsafe { pe_draft_result(core, request) };
+    assert_eq!(text(unsafe { &*pe_draft_info(draft) }.subject), "Re: Report");
+    unsafe { pe_draft_free(draft) };
+    assert!(unsafe { pe_draft_result(core, request) }.is_null(), "once");
+
+    let list = view_of(inbox, None);
+    let shown = pe_selection_new();
+    unsafe { pe_selection_add(shown, inbox, uid) };
+    let request = unsafe { pe_list_view_load(core, list, shown, -1, -1, false) };
+    wait(&events, |e| e.kind == PeEventKind::ListReady && e.uid == request);
+    let load = unsafe { pe_list_load_result(core, request) };
+    let info = unsafe { &*pe_list_load_info(load) };
+    let index = unsafe { pe_list_view_index(core, list, inbox, uid) };
+    assert_eq!(
+        (
+            info.failed,
+            info.counted,
+            info.total,
+            info.unread,
+            info.rows,
+            info.reselection,
+            info.focus
+        ),
+        (false, true, 2, 1, 2, PeReselection::Kept, index)
+    );
+    assert!(unsafe { pe_list_load_error(load) }.is_null());
+    let selected = unsafe { pe_list_load_selected(load) };
+    assert_eq!(unsafe { pe_positions_count(selected) }, 1);
+    assert_eq!(unsafe { pe_positions_get(selected, 0) }, index as u64);
+    unsafe { pe_positions_free(selected) };
+    unsafe { pe_selection_clear(shown) };
+    assert!(unsafe { pe_list_load_selection(load, shown) });
+    assert_eq!(unsafe { pe_selection_count(shown) }, 1);
+    let rows = unsafe { pe_list_load_messages(load) };
+    assert_eq!(unsafe { pe_message_list_count(rows) }, 2);
+    assert_eq!(unsafe { &*pe_message_list_get(rows, index as usize) }.uid, uid);
+    unsafe {
+        pe_message_list_free(rows);
+        pe_list_load_free(load);
+        pe_selection_free(shown);
+    }
+    let request = unsafe { pe_list_view_load_page(core, list, 1) };
+    wait(&events, |e| e.kind == PeEventKind::ListPageReady && e.uid == request);
+    let load = unsafe { pe_list_load_result(core, request) };
+    let info = unsafe { &*pe_list_load_info(load) };
+    assert_eq!(
+        (info.offset, info.counted, info.reselection, info.focus),
+        (1, false, PeReselection::None, -1)
+    );
+    unsafe { pe_list_load_free(load) };
+    // a list that can not be read says why
+    let nowhere = view_of(inbox + 1000, None);
+    let request = unsafe { pe_list_view_load(core, nowhere, std::ptr::null(), -1, -1, false) };
+    wait(&events, |e| e.kind == PeEventKind::ListReady && e.uid == request);
+    let load = unsafe { pe_list_load_result(core, request) };
+    assert!(unsafe { &*pe_list_load_info(load) }.failed);
+    let why = unsafe { pe_list_load_error(load) };
+    assert!(!text(why).is_empty());
+    unsafe {
+        pe_string_free(why);
+        pe_list_load_free(load);
+        pe_list_view_free(nowhere);
+    }
+
+    let all = pe_selection_new();
+    assert!(unsafe { pe_list_view_select_all(core, list, all) });
+    assert!(unsafe { pe_selection_is_all(all) });
+    assert_eq!(unsafe { pe_selection_count(all) }, 2);
+    let mut summary = PeSelectionSummary::default();
+    assert!(unsafe { pe_selection_summary(core, all, &mut summary) });
+    assert_eq!((summary.count, summary.unread), (2, 1));
+    let request = unsafe { pe_selection_summary_start(core, all) };
+    wait(&events, |e| e.kind == PeEventKind::ReadDone && e.uid == request);
+    let mut counted = PeSelectionSummary::default();
+    assert!(unsafe { pe_selection_summary_result(core, request, &mut counted) });
+    assert_eq!((counted.count, counted.unread), (2, 1));
+    let request = unsafe { pe_list_view_load(core, list, all, -1, -1, false) };
+    wait(&events, |e| e.kind == PeEventKind::ListReady && e.uid == request);
+    let load = unsafe { pe_list_load_result(core, request) };
+    assert_eq!(unsafe { &*pe_list_load_info(load) }.reselection, PeReselection::All);
+    assert!(unsafe { pe_list_load_selection(load, all) } && unsafe { pe_selection_is_all(all) });
+    unsafe { pe_list_load_free(load) };
+    let request = unsafe { pe_mark_read_start(core, PeMarkRead::Folder, inbox) };
+    let acted = wait(&events, |e| e.kind == PeEventKind::Acted && e.uid == request);
+    assert_eq!(
+        (acted.failure, acted.message.as_deref()),
+        (PeFailureKind::None, Some("Marked 1 message as read"))
+    );
+    let request = unsafe { pe_selection_act_start(core, all, PeAction::Unread, 0) };
+    let acted = wait(&events, |e| e.kind == PeEventKind::Acted && e.uid == request);
+    assert_eq!(acted.message.as_deref(), Some("Marked 2 messages as unread"));
+    assert!(unsafe { pe_selection_list(core, all) } && !unsafe { pe_selection_is_all(all) });
+    assert_eq!(unsafe { pe_selection_count(all) }, 2);
+    assert_eq!(counts(core, list), (2, 2));
+    unsafe {
+        pe_selection_free(all);
+        pe_list_view_free(list);
+    }
 
     // View Source: the whole message as text, its window named for it
     let mut title: *mut c_char = null_mut();
@@ -378,7 +484,8 @@ fn reads_mail_through_the_c_api() {
 
     assert!(unsafe { pe_message_set_seen(core, inbox, uid, true) });
     wait(&events, |e| e.kind == PeEventKind::FolderChanged && e.folder == inbox);
-    assert!(unsafe { pe_folder_mark_all_read(core, inbox) });
+    let request = unsafe { pe_mark_read_start(core, PeMarkRead::Folder, inbox) };
+    wait(&events, |e| e.kind == PeEventKind::Acted && e.uid == request);
     assert_eq!(unsafe { pe_inbox_unread(core) }, 0);
     assert_eq!(unsafe { pe_inbox_unread(std::ptr::null()) }, 0);
 
@@ -425,10 +532,14 @@ fn reads_mail_through_the_c_api() {
     );
     unsafe { pe_contact_list_free(contacts) };
     assert!(unsafe { pe_book_delete(core, 0, &card, 1, std::ptr::null(), 0) });
-    assert!(!unsafe { pe_folder_mark_all_read(core, 999_999) });
+    let request = unsafe { pe_mark_read_start(core, PeMarkRead::Folder, 999_999) };
+    let refused = wait(&events, |e| e.kind == PeEventKind::Acted && e.uid == request);
+    assert_eq!(refused.failure, PeFailureKind::Other);
 
     // a reply drafted in Rust, sent through the C API
-    let draft = unsafe { pe_message_draft(core, inbox, uid, PeDraftKind::Reply) };
+    let request = unsafe { pe_message_draft_start(core, inbox, uid, PeDraftKind::Reply) };
+    wait(&events, |e| e.kind == PeEventKind::ReadDone && e.uid == request);
+    let draft = unsafe { pe_draft_result(core, request) };
     let info = unsafe { &*pe_draft_info(draft) };
     assert_eq!(
         (text(info.to), text(info.subject)),
@@ -899,6 +1010,31 @@ fn null_and_bad_arguments() {
         assert!(!pe_sync(core, 42));
         assert!(pe_message_view(core, 1, 1, false).is_null());
         assert_eq!(pe_message_view_start(std::ptr::null(), 1, 1, false), 0);
+        assert_eq!(
+            pe_list_view_load(std::ptr::null(), std::ptr::null(), std::ptr::null(), -1, -1, true),
+            0
+        );
+        assert_eq!(pe_list_view_load_page(std::ptr::null(), std::ptr::null(), 0), 0);
+        assert!(pe_list_load_result(std::ptr::null(), 1).is_null());
+        assert!(pe_list_load_info(std::ptr::null()).is_null());
+        assert!(pe_list_load_messages(std::ptr::null()).is_null());
+        assert!(pe_list_load_selected(std::ptr::null()).is_null());
+        assert!(pe_list_load_error(std::ptr::null()).is_null());
+        assert!(!pe_list_load_selection(std::ptr::null(), null_mut()));
+        pe_list_load_free(null_mut());
+        assert_eq!(pe_message_draft_start(std::ptr::null(), 1, 1, PeDraftKind::Reply), 0);
+        assert_eq!(pe_draft_open_start(std::ptr::null(), 1, 1), 0);
+        assert!(pe_draft_result(std::ptr::null(), 1).is_null());
+        assert_eq!(pe_attachment_data_start(std::ptr::null(), 1, 1, 0), 0);
+        assert_eq!(pe_attachment_open_start(std::ptr::null(), 1, 1, 0), 0);
+        assert_eq!(
+            pe_selection_act_start(std::ptr::null(), std::ptr::null(), PeAction::Read, 0),
+            0
+        );
+        assert_eq!(pe_mark_read_start(std::ptr::null(), PeMarkRead::AllInboxes, 0), 0);
+        assert!(!pe_list_view_select_all(std::ptr::null(), std::ptr::null(), null_mut()));
+        assert!(!pe_selection_is_all(std::ptr::null()));
+        assert!(!pe_selection_list(std::ptr::null(), null_mut()));
         assert!(!pe_message_set_seen(std::ptr::null(), 1, 1, true));
         let mut reason: *mut c_char = null_mut();
         let bad = CString::new("").unwrap();
@@ -912,7 +1048,7 @@ fn null_and_bad_arguments() {
         let missing = CString::new("/no/such/file.eml").unwrap();
         assert!(!pe_message_import(core, 1, missing.as_ptr(), null_mut()));
         // drafts: nothing to open, no account to save in
-        assert!(pe_draft_open(core, 1, 1).is_null());
+        assert!(pe_draft_result(core, 1).is_null());
         assert!(pe_message_headers(core, 1, 1).is_null());
         let dir = CString::new(".").unwrap();
         assert!(!pe_save_attachments(core, 1, 1, dir.as_ptr(), null_mut(), null_mut()));
@@ -925,7 +1061,6 @@ fn null_and_bad_arguments() {
             null_mut()
         ));
         assert!(pe_message_headers(std::ptr::null(), 1, 1).is_null());
-        assert!(pe_draft_open(std::ptr::null(), 1, 1).is_null());
         let mut id: *mut c_char = null_mut();
         assert!(!pe_draft_save(core, 42, std::ptr::null(), &mut id, null_mut()));
         assert!(id.is_null());

@@ -1253,3 +1253,30 @@ setup-skipped-unreachable = { $name } tika izlaista: ar tās pierakstīšanās p
 attachment-runs-programs = Fails „{ $name }” var palaist programmas, tāpēc Inbox Classic to neatver. Saglabājiet to un pēc tam atveriet paši, ja uzticaties tā izcelsmei.
 # review: new
 attachment-decrypted-note = Šis pielikums ir no šifrēta ziņojuma. Lai to atvērtu, Inbox Classic glabā to atšifrētu šajā datorā, jūsu mapē, ko Inbox Classic iztukšo pēc vienas dienas.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+   *[other] Serveris neveica pārvietošanu uz { $folder }, tāpēc { $messages } atkal ir mapē { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+   *[other] Serveris neveica dzēšanu, tāpēc { $messages } atkal ir mapē { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+   *[other] Serveris neveica arhivēšanu, tāpēc { $messages } atkal ir mapē { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Serveris to neatzīmēja kā lasītu, tāpēc { $messages } atkal ir nelasīts: { $reason }
+   *[other] Serveris tos neatzīmēja kā lasītus, tāpēc { $messages } atkal ir nelasīti: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Serveris to neatzīmēja kā nelasītu, tāpēc { $messages } atkal ir lasīts: { $reason }
+   *[other] Serveris tos neatzīmēja kā nelasītus, tāpēc { $messages } atkal ir lasīti: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+   *[other] Serveris nemainīja karodziņus, tāpēc { $messages } ir tāpat kā iepriekš: { $reason }
+}

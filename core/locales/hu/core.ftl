@@ -1184,3 +1184,34 @@ setup-skipped-unreachable = Kimaradt: { $name }. A bejelentkezési szolgáltatá
 attachment-runs-programs = „{ $name }” programokat futtathat, ezért az Inbox Classic nem nyitja meg. Mentse, majd nyissa meg saját maga, ha megbízik a forrásában.
 # review: new
 attachment-decrypted-note = Ez a melléklet titkosított üzenetből származik. A megnyitásához az Inbox Classic visszafejtve tárolja ezen a számítógépen, egy saját mappában, amelyet az Inbox Classic egy nap után kiürít.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] A kiszolgáló nem helyezte át az üzenetet (cél: { $folder }), így { $messages } ismét a régi helyén van ({ $from }): { $reason }
+   *[other] A kiszolgáló nem helyezte át az üzeneteket (cél: { $folder }), így { $messages } ismét a régi helyén van ({ $from }): { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] A kiszolgáló nem törölte az üzenetet, így { $messages } ismét a régi helyén van ({ $from }): { $reason }
+   *[other] A kiszolgáló nem törölte az üzeneteket, így { $messages } ismét a régi helyén van ({ $from }): { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] A kiszolgáló nem archiválta az üzenetet, így { $messages } ismét a régi helyén van ({ $from }): { $reason }
+   *[other] A kiszolgáló nem archiválta az üzeneteket, így { $messages } ismét a régi helyén van ({ $from }): { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] A kiszolgáló nem jelölte olvasottként az üzenetet, így { $messages } ismét olvasatlan: { $reason }
+   *[other] A kiszolgáló nem jelölte olvasottként az üzeneteket, így { $messages } ismét olvasatlan: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] A kiszolgáló nem jelölte olvasatlanként az üzenetet, így { $messages } ismét olvasott: { $reason }
+   *[other] A kiszolgáló nem jelölte olvasatlanként az üzeneteket, így { $messages } ismét olvasott: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] A kiszolgáló nem módosította az üzenet jelölőit, így { $messages } változatlan maradt: { $reason }
+   *[other] A kiszolgáló nem módosította az üzenetek jelölőit, így { $messages } változatlan maradt: { $reason }
+}

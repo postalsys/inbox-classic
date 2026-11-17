@@ -4,22 +4,41 @@
 use std::ffi::c_char;
 use std::ptr::null_mut;
 
-use pe_core::{Action, MessageRef, Summary};
+use pe_core::{Action, MessageRef, Selected, Summary};
 
-use crate::core::{PeCore, Rows, handed, refused, take_back, with};
+use crate::core::{PeCore, Rows, handed, refused, take_back, with, with_shared};
 use crate::{guard, into_c_string};
 
-/// Selected messages; free with `pe_selection_free`
+/// Selected messages: listed, or every message of a list (`pe_list_view_select_all`), listed only when a call needs
+/// them; free with `pe_selection_free`
 #[derive(Default)]
-pub struct PeSelection(pub(crate) Vec<MessageRef>);
+pub struct PeSelection(pub(crate) Selected);
 
-/// The messages of `selection`, none for NULL
+impl PeSelection {
+    /// The messages listed, empty for a whole list not listed yet
+    fn listed(&self) -> &[MessageRef] {
+        match &self.0 {
+            Selected::Listed(refs) => refs,
+            Selected::All { .. } => &[],
+        }
+    }
+}
+
+/// The messages of `selection`, none for NULL; a whole list's listed now (on the calling thread: the calls taking a
+/// selection that run on the window thread are those of a few messages, or block anyway)
 ///
 /// # Safety
-/// `selection` must be NULL or a live selection.
-unsafe fn refs_of(selection: *const PeSelection) -> Vec<MessageRef> {
+/// `core` must be NULL or a live handle, `selection` NULL or a live selection.
+unsafe fn refs_of(core: *const PeCore, selection: *const PeSelection) -> Vec<MessageRef> {
     // SAFETY: as the caller guarantees
-    unsafe { selection.as_ref() }.map(|s| s.0.clone()).unwrap_or_default()
+    let Some(selection) = (unsafe { selection.as_ref() }) else {
+        return Vec::new();
+    };
+    match &selection.0 {
+        Selected::Listed(refs) => refs.clone(),
+        // SAFETY: as the caller guarantees
+        all => unsafe { with(core, Vec::new(), |core| core.selected_refs(all).unwrap_or_default()) },
+    }
 }
 
 /// An empty selection
@@ -44,11 +63,11 @@ pub unsafe extern "C" fn pe_selection_free(selection: *mut PeSelection) {
 pub unsafe extern "C" fn pe_selection_clear(selection: *mut PeSelection) {
     // SAFETY: as the caller guarantees
     if let Some(selection) = unsafe { selection.as_mut() } {
-        selection.0.clear();
+        selection.0 = Selected::default();
     }
 }
 
-/// Adds the message `uid` of `folder`
+/// Adds the message `uid` of `folder`; to a whole list's selection (`pe_list_view_select_all`), in its place
 ///
 /// # Safety
 /// `selection` must be NULL or a live selection.
@@ -56,21 +75,62 @@ pub unsafe extern "C" fn pe_selection_clear(selection: *mut PeSelection) {
 pub unsafe extern "C" fn pe_selection_add(selection: *mut PeSelection, folder: i64, uid: u64) {
     // SAFETY: as the caller guarantees
     if let Some(selection) = unsafe { selection.as_mut() } {
-        selection.0.push(MessageRef { folder, uid });
+        let at = MessageRef { folder, uid };
+        match &mut selection.0 {
+            Selected::Listed(refs) => refs.push(at),
+            all => *all = Selected::Listed(vec![at]),
+        }
     }
 }
 
-/// How many messages it has
+/// How many messages it has; for a whole list's (`pe_list_view_select_all`), how many the list had then, without
+/// listing them
 ///
 /// # Safety
 /// `selection` must be NULL or a live selection.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_selection_count(selection: *const PeSelection) -> usize {
     // SAFETY: as the caller guarantees
-    unsafe { selection.as_ref() }.map_or(0, |s| s.0.len())
+    unsafe { selection.as_ref() }.map_or(0, |s| usize::try_from(s.0.count()).unwrap_or(usize::MAX))
 }
 
-/// Message `index` of it (in the list's order when it was filled from ranges); false past the end
+/// Whether it is a whole list's (`pe_list_view_select_all`), its messages not listed: `pe_selection_get` gives none
+/// until `pe_selection_list` lists them
+///
+/// # Safety
+/// `selection` must be NULL or a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_is_all(selection: *const PeSelection) -> bool {
+    // SAFETY: as the caller guarantees
+    unsafe { selection.as_ref() }.is_some_and(|s| matches!(s.0, Selected::All { .. }))
+}
+
+/// Lists the messages of a whole list's selection, in the list's order, for `pe_selection_get` (the calls taking a
+/// selection list them by themselves); on the calling thread, as long as reading the list takes. False on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `selection` NULL or a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_list(core: *const PeCore, selection: *mut PeSelection) -> bool {
+    // SAFETY: as the caller guarantees
+    let Some(selection) = (unsafe { selection.as_mut() }) else {
+        return false;
+    };
+    if let Selected::Listed(_) = selection.0 {
+        return true;
+    }
+    // SAFETY: as the caller guarantees
+    match unsafe { with(core, None, |core| core.selected_refs(&selection.0).ok()) } {
+        Some(refs) => {
+            selection.0 = Selected::Listed(refs);
+            true
+        }
+        None => false,
+    }
+}
+
+/// Message `index` of it (in the list's order when it was filled from ranges); false past the end, and for a whole
+/// list's selection not listed (`pe_selection_list`)
 ///
 /// # Safety
 /// `selection` must be NULL or a live selection, `folder` and `uid` valid pointers.
@@ -82,7 +142,7 @@ pub unsafe extern "C" fn pe_selection_get(
     uid: *mut u64,
 ) -> bool {
     // SAFETY: as the caller guarantees
-    let Some(at) = (unsafe { selection.as_ref() }).and_then(|s| s.0.get(index)) else {
+    let Some(at) = (unsafe { selection.as_ref() }).and_then(|s| s.listed().get(index)) else {
         return false;
     };
     if folder.is_null() || uid.is_null() {
@@ -115,7 +175,8 @@ pub(crate) unsafe fn ranges_of(starts: *const u64, ends: *const u64, count: usiz
 pub struct PePositions(pub(crate) Vec<u64>);
 
 /// # Safety
-/// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, not freed yet.
+/// `positions` must be NULL or from `pe_list_view_positions`, `pe_list_view_restored` or `pe_list_load_selected`, not
+/// freed yet.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_count(positions: *const PePositions) -> usize {
     // SAFETY: as the caller guarantees
@@ -125,7 +186,8 @@ pub unsafe extern "C" fn pe_positions_count(positions: *const PePositions) -> us
 /// Position `index`; 0 past the end
 ///
 /// # Safety
-/// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, not freed yet.
+/// `positions` must be NULL or from `pe_list_view_positions`, `pe_list_view_restored` or `pe_list_load_selected`, not
+/// freed yet.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_get(positions: *const PePositions, index: usize) -> u64 {
     // SAFETY: as the caller guarantees
@@ -135,7 +197,8 @@ pub unsafe extern "C" fn pe_positions_get(positions: *const PePositions, index: 
 }
 
 /// # Safety
-/// `positions` must be NULL or from `pe_list_view_positions` or `pe_list_view_restored`, freed once.
+/// `positions` must be NULL or from `pe_list_view_positions`, `pe_list_view_restored` or `pe_list_load_selected`,
+/// freed once.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_positions_free(positions: *mut PePositions) {
     // SAFETY: as the caller guarantees
@@ -203,7 +266,8 @@ impl From<Summary> for PeSelectionSummary {
     }
 }
 
-/// Fills `summary`; false on failure
+/// Fills `summary`; false on failure. A whole list's selection is counted where its messages are, never listed (its
+/// `flag_color` is 0).
 ///
 /// # Safety
 /// `core` must be a live handle, `selection` a live selection, `summary` a valid pointer.
@@ -221,7 +285,46 @@ pub unsafe extern "C" fn pe_selection_summary(
         return false;
     }
     // SAFETY: as the caller guarantees
-    let Some(found) = (unsafe { with(core, None, |core| core.summary(&selection.0).ok()) }) else {
+    let Some(found) = (unsafe { with(core, None, |core| core.summary_of(&selection.0).ok()) }) else {
+        return false;
+    };
+    // SAFETY: the caller gave a valid pointer
+    unsafe { *summary = found.into() };
+    true
+}
+
+/// `pe_selection_summary` off the window thread, for a whole list's selection (`pe_list_view_select_all`), which
+/// counts every message of the list: `ReadDone` with the request this returns in `uid` follows, then
+/// `pe_selection_summary_result`. Meanwhile `pe_selection_count` is there at once. 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle, `selection` NULL or a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_summary_start(core: *const PeCore, selection: *const PeSelection) -> u64 {
+    // SAFETY: as the caller guarantees
+    let Some(selection) = (unsafe { selection.as_ref() }) else {
+        return 0;
+    };
+    let selected = selection.0.clone();
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, 0, |core| core.summary_start(selected).unwrap_or(0)) }
+}
+
+/// What `pe_selection_summary_start` counted, once, into `summary`; false for another request or on failure
+///
+/// # Safety
+/// `core` must be a live handle, `summary` a valid pointer.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_summary_result(
+    core: *const PeCore,
+    request: u64,
+    summary: *mut PeSelectionSummary,
+) -> bool {
+    if summary.is_null() {
+        return false;
+    }
+    // SAFETY: as the caller guarantees
+    let Some(found) = (unsafe { with(core, None, |core| core.summary_result(request)) }) else {
         return false;
     };
     // SAFETY: the caller gave a valid pointer
@@ -365,7 +468,7 @@ pub unsafe extern "C" fn pe_selection_act(
     error: *mut *mut c_char,
 ) -> *mut c_char {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { refs_of(selection) };
+    let refs = unsafe { refs_of(core, selection) };
     let Some(action) = action_of(action, to) else {
         if !error.is_null() {
             // SAFETY: the caller gave a valid pointer
@@ -377,6 +480,62 @@ pub unsafe extern "C" fn pe_selection_act(
     let outcome = unsafe { with(core, Err(None), |core| core.act(&refs, action).map_err(Some)) };
     // SAFETY: as the caller guarantees
     unsafe { refused(error, outcome, "the messages could not be changed") }.map_or(null_mut(), into_c_string)
+}
+
+/// Does `action` to the selected messages as `pe_selection_act` does, off the window thread: the messages listed (a
+/// whole list's too), changed in the store on a connection of the core's own (`FolderChanged` follows, and the list
+/// shows the change) and handed to the server, after the actions asked for before it. `Acted` follows with the request
+/// this returns in `uid` and what the status bar says, or why not. When the server does not do it, the store takes it
+/// back and `ActionUndone` says so. 0 on failure (a flag colour that is none).
+///
+/// # Safety
+/// `core` must be a live handle, `selection` NULL or a live selection.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_selection_act_start(
+    core: *const PeCore,
+    selection: *const PeSelection,
+    action: PeAction,
+    to: i64,
+) -> u64 {
+    // SAFETY: as the caller guarantees
+    let Some(selection) = (unsafe { selection.as_ref() }) else {
+        return 0;
+    };
+    let Some(action) = action_of(action, to) else {
+        return 0;
+    };
+    let selected = selection.0.clone();
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, 0, |core| core.act_start(selected, action).unwrap_or(0)) }
+}
+
+/// What Mark All Read marks (`pe_mark_read_start`)
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PeMarkRead {
+    /// The folder `id`
+    Folder = 0,
+    /// Every folder of the account `id`
+    Account = 1,
+    /// Every account's Inbox (`id` not used)
+    AllInboxes = 2,
+}
+
+/// Mark All Read off the window thread, as `pe_selection_act_start` does an action: `Acted` follows with the request
+/// this returns in `uid` and what the status bar says ("Marked 3 messages as read"); `ActionUndone` when the server
+/// refuses. 0 on failure.
+///
+/// # Safety
+/// `core` must be a live handle.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_mark_read_start(core: *const PeCore, what: PeMarkRead, id: i64) -> u64 {
+    let what = match what {
+        PeMarkRead::Folder => pe_core::MarkRead::Folder(id),
+        PeMarkRead::Account => pe_core::MarkRead::Account(id),
+        PeMarkRead::AllInboxes => pe_core::MarkRead::AllInboxes,
+    };
+    // SAFETY: as the caller guarantees
+    unsafe { with_shared(core, 0, |core| core.mark_read_start(what).unwrap_or(0)) }
 }
 
 #[repr(C)]
@@ -561,7 +720,7 @@ pub unsafe extern "C" fn pe_selection_file_names(
     selection: *const PeSelection,
 ) -> *mut PeTextList {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { refs_of(selection) };
+    let refs = unsafe { refs_of(core, selection) };
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
@@ -577,7 +736,7 @@ pub unsafe extern "C" fn pe_selection_file_names(
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_selection_all_downloaded(core: *const PeCore, selection: *const PeSelection) -> bool {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { refs_of(selection) };
+    let refs = unsafe { refs_of(core, selection) };
     // SAFETY: as the caller guarantees
     unsafe { with(core, false, |core| core.all_downloaded(&refs).unwrap_or(false)) }
 }
@@ -600,7 +759,7 @@ pub unsafe extern "C" fn pe_selection_export(
     timeout_ms: u64,
 ) -> *mut PeExport {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { refs_of(selection) };
+    let refs = unsafe { refs_of(core, selection) };
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| {
@@ -688,7 +847,7 @@ pub unsafe extern "C" fn pe_selection_save(
     error: *mut *mut c_char,
 ) -> *mut PeTextList {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { refs_of(selection) };
+    let refs = unsafe { refs_of(core, selection) };
     // SAFETY: as the caller guarantees
     let dir = unsafe { crate::core::arg(dir) }.unwrap_or_default().to_string();
     // SAFETY: as the caller guarantees
@@ -722,7 +881,7 @@ pub unsafe extern "C" fn pe_selection_forward(
     error: *mut *mut c_char,
 ) -> *mut crate::core::PeDraft {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { refs_of(selection) };
+    let refs = unsafe { refs_of(core, selection) };
     // SAFETY: as the caller guarantees
     let outcome = unsafe {
         with(core, Err(None), |core| {
@@ -761,7 +920,7 @@ pub unsafe extern "C" fn pe_selection_drag_files(
     error: *mut *mut c_char,
 ) -> *mut PeTextList {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { refs_of(selection) };
+    let refs = unsafe { refs_of(core, selection) };
     // SAFETY: as the caller guarantees
     let outcome = unsafe {
         with(core, Err(None), |core| {
@@ -881,7 +1040,7 @@ pub unsafe extern "C" fn pe_selection_downloading_text(
     selection: *const PeSelection,
 ) -> *mut c_char {
     // SAFETY: as the caller guarantees
-    let refs = unsafe { refs_of(selection) };
+    let refs = unsafe { refs_of(core, selection) };
     // SAFETY: as the caller guarantees
     unsafe {
         with(core, null_mut(), |core| match core.downloading_text(&refs) {

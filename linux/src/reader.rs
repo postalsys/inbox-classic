@@ -1047,15 +1047,18 @@ impl Reader {
     // ---- the files, the calendar and unsubscribing ----
 
     /// The attachment `index` of the message shown, its name and bytes, from the message file shown or from the
-    /// folder's message; None when it could not be read
-    fn attachment(&self, index: usize) -> Option<(String, Vec<u8>)> {
+    /// folder's message (read off the window thread); None when it could not be read or the window closed first
+    async fn attachment_read(&self, index: usize) -> Option<(String, Vec<u8>)> {
         let core = &shell().core;
-        match self.file.borrow().as_deref() {
-            Some(path) => core.file_attachment(path, index),
-            None => core.attachment(self.folder.get(), self.uid.get(), index),
+        if let Some(path) = self.file.borrow().as_deref() {
+            return core.file_attachment(path, index).ok().flatten();
         }
-        .ok()
-        .flatten()
+        let window = self.window()?;
+        let request = core.attachment_start(self.folder.get(), self.uid.get(), index).ok()?;
+        if !ui::wait_read(&window, request).await {
+            return None;
+        }
+        core.attachment_result(request).map(|(name, _, data)| (name, data))
     }
 
     /// Every attachment of the message shown saved into `dir`: how many of how many, None when it could not be read
@@ -1084,7 +1087,7 @@ impl Reader {
 
     async fn save_attachment(&self, index: usize) {
         let Some(window) = self.window() else { return };
-        let Some((name, data)) = self.attachment(index) else {
+        let Some((name, data)) = self.attachment_read(index).await else {
             ui::alert(&window, TITLE, &self.not_read()).await;
             return;
         };
@@ -1098,7 +1101,7 @@ impl Reader {
 
     /// Attachment `index` opened with the system's program for it: a file that can run programs refused from its row,
     /// in the core's words; any other written by the core into a private folder of the user's on a thread of its own
-    /// (a large or encrypted message takes a while: its item dims after 400 ms), the note it gives shown first
+    /// (a large or encrypted message takes a while: its item dims after `LIST_LOADING_MS`), the note it gives shown first
     async fn open_attachment(&self, index: usize) {
         let Some(window) = self.window() else { return };
         let Some(file) = self.strip.file(index) else { return };
@@ -1111,7 +1114,8 @@ impl Reader {
         let done = Rc::new(Cell::new(false));
         let strip = self.strip.clone();
         let waited = done.clone();
-        glib::timeout_add_local_once(std::time::Duration::from_millis(400), move || {
+        let busy_after = std::time::Duration::from_millis(pe_core::LIST_LOADING_MS.into());
+        glib::timeout_add_local_once(busy_after, move || {
             if !waited.get() {
                 strip.busy(Some(index));
             }
@@ -1119,17 +1123,28 @@ impl Reader {
         let core = shell().core.clone();
         let path = self.file.borrow().clone();
         let (folder, uid) = (self.folder.get(), self.uid.get());
-        let opened = gio::spawn_blocking(move || match path {
-            Some(path) => core.file_open_attachment(&path, index),
-            None => core.open_attachment(folder, uid, index),
-        })
-        .await;
+        let opened = match path {
+            Some(path) => gio::spawn_blocking(move || core.file_open_attachment(&path, index))
+                .await
+                .unwrap_or(Ok(None)),
+            // a folder's message: written off the window thread by the core, the window closing drops it
+            None => match core.open_attachment_start(folder, uid, index) {
+                Ok(request) if ui::wait_read(&window, request).await => core.open_attachment_result(request),
+                // the window closed first
+                Ok(_) => {
+                    done.set(true);
+                    self.opening.set(false);
+                    return;
+                }
+                Err(error) => Err(error),
+            },
+        };
         done.set(true);
         self.strip.busy(None);
         self.opening.set(false);
         let opened = match opened {
-            Ok(Ok(Some(opened))) => opened,
-            Ok(Err(refused)) => return ui::alert(&window, TITLE, &refused.to_string()).await,
+            Ok(Some(opened)) => opened,
+            Err(refused) => return ui::alert(&window, TITLE, &refused.to_string()).await,
             _ => return ui::alert(&window, TITLE, &self.not_read()).await,
         };
         if let Some(note) = &opened.note {

@@ -196,12 +196,17 @@ void Reply(MessageWindow* state, PeDraftKind kind) {
         MessageBoxW(state->hwnd, core::T(PE_TEXT_UI_ADD_ACCOUNT_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
-    core::Draft draft = state->reader.DraftOf(kind, account);
-    if (!draft) {
+    // made off the window thread: the compose window opens once it is (the reader drops it when this window closes)
+    bool started = state->reader.DraftOf(kind, account, [hwnd = state->hwnd, main = state->main, handle = state->core, account](core::Draft draft) {
+        if (!draft) {
+            MessageBoxW(hwnd, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+            return;
+        }
+        OpenCompose(main, handle, account, pe_draft_info(draft.get()));
+    });
+    if (!started) {
         MessageBoxW(state->hwnd, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
-        return;
     }
-    OpenCompose(state->main, state->core, account, pe_draft_info(draft.get()));
 }
 
 // Save As of a message file: a copy of it where the user says

@@ -1668,22 +1668,28 @@ void MakeDefaultMailApp() {
 }
 
 void Reply(PeDraftKind kind) {
-    core::Draft draft = g_mailbox.DraftOfShown(kind);
-    if (!draft) {
+    // made off the window thread: the compose window opens once it is
+    bool started = g_mailbox.DraftOfShown(kind, [](core::Draft draft, int64_t account) {
+        if (!draft) {
+            MessageBoxW(g_main, core::T(PE_TEXT_UI_NOT_DOWNLOADED).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
+            return;
+        }
+        OpenCompose(g_main, g_core.get(), account, pe_draft_info(draft.get()));
+    });
+    if (!started) {
         MessageBoxW(g_main, core::T(PE_TEXT_UI_SELECT_MESSAGE_FIRST).c_str(), kTitle, MB_OK | MB_ICONINFORMATION);
-        return;
     }
-    OpenCompose(g_main, g_core.get(), g_mailbox.CurrentAccount(), pe_draft_info(draft.get()));
 }
 
 void OnCommand(WORD id, WORD code) {
-    // a command of the menus, toolbar or keys that acts on the list of the folder chosen or its selection: that list read
-    // now if it waits for the paint. The Flag submenu's colours act through Mailbox::Act, which reads it
-    if (CommandActsOnList(id)) {
-        g_mailbox.FlushListLoad();
+    // a command of the menus, toolbar or keys that acts on the list of the folder chosen or its selection: run once
+    // that list is drawn, if it waits for it. The Flag submenu's colours and Clear Flag too
+    bool flagColor = id > IDM_FLAG_COLOR && id <= IDM_FLAG_CLEAR;
+    if ((CommandActsOnList(id) || flagColor) && g_mailbox.DeferCommand(id, code)) {
+        return;
     }
     // a colour of the Flag submenu, or Clear Flag
-    if (id > IDM_FLAG_COLOR && id <= IDM_FLAG_CLEAR) {
+    if (flagColor) {
         g_mailbox.FlagColor(id == IDM_FLAG_CLEAR ? 0 : id - IDM_FLAG_COLOR);
         return;
     }
@@ -1890,7 +1896,7 @@ void OnCommand(WORD id, WORD code) {
         return;
     case IDM_ACCOUNT_MARK_ALL_READ:
         if (int64_t account = g_mailbox.SelectedAccount()) {
-            pe_account_mark_all_read(g_core.get(), account);
+            g_mailbox.MarkAccountRead(account);
         }
         return;
     case IDM_ACCOUNT_PROPERTIES:
@@ -2055,11 +2061,6 @@ LRESULT CALLBACK MainProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (g_arguments.testHooks && data->dwData == kTestHoldList && data->cbData >= sizeof(wchar_t)) {
             g_mailbox.TestHoldList(*static_cast<const wchar_t*>(data->lpData) == L'1');
             return 1;
-        }
-        // the hooks that look at the list or act on its messages look at the folder chosen
-        if (g_arguments.testHooks && (data->dwData == kTestRowPicture || data->dwData == kTestListTop ||
-                                      data->dwData == kTestDragOut || data->dwData == kTestDropFiles)) {
-            g_mailbox.FlushListLoad();
         }
         if (g_arguments.testHooks && data->dwData == kTestFromStore) {
             return pe_last_open_from_store(g_core.get()) ? 11 : 10;

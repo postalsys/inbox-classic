@@ -1241,3 +1241,40 @@ setup-skipped-unreachable = { $name } je preskočen: njegova usluga prijave nije
 attachment-runs-programs = Datoteka „{ $name }“ može pokretati programe pa je Inbox Classic ne otvara. Spremite je, a zatim je sami otvorite ako vjerujete njezinu izvoru.
 # review: new
 attachment-decrypted-note = Ovaj privitak potječe iz šifrirane poruke. Da bi ga otvorio, Inbox Classic ga sprema dešifriranog na ovo računalo, u vašu mapu koju Inbox Classic prazni nakon jednog dana.
+# a bar over the list when the server did not do what the user asked of messages, so they are as they were again
+# review: new
+undone-move = { $count ->
+    [one] Poslužitelj nije premjestio poruku u mapu { $folder }, pa je { $messages } ponovno u mapi { $from }: { $reason }
+    [few] Poslužitelj nije premjestio poruke u mapu { $folder }, pa su { $messages } ponovno u mapi { $from }: { $reason }
+   *[other] Poslužitelj nije premjestio poruke u mapu { $folder }, pa je { $messages } ponovno u mapi { $from }: { $reason }
+}
+# review: new
+undone-delete = { $count ->
+    [one] Poslužitelj nije izbrisao poruku, pa je { $messages } ponovno u mapi { $from }: { $reason }
+    [few] Poslužitelj nije izbrisao poruke, pa su { $messages } ponovno u mapi { $from }: { $reason }
+   *[other] Poslužitelj nije izbrisao poruke, pa je { $messages } ponovno u mapi { $from }: { $reason }
+}
+# review: new
+undone-archive = { $count ->
+    [one] Poslužitelj nije arhivirao poruku, pa je { $messages } ponovno u mapi { $from }: { $reason }
+    [few] Poslužitelj nije arhivirao poruke, pa su { $messages } ponovno u mapi { $from }: { $reason }
+   *[other] Poslužitelj nije arhivirao poruke, pa je { $messages } ponovno u mapi { $from }: { $reason }
+}
+# review: new
+undone-read = { $count ->
+    [one] Poslužitelj nije označio poruku kao pročitanu, pa je { $messages } ponovno nepročitana: { $reason }
+    [few] Poslužitelj nije označio poruke kao pročitane, pa su { $messages } ponovno nepročitane: { $reason }
+   *[other] Poslužitelj nije označio poruke kao pročitane, pa je { $messages } ponovno nepročitano: { $reason }
+}
+# review: new
+undone-unread = { $count ->
+    [one] Poslužitelj nije označio poruku kao nepročitanu, pa je { $messages } ponovno pročitana: { $reason }
+    [few] Poslužitelj nije označio poruke kao nepročitane, pa su { $messages } ponovno pročitane: { $reason }
+   *[other] Poslužitelj nije označio poruke kao nepročitane, pa je { $messages } ponovno pročitano: { $reason }
+}
+# review: new
+undone-flags = { $count ->
+    [one] Poslužitelj nije promijenio zastavice poruke, pa { $messages } ostaje kao prije: { $reason }
+    [few] Poslužitelj nije promijenio zastavice poruka, pa { $messages } ostaju kao prije: { $reason }
+   *[other] Poslužitelj nije promijenio zastavice poruka, pa { $messages } ostaje kao prije: { $reason }
+}

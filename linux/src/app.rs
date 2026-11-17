@@ -284,6 +284,13 @@ impl Shell {
         self.requests.borrow_mut().remove(&request);
     }
 
+    /// A request dropped before its event: whoever waits for it hears false
+    pub fn cancel_request(&self, request: u64) {
+        if let Some(done) = self.requests.borrow_mut().remove(&request) {
+            let _ = done.try_send(false);
+        }
+    }
+
     fn request_done(&self, request: u64) {
         if let Some(done) = self.requests.borrow_mut().remove(&request) {
             let _ = done.try_send(true);
@@ -306,9 +313,10 @@ impl Shell {
                     main.set_status(&rules_said.unwrap_or_else(|| t!(UiDone)));
                 }
             }
-            Event::AutoconfigDone { request } | Event::SignInDone { request } | Event::SignInAppChecked { request } => {
-                self.request_done(*request)
-            }
+            Event::AutoconfigDone { request }
+            | Event::SignInDone { request }
+            | Event::SignInAppChecked { request }
+            | Event::ReadDone { request } => self.request_done(*request),
             Event::NewMail { .. } => self.notify_new_mail(&event),
             Event::Unsubscribed { request, problem } => {
                 let mut said = main.reader.unsubscribed(*request, problem.as_deref());
@@ -544,13 +552,7 @@ impl Shell {
 
     fn reply(&self, kind: DraftKind) {
         let main = self.main();
-        match main.draft_of_shown(kind) {
-            Some(draft) => compose::open(main.current_account(), Some(draft)),
-            None => {
-                let window = main.window().clone();
-                spawn(async move { ui::alert(&window, TITLE, &t!(UiSelectMessageFirst)).await });
-            }
-        }
+        spawn(async move { main.reply(kind).await });
     }
 
     pub fn set_notify(&self, on: bool) {

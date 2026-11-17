@@ -27,6 +27,18 @@ impl MessageRef {
     }
 }
 
+/// The messages of one folder in a list, in numbers ([`Store::search_summary`])
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct FolderSummary {
+    pub folder: FolderId,
+    pub count: u64,
+    pub unread: u64,
+    pub flagged: u64,
+    /// In watched conversations, and in ignored ones
+    pub watched: u64,
+    pub ignored: u64,
+}
+
 /// What an action on picked messages needs of each: where it is, its flags and its Message-ID
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Picked {
@@ -159,6 +171,30 @@ impl Store {
         })
     }
 
+    /// Those of `refs` that `search` finds, in the order given: a selection made of them holds only messages its list
+    /// shows, never one of another folder or one that left it
+    pub fn refs_found(&self, search: &Search, refs: &[MessageRef]) -> Result<Vec<MessageRef>> {
+        if refs.is_empty() {
+            return Ok(Vec::new());
+        }
+        let found: std::collections::HashSet<MessageRef> = self.with_picked_refs(refs, || {
+            let (condition, values) = search.ungrouped().condition(false);
+            let mut statement = self.db.prepare(&format!(
+                "SELECT folder_id, uid FROM messages WHERE ({condition}) \
+                 AND (folder_id, uid) IN (SELECT folder_id, uid FROM temp.picked_refs)"
+            ))?;
+            statement
+                .query_map(params_from_iter(values), |row| {
+                    Ok(MessageRef {
+                        folder: row.get(0)?,
+                        uid: row.get(1)?,
+                    })
+                })?
+                .collect()
+        })?;
+        Ok(refs.iter().copied().filter(|r| found.contains(r)).collect())
+    }
+
     /// `f` run with `refs` in the table `temp.picked_refs` (folder_id, uid), emptied again after
     fn with_picked_refs<T>(&self, refs: &[MessageRef], f: impl FnOnce() -> Result<T>) -> Result<T> {
         self.scratch(|| {
@@ -205,6 +241,39 @@ impl Store {
                     },
                     row.get(2)?,
                 ))
+            })?
+            .collect()
+    }
+
+    /// What the list `search` makes has in each folder, in numbers, with one pass over it (counted where each row
+    /// is, never listed): for a selection of the whole list (Select All), whatever its size
+    pub fn search_summary(&self, search: &Search) -> Result<Vec<FolderSummary>> {
+        // every message of the list, a collapsed conversation's too
+        let search = Search {
+            threads: None,
+            ..search.clone()
+        };
+        let (condition, values) = search.condition(false);
+        let mut statement = self.db.prepare(&format!(
+            "SELECT folder_id, COUNT(*), COALESCE(SUM(NOT seen), 0), \
+             COALESCE(SUM(instr(' ' || lower(flags) || ' ', ' \\flagged ') > 0), 0), \
+             COALESCE(SUM(mark = {watch}), 0), COALESCE(SUM(mark = {ignore}), 0) FROM \
+             (SELECT folder_id, seen, flags, \
+              COALESCE((SELECT mark FROM thread_marks t WHERE t.thread_id = messages.thread_id), 0) AS mark \
+              FROM messages WHERE {condition}) GROUP BY folder_id ORDER BY folder_id",
+            watch = crate::marks::WATCH,
+            ignore = crate::marks::IGNORE,
+        ))?;
+        statement
+            .query_map(params_from_iter(values), |row| {
+                Ok(FolderSummary {
+                    folder: row.get(0)?,
+                    count: row.get(1)?,
+                    unread: row.get(2)?,
+                    flagged: row.get(3)?,
+                    watched: row.get(4)?,
+                    ignored: row.get(5)?,
+                })
             })?
             .collect()
     }

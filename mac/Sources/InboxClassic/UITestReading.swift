@@ -108,7 +108,7 @@ extension UITest {
     func columnLayout() async throws {
         step("the column layout")
         selectFolder(named: "Inbox")
-        _ = await waitUntil { list.numberOfRows > 0 }
+        _ = await waitUntil { !main.mailbox.listLoading && list.numberOfRows > 0 }
         await selectRow(0)
         command(.layoutColumns)
         check(await waitUntil(10) { main.mailbox.layout == PE_LAYOUT_COLUMNS }, "View > Layout > Columns shows the column layout")
@@ -405,7 +405,7 @@ extension UITest {
 
     /// the message with `subject` of the Inbox shown in the reading pane
     func showShopMessage(_ subject: String) async {
-        search("subject:\"\(subject)\"")
+        await search("subject:\"\(subject)\"")
         _ = await waitUntil(20) { list.numberOfRows == 1 }
         await selectRow(0)
         _ = await waitUntil(15) { main.mailbox.reader.subject == subject }
@@ -508,7 +508,7 @@ extension UITest {
         onMain { options.downloadAhead.selectItem(at: 2); options.downloadAheadChosen() }
         check(await waitUntil(5) { main.core.downloadAhead == PE_DOWNLOAD_AHEAD_NEVER }, "and Only when opened again")
         onMain { options.window.close() }
-        search("")
+        await search("")
     }
 
     // ---- a message file from the Finder ----
