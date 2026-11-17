@@ -87,7 +87,7 @@ final class SecurityBar: NSView {
         words.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         words.setContentHuggingPriority(.init(1), for: .horizontal)
         words.setAccessibilityIdentifier("reader.security.words")
-        detailsButton.title = Text.uiProtectionDetails.text.replacingOccurrences(of: "...", with: "\u{2026}")
+        detailsButton.title = Text.uiProtectionDetails.opens
         detailsButton.bezelStyle = .push
         detailsButton.controlSize = .small
         detailsButton.font = .systemFont(ofSize: NSFont.systemFontSize(for: .small))

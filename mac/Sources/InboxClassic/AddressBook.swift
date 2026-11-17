@@ -1117,7 +1117,7 @@ final class ContactSheet: NSObject, NSTableViewDataSource, NSTableViewDelegate, 
 
     /// the well with Choose and Remove beside it, Remove only while there is a picture
     private func pictureRow() -> NSView {
-        let choose = NSButton(title: Text.uiCardPictureChoose.text.replacingOccurrences(of: "...", with: "\u{2026}"),
+        let choose = NSButton(title: Text.uiCardPictureChoose.opens,
                               target: self, action: #selector(choosePictureClicked))
         choose.setAccessibilityIdentifier("contact.picture.choose")
         removePictureButton.target = self
@@ -1717,7 +1717,7 @@ final class PictureWell: NSView {
         registerForDraggedTypes([.fileURL])
         setAccessibilityElement(true)
         setAccessibilityRole(.image)
-        setAccessibilityLabel(Text.uiCardPicture.text.trimmingCharacters(in: CharacterSet(charactersIn: ":\u{a0} ")))
+        setAccessibilityLabel(fieldTitle(Text.uiCardPicture.text))
         setAccessibilityIdentifier("contact.picture")
     }
 

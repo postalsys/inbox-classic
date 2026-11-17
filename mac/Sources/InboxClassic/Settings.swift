@@ -113,26 +113,10 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
     private static let spacing: CGFloat = 8
 
     let window: NSWindow
-    let language = NSPopUpButton()
-    let notify = WrappingCheckbox()
-    let signInCodes = WrappingCheckbox()
-    /// Delay before sending (Undo Send)
-    let sendDelay = NSPopUpButton()
-    /// Check for updates automatically: Sparkle's own setting, disabled in a build without it
-    let checkUpdates = WrappingCheckbox()
-    /// Automatic, Classic, Columns: View > Layout's choice
-    let layout = NSPopUpButton()
-    let grouping = WrappingCheckbox()
-    let listPictures = WrappingCheckbox()
-    /// Show messages on a dark background when the system is dark
-    let darkMessages = WrappingCheckbox()
-    let pictures = WrappingCheckbox()
-    let downloadAhead = NSPopUpButton()
-    let downloadLimit = NSPopUpButton()
     private(set) var pane = SettingsPage.general
     private var panes: [SettingsPage: NSView] = [:]
-    /// the check boxes by their settings, for the ones that depend on another
-    private var toggles: [Setting: NSButton] = [:]
+    /// the controls of the settings, every pane's, made when the window opens
+    private var controls: [Setting: NSControl] = [:]
     private let core: Core
     /// the codes of the language pop-up's items, nil for System default
     private var codes: [String?] = []
@@ -202,26 +186,44 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
         SettingsPage(rawValue: item.itemIdentifier.rawValue).map { select($0) }
     }
 
+    /// the controls the UI test reads and the actions read back
+    var language: NSPopUpButton { popup(.language) }
+    var notify: NSButton { box(.notifyNewMail) }
+    var signInCodes: NSButton { box(.codesInNotifications) }
+    /// Delay before sending (Undo Send)
+    var sendDelay: NSPopUpButton { popup(.sendDelay) }
+    /// Check for updates automatically: Sparkle's own setting, disabled in a build without it
+    var checkUpdates: NSButton { box(.checkForUpdates) }
+    /// Automatic, Classic, Columns: View > Layout's choice
+    var layout: NSPopUpButton { popup(.layout) }
+    var grouping: NSButton { box(.groupByConversation) }
+    var listPictures: NSButton { box(.listPictures) }
+    /// Show messages on a dark background when the system is dark
+    var darkMessages: NSButton { box(.darkMessages) }
+    var pictures: NSButton { box(.picturesAlways) }
+    var downloadAhead: NSPopUpButton { popup(.downloadAhead) }
+    var downloadLimit: NSPopUpButton { popup(.downloadLimit) }
+
+    // every setting's control is made in init, so these always find theirs
+    private func popup(_ setting: Setting) -> NSPopUpButton {
+        controls[setting] as! NSPopUpButton
+    }
+
+    private func box(_ setting: Setting) -> NSButton {
+        controls[setting] as! NSButton
+    }
+
     /// A pane: its groups' settings in a grid, the labels right aligned before the controls, as Apple's panes have
     /// them (a pop-up's own, and a group's title on its first control's row when that is no pop-up), the groups set
     /// apart by space, and the help button in the bottom right corner
     private func makePane(_ page: SettingsPage) -> NSView {
         let settings = page.groups.flatMap(\.settings)
-        let controls = Dictionary(uniqueKeysWithValues: settings.map { ($0, control(for: $0)) })
-        // the labels as wide as the widest of them, up to a limit that leaves the widest pop-up or push button its room
-        // (those do not wrap); check boxes and notes wrap in what is left
-        let room = Self.width - 2 * Self.margin
-        let widestFixed = controls.values.filter { !($0 is WrappingCheckbox) }.map(\.intrinsicContentSize.width).max() ?? 0
-        let limit = max(min(Self.widestLabel, room - Self.spacing - ceil(widestFixed)), Self.widestLabel / 2)
-        var labels: [Setting: NSTextField] = [:]
-        for group in page.groups {
-            for setting in group.settings {
-                if let text = labelText(setting, in: group) {
-                    labels[setting] = label(text, limit)
-                }
-            }
+        for setting in settings {
+            controls[setting] = control(for: setting)
         }
+        let labels = labelColumn(for: page, controls: settings.compactMap { controls[$0] })
         let labelWidth = labels.values.map(\.preferredMaxLayoutWidth).max() ?? 0
+        let room = Self.width - 2 * Self.margin
         let column = labelWidth > 0 ? room - labelWidth - Self.spacing : room
         let grid = NSGridView()
         grid.rowSpacing = 10
@@ -252,6 +254,28 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
         // a pane without pop-ups has its controls start at the margin
         grid.column(at: 0).isHidden = labels.isEmpty
         grid.column(at: 0).xPlacement = .trailing
+        return framed(grid)
+    }
+
+    /// The labels of `page` by their settings, as wide as the widest of them, up to a limit that leaves the widest of
+    /// `controls` that does not wrap (a pop-up or push button) its room; check boxes and notes wrap in what is left
+    private func labelColumn(for page: SettingsPage, controls: [NSControl]) -> [Setting: NSTextField] {
+        let room = Self.width - 2 * Self.margin
+        let widestFixed = controls.filter { !($0 is WrappingCheckbox) }.map(\.intrinsicContentSize.width).max() ?? 0
+        let limit = max(min(Self.widestLabel, room - Self.spacing - ceil(widestFixed)), Self.widestLabel / 2)
+        var labels: [Setting: NSTextField] = [:]
+        for group in page.groups {
+            for setting in group.settings {
+                if let text = labelText(setting, in: group) {
+                    labels[setting] = label(text, limit)
+                }
+            }
+        }
+        return labels
+    }
+
+    /// `grid` within the pane's margins, the help button in the bottom right corner under it
+    private func framed(_ grid: NSGridView) -> NSView {
         grid.translatesAutoresizingMaskIntoConstraints = false
         let help = HelpButton("options")
         help.translatesAutoresizingMaskIntoConstraints = false
@@ -271,57 +295,41 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
     }
 
     /// The control of `setting`, set to its value
-    private func control(for setting: Setting) -> NSView {
+    private func control(for setting: Setting) -> NSControl {
+        let app = AppDelegate.shared
         switch setting {
         case .language:
-            fillLanguages()
-            return choice(language, setting, #selector(languageChosen))
+            return fillLanguages(choice(setting, #selector(languageChosen)))
         case .notifyNewMail:
-            return toggle(notify, setting, AppDelegate.shared?.notify ?? true, #selector(notifyChanged))
+            return toggle(setting, app?.notify ?? true, #selector(notifyChanged))
         case .codesInNotifications:
-            return toggle(signInCodes, setting, AppDelegate.shared?.codesInNotifications ?? false, #selector(signInCodesChanged))
+            return toggle(setting, app?.codesInNotifications ?? false, #selector(signInCodesChanged))
         case .sendDelay:
-            sendDelay.addItems(withTitles: Core.sendDelays)
-            sendDelay.selectItem(at: core.sendDelayIndex)
-            return choice(sendDelay, setting, #selector(sendDelayChosen))
+            return filled(choice(setting, #selector(sendDelayChosen)), Core.sendDelays, core.sendDelayIndex)
         case .defaultMailApp:
             return button(setting, #selector(defaultAppClicked))
         case .emlDefault:
             return button(setting, #selector(emlDefaultClicked))
         case .checkForUpdates:
-            let updater = AppDelegate.shared?.updater
-            toggle(checkUpdates, setting, updater?.automaticallyChecksForUpdates ?? false, #selector(checkUpdatesChanged))
-            checkUpdates.isEnabled = updater != nil
-            return checkUpdates
+            let box = toggle(setting, app?.updater?.automaticallyChecksForUpdates ?? false, #selector(checkUpdatesChanged))
+            box.isEnabled = app?.updater != nil
+            return box
         case .layout:
-            // View > Layout's choices, each item tagged with its mode
-            for (command, mode) in AppDelegate.layoutModes.sorted(by: { $0.value.rawValue < $1.value.rawValue }) {
-                layout.addItem(withTitle: command.label)
-                layout.lastItem?.tag = Int(mode.rawValue)
-            }
-            layout.selectItem(withTag: Int(AppDelegate.shared?.layoutMode.rawValue ?? 0))
-            return choice(layout, setting, #selector(layoutChosen))
+            return fillLayouts(choice(setting, #selector(layoutChosen)))
         case .groupByConversation:
-            return toggle(grouping, setting, AppDelegate.shared?.groupByConversation ?? true, #selector(groupingChanged))
+            return toggle(setting, app?.groupByConversation ?? true, #selector(groupingChanged))
         case .listPictures:
-            return toggle(listPictures, setting, AppDelegate.shared?.listPictures ?? true, #selector(listPicturesChanged))
+            return toggle(setting, app?.listPictures ?? true, #selector(listPicturesChanged))
         case .darkMessages:
-            return toggle(darkMessages, setting, core.darkMessages, #selector(darkMessagesChanged))
+            return toggle(setting, core.darkMessages, #selector(darkMessagesChanged))
         case .picturesAlways:
-            return toggle(pictures, setting, core.alwaysLoadPictures, #selector(picturesChanged))
+            return toggle(setting, core.alwaysLoadPictures, #selector(picturesChanged))
         case .trustedSenders:
             return button(setting, #selector(trustedSendersClicked))
         case .downloadAhead:
-            // in the order of PeDownloadAhead
-            for item in [Text.uiDownloadAheadRecent, Text.uiDownloadAheadAll, Text.uiDownloadAheadNever] {
-                downloadAhead.addItem(withTitle: item.text)
-            }
-            downloadAhead.selectItem(at: Int(core.downloadAhead.rawValue))
-            return choice(downloadAhead, setting, #selector(downloadAheadChosen))
+            return fillDownloadAhead(choice(setting, #selector(downloadAheadChosen)))
         case .downloadLimit:
-            downloadLimit.addItems(withTitles: Core.downloadLimits)
-            downloadLimit.selectItem(at: core.downloadLimitIndex)
-            return choice(downloadLimit, setting, #selector(downloadLimitChosen))
+            return filled(choice(setting, #selector(downloadLimitChosen)), Core.downloadLimits, core.downloadLimitIndex)
         }
     }
 
@@ -330,18 +338,18 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
         "settings.\(setting)"
     }
 
-    @discardableResult
-    private func toggle(_ box: WrappingCheckbox, _ setting: Setting, _ on: Bool, _ action: Selector) -> NSButton {
+    private func toggle(_ setting: Setting, _ on: Bool, _ action: Selector) -> WrappingCheckbox {
+        let box = WrappingCheckbox()
         box.title = hyphensKept(setting.label.text)
         box.state = on ? .on : .off
         box.target = self
         box.action = action
         box.setAccessibilityIdentifier(id(setting))
-        toggles[setting] = box
         return box
     }
 
-    private func choice(_ popup: NSPopUpButton, _ setting: Setting, _ action: Selector) -> NSPopUpButton {
+    private func choice(_ setting: Setting, _ action: Selector) -> NSPopUpButton {
+        let popup = NSPopUpButton()
         popup.target = self
         popup.action = action
         popup.setAccessibilityIdentifier(id(setting))
@@ -349,7 +357,7 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
     }
 
     private func button(_ setting: Setting, _ action: Selector) -> NSButton {
-        let button = NSButton(title: setting.label.text.replacingOccurrences(of: "...", with: "…"), target: self, action: action)
+        let button = NSButton(title: setting.label.opens, target: self, action: action)
         button.setAccessibilityIdentifier(id(setting))
         return button
     }
@@ -402,22 +410,43 @@ final class SettingsWindow: NSObject, NSWindowDelegate, NSToolbarDelegate {
         return stack
     }
 
-    private func fillLanguages() {
-        language.addItem(withTitle: Text.uiOptionsSystemDefault.text(["language": Languages.name(Languages.system)]))
-        codes = [nil]
-        for (code, name) in Languages.all {
-            language.addItem(withTitle: name)
-            codes.append(code)
-        }
+    /// `popup` with `titles`, the one at `selected` chosen
+    private func filled(_ popup: NSPopUpButton, _ titles: [String], _ selected: Int) -> NSPopUpButton {
+        popup.addItems(withTitles: titles)
+        popup.selectItem(at: selected)
+        return popup
+    }
+
+    /// System default and the languages there is a catalog of, the one chosen selected
+    private func fillLanguages(_ popup: NSPopUpButton) -> NSPopUpButton {
+        let languages = Languages.all
+        codes = [nil] + languages.map(\.code)
+        let titles = [Text.uiOptionsSystemDefault.text(["language": Languages.name(Languages.system)])] + languages.map(\.name)
         let chosen = Languages.chosen
-        language.selectItem(at: codes.firstIndex { $0 == chosen } ?? 0)
+        return filled(popup, titles, codes.firstIndex { $0 == chosen } ?? 0)
+    }
+
+    /// View > Layout's choices, each item tagged with its mode
+    private func fillLayouts(_ popup: NSPopUpButton) -> NSPopUpButton {
+        for (command, mode) in AppDelegate.layoutModes.sorted(by: { $0.value.rawValue < $1.value.rawValue }) {
+            popup.addItem(withTitle: command.label)
+            popup.lastItem?.tag = Int(mode.rawValue)
+        }
+        popup.selectItem(withTag: Int(AppDelegate.shared?.layoutMode.rawValue ?? 0))
+        return popup
+    }
+
+    /// Recent, All and Never, in the order of PeDownloadAhead
+    private func fillDownloadAhead(_ popup: NSPopUpButton) -> NSPopUpButton {
+        let items = [Text.uiDownloadAheadRecent, Text.uiDownloadAheadAll, Text.uiDownloadAheadNever]
+        return filled(popup, items.map(\.text), Int(core.downloadAhead.rawValue))
     }
 
     /// a check box that depends on another enabled only while that one is checked, keeping its own value
     private func updateDependents() {
-        for (setting, box) in toggles {
-            if let parent = setting.dependsOn.flatMap({ toggles[$0] }) {
-                box.isEnabled = parent.state == .on
+        for (setting, control) in controls {
+            if let parent = setting.dependsOn.flatMap({ controls[$0] as? NSButton }) {
+                control.isEnabled = parent.state == .on
             }
         }
     }

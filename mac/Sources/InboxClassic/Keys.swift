@@ -5,11 +5,6 @@ import AppKit
 import CInboxClassic
 import UniformTypeIdentifiers
 
-/// A word of a button that opens a window, with the Mac's ellipsis ("New Key…")
-private func opens(_ text: Text) -> String {
-    text.text.replacingOccurrences(of: "...", with: "\u{2026}")
-}
-
 /// The rounded panel the fingerprint of Verify Key is shown on, in the fill of the light or dark look
 private final class FingerprintPanel: NSView {
     override func draw(_ dirtyRect: NSRect) {
@@ -87,7 +82,7 @@ enum KeyActions {
     @discardableResult
     static func makeKey(core: Core, accounts: [Account]? = nil) -> String? {
         guard let fingerprint = NewKeyWindow(core: core, accounts: accounts ?? core.accounts()).run() else { return nil }
-        if ask(Text.uiKeysBackupOffer.text, title: Text.uiKeysNewTitle.text, yes: opens(.uiKeysBackupNow),
+        if ask(Text.uiKeysBackupOffer.text, title: Text.uiKeysNewTitle.text, yes: Text.uiKeysBackupNow.opens,
                no: Text.uiKeysLater.text, style: .information) {
             backup(core: core, fingerprint: fingerprint)
         }
@@ -481,7 +476,7 @@ private final class KeyPropertiesView: NSObject {
         let buttons = buttonRow([close], help: "encryption-keys")
         // Verify does not close the window: at the left, after the help button
         if key.canVerify {
-            let verify = keyButton(opens(.uiKeysVerify), self, #selector(verifyClicked), "key.properties.verify")
+            let verify = keyButton(Text.uiKeysVerify.opens, self, #selector(verifyClicked), "key.properties.verify")
             buttons.insertArrangedSubview(verify, at: 1)
         }
         let stack = NSStackView(views: [grid, buttons])
@@ -655,9 +650,9 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
     private let core: Core
     private let table = KeysTable()
     private let empty = NSTextField(wrappingLabelWithString: Text.uiKeysEmpty.text)
-    private let export = NSButton(title: opens(.uiKeysExport), target: nil, action: nil)
-    private let backup = NSButton(title: opens(.uiKeysBackup), target: nil, action: nil)
-    private let verify = NSButton(title: opens(.uiKeysVerify), target: nil, action: nil)
+    private let export = NSButton(title: Text.uiKeysExport.opens, target: nil, action: nil)
+    private let backup = NSButton(title: Text.uiKeysBackup.opens, target: nil, action: nil)
+    private let verify = NSButton(title: Text.uiKeysVerify.opens, target: nil, action: nil)
     private let properties = NSButton(title: Text.macPropertiesButton.text, target: nil, action: nil)
     private let remove = NSButton(title: Text.uiRemove.text, target: nil, action: nil)
     private var keys: [PgpKey] = []
@@ -710,8 +705,8 @@ private final class KeysListWindow: NSObject, NSTableViewDataSource, NSTableView
             empty.centerYAnchor.constraint(equalTo: scroll.centerYAnchor, constant: 12),
             empty.widthAnchor.constraint(lessThanOrEqualTo: scroll.widthAnchor, constant: -40),
         ])
-        let new = keyButton(opens(.uiKeysNew), self, #selector(newClicked), "keys.new")
-        let importButton = keyButton(opens(.uiKeysImport), self, #selector(importClicked), "keys.import")
+        let new = keyButton(Text.uiKeysNew.opens, self, #selector(newClicked), "keys.new")
+        let importButton = keyButton(Text.uiKeysImport.opens, self, #selector(importClicked), "keys.import")
         for (button, action, id) in [(export, #selector(exportClicked), "keys.export"), (backup, #selector(backupClicked), "keys.backup"),
                                      (verify, #selector(verifyClicked), "keys.verify"),
                                      (properties, #selector(propertiesClicked), "keys.properties"),
@@ -874,7 +869,7 @@ final class AccountSecurityWindow: NSObject {
         key.setAccessibilityIdentifier("account.security.key")
         key.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         autocrypt.setAccessibilityIdentifier("account.security.autocrypt")
-        let new = keyButton(opens(.uiAccountKeyNew), self, #selector(newClicked), "account.security.new")
+        let new = keyButton(Text.uiAccountKeyNew.opens, self, #selector(newClicked), "account.security.new")
         let choice = NSStackView(views: [key, new])
         choice.alignment = .firstBaseline
         let grid = NSGridView(views: [
@@ -983,7 +978,7 @@ final class ContactKeys: NSObject {
                 let words = wrappingLabel("\(address): \(key.grouped) (\(key.status))")
                 words.isSelectable = true
                 words.setAccessibilityIdentifier("contact.key.\(index)")
-                let verify = keyButton(opens(.uiKeysVerify), self, #selector(verifyClicked(_:)), "contact.key.verify.\(index)")
+                let verify = keyButton(Text.uiKeysVerify.opens, self, #selector(verifyClicked(_:)), "contact.key.verify.\(index)")
                 verify.tag = index
                 verify.controlSize = .small
                 verify.font = .systemFont(ofSize: NSFont.smallSystemFontSize)
