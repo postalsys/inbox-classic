@@ -490,19 +490,14 @@ async fn reply_to_encrypted(d: &Driver) {
     c.editor.run_script(
         "document.getElementById('more').click();var q=document.querySelector('#body > div.quoted');if(q)q.remove();",
     );
-    // the core's line then (with Sign on it says the message is signed)
     let clear = wait_until(10, || {
-        c.protection
-            .security
-            .borrow()
-            .as_ref()
-            .is_some_and(|s| s.block == pe_core::compose_keys::Block::None)
+        line(&c).0 == "Not encrypted, although the message it answers or forwards was."
     })
     .await;
     d.check(
-        clear && !line(&c).0.contains("can only be sent encrypted"),
+        clear && line(&c).1 == "warning",
         &format!(
-            "the quote unfolded and deleted, it may go without encryption ({})",
+            "the quote unfolded and deleted, the line says it is not encrypted, in amber ({})",
             line(&c).0
         ),
     );
