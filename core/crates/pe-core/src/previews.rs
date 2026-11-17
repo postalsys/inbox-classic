@@ -137,7 +137,11 @@ impl Core {
         let crashed = store.pdf_previews_crashed().unwrap_or(false) && !store.pdf_previews().unwrap_or(true);
         crashed.then(|| {
             let option = tr(Text::PreviewPdfOption);
-            tr_args(Text::PreviewPdfOffCrashed, &[("option", (&option).into())])
+            let settings = pe_html::settings_words("reading", pe_html::Platform::current(), pe_i18n::language());
+            tr_args(
+                Text::PreviewPdfOffCrashed,
+                &[("option", (&option).into()), ("settings", (&settings).into())],
+            )
         })
     }
 
@@ -392,6 +396,10 @@ mod crash_tests {
         assert!(!core.pdf_previews().unwrap());
         let notice = core.previews_notice().unwrap();
         assert!(notice.contains(&tr(Text::PreviewPdfOption)), "{notice}");
+        // names the place the way the platform does, as the key server notice does
+        let settings = pe_html::settings_words("reading", pe_html::Platform::current(), pe_i18n::language());
+        assert!(!settings.is_empty());
+        assert!(notice.contains(&settings), "{notice}");
 
         // a PDF file is a tile that says why, a picture still draws
         core.store().set_source(inbox, 1, &super::tests::message()).unwrap();
