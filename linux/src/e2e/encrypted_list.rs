@@ -36,7 +36,7 @@ fn row_icons(name: &str) -> Vec<String> {
 }
 
 /// The messages of the list as it shows them now, by their protection
-fn shown(protection: u8) -> Vec<pe_store::Message> {
+fn shown(protection: pe_store::Protection) -> Vec<pe_store::Message> {
     shell()
         .main()
         .list
@@ -72,7 +72,7 @@ async fn remove(d: &Driver) {
     }
     run_command(Command::Sync);
     let gone = wait_until(30, || {
-        shown(pe_store::PROTECTION_SIGNED).is_empty() && shown(pe_store::PROTECTION_ENCRYPTED).is_empty()
+        shown(pe_store::Protection::Signed).is_empty() && shown(pe_store::Protection::Encrypted).is_empty()
     })
     .await;
     d.check(gone, "the signed and encrypted messages are taken away");
@@ -92,7 +92,7 @@ pub async fn in_the_list_and_the_search(d: &Driver) {
         .all(|name| d.add_message(&read_fixture(name), &["\\Seen"]).is_ok());
     run_command(Command::Sync);
     let listed = wait_until(30, || {
-        shown(pe_store::PROTECTION_SIGNED).len() == 1 && shown(pe_store::PROTECTION_ENCRYPTED).len() == 1
+        shown(pe_store::Protection::Signed).len() == 1 && shown(pe_store::Protection::Encrypted).len() == 1
     })
     .await;
     d.check(added && listed, "the signed and the encrypted message are in the Inbox");
@@ -102,7 +102,7 @@ pub async fn in_the_list_and_the_search(d: &Driver) {
     shell().set_notify(true);
     let before = watch::notified().len();
     let came = watch::while_hidden(d, &read_fixture("secure-protected-subject.eml"), || {
-        shown(pe_store::PROTECTION_ENCRYPTED).len() == 2
+        shown(pe_store::Protection::Encrypted).len() == 2
     })
     .await;
     shell().set_notify(notify_was);
@@ -115,7 +115,7 @@ pub async fn in_the_list_and_the_search(d: &Driver) {
     );
 
     // the marks, the encrypted rows with the Subject they came with and no words of their text
-    let encrypted = shown(pe_store::PROTECTION_ENCRYPTED);
+    let encrypted = shown(pe_store::Protection::Encrypted);
     d.check(
         encrypted.iter().all(|m| {
             m.info.subject == OUTER && m.snippet.as_deref() == Some("Encrypted message") && !m.info.has_attachments
@@ -176,7 +176,7 @@ pub async fn in_the_list_and_the_search(d: &Driver) {
             listed.len() == 2
                 && listed
                     .iter()
-                    .all(|m| m.info.protection == pe_store::PROTECTION_ENCRYPTED)
+                    .all(|m| m.info.protection == pe_store::Protection::Encrypted)
         })
         .await,
         "is:encrypted lists the encrypted messages alone",
@@ -197,7 +197,7 @@ pub async fn in_the_list_and_the_search(d: &Driver) {
             messages_listed() + 2 == all
                 && listed
                     .iter()
-                    .all(|m| m.info.protection != pe_store::PROTECTION_ENCRYPTED)
+                    .all(|m| m.info.protection != pe_store::Protection::Encrypted)
         })
         .await,
         &format!(
@@ -214,7 +214,7 @@ pub async fn in_the_list_and_the_search(d: &Driver) {
     );
     search("alice").await;
     d.check(
-        wait_until(10, || shown(pe_store::PROTECTION_ENCRYPTED).len() == 2).await,
+        wait_until(10, || shown(pe_store::Protection::Encrypted).len() == 2).await,
         "and its sender (\"alice\") finds it",
     );
 
@@ -224,14 +224,14 @@ pub async fn in_the_list_and_the_search(d: &Driver) {
     wait_until(10, || main.selected_name() == "Inbox").await;
     let _ = core.set_pgp_index_encrypted(true);
     let decrypted = wait_until(60, || {
-        let encrypted = shown(pe_store::PROTECTION_ENCRYPTED);
+        let encrypted = shown(pe_store::Protection::Encrypted);
         encrypted.iter().any(|m| m.info.subject == PROTECTED)
             && encrypted
                 .iter()
                 .all(|m| m.snippet.as_deref().is_some_and(|s| s != "Encrypted message"))
     })
     .await;
-    let rows: Vec<(String, Option<String>)> = shown(pe_store::PROTECTION_ENCRYPTED)
+    let rows: Vec<(String, Option<String>)> = shown(pe_store::Protection::Encrypted)
         .into_iter()
         .map(|m| (m.info.subject, m.snippet))
         .collect();
@@ -245,12 +245,12 @@ pub async fn in_the_list_and_the_search(d: &Driver) {
     search("mill").await;
     d.check(
         wait_until(30, || {
-            if shown(pe_store::PROTECTION_ENCRYPTED).is_empty() {
+            if shown(pe_store::Protection::Encrypted).is_empty() {
                 // the index follows the background pass: the search again once it is in
                 shell().main().find.set_text("mill ");
                 shell().main().find.set_text("mill");
             }
-            !shown(pe_store::PROTECTION_ENCRYPTED).is_empty()
+            !shown(pe_store::Protection::Encrypted).is_empty()
         })
         .await,
         "and \"mill\" finds the encrypted message",

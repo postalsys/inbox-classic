@@ -239,8 +239,8 @@ std::wstring Mailbox::ColumnsRowText(const PeMessage& row) const {
     if (row.flagged) {
         parts.push_back(core::T(PE_TEXT_UI_ROW_FLAGGED));
     }
-    if (row.protection != PE_PROTECTION_NONE) {
-        parts.push_back(core::T(row.protection == PE_PROTECTION_ENCRYPTED ? PE_TEXT_UI_ROW_ENCRYPTED : PE_TEXT_UI_ROW_SIGNED));
+    if (row.protection_words && *row.protection_words) {
+        parts.push_back(Text(row.protection_words));
     }
     if (row.has_attachments) {
         parts.push_back(core::T(PE_TEXT_UI_ROW_ATTACHMENTS));
@@ -302,7 +302,8 @@ void Mailbox::DrawColumnsRow(HDC dc, int index, const PeMessage& row) {
         threadRight = box.left - Scale(4) - count - Scale(8);
     }
     if (row.snippet && *row.snippet) {
-        DrawLine(paint, 2, paint.left, threadRight, Text(row.snippet), normal_, faint);
+        // the core's word for the message's state is set apart from words its sender wrote
+        DrawLine(paint, 2, paint.left, threadRight, Text(row.snippet), row.snippet_is_state ? italic_ : normal_, faint);
     }
     if (selected && active && (ListView_GetItemState(list_, index, LVIS_FOCUSED) & LVIS_FOCUSED)) {
         RECT focus = area;

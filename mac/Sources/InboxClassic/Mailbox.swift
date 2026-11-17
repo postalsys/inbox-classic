@@ -773,6 +773,19 @@ public final class Mailbox: NSObject {
 
     private enum ColumnID: String, CaseIterable {
         case attach, flag, secure, from, subject, received, folder
+
+        /// a column of a mark alone, its icon in its header: a fixed width, and a click sorts nothing
+        var isIcon: Bool { [.attach, .flag, .secure].contains(self) }
+
+        /// the icon in the header of a mark's column, and what its tooltip says (nil: the header says it in words)
+        @MainActor var header: (icon: NSImage?, tip: String?)? {
+            switch self {
+            case .attach: (Icons.list("attach"), Text.uiRowAttachments.text)
+            case .flag: (Icons.list("flag"), Text.uiRowFlagged.text)
+            case .secure: (Icons.encrypted, Text.headerSecurity.text)
+            case .from, .subject, .received, .folder: nil
+            }
+        }
     }
 
     private func setUpList() {
@@ -804,15 +817,15 @@ public final class Mailbox: NSObject {
         }
         // the paper clip and the flag in their headers, as Outlook Express has them (a header cell does not draw the
         // image of a column without a title on its own)
-        for (id, image) in [("attach", Icons.list("attach")), ("flag", Icons.list("flag")), ("secure", Icons.encrypted)] {
-            guard let column = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id)), let image else { continue }
+        // an icon alone in a header does not say what the column is: its tooltip does, the same word on every platform
+        for id in ColumnID.allCases {
+            guard let mark = id.header, let image = mark.icon,
+                  let column = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id.rawValue)) else { continue }
             let header = IconHeaderCell(textCell: "")
             header.icon = image
             column.headerCell = header
+            column.headerToolTip = mark.tip
         }
-        // the lock alone in a header does not say what the column is
-        list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(ColumnID.secure.rawValue))?.headerToolTip =
-            Text.uiSettingsEncryption.text
         showSortIndicator()
     }
 
@@ -823,7 +836,7 @@ public final class Mailbox: NSObject {
         }
         column.title = title
         column.width = width
-        if [.attach, .flag, .secure].contains(id) {
+        if id.isIcon {
             column.minWidth = width
             column.maxWidth = width
             column.resizingMask = []
@@ -2799,7 +2812,7 @@ extension Mailbox: NSTableViewDataSource, NSTableViewDelegate {
             switch ColumnID(rawValue: id.rawValue) {
             // a bounce's mark in the paper clip's place, whether or not it has files
             case .attach: cell.show(message.attachIcon)
-            case .secure: cell.show(message.secureIcon, tip: message.secureWords)
+            case .secure: cell.show(message.secureIcon, tip: message.protectionWords)
             default: cell.show(message.flagIcons.plain, selected: message.flagIcons.selected)
             }
             return cell
@@ -3136,14 +3149,6 @@ extension Message {
         }
     }
 
-    /// the words of that mark: its tooltip and what a screen reader says of the row
-    var secureWords: String? {
-        switch protection {
-        case PE_PROTECTION_ENCRYPTED: Text.uiRowEncrypted.text
-        case PE_PROTECTION_SIGNED: Text.uiRowSigned.text
-        default: nil
-        }
-    }
 
     /// its flag in its colour, and white for a selected row (a blue flag stays visible on the selection's blue)
     var flagIcons: (plain: NSImage?, selected: NSImage?) {
@@ -3389,13 +3394,12 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
         attach.isHidden = attach.image == nil
         secure.image = message.secureIcon
         secure.isHidden = secure.image == nil
-        secure.toolTip = message.secureWords
+        secure.toolTip = message.protectionWords
         flags = message.flagIcons
         flag.isHidden = !message.flagged
         snippet.stringValue = message.snippet
         // "Encrypted message" is the core's word for a state, not the sender's: in italics, so it reads as one
-        let state = message.protection == PE_PROTECTION_ENCRYPTED && message.snippet == Text.listEncrypted.text
-        snippet.font = state ? NSFontManager.shared.convert(.systemFont(ofSize: 12), toHaveTrait: .italicFontMask)
+        snippet.font = message.snippetIsState ? NSFontManager.shared.convert(.systemFont(ofSize: 12), toHaveTrait: .italicFontMask)
             : .systemFont(ofSize: 12)
         // the count is a number alone, which needs no words of a language
         count.stringValue = "\(message.threadCount)"
@@ -3416,7 +3420,7 @@ final class MessageRowCell: NSTableCellView, ConversationCell {
         parts += [name, subject.stringValue, when]
         if message.flagged { parts.append(Text.uiRowFlagged.text) }
         if message.hasAttachments { parts.append(Text.uiRowAttachments.text) }
-        if let words = message.secureWords { parts.append(words) }
+        if let words = message.protectionWords { parts.append(words) }
         if message.opens { parts.append(Text.uiRowMessages.text(["count": message.threadCount])) }
         if !message.snippet.isEmpty { parts.append(message.snippet) }
         return parts.joined(separator: ", ")

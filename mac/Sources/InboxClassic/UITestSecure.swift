@@ -361,7 +361,7 @@ extension UITest {
         check(marks(encrypted) === Icons.encrypted && marks(signed) === Icons.signed && marks(plain) == nil,
               "the classic list's security column: the lock on the encrypted row, the rosette on the signed one, nothing on the plain one")
         let header = list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier("secure"))
-        check(header?.headerToolTip == Text.uiSettingsEncryption.text && (header?.width ?? 99) <= 22,
+        check(header?.headerToolTip == Text.headerSecurity.text && (header?.width ?? 99) <= 22,
               "a narrow column beside the flag's, its header the lock with a tooltip (\(header?.headerToolTip ?? ""))")
         let width = { (id: String) in self.list.tableColumn(withIdentifier: NSUserInterfaceItemIdentifier(id))?.width ?? 0 }
         check(width("subject") > width("from") && width("from") >= 150,

@@ -126,6 +126,46 @@ public static RECT RemoteRect(IntPtr window, uint message, IntPtr wParam, long s
     CloseHandle(process);
     return rect;
 }
+// where the tooltip of tool `id` of `owner` (a header's column) is, in screen pixels: found among the tooltip windows
+// of owner's process (TTM_ENUMTOOLSW into its memory); empty when there is none
+public static RECT RemoteToolRect(IntPtr owner, long id) {
+    uint pid;
+    GetWindowThreadProcessId(owner, out pid);
+    var found = new RECT();
+    IntPtr process = OpenProcess(0x0038, false, pid);
+    if (process == IntPtr.Zero) { return found; }
+    IntPtr remote = VirtualAllocEx(process, IntPtr.Zero, (IntPtr)128, 0x3000, 0x04);
+    var tips = new System.Collections.Generic.List<IntPtr>();
+    EnumWindows((hwnd, l) => {
+        uint owned;
+        GetWindowThreadProcessId(hwnd, out owned);
+        var name = new System.Text.StringBuilder(64);
+        GetClassName(hwnd, name, 64);
+        if (owned == pid && name.ToString() == "tooltips_class32") { tips.Add(hwnd); }
+        return true;
+    }, IntPtr.Zero);
+    foreach (IntPtr tip in tips) {
+        int count = (int)SendMessage(tip, 0x040D, IntPtr.Zero, IntPtr.Zero);
+        for (int i = 0; i < count && remote != IntPtr.Zero; i++) {
+            IntPtr done;
+            // a TOOLINFOW of 64-bit Windows: cbSize, uFlags, hwnd, uId, rect, then pointers left empty (no text copied)
+            byte[] info = new byte[72];
+            BitConverter.GetBytes(72).CopyTo(info, 0);
+            WriteProcessMemory(process, remote, info, (IntPtr)72, out done);
+            if (SendMessage(tip, 0x043A, (IntPtr)i, remote) == IntPtr.Zero) { continue; }
+            ReadProcessMemory(process, remote, info, (IntPtr)72, out done);
+            if (BitConverter.ToInt64(info, 8) != owner.ToInt64() || BitConverter.ToInt64(info, 16) != id) { continue; }
+            var corner = new POINT { X = BitConverter.ToInt32(info, 24), Y = BitConverter.ToInt32(info, 28) };
+            var end = new POINT { X = BitConverter.ToInt32(info, 32), Y = BitConverter.ToInt32(info, 36) };
+            ClientToScreen(owner, ref corner);
+            ClientToScreen(owner, ref end);
+            found = new RECT { Left = corner.X, Top = corner.Y, Right = end.X, Bottom = end.Y };
+        }
+    }
+    if (remote != IntPtr.Zero) { VirtualFreeEx(process, remote, IntPtr.Zero, 0x8000); }
+    CloseHandle(process);
+    return found;
+}
 // the text of tree item `item` of a tree view of another process (TVM_GETITEMW into its memory)
 public static string RemoteTreeText(IntPtr tree, IntPtr item) {
     uint pid;
@@ -2527,6 +2567,19 @@ public static class Dragger {
     $header = [Native.Win]::SendMessage($list, 0x101F, [IntPtr]::Zero, [IntPtr]::Zero)
     $headerWidth = { param($column) $r = [Native.Win]::RemoteRect($header, 0x1207, [IntPtr]$column, 0); $r.Right - $r.Left }
     Check ((& $headerWidth $COL_SECURE) -gt 0 -and (& $headerWidth $COL_SECURE) -eq (& $headerWidth 0)) "the column is as narrow as the paper clip's ($(& $headerWidth $COL_SECURE))"
+    # the header's tooltip over the lock's header, and still there once a column before it is made wider (the
+    # header's own change notice moves it, mailbox.cpp PlaceHeaderTips)
+    $tipOverHeader = {
+        $h = [Native.Win]::RemoteRect($header, 0x1207, [IntPtr]$COL_SECURE, 0)
+        $t = [Native.Win]::RemoteToolRect($header, [long]$COL_SECURE)
+        ($t.Right -gt $t.Left) -and $t.Left -eq $h.Left -and $t.Right -eq $h.Right
+    }
+    Check (& $tipOverHeader) 'the lock column header has its tooltip over it'
+    $flagWidth = & $headerWidth $COL_FLAG
+    [void][Native.Win]::SendMessage($list, 0x101E, [IntPtr]$COL_FLAG, [IntPtr]($flagWidth + 20))
+    Start-Sleep -Milliseconds 300
+    Check (& $tipOverHeader) 'the tooltip follows the lock column header when a column before it is resized'
+    [void][Native.Win]::SendMessage($list, 0x101E, [IntPtr]$COL_FLAG, [IntPtr]$flagWidth)
     Shot $main 'main-12-lock-in-list'
     # selected, the lock stays on the highlight
     SelectRow (& $rowOfSubject '...')

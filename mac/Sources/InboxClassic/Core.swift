@@ -985,6 +985,11 @@ struct Message {
     /// the first words of what the sender wrote, empty until the core has read them (text from the sender: shown as
     /// text only)
     let snippet: String
+    /// `snippet` says the message's state ("Encrypted message"), not words its sender wrote: styled as a state
+    let snippetIsState: Bool
+    /// what the lock or the rosette says (its tooltip, and the row's words for a screen reader), the core's; nil for
+    /// neither
+    let protectionWords: String?
     /// the sender's picture in the column layout: the key the core draws it by (0 for none: a logo or a contact's
     /// picture are drawn alike), and the initials shown without one
     let picture: UInt64
@@ -1017,6 +1022,9 @@ struct Message {
         mark = message.mark
         dimmed = message.dimmed
         snippet = text(message.snippet)
+        snippetIsState = message.snippet_is_state
+        let words = text(message.protection_words)
+        protectionWords = words.isEmpty ? nil : words
         picture = message.picture
         initials = text(message.initials)
     }

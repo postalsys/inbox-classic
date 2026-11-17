@@ -156,9 +156,21 @@ LRESULT CALLBACK ListProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
     return result;
 }
 
-// the columns that show an icon of the list strip in their header and nothing else: a click on one sorts nothing
+// the columns that show an icon of the list strip in their header and nothing else, and what each stands for (its
+// header's tooltip, the same word on every platform); a click on one sorts nothing
+struct IconColumnOf {
+    int column;
+    int icon;
+    PeText tip;
+};
+constexpr IconColumnOf kIconColumns[] = {
+    {COL_ATTACH, LIST_ATTACH, PE_TEXT_UI_ROW_ATTACHMENTS},
+    {COL_FLAG, LIST_FLAG, PE_TEXT_UI_ROW_FLAGGED},
+    {COL_SECURE, LIST_LOCK_CLOSED, PE_TEXT_HEADER_SECURITY},
+};
+
 bool IsIconColumn(int column) {
-    return column == COL_ATTACH || column == COL_FLAG || column == COL_SECURE;
+    return std::ranges::any_of(kIconColumns, [column](const IconColumnOf& icon) { return icon.column == column; });
 }
 
 // a column that shows an icon of the list strip in its header (the paper clip, the flag, the lock) and nothing else
@@ -244,9 +256,9 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     // the Columns layout's "Sorted by" over the list (SetColumns shows it)
     sortButton_ = CreateChild(parent, L"BUTTON", SortedByText().c_str(), WS_TABSTOP | BS_OWNERDRAW, IDC_SORT_BUTTON, {});
     ShowWindow(sortButton_, SW_HIDE);
-    IconColumn(list_, COL_ATTACH, LIST_ATTACH);
-    IconColumn(list_, COL_FLAG, LIST_FLAG);
-    IconColumn(list_, COL_SECURE, LIST_LOCK_CLOSED);
+    for (const IconColumnOf& icon : kIconColumns) {
+        IconColumn(list_, icon.column, icon.icon);
+    }
     AddHeaderTips();
     AddColumn(list_, COL_FROM, core::T(PE_TEXT_UI_COL_FROM).c_str(), 200);
     AddColumn(list_, COL_SUBJECT, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 320);
@@ -294,6 +306,10 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     if (!normal_) {
         normal_ = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
     }
+    LOGFONTW listFont = {};
+    GetObjectW(normal_, sizeof(listFont), &listFont);
+    listFont.lfItalic = TRUE;
+    italic_ = CreateFontIndirectW(&listFont);
     ClearReader();
     Reload();
 }
@@ -386,6 +402,8 @@ void Mailbox::Destroy() {
     bold_ = nullptr;
     DeleteObject(link_);
     link_ = nullptr;
+    DeleteObject(italic_);
+    italic_ = nullptr;
 }
 
 void Mailbox::Layout(const RECT& tree, const RECT& list, const RECT& reader) {
@@ -452,24 +470,17 @@ void Mailbox::LayoutList() {
     FitSubjectColumn();
 }
 
-// the words of the icon columns' headers, in the order of the columns
-constexpr std::pair<int, PeText> kHeaderTips[] = {
-    {COL_ATTACH, PE_TEXT_UI_ROW_ATTACHMENTS},
-    {COL_FLAG, PE_TEXT_UI_ROW_FLAGGED},
-    {COL_SECURE, PE_TEXT_HEADER_SECURITY},
-};
-
 void Mailbox::AddHeaderTips() {
     HWND header = ListView_GetHeader(list_);
     headerTip_ = CreateWindowExW(WS_EX_TOPMOST, TOOLTIPS_CLASSW, nullptr, WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX, CW_USEDEFAULT,
                                  CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, parent_, nullptr, GetModuleHandleW(nullptr), nullptr);
-    for (const auto& [column, words] : kHeaderTips) {
+    for (const IconColumnOf& icon : kIconColumns) {
         TOOLINFOW tool = {sizeof(tool)};
         tool.uFlags = TTF_SUBCLASS;
         tool.hwnd = header;
-        tool.uId = static_cast<UINT_PTR>(column);
+        tool.uId = static_cast<UINT_PTR>(icon.column);
         // the tooltip keeps a copy
-        std::wstring text = core::T(words);
+        std::wstring text = core::T(icon.tip);
         tool.lpszText = text.data();
         SendMessageW(headerTip_, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&tool));
     }
@@ -481,11 +492,11 @@ void Mailbox::PlaceHeaderTips() {
     if (!headerTip_ || !header) {
         return;
     }
-    for (const auto& [column, words] : kHeaderTips) {
+    for (const IconColumnOf& icon : kIconColumns) {
         TOOLINFOW tool = {sizeof(tool)};
         tool.hwnd = header;
-        tool.uId = static_cast<UINT_PTR>(column);
-        Header_GetItemRect(header, column, &tool.rect);
+        tool.uId = static_cast<UINT_PTR>(icon.column);
+        Header_GetItemRect(header, icon.column, &tool.rect);
         SendMessageW(headerTip_, TTM_NEWTOOLRECTW, 0, reinterpret_cast<LPARAM>(&tool));
     }
 }
@@ -514,7 +525,6 @@ void Mailbox::FitSubjectColumn() {
         }
         if (columns_) {
             ListView_SetColumnWidth(list_, COL_SUBJECT, static_cast<int>(client.right));
-            PlaceHeaderTips();
             return;
         }
         classicWidths_.clear();
@@ -526,7 +536,6 @@ void Mailbox::FitSubjectColumn() {
         }
     }
     ListView_SetColumnWidth(list_, COL_SUBJECT, std::max(Scale(120), static_cast<int>(client.right) - others));
-    PlaceHeaderTips();
 }
 
 void Mailbox::UpdateSearchBar() {
@@ -2991,7 +3000,8 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
         return true;
     }
     if (header->hwndFrom == ListView_GetHeader(list_) && (header->code == HDN_ITEMCHANGEDW || header->code == HDN_ITEMCHANGEDA)) {
-        // a column made wider or narrower moves the headers after it
+        // a column made wider or narrower moves the headers after it, by the user or by the layout (the list sends this
+        // for ListView_SetColumnWidth too): the one place the tooltips follow them
         PlaceHeaderTips();
         return false;
     }

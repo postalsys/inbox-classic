@@ -839,19 +839,15 @@ pub(crate) fn attachment_icon(m: &Message) -> Option<&'static str> {
 /// wins: such a message is often signed inside too); none for the others
 pub(crate) fn security_icon(m: &Message) -> Option<&'static str> {
     match m.info.protection {
-        pe_store::PROTECTION_ENCRYPTED => Some("ic-lock-closed-symbolic"),
-        pe_store::PROTECTION_SIGNED => Some("ic-ribbon-symbolic"),
-        _ => None,
+        pe_store::Protection::Encrypted => Some("ic-lock-closed-symbolic"),
+        pe_store::Protection::Signed => Some("ic-ribbon-symbolic"),
+        pe_store::Protection::None => None,
     }
 }
 
-/// What the security mark says on hover and to a screen reader: Encrypted or Signed
+/// What the security mark says on hover and to a screen reader, the core's words: Encrypted or Signed
 pub(crate) fn security_tip(m: &Message) -> Option<String> {
-    match m.info.protection {
-        pe_store::PROTECTION_ENCRYPTED => Some(t!(UiRowEncrypted)),
-        pe_store::PROTECTION_SIGNED => Some(t!(UiRowSigned)),
-        _ => None,
-    }
+    pe_core::protection_words(m.info.protection)
 }
 
 /// The column of the paper clip: an icon, or none, for each row, and what it says on hover and to a screen reader

@@ -1154,6 +1154,8 @@ private:
     HFONT bold_ = nullptr;
     // the list's font, for the rows not in bold
     HFONT normal_ = nullptr;
+    // the list's font in italics: a line that says a message's state ("Encrypted message"), not its sender's words
+    HFONT italic_ = nullptr;
     HFONT link_ = nullptr;
     // where the list goes, with the search bar over it while searching
     RECT listArea_ = {};

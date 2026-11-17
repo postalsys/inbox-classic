@@ -266,6 +266,10 @@ fn bind(row: &gtk::Widget, parts: &Parts, m: &Message, context: &RowContext) {
     bind_picture(parts, m, context.pictures.get());
     let snippet = m.snippet.as_deref().unwrap_or_default();
     parts.snippet.set_text(snippet);
+    // the message's state ("Encrypted message") rather than its sender's words: in italics, as on the other platforms
+    parts
+        .snippet
+        .set_attributes(m.snippet_is_state.then(state_attributes).as_ref());
     bind_thread(parts, m);
     set_class(&parts.text, "dim-label", m.dimmed());
     let unread = if m.info.seen() {
@@ -403,4 +407,11 @@ fn day_month_format() -> &'static str {
             _ => "%-e %b",
         }
     })
+}
+
+/// Italics, for a line that says a message's state rather than its words
+fn state_attributes() -> gtk::pango::AttrList {
+    let attributes = gtk::pango::AttrList::new();
+    attributes.insert(gtk::pango::AttrInt::new_style(gtk::pango::Style::Italic));
+    attributes
 }
