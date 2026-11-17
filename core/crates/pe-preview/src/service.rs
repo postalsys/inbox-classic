@@ -1,119 +1,35 @@
 //! The render thread and what watches it. Requests wait in a queue and are drawn one file at a time, in the order
 //! they came (the document's), on a thread of their own: never a window's thread, never the core's async threads.
 //!
-//! A dispatcher thread takes each request, answers what it can from the cache, and hands the rest to the render
-//! thread, waiting for each step of it no longer than its time ([`Settings::page_time`], [`Settings::picture_time`]).
-//! A render that runs over is abandoned: a thread can not be stopped from outside, so it is left to finish on its own
-//! (it may keep a core busy until the app quits), a new render thread takes its place, the file is never drawn again
-//! ([`crate::marker`]), and after a PDF did that no PDF is drawn for the rest of the session. After
-//! [`MAX_ABANDONED`] abandoned threads nothing is drawn.
+//! A dispatcher thread takes each request, answers what it can from the cache, and hands the pages the cache does not
+//! hold to the render thread, waiting for each step of it no longer than its time ([`Settings::page_time`],
+//! [`Settings::picture_time`]). A render that runs over is abandoned: a thread can not be stopped from outside, so it
+//! is left to finish on its own (it may keep a core busy until the app quits), a new render thread takes its place, the
+//! file is never drawn again ([`crate::marker`]), and after a PDF did that no PDF is drawn for the rest of the session.
+//! After [`MAX_ABANDONED`] abandoned threads nothing is drawn.
 
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
+use std::sync::mpsc::{self, Receiver, RecvTimeoutError, SendError, Sender};
 use std::sync::{Arc, Condvar, Mutex, MutexGuard};
 use std::time::{Duration, Instant};
 
 use crate::cache::{Cache, Entry, Slot};
+use crate::engine::{Engine, Real, Step};
 use crate::limits::{
     CACHE_BYTES, MAX_ABANDONED, MAX_FILE, MAX_PAGES, MESSAGE_PIXELS, PAGE_TIME, PICTURE_TIME, RENDER_STACK,
 };
 use crate::marker::Markers;
-use crate::{Description, Key, Kind, Picture, Refusal, pdf, picture};
-
-/// What draws a file: [`Real`] (the `image` crate and hayro), or a fake in tests that hangs or panics
-pub trait Engine: Send + Sync + 'static {
-    /// Draws `file`, a `kind` file: its description first, then its first `pages` pages (none for 0) while their
-    /// pixels fit in `budget`, each step told to `emit`, which says whether to go on (false: the request was
-    /// cancelled, stop). [`Step::Started`] comes before each part with a time limit
-    fn run(&self, kind: Kind, file: &Arc<Vec<u8>>, pages: usize, budget: u64, emit: &mut dyn FnMut(Step) -> bool);
-}
-
-/// A step of a render
-#[derive(Debug)]
-pub enum Step {
-    /// A part with a time limit starts: a page of a PDF (opening it counts as its first), or a whole picture
-    Started(Kind),
-    /// The file read: a refusal ends it
-    Described(Result<Description, Refusal>),
-    Page(usize, Result<Picture, Refusal>),
-}
-
-/// The engine of the app: pictures with the `image` crate, PDF files with hayro
-pub struct Real;
-
-impl Engine for Real {
-    fn run(&self, kind: Kind, file: &Arc<Vec<u8>>, pages: usize, budget: u64, emit: &mut dyn FnMut(Step) -> bool) {
-        match kind {
-            Kind::Picture => {
-                if !emit(Step::Started(Kind::Picture)) {
-                    return;
-                }
-                let description = picture::describe(file);
-                let size = description
-                    .as_ref()
-                    .ok()
-                    .and_then(|d| d.sizes.first().copied().flatten());
-                if !emit(Step::Described(description)) || pages == 0 {
-                    return;
-                }
-                let Some((width, height)) = size else {
-                    return;
-                };
-                let page = if u64::from(width) * u64::from(height) > budget {
-                    Err(Refusal::OverBudget)
-                } else {
-                    picture::render(file)
-                };
-                emit(Step::Page(0, page));
-            }
-            Kind::Pdf => {
-                if !emit(Step::Started(Kind::Pdf)) {
-                    return;
-                }
-                let document = match pdf::Document::open(file.clone()) {
-                    Ok(document) => document,
-                    Err(refusal) => {
-                        emit(Step::Described(Err(refusal)));
-                        return;
-                    }
-                };
-                let description = document.describe();
-                let sizes = description.sizes.clone();
-                if !emit(Step::Described(Ok(description))) {
-                    return;
-                }
-                let drawn = document.pages();
-                let mut left = budget;
-                for (index, size) in sizes.into_iter().enumerate().take(pages.min(MAX_PAGES)) {
-                    let page = match size {
-                        None => Err(Refusal::TooLarge),
-                        Some((width, height)) if u64::from(width) * u64::from(height) > left => {
-                            Err(Refusal::OverBudget)
-                        }
-                        Some((width, height)) => {
-                            left -= u64::from(width) * u64::from(height);
-                            if !emit(Step::Started(Kind::Pdf)) {
-                                return;
-                            }
-                            drawn.render(index)
-                        }
-                    };
-                    if !emit(Step::Page(index, page)) {
-                        return;
-                    }
-                }
-            }
-        }
-    }
-}
+use crate::{Description, Key, Kind, Picture, Refusal};
 
 /// How a [`Previewer`] works: the defaults are the app's, tests change them
 pub struct Settings {
     /// Where the crash markers and the list of files never drawn again are kept (the app's data folder's
     /// `previews`); None keeps no markers
     pub dir: Option<PathBuf>,
+    /// Whether PDF files are drawn at all: the user's setting ([`Previewer::set_pdfs`] changes it)
+    pub pdfs: bool,
     pub page_time: Duration,
     pub picture_time: Duration,
     pub cache_bytes: usize,
@@ -124,6 +40,7 @@ impl Default for Settings {
     fn default() -> Self {
         Settings {
             dir: None,
+            pdfs: true,
             page_time: PAGE_TIME,
             picture_time: PICTURE_TIME,
             cache_bytes: CACHE_BYTES,
@@ -133,7 +50,6 @@ impl Default for Settings {
 }
 
 /// A file to draw
-#[derive(Clone)]
 pub struct Request {
     /// Whose previews these are (a message view): its pixel budget ([`MESSAGE_PIXELS`]) and what
     /// [`Previewer::cancel`] drops
@@ -149,32 +65,25 @@ pub struct Request {
     pub keep: bool,
 }
 
-/// What came of a request, told to the sink of the [`Previewer`] as it comes: [`Outcome::Described`] first (or a
-/// refusal of the whole file), then each page, then [`Outcome::Done`]
+/// What came of a request, told to the sink of the [`Previewer`] as it comes: [`What::Described`] first (or a
+/// refusal of the whole file), then each page, then [`What::Done`]
 #[derive(Debug, Clone)]
-pub enum Outcome {
-    Described {
-        owner: u64,
-        attachment: usize,
-        description: Arc<Description>,
-    },
-    Page {
-        owner: u64,
-        attachment: usize,
-        page: usize,
-        picture: Arc<Picture>,
-    },
+pub struct Outcome {
+    pub owner: u64,
+    pub attachment: usize,
+    pub what: What,
+}
+
+#[derive(Debug, Clone)]
+pub enum What {
+    Described(Arc<Description>),
+    Page(usize, Arc<Picture>),
     /// The whole file (`page` None) or a page of it has no preview: a tile
     Refused {
-        owner: u64,
-        attachment: usize,
         page: Option<usize>,
         reason: Refusal,
     },
-    Done {
-        owner: u64,
-        attachment: usize,
-    },
+    Done,
 }
 
 type Sink = Arc<dyn Fn(Outcome) + Send + Sync>;
@@ -183,6 +92,28 @@ struct Job {
     request: Request,
     /// Where its outcomes go in place of the sink ([`Previewer::describe`])
     reply: Option<Sender<Outcome>>,
+}
+
+impl Job {
+    fn tell(&self, sink: &Sink, what: What) {
+        let outcome = Outcome {
+            owner: self.request.owner,
+            attachment: self.request.attachment,
+            what,
+        };
+        match &self.reply {
+            Some(reply) => {
+                let _ = reply.send(outcome);
+            }
+            None => sink(outcome),
+        }
+    }
+
+    /// Refuses the whole file, then says it is done
+    fn refuse(&self, sink: &Sink, reason: Refusal) {
+        self.tell(sink, What::Refused { page: None, reason });
+        self.tell(sink, What::Done);
+    }
 }
 
 #[derive(Default)]
@@ -199,6 +130,8 @@ struct Shared {
     queue: Mutex<Queue>,
     wake: Condvar,
     sink: Sink,
+    /// The user's setting: PDF files drawn at all
+    pdfs: AtomicBool,
 }
 
 impl Shared {
@@ -220,6 +153,7 @@ impl Previewer {
             queue: Mutex::default(),
             wake: Condvar::new(),
             sink: Arc::new(sink),
+            pdfs: AtomicBool::new(settings.pdfs),
         });
         let (markers, refused) = match settings.dir.as_deref().map(Markers::open) {
             Some(Ok((markers, refused))) => (Some(Arc::new(markers)), refused),
@@ -247,24 +181,21 @@ impl Previewer {
 
     /// Queues `request`: its outcomes come to the sink (at once, [`Refusal::Off`], when there is no render thread)
     pub fn request(&self, request: Request) {
-        let (owner, attachment) = (request.owner, request.attachment);
-        {
-            let mut queue = self.shared.queue();
-            if !queue.closed {
-                queue.jobs.push_back(Job { request, reply: None });
-                drop(queue);
-                self.shared.wake.notify_one();
-                return;
-            }
+        let job = Job { request, reply: None };
+        let mut queue = self.shared.queue();
+        if queue.closed {
+            drop(queue);
+            job.refuse(&self.shared.sink, Refusal::Off);
+            return;
         }
-        let sink = &self.shared.sink;
-        sink(Outcome::Refused {
-            owner,
-            attachment,
-            page: None,
-            reason: Refusal::Off,
-        });
-        sink(Outcome::Done { owner, attachment });
+        queue.jobs.push_back(job);
+        drop(queue);
+        self.shared.wake.notify_one();
+    }
+
+    /// Turns the drawing of PDF files on or off (the user's setting); off, they are [`Refusal::Disabled`]
+    pub fn set_pdfs(&self, on: bool) {
+        self.shared.pdfs.store(on, Ordering::Relaxed);
     }
 
     /// The description of `file` (a picture's size, a PDF's pages and title), read on the render thread ahead of
@@ -293,9 +224,12 @@ impl Previewer {
         self.shared.wake.notify_one();
         let until = Instant::now() + wait;
         loop {
-            match answers.recv_timeout(until.saturating_duration_since(Instant::now())) {
-                Ok(Outcome::Described { description, .. }) => return Ok(description),
-                Ok(Outcome::Refused { page: None, reason, .. }) => return Err(reason),
+            match answers
+                .recv_timeout(until.saturating_duration_since(Instant::now()))
+                .map(|o| o.what)
+            {
+                Ok(What::Described(description)) => return Ok(description),
+                Ok(What::Refused { page: None, reason }) => return Err(reason),
                 Ok(_) => {}
                 Err(RecvTimeoutError::Timeout) => return Err(Refusal::TimedOut),
                 Err(RecvTimeoutError::Disconnected) => return Err(Refusal::Unreadable),
@@ -338,7 +272,7 @@ enum Message {
 struct Work {
     kind: Kind,
     file: Arc<Vec<u8>>,
-    pages: usize,
+    pages: Vec<usize>,
     budget: u64,
     key: Key,
     about: String,
@@ -359,6 +293,24 @@ struct Dispatcher {
     worker: Option<Sender<Work>>,
 }
 
+/// A file being drawn: what its steps are told with
+struct Drawing<'a> {
+    job: &'a Job,
+    key: Key,
+    /// Its description was told already (from the cache)
+    described: bool,
+    /// The page after the last one told: where a render abandoned stopped
+    next_page: usize,
+}
+
+/// A refusal that comes of the file itself, the same each time it is read, and so kept in the cache
+fn is_fixed(reason: &Refusal) -> bool {
+    matches!(
+        reason,
+        Refusal::Unsupported | Refusal::TooLarge | Refusal::Password | Refusal::Unreadable
+    )
+}
+
 impl Dispatcher {
     fn serve(&mut self) {
         loop {
@@ -374,35 +326,23 @@ impl Dispatcher {
                     queue = self.shared.wake.wait(queue).unwrap_or_else(|p| p.into_inner());
                 }
             };
-            self.handle(job);
+            self.handle(&job);
         }
     }
 
-    fn handle(&mut self, job: Job) {
+    fn handle(&mut self, job: &Job) {
         let sink = self.shared.sink.clone();
-        let tell = |outcome: Outcome| match &job.reply {
-            Some(reply) => {
-                let _ = reply.send(outcome);
-            }
-            None => sink(outcome),
-        };
-        let request = &job.request;
-        let (owner, attachment) = (request.owner, request.attachment);
-        match self.check(request) {
-            Err(reason) => tell(Outcome::Refused {
-                owner,
-                attachment,
-                page: None,
-                reason,
-            }),
+        match self.check(&job.request) {
+            Err(reason) => return job.refuse(&sink, reason),
             Ok((kind, key)) => {
-                if !self.answer_cached(request, &key, &tell) {
-                    // a description asked for by a window is not stopped by an owner's cancel
-                    self.render(request, kind, key, job.reply.is_none(), &tell);
+                if let Some((described, missing)) = self.answer_cached(job, &key)
+                    && (!described || !missing.is_empty())
+                {
+                    self.render(job, kind, key, missing, described);
                 }
             }
         }
-        tell(Outcome::Done { owner, attachment });
+        job.tell(&sink, What::Done);
     }
 
     /// The file's kind and key, or why it is not drawn
@@ -414,6 +354,9 @@ impl Dispatcher {
         if request.file.len() > MAX_FILE {
             return Err(Refusal::TooLarge);
         }
+        if kind == Kind::Pdf && !self.shared.pdfs.load(Ordering::Relaxed) {
+            return Err(Refusal::Disabled);
+        }
         if kind == Kind::Pdf && self.pdfs_off {
             return Err(Refusal::Off);
         }
@@ -424,45 +367,53 @@ impl Dispatcher {
         Ok((kind, key))
     }
 
-    /// Answers `request` from the cache when it holds the description and every page asked for
-    fn answer_cached(&mut self, request: &Request, key: &Key, tell: &dyn Fn(Outcome)) -> bool {
+    /// Tells what the cache holds of the file: its description and the pages asked for, drawn or refused for good.
+    /// Whether it held the description, and the pages it does not hold, to be drawn; None when the cache answered the
+    /// whole file (a refusal of it)
+    fn answer_cached(&mut self, job: &Job, key: &Key) -> Option<(bool, Vec<usize>)> {
+        let request = &job.request;
+        let all: Vec<usize> = (0..request.pages.min(MAX_PAGES)).collect();
         if !request.keep {
-            return false;
+            return Some((false, all));
         }
-        let Some(Entry::Description(description)) = self.cache.get(key, Slot::Description) else {
-            return false;
+        let sink = self.shared.sink.clone();
+        let wanted = match self.cache.get(key, Slot::Description) {
+            Some(Entry::Description(description)) => {
+                let wanted: Vec<usize> = all.into_iter().filter(|&page| page < description.sizes.len()).collect();
+                job.tell(&sink, What::Described(description));
+                wanted
+            }
+            Some(Entry::Refused(reason)) => {
+                job.tell(&sink, What::Refused { page: None, reason });
+                return None;
+            }
+            _ => return Some((false, all)),
         };
-        let wanted = request.pages.min(description.sizes.len()).min(MAX_PAGES);
-        let mut pages = Vec::with_capacity(wanted);
-        for page in 0..wanted {
+        let mut missing = Vec::new();
+        for page in wanted {
             match self.cache.get(key, Slot::Page(page)) {
-                Some(Entry::Page(picture)) => pages.push(picture),
-                _ => return false,
+                Some(Entry::Page(picture)) => {
+                    let what = if self.spend(request.owner, &picture) {
+                        What::Page(page, picture)
+                    } else {
+                        What::Refused {
+                            page: Some(page),
+                            reason: Refusal::OverBudget,
+                        }
+                    };
+                    job.tell(&sink, what);
+                }
+                Some(Entry::Refused(reason)) => job.tell(
+                    &sink,
+                    What::Refused {
+                        page: Some(page),
+                        reason,
+                    },
+                ),
+                _ => missing.push(page),
             }
         }
-        let (owner, attachment) = (request.owner, request.attachment);
-        tell(Outcome::Described {
-            owner,
-            attachment,
-            description,
-        });
-        for (page, picture) in pages.into_iter().enumerate() {
-            match self.spend(owner, &picture) {
-                true => tell(Outcome::Page {
-                    owner,
-                    attachment,
-                    page,
-                    picture,
-                }),
-                false => tell(Outcome::Refused {
-                    owner,
-                    attachment,
-                    page: Some(page),
-                    reason: Refusal::OverBudget,
-                }),
-            }
-        }
-        true
+        Some((true, missing))
     }
 
     /// Counts `picture` against its owner's budget, unless it does not fit
@@ -481,107 +432,117 @@ impl Dispatcher {
         MESSAGE_PIXELS.saturating_sub(self.shared.queue().used.get(&owner).copied().unwrap_or(0))
     }
 
-    /// Hands `request` to the render thread and passes on its steps, abandoning it when a step runs over its time
-    fn render(&mut self, request: &Request, kind: Kind, key: Key, cancellable: bool, tell: &dyn Fn(Outcome)) {
-        let (owner, attachment) = (request.owner, request.attachment);
+    /// Hands the pages `pages` of the file to the render thread and passes on its steps, abandoning it when a step
+    /// runs over its time
+    fn render(&mut self, job: &Job, kind: Kind, key: Key, pages: Vec<usize>, described: bool) {
+        let owner = job.request.owner;
         let stop = Arc::new(AtomicBool::new(false));
         let (steps, messages) = mpsc::channel();
         let work = Work {
             kind,
-            file: request.file.clone(),
-            pages: request.pages.min(MAX_PAGES),
+            file: job.request.file.clone(),
+            pages,
             budget: self.budget(owner),
             key: key.clone(),
-            about: request.about.clone(),
+            about: job.request.about.clone(),
             stop: stop.clone(),
             steps,
         };
         if !self.send(work) {
-            tell(Outcome::Refused {
-                owner,
-                attachment,
-                page: None,
-                reason: Refusal::Off,
-            });
-            return;
+            return job.tell(
+                &self.shared.sink.clone(),
+                What::Refused {
+                    page: None,
+                    reason: Refusal::Off,
+                },
+            );
         }
-        if cancellable {
+        // a description asked for by a window is not stopped by an owner's cancel
+        if job.reply.is_none() {
             self.shared.queue().running = Some((owner, stop));
         }
-        let mut next_page = 0;
+        let mut drawing = Drawing {
+            job,
+            key,
+            described,
+            next_page: 0,
+        };
         let times = (self.settings.picture_time, self.settings.page_time);
-        let ended = follow(&messages, kind, times, |step| match step {
-            Step::Started(_) => {}
+        let ended = follow(&messages, kind, times, |step| self.on_step(&mut drawing, step));
+        self.shared.queue().running = None;
+        self.on_end(&drawing, kind, ended);
+    }
+
+    /// Tells a step of a render, keeping in the cache what may be kept
+    fn on_step(&mut self, drawing: &mut Drawing<'_>, step: Step) {
+        let sink = self.shared.sink.clone();
+        let keep = drawing.job.request.keep;
+        let what = match step {
+            Step::Started(_) => return,
+            Step::Described(Ok(_)) if drawing.described => return,
             Step::Described(Ok(description)) => {
                 let description = Arc::new(description);
-                if request.keep {
-                    self.cache
-                        .put(key.clone(), Slot::Description, Entry::Description(description.clone()));
+                if keep {
+                    self.cache.put(
+                        drawing.key.clone(),
+                        Slot::Description,
+                        Entry::Description(description.clone()),
+                    );
                 }
-                tell(Outcome::Described {
-                    owner,
-                    attachment,
-                    description,
-                });
+                What::Described(description)
             }
-            Step::Described(Err(reason)) => tell(Outcome::Refused {
-                owner,
-                attachment,
-                page: None,
-                reason,
-            }),
+            Step::Described(Err(reason)) => {
+                if keep && is_fixed(&reason) {
+                    self.cache
+                        .put(drawing.key.clone(), Slot::Description, Entry::Refused(reason.clone()));
+                }
+                What::Refused { page: None, reason }
+            }
             Step::Page(page, Ok(picture)) => {
-                next_page = page + 1;
+                drawing.next_page = page + 1;
                 let picture = Arc::new(picture);
-                if !self.spend(owner, &picture) {
-                    tell(Outcome::Refused {
-                        owner,
-                        attachment,
+                if keep {
+                    self.cache
+                        .put(drawing.key.clone(), Slot::Page(page), Entry::Page(picture.clone()));
+                }
+                if self.spend(drawing.job.request.owner, &picture) {
+                    What::Page(page, picture)
+                } else {
+                    What::Refused {
                         page: Some(page),
                         reason: Refusal::OverBudget,
-                    });
-                    return;
+                    }
                 }
-                if request.keep {
-                    self.cache
-                        .put(key.clone(), Slot::Page(page), Entry::Page(picture.clone()));
-                }
-                tell(Outcome::Page {
-                    owner,
-                    attachment,
-                    page,
-                    picture,
-                });
             }
             Step::Page(page, Err(reason)) => {
-                next_page = page + 1;
-                tell(Outcome::Refused {
-                    owner,
-                    attachment,
+                drawing.next_page = page + 1;
+                if keep && is_fixed(&reason) {
+                    self.cache
+                        .put(drawing.key.clone(), Slot::Page(page), Entry::Refused(reason.clone()));
+                }
+                What::Refused {
                     page: Some(page),
                     reason,
-                });
+                }
             }
-        });
-        self.shared.queue().running = None;
-        match ended {
-            Ended::Finished => {}
-            Ended::Panicked => tell(Outcome::Refused {
-                owner,
-                attachment,
-                page: None,
-                reason: Refusal::Unreadable,
-            }),
+        };
+        drawing.job.tell(&sink, what);
+    }
+
+    /// How a render ended: a panic refuses the file, a render over its time is abandoned
+    fn on_end(&mut self, drawing: &Drawing<'_>, kind: Kind, ended: Ended) {
+        let reason = match ended {
+            Ended::Finished => return,
+            Ended::Panicked => Refusal::Unreadable,
             Ended::TimedOut => {
-                self.abandon(kind, &key);
-                tell(Outcome::Refused {
-                    owner,
-                    attachment,
-                    page: (next_page > 0).then_some(next_page),
-                    reason: Refusal::TimedOut,
-                });
+                self.abandon(kind, &drawing.key);
+                Refusal::TimedOut
             }
-        }
+        };
+        let page = (drawing.next_page > 0).then_some(drawing.next_page);
+        drawing
+            .job
+            .tell(&self.shared.sink.clone(), What::Refused { page, reason });
     }
 
     /// The render thread hung on the file of `key`: left to finish on its own, a new one for the next file, the file
@@ -598,25 +559,17 @@ impl Dispatcher {
         }
     }
 
-    /// Gives `work` to the render thread, starting one when there is none (or the last one is gone)
+    /// Gives `work` to the render thread, starting a new one when there is none or the last one is gone
     fn send(&mut self, work: Work) -> bool {
-        let mut work = Some(work);
-        for _ in 0..2 {
-            if self.worker.is_none() {
-                self.worker = spawn_worker(self.settings.engine.clone(), self.markers.clone());
-            }
-            let Some(worker) = &self.worker else {
-                return false;
-            };
-            match worker.send(work.take().expect("work is put back on failure")) {
+        let work = match &self.worker {
+            Some(worker) => match worker.send(work) {
                 Ok(()) => return true,
-                Err(mpsc::SendError(back)) => {
-                    work = Some(back);
-                    self.worker = None;
-                }
-            }
-        }
-        false
+                Err(SendError(back)) => back,
+            },
+            None => work,
+        };
+        self.worker = spawn_worker(self.settings.engine.clone(), self.markers.clone());
+        self.worker.as_ref().is_some_and(|worker| worker.send(work).is_ok())
     }
 }
 
@@ -660,11 +613,13 @@ fn spawn_worker(engine: Arc<dyn Engine>, markers: Option<Arc<Markers>>) -> Optio
         .stack_size(RENDER_STACK)
         .spawn(move || {
             while let Ok(work) = works.recv() {
-                let marker = markers.as_ref().map(|markers| markers.begin(&work.key, &work.about));
+                let marker = markers
+                    .as_ref()
+                    .map(|markers| markers.begin(&work.key, work.kind, &work.about));
                 let steps = work.steps.clone();
                 let stop = work.stop.clone();
                 let ran = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                    engine.run(work.kind, &work.file, work.pages, work.budget, &mut |step| {
+                    engine.run(work.kind, &work.file, &work.pages, work.budget, &mut |step| {
                         steps.send(Message::Step(step)).is_ok() && !stop.load(Ordering::Relaxed)
                     });
                 }));

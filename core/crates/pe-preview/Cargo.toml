@@ -8,6 +8,8 @@ rust-version.workspace = true
 publish.workspace = true
 
 [dependencies]
+# the direction marks left out of a PDF title, as of a file name
+pe-mime.workspace = true
 # pictures: the formats every platform gets a preview of, decoded in Rust, never handed to a web view as they came
 image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "webp", "bmp", "ico", "tiff"] }
 # PDF pages in Rust; the standard 14 fonts (about 260 KB) and the predefined CMaps (about 460 KB) built in, so no

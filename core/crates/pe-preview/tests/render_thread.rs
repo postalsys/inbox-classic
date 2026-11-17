@@ -8,7 +8,9 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
 use pe_preview::limits::{MAX_FILE, MESSAGE_PIXELS};
-use pe_preview::{Description, Engine, Kind, Mime, Outcome, Picture, Previewer, Refusal, Request, Settings, Step};
+use pe_preview::{
+    Description, Engine, Kind, Mime, Outcome, Picture, Previewer, Refusal, Request, Settings, Step, What,
+};
 
 /// A PDF file's start: enough for the kind to be told
 const PDF: &[u8] = b"%PDF-1.7\n";
@@ -41,10 +43,12 @@ fn picture(width: u32, height: u32) -> Picture {
     }
 }
 
-/// A fake engine: a file whose bytes end in "hang" never finishes (until released), "panic" panics, anything else
-/// gives a description and one page per `pages` of `size`
+/// A fake engine: a file whose bytes end in "hang" never finishes (until released), "panic" panics, "broken" has a
+/// page 1 that can not be read, anything else gives a description and one page per `pages` of `size`
 struct Fake {
     runs: AtomicUsize,
+    /// The pages each run was asked for
+    asked: Mutex<Vec<Vec<usize>>>,
     release: AtomicBool,
     size: (u32, u32),
     pages: usize,
@@ -54,6 +58,7 @@ impl Fake {
     fn new() -> Arc<Fake> {
         Arc::new(Fake {
             runs: AtomicUsize::new(0),
+            asked: Mutex::default(),
             release: AtomicBool::new(false),
             size: (100, 50),
             pages: 1,
@@ -62,8 +67,9 @@ impl Fake {
 }
 
 impl Engine for Fake {
-    fn run(&self, kind: Kind, file: &Arc<Vec<u8>>, pages: usize, budget: u64, emit: &mut dyn FnMut(Step) -> bool) {
+    fn run(&self, kind: Kind, file: &Arc<Vec<u8>>, pages: &[usize], budget: u64, emit: &mut dyn FnMut(Step) -> bool) {
         self.runs.fetch_add(1, Ordering::SeqCst);
+        self.asked.lock().unwrap().push(pages.to_vec());
         if !emit(Step::Started(kind)) {
             return;
         }
@@ -76,6 +82,10 @@ impl Engine for Fake {
         if file.ends_with(b"panic") {
             panic!("a decoder's bug");
         }
+        if file.ends_with(b"password") {
+            emit(Step::Described(Err(Refusal::Password)));
+            return;
+        }
         let description = Description {
             kind,
             pages: self.pages,
@@ -86,7 +96,7 @@ impl Engine for Fake {
             return;
         }
         let mut left = budget;
-        for page in 0..pages.min(self.pages) {
+        for &page in pages.iter().filter(|&&page| page < self.pages) {
             let pixels = u64::from(self.size.0) * u64::from(self.size.1);
             if pixels > left {
                 emit(Step::Page(page, Err(Refusal::OverBudget)));
@@ -95,6 +105,10 @@ impl Engine for Fake {
             left -= pixels;
             if !emit(Step::Started(kind)) {
                 return;
+            }
+            if page == 1 && file.ends_with(b"broken") {
+                emit(Step::Page(page, Err(Refusal::Unreadable)));
+                continue;
             }
             std::thread::sleep(Duration::from_millis(2));
             if !emit(Step::Page(page, Ok(picture(self.size.0, self.size.1)))) {
@@ -130,7 +144,7 @@ fn until_done(outcomes: &Receiver<Outcome>, owner: u64, attachment: usize) -> Ve
         let outcome = outcomes
             .recv_timeout(Duration::from_secs(10))
             .expect("an outcome in time");
-        let done = matches!(outcome, Outcome::Done { owner: o, attachment: a } if o == owner && a == attachment);
+        let done = matches!(outcome.what, What::Done) && outcome.owner == owner && outcome.attachment == attachment;
         seen.push(outcome);
         if done {
             return seen;
@@ -139,8 +153,8 @@ fn until_done(outcomes: &Receiver<Outcome>, owner: u64, attachment: usize) -> Ve
 }
 
 fn refusal(outcomes: &[Outcome]) -> Option<(Option<usize>, Refusal)> {
-    outcomes.iter().find_map(|o| match o {
-        Outcome::Refused { page, reason, .. } => Some((*page, reason.clone())),
+    outcomes.iter().find_map(|o| match &o.what {
+        What::Refused { page, reason } => Some((*page, reason.clone())),
         _ => None,
     })
 }
@@ -148,8 +162,8 @@ fn refusal(outcomes: &[Outcome]) -> Option<(Option<usize>, Refusal)> {
 fn pages(outcomes: &[Outcome]) -> Vec<usize> {
     outcomes
         .iter()
-        .filter_map(|o| match o {
-            Outcome::Page { page, .. } => Some(*page),
+        .filter_map(|o| match &o.what {
+            What::Page(page, _) => Some(*page),
             _ => None,
         })
         .collect()
@@ -167,7 +181,7 @@ fn a_file_is_described_then_drawn_then_done() {
     let (previewer, outcomes) = start(settings(fake.clone(), None));
     previewer.request(request(1, 0, file(PNG, "a")));
     let seen = until_done(&outcomes, 1, 0);
-    assert!(matches!(&seen[0], Outcome::Described { description, .. } if description.sizes == [Some((100, 50))]));
+    assert!(matches!(&seen[0].what, What::Described(description) if description.sizes == [Some((100, 50))]));
     assert_eq!(pages(&seen), [0]);
     assert_eq!(seen.len(), 3);
 }
@@ -202,11 +216,13 @@ fn the_cache_answers_a_file_drawn_before() {
     assert_eq!(pages(&seen), [0]);
     assert_eq!(fake.runs.load(Ordering::SeqCst), 1);
     // a decrypted part's file is never kept, and so drawn again
-    let mut private = request(3, 0, file(PNG, "private"));
-    private.keep = false;
-    previewer.request(private.clone());
+    let private = || Request {
+        keep: false,
+        ..request(3, 0, file(PNG, "private"))
+    };
+    previewer.request(private());
     until_done(&outcomes, 3, 0);
-    previewer.request(private);
+    previewer.request(private());
     until_done(&outcomes, 3, 0);
     assert_eq!(fake.runs.load(Ordering::SeqCst), 3);
 }
@@ -311,10 +327,7 @@ fn cancel_drops_what_waits_and_stops_what_draws() {
     previewer.cancel(7);
     // what was not taken yet is gone; at most the one taken is done
     std::thread::sleep(Duration::from_millis(200));
-    let done: Vec<_> = outcomes
-        .try_iter()
-        .filter(|o| matches!(o, Outcome::Done { .. }))
-        .collect();
+    let done: Vec<_> = outcomes.try_iter().filter(|o| matches!(o.what, What::Done)).collect();
     assert!(done.len() <= 1, "{done:?}");
     assert!(fake.runs.load(Ordering::SeqCst) <= 1);
 }
@@ -375,7 +388,7 @@ fn the_real_engine_draws_a_picture_and_a_pdf() {
     };
     previewer.request(request(1, 0, png));
     let seen = until_done(&outcomes, 1, 0);
-    let Some(Outcome::Page { picture, .. }) = seen.iter().find(|o| matches!(o, Outcome::Page { .. })) else {
+    let Some(What::Page(_, picture)) = seen.iter().map(|o| &o.what).find(|w| matches!(w, What::Page(..))) else {
         panic!("{seen:?}");
     };
     assert_eq!((picture.width, picture.height, picture.mime), (300, 200, Mime::Png));
@@ -383,8 +396,70 @@ fn the_real_engine_draws_a_picture_and_a_pdf() {
     previewer.request(request(1, 1, Arc::new(pdf)));
     let seen = until_done(&outcomes, 1, 1);
     assert!(
-        matches!(&seen[0], Outcome::Described { description, .. } if description.pages == 1
+        matches!(&seen[0].what, What::Described(description) if description.pages == 1
         && description.title.as_deref() == Some("Invoice 2026-116"))
     );
     assert_eq!(pages(&seen), [0]);
+}
+
+#[test]
+fn only_the_pages_the_cache_does_not_hold_are_drawn() {
+    let fake = Arc::new(Fake {
+        pages: 5,
+        ..Arc::into_inner(Fake::new()).unwrap()
+    });
+    let (previewer, outcomes) = start(settings(fake.clone(), None));
+    let pdf = file(PDF, "broken");
+    previewer.request(Request {
+        pages: 2,
+        ..request(1, 0, pdf.clone())
+    });
+    let seen = until_done(&outcomes, 1, 0);
+    assert_eq!(pages(&seen), [0]);
+    assert_eq!(refusal(&seen), Some((Some(1), Refusal::Unreadable)));
+    // three pages now: page 0 and the refusal of page 1 come from the cache, only page 2 is drawn
+    previewer.request(request(2, 0, pdf));
+    let seen = until_done(&outcomes, 2, 0);
+    assert!(matches!(seen[0].what, What::Described(_)));
+    assert_eq!(pages(&seen), [0, 2, 3, 4]);
+    assert_eq!(refusal(&seen), Some((Some(1), Refusal::Unreadable)));
+    assert_eq!(*fake.asked.lock().unwrap(), [vec![0, 1], vec![2, 3, 4]]);
+}
+
+#[test]
+fn a_file_refused_for_good_is_answered_from_the_cache() {
+    let fake = Fake::new();
+    let (previewer, outcomes) = start(settings(fake.clone(), None));
+    let mut huge = PNG.to_vec();
+    huge.extend(b"panic");
+    // a panic is no lasting refusal: drawn again
+    previewer.request(request(1, 0, Arc::new(huge.clone())));
+    until_done(&outcomes, 1, 0);
+    previewer.request(request(1, 1, Arc::new(huge)));
+    assert_eq!(refusal(&until_done(&outcomes, 1, 1)), Some((None, Refusal::Unreadable)));
+    assert_eq!(fake.runs.load(Ordering::SeqCst), 2);
+    // a file that wants a password always will: the cache says so
+    let locked = file(PDF, "password");
+    previewer.request(request(1, 2, locked.clone()));
+    assert_eq!(refusal(&until_done(&outcomes, 1, 2)), Some((None, Refusal::Password)));
+    previewer.request(request(2, 0, locked));
+    assert_eq!(refusal(&until_done(&outcomes, 2, 0)), Some((None, Refusal::Password)));
+    assert_eq!(fake.runs.load(Ordering::SeqCst), 3);
+}
+
+#[test]
+fn pdfs_off_by_the_setting_are_disabled_and_come_back_on() {
+    let fake = Fake::new();
+    let (previewer, outcomes) = start(Settings {
+        pdfs: false,
+        ..settings(fake.clone(), None)
+    });
+    previewer.request(request(1, 0, file(PDF, "a")));
+    assert_eq!(refusal(&until_done(&outcomes, 1, 0)), Some((None, Refusal::Disabled)));
+    // pictures still draw
+    previewer.request(request(1, 1, file(PNG, "b")));
+    assert_eq!(pages(&until_done(&outcomes, 1, 1)), [0]);
+    previewer.set_pdfs(true);
+    previewer.request(request(1, 2, file(PDF, "a")));
+    assert_eq!(pages(&until_done(&outcomes, 1, 2)), [0]);
 }

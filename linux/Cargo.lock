@@ -3026,6 +3026,7 @@ dependencies = [
  "flate2",
  "hayro",
  "image",
+ "pe-mime",
  "sha2 0.10.9",
  "weezl",
 ]

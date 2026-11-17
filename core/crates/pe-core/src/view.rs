@@ -675,8 +675,11 @@ pub(crate) fn attachments(source: &[u8]) -> Vec<(String, Vec<u8>)> {
     let Ok(message) = parser::parse(source) else {
         return Vec::new();
     };
-    listed(&message.attachments)
-        .map(|a| (a.safe_filename(), a.content.clone()))
+    message
+        .attachments
+        .into_iter()
+        .filter(is_listed)
+        .map(|a| (a.safe_filename(), a.content))
         .collect()
 }
 

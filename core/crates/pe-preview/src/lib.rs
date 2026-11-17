@@ -17,6 +17,7 @@
 
 pub mod cache;
 mod encode;
+mod engine;
 pub mod limits;
 pub mod marker;
 pub mod pdf;
@@ -24,7 +25,8 @@ pub mod picture;
 mod service;
 pub mod streams;
 
-pub use service::{Engine, Outcome, Previewer, Request, Settings, Step};
+pub use engine::{Engine, Real, Step};
+pub use service::{Outcome, Previewer, Request, Settings, What};
 
 use std::sync::Arc;
 
@@ -116,15 +118,18 @@ pub enum Refusal {
     Crashed,
     /// Previews of this kind are off for the rest of the session: a PDF hung before
     Off,
+    /// PDF files are not drawn: the user's setting, turned off by the core after a PDF file ended the app
+    Disabled,
 }
 
 /// The key of a file: SHA-256 of its bytes, as hex
 pub fn key_of(bytes: &[u8]) -> Key {
     use sha2::Digest;
+    use std::fmt::Write;
     let digest = sha2::Sha256::digest(bytes);
     let mut hex = String::with_capacity(64);
     for byte in digest {
-        hex.push_str(&format!("{byte:02x}"));
+        let _ = write!(hex, "{byte:02x}");
     }
     Key(Arc::from(hex))
 }

@@ -144,22 +144,10 @@ pub fn page_size(width: f32, height: f32) -> Option<(u32, u32, f64)> {
 /// A PDF text string as text: UTF-16 with its byte order mark, UTF-8 with its mark (PDF 2.0), or PDFDocEncoding
 /// (Latin-1 for what titles use); control characters dropped, at most [`MAX_TITLE`] characters. None when empty
 fn text_string(bytes: &[u8]) -> Option<String> {
-    let text: String = if let Some(utf16) = bytes.strip_prefix(b"\xfe\xff") {
-        let units: Vec<u16> = utf16
-            .as_chunks::<2>()
-            .0
-            .iter()
-            .map(|c| u16::from_be_bytes(*c))
-            .collect();
-        char::decode_utf16(units).map(|c| c.unwrap_or('\u{fffd}')).collect()
-    } else if let Some(utf16) = bytes.strip_prefix(b"\xff\xfe") {
-        let units: Vec<u16> = utf16
-            .as_chunks::<2>()
-            .0
-            .iter()
-            .map(|c| u16::from_le_bytes(*c))
-            .collect();
-        char::decode_utf16(units).map(|c| c.unwrap_or('\u{fffd}')).collect()
+    let text: String = if let Some(utf16_be) = bytes.strip_prefix(b"\xfe\xff") {
+        utf16(utf16_be, u16::from_be_bytes)
+    } else if let Some(utf16_le) = bytes.strip_prefix(b"\xff\xfe") {
+        utf16(utf16_le, u16::from_le_bytes)
     } else if let Some(utf8) = bytes.strip_prefix(b"\xef\xbb\xbf") {
         String::from_utf8_lossy(utf8).into_owned()
     } else {
@@ -168,11 +156,18 @@ fn text_string(bytes: &[u8]) -> Option<String> {
     let text: String = text
         .chars()
         .map(|c| if c.is_control() { ' ' } else { c })
-        .filter(|c| !matches!(c, '\u{200e}' | '\u{200f}' | '\u{202a}'..='\u{202e}' | '\u{2066}'..='\u{2069}'))
+        .filter(|&c| !pe_mime::parser::is_direction_mark(c))
         .take(MAX_TITLE)
         .collect();
     let text = text.split_whitespace().collect::<Vec<_>>().join(" ");
     (!text.is_empty()).then_some(text)
+}
+
+/// UTF-16 in the byte order `unit` reads, a broken pair as the replacement character
+fn utf16(bytes: &[u8], unit: fn([u8; 2]) -> u16) -> String {
+    char::decode_utf16(bytes.as_chunks::<2>().0.iter().map(|&pair| unit(pair)))
+        .map(|c| c.unwrap_or('\u{fffd}'))
+        .collect()
 }
 
 #[cfg(test)]

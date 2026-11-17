@@ -5,7 +5,7 @@
 use std::collections::{BTreeMap, HashMap};
 use std::sync::Arc;
 
-use crate::{Description, Key, Picture};
+use crate::{Description, Key, Picture, Refusal};
 
 /// What is kept of a file
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -18,13 +18,15 @@ pub enum Slot {
 pub enum Entry {
     Description(Arc<Description>),
     Page(Arc<Picture>),
+    /// The file (in the description's slot) or a page refused for a reason of its own, the same each time
+    Refused(Refusal),
 }
 
 impl Entry {
     /// What it counts for against the size of the cache: a description counts as a little, a page as its bytes
     fn weight(&self) -> usize {
         match self {
-            Entry::Description(_) => 256,
+            Entry::Description(_) | Entry::Refused(_) => 256,
             Entry::Page(picture) => picture.bytes.len() + 64,
         }
     }

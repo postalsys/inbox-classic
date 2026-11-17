@@ -22,30 +22,30 @@ pub(crate) fn encode(image: DynamicImage, photo: bool, icc: Option<Vec<u8>>) -> 
         (false, true) => (image.into_rgba8().into_raw(), ExtendedColorType::Rgba8),
     };
     let icc = icc.filter(|icc| icc_matches(icc, gray));
-    if photo && !alpha {
-        let bytes = write(Mime::Jpeg, &pixels, width, height, color, icc)?;
-        return Ok(Picture {
-            mime: Mime::Jpeg,
-            bytes,
-            width,
-            height,
-        });
-    }
-    if alpha {
-        let bytes = write(Mime::Png, &pixels, width, height, color, icc)?;
-        return Ok(Picture {
-            mime: Mime::Png,
-            bytes,
-            width,
-            height,
-        });
-    }
-    opaque(&pixels, width, height, color, icc)
+    let written = match (photo, alpha) {
+        (true, false) => (Mime::Jpeg, write(Mime::Jpeg, &pixels, width, height, color, icc)?),
+        (_, true) => (Mime::Png, write(Mime::Png, &pixels, width, height, color, icc)?),
+        (false, false) => opaque(&pixels, width, height, color, icc)?,
+    };
+    Ok(picture(written, width, height))
 }
 
 /// RGB pixels of a drawn page (opaque), as [`opaque`] writes them
 pub(crate) fn page(rgb: &[u8], width: u32, height: u32) -> Result<Picture, Refusal> {
-    opaque(rgb, width, height, ExtendedColorType::Rgb8, None)
+    Ok(picture(
+        opaque(rgb, width, height, ExtendedColorType::Rgb8, None)?,
+        width,
+        height,
+    ))
+}
+
+fn picture((mime, bytes): (Mime, Vec<u8>), width: u32, height: u32) -> Picture {
+    Picture {
+        mime,
+        bytes,
+        width,
+        height,
+    }
 }
 
 /// Opaque pixels that are not known to be a photo: a PNG, which keeps text and lines sharp; one whose PNG is over
@@ -56,22 +56,15 @@ fn opaque(
     height: u32,
     color: ExtendedColorType,
     icc: Option<Vec<u8>>,
-) -> Result<Picture, Refusal> {
+) -> Result<(Mime, Vec<u8>), Refusal> {
     let png = write(Mime::Png, pixels, width, height, color, icc.clone())?;
-    let (mime, bytes) = if png.len() > PAGE_PNG {
-        match write(Mime::Jpeg, pixels, width, height, color, icc) {
-            Ok(jpeg) if jpeg.len() < png.len() / 2 => (Mime::Jpeg, jpeg),
-            _ => (Mime::Png, png),
-        }
-    } else {
-        (Mime::Png, png)
-    };
-    Ok(Picture {
-        mime,
-        bytes,
-        width,
-        height,
-    })
+    if png.len() > PAGE_PNG
+        && let Ok(jpeg) = write(Mime::Jpeg, pixels, width, height, color, icc)
+        && jpeg.len() < png.len() / 2
+    {
+        return Ok((Mime::Jpeg, jpeg));
+    }
+    Ok((Mime::Png, png))
 }
 
 fn write(

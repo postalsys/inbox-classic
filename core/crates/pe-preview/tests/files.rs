@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::sync::mpsc;
 use std::time::{Duration, Instant};
 
-use pe_preview::{Kind, Mime, Outcome, Previewer, Refusal, Request, Settings, pdf, picture};
+use pe_preview::{Kind, Mime, Outcome, Previewer, Refusal, Request, Settings, What, pdf, picture};
 
 fn read(name: &str) -> Arc<Vec<u8>> {
     let path = format!("{}/tests/files/{name}", env!("CARGO_MANIFEST_DIR"));
@@ -80,7 +80,18 @@ fn hostile_pdf_files_are_bounded() {
     let (_, _, drawn) = pdf_pages("mediabox-thread.pdf").unwrap();
     assert_eq!(drawn, [Ok((512, 2048, Mime::Png))]);
     // what would make hayro allocate without limit is measured first and not drawn
-    for name in ["flate-bomb.pdf", "image-60000.pdf", "path-bomb.pdf"] {
+    // and what hayro reads that flate2 does not, inline pictures, and pictures whose codec says a larger size than
+    // their dictionary (before, these took 290 MB, 425 MB, 1.2 GB and 4.8 GB)
+    for name in [
+        "flate-bomb.pdf",
+        "image-60000.pdf",
+        "path-bomb.pdf",
+        "lenient-flate-bomb.pdf",
+        "inline-image-bomb.pdf",
+        "ccitt-columns.pdf",
+        "jpx-siz.pdf",
+        "jbig2-page.pdf",
+    ] {
         let started = Instant::now();
         let (_, _, drawn) = pdf_pages(name).unwrap();
         assert_eq!(drawn, [Err(Refusal::TooLarge)], "{name}");
@@ -147,9 +158,10 @@ fn a_pdf_that_never_finishes_is_abandoned() {
     let wait = |attachment| {
         let mut refused = None;
         loop {
-            match outcomes.recv_timeout(Duration::from_secs(10)).unwrap() {
-                Outcome::Refused { reason, .. } => refused = Some(reason),
-                Outcome::Done { attachment: a, .. } if a == attachment => return refused,
+            let outcome: Outcome = outcomes.recv_timeout(Duration::from_secs(10)).unwrap();
+            match outcome.what {
+                What::Refused { reason, .. } => refused = Some(reason),
+                What::Done if outcome.attachment == attachment => return refused,
                 _ => {}
             }
         }
