@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Check the remaining agents-connect topics against the GTK switch and review only affected control instructions. Then review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve reviewed screenshot descriptions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21783/801; pending 12621/555; improvements 4045. REVIEWED unchanged.",
+  "next_batch": "Review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve the reviewed screenshot descriptions and agent-connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21783/801; pending 12621/555; improvements 4045. REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -2618,6 +2618,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "bg-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/bg/agents-connect.html": "4c5d847e543e0e5ccf9fbfbe3fca9b846d0f0874d5951a9c688fe86aa3af8d32"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ]
@@ -5282,6 +5314,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "cs-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/cs/agents-connect.html": "639e606f22a1bd395c97b75d29e78a91ba6052e565cfadb01e88b90acf0d8db7"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -7865,6 +7929,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "da-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/da/agents-connect.html": "688e5045e5428a66b6017f17a69b6260fa67fd4be99ab4926bb1d5980c2e3d3f"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -9006,6 +9102,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "de-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 0,
+          "files": {
+            "core/crates/pe-html/help/de/agents-connect.html": "bab3d3af74621f73a56edcbe72aacf7169420f7218071902e72a122078e5d8e4"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "The existing instruction already uses neutral disable wording and is retained unchanged. Only this paragraph was reassessed; no extra full-topic credit.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ]
@@ -11564,6 +11692,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "el-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/el/agents-connect.html": "56521c33a89c150a93850267a548b1ebb072a5d14c98819dd4e441d29a9a9f0e"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -12709,6 +12869,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "es-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 0,
+          "files": {
+            "core/crates/pe-html/help/es/agents-connect.html": "65c725945c8dd7c14a08b114d9185c84ba8d8795a62e38cec513052014b8ea54"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "The existing instruction already uses neutral disable wording and is retained unchanged. Only this paragraph was reassessed; no extra full-topic credit.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ]
@@ -13884,6 +14076,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "et-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/et/agents-connect.html": "d20132330ed983002dddc2a2be575f0cb5dc4b7cb8fd43c903a7cd62c993a560"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ]
@@ -16433,6 +16657,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "fi-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/fi/agents-connect.html": "170eab319148da663d89727c7f2f13ae468fd5188c11fefddc26cfe3fdca2dcc"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -17628,6 +17884,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "fr-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/fr/agents-connect.html": "f694535eb10abf718e6a8d63cc72350cca6b2322f692fa5972551ce97f823308"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ]
@@ -20043,6 +20331,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "hr-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/hr/agents-connect.html": "2724500ed7ad2608f0388320bf2109f4d3003a8eab26bb5e65d2f557f924039b"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -22093,6 +22413,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "hu-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/hu/agents-connect.html": "c0785b68c490befe19488d39b40dbbbeef94edb9329e9ed8782a33698c2ddc1d"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ]
@@ -24892,6 +25244,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "it-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/it/agents-connect.html": "31f4c63ce1ddf9d2bb3f6670b50064d2b443729a1881fbbed5de8da4ee98f103"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -26908,6 +27292,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "lt-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/lt/agents-connect.html": "4e7b3b3463c5bef8fd40cf4c76962b51cb418ad4bc2e2b20696bdcc2cdd2cd45"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -28900,6 +29316,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "lv-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/lv/agents-connect.html": "476ba622e9c060b71e155cc609dc407bc4f6333b49934d975caa539942beee77"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ]
@@ -31771,6 +32219,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "nl-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 0,
+          "files": {
+            "core/crates/pe-html/help/nl/agents-connect.html": "202b08b8006d628463f9eea0dc7966c269d0156edbde3ca2d2dd4f5b5b56ebe6"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "The existing instruction already uses neutral disable wording and is retained unchanged. Only this paragraph was reassessed; no extra full-topic credit.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -33763,6 +34243,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "pl-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/pl/agents-connect.html": "60c9737a11f56fd12649cb13d592cba64bf191e27f58f1f6e81fd37e324ad282"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ]
@@ -36557,6 +37069,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "pt-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/pt/agents-connect.html": "7e375692c319c1150fc319ced015d6c6cb4b20414e4c145edb199f7ab35531dc"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -38563,6 +39107,38 @@
             "joins.log": "/private/tmp/inbox-ro-agents-joins.log",
             "since.log": "/private/tmp/inbox-ro-agents-since.log",
             "html.log": "/private/tmp/inbox-ro-agents-html.log"
+          }
+        },
+        {
+          "id": "ro-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/ro/agents-connect.html": "a0a1eb8472ba42d9278a20069f62fc93a0e0875b6979baa0c4080184e1af8db8"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ]
@@ -40600,6 +41176,38 @@
             "since.log": "/private/tmp/inbox-ru-agents-since.log",
             "html.log": "/private/tmp/inbox-ru-agents-html.log"
           }
+        },
+        {
+          "id": "ru-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 0,
+          "files": {
+            "core/crates/pe-html/help/ru/agents-connect.html": "77e63e49137e67f712ed5db8755916d6e1f1542b505dbabf10e816e124f1191d"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "The existing instruction already uses neutral disable wording and is retained unchanged. Only this paragraph was reassessed; no extra full-topic credit.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -42422,6 +43030,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "sk-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/sk/agents-connect.html": "c6a3f59fd3ae2593d0d3f072a5317de7badbc9ab8ebbbe3d6c4287da21b09c60"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ]
@@ -44246,6 +44886,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "sl-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/sl/agents-connect.html": "29950884ea5ac86f962eb5d3758652cb3be01ae639fe6aea19d732b1d10b0aa7"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -46069,6 +46741,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "sv-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/sv/agents-connect.html": "d9cff405fb04300354b4ecafe3de140eb7a277e01b454a68805aef699c1d8e02"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ]
     },
@@ -47891,6 +48595,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "uk-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/uk/agents-connect.html": "6b5014b74e2b7f25370d2f27be7a20b3261f7d6c091e39ba57eb3c05a8474be8"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ]
@@ -50607,6 +51343,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "ca-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/ca/agents-connect.html": "4f1128558156857d4221a4a7662d3722deb41e1b055deff45ea5a3a8582d1cdf"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -53273,6 +54041,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "nb-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/nb/agents-connect.html": "88a29db4e2955fbe49537ec9da93a12055555f82d18ece7c06eaafd32be4ca58"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ],
@@ -55945,6 +56745,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "pt-BR-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/pt-BR/agents-connect.html": "bbb4e0e7eb4e69e55df38cf376a18eabd3590ff66c4de1b5ce2fbede64ec7cb8"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -58616,6 +59448,38 @@
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
           }
+        },
+        {
+          "id": "sr-Latn-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/sr-Latn/agents-connect.html": "45dc80b2464505177008b2a684e2d027483d7d312f019258d7de4d863676d229"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
+          }
         }
       ],
       "source_ref": "feat/languages-wave1",
@@ -61238,6 +62102,38 @@
             "source-audit.json": "/private/tmp/inbox-agent-picture-source-audit.json",
             "since.log": "/private/tmp/inbox-agent-picture-since.log",
             "html.log": "/private/tmp/inbox-agent-picture-html.log"
+          }
+        },
+        {
+          "id": "tr-agent-connect-toggle-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [],
+          "followup_reviewed_help": [
+            "agents-connect.html"
+          ],
+          "reviewed_help_passages": {
+            "agents-connect.html": [
+              "p containing b[data-text=\"ui-let-agents-connect\"]"
+            ]
+          },
+          "changed_values": 0,
+          "help_wording_lines_changed": 1,
+          "files": {
+            "core/crates/pe-html/help/tr/agents-connect.html": "9eb110ae81d1724e1eac8801fc29053bc02433a027937f7cbf4f6d570e495815"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/agents-connect.html": "46fc8b4633b38c54592fa07d99642bffbf0bcd97e44ce1e8d7e74db26f11bd70"
+          },
+          "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+          "notes": "Reviewed only the instruction for disabling all agent connections against the GTK switch, Mac/Windows checkboxes and current catalog labels. All other topic bytes are preserved. No full-topic credit; broader pending prose remains marked.",
+          "validation_artifacts": {
+            "edits.json": "/private/tmp/inbox-agent-toggle-edits.json",
+            "exact.json": "/private/tmp/inbox-agent-toggle-exact.json",
+            "checks.json": "/private/tmp/inbox-agent-toggle-checks.json",
+            "source-audit.json": "/private/tmp/inbox-agent-toggle-source-audit.json",
+            "joins.log": "/private/tmp/inbox-agent-toggle-joins.log",
+            "since.log": "/private/tmp/inbox-agent-toggle-since.log",
+            "html.log": "/private/tmp/inbox-agent-toggle-html.log"
           }
         }
       ],
@@ -65180,7 +66076,7 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Russian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 30 improved values, 32 retained good values and three complete help topics with 38 changed wording lines. All untargeted values, the reviewed approval log and screenshot alt description remain unchanged. Tags, attributes, controls, platform branches, literal keys, variables, plural branches, mnemonic counts and generated IDs are preserved. О/Н unsubscribe keys are distinct; shared Mac/Linux labels remain plain. Help joins with actual labels were inspected across all three platforms. Seven notice UI files and sixteen runtime/UI/rendering files match the captured evidence, including immediate user takeover on save or send and guards against queued agent changes. Global reconciliation accounts for 21,821 unmarked entries, 11,081 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,144 entries/243 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+    "latest_source_audit": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
     "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
     "upstream_integration": {
       "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
@@ -114847,6 +115743,565 @@
         },
         "runtime_context_artifact": "/private/tmp/inbox-ru-agents-runtime.json",
         "runtime_context_sha256": "ddfed56ffaf10d5a8beb6fd9253e14d3759a1b8103ae7d3fff4426d07ecb17bc"
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "965f86fd6b36cfb301aab6b5f2ed3bd3bc839e14",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074",
+          "chore/pgp-hardening": "51d67bb4e5fb6732f5baea4b8004bc46507f1442"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/master": {
+            "merge_base": "965f86fd6b36cfb301aab6b5f2ed3bd3bc839e14",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "chore/pgp-hardening": {
+            "merge_base": "51d67bb4e5fb6732f5baea4b8004bc46507f1442",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          }
+        },
+        "integrated_help_source": "255205aad7e70f680909092c3167cc724618b70e",
+        "root_locale_help_settings_status": [],
+        "unmerged_non_help_path_count": 0,
+        "unmerged_non_help_paths_except_fuzz_corpora": [],
+        "guide_sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
+        "changed_source_tips_since_last_checkpoint": {
+          "origin/master": {
+            "before": "c3586aa438593c815b50a0397fb4bab597321574",
+            "after": "965f86fd6b36cfb301aab6b5f2ed3bd3bc839e14"
+          }
+        },
+        "integrated_active_key_source_check": {
+          "status": "source-only catalogs integrated and reviewed",
+          "ref": "chore/pgp-hardening",
+          "observed_source_tip": "51d67bb4e5fb6732f5baea4b8004bc46507f1442",
+          "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+          "new_catalog_entries": 28,
+          "catalog_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "new_help_topics": 0,
+          "changed_help_topics": 0,
+          "files": {},
+          "note": "New signature reason from the hardening branch: a valid signature used a key other than the active key for the From address. Exact source entry was imported in205bd846 and reviewed; current source entry still matches. Other hardening code/fuzz changes stay separate; inspect caller before review."
+        },
+        "preview_mcp_source_checks": [
+          {
+            "ref": "feat/preview-render",
+            "observed_tip": "2567d2d700c546725c6ba5468aa9b4d0dc81c06a",
+            "source_commit": "687113a325f3aaaab17784f307ccc86df4b8c061",
+            "source_files": 29,
+            "source_file_sha256": {
+              "core/locales/bg/core.ftl": "43dc4d75a55a0fa792b6d34976226d49c7158b0fdbdb92e98a55088e5623da62",
+              "core/locales/ca/core.ftl": "b0a9e91845f8068d67a614aba9a77122121a90875465a9272137552808b20928",
+              "core/locales/cs/core.ftl": "5caee113cfc0008f67c4792af63149f457723029243fb6937de5589d7a35ff83",
+              "core/locales/da/core.ftl": "8e3ff6a89174ff230a1bb21fbc631a3dddc47dbaf99805b3d491f0a774f05941",
+              "core/locales/de/core.ftl": "1c0a12d70276c443616dc9f50d80d8b2ac36fc3e17189aeb59e8fb30dd783d0b",
+              "core/locales/el/core.ftl": "9c827da4f4d3d3777ba3fdd02809eeb6a161b13439db0b774da7f5f425906066",
+              "core/locales/en/core.ftl": "56940f2b113f38b587f6acac1ed80865a92e73f6161596822bcd02e15db800a3",
+              "core/locales/es/core.ftl": "60cc61acd3ee5f71a14013f0c12fa822c0df47a706314af3345dcc5d179f6f8b",
+              "core/locales/et/core.ftl": "338071b2f1c3257bde40d78a986fc8819b8feaa0390c30669a73d75731781699",
+              "core/locales/fi/core.ftl": "6f87440104dfd5484579c555c48c3b067d31844320cadd3dc301c74677d82449",
+              "core/locales/fr/core.ftl": "6967627c63303663b7a8f1a2c1fd8736bc41b15549a797d4a2986cae32536d36",
+              "core/locales/hr/core.ftl": "5a6d8f6ff33b8356191fccf3ebe1deac854d4a5240e8cfd591dd48db3ce86b51",
+              "core/locales/hu/core.ftl": "07db76518ce65b0354314742463f69754182e7a751452f0fa65684b0be817839",
+              "core/locales/it/core.ftl": "8401c6191ada919e50047f682f90c1eb953d3028cacd86b8a2e9fe944b5d3bbc",
+              "core/locales/lt/core.ftl": "b3752f1f3581a3de8c51fee696b0fcf5f145279f3a2487ba3ca9da500dd99e37",
+              "core/locales/lv/core.ftl": "b0a70b4544a547cf70cf028cf656af0746665944a778eb1fc41b80f285482686",
+              "core/locales/nb/core.ftl": "bf57f315f85410c0bd9a8ba84da622445f895eb5f45b5d0c02642b05001752d6",
+              "core/locales/nl/core.ftl": "4df68abacca2264036d4f2689ace1cf0b59ae6073451e609d4703ac7ccb3abf5",
+              "core/locales/pl/core.ftl": "1d2b9fc5d35e1ebed2ef54661977bcd194376299911fae664c2dfc82e79805a0",
+              "core/locales/pt/core.ftl": "70cb82f3cc6a4ed36d7fe3ce107c18c7d7afdd269f70dd7fd811ff8368f32d14",
+              "core/locales/pt-BR/core.ftl": "6e330af2c1b84eb76f83d8e7dd8eb919de3ab0100b99f11fd76bdc4a9413c398",
+              "core/locales/ro/core.ftl": "c48544e49c08fbca6fa19baed73d47d20367184fec2269823dd6d90f1eddfaed",
+              "core/locales/ru/core.ftl": "d7271d713b6e46074e0d09e19627caf5eee769a5247bcabda4889f17051c20c0",
+              "core/locales/sk/core.ftl": "da05b7458ced6138dcd2c700b2fad34d58c573f44176b095b4ff4f34fe3b3ee0",
+              "core/locales/sl/core.ftl": "6e2966a4830ab1ac2fd3ec3e8909c8829e17ca1f0c6d456cade9028a3c9b47a0",
+              "core/locales/sr-Latn/core.ftl": "b8bb1429fe91dcdc72f7ef640e3d6e9be5a777f952402097edb796599431b8bb",
+              "core/locales/sv/core.ftl": "a38bd735888fa39db358306d5a5c87d4bebcf66ab7d0bf767f894728dcdd724b",
+              "core/locales/tr/core.ftl": "169d7cb61bb6aad601ed16dcc75ef8081ae1d2857f16b03f1650224e0893aaec",
+              "core/locales/uk/core.ftl": "0fdfaf0abf4ecea494dfceaf8a929d12b4dc20334c99dec02800c0d13300033d"
+            },
+            "changed_relevant_paths": [
+              "core/crates/pe-html/help/bg/agents-permissions.html",
+              "core/crates/pe-html/help/bg/agents-sending.html",
+              "core/crates/pe-html/help/ca/agents-permissions.html",
+              "core/crates/pe-html/help/ca/agents-sending.html",
+              "core/crates/pe-html/help/cs/agents-permissions.html",
+              "core/crates/pe-html/help/cs/agents-sending.html",
+              "core/crates/pe-html/help/da/agents-permissions.html",
+              "core/crates/pe-html/help/da/agents-sending.html",
+              "core/crates/pe-html/help/de/agents-permissions.html",
+              "core/crates/pe-html/help/de/agents-sending.html",
+              "core/crates/pe-html/help/el/agents-permissions.html",
+              "core/crates/pe-html/help/el/agents-sending.html",
+              "core/crates/pe-html/help/en/agents-permissions.html",
+              "core/crates/pe-html/help/en/agents-sending.html",
+              "core/crates/pe-html/help/es/agents-permissions.html",
+              "core/crates/pe-html/help/es/agents-sending.html",
+              "core/crates/pe-html/help/et/agents-permissions.html",
+              "core/crates/pe-html/help/et/agents-sending.html",
+              "core/crates/pe-html/help/fi/agents-permissions.html",
+              "core/crates/pe-html/help/fi/agents-sending.html",
+              "core/crates/pe-html/help/fr/agents-permissions.html",
+              "core/crates/pe-html/help/fr/agents-sending.html",
+              "core/crates/pe-html/help/hr/agents-permissions.html",
+              "core/crates/pe-html/help/hr/agents-sending.html",
+              "core/crates/pe-html/help/hu/agents-permissions.html",
+              "core/crates/pe-html/help/hu/agents-sending.html",
+              "core/crates/pe-html/help/it/agents-permissions.html",
+              "core/crates/pe-html/help/it/agents-sending.html",
+              "core/crates/pe-html/help/lt/agents-permissions.html",
+              "core/crates/pe-html/help/lt/agents-sending.html",
+              "core/crates/pe-html/help/lv/agents-permissions.html",
+              "core/crates/pe-html/help/lv/agents-sending.html",
+              "core/crates/pe-html/help/nb/agents-permissions.html",
+              "core/crates/pe-html/help/nb/agents-sending.html",
+              "core/crates/pe-html/help/nl/agents-permissions.html",
+              "core/crates/pe-html/help/nl/agents-sending.html",
+              "core/crates/pe-html/help/pl/agents-permissions.html",
+              "core/crates/pe-html/help/pl/agents-sending.html",
+              "core/crates/pe-html/help/pt-BR/agents-permissions.html",
+              "core/crates/pe-html/help/pt-BR/agents-sending.html",
+              "core/crates/pe-html/help/pt/agents-permissions.html",
+              "core/crates/pe-html/help/pt/agents-sending.html",
+              "core/crates/pe-html/help/ro/agents-permissions.html",
+              "core/crates/pe-html/help/ro/agents-sending.html",
+              "core/crates/pe-html/help/ru/agents-permissions.html",
+              "core/crates/pe-html/help/ru/agents-sending.html",
+              "core/crates/pe-html/help/sk/agents-permissions.html",
+              "core/crates/pe-html/help/sk/agents-sending.html",
+              "core/crates/pe-html/help/sl/agents-permissions.html",
+              "core/crates/pe-html/help/sl/agents-sending.html",
+              "core/crates/pe-html/help/sr-Latn/agents-permissions.html",
+              "core/crates/pe-html/help/sr-Latn/agents-sending.html",
+              "core/crates/pe-html/help/sv/agents-permissions.html",
+              "core/crates/pe-html/help/sv/agents-sending.html",
+              "core/crates/pe-html/help/tr/agents-permissions.html",
+              "core/crates/pe-html/help/tr/agents-sending.html",
+              "core/crates/pe-html/help/uk/agents-permissions.html",
+              "core/crates/pe-html/help/uk/agents-sending.html",
+              "core/locales/bg/app.ftl",
+              "core/locales/bg/core.ftl",
+              "core/locales/bg/windows.ftl",
+              "core/locales/ca/app.ftl",
+              "core/locales/ca/core.ftl",
+              "core/locales/ca/windows.ftl",
+              "core/locales/cs/app.ftl",
+              "core/locales/cs/core.ftl",
+              "core/locales/cs/windows.ftl",
+              "core/locales/da/app.ftl",
+              "core/locales/da/core.ftl",
+              "core/locales/da/windows.ftl",
+              "core/locales/de/app.ftl",
+              "core/locales/de/core.ftl",
+              "core/locales/de/windows.ftl",
+              "core/locales/el/app.ftl",
+              "core/locales/el/core.ftl",
+              "core/locales/el/windows.ftl",
+              "core/locales/en/app.ftl",
+              "core/locales/en/core.ftl",
+              "core/locales/en/windows.ftl",
+              "core/locales/es/app.ftl",
+              "core/locales/es/core.ftl",
+              "core/locales/es/windows.ftl",
+              "core/locales/et/app.ftl",
+              "core/locales/et/core.ftl",
+              "core/locales/et/windows.ftl",
+              "core/locales/fi/app.ftl",
+              "core/locales/fi/core.ftl",
+              "core/locales/fi/windows.ftl",
+              "core/locales/fr/app.ftl",
+              "core/locales/fr/core.ftl",
+              "core/locales/fr/windows.ftl",
+              "core/locales/hr/app.ftl",
+              "core/locales/hr/core.ftl",
+              "core/locales/hr/windows.ftl",
+              "core/locales/hu/app.ftl",
+              "core/locales/hu/core.ftl",
+              "core/locales/hu/windows.ftl",
+              "core/locales/it/app.ftl",
+              "core/locales/it/core.ftl",
+              "core/locales/it/windows.ftl",
+              "core/locales/lt/app.ftl",
+              "core/locales/lt/core.ftl",
+              "core/locales/lt/windows.ftl",
+              "core/locales/lv/app.ftl",
+              "core/locales/lv/core.ftl",
+              "core/locales/lv/windows.ftl",
+              "core/locales/nb/app.ftl",
+              "core/locales/nb/core.ftl",
+              "core/locales/nb/windows.ftl",
+              "core/locales/nl/app.ftl",
+              "core/locales/nl/core.ftl",
+              "core/locales/nl/windows.ftl",
+              "core/locales/pl/app.ftl",
+              "core/locales/pl/core.ftl",
+              "core/locales/pl/windows.ftl",
+              "core/locales/pt-BR/app.ftl",
+              "core/locales/pt-BR/core.ftl",
+              "core/locales/pt-BR/windows.ftl",
+              "core/locales/pt/app.ftl",
+              "core/locales/pt/core.ftl",
+              "core/locales/pt/windows.ftl",
+              "core/locales/ro/app.ftl",
+              "core/locales/ro/core.ftl",
+              "core/locales/ro/windows.ftl",
+              "core/locales/ru/app.ftl",
+              "core/locales/ru/core.ftl",
+              "core/locales/ru/windows.ftl",
+              "core/locales/sk/app.ftl",
+              "core/locales/sk/core.ftl",
+              "core/locales/sk/windows.ftl",
+              "core/locales/sl/app.ftl",
+              "core/locales/sl/core.ftl",
+              "core/locales/sl/windows.ftl",
+              "core/locales/sr-Latn/app.ftl",
+              "core/locales/sr-Latn/core.ftl",
+              "core/locales/sr-Latn/windows.ftl",
+              "core/locales/sv/app.ftl",
+              "core/locales/sv/core.ftl",
+              "core/locales/sv/windows.ftl",
+              "core/locales/tr/app.ftl",
+              "core/locales/tr/core.ftl",
+              "core/locales/tr/windows.ftl",
+              "core/locales/uk/app.ftl",
+              "core/locales/uk/core.ftl",
+              "core/locales/uk/windows.ftl"
+            ],
+            "new_catalog_entries": 84,
+            "changed_catalog_entries": 0,
+            "changed_help_topics": 0,
+            "validated_relevant_tree": true,
+            "inherited_upstream_verified": "65087591dc4d32bb15d66087e7026af495e2d370",
+            "note": "The immutable previously audited source tip is unchanged and is now an ancestor of GitHub master. All previously recorded source file hashes verified; no new source delta.",
+            "integrated_into_audited_upstream": "965f86fd6b36cfb301aab6b5f2ed3bd3bc839e14"
+          },
+          {
+            "ref": "feat/mcp-phase1",
+            "observed_tip": "9a24e99bac4d3a67006bd7f41a53a8467733532d",
+            "source_commit": "9a24e99bac4d3a67006bd7f41a53a8467733532d",
+            "source_files": 145,
+            "source_file_sha256": {
+              "core/locales/bg/core.ftl": "ef8eacd29bf115787ac04ee96de761d63225882ad971fe42ca7eac56b8be559e",
+              "core/locales/bg/windows.ftl": "28df4285eb445dba8a26b24049f8c75fb0dfe593a32c9b7c778066cd2125f776",
+              "core/locales/bg/app.ftl": "eab8164e71a94b710e2f3ca9443015fadc8a510122ec4f5ccd31f0d91aaf4119",
+              "core/locales/ca/core.ftl": "2469fa060e783ccc8fa5df50bce2216684039afd255166a9296dfd43302fdb2a",
+              "core/locales/ca/windows.ftl": "c01b1c34712fd48cd5dcd3bc3a3263110797c4b7ad954c2e3bfcdf464293962d",
+              "core/locales/ca/app.ftl": "46979883c26839921de1023bb7d36b2ef087f2e3272117681c7f73d39ba14590",
+              "core/locales/cs/core.ftl": "64da78c2a61ce1ae0834c2f91a1ca94c97562fbdd0c5b0470281477b04a03f3f",
+              "core/locales/cs/windows.ftl": "002b3ed4ff1ffd7fb8b78921b957a3cf93c2cfe070ee996a07381909452bf4b1",
+              "core/locales/cs/app.ftl": "ad00aeeabcaeeb1a154ec8cea0e3b70b0154b8305aa5cac8cdd5520dfce58aeb",
+              "core/locales/da/core.ftl": "faa7427e0cfcfeae5462a91d8741c3782c6170ae612caa5af01d48c91546470b",
+              "core/locales/da/windows.ftl": "61f89d05b510c9fdc8cb844bef55b3d5f68d55a5e9dad20285e28720189fb2b6",
+              "core/locales/da/app.ftl": "12d41770b039b03c14b551dd68bf34f48b869cef1050c26a46c8778690e8da00",
+              "core/locales/de/core.ftl": "18fd80273fb1a3d58be5ff04fb799298874266d42ea2dd6d86fbdaf7b909a079",
+              "core/locales/de/windows.ftl": "732bd090c9bdadb18112a78788ddda08f5067d2bf9dced6e1c873a0e8a2b5dd3",
+              "core/locales/de/app.ftl": "0bab1c0d16bfa01070bbeb1ba83481ecc587850f94babbeb968838ecc72267b5",
+              "core/locales/el/core.ftl": "5a60a7194ae118a4b06acd40e60da630a96b6e4d8405076b764d874e00d0079c",
+              "core/locales/el/windows.ftl": "37d023381f8bd36d022096918d100dc9442567cbe9911b0ebfa2201f0035c375",
+              "core/locales/el/app.ftl": "45c54097606708474363fb5798be8eb905f8c993a08fbcff2531abcc614c4b25",
+              "core/locales/en/core.ftl": "a2f1754ab4306997b7e93a7207b2cbf47a582a937f8ea7f1e608bda8902498af",
+              "core/locales/en/windows.ftl": "8baa46684f4ae0a37d2b48948068eee4dd36865f53d3eced1c3080c592a55051",
+              "core/locales/en/app.ftl": "1c0e8270fd8b3df65a5f3895f1306e4bc1ee0505a1cc63f4a9b6c7997746fa01",
+              "core/locales/es/core.ftl": "abe9933b053b4c905dddd32fde509c2a0eb5929a00a732ec9144b25e410b5f2f",
+              "core/locales/es/windows.ftl": "a0f493bda7d999e6e7717cadb367777151d1ab04674f218130b0b3679f9b6754",
+              "core/locales/es/app.ftl": "4849f82a60adac4bf33e2f9544da8335dcf7c53a088f588f8661fe8e60cd1bd4",
+              "core/locales/et/core.ftl": "2634f1200fb5ac29a9e10a0dbb4e2fde3fb5dcfa0cf6f404ce224842fa70bbc1",
+              "core/locales/et/windows.ftl": "c386e8b0d7f88f0e911d3cde58865f9fd147153e4fb55d1a9d4e626dc700a82d",
+              "core/locales/et/app.ftl": "9bb922d37f995ccad38a07fb9e63ff399092d01f1d898a023fbde02a7f09b80e",
+              "core/locales/fi/core.ftl": "d3f59ac42cbfbf7992d2d214cc9a1d0069277835336c9643c85e5a83cd990273",
+              "core/locales/fi/windows.ftl": "fba8803f1541f73f45c21bc789d0542957de68f354b92f23b99c87f1cfd27655",
+              "core/locales/fi/app.ftl": "76b66a08616beaeba3d13a95d4a0648307309a449000c34bf36f7641ac17aa54",
+              "core/locales/fr/core.ftl": "4f3bbb44f3751ebf80b9a85b589e172a1c752f4d7306c976bf920018b5a1fc6c",
+              "core/locales/fr/windows.ftl": "22a507c92cedc8868d959a65d541ecb75dc405f43eb2d1f9fa87d41043323372",
+              "core/locales/fr/app.ftl": "ca938cdde47b031eef2a78612e1b73f45624b270a3ebc5b88a35cdf4ef47dd42",
+              "core/locales/hr/core.ftl": "8bbe1a0106025aef7d9697bd3806b8db9f0e6d8f8851439bcc5f63ebfb84a3aa",
+              "core/locales/hr/windows.ftl": "a4cee3870cc2c78e8f6a8c51113ef46f03015780cad020211dab8feb4f9523ec",
+              "core/locales/hr/app.ftl": "6c7f16ac4b31153c56be82ed9aab0a6930f5563d8f7f45827c74262136838d37",
+              "core/locales/hu/core.ftl": "d8d5c909766906605acbb480863c6f272b6408d8b5a57eb2163bdc00e84672f3",
+              "core/locales/hu/windows.ftl": "425e173a0d098421cfb11f48a87f10429ba805f6c3fec104627d78855e8383db",
+              "core/locales/hu/app.ftl": "02e6dd9af4a7398eb1bd6498079463fbe3f83da51497b146256ebf6ef95caee8",
+              "core/locales/it/core.ftl": "4bed9867bbd670b4fa53dd104022a8ed0ad7de383664249f94bae602a5582453",
+              "core/locales/it/windows.ftl": "3fdf9d72e6b957cf5636d3bb85c148c36e3d0ee53943b733f0de20dcbbc5de6b",
+              "core/locales/it/app.ftl": "328df78779a336e59eb7ad248d97a94475144749bb0645b9b265003518de1a78",
+              "core/locales/lt/core.ftl": "2e83761cc3a1f1f242b299dacdc3124b1e6b87fc5b792cf11483902f999b9a8e",
+              "core/locales/lt/windows.ftl": "5ec9757bc25cd6d0bf3407e0827b7c6dd9f09fcc53a89dbaf148cc92fa8feec4",
+              "core/locales/lt/app.ftl": "f03a21fc34bc5bfd419ad00ed92ed2dacf3866e8d29612b818393662bd8d25ec",
+              "core/locales/lv/core.ftl": "3edf91f34de4e1a42ae2b8d46e3881ae292be831f99694b625eb564720038c29",
+              "core/locales/lv/windows.ftl": "592cd053295dd2c6ba7c36752db1a0b6da5eff9eb6dc84f56a36e39b2d42bc25",
+              "core/locales/lv/app.ftl": "474b9b10b07dcd9c980f4af66994c2c7db565ef3de37c6188f632a7ec84d037b",
+              "core/locales/nb/core.ftl": "14376984b8cd84ae12a975404b536f36baaf1c6235969378d9a7e8fbc6ec30b1",
+              "core/locales/nb/windows.ftl": "1aae135900b40149a831a8425738b1f1970785c4f7f178642b637a23fecaac36",
+              "core/locales/nb/app.ftl": "cacf1bead749c8b736ca0ac122464c713c7474871d773b125a1a623a32e62146",
+              "core/locales/nl/core.ftl": "ce9e9abc569483e0c2d0d0d10d5e5dfc5182122cfff4d7416830d8d1e711c674",
+              "core/locales/nl/windows.ftl": "837fcf2a063cfb81b50a91fe8837cde6f38f64f080a6478c1941eed2ca12195a",
+              "core/locales/nl/app.ftl": "d23dcf5058101e3c8e532c0e5feea196204c53f356acf13c01f102d8e473f3cf",
+              "core/locales/pl/core.ftl": "a1f850f0d345ca34022d3c2b42ec775b203fd2ae488c9cb39c143ef7b6a70da1",
+              "core/locales/pl/windows.ftl": "fb931d76423ac351e6ac78921873c80d689e7a41f0633d537bdc4b898d621848",
+              "core/locales/pl/app.ftl": "b50f180642afe06b064fc662862e010b91f26f11dea536affaea02961d4fab79",
+              "core/locales/pt/core.ftl": "d66225a1a0598ca4b3b1547956aef525d1218a439e6109d5ea60c26d3517c6f7",
+              "core/locales/pt/windows.ftl": "b73774eb5d961e84cde66e7d4888296a83924b13a60502b9dbaf0102f90fa71e",
+              "core/locales/pt/app.ftl": "f1cfe3e6529c5b6c9de719ca2e78fbe370d621427cd520ab1d66e77382c0cccd",
+              "core/locales/pt-BR/core.ftl": "1028e96b850515e4a2afb6aa2107414653ee892f52137d829111d68675b19fbe",
+              "core/locales/pt-BR/windows.ftl": "96316cf354adb9119eb871a5b7a35f8bdd1b43226861e11acbc4547f0ffbd361",
+              "core/locales/pt-BR/app.ftl": "58eadeda88a03825c949e9805fe61d8024aa2e946d25cf67b93859bdf2a4c22e",
+              "core/locales/ro/core.ftl": "088f98ccebd0d1a462930991391f2a9ddbd50d455b2faa247fba4320fae1688b",
+              "core/locales/ro/windows.ftl": "4c0a4538ae7af0df2a4251c7f6a066df1e41940670fcfd0f35398fad82e105bc",
+              "core/locales/ro/app.ftl": "37ded1473ba08b2499506f4d6c02b584f93e97d5412c5b111789734b32ad04fe",
+              "core/locales/ru/core.ftl": "3f5e768132bb1521bb400ab99adb82c93f7a8826a5a954108f288d8e8daf5ea6",
+              "core/locales/ru/windows.ftl": "174c80410d6c6f87e2c291c1c592ee88f5c3d2e623f09facb8b0f58ba29a0057",
+              "core/locales/ru/app.ftl": "5f517d330c403983c40678fd40d840f14ef8ac9396cf613d49744073060e93fb",
+              "core/locales/sk/core.ftl": "afd6163dcb4bb1fd9122dffaf646f7dc8fab62d4bcbf9b4fd89015a68d308604",
+              "core/locales/sk/windows.ftl": "d14942da5d908619b86c4cdfd1a35fcffa2585abe77f2ede4f08fbdb1dc5aa94",
+              "core/locales/sk/app.ftl": "c0515f4a4e956615b0bfd292e111f40b6077c24a8c5537b22518e5a365618f1c",
+              "core/locales/sl/core.ftl": "6b637ee53c7afe28c143395466dd85aa76ca8a8a861f47a6016318a0e99cf27e",
+              "core/locales/sl/windows.ftl": "ed0101ab95e6e60fb9c1dc65134614da4a58a7a6de891d707ee99649650d5d55",
+              "core/locales/sl/app.ftl": "f5ad73b73f10afac90247bde81485e74c264dfe1a3fa317bac3f7bb752402d25",
+              "core/locales/sr-Latn/core.ftl": "7df352284df7f3ab0a7986992e3afcb47284d7feef8afe0bb693d007da1b393c",
+              "core/locales/sr-Latn/windows.ftl": "c2d0ce24d380c637b94312abe27a7082989878ca43dc87bc091b9c9b9d35eee7",
+              "core/locales/sr-Latn/app.ftl": "18c294ec090afb8a4e2de60cb582b2c17b09b2ceca942f4dffd74083edef19f4",
+              "core/locales/sv/core.ftl": "870808b7995d72cdabf5fa815ed156d9b1ba0e8cbae1268d0a31ec8c3cb70f1e",
+              "core/locales/sv/windows.ftl": "7176163dac1f0736a27ae8a7e4a42191ff92a0bcab42a733f34241b7affc5704",
+              "core/locales/sv/app.ftl": "0c1865314a57d36b88532206ef180c32dc620fcdcbe021b254e9debdcde45f8a",
+              "core/locales/tr/core.ftl": "25e438a6bb901b8a616ed3424beff7dbde4db8b7fcc1e3453fdd9c5170b5733a",
+              "core/locales/tr/windows.ftl": "0ffce480bf2e3d954ee3c6b6b4acb848cf8c00864e0d15c9730f0cf0b52d78ca",
+              "core/locales/tr/app.ftl": "ae836f1a416db9b6e3800b76ffe05c33c55a2606df6a99664df54bf696f12cc8",
+              "core/locales/uk/core.ftl": "a231145d144e485e8dc8cf9b56fec8fc892ad46dd9050173967fab1276cdea96",
+              "core/locales/uk/windows.ftl": "c2a04948ac716fe22ecbfe257c6d2cf22f27010c340a8edba677334ded4895b5",
+              "core/locales/uk/app.ftl": "98d492a8e5c7540f1e75f9fc49b7524fb241371156365aa30249c9f912b39976",
+              "core/crates/pe-html/help/bg/agents-permissions.html": "9039282e4519e57d345d2db7d652590e984935d01e22e0b1003570c2784f82a4",
+              "core/crates/pe-html/help/bg/agents-sending.html": "47bcf87572b41cf6c96a9eaff9d1a53531ffdc9a3b37af3f5d035437ea835848",
+              "core/crates/pe-html/help/ca/agents-permissions.html": "c95be3c16468f96e271a9dd60e519e0ed050e0f0a37d23f0b6b868f9fc3f0cda",
+              "core/crates/pe-html/help/ca/agents-sending.html": "09aa142a712451442cfa0241907fe71a2b68cbb328a2f207dc7d3b242c2ca4bf",
+              "core/crates/pe-html/help/cs/agents-permissions.html": "f6b755d162d635d7e8bfa15f9a251f040246376379e342f1adab951413a1588b",
+              "core/crates/pe-html/help/cs/agents-sending.html": "131b08d32e0eccdfe7c2e71b4d9e98c152a4da19e5142b21b6c96d5083afc35c",
+              "core/crates/pe-html/help/da/agents-permissions.html": "2fe8feb3d60b175d7e2581ca877247deabe2baceda3c360c178899109734cb50",
+              "core/crates/pe-html/help/da/agents-sending.html": "29d70227c012ac8acbbd12628b1b3445b1a5a8d5ed68b4ee357a82a3bf64cdab",
+              "core/crates/pe-html/help/de/agents-permissions.html": "4042c3b565720e2162b2cd3b3b7c113465e09064794a65978bfcd7c1ef65cae0",
+              "core/crates/pe-html/help/de/agents-sending.html": "16cf2466fffc5720928eb8b485e70aa1d8567f38b509b7ded5003f6e91d1d2e1",
+              "core/crates/pe-html/help/el/agents-permissions.html": "92ac29fcc54870e92fb1ea97bafdfa9ce7749de8c9656e09a968a1241f54ada3",
+              "core/crates/pe-html/help/el/agents-sending.html": "ba381615e4923eaee26a66e0333e2c0312794a16e1b4c05319e48b72ff2b3a7b",
+              "core/crates/pe-html/help/en/agents-permissions.html": "325e3ae6517438aa5f69e21a46c84a06e7985950dd3366c9a6e218be96bde1e2",
+              "core/crates/pe-html/help/en/agents-sending.html": "42d3d41e34cd7ac92d286ad745c8e02a674728d1f1de0055a94c6e4d35b93f4b",
+              "core/crates/pe-html/help/es/agents-permissions.html": "0d97882f47d3b83a86d17b1a8f237586394fc30740421a6a48cd92bd598c0801",
+              "core/crates/pe-html/help/es/agents-sending.html": "c593a72fdcbad6d43efb0638cbc11e1157aac21f881eb4d582aa1824e66641e7",
+              "core/crates/pe-html/help/et/agents-permissions.html": "9c60b29e87b0031cf51cbfc139953be92455a1ccef3b7bbab99f4911c9486e79",
+              "core/crates/pe-html/help/et/agents-sending.html": "c41061928898a66d4d0c78fdf00a435c28adc600fd03faeca6cf1c0a6218202e",
+              "core/crates/pe-html/help/fi/agents-permissions.html": "51ae744901f330ee021ca414e30dfe82c4e5b48c8effe27ac7271125d3f55ca5",
+              "core/crates/pe-html/help/fi/agents-sending.html": "5154c73e5c9b39cb04a046598e9b777656330edab064c7cef918c7012a497098",
+              "core/crates/pe-html/help/fr/agents-permissions.html": "826d98488819ca0b8f9d2e2c3e81b05d3e7be67c629e4b9b5f260905bcfb5bd6",
+              "core/crates/pe-html/help/fr/agents-sending.html": "63ae313a5c1727e208e40ba209f1a687dcfd4c5dc74b87a0bd6fa8afc2a8ad16",
+              "core/crates/pe-html/help/hr/agents-permissions.html": "4595adcd6734541ca8251cdacdc7852fee859eb97fff954b1e595dd649a2f1dc",
+              "core/crates/pe-html/help/hr/agents-sending.html": "517c9111041c913b048849774df9c24b895e72865799b8166d24cc2b9946e7e2",
+              "core/crates/pe-html/help/hu/agents-permissions.html": "a8519bd821dbebbebdd60eb4ef6201d067ec41877bd8688695b354f345398152",
+              "core/crates/pe-html/help/hu/agents-sending.html": "44c7dc03f0e652ca17a6079ada1f00332a6c36cc19379a29d3ed54ab05cc0041",
+              "core/crates/pe-html/help/it/agents-permissions.html": "ff7f57a6a6796895ae34262b3c1bdbf853e85ed56d78af323c2c876b59ef25da",
+              "core/crates/pe-html/help/it/agents-sending.html": "ba967a636203f2c38d0100a5ffe7b02db3e81e5993f071da160c8e181da7add9",
+              "core/crates/pe-html/help/lt/agents-permissions.html": "0cf7d8d58297c5c1bfc215263de3ab4d5bf48e5ce956b03c37e925ca61ca914f",
+              "core/crates/pe-html/help/lt/agents-sending.html": "5b88bbc43a42b7d899208539bddb61af7f8d867a36eb46826b12e754b4336b62",
+              "core/crates/pe-html/help/lv/agents-permissions.html": "6f8760ca97d3b1f31a9541f2a37085f7475d80fe9b09b866e787dd432a648d4f",
+              "core/crates/pe-html/help/lv/agents-sending.html": "09dc8c65dfa8c96a05f75ee60db44baf0d570551b24aaa051111c05c4bf6ad86",
+              "core/crates/pe-html/help/nb/agents-permissions.html": "cf0f5acc6c1bb3b1fa9a5a6c074286a412f70a9fe6a2f00fe325e39bc59c4e82",
+              "core/crates/pe-html/help/nb/agents-sending.html": "bb1a8c45e04a31112a803f62f40754bf198d81c2fedd57802959628197d4e465",
+              "core/crates/pe-html/help/nl/agents-permissions.html": "027ea17715cf1646cf2a153c9319938ecf0281996451da998729aebf7ef7788f",
+              "core/crates/pe-html/help/nl/agents-sending.html": "940fb1788a2300f286593335dcf8ea415a91fb0d473be759096609c9fa14ea0b",
+              "core/crates/pe-html/help/pl/agents-permissions.html": "76108cba4645df64358343295a2075f55339129f9a78bd71b0635919e85b5a26",
+              "core/crates/pe-html/help/pl/agents-sending.html": "f797afa6445920d8bac0f63964b508358e107847308e1a9ff635e23e743bfb1d",
+              "core/crates/pe-html/help/pt/agents-permissions.html": "7940094b869a4ac5ba8e69b293a9dd171a6c95e0b2f596dc1a427b5f946f2ca9",
+              "core/crates/pe-html/help/pt/agents-sending.html": "cdb8a182d99126f1ab1facfb3e5ef0db6dc6d72c53857677ad089cae57144883",
+              "core/crates/pe-html/help/pt-BR/agents-permissions.html": "7046acda6ce14b5e41162d7f85c1c234f14bddbf92c7a37c6b1bc4be2c94a650",
+              "core/crates/pe-html/help/pt-BR/agents-sending.html": "74d523946ea25d217b0afb7bdcb8083c385cf8426af329d5b1b5085cee1fd79f",
+              "core/crates/pe-html/help/ro/agents-permissions.html": "78da2700bed3b3c2e94f26f297993f1fb010668bfe7f902f234ef05fdbe93b44",
+              "core/crates/pe-html/help/ro/agents-sending.html": "63ba33396aecdd816d4114ba08d9707a122a8c73347f23b5178a9646478094c4",
+              "core/crates/pe-html/help/ru/agents-permissions.html": "984309c800b68ed7327eee4d0c43de62e7b36a68cb10611a861849e804c2ed96",
+              "core/crates/pe-html/help/ru/agents-sending.html": "d5262212809f025a3f13a2a39de9e751d3dfe6e5762efa9fecaf33c3575f5c86",
+              "core/crates/pe-html/help/sk/agents-permissions.html": "cc595b8a0bef5eb3567b555eb598492bc41cbc4f67d5d226ced74df9f4441474",
+              "core/crates/pe-html/help/sk/agents-sending.html": "0e575d1f435bae8b343d8fb292612de09a58a8c3133a3be4cb482eb8954310cd",
+              "core/crates/pe-html/help/sl/agents-permissions.html": "839a3a0696a6242046580b82c9507b2d8d1bf737013364566827a6099799a6d6",
+              "core/crates/pe-html/help/sl/agents-sending.html": "dd4f378f2cdd4450761ff9c9f2e2abf65b700900283dc31a28d19ed4c1a98e54",
+              "core/crates/pe-html/help/sr-Latn/agents-permissions.html": "79b7ab1785487af3bd88dd4fe967bf7f7e5594fc7a8bf14ab5c99fc38d4e4897",
+              "core/crates/pe-html/help/sr-Latn/agents-sending.html": "2f8f85b5cd6e8a7ee745d5695f37afe6826929d4a74c2d654e18558073aaacef",
+              "core/crates/pe-html/help/sv/agents-permissions.html": "4793fa7c28706163f957ac23dfe337f4ffba23df8abdc55090396ecc7a06ea57",
+              "core/crates/pe-html/help/sv/agents-sending.html": "92bf655901d1307d73bc857a821a9476b30a78d48460b5765962edb8f3d1f347",
+              "core/crates/pe-html/help/tr/agents-permissions.html": "5b15c46d809c3b1e7f1117648d87259411cd3cefb16557418b73984b5018a348",
+              "core/crates/pe-html/help/tr/agents-sending.html": "227db0a72623466afd5b9d111900760687a5494864e8c0f81d77e79e9ad1a170",
+              "core/crates/pe-html/help/uk/agents-permissions.html": "e30564aef3b23ac3992667fc35971f02330ae41885632167e456e5b4a62842b5",
+              "core/crates/pe-html/help/uk/agents-sending.html": "85e17c9a4b5ce87645520719f7f12eebfbde05d8a51bd81d6f4a8f09ac7b8beb"
+            },
+            "changed_relevant_paths": [],
+            "new_catalog_entries": 196,
+            "changed_catalog_entries": 28,
+            "changed_help_topics": 56,
+            "validated_relevant_tree": true,
+            "inherited_upstream_verified": null,
+            "note": "The immutable previously audited source tip is unchanged and is now an ancestor of GitHub master. All previously recorded source file hashes verified; no new source delta.",
+            "integrated_into_audited_upstream": "965f86fd6b36cfb301aab6b5f2ed3bd3bc839e14"
+          }
+        ],
+        "source_worktree_relevant_status": {
+          "/Users/andris/Projects/PostalExpress": [],
+          "/Users/andris/Projects/PostalExpress-wave1": [],
+          "/Users/andris/Projects/PostalExpress-lang": [
+            "?? core/crates/pe-html/help/ca/",
+            "?? core/crates/pe-html/help/nb/",
+            "?? core/crates/pe-html/help/pt-BR/",
+            "?? core/crates/pe-html/help/sr-Latn/",
+            "?? core/crates/pe-html/help/tr/",
+            "?? core/locales/ca/",
+            "?? core/locales/nb/",
+            "?? core/locales/pt-BR/",
+            "?? core/locales/sr-Latn/",
+            "?? core/locales/tr/"
+          ],
+          "/Users/andris/Projects/PostalExpress-settings": [],
+          "/Users/andris/Projects/PostalExpress-pgp11": [],
+          "/Users/andris/Projects/PostalExpress-pgp7": []
+        },
+        "untracked_initial_wave1_copy_audit": {
+          "worktree": "/Users/andris/Projects/PostalExpress-lang",
+          "codes": [
+            "ca",
+            "nb",
+            "pt-BR",
+            "sr-Latn",
+            "tr"
+          ],
+          "status": "All290 files are exact copies of the already integrated initial wave1 draft snapshot; no later edits or new work. Left untouched.",
+          "source_snapshot": "cfdf55ab135d7def5ca1ce42e8603d866a33ce26",
+          "files": 290,
+          "exact_matches_initial_snapshot": 290,
+          "exact_matches_current_wave1_tip": 275,
+          "manifest_artifact": "/private/tmp/inbox-untracked-wave1-copies.json",
+          "manifest_sha256": "5e2e255d82be9f6ae6ae6b4d1433a356fbef80c6b56a9b8aa7e6b561a548a059"
+        },
+        "all_source_inventory_check": {
+          "worktrees": 46,
+          "refs": 188,
+          "artifact": "/private/tmp/inbox-agent-toggle-all-sources.json",
+          "sha256": "16e24d3e4cfb5d8f441a195a2065aaded1d1cc806c6aa0be879b71ffe1f6517e",
+          "unexpected_changes": 0,
+          "equivalent_relevant_trees": [
+            {
+              "refs": [
+                "refs/remotes/origin/release-please--branches--master--components--inbox-classic"
+              ],
+              "commit": "cd982d488870a3307ae569618195c2540e2ffa97",
+              "audited_upstream": "c3586aa438593c815b50a0397fb4bab597321574",
+              "latest_audited_upstream": "965f86fd6b36cfb301aab6b5f2ed3bd3bc839e14",
+              "historical_upstream_ancestor_verified": true,
+              "all_relevant_paths_identical": [
+                "core/locales",
+                "core/crates/pe-html/help",
+                "core/commands.toml",
+                "core/settings.toml",
+                "core/crates/pe-i18n/src/lib.rs"
+              ],
+              "inherited_relevant_delta_paths": 1110,
+              "new_review_work": 0
+            }
+          ],
+          "recorded_worktree_changes": [],
+          "recorded_pending_refs": [],
+          "recorded_integrated_refs": [
+            {
+              "refs": [
+                "refs/heads/feat/mcp-phase2a"
+              ],
+              "commit": "692923ae14b82e2b8209539576b4f7727c22458a",
+              "recorded_source_commit": "692923ae14b82e2b8209539576b4f7727c22458a",
+              "files_verified": 33,
+              "status": "exact recorded source-only import; linguistic review pending",
+              "integrated": true,
+              "new_catalog_entries": 0,
+              "changed_help_topics": 28
+            },
+            {
+              "refs": [
+                "refs/heads/feat/preview-pane"
+              ],
+              "commit": "cb9716a78c1f6b32fcd1884903b368fce1640367",
+              "recorded_source_commit": "2e6a5d00d511af0a35dc61c98fc0faff48ca6b23",
+              "files_verified": 29,
+              "status": "exact recorded source-only import; linguistic review pending",
+              "integrated": true,
+              "new_catalog_entries": 0,
+              "changed_help_topics": 0
+            }
+          ],
+          "verified_integrated_refs": [],
+          "pending_source_integrations": []
+        },
+        "since_start_pending_catalog_entries": 1144,
+        "since_start_pending_help_passages": 261,
+        "remaining_since_omissions": [],
+        "pending_catalog_entries": 12621,
+        "pending_help_topics": 555,
+        "additional_unrecorded_work": 0,
+        "kind": "Agent-connection control instruction followup across all 28 languages",
+        "review_commit": "965f86fd6b36cfb301aab6b5f2ed3bd3bc839e14",
+        "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
+        "runtime_source_files_verified": {
+          "linux/src/agents.rs": "408d55db859e39e7f36e3122f3f5b8cd208bd42cc46fa0b6d3c272efb15f9440",
+          "mac/Sources/InboxClassic/Agents.swift": "65cc89415af81e3dbc5730f01ab0d9857187d228caf7c65bd57b58af7e9a5f02",
+          "app/src/agents.cpp": "a03d3d2b3373311c4c15eaf53dd6fcdc0036260bd5d140f4fd023d995dc2efb0",
+          "core/crates/pe-core/src/agents.rs": "86f1ca3f39d91ad8c85641ff1059b133eb08d54ea9355620cad6ce8dcdaae5ca",
+          "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2"
+        }
       }
     ],
     "settings_source_integration": {
@@ -122611,7 +124066,7 @@
     "source_worktree_audit_policy": "At later source checkpoints also inspect uncommitted locale/help/commands/settings/registry changes in root and the wave1, more-languages, settings, hardening and compose worktrees. Do not treat the old untracked five-language copies as new work without comparing their content. All290 matched cfdf55ab exactly at the Dutch checkpoint; any future mismatch must be diffed and recorded.",
     "source_worktree_audit_helper": "/private/tmp/inbox-compose-worktree-audit.py <batch-prefix>; run after the matching source-audit helper. Verifies relevant status in all six source worktrees and exact current contents/inventory of the290 known old copies against the verified source manifest; merges evidence into the batch source-audit JSON.",
     "compose_record_helper": "/private/tmp/inbox-compose-record.py <spec.json>; use only after the language, mnemonic, exact reconstruction, global reconciliation, source/worktree/queue and HTML checks pass. It records completed work; it does not replace linguistic review or validation.",
-    "source_audit_helper": "/private/tmp/inbox-ru-agents-source-audit.py with prefix adapted; then /private/tmp/inbox-agent-picture-source-extension.py, /private/tmp/inbox-compose-worktree-audit.py, /private/tmp/inbox-agent-picture-all-source-audit.py and the batch queue audit. Await each terminal success; preserve immutable source snapshots and baselines.",
+    "source_audit_helper": "/private/tmp/inbox-agent-toggle-source-audit.py with prefix adapted; then /private/tmp/inbox-agent-picture-source-extension.py, /private/tmp/inbox-compose-worktree-audit.py, /private/tmp/inbox-agent-picture-all-source-audit.py and the batch queue audit. Await each terminal success; preserve immutable source snapshots and baselines.",
     "new_source_inventory_artifact": {
       "path": "/private/tmp/inbox-new-preview-mcp-source-inventory.json",
       "sha256": "d899aee873dbe1d41681ed098ac10a2ecccf63023e1e4a2d1262771a00c2279f"
@@ -122629,7 +124084,7 @@
     },
     "pending_source_integration_resume": {
       "status": "All currently discovered source text imported; screenshot alt descriptions reviewed. Remaining agent and preview language work is recorded in the pending queue.",
-      "next": "Check the remaining agents-connect topics against the GTK switch and review only affected control instructions. Then review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve reviewed screenshot descriptions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21783/801; pending 12621/555; improvements 4045. REVIEWED unchanged."
+      "next": "Review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve the reviewed screenshot descriptions and agent-connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21783/801; pending 12621/555; improvements 4045. REVIEWED unchanged."
     },
     "preview_mcp_source_integration": {
       "status": "source-only import validated; original agent additions complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru; remaining four agent languages and PDF previews pending",
@@ -125549,7 +127004,7 @@
         "reason": "All captured catalogs/settings now committed byte-for-byte; subsequent help insertions included in the frozen full source inventory."
       }
     ],
-    "pending_phase2_resume": "Check the remaining agents-connect topics against the GTK switch and review only affected control instructions. Then review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve reviewed screenshot descriptions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21783/801; pending 12621/555; improvements 4045. REVIEWED unchanged.",
+    "pending_phase2_resume": "Review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve the reviewed screenshot descriptions and agent-connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites. Scope 34404/1356; completed 21783/801; pending 12621/555; improvements 4045. REVIEWED unchanged.",
     "preview_mcp_source_extension": {
       "path": "/private/tmp/inbox-agent-picture-source-extension.py",
       "sha256": "af7d8f691c807d8915e2a4112fdfee8229e35a6605d52ab8354be450d1cf4e1f",
@@ -127320,7 +128775,7 @@
     },
     "agent_notice_resume": {
       "status": "notices complete in de/es/et/fr/nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr/hu/lt/lv/pl/ro/ru",
-      "next": "Check the remaining agents-connect topics against the GTK switch and review only affected control instructions. Then review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve reviewed screenshot descriptions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.",
+      "next": "Review Slovak agent strings, including the entire pending core block, unsubscribe/draft additions, shared controls and both full help topics; then sl/sv/uk. Preserve the reviewed screenshot descriptions and agent-connection shutdown instructions. After the agent queue, resume Greek and remaining compose additions, the 46 original Hungarian help topics and broader catalogs/help. Preview wording remains pending. Push and merge each validated batch, then synchronize with master. No local test suites.",
       "context": "agent-drafts-phase2-context.notice_ui_context",
       "guard": "Recheck exact UI source hashes; source captures are observations, not tests of the review checkout.",
       "no_tests": true
@@ -128898,9 +130353,24 @@
         "review_branch_synchronized": true,
         "local_tests_run": false,
         "ci_status_at_merge": "Automatic GitHub CI started, with no failure reported at merge; full run remains pending."
+      },
+      {
+        "status": "Published and merged into GitHub master; review branch synchronized before the agent control followup.",
+        "pr": 143,
+        "url": "https://github.com/postalsys/inbox-classic/pull/143",
+        "state": "MERGED",
+        "merged_at": "2026-11-17T21:56:46Z",
+        "merge_commit": "965f86fd6b36cfb301aab6b5f2ed3bd3bc839e14",
+        "review_commit": "11fcac2e4e071d9c3b279f973799c37074c7767b",
+        "ci_compatibility_commit": "a902be95b4b6b7d5d50b55f08d4d36b83d817d97",
+        "review_branch_synchronized": true,
+        "working_tree_clean": true,
+        "local_test_suites": "not run at user request",
+        "automatic_ci": "pending at merge; not claimed passed",
+        "next": "Audit remaining agents-connect instructions for GTK switch context, then resume Slovak agent batch."
       }
     ],
-    "source_audit_helper_sha256": "0867b9ec9dd57adbfbb1d36631b3e1b1743916fc040cd0b2f7efcb70198d84be",
+    "source_audit_helper_sha256": "6938e3abae0c9d85b8f10c2e7d76b1bbde9301df73c92abde273d7977dc59751",
     "agent_picture_source_integration": {
       "status": "Imported and all 28 new alt passages reviewed; older prose unchanged.",
       "review_parent": "37eb82fab56e4daea45ce7e92bf68fc5d4e41d44",
@@ -129447,10 +130917,28 @@
         "context": "The new code records user takeover immediately on save and on sending, then guards queued agent draft changes/removal. The existing reviewed save/autosave explanation remains accurate; opening alone still does not take over. The screenshot/alt meaning is unchanged. Refresh runtime snapshots before the next full agent-language batch; earlier snapshot hashes remain historical evidence."
       }
     },
-    "pending_context_observations": [
+    "pending_context_observations": [],
+    "help_join_helper": {
+      "path": "/private/tmp/inbox-agent-help-joins-v2.py",
+      "sha256": "2362af040d34b0b6dc30c789f67d23f2932abf8874361902789eb92602c535d0",
+      "note": "Matches help.rs words() removal of mnemonic markers, ellipses and trailing colons; accepts all three agent topics."
+    },
+    "publication_ci_observation": {
+      "run": 44177344672,
+      "commit": "37eb82fab56e4daea45ce7e92bf68fc5d4e41d44",
+      "finding": "Existing core/Mac/Linux tests still looked for decrypted; current English warning says unencrypted copy. Windows/Linux export tests expected old password wording, superseded by saved passwords, sign-in credentials and private keys. Both texts changed at review baseline 7c0b1672. A separate compatibility commit now updates these five test files only: core/Mac/Linux attachment checks compare with the localized catalog text, the Linux export check uses its rendered catalog text, and the Windows export regex matches current English. Existing file-content, warning timing, once-only and export-control checks are preserved. Targeted Rust formatting, Swift parsing, Windows regex-to-source comparison and git diff --check pass. PowerShell is unavailable locally, so its parser was not run. No local test suite or new app build was run; fresh automatic CI results remain pending.",
+      "logs": [
+        "/private/tmp/inbox-ru-pr139-rust-ci.log",
+        "/private/tmp/inbox-ru-pr139-mac-ci.log",
+        "/private/tmp/inbox-ru-pr139-linux-ci.log",
+        "/private/tmp/inbox-ru-pr139-windows-ci.log",
+        "/private/tmp/inbox-ru-pr139-arch-ci.log"
+      ]
+    },
+    "completed_context_observations": [
       {
         "id": "agent-connect-toggle-wording",
-        "status": "Russian fixed; other languages require a targeted wording audit before completion.",
+        "status": "All 28 instructions inspected; 24 corrected and four retained. Static validation complete; broader pending help remains marked.",
         "topic": "agents-connect.html",
         "candidate_languages": [
           "bg",
@@ -129486,26 +130974,24 @@
           "sha256": "408d55db859e39e7f36e3122f3f5b8cd208bd42cc46fa0b6d3c272efb15f9440",
           "control": "adw::SwitchRow named agents-enabled"
         },
-        "instruction": "The English source says to clear a checkbox, but GTK uses a switch. Inspect each existing translation and reopen only control-specific wording that needs correction. Do not award full-topic credit for a targeted fix."
+        "instruction": "The English source says to clear a checkbox, but GTK uses a switch. Inspect each existing translation and reopen only control-specific wording that needs correction. Do not award full-topic credit for a targeted fix.",
+        "followup": "agent-connect-toggle-context"
       }
     ],
-    "help_join_helper": {
-      "path": "/private/tmp/inbox-agent-help-joins-v2.py",
-      "sha256": "2362af040d34b0b6dc30c789f67d23f2932abf8874361902789eb92602c535d0",
-      "note": "Matches help.rs words() removal of mnemonic markers, ellipses and trailing colons; accepts all three agent topics."
-    },
-    "publication_ci_observation": {
-      "run": 44177344672,
-      "commit": "37eb82fab56e4daea45ce7e92bf68fc5d4e41d44",
-      "finding": "Existing core/Mac/Linux tests still looked for decrypted; current English warning says unencrypted copy. Windows/Linux export tests expected old password wording, superseded by saved passwords, sign-in credentials and private keys. Both texts changed at review baseline 7c0b1672. A separate compatibility commit now updates these five test files only: core/Mac/Linux attachment checks compare with the localized catalog text, the Linux export check uses its rendered catalog text, and the Windows export regex matches current English. Existing file-content, warning timing, once-only and export-control checks are preserved. Targeted Rust formatting, Swift parsing, Windows regex-to-source comparison and git diff --check pass. PowerShell is unavailable locally, so its parser was not run. No local test suite or new app build was run; fresh automatic CI results remain pending.",
-      "logs": [
-        "/private/tmp/inbox-ru-pr139-rust-ci.log",
-        "/private/tmp/inbox-ru-pr139-mac-ci.log",
-        "/private/tmp/inbox-ru-pr139-linux-ci.log",
-        "/private/tmp/inbox-ru-pr139-windows-ci.log",
-        "/private/tmp/inbox-ru-pr139-arch-ci.log"
-      ]
-    }
+    "review_metadata_corrections": [
+      {
+        "context": "agent-unsubscribe-context",
+        "old_changed_values": 8,
+        "correct_changed_values": 4,
+        "reason": "The prior finalizer compared Russian old values to Romanian new values for these overlapping context subtotals. Recomputed against Russian on both sides; the main 30-value batch count and round totals were already correct."
+      },
+      {
+        "context": "agent-drafts-phase2-context",
+        "old_changed_values": 3,
+        "correct_changed_values": 2,
+        "reason": "The prior finalizer compared Russian old values to Romanian new values for these overlapping context subtotals. Recomputed against Russian on both sides; the main 30-value batch count and round totals were already correct."
+      }
+    ]
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
   "guide_updates": [
@@ -139251,7 +140737,7 @@
           "validation": "Russian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 30 improved values, 32 retained good values and three complete help topics with 38 changed wording lines. All untargeted values, the reviewed approval log and screenshot alt description remain unchanged. Tags, attributes, controls, platform branches, literal keys, variables, plural branches, mnemonic counts and generated IDs are preserved. О/Н unsubscribe keys are distinct; shared Mac/Linux labels remain plain. Help joins with actual labels were inspected across all three platforms. Seven notice UI files and sixteen runtime/UI/rendering files match the captured evidence, including immediate user takeover on save or send and guards against queued agent changes. Global reconciliation accounts for 21,821 unmarked entries, 11,081 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,144 entries/243 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
           "note": "Context counts overlap this single 62-entry/three-topic batch; do not add them again to review totals.",
           "entries": 8,
-          "changed_values": 8,
+          "changed_values": 4,
           "combined_catalog_entries_reviewed": 62,
           "combined_changed_values": 30,
           "combined_help_wording_lines_changed": 38
@@ -141814,7 +143300,7 @@
           "validation": "Russian structural checker passes with 77 expected mark-only diagnostics. Exact reconstruction verifies 62 reviewed entries, 30 improved values, 32 retained good values and three complete help topics with 38 changed wording lines. All untargeted values, the reviewed approval log and screenshot alt description remain unchanged. Tags, attributes, controls, platform branches, literal keys, variables, plural branches, mnemonic counts and generated IDs are preserved. О/Н unsubscribe keys are distinct; shared Mac/Linux labels remain plain. Help joins with actual labels were inspected across all three platforms. Seven notice UI files and sixteen runtime/UI/rendering files match the captured evidence, including immediate user takeover on save or send and guards against queued agent changes. Global reconciliation accounts for 21,821 unmarked entries, 11,081 help lines and 14 unchanged/moved baseline pairs; all latest file/source hashes match. All 28 full inventories and since-start 1,144 entries/243 passages reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged.",
           "note": "Context counts overlap this single 62-entry/three-topic batch; do not add them again to review totals.",
           "entries": 3,
-          "changed_values": 3,
+          "changed_values": 2,
           "combined_catalog_entries_reviewed": 62,
           "combined_changed_values": 30,
           "combined_help_wording_lines_changed": 38
@@ -142901,6 +144387,391 @@
       "retained_prose_proof": "/private/tmp/inbox-agent-picture-import-review.json",
       "notes": "The 22 previously complete topics were revisited for the new image description only and remain complete. Six full-topic drafts remain pending; their marks were split around the reviewed image. All older prose and markup are byte-identical.",
       "validation": "All 28 language structural checkers pass with 27,754 expected mark-only diagnostics. Exact reconstruction verifies 33 imported source paths, 28 improved alt descriptions and byte-identical older prose, catalogs, pending inventories and prior review records. Existing tags/attributes are preserved; the new image source is exact and only its translated alt value is edited. Global reconciliation accounts for 21,697 unmarked entries, 11,002 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. Since-start 1,168 entries/249 marked passages and all full inventories reconcile. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies. The source branch rebased onto reviewed master during this batch; all 33 relevant additions still match the original image/alt snapshot and every older prose byte is preserved. No unrecorded translation work found. HTML refreshed and git diff --check passes. No local test suites, builds or GUI runs. REVIEWED and full-topic totals remain unchanged."
+    },
+    {
+      "id": "agent-connect-toggle-context",
+      "status": "complete, targeted instruction only",
+      "review_parent": "965f86fd6b36cfb301aab6b5f2ed3bd3bc839e14",
+      "catalog_ids": {},
+      "help_topics": [
+        "agents-connect.html"
+      ],
+      "reviewed_help_passages": {
+        "agents-connect.html": [
+          "p containing b[data-text=\"ui-let-agents-connect\"]"
+        ]
+      },
+      "completed_languages": [
+        "bg",
+        "cs",
+        "da",
+        "de",
+        "el",
+        "es",
+        "et",
+        "fi",
+        "fr",
+        "hr",
+        "hu",
+        "it",
+        "lt",
+        "lv",
+        "nl",
+        "pl",
+        "pt",
+        "ro",
+        "ru",
+        "sk",
+        "sl",
+        "sv",
+        "uk",
+        "ca",
+        "nb",
+        "pt-BR",
+        "sr-Latn",
+        "tr"
+      ],
+      "pending_languages": [],
+      "changed_languages": [
+        "bg",
+        "cs",
+        "da",
+        "el",
+        "et",
+        "fi",
+        "fr",
+        "hr",
+        "hu",
+        "it",
+        "lt",
+        "lv",
+        "pl",
+        "pt",
+        "ro",
+        "sk",
+        "sl",
+        "sv",
+        "uk",
+        "ca",
+        "nb",
+        "pt-BR",
+        "sr-Latn",
+        "tr"
+      ],
+      "retained_unchanged_languages": [
+        "de",
+        "es",
+        "nl",
+        "ru"
+      ],
+      "whole_topic_still_pending_languages": [
+        "hu",
+        "lt",
+        "lv",
+        "pl",
+        "ro",
+        "sk",
+        "sl",
+        "sv",
+        "uk"
+      ],
+      "scope_added_catalogs": 0,
+      "scope_added_help": 0,
+      "new_full_topic_credit": 0,
+      "verified_context": "GTK uses adw::SwitchRow for agents-enabled; Windows BS_AUTOCHECKBOX and Mac NSButton checkbox control the same agents_enabled setting. Disabling it blocks agent calls, not the external program. Use neutral disable/turn-off wording for the option in shared help.",
+      "source_issue": "English says clear the control, which fits the checkbox platforms but is ambiguous for the GTK switch. English and implementation remain unchanged.",
+      "evidence_worktree": "/Users/andris/Projects/PostalExpress-mcp2",
+      "evidence": {
+        "linux/src/agents.rs": "408d55db859e39e7f36e3122f3f5b8cd208bd42cc46fa0b6d3c272efb15f9440",
+        "mac/Sources/InboxClassic/Agents.swift": "65cc89415af81e3dbc5730f01ab0d9857187d228caf7c65bd57b58af7e9a5f02",
+        "app/src/agents.cpp": "a03d3d2b3373311c4c15eaf53dd6fcdc0036260bd5d140f4fd023d995dc2efb0",
+        "core/crates/pe-core/src/agents.rs": "86f1ca3f39d91ad8c85641ff1059b133eb08d54ea9355620cad6ce8dcdaae5ca",
+        "core/crates/pe-html/src/help.rs": "042663e880e10339e824a81e852ad4c53c3fc5ced32160953566c868cd7c5fe2"
+      },
+      "language_reviews": {
+        "bg": {
+          "file": "core/crates/pe-html/help/bg/agents-connect.html",
+          "before": "<p>За да изключите всички агенти наведнъж, махнете отметката от <b data-text=\"ui-let-agents-connect\"></b> в <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>За да спрете достъпа на всички агенти наведнъж, изключете опцията <b data-text=\"ui-let-agents-connect\"></b> в <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "834abfbc88dd9ea35aca8223ef58b2d56d68013ae086739e1fcdce24487fc3e9",
+          "sha256": "4c5d847e543e0e5ccf9fbfbe3fca9b846d0f0874d5951a9c688fe86aa3af8d32",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "cs": {
+          "file": "core/crates/pe-html/help/cs/agents-connect.html",
+          "before": "<p>Všechny agenty najednou vypnete zrušením volby <b data-text=\"ui-let-agents-connect\"></b> v nabídce <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Chcete-li všem agentům zakázat přístup, vypněte možnost <b data-text=\"ui-let-agents-connect\"></b> v nabídce <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "26cf63a909138102572c05619cfc4a128db6d1a6cd9f843b6ca9ed3adc57f2b0",
+          "sha256": "639e606f22a1bd395c97b75d29e78a91ba6052e565cfadb01e88b90acf0d8db7",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "da": {
+          "file": "core/crates/pe-html/help/da/agents-connect.html",
+          "before": "<p>Hvis du vil afbryde adgangen for alle agenter på én gang, skal du fjerne fluebenet ved <b data-text=\"ui-let-agents-connect\"></b> under <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Hvis du vil afbryde adgangen for alle agenter på én gang, skal du slå indstillingen <b data-text=\"ui-let-agents-connect\"></b> fra under <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "63ed7f6e47de3bd5b7f4ddee70b674b51aacca400b8e8c98c0249edea0c8390e",
+          "sha256": "688e5045e5428a66b6017f17a69b6260fa67fd4be99ab4926bb1d5980c2e3d3f",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "de": {
+          "file": "core/crates/pe-html/help/de/agents-connect.html",
+          "before": "<p>Um alle Agenten auf einmal auszuschalten, deaktivieren Sie <b data-text=\"ui-let-agents-connect\"></b> unter <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Um alle Agenten auf einmal auszuschalten, deaktivieren Sie <b data-text=\"ui-let-agents-connect\"></b> unter <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "bab3d3af74621f73a56edcbe72aacf7169420f7218071902e72a122078e5d8e4",
+          "sha256": "bab3d3af74621f73a56edcbe72aacf7169420f7218071902e72a122078e5d8e4",
+          "changed": false,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": false
+        },
+        "el": {
+          "file": "core/crates/pe-html/help/el/agents-connect.html",
+          "before": "<p>Για να αποκλείσετε την πρόσβαση όλων των πρακτόρων στο Inbox Classic, καταργήστε την επιλογή <b data-text=\"ui-let-agents-connect\"></b> στο <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Για να αποκλείσετε την πρόσβαση όλων των πρακτόρων στο Inbox Classic, απενεργοποιήστε την επιλογή <b data-text=\"ui-let-agents-connect\"></b> στο <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "b1ff280c044df694443023fa437609715613eeb2e437f2db31372537092f4a34",
+          "sha256": "56521c33a89c150a93850267a548b1ebb072a5d14c98819dd4e441d29a9a9f0e",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "es": {
+          "file": "core/crates/pe-html/help/es/agents-connect.html",
+          "before": "<p>Para desactivar todos los agentes a la vez, desactive <b data-text=\"ui-let-agents-connect\"></b> en <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Para desactivar todos los agentes a la vez, desactive <b data-text=\"ui-let-agents-connect\"></b> en <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "65c725945c8dd7c14a08b114d9185c84ba8d8795a62e38cec513052014b8ea54",
+          "sha256": "65c725945c8dd7c14a08b114d9185c84ba8d8795a62e38cec513052014b8ea54",
+          "changed": false,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": false
+        },
+        "et": {
+          "file": "core/crates/pe-html/help/et/agents-connect.html",
+          "before": "<p>Kõigi agentide korraga väljalülitamiseks tühjendage menüüs <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b> märkeruut <b data-text=\"ui-let-agents-connect\"></b>.</p>",
+          "after": "<p>Kõigi agentide juurdepääsu keelamiseks lülitage menüüs <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b> valik <b data-text=\"ui-let-agents-connect\"></b> välja.</p>",
+          "previous_sha256": "20d742e5659794106fafbc2136fa36f34c3a2009b577ca74d5cf39a803fa38bf",
+          "sha256": "d20132330ed983002dddc2a2be575f0cb5dc4b7cb8fd43c903a7cd62c993a560",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "fi": {
+          "file": "core/crates/pe-html/help/fi/agents-connect.html",
+          "before": "<p>Voit estää kaikkien agenttien yhteydet poistamalla valinnan <b data-text=\"ui-let-agents-connect\"></b> kohdassa <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Estä kaikkien agenttien yhteydet poistamalla asetus <b data-text=\"ui-let-agents-connect\"></b> käytöstä kohdassa <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "5587ddd04c4e92ada213445c486914739a1db3454d6c8f0084b811eada6a3527",
+          "sha256": "170eab319148da663d89727c7f2f13ae468fd5188c11fefddc26cfe3fdca2dcc",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "fr": {
+          "file": "core/crates/pe-html/help/fr/agents-connect.html",
+          "before": "<p>Pour désactiver tous les agents d'un coup, décochez <b data-text=\"ui-let-agents-connect\"></b> dans <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Pour bloquer l’accès de tous les agents à la fois, désactivez l’option <b data-text=\"ui-let-agents-connect\"></b> dans <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "3ec7a877a4d19a81908d4d67cf6b8b06478898524642af8558d10829d32209d6",
+          "sha256": "f694535eb10abf718e6a8d63cc72350cca6b2322f692fa5972551ce97f823308",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "hr": {
+          "file": "core/crates/pe-html/help/hr/agents-connect.html",
+          "before": "<p>Da biste svim agentima onemogućili pristup putem programa Inbox Classic, poništite odabir mogućnosti „<b data-text=\"ui-let-agents-connect\"></b>“ u prozoru <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Da biste svim agentima onemogućili pristup putem programa Inbox Classic, isključite mogućnost „<b data-text=\"ui-let-agents-connect\"></b>“ u prozoru <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "96341b6adbcaf6dafafb69239479510eff763e0c7e30947de03971b063f71aef",
+          "sha256": "2724500ed7ad2608f0388320bf2109f4d3003a8eab26bb5e65d2f557f924039b",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "hu": {
+          "file": "core/crates/pe-html/help/hu/agents-connect.html",
+          "before": "<p>Ha az összes ügynököt egyszerre szeretné kikapcsolni, törölje a jelet ebből: <b data-text=\"ui-let-agents-connect\"></b>, itt: <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Az összes ügynök hozzáférésének letiltásához kapcsolja ki ezt a beállítást: <b data-text=\"ui-let-agents-connect\"></b>. A beállítás itt található: <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "0ee866e90e46188e989cec340e85697f09bab8478386b57103f851b07440763a",
+          "sha256": "c0785b68c490befe19488d39b40dbbbeef94edb9329e9ed8782a33698c2ddc1d",
+          "changed": true,
+          "whole_topic_still_pending": true,
+          "reopened_only_target_paragraph": false
+        },
+        "it": {
+          "file": "core/crates/pe-html/help/it/agents-connect.html",
+          "before": "<p>Per disattivare tutti gli agenti in una volta, deseleziona <b data-text=\"ui-let-agents-connect\"></b> in <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Per bloccare l’accesso a tutti gli agenti, disattiva l’opzione <b data-text=\"ui-let-agents-connect\"></b> in <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "6fab88bb61528ad6fe8a77d931f655bef93fe68403fb4d0d711d2d7562e16543",
+          "sha256": "31f4c63ce1ddf9d2bb3f6670b50064d2b443729a1881fbbed5de8da4ee98f103",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "lt": {
+          "file": "core/crates/pe-html/help/lt/agents-connect.html",
+          "before": "<p>Norėdami iškart išjungti visus agentus, išvalykite žymimąjį langelį <b data-text=\"ui-let-agents-connect\"></b> lange <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Norėdami uždrausti visiems agentams prisijungti, išjunkite parinktį <b data-text=\"ui-let-agents-connect\"></b> lange <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "122b155b194cbe353b61e6752a53b931bb25c14c87c05322cd1dd7220b4e2fc1",
+          "sha256": "4e7b3b3463c5bef8fd40cf4c76962b51cb418ad4bc2e2b20696bdcc2cdd2cd45",
+          "changed": true,
+          "whole_topic_still_pending": true,
+          "reopened_only_target_paragraph": false
+        },
+        "lv": {
+          "file": "core/crates/pe-html/help/lv/agents-connect.html",
+          "before": "<p>Lai izslēgtu visus aģentus uzreiz, notīriet <b data-text=\"ui-let-agents-connect\"></b> sadaļā <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Lai liegtu piekļuvi visiem aģentiem, izslēdziet opciju <b data-text=\"ui-let-agents-connect\"></b> sadaļā <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "ceed2e135c89cf7d0d8cdaf3b0c1a81419b2085b5764561d6494bf3df94056e3",
+          "sha256": "476ba622e9c060b71e155cc609dc407bc4f6333b49934d975caa539942beee77",
+          "changed": true,
+          "whole_topic_still_pending": true,
+          "reopened_only_target_paragraph": false
+        },
+        "nl": {
+          "file": "core/crates/pe-html/help/nl/agents-connect.html",
+          "before": "<p>Wil je alle agents in één keer uitschakelen, schakel dan <b data-text=\"ui-let-agents-connect\"></b> uit in <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Wil je alle agents in één keer uitschakelen, schakel dan <b data-text=\"ui-let-agents-connect\"></b> uit in <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "202b08b8006d628463f9eea0dc7966c269d0156edbde3ca2d2dd4f5b5b56ebe6",
+          "sha256": "202b08b8006d628463f9eea0dc7966c269d0156edbde3ca2d2dd4f5b5b56ebe6",
+          "changed": false,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": false
+        },
+        "pl": {
+          "file": "core/crates/pe-html/help/pl/agents-connect.html",
+          "before": "<p>Aby wyłączyć naraz wszystkich agentów, wyczyść pole <b data-text=\"ui-let-agents-connect\"></b> w <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Aby zablokować dostęp wszystkim agentom, wyłącz opcję <b data-text=\"ui-let-agents-connect\"></b> w oknie <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "393d40a9a4a0dcaa4861dccd3d86601a094967729b6b3a3bccee6659a5b6a535",
+          "sha256": "60c9737a11f56fd12649cb13d592cba64bf191e27f58f1f6e81fd37e324ad282",
+          "changed": true,
+          "whole_topic_still_pending": true,
+          "reopened_only_target_paragraph": false
+        },
+        "pt": {
+          "file": "core/crates/pe-html/help/pt/agents-connect.html",
+          "before": "<p>Para desativar todos os agentes de uma vez, desmarque <b data-text=\"ui-let-agents-connect\"></b> em <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Para bloquear o acesso de todos os agentes, desative a opção <b data-text=\"ui-let-agents-connect\"></b> em <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "eada3e3b8e9d0ef0901c62ac309650453fa3f511c5a729fd196739c58b5227bf",
+          "sha256": "7e375692c319c1150fc319ced015d6c6cb4b20414e4c145edb199f7ab35531dc",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "ro": {
+          "file": "core/crates/pe-html/help/ro/agents-connect.html",
+          "before": "<p>Pentru a dezactiva toți agenții deodată, debifați <b data-text=\"ui-let-agents-connect\"></b> în <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Pentru a bloca accesul tuturor agenților, dezactivați opțiunea <b data-text=\"ui-let-agents-connect\"></b> din <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "9f5e520f42493d83f5d3481e7707475b33b827b19b0e7bfe599da9561a674ab4",
+          "sha256": "a0a1eb8472ba42d9278a20069f62fc93a0e0875b6979baa0c4080184e1af8db8",
+          "changed": true,
+          "whole_topic_still_pending": true,
+          "reopened_only_target_paragraph": false
+        },
+        "ru": {
+          "file": "core/crates/pe-html/help/ru/agents-connect.html",
+          "before": "<p>Чтобы запретить всем агентам доступ к почте, отключите параметр <b data-text=\"ui-let-agents-connect\"></b> в окне <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Чтобы запретить всем агентам доступ к почте, отключите параметр <b data-text=\"ui-let-agents-connect\"></b> в окне <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "77e63e49137e67f712ed5db8755916d6e1f1542b505dbabf10e816e124f1191d",
+          "sha256": "77e63e49137e67f712ed5db8755916d6e1f1542b505dbabf10e816e124f1191d",
+          "changed": false,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": false
+        },
+        "sk": {
+          "file": "core/crates/pe-html/help/sk/agents-connect.html",
+          "before": "<p>Ak chcete vypnúť všetkých agentov naraz, zrušte začiarknutie <b data-text=\"ui-let-agents-connect\"></b> v ponuke <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Ak chcete všetkým agentom zakázať prístup, vypnite možnosť <b data-text=\"ui-let-agents-connect\"></b> v ponuke <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "9734d7e56e48e821bd25431a95b539b35cc461df5b00d5861e85f3620b2fe462",
+          "sha256": "c6a3f59fd3ae2593d0d3f072a5317de7badbc9ab8ebbbe3d6c4287da21b09c60",
+          "changed": true,
+          "whole_topic_still_pending": true,
+          "reopened_only_target_paragraph": false
+        },
+        "sl": {
+          "file": "core/crates/pe-html/help/sl/agents-connect.html",
+          "before": "<p>Če želite izklopiti vse agente hkrati, v meniju <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b> počistite <b data-text=\"ui-let-agents-connect\"></b>.</p>",
+          "after": "<p>Če želite vsem agentom onemogočiti dostop, v meniju <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b> izklopite možnost <b data-text=\"ui-let-agents-connect\"></b>.</p>",
+          "previous_sha256": "eb78b10a6e3419a46f39d69719789bb800826480395819a74237da568a8b5368",
+          "sha256": "29950884ea5ac86f962eb5d3758652cb3be01ae639fe6aea19d732b1d10b0aa7",
+          "changed": true,
+          "whole_topic_still_pending": true,
+          "reopened_only_target_paragraph": false
+        },
+        "sv": {
+          "file": "core/crates/pe-html/help/sv/agents-connect.html",
+          "before": "<p>Om du vill stänga av alla agenter på en gång avmarkerar du <b data-text=\"ui-let-agents-connect\"></b> i <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Om du vill blockera åtkomsten för alla agenter stänger du av inställningen <b data-text=\"ui-let-agents-connect\"></b> under <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "9e71303b8e4380be4136d7db5007d07702d8937ebfc2eb60410d3578c57bfe17",
+          "sha256": "d9cff405fb04300354b4ecafe3de140eb7a277e01b454a68805aef699c1d8e02",
+          "changed": true,
+          "whole_topic_still_pending": true,
+          "reopened_only_target_paragraph": false
+        },
+        "uk": {
+          "file": "core/crates/pe-html/help/uk/agents-connect.html",
+          "before": "<p>Щоб вимкнути всіх агентів одразу, зніміть позначку <b data-text=\"ui-let-agents-connect\"></b> у меню <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Щоб заборонити доступ усім агентам, вимкніть параметр <b data-text=\"ui-let-agents-connect\"></b> у меню <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "144596998aa26597721151aecaee40e7723f8349f6d4e5a02a78dd7b4b455174",
+          "sha256": "6b5014b74e2b7f25370d2f27be7a20b3261f7d6c091e39ba57eb3c05a8474be8",
+          "changed": true,
+          "whole_topic_still_pending": true,
+          "reopened_only_target_paragraph": false
+        },
+        "ca": {
+          "file": "core/crates/pe-html/help/ca/agents-connect.html",
+          "before": "<p>Per desactivar tots els agents alhora, desmarqueu <b data-text=\"ui-let-agents-connect\"></b> a <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Per bloquejar l’accés de tots els agents, desactiveu l’opció <b data-text=\"ui-let-agents-connect\"></b> a <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "bb9f2204cc34fdd5980c332202bfea874946c8d242ae716251b17dbaf7b16136",
+          "sha256": "4f1128558156857d4221a4a7662d3722deb41e1b055deff45ea5a3a8582d1cdf",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "nb": {
+          "file": "core/crates/pe-html/help/nb/agents-connect.html",
+          "before": "<p>Vil du slå av alle agenter på én gang, fjerner du merket for <b data-text=\"ui-let-agents-connect\"></b> under <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Vil du stenge tilgangen for alle agenter på én gang, slår du av innstillingen <b data-text=\"ui-let-agents-connect\"></b> under <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "b9f1c9dbb8f1b81df6132e4984d4c8f4685e974603d856ad2a2b0b8adb29af04",
+          "sha256": "88a29db4e2955fbe49537ec9da93a12055555f82d18ece7c06eaafd32be4ca58",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "pt-BR": {
+          "file": "core/crates/pe-html/help/pt-BR/agents-connect.html",
+          "before": "<p>Para desativar todos os agentes de uma vez, desmarque <b data-text=\"ui-let-agents-connect\"></b> em <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Para bloquear o acesso de todos os agentes, desative a opção <b data-text=\"ui-let-agents-connect\"></b> em <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "ba689d1235ade801c10292e6033e1ca8713e4bcedfb8211885e1e8ba05893e3e",
+          "sha256": "bbb4e0e7eb4e69e55df38cf376a18eabd3590ff66c4de1b5ce2fbede64ec7cb8",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "sr-Latn": {
+          "file": "core/crates/pe-html/help/sr-Latn/agents-connect.html",
+          "before": "<p>Da biste odjednom isključili sve agente, opozovite izbor opcije <b data-text=\"ui-let-agents-connect\"></b> u prozoru koji otvarate preko menija <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "after": "<p>Da biste svim agentima onemogućili pristup, isključite opciju <b data-text=\"ui-let-agents-connect\"></b> u prozoru koji otvarate preko menija <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b>.</p>",
+          "previous_sha256": "412351dbf3620703c2b191eb3a6593efb7605a0c4f6a123c867b433e60599e16",
+          "sha256": "45dc80b2464505177008b2a684e2d027483d7d312f019258d7de4d863676d229",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        },
+        "tr": {
+          "file": "core/crates/pe-html/help/tr/agents-connect.html",
+          "before": "<p>Tüm aracıların bağlantısını devre dışı bırakmak için <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b> içinde <b data-text=\"ui-let-agents-connect\"></b> seçeneğinin işaretini kaldırın.</p>",
+          "after": "<p>Tüm aracıların erişimini engellemek için <b data-text=\"menu-tools\"></b> &gt; <b data-text=\"cmd-ai-agents\"></b> içindeki <b data-text=\"ui-let-agents-connect\"></b> seçeneğini kapatın.</p>",
+          "previous_sha256": "da20231814f4a359d96dd40ce73c83bc7c7a3538db8a404b038035b20ee5e5df",
+          "sha256": "9eb110ae81d1724e1eac8801fc29053bc02433a027937f7cbf4f6d570e495815",
+          "changed": true,
+          "whole_topic_still_pending": false,
+          "reopened_only_target_paragraph": true
+        }
+      },
+      "notes": "This is a targeted passage followup. Existing completed-topic counts and pending-topic inventories are unchanged; Estonian and French baseline topics gain only a new reviewed-paragraph record, not a claim that the full topic was re-reviewed.",
+      "validation": "All 28 language structural checkers pass with 27,883 expected mark-only diagnostics. Exact reconstruction verifies 24 changed instructions, four retained instructions and byte-identical surrounding prose, tags, attributes, controls, links and literal keys. Nine broader drafts retain their marks around the remaining prose; no full-topic or catalog credit is added. Current control-label sentence joins were inspected for all 28 languages. Five UI/runtime/help-renderer files match the recorded evidence. Global reconciliation accounts for 21,821 unmarked entries, 11,092 help lines and 14 unchanged/moved baseline pairs; latest file/source hashes match. All full inventories and since-start 1,144 entries/261 marked passages reconcile. The additional marked passages result from splitting nine existing draft marks, not new help topics. Source audit covers 46 worktrees/188 refs and 290 unchanged old draft copies; no unrecorded translation work found. HTML refreshed; git diff --check passes. No local test suites, builds or GUI runs. REVIEWED remains unchanged."
     }
   ]
 }
