@@ -12,11 +12,28 @@ use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-use crate::Key;
 use crate::limits::MAX_REFUSED_KEPT;
+use crate::{Key, Kind};
 
 const PREFIX: &str = "rendering-";
 const REFUSED: &str = "refused";
+
+/// How many markers the app left in `dir` when it ended: files whose render ended it. Read only, at the start,
+/// before a [`crate::Previewer`] opens the folder (which lists their files and removes them)
+pub fn left_behind(dir: &Path) -> usize {
+    std::fs::read_dir(dir).map_or(0, |entries| {
+        entries
+            .flatten()
+            .filter(|entry| {
+                let name = entry.file_name();
+                name.to_str()
+                    .and_then(|n| n.strip_prefix(PREFIX))
+                    .and_then(Key::parse)
+                    .is_some()
+            })
+            .count()
+    })
+}
 
 pub struct Markers {
     dir: PathBuf,
@@ -54,12 +71,12 @@ impl Markers {
         Ok((markers, set))
     }
 
-    /// Writes the marker of `key` (`about` says what the file is) and returns the guard that removes it when the
-    /// render ends
-    pub fn begin(&self, key: &Key, about: &str) -> Marker {
+    /// Writes the marker of `key`, a `kind` file (`about` says what it is), and returns the guard that removes it
+    /// when the render ends
+    pub fn begin(&self, key: &Key, kind: Kind, about: &str) -> Marker {
         let path = self.dir.join(format!("{PREFIX}{}", key.as_str()));
         let about: String = about.chars().filter(|c| !c.is_control()).take(500).collect();
-        let written = std::fs::write(&path, format!("{}\n{about}\n", key.as_str())).is_ok();
+        let written = std::fs::write(&path, format!("{}\n{kind:?}\n{about}\n", key.as_str())).is_ok();
         Marker {
             path: written.then_some(path),
         }
@@ -134,7 +151,7 @@ pub(crate) mod tests {
         let (markers, refused) = Markers::open(&dir).unwrap();
         assert!(refused.is_empty());
         let key = crate::key_of(b"file");
-        let marker = markers.begin(&key, "account 1, message 7, part 2");
+        let marker = markers.begin(&key, Kind::Pdf, "account 1, message 7, part 2");
         let path = dir.join(format!("rendering-{}", key.as_str()));
         let text = std::fs::read_to_string(&path).unwrap();
         assert!(text.starts_with(key.as_str()));
@@ -153,11 +170,13 @@ pub(crate) mod tests {
         {
             let (markers, _) = Markers::open(&dir).unwrap();
             // the app ended while drawing it: the guard never ran
-            std::mem::forget(markers.begin(&key, "message 9"));
+            std::mem::forget(markers.begin(&key, Kind::Pdf, "message 9"));
         }
+        assert_eq!(left_behind(&dir), 1);
         let (_, refused) = Markers::open(&dir).unwrap();
         assert!(refused.contains(&key));
         assert!(!dir.join(format!("rendering-{}", key.as_str())).exists());
+        assert_eq!(left_behind(&dir), 0);
         // still refused at the start after, with no marker
         let (_, refused) = Markers::open(&dir).unwrap();
         assert!(refused.contains(&key));
@@ -170,7 +189,7 @@ pub(crate) mod tests {
         let (markers, _) = Markers::open(&dir).unwrap();
         let key = crate::key_of(b"panics");
         let caught = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            let _marker = markers.begin(&key, "");
+            let _marker = markers.begin(&key, Kind::Picture, "");
             panic!("a decoder's bug");
         }));
         assert!(caught.is_err());

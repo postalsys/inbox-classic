@@ -974,3 +974,12 @@ undone-flags = { $count ->
     [one] Server ei muutnud kirja lippe, seega on { $messages } nagu enne: { $reason }
    *[other] Server ei muutnud kirjade lippe, seega on { $messages } nagu enne: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Näita PDF-faile kirjades
+# review: new
+preview-pdf-off = PDF-faile kirjades ei näidata.
+# review: new
+preview-pdf-off-crashed = PDF-fail sulges Inbox Classicu selle näitamise ajal, seetõttu ei näidata PDF-faile kirjades enam. Pilte näidatakse endiselt. PDF-failide uuesti näitamiseks lülitage lugemisvalikutes sisse { $option }.

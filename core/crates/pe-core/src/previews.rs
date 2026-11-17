@@ -4,20 +4,26 @@
 //! is kept here under the request ([`Core::previews_start`]) until it is cancelled, and announced by
 //! [`Event::PreviewReady`]. The reading pane takes it with [`Core::preview_file`].
 //!
-//! The crash markers and the list of files never drawn again are kept in `previews` beside the store.
+//! The crash markers and the list of files never drawn again are kept in `previews` beside the store. A marker left
+//! behind means a file ended the app while it was drawn: the core then turns PDF previews off (a sender could change
+//! a byte of the file for each message and end the app once a message), says so ([`Event::PdfPreviewsOff`],
+//! [`Core::previews_notice`]) until the user turns them on again ([`Core::set_pdf_previews`]). Pictures stay on:
+//! their decoders have hard limits.
 
 use std::collections::{BTreeMap, HashMap};
+use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use std::sync::{Arc, Mutex, MutexGuard, OnceLock};
 
-use pe_preview::{Outcome, Previewer, Request, Settings};
-use pe_store::FolderId;
+use pe_i18n::{Text, tr, tr_args};
+use pe_preview::{Outcome, Previewer, Request, Settings, What};
+use pe_store::{FolderId, Store};
 
 pub use pe_preview::limits::MAX_PAGES as PREVIEW_PAGES;
 pub use pe_preview::{Description as PreviewDescription, Mime as PreviewMime, Picture, Refusal as PreviewRefusal};
 
 use crate::connections::Connection;
-use crate::{Core, Event, EventSink, Result, protect, view};
+use crate::{Core, Event, EventSink, Result, view};
 
 /// What came of one file's previews so far
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
@@ -44,6 +50,28 @@ pub(crate) struct Previews {
 
 fn lock(files: &Files) -> MutexGuard<'_, HashMap<(u64, usize), PreviewFile>> {
     files.lock().unwrap_or_else(|p| p.into_inner())
+}
+
+/// The folder of the crash markers, beside the store at `store_path`
+pub(crate) fn markers_dir(store_path: &Path) -> Option<PathBuf> {
+    store_path.parent().map(|dir| dir.join("previews"))
+}
+
+/// At the start: when the app ended while a file was drawn (a crash marker was left behind), PDF previews are turned
+/// off in `store`. Whether they were (the caller then announces it)
+pub(crate) fn check_crash_markers(store_path: &Path, store: &Store) -> bool {
+    let Some(dir) = markers_dir(store_path) else {
+        return false;
+    };
+    if pe_preview::marker::left_behind(&dir) == 0 || !store.pdf_previews().unwrap_or(true) {
+        return false;
+    }
+    store.set_pdf_previews(false).is_ok() && store.set_pdf_previews_crashed(true).is_ok()
+}
+
+/// What a tile says of a file without a preview, when the reason is the user's to change: PDF previews turned off
+pub fn refusal_text(reason: &PreviewRefusal) -> Option<String> {
+    matches!(reason, PreviewRefusal::Disabled).then(|| tr(Text::PreviewPdfOff))
 }
 
 impl Core {
@@ -82,36 +110,70 @@ impl Core {
         }
     }
 
+    /// "Show PDF files in messages"
+    pub fn pdf_previews(&self) -> Result<bool> {
+        Ok(self.store().pdf_previews()?)
+    }
+
+    /// Turns PDF previews on or off; on again, the note that a PDF file ended the app is gone
+    pub fn set_pdf_previews(&self, on: bool) -> Result<()> {
+        {
+            let store = self.store();
+            store.set_pdf_previews(on)?;
+            if on {
+                store.set_pdf_previews_crashed(false)?;
+            }
+        }
+        if let Some(previewer) = self.previews.previewer.get() {
+            previewer.set_pdfs(on);
+        }
+        Ok(())
+    }
+
+    /// What the reading pane says where previews are shown, when PDF previews were turned off because a PDF file
+    /// ended the app: why, and how to turn them on again. None otherwise
+    pub fn previews_notice(&self) -> Option<String> {
+        let store = self.store();
+        let crashed = store.pdf_previews_crashed().unwrap_or(false) && !store.pdf_previews().unwrap_or(true);
+        crashed.then(|| {
+            let option = tr(Text::PreviewPdfOption);
+            tr_args(Text::PreviewPdfOffCrashed, &[("option", (&option).into())])
+        })
+    }
+
     /// Reads the message once and hands its files to the render thread, on a thread of the blocking pool
     fn request_previews(&self, request: u64, folder: FolderId, uid: u64, attachments: &[usize]) {
         let found = {
             let store = self.store();
-            store.source(folder, uid).ok().flatten().map(|raw| {
-                // a decrypted part's previews are never kept in the cache
-                let keep = !protect::has_encrypted(&raw);
-                (self.shown(&store, raw), keep)
-            })
+            // a decrypted part's previews are never kept in the cache
+            let found = store
+                .source(folder, uid)
+                .ok()
+                .flatten()
+                .map(|raw| self.shown_decrypted(&store, raw));
+            found.map(|(source, decrypted)| (source, !decrypted, store.pdf_previews().unwrap_or(true)))
         };
         let files = self.previews.files.clone();
         let events = self.events.clone();
-        let Some((source, keep)) = found else {
+        let Some((source, keep, pdfs)) = found else {
             for &attachment in attachments {
                 not_drawn(&files, &events, request, attachment);
             }
             return;
         };
-        let listed = view::attachments(&source);
-        let previewer = self.previewer();
+        let mut listed = view::attachments(&source);
+        drop(source);
+        let previewer = self.previewer(pdfs);
         for &attachment in attachments {
             if !lock(&files).contains_key(&(request, attachment)) {
                 // cancelled meanwhile
                 continue;
             }
-            match listed.get(attachment) {
+            match listed.get_mut(attachment) {
                 Some((_, bytes)) => previewer.request(Request {
                     owner: request,
                     attachment,
-                    file: Arc::new(bytes.clone()),
+                    file: Arc::new(std::mem::take(bytes)),
                     about: format!("folder {folder}, message {uid}, attachment {attachment}"),
                     pages: PREVIEW_PAGES,
                     keep,
@@ -121,13 +183,14 @@ impl Core {
         }
     }
 
-    /// The render thread, started by the first preview
-    fn previewer(&self) -> &Previewer {
+    /// The render thread, started by the first preview (`pdfs`: the user's setting then)
+    fn previewer(&self, pdfs: bool) -> &Previewer {
         self.previews.previewer.get_or_init(|| {
             let files = self.previews.files.clone();
             let events = self.events.clone();
             let settings = Settings {
-                dir: self.path.parent().map(|dir| dir.join("previews")),
+                dir: markers_dir(&self.path),
+                pdfs,
                 ..Settings::default()
             };
             Previewer::new(settings, move |outcome| record(&files, &events, outcome))
@@ -137,53 +200,57 @@ impl Core {
 
 /// A file that is not there (the message left the store, or has no such attachment): refused, and done
 fn not_drawn(files: &Files, events: &EventSink, request: u64, attachment: usize) {
-    let refused = Outcome::Refused {
-        owner: request,
-        attachment,
+    let refused = What::Refused {
         page: None,
         reason: PreviewRefusal::Unreadable,
     };
-    record(files, events, refused);
-    record(
-        files,
-        events,
-        Outcome::Done {
-            owner: request,
-            attachment,
-        },
-    );
+    for what in [refused, What::Done] {
+        record(
+            files,
+            events,
+            Outcome {
+                owner: request,
+                attachment,
+                what,
+            },
+        );
+    }
 }
 
 /// Keeps what came of a file under its request (unless the request was cancelled) and announces it
-fn record(files: &Files, events: &EventSink, outcome: Outcome) {
-    let (request, attachment) = match &outcome {
-        Outcome::Described { owner, attachment, .. }
-        | Outcome::Page { owner, attachment, .. }
-        | Outcome::Refused { owner, attachment, .. }
-        | Outcome::Done { owner, attachment } => (*owner, *attachment),
-    };
+fn record(
+    files: &Files,
+    events: &EventSink,
+    Outcome {
+        owner,
+        attachment,
+        what,
+    }: Outcome,
+) {
     {
         let mut files = lock(files);
-        let Some(file) = files.get_mut(&(request, attachment)) else {
+        let Some(file) = files.get_mut(&(owner, attachment)) else {
             return;
         };
-        match outcome {
-            Outcome::Described { description, .. } => file.description = Some(description),
-            Outcome::Page { page, picture, .. } => {
+        match what {
+            What::Described(description) => file.description = Some(description),
+            What::Page(page, picture) => {
                 file.pages.insert(page, Ok(picture));
             }
-            Outcome::Refused {
+            What::Refused {
                 page: Some(page),
                 reason,
-                ..
             } => {
                 file.pages.insert(page, Err(reason));
             }
-            Outcome::Refused { page: None, reason, .. } => file.refused = Some(reason),
-            Outcome::Done { .. } => file.done = true,
+            What::Refused { page: None, reason } => file.refused = Some(reason),
+            What::Done => file.done = true,
         }
     }
-    events(Event::PreviewReady { request, attachment });
+    events(Event::PreviewReady {
+        request: owner,
+        attachment,
+    });
 }
 
 #[cfg(test)]
@@ -197,7 +264,7 @@ mod tests {
     const INVOICE: &[u8] = include_bytes!("../../pe-preview/tests/files/invoice.pdf");
 
     /// A message with a PNG, a PDF file and a text file attached
-    fn message() -> Vec<u8> {
+    pub(super) fn message() -> Vec<u8> {
         let png = {
             let picture = image::RgbImage::from_pixel(64, 32, image::Rgb([200, 30, 30]));
             let mut bytes = Vec::new();
@@ -223,7 +290,12 @@ mod tests {
     }
 
     /// The files of `request` once each is done
-    fn finished(core: &Core, events: &Receiver<Event>, request: u64, attachments: &[usize]) -> Vec<PreviewFile> {
+    pub(super) fn finished(
+        core: &Core,
+        events: &Receiver<Event>,
+        request: u64,
+        attachments: &[usize],
+    ) -> Vec<PreviewFile> {
         let until = Instant::now() + Duration::from_secs(20);
         loop {
             let files: Vec<_> = attachments
@@ -288,5 +360,60 @@ mod tests {
         let request = core.previews_start(inbox, 1, vec![0]).unwrap();
         let files = finished(&core, &events, request, &[0]);
         assert_eq!(files[0].refused, Some(PreviewRefusal::Unreadable));
+    }
+}
+
+#[cfg(test)]
+mod crash_tests {
+    use super::*;
+    use crate::list_load::tests::opened;
+    use std::time::{Duration, Instant};
+
+    #[test]
+    fn a_crash_marker_turns_pdf_previews_off_until_the_user_turns_them_on() {
+        let dir = pe_testkit::TempDir::new("core-previews-crashed");
+        let markers = dir.path().join("previews");
+        std::fs::create_dir_all(&markers).unwrap();
+        // the app ended while drawing this file
+        std::fs::write(
+            markers.join(format!("rendering-{}", "ab".repeat(32))),
+            "Pdf\nmessage 3\n",
+        )
+        .unwrap();
+        let (core, inbox, events) = opened(&dir, 1);
+        let until = Instant::now() + Duration::from_secs(10);
+        loop {
+            match events.recv_timeout(until.saturating_duration_since(Instant::now())) {
+                Ok(Event::PdfPreviewsOff) => break,
+                Ok(_) => {}
+                Err(error) => panic!("no PdfPreviewsOff: {error}"),
+            }
+        }
+        assert!(!core.pdf_previews().unwrap());
+        let notice = core.previews_notice().unwrap();
+        assert!(notice.contains(&tr(Text::PreviewPdfOption)), "{notice}");
+
+        // a PDF file is a tile that says why, a picture still draws
+        core.store().set_source(inbox, 1, &super::tests::message()).unwrap();
+        let request = core.previews_start(inbox, 1, vec![0, 1]).unwrap();
+        let files = super::tests::finished(&core, &events, request, &[0, 1]);
+        assert!(files[0].pages[&0].is_ok());
+        assert_eq!(files[1].refused, Some(PreviewRefusal::Disabled));
+        assert!(refusal_text(&PreviewRefusal::Disabled).is_some());
+
+        // turned on again: the note is gone, PDF files draw
+        core.set_pdf_previews(true).unwrap();
+        assert_eq!(core.previews_notice(), None);
+        let request = core.previews_start(inbox, 1, vec![1]).unwrap();
+        let files = super::tests::finished(&core, &events, request, &[1]);
+        assert!(files[0].pages[&0].is_ok());
+    }
+
+    #[test]
+    fn no_marker_leaves_pdf_previews_on() {
+        let dir = pe_testkit::TempDir::new("core-previews-no-crash");
+        let (core, ..) = opened(&dir, 1);
+        assert!(core.pdf_previews().unwrap());
+        assert_eq!(core.previews_notice(), None);
     }
 }

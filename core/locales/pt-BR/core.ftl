@@ -1350,3 +1350,12 @@ undone-flags = { $count ->
     [one] O servidor não alterou os sinalizadores de { $messages }, por isso ela está como estava: { $reason }
    *[other] O servidor não alterou os sinalizadores de { $messages }, por isso elas estão como estavam: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Mostrar arquivos PDF nas mensagens
+# review: new
+preview-pdf-off = Os arquivos PDF não são mostrados nas mensagens.
+# review: new
+preview-pdf-off-crashed = Um arquivo PDF fechou o Inbox Classic enquanto era mostrado, por isso os arquivos PDF não são mais mostrados nas mensagens. As imagens continuam sendo. Para voltar a mostrar arquivos PDF, ative { $option } nas opções de leitura.

@@ -1291,3 +1291,12 @@ undone-flags = { $count ->
     [one] A kiszolgáló nem módosította az üzenet jelölőit, így { $messages } változatlan maradt: { $reason }
    *[other] A kiszolgáló nem módosította az üzenetek jelölőit, így { $messages } változatlan maradt: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = PDF-fájlok megjelenítése az üzenetekben
+# review: new
+preview-pdf-off = A PDF-fájlok nem jelennek meg az üzenetekben.
+# review: new
+preview-pdf-off-crashed = Egy PDF-fájl megjelenítés közben bezárta az Inbox Classicot, ezért a PDF-fájlok már nem jelennek meg az üzenetekben. A képek továbbra is megjelennek. A PDF-fájlok ismételt megjelenítéséhez kapcsolja be az olvasási beállításokban ezt: { $option }.

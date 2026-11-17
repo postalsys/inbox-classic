@@ -1357,3 +1357,12 @@ undone-unread = { $count ->
 undone-flags = { $count ->
    *[other] Serveris nemainīja karodziņus, tāpēc { $messages } ir tāpat kā iepriekš: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Rādīt PDF failus vēstulēs
+# review: new
+preview-pdf-off = PDF faili vēstulēs netiek rādīti.
+# review: new
+preview-pdf-off-crashed = PDF fails aizvēra Inbox Classic, kamēr tas tika rādīts, tāpēc PDF faili vēstulēs vairs netiek rādīti. Attēli joprojām tiek rādīti. Lai atkal rādītu PDF failus, lasīšanas opcijās ieslēdziet { $option }.

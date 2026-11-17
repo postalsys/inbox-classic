@@ -1323,3 +1323,12 @@ undone-flags = { $count ->
     [one] El servidor no ha canviat les banderes de { $messages }, així que està com estava: { $reason }
    *[other] El servidor no ha canviat les banderes de { $messages }, així que estan com estaven: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Mostra els fitxers PDF als missatges
+# review: new
+preview-pdf-off = Els fitxers PDF no es mostren als missatges.
+# review: new
+preview-pdf-off-crashed = Un fitxer PDF ha tancat Inbox Classic mentre es mostrava, per això els fitxers PDF ja no es mostren als missatges. Les imatges sí. Per tornar a mostrar els fitxers PDF, activeu { $option } a les opcions de lectura.

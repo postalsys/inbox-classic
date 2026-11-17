@@ -1357,3 +1357,12 @@ undone-flags = { $count ->
     [few] Poslužitelj nije promijenio zastavice poruka, pa { $messages } ostaju kao prije: { $reason }
    *[other] Poslužitelj nije promijenio zastavice poruka, pa { $messages } ostaje kao prije: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Prikaži PDF datoteke u porukama
+# review: new
+preview-pdf-off = PDF datoteke ne prikazuju se u porukama.
+# review: new
+preview-pdf-off-crashed = PDF datoteka zatvorila je Inbox Classic dok se prikazivala, pa se PDF datoteke više ne prikazuju u porukama. Slike se i dalje prikazuju. Za ponovni prikaz PDF datoteka uključite { $option } u mogućnostima čitanja.

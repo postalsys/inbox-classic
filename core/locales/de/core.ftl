@@ -990,3 +990,12 @@ undone-flags = { $count ->
     [one] Der Server hat die Kennzeichnungen von { $messages } nicht geändert, daher ist sie wie zuvor: { $reason }
    *[other] Der Server hat die Kennzeichnungen von { $messages } nicht geändert, daher sind sie wie zuvor: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = PDF-Dateien in Nachrichten anzeigen
+# review: new
+preview-pdf-off = PDF-Dateien werden in Nachrichten nicht angezeigt.
+# review: new
+preview-pdf-off-crashed = Eine PDF-Datei hat Inbox Classic beim Anzeigen beendet, daher werden PDF-Dateien in Nachrichten nicht mehr angezeigt. Bilder werden weiterhin angezeigt. Um PDF-Dateien wieder anzuzeigen, aktivieren Sie { $option } in den Leseoptionen.

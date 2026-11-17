@@ -1311,3 +1311,12 @@ undone-flags = { $count ->
     [one] Palvelin ei muuttanut viestin lippuja, joten { $messages } on ennallaan: { $reason }
    *[other] Palvelin ei muuttanut viestien lippuja, joten { $messages } on ennallaan: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Näytä PDF-tiedostot viesteissä
+# review: new
+preview-pdf-off = PDF-tiedostoja ei näytetä viesteissä.
+# review: new
+preview-pdf-off-crashed = PDF-tiedosto sulki Inbox Classicin näytettäessä, joten PDF-tiedostoja ei enää näytetä viesteissä. Kuvat näytetään edelleen. Voit näyttää PDF-tiedostot uudelleen ottamalla asetuksen { $option } käyttöön lukuasetuksissa.

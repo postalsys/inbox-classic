@@ -1409,3 +1409,12 @@ undone-flags = { $count ->
     [few] Strežnik ni spremenil zastavic sporočil, zato { $messages } ostajajo nespremenjena: { $reason }
    *[other] Strežnik ni spremenil zastavic sporočil, zato { $messages } ostaja nespremenjenih: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Prikaži datoteke PDF v sporočilih
+# review: new
+preview-pdf-off = Datoteke PDF se v sporočilih ne prikazujejo.
+# review: new
+preview-pdf-off-crashed = Datoteka PDF je med prikazovanjem zaprla Inbox Classic, zato se datoteke PDF v sporočilih ne prikazujejo več. Slike se še prikazujejo. Če želite znova prikazovati datoteke PDF, v možnostih branja vklopite { $option }.

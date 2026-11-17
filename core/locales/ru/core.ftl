@@ -1394,3 +1394,12 @@ undone-flags = { $count ->
     [one] Сервер не изменил флажки, поэтому { $messages } осталось без изменений: { $reason }
    *[other] Сервер не изменил флажки, поэтому { $messages } остались без изменений: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Показывать PDF-файлы в письмах
+# review: new
+preview-pdf-off = PDF-файлы в письмах не показываются.
+# review: new
+preview-pdf-off-crashed = PDF-файл закрыл Inbox Classic во время показа, поэтому PDF-файлы в письмах больше не показываются. Изображения по-прежнему показываются. Чтобы снова показывать PDF-файлы, включите параметр { $option } в настройках чтения.

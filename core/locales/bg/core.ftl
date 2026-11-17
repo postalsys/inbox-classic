@@ -1321,3 +1321,12 @@ undone-flags = { $count ->
     [one] Сървърът не промени флаговете на { $messages }, затова съобщението е както преди: { $reason }
    *[other] Сървърът не промени флаговете на { $messages }, затова съобщенията са както преди: { $reason }
 }
+
+## Previews of attachments: the pictures and PDF files shown in a message
+
+# review: new
+preview-pdf-option = Показване на PDF файлове в съобщенията
+# review: new
+preview-pdf-off = PDF файловете не се показват в съобщенията.
+# review: new
+preview-pdf-off-crashed = PDF файл затвори Inbox Classic, докато се показваше, затова PDF файловете вече не се показват в съобщенията. Изображенията все още се показват. За да показвате отново PDF файлове, включете { $option } в настройките за четене.
