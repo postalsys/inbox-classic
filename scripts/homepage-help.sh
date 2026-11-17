@@ -15,11 +15,14 @@ for platform in windows mac linux; do
 done
 rm -rf "$HOMEPAGE/help"
 mkdir -p "$HOMEPAGE/help"
-# the languages there is help in, as the export wrote them (pe_i18n::LANGUAGES), for the page that picks one
-languages=""
-for code in $(scripts/languages.sh --codes); do
-    if [ -d "$out/windows/$code" ]; then languages="${languages:+$languages, }'$code'"; fi
-done
+# the tags a visitor's language is looked up by, of the languages there is help in, as the export wrote them
+# (core/include/languages.tsv, made from pe_i18n::LANGUAGES: each catalog's lookup tags)
+keys=""
+while IFS=$'\t' read -r code _ _ _ lookup; do
+    case "$code" in '#'*) continue ;; esac
+    [ -d "$out/windows/$code" ] || continue
+    for key in ${lookup//,/ }; do keys="${keys:+$keys, }'$key': '$code'"; done
+done <core/include/languages.tsv
 # the export writes <platform>/<language>/; the site has <language>/<platform>/
 for platform in windows mac linux; do
     for language_dir in "$out/$platform"/*/; do
@@ -41,23 +44,15 @@ cat >"$HOMEPAGE/help/index.html" <<EOF
 <link rel="canonical" href="https://inboxclassic.com/help/en/windows/index.html">
 <script>
 (function () {
-    var languages = [${languages}];
-    // as the app picks one (pe_i18n::supported): the language (no is nb), then the one of the tag's region or
-    // script (pt-BR), then the language's own (pt), then its first (every Serbian gets sr-Latn)
+    // the catalog of each tag a system may give (pe_i18n::supported, as core/include/languages.tsv has it): the
+    // tag's language with a region or script of it first, then the language alone
+    var keys = {${keys}};
     function pick(tag) {
-        var parts = String(tag).split(/[.@]/)[0].split(/[-_]/);
-        var primary = parts[0].toLowerCase() === 'no' ? 'nb' : parts[0].toLowerCase();
-        var same = [], plain = null;
-        for (var i = 0; i < languages.length; i++) {
-            var own = languages[i].split('-');
-            if (own[0] !== primary) continue;
-            for (var k = 1; own[1] && k < parts.length; k++) {
-                if (parts[k].toLowerCase() === own[1].toLowerCase()) return languages[i];
-            }
-            if (!own[1]) plain = languages[i];
-            same.push(languages[i]);
+        var parts = String(tag).toLowerCase().split(/[.@]/)[0].split(/[-_]/);
+        for (var k = 1; k < parts.length; k++) {
+            if (keys.hasOwnProperty(parts[0] + '-' + parts[k])) return keys[parts[0] + '-' + parts[k]];
         }
-        return plain || same[0] || null;
+        return keys.hasOwnProperty(parts[0]) ? keys[parts[0]] : null;
     }
     var language = 'en';
     var wanted = navigator.languages || [navigator.language || 'en'];

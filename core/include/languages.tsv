@@ -1,0 +1,31 @@
+# Generated from pe_i18n::LANGUAGES and core/locales by core/crates/pe-ffi/build.rs, do not edit
+# tag	name	gettext	nsis	lookup (comma separated)
+en	English	en	English	en
+ca	Català	ca	Catalan	ca
+cs	Čeština	cs	Czech	cs
+da	Dansk	da	Danish	da
+de	Deutsch	de	German	de
+et	Eesti	et	Estonian	et
+es	Español	es	Spanish	es
+fr	Français	fr	French	fr
+hr	Hrvatski	hr	Croatian	hr
+it	Italiano	it	Italian	it
+lv	Latviešu	lv	Latvian	lv
+lt	Lietuvių	lt	Lithuanian	lt
+hu	Magyar	hu	Hungarian	hu
+nl	Nederlands	nl	Dutch	nl
+nb	Norsk bokmål	nb	Norwegian	nb,no
+pl	Polski	pl	Polish	pl
+pt-BR	Português (Brasil)	pt_BR	PortugueseBR	pt-br
+pt	Português (Portugal)	pt	Portuguese	pt
+ro	Română	ro	Romanian	ro
+sk	Slovenčina	sk	Slovak	sk
+sl	Slovenščina	sl	Slovenian	sl
+sr-Latn	Srpski	sr@latin	SerbianLatin	sr-latn,sr
+fi	Suomi	fi	Finnish	fi
+sv	Svenska	sv	Swedish	sv
+tr	Türkçe	tr	Turkish	tr
+el	Ελληνικά	el	Greek	el
+bg	Български	bg	Bulgarian	bg
+ru	Русский	ru	Russian	ru
+uk	Українська	uk	Ukrainian	uk

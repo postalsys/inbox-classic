@@ -446,7 +446,13 @@ pub(crate) struct Worker {
     connections_made: u64,
     /// The server's host, for the timing of opens
     host: String,
+    /// The messages opened whose search text is being read on the blocking pool, oldest first: their index rows are
+    /// written when it is read ([`Worker::index_parsed`]), not before the next open (reader.rs)
+    parsing: std::collections::VecDeque<Parsing>,
 }
+
+/// A message opened (its id in the store) and its search text being read off the async threads
+type Parsing = (i64, tokio::task::JoinHandle<Option<pe_store::IndexText>>);
 
 /// What ended a wait on the Inbox
 enum Wake {
@@ -486,6 +492,7 @@ impl Worker {
             wake_seen: 0,
             connections_made: 0,
             host: String::new(),
+            parsing: std::collections::VecDeque::new(),
         }
     }
 
@@ -927,25 +934,30 @@ impl Worker {
             }
             Err(failure) => return Err(failure),
         };
-        // read before the transaction, which holds the store
-        let indexed: Vec<(i64, pe_store::IndexText)> = messages
-            .iter()
-            .filter(|(message, _)| !refused.contains(message))
-            .map(|(message, uid)| {
-                let body = texts
-                    .iter()
-                    .find(|(found, _)| found == uid)
-                    .map(|(_, parts)| crate::search::parts_text(parts))
-                    .unwrap_or_default();
-                let snippet = crate::snippet::of(&body);
-                let text = pe_store::IndexText {
-                    body,
-                    snippet,
-                    ..Default::default()
-                };
-                (*message, text)
-            })
-            .collect();
+        // read before the transaction, which holds the store, and on the blocking pool: decoding and finding what
+        // the sender wrote would hold an async thread the syncs and the opens need
+        let read = messages.clone();
+        let indexed: Vec<(i64, pe_store::IndexText)> = tokio::task::spawn_blocking(move || {
+            read.iter()
+                .filter(|(message, _)| !refused.contains(message))
+                .map(|(message, uid)| {
+                    let body = texts
+                        .iter()
+                        .find(|(found, _)| found == uid)
+                        .map(|(_, parts)| crate::search::parts_text(parts))
+                        .unwrap_or_default();
+                    let snippet = crate::snippet::of(&body);
+                    let text = pe_store::IndexText {
+                        body,
+                        snippet,
+                        ..Default::default()
+                    };
+                    (*message, text)
+                })
+                .collect()
+        })
+        .await
+        .map_err(|error| Failure::said(FailureKind::Other, error.to_string()))?;
         store.transaction(|store| {
             for (message, text) in &indexed {
                 store.set_indexed(*message, text)?;
@@ -1013,7 +1025,7 @@ impl Worker {
                 if let Err(failure) = self.open_message(store, folder, uid, asked).await {
                     self.message_failed(folder, uid, failure);
                 }
-                Ok(())
+                self.index_all_parsed(store).await
             }
             Command::Connect => Ok(()),
             Command::SyncFolder { folder } => self.sync_one(store, folder).await,

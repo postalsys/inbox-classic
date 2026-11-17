@@ -16,8 +16,8 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with upstream integration/audit against origin/master `76f67e82`, which merged the already
-  inventoried wave1 languages. Then review Finnish (fi), starting app.ftl and its actual menu/dialog contexts.
+- Resume with Finnish (fi), starting all 626 pending app.ftl entries and their actual menu/dialog contexts.
+  Upstream master `76f67e82` is integrated and its already-inventoried wave1 content reconciled.
   Greek is complete: 1,334 catalog entries, 211 values improved, all 52 help topics. Both context followups
   are complete. Twelve languages still have pending content. All 84 late list-loading labels are reviewed.
   Bulgarian, Czech, Danish, Dutch, Italian, Portuguese (Portugal), Brazilian Portuguese, Catalan,
@@ -27,7 +27,8 @@ Commit completed batches regularly and preserve an exact resume point.
 - Additional scope requested during review: Brazilian Portuguese (`pt-BR`), Turkish (`tr`), Norwegian Bokmål
   (`nb`), Catalan (`ca`) and Serbian Latin (`sr-Latn`). Found on local `feat/languages-wave1` at `cfdf55ab`,
   not yet on `master` or `origin/master`. They are included in the isolated review checkout;
-  the feature implementation remains on the isolated branch and has not been merged into master.
+  the feature implementation was initially isolated and has now reached origin/master at `76f67e82`.
+  The translation review edits remain on the isolated review branch.
   This adds 6,655 catalog entries and 260 help topics: scope after that addition was 32,008 entries and 1,252 topics. The later loading labels add 84 entries,
   bringing the current scope to 32,092 entries and 1,252 topics.
   The state records exact inventories and the source commit. Recheck the branch and master for later edits.
@@ -610,6 +611,21 @@ in this review round. Local master remains `5573ee4b`; local/remote wave1 remain
 feature tip with new origin/master shows no localization/help/command changes. Integrate mainline ancestry
 and reconcile after this Greek checkpoint before continuing Finnish. The full late-arrival audit is still
 required once all twelve pending languages are complete.
+
+### Upstream integration after Greek completion
+
+Integrated origin/master `76f67e82`, which merged the five wave1 languages already reviewed here. Duplicate
+history caused conflicts in their draft translations and language infrastructure. Kept reviewed catalog/help,
+glossary and generated translations, and adopted the inspected upstream source versions. One automatic merge
+duplicated fold::register; resolved the file to the upstream version. All 15 integrated source paths now match
+origin/master exactly. The isolated offline pe-ffi build passes, with no tests run. Existing generated translations
+are unchanged; the new generated languages.tsv matches upstream and is recorded in the state.
+
+All 28 translated languages have the required catalog IDs, variable sets and help topics. Pending marks match
+exactly 15,972 catalog entries and 624 help topics; completed file/English-source hashes reconcile. The captured
+--since starting-commit audit reports zero newly pending messages/passages. The 24,538 intentionally unmarked
+changes reconcile to 16,124 catalog messages and 8,414 help lines (including separate context followups).
+Both working-tree and staged whitespace checks pass. Greek completion checkpoint: `fd1002f6`. Continue Finnish.
 
 Current totals: 16,120 catalog entries and 628 help pages reviewed; 2,482 catalog values improved. Remaining:
 15,972 catalog entries and 624 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.

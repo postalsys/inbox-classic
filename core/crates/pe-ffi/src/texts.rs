@@ -181,6 +181,34 @@ pub unsafe extern "C" fn pe_localized_picture(name: *const c_char) -> *mut c_cha
     guard(|| into_c_string(pe_i18n::localized_picture(name))).unwrap_or(null_mut())
 }
 
+/// The Windows resource of [`pe_localized_picture`]'s picture, as `app/res/sign-in-buttons.rc` names it
+/// (`brands/google-sign-in.png` as `GOOGLE_SIGN_IN_PT_BR` in Brazilian Portuguese); NULL for a name that is not UTF-8.
+/// Free with `pe_string_free`.
+///
+/// # Safety
+/// `name` must be a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_localized_picture_resource(name: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let Some(name) = (unsafe { arg(name) }) else {
+        return null_mut();
+    };
+    guard(|| into_c_string(pe_i18n::picture_resource(&pe_i18n::localized_picture(name)))).unwrap_or(null_mut())
+}
+
+/// The locale of the dates of the windows in the language in use, with the system's `region` (`EE`, NULL for none)
+/// where the language has no region of its own: an ICU identifier (`de_EE`, `pt_BR`, `sr_Latn_RS`), English's for the
+/// pseudo-language. Free with `pe_string_free`.
+///
+/// # Safety
+/// `region` must be NULL or a NUL-terminated string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_date_locale(region: *const c_char) -> *mut c_char {
+    // SAFETY: as the caller guarantees
+    let region = unsafe { arg(region) }.map(str::to_string);
+    guard(|| into_c_string(pe_i18n::date_locale(pe_i18n::language(), region.as_deref()))).unwrap_or(null_mut())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

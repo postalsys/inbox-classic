@@ -14,8 +14,8 @@ include!(concat!(env!("OUT_DIR"), "/texts.rs"));
 /// The languages there is a catalog of, by tag, with their names in themselves, as the language choice lists them: the
 /// language's two letters, with a region (`pt-BR`) or a script (`sr-Latn`) for one written differently there.
 /// Everything made per language follows this list: the installer's languages and words, the sign-in buttons, the
-/// Linux desktop entry and metainfo, the Mac's localizations and Help Book, the homepage's help, the UI tests. Keep
-/// one language a line as it is, `scripts/languages.sh` reads them so (a test checks it).
+/// Linux desktop entry and metainfo, the Mac's localizations and Help Book, the homepage's help, the UI tests (the
+/// scripts read it from `core/include/languages.tsv`, which pe-ffi's build writes).
 pub const LANGUAGES: &[(&str, &str)] = &[
     ("en", "English"),
     ("ca", "Català"),
@@ -105,10 +105,10 @@ pub fn supported(tag: &str) -> Option<&'static str> {
     if primary == PSEUDO {
         return Some(PSEUDO);
     }
-    let primary = match primary.as_str() {
-        "no" => "nb",
-        other => other,
-    };
+    let primary = ALIASES
+        .iter()
+        .find(|(alias, _)| *alias == primary)
+        .map_or(primary.as_str(), |(_, language)| language);
     let same = || {
         LANGUAGES
             .iter()
@@ -125,14 +125,70 @@ pub fn supported(tag: &str) -> Option<&'static str> {
         .or_else(|| same().next())
 }
 
-/// A tag of [`LANGUAGES`] as gettext and the freedesktop files write a locale (Linux's desktop entry, its metainfo, the
-/// help folders of Yelp): `pt_BR`, `sr@latin`
-pub fn gettext_locale(code: &str) -> String {
-    match code.split_once('-') {
-        Some((language, "Latn")) => format!("{language}@latin"),
-        Some((language, region)) => format!("{language}_{region}"),
-        None => code.to_string(),
+/// Languages a system may name by another code: Norwegian (`no`) is Bokmål's `nb`
+pub const ALIASES: &[(&str, &str)] = &[("no", "nb")];
+
+/// A tag's parts, by BCP 47: the language, and after it a script (four letters, `Latn`) and a region (two letters or
+/// three digits, `BR`)
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub struct Tag<'a> {
+    pub language: &'a str,
+    pub script: Option<&'a str>,
+    pub region: Option<&'a str>,
+}
+
+impl<'a> Tag<'a> {
+    /// The parts of `tag` (`sr-Latn-RS`, `pt_BR`); a subtag that is neither a script nor a region is left out
+    pub fn parse(tag: &'a str) -> Tag<'a> {
+        let mut parts = tag.split(['-', '_']);
+        let mut parsed = Tag {
+            language: parts.next().unwrap_or_default(),
+            ..Default::default()
+        };
+        for part in parts {
+            let letters = part.bytes().all(|b| b.is_ascii_alphabetic());
+            match part.len() {
+                4 if letters && parsed.script.is_none() => parsed.script = Some(part),
+                2 if letters => parsed.region = Some(part),
+                3 if part.bytes().all(|b| b.is_ascii_digit()) => parsed.region = Some(part),
+                _ => {}
+            }
+        }
+        parsed
     }
+}
+
+/// A tag of [`LANGUAGES`] as gettext and the freedesktop files write a locale (Linux's desktop entry, its metainfo, the
+/// help folders of Yelp): the region after an underscore, the script as a modifier, `pt_BR`, `sr@latin`
+pub fn gettext_locale(code: &str) -> String {
+    let tag = Tag::parse(code);
+    let mut locale = tag.language.to_string();
+    if let Some(region) = tag.region {
+        locale.push('_');
+        locale.push_str(region);
+    }
+    if let Some(script) = tag.script {
+        locale.push('@');
+        match script {
+            "Latn" => locale.push_str("latin"),
+            "Cyrl" => locale.push_str("cyrillic"),
+            other => locale.push_str(&other.to_ascii_lowercase()),
+        }
+    }
+    locale
+}
+
+/// The locale of the dates of the windows in language `code` (an ICU identifier: `de_EE`, `pt_BR`, `sr_Latn_RS`): the
+/// language and its script, and its own region or else the system's `region`; the pseudo-language's English
+pub fn date_locale(code: &str, region: Option<&str>) -> String {
+    let code = if code == PSEUDO { "en" } else { code };
+    let tag = Tag::parse(code);
+    [Some(tag.language), tag.script, tag.region.or(region)]
+        .into_iter()
+        .flatten()
+        .filter(|part| !part.is_empty())
+        .collect::<Vec<_>>()
+        .join("_")
 }
 
 /// The language for the system's preferred languages, the first one there is a catalog of, English when none
@@ -377,6 +433,20 @@ pub fn localized_picture(name: &str) -> String {
         Some((stem, extension)) if language != "en" && language != PSEUDO => format!("{stem}.{language}.{extension}"),
         _ => name.to_string(),
     }
+}
+
+/// The Windows resource of a picture's file as `app/res/sign-in-buttons.rc` names it: its name without the folder and
+/// the extension, in capitals, its hyphens and dots as underscores (`brands/google-sign-in.pt-BR.png` is
+/// `GOOGLE_SIGN_IN_PT_BR`)
+pub fn picture_resource(file: &str) -> String {
+    let name = file.rsplit('/').next().unwrap_or(file);
+    let name = name.strip_suffix(".png").unwrap_or(name);
+    name.chars()
+        .map(|c| match c {
+            '-' | '.' => '_',
+            c => c.to_ascii_uppercase(),
+        })
+        .collect()
 }
 
 /// Command `text` as the title of the window it opens: without its mnemonic mark and the dots that say it asks for

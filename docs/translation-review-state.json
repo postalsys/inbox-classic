@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Greek complete: 1334 catalog entries, 211 improved values, 52 help topics. Finish upstream integration/audit against new origin/master 76f67e82 (merges the already-reviewed wave1 content, no new localization relative to 8df686a4), then review Finnish (fi) app.ftl in app context and proceed through remaining catalogs/help. Both context followups complete. Do not run tests. Active checkout build/i18n-wave1.",
+  "next_batch": "Review Finnish (fi), starting all 626 pending app.ftl entries in actual menu/dialog contexts, then core/platform catalogs and 52 help topics. Greek complete: 1334 catalog entries, 211 improved values, 52 help. Upstream master 76f67e82 integrated; all 28 language structures, inventories and completed hashes reconcile. Both context followups complete. Do not run the test suite. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -38161,7 +38161,8 @@
   "generated_files": {
     "installer/languages.nsh": "669f2422a449ef15627e9459b46889bf2648f648420b3196fc939a664aac9e29",
     "linux/data/com.inboxclassic.InboxClassic.desktop": "28328ce5c07bd0ad603f2658aa722e56a6a5ee4326a6ae848a50d1a3c0672f14",
-    "linux/data/com.inboxclassic.InboxClassic.metainfo.xml": "fc156a0e6b30584275edfad9cff50840c472d0c3512514a49832071e3dcb7da4"
+    "linux/data/com.inboxclassic.InboxClassic.metainfo.xml": "fc156a0e6b30584275edfad9cff50840c472d0c3512514a49832071e3dcb7da4",
+    "core/include/languages.tsv": "adb821f3459cb74929a470e8e8fef36480fe5f793ad8361c6ccd0521271c816e"
   },
   "scope_additions": [
     {
@@ -38196,8 +38197,30 @@
     "branch": "i18n/review-wave1",
     "note": "Active, authoritative review checkout. Merge d432ebac incorporates master review checkpoint 5573ee4b into the wave1 feature checkout based at 8f2d9848. Master retains the handoff checkpoint.",
     "merge_commit": "d432ebac",
-    "latest_source_audit": "Fetched origin during Greek completion. Local master remains 5573ee4b; origin/master advanced to 76f67e82 by merging feat/languages-wave1. Local/remote wave1 remain 8df686a4. No catalog/help/commands differences between that recorded feature tip and new origin/master. This content is already in the review inventory. Integrate and reconcile the new mainline ancestry after committing Greek help. Final late-arrival audit still required.",
-    "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review"
+    "latest_source_audit": "Fetched origin after Greek completion fd1002f6. Local master 5573ee4b, origin/master 76f67e82, local/remote wave1 8df686a4. New master merges the five already-inventoried wave1 languages with no further localization changes. Integrated upstream ancestry, retaining reviewed translation/glossary/generated contents and taking inspected current upstream code/scripts. One automatic merge duplicated fold::register; resolved to upstream initialization. Fifteen upstream source paths match origin/master exactly. Offline pe-ffi build in isolated target passed; existing generated translations unchanged; new languages.tsv matches upstream. Full 28-language catalogs/variables/help inventory matches state: 15972 pending catalog entries and 624 help topics. All completed translation and English hashes match; --since starting_commit reports 0 newly pending messages/passages. Mark-only diagnostics reconcile exactly. No tests run. Final audit still required after queue.",
+    "cargo_target_directory": "/Users/andris/Projects/PostalExpress/build/cargo-translation-review",
+    "upstream_integration": {
+      "source_commit": "76f67e82be158f199212dd8dae913a9cc79501b1",
+      "review_parent": "fd1002f6",
+      "source_paths": [
+        "app/src/accounts.cpp",
+        "core/crates/pe-core/src/worker.rs",
+        "core/crates/pe-core/src/worker/download.rs",
+        "core/crates/pe-core/src/worker/reader.rs",
+        "core/crates/pe-ffi/build_languages.rs",
+        "core/crates/pe-ffi/src/texts.rs",
+        "core/crates/pe-i18n/src/lib.rs",
+        "core/crates/pe-i18n/src/tests.rs",
+        "core/crates/pe-store/src/lib.rs",
+        "core/include/inbox_classic.h",
+        "core/include/languages.tsv",
+        "mac/Sources/InboxClassic/Settings.swift",
+        "scripts/homepage-help.sh",
+        "scripts/languages.sh",
+        "scripts/ui-e2e.ps1"
+      ],
+      "validation": "Offline cargo build -p pe-ffi passed in isolated target; generated translation outputs unchanged. All 28 catalogs/help inventories and variable sets checked; completed file/source hashes reconcile. git diff --check and cached check pass. No test suite run per user instruction."
+    }
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
   "guide_updates": [

@@ -4,6 +4,8 @@
 //   app/res/sign-in-buttons.rc                            the Windows resources of the sign-in button pictures
 //   linux/data/com.inboxclassic.InboxClassic.desktop      the desktop entry with its translations (linux.ftl)
 //   linux/data/com.inboxclassic.InboxClassic.metainfo.xml the software stores' page with its translations (linux.ftl)
+//   core/include/languages.tsv                            the list for the scripts (languages.sh, ui-e2e.ps1, the
+//                                                         homepage's help)
 // Each writes a language's tag the way its platform does: NSIS by its language file's name (PortugueseBR), Windows'
 // resources in capitals with an underscore (PT_BR), Linux's files as gettext locales (pt_BR, sr@latin).
 // A language a catalog has no message of is left out of the Linux files (they show English then); the installer
@@ -11,7 +13,7 @@
 use std::fmt::Write as _;
 use std::path::Path;
 
-use pe_i18n::{Arg, LANGUAGES, gettext_locale, translated};
+use pe_i18n::{ALIASES, Arg, LANGUAGES, Tag, gettext_locale, picture_resource, supported, translated};
 
 /// The languages but English, which the files have as their default
 fn others() -> impl Iterator<Item = &'static str> {
@@ -19,6 +21,7 @@ fn others() -> impl Iterator<Item = &'static str> {
 }
 
 pub fn write_all(root: &Path, write: fn(&Path, &str)) {
+    write(&root.join("core/include/languages.tsv"), &table());
     write(&root.join("installer/languages.nsh"), &nsis());
     write(&root.join("app/res/sign-in-buttons.rc"), &sign_in_buttons());
     write(
@@ -164,21 +167,48 @@ fn nsis() -> String {
     out
 }
 
+/// The list for the scripts, a language a line: its tag, its name in itself, its gettext locale, its NSIS language
+/// (empty for none), and the lowercase tags a system may give that it answers to by themselves (`pt-br`; `pt` for the
+/// language's own catalog, `sr` for the first of the language's, `no` for an alias), which a script looks up a tag's
+/// `language-subtag` in, then its language, without matching anything itself
+fn table() -> String {
+    let mut out = format!("# {NOTE}\n# tag\tname\tgettext\tnsis\tlookup (comma separated)\n");
+    for (code, name) in LANGUAGES {
+        let nsis = NSIS_LANGUAGES.iter().find(|(c, _)| c == code).map_or("", |(_, n)| *n);
+        let language = Tag::parse(code).language;
+        let mut keys = vec![code.to_ascii_lowercase()];
+        let candidates = std::iter::once(language).chain(
+            ALIASES
+                .iter()
+                .filter(|(_, target)| *target == language)
+                .map(|(alias, _)| *alias),
+        );
+        for key in candidates {
+            if supported(key) == Some(*code) && !keys.iter().any(|k| k == key) {
+                keys.push(key.to_string());
+            }
+        }
+        writeln!(
+            out,
+            "{code}\t{name}\t{}\t{nsis}\t{}",
+            gettext_locale(code),
+            keys.join(",")
+        )
+        .unwrap();
+    }
+    out
+}
+
 fn sign_in_buttons() -> String {
     let mut out = format!(
         "// {NOTE}\n// the sign-in buttons of Add Mail Account, Google's and Microsoft's own, and with the words of each language\n// (scripts/build-sign-in-buttons.sh), named after their files (PictureResource in accounts.cpp)\n"
     );
     for provider in ["google", "microsoft"] {
-        let name = format!("{}_SIGN_IN", provider.to_uppercase());
-        writeln!(out, "{name} RCDATA \"brands/{provider}-sign-in.png\"").unwrap();
+        let file = format!("brands/{provider}-sign-in.png");
+        writeln!(out, "{} RCDATA \"{file}\"", picture_resource(&file)).unwrap();
         for code in others() {
-            // a resource name has no hyphen: PT_BR, as PictureResource in accounts.cpp makes it
-            writeln!(
-                out,
-                "{name}_{} RCDATA \"brands/{provider}-sign-in.{code}.png\"",
-                code.to_uppercase().replace('-', "_")
-            )
-            .unwrap();
+            let file = format!("brands/{provider}-sign-in.{code}.png");
+            writeln!(out, "{} RCDATA \"{file}\"", picture_resource(&file)).unwrap();
         }
     }
     out

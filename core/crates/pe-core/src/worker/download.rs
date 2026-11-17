@@ -82,11 +82,17 @@ impl Worker {
     /// Downloads messages of a folder in one FETCH and keeps each with its search text, in one transaction. One the
     /// server does not give, or the parser can not read, is marked and not tried again in the background.
     async fn download_many(&mut self, store: &mut Store, folder: FolderId, uids: &[u64]) -> Result<(), Failure> {
-        let mut fetched = pe_sync::fetch_sources(self.client(store).await?, store, folder, uids).await?;
-        let texts: Vec<_> = fetched
-            .iter()
-            .map(|(_, source)| crate::search::read_index_text(source))
-            .collect();
+        let fetched = pe_sync::fetch_sources(self.client(store).await?, store, folder, uids).await?;
+        // parsed on the blocking pool, not on an async thread the syncs and the opens need
+        let (mut fetched, texts) = tokio::task::spawn_blocking(move || {
+            let texts: Vec<_> = fetched
+                .iter()
+                .map(|(_, source)| crate::search::read_index_text(source))
+                .collect();
+            (fetched, texts)
+        })
+        .await
+        .map_err(|error| Failure::said(crate::FailureKind::Other, error.to_string()))?;
         store.transaction(|store| {
             for &uid in uids {
                 let Some(message) = store.message(folder, uid)? else {

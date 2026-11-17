@@ -97,9 +97,9 @@ impl Store {
         db.pragma_update(None, "foreign_keys", true)?;
         db.pragma_update(None, "synchronous", "NORMAL")?;
         db.busy_timeout(std::time::Duration::from_secs(5))?;
-        fold::register(&db)?;
         static OPENED: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
         let id = OPENED.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        fold::register(&db)?;
         let mut store = Store {
             db,
             id,
