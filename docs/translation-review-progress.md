@@ -16,7 +16,8 @@ Commit completed batches regularly and preserve an exact resume point.
   This checkout is now authoritative for progress. Merge `d432ebac` includes master checkpoint `5573ee4b`
   and the wave1 branch through `8f2d9848`. Generated installer/store conflicts were resolved by regeneration.
   All five new language structures pass, and all 75 localization/help tests pass after integration.
-- Resume with Finnish (fi), all 52 help topics. Its 1,334 catalog entries are reviewed, with 174 value improvements.
+- Resume with Finnish (fi), the remaining 44 help topics after its first eight. Its 1,334 catalog entries
+  are reviewed, with 174 value improvements. Continue everyday/account help, starting delete-and-undo and folders.
   The extended mnemonic followup is complete: 44 actual menu/dialog scopes pass across all 17 languages
   with reviewed catalogs. Use the expanded scopes for remaining languages; exact definitions are in state.
   Upstream master `76f67e82` is integrated and its already-inventoried wave1 content reconciled.
@@ -684,8 +685,20 @@ and the seven recorded es/fr multiline-parser false positives. Exact completed i
 hashes reconcile; help markup and literal keys are preserved. Review HTML regenerated, git diff --check passes.
 No test suite was run. Finnish catalog checkpoint: `ac13722a`. Continue its 52 help topics.
 
-Current totals: 17,451 catalog entries and 628 help pages reviewed; 2,729 catalog values improved. Remaining:
-14,641 catalog entries and 624 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
+### Finnish first eight help topics
+
+Reviewed account setup, Google/Microsoft sign-in, main window, layouts, reading, search, conversations and
+message organization. Improved natural instructions and corrected combined Sent/Drafts navigation, collapsed
+unread counts excluding Junk/Deleted, search indexing versus reading and display-date behavior. Clarified
+folded quoted messages and conditional app-password support. All markup, attributes, control references,
+platform branches and literal keyboard tags are preserved.
+
+Static structural checks, inline joins, exact inventories and source/file hashes pass. Review HTML regenerated;
+git diff --check passes. No test suite was run. Forty-four Finnish help topics remain.
+Expanded mnemonic followup checkpoint: `b3b4ac1c`.
+
+Current totals: 17,451 catalog entries and 636 help pages reviewed; 2,729 catalog values improved. Remaining:
+14,641 catalog entries and 616 help pages (including the five additional languages). `REVIEWED` remains unchanged until the full round is complete.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

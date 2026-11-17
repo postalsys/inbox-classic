@@ -602,6 +602,8 @@ Terms: Saapuneet; Lähtevät; Lähetetyt; Poistetut; Luonnokset; Roskaposti; vie
 Poista lippu); Vastaa kaikille; Välitä edelleen (toolbar: Välitä).
 
 - Informal singular ("Valitse", "Kirjoita"); sentence case.
+- Help terms: "työkalurivi", "lukuruutu", "tilarivi", "kansioluettelo". A collapsed conversation is
+  "supistettu keskustelu"; its messages are hidden, not closed or ended.
 - Placeables never inflect: a head noun takes the case ("kansioon { $folder }", "tililtä { $account }") or a label and
   colon is used ("Siirretty: { $messages }. Kohde: { $folder }"); `their-folders` and `transfer-another-account` are
   nominative to fit "Kohde:".

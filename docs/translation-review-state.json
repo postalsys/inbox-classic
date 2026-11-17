@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Finnish catalogs complete: 1334 entries reviewed, 174 catalog-value improvements including the mnemonic followup. Review all 52 Finnish help topics next. Extended 44-scope mnemonic followup complete across all 17 languages with reviewed catalogs; use these scopes for remaining languages. Recheck late additions after Finnish and after the full queue. Do not run the test suite. Active checkout build/i18n-wave1.",
+  "next_batch": "Continue Finnish help: 44 of 52 topics remain. Next everyday/account batch: delete-and-undo.html, folders.html, write-message.html, reply-forward.html, signatures.html, attachments.html, save-print-import.html, drafts-outbox.html, address-book.html, new-mail.html, all-inboxes.html, manage-accounts.html, move-computer.html. In write-message, attachment reminders recognize EN/DE/ET/ES/FR keywords only; use a recognized example such as attached and do not promise Finnish keyword matching. Finnish catalogs complete, 174 value improvements; all 44 mnemonic scopes pass across the 17 reviewed catalog languages. Recheck late additions after Finnish and after the full queue. Do not run the test suite. Active checkout build/i18n-wave1.",
   "languages": {
     "bg": {
       "pending_catalogs": {},
@@ -7107,7 +7107,6 @@
       "pending_catalogs": {},
       "pending_help": [
         "account-security.html",
-        "add-account.html",
         "address-book.html",
         "agents-connect.html",
         "agents-permissions.html",
@@ -7118,7 +7117,6 @@
         "certificate-errors.html",
         "command-line.html",
         "connections.html",
-        "conversations.html",
         "data-storage.html",
         "default-mail-program.html",
         "delete-and-undo.html",
@@ -7128,14 +7126,10 @@
         "encrypted-and-signed-mail.html",
         "encryption-errors.html",
         "encryption-keys.html",
-        "find-messages.html",
         "folders.html",
-        "gmail-outlook.html",
         "invitations.html",
         "keyboard-shortcuts.html",
-        "layouts.html",
         "links-scripts.html",
-        "main-window.html",
         "manage-accounts.html",
         "message-not-shown.html",
         "message-rules.html",
@@ -7143,10 +7137,8 @@
         "new-mail.html",
         "no-connection.html",
         "options-language.html",
-        "organize-mail.html",
         "password-not-accepted.html",
         "pictures-tracking.html",
-        "read-messages.html",
         "removing.html",
         "reply-forward.html",
         "save-print-import.html",
@@ -8613,6 +8605,43 @@
           },
           "validation": "All 44 actual main/context/menu/dialog scopes, including runtime Flag colours, pass in 17 languages. Full catalog IDs/variable sets match English. Static check-language has only intentional removed marks and seven recorded, independently verified es/fr multiline-parser false positives. Changed labels are byte-for-byte identical after removing their mnemonic marker. French help markup, literal keys and platform branches preserved. Global 17503 intentionally unmarked catalog messages and 8415 help lines reconcile to exact batches; completed translation/English-source hashes and all pending catalog marks match. Review HTML regenerated and git diff --check passes. No test suite run.",
           "notes": "Expanded actual-scope audit, including Settings/accounts/folder menus/folder picker and runtime colour-letter assignment in FlagMenu. Adjusted access-key positions only, preserving all visible catalog wording, variables and plural structures. French Cci now uses Alt+I on both Windows and GTK; help explains localized Alt+C/Alt+I beside unchanged literal key tags. Open Draft and Not Junk are mutually exclusive by folder role. Separate re-review: do not add these entries/topics to initial scope totals."
+        },
+        {
+          "id": "fi-help-start-round2",
+          "reviewed_ids": {},
+          "reviewed_help": [
+            "add-account.html",
+            "gmail-outlook.html",
+            "main-window.html",
+            "layouts.html",
+            "read-messages.html",
+            "find-messages.html",
+            "conversations.html",
+            "organize-mail.html"
+          ],
+          "changed_values": 0,
+          "files": {
+            "core/crates/pe-html/help/fi/add-account.html": "a6556c2b8b76900c1f6b44d751f4ead79bdb457b0d927b2d441c4ff70f5be750",
+            "core/crates/pe-html/help/fi/gmail-outlook.html": "c0d372b4bfcfad269936632603b0fe364128c69c69e891ac625b0751a6919a24",
+            "core/crates/pe-html/help/fi/main-window.html": "fb90c03a395626f0925097e5c3cf16a96c7dc3a8ca74f2f11773ec5e23b7bcb1",
+            "core/crates/pe-html/help/fi/layouts.html": "26a77bafc38fc129453b14fd0bb897b48cd2c8bc0270194114caa67092a54a6f",
+            "core/crates/pe-html/help/fi/read-messages.html": "880e49ca414980652c11f7230a23da9f25389984eda89e48908c4876f5040a27",
+            "core/crates/pe-html/help/fi/find-messages.html": "a4b149f6545b8702dbef68ac536d90c8105fce4f1ca41c1bc1c668ae775816c0",
+            "core/crates/pe-html/help/fi/conversations.html": "794890f4b40b85acd3d706f825156361f775b245d34f6a8cbd04b80fc62bffd9",
+            "core/crates/pe-html/help/fi/organize-mail.html": "3a1c72afdf7c9640be10a3c6a9ea8f496df1cff41e49b03d3dc529149052bca0"
+          },
+          "english_sources": {
+            "core/crates/pe-html/help/en/add-account.html": "07fe4a8ae27c3acaf2594782a770b21b1b1b229b0ce81a5f88986feddc823b25",
+            "core/crates/pe-html/help/en/gmail-outlook.html": "d093be2eb683a0a3ea53bb68efab3bbef98ef09e341100495f42f7e77493de2c",
+            "core/crates/pe-html/help/en/main-window.html": "1bda497c507b83039b305560b2c14c93e38bc07f72709634bdbb54e8cc65d6b5",
+            "core/crates/pe-html/help/en/layouts.html": "1fbc05e979357066dd5358eff87b394d2f1b88516f65abad32c2e5b6336ccfe0",
+            "core/crates/pe-html/help/en/read-messages.html": "f4b67aaac301a14d8590439037ee0626bfdc75a0045fa0d1b34d865ff877e763",
+            "core/crates/pe-html/help/en/find-messages.html": "3cde4173761e98f4e4af66ff67cc8be4b045346c6a741ee17bf6588d8dce6e73",
+            "core/crates/pe-html/help/en/conversations.html": "1c8af3ca7c98c253e6e93d34f1f83ad88d7f87cc184e7ef0fd8a09db4e74b938",
+            "core/crates/pe-html/help/en/organize-mail.html": "a63b4edf72374937db37a8b40e34a222102d3b13d0d575930e08db9a9f96ebc8"
+          },
+          "validation": "Static check-language has only the 1334 catalog and 8 help marks deliberately removed; no structural findings. All eight topics preserve exact markup/attributes, literal keyboard tags, platform branches and control references; inline joins and dash checks pass. Global 17503 unmarked catalog messages and 8536 help lines reconcile to completed batches; translation/English-source hashes match. Review HTML regenerated; git diff --check passes. No test suite run.",
+          "notes": "Read English/Finnish text and reviewed all eight topics: account setup, Google/Microsoft sign-in, main window, layouts, reading, search, conversations and message organization. Improved natural instructions and source-accurate combined Sent/Drafts navigation, collapsed unread counts excluding Junk/Deleted, search indexing versus reading, display-date capping and folded quoted messages. App passwords are conditional on account support. Data-text controls, tags/attributes, links/images, platform branches and literal keyboard tags preserved. No tests run per user instruction."
         }
       ]
     },
