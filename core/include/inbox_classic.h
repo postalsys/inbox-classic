@@ -962,6 +962,15 @@ typedef struct PeComposeSecurityInfo {
   // Recipients' Keys offers Send Without Encryption; when not, `unencrypted_text` says why
   bool can_send_unencrypted;
   const char *unencrypted_text;
+  // Send in Recipients' Keys can send encrypted (every recipient has a key, and there are some)
+  bool can_send;
+  // Send, else Cancel, is Recipients' Keys' default button (Enter)
+  bool send_default;
+  // The Keys line under the fields shows (Encrypt on, and recipients)
+  bool show_keys;
+  // Ask again (`pe_compose_security`) on the editor's `edited` while this is set: the message answers or forwards
+  // encrypted mail and goes without encryption, so taking its quote out changes the line and what Send does
+  bool watch_text;
 } PeComposeSecurityInfo;
 
 // A recipient and their key, a row of the Keys line and of Recipients' Keys
@@ -972,6 +981,8 @@ typedef struct PeComposeRecipient {
   const char *label;
   enum PeRecipientField field;
   enum PeRecipientKey key;
+  // It can be encrypted to now (verified, found or one's own key)
+  bool has_key;
   // The colour of its lock: green, blue, amber or grey
   enum PeProtectionTone tone;
   // The key in words: "Key verified", "No key: none was found on 3 May 2027"
@@ -990,10 +1001,12 @@ typedef struct PeComposeToggled {
   bool encrypt;
   // A question to ask first, which left the switches as they were
   enum PeComposeQuestion question;
-  // The question and its two buttons (& marks the menu letter), empty without one
+  // The question, empty without one
   char *text;
-  char *yes;
-  char *no;
+  // Its two buttons as words of the catalog (PE_TEXT_..., core/include/texts.h), for each window to show its own
+  // way: `pe_text` with the menu letter, `pe_text_plain` without; 0 without a question
+  uint32_t yes;
+  uint32_t no;
   // A lookup of the recipients' keys that Encrypt started, 0 for none: `KeysFound` follows with it in `uid`
   uint64_t lookup;
 } PeComposeToggled;
@@ -2282,8 +2295,19 @@ struct PeComposeToggled *pe_compose_toggle(const struct PeCore *core,
                                            bool on,
                                            bool confirmed);
 
+// Recipients' Keys' Send Without Encryption: Encrypt off for `message`, Sign as the user had it, without asking the
+// Turn Off question again while the message carries nothing encrypted (`can_send_unencrypted`); while it does, the
+// question comes as from `pe_compose_toggle` (Yes: that call again with `confirmed`). Keep the switches it gives and
+// send when it has no question and Encrypt is off. NULL on failure. Free with `pe_compose_toggled_free`.
+//
 // # Safety
-// `toggled` must be NULL or from `pe_compose_toggle`, freed once.
+// `core` must be a live handle, `message` a valid message.
+struct PeComposeToggled *pe_compose_send_unencrypted(const struct PeCore *core,
+                                                     int64_t account,
+                                                     const struct PeOutgoing *message);
+
+// # Safety
+// `toggled` must be NULL or from `pe_compose_toggle` or `pe_compose_send_unencrypted`, freed once.
 void pe_compose_toggled_free(struct PeComposeToggled *toggled);
 
 // With Encrypt on, looks up the keys of the recipients that have none: when the recipients change (a field left,

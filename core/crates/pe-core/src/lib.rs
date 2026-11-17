@@ -1843,7 +1843,7 @@ impl Core {
         let account = self.store().folder(folder)?.account_id;
         draft.from = self.other_address(account, draft.from.take())?;
         if !files.is_empty() {
-            draft.attachments = attachments_out(&format!("draft-{folder}-{uid}"), files)?;
+            draft.attachments = attachments_out(&format!("{DRAFT_OUT}{folder}-{uid}"), files)?;
         }
         Ok(Some(draft))
     }
@@ -1968,7 +1968,7 @@ impl Core {
         if kind == DraftKind::Forward {
             let files = compose::forwarded_files(&source);
             if !files.is_empty() {
-                draft.attachments = attachments_out(&format!("forward-{folder}-{uid}"), files)?;
+                draft.attachments = attachments_out(&format!("{FORWARD_OUT}{folder}-{uid}"), files)?;
             }
         }
         Ok(Some(draft))
@@ -2007,7 +2007,7 @@ impl Core {
         if kind == DraftKind::Forward {
             let files = compose::forwarded_files(&source);
             if !files.is_empty() {
-                draft.attachments = attachments_out("forward-file", files)?;
+                draft.attachments = attachments_out(&format!("{FORWARD_OUT}file"), files)?;
             }
         }
         Ok(draft)
@@ -2565,6 +2565,14 @@ pub(crate) fn own_addresses(store: &pe_store::Store, account: AccountId) -> Resu
     own.extend(store.account_addresses(account)?.into_iter().map(|(email, _)| email));
     Ok(own)
 }
+
+/// The folders a message's own files are written out to for the compose window, by what it is: a forward's, a
+/// reopened draft's, a message taken back. A file under one of them came out of a message rather than being chosen by
+/// the user (compose_keys.rs `written_out`), which matters for a message that forwards encrypted mail.
+pub(crate) const FORWARD_OUT: &str = "forward-";
+pub(crate) const DRAFT_OUT: &str = "draft-";
+pub(crate) const UNSENT_OUT: &str = "unsent-";
+pub(crate) const WRITTEN_OUT: [&str; 3] = [FORWARD_OUT, DRAFT_OUT, UNSENT_OUT];
 
 /// [`write_out`] for a message to write on: its files, or why they could not be written out, in words
 pub(crate) fn attachments_out(name: &str, files: Vec<(String, Vec<u8>)>) -> Result<Vec<PathBuf>> {

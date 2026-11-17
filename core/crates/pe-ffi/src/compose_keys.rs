@@ -62,6 +62,8 @@ pub struct PeComposeRecipient {
     pub label: *const c_char,
     pub field: PeRecipientField,
     pub key: PeRecipientKey,
+    /// It can be encrypted to now (verified, found or one's own key)
+    pub has_key: bool,
     /// The colour of its lock: green, blue, amber or grey
     pub tone: PeProtectionTone,
     /// The key in words: "Key verified", "No key: none was found on 3 May 2027"
@@ -102,6 +104,15 @@ pub struct PeComposeSecurityInfo {
     /// Recipients' Keys offers Send Without Encryption; when not, `unencrypted_text` says why
     pub can_send_unencrypted: bool,
     pub unencrypted_text: *const c_char,
+    /// Send in Recipients' Keys can send encrypted (every recipient has a key, and there are some)
+    pub can_send: bool,
+    /// Send, else Cancel, is Recipients' Keys' default button (Enter)
+    pub send_default: bool,
+    /// The Keys line under the fields shows (Encrypt on, and recipients)
+    pub show_keys: bool,
+    /// Ask again (`pe_compose_security`) on the editor's `edited` while this is set: the message answers or forwards
+    /// encrypted mail and goes without encryption, so taking its quote out changes the line and what Send does
+    pub watch_text: bool,
 }
 
 /// The compose window's signing and encrypting, with its recipients; free with `pe_compose_security_free`
@@ -113,17 +124,12 @@ pub struct PeComposeSecurity {
 
 fn security_handle(security: &ComposeSecurity) -> *mut PeComposeSecurity {
     let mut strings = Strings::default();
-    let tone = if security.text.is_empty() {
-        PeProtectionTone::None
-    } else {
-        security.tone.into()
-    };
     let info = PeComposeSecurityInfo {
         sign: security.sign,
         sign_enabled: security.sign_enabled,
         encrypt: security.encrypt,
         has_own_key: security.has_own_key,
-        tone,
+        tone: security.tone.map_or(PeProtectionTone::None, Into::into),
         text: strings.add(&security.text),
         sign_tip: strings.add(&security.sign_tip),
         encrypt_tip: strings.add(&security.encrypt_tip),
@@ -139,6 +145,10 @@ fn security_handle(security: &ComposeSecurity) -> *mut PeComposeSecurity {
         keys_intro: strings.add(&security.keys_intro),
         can_send_unencrypted: security.can_send_unencrypted,
         unencrypted_text: strings.add(&security.unencrypted_text),
+        can_send: security.can_send,
+        send_default: security.send_default,
+        show_keys: security.show_keys,
+        watch_text: security.watch_text,
     };
     let recipients = Rows::new(&security.recipients, |r, strings| PeComposeRecipient {
         address: strings.add(&r.address),
@@ -156,6 +166,7 @@ fn security_handle(security: &ComposeSecurity) -> *mut PeComposeSecurity {
             RecipientKey::Missing => PeRecipientKey::Missing,
             RecipientKey::Unusable => PeRecipientKey::Unusable,
         },
+        has_key: r.has_key,
         tone: r.tone.into(),
         text: strings.add(&r.text),
         pending: r.pending.as_deref().map_or(std::ptr::null(), |p| strings.add(p)),
@@ -262,10 +273,12 @@ pub struct PeComposeToggled {
     pub encrypt: bool,
     /// A question to ask first, which left the switches as they were
     pub question: PeComposeQuestion,
-    /// The question and its two buttons (& marks the menu letter), empty without one
+    /// The question, empty without one
     pub text: *mut c_char,
-    pub yes: *mut c_char,
-    pub no: *mut c_char,
+    /// Its two buttons as words of the catalog (PE_TEXT_..., core/include/texts.h), for each window to show its own
+    /// way: `pe_text` with the menu letter, `pe_text_plain` without; 0 without a question
+    pub yes: u32,
+    pub no: u32,
     /// A lookup of the recipients' keys that Encrypt started, 0 for none: `KeysFound` follows with it in `uid`
     pub lookup: u64,
 }
@@ -281,8 +294,8 @@ fn toggled_handle(toggled: Toggled) -> *mut PeComposeToggled {
             Question::TurnOffEncrypt => PeComposeQuestion::TurnOffEncrypt,
         },
         text: into_c_string(toggled.text),
-        yes: into_c_string(toggled.yes),
-        no: into_c_string(toggled.no),
+        yes: toggled.yes.map_or(0, |word| word as u32),
+        no: toggled.no.map_or(0, |word| word as u32),
         lookup: toggled.lookup.unwrap_or(0),
     })
 }
@@ -319,8 +332,34 @@ pub unsafe extern "C" fn pe_compose_toggle(
     }
 }
 
+/// Recipients' Keys' Send Without Encryption: Encrypt off for `message`, Sign as the user had it, without asking the
+/// Turn Off question again while the message carries nothing encrypted (`can_send_unencrypted`); while it does, the
+/// question comes as from `pe_compose_toggle` (Yes: that call again with `confirmed`). Keep the switches it gives and
+/// send when it has no question and Encrypt is off. NULL on failure. Free with `pe_compose_toggled_free`.
+///
 /// # Safety
-/// `toggled` must be NULL or from `pe_compose_toggle`, freed once.
+/// `core` must be a live handle, `message` a valid message.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn pe_compose_send_unencrypted(
+    core: *const PeCore,
+    account: i64,
+    message: *const PeOutgoing,
+) -> *mut PeComposeToggled {
+    // SAFETY: as the caller guarantees
+    let Some(message) = (unsafe { outgoing(message) }) else {
+        return null_mut();
+    };
+    // SAFETY: as the caller guarantees
+    unsafe {
+        with(core, null_mut(), |core| {
+            core.compose_send_unencrypted(account, &message)
+                .map_or(null_mut(), toggled_handle)
+        })
+    }
+}
+
+/// # Safety
+/// `toggled` must be NULL or from `pe_compose_toggle` or `pe_compose_send_unencrypted`, freed once.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pe_compose_toggled_free(toggled: *mut PeComposeToggled) {
     if toggled.is_null() {
@@ -331,8 +370,6 @@ pub unsafe extern "C" fn pe_compose_toggled_free(toggled: *mut PeComposeToggled)
     // SAFETY: made by into_c_string
     unsafe {
         crate::pe_string_free(toggled.text);
-        crate::pe_string_free(toggled.yes);
-        crate::pe_string_free(toggled.no);
     }
 }
 
@@ -521,6 +558,7 @@ mod tests {
         assert!(unsafe { pe_compose_security(std::ptr::null(), 1, &message) }.is_null());
         assert!(unsafe { pe_compose_security_info(std::ptr::null()) }.is_null());
         assert_eq!(unsafe { pe_compose_security_count(std::ptr::null()) }, 0);
+        assert!(unsafe { pe_compose_send_unencrypted(std::ptr::null(), 1, &message) }.is_null());
         unsafe { pe_compose_toggled_free(null_mut()) };
     }
 }

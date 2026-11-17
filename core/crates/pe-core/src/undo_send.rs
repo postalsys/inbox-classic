@@ -142,7 +142,7 @@ impl Core {
             .take(40)
             .collect();
         if !files.is_empty() {
-            draft.attachments = crate::attachments_out(&format!("unsent-{name}"), files)?;
+            draft.attachments = crate::attachments_out(&format!("{}{name}", crate::UNSENT_OUT), files)?;
         }
         self.post(Event::OutboxChanged { account })?;
         let said = pe_i18n::tr_args(Text::UiSendUndone, &[("subject", (&subject).into())]);

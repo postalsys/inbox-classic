@@ -40,6 +40,23 @@ pub enum RecipientKey {
     Unusable,
 }
 
+impl RecipientKey {
+    /// Whether it can be encrypted to now
+    pub fn usable(self) -> bool {
+        matches!(self, RecipientKey::Verified | RecipientKey::Found | RecipientKey::Own)
+    }
+
+    /// The colour of its lock
+    pub fn tone(self) -> Tone {
+        match self {
+            RecipientKey::Verified => Tone::Verified,
+            RecipientKey::Found | RecipientKey::Own => Tone::Good,
+            RecipientKey::Looking => Tone::Neutral,
+            RecipientKey::Missing | RecipientKey::Unusable => Tone::Warning,
+        }
+    }
+}
+
 /// The field a recipient is in
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RecipientField {
@@ -57,6 +74,8 @@ pub struct Recipient {
     pub label: String,
     pub field: RecipientField,
     pub key: RecipientKey,
+    /// It can be encrypted to now ([`RecipientKey::usable`])
+    pub has_key: bool,
     pub tone: Tone,
     /// The key in words: "Key verified", "No key: none was found on 3 May 2027"
     pub text: String,
@@ -89,8 +108,8 @@ pub struct ComposeSecurity {
     pub encrypt: bool,
     /// The From address has a key of its own that can sign and be encrypted to
     pub has_own_key: bool,
-    /// The colour of the line under the fields (none: no line)
-    pub tone: Tone,
+    /// The colour of the line under the fields; None when there is no line
+    pub tone: Option<Tone>,
     /// The line under the fields
     pub text: String,
     pub sign_tip: String,
@@ -109,6 +128,15 @@ pub struct ComposeSecurity {
     /// Recipients' Keys may offer Send Without Encryption; when not, [`ComposeSecurity::unencrypted_text`] says why
     pub can_send_unencrypted: bool,
     pub unencrypted_text: String,
+    /// Send in Recipients' Keys can send encrypted: there are recipients, and every one has a key
+    pub can_send: bool,
+    /// Send is Recipients' Keys' default button (else Cancel): once every recipient has a key, as [`Self::can_send`]
+    pub send_default: bool,
+    /// The Keys line under the fields shows: Encrypt is on and the message has recipients
+    pub show_keys: bool,
+    /// The window looks at the text again as it is edited (the editor's `edited`): the message answers or forwards
+    /// encrypted mail and goes without encryption, so taking its quote out changes what Send does
+    pub watch_text: bool,
 }
 
 /// A switch of the compose window
@@ -137,12 +165,29 @@ pub struct Toggled {
     pub sign: bool,
     pub encrypt: bool,
     pub question: Question,
-    /// The question, and its two buttons
+    /// The question, and the words of its two buttons (with their menu letter in the catalog: each window shows them
+    /// its own way); None without a question
     pub text: String,
-    pub yes: String,
-    pub no: String,
+    pub yes: Option<Text>,
+    pub no: Option<Text>,
     /// A lookup of the recipients' keys started with Encrypt: `KeysFound` follows with it
     pub lookup: Option<u64>,
+}
+
+/// The mailboxes of a recipient list as typed (groups opened), each as its address in lower case and its label (the
+/// name typed with it, else the address); what is no address is left out. Sending encrypts to the same ones
+/// (protect_out.rs).
+pub(crate) fn mailboxes_in(list: &str) -> Vec<(String, String)> {
+    parse_addresses(list)
+        .iter()
+        .flat_map(|parsed| parsed.mailboxes())
+        .filter_map(|mailbox| {
+            let address = normal_address(&mailbox.address);
+            let name = mailbox.name.trim();
+            let label = if name.is_empty() { mailbox.address.trim() } else { name };
+            address.contains('@').then(|| (address, label.to_string()))
+        })
+        .collect()
 }
 
 /// The recipients of `outgoing` once each, in the order of their fields
@@ -153,15 +198,9 @@ fn recipients_of(outgoing: &Outgoing) -> Vec<(String, String, RecipientField)> {
         (&outgoing.cc, RecipientField::Cc),
         (&outgoing.bcc, RecipientField::Bcc),
     ] {
-        for parsed in parse_addresses(list) {
-            for mailbox in parsed.mailboxes() {
-                let address = normal_address(&mailbox.address);
-                if !address.contains('@') || found.iter().any(|(a, ..)| *a == address) {
-                    continue;
-                }
-                let name = mailbox.name.trim();
-                let label = if name.is_empty() { mailbox.address.trim() } else { name };
-                found.push((address, label.to_string(), field));
+        for (address, label) in mailboxes_in(list) {
+            if !found.iter().any(|(a, ..)| *a == address) {
+                found.push((address, label, field));
             }
         }
     }
@@ -216,9 +255,7 @@ fn written_out(path: &std::path::Path) -> bool {
     };
     rest.components().next().is_some_and(|first| {
         let name = first.as_os_str().to_string_lossy();
-        ["forward-", "draft-", "unsent-"]
-            .iter()
-            .any(|kind| name.starts_with(kind))
+        crate::WRITTEN_OUT.iter().any(|kind| name.starts_with(kind))
     })
 }
 
@@ -256,6 +293,88 @@ pub fn without_recipient(outgoing: &Outgoing, address: &str) -> (String, String,
             .join(", ")
     };
     (rewrite(&outgoing.to), rewrite(&outgoing.cc), rewrite(&outgoing.bcc))
+}
+
+impl Toggled {
+    /// The switches left as they were, and a question to ask first with its two buttons
+    fn ask(self, question: Question, text: String, yes: Text, no: Text) -> Toggled {
+        Toggled {
+            question,
+            text,
+            yes: Some(yes),
+            no: Some(no),
+            ..self
+        }
+    }
+}
+
+impl ComposeSecurity {
+    /// The line under the fields and its colour, None for no line
+    fn line(&self, quote_encrypted: bool) -> Option<(Tone, String)> {
+        let list =
+            |of: &mut dyn Iterator<Item = &Recipient>| of.map(|r| r.label.as_str()).collect::<Vec<_>>().join(", ");
+        let (tone, text) = match self.block {
+            Block::EncryptedQuote | Block::NoOwnKey => (Tone::Warning, self.block_text.clone()),
+            Block::MissingKeys if self.looking => {
+                let asked = list(&mut self.recipients.iter().filter(|r| r.key == RecipientKey::Looking));
+                (
+                    Tone::Neutral,
+                    tr_args(Text::PgpComposeLooking, &[("addresses", (&asked).into())]),
+                )
+            }
+            Block::MissingKeys => {
+                let lacking = list(&mut self.recipients.iter().filter(|r| !r.has_key));
+                let args = [
+                    ("addresses", (&lacking).into()),
+                    ("count", (self.missing as i64).into()),
+                ];
+                (Tone::Warning, tr_args(Text::PgpComposeMissing, &args))
+            }
+            Block::None if self.encrypt && self.recipients.is_empty() => (Tone::Good, tr(Text::PgpComposeEncryptReady)),
+            Block::None if self.encrypt => {
+                let mut others = self.recipients.iter().filter(|r| r.key != RecipientKey::Own).peekable();
+                let all_verified = others.peek().is_some() && others.all(|r| r.key == RecipientKey::Verified);
+                let tone = if all_verified { Tone::Verified } else { Tone::Good };
+                let all = list(&mut self.recipients.iter());
+                let args = [
+                    ("addresses", (&all).into()),
+                    ("count", (self.recipients.len() as i64).into()),
+                ];
+                (tone, tr_args(Text::PgpComposeEncrypted, &args))
+            }
+            // a message that answers encrypted mail and goes without encryption says so, signed or not: that it is no
+            // longer encrypted matters more than that it is signed
+            Block::None if quote_encrypted => (Tone::Warning, tr(Text::PgpComposeReplyClear)),
+            Block::None if self.sign => (Tone::Good, tr(Text::PgpComposeSigned)),
+            Block::None => return None,
+        };
+        (!text.is_empty()).then_some((tone, text))
+    }
+}
+
+/// What Send would refuse now, in the order sending checks it (protect_out.rs), and why in words (empty for nothing)
+fn block_of(
+    encrypted: Option<&ComposeError>,
+    sign: bool,
+    encrypt: bool,
+    has_own_key: bool,
+    from: &str,
+    recipients: &[Recipient],
+) -> (Block, String) {
+    let (block, reason) = match encrypted {
+        Some(reason) if !encrypt => (Block::EncryptedQuote, reason.clone()),
+        _ if sign && !has_own_key => (Block::NoOwnKey, ComposeError::NoOwnKey(from.to_string())),
+        _ if encrypt && recipients.iter().any(|r| !r.has_key) => {
+            let lacking = recipients
+                .iter()
+                .filter(|r| !r.has_key)
+                .map(|r| r.address.clone())
+                .collect();
+            (Block::MissingKeys, ComposeError::MissingKeys(lacking))
+        }
+        _ => return (Block::None, String::new()),
+    };
+    (block, reason.to_string())
 }
 
 /// The own key of an address as sending needs it
@@ -333,111 +452,55 @@ impl Core {
         })
     }
 
+    /// A recipient of the message as the window shows it: its key, the colour of its lock, whether Find Key applies
+    fn recipient_row(
+        &self,
+        (address, label, field): (String, String, RecipientField),
+        from: &str,
+        now: i64,
+    ) -> Result<Recipient> {
+        let (key, text, pending) = self.recipient_key(&address, from, now)?;
+        let can_find = !key.usable() && key != RecipientKey::Looking && !self.asked_lately(&address, now)?;
+        Ok(Recipient {
+            address,
+            label,
+            field,
+            key,
+            has_key: key.usable(),
+            tone: key.tone(),
+            text,
+            pending,
+            can_find,
+        })
+    }
+
     /// Everything the compose window shows of signing and encrypting `outgoing` from `account`
     pub fn compose_security(&self, account: AccountId, outgoing: &Outgoing) -> Result<ComposeSecurity> {
         let now = unix_now();
         let from = sending_address(self, account, outgoing)?;
         let encrypt = outgoing.encrypt;
         let sign = outgoing.sign || encrypt;
-        let own = if sign { Some(self.own_key(&from)?) } else { None };
-        let has_own_key = match &own {
-            Some(own) => matches!(own, OwnKey::Ready),
-            None => matches!(self.own_key(&from)?, OwnKey::Ready),
-        };
-        let mut recipients = Vec::new();
-        for (address, label, field) in recipients_of(outgoing) {
-            let (key, text, pending) = self.recipient_key(&address, &from, now)?;
-            let tone = match key {
-                RecipientKey::Verified => Tone::Verified,
-                RecipientKey::Found | RecipientKey::Own => Tone::Good,
-                RecipientKey::Looking => Tone::Neutral,
-                RecipientKey::Missing | RecipientKey::Unusable => Tone::Warning,
-            };
-            let usable = matches!(key, RecipientKey::Verified | RecipientKey::Found | RecipientKey::Own);
-            let can_find = !usable && key != RecipientKey::Looking && !self.asked_lately(&address, now)?;
-            recipients.push(Recipient {
-                address,
-                label,
-                field,
-                key,
-                tone,
-                text,
-                pending,
-                can_find,
-            });
-        }
-        let lacking: Vec<&Recipient> = recipients
-            .iter()
-            .filter(|r| !matches!(r.key, RecipientKey::Verified | RecipientKey::Found | RecipientKey::Own))
-            .collect();
-        let looking = recipients.iter().any(|r| r.key == RecipientKey::Looking);
-        let missing = lacking.len();
+        let has_own_key = matches!(self.own_key(&from)?, OwnKey::Ready);
+        let recipients = recipients_of(outgoing)
+            .into_iter()
+            .map(|recipient| self.recipient_row(recipient, &from, now))
+            .collect::<Result<Vec<_>>>()?;
+        let missing = recipients.iter().filter(|r| !r.has_key).count();
         let encrypted = encrypted_content(outgoing);
-        // what Send refuses, in the order sending checks it (protect_out.rs)
-        let (block, block_error) = if let Some(reason) = encrypted.clone().filter(|_| !encrypt) {
-            (Block::EncryptedQuote, Some(reason))
-        } else if sign && !has_own_key {
-            (Block::NoOwnKey, Some(ComposeError::NoOwnKey(from.clone())))
-        } else if encrypt && missing > 0 {
-            let addresses = lacking.iter().map(|r| r.address.clone()).collect();
-            (Block::MissingKeys, Some(ComposeError::MissingKeys(addresses)))
-        } else {
-            (Block::None, None)
-        };
-        let block_text = block_error.as_ref().map(ToString::to_string).unwrap_or_default();
-        let list = |of: &[&Recipient]| of.iter().map(|r| r.label.as_str()).collect::<Vec<_>>().join(", ");
-        let (tone, text) = match block {
-            Block::EncryptedQuote | Block::NoOwnKey => (Tone::Warning, block_text.clone()),
-            Block::MissingKeys if looking => {
-                let asked: Vec<&Recipient> = recipients.iter().filter(|r| r.key == RecipientKey::Looking).collect();
-                (
-                    Tone::Neutral,
-                    tr_args(Text::PgpComposeLooking, &[("addresses", (&list(&asked)).into())]),
-                )
-            }
-            Block::MissingKeys => (
-                Tone::Warning,
-                tr_args(
-                    Text::PgpComposeMissing,
-                    &[
-                        ("addresses", (&list(&lacking)).into()),
-                        ("count", (missing as i64).into()),
-                    ],
-                ),
-            ),
-            Block::None if encrypt && recipients.is_empty() => (Tone::Good, tr(Text::PgpComposeEncryptReady)),
-            Block::None if encrypt => {
-                let others: Vec<&Recipient> = recipients.iter().filter(|r| r.key != RecipientKey::Own).collect();
-                let all_verified = !others.is_empty() && others.iter().all(|r| r.key == RecipientKey::Verified);
-                let tone = if all_verified { Tone::Verified } else { Tone::Good };
-                let text = tr_args(
-                    Text::PgpComposeEncrypted,
-                    &[
-                        ("addresses", (&list(&recipients.iter().collect::<Vec<_>>())).into()),
-                        ("count", (recipients.len() as i64).into()),
-                    ],
-                );
-                (tone, text)
-            }
-            // a message that answers encrypted mail and goes without encryption says so, signed or not: that it is no
-            // longer encrypted matters more than that it is signed
-            Block::None if outgoing.quote_encrypted => (Tone::Warning, tr(Text::PgpComposeReplyClear)),
-            Block::None if sign => (Tone::Good, tr(Text::PgpComposeSigned)),
-            Block::None => (Tone::Neutral, String::new()),
-        };
-        let tone = if text.is_empty() { None } else { Some(tone) };
+        let (block, block_text) = block_of(encrypted.as_ref(), sign, encrypt, has_own_key, &from, &recipients);
         let keys_intro = if missing > 0 {
             tr_args(Text::PgpRecipientsIntroMissing, &[("count", (missing as i64).into())])
         } else {
             tr(Text::PgpRecipientsIntro)
         };
-        Ok(ComposeSecurity {
+        let can_send = missing == 0 && !recipients.is_empty();
+        let mut security = ComposeSecurity {
             sign,
             sign_enabled: !encrypt,
             encrypt,
             has_own_key,
-            tone: tone.unwrap_or(Tone::Neutral),
-            text,
+            tone: None,
+            text: String::new(),
             sign_tip: tr(if encrypt {
                 Text::PgpComposeSignTipEncrypted
             } else {
@@ -446,13 +509,22 @@ impl Core {
             encrypt_tip: tr(Text::PgpComposeEncryptTip),
             block,
             block_text,
+            looking: recipients.iter().any(|r| r.key == RecipientKey::Looking),
+            show_keys: encrypt && !recipients.is_empty(),
             recipients,
             missing,
-            looking,
             keys_intro,
             can_send_unencrypted: encrypted.is_none(),
             unencrypted_text: encrypted.map(|reason| reason.to_string()).unwrap_or_default(),
-        })
+            can_send,
+            send_default: can_send,
+            watch_text: outgoing.quote_encrypted && !encrypt,
+        };
+        if let Some((tone, text)) = security.line(outgoing.quote_encrypted) {
+            security.tone = Some(tone);
+            security.text = text;
+        }
+        Ok(security)
     }
 
     /// A click on Sign or Encrypt (`on` what it is to become), or the same once its question was answered Yes
@@ -465,13 +537,13 @@ impl Core {
         on: bool,
         confirmed: bool,
     ) -> Result<Toggled> {
-        let mut toggled = Toggled {
+        let toggled = Toggled {
             sign: outgoing.sign,
             encrypt: outgoing.encrypt,
             question: Question::None,
             text: String::new(),
-            yes: String::new(),
-            no: String::new(),
+            yes: None,
+            no: None,
             lookup: None,
         };
         if on {
@@ -479,48 +551,58 @@ impl Core {
             match self.own_key(&from)? {
                 OwnKey::Ready => {}
                 OwnKey::None => {
-                    toggled.question = Question::MakeKey;
-                    toggled.text = tr_args(Text::PgpComposeMakeKey, &[("address", (&from).into())]);
-                    toggled.yes = tr(Text::UiComposeMakeKey);
-                    toggled.no = tr(Text::UiCancel);
-                    return Ok(toggled);
+                    let text = tr_args(Text::PgpComposeMakeKey, &[("address", (&from).into())]);
+                    return Ok(toggled.ask(Question::MakeKey, text, Text::UiComposeMakeKey, Text::UiCancel));
                 }
                 OwnKey::Unusable(state) => {
-                    toggled.question = Question::ShowKeys;
-                    toggled.text = tr_args(
+                    let text = tr_args(
                         Text::PgpComposeKeyUnusable,
                         &[("address", (&from).into()), ("state", (&state).into())],
                     );
-                    toggled.yes = tr(Text::UiComposeShowKeys);
-                    toggled.no = tr(Text::UiCancel);
-                    return Ok(toggled);
+                    return Ok(toggled.ask(Question::ShowKeys, text, Text::UiComposeShowKeys, Text::UiCancel));
                 }
             }
         }
-        match (switch, on) {
-            (Switch::Sign, on) => toggled.sign = on,
+        Ok(match (switch, on) {
+            (Switch::Sign, on) => Toggled { sign: on, ..toggled },
             (Switch::Encrypt, true) => {
-                toggled.encrypt = true;
                 let on = Outgoing {
                     encrypt: true,
                     ..outgoing.clone()
                 };
-                toggled.lookup = self.compose_find_keys(account, &on)?;
+                Toggled {
+                    encrypt: true,
+                    lookup: self.compose_find_keys(account, &on)?,
+                    ..toggled
+                }
             }
             (Switch::Encrypt, false) if outgoing.quote_encrypted && outgoing.encrypt && !confirmed => {
-                toggled.question = Question::TurnOffEncrypt;
-                toggled.text = tr(match encrypted_content(outgoing) {
+                let text = tr(match encrypted_content(outgoing) {
                     Some(_) => Text::PgpComposeEncryptOffQuote,
                     None => Text::PgpComposeEncryptOffReply,
                 });
-                toggled.yes = tr(Text::UiComposeEncryptOff);
-                toggled.no = tr(Text::UiComposeKeepEncrypted);
+                toggled.ask(
+                    Question::TurnOffEncrypt,
+                    text,
+                    Text::UiComposeEncryptOff,
+                    Text::UiComposeKeepEncrypted,
+                )
             }
-            (Switch::Encrypt, false) => toggled.encrypt = false,
-        }
-        Ok(toggled)
+            (Switch::Encrypt, false) => Toggled {
+                encrypt: false,
+                ..toggled
+            },
+        })
     }
 
+    /// Recipients' Keys' Send Without Encryption: Encrypt off, Sign as the user had it. Choosing it answers the Turn
+    /// Off question already, so it is not asked again while the message carries nothing encrypted
+    /// ([`ComposeSecurity::can_send_unencrypted`]); while it does, it is asked as [`Core::compose_toggle`] asks. Send
+    /// follows when the result has no question and Encrypt off.
+    pub fn compose_send_unencrypted(&self, account: AccountId, outgoing: &Outgoing) -> Result<Toggled> {
+        let confirmed = encrypted_content(outgoing).is_none();
+        self.compose_toggle(account, outgoing, Switch::Encrypt, false, confirmed)
+    }
     /// With Encrypt on, looks up the keys of the recipients that have none (not asked in vain in the last day): after
     /// Encrypt is turned on, and when the recipients change. `KeysFound` follows with the request; None when there is
     /// nothing to ask.
@@ -589,6 +671,37 @@ mod tests {
                 ("carol@example.org", "carol@example.org", RecipientField::To),
                 ("dave@example.org", "Dave", RecipientField::Cc),
                 ("eve@example.org", "eve@example.org", RecipientField::Bcc),
+            ]
+        );
+    }
+
+    #[test]
+    fn mailboxes_of_a_list_with_their_labels_and_no_others() {
+        assert_eq!(
+            mailboxes_in("Bob <Bob@Example.org>, Team: carol@example.org;, not an address"),
+            [
+                ("bob@example.org".to_string(), "Bob".to_string()),
+                ("carol@example.org".to_string(), "carol@example.org".to_string()),
+            ]
+        );
+    }
+
+    #[test]
+    fn a_key_usable_and_its_lock() {
+        use RecipientKey::*;
+        let keys = [Verified, Found, Own, Looking, Missing, Unusable];
+        let usable: Vec<bool> = keys.iter().map(|k| k.usable()).collect();
+        assert_eq!(usable, [true, true, true, false, false, false]);
+        let tones: Vec<Tone> = keys.iter().map(|k| k.tone()).collect();
+        assert_eq!(
+            tones,
+            [
+                Tone::Verified,
+                Tone::Good,
+                Tone::Good,
+                Tone::Neutral,
+                Tone::Warning,
+                Tone::Warning
             ]
         );
     }
@@ -689,8 +802,15 @@ mod tests {
             ..Default::default()
         };
         assert_eq!(encrypted_content(&message), None);
-        message.attachments.push(base.join("forward-3-9-123/0/plan.pdf"));
-        assert_eq!(encrypted_content(&message), Some(ComposeError::EncryptedFiles));
+        // a forward's, a reopened draft's and an unsent message's files each came out of the message
+        for kind in crate::WRITTEN_OUT {
+            message.attachments = vec![base.join(format!("{kind}3-9-123/0/plan.pdf"))];
+            assert_eq!(
+                encrypted_content(&message),
+                Some(ComposeError::EncryptedFiles),
+                "{kind}"
+            );
+        }
         message.quote_encrypted = false;
         assert_eq!(encrypted_content(&message), None);
     }

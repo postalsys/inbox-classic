@@ -9,7 +9,6 @@
 //! - **A draft** with Encrypt on: encrypted to the sender's own key only, not signed (RFC 9787 section 9.5).
 
 use pe_pgp::{Cert, SecretKey};
-use pe_store::normal_address;
 
 use crate::compose::{ComposeError, Outgoing};
 use crate::worker::unix_now;
@@ -39,17 +38,11 @@ impl std::fmt::Debug for OutgoingKeys {
     }
 }
 
-/// The addresses of a list as typed
+/// The addresses of a list as typed, as the compose window lists them
 fn addresses(list: &str) -> Vec<String> {
-    pe_mime::parser::parse_addresses(list)
-        .iter()
-        .flat_map(|address| {
-            address
-                .mailboxes()
-                .iter()
-                .map(|m| normal_address(&m.address))
-                .collect::<Vec<_>>()
-        })
+    crate::compose_keys::mailboxes_in(list)
+        .into_iter()
+        .map(|(address, _)| address)
         .collect()
 }
 

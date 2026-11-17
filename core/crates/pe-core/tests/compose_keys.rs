@@ -6,6 +6,7 @@ use std::io::Read;
 use std::net::TcpListener;
 
 use pe_core::compose_keys::{Block, Question, RecipientField, RecipientKey, Switch, without_recipient};
+use pe_core::i18n::Text;
 use pe_core::keys::KeySource;
 use pe_core::protect::Tone;
 use pe_core::{ComposeError, Core, Error, Options, Outgoing, PasswordStore};
@@ -89,13 +90,22 @@ fn a_new_message_has_neither_and_turning_one_on_asks_for_a_key_first() {
     assert!(!shown.has_own_key);
     assert_eq!(shown.block, Block::None);
     assert!(shown.text.is_empty(), "no line for ordinary mail: {}", shown.text);
+    assert_eq!(shown.tone, None);
+    assert!(
+        !shown.show_keys && !shown.watch_text,
+        "no Keys line while Encrypt is off"
+    );
+    assert!(!shown.recipients[0].has_key);
     // no own key: a question, nothing turned on
     let toggled = core
         .compose_toggle(account, &message, Switch::Sign, true, false)
         .unwrap();
     assert_eq!(toggled.question, Question::MakeKey);
     assert!(toggled.text.contains("alice@example.org"), "{}", toggled.text);
-    assert_eq!(toggled.yes, "&Make a Key...");
+    assert_eq!(
+        (toggled.yes, toggled.no),
+        (Some(Text::UiComposeMakeKey), Some(Text::UiCancel))
+    );
     assert!(!toggled.sign);
     let toggled = core
         .compose_toggle(account, &message, Switch::Encrypt, true, false)
@@ -112,7 +122,7 @@ fn a_new_message_has_neither_and_turning_one_on_asks_for_a_key_first() {
     let signed = Outgoing { sign: true, ..message };
     let shown = core.compose_security(account, &signed).unwrap();
     assert!(shown.sign && shown.sign_enabled && shown.has_own_key);
-    assert_eq!(shown.tone, Tone::Good);
+    assert_eq!(shown.tone, Some(Tone::Good));
     assert!(shown.text.starts_with("Signed"), "{}", shown.text);
     assert!(shown.recipients.iter().all(|r| r.key == RecipientKey::Missing));
     assert_eq!(shown.block, Block::None, "signing needs no recipient's key");
@@ -180,9 +190,17 @@ fn each_recipient_shows_its_key_and_encrypt_stops_on_one_without() {
     assert_eq!(shown.recipients[1].text, "Key verified");
     assert_eq!(shown.recipients[3].text, "No key");
     assert!(shown.recipients[3].can_find);
+    let keys: Vec<bool> = shown.recipients.iter().map(|r| r.has_key).collect();
+    assert_eq!(
+        keys,
+        [true, true, true, false],
+        "verified, found and one's own key can be encrypted to"
+    );
     assert_eq!(shown.missing, 1);
+    // one without a key: Recipients' Keys can not send encrypted, and Cancel is its default
+    assert!(shown.show_keys && !shown.can_send && !shown.send_default && !shown.watch_text);
     assert_eq!(shown.block, Block::MissingKeys);
-    assert_eq!(shown.tone, Tone::Warning);
+    assert_eq!(shown.tone, Some(Tone::Warning));
     assert_eq!(
         shown.text,
         "dave@example.org has no key, so the message can not be encrypted yet."
@@ -208,7 +226,11 @@ fn each_recipient_shows_its_key_and_encrypt_stops_on_one_without() {
     };
     let shown = core.compose_security(account, &without).unwrap();
     assert_eq!(shown.block, Block::None);
-    assert_eq!(shown.tone, Tone::Good, "Bob's key is not verified");
+    assert!(
+        shown.can_send && shown.send_default,
+        "every recipient has a key: Send is the default"
+    );
+    assert_eq!(shown.tone, Some(Tone::Good), "Bob's key is not verified");
     assert_eq!(
         shown.text,
         "Encrypted and signed: only you and its 3 recipients can read it."
@@ -222,7 +244,7 @@ fn each_recipient_shows_its_key_and_encrypt_stops_on_one_without() {
         ..without
     };
     let shown = core.compose_security(account, &only_carol).unwrap();
-    assert_eq!(shown.tone, Tone::Verified);
+    assert_eq!(shown.tone, Some(Tone::Verified));
     assert_eq!(
         shown.text,
         "Encrypted and signed: only you and carol@example.org can read it."
@@ -241,6 +263,8 @@ fn encrypt_with_no_recipients_yet_and_sign_that_encrypt_keeps() {
     };
     let shown = core.compose_security(account, &message).unwrap();
     assert_eq!(shown.block, Block::None);
+    // no recipients: no Keys line, and nothing for Recipients' Keys to send to
+    assert!(!shown.show_keys && !shown.can_send && !shown.send_default);
     assert!(
         shown.text.starts_with("It will be encrypted and signed"),
         "{}",
@@ -295,9 +319,13 @@ fn a_reply_to_encrypted_mail_asks_before_encrypt_goes_off_and_its_quote_stays_en
         toggled.text
     );
     assert_eq!(
-        (toggled.yes.as_str(), toggled.no.as_str()),
-        ("&Turn Encryption Off", "&Keep It Encrypted")
+        (toggled.yes, toggled.no),
+        (Some(Text::UiComposeEncryptOff), Some(Text::UiComposeKeepEncrypted))
     );
+    // Send Without Encryption while the quote is there asks the same question
+    let unencrypted = core.compose_send_unencrypted(account, &reply).unwrap();
+    assert_eq!(unencrypted.question, Question::TurnOffEncrypt);
+    assert!(unencrypted.encrypt);
     let toggled = core
         .compose_toggle(account, &reply, Switch::Encrypt, false, true)
         .unwrap();
@@ -309,7 +337,11 @@ fn a_reply_to_encrypted_mail_asks_before_encrypt_goes_off_and_its_quote_stays_en
     };
     let shown = core.compose_security(account, &clear).unwrap();
     assert_eq!(shown.block, Block::EncryptedQuote);
-    assert_eq!(shown.tone, Tone::Warning);
+    assert!(
+        shown.watch_text,
+        "the window looks at the text for the quote while it goes without encryption"
+    );
+    assert_eq!(shown.tone, Some(Tone::Warning));
     assert!(shown.text.contains("can only be sent encrypted"), "{}", shown.text);
     match core.send(account, clear.clone()) {
         Err(Error::Compose(ComposeError::EncryptedQuote)) => {}
@@ -331,7 +363,7 @@ fn a_reply_to_encrypted_mail_asks_before_encrypt_goes_off_and_its_quote_stays_en
         },
     ] {
         let shown = core.compose_security(account, &message).unwrap();
-        assert_eq!(shown.tone, Tone::Warning);
+        assert_eq!(shown.tone, Some(Tone::Warning));
         assert_eq!(
             shown.text,
             "Not encrypted, although the message it answers or forwards was."
@@ -351,6 +383,12 @@ fn a_reply_to_encrypted_mail_asks_before_encrypt_goes_off_and_its_quote_stays_en
         "{}",
         toggled.text
     );
+    assert!(!core.compose_security(account, &encrypted_again).unwrap().watch_text);
+    // Send Without Encryption with the quote gone is the user's answer already: Encrypt off, Sign kept, nothing asked
+    let unencrypted = core.compose_send_unencrypted(account, &encrypted_again).unwrap();
+    assert_eq!(unencrypted.question, Question::None);
+    assert!(!unencrypted.encrypt && unencrypted.sign);
+    assert_eq!((unencrypted.yes, unencrypted.no), (None, None));
 }
 
 #[test]
@@ -381,7 +419,11 @@ fn encrypt_looks_up_the_keys_it_lacks_and_find_key_waits_its_minute() {
     assert!(!dave.can_find);
     assert!(shown.looking);
     assert_eq!(shown.block, Block::MissingKeys, "Send waits for the lookup");
-    assert_eq!(shown.tone, Tone::Neutral);
+    assert_eq!(shown.tone, Some(Tone::Neutral));
+    assert!(
+        !dave.has_key && !shown.can_send && !shown.send_default,
+        "a key being looked up is no key yet"
+    );
     assert_eq!(shown.text, "Looking for the keys of dave@example.org...");
     let own = shown
         .recipients

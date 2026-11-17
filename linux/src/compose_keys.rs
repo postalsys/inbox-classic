@@ -150,12 +150,12 @@ impl SecurityLine {
     }
 
     fn show(&self, security: &ComposeSecurity) {
-        if security.text.is_empty() {
+        let Some(tone) = security.tone else {
             self.widget.set_visible(false);
             return;
-        }
-        set_tone(&self.widget, security.tone);
-        let icon = if security.tone == Tone::Warning {
+        };
+        set_tone(&self.widget, tone);
+        let icon = if tone == Tone::Warning {
             "ic-warning-symbolic"
         } else if security.encrypt {
             "ic-lock-closed-symbolic"
@@ -617,7 +617,8 @@ fn apply(compose: &Rc<Compose>, toggled: &Toggled) {
 /// The question of a switch: `no` (Cancel, Keep It Encrypted) the default and Esc; Turn Encryption Off in red, the
 /// other answers suggested
 async fn ask(compose: &Compose, toggled: &Toggled) -> bool {
-    let (yes, no) = (without_mnemonic(&toggled.yes), without_mnemonic(&toggled.no));
+    let word = |text: Option<pe_core::i18n::Text>| text.map(crate::words::plain).unwrap_or_default();
+    let (yes, no) = (word(toggled.yes), word(toggled.no));
     let destructive = (toggled.question == Question::TurnOffEncrypt).then_some("yes");
     ui::ask(
         &compose.window,
