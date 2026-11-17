@@ -93,7 +93,7 @@ impl Core {
     /// the user turned the key server off.
     pub fn pgp_find_handle(&self, handle: &str) -> Result<u64> {
         if !self.store().pgp_keyserver()? {
-            return Err(crate::Error::Unavailable(pe_i18n::tr(pe_i18n::Text::PgpKeyserverOff)));
+            return Err(crate::Error::Unavailable(keyserver_off()));
         }
         self.start_lookup(Wanted::Handle(handle.to_string()), true)
     }
@@ -269,7 +269,7 @@ impl Core {
         self.pgp_publishes.take(request)
     }
 
-    /// Options' "Look up keys on keys.openpgp.org"
+    /// Settings > Reading > Encryption: "Look up keys on keys.openpgp.org", on out of the box
     pub fn pgp_keyserver(&self) -> Result<bool> {
         Ok(self.store().pgp_keyserver()?)
     }
@@ -277,4 +277,9 @@ impl Core {
     pub fn set_pgp_keyserver(&self, on: bool) -> Result<()> {
         Ok(self.store().set_pgp_keyserver(on)?)
     }
+}
+/// Why a key is not looked up on keys.openpgp.org, naming where the switch is as the window names it on this platform
+pub(crate) fn keyserver_off() -> String {
+    let settings = pe_html::settings_words("reading", pe_html::Platform::current(), pe_i18n::language());
+    pe_i18n::tr_args(pe_i18n::Text::PgpKeyserverOff, &[("settings", (&settings).into())])
 }

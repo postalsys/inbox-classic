@@ -754,6 +754,8 @@ ui-settings-message-list = Viestiluettelo
 # review: new
 ui-settings-messages = Viestit
 # review: new
+ui-settings-encryption = Salaus
+# review: new
 ui-settings-language = Kieli
 # review: new
 ui-settings-label = { $label }:
@@ -1135,6 +1137,14 @@ ui-trusted-everyone-at = Kaikki verkkotunnuksessa { $domain }
 # review: new
 ui-trusted-senders-empty = Luotettuja lähettäjiä ei ole vielä lisätty.
 # review: new
+ui-search-encrypted = Hae &salatuista viesteistä
+# review: new
+ui-search-encrypted-note = Salatut viestit puretaan tällä tietokoneella, kun ne on ladattu tai avattu, jotta niiden sanat löytyvät ja luettelo näyttää niiden oman aiheen. Hakemistoa ei ole salattu, eivätkä tekoälyagentit koskaan hae siitä. Poista tämä käytöstä, niin ne poistetaan hakemistosta.
+# review: new
+ui-pgp-keyserver = &Hae avaimia palvelusta keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Kun salaat viestin tai haet avainta, haettu osoite lähetetään palveluun keys.openpgp.org. Ensin kysytään osoitteen omalta verkkotunnukselta.
+# review: new
 ui-eml-default = &Avaa .eml-tiedostot Inbox Classicilla
 # review: new
 ui-eml-default-done = Inbox Classic avaa nyt .eml-tiedostot.
@@ -1154,6 +1164,10 @@ ui-row-unread = Lukematon
 ui-row-flagged = Liputettu
 # review: new
 ui-row-attachments = Sisältää liitteitä
+# review: new
+ui-row-encrypted = Salattu
+# review: new
+ui-row-signed = Allekirjoitettu
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } viesti

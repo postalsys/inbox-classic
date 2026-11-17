@@ -713,6 +713,10 @@ agent-unreadable = Ez az üzenet nem olvasható.
 # review: new
 agent-encrypted-original = Ez az üzenet titkosított: az ügynök nem válaszolhat rá és nem továbbíthatja, mert nem tud titkosítani.
 # review: new
+agent-encrypted = Ez az üzenet titkosított. Csak a felhasználó olvashatja el, az Inbox Classicban.
+# review: new
+list-encrypted = Titkosított üzenet
+# review: new
 agent-log-composed = Új üzenetben megnyitva, hogy Ön befejezze: „{ $subject }”
 # review: new
 agent-log-refused = Ön nem küldte el: „{ $subject }”
@@ -945,8 +949,8 @@ pgp-publish-pending = A keys.openpgp.org megerősítő hivatkozást küldött id
 pgp-publish-done = A kulcsa közzétéve a keys.openpgp.org oldalon ezekhez a címekhez: { $addresses }.
 # review: new
 pgp-publish-failed = A kulcsot nem sikerült közzétenni: { $error }
-# review: new
-pgp-keyserver-off = A kulcsok keresése a keys.openpgp.org oldalon ki van kapcsolva a Beállításokban.
+# review: changed
+pgp-keyserver-off = A kulcsok keresése a keys.openpgp.org oldalon ki van kapcsolva itt: { $settings }.
 # review: new
 pgp-details-part = { $number }. rész: { $label }
 # review: new

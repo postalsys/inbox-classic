@@ -215,6 +215,7 @@ mod tests {
             sender_auth,
             logo,
             contact,
+            snippet_is_state: false,
         }
     }
 

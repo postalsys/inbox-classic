@@ -294,6 +294,13 @@ typedef enum PePictureKind {
   PE_PICTURE_KIND_CONTACT = 2,
 } PePictureKind;
 
+// Whether a message is signed or encrypted as a whole
+typedef enum PeProtection {
+  PE_PROTECTION_NONE = 0,
+  PE_PROTECTION_SIGNED = 1,
+  PE_PROTECTION_ENCRYPTED = 2,
+} PeProtection;
+
 // What a link clicked in the reading pane is to the app
 typedef enum PeReaderLink {
   // A link of the message: the browser opens it, as before
@@ -1033,6 +1040,14 @@ typedef struct PeMessage {
   uint64_t picture;
   // One or two letters for a sender without a picture ("AL" for Ann Lee), empty when there is no letter
   const char *initials;
+  // The message is signed or encrypted as a whole (OpenPGP, from its structure): the list marks it
+  enum PeProtection protection;
+  // What that mark says (its tooltip, and the row's words for a screen reader): Encrypted or Signed; empty for
+  // neither
+  const char *protection_words;
+  // `snippet` says the message's state ("Encrypted message"), not words its sender wrote: shown in the list's
+  // secondary style for a state (italic)
+  bool snippet_is_state;
 } PeMessage;
 
 // Words an instant (seconds since the Unix epoch) for the event cards: its day in full (`time` false) or its time of
@@ -3584,6 +3599,30 @@ bool pe_pgp_set_account_key(const struct PeCore *core,
                             int64_t account,
                             const char *fingerprint,
                             bool autocrypt);
+
+// Settings, Reading > Encryption: whether the search index keeps the text of encrypted messages once they are decrypted
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_pgp_index_encrypted(const struct PeCore *core);
+
+// Turns it on or off; off, the text decrypted so far leaves the index
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_pgp_set_index_encrypted(const struct PeCore *core, bool on);
+
+// Settings > Reading > Encryption: whether keys are looked up on keys.openpgp.org (Encrypt and Find Key)
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_pgp_keyserver(const struct PeCore *core);
+
+// Turns it on or off
+//
+// # Safety
+// `core` must be a live handle.
+bool pe_pgp_set_keyserver(const struct PeCore *core, bool on);
 
 // The layout of a window `width` wide (96 DPI pixels, points or sp) that shows `current` now, for `mode`: Automatic
 // turns to Columns at 1320 and back to Classic below 1200; Columns chosen holds down to 900

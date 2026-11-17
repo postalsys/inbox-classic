@@ -173,7 +173,14 @@ fn the_key_server_turned_off() {
     assert_eq!(w.result(request).addresses, [("bob@example.org".to_string(), false)]);
     assert!(w.asked.lock().unwrap().iter().all(|path| !path.contains("/vks/")));
     // nor by fingerprint, for a signature's unknown key
-    assert!(w.core.pgp_find_handle(&bob.fingerprint()).is_err());
+    // refused, naming where the switch is as the window names it
+    match w.core.pgp_find_handle(&bob.fingerprint()) {
+        Err(pe_core::Error::Unavailable(why)) => {
+            assert!(why.contains("keys.openpgp.org") && why.contains("Reading"), "{why}");
+            assert!(!why.contains("{"), "{why}");
+        }
+        other => panic!("{other:?}"),
+    }
     assert!(w.asked.lock().unwrap().iter().all(|path| !path.contains("/vks/")));
 }
 

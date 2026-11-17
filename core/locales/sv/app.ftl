@@ -753,6 +753,8 @@ ui-settings-message-list = Meddelandelista
 # review: new
 ui-settings-messages = Meddelanden
 # review: new
+ui-settings-encryption = Kryptering
+# review: new
 ui-settings-language = Språk
 # review: new
 ui-settings-label = { $label }:
@@ -1134,6 +1136,14 @@ ui-trusted-everyone-at = Alla på { $domain }
 # review: new
 ui-trusted-senders-empty = Inga betrodda avsändare har lagts till ännu.
 # review: new
+ui-search-encrypted = Sök i &krypterade meddelanden
+# review: new
+ui-search-encrypted-note = Krypterade meddelanden dekrypteras på den här datorn när de har hämtats eller öppnats, så att orden i dem kan hittas och listan visar deras eget ämne. Indexet är inte krypterat och AI-agenter söker aldrig i det. Stäng av detta för att ta bort dem från indexet.
+# review: new
+ui-pgp-keyserver = &Sök efter nycklar på keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = När du krypterar ett meddelande eller söker efter en nyckel skickas adressen som söks till keys.openpgp.org. Adressens egen domän tillfrågas först.
+# review: new
 ui-eml-default = &Öppna .eml-filer med Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic öppnar nu .eml-filer.
@@ -1153,6 +1163,10 @@ ui-row-unread = Oläst
 ui-row-flagged = Flaggat
 # review: new
 ui-row-attachments = Har bilagor
+# review: new
+ui-row-encrypted = Krypterat
+# review: new
+ui-row-signed = Signerat
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } meddelande

@@ -782,6 +782,10 @@ agent-unreadable = Túto správu nemožno prečítať.
 # review: new
 agent-encrypted-original = Táto správa je šifrovaná: agent na ňu nemôže odpovedať ani ju preposlať, pretože nevie šifrovať.
 # review: new
+agent-encrypted = Táto správa je šifrovaná. Prečítať ju môže iba používateľ, v aplikácii Inbox Classic.
+# review: new
+list-encrypted = Šifrovaná správa
+# review: new
 agent-log-composed = „{ $subject }“ otvorené v novej správe, aby ste ju dokončili
 # review: new
 agent-log-refused = „{ $subject }“ ste neodoslali
@@ -1018,8 +1022,8 @@ pgp-publish-pending = keys.openpgp.org poslal odkaz na potvrdenie na { $addresse
 pgp-publish-done = Váš kľúč je zverejnený na keys.openpgp.org pre { $addresses }.
 # review: new
 pgp-publish-failed = Kľúč sa nepodarilo zverejniť: { $error }
-# review: new
-pgp-keyserver-off = Vyhľadávanie kľúčov na keys.openpgp.org je vypnuté v Možnostiach.
+# review: changed
+pgp-keyserver-off = Vyhľadávanie kľúčov na keys.openpgp.org je vypnuté v { $settings }.
 # review: new
 pgp-details-part = Časť { $number }: { $label }
 # review: new

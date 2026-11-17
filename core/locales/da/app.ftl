@@ -753,6 +753,8 @@ ui-settings-message-list = Meddelelsesliste
 # review: new
 ui-settings-messages = Meddelelser
 # review: new
+ui-settings-encryption = Kryptering
+# review: new
 ui-settings-language = Sprog
 # review: new
 ui-settings-label = { $label }:
@@ -1134,6 +1136,14 @@ ui-trusted-everyone-at = Alle hos { $domain }
 # review: new
 ui-trusted-senders-empty = Der er ikke tilføjet nogen betroede afsendere endnu.
 # review: new
+ui-search-encrypted = Søg i &krypterede meddelelser
+# review: new
+ui-search-encrypted-note = Krypterede meddelelser dekrypteres på denne computer, når de er hentet eller åbnet, så deres ord kan findes, og listen viser deres eget emne. Indekset er ikke krypteret, og AI-agenter søger aldrig i det. Slå dette fra for at fjerne dem fra indekset.
+# review: new
+ui-pgp-keyserver = &Søg efter nøgler på keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Når du krypterer en meddelelse eller søger efter en nøgle, sendes den adresse, der søges efter, til keys.openpgp.org. Adressens eget domæne spørges først.
+# review: new
 ui-eml-default = &Åbn .eml-filer med Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic åbner nu .eml-filer.
@@ -1153,6 +1163,10 @@ ui-row-unread = Ulæst
 ui-row-flagged = Med flag
 # review: new
 ui-row-attachments = Har vedhæftede filer
+# review: new
+ui-row-encrypted = Krypteret
+# review: new
+ui-row-signed = Signeret
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } meddelelse

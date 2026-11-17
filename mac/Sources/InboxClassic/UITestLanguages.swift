@@ -6,6 +6,28 @@ import AppKit
 import CInboxClassic
 
 extension UITest {
+    /// Settings > Reading > Encryption: its two switches, on at first, each with its note; each turned off counts at once
+    /// (the window is then closed and opened again, where they are still off)
+    func encryptionSettings(_ shown: SettingsWindow) async throws {
+        let labelled = views(NSTextField.self, in: shown.window.contentView).map(\.stringValue)
+        check(labelled.contains("Encryption:"), "Reading has the Encryption group, its title in the label column")
+        check(shown.searchEncrypted.title == "Search in encrypted messages" && shown.keyserver.title == "Look up keys on keys.openpgp.org",
+              "with Search in encrypted messages and Look up keys on keys.openpgp.org (\(shown.searchEncrypted.title), \(shown.keyserver.title))")
+        check(shown.searchEncrypted.state == .on && shown.keyserver.state == .on, "both on at first")
+        check(labelled.contains { $0.contains("The index is not encrypted, and AI agents never search it") }
+              && labelled.contains { $0.contains("the address looked up is sent to keys.openpgp.org") },
+              "each with its note: the index is not encrypted and agents never search it; only the address is sent")
+        let below = { (view: NSView) in view.convert(view.bounds, to: nil).minY }
+        check(below(shown.keyserver) < below(shown.searchEncrypted) && below(shown.searchEncrypted) < below(shown.pictures),
+              "after Messages, in the order of settings.toml")
+        await shot(shown.window, "options-4-encryption")
+        onMain {
+            shown.searchEncrypted.performClick(nil)
+            shown.keyserver.performClick(nil)
+        }
+        check(await waitUntil(5) { !main.core.searchEncrypted && !main.core.keyserver }, "each turned off counts at once")
+    }
+
     func languages() async throws {
         step("Settings and the language")
         command(.options)
@@ -44,11 +66,19 @@ extension UITest {
         await showPane(shown, .reading)
         check(settings.title == "Reading", "the Reading pane titles the window Reading (\(settings.title))")
         await shot(settings, "options-2-reading")
+        try await encryptionSettings(shown)
         settings.close()
         _ = await waitUntil { SettingsWindow.current == nil }
         command(.options)
         if let again = await waitFor(10, { SettingsWindow.current }) {
             check(again.pane == .reading && again.window.title == "Reading", "closed on Reading and opened again, it opens on Reading")
+            check(again.searchEncrypted.state == .off && again.keyserver.state == .off && !main.core.searchEncrypted
+                  && !main.core.keyserver, "Search in encrypted messages and Look up keys turned off stay off")
+            onMain {
+                again.searchEncrypted.performClick(nil)
+                again.keyserver.performClick(nil)
+            }
+            check(await waitUntil(5) { main.core.searchEncrypted && main.core.keyserver }, "and on again")
             await showPane(again, .general)
             again.window.close()
         } else {

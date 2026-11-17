@@ -733,6 +733,10 @@ agent-unreadable = Dit bericht kan niet worden gelezen.
 # review: new
 agent-encrypted-original = Dit bericht is versleuteld: een agent kan het niet beantwoorden of doorsturen, omdat hij niet kan versleutelen.
 # review: new
+agent-encrypted = Dit bericht is versleuteld. Alleen de gebruiker kan het lezen, in Inbox Classic.
+# review: new
+list-encrypted = Versleuteld bericht
+# review: new
 agent-log-composed = “{ $subject }” geopend in een nieuw bericht dat jij afmaakt
 # review: new
 agent-log-refused = Je hebt “{ $subject }” niet verzonden
@@ -966,8 +970,8 @@ pgp-publish-pending = keys.openpgp.org heeft een bevestigingslink gestuurd naar 
 pgp-publish-done = Je sleutel is gepubliceerd op keys.openpgp.org voor { $addresses }.
 # review: new
 pgp-publish-failed = De sleutel kon niet worden gepubliceerd: { $error }
-# review: new
-pgp-keyserver-off = Sleutels opzoeken op keys.openpgp.org is uitgeschakeld in Opties.
+# review: changed
+pgp-keyserver-off = Sleutels zoeken op keys.openpgp.org staat uit bij { $settings }.
 # review: new
 pgp-details-part = Deel { $number }: { $label }
 # review: new

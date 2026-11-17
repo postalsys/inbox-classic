@@ -51,6 +51,74 @@ pub struct MessageInfo {
     /// The mailing list it came through (its List-Id, the part in angle brackets, lowercase), for `list:`; written by
     /// `add_messages`, never read back with the message
     pub list_id: Option<String>,
+    /// OpenPGP: whether it is signed or encrypted as a whole, from its structure (`multipart/signed`,
+    /// `multipart/encrypted`)
+    pub protection: Protection,
+    /// The Subject it came with, while `subject` is the protected one decrypted from it: what an AI agent is told.
+    /// Read back with the message, never written by `add_messages`
+    pub outer_subject: Option<String>,
+    /// Its text, people and file names in the store came from decrypting it (the search's and the list's). Read back
+    /// with the message: `add_messages` stores such a message again as it came ([`MessageInfo::as_received`])
+    pub decrypted: bool,
+}
+
+impl MessageInfo {
+    /// The message as it came from the server: a decrypted one without what decrypting it gave (its protected
+    /// Subject, the people and the files inside), so that a row stored again (a move the server refused, Undo) holds
+    /// nothing decrypted that is not marked so; the background pass decrypts it again
+    pub fn as_received(&self) -> std::borrow::Cow<'_, MessageInfo> {
+        if !self.decrypted {
+            return std::borrow::Cow::Borrowed(self);
+        }
+        std::borrow::Cow::Owned(MessageInfo {
+            subject: self.outer_subject.clone().unwrap_or_else(|| self.subject.clone()),
+            sender_people: String::new(),
+            recipient_people: String::new(),
+            attachment_names: String::new(),
+            attachment_count: 0,
+            outer_subject: None,
+            decrypted: false,
+            ..self.clone()
+        })
+    }
+}
+
+/// Whether a message is signed or encrypted as a whole (OpenPGP), from its own type; kept as 0, 1 and 2
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+pub enum Protection {
+    #[default]
+    None,
+    /// `multipart/signed`
+    Signed,
+    /// `multipart/encrypted`
+    Encrypted,
+}
+
+impl Protection {
+    /// How the store keeps it
+    pub(crate) const fn stored(self) -> i64 {
+        match self {
+            Protection::None => 0,
+            Protection::Signed => 1,
+            Protection::Encrypted => 2,
+        }
+    }
+}
+
+impl rusqlite::types::ToSql for Protection {
+    fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
+        Ok(self.stored().into())
+    }
+}
+
+impl rusqlite::types::FromSql for Protection {
+    fn column_result(value: rusqlite::types::ValueRef<'_>) -> rusqlite::types::FromSqlResult<Self> {
+        Ok(match value.as_i64()? {
+            2 => Protection::Encrypted,
+            1 => Protection::Signed,
+            _ => Protection::None,
+        })
+    }
 }
 
 /// The colour of a flag, as Apple Mail keeps it: `\\Flagged` with three keyword bits, `$MailFlagBit0` to
@@ -173,9 +241,17 @@ pub struct Message {
     /// The picture of the Address Book's card with its sender's address, (card, its picture's revision), when there is
     /// one: the core shows it only for a confirmed sender ([`Message::sender_auth`]); never in a Junk folder
     pub contact: Option<(i64, i64)>,
+    /// [`Message::snippet`] says the message's state ("Encrypted message"), not words its sender wrote: the apps style
+    /// it as such (the core sets it)
+    pub snippet_is_state: bool,
 }
 
 impl Message {
+    /// The Subject an AI agent is told: the one it came with, never one decrypted for the user
+    pub fn agent_subject(&self) -> &str {
+        self.info.outer_subject.as_deref().unwrap_or(&self.info.subject)
+    }
+
     /// Whether its row is bold: it is unread, or it is a collapsed conversation's row and one of its messages is
     pub fn bold(&self) -> bool {
         !self.info.seen() || self.thread.is_some_and(|t| t.collapsed() && t.unread > 0)
@@ -285,7 +361,7 @@ pub(crate) const COLUMNS: &str = "id, folder_id, uid, modseq, flags, internal_da
       ORDER BY a.card_id LIMIT 1), \
      (SELECT p.changed FROM card_addresses a JOIN card_pictures p ON p.card_id = a.card_id \
       WHERE a.address = messages.from_address COLLATE NOCASE AND messages.from_address != '' \
-      ORDER BY a.card_id LIMIT 1)";
+      ORDER BY a.card_id LIMIT 1), protection, outer_subject, decrypted = 1";
 
 pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
     let junk: bool = row.get(27)?;
@@ -303,6 +379,7 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
             (Some(card), Some(changed)) if !junk => Some((card, changed)),
             _ => None,
         },
+        snippet_is_state: false,
         info: MessageInfo {
             uid: row.get(2)?,
             modseq: row.get(3)?,
@@ -328,6 +405,9 @@ pub(crate) fn from_row(row: &Row) -> rusqlite::Result<Message> {
             bounce: row.get(22)?,
             auth_headers: None,
             list_id: None,
+            protection: row.get(30)?,
+            outer_subject: row.get(31)?,
+            decrypted: row.get(32)?,
         },
     })
 }
@@ -336,6 +416,14 @@ impl Store {
     /// Adds messages to a folder. For a UID it has, only the flags are updated: within one
     /// UIDVALIDITY the rest of a message never changes.
     pub fn add_messages(&self, folder: FolderId, messages: &[MessageInfo]) -> Result<()> {
+        // nothing decrypted goes in unmarked: a decrypted message stored again is stored as it came
+        let received: Vec<MessageInfo>;
+        let messages = if messages.iter().any(|m| m.decrypted) {
+            received = messages.iter().map(|m| m.as_received().into_owned()).collect();
+            received.as_slice()
+        } else {
+            messages
+        };
         // the people of the messages new to the store go in the address book, before they are in the store
         self.note_correspondents(folder, messages)?;
         let account: AccountId =
@@ -351,8 +439,8 @@ impl Store {
             "INSERT INTO messages (folder_id, uid, modseq, flags, seen, internal_date, date, size, subject, from_name, \
              from_address, recipients, message_id, in_reply_to, has_attachments, sender_people, recipient_people, \
              attachment_names, attachment_count, refs, bounce, auth_headers, list_id, sort_from, sort_subject, thread_id, \
-             id) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, \
-             ?22, ?23, ?24, ?25, ?26, (SELECT high + 1 FROM message_ids)) \
+             protection, id) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, \
+             ?20, ?21, ?22, ?23, ?24, ?25, ?26, ?27, (SELECT high + 1 FROM message_ids)) \
              ON CONFLICT (folder_id, uid) DO UPDATE SET modseq = excluded.modseq, flags = excluded.flags, \
              seen = excluded.seen",
         )?;
@@ -395,7 +483,8 @@ impl Store {
                     &m.from_name
                 }),
                 crate::fold::fold(&m.subject),
-                thread
+                thread,
+                m.protection
             ])?;
         }
         Ok(())

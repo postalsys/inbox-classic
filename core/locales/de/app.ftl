@@ -395,6 +395,8 @@ ui-settings-message-list = Nachrichtenliste
 # review: new
 ui-settings-messages = Nachrichten
 # review: new
+ui-settings-encryption = Verschlüsselung
+# review: new
 ui-settings-language = Sprache
 # review: new
 ui-settings-label = { $label }:
@@ -617,6 +619,14 @@ ui-trusted-senders-title = Vertrauenswürdige Absender
 ui-trusted-senders-note = Bilder in Nachrichten dieser Absender werden automatisch heruntergeladen, wenn Ihr E-Mail-Anbieter die Absenderdomain bestätigt.
 ui-trusted-everyone-at = Alle Absender der Domain { $domain }
 ui-trusted-senders-empty = Es wurden noch keine vertrauenswürdigen Absender hinzugefügt.
+# review: new
+ui-search-encrypted = In verschlüsselten Nachrichten &suchen
+# review: new
+ui-search-encrypted-note = Verschlüsselte Nachrichten werden auf diesem Computer entschlüsselt, sobald sie heruntergeladen oder geöffnet sind, damit ihre Wörter gefunden werden und die Liste ihren eigenen Betreff zeigt. Der Index ist nicht verschlüsselt, und KI-Agenten durchsuchen ihn nie. Schalten Sie dies aus, um sie aus dem Index zu entfernen.
+# review: new
+ui-pgp-keyserver = Schlüssel &auf keys.openpgp.org suchen
+# review: new
+ui-pgp-keyserver-note = Wenn Sie eine Nachricht verschlüsseln oder einen Schlüssel suchen, wird die gesuchte Adresse an keys.openpgp.org gesendet. Zuerst wird die Domain der Adresse selbst gefragt.
 # review: changed
 ui-eml-default = .&eml-Dateien mit Inbox Classic öffnen
 ui-eml-default-done = Inbox Classic öffnet jetzt .eml-Dateien.
@@ -629,6 +639,10 @@ ui-columns-note = Das Fenster ist breit genug für das Spaltenlayout. Sie könne
 ui-row-unread = Ungelesen
 ui-row-flagged = Gekennzeichnet
 ui-row-attachments = Mit Anlagen
+# review: new
+ui-row-encrypted = Verschlüsselt
+# review: new
+ui-row-signed = Signiert
 ui-row-messages = { $count ->
     [one] { $count } Nachricht
    *[other] { $count } Nachrichten

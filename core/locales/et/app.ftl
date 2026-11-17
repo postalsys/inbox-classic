@@ -395,6 +395,8 @@ ui-settings-message-list = Kirjade loend
 # review: new
 ui-settings-messages = Kirjad
 # review: new
+ui-settings-encryption = Krüptimine
+# review: new
 ui-settings-language = Keel
 # review: new
 ui-settings-label = { $label }:
@@ -617,6 +619,14 @@ ui-trusted-senders-title = Usaldusväärsed saatjad
 ui-trusted-senders-note = Nende saatjate kirjade pildid laaditakse automaatselt alla, kui teie meiliteenuse pakkuja on saatja domeeni kinnitanud.
 ui-trusted-everyone-at = Kõik domeeni { $domain } saatjad
 ui-trusted-senders-empty = Usaldusväärseid saatjaid pole veel lisatud.
+# review: new
+ui-search-encrypted = Otsi &krüptitud kirjadest
+# review: new
+ui-search-encrypted-note = Krüptitud kirjad dekrüptitakse selles arvutis pärast allalaadimist või avamist, et nende sõnu saaks leida ja loend näitaks nende enda teemat. Indeks ei ole krüptitud ja tehisintellekti agendid ei otsi sellest kunagi. Lülitage see välja, et need indeksist eemaldada.
+# review: new
+ui-pgp-keyserver = &Otsi võtmeid serverist keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Kui krüptite kirja või otsite võtit, saadetakse otsitav aadress serverisse keys.openpgp.org. Kõigepealt küsitakse aadressi enda domeenilt.
 # review: changed
 ui-eml-default = Ava .eml-&failid Inbox Classicuga
 ui-eml-default-done = Inbox Classic avab nüüd .eml-failid.
@@ -629,6 +639,10 @@ ui-columns-note = Aken on veergudega paigutuse jaoks piisavalt lai. Paigutust sa
 ui-row-unread = Lugemata
 ui-row-flagged = Lipuga
 ui-row-attachments = Manustega
+# review: new
+ui-row-encrypted = Krüptitud
+# review: new
+ui-row-signed = Allkirjastatud
 ui-row-messages = { $count ->
     [one] { $count } kiri
    *[other] { $count } kirja

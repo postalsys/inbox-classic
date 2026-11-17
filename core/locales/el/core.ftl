@@ -740,6 +740,10 @@ agent-unreadable = Δεν είναι δυνατή η ανάγνωση αυτού
 # review: new
 agent-encrypted-original = Αυτό το μήνυμα είναι κρυπτογραφημένο: ένας πράκτορας δεν μπορεί να του απαντήσει ή να το προωθήσει, καθώς δεν μπορεί να κρυπτογραφήσει.
 # review: new
+agent-encrypted = Αυτό το μήνυμα είναι κρυπτογραφημένο. Μόνο ο χρήστης μπορεί να το διαβάσει, στο Inbox Classic.
+# review: new
+list-encrypted = Κρυπτογραφημένο μήνυμα
+# review: new
 agent-log-composed = Άνοιξε το «{ $subject }» σε νέο μήνυμα για να το ολοκληρώσετε
 # review: new
 agent-log-refused = Δεν στείλατε το «{ $subject }»
@@ -973,8 +977,8 @@ pgp-publish-pending = Το keys.openpgp.org έστειλε σύνδεσμο επ
 pgp-publish-done = Το κλειδί σας δημοσιεύτηκε στο keys.openpgp.org για { $addresses }.
 # review: new
 pgp-publish-failed = Δεν ήταν δυνατή η δημοσίευση του κλειδιού: { $error }
-# review: new
-pgp-keyserver-off = Η αναζήτηση κλειδιών στο keys.openpgp.org είναι απενεργοποιημένη στις Επιλογές.
+# review: changed
+pgp-keyserver-off = Η αναζήτηση κλειδιών στο keys.openpgp.org είναι απενεργοποιημένη στο { $settings }.
 # review: new
 pgp-details-part = Τμήμα { $number }: { $label }
 # review: new

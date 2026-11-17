@@ -336,3 +336,161 @@ fn pe_core_now() -> i64 {
         .unwrap()
         .as_secs() as i64
 }
+
+/// An encrypted message the user can read: an agent lists it by its envelope, reads that it is encrypted and no more,
+/// gets none of its files, never finds it by a word only the decrypted text has (which the user's search finds once
+/// it was opened), and can not answer it; no tool signs or encrypts
+#[test]
+fn an_agent_never_reads_encrypted_mail() {
+    let Some(server) = ImapKit::start(json!({})) else {
+        return;
+    };
+    let fixtures = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../scripts/ui-e2e/pgp");
+    let read = |name: &str| std::fs::read(fixtures.join(name)).unwrap();
+    // encrypted to the user's key, with a protected Subject the user's list shows once it is decrypted
+    let me = pe_pgp::read_certs(&read("me.asc")).unwrap().remove(0);
+    let inner = "Content-Type: text/plain; charset=utf-8; protected-headers=\"v1\"\r\nSubject: The zebrafish plan\r\n\r\n\
+                 See you at the old mill.\r\n";
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs() as i64;
+    let armored = pe_pgp::encrypt(inner.as_bytes().to_vec(), &[&me], &[], None, now).unwrap();
+    let raw = format!(
+        "From: Alice Example <alice@example.org>\r\nTo: testuser@example.com\r\nSubject: ...\r\n\
+         Message-ID: <sealed@example.org>\r\nMIME-Version: 1.0\r\n\
+         Content-Type: multipart/encrypted; protocol=\"application/pgp-encrypted\"; boundary=\"e\"\r\n\r\n\
+         --e\r\nContent-Type: application/pgp-encrypted\r\n\r\nVersion: 1\r\n--e\r\n\
+         Content-Type: application/octet-stream\r\n\r\n{armored}\r\n--e--\r\n"
+    );
+    let sealed = server.add_message("INBOX", &raw, &[]);
+
+    let dir = TempDir::new("mcp-pgp");
+    let (sender, events) = channel();
+    let options = pe_core::Options {
+        trust: pe_net::Trust::Pinned(vec![server.cert.clone()]),
+        passwords: pe_core::PasswordStore::Memory,
+        ..Default::default()
+    };
+    let core = Arc::new(
+        Core::open_with(dir.path().join("store.db"), options, move |event| {
+            let _ = sender.send(event);
+        })
+        .unwrap(),
+    );
+    let passphrase = String::from_utf8(read("me.passphrase")).unwrap();
+    core.pgp_import(&read("me.asc"), Some(passphrase.trim()), pe_core::keys::KeySource::File)
+        .unwrap();
+    let mut settings = server.account_settings();
+    settings.smtp_security = pe_store::Security::StartTls;
+    let account = core.add_account(&settings, PASSWORD).unwrap();
+    let (others, rest) = channel();
+    answer_questions(core.clone(), events, others);
+    core.sync(account).unwrap();
+    loop {
+        match rest.recv_timeout(Duration::from_secs(20)).expect("the sync finishes") {
+            Event::SyncFinished { failure: None, .. } => break,
+            Event::Failed { message, .. } => panic!("{message}"),
+            _ => {}
+        }
+    }
+    let inbox = core
+        .folders(account)
+        .unwrap()
+        .into_iter()
+        .find(|f| f.info.path == "INBOX")
+        .unwrap()
+        .id;
+    let user_finds = |text: &str| {
+        let search = pe_core::Search {
+            scope: pe_core::Scope::Everywhere,
+            show: pe_core::Show::All,
+            text: text.into(),
+            ..Default::default()
+        };
+        core.search(&search, pe_store::Sort::default(), 0, 10).unwrap().len()
+    };
+
+    let socket = dir.path().join("agents").join("mcp.sock");
+    let mut mcp = McpServer::listen_unix(core.clone(), &socket).unwrap();
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+    runtime.block_on(async {
+        let mut agent = Client::connect(&socket, "/test/bin/agent", "Test Agent").await;
+        agent.initialize().await;
+        // no tool signs or encrypts
+        let tools = agent.request("tools/list", json!({})).await;
+        for tool in tools["result"]["tools"].as_array().unwrap() {
+            let name = tool["name"].as_str().unwrap();
+            assert!(
+                !name.contains("sign") && !name.contains("encrypt") && !name.contains("key"),
+                "{name}"
+            );
+        }
+
+        // read: who sent it and when, and that it is encrypted (this also downloads it)
+        let message = agent
+            .call("get_message", json!({ "folder": inbox, "uid": sealed }))
+            .await
+            .unwrap();
+        assert_eq!(message["from"], "Alice Example <alice@example.org>", "{message}");
+        let text = message["text"].as_str().unwrap();
+        assert!(text.contains("encrypted") && !text.contains("mill"), "{message}");
+        assert!(message["attachments"].as_array().unwrap().is_empty(), "{message}");
+        let file = agent
+            .call("get_attachment", json!({ "folder": inbox, "uid": sealed, "index": 0 }))
+            .await;
+        assert!(file.is_err(), "{file:?}");
+
+        // decrypted for the user (by the background pass, or as it is opened): their search finds its words, an
+        // agent's never does
+        let view = core.message_view(inbox, sealed, false).unwrap().unwrap();
+        assert!(view.protection.as_ref().is_some_and(|p| p.encrypted));
+        assert!(eventually(10, || user_finds("mill") == 1), "decrypted for the user");
+        let found = agent.call("search_messages", json!({ "query": "mill" })).await.unwrap();
+        assert!(found["messages"].as_array().unwrap().is_empty(), "{found}");
+        let found = agent
+            .call("search_messages", json!({ "query": "is:encrypted" }))
+            .await
+            .unwrap();
+        assert_eq!(found["messages"][0]["uid"], sealed, "{found}");
+        let found = agent
+            .call("search_messages", json!({ "query": "from:alice" }))
+            .await
+            .unwrap();
+        assert!(
+            found["messages"].as_array().unwrap().is_empty(),
+            "words never reach what was decrypted: {found}"
+        );
+        // listed by the Subject it came with, while the user's list shows the protected one
+        assert_eq!(
+            core.message(inbox, sealed).unwrap().unwrap().info.subject,
+            "The zebrafish plan"
+        );
+        let listed = agent.call("list_messages", json!({ "folder": inbox })).await.unwrap();
+        assert_eq!(listed["messages"][0]["subject"], "...", "{listed}");
+        for listed in [
+            listed,
+            agent
+                .call("get_message", json!({ "folder": inbox, "uid": sealed }))
+                .await
+                .unwrap(),
+        ] {
+            assert!(!listed.to_string().contains("mill"), "{listed}");
+        }
+
+        // nor answered, which would quote it unencrypted
+        let reply = agent
+            .call(
+                "send_message",
+                json!({ "account": account, "to": "alice@example.org", "subject": "Re: ...", "text": "Yes",
+                        "reply_to": { "folder": inbox, "uid": sealed, "kind": "reply" } }),
+            )
+            .await;
+        assert!(reply.as_ref().is_err_and(|why| why.contains("encrypted")), "{reply:?}");
+        assert!(core.outbox().unwrap().is_empty());
+    });
+    mcp.stop();
+}

@@ -164,6 +164,17 @@ impl World {
         let subject = r.pick(&subjects).to_string();
         let recipients = r.pick(&["Ann", "Bob", "", "carol@x"]).to_string();
         let size = (!r.chance(10)).then(|| r.below(5) * 100);
+        // OpenPGP: some signed, some encrypted, as the sync reads them from the structure
+        let protection = *r.pick(&[
+            crate::Protection::None,
+            crate::Protection::None,
+            crate::Protection::None,
+            crate::Protection::None,
+            crate::Protection::None,
+            crate::Protection::None,
+            crate::Protection::Signed,
+            crate::Protection::Encrypted,
+        ]);
         let flags = self.flags();
         self.ids.push(id.clone());
         MessageInfo {
@@ -179,6 +190,7 @@ impl World {
             message_id: Some(id),
             in_reply_to: references.last().cloned(),
             references,
+            protection,
             ..Default::default()
         }
     }
@@ -215,7 +227,8 @@ impl World {
             }
             (76..=80, Some(at)) => self.join_conversations(at),
             (81..=82, Some(at)) => self.thread_again(at),
-            (83..=85, Some(at)) => self.redate(at),
+            (83..=84, Some(at)) => self.redate(at),
+            (85, Some(at)) => self.decrypt(at),
             (86..=88, Some(at)) => self.mark_conversation(at),
             (89..=90, _) => {
                 if self.rng.chance(50) {
@@ -255,6 +268,34 @@ impl World {
             batch.push(again);
         }
         self.store.add_messages(folder, &batch).unwrap();
+    }
+
+    /// An encrypted message decrypted for the index, its protected Subject shown in the list (which moves it in the
+    /// Subject order and may make it its conversation's first); now and then the switch turned off, which puts every
+    /// Subject back
+    fn decrypt(&mut self, (folder, uid): (FolderId, u64)) {
+        if self.rng.chance(20) {
+            self.store.forget_decrypted().unwrap();
+            return;
+        }
+        let subject = *self
+            .rng
+            .pick(&["Aardvark plans", "zz inside", "Hello", "Ärger im Haus"]);
+        let text = crate::IndexText {
+            body: "the inside".into(),
+            snippet: "the inside".into(),
+            ..Default::default()
+        };
+        self.store.index_decrypted(folder, uid, &text, Some(subject)).unwrap();
+        // a move the server refused: the row comes back as it came, nothing decrypted left in it unmarked
+        if self.rng.chance(30)
+            && let Some(message) = self.store.message(folder, uid).unwrap()
+        {
+            self.store.remove_messages(folder, &[uid]).unwrap();
+            self.store.add_messages(folder, &[message.info]).unwrap();
+            let back = self.store.message(folder, uid).unwrap().unwrap();
+            assert!(!back.info.decrypted && back.info.outer_subject.is_none() && back.info.sender_people.is_empty());
+        }
     }
 
     /// References fetched later join conversations
@@ -434,15 +475,32 @@ impl World {
                 Some(open)
             }
         };
+        // now and then a search of a mark: its terms read the messages, in pages from a row next to them too
+        let text = r
+            .pick(&["", "", "", "", "", "is:encrypted", "is:signed", "-is:encrypted"])
+            .to_string();
         let search = Search {
             scope,
             show,
             threads,
             hide_ignored: r.chance(30),
             read_since,
+            text,
             ..Default::default()
         };
         (search, sort)
+    }
+
+    /// A search of a mark finds the messages that have it and no other
+    fn check_marks(&self, search: &Search, sort: Sort, what: &str) {
+        let wanted: fn(crate::Protection) -> bool = match search.text.as_str() {
+            "is:encrypted" => |p| p == crate::Protection::Encrypted,
+            "is:signed" => |p| p == crate::Protection::Signed,
+            "-is:encrypted" => |p| p != crate::Protection::Encrypted,
+            _ => return,
+        };
+        let found = self.store.search(&search.ungrouped(), sort, 0, 10_000).unwrap();
+        assert!(found.iter().all(|m| wanted(m.info.protection)), "{what}");
     }
 
     /// Every call of the list reads what it read from the messages: rows, counts, places, neighbours, Next Unread and
@@ -463,6 +521,7 @@ impl World {
             .iter()
             .map(Message::at)
             .collect();
+        self.check_marks(search, sort, &what);
         self.check_places(search, sort, &all, &members, &what);
         self.check_walks(search, sort, &all, &members, &what);
         self.check_anchored_pages(search, sort, &all, &what);
@@ -640,12 +699,18 @@ fn the_migration_counts_what_was_stored_before() {
          DROP INDEX messages_all_by_from; DROP INDEX messages_all_by_subject; DROP INDEX messages_read_at; \
          DROP INDEX messages_all_by_date; DROP INDEX messages_all_by_received; \
          CREATE INDEX messages_all_by_date ON messages (COALESCE(MIN(date, internal_date), date, internal_date), uid, id); \
-         CREATE INDEX messages_all_by_received ON messages (internal_date, uid, id);",
+         CREATE INDEX messages_all_by_received ON messages (internal_date, uid, id); \
+         DROP INDEX messages_to_decrypt; ALTER TABLE messages DROP COLUMN protection; \
+         ALTER TABLE messages DROP COLUMN decrypted; ALTER TABLE messages DROP COLUMN outer_subject;",
     )
     .unwrap();
-    let db = &mut world.store.db;
-    db.pragma_update(None, "user_version", crate::schema::MIGRATIONS.len() - 1)
+    // from the migration that counts, and those after it
+    let counts = crate::schema::MIGRATIONS
+        .iter()
+        .position(|m| m.contains("CREATE TABLE conversations"))
         .unwrap();
+    let db = &mut world.store.db;
+    db.pragma_update(None, "user_version", counts).unwrap();
     crate::schema::migrate(db).unwrap();
     assert_eq!(kept(&world.store.db), before);
     // and keeps them from then on

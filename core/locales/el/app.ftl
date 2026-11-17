@@ -753,6 +753,8 @@ ui-settings-message-list = Λίστα μηνυμάτων
 # review: new
 ui-settings-messages = Μηνύματα
 # review: new
+ui-settings-encryption = Κρυπτογράφηση
+# review: new
 ui-settings-language = Γλώσσα
 # review: new
 ui-settings-label = { $label }:
@@ -1134,6 +1136,14 @@ ui-trusted-everyone-at = Όλοι στο { $domain }
 # review: new
 ui-trusted-senders-empty = Δεν έχουν προστεθεί ακόμη αξιόπιστοι αποστολείς.
 # review: new
+ui-search-encrypted = Αναζήτηση σε &κρυπτογραφημένα μηνύματα
+# review: new
+ui-search-encrypted-note = Τα κρυπτογραφημένα μηνύματα αποκρυπτογραφούνται σε αυτόν τον υπολογιστή μόλις ληφθούν ή ανοιχτούν, ώστε να βρίσκονται οι λέξεις τους και η λίστα να δείχνει το δικό τους θέμα. Το ευρετήριο δεν είναι κρυπτογραφημένο και οι πράκτορες ΤΝ δεν κάνουν ποτέ αναζήτηση σε αυτό. Απενεργοποιήστε το για να αφαιρεθούν από το ευρετήριο.
+# review: new
+ui-pgp-keyserver = Αναζήτηση κλειδιών &στο keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Όταν κρυπτογραφείτε ένα μήνυμα ή αναζητάτε ένα κλειδί, η διεύθυνση που αναζητείται στέλνεται στο keys.openpgp.org. Πρώτα ερωτάται ο ίδιος ο τομέας της διεύθυνσης.
+# review: new
 ui-eml-default = &Άνοιγμα αρχείων .eml με το Inbox Classic
 # review: new
 ui-eml-default-done = Το Inbox Classic ανοίγει πλέον τα αρχεία .eml.
@@ -1153,6 +1163,10 @@ ui-row-unread = Αδιάβαστο
 ui-row-flagged = Με σημαία
 # review: new
 ui-row-attachments = Έχει συνημμένα
+# review: new
+ui-row-encrypted = Κρυπτογραφημένο
+# review: new
+ui-row-signed = Υπογεγραμμένο
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } μήνυμα

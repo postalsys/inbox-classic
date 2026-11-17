@@ -395,6 +395,8 @@ ui-settings-message-list = Lista de mensajes
 # review: new
 ui-settings-messages = Mensajes
 # review: new
+ui-settings-encryption = Cifrado
+# review: new
 ui-settings-language = Idioma
 # review: new
 ui-settings-label = { $label }:
@@ -617,6 +619,14 @@ ui-trusted-senders-title = Remitentes de confianza
 ui-trusted-senders-note = Las imágenes de los mensajes de estos remitentes se descargan automáticamente cuando su proveedor de correo verifica el dominio del remitente.
 ui-trusted-everyone-at = Todos los remitentes del dominio { $domain }
 ui-trusted-senders-empty = Aún no hay remitentes de confianza.
+# review: new
+ui-search-encrypted = &Buscar en mensajes cifrados
+# review: new
+ui-search-encrypted-note = Los mensajes cifrados se descifran en este equipo una vez descargados o abiertos, para que se puedan encontrar sus palabras y la lista muestre su propio asunto. El índice no está cifrado y los agentes de IA nunca buscan en él. Desactívelo para quitarlos del índice.
+# review: new
+ui-pgp-keyserver = Buscar claves &en keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Cuando cifra un mensaje o busca una clave, la dirección buscada se envía a keys.openpgp.org. Antes se consulta al propio dominio de la dirección.
 # review: changed
 ui-eml-default = Abrir &los archivos .eml con Inbox Classic
 ui-eml-default-done = Inbox Classic abre ahora los archivos .eml.
@@ -629,6 +639,10 @@ ui-columns-note = La ventana es lo bastante ancha para el diseño en columnas. P
 ui-row-unread = No leído
 ui-row-flagged = Marcado
 ui-row-attachments = Con archivos adjuntos
+# review: new
+ui-row-encrypted = Cifrado
+# review: new
+ui-row-signed = Firmado
 ui-row-messages = { $count ->
     [one] { $count } mensaje
    *[other] { $count } mensajes

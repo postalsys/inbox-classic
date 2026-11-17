@@ -753,6 +753,8 @@ ui-settings-message-list = Elenco messaggi
 # review: new
 ui-settings-messages = Messaggi
 # review: new
+ui-settings-encryption = Crittografia
+# review: new
 ui-settings-language = Lingua
 # review: new
 ui-settings-label = { $label }:
@@ -1134,6 +1136,14 @@ ui-trusted-everyone-at = Chiunque in { $domain }
 # review: new
 ui-trusted-senders-empty = Non hai ancora aggiunto mittenti attendibili.
 # review: new
+ui-search-encrypted = Cerca nei messaggi &crittografati
+# review: new
+ui-search-encrypted-note = I messaggi crittografati vengono decrittografati su questo computer una volta scaricati o aperti, così le loro parole possono essere trovate e l’elenco ne mostra l’oggetto vero. L’indice non è crittografato e gli agenti IA non vi cercano mai. Disattiva l’opzione per rimuoverli dall’indice.
+# review: new
+ui-pgp-keyserver = C&erca le chiavi su keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Quando crittografi un messaggio o cerchi una chiave, l’indirizzo cercato viene inviato a keys.openpgp.org. Prima viene interpellato il dominio dell’indirizzo stesso.
+# review: new
 ui-eml-default = Apri i &file .eml con Inbox Classic
 # review: new
 ui-eml-default-done = Ora Inbox Classic apre i file .eml.
@@ -1153,6 +1163,10 @@ ui-row-unread = Da leggere
 ui-row-flagged = Contrassegnato
 # review: new
 ui-row-attachments = Con allegati
+# review: new
+ui-row-encrypted = Crittografato
+# review: new
+ui-row-signed = Firmato
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } messaggio

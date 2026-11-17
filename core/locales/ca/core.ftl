@@ -744,6 +744,10 @@ agent-unreadable = Aquest missatge no es pot llegir.
 # review: new
 agent-encrypted-original = Aquest missatge està xifrat: un agent no hi pot respondre ni reenviar-lo, perquè no pot xifrar.
 # review: new
+agent-encrypted = Aquest missatge està xifrat. Només l’usuari el pot llegir, a Inbox Classic.
+# review: new
+list-encrypted = Missatge xifrat
+# review: new
 agent-log-composed = Ha obert «{ $subject }» en un missatge nou perquè l’acabeu
 # review: new
 agent-log-refused = No heu enviat «{ $subject }»
@@ -977,8 +981,8 @@ pgp-publish-pending = keys.openpgp.org ha enviat un enllaç de confirmació a { 
 pgp-publish-done = La vostra clau està publicada a keys.openpgp.org per a { $addresses }.
 # review: new
 pgp-publish-failed = No s’ha pogut publicar la clau: { $error }
-# review: new
-pgp-keyserver-off = La cerca de claus a keys.openpgp.org està desactivada a Opcions.
+# review: changed
+pgp-keyserver-off = La cerca de claus a keys.openpgp.org està desactivada a { $settings }.
 # review: new
 pgp-details-part = Part { $number }: { $label }
 # review: new

@@ -769,6 +769,10 @@ agent-unreadable = Šo ziņojumu nevar nolasīt.
 # review: new
 agent-encrypted-original = Šis ziņojums ir šifrēts: aģents nevar uz to atbildēt vai to pārsūtīt, jo nevar šifrēt.
 # review: new
+agent-encrypted = Šis ziņojums ir šifrēts. To var izlasīt tikai lietotājs lietotnē Inbox Classic.
+# review: new
+list-encrypted = Šifrēts ziņojums
+# review: new
 agent-log-composed = Atvēra „{ $subject }” jaunā ziņojumā, lai jūs to pabeigtu
 # review: new
 agent-log-refused = Jūs nenosūtījāt „{ $subject }”
@@ -1004,8 +1008,8 @@ pgp-publish-pending = keys.openpgp.org nosūtīja apstiprinājuma saiti uz { $ad
 pgp-publish-done = Jūsu atslēga ir publicēta vietnē keys.openpgp.org adresei { $addresses }.
 # review: new
 pgp-publish-failed = Atslēgu nevarēja publicēt: { $error }
-# review: new
-pgp-keyserver-off = Atslēgu meklēšana vietnē keys.openpgp.org ir izslēgta opcijās.
+# review: changed
+pgp-keyserver-off = Atslēgu meklēšana vietnē keys.openpgp.org ir izslēgta sadaļā { $settings }.
 # review: new
 pgp-details-part = { $number }. daļa: { $label }
 # review: new

@@ -753,6 +753,8 @@ ui-settings-message-list = Llista de missatges
 # review: new
 ui-settings-messages = Missatges
 # review: new
+ui-settings-encryption = Xifratge
+# review: new
 ui-settings-language = Llengua
 # review: new
 ui-settings-label = { $label }:
@@ -1134,6 +1136,14 @@ ui-trusted-everyone-at = Tothom del domini { $domain }
 # review: new
 ui-trusted-senders-empty = Encara no s’ha afegit cap remitent de confiança.
 # review: new
+ui-search-encrypted = Cerca als missatges &xifrats
+# review: new
+ui-search-encrypted-note = Els missatges xifrats es desxifren en aquest ordinador un cop baixats o oberts, perquè se’n puguin trobar les paraules i la llista en mostri l’assumpte propi. L’índex no està xifrat i els agents d’IA no hi cerquen mai. Desactiveu-ho per treure’ls de l’índex.
+# review: new
+ui-pgp-keyserver = C&erca claus a keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Quan xifreu un missatge o cerqueu una clau, l’adreça cercada s’envia a keys.openpgp.org. Primer es consulta el domini de l’adreça.
+# review: new
 ui-eml-default = &Obre els fitxers .eml amb Inbox Classic
 # review: new
 ui-eml-default-done = Ara Inbox Classic obre els fitxers .eml.
@@ -1153,6 +1163,10 @@ ui-row-unread = No llegit
 ui-row-flagged = Amb bandera
 # review: new
 ui-row-attachments = Té fitxers adjunts
+# review: new
+ui-row-encrypted = Xifrat
+# review: new
+ui-row-signed = Signat
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } missatge

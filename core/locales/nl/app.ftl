@@ -753,6 +753,8 @@ ui-settings-message-list = Berichtenlijst
 # review: new
 ui-settings-messages = Berichten
 # review: new
+ui-settings-encryption = Versleuteling
+# review: new
 ui-settings-language = Taal
 # review: new
 ui-settings-label = { $label }:
@@ -1134,6 +1136,14 @@ ui-trusted-everyone-at = Iedereen bij { $domain }
 # review: new
 ui-trusted-senders-empty = Er zijn nog geen vertrouwde afzenders toegevoegd.
 # review: new
+ui-search-encrypted = &Zoeken in versleutelde berichten
+# review: new
+ui-search-encrypted-note = Versleutelde berichten worden op deze computer ontsleuteld zodra ze zijn gedownload of geopend, zodat hun woorden kunnen worden gevonden en de lijst hun eigen onderwerp toont. De index is niet versleuteld en AI-agents zoeken er nooit in. Zet dit uit om ze uit de index te verwijderen.
+# review: new
+ui-pgp-keyserver = &Sleutels zoeken op keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Als je een bericht versleutelt of naar een sleutel zoekt, wordt het gezochte adres naar keys.openpgp.org gestuurd. Eerst wordt het eigen domein van het adres gevraagd.
+# review: new
 ui-eml-default = .&eml-bestanden openen met Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic opent nu .eml-bestanden.
@@ -1153,6 +1163,10 @@ ui-row-unread = Ongelezen
 ui-row-flagged = Gemarkeerd
 # review: new
 ui-row-attachments = Heeft bijlagen
+# review: new
+ui-row-encrypted = Versleuteld
+# review: new
+ui-row-signed = Ondertekend
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } bericht

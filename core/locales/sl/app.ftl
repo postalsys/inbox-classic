@@ -756,6 +756,8 @@ ui-settings-message-list = Seznam sporočil
 # review: new
 ui-settings-messages = Sporočila
 # review: new
+ui-settings-encryption = Šifriranje
+# review: new
 ui-settings-language = Jezik
 # review: new
 ui-settings-label = { $label }:
@@ -1153,6 +1155,14 @@ ui-trusted-everyone-at = Vsi na { $domain }
 # review: new
 ui-trusted-senders-empty = Dodan še ni noben zaupanja vreden pošiljatelj.
 # review: new
+ui-search-encrypted = Išči v &šifriranih sporočilih
+# review: new
+ui-search-encrypted-note = Šifrirana sporočila se v tem računalniku dešifrirajo, ko so prenesena ali odprta, da je mogoče najti njihove besede in seznam prikaže njihovo pravo zadevo. Indeks ni šifriran in agenti UI v njem nikoli ne iščejo. Izklopite to, da jih odstranite iz indeksa.
+# review: new
+ui-pgp-keyserver = &Išči ključe na keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Ko šifrirate sporočilo ali iščete ključ, se iskani naslov pošlje na keys.openpgp.org. Najprej se vpraša domena naslova.
+# review: new
 ui-eml-default = Odpiraj &datoteke .eml z Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic zdaj odpira datoteke .eml.
@@ -1172,6 +1182,10 @@ ui-row-unread = Neprebrano
 ui-row-flagged = Z zastavico
 # review: new
 ui-row-attachments = Ima priponke
+# review: new
+ui-row-encrypted = Šifrirano
+# review: new
+ui-row-signed = Podpisano
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } sporočilo

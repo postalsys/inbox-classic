@@ -45,6 +45,16 @@ pub fn send_delay_index(seconds: u64) -> usize {
     SEND_DELAYS.iter().rposition(|&choice| choice <= seconds).unwrap_or(0)
 }
 
+/// What the list's mark of a message signed or encrypted as a whole says (its tooltip, and what a screen reader says
+/// of the row): Encrypted or Signed; None for neither
+pub fn protection_words(protection: pe_store::Protection) -> Option<String> {
+    match protection {
+        pe_store::Protection::None => None,
+        pe_store::Protection::Signed => Some(tr(Text::UiRowSigned)),
+        pe_store::Protection::Encrypted => Some(tr(Text::UiRowEncrypted)),
+    }
+}
+
 /// The initials the list shows for a sender without a picture: the first letters of the first and the last word of
 /// the name ("Ann Lee", "Lee, Ann" and "Ann B. Lee" give AL), one for a name of one word (a Chinese name gives its first
 /// character), else the first letter of the address; empty when there is no letter (an emoji for a name)

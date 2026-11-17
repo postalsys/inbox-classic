@@ -754,6 +754,8 @@ ui-settings-message-list = Списък със съобщения
 # review: new
 ui-settings-messages = Съобщения
 # review: new
+ui-settings-encryption = Шифроване
+# review: new
 ui-settings-language = Език
 # review: new
 ui-settings-label = { $label }:
@@ -1135,6 +1137,14 @@ ui-trusted-everyone-at = Всички в { $domain }
 # review: new
 ui-trusted-senders-empty = Все още не са добавени доверени податели.
 # review: new
+ui-search-encrypted = Търсене в &шифрованите съобщения
+# review: new
+ui-search-encrypted-note = Шифрованите съобщения се дешифрират на този компютър, след като бъдат изтеглени или отворени, за да могат думите им да бъдат намерени, а списъкът да показва собствената им тема. Индексът не е шифрован и агентите с ИИ никога не търсят в него. Изключете това, за да ги премахнете от индекса.
+# review: new
+ui-pgp-keyserver = &Търсене на ключове в keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Когато шифровате съобщение или търсите ключ, търсеният адрес се изпраща до keys.openpgp.org. Първо се пита собственият домейн на адреса.
+# review: new
 ui-eml-default = &Отваряне на файловете .eml с Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic вече отваря файловете .eml.
@@ -1154,6 +1164,10 @@ ui-row-unread = Непрочетено
 ui-row-flagged = С флаг
 # review: new
 ui-row-attachments = Има прикачени файлове
+# review: new
+ui-row-encrypted = Шифровано
+# review: new
+ui-row-signed = Подписано
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } съобщение

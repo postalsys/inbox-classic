@@ -742,6 +742,10 @@ agent-unreadable = Това съобщение не може да бъде пр�
 # review: new
 agent-encrypted-original = Това съобщение е шифровано: агент не може да отговори на него или да го препрати, тъй като не може да шифрова.
 # review: new
+agent-encrypted = Това съобщение е шифровано. Само потребителят може да го прочете, в Inbox Classic.
+# review: new
+list-encrypted = Шифровано съобщение
+# review: new
 agent-log-composed = „{ $subject }“ е отворено в ново съобщение, за да го довършите
 # review: new
 agent-log-refused = Не изпратихте „{ $subject }“
@@ -975,8 +979,8 @@ pgp-publish-pending = keys.openpgp.org изпрати връзка за потв
 pgp-publish-done = Ключът ви е публикуван в keys.openpgp.org за { $addresses }.
 # review: new
 pgp-publish-failed = Ключът не можа да бъде публикуван: { $error }
-# review: new
-pgp-keyserver-off = Търсенето на ключове в keys.openpgp.org е изключено в „Опции“.
+# review: changed
+pgp-keyserver-off = Търсенето на ключове в keys.openpgp.org е изключено в { $settings }.
 # review: new
 pgp-details-part = Част { $number }: { $label }
 # review: new

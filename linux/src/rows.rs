@@ -13,7 +13,7 @@ use pe_store::Message;
 
 use crate::app::shell;
 use crate::commands::Command;
-use crate::messages::{MessageRow, attachment_icon, bind_flag, thread_expander};
+use crate::messages::{MessageRow, attachment_icon, bind_flag, security_icon, security_tip, thread_expander};
 use crate::ui::set_class;
 
 /// How far the rows of an opened conversation are indented under its first, as the other apps' Columns rows
@@ -85,6 +85,8 @@ struct Parts {
     subject: gtk::Label,
     folder: gtk::Label,
     attachment: gtk::Image,
+    /// The lock of an encrypted message or the ribbon of a signed one, left of the paper clip
+    security: gtk::Image,
     /// Glasses on a watched conversation, the muted sign on an ignored one, as the Mac's and Windows' rows have
     watch: gtk::Image,
     flag: gtk::DrawingArea,
@@ -138,6 +140,7 @@ impl Parts {
         small_dim(&folder);
         folder.set_max_width_chars(18);
         let attachment = gtk::Image::new();
+        let security = gtk::Image::new();
         let watch = gtk::Image::new();
         let flag = gtk::DrawingArea::new();
         flag.set_content_width(16);
@@ -153,6 +156,7 @@ impl Parts {
             subject.upcast_ref(),
             folder.upcast_ref(),
             watch.upcast_ref(),
+            security.upcast_ref(),
             attachment.upcast_ref(),
             flag.upcast_ref(),
         ]));
@@ -181,6 +185,7 @@ impl Parts {
             subject,
             folder,
             attachment,
+            security,
             watch,
             flag,
             snippet,
@@ -261,6 +266,10 @@ fn bind(row: &gtk::Widget, parts: &Parts, m: &Message, context: &RowContext) {
     bind_picture(parts, m, context.pictures.get());
     let snippet = m.snippet.as_deref().unwrap_or_default();
     parts.snippet.set_text(snippet);
+    // the message's state ("Encrypted message") rather than its sender's words: in italics, as on the other platforms
+    parts
+        .snippet
+        .set_attributes(m.snippet_is_state.then(state_attributes).as_ref());
     bind_thread(parts, m);
     set_class(&parts.text, "dim-label", m.dimmed());
     let unread = if m.info.seen() {
@@ -268,7 +277,8 @@ fn bind(row: &gtk::Widget, parts: &Parts, m: &Message, context: &RowContext) {
     } else {
         format!("{}, ", t!(UiRowUnread))
     };
-    let label = format!("{unread}{who}, {}, {date}, {snippet}", m.info.subject);
+    let security = security_tip(m).map(|said| format!("{said}, ")).unwrap_or_default();
+    let label = format!("{unread}{security}{who}, {}, {date}, {snippet}", m.info.subject);
     row.update_property(&[gtk::accessible::Property::Label(&label)]);
 }
 
@@ -304,8 +314,8 @@ pub fn picture_shown(row: &RowWidget) -> bool {
         .is_some_and(|parts| parts.picture.widget.is_visible())
 }
 
-/// The marks at the right of the subject: the paper clip (a bounce's own mark in its place) and the flag in its colour,
-/// as the classic row has them (an ignored conversation is grey, as there)
+/// The marks at the right of the subject: the lock or the ribbon, the paper clip (a bounce's own mark in its place) and
+/// the flag in its colour, as the classic row has them (an ignored conversation is grey, as there)
 fn bind_marks(parts: &Parts, m: &Message) {
     let (icon, command) = match m.mark {
         pe_store::ThreadMark::Watch => (Some("ic-glasses-symbolic"), Some(Command::WatchConversation)),
@@ -315,6 +325,10 @@ fn bind_marks(parts: &Parts, m: &Message) {
     parts.watch.set_icon_name(icon);
     parts.watch.set_visible(icon.is_some());
     parts.watch.set_tooltip_text(command.map(Command::label));
+    let security = security_icon(m);
+    parts.security.set_icon_name(security);
+    parts.security.set_visible(security.is_some());
+    parts.security.set_tooltip_text(security_tip(m).as_deref());
     let attachment = attachment_icon(m);
     parts.attachment.set_icon_name(attachment);
     parts.attachment.set_visible(attachment.is_some());
@@ -393,4 +407,11 @@ fn day_month_format() -> &'static str {
             _ => "%-e %b",
         }
     })
+}
+
+/// Italics, for a line that says a message's state rather than its words
+fn state_attributes() -> gtk::pango::AttrList {
+    let attributes = gtk::pango::AttrList::new();
+    attributes.insert(gtk::pango::AttrInt::new_style(gtk::pango::Style::Italic));
+    attributes
 }

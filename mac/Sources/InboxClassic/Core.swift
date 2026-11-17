@@ -178,6 +178,18 @@ final class Core {
         set { pe_set_always_load_pictures(handle, newValue) }
     }
 
+    /// Settings > Reading > Encryption: "Search in encrypted messages"; off takes their decrypted text out of the index
+    var searchEncrypted: Bool {
+        get { pe_pgp_index_encrypted(handle) }
+        set { _ = pe_pgp_set_index_encrypted(handle, newValue) }
+    }
+
+    /// Settings > Reading > Encryption: "Look up keys on keys.openpgp.org"
+    var keyserver: Bool {
+        get { pe_pgp_keyserver(handle) }
+        set { _ = pe_pgp_set_keyserver(handle, newValue) }
+    }
+
     /// Settings' "Show messages on a dark background when the system is dark", for the documents built from then on
     var darkMessages: Bool {
         get { pe_dark_messages(handle) }
@@ -948,6 +960,8 @@ struct Message {
     let flagColor: UInt8
     let answered: Bool
     let hasAttachments: Bool
+    /// encrypted or signed as a whole, from its structure (the list's lock or rosette)
+    let protection: PeProtection
     /// bold: unread, or a collapsed conversation's row with an unread message (the core decides)
     let bold: Bool
     /// its place in a list grouped by conversation: the conversation (0 when not grouped), 0 for the conversation's
@@ -971,6 +985,11 @@ struct Message {
     /// the first words of what the sender wrote, empty until the core has read them (text from the sender: shown as
     /// text only)
     let snippet: String
+    /// `snippet` says the message's state ("Encrypted message"), not words its sender wrote: styled as a state
+    let snippetIsState: Bool
+    /// what the lock or the rosette says (its tooltip, and the row's words for a screen reader), the core's; nil for
+    /// neither
+    let protectionWords: String?
     /// the sender's picture in the column layout: the key the core draws it by (0 for none: a logo or a contact's
     /// picture are drawn alike), and the initials shown without one
     let picture: UInt64
@@ -990,6 +1009,7 @@ struct Message {
         flagColor = message.flag_color
         answered = message.answered
         hasAttachments = message.has_attachments
+        protection = message.protection
         thread = message.thread
         threadDepth = message.thread_depth
         threadCount = message.thread_count
@@ -1002,6 +1022,9 @@ struct Message {
         mark = message.mark
         dimmed = message.dimmed
         snippet = text(message.snippet)
+        snippetIsState = message.snippet_is_state
+        let words = text(message.protection_words)
+        protectionWords = words.isEmpty ? nil : words
         picture = message.picture
         initials = text(message.initials)
     }

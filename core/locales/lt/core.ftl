@@ -757,6 +757,10 @@ agent-unreadable = Šio laiško perskaityti negalima.
 # review: new
 agent-encrypted-original = Šis laiškas užšifruotas: agentas negali į jį atsakyti ar jo persiųsti, nes negali šifruoti.
 # review: new
+agent-encrypted = Šis laiškas užšifruotas. Jį gali perskaityti tik naudotojas, programoje Inbox Classic.
+# review: new
+list-encrypted = Užšifruotas laiškas
+# review: new
 agent-log-composed = „{ $subject }“ atidarytas naujame laiške, kad jį užbaigtumėte
 # review: new
 agent-log-refused = Neišsiuntėte „{ $subject }“
@@ -993,8 +997,8 @@ pgp-publish-pending = keys.openpgp.org išsiuntė patvirtinimo nuorodą adresu {
 pgp-publish-done = Jūsų raktas paskelbtas keys.openpgp.org adresams { $addresses }.
 # review: new
 pgp-publish-failed = Rakto paskelbti nepavyko: { $error }
-# review: new
-pgp-keyserver-off = Raktų paieška keys.openpgp.org išjungta parinktyse.
+# review: changed
+pgp-keyserver-off = Raktų paieška keys.openpgp.org išjungta skiltyje { $settings }.
 # review: new
 pgp-details-part = { $number } dalis: { $label }
 # review: new

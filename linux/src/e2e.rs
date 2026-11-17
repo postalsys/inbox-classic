@@ -53,6 +53,9 @@ mod dark;
 /// Step 19i: signed and encrypted mail
 mod secure;
 
+/// Step 19i: encrypted and signed mail in the list and the search, and Search in encrypted messages
+mod encrypted_list;
+
 /// Step 8a: opening attachments (after 19i, for the account's key)
 mod attach;
 /// Step 45a: settings and accounts to another computer
@@ -1061,12 +1064,14 @@ async fn scenario(d: Rc<Driver>) {
     accounts(&d).await;
     sign_in_apps(&d).await;
     setup::settings_and_accounts(&d).await;
+    encrypted_list::encryption_settings(&d).await;
     steps::languages(&d).await;
     steps::language_tour(&d).await;
     about_and_help(&d).await;
     printing(&d).await;
     dark::dark_messages(&d).await;
     steps::opened_from_store(&d).await;
+    encrypted_list::in_the_list_and_the_search(&d).await;
     steps::closing(&d).await;
 }
 

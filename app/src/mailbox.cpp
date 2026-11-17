@@ -47,7 +47,7 @@ const wchar_t* kClosedRowsPreference = L"ClosedFolderRows";
 
 // as Outlook Express has them: the paper clip, the flag and the Watch column (glasses, or the sign of an ignored
 // conversation), then the text columns; no read and unread column: bold says it
-enum Column { COL_ATTACH, COL_FLAG, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_FOLDER };
+enum Column { COL_ATTACH, COL_FLAG, COL_SECURE, COL_FROM, COL_SUBJECT, COL_RECEIVED, COL_FOLDER };
 
 // what the Find box takes, shown when the mouse rests on it: the words of the query syntax are the same in every
 // language
@@ -156,7 +156,24 @@ LRESULT CALLBACK ListProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam,
     return result;
 }
 
-// a column that shows an icon of the list strip in its header (the paper clip, the flag, the glasses) and nothing else
+// the columns that show an icon of the list strip in their header and nothing else, and what each stands for (its
+// header's tooltip, the same word on every platform); a click on one sorts nothing
+struct IconColumnOf {
+    int column;
+    int icon;
+    PeText tip;
+};
+constexpr IconColumnOf kIconColumns[] = {
+    {COL_ATTACH, LIST_ATTACH, PE_TEXT_UI_ROW_ATTACHMENTS},
+    {COL_FLAG, LIST_FLAG, PE_TEXT_UI_ROW_FLAGGED},
+    {COL_SECURE, LIST_LOCK_CLOSED, PE_TEXT_HEADER_SECURITY},
+};
+
+bool IsIconColumn(int column) {
+    return std::ranges::any_of(kIconColumns, [column](const IconColumnOf& icon) { return icon.column == column; });
+}
+
+// a column that shows an icon of the list strip in its header (the paper clip, the flag, the lock) and nothing else
 void IconColumn(HWND list, int index, int icon) {
     AddColumn(list, index, L"", 28);
     LVCOLUMNW column = {};
@@ -239,8 +256,10 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     // the Columns layout's "Sorted by" over the list (SetColumns shows it)
     sortButton_ = CreateChild(parent, L"BUTTON", SortedByText().c_str(), WS_TABSTOP | BS_OWNERDRAW, IDC_SORT_BUTTON, {});
     ShowWindow(sortButton_, SW_HIDE);
-    IconColumn(list_, COL_ATTACH, LIST_ATTACH);
-    IconColumn(list_, COL_FLAG, LIST_FLAG);
+    for (const IconColumnOf& icon : kIconColumns) {
+        IconColumn(list_, icon.column, icon.icon);
+    }
+    AddHeaderTips();
     AddColumn(list_, COL_FROM, core::T(PE_TEXT_UI_COL_FROM).c_str(), 200);
     AddColumn(list_, COL_SUBJECT, core::T(PE_TEXT_UI_COL_SUBJECT).c_str(), 320);
     AddColumn(list_, COL_RECEIVED, core::T(PE_TEXT_UI_COL_RECEIVED).c_str(), 130);
@@ -287,6 +306,10 @@ void Mailbox::Create(HWND parent, PeCore* core) {
     if (!normal_) {
         normal_ = static_cast<HFONT>(GetStockObject(DEFAULT_GUI_FONT));
     }
+    LOGFONTW listFont = {};
+    GetObjectW(normal_, sizeof(listFont), &listFont);
+    listFont.lfItalic = TRUE;
+    italic_ = CreateFontIndirectW(&listFont);
     ClearReader();
     Reload();
 }
@@ -379,6 +402,8 @@ void Mailbox::Destroy() {
     bold_ = nullptr;
     DeleteObject(link_);
     link_ = nullptr;
+    DeleteObject(italic_);
+    italic_ = nullptr;
 }
 
 void Mailbox::Layout(const RECT& tree, const RECT& list, const RECT& reader) {
@@ -443,6 +468,38 @@ void Mailbox::LayoutList() {
     }
     MoveWindow(list_, list.left, list.top, width, list.bottom - list.top, TRUE);
     FitSubjectColumn();
+}
+
+void Mailbox::AddHeaderTips() {
+    HWND header = ListView_GetHeader(list_);
+    headerTip_ = CreateWindowExW(WS_EX_TOPMOST, TOOLTIPS_CLASSW, nullptr, WS_POPUP | TTS_ALWAYSTIP | TTS_NOPREFIX, CW_USEDEFAULT,
+                                 CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, parent_, nullptr, GetModuleHandleW(nullptr), nullptr);
+    for (const IconColumnOf& icon : kIconColumns) {
+        // the classic tooltips take the size of their first version (ui.cpp AddTip): a larger one is refused
+        TOOLINFOW tool = {TTTOOLINFOW_V2_SIZE};
+        tool.uFlags = TTF_SUBCLASS;
+        tool.hwnd = header;
+        tool.uId = static_cast<UINT_PTR>(icon.column);
+        // the tooltip keeps a copy
+        std::wstring text = core::T(icon.tip);
+        tool.lpszText = text.data();
+        SendMessageW(headerTip_, TTM_ADDTOOLW, 0, reinterpret_cast<LPARAM>(&tool));
+    }
+    PlaceHeaderTips();
+}
+
+void Mailbox::PlaceHeaderTips() {
+    HWND header = ListView_GetHeader(list_);
+    if (!headerTip_ || !header) {
+        return;
+    }
+    for (const IconColumnOf& icon : kIconColumns) {
+        TOOLINFOW tool = {TTTOOLINFOW_V2_SIZE};
+        tool.hwnd = header;
+        tool.uId = static_cast<UINT_PTR>(icon.column);
+        Header_GetItemRect(header, icon.column, &tool.rect);
+        SendMessageW(headerTip_, TTM_NEWTOOLRECTW, 0, reinterpret_cast<LPARAM>(&tool));
+    }
 }
 
 // the Subject column takes the width the other columns leave, so a long subject has the room
@@ -1393,15 +1450,43 @@ void DrawFlag(HDC dc, int left, int top, int size, COLORREF rgb) {
     DeleteObject(fill);
 }
 
+int SecurityIcon(const PeMessage& row) {
+    switch (row.protection) {
+    case PE_PROTECTION_ENCRYPTED:
+        return LIST_LOCK_CLOSED;
+    case PE_PROTECTION_SIGNED:
+        return LIST_RIBBON;
+    case PE_PROTECTION_NONE:
+        return -1;
+    }
+    return -1;
+}
+
+namespace {
+
+// the plate of the list's background a mark of a selected row is drawn on
+void DrawMarkPlate(HDC dc, int left, int top, int size) {
+    HGDIOBJ oldBrush = SelectObject(dc, GetSysColorBrush(COLOR_WINDOW));
+    HGDIOBJ oldPen = SelectObject(dc, GetStockObject(NULL_PEN));
+    RoundRect(dc, left, top, left + size + 1, top + size + 1, 4, 4);
+    SelectObject(dc, oldPen);
+    SelectObject(dc, oldBrush);
+}
+
+}  // namespace
+
 void DrawFlagMark(HDC dc, int left, int top, int size, bool selected, int color) {
     if (selected) {
-        HGDIOBJ oldBrush = SelectObject(dc, GetSysColorBrush(COLOR_WINDOW));
-        HGDIOBJ oldPen = SelectObject(dc, GetStockObject(NULL_PEN));
-        RoundRect(dc, left, top, left + size + 1, top + size + 1, 4, 4);
-        SelectObject(dc, oldPen);
-        SelectObject(dc, oldBrush);
+        DrawMarkPlate(dc, left, top, size);
     }
     DrawFlag(dc, left, top, size, FlagRgb(color ? color : 1));
+}
+
+void DrawListMark(HDC dc, HIMAGELIST strip, int icon, int left, int top, int size, bool selected) {
+    if (selected) {
+        DrawMarkPlate(dc, left, top, size);
+    }
+    ImageList_Draw(strip, icon, dc, left, top, ILD_TRANSPARENT);
 }
 
 namespace {
@@ -1512,7 +1597,7 @@ void Mailbox::DrawThreadBox(HDC dc, const RECT& box, bool collapsed) {
     }
 }
 
-// the paper clip (or a bounce's mark) and the flag of a row, drawn over the row as the list painted it:
+// the paper clip (or a bounce's mark), the flag and the lock or seal of a row, drawn over the row as the list painted it:
 // the list itself would dither the images of a selected row, and does not highlight those of other columns
 void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
     bool selected = (ListView_GetItemState(list_, index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
@@ -1522,14 +1607,17 @@ void Mailbox::DrawRowIcons(HDC dc, int index, const PeMessage& row) {
         ListView_GetSubItemRect(list_, index, column, LVIR_BOUNDS, &cell);
         // the first column's bounds are the whole row's: its width is the column's
         int width = ListView_GetColumnWidth(list_, column);
-        ImageList_Draw(listIcons_, icon, dc, cell.left + (width - iconSize_) / 2, cell.top + (cell.bottom - cell.top - iconSize_) / 2,
-                       ILD_TRANSPARENT);
+        DrawListMark(dc, listIcons_, icon, cell.left + (width - iconSize_) / 2, cell.top + (cell.bottom - cell.top - iconSize_) / 2,
+                     iconSize_, selected);
     };
     // a bounce's mark in the paper clip's place, also when it has files
     if (row.bounce) {
         draw(COL_ATTACH, LIST_MAIL_ERROR);
     } else if (row.has_attachments) {
         draw(COL_ATTACH, LIST_ATTACH);
+    }
+    if (int security = SecurityIcon(row); security >= 0) {
+        draw(COL_SECURE, security);
     }
     if (row.flagged) {
         // the flag in its colour (red when it has none); on the selected row's highlight on a plate of the list's own
@@ -2912,6 +3000,12 @@ bool Mailbox::OnNotify(NMHDR* header, LRESULT& result) {
     if (reader_.OnNotify(header, result)) {
         return true;
     }
+    if (header->hwndFrom == ListView_GetHeader(list_) && (header->code == HDN_ITEMCHANGEDW || header->code == HDN_ITEMCHANGEDA)) {
+        // a column made wider or narrower moves the headers after it, by the user or by the layout (the list sends this
+        // for ListView_SetColumnWidth too): the one place the tooltips follow them
+        PlaceHeaderTips();
+        return false;
+    }
     return header->hwndFrom == list_ && OnListNotify(header, result);
 }
 
@@ -2982,7 +3076,11 @@ bool Mailbox::OnListNotify(NMHDR* header, LRESULT& result) {
         }
         return true;
     case LVN_COLUMNCLICK: {
-        PeSortField sort = SortOf(reinterpret_cast<NMLISTVIEW*>(header)->iSubItem);
+        int column = reinterpret_cast<NMLISTVIEW*>(header)->iSubItem;
+        if (IsIconColumn(column)) {
+            return true;
+        }
+        PeSortField sort = SortOf(column);
         // the same column again turns the order around; another starts its own way (dates and sizes the largest first)
         if (sort == sort_) {
             SetAscending(!ascending_);

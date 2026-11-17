@@ -753,6 +753,8 @@ ui-settings-message-list = İleti listesi
 # review: new
 ui-settings-messages = İletiler
 # review: new
+ui-settings-encryption = Şifreleme
+# review: new
 ui-settings-language = Dil
 # review: new
 ui-settings-label = { $label }:
@@ -1134,6 +1136,14 @@ ui-trusted-everyone-at = { $domain } etki alanındaki herkes
 # review: new
 ui-trusted-senders-empty = Henüz güvenilen gönderen eklenmedi.
 # review: new
+ui-search-encrypted = Şifreli iletilerde &ara
+# review: new
+ui-search-encrypted-note = Şifreli iletiler indirildikten veya açıldıktan sonra bu bilgisayarda çözülür; böylece sözcükleri bulunabilir ve liste kendi konularını gösterir. Dizin şifreli değildir ve yapay zeka aracıları dizinde hiçbir zaman arama yapmaz. Dizinden kaldırmak için bunu kapatın.
+# review: new
+ui-pgp-keyserver = A&nahtarları keys.openpgp.org üzerinde ara
+# review: new
+ui-pgp-keyserver-note = Bir iletiyi şifrelediğinizde veya anahtar aradığınızda, aranan adres keys.openpgp.org adresine gönderilir. Önce adresin kendi etki alanına sorulur.
+# review: new
 ui-eml-default = .&eml Dosyalarını Inbox Classic ile Aç
 # review: new
 ui-eml-default-done = Inbox Classic artık .eml dosyalarını açıyor.
@@ -1153,6 +1163,10 @@ ui-row-unread = Okunmamış
 ui-row-flagged = Bayraklı
 # review: new
 ui-row-attachments = Ekleri var
+# review: new
+ui-row-encrypted = Şifreli
+# review: new
+ui-row-signed = İmzalı
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } ileti

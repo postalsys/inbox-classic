@@ -445,6 +445,8 @@ pub(crate) struct Context {
     pub(crate) partials: Partials,
     /// The messages taken back in the store when the server refused an action, for the window to select
     pub(crate) restored: crate::selection::Restored,
+    /// The certificates read so far, shared with the core: the background pass decrypts with the user's keys
+    pub(crate) pgp_certs: Arc<crate::keys::CertCache>,
 }
 
 pub(crate) struct Worker {
@@ -461,6 +463,8 @@ pub(crate) struct Worker {
     worked: bool,
     /// The Gmail labels archived messages lost, by Message-ID, for Undo to put back
     archived_labels: HashMap<String, Vec<String>>,
+    /// The user's keys the background pass decrypts with, read once a pass ([`Worker::decrypt_stored`])
+    decrypt_ring: Option<Arc<crate::protect::KeyRing>>,
     /// The main worker, for a reader the server refuses a connection of its own: the opens go there
     pub(crate) fallback: Option<UnboundedSender<Command>>,
     /// The main worker's own commands, kept without keeping it running: what its uploader sends back (upload.rs)
@@ -517,6 +521,7 @@ impl Worker {
             behind: None,
             worked: false,
             archived_labels: HashMap::new(),
+            decrypt_ring: None,
             fallback: None,
             main: None,
             uploader: None,
@@ -1680,9 +1685,16 @@ impl Worker {
                 let from = newest.info.sender().to_string();
                 let count = fresh.announced.len();
                 let watched = newest.mark == pe_store::ThreadMark::Watch;
-                let (title, mut text) = crate::text::new_mail_words(count, &from, &newest.info.subject, watched);
+                // an encrypted message says so, not its outer subject (often "..."), and has no code to offer
+                let encrypted = newest.info.protection == pe_store::Protection::Encrypted;
+                let subject = if encrypted {
+                    pe_i18n::tr(pe_i18n::Text::ListEncrypted)
+                } else {
+                    newest.info.subject.clone()
+                };
+                let (title, mut text) = crate::text::new_mail_words(count, &from, &subject, watched);
                 // a one-time code of a fresh message, named first when the app asks for it
-                if let Some(code) = self.code_of_new(store, folder, newest).await {
+                if !encrypted && let Some(code) = self.code_of_new(store, folder, newest).await {
                     text = crate::otp::notification_text(&code, &text);
                 }
                 self.emit(Event::NewMail {
@@ -1691,7 +1703,7 @@ impl Worker {
                     uid: newest.info.uid,
                     count,
                     from,
-                    subject: newest.info.subject.clone(),
+                    subject,
                     watched,
                     title,
                     text,

@@ -308,6 +308,21 @@ impl Store {
     }
 }
 
+/// Options' "Search in encrypted messages"
+const INDEX_ENCRYPTED: &str = "pgp.index_encrypted";
+
+impl Store {
+    /// Options' "Search in encrypted messages": the text of an encrypted message opened goes into the index, on out
+    /// of the box
+    pub fn pgp_index_encrypted(&self) -> Result<bool> {
+        self.bool_setting(INDEX_ENCRYPTED, true)
+    }
+
+    pub fn set_pgp_index_encrypted(&self, on: bool) -> Result<()> {
+        self.set_bool_setting(INDEX_ENCRYPTED, on)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

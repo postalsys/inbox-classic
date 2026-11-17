@@ -755,6 +755,10 @@ agent-unreadable = Não é possível ler esta mensagem.
 # review: new
 agent-encrypted-original = Esta mensagem está criptografada: um agente não pode respondê-la nem encaminhá-la, porque não consegue criptografar.
 # review: new
+agent-encrypted = Esta mensagem está criptografada. Somente o usuário pode lê-la, no Inbox Classic.
+# review: new
+list-encrypted = Mensagem criptografada
+# review: new
 agent-log-composed = Abriu “{ $subject }” em uma nova mensagem para você terminar
 # review: new
 agent-log-refused = Você não enviou “{ $subject }”
@@ -991,8 +995,8 @@ pgp-publish-pending = keys.openpgp.org enviou um link de confirmação para { $a
 pgp-publish-done = Sua chave está publicada em keys.openpgp.org para { $addresses }.
 # review: new
 pgp-publish-failed = Não foi possível publicar a chave: { $error }
-# review: new
-pgp-keyserver-off = A procura de chaves em keys.openpgp.org está desativada em Opções.
+# review: changed
+pgp-keyserver-off = A procura de chaves em keys.openpgp.org está desativada em { $settings }.
 # review: new
 pgp-details-part = Parte { $number }: { $label }
 # review: new

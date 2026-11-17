@@ -729,6 +729,10 @@ agent-unreadable = Bu ileti okunamıyor.
 # review: new
 agent-encrypted-original = Bu ileti şifreli: aracı şifreleme yapamadığı için ona yanıt veremez veya onu iletemez.
 # review: new
+agent-encrypted = Bu ileti şifreli. Yalnızca kullanıcı Inbox Classic'te okuyabilir.
+# review: new
+list-encrypted = Şifreli ileti
+# review: new
 agent-log-composed = “{ $subject }” bitirmeniz için yeni bir iletide açıldı
 # review: new
 agent-log-refused = “{ $subject }” iletisini göndermediniz
@@ -962,8 +966,8 @@ pgp-publish-pending = keys.openpgp.org şu adreslere bir onay bağlantısı gön
 pgp-publish-done = Anahtarınız keys.openpgp.org'da şu adresler için yayımlandı: { $addresses }.
 # review: new
 pgp-publish-failed = Anahtar yayımlanamadı: { $error }
-# review: new
-pgp-keyserver-off = keys.openpgp.org'da anahtar arama Seçenekler'de kapalı.
+# review: changed
+pgp-keyserver-off = keys.openpgp.org üzerinde anahtar arama { $settings } altında kapalı.
 # review: new
 pgp-details-part = Bölüm { $number }: { $label }
 # review: new

@@ -38,12 +38,12 @@ fn fixture(name: &str) -> PathBuf {
         .join(name)
 }
 
-fn read_fixture(name: &str) -> String {
+pub(super) fn read_fixture(name: &str) -> String {
     std::fs::read_to_string(fixture(name)).unwrap_or_default()
 }
 
 /// The Message-ID of a fixture, by which it is found on the server to be taken away
-fn message_id(raw: &str) -> String {
+pub(super) fn message_id(raw: &str) -> String {
     raw.lines()
         .find_map(|line| line.strip_prefix("Message-ID:"))
         .map(|id| id.trim().to_string())

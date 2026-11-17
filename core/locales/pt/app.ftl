@@ -754,6 +754,8 @@ ui-settings-message-list = Lista de mensagens
 # review: new
 ui-settings-messages = Mensagens
 # review: new
+ui-settings-encryption = Encriptação
+# review: new
 ui-settings-language = Idioma
 # review: new
 ui-settings-label = { $label }:
@@ -1140,6 +1142,14 @@ ui-trusted-everyone-at = Todos em { $domain }
 # review: new
 ui-trusted-senders-empty = Ainda não foram adicionados remetentes fidedignos.
 # review: new
+ui-search-encrypted = &Pesquisar em mensagens encriptadas
+# review: new
+ui-search-encrypted-note = As mensagens encriptadas são desencriptadas neste computador depois de transferidas ou abertas, para que as suas palavras possam ser encontradas e a lista mostre o assunto delas. O índice não está encriptado e os agentes de IA nunca pesquisam nele. Desative esta opção para as remover do índice.
+# review: new
+ui-pgp-keyserver = Procurar &chaves em keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Quando encripta uma mensagem ou procura uma chave, o endereço procurado é enviado para keys.openpgp.org. O próprio domínio do endereço é consultado primeiro.
+# review: new
 ui-eml-default = Abrir &ficheiros .eml com o Inbox Classic
 # review: new
 ui-eml-default-done = O Inbox Classic abre agora os ficheiros .eml.
@@ -1159,6 +1169,10 @@ ui-row-unread = Não lida
 ui-row-flagged = Sinalizada
 # review: new
 ui-row-attachments = Tem anexos
+# review: new
+ui-row-encrypted = Encriptada
+# review: new
+ui-row-signed = Assinada
 # review: new
 ui-row-messages = { $count ->
     [0] 0 mensagens

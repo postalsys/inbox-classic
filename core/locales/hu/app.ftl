@@ -752,6 +752,8 @@ ui-settings-message-list = Üzenetlista
 # review: new
 ui-settings-messages = Üzenetek
 # review: new
+ui-settings-encryption = Titkosítás
+# review: new
 ui-settings-language = Nyelv
 # review: new
 ui-settings-label = { $label }:
@@ -1133,6 +1135,14 @@ ui-trusted-everyone-at = Mindenki ebből a tartományból: { $domain }
 # review: new
 ui-trusted-senders-empty = Még nincs megbízható feladó.
 # review: new
+ui-search-encrypted = Keresés a &titkosított üzenetekben
+# review: new
+ui-search-encrypted-note = A titkosított üzeneteket a letöltésük vagy megnyitásuk után ez a számítógép visszafejti, így a szavaik megtalálhatók, a lista pedig a saját tárgyukat mutatja. Az index nincs titkosítva, és az MI-ügynökök soha nem keresnek benne. Kapcsolja ki, hogy eltávolítsa őket az indexből.
+# review: new
+ui-pgp-keyserver = Kulcsok keresése a keys.openpgp.org &oldalon
+# review: new
+ui-pgp-keyserver-note = Ha titkosít egy üzenetet vagy kulcsot keres, a keresett cím a keys.openpgp.org oldalra kerül. Először a cím saját tartományát kérdezi meg.
+# review: new
 ui-eml-default = .&eml fájlok megnyitása az Inbox Classickal
 # review: new
 ui-eml-default-done = Az Inbox Classic mostantól megnyitja az .eml fájlokat.
@@ -1152,6 +1162,10 @@ ui-row-unread = Olvasatlan
 ui-row-flagged = Megjelölt
 # review: new
 ui-row-attachments = Van melléklete
+# review: new
+ui-row-encrypted = Titkosított
+# review: new
+ui-row-signed = Aláírt
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } üzenet

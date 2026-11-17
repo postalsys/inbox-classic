@@ -750,6 +750,8 @@ ui-settings-message-list = Seznam zpráv
 # review: new
 ui-settings-messages = Zprávy
 # review: new
+ui-settings-encryption = Šifrování
+# review: new
 ui-settings-language = Jazyk
 # review: new
 ui-settings-label = { $label }:
@@ -1138,6 +1140,14 @@ ui-trusted-everyone-at = Všichni z domény { $domain }
 # review: new
 ui-trusted-senders-empty = Zatím nebyli přidáni žádní důvěryhodní odesílatelé.
 # review: new
+ui-search-encrypted = Hledat v &šifrovaných zprávách
+# review: new
+ui-search-encrypted-note = Šifrované zprávy se v tomto počítači dešifrují, jakmile se stáhnou nebo otevřou, aby bylo možné najít jejich slova a seznam ukázal jejich vlastní předmět. Index není šifrovaný a agenti AI v něm nikdy nehledají. Vypnutím je z indexu odeberete.
+# review: new
+ui-pgp-keyserver = &Hledat klíče na keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Když šifrujete zprávu nebo hledáte klíč, hledaná adresa se odešle na keys.openpgp.org. Nejdřív se zeptá vlastní domény adresy.
+# review: new
 ui-eml-default = Otevírat &soubory .eml v Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic teď otevírá soubory .eml.
@@ -1157,6 +1167,10 @@ ui-row-unread = Nepřečtená
 ui-row-flagged = S příznakem
 # review: new
 ui-row-attachments = Obsahuje přílohy
+# review: new
+ui-row-encrypted = Šifrováno
+# review: new
+ui-row-signed = Podepsáno
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } zpráva

@@ -756,6 +756,8 @@ ui-settings-message-list = Ziņojumu saraksts
 # review: new
 ui-settings-messages = Ziņojumi
 # review: new
+ui-settings-encryption = Šifrēšana
+# review: new
 ui-settings-language = Valoda
 # review: new
 ui-settings-label = { $label }:
@@ -1139,6 +1141,14 @@ ui-trusted-everyone-at = Visi domēnā { $domain }
 # review: new
 ui-trusted-senders-empty = Vēl nav pievienots neviens uzticams sūtītājs.
 # review: new
+ui-search-encrypted = Meklēt &šifrētos ziņojumos
+# review: new
+ui-search-encrypted-note = Šifrētie ziņojumi šajā datorā tiek atšifrēti pēc lejupielādes vai atvēršanas, lai to vārdus varētu atrast un sarakstā būtu redzams to īstais temats. Indekss nav šifrēts, un MI aģenti tajā nekad nemeklē. Izslēdziet šo, lai tos noņemtu no indeksa.
+# review: new
+ui-pgp-keyserver = &Meklēt atslēgas vietnē keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Kad šifrējat ziņojumu vai meklējat atslēgu, meklētā adrese tiek nosūtīta uz keys.openpgp.org. Vispirms tiek vaicāts pašas adreses domēnam.
+# review: new
 ui-eml-default = Atvērt .&eml failus ar Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic tagad atver .eml failus.
@@ -1158,6 +1168,10 @@ ui-row-unread = Nelasīts
 ui-row-flagged = Ar karodziņu
 # review: new
 ui-row-attachments = Ir pielikumi
+# review: new
+ui-row-encrypted = Šifrēts
+# review: new
+ui-row-signed = Parakstīts
 # review: new
 ui-row-messages = { $count ->
     [zero] { $count } ziņojumu

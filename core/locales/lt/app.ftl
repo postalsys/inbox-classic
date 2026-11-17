@@ -753,6 +753,8 @@ ui-settings-message-list = Laiškų sąrašas
 # review: new
 ui-settings-messages = Laiškai
 # review: new
+ui-settings-encryption = Šifravimas
+# review: new
 ui-settings-language = Kalba
 # review: new
 ui-settings-label = { $label }:
@@ -1140,6 +1142,14 @@ ui-trusted-everyone-at = Visi iš { $domain }
 # review: new
 ui-trusted-senders-empty = Patikimų siuntėjų dar nepridėta.
 # review: new
+ui-search-encrypted = Ieškoti &užšifruotuose laiškuose
+# review: new
+ui-search-encrypted-note = Užšifruoti laiškai šiame kompiuteryje iššifruojami juos atsisiuntus ar atidarius, kad būtų galima rasti jų žodžius, o sąraše būtų rodoma jų tikroji tema. Indeksas nėra šifruotas, o DI agentai jame niekada neieško. Išjunkite, kad jie būtų pašalinti iš indekso.
+# review: new
+ui-pgp-keyserver = I&eškoti raktų keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Kai šifruojate laišką arba ieškote rakto, ieškomas adresas siunčiamas į keys.openpgp.org. Pirmiausia klausiama paties adreso domeno.
+# review: new
 ui-eml-default = &Atidaryti .eml failus su Inbox Classic
 # review: new
 ui-eml-default-done = Dabar .eml failus atidaro Inbox Classic.
@@ -1159,6 +1169,10 @@ ui-row-unread = Neskaitytas
 ui-row-flagged = Su vėliavėle
 # review: new
 ui-row-attachments = Yra priedų
+# review: new
+ui-row-encrypted = Užšifruotas
+# review: new
+ui-row-signed = Pasirašytas
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } laiškas

@@ -765,6 +765,10 @@ agent-unreadable = Ova poruka ne može da se pročita.
 # review: new
 agent-encrypted-original = Ova poruka je šifrovana: agent ne može na nju da odgovori niti da je prosledi jer ne može da šifruje.
 # review: new
+agent-encrypted = Ova poruka je šifrovana. Može da je pročita samo korisnik, u aplikaciji Inbox Classic.
+# review: new
+list-encrypted = Šifrovana poruka
+# review: new
 agent-log-composed = Poruka „{ $subject }“ je otvorena kao nova poruka koju ćete dovršiti
 # review: new
 agent-log-refused = Niste poslali poruku „{ $subject }“
@@ -1003,8 +1007,8 @@ pgp-publish-pending = keys.openpgp.org je poslao vezu za potvrdu na { $addresses
 pgp-publish-done = Vaš ključ je objavljen na keys.openpgp.org za { $addresses }.
 # review: new
 pgp-publish-failed = Ključ nije moguće objaviti: { $error }
-# review: new
-pgp-keyserver-off = Traženje ključeva na keys.openpgp.org je isključeno u Opcijama.
+# review: changed
+pgp-keyserver-off = Traženje ključeva na keys.openpgp.org isključeno je u { $settings }.
 # review: new
 pgp-details-part = Deo { $number }: { $label }
 # review: new

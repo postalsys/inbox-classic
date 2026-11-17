@@ -730,6 +730,10 @@ agent-unreadable = Denne meldingen kan ikke leses.
 # review: new
 agent-encrypted-original = Denne meldingen er kryptert: en agent kan ikke svare på den eller videresende den, siden den ikke kan kryptere.
 # review: new
+agent-encrypted = Denne meldingen er kryptert. Bare brukeren kan lese den, i Inbox Classic.
+# review: new
+list-encrypted = Kryptert melding
+# review: new
 agent-log-composed = Åpnet «{ $subject }» i en ny melding som du kan gjøre ferdig
 # review: new
 agent-log-refused = Du sendte ikke «{ $subject }»
@@ -963,8 +967,8 @@ pgp-publish-pending = keys.openpgp.org sendte en bekreftelseslenke til { $addres
 pgp-publish-done = Nøkkelen din er publisert på keys.openpgp.org for { $addresses }.
 # review: new
 pgp-publish-failed = Nøkkelen kunne ikke publiseres: { $error }
-# review: new
-pgp-keyserver-off = Oppslag av nøkler på keys.openpgp.org er slått av under Alternativer.
+# review: changed
+pgp-keyserver-off = Søk etter nøkler på keys.openpgp.org er slått av under { $settings }.
 # review: new
 pgp-details-part = Del { $number }: { $label }
 # review: new

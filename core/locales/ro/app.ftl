@@ -755,6 +755,8 @@ ui-settings-message-list = Lista de mesaje
 # review: new
 ui-settings-messages = Mesaje
 # review: new
+ui-settings-encryption = Criptare
+# review: new
 ui-settings-language = Limbă
 # review: new
 ui-settings-label = { $label }:
@@ -1144,6 +1146,14 @@ ui-trusted-everyone-at = Oricine din { $domain }
 # review: new
 ui-trusted-senders-empty = Nu a fost adăugat încă niciun expeditor de încredere.
 # review: new
+ui-search-encrypted = Căutare în mesajele &criptate
+# review: new
+ui-search-encrypted-note = Mesajele criptate sunt decriptate pe acest computer după ce sunt descărcate sau deschise, ca să le puteți găsi cuvintele, iar lista să le afișeze subiectul propriu. Indexul nu este criptat, iar agenții AI nu caută niciodată în el. Dezactivați opțiunea pentru a le elimina din index.
+# review: new
+ui-pgp-keyserver = Căutare chei &pe keys.openpgp.org
+# review: new
+ui-pgp-keyserver-note = Când criptați un mesaj sau căutați o cheie, adresa căutată este trimisă la keys.openpgp.org. Mai întâi este întrebat domeniul adresei.
+# review: new
 ui-eml-default = &Deschidere fișiere .eml cu Inbox Classic
 # review: new
 ui-eml-default-done = Inbox Classic deschide acum fișierele .eml.
@@ -1163,6 +1173,10 @@ ui-row-unread = Necitit
 ui-row-flagged = Semnalizat
 # review: new
 ui-row-attachments = Are atașări
+# review: new
+ui-row-encrypted = Criptat
+# review: new
+ui-row-signed = Semnat
 # review: new
 ui-row-messages = { $count ->
     [one] { $count } mesaj
