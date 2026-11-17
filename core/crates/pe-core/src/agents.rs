@@ -386,14 +386,23 @@ pub(crate) fn agent_message(source: &[u8]) -> AgentMessage {
     AgentMessage {
         written,
         earlier,
-        attachments: message
-            .attachments
-            .iter()
-            .filter(|a| !a.related)
+        attachments: crate::view::agent_listed(&message.attachments)
             .map(|a| (a.safe_filename(), a.mime_type.clone(), a.content.len() as u64))
             .collect(),
         ..envelope
     }
+}
+
+/// Attachment `index` of a message's source as an agent reads it, numbered as [`agent_message`] lists them: refused for
+/// an encrypted message, whose files are never decrypted for an agent; None when there is no such attachment
+pub(crate) fn agent_attachment(source: &[u8], index: usize) -> Result<Option<(String, String, Vec<u8>)>> {
+    if crate::protect::has_encrypted(source) {
+        return Err(Error::Unavailable(tr(Text::AgentEncrypted)));
+    }
+    let Ok(message) = parser::parse(source) else {
+        return Ok(None);
+    };
+    Ok(crate::view::agent_attachment(&message, index))
 }
 
 /// How a change of an agent is taken back, as the log keeps it
@@ -882,10 +891,7 @@ impl Core {
         let Some(source) = self.store().source(folder, uid)? else {
             return Ok(None);
         };
-        if crate::protect::has_encrypted(&source) {
-            return Err(Error::Unavailable(tr(Text::AgentEncrypted)));
-        }
-        Ok(crate::view::attachment_with_type(&source, index))
+        agent_attachment(&source, index)
     }
 
     /// A message as an agent reads it, None when its source is not here yet ([`Core::open_message`] fetches it)
@@ -1017,6 +1023,50 @@ mod tests {
         // the HTML part is what the reading pane shows, without what it hides; the text part is not read
         assert!(message.written.contains("See you at noon."), "{}", message.written);
         assert!(!message.written.contains("invoice"), "{}", message.written);
+    }
+
+    /// The names get_message lists, and the name get_attachment gives for each index
+    fn numbered(source: &[u8]) -> (Vec<String>, Vec<String>) {
+        let listed = agent_message(source).attachments.into_iter().map(|a| a.0).collect();
+        let read = (0..)
+            .map_while(|index| agent_attachment(source, index).unwrap())
+            .map(|a| a.0)
+            .collect();
+        (listed, read)
+    }
+
+    #[test]
+    fn attachments_have_one_numbering() {
+        // a bounce: the delivery report's parts for servers are no files, the returned message is
+        let bounce = b"From: MAILER-DAEMON@example.com\r\nTo: me@example.com\r\nSubject: Undelivered Mail\r\n\
+            Content-Type: multipart/report; report-type=delivery-status; boundary=r\r\n\r\n\
+            --r\r\nContent-Type: text/plain\r\n\r\nYour message could not be delivered.\r\n\
+            --r\r\nContent-Type: message/delivery-status\r\n\r\nReporting-MTA: dns; mx.example.com\r\n\r\n\
+            Final-Recipient: rfc822; gone@example.org\r\nAction: failed\r\nStatus: 5.1.1\r\n\
+            --r\r\nContent-Type: text/plain; name=notes.txt\r\nContent-Disposition: attachment; filename=notes.txt\r\n\r\n\
+            the notes\r\n\
+            --r\r\nContent-Type: message/rfc822\r\n\r\nFrom: me@example.com\r\nTo: gone@example.org\r\n\
+            Subject: Hello\r\n\r\nHi\r\n--r--\r\n";
+        let (listed, read) = numbered(bounce);
+        assert_eq!(listed, read);
+        assert_eq!(listed.len(), 2, "{listed:?}");
+        assert_eq!(listed[0], "notes.txt");
+        assert_eq!(agent_attachment(bounce, 0).unwrap().unwrap().2, b"the notes");
+        // a signed message: its signature is no file
+        let signed = b"From: Ann <ann@example.com>\r\nTo: me@example.com\r\nSubject: Signed\r\n\
+            Content-Type: multipart/signed; micalg=pgp-sha256; protocol=\"application/pgp-signature\"; boundary=s\r\n\r\n\
+            --s\r\nContent-Type: multipart/mixed; boundary=m\r\n\r\n\
+            --m\r\nContent-Type: text/plain\r\n\r\nThe plan.\r\n\
+            --m\r\nContent-Type: text/csv; name=plan.csv\r\nContent-Disposition: attachment; filename=plan.csv\r\n\r\n\
+            a,b\r\n--m--\r\n\
+            --s\r\nContent-Type: application/pgp-signature; name=signature.asc\r\n\
+            Content-Disposition: attachment; filename=signature.asc\r\n\r\n\
+            -----BEGIN PGP SIGNATURE-----\r\n\r\nAAAA\r\n-----END PGP SIGNATURE-----\r\n--s--\r\n";
+        let (listed, read) = numbered(signed);
+        assert_eq!(listed, read);
+        assert_eq!(listed, ["plan.csv"]);
+        assert_eq!(agent_attachment(signed, 0).unwrap().unwrap().1, "text/csv");
+        assert!(agent_attachment(signed, 1).unwrap().is_none());
     }
 
     #[test]
