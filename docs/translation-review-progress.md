@@ -19,18 +19,18 @@ Commit completed batches regularly and preserve an exact resume point.
 - Upstream settings pages at `bd4a2bd1` are now integrated after Croatian app checkpoint `580d74a0`.
   German, Spanish, Estonian, French, Dutch, Italian, European/Brazilian Portuguese, Catalan, Norwegian
   Bokmål, Serbian Latin, Turkish, Bulgarian, Czech, Danish, Greek and Finnish settings are complete, including
-  encrypted-image and rendered-label followups. Fresh fetch at 45d95ce9 found only upstream Linux date-format
-  test/CI changes at 154e0f6d, with no translation/help or app-behavior changes; these remain unmerged.
-  German, Spanish, Estonian, French, Dutch, Italian and both Portuguese variants now also have the
-  provider-app-password followup completed. FIRST resolve it in the other nine previously completed languages.
-  Their other reviewed content remains preserved. Croatian's catalogs and first eight help topics are reviewed;
-  it has 44 help topics left. Its four provider introductions and Gmail/Outlook help are already corrected.
-  Then continue Croatian help, keeping its three settings-context followups open until their remaining help is done.
-  Exact source IDs/topics are in state; do not restart full language reviews.
+  encrypted-image and rendered-label followups. The provider-app-password followup is now complete in all
+  17 previously completed languages and Croatian. Only the ten broader language drafts still require it.
+  Fresh fetch at 09aa4b57 found origin/master at 5c645187 with only README updates and the previously seen
+  Linux date-format test/CI changes; these unrelated changes remain unmerged. No new translation/help or
+  app-behavior changes. Croatian's catalogs and first eight help topics are reviewed; 44 help topics remain.
+  NEXT review Croatian message-rules/delete-and-undo/folders/write-message/reply-forward/attachments/
+  drafts-outbox/signatures, then its other pending topics. Keep its three settings-context followups open
+  until the relevant help is reviewed. Exact source IDs/topics are in state; do not restart full language reviews.
 - The integration added 16 IDs, removed 13 and changed 11 per language, and changed 11 help topics in
   each of 28 languages. Affected completed entries were reopened; no new draft was marked reviewed.
   Previous review IDs/topics are preserved under `removed_`/`reopened_` fields. New round scope is
-  32,456 catalog entries and 1,296 help topics; 13,358 entries and 573 topics are currently pending.
+  32,456 catalog entries and 1,296 help topics; 13,330 entries and 564 topics are currently pending.
 - The 13 completed new-language initial reviews and round-1 languages received this late review work.
   Finnish had 1,340 entries/52 topics reviewed, with 174 improvements. Croatian's 626 app entries plus
   one Windows button were initially reviewed with 74 improvements; its 24 app settings additions now have two
@@ -1345,10 +1345,37 @@ are unchanged. No new languages or translation/help/app-behavior changes. The si
 omitted by --since because they equal their marked starting snapshots; verified separately. The four previously
 omitted Dutch entries are now corrected and reviewed. Continue ca/nb/sr-Latn/tr/bg/cs/da/el/fi, then Croatian help.
 
-Current totals: 19,098 catalog entries and 723 help topics completed in the active scope; 3,156 historical
-catalog value improvements. Remaining: 13,358 catalog entries and 573 help topics. Eight languages have no
-pending content; nine otherwise completed languages have the focused provider followup pending. Croatian
-and ten other languages retain broader queues. Settings followups still await 11 languages. `REVIEWED` is unchanged.
+### Provider followup completed in the remaining nine reviewed languages
+
+Reviewed Catalan, Norwegian Bokmål, Serbian Latin, Turkish, Bulgarian, Czech, Danish, Greek and Finnish:
+32 catalog entries and nine help topics, improving all 32 catalog values. Turkish's four introductions already
+condition account support and remain unchanged. Reassessing Bulgarian found provider-wide support too broad
+for Microsoft mail; reopened and corrected its four introductions without increasing scope. The net pending
+catalog reduction is 28, because those Bulgarian entries were already counted as reviewed before this batch.
+
+Microsoft mail uses browser sign-in. Google app-password steps now require an eligible account and two-step
+verification; incorrect Microsoft menu paths are removed. Preserved each language's form of address and terms,
+including Turkish Google's own şifre label inside otherwise consistent parola prose and Serbian explanations
+beside the existing English Google labels. Norwegian app-passord agrees with the
+[official Google wording](https://support.google.com/accounts/answer/185833?hl=no). Improved account-window
+sentence joins in Catalan, Norwegian, Bulgarian and Danish after substituting the actual control titles.
+
+All nine static checks report only 1,395 deliberately removed marks per language; all 46 shortcut scopes pass.
+Variables, markup, attributes, control references, platform branches and literal keys are preserved. Inspected
+substituted control/topic joins and provider fallbacks. All 28 inventories and completed/source hashes reconcile:
+19,160 unmarked messages, 9,526 changed help lines and 14 verified baseline pairs. Report regenerated;
+git diff --check passes. No tests run. Previous checkpoint: `09aa4b57`.
+
+Fresh fetch found origin/master at `5c645187`, adding README documentation updates. Inspected them; the total
+unmerged delta is README plus the four previously checked Linux date-format test/CI paths. These unrelated
+changes remain unmerged. Other five source refs and the guide hash are unchanged. No new language or translation/
+help/app-behavior work. All 270 entries and 118 passages in the since-start report match the pending inventory.
+The formerly omitted Czech/Danish/Dutch provider introductions are now all corrected and reviewed.
+
+Current totals: 19,126 catalog entries and 732 help topics completed in the active scope; 3,188 historical
+catalog value improvements. Remaining: 13,330 catalog entries and 564 help topics. Seventeen languages have no
+pending content. Croatian has 44 help topics left; hu/lt/lv/pl/ro/ru/sk/sl/sv/uk retain their broader queues,
+including provider context. Settings followups still await these 11 languages. `REVIEWED` is unchanged.
 
 Context to retain: the new languages were drafted before the last source corrections. Check the round-1 final
 consistency findings when reviewing their encryption, transfer, attachment and folder-navigation text.

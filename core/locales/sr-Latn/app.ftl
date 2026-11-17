@@ -323,10 +323,8 @@ ui-start-intro = Gmail, Google Workspace, Outlook.com i Microsoft 365: prijavite
 ui-start-intro-apps = Prijavite se putem pregledača pomoću jedne od svojih aplikacija za prijavljivanje (Još opcija za prijavljivanje) ili unesite ime i adresu ispod da biste dodali drugi nalog e-pošte.
 ui-use-app-password = Koristi lozinku za aplikaciju
 ui-the-provider = Vaš pružalac usluge e-pošte
-# review: changed
-ui-provider-intro = { $provider }: Prijavite se na nalog { $email } na veb-sajtu pružaoca usluge. Inbox Classic ne dobija vašu lozinku. Možete da koristite i lozinku za aplikaciju napravljenu u bezbednosnim podešavanjima naloga.
-# review: changed
-ui-provider-intro-apps = { $provider }: Prijavite se na nalog { $email } na veb-sajtu pružaoca usluge pomoću jedne od svojih aplikacija za prijavljivanje (Još opcija za prijavljivanje). Možete da koristite i lozinku za aplikaciju napravljenu u bezbednosnim podešavanjima naloga.
+ui-provider-intro = { $provider }: Prijavite se na nalog { $email } na veb-sajtu pružaoca usluge. Inbox Classic ne dobija vašu lozinku. Ako vaš nalog podržava lozinke za aplikacije, možete da napravite jednu u bezbednosnim podešavanjima. Za Outlook.com i Microsoft 365 prijavite se putem pregledača.
+ui-provider-intro-apps = { $provider }: Prijavite se na nalog { $email } na veb-sajtu pružaoca usluge pomoću jedne od svojih aplikacija za prijavljivanje (Još opcija za prijavljivanje). Ako vaš nalog podržava lozinke za aplikacije, možete da napravite jednu u bezbednosnim podešavanjima. Za Outlook.com i Microsoft 365 prijavite se putem pregledača.
 ui-finish = Završi
 ui-logon = Prijava
 ui-enter-password = Unesite lozinku za nalog { $account }.

@@ -120,10 +120,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Seuraava >
-# review: changed
-gtk-provider-sign-in = { $provider }: kirjaudu tilille { $address } palveluntarjoajan sivustolla. Inbox Classic ei saa salasanaasi. Voit myös käyttää sovellussalasanaa, jonka olet luonut tilisi suojausasetuksissa.
-# review: changed
-gtk-provider-sign-in-apps = { $provider }: kirjaudu tilille { $address } palveluntarjoajan sivustolla jollakin kirjautumissovelluksellasi (Lisää kirjautumisvaihtoehtoja). Voit myös käyttää sovellussalasanaa, jonka olet luonut tilisi suojausasetuksissa.
+gtk-provider-sign-in = { $provider }: kirjaudu tilille { $address } palveluntarjoajan sivustolla. Inbox Classic ei saa salasanaasi. Jos tilisi tukee sovellussalasanoja, voit luoda sellaisen tilin suojausasetuksissa. Outlook.com- ja Microsoft 365 -tileille on kirjauduttava selaimen kautta.
+gtk-provider-sign-in-apps = { $provider }: kirjaudu tilille { $address } palveluntarjoajan sivustolla jollakin kirjautumissovelluksellasi (Lisää kirjautumisvaihtoehtoja). Jos tilisi tukee sovellussalasanoja, voit luoda sellaisen tilin suojausasetuksissa. Outlook.com- ja Microsoft 365 -tileille on kirjauduttava selaimen kautta.
 gtk-accounts-add = Lisää...
 gtk-accounts-properties = Ominaisuudet...
 gtk-accounts-signature = Allekirjoitus...

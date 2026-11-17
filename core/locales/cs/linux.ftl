@@ -119,10 +119,8 @@ gtk-turned-off-why-long =
 
     { $reason }
 gtk-next = Další >
-# review: changed
-gtk-provider-sign-in = Přihlaste se k účtu { $address } na webu poskytovatele ({ $provider }). Vaše heslo se aplikaci Inbox Classic nepředává. Můžete také použít heslo aplikace vytvořené v nastavení zabezpečení vašeho účtu.
-# review: changed
-gtk-provider-sign-in-apps = Přihlaste se k účtu { $address } na webu poskytovatele ({ $provider }) pomocí některé ze svých přihlašovacích aplikací (Další možnosti přihlášení). Můžete také použít heslo aplikace vytvořené v nastavení zabezpečení vašeho účtu.
+gtk-provider-sign-in = Přihlaste se k účtu { $address } na webu poskytovatele ({ $provider }). Vaše heslo se aplikaci Inbox Classic nepředává. Pokud váš účet podporuje hesla aplikací, můžete si jedno vytvořit v nastavení zabezpečení. Pro účty Outlook.com a Microsoft 365 je nutné přihlášení přes prohlížeč.
+gtk-provider-sign-in-apps = Přihlaste se k účtu { $address } na webu poskytovatele ({ $provider }) pomocí některé ze svých přihlašovacích aplikací (Další možnosti přihlášení). Pokud váš účet podporuje hesla aplikací, můžete si jedno vytvořit v nastavení zabezpečení. Pro účty Outlook.com a Microsoft 365 je nutné přihlášení přes prohlížeč.
 gtk-accounts-add = Přidat...
 gtk-accounts-properties = Vlastnosti...
 gtk-accounts-signature = Podpis...
