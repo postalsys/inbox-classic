@@ -5,21 +5,22 @@ Commit completed batches regularly and preserve an exact resume point.
 
 ## Resume here
 
-- **Next: review the new compose signing/encryption additions, starting with de/es/et/fr.**
-  Feature `162c0dd2`, observed in upstream merge `a6ed91d6`, is integrated after `040b7373`. All 1,120 new
-  catalog entries (17 app and 23 core IDs per language), 28 new sign-and-encrypt topics and 28 write-message
-  insertions remain marked. Eighteen previously completed write-message topics need only their new paragraph.
-  Exact targets and verified behavior are in `compose-sign-encrypt-context`; no new language was added.
-  Continue nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and Hungarian afterward.
-- Current scope: 33,840 catalog entries and 1,352 help topics. Completed: 20,642 entries and 790 full topics;
-  pending: 13,198 entries and 562 topics. Earlier prose is preserved; the completed-topic count fell because
-  existing topics reopened for the new insertion. Historical catalog improvements: 3,516.
-  Hungarian has 48 original help topics left in addition to this new compose work, then lt/lv/pl/ro/ru/sk/sl/sv/uk.
-- Structural checks pass with only expected mark diagnostics; 116 catalog/help outputs preserve all prior bytes,
-  and 76 implementation/generated source imports match upstream. Existing English corrections are retained.
-  The mnemonic helper now covers 53 actual scopes, including compose menus and recipient/question dialogs.
-  New conflicts in nine languages are recorded for their review. No test suites or builds run for this import.
-  `REVIEWED` is unchanged; source discovery and the final late-arrival audit remain required.
+- **Next: integrate the newly arrived signature reason `pgp-why-not-key-in-use`.**
+  It adds one core ID in each of 28 languages on `chore/pgp-hardening`, from focused commit `9924cfe7`
+  (observed branch tip `c69576e6`). Exact source hashes and caller evidence are in `pending_source_import`.
+  Assess that focused commit's dependencies and preserve reviewed translations; keep unrelated hardening/corpus
+  work separate. The 28 new reasons are pending integration and are not included in the totals below.
+- German's 40 compose additions and both help targets are now reviewed, with 16 improvements. Review the
+  remaining compose additions starting es/et/fr, then nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and hu.
+  Feature `162c0dd2` was integrated in `3552434d`; exact targets/context are in `compose-sign-encrypt-context`.
+  Every earlier help passage is preserved. No new language was found in the latest audit.
+- Current integrated scope: 33,840 catalog entries and 1,352 help topics. Completed: 20,682 entries and 792
+  full topics; pending: 13,158 entries and 560 topics. Historical catalog improvements: 3,532.
+  Hungarian has 48 original help topics left in addition to compose work, then lt/lv/pl/ro/ru/sk/sl/sv/uk.
+- Structural checks and German's 53 actual mnemonic scopes pass. The initial icon note was corrected after
+  inspecting individual recipients: they use green/blue locks, with lookup/warning symbols as appropriate;
+  the separate overall status bar uses the verified shield. Keep this distinction in future help edits.
+  No test suites or builds run. `REVIEWED` remains unchanged; the final late-arrival audit is still required.
 - Starting checkout: `e99f7e59`; review baseline: `7c0b1672581c9bd7a33c226f35da16cedca4b528`.
 - Read `/Users/andris/Downloads/inbox-classic-translation-guide.md`, `core/locales/GLOSSARY.md` (including the
   language's own notes), and `core/crates/pe-html/help/FORMAT.md`.
@@ -1947,8 +1948,42 @@ recorded for review, along with the prior broader-draft issues. HTML regenerated
 
 Actual behavior requires context corrections during review: compose status describes intended protection;
 valid signatures do not prove key ownership. Recipients need usable keys, and missing-key counts include
-unusable ones. Verified keys use a green shield, with locks, lookup indicators and warning icons for other
-states. Unencrypted sending stays blocked while protected quoted text, inline media or extracted attachments
+unusable ones. Verified recipients use green locks; the separate overall status bar uses a shield. Lookup and warning
+icons vary by platform. This corrects the initial integration note after inspecting each individual icon caller. Unencrypted sending stays blocked while protected quoted text, inline media or extracted attachments
 remain. Encrypted drafts use the sender's key only and are not signed; sent copies retain encryption.
 Remove from Message removes recipient fields, not contacts. All details and source callers are in state.
 Review German next, followed by Spanish, Estonian and French, then the other earlier languages and Hungarian.
+
+
+### German compose additions reviewed; another late source reason found
+
+Reviewed all 17 new app labels and 23 core messages, retaining good labels and improving 16 core values.
+Status text describes protection applied when sending. Signatures support integrity checks without claiming
+verified ownership. Missing-key guidance includes unusable keys; placeholders work for names/address lists,
+counts and full-sentence key-state reasons. Downgrade warnings cover inherited text, images and attachments,
+and unencrypted sending is conditional. Reviewed the new sign-and-encrypt topic and only the inserted paragraph
+in write-message, improving 14 help lines. Every earlier write-message byte is preserved.
+
+Help uses a cross-platform color/status table instead of calling every icon a lock. Green means verified key
+ownership; blue also covers own keys, and orange includes unusable keys. The integration note was corrected:
+individual recipients use locks, while the separate overall status bar can use a shield. Encrypted drafts use
+the sender's own key; attaching a public key follows the selected From address. German glossary notes record
+signature terminology, usable-key conditions and whole-sentence reason handling.
+
+All 53 mnemonic scopes pass. The structural checker has exactly 1,445 expected removed-mark diagnostics and no
+other findings. Exact reconstruction verifies the 16 value edits and 40 mark removals; variables, plural branches,
+comments, help tags/attributes/keys and platform branches are preserved. Control joins were inspected on all
+three platforms. An existing German Linux compose screenshot was inspected, but it predates the new controls;
+new layout/wrapping was checked in source. No GUI run, test suites or builds.
+
+All 28 active inventories and current hashes reconcile: 20,716 unmarked messages, 10,391 changed help lines and
+14 verified baseline pairs. The 1,413 since-start entries and 213 passages match the queue. HTML regenerated;
+git diff --check passes. Current totals: 20,682 entries and 792 topics reviewed, 13,158 entries and 560 topics
+pending; 3,532 historical catalog improvements. Scope remains 33,840/1,352 before the next source integration.
+
+Fresh fetch and source comparison found one more reason in all 28 languages: pgp-why-not-key-in-use, from
+`9924cfe7` on the hardening branch, now at `c69576e6`. It reports a signing key different from the key currently
+selected for the From address. It does not mean an expired key, an invalid cryptographic signature or proven
+impersonation. No other source values or languages changed. Exact hashes and caller evidence are recorded for
+focused integration next; these 28 additions are not yet counted in the active inventory. The guide and root
+translation files are unchanged. Other source-branch changes remain untouched. `REVIEWED` is unchanged.

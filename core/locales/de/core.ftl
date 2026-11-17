@@ -587,60 +587,38 @@ pgp-publish-done = Ihr Schlüssel ist auf keys.openpgp.org für { $addresses } v
 pgp-publish-failed = Der Schlüssel konnte nicht veröffentlicht werden: { $error }
 pgp-keyserver-off = Die Schlüsselsuche auf keys.openpgp.org ist unter { $settings } ausgeschaltet.
 # the compose window with Sign and Encrypt: the line under the fields, each recipient's key, the questions
-# review: new
 pgp-compose-encrypted = { $count ->
-    [one] Verschlüsselt und signiert: Nur Sie und { $addresses } können die Nachricht lesen.
-   *[other] Verschlüsselt und signiert: Nur Sie und die { $count } Empfänger können die Nachricht lesen.
+    [one] Beim Senden verschlüsselt und signiert. Den Inhalt können nur Sie und { $addresses } lesen.
+   *[other] Beim Senden verschlüsselt und signiert. Den Inhalt können nur Sie und die { $count } Empfänger lesen.
 }
-# review: new
-pgp-compose-encrypt-ready = Die Nachricht wird verschlüsselt und signiert. Fügen Sie Empfänger hinzu, deren Schlüssel Sie haben.
-# review: new
+pgp-compose-encrypt-ready = Beim Senden wird die Nachricht verschlüsselt und signiert. Fügen Sie Empfänger hinzu, für die ein verwendbarer Schlüssel vorliegt.
 pgp-compose-missing = { $count ->
-    [one] { $addresses } hat keinen Schlüssel, daher kann die Nachricht noch nicht verschlüsselt werden.
-   *[other] { $count } Empfänger haben keinen Schlüssel, daher kann die Nachricht noch nicht verschlüsselt werden: { $addresses }.
+    [one] Für diesen Empfänger fehlt ein verwendbarer Schlüssel: { $addresses }. Die Nachricht kann noch nicht verschlüsselt werden.
+   *[other] Für { $count } Empfänger fehlt ein verwendbarer Schlüssel: { $addresses }. Die Nachricht kann noch nicht verschlüsselt werden.
 }
-# review: new
-pgp-compose-looking = Die Schlüssel von { $addresses } werden gesucht...
-# review: new
-pgp-compose-signed = Signiert: Die Empfänger können prüfen, dass die Nachricht von Ihnen stammt und nicht verändert wurde.
-# review: new
+pgp-compose-looking = Schlüsselsuche für: { $addresses }...
+pgp-compose-signed = Beim Senden digital signiert: Die Empfänger können die Signatur prüfen und Änderungen am Inhalt erkennen.
 pgp-compose-reply-clear = Nicht verschlüsselt, obwohl die beantwortete oder weitergeleitete Nachricht verschlüsselt war.
-# review: new
-pgp-compose-encrypted-files = Dateien einer verschlüsselten Nachricht sind angehängt, daher kann diese Nachricht nur verschlüsselt gesendet werden. Schalten Sie Verschlüsseln ein, oder entfernen Sie diese Dateien.
-# review: new
-pgp-compose-sign-tip = Die Nachricht mit Ihrem Schlüssel signieren, damit die Empfänger prüfen können, dass sie von Ihnen stammt und nicht verändert wurde
-# review: new
-pgp-compose-sign-tip-encrypted = Eine verschlüsselte Nachricht wird immer signiert
-# review: new
-pgp-compose-encrypt-tip = Die Nachricht verschlüsseln, damit nur Sie und die Empfänger sie lesen können
-# review: new
-pgp-compose-make-key = Sie haben noch keinen Schlüssel für { $address }. Jetzt einen erstellen? Damit können Ihre Nachrichten signiert und verschlüsselt werden.
-# review: new
-pgp-compose-key-unusable = Ihr Schlüssel für { $address } kann nicht verwendet werden ({ $state }). Öffnen Sie Verschlüsselungsschlüssel, um seine Sicherung zu importieren oder einen neuen Schlüssel zu erstellen.
-# review: new
-pgp-compose-encrypt-off-quote = Diese Nachricht zitiert oder leitet eine verschlüsselte Nachricht weiter. Ohne Verschlüsselung kann sie erst gesendet werden, wenn Sie das Zitierte entfernen. Verschlüsselung trotzdem ausschalten?
-# review: new
-pgp-compose-encrypt-off-reply = Diese Nachricht beantwortet eine verschlüsselte Nachricht oder leitet sie weiter. Ohne Verschlüsselung kann jeder, der Ihre Nachricht unterwegs befördert, sie lesen. Verschlüsselung ausschalten?
-# review: new
+pgp-compose-encrypted-files = Die Nachricht enthält Anlagen aus einer verschlüsselten Nachricht und kann daher nur verschlüsselt gesendet werden. Aktivieren Sie „Verschlüsseln“ oder entfernen Sie diese Anlagen.
+pgp-compose-sign-tip = Die Nachricht beim Senden digital signieren, damit die Empfänger die Signatur und die Unversehrtheit des Inhalts prüfen können
+pgp-compose-sign-tip-encrypted = Verschlüsselt gesendete Nachrichten werden immer auch signiert
+pgp-compose-encrypt-tip = Den Nachrichteninhalt beim Senden verschlüsseln, damit nur Sie und die Empfänger ihn lesen können
+pgp-compose-make-key = Für { $address } ist noch kein eigener Schlüssel eingerichtet. Möchten Sie jetzt einen erstellen? Damit können Sie Nachrichten digital signieren und verschlüsseln.
+pgp-compose-key-unusable = Ihr Schlüssel für { $address } kann nicht verwendet werden. Grund: { $state }
+    Öffnen Sie „Verschlüsselungsschlüssel“, um die Sicherung dieses Schlüssels zu importieren oder einen neuen Schlüssel zu erstellen.
+pgp-compose-encrypt-off-quote = Diese Nachricht enthält noch Inhalte aus einer verschlüsselten Nachricht. Entfernen Sie erst die übernommenen Inhalte und Anlagen, bevor Sie die Nachricht unverschlüsselt senden. Verschlüsselung trotzdem ausschalten?
+pgp-compose-encrypt-off-reply = Die ursprüngliche Nachricht war verschlüsselt. Wenn Sie diese Antwort oder Weiterleitung unverschlüsselt senden, können beteiligte Mailserver ihren Inhalt lesen. Verschlüsselung ausschalten?
 pgp-recipient-verified = Schlüssel überprüft
-# review: new
 pgp-recipient-found = Schlüssel nicht überprüft
-# review: new
 pgp-recipient-own = Ihr eigener Schlüssel
-# review: new
 pgp-recipient-looking = Schlüssel wird gesucht...
-# review: new
 pgp-recipient-missing = Kein Schlüssel
-# review: new
-pgp-recipient-not-found = Kein Schlüssel: Am { $date } wurde keiner gefunden
-# review: new
+pgp-recipient-not-found = Kein Schlüssel gefunden. Letzte Suche: { $date }
 pgp-recipient-unusable = Schlüssel nicht verwendbar: { $state }
-# review: new
-pgp-recipients-intro = Die Nachricht wird für den Schlüssel jedes Empfängers verschlüsselt und für Ihren.
-# review: new
+pgp-recipients-intro = Zum Verschlüsseln verwendet Inbox Classic die Schlüssel aller Empfänger und Ihren eigenen.
 pgp-recipients-intro-missing = { $count ->
-    [one] Ein Empfänger hat keinen Schlüssel zum Verschlüsseln. Suchen Sie seinen Schlüssel, entfernen Sie ihn aus dieser Nachricht, oder senden Sie die Nachricht ohne Verschlüsselung.
-   *[other] { $count } Empfänger haben keinen Schlüssel zum Verschlüsseln. Suchen Sie ihre Schlüssel, entfernen Sie sie aus dieser Nachricht, oder senden Sie die Nachricht ohne Verschlüsselung.
+    [one] Für einen Empfänger fehlt ein verwendbarer Schlüssel. Suchen Sie nach dem Schlüssel oder entfernen Sie den Empfänger aus der Nachricht. Unverschlüsselt senden können Sie nur ohne übernommene Inhalte aus verschlüsselten Nachrichten.
+   *[other] Für { $count } Empfänger fehlt ein verwendbarer Schlüssel. Suchen Sie nach den Schlüsseln oder entfernen Sie die Empfänger aus der Nachricht. Unverschlüsselt senden können Sie nur ohne übernommene Inhalte aus verschlüsselten Nachrichten.
 }
 pgp-details-part = Teil { $number }: { $label }
 pgp-details-signed = Am { $when } mit Schlüssel { $key } signiert

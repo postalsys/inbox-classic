@@ -12,7 +12,6 @@ menu-layout = &Layout
 menu-sort-by = &Sortieren nach
 menu-text-size = Schri&ftgröße
 menu-folder = &Ordner
-# review: new
 menu-insert = &Einfügen
 
 ## The commands
@@ -96,11 +95,8 @@ cmd-import-address-book = &Adressbuch importieren...
 cmd-export-address-book = Adressbuch e&xportieren...
 cmd-export-setup = Einstellun&gen und Konten exportieren...
 cmd-import-setup = Einstellungen und Konten im&portieren...
-# review: new
 cmd-compose-sign = Digital &signieren
-# review: new
 cmd-compose-encrypt = &Verschlüsseln
-# review: new
 cmd-attach-my-key = Meinen ö&ffentlichen Schlüssel anhängen
 
 ## The tray icon's menu
@@ -217,11 +213,8 @@ ui-format-line = Horizontale Linie einfügen
 ui-tb-send = Senden
 ui-tb-save = Speichern
 ui-tb-attach = Anhängen
-# review: new
 ui-tb-sign = Signieren
-# review: new
 ui-tb-encrypt = Verschlüsseln
-# review: new
 ui-field-keys = Schlüssel:
 ui-field-from = Von:
 ui-field-to = An:
@@ -701,25 +694,15 @@ ui-contact-key = Verschlüsselungsschlüssel:
 ui-contact-key-none = Kein Schlüssel
 ui-contact-key-use-new = Den neuen Schlüssel &verwenden
 ui-contact-key-keep = &Bisherigen Schlüssel behalten
-# review: new
 ui-recipient-keys-title = Schlüssel der Empfänger
-# review: new
 ui-recipient-col-recipient = Empfänger
-# review: new
 ui-recipient-col-key = Schlüssel
-# review: new
 ui-recipient-find-key = Schlüssel &suchen
-# review: new
 ui-recipient-remove = Aus der Nachricht &entfernen
-# review: new
 ui-send-unencrypted = &Unverschlüsselt senden
-# review: new
 ui-compose-make-key = Schlüssel &erstellen...
-# review: new
 ui-compose-show-keys = &Verschlüsselungsschlüssel...
-# review: new
 ui-compose-encrypt-off = Verschlüsselung &ausschalten
-# review: new
 ui-compose-keep-encrypted = &Verschlüsselt lassen
 ui-setup-export-title = Einstellungen und Konten exportieren
 ui-setup-import-title = Einstellungen und Konten importieren

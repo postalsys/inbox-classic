@@ -107,6 +107,15 @@ Forms of address: German uses "Sie", French "vous", Spanish "usted", Estonian th
 French Cc/Cci use Alt+C/Alt+I on Windows and Linux; preserve literal English shortcuts in help and explain
 the localized combinations beside them.
 
+### German compose signing and encryption
+
+- Keep "digital signieren" separate from the signature text appended to a message. Compose status describes
+  protection applied when sending, not a completed delivery. A valid signature does not by itself verify ownership.
+- Use "verwendbarer Schlüssel" when sending requires a usable key; expired or revoked keys also trigger missing-key
+  guidance. "Aus der Nachricht entfernen" removes a recipient from address fields, not from the address book.
+- A reason placeholder can be a complete sentence, including locked-key recovery instructions. Put it after
+  "Grund:" and separate the next instruction, rather than embedding it in parentheses.
+
 ### Estonian encryption and settings transfer
 
 - Use the polite plural in explanations and questions; short commands stay imperative ("Impordi", "Kontrolli").
@@ -135,7 +144,7 @@ Context notes:
 
 - Check the Flag submenu's runtime colour mnemonics too: each colour takes its first unused letter, and
   Clear Flag must use another. Account/folder context menus, Settings and folder-picker buttons have their
-  own combined scopes beyond the main menus. With the three settings pages, the extended review helper covers 46 such scopes.
+  own combined scopes beyond the main menus. With the three settings pages and the compose menus, recipient-key dialog and questions, the extended review helper covers 53 such scopes.
 
 - Sign-in code cards require a provider-confirmed domain signature (`otp::of`). That authenticates the
   domain associated with the code, not the safety or trustworthiness of all message content. Avoid claiming

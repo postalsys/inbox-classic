@@ -9,7 +9,7 @@
     "state": "docs/translation-review-round1-state.json",
     "progress": "docs/translation-review-round1-progress.md"
   },
-  "next_batch": "Review new compose signing/encryption additions in de/es/et/fr, then nl/it/pt/pt-BR/ca/nb/sr-Latn/tr/bg/cs/da/el/fi/hr and Hungarian. Each language has 17 app IDs, 23 core IDs, a new sign-and-encrypt topic and one write-message insertion; exact targets and verified context in compose-sign-encrypt-context. Feature 162c0dd2 (origin/master merge a6ed91d6) integrated after 040b7373, with all prior values/prose and five earlier English corrections preserved. All new strings remain marked. 53 actual mnemonic scopes now include compose/recipient dialogs; new collisions are recorded. Scope 33840/1352, pending 13198/562, completed 20642/790, historical catalog improvements 3516. Then Hungarian original remaining 48 help topics and lt/lv/pl/ro/ru/sk/sl/sv/uk. No tests; REVIEWED unchanged.",
+  "next_batch": "Integrate the late signature reason pgp-why-not-key-in-use from focused source9924cfe7 on chore/pgp-hardening (observed c69576e6), one core ID per language, with exact files/hashes/caller evidence under pending_source_import. Preserve reviewed text; assess focused source dependencies rather than importing the whole hardening/corpus branch. Then review that reason and remaining compose additions, starting es/et/fr. German40 compose entries and both help topics are complete with16 improvements; all53 mnemonic scopes pass. Current integrated totals: scope33840/1352, completed20682/792, pending13158/560, historical catalog improvements3532. The28 newly found reasons are additional pending work, not yet counted. Continue other earlier languages/Hungarian compose targets, then48 original Hungarian help topics and lt/lv/pl/ro/ru/sk/sl/sv/uk. No test suites; REVIEWED unchanged.",
   "languages": {
     "bg": {
       "pending_catalogs": {
@@ -6632,56 +6632,8 @@
       ]
     },
     "de": {
-      "pending_catalogs": {
-        "app.ftl": [
-          "menu-insert",
-          "cmd-compose-sign",
-          "cmd-compose-encrypt",
-          "cmd-attach-my-key",
-          "ui-tb-sign",
-          "ui-tb-encrypt",
-          "ui-field-keys",
-          "ui-recipient-keys-title",
-          "ui-recipient-col-recipient",
-          "ui-recipient-col-key",
-          "ui-recipient-find-key",
-          "ui-recipient-remove",
-          "ui-send-unencrypted",
-          "ui-compose-make-key",
-          "ui-compose-show-keys",
-          "ui-compose-encrypt-off",
-          "ui-compose-keep-encrypted"
-        ],
-        "core.ftl": [
-          "pgp-compose-encrypted",
-          "pgp-compose-encrypt-ready",
-          "pgp-compose-missing",
-          "pgp-compose-looking",
-          "pgp-compose-signed",
-          "pgp-compose-reply-clear",
-          "pgp-compose-encrypted-files",
-          "pgp-compose-sign-tip",
-          "pgp-compose-sign-tip-encrypted",
-          "pgp-compose-encrypt-tip",
-          "pgp-compose-make-key",
-          "pgp-compose-key-unusable",
-          "pgp-compose-encrypt-off-quote",
-          "pgp-compose-encrypt-off-reply",
-          "pgp-recipient-verified",
-          "pgp-recipient-found",
-          "pgp-recipient-own",
-          "pgp-recipient-looking",
-          "pgp-recipient-missing",
-          "pgp-recipient-not-found",
-          "pgp-recipient-unusable",
-          "pgp-recipients-intro",
-          "pgp-recipients-intro-missing"
-        ]
-      },
-      "pending_help": [
-        "sign-and-encrypt.html",
-        "write-message.html"
-      ],
+      "pending_catalogs": {},
+      "pending_help": [],
       "completed_batches": [
         {
           "id": "de-platform-additions-round2",
@@ -7306,6 +7258,76 @@
           },
           "validation": "All 28 full catalogs, variables, access-key counts, help references and exact pending inventories pass. Language checkers report exactly 26718 expected removed/partial-mark diagnostics and no structural findings. All 116 catalog/help outputs equal the prepared lossless import, and all 76 nontranslation source/generated imports plus help topics metadata match feature source 162c0dd2. Existing English corrections retained. All 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs reconcile; current completed/source hashes match. Expanded to 53 mnemonic scopes using actual compose menus and recipient/question dialogs; new collisions in nine languages remain recorded for linguistic review, alongside previous broader-draft issues. HTML regenerated. No test suite or build run; installer/store strings unchanged.",
           "notes": "Integrated 17 new app IDs, 23 new core IDs, a new sign-and-encrypt topic and one write-message paragraph. All new translations remain marked. Every earlier catalog byte/comment and help passage is preserved; completed write-message topics reopen only the insertion. No linguistic review or test-suite execution claimed."
+        },
+        {
+          "id": "de-compose-sign-encrypt-round2",
+          "reviewed_ids": {
+            "app.ftl": [
+              "menu-insert",
+              "cmd-compose-sign",
+              "cmd-compose-encrypt",
+              "cmd-attach-my-key",
+              "ui-tb-sign",
+              "ui-tb-encrypt",
+              "ui-field-keys",
+              "ui-recipient-keys-title",
+              "ui-recipient-col-recipient",
+              "ui-recipient-col-key",
+              "ui-recipient-find-key",
+              "ui-recipient-remove",
+              "ui-send-unencrypted",
+              "ui-compose-make-key",
+              "ui-compose-show-keys",
+              "ui-compose-encrypt-off",
+              "ui-compose-keep-encrypted"
+            ],
+            "core.ftl": [
+              "pgp-compose-encrypted",
+              "pgp-compose-encrypt-ready",
+              "pgp-compose-missing",
+              "pgp-compose-looking",
+              "pgp-compose-signed",
+              "pgp-compose-reply-clear",
+              "pgp-compose-encrypted-files",
+              "pgp-compose-sign-tip",
+              "pgp-compose-sign-tip-encrypted",
+              "pgp-compose-encrypt-tip",
+              "pgp-compose-make-key",
+              "pgp-compose-key-unusable",
+              "pgp-compose-encrypt-off-quote",
+              "pgp-compose-encrypt-off-reply",
+              "pgp-recipient-verified",
+              "pgp-recipient-found",
+              "pgp-recipient-own",
+              "pgp-recipient-looking",
+              "pgp-recipient-missing",
+              "pgp-recipient-not-found",
+              "pgp-recipient-unusable",
+              "pgp-recipients-intro",
+              "pgp-recipients-intro-missing"
+            ]
+          },
+          "reviewed_help": [
+            "write-message.html",
+            "sign-and-encrypt.html"
+          ],
+          "changed_values": 16,
+          "files": {
+            "core/locales/de/app.ftl": "b79610503f4fc2866324d78c05423948bfdba1d9e67d8326bf43e4321df1a734",
+            "core/locales/de/core.ftl": "d67f982f3a2dcd94dd533bc2f2c567dca759b714d1b3aeade3b38c2025792d36",
+            "core/crates/pe-html/help/de/write-message.html": "f826c4bf1ed34d45e0ed6f6ff8c5a5ccf684f1bb6ab732b14f6162384f7d2b0d",
+            "core/crates/pe-html/help/de/sign-and-encrypt.html": "a235d4abd1312c180ee18b72de1007b63c10d35b29d53141aef8a423d46720b4"
+          },
+          "english_sources": {
+            "core/locales/en/app.ftl": "a0b8f5de6157b820dcb5543c0ca40728c6ce41a6664b69bf31d9fd27f5878299",
+            "core/locales/en/core.ftl": "7282e8e896df745657052a9064f727645aee33fd83055c295b5c42d8287bfdce",
+            "core/crates/pe-html/help/en/write-message.html": "d161c1a2aeffb7539b2e8086d1a7ee6ea4bc39d5f702d93e362d8d10bfe8ff42",
+            "core/crates/pe-html/help/en/sign-and-encrypt.html": "7ab75ec9da59bc24d60b1f36e7073dbecd478c18e061b9e947a06e1f01446675"
+          },
+          "validation": "German check-language has exactly 1445 expected removed-mark diagnostics and no structural findings. All 53 actual mnemonic groups pass. Exact reconstruction verifies 16 value edits and 40 mark removals; IDs, full variables, plural branches, braces, access keys and comments are preserved. Help markup/attributes/code/literal keyboard contents/platform branches preserved; all prose outside the write-message insertion is byte-for-byte unchanged. Substituted control joins inspected on Windows/Mac/Linux, and dynamic command shortcuts checked against commands.toml. All 28 full active inventories and pending marks match; current file/source hashes reconcile: 20716 unmarked messages, 10391 changed help lines, 14 verified baseline pairs. Since-start1413 entries and213 passages match. HTML regenerated; git diff --check passes. No tests or builds.",
+          "notes": "Reviewed all 40 compose additions and both help targets against shared decisions and each platform caller. Kept all 17 concise app labels. Improved 16 core values: intended sending protection, signature versus ownership, usable-key conditions, counts/address lists, whole-sentence state reasons, clear downgrade warnings, and conditional unencrypted sending. Help distinguishes individual recipient color/status from the overall security bar, recognizes own/unusable keys, explains safe reply/forward handling and sender-only encrypted drafts, and names the selected From address when attaching a public key. Only the inserted write-message paragraph changed; all earlier prose retained. All 53 mnemonic scopes pass. Existing German Linux compose screenshot inspected, but it predates the new controls; new control layout/word wrapping checked in source. No GUI run, no test suite, no build.",
+          "changed_help_lines": 14,
+          "glossary_sha256": "c90b22c45e4965585ed72d0ccda02e576a1531f56ad0a7fb932189bf97196a85"
         }
       ]
     },
@@ -59336,6 +59358,431 @@
         "review_commit": "f90cee0e84585c15344f82f9d8a53266f2a95f1d",
         "validation": "Hungarian structural checker has exactly 1356 expected removed-mark diagnostics and no other findings. All 46 actual mnemonic groups passed for the catalog batch. Exact reconstruction accounts for all 45 value edits and 245 mark removals, preserving IDs, full variables, selectors, braces, access-key counts and comments. Four help topics preserve every tag/attribute, empty control, literal code/kbd and platform branch. Substituted control and settings-path joins inspected on Windows/Mac/Linux; dynamic shortcut IDs checked in commands.toml. All 28 active-checkout inventories and current translation/source hashes reconcile: 20676 unmarked messages, 10371 changed help lines and 14 verified baseline pairs. Since-start 333 entries and 159 passages match the active queue. Installer/metainfo changes are Hungarian-only and match the catalogs exactly. Separate-target offline pe-ffi build succeeded in 10.14s. HTML regenerated; git diff --check passes. No test suite run. Newly discovered compose sources are recorded separately pending integration.",
         "active_queue_note": "Counts describe the current review checkout. The fully inventoried pending_source_import adds 1120 catalog entries, 28 new topics and 28 write-message insertions across all 28 languages; 18 completed topics must reopen on integration. Scope will be adjusted during import, before reviewing those additions."
+      },
+      {
+        "source_tips": {
+          "master": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+          "origin/master": "a6ed91d6d98637ee3d18102862f697adc4ddbdf5",
+          "feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "origin/feat/languages-wave1": "8df686a41750158ebaf60784ab8db166e34b1fba",
+          "feat/more-languages": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+          "feat/settings-pages": "777f407e65c8a6b2ed15a251bb577df14f472074",
+          "chore/pgp-hardening": "c69576e6435b07914360cfa83c562c66d734ec45"
+        },
+        "source_deltas": {
+          "master": {
+            "merge_base": "5573ee4b6a787c7813e76251023312d4fb3a4cdd",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/master": {
+            "merge_base": "162c0dd22d9489061cdc195a42810d695a5672ba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "origin/feat/languages-wave1": {
+            "merge_base": "8df686a41750158ebaf60784ab8db166e34b1fba",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/more-languages": {
+            "merge_base": "61e5dbf4ee78a5ee3bd67d559532f3e253ccf9bf",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "feat/settings-pages": {
+            "merge_base": "777f407e65c8a6b2ed15a251bb577df14f472074",
+            "new_languages": [],
+            "integrated_help_paths": 0,
+            "unmerged_non_help_path_count": 0,
+            "unmerged_non_help_paths_except_fuzz_corpora": [],
+            "non_help_prefix_counts": {}
+          },
+          "chore/pgp-hardening": {
+            "merge_base": "162c0dd22d9489061cdc195a42810d695a5672ba",
+            "new_languages": [],
+            "integrated_help_paths": 87,
+            "unmerged_non_help_path_count": 16827,
+            "unmerged_non_help_paths_except_fuzz_corpora": [
+              ".github/workflows/pgp-interop-suite.yml",
+              "CLAUDE.md",
+              "app/CMakeLists.txt",
+              "app/src/main.cpp",
+              "core/crates/pe-bounce/tests/hostile.rs",
+              "core/crates/pe-core/src/autocrypt.rs",
+              "core/crates/pe-core/src/compose_keys.rs",
+              "core/crates/pe-core/src/export.rs",
+              "core/crates/pe-core/src/keys.rs",
+              "core/crates/pe-core/src/lib.rs",
+              "core/crates/pe-core/src/protect.rs",
+              "core/crates/pe-core/src/protect_out.rs",
+              "core/crates/pe-core/src/secrets.rs",
+              "core/crates/pe-core/src/worker/background.rs",
+              "core/crates/pe-core/tests/e2e_core.rs",
+              "core/crates/pe-core/tests/pgp_mail.rs",
+              "core/crates/pe-keys/src/lib.rs",
+              "core/crates/pe-net/src/http.rs",
+              "core/crates/pe-pgp/src/cert.rs",
+              "core/crates/pe-pgp/src/decrypt.rs",
+              "core/crates/pe-pgp/src/lib.rs",
+              "core/crates/pe-pgp/src/policy.rs",
+              "core/crates/pe-pgp/src/sealed.rs",
+              "core/crates/pe-pgp/src/verify.rs",
+              "core/crates/pe-pgp/tests/forge/mod.rs",
+              "core/crates/pe-pgp/tests/policy.rs",
+              "core/crates/pe-store/src/pgp.rs",
+              "core/fuzz/.gitignore",
+              "core/include/texts.h",
+              "docs/pgp-plan.md",
+              "docs/shells.md",
+              "linux/src/agents.rs",
+              "linux/src/app.rs",
+              "linux/src/e2e/keys.rs",
+              "linux/src/e2e/layout.rs",
+              "linux/src/e2e/steps.rs",
+              "linux/src/keys.rs",
+              "linux/src/mailbox.rs",
+              "mac/Sources/InboxClassic/App.swift",
+              "mac/Sources/InboxClassic/Generated/Texts.swift",
+              "mac/Sources/InboxClassic/MainWindow.swift",
+              "mac/Sources/InboxClassic/UITestSteps.swift",
+              "scripts/pgp-interop-suite.sh",
+              "scripts/pgp-interop-summary.py",
+              "scripts/pgp-interop.sh",
+              "scripts/ui-e2e.ps1",
+              "scripts/ui-e2e/SCENARIO.md"
+            ],
+            "non_help_prefix_counts": {
+              ".github/workflows": 1,
+              "CLAUDE.md": 1,
+              "app/CMakeLists.txt": 1,
+              "app/src": 1,
+              "core/crates": 23,
+              "core/fuzz": 16781,
+              "core/include": 1,
+              "docs/pgp-plan.md": 1,
+              "docs/shells.md": 1,
+              "linux/src": 7,
+              "mac/Sources": 4,
+              "scripts/pgp-interop-suite.sh": 1,
+              "scripts/pgp-interop-summary.py": 1,
+              "scripts/pgp-interop.sh": 1,
+              "scripts/ui-e2e.ps1": 1,
+              "scripts/ui-e2e": 1
+            },
+            "complete_path_list_sha256": "49d9defb7cd5a49e388398c9f1acc01570072be32bcb9e7f0ce39e3f30086309",
+            "complete_path_list_artifact": "/private/tmp/inbox-de-compose-unmerged-chore-pgp-hardening.txt"
+          }
+        },
+        "integrated_help_source": "255205aad7e70f680909092c3167cc724618b70e",
+        "root_locale_help_settings_status": [],
+        "unmerged_non_help_path_count": 16827,
+        "unmerged_non_help_paths_except_fuzz_corpora": [
+          ".github/workflows/pgp-interop-suite.yml",
+          "CLAUDE.md",
+          "app/CMakeLists.txt",
+          "app/src/main.cpp",
+          "core/crates/pe-bounce/tests/hostile.rs",
+          "core/crates/pe-core/src/autocrypt.rs",
+          "core/crates/pe-core/src/compose_keys.rs",
+          "core/crates/pe-core/src/export.rs",
+          "core/crates/pe-core/src/keys.rs",
+          "core/crates/pe-core/src/lib.rs",
+          "core/crates/pe-core/src/protect.rs",
+          "core/crates/pe-core/src/protect_out.rs",
+          "core/crates/pe-core/src/secrets.rs",
+          "core/crates/pe-core/src/worker/background.rs",
+          "core/crates/pe-core/tests/e2e_core.rs",
+          "core/crates/pe-core/tests/pgp_mail.rs",
+          "core/crates/pe-keys/src/lib.rs",
+          "core/crates/pe-net/src/http.rs",
+          "core/crates/pe-pgp/src/cert.rs",
+          "core/crates/pe-pgp/src/decrypt.rs",
+          "core/crates/pe-pgp/src/lib.rs",
+          "core/crates/pe-pgp/src/policy.rs",
+          "core/crates/pe-pgp/src/sealed.rs",
+          "core/crates/pe-pgp/src/verify.rs",
+          "core/crates/pe-pgp/tests/forge/mod.rs",
+          "core/crates/pe-pgp/tests/policy.rs",
+          "core/crates/pe-store/src/pgp.rs",
+          "core/fuzz/.gitignore",
+          "core/include/texts.h",
+          "docs/pgp-plan.md",
+          "docs/shells.md",
+          "linux/src/agents.rs",
+          "linux/src/app.rs",
+          "linux/src/e2e/keys.rs",
+          "linux/src/e2e/layout.rs",
+          "linux/src/e2e/steps.rs",
+          "linux/src/keys.rs",
+          "linux/src/mailbox.rs",
+          "mac/Sources/InboxClassic/App.swift",
+          "mac/Sources/InboxClassic/Generated/Texts.swift",
+          "mac/Sources/InboxClassic/MainWindow.swift",
+          "mac/Sources/InboxClassic/UITestSteps.swift",
+          "scripts/pgp-interop-suite.sh",
+          "scripts/pgp-interop-summary.py",
+          "scripts/pgp-interop.sh",
+          "scripts/ui-e2e.ps1",
+          "scripts/ui-e2e/SCENARIO.md"
+        ],
+        "guide_sha256": "00a7fdf61ac0a3a4fbb1994e02d789b02717869f9a04f838e3f28abd26d96d8f",
+        "changed_source_tips_since_last_checkpoint": {
+          "chore/pgp-hardening": {
+            "before": "9b6dea1b294c62b94de1182b10f68a7549b73b25",
+            "after": "c69576e6435b07914360cfa83c562c66d734ec45"
+          }
+        },
+        "pending_source_import": {
+          "status": "not yet integrated",
+          "ref": "chore/pgp-hardening",
+          "observed_source_tip": "c69576e6435b07914360cfa83c562c66d734ec45",
+          "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+          "new_catalog_entries": 28,
+          "catalog_ids": {
+            "core.ftl": [
+              "pgp-why-not-key-in-use"
+            ]
+          },
+          "new_help_topics": 0,
+          "changed_help_topics": 0,
+          "files": {
+            "core/locales/bg/core.ftl": {
+              "source_sha256": "16e9e19f2d1d75dffbeb0074ec93310c8978796141453b1d0953ad5e3fbb5977",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4a62b72469db30848900d67c0a2c9504a3ee7fe1db297e716e77b24f9bf25f51"
+            },
+            "core/locales/ca/core.ftl": {
+              "source_sha256": "3a2788707c50ee6cf4e2eabc676d35f4088226db8de9d407e1db41922b9602b6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "57c515541e23b49ca41dd16e5e8535fe4a5e2a3f4e1c21ed7aa04d0344921b25"
+            },
+            "core/locales/cs/core.ftl": {
+              "source_sha256": "fda0c74b699a113eeb04c082d374268ca8d9639e50bf6b072b27cda3a24463f0",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "c0830122e3de177236be73d54f8f09ae7c9771640dbb8691c3a9cb762d05b545"
+            },
+            "core/locales/da/core.ftl": {
+              "source_sha256": "35a86bb9f3542fa7b2a437ddf71f05424854b796281d02961d4ad4cfa47eb9d2",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "b8fad7dd255994701d3c2cc2f8fcee2e131cfde4ee196a3004607ea08964fe69"
+            },
+            "core/locales/de/core.ftl": {
+              "source_sha256": "b91224b783883801433c0c09fa6e07e6821ae6f2a19e786995788ce7e383fae9",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "a591d2f53c326961386e0554ef10cbc6b21d5015e0ebcc1676b091d62269b521"
+            },
+            "core/locales/el/core.ftl": {
+              "source_sha256": "8ed80fcf78378a7f8d081215a1eae4445722259f5db683a7a730eb0e3a82a35a",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "8dc74a5766f33d0e20ab13aef37846db1e35798134df77b2c432e6a13d4817ca"
+            },
+            "core/locales/en/core.ftl": {
+              "source_sha256": "16f82911b700dec76b7761ca4f32efcae14e3371a52d8f0d58e1382d6aa8787e",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4c94ae03e10150e79745253914b4f59ba7460faa230333cb6cf27b858753417c"
+            },
+            "core/locales/es/core.ftl": {
+              "source_sha256": "d9771c37c09402b1f1eda65bd6da77dbf3cde653f0bd7fb194f5384c21c0925c",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5c755b4c3eacebe03b92a2ef3c69e1e7c7121677189e3f1fdc4da8b5cfa843d0"
+            },
+            "core/locales/et/core.ftl": {
+              "source_sha256": "bb4c3968c7aa2c06b64213b962428681d594c59efc3a673dd12e5d3fc0a83a0f",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "b84a2b56e579b24973d3cbcb97dafa0438cedc5a654485d11b70ab5e068b56c5"
+            },
+            "core/locales/fi/core.ftl": {
+              "source_sha256": "f9f444897faf1136880a1a23befe7c0bb908f6a9eb9394c48c08dda9cb3be6e4",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "7990a785d1a186c7663d704dd2f26d8afb05a2b9fa53b52477558d3d3023588c"
+            },
+            "core/locales/fr/core.ftl": {
+              "source_sha256": "eeab1aa52ac26e5339884a49aa00deeb38ab80ad7c238f671300bc234b074dbd",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "76a6f40ecd4c18e13f7cb623bc0d4ba305f95b3a43f33176bf1f32837ff0ed7b"
+            },
+            "core/locales/hr/core.ftl": {
+              "source_sha256": "7bf5f0d2a9eebd494029b1bb6d5e2bfff03ad3d2bed4e5b3c75851f7aa758463",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "d0c9e7c7d9ad28a5260be6269219a52b43eba84490591aa1dea1d068507c6783"
+            },
+            "core/locales/hu/core.ftl": {
+              "source_sha256": "5b7fd3ff7ae169491dcb4e7471dc2a245ec5e81178ad8af848845e5f870da4c6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "de8f9cdcbd1dc605392c4d8c20711be450416b12cba221a0c8bb7545dd552e43"
+            },
+            "core/locales/it/core.ftl": {
+              "source_sha256": "e6c91c269a2b077a15b61e05cc6013cefd31a1bc55de89082a3f769bf10d4b37",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5ca92264998878c72c7c22bf864e3e3e6b904c700410086d18b2c072a4311b86"
+            },
+            "core/locales/lt/core.ftl": {
+              "source_sha256": "8fdb56b72ac0d592e065a0f2bf68d5a5e6df85c451a77696d0129eeaf9050816",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "9d0ae049a6651b7f700dc6201427e9d81c1aec1fc98f0f54def301c6ee42d1cd"
+            },
+            "core/locales/lv/core.ftl": {
+              "source_sha256": "c88a2a159132bc8ebd8eb346f56cd44c01d475ffda3678dd4db1854ba774d129",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "7162e0590d1544cd8557d4ea301077345570fea82bc4046f35324484bbdc84ea"
+            },
+            "core/locales/nb/core.ftl": {
+              "source_sha256": "fd98dd1f618212c77559a741d920bbcb819c023ac8b9955606ed59f362050536",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "649a5588a1c7b9b28c9971c913eda5dc347169814a90937b34677c80bad40965"
+            },
+            "core/locales/nl/core.ftl": {
+              "source_sha256": "c53c686eb8355626ad21a5de618b72cb3251290c2a86065eaa9958c90d509d12",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4788eb5e5382b227db6b52fa79d2d948e80d5ed97e6af51fa02c66e8421270e1"
+            },
+            "core/locales/pl/core.ftl": {
+              "source_sha256": "498b42c041b31dbfd2eb29518e441f59cb49ae0cf948c2e6b6f57c257fa828c8",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "c46ac141935e59f3c3d39f5a5bc085afb01e2d3d8133609a0cc8d754119a249c"
+            },
+            "core/locales/pt-BR/core.ftl": {
+              "source_sha256": "37e163d195e68444030d92ea2c5514bc9768e4dbb404575f18ab0fd2c63e1001",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+            },
+            "core/locales/pt/core.ftl": {
+              "source_sha256": "355f896a75ae3e52e26664563f19b6680d0719690b1d007528fccb6087b6d1a6",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+            },
+            "core/locales/ro/core.ftl": {
+              "source_sha256": "f2e7b552140a37bddfb8020b8b01f4095f7e309f7b1379aee3b4c58955084a74",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "ccb6595e0be610fe030b171dbe9df6cfb0f536873e539ce5ad865c02f7175db4"
+            },
+            "core/locales/ru/core.ftl": {
+              "source_sha256": "4bcc4ffedcb660b5fe86ac69beabc7a766daeb5cfb1381e6fe929605397e2e54",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4353044c1df65b4b4990323e714482b6311db76d8415626e558320b6026620bc"
+            },
+            "core/locales/sk/core.ftl": {
+              "source_sha256": "5fd463a4f1c91fc2a14fc3bf7cb49c5afb52d78b62e82e1f3c5ffef74ae4bb97",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "88d88798c1bb159d82f82f2dd33f48583b1d5bb60199fe3bd4e84a3a0b0af3b6"
+            },
+            "core/locales/sl/core.ftl": {
+              "source_sha256": "9787b443035e1b48b59cab003b34a97545fc2a8930b2ee230fce0b8b367264ac",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "67fc0ca660f323b20c4a178855b30792f94f71bfe71d85135793eb0e9444ef7f"
+            },
+            "core/locales/sr-Latn/core.ftl": {
+              "source_sha256": "f38acd96c4995038503690ccc62016cfaefdc803a0860b7d649bef0699538b54",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "fecb2884b4c4f0373831458647d4f208fc2736d6387c8859dab5d1ad18cf1810"
+            },
+            "core/locales/sv/core.ftl": {
+              "source_sha256": "e420ae2d02d82bb51c2158659755840d94902b56305aeb5a4f58843119a3f1ac",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "6b1875cf2a7190d360a6c0ab3d3e3c7272ca9896daa013b41950c03ee60be777"
+            },
+            "core/locales/tr/core.ftl": {
+              "source_sha256": "4ea56cafd6c1b8ddf348d4392777faf297c5f11827e45240f999bb96a25b84a1",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "ed1c9e5bcd9f5f0bcc739cbfa59c1808fa9f8fafe9c762b80787772b834dd346"
+            },
+            "core/locales/uk/core.ftl": {
+              "source_sha256": "d801bd33eb1c5a09b64de91527c873425dfc966b4afa09bafd20ac821194b346",
+              "added_ids": [
+                "pgp-why-not-key-in-use"
+              ],
+              "value_sha256": "4d507d7ad7a78f6e3e07b38976613b1e782c80074553203195fb147a96b3989d"
+            }
+          },
+          "note": "New signature reason from the hardening branch: a valid signature used a key other than the active key for the From address. Exact source insertion is pending. Other hardening code/fuzz changes stay separate; inspect caller before review."
+        },
+        "since_start_pending_catalog_entries": 1413,
+        "since_start_pending_help_passages": 213,
+        "remaining_since_omissions": [],
+        "pending_catalog_entries": 13158,
+        "pending_help_topics": 560,
+        "additional_unrecorded_work": 0,
+        "kind": "German compose review and late signature-reason discovery",
+        "review_commit": "3552434d",
+        "new_languages": 0,
+        "validation": "Fresh fetch; origin/master remains a6ed91d6. Hardening branch advanced to c69576e6 and adds exactly pgp-why-not-key-in-use in every language (28 translations), from focused commit9924cfe7. No existing source value changed. New files/IDs/hashes recorded pending import, not counted in active scope. Guide unchanged; root has no relevant edits; original key-help source exact. Other code/fuzz work untouched. German check-language has exactly 1445 expected removed-mark diagnostics and no structural findings. All 53 actual mnemonic groups pass. Exact reconstruction verifies 16 value edits and 40 mark removals; IDs, full variables, plural branches, braces, access keys and comments are preserved. Help markup/attributes/code/literal keyboard contents/platform branches preserved; all prose outside the write-message insertion is byte-for-byte unchanged. Substituted control joins inspected on Windows/Mac/Linux, and dynamic command shortcuts checked against commands.toml. All 28 full active inventories and pending marks match; current file/source hashes reconcile: 20716 unmarked messages, 10391 changed help lines, 14 verified baseline pairs. Since-start1413 entries and213 passages match. HTML regenerated; git diff --check passes. No tests or builds."
       }
     ],
     "settings_source_integration": {
@@ -64615,14 +65062,230 @@
       ]
     },
     "pending_source_import": {
-      "status": "integrated and structurally validated; linguistic review pending",
-      "source_commit": "a6ed91d6d98637ee3d18102862f697adc4ddbdf5",
-      "audit_checkpoint_index": 30,
-      "new_catalog_entries": 1120,
-      "new_help_topics": 28,
-      "changed_help_topics": 28,
-      "previously_completed_help_topics_to_reopen": 18,
-      "note": "Counts describe the current review checkout. The fully inventoried pending_source_import adds 1120 catalog entries, 28 new topics and 28 write-message insertions across all 28 languages; 18 completed topics must reopen on integration. Scope will be adjusted during import, before reviewing those additions."
+      "status": "not yet integrated",
+      "ref": "chore/pgp-hardening",
+      "observed_source_tip": "c69576e6435b07914360cfa83c562c66d734ec45",
+      "source_commit": "9924cfe7b2466b4377136480e652cfa83d0e0fc0",
+      "new_catalog_entries": 28,
+      "catalog_ids": {
+        "core.ftl": [
+          "pgp-why-not-key-in-use"
+        ]
+      },
+      "new_help_topics": 0,
+      "changed_help_topics": 0,
+      "files": {
+        "core/locales/bg/core.ftl": {
+          "source_sha256": "16e9e19f2d1d75dffbeb0074ec93310c8978796141453b1d0953ad5e3fbb5977",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "4a62b72469db30848900d67c0a2c9504a3ee7fe1db297e716e77b24f9bf25f51"
+        },
+        "core/locales/ca/core.ftl": {
+          "source_sha256": "3a2788707c50ee6cf4e2eabc676d35f4088226db8de9d407e1db41922b9602b6",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "57c515541e23b49ca41dd16e5e8535fe4a5e2a3f4e1c21ed7aa04d0344921b25"
+        },
+        "core/locales/cs/core.ftl": {
+          "source_sha256": "fda0c74b699a113eeb04c082d374268ca8d9639e50bf6b072b27cda3a24463f0",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "c0830122e3de177236be73d54f8f09ae7c9771640dbb8691c3a9cb762d05b545"
+        },
+        "core/locales/da/core.ftl": {
+          "source_sha256": "35a86bb9f3542fa7b2a437ddf71f05424854b796281d02961d4ad4cfa47eb9d2",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "b8fad7dd255994701d3c2cc2f8fcee2e131cfde4ee196a3004607ea08964fe69"
+        },
+        "core/locales/de/core.ftl": {
+          "source_sha256": "b91224b783883801433c0c09fa6e07e6821ae6f2a19e786995788ce7e383fae9",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "a591d2f53c326961386e0554ef10cbc6b21d5015e0ebcc1676b091d62269b521"
+        },
+        "core/locales/el/core.ftl": {
+          "source_sha256": "8ed80fcf78378a7f8d081215a1eae4445722259f5db683a7a730eb0e3a82a35a",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "8dc74a5766f33d0e20ab13aef37846db1e35798134df77b2c432e6a13d4817ca"
+        },
+        "core/locales/en/core.ftl": {
+          "source_sha256": "16f82911b700dec76b7761ca4f32efcae14e3371a52d8f0d58e1382d6aa8787e",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "4c94ae03e10150e79745253914b4f59ba7460faa230333cb6cf27b858753417c"
+        },
+        "core/locales/es/core.ftl": {
+          "source_sha256": "d9771c37c09402b1f1eda65bd6da77dbf3cde653f0bd7fb194f5384c21c0925c",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "5c755b4c3eacebe03b92a2ef3c69e1e7c7121677189e3f1fdc4da8b5cfa843d0"
+        },
+        "core/locales/et/core.ftl": {
+          "source_sha256": "bb4c3968c7aa2c06b64213b962428681d594c59efc3a673dd12e5d3fc0a83a0f",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "b84a2b56e579b24973d3cbcb97dafa0438cedc5a654485d11b70ab5e068b56c5"
+        },
+        "core/locales/fi/core.ftl": {
+          "source_sha256": "f9f444897faf1136880a1a23befe7c0bb908f6a9eb9394c48c08dda9cb3be6e4",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "7990a785d1a186c7663d704dd2f26d8afb05a2b9fa53b52477558d3d3023588c"
+        },
+        "core/locales/fr/core.ftl": {
+          "source_sha256": "eeab1aa52ac26e5339884a49aa00deeb38ab80ad7c238f671300bc234b074dbd",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "76a6f40ecd4c18e13f7cb623bc0d4ba305f95b3a43f33176bf1f32837ff0ed7b"
+        },
+        "core/locales/hr/core.ftl": {
+          "source_sha256": "7bf5f0d2a9eebd494029b1bb6d5e2bfff03ad3d2bed4e5b3c75851f7aa758463",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "d0c9e7c7d9ad28a5260be6269219a52b43eba84490591aa1dea1d068507c6783"
+        },
+        "core/locales/hu/core.ftl": {
+          "source_sha256": "5b7fd3ff7ae169491dcb4e7471dc2a245ec5e81178ad8af848845e5f870da4c6",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "de8f9cdcbd1dc605392c4d8c20711be450416b12cba221a0c8bb7545dd552e43"
+        },
+        "core/locales/it/core.ftl": {
+          "source_sha256": "e6c91c269a2b077a15b61e05cc6013cefd31a1bc55de89082a3f769bf10d4b37",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "5ca92264998878c72c7c22bf864e3e3e6b904c700410086d18b2c072a4311b86"
+        },
+        "core/locales/lt/core.ftl": {
+          "source_sha256": "8fdb56b72ac0d592e065a0f2bf68d5a5e6df85c451a77696d0129eeaf9050816",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "9d0ae049a6651b7f700dc6201427e9d81c1aec1fc98f0f54def301c6ee42d1cd"
+        },
+        "core/locales/lv/core.ftl": {
+          "source_sha256": "c88a2a159132bc8ebd8eb346f56cd44c01d475ffda3678dd4db1854ba774d129",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "7162e0590d1544cd8557d4ea301077345570fea82bc4046f35324484bbdc84ea"
+        },
+        "core/locales/nb/core.ftl": {
+          "source_sha256": "fd98dd1f618212c77559a741d920bbcb819c023ac8b9955606ed59f362050536",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "649a5588a1c7b9b28c9971c913eda5dc347169814a90937b34677c80bad40965"
+        },
+        "core/locales/nl/core.ftl": {
+          "source_sha256": "c53c686eb8355626ad21a5de618b72cb3251290c2a86065eaa9958c90d509d12",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "4788eb5e5382b227db6b52fa79d2d948e80d5ed97e6af51fa02c66e8421270e1"
+        },
+        "core/locales/pl/core.ftl": {
+          "source_sha256": "498b42c041b31dbfd2eb29518e441f59cb49ae0cf948c2e6b6f57c257fa828c8",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "c46ac141935e59f3c3d39f5a5bc085afb01e2d3d8133609a0cc8d754119a249c"
+        },
+        "core/locales/pt-BR/core.ftl": {
+          "source_sha256": "37e163d195e68444030d92ea2c5514bc9768e4dbb404575f18ab0fd2c63e1001",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+        },
+        "core/locales/pt/core.ftl": {
+          "source_sha256": "355f896a75ae3e52e26664563f19b6680d0719690b1d007528fccb6087b6d1a6",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "5a601adb9eb2fda2b34b42f126b4b7c1d092be0a19fd87d6ef12095a80541c7f"
+        },
+        "core/locales/ro/core.ftl": {
+          "source_sha256": "f2e7b552140a37bddfb8020b8b01f4095f7e309f7b1379aee3b4c58955084a74",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "ccb6595e0be610fe030b171dbe9df6cfb0f536873e539ce5ad865c02f7175db4"
+        },
+        "core/locales/ru/core.ftl": {
+          "source_sha256": "4bcc4ffedcb660b5fe86ac69beabc7a766daeb5cfb1381e6fe929605397e2e54",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "4353044c1df65b4b4990323e714482b6311db76d8415626e558320b6026620bc"
+        },
+        "core/locales/sk/core.ftl": {
+          "source_sha256": "5fd463a4f1c91fc2a14fc3bf7cb49c5afb52d78b62e82e1f3c5ffef74ae4bb97",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "88d88798c1bb159d82f82f2dd33f48583b1d5bb60199fe3bd4e84a3a0b0af3b6"
+        },
+        "core/locales/sl/core.ftl": {
+          "source_sha256": "9787b443035e1b48b59cab003b34a97545fc2a8930b2ee230fce0b8b367264ac",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "67fc0ca660f323b20c4a178855b30792f94f71bfe71d85135793eb0e9444ef7f"
+        },
+        "core/locales/sr-Latn/core.ftl": {
+          "source_sha256": "f38acd96c4995038503690ccc62016cfaefdc803a0860b7d649bef0699538b54",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "fecb2884b4c4f0373831458647d4f208fc2736d6387c8859dab5d1ad18cf1810"
+        },
+        "core/locales/sv/core.ftl": {
+          "source_sha256": "e420ae2d02d82bb51c2158659755840d94902b56305aeb5a4f58843119a3f1ac",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "6b1875cf2a7190d360a6c0ab3d3e3c7272ca9896daa013b41950c03ee60be777"
+        },
+        "core/locales/tr/core.ftl": {
+          "source_sha256": "4ea56cafd6c1b8ddf348d4392777faf297c5f11827e45240f999bb96a25b84a1",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "ed1c9e5bcd9f5f0bcc739cbfa59c1808fa9f8fafe9c762b80787772b834dd346"
+        },
+        "core/locales/uk/core.ftl": {
+          "source_sha256": "d801bd33eb1c5a09b64de91527c873425dfc966b4afa09bafd20ac821194b346",
+          "added_ids": [
+            "pgp-why-not-key-in-use"
+          ],
+          "value_sha256": "4d507d7ad7a78f6e3e07b38976613b1e782c80074553203195fb147a96b3989d"
+        }
+      },
+      "note": "Exact new source reason is pending integration. Evaluate focused commit9924cfe7 and its dependencies; preserve reviewed catalogs and avoid importing the unrelated corpus tree. The message describes a key mismatch, not an expired/revoked key, failed cryptographic signature or proven impersonation.",
+      "audit_checkpoint_index": 31,
+      "caller_evidence": [
+        "9924cfe7:core/crates/pe-core/src/protect.rs: Reader::signature classifies an otherwise valid signature as Bad when its key differs from ring.in_use for the From address",
+        "9924cfe7:core/crates/pe-core/src/keys.rs: Book::ring fills active correspondent keys and own identity keys",
+        "9924cfe7:core/crates/pe-store/src/pgp.rs: pgp_keys_in_use returns selected address/fingerprint pairs"
+      ]
     },
     "compose_source_integration": {
       "source_commit": "162c0dd22d9489061cdc195a42810d695a5672ba",
@@ -64750,7 +65413,7 @@
           "attachment-decrypted-note"
         ]
       },
-      "status": "validated; awaiting merge commit",
+      "status": "committed as 3552434d; linguistic review underway",
       "catalog_ids": {
         "app.ftl": [
           "menu-insert",
@@ -66763,8 +67426,21 @@
         "pending_catalog_entries": 13198,
         "pending_help_topics": 562,
         "additional_unrecorded_work": 0
+      },
+      "integration_commit": "3552434d"
+    },
+    "completed_source_imports": [
+      {
+        "status": "integrated in 3552434d; linguistic review pending",
+        "source_commit": "a6ed91d6d98637ee3d18102862f697adc4ddbdf5",
+        "audit_checkpoint_index": 30,
+        "new_catalog_entries": 1120,
+        "new_help_topics": 28,
+        "changed_help_topics": 28,
+        "previously_completed_help_topics_to_reopen": 18,
+        "note": "Counts describe the current review checkout. The fully inventoried pending_source_import adds 1120 catalog entries, 28 new topics and 28 write-message insertions across all 28 languages; 18 completed topics must reopen on integration. Scope will be adjusted during import, before reviewing those additions."
       }
-    }
+    ]
   },
   "completion_audit": "After the pending queue is complete, audit master, the source feature branch and the review worktree for added/changed languages, catalog IDs, English sources and help passages, including previously reviewed languages. Process every new item before marking the round complete or advancing REVIEWED.",
   "guide_updates": [
@@ -75217,7 +75893,6 @@
         "bg",
         "cs",
         "da",
-        "de",
         "el",
         "es",
         "et",
@@ -75243,7 +75918,9 @@
         "sr-Latn",
         "tr"
       ],
-      "completed_languages": [],
+      "completed_languages": [
+        "de"
+      ],
       "retained_help_reviews": {
         "core/crates/pe-html/help/bg/write-message.html": {
           "commit": "040b73734a7b02c3a13391e671c5c4fa4bff30a7",
@@ -75370,11 +76047,17 @@
         "Compose status describes intended sending protection, not proof of delivery. Encrypt forces signing when sending; encrypted drafts are encrypted only to the sender and are not signed. Drafts retaining an encrypted quote or extracted attachment stay encrypted even if the toggle was switched off.",
         "Signatures allow checking content integrity and signing-key use. They do not by themselves prove the displayed sender identity or who wrote the message; ownership verification is separate.",
         "Recipient warning/missing counts include expired, revoked or otherwise unusable keys. Any key is insufficient. Own sender key must also be usable. Placeholders can contain typed names or addresses; no inflection attached to them.",
-        "The verified recipient uses a green shield, a found/unverified or own key a blue lock; lookup uses a spinner/hourglass, and missing or unusable keys a warning icon. Help must not call every state a lock.",
+        "Individual recipient chips use a green lock for verified keys and a blue lock for found/unverified or own keys. Lookup is a gray lock on Windows, an hourglass on Mac and a spinner on Linux. Missing/unusable keys use warning icons. The separate overall status bar adds a shield when all other recipients are verified. Do not confuse that shield with the individual recipient chip; a color/status table works across platforms.",
         "The explicit Find Key action retries even after a negative lookup, subject to a one-minute limit; automatic lookup skips recent failed requests. Existing WKD/keyserver privacy and consent notes remain applicable.",
         "Turning encryption off for a reply/forward asks first. Sending unencrypted remains blocked while encrypted quoted text, inline media or extracted attachments remain. Send Without Encryption may be disabled; it is not an unconditional alternative.",
         "Remove from Message removes the selected recipient from To, Cc and Bcc, without deleting a contact. Attach My Public Key exports the public key of the selected From address, not a private key.",
         "Core protection wraps the content under top-level headers; do not claim all metadata is hidden. Sent copies retain encryption. Signing/encryption happens before queuing; a compose status is not a successful-send receipt."
+      ],
+      "context_corrections": [
+        {
+          "checkpoint": "3552434d",
+          "correction": "The initial integration note incorrectly assigned the overall verified-status shield to individual recipients. Exact Windows RecipientKeyPicture, Mac symbol and GTK key_icon callers show recipient locks; corrected here before reviewing the first language."
+        }
       ]
     }
   ]
