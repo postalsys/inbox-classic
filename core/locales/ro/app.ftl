@@ -470,7 +470,6 @@ ui-no-match-in = Căutarea în { $folder } acoperă subiectele, expeditorii, des
 ui-no-items = Nu există elemente în această vizualizare.
 # review: new
 ui-choose-folder = Alegeți un folder pentru a-i vedea mesajele.
-# review: new
 ui-unsubscribe = Dezabonare
 # review: new
 ui-open-in-calendar = Deschidere în Calendar
@@ -854,7 +853,6 @@ ui-dont-allow = Nu permiteți
 ui-allow = &Permitere
 # review: new
 ui-dont-send = Nu trimiteți
-# review: new
 ui-dont-unsubscribe = Nu vă dezabonați
 # review: new
 ui-edit-first = &Editați mai întâi

@@ -855,6 +855,19 @@ Plurals: `[one]` 1; `[few]` 0, 2 to 19 and numbers ending in 01 to 19 above 100;
 - `done-flagged-color` and `done-unflagged` agree the colour with "semnalizarea" (f.), not with `$messages`.
 - Quotes „...”, comma-below ș and ț; days of the week lowercase.
 
+- Agent permissions use noun labels and "agent IA"; consent keeps polite plural forms and the D/N unsubscribe
+  access keys. "Creare de schițe" distinguishes the permission from sending; each send needs approval.
+- Agent logs use third-person past forms for agent actions and polite plural for the user's decisions. Subject
+  placeholders follow "mesajul" or "Subiect:"; access summaries keep their independent account plurals.
+- A send log describes the "coada de trimitere", before delivery. An unavailable Undo reports that the message
+  is absent from "Mesaje de trimis", without claiming that it was delivered. The seconds value is always 30
+  at this caller, so the confirmation uses "30 de secunde".
+- "Cerere de dezabonare" names the request, not successful list removal. The quota counts approved requests
+  per program over the preceding 24 hours, including failures. Mail content is data, not instructions to follow.
+- Only the agent's own drafts not yet saved in the editor can be permanently deleted. Saving, including
+  autosave, or sending ends agent access; merely opening does not. "Textul semnăturii contului" is optional
+  message footer text, distinct from a digital signature. Removing program access does not uninstall it.
+
 ### Slovenčina (sk)
 
 Terms: Doručená pošta; Pošta na odoslanie; Odoslaná pošta; Odstránená pošta; Koncepty; Nevyžiadaná pošta; správa;
